@@ -1,0 +1,518 @@
+
+/* Poprawki tylko! */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 98.5%;
+    --foreground: 222.2 84% 4.9%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222.2 84% 4.9%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222.2 84% 4.9%;
+
+    /* v6.9.0 — darkened from 255 85% 76% (#B9A0FB, contrast 2.0:1 with white)
+       to 255 70% 55% (#5E3FD9, contrast 5.9:1) for WCAG AA compliance on
+       primary CTAs while preserving violet brand identity. */
+    --primary: 255 70% 55%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 210 40% 96.1%;
+    --secondary-foreground: 222.2 47.4% 11.2%;
+
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+
+    --accent: 240 24% 96%;
+    --accent-foreground: 222.2 47.4% 11.2%;
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+    --info: 199 89% 48%;
+    --info-foreground: 0 0% 100%;
+
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 255 70% 55%;
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    /* v6.9.0 — dark mode keeps lighter violet so primary-foreground stays dark
+       (contrast 4.9:1 with #1A1A2E). Darkening would invert UX in dark theme. */
+    --primary: 255 85% 76%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --success: 142 65% 45%;
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;
+    --warning-foreground: 222.2 47.4% 11.2%;
+    --info: 199 89% 48%;
+    --info-foreground: 0 0% 100%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+    
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    scroll-behavior: smooth;
+  }
+}
+
+.worksheet-content {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+}
+
+.worksheet-content h1 {
+  @apply text-2xl font-bold mb-4;
+}
+
+.worksheet-content h2 {
+  @apply text-xl font-semibold mb-3 mt-5;
+}
+
+.worksheet-content h3 {
+  @apply text-lg font-medium mb-2 mt-4;
+}
+
+.worksheet-content p {
+  @apply mb-4;
+}
+
+.worksheet-content ul {
+  @apply list-disc ml-5 mb-4;
+}
+
+.worksheet-content ol {
+  @apply list-decimal ml-5 mb-4;
+}
+
+.worksheet-content .exercise {
+  @apply border rounded-lg p-4 mb-6 bg-white shadow-sm;
+}
+
+.editable-content {
+  @apply focus:outline-none focus:ring-2 focus:ring-worksheet-purple rounded-md p-1;
+}
+
+/* Rainbow gradient styles */
+.rainbow-text {
+  background: linear-gradient(to right, #ff0000, #ff8000, #ffff00, #80ff00, #00ff00, #00ffff, #0000ff, #8000ff, #ff00ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Styling for fill-in-the-blanks */
+.fill-blank {
+  display: inline-block;
+  min-width: 200px;
+  height: 1.5em;
+  border-bottom: 1px solid #333;
+  margin: 0 5px;
+  text-align: center;
+}
+
+/* Word formation blanks */
+.word-formation-blank {
+  display: inline-block;
+  min-width: 300px;
+  height: 1.5em;
+  border-bottom: 1px solid #333;
+  margin: 0 5px;
+  text-align: center;
+}
+
+/* Teacher/student view sections */
+.rating-section, .teacher-notes {
+  @apply bg-gray-50 border border-gray-200 rounded-lg p-6 shadow-sm my-4 text-center;
+}
+
+.rating-section h2 {
+  @apply text-indigo-800 text-xl font-bold mb-2;
+}
+
+.rating-section p {
+  @apply text-gray-600 mb-4;
+}
+
+.rating-stars {
+  @apply flex justify-center space-x-2;
+}
+
+/* Teacher's tips */
+.teacher-tip {
+  @apply bg-white border border-gray-200 rounded-lg shadow-sm my-2 text-sm;
+  max-height: 100px;
+  overflow-y: auto;
+}
+
+/* Teacher notes section */
+.teacher-notes {
+  @apply bg-gray-50 border border-gray-200 rounded-lg p-6 shadow-sm my-6;
+}
+
+.teacher-notes h3 {
+  @apply text-indigo-800 text-xl font-bold mb-3;
+}
+
+.teacher-notes ul {
+  @apply list-disc ml-6 text-gray-700;
+}
+
+.teacher-notes li {
+  @apply mb-2;
+}
+
+/* Modern toast styling */
+.modern-toast {
+  @apply bg-white shadow-lg rounded-xl overflow-hidden transform transition-all;
+  animation: toast-enter 0.3s ease-out;
+}
+
+@keyframes toast-enter {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Vocabulary sheet styling */
+.vocabulary-card {
+  height: 100%;
+  min-height: 100px;
+}
+
+.vocabulary-definition-label {
+  font-weight: normal;
+  font-size: 0.9rem;
+  display: block;
+  margin-top: 8px;
+  color: #666;
+}
+
+/* Scroll to top button */
+.scroll-to-top {
+  @apply fixed bottom-6 right-6 rounded-full bg-worksheet-purple text-white p-3 shadow-lg cursor-pointer opacity-80 hover:opacity-100 transition-opacity z-50;
+}
+
+/* Sidebar and main container styling */
+.main-container {
+  display: flex;
+  width: 100%;
+  height: 100%;
+}
+
+.sidebar-container {
+  height: 100%;
+  min-height: 100%;
+  width: 100%;
+}
+
+.form-container {
+  width: 100%;
+}
+
+/* Poprawiona wysokość toast */
+.modern-toast {
+  @apply bg-white shadow-lg rounded-xl px-4 py-2; /* padding-y-2 = 0.5rem = około 8px */
+  animation: slide-in 0.3s ease-out;
+}
+
+@keyframes slide-in {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Student answer blank for matching exercises */
+.student-answer-blank {
+  display: inline-block;
+  width: 30px;
+  border-bottom: 1px solid #333;
+  text-align: center;
+  margin: 0 5px;
+}
+
+.teacher-answer {
+  display: inline-block;
+  font-weight: bold;
+  margin: 0 5px;
+}
+
+/* Exercise header for PDF */
+@media print {
+  /* Hide rating section in PDF */
+  [data-no-pdf="true"] {
+    display: none !important;
+  }
+  
+  /* Fix exercise header height in PDF */
+  .exercise-header {
+    display: flex !important;
+    align-items: center !important;
+    height: 40px !important; /* Fixed height */
+    max-height: 40px !important;
+    min-height: 40px !important;
+    overflow: hidden !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+  }
+  
+  /* Fix vocabulary matching container in PDF */
+  .vocabulary-matching-container {
+    display: grid !important;
+    grid-template-columns: 1fr 1fr !important;
+    width: 100% !important;
+    gap: 20px !important;
+  }
+  
+  /* Fix word bank container in PDF */
+  .word-bank-container {
+    display: flex !important;
+    flex-direction: column !important;
+    padding: 15px !important;
+  }
+  
+  .word-bank-container p {
+    margin-bottom: 8px !important;
+  }
+  
+  .word-bank-container div {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+  }
+  
+  .word-bank-container div span {
+    display: inline-flex !important;
+    align-items: center !important;
+    height: 28px !important;
+    margin: 2px 5px !important;
+  }
+  
+  /* Fix fill-in-the-blank and word formation blank sizes */
+  .fill-blank {
+    min-width: 150px !important;
+    display: inline-block !important;
+  }
+  
+  .word-formation-blank {
+    min-width: 300px !important;
+    display: inline-block !important;
+  }
+  
+  /* Fix multiple choice options in PDF */
+  .multiple-choice-option {
+    display: flex !important;
+    align-items: center !important;
+    gap: 10px !important;
+    page-break-inside: avoid !important;
+  }
+  
+  .option-icon {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    width: 24px !important;
+    height: 24px !important;
+    margin-right: 5px !important;
+    vertical-align: middle !important;
+    position: relative !important; 
+    top: 0 !important;
+  }
+  
+  /* Fix page breaks */
+  .dialogue-line {
+    page-break-inside: avoid !important;
+  }
+  
+  .exercise-item, .exercise-question, .sentence-item, .multiple-choice-question {
+    page-break-inside: avoid !important;
+  }
+}
+
+/* Landing page scroll animations */
+.animate-fade-up {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.animate-fade-up.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+.stagger-1 { transition-delay: 0.1s; }
+.stagger-2 { transition-delay: 0.2s; }
+.stagger-3 { transition-delay: 0.3s; }
+.stagger-4 { transition-delay: 0.4s; }
+.stagger-5 { transition-delay: 0.5s; }
+.stagger-6 { transition-delay: 0.6s; }
+
+/* Layered background for authenticated views */
+.auth-bg-shell {
+  position: relative;
+  isolation: isolate;
+  background-color: hsl(var(--background));
+}
+
+.auth-bg-shell::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -2;
+  background: hsl(var(--background));
+}
+
+.auth-bg-shell::after,
+.auth-bg-shell[data-pattern="isometric"]::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle at 50% -10%, hsl(var(--primary) / 0.16), transparent 34%),
+    radial-gradient(circle at 100% 0%, hsl(var(--primary) / 0.08), transparent 26%),
+    repeating-linear-gradient(60deg, hsl(var(--foreground) / 0.035) 0 2px, transparent 2px 56px),
+    repeating-linear-gradient(-60deg, hsl(var(--primary) / 0.06) 0 3px, transparent 3px 56px);
+  background-size: auto, auto, 320px 320px, 320px 320px;
+  background-position: center top, right top, center, center;
+}
+
+.auth-bg-shell[data-pattern="dots"]::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle at 50% -10%, hsl(var(--primary) / 0.16), transparent 34%),
+    radial-gradient(circle, hsl(var(--foreground) / 0.07) 2px, transparent 2px);
+  background-size: auto, 40px 40px;
+}
+
+.auth-bg-shell[data-pattern="waves"]::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle at 50% -10%, hsl(var(--primary) / 0.16), transparent 34%),
+    repeating-linear-gradient(0deg, transparent, transparent 40px, hsl(var(--primary) / 0.04) 40px, hsl(var(--primary) / 0.04) 41px),
+    repeating-linear-gradient(90deg, transparent, transparent 80px, hsl(var(--foreground) / 0.025) 80px, hsl(var(--foreground) / 0.025) 81px);
+  background-size: auto, auto, auto;
+}
+
+.auth-bg-shell[data-pattern="crosshatch"]::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle at 50% -10%, hsl(var(--primary) / 0.16), transparent 34%),
+    repeating-linear-gradient(45deg, hsl(var(--foreground) / 0.03) 0 1px, transparent 1px 40px),
+    repeating-linear-gradient(-45deg, hsl(var(--primary) / 0.05) 0 1px, transparent 1px 40px);
+  background-size: auto, 56px 56px, 56px 56px;
+}
+
+.auth-bg-shell[data-pattern="clean"]::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image:
+    radial-gradient(circle at 50% -10%, hsl(var(--primary) / 0.12), transparent 34%),
+    radial-gradient(circle at 100% 0%, hsl(var(--primary) / 0.06), transparent 26%);
+  background-size: auto;
+}
+
+.auth-bg-pattern {
+  background-image:
+    repeating-linear-gradient(60deg, hsl(var(--foreground) / 0.03) 0 1px, transparent 1px 24px),
+    repeating-linear-gradient(-60deg, hsl(var(--primary) / 0.05) 0 2px, transparent 2px 24px);
+  background-size: 140px 140px;
+}
+
+/* Dark mode: reduce pattern visibility */
+.dark .auth-bg-shell::after,
+.dark .auth-bg-shell[data-pattern="isometric"]::after {
+  opacity: 0.6;
+}
+.dark .auth-bg-shell[data-pattern="dots"]::after,
+.dark .auth-bg-shell[data-pattern="waves"]::after,
+.dark .auth-bg-shell[data-pattern="crosshatch"]::after {
+  opacity: 0.5;
+}

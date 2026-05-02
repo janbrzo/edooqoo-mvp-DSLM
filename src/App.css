@@ -1,0 +1,204 @@
+
+#root {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 2rem;
+  text-align: center;
+}
+
+.logo {
+  height: 6em;
+  padding: 1.5em;
+  will-change: filter;
+  transition: filter 300ms;
+}
+.logo:hover {
+  filter: drop-shadow(0 0 2em #646cffaa);
+}
+.logo.react:hover {
+  filter: drop-shadow(0 0 2em #61dafbaa);
+}
+
+@keyframes logo-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo {
+    animation: logo-spin infinite 20s linear;
+  }
+}
+
+.card {
+  padding: 2em;
+}
+
+.read-the-docs {
+  color: #888;
+}
+
+/* Rainbow gradient text */
+.rainbow-gradient-text {
+  background: linear-gradient(to right, #ff0000, #ff8000, #ffff00, #80ff00, #00ff00, #00ffff, #0000ff, #8000ff, #ff00ff);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
+
+/* Modern toast notifications - reduced height */
+.modern-toast {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+  display: flex;
+  padding: 8px 10px;
+  max-width: 400px;
+  max-height: 32px;
+  min-height: 24px;
+  align-items: center;
+  animation: toast-slide-in 0.3s ease-out forwards;
+}
+
+.modern-toast-success {
+  border-left-color: #10b981;
+}
+
+.modern-toast-error {
+  border-left-color: #ef4444;
+}
+
+.modern-toast-warning {
+  border-left-color: #f59e0b;
+}
+
+.modern-toast-info {
+  border-left-color: #3b82f6;
+}
+
+@keyframes toast-slide-in {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+/* Responsive layout */
+.main-container {
+  display: flex;
+  width: 100%;
+  min-height: 100vh;
+  height: 100%;
+}
+
+.sidebar-container {
+  width: 20%;
+  height: 100%;
+}
+
+.form-container {
+  width: 80%;
+  height: 100%;
+}
+
+/* For fill in the blanks exercise */
+.fill-blank {
+  min-width: 150px;
+  display: inline-block;
+  border-bottom: 1px solid #333;
+  text-align: center;
+  margin: 0 5px;
+}
+
+/* Styles for teacher answers alignment */
+.teacher-answer {
+  text-align: left;
+  margin-left: 8px;
+  color: #10b981;
+  font-weight: 500;
+}
+
+/* Scroll to top button */
+.scroll-to-top-button {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #9b87f5;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  z-index: 999;
+}
+
+.scroll-to-top-button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+/* Teacher tip box styles */
+.teacher-notes {
+  list-style-type: none;
+  padding-left: 0;
+  margin: 0;
+}
+
+/* Title text color */
+.worksheet-title {
+  color: white;
+}
+
+/* Exercise header styles for both screen and PDF */
+.exercise-header {
+  height: 48px !important;
+  max-height: 48px !important;
+  min-height: 48px !important;
+  display: flex !important;
+  align-items: center !important;
+  overflow: visible !important;
+}
+
+/* Word bank container for both screen and PDF */
+.word-bank-container {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.word-bank {
+  margin: auto 0 !important;
+  line-height: 1.5 !important;
+  vertical-align: middle !important;
+}
+
+/* Multiple choice options and icons alignment for both screen and PDF */
+.multiple-choice-option {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+}
+
+.option-icon {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 24px !important;
+  height: 24px !important;
+  vertical-align: middle !important;
+}
