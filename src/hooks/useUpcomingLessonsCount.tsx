@@ -25,7 +25,7 @@ export const useUpcomingLessonsCount = () => {
           .eq('teacher_id', user.id)
           .gte('slot_date', fmt(today))
           .lte('slot_date', fmt(in7))
-          .in('status', ['booked', 'available', 'needs_review']);
+          .eq('status', 'booked');
         if (error) throw error;
         setCount(data?.length || 0);
       } catch (e) {
