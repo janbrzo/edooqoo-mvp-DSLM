@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { useDemoContext } from '@/contexts/DemoContext';
 
 interface DeleteWorksheetButtonProps {
   worksheetId: string;
@@ -34,8 +35,10 @@ export const DeleteWorksheetButton = ({
   const [isDeleting, setIsDeleting] = useState(false);
   const [confirmText, setConfirmText] = useState('');
   const { toast } = useToast();
+  const { isDemoMode, showDemoBlockedToast } = useDemoContext();
 
   const handleDelete = async () => {
+    if (isDemoMode) { showDemoBlockedToast('Deleting worksheets'); return; }
     setIsDeleting(true);
     
     try {

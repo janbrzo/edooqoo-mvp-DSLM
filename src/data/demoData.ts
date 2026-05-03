@@ -1,5 +1,6 @@
 
 import { getDemoLocale, type DemoLocaleNames } from './demoLocales';
+import { DEMO_WORKSHEET_CONTENT } from './demoWorksheetContent';
 
 // Helper to generate dates relative to today
 const daysAgo = (n: number) => {
@@ -448,11 +449,19 @@ export function buildDemoData(countryCode: string): DemoDataSet {
     deleted_at: null,
   }));
 
-  // Map student names to worksheets
-  const worksheets = WORKSHEETS.map((ws) => ({
-    ...ws,
-    teacher_id: 'demo-teacher',
-  }));
+  // Map student names to worksheets, overlaying full production content when available
+  const worksheets = WORKSHEETS.map((ws) => {
+    const overlay = DEMO_WORKSHEET_CONTENT[ws.id];
+    return {
+      ...ws,
+      ...(overlay || {}),
+      id: ws.id,
+      student_id: ws.student_id,
+      created_at: ws.created_at,
+      share_token: ws.share_token,
+      teacher_id: 'demo-teacher',
+    };
+  });
 
   const homework = HOMEWORK.map((hw) => ({ ...hw }));
 

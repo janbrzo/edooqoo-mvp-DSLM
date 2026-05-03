@@ -39,6 +39,15 @@ const Index = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
+  // v6.9.6 — force light theme on public landing (mobile dark mode was inheriting
+  // prefers-color-scheme:dark and rendering the marketing page with poor contrast).
+  useEffect(() => {
+    const html = document.documentElement;
+    const wasDark = html.classList.contains('dark');
+    html.classList.remove('dark');
+    return () => { if (wasDark) html.classList.add('dark'); };
+  }, []);
+
   // v6.9.1 — deep-link scroll from feature pills (anon nav). When the user
   // clicks a pill on the landing or returns from /signup, location.state may
   // contain { scrollTo: 'feature-xxx' }. We scroll once and clear the state

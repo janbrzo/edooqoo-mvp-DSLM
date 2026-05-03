@@ -9,6 +9,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Copy, Share2, ExternalLink, Loader2, Mail, Send } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useOnboardingProgress } from '@/hooks/useOnboardingProgress';
+import { useDemoContext } from '@/contexts/DemoContext';
 
 interface ShareWorksheetModalProps {
   isOpen: boolean;
@@ -32,6 +33,7 @@ const ShareWorksheetModal = ({
   const [saveEmailForVerification, setSaveEmailForVerification] = useState(true);
   const { toast } = useToast();
   const { refreshProgress } = useOnboardingProgress();
+  const { isDemoMode, showDemoBlockedToast } = useDemoContext();
 
   useEffect(() => {
     if (initialStudentEmail) {
@@ -41,6 +43,11 @@ const ShareWorksheetModal = ({
 
   useEffect(() => {
     if (isOpen) {
+      if (isDemoMode) {
+        showDemoBlockedToast('Sharing worksheets');
+        onClose();
+        return;
+      }
       loadShareUrl();
     } else {
       setShareUrl('');

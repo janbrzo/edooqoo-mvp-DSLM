@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthUser } from '@/hooks/useAuthUser';
+import { useDemoContext } from '@/contexts/DemoContext';
 
 interface DeletedWorksheetItem {
   id: string;
@@ -25,14 +26,21 @@ export const useDeletedWorksheets = (
   const [loading, setLoading] = useState(true);
   const [totalCount, setTotalCount] = useState(0);
   const { data: user } = useAuthUser();
+  const { isDemoMode } = useDemoContext();
 
   useEffect(() => {
+    if (isDemoMode) {
+      setDeletedWorksheets([]);
+      setTotalCount(0);
+      setLoading(false);
+      return;
+    }
     fetchDeletedWorksheets();
-  }, [studentId, page, pageSize, user?.id]);
+  }, [studentId, page, pageSize, user?.id, isDemoMode]);
 
   const fetchDeletedWorksheets = async () => {
     try {
-      if (!user) return;
+      if (!user) { setLoading(false); return; }
 
       const selectQuery = listView
         ? 'id, title, created_at, deleted_at, student_id, generation_time_seconds, form_data, audio_url, audio_duration, audio_voice, selected_audio, selected_image, media_metadata'

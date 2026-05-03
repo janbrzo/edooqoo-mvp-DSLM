@@ -173,6 +173,11 @@ const CalendarSettingsPage = () => {
           </Button>
           <h1 className="text-2xl font-bold">Calendar Settings</h1>
         </div>
+        {isDemoMode && (
+          <div className="mb-4 rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900 dark:bg-amber-950/40 dark:text-amber-200 dark:border-amber-800">
+            👁 Demo view — settings are visible but cannot be modified. Sign up free to unlock editing.
+          </div>
+        )}
 
         <div className="flex gap-6">
           {/* Sidebar navigation — hidden on mobile */}

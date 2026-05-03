@@ -1,157 +1,273 @@
+# Plan v6.9.6 — Dashboard symmetry, mobile Hero, DEMO lockdown, demo worksheets content
 
-# Plan v6.9.5 — Kompaktowy Dashboard Stats Bar + Audyt SEO
+## Analiza problemu (krótko)
 
-## Część 1 — Audyt SEO (raport, bez zmian w kodzie)
-
-Przeprowadziłem weryfikację techniczną Twojego wdrożenia. **Status: SUKCES.**
-
-### Co zweryfikowałem:
-
-1. **Folder `public/` w repo** — obecne są wszystkie 17 prerenderowanych snapshotów:
-   - `public/about/index.html`, `public/how-it-works/`, `public/pricing/`, `public/cookie-policy/`, `public/privacy-policy/`, `public/glossary/`, `public/exercise-types/`, `public/resources/`, `public/blog/`, `public/prompts/`
-   - `public/features/` → `placement-test/`, `homework/`, `calendar/`, `live-sessions/`, `flashcards/`, `student-hub/`, `dslm/`
-
-2. **Tagi canonical w snapshotach** — każdy plik ma poprawny self-canonical:
-   - `public/about/index.html` → `<link rel="canonical" href="https://edooqoo.com/about">` ✅
-   - `public/features/placement-test/index.html` → `https://edooqoo.com/features/placement-test` ✅
-
-3. **Produkcja (`curl https://edooqoo.com/about`)** — Lovable hosting **serwuje statyczne pliki z pierwszeństwem** nad SPA fallback. Googlebot dostaje pełny HTML z właściwym canonical, NIE pustą powłokę React.
-
-4. **Strona główna `/`** — nadal serwuje SPA `index.html` (canonical = `https://edooqoo.com/`). To jest **poprawne** — `/` to faktyczny SPA root.
-
-### Wnioski dla GSC:
-- Walidacja "Strona wykryta — obecnie niezindeksowana" powinna **przejść** w 7-21 dni (Google musi ponownie scrawlować i renderować).
-- Błędy "tag kanoniczny" zostały **fundamentalnie usunięte** — fizycznie nie ma już duplikatów wskazujących na `/`.
-- **Brak akcji do podjęcia.** Czekaj na rezultat walidacji w GSC.
-
-### Drobna obserwacja (nie blokująca):
-W snapshotach `og:url` zawsze wskazuje `https://edooqoo.com` zamiast pełnego URL strony. To kosmetyczne — Google używa `canonical`, nie `og:url`. Można poprawić w przyszłej iteracji skryptu prerender (osobny ticket).
+1. **Dashboard `CompactStatsBar`** — obecnie HubInfo + 6 kafli leży w jednej linii. Wizualnie nie jest "symetryczne" do gridu poniżej (lewa kolumna = Students, prawa = Recent Worksheets). Trzeba HubInfo nad lewą kolumną, a kafle statystyk nad prawą kolumną — w jednym wierszu, ale wyrównane do tych samych szerokości co poniżej.
+2. **Theme mobile** — `useTheme()` honoruje `prefers-color-scheme: system`. Telefon użytkownika jest w trybie ciemnym → strona renderuje się w dark. W preview (Chrome desktop) jest light. Landing publiczny powinien być **wymuszony light** (do tej pory tak działało dla wielu marketingowych stron).
+3. **Hero CTA mobile** — `h-14 px-8 text-lg` + długi tekst "Generate Your First Worksheet — Free" przekracza 100% szerokości viewportu na 360–390 px. Trzeba zmniejszyć tylko < `sm`.
+4. **DEMO** — wiele ścieżek nie ma guard wcześniejszego niż dolna warstwa (modal otwiera się i fail dopiero przy submit; albo przekierowuje do settings; albo brakuje danych). Trzeba twardo gardować na poziomie handlerów (akcje), warstwę widoku zostawić podgląd-only.
+5. **`/worksheets` (AllWorksheetsPage) w DEMO** — używa `useDeletedWorksheets` (bez guarda demo) → `if (!user) return;` zostaje wiecznie w `loading=true` (bo ustawia `setLoading(false)` tylko w `finally`, a wcześniej `return` przed try). Stąd biały spinner. Plus `useAuthFlow` w demo zwraca syntetycznego usera, więc nawigacja przechodzi, ale `useDeletedWorksheets` korzysta z `useAuthUser` (Supabase) — nie ma usera → wisi.
+6. **Worksheety demo puste** — `ai_response` zawiera tylko 2–3 itemy bez pełnej struktury renderowanej przez `WorksheetDisplay`. Brakuje tytułów, instrukcji, większej liczby ćwiczeń. Przeniesiemy faktyczną treść z 10 produkcyjnych worksheetów wskazanych przez użytkownika (preview env).
 
 ---
 
-## Część 2 — Ultra-kompaktowy pasek statystyk na `/dashboard`
+## 1. Dashboard — symetryczny układ HubInfo / Stats
 
-### Problem
+**Plik:** `src/components/dashboard/CompactStatsBar.tsx`
 
-Obecny układ na `/dashboard`:
-- Kafelki statystyk (Tokens / This month / All time / Students) zajmują grid 2×4 i osobną sekcję.
-- Pasek "Student Hub: students log in..." jest osobnym wierszem **poniżej**, co marnuje vertical space.
-- Możemy dodać więcej wartościowych statystyk (homework, lessons), które już mamy w bazie.
+Zmiana: wewnątrz `CompactStatsBar` zamiast jednego flex‑rowa zwracamy **CSS grid 2-kolumnowy** o tych samych breakpointach co siatka pod spodem w `Dashboard.tsx` (`lg:grid-cols-2`).
 
-### Rozwiązanie
+Konkretnie:
 
-**Jeden wiersz** poziomy zawierający:
-- **Lewa strona (priorytet, większa waga wizualna):** Pasek `Student Hub → edooqoo.com/my` z ikoną i pełnym CTA.
-- **Prawa strona:** **6 mikro-kafelków** w jednej linii (na desktop), zwijających się w gridy na tabletach/mobile.
+- Mobile (<lg): zachowujemy obecny layout (HubInfo full + grid 3-kol).
+- Desktop (≥lg):
+  ```text
+  <div class="hidden lg:grid grid-cols-2 gap-6 mb-4 items-stretch">
+     [HubInfo — pełna szerokość lewej kolumny]
+     [Pasek 6 statystyk — pełna szerokość prawej kolumny, z divide-x]
+  </div>
+  ```
+- HubInfo (problem 1): **rozszerzony tekst**:
+  > **Student Hub:** students log in with just their email at **edooqoo.com/my** — no login needed. They access their worksheets, homework, flashcards & lessons.
 
-### Layout (desktop ≥1024px)
+  Dla mobile pokazujemy skróconą wersję (jak teraz: `login at edooqoo.com/my`), a długą — tylko `lg+` (renderujemy oba spany z `hidden lg:inline` / `lg:hidden`).
+- StatPills bez zmian (6 ikon).
 
-```text
-┌─────────────────────────────────────────────────────────────────────────────────┐
-│ 📖 Student Hub: edooqoo.com/my   │ 🪙346 │ 📄0 │ 🎯181 │ 👥14 │ 📋12 │ 📅3   │
-│         (left, prominent)         │tokens │month│ total │stud.│homew.│lesson │
-└─────────────────────────────────────────────────────────────────────────────────┘
+Brak zmian w `Dashboard.tsx` (dalej renderuje `<CompactStatsBar … />` jako pierwsze dziecko gridu). Brak migracji DB.
+
+---
+
+## 2. Landing — wymuszony light theme + Hero CTA mobile
+
+**Plik:** `src/pages/Index.tsx` (root landing) — dodanie efektu, który **na mount** ściąga klasę `dark` z `<html>` i przywraca przy unmount poprzedni stan (zachowując jednak `localStorage` użytkownika; teacherzy w aplikacji dalej mają dark mode po zalogowaniu).
+
+```tsx
+useEffect(() => {
+  const html = document.documentElement;
+  const wasDark = html.classList.contains('dark');
+  html.classList.remove('dark');
+  return () => { if (wasDark) html.classList.add('dark'); };
+}, []);
 ```
 
-- Wysokość paska: ~52px (vs obecne ~180px = oszczędność ~130px scroll).
-- Hub Info: większa typografia (`text-sm`, kolor primary), klikalny link.
-- Mikro-kafelki: tylko ikona + liczba + label (jeden wiersz każdy), bez kart-pudełek — separator pionowy `divide-x`.
+Uzasadnienie: nie modyfikujemy `useTheme` (teacher dark mode chroniony zgodnie z core-rule). Wymuszamy light **tylko** na publicznej Index, gdzie `prefers-color-scheme: dark` z telefonu psuł kontrast. Pozostałe public pages (About, Pricing itd.) — ten sam prosty wrapper (do zrobienia w opcjonalnym kroku 2b: dodanie hooka `useForceLightTheme()` w `src/hooks/useForceLightTheme.ts` i wpięcie w 1 Indeks teraz, kolejne strony — w razie potrzeby).
 
-### Layout (tablet 768-1023px)
-- Hub Info pełna szerokość (góra).
-- Mikro-kafelki: grid 3×2 pod spodem (kompaktowe).
+**Hero CTA mobile** — `src/components/landing/HeroHeadline.tsx`:
 
-### Layout (mobile <768px)
-- Hub Info: pełna szerokość, zwięzła wersja ("Hub: edooqoo.com/my").
-- Mikro-kafelki: grid 2×3 pod spodem.
+```tsx
+className="h-12 sm:h-14 px-4 sm:px-8 text-base sm:text-lg max-w-full whitespace-normal sm:whitespace-nowrap font-semibold rounded-full ..."
+```
+Plus skrócony tekst < `sm`:
+```tsx
+<span className="sm:hidden">Generate Free Worksheet</span>
+<span className="hidden sm:inline">Generate Your First Worksheet — Free</span>
+```
 
-### Nowe statystyki (dodatkowe 2 kafelki)
+---
 
-Wykorzystamy istniejące hooki — **bez nowych zapytań do DB tam, gdzie się da**:
+## 3. DEMO lockdown — szczegóły
 
-| Kafelek | Wartość | Źródło danych | Ikona |
-|---|---|---|---|
-| Tokens left | `tokenLeft` | `useTokenSystem` (już używane) | `Coins` |
-| This month | `thisMonthCount` | `useWorksheetStats` (już używane) | `FileText` |
-| All time | `totalWorksheetsCreated` | `profile` (już używane) | `Target` |
-| Students | `students.length` | `useStudents` (już używane) | `Users` |
-| **Active homework** ✨NEW | count(homework gdzie `completed_at IS NULL`) | agregacja z `homeworkByWorksheet` (już pobrane!) | `ClipboardList` |
-| **Upcoming lessons** ✨NEW | count(slotów w nadchodzących 7 dniach, status `confirmed`/`pending`) | nowy lekki hook `useUpcomingLessonsCount` | `Calendar` |
+Wszystkie miejsca poniżej korzystają z istniejącego `useDemoContext()` / `useDemoGuard()`. Brak zmian DB i edge functions. Brak zmian w core flow worksheet generation.
 
-### Implementacja techniczna
+### 3A. Calendar — `+ Add` slot
 
-**Nowe pliki:**
+**Plik:** `src/components/calendar/UnifiedSlotModal.tsx`
 
-1. `src/hooks/useUpcomingLessonsCount.tsx` — minimalny hook:
+W `handleSubmit` na samym początku:
+```ts
+if (isDemoMode) {
+  showDemoBlockedToast('Adding calendar slots');
+  return;
+}
+```
++ wcześniej (dla wizualnego komfortu) gdy `isDemoMode`, w nagłówku modala dodać żółty pasek `<div className="rounded bg-amber-50 ...">Demo mode — changes won't be saved</div>` i ukryć błąd "Conflicts detected" gdy `isDemoMode`.
+
+Alternatywa (preferowana, bardziej czysta): w `CalendarPage.tsx` w `handleAddSlot` (i pozostałych handlerach otwierających modal: edit/block) — guardować otwarcie modala:
+```ts
+if (isDemoMode) { showDemoBlockedToast('Adding lessons'); return; }
+```
+Dzięki temu modal nawet się nie otwiera. **Wybieramy ten wariant** (mniej ingerencji w UnifiedSlotModal, brak ryzyka popsucia produkcji).
+
+Lista handlerów w `CalendarPage.tsx` do guardowania (na początku każdego):
+- `handleAddSlot`
+- `handleSlotClick` (edycja istniejącego slotu — dopuszczamy podgląd, ale guardujemy `onSave` w child modalu; w praktyce: dodać `readOnly` prop do modala, gdy `isDemoMode`)
+- `handleBulkDelete`, `handleBulkBlock`, `handleBulkPaid`, `handleMarkPaid`, `handleNotificationClick` (jeśli mutuje)
+
+W `useCalendarSlots` mutacje są już no-op w demo — to second line of defense, zostawiamy.
+
+### 3B. Calendar — Share
+
+**Plik:** `src/pages/CalendarPage.tsx`, funkcja `handleShare`:
+```ts
+const handleShare = () => {
+  if (isDemoMode) { showDemoBlockedToast('Sharing public calendar'); return; }
+  if (settings?.public_calendar_token) { /* ... */ }
+  else { toast.info('Enable public calendar in settings first.'); }
+};
+```
+
+### 3C. Calendar Settings — read-only render
+
+**Plik:** `src/pages/CalendarSettingsPage.tsx`
+
+Obecnie: `if (authLoading || loading || !settings) return null;` — w demo `loading` zostaje `false` (early return w hooku) i `settings === null` → strona pusta.
+
+Plan:
+1. W `useCalendarSettings.tsx` dodać blok demo (analogiczny do `useStudents`):
    ```ts
-   // SELECT id FROM calendar_slots 
-   // WHERE teacher_id = user.id 
-   //   AND slot_date >= today 
-   //   AND slot_date <= today + 7 days
-   //   AND status IN ('confirmed','pending')
+   if (isDemoMode) {
+     setSettings(DEMO_CALENDAR_SETTINGS);
+     setLoading(false);
+     return;
+   }
    ```
-   Cache w komponencie (single fetch on mount). Brak realtime.
+   `DEMO_CALENDAR_SETTINGS` (do dodania w `src/data/demoData.ts`): obiekt z pełnym kompletem rozsądnych defaults (`default_lesson_duration_minutes: 60`, `public_calendar_enabled: true`, `public_calendar_token: 'demo-public-token'`, `public_calendar_slug: 'martha-demo'`, `gcal_integration_enabled: false`, `payment_tracking_enabled: true`, `working_hours_*`, etc.).
+2. W `updateSettings`/`generatePublicToken` — już są no-op w demo (linia 134). Dodać `showDemoBlockedToast` dla feedbacku.
+3. W `CalendarSettingsPage.tsx` — gdy `isDemoMode`, na górze sekcji content wstawić sticky banner:
+   ```tsx
+   {isDemoMode && (
+     <div className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-200 dark:border-amber-800">
+       👁 Demo view — settings are visible but cannot be modified.
+     </div>
+   )}
+   ```
+4. Każdy `<Switch onCheckedChange>`, `<Input onChange>`, `<Button onClick>` z mutacją otoczyć `disabled={isDemoMode}` (proste, masowe). Wyjątek: navigation/scroll (np. scrollToSection) bez `disabled`.
 
-2. `src/components/dashboard/CompactStatsBar.tsx` — nowy komponent:
-   - Props: `{ tokenLeft, thisMonthCount, totalWorksheets, studentsCount, activeHomeworkCount, upcomingLessonsCount }`.
-   - Tailwind: `flex items-center gap-2` na desktop, `flex-col gap-3` na mobile (via `useIsMobile`).
-   - Hub Info: ~40% szerokości, lekkie tło `bg-primary/5`, border `border-primary/20`.
-   - Każdy mikro-kafelek: `flex items-center gap-1.5 px-3` z `divide-x divide-border`.
-   - Tooltip na każdym kafelku (full label).
+### 3D. `/worksheets` nie ładuje się
 
-**Zmiana w `src/pages/Dashboard.tsx`:**
-- Usunięcie obecnego bloku `Compact Stats Strip` (linie 187-209) i `Student Hub Info` (linie 211-218).
-- Wstawienie `<CompactStatsBar {...props} />` w jednej linii.
-- Wyliczenie `activeHomeworkCount`:
-  ```ts
-  const activeHomeworkCount = Object.values(homeworkByWorksheet)
-    .flat()
-    .filter(h => !h.completed_at).length;
-  ```
+Root cause: `useDeletedWorksheets` używa `useAuthUser` zamiast respektować demo, a w `if (!user) return;` nie ustawia `loading=false`.
 
-**Brak zmian w:**
-- Innych komponentach dashboardu (Students card, Recent Worksheets card pozostają identyczne).
-- StickyNav, AuthenticatedPageShell, hookach DB poza nowym `useUpcomingLessonsCount`.
-- RLS / migracjach (tylko SELECT z istniejącej tabeli `calendar_slots`).
+**Plik:** `src/hooks/useDeletedWorksheets.tsx`
+- Dodać `const { isDemoMode, demoData } = useDemoContext();`
+- Na górze `useEffect`: jeśli `isDemoMode` → `setDeletedWorksheets([]); setTotalCount(0); setLoading(false); return;` (w demo nie pokazujemy "deleted").
+- W `fetchDeletedWorksheets`: `if (!user) { setLoading(false); return; }` (poprawka regression-safe).
 
-### Bezpieczeństwo i regresje
-- **Zero zmian DB** — tylko nowe SELECT.
-- **Zero zmian w worksheet engine** (Sanctity Rule respected).
-- Hook `useUpcomingLessonsCount` zwraca `0` przy błędzie (graceful degradation), nie blokuje renderu dashboardu.
-- Wszystkie etykiety po angielsku (UI rule).
+To wystarczy, by `AllWorksheetsPage` przestało wisieć (bo `loading` już się rozwiąże dzięki `useWorksheetHistory` które jest demo-aware).
 
-### Alternatywy rozważone (odrzucone)
-- **A) Dropdown "More stats"** — więcej kliknięć, gorszy UX dla power-userów (Martha).
-- **B) Sticky pasek u góry** — koliduje z istniejącym `StickyNav`, podwójna fiksacja.
-- **C) Wykres zamiast liczb** — nadmiarowe wizualnie, dane są niskoliczbowe (single integers).
+Dodatkowo w `AllWorksheetsPage.tsx` w warunku spinera:
+```ts
+if (authLoading || (loading && !isDemoMode)) { ... }
+```
+Pobranie `isDemoMode` z `useDemoContext`. Naprawia warunek edge.
 
-Wybrane: **inline mikro-kafelki + Hub-info po lewej** = max gęstość informacji, min wysokość.
+### 3E. Worksheet actions: Transfer / Delete / Share / AddStudent
+
+Najczystszy fix punktowy w UI (zachowuje cały istniejący kod akcji dla produkcji):
+
+**Plik:** `src/pages/AllWorksheetsPage.tsx` oraz komponenty akcji per-worksheet (`DeleteWorksheetButton`, `DuplicateWorksheetButton`, `ShareWorksheetModal`, `StudentSelector` w wierszu).
+
+Strategia: gardujemy w handlerach na poziomie wywołania (top-of-handler):
+- `onDelete = (id) => guardAction('Deleting worksheets', () => deleteWorksheet(id))`
+- `onTransfer = (id, sid) => guardAction('Transferring worksheets', () => updateStudent(...))`
+- `onShare`, `onDuplicate`, `onAddStudent` — analogicznie.
+
+Lista konkretnych miejsc do podpięcia `useDemoGuard` (jednolity wzorzec):
+- `src/pages/AllWorksheetsPage.tsx` — `handleBulkDelete`, `handleDelete` (linia ~552), inline `await deleteWorksheet(id)` (~352).
+- `src/components/DeleteWorksheetButton.tsx` — handler usunięcia.
+- `src/components/DuplicateWorksheetButton.tsx` + `DuplicateWorksheetModal.tsx` — handler submit.
+- `src/components/ShareWorksheetModal.tsx` — handler `generateShareLink`.
+- `src/components/dashboard/AddStudentButton.tsx` + `AddStudentDialog.tsx` — handler create.
+- Transfer-to-Student dropdown wewnątrz item kafla worksheetu (znaleźć w `AllWorksheetsPage.tsx` koło 540 — `StudentSelector` z onChange).
+
+Dla każdego handlera: `if (isDemoMode) { showDemoBlockedToast('<Action name>'); return; }` zamiast aktualnego błędu UUID.
+
+Toast copy (jednolite):
+- "Deleting worksheets is disabled in demo mode. Sign up free to unlock."
+- "Transferring worksheets is disabled in demo mode."
+- "Sharing worksheets is disabled in demo mode."
+- "Adding students is disabled in demo mode."
+
+### 3F. Worksheet content (10 produkcyjnych)
+
+**Krok wykonania (w fazie implementacji):**
+
+1. Skrypt jednorazowy w `code--exec` użyje `psql` do `SELECT id, title, ai_response, html_content, form_data, generation_time_seconds FROM worksheets WHERE id IN (…10 UUID-ów…)` z preview env (env vars już są w sandbox dla głównego projektu; jeśli to inny projekt, użytkownik zostanie zapytany o dump w przeciwnym razie zaciągniemy publicznie po `share_token` jeśli istnieje — preferencja: bezpośredni dump z DB).
+2. Wynik mapujemy 1:1 na 10 obecnych demo-worksheetów (po `id` `demo-ws-1..10`). Zachowujemy istniejące `id`, `student_id`, `created_at` (relative dates), `share_token`. Podmieniamy: `title`, `form_data`, `ai_response`, `html_content`, `generation_time_seconds`.
+3. Dane lokalne hard-codujemy w `src/data/demoData.ts` (zwiększy rozmiar bundla o ~50–150 KB — akceptowalne, demo to onboarding).
+4. Sanity check: `WorksheetPage` renderuje `worksheet.ai_response` przez `WorksheetDisplay` — zachowujemy ten sam JSON shape. `html_content` jest fallbackiem; produkcyjne wartości to gotowe HTML — bezpiecznie pasuje.
+5. Mapowanie tematyczne — zachowujemy spójność poziomu studenta:
+   - student-1 (B2 Business): worksheet IDs `4df96ff7…`, `13e92a57…`, `575dd5a8…`, `e95ee859…`, `ed6514ba…`
+   - student-2 (A2): `87768bb0…`, `be7b86b6…`, `c12d2180…`
+   - student-3 (C1): `2588083c…`, `f3a4667d…`
+
+   (Dokładne przypisanie potwierdzimy podczas dump'u na podstawie poziomu w `form_data`).
+
+### 3G. WorksheetPage `/student/demo-student-1` loading screenshot
+
+Problem: route `/student/:id` (StudentPage) — sprawdzić czy jest demo-aware. Plan: dodać do `StudentPage.tsx` demo branch który ładuje studenta z `demoData.students.find(s => s.id === id)` zamiast czekać na Supabase. Jednolinijkowy fix: w hooku `useStudent.tsx` dodać branch demo (analogicznie do `useStudents`).
 
 ---
 
-## Część 3 — Aktualizacja dokumentacji RAG
+## 4. Dokumentacja RAG (obowiązkowo)
 
-Zmiany w plikach:
-- `docs/llm-context.md` — sekcja `## Dashboard Stats Bar` z formatem Problem → Solution → Mechanics + RAG Keywords (dashboard, stats, kafelki, KPI, homework count, upcoming lessons).
-- `llms.txt` — krótki wpis w sekcji features.
-- `mem/features/dashboard/compact-stats-bar.md` — nowa pamięć projektu z opisem komponentu i źródeł danych.
+Edycje w `docs/llm-context.md` i `llms.txt` w jednym push'u, format `Problem → Solution → Mechanics → RAG Keywords`:
 
-Wpis do indeksu pamięci (`mem://index.md`) — dodany jeden nowy wiersz w sekcji Memories.
+### Sekcja: "Demo Mode — Hard Lockdown (v6.9.6)"
+
+- **Problem:** Akcje mutujące w demo wywoływały błędy UUID/PG zamiast czytelnego komunikatu. `/worksheets` wisiało (useDeletedWorksheets bez guard demo). `/calendar/settings` było puste. Share przekierowywał do settings.
+- **Solution:** Każdy handler mutujący po stronie UI gardowany przez `useDemoGuard().guardAction(label, fn)`. Hooki Supabase wcześnie zwracają w `isDemoMode`. `useCalendarSettings` w demo dostarcza `DEMO_CALENDAR_SETTINGS`. Modale (Add slot/Share) blokowane na poziomie otwarcia.
+- **Mechanics:** Pliki: `useDemoGuard`, `DemoContext`, `useDeletedWorksheets`, `useCalendarSettings`, `useStudent`, `CalendarPage.handleShare/handleAddSlot`, `CalendarSettingsPage` (banner + `disabled`), wszystkie komponenty akcji per-worksheet.
+- **RAG Keywords:** demo mode, lockdown, read-only, demo guard, mutation block, demo settings, demo calendar, fake user, sandbox preview, edooqoo demo.
+
+### Sekcja: "Dashboard Symmetry & Hub Info"
+
+- **Problem:** HubInfo i kafle statystyk nie wyrównane z gridem Students/Recent Worksheets.
+- **Solution:** `CompactStatsBar` używa `lg:grid-cols-2` zgodnie z gridem poniżej. Pełny opis Student Hub na desktop, skrócony na mobile.
+- **Mechanics:** `CompactStatsBar.tsx` — dwa warianty: mobile (stack) i desktop (2-col grid).
+- **RAG Keywords:** dashboard layout, student hub banner, stats bar, compact stats, two column grid, edooqoo.com/my.
+
+### Sekcja: "Forced Light Theme on Public Landing"
+
+- **Problem:** Mobile w trybie ciemnym renderował landing w dark.
+- **Solution:** `Index.tsx` na mount usuwa klasę `dark`, na unmount przywraca.
+- **Mechanics:** `useEffect` w `src/pages/Index.tsx`. Brak zmian w `useTheme` (chronione dark mode dla nauczycieli pozostaje).
+- **RAG Keywords:** prefers-color-scheme, dark mode mobile, landing page light, public theme override.
+
+### Sekcja: "Hero CTA Mobile Sizing"
+
+- **Problem:** "Generate Your First Worksheet — Free" wychodził poza viewport.
+- **Solution:** Dwa warianty tekstu (`sm:hidden` vs `hidden sm:inline`), przycisk `h-12 sm:h-14`, `px-4 sm:px-8`.
+- **Mechanics:** `HeroHeadline.tsx`.
+- **RAG Keywords:** hero CTA mobile, button overflow, responsive hero, landing CTA size.
+
+### Sekcja: "Demo Worksheets — Production Content"
+
+- **Problem:** Demo worksheety renderowały puste UI (skrócony stub `ai_response`).
+- **Solution:** 10 worksheetów demo zasilonych pełną treścią z 10 produkcyjnych UUID-ów (preview env).
+- **Mechanics:** `src/data/demoData.ts` — pola `title/form_data/ai_response/html_content/generation_time_seconds` podmienione, struktura JSON zachowana (kompatybilność z `WorksheetDisplay`).
+- **RAG Keywords:** demo data, fake worksheets, sample content, preview env import, demoData seed.
 
 ---
 
-## Pliki do utworzenia / edycji
+## 5. Pamięć projektu (mem://)
 
-**Nowe:**
-- `src/hooks/useUpcomingLessonsCount.tsx`
-- `src/components/dashboard/CompactStatsBar.tsx`
-- `mem/features/dashboard/compact-stats-bar.md`
+Aktualizacja:
+- `mem/features/dashboard/compact-stats-bar.md` → wzmianka o dwukolumnowym wyrównaniu z gridem poniżej.
+- Nowy: `mem/features/public-demo-mode-lockdown.md` — lista wszystkich punktów guard, wzór `useDemoGuard`, oraz reguła "każdy nowy handler mutujący MUST przejść przez guardAction lub wcześnie return na isDemoMode".
+- `mem://index.md` — dodać linka do nowego pliku.
 
-**Edytowane:**
-- `src/pages/Dashboard.tsx` (usunięcie 2 bloków, wstawienie 1 komponentu, wyliczenie activeHomeworkCount)
-- `docs/llm-context.md`
-- `llms.txt`
-- `mem/index.md`
+---
 
-## Decyzje pozostawione użytkownikowi
-**Żadne** — wszystkie wybory zapadły w planie (6 kafelków, kolejność, źródła, layout responsywny, brak realtime).
+## 6. Kolejność wdrożenia (atomowa)
+
+1. CompactStatsBar layout + tekst HubInfo.
+2. Index.tsx force-light.
+3. HeroHeadline mobile button.
+4. useDeletedWorksheets demo branch + AllWorksheetsPage warunek loading.
+5. useCalendarSettings demo branch + DEMO_CALENDAR_SETTINGS w demoData.ts.
+6. CalendarSettingsPage banner + `disabled` na inputach.
+7. CalendarPage handleAddSlot/handleShare/handleBulk* guards.
+8. useStudent demo branch (StudentPage loading fix).
+9. Guardy w komponentach akcji worksheetów (Delete/Duplicate/Share/AddStudent/Transfer).
+10. Dump 10 produkcyjnych worksheetów → podmiana w demoData.ts.
+11. Update `docs/llm-context.md`, `llms.txt`, mem.
+
+---
+
+## 7. Bezpieczeństwo / brak regresji
+
+- Wszystkie nowe ścieżki wzdłuż istniejącego wzorca `isDemoMode` (już używane w 30+ miejscach).
+- Brak zmian DB, RLS, edge functions.
+- Brak zmian w `Worksheet Generation Engine` (sanctity rule).
+- Light theme override izolowany w `Index.tsx` — nie dotyka teacher app.
+- Konsolidacja w `useDemoGuard` zapewnia, że produkcyjna ścieżka pozostaje 1:1.
