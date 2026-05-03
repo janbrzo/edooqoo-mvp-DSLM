@@ -70,7 +70,7 @@ const CalendarPage = () => {
   // Elevated notification state (Problem 7)
   const { notifications, unreadCount, markAllRead, refetch: refetchNotifications } = useCalendarNotifications(user?.id);
 
-  const { isDemoMode } = useDemoContext();
+  const { isDemoMode, showDemoBlockedToast } = useDemoContext();
   const [gcalConnected, setGcalConnected] = useState<boolean | null>(null);
   useEffect(() => {
     if (!user?.id || isDemoMode) return;
@@ -164,6 +164,7 @@ const CalendarPage = () => {
   }, [filteredSlots]);
 
   const handleAddSlot = (date?: Date, startTime?: string) => {
+    if (isDemoMode) { showDemoBlockedToast('Adding lessons'); return; }
     setAddModalDate(date);
     setAddModalStartTime(startTime);
     setAddModalOpen(true);
@@ -180,6 +181,7 @@ const CalendarPage = () => {
   };
 
   const handleSlotClick = (slot: CalendarSlot) => {
+    if (isDemoMode && !selectionMode) { showDemoBlockedToast('Editing lessons'); return; }
     if (selectionMode) {
       const slotType = getSlotSelectionType(slot);
       if (selectionType && slotType !== selectionType) return;
@@ -200,6 +202,7 @@ const CalendarPage = () => {
   };
 
   const handleShare = () => {
+    if (isDemoMode) { showDemoBlockedToast('Sharing public calendar'); return; }
     if (settings?.public_calendar_token) {
       const url = `${window.location.origin}/book/${settings.public_calendar_token}`;
       navigator.clipboard.writeText(url);
