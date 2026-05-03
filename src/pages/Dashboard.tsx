@@ -46,6 +46,8 @@ import { ChevronDown } from "lucide-react";
 import RenameDialog from "@/components/RenameDialog";
 import { toast } from "sonner";
 import StickyNav from '@/components/landing/StickyNav';
+import CompactStatsBar from '@/components/dashboard/CompactStatsBar';
+import { useUpcomingLessonsCount } from '@/hooks/useUpcomingLessonsCount';
 
 const Dashboard = () => {
   const { user, loading, isRegisteredUser } = useAuthFlow();
@@ -69,6 +71,7 @@ const Dashboard = () => {
   // Fetch homework for all worksheets
   const worksheetIds = worksheets.map(w => w.id);
   const { homeworkByWorksheet, loading: homeworkLoading } = useAllWorksheetHomework(worksheetIds);
+  const { count: upcomingLessonsCount } = useUpcomingLessonsCount();
 
   // ✅ FIX: Mark as loaded once all data is ready (only first time)
   useEffect(() => {
@@ -183,39 +186,14 @@ const Dashboard = () => {
 
       <div className="container mx-auto px-4 py-4">
 
-        {/* Compact Stats Strip — single row, low height */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
-          {[
-            { label: 'Tokens left', value: tokenLeft, hint: 'available', Icon: Coins },
-            { label: 'This month', value: thisMonthCount, hint: 'worksheets', Icon: FileText },
-            { label: 'All time', value: totalWorksheetsCreated, hint: 'worksheets', Icon: Target },
-            { label: 'Students', value: students.length, hint: 'active', Icon: Users },
-          ].map(({ label, value, hint, Icon }) => (
-            <Card key={label} className="p-3">
-              <div className="flex items-center gap-3">
-                <div className="h-8 w-8 rounded-md bg-primary/10 flex items-center justify-center shrink-0">
-                  <Icon className="h-4 w-4 text-primary" />
-                </div>
-                <div className="min-w-0">
-                  <div className="text-xs text-muted-foreground leading-tight">{label}</div>
-                  <div className="flex items-baseline gap-1.5">
-                    <span className="text-lg font-semibold leading-none">{value}</span>
-                    <span className="text-[11px] text-muted-foreground">{hint}</span>
-                  </div>
-                </div>
-              </div>
-            </Card>
-          ))}
-        </div>
-
-        {/* Student Hub Info — slim one-liner */}
-        <div className="mb-6 flex items-center gap-2 text-xs text-muted-foreground border border-primary/20 bg-primary/5 rounded-md px-3 py-2">
-          <BookOpen className="h-3.5 w-3.5 text-primary shrink-0" />
-          <span className="truncate">
-            <span className="font-medium text-foreground">Student Hub:</span> students log in with just their email at{' '}
-            <a href="https://edooqoo.com/my" target="_blank" rel="noopener noreferrer" className="font-medium text-primary hover:underline">edooqoo.com/my</a>
-          </span>
-        </div>
+        <CompactStatsBar
+          tokenLeft={tokenLeft}
+          thisMonthCount={thisMonthCount}
+          totalWorksheets={totalWorksheetsCreated}
+          studentsCount={students.length}
+          activeHomeworkCount={Object.values(homeworkByWorksheet).flat().filter((h: any) => !h.completed_at).length}
+          upcomingLessonsCount={upcomingLessonsCount}
+        />
 
         {/* Two Column Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
