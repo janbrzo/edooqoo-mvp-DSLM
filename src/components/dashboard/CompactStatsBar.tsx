@@ -28,11 +28,14 @@ const CompactStatsBar: React.FC<CompactStatsBarProps> = ({
   ];
 
   const HubInfo = (
-    <div className="flex items-center gap-2 px-3 py-2 rounded-md bg-primary/5 border border-primary/20 min-w-0 flex-1 lg:flex-none lg:basis-[40%]">
-      <BookOpen className="h-4 w-4 text-primary shrink-0" />
-      <span className="text-sm truncate">
+    <div className="flex items-start gap-2 px-3 py-2 rounded-md bg-primary/5 border border-primary/20 min-w-0 h-full">
+      <BookOpen className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+      <span className="text-sm leading-snug">
         <span className="font-semibold text-foreground">Student Hub:</span>{' '}
-        <span className="text-muted-foreground">login at </span>
+        <span className="text-muted-foreground">
+          <span className="lg:hidden">login at </span>
+          <span className="hidden lg:inline">students log in with just their email at </span>
+        </span>
         <a
           href="https://edooqoo.com/my"
           target="_blank"
@@ -41,6 +44,7 @@ const CompactStatsBar: React.FC<CompactStatsBarProps> = ({
         >
           edooqoo.com/my
         </a>
+        <span className="hidden lg:inline text-muted-foreground"> — no login needed. They access their worksheets, homework, flashcards & lessons.</span>
       </span>
     </div>
   );
@@ -72,9 +76,9 @@ const CompactStatsBar: React.FC<CompactStatsBarProps> = ({
   }
 
   return (
-    <div className="mb-4 flex items-stretch gap-2">
+    <div className="mb-4 grid grid-cols-1 lg:grid-cols-2 gap-6 items-stretch">
       {HubInfo}
-      <div className="flex items-center divide-x divide-border border border-border rounded-md bg-card overflow-x-auto">
+      <div className="flex items-center justify-between divide-x divide-border border border-border rounded-md bg-card overflow-x-auto">
         {stats.map(s => <StatPill key={s.label} {...s} />)}
       </div>
     </div>
