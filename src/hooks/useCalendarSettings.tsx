@@ -93,10 +93,22 @@ export function useCalendarSettings(teacherId?: string) {
   const [settings, setSettings] = useState<CalendarSettings | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
-  const { isDemoMode } = useDemoContext();
+  const { isDemoMode, showDemoBlockedToast } = useDemoContext();
 
   const fetchSettings = useCallback(async () => {
-    if (!teacherId || isDemoMode) { setLoading(false); return; }
+    if (isDemoMode) {
+      setSettings({
+        id: 'demo-calendar-settings',
+        teacher_id: 'demo-teacher',
+        ...DEFAULT_SETTINGS,
+        public_calendar_enabled: true,
+        public_calendar_token: 'demo-public-token',
+        payment_tracking_enabled: true,
+      } as CalendarSettings);
+      setLoading(false);
+      return;
+    }
+    if (!teacherId) { setLoading(false); return; }
     setLoading(true);
     try {
       const { data, error } = await supabase
@@ -131,7 +143,8 @@ export function useCalendarSettings(teacherId?: string) {
   useEffect(() => { fetchSettings(); }, [fetchSettings]);
 
   const updateSettings = useCallback(async (updates: Partial<CalendarSettings>) => {
-    if (!settings || isDemoMode) return;
+    if (isDemoMode) { showDemoBlockedToast('Editing calendar settings'); return; }
+    if (!settings) return;
     try {
       const { error } = await supabase
         .from('calendar_settings')
