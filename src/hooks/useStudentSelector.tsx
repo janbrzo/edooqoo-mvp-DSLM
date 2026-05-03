@@ -3,9 +3,11 @@ import { useState } from 'react';
 import { updateWorksheetStudentAPI } from '@/services/worksheetService/updateService';
 import { toast } from '@/hooks/use-toast';
 import { devLog } from '@/utils/logger';
+import { useDemoContext } from '@/contexts/DemoContext';
 
 export const useStudentSelector = (onSuccess?: () => void) => {
   const [isLoading, setIsLoading] = useState(false);
+  const { isDemoMode, showDemoBlockedToast } = useDemoContext();
 
   const updateWorksheetStudent = async (
     worksheetId: string, 
@@ -14,6 +16,7 @@ export const useStudentSelector = (onSuccess?: () => void) => {
     worksheetTitle?: string,
     newStudentName?: string
   ) => {
+    if (isDemoMode) { showDemoBlockedToast('Transferring worksheets'); return false; }
     if (!userId) {
       toast({
         title: "Error",

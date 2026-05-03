@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Copy } from 'lucide-react';
 import { DuplicateWorksheetModal } from './DuplicateWorksheetModal';
+import { useDemoContext } from '@/contexts/DemoContext';
 
 interface DuplicateWorksheetButtonProps {
   worksheetId: string;
@@ -21,9 +22,11 @@ export const DuplicateWorksheetButton = ({
   className = ''
 }: DuplicateWorksheetButtonProps) => {
   const [modalOpen, setModalOpen] = useState(false);
+  const { isDemoMode, showDemoBlockedToast } = useDemoContext();
 
   const handleClick = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent triggering parent onClick handlers
+    if (isDemoMode) { showDemoBlockedToast('Duplicating worksheets'); return; }
     setModalOpen(true);
   };
 

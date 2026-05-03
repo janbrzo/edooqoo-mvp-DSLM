@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useStudents } from '@/hooks/useStudents';
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
+import { useDemoContext } from '@/contexts/DemoContext';
 
 const ENGLISH_LEVELS = [
   { value: 'A1', label: 'A1 (Beginner)' },
@@ -46,9 +47,11 @@ export const AddStudentButton = ({ onStudentAdded, size = 'default', variant = '
   const [studentEmail, setStudentEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const { addStudent } = useStudents();
+  const { isDemoMode, showDemoBlockedToast } = useDemoContext();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (isDemoMode) { showDemoBlockedToast('Adding students'); setOpen(false); return; }
     const finalGoal = mainGoal === 'custom' ? customGoal : mainGoal;
     if (!name || !englishLevel || !finalGoal) return;
 
