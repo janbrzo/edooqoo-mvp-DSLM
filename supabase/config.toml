@@ -1,1 +1,4 @@
 project_id = "bvfrkzdlklyvnhlpleck"
+
+[functions.format-worksheet-prompt]
+verify_jwt = false

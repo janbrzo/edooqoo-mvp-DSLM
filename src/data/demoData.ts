@@ -1,6 +1,8 @@
 
 import { getDemoLocale, type DemoLocaleNames } from './demoLocales';
-import { DEMO_WORKSHEET_CONTENT } from './demoWorksheetContent';
+// v6.9.7 — DEMO_WORKSHEET_CONTENT is lazy-imported below to keep ~150 KiB of
+// production-grade demo content out of the initial bundle (IP protection +
+// LCP). Static import would defeat the manualChunks split in vite.config.ts.
 
 // Helper to generate dates relative to today
 const daysAgo = (n: number) => {
@@ -428,8 +430,10 @@ export interface DemoDataSet {
   knowledgeEntries: any[];
 }
 
-export function buildDemoData(countryCode: string): DemoDataSet {
+export async function buildDemoData(countryCode: string): Promise<DemoDataSet> {
   const locale = getDemoLocale(countryCode);
+  // Lazy chunk: only fetched when demo mode is actually entered.
+  const { DEMO_WORKSHEET_CONTENT } = await import('./demoWorksheetContent');
 
   const teacher = {
     ...TEACHER_PROFILE,

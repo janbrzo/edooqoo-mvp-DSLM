@@ -125,7 +125,7 @@ export const useWorksheetGeneration = (
     try {
       devLog('📡 Starting worksheet generation...');
       
-      const fullPrompt = formatPromptForAI(data);
+      const fullPrompt = await formatPromptForAI(data);
       const formDataForStorage = createFormDataForStorage(data);
       
       if (!userId) {

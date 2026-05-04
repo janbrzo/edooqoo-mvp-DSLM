@@ -1,18 +1,21 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import WorksheetContent from "@/components/worksheet/WorksheetContent";
-import { mockNewExercisesData } from "@/mockNewExercisesData";
 
 /**
  * Test page for previewing all 6 new exercise types
  * Accessible at /test-exercises for immediate testing without generation
  */
 const TestExercises = () => {
-  const [editableWorksheet, setEditableWorksheet] = useState(mockNewExercisesData);
+  // v6.9.7 — lazy-load mock content so it stays out of the main bundle.
+  const [editableWorksheet, setEditableWorksheet] = useState<any>(null);
+  useEffect(() => {
+    import("@/mockNewExercisesData").then((m) => setEditableWorksheet(m.mockNewExercisesData));
+  }, []);
   const [isEditing, setIsEditing] = useState(false);
   const [viewMode, setViewMode] = useState<"student" | "teacher">("teacher");
 
@@ -159,16 +162,20 @@ const TestExercises = () => {
         </Card>
 
         {/* Worksheet content */}
-        <WorksheetContent
-          editableWorksheet={editableWorksheet}
-          isEditing={isEditing}
-          viewMode={viewMode}
-          setEditableWorksheet={setEditableWorksheet}
-          worksheetId="test-new-exercises"
-          onFeedbackSubmit={() => {}}
-          isDownloadUnlocked={true}
-          inputParams={mockInputParams}
-        />
+        {editableWorksheet ? (
+          <WorksheetContent
+            editableWorksheet={editableWorksheet}
+            isEditing={isEditing}
+            viewMode={viewMode}
+            setEditableWorksheet={setEditableWorksheet}
+            worksheetId="test-new-exercises"
+            onFeedbackSubmit={() => {}}
+            isDownloadUnlocked={true}
+            inputParams={mockInputParams}
+          />
+        ) : (
+          <div className="p-8 text-center text-gray-500">Loading test exercises…</div>
+        )}
       </div>
     </div>
   );
