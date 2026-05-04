@@ -9,10 +9,7 @@
  * - Zmiana w jednym narzędziu NIE wpływa na inne
  */
 
-devLog('🎨 DrawingToolbar v5.0 loaded');
-
 import { 
-import { devLog } from '@/utils/logger';
   Undo2,
   Redo2,
   Trash2,
@@ -20,6 +17,9 @@ import { devLog } from '@/utils/logger';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { devLog } from '@/utils/logger';
+
+devLog('🎨 DrawingToolbar v5.0 loaded');
 import {
   AlertDialog,
   AlertDialogAction,

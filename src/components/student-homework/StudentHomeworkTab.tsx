@@ -19,7 +19,6 @@ import { CreateHomeworkModal } from '@/components/homework/CreateHomeworkModal';
 import { SendHomeworkEmailDialog } from '@/components/homework/SendHomeworkEmailDialog';
 import { useStudents } from '@/hooks/useStudents';
 import {
-import { devLog } from '@/utils/logger';
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -30,6 +29,7 @@ import { devLog } from '@/utils/logger';
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import RenameDialog from '@/components/RenameDialog';
+import { devLog } from '@/utils/logger';
 
 interface StudentHomeworkTabProps {
   studentId: string;

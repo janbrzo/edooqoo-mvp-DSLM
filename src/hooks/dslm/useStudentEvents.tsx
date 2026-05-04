@@ -6,7 +6,6 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { 
-import { devWarn } from '@/utils/logger';
   StudentEvent, 
   CreateStudentEventInput, 
   StudentEventFilters,
@@ -14,6 +13,7 @@ import { devWarn } from '@/utils/logger';
   StudentEventType,
   EventSource
 } from '@/types/dslm/events';
+import { devWarn } from '@/utils/logger';
 
 interface UseStudentEventsProps {
   studentId: string;
