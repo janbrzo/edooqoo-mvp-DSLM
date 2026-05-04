@@ -12,12 +12,9 @@
  * - UNDO/REDO: Poprawnie limitowane do 50 kroków
  */
 
-devLog('🎨 DrawingOverlay v6.0 loaded - FULL REWRITE of Eraser/Undo/Redo');
-
 import { useEffect, useRef, useState, useCallback, forwardRef, useImperativeHandle, useReducer } from 'react';
 import { Canvas as FabricCanvas, PencilBrush, Line, FabricObject, Triangle, Path, Point } from 'fabric';
 import { 
-import { devLog } from '@/utils/logger';
   DrawingOverlayProps, 
   DrawingState, 
   DrawingTool,
@@ -35,6 +32,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { useDemoContext } from '@/contexts/DemoContext';
+import { devLog } from '@/utils/logger';
+
+devLog('🎨 DrawingOverlay v6.0 loaded - FULL REWRITE of Eraser/Undo/Redo');
 
 /** Rozszerzone props z opcjonalnym zewnętrznym sterowaniem */
 export interface DrawingOverlayExternalProps extends DrawingOverlayProps {
