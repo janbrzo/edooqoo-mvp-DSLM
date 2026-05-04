@@ -1,3 +1,4 @@
+import { devLog } from '@/utils/logger';
 /**
  * Worksheet Streaming Service
  * Handles SSE connection to backend for real-time worksheet generation
@@ -24,7 +25,7 @@ export function streamWorksheetGeneration(
   // Use the same URL as regular generation
   const GENERATE_WORKSHEET_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generateWorksheet`;
   
-  console.log('🚀 Starting streaming worksheet generation...', { hasUserId: !!userId });
+  devLog('🚀 Starting streaming worksheet generation...', { hasUserId: !!userId });
 
   // v5.1: heartbeat — abort if no chunk arrives for 40s.
   const HEARTBEAT_MS = 40000;
@@ -72,7 +73,7 @@ export function streamWorksheetGeneration(
     while (true) {
       const { done, value } = await reader.read();
       if (done) {
-        console.log('✅ Stream completed');
+        devLog('✅ Stream completed');
         break;
       }
       resetHeartbeat();
@@ -98,7 +99,7 @@ export function streamWorksheetGeneration(
         try {
           const data = JSON.parse(dataStr);
           
-          console.log(`📨 Received SSE event: ${eventType}`, data);
+          devLog(`📨 Received SSE event: ${eventType}`, data);
           
           switch (eventType) {
             case 'start':
@@ -133,7 +134,7 @@ export function streamWorksheetGeneration(
   }).catch(error => {
     if (heartbeatTimer) { clearTimeout(heartbeatTimer); heartbeatTimer = null; }
     if (error.name === 'AbortError') {
-      console.log('🛑 Stream aborted by user');
+      devLog('🛑 Stream aborted by user');
       return;
     }
     

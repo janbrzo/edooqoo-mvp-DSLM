@@ -6,6 +6,7 @@
 import { useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import type { 
+import { devWarn } from '@/utils/logger';
   StudentEvent, 
   CreateStudentEventInput, 
   StudentEventFilters,
@@ -105,7 +106,7 @@ export const useStudentEvents = ({
     // CRITICAL FIX: Validate for actual UUIDs, not just truthy values
     // Empty strings are falsy but pass through || fallbacks
     if (!studentId || studentId.trim() === '' || !teacherId || teacherId.trim() === '') {
-      console.warn('⚠️ [useStudentEvents] addEvent skipped - invalid IDs:', { 
+      devWarn('⚠️ [useStudentEvents] addEvent skipped - invalid IDs:', { 
         studentId: studentId || '(empty)', 
         teacherId: teacherId || '(empty)',
         eventType: input.event_type 

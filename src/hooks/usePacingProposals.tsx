@@ -8,6 +8,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthUser } from '@/hooks/useAuthUser';
 import { toast } from 'sonner';
+import { devWarn } from '@/utils/logger';
 
 export interface PacingProposal {
   id: string;
@@ -56,7 +57,7 @@ export const usePacingProposals = (studentId?: string) => {
       }
       setProposals(rows);
     } catch (e) {
-      console.warn('[usePacingProposals] fetch failed', e);
+      devWarn('[usePacingProposals] fetch failed', e);
     } finally {
       setLoading(false);
     }

@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Tables } from '@/integrations/supabase/types';
 import { toast } from '@/hooks/use-toast';
-import { devLog } from '@/utils/logger';
+import { devLog, devWarn } from '@/utils/logger';
 import { useDemoContext } from '@/contexts/DemoContext';
 import { useAuthUser } from '@/hooks/useAuthUser';
 
@@ -99,8 +99,8 @@ export const useStudents = () => {
       try {
         supabase.functions.invoke('recalculate-pacing', {
           body: { studentId: data.id, teacherId: user.id },
-        }).catch((e) => console.warn('[v4.8] Initial pacing calc failed', e));
-      } catch (e) { console.warn('[v4.8] recalculate-pacing dispatch threw', e); }
+        }).catch((e) => devWarn('[v4.8] Initial pacing calc failed', e));
+      } catch (e) { devWarn('[v4.8] recalculate-pacing dispatch threw', e); }
 
       // Auto-generate permanent Google Meet link if setting is enabled and GCal is connected
       try {
@@ -171,7 +171,7 @@ export const useStudents = () => {
                 },
               },
             });
-            if (pacingErr) { console.warn('[v5.2] Goal-trigger pacing failed', pacingErr); return; }
+            if (pacingErr) { devWarn('[v5.2] Goal-trigger pacing failed', pacingErr); return; }
             const result: any = pacingRes || {};
             if (result.proposalId) {
               window.dispatchEvent(new CustomEvent('pacingProposalChanged'));
@@ -185,7 +185,7 @@ export const useStudents = () => {
                 description: `Current ${result.current ?? '?'}/100 stays optimal (${result.skipReason || 'no significant change'}).`,
               });
             }
-          } catch (e) { console.warn('[v5.2] Goal-trigger dispatch threw', e); }
+          } catch (e) { devWarn('[v5.2] Goal-trigger dispatch threw', e); }
         })();
       }
 

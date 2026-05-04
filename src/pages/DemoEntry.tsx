@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDemoContext } from '@/contexts/DemoContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Loader2 } from 'lucide-react';
+import { devWarn } from '@/utils/logger';
 
 const DemoEntry: React.FC = () => {
   const navigate = useNavigate();
@@ -28,7 +29,7 @@ const DemoEntry: React.FC = () => {
         }
       } catch (e) {
         // Fallback to DEFAULT
-        console.warn('Could not detect locale, using default:', e);
+        devWarn('Could not detect locale, using default:', e);
       }
 
       enterDemo(countryCode);

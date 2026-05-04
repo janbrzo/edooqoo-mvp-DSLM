@@ -1,6 +1,7 @@
+import { devLog } from '@/utils/logger';
 // Enhanced deep fix for {text} objects and nano_skill structures
 export const deepFixTextObjects = (obj: any, path: string = 'root'): any => {
-  console.log(`🔧 Checking path: ${path}, type: ${typeof obj}`);
+  devLog(`🔧 Checking path: ${path}, type: ${typeof obj}`);
   
   if (obj === null || obj === undefined) {
     return obj;
@@ -13,7 +14,7 @@ export const deepFixTextObjects = (obj: any, path: string = 'root'): any => {
   
   // Special case: {text: "something"} object with ONLY text key - convert to string
   if (typeof obj === 'object' && obj.hasOwnProperty('text') && Object.keys(obj).length === 1) {
-    console.log(`🔧 FIXED {text} object at ${path}:`, obj, '→', obj.text);
+    devLog(`🔧 FIXED {text} object at ${path}:`, obj, '→', obj.text);
     return obj.text;
   }
   
@@ -22,7 +23,7 @@ export const deepFixTextObjects = (obj: any, path: string = 'root'): any => {
     // This is an item like {text: "...", nano_skill: {...}} - keep it as object
     // but ensure nested text is flattened if needed
     if (typeof obj.text === 'object' && obj.text?.text) {
-      console.log(`🔧 FLATTENED nested text at ${path}:`, obj.text, '→', obj.text.text);
+      devLog(`🔧 FLATTENED nested text at ${path}:`, obj.text, '→', obj.text.text);
       return { ...obj, text: obj.text.text };
     }
     // Keep the object as-is - it has valid structure
@@ -39,7 +40,7 @@ export const deepFixTextObjects = (obj: any, path: string = 'root'): any => {
   for (const [key, value] of Object.entries(obj)) {
     // Handle warmup_questions array
     if (key === 'warmup_questions' && Array.isArray(value)) {
-      console.log(`🔧 ${path}.${key}: Processing warmup questions array`);
+      devLog(`🔧 ${path}.${key}: Processing warmup questions array`);
       fixed[key] = value.map((question, index) => {
         if (typeof question === 'string') {
           return question;

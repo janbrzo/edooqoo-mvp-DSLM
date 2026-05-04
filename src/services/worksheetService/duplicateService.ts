@@ -1,4 +1,5 @@
 import { supabase } from '@/integrations/supabase/client';
+import { devLog } from '@/utils/logger';
 
 /**
  * Duplicates a worksheet - creates a 1:1 copy with a new student assignment
@@ -9,7 +10,7 @@ export async function duplicateWorksheetAPI(
   userId: string
 ): Promise<{ success: boolean; worksheetId?: string; error?: string }> {
   try {
-    console.log('🔄 Duplicating worksheet:', { originalWorksheetId, newStudentId, userId });
+    devLog('🔄 Duplicating worksheet:', { originalWorksheetId, newStudentId, userId });
     
     // 1. Fetch the original worksheet
     const { data: original, error: fetchError } = await supabase
@@ -49,7 +50,7 @@ export async function duplicateWorksheetAPI(
       share_token: null
     };
     
-    console.log('📝 Duplicate data prepared:', { 
+    devLog('📝 Duplicate data prepared:', { 
       originalTitle: original.title,
       newTitle: duplicateData.title,
       newStudentId
@@ -72,7 +73,7 @@ export async function duplicateWorksheetAPI(
       return { success: false, error: 'Failed to create duplicate worksheet' };
     }
     
-    console.log('✅ Worksheet duplicated successfully:', newWorksheet);
+    devLog('✅ Worksheet duplicated successfully:', newWorksheet);
     return { success: true, worksheetId: newWorksheet.id };
     
   } catch (error: any) {

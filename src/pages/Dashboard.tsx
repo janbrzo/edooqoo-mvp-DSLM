@@ -16,6 +16,7 @@ import { StudentSelector } from "@/components/StudentSelector";
 import { useProfile } from "@/hooks/useProfile";
 import { format } from "date-fns";
 import { 
+import { devLog } from '@/utils/logger';
   Users, 
   FileText, 
   Calendar,
@@ -142,7 +143,7 @@ const Dashboard = () => {
   };
 
   const handleDeleteWorksheet = async (worksheetId: string) => {
-    console.log('Dashboard: Deleting worksheet', worksheetId);
+    devLog('Dashboard: Deleting worksheet', worksheetId);
     try {
       const result = await deleteWorksheet(worksheetId);
       if (result.success) {

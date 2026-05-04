@@ -13,6 +13,7 @@ import { useInteractiveSharedWorksheet } from '@/hooks/useInteractiveSharedWorks
 import { ExerciseNavSidebar } from '@/components/worksheet/ExerciseNavSidebar';
 import { useWorksheetNavigation } from '@/hooks/useWorksheetNavigation';
 import { DrawingToggleButton, DrawingToolbar, DrawingOverlay, type DrawingOverlayRef } from '@/components/drawing';
+import { devLog } from '@/utils/logger';
 // useDrawingCanvas not needed - DrawingOverlay handles saving internally
 import type { SharedWorksheetData } from '@/types/interactiveSharedWorksheet';
 import type { DrawingTool, DrawingColor, StrokeWidth, DrawingState } from '@/types/drawing';
@@ -44,7 +45,7 @@ const SharedWorksheet = () => {
         const parsed = JSON.parse(storedData);
         // Check if not expired (48h = 172800000ms)
         if (parsed.email && parsed.expiresAt && Date.now() < parsed.expiresAt) {
-          console.log('[SharedWorksheet] Found remembered email:', parsed.email);
+          devLog('[SharedWorksheet] Found remembered email:', parsed.email);
           setVerifiedEmail(parsed.email);
         } else {
           // Clean up expired data
@@ -166,7 +167,7 @@ const SharedWorksheet = () => {
           .single();
         
         if (worksheetData && worksheetData.teacher_id === user.id) {
-          console.log('[SharedWorksheet] User is the teacher - bypassing email verification');
+          devLog('[SharedWorksheet] User is the teacher - bypassing email verification');
           setIsTeacher(true);
           setVerifiedEmail(user.email || 'teacher');
           // DRAWING: Save teacher ID for drawing canvas
@@ -255,7 +256,7 @@ const SharedWorksheet = () => {
   };
 
   const handleEmailVerified = (email: string) => {
-    console.log('[SharedWorksheet] Email verified:', email);
+    devLog('[SharedWorksheet] Email verified:', email);
     setVerifiedEmail(email);
     
     // PROBLEM 5: Remember email for 48 hours
@@ -272,7 +273,7 @@ const SharedWorksheet = () => {
   };
 
   const handleStartStudy = () => {
-    console.log('[SharedWorksheet] Starting study mode');
+    devLog('[SharedWorksheet] Starting study mode');
     setIsStudyMode(true);
   };
 

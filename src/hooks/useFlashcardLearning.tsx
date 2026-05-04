@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { LearningCard, ReviewQuality, LearningSessionStats } from '@/types/flashcards';
+import { devLog } from '@/utils/logger';
 
 // SM-2 Algorithm Implementation
 function calculateSM2(
@@ -149,7 +150,7 @@ export const useFlashcardLearning = (setId: string, learnerEmail: string) => {
     // PROBLEM 4 FIX: Calculate response time (excludes paused time)
     const activeTime = isTabActive ? (Date.now() - cardShownAt) : 0;
     const responseTimeMs = pausedTimeMs + activeTime;
-    console.log('[Flashcard] Response time:', responseTimeMs, 'ms');
+    devLog('[Flashcard] Response time:', responseTimeMs, 'ms');
 
     try {
       const { newRepetition, newEF, newInterval } = calculateSM2(

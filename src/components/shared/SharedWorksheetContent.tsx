@@ -32,6 +32,7 @@ import { getIconComponent } from '../../utils/iconUtils';
 import { getOfficialExerciseName } from '../../utils/exerciseProcessor';
 import { HomeworkSpeakingRecorder } from '@/components/homework/HomeworkSpeakingRecorder';
 import { AutoResizeTextarea } from '@/components/ui/AutoResizeTextarea';
+import { devLog } from '@/utils/logger';
 
 interface SharedWorksheetContentProps {
   worksheet: {
@@ -190,22 +191,22 @@ const SharedWorksheetContent: React.FC<SharedWorksheetContentProps> = ({
     if (!shouldShowAiEvalsForExercise(exerciseType)) return undefined;
     return aiEvaluations?.[index] ?? convertItemEvalsToAiEvals(itemEvaluations?.[index]);
   };
-  console.log('🔧 SharedWorksheetContent: Starting data parsing...');
-  console.log('🔧 ai_response length:', worksheet.ai_response?.length || 0);
-  console.log('🔧 html_content length:', worksheet.html_content?.length || 0);
+  devLog('🔧 SharedWorksheetContent: Starting data parsing...');
+  devLog('🔧 ai_response length:', worksheet.ai_response?.length || 0);
+  devLog('🔧 html_content length:', worksheet.html_content?.length || 0);
 
   let worksheetData = null;
 
   // Try ai_response first (contains complete data), then html_content as fallback
   if (worksheet.ai_response && worksheet.ai_response.trim()) {
     try {
-      console.log('🔧 Attempting to parse ai_response...');
+      devLog('🔧 Attempting to parse ai_response...');
       const rawData = JSON.parse(worksheet.ai_response);
-      console.log('✅ Successfully parsed ai_response, now fixing text objects:', rawData);
+      devLog('✅ Successfully parsed ai_response, now fixing text objects:', rawData);
       
       // CRITICAL FIX: Apply deepFixTextObjects to fix {text: "..."} objects
       worksheetData = deepFixTextObjects(rawData, 'ai_response');
-      console.log('✅ Text objects fixed:', worksheetData);
+      devLog('✅ Text objects fixed:', worksheetData);
     } catch (error) {
       console.error('❌ Error parsing ai_response:', error);
     }
@@ -214,13 +215,13 @@ const SharedWorksheetContent: React.FC<SharedWorksheetContentProps> = ({
   // Fallback to html_content if ai_response failed
   if (!worksheetData && worksheet.html_content && worksheet.html_content.trim()) {
     try {
-      console.log('🔧 Fallback: Attempting to parse html_content...');
+      devLog('🔧 Fallback: Attempting to parse html_content...');
       const rawData = JSON.parse(worksheet.html_content);
-      console.log('✅ Successfully parsed html_content, now fixing text objects:', rawData);
+      devLog('✅ Successfully parsed html_content, now fixing text objects:', rawData);
       
       // CRITICAL FIX: Apply deepFixTextObjects to fix {text: "..."} objects
       worksheetData = deepFixTextObjects(rawData, 'html_content');
-      console.log('✅ Text objects fixed:', worksheetData);
+      devLog('✅ Text objects fixed:', worksheetData);
     } catch (error) {
       console.error('❌ Error parsing html_content:', error);
     }
@@ -240,7 +241,7 @@ const SharedWorksheetContent: React.FC<SharedWorksheetContentProps> = ({
     );
   }
 
-  console.log('✅ Using worksheet data:', {
+  devLog('✅ Using worksheet data:', {
     title: worksheetData.title,
     hasExercises: worksheetData.exercises?.length || 0,
     hasWarmup: worksheetData.warmup_questions?.length || 0,
@@ -400,7 +401,7 @@ const SharedWorksheetContent: React.FC<SharedWorksheetContentProps> = ({
 
       {/* Exercises - using proper React components with FIXED ICONS */}
       {worksheetData.exercises && worksheetData.exercises.map((exercise: any, index: number) => {
-        console.log(`🔧 Rendering exercise ${index + 1}: ${exercise.type}`, exercise);
+        devLog(`🔧 Rendering exercise ${index + 1}: ${exercise.type}`, exercise);
         
         // Normalize type to handle -picture and -audio suffixes
         const normalizedType = normalizeExerciseType(exercise.type);

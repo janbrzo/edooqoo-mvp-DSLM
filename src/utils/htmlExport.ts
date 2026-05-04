@@ -1,3 +1,4 @@
+import { devLog, devWarn } from '@/utils/logger';
 
 /**
  * Fetches CSS content from a URL
@@ -9,7 +10,7 @@ async function fetchCSSContent(url: string): Promise<string> {
       return await response.text();
     }
   } catch (error) {
-    console.warn(`Failed to fetch CSS from ${url}:`, error);
+    devWarn(`Failed to fetch CSS from ${url}:`, error);
   }
   return '';
 }
@@ -19,7 +20,7 @@ async function fetchCSSContent(url: string): Promise<string> {
  */
 export async function exportAsHTML(elementId: string, filename: string, exportViewMode: 'student' | 'teacher' = 'student', title: string = 'English Worksheet'): Promise<boolean> {
   try {
-    console.log(`[HTML EXPORT] Starting HTML export of current view for "${filename}"`);
+    devLog(`[HTML EXPORT] Starting HTML export of current view for "${filename}"`);
     
     const element = document.getElementById(elementId);
     if (!element) {
@@ -44,7 +45,7 @@ export async function exportAsHTML(elementId: string, filename: string, exportVi
     // Fetch and inline all external CSS
     const cssPromises = externalStylesheets.map(async (link) => {
       const href = link.href;
-      console.log('[HTML EXPORT] Fetching CSS from:', href);
+      devLog('[HTML EXPORT] Fetching CSS from:', href);
       
       try {
         const absoluteUrl = new URL(href, window.location.origin).href;
@@ -54,7 +55,7 @@ export async function exportAsHTML(elementId: string, filename: string, exportVi
           return `/* CSS from ${href} */\n${cssContent}\n`;
         }
       } catch (error) {
-        console.warn(`[HTML EXPORT] Failed to process CSS from ${href}:`, error);
+        devWarn(`[HTML EXPORT] Failed to process CSS from ${href}:`, error);
       }
       return '';
     });
@@ -85,11 +86,11 @@ export async function exportAsHTML(elementId: string, filename: string, exportVi
             }
           }
         } catch (e) {
-          console.warn('[HTML EXPORT] Could not access stylesheet rules (likely CORS):', e);
+          devWarn('[HTML EXPORT] Could not access stylesheet rules (likely CORS):', e);
         }
       });
     } catch (error) {
-      console.warn('[HTML EXPORT] Error accessing document.styleSheets:', error);
+      devWarn('[HTML EXPORT] Error accessing document.styleSheets:', error);
     }
 
     // Add additional styles including functional navigation
@@ -446,12 +447,12 @@ export async function exportAsHTML(elementId: string, filename: string, exportVi
       return false;
     }
     
-    console.log(`[HTML EXPORT] Original DOM for #${elementId} has been cloned. Cleaning up for export.`);
+    devLog(`[HTML EXPORT] Original DOM for #${elementId} has been cloned. Cleaning up for export.`);
 
     // Remove elements that should not be in the export, like feedback forms.
     // Teacher tips are handled correctly because the view is already set before calling this function.
     const elementsToRemove = clonedElement.querySelectorAll('[data-no-pdf="true"]:not([data-teacher-tip="true"])');
-    console.log(`[HTML EXPORT] Removing ${elementsToRemove.length} non-exportable elements (e.g., rating section).`);
+    devLog(`[HTML EXPORT] Removing ${elementsToRemove.length} non-exportable elements (e.g., rating section).`);
     elementsToRemove.forEach(el => el.remove());
     
     // PROBLEM 1 FIX: For student view, remove all visible answers (True/False green text, teacher answers)
@@ -486,7 +487,7 @@ export async function exportAsHTML(elementId: string, filename: string, exportVi
         inputRadio.setAttribute('data-checked', 'false');
         inputRadio.defaultChecked = false;
       });
-      console.log(`[HTML EXPORT] Student view: Unchecked ${radioButtons.length} radio buttons for clean export.`);
+      devLog(`[HTML EXPORT] Student view: Unchecked ${radioButtons.length} radio buttons for clean export.`);
       
       // Additional True/False cleanup: remove any green/correct indicators in T/F sections
       const tfCorrectLabels = clonedElement.querySelectorAll('.text-green-600.italic, .text-green-700.italic');
@@ -497,7 +498,7 @@ export async function exportAsHTML(elementId: string, filename: string, exportVi
         }
       });
       
-      console.log(`[HTML EXPORT] Student view: Removed answer indicators for clean student worksheet.`);
+      devLog(`[HTML EXPORT] Student view: Removed answer indicators for clean student worksheet.`);
     }
 
     // Copy existing navigation elements from the current DOM
@@ -754,7 +755,7 @@ ${finalCSS}
     // Clean up
     URL.revokeObjectURL(url);
     
-    console.log(`[HTML EXPORT] HTML export completed successfully.`);
+    devLog(`[HTML EXPORT] HTML export completed successfully.`);
     return true;
   } catch (error) {
     console.error('[HTML EXPORT] Error exporting HTML:', error);

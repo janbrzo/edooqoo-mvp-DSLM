@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { devLog } from '@/utils/logger';
 
 import { Button } from "@/components/ui/button";
 import { Edit, Lightbulb, User, Download, Lock, Loader2, Share2, Gift, BookOpen, Copy, Radio, Paintbrush, Eye, EyeOff, Plus } from "lucide-react";
@@ -161,7 +162,7 @@ const WorksheetToolbar = ({
       const sanitizedTitle = title.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
       const filename = `${timestamp}-${viewModeText}-${sanitizedTitle}.html`;
       
-      console.log(`Preparing to download HTML for ${downloadViewMode} view.`);
+      devLog(`Preparing to download HTML for ${downloadViewMode} view.`);
       
       const success = await exportAsHTML('worksheet-content', filename, downloadViewMode, title);
       
@@ -172,14 +173,14 @@ const WorksheetToolbar = ({
         
         if (worksheetId) {
           try {
-            console.log(`Attempting to track download for worksheet: ${worksheetId}`);
+            devLog(`Attempting to track download for worksheet: ${worksheetId}`);
             await trackWorksheetEvent('download', worksheetId, userIp || 'anonymous');
-            console.log('Download tracked successfully in worksheets table');
+            devLog('Download tracked successfully in worksheets table');
           } catch (error) {
             console.error('Failed to track download in worksheets table:', error);
           }
         } else {
-          console.log('No worksheetId provided, skipping worksheet table tracking');
+          devLog('No worksheetId provided, skipping worksheet table tracking');
         }
       }
       if (!success) {
@@ -241,10 +242,10 @@ const WorksheetToolbar = ({
   };
 
   const handleShareClick = () => {
-    console.log('Share button clicked');
-    console.log('User:', user);
-    console.log('Is registered user:', isRegisteredUser);
-    console.log('Worksheet ID:', worksheetId);
+    devLog('Share button clicked');
+    devLog('User:', user);
+    devLog('Is registered user:', isRegisteredUser);
+    devLog('Worksheet ID:', worksheetId);
     
     setShowShareModal(true);
   };

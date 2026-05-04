@@ -10,6 +10,7 @@ import { Mic, Square, Play, Pause, RotateCcw, Upload, CheckCircle, Loader2, Aler
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { devLog } from '@/utils/logger';
 
 interface SpeakingRecorderProps {
   maxSeconds?: number;
@@ -107,12 +108,12 @@ export function SpeakingRecorder({ maxSeconds = 60, answer, onAnswer, questionId
         const blob = currentBlob;
         const capturedPrevId = prevId;
         
-        console.log('[SpeakingRecorder] Auto-saving (questionId change) for:', capturedPrevId);
+        devLog('[SpeakingRecorder] Auto-saving (questionId change) for:', capturedPrevId);
         
         uploadBlobToR2(blob)
           .then((url) => {
             if (url && onAutoSave) {
-              console.log('[SpeakingRecorder] Auto-save success:', capturedPrevId, url);
+              devLog('[SpeakingRecorder] Auto-save success:', capturedPrevId, url);
               onAutoSave(capturedPrevId, url);
             } else if (url) {
               onAnswer(url);
@@ -155,12 +156,12 @@ export function SpeakingRecorder({ maxSeconds = 60, answer, onAnswer, questionId
           mediaRecorderRef.current.stop();
         }
 
-        console.log('[SpeakingRecorder] Unmount auto-save for:', prevId);
+        devLog('[SpeakingRecorder] Unmount auto-save for:', prevId);
 
         uploadBlobToR2(blob)
           .then((url) => {
             if (url && prevId) {
-              console.log('[SpeakingRecorder] Unmount auto-save success:', prevId);
+              devLog('[SpeakingRecorder] Unmount auto-save success:', prevId);
               (window as any).__welcomeTestAutoSave?.(prevId, url);
             }
           })
@@ -217,7 +218,7 @@ export function SpeakingRecorder({ maxSeconds = 60, answer, onAnswer, questionId
         stream.getTracks().forEach(t => t.stop());
         // Set global pending recording for parent-level flush before navigation
         (window as any).__pendingSpeakingRecording = { questionId, blob };
-        console.log('[SpeakingRecorder] Set __pendingSpeakingRecording for:', questionId);
+        devLog('[SpeakingRecorder] Set __pendingSpeakingRecording for:', questionId);
       };
 
       mediaRecorder.onerror = () => {

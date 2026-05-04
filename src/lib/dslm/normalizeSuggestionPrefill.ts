@@ -1,3 +1,4 @@
+import { devWarn } from '@/utils/logger';
 /**
  * normalizeSuggestionPrefill — single source of truth for converting a DSLM
  * suggestion (next step / phase step) or a persisted draft into a coherent
@@ -95,7 +96,7 @@ export function normalizeSuggestionPrefill(input: NormalizeInput): NormalizedPre
     mediaFamily = pictureCount >= audioCount ? 'picture' : 'audio';
     if (typeof console !== 'undefined') {
       // eslint-disable-next-line no-console
-      console.warn('[normalizeSuggestionPrefill] mixed picture+audio → forcing', mediaFamily);
+      devWarn('[normalizeSuggestionPrefill] mixed picture+audio → forcing', mediaFamily);
     }
   }
 

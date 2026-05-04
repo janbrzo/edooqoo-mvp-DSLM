@@ -15,6 +15,7 @@ import { StudyModeButton } from "@/components/shared/StudyModeButton";
 import MediaSection from "@/components/worksheet/MediaSection";
 import { ExerciseNavSidebar } from "@/components/worksheet/ExerciseNavSidebar";
 import {
+import { devLog } from '@/utils/logger';
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -72,7 +73,7 @@ export default function HomeworkPage() {
       try {
         const { email, expiresAt } = JSON.parse(stored);
         if (new Date(expiresAt) > new Date()) {
-          console.log('[HomeworkPage] Using remembered email from localStorage:', email);
+          devLog('[HomeworkPage] Using remembered email from localStorage:', email);
           setVerifiedEmail(email);
         } else {
           // Expired - remove it
@@ -179,7 +180,7 @@ export default function HomeworkPage() {
           .single();
         
         if (homeworkData && homeworkData.teacher_id === user.id) {
-          console.log('[HomeworkPage] Logged-in user is teacher, skipping email verification');
+          devLog('[HomeworkPage] Logged-in user is teacher, skipping email verification');
           setIsTeacher(true);
           setVerifiedEmail('teacher');
           
@@ -194,7 +195,7 @@ export default function HomeworkPage() {
               .single();
             
             if (studentData?.student_email) {
-              console.log('[HomeworkPage] Loaded student email for teacher view:', studentData.student_email);
+              devLog('[HomeworkPage] Loaded student email for teacher view:', studentData.student_email);
               setStudentEmailForTeacher(studentData.student_email);
             }
           }
@@ -318,7 +319,7 @@ export default function HomeworkPage() {
         selected_exercises: deepFixTextObjects(data.selected_exercises, 'homework.selected_exercises')
       };
 
-      console.log('[HomeworkPage] Loaded and fixed homework data:', {
+      devLog('[HomeworkPage] Loaded and fixed homework data:', {
         id: fixedData.id,
         exerciseCount: Array.isArray(fixedData.selected_exercises) ? fixedData.selected_exercises.length : 0
       });
@@ -445,36 +446,36 @@ export default function HomeworkPage() {
       hasAudioMedia: false
     };
     
-    console.log('[HomeworkPage] Extracting media from homework:', homework);
+    devLog('[HomeworkPage] Extracting media from homework:', homework);
     
     // First, check homework-level media (from source worksheet)
     if (homework.selected_image?.url) {
-      console.log('[HomeworkPage] Found homework-level image:', homework.selected_image.url);
+      devLog('[HomeworkPage] Found homework-level image:', homework.selected_image.url);
       media.images.push(homework.selected_image.url);
       media.hasImageMedia = true;
     }
     
     if (homework.selected_audio?.url) {
-      console.log('[HomeworkPage] Found homework-level audio (selected_audio):', homework.selected_audio.url);
+      devLog('[HomeworkPage] Found homework-level audio (selected_audio):', homework.selected_audio.url);
       media.audios.push({
         url: homework.selected_audio.url,
         transcript: homework.selected_audio.transcript
       });
     } else if (homework.audio_url) {
-      console.log('[HomeworkPage] Found homework-level audio (audio_url):', homework.audio_url);
+      devLog('[HomeworkPage] Found homework-level audio (audio_url):', homework.audio_url);
       media.audios.push({ url: homework.audio_url });
     }
     
     // Then, check exercise-level media
     if (!Array.isArray(homework.selected_exercises)) {
-      console.log('[HomeworkPage] No exercises array found');
+      devLog('[HomeworkPage] No exercises array found');
       return media;
     }
     
-    console.log('[HomeworkPage] Checking', homework.selected_exercises.length, 'exercises for media');
+    devLog('[HomeworkPage] Checking', homework.selected_exercises.length, 'exercises for media');
     
     homework.selected_exercises.forEach((exercise, index) => {
-      console.log(`[HomeworkPage] Exercise ${index}:`, {
+      devLog(`[HomeworkPage] Exercise ${index}:`, {
         type: exercise.type,
         hasImageUrl: !!exercise.image_url,
         hasAudioUrl: !!exercise.audio_url,
@@ -484,7 +485,7 @@ export default function HomeworkPage() {
       // Extract images from picture exercises
       const pictureTypes = ['picture', 'image', 'describe', 'answer-questions-picture', 'describe-picture'];
       if (pictureTypes.includes(exercise.type) && exercise.image_url && !media.images.includes(exercise.image_url)) {
-        console.log('[HomeworkPage] Found exercise image:', exercise.image_url);
+        devLog('[HomeworkPage] Found exercise image:', exercise.image_url);
         media.images.push(exercise.image_url);
       }
       
@@ -493,7 +494,7 @@ export default function HomeworkPage() {
       if (audioTypes.includes(exercise.type) && exercise.audio_url) {
         const existingAudio = media.audios.find(a => a.url === exercise.audio_url);
         if (!existingAudio) {
-          console.log('[HomeworkPage] Found exercise audio:', exercise.audio_url);
+          devLog('[HomeworkPage] Found exercise audio:', exercise.audio_url);
           media.audios.push({
             url: exercise.audio_url,
             transcript: exercise.audio_transcript
@@ -502,7 +503,7 @@ export default function HomeworkPage() {
       }
     });
     
-    console.log('[HomeworkPage] Media extraction complete:', {
+    devLog('[HomeworkPage] Media extraction complete:', {
       images: media.images.length,
       audios: media.audios.length
     });
@@ -570,7 +571,7 @@ export default function HomeworkPage() {
               const expiresAt = new Date();
               expiresAt.setHours(expiresAt.getHours() + 24);
               localStorage.setItem(storageKey, JSON.stringify({ email, expiresAt: expiresAt.toISOString() }));
-              console.log('[HomeworkPage] Saved email to localStorage for 24h:', email);
+              devLog('[HomeworkPage] Saved email to localStorage for 24h:', email);
             }
             setVerifiedEmail(email);
           }}

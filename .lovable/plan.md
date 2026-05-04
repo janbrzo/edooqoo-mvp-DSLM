@@ -1,273 +1,259 @@
-# Plan v6.9.6 — Dashboard symmetry, mobile Hero, DEMO lockdown, demo worksheets content
+# Plan v6.9.7 — Ochrona IP + Spersonalizowany Email Powitalny
 
-## Analiza problemu (krótko)
+## Kontekst i ocena ryzyka
 
-1. **Dashboard `CompactStatsBar`** — obecnie HubInfo + 6 kafli leży w jednej linii. Wizualnie nie jest "symetryczne" do gridu poniżej (lewa kolumna = Students, prawa = Recent Worksheets). Trzeba HubInfo nad lewą kolumną, a kafle statystyk nad prawą kolumną — w jednym wierszu, ale wyrównane do tych samych szerokości co poniżej.
-2. **Theme mobile** — `useTheme()` honoruje `prefers-color-scheme: system`. Telefon użytkownika jest w trybie ciemnym → strona renderuje się w dark. W preview (Chrome desktop) jest light. Landing publiczny powinien być **wymuszony light** (do tej pory tak działało dla wielu marketingowych stron).
-3. **Hero CTA mobile** — `h-14 px-8 text-lg` + długi tekst "Generate Your First Worksheet — Free" przekracza 100% szerokości viewportu na 360–390 px. Trzeba zmniejszyć tylko < `sm`.
-4. **DEMO** — wiele ścieżek nie ma guard wcześniejszego niż dolna warstwa (modal otwiera się i fail dopiero przy submit; albo przekierowuje do settings; albo brakuje danych). Trzeba twardo gardować na poziomie handlerów (akcje), warstwę widoku zostawić podgląd-only.
-5. **`/worksheets` (AllWorksheetsPage) w DEMO** — używa `useDeletedWorksheets` (bez guarda demo) → `if (!user) return;` zostaje wiecznie w `loading=true` (bo ustawia `setLoading(false)` tylko w `finally`, a wcześniej `return` przed try). Stąd biały spinner. Plus `useAuthFlow` w demo zwraca syntetycznego usera, więc nawigacja przechodzi, ale `useDeletedWorksheets` korzysta z `useAuthUser` (Supabase) — nie ma usera → wisi.
-6. **Worksheety demo puste** — `ai_response` zawiera tylko 2–3 itemy bez pełnej struktury renderowanej przez `WorksheetDisplay`. Brakuje tytułów, instrukcji, większej liczby ćwiczeń. Przeniesiemy faktyczną treść z 10 produkcyjnych worksheetów wskazanych przez użytkownika (preview env).
+### Co realnie może wyciec z przeglądarki (audyt)
 
----
+Każda aplikacja React/Vite jest **klientem JavaScript** — cały kod renderowany w przeglądarce jest z definicji widoczny (View Source, DevTools → Sources, Network). Nie da się tego "zaszyfrować". Ale można **przesunąć wartościowe IP na backend**, żeby plagiator dostał tylko skorupę UI bez "mózgu". Audyt obecnego stanu Edooqoo:
 
-## 1. Dashboard — symetryczny układ HubInfo / Stats
 
-**Plik:** `src/components/dashboard/CompactStatsBar.tsx`
+| Element                                                                                                     | Gdzie jest dziś               | Ryzyko                                                                                  | Co robimy                                             |
+| ----------------------------------------------------------------------------------------------------------- | ----------------------------- | --------------------------------------------------------------------------------------- | ----------------------------------------------------- |
+| **Worksheet Generation Engine prompt** (sanctity)                                                           | ✅ Edge Function (Supabase)    | Niskie — niewidoczny dla klienta                                                        | Bez zmian (sanctity rule)                             |
+| `**src/utils/promptFormatter.ts**` — formatowanie inputu + szczegółowe instrukcje "language style 1-5"      | ❌ Bundle klienta              | **WYSOKIE** — to część metodyki Marthy, plagiator dostaje ją gratis                     | Przenieść do Edge Function `format-worksheet-prompt`  |
+| `**src/data/demoWorksheetContent.ts**` (~950 KB) — 10 pełnych produkcyjnych worksheetów z `ai_response`     | ❌ Bundle klienta (lazy chunk) | **ŚREDNIE** — pokazuje dokładny output Engine, ale to materiały demo, świadomy showcase | Lazy-load + dynamic import, brak zmian merytorycznych |
+| `**src/lib/exerciseTaxonomy.ts**` + `constants/featurePromptCopy.ts`                                        | Bundle klienta                | Niskie — to taksonomia widoczna i tak w UI                                              | Bez zmian                                             |
+| **Mock data** (`src/mockWorksheetData.ts`, `mockNewExercisesData.ts`)                                       | Bundle klienta                | Średnie — pokazują strukturę odpowiedzi                                                 | Tree-shake — używać tylko w trybie dev/demo           |
+| **467 wystąpień `console.log`/`console.warn**` — m.in. `📝 Formatting prompt for AI with data:` w produkcji | Bundle + runtime              | **WYSOKIE** — wyciek user IDs, emaili, pełnych form data, struktur AI w DevTools        | Migracja na `devLog/devWarn` (no-op w prod)           |
+| **Supabase anon key + URL**                                                                                 | `client.ts`                   | Brak ryzyka — to publishable key, RLS chroni dane                                       | Bez zmian                                             |
+| **Edge Function names** w Network tab                                                                       | DevTools                      | Brak ryzyka — i tak chronione przez JWT/RLS                                             | Bez zmian                                             |
+| **Source maps**                                                                                             | `dist/*.map` (build)          | Średnie — pokazuje czytelny kod TS                                                      | Wyłączyć w prod build                                 |
+| **Fake demo emails** w `demoData.ts`                                                                        | Bundle                        | Brak — celowo demo                                                                      | Bez zmian                                             |
 
-Zmiana: wewnątrz `CompactStatsBar` zamiast jednego flex‑rowa zwracamy **CSS grid 2-kolumnowy** o tych samych breakpointach co siatka pod spodem w `Dashboard.tsx` (`lg:grid-cols-2`).
 
-Konkretnie:
+**Werdykt strategiczny (Critical Advisor):** Twoje główne IP (Worksheet Engine prompt) jest już bezpieczne na serwerze. Realne wycieki to: (a) `promptFormatter.ts` z metodyką andragogiczną Marthy, (b) gadatliwe `console.log` zalewające DevTools danymi userów + strukturami AI, (c) sourcemapy w prod. Te 3 rzeczy łatamy. Reszta to UI/szkielet — plagiator i tak musiałby zbudować Engine od zera. **Nie warto inwestować w obfuskację** (false sense of security, łamie dev experience, +5-10% bundle, debug w prod = piekło).
 
-- Mobile (<lg): zachowujemy obecny layout (HubInfo full + grid 3-kol).
-- Desktop (≥lg):
-  ```text
-  <div class="hidden lg:grid grid-cols-2 gap-6 mb-4 items-stretch">
-     [HubInfo — pełna szerokość lewej kolumny]
-     [Pasek 6 statystyk — pełna szerokość prawej kolumny, z divide-x]
-  </div>
-  ```
-- HubInfo (problem 1): **rozszerzony tekst**:
-  > **Student Hub:** students log in with just their email at **edooqoo.com/my** — no login needed. They access their worksheets, homework, flashcards & lessons.
+### Email powitalny — stan obecny
 
-  Dla mobile pokazujemy skróconą wersję (jak teraz: `login at edooqoo.com/my`), a długą — tylko `lg+` (renderujemy oba spany z `hidden lg:inline` / `lg:hidden`).
-- StatPills bez zmian (6 ikon).
-
-Brak zmian w `Dashboard.tsx` (dalej renderuje `<CompactStatsBar … />` jako pierwsze dziecko gridu). Brak migracji DB.
+- Signup (`src/pages/Signup.tsx`) zapisuje `first_name`, `last_name`, `school_institution` w `auth.users.user_metadata`.
+- Po rejestracji email/Google → Supabase wysyła **domyślny generyczny** email konfirmacyjny ("Confirm your signup") bez brandingu Edooqoo.
+- **Po potwierdzeniu emaila NIE MA dedykowanego welcome maila.**
+- Domena `edooqoo.com` jest custom domeną Lovable, ale **nie została jeszcze skonfigurowana jako email domain** (sprawdzone tooling — workspace nie ma żadnej email domain).
+- Nie istnieje folder `supabase/functions/` — to pierwsza Edge Function w projekcie.
 
 ---
 
-## 2. Landing — wymuszony light theme + Hero CTA mobile
+## Rozwiązanie
 
-**Plik:** `src/pages/Index.tsx` (root landing) — dodanie efektu, który **na mount** ściąga klasę `dark` z `<html>` i przywraca przy unmount poprzedni stan (zachowując jednak `localStorage` użytkownika; teacherzy w aplikacji dalej mają dark mode po zalogowaniu).
+### CZĘŚĆ 1 — Hardening IP (3 łatki, bez zmian funkcjonalnych)
 
-```tsx
-useEffect(() => {
-  const html = document.documentElement;
-  const wasDark = html.classList.contains('dark');
-  html.classList.remove('dark');
-  return () => { if (wasDark) html.classList.add('dark'); };
-}, []);
-```
+#### 1.1 Przeniesienie `promptFormatter` na backend
 
-Uzasadnienie: nie modyfikujemy `useTheme` (teacher dark mode chroniony zgodnie z core-rule). Wymuszamy light **tylko** na publicznej Index, gdzie `prefers-color-scheme: dark` z telefonu psuł kontrast. Pozostałe public pages (About, Pricing itd.) — ten sam prosty wrapper (do zrobienia w opcjonalnym kroku 2b: dodanie hooka `useForceLightTheme()` w `src/hooks/useForceLightTheme.ts` i wpięcie w 1 Indeks teraz, kolejne strony — w razie potrzeby).
+**Nowa Edge Function:** `supabase/functions/format-worksheet-prompt/index.ts`
 
-**Hero CTA mobile** — `src/components/landing/HeroHeadline.tsx`:
+- Przyjmuje `FormData` z UI, zwraca `{ formattedPrompt: string }`.
+- Cała logika "language style 1-5" + opisy stylów + exercise focus map → po stronie serwera.
+- Walidacja JWT (zalogowany user) + rate limit (przez RLS na `worksheet_history`).
+- Klient (`useWorksheetGeneration.tsx`) wywołuje `supabase.functions.invoke('format-worksheet-prompt', { body: data })` zamiast lokalnej funkcji.
 
-```tsx
-className="h-12 sm:h-14 px-4 sm:px-8 text-base sm:text-lg max-w-full whitespace-normal sm:whitespace-nowrap font-semibold rounded-full ..."
-```
-Plus skrócony tekst < `sm`:
-```tsx
-<span className="sm:hidden">Generate Free Worksheet</span>
-<span className="hidden sm:inline">Generate Your First Worksheet — Free</span>
-```
+**Plik `src/utils/promptFormatter.ts`:** redukujemy do thin wrappera, który wywołuje Edge Function. Stara implementacja kasowana. 
 
----
+**Zachowanie kompatybilności:** sygnatura wejścia/wyjścia bez zmian dla `WorksheetForm`. `useWorksheetGeneration` zyskuje await na wywołanie funkcji (już jest async — zerowy regress).
 
-## 3. DEMO lockdown — szczegóły
+#### 1.2 Czyszczenie console.log w produkcji
 
-Wszystkie miejsca poniżej korzystają z istniejącego `useDemoContext()` / `useDemoGuard()`. Brak zmian DB i edge functions. Brak zmian w core flow worksheet generation.
+- Utworzyć skrypt `scripts/codemod/replace-console.mjs` (jeden run, jednorazowo) — zamienia w `src/**/*.{ts,tsx}` (z wyłączeniem `src/utils/logger.ts`):
+  - `console.log(` → `devLog(` + auto-import `import { devLog } from '@/utils/logger'`
+  - `console.warn(` → `devWarn(`
+  - `console.error` **zostaje** (krytyczny debug w prod)
+- Ręczne wyjątki: pliki edge functions, testy, Sentry-style.
+- Po codemocie: `rg "console\.(log|warn)" src/ | wc -l` musi = 0.
 
-### 3A. Calendar — `+ Add` slot
+#### 1.3 Vite production build hardening
 
-**Plik:** `src/components/calendar/UnifiedSlotModal.tsx`
+W `vite.config.ts` w sekcji `build`:
 
-W `handleSubmit` na samym początku:
 ```ts
-if (isDemoMode) {
-  showDemoBlockedToast('Adding calendar slots');
-  return;
+build: {
+  sourcemap: false,           // brak .map w prod
+  minify: 'esbuild',
+  target: 'es2020',
+  rollupOptions: {
+    output: {
+      // demo content jako osobny chunk, ładowany tylko dla /demo
+      manualChunks: (id) => {
+        if (id.includes('demoWorksheetContent')) return 'demo-content';
+        if (id.includes('mockWorksheet') || id.includes('mockNewExercises')) return 'mock-data';
+      }
+    }
+  },
+  esbuild: { drop: ['debugger'] }
 }
 ```
-+ wcześniej (dla wizualnego komfortu) gdy `isDemoMode`, w nagłówku modala dodać żółty pasek `<div className="rounded bg-amber-50 ...">Demo mode — changes won't be saved</div>` i ukryć błąd "Conflicts detected" gdy `isDemoMode`.
 
-Alternatywa (preferowana, bardziej czysta): w `CalendarPage.tsx` w `handleAddSlot` (i pozostałych handlerach otwierających modal: edit/block) — guardować otwarcie modala:
-```ts
-if (isDemoMode) { showDemoBlockedToast('Adding lessons'); return; }
+Plus: `src/data/demoWorksheetContent.ts` ładowane przez `await import()` w `buildDemoData()` (już dziś jest statyczny import — zmiana na lazy).
+
+#### 1.4 Co świadomie odrzucamy (i dlaczego)
+
+- ❌ **Obfuskacja kodu (javascript-obfuscator):** koszt > korzyść, łamie sourcemapy dla legit błędów, +20% bundle, false security.
+- ❌ **Disable DevTools / right-click:** dziecinne, łatwo obejść, psuje UX.
+- ❌ **Watermarking JS:** ślad legalny, ale nie chroni przed plagiatem UI.
+- ❌ **Server-side rendering całego dashboardu:** ogromna refaktoryzacja, niespójne z architekturą Vite SPA, sanctity violation.
+
+---
+
+### CZĘŚĆ 2 — Spersonalizowany Email Powitalny
+
+#### 2.1 Konfiguracja email domain (prerequisite)
+
+Domena `edooqoo.com` jest custom domeną projektu, ale workspace nie ma jeszcze skonfigurowanej email domain. **Pierwszy krok implementacji:** otworzyć dialog setup email domain dla `edooqoo.com` (DNS będzie weryfikowany w tle). Bez tego scaffold nie zadziała.
+
+Sender: `Edooqoo <hello@edooqoo.com>` (lub `welcome@`, do potwierdzenia po setup — tool dobierze automatycznie sender wg config domeny).
+
+#### 2.2 Brandowane szablony auth (6 templates)
+
+Scaffold: `email_domain--scaffold_auth_email_templates`. Tworzy:
+
+- `supabase/functions/auth-email-hook/index.ts`
+- `supabase/functions/_shared/email-templates/` × 6 (signup, magic-link, recovery, invite, email-change, reauthentication)
+
+**Branding (z `src/index.css` + tailwind config):**
+
+- Primary: `worksheet-purple` (HSL z tokens) — buttony
+- Background body: `#ffffff` (zawsze, nawet jeśli app ma dark)
+- Logo: `public/logo.png` lub `src/assets/` (sprawdzić podczas implementacji) → upload do `email-assets` bucket w Storage
+- Font stack: `Inter, -apple-system, sans-serif`
+- Border radius: `--radius` (8px)
+
+**Personalizacja w szablonie `signup.tsx` (welcome email):**
+
+- Nagłówek: `Welcome to Edooqoo, {{ first_name }}!`
+- Body (andragogiczny ton, nie "school-like"):
+  > Hi {{ first_name }},
+  >
+  > You're now part of a community of professional English tutors who specialize in 1-on-1 adult education.
+  >
+  > **Your account is ready** → confirm your email to unlock 2 free worksheet tokens.
+  >
+  > [Confirm email & start →]
+  >
+  > Once you're in, here's what most tutors do first:
+  >
+  > 1. Generate your first worksheet (90 seconds, fully editable)
+  > 2. Share it with a student via `edooqoo.com/my` — no login needed for them
+  > 3. Track their homework, flashcards, and progress in one dashboard
+  >
+  > Edooqoo team
+- Footer: link Privacy / Terms / Unsubscribe (Lovable wstawia automatycznie dla auth)
+
+**Dane do template:**
+
+- `siteName`, `siteUrl`, `recipient`, `confirmationUrl` — auto z auth hook
+- `first_name` — wyciągamy z `user_metadata.first_name` w `auth-email-hook/index.ts` (przekazany w `signUp({ data: { first_name }})` — już jest w `Signup.tsx`)
+- Google OAuth: `first_name` pobieramy z `user_metadata.given_name` (Google fill) jako fallback
+
+#### 2.3 Drugi mail — "Welcome (post-confirmation)"
+
+Domyślny `signup.tsx` to mail **konfirmacyjny** (przed kliknięciem linku). Po potwierdzeniu emaila chcemy **drugi, czysto powitalny mail** z onboardingiem (bez CTA "confirm"). Architektura:
+
+**Trigger:** Database trigger na `auth.users` → przy `email_confirmed_at IS NOT NULL` (UPDATE) → wywołuje Edge Function przez `pg_net` lub enqueue do `pgmq`.
+
+**Implementacja:**
+
+1. Migration: trigger `on_user_email_confirmed` po UPDATE `auth.users`, gdy `OLD.email_confirmed_at IS NULL AND NEW.email_confirmed_at IS NOT NULL`.
+2. Trigger wywołuje funkcję bazodanową `enqueue_welcome_email(user_id, email, first_name)` — wrzuca do kolejki `pgmq` (jeśli setup_email_infra utworzył) lub bezpośrednio invokes Edge Function.
+3. Nowa Edge Function `send-welcome-email`: renderuje template `_shared/email-templates/welcome.tsx` (post-confirmation, oddzielny od `signup.tsx`), wysyła przez Lovable Email API.
+
+**Template `welcome.tsx**` (post-confirmation):
+
+- Brak CTA "confirm"
+- "Your free tokens are loaded. Generate your first worksheet."
+- 3 bullety z linkami: Generate worksheet / Add first student / Try demo
+- Mocne CTA: `[Open dashboard →]({{site_url}}/dashboard)`
+- PS od Marthy z 1 zdaniem heurystyki: *"Tip: the more specific your student's professional context, the sharper the worksheet. We optimize for adults, not classrooms."*
+
+#### 2.4 Lokalizacja first_name — fallback
+
+Jeśli `first_name` puste (rzadki case Google OAuth bez given_name):
+
+- Fallback: `email.split('@')[0]` z capitalize
+- Edge case: jeśli email = `john.doe@x.com` → `John`
+
+---
+
+## Pliki do utworzenia / zmiany
+
+**Nowe:**
+
+- `supabase/functions/format-worksheet-prompt/index.ts` (CZĘŚĆ 1.1)
+- `supabase/functions/auth-email-hook/index.ts` (scaffold)
+- `supabase/functions/auth-email-hook/deno.json` (scaffold)
+- `supabase/functions/_shared/email-templates/signup.tsx` (scaffold + branding)
+- `supabase/functions/_shared/email-templates/{magic-link,recovery,invite,email-change,reauthentication}.tsx` (scaffold + branding)
+- `supabase/functions/_shared/email-templates/welcome.tsx` (NOWY — post-confirmation)
+- `supabase/functions/send-welcome-email/index.ts` (CZĘŚĆ 2.3)
+- Migration SQL: trigger `on_user_email_confirmed`
+- `scripts/codemod/replace-console.mjs` (CZĘŚĆ 1.2, jednorazowy)
+- `mem/features/security/ip-protection-hardening.md`
+- `mem/features/email/welcome-email-pipeline.md`
+
+**Edytowane:**
+
+- `src/utils/promptFormatter.ts` → thin wrapper na Edge Function
+- `src/hooks/useWorksheetGeneration.tsx` → await na nowy call
+- `vite.config.ts` → sourcemap: false, manualChunks, drop debugger
+- `src/data/demoData.ts` → `await import('./demoWorksheetContent')` (lazy)
+- `supabase/config.toml` → rejestracja 3 nowych funkcji
+- `src/pages/Signup.tsx` → komentarz że welcome mail wysyłany automatycznie po confirm
+- ~80-150 plików `src/**/*.{ts,tsx}` — codemod console.log → devLog (auto)
+- `docs/llm-context.md` → sekcja v6.9.7
+- `llms.txt` → bump version
+- `mem/index.md` → 2 nowe wpisy
+
+---
+
+## Sekcja techniczna (dla weryfikacji)
+
+### Sequence: Welcome Email Pipeline
+
+```text
+User → Signup form → supabase.auth.signUp({ data: { first_name }})
+  ↓
+Supabase Auth → confirmation email (auth-email-hook → signup.tsx template, branded)
+  ↓
+User clicks link → email_confirmed_at = now()
+  ↓
+Trigger on_user_email_confirmed → enqueue_welcome_email(...)
+  ↓
+pgmq queue → cron → send-welcome-email Edge Function
+  ↓
+welcome.tsx rendered → Lovable Email API → user inbox
 ```
-Dzięki temu modal nawet się nie otwiera. **Wybieramy ten wariant** (mniej ingerencji w UnifiedSlotModal, brak ryzyka popsucia produkcji).
 
-Lista handlerów w `CalendarPage.tsx` do guardowania (na początku każdego):
-- `handleAddSlot`
-- `handleSlotClick` (edycja istniejącego slotu — dopuszczamy podgląd, ale guardujemy `onSave` w child modalu; w praktyce: dodać `readOnly` prop do modala, gdy `isDemoMode`)
-- `handleBulkDelete`, `handleBulkBlock`, `handleBulkPaid`, `handleMarkPaid`, `handleNotificationClick` (jeśli mutuje)
+### Google OAuth path
 
-W `useCalendarSlots` mutacje są już no-op w demo — to second line of defense, zostawiamy.
+- Google signup: `email_confirmed_at` ustawiane natychmiast → trigger pali od razu → welcome mail wysyłany w ciągu ~30s.
+- Brak konfirmacyjnego maila (Google już zweryfikował) — to jest poprawne UX.
 
-### 3B. Calendar — Share
+### RLS / Security
 
-**Plik:** `src/pages/CalendarPage.tsx`, funkcja `handleShare`:
-```ts
-const handleShare = () => {
-  if (isDemoMode) { showDemoBlockedToast('Sharing public calendar'); return; }
-  if (settings?.public_calendar_token) { /* ... */ }
-  else { toast.info('Enable public calendar in settings first.'); }
-};
-```
+- Edge Function `format-worksheet-prompt`: wymaga JWT (verify_jwt: true w config.toml).
+- Edge Function `send-welcome-email`: `verify_jwt: false` (wywoływana przez pg_net z service role key w headerach).
+- Trigger używa `security definer` z `set search_path = public`.
 
-### 3C. Calendar Settings — read-only render
+### Sanctity check
 
-**Plik:** `src/pages/CalendarSettingsPage.tsx`
-
-Obecnie: `if (authLoading || loading || !settings) return null;` — w demo `loading` zostaje `false` (early return w hooku) i `settings === null` → strona pusta.
-
-Plan:
-1. W `useCalendarSettings.tsx` dodać blok demo (analogiczny do `useStudents`):
-   ```ts
-   if (isDemoMode) {
-     setSettings(DEMO_CALENDAR_SETTINGS);
-     setLoading(false);
-     return;
-   }
-   ```
-   `DEMO_CALENDAR_SETTINGS` (do dodania w `src/data/demoData.ts`): obiekt z pełnym kompletem rozsądnych defaults (`default_lesson_duration_minutes: 60`, `public_calendar_enabled: true`, `public_calendar_token: 'demo-public-token'`, `public_calendar_slug: 'martha-demo'`, `gcal_integration_enabled: false`, `payment_tracking_enabled: true`, `working_hours_*`, etc.).
-2. W `updateSettings`/`generatePublicToken` — już są no-op w demo (linia 134). Dodać `showDemoBlockedToast` dla feedbacku.
-3. W `CalendarSettingsPage.tsx` — gdy `isDemoMode`, na górze sekcji content wstawić sticky banner:
-   ```tsx
-   {isDemoMode && (
-     <div className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-200 dark:border-amber-800">
-       👁 Demo view — settings are visible but cannot be modified.
-     </div>
-   )}
-   ```
-4. Każdy `<Switch onCheckedChange>`, `<Input onChange>`, `<Button onClick>` z mutacją otoczyć `disabled={isDemoMode}` (proste, masowe). Wyjątek: navigation/scroll (np. scrollToSection) bez `disabled`.
-
-### 3D. `/worksheets` nie ładuje się
-
-Root cause: `useDeletedWorksheets` używa `useAuthUser` zamiast respektować demo, a w `if (!user) return;` nie ustawia `loading=false`.
-
-**Plik:** `src/hooks/useDeletedWorksheets.tsx`
-- Dodać `const { isDemoMode, demoData } = useDemoContext();`
-- Na górze `useEffect`: jeśli `isDemoMode` → `setDeletedWorksheets([]); setTotalCount(0); setLoading(false); return;` (w demo nie pokazujemy "deleted").
-- W `fetchDeletedWorksheets`: `if (!user) { setLoading(false); return; }` (poprawka regression-safe).
-
-To wystarczy, by `AllWorksheetsPage` przestało wisieć (bo `loading` już się rozwiąże dzięki `useWorksheetHistory` które jest demo-aware).
-
-Dodatkowo w `AllWorksheetsPage.tsx` w warunku spinera:
-```ts
-if (authLoading || (loading && !isDemoMode)) { ... }
-```
-Pobranie `isDemoMode` z `useDemoContext`. Naprawia warunek edge.
-
-### 3E. Worksheet actions: Transfer / Delete / Share / AddStudent
-
-Najczystszy fix punktowy w UI (zachowuje cały istniejący kod akcji dla produkcji):
-
-**Plik:** `src/pages/AllWorksheetsPage.tsx` oraz komponenty akcji per-worksheet (`DeleteWorksheetButton`, `DuplicateWorksheetButton`, `ShareWorksheetModal`, `StudentSelector` w wierszu).
-
-Strategia: gardujemy w handlerach na poziomie wywołania (top-of-handler):
-- `onDelete = (id) => guardAction('Deleting worksheets', () => deleteWorksheet(id))`
-- `onTransfer = (id, sid) => guardAction('Transferring worksheets', () => updateStudent(...))`
-- `onShare`, `onDuplicate`, `onAddStudent` — analogicznie.
-
-Lista konkretnych miejsc do podpięcia `useDemoGuard` (jednolity wzorzec):
-- `src/pages/AllWorksheetsPage.tsx` — `handleBulkDelete`, `handleDelete` (linia ~552), inline `await deleteWorksheet(id)` (~352).
-- `src/components/DeleteWorksheetButton.tsx` — handler usunięcia.
-- `src/components/DuplicateWorksheetButton.tsx` + `DuplicateWorksheetModal.tsx` — handler submit.
-- `src/components/ShareWorksheetModal.tsx` — handler `generateShareLink`.
-- `src/components/dashboard/AddStudentButton.tsx` + `AddStudentDialog.tsx` — handler create.
-- Transfer-to-Student dropdown wewnątrz item kafla worksheetu (znaleźć w `AllWorksheetsPage.tsx` koło 540 — `StudentSelector` z onChange).
-
-Dla każdego handlera: `if (isDemoMode) { showDemoBlockedToast('<Action name>'); return; }` zamiast aktualnego błędu UUID.
-
-Toast copy (jednolite):
-- "Deleting worksheets is disabled in demo mode. Sign up free to unlock."
-- "Transferring worksheets is disabled in demo mode."
-- "Sharing worksheets is disabled in demo mode."
-- "Adding students is disabled in demo mode."
-
-### 3F. Worksheet content (10 produkcyjnych)
-
-**Krok wykonania (w fazie implementacji):**
-
-1. Skrypt jednorazowy w `code--exec` użyje `psql` do `SELECT id, title, ai_response, html_content, form_data, generation_time_seconds FROM worksheets WHERE id IN (…10 UUID-ów…)` z preview env (env vars już są w sandbox dla głównego projektu; jeśli to inny projekt, użytkownik zostanie zapytany o dump w przeciwnym razie zaciągniemy publicznie po `share_token` jeśli istnieje — preferencja: bezpośredni dump z DB).
-2. Wynik mapujemy 1:1 na 10 obecnych demo-worksheetów (po `id` `demo-ws-1..10`). Zachowujemy istniejące `id`, `student_id`, `created_at` (relative dates), `share_token`. Podmieniamy: `title`, `form_data`, `ai_response`, `html_content`, `generation_time_seconds`.
-3. Dane lokalne hard-codujemy w `src/data/demoData.ts` (zwiększy rozmiar bundla o ~50–150 KB — akceptowalne, demo to onboarding).
-4. Sanity check: `WorksheetPage` renderuje `worksheet.ai_response` przez `WorksheetDisplay` — zachowujemy ten sam JSON shape. `html_content` jest fallbackiem; produkcyjne wartości to gotowe HTML — bezpiecznie pasuje.
-5. Mapowanie tematyczne — zachowujemy spójność poziomu studenta:
-   - student-1 (B2 Business): worksheet IDs `4df96ff7…`, `13e92a57…`, `575dd5a8…`, `e95ee859…`, `ed6514ba…`
-   - student-2 (A2): `87768bb0…`, `be7b86b6…`, `c12d2180…`
-   - student-3 (C1): `2588083c…`, `f3a4667d…`
-
-   (Dokładne przypisanie potwierdzimy podczas dump'u na podstawie poziomu w `form_data`).
-
-### 3G. WorksheetPage `/student/demo-student-1` loading screenshot
-
-Problem: route `/student/:id` (StudentPage) — sprawdzić czy jest demo-aware. Plan: dodać do `StudentPage.tsx` demo branch który ładuje studenta z `demoData.students.find(s => s.id === id)` zamiast czekać na Supabase. Jednolinijkowy fix: w hooku `useStudent.tsx` dodać branch demo (analogicznie do `useStudents`).
+- Worksheet Engine prompt **NIE jest dotykany**. Zmiana 1.1 dotyczy jedynie *formatowania inputu od usera* (language style guidelines), nie głównego prompta.
 
 ---
 
-## 4. Dokumentacja RAG (obowiązkowo)
+## Kolejność implementacji (atomic commits)
 
-Edycje w `docs/llm-context.md` i `llms.txt` w jednym push'u, format `Problem → Solution → Mechanics → RAG Keywords`:
-
-### Sekcja: "Demo Mode — Hard Lockdown (v6.9.6)"
-
-- **Problem:** Akcje mutujące w demo wywoływały błędy UUID/PG zamiast czytelnego komunikatu. `/worksheets` wisiało (useDeletedWorksheets bez guard demo). `/calendar/settings` było puste. Share przekierowywał do settings.
-- **Solution:** Każdy handler mutujący po stronie UI gardowany przez `useDemoGuard().guardAction(label, fn)`. Hooki Supabase wcześnie zwracają w `isDemoMode`. `useCalendarSettings` w demo dostarcza `DEMO_CALENDAR_SETTINGS`. Modale (Add slot/Share) blokowane na poziomie otwarcia.
-- **Mechanics:** Pliki: `useDemoGuard`, `DemoContext`, `useDeletedWorksheets`, `useCalendarSettings`, `useStudent`, `CalendarPage.handleShare/handleAddSlot`, `CalendarSettingsPage` (banner + `disabled`), wszystkie komponenty akcji per-worksheet.
-- **RAG Keywords:** demo mode, lockdown, read-only, demo guard, mutation block, demo settings, demo calendar, fake user, sandbox preview, edooqoo demo.
-
-### Sekcja: "Dashboard Symmetry & Hub Info"
-
-- **Problem:** HubInfo i kafle statystyk nie wyrównane z gridem Students/Recent Worksheets.
-- **Solution:** `CompactStatsBar` używa `lg:grid-cols-2` zgodnie z gridem poniżej. Pełny opis Student Hub na desktop, skrócony na mobile.
-- **Mechanics:** `CompactStatsBar.tsx` — dwa warianty: mobile (stack) i desktop (2-col grid).
-- **RAG Keywords:** dashboard layout, student hub banner, stats bar, compact stats, two column grid, edooqoo.com/my.
-
-### Sekcja: "Forced Light Theme on Public Landing"
-
-- **Problem:** Mobile w trybie ciemnym renderował landing w dark.
-- **Solution:** `Index.tsx` na mount usuwa klasę `dark`, na unmount przywraca.
-- **Mechanics:** `useEffect` w `src/pages/Index.tsx`. Brak zmian w `useTheme` (chronione dark mode dla nauczycieli pozostaje).
-- **RAG Keywords:** prefers-color-scheme, dark mode mobile, landing page light, public theme override.
-
-### Sekcja: "Hero CTA Mobile Sizing"
-
-- **Problem:** "Generate Your First Worksheet — Free" wychodził poza viewport.
-- **Solution:** Dwa warianty tekstu (`sm:hidden` vs `hidden sm:inline`), przycisk `h-12 sm:h-14`, `px-4 sm:px-8`.
-- **Mechanics:** `HeroHeadline.tsx`.
-- **RAG Keywords:** hero CTA mobile, button overflow, responsive hero, landing CTA size.
-
-### Sekcja: "Demo Worksheets — Production Content"
-
-- **Problem:** Demo worksheety renderowały puste UI (skrócony stub `ai_response`).
-- **Solution:** 10 worksheetów demo zasilonych pełną treścią z 10 produkcyjnych UUID-ów (preview env).
-- **Mechanics:** `src/data/demoData.ts` — pola `title/form_data/ai_response/html_content/generation_time_seconds` podmienione, struktura JSON zachowana (kompatybilność z `WorksheetDisplay`).
-- **RAG Keywords:** demo data, fake worksheets, sample content, preview env import, demoData seed.
+1. Codemod console.log → devLog (CZĘŚĆ 1.2)
+2. vite.config.ts hardening (CZĘŚĆ 1.3)
+3. Edge Function `format-worksheet-prompt` + thin wrapper (CZĘŚĆ 1.1)
+4. Setup email domain dla `edooqoo.com` (dialog)
+5. Scaffold auth email templates + branding (CZĘŚĆ 2.2)
+6. Welcome email template + Edge Function + trigger (CZĘŚĆ 2.3)
+7. Deploy edge functions
+8. Update `docs/llm-context.md`, `llms.txt`, `mem/`
 
 ---
 
-## 5. Pamięć projektu (mem://)
+## Pytanie kontrolne (potrzebne PRZED implementacją)
 
-Aktualizacja:
-- `mem/features/dashboard/compact-stats-bar.md` → wzmianka o dwukolumnowym wyrównaniu z gridem poniżej.
-- Nowy: `mem/features/public-demo-mode-lockdown.md` — lista wszystkich punktów guard, wzór `useDemoGuard`, oraz reguła "każdy nowy handler mutujący MUST przejść przez guardAction lub wcześnie return na isDemoMode".
-- `mem://index.md` — dodać linka do nowego pliku.
+1. **Sender address welcome maila:** `hello@edooqoo.com`, `welcome@edooqoo.com`, czy `martha@edooqoo.com` (bardziej osobiste, zgodne z personą Marthy)? `hello@edooqoo.com`
+2. **Welcome mail po Google OAuth:** wysyłać natychmiast, czy z 5-min delay (uniknąć "spam-vibe")? 5-min delay
+3. **Tekst welcome maila:** zatwierdzasz draft powyżej, czy podać 2-3 alternatywne warianty tonu (np. krótszy / cieplejszy / bardziej business)? zmieniłem draft
 
----
-
-## 6. Kolejność wdrożenia (atomowa)
-
-1. CompactStatsBar layout + tekst HubInfo.
-2. Index.tsx force-light.
-3. HeroHeadline mobile button.
-4. useDeletedWorksheets demo branch + AllWorksheetsPage warunek loading.
-5. useCalendarSettings demo branch + DEMO_CALENDAR_SETTINGS w demoData.ts.
-6. CalendarSettingsPage banner + `disabled` na inputach.
-7. CalendarPage handleAddSlot/handleShare/handleBulk* guards.
-8. useStudent demo branch (StudentPage loading fix).
-9. Guardy w komponentach akcji worksheetów (Delete/Duplicate/Share/AddStudent/Transfer).
-10. Dump 10 produkcyjnych worksheetów → podmiana w demoData.ts.
-11. Update `docs/llm-context.md`, `llms.txt`, mem.
-
----
-
-## 7. Bezpieczeństwo / brak regresji
-
-- Wszystkie nowe ścieżki wzdłuż istniejącego wzorca `isDemoMode` (już używane w 30+ miejscach).
-- Brak zmian DB, RLS, edge functions.
-- Brak zmian w `Worksheet Generation Engine` (sanctity rule).
-- Light theme override izolowany w `Index.tsx` — nie dotyka teacher app.
-- Konsolidacja w `useDemoGuard` zapewnia, że produkcyjna ścieżka pozostaje 1:1.
+Po Twoich odpowiedziach wchodzę w implementację bez kolejnych pytań.

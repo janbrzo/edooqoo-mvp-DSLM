@@ -11,6 +11,7 @@ import { useAuthFlow } from "@/hooks/useAuthFlow";
 import RenameDialog from "@/components/RenameDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { devLog } from '@/utils/logger';
 
 interface WorksheetHeaderProps {
   onBack: () => void;
@@ -93,7 +94,7 @@ function WorksheetHeader({
     }
   };
 
-  console.log('🔍 WorksheetHeader debug:', {
+  devLog('🔍 WorksheetHeader debug:', {
     worksheetId,
     displayStudentName,
     studentId,

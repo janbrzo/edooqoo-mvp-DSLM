@@ -9,9 +9,10 @@
  * - Zmiana w jednym narzędziu NIE wpływa na inne
  */
 
-console.log('🎨 DrawingToolbar v5.0 loaded');
+devLog('🎨 DrawingToolbar v5.0 loaded');
 
 import { 
+import { devLog } from '@/utils/logger';
   Undo2,
   Redo2,
   Trash2,
@@ -55,7 +56,7 @@ export const DrawingToolbar = ({
   // Użyj przekazanych toolSettings lub fallback
   const settings = toolSettings || DEFAULT_TOOL_SETTINGS;
 
-  console.log('🎨 [DrawingToolbar] Render:', { activeTool, canUndo, canRedo, isSaving });
+  devLog('🎨 [DrawingToolbar] Render:', { activeTool, canUndo, canRedo, isSaving });
 
   // Pobierz ustawienia dla konkretnego narzędzia
   const getToolColor = (toolId: DrawingTool) => {

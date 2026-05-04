@@ -1,3 +1,4 @@
+import { devWarn } from '@/utils/logger';
 /**
  * Enhanced security utilities for input validation and sanitization
  */
@@ -95,7 +96,7 @@ export function validatePrompt(prompt: string): { isValid: boolean; error?: stri
   
   for (const pattern of suspiciousPatterns) {
     if (pattern.test(trimmedPrompt)) {
-      console.warn('Suspicious pattern detected in prompt:', pattern);
+      devWarn('Suspicious pattern detected in prompt:', pattern);
       return { isValid: false, error: 'Prompt contains potentially harmful content' };
     }
   }
@@ -143,7 +144,7 @@ export function validateComment(comment: string): { isValid: boolean; error?: st
   
   for (const pattern of suspiciousPatterns) {
     if (pattern.test(comment)) {
-      console.warn('Suspicious pattern detected in comment:', pattern);
+      devWarn('Suspicious pattern detected in comment:', pattern);
       return { isValid: false, error: 'Comment contains potentially harmful content' };
     }
   }
@@ -197,7 +198,7 @@ class RateLimiter {
     if (entry.count >= maxRequests) {
       entry.blocked = true;
       this.requests.set(key, entry);
-      console.warn(`Rate limit exceeded for key: ${key}`);
+      devWarn(`Rate limit exceeded for key: ${key}`);
       return false;
     }
     
@@ -268,7 +269,7 @@ export class SecurityMonitor {
     }
     
     // Log to console for monitoring
-    console.warn(`Security Event [${type}]:`, event.details);
+    devWarn(`Security Event [${type}]:`, event.details);
     
     // In production, you might want to send this to a monitoring service
     if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
@@ -285,9 +286,9 @@ export class SecurityMonitor {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(event)
-      }).catch(err => console.warn('Failed to send security event:', err));
+      }).catch(err => devWarn('Failed to send security event:', err));
     } catch (error) {
-      console.warn('Monitoring service unavailable:', error);
+      devWarn('Monitoring service unavailable:', error);
     }
   }
   

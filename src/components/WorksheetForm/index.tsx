@@ -18,6 +18,7 @@ import { useWorksheetFormPersistence, type WorksheetDraft } from "@/hooks/useWor
 import { normalizeSuggestionPrefill } from "@/lib/dslm/normalizeSuggestionPrefill";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Shuffle, Brain, MousePointer, ChevronDown, Image, Headphones, Lock, Eraser } from "lucide-react";
+import { devLog, devWarn } from '@/utils/logger';
 
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import type { MediaType } from './types';
@@ -130,7 +131,7 @@ export default function WorksheetForm({
           setShowMoreFields(true);
         }
       } catch (e) {
-        console.warn('[WorksheetForm] draft hydration failed', e);
+        devWarn('[WorksheetForm] draft hydration failed', e);
       }
     },
   );
@@ -166,9 +167,9 @@ export default function WorksheetForm({
     const handler = () => {
       try {
         clearPersistedDraft();
-        console.log('[WorksheetForm] Draft cleared after successful generation');
+        devLog('[WorksheetForm] Draft cleared after successful generation');
       } catch (e) {
-        console.warn('[WorksheetForm] Failed to clear draft', e);
+        devWarn('[WorksheetForm] Failed to clear draft', e);
       }
     };
     window.addEventListener('worksheetGenerationSuccess', handler);
@@ -194,7 +195,7 @@ export default function WorksheetForm({
           setGrammarFocus(parsed.grammarFocus);
         }
         sessionStorage.removeItem('prefillWorksheet');
-        console.log('✅ [WorksheetForm] Pre-filled from Progress Tab:', parsed);
+        devLog('✅ [WorksheetForm] Pre-filled from Progress Tab:', parsed);
       } catch (error) {
         console.error('Error parsing prefillWorksheet:', error);
         sessionStorage.removeItem('prefillWorksheet');
@@ -229,7 +230,7 @@ export default function WorksheetForm({
           setExerciseFocusMap(norm.exerciseFocusMap);
           setSelectionMode('manual');
           setActiveTab('exercises');
-          console.log('✅ [WorksheetForm] DSLM prefill normalized:', norm);
+          devLog('✅ [WorksheetForm] DSLM prefill normalized:', norm);
         }
         sessionStorage.removeItem('prefillExercises');
         sessionStorage.removeItem('prefillExerciseFocusMap');
@@ -254,7 +255,7 @@ export default function WorksheetForm({
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
             if (formRef.current) {
-              console.log('🚀 [WorksheetForm] Auto-submitting from DSLM autoGenerate flag (v4.7 timing)');
+              devLog('🚀 [WorksheetForm] Auto-submitting from DSLM autoGenerate flag (v4.7 timing)');
               formRef.current.requestSubmit();
             }
           });
@@ -307,7 +308,7 @@ export default function WorksheetForm({
       if (domValue) {
         effectiveTopic = domValue;
         setLessonTopic(domValue);
-        console.warn('[WorksheetForm] Recovered lessonTopic from DOM (stale closure path):', domValue);
+        devWarn('[WorksheetForm] Recovered lessonTopic from DOM (stale closure path):', domValue);
       }
     }
     if (!effectiveTopic) {
@@ -335,8 +336,8 @@ export default function WorksheetForm({
     const maxExercises = lessonTime === '45min' ? 6 : 8;
     let finalExercises = [...selectedExercises];
     if (!finalExercises || finalExercises.length < maxExercises) {
-      console.log(`🔧 [WORKSHEET-FORM] Auto-completing exercises: ${finalExercises.length} < ${maxExercises}`);
-      console.log(`🔧 [WORKSHEET-FORM] Media mode: picture=${isPictureMode}, audio=${isAudioMode}`);
+      devLog(`🔧 [WORKSHEET-FORM] Auto-completing exercises: ${finalExercises.length} < ${maxExercises}`);
+      devLog(`🔧 [WORKSHEET-FORM] Media mode: picture=${isPictureMode}, audio=${isAudioMode}`);
 
       // PROBLEM 2.2/2.3: Filter available exercises by media type
       const unusedExercises = GENERAL_EXERCISES.filter(ex => {
@@ -353,7 +354,7 @@ export default function WorksheetForm({
       const shuffledUnused = [...unusedExercises].sort(() => Math.random() - 0.5);
       const autoSelected = shuffledUnused.slice(0, remainingSlots);
       finalExercises = [...finalExercises, ...autoSelected];
-      console.log(`🔧 [WORKSHEET-FORM] Auto-completed exercises (media-filtered):`, finalExercises);
+      devLog(`🔧 [WORKSHEET-FORM] Auto-completed exercises (media-filtered):`, finalExercises);
 
       // Update the form state
       setSelectedExercises(finalExercises);
@@ -396,7 +397,7 @@ export default function WorksheetForm({
     };
 
     // Refresh onboarding progress after successful worksheet generation
-    console.log('[WorksheetForm] Triggering onboarding refresh after worksheet generation');
+    devLog('[WorksheetForm] Triggering onboarding refresh after worksheet generation');
     refreshProgress();
     setTimeout(refreshProgress, 1000);
     setTimeout(refreshProgress, 2000);
@@ -412,7 +413,7 @@ export default function WorksheetForm({
 
   // Handle selection mode changes
   const handleModeChange = async (mode: ExerciseSelectionMode) => {
-    console.log(`🔧 [WORKSHEET-FORM] Changing mode to: ${mode}`);
+    devLog(`🔧 [WORKSHEET-FORM] Changing mode to: ${mode}`);
     setSelectionMode(mode);
     setActiveTab('exercises');
     const maxExercises = lessonTime === '45min' ? 6 : 8;
