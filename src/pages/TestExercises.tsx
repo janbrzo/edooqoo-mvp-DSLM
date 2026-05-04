@@ -162,16 +162,20 @@ const TestExercises = () => {
         </Card>
 
         {/* Worksheet content */}
-        <WorksheetContent
-          editableWorksheet={editableWorksheet}
-          isEditing={isEditing}
-          viewMode={viewMode}
-          setEditableWorksheet={setEditableWorksheet}
-          worksheetId="test-new-exercises"
-          onFeedbackSubmit={() => {}}
-          isDownloadUnlocked={true}
-          inputParams={mockInputParams}
-        />
+        {editableWorksheet ? (
+          <WorksheetContent
+            editableWorksheet={editableWorksheet}
+            isEditing={isEditing}
+            viewMode={viewMode}
+            setEditableWorksheet={setEditableWorksheet}
+            worksheetId="test-new-exercises"
+            onFeedbackSubmit={() => {}}
+            isDownloadUnlocked={true}
+            inputParams={mockInputParams}
+          />
+        ) : (
+          <div className="p-8 text-center text-gray-500">Loading test exercises…</div>
+        )}
       </div>
     </div>
   );
