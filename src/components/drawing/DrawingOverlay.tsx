@@ -986,3 +986,4 @@ export const DrawingOverlay = forwardRef<DrawingOverlayRef, DrawingOverlayExtern
 DrawingOverlay.displayName = 'DrawingOverlay';
 
 export default DrawingOverlay;
+TEST_1777879520
