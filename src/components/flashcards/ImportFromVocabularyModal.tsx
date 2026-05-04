@@ -8,6 +8,7 @@ import { useFlashcardCards } from '@/hooks/useFlashcardCards';
 import { normalizeVocabularySheet } from '@/types/flashcards';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
+import { devLog } from '@/utils/logger';
 
 interface ImportFromVocabularyModalProps {
   open: boolean;
@@ -121,7 +122,7 @@ export function ImportFromVocabularyModal({
       // If backType is 'translation', auto-translate definitions
       let processedItems = itemsToImport;
       if (backType === 'translation' && nativeLanguage) {
-        console.log('[ImportFromVocabularyModal] Auto-translating to', nativeLanguage);
+        devLog('[ImportFromVocabularyModal] Auto-translating to', nativeLanguage);
         
         // Translate each word (term), NOT the definition
         const translationPromises = itemsToImport.map(async (item) => {

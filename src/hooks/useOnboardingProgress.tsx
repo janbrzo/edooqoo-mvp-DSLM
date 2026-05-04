@@ -220,7 +220,7 @@ export const useOnboardingProgress = () => {
           filter: `teacher_id=eq.${profile.id}`
         },
         (payload) => {
-          console.log('[Onboarding] Worksheet created, refreshing steps:', payload);
+          devLog('[Onboarding] Worksheet created, refreshing steps:', payload);
           setTimeout(checkSteps, 1000); // Small delay to ensure profile is updated
         }
       )
@@ -233,7 +233,7 @@ export const useOnboardingProgress = () => {
           filter: `teacher_id=eq.${profile.id}`
         },
         (payload) => {
-          console.log('[Onboarding] Worksheet updated, checking for share_token:', payload);
+          devLog('[Onboarding] Worksheet updated, checking for share_token:', payload);
           if (payload.new.share_token && !payload.old.share_token) {
             setTimeout(checkSteps, 500); // Check immediately when worksheet is shared
           }
@@ -253,7 +253,7 @@ export const useOnboardingProgress = () => {
           filter: `teacher_id=eq.${profile.id}`
         },
         (payload) => {
-          console.log('[Onboarding] Student added, refreshing steps:', payload);
+          devLog('[Onboarding] Student added, refreshing steps:', payload);
           setTimeout(checkSteps, 500);
         }
       )
@@ -326,7 +326,7 @@ export const useOnboardingProgress = () => {
 
   // Manual refresh function to trigger from components
   const refreshProgress = useCallback(() => {
-    console.log('[Onboarding] Manual refresh triggered');
+    devLog('[Onboarding] Manual refresh triggered');
     checkSteps();
   }, [checkSteps]);
 
@@ -344,7 +344,7 @@ export const useOnboardingProgress = () => {
     // Clear session storage
     sessionStorage.removeItem('onboarding-temp-dismissed');
     
-    console.log('[Onboarding] Reset completed - onboarding will show again');
+    devLog('[Onboarding] Reset completed - onboarding will show again');
   };
 
   return {

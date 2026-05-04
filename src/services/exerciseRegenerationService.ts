@@ -1,5 +1,6 @@
 import { supabase } from '@/integrations/supabase/client';
 import { updateWorksheetAPI } from './worksheetService/updateService';
+import { devLog } from '@/utils/logger';
 
 // URLs for the Edge Functions
 const REGENERATE_EXERCISE_URL = 'https://bvfrkzdlklyvnhlpleck.supabase.co/functions/v1/generateWorksheet';
@@ -23,15 +24,15 @@ class ExerciseRegenerationService {
     userId: string
   ) {
     try {
-      console.log('📤 [REGENERATE] Sending regeneration request to Edge Function');
-      console.log('📝 [REGENERATE] Worksheet ID:', worksheetId);
-      console.log('📝 [REGENERATE] Exercise index:', exerciseIndex);
-      console.log('📝 [REGENERATE] Exercise type:', currentExercise.type);
-      console.log('📝 [REGENERATE] Exercise title:', currentExercise.title);
-      console.log('📝 [REGENERATE] Additional guidelines:', additionalGuidelines || '(none)');
-      console.log('📝 [REGENERATE] Has audio_transcript:', !!originalFormData.audio_transcript);
-      console.log('📝 [REGENERATE] Has image description:', !!originalFormData.selected_image?.description);
-      console.log('📝 [REGENERATE] User ID:', userId);
+      devLog('📤 [REGENERATE] Sending regeneration request to Edge Function');
+      devLog('📝 [REGENERATE] Worksheet ID:', worksheetId);
+      devLog('📝 [REGENERATE] Exercise index:', exerciseIndex);
+      devLog('📝 [REGENERATE] Exercise type:', currentExercise.type);
+      devLog('📝 [REGENERATE] Exercise title:', currentExercise.title);
+      devLog('📝 [REGENERATE] Additional guidelines:', additionalGuidelines || '(none)');
+      devLog('📝 [REGENERATE] Has audio_transcript:', !!originalFormData.audio_transcript);
+      devLog('📝 [REGENERATE] Has image description:', !!originalFormData.selected_image?.description);
+      devLog('📝 [REGENERATE] User ID:', userId);
 
       // Create a specific prompt for single exercise regeneration
       const regenerationPrompt = this.createRegenerationPrompt(
@@ -40,7 +41,7 @@ class ExerciseRegenerationService {
         additionalGuidelines
       );
 
-      console.log('🔄 Regeneration prompt (length:', regenerationPrompt.length, 'chars)');
+      devLog('🔄 Regeneration prompt (length:', regenerationPrompt.length, 'chars)');
 
       const requestBody = {
         prompt: regenerationPrompt,
@@ -54,7 +55,7 @@ class ExerciseRegenerationService {
         isRegeneration: true
       };
       
-      console.log('📤 [REGENERATE] Request body:', {
+      devLog('📤 [REGENERATE] Request body:', {
         promptLength: regenerationPrompt.length,
         formDataKeys: Object.keys(requestBody.formData),
         targetExerciseType: currentExercise.type,
@@ -70,7 +71,7 @@ class ExerciseRegenerationService {
         body: JSON.stringify(requestBody)
       });
       
-      console.log('📥 [REGENERATE] Response status:', response.status, response.statusText);
+      devLog('📥 [REGENERATE] Response status:', response.status, response.statusText);
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
@@ -79,7 +80,7 @@ class ExerciseRegenerationService {
       }
 
       const result = await response.json();
-      console.log('📦 [REGENERATE] Response data:', {
+      devLog('📦 [REGENERATE] Response data:', {
         hasExercises: !!result.exercises,
         exercisesCount: result.exercises?.length || 0,
         firstExerciseType: result.exercises?.[0]?.type
@@ -92,7 +93,7 @@ class ExerciseRegenerationService {
         // Ensure the exercise has the correct index-based title
         newExercise.title = `Exercise ${exerciseIndex + 1}: ${newExercise.type.charAt(0).toUpperCase() + newExercise.type.slice(1).replace(/-/g, ' ')}`;
         
-        console.log('✅ [REGENERATE] Exercise regenerated successfully:', {
+        devLog('✅ [REGENERATE] Exercise regenerated successfully:', {
           type: newExercise.type,
           title: newExercise.title,
           hasInstructions: !!newExercise.instructions,
@@ -119,9 +120,9 @@ class ExerciseRegenerationService {
     userId: string
   ) {
     try {
-      console.log('💾 Updating worksheet in database');
+      devLog('💾 Updating worksheet in database');
       await updateWorksheetAPI(worksheetId, updatedWorksheet, userId);
-      console.log('✅ Worksheet updated successfully in database');
+      devLog('✅ Worksheet updated successfully in database');
     } catch (error) {
       console.error('❌ Error updating worksheet in database:', error);
       throw error;
@@ -193,7 +194,7 @@ Return the response in the same JSON format as a full worksheet, but with only o
     userId: string
   ): Promise<string[]> {
     try {
-      console.log('📤 Sending warmup regeneration request to Edge Function');
+      devLog('📤 Sending warmup regeneration request to Edge Function');
 
       const regenerationPrompt = this.createWarmupRegenerationPrompt(
         originalFormData,
@@ -201,7 +202,7 @@ Return the response in the same JSON format as a full worksheet, but with only o
         additionalGuidelines
       );
 
-      console.log('🔄 Warmup regeneration prompt:', regenerationPrompt);
+      devLog('🔄 Warmup regeneration prompt:', regenerationPrompt);
 
       const response = await fetch(REGENERATE_EXERCISE_URL, {
         method: 'POST',
@@ -228,7 +229,7 @@ Return the response in the same JSON format as a full worksheet, but with only o
       const result = await response.json();
       
       if (result.warmup_questions && result.warmup_questions.length > 0) {
-        console.log('✅ Warmup questions regenerated successfully');
+        devLog('✅ Warmup questions regenerated successfully');
         return result.warmup_questions;
       } else {
         throw new Error('No warmup questions returned from regeneration');
@@ -249,7 +250,7 @@ Return the response in the same JSON format as a full worksheet, but with only o
     userId: string
   ): Promise<any> {
     try {
-      console.log('📤 Sending grammar regeneration request to Edge Function');
+      devLog('📤 Sending grammar regeneration request to Edge Function');
 
       const regenerationPrompt = this.createGrammarRegenerationPrompt(
         originalFormData,
@@ -257,7 +258,7 @@ Return the response in the same JSON format as a full worksheet, but with only o
         additionalGuidelines
       );
 
-      console.log('🔄 Grammar regeneration prompt:', regenerationPrompt);
+      devLog('🔄 Grammar regeneration prompt:', regenerationPrompt);
 
       const response = await fetch(REGENERATE_EXERCISE_URL, {
         method: 'POST',
@@ -284,7 +285,7 @@ Return the response in the same JSON format as a full worksheet, but with only o
       const result = await response.json();
       
       if (result.grammar_rules) {
-        console.log('✅ Grammar rules regenerated successfully');
+        devLog('✅ Grammar rules regenerated successfully');
         return result.grammar_rules;
       } else {
         throw new Error('No grammar rules returned from regeneration');

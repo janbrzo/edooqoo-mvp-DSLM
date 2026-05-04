@@ -8,6 +8,7 @@ import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { 
+import { devLog, devWarn } from '@/utils/logger';
   ALL_WELCOME_TEST_QUESTIONS, 
   WELCOME_TEST_SECTIONS_WITH_QUESTIONS,
 } from '@/data/welcomeTestQuestions';
@@ -460,14 +461,14 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
     try {
       const { uploadBlobToR2 } = await import('@/components/welcome-test/SpeakingRecorder');
       
-      console.log('[flushSpeaking] Uploading pending recording for:', pending.questionId);
+      devLog('[flushSpeaking] Uploading pending recording for:', pending.questionId);
       const url = await uploadBlobToR2(pending.blob);
       if (url) {
-        console.log('[flushSpeaking] Upload success, saving answer:', url);
+        devLog('[flushSpeaking] Upload success, saving answer:', url);
         await saveAnswer(pending.questionId, url);
         await commitAnswer(pending.questionId, url);
       } else {
-        console.warn('[flushSpeaking] Upload returned no URL, saving placeholder');
+        devWarn('[flushSpeaking] Upload returned no URL, saving placeholder');
         await saveAnswer(pending.questionId, `recording_pending_${Date.now()}`);
         await commitAnswer(pending.questionId, `recording_pending_${Date.now()}`);
       }

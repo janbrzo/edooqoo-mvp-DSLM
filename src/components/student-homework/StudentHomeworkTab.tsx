@@ -19,6 +19,7 @@ import { CreateHomeworkModal } from '@/components/homework/CreateHomeworkModal';
 import { SendHomeworkEmailDialog } from '@/components/homework/SendHomeworkEmailDialog';
 import { useStudents } from '@/hooks/useStudents';
 import {
+import { devLog } from '@/utils/logger';
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -595,7 +596,7 @@ export const StudentHomeworkTab = ({ studentId, teacherId, studentName }: Studen
               return parsed.exercises || [];
             } catch (e) {
               console.error('❌ Failed to parse worksheet ai_response for homework modal:', e);
-              console.log(`⚠️ Worksheet ${firstWorksheet.id} ai_response length: ${firstWorksheet.ai_response?.length || 0}`);
+              devLog(`⚠️ Worksheet ${firstWorksheet.id} ai_response length: ${firstWorksheet.ai_response?.length || 0}`);
               return [];
             }
           })()}

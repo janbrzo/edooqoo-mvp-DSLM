@@ -17,6 +17,7 @@ import { ExerciseNavSidebar } from "./ExerciseNavSidebar";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { ChevronDown, ChevronUp, RotateCcw, Loader2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { devLog } from '@/utils/logger';
 
 interface WorksheetContentProps {
   editableWorksheet: any;
@@ -147,7 +148,7 @@ export default function WorksheetContent({
 
   // CRITICAL FIX: Add safety check to prevent rendering with null worksheet
   if (!editableWorksheet) {
-    console.log('WorksheetContent: editableWorksheet is null, showing loading...');
+    devLog('WorksheetContent: editableWorksheet is null, showing loading...');
     return (
       <div className="flex items-center justify-center min-h-64">
         <div className="animate-spin h-8 w-8 border-4 border-worksheet-purple border-t-transparent rounded-full"></div>
@@ -155,9 +156,9 @@ export default function WorksheetContent({
     );
   }
 
-  console.log('WorksheetContent: Rendering with editableWorksheet:', editableWorksheet);
-  console.log('WorksheetContent: Calculated times:', worksheetTimes);
-  console.log('WorksheetContent: Has grammar:', hasGrammar);
+  devLog('WorksheetContent: Rendering with editableWorksheet:', editableWorksheet);
+  devLog('WorksheetContent: Calculated times:', worksheetTimes);
+  devLog('WorksheetContent: Has grammar:', hasGrammar);
 
   const getExerciseName = (index: number) => {
     if (editableWorksheet?.exercises?.[index]) {
@@ -169,14 +170,14 @@ export default function WorksheetContent({
   // Function to save worksheet changes to database
   const saveWorksheetChanges = async (updatedWorksheet: any) => {
     if (!worksheetId || !userId) {
-      console.log('Cannot save - missing worksheetId or userId');
+      devLog('Cannot save - missing worksheetId or userId');
       return;
     }
     
     try {
-      console.log('💾 Saving worksheet changes to database...');
+      devLog('💾 Saving worksheet changes to database...');
       await updateWorksheet(worksheetId, updatedWorksheet, userId);
-      console.log('✅ Worksheet saved successfully');
+      devLog('✅ Worksheet saved successfully');
     } catch (error) {
       console.error('❌ Failed to save worksheet:', error);
       toast.error('Failed to save changes');

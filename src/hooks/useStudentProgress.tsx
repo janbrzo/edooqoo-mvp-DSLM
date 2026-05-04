@@ -5,6 +5,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import type { ProgressGoal, LearningElement, GoalType, ElementType, ElementSource } from '@/types/studentProgress';
+import { devLog, devWarn } from '@/utils/logger';
 
 interface UseStudentProgressProps {
   studentId: string;
@@ -109,7 +110,7 @@ export const useStudentProgress = ({ studentId, teacherId }: UseStudentProgressP
                 triggerDetails: { action: 'goal_added', goalType, title, targetDate },
               },
             });
-            console.log('[v5.1] recalculate-pacing (addGoal) result', { data, error });
+            devLog('[v5.1] recalculate-pacing (addGoal) result', { data, error });
             if (error) return;
             const result: any = data || {};
             if (result.proposalId) {
@@ -122,7 +123,7 @@ export const useStudentProgress = ({ studentId, teacherId }: UseStudentProgressP
                 description: `Current ${result.current ?? '?'}/100 stays optimal (${result.skipReason || 'no significant change'}).`,
               });
             }
-          } catch (e) { console.warn('[v5.1] Goal-add pacing failed', e); }
+          } catch (e) { devWarn('[v5.1] Goal-add pacing failed', e); }
         })();
       }
 
@@ -189,7 +190,7 @@ export const useStudentProgress = ({ studentId, teacherId }: UseStudentProgressP
                 },
               },
             });
-            console.log('[v5.1] recalculate-pacing (updateGoal) result', { data, error });
+            devLog('[v5.1] recalculate-pacing (updateGoal) result', { data, error });
             if (error) return;
             const result: any = data || {};
             if (result.proposalId) {
@@ -202,7 +203,7 @@ export const useStudentProgress = ({ studentId, teacherId }: UseStudentProgressP
                 description: `Current ${result.current ?? '?'}/100 stays optimal (${result.skipReason || 'no significant change'}).`,
               });
             }
-          } catch (e) { console.warn('[v5.1] Goal-trigger pacing failed', e); }
+          } catch (e) { devWarn('[v5.1] Goal-trigger pacing failed', e); }
         })();
       }
 

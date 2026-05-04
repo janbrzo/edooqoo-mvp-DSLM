@@ -1,8 +1,9 @@
 
 import { FormData } from "@/components/WorksheetForm";
+import { devLog } from '@/utils/logger';
 
 export const formatPromptForAI = (data: FormData): string => {
-  console.log('📝 Formatting prompt for AI with data:', data);
+  devLog('📝 Formatting prompt for AI with data:', data);
   
   // Build array of prompt lines for easy filtering of empty values
   const promptLines = [];
@@ -28,15 +29,15 @@ export const formatPromptForAI = (data: FormData): string => {
   // Add selected exercises information
   if (data.selectedExercises && data.selectedExercises.length > 0) {
     promptLines.push(`selectedExercises: ${data.selectedExercises.join(', ')}`);
-    console.log('📝 [FORMAT-PROMPT] Adding selectedExercises to AI prompt:', data.selectedExercises);
+    devLog('📝 [FORMAT-PROMPT] Adding selectedExercises to AI prompt:', data.selectedExercises);
   } else {
-    console.log('📝 [FORMAT-PROMPT] No selectedExercises provided, AI will use defaults');
+    devLog('📝 [FORMAT-PROMPT] No selectedExercises provided, AI will use defaults');
   }
 
   // Add exercise focus map (V/G tags) if provided
   if (data.exerciseFocusMap && Object.keys(data.exerciseFocusMap).length > 0) {
     promptLines.push(`exerciseFocusMap: ${JSON.stringify(data.exerciseFocusMap)}`);
-    console.log('📝 [FORMAT-PROMPT] Adding exerciseFocusMap:', data.exerciseFocusMap);
+    devLog('📝 [FORMAT-PROMPT] Adding exerciseFocusMap:', data.exerciseFocusMap);
   }
 
   // Add detailed language style instructions
@@ -95,7 +96,7 @@ export const formatPromptForAI = (data: FormData): string => {
   // Join lines with newlines for clean key-value format
   const formattedPrompt = promptLines.join('\n');
   
-  console.log('📝 Formatted prompt (key-value format):', formattedPrompt);
+  devLog('📝 Formatted prompt (key-value format):', formattedPrompt);
   return formattedPrompt;
 };
 
@@ -109,9 +110,9 @@ const getLanguageStyleDescription = (value: number): string => {
 };
 
 export const createFormDataForStorage = (prompt: FormData) => {
-  console.log('🔧 [PROMPT-FORMATTER] createFormDataForStorage - input selectedExercises:', prompt.selectedExercises);
-  console.log('🔧 [PROMPT-FORMATTER] createFormDataForStorage - input selectedExercises type:', typeof prompt.selectedExercises);
-  console.log('🔧 [PROMPT-FORMATTER] createFormDataForStorage - full prompt object:', prompt);
+  devLog('🔧 [PROMPT-FORMATTER] createFormDataForStorage - input selectedExercises:', prompt.selectedExercises);
+  devLog('🔧 [PROMPT-FORMATTER] createFormDataForStorage - input selectedExercises type:', typeof prompt.selectedExercises);
+  devLog('🔧 [PROMPT-FORMATTER] createFormDataForStorage - full prompt object:', prompt);
   
   const formDataForStorage = {
     lessonTopic: prompt.lessonTopic,
@@ -127,8 +128,8 @@ export const createFormDataForStorage = (prompt: FormData) => {
     selectedAudio: prompt.selectedAudio || null
   };
   
-  console.log('🔧 [PROMPT-FORMATTER] createFormDataForStorage - output selectedExercises:', formDataForStorage.selectedExercises);
-  console.log('🔧 [PROMPT-FORMATTER] createFormDataForStorage - output object:', formDataForStorage);
+  devLog('🔧 [PROMPT-FORMATTER] createFormDataForStorage - output selectedExercises:', formDataForStorage.selectedExercises);
+  devLog('🔧 [PROMPT-FORMATTER] createFormDataForStorage - output object:', formDataForStorage);
   
   return formDataForStorage;
 };
