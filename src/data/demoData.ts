@@ -430,8 +430,10 @@ export interface DemoDataSet {
   knowledgeEntries: any[];
 }
 
-export function buildDemoData(countryCode: string): DemoDataSet {
+export async function buildDemoData(countryCode: string): Promise<DemoDataSet> {
   const locale = getDemoLocale(countryCode);
+  // Lazy chunk: only fetched when demo mode is actually entered.
+  const { DEMO_WORKSHEET_CONTENT } = await import('./demoWorksheetContent');
 
   const teacher = {
     ...TEACHER_PROFILE,
