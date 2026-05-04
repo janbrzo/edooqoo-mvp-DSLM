@@ -8,13 +8,13 @@ import { useState, useCallback, useRef, useEffect, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { 
-import { devLog, devWarn } from '@/utils/logger';
   ALL_WELCOME_TEST_QUESTIONS, 
   WELCOME_TEST_SECTIONS_WITH_QUESTIONS,
 } from '@/data/welcomeTestQuestions';
 import type { WelcomeTestQuestionDef, WelcomeTestSectionDef } from '@/types/welcomeTest';
 import type { Json } from '@/integrations/supabase/types';
 import { toCanonicalId } from '@/utils/welcomeTestNumbering';
+import { devLog, devWarn } from '@/utils/logger';
 
 interface UseWelcomeTestProps {
   shareToken: string | null;

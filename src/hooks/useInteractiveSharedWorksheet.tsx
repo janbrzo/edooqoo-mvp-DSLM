@@ -8,7 +8,6 @@ import { toast } from '@/hooks/use-toast';
 import { ExerciseAnswers } from '@/types/interactiveHomework';
 import { SharedWorksheetProgress } from '@/types/interactiveSharedWorksheet';
 import { 
-import { devLog, devWarn } from '@/utils/logger';
   buildItemEvaluations, 
   calculateOverallMastery,
   OPEN_ENDED_EXERCISE_TYPES,
@@ -16,6 +15,7 @@ import { devLog, devWarn } from '@/utils/logger';
 } from '@/utils/masteryCalculator';
 import { parseAiEvaluation, mapItemEvaluationsToAiEvaluations } from '@/utils/aiEvaluationMapper';
 import type { AiEvaluation } from '@/components/homework/AiEvaluationBadge';
+import { devLog, devWarn } from '@/utils/logger';
 
 interface UseInteractiveSharedWorksheetProps {
   worksheetId: string;

@@ -19,7 +19,6 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Slider } from '@/components/ui/slider';
 import { ChevronDown, Pen, Highlighter, MoveUpRight, Eraser, MousePointer2 } from 'lucide-react';
 import { 
-import { devLog } from '@/utils/logger';
   DrawingTool, 
   DrawingColor, 
   StrokeWidth,
@@ -27,6 +26,7 @@ import { devLog } from '@/utils/logger';
   HIGHLIGHTER_COLORS,
 } from '@/types/drawing';
 import { cn } from '@/lib/utils';
+import { devLog } from '@/utils/logger';
 
 interface DrawingToolButtonProps {
   tool: DrawingTool;

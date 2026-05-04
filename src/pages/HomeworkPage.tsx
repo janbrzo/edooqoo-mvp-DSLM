@@ -15,7 +15,6 @@ import { StudyModeButton } from "@/components/shared/StudyModeButton";
 import MediaSection from "@/components/worksheet/MediaSection";
 import { ExerciseNavSidebar } from "@/components/worksheet/ExerciseNavSidebar";
 import {
-import { devLog } from '@/utils/logger';
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -25,6 +24,7 @@ import { devLog } from '@/utils/logger';
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { devLog } from '@/utils/logger';
 
 interface HomeworkData {
   id: string;

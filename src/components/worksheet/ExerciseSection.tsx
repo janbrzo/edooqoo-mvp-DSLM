@@ -37,7 +37,6 @@ import { RefreshCw, Loader2, ChevronDown } from "lucide-react";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { cn } from "@/lib/utils";
 import {
-import { devLog } from '@/utils/logger';
   handleExerciseChange,
   handleQuestionChange,
   handleItemChange,
@@ -49,6 +48,7 @@ import { devLog } from '@/utils/logger';
   getMatchedItems,
   renderOtherExerciseTypes
 } from "./ExerciseSectionUtils";
+import { devLog } from '@/utils/logger';
 import { safeGetNanoSkill, safeGetAllNanoSkills } from "@/utils/textObjectFixer";
 import NanoSkillBadge, { NanoSkill } from "./NanoSkillBadge";
 import { supabase } from "@/integrations/supabase/client";

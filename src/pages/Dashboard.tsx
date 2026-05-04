@@ -16,7 +16,6 @@ import { StudentSelector } from "@/components/StudentSelector";
 import { useProfile } from "@/hooks/useProfile";
 import { format } from "date-fns";
 import { 
-import { devLog } from '@/utils/logger';
   Users, 
   FileText, 
   Calendar,
@@ -33,6 +32,7 @@ import { devLog } from '@/utils/logger';
   UserPlus,
   Share2
 } from "lucide-react";
+import { devLog } from '@/utils/logger';
 import { Tooltip, TooltipTrigger, TooltipContent } from "@/components/ui/tooltip";
 import { useWorksheetStats } from "@/hooks/useWorksheetStats";
 import { DeleteWorksheetButton } from "@/components/DeleteWorksheetButton";
