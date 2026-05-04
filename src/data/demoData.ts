@@ -1,6 +1,8 @@
 
 import { getDemoLocale, type DemoLocaleNames } from './demoLocales';
-import { DEMO_WORKSHEET_CONTENT } from './demoWorksheetContent';
+// v6.9.7 — DEMO_WORKSHEET_CONTENT is lazy-imported below to keep ~150 KiB of
+// production-grade demo content out of the initial bundle (IP protection +
+// LCP). Static import would defeat the manualChunks split in vite.config.ts.
 
 // Helper to generate dates relative to today
 const daysAgo = (n: number) => {
