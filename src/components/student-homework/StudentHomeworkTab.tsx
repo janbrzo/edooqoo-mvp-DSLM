@@ -50,7 +50,7 @@ export const StudentHomeworkTab = ({ studentId, teacherId, studentName }: Studen
   
   const { students } = useStudents();
   const { worksheets } = useWorksheetHistory(studentId);
-  const { isDemoMode } = useDemoContext();
+  const { isDemoMode, showDemoBlockedToast } = useDemoContext();
   
   // Fetch homework directly for this student, regardless of worksheet assignment
   const [allHomework, setAllHomework] = useState<any[]>([]);
