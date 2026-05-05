@@ -8,7 +8,7 @@ Generates editable worksheets, interactive homework, flashcards, and live sessio
 - /mem/index.md — project memory index (per-feature notes)
 
 ## Latest version
-v6.9.7 (part 1) — IP Protection Hardening: prompt formatting moved to `format-worksheet-prompt` edge function; dev-only logger neutralizes `console.log`/`console.warn` in prod; demo/mock content lazy-loaded; production source maps disabled; `debugger` stripped.
+v6.9.7 — IP Protection Hardening (part 1) + Welcome Email Pipeline (part 2). Prompt formatting moved to `format-worksheet-prompt` edge function; dev-only logger neutralizes `console.log`/`console.warn` in prod; demo/mock content lazy-loaded; production source maps disabled; `debugger` stripped. Branded post-signup welcome email via Resend (`hello@edooqoo.com`), fired by `auth.users` trigger `on_user_email_confirmed` (NULL → NOT NULL on `email_confirmed_at`), idempotent per recipient via `email_send_log`, internal-secret-protected `send-welcome-email` edge function.
 v6.9.6 — Demo Mode Lockdown, Dashboard Compact Stats Bar, Landing mobile light-theme guard.
 See `docs/llm-context.md` § v6.9.7 / § v6.9.6 for full details.
 
@@ -23,3 +23,5 @@ React 18 + Vite 5 + TypeScript 5 + Tailwind 3 + shadcn/ui. Supabase (Lovable Clo
 - All mutating UI handlers MUST guard `isDemoMode` before Supabase calls.
 - All client logging MUST go through `src/utils/logger.ts` (`devLog`/`devWarn`).
 - Worksheet prompt formatting lives in `format-worksheet-prompt` edge function — never move it back to client.
+- Welcome email is sent ONLY by the DB trigger `on_user_email_confirmed`. Never invoke `send-welcome-email` from client code. `email_send_log` enforces idempotency.
+- Resend sender for transactional emails is `hello@edooqoo.com` (verified). Internal endpoint secret lives in `app_internal_config.welcome_email_secret`.
