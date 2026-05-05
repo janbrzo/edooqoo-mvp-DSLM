@@ -58,6 +58,7 @@ interface UnifiedSlotModalProps {
   studentMap: Record<string, string>;
   teacherId?: string;
   onLinkWorksheet?: (studentId: string | null) => void;
+  demoMode?: boolean;
 }
 
 function computeEndTime(start: string, duration: number): string {
@@ -80,7 +81,7 @@ function generateId(): string {
 export function UnifiedSlotModal({
   open, onOpenChange, onCreateSingle, onCreateBatch, onCreateRecurring,
   onDeleteSlot, students, defaultDuration, defaultDate, defaultStartTime,
-  currentDate, existingSlots, studentMap, teacherId, onLinkWorksheet,
+  currentDate, existingSlots, studentMap, teacherId, onLinkWorksheet, demoMode = false,
 }: UnifiedSlotModalProps) {
   const [slotType, setSlotType] = useState<SlotType>('available');
   const [availableMode, setAvailableMode] = useState<AvailableMode>('single');

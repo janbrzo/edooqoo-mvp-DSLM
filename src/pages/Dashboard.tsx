@@ -14,6 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { StudentCard } from "@/components/dashboard/StudentCard";
 import { StudentSelector } from "@/components/StudentSelector";
 import { useProfile } from "@/hooks/useProfile";
+import { useDemoContext } from "@/contexts/DemoContext";
 import { format } from "date-fns";
 import { 
   Users, 
@@ -58,6 +59,7 @@ const Dashboard = () => {
   const { worksheets, loading: historyLoading, refetch: refetchWorksheets, deleteWorksheet } = useWorksheetHistory(undefined, true, true);
   const { thisMonthCount, loading: statsLoading } = useWorksheetStats();
   const { profile: userProfile } = useProfile();
+  const { isDemoMode, showDemoBlockedToast } = useDemoContext();
   
   const [addStudentModalOpen, setAddStudentModalOpen] = useState(false);
   const navigate = useNavigate();
@@ -113,12 +115,14 @@ const Dashboard = () => {
   const totalWorksheetsCreated = profile?.total_worksheets_created || 0;
 
   const handleGenerateWorksheet = () => {
+    if (isDemoMode) { showDemoBlockedToast('Generating worksheets'); return; }
     sessionStorage.setItem('forceNewWorksheet', 'true');
     navigate('/');
   };
 
   const handleRenameWorksheet = async (newTitle: string) => {
     if (!renameWorksheetData) return;
+    if (isDemoMode) { showDemoBlockedToast('Renaming worksheets'); return; }
     
     try {
       const { error } = await supabase

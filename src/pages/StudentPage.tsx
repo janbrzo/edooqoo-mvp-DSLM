@@ -239,7 +239,7 @@ const StudentPage = () => {
   const navigate = useNavigate();
   const { user, isRegisteredUser } = useAuthFlow();
   const { tokenLeft } = useTokenSystem(user?.id);
-  const { isDemoMode } = useDemoContext();
+  const { isDemoMode, showDemoBlockedToast } = useDemoContext();
   const [searchParams, setSearchParams] = useSearchParams();
   const { students, updateStudent, deleteStudent, loading: studentsLoading } = useStudents();
   const [currentPage, setCurrentPage] = useState(1);
@@ -397,6 +397,7 @@ const StudentPage = () => {
   
   // Rename worksheet handler
   const handleRenameWorksheet = async (worksheetId: string, newTitle: string) => {
+    if (isDemoMode) { showDemoBlockedToast('Renaming worksheets'); return; }
     try {
       const { error } = await supabase
         .from('worksheets')

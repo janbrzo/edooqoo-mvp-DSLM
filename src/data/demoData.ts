@@ -404,7 +404,7 @@ const TEACHER_PROFILE = {
   id: 'demo-teacher',
   available_tokens: 15,
   is_tokens_frozen: false,
-  subscription_type: 'professional',
+  subscription_type: 'Full-Time 30',
   subscription_status: 'active',
   subscription_expires_at: daysFromNow(180),
   monthly_worksheet_limit: 50,
