@@ -16,8 +16,8 @@ export const useStudents = () => {
   const teacherId = user?.id;
 
   const studentsQuery = useQuery<Student[]>({
-    queryKey: ['students', teacherId, isDemoMode],
-    enabled: isDemoMode ? true : !!teacherId,
+    queryKey: ['students', teacherId, isDemoMode, !!demoData],
+    enabled: isDemoMode ? !!demoData : !!teacherId,
     queryFn: async () => {
       if (isDemoMode && demoData) {
         return demoData.students as unknown as Student[];
