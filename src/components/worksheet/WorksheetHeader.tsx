@@ -44,6 +44,7 @@ function WorksheetHeader({
   onTitleChange
 }: WorksheetHeaderProps) {
   const { isRegisteredUser } = useAuthFlow();
+  const { isDemoMode, showDemoBlockedToast } = useDemoContext();
   const navigate = useNavigate();
   const [isRenameOpen, setIsRenameOpen] = useState(false);
   
@@ -60,6 +61,7 @@ function WorksheetHeader({
   };
 
   const handleGenerateNewWorksheet = () => {
+    if (isDemoMode) { showDemoBlockedToast('Generating worksheets'); return; }
     sessionStorage.setItem('forceNewWorksheet', 'true');
     navigate('/?forceNew=' + Date.now());
   };
@@ -77,6 +79,7 @@ function WorksheetHeader({
   
   const handleRenameWorksheet = async (newTitle: string) => {
     if (!worksheetId) return;
+    if (isDemoMode) { showDemoBlockedToast('Renaming worksheets'); return; }
     
     try {
       const { error } = await supabase
