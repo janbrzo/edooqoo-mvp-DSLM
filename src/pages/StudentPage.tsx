@@ -59,7 +59,7 @@ import { toast } from 'sonner';
 import { Label } from '@/components/ui/label';
 
 function MeetingLinkField({ studentId, teacherId, hasGcal }: { studentId: string; teacherId: string; hasGcal?: boolean }) {
-  const { isDemoMode } = useDemoContext();
+  const { isDemoMode, showDemoBlockedToast } = useDemoContext();
   const [link, setLink] = useState('');
   const [saved, setSaved] = useState(false);
   const [autoLinkEnabled, setAutoLinkEnabled] = useState(false);
@@ -397,6 +397,7 @@ const StudentPage = () => {
   
   // Rename worksheet handler
   const handleRenameWorksheet = async (worksheetId: string, newTitle: string) => {
+    if (isDemoMode) { showDemoBlockedToast('Renaming worksheets'); return; }
     try {
       const { error } = await supabase
         .from('worksheets')
