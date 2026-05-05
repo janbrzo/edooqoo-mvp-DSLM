@@ -241,6 +241,7 @@ export const StudentHomeworkTab = ({ studentId, teacherId, studentName }: Studen
   
   // Rename homework handler
   const handleRenameHomework = async (homeworkId: string, newTitle: string) => {
+    if (isDemoMode) { showDemoBlockedToast('Renaming homework'); return; }
     try {
       const { error } = await supabase
         .from('homework_assignments')
