@@ -14,6 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { StudentCard } from "@/components/dashboard/StudentCard";
 import { StudentSelector } from "@/components/StudentSelector";
 import { useProfile } from "@/hooks/useProfile";
+import { useDemoContext } from "@/contexts/DemoContext";
 import { format } from "date-fns";
 import { 
   Users, 
