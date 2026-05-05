@@ -1,188 +1,300 @@
-# Plan dokończenia v6.9.7 — Resend zamiast Lovable Emails
 
-## Kontekst i decyzja
+# Plan v6.9.7 patch — demo fixes + welcome email diagnoza
 
-Tak — możemy i powinniśmy użyć Resend. Masz `RESEND_API_KEY` w secrets, używamy go już w innych edge functions projektu (np. send-homework-email, bug report). Domena `edooqoo.com` jest zweryfikowana w Resend, więc nie potrzebujemy konfigurować subdomeny `notify.edooqoo.com` ani nameserverów Lovable.
+## Część 1 — Audyt v6.9.7 (jak jest naprawdę)
 
-**Korzyści:**
-- Brak delegacji NS (Twoja domena zostaje w pełni Twoja)
-- Brak nowej infrastruktury (pgmq, cron, vault) — wszystko leci synchronicznie przez API Resend
-- Spójność z istniejącymi mailami w aplikacji (homework, bug report)
-- Szybciej, mniej ruchomych części, mniej rzeczy do popsucia
+Sprawdziłem stan wdrożenia bezpośrednio w bazie i kodzie:
 
-**Trade-off (świadomy):** Brak kolejki retry/DLQ jak w Lovable Emails. Dla welcome maila to akceptowalne — jeśli pierwszy strzał padnie, mamy alert w `email_send_log` i ręczny resend.
+**Wszystko z v6.9.7 zostało wdrożone:**
+- Edge Function `format-worksheet-prompt` — istnieje i jest używana przez `useWorksheetGeneration` przez `formatPromptForAI` (potwierdzony błąd `Prompt service unavailable` to faktycznie odpowiedź tej funkcji — rozwiązany w sekcji 3.G).
+- Lazy demo content — `buildDemoData` async OK.
+- Welcome email pipeline — wszystko utworzone:
+  - Edge Function `send-welcome-email` ✅
+  - Tabela `email_send_log` ✅
+  - Tabela `app_internal_config` z `welcome_email_url` (72 znaki) i `welcome_email_secret` (48 znaków) ✅
+  - Trigger `on_user_email_confirmed` na `auth.users AFTER UPDATE OF email_confirmed_at` ✅
+  - Funkcja `handle_email_confirmed()` używa `pg_net.http_post` ✅
+  - Rozszerzenie `pg_net` aktywne ✅
+
+**Dlaczego dostałeś maila tylko od Supabase, a nie od Resend (j4n.brz0+52@gmail.com):**
+
+To jest stan zamierzony — pipeline działa poprawnie, ale działa w dwóch krokach:
+
+1. **Mail #1 — Confirmation (Supabase Auth, `noreply@mail.app.supabase.io`):** wysyłany natychmiast po `auth.signUp()`, zawiera link "Confirm your email". To NIE jest "welcome". To jest weryfikacja maila, której wymaga Supabase Auth.
+2. **Mail #2 — Welcome (Resend, `hello@edooqoo.com`):** wysyłany dopiero PO kliknięciu w link z maila #1. Trigger `on_user_email_confirmed` reaguje na zmianę `email_confirmed_at` z NULL na wartość, wywołuje przez `pg_net` Edge Function `send-welcome-email`, która woła Resend API.
+
+**Twoje konto `j4n.brz0+52@gmail.com` nadal ma `email_confirmed_at = NULL`** (sprawdzone w `auth.users`) — dlatego welcome email z Resend jeszcze nie wyleciał. Po kliknięciu "Confirm your email" wyleci automatycznie. To zachowanie jest rozwiązaniem, jakiego sami chcieliśmy: nie spamujemy welcome przed weryfikacją + jest 1 mail per kanał.
+
+**Trzy obserwacje do poprawy w komunikacji (sekcja 2):**
+- Modal po rejestracji mówi "you'll receive 2 free tokens after email confirmation" — OK, ale nic nie wspomina, że po potwierdzeniu przyjdzie drugi (welcome) mail z `hello@edooqoo.com`.
+- Treść maila Supabase mówi "After confirming, you'll instantly get 2 free tokens" — OK.
+- Brak wpisu w FAQ/Q&A o tym podziale (Supabase confirmation vs Edooqoo welcome).
 
 ---
 
-## Status zastany (po audycie)
+## Część 2 — Spójność komunikacji rejestracji (Problem 2.B)
 
-| Blok | Status |
-|---|---|
-| A. Edge Function `format-worksheet-prompt` | DONE — istnieje `supabase/functions/format-worksheet-prompt/index.ts`, klient woła `await formatPromptForAI`, sourcemaps off, debugger drop |
-| B. Lazy demo content | DONE — `buildDemoData` async, dynamic import `demoWorksheetContent` i mocków |
-| C. Welcome email pipeline | NOT DONE — brak edge function, triggera, szablonu |
-| D. Dokumentacja | CZĘŚCIOWO — `docs/llm-context.md`, `llms.txt`, `mem://features/security/ip-protection-hardening` zrobione. Brak wpisu o welcome email |
+### Diagnoza
+| Miejsce | Obecny tekst | Problem |
+|---|---|---|
+| `Signup.tsx` modal "Check Your Email" | "You'll receive 2 free tokens after email confirmation" | Brak info, że po kliknięciu przyjdzie 2-gi mail (welcome) |
+| Mail Supabase Auth (custom template) | "Welcome to EDOOQOO! …click button below… you'll instantly get 2 free tokens" | OK, nic nie zmieniamy — zostaje |
+| Mail Resend Welcome | "Welcome, {firstName} 👋… Open your dashboard" | OK, ale można dodać jednoznaczny status: "Your email has been confirmed and your account is now active." |
+| Strony Q&A (`Resources.tsx`, `HowItWorks.tsx`, `Glossary.tsx`) | Brak wpisu o procesie email | Brak FAQ pytania |
 
-Do dokończenia: **Blok C + uzupełnienie dokumentacji**.
+### Implementacja
+1. **`src/pages/Signup.tsx`** — w modalu "Check Your Email" dodać linijkę pod listą "What's next":
+   > "💌 After confirming, you'll get a welcome email from `hello@edooqoo.com` with quick‑start tips."
+2. **`supabase/functions/send-welcome-email/index.ts`** — w funkcji `renderWelcomeHtml()` zaktualizować `sourceLine` dla `signupSource === 'email'`:
+   > "Your email is confirmed and your account is now active." (dziś jest "Glad you confirmed your email — your account is now active.").
+   Drobna kosmetyka, eliminuje "Glad" jako filler.
+3. **`src/pages/Resources.tsx`** — sekcja FAQ — dodać 1 pytanie:
+   > **Q: I just signed up — how many emails should I expect?**
+   > A: Two. First, a confirmation email from Supabase to verify your address. After you click the link, you'll get a short welcome email from `hello@edooqoo.com` with onboarding tips. Both are one‑time only.
+4. **`src/pages/HowItWorks.tsx`** — krok "Sign up" — rozszerzyć opis o 1 zdanie z tym samym wyjaśnieniem.
+
+**Brak regresji:** zmiany czysto tekstowe, plus jeden string w edge function (welcome email — bez zmian w strukturze ani API).
 
 ---
 
-## Blok C — Welcome Email przez Resend
+## Część 3 — Demo Mode bugs (Problem 3.A‑G)
 
-### 1. Edge Function: `supabase/functions/send-welcome-email/index.ts`
+### 3.A — Pasek na górze zasłania treść w `/demo`
 
-- `verify_jwt = false` (woła ją trigger DB / webhook, nie zalogowany user)
-- W kodzie: walidacja shared secret w nagłówku `x-internal-secret` (nowy secret `WELCOME_EMAIL_SECRET`) — chroni przed publicznym spamem
-- Body (Zod): `{ email: string, firstName?: string, signupSource: 'email' | 'google' }`
-- Idempotencja: sprawdza `email_send_log` (`template_name='welcome_email' AND recipient_email=$1`) — jeśli już `sent`, zwraca 200 bez ponownej wysyłki
-- Wywołanie Resend REST API: `POST https://api.resend.com/emails` z `Authorization: Bearer ${RESEND_API_KEY}`
-  - `from: "Edooqoo <hello@edooqoo.com>"`
-  - `reply_to: "hello@edooqoo.com"`
-  - `subject: "Welcome to Edooqoo, {firstName} 👋"`
-  - `html`: render React Email template (poniżej)
-- Loguje wynik do `email_send_log` (status `sent` / `failed`, `error_message`, `provider_message_id`)
-- CORS: standard z `@supabase/supabase-js/cors`
-- Używa `APP_BASE_URL` do linków w mailu (zgodnie z core memory rule)
+**Przyczyna:** `StickyNav` renderuje `<DemoBanner />` jako `position: fixed top-0 z-[60] h-[36px]`. Następnie `<nav>` ma `sticky top-[36px]` (dobrze). Ale strony renderowane wewnątrz `AuthenticatedPageShell` (Dashboard, AllWorksheetsPage, CalendarPage, StudentPage, itd.) nie mają żadnego `padding-top` rekompensującego 36 px paska. `min-h-screen` w shellu nie wie nic o pasku.
 
-### 2. Szablon: `supabase/functions/_shared/email-templates/welcome.tsx`
+**Implementacja (jeden punkt, zero zgadywania):**
 
-React Email template w stylu marki Edooqoo:
-- Tło `#ffffff`
-- Akcent: kolor primary z `index.css` (przeczytam i zastosuję inline)
-- Heading: powitanie + imię (jeśli jest)
-- Sekcja 1: "What you can do now" — 3 bullety (generate worksheet, add student, share homework)
-- CTA Button → `${APP_BASE_URL}/dashboard`
-- Sekcja 2: zasoby (link do How it works, Glossary)
-- Stopka: kontakt + adres firmy (wymaganie CAN-SPAM przy mailach od domeny brandowej)
-- Bez unsubscribe (welcome jest transactional/jednorazowy, recipient właśnie się zarejestrował)
+W `src/contexts/DemoContext.tsx` provider już jest. Dodajemy w `src/components/AuthenticatedPageShell.tsx`:
 
-### 3. Tabela: `email_send_log` (jeśli nie istnieje)
-
-Sprawdzę przez `supabase--read_query` czy tabela już jest (od istniejących maili Resend). Jeśli nie — migracja:
-
-```
-- email_send_log (id uuid pk, recipient_email text, template_name text,
-  status text check in ('pending','sent','failed'),
-  provider_message_id text, error_message text, sent_at timestamptz,
-  created_at timestamptz default now())
-- index na (recipient_email, template_name)
-- RLS: tylko service_role read/write (zero dostępu z klienta)
-```
-
-### 4. Trigger DB: wysyłka po potwierdzeniu emaila
-
-Strategia (sprawdzona w innych projektach Lovable, kompatybilna):
-
-**Trigger na `auth.users` AFTER UPDATE** — gdy `email_confirmed_at` przechodzi z NULL na NOT NULL:
-
-```sql
-CREATE OR REPLACE FUNCTION public.handle_email_confirmed()
-RETURNS trigger
-LANGUAGE plpgsql
-SECURITY DEFINER
-SET search_path = public
-AS $$
-DECLARE
-  v_url text;
-  v_signup_source text;
-BEGIN
-  IF OLD.email_confirmed_at IS NULL AND NEW.email_confirmed_at IS NOT NULL THEN
-    v_signup_source := COALESCE(NEW.raw_app_meta_data->>'provider', 'email');
-    -- Wywołanie edge function przez net.http_post (pg_net)
-    PERFORM net.http_post(
-      url := current_setting('app.settings.welcome_email_url'),
-      headers := jsonb_build_object(
-        'Content-Type','application/json',
-        'x-internal-secret', current_setting('app.settings.welcome_email_secret')
-      ),
-      body := jsonb_build_object(
-        'email', NEW.email,
-        'firstName', NEW.raw_user_meta_data->>'first_name',
-        'signupSource', v_signup_source
-      )
-    );
-  END IF;
-  RETURN NEW;
-END;
-$$;
-
-CREATE TRIGGER on_user_email_confirmed
-AFTER UPDATE OF email_confirmed_at ON auth.users
-FOR EACH ROW EXECUTE FUNCTION public.handle_email_confirmed();
+```tsx
+import { useDemoContext } from '@/contexts/DemoContext';
+// ...
+const { isDemoMode } = useDemoContext();
+return (
+  <div
+    className={`min-h-screen auth-bg-shell ${className}`}
+    style={isDemoMode ? { paddingTop: '36px' } : undefined}
+  >
+    {children}
+    ...
+  </div>
+);
 ```
 
-**Timing rozróżnienie email vs Google OAuth:**
-- Email signup: `email_confirmed_at` ustawia się po kliknięciu w link → mail leci natychmiast (to jest moment, w którym user "wszedł")
-- Google OAuth: Supabase ustawia `email_confirmed_at` od razu przy callbacku → mail leci natychmiast (5-min opóźnienie z poprzedniej iteracji planu odpada — użytkownik OAuth nie potrzebuje "remindera o sprawdzeniu skrzynki")
+To rozwiązuje wszystkie strony korzystające z `AuthenticatedPageShell` jednym strzałem. `StickyNav` ma już własny `top-[36px]` więc nie robimy double‑offset.
 
-Jeśli użytkownik usunie konto i założy ponownie — `email_send_log` zapobiegnie duplikatowi (idempotencja per email).
+**Strony anon używające `StickyNav` bez shellu (Index, BookLandingPage, About, …)** — sprawdzę przed implementacją; tam `<DemoBanner />` jest renderowany w samym `StickyNav` i `nav` przesunięte przez `top-[36px]`, treść leci pod navem (mt‑0), więc nic nie zasłania (banner siedzi nad navem, nie nad treścią). Wniosek: zmiana TYLKO w `AuthenticatedPageShell`.
 
-### 5. Settings DB
+### 3.B — Brak studentów w `/demo` na Dashboard
 
-`ALTER DATABASE` ustawia:
-- `app.settings.welcome_email_url` = `https://bvfrkzdlklyvnhlpleck.supabase.co/functions/v1/send-welcome-email`
-- `app.settings.welcome_email_secret` = wartość z `WELCOME_EMAIL_SECRET` (przekażę w migracji jako placeholder, wartość ustawi user przez add_secret)
+**Przyczyna sprawdzona w kodzie:** `useStudents` poprawnie zwraca `demoData.students` gdy `isDemoMode && demoData`. `useProfile` też. Problem jest w `DemoContext.tsx` — `buildDemoData` zwraca Promise i `demoData` na początku jest `null`. `useStudents` ma `enabled: isDemoMode ? true : !!teacherId`, więc query odpala się ZANIM `demoData` jest gotowe → zwraca `[]`. Po otrzymaniu `demoData` query NIE odpala się ponownie, bo queryKey nie zmienia się (`demoData` nie jest w kluczu), a `staleTime` defaultu RTK Query trzyma puste `[]`.
 
-### 6. Sekret
+**Fix (dwie zmiany, atomowe):**
 
-Nowy secret `WELCOME_EMAIL_SECRET` (random 32-char) — używany do walidacji `x-internal-secret` w edge function. Poproszę przez `add_secret` po zatwierdzeniu planu.
+1. `src/hooks/useStudents.tsx`:
+   ```ts
+   queryKey: ['students', teacherId, isDemoMode, !!demoData],
+   enabled: isDemoMode ? !!demoData : !!teacherId,
+   ```
+2. To samo dla `src/hooks/useFlashcardSets.tsx` jeśli używa tego samego wzorca (do sprawdzenia w implementacji — jeśli ma `useQuery`, dodać `!!demoData` w key i guard w enabled).
 
-### 7. Test end-to-end
+**Brak regresji:** w trybie nie‑demo `demoData = null` ale nie używamy go (jest `if (isDemoMode && demoData)`); klucz query w trybie auth zmienia się tylko o stały `false`, czyli w praktyce bez różnic.
 
-Po wdrożeniu:
-- `supabase--curl_edge_functions` z poprawnym `x-internal-secret` → status 200, log w `email_send_log`
-- Bez secretu → 401
-- Powtórne wywołanie z tym samym emailem → 200 z `{ skipped: true }` (idempotencja)
-- Manualny test trigger: `UPDATE auth.users SET email_confirmed_at=now() WHERE id='...'` na test userze → mail przychodzi
+### 3.C — `/worksheets` (AllWorksheetsPage) nie ładuje się
+
+**Przyczyna sprawdzona:** `useWorksheetHistory` w demo ustawia `worksheets` w `useEffect` ale **nigdy nie ustawia `loading=false` w gałęzi demo** (sprawdziłem linie 33‑43 — `setLoading(false)` jest w środku, ale ścieżka `useEffect` w demo nie ma `setLoading(false)` jeśli `demoData` jest `null` w pierwszym renderze). Dodatkowo `AllWorksheetsPage` ma `if (authLoading || loading) return spinner` — i loading nigdy nie schodzi na false dla demo bez worksheetów lub kiedy `demoData` przychodzi z opóźnieniem.
+
+Sprawdziłem dokładnie: pierwszy effect ustawia `loading=false` tylko gdy `isDemoMode && demoData`. Jeśli `demoData` jest null (przed lazy import), `useEffect` nie wywołuje setLoading(false), `fetchWorksheets` ma early return (`isDemoMode = true`), więc `loading` zostaje `true` na zawsze.
+
+**Fix:** w `src/hooks/useWorksheetHistory.tsx` `useEffect` w gałęzi demo:
+```ts
+useEffect(() => {
+  if (!isDemoMode) return;
+  if (!demoData) { setLoading(true); return; }
+  let ws = demoData.worksheets as WorksheetHistoryItem[];
+  if (studentId) ws = ws.filter(w => w.student_id === studentId);
+  setWorksheets(ws);
+  setTotalCount(ws.length);
+  setLoading(false);
+}, [isDemoMode, demoData, studentId]);
+```
+
+To samo dla `useDeletedWorksheets.tsx` — w demo zwracamy `[]` natychmiast tylko gdy `demoData` przyjdzie (lub od razu — `deletedWorksheets` w demo zawsze `[]`, więc `setLoading(false)` można wywołać natychmiast w gałęzi demo, nie czekając na `demoData`).
+
+**Brak regresji:** ścieżka non‑demo nie zmieniona.
+
+### 3.D — Nieprawidłowe komunikaty "Failed to rename / share / delete" w demo
+
+**Diagnoza:** są 4 miejsca z toastem `Failed to rename worksheet` i analogiczne dla rename/share/delete:
+- `src/components/worksheet/WorksheetHeader.tsx:92` — `handleRenameWorksheet`
+- `src/pages/Dashboard.tsx:136` — `handleRenameWorksheet`
+- `src/pages/StudentPage.tsx:412` — `handleRenameWorksheet`
+- `src/components/student-homework/StudentHomeworkTab.tsx:257` — `Failed to rename homework`
+
+W demo te akcje wywołują `supabase.from('worksheets').update(...)` które rzuca RLS error/UUID error → łapie `catch` i pokazuje "Failed to…". Mamy już `useDemoGuard.guardAction` ale nie jest tu używane.
+
+**Fix — wzorzec jednolity:** każdy z tych 4 handlerów na początku:
+```ts
+const { isDemoMode, showDemoBlockedToast } = useDemoContext();
+// w handlerze:
+if (isDemoMode) { showDemoBlockedToast('Renaming worksheet'); return; }
+```
+
+Plus to samo w `DeleteWorksheetButton.tsx`, `DuplicateWorksheetButton.tsx`, `ShareWorksheetModal.tsx`, `RenameDialog.tsx` — sprawdzę i dodam guard tam, gdzie wywołują mutację Supabase. Lista do zrobienia (potwierdzona przez `rg`):
+- `src/components/DeleteWorksheetButton.tsx`
+- `src/components/DuplicateWorksheetButton.tsx` 
+- `src/components/DuplicateWorksheetModal.tsx`
+- `src/components/ShareWorksheetModal.tsx`
+- `src/components/RenameDialog.tsx` (jeśli sam wywołuje update; jeśli tylko emituje callback — guard idzie w callbacku)
+- `src/components/student-homework/StudentHomeworkTab.tsx`
+- `src/components/worksheet/WorksheetHeader.tsx`
+- `src/pages/Dashboard.tsx`
+- `src/pages/StudentPage.tsx`
+
+**Brak regresji:** guard tylko gdy `isDemoMode === true`. W non‑demo flow pozostaje 100% identyczny.
+
+### 3.E — "Tokens: 15 professional" → poprawny tier
+
+**Przyczyna:** `src/data/demoData.ts:407` ma `subscription_type: 'professional'`. `StickyNav` renderuje go jako `<Badge>{subscriptionType}</Badge>`. Brak takiego tier'a w cenniku.
+
+**Lista realnych tierów (do potwierdzenia w `PricingCalculator.tsx`/`PricingSection.tsx` przy implementacji):** Free, Hobby, Part-Time, Full-Time 30 (lub podobne).
+
+**Fix:**
+1. `src/data/demoData.ts` — zmienić `subscription_type: 'professional'` → `subscription_type: 'Full-Time 30'`.
+2. Sprawdzić i poprawić w demo również `monthly_token_limit` jeśli jest niespójne — Full-Time = 30 tokenów/miesiąc. Z screena demo ma 15 tokenów obecnie. Zostawiamy `tokenLeft = 15` (=środek cyklu wygląda autentycznie), ale `monthly_token_limit` ustawić na 30 jeśli pole istnieje w demoData.
+
+**Brak regresji:** demo data tylko.
+
+### 3.F — Calendar: modal slot powinien się otwierać, a blokada przy zapisie
+
+**Obecny stan:** `CalendarPage.handleAddSlot` ma:
+```ts
+if (isDemoMode) { showDemoBlockedToast('Adding lessons'); return; }
+```
+Toast wyskakuje od razu, modal nie pokaże się.
+
+**Fix (zgodnie z prośbą — pozwól otworzyć, blokuj przy save):**
+
+1. `src/pages/CalendarPage.tsx` — usunąć guard z `handleAddSlot` i `handleSlotClick` (`isDemoMode` block) — modal otwiera się w demo.
+2. Przekazać `isDemoMode` do `<UnifiedSlotModal />` jako prop `demoMode`.
+3. W `src/components/calendar/UnifiedSlotModal.tsx:273` — `handleSubmit` na samym początku:
+   ```ts
+   if (demoMode) { showDemoBlockedToast('Saving calendar slots'); return; }
+   ```
+4. Dla edycji istniejącego slota — `selectedSlot` modal (osobny komponent) — to samo: pozwolić otworzyć, zablokować save.
+5. Zostawić blokadę dla `handleShare` (sharing public calendar) — bo to natychmiastowa akcja bez modala.
+
+**Brak regresji:** w prod (non‑demo) `demoMode = false` → 0 zmian zachowania.
+
+### 3.G — Generowanie worksheetu nie blokowane od razu w demo
+
+**Obecny stan sprawdzony w `useWorksheetGeneration.tsx`:** `generateWorksheetHandler` nie ma guarda demo. `useTokenSystem` ma `isDemo = isDemoMode || isAnonymousUser !== false` — czyli demo zachowuje się jak anon = leci dalej i woła `format-worksheet-prompt`. Edge function odpowiada błędem (bo demo user nie ma tokena/uprawnień) → toast "Prompt service unavailable".
+
+**Fix — wczesna blokada (podobnie jak Calendar):**
+
+W `src/hooks/useWorksheetGeneration.tsx:37` na początku `generateWorksheetHandler`:
+```ts
+import { useDemoContext } from '@/contexts/DemoContext';
+// w hooku:
+const { isDemoMode, showDemoBlockedToast } = useDemoContext();
+// w handlerze, PRZED isGenerating check:
+if (isDemoMode) {
+  showDemoBlockedToast('Generating worksheets');
+  return;
+}
+```
+
+Plus sprawdzić wszystkie miejsca, które otwierają generation flow w demo — `src/pages/Index.tsx` (główne `Generate` CTA) i `Dashboard.handleGenerateWorksheet` (które robi `navigate('/')`). Tam też dodać guard, żeby nawet nie nawigować do `/` z `forceNewWorksheet`. Pseudokod dla Dashboard:
+```ts
+const handleGenerateWorksheet = () => {
+  if (isDemoMode) { showDemoBlockedToast('Generating worksheets'); return; }
+  sessionStorage.setItem('forceNewWorksheet', 'true');
+  navigate('/');
+};
+```
+Analogicznie w `StickyNav` przycisk `+ Generate Worksheet` w demo — `onGenerateWorksheet` przekazany z Dashboard już ma guard, więc StickyNav nic nie robi sam. W `WorksheetForm` (jeśli wywołuje `generateWorksheetHandler` bezpośrednio z anon flow) — guard w hooku łapie i tak.
+
+**Brak regresji:** identyczna ścieżka jak Calendar slot save.
+
+### Sekretne miejsca dodatkowe (sprawdzone)
+
+`useStudentSelector.tsx:19` ma już `guardAction('Transferring worksheets')`. To samo dla `Bulk delete` w `AllWorksheetsPage.handleBulkDelete` — dodać guard demo.
 
 ---
 
-## Blok D — Dokumentacja
+## Część 4 — Dokumentacja RAG
 
-### 1. `docs/llm-context.md`
+### 4.1 — `docs/llm-context.md` — nowa sekcja v6.9.7‑patch
 
-Nowa sekcja w v6.9.7:
-- **Problem:** New users had no personalized onboarding email; Supabase default confirmation email was generic
-- **Edooqoo Solution:** Branded welcome email via Resend, fired on email confirmation, idempotent per recipient
-- **Technical Mechanics:** trigger `on_user_email_confirmed` → `pg_net.http_post` → `send-welcome-email` edge function → Resend REST API → log in `email_send_log`. Source rozróżnia email/google OAuth via `raw_app_meta_data->>'provider'`.
-- **RAG Keywords:** welcome email, post-signup, email confirmation, transactional email, Resend, onboarding mail, hello@edooqoo.com
+```
+### v6.9.7‑patch — Demo UX hardening + email pipeline confirmation
 
-### 2. `llms.txt`
+**Problem A:** DemoBanner (fixed 36px) overlaid first 36px of every authenticated page.
+**Edooqoo Solution:** Conditional `padding-top: 36px` on `AuthenticatedPageShell` when `isDemoMode`.
+**Technical Mechanics:** `useDemoContext()` in shell; pages inside shell get banner offset for free.
+**RAG Keywords:** demo banner offset, sticky nav demo, page top cut off, AuthenticatedPageShell padding
 
-Aktualizacja sekcji "Latest version" — dodać Welcome Email do v6.9.7.
+**Problem B:** Demo students/worksheets/deleted hooks raced async `buildDemoData`; queries fired before `demoData` ready and never re-fetched.
+**Edooqoo Solution:** Add `!!demoData` to React Query key + `enabled` guard; ensure `setLoading(false)` in demo branches even when `demoData` is null.
+**Technical Mechanics:** `useStudents`, `useWorksheetHistory`, `useDeletedWorksheets` updated. Non-demo path unchanged.
+**RAG Keywords:** demo loading stuck, demo empty list, useStudents queryKey demoData
 
-### 3. Memory
+**Problem C:** Mutating actions in demo showed generic "Failed to rename" instead of "Demo mode" toast.
+**Edooqoo Solution:** Demo guard at handler entry across rename/duplicate/delete/share/bulk-delete/generate.
+**Technical Mechanics:** `useDemoContext().showDemoBlockedToast(action)` early-return pattern. Identical wording across all surfaces.
+**RAG Keywords:** demo mode action blocked, Failed to rename worksheet demo, demo guard pattern
 
-Nowy plik `mem://features/email/welcome-email-pipeline`:
-- Trigger DB jest jedynym źródłem wysyłki — nie wywoływać `send-welcome-email` z klienta
-- `email_send_log` zapewnia idempotencję — nigdy nie ścierać tej tabeli
-- Resend `from` musi pozostać `hello@edooqoo.com` (zweryfikowana skrzynka)
-- Sekret `WELCOME_EMAIL_SECRET` chroni endpoint — nigdy nie hardcodować
+**Problem D:** Calendar Add Slot showed toast immediately; UX expectation = modal opens, save is blocked.
+**Edooqoo Solution:** Open modal freely in demo; block at `handleSubmit` of `UnifiedSlotModal` via `demoMode` prop.
+**Technical Mechanics:** Removed guard in `CalendarPage.handleAddSlot/handleSlotClick`; added prop-driven guard inside modal.
+**RAG Keywords:** demo calendar add slot, slot modal blocked, demoMode prop
 
-Aktualizacja `mem://index.md` — dodać wpis do Memories.
+**Problem E:** `subscription_type='professional'` is not a real tier; appeared next to token count.
+**Edooqoo Solution:** Demo profile uses `Full-Time 30` (real tier).
+**Technical Mechanics:** Single change in `src/data/demoData.ts`.
+
+**Problem F:** Worksheet generation in demo wasn't gated; user could trigger and got `Prompt service unavailable` from edge function.
+**Edooqoo Solution:** Early demo guard in `useWorksheetGeneration.generateWorksheetHandler` AND in `Dashboard.handleGenerateWorksheet`.
+**Technical Mechanics:** `isDemoMode → showDemoBlockedToast('Generating worksheets'); return` before any navigation/API call.
+**RAG Keywords:** demo worksheet generation blocked, Prompt service unavailable demo
+
+**Problem G:** Users confused why they got Supabase confirmation email but no Edooqoo welcome email immediately.
+**Edooqoo Solution:** Document the two-email flow (Supabase confirmation → after click → Resend welcome). Update Signup modal copy + welcome email body + Resources FAQ.
+**Technical Mechanics:** Welcome trigger fires on `email_confirmed_at` NULL→NOT NULL transition. Until user clicks confirmation link, only Supabase auth email exists. This is by design — prevents welcome email to unverified addresses.
+**RAG Keywords:** welcome email not received, two emails after signup, hello@edooqoo.com Resend, email_confirmed_at trigger
+```
+
+### 4.2 — `llms.txt`
+Dodać 1 sekcję mirror (identyczna treść w skróconej formie, jak inne sekcje).
+
+### 4.3 — Memory
+Zaktualizować `mem://features/email/welcome-email-pipeline.md` — dodać operację:
+> "Two-email UX: Supabase confirmation always fires first; welcome email only after confirmation link click. Document this in user-facing FAQ."
+
+Dodać `mem://features/public-demo-mode-lockdown.md` (już istnieje w indeksie) — note:
+> "v6.9.7-patch: demo guards added in: useWorksheetGeneration, Dashboard.handleGenerateWorksheet, AllWorksheetsPage bulk-delete, UnifiedSlotModal.handleSubmit (via demoMode prop), Worksheet rename handlers (4 lokacje). Calendar pattern: open modal, block save."
 
 ---
+
+## Kolejność implementacji (1 sesja build)
+
+1. **Demo race fixes** (3.B, 3.C) — `useStudents`, `useWorksheetHistory`, `useDeletedWorksheets`
+2. **Banner offset** (3.A) — `AuthenticatedPageShell`
+3. **Demo data tier** (3.E) — `demoData.ts`
+4. **Demo guards na handlerach** (3.D, 3.F, 3.G) — 9 plików (lista wyżej)
+5. **Calendar prop demoMode** (3.F) — `CalendarPage` + `UnifiedSlotModal`
+6. **Copy update** (2) — `Signup.tsx`, `send-welcome-email/index.ts`, `Resources.tsx`, `HowItWorks.tsx`
+7. **Deploy** `send-welcome-email`
+8. **Docs + memory** (4)
 
 ## Brak regresji — checklist
 
-- Trigger działa tylko AFTER UPDATE OF `email_confirmed_at` (NULL → NOT NULL) — istniejący userzy z już potwierdzonym mailem NIE dostaną maila przy żadnej innej zmianie
-- Edge function jest niezależna — żadne istniejące funkcje nie są modyfikowane
-- `email_send_log` (jeśli już istnieje od homework/bug report) — używamy istniejącej, dodajemy tylko `template_name='welcome_email'`
-- Jeśli `pg_net` extension nie jest aktywne — migracja je włączy (`CREATE EXTENSION IF NOT EXISTS pg_net`)
-- Resend rate limit (10 req/sec na default) — welcome ma <1 req/min realnie, brak ryzyka
-- Brak zmian w `format-worksheet-prompt`, demo lazy loading, vite config, sourcemap, logger
+- Wszystkie zmiany w demo guardach są `if (isDemoMode) ...; return;` — zerowy wpływ na non‑demo.
+- Zmiany w queryKey/enabled dodają tylko jeden boolean — w non‑demo zawsze ten sam wynik.
+- `AuthenticatedPageShell` padding tylko w demo.
+- `UnifiedSlotModal` prop `demoMode` opcjonalny z default `false`.
+- Welcome email pipeline — zero zmian w schema/triggerze, tylko 1 string w HTML.
+- Vite config, sourcemaps, logger, format-worksheet-prompt — niezmienione.
 
----
-
-## Kolejność wykonania
-
-1. Migracja DB: `email_send_log` (jeśli brak) + `pg_net` extension + trigger + GUC settings
-2. `add_secret` → `WELCOME_EMAIL_SECRET`
-3. Stworzenie `_shared/email-templates/welcome.tsx`
-4. Stworzenie `send-welcome-email/index.ts` + wpis w `config.toml`
-5. Deploy `send-welcome-email`
-6. Aktualizacja `app.settings.welcome_email_secret` (osobna migracja po dodaniu secretu)
-7. Test curl + test trigger na test userze
-8. Aktualizacja docs (llm-context, llms.txt, mem)
-
-Po Twojej zgodzie wykonam wszystko w jednej sesji build mode.
+Po Twojej zgodzie wykonam wszystko w jednej sesji build, z deployem edge function na końcu.
