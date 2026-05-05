@@ -12,6 +12,7 @@ import RenameDialog from "@/components/RenameDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { devLog } from '@/utils/logger';
+import { useDemoContext } from '@/contexts/DemoContext';
 
 interface WorksheetHeaderProps {
   onBack: () => void;
