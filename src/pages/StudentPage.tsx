@@ -59,7 +59,7 @@ import { toast } from 'sonner';
 import { Label } from '@/components/ui/label';
 
 function MeetingLinkField({ studentId, teacherId, hasGcal }: { studentId: string; teacherId: string; hasGcal?: boolean }) {
-  const { isDemoMode, showDemoBlockedToast } = useDemoContext();
+  const { isDemoMode } = useDemoContext();
   const [link, setLink] = useState('');
   const [saved, setSaved] = useState(false);
   const [autoLinkEnabled, setAutoLinkEnabled] = useState(false);
@@ -239,7 +239,7 @@ const StudentPage = () => {
   const navigate = useNavigate();
   const { user, isRegisteredUser } = useAuthFlow();
   const { tokenLeft } = useTokenSystem(user?.id);
-  const { isDemoMode } = useDemoContext();
+  const { isDemoMode, showDemoBlockedToast } = useDemoContext();
   const [searchParams, setSearchParams] = useSearchParams();
   const { students, updateStudent, deleteStudent, loading: studentsLoading } = useStudents();
   const [currentPage, setCurrentPage] = useState(1);
