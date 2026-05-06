@@ -173,6 +173,12 @@ export default function WorksheetContent({
       devLog('Cannot save - missing worksheetId or userId');
       return;
     }
+    // v6.9.8 — demo mode: block DB write (worksheet IDs like "demo-ws-1" are not UUIDs)
+    if (typeof window !== 'undefined' && localStorage.getItem('edooqoo_demo_mode') === 'true') {
+      const { toast: sonnerToast } = await import('sonner');
+      sonnerToast.info('Demo mode — Saving worksheet changes is disabled.');
+      return;
+    }
     
     try {
       devLog('💾 Saving worksheet changes to database...');

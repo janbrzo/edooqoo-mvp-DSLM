@@ -25,6 +25,7 @@ import { AuthenticatedPageShell } from "@/components/AuthenticatedPageShell";
 import PricingTeaser from "@/components/landing/PricingTeaser";
 import AnonPostWorksheetLandingPage from "@/components/anon/AnonPostWorksheetLandingPage";
 import WelcomeBackBanner from "@/components/anon/WelcomeBackBanner";
+import ParticlesBackground from "@/components/landing/ParticlesBackground";
 import { markWorksheetForClaim } from "@/hooks/useWorksheetClaim";
 import { devLog, devWarn } from '@/utils/logger';
 
@@ -336,6 +337,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen relative bg-gradient-to-br from-background to-secondary/20">
+      <ParticlesBackground />
       <FreeWeekBanner />
       <WelcomeBackBanner shouldShow={showWelcomeBackModal} />
       

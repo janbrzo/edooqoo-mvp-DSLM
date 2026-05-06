@@ -1986,6 +1986,9 @@ export type Database = {
       }
       student_knowledge_entries: {
         Row: {
+          ai_classified: boolean | null
+          ai_confidence: number | null
+          archived_at: string | null
           category: string
           content: string
           created_at: string | null
@@ -2000,9 +2003,13 @@ export type Database = {
           tags: string[] | null
           teacher_id: string
           updated_at: string | null
+          used_in_worksheet_id: string | null
           worksheet_id: string | null
         }
         Insert: {
+          ai_classified?: boolean | null
+          ai_confidence?: number | null
+          archived_at?: string | null
           category: string
           content: string
           created_at?: string | null
@@ -2017,9 +2024,13 @@ export type Database = {
           tags?: string[] | null
           teacher_id: string
           updated_at?: string | null
+          used_in_worksheet_id?: string | null
           worksheet_id?: string | null
         }
         Update: {
+          ai_classified?: boolean | null
+          ai_confidence?: number | null
+          archived_at?: string | null
           category?: string
           content?: string
           created_at?: string | null
@@ -2034,6 +2045,7 @@ export type Database = {
           tags?: string[] | null
           teacher_id?: string
           updated_at?: string | null
+          used_in_worksheet_id?: string | null
           worksheet_id?: string | null
         }
         Relationships: [
@@ -2042,6 +2054,13 @@ export type Database = {
             columns: ["student_id"]
             isOneToOne: false
             referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "student_knowledge_entries_used_in_worksheet_id_fkey"
+            columns: ["used_in_worksheet_id"]
+            isOneToOne: false
+            referencedRelation: "worksheets"
             referencedColumns: ["id"]
           },
           {

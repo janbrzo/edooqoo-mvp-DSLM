@@ -105,6 +105,51 @@ export const useStudentKnowledge = ({ studentId, teacherId }: UseStudentKnowledg
         .select()
         .single();
       if (error) throw error;
+      // v6.9.8 — fire-and-forget AI classification (only when teacher didn't pick a specific category)
+      if (entry.category === 'Notes' && data?.id) {
+        (async () => {
+          try {
+            // Lightweight student context (best-effort)
+            const { data: stu } = await supabase
+              .from('students')
+              .select('english_level, main_goal')
+              .eq('id', studentId)
+              .maybeSingle();
+            const { data: clsRes } = await supabase.functions.invoke('classify-knowledge-entry', {
+              body: {
+                content: entry.content,
+                englishLevel: stu?.english_level || '',
+                mainGoal: stu?.main_goal || '',
+              },
+            });
+            const c = (clsRes as any)?.classification;
+            if (!c) return;
+            const conf = typeof c.confidence === 'number' ? c.confidence : 0;
+            const acceptCategory = conf >= 0.6 && c.category && c.category !== 'Notes';
+            const newMetadata: Record<string, unknown> = { ...(insertData.metadata as any) };
+            if (c.skill_subtype) newMetadata.skill_subtype = c.skill_subtype;
+            if (c.element_type) newMetadata.element_type = c.element_type;
+            if (c.nano_skill) newMetadata.nano_skill = c.nano_skill;
+            if (typeof c.suggested_mastery === 'number') newMetadata.mastery = c.suggested_mastery;
+            if (c.sub_category) newMetadata.sub_category = c.sub_category;
+            const mergedTags = Array.from(new Set([...(insertData.tags as string[]), ...((c.tags as string[]) || [])])).slice(0, 8);
+            await supabase
+              .from('student_knowledge_entries')
+              .update({
+                category: acceptCategory ? c.category : 'Notes',
+                tags: mergedTags,
+                metadata: newMetadata as any,
+                ai_classified: true,
+                ai_confidence: conf,
+              } as any)
+              .eq('id', data.id);
+            queryClient.invalidateQueries({ queryKey: ['knowledge', 'entries', studentId, teacherId] });
+          } catch (e) {
+            // Silent: classification is best-effort
+            console.warn('[v6.9.8] knowledge classify failed', e);
+          }
+        })();
+      }
       return data;
     },
     onSuccess: () => {

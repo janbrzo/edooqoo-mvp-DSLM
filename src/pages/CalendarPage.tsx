@@ -180,7 +180,7 @@ const CalendarPage = () => {
   };
 
   const handleSlotClick = (slot: CalendarSlot) => {
-    if (isDemoMode && !selectionMode) { showDemoBlockedToast('Editing lessons'); return; }
+    // v6.9.8 — demo: opening modals is allowed (read-only preview); blocking happens on Save
     if (selectionMode) {
       const slotType = getSlotSelectionType(slot);
       if (selectionType && slotType !== selectionType) return;
