@@ -8,6 +8,7 @@ Generates editable worksheets, interactive homework, flashcards, and live sessio
 - /mem/index.md — project memory index (per-feature notes)
 
 ## Latest version
+v6.9.7-patch — Demo Mode hardening + signup email clarity. Calendar slot/lesson creation now blocks INSIDE `UnifiedSlotModal` via `demoMode` prop (modal opens, save shows demo toast). `AllWorksheetsPage.handleBulkDelete` guarded. Demo data hooks (`useStudents`, `useWorksheetHistory`, `useDeletedWorksheets`) await `demoData` before resolving `loading=false`. `AuthenticatedPageShell` adds `paddingTop:36px` when demo banner is visible. `EmailConfirmationModal` and `/how-it-works` FAQ now explain the two-email flow (Supabase confirm → Edooqoo welcome from `hello@edooqoo.com`). `demoData.subscription_type` set to `'Full-Time 30'`.
 v6.9.7 — IP Protection Hardening (part 1) + Welcome Email Pipeline (part 2). Prompt formatting moved to `format-worksheet-prompt` edge function; dev-only logger neutralizes `console.log`/`console.warn` in prod; demo/mock content lazy-loaded; production source maps disabled; `debugger` stripped. Branded post-signup welcome email via Resend (`hello@edooqoo.com`), fired by `auth.users` trigger `on_user_email_confirmed` (NULL → NOT NULL on `email_confirmed_at`), idempotent per recipient via `email_send_log`, internal-secret-protected `send-welcome-email` edge function.
 v6.9.6 — Demo Mode Lockdown, Dashboard Compact Stats Bar, Landing mobile light-theme guard.
 See `docs/llm-context.md` § v6.9.7 / § v6.9.6 for full details.
