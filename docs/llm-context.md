@@ -5,6 +5,44 @@ Written in Problem → Edooqoo.com Solution → Technical Mechanics format.
 
 ---
 
+## v6.9.7-patch — Demo Mode Hardening + Signup Email Clarity
+
+### Problem
+1. In `/demo`, clicking an empty calendar slot or "Add lesson" early-returned with a toast and never opened the modal — UX dead-end; users couldn't see the lesson-creation flow.
+2. `AllWorksheetsPage.handleBulkDelete` was unguarded; demo users could trigger Supabase delete with synthetic UUIDs.
+3. Hooks `useStudents`, `useWorksheetHistory`, `useDeletedWorksheets` could resolve `loading=false` before `demoData` arrived (async lazy-load), causing flashes of empty states.
+4. The demo banner (fixed top, 36px) overlapped page content because `AuthenticatedPageShell` did not reserve space.
+5. After signup, users only saw "check your email" but received NO welcome email until they clicked the Supabase confirmation link → confusion ("did the welcome email fail?"). FAQ also did not explain the two-email flow.
+6. `demoData.subscription_type` was `'professional'` (not a real plan name), making demo dashboard look fake.
+
+### Edooqoo.com Solution
+1. Calendar modal now opens in demo mode but blocks the SAVE step inside `UnifiedSlotModal.handleSubmit` via new `demoMode` prop + `useDemoContext`. Users can explore the form; toast fires only on submit.
+2. `handleBulkDelete` early-returns with `showDemoBlockedToast('Deleting worksheets')`.
+3. Demo-aware hooks gate on `!!demoData` in `queryKey`/`enabled`; `useDeletedWorksheets` early-returns `setLoading(false)` for demo.
+4. `AuthenticatedPageShell` injects `style={{ paddingTop: '36px' }}` when `isDemoMode` to clear the banner.
+5. `EmailConfirmationModal` "What's next" list and `/how-it-works` FAQ now explicitly describe the two-email sequence: (a) Supabase confirmation, (b) branded Edooqoo welcome from `hello@edooqoo.com`.
+6. `demoData.subscription_type = 'Full-Time 30'`.
+
+### Technical Mechanics
+- `src/components/calendar/UnifiedSlotModal.tsx` — new optional prop `demoMode?: boolean`; pulls `useDemoContext` directly; `handleSubmit` short-circuits when `isDemoMode || demoMode`. `CalendarPage` passes `demoMode={isDemoMode}` and removes the early-return inside `handleAddSlot`/`handleSlotClick` (the modal handles it).
+- `src/pages/AllWorksheetsPage.tsx` — imports `useDemoContext`, guards `handleBulkDelete`.
+- `src/hooks/useStudents.tsx`, `src/hooks/useWorksheetHistory.tsx` — `queryKey` includes `!!demoData`; `enabled` requires demo data ready.
+- `src/hooks/useDeletedWorksheets.tsx` — explicit `if (isDemoMode) { setLoading(false); return; }`.
+- `src/components/AuthenticatedPageShell.tsx` — conditional `paddingTop` style.
+- `src/components/EmailConfirmationModal.tsx` + `src/pages/HowItWorks.tsx` — copy updates only.
+- `src/data/demoData.ts` — single literal change.
+
+### Invariants (do not regress)
+- NEVER add an early-return for `isDemoMode` inside `CalendarPage.handleAddSlot` / `handleSlotClick` — modal owns the guard.
+- NEVER remove the `demoMode` prop from `UnifiedSlotModal.handleSubmit` — it is the actual write barrier.
+- NEVER drop the two-email explanation from `EmailConfirmationModal` until the Supabase confirmation step is removed (it is not).
+- All NEW mutating handlers in pages still MUST guard `isDemoMode` per the v6.9.6 rule.
+
+### RAG Keywords
+demo mode patch, calendar demo modal, UnifiedSlotModal demoMode prop, demo bulk delete guard, demoData loading race, AuthenticatedPageShell padding banner, signup confirmation email, two-email signup flow, EmailConfirmationModal welcome email FAQ, hello@edooqoo.com explanation, Full-Time 30 demo subscription.
+
+---
+
 ## v6.9.7 — IP Protection Hardening (part 1) + Welcome Email Pipeline (part 2)
 
 ### Problem
