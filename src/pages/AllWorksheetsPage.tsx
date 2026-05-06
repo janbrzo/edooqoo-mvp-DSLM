@@ -213,6 +213,8 @@ const AllWorksheetsPage = () => {
   const { user, loading: authLoading, isRegisteredUser } = useAuthFlow();
   const { tokenLeft } = useTokenSystem(user?.id);
   const { isDemoMode, showDemoBlockedToast } = useDemoContext();
+  // v6.9.8 — wait for demo data before rendering empty state
+  const { demoData } = useDemoContext();
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
