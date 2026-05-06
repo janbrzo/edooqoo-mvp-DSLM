@@ -31,6 +31,12 @@ export const BackgroundPatternSwitcher: React.FC = () => {
 
   // Load saved pattern on mount
   useEffect(() => {
+    // One-time migration: force Particles as default for all existing users
+    const MIGRATION_KEY = 'edooqoo-bg-pattern-migrated-v1';
+    if (!localStorage.getItem(MIGRATION_KEY)) {
+      localStorage.setItem(STORAGE_KEY, 'particles');
+      localStorage.setItem(MIGRATION_KEY, '1');
+    }
     const saved = localStorage.getItem(STORAGE_KEY) as PatternId | null;
     if (saved && PATTERNS.some(p => p.id === saved)) {
       setActivePattern(saved);
