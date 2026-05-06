@@ -504,6 +504,12 @@
 .auth-bg-shell[data-pattern="particles"]::after {
   display: none;
 }
+.auth-bg-shell[data-pattern="particles"] {
+  background-color: transparent;
+}
+.auth-bg-shell[data-pattern="particles"]::before {
+  background: hsl(var(--background));
+}
 
 .auth-bg-pattern {
   background-image:
