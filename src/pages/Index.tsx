@@ -337,6 +337,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen relative bg-gradient-to-br from-background to-secondary/20">
+      <ParticlesBackground />
       <FreeWeekBanner />
       <WelcomeBackBanner shouldShow={showWelcomeBackModal} />
       
