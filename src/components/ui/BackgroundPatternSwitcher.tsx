@@ -45,6 +45,7 @@ export const BackgroundPatternSwitcher: React.FC = () => {
     if (shell) {
       shell.setAttribute('data-pattern', pattern);
     }
+    window.dispatchEvent(new CustomEvent('edooqoo-bg-pattern-changed', { detail: pattern }));
   };
 
   const handleSelect = (pattern: PatternId) => {
