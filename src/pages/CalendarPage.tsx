@@ -164,7 +164,6 @@ const CalendarPage = () => {
   }, [filteredSlots]);
 
   const handleAddSlot = (date?: Date, startTime?: string) => {
-    if (isDemoMode) { showDemoBlockedToast('Adding lessons'); return; }
     setAddModalDate(date);
     setAddModalStartTime(startTime);
     setAddModalOpen(true);
@@ -554,6 +553,7 @@ const CalendarPage = () => {
         studentMap={studentMap}
         teacherId={user?.id}
         onLinkWorksheet={handleUnifiedModalLinkWorksheet}
+        demoMode={isDemoMode}
       />
 
       <SlotDetailModal

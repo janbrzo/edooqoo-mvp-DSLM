@@ -15,6 +15,7 @@ import { CalendarSlot, CreateSlotInput } from '@/hooks/useCalendarSlots';
 import { CreateRecurrenceInput } from '@/hooks/useCalendarRecurrence';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
+import { useDemoContext } from '@/contexts/DemoContext';
 
 const DAYS_LABELS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 const DURATIONS = [30, 45, 60, 90, 120];
@@ -86,6 +87,7 @@ export function UnifiedSlotModal({
   const [slotType, setSlotType] = useState<SlotType>('available');
   const [availableMode, setAvailableMode] = useState<AvailableMode>('single');
   const [lessonMode, setLessonMode] = useState<LessonMode>('single');
+  const { isDemoMode, showDemoBlockedToast } = useDemoContext();
 
   // Single fields
   const [date, setDate] = useState('');
@@ -272,6 +274,10 @@ export function UnifiedSlotModal({
   };
 
   const handleSubmit = async () => {
+    if (isDemoMode || demoMode) {
+      showDemoBlockedToast(slotType === 'block' ? 'Adding blocks' : slotType === 'lesson' ? 'Adding lessons' : 'Adding slots');
+      return;
+    }
     setSaving(true);
     try {
       // Block type
