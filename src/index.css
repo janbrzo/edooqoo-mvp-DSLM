@@ -499,6 +499,12 @@
   background-size: auto;
 }
 
+/* Particles pattern: suppress decorative ::after so the animated tsparticles
+   canvas (rendered by <ParticlesBackground/>) is the sole background layer. */
+.auth-bg-shell[data-pattern="particles"]::after {
+  display: none;
+}
+
 .auth-bg-pattern {
   background-image:
     repeating-linear-gradient(60deg, hsl(var(--foreground) / 0.03) 0 1px, transparent 1px 24px),
