@@ -15,6 +15,7 @@ const steps = [
 
 const faqItems = [
   { q: "How long does the entire setup take?", a: "You can go from sign-up to generating your first worksheet in under 5 minutes. Adding a student takes 30 seconds. The Welcome Test is optional and takes students 20-30 minutes to complete." },
+  { q: "What emails will I receive after signing up?", a: "Two emails. First, a confirmation email from Supabase (no-reply) with an activation link — click it to activate your account. After confirming, you'll receive a branded welcome email from hello@edooqoo.com with quick-start guidance and a link to your dashboard." },
   { q: "Do students need to create accounts?", a: "No. Students access everything via links or the Student Hub portal using just their email. No account creation, no password, no app installation needed." },
   { q: "Can I skip the Welcome Test?", a: "Yes. The Welcome Test is optional. You can start generating worksheets immediately by manually setting the student's CEFR level. The test is recommended for new students where you want a detailed skill assessment." },
   { q: "How many worksheets can I generate?", a: "Free plan: 2 worksheets. Side-Gig ($9/mo): 15 worksheets/month. Full-Time (from $19/mo): 30-90 worksheets/month. Each worksheet can contain up to 12 exercises." },
