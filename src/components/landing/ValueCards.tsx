@@ -24,7 +24,7 @@ const ValueCards: React.FC = () => {
   const { ref, isVisible } = useScrollAnimation();
 
   return (
-    <section ref={ref} className="bg-background py-20 relative border-b border-border">
+    <section ref={ref} className="bg-background/60 backdrop-blur-sm py-20 relative border-b border-border">
       <div className="max-w-6xl mx-auto px-4">
         <div className={`text-center mb-16 animate-fade-up ${isVisible ? 'visible' : ''}`}>
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
