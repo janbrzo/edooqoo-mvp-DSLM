@@ -1,7 +1,8 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { BackgroundPatternSwitcher } from '@/components/ui/BackgroundPatternSwitcher';
 import { BugReportButton } from '@/components/bug-report/BugReportButton';
 import { useDemoContext } from '@/contexts/DemoContext';
+import ParticlesBackground from '@/components/landing/ParticlesBackground';
 
 interface Props {
   children: React.ReactNode;
@@ -10,12 +11,19 @@ interface Props {
 
 export const AuthenticatedPageShell: React.FC<Props> = ({ children, className = '' }) => {
   const { isDemoMode } = useDemoContext();
+  const [pattern, setPattern] = useState<string>(() => {
+    return localStorage.getItem('edooqoo-bg-pattern') || 'particles';
+  });
   useEffect(() => {
-    const saved = localStorage.getItem('edooqoo-bg-pattern');
+    const saved = localStorage.getItem('edooqoo-bg-pattern') || 'particles';
     const shell = document.querySelector('.auth-bg-shell');
-    if (shell && saved) {
+    if (shell) {
       shell.setAttribute('data-pattern', saved);
     }
+    setPattern(saved);
+    const handler = (e: Event) => setPattern((e as CustomEvent).detail);
+    window.addEventListener('edooqoo-bg-pattern-changed', handler);
+    return () => window.removeEventListener('edooqoo-bg-pattern-changed', handler);
   }, []);
 
   return (
@@ -23,6 +31,7 @@ export const AuthenticatedPageShell: React.FC<Props> = ({ children, className = 
       className={`min-h-screen auth-bg-shell ${className}`}
       style={isDemoMode ? { paddingTop: '36px' } : undefined}
     >
+      {pattern === 'particles' && <ParticlesBackground />}
       {children}
       <BackgroundPatternSwitcher />
       <BugReportButton />
