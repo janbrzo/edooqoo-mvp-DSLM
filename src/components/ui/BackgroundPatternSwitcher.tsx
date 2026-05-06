@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Paintbrush, Sun, Moon, Monitor } from 'lucide-react';
+import { Paintbrush, Sun, Moon, Monitor, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/hooks/useTheme';
 
 const PATTERNS = [
+  { id: 'particles', label: 'Particles', preview: '✦' },
   { id: 'isometric', label: 'Isometric Grid', preview: '◇' },
   { id: 'dots', label: 'Dots', preview: '·' },
   { id: 'waves', label: 'Waves', preview: '~' },
@@ -24,7 +25,7 @@ const THEMES = [
 ];
 
 export const BackgroundPatternSwitcher: React.FC = () => {
-  const [activePattern, setActivePattern] = useState<PatternId>('isometric');
+  const [activePattern, setActivePattern] = useState<PatternId>('particles');
   const [open, setOpen] = useState(false);
   const { theme, setTheme } = useTheme();
 
@@ -35,7 +36,7 @@ export const BackgroundPatternSwitcher: React.FC = () => {
       setActivePattern(saved);
       applyPattern(saved);
     } else {
-      applyPattern('isometric');
+      applyPattern('particles');
     }
   }, []);
 
@@ -44,6 +45,7 @@ export const BackgroundPatternSwitcher: React.FC = () => {
     if (shell) {
       shell.setAttribute('data-pattern', pattern);
     }
+    window.dispatchEvent(new CustomEvent('edooqoo-bg-pattern-changed', { detail: pattern }));
   };
 
   const handleSelect = (pattern: PatternId) => {
