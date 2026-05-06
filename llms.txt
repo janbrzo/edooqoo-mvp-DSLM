@@ -26,3 +26,27 @@ React 18 + Vite 5 + TypeScript 5 + Tailwind 3 + shadcn/ui. Supabase (Lovable Clo
 - Worksheet prompt formatting lives in `format-worksheet-prompt` edge function — never move it back to client.
 - Welcome email is sent ONLY by the DB trigger `on_user_email_confirmed`. Never invoke `send-welcome-email` from client code. `email_send_log` enforces idempotency.
 - Resend sender for transactional emails is `hello@edooqoo.com` (verified). Internal endpoint secret lives in `app_internal_config.welcome_email_secret`.
+
+## v6.9.8 (2026-05-06)
+
+**Problem → Solution → Mechanics**
+
+1. **Student Knowledge friction**: required category+subtype on every add → teachers skipped tool. Solution: frictionless Quick Add (textarea only) + AI auto-classify in background. Mechanics: `StudentKnowledgeQuickAddModal` simplified to text+tags. `useStudentKnowledge.addEntry` saves as `category='Notes'` then fires `supabase.functions.invoke('classify-knowledge-entry')` (Lovable AI Gateway, `google/gemini-2.5-flash`, tool-call schema). If `confidence>=0.6` patches row with category+metadata. New columns: `ai_classified`, `ai_confidence`, `archived_at`, `used_in_worksheet_id`.
+
+2. **Welcome email CTA misaligned**: led to dashboard instead of Add Student. Solution: primary CTA = "Add your first student" → `/dashboard?action=add-student`; Dashboard auto-opens AddStudentDialog from this query. Reorder list (add Welcome Placement Test, Calendar availability). Removed "a real human reads it" line. `reply_to: 'edooqoo@gmail.com'` (admin inbox).
+
+3. **Particles landing background**: added `tsparticles` slim build. `src/components/landing/ParticlesBackground.tsx` rendered only on anon Index page (250 particles desktop / 80 mobile, color `#643cdd`, links `#9d8af5`, hover grab, click push). Fixed `-z-10`, `pointer-events-none`.
+
+4. **Demo /worksheet Save UUID error**: `WorksheetContent.saveWorksheetChanges` now early-returns in demo with toast.
+
+5. **Demo students/worksheets empty**: `useStudents.loading` now `(isDemoMode && !demoData) || query.isLoading` so consumers wait for demoData.
+
+6. **Demo Calendar UX**: `handleSlotClick` no longer guards on demo (modal opens read-only). `SlotDetailModal.handleSave` blocks with toast. `UnifiedSlotModal.handleSubmit` already guarded.
+
+7. **Demo Dashboard Generate Worksheet**: navigation handler — guard removed. Actual generation guard remains in `useWorksheetGeneration`.
+
+**Invariants**:
+- Welcome email `from=hello@edooqoo.com`, `reply_to=edooqoo@gmail.com`. Never swap.
+- Particles only when `!isRegisteredUser`. Never `particles.js` jQuery legacy.
+- Quick Add saves immediately as Notes, AI classifies async; never block teacher.
+- Demo navigation handlers MUST NOT guard `isDemoMode`. Modals MAY open. Save handlers MUST guard.

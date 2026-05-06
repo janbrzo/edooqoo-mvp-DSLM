@@ -149,3 +149,48 @@ or wrap with `guardAction('<Action>', () => mutate())`.
 
 ### RAG Keywords
 demo mode, lockdown, read-only demo, demo guard, useDemoGuard, guardAction, edooqoo_demo_mode, fake user, sandbox preview, /demo route, demo worksheets, demo calendar, demo settings, mutation block, UUID error, demo toast, public demo, sign up unlock, compact stats bar, dashboard stats, student hub CTA, edooqoo.com/my, upcoming lessons count, mobile dark mode hero, landing light theme, hero CTA mobile overflow.
+
+## v6.9.8
+
+### Student Knowledge — Quick Capture + AI Classification
+- **Problem**: Forced category+subtype+element+nano_skill+mastery selection on every add blocked teachers from capturing notes mid-lesson.
+- **Solution**: Frictionless capture — textarea only. AI classifies in background after save.
+- **Mechanics**: 
+  - Migration: `ALTER TABLE student_knowledge_entries ADD COLUMN ai_classified, ai_confidence, archived_at, used_in_worksheet_id`.
+  - Edge function `classify-knowledge-entry`: Lovable AI Gateway (`google/gemini-2.5-flash`) with constrained tool-call schema returning `{category, confidence, tags, skill_subtype?, element_type?, nano_skill?, suggested_mastery?, sub_category?}`.
+  - `useStudentKnowledge.addMutation`: inserts as `Notes`, then async fetches student `english_level/main_goal`, invokes classifier, patches row when `confidence>=0.6`.
+  - `StudentKnowledgeQuickAddModal`: textarea + optional tags + Save. No category picker.
+  - `StudentKnowledgeSidePanel` retained as advanced editor (full metadata controls).
+- **RAG Keywords**: notes, student notes, knowledge base, ai categorize, auto-tag, frictionless input, quick capture, 1-minute prep input
+
+### Welcome Email v2 — Add Student CTA
+- **Problem**: CTA pointed to /dashboard; reply went to hello@ (no admin notification); list missed Welcome Test + Calendar.
+- **Solution**: Primary CTA = "Add your first student" → `/dashboard?action=add-student`. Reply-to = `edooqoo@gmail.com`. New 5-item list with Welcome Placement Test + Calendar availability. Removed AI-sounding "a real human reads it".
+- **Mechanics**: 
+  - `send-welcome-email/index.ts` — new HTML, `reply_to: 'edooqoo@gmail.com'`.
+  - `Dashboard.tsx` — `useSearchParams().get('action')==='add-student'` → opens `AddStudentDialog`, strips param.
+- **RAG Keywords**: welcome email, onboarding email, resend, edooqoo gmail reply, add student CTA
+
+### Mail #1 (Supabase Confirmation)
+- **Decision**: Stay on native Supabase auth email (no auth-email-hook to avoid DNS delegation conflict). Customize HTML+sender name in Supabase Dashboard → Auth → Email Templates. See `docs/operational/supabase-confirmation-template.md`.
+
+### Particles Landing Background
+- **Problem**: Static landing background — wanted animated particles per particles.js config (250 nodes, #643cdd).
+- **Solution**: `tsparticles` (slim) modern fork, React 18 compatible.
+- **Mechanics**: 
+  - Deps: `@tsparticles/react @tsparticles/slim @tsparticles/engine`.
+  - `src/components/landing/ParticlesBackground.tsx` — `initParticlesEngine(loadSlim)`, mobile downgrade to 80 particles, fixed `-z-10` `pointer-events-none`.
+  - Mounted in `Index.tsx` only on anon path (return after `isRegisteredUser` early-return).
+- **RAG Keywords**: particles, animated background, tsparticles, landing hero, network nodes, vincentgarreau
+
+### Demo Mode Fixes (Lockdown v3)
+- **Problem**: Save Changes on demo worksheet threw "invalid input syntax for type uuid: demo-ws-1". Students/worksheets pages empty. Calendar modal blocked from opening. Dashboard Generate (navigation) wrongly blocked.
+- **Solution**: Guard at MUTATION sites only; navigation/modals stay open in demo.
+- **Mechanics**:
+  - `WorksheetContent.saveWorksheetChanges` — early-return + toast when `localStorage.edooqoo_demo_mode==='true'`.
+  - `useStudents.loading` — `(isDemoMode && !demoData) || query.isLoading` — synthetic loading until demoData arrives.
+  - `CalendarPage.handleSlotClick` — removed demo guard (modal opens).
+  - `SlotDetailModal.handleSave` — added demo guard with toast.
+  - `Dashboard.handleGenerateWorksheet` — removed demo guard (it only navigates).
+- **Invariant**: Demo navigation handlers NEVER guard. Demo modals CAN open. Demo MUTATION handlers MUST guard.
+- **RAG Keywords**: demo mode, public demo, read-only, fake auth, demoData, isDemoMode, edooqoo_demo_mode, demo guard
