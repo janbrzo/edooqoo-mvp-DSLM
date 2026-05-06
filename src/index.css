@@ -508,7 +508,7 @@
   background-color: transparent;
 }
 .auth-bg-shell[data-pattern="particles"]::before {
-  background: hsl(var(--background));
+  background: transparent;
 }
 
 .auth-bg-pattern {
