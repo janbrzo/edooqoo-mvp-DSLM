@@ -22,6 +22,7 @@ import { StudentSelector } from '@/components/StudentSelector';
 import { StudentKnowledgeSection } from '@/components/student-knowledge/StudentKnowledgeSection';
 import { useStudentKnowledge } from '@/hooks/useStudentKnowledge';
 import { StudentKnowledgeEntryCard } from '@/components/student-knowledge/StudentKnowledgeEntryCard';
+import { OneMinutePrepCard } from '@/components/student-knowledge/OneMinutePrepCard';
 import { useAllWorksheetHomework } from '@/hooks/useAllWorksheetHomework';
 import { WorksheetHomeworkSection } from '@/components/worksheet/WorksheetHomeworkSection';
 import { StudentHomeworkTab } from '@/components/student-homework/StudentHomeworkTab';
@@ -504,6 +505,12 @@ const StudentPage = () => {
               studentName={student.name}
               studentEmail={student.student_email}
               surface="overview"
+            />
+            {/* v6.9.8 — Quick Prep digest (Personal hooks + Focus on + Lesson ideas) */}
+            <OneMinutePrepCard
+              studentId={student.id}
+              teacherId={student.teacher_id}
+              studentName={student.name}
             />
             {student.student_email && (
               <div className="bg-muted/50 border border-border rounded-md p-3 text-sm mb-4 flex items-start gap-3">

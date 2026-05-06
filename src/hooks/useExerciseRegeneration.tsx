@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { toast } from 'sonner';
 import { exerciseRegenerationService } from '@/services/exerciseRegenerationService';
 import { devLog } from '@/utils/logger';
+import { useDemoContext } from '@/contexts/DemoContext';
 
 interface RegenerationState {
   isModalOpen: boolean;
@@ -11,6 +12,7 @@ interface RegenerationState {
 }
 
 export const useExerciseRegeneration = () => {
+  const { isDemoMode, showDemoBlockedToast } = useDemoContext();
   const [state, setState] = useState<RegenerationState>({
     isModalOpen: false,
     isLoading: false,
@@ -48,6 +50,11 @@ export const useExerciseRegeneration = () => {
     setEditableWorksheet: React.Dispatch<React.SetStateAction<any>>,
     userId: string
   ) => {
+    if (isDemoMode) {
+      showDemoBlockedToast('Regenerating exercises');
+      closeModal();
+      return;
+    }
     try {
       setState(prev => ({ ...prev, isLoading: true }));
       closeModal();
