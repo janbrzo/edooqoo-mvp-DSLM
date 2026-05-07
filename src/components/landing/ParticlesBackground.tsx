@@ -10,9 +10,11 @@ import { loadSlim } from '@tsparticles/slim';
 interface ParticlesBackgroundProps {
   /** When false, hover/click interactions are disabled (used in authenticated shell). */
   interactive?: boolean;
+  /** Overall opacity multiplier 0..1 applied to the canvas wrapper. */
+  opacity?: number;
 }
 
-export default function ParticlesBackground({ interactive = true }: ParticlesBackgroundProps = {}) {
+export default function ParticlesBackground({ interactive = true, opacity = 1 }: ParticlesBackgroundProps = {}) {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
@@ -41,7 +43,7 @@ export default function ParticlesBackground({ interactive = true }: ParticlesBac
           enable: true,
           distance: 150,
           color: '#9d8af5',
-          opacity: interactive ? 0.4 : 1,
+          opacity: interactive ? 0.4 : 0.5,
           width: 1,
         },
         move: {
@@ -75,6 +77,7 @@ export default function ParticlesBackground({ interactive = true }: ParticlesBac
       id="bg-particles"
       options={options as any}
       className="fixed inset-0 -z-10 pointer-events-none"
+      style={{ opacity }}
     />
   );
 }
