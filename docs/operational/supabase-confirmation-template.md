@@ -20,3 +20,33 @@ Paste into Supabase Dashboard → Authentication → Email Templates → "Confir
 ```
 
 Reply-to (`hello@edooqoo.com`) requires custom SMTP — not configured. Optional future improvement.
+
+```wcześniej był taki
+<!DOCTYPE html>
+<html>
+  <body style="font-family: sans-serif; background-color: #f5f5f5; padding: 20px; color: #333;">
+    <table width="100%" cellpadding="0" cellspacing="0" style="max-width: 600px; margin: 0 auto; background-color: white; padding: 30px; border-radius: 10px;">
+      <tr>
+        <td>
+          <h2 style="color: #111;">Welcome{{if.UserMetadata.first_name}},{{.UserMetadata.first_name}}{{end}} to EDOOQOO!</h2>
+          <p style="font-size: 16px;">You're in! Get ready to generate unique ESL worksheets tailored to your students in seconds.</p>
+
+          <p style="font-size: 16px; margin-top: 20px;">To activate your account, click the button below:</p>
+
+          <p style="text-align: center; margin: 30px 0;">
+            <a href="{{ .ConfirmationURL }}" style="background-color: #5a67d8; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: bold;">
+              Confirm your email
+            </a>
+          </p>
+
+          <p style="font-size: 16px;">After confirming, you'll instantly get <strong>2 free tokens</strong> to explore the platform and create your first materials - no strings attached.</p>
+
+          <p style="font-size: 15px; color: #777; margin-top: 40px;">If you didn’t sign up, feel free to ignore this message.</p>
+
+          <p style="font-size: 15px; color: #777;">— EDOOQOO Team</p>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
+```
