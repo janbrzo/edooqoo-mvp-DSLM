@@ -7,7 +7,12 @@ import { loadSlim } from '@tsparticles/slim';
  * Config converted from particles.js JSON (vincentgarreau.com) to tsparticles v3.
  * Renders fixed full-viewport, behind all content (z-index: -10).
  */
-export default function ParticlesBackground() {
+interface ParticlesBackgroundProps {
+  /** When false, hover/click interactions are disabled (used in authenticated shell). */
+  interactive?: boolean;
+}
+
+export default function ParticlesBackground({ interactive = true }: ParticlesBackgroundProps = {}) {
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
@@ -36,7 +41,7 @@ export default function ParticlesBackground() {
           enable: true,
           distance: 150,
           color: '#9d8af5',
-          opacity: 0.4,
+          opacity: interactive ? 0.4 : 1,
           width: 1,
         },
         move: {
@@ -51,8 +56,8 @@ export default function ParticlesBackground() {
       interactivity: {
         detectsOn: 'window' as const,
         events: {
-          onHover: { enable: true, mode: 'grab' },
-          onClick: { enable: true, mode: 'push' },
+          onHover: { enable: interactive, mode: 'grab' },
+          onClick: { enable: interactive, mode: 'push' },
           resize: { enable: true },
         },
         modes: {
@@ -61,7 +66,7 @@ export default function ParticlesBackground() {
         },
       },
     };
-  }, []);
+  }, [interactive]);
 
   if (!ready) return null;
 
