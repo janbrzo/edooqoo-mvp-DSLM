@@ -194,3 +194,31 @@ demo mode, lockdown, read-only demo, demo guard, useDemoGuard, guardAction, edoo
   - `Dashboard.handleGenerateWorksheet` — removed demo guard (it only navigates).
 - **Invariant**: Demo navigation handlers NEVER guard. Demo modals CAN open. Demo MUTATION handlers MUST guard.
 - **RAG Keywords**: demo mode, public demo, read-only, fake auth, demoData, isDemoMode, edooqoo_demo_mode, demo guard
+
+## Student Knowledge v6.9.9 — Three Views + Manual Archive
+**Problem**: Single timeline view of `student_knowledge_entries` made DSLM-style skill aggregation and 1‑minute lesson prep impossible. `Next Lesson Ideas` accumulated forever with no signal of what was already used. AI background classifications were invisible to teachers, causing distrust.
+**Edooqoo Solution**: `StudentKnowledgeSection` exposes 3 tabs — **Timeline** (existing), **By Skill** (groups `Skill Assessment` rows by `metadata.nano_skill`, shows latest mastery), **For Next Lesson** (shared data source with `OneMinutePrepCard`). Each `Next Lesson Ideas` card gets a one-click `CheckCircle2` "mark as used" button that archives via `archiveEntry`, immediately removing it from the prep view. AI classifications surface as a `Sparkles "AI organized"` badge with confidence tooltip on each card.
+**Technical Mechanics**:
+- `useStudentKnowledge.archiveEntry(entryId, worksheetId?)` mutation sets `archived_at = now()` and optional `used_in_worksheet_id`. Invalidates both `['knowledge', 'entries', ...]` and `['one-minute-prep', ...]` query keys.
+- `useOneMinutePrep` (existing, unchanged) filters `archived_at IS NULL` → archived ideas vanish.
+- `StudentKnowledgeSection` uses `Tabs` from `@/components/ui/tabs`; `By Skill` view groups `entries.filter(e => e.category === 'Skill Assessment')` client-side by `metadata.nano_skill` (fallback `metadata.element_type` → `'Other'`).
+- `StudentKnowledgeEntryCard` reads `entry.ai_classified` + `entry.ai_confidence` (added to `StudentKnowledgeEntry` type) and renders `Tooltip` with `Sparkles` icon when both present and confidence ≥ 0.6.
+- Auto-link `used_in_worksheet_id` from `worksheetService.create` is INTENTIONALLY OMITTED to keep the worksheet engine pristine (Sanctity rule). Only manual archive flow is wired.
+**RAG Keywords**: student knowledge tabs, by skill view, for next lesson, archive entry, used in worksheet, AI organized badge, manual archive, mark as used, three views student notes, lesson prep digest
+
+## Email v6.9.9 — Footer Honesty + Confirm Personalization
+**Problem**: Both Supabase confirmation email and Resend welcome email displayed `Edooqoo · hello@edooqoo.com` in their footer. The mailbox does not exist; replies are silently dropped. Confirm signup was generic with no recipient personalization despite `first_name` being captured at signup.
+**Edooqoo Solution**: Removed literal `hello@edooqoo.com` from both email footers. Confirmation email greets users by name via Supabase Go template `{{ if .Data.first_name }}Welcome, {{ .Data.first_name }}!{{ else }}Confirm your email{{ end }}`. Welcome email keeps `from: 'Edooqoo <hello@edooqoo.com>'` (Resend-verified domain, display-only) with `reply_to: 'edooqoo@gmail.com'` (real inbox).
+**Technical Mechanics**:
+- Source of truth for confirmation HTML: `docs/operational/supabase-confirmation-template.md` — must be manually pasted to Supabase Dashboard → Auth → Email Templates → Confirm signup.
+- Welcome footer change: `supabase/functions/send-welcome-email/index.ts` line 70 now reads `Edooqoo · helping English tutors save prep time` (no email address).
+- `first_name` arrives via `signUp({ options: { data: { first_name: firstName } } })` in `src/pages/Signup.tsx` (line 90) → stored in `auth.users.raw_user_meta_data.first_name` → exposed to Supabase email templates as `{{ .Data.first_name }}`.
+**RAG Keywords**: email footer, hello@edooqoo.com, confirm signup template, first_name personalization, raw_user_meta_data, supabase auth template, reply_to gmail, resend from address
+
+## Particles Background v6.9.9 — Authenticated Non-Interactive Mode
+**Problem**: Authenticated teachers got the same hover-reactive `tsparticles` background as anonymous landing page; the "grab" mode pulled lines toward the cursor and was distracting during work.
+**Edooqoo Solution**: `ParticlesBackground` accepts `interactive?: boolean` (default `true`). `AuthenticatedPageShell` passes `interactive={false}` → disables `onHover` and `onClick` event modes; raises link opacity to 1 to compensate for the lost hover highlight. Landing page (`src/pages/Index.tsx`) renders without the prop → keeps reactive behaviour.
+**Technical Mechanics**:
+- `src/components/landing/ParticlesBackground.tsx` — prop drilled into `useMemo([interactive])` options; `onHover.enable` and `onClick.enable` bound to `interactive`; `links.opacity` ternary.
+- `src/components/AuthenticatedPageShell.tsx` — `<ParticlesBackground interactive={false} />` when `pattern === 'particles'`.
+**RAG Keywords**: particles interactive false, hover disabled, authenticated background, tsparticles non-interactive, AuthenticatedPageShell pattern particles

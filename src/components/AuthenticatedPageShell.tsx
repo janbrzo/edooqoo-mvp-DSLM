@@ -31,7 +31,7 @@ export const AuthenticatedPageShell: React.FC<Props> = ({ children, className = 
       className={`min-h-screen auth-bg-shell ${className}`}
       style={isDemoMode ? { paddingTop: '36px' } : undefined}
     >
-      {pattern === 'particles' && <ParticlesBackground />}
+      {pattern === 'particles' && <ParticlesBackground interactive={false} />}
       {children}
       <BackgroundPatternSwitcher />
       <BugReportButton />

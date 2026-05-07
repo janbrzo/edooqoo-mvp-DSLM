@@ -50,3 +50,9 @@ React 18 + Vite 5 + TypeScript 5 + Tailwind 3 + shadcn/ui. Supabase (Lovable Clo
 - Particles only when `!isRegisteredUser`. Never `particles.js` jQuery legacy.
 - Quick Add saves immediately as Notes, AI classifies async; never block teacher.
 - Demo navigation handlers MUST NOT guard `isDemoMode`. Modals MAY open. Save handlers MUST guard.
+
+## v6.9.9
+- Knowledge tabs: Timeline / By Skill (group by nano_skill) / For Next Lesson (shares useOneMinutePrep). Manual `archiveEntry` button on Next Lesson Ideas. AI badge on cards when ai_confidence>=0.6.
+- Email footers: removed literal `hello@edooqoo.com` from Supabase confirm template and Resend welcome footer. Confirm template personalized via `{{ .Data.first_name }}`.
+- ParticlesBackground accepts `interactive` prop; AuthenticatedPageShell passes `false`.
+- Sanctity: worksheet engine NOT touched; `used_in_worksheet_id` only set via manual archive button.

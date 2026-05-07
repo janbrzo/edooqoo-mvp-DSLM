@@ -1,13 +1,16 @@
 import { useState, useMemo } from 'react';
-import { Plus, Inbox } from 'lucide-react';
+import { Plus, Inbox, Heart, AlertCircle, Lightbulb, Target } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import { Badge } from '@/components/ui/badge';
 import { StudentKnowledgeFilterBar } from './StudentKnowledgeFilterBar';
 import { StudentKnowledgeEntryCard } from './StudentKnowledgeEntryCard';
 import { StudentKnowledgeSidePanel } from './StudentKnowledgeSidePanel';
 import { useStudentKnowledge } from '@/hooks/useStudentKnowledge';
+import { useOneMinutePrep } from '@/hooks/useOneMinutePrep';
 import {
   StudentKnowledgeEntry,
   UpdateKnowledgeEntry,
@@ -47,10 +50,14 @@ export const StudentKnowledgeSection = ({
     deleteEntry,
     markAsOutdated,
     markAsCurrent,
+    archiveEntry,
     fetchEntries,
     loadMore,
     resetFilters,
   } = useStudentKnowledge({ studentId, teacherId });
+
+  const { data: prepData, isLoading: isLoadingPrep } = useOneMinutePrep(studentId, teacherId);
+  const [activeView, setActiveView] = useState<'timeline' | 'skill' | 'next'>('timeline');
 
   const [panelMode, setPanelMode] = useState<'add' | 'view' | 'edit'>('add');
   const [isPanelOpen, setIsPanelOpen] = useState(false);
@@ -136,6 +143,25 @@ export const StudentKnowledgeSection = ({
     await markAsCurrent(entryId);
   };
 
+  const handleArchive = async (entryId: string) => {
+    await archiveEntry(entryId);
+  };
+
+  // By Skill: group Skill Assessment entries by metadata.nano_skill
+  const skillGroups = useMemo(() => {
+    const groups: Record<string, { entries: StudentKnowledgeEntry[]; mastery?: number }> = {};
+    entries
+      .filter((e) => e.category === 'Skill Assessment')
+      .forEach((e) => {
+        const key = (e.metadata as any)?.nano_skill?.trim() || (e.metadata as any)?.element_type || 'Other';
+        if (!groups[key]) groups[key] = { entries: [] };
+        groups[key].entries.push(e);
+        const m = (e.metadata as any)?.mastery;
+        if (typeof m === 'number') groups[key].mastery = m;
+      });
+    return Object.entries(groups).sort((a, b) => b[1].entries.length - a[1].entries.length);
+  }, [entries]);
+
   const hasActiveFilters =
     filters.search !== '' ||
     filters.category !== null ||
@@ -160,8 +186,15 @@ export const StudentKnowledgeSection = ({
 
       <Separator />
 
-      {/* Filter Bar */}
-      <StudentKnowledgeFilterBar
+      <Tabs value={activeView} onValueChange={(v) => setActiveView(v as any)} className="w-full">
+        <TabsList className="grid w-full grid-cols-3 max-w-md">
+          <TabsTrigger value="timeline">Timeline</TabsTrigger>
+          <TabsTrigger value="skill">By Skill</TabsTrigger>
+          <TabsTrigger value="next">For Next Lesson</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="timeline" className="mt-4 space-y-6">
+          <StudentKnowledgeFilterBar
         searchQuery={filters.search || ''}
         onSearchChange={handleSearchChange}
         selectedCategory={filters.category || null}
@@ -240,6 +273,7 @@ export const StudentKnowledgeSection = ({
                     onDelete={handleDelete}
                     onMarkOutdated={handleMarkOutdated}
                     onMarkCurrent={handleMarkCurrent}
+                    onArchive={handleArchive}
                     worksheetTitle={entry.worksheet_id ? 'Worksheet' : undefined}
                   />
                 ))}
@@ -257,6 +291,51 @@ export const StudentKnowledgeSection = ({
           </Button>
         </div>
       )}
+        </TabsContent>
+
+        <TabsContent value="skill" className="mt-4 space-y-3">
+          {skillGroups.length === 0 && (
+            <Card className="border-dashed"><CardContent className="py-8 text-center text-sm text-muted-foreground">
+              No Skill Assessment notes yet. Add notes about strengths, weaknesses or things to practice.
+            </CardContent></Card>
+          )}
+          {skillGroups.map(([key, group]) => (
+            <Card key={key}>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <Target className="h-4 w-4 text-primary" />
+                    <span className="font-semibold">{key}</span>
+                    <Badge variant="secondary" className="text-[10px] h-4 px-1">{group.entries.length}</Badge>
+                  </div>
+                  {typeof group.mastery === 'number' && (
+                    <span className="text-xs text-muted-foreground">Mastery: <strong>{group.mastery}%</strong></span>
+                  )}
+                </div>
+                <ul className="ml-6 list-disc text-sm text-foreground/90 space-y-0.5">
+                  {group.entries.slice(0, 5).map((e) => (
+                    <li key={e.id} className="line-clamp-2">{e.content}</li>
+                  ))}
+                </ul>
+              </CardContent>
+            </Card>
+          ))}
+        </TabsContent>
+
+        <TabsContent value="next" className="mt-4 space-y-3">
+          {isLoadingPrep && <Skeleton className="h-24 w-full" />}
+          {!isLoadingPrep && prepData && (
+            <>
+              <PrepGroup icon={<Heart className="h-3.5 w-3.5 text-rose-500" />} label="Personal hooks" entries={prepData.personalHooks.map((e) => e.content)} />
+              <PrepGroup icon={<AlertCircle className="h-3.5 w-3.5 text-amber-600" />} label="Focus on" entries={prepData.topWeaknesses.map((e) => {
+                const ns = (e.metadata as any)?.nano_skill;
+                return ns ? `${ns} — ${e.content}` : e.content;
+              })} />
+              <PrepGroup icon={<Lightbulb className="h-3.5 w-3.5 text-yellow-500" />} label="Lesson ideas" entries={prepData.lessonIdeas.map((e) => e.content)} />
+            </>
+          )}
+        </TabsContent>
+      </Tabs>
 
       {/* Side Panel */}
       <StudentKnowledgeSidePanel
@@ -274,5 +353,23 @@ export const StudentKnowledgeSection = ({
         suggestedTags={suggestedTags}
       />
     </div>
+  );
+};
+
+const PrepGroup = ({ icon, label, entries }: { icon: React.ReactNode; label: string; entries: string[] }) => {
+  if (entries.length === 0) return null;
+  return (
+    <Card>
+      <CardContent className="p-4">
+        <div className="flex items-center gap-1.5 mb-2">
+          {icon}
+          <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">{label}</span>
+          <Badge variant="secondary" className="h-4 px-1 text-[10px]">{entries.length}</Badge>
+        </div>
+        <ul className="ml-5 list-disc space-y-0.5 text-sm text-foreground/90">
+          {entries.map((e, i) => <li key={i} className="line-clamp-2">{e}</li>)}
+        </ul>
+      </CardContent>
+    </Card>
   );
 };

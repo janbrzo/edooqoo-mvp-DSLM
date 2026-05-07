@@ -1,7 +1,8 @@
-import { Eye, Pencil, Trash2, ExternalLink, Archive, ArchiveRestore, ChevronDown, ChevronUp } from 'lucide-react';
+import { Eye, Pencil, Trash2, ExternalLink, Archive, ArchiveRestore, ChevronDown, ChevronUp, Sparkles, CheckCircle2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useState } from 'react';
 import {
   AlertDialog,
@@ -24,6 +25,7 @@ interface StudentKnowledgeEntryCardProps {
   onDelete: (entryId: string) => void;
   onMarkOutdated: (entryId: string) => void;
   onMarkCurrent: (entryId: string) => void;
+  onArchive?: (entryId: string) => void;
   worksheetTitle?: string;
 }
 
@@ -34,6 +36,7 @@ export const StudentKnowledgeEntryCard = ({
   onDelete,
   onMarkOutdated,
   onMarkCurrent,
+  onArchive,
   worksheetTitle,
 }: StudentKnowledgeEntryCardProps) => {
   const categoryMeta = getCategoryMetadata(entry.category);
@@ -63,7 +66,27 @@ export const StudentKnowledgeEntryCard = ({
               <span className="text-sm">{categoryMeta?.icon}</span>
               <span className="text-xs font-medium">{categoryMeta?.label}</span>
             </Badge>
-            
+
+            {entry.ai_classified && typeof entry.ai_confidence === 'number' && entry.ai_confidence >= 0.6 && (
+              <TooltipProvider delayDuration={200}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Badge variant="secondary" className="gap-1 px-1.5 py-0.5 text-[10px]">
+                      <Sparkles className="h-3 w-3 text-primary" />
+                      AI organized
+                    </Badge>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <span className="text-xs">Auto-classified · confidence {(entry.ai_confidence * 100).toFixed(0)}%</span>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
+
+            {entry.archived_at && (
+              <Badge variant="secondary" className="text-xs px-2 py-0.5">Used</Badge>
+            )}
+
             {entry.is_outdated && (
               <Badge variant="secondary" className="text-xs px-2 py-0.5">
                 Outdated
@@ -72,6 +95,23 @@ export const StudentKnowledgeEntryCard = ({
           </div>
 
           <div className="flex items-center gap-1">
+            {onArchive && entry.category === 'Next Lesson Ideas' && !entry.archived_at && (
+              <TooltipProvider delayDuration={200}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 w-8 p-0 text-emerald-600 hover:text-emerald-700"
+                      onClick={() => onArchive(entry.id)}
+                    >
+                      <CheckCircle2 className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent><span className="text-xs">Mark as used in worksheet</span></TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
             <Button
               variant="ghost"
               size="sm"

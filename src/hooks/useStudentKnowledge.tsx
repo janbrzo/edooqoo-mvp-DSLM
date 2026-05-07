@@ -242,6 +242,29 @@ export const useStudentKnowledge = ({ studentId, teacherId }: UseStudentKnowledg
     },
   });
 
+  // v6.9.9 — manual archive (e.g. Next Lesson Idea used in a worksheet)
+  const archiveMutation = useMutation({
+    mutationFn: async ({ entryId, worksheetId }: { entryId: string; worksheetId?: string | null }) => {
+      const update: Record<string, unknown> = { archived_at: new Date().toISOString() };
+      if (worksheetId) update.used_in_worksheet_id = worksheetId;
+      const { error } = await supabase
+        .from('student_knowledge_entries')
+        .update(update as any)
+        .eq('id', entryId)
+        .eq('teacher_id', teacherId);
+      if (error) throw error;
+      return true;
+    },
+    onSuccess: () => {
+      invalidateAll();
+      queryClient.invalidateQueries({ queryKey: ['one-minute-prep', studentId, teacherId] });
+      toast({ title: 'Archived', description: 'Marked as used' });
+    },
+    onError: (err: any) => {
+      toast({ title: 'Error', description: err?.message || 'Failed', variant: 'destructive' });
+    },
+  });
+
   const entries = entriesQuery.data?.entries || [];
   const totalCount = entriesQuery.data?.totalCount || 0;
   const limit = filters.limit || DEFAULT_FILTERS.limit!;
@@ -271,7 +294,7 @@ export const useStudentKnowledge = ({ studentId, teacherId }: UseStudentKnowledg
     setFiltersState(DEFAULT_FILTERS);
   }, []);
 
-  const isMutating = addMutation.isPending || updateMutation.isPending || deleteMutation.isPending || markOutdatedMutation.isPending || markCurrentMutation.isPending;
+  const isMutating = addMutation.isPending || updateMutation.isPending || deleteMutation.isPending || markOutdatedMutation.isPending || markCurrentMutation.isPending || archiveMutation.isPending;
 
   return {
     entries,
@@ -288,6 +311,7 @@ export const useStudentKnowledge = ({ studentId, teacherId }: UseStudentKnowledg
     deleteEntry: (entryId: string) => deleteMutation.mutateAsync(entryId),
     markAsOutdated: (entryId: string, reason?: string) => markOutdatedMutation.mutateAsync({ entryId, reason }),
     markAsCurrent: (entryId: string) => markCurrentMutation.mutateAsync(entryId),
+    archiveEntry: (entryId: string, worksheetId?: string | null) => archiveMutation.mutateAsync({ entryId, worksheetId }),
     loadMore,
     resetFilters,
     setFilters,

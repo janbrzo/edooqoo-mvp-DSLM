@@ -67,7 +67,7 @@ function renderWelcomeHtml(firstName: string, signupSource: string): string {
 
         <tr><td style="padding:20px 32px 28px;border-top:1px solid #f1f5f9;">
           <p style="margin:0 0 4px;font-size:12px;line-height:1.6;color:#9ca3af;">Questions? Just reply to this email — we read every message.</p>
-          <p style="margin:0;font-size:12px;line-height:1.6;color:#9ca3af;">Edooqoo · hello@edooqoo.com</p>
+          <p style="margin:0;font-size:12px;line-height:1.6;color:#9ca3af;">Edooqoo · helping English tutors save prep time</p>
         </td></tr>
       </table>
     </td></tr>
