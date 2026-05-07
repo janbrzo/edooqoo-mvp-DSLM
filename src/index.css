@@ -526,10 +526,10 @@
 /* Dark mode: reduce pattern visibility */
 .dark .auth-bg-shell::after,
 .dark .auth-bg-shell[data-pattern="isometric"]::after {
-  opacity: 0.6;
+  opacity: calc(var(--bg-pattern-opacity, 1) * 0.6);
 }
 .dark .auth-bg-shell[data-pattern="dots"]::after,
 .dark .auth-bg-shell[data-pattern="waves"]::after,
 .dark .auth-bg-shell[data-pattern="crosshatch"]::after {
-  opacity: 0.5;
+  opacity: calc(var(--bg-pattern-opacity, 1) * 0.5);
 }
