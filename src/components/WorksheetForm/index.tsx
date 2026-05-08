@@ -16,6 +16,7 @@ import { useStudents } from "@/hooks/useStudents";
 import { useOnboardingProgress } from "@/hooks/useOnboardingProgress";
 import { useWorksheetFormPersistence, type WorksheetDraft } from "@/hooks/useWorksheetFormPersistence";
 import { normalizeSuggestionPrefill } from "@/lib/dslm/normalizeSuggestionPrefill";
+import { NextStepsPresetBanner, type PresetPayload } from "./NextStepsPresetBanner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Shuffle, Brain, MousePointer, ChevronDown, Image, Headphones, Lock, Eraser } from "lucide-react";
 import { devLog, devWarn } from '@/utils/logger';
@@ -164,12 +165,24 @@ export default function WorksheetForm({
   // worksheet is saved + token consumed. Failures (network, paywall, AI error)
   // intentionally preserve the draft so the user can retry.
   useEffect(() => {
-    const handler = () => {
+    const handler = (e: Event) => {
       try {
         clearPersistedDraft();
         devLog('[WorksheetForm] Draft cleared after successful generation');
       } catch (e) {
         devWarn('[WorksheetForm] Failed to clear draft', e);
+      }
+      // v6.9.10 — if this generation originated from a Next-Step preset chip,
+      // propagate to NextStepsPresetBanner so it can mark the suggestion as used.
+      try {
+        const sid = sessionStorage.getItem('appliedPresetSuggestionId');
+        if (sid) {
+          const wsId = ((e as CustomEvent)?.detail?.worksheetId as string | undefined) || null;
+          window.dispatchEvent(new CustomEvent('markPresetUsed', { detail: { suggestionId: sid, worksheetId: wsId } }));
+          sessionStorage.removeItem('appliedPresetSuggestionId');
+        }
+      } catch (e) {
+        devWarn('[WorksheetForm] markPresetUsed dispatch failed', e);
       }
     };
     window.addEventListener('worksheetGenerationSuccess', handler);
@@ -504,6 +517,29 @@ export default function WorksheetForm({
       title: set[field]
     }));
   };
+
+  // v6.9.10 — apply a Next-Step preset (chip click) into form state.
+  const applyPreset = (p: PresetPayload) => {
+    setLessonTopic(p.topic || '');
+    setLessonGoal(p.goal || '');
+    if (p.additionalInfo || p.grammarFocus) setShowMoreFields(true);
+    setAdditionalInformation(p.additionalInfo || '');
+    setGrammarFocus(p.grammarFocus || '');
+    const norm = normalizeSuggestionPrefill({
+      exercises: p.exercises,
+      focusMap: p.exerciseFocusMap,
+      mediaTypes: p.mediaTypes,
+      lessonTime: lessonTime as '45min' | '60min',
+    });
+    setSelectedMediaTypes(norm.selectedMediaTypes as MediaType[]);
+    setSelectedExercises(norm.selectedExercises);
+    setExerciseFocusMap(norm.exerciseFocusMap);
+    setSelectionMode('manual');
+    setActiveTab('exercises');
+    sessionStorage.setItem('appliedPresetSuggestionId', p.sourceSuggestionId);
+    toast({ title: 'Preset applied', description: 'Review fields and generate.' });
+  };
+
   return <div className={`w-full ${isMobile ? 'py-2' : 'py-[24px]'}`}>
       <Card className="bg-card/88 backdrop-blur-sm border-border/60 shadow-lg">
         <CardContent className={`${isMobile ? 'p-3' : 'p-8'}`}>
@@ -599,6 +635,16 @@ export default function WorksheetForm({
 
                   <FormField label="Grammar focus" placeholder={currentPlaceholders.grammarFocus} value={grammarFocus} onChange={setGrammarFocus} suggestions={createSuggestionTiles('grammarFocus')} isOptional={true} />
                 </div>}
+
+              {/* v6.9.10 — Next-Step preset banner (per selected student) */}
+              {userId && selectedStudentId !== 'no-student' && (
+                <NextStepsPresetBanner
+                  studentId={selectedStudentId}
+                  studentName={students.find(s => s.id === selectedStudentId)?.name}
+                  teacherId={userId}
+                  onApplyPreset={applyPreset}
+                />
+              )}
 
               {/* Exercise Selection Cards */}
               <div className="mb-6">

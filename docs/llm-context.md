@@ -222,3 +222,40 @@ demo mode, lockdown, read-only demo, demo guard, useDemoGuard, guardAction, edoo
 - `src/components/landing/ParticlesBackground.tsx` — prop drilled into `useMemo([interactive])` options; `onHover.enable` and `onClick.enable` bound to `interactive`; `links.opacity` ternary.
 - `src/components/AuthenticatedPageShell.tsx` — `<ParticlesBackground interactive={false} />` when `pattern === 'particles'`.
 **RAG Keywords**: particles interactive false, hover disabled, authenticated background, tsparticles non-interactive, AuthenticatedPageShell pattern particles
+
+## v6.9.10 — Worksheet Form Next-Step Preset + Stale Knowledge Badge
+
+### Worksheet Form Next-Step Preset
+**Problem**: After teachers built a learning plan via `useFutureTimeline` (Next Steps / Phase Steps), the WorksheetForm was unaware of it. They restated topic/goal/exercises by hand, ignoring the plan; cohesion across worksheets degraded; `future_worksheet_suggestions.is_used` rarely flipped, so suggestions accumulated as stale clutter.
+**Edooqoo Solution**: Thin banner on `WorksheetForm` directly above the Exercise Selection Cards, surfaces up to 3 `phase_step` (preferred) + `next_step` chips for the currently selected student. Click prefills the form. Empty state = soft amber CTA "Open Learning Plan" → `/student/{id}?tab=progress`. Banner collapses (`return null`) when `selectedStudentId === 'no-student'` or `!userId`.
+**Technical Mechanics**:
+- `src/components/WorksheetForm/NextStepsPresetBanner.tsx` — consumes `useFutureTimeline({studentId, teacherId})`. Presets selector: `[...phaseSteps, ...nextSteps].slice(0,3)`. Loading state = `Skeleton h-10` inside `min-h-[44px]` wrapper to prevent layout shift. Tooltip on each chip renders `goal — rationale`.
+- Apply path uses parent's `applyPreset(p: PresetPayload)` which calls `normalizeSuggestionPrefill` (single source of truth, shared with DSLM `prefillExercises` sessionStorage path) — guarantees coherent `selectedExercises` / `selectedMediaTypes` / `exerciseFocusMap` triple, exact target count (6 for 45min, 8 for 60min), one media family at most.
+- Origin tracking: `applyPreset` writes `sessionStorage.appliedPresetSuggestionId = p.sourceSuggestionId`. `WorksheetForm`'s existing `worksheetGenerationSuccess` handler reads it and dispatches `markPresetUsed` `CustomEvent` with `{suggestionId, worksheetId}`. `NextStepsPresetBanner` listens for `markPresetUsed` and calls `useSuggestion(id, worksheetId)` → flips `is_used=true`, `used_at=now()`, `used_worksheet_id=worksheetId` in `future_worksheet_suggestions`.
+- `inferMediaTypes(exercises)` in banner: picture > audio > none, based on `PICTURE_EXERCISE_IDS` / `AUDIO_EXERCISE_IDS` constants exported from `normalizeSuggestionPrefill.ts`.
+- Sanctity preserved: zero changes to worksheet generation prompt, `format-worksheet-prompt`, `generate-curriculum-phases`, `generate-timeline`, `useWorksheetGeneration`.
+**Mental Model — Knowledge ↔ Plan ↔ Worksheet** (canonical for future agents):
+```
+Goals (student profile + Knowledge: Skill Assessment, Personal, Goals)
+  ↓
+generate-curriculum-phases  → 3-6 macro phases (dslm_curriculum_phases) — multi-week blocks
+  ↓
+generate-timeline           → 1-3 worksheet ideas (future_worksheet_suggestions)
+                              kinds: 'next_step' (free) | 'phase_step' (bound via phase_id)
+  ↓
+WorksheetForm preset chip   → prefill via normalizeSuggestionPrefill
+  ↓
+worksheet generation engine (UNTOUCHED prompt, Sanctity)
+```
+Two distinct edge functions live ONLY in Supabase deployment (not in repo): `generate-curriculum-phases` (macro) and `generate-timeline` (micro). Hooks `useCurriculumPhases` / `useFutureTimeline` are the only client surface.
+**RAG Keywords**: worksheet form preset, next step chip, learning plan banner, prefill from suggestion, future timeline preset, phase step preset, suggestion used flag, mark preset used, applied preset session storage, normalize prefill, knowledge plan worksheet pipeline, curriculum phases vs timeline, macro vs micro plan
+
+### Stale Knowledge Badge
+**Problem**: `student_knowledge_entries` of category Personal / Skill Assessment / Goals older than 90 days may be obsolete (job change, mastered skill, life change), but the UI gave no signal — teacher trusted a 6-month-old "works at startup X, learning negotiation phrases" as fresh truth.
+**Edooqoo Solution**: Pure client-side amber badge on `StudentKnowledgeEntryCard` reading "Stale ({age}d old) — still true?" with two inline actions: `Yes, still current` resets the freshness clock; `Mark outdated` reuses existing flow. No cron, no email, no edge function, no schema change.
+**Technical Mechanics**:
+- `freshnessAnchor = max(created_at, metadata.last_confirmed_at)`. `isStale = !is_outdated && !archived_at && category ∈ {Personal, Skill Assessment, Goals} && differenceInDays(now, freshnessAnchor) >= 90`.
+- New mutation `confirmCurrent(entryId)` in `useStudentKnowledge`: read row → patch `metadata = { ...metadata, last_confirmed_at: new Date().toISOString() }`. Invalidates `['knowledge','entries',...]`.
+- `metadata.last_confirmed_at` is a free-form JSONB key; never persisted as column. `created_at` is NEVER mutated.
+- Badge only renders in `StudentKnowledgeSection` (passes `onConfirmCurrent`); other consumers (DSLM `SkillsView`, `GoalsView`, `ProfileView`, `PathwayView`, `StudentPage`) omit the prop → badge silently hidden, zero regression.
+**RAG Keywords**: stale note, knowledge freshness, last confirmed at, 90 days outdated, confirm current mutation, knowledge audit prompt, freshness anchor, isStale, metadata last_confirmed_at
