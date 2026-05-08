@@ -56,3 +56,32 @@ React 18 + Vite 5 + TypeScript 5 + Tailwind 3 + shadcn/ui. Supabase (Lovable Clo
 - Email footers: removed literal `hello@edooqoo.com` from Supabase confirm template and Resend welcome footer. Confirm template personalized via `{{ .Data.first_name }}`.
 - ParticlesBackground accepts `interactive` prop; AuthenticatedPageShell passes `false`.
 - Sanctity: worksheet engine NOT touched; `used_in_worksheet_id` only set via manual archive button.
+
+## v6.9.10
+
+**Problem → Solution → Mechanics**
+
+1. **Worksheet form ignores existing learning plan**: teacher generating a worksheet for a student didn't see the previously generated `next_steps` / `phase_steps` from `useFutureTimeline` → produced ad-hoc topics, plan went unused, materials lost cohesion.
+   - Solution: thin banner above Exercise Selection Cards on `WorksheetForm` showing up to 3 suggested next-step chips for the selected student. Click prefills topic/goal/additionalInfo/grammarFocus/exercises/focusMap. Empty state shows soft CTA "Open Learning Plan" → `/student/{id}?tab=progress`. Hidden when no student selected.
+   - Mechanics: `src/components/WorksheetForm/NextStepsPresetBanner.tsx` consumes `useFutureTimeline({studentId, teacherId})`; presets = `[...phaseSteps, ...nextSteps].slice(0,3)` (phase-bound first). Apply path: writes setters via parent's `applyPreset`, calls `normalizeSuggestionPrefill` (single source of truth shared with DSLM prefill). Tracks origin via `sessionStorage.appliedPresetSuggestionId`; on `worksheetGenerationSuccess` event, WorksheetForm re-emits `markPresetUsed` with `{suggestionId, worksheetId}`; banner listener invokes `useSuggestion(id, worksheetId)` to flip `is_used` in `future_worksheet_suggestions`. Sanctity: zero changes to worksheet generation prompt or edge functions.
+
+2. **Stale knowledge entries trusted as fresh**: notes in Personal/Skill Assessment/Goals older than 90 days may be obsolete (job change, mastered skill) but UI gave no signal.
+   - Solution: client-side amber badge "Stale ({age}d old) — still true?" with two inline actions: `Yes, still current` (resets freshness clock via `metadata.last_confirmed_at`) and `Mark outdated` (existing `markAsOutdated`).
+   - Mechanics: `StudentKnowledgeEntryCard` computes `freshnessAnchor = max(created_at, metadata.last_confirmed_at)`. New mutation `confirmCurrent(entryId)` in `useStudentKnowledge` patches `metadata.last_confirmed_at = now()`. Zero cron, zero edge function, zero schema change.
+
+**Mental model — Knowledge ↔ Plan ↔ Worksheet** (for future agents):
+```
+Goals → generate-curriculum-phases (macro phases, dslm_curriculum_phases)
+      → generate-timeline (concrete worksheet ideas, future_worksheet_suggestions, kinds: next_step | phase_step)
+      → WorksheetForm preset chip → worksheet generation engine (UNTOUCHED prompt)
+```
+`generate-curriculum-phases` produces 3-6 multi-week macro phases. `generate-timeline` produces 1-3 worksheet-ready suggestions, optionally bound to a phase via `phaseId`. Both invoked from hooks (`useCurriculumPhases`, `useFutureTimeline`); their edge function source lives only in Supabase.
+
+**Invariants v6.9.10**:
+- WorksheetForm preset chips MUST use `normalizeSuggestionPrefill`. Never duplicate the media/exercise normalization.
+- `applyPreset` MUST write `sessionStorage.appliedPresetSuggestionId` so the post-success dispatch can fire `markPresetUsed`.
+- Stale badge is purely client-side derived. Never persist `is_stale`.
+- `confirmCurrent` MUST only patch `metadata.last_confirmed_at`; never touch `created_at`.
+- Sanctity: do NOT modify worksheet generation prompt, `format-worksheet-prompt`, `generate-curriculum-phases`, or `generate-timeline` edge functions.
+
+**RAG Keywords**: next step preset, suggestion chip, learning plan banner, worksheet form preset, prefill from suggestion, future timeline preset, phase step preset, stale note badge, knowledge freshness, last confirmed at, 90 days outdated, confirm current, knowledge audit, mental model curriculum vs timeline, mark preset used.
