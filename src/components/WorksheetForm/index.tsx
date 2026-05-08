@@ -517,6 +517,29 @@ export default function WorksheetForm({
       title: set[field]
     }));
   };
+
+  // v6.9.10 — apply a Next-Step preset (chip click) into form state.
+  const applyPreset = (p: PresetPayload) => {
+    setLessonTopic(p.topic || '');
+    setLessonGoal(p.goal || '');
+    if (p.additionalInfo || p.grammarFocus) setShowMoreFields(true);
+    setAdditionalInformation(p.additionalInfo || '');
+    setGrammarFocus(p.grammarFocus || '');
+    const norm = normalizeSuggestionPrefill({
+      exercises: p.exercises,
+      focusMap: p.exerciseFocusMap,
+      mediaTypes: p.mediaTypes,
+      lessonTime: lessonTime as '45min' | '60min',
+    });
+    setSelectedMediaTypes(norm.selectedMediaTypes as MediaType[]);
+    setSelectedExercises(norm.selectedExercises);
+    setExerciseFocusMap(norm.exerciseFocusMap);
+    setSelectionMode('manual');
+    setActiveTab('exercises');
+    sessionStorage.setItem('appliedPresetSuggestionId', p.sourceSuggestionId);
+    toast({ title: 'Preset applied', description: 'Review fields and generate.' });
+  };
+
   return <div className={`w-full ${isMobile ? 'py-2' : 'py-[24px]'}`}>
       <Card className="bg-card/88 backdrop-blur-sm border-border/60 shadow-lg">
         <CardContent className={`${isMobile ? 'p-3' : 'p-8'}`}>
