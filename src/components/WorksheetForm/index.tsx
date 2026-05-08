@@ -165,7 +165,7 @@ export default function WorksheetForm({
   // worksheet is saved + token consumed. Failures (network, paywall, AI error)
   // intentionally preserve the draft so the user can retry.
   useEffect(() => {
-    const handler = () => {
+    const handler = (e: Event) => {
       try {
         clearPersistedDraft();
         devLog('[WorksheetForm] Draft cleared after successful generation');
@@ -177,8 +177,7 @@ export default function WorksheetForm({
       try {
         const sid = sessionStorage.getItem('appliedPresetSuggestionId');
         if (sid) {
-          // worksheetId comes from the source event detail (see useWorksheetGeneration)
-          const wsId = (arguments as any)?.[0]?.detail?.worksheetId || null;
+          const wsId = ((e as CustomEvent)?.detail?.worksheetId as string | undefined) || null;
           window.dispatchEvent(new CustomEvent('markPresetUsed', { detail: { suggestionId: sid, worksheetId: wsId } }));
           sessionStorage.removeItem('appliedPresetSuggestionId');
         }
