@@ -265,6 +265,36 @@ export const useStudentKnowledge = ({ studentId, teacherId }: UseStudentKnowledg
     },
   });
 
+  // v6.9.10 — confirm a stale note is still current (resets the staleness clock
+  // by writing metadata.last_confirmed_at). No DB schema change required.
+  const confirmCurrentMutation = useMutation({
+    mutationFn: async (entryId: string) => {
+      const { data: row, error: readErr } = await supabase
+        .from('student_knowledge_entries')
+        .select('metadata')
+        .eq('id', entryId)
+        .eq('teacher_id', teacherId)
+        .maybeSingle();
+      if (readErr) throw readErr;
+      const prevMeta = (row?.metadata as Record<string, unknown> | null) || {};
+      const newMeta = { ...prevMeta, last_confirmed_at: new Date().toISOString() };
+      const { error } = await supabase
+        .from('student_knowledge_entries')
+        .update({ metadata: newMeta as any })
+        .eq('id', entryId)
+        .eq('teacher_id', teacherId);
+      if (error) throw error;
+      return true;
+    },
+    onSuccess: () => {
+      invalidateAll();
+      toast({ title: 'Confirmed', description: 'Marked as still current' });
+    },
+    onError: (err: any) => {
+      toast({ title: 'Error', description: err?.message || 'Failed', variant: 'destructive' });
+    },
+  });
+
   const entries = entriesQuery.data?.entries || [];
   const totalCount = entriesQuery.data?.totalCount || 0;
   const limit = filters.limit || DEFAULT_FILTERS.limit!;
@@ -294,7 +324,7 @@ export const useStudentKnowledge = ({ studentId, teacherId }: UseStudentKnowledg
     setFiltersState(DEFAULT_FILTERS);
   }, []);
 
-  const isMutating = addMutation.isPending || updateMutation.isPending || deleteMutation.isPending || markOutdatedMutation.isPending || markCurrentMutation.isPending || archiveMutation.isPending;
+  const isMutating = addMutation.isPending || updateMutation.isPending || deleteMutation.isPending || markOutdatedMutation.isPending || markCurrentMutation.isPending || archiveMutation.isPending || confirmCurrentMutation.isPending;
 
   return {
     entries,
@@ -312,6 +342,7 @@ export const useStudentKnowledge = ({ studentId, teacherId }: UseStudentKnowledg
     markAsOutdated: (entryId: string, reason?: string) => markOutdatedMutation.mutateAsync({ entryId, reason }),
     markAsCurrent: (entryId: string) => markCurrentMutation.mutateAsync(entryId),
     archiveEntry: (entryId: string, worksheetId?: string | null) => archiveMutation.mutateAsync({ entryId, worksheetId }),
+    confirmCurrent: (entryId: string) => confirmCurrentMutation.mutateAsync(entryId),
     loadMore,
     resetFilters,
     setFilters,
