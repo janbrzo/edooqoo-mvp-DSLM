@@ -51,6 +51,7 @@ export const StudentKnowledgeSection = ({
     markAsOutdated,
     markAsCurrent,
     archiveEntry,
+    confirmCurrent,
     fetchEntries,
     loadMore,
     resetFilters,
@@ -145,6 +146,10 @@ export const StudentKnowledgeSection = ({
 
   const handleArchive = async (entryId: string) => {
     await archiveEntry(entryId);
+  };
+
+  const handleConfirmCurrent = async (entryId: string) => {
+    await confirmCurrent(entryId);
   };
 
   // By Skill: group Skill Assessment entries by metadata.nano_skill
@@ -274,6 +279,7 @@ export const StudentKnowledgeSection = ({
                     onMarkOutdated={handleMarkOutdated}
                     onMarkCurrent={handleMarkCurrent}
                     onArchive={handleArchive}
+                    onConfirmCurrent={handleConfirmCurrent}
                     worksheetTitle={entry.worksheet_id ? 'Worksheet' : undefined}
                   />
                 ))}
