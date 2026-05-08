@@ -16,6 +16,7 @@ import { useStudents } from "@/hooks/useStudents";
 import { useOnboardingProgress } from "@/hooks/useOnboardingProgress";
 import { useWorksheetFormPersistence, type WorksheetDraft } from "@/hooks/useWorksheetFormPersistence";
 import { normalizeSuggestionPrefill } from "@/lib/dslm/normalizeSuggestionPrefill";
+import { NextStepsPresetBanner, type PresetPayload } from "./NextStepsPresetBanner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Shuffle, Brain, MousePointer, ChevronDown, Image, Headphones, Lock, Eraser } from "lucide-react";
 import { devLog, devWarn } from '@/utils/logger';
@@ -170,6 +171,19 @@ export default function WorksheetForm({
         devLog('[WorksheetForm] Draft cleared after successful generation');
       } catch (e) {
         devWarn('[WorksheetForm] Failed to clear draft', e);
+      }
+      // v6.9.10 — if this generation originated from a Next-Step preset chip,
+      // propagate to NextStepsPresetBanner so it can mark the suggestion as used.
+      try {
+        const sid = sessionStorage.getItem('appliedPresetSuggestionId');
+        if (sid) {
+          // worksheetId comes from the source event detail (see useWorksheetGeneration)
+          const wsId = (arguments as any)?.[0]?.detail?.worksheetId || null;
+          window.dispatchEvent(new CustomEvent('markPresetUsed', { detail: { suggestionId: sid, worksheetId: wsId } }));
+          sessionStorage.removeItem('appliedPresetSuggestionId');
+        }
+      } catch (e) {
+        devWarn('[WorksheetForm] markPresetUsed dispatch failed', e);
       }
     };
     window.addEventListener('worksheetGenerationSuccess', handler);
