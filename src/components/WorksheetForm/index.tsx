@@ -636,6 +636,16 @@ export default function WorksheetForm({
                   <FormField label="Grammar focus" placeholder={currentPlaceholders.grammarFocus} value={grammarFocus} onChange={setGrammarFocus} suggestions={createSuggestionTiles('grammarFocus')} isOptional={true} />
                 </div>}
 
+              {/* v6.9.10 — Next-Step preset banner (per selected student) */}
+              {userId && selectedStudentId !== 'no-student' && (
+                <NextStepsPresetBanner
+                  studentId={selectedStudentId}
+                  studentName={students.find(s => s.id === selectedStudentId)?.name}
+                  teacherId={userId}
+                  onApplyPreset={applyPreset}
+                />
+              )}
+
               {/* Exercise Selection Cards */}
               <div className="mb-6">
                 {/* Card Headers in One Line with Student Selector */}
