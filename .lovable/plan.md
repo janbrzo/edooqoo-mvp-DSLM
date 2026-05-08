@@ -1,146 +1,293 @@
-# Plan wdrożenia v6.9.9 — 4 problemy
+## Plan v6.9.10 — Knowledge audit + Worksheet form Next-Step preset
 
-Krótkie wyjaśnienie kontekstu: część rzeczy z planu Student Knowledge jest już wdrożona (migracja kolumn, edge function `classify-knowledge-entry`, uproszczony Quick Add, hook `useOneMinutePrep`, `OneMinutePrepCard` na StudentPage). Brakuje **3 elementów z pkt 1**, które dokończymy poniżej. Reszta planu (pkt 2-4) to naprawy maili i tła.
-
----
-
-## PROBLEM 1 — Student Knowledge: dokończenie planu
-
-### Co jest gotowe (weryfikacja):
-
-- ✅ Migracja kolumn `ai_classified`, `ai_confidence`, `archived_at`, `used_in_worksheet_id`
-- ✅ Edge function `classify-knowledge-entry` (Lovable AI, gemini-2.5-flash, tool-call schema)
-- ✅ Quick Add bez wymogu kategorii (`StudentKnowledgeQuickAddModal`)
-- ✅ `useStudentKnowledge.addEntry` → fire-and-forget classify
-- ✅ `useOneMinutePrep` + `OneMinutePrepCard` na górze StudentPage
-
-### Czego brakuje (do zrobienia w tej iteracji):
-
-**1.1. Auto-archive „Next Lesson Ideas" po użyciu w worksheet**  
-Obecnie kolumna `used_in_worksheet_id` jest schema-ready, ale nikt jej nie zapisuje. Dodajemy:
-
-- W `src/components/student-knowledge/StudentKnowledgeSidePanel.tsx` (lub gdzie wyświetlane są Next Lesson Ideas) dodać przycisk **„Mark as used in worksheet"** dla wpisów `category='Next Lesson Ideas'` które mają `archived_at IS NULL` — manual flow na teraz (auto-link z worksheet generation jest poza scope tej iteracji, bo wymagałby zmian w `worksheetService.create`, czego unikamy).
-- Nowa mutacja `archiveEntry(entryId, worksheetId?)` w `useStudentKnowledge`: ustawia `archived_at = now()` i opcjonalnie `used_in_worksheet_id`.
-- `useOneMinutePrep` już filtruje po `archived_at IS NULL` ✅ — działa od razu.
-
-**1.2. Three views — zakładki w `StudentKnowledgeSidePanel**`  
-Obecny side panel ma jeden widok („Timeline"). Dodajemy Tabs (`@/components/ui/tabs`) z 3 zakładkami:
-
-- **Timeline** (default, istniejący widok)
-- **By Skill** — grupowanie `entries.filter(e => e.category === 'Skill Assessment')` po `metadata.nano_skill`, każda grupa pokazuje liczbę wpisów + ostatni `metadata.mastery` jeśli istnieje. Zero zmian w schema.
-- **For Next Lesson** — używa danych z `useOneMinutePrep(studentId, teacherId)`; renderuje 3 sekcje (Personal hooks / Focus on / Lesson ideas) — zero duplikacji logiki, ten sam hook co `OneMinutePrepCard`.
-
-**1.3. AI suggestion banner (opcjonalna kontrola nauczyciela)**  
-Po klasyfikacji AI obecnie wpis jest cicho aktualizowany. Dodajemy delikatną informację wizualną:
-
-- W `StudentKnowledgeEntryCard` (lub równoważnym) — jeśli `ai_classified === true && ai_confidence >= 0.6`, pokaż mały badge `<Sparkles className="h-3 w-3"/> AI organized` z tooltipem `confidence: {ai_confidence}`.
-- Brak przycisku „Refine/Reject" — jeśli teacher nie zgadza się z kategorią, używa istniejącego trybu Edit (już istnieje). To minimalny dodatek bez nowego UI flow.
-
-**1.4. Dokumentacja / memory**  
-
-- Zaktualizować `mem://features/student-knowledge/quick-capture-and-ai-classify.md` — dopisać sekcję o `archived_at` i 3 widokach.
-- Dopisać sekcję do `docs/llm-context.md` i `llms.txt`:
-  ```
-  ## Student Knowledge v6.9.9
-  Problem: Friction-heavy categorization blocked in-lesson capture; no actionable lesson-prep view.
-  Edooqoo Solution: Frictionless quick capture + background AI classification + 3-view side panel (Timeline / By Skill / For Next Lesson) + manual archive of used lesson ideas.
-  Technical Mechanics: useStudentKnowledge.addEntry inserts as Notes, fires classify-knowledge-entry (gemini-2.5-flash, tool-call). Patches when confidence>=0.6. archiveEntry mutation sets archived_at + used_in_worksheet_id. useOneMinutePrep filters archived_at IS NULL. StudentKnowledgeSidePanel Tabs use shared data sources.
-  RAG Keywords: student notes, knowledge entries, AI classification, lesson prep, next lesson ideas, archive, by skill view, frictionless capture
-  ```
+Cztery niezależne bloki. Każdy można wdrożyć osobno bez ryzyka regresji.
 
 ---
 
-## PROBLEM 2 — Mail #1 (Supabase confirm signup): personalizacja + naprawa „Edooqoo · [hello@edooqoo.com](mailto:hello@edooqoo.com)"
+## BLOK 1 — Jak DZIŚ działa System Notatek (Student Knowledge), opisowo
 
-### 2A. Skrzynka [hello@edooqoo.com](mailto:hello@edooqoo.com) nie istnieje
+To nie jest zadanie do implementacji — to inwentaryzacja, której potrzebujesz przed decyzją o BLOKU 2. Po wdrożeniu v6.9.8 + v6.9.9 stan jest następujący:
 
-**Decyzja**: usuwamy literalny adres `hello@edooqoo.com` z treści maila. Zamiast tego stopka pokazuje sam brand „Edooqoo" — bez klikalnego adresu. (Reply-to dla tego maila Supabase i tak idzie na `noreply@mail.app.supabase.io`, więc obietnica „odpowiedz na ten mail" jest nieprawdziwa — usuwamy ją.)
+### 1.1 Wejście danych (jak nauczyciel dodaje notatkę)
 
-Alternatywa odrzucona: catch-all forward `hello@ → edooqoo@gmail.com` wymaga konfiguracji DNS/MX poza zakresem aplikacji i nie jest pewne czy user ma do tego dostęp. Bez tego pokazywanie adresu wprowadza w błąd.
+Trzy ścieżki, wszystkie trafiają do tej samej tabeli `student_knowledge_entries`:
 
-### 2B. Personalizacja imieniem
+- **Quick Add (główna)** — komponent `StudentKnowledgeQuickAddModal`. Otwierany z FAB-a (ikonka książki w prawym dolnym rogu strony studenta) lub z przycisku „Add note". Pokazuje TYLKO pole tekstowe + opcjonalne tagi. Brak wymaganej kategorii. Po zapisie wpis trafia natychmiast do bazy z `category='Notes'`.
+- **Live Session Quick Notes** — pasek na dole ekranu Live Session (`LiveSessionQuickNotes`). Tu nauczyciel WYBIERA kategorię ikonką (Personal / Skill / Goals / Notes / Next Lesson) i wpisuje notatkę. To świadoma decyzja — w trakcie lekcji nauczyciel wie, czego dotyczy obserwacja.
+- **Side Panel (zaawansowane)** — `StudentKnowledgeSidePanel`. Pełna edycja: kategoria, podtyp (np. dla Skill Assessment: strength/weakness/mistake/practice), nano_skill, mastery 0-100, sub_category dla Personal itd. Używane do edycji istniejących wpisów albo świadomego, bogato strukturalnego dodania.
 
-Supabase template ma dostęp do `{{ .Data.first_name }}` (z `raw_user_meta_data` przy `signUp({ options: { data: { first_name } } })`). Sprawdzimy `src/pages/Signup.tsx` czy `first_name` trafia do metadata — jeśli nie, dodamy. Template:
+### 1.2 Co się dzieje PO zapisaniu Quick Add (auto-klasyfikacja AI)
 
+W `useStudentKnowledge.addEntry` po insercie wpisu odpalany jest **fire-and-forget** request do edge function `classify-knowledge-entry` (Lovable AI Gateway, model `google/gemini-2.5-flash`, tool-calling). Nauczyciel NIE czeka — UI nie blokuje się.
+
+AI dostaje tekst notatki + level studenta + jego główny cel i zwraca:
+- `category` (jedna z 5: Skill Assessment, Personal, Goals, Next Lesson Ideas, Notes),
+- `confidence` 0..1,
+- `tags` (1-4 słowa kluczowe),
+- jeśli Skill Assessment → `skill_subtype` + `element_type` + opcjonalnie `nano_skill` + `suggested_mastery`,
+- jeśli Personal → `sub_category`,
+- `summary` — jednolinijkowe streszczenie.
+
+Jeśli `confidence >= 0.65` (tak ma prompt) — klient patchuje wiersz: zmienia category na sugerowaną, zapisuje metadata, ustawia `ai_classified=true`, `ai_confidence=…`. Jeśli mniej pewne — zostaje jako `Notes`.
+
+Skutek: nauczyciel pisze „Tomek myli used to z would" → po sekundzie wpis sam staje się Skill Assessment / weakness / grammar.
+
+### 1.3 Co nauczyciel widzi (3 widoki w `StudentKnowledgeSection`)
+
+Sekcja na karcie studenta („Knowledge" tab) ma 3 zakładki (Tabs):
+
+- **Timeline** (default) — chronologiczna lista wszystkich wpisów. Każdy wpis (`StudentKnowledgeEntryCard`) pokazuje: kategorię (kolorowa kropka), treść, tagi, datę, ikonę „Sparkles AI organized" jeśli wpis pochodzi z auto-klasyfikacji z `confidence >= 0.6`, oraz menu (edit / delete / mark outdated).
+- **By Skill** — grupuje WYŁĄCZNIE wpisy `Skill Assessment` po `metadata.nano_skill` (np. „past simple irregular verbs", „phone vocabulary"). Pod każdą umiejętnością widać mini-pasek mastery (z `metadata.suggested_mastery`) i wszystkie powiązane wpisy. To jest mapa „co umie / czego nie umie ten uczeń" w jednym miejscu.
+- **For Next Lesson** — czerpie z hooka `useOneMinutePrep`. Pokazuje 3 sekcje, max 3 wpisy każda:
+  - Personal Hooks (świeże Personal z ostatnich 30 dni — do small-talku),
+  - Top Weaknesses (Skill Assessment z subtypami weakness/mistake/practice — co ćwiczyć),
+  - Lesson Ideas (Next Lesson Ideas, które jeszcze nie są zarchiwizowane).
+  Każda karta w sekcji „Lesson Ideas" ma przycisk **„Mark as used"** → mutacja `archiveEntry(id)` ustawia `archived_at=now()` i wpis znika z tej listy (zostaje w Timeline). Dzięki temu nauczyciel po lekcji szybko czyści to, co już zrealizował.
+
+### 1.4 Skąd te dane są używane W INNYCH miejscach aplikacji
+
+- **Side Panel + Mini List** — pasek/panel na różnych ekranach studenta (np. podczas oglądania worksheeta) pokazuje skondensowaną listę.
+- **`OneMinutePrepCard`** — karta „1-Minute Prep" pojawia się na stronie studenta nad listą worksheetów; to ten sam digest co zakładka „For Next Lesson".
+- **Lesson Ideas Button** — w paskach narzędzi (`StudentKnowledgeLessonIdeasButton`) dropdown z aktywnymi pomysłami.
+- **Worksheet Generation prompt** — `format-worksheet-prompt` edge function dolewa do promptu skrót knowledge'u studenta (Personal facts + recent weaknesses), żeby AI personalizowała ćwiczenia. Ten przepływ jest gotowy i działa.
+
+### 1.5 Co wpadło, czego NIE ma (kontekst do BLOKU 2)
+
+- NIE ma automatycznego ustawiania `used_in_worksheet_id` przy generacji worksheeta (tylko ręczny przycisk).
+- NIE ma helpera DSLM, który powiązałby wpisy z eventami nauki.
+- NIE ma cron-a „is this still current?" po 90 dniach.
+
+To są te 3 świadome pominięcia z poprzedniej iteracji.
+
+---
+
+## BLOK 2 — 3 pominięte funkcje: rekomendacja per pozycja
+
+Decyzja per pozycja, czy domykać teraz czy zostawić:
+
+### 2.1 Auto-link `used_in_worksheet_id` z poziomu generacji worksheeta
+
+**Rekomendacja: NIE domykamy w v6.9.10. Robimy w osobnej, dedykowanej iteracji „Worksheet ↔ Knowledge bridge".**
+
+Powód: wymaga modyfikacji `worksheetService` + `useWorksheetGeneration` (nie samego promptu — to jest święte), z dokładnym matchingiem „który wpis Next Lesson Ideas został właśnie zrealizowany". Bez UX-u potwierdzenia („Did this worksheet cover idea X?") system będzie albo over-archive (znikają wpisy, których nauczyciel nie zrealizował) albo nigdy nie trafia. Ręczny przycisk „Mark as used" działa, jest jednoznaczny, zero ryzyka. Wracamy do tego, jak będziemy projektowali pełny flow „suggestion → worksheet → review".
+
+### 2.2 Helper `recordKnowledgeBackedEvent` w `useStudentEvents` (DSLM)
+
+**Rekomendacja: NIE w v6.9.10. To część osobnej iteracji DSLM.**
+
+Powód: DSLM ma swój własny model zdarzeń (`useStudentEvents`, `dslm_events`, kalkulacja confidence). Zlepianie tego z Knowledge bez przemyślenia, jak mastery z notatki nauczyciela ma rywalizować z mastery z faktycznych ćwiczeń, popsuje confidence score. Wymaga osobnego specu.
+
+### 2.3 Auto-suggest „is this still current?" po 90 dniach
+
+**Rekomendacja: TAK, ale tylko jako klient-side w v6.9.10 (zero infrastruktury cron).**
+
+Wystarczy dodać w `StudentKnowledgeEntryCard` mały badge „Stale (90+ days) — still relevant?" gdy `created_at < now() - 90d` AND `is_outdated=false` AND `category IN ('Personal','Skill Assessment','Goals')`. Badge ma dwa szybkie buttony: „Still current" (ustawia `created_at = now()` żeby zresetować zegar — albo lepiej dodaje `metadata.last_confirmed_at`) i „Mark outdated" (istniejąca mutacja `markAsOutdated`).
+
+Brak cron-a, brak emaili, brak edge functions. Pure UI computed property. Ryzyko regresji: zerowe.
+
+**Implementacja BLOK 2.3:**
+- W `StudentKnowledgeEntryCard.tsx` dodać `isStale = differenceInDays(now, entry.created_at) >= 90 && !entry.is_outdated && ['Personal','Skill Assessment','Goals'].includes(entry.category)`.
+- Renderować pod treścią mały żółty badge `<Clock /> Stale — still true?` z dwoma textbuttonami `Yes, still current` / `Mark outdated`.
+- „Yes, still current" → nowa mutacja `confirmCurrent(id)` w `useStudentKnowledge` która patchuje `metadata = { ...metadata, last_confirmed_at: new Date().toISOString() }`. W `isStale` używać `max(created_at, metadata.last_confirmed_at)`.
+- „Mark outdated" → istniejące `markAsOutdated`.
+
+---
+
+## BLOK 3 — `generate-curriculum-phases` vs `generate-timeline` (różnica, kiedy używane)
+
+To DWIE różne edge functions na dwóch poziomach planowania. Obie istnieją po stronie Supabase (w repo widać tylko hooki które je wywołują: `useCurriculumPhases.tsx` i `useFutureTimeline.tsx`).
+
+### 3.1 `generate-curriculum-phases` — POZIOM MAKRO (fazy curriculum)
+
+- **Wywoływana z**: `useCurriculumPhases.generatePhases()` w komponencie `MacroTimeline` na zakładce Progress studenta.
+- **Co generuje**: 3-6 dużych „faz nauki" (`dslm_curriculum_phases`), np. Faza 1: „Foundational business email vocab" (4-6 tygodni), Faza 2: „Negotiation phrasing" (3-4 tyg.). Każda faza ma: title, description, status (planned/in_progress/done), `estimated_weeks_start/end`, `focus_areas[]`, rationale.
+- **Kontekst**: cele studenta, jego level, główny goal, dotychczasowe Skill Assessment z Knowledge, performance z DSLM.
+- **NIE generuje konkretnych worksheetów** — to jest mapa drogowa: „w jakim porządku ten student powinien iść przez najbliższe 3-6 miesięcy".
+
+### 3.2 `generate-timeline` — POZIOM MIKRO (konkretne worksheety = next steps)
+
+- **Wywoływana z**: `useFutureTimeline.generateNextSteps()` i `regenerateInPlace()`.
+- **Co generuje**: 1-3 konkretnych pomysłów na worksheet (`future_worksheet_suggestions`), każdy z: `topic`, `goal`, `additionalInfo`, `grammarFocus`, `exercises[]` (gotowy zestaw 8 ćwiczeń), `exerciseFocusMap` (focus per ćwiczenie), `rationale`, `focusSkills[]`, `difficulty`.
+- **Dwa tryby**:
+  - `mode='next_steps'` (`phaseId=null`) — luźne pomysły, niezwiązane z fazą,
+  - `mode='phase_steps'` (`phaseId=<id fazy>`) — pomysły skrojone pod konkretną fazę z `dslm_curriculum_phases`. Wynik dostaje `suggestion_kind='phase_step'` + `phase_id`.
+- **TO jest źródło tego, co użytkownik zobaczy w „Next Steps" na profilu studenta** — i co chcemy podnieść do formularza w BLOKU 4.
+
+### 3.3 Hierarchia (mental model dla ciebie)
+
+```text
+Goals studenta (np. „awans na seniora w IT")
+   ↓
+generate-curriculum-phases  →  Fazy (3-6 bloków × tygodnie)
+   ↓
+generate-timeline           →  Konkretne worksheety w ramach fazy
+   ↓
+Worksheet generation engine →  Wypełniony worksheet z ćwiczeniami
 ```
-{{ if .Data.first_name }}Welcome, {{ .Data.first_name }}!{{ else }}Welcome to Edooqoo!{{ end }}
+
+Dwa różne prompty, dwa różne poziomy abstrakcji, dwie różne tabele. Nie nakładają się.
+
+---
+
+## BLOK 4 — Preset „Next Step" na formularzu generowania
+
+To jedyny realny blok do implementacji w v6.9.10.
+
+### 4.1 Cel UX (tak jak chcesz)
+
+Po wybraniu ucznia w selectorze na `WorksheetForm`:
+- **Jeśli student MA aktywne `next_steps`** (`useFutureTimeline.nextSteps` non-empty): pokazujemy elegancki banner-pasek z 1-3 chipami „Use preset" — kliknięcie wpełnia formularz (topic, goal, additionalInfo, grammarFocus, exercises, focusMap) z wybranego next_step.
+- **Jeśli student NIE MA next_steps**: pokazujemy łagodny banner „No learning plan yet — your worksheets will be more cohesive if you add one. [Open Learning Plan ↗]" linkujący do zakładki Progress studenta.
+
+Banner musi:
+- mieścić się wizualnie nad sekcją „Exercise Selection Cards" (linia 603-642),
+- zwijać się gdy nie ma studenta lub student nie istnieje (no-student),
+- być responsywny (mobile = pełna szerokość),
+- nie rozjeżdżać layoutu — używać tych samych szerokości i marginesów co istniejące karty.
+
+### 4.2 Nowy komponent: `src/components/WorksheetForm/NextStepsPresetBanner.tsx`
+
+```text
+Props:
+  studentId: string | null     // null = no-student
+  teacherId: string
+  onApplyPreset: (preset: PresetPayload) => void
+
+PresetPayload {
+  topic, goal, additionalInfo, grammarFocus,
+  exercises: string[],
+  exerciseFocusMap: Record<string,string>,
+  mediaTypes: MediaType[]      // wyderywowane z exercises (fill-in-blanks-audio → ['audio'])
+  sourceSuggestionId: string   // żeby potem móc wywołać useSuggestion()
+}
 ```
 
-### Plik do podmiany: `docs/operational/supabase-confirmation-template.md`
+Wewnątrz:
+- Wczesny return `null` jeśli `!studentId`.
+- `const { nextSteps, phaseSteps, loading } = useFutureTimeline({ studentId, teacherId })`.
+- Łączymy: `const presets = [...nextSteps, ...phaseSteps].slice(0,3)` (preferujemy phase_steps na początku — bardziej kontekstowe; albo zostawiamy tylko nextSteps — patrz 4.5 Decyzje).
+- Stan ładowania: skeleton bar (1 linia, h-10).
+- **Pusty stan**: jasno-żółty banner z `<Lightbulb />` + tekst „No learning plan for **{studentName}** yet. Plans help AI generate cohesive, goal-driven worksheets." + button outline „Open Learning Plan" → `navigate(`/student/${studentId}?tab=progress`)`.
+- **Z presetami**: poziomy pasek tła `bg-purple-50/50 dark:bg-purple-900/10` z label „Suggested next steps:" i 1-3 chipami. Każdy chip = `<Button variant="outline" size="sm">` z ikonką ✦, tekstem `{preset.suggested_topic}` (truncate max 30 znaków + tooltip z pełnym opisem + rationale) i klik → `onApplyPreset(...)`.
 
-Nowy HTML (do skopiowania ręcznie do Supabase Dashboard przez użytkownika):
+### 4.3 Integracja w `WorksheetForm/index.tsx`
 
-```html
-<!DOCTYPE html>
-<html lang="en"><body style="margin:0;background:#fff;font-family:-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#0b1220;">
-<table width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:32px 16px;">
-<table width="560" cellpadding="0" cellspacing="0" style="max-width:560px;border:1px solid #e5e7eb;border-radius:12px;">
-<tr><td style="padding:32px;">
-<div style="font-size:14px;color:#5E3FD9;font-weight:600;text-transform:uppercase;letter-spacing:.04em;">Edooqoo</div>
-<h1 style="margin:12px 0 8px;font-size:24px;color:#0b1220;">{{ if .Data.first_name }}Welcome, {{ .Data.first_name }}!{{ else }}Confirm your email{{ end }}</h1>
-<p style="margin:0 0 24px;font-size:15px;line-height:1.6;color:#4b5563;">Click the button below to activate your Edooqoo account. After confirming, you'll get a welcome email with next steps and 2 free tokens.</p>
-<p style="text-align:center;margin:0 0 20px;"><a href="{{ .ConfirmationURL }}" style="display:inline-block;background:#5E3FD9;color:#fff;text-decoration:none;font-weight:600;padding:12px 24px;border-radius:8px;">Confirm email</a></p>
-<p style="font-size:12px;color:#9ca3af;margin:24px 0 0;border-top:1px solid #f1f5f9;padding-top:16px;">Edooqoo</p>
-</td></tr></table></td></tr></table></body></html>
-```
+Bez modyfikacji żadnego istniejącego stanu/promptów. Dodajemy:
 
-Zmiany vs obecny: (a) usunięcie `hello@edooqoo.com` ze stopki; (b) personalizacja H1 przez `{{ .Data.first_name }}`; (c) wzmianka o 2 free tokens (przeniesiona z poprzedniej wersji).
+1. **Import**: `import { NextStepsPresetBanner } from './NextStepsPresetBanner';`
+2. **Auth context**: `WorksheetForm` ma już `userId` i `selectedStudentId`. Potrzebujemy `teacherId === userId`.
+3. **Handler `applyPreset`** — analogiczny do istniejącego mechanizmu prefill z sessionStorage (ale bez rerouting przez sessionStorage):
+   ```text
+   const applyPreset = (p: PresetPayload) => {
+     setLessonTopic(p.topic);
+     setLessonGoal(p.goal ?? '');
+     setAdditionalInformation(p.additionalInfo ?? '');
+     setGrammarFocus(p.grammarFocus ?? '');
+     // użyj normalizeSuggestionPrefill — to samo co już działa dla DSLM
+     const norm = normalizeSuggestionPrefill({
+       exercises: p.exercises, focusMap: p.exerciseFocusMap,
+       mediaTypes: p.mediaTypes, lessonTime,
+     });
+     setSelectedMediaTypes(norm.selectedMediaTypes as MediaType[]);
+     setSelectedExercises(norm.selectedExercises);
+     setExerciseFocusMap(norm.exerciseFocusMap);
+     setSelectionMode('manual');
+     setActiveTab('exercises');
+     toast.success('Preset applied — review and generate');
+     // WAŻNE: NIE wywołujemy useSuggestion() tutaj. Robimy to dopiero po sukcesie generacji
+     // przez istniejący mechanizm window event 'suggestionMarkedUsed'.
+     // Zapisujemy id do sessionStorage:
+     sessionStorage.setItem('appliedPresetSuggestionId', p.sourceSuggestionId);
+   };
+   ```
+4. **Renderowanie** — bezpośrednio NAD blokiem `{/* Exercise Selection Cards */}` (linia 603), ALE poniżej selektora ucznia. Selektor zostaje gdzie jest. Banner umieszczamy w nowym `<div className="mb-3">`.
 
-Dodatkowo: w `src/pages/Signup.tsx` zweryfikujemy czy `signUp` wysyła `options.data.first_name`. Jeśli nie ma — dodamy (drobna zmiana 1-linijkowa).
+   Aktualnie selector ucznia jest WEWNĄTRZ tej samej linii co Exercise/Time cards (linia 605-641). To utrudnia wstawienie pełnoszerokościowego bannera. Dlatego:
+
+   **Refactor minimalny**: wyciągamy `studentName` z `students.find(...)` i renderujemy banner JAKO OSOBNY blok przed `<div className={`flex ${isMobile...}>`}`. Banner kolapsuje się gdy `selectedStudentId === 'no-student'`. Zero zmian w samym selektorze.
+
+5. **Powiązanie „preset → mark as used" po sukcesie generacji**:
+   W `useWorksheetGeneration` (lub w handlerze `worksheetGenerationSuccess` w WorksheetForm) po sukcesie:
+   ```text
+   const id = sessionStorage.getItem('appliedPresetSuggestionId');
+   if (id && newWorksheetId) {
+     // wywołaj useSuggestion(id, newWorksheetId) — wymaga dostępu do hooka
+     window.dispatchEvent(new CustomEvent('markPresetUsed', { detail: { id, worksheetId: newWorksheetId } }));
+     sessionStorage.removeItem('appliedPresetSuggestionId');
+   }
+   ```
+   I w `NextStepsPresetBanner` (który ma `useFutureTimeline`) listener:
+   ```text
+   useEffect(() => {
+     const h = (e: any) => useSuggestion(e.detail.id, e.detail.worksheetId);
+     window.addEventListener('markPresetUsed', h);
+     return () => window.removeEventListener('markPresetUsed', h);
+   }, [useSuggestion]);
+   ```
+   To re-używa istniejący wzorzec event-driven (`suggestionMarkedUsed` jest już w `useFutureTimeline` linia 391-395).
+
+### 4.4 Kompatybilność z istniejącym DSLM prefill
+
+WorksheetForm ma już mechanizm prefill z sessionStorage (`prefillExercises`, `prefillExerciseFocusMap`, `prefillMediaTypes`, `prefillWorksheet` z linii 180-244). Nasz `applyPreset` używa TEJ SAMEJ funkcji `normalizeSuggestionPrefill` co istniejący DSLM prefill — więc nie ma rozjazdu między dwiema ścieżkami prefill. Różnica: my robimy to w-place (state setters), sessionStorage używamy tylko do trackowania `sourceSuggestionId` przez cykl generacji.
+
+### 4.5 Decyzje, które ja podejmuję teraz (żebyś nie musiał)
+
+- **Co pokazujemy w bannerze**: top 3 z `[...phaseSteps, ...nextSteps]` (phase_steps mają wyższy priorytet, są bardziej osadzone w planie). Jeśli phase_steps puste → wszystkie 3 z nextSteps.
+- **Liczba chipów**: max 3, min 1.
+- **Kolory**: banner używa istniejącego `bg-worksheet-purpleLight` (jest w design system) dla spójności z resztą formularza.
+- **Empty state CTA**: link do `/student/${id}?tab=progress&action=generate-timeline` — query param `action` zostanie obsłużony w przyszłej iteracji (na teraz wystarczy nawigacja do tabu, user kliknie sam Generate).
+- **Loading state**: 1-linijkowy `Skeleton` h-10 — bez migotania.
+- **Niedostępność (anonimowy / no-student)**: banner zwinięty (return null), bo nie ma kontekstu studenta.
+- **Anti-rozjazd**: banner ma stały `min-h-[44px]` żeby przejście empty→presets→loading nie ruszało wysokości formularza.
+
+### 4.6 Ryzyko regresji
+
+Zerowe dla istniejących ścieżek:
+- Nie modyfikujemy promptu generacji (sanctity OK).
+- Nie modyfikujemy `useWorksheetGeneration` poza dodaniem 1 dispatcha (opcjonalne, można też zostawić — jeśli nie ustawimy `is_used`, nauczyciel kliknie ręcznie „Mark as used").
+- Nie modyfikujemy `useFutureTimeline` ani edge functions.
+- Selector ucznia wygląda i działa tak jak teraz.
 
 ---
 
-## PROBLEM 3 — Mail #2 Welcome (Resend): adres [hello@edooqoo.com](mailto:hello@edooqoo.com)
+## BLOK 5 — Dokumentacja (RAG)
 
-Ta sama logika co pkt 2A — brak skrzynki, więc:
+Wpisy do `docs/llm-context.md` i `llms.txt` — sekcja **v6.9.10**, struktura Problem → Solution → Mechanics + RAG Keywords:
 
-- W `supabase/functions/send-welcome-email/index.ts` (linia 69-70): usunąć `hello@edooqoo.com` ze stopki, zostawić tylko „Edooqoo · helping English tutors save prep time" (lub podobne neutralne).
-- Linia 69 „Questions? Just reply to this email — we read every message." → **zostawiamy**, bo `reply_to: 'edooqoo@gmail.com'` (linia 152) jest prawidłowe i odpowiedzi DOCIERAJĄ. To jedyna prawdziwa droga kontaktu — i tak działa.
-- Linia 150 `from: 'Edooqoo <hello@edooqoo.com>'` — **zostawiamy** (Resend wymaga zweryfikowanej domeny do nagłówka From; działa jako display-only, fizyczne odpowiedzi przekierowuje `reply_to`).
+### 5.1 Wpis 1: Worksheet Form — Next-Step Preset
 
-Czyli **jedyna zmiana** to linia 70 — usunąć literalny adres ze stopki.
+- **Problem**: nauczyciel generujący worksheet dla studenta nie widzi wcześniej wygenerowanych „next steps" → tworzy ad-hoc, ignoruje plan, materiały tracą spójność.
+- **Solution**: banner pod selektorem ucznia z top 3 next_steps, klik = prefill. Empty state zachęca do utworzenia learning plan.
+- **Mechanics**: `NextStepsPresetBanner` → `useFutureTimeline.nextSteps + phaseSteps`. Apply używa `normalizeSuggestionPrefill`. Po sukcesie generacji dispatch `markPresetUsed` → `useSuggestion(id, worksheetId)`. Sanctity: prompt engine niemodyfikowany.
+- **RAG Keywords**: preset, next step, learning plan, suggestion chip, prefill from suggestion, worksheet form student selector, future timeline preset, lesson preset.
+
+### 5.2 Wpis 2: Stale Knowledge Badge
+
+- **Problem**: notatki Personal/Skill/Goals starsze niż 90 dni mogą być nieaktualne (zmiana pracy, awans, nawyk już opanowany), a nauczyciel ma do nich zaufanie jak do świeżych.
+- **Solution**: client-side badge „Stale — still true?" z dwoma akcjami: confirm current (resetuje `metadata.last_confirmed_at`) lub mark outdated.
+- **Mechanics**: computed `isStale` w `StudentKnowledgeEntryCard`, mutacja `confirmCurrent` w `useStudentKnowledge` (patchuje metadata). Brak cron-a / brak edge function. `markAsOutdated` istnieje.
+- **RAG Keywords**: stale note, knowledge freshness, confirm current, 90 days outdated, knowledge audit.
+
+### 5.3 Wpis 3: Knowledge System Mental Model (sekcja edukacyjna)
+
+Dla przyszłych agentów: opisz wprost relację Knowledge ↔ Curriculum Phases ↔ Future Timeline ↔ Worksheet Generation. Diagram tekstowy z BLOK 3.3.
+
+### 5.4 Update `mem/features/student-knowledge/quick-capture-and-ai-classify.md`
+
+Dodać akapit „v6.9.10: Stale badge + Worksheet form preset integration".
+
+### 5.5 Nowa pamięć: `mem/features/worksheet-form/next-step-preset.md`
+
+Plik z zasadą: „WorksheetForm pokazuje banner presetów per student. Apply używa normalizeSuggestionPrefill. Mark-as-used przez window event po sukcesie generacji. Nigdy nie modyfikować promptu generacji."
 
 ---
 
-## PROBLEM 4 — Tło dla zalogowanych bez interakcji (hover)
+## Zakres do implementacji w v6.9.10 (po zatwierdzeniu)
 
-Załączony plik `particlesjs-config_250_03_o100_nohover.json` różni się od obecnej konfiguracji w `ParticlesBackground.tsx` głównie wyłączeniem hover'a (`onhover.enable: false`).
+1. **BLOK 2.3** — Stale badge (1 komponent, 1 mutacja w hook).
+2. **BLOK 4 całość** — `NextStepsPresetBanner` + integracja w `WorksheetForm` + dispatch po sukcesie generacji.
+3. **BLOK 5** — dokumentacja RAG + 1 nowy plik mem.
 
-### Implementacja
+**NIE w tej iteracji**: BLOK 2.1 (auto-link worksheet), BLOK 2.2 (DSLM helper) — czekają na osobne iteracje.
 
-- Dodajemy prop `interactive?: boolean` do `ParticlesBackground` (default `true` = obecne zachowanie dla landing page).
-- Kiedy `interactive={false}`: ustawiamy `onHover.enable: false` (ostatecznie też `onClick.enable: false`, żeby uniknąć dodawania cząsteczek przez przypadek w panelu pracy).
-- W `AuthenticatedPageShell.tsx` (gdzie obecnie montujemy `<ParticlesBackground />` przy `pattern==='particles'`) — przekazać `interactive={false}`.
-- Landing (`src/pages/Index.tsx`) zostaje bez zmian (`interactive` nieprzekazany → default `true`).
-
-Dodatkowo upewniamy się, że `links.opacity` i `move.speed` w trybie `interactive=false` są zgodne z plikiem usera (`opacity: 1`, `speed: 0.3`) — ale obecna konfiguracja ma `opacity: 0.4`. Decyzja: dla `interactive=false` używamy wartości z pliku usera (cichsze tło, bez „grab" highlightu).
-
----
-
-## Lista zmian plikowych (deterministyczna)
-
-
-| Plik                                                              | Zmiana                                                                                          |
-| ----------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| `src/hooks/useStudentKnowledge.tsx`                               | + mutacja `archiveEntry(entryId, worksheetId?)`                                                 |
-| `src/components/student-knowledge/StudentKnowledgeSidePanel.tsx`  | + Tabs (Timeline / By Skill / For Next Lesson); + przycisk „Mark as used" dla Next Lesson Ideas |
-| `src/components/student-knowledge/` (entry card)                  | + badge „AI organized" gdy `ai_classified`                                                      |
-| `src/pages/Signup.tsx`                                            | weryfikacja/dodanie `options.data.first_name` w `signUp`                                        |
-| `docs/operational/supabase-confirmation-template.md`              | nowy HTML z personalizacją + bez `hello@`                                                       |
-| `supabase/functions/send-welcome-email/index.ts`                  | usunąć `hello@edooqoo.com` z linii 70                                                           |
-| `src/components/landing/ParticlesBackground.tsx`                  | + prop `interactive`                                                                            |
-| `src/components/AuthenticatedPageShell.tsx`                       | przekazać `interactive={false}`                                                                 |
-| `mem/features/student-knowledge/quick-capture-and-ai-classify.md` | aktualizacja                                                                                    |
-| `docs/llm-context.md` + `llms.txt`                                | sekcja v6.9.9 (Problem→Solution→Mechanics + RAG Keywords)                                       |
-
-
-## Co BĘDZIE wymagało ręcznej akcji usera (1 krok)
-
-Po wdrożeniu — wkleić nowy HTML z `docs/operational/supabase-confirmation-template.md` do Supabase Dashboard → Auth → Email Templates → Confirm signup. ZROBIONE RĘCZNIE 
-
-## Co świadomie pomijamy w tej iteracji
-
-- Auto-link `used_in_worksheet_id` z poziomu `worksheetService.create` (wymagałoby zmian w pipeline generacji — duże ryzyko regresji; manual button wystarcza).
-- Helper `recordKnowledgeBackedEvent` w `useStudentEvents` (DSLM integration) — osobna iteracja DSLM.
-- Auto-suggest „is this still current?" po 90 dniach — wymaga cron/notyfikacji, osobna iteracja.
-- Catch-all forward `hello@edooqoo.com → edooqoo@gmail.com` — wymaga konfiguracji DNS/MX.
+**Sanctity**: zero zmian w promptach worksheet engine, zero zmian w edge functions `generate-curriculum-phases` / `generate-timeline` / `format-worksheet-prompt`.
