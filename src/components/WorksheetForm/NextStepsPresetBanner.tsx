@@ -20,6 +20,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useFutureTimeline } from '@/hooks/useFutureTimeline';
 import { useCurriculumPhases } from '@/hooks/dslm/useCurriculumPhases';
+import { SuggestionEditDialog, type SuggestionEditValue } from '@/components/dslm/SuggestionEditDialog';
 import {
   PICTURE_EXERCISE_IDS,
   AUDIO_EXERCISE_IDS,
@@ -68,7 +69,7 @@ export function NextStepsPresetBanner({
 
   const enabledStudentId = studentId || '';
   const enabledTeacherId = teacherId || '';
-  const { nextSteps, phaseSteps, loading, useSuggestion } = useFutureTimeline({
+  const { nextSteps, phaseSteps, loading, useSuggestion, updateSuggestion } = useFutureTimeline({
     studentId: enabledStudentId,
     teacherId: enabledTeacherId,
   });
@@ -131,6 +132,38 @@ export function NextStepsPresetBanner({
   const total = sortedItems.length;
   const canPrev = windowStart > 0;
   const canNext = windowStart + 3 < total;
+
+  // v6.9.13 — local Edit dialog (no nav away from form).
+  const EMPTY_EDIT: SuggestionEditValue = {
+    topic: '', goal: '', additionalInfo: '', grammarFocus: '',
+    exercises: [], exerciseFocusMap: {},
+  };
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editValue, setEditValue] = useState<SuggestionEditValue>(EMPTY_EDIT);
+  const openEdit = (s: any) => {
+    setEditingId(s.id);
+    setEditValue({
+      topic: s.suggested_topic || '',
+      goal: s.suggested_goal || '',
+      additionalInfo: s.suggested_additional_info || '',
+      grammarFocus: s.suggested_grammar_focus || '',
+      exercises: Array.isArray(s.suggested_exercises) ? [...s.suggested_exercises] : [],
+      exerciseFocusMap: s.suggested_exercise_focus_map ? { ...(s.suggested_exercise_focus_map as Record<string, string>) } : {},
+    });
+  };
+  const saveEdit = async () => {
+    if (!editingId || !editValue.topic.trim()) return;
+    await updateSuggestion(
+      editingId,
+      editValue.topic,
+      editValue.goal,
+      editValue.additionalInfo,
+      editValue.grammarFocus,
+      editValue.exercises,
+      editValue.exerciseFocusMap,
+    );
+    setEditingId(null);
+  };
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -235,7 +268,6 @@ export function NextStepsPresetBanner({
                 const label = phaseSeq
                   ? `S${displayIndex}•P${phaseSeq} ${truncate(payload.topic || 'Untitled step', 28)}`
                   : `S${displayIndex} ${truncate(payload.topic || 'Untitled step', 30)}`;
-                const editHref = `/student/${studentId}?tab=dslm&view=pathway&editSuggestion=${p.id}`;
                 return (
                   <Tooltip key={p.id}>
                     <TooltipTrigger asChild>
@@ -250,10 +282,10 @@ export function NextStepsPresetBanner({
                         </button>
                         <button
                           type="button"
-                          aria-label="Edit suggestion in plan"
-                          title="Edit in plan"
+                          aria-label="Edit suggestion"
+                          title="Edit suggestion"
                           className="h-7 w-6 inline-flex items-center justify-center border-l border-worksheet-purple/20 text-worksheet-purpleDark hover:bg-worksheet-purple/10"
-                          onClick={(e) => { e.stopPropagation(); navigate(editHref); }}
+                          onClick={(e) => { e.stopPropagation(); openEdit(p); }}
                         >
                           <Edit2 className="h-3 w-3" />
                         </button>
@@ -277,7 +309,7 @@ export function NextStepsPresetBanner({
                             variant="outline"
                             size="sm"
                             className="h-7 gap-1 text-xs"
-                            onClick={() => navigate(editHref)}
+                            onClick={() => openEdit(p)}
                           >
                             <Edit2 className="h-3 w-3" /> Edit suggestion
                           </Button>
@@ -309,6 +341,13 @@ export function NextStepsPresetBanner({
           </div>
         </div>
       </div>
+      <SuggestionEditDialog
+        open={!!editingId}
+        value={editValue}
+        onChange={(updates) => setEditValue((prev) => ({ ...prev, ...updates }))}
+        onSave={saveEdit}
+        onCancel={() => setEditingId(null)}
+      />
     </TooltipProvider>
   );
 }
