@@ -14,7 +14,7 @@
  */
 import { useEffect, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Sparkles, Lightbulb, ArrowUpRight, Map, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Sparkles, Lightbulb, ArrowUpRight, Map, ChevronLeft, ChevronRight, Edit2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -116,6 +116,7 @@ export function NextStepsPresetBanner({
       s,
       displayIndex: displayIndexById[s.id] ?? 0,
       phaseLabel: s.phase_id ? (phaseLabelById[s.phase_id] ?? null) : null,
+      phaseSeq: s.phase_id ? (phaseOrderById[s.phase_id] ?? null) : null,
     }));
     return { sortedItems: items };
   }, [phaseSteps, nextSteps, phases]);
@@ -174,7 +175,7 @@ export function NextStepsPresetBanner({
             variant="outline"
             size="sm"
             className="h-8 gap-1 border-amber-400 text-amber-900 hover:bg-amber-100 dark:text-amber-100 self-center"
-            onClick={() => navigate(`/student/${studentId}?tab=progress`)}
+            onClick={() => navigate(`/student/${studentId}?tab=dslm&view=pathway`)}
           >
             Open Learning Plan
             <ArrowUpRight className="h-3.5 w-3.5" />
@@ -196,7 +197,7 @@ export function NextStepsPresetBanner({
             </div>
             <button
               type="button"
-              onClick={() => navigate(`/student/${studentId}?tab=progress`)}
+              onClick={() => navigate(`/student/${studentId}?tab=dslm&view=pathway`)}
               className="text-[11px] text-worksheet-purpleDark dark:text-purple-200 hover:underline flex items-center gap-0.5"
             >
               View plan <ArrowUpRight className="h-3 w-3" />
@@ -218,7 +219,7 @@ export function NextStepsPresetBanner({
             </Button>
 
             <div className="flex flex-wrap items-center gap-1.5 flex-1">
-              {visible.map(({ s: p, displayIndex, phaseLabel }) => {
+              {visible.map(({ s: p, displayIndex, phaseLabel, phaseSeq }) => {
                 const exercises: string[] = Array.isArray(p.suggested_exercises) ? p.suggested_exercises : [];
                 const focusMap: Record<string, string> = (p.suggested_exercise_focus_map as Record<string, string>) || {};
                 const payload: PresetPayload = {
@@ -231,23 +232,35 @@ export function NextStepsPresetBanner({
                   mediaTypes: inferMediaTypes(exercises),
                   sourceSuggestionId: p.id,
                 };
-                const label = `#${displayIndex} ${truncate(payload.topic || 'Untitled step', 32)}`;
+                const label = phaseSeq
+                  ? `S${displayIndex}•P${phaseSeq} ${truncate(payload.topic || 'Untitled step', 28)}`
+                  : `S${displayIndex} ${truncate(payload.topic || 'Untitled step', 30)}`;
+                const editHref = `/student/${studentId}?tab=dslm&view=pathway&editSuggestion=${p.id}`;
                 return (
                   <Tooltip key={p.id}>
                     <TooltipTrigger asChild>
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        className="h-7 gap-1 bg-white/80 dark:bg-background/40 border-worksheet-purple/30 text-xs"
-                        onClick={() => { onApplyPreset(payload); setWindowStart(0); }}
-                      >
-                        <Sparkles className="h-3 w-3 text-worksheet-purple" />
-                        <span className="max-w-[200px] truncate">{label}</span>
-                      </Button>
+                      <div className="inline-flex items-center rounded-md border border-worksheet-purple/30 bg-white/80 dark:bg-background/40 overflow-hidden">
+                        <button
+                          type="button"
+                          className="h-7 px-2 inline-flex items-center gap-1 text-xs hover:bg-worksheet-purple/10"
+                          onClick={() => { onApplyPreset(payload); setWindowStart(0); }}
+                        >
+                          <Sparkles className="h-3 w-3 text-worksheet-purple" />
+                          <span className="max-w-[180px] truncate">{label}</span>
+                        </button>
+                        <button
+                          type="button"
+                          aria-label="Edit suggestion in plan"
+                          title="Edit in plan"
+                          className="h-7 w-6 inline-flex items-center justify-center border-l border-worksheet-purple/20 text-worksheet-purpleDark hover:bg-worksheet-purple/10"
+                          onClick={(e) => { e.stopPropagation(); navigate(editHref); }}
+                        >
+                          <Edit2 className="h-3 w-3" />
+                        </button>
+                      </div>
                     </TooltipTrigger>
                     <TooltipContent side="bottom" className="max-w-sm">
-                      <div className="space-y-0.5 text-xs">
+                      <div className="space-y-1 text-xs">
                         <div className="font-semibold">
                           Step #{displayIndex} • {phaseLabel ?? 'Free step'}
                         </div>
@@ -258,6 +271,17 @@ export function NextStepsPresetBanner({
                         {p.rationale && (
                           <div className="italic opacity-80"><span className="not-italic opacity-70">Why:</span> {p.rationale}</div>
                         )}
+                        <div className="pt-1">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="h-7 gap-1 text-xs"
+                            onClick={() => navigate(editHref)}
+                          >
+                            <Edit2 className="h-3 w-3" /> Edit suggestion
+                          </Button>
+                        </div>
                       </div>
                     </TooltipContent>
                   </Tooltip>

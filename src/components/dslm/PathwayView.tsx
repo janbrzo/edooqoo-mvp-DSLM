@@ -8,7 +8,8 @@
  * Per-step regeneration uses regenerateInPlace — preserves the original sequence position.
  * When useRoadmap=false: phase context is ignored when generating next steps.
  */
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -75,6 +76,7 @@ export const PathwayView: React.FC<PathwayViewProps> = ({
   const [editedSuggestion, setEditedSuggestion] = useState<SuggestionEditValue>(EMPTY_EDIT);
   const [notesOpen, setNotesOpen] = useState(false);
   const [roadmapOpen, setRoadmapOpen] = useState(true);
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const nextLessonNotes = planningNotes.entries.filter(e => e.category === 'Next Lesson Ideas');
 
@@ -158,6 +160,21 @@ export const PathwayView: React.FC<PathwayViewProps> = ({
       exerciseFocusMap: s.suggested_exercise_focus_map ? { ...s.suggested_exercise_focus_map } : {},
     });
   };
+
+  // Open shared edit dialog when arriving with ?editSuggestion={id} (used by NextStepsPresetBanner).
+  useEffect(() => {
+    const editId = searchParams.get('editSuggestion');
+    if (!editId) return;
+    const all = [...phaseSteps, ...nextSteps];
+    const target = all.find((s: any) => s.id === editId);
+    if (target) {
+      handleEditSuggestion(target);
+      const next = new URLSearchParams(searchParams);
+      next.delete('editSuggestion');
+      setSearchParams(next, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, phaseSteps, nextSteps]);
 
   const handleSaveSuggestion = async () => {
     if (!editingSuggestionId || !editedSuggestion.topic.trim()) return;

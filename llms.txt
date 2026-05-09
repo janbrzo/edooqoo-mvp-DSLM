@@ -100,3 +100,10 @@ Goals → generate-curriculum-phases (macro phases, dslm_curriculum_phases)
 **Critical fix v6.9.11**: `useGoalProgress` moved ABOVE `if (loading) return ...` in `StudentProgressTab.tsx` to satisfy Rules of Hooks (was causing React #310 → blank `/student/{id}?tab=progress`). New core invariant: never call hooks below early returns.
 
 **Student Knowledge status v6.9.11**: implemented = quick capture + AI background classify (≥0.65 conf), Stale Badge (90d) for Personal/Skill Assessment/Goals, DSLM integration, Next Lesson Ideas in PathwayView. Deferred (separate iteration v6.9.12+) = pg_cron auto-suggest "still current?", auto-link `used_in_worksheet_id`, sentiment trend chart.
+
+**v6.9.12 — Worksheet form preset polish + phase-aware step counts**:
+- Chip label `S{seq}•P{phaseSeq} topic` (phase-bound) / `S{seq} topic` (free). Source: `phaseOrderById` from `useCurriculumPhases`.
+- Edit button on chip + tooltip → `/student/{id}?tab=dslm&view=pathway&editSuggestion={suggId}`. PathwayView `useEffect` reads param, opens shared `SuggestionEditDialog`, strips param. Single edit source of truth.
+- View plan / Open Learning Plan now link to `?tab=dslm&view=pathway` (canonical). Old `?tab=progress` redirect kept.
+- Per-phase step count: `recommendedStepsForPhase = clamp(end-start+1, 1..6)`; 1 step ≈ 1 weekly lesson. Used in `MacroTimeline` quick dropdown and `Generate steps with comment`. Free next-steps stay default 3. Helper text in dropdown.
+- KNOWN: `generate-curriculum-phases` prompt does not cap total weeks by goal deadline — 90-day goal can yield 20-week plan. Flagged; sanctity rule applies.

@@ -22,6 +22,24 @@ import { cn } from '@/lib/utils';
 import { computePhaseConfidence } from '@/lib/dslm/confidenceScore';
 import { ConfidenceBadge } from './ConfidenceBadge';
 
+/**
+ * v6.9.12 — Recommend 1 step per week of the phase length, clamped 1–6.
+ * Falls back to 3 (rolling 3-lesson plan) when weeks are not set.
+ */
+function recommendedStepsForPhase(phase: CurriculumPhase): number {
+  const start = phase.estimated_weeks_start;
+  const end = phase.estimated_weeks_end;
+  if (!start || !end || end < start) return 3;
+  const weeks = end - start + 1;
+  return Math.max(1, Math.min(6, weeks));
+}
+function phaseWeeks(phase: CurriculumPhase): number | null {
+  const s = phase.estimated_weeks_start;
+  const e = phase.estimated_weeks_end;
+  if (!s || !e || e < s) return null;
+  return e - s + 1;
+}
+
 interface MacroTimelineProps {
   studentId: string;
   teacherId: string;
@@ -150,7 +168,8 @@ export const MacroTimeline: React.FC<MacroTimelineProps> = ({
 
   const openPhaseCommentDialog = (phaseId: string) => {
     setPhaseComment('');
-    setPhaseCommentCount(3);
+    const phase = phases.find(p => p.id === phaseId);
+    setPhaseCommentCount(phase ? recommendedStepsForPhase(phase) : 3);
     setPhaseCommentDialog({ open: true, phaseId });
   };
   const submitPhaseComment = async () => {
@@ -163,7 +182,11 @@ export const MacroTimeline: React.FC<MacroTimelineProps> = ({
   };
 
 
-  const getPhaseQuickCount = (id: string) => phaseQuickCount[id] ?? 3;
+  const getPhaseQuickCount = (id: string) => {
+    if (phaseQuickCount[id] !== undefined) return phaseQuickCount[id];
+    const phase = phases.find(p => p.id === id);
+    return phase ? recommendedStepsForPhase(phase) : 3;
+  };
   const setPhaseQuickCountFor = (id: string, n: number) =>
     setPhaseQuickCount(p => ({ ...p, [id]: Math.min(6, Math.max(1, n)) }));
 
@@ -310,6 +333,19 @@ export const MacroTimeline: React.FC<MacroTimelineProps> = ({
                                 onChange={(e) => setPhaseQuickCountFor(phase.id, parseInt(e.target.value) || 1)}
                                 className="h-8"
                               />
+                              {(() => {
+                                const w = phaseWeeks(phase);
+                                const rec = recommendedStepsForPhase(phase);
+                                return w ? (
+                                  <p className="text-[10px] text-muted-foreground leading-snug">
+                                    Suggested: {rec} (one per week of {w}-week phase).
+                                  </p>
+                                ) : (
+                                  <p className="text-[10px] text-muted-foreground leading-snug">
+                                    Suggested: 3 (set phase weeks for a smarter default).
+                                  </p>
+                                );
+                              })()}
                               <Button
                                 size="sm" className="w-full"
                                 onClick={() => onGenerateForPhase(phase.id, getPhaseQuickCount(phase.id), '')}
