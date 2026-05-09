@@ -653,18 +653,27 @@ export default function WorksheetForm({
                   
                   {/* Student Selection - Lock icon for anonymous/no students, dropdown for authenticated with students */}
                   {userId && students.length > 0 ? (
-                    <div className={`${isMobile ? 'w-full' : 'w-[23%]'} flex items-center`}>
+                    <div className={`${isMobile ? 'w-full' : 'w-[23%]'} flex flex-col justify-center`}>
                       <Select value={selectedStudentId} onValueChange={setSelectedStudentId}>
-                        <SelectTrigger className="w-full h-full">
-                          <SelectValue placeholder="No specific student" />
+                        <SelectTrigger
+                          className={`w-full ${selectedStudentId === 'no-student'
+                            ? 'border-amber-400 ring-1 ring-amber-300 bg-amber-50/40 dark:bg-amber-900/10'
+                            : ''}`}
+                        >
+                          <SelectValue placeholder="Choose a student" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="no-student">No specific student</SelectItem>
+                          <SelectItem value="no-student">Generic worksheet (no student)</SelectItem>
                           {students.map(student => <SelectItem key={student.id} value={student.id}>
                               {student.name} ({student.english_level})
                             </SelectItem>)}
                         </SelectContent>
                       </Select>
+                      {selectedStudentId === 'no-student' && (
+                        <p className="text-[11px] text-amber-700 dark:text-amber-300 mt-1 leading-tight">
+                          Pick a student to unlock personalized goals, level, and Next Steps.
+                        </p>
+                      )}
                     </div>
                   ) : (
                     <TooltipProvider>
