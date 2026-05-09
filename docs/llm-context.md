@@ -301,3 +301,24 @@ Two distinct edge functions live ONLY in Supabase deployment (not in repo): `gen
 **Technical Mechanics**: Single edit in `src/components/student-progress/StudentProgressTab.tsx`. New invariant in `mem://index.md` Core: "Hooks must be called above any early return."
 
 **RAG Keywords**: react error 310, rules of hooks, conditional hook call, white screen progress tab, useGoalProgress crash, early return before hook
+
+## v6.9.12 — Worksheet Form Preset Polish + Phase-Aware Step Counts
+
+**Problem 1**: Banner chips in `NextStepsPresetBanner` showed `#N topic` — no phase context, identical to free steps.
+**Edooqoo Solution**: Chip label = `S{seq}•P{phaseSeq} topic` for phase-bound steps; `S{seq} topic` for free (legacy `next_step` without `phase_id`). Tooltip header unchanged (`Step #N • Phase X / Free step`).
+**Technical Mechanics**: `useMemo` in `NextStepsPresetBanner.tsx` extends each item with `phaseSeq` from `phaseOrderById` (already built from `useCurriculumPhases`). Label assembled inline at render.
+
+**Problem 2**: Tooltip rationale truncated; no edit affordance from the worksheet form.
+**Edooqoo Solution**: Added `Edit2` button on chip (split-button pattern, right segment) and full `Edit suggestion` button in tooltip. Both navigate to `/student/{studentId}?tab=dslm&view=pathway&editSuggestion={suggestionId}`.
+**Technical Mechanics**: `PathwayView.tsx` mounts `useEffect` that reads `searchParams.get('editSuggestion')`, finds the suggestion in `[...phaseSteps, ...nextSteps]`, calls existing `handleEditSuggestion(target)` (single source of truth — same `SuggestionEditDialog`), then strips the param via `setSearchParams(..., {replace:true})`. No new edit modal in the form. Chip click handler uses `e.stopPropagation()` so the Edit button does not fire `applyPreset`.
+
+**Problem 3**: `View plan` and `Open Learning Plan` linked to deprecated `?tab=progress`.
+**Edooqoo Solution**: Both links navigate to canonical `?tab=dslm&view=pathway`. The redirect in `StudentPage.tsx` (`progress` → `dslm&view=pathway`) is retained for backward compatibility with old emails/notifications.
+
+**Problem 4**: "Generate steps for this phase" defaulted to 3 regardless of phase length. For a 4-week phase with weekly lessons this under-recommends.
+**Edooqoo Solution**: Recommendation = `(estimated_weeks_end - estimated_weeks_start + 1)`, clamped 1-6 (1 step ≈ 1 weekly lesson). Free next-steps (no phase) keep 3 (rolling lesson plan). Teacher overrides preserved per-phase.
+**Technical Mechanics**: `recommendedStepsForPhase(phase)` helper + `phaseWeeks(phase)` in `MacroTimeline.tsx`. `getPhaseQuickCount(id)` returns recommended fallback when teacher hasn't overridden. `openPhaseCommentDialog` initializes `phaseCommentCount` from recommendation. New dropdown helper text: `Suggested: {N} (one per week of {W}-week phase)`. `NextStepsSection` first-gen dialog copy updated to explain the difference between free and phase-bound steps.
+
+**Phase Count Rationale (sanctity reminder)**: `generate-curriculum-phases` prompt is hard-coded 3-6 phases. AI picks within band based on goal count + deadlines + skill-gap breadth — NOT random. KNOWN LIMITATION: prompt does not enforce student goal deadline as upper bound on total weeks (90-day deadline can still yield 5×4w=20w plan = ~7w over). Acceptable as didactic horizon (buffer beyond deadline). Flagged for future engine update; sanctity rule blocks prompt edits without explicit approval.
+
+**RAG Keywords**: S P chip label, edit suggestion from worksheet form, editSuggestion search param, pathway tab url, recommended steps per phase, one step per week, phase length steps, recommendedStepsForPhase, phase weeks, deadline horizon limitation, view plan link, open learning plan link
