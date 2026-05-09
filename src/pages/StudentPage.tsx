@@ -22,6 +22,7 @@ import { StudentSelector } from '@/components/StudentSelector';
 import { StudentKnowledgeSection } from '@/components/student-knowledge/StudentKnowledgeSection';
 import { useStudentKnowledge } from '@/hooks/useStudentKnowledge';
 import { StudentKnowledgeEntryCard } from '@/components/student-knowledge/StudentKnowledgeEntryCard';
+import { StudentKnowledgeQuickAddModal } from '@/components/student-knowledge/StudentKnowledgeQuickAddModal';
 import { OneMinutePrepCard } from '@/components/student-knowledge/OneMinutePrepCard';
 import { useAllWorksheetHomework } from '@/hooks/useAllWorksheetHomework';
 import { WorksheetHomeworkSection } from '@/components/worksheet/WorksheetHomeworkSection';
@@ -321,6 +322,9 @@ const StudentPage = () => {
   
   // Rename worksheet state
   const [renameWorksheetData, setRenameWorksheetData] = useState<{id: string; title: string} | null>(null);
+
+  // v6.9.13 — local Add-Note quick modal triggered from overview tab.
+  const [quickAddNoteOpen, setQuickAddNoteOpen] = useState(false);
 
   // Get recent notes for overview
   const studentKnowledge = useStudentKnowledge({
@@ -731,7 +735,7 @@ const StudentPage = () => {
                   <div className="flex gap-2">
                     <Button 
                       size="sm"
-                      onClick={() => handleTabChange('knowledge')}
+                      onClick={() => setQuickAddNoteOpen(true)}
                       className="flex-1"
                     >
                       <Plus className="h-4 w-4 mr-1" />
@@ -778,7 +782,7 @@ const StudentPage = () => {
                     <StickyNote className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
                     <p className="text-muted-foreground">No notes added yet</p>
                     <Button 
-                      onClick={() => handleTabChange('knowledge')} 
+                      onClick={() => setQuickAddNoteOpen(true)} 
                       className="mt-4" 
                       size="sm"
                     >
@@ -1221,6 +1225,14 @@ const StudentPage = () => {
             type="worksheet"
           />
         )}
+
+        {/* v6.9.13 — Quick Add Note (from overview tab) */}
+        <StudentKnowledgeQuickAddModal
+          isOpen={quickAddNoteOpen}
+          onClose={() => setQuickAddNoteOpen(false)}
+          onAdd={studentKnowledge.addEntry}
+          suggestedTags={studentKnowledge.suggestedTags || []}
+        />
       </div>
     </AuthenticatedPageShell>
   );
