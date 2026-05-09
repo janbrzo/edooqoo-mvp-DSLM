@@ -1230,7 +1230,7 @@ const StudentPage = () => {
         <StudentKnowledgeQuickAddModal
           isOpen={quickAddNoteOpen}
           onClose={() => setQuickAddNoteOpen(false)}
-          onAdd={studentKnowledge.addEntry}
+          onAdd={async (entry) => { await studentKnowledge.addEntry(entry); }}
           suggestedTags={studentKnowledge.suggestedTags || []}
         />
       </div>
