@@ -107,3 +107,11 @@ Goals → generate-curriculum-phases (macro phases, dslm_curriculum_phases)
 - View plan / Open Learning Plan now link to `?tab=dslm&view=pathway` (canonical). Old `?tab=progress` redirect kept.
 - Per-phase step count: `recommendedStepsForPhase = clamp(end-start+1, 1..6)`; 1 step ≈ 1 weekly lesson. Used in `MacroTimeline` quick dropdown and `Generate steps with comment`. Free next-steps stay default 3. Helper text in dropdown.
 - KNOWN: `generate-curriculum-phases` prompt does not cap total weeks by goal deadline — 90-day goal can yield 20-week plan. Flagged; sanctity rule applies.
+
+**v6.9.13 — Deadline-fit curriculum + DSLM sub-navigation**:
+- `generate-curriculum-phases` now ENFORCES deadline. Two layers:
+  1. Prompt block `HARD CONSTRAINT — DEADLINE FIT` declares exact totalWeeks budget (=`weeksUntilDeadline` for replace; =`weeksUntilDeadline − consumed` for add) and demands contiguous integer ranges.
+  2. Server-side `fitPhasesToDeadline(phases, targetWeeks)` rescales any AI overflow proportionally (minWeeks=2) and rebases to contiguous ranges from week 1. `generation_context.deadline_fit_adjusted=true` when scaling fired. `target_total_weeks` recorded.
+- `existingPhases` query selects `estimated_weeks_start/end` so add-mode subtracts already-consumed weeks. Worksheet-generation prompt UNTOUCHED (sanctity).
+- DSLM sub-navigation: `CollapsibleSection` accepts `id`; listens for `window` event `dslm:openSubsection`; sets `open=true` and `scrollIntoView`. `DSLMTab` sub-nav map: goals (supporting/additional/achieved/archived/notes), skills (heatmap/micro/notes), profile (ai-summary/psych/behavioral/personal/all-notes/debug). Pathway has no subs. Sub-buttons render under active top section. Sticky-nav offset via `scroll-mt-24`.
+- All call-sites in `GoalsView/SkillsView/ProfileView` tagged with stable `id` props.
