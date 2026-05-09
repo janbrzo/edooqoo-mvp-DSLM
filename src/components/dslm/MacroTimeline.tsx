@@ -26,14 +26,14 @@ import { ConfidenceBadge } from './ConfidenceBadge';
  * v6.9.12 — Recommend 1 step per week of the phase length, clamped 1–6.
  * Falls back to 3 (rolling 3-lesson plan) when weeks are not set.
  */
-function recommendedStepsForPhase(phase: CurriculumPhase): number {
+export function recommendedStepsForPhase(phase: CurriculumPhase): number {
   const start = phase.estimated_weeks_start;
   const end = phase.estimated_weeks_end;
   if (!start || !end || end < start) return 3;
   const weeks = end - start + 1;
   return Math.max(1, Math.min(6, weeks));
 }
-function phaseWeeks(phase: CurriculumPhase): number | null {
+export function phaseWeeks(phase: CurriculumPhase): number | null {
   const s = phase.estimated_weeks_start;
   const e = phase.estimated_weeks_end;
   if (!s || !e || e < s) return null;
