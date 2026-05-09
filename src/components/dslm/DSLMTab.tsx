@@ -80,14 +80,7 @@ const SUBSECTIONS: Record<ViewId, { id: string; label: string }[]> = {
   ],
 };
 
-const openSubsection = (parent: ViewId, subId: string) => {
-  // First scroll to the parent section, then notify the matching CollapsibleSection.
-  window.dispatchEvent(new CustomEvent('dslm:scrollToSection', { detail: { id: parent } }));
-  // Small delay so the parent scroll completes before sub-scroll/open.
-  setTimeout(() => {
-    window.dispatchEvent(new CustomEvent('dslm:openSubsection', { detail: { id: subId } }));
-  }, 250);
-};
+// Sub-nav clicks dispatch `dslm:openSubsection` (handled inline at click site).
 
 export const DSLMTab: React.FC<DSLMTabProps> = ({
   studentId,
