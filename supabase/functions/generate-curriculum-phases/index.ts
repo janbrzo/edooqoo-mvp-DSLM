@@ -10,17 +10,66 @@
  */
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
-import {
-  computePacingIndex,
-  pacingLabel,
-  buildScientificPrinciplesBlock,
-  buildStudentProfileBlock,
-  buildWeakAreasBlock,
-  buildKnowledgeBlock,
-  buildWorksheetHistoryBlock,
-  buildGoalsBlock,
-  buildExistingPhasesBlock,
-} from "../_shared/dslmPromptCore.ts";
+
+// v6.9.13 — helpers inlined (previously imported from ../_shared/dslmPromptCore.ts).
+// Inlined to keep deploy self-contained. Behavior preserved.
+function computePacingIndex(student: any, weeksUntilDeadline: number | null): number {
+  const stored = Number.isFinite(student?.dslm_pacing_mode) ? Number(student.dslm_pacing_mode) : 50;
+  if (stored !== 50) return Math.max(0, Math.min(100, stored));
+  // Auto: tighter deadline → more pragmatic (higher index).
+  if (weeksUntilDeadline === null) return 50;
+  if (weeksUntilDeadline <= 8) return 80;
+  if (weeksUntilDeadline <= 16) return 65;
+  if (weeksUntilDeadline <= 32) return 50;
+  return 35;
+}
+function pacingLabel(p: number): string {
+  if (p >= 75) return 'Pragmatic';
+  if (p >= 55) return 'Balanced-Pragmatic';
+  if (p >= 45) return 'Balanced';
+  if (p >= 25) return 'Balanced-Scientific';
+  return 'Scientific';
+}
+function buildScientificPrinciplesBlock(level: string, pacing: number): string {
+  return `LEARNING SCIENCE FRAMEWORK (level=${level || 'unknown'}, pacing=${pacing}/100):
+- Apply Task-Based Language Teaching (TBLT) — every phase frames a real adult outcome.
+- Spaced retrieval across phases; weak skills resurface in later phases under new tasks.
+- Pragmatic mode = front-load the deadline-blocking outcome; Scientific mode = solidify foundations first.`;
+}
+function buildStudentProfileBlock(student: any, _pacing: number): string {
+  return `STUDENT PROFILE:
+- Name: ${student?.name || 'Unknown'}
+- Level: ${student?.english_level || 'unknown'}
+- Main goal: ${student?.main_goal || 'not set'}`;
+}
+function buildWeakAreasBlock(metrics: any[], limit: number): string {
+  if (!metrics?.length) return '(no skill metrics yet)';
+  return metrics.slice(0, limit).map((m: any) => {
+    const age = m.updated_at ? Math.round((Date.now() - new Date(m.updated_at).getTime()) / (1000*60*60*24)) : null;
+    return `- ${m.skill_category || ''}/${m.micro_skill || m.skill_name}: mastery=${m.current_mastery}, trend=${m.trend || 'flat'}${age !== null ? `, ${age}d old` : ''}`;
+  }).join('\n  ');
+}
+function buildKnowledgeBlock(notes: any[], limit: number): string {
+  if (!notes?.length) return '(no notes)';
+  return notes.slice(0, limit).map((n: any) => `- [${n.category || 'general'}] ${String(n.content || '').slice(0, 200)}`).join('\n  ');
+}
+function buildWorksheetHistoryBlock(ws: any[], limit: number): string {
+  if (!ws?.length) return '(no prior worksheets)';
+  return ws.slice(0, limit).map((w: any) => `- ${w.topic} (${new Date(w.created_at).toISOString().slice(0,10)})`).join('\n  ');
+}
+function buildGoalsBlock(goals: any[]): string {
+  if (!goals?.length) return '(no active goals)';
+  return goals.map((g: any) => {
+    const dl = g.target_date ? ` [DEADLINE: ${g.target_date}]` : '';
+    return `- (${g.goal_type || 'goal'}) ${g.title}${dl}${g.description ? ` — ${g.description}` : ''}`;
+  }).join('\n');
+}
+function buildExistingPhasesBlock(phases: any[]): string {
+  if (!phases?.length) return '(none — fresh roadmap)';
+  return phases.map((p: any) =>
+    `- #${p.sequence_number} [${p.status}] "${p.title}" weeks ${p.estimated_weeks_start || '?'}-${p.estimated_weeks_end || '?'} focus=[${(p.focus_areas || []).join(', ')}]`
+  ).join('\n');
+}
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
