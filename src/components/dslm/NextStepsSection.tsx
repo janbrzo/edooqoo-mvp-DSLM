@@ -69,6 +69,9 @@ export const NextStepsSection: React.FC<NextStepsSectionProps> = ({
   const [commentDialog, setCommentDialog] = useState<{ open: boolean; suggestion?: any }>({ open: false });
   const [comment, setComment] = useState('');
   const [moreCount, setMoreCount] = useState(3);
+  // v6.9.11: count dialog for the FIRST generation (empty state) — UX parity with "Generate more".
+  const [firstGenDialogOpen, setFirstGenDialogOpen] = useState(false);
+  const [firstGenCount, setFirstGenCount] = useState(3);
 
   const allIds = items.map(it => it.s.id);
   const first = items[0] || null;
@@ -102,7 +105,7 @@ export const NextStepsSection: React.FC<NextStepsSectionProps> = ({
         onUse={onUse}
         onUseAndGenerate={onUseAndGenerate}
         onEdit={onEdit}
-        onGenerate={() => onGenerateMore(3, [])}
+        onGenerate={() => { setFirstGenCount(3); setFirstGenDialogOpen(true); }}
         onRegenerateWithComment={openCommentForOne}
         onMarkUsed={onMarkUsed}
         generating={generating}
@@ -213,6 +216,39 @@ export const NextStepsSection: React.FC<NextStepsSectionProps> = ({
             <Button onClick={submitComment} disabled={generating}>
               {generating ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <RefreshCw className="h-4 w-4 mr-2" />}
               Regenerate
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* v6.9.11: First-generation count dialog (empty state). */}
+      <Dialog open={firstGenDialogOpen} onOpenChange={setFirstGenDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Generate next steps</DialogTitle>
+            <DialogDescription>
+              How many AI-generated next steps should we create for this student?
+              {currentPhaseLabel ? <> They will be bound to <strong>{currentPhaseLabel}</strong>.</> : null}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-2">
+            <Input
+              type="number" min="1" max="6" value={firstGenCount}
+              onChange={(e) => setFirstGenCount(Math.min(6, Math.max(1, parseInt(e.target.value) || 1)))}
+              className="h-9"
+            />
+            <p className="text-[11px] text-muted-foreground leading-snug">
+              Recommended: 3 (rolling 3-lesson plan). You can always add more later.
+            </p>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setFirstGenDialogOpen(false)}>Cancel</Button>
+            <Button
+              onClick={async () => { setFirstGenDialogOpen(false); await onGenerateMore(firstGenCount, []); }}
+              disabled={generating}
+            >
+              {generating ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Plus className="h-4 w-4 mr-2" />}
+              Generate {firstGenCount} step{firstGenCount > 1 ? 's' : ''}
             </Button>
           </DialogFooter>
         </DialogContent>
