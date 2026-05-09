@@ -78,21 +78,6 @@ export const PathwayView: React.FC<PathwayViewProps> = ({
   const [roadmapOpen, setRoadmapOpen] = useState(true);
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // Open shared edit dialog when arriving with ?editSuggestion={id} (used by NextStepsPresetBanner)
-  useEffect(() => {
-    const editId = searchParams.get('editSuggestion');
-    if (!editId) return;
-    const all = [...phaseSteps, ...nextSteps];
-    const target = all.find((s: any) => s.id === editId);
-    if (target) {
-      handleEditSuggestion(target);
-      const next = new URLSearchParams(searchParams);
-      next.delete('editSuggestion');
-      setSearchParams(next, { replace: true });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams, phaseSteps, nextSteps]);
-
   const nextLessonNotes = planningNotes.entries.filter(e => e.category === 'Next Lesson Ideas');
 
   const currentPhase = useMemo(() => phases.find(p => p.status === 'in_progress') || null, [phases]);
@@ -175,6 +160,21 @@ export const PathwayView: React.FC<PathwayViewProps> = ({
       exerciseFocusMap: s.suggested_exercise_focus_map ? { ...s.suggested_exercise_focus_map } : {},
     });
   };
+
+  // Open shared edit dialog when arriving with ?editSuggestion={id} (used by NextStepsPresetBanner).
+  useEffect(() => {
+    const editId = searchParams.get('editSuggestion');
+    if (!editId) return;
+    const all = [...phaseSteps, ...nextSteps];
+    const target = all.find((s: any) => s.id === editId);
+    if (target) {
+      handleEditSuggestion(target);
+      const next = new URLSearchParams(searchParams);
+      next.delete('editSuggestion');
+      setSearchParams(next, { replace: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, phaseSteps, nextSteps]);
 
   const handleSaveSuggestion = async () => {
     if (!editingSuggestionId || !editedSuggestion.topic.trim()) return;
