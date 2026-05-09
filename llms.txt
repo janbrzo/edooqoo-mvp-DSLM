@@ -85,3 +85,18 @@ Goals → generate-curriculum-phases (macro phases, dslm_curriculum_phases)
 - Sanctity: do NOT modify worksheet generation prompt, `format-worksheet-prompt`, `generate-curriculum-phases`, or `generate-timeline` edge functions.
 
 **RAG Keywords**: next step preset, suggestion chip, learning plan banner, worksheet form preset, prefill from suggestion, future timeline preset, phase step preset, stale note badge, knowledge freshness, last confirmed at, 90 days outdated, confirm current, knowledge audit, mental model curriculum vs timeline, mark preset used.
+
+**v6.9.11**:
+- WorksheetForm preset banner: header `Next Steps from Learning Plan` (Map icon) + `View plan ↗`. Chips sorted by (currentPhase first, phaseOrder ASC, sequence_number ASC) — matches Profile/Pathway. `displayIndex` per-phase. Tooltip = Step #N • Phase, full topic, goal, why.
+- Sliding-window carousel (3-of-N, advance by 1) replaces hard `slice(0,3)`. Resets on student change & after `applyPreset`.
+- Empty-state CTA expanded with strong didactic copy (no fake percentages); button → `/student/{id}?tab=progress`.
+- WorksheetForm student select: amber border + "Pick a student to unlock…" hint when `no-student`. Placeholder `Choose a student`. Item label `Generic worksheet (no student)` (value unchanged).
+- NextStepBanner empty state: "Just added some? Refresh the page to see them." + Refresh button when `!hasGoals`.
+- NextStepsSection: first-time generate now opens count Dialog (1-6, default 3) — parity with "Generate more".
+- useFutureTimeline: catch differentiates 402 (credits) / 429 (rate) / generic.
+
+**Counts rationale**: 3-6 phases = quarter-to-semester arc (12-24w); 1-3 next steps = rolling 3-lesson plan (4+ becomes stale after 2 lessons). AI picks within band based on goals + nearest deadline + mainGoal breadth.
+
+**Critical fix v6.9.11**: `useGoalProgress` moved ABOVE `if (loading) return ...` in `StudentProgressTab.tsx` to satisfy Rules of Hooks (was causing React #310 → blank `/student/{id}?tab=progress`). New core invariant: never call hooks below early returns.
+
+**Student Knowledge status v6.9.11**: implemented = quick capture + AI background classify (≥0.65 conf), Stale Badge (90d) for Personal/Skill Assessment/Goals, DSLM integration, Next Lesson Ideas in PathwayView. Deferred (separate iteration v6.9.12+) = pg_cron auto-suggest "still current?", auto-link `used_in_worksheet_id`, sentiment trend chart.

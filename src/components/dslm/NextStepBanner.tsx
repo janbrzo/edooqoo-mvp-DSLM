@@ -62,15 +62,29 @@ export const NextStepBanner: React.FC<NextStepBannerProps> = ({
     return (
       <Card className="border-dashed border-2 border-muted-foreground/20">
         <CardContent className="pt-6 text-center space-y-3">
-          <p className="text-muted-foreground">
-            {hasGoals
-              ? 'No next step yet. Generate AI-powered worksheet suggestions.'
-              : 'Add goals first for better worksheet suggestions.'}
-          </p>
-          <Button onClick={onGenerate} disabled={generating || !hasGoals}>
-            {generating ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Sparkles className="h-4 w-4 mr-2" />}
-            Generate next steps
-          </Button>
+          <div className="space-y-1">
+            <p className="text-muted-foreground">
+              {hasGoals
+                ? 'No next step yet. Generate AI-powered worksheet suggestions.'
+                : 'Add goals first for better worksheet suggestions.'}
+            </p>
+            {!hasGoals && (
+              <p className="text-[11px] opacity-70">
+                Just added some? Refresh the page to see them.
+              </p>
+            )}
+          </div>
+          <div className="flex items-center justify-center gap-2">
+            <Button onClick={onGenerate} disabled={generating || !hasGoals}>
+              {generating ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Sparkles className="h-4 w-4 mr-2" />}
+              Generate next steps
+            </Button>
+            {!hasGoals && (
+              <Button variant="ghost" size="sm" onClick={() => window.location.reload()}>
+                Refresh
+              </Button>
+            )}
+          </div>
         </CardContent>
       </Card>
     );

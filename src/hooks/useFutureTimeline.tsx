@@ -195,7 +195,15 @@ export const useFutureTimeline = ({ studentId, teacherId }: UseFutureTimelinePro
       return true;
     } catch (error) {
       console.error('Error generating next steps:', error);
-      toast.error('Failed to generate next steps');
+      // v6.9.11: distinguish gateway 402 (no credits) / 429 (rate limit) / generic 5xx.
+      const status = (error as any)?.context?.status ?? (error as any)?.status;
+      if (status === 402) {
+        toast.error('AI credits exhausted. Add credits in Workspace settings.');
+      } else if (status === 429) {
+        toast.error('Too many AI requests. Wait a moment and retry.');
+      } else {
+        toast.error('Failed to generate next steps. Please try again.');
+      }
       return false;
     } finally {
       setGenerating(false);
