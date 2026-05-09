@@ -19,7 +19,8 @@ import { useFutureTimeline } from '@/hooks/useFutureTimeline';
 import { useStudentKnowledge } from '@/hooks/useStudentKnowledge';
 import { useCurriculumPhases } from '@/hooks/dslm/useCurriculumPhases';
 import { NextStepsSection } from './NextStepsSection';
-import { MacroTimeline } from './MacroTimeline';
+import { MacroTimeline, recommendedStepsForPhase, phaseWeeks } from './MacroTimeline';
+import type { PhaseOption } from './GenerateStepsDialog';
 import { SuggestionEditDialog, type SuggestionEditValue } from './SuggestionEditDialog';
 import { StudentKnowledgeEntryCard } from '@/components/student-knowledge/StudentKnowledgeEntryCard';
 import { ChevronDown, StickyNote, Map } from 'lucide-react';
@@ -188,9 +189,38 @@ export const PathwayView: React.FC<PathwayViewProps> = ({
   };
 
   // Roadmap toggle: when off, never bind to a phase.
-  const targetPhaseId = useRoadmap ? (currentPhase?.id ?? null) : null;
   const currentPhaseLabelForUI = useRoadmap && currentPhase
     ? `${phaseLabelById[currentPhase.id]}: ${currentPhase.title}` : null;
+
+  // v6.9.13 — phase metadata for the shared GenerateStepsDialog.
+  const phaseOptions: PhaseOption[] = useMemo(() => {
+    const counts: Record<string, number> = {};
+    for (const s of phaseSteps) {
+      if (s.phase_id) counts[s.phase_id] = (counts[s.phase_id] || 0) + 1;
+    }
+    return [...phases]
+      .sort((a, b) => a.sequence_number - b.sequence_number)
+      .map((p): PhaseOption => ({
+        id: p.id,
+        label: p.title,
+        sequence: p.sequence_number,
+        status: p.status,
+        have: counts[p.id] || 0,
+        need: recommendedStepsForPhase(p),
+        weeks: phaseWeeks(p),
+      }));
+  }, [phases, phaseSteps]);
+
+  // v6.9.13 — pick best target: in_progress with have<need, else planned with have<need, else null.
+  const recommendedTargetPhaseId = useMemo<string | null>(() => {
+    if (!useRoadmap) return null;
+    const inProgress = phaseOptions.filter(p => p.status === 'in_progress');
+    const planned = phaseOptions.filter(p => p.status === 'planned');
+    for (const p of [...inProgress, ...planned]) {
+      if (p.have < p.need) return p.id;
+    }
+    return null;
+  }, [useRoadmap, phaseOptions]);
 
   const regenerateOne = async (id: string, comment: string) => {
     return regenerateInPlace(id, comment);
@@ -218,10 +248,14 @@ export const PathwayView: React.FC<PathwayViewProps> = ({
         onMarkUsed={handleMarkUsed}
         usedSteps={usedSteps}
         onRestore={restoreSuggestion}
-        onGenerateMore={(count, excludeIds) =>
+        phaseOptions={phaseOptions}
+        defaultTargetPhaseId={recommendedTargetPhaseId}
+        showPhaseSelector={useRoadmap}
+        onGenerateMore={(count, excludeIds, phaseId) =>
           generateNextSteps({
             mode: excludeIds.length > 0 ? 'add' : 'replace',
-            count, excludeIds, phaseId: targetPhaseId,
+            count, excludeIds,
+            phaseId: useRoadmap ? phaseId : null,
           })
         }
         onRegenerateOne={regenerateOne}

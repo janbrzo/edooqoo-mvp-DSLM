@@ -11,14 +11,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger, DropdownMenuLabel } from '@/components/ui/dropdown-menu';
 import { Textarea } from '@/components/ui/textarea';
 import { NextStepBanner } from './NextStepBanner';
 import { CompactSuggestionCard } from './CompactSuggestionCard';
 import { ScrollableStepList } from './ScrollableStepList';
 import { ChevronDown, Plus, RefreshCw, Loader2, History } from 'lucide-react';
-import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
+import { GenerateStepsDialog, type PhaseOption } from './GenerateStepsDialog';
 
 interface DisplayItem {
   s: any;
@@ -38,7 +37,7 @@ interface NextStepsSectionProps {
   onUse: (s: any) => void;
   onEdit: (s: any) => void;
   onDelete: (id: string) => void;
-  onGenerateMore: (count: number, excludeIds: string[]) => Promise<boolean> | boolean;
+  onGenerateMore: (count: number, excludeIds: string[], phaseId: string | null) => Promise<boolean> | boolean;
   onRegenerateOne: (id: string, teacherComment: string) => Promise<boolean> | boolean;
   /** v4.8: mark suggestion as already used (no worksheet link). */
   onMarkUsed?: (id: string) => void;
@@ -46,6 +45,12 @@ interface NextStepsSectionProps {
   usedSteps?: any[];
   /** v5.0: restore the most recent used step back to active list. */
   onRestore?: (id: string) => void;
+  /** v6.9.13 — phase metadata for the shared GenerateStepsDialog. */
+  phaseOptions?: PhaseOption[];
+  /** v6.9.13 — recommended target phase id (null = free). */
+  defaultTargetPhaseId?: string | null;
+  /** v6.9.13 — when false, hide phase selector (roadmap disabled). */
+  showPhaseSelector?: boolean;
 }
 
 export const NextStepsSection: React.FC<NextStepsSectionProps> = ({
@@ -63,15 +68,17 @@ export const NextStepsSection: React.FC<NextStepsSectionProps> = ({
   onMarkUsed,
   usedSteps = [],
   onRestore,
+  phaseOptions = [],
+  defaultTargetPhaseId = null,
+  showPhaseSelector = true,
 }) => {
-  const [moreOpen, setMoreOpen] = useState(false);
+  const [moreListOpen, setMoreListOpen] = useState(false);
   const [usedOpen, setUsedOpen] = useState(false);
   const [commentDialog, setCommentDialog] = useState<{ open: boolean; suggestion?: any }>({ open: false });
   const [comment, setComment] = useState('');
-  const [moreCount, setMoreCount] = useState(3);
-  // v6.9.11: count dialog for the FIRST generation (empty state) — UX parity with "Generate more".
-  const [firstGenDialogOpen, setFirstGenDialogOpen] = useState(false);
-  const [firstGenCount, setFirstGenCount] = useState(3);
+  // v6.9.13 — unified shared dialog for both first/more flows.
+  const [genDialogOpen, setGenDialogOpen] = useState(false);
+  const [genMode, setGenMode] = useState<'first' | 'more'>('first');
 
   const allIds = items.map(it => it.s.id);
   const first = items[0] || null;
@@ -105,7 +112,7 @@ export const NextStepsSection: React.FC<NextStepsSectionProps> = ({
         onUse={onUse}
         onUseAndGenerate={onUseAndGenerate}
         onEdit={onEdit}
-        onGenerate={() => { setFirstGenCount(3); setFirstGenDialogOpen(true); }}
+        onGenerate={() => { setGenMode('first'); setGenDialogOpen(true); }}
         onRegenerateWithComment={openCommentForOne}
         onMarkUsed={onMarkUsed}
         generating={generating}
@@ -113,7 +120,7 @@ export const NextStepsSection: React.FC<NextStepsSectionProps> = ({
       />
 
       {rest.length > 0 && (
-        <Collapsible open={moreOpen} onOpenChange={setMoreOpen}>
+        <Collapsible open={moreListOpen} onOpenChange={setMoreListOpen}>
           <CollapsibleTrigger asChild>
             {/* v4.6: high-contrast bar so it doesn't get lost under the blue Next Step #1 banner. */}
             <Button
@@ -123,7 +130,7 @@ export const NextStepsSection: React.FC<NextStepsSectionProps> = ({
             >
               <span className="flex flex-col items-start text-left">
                 <span className="font-semibold">
-                  {moreOpen ? 'Hide' : 'Show'} {rest.length} more next step{rest.length > 1 ? 's' : ''}
+                  {moreListOpen ? 'Hide' : 'Show'} {rest.length} more next step{rest.length > 1 ? 's' : ''}
                 </span>
                 <span className="text-[10px] opacity-80 font-normal">
                   Queued recommendations beyond the top priority step
@@ -133,7 +140,7 @@ export const NextStepsSection: React.FC<NextStepsSectionProps> = ({
                 <Badge variant="secondary" className="bg-blue-200 text-blue-900 dark:bg-blue-800 dark:text-blue-100 text-[10px]">
                   {rest.length}
                 </Badge>
-                <ChevronDown className={cn('h-4 w-4 transition-transform', moreOpen && 'rotate-180')} />
+                <ChevronDown className={cn('h-4 w-4 transition-transform', moreListOpen && 'rotate-180')} />
               </span>
             </Button>
           </CollapsibleTrigger>
@@ -158,41 +165,16 @@ export const NextStepsSection: React.FC<NextStepsSectionProps> = ({
         </Collapsible>
       )}
 
-      {/* Toolbar: only "Generate more" — regenerate-all removed */}
+      {/* Toolbar: only "Generate more" — opens shared dialog with phase selector */}
       {items.length > 0 && (
         <div className="flex flex-wrap gap-2 pt-1">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" disabled={generating}>
-                {generating ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Plus className="h-4 w-4 mr-2" />}
-                Generate more next steps
-                <ChevronDown className="h-3 w-3 ml-1" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-72 p-2 space-y-2">
-              <DropdownMenuLabel className="text-xs">How many next steps to add?</DropdownMenuLabel>
-              <Input
-                type="number" min="1" max="6" value={moreCount}
-                onChange={(e) => setMoreCount(Math.min(6, Math.max(1, parseInt(e.target.value) || 1)))}
-                className="h-8"
-              />
-              <p className="text-[11px] text-muted-foreground leading-snug">
-                {currentPhaseLabel ? (
-                  <>Will generate for: <strong className="text-foreground">{currentPhaseLabel}</strong>.
-                  To target a different phase, use the phase's own generate button.</>
-                ) : (
-                  <>No phase active. New steps will be free-floating. Tip: start a curriculum phase to focus next steps on it.</>
-                )}
-              </p>
-              <Button
-                size="sm" className="w-full"
-                onClick={() => onGenerateMore(moreCount, allIds)}
-                disabled={generating}
-              >
-                Add {moreCount} next step{moreCount > 1 ? 's' : ''}
-              </Button>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <Button
+            variant="outline" size="sm" disabled={generating}
+            onClick={() => { setGenMode('more'); setGenDialogOpen(true); }}
+          >
+            {generating ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Plus className="h-4 w-4 mr-2" />}
+            Generate more next steps
+          </Button>
         </div>
       )}
 
@@ -221,38 +203,24 @@ export const NextStepsSection: React.FC<NextStepsSectionProps> = ({
         </DialogContent>
       </Dialog>
 
-      {/* v6.9.11: First-generation count dialog (empty state). */}
-      <Dialog open={firstGenDialogOpen} onOpenChange={setFirstGenDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Generate next steps</DialogTitle>
-            <DialogDescription>
-              How many AI-generated next steps should we create for this student?
-              {currentPhaseLabel ? <> They will be bound to <strong>{currentPhaseLabel}</strong>.</> : null}
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-2">
-            <Input
-              type="number" min="1" max="6" value={firstGenCount}
-              onChange={(e) => setFirstGenCount(Math.min(6, Math.max(1, parseInt(e.target.value) || 1)))}
-              className="h-9"
-            />
-            <p className="text-[11px] text-muted-foreground leading-snug">
-              Recommended: 3 (rolling 3-lesson plan). For phase-bound steps, the recommendation matches the phase length (1 step ≈ 1 week).
-            </p>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setFirstGenDialogOpen(false)}>Cancel</Button>
-            <Button
-              onClick={async () => { setFirstGenDialogOpen(false); await onGenerateMore(firstGenCount, []); }}
-              disabled={generating}
-            >
-              {generating ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Plus className="h-4 w-4 mr-2" />}
-              Generate {firstGenCount} step{firstGenCount > 1 ? 's' : ''}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* v6.9.13 — unified Generate Steps dialog (first or more). */}
+      <GenerateStepsDialog
+        open={genDialogOpen}
+        onOpenChange={setGenDialogOpen}
+        mode={genMode}
+        defaultCount={3}
+        defaultTargetPhaseId={defaultTargetPhaseId}
+        phaseOptions={phaseOptions}
+        showPhaseSelector={showPhaseSelector}
+        generating={generating}
+        onConfirm={async (count, phaseId) => {
+          if (genMode === 'first') {
+            await onGenerateMore(count, [], phaseId);
+          } else {
+            await onGenerateMore(count, allIds, phaseId);
+          }
+        }}
+      />
 
       {/* v4.8: Used Steps history (negative-numbered) */}
       {usedSteps.length > 0 && (
