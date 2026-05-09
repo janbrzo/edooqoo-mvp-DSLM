@@ -259,3 +259,45 @@ Two distinct edge functions live ONLY in Supabase deployment (not in repo): `gen
 - `metadata.last_confirmed_at` is a free-form JSONB key; never persisted as column. `created_at` is NEVER mutated.
 - Badge only renders in `StudentKnowledgeSection` (passes `onConfirmCurrent`); other consumers (DSLM `SkillsView`, `GoalsView`, `ProfileView`, `PathwayView`, `StudentPage`) omit the prop → badge silently hidden, zero regression.
 **RAG Keywords**: stale note, knowledge freshness, last confirmed at, 90 days outdated, confirm current mutation, knowledge audit prompt, freshness anchor, isStale, metadata last_confirmed_at
+
+## v6.9.11 — Worksheet Form Next Steps Preset (UX upgrade) + Critical Hook Fix
+**Problem**:
+1. Teachers couldn't tell where the chip suggestions came from ("random AI suggestions?" vs. Learning Plan).
+2. Chips order ignored phase order — `[...phaseSteps, ...nextSteps].slice(0,3)` showed Phase 4 before Phase 1.
+3. Only 3 chips visible with no way to browse N>3.
+4. Empty state ("no learning plan") had weak CTA.
+5. `StudentProgressTab` crashed white-screen with React error #310 because `useGoalProgress` was called below an early `return` when `loading`.
+
+**Edooqoo Solution**:
+1. Banner header now reads `Next Steps from Learning Plan` (Map icon) + `View plan ↗` link to `/student/{id}?tab=progress`. Each chip shows `#displayIndex topic` and tooltip with `Step #N • Phase X / Free step`, full topic, goal, rationale.
+2. Banner imports `useCurriculumPhases` and replicates `PathwayView` sort: currentPhase first → phaseOrder ASC → sequence_number ASC. `displayIndex` is per-phase (matches Profile UI).
+3. Sliding-window carousel (3 visible, advance by 1) with `<` `>` arrows + `windowStart+1–end of total` label. `windowStart` resets to 0 on `studentId` change and after `applyPreset`.
+4. Empty state expanded to 2-line copy: "No learning plan… Students with a structured Learning Plan get worksheets that build on each other instead of being standalone exercises. Strongly recommended." + `Open Learning Plan ↗` button.
+5. Hook `useGoalProgress(...)` moved above `if (loading) return ...` in `StudentProgressTab.tsx`. `useGoalProgress` already handles empty `goals` safely.
+
+**Technical Mechanics**:
+- `NextStepsPresetBanner.tsx`: now uses `useFutureTimeline` + `useCurriculumPhases`. `useState<number>(windowStart=0)`. Memoizes `sortedItems` containing `{ s, displayIndex, phaseLabel }`. Visible slice = `sortedItems.slice(windowStart, windowStart+3)`. Carousel controls disabled at boundaries.
+- `WorksheetForm/index.tsx`: student select trigger gets `border-amber-400 ring-1 ring-amber-300 bg-amber-50/40` when `selectedStudentId === 'no-student'`. Placeholder: `Choose a student`. Item label: `Generic worksheet (no student)` (value still `'no-student'` for back-compat). Subtle amber hint paragraph below.
+- `NextStepBanner.tsx`: empty state adds "Just added some? Refresh the page to see them." + `Refresh` ghost button when `!hasGoals`.
+- `NextStepsSection.tsx`: empty-state generate now opens a count Dialog (1-6, default 3) before calling `onGenerateMore`. Identical UX to "Generate more next steps" dropdown.
+- `useFutureTimeline.tsx`: `generateNextSteps` catch differentiates 402 / 429 / generic via `error.context?.status` and shows specific toast.
+
+## Pathway Generation Counts (Why 3-6 Phases, 1-3 Next Steps)
+**Problem**: Why these specific ranges? Are they arbitrary?
+
+**Edooqoo Solution**:
+- **3-6 phases (`generate-curriculum-phases`)**: Maps to a typical course/B2B cycle — 3 phases × 4 weeks ≈ a quarter, 6 phases × 4-6 weeks ≈ a semester (12-24 weeks). <3 = no narrative arc (student can't feel progress); >6 = phases collapse into single lessons, contradicting the definition of "phase" as a 3-6 week block. Actual count is AI-selected within the band, driven by: number of student goals, `nearest_goal_deadline` horizon, breadth of `mainGoal`.
+- **1-3 next steps (`generate-timeline` default)**: 1 = the always-visible Banner #1; 3 = optimal short-horizon planning ("rolling 3-lesson plan"). >3 hard-coded = staleness risk: by lesson 2, items 4-5 are stale because feedback has shifted context. Teacher can override via dialog (1/2/3/5/6).
+
+**Technical Mechanics**: Counts are enforced by the AI prompt (in the deployed edge function — sanctity, not in repo). UI now offers count picker for first generation too (parity with "Generate more").
+
+**RAG Keywords**: phase count rationale, why 3 to 6 phases, next steps count, rolling 3 lesson plan, semester pacing, curriculum block size, AI suggestion count, worksheet horizon, dydaktyczny powod liczby faz
+
+## Critical Fix v6.9.11: useGoalProgress Hook Order
+**Problem**: `/student/{id}?tab=progress` rendered as a blank page. Console: `Minified React error #310: Rendered more hooks than during the previous render`. Root cause: `useGoalProgress(...)` was called on line 154, AFTER `if (loading) return <Loader/>` on line 148. First render returned early (1 hook fewer); second render after data loaded had 1 more hook → React aborted.
+
+**Edooqoo Solution**: Move the `useGoalProgress` call above the early return. The hook already returns an empty `Map` when `goals` is empty, so no behavioral change.
+
+**Technical Mechanics**: Single edit in `src/components/student-progress/StudentProgressTab.tsx`. New invariant in `mem://index.md` Core: "Hooks must be called above any early return."
+
+**RAG Keywords**: react error 310, rules of hooks, conditional hook call, white screen progress tab, useGoalProgress crash, early return before hook
