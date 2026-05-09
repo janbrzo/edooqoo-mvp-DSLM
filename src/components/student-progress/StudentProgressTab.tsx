@@ -77,6 +77,11 @@ export const StudentProgressTab: React.FC<StudentProgressTabProps> = ({
 
   const stats = getProgressStats();
 
+  // v6.9.11 fix: hooks must be called above any early return (Rules of Hooks).
+  // Previously this was below the `if (loading) return ...` line which caused
+  // React error #310 (rendered more hooks than during the previous render).
+  const { map: progressMap } = useGoalProgress(goals as any, studentId, teacherId);
+
   const handleAddGoal = async () => {
     if (!newGoal.title.trim()) return;
     await addGoal(newGoal.type as any, newGoal.title, newGoal.description, newGoal.targetDate || undefined);
@@ -151,7 +156,6 @@ export const StudentProgressTab: React.FC<StudentProgressTabProps> = ({
 
   const supportingGoals = goals.filter(g => g.goal_type === 'supporting');
   const additionalGoals = goals.filter(g => g.goal_type === 'additional');
-  const { map: progressMap } = useGoalProgress(goals as any, studentId, teacherId);
   const editingGoal = editingGoalId ? (goals.find(g => g.id === editingGoalId) || null) : null;
   const renderGoalCard = (goal: any) => {
     const r = progressMap.get(goal.id);
