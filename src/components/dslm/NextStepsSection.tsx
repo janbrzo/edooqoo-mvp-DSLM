@@ -238,7 +238,7 @@ export const NextStepsSection: React.FC<NextStepsSectionProps> = ({
               className="h-9"
             />
             <p className="text-[11px] text-muted-foreground leading-snug">
-              Recommended: 3 (rolling 3-lesson plan). You can always add more later.
+              Recommended: 3 (rolling 3-lesson plan). For phase-bound steps, the recommendation matches the phase length (1 step ≈ 1 week).
             </p>
           </div>
           <DialogFooter>
