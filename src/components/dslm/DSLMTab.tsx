@@ -58,7 +58,11 @@ type ViewId = typeof VIEWS[number]['id'];
 
 // v6.9.13 — sub-nav map. Clicking a child dispatches `dslm:openSubsection` (handled by CollapsibleSection).
 const SUBSECTIONS: Record<ViewId, { id: string; label: string }[]> = {
-  pathway: [],
+  pathway: [
+    { id: 'pathway-next-steps', label: 'Next Steps' },
+    { id: 'pathway-roadmap', label: 'Learning Roadmap' },
+    { id: 'pathway-notes', label: 'Next Lesson Ideas' },
+  ],
   goals: [
     { id: 'goals-supporting', label: 'Supporting' },
     { id: 'goals-additional', label: 'Additional' },
