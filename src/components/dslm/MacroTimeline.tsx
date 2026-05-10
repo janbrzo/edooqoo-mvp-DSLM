@@ -21,6 +21,7 @@ import { Check, ChevronDown, Sparkles, Loader2, Plus, Edit2, Trash2, Map, Messag
 import { cn } from '@/lib/utils';
 import { computePhaseConfidence } from '@/lib/dslm/confidenceScore';
 import { ConfidenceBadge } from './ConfidenceBadge';
+import { ConfirmTypeToDeleteDialog } from './ConfirmTypeToDeleteDialog';
 
 /**
  * v6.9.12 — Recommend 1 step per week of the phase length, clamped 1–6.
@@ -521,6 +522,16 @@ export const MacroTimeline: React.FC<MacroTimelineProps> = ({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* v6.9.14 — type-to-confirm phase delete */}
+      <ConfirmTypeToDeleteDialog
+        open={!!deletingPhase}
+        onOpenChange={(o) => !o && setDeletingPhase(null)}
+        label={deletingPhase ? `Phase ${deletingPhase.sequence_number}: ${deletingPhase.title}` : ''}
+        expectedText={deletingPhase ? `Phase ${deletingPhase.sequence_number}` : ''}
+        description="Removing a phase deletes its plan and unlinks any phase-bound next steps. This cannot be undone."
+        onConfirm={async () => { if (deletingPhase) await deletePhase(deletingPhase.id); }}
+      />
     </div>
   );
 };
