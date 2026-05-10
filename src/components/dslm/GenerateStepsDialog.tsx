@@ -50,14 +50,18 @@ export const GenerateStepsDialog: React.FC<GenerateStepsDialogProps> = ({
   );
   const [countTouched, setCountTouched] = useState(false);
 
-  // Reset state every time the dialog opens.
+  // v6.9.14 — Reset every open. Initial count = (need - have) for recommended phase, else defaultCount.
   useEffect(() => {
-    if (open) {
-      setCount(defaultCount);
-      setPhaseValue(defaultTargetPhaseId ?? FREE_VALUE);
-      setCountTouched(false);
-    }
-  }, [open, defaultCount, defaultTargetPhaseId]);
+    if (!open) return;
+    const initialPhaseId = defaultTargetPhaseId ?? FREE_VALUE;
+    setPhaseValue(initialPhaseId);
+    setCountTouched(false);
+    const recPhase = phaseOptions.find(p => p.id === defaultTargetPhaseId);
+    const initialCount = recPhase
+      ? Math.min(6, Math.max(1, recPhase.need - recPhase.have))
+      : defaultCount;
+    setCount(initialCount);
+  }, [open, defaultCount, defaultTargetPhaseId, phaseOptions]);
 
   const selectedPhase = useMemo(
     () => phaseOptions.find(p => p.id === phaseValue) || null,
@@ -87,8 +91,9 @@ export const GenerateStepsDialog: React.FC<GenerateStepsDialogProps> = ({
   })();
 
   const recommendedId = defaultTargetPhaseId;
-  const phaseRecommendedLabel = recommendedId
-    ? (phaseOptions.find(p => p.id === recommendedId)?.label ?? null)
+  const recPhaseForLabel = recommendedId ? phaseOptions.find(p => p.id === recommendedId) : null;
+  const phaseRecommendedLabel = recPhaseForLabel
+    ? `Phase ${recPhaseForLabel.sequence}: ${recPhaseForLabel.label}`
     : 'Free step';
 
   return (
@@ -123,13 +128,13 @@ export const GenerateStepsDialog: React.FC<GenerateStepsDialogProps> = ({
             <div className="space-y-1">
               <Label className="text-xs">Target phase</Label>
               <Select value={phaseValue} onValueChange={(v) => { setPhaseValue(v); setCountTouched(false); }}>
-                <SelectTrigger className="h-9">
-                  <SelectValue />
+                <SelectTrigger className="h-9 min-w-0">
+                  <SelectValue className="truncate text-left" />
                 </SelectTrigger>
                 <SelectContent className="bg-popover">
                   {recommendedId && phaseOptions.find(p => p.id === recommendedId) && (
                     <SelectItem value={recommendedId}>
-                      🎯 Recommended: {phaseRecommendedLabel}
+                      <span className="block text-left">🎯 Recommended — {phaseRecommendedLabel}</span>
                     </SelectItem>
                   )}
                   {phaseOptions
