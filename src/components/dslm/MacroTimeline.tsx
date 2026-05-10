@@ -78,6 +78,7 @@ export const MacroTimeline: React.FC<MacroTimelineProps> = ({
   const [userTouchedExpand, setUserTouchedExpand] = useState(false);
   const [editingPhase, setEditingPhase] = useState<CurriculumPhase | null>(null);
   const [editForm, setEditForm] = useState({ title: '', description: '', status: 'planned' as PhaseStatus, weeks_start: '', weeks_end: '' });
+  const [deletingPhase, setDeletingPhase] = useState<CurriculumPhase | null>(null);
 
   // Phase comment dialog (regenerate steps for phase)
   const [phaseCommentDialog, setPhaseCommentDialog] = useState<{ open: boolean; phaseId: string | null }>({ open: false, phaseId: null });
@@ -375,7 +376,7 @@ export const MacroTimeline: React.FC<MacroTimelineProps> = ({
                               Start phase
                             </Button>
                           )}
-                          <Button size="sm" variant="ghost" className="h-7 text-xs text-destructive hover:text-destructive" onClick={() => deletePhase(phase.id)}>
+                          <Button size="sm" variant="ghost" className="h-7 text-xs text-destructive hover:text-destructive" onClick={() => setDeletingPhase(phase)}>
                             <Trash2 className="h-3 w-3 mr-1" /> Remove
                           </Button>
                         </div>
