@@ -79,6 +79,17 @@ export const PathwayView: React.FC<PathwayViewProps> = ({
   const [roadmapOpen, setRoadmapOpen] = useState(true);
   const [searchParams, setSearchParams] = useSearchParams();
 
+  // v6.9.13 — listen for sub-nav events; force-open the targeted Collapsible.
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const id = (e as CustomEvent).detail?.id;
+      if (id === 'pathway-roadmap') setRoadmapOpen(true);
+      if (id === 'pathway-notes') setNotesOpen(true);
+    };
+    window.addEventListener('dslm:openSubsection', handler as EventListener);
+    return () => window.removeEventListener('dslm:openSubsection', handler as EventListener);
+  }, []);
+
   const nextLessonNotes = planningNotes.entries.filter(e => e.category === 'Next Lesson Ideas');
 
   const currentPhase = useMemo(() => phases.find(p => p.status === 'in_progress') || null, [phases]);
@@ -235,6 +246,7 @@ export const PathwayView: React.FC<PathwayViewProps> = ({
           ))}
         </div>
       )}
+      <div id="pathway-next-steps" className="scroll-mt-24">
       <NextStepsSection
         items={allActiveItems}
         studentId={studentId}
@@ -260,8 +272,10 @@ export const PathwayView: React.FC<PathwayViewProps> = ({
         }
         onRegenerateOne={regenerateOne}
       />
+      </div>
 
       <Collapsible open={roadmapOpen} onOpenChange={setRoadmapOpen}>
+        <div id="pathway-roadmap" className="scroll-mt-24" />
         <div className="flex items-center justify-between gap-2">
           <CollapsibleTrigger asChild>
             <Button variant="ghost" className="flex-1 justify-between text-muted-foreground">
@@ -313,6 +327,7 @@ export const PathwayView: React.FC<PathwayViewProps> = ({
       </Collapsible>
 
       <Collapsible open={notesOpen} onOpenChange={setNotesOpen}>
+        <div id="pathway-notes" className="scroll-mt-24" />
         <CollapsibleTrigger asChild>
           <Button variant="ghost" className="w-full justify-between text-muted-foreground">
             <span className="flex items-center gap-2">
