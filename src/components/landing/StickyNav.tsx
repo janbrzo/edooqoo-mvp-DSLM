@@ -6,7 +6,7 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { GCalStatusButton } from '@/components/calendar/GCalStatusButton';
 import { PacingProposalsBell } from '@/components/dslm/PacingProposalsBell';
 import { UnifiedBell } from '@/components/notifications/UnifiedBell';
-import { Menu, GraduationCap, User, Plus, Eye, Calendar as CalendarIcon } from 'lucide-react';
+import { Menu, GraduationCap, User, Plus, Eye } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useDemoContext } from '@/contexts/DemoContext';
 import FeatureNavPills from '@/components/landing/FeatureNavPills';
@@ -49,14 +49,6 @@ const StickyNav: React.FC<StickyNavProps> = ({ isRegisteredUser, tokenLeft, user
   // State carried into auth pages so closing the modal returns the user to
   // the worksheet they came from.
   const fromState = { from: location.pathname + location.search };
-
-  // v6.9.13 — modifier-aware nav handler. Lets browser open new tab on
-  // Ctrl/Cmd/Shift/middle-click; otherwise SPA-navigates.
-  const handleAnchorNav = (path: string) => (e: React.MouseEvent) => {
-    if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
-    e.preventDefault();
-    navigate(path);
-  };
 
   const DemoBanner = () => isDemoMode ? (
     <div className="fixed top-0 left-0 right-0 z-[60] bg-amber-400 text-amber-900 text-center text-sm font-medium py-1.5 flex items-center justify-center gap-3">
