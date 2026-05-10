@@ -62,6 +62,17 @@ export const useCurriculumPhases = ({ studentId, teacherId }: UseCurriculumPhase
 
   useEffect(() => { fetchPhases(); }, [fetchPhases]);
 
+  // v6.9.14 — cross-instance sync: when one hook generates phases,
+  // other instances (e.g. PathwayView vs MacroTimeline) refetch.
+  useEffect(() => {
+    const h = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail?.studentId === studentId) fetchPhases();
+    };
+    window.addEventListener('dslm:phasesUpdated', h);
+    return () => window.removeEventListener('dslm:phasesUpdated', h);
+  }, [studentId, fetchPhases]);
+
   const generatePhases = async (
     mode: 'replace' | 'add' = 'replace',
     opts: { count?: number; teacherComment?: string } = {}
@@ -78,6 +89,7 @@ export const useCurriculumPhases = ({ studentId, teacherId }: UseCurriculumPhase
         return false;
       }
       await fetchPhases();
+      window.dispatchEvent(new CustomEvent('dslm:phasesUpdated', { detail: { studentId } }));
       toast.success(`Generated ${newPhases.length} curriculum phases`);
       return true;
     } catch (e: any) {
