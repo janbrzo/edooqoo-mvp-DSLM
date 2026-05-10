@@ -115,6 +115,7 @@ export const NextStepsSection: React.FC<NextStepsSectionProps> = ({
         onGenerate={() => { setGenMode('first'); setGenDialogOpen(true); }}
         onRegenerateWithComment={openCommentForOne}
         onMarkUsed={onMarkUsed}
+        onDelete={onDelete}
         generating={generating}
         hasGoals={hasGoals}
       />

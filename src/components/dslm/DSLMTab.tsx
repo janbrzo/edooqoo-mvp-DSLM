@@ -334,8 +334,11 @@ export const DSLMTab: React.FC<DSLMTabProps> = ({
                       <Icon className="h-4 w-4" />
                       {view.label}
                     </button>
-                    {activeSection === view.id && subs.length > 0 && (
-                      <div className="ml-6 mt-1 mb-1 space-y-0.5 border-l border-border pl-2">
+                    {subs.length > 0 && (
+                      <div className={cn(
+                        "ml-6 mt-1 mb-1 space-y-0.5 border-l pl-2",
+                        activeSection === view.id ? "border-primary" : "border-border opacity-70"
+                      )}>
                         {subs.map(s => (
                           <button
                             key={s.id}

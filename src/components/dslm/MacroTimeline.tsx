@@ -21,6 +21,7 @@ import { Check, ChevronDown, Sparkles, Loader2, Plus, Edit2, Trash2, Map, Messag
 import { cn } from '@/lib/utils';
 import { computePhaseConfidence } from '@/lib/dslm/confidenceScore';
 import { ConfidenceBadge } from './ConfidenceBadge';
+import { ConfirmTypeToDeleteDialog } from './ConfirmTypeToDeleteDialog';
 
 /**
  * v6.9.12 — Recommend 1 step per week of the phase length, clamped 1–6.
@@ -78,6 +79,7 @@ export const MacroTimeline: React.FC<MacroTimelineProps> = ({
   const [userTouchedExpand, setUserTouchedExpand] = useState(false);
   const [editingPhase, setEditingPhase] = useState<CurriculumPhase | null>(null);
   const [editForm, setEditForm] = useState({ title: '', description: '', status: 'planned' as PhaseStatus, weeks_start: '', weeks_end: '' });
+  const [deletingPhase, setDeletingPhase] = useState<CurriculumPhase | null>(null);
 
   // Phase comment dialog (regenerate steps for phase)
   const [phaseCommentDialog, setPhaseCommentDialog] = useState<{ open: boolean; phaseId: string | null }>({ open: false, phaseId: null });
@@ -375,7 +377,7 @@ export const MacroTimeline: React.FC<MacroTimelineProps> = ({
                               Start phase
                             </Button>
                           )}
-                          <Button size="sm" variant="ghost" className="h-7 text-xs text-destructive hover:text-destructive" onClick={() => deletePhase(phase.id)}>
+                          <Button size="sm" variant="ghost" className="h-7 text-xs text-destructive hover:text-destructive" onClick={() => setDeletingPhase(phase)}>
                             <Trash2 className="h-3 w-3 mr-1" /> Remove
                           </Button>
                         </div>
@@ -520,6 +522,16 @@ export const MacroTimeline: React.FC<MacroTimelineProps> = ({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* v6.9.14 — type-to-confirm phase delete */}
+      <ConfirmTypeToDeleteDialog
+        open={!!deletingPhase}
+        onOpenChange={(o) => !o && setDeletingPhase(null)}
+        label={deletingPhase ? `Phase ${deletingPhase.sequence_number}: ${deletingPhase.title}` : ''}
+        expectedText={deletingPhase ? `Phase ${deletingPhase.sequence_number}` : ''}
+        description="Removing a phase deletes its plan and unlinks any phase-bound next steps. This cannot be undone."
+        onConfirm={async () => { if (deletingPhase) await deletePhase(deletingPhase.id); }}
+      />
     </div>
   );
 };

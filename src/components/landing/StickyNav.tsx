@@ -6,7 +6,7 @@ import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { GCalStatusButton } from '@/components/calendar/GCalStatusButton';
 import { PacingProposalsBell } from '@/components/dslm/PacingProposalsBell';
 import { UnifiedBell } from '@/components/notifications/UnifiedBell';
-import { Menu, GraduationCap, User, Plus, Eye, Calendar as CalendarIcon } from 'lucide-react';
+import { Menu, GraduationCap, User, Plus, Eye } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useDemoContext } from '@/contexts/DemoContext';
 import FeatureNavPills from '@/components/landing/FeatureNavPills';
@@ -36,8 +36,9 @@ const StickyNav: React.FC<StickyNavProps> = ({ isRegisteredUser, tokenLeft, user
   const isDashboard = location.pathname === '/dashboard';
   const isProfile = location.pathname === '/profile';
   const isCalendar = location.pathname === '/calendar';
+  const isStudentPage = /^\/student\//.test(location.pathname);
   // v6.9.13 — show NavStudentSwitcher on every authenticated page except dashboard/profile
-  const showStudentSwitcher = isRegisteredUser && !isDashboard && !isProfile;
+  const showStudentSwitcher = isRegisteredUser && !isDashboard && !isProfile && !isStudentPage;
   const { isDemoMode, exitDemo } = useDemoContext();
 
   // Position class for ANON nav (non-sticky on worksheet pages, sticky elsewhere)
@@ -48,14 +49,6 @@ const StickyNav: React.FC<StickyNavProps> = ({ isRegisteredUser, tokenLeft, user
   // State carried into auth pages so closing the modal returns the user to
   // the worksheet they came from.
   const fromState = { from: location.pathname + location.search };
-
-  // v6.9.13 — modifier-aware nav handler. Lets browser open new tab on
-  // Ctrl/Cmd/Shift/middle-click; otherwise SPA-navigates.
-  const handleAnchorNav = (path: string) => (e: React.MouseEvent) => {
-    if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
-    e.preventDefault();
-    navigate(path);
-  };
 
   const DemoBanner = () => isDemoMode ? (
     <div className="fixed top-0 left-0 right-0 z-[60] bg-amber-400 text-amber-900 text-center text-sm font-medium py-1.5 flex items-center justify-center gap-3">
@@ -88,14 +81,6 @@ const StickyNav: React.FC<StickyNavProps> = ({ isRegisteredUser, tokenLeft, user
           </div>
           <div className="flex items-center gap-2">
             {showStudentSwitcher && <NavStudentSwitcher />}
-            {!isCalendar && (
-              <Button asChild variant="outline" size="sm" className="h-8 text-xs">
-                <a href="/calendar" onClick={handleAnchorNav('/calendar')}>
-                  <CalendarIcon className="h-3.5 w-3.5 mr-1" />
-                  Calendar
-                </a>
-              </Button>
-            )}
             {onGenerateWorksheet && isDashboard && (
               <Button size="sm" onClick={onGenerateWorksheet} className="h-8 text-xs">
                 <Plus className="h-3.5 w-3.5 mr-1" />
@@ -104,7 +89,14 @@ const StickyNav: React.FC<StickyNavProps> = ({ isRegisteredUser, tokenLeft, user
             )}
             {onGenerateWorksheet && !isDashboard && (
               <Button asChild size="sm" className="h-8 text-xs">
-                <a href="/" onClick={handleAnchorNav('/')}>
+                <a
+                  href="/"
+                  onClick={(e) => {
+                    if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
+                    e.preventDefault();
+                    onGenerateWorksheet();
+                  }}
+                >
                   <Plus className="h-3.5 w-3.5 mr-1" />
                   Generate
                 </a>
@@ -156,14 +148,6 @@ const StickyNav: React.FC<StickyNavProps> = ({ isRegisteredUser, tokenLeft, user
         </div>
         <div className="flex items-center gap-3">
           {showStudentSwitcher && <NavStudentSwitcher />}
-          {!isCalendar && (
-            <Button asChild variant="outline" size="sm">
-              <a href="/calendar" onClick={handleAnchorNav('/calendar')}>
-                <CalendarIcon className="h-4 w-4 mr-2" />
-                Calendar
-              </a>
-            </Button>
-          )}
           {onGenerateWorksheet && isDashboard && (
             <Button size="sm" onClick={onGenerateWorksheet}>
               <Plus className="h-4 w-4 mr-2" />
@@ -172,7 +156,14 @@ const StickyNav: React.FC<StickyNavProps> = ({ isRegisteredUser, tokenLeft, user
           )}
           {onGenerateWorksheet && !isDashboard && (
             <Button asChild size="sm">
-              <a href="/" onClick={handleAnchorNav('/')}>
+              <a
+                href="/"
+                onClick={(e) => {
+                  if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
+                  e.preventDefault();
+                  onGenerateWorksheet();
+                }}
+              >
                 <Plus className="h-4 w-4 mr-2" />
                 Generate Worksheet
               </a>

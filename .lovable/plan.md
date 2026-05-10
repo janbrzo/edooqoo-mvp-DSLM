@@ -1,805 +1,407 @@
 
-# Plan v6.9.13 (rev. 2) — Prompt-level deadline cap + Form-local Edit + Smart phase target + DSLM sub-nav + Nav student switcher + Add Note quick modal
+# Plan v6.9.14 — Naprawy DSLM Pathway, Nav, Worksheet Form
 
-## CZĘŚĆ A — Deadline cap w PROMPCIE `generate-curriculum-phases` (zaktualizowana zgodnie z decyzją usera)
-
-### A0. Stan początkowy i ryzyko
-
-Źródło edge function `generate-curriculum-phases` **nie znajduje się w lokalnym repo** (`supabase/functions/` zawiera tylko `classify-knowledge-entry`, `format-worksheet-prompt`, `send-welcome-email`). Funkcja jest zdeployowana w projekcie Supabase (Lovable Cloud) i wywoływana z hooka `useCurriculumPhases.generatePhases` przez `supabase.functions.invoke('generate-curriculum-phases', { body: { studentId, teacherId, mode, count, teacherComment } })`.
-
-Aby zmodyfikować prompt, w kroku implementacji należy:
-
-1. **Pobrać aktualne źródło funkcji** — w trybie build agent ma dostęp do plików projektu Supabase. Pierwszą operacją MUSI być stworzenie pliku lokalnego `supabase/functions/generate-curriculum-phases/index.ts` z aktualną zawartością wdrożoną. Dopuszczalne źródła w kolejności preferencji:
-   - odczyt z metadanych projektu Lovable Cloud (jeśli dostępne),
-   - wywołanie `supabase--curl_edge_functions` z trybem `OPTIONS` lub testowym body, aby zweryfikować deployment + odczyt logów (`supabase--edge_function_logs`) z ostatnich uruchomień, w których typowo widać schema response,
-   - jeśli powyższe zawiedzie — agent **NIE rekonstruuje funkcji od zera**, tylko wraca do usera z prośbą o wklejenie źródła. Sanctity działającej funkcji ma priorytet.
-
-2. **Dodać `[functions.generate-curriculum-phases]` z `verify_jwt = false`** do `supabase/config.toml`, jeśli nie istnieje (w pozostałych funkcjach jest tak ustawione — aktualnie wszystkie używają in-code auth).
-
-3. **Wdrożyć przez `supabase--deploy_edge_functions`** po edycji.
-
-### A1. Body wysyłane z klienta — nowe pole `targetWeeks`
-
-W `src/hooks/dslm/useCurriculumPhases.tsx`:
-
-```ts
-const generatePhases = async (
-  mode: 'replace' | 'add' = 'replace',
-  opts: { count?: number; teacherComment?: string; targetWeeks?: number | null } = {}
-): Promise<boolean> => {
-  ...
-  body: {
-    studentId, teacherId, mode,
-    count: opts.count,
-    teacherComment: opts.teacherComment ?? '',
-    targetWeeks: opts.targetWeeks ?? null,   // ← NOWE: liczba tygodni do najwcześniejszego deadline'u
-    targetWeeksSource: opts.targetWeeks ? 'main_goal_or_nearest' : null, // do logów/debug
-  }
-  ...
-}
-```
-
-`MacroTimeline` oblicza `targetWeeks` z propsów `mainGoalTargetDate` i `nearestGoalDeadlineDate` (oba propagowane z `DSLMTab` → `PathwayView` → `MacroTimeline`):
-
-```ts
-const deadlineISO = mainGoalTargetDate || nearestGoalDeadlineDate || null;
-const targetWeeks = deadlineISO
-  ? Math.max(2, Math.ceil((+new Date(deadlineISO) - Date.now()) / (7 * 86400 * 1000)))
-  : null;
-```
-
-Jeśli `targetWeeks === null` → AI zachowuje stare zachowanie (3-6 faz po 3-6 tyg.).
-
-### A2. Modyfikacja PROMPTU `generate-curriculum-phases`
-
-Po pobraniu aktualnego pliku `supabase/functions/generate-curriculum-phases/index.ts` należy zlokalizować blok `SYSTEM_PROMPT` (lub równoważny `messages[0].content` typu `system`) i wprowadzić następujące **dodatki bez usuwania istniejących reguł**:
-
-#### A2.1. Nowa sekcja w prompcie (wstawiana na samej górze SYSTEM_PROMPT, BEFORE existing rules)
-
-```text
-═══════════════════════════════════════════════════════════════════
-HARD CONSTRAINT — DEADLINE FIT (added v6.9.13)
-═══════════════════════════════════════════════════════════════════
-The user input includes `targetWeeks` (integer) representing the number of
-weeks until the student's nearest goal deadline. When `targetWeeks` is
-provided (not null):
-
-1. The SUM of (estimated_weeks_end − estimated_weeks_start + 1) across ALL
-   generated phases MUST be ≤ targetWeeks. This is a HARD UPPER BOUND, not
-   a suggestion.
-2. The number of phases (3–6) is still chosen by you, but the per-phase
-   length MUST be reduced so the total fits. Minimum 1 week per phase;
-   prefer 2 weeks per phase when targetWeeks allows.
-3. Distribution rule:
-   - If targetWeeks ≥ 12 → use 3–4 phases of 3–4 weeks each.
-   - If 8 ≤ targetWeeks < 12 → use 3 phases (≈ targetWeeks/3 each, rounded).
-   - If 4 ≤ targetWeeks < 8 → use 2–3 phases of 1–3 weeks each (override
-     normal 3-phase minimum if needed; absolute minimum 2 phases).
-   - If targetWeeks < 4 → use 1–2 sprint phases of 1–2 weeks each.
-4. Phases MUST be contiguous and non-overlapping:
-   estimated_weeks_start[i] = estimated_weeks_end[i−1] + 1, and
-   estimated_weeks_start[0] = 1.
-5. Last phase ends EXACTLY at targetWeeks (estimated_weeks_end[last] === targetWeeks).
-6. If teacher_comment requests a different cadence, deadline still wins.
-   Acknowledge the deadline in `rationale` of the last phase, e.g.:
-   "Compressed to fit the {targetWeeks}-week deadline."
-
-When `targetWeeks` is null, keep the previous behavior (3–6 phases of 3–6
-weeks each, no upper bound).
-═══════════════════════════════════════════════════════════════════
-```
-
-#### A2.2. Modyfikacja USER_PROMPT (lub user message)
-
-W miejscu, gdzie do user prompta dorzucane są dane studenta, dopisać:
-
-```ts
-const deadlineLine = targetWeeks
-  ? `\nDEADLINE WINDOW: ${targetWeeks} weeks total (HARD UPPER BOUND for sum of phase lengths).`
-  : '\nDEADLINE WINDOW: not specified — use natural 3–6 phase × 3–6 week layout.';
-```
-
-I wstrzyknąć `deadlineLine` przed sekcją z `teacherComment`.
-
-#### A2.3. Walidacja serwerowa (defense-in-depth)
-
-W kodzie funkcji, **po** otrzymaniu odpowiedzi z modelu i **przed** UPSERT do `dslm_curriculum_phases`, dodać blok walidacyjny:
-
-```ts
-// v6.9.13: server-side enforcement — even if model violates, we clip.
-if (typeof targetWeeks === 'number' && targetWeeks > 0 && Array.isArray(phases) && phases.length) {
-  // Sort by suggested sequence_number (model should already do this).
-  phases.sort((a, b) => (a.sequence_number ?? 0) - (b.sequence_number ?? 0));
-  // Compute total span; if > targetWeeks, scale proportionally then make contiguous.
-  let total = 0;
-  for (const p of phases) {
-    const len = (p.estimated_weeks_end ?? 0) - (p.estimated_weeks_start ?? 0) + 1;
-    total += Math.max(1, len);
-  }
-  if (total > targetWeeks) {
-    const scale = targetWeeks / total;
-    let cursor = 1;
-    const minPerPhase = Math.max(1, Math.floor(targetWeeks / phases.length));
-    for (let i = 0; i < phases.length; i++) {
-      const origLen = Math.max(1, (phases[i].estimated_weeks_end ?? 0) - (phases[i].estimated_weeks_start ?? 0) + 1);
-      let len = Math.max(minPerPhase, Math.round(origLen * scale));
-      // Last phase: snap to deadline.
-      if (i === phases.length - 1) len = Math.max(1, targetWeeks - cursor + 1);
-      phases[i].estimated_weeks_start = cursor;
-      phases[i].estimated_weeks_end = cursor + len - 1;
-      cursor += len;
-    }
-    // Append a marker to last phase rationale.
-    const last = phases[phases.length - 1];
-    last.rationale = (last.rationale ? last.rationale + ' ' : '') +
-      `[Auto-fitted to ${targetWeeks}-week deadline by server validator.]`;
-  }
-}
-```
-
-To jest **redundantna obrona**, NIE zastępuje promptu — gwarantuje, że nawet jeśli model nie posłucha, wynik będzie zgodny z deadline. Sanctity engine'u zachowana, bo działa po wygenerowaniu i tylko w jednym scenariuszu (`targetWeeks` provided AND violated).
-
-### A3. UI — badge "Fit to deadline"
-
-W `MacroTimeline.tsx` w nagłówku roadmapy: jeśli istnieje `targetWeeks` ORAZ `Σ phaseWeeks(phases) === targetWeeks` → drobny `<Badge variant="outline" className="text-[10px]">Fit to {targetWeeks}w deadline</Badge>` obok tytułu sekcji. Info-only, niefunkcjonalny.
-
-### A4. Test akceptacyjny (do uruchomienia po deployu)
-
-Wywołać `supabase--curl_edge_functions` z body:
-```json
-{ "studentId":"<uuid>", "teacherId":"<uuid>", "mode":"replace", "targetWeeks": 13 }
-```
-Oczekiwany wynik: `phases.length ∈ [3,4]`, `Σ (end-start+1) === 13`, `phases[last].estimated_weeks_end === 13`.
+Wszystkie zmiany są **chirurgiczne** — żadna nie przebudowuje istniejących mechanizmów. Sankcyjny prompt do generowania worksheetów (`format-worksheet-prompt`) **nie jest dotykany**. Zmieniamy wyłącznie prompt do `generate-curriculum-phases` (curriculum), co jest w pełni dozwolone (potwierdzone przez Ciebie).
 
 ---
 
-## CZĘŚĆ B — Edit suggestion lokalnie w formularzu (BEZ ZMIAN, powtórzenie)
+## Problem 1 — AI generuje 5×4=20 tyg. zamiast wpasować się w deadline 90 dni
 
-**Plik:** `src/components/WorksheetForm/NextStepsPresetBanner.tsx`
+### Root cause (potwierdzone w bazie)
+Funkcja `generate-curriculum-phases` liczy `weeksUntilDeadline` **tylko** z `students.main_goal_target_date`. Charlotte ma `main_goal_target_date = NULL`, ale ma cel w `student_progress_goals.target_date = 2026-08-07` (≈13 tyg.). Skutek: `weeksUntilDeadline=null` → `remainingBudget=null` → safety net `fitPhasesToDeadline` jest no-opem → AI dostaje "no deadline" i generuje swobodne 5×4=20 tyg. Stąd zapis `deadline_fit_adjusted:false, target_total_weeks:nil` w `generation_context`.
 
-### B1. Nowy stan i import dialogu
+### Rozwiązanie
 
-```tsx
-import { SuggestionEditDialog, type SuggestionEditValue } from '@/components/dslm/SuggestionEditDialog';
-const EMPTY_EDIT: SuggestionEditValue = { topic:'', goal:'', additionalInfo:'', grammarFocus:'', exercises:[], exerciseFocusMap:{} };
-const [editingId, setEditingId] = useState<string | null>(null);
-const [editValue, setEditValue] = useState<SuggestionEditValue>(EMPTY_EDIT);
+**A. Edge function `generate-curriculum-phases` — fallback na cele**
+
+Po obliczeniu `weeksUntilDeadline` z `main_goal_target_date`, jeśli wynik to `null`, wybierz **najwcześniejszy** `target_date` spośród niezakończonych (`is_achieved=false`, `archived_at IS NULL`) celów ucznia jako fallback.
+
+```ts
+// po istniejącym bloku liczącym weeksUntilDeadline z main_goal_target_date:
+if (weeksUntilDeadline === null) {
+  const goalDates = goals
+    .filter((g: any) => g.target_date && !g.is_achieved)
+    .map((g: any) => new Date(g.target_date).getTime())
+    .filter((t: number) => Number.isFinite(t) && t > Date.now());
+  if (goalDates.length > 0) {
+    const earliest = Math.min(...goalDates);
+    const days = Math.max(0, Math.round((earliest - Date.now()) / 86400000));
+    weeksUntilDeadline = Math.max(1, Math.round(days / 7));
+  }
+}
 ```
 
-`useFutureTimeline` już zwraca `updateSuggestion` — destrukturyzujemy go z hooka.
+**B. Domyślny `phaseCount` adaptuje się do krótkiego deadline'u**
 
-### B2. Nowy handler `openEdit`
+Obecny wzór `min(5, max(3, round(weeksUntilDeadline/4)))` dla 13 tyg. → 3 fazy (OK), ale safety net już rebase'uje. Zostawiamy bez zmian (działa po fallbacku z punktu A).
 
-```tsx
-const openEdit = (s: any) => {
-  setEditingId(s.id);
-  setEditValue({
-    topic: s.suggested_topic || '',
-    goal: s.suggested_goal || '',
-    additionalInfo: s.suggested_additional_info || '',
-    grammarFocus: s.suggested_grammar_focus || '',
-    exercises: Array.isArray(s.suggested_exercises) ? [...s.suggested_exercises] : [],
-    exerciseFocusMap: s.suggested_exercise_focus_map ? { ...s.suggested_exercise_focus_map } : {},
-  });
-};
-const saveEdit = async () => {
-  if (!editingId || !editValue.topic.trim()) return;
-  await updateSuggestion(
-    editingId, editValue.topic, editValue.goal,
-    editValue.additionalInfo, editValue.grammarFocus,
-    editValue.exercises, editValue.exerciseFocusMap,
+**C. Wzmocniony prompt — eksplicytny przykład rozkładu**
+
+W bloku `HARD CONSTRAINT — DEADLINE FIT` dopisujemy konkretny przykład:
+
+```
+EXAMPLE for budget=13 weeks, phaseCount=4:
+  Phase 1: weeks 1-3 (3w)
+  Phase 2: weeks 4-6 (3w)
+  Phase 3: weeks 7-9 (3w)
+  Phase 4: weeks 10-13 (4w)
+SUM=13 ✓ (not 16, not 20)
+```
+
+**D. Telemetry — tag `deadline_source`** w `generation_context`:
+- `'student.main_goal_target_date'` | `'goal.target_date'` | `'fallback_no_deadline'`
+
+Pozwoli w przyszłości audytować skąd przyszedł budżet.
+
+**E. Zachowanie wstecz-kompatybilne**: gdy nadal brak jakiejkolwiek daty → identyczne zachowanie jak teraz (5 faz × 4 tyg.). Nic się nie psuje.
+
+---
+
+## Problem 2 — `Failed to generate next steps` (500 z `generate-timeline`)
+
+### Root cause
+Funkcja `generate-timeline` istnieje **tylko jako zdeployowana w Supabase**; nie ma jej w `supabase/functions/` w repo (nie możemy edytować jej bezpośrednio). Ręczny test (curl) z poprawnymi `studentId+teacherId` zwraca **200 OK** z poprawnym JSON-em. Oznacza to, że 500 jest scenariuszowy — najprawdopodobniej powstaje, gdy `excludeIds` zawiera UUID-y istniejących sugestii albo `phaseId` wskazuje na fazę.
+
+### Rozwiązanie
+
+**A. Frontend — defensywna kompresja payloadu** (`useFutureTimeline.tsx`, linie 119–135):
+
+1. **Limituj `excludeIds`** do max. 25 najnowszych (UUID array zbyt duży powoduje też przekraczanie tokenów AI-Gateway).
+   ```ts
+   const excludeIds = (opts.excludeIds ?? []).slice(0, 25);
+   ```
+2. **Walidacja przed wysyłką**: jeśli `studentId`/`teacherId` puste → wczesny return + toast (chroni przed 404).
+
+**B. Frontend — czytelniejszy fallback komunikatów**
+
+W catchu `generateNextSteps`, dodaj rozróżnienie 500 ≠ błąd kredytów:
+
+```ts
+if (status === 500) {
+  toast.error(
+    'Generator timeline returned an error. Try without phase target, or reduce existing steps and retry.',
+    { duration: 7000 }
   );
-  setEditingId(null);
-};
-```
-
-### B3. Zamiana `navigate(editHref)` → `openEdit(p)`
-
-W obu miejscach (przycisk Edit2 na chipie ORAZ w tooltipie) — usunąć `editHref` i `navigate(...)`, zamiast tego `onClick={(e)=>{ e.stopPropagation(); openEdit(p); }}`.
-
-### B4. Render dialogu
-
-Tuż przed `</TooltipProvider>` w returnie:
-
-```tsx
-<SuggestionEditDialog
-  open={!!editingId}
-  value={editValue}
-  onChange={(u) => setEditValue(prev => ({ ...prev, ...u }))}
-  onSave={saveEdit}
-  onCancel={() => setEditingId(null)}
-/>
-```
-
-### B5. Konsekwencja dla PathwayView
-
-W `PathwayView.tsx` zostawiamy mechanizm `?editSuggestion=` (backward compat — ktoś może mieć link), ALE on nie będzie już używany przez banner. Brak zmian.
-
----
-
-## CZĘŚĆ C — Smart phase targeting dla "Generate next steps" (BEZ ZMIAN, powtórzenie)
-
-### C1. Helper w `PathwayView.tsx`
-
-```ts
-import { recommendedStepsForPhase } from './MacroTimeline'; // wystawimy export
-function pickBestTargetPhase(phases, phaseSteps): string | null {
-  const counts: Record<string, number> = {};
-  for (const s of phaseSteps) if (s.phase_id) counts[s.phase_id] = (counts[s.phase_id]||0)+1;
-  // Order: in_progress, then planned (by sequence_number ASC).
-  const ordered = [
-    ...phases.filter(p => p.status === 'in_progress'),
-    ...phases.filter(p => p.status === 'planned'),
-  ].sort((a,b) => a.sequence_number - b.sequence_number);
-  for (const p of ordered) {
-    const have = counts[p.id] || 0;
-    const need = recommendedStepsForPhase(p);
-    if (have < need) return p.id;
-  }
-  return null; // wszystkie pełne — sugeruj free
 }
 ```
 
-`recommendedStepsForPhase` w `MacroTimeline.tsx` → dodać `export function recommendedStepsForPhase(...)`.
+**C. Logowanie payloadu w konsoli**
 
-### C2. PathwayView — przekazanie informacji o fazach do `NextStepsSection`
+Przed `supabase.functions.invoke('generate-timeline', …)` dodaj `logger.debug('[generate-timeline] payload', body)` żebyśmy w następnej iteracji mogli dokładnie zobaczyć co poleciało.
 
-Zamiast dotychczasowego `targetPhaseId = currentPhase?.id ?? null`, oblicz:
+**D. Twardy retry przy `phaseId`**
 
-```ts
-const recommendedTargetPhaseId = useMemo(
-  () => useRoadmap ? pickBestTargetPhase(phases, phaseSteps) : null,
-  [useRoadmap, phases, phaseSteps]
-);
-```
+Jeśli pierwsze wywołanie z `phaseId` zwróci błąd, spróbuj ponownie z `phaseId=null` (free step) — degradacja zamiast fail. Komunikat: "Phase-bound generation failed; created a free step instead."
 
-Rozszerz interfejs `NextStepsSectionProps`:
-
-```ts
-phaseOptions: Array<{ id: string; label: string; sequence: number;
-  status: PhaseStatus; have: number; need: number; weeks: number | null }>;
-defaultTargetPhaseId: string | null;          // null = free
-useRoadmap: boolean;                          // żeby ukryć selector, jeśli wyłączony
-onGenerateMore: (count: number, excludeIds: string[], phaseId: string | null) => Promise<boolean> | boolean;
-```
-
-Zbuduj `phaseOptions` w PathwayView i przekaż. Zmień handler:
-
-```ts
-onGenerateMore={(count, excludeIds, phaseId) =>
-  generateNextSteps({
-    mode: excludeIds.length > 0 ? 'add' : 'replace',
-    count, excludeIds,
-    phaseId: useRoadmap ? phaseId : null,
-  })
-}
-```
-
-### C3. NextStepsSection — selector w dwóch dialogach
-
-Oba dialogi (`firstGenDialogOpen` empty-state ORAZ `DropdownMenu` "Generate more") dostają **ten sam blok UI**:
-
-1. Nowy stan `const [targetPhaseId, setTargetPhaseId] = useState<string | null>(defaultTargetPhaseId);` — sync z propa przy każdym otwarciu (`useEffect` przy `open`).
-2. `Select`:
-   - Etykieta: `Target phase`
-   - Pierwsza opcja: `🎯 Recommended: {recommendedLabel}` — value = `defaultTargetPhaseId` (lub `__free__` jeśli null) — domyślnie zaznaczona.
-   - Pozostałe: każda faza w `phaseOptions` jako `Phase {seq}: {label} — {have}/{need} steps ({weeks ? weeks+'w' : '—'})`.
-   - Ostatnia: `Free step (no phase)` — value `__free__`.
-3. Helper text pod selectem (warunkowe):
-   - jeżeli wybrana faza ma `have >= need`: `⚠ Already at recommended count ({have}/{need}). Adding more is OK but the rolling plan stays at {need} per week-block.`
-   - jeżeli faza ma `have < need`: `Phase has {have}/{need} steps. Recommended add: {need-have}.` — i auto-presetuj input `count = max(1, need - have)` (tylko gdy user nie zmienił ręcznie — proste: zrób to przy zmianie selectu).
-   - jeżeli `__free__`: `Free step — not bound to any phase. Use only after current phase is complete or for ad-hoc topics.`
-4. `count` clamp pozostaje 1-6.
-5. Przycisk submit przekazuje `phaseId = targetPhaseId === '__free__' ? null : targetPhaseId`.
-
-`currentPhaseLabel` (badge przy "Next Steps") **zostaje** jako informacja "który phase jest in_progress" (orientacja), ale nie służy już jako sztywny target.
-
-### C4. Refaktor — wspólny komponent `GenerateStepsDialog`
-
-Aby uniknąć duplikacji, wyciąg do nowego pliku `src/components/dslm/GenerateStepsDialog.tsx`:
-- props: `{ open, mode: 'first'|'more', defaultCount, defaultTargetPhaseId, phaseOptions, generating, onCancel, onConfirm(count, phaseId) }`
-- środek = Input number + Select + helpery z C3.
-- `NextStepsSection` używa go dwukrotnie (zamiast dwóch lokalnych dialogów).
-- `MacroTimeline` może opcjonalnie też z niego skorzystać w przyszłości — w tej iteracji NIE ruszamy MacroTimeline (sanctity zakresu).
+> Uwaga: nie możemy edytować deployowanej `generate-timeline` (nie ma jej w repo). Jeśli mimo defensywnych zmian błąd pozostanie, w kolejnym kroku trzeba zrekonstruować jej źródło z bieżącej deploymentu (osobny task — poza tym planem).
 
 ---
 
-## CZĘŚĆ D — Pełne podsekcje w nawigacji DSLM (BEZ ZMIAN, powtórzenie)
+## Problem 3 — Brak ikony "Remove" przy Next Step #1 + brak potwierdzenia
 
-**Pliki:** `DSLMTab.tsx`, `CollapsibleSection.tsx`, `PathwayView.tsx`.
+### Root cause
+`NextStepBanner` nie ma żadnego `onDelete` — można tylko `Mark used`/`Edit`/`Regenerate`. `CompactSuggestionCard` (kroki #2..N) ma delete.
 
-### D1. Mechanizm "scroll + open" przez window event
+### Rozwiązanie
 
-W `CollapsibleSection.tsx`:
+**A. Dodaj `onDelete` do `NextStepBanner`**
 
-```tsx
-interface CollapsibleSectionProps { id?: string; ... }
+Plik: `src/components/dslm/NextStepBanner.tsx`
+- Dodaj prop `onDelete: (id: string) => void`.
+- W toolbarze (obok `onMarkUsed`) dodaj przycisk `Trash2` z wariantem `ghost` na białym overlayu (banner ma kolorowe tło).
 
-export const CollapsibleSection = ({ id, ..., defaultOpen=false, ... }) => {
-  const [open, setOpen] = useState(defaultOpen);
-  useEffect(() => {
-    if (!id) return;
-    const handler = (e: Event) => {
-      const target = (e as CustomEvent).detail?.id;
-      if (target === id) setOpen(true);
-    };
-    window.addEventListener('dslm:openSubsection', handler as EventListener);
-    return () => window.removeEventListener('dslm:openSubsection', handler as EventListener);
-  }, [id]);
-  return <Card id={id} ...>...</Card>;
-};
+**B. Modal potwierdzenia — wpisanie nazwy**
+
+Stwórz `src/components/dslm/ConfirmTypeToDeleteDialog.tsx` (reużywalny):
+- Props: `open, onOpenChange, label /* "Next Step #1" lub "Phase 1: …" */, expectedText /* "Phase 1" lub "Next Step #1" */, onConfirm`.
+- Tekst wymaga **dokładnego dopasowania** (case-sensitive); przycisk `Delete` disabled dopóki input ≠ expectedText.
+- Reużycie z `NextStepBanner` **i** z `CompactSuggestionCard` (też dla phase'ów — patrz dalej).
+
+**C. Faza w `MacroTimeline` — dodaj ten sam confirm**
+
+Aktualny `deletePhase` z `useCurriculumPhases` wykonuje hard delete bez potwierdzenia. Owinąć w `ConfirmTypeToDeleteDialog` z `expectedText = "Phase {sequence}"`.
+
+---
+
+## Problem 4 — `GenerateStepsDialog` ma stare dane po zamknięciu/otwarciu
+
+### Root causes (3 podproblemy)
+
+**4a. Po pierwszym wygenerowaniu faz, klik "Generate next steps" zanim hook `useCurriculumPhases` zrefetchuje fazy** → `phaseOptions=[]` → modal nie wie o fazach → `defaultTargetPhaseId=null` → `count=3` (default).
+
+**4b. Reopen modalu nie auto-resetuje `count` do `(need - have)`**: `useEffect` (linia 68) ma deps `[phaseValue, selectedPhase, ...]` — gdy `phaseValue` po reopen jest taka sama, efekt się nie odpala mimo, że `countTouched` resetuje się.
+
+**4c. SelectItem "🎯 Recommended:" pokazuje sam tytuł frazy — bez "Phase 1:" + ucięty po prawej** w `SelectTrigger` z powodu `w-[23%]` szerokości.
+
+### Rozwiązanie
+
+**A. (4a)** W `useFutureTimeline.tsx` po `generatePhases` w `useCurriculumPhases.tsx` już jest `await fetchPhases()`. Problem: `PathwayView` używa `useCurriculumPhases` osobno od `MacroTimeline`. Dwie instancje hooka = dwa stany. Po wygenerowaniu w `MacroTimeline`, instancja w `PathwayView` nie wie.
+
+**Fix**: emit globalny event `dslm:phasesUpdated` z `useCurriculumPhases.generatePhases` po `fetchPhases`; subskrybuj w drugiej instancji hooka i wywołaj `fetchPhases`. Minimalna inwazja:
+```ts
+// useCurriculumPhases.tsx — po fetchPhases() w generatePhases:
+window.dispatchEvent(new CustomEvent('dslm:phasesUpdated', { detail: { studentId } }));
+
+// useEffect w hooku:
+useEffect(() => {
+  const h = (e: Event) => {
+    if ((e as CustomEvent).detail?.studentId === studentId) fetchPhases();
+  };
+  window.addEventListener('dslm:phasesUpdated', h);
+  return () => window.removeEventListener('dslm:phasesUpdated', h);
+}, [studentId, fetchPhases]);
 ```
 
-(`id` na `<Card>` daje natywny anchor dla `scrollIntoView`.)
-
-### D2. Mapa subsekcji w DSLMTab
-
-Tuż obok `VIEWS` dodaj:
+**B. (4b)** W `GenerateStepsDialog.tsx` przeniesione ustawienie `count` z `useEffect[phaseValue,...]` do **bloku resetu na open**:
 
 ```ts
-const SUBSECTIONS: Record<ViewId, Array<{ id: string; label: string }>> = {
-  pathway: [
-    { id: 'sub-pathway-next-steps', label: 'Next Steps' },
-    { id: 'sub-pathway-roadmap',    label: 'Learning Roadmap' },
-    { id: 'sub-pathway-notes',      label: 'Next Lesson Ideas' },
-  ],
-  goals: [
-    { id: 'sub-goals-main',       label: 'Main Goal' },
-    { id: 'sub-goals-supporting', label: 'Supporting Goals' },
-    { id: 'sub-goals-additional', label: 'Additional Goals' },
-    { id: 'sub-goals-achieved',   label: 'Achieved Goals' },
-    { id: 'sub-goals-archived',   label: 'Archived Goals' },
-    { id: 'sub-goals-notes',      label: 'Goal Notes' },
-  ],
-  skills: [
-    { id: 'sub-skills-heatmap',    label: 'Skills Heat Map' },
-    { id: 'sub-skills-micro',      label: 'Micro Skills' },
-    { id: 'sub-skills-notes',      label: 'Skill Assessment Notes' },
-  ],
-  profile: [
-    { id: 'sub-profile-summary',     label: 'AI Summary' },
-    { id: 'sub-profile-psych',       label: 'Psychological Profile' },
-    { id: 'sub-profile-behavior',    label: 'Behavioral Stats' },
-    { id: 'sub-profile-personal',    label: 'Personal Notes' },
-    { id: 'sub-profile-allnotes',    label: 'All Notes' },
-    { id: 'sub-profile-debug',       label: 'Debug: Event Log' },
-  ],
-};
+useEffect(() => {
+  if (!open) return;
+  const initialPhaseId = defaultTargetPhaseId ?? FREE_VALUE;
+  setPhaseValue(initialPhaseId);
+  setCountTouched(false);
+  // Compute initial count based on recommended phase
+  const recPhase = phaseOptions.find(p => p.id === defaultTargetPhaseId);
+  const initialCount = recPhase
+    ? Math.min(6, Math.max(1, recPhase.need - recPhase.have))
+    : defaultCount;
+  setCount(initialCount);
+}, [open, defaultCount, defaultTargetPhaseId, phaseOptions]);
 ```
+Dotychczasowy efekt auto-preset na zmianę `phaseValue` zostawiamy jak jest (działa przy ręcznej zmianie).
 
-### D3. Handler `handleScrollToSub`
+**C. (4c)**
 
-```ts
-const handleScrollToSub = useCallback((view: ViewId, subId: string) => {
-  setActiveSection(view);
-  setSearchParams({ tab: 'dslm', view, section: subId });
-  // Open + scroll z drobnym delay, żeby IntersectionObserver się ustabilizował
-  window.dispatchEvent(new CustomEvent('dslm:openSubsection', { detail: { id: subId } }));
-  setTimeout(() => {
-    const el = document.getElementById(subId);
-    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-  }, 50);
-}, [setSearchParams]);
-```
+W `GenerateStepsDialog.tsx`:
+- Etykieta Recommended: zawsze prefiksuj `Phase {sequence}`:
+  ```ts
+  const recPhase = phaseOptions.find(p => p.id === recommendedId);
+  const phaseRecommendedLabel = recPhase
+    ? `Phase ${recPhase.sequence}: ${recPhase.label}`
+    : 'Free step';
+  ```
+- Tekst itema: `🎯 Recommended — {phaseRecommendedLabel}` zamiast `🎯 Recommended: {phaseRecommendedLabel}` (czytelniejsze).
 
-Plus na mount: jeśli `searchParams.get('section')` istnieje → wywołaj `handleScrollToSub(view, sectionId)` z większym timeoutem (300ms) żeby `LazySection` zdążył zhydrować Goals/Skills/Profile.
+**Wcięcie po lewej w trigger**: shadcn `SelectItem` ma `pl-8` na slot ikony check. Trigger renderuje `SelectValue` który nie dziedziczy `pl-8`, ale **zawartość SelectItem-a** (cały JSX) jest renderowana. Naprawa: użyj `<SelectValue placeholder="…" />` z explicit override w komponencie:
+- W `SelectItem` Recommended owiń label w `<span className="block text-left">…</span>`.
+- W `SelectTrigger` dodaj `min-w-0` i klasę pozwalającą na truncate: `<SelectValue className="truncate text-left" />`.
+- Zwiększ szerokość trigger w PathwayView modalu z domyślnej do `min-w-[280px]` (modal ma `DialogContent` ~`max-w-lg` = 512px — jest miejsce).
 
-### D4. UI nawigacji desktop
+---
 
-Pod każdym button widoku w `<nav>` dodać (gdy `activeSection === view.id`) zwijany blok:
+## Problem 4-bis — Sub-sekcje w `DSLMTab` widoczne tylko dla aktywnej sekcji
+
+### Rozwiązanie
+
+W `src/components/dslm/DSLMTab.tsx` linia 337:
 
 ```tsx
-{activeSection === view.id && SUBSECTIONS[view.id].length > 0 && (
-  <div className="ml-6 space-y-0.5 mt-0.5">
-    {SUBSECTIONS[view.id].map(sub => (
-      <button
-        key={sub.id}
-        onClick={() => handleScrollToSub(view.id, sub.id)}
-        className="w-full text-left text-xs px-2 py-1 rounded text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-      >
-        {sub.label}
-      </button>
-    ))}
+{activeSection === view.id && subs.length > 0 && (
+```
+
+zmień na **bezwarunkowe renderowanie**, ale **wizualnie wyróżnij** aktywną grupę:
+
+```tsx
+{subs.length > 0 && (
+  <div className={cn(
+    "ml-6 mt-1 mb-1 space-y-0.5 border-l pl-2",
+    activeSection === view.id ? "border-primary" : "border-border opacity-70"
+  )}>
+    {subs.map(s => ( /* … bez zmian … */ ))}
   </div>
 )}
 ```
 
-Dla mobile: pod paskiem widoków render drugi rząd subsekcji (chip-style, scroll-x), tylko gdy `activeSection` to view, który ma >0 subsekcji.
-
-### D5. Przypisanie `id` do `CollapsibleSection`
-
-- `GoalsView.tsx`: 6 sekcji — dopisz `id="sub-goals-..."` po kolei zgodnie z mapą D2. Sekcja Main Goal jest renderowana inline (bez CollapsibleSection) — opakuj jej zewnętrzny `<Card>` (jeśli istnieje) w `<div id="sub-goals-main">` lub dodaj `id` na pierwszej `<Card>` rezygnując z CollapsibleSection.
-- `SkillsView.tsx`: 3 sekcje — dopisz id.
-- `ProfileView.tsx`: 6 sekcji — dopisz id.
-- `PathwayView.tsx`: 3 sekcje — żadna nie używa CollapsibleSection. Owijamy każdą w `<div id="sub-pathway-...">`:
-  - Next Steps section → wokół `<NextStepsSection ... />`.
-  - Roadmap → wokół `<Collapsible open={roadmapOpen} ...>`.
-  - Next Lesson Ideas → wokół `<Collapsible open={notesOpen} ...>`.
-  - Dodajemy także obsługę window event `dslm:openSubsection` w PathwayView, aby otwierał roadmap/notes Collapsible (jednolinijkowy `useEffect`).
-
-### D6. Backward compat URL
-
-`?tab=dslm&view=pathway` (bez `section`) działa jak dotąd. Stare `?tab=progress` redirect (StudentPage.tsx) zostawiamy.
+Tylko dla desktopa (mobile nie ma sidebar — bez zmian).
 
 ---
 
-## CZĘŚĆ E — Student switcher na pasku nawigacji (NOWY)
+## Problem 5 — `NavStudentSwitcher`: poziom pod nazwą + pokazuje się też na `/student/:id`
 
-**Plik:** `src/components/landing/StickyNav.tsx`, opcjonalnie nowy `src/components/landing/NavStudentSwitcher.tsx`.
+### Rozwiązanie
 
-### E1. Kontekst
+**A. Hide na stronie studenta**
+`src/components/landing/StickyNav.tsx`, linia 40:
+```ts
+const isStudentPage = /^\/student\//.test(location.pathname);
+const showStudentSwitcher = isRegisteredUser && !isDashboard && !isProfile && !isStudentPage;
+```
 
-Obecny `StudentSwitcherPopover` (`src/components/StudentSwitcherPopover.tsx`) wyświetla scrollowalną listę studentów z sortowaniem `updated_at DESC`, ale jest renderowany tylko na stronie studenta (StudentPage). Brakuje go w globalnym `StickyNav` na innych stronach (`/calendar`, `/all-worksheets`, `/student/:id`, `/homework/:id`, etc.).
-
-### E2. Nowy komponent `NavStudentSwitcher`
-
-Plik: `src/components/landing/NavStudentSwitcher.tsx` (mały wrapper żeby nie zaśmiecać StickyNav):
-
+**B. Inline level + nazwa**
+`src/components/landing/NavStudentSwitcher.tsx`, sekcja `<a>`:
 ```tsx
-import { useNavigate, useLocation } from 'react-router-dom';
-import { useStudents } from '@/hooks/useStudents';
-import { Button } from '@/components/ui/button';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Users, ChevronDown } from 'lucide-react';
-import React from 'react';
+<a … className="flex items-center justify-between gap-2 px-3 py-2 rounded-md text-sm hover:bg-muted">
+  <span className="font-medium truncate">{s.name}</span>
+  <Badge variant="outline" className="text-[10px] shrink-0">{s.english_level}</Badge>
+</a>
+```
+(Usuwamy `<div className="text-[11px] …">` z drugą linią).
 
-export const NavStudentSwitcher: React.FC = () => {
-  const navigate = useNavigate();
-  const location = useLocation();
-  const { students = [], loading } = useStudents();
-  const [open, setOpen] = React.useState(false);
+---
 
-  const sorted = React.useMemo(
-    () => [...students].sort((a: any, b: any) =>
-      new Date(b.updated_at).getTime() - new Date(a.updated_at).getTime()),
-    [students]
-  );
+## Problem 6 — Duplikat przycisku "Calendar" na środku nav
 
-  const goTo = (id: string, newTab: boolean) => {
-    const url = `/student/${id}`;
-    if (newTab) {
-      window.open(url, '_blank', 'noopener,noreferrer');
-    } else {
-      navigate(url);
-      setOpen(false);
-    }
-  };
+### Rozwiązanie
 
-  // Middle-click + Ctrl/Cmd-click handler — opens new tab
-  const handleClickWithModifier = (e: React.MouseEvent, id: string) => {
-    if (e.button === 1 || e.metaKey || e.ctrlKey) {
-      e.preventDefault();
-      goTo(id, true);
-      return;
-    }
-    goTo(id, false);
-  };
-  const handleAuxClick = (e: React.MouseEvent, id: string) => {
-    if (e.button === 1) { e.preventDefault(); goTo(id, true); }
-  };
+**A. Usuń duplikat z `StickyNav.tsx`** (linie 91–98 mobile + 159–166 desktop — dwa bloki `{!isCalendar && (<Button asChild ...)}`).
 
-  return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button variant="ghost" size="sm" className="gap-1.5">
-          <Users className="h-4 w-4" />
-          Students
-          <ChevronDown className="h-3 w-3 opacity-60" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-72 p-0" align="end">
-        <div className="px-3 py-2 border-b text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-          Switch to student
-        </div>
-        <div className="max-h-80 overflow-y-auto p-1">
-          {loading && <div className="px-3 py-2 text-sm text-muted-foreground">Loading…</div>}
-          {!loading && sorted.length === 0 && (
-            <div className="px-3 py-2 text-sm text-muted-foreground">No students yet.</div>
-          )}
-          {!loading && sorted.map((s: any) => (
-            <a
-              key={s.id}
-              href={`/student/${s.id}`}
-              onClick={(e) => { e.preventDefault(); handleClickWithModifier(e, s.id); }}
-              onAuxClick={(e) => handleAuxClick(e, s.id)}
-              className="block px-3 py-2 rounded-md text-sm hover:bg-muted transition-colors"
-              title="Click to open · Middle/Ctrl-click for new tab"
-            >
-              <div className="font-medium truncate">{s.name}</div>
-              <div className="text-[11px] text-muted-foreground">{s.english_level}</div>
-            </a>
-          ))}
-        </div>
-      </PopoverContent>
-    </Popover>
-  );
+**B. Dodaj middle-click → new tab do istniejącego `GCalStatusButton`**
+
+Plik: `src/components/calendar/GCalStatusButton.tsx`
+
+Zamień `<Button onClick={() => navigate('/calendar')}>` na **anchor wrapper z modyfikatorami**, identyczny pattern jak `handleAnchorNav`:
+```tsx
+const handleClick = (e: React.MouseEvent) => {
+  if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return; // browser handles new tab
+  e.preventDefault();
+  navigate('/calendar');
 };
-```
-
-**Kluczowe**: użycie `<a href="...">` zamiast `<button>` automatycznie aktywuje natywne zachowanie przeglądarki dla middle-click i Ctrl/Cmd-click ("Open in new tab"). `e.preventDefault()` w `onClick` blokuje normalną nawigację, ale pozostawia natywne otwieranie w nowej karcie aktywne (bo `auxclick` / modifier-click są przetwarzane wcześniej).
-
-### E3. Integracja w `StickyNav.tsx`
-
-W gałęzi `isRegisteredUser` (zarówno mobile, jak i desktop) — przed przyciskiem Calendar/Generate:
-
-```tsx
-import { NavStudentSwitcher } from './NavStudentSwitcher';
-...
-{!isDashboard && !isProfile && <NavStudentSwitcher />}
-```
-
-Mobile: powyżej menu sheet, w głównym pasku (po prawej stronie obok `Generate`). Sheet w mobile pozostaje bez zmian (stara nawigacja Dashboard/Profile).
-
-Warunek `!isDashboard && !isProfile` — zgodnie z wymaganiem usera ("poza /dashboard i /profile").
-
----
-
-## CZĘŚĆ F — Middle/Ctrl-click open-in-new-tab dla Calendar i Generate Worksheet (NOWY)
-
-**Plik:** `src/components/landing/StickyNav.tsx`.
-
-### F1. Problem
-
-Aktualnie `Generate Worksheet` i (jeśli istnieje) Calendar są przyciskami `<button onClick={...}>`, które wykonują `navigate(...)` lub callback JS. Middle-click i Ctrl/Cmd-click są ignorowane → brak natywnej obsługi otwierania w nowej karcie.
-
-### F2. Audyt obecnego stanu
-
-- `onGenerateWorksheet` jest **callbackiem** — nie navigatem. Najczęściej w aplikacji ten przycisk otwiera modal/dialog generacji. **Sprawdź w implementacji**, czy w dashboardzie i innych miejscach `onGenerateWorksheet` faktycznie ostatecznie navigates do `/dashboard?action=generate` lub do innego adresu. Jeśli tak — wystaw `<a href>` z `onClick` preventem (jak w E2).
-- Calendar — w obecnym `StickyNav` brak przycisku Calendar. Najprawdopodobniej user mówi o przycisku Calendar w `Sidebar`/dashboard nav lub planuje go DODAĆ. **Decyzja:** dodajemy przycisk Calendar do StickyNav (registered, desktop+mobile) jako brakujący, oraz konwertujemy oba (Calendar + Generate Worksheet) do anchor pattern.
-
-### F3. Konwersja na anchor pattern (Calendar)
-
-```tsx
-import { Calendar } from 'lucide-react';
-const isCalendar = location.pathname === '/calendar';
-...
-{!isCalendar && (
-  <Button asChild variant="outline" size="sm">
-    <a
-      href="/calendar"
-      onClick={(e) => {
-        if (e.metaKey || e.ctrlKey || e.button === 1) return; // let native handle
-        e.preventDefault();
-        navigate('/calendar');
-      }}
-      onAuxClick={(e) => { /* native handles middle */ }}
-    >
-      <Calendar className="h-4 w-4 mr-2" />Calendar
+return (
+  <Button asChild variant="outline" size="sm" className="text-xs h-8 relative">
+    <a href="/calendar" onClick={handleClick} onAuxClick={handleClick}>
+      🗓️ Calendar
+      {unreadCount > 0 && (<Badge … />)}
     </a>
   </Button>
-)}
+);
 ```
 
-`Button asChild` z `<a>` w środku jest standardowym wzorcem shadcn — zachowuje style i daje natywne zachowanie przeglądarki dla modyfikatorów.
+Zachowuje: badge unreadCount, styl, tooltip dla anonimowych.
 
-Analogicznie dla `Dashboard`/`Profile` (już używają `Button asChild` + `<Link>` — `<Link>` z react-router NIE obsługuje natywnie middle-click→new-tab dla zewnętrznych przeglądarek; faktycznie `<Link>` renderuje `<a href>`, więc działa OK z modyfikatorami. **Nie zmieniamy Dashboard/Profile.**)
+**Mobile**: `GCalStatusButton` jest tylko w Sheet menu — wystarczy. Brak duplikatu na top barze (po usunięciu).
 
-### F4. Konwersja `Generate Worksheet`
+---
 
-Generate Worksheet to akcja, nie route, ale wymaganie user'a sugeruje, że ma być nawigacyjne. **Decyzja:** `Generate Worksheet` przy obecnej architekturze:
+## Problem 7 — Generate Worksheet z `/student` nie auto-wybiera studenta + label "Generic worksheet" ucięty
 
-- **na innych stronach niż `/dashboard`** → zamień na `<a href="/dashboard?action=generate">` (anchor + onClick navigate). Nowa karta: otwiera dashboard z auto-otwartym formularzem (dashboard już obsługuje `?action=add-student` analogicznie — dodajemy obsługę `?action=generate` w `Dashboard.tsx`: `useEffect` sprawdza param i otwiera/scrolluje do formularza).
-- **na `/dashboard`** → tak jak teraz, callback `onGenerateWorksheet` (otwiera/scrolluje do formularza inline). Anchor pattern niepotrzebny — i tak jesteś już na dashboard.
+### Root cause #1 (auto-select)
+W `StickyNav.tsx` (linie 173–180), gdy nie-dashboard, przycisk "Generate Worksheet" jest `<Button asChild><a href="/" onClick={handleAnchorNav('/')}/>`. **`handleAnchorNav` nawiguje do `/` ignorując callback `onGenerateWorksheet`** — a to właśnie ten callback (z `StudentPage.handleGenerateWorksheet`) ustawia `sessionStorage.preSelectedStudent`. Skutek: nawigacja do `/`, ale sessionStorage puste → form bez auto-selectu.
 
+### Rozwiązanie #1
+
+W `StickyNav.tsx` linie 173–180 (i analogicznie mobile 105–112):
 ```tsx
 {onGenerateWorksheet && !isDashboard && (
   <Button asChild size="sm">
     <a
-      href="/dashboard?action=generate"
+      href="/"
       onClick={(e) => {
-        if (e.metaKey || e.ctrlKey || e.button === 1) return;
+        // Modyfikatory → otwórz w nowej karcie (bez callbacku — sessionStorage by nie zadziałało między tabami)
+        if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
         e.preventDefault();
-        navigate('/dashboard?action=generate');
+        onGenerateWorksheet(); // ← wywołaj callback który ustawia sessionStorage + nawiguje
+      }}
+      onAuxClick={(e) => {
+        if (e.button === 1) return; // browser handles
       }}
     >
-      <Plus className="h-4 w-4 mr-2" />Generate Worksheet
+      <Plus className="h-4 w-4 mr-2" /> Generate Worksheet
     </a>
   </Button>
 )}
-{onGenerateWorksheet && isDashboard && (
-  <Button size="sm" onClick={onGenerateWorksheet}>
-    <Plus className="h-4 w-4 mr-2" />Generate Worksheet
-  </Button>
-)}
 ```
 
-### F5. Obsługa `?action=generate` w `Dashboard.tsx`
+Skutek: zwykły click → callback (z preSelectedStudent), modyfikator → nowa karta bez preselekcji (intencja użytkownika to nowa karta — preselekcja przez sessionStorage między tabami nie zadziałałaby tak czy inaczej).
 
-W istniejącym `useEffect` reagującym na `searchParams` (już obsługuje `action=add-student`) dodać:
+### Root cause #2 (label ucięty)
+SelectTrigger ma `w-full` w kontenerze `w-[23%]` (~285px). Tekst "Generic worksheet (no student)" + chevron + padding nie mieszczą się.
 
-```ts
-if (searchParams.get('action') === 'generate') {
-  // scroll do formularza i/lub otworzyć go
-  document.getElementById('worksheet-generation-form')?.scrollIntoView({ behavior: 'smooth' });
-  // czyszczenie param
-  searchParams.delete('action'); setSearchParams(searchParams, { replace: true });
-}
-```
+### Rozwiązanie #2
 
-(Dokładny anchor — sprawdzić ID `WorksheetForm` rootu w `Dashboard.tsx`; jeśli go nie ma — dodać `<div id="worksheet-generation-form" />` jako anchor.)
+W `src/components/WorksheetForm/index.tsx`:
+- Linia 666: zmień label na **krótszy**: `<SelectItem value="no-student">No student (generic)</SelectItem>`
+- Doda `truncate` w `SelectValue` jak w 4c.
+
+Krótsza fraza + truncate = tekst widoczny w pełni przy 23% szerokości.
 
 ---
 
-## CZĘŚĆ G — Add Note z tab=overview otwiera Quick Add modal (NOWY)
+## Problem 8 — "Add students first" ma być spójny z "No student (generic)" + klikalny → modal Add Student
 
-**Pliki:** `src/pages/StudentPage.tsx`, `src/components/student-knowledge/StudentKnowledgeQuickAddModal.tsx` (już istnieje).
+### Root cause
+Linie 678–696 w `WorksheetForm/index.tsx`: gdy nauczyciel ma 0 studentów, renderuje się statyczny `Lock` div z tooltipem. Brak akcji.
 
-### G1. Problem
+### Rozwiązanie
 
-W `StudentPage.tsx:732` przycisk **Add Note** w sekcji Recent Notes (tab `overview`) wywołuje `handleTabChange('knowledge')`, co przez `redirectMap` (linia 271) przenosi na `?tab=dslm&view=profile`. PathwayView/ProfileView NIE otwiera żadnego modalu dodawania notki — efekt: nawigacja, brak akcji.
+**A. Sprawdź dostępny modal Add Student**
 
-`StudentKnowledgeQuickAddModal` istnieje (`src/components/student-knowledge/StudentKnowledgeQuickAddModal.tsx`) i jest niezaimportowany w StudentPage.
+`src/components/StudentEditDialog.tsx` istnieje. Otwiera się przez prop `open`. Można go reużyć dla create-mode (jeśli wspiera `student=null`/`isNew`).
 
-### G2. Rozwiązanie: lokalny modal w StudentPage, bez nawigacji
+> Decyzja do potwierdzenia w trakcie implementacji: jeśli `StudentEditDialog` nie wspiera trybu "create", użyć `Dashboard`'owego flow przez `navigate('/dashboard?action=add-student')` (Dashboard już parsuje `?action=add-student` zgodnie z mem `welcome-email-cta-add-student`). To pewniejsze i mniej inwazyjne — **wybieramy ten wariant** w planie.
 
-W `StudentPage.tsx`:
+**B. Render gdy `userId && students.length === 0`**:
 
-1. Import + state:
-
+Zamiast `Lock` divu:
 ```tsx
-import { StudentKnowledgeQuickAddModal } from '@/components/student-knowledge/StudentKnowledgeQuickAddModal';
-const [quickAddOpen, setQuickAddOpen] = useState(false);
+<div className={`${isMobile ? 'w-full' : 'w-[23%]'} flex flex-col justify-center`}>
+  <button
+    type="button"
+    onClick={() => navigate('/dashboard?action=add-student')}
+    className="w-full h-full flex items-center gap-2 px-3 py-2 border-2 border-amber-400 ring-1 ring-amber-300 bg-amber-50/40 dark:bg-amber-900/10 rounded-md text-left hover:bg-amber-50 transition-colors"
+  >
+    <Plus className="h-4 w-4 text-amber-700 shrink-0" />
+    <span className="text-sm text-amber-900 dark:text-amber-300 truncate">Add your first student</span>
+  </button>
+  <p className="text-[11px] text-amber-700 dark:text-amber-300 mt-1 leading-tight">
+    Click to add a student and unlock personalized worksheets.
+  </p>
+</div>
 ```
 
-2. Zamiana onClick obu przycisków "Add Note" (overview tab + każde inne miejsce w pliku gdzie jest CTA "Add Note" prowadzące do `handleTabChange('knowledge')` z intencją dodawania):
-
-```tsx
-<Button size="sm" onClick={() => setQuickAddOpen(true)} className="flex-1">
-  <Plus className="h-4 w-4 mr-1" /> Add Note
-</Button>
-```
-
-Przycisk **View All** zostawiamy z `handleTabChange('knowledge')` (intencją jest nawigacja, nie dodawanie).
-
-3. Render modalu na końcu komponentu (przy innych dialogach):
-
-```tsx
-<StudentKnowledgeQuickAddModal
-  open={quickAddOpen}
-  onClose={() => setQuickAddOpen(false)}
-  studentId={id!}
-  teacherId={teacherId}
-  studentName={student?.name || ''}
-  onAdded={() => {
-    studentKnowledge.refetch?.();
-    setQuickAddOpen(false);
-  }}
-/>
-```
-
-(Sprawdzić w implementacji dokładny props signature `StudentKnowledgeQuickAddModal` — zaadaptować nazwy callbacków. Plik istnieje, zaczyta się przed implementacją.)
-
-### G3. Konsekwencja
-
-- Brak zmian w `redirectMap` (zostaje dla starych deep-linków).
-- Brak zmian w DSLMTab/ProfileView.
-- Quick Add zachowuje się identycznie jak na innych ekranach (zgodnie z v6.9.8 quick-capture flow: zapis jako `category='Notes'`, AI klasyfikuje w tle).
+Anonimowy (`!userId`) — bez zmian (Lock + tooltip).
 
 ---
 
-## CZĘŚĆ H — Dokumentacja (RAG)
+## Dokumentacja (RAG injection)
 
-### H1. `docs/llm-context.md` + `llms.txt` — sekcja v6.9.13
+### `docs/llm-context.md` + `llms.txt` — nowy rozdział `## v6.9.14 — Pathway/Nav Fixes`
 
-```markdown
-## v6.9.13 — Deadline-aware phase prompt + form-local Edit + smart phase target + DSLM sub-nav + nav student switcher + Add Note quick modal
+Format Problem → Edooqoo Solution → Technical Mechanics dla każdego z 8 punktów. Dodaj `RAG Keywords:` na końcu każdego z synonimami: "deadline cap", "phase budget", "next steps modal", "student switcher", "calendar nav button", "preselected student", "add student CTA", "delete next step confirmation", "type to confirm", "DSLM sub-nav always visible".
 
-### Problem 1: generate-curriculum-phases ignored goal deadline (5×4w = 20w plan for 90-day goal).
-Edooqoo.com Solution: SYSTEM_PROMPT extended with HARD CONSTRAINT "DEADLINE FIT" requiring Σ phase weeks ≤ targetWeeks. Server-side validator clips overruns as defense-in-depth. Client passes targetWeeks computed from main_goal_target_date or nearest goal deadline.
-Technical Mechanics: useCurriculumPhases.generatePhases body adds {targetWeeks}. Edge function generate-curriculum-phases prompt prepended with "HARD CONSTRAINT — DEADLINE FIT" block (rules 1-6 incl. distribution table, contiguity, last-phase snap). Post-AI validator scales+snaps phases when total > targetWeeks. UI: "Fit to {N}w deadline" badge in MacroTimeline header.
+### Memory updates
 
-### Problem 2: Edit suggestion in WorksheetForm forced navigation away.
-Solution: SuggestionEditDialog reused inline in NextStepsPresetBanner. updateSuggestion called via useFutureTimeline. PathwayView ?editSuggestion= path kept for backward compat.
-Technical Mechanics: Banner owns editingId/editValue; saveEdit invokes hook mutation; banner refetches via hook subscription.
-
-### Problem 3: "Generate next steps" hard-coded current in_progress phase, no override.
-Solution: pickBestTargetPhase() = first in_progress with have<need, else first planned with have<need, else null. Recommendation surfaced as default in shared GenerateStepsDialog with phase Select (incl. "Free step"). count auto-presets to need-have.
-Technical Mechanics: PathwayView computes phaseOptions[{id,label,sequence,status,have,need,weeks}] and defaultTargetPhaseId. NextStepsSection renders shared GenerateStepsDialog for both first-time and "more" flows.
-
-### Problem 4: DSLM left-nav showed only top-level views; subsections undiscoverable.
-Solution: SUBSECTIONS map in DSLMTab; nested nav under active view. handleScrollToSub() dispatches window event 'dslm:openSubsection' + scrollIntoView.
-Technical Mechanics: CollapsibleSection accepts id, listens to event, force-opens when id matches; root <Card> gets DOM id. PathwayView panels wrapped in <div id="sub-pathway-*"> with mirrored event listener for its Collapsibles. URL: ?tab=dslm&view=X&section=sub-...
-
-### Problem 5: No global student switcher in nav (outside dashboard/profile).
-Solution: NavStudentSwitcher in StickyNav for registered users when !isDashboard && !isProfile. Popover with scrollable list sorted by updated_at DESC. Anchor-based items support middle/Ctrl-click for new-tab.
-Technical Mechanics: <a href="/student/{id}"> with onClick preventDefault for normal nav, native handling for modifier+aux clicks. Reuses useStudents hook.
-
-### Problem 6: Calendar / Generate Worksheet didn't support open-in-new-tab via middle/Ctrl-click.
-Solution: Convert to <Button asChild><a href="..." onClick={modifier-aware navigate}> pattern. Generate Worksheet on non-dashboard pages anchors to /dashboard?action=generate; Dashboard.tsx handles ?action=generate by scrolling to #worksheet-generation-form anchor.
-Technical Mechanics: onClick checks metaKey/ctrlKey/button===1 → returns (native opens new tab); else preventDefault + navigate.
-
-### Problem 7: tab=overview "Add Note" navigated to dslm/profile but no modal opened.
-Solution: Local StudentKnowledgeQuickAddModal in StudentPage. Add Note button in Recent Notes section opens local modal; "View All" still navigates to dslm/profile.
-Technical Mechanics: import + state quickAddOpen; render <StudentKnowledgeQuickAddModal> at page footer with onAdded → studentKnowledge.refetch.
-
-### RAG Keywords
-deadline cap phases, hard constraint deadline fit, server-side phase validator, targetWeeks, generate-curriculum-phases prompt v6.9.13, in-form edit suggestion, suggestion edit modal worksheet form, smart phase target, recommended target phase, phase coverage have need, free step option, dslm sub-nav, subsection navigation, openSubsection event, learning plan deadline fit, nav student switcher, NavStudentSwitcher, middle click open new tab, ctrl click new tab, generate worksheet anchor, action=generate, add note modal, StudentKnowledgeQuickAddModal in StudentPage
-```
-
-### H2. `mem/features/worksheet-form/next-step-preset.md` — dopisek v6.9.13
-
-- Edit modal teraz lokalny w bannerze (SuggestionEditDialog).
-- Brak nawigacji do PathwayView dla edycji.
-- updateSuggestion via useFutureTimeline.
-
-### H3. Nowy plik `mem/features/dslm/sub-navigation.md`
-
-Mapa sekcji + mechanizm window event `dslm:openSubsection`. Aktualizacja `mem/index.md`.
-
-### H4. Nowy plik `mem/features/dslm/curriculum-phases-deadline-fit.md`
-
-- Prompt-level rule "HARD CONSTRAINT — DEADLINE FIT" — dokładny tekst i logika rozkładu długości.
-- Server-side validator jako defense-in-depth.
-- Sanctity rule: prompt można edytować tylko po wyraźnej zgodzie usera (jak tutaj v6.9.13).
-
-### H5. Nowy plik `mem/features/navigation/nav-student-switcher.md`
-
-- Kiedy pokazany (registered, !dashboard, !profile).
-- Anchor pattern dla nowej karty.
-- Sortowanie updated_at DESC.
-
-### H6. Nowy plik `mem/features/navigation/middle-click-anchor-pattern.md`
-
-- Zasada: każdy nawigacyjny przycisk w globalnym nav używa `<Button asChild><a href onClick={...}>`.
-- onClick guard: `if (metaKey||ctrlKey||button===1) return`.
-- Generate Worksheet → `?action=generate` na Dashboard.
-
-### H7. Nowy plik `mem/features/student-page/quick-add-note-from-overview.md`
-
-- Add Note z overview otwiera lokalny QuickAdd modal, nie nawiguje.
-- View All zostaje navigacją do dslm/profile.
-
-### H8. Aktualizacja `mem/index.md`
-
-Dopisanie 5 nowych pozycji w sekcji `## Memories`.
+Aktualizuj/utwórz pliki:
+- `mem/features/curriculum-phases/deadline-fit-enforcement.md` — dopisz źródło deadline'u: `goal.target_date` jako fallback.
+- `mem/features/dslm-subnav/always-visible-subsections.md` (nowy) — sub-sekcje zawsze widoczne, aktywna podświetlona.
+- `mem/features/navigation/calendar-button-single-instance.md` (nowy) — Calendar tylko przez `GCalStatusButton`, anchor pattern.
+- `mem/features/navigation/nav-student-switcher.md` — dopisz: hide na `/student/:id`, level inline jako badge.
+- `mem/features/worksheet-form/student-selector-states.md` (nowy) — 3 stany: anon (Lock), 0 students (CTA), N students (Select). Krótka etykieta "No student (generic)".
+- `mem/features/dslm/type-to-confirm-delete.md` (nowy) — wzorzec ConfirmTypeToDeleteDialog.
+- Aktualizacja `mem/index.md` z odnośnikami do nowych plików (zachowując całą dotychczasową treść).
 
 ---
 
-## Zmienione pliki (lista do implementacji)
+## Kolejność implementacji (8 atomowych kroków)
 
-| Plik | Zakres |
+1. **Edge function `generate-curriculum-phases`** — fallback na goal target_date + przykład w prompcie + telemetry `deadline_source`. (Problem 1)
+2. **`useFutureTimeline.tsx`** — defensywne limity excludeIds, lepsze komunikaty 500, fallback bez phaseId. (Problem 2)
+3. **`ConfirmTypeToDeleteDialog.tsx`** (nowy) + zastosowanie w `NextStepBanner` (delete) + `MacroTimeline` (phase delete). (Problem 3)
+4. **`GenerateStepsDialog.tsx`** — reset count na open uwzględnia `recPhase.need - recPhase.have`, label `Phase X: …`, truncate. (Problem 4abc)
+5. **`useCurriculumPhases.tsx`** — emit/listen `dslm:phasesUpdated`. (Problem 4a)
+6. **`DSLMTab.tsx`** — sub-sekcje zawsze widoczne, aktywna z `border-primary`. (Problem 4-bis)
+7. **`StickyNav.tsx` + `NavStudentSwitcher.tsx` + `GCalStatusButton.tsx`** — usunięcie duplikatu Calendar, anchor w GCal, hide switcher na `/student/:id`, level inline. (Problemy 5+6)
+8. **`StickyNav.tsx` (Generate btn) + `WorksheetForm/index.tsx`** — fix callbacku Generate, krótka etykieta, klikalny CTA Add student. (Problemy 7+8)
+9. **Dokumentacja** — `docs/llm-context.md`, `llms.txt`, mem files + index.
+
+---
+
+## Co NIE zostanie zmienione (sanctity)
+
+- Prompt `format-worksheet-prompt` — nietknięty.
+- Schemat bazy — bez migracji (`generation_context` to JSONB, dodajemy nowy klucz bez zmian struktury).
+- API `generate-timeline` (deployed) — bez modyfikacji (brak źródła w repo).
+- DSLM Skill Assessment, AI evaluations, deterministic tasks — bez zmian.
+- Demo mode lockdown — bez zmian (wszystkie nowe akcje już chronione w istniejących handlerach).
+
+---
+
+## Ryzyka i ich mitigacja
+
+| Ryzyko | Mitigacja |
 |---|---|
-| `supabase/functions/generate-curriculum-phases/index.ts` | **NOWY w repo** — pobrać aktualny deploy, dodać HARD CONSTRAINT block do SYSTEM_PROMPT, dorzucić line w user prompt, dodać server-side validator (A2.1, A2.2, A2.3) |
-| `supabase/config.toml` | Dodać `[functions.generate-curriculum-phases] verify_jwt = false` jeśli brakuje |
-| `src/hooks/dslm/useCurriculumPhases.tsx` | A1 — `targetWeeks` w body |
-| `src/components/dslm/MacroTimeline.tsx` | A3 (przekazanie targetWeeks z propsów do generatePhases), A4 (badge), `export recommendedStepsForPhase` |
-| `src/components/dslm/PathwayView.tsx` | C1, C2, D5 (3 wrappery + listener), przekazanie deadline'ów do MacroTimeline |
-| `src/components/dslm/DSLMTab.tsx` | przekazanie `mainGoalTargetDate` + `nearestGoalDeadlineDate` do PathwayView; D2, D3, D4 (subsekcje) |
-| `src/components/dslm/NextStepsSection.tsx` | C3, C4 (refaktor do GenerateStepsDialog) |
-| `src/components/dslm/GenerateStepsDialog.tsx` | **NOWY** — wspólny dialog z Select fazy |
-| `src/components/dslm/CollapsibleSection.tsx` | D1 (id + event listener) |
-| `src/components/dslm/GoalsView.tsx` | D5 (id na 6 sekcjach) |
-| `src/components/dslm/SkillsView.tsx` | D5 (id na 3 sekcjach) |
-| `src/components/dslm/ProfileView.tsx` | D5 (id na 6 sekcjach) |
-| `src/components/WorksheetForm/NextStepsPresetBanner.tsx` | B1-B4 (lokalny edit modal) |
-| `src/components/landing/StickyNav.tsx` | E3 (NavStudentSwitcher), F3 (Calendar anchor), F4 (Generate Worksheet anchor) |
-| `src/components/landing/NavStudentSwitcher.tsx` | **NOWY** — komponent E2 |
-| `src/pages/Dashboard.tsx` | F5 (?action=generate handling + anchor #worksheet-generation-form) |
-| `src/pages/StudentPage.tsx` | G2 (Quick Add modal lokalnie, zamiana onClick "Add Note") |
-| `docs/llm-context.md` | H1 |
-| `llms.txt` | H1 |
-| `mem/features/worksheet-form/next-step-preset.md` | H2 |
-| `mem/features/dslm/sub-navigation.md` | **NOWY** H3 |
-| `mem/features/dslm/curriculum-phases-deadline-fit.md` | **NOWY** H4 |
-| `mem/features/navigation/nav-student-switcher.md` | **NOWY** H5 |
-| `mem/features/navigation/middle-click-anchor-pattern.md` | **NOWY** H6 |
-| `mem/features/student-page/quick-add-note-from-overview.md` | **NOWY** H7 |
-| `mem/index.md` | H8 (5 nowych pozycji) |
+| Fallback na goal.target_date pogorszy plany dla studentów z odległym celem | Filtr `target_date > now()` + `min(...)` — bierzemy najbliższy realny |
+| Type-to-confirm dla phase'a może denerwować | Dotyczy tylko Remove (nie zmiany statusu); zgodne z prośbą użytkownika |
+| Anchor onClick dla GCalStatusButton przerwie istniejący navigate | Test: zwykły click → SPA nav, modyfikator → new tab |
+| Sub-sekcje zawsze widoczne mogą wydłużyć sidebar | Wszystkie 4 grupy razem ≈18 pozycji × 22px ≈ 400px, mieści się w sticky |
+| Defensywny limit excludeIds=25 może powtarzać kroki | Akceptowalne — przy >25 użytkownik ma już dużo opcji, AI ma kontekst |
 
-## Sanctity — nietknięte
-
-- Edge functions `generate-timeline`, `format-worksheet-prompt`, `classify-knowledge-entry`, `send-welcome-email` (oraz prompt worksheet engine).
-- Schema DB (zero migracji).
-- `normalizeSuggestionPrefill`.
-- `MacroTimeline` per-phase quick-generate (B/C dotyczy tylko Next Steps section).
-- `Dashboard` "Generate Worksheet" zachowanie inline (zmiana tylko dla wywołań spoza Dashboardu).
-
-## Backward compatibility
-
-- Stary URL `?tab=progress` → istniejący redirect.
-- `?editSuggestion=` w PathwayView nadal działa.
-- `useCurriculumPhases.generatePhases` — `opts.targetWeeks` opcjonalny, brak = stare zachowanie.
-- `onGenerateMore` w `NextStepsSection` — sygnatura rośnie o 3-ci argument; jedyny caller (`PathwayView`) zaktualizowany.
-- `StickyNav` — `NavStudentSwitcher` ukryty, gdy `students.length === 0` lub na dashboard/profile.
-- `redirectMap` w StudentPage zostaje (deep-linki).
-- Generate Worksheet anchor pattern działa wstecznie — `onGenerateWorksheet` callback nadal jest używany na `/dashboard`.
