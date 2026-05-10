@@ -246,11 +246,26 @@ serve(async (req) => {
 
     // Compute weeks until deadline
     let weeksUntilDeadline: number | null = null;
+    let deadlineSource: 'student.main_goal_target_date' | 'goal.target_date' | 'fallback_no_deadline' = 'fallback_no_deadline';
     if (student.main_goal_target_date) {
       const target = new Date(student.main_goal_target_date).getTime();
       const today = Date.now();
       const days = Math.max(0, Math.round((target - today) / (1000 * 60 * 60 * 24)));
       weeksUntilDeadline = Math.max(1, Math.round(days / 7));
+      deadlineSource = 'student.main_goal_target_date';
+    }
+    // v6.9.14 — fallback to earliest non-achieved goal.target_date
+    if (weeksUntilDeadline === null) {
+      const goalTimes = (goals || [])
+        .filter((g: any) => g.target_date && !g.is_achieved)
+        .map((g: any) => new Date(g.target_date).getTime())
+        .filter((t: number) => Number.isFinite(t) && t > Date.now());
+      if (goalTimes.length > 0) {
+        const earliest = Math.min(...goalTimes);
+        const days = Math.max(0, Math.round((earliest - Date.now()) / 86400000));
+        weeksUntilDeadline = Math.max(1, Math.round(days / 7));
+        deadlineSource = 'goal.target_date';
+      }
     }
 
     const hasLessons = worksheets.length > 0;
@@ -302,7 +317,14 @@ serve(async (req) => {
 - Phases MUST be contiguous: phase[i].estimated_weeks_start = phase[i-1].estimated_weeks_end + 1.
 - First phase starts at week ${mode === 'add' && weeksUntilDeadline ? (weeksUntilDeadline - totalWeeks + 1) : 1}.
 - DO NOT exceed week ${weeksUntilDeadline} under any circumstance — the deadline is a wall, not a guideline.
-- A server-side validator WILL rescale your durations if they overflow; honoring the budget yourself produces better learning sequencing.\n`
+- A server-side validator WILL rescale your durations if they overflow; honoring the budget yourself produces better learning sequencing.
+
+EXAMPLE for budget=13 weeks, phaseCount=4:
+  Phase 1: weeks 1-3 (3w)
+  Phase 2: weeks 4-6 (3w)
+  Phase 3: weeks 7-9 (3w)
+  Phase 4: weeks 10-13 (4w)
+SUM=13 ✓ (NOT 16, NOT 20)\n`
       : `\nNo deadline set — distribute ~${avgWeeksPerPhase} weeks per phase as a rough guide.\n`;
 
     const prompt = `You are an expert ESL curriculum architect designing a MACRO learning roadmap (curriculum phases) for an adult 1-on-1 English student.
@@ -441,6 +463,7 @@ Return ONLY a valid JSON array (no markdown), with this exact format:
       weeks_until_deadline: weeksUntilDeadline,
       target_total_weeks: remainingBudget,
       deadline_fit_adjusted: fit.adjusted,
+      deadline_source: deadlineSource,
       phase_count: phases.length,
       pacing_index: pacing,
       pacing_label: pLabel,
