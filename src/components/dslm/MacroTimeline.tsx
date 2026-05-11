@@ -522,15 +522,21 @@ export const MacroTimeline: React.FC<MacroTimelineProps> = ({
         </DialogContent>
       </Dialog>
 
-      {/* v6.9.14 — type-to-confirm phase delete */}
-      <ConfirmTypeToDeleteDialog
-        open={!!deletingPhase}
-        onOpenChange={(o) => !o && setDeletingPhase(null)}
-        label={deletingPhase ? `Phase ${deletingPhase.sequence_number}: ${deletingPhase.title}` : ''}
-        expectedText={deletingPhase ? `Phase ${deletingPhase.sequence_number}` : ''}
-        description="Removing a phase deletes its plan and unlinks any phase-bound next steps. This cannot be undone."
-        onConfirm={async () => { if (deletingPhase) await deletePhase(deletingPhase.id); }}
-      />
+      {/* Phase delete confirmation */}
+      <Dialog open={!!deletingPhase} onOpenChange={(o) => !o && setDeletingPhase(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete {deletingPhase ? `Phase ${deletingPhase.sequence_number}: ${deletingPhase.title}` : 'phase'}?</DialogTitle>
+            <DialogDescription>
+              Removing a phase deletes its plan and unlinks any phase-bound next steps. This cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeletingPhase(null)}>Cancel</Button>
+            <Button variant="destructive" onClick={async () => { if (deletingPhase) await deletePhase(deletingPhase.id); setDeletingPhase(null); }}>Delete</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
