@@ -55,9 +55,13 @@ export const NavStudentSwitcher: React.FC = () => {
               className="block px-3 py-2 rounded-md text-sm hover:bg-muted transition-colors"
               title="Click to open · Middle/Ctrl-click for new tab"
             >
-              <div className="font-medium truncate">{s.name}</div>
-              <div className="text-[11px] text-muted-foreground truncate">
-                {s.english_level}
+              <div className="flex items-center justify-between gap-2 min-w-0">
+                <span className="font-medium truncate">{s.name}</span>
+                {s.english_level && (
+                  <span className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground bg-muted px-1.5 py-0.5 rounded shrink-0">
+                    {s.english_level}
+                  </span>
+                )}
               </div>
             </a>
           ))}
