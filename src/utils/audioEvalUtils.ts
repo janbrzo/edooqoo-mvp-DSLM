@@ -4,7 +4,7 @@
  */
 
 import { supabase } from '@/integrations/supabase/client';
-import { devLog, devWarn } from '@/utils/logger';
+import { devLog } from '@/utils/logger';
 
 export interface TranscriptionResult {
   text: string;
@@ -70,7 +70,7 @@ export async function transcribeAllAudio(
           };
           devLog(`${logPrefix} Transcription success: ${words.length} words`);
         } else {
-          devWarn(`${logPrefix} No transcription returned for ${cacheKey}`, transcResult);
+          console.warn(`${logPrefix} No transcription returned for ${cacheKey}`, transcResult);
         }
       } catch (err) {
         console.error(`${logPrefix} Transcription failed for ${cacheKey}:`, err);

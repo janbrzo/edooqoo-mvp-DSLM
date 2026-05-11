@@ -1,407 +1,273 @@
+# Plan v6.9.6 — Dashboard symmetry, mobile Hero, DEMO lockdown, demo worksheets content
 
-# Plan v6.9.14 — Naprawy DSLM Pathway, Nav, Worksheet Form
+## Analiza problemu (krótko)
 
-Wszystkie zmiany są **chirurgiczne** — żadna nie przebudowuje istniejących mechanizmów. Sankcyjny prompt do generowania worksheetów (`format-worksheet-prompt`) **nie jest dotykany**. Zmieniamy wyłącznie prompt do `generate-curriculum-phases` (curriculum), co jest w pełni dozwolone (potwierdzone przez Ciebie).
-
----
-
-## Problem 1 — AI generuje 5×4=20 tyg. zamiast wpasować się w deadline 90 dni
-
-### Root cause (potwierdzone w bazie)
-Funkcja `generate-curriculum-phases` liczy `weeksUntilDeadline` **tylko** z `students.main_goal_target_date`. Charlotte ma `main_goal_target_date = NULL`, ale ma cel w `student_progress_goals.target_date = 2026-08-07` (≈13 tyg.). Skutek: `weeksUntilDeadline=null` → `remainingBudget=null` → safety net `fitPhasesToDeadline` jest no-opem → AI dostaje "no deadline" i generuje swobodne 5×4=20 tyg. Stąd zapis `deadline_fit_adjusted:false, target_total_weeks:nil` w `generation_context`.
-
-### Rozwiązanie
-
-**A. Edge function `generate-curriculum-phases` — fallback na cele**
-
-Po obliczeniu `weeksUntilDeadline` z `main_goal_target_date`, jeśli wynik to `null`, wybierz **najwcześniejszy** `target_date` spośród niezakończonych (`is_achieved=false`, `archived_at IS NULL`) celów ucznia jako fallback.
-
-```ts
-// po istniejącym bloku liczącym weeksUntilDeadline z main_goal_target_date:
-if (weeksUntilDeadline === null) {
-  const goalDates = goals
-    .filter((g: any) => g.target_date && !g.is_achieved)
-    .map((g: any) => new Date(g.target_date).getTime())
-    .filter((t: number) => Number.isFinite(t) && t > Date.now());
-  if (goalDates.length > 0) {
-    const earliest = Math.min(...goalDates);
-    const days = Math.max(0, Math.round((earliest - Date.now()) / 86400000));
-    weeksUntilDeadline = Math.max(1, Math.round(days / 7));
-  }
-}
-```
-
-**B. Domyślny `phaseCount` adaptuje się do krótkiego deadline'u**
-
-Obecny wzór `min(5, max(3, round(weeksUntilDeadline/4)))` dla 13 tyg. → 3 fazy (OK), ale safety net już rebase'uje. Zostawiamy bez zmian (działa po fallbacku z punktu A).
-
-**C. Wzmocniony prompt — eksplicytny przykład rozkładu**
-
-W bloku `HARD CONSTRAINT — DEADLINE FIT` dopisujemy konkretny przykład:
-
-```
-EXAMPLE for budget=13 weeks, phaseCount=4:
-  Phase 1: weeks 1-3 (3w)
-  Phase 2: weeks 4-6 (3w)
-  Phase 3: weeks 7-9 (3w)
-  Phase 4: weeks 10-13 (4w)
-SUM=13 ✓ (not 16, not 20)
-```
-
-**D. Telemetry — tag `deadline_source`** w `generation_context`:
-- `'student.main_goal_target_date'` | `'goal.target_date'` | `'fallback_no_deadline'`
-
-Pozwoli w przyszłości audytować skąd przyszedł budżet.
-
-**E. Zachowanie wstecz-kompatybilne**: gdy nadal brak jakiejkolwiek daty → identyczne zachowanie jak teraz (5 faz × 4 tyg.). Nic się nie psuje.
+1. **Dashboard `CompactStatsBar`** — obecnie HubInfo + 6 kafli leży w jednej linii. Wizualnie nie jest "symetryczne" do gridu poniżej (lewa kolumna = Students, prawa = Recent Worksheets). Trzeba HubInfo nad lewą kolumną, a kafle statystyk nad prawą kolumną — w jednym wierszu, ale wyrównane do tych samych szerokości co poniżej.
+2. **Theme mobile** — `useTheme()` honoruje `prefers-color-scheme: system`. Telefon użytkownika jest w trybie ciemnym → strona renderuje się w dark. W preview (Chrome desktop) jest light. Landing publiczny powinien być **wymuszony light** (do tej pory tak działało dla wielu marketingowych stron).
+3. **Hero CTA mobile** — `h-14 px-8 text-lg` + długi tekst "Generate Your First Worksheet — Free" przekracza 100% szerokości viewportu na 360–390 px. Trzeba zmniejszyć tylko < `sm`.
+4. **DEMO** — wiele ścieżek nie ma guard wcześniejszego niż dolna warstwa (modal otwiera się i fail dopiero przy submit; albo przekierowuje do settings; albo brakuje danych). Trzeba twardo gardować na poziomie handlerów (akcje), warstwę widoku zostawić podgląd-only.
+5. **`/worksheets` (AllWorksheetsPage) w DEMO** — używa `useDeletedWorksheets` (bez guarda demo) → `if (!user) return;` zostaje wiecznie w `loading=true` (bo ustawia `setLoading(false)` tylko w `finally`, a wcześniej `return` przed try). Stąd biały spinner. Plus `useAuthFlow` w demo zwraca syntetycznego usera, więc nawigacja przechodzi, ale `useDeletedWorksheets` korzysta z `useAuthUser` (Supabase) — nie ma usera → wisi.
+6. **Worksheety demo puste** — `ai_response` zawiera tylko 2–3 itemy bez pełnej struktury renderowanej przez `WorksheetDisplay`. Brakuje tytułów, instrukcji, większej liczby ćwiczeń. Przeniesiemy faktyczną treść z 10 produkcyjnych worksheetów wskazanych przez użytkownika (preview env).
 
 ---
 
-## Problem 2 — `Failed to generate next steps` (500 z `generate-timeline`)
+## 1. Dashboard — symetryczny układ HubInfo / Stats
 
-### Root cause
-Funkcja `generate-timeline` istnieje **tylko jako zdeployowana w Supabase**; nie ma jej w `supabase/functions/` w repo (nie możemy edytować jej bezpośrednio). Ręczny test (curl) z poprawnymi `studentId+teacherId` zwraca **200 OK** z poprawnym JSON-em. Oznacza to, że 500 jest scenariuszowy — najprawdopodobniej powstaje, gdy `excludeIds` zawiera UUID-y istniejących sugestii albo `phaseId` wskazuje na fazę.
+**Plik:** `src/components/dashboard/CompactStatsBar.tsx`
 
-### Rozwiązanie
+Zmiana: wewnątrz `CompactStatsBar` zamiast jednego flex‑rowa zwracamy **CSS grid 2-kolumnowy** o tych samych breakpointach co siatka pod spodem w `Dashboard.tsx` (`lg:grid-cols-2`).
 
-**A. Frontend — defensywna kompresja payloadu** (`useFutureTimeline.tsx`, linie 119–135):
+Konkretnie:
 
-1. **Limituj `excludeIds`** do max. 25 najnowszych (UUID array zbyt duży powoduje też przekraczanie tokenów AI-Gateway).
-   ```ts
-   const excludeIds = (opts.excludeIds ?? []).slice(0, 25);
-   ```
-2. **Walidacja przed wysyłką**: jeśli `studentId`/`teacherId` puste → wczesny return + toast (chroni przed 404).
-
-**B. Frontend — czytelniejszy fallback komunikatów**
-
-W catchu `generateNextSteps`, dodaj rozróżnienie 500 ≠ błąd kredytów:
-
-```ts
-if (status === 500) {
-  toast.error(
-    'Generator timeline returned an error. Try without phase target, or reduce existing steps and retry.',
-    { duration: 7000 }
-  );
-}
-```
-
-**C. Logowanie payloadu w konsoli**
-
-Przed `supabase.functions.invoke('generate-timeline', …)` dodaj `logger.debug('[generate-timeline] payload', body)` żebyśmy w następnej iteracji mogli dokładnie zobaczyć co poleciało.
-
-**D. Twardy retry przy `phaseId`**
-
-Jeśli pierwsze wywołanie z `phaseId` zwróci błąd, spróbuj ponownie z `phaseId=null` (free step) — degradacja zamiast fail. Komunikat: "Phase-bound generation failed; created a free step instead."
-
-> Uwaga: nie możemy edytować deployowanej `generate-timeline` (nie ma jej w repo). Jeśli mimo defensywnych zmian błąd pozostanie, w kolejnym kroku trzeba zrekonstruować jej źródło z bieżącej deploymentu (osobny task — poza tym planem).
-
----
-
-## Problem 3 — Brak ikony "Remove" przy Next Step #1 + brak potwierdzenia
-
-### Root cause
-`NextStepBanner` nie ma żadnego `onDelete` — można tylko `Mark used`/`Edit`/`Regenerate`. `CompactSuggestionCard` (kroki #2..N) ma delete.
-
-### Rozwiązanie
-
-**A. Dodaj `onDelete` do `NextStepBanner`**
-
-Plik: `src/components/dslm/NextStepBanner.tsx`
-- Dodaj prop `onDelete: (id: string) => void`.
-- W toolbarze (obok `onMarkUsed`) dodaj przycisk `Trash2` z wariantem `ghost` na białym overlayu (banner ma kolorowe tło).
-
-**B. Modal potwierdzenia — wpisanie nazwy**
-
-Stwórz `src/components/dslm/ConfirmTypeToDeleteDialog.tsx` (reużywalny):
-- Props: `open, onOpenChange, label /* "Next Step #1" lub "Phase 1: …" */, expectedText /* "Phase 1" lub "Next Step #1" */, onConfirm`.
-- Tekst wymaga **dokładnego dopasowania** (case-sensitive); przycisk `Delete` disabled dopóki input ≠ expectedText.
-- Reużycie z `NextStepBanner` **i** z `CompactSuggestionCard` (też dla phase'ów — patrz dalej).
-
-**C. Faza w `MacroTimeline` — dodaj ten sam confirm**
-
-Aktualny `deletePhase` z `useCurriculumPhases` wykonuje hard delete bez potwierdzenia. Owinąć w `ConfirmTypeToDeleteDialog` z `expectedText = "Phase {sequence}"`.
-
----
-
-## Problem 4 — `GenerateStepsDialog` ma stare dane po zamknięciu/otwarciu
-
-### Root causes (3 podproblemy)
-
-**4a. Po pierwszym wygenerowaniu faz, klik "Generate next steps" zanim hook `useCurriculumPhases` zrefetchuje fazy** → `phaseOptions=[]` → modal nie wie o fazach → `defaultTargetPhaseId=null` → `count=3` (default).
-
-**4b. Reopen modalu nie auto-resetuje `count` do `(need - have)`**: `useEffect` (linia 68) ma deps `[phaseValue, selectedPhase, ...]` — gdy `phaseValue` po reopen jest taka sama, efekt się nie odpala mimo, że `countTouched` resetuje się.
-
-**4c. SelectItem "🎯 Recommended:" pokazuje sam tytuł frazy — bez "Phase 1:" + ucięty po prawej** w `SelectTrigger` z powodu `w-[23%]` szerokości.
-
-### Rozwiązanie
-
-**A. (4a)** W `useFutureTimeline.tsx` po `generatePhases` w `useCurriculumPhases.tsx` już jest `await fetchPhases()`. Problem: `PathwayView` używa `useCurriculumPhases` osobno od `MacroTimeline`. Dwie instancje hooka = dwa stany. Po wygenerowaniu w `MacroTimeline`, instancja w `PathwayView` nie wie.
-
-**Fix**: emit globalny event `dslm:phasesUpdated` z `useCurriculumPhases.generatePhases` po `fetchPhases`; subskrybuj w drugiej instancji hooka i wywołaj `fetchPhases`. Minimalna inwazja:
-```ts
-// useCurriculumPhases.tsx — po fetchPhases() w generatePhases:
-window.dispatchEvent(new CustomEvent('dslm:phasesUpdated', { detail: { studentId } }));
-
-// useEffect w hooku:
-useEffect(() => {
-  const h = (e: Event) => {
-    if ((e as CustomEvent).detail?.studentId === studentId) fetchPhases();
-  };
-  window.addEventListener('dslm:phasesUpdated', h);
-  return () => window.removeEventListener('dslm:phasesUpdated', h);
-}, [studentId, fetchPhases]);
-```
-
-**B. (4b)** W `GenerateStepsDialog.tsx` przeniesione ustawienie `count` z `useEffect[phaseValue,...]` do **bloku resetu na open**:
-
-```ts
-useEffect(() => {
-  if (!open) return;
-  const initialPhaseId = defaultTargetPhaseId ?? FREE_VALUE;
-  setPhaseValue(initialPhaseId);
-  setCountTouched(false);
-  // Compute initial count based on recommended phase
-  const recPhase = phaseOptions.find(p => p.id === defaultTargetPhaseId);
-  const initialCount = recPhase
-    ? Math.min(6, Math.max(1, recPhase.need - recPhase.have))
-    : defaultCount;
-  setCount(initialCount);
-}, [open, defaultCount, defaultTargetPhaseId, phaseOptions]);
-```
-Dotychczasowy efekt auto-preset na zmianę `phaseValue` zostawiamy jak jest (działa przy ręcznej zmianie).
-
-**C. (4c)**
-
-W `GenerateStepsDialog.tsx`:
-- Etykieta Recommended: zawsze prefiksuj `Phase {sequence}`:
-  ```ts
-  const recPhase = phaseOptions.find(p => p.id === recommendedId);
-  const phaseRecommendedLabel = recPhase
-    ? `Phase ${recPhase.sequence}: ${recPhase.label}`
-    : 'Free step';
-  ```
-- Tekst itema: `🎯 Recommended — {phaseRecommendedLabel}` zamiast `🎯 Recommended: {phaseRecommendedLabel}` (czytelniejsze).
-
-**Wcięcie po lewej w trigger**: shadcn `SelectItem` ma `pl-8` na slot ikony check. Trigger renderuje `SelectValue` który nie dziedziczy `pl-8`, ale **zawartość SelectItem-a** (cały JSX) jest renderowana. Naprawa: użyj `<SelectValue placeholder="…" />` z explicit override w komponencie:
-- W `SelectItem` Recommended owiń label w `<span className="block text-left">…</span>`.
-- W `SelectTrigger` dodaj `min-w-0` i klasę pozwalającą na truncate: `<SelectValue className="truncate text-left" />`.
-- Zwiększ szerokość trigger w PathwayView modalu z domyślnej do `min-w-[280px]` (modal ma `DialogContent` ~`max-w-lg` = 512px — jest miejsce).
-
----
-
-## Problem 4-bis — Sub-sekcje w `DSLMTab` widoczne tylko dla aktywnej sekcji
-
-### Rozwiązanie
-
-W `src/components/dslm/DSLMTab.tsx` linia 337:
-
-```tsx
-{activeSection === view.id && subs.length > 0 && (
-```
-
-zmień na **bezwarunkowe renderowanie**, ale **wizualnie wyróżnij** aktywną grupę:
-
-```tsx
-{subs.length > 0 && (
-  <div className={cn(
-    "ml-6 mt-1 mb-1 space-y-0.5 border-l pl-2",
-    activeSection === view.id ? "border-primary" : "border-border opacity-70"
-  )}>
-    {subs.map(s => ( /* … bez zmian … */ ))}
+- Mobile (<lg): zachowujemy obecny layout (HubInfo full + grid 3-kol).
+- Desktop (≥lg):
+  ```text
+  <div class="hidden lg:grid grid-cols-2 gap-6 mb-4 items-stretch">
+     [HubInfo — pełna szerokość lewej kolumny]
+     [Pasek 6 statystyk — pełna szerokość prawej kolumny, z divide-x]
   </div>
-)}
-```
+  ```
+- HubInfo (problem 1): **rozszerzony tekst**:
+  > **Student Hub:** students log in with just their email at **edooqoo.com/my** — no login needed. They access their worksheets, homework, flashcards & lessons.
 
-Tylko dla desktopa (mobile nie ma sidebar — bez zmian).
+  Dla mobile pokazujemy skróconą wersję (jak teraz: `login at edooqoo.com/my`), a długą — tylko `lg+` (renderujemy oba spany z `hidden lg:inline` / `lg:hidden`).
+- StatPills bez zmian (6 ikon).
+
+Brak zmian w `Dashboard.tsx` (dalej renderuje `<CompactStatsBar … />` jako pierwsze dziecko gridu). Brak migracji DB.
 
 ---
 
-## Problem 5 — `NavStudentSwitcher`: poziom pod nazwą + pokazuje się też na `/student/:id`
+## 2. Landing — wymuszony light theme + Hero CTA mobile
 
-### Rozwiązanie
+**Plik:** `src/pages/Index.tsx` (root landing) — dodanie efektu, który **na mount** ściąga klasę `dark` z `<html>` i przywraca przy unmount poprzedni stan (zachowując jednak `localStorage` użytkownika; teacherzy w aplikacji dalej mają dark mode po zalogowaniu).
 
-**A. Hide na stronie studenta**
-`src/components/landing/StickyNav.tsx`, linia 40:
+```tsx
+useEffect(() => {
+  const html = document.documentElement;
+  const wasDark = html.classList.contains('dark');
+  html.classList.remove('dark');
+  return () => { if (wasDark) html.classList.add('dark'); };
+}, []);
+```
+
+Uzasadnienie: nie modyfikujemy `useTheme` (teacher dark mode chroniony zgodnie z core-rule). Wymuszamy light **tylko** na publicznej Index, gdzie `prefers-color-scheme: dark` z telefonu psuł kontrast. Pozostałe public pages (About, Pricing itd.) — ten sam prosty wrapper (do zrobienia w opcjonalnym kroku 2b: dodanie hooka `useForceLightTheme()` w `src/hooks/useForceLightTheme.ts` i wpięcie w 1 Indeks teraz, kolejne strony — w razie potrzeby).
+
+**Hero CTA mobile** — `src/components/landing/HeroHeadline.tsx`:
+
+```tsx
+className="h-12 sm:h-14 px-4 sm:px-8 text-base sm:text-lg max-w-full whitespace-normal sm:whitespace-nowrap font-semibold rounded-full ..."
+```
+Plus skrócony tekst < `sm`:
+```tsx
+<span className="sm:hidden">Generate Free Worksheet</span>
+<span className="hidden sm:inline">Generate Your First Worksheet — Free</span>
+```
+
+---
+
+## 3. DEMO lockdown — szczegóły
+
+Wszystkie miejsca poniżej korzystają z istniejącego `useDemoContext()` / `useDemoGuard()`. Brak zmian DB i edge functions. Brak zmian w core flow worksheet generation.
+
+### 3A. Calendar — `+ Add` slot
+
+**Plik:** `src/components/calendar/UnifiedSlotModal.tsx`
+
+W `handleSubmit` na samym początku:
 ```ts
-const isStudentPage = /^\/student\//.test(location.pathname);
-const showStudentSwitcher = isRegisteredUser && !isDashboard && !isProfile && !isStudentPage;
+if (isDemoMode) {
+  showDemoBlockedToast('Adding calendar slots');
+  return;
+}
 ```
++ wcześniej (dla wizualnego komfortu) gdy `isDemoMode`, w nagłówku modala dodać żółty pasek `<div className="rounded bg-amber-50 ...">Demo mode — changes won't be saved</div>` i ukryć błąd "Conflicts detected" gdy `isDemoMode`.
 
-**B. Inline level + nazwa**
-`src/components/landing/NavStudentSwitcher.tsx`, sekcja `<a>`:
-```tsx
-<a … className="flex items-center justify-between gap-2 px-3 py-2 rounded-md text-sm hover:bg-muted">
-  <span className="font-medium truncate">{s.name}</span>
-  <Badge variant="outline" className="text-[10px] shrink-0">{s.english_level}</Badge>
-</a>
+Alternatywa (preferowana, bardziej czysta): w `CalendarPage.tsx` w `handleAddSlot` (i pozostałych handlerach otwierających modal: edit/block) — guardować otwarcie modala:
+```ts
+if (isDemoMode) { showDemoBlockedToast('Adding lessons'); return; }
 ```
-(Usuwamy `<div className="text-[11px] …">` z drugą linią).
+Dzięki temu modal nawet się nie otwiera. **Wybieramy ten wariant** (mniej ingerencji w UnifiedSlotModal, brak ryzyka popsucia produkcji).
 
----
+Lista handlerów w `CalendarPage.tsx` do guardowania (na początku każdego):
+- `handleAddSlot`
+- `handleSlotClick` (edycja istniejącego slotu — dopuszczamy podgląd, ale guardujemy `onSave` w child modalu; w praktyce: dodać `readOnly` prop do modala, gdy `isDemoMode`)
+- `handleBulkDelete`, `handleBulkBlock`, `handleBulkPaid`, `handleMarkPaid`, `handleNotificationClick` (jeśli mutuje)
 
-## Problem 6 — Duplikat przycisku "Calendar" na środku nav
+W `useCalendarSlots` mutacje są już no-op w demo — to second line of defense, zostawiamy.
 
-### Rozwiązanie
+### 3B. Calendar — Share
 
-**A. Usuń duplikat z `StickyNav.tsx`** (linie 91–98 mobile + 159–166 desktop — dwa bloki `{!isCalendar && (<Button asChild ...)}`).
-
-**B. Dodaj middle-click → new tab do istniejącego `GCalStatusButton`**
-
-Plik: `src/components/calendar/GCalStatusButton.tsx`
-
-Zamień `<Button onClick={() => navigate('/calendar')}>` na **anchor wrapper z modyfikatorami**, identyczny pattern jak `handleAnchorNav`:
-```tsx
-const handleClick = (e: React.MouseEvent) => {
-  if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return; // browser handles new tab
-  e.preventDefault();
-  navigate('/calendar');
+**Plik:** `src/pages/CalendarPage.tsx`, funkcja `handleShare`:
+```ts
+const handleShare = () => {
+  if (isDemoMode) { showDemoBlockedToast('Sharing public calendar'); return; }
+  if (settings?.public_calendar_token) { /* ... */ }
+  else { toast.info('Enable public calendar in settings first.'); }
 };
-return (
-  <Button asChild variant="outline" size="sm" className="text-xs h-8 relative">
-    <a href="/calendar" onClick={handleClick} onAuxClick={handleClick}>
-      🗓️ Calendar
-      {unreadCount > 0 && (<Badge … />)}
-    </a>
-  </Button>
-);
 ```
 
-Zachowuje: badge unreadCount, styl, tooltip dla anonimowych.
+### 3C. Calendar Settings — read-only render
 
-**Mobile**: `GCalStatusButton` jest tylko w Sheet menu — wystarczy. Brak duplikatu na top barze (po usunięciu).
+**Plik:** `src/pages/CalendarSettingsPage.tsx`
 
----
+Obecnie: `if (authLoading || loading || !settings) return null;` — w demo `loading` zostaje `false` (early return w hooku) i `settings === null` → strona pusta.
 
-## Problem 7 — Generate Worksheet z `/student` nie auto-wybiera studenta + label "Generic worksheet" ucięty
+Plan:
+1. W `useCalendarSettings.tsx` dodać blok demo (analogiczny do `useStudents`):
+   ```ts
+   if (isDemoMode) {
+     setSettings(DEMO_CALENDAR_SETTINGS);
+     setLoading(false);
+     return;
+   }
+   ```
+   `DEMO_CALENDAR_SETTINGS` (do dodania w `src/data/demoData.ts`): obiekt z pełnym kompletem rozsądnych defaults (`default_lesson_duration_minutes: 60`, `public_calendar_enabled: true`, `public_calendar_token: 'demo-public-token'`, `public_calendar_slug: 'martha-demo'`, `gcal_integration_enabled: false`, `payment_tracking_enabled: true`, `working_hours_*`, etc.).
+2. W `updateSettings`/`generatePublicToken` — już są no-op w demo (linia 134). Dodać `showDemoBlockedToast` dla feedbacku.
+3. W `CalendarSettingsPage.tsx` — gdy `isDemoMode`, na górze sekcji content wstawić sticky banner:
+   ```tsx
+   {isDemoMode && (
+     <div className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900 dark:bg-amber-950 dark:text-amber-200 dark:border-amber-800">
+       👁 Demo view — settings are visible but cannot be modified.
+     </div>
+   )}
+   ```
+4. Każdy `<Switch onCheckedChange>`, `<Input onChange>`, `<Button onClick>` z mutacją otoczyć `disabled={isDemoMode}` (proste, masowe). Wyjątek: navigation/scroll (np. scrollToSection) bez `disabled`.
 
-### Root cause #1 (auto-select)
-W `StickyNav.tsx` (linie 173–180), gdy nie-dashboard, przycisk "Generate Worksheet" jest `<Button asChild><a href="/" onClick={handleAnchorNav('/')}/>`. **`handleAnchorNav` nawiguje do `/` ignorując callback `onGenerateWorksheet`** — a to właśnie ten callback (z `StudentPage.handleGenerateWorksheet`) ustawia `sessionStorage.preSelectedStudent`. Skutek: nawigacja do `/`, ale sessionStorage puste → form bez auto-selectu.
+### 3D. `/worksheets` nie ładuje się
 
-### Rozwiązanie #1
+Root cause: `useDeletedWorksheets` używa `useAuthUser` zamiast respektować demo, a w `if (!user) return;` nie ustawia `loading=false`.
 
-W `StickyNav.tsx` linie 173–180 (i analogicznie mobile 105–112):
-```tsx
-{onGenerateWorksheet && !isDashboard && (
-  <Button asChild size="sm">
-    <a
-      href="/"
-      onClick={(e) => {
-        // Modyfikatory → otwórz w nowej karcie (bez callbacku — sessionStorage by nie zadziałało między tabami)
-        if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
-        e.preventDefault();
-        onGenerateWorksheet(); // ← wywołaj callback który ustawia sessionStorage + nawiguje
-      }}
-      onAuxClick={(e) => {
-        if (e.button === 1) return; // browser handles
-      }}
-    >
-      <Plus className="h-4 w-4 mr-2" /> Generate Worksheet
-    </a>
-  </Button>
-)}
+**Plik:** `src/hooks/useDeletedWorksheets.tsx`
+- Dodać `const { isDemoMode, demoData } = useDemoContext();`
+- Na górze `useEffect`: jeśli `isDemoMode` → `setDeletedWorksheets([]); setTotalCount(0); setLoading(false); return;` (w demo nie pokazujemy "deleted").
+- W `fetchDeletedWorksheets`: `if (!user) { setLoading(false); return; }` (poprawka regression-safe).
+
+To wystarczy, by `AllWorksheetsPage` przestało wisieć (bo `loading` już się rozwiąże dzięki `useWorksheetHistory` które jest demo-aware).
+
+Dodatkowo w `AllWorksheetsPage.tsx` w warunku spinera:
+```ts
+if (authLoading || (loading && !isDemoMode)) { ... }
 ```
+Pobranie `isDemoMode` z `useDemoContext`. Naprawia warunek edge.
 
-Skutek: zwykły click → callback (z preSelectedStudent), modyfikator → nowa karta bez preselekcji (intencja użytkownika to nowa karta — preselekcja przez sessionStorage między tabami nie zadziałałaby tak czy inaczej).
+### 3E. Worksheet actions: Transfer / Delete / Share / AddStudent
 
-### Root cause #2 (label ucięty)
-SelectTrigger ma `w-full` w kontenerze `w-[23%]` (~285px). Tekst "Generic worksheet (no student)" + chevron + padding nie mieszczą się.
+Najczystszy fix punktowy w UI (zachowuje cały istniejący kod akcji dla produkcji):
 
-### Rozwiązanie #2
+**Plik:** `src/pages/AllWorksheetsPage.tsx` oraz komponenty akcji per-worksheet (`DeleteWorksheetButton`, `DuplicateWorksheetButton`, `ShareWorksheetModal`, `StudentSelector` w wierszu).
 
-W `src/components/WorksheetForm/index.tsx`:
-- Linia 666: zmień label na **krótszy**: `<SelectItem value="no-student">No student (generic)</SelectItem>`
-- Doda `truncate` w `SelectValue` jak w 4c.
+Strategia: gardujemy w handlerach na poziomie wywołania (top-of-handler):
+- `onDelete = (id) => guardAction('Deleting worksheets', () => deleteWorksheet(id))`
+- `onTransfer = (id, sid) => guardAction('Transferring worksheets', () => updateStudent(...))`
+- `onShare`, `onDuplicate`, `onAddStudent` — analogicznie.
 
-Krótsza fraza + truncate = tekst widoczny w pełni przy 23% szerokości.
+Lista konkretnych miejsc do podpięcia `useDemoGuard` (jednolity wzorzec):
+- `src/pages/AllWorksheetsPage.tsx` — `handleBulkDelete`, `handleDelete` (linia ~552), inline `await deleteWorksheet(id)` (~352).
+- `src/components/DeleteWorksheetButton.tsx` — handler usunięcia.
+- `src/components/DuplicateWorksheetButton.tsx` + `DuplicateWorksheetModal.tsx` — handler submit.
+- `src/components/ShareWorksheetModal.tsx` — handler `generateShareLink`.
+- `src/components/dashboard/AddStudentButton.tsx` + `AddStudentDialog.tsx` — handler create.
+- Transfer-to-Student dropdown wewnątrz item kafla worksheetu (znaleźć w `AllWorksheetsPage.tsx` koło 540 — `StudentSelector` z onChange).
 
----
+Dla każdego handlera: `if (isDemoMode) { showDemoBlockedToast('<Action name>'); return; }` zamiast aktualnego błędu UUID.
 
-## Problem 8 — "Add students first" ma być spójny z "No student (generic)" + klikalny → modal Add Student
+Toast copy (jednolite):
+- "Deleting worksheets is disabled in demo mode. Sign up free to unlock."
+- "Transferring worksheets is disabled in demo mode."
+- "Sharing worksheets is disabled in demo mode."
+- "Adding students is disabled in demo mode."
 
-### Root cause
-Linie 678–696 w `WorksheetForm/index.tsx`: gdy nauczyciel ma 0 studentów, renderuje się statyczny `Lock` div z tooltipem. Brak akcji.
+### 3F. Worksheet content (10 produkcyjnych)
 
-### Rozwiązanie
+**Krok wykonania (w fazie implementacji):**
 
-**A. Sprawdź dostępny modal Add Student**
+1. Skrypt jednorazowy w `code--exec` użyje `psql` do `SELECT id, title, ai_response, html_content, form_data, generation_time_seconds FROM worksheets WHERE id IN (…10 UUID-ów…)` z preview env (env vars już są w sandbox dla głównego projektu; jeśli to inny projekt, użytkownik zostanie zapytany o dump w przeciwnym razie zaciągniemy publicznie po `share_token` jeśli istnieje — preferencja: bezpośredni dump z DB).
+2. Wynik mapujemy 1:1 na 10 obecnych demo-worksheetów (po `id` `demo-ws-1..10`). Zachowujemy istniejące `id`, `student_id`, `created_at` (relative dates), `share_token`. Podmieniamy: `title`, `form_data`, `ai_response`, `html_content`, `generation_time_seconds`.
+3. Dane lokalne hard-codujemy w `src/data/demoData.ts` (zwiększy rozmiar bundla o ~50–150 KB — akceptowalne, demo to onboarding).
+4. Sanity check: `WorksheetPage` renderuje `worksheet.ai_response` przez `WorksheetDisplay` — zachowujemy ten sam JSON shape. `html_content` jest fallbackiem; produkcyjne wartości to gotowe HTML — bezpiecznie pasuje.
+5. Mapowanie tematyczne — zachowujemy spójność poziomu studenta:
+   - student-1 (B2 Business): worksheet IDs `4df96ff7…`, `13e92a57…`, `575dd5a8…`, `e95ee859…`, `ed6514ba…`
+   - student-2 (A2): `87768bb0…`, `be7b86b6…`, `c12d2180…`
+   - student-3 (C1): `2588083c…`, `f3a4667d…`
 
-`src/components/StudentEditDialog.tsx` istnieje. Otwiera się przez prop `open`. Można go reużyć dla create-mode (jeśli wspiera `student=null`/`isNew`).
+   (Dokładne przypisanie potwierdzimy podczas dump'u na podstawie poziomu w `form_data`).
 
-> Decyzja do potwierdzenia w trakcie implementacji: jeśli `StudentEditDialog` nie wspiera trybu "create", użyć `Dashboard`'owego flow przez `navigate('/dashboard?action=add-student')` (Dashboard już parsuje `?action=add-student` zgodnie z mem `welcome-email-cta-add-student`). To pewniejsze i mniej inwazyjne — **wybieramy ten wariant** w planie.
+### 3G. WorksheetPage `/student/demo-student-1` loading screenshot
 
-**B. Render gdy `userId && students.length === 0`**:
-
-Zamiast `Lock` divu:
-```tsx
-<div className={`${isMobile ? 'w-full' : 'w-[23%]'} flex flex-col justify-center`}>
-  <button
-    type="button"
-    onClick={() => navigate('/dashboard?action=add-student')}
-    className="w-full h-full flex items-center gap-2 px-3 py-2 border-2 border-amber-400 ring-1 ring-amber-300 bg-amber-50/40 dark:bg-amber-900/10 rounded-md text-left hover:bg-amber-50 transition-colors"
-  >
-    <Plus className="h-4 w-4 text-amber-700 shrink-0" />
-    <span className="text-sm text-amber-900 dark:text-amber-300 truncate">Add your first student</span>
-  </button>
-  <p className="text-[11px] text-amber-700 dark:text-amber-300 mt-1 leading-tight">
-    Click to add a student and unlock personalized worksheets.
-  </p>
-</div>
-```
-
-Anonimowy (`!userId`) — bez zmian (Lock + tooltip).
+Problem: route `/student/:id` (StudentPage) — sprawdzić czy jest demo-aware. Plan: dodać do `StudentPage.tsx` demo branch który ładuje studenta z `demoData.students.find(s => s.id === id)` zamiast czekać na Supabase. Jednolinijkowy fix: w hooku `useStudent.tsx` dodać branch demo (analogicznie do `useStudents`).
 
 ---
 
-## Dokumentacja (RAG injection)
+## 4. Dokumentacja RAG (obowiązkowo)
 
-### `docs/llm-context.md` + `llms.txt` — nowy rozdział `## v6.9.14 — Pathway/Nav Fixes`
+Edycje w `docs/llm-context.md` i `llms.txt` w jednym push'u, format `Problem → Solution → Mechanics → RAG Keywords`:
 
-Format Problem → Edooqoo Solution → Technical Mechanics dla każdego z 8 punktów. Dodaj `RAG Keywords:` na końcu każdego z synonimami: "deadline cap", "phase budget", "next steps modal", "student switcher", "calendar nav button", "preselected student", "add student CTA", "delete next step confirmation", "type to confirm", "DSLM sub-nav always visible".
+### Sekcja: "Demo Mode — Hard Lockdown (v6.9.6)"
 
-### Memory updates
+- **Problem:** Akcje mutujące w demo wywoływały błędy UUID/PG zamiast czytelnego komunikatu. `/worksheets` wisiało (useDeletedWorksheets bez guard demo). `/calendar/settings` było puste. Share przekierowywał do settings.
+- **Solution:** Każdy handler mutujący po stronie UI gardowany przez `useDemoGuard().guardAction(label, fn)`. Hooki Supabase wcześnie zwracają w `isDemoMode`. `useCalendarSettings` w demo dostarcza `DEMO_CALENDAR_SETTINGS`. Modale (Add slot/Share) blokowane na poziomie otwarcia.
+- **Mechanics:** Pliki: `useDemoGuard`, `DemoContext`, `useDeletedWorksheets`, `useCalendarSettings`, `useStudent`, `CalendarPage.handleShare/handleAddSlot`, `CalendarSettingsPage` (banner + `disabled`), wszystkie komponenty akcji per-worksheet.
+- **RAG Keywords:** demo mode, lockdown, read-only, demo guard, mutation block, demo settings, demo calendar, fake user, sandbox preview, edooqoo demo.
 
-Aktualizuj/utwórz pliki:
-- `mem/features/curriculum-phases/deadline-fit-enforcement.md` — dopisz źródło deadline'u: `goal.target_date` jako fallback.
-- `mem/features/dslm-subnav/always-visible-subsections.md` (nowy) — sub-sekcje zawsze widoczne, aktywna podświetlona.
-- `mem/features/navigation/calendar-button-single-instance.md` (nowy) — Calendar tylko przez `GCalStatusButton`, anchor pattern.
-- `mem/features/navigation/nav-student-switcher.md` — dopisz: hide na `/student/:id`, level inline jako badge.
-- `mem/features/worksheet-form/student-selector-states.md` (nowy) — 3 stany: anon (Lock), 0 students (CTA), N students (Select). Krótka etykieta "No student (generic)".
-- `mem/features/dslm/type-to-confirm-delete.md` (nowy) — wzorzec ConfirmTypeToDeleteDialog.
-- Aktualizacja `mem/index.md` z odnośnikami do nowych plików (zachowując całą dotychczasową treść).
+### Sekcja: "Dashboard Symmetry & Hub Info"
 
----
+- **Problem:** HubInfo i kafle statystyk nie wyrównane z gridem Students/Recent Worksheets.
+- **Solution:** `CompactStatsBar` używa `lg:grid-cols-2` zgodnie z gridem poniżej. Pełny opis Student Hub na desktop, skrócony na mobile.
+- **Mechanics:** `CompactStatsBar.tsx` — dwa warianty: mobile (stack) i desktop (2-col grid).
+- **RAG Keywords:** dashboard layout, student hub banner, stats bar, compact stats, two column grid, edooqoo.com/my.
 
-## Kolejność implementacji (8 atomowych kroków)
+### Sekcja: "Forced Light Theme on Public Landing"
 
-1. **Edge function `generate-curriculum-phases`** — fallback na goal target_date + przykład w prompcie + telemetry `deadline_source`. (Problem 1)
-2. **`useFutureTimeline.tsx`** — defensywne limity excludeIds, lepsze komunikaty 500, fallback bez phaseId. (Problem 2)
-3. **`ConfirmTypeToDeleteDialog.tsx`** (nowy) + zastosowanie w `NextStepBanner` (delete) + `MacroTimeline` (phase delete). (Problem 3)
-4. **`GenerateStepsDialog.tsx`** — reset count na open uwzględnia `recPhase.need - recPhase.have`, label `Phase X: …`, truncate. (Problem 4abc)
-5. **`useCurriculumPhases.tsx`** — emit/listen `dslm:phasesUpdated`. (Problem 4a)
-6. **`DSLMTab.tsx`** — sub-sekcje zawsze widoczne, aktywna z `border-primary`. (Problem 4-bis)
-7. **`StickyNav.tsx` + `NavStudentSwitcher.tsx` + `GCalStatusButton.tsx`** — usunięcie duplikatu Calendar, anchor w GCal, hide switcher na `/student/:id`, level inline. (Problemy 5+6)
-8. **`StickyNav.tsx` (Generate btn) + `WorksheetForm/index.tsx`** — fix callbacku Generate, krótka etykieta, klikalny CTA Add student. (Problemy 7+8)
-9. **Dokumentacja** — `docs/llm-context.md`, `llms.txt`, mem files + index.
+- **Problem:** Mobile w trybie ciemnym renderował landing w dark.
+- **Solution:** `Index.tsx` na mount usuwa klasę `dark`, na unmount przywraca.
+- **Mechanics:** `useEffect` w `src/pages/Index.tsx`. Brak zmian w `useTheme` (chronione dark mode dla nauczycieli pozostaje).
+- **RAG Keywords:** prefers-color-scheme, dark mode mobile, landing page light, public theme override.
 
----
+### Sekcja: "Hero CTA Mobile Sizing"
 
-## Co NIE zostanie zmienione (sanctity)
+- **Problem:** "Generate Your First Worksheet — Free" wychodził poza viewport.
+- **Solution:** Dwa warianty tekstu (`sm:hidden` vs `hidden sm:inline`), przycisk `h-12 sm:h-14`, `px-4 sm:px-8`.
+- **Mechanics:** `HeroHeadline.tsx`.
+- **RAG Keywords:** hero CTA mobile, button overflow, responsive hero, landing CTA size.
 
-- Prompt `format-worksheet-prompt` — nietknięty.
-- Schemat bazy — bez migracji (`generation_context` to JSONB, dodajemy nowy klucz bez zmian struktury).
-- API `generate-timeline` (deployed) — bez modyfikacji (brak źródła w repo).
-- DSLM Skill Assessment, AI evaluations, deterministic tasks — bez zmian.
-- Demo mode lockdown — bez zmian (wszystkie nowe akcje już chronione w istniejących handlerach).
+### Sekcja: "Demo Worksheets — Production Content"
+
+- **Problem:** Demo worksheety renderowały puste UI (skrócony stub `ai_response`).
+- **Solution:** 10 worksheetów demo zasilonych pełną treścią z 10 produkcyjnych UUID-ów (preview env).
+- **Mechanics:** `src/data/demoData.ts` — pola `title/form_data/ai_response/html_content/generation_time_seconds` podmienione, struktura JSON zachowana (kompatybilność z `WorksheetDisplay`).
+- **RAG Keywords:** demo data, fake worksheets, sample content, preview env import, demoData seed.
 
 ---
 
-## Ryzyka i ich mitigacja
+## 5. Pamięć projektu (mem://)
 
-| Ryzyko | Mitigacja |
-|---|---|
-| Fallback na goal.target_date pogorszy plany dla studentów z odległym celem | Filtr `target_date > now()` + `min(...)` — bierzemy najbliższy realny |
-| Type-to-confirm dla phase'a może denerwować | Dotyczy tylko Remove (nie zmiany statusu); zgodne z prośbą użytkownika |
-| Anchor onClick dla GCalStatusButton przerwie istniejący navigate | Test: zwykły click → SPA nav, modyfikator → new tab |
-| Sub-sekcje zawsze widoczne mogą wydłużyć sidebar | Wszystkie 4 grupy razem ≈18 pozycji × 22px ≈ 400px, mieści się w sticky |
-| Defensywny limit excludeIds=25 może powtarzać kroki | Akceptowalne — przy >25 użytkownik ma już dużo opcji, AI ma kontekst |
+Aktualizacja:
+- `mem/features/dashboard/compact-stats-bar.md` → wzmianka o dwukolumnowym wyrównaniu z gridem poniżej.
+- Nowy: `mem/features/public-demo-mode-lockdown.md` — lista wszystkich punktów guard, wzór `useDemoGuard`, oraz reguła "każdy nowy handler mutujący MUST przejść przez guardAction lub wcześnie return na isDemoMode".
+- `mem://index.md` — dodać linka do nowego pliku.
 
+---
+
+## 6. Kolejność wdrożenia (atomowa)
+
+1. CompactStatsBar layout + tekst HubInfo.
+2. Index.tsx force-light.
+3. HeroHeadline mobile button.
+4. useDeletedWorksheets demo branch + AllWorksheetsPage warunek loading.
+5. useCalendarSettings demo branch + DEMO_CALENDAR_SETTINGS w demoData.ts.
+6. CalendarSettingsPage banner + `disabled` na inputach.
+7. CalendarPage handleAddSlot/handleShare/handleBulk* guards.
+8. useStudent demo branch (StudentPage loading fix).
+9. Guardy w komponentach akcji worksheetów (Delete/Duplicate/Share/AddStudent/Transfer).
+10. Dump 10 produkcyjnych worksheetów → podmiana w demoData.ts.
+11. Update `docs/llm-context.md`, `llms.txt`, mem.
+
+---
+
+## 7. Bezpieczeństwo / brak regresji
+
+- Wszystkie nowe ścieżki wzdłuż istniejącego wzorca `isDemoMode` (już używane w 30+ miejscach).
+- Brak zmian DB, RLS, edge functions.
+- Brak zmian w `Worksheet Generation Engine` (sanctity rule).
+- Light theme override izolowany w `Index.tsx` — nie dotyka teacher app.
+- Konsolidacja w `useDemoGuard` zapewnia, że produkcyjna ścieżka pozostaje 1:1.

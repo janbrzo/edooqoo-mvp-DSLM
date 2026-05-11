@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { ChevronDown, ChevronUp } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { LessonTime, ExerciseSelectionMode, MediaType } from './types';
-import { devLog } from '@/utils/logger';
 
 const AVAILABLE_EXERCISES = [
   // Basic exercises
@@ -503,8 +502,8 @@ export default function ExerciseSelector({
       const shuffledOther = [...availableOtherExercises].sort(() => Math.random() - 0.5);
       const selectedOther = shuffledOther.slice(0, remainingSlots);
       
-      devLog('🎲 [RANDOM-PICTURE] Selected picture exercises:', selectedPicture);
-      devLog('🎲 [RANDOM-PICTURE] Selected other exercises:', selectedOther);
+      console.log('🎲 [RANDOM-PICTURE] Selected picture exercises:', selectedPicture);
+      console.log('🎲 [RANDOM-PICTURE] Selected other exercises:', selectedOther);
       return [...selectedPicture, ...selectedOther];
     } else if (isAudioMode) {
       // Get ALL audio exercises (ensure we have at least 2)
@@ -525,8 +524,8 @@ export default function ExerciseSelector({
       const shuffledOther = [...availableOtherExercises].sort(() => Math.random() - 0.5);
       const selectedOther = shuffledOther.slice(0, remainingSlots);
       
-      devLog('🎲 [RANDOM-AUDIO] Selected audio exercises:', selectedAudio);
-      devLog('🎲 [RANDOM-AUDIO] Selected other exercises:', selectedOther);
+      console.log('🎲 [RANDOM-AUDIO] Selected audio exercises:', selectedAudio);
+      console.log('🎲 [RANDOM-AUDIO] Selected other exercises:', selectedOther);
       return [...selectedAudio, ...selectedOther];
     } else {
       const availableExercises = AVAILABLE_EXERCISES
@@ -627,7 +626,7 @@ export default function ExerciseSelector({
         const selectedOther = shuffledOther.slice(0, remainingSlots);
         
         newExercises = [...selectedPicture, ...selectedOther];
-        devLog('🎲 [MEDIA-TOGGLE-RANDOM-PICTURE] Selected exercises:', newExercises);
+        console.log('🎲 [MEDIA-TOGGLE-RANDOM-PICTURE] Selected exercises:', newExercises);
       } else if (tempMediaTypes.includes('audio')) {
         const availableAudioExercises = AVAILABLE_EXERCISES
           .filter(ex => !ex.comingSoon && AUDIO_COMPATIBLE_EXERCISES.includes(ex.id))
@@ -644,14 +643,14 @@ export default function ExerciseSelector({
         const selectedOther = shuffledOther.slice(0, remainingSlots);
         
         newExercises = [...selectedAudio, ...selectedOther];
-        devLog('🎲 [MEDIA-TOGGLE-RANDOM-AUDIO] Selected exercises:', newExercises);
+        console.log('🎲 [MEDIA-TOGGLE-RANDOM-AUDIO] Selected exercises:', newExercises);
       } else {
         const availableExercises = AVAILABLE_EXERCISES
           .filter(ex => !ex.comingSoon && !ex.pictureRequired && !ex.audioRequired)
           .map(ex => ex.id);
         const shuffled = [...availableExercises].sort(() => Math.random() - 0.5);
         newExercises = shuffled.slice(0, maxExercises);
-        devLog('🎲 [MEDIA-TOGGLE-RANDOM-NONE] Selected exercises:', newExercises);
+        console.log('🎲 [MEDIA-TOGGLE-RANDOM-NONE] Selected exercises:', newExercises);
       }
     } else {
       // Manual mode: use predefined defaults

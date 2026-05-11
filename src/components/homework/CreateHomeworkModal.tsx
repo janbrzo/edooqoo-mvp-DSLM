@@ -17,7 +17,6 @@ import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
 import { useHomeworkExerciseGeneration } from "@/hooks/useHomeworkExerciseGeneration";
-import { devLog } from '@/utils/logger';
 
 interface CreateHomeworkModalProps {
   open: boolean;
@@ -219,7 +218,7 @@ export function CreateHomeworkModal({
       
       // If sendToTeacher is enabled, send email to teacher as well
       if (sendToTeacher && teacherEmail && !isReminder) {
-        devLog('[CreateHomeworkModal] Sending email to teacher:', teacherEmail);
+        console.log('[CreateHomeworkModal] Sending email to teacher:', teacherEmail);
         const { error: teacherEmailError } = await supabase.functions.invoke('send-homework-email', {
           headers: {
             Authorization: `Bearer ${session.access_token}`,
@@ -236,7 +235,7 @@ export function CreateHomeworkModal({
           console.error('Error sending email to teacher:', teacherEmailError);
           // Don't fail the whole operation if teacher email fails
         } else {
-          devLog('[CreateHomeworkModal] Email sent to teacher successfully');
+          console.log('[CreateHomeworkModal] Email sent to teacher successfully');
         }
       }
     } catch (error: any) {
@@ -300,7 +299,7 @@ export function CreateHomeworkModal({
         selectedDate.setHours(hours, minutes, 0, 0);
         
         finalDeadline = selectedDate.toISOString();
-        devLog('[CreateHomeworkModal] Final deadline:', finalDeadline, 'Local:', selectedDate, 'Time:', deadlineTime);
+        console.log('[CreateHomeworkModal] Final deadline:', finalDeadline, 'Local:', selectedDate, 'Time:', deadlineTime);
       }
 
       const { data: homework, error: insertError } = await supabase

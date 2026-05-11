@@ -11,11 +11,10 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Sparkles, Edit, Loader2, ArrowRight, ChevronDown, ClipboardCopy, MessageSquarePlus, CheckCircle2, Trash2 } from 'lucide-react';
+import { Sparkles, Edit, Loader2, ArrowRight, ChevronDown, ClipboardCopy, MessageSquarePlus, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { computeConfidence } from '@/lib/dslm/confidenceScore';
 import { ConfidenceBadge } from './ConfidenceBadge';
-import { ConfirmTypeToDeleteDialog } from './ConfirmTypeToDeleteDialog';
 
 interface NextStepBannerProps {
   suggestion: any | null;
@@ -28,8 +27,6 @@ interface NextStepBannerProps {
   onRegenerateWithComment?: (suggestion: any) => void;
   /** v4.8: mark this suggestion as already used (manual flag, no worksheet link). */
   onMarkUsed?: (suggestionId: string) => void;
-  /** v6.9.14 — delete the #1 next step (with type-to-confirm). */
-  onDelete?: (suggestionId: string) => void;
   generating: boolean;
   hasGoals: boolean;
 }
@@ -43,13 +40,11 @@ export const NextStepBanner: React.FC<NextStepBannerProps> = ({
   onGenerate,
   onRegenerateWithComment,
   onMarkUsed,
-  onDelete,
   generating,
   hasGoals,
 }) => {
   const storageKey = `dslm.nextStep.detailsOpen.${studentId}`;
   const [detailsOpen, setDetailsOpen] = useState(false);
-  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
   useEffect(() => {
     try {
@@ -67,29 +62,15 @@ export const NextStepBanner: React.FC<NextStepBannerProps> = ({
     return (
       <Card className="border-dashed border-2 border-muted-foreground/20">
         <CardContent className="pt-6 text-center space-y-3">
-          <div className="space-y-1">
-            <p className="text-muted-foreground">
-              {hasGoals
-                ? 'No next step yet. Generate AI-powered worksheet suggestions.'
-                : 'Add goals first for better worksheet suggestions.'}
-            </p>
-            {!hasGoals && (
-              <p className="text-[11px] opacity-70">
-                Just added some? Refresh the page to see them.
-              </p>
-            )}
-          </div>
-          <div className="flex items-center justify-center gap-2">
-            <Button onClick={onGenerate} disabled={generating || !hasGoals}>
-              {generating ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Sparkles className="h-4 w-4 mr-2" />}
-              Generate next steps
-            </Button>
-            {!hasGoals && (
-              <Button variant="ghost" size="sm" onClick={() => window.location.reload()}>
-                Refresh
-              </Button>
-            )}
-          </div>
+          <p className="text-muted-foreground">
+            {hasGoals
+              ? 'No next step yet. Generate AI-powered worksheet suggestions.'
+              : 'Add goals first for better worksheet suggestions.'}
+          </p>
+          <Button onClick={onGenerate} disabled={generating || !hasGoals}>
+            {generating ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Sparkles className="h-4 w-4 mr-2" />}
+            Generate next steps
+          </Button>
         </CardContent>
       </Card>
     );
@@ -185,15 +166,6 @@ export const NextStepBanner: React.FC<NextStepBannerProps> = ({
                 <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Mark as already used
               </Button>
             )}
-            {onDelete && (
-              <Button
-                size="sm" variant="ghost"
-                className="text-primary-foreground hover:bg-white/20 h-8"
-                onClick={() => setConfirmDeleteOpen(true)}
-              >
-                <Trash2 className="h-3.5 w-3.5 mr-1" /> Remove
-              </Button>
-            )}
           </div>
 
           <Collapsible open={detailsOpen} onOpenChange={handleToggleDetails}>
@@ -225,16 +197,6 @@ export const NextStepBanner: React.FC<NextStepBannerProps> = ({
           </Collapsible>
         </CardContent>
       </Card>
-      {onDelete && (
-        <ConfirmTypeToDeleteDialog
-          open={confirmDeleteOpen}
-          onOpenChange={setConfirmDeleteOpen}
-          label="Next Step #1"
-          expectedText="Next Step #1"
-          description="This will remove the top-priority next step. You can regenerate later."
-          onConfirm={() => onDelete(suggestion.id)}
-        />
-      )}
     </TooltipProvider>
   );
 };

@@ -1,6 +1,5 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { devLog } from '@/utils/logger';
 
 export interface DownloadSession {
   id: string;
@@ -32,7 +31,7 @@ export const downloadSessionService = {
         return null;
       }
 
-      devLog('Download session created successfully:', data);
+      console.log('Download session created successfully:', data);
       return data;
     } catch (error) {
       console.error('Error creating download session:', error);
@@ -64,7 +63,7 @@ export const downloadSessionService = {
   // Increment download count with better error handling and logging
   async incrementDownloadCount(sessionToken: string): Promise<boolean> {
     try {
-      devLog('Attempting to increment download count for token:', sessionToken);
+      console.log('Attempting to increment download count for token:', sessionToken);
       
       // First get current session data
       const { data: session, error: fetchError } = await supabase
@@ -83,9 +82,9 @@ export const downloadSessionService = {
         return false;
       }
 
-      devLog('Current downloads_count:', session.downloads_count);
+      console.log('Current downloads_count:', session.downloads_count);
       const newCount = (session.downloads_count || 0) + 1;
-      devLog('New downloads_count will be:', newCount);
+      console.log('New downloads_count will be:', newCount);
 
       // Then update with incremented value
       const { data: updateData, error: updateError } = await supabase
@@ -102,7 +101,7 @@ export const downloadSessionService = {
         return false;
       }
 
-      devLog('Download count updated successfully to:', updateData?.downloads_count);
+      console.log('Download count updated successfully to:', updateData?.downloads_count);
       return true;
     } catch (error) {
       console.error('Error incrementing download count:', error);
@@ -150,7 +149,7 @@ export const downloadSessionService = {
         return null;
       }
 
-      devLog('Session stats fetched:', data);
+      console.log('Session stats fetched:', data);
       return data;
     } catch (error) {
       console.error('Error fetching session stats:', error);

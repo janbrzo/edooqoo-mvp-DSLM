@@ -1,12 +1,11 @@
 
 import { useEventTracking } from './useEventTracking';
-import { devLog } from '@/utils/logger';
 
 export const usePaymentTracking = (userId?: string) => {
   const { trackEvent } = useEventTracking(userId);
 
   const trackPaymentButtonClick = (worksheetId: string, amount: number) => {
-    devLog('🔘 TRACKING PAYMENT BUTTON CLICK:', { worksheetId, amount });
+    console.log('🔘 TRACKING PAYMENT BUTTON CLICK:', { worksheetId, amount });
     
     trackEvent({
       eventType: 'payment_button_click',
@@ -19,7 +18,7 @@ export const usePaymentTracking = (userId?: string) => {
   };
 
   const trackStripePaymentSuccess = async (worksheetId: string, paymentId: string, amount: number) => {
-    devLog('💳 TRACKING STRIPE PAYMENT SUCCESS:', { 
+    console.log('💳 TRACKING STRIPE PAYMENT SUCCESS:', { 
       worksheetId, 
       paymentId, 
       amount,
@@ -37,7 +36,7 @@ export const usePaymentTracking = (userId?: string) => {
         }
       });
       
-      devLog('✅ STRIPE PAYMENT SUCCESS EVENT SENT TO TRACKING');
+      console.log('✅ STRIPE PAYMENT SUCCESS EVENT SENT TO TRACKING');
     } catch (error) {
       console.error('❌ ERROR SENDING STRIPE PAYMENT SUCCESS EVENT:', error);
       throw error;

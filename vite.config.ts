@@ -25,23 +25,13 @@ export default defineConfig(({ mode }) => ({
     // together because Router pulls React internals.
     rollupOptions: {
       output: {
-        manualChunks: (id) => {
-          // v6.9.7 — isolate demo + mock content into lazy chunks. They are
-          // only required by /demo and dev tooling; keeping them out of the
-          // main bundle reduces what plagiarists can scrape from a casual
-          // bundle inspection and improves LCP for real users.
-          if (id.includes('demoWorksheetContent')) return 'demo-content';
-          if (id.includes('mockWorksheetData') || id.includes('mockNewExercisesData')) return 'mock-data';
-          if (id.includes('react-router-dom') || id.includes('node_modules/react-dom') || id.includes('node_modules/react/')) return 'react-vendor';
-          if (id.includes('@supabase/supabase-js')) return 'supabase';
-          if (id.includes('lucide-react')) return 'lucide';
+        manualChunks: {
+          'react-vendor': ['react', 'react-dom', 'react-router-dom'],
+          'supabase': ['@supabase/supabase-js'],
+          'lucide': ['lucide-react'],
         },
       },
     },
-    // v6.9.7 — strip debugger statements from production output. Combined
-    // with sourcemap=false this denies casual reverse-engineering through
-    // DevTools breakpoints on minified symbols.
-    esbuild: { drop: ['debugger'] },
   },
   plugins: [
     react(),

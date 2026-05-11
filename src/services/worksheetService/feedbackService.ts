@@ -1,7 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { devLog } from '@/utils/logger';
 
 // URL for the Edge Function
 const SUBMIT_FEEDBACK_URL = 'https://bvfrkzdlklyvnhlpleck.supabase.co/functions/v1/submitFeedback';
@@ -11,7 +10,7 @@ const SUBMIT_FEEDBACK_URL = 'https://bvfrkzdlklyvnhlpleck.supabase.co/functions/
  */
 export async function submitFeedbackAPI(worksheetId: string, rating: number, comment: string, userId: string) {
   try {
-    devLog('Submitting feedback:', { worksheetId, rating, comment, userId });
+    console.log('Submitting feedback:', { worksheetId, rating, comment, userId });
     
     if (!worksheetId || !userId) {
       console.error('Missing required parameters for feedback:', { worksheetId, userId });
@@ -36,7 +35,7 @@ export async function submitFeedbackAPI(worksheetId: string, rating: number, com
 
       if (response.ok) {
         const result = await response.json();
-        devLog('Feedback submission successful via API:', result);
+        console.log('Feedback submission successful via API:', result);
         toast.success('Thank you for your feedback!');
         return result.data;
       }
@@ -66,7 +65,7 @@ export async function submitFeedbackAPI(worksheetId: string, rating: number, com
       
       // If direct insert fails and we don't have a worksheet_id, try creating a placeholder
       if (error.message.includes('violates foreign key constraint')) {
-        devLog('Creating placeholder worksheet for feedback');
+        console.log('Creating placeholder worksheet for feedback');
         
         const { data: placeholderData, error: placeholderError } = await supabase
           .from('worksheets')
@@ -131,7 +130,7 @@ export async function submitFeedbackAPI(worksheetId: string, rating: number, com
  */
 export async function updateFeedbackAPI(id: string, comment: string, userId: string) {
   try {
-    devLog('Updating feedback with comment:', { id, comment });
+    console.log('Updating feedback with comment:', { id, comment });
 
     const { data, error } = await supabase
       .from('feedbacks')
@@ -145,7 +144,7 @@ export async function updateFeedbackAPI(id: string, comment: string, userId: str
       throw new Error(`Failed to update feedback: ${error.message}`);
     }
     
-    devLog('Feedback updated successfully:', data);
+    console.log('Feedback updated successfully:', data);
     return data;
   } catch (error) {
     console.error('Error updating feedback:', error);

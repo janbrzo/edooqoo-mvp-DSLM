@@ -1,4 +1,3 @@
-import { devLog, devWarn } from '@/utils/logger';
 
 export interface WorksheetTimes {
   warmup: number;
@@ -30,7 +29,7 @@ export const calculateWorksheetTimes = (lessonTime: string, hasGrammar: boolean 
 
 // Fixed exercise times based on lesson duration and grammar presence - updated with exact specifications
 export const getExerciseTimeByType = (exerciseType: string, lessonTime: string, hasGrammar: boolean = true): number => {
-  devLog(`🔧 getExerciseTimeByType called with:`, { exerciseType, lessonTime, hasGrammar });
+  console.log(`🔧 getExerciseTimeByType called with:`, { exerciseType, lessonTime, hasGrammar });
   
   const timeMap = {
     '45min': {
@@ -141,22 +140,22 @@ export const getExerciseTimeByType = (exerciseType: string, lessonTime: string, 
   
   // Normalize lesson time format - handle both "45min" and "45 min" formats
   const normalizedLessonTime = lessonTime.replace(/\s+/g, ''); // Remove all spaces
-  devLog(`🔧 Normalized lesson time from "${lessonTime}" to "${normalizedLessonTime}"`);
+  console.log(`🔧 Normalized lesson time from "${lessonTime}" to "${normalizedLessonTime}"`);
   
   const lessonConfig = timeMap[normalizedLessonTime as keyof typeof timeMap];
   if (!lessonConfig) {
-    devWarn(`🔧 No lesson config found for "${normalizedLessonTime}", falling back to 45min`);
+    console.warn(`🔧 No lesson config found for "${normalizedLessonTime}", falling back to 45min`);
     const fallbackConfig = timeMap['45min'];
     const grammarConfig = hasGrammar ? fallbackConfig.withGrammar : fallbackConfig.withoutGrammar;
     const result = grammarConfig[exerciseType as keyof typeof grammarConfig] || 3; // Minimum 3 minutes for unknown types
-    devLog(`🔧 Fallback result for ${exerciseType}: ${result} minutes`);
+    console.log(`🔧 Fallback result for ${exerciseType}: ${result} minutes`);
     return result;
   }
   
   const grammarConfig = hasGrammar ? lessonConfig.withGrammar : lessonConfig.withoutGrammar;
   const result = grammarConfig[exerciseType as keyof typeof grammarConfig] || 3; // Minimum 3 minutes for unknown types
   
-  devLog(`🔧 Found time for ${exerciseType} in ${normalizedLessonTime} ${hasGrammar ? 'with' : 'without'} grammar: ${result} minutes`);
+  console.log(`🔧 Found time for ${exerciseType} in ${normalizedLessonTime} ${hasGrammar ? 'with' : 'without'} grammar: ${result} minutes`);
   
   return result;
 };

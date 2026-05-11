@@ -46,17 +46,17 @@ export const SkillsView: React.FC<SkillsViewProps> = ({
       </Card>
 
       {/* Skills Heat Map — open by default (radar + categories only) */}
-      <CollapsibleSection id="skills-heatmap" title="Skills Heat Map" icon={BarChart3} defaultOpen>
+      <CollapsibleSection title="Skills Heat Map" icon={BarChart3} defaultOpen>
         <SkillsOverviewPanel studentId={studentId} teacherId={teacherId} onlySection="heatmap" />
       </CollapsibleSection>
 
       {/* Micro Skills — collapsed, independent */}
-      <CollapsibleSection id="skills-micro" title="Micro Skills" icon={Layers}>
+      <CollapsibleSection title="Micro Skills" icon={Layers}>
         <SkillsOverviewPanel studentId={studentId} teacherId={teacherId} onlySection="micro" />
       </CollapsibleSection>
 
       {/* Skill Assessment Notes — collapsed */}
-      <CollapsibleSection id="skills-notes" title="Skill Assessment Notes" icon={StickyNote} count={skillAssessmentNotes.length}>
+      <CollapsibleSection title="Skill Assessment Notes" icon={StickyNote} count={skillAssessmentNotes.length}>
         {skillAssessmentNotes.length === 0 ? (
           <p className="text-xs text-muted-foreground text-center py-2">No skill assessment notes yet</p>
         ) : (

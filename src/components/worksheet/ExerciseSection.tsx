@@ -48,7 +48,6 @@ import {
   getMatchedItems,
   renderOtherExerciseTypes
 } from "./ExerciseSectionUtils";
-import { devLog } from '@/utils/logger';
 import { safeGetNanoSkill, safeGetAllNanoSkills } from "@/utils/textObjectFixer";
 import NanoSkillBadge, { NanoSkill } from "./NanoSkillBadge";
 import { supabase } from "@/integrations/supabase/client";
@@ -411,7 +410,7 @@ const ExerciseSection = forwardRef<HTMLDivElement, ExerciseSectionProps>(({
       setIsLoadingAiEvaluation(true);
       setAiEvaluations(null);
       
-      devLog('[AI Evaluation] Starting for exercise type:', exerciseType);
+      console.log('[AI Evaluation] Starting for exercise type:', exerciseType);
       
       // Prepare answers to evaluate
       const answersToEvaluate = Object.entries(liveSessionAnswer)
@@ -428,7 +427,7 @@ const ExerciseSection = forwardRef<HTMLDivElement, ExerciseSectionProps>(({
             const prompt = exercise.prompts[qIndex];
             questionText = typeof prompt === 'string' ? prompt : prompt.prompt || prompt.text || questionText;
             suggestedAnswer = typeof prompt === 'object' ? (prompt.suggested || prompt.answer) : undefined;
-            devLog(`[AI Evaluation] Describe-picture using prompts[${qIndex}]:`, questionText);
+            console.log(`[AI Evaluation] Describe-picture using prompts[${qIndex}]:`, questionText);
           } else if (exercise.questions?.[qIndex]) {
             questionText = exercise.questions[qIndex].question || exercise.questions[qIndex].text || questionText;
             suggestedAnswer = exercise.questions[qIndex].answer || exercise.questions[qIndex].suggested;
@@ -451,7 +450,7 @@ const ExerciseSection = forwardRef<HTMLDivElement, ExerciseSectionProps>(({
           };
         });
       
-      devLog('[AI Evaluation] Answers to evaluate:', answersToEvaluate.length);
+      console.log('[AI Evaluation] Answers to evaluate:', answersToEvaluate.length);
       
       if (answersToEvaluate.length > 0) {
         try {
@@ -468,7 +467,7 @@ const ExerciseSection = forwardRef<HTMLDivElement, ExerciseSectionProps>(({
           }
           const fullContext = contextParts.filter(p => p).join('\n\n');
           
-          devLog('[AI Evaluation] Context being sent:', fullContext);
+          console.log('[AI Evaluation] Context being sent:', fullContext);
           
           const { data, error } = await supabase.functions.invoke('verify-open-answers', {
             body: {
@@ -487,8 +486,8 @@ const ExerciseSection = forwardRef<HTMLDivElement, ExerciseSectionProps>(({
               evaluationsMap[e.question_index] = Math.round(e.quality_score * 100);
             });
             setAiEvaluations(evaluationsMap);
-            devLog('[AI Evaluation] Results:', evaluationsMap);
-            devLog('[AI Evaluation] FULL Response from AI:', JSON.stringify(data, null, 2));
+            console.log('[AI Evaluation] Results:', evaluationsMap);
+            console.log('[AI Evaluation] FULL Response from AI:', JSON.stringify(data, null, 2));
           }
         } catch (err) {
           console.error('[AI Evaluation] Exception:', err);
@@ -521,7 +520,7 @@ const ExerciseSection = forwardRef<HTMLDivElement, ExerciseSectionProps>(({
       try {
         const exerciseIdx = originalIndex !== undefined ? originalIndex : index - 1;
         
-        devLog('📝 Saving mastery evaluation:', {
+        console.log('📝 Saving mastery evaluation:', {
           studentId: studentIdProp,
           teacherId: teacherIdProp,
           worksheetId: worksheetIdForStorage,
@@ -564,10 +563,10 @@ const ExerciseSection = forwardRef<HTMLDivElement, ExerciseSectionProps>(({
           
           if (updateError) throw updateError;
           
-          devLog('✅ Updated existing mastery evaluation:', existingEvent.id);
+          console.log('✅ Updated existing mastery evaluation:', existingEvent.id);
         } else {
           // INSERT new record - use direct RPC call with validated props to bypass hook issues
-          devLog('📤 [Mastery] Calling add_student_event RPC with:', {
+          console.log('📤 [Mastery] Calling add_student_event RPC with:', {
             p_student_id: studentIdProp,
             p_teacher_id: teacherIdProp,
             p_event_type: 'exercise_mastery_evaluation',
@@ -600,7 +599,7 @@ const ExerciseSection = forwardRef<HTMLDivElement, ExerciseSectionProps>(({
             throw new Error('Event creation returned null');
           }
           
-          devLog('✅ [Mastery] Created new mastery evaluation, event ID:', eventResult);
+          console.log('✅ [Mastery] Created new mastery evaluation, event ID:', eventResult);
         }
         
         toast({
@@ -616,7 +615,7 @@ const ExerciseSection = forwardRef<HTMLDivElement, ExerciseSectionProps>(({
         });
       }
     } else {
-      devLog('No ratings with values set - skipping save to DB');
+      console.log('No ratings with values set - skipping save to DB');
     }
     
     // Mark as done locally
@@ -727,7 +726,7 @@ const ExerciseSection = forwardRef<HTMLDivElement, ExerciseSectionProps>(({
   
   // DEBUG: Log structure for answer-questions-picture to diagnose editing issues
   if (exercise.type === 'answer-questions-picture') {
-    devLog('[DEBUG] Answer Questions Picture exercise structure:', {
+    console.log('[DEBUG] Answer Questions Picture exercise structure:', {
       type: exercise.type,
       hasQuestions: !!exercise.questions,
       questionsType: Array.isArray(exercise.questions) ? 'array' : typeof exercise.questions,
@@ -744,7 +743,7 @@ const ExerciseSection = forwardRef<HTMLDivElement, ExerciseSectionProps>(({
   const showImage = !hideExerciseMedia && !hasSelectedImage;
 
   const handleRegenerateClick = () => {
-    devLog('🔄 [REGENERATE] Opening modal:', { 
+    console.log('🔄 [REGENERATE] Opening modal:', { 
       displayIndex: index, 
       arrayIndex, 
       exerciseType: exercise.type,

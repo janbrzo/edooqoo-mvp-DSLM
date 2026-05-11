@@ -56,36 +56,6 @@ const VIEWS = [
 
 type ViewId = typeof VIEWS[number]['id'];
 
-// v6.9.13 — sub-nav map. Clicking a child dispatches `dslm:openSubsection` (handled by CollapsibleSection).
-const SUBSECTIONS: Record<ViewId, { id: string; label: string }[]> = {
-  pathway: [
-    { id: 'pathway-next-steps', label: 'Next Steps' },
-    { id: 'pathway-roadmap', label: 'Learning Roadmap' },
-    { id: 'pathway-notes', label: 'Next Lesson Ideas' },
-  ],
-  goals: [
-    { id: 'goals-supporting', label: 'Supporting' },
-    { id: 'goals-additional', label: 'Additional' },
-    { id: 'goals-achieved', label: 'Achieved' },
-    { id: 'goals-archived', label: 'Archived' },
-    { id: 'goals-notes', label: 'Goal Notes' },
-  ],
-  skills: [
-    { id: 'skills-heatmap', label: 'Heat Map' },
-    { id: 'skills-micro', label: 'Micro Skills' },
-    { id: 'skills-notes', label: 'Notes' },
-  ],
-  profile: [
-    { id: 'profile-ai-summary', label: 'AI Summary' },
-    { id: 'profile-psych', label: 'Psychological' },
-    { id: 'profile-behavioral', label: 'Behavioral' },
-    { id: 'profile-personal', label: 'Personal Notes' },
-    { id: 'profile-all-notes', label: 'All Notes' },
-  ],
-};
-
-// Sub-nav clicks dispatch `dslm:openSubsection` (handled inline at click site).
-
 export const DSLMTab: React.FC<DSLMTabProps> = ({
   studentId,
   teacherId,
@@ -319,43 +289,20 @@ export const DSLMTab: React.FC<DSLMTabProps> = ({
             <nav className="space-y-1">
               {VIEWS.map(view => {
                 const Icon = view.icon;
-                const subs = SUBSECTIONS[view.id];
                 return (
-                  <div key={view.id}>
-                    <button
-                      onClick={() => handleScrollTo(view.id)}
-                      className={cn(
-                        'w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-left',
-                        activeSection === view.id
-                          ? 'bg-primary text-primary-foreground'
-                          : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-                      )}
-                    >
-                      <Icon className="h-4 w-4" />
-                      {view.label}
-                    </button>
-                    {subs.length > 0 && (
-                      <div className={cn(
-                        "ml-6 mt-1 mb-1 space-y-0.5 border-l pl-2",
-                        activeSection === view.id ? "border-primary" : "border-border opacity-70"
-                      )}>
-                        {subs.map(s => (
-                          <button
-                            key={s.id}
-                            onClick={() => {
-                              handleScrollTo(view.id);
-                              setTimeout(() => {
-                                window.dispatchEvent(new CustomEvent('dslm:openSubsection', { detail: { id: s.id } }));
-                              }, 250);
-                            }}
-                            className="block w-full text-left px-2 py-1 rounded text-xs text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
-                          >
-                            {s.label}
-                          </button>
-                        ))}
-                      </div>
+                  <button
+                    key={view.id}
+                    onClick={() => handleScrollTo(view.id)}
+                    className={cn(
+                      'w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-left',
+                      activeSection === view.id
+                        ? 'bg-primary text-primary-foreground'
+                        : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                     )}
-                  </div>
+                  >
+                    <Icon className="h-4 w-4" />
+                    {view.label}
+                  </button>
                 );
               })}
             </nav>

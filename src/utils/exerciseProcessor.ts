@@ -1,7 +1,6 @@
 
 import { shuffleArray, createSampleVocabulary } from "./worksheetUtils";
 import { getExerciseTimeByType, validateWorksheetTimes } from "./timeCalculator";
-import { devLog, devWarn } from '@/utils/logger';
 
 /**
  * PROBLEM 4 FIX: Official exercise type names for consistent titles
@@ -50,15 +49,15 @@ export const getOfficialExerciseName = (type: string): string => {
 };
 
 export const processExercises = (exercises: any[], lessonTime: string = '45min', hasGrammar: boolean = true): any[] => {
-  devLog('🔧 Processing exercises - Starting with:', exercises.length, 'exercises');
-  devLog('🔧 Lesson config:', { lessonTime, hasGrammar });
+  console.log('🔧 Processing exercises - Starting with:', exercises.length, 'exercises');
+  console.log('🔧 Lesson config:', { lessonTime, hasGrammar });
   
   // Normalize lesson time format to remove spaces
   const normalizedLessonTime = lessonTime.replace(/\s+/g, '');
-  devLog('🔧 Normalized lesson time:', normalizedLessonTime);
+  console.log('🔧 Normalized lesson time:', normalizedLessonTime);
   
   const processedExercises = exercises.map((exercise: any, index: number) => {
-    devLog(`🔧 Processing exercise ${index + 1}: ${exercise.type}`);
+    console.log(`🔧 Processing exercise ${index + 1}: ${exercise.type}`);
     
     // PROBLEM 6 FIX: Preserve AI-generated description in exercise titles
     const officialName = getOfficialExerciseName(exercise.type);
@@ -73,19 +72,19 @@ export const processExercises = (exercises: any[], lessonTime: string = '45min',
     
     // Assign fixed time based on exercise type, lesson duration, and grammar presence
     exercise.time = getExerciseTimeByType(exercise.type, normalizedLessonTime, hasGrammar);
-    devLog(`🔧 Assigned ${exercise.time} minutes to ${exercise.type} exercise (lessonTime: ${normalizedLessonTime}, hasGrammar: ${hasGrammar})`);
+    console.log(`🔧 Assigned ${exercise.time} minutes to ${exercise.type} exercise (lessonTime: ${normalizedLessonTime}, hasGrammar: ${hasGrammar})`);
     
     if (exercise.type === "matching" && exercise.items) {
       exercise.originalItems = [...exercise.items];
       exercise.shuffledTerms = shuffleArray([...exercise.items]);
-      devLog(`🔧 Processed matching exercise with ${exercise.items.length} items`);
+      console.log(`🔧 Processed matching exercise with ${exercise.items.length} items`);
     }
     
     // FIXED: Multiple choice questions processing with randomized correct answer positions
     if (exercise.type === "multiple-choice" && exercise.questions) {
       exercise.questions = exercise.questions.map((question: any) => {
         if (question.options && question.options.length >= 2) {
-          devLog('🔧 Processing multiple choice question options');
+          console.log('🔧 Processing multiple choice question options');
           
           // Get all unique option texts while preserving their correct status
           const uniqueTexts = new Set();
@@ -132,7 +131,7 @@ export const processExercises = (exercises: any[], lessonTime: string = '45min',
             // Insert the correct answer at the random position
             fourOptions.splice(randomPosition, 0, correctAnswer);
             
-            devLog(`🔧 Moved correct answer to position ${randomPosition + 1} (${String.fromCharCode(65 + randomPosition)})`);
+            console.log(`🔧 Moved correct answer to position ${randomPosition + 1} (${String.fromCharCode(65 + randomPosition)})`);
           } else {
             // If no correct answer exists, make the first option correct and randomize its position
             fourOptions[0].correct = true;
@@ -142,7 +141,7 @@ export const processExercises = (exercises: any[], lessonTime: string = '45min',
             const randomPosition = Math.floor(Math.random() * 4);
             fourOptions.splice(randomPosition, 0, correctAnswer);
             
-            devLog(`🔧 Set first option as correct and moved to position ${randomPosition + 1} (${String.fromCharCode(65 + randomPosition)})`);
+            console.log(`🔧 Set first option as correct and moved to position ${randomPosition + 1} (${String.fromCharCode(65 + randomPosition)})`);
           }
           
           // Ensure only one option is marked as correct
@@ -162,11 +161,11 @@ export const processExercises = (exercises: any[], lessonTime: string = '45min',
           }));
           
           question.options = finalOptions;
-          devLog('🔧 Fixed multiple choice options:', question.options.map(o => `${o.label}: ${o.text} (${o.correct ? 'CORRECT' : 'incorrect'})`));
+          console.log('🔧 Fixed multiple choice options:', question.options.map(o => `${o.label}: ${o.text} (${o.correct ? 'CORRECT' : 'incorrect'})`));
         }
         return question;
       });
-      devLog(`🔧 Processed multiple-choice exercise with ${exercise.questions.length} questions`);
+      console.log(`🔧 Processed multiple-choice exercise with ${exercise.questions.length} questions`);
     }
 
     // New Phase 1 exercise processing
@@ -185,13 +184,13 @@ export const processExercises = (exercises: any[], lessonTime: string = '45min',
         }
         return question;
       });
-      devLog(`🔧 Processed odd-one-out exercise with ${exercise.questions.length} questions`);
+      console.log(`🔧 Processed odd-one-out exercise with ${exercise.questions.length} questions`);
     }
 
     if (exercise.type === "synonyms" || exercise.type === "antonyms" || exercise.type === "synonyms-antonyms" && exercise.items) {
       // Shuffle items for variety but maintain pairs
       exercise.originalItems = [...exercise.items];
-      devLog(`🔧 Processed ${exercise.type} exercise with ${exercise.items.length} pairs`);
+      console.log(`🔧 Processed ${exercise.type} exercise with ${exercise.items.length} pairs`);
     }
 
     if (exercise.type === "sentence-transformation" && exercise.sentences) {
@@ -202,7 +201,7 @@ export const processExercises = (exercises: any[], lessonTime: string = '45min',
         }
         return sentence;
       });
-      devLog(`🔧 Processed sentence-transformation exercise with ${exercise.sentences.length} sentences`);
+      console.log(`🔧 Processed sentence-transformation exercise with ${exercise.sentences.length} sentences`);
     }
 
     if (exercise.type === "word-order" && exercise.sentences) {
@@ -214,7 +213,7 @@ export const processExercises = (exercises: any[], lessonTime: string = '45min',
         }
         return sentence;
       });
-      devLog(`🔧 Processed word-order exercise with ${exercise.sentences.length} sentences`);
+      console.log(`🔧 Processed word-order exercise with ${exercise.sentences.length} sentences`);
     }
 
     if (exercise.type === "gap-text" && exercise.sentences) {
@@ -223,24 +222,24 @@ export const processExercises = (exercises: any[], lessonTime: string = '45min',
         exercise.originalWordBank = [...exercise.word_bank];
         exercise.word_bank = shuffleArray([...exercise.word_bank]);
       }
-      devLog(`🔧 Processed gap-text exercise with ${exercise.sentences.length} sentences`);
+      console.log(`🔧 Processed gap-text exercise with ${exercise.sentences.length} sentences`);
     }
 
     if (exercise.type === "negative-prefixes" && exercise.words) {
       // Ensure each word has required fields
       exercise.words = exercise.words.map((word: any) => {
         if (!word.base_word || !word.prefix) {
-          devWarn(`🔧 Missing base_word or prefix for negative prefix word:`, word);
+          console.warn(`🔧 Missing base_word or prefix for negative prefix word:`, word);
         }
         return word;
       });
-      devLog(`🔧 Processed negative-prefixes exercise with ${exercise.words.length} words`);
+      console.log(`🔧 Processed negative-prefixes exercise with ${exercise.words.length} words`);
     }
 
     // PROBLEM 4 FIX: Process describe-picture exercises to ensure prompts exist
     if (exercise.type === 'describe-picture' || exercise.type === 'describe') {
       const prompts = exercise.prompts || exercise.questions || [];
-      devLog(`🔧 Processing describe-picture exercise, found ${prompts.length} prompts`);
+      console.log(`🔧 Processing describe-picture exercise, found ${prompts.length} prompts`);
       
       // If no prompts/questions exist, generate default guiding questions
       if (prompts.length === 0) {
@@ -256,7 +255,7 @@ export const processExercises = (exercises: any[], lessonTime: string = '45min',
           "What questions would you ask about this image?",
           "Create a short story or narrative inspired by this image."
         ];
-        devLog(`🔧 Added 10 default prompts to describe-picture exercise`);
+        console.log(`🔧 Added 10 default prompts to describe-picture exercise`);
       } else if (prompts.length < 5) {
         // Ensure at least 5 prompts
         const additionalPrompts = [
@@ -269,7 +268,7 @@ export const processExercises = (exercises: any[], lessonTime: string = '45min',
         while (exercise.prompts && exercise.prompts.length < 5 && additionalPrompts.length > 0) {
           exercise.prompts.push(additionalPrompts.shift()!);
         }
-        devLog(`🔧 Padded describe-picture prompts to ${exercise.prompts.length}`);
+        console.log(`🔧 Padded describe-picture prompts to ${exercise.prompts.length}`);
       } else {
         // Prompts exist - ensure they're in the right field
         exercise.prompts = prompts;
@@ -278,7 +277,7 @@ export const processExercises = (exercises: any[], lessonTime: string = '45min',
     
     if (exercise.type === 'reading' && exercise.content) {
       const wordCount = exercise.content.split(/\s+/).filter(Boolean).length;
-      devLog(`🔧 Reading exercise word count: ${wordCount}`);
+      console.log(`🔧 Reading exercise word count: ${wordCount}`);
       
       if (!exercise.questions || exercise.questions.length < 5) {
         if (!exercise.questions) exercise.questions = [];
@@ -288,7 +287,7 @@ export const processExercises = (exercises: any[], lessonTime: string = '45min',
             answer: "Answer would be based on the text content."
           });
         }
-        devLog(`🔧 Added missing questions to reading exercise`);
+        console.log(`🔧 Added missing questions to reading exercise`);
       }
     }
     
@@ -303,7 +302,7 @@ export const processExercises = (exercises: any[], lessonTime: string = '45min',
   
   const validation = validateWorksheetTimes(warmupTime, grammarTime, exerciseTimes, targetTime);
   
-  devLog(`🔧 Exercise times breakdown:`, {
+  console.log(`🔧 Exercise times breakdown:`, {
     exercises: processedExercises.map((ex, idx) => `${ex.type}: ${ex.time}min`),
     totalExerciseTime: exerciseTimes.reduce((sum, time) => sum + time, 0),
     warmup: warmupTime,
@@ -313,7 +312,7 @@ export const processExercises = (exercises: any[], lessonTime: string = '45min',
   });
   
   if (!validation.isValid) {
-    devWarn(`⚠️ Worksheet time validation failed:`, {
+    console.warn(`⚠️ Worksheet time validation failed:`, {
       target: targetTime,
       actual: validation.actualTime,
       difference: validation.difference,
@@ -325,9 +324,9 @@ export const processExercises = (exercises: any[], lessonTime: string = '45min',
       }
     });
   } else {
-    devLog(`✅ Worksheet times validated successfully: ${validation.actualTime}/${targetTime} minutes`);
+    console.log(`✅ Worksheet times validated successfully: ${validation.actualTime}/${targetTime} minutes`);
   }
   
-  devLog('🔧 Processing exercises - Completed with:', processedExercises.length, 'exercises');
+  console.log('🔧 Processing exercises - Completed with:', processedExercises.length, 'exercises');
   return processedExercises;
 };

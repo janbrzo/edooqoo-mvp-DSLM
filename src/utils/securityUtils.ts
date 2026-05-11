@@ -1,4 +1,3 @@
-import { devWarn } from '@/utils/logger';
 /**
  * Enhanced security utilities for input validation and sanitization
  */
@@ -96,7 +95,7 @@ export function validatePrompt(prompt: string): { isValid: boolean; error?: stri
   
   for (const pattern of suspiciousPatterns) {
     if (pattern.test(trimmedPrompt)) {
-      devWarn('Suspicious pattern detected in prompt:', pattern);
+      console.warn('Suspicious pattern detected in prompt:', pattern);
       return { isValid: false, error: 'Prompt contains potentially harmful content' };
     }
   }
@@ -144,7 +143,7 @@ export function validateComment(comment: string): { isValid: boolean; error?: st
   
   for (const pattern of suspiciousPatterns) {
     if (pattern.test(comment)) {
-      devWarn('Suspicious pattern detected in comment:', pattern);
+      console.warn('Suspicious pattern detected in comment:', pattern);
       return { isValid: false, error: 'Comment contains potentially harmful content' };
     }
   }
@@ -198,7 +197,7 @@ class RateLimiter {
     if (entry.count >= maxRequests) {
       entry.blocked = true;
       this.requests.set(key, entry);
-      devWarn(`Rate limit exceeded for key: ${key}`);
+      console.warn(`Rate limit exceeded for key: ${key}`);
       return false;
     }
     
@@ -269,7 +268,7 @@ export class SecurityMonitor {
     }
     
     // Log to console for monitoring
-    devWarn(`Security Event [${type}]:`, event.details);
+    console.warn(`Security Event [${type}]:`, event.details);
     
     // In production, you might want to send this to a monitoring service
     if (typeof window !== 'undefined' && window.location.hostname !== 'localhost') {
@@ -286,9 +285,9 @@ export class SecurityMonitor {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(event)
-      }).catch(err => devWarn('Failed to send security event:', err));
+      }).catch(err => console.warn('Failed to send security event:', err));
     } catch (error) {
-      devWarn('Monitoring service unavailable:', error);
+      console.warn('Monitoring service unavailable:', error);
     }
   }
   

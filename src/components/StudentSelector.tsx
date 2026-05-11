@@ -8,7 +8,6 @@ import { useStudents } from '@/hooks/useStudents';
 import { useStudentSelector } from '@/hooks/useStudentSelector';
 import { useAuthFlow } from '@/hooks/useAuthFlow';
 import { Tables } from '@/integrations/supabase/types';
-import { devLog } from '@/utils/logger';
 
 type Student = Tables<'students'>;
 
@@ -38,7 +37,7 @@ export const StudentSelector: React.FC<StudentSelectorProps> = ({
     // to pass the new student name
   });
 
-  devLog('🔍 StudentSelector render debug:', {
+  console.log('🔍 StudentSelector render debug:', {
     worksheetId,
     currentStudentId,
     studentsCount: students?.length || 0,
@@ -82,14 +81,14 @@ export const StudentSelector: React.FC<StudentSelectorProps> = ({
 
   // Handle click with proper event stopping
   const handleClick = (e: React.MouseEvent) => {
-    devLog('🎯 StudentSelector clicked - stopping propagation');
+    console.log('🎯 StudentSelector clicked - stopping propagation');
     e.stopPropagation();
     e.preventDefault();
   };
 
   // Handle popover trigger click
   const handlePopoverTrigger = (e: React.MouseEvent) => {
-    devLog('🎯 Popover trigger clicked, current isOpen:', isOpen);
+    console.log('🎯 Popover trigger clicked, current isOpen:', isOpen);
     e.stopPropagation();
     e.preventDefault();
     setIsOpen(!isOpen);

@@ -15,7 +15,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { PricingCalculator } from '@/components/PricingCalculator';
 import { ConfirmDowngradeDialog } from '@/components/ConfirmDowngradeDialog';
-import { devLog } from '@/utils/logger';
 
 import { faqItems } from '@/constants/faqItems';
 import StickyNav from '@/components/landing/StickyNav';
@@ -95,7 +94,7 @@ const Pricing = () => {
     try {
       const { planType, targetPlan } = pendingDowngrade;
       
-      devLog('Attempting downgrade:', { planType, targetPlan });
+      console.log('Attempting downgrade:', { planType, targetPlan });
 
       const { data, error } = await supabase.functions.invoke('downgrade-subscription', {
         body: {
@@ -112,7 +111,7 @@ const Pricing = () => {
       }
 
       if (data?.success) {
-        devLog('Downgrade successful:', data);
+        console.log('Downgrade successful:', data);
         toast({
           title: "Plan Changed Successfully!",
           description: `Your subscription has been changed to ${data.newPlan}. The change is effective immediately.`,
@@ -206,7 +205,7 @@ const Pricing = () => {
     }
 
     try {
-      devLog('Attempting to open customer portal...');
+      console.log('Attempting to open customer portal...');
       const { data, error } = await supabase.functions.invoke('customer-portal');
       
       if (error) {
@@ -215,7 +214,7 @@ const Pricing = () => {
       }
 
       if (data?.url) {
-        devLog('Opening customer portal:', data.url);
+        console.log('Opening customer portal:', data.url);
         window.open(data.url, '_blank');
       } else {
         throw new Error('No portal URL received');

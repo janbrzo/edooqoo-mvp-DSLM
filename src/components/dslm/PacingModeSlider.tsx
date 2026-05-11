@@ -18,7 +18,6 @@ import { cn } from '@/lib/utils';
 import { BookOpen } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { devWarn } from '@/utils/logger';
 
 interface PacingModeSliderProps {
   value: number;
@@ -79,7 +78,7 @@ export const PacingModeSlider: React.FC<PacingModeSliderProps> = ({
           at: data.last_pacing_recalc_at || r?.at,
           setManually: !!data.last_pacing_set_manually,
         });
-      } catch (e) { devWarn('[PacingModeSlider] load last_pacing_reasoning failed', e); }
+      } catch (e) { console.warn('[PacingModeSlider] load last_pacing_reasoning failed', e); }
     })();
     return () => { cancelled = true; };
   }, [studentId, teacherId, recalculating]);
@@ -94,7 +93,7 @@ export const PacingModeSlider: React.FC<PacingModeSliderProps> = ({
         .eq('id', studentId)
         .eq('teacher_id', teacherId)
         .then(() => setLastInfo(prev => prev ? { ...prev, setManually: true } : prev))
-        .then(undefined, (e: any) => devWarn('[PacingModeSlider] manual flag update failed', e));
+        .then(undefined, (e: any) => console.warn('[PacingModeSlider] manual flag update failed', e));
     }
   }, [onChange, studentId, teacherId]);
 

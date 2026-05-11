@@ -8,8 +8,7 @@
  * Per-step regeneration uses regenerateInPlace — preserves the original sequence position.
  * When useRoadmap=false: phase context is ignored when generating next steps.
  */
-import React, { useEffect, useMemo, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import React, { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -19,8 +18,7 @@ import { useFutureTimeline } from '@/hooks/useFutureTimeline';
 import { useStudentKnowledge } from '@/hooks/useStudentKnowledge';
 import { useCurriculumPhases } from '@/hooks/dslm/useCurriculumPhases';
 import { NextStepsSection } from './NextStepsSection';
-import { MacroTimeline, recommendedStepsForPhase, phaseWeeks } from './MacroTimeline';
-import type { PhaseOption } from './GenerateStepsDialog';
+import { MacroTimeline } from './MacroTimeline';
 import { SuggestionEditDialog, type SuggestionEditValue } from './SuggestionEditDialog';
 import { StudentKnowledgeEntryCard } from '@/components/student-knowledge/StudentKnowledgeEntryCard';
 import { ChevronDown, StickyNote, Map } from 'lucide-react';
@@ -77,18 +75,6 @@ export const PathwayView: React.FC<PathwayViewProps> = ({
   const [editedSuggestion, setEditedSuggestion] = useState<SuggestionEditValue>(EMPTY_EDIT);
   const [notesOpen, setNotesOpen] = useState(false);
   const [roadmapOpen, setRoadmapOpen] = useState(true);
-  const [searchParams, setSearchParams] = useSearchParams();
-
-  // v6.9.13 — listen for sub-nav events; force-open the targeted Collapsible.
-  useEffect(() => {
-    const handler = (e: Event) => {
-      const id = (e as CustomEvent).detail?.id;
-      if (id === 'pathway-roadmap') setRoadmapOpen(true);
-      if (id === 'pathway-notes') setNotesOpen(true);
-    };
-    window.addEventListener('dslm:openSubsection', handler as EventListener);
-    return () => window.removeEventListener('dslm:openSubsection', handler as EventListener);
-  }, []);
 
   const nextLessonNotes = planningNotes.entries.filter(e => e.category === 'Next Lesson Ideas');
 
@@ -173,21 +159,6 @@ export const PathwayView: React.FC<PathwayViewProps> = ({
     });
   };
 
-  // Open shared edit dialog when arriving with ?editSuggestion={id} (used by NextStepsPresetBanner).
-  useEffect(() => {
-    const editId = searchParams.get('editSuggestion');
-    if (!editId) return;
-    const all = [...phaseSteps, ...nextSteps];
-    const target = all.find((s: any) => s.id === editId);
-    if (target) {
-      handleEditSuggestion(target);
-      const next = new URLSearchParams(searchParams);
-      next.delete('editSuggestion');
-      setSearchParams(next, { replace: true });
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams, phaseSteps, nextSteps]);
-
   const handleSaveSuggestion = async () => {
     if (!editingSuggestionId || !editedSuggestion.topic.trim()) return;
     await updateSuggestion(
@@ -200,38 +171,9 @@ export const PathwayView: React.FC<PathwayViewProps> = ({
   };
 
   // Roadmap toggle: when off, never bind to a phase.
+  const targetPhaseId = useRoadmap ? (currentPhase?.id ?? null) : null;
   const currentPhaseLabelForUI = useRoadmap && currentPhase
     ? `${phaseLabelById[currentPhase.id]}: ${currentPhase.title}` : null;
-
-  // v6.9.13 — phase metadata for the shared GenerateStepsDialog.
-  const phaseOptions: PhaseOption[] = useMemo(() => {
-    const counts: Record<string, number> = {};
-    for (const s of phaseSteps) {
-      if (s.phase_id) counts[s.phase_id] = (counts[s.phase_id] || 0) + 1;
-    }
-    return [...phases]
-      .sort((a, b) => a.sequence_number - b.sequence_number)
-      .map((p): PhaseOption => ({
-        id: p.id,
-        label: p.title,
-        sequence: p.sequence_number,
-        status: p.status,
-        have: counts[p.id] || 0,
-        need: recommendedStepsForPhase(p),
-        weeks: phaseWeeks(p),
-      }));
-  }, [phases, phaseSteps]);
-
-  // v6.9.13 — pick best target: in_progress with have<need, else planned with have<need, else null.
-  const recommendedTargetPhaseId = useMemo<string | null>(() => {
-    if (!useRoadmap) return null;
-    const inProgress = phaseOptions.filter(p => p.status === 'in_progress');
-    const planned = phaseOptions.filter(p => p.status === 'planned');
-    for (const p of [...inProgress, ...planned]) {
-      if (p.have < p.need) return p.id;
-    }
-    return null;
-  }, [useRoadmap, phaseOptions]);
 
   const regenerateOne = async (id: string, comment: string) => {
     return regenerateInPlace(id, comment);
@@ -246,7 +188,6 @@ export const PathwayView: React.FC<PathwayViewProps> = ({
           ))}
         </div>
       )}
-      <div id="pathway-next-steps" className="scroll-mt-24">
       <NextStepsSection
         items={allActiveItems}
         studentId={studentId}
@@ -260,22 +201,16 @@ export const PathwayView: React.FC<PathwayViewProps> = ({
         onMarkUsed={handleMarkUsed}
         usedSteps={usedSteps}
         onRestore={restoreSuggestion}
-        phaseOptions={phaseOptions}
-        defaultTargetPhaseId={recommendedTargetPhaseId}
-        showPhaseSelector={useRoadmap}
-        onGenerateMore={(count, excludeIds, phaseId) =>
+        onGenerateMore={(count, excludeIds) =>
           generateNextSteps({
             mode: excludeIds.length > 0 ? 'add' : 'replace',
-            count, excludeIds,
-            phaseId: useRoadmap ? phaseId : null,
+            count, excludeIds, phaseId: targetPhaseId,
           })
         }
         onRegenerateOne={regenerateOne}
       />
-      </div>
 
       <Collapsible open={roadmapOpen} onOpenChange={setRoadmapOpen}>
-        <div id="pathway-roadmap" className="scroll-mt-24" />
         <div className="flex items-center justify-between gap-2">
           <CollapsibleTrigger asChild>
             <Button variant="ghost" className="flex-1 justify-between text-muted-foreground">
@@ -327,7 +262,6 @@ export const PathwayView: React.FC<PathwayViewProps> = ({
       </Collapsible>
 
       <Collapsible open={notesOpen} onOpenChange={setNotesOpen}>
-        <div id="pathway-notes" className="scroll-mt-24" />
         <CollapsibleTrigger asChild>
           <Button variant="ghost" className="w-full justify-between text-muted-foreground">
             <span className="flex items-center gap-2">

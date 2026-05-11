@@ -34,7 +34,6 @@ import type { NewKnowledgeEntry, StudentKnowledgeEntry, UpdateKnowledgeEntry, Kn
 import { LoginRequiredModal } from "@/components/LoginRequiredModal";
 import { StudentRequiredModal } from "@/components/StudentRequiredModal";
 import { KNOWLEDGE_CATEGORIES } from "@/types/studentKnowledge";
-import { devLog, devWarn } from '@/utils/logger';
 // Drawing overlay imports
 import { DrawingToolbar, DrawingOverlay, type DrawingOverlayRef } from "@/components/drawing";
 import type { DrawingTool, DrawingColor, StrokeWidth } from "@/types/drawing";
@@ -224,7 +223,7 @@ export default function WorksheetDisplay({
 
     // Only update if something changed
     if (needsUpdate) {
-      devLog('[WorksheetDisplay] Injecting media into editableWorksheet:', updates);
+      console.log('[WorksheetDisplay] Injecting media into editableWorksheet:', updates);
       setEditableWorksheet({
         ...editableWorksheet,
         ...updates
@@ -294,7 +293,7 @@ export default function WorksheetDisplay({
   useEffect(() => {
     if (!editableWorksheet || !worksheetId) return;
     
-    devLog('🔍 Media reconstruction check:', {
+    console.log('🔍 Media reconstruction check:', {
       worksheetId,
       hasSelectedAudio: !!editableWorksheet.selected_audio,
       hasAudioUrl: !!editableWorksheet.audio_url,
@@ -307,7 +306,7 @@ export default function WorksheetDisplay({
     
     // Reconstruct selectedAudio if NULL but audio_url exists
     if (!updatedWorksheet.selected_audio && updatedWorksheet.audio_url) {
-      devLog('🎵 Reconstructing selectedAudio from database fields:', {
+      console.log('🎵 Reconstructing selectedAudio from database fields:', {
         audio_url: updatedWorksheet.audio_url,
         audio_transcript: updatedWorksheet.audio_transcript,
         audio_duration: updatedWorksheet.audio_duration,
@@ -326,16 +325,16 @@ export default function WorksheetDisplay({
     
     // Reconstruct selectedImage if NULL but form_data has selectedImage
     if (!updatedWorksheet.selected_image && updatedWorksheet.form_data?.selectedImage) {
-      devLog('🖼️ Reconstructing selectedImage from form_data');
+      console.log('🖼️ Reconstructing selectedImage from form_data');
       updatedWorksheet.selected_image = updatedWorksheet.form_data.selectedImage;
       needsUpdate = true;
     }
     
     if (needsUpdate) {
-      devLog('✅ Media reconstructed successfully, updating state');
+      console.log('✅ Media reconstructed successfully, updating state');
       setEditableWorksheet(updatedWorksheet);
     } else {
-      devLog('✅ No media reconstruction needed');
+      console.log('✅ No media reconstruction needed');
     }
   }, [worksheetId, editableWorksheet?.audio_url, editableWorksheet?.selected_audio, editableWorksheet?.selected_image]); // Run when worksheet or media fields change
   
@@ -345,7 +344,7 @@ export default function WorksheetDisplay({
     const checkExistingDrawings = async () => {
       if (!worksheetId) return;
       
-      devLog('🎨 [Drawing] Checking existing drawings for worksheet:', worksheetId);
+      console.log('🎨 [Drawing] Checking existing drawings for worksheet:', worksheetId);
       
       try {
         const { data, error } = await supabase
@@ -355,7 +354,7 @@ export default function WorksheetDisplay({
           .maybeSingle();
         
         if (error) {
-          devLog('🎨 [Drawing] Error checking drawings:', error.message);
+          console.log('🎨 [Drawing] Error checking drawings:', error.message);
           setHasExistingDrawings(false);
           return;
         }
@@ -364,11 +363,11 @@ export default function WorksheetDisplay({
         const drawingData = data?.drawing_data as any;
         const hasDrawings = !!(drawingData?.objects && drawingData.objects.length > 0);
         
-        devLog('🎨 [Drawing] Found drawings:', hasDrawings, 'Objects count:', drawingData?.objects?.length || 0);
+        console.log('🎨 [Drawing] Found drawings:', hasDrawings, 'Objects count:', drawingData?.objects?.length || 0);
         
         setHasExistingDrawings(hasDrawings);
       } catch (err) {
-        devLog('🎨 [Drawing] Exception checking drawings:', err);
+        console.log('🎨 [Drawing] Exception checking drawings:', err);
         setHasExistingDrawings(false);
       }
     };
@@ -378,13 +377,13 @@ export default function WorksheetDisplay({
   // NAPRAWKA v5: ZAWSZE pokaż warstwę przy przełączeniu na Live Session
   // Używamy setTimeout żeby dać czas na mount DrawingOverlay przed ustawieniem widoczności
   useEffect(() => {
-    devLog('🎨 [Drawing] ViewMode effect:', { viewMode, isDrawingLayerVisible });
+    console.log('🎨 [Drawing] ViewMode effect:', { viewMode, isDrawingLayerVisible });
     
     if (viewMode === 'live-session') {
       // NAPRAWKA v5: Użyj setTimeout żeby dać czas na mount komponentu
       // To zapobiega race condition gdzie komponent nie jest jeszcze gotowy
       const timeoutId = setTimeout(() => {
-        devLog('🎨 [Drawing] Auto-showing drawing layer (entering live-session, after delay)');
+        console.log('🎨 [Drawing] Auto-showing drawing layer (entering live-session, after delay)');
         setIsDrawingLayerVisible(true);
       }, 100); // 100ms daje czas na mount i inicjalizację canvas
       
@@ -392,7 +391,7 @@ export default function WorksheetDisplay({
     } else {
       // Tylko wyłącz tryb rysowania przy wyjściu z live-session
       if (isDrawingEnabled) {
-        devLog('🎨 [Drawing] Disabling drawing mode (left live-session)');
+        console.log('🎨 [Drawing] Disabling drawing mode (left live-session)');
         setIsDrawingEnabled(false);
       }
     }
@@ -401,7 +400,7 @@ export default function WorksheetDisplay({
   // FAZA E: Select Word mode automatycznie włącza Select on Worksheet
   useEffect(() => {
     if (isSelectWordMode && isDrawingEnabled) {
-      devLog('🎨 [Drawing] Select Word mode active - switching to select-worksheet tool');
+      console.log('🎨 [Drawing] Select Word mode active - switching to select-worksheet tool');
       setCurrentDrawingTool('select-worksheet');
     }
   }, [isSelectWordMode, isDrawingEnabled]);
@@ -411,7 +410,7 @@ export default function WorksheetDisplay({
     
     // AUTO-UNLOCK: Check if this is a token-generated worksheet
     if (userId && worksheetId) {
-      devLog('🔍 Checking if worksheet should be auto-unlocked for user:', userId);
+      console.log('🔍 Checking if worksheet should be auto-unlocked for user:', userId);
       checkTokenGeneratedWorksheet(worksheetId, userId);
     }
     
@@ -583,7 +582,7 @@ export default function WorksheetDisplay({
         description: "Your changes have been saved in this browser. Log in to save them to your account.",
         className: "bg-green-50 border-green-200"
       });
-      devLog('📝 Anonymous user changes saved locally');
+      console.log('📝 Anonymous user changes saved locally');
       return;
     }
 
@@ -591,7 +590,7 @@ export default function WorksheetDisplay({
     setIsSaving(true);
     
     try {
-      devLog('💾 Saving worksheet changes to database...');
+      console.log('💾 Saving worksheet changes to database...');
       await updateWorksheet(worksheetId, editableWorksheet, userId);
       
       setIsEditing(false);
@@ -601,7 +600,7 @@ export default function WorksheetDisplay({
         className: "bg-green-50 border-green-200"
       });
       
-      devLog('✅ Worksheet changes saved successfully');
+      console.log('✅ Worksheet changes saved successfully');
     } catch (error) {
       console.error('❌ Error saving worksheet changes:', error);
       toast({
@@ -723,17 +722,17 @@ export default function WorksheetDisplay({
     
     // Trigger AI evaluation BEFORE opening modal (Problem 1A fix)
     try {
-      devLog('[WorksheetDisplay] Triggering AI eval before Create Homework modal, worksheetId:', worksheetId);
+      console.log('[WorksheetDisplay] Triggering AI eval before Create Homework modal, worksheetId:', worksheetId);
       const { data, error } = await supabase.functions.invoke('process-pending-ai-evaluations', {
         body: { worksheet_id: worksheetId, trigger_source: 'create_homework' }
       });
       if (error) {
         console.error('[WorksheetDisplay] AI eval error:', error);
       } else {
-        devLog('[WorksheetDisplay] AI eval result:', data);
+        console.log('[WorksheetDisplay] AI eval result:', data);
       }
     } catch (err) {
-      devWarn('[WorksheetDisplay] AI eval network error:', err);
+      console.warn('[WorksheetDisplay] AI eval network error:', err);
     }
     
     setIsAiEvalLoading(false);

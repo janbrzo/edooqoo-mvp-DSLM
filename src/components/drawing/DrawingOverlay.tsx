@@ -12,6 +12,8 @@
  * - UNDO/REDO: Poprawnie limitowane do 50 kroków
  */
 
+console.log('🎨 DrawingOverlay v6.0 loaded - FULL REWRITE of Eraser/Undo/Redo');
+
 import { useEffect, useRef, useState, useCallback, forwardRef, useImperativeHandle, useReducer } from 'react';
 import { Canvas as FabricCanvas, PencilBrush, Line, FabricObject, Triangle, Path, Point } from 'fabric';
 import { 
@@ -32,9 +34,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { useDemoContext } from '@/contexts/DemoContext';
-import { devLog } from '@/utils/logger';
-
-devLog('🎨 DrawingOverlay v6.0 loaded - FULL REWRITE of Eraser/Undo/Redo');
 
 /** Rozszerzone props z opcjonalnym zewnętrznym sterowaniem */
 export interface DrawingOverlayExternalProps extends DrawingOverlayProps {
@@ -101,25 +100,25 @@ export const DrawingOverlay = forwardRef<DrawingOverlayRef, DrawingOverlayExtern
         // Ogranicz do 50 kroków
         const trimmedStack = newStack.length > 50 ? newStack.slice(-50) : newStack;
         const newIndex = trimmedStack.length - 1;
-        devLog('🎨 [History v7] PUSH - new index:', newIndex, 'stack length:', trimmedStack.length);
+        console.log('🎨 [History v7] PUSH - new index:', newIndex, 'stack length:', trimmedStack.length);
         return { stack: trimmedStack, index: newIndex };
       }
       case 'UNDO': {
         const newIndex = Math.max(0, state.index - 1);
-        devLog('🎨 [History v7] UNDO - new index:', newIndex);
+        console.log('🎨 [History v7] UNDO - new index:', newIndex);
         return { ...state, index: newIndex };
       }
       case 'REDO': {
         const newIndex = Math.min(state.stack.length - 1, state.index + 1);
-        devLog('🎨 [History v7] REDO - new index:', newIndex);
+        console.log('🎨 [History v7] REDO - new index:', newIndex);
         return { ...state, index: newIndex };
       }
       case 'INIT': {
-        devLog('🎨 [History v7] INIT - setting initial state');
+        console.log('🎨 [History v7] INIT - setting initial state');
         return { stack: [action.state], index: 0 };
       }
       case 'CLEAR': {
-        devLog('🎨 [History v7] CLEAR - resetting history');
+        console.log('🎨 [History v7] CLEAR - resetting history');
         return { stack: [], index: -1 };
       }
       default:
@@ -135,7 +134,7 @@ export const DrawingOverlay = forwardRef<DrawingOverlayRef, DrawingOverlayExtern
   
   // Synchronizuj props z callback'ami
   const updateHistoryState = useCallback(() => {
-    devLog('🎨 [History v7] Update state:', { 
+    console.log('🎨 [History v7] Update state:', { 
       stackLength: historyState.stack.length, 
       historyIndex: historyState.index, 
       canUndo, 
@@ -205,12 +204,12 @@ export const DrawingOverlay = forwardRef<DrawingOverlayRef, DrawingOverlayExtern
     return new Promise((resolve) => {
       const canvas = fabricCanvasRef.current;
       if (!canvas || !drawingData.objects || drawingData.objects.length === 0) {
-        devLog('🎨 [Load] No objects to load or no canvas');
+        console.log('🎨 [Load] No objects to load or no canvas');
         resolve(false);
         return;
       }
 
-      devLog('🎨 [Load] Loading', drawingData.objects.length, 'objects from data');
+      console.log('🎨 [Load] Loading', drawingData.objects.length, 'objects from data');
 
       canvas.loadFromJSON({ objects: drawingData.objects }, () => {
         canvas.renderAll();
@@ -221,13 +220,13 @@ export const DrawingOverlay = forwardRef<DrawingOverlayRef, DrawingOverlayExtern
           obj.evented = false;
         });
         
-        devLog('🎨 [Load] Objects loaded and locked, count:', canvas.getObjects().length);
+        console.log('🎨 [Load] Objects loaded and locked, count:', canvas.getObjects().length);
         
         // NAPRAWKA v7: Zapisz initial state używając dispatch
         if (shouldSaveInitialState) {
           const initialState = JSON.stringify(canvas.toJSON());
           dispatchHistory({ type: 'INIT', state: initialState });
-          devLog('🎨 [Load v7] Initial state saved AFTER loading, objects:', canvas.getObjects().length);
+          console.log('🎨 [Load v7] Initial state saved AFTER loading, objects:', canvas.getObjects().length);
         }
         
         resolve(true);
@@ -239,7 +238,7 @@ export const DrawingOverlay = forwardRef<DrawingOverlayRef, DrawingOverlayExtern
   const loadDrawings = useCallback(async (shouldSaveInitialState: boolean = false): Promise<boolean> => {
     if (isDemoMode) return false;
     try {
-      devLog('🎨 [Load] Loading drawings for worksheet:', worksheetId, 'shouldSaveInitialState:', shouldSaveInitialState);
+      console.log('🎨 [Load] Loading drawings for worksheet:', worksheetId, 'shouldSaveInitialState:', shouldSaveInitialState);
       
       const { data, error } = await supabase
         .from('worksheet_drawings')
@@ -256,12 +255,12 @@ export const DrawingOverlay = forwardRef<DrawingOverlayRef, DrawingOverlayExtern
         const drawingData = data.drawing_data as unknown as DrawingData;
         if (drawingData && drawingData.objects && drawingData.objects.length > 0) {
           await loadDrawingsFromData(drawingData, shouldSaveInitialState);
-          devLog('🎨 [Load] Drawings loaded successfully');
+          console.log('🎨 [Load] Drawings loaded successfully');
           return true;
         }
       }
       
-      devLog('🎨 [Load] No drawings found');
+      console.log('🎨 [Load] No drawings found');
       return false;
     } catch (err) {
       console.error('🎨 [Load] Error loading drawings:', err);
@@ -344,19 +343,19 @@ export const DrawingOverlay = forwardRef<DrawingOverlayRef, DrawingOverlayExtern
   const handleUndo = useCallback(() => {
     const canvas = fabricCanvasRef.current;
     if (!canvas) {
-      devLog('🎨 [Undo v7] No canvas');
+      console.log('🎨 [Undo v7] No canvas');
       return;
     }
     
     if (!canUndo) {
-      devLog('🎨 [Undo v7] Nothing to undo, index:', historyState.index);
+      console.log('🎨 [Undo v7] Nothing to undo, index:', historyState.index);
       return;
     }
 
     const newIndex = historyState.index - 1;
     const previousState = historyState.stack[newIndex];
     
-    devLog('🎨 [Undo v7] Undoing to index:', newIndex, 'objects:', JSON.parse(previousState).objects?.length || 0);
+    console.log('🎨 [Undo v7] Undoing to index:', newIndex, 'objects:', JSON.parse(previousState).objects?.length || 0);
     
     canvas.loadFromJSON(JSON.parse(previousState), () => {
       canvas.renderAll();
@@ -366,7 +365,7 @@ export const DrawingOverlay = forwardRef<DrawingOverlayRef, DrawingOverlayExtern
       });
       
       dispatchHistory({ type: 'UNDO' });
-      devLog('🎨 [Undo v7] State restored');
+      console.log('🎨 [Undo v7] State restored');
       scheduleAutoSave();
     });
   }, [canUndo, historyState.index, historyState.stack, scheduleAutoSave]);
@@ -375,19 +374,19 @@ export const DrawingOverlay = forwardRef<DrawingOverlayRef, DrawingOverlayExtern
   const handleRedo = useCallback(() => {
     const canvas = fabricCanvasRef.current;
     if (!canvas) {
-      devLog('🎨 [Redo v7] No canvas');
+      console.log('🎨 [Redo v7] No canvas');
       return;
     }
     
     if (!canRedo) {
-      devLog('🎨 [Redo v7] Nothing to redo, index:', historyState.index, 'stack length:', historyState.stack.length);
+      console.log('🎨 [Redo v7] Nothing to redo, index:', historyState.index, 'stack length:', historyState.stack.length);
       return;
     }
 
     const newIndex = historyState.index + 1;
     const nextState = historyState.stack[newIndex];
     
-    devLog('🎨 [Redo v7] Redoing to index:', newIndex, 'objects:', JSON.parse(nextState).objects?.length || 0);
+    console.log('🎨 [Redo v7] Redoing to index:', newIndex, 'objects:', JSON.parse(nextState).objects?.length || 0);
 
     canvas.loadFromJSON(JSON.parse(nextState), () => {
       canvas.renderAll();
@@ -397,7 +396,7 @@ export const DrawingOverlay = forwardRef<DrawingOverlayRef, DrawingOverlayExtern
       });
       
       dispatchHistory({ type: 'REDO' });
-      devLog('🎨 [Redo v7] State restored');
+      console.log('🎨 [Redo v7] State restored');
       scheduleAutoSave();
     });
   }, [canRedo, historyState.index, historyState.stack, scheduleAutoSave]);
@@ -428,11 +427,11 @@ export const DrawingOverlay = forwardRef<DrawingOverlayRef, DrawingOverlayExtern
     
     // Jeśli canvas już istnieje, nie twórz nowego
     if (isInitializedRef.current && fabricCanvasRef.current) {
-      devLog('🎨 [Init] Canvas already initialized, skipping');
+      console.log('🎨 [Init] Canvas already initialized, skipping');
       return;
     }
 
-    devLog('🎨 [Init] Initializing Fabric.js canvas for worksheet:', worksheetId);
+    console.log('🎨 [Init] Initializing Fabric.js canvas for worksheet:', worksheetId);
 
     const container = containerRef.current;
     const canvas = new FabricCanvas(canvasRef.current, {
@@ -457,7 +456,7 @@ export const DrawingOverlay = forwardRef<DrawingOverlayRef, DrawingOverlayExtern
       if (!hasDrawings && fabricCanvasRef.current) {
         const initialState = JSON.stringify(fabricCanvasRef.current.toJSON());
         dispatchHistory({ type: 'INIT', state: initialState });
-        devLog('🎨 [Init v7] Empty initial state saved (no drawings found)');
+        console.log('🎨 [Init v7] Empty initial state saved (no drawings found)');
       }
     });
 
@@ -478,7 +477,7 @@ export const DrawingOverlay = forwardRef<DrawingOverlayRef, DrawingOverlayExtern
     window.addEventListener('resize', handleResize);
 
     return () => {
-      devLog('🎨 [Init] Cleanup - disposing canvas');
+      console.log('🎨 [Init] Cleanup - disposing canvas');
       window.removeEventListener('resize', handleResize);
       if (autoSaveTimeoutRef.current) {
         clearTimeout(autoSaveTimeoutRef.current);
@@ -541,7 +540,7 @@ export const DrawingOverlay = forwardRef<DrawingOverlayRef, DrawingOverlayExtern
         path.selectable = false;
         path.evented = false;
         
-        devLog('🎨 [Path] Created, saving to history');
+        console.log('🎨 [Path] Created, saving to history');
         saveToHistory();
         scheduleAutoSave();
       }
@@ -628,7 +627,7 @@ export const DrawingOverlay = forwardRef<DrawingOverlayRef, DrawingOverlayExtern
         triangle.selectable = false;
         triangle.evented = false;
         
-        devLog('🎨 [Arrow] Created, saving to history');
+        console.log('🎨 [Arrow] Created, saving to history');
         saveToHistory();
         scheduleAutoSave();
       }
@@ -655,7 +654,7 @@ export const DrawingOverlay = forwardRef<DrawingOverlayRef, DrawingOverlayExtern
     const canvas = fabricCanvasRef.current;
     
     // DIAGNOSTYKA: Loguj warunki wejściowe
-    devLog('🎨 [Eraser] useEffect check:', { 
+    console.log('🎨 [Eraser] useEffect check:', { 
       hasCanvas: !!canvas, 
       isTeacher, 
       isEnabled, 
@@ -664,15 +663,15 @@ export const DrawingOverlay = forwardRef<DrawingOverlayRef, DrawingOverlayExtern
     });
     
     if (!canvas || !isTeacher || !isEnabled) {
-      devLog('🎨 [Eraser] Skipping - missing requirements');
+      console.log('🎨 [Eraser] Skipping - missing requirements');
       return;
     }
     if (drawingState.activeTool !== 'eraser') {
-      devLog('🎨 [Eraser] Skipping - not eraser tool');
+      console.log('🎨 [Eraser] Skipping - not eraser tool');
       return;
     }
 
-    devLog('🎨 [Eraser] ACTIVE - setting up handlers');
+    console.log('🎨 [Eraser] ACTIVE - setting up handlers');
     canvas.isDrawingMode = false;
     let isErasing = false;
     let hasErased = false;
@@ -779,7 +778,7 @@ export const DrawingOverlay = forwardRef<DrawingOverlayRef, DrawingOverlayExtern
               const distance = pointToSegmentDistance(pointer.x, pointer.y, startX, startY, endX, endY);
               
               if (distance < strokeTolerance) {
-                devLog('🎨 [Eraser] Hit path segment, distance:', distance.toFixed(2));
+                console.log('🎨 [Eraser] Hit path segment, distance:', distance.toFixed(2));
                 return true;
               }
             }
@@ -812,29 +811,29 @@ export const DrawingOverlay = forwardRef<DrawingOverlayRef, DrawingOverlayExtern
       const objectsToRemove: FabricObject[] = [];
       const totalObjects = canvas.getObjects().length;
       
-      devLog('🎨 [Eraser] Checking at point:', pointer, 'Total objects:', totalObjects);
+      console.log('🎨 [Eraser] Checking at point:', pointer, 'Total objects:', totalObjects);
       
       canvas.forEachObject((obj) => {
         const hit = isPointOnObject(obj, pointer);
         if (hit) {
-          devLog('🎨 [Eraser] HIT object type:', obj.type);
+          console.log('🎨 [Eraser] HIT object type:', obj.type);
           objectsToRemove.push(obj);
         }
       });
       
       if (objectsToRemove.length > 0) {
-        devLog('🎨 [Eraser] Removing', objectsToRemove.length, 'objects');
+        console.log('🎨 [Eraser] Removing', objectsToRemove.length, 'objects');
         objectsToRemove.forEach(obj => canvas.remove(obj));
         canvas.renderAll();
         hasErased = true;
       } else if (totalObjects > 0) {
-        devLog('🎨 [Eraser] No hits at this point');
+        console.log('🎨 [Eraser] No hits at this point');
       }
     };
 
     const handleMouseUp = () => {
       if (isErasing && hasErased) {
-        devLog('🎨 [Eraser] Erased objects, saving to history');
+        console.log('🎨 [Eraser] Erased objects, saving to history');
         saveToHistory();
         scheduleAutoSave();
       }

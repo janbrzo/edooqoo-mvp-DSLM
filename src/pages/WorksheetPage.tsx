@@ -15,7 +15,6 @@ import AnonPostWorksheetLandingPage from '@/components/anon/AnonPostWorksheetLan
 import AnonPreWorksheetBanner from '@/components/anon/AnonPreWorksheetBanner';
 import StickyNav from '@/components/landing/StickyNav';
 import { markWorksheetForClaim } from '@/hooks/useWorksheetClaim';
-import { devLog } from '@/utils/logger';
 
 // PROBLEM 3 FIX: Calculate source count deterministically based on worksheet parameters
 const calculateSourceCount = (formData: any): number => {
@@ -143,27 +142,27 @@ export default function WorksheetPage() {
         // Parse ai_response with fallback to html_content for corrupted data
         let parsed = null;
         const aiResponseLength = worksheet.ai_response?.length || 0;
-        devLog(`📊 ai_response length: ${aiResponseLength} characters`);
+        console.log(`📊 ai_response length: ${aiResponseLength} characters`);
         
         if (worksheet.ai_response) {
           try {
             parsed = JSON.parse(worksheet.ai_response);
             parsed = deepFixTextObjects(parsed, 'worksheetPage');
-            devLog('✅ Successfully parsed and fixed worksheet data from ai_response');
+            console.log('✅ Successfully parsed and fixed worksheet data from ai_response');
           } catch (parseError) {
             console.error('❌ Error parsing ai_response:', parseError);
-            devLog(`⚠️ ai_response was ${aiResponseLength} chars - likely truncated if near 50000 or 200000`);
+            console.log(`⚠️ ai_response was ${aiResponseLength} chars - likely truncated if near 50000 or 200000`);
             
             // FALLBACK: Try to parse from html_content (contains full JSON.stringify data)
             if (worksheet.html_content) {
-              devLog('🔄 Attempting fallback to html_content...');
+              console.log('🔄 Attempting fallback to html_content...');
               const htmlContentLength = worksheet.html_content?.length || 0;
-              devLog(`📊 html_content length: ${htmlContentLength} characters`);
+              console.log(`📊 html_content length: ${htmlContentLength} characters`);
               
               try {
                 parsed = JSON.parse(worksheet.html_content);
                 parsed = deepFixTextObjects(parsed, 'html_content_fallback');
-                devLog('✅ Successfully parsed worksheet from html_content fallback');
+                console.log('✅ Successfully parsed worksheet from html_content fallback');
                 toast({
                   title: "Worksheet Loaded",
                   description: "Loaded from backup data (original was corrupted).",

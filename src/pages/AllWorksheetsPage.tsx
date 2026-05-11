@@ -16,7 +16,6 @@ import { useStudents } from '@/hooks/useStudents';
 import { useDeletedWorksheets } from '@/hooks/useDeletedWorksheets';
 import { supabase } from '@/integrations/supabase/client';
 import { DeleteWorksheetButton } from '@/components/DeleteWorksheetButton';
-import { useDemoContext } from '@/contexts/DemoContext';
 import { format } from 'date-fns';
 import { 
   FileText, 
@@ -212,7 +211,6 @@ const WorksheetTableRow = ({
 const AllWorksheetsPage = () => {
   const { user, loading: authLoading, isRegisteredUser } = useAuthFlow();
   const { tokenLeft } = useTokenSystem(user?.id);
-  const { isDemoMode, showDemoBlockedToast } = useDemoContext();
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -346,7 +344,6 @@ const AllWorksheetsPage = () => {
 
   const handleBulkDelete = async () => {
     if (selectedWorksheets.length === 0) return;
-    if (isDemoMode) { showDemoBlockedToast('Deleting worksheets'); return; }
     
     const confirmed = window.confirm(`Are you sure you want to delete ${selectedWorksheets.length} worksheet(s)?`);
     if (!confirmed) return;

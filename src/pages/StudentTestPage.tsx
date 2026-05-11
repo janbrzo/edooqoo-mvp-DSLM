@@ -17,7 +17,6 @@ import { useStudentTestSession } from '@/hooks/useStudentTests';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import type { TestQuestion, MultipleChoiceData } from '@/types/studentTests';
-import { devLog } from '@/utils/logger';
 
 export default function StudentTestPage() {
   const { token } = useParams<{ token: string }>();
@@ -63,7 +62,7 @@ export default function StudentTestPage() {
       try {
         const { email, expiresAt } = JSON.parse(stored);
         if (new Date(expiresAt) > new Date()) {
-          devLog('[StudentTestPage] Using remembered email from localStorage:', email);
+          console.log('[StudentTestPage] Using remembered email from localStorage:', email);
           setVerifiedEmail(email);
         } else {
           localStorage.removeItem(storageKey);
@@ -88,7 +87,7 @@ export default function StudentTestPage() {
       
       const { data: { user } } = await supabase.auth.getUser();
       if (user && test.teacher_id === user.id) {
-        devLog('[StudentTestPage] Logged-in user is teacher, skipping email verification');
+        console.log('[StudentTestPage] Logged-in user is teacher, skipping email verification');
         setIsTeacher(true);
         setVerifiedEmail('teacher');
       }
@@ -116,7 +115,7 @@ export default function StudentTestPage() {
       const expiresAt = new Date();
       expiresAt.setHours(expiresAt.getHours() + 24);
       localStorage.setItem(storageKey, JSON.stringify({ email, expiresAt: expiresAt.toISOString() }));
-      devLog('[StudentTestPage] Saved email to localStorage for 24h:', email);
+      console.log('[StudentTestPage] Saved email to localStorage for 24h:', email);
     }
     
     setVerifiedEmail(email);

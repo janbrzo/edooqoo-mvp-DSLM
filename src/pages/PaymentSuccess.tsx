@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { usePaymentTracking } from "@/hooks/usePaymentTracking";
-import { devLog } from '@/utils/logger';
 
 const PaymentSuccess = () => {
   const [searchParams] = useSearchParams();
@@ -30,13 +29,13 @@ const PaymentSuccess = () => {
 
   const verifyPayment = async () => {
     try {
-      devLog('🔍 PAYMENT VERIFICATION START - Session ID:', sessionId);
+      console.log('🔍 PAYMENT VERIFICATION START - Session ID:', sessionId);
       
       const { data, error } = await supabase.functions.invoke('verify-export-payment', {
         body: { sessionId }
       });
 
-      devLog('📋 PAYMENT VERIFICATION RESPONSE:', {
+      console.log('📋 PAYMENT VERIFICATION RESPONSE:', {
         data,
         error,
         hasData: !!data,
@@ -63,8 +62,8 @@ const PaymentSuccess = () => {
         }
         
         // Track successful Stripe payment - with comprehensive logging
-        devLog('💰 ATTEMPTING TO TRACK STRIPE PAYMENT SUCCESS');
-        devLog('📊 Tracking data:', {
+        console.log('💰 ATTEMPTING TO TRACK STRIPE PAYMENT SUCCESS');
+        console.log('📊 Tracking data:', {
           worksheetId: data.worksheetId,
           paymentId: data.paymentId,
           amount: data.amount,
@@ -79,7 +78,7 @@ const PaymentSuccess = () => {
           const trackingPaymentId = data.paymentId || sessionId || 'unknown';
           const trackingAmount = data.amount || 100;
 
-          devLog('🚀 CALLING trackStripePaymentSuccess with:', {
+          console.log('🚀 CALLING trackStripePaymentSuccess with:', {
             worksheetId: trackingWorksheetId,
             paymentId: trackingPaymentId,
             amount: trackingAmount
@@ -87,16 +86,16 @@ const PaymentSuccess = () => {
 
           await trackStripePaymentSuccess(trackingWorksheetId, trackingPaymentId, trackingAmount);
           
-          devLog('✅ STRIPE PAYMENT SUCCESS TRACKING COMPLETED');
+          console.log('✅ STRIPE PAYMENT SUCCESS TRACKING COMPLETED');
 
         } catch (trackingError) {
           console.error('❌ ERROR IN STRIPE PAYMENT TRACKING:', trackingError);
           
           // Fallback: try to track with minimal data
           try {
-            devLog('🔄 ATTEMPTING FALLBACK TRACKING');
+            console.log('🔄 ATTEMPTING FALLBACK TRACKING');
             await trackStripePaymentSuccess('fallback-worksheet', sessionId || 'unknown', 100);
-            devLog('✅ FALLBACK TRACKING COMPLETED');
+            console.log('✅ FALLBACK TRACKING COMPLETED');
           } catch (fallbackError) {
             console.error('❌ FALLBACK TRACKING ALSO FAILED:', fallbackError);
           }
@@ -112,7 +111,7 @@ const PaymentSuccess = () => {
           navigate('/', { replace: true });
         }, 1000);
       } else {
-        devLog('⚠️ Payment not completed, status:', data.status);
+        console.log('⚠️ Payment not completed, status:', data.status);
       }
     } catch (error) {
       console.error('💥 PAYMENT VERIFICATION EXCEPTION:', error);

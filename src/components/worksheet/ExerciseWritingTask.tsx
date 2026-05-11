@@ -3,7 +3,6 @@ import { InteractiveExerciseProps } from "@/types/interactiveHomework";
 import { Textarea } from "@/components/ui/textarea";
 import { safeGetNanoSkill, safeGetAllNanoSkills } from "@/utils/textObjectFixer";
 import NanoSkillBadge, { NanoSkill } from "./NanoSkillBadge";
-import { devWarn } from '@/utils/logger';
 
 /**
  * Interface for the scenario_prompt + tasks JSON format
@@ -56,7 +55,7 @@ const ExerciseWritingTask: React.FC<ExerciseWritingTaskProps> = ({
 }) => {
   // Validate content structure
   if (!content || !content.scenario_prompt || !Array.isArray(content.tasks)) {
-    devWarn('[ExerciseWritingTask] Invalid content structure:', content);
+    console.warn('[ExerciseWritingTask] Invalid content structure:', content);
     return (
       <div className="p-4 border border-yellow-300 bg-yellow-50 rounded-lg">
         <p className="text-yellow-800">⚠️ Unable to display exercise content. Invalid format.</p>

@@ -29,7 +29,6 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import RenameDialog from '@/components/RenameDialog';
-import { devLog } from '@/utils/logger';
 
 interface StudentHomeworkTabProps {
   studentId: string;
@@ -50,7 +49,7 @@ export const StudentHomeworkTab = ({ studentId, teacherId, studentName }: Studen
   
   const { students } = useStudents();
   const { worksheets } = useWorksheetHistory(studentId);
-  const { isDemoMode, showDemoBlockedToast } = useDemoContext();
+  const { isDemoMode } = useDemoContext();
   
   // Fetch homework directly for this student, regardless of worksheet assignment
   const [allHomework, setAllHomework] = useState<any[]>([]);
@@ -241,7 +240,6 @@ export const StudentHomeworkTab = ({ studentId, teacherId, studentName }: Studen
   
   // Rename homework handler
   const handleRenameHomework = async (homeworkId: string, newTitle: string) => {
-    if (isDemoMode) { showDemoBlockedToast('Renaming homework'); return; }
     try {
       const { error } = await supabase
         .from('homework_assignments')
@@ -597,7 +595,7 @@ export const StudentHomeworkTab = ({ studentId, teacherId, studentName }: Studen
               return parsed.exercises || [];
             } catch (e) {
               console.error('❌ Failed to parse worksheet ai_response for homework modal:', e);
-              devLog(`⚠️ Worksheet ${firstWorksheet.id} ai_response length: ${firstWorksheet.ai_response?.length || 0}`);
+              console.log(`⚠️ Worksheet ${firstWorksheet.id} ai_response length: ${firstWorksheet.ai_response?.length || 0}`);
               return [];
             }
           })()}

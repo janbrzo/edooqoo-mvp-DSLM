@@ -7,7 +7,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { ExerciseAnswers } from '@/types/interactiveHomework';
 import { LiveSessionAnswer } from '@/types/interactiveSharedWorksheet';
 import { useDemoContext } from '@/contexts/DemoContext';
-import { devLog, devWarn } from '@/utils/logger';
 
 interface UseLiveSessionAnswersProps {
   worksheetId: string;
@@ -35,7 +34,7 @@ export const useLiveSessionAnswers = ({
     if (!worksheetId || isDemoMode) return;
     
     try {
-      devLog('[useLiveSessionAnswers] Loading initial answers for worksheet:', worksheetId);
+      console.log('[useLiveSessionAnswers] Loading initial answers for worksheet:', worksheetId);
       
       const { data, error } = await supabase.rpc('get_worksheet_live_answers', {
         p_worksheet_id: worksheetId
@@ -70,7 +69,7 @@ export const useLiveSessionAnswers = ({
         setLiveAiEvaluations(loadedAiEvals);
         setStudentEmail(latestEmail);
         setLastUpdatedAt(new Date());
-        devLog('[useLiveSessionAnswers] Loaded initial answers:', loadedAnswers, 'evals:', loadedEvals);
+        console.log('[useLiveSessionAnswers] Loaded initial answers:', loadedAnswers, 'evals:', loadedEvals);
       }
     } catch (error) {
       console.error('[useLiveSessionAnswers] Error loading initial answers:', error);
@@ -82,23 +81,23 @@ export const useLiveSessionAnswers = ({
     if (!worksheetId || isDemoMode) return;
     
     try {
-      devLog('[useLiveSessionAnswers] Processing pending AI evaluations for worksheet:', worksheetId);
+      console.log('[useLiveSessionAnswers] Processing pending AI evaluations for worksheet:', worksheetId);
       
       const { data, error } = await supabase.functions.invoke('process-pending-ai-evaluations', {
         body: { worksheet_id: worksheetId }
       });
       
       if (error) {
-        devWarn('[useLiveSessionAnswers] Failed to process pending AI evals:', error);
+        console.warn('[useLiveSessionAnswers] Failed to process pending AI evals:', error);
       } else {
-        devLog('[useLiveSessionAnswers] Pending AI evals result:', data);
+        console.log('[useLiveSessionAnswers] Pending AI evals result:', data);
         // Reload answers if any were processed
         if (data?.processed > 0) {
           loadInitialAnswers();
         }
       }
     } catch (error) {
-      devWarn('[useLiveSessionAnswers] Error processing pending AI evals:', error);
+      console.warn('[useLiveSessionAnswers] Error processing pending AI evals:', error);
     }
   }, [worksheetId, loadInitialAnswers]);
 
@@ -110,7 +109,7 @@ export const useLiveSessionAnswers = ({
       return;
     }
 
-    devLog('[useLiveSessionAnswers] Setting up Realtime subscription for worksheet:', worksheetId);
+    console.log('[useLiveSessionAnswers] Setting up Realtime subscription for worksheet:', worksheetId);
     
     // Load initial data first
     loadInitialAnswers();
@@ -133,7 +132,7 @@ export const useLiveSessionAnswers = ({
           filter: `worksheet_id=eq.${worksheetId}`
         },
         (payload) => {
-          devLog('[useLiveSessionAnswers] Realtime update received:', payload.eventType);
+          console.log('[useLiveSessionAnswers] Realtime update received:', payload.eventType);
           
           if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
             const newData = payload.new as any;
@@ -170,13 +169,13 @@ export const useLiveSessionAnswers = ({
         }
       )
       .subscribe((status) => {
-        devLog('[useLiveSessionAnswers] Subscription status:', status);
+        console.log('[useLiveSessionAnswers] Subscription status:', status);
         setIsConnected(status === 'SUBSCRIBED');
       });
 
     // Cleanup on unmount or when disabled
     return () => {
-      devLog('[useLiveSessionAnswers] Removing Realtime subscription');
+      console.log('[useLiveSessionAnswers] Removing Realtime subscription');
       supabase.removeChannel(channel);
       setIsConnected(false);
       hasProcessedRef.current = false;
@@ -188,7 +187,7 @@ export const useLiveSessionAnswers = ({
   useEffect(() => {
     if (!enabled || !worksheetId || isDemoMode) return;
     const interval = setInterval(() => {
-      devLog('[useLiveSessionAnswers] Polling for AI evaluations...');
+      console.log('[useLiveSessionAnswers] Polling for AI evaluations...');
       loadInitialAnswers();
     }, 15000);
     return () => clearInterval(interval);

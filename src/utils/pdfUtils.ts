@@ -1,5 +1,4 @@
 import html2pdf from 'html2pdf.js';
-import { devLog, devWarn } from '@/utils/logger';
 
 export const generatePDF = async (elementId: string, filename: string, isTeacherView = false, title = 'English Worksheet') => {
   try {
@@ -151,7 +150,7 @@ export const generatePDF = async (elementId: string, filename: string, isTeacher
     
     // Generate the PDF
     const result = await html2pdf().set(options).from(container.innerHTML).save();
-    devLog('PDF generated successfully:', filename);
+    console.log('PDF generated successfully:', filename);
     return true;
   } catch (error) {
     console.error('Error generating PDF:', error);
@@ -169,7 +168,7 @@ async function fetchCSSContent(url: string): Promise<string> {
       return await response.text();
     }
   } catch (error) {
-    devWarn(`Failed to fetch CSS from ${url}:`, error);
+    console.warn(`Failed to fetch CSS from ${url}:`, error);
   }
   return '';
 }
@@ -202,7 +201,7 @@ export async function exportAsHTML(elementId: string, filename: string, viewMode
     // Fetch and inline all external CSS
     const cssPromises = externalStylesheets.map(async (link) => {
       const href = link.href;
-      devLog('Fetching CSS from:', href);
+      console.log('Fetching CSS from:', href);
       
       try {
         // Handle relative URLs
@@ -213,7 +212,7 @@ export async function exportAsHTML(elementId: string, filename: string, viewMode
           return `/* CSS from ${href} */\n${cssContent}\n`;
         }
       } catch (error) {
-        devWarn(`Failed to process CSS from ${href}:`, error);
+        console.warn(`Failed to process CSS from ${href}:`, error);
       }
       return '';
     });
@@ -245,11 +244,11 @@ export async function exportAsHTML(elementId: string, filename: string, viewMode
           }
         } catch (e) {
           // CORS blocked or other error - skip this stylesheet
-          devWarn('Could not access stylesheet rules (likely CORS):', e);
+          console.warn('Could not access stylesheet rules (likely CORS):', e);
         }
       });
     } catch (error) {
-      devWarn('Error accessing document.styleSheets:', error);
+      console.warn('Error accessing document.styleSheets:', error);
     }
 
     // Add additional styles to ensure proper rendering and hide browser print headers/footers
@@ -491,7 +490,7 @@ ${finalCSS}
     // Clean up
     URL.revokeObjectURL(url);
     
-    devLog('HTML export completed successfully');
+    console.log('HTML export completed successfully');
     return true;
   } catch (error) {
     console.error('Error exporting HTML:', error);

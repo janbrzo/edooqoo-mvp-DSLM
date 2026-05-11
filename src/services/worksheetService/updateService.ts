@@ -1,5 +1,4 @@
 import { supabase } from '@/integrations/supabase/client';
-import { devLog } from '@/utils/logger';
 
 /**
  * Updates a worksheet in the database with edited content
@@ -10,12 +9,12 @@ export async function updateWorksheetAPI(
   userId: string
 ) {
   try {
-    devLog('🔄 Updating worksheet in database:', worksheetId);
-    devLog('🔄 User ID:', userId);
-    devLog('🔄 Editable worksheet data:', editableWorksheet);
+    console.log('🔄 Updating worksheet in database:', worksheetId);
+    console.log('🔄 User ID:', userId);
+    console.log('🔄 Editable worksheet data:', editableWorksheet);
     
     // CRITICAL DEBUG: Check if worksheet exists first
-    devLog('🔍 First, checking if worksheet exists...');
+    console.log('🔍 First, checking if worksheet exists...');
     const { data: existingWorksheet, error: checkError } = await supabase
       .from('worksheets')
       .select('id, title, teacher_id')
@@ -32,7 +31,7 @@ export async function updateWorksheetAPI(
       throw new Error(`Worksheet with ID ${worksheetId} not found in database`);
     }
 
-    devLog('✅ Worksheet found:', existingWorksheet);
+    console.log('✅ Worksheet found:', existingWorksheet);
 
     // Check if user owns this worksheet
     if (existingWorksheet.teacher_id !== userId) {
@@ -56,7 +55,7 @@ export async function updateWorksheetAPI(
       last_modified_at: new Date().toISOString()
     };
     
-    devLog('📝 Update data prepared:', { 
+    console.log('📝 Update data prepared:', { 
       worksheetId, 
       title: updateData.title,
       hasHtmlContent: !!updateData.html_content,
@@ -83,7 +82,7 @@ export async function updateWorksheetAPI(
       throw new Error('Update operation did not return data');
     }
 
-    devLog('✅ Worksheet updated successfully:', data);
+    console.log('✅ Worksheet updated successfully:', data);
     return { success: true, data };
     
   } catch (error) {
@@ -101,7 +100,7 @@ export async function updateWorksheetStudentAPI(
   userId: string
 ) {
   try {
-    devLog('🔄 Updating worksheet student assignment:', { worksheetId, studentId, userId });
+    console.log('🔄 Updating worksheet student assignment:', { worksheetId, studentId, userId });
     
     // Check if worksheet exists and user owns it
     const { data: existingWorksheet, error: checkError } = await supabase
@@ -170,7 +169,7 @@ export async function updateWorksheetStudentAPI(
       throw new Error('Update operation failed');
     }
 
-    devLog('✅ Worksheet student assignment updated:', data);
+    console.log('✅ Worksheet student assignment updated:', data);
     return { success: true, data };
     
   } catch (error) {

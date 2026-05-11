@@ -9,8 +9,6 @@ import { HubGoogleSignInButton } from '@/components/student-hub/HubGoogleSignInB
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { getSavedHubEmail, saveHubEmail, clearHubEmail } from '@/hooks/useStudentHubData';
-import { AppBackground } from '@/components/ui/AppBackground';
-import { BackgroundPatternSwitcher } from '@/components/ui/BackgroundPatternSwitcher';
 
 interface Teacher {
   name: string;
@@ -122,7 +120,7 @@ const StudentHubLanding = () => {
   const savedEmail = getSavedHubEmail();
 
   return (
-    <AppBackground className="min-h-screen flex items-center justify-center px-4">
+    <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <Card className="max-w-md w-full min-h-[340px]">
         <CardHeader className="text-center">
           <GraduationCap className="h-10 w-10 mx-auto text-primary mb-2" />
@@ -214,8 +212,7 @@ const StudentHubLanding = () => {
           )}
         </CardContent>
       </Card>
-      <BackgroundPatternSwitcher />
-    </AppBackground>
+    </div>
   );
 };
 

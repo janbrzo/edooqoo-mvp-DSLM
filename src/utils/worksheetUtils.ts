@@ -1,4 +1,3 @@
-import { devLog, devWarn } from '@/utils/logger';
 export const getExpectedExerciseCount = (lessonTime: string): number => {
   if (lessonTime.includes('45')) {
     return 6;
@@ -60,7 +59,7 @@ export const hasImage = (worksheet: any): boolean => {
         : worksheet.ai_response;
       exercises = parsed?.exercises;
     } catch (e) {
-      devWarn('Failed to parse ai_response for image detection:', e);
+      console.warn('Failed to parse ai_response for image detection:', e);
       return false;
     }
   } else if (!exercises && !worksheet?.ai_response) {
@@ -105,7 +104,7 @@ export const hasAudio = (worksheet: any): boolean => {
         : worksheet.ai_response;
       exercises = parsed?.exercises;
     } catch (e) {
-      devWarn('Failed to parse ai_response for audio detection:', e);
+      console.warn('Failed to parse ai_response for audio detection:', e);
       return false;
     }
   } else if (!exercises && !worksheet?.ai_response) {
@@ -145,9 +144,9 @@ export const createSampleVocabulary = (count: number) => {
 };
 
 export const validateWorksheet = (worksheetData: any, expectedCount: number): boolean => {
-  devLog('🔍 Frontend validation - Expected exercises:', expectedCount);
-  devLog('🔍 Frontend validation - Received exercises:', worksheetData?.exercises?.length || 0);
-  devLog('🔍 Frontend validation - Worksheet data structure:', {
+  console.log('🔍 Frontend validation - Expected exercises:', expectedCount);
+  console.log('🔍 Frontend validation - Received exercises:', worksheetData?.exercises?.length || 0);
+  console.log('🔍 Frontend validation - Worksheet data structure:', {
     hasWorksheet: !!worksheetData,
     hasExercises: !!worksheetData?.exercises,
     isArray: Array.isArray(worksheetData?.exercises),
@@ -155,11 +154,11 @@ export const validateWorksheet = (worksheetData: any, expectedCount: number): bo
   });
   
   if (!worksheetData || !worksheetData.exercises || !Array.isArray(worksheetData.exercises)) {
-    devLog('❌ Frontend validation - FAILED: Missing or invalid exercises array');
+    console.log('❌ Frontend validation - FAILED: Missing or invalid exercises array');
     return false;
   }
   
   const result = worksheetData.exercises.length >= 6; // Accept 6, 7, or 8 exercises
-  devLog('🔍 Frontend validation - Result:', result);
+  console.log('🔍 Frontend validation - Result:', result);
   return result;
 };

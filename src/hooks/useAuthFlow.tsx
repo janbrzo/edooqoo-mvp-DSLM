@@ -2,7 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
-import { devLog, devWarn } from '@/utils/logger';
+import { devLog } from '@/utils/logger';
 import { useDemoContext } from '@/contexts/DemoContext';
 import { claimPendingWorksheets, getPendingClaimIds } from '@/hooks/useWorksheetClaim';
 import { toast } from 'sonner';
@@ -66,7 +66,7 @@ export function useAuthFlow() {
                 }));
               }
             } catch (e) {
-              devWarn('[useAuthFlow] claim failed:', e);
+              console.warn('[useAuthFlow] claim failed:', e);
             }
           }, 0);
         }

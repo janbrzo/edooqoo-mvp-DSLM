@@ -12,7 +12,6 @@ import { GoogleSignInButton } from '@/components/GoogleSignInButton';
 import { DashboardPreviewBackground } from '@/components/DashboardPreviewBackground';
 import { claimPendingWorksheets, getPendingClaimIds } from '@/hooks/useWorksheetClaim';
 import { toast as sonnerToast } from 'sonner';
-import { devLog } from '@/utils/logger';
 
 const Signup = () => {
   useEffect(() => {
@@ -110,7 +109,7 @@ const Signup = () => {
         // Email confirmation required
         setRegisteredEmail(email);
         setShowEmailModal(true);
-        devLog('Account created, email confirmation required');
+        console.log('Account created, email confirmation required');
       } else if (data?.session) {
         // Immediate login (shouldn't happen with email confirmation enabled)
         toast({

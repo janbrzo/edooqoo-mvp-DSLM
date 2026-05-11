@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from "react";
 import { downloadSessionService } from "@/services/downloadSessionService";
-import { devLog } from '@/utils/logger';
 
 export function useDownloadStatus() {
   const [isDownloadUnlocked, setIsDownloadUnlocked] = useState(false);
@@ -14,7 +13,7 @@ export function useDownloadStatus() {
         const response = await fetch('https://api.ipify.org?format=json');
         const data = await response.json();
         setUserIp(data.ip);
-        devLog('User IP fetched:', data.ip);
+        console.log('User IP fetched:', data.ip);
       } catch (error) {
         console.error('Failed to fetch IP:', error);
         setUserIp(`browser_${navigator.userAgent.slice(0, 50)}_${Date.now()}`);
@@ -29,7 +28,7 @@ export function useDownloadStatus() {
     const token = sessionStorage.getItem('downloadToken');
     const expiry = sessionStorage.getItem('downloadTokenExpiry');
     
-    devLog('Checking download status with token:', token);
+    console.log('Checking download status with token:', token);
     
     if (token && expiry) {
       const expiryTime = parseInt(expiry);
@@ -41,7 +40,7 @@ export function useDownloadStatus() {
           // Get download stats
           const stats = await downloadSessionService.getSessionStats(token);
           setDownloadStats(stats);
-          devLog('Download unlocked with stats:', stats);
+          console.log('Download unlocked with stats:', stats);
         } else {
           // Session expired in database, clean up
           sessionStorage.removeItem('downloadToken');
@@ -57,34 +56,34 @@ export function useDownloadStatus() {
   };
 
   const handleDownloadUnlock = async (token: string) => {
-    devLog('Unlocking downloads with token:', token);
+    console.log('Unlocking downloads with token:', token);
     setIsDownloadUnlocked(true);
     
     // Create session in database if it doesn't exist
     const existingSession = await downloadSessionService.getSessionByToken(token);
     if (!existingSession) {
-      devLog('Creating new download session...');
+      console.log('Creating new download session...');
       await downloadSessionService.createSession(token);
     }
     
     // Get updated stats
     const stats = await downloadSessionService.getSessionStats(token);
     setDownloadStats(stats);
-    devLog('Download unlock completed with stats:', stats);
+    console.log('Download unlock completed with stats:', stats);
   };
 
   const trackDownload = async () => {
     const token = sessionStorage.getItem('downloadToken');
-    devLog('Tracking download with token:', token);
+    console.log('Tracking download with token:', token);
     
     if (token) {
       const success = await downloadSessionService.incrementDownloadCount(token);
       if (success) {
-        devLog('Download tracked successfully');
+        console.log('Download tracked successfully');
         // Update local stats
         const stats = await downloadSessionService.getSessionStats(token);
         setDownloadStats(stats);
-        devLog('Updated stats after download:', stats);
+        console.log('Updated stats after download:', stats);
       } else {
         console.error('Failed to track download');
       }
@@ -98,12 +97,12 @@ export function useDownloadStatus() {
     // IMPORTANT: Only auto-unlock if user is authenticated AND has active subscription/tokens
     // This prevents auto-unlocking for anonymous users who should pay $1
     if (!userId || userId === 'anonymous') {
-      devLog('❌ No valid userId provided - anonymous user must pay for downloads');
+      console.log('❌ No valid userId provided - anonymous user must pay for downloads');
       return;
     }
     
     if (worksheetId && worksheetId !== 'unknown') {
-      devLog('🔓 Auto-unlocking download for authenticated user with token-generated worksheet');
+      console.log('🔓 Auto-unlocking download for authenticated user with token-generated worksheet');
       const autoToken = `token_${worksheetId}_${userId}_${Date.now()}`;
       
       // Set a long-lasting token for token-generated worksheets
@@ -114,7 +113,7 @@ export function useDownloadStatus() {
       setIsDownloadUnlocked(true);
       setDownloadStats({ downloads_count: 0, expires_at: new Date(expiryTime).toISOString() });
       
-      devLog('✅ Auto-unlock completed for authenticated user with token-generated worksheet');
+      console.log('✅ Auto-unlock completed for authenticated user with token-generated worksheet');
     }
   };
 

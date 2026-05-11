@@ -7,7 +7,6 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { usePaymentTracking } from "@/hooks/usePaymentTracking";
 import { isFreeCustomDemoWeek, getFreeWeekEndDateString, isLastDayOfFreeWeek, isPromoForLoggedInOnly } from "@/utils/promoUtils";
-import { devLog } from '@/utils/logger';
 
 interface PaymentPopupProps {
   isOpen: boolean;
@@ -38,7 +37,7 @@ const PaymentPopup = ({ isOpen, onClose, onPaymentSuccess, worksheetId, userIp, 
       if (downloadToken && tokenExpiry) {
         const expiryTime = parseInt(tokenExpiry);
         if (Date.now() < expiryTime) {
-          devLog('Found existing valid token, unlocking downloads');
+          console.log('Found existing valid token, unlocking downloads');
           onPaymentSuccess(downloadToken);
           onClose();
           return;
@@ -69,7 +68,7 @@ const PaymentPopup = ({ isOpen, onClose, onPaymentSuccess, worksheetId, userIp, 
 
     setIsProcessing(true);
     try {
-      devLog('Creating payment session for:', { worksheetId, userIdentifier });
+      console.log('Creating payment session for:', { worksheetId, userIdentifier });
       
       // Set flag to prevent "worksheet restored" message when returning from payment
       sessionStorage.setItem('returningFromPayment', 'true');
@@ -92,7 +91,7 @@ const PaymentPopup = ({ isOpen, onClose, onPaymentSuccess, worksheetId, userIp, 
       }
 
       if (data?.url) {
-        devLog('Redirecting to Stripe checkout:', data.url);
+        console.log('Redirecting to Stripe checkout:', data.url);
         // Redirect to Stripe checkout in the same window
         window.location.href = data.url;
       } else {

@@ -14,7 +14,6 @@ import {
 import type { WelcomeTestQuestionDef, WelcomeTestSectionDef } from '@/types/welcomeTest';
 import type { Json } from '@/integrations/supabase/types';
 import { toCanonicalId } from '@/utils/welcomeTestNumbering';
-import { devLog, devWarn } from '@/utils/logger';
 
 interface UseWelcomeTestProps {
   shareToken: string | null;
@@ -461,14 +460,14 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
     try {
       const { uploadBlobToR2 } = await import('@/components/welcome-test/SpeakingRecorder');
       
-      devLog('[flushSpeaking] Uploading pending recording for:', pending.questionId);
+      console.log('[flushSpeaking] Uploading pending recording for:', pending.questionId);
       const url = await uploadBlobToR2(pending.blob);
       if (url) {
-        devLog('[flushSpeaking] Upload success, saving answer:', url);
+        console.log('[flushSpeaking] Upload success, saving answer:', url);
         await saveAnswer(pending.questionId, url);
         await commitAnswer(pending.questionId, url);
       } else {
-        devWarn('[flushSpeaking] Upload returned no URL, saving placeholder');
+        console.warn('[flushSpeaking] Upload returned no URL, saving placeholder');
         await saveAnswer(pending.questionId, `recording_pending_${Date.now()}`);
         await commitAnswer(pending.questionId, `recording_pending_${Date.now()}`);
       }

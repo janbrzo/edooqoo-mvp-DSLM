@@ -12,7 +12,6 @@ import { useNavigate } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import { NATIVE_LANGUAGES } from '@/types/flashcards';
 import { MAIN_GOALS, ENGLISH_LEVELS } from '@/constants/studentGoals';
-import { devLog } from '@/utils/logger';
 
 const ADD_STUDENT_DRAFT_KEY = 'add-student-dialog-draft';
 
@@ -143,7 +142,7 @@ export const AddStudentDialog = ({
       setOpen(false);
       
       // Refresh onboarding progress
-      devLog('[AddStudentDialog] Force refreshing students hook and onboarding');
+      console.log('[AddStudentDialog] Force refreshing students hook and onboarding');
       refreshProgress();
       
       // Force refresh students
@@ -152,13 +151,13 @@ export const AddStudentDialog = ({
       
       // Notify parent component that student was added
       if (onStudentAdded) {
-        devLog('🔄 Calling onStudentAdded callback...');
+        console.log('🔄 Calling onStudentAdded callback...');
         onStudentAdded();
       }
       
       // PROBLEM 7: Navigate to new student's page with overview tab
       if (newStudent?.id) {
-        devLog('🚀 Navigating to new student page:', newStudent.id);
+        console.log('🚀 Navigating to new student page:', newStudent.id);
         navigate(`/student/${newStudent.id}?tab=overview`);
       }
     } catch (error) {

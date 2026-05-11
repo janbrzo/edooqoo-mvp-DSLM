@@ -18,7 +18,6 @@ import { FreeWeekBanner } from '@/components/FreeWeekBanner';
 import StickyNav from '@/components/landing/StickyNav';
 import { useOnboardingProgress } from '@/hooks/useOnboardingProgress';
 import { useDemoContext } from '@/contexts/DemoContext';
-import { devLog } from '@/utils/logger';
 
 const Profile = () => {
   const { user, loading, isRegisteredUser } = useAuthFlow();
@@ -82,25 +81,25 @@ const Profile = () => {
         // Check sessionStorage to prevent duplicate processing
         const processedKey = `upgrade_processed_${sessionId}`;
         if (sessionStorage.getItem(processedKey)) {
-          devLog('[Profile] Upgrade already processed for this session, skipping');
+          console.log('[Profile] Upgrade already processed for this session, skipping');
           // Clear URL parameters
           const newUrl = window.location.pathname;
           window.history.replaceState({}, '', newUrl);
           return;
         }
         
-        devLog('[Profile] Detected return from Stripe with session_id:', sessionId);
+        console.log('[Profile] Detected return from Stripe with session_id:', sessionId);
         
         // ENHANCED DEBUG: Add comprehensive logging for troubleshooting
-        devLog('[Profile] DEBUG: URL params:', { sessionId, success });
-        devLog('[Profile] DEBUG: User info:', { userId: user?.id, email: user?.email });
-        devLog('[Profile] DEBUG: Current profile:', { profile });
+        console.log('[Profile] DEBUG: URL params:', { sessionId, success });
+        console.log('[Profile] DEBUG: User info:', { userId: user?.id, email: user?.email });
+        console.log('[Profile] DEBUG: Current profile:', { profile });
         
         try {
           // Mark as processing in sessionStorage
           sessionStorage.setItem(processedKey, 'true');
           
-          devLog('[Profile] Calling finalize-upgrade to process all tables...');
+          console.log('[Profile] Calling finalize-upgrade to process all tables...');
           // Call finalize-upgrade as primary mechanism to update all tables
           let upgradeData = null;
           try {
@@ -114,7 +113,7 @@ const Profile = () => {
             }
             
             upgradeData = finalizeData;
-            devLog('[Profile] Finalize-upgrade successful:', upgradeData);
+            console.log('[Profile] Finalize-upgrade successful:', upgradeData);
           } catch (finalizeErr) {
             console.error('[Profile] Finalize-upgrade failed, falling back to webhook processing:', finalizeErr);
             // Wait for webhook to process as fallback
@@ -122,11 +121,11 @@ const Profile = () => {
           }
           
           // Sync subscription status after processing
-          devLog('[Profile] Syncing subscription status after processing...');
+          console.log('[Profile] Syncing subscription status after processing...');
           const { data: syncData, error: syncError } = await supabase.functions.invoke('check-subscription-status');
           
           if (!syncError && syncData?.subscribed) {
-            devLog('[Profile] Subscription synced successfully:', syncData);
+            console.log('[Profile] Subscription synced successfully:', syncData);
             
             toast({
               title: "Upgrade Successful!",
@@ -136,7 +135,7 @@ const Profile = () => {
             // Refresh profile data after upgrade
             await refetch();
           } else {
-            devLog('[Profile] Sync completed but no subscription found');
+            console.log('[Profile] Sync completed but no subscription found');
             toast({
               title: "Payment Successful!",
               description: "Your payment has been processed successfully.",
@@ -171,7 +170,7 @@ const Profile = () => {
       syncExecutedRef.current = true;
       
       try {
-        devLog('Syncing subscription status on profile page mount');
+        console.log('Syncing subscription status on profile page mount');
         await supabase.functions.invoke('check-subscription-status');
         
         // Fetch fallback subscription data from subscriptions table
@@ -183,7 +182,7 @@ const Profile = () => {
           
         if (!subError && subData) {
           setSubscriptionData(subData);
-          devLog('Fetched subscription data:', subData);
+          console.log('Fetched subscription data:', subData);
         }
         
         // Refresh profile data
@@ -297,7 +296,7 @@ const Profile = () => {
     try {
       const { planType, targetPlan } = pendingDowngrade;
       
-      devLog('Attempting downgrade:', { planType, targetPlan });
+      console.log('Attempting downgrade:', { planType, targetPlan });
 
       const { data, error } = await supabase.functions.invoke('downgrade-subscription', {
         body: {
@@ -314,7 +313,7 @@ const Profile = () => {
       }
 
       if (data?.success) {
-        devLog('Downgrade successful:', data);
+        console.log('Downgrade successful:', data);
         toast({
           title: "Plan Changed Successfully!",
           description: `Your subscription has been changed to ${data.newPlan}. The change is effective immediately.`,
@@ -364,7 +363,7 @@ const Profile = () => {
       const upgradePrice = getUpgradePrice(targetPlan);
       const upgradeTokens = getUpgradeTokens(targetPlan);
 
-      devLog('Attempting to create subscription:', { planType, planData, upgradePrice, upgradeTokens });
+      console.log('Attempting to create subscription:', { planType, planData, upgradePrice, upgradeTokens });
 
       const { data, error } = await supabase.functions.invoke('create-subscription', {
         body: {
@@ -406,13 +405,13 @@ const Profile = () => {
 
       // Handle redirect to Customer Portal for existing customers
       if (data?.redirect_to_portal && data?.url) {
-        devLog('Redirecting to Stripe Customer Portal for upgrade:', data.url);
+        console.log('Redirecting to Stripe Customer Portal for upgrade:', data.url);
         window.open(data.url, '_blank');
         return;
       }
 
       if (data?.url) {
-        devLog('Redirecting to Stripe checkout:', data.url);
+        console.log('Redirecting to Stripe checkout:', data.url);
         // Redirect to Stripe checkout
         window.location.href = data.url;
       } else {
@@ -454,7 +453,7 @@ const Profile = () => {
     if (!canManage) return;
 
     try {
-      devLog('Attempting to open customer portal...');
+      console.log('Attempting to open customer portal...');
       const { data, error } = await supabase.functions.invoke('customer-portal');
       
       if (error) {
@@ -463,7 +462,7 @@ const Profile = () => {
       }
 
       if (data?.url) {
-        devLog('Opening customer portal:', data.url);
+        console.log('Opening customer portal:', data.url);
         window.open(data.url, '_blank');
       } else {
         throw new Error('No portal URL received');
@@ -483,11 +482,11 @@ const Profile = () => {
     
     if (!expiryDate && subscriptionData?.current_period_end) {
       expiryDate = subscriptionData.current_period_end;
-      devLog('Using fallback expiry date from subscriptions table:', expiryDate);
+      console.log('Using fallback expiry date from subscriptions table:', expiryDate);
     }
     
     if (!expiryDate) {
-      devLog('No expiry date available from profile or subscriptions table');
+      console.log('No expiry date available from profile or subscriptions table');
       return null;
     }
     
