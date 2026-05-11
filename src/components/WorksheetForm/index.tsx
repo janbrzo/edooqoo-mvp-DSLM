@@ -663,9 +663,9 @@ export default function WorksheetForm({
                           <SelectValue placeholder="Choose a student" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="no-student">Generic worksheet (no student)</SelectItem>
+                          <SelectItem value="no-student">No student (generic)</SelectItem>
                           {students.map(student => <SelectItem key={student.id} value={student.id}>
-                              {student.name} ({student.english_level})
+                              <span className="truncate">{student.name} ({student.english_level})</span>
                             </SelectItem>)}
                         </SelectContent>
                       </Select>
@@ -675,6 +675,17 @@ export default function WorksheetForm({
                         </p>
                       )}
                     </div>
+                  ) : userId ? (
+                    <div className={`${isMobile ? 'w-full' : 'w-[23%]'} flex items-center`}>
+                      <a
+                        href="/dashboard?action=add-student"
+                        className="w-full h-full flex items-center gap-2 px-3 py-2 border-2 border-dashed border-primary/40 rounded-md bg-primary/5 hover:bg-primary/10 text-primary text-sm font-medium transition-colors"
+                        title="Add your first student"
+                      >
+                        <Plus className="h-4 w-4 flex-shrink-0" />
+                        <span className="truncate">Add your first student</span>
+                      </a>
+                    </div>
                   ) : (
                     <TooltipProvider>
                       <Tooltip>
@@ -682,14 +693,12 @@ export default function WorksheetForm({
                           <div className={`${isMobile ? 'w-full' : 'w-[23%]'} flex items-center`}>
                             <div className="w-full h-full flex items-center gap-2 px-3 py-2 border rounded-md bg-muted/50 text-muted-foreground cursor-help">
                               <Lock className="h-4 w-4 flex-shrink-0" />
-                              <span className="text-sm truncate">
-                                {userId ? 'Add students first' : 'Student assignment'}
-                              </span>
+                              <span className="text-sm truncate">Student assignment</span>
                             </div>
                           </div>
                         </TooltipTrigger>
                         <TooltipContent side="bottom">
-                          <p>{userId ? '➕ Add students in Dashboard to assign worksheets' : '🔒 Log in to assign worksheets to students'}</p>
+                          <p>🔒 Log in to assign worksheets to students</p>
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>
