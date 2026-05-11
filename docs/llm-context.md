@@ -336,3 +336,50 @@ Two distinct edge functions live ONLY in Supabase deployment (not in repo): `gen
 **Technical Mechanics**: `CollapsibleSection.tsx` accepts new `id` prop, registers a `window.addEventListener('dslm:openSubsection', ...)` listener that compares `detail.id`, sets `open=true`, and calls `cardRef.current.scrollIntoView({block:'start'})` inside `requestAnimationFrame`. `scroll-mt-24` ensures the sticky nav doesn't cover the heading. `DSLMTab.tsx` declares a static `SUBSECTIONS: Record<ViewId, {id,label}[]>` map (goals: supporting/additional/achieved/archived/notes; skills: heatmap/micro/notes; profile: ai-summary/psych/behavioral/personal/all-notes/debug). Sub-buttons render under the active top section with `border-l border-border pl-2`. All existing `CollapsibleSection` call-sites were tagged with stable `id` props in `GoalsView.tsx`, `SkillsView.tsx`, `ProfileView.tsx`. Pathway has no subsections (single-flow view).
 
 **RAG Keywords**: deadline fit, curriculum scaling, fitPhasesToDeadline, hard constraint deadline, weeksUntilDeadline, target_total_weeks, deadline_fit_adjusted, generate-curriculum-phases prompt, phase budget, contiguous weeks, dslm subsection navigation, openSubsection event, CollapsibleSection id, sub-nav sidebar, scroll into view accordion, SUBSECTIONS map, skills heat map link, achieved goals link, behavioral stats link
+
+## v6.9.14 — Goal-Deadline Fallback + Safe Deletes + Nav Cleanup
+
+**Problem 1 — AI ignores 90-day deadline when stored on goal not student**: `generate-curriculum-phases` only read `students.deadline`. Teachers commonly leave the student-level deadline blank but set `target_date` on each `student_progress_goals` row. Result: `weeksUntilDeadline = null` → no `HARD CONSTRAINT — DEADLINE FIT` block → AI defaults to ~20-week plan even for 13-week goals.
+**Edooqoo Solution**: Edge function falls back to the EARLIEST `student_progress_goals.target_date` when student-level deadline is missing. Telemetry `generation_context.deadline_source = 'student' | 'goal' | null` allows future audit. Prompt example reinforces scaling: `"90 days = ~13 weeks → 3 phases of 3 weeks + 1 phase of 4 weeks"`.
+**Technical Mechanics**: `supabase/functions/generate-curriculum-phases/index.ts` — `effectiveDeadline = student.deadline ?? min(activeGoals.map(g => g.target_date))`. `weeksUntilDeadline` and `target_total_weeks` derive from `effectiveDeadline`. Server-side `fitPhasesToDeadline` (v6.9.13) still applies. Worksheet engine UNTOUCHED.
+
+**Problem 2 — Accidental destructive actions**: Single-click delete on phases / next-step banner caused unrecoverable data loss.
+**Edooqoo Solution**: Reusable `ConfirmTypeToDeleteDialog` requiring user to type the exact item label (e.g. `Phase 2`, `Next Step #1`) before destruction is enabled.
+**Technical Mechanics**: `src/components/dslm/ConfirmTypeToDeleteDialog.tsx` accepts `{itemLabel, onConfirm, trigger}`. Wired into `MacroTimeline.tsx` (phase delete) and `NextStepBanner.tsx` (step delete).
+
+**Problem 3 — Phase state desync between Pathway and Timeline**: Two component instances of `useCurriculumPhases` held independent React-Query caches; mutating one didn't refetch the other.
+**Edooqoo Solution**: Global `dslm:phasesUpdated` window event after every mutation. Sibling instances listen + invalidate.
+**Technical Mechanics**: `src/hooks/dslm/useCurriculumPhases.tsx` — `dispatchEvent(new CustomEvent('dslm:phasesUpdated', {detail:{studentId}}))` after add/update/delete; `useEffect` listener invokes `refetch()` when `detail.studentId` matches.
+
+**Problem 4 — `useFutureTimeline` 500 errors with long suggestion histories**: `excludeIds` array passed to edge function grew unbounded, exceeding request body limits.
+**Edooqoo Solution**: Cap at 25 most-recent IDs. Phase-bound generation that fails validation retries as a free `next_step`.
+**Technical Mechanics**: `src/hooks/useFutureTimeline.tsx` — `excludeIds = recentSuggestions.slice(0, 25).map(s => s.id)`. Catch block: 402 → credits toast, 429 → rate-limit toast, otherwise generic.
+
+**Problem 5 — Generate-Steps dialog stale count**: Reopening the dialog for a phase that already had steps still defaulted to 3 (recommended on first generation), confusing teachers.
+**Edooqoo Solution**: On open, compute `recommendedCount = clamp(neededForPhase - currentlyHave, 1, 6)`.
+
+**Problem 6 — DSLM sub-nav hidden until top click**: First-time UX confused teachers who didn't realize sub-sections existed.
+**Edooqoo Solution**: `DSLMTab.tsx` renders sub-section buttons for ALL categories simultaneously; active section ring via `border-primary`.
+
+**Problem 7 — StickyNav redundant Calendar buttons + lost middle-click**: Standalone "Calendar" button duplicated `GCalStatusButton`, and both used `onClick={() => navigate('/calendar')}` — middle-click did nothing.
+**Edooqoo Solution**: Removed standalone. `GCalStatusButton` rewritten as `<Button asChild><a href="/calendar" onClick={modifierAware}>` — plain click → SPA navigate; middle/Ctrl/Shift/Cmd click → browser default (new tab).
+**Technical Mechanics**: `src/components/calendar/GCalStatusButton.tsx`. Pattern documented in `mem/features/navigation/middle-click-anchor-pattern.md`.
+
+**Problem 8 — "Generate Worksheet" CTA bypassed pre-selection on non-`/` pages**: `StickyNav` did `navigate('/')` only, dropping the selected student. Teacher had to re-pick after every nav.
+**Edooqoo Solution**: `StickyNav` always invokes `onGenerateWorksheet()` callback, which routes to `/` with the student pre-selected via parent state. Anchor wrapper preserves middle-click new-tab.
+
+**Problem 9 — WorksheetForm clipped labels + dead-end locked CTA**: Long student labels (e.g. "Generic worksheet (no student)") overflowed the 23%-width selector. Teachers with zero students saw a non-clickable lock with the cryptic message "Add students first".
+**Edooqoo Solution**: Shortened to `No student (generic)`, all selector items use `truncate`. Authenticated teachers with `students.length === 0` get a clickable dashed-border CTA `<a href="/dashboard?action=add-student">Add your first student</a>` (Dashboard already auto-opens AddStudentDialog from this query — see v6.9.8). Anonymous users still see the lock tooltip.
+**Technical Mechanics**: `src/components/WorksheetForm/index.tsx` — split the previous else-branch into `userId ? <AddCTA/> : <Lock/>`.
+
+**Problem 10 — NavStudentSwitcher wasted vertical space**: English level on its own line forced popover to ~80px per item.
+**Edooqoo Solution**: Inline pill badge (`text-[10px] uppercase bg-muted`) right of the name. Halves item height; level still scannable.
+
+**Invariants**:
+- `effectiveDeadline` fallback chain MUST stay (student → goal → null). Worksheet engine still UNTOUCHED.
+- Any new destructive curriculum/step UI MUST use `ConfirmTypeToDeleteDialog`.
+- `dslm:phasesUpdated` MUST fire after every `useCurriculumPhases` mutation.
+- All nav buttons routing to `/calendar`, `/student/:id`, `/` MUST use the modifier-aware anchor pattern.
+- Locked student selector in WorksheetForm reserved for anon users only; authenticated teachers with zero students get the clickable Add CTA.
+
+**RAG Keywords**: goal target_date fallback, effectiveDeadline curriculum, deadline_source telemetry, type to confirm delete dialog, phase delete confirmation, dslm phasesUpdated event, sibling refetch, future timeline excludeIds cap, 25 most recent suggestions, generate steps recommended count reset, dslm always visible sub navigation, gcal middle click new tab, modifier aware anchor, worksheet form generate cta pre-selection, no student generic label, add your first student cta, nav student switcher inline level pill.
