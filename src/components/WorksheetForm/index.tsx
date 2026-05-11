@@ -18,7 +18,7 @@ import { useWorksheetFormPersistence, type WorksheetDraft } from "@/hooks/useWor
 import { normalizeSuggestionPrefill } from "@/lib/dslm/normalizeSuggestionPrefill";
 import { NextStepsPresetBanner, type PresetPayload } from "./NextStepsPresetBanner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Shuffle, Brain, MousePointer, ChevronDown, Image, Headphones, Lock, Eraser } from "lucide-react";
+import { Shuffle, Brain, MousePointer, ChevronDown, Image, Headphones, Lock, Eraser, Plus } from "lucide-react";
 import { devLog, devWarn } from '@/utils/logger';
 
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
