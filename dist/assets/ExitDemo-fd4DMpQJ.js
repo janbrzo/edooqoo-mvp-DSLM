@@ -1,1 +1,0 @@
-import{r}from"./react-vendor-BCRR3Q7s.js";import{cQ as t}from"./index-DrW5eBRH.js";import"./supabase-B_WdKeow.js";import"./lucide-BAy52wox.js";function i(){return r.useEffect(()=>{t()},[]),null}export{i as default};
