@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -9,6 +10,7 @@ import { Calendar } from 'lucide-react';
 export function GCalStatusButton() {
   const { isRegisteredUser, user } = useAuthFlow();
   const { unreadCount } = useCalendarNotifications(isRegisteredUser ? user?.id : undefined);
+  const navigate = useNavigate();
 
   if (!isRegisteredUser) {
     return (
@@ -27,7 +29,14 @@ export function GCalStatusButton() {
 
   return (
     <Button asChild variant="outline" size="sm" className="text-xs h-8 relative">
-      <a href="/calendar">
+      <a
+        href="/calendar"
+        onClick={(e) => {
+          if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
+          e.preventDefault();
+          navigate('/calendar');
+        }}
+      >
         🗓️ Calendar
         {unreadCount > 0 && (
           <Badge className="absolute -top-1.5 -right-1.5 h-4 min-w-4 p-0 flex items-center justify-center text-[10px] bg-destructive text-destructive-foreground border-0">
