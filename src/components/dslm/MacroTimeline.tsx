@@ -21,7 +21,6 @@ import { Check, ChevronDown, Sparkles, Loader2, Plus, Edit2, Trash2, Map, Messag
 import { cn } from '@/lib/utils';
 import { computePhaseConfidence } from '@/lib/dslm/confidenceScore';
 import { ConfidenceBadge } from './ConfidenceBadge';
-import { ConfidenceBadge } from './ConfidenceBadge';
 
 /**
  * v6.9.12 — Recommend 1 step per week of the phase length, clamped 1–6.
