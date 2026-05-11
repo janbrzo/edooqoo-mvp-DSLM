@@ -115,3 +115,38 @@ Goals → generate-curriculum-phases (macro phases, dslm_curriculum_phases)
 - `existingPhases` query selects `estimated_weeks_start/end` so add-mode subtracts already-consumed weeks. Worksheet-generation prompt UNTOUCHED (sanctity).
 - DSLM sub-navigation: `CollapsibleSection` accepts `id`; listens for `window` event `dslm:openSubsection`; sets `open=true` and `scrollIntoView`. `DSLMTab` sub-nav map: goals (supporting/additional/achieved/archived/notes), skills (heatmap/micro/notes), profile (ai-summary/psych/behavioral/personal/all-notes/debug). Pathway has no subs. Sub-buttons render under active top section. Sticky-nav offset via `scroll-mt-24`.
 - All call-sites in `GoalsView/SkillsView/ProfileView` tagged with stable `id` props.
+
+## v6.9.14 (2026-05-11)
+
+**Problem → Solution → Mechanics**
+
+1. **Deadline data missing on student**: `generate-curriculum-phases` only read `students.deadline`. When teacher set a target date on a goal (`student_progress_goals.target_date`) but not on the student record, AI got no totalWeeks budget → produced 5×4-week phases regardless of 90-day deadline.
+   - Solution: edge function fallback to earliest goal deadline.
+   - Mechanics: `effectiveDeadline = student.deadline ?? min(goals[].target_date)`. Telemetry `generation_context.deadline_source = 'student' | 'goal' | null`. Prompt now includes worked example: `"90 days = ~13 weeks → e.g. 3 phases of 3 weeks + 1 phase of 4 weeks"`.
+
+2. **Bulk-delete by accident** in MacroTimeline / NextStepBanner. Solution: `ConfirmTypeToDeleteDialog` requiring user to type the exact item label ("Phase 2", "Next Step #1") before destructive action. Reusable component in `src/components/dslm/`.
+
+3. **Phase state desync**: pathway view and timeline view rendered different `dslm_curriculum_phases` snapshots after add/delete. Solution: `useCurriculumPhases` dispatches `dslm:phasesUpdated` window event after every mutation; sibling instances refetch.
+
+4. **Future-timeline 500 errors**: `excludeIds` array unbounded → request body too large. Solution: cap at 25 most recent IDs in `useFutureTimeline`. Phase-bound generation falls back to free `next_step` on retry when all phase steps fail validation.
+
+5. **GenerateStepsDialog stale count**: dialog reopened with previous count even when student already had enough. Solution: reset to `recommendedCount = clamp(need - have, 1, 6)` on open.
+
+6. **DSLM sub-nav hidden until top-section click**: confusing first-time UX. Solution: `DSLMTab` renders sub-section buttons for ALL categories simultaneously; active section highlighted via `border-primary` ring.
+
+7. **StickyNav redundant Calendar buttons**: standalone Calendar link duplicated `GCalStatusButton`. Solution: removed standalone; `GCalStatusButton` rewritten as `<Button asChild><a href="/calendar" onClick={modifierAware}>` to support middle-click → new tab natively.
+
+8. **WorksheetForm "Generate Worksheet" CTA bypassed pre-selection**: clicking nav button on non-`/` pages did `navigate('/')` only, losing the selected-student context. Solution: `StickyNav` calls `onGenerateWorksheet()` callback which routes to `/` with the student pre-selected; anchor wrapper preserves middle-click new-tab.
+
+9. **WorksheetForm clipped student labels + locked CTA dead-end**: long labels overflowed; teachers with 0 students saw a non-clickable "Add students first" lock. Solution: shortened to `No student (generic)`, added `truncate`; teachers-with-zero-students see clickable `Add your first student` CTA → `/dashboard?action=add-student` (Dashboard already auto-opens AddStudentDialog from this query — see v6.9.8).
+
+10. **NavStudentSwitcher level placement**: english level on its own line wasted vertical space. Solution: inline pill badge (`text-[10px] uppercase`) right of the name in popover items.
+
+**Invariants v6.9.14**:
+- `effectiveDeadline` fallback in `generate-curriculum-phases` MUST stay (student.deadline → goals min target_date → null). Worksheet engine still UNTOUCHED.
+- `ConfirmTypeToDeleteDialog` required for any new destructive curriculum/step action.
+- `dslm:phasesUpdated` event MUST fire after every mutation in `useCurriculumPhases`.
+- All nav buttons that route to `/calendar`, `/student/:id`, or `/` MUST use the modifier-aware anchor pattern (see `mem/features/navigation/middle-click-anchor-pattern.md`).
+- Locked student selector in WorksheetForm is reserved for ANON users only. Authenticated teachers with zero students get the clickable Add CTA.
+
+**RAG Keywords**: deadline fit goal fallback, curriculum total weeks, type to confirm delete, phases updated event, future timeline 500 cap, generate steps recommended count, dslm always-visible subnav, gcal middle click, worksheet form add first student CTA, generic worksheet label.
