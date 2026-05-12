@@ -242,17 +242,29 @@ Adult/professional tone. No school-like content. CLT anchoring mandatory.`;
         }],
         tool_choice: { type: 'function', function: { name: 'generate_suggestions' } },
         temperature: 0.85,
-        max_tokens: 3500
+        // v6.9.15a — scale token budget with requested count to avoid truncation (was hardcoded 3500).
+        max_tokens: Math.min(8192, 1800 + 2000 * count)
       })
     });
 
     if (!aiResponse.ok) {
       const errorText = await aiResponse.text();
       console.error('AI Gateway error:', errorText);
-      throw new Error(`AI Gateway error: ${aiResponse.status}`);
+      return new Response(
+        JSON.stringify({
+          error: 'AI Gateway error',
+          status: aiResponse.status,
+          detail: errorText.slice(0, 500),
+          count,
+          mode: finalMode,
+          suggestions: [],
+        }),
+        { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     }
 
     const aiData = await aiResponse.json();
+    const finishReason = aiData.choices?.[0]?.finish_reason;
     let suggestions: any[] = [];
     try {
       const toolCall = aiData.choices?.[0]?.message?.tool_calls?.[0];
@@ -267,7 +279,7 @@ Adult/professional tone. No school-like content. CLT anchoring mandatory.`;
         suggestions = Array.isArray(parsed) ? parsed : (parsed.suggestions || []);
       }
     } catch (e) {
-      console.error('Failed to parse AI response', e);
+      console.error('Failed to parse AI response', { finishReason, error: String(e) });
       suggestions = [];
     }
 
