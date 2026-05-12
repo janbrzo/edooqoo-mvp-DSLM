@@ -151,9 +151,24 @@ export const useFutureTimeline = ({ studentId, teacherId }: UseFutureTimelinePro
           }
         }
       }
-      if (response.error) throw response.error;
+      if (response.error) {
+        // v6.9.15a — clearer guidance when both attempts fail.
+        const status = (response.error as any)?.context?.status;
+        if (requestedCount > 1) {
+          toast.error('AI generator overloaded — try generating 1 step at a time.');
+        } else {
+          toast.error(status === 502
+            ? 'AI generator is temporarily unavailable. Please retry in a moment.'
+            : 'Generator returned an error. Try again or reduce existing steps.');
+        }
+        throw response.error;
+      }
       const rawSuggestions = response.data?.suggestions || [];
       const generationContext = response.data?.generationContext || {};
+      // v6.9.15a — warn when AI returned fewer than requested (truncation / partial).
+      if (generationContext?.warning && rawSuggestions.length > 0 && rawSuggestions.length < requestedCount) {
+        toast.info(`AI returned only ${rawSuggestions.length}/${requestedCount} steps (${generationContext.warning}). Try a smaller count for full output.`);
+      }
       // Defense in depth: enforce exact count on the client too.
       const newSuggestions = rawSuggestions.slice(0, requestedCount);
       if (newSuggestions.length === 0) {
