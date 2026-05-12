@@ -122,13 +122,31 @@ export const useCurriculumPhases = ({ studentId, teacherId }: UseCurriculumPhase
 
   const deletePhase = async (id: string): Promise<boolean> => {
     try {
+      const phaseToDelete = phases.find(p => p.id === id);
+      if (!phaseToDelete) return false;
+      const deletedSeq = phaseToDelete.sequence_number;
       const { error } = await supabase
         .from('dslm_curriculum_phases')
         .update({ deleted_at: new Date().toISOString() })
         .eq('id', id)
         .eq('teacher_id', teacherId);
       if (error) throw error;
-      setPhases(prev => prev.filter(p => p.id !== id));
+      // v6.9.15a — renumber remaining phases so sequence_number stays contiguous (1..N).
+      const toShift = phases.filter(p => p.id !== id && p.sequence_number > deletedSeq);
+      for (const p of toShift) {
+        const { error: shiftErr } = await supabase
+          .from('dslm_curriculum_phases')
+          .update({ sequence_number: p.sequence_number - 1 })
+          .eq('id', p.id)
+          .eq('teacher_id', teacherId);
+        if (shiftErr) console.error('Failed to renumber phase', p.id, shiftErr);
+      }
+      setPhases(prev => prev
+        .filter(p => p.id !== id)
+        .map(p => p.sequence_number > deletedSeq
+          ? { ...p, sequence_number: p.sequence_number - 1 }
+          : p
+        ));
       toast.success('Phase removed');
       return true;
     } catch (e) {
