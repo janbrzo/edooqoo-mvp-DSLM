@@ -14,7 +14,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { generateAudioForWorksheet, generateImageForWorksheet } from '@/services/mediaService';
 import { streamWorksheetGeneration } from '@/services/worksheetStreamService';
 import { markWorksheetForClaim } from '@/hooks/useWorksheetClaim';
-import { devLog } from '@/utils/logger';
+import { devLog, devWarn } from '@/utils/logger';
+import { useDemoContext } from '@/contexts/DemoContext';
 
 export const useWorksheetGeneration = (
   userId: string | null,
@@ -33,11 +34,17 @@ export const useWorksheetGeneration = (
   const { toast } = useToast();
   const { trackEvent } = useEventTracking(userId);
   const { tokenLeft, hasTokens, isDemo, consumeToken } = useTokenSystem(userId);
+  const { isDemoMode, showDemoBlockedToast } = useDemoContext();
 
   const generateWorksheetHandler = async (data: FormData) => {
+    // v6.9.7-patch — hard demo guard before any work or navigation
+    if (isDemoMode) {
+      showDemoBlockedToast('Generating worksheets');
+      return;
+    }
     // Guard against double-click / duplicate requests
     if (isGenerating) {
-      console.warn('⚠️ Generation already in progress, ignoring duplicate click');
+      devWarn('⚠️ Generation already in progress, ignoring duplicate click');
       return;
     }
     devLog('🚀 Starting worksheet generation for:', data.lessonTime);
@@ -125,7 +132,7 @@ export const useWorksheetGeneration = (
     try {
       devLog('📡 Starting worksheet generation...');
       
-      const fullPrompt = formatPromptForAI(data);
+      const fullPrompt = await formatPromptForAI(data);
       const formDataForStorage = createFormDataForStorage(data);
       
       if (!userId) {
@@ -269,7 +276,7 @@ export const useWorksheetGeneration = (
                             errorMessage.includes('net::ERR');
       
       if (isNetworkError) {
-        console.warn('🌐 Network error detected - showing external issue message');
+        devWarn('🌐 Network error detected - showing external issue message');
         
         toast({
           title: "Generation failed due to external issues",
@@ -401,7 +408,7 @@ export const useWorksheetGeneration = (
           devLog('📌 Worksheet marked for claim after sign-up:', finalWorksheetId);
         }
       } catch (claimErr) {
-        console.warn('[claim] Failed to mark worksheet for claim:', claimErr);
+        devWarn('[claim] Failed to mark worksheet for claim:', claimErr);
       }
       
       setTimeout(() => {
@@ -441,7 +448,7 @@ export const useWorksheetGeneration = (
         }));
         devLog('📣 Dispatched worksheetGenerationSuccess event');
       } catch (e) {
-        console.warn('Failed to dispatch worksheetGenerationSuccess', e);
+        devWarn('Failed to dispatch worksheetGenerationSuccess', e);
       }
 
       // v4.8: if this generation originated from a DSLM suggestion, flip is_used.
@@ -457,7 +464,7 @@ export const useWorksheetGeneration = (
             })
             .eq('id', sourceSuggestionId);
           if (usedErr) {
-            console.warn('[v4.8] Failed to mark suggestion as used:', usedErr);
+            devWarn('[v4.8] Failed to mark suggestion as used:', usedErr);
           } else {
             devLog('[v4.8] Marked suggestion as used:', sourceSuggestionId);
             sessionStorage.removeItem('prefillSuggestionId');
@@ -467,7 +474,7 @@ export const useWorksheetGeneration = (
           }
         }
       } catch (e) {
-        console.warn('[v4.8] suggestion-used update threw', e);
+        devWarn('[v4.8] suggestion-used update threw', e);
       }
       
       if (studentId) {

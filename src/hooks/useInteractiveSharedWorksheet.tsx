@@ -15,6 +15,7 @@ import {
 } from '@/utils/masteryCalculator';
 import { parseAiEvaluation, mapItemEvaluationsToAiEvaluations } from '@/utils/aiEvaluationMapper';
 import type { AiEvaluation } from '@/components/homework/AiEvaluationBadge';
+import { devLog, devWarn } from '@/utils/logger';
 
 interface UseInteractiveSharedWorksheetProps {
   worksheetId: string;
@@ -52,7 +53,7 @@ export const useInteractiveSharedWorksheet = ({
   // Verify student email against database
   const verifyStudentEmail = useCallback(async (worksheetId: string, email: string): Promise<boolean> => {
     try {
-      console.log('[useInteractiveSharedWorksheet] Verifying email:', email, 'for worksheet:', worksheetId);
+      devLog('[useInteractiveSharedWorksheet] Verifying email:', email, 'for worksheet:', worksheetId);
       
       const { data, error } = await supabase.rpc('verify_worksheet_student_email', {
         p_worksheet_id: worksheetId,
@@ -64,7 +65,7 @@ export const useInteractiveSharedWorksheet = ({
         throw error;
       }
 
-      console.log('[useInteractiveSharedWorksheet] Verification result:', data);
+      devLog('[useInteractiveSharedWorksheet] Verification result:', data);
       return data === true;
     } catch (error) {
       console.error('Error verifying student email:', error);
@@ -78,7 +79,7 @@ export const useInteractiveSharedWorksheet = ({
     
     try {
       setIsLoading(true);
-      console.log('[useInteractiveSharedWorksheet] Loading answers for:', worksheetId, studentEmail);
+      devLog('[useInteractiveSharedWorksheet] Loading answers for:', worksheetId, studentEmail);
       
       const { data, error } = await supabase.rpc('get_worksheet_student_answers', {
         p_worksheet_id: worksheetId,
@@ -129,7 +130,7 @@ export const useInteractiveSharedWorksheet = ({
           setIsSubmittedForReview(true);
         }
         
-        console.log('[useInteractiveSharedWorksheet] Loaded answers:', loadedAnswers, 'audio:', loadedAudio, 'evals:', loadedEvals, 'aiEvals:', loadedAiEvals, 'submittedForReview:', hasCompletedOrAiEval);
+        devLog('[useInteractiveSharedWorksheet] Loaded answers:', loadedAnswers, 'audio:', loadedAudio, 'evals:', loadedEvals, 'aiEvals:', loadedAiEvals, 'submittedForReview:', hasCompletedOrAiEval);
       }
     } catch (error: any) {
       console.error('Error loading answers:', error);
@@ -222,7 +223,7 @@ export const useInteractiveSharedWorksheet = ({
     const hasRealAiEval = itemEvaluations?.some(e => e.hasValue !== false);
     const evalToSend = hasRealAiEval ? itemEvaluations : null;
     
-    console.log('[useInteractiveSharedWorksheet] Saving with itemEvaluations:', {
+    devLog('[useInteractiveSharedWorksheet] Saving with itemEvaluations:', {
       exerciseIndex,
       exerciseType,
       mastery,
@@ -441,7 +442,7 @@ export const useInteractiveSharedWorksheet = ({
       // 1. More than 10 minutes since last save
       // 2. We haven't triggered since that save
       if (timeSinceLastSave >= TEN_MINUTES && lastSavedAt.getTime() > lastAiEvalTriggerRef.current) {
-        console.log('[useInteractiveSharedWorksheet] 10 min passed, checking for pending AI evaluations');
+        devLog('[useInteractiveSharedWorksheet] 10 min passed, checking for pending AI evaluations');
         
         // Queue AI evaluations for all open-ended exercises
         for (const exerciseIndexStr of Object.keys(answers)) {
@@ -475,7 +476,7 @@ export const useInteractiveSharedWorksheet = ({
                   questions: exercise?.questions || exercise?.prompts || exercise?.sentences || exercise?.expressions || exercise?.items || []
                 }
               });
-              console.log(`[useInteractiveSharedWorksheet] Queued AI eval for exercise ${exerciseIndex}`);
+              devLog(`[useInteractiveSharedWorksheet] Queued AI eval for exercise ${exerciseIndex}`);
             }
           } catch (err) {
             console.error('[useInteractiveSharedWorksheet] Failed to queue AI eval:', err);
@@ -487,14 +488,14 @@ export const useInteractiveSharedWorksheet = ({
         
         // PLAN FIX 1C: Actually process the queued evaluations
         try {
-          console.log('[useInteractiveSharedWorksheet] Calling process-pending-ai-evaluations after 10-min timer');
+          devLog('[useInteractiveSharedWorksheet] Calling process-pending-ai-evaluations after 10-min timer');
           await supabase.functions.invoke('process-pending-ai-evaluations', {
             body: { worksheet_id: worksheetId, trigger_source: '10min_inactivity' }
           });
-          console.log('[useInteractiveSharedWorksheet] AI evaluations processed successfully');
+          devLog('[useInteractiveSharedWorksheet] AI evaluations processed successfully');
           setIsSubmittedForReview(true);
         } catch (processErr) {
-          console.warn('[useInteractiveSharedWorksheet] Failed to process AI evals (non-critical):', processErr);
+          devWarn('[useInteractiveSharedWorksheet] Failed to process AI evals (non-critical):', processErr);
         }
       }
     };
@@ -541,7 +542,7 @@ export const useInteractiveSharedWorksheet = ({
         });
         
         if (hasNewEvals) {
-          console.log('[useInteractiveSharedWorksheet] Polling found new evaluations:', loadedEvals);
+          devLog('[useInteractiveSharedWorksheet] Polling found new evaluations:', loadedEvals);
           setItemEvaluations(loadedEvals);
           setAiEvaluations(loadedAiEvals);
           
@@ -582,7 +583,7 @@ export const useInteractiveSharedWorksheet = ({
     const evalToSend = hasRealAiEval ? itemEvals : null;
     saveAnswer(exerciseIndex, exerciseType, currentAnswers, mastery, evalToSend, newAudioForExercise);
     
-    console.log('[useInteractiveSharedWorksheet] Audio answer saved to DB:', { exerciseIndex, questionIndex, audioUrl: audioUrl.substring(0, 50) });
+    devLog('[useInteractiveSharedWorksheet] Audio answer saved to DB:', { exerciseIndex, questionIndex, audioUrl: audioUrl.substring(0, 50) });
   }, [answers, exercises, saveAnswer, worksheetId, audioAnswers]);
 
   return {

@@ -10,6 +10,7 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { FormData } from '@/components/WorksheetForm';
+import { devLog } from '@/utils/logger';
 
 /**
  * Generate audio for a worksheet before worksheet generation
@@ -18,7 +19,7 @@ import { FormData } from '@/components/WorksheetForm';
  * @returns Audio data object or null if generation fails
  */
 export const generateAudioForWorksheet = async (formData: FormData) => {
-  console.log('🎵 [MEDIA-SERVICE] Starting audio pre-generation');
+  devLog('🎵 [MEDIA-SERVICE] Starting audio pre-generation');
   
   const startTime = Date.now();
   
@@ -41,7 +42,7 @@ export const generateAudioForWorksheet = async (formData: FormData) => {
       throw new Error('Audio generation failed: ' + response.error.message);
     }
     
-    console.log('🎵 [MEDIA-SERVICE] Audio generated successfully in ' + duration + 's');
+    devLog('🎵 [MEDIA-SERVICE] Audio generated successfully in ' + duration + 's');
     return response.data.audioData;
     
   } catch (error) {
@@ -58,7 +59,7 @@ export const generateAudioForWorksheet = async (formData: FormData) => {
  * @returns Image data object or null if generation fails
  */
 export const generateImageForWorksheet = async (formData: FormData) => {
-  console.log('🎨 [MEDIA-SERVICE] Starting image pre-generation');
+  devLog('🎨 [MEDIA-SERVICE] Starting image pre-generation');
   
   const startTime = Date.now();
   
@@ -78,7 +79,7 @@ export const generateImageForWorksheet = async (formData: FormData) => {
     }
     
     if (response.data?.success && response.data?.image) {
-      console.log('🎨 [MEDIA-SERVICE] Image generated successfully in ' + duration + 's');
+      devLog('🎨 [MEDIA-SERVICE] Image generated successfully in ' + duration + 's');
       return response.data.image;
     } else {
       throw new Error('Invalid response from generate-image function');

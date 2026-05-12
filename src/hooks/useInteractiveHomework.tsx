@@ -13,7 +13,7 @@ import {
   OPEN_ENDED_EXERCISE_TYPES,
   ItemEvaluation 
 } from '@/utils/masteryCalculator';
-import { devLog } from '@/utils/logger';
+import { devLog, devWarn } from '@/utils/logger';
 import { transcribeAllAudio, buildAnswersToVerify } from '@/utils/audioEvalUtils';
 
 
@@ -311,7 +311,7 @@ export const useInteractiveHomework = ({
           devLog('[submitHomework] homework_submitted event emitted');
         }
       } catch (e) {
-        console.warn('[submitHomework] Failed to emit homework_submitted event:', e);
+        devWarn('[submitHomework] Failed to emit homework_submitted event:', e);
       }
 
       const openAnswerTypes = [

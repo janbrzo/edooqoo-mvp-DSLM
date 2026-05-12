@@ -6,6 +6,7 @@ import { cn } from "@/lib/utils";
 import { useToast } from "@/hooks/use-toast";
 import DemoWatermark from './DemoWatermark';
 import AudioPlayer from './AudioPlayer';
+import { devLog } from '@/utils/logger';
 
 interface MediaSectionProps {
   selectedImage?: {
@@ -58,7 +59,7 @@ export default function MediaSection({
   }, []);
   
   // DEBUGGING: Log media data
-  console.log('🖼️ [MEDIASECTION] Rendering with media:', {
+  devLog('🖼️ [MEDIASECTION] Rendering with media:', {
     hasImage: !!selectedImage,
     hasAudio: !!selectedAudio,
     imageId: selectedImage?.id,
@@ -70,7 +71,7 @@ export default function MediaSection({
   if (!selectedImage && !selectedAudio) return null;
 
   // DEBUG: Log audio rendering conditions
-  console.log('🎵 [MEDIASECTION] Checking audio render:', {
+  devLog('🎵 [MEDIASECTION] Checking audio render:', {
     hasSelectedAudio: !!selectedAudio,
     hasUrl: !!selectedAudio?.url,
     hasAiUrl: !!selectedAudio?.ai_generated_audio_url,
@@ -175,17 +176,17 @@ export default function MediaSection({
     // Priority 1: Try R2 URL first (ai_generated_url or url if not base64)
     if (!imageError) {
       if (selectedImage.ai_generated_url) {
-        console.log('🖼️ [MEDIASECTION] Using R2 URL (ai_generated_url):', selectedImage.ai_generated_url?.substring(0, 80) + '...');
+        devLog('🖼️ [MEDIASECTION] Using R2 URL (ai_generated_url):', selectedImage.ai_generated_url?.substring(0, 80) + '...');
         return selectedImage.ai_generated_url;
       }
       if (selectedImage.url && !selectedImage.url.startsWith('data:')) {
-        console.log('🖼️ [MEDIASECTION] Using R2 URL (url field):', selectedImage.url?.substring(0, 80) + '...');
+        devLog('🖼️ [MEDIASECTION] Using R2 URL (url field):', selectedImage.url?.substring(0, 80) + '...');
         return selectedImage.url;
       }
     }
     
     // Priority 2: Last resort - url field (might be base64 from old worksheets)
-    console.log('🔄 [MEDIASECTION] Using url field as last resort (backward compatibility)');
+    devLog('🔄 [MEDIASECTION] Using url field as last resort (backward compatibility)');
     return selectedImage.url || "";
   }, [selectedImage, imageError]);
 
@@ -237,7 +238,7 @@ export default function MediaSection({
               onClick={onToggleFullScreen}
               onLoad={() => {
                 setImageLoading(false);
-                console.log('✅ [MEDIASECTION] Image loaded successfully:', imageUrl?.substring(0, 80));
+                devLog('✅ [MEDIASECTION] Image loaded successfully:', imageUrl?.substring(0, 80));
               }}
               onError={(e) => {
                 console.error('❌ [MEDIASECTION] Image load failed:', imageUrl?.substring(0, 80));

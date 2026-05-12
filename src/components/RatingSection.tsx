@@ -4,6 +4,7 @@ import { Star } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { devLog } from '@/utils/logger';
 
 interface RatingSectionProps {
   className?: string;
@@ -17,7 +18,7 @@ const RatingSection = ({ className }: RatingSectionProps) => {
   const [submitted, setSubmitted] = useState(false);
 
   const handleSubmit = () => {
-    console.log({ rating, feedback });
+    devLog({ rating, feedback });
     setSubmitted(true);
     setIsOpen(false);
   };

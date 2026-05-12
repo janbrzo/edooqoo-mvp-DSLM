@@ -6,6 +6,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { devLog } from '@/utils/logger';
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
@@ -112,7 +113,7 @@ const calculateInitialMasteryForItem = (
 ): { mastery: number | null; hasValue: boolean } => {
   // PROBLEM 1.2: If we have AI evaluation for this item, use it
   if (aiEvaluations && aiEvaluations[itemIndex] !== undefined) {
-    console.log(`[Mastery] Using AI evaluation for item ${itemIndex}: ${aiEvaluations[itemIndex]}%`);
+    devLog(`[Mastery] Using AI evaluation for item ${itemIndex}: ${aiEvaluations[itemIndex]}%`);
     return { mastery: aiEvaluations[itemIndex], hasValue: true };
   }
 
@@ -150,7 +151,7 @@ const calculateInitialMasteryForItem = (
     if (question.correct_answer) {
       isCorrect = String(studentAnswer).toLowerCase().trim() === 
                   String(question.correct_answer).toLowerCase().trim();
-      console.log(`[Mastery] Odd One Out item ${itemIndex}: student="${studentAnswer}", correct="${question.correct_answer}", isCorrect=${isCorrect}`);
+      devLog(`[Mastery] Odd One Out item ${itemIndex}: student="${studentAnswer}", correct="${question.correct_answer}", isCorrect=${isCorrect}`);
     }
     
     // Reading/answer questions with expected answer
@@ -183,7 +184,7 @@ const calculateInitialMasteryForItem = (
       if (correctIndex !== -1) {
         const correctLetter = String.fromCharCode(65 + correctIndex); // 0=A, 1=B, 2=C...
         isCorrect = studentAnswer.toUpperCase().trim() === correctLetter;
-        console.log(`[Mastery] Synonyms/Antonyms item ${itemIndex}: word="${item.word}", student="${studentAnswer}", correctLetter="${correctLetter}", isCorrect=${isCorrect}`);
+        devLog(`[Mastery] Synonyms/Antonyms item ${itemIndex}: word="${item.word}", student="${studentAnswer}", correctLetter="${correctLetter}", isCorrect=${isCorrect}`);
       }
     }
   }
@@ -197,7 +198,7 @@ const calculateInitialMasteryForItem = (
     if (errorCorrectionAnswer && !sentence.answer && !sentence.missing_word) {
       if (typeof studentAnswer === 'string') {
         isCorrect = studentAnswer.toLowerCase().trim() === errorCorrectionAnswer.toLowerCase().trim();
-        console.log(`[Mastery] Error Correction item ${itemIndex}: student="${studentAnswer}", correct="${errorCorrectionAnswer}", isCorrect=${isCorrect}`);
+        devLog(`[Mastery] Error Correction item ${itemIndex}: student="${studentAnswer}", correct="${errorCorrectionAnswer}", isCorrect=${isCorrect}`);
       }
     }
     
@@ -205,7 +206,7 @@ const calculateInitialMasteryForItem = (
     if (sentence.correct_order) {
       if (typeof studentAnswer === 'string') {
         isCorrect = studentAnswer.toLowerCase().trim() === sentence.correct_order.toLowerCase().trim();
-        console.log(`[Mastery] Word Order item ${itemIndex}: student="${studentAnswer}", correct="${sentence.correct_order}", isCorrect=${isCorrect}`);
+        devLog(`[Mastery] Word Order item ${itemIndex}: student="${studentAnswer}", correct="${sentence.correct_order}", isCorrect=${isCorrect}`);
       }
     }
     
@@ -223,7 +224,7 @@ const calculateInitialMasteryForItem = (
     const correctAnswer = word.answer || word.complete || word.complete_word;
     if (correctAnswer && typeof studentAnswer === 'string') {
       isCorrect = studentAnswer.toLowerCase().trim() === correctAnswer.toLowerCase().trim();
-      console.log(`[Mastery] Words item ${itemIndex}: student="${studentAnswer}", correct="${correctAnswer}", isCorrect=${isCorrect}`);
+      devLog(`[Mastery] Words item ${itemIndex}: student="${studentAnswer}", correct="${correctAnswer}", isCorrect=${isCorrect}`);
     }
   }
   
@@ -249,7 +250,7 @@ const calculateInitialMasteryForItem = (
       if (correctCategoryIndex !== -1) {
         const studentCatIdx = typeof studentAnswer === 'number' ? studentAnswer : parseInt(studentAnswer);
         isCorrect = studentCatIdx === correctCategoryIndex;
-        console.log(`[Mastery] Categorize item ${itemIndex}: word="${itemWord}", studentCat=${studentCatIdx}, correctCat=${correctCategoryIndex}, isCorrect=${isCorrect}`);
+        devLog(`[Mastery] Categorize item ${itemIndex}: word="${itemWord}", studentCat=${studentCatIdx}, correctCat=${correctCategoryIndex}, isCorrect=${isCorrect}`);
       }
     }
   }
@@ -272,7 +273,7 @@ const calculateInitialMasteryForItem = (
       
       if (normalizedAnswer !== null) {
         isCorrect = normalizedAnswer === expectedValue;
-        console.log(`[Mastery] True/False item ${itemIndex}: student=${normalizedAnswer}, expected=${expectedValue}, isCorrect=${isCorrect}`);
+        devLog(`[Mastery] True/False item ${itemIndex}: student=${normalizedAnswer}, expected=${expectedValue}, isCorrect=${isCorrect}`);
       }
     }
   }
@@ -318,7 +319,7 @@ const calculateInitialMasteryForItem = (
     if (shuffledPosition !== -1 && typeof studentAnswer === 'string') {
       const correctLetter = String.fromCharCode(65 + shuffledPosition);
       isCorrect = studentAnswer.toUpperCase() === correctLetter;
-      console.log(`[Mastery] Matching Halves item ${itemIndex}: student="${studentAnswer}", shuffledPos=${shuffledPosition}, correct="${correctLetter}", isCorrect=${isCorrect}`);
+      devLog(`[Mastery] Matching Halves item ${itemIndex}: student="${studentAnswer}", shuffledPos=${shuffledPosition}, correct="${correctLetter}", isCorrect=${isCorrect}`);
     }
   }
   
@@ -378,7 +379,7 @@ const NanoSkillMasteryModal: React.FC<NanoSkillMasteryModalProps> = ({
       if (allSkillsWithPositions.length === 0) processItems(exerciseData.prompts);
     }
     
-    console.log('[Mastery] All skills with positions:', allSkillsWithPositions.map(s => ({
+    devLog('[Mastery] All skills with positions:', allSkillsWithPositions.map(s => ({
       name: s.skill.name,
       itemIndex: s.itemIndex
     })));
@@ -400,7 +401,7 @@ const NanoSkillMasteryModal: React.FC<NanoSkillMasteryModalProps> = ({
           // Get mastery for this SPECIFIC item based on its answer (now includes AI evaluations)
           const { mastery, hasValue } = calculateInitialMasteryForItem(itemIndex, studentAnswers, exerciseData, aiEvaluations);
           
-          console.log(`[Mastery Init] SkillIndex: ${skillIndex}, Skill: ${skill.name}, ItemIndex: ${itemIndex}, Answer: ${studentAnswers?.[itemIndex]}, AI: ${aiEvaluations?.[itemIndex]}, Mastery: ${mastery}`);
+          devLog(`[Mastery Init] SkillIndex: ${skillIndex}, Skill: ${skill.name}, ItemIndex: ${itemIndex}, Answer: ${studentAnswers?.[itemIndex]}, AI: ${aiEvaluations?.[itemIndex]}, Mastery: ${mastery}`);
           
           return {
             name: skill.name,

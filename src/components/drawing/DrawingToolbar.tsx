@@ -9,8 +9,6 @@
  * - Zmiana w jednym narzędziu NIE wpływa na inne
  */
 
-console.log('🎨 DrawingToolbar v5.0 loaded');
-
 import { 
   Undo2,
   Redo2,
@@ -19,6 +17,9 @@ import {
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { devLog } from '@/utils/logger';
+
+devLog('🎨 DrawingToolbar v5.0 loaded');
 import {
   AlertDialog,
   AlertDialogAction,
@@ -55,7 +56,7 @@ export const DrawingToolbar = ({
   // Użyj przekazanych toolSettings lub fallback
   const settings = toolSettings || DEFAULT_TOOL_SETTINGS;
 
-  console.log('🎨 [DrawingToolbar] Render:', { activeTool, canUndo, canRedo, isSaving });
+  devLog('🎨 [DrawingToolbar] Render:', { activeTool, canUndo, canRedo, isSaving });
 
   // Pobierz ustawienia dla konkretnego narzędzia
   const getToolColor = (toolId: DrawingTool) => {

@@ -1,5 +1,6 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import { devLog } from '@/utils/logger';
 
 /**
  * Tracks an event (view, download, etc.)
@@ -8,17 +9,17 @@ export async function trackWorksheetEventAPI(type: string, worksheetId: string, 
   try {
     // Skip tracking if worksheetId is not a valid UUID
     if (!worksheetId || worksheetId.length < 10) {
-      console.log(`Skipping ${type} event tracking for invalid worksheetId: ${worksheetId}`);
+      devLog(`Skipping ${type} event tracking for invalid worksheetId: ${worksheetId}`);
       return;
     }
     
-    console.log(`Tracking event: ${type} for worksheet: ${worksheetId}`);
+    devLog(`Tracking event: ${type} for worksheet: ${worksheetId}`);
     
     try {
       // For download events, increment the download counter
       if (type === 'download') {
         try {
-          console.log(`Attempting to increment download count for worksheet: ${worksheetId}`);
+          devLog(`Attempting to increment download count for worksheet: ${worksheetId}`);
           
           // Use the dedicated function for incrementing download count
           const { data, error } = await supabase.rpc('increment_worksheet_download_count', {
@@ -45,13 +46,13 @@ export async function trackWorksheetEventAPI(type: string, worksheetId: string, 
                 .eq('id', worksheetId);
               
               if (!updateError) {
-                console.log(`Download count updated to ${newCount} for worksheet: ${worksheetId}`);
+                devLog(`Download count updated to ${newCount} for worksheet: ${worksheetId}`);
               } else {
                 console.error(`Update error: ${updateError.message}`);
               }
             }
           } else {
-            console.log(`Download count incremented via RPC for worksheet: ${worksheetId}`, data);
+            devLog(`Download count incremented via RPC for worksheet: ${worksheetId}`, data);
           }
         } catch (countError) {
           console.error(`Failed to increment download count: ${countError}`);
@@ -67,7 +68,7 @@ export async function trackWorksheetEventAPI(type: string, worksheetId: string, 
               last_modified_at: new Date().toISOString() 
             })
             .eq('id', worksheetId);
-          console.log(`Last viewed timestamp updated for worksheet: ${worksheetId}`);
+          devLog(`Last viewed timestamp updated for worksheet: ${worksheetId}`);
         } catch (viewError) {
           console.error(`Failed to update view timestamp: ${viewError}`);
         }

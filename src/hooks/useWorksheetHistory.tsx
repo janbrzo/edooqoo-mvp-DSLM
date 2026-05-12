@@ -29,17 +29,17 @@ export const useWorksheetHistory = (
   const { isDemoMode, demoData } = useDemoContext();
   const { data: user } = useAuthUser();
 
-  // Demo mode: return hardcoded worksheets
+  // Demo mode: return hardcoded worksheets (handles async demoData load)
   useEffect(() => {
-    if (isDemoMode && demoData) {
-      let ws = demoData.worksheets as WorksheetHistoryItem[];
-      if (studentId) {
-        ws = ws.filter(w => w.student_id === studentId);
-      }
-      setWorksheets(ws);
-      setTotalCount(ws.length);
-      setLoading(false);
+    if (!isDemoMode) return;
+    if (!demoData) { setLoading(true); return; }
+    let ws = demoData.worksheets as WorksheetHistoryItem[];
+    if (studentId) {
+      ws = ws.filter(w => w.student_id === studentId);
     }
+    setWorksheets(ws);
+    setTotalCount(ws.length);
+    setLoading(false);
   }, [isDemoMode, demoData, studentId]);
 
   const fetchWorksheets = async () => {

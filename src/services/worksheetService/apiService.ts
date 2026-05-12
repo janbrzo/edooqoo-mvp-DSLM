@@ -1,6 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { FormData as WorksheetFormData } from '@/components/WorksheetForm';
 import { toast } from 'sonner';
+import { devLog, devWarn } from '@/utils/logger';
 
 // URLs for the Edge Functions
 const GENERATE_WORKSHEET_URL = 'https://bvfrkzdlklyvnhlpleck.supabase.co/functions/v1/generateWorksheet';
@@ -10,7 +11,7 @@ const GENERATE_WORKSHEET_URL = 'https://bvfrkzdlklyvnhlpleck.supabase.co/functio
  */
 export async function generateWorksheetAPI(prompt: WorksheetFormData & { fullPrompt?: string, formDataForStorage?: any, studentId?: string }, userId: string) {
   try {
-    console.log('Generating worksheet with prompt:', prompt);
+    devLog('Generating worksheet with prompt:', prompt);
     
     // Use the full prompt if provided, otherwise create legacy format
     const formattedPrompt = prompt.fullPrompt || `${prompt.lessonTopic} - ${prompt.lessonGoal}. Teaching preferences: ${prompt.teachingPreferences}${prompt.englishLevel ? `. English level: ${prompt.englishLevel}` : ''}. Lesson duration: ${prompt.lessonTime}.`;
@@ -37,7 +38,7 @@ export async function generateWorksheetAPI(prompt: WorksheetFormData & { fullPro
     }
     
     // ETAP 3: Logowanie dla weryfikacji przekazywania selectedImage
-    console.log('📸 [API-SERVICE] selectedImage being sent to backend:', {
+    devLog('📸 [API-SERVICE] selectedImage being sent to backend:', {
       hasSelectedImage: !!formData.selectedImage,
       imageUrl: formData.selectedImage?.url,
       imageId: formData.selectedImage?.id,
@@ -45,7 +46,7 @@ export async function generateWorksheetAPI(prompt: WorksheetFormData & { fullPro
     });
     
     // ETAP 5: Logowanie dla weryfikacji przekazywania selectedAudio
-    console.log('🎵 [API-SERVICE] selectedAudio being sent to backend:', {
+    devLog('🎵 [API-SERVICE] selectedAudio being sent to backend:', {
       hasSelectedAudio: !!formData.selectedAudio,
       audioUrl: formData.selectedAudio?.url,
       transcriptLength: formData.selectedAudio?.transcript?.length,
@@ -53,8 +54,8 @@ export async function generateWorksheetAPI(prompt: WorksheetFormData & { fullPro
       voice: formData.selectedAudio?.voice
     });
     
-    console.log('Sending formatted prompt to API:', formattedPrompt);
-    console.log('Student ID being sent:', prompt.studentId);
+    devLog('Sending formatted prompt to API:', formattedPrompt);
+    devLog('Student ID being sent:', prompt.studentId);
     
     const response = await fetch(GENERATE_WORKSHEET_URL, {
       method: 'POST',
@@ -69,7 +70,7 @@ export async function generateWorksheetAPI(prompt: WorksheetFormData & { fullPro
       })
     });
 
-    console.log('API response status:', response.status);
+    devLog('API response status:', response.status);
     
     if (!response.ok) {
       const errorData = await response.json().catch(() => null);
@@ -82,7 +83,7 @@ export async function generateWorksheetAPI(prompt: WorksheetFormData & { fullPro
     }
 
     const worksheetData = await response.json();
-    console.log('API returned worksheet data:', worksheetData);
+    devLog('API returned worksheet data:', worksheetData);
     
     if (!worksheetData || typeof worksheetData !== 'object') {
       console.error('Invalid response format:', worksheetData);
@@ -97,10 +98,10 @@ export async function generateWorksheetAPI(prompt: WorksheetFormData & { fullPro
     for (const exercise of worksheetData.exercises) {
       if (exercise.type === 'reading') {
         const wordCount = exercise.content?.split(/\s+/).filter(Boolean).length || 0;
-        console.log(`Reading exercise word count: ${wordCount}`);
+        devLog(`Reading exercise word count: ${wordCount}`);
         
         if (wordCount < 280 || wordCount > 320) {
-          console.warn(`Reading exercise word count (${wordCount}) outside target range of 280-320 words`);
+          devWarn(`Reading exercise word count (${wordCount}) outside target range of 280-320 words`);
         }
         
         if (!exercise.questions || exercise.questions.length < 5) {
@@ -123,7 +124,7 @@ export async function generateWorksheetAPI(prompt: WorksheetFormData & { fullPro
     };
     
     const expectedCount = getExpectedExerciseCount(prompt.lessonTime);
-    console.log(`Expected ${expectedCount} exercises for ${prompt.lessonTime} lesson, got ${worksheetData.exercises.length}`);
+    devLog(`Expected ${expectedCount} exercises for ${prompt.lessonTime} lesson, got ${worksheetData.exercises.length}`);
     
     return worksheetData;
   } catch (error) {

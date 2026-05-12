@@ -1,5 +1,6 @@
 import { useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { devWarn } from '@/utils/logger';
 
 const STORAGE_KEY = 'edooqoo_unclaimed_worksheets';
 const TTL_MS = 7 * 24 * 60 * 60 * 1000; // 7 days
@@ -33,7 +34,7 @@ function writeStorage(data: ClaimStorage) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   } catch (e) {
-    console.warn('[useWorksheetClaim] localStorage write failed', e);
+    devWarn('[useWorksheetClaim] localStorage write failed', e);
   }
 }
 
@@ -83,7 +84,7 @@ export async function claimPendingWorksheets(): Promise<string[]> {
       body: { worksheetIds: pending, anonUserId },
     });
     if (error) {
-      console.warn('[useWorksheetClaim] claim invoke error', error);
+      devWarn('[useWorksheetClaim] claim invoke error', error);
       return [];
     }
     const claimedIds: string[] = Array.isArray(data?.claimedIds) ? data.claimedIds : [];
@@ -91,7 +92,7 @@ export async function claimPendingWorksheets(): Promise<string[]> {
     clearClaims();
     return claimedIds;
   } catch (e) {
-    console.warn('[useWorksheetClaim] claim threw', e);
+    devWarn('[useWorksheetClaim] claim threw', e);
     return [];
   }
 }

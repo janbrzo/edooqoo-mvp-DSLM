@@ -16,8 +16,10 @@ import { useStudents } from "@/hooks/useStudents";
 import { useOnboardingProgress } from "@/hooks/useOnboardingProgress";
 import { useWorksheetFormPersistence, type WorksheetDraft } from "@/hooks/useWorksheetFormPersistence";
 import { normalizeSuggestionPrefill } from "@/lib/dslm/normalizeSuggestionPrefill";
+import { NextStepsPresetBanner, type PresetPayload } from "./NextStepsPresetBanner";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Shuffle, Brain, MousePointer, ChevronDown, Image, Headphones, Lock, Eraser } from "lucide-react";
+import { Shuffle, Brain, MousePointer, ChevronDown, Image, Headphones, Lock, Eraser, Plus } from "lucide-react";
+import { devLog, devWarn } from '@/utils/logger';
 
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
 import type { MediaType } from './types';
@@ -130,7 +132,7 @@ export default function WorksheetForm({
           setShowMoreFields(true);
         }
       } catch (e) {
-        console.warn('[WorksheetForm] draft hydration failed', e);
+        devWarn('[WorksheetForm] draft hydration failed', e);
       }
     },
   );
@@ -163,12 +165,24 @@ export default function WorksheetForm({
   // worksheet is saved + token consumed. Failures (network, paywall, AI error)
   // intentionally preserve the draft so the user can retry.
   useEffect(() => {
-    const handler = () => {
+    const handler = (e: Event) => {
       try {
         clearPersistedDraft();
-        console.log('[WorksheetForm] Draft cleared after successful generation');
+        devLog('[WorksheetForm] Draft cleared after successful generation');
       } catch (e) {
-        console.warn('[WorksheetForm] Failed to clear draft', e);
+        devWarn('[WorksheetForm] Failed to clear draft', e);
+      }
+      // v6.9.10 — if this generation originated from a Next-Step preset chip,
+      // propagate to NextStepsPresetBanner so it can mark the suggestion as used.
+      try {
+        const sid = sessionStorage.getItem('appliedPresetSuggestionId');
+        if (sid) {
+          const wsId = ((e as CustomEvent)?.detail?.worksheetId as string | undefined) || null;
+          window.dispatchEvent(new CustomEvent('markPresetUsed', { detail: { suggestionId: sid, worksheetId: wsId } }));
+          sessionStorage.removeItem('appliedPresetSuggestionId');
+        }
+      } catch (e) {
+        devWarn('[WorksheetForm] markPresetUsed dispatch failed', e);
       }
     };
     window.addEventListener('worksheetGenerationSuccess', handler);
@@ -194,7 +208,7 @@ export default function WorksheetForm({
           setGrammarFocus(parsed.grammarFocus);
         }
         sessionStorage.removeItem('prefillWorksheet');
-        console.log('✅ [WorksheetForm] Pre-filled from Progress Tab:', parsed);
+        devLog('✅ [WorksheetForm] Pre-filled from Progress Tab:', parsed);
       } catch (error) {
         console.error('Error parsing prefillWorksheet:', error);
         sessionStorage.removeItem('prefillWorksheet');
@@ -229,7 +243,7 @@ export default function WorksheetForm({
           setExerciseFocusMap(norm.exerciseFocusMap);
           setSelectionMode('manual');
           setActiveTab('exercises');
-          console.log('✅ [WorksheetForm] DSLM prefill normalized:', norm);
+          devLog('✅ [WorksheetForm] DSLM prefill normalized:', norm);
         }
         sessionStorage.removeItem('prefillExercises');
         sessionStorage.removeItem('prefillExerciseFocusMap');
@@ -254,7 +268,7 @@ export default function WorksheetForm({
         requestAnimationFrame(() => {
           requestAnimationFrame(() => {
             if (formRef.current) {
-              console.log('🚀 [WorksheetForm] Auto-submitting from DSLM autoGenerate flag (v4.7 timing)');
+              devLog('🚀 [WorksheetForm] Auto-submitting from DSLM autoGenerate flag (v4.7 timing)');
               formRef.current.requestSubmit();
             }
           });
@@ -307,7 +321,7 @@ export default function WorksheetForm({
       if (domValue) {
         effectiveTopic = domValue;
         setLessonTopic(domValue);
-        console.warn('[WorksheetForm] Recovered lessonTopic from DOM (stale closure path):', domValue);
+        devWarn('[WorksheetForm] Recovered lessonTopic from DOM (stale closure path):', domValue);
       }
     }
     if (!effectiveTopic) {
@@ -335,8 +349,8 @@ export default function WorksheetForm({
     const maxExercises = lessonTime === '45min' ? 6 : 8;
     let finalExercises = [...selectedExercises];
     if (!finalExercises || finalExercises.length < maxExercises) {
-      console.log(`🔧 [WORKSHEET-FORM] Auto-completing exercises: ${finalExercises.length} < ${maxExercises}`);
-      console.log(`🔧 [WORKSHEET-FORM] Media mode: picture=${isPictureMode}, audio=${isAudioMode}`);
+      devLog(`🔧 [WORKSHEET-FORM] Auto-completing exercises: ${finalExercises.length} < ${maxExercises}`);
+      devLog(`🔧 [WORKSHEET-FORM] Media mode: picture=${isPictureMode}, audio=${isAudioMode}`);
 
       // PROBLEM 2.2/2.3: Filter available exercises by media type
       const unusedExercises = GENERAL_EXERCISES.filter(ex => {
@@ -353,7 +367,7 @@ export default function WorksheetForm({
       const shuffledUnused = [...unusedExercises].sort(() => Math.random() - 0.5);
       const autoSelected = shuffledUnused.slice(0, remainingSlots);
       finalExercises = [...finalExercises, ...autoSelected];
-      console.log(`🔧 [WORKSHEET-FORM] Auto-completed exercises (media-filtered):`, finalExercises);
+      devLog(`🔧 [WORKSHEET-FORM] Auto-completed exercises (media-filtered):`, finalExercises);
 
       // Update the form state
       setSelectedExercises(finalExercises);
@@ -396,7 +410,7 @@ export default function WorksheetForm({
     };
 
     // Refresh onboarding progress after successful worksheet generation
-    console.log('[WorksheetForm] Triggering onboarding refresh after worksheet generation');
+    devLog('[WorksheetForm] Triggering onboarding refresh after worksheet generation');
     refreshProgress();
     setTimeout(refreshProgress, 1000);
     setTimeout(refreshProgress, 2000);
@@ -412,7 +426,7 @@ export default function WorksheetForm({
 
   // Handle selection mode changes
   const handleModeChange = async (mode: ExerciseSelectionMode) => {
-    console.log(`🔧 [WORKSHEET-FORM] Changing mode to: ${mode}`);
+    devLog(`🔧 [WORKSHEET-FORM] Changing mode to: ${mode}`);
     setSelectionMode(mode);
     setActiveTab('exercises');
     const maxExercises = lessonTime === '45min' ? 6 : 8;
@@ -503,6 +517,29 @@ export default function WorksheetForm({
       title: set[field]
     }));
   };
+
+  // v6.9.10 — apply a Next-Step preset (chip click) into form state.
+  const applyPreset = (p: PresetPayload) => {
+    setLessonTopic(p.topic || '');
+    setLessonGoal(p.goal || '');
+    if (p.additionalInfo || p.grammarFocus) setShowMoreFields(true);
+    setAdditionalInformation(p.additionalInfo || '');
+    setGrammarFocus(p.grammarFocus || '');
+    const norm = normalizeSuggestionPrefill({
+      exercises: p.exercises,
+      focusMap: p.exerciseFocusMap,
+      mediaTypes: p.mediaTypes,
+      lessonTime: lessonTime as '45min' | '60min',
+    });
+    setSelectedMediaTypes(norm.selectedMediaTypes as MediaType[]);
+    setSelectedExercises(norm.selectedExercises);
+    setExerciseFocusMap(norm.exerciseFocusMap);
+    setSelectionMode('manual');
+    setActiveTab('exercises');
+    sessionStorage.setItem('appliedPresetSuggestionId', p.sourceSuggestionId);
+    toast({ title: 'Preset applied', description: 'Review fields and generate.' });
+  };
+
   return <div className={`w-full ${isMobile ? 'py-2' : 'py-[24px]'}`}>
       <Card className="bg-card/88 backdrop-blur-sm border-border/60 shadow-lg">
         <CardContent className={`${isMobile ? 'p-3' : 'p-8'}`}>
@@ -599,6 +636,16 @@ export default function WorksheetForm({
                   <FormField label="Grammar focus" placeholder={currentPlaceholders.grammarFocus} value={grammarFocus} onChange={setGrammarFocus} suggestions={createSuggestionTiles('grammarFocus')} isOptional={true} />
                 </div>}
 
+              {/* v6.9.10 — Next-Step preset banner (per selected student) */}
+              {userId && selectedStudentId !== 'no-student' && (
+                <NextStepsPresetBanner
+                  studentId={selectedStudentId}
+                  studentName={students.find(s => s.id === selectedStudentId)?.name}
+                  teacherId={userId}
+                  onApplyPreset={applyPreset}
+                />
+              )}
+
               {/* Exercise Selection Cards */}
               <div className="mb-6">
                 {/* Card Headers in One Line with Student Selector */}
@@ -606,18 +653,38 @@ export default function WorksheetForm({
                   
                   {/* Student Selection - Lock icon for anonymous/no students, dropdown for authenticated with students */}
                   {userId && students.length > 0 ? (
-                    <div className={`${isMobile ? 'w-full' : 'w-[23%]'} flex items-center`}>
+                    <div className={`${isMobile ? 'w-full' : 'w-[23%]'} flex flex-col justify-center`}>
                       <Select value={selectedStudentId} onValueChange={setSelectedStudentId}>
-                        <SelectTrigger className="w-full h-full">
-                          <SelectValue placeholder="No specific student" />
+                        <SelectTrigger
+                          className={`w-full ${selectedStudentId === 'no-student'
+                            ? 'border-amber-400 ring-1 ring-amber-300 bg-amber-50/40 dark:bg-amber-900/10'
+                            : ''}`}
+                        >
+                          <SelectValue placeholder="Choose a student" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="no-student">No specific student</SelectItem>
+                          <SelectItem value="no-student">No student (generic)</SelectItem>
                           {students.map(student => <SelectItem key={student.id} value={student.id}>
-                              {student.name} ({student.english_level})
+                              <span className="truncate">{student.name} ({student.english_level})</span>
                             </SelectItem>)}
                         </SelectContent>
                       </Select>
+                      {selectedStudentId === 'no-student' && (
+                        <p className="text-[11px] text-amber-700 dark:text-amber-300 mt-1 leading-tight">
+                          Pick a student to unlock personalized goals, level, and Next Steps.
+                        </p>
+                      )}
+                    </div>
+                  ) : userId ? (
+                    <div className={`${isMobile ? 'w-full' : 'w-[23%]'} flex items-center`}>
+                      <a
+                        href="/dashboard?action=add-student"
+                        className="w-full h-full flex items-center gap-2 px-3 py-2 border-2 border-dashed border-primary/40 rounded-md bg-primary/5 hover:bg-primary/10 text-primary text-sm font-medium transition-colors"
+                        title="Add your first student"
+                      >
+                        <Plus className="h-4 w-4 flex-shrink-0" />
+                        <span className="truncate">Add your first student</span>
+                      </a>
                     </div>
                   ) : (
                     <TooltipProvider>
@@ -626,14 +693,12 @@ export default function WorksheetForm({
                           <div className={`${isMobile ? 'w-full' : 'w-[23%]'} flex items-center`}>
                             <div className="w-full h-full flex items-center gap-2 px-3 py-2 border rounded-md bg-muted/50 text-muted-foreground cursor-help">
                               <Lock className="h-4 w-4 flex-shrink-0" />
-                              <span className="text-sm truncate">
-                                {userId ? 'Add students first' : 'Student assignment'}
-                              </span>
+                              <span className="text-sm truncate">Student assignment</span>
                             </div>
                           </div>
                         </TooltipTrigger>
                         <TooltipContent side="bottom">
-                          <p>{userId ? '➕ Add students in Dashboard to assign worksheets' : '🔒 Log in to assign worksheets to students'}</p>
+                          <p>🔒 Log in to assign worksheets to students</p>
                         </TooltipContent>
                       </Tooltip>
                     </TooltipProvider>

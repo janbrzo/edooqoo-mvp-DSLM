@@ -11,7 +11,7 @@
  * - Usunięte onOpenChange z Popover - pełna kontrola ręczna
  */
 
-console.log('🎨 DrawingToolButton v3.0 loaded');
+devLog('🎨 DrawingToolButton v3.0 loaded');
 
 import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
@@ -26,6 +26,7 @@ import {
   HIGHLIGHTER_COLORS,
 } from '@/types/drawing';
 import { cn } from '@/lib/utils';
+import { devLog } from '@/utils/logger';
 
 interface DrawingToolButtonProps {
   tool: DrawingTool;
@@ -70,7 +71,7 @@ export const DrawingToolButton = ({
   // NAPRAWKA v3: Zamknij popover gdy narzędzie przestaje być aktywne
   useEffect(() => {
     if (!isActive && isPopoverOpen) {
-      console.log('🎨 [ToolButton] Closing popover - tool deactivated');
+      devLog('🎨 [ToolButton] Closing popover - tool deactivated');
       setIsPopoverOpen(false);
     }
   }, [isActive, isPopoverOpen]);
@@ -80,16 +81,16 @@ export const DrawingToolButton = ({
     e.preventDefault();
     e.stopPropagation();
     
-    console.log('🎨 [ToolButton] Click:', { tool, isActive, hasColorPicker, isPopoverOpen });
+    devLog('🎨 [ToolButton] Click:', { tool, isActive, hasColorPicker, isPopoverOpen });
     
     if (!isActive) {
       // Pierwsze kliknięcie = wybierz narzędzie, NIE otwieraj popover
-      console.log('🎨 [ToolButton] Selecting tool:', tool);
+      devLog('🎨 [ToolButton] Selecting tool:', tool);
       onToolSelect();
       // Popover pozostaje zamknięty
     } else if (hasColorPicker || hasStrokeWidth) {
       // Drugie kliknięcie na aktywne narzędzie = toggle popover
-      console.log('🎨 [ToolButton] Toggle popover:', !isPopoverOpen);
+      devLog('🎨 [ToolButton] Toggle popover:', !isPopoverOpen);
       setIsPopoverOpen(prev => !prev);
     }
   };
@@ -98,14 +99,14 @@ export const DrawingToolButton = ({
   const handleColorSelect = (color: DrawingColor, e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    console.log('🎨 [ToolButton] Color selected:', color.name);
+    devLog('🎨 [ToolButton] Color selected:', color.name);
     onColorChange(color);
     setIsPopoverOpen(false);
   };
 
   // NAPRAWKA v3: Zamknij popover po wyborze grubości (onValueCommit)
   const handleStrokeWidthCommit = (value: number[]) => {
-    console.log('🎨 [ToolButton] StrokeWidth committed:', value[0]);
+    devLog('🎨 [ToolButton] StrokeWidth committed:', value[0]);
     onStrokeWidthChange({ name: `${value[0]}`, value: value[0] });
     setIsPopoverOpen(false);
   };
@@ -160,11 +161,11 @@ export const DrawingToolButton = ({
             onPointerDownOutside={(e) => {
               // NAPRAWKA v3: Zapobiegaj rysowaniu gdy klikamy poza popover
               e.preventDefault();
-              console.log('🎨 [ToolButton] Closing popover - clicked outside');
+              devLog('🎨 [ToolButton] Closing popover - clicked outside');
               setIsPopoverOpen(false);
             }}
             onEscapeKeyDown={() => {
-              console.log('🎨 [ToolButton] Closing popover - escape pressed');
+              devLog('🎨 [ToolButton] Closing popover - escape pressed');
               setIsPopoverOpen(false);
             }}
             onFocusOutside={(e) => {

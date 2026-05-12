@@ -25,7 +25,9 @@ import { AuthenticatedPageShell } from "@/components/AuthenticatedPageShell";
 import PricingTeaser from "@/components/landing/PricingTeaser";
 import AnonPostWorksheetLandingPage from "@/components/anon/AnonPostWorksheetLandingPage";
 import WelcomeBackBanner from "@/components/anon/WelcomeBackBanner";
+import ParticlesBackground from "@/components/landing/ParticlesBackground";
 import { markWorksheetForClaim } from "@/hooks/useWorksheetClaim";
+import { devLog, devWarn } from '@/utils/logger';
 
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
@@ -136,16 +138,16 @@ const Index = () => {
     if (restoredWorksheet) {
       try {
         const worksheet = JSON.parse(restoredWorksheet);
-        console.log('🔄 Restoring worksheet from dashboard:', worksheet);
+        devLog('🔄 Restoring worksheet from dashboard:', worksheet);
         
         let parsedWorksheet = null;
         if (worksheet.ai_response) {
           try {
             parsedWorksheet = JSON.parse(worksheet.ai_response);
-            console.log('✅ Successfully parsed ai_response:', parsedWorksheet);
+            devLog('✅ Successfully parsed ai_response:', parsedWorksheet);
             
             parsedWorksheet = deepFixTextObjects(parsedWorksheet, 'restoredWorksheet');
-            console.log('✅ Successfully fixed {text} objects in restored worksheet');
+            devLog('✅ Successfully fixed {text} objects in restored worksheet');
             
           } catch (parseError) {
             console.error('❌ Failed to parse ai_response:', parseError);
@@ -210,7 +212,7 @@ const Index = () => {
   }
 
   const handleGenerateWorksheet = (data: any) => {
-    console.log('🔍 POPUP DECISION DEBUG:', {
+    devLog('🔍 POPUP DECISION DEBUG:', {
       userId: user?.id,
       isAnonymous,
       isRegisteredUser,
@@ -227,7 +229,7 @@ const Index = () => {
     // dispatches generation with empty topic, abort with explicit feedback
     // instead of starting an empty AI generation.
     if (!data?.lessonTopic || String(data.lessonTopic).trim().length === 0) {
-      console.warn('[Index] handleGenerateWorksheet aborted: empty lessonTopic');
+      devWarn('[Index] handleGenerateWorksheet aborted: empty lessonTopic');
       toast.error('Please enter a lesson topic before generating');
       const topicEl =
         document.querySelector('[name="lessonTopic"]') ||
@@ -247,11 +249,11 @@ const Index = () => {
     const retryCount = (data as any).__tokenRetry || 0;
     if (isRegisteredUser && tokensLoading) {
       if (retryCount >= 2) {
-        console.warn('⏳ Token check still in progress after 2 retries — surfacing soft error');
+        devWarn('⏳ Token check still in progress after 2 retries — surfacing soft error');
         return;
       }
       const delay = retryCount === 0 ? 250 : 500;
-      console.log(`⏳ Token entitlement still resolving — retry ${retryCount + 1}/2 in ${delay}ms`);
+      devLog(`⏳ Token entitlement still resolving — retry ${retryCount + 1}/2 in ${delay}ms`);
       setTimeout(() => handleGenerateWorksheet({ ...data, __tokenRetry: retryCount + 1 }), delay);
       return;
     }
@@ -334,7 +336,8 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen relative bg-gradient-to-br from-background to-secondary/20">
+    <div className="min-h-screen relative">
+      <ParticlesBackground />
       <FreeWeekBanner />
       <WelcomeBackBanner shouldShow={showWelcomeBackModal} />
       
@@ -350,7 +353,7 @@ const Index = () => {
       {!bothWorksheetsReady ? (
         <>
           <HeroHeadline />
-          <div id="worksheet-form" className="scroll-mt-16 bg-gradient-to-b from-background to-secondary/30 pb-16">
+          <div id="worksheet-form" className="scroll-mt-16 pb-16">
             <FormView 
               onSubmit={handleGenerateWorksheet} 
               userId={user?.id || null} 

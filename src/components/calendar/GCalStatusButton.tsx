@@ -28,13 +28,22 @@ export function GCalStatusButton() {
   }
 
   return (
-    <Button variant="outline" size="sm" className="text-xs h-8 relative" onClick={() => navigate('/calendar')}>
-      🗓️ Calendar
-      {unreadCount > 0 && (
-        <Badge className="absolute -top-1.5 -right-1.5 h-4 min-w-4 p-0 flex items-center justify-center text-[10px] bg-destructive text-destructive-foreground border-0">
-          {unreadCount}
-        </Badge>
-      )}
+    <Button asChild variant="outline" size="sm" className="text-xs h-8 relative">
+      <a
+        href="/calendar"
+        onClick={(e) => {
+          if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
+          e.preventDefault();
+          navigate('/calendar');
+        }}
+      >
+        🗓️ Calendar
+        {unreadCount > 0 && (
+          <Badge className="absolute -top-1.5 -right-1.5 h-4 min-w-4 p-0 flex items-center justify-center text-[10px] bg-destructive text-destructive-foreground border-0">
+            {unreadCount}
+          </Badge>
+        )}
+      </a>
     </Button>
   );
 }

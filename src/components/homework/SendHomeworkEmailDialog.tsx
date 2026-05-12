@@ -9,6 +9,7 @@ import { Mail, Loader2, Clock, CheckCircle2, Calendar } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
+import { devLog } from '@/utils/logger';
 
 interface SendHomeworkEmailDialogProps {
   open: boolean;
@@ -76,7 +77,7 @@ export function SendHomeworkEmailDialog({
         
         if (hwRow?.reminder_scheduled_at) {
           const scheduledDate = new Date(hwRow.reminder_scheduled_at);
-          console.log('[SendHomeworkEmailDialog] Updated reminder_scheduled_at:', hwRow.reminder_scheduled_at);
+          devLog('[SendHomeworkEmailDialog] Updated reminder_scheduled_at:', hwRow.reminder_scheduled_at);
           toast.success(`Reminder scheduled for: ${format(scheduledDate, 'MMM dd, yyyy HH:mm')}. Email will be sent automatically.`);
         }
       }
