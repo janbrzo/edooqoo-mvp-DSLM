@@ -53,10 +53,14 @@ export const GenerateStepsDialog: React.FC<GenerateStepsDialogProps> = ({
   // v6.9.14 — Reset every open. Initial count = (need - have) for recommended phase, else defaultCount.
   useEffect(() => {
     if (!open) return;
-    const initialPhaseId = defaultTargetPhaseId ?? FREE_VALUE;
+    // v6.9.15a — guard against stale defaultTargetPhaseId after a phase was deleted.
+    const validId = defaultTargetPhaseId && phaseOptions.some(p => p.id === defaultTargetPhaseId)
+      ? defaultTargetPhaseId
+      : null;
+    const initialPhaseId = validId ?? FREE_VALUE;
     setPhaseValue(initialPhaseId);
     setCountTouched(false);
-    const recPhase = phaseOptions.find(p => p.id === defaultTargetPhaseId);
+    const recPhase = phaseOptions.find(p => p.id === validId);
     const initialCount = recPhase
       ? Math.min(6, Math.max(1, recPhase.need - recPhase.have))
       : defaultCount;
@@ -90,7 +94,10 @@ export const GenerateStepsDialog: React.FC<GenerateStepsDialogProps> = ({
     return `Phase has ${selectedPhase.have}/${selectedPhase.need} steps. Recommended add: ${gap}.`;
   })();
 
-  const recommendedId = defaultTargetPhaseId;
+  // v6.9.15a — only treat as "recommended" if the phase still exists.
+  const recommendedId = defaultTargetPhaseId && phaseOptions.some(p => p.id === defaultTargetPhaseId)
+    ? defaultTargetPhaseId
+    : null;
   const recPhaseForLabel = recommendedId ? phaseOptions.find(p => p.id === recommendedId) : null;
   const phaseRecommendedLabel = recPhaseForLabel
     ? `Phase ${recPhaseForLabel.sequence}: ${recPhaseForLabel.label}`

@@ -154,6 +154,10 @@ export const useFutureTimeline = ({ studentId, teacherId }: UseFutureTimelinePro
       if (response.error) throw response.error;
       const rawSuggestions = response.data?.suggestions || [];
       const generationContext = response.data?.generationContext || {};
+      // v6.9.15a — warn when AI returned fewer than requested (truncation / partial).
+      if (generationContext?.warning && rawSuggestions.length > 0 && rawSuggestions.length < requestedCount) {
+        toast.info(`AI returned only ${rawSuggestions.length}/${requestedCount} steps (${generationContext.warning}). Try a smaller count for full output.`);
+      }
       // Defense in depth: enforce exact count on the client too.
       const newSuggestions = rawSuggestions.slice(0, requestedCount);
       if (newSuggestions.length === 0) {
@@ -219,6 +223,15 @@ export const useFutureTimeline = ({ studentId, teacherId }: UseFutureTimelinePro
         toast.error('AI credits exhausted. Add credits in Workspace settings.');
       } else if (status === 429) {
         toast.error('Too many AI requests. Wait a moment and retry.');
+      } else if (status === 502) {
+        // v6.9.15a — backend now returns 502 for AI Gateway errors with diagnostic detail.
+        const reqCount = opts.count ?? 3;
+        toast.error(
+          reqCount > 1
+            ? 'AI generator overloaded for batch requests — try generating 1 step at a time.'
+            : 'AI generator is temporarily unavailable. Please retry in a moment.',
+          { duration: 7000 }
+        );
       } else if (status === 500) {
         toast.error(
           'Generator returned an error. Try without phase target, or reduce existing steps and retry.',

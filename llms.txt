@@ -150,3 +150,13 @@ Goals → generate-curriculum-phases (macro phases, dslm_curriculum_phases)
 - Locked student selector in WorksheetForm is reserved for ANON users only. Authenticated teachers with zero students get the clickable Add CTA.
 
 **RAG Keywords**: deadline fit goal fallback, curriculum total weeks, type to confirm delete, phases updated event, future timeline 500 cap, generate steps recommended count, dslm always-visible subnav, gcal middle click, worksheet form add first student CTA, generic worksheet label.
+
+## v6.9.15a — Next Steps generator hardening + UX hints
+- `generate-timeline`: dynamic `max_tokens = min(8192, 1800 + 2000 * count)`; AI Gateway errors return 502 with `{status,detail,finish_reason}`; partial output → 200 with `generationContext.warning ∈ {"truncated","partial"}`.
+- `useFutureTimeline`: 502 branch toasts batch-overload guidance; partial-success info toast.
+- `NextStepBanner`: single-row action bar with shortened labels + tooltips; `Remove` is icon-only.
+- `useCurriculumPhases.deletePhase`: shifts `sequence_number -= 1` for phases above deleted seq (no DB migration).
+- `GenerateStepsDialog`: validates stale `defaultTargetPhaseId` against current `phaseOptions`.
+- `WorksheetForm`: new `StudentContextHint` (3 variants) + `useStudentNextStepsCount` hook.
+
+**RAG Keywords**: generate-timeline batch 500, max_tokens dynamic, finish_reason truncated, phase delete renumber sequence_number, GenerateStepsDialog stale phaseId, StudentContextHint no-students no-selection no-next-steps, useStudentNextStepsCount.

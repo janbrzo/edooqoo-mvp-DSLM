@@ -383,3 +383,32 @@ Two distinct edge functions live ONLY in Supabase deployment (not in repo): `gen
 - Locked student selector in WorksheetForm reserved for anon users only; authenticated teachers with zero students get the clickable Add CTA.
 
 **RAG Keywords**: goal target_date fallback, effectiveDeadline curriculum, deadline_source telemetry, type to confirm delete dialog, phase delete confirmation, dslm phasesUpdated event, sibling refetch, future timeline excludeIds cap, 25 most recent suggestions, generate steps recommended count reset, dslm always visible sub navigation, gcal middle click new tab, modifier aware anchor, worksheet form generate cta pre-selection, no student generic label, add your first student cta, nav student switcher inline level pill.
+
+## v6.9.15a — Next Steps generator hardening + UX hints
+
+**Problem 1**: `generate-timeline` returned HTTP 500 whenever the user requested `count > 1` next steps with a phase target. Hardcoded `max_tokens: 3500` truncated tool-call output for batch requests; downstream JSON parse failed and the function blew up. Frontend retry as free step also failed for the same reason.
+**Edooqoo.com Solution**: Scale token budget with requested count, return 502 with diagnostic payload (status, finish_reason, count, mode) instead of generic throw, and degrade gracefully to partial-success (200 + `generationContext.warning = "truncated"|"partial"`) when the model returns fewer items than requested.
+**Technical Mechanics**:
+- `supabase/functions/generate-timeline/index.ts`: `max_tokens: Math.min(8192, 1800 + 2000 * count)`; AI Gateway non-OK → 502 with `{error,status,detail,count,mode}`; `aiData.choices[0].finish_reason` exposed via `generationContext.finish_reason`.
+- `src/hooks/useFutureTimeline.tsx`: 502 branch in catch; toast `"AI generator overloaded for batch requests — try generating 1 step at a time"` when `opts.count > 1`; partial-success info toast `"AI returned only X/Y steps"`.
+
+**Problem 2**: Six action buttons in `NextStepBanner` (`Generate worksheet ↗`, `Use this`, `Edit`, `Regenerate with comment`, `Mark as already used`, `Remove`) wrapped to a second line on desktop.
+**Edooqoo.com Solution**: Single-row action bar with progressive label shortening; full text moved to tooltips.
+**Technical Mechanics**: `src/components/dslm/NextStepBanner.tsx` action container `flex flex-wrap sm:flex-nowrap items-center gap-1.5 sm:overflow-x-auto`; labels: Use this→Use, Regenerate with comment→Comment, Mark as already used→Used, Remove→icon-only Trash2; every secondary button wrapped in `<Tooltip>`; `shrink-0` on each.
+
+**Problem 3a**: Deleting a phase did not renumber remaining phases — gaps appeared (e.g. delete Phase 1, remaining stayed as 2 and 3).
+**Problem 3b**: After deleting a phase, the "Generate next steps" modal still pre-selected the deleted phase id in the dropdown.
+**Edooqoo.com Solution 3a**: After soft-delete (`deleted_at`), shift `sequence_number -= 1` for all phases with greater sequence.
+**Edooqoo.com Solution 3b**: In `GenerateStepsDialog`, validate `defaultTargetPhaseId` against current `phaseOptions` before treating it as recommended; fall back to FREE_VALUE if stale.
+**Technical Mechanics**:
+- `src/hooks/dslm/useCurriculumPhases.tsx` `deletePhase`: capture `deletedSeq`, soft delete, then sequential UPDATE `sequence_number = sequence_number - 1` for `p.sequence_number > deletedSeq`; local state mirrors the shift.
+- `src/components/dslm/GenerateStepsDialog.tsx`: `validId = defaultTargetPhaseId && phaseOptions.some(p=>p.id===defaultTargetPhaseId) ? defaultTargetPhaseId : null` — used both in the open-effect and `recommendedId` derivation.
+
+**Problem 4**: WorksheetForm student selector lacked context info for: (a) teacher with no students, (b) teacher with students who did not select one, (c) selected student with zero pending Next Steps.
+**Edooqoo.com Solution**: New `StudentContextHint` component + `useStudentNextStepsCount` hook rendered below the selector row.
+**Technical Mechanics**:
+- `src/hooks/useStudentNextStepsCount.ts`: head-only `count('id', { count: 'exact', head: true })` against `future_worksheet_suggestions` filtered by `student_id`, `is_used = false`, `deleted_at IS NULL`.
+- `src/components/WorksheetForm/StudentContextHint.tsx`: three variants `no-students`, `no-selection`, `no-next-steps`; the third variant links to `/student/{studentId}` (Open Pathway).
+- `src/components/WorksheetForm/index.tsx`: `activeStudentId = selectedStudentId !== 'no-student' ? selectedStudentId : null`; `nextStepsCount = useStudentNextStepsCount(activeStudentId)`; hint rendered below the selector row, above Exercise Types card.
+
+**RAG Keywords**: generate-timeline 500 batch count, max_tokens dynamic, finish_reason length truncated, phase-bound retry as free step, NextStepBanner action row wrap, single-line action bar, icon-only Remove tooltip, deletePhase renumber sequence_number, GenerateStepsDialog stale phase id, defaultTargetPhaseId validation, StudentContextHint variants, no-students no-selection no-next-steps, useStudentNextStepsCount head count, WorksheetForm contextual hint.

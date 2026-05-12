@@ -17,6 +17,8 @@ import { useOnboardingProgress } from "@/hooks/useOnboardingProgress";
 import { useWorksheetFormPersistence, type WorksheetDraft } from "@/hooks/useWorksheetFormPersistence";
 import { normalizeSuggestionPrefill } from "@/lib/dslm/normalizeSuggestionPrefill";
 import { NextStepsPresetBanner, type PresetPayload } from "./NextStepsPresetBanner";
+import { StudentContextHint } from "./StudentContextHint";
+import { useStudentNextStepsCount } from "@/hooks/useStudentNextStepsCount";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Shuffle, Brain, MousePointer, ChevronDown, Image, Headphones, Lock, Eraser, Plus } from "lucide-react";
 import { devLog, devWarn } from '@/utils/logger';
@@ -90,6 +92,10 @@ export default function WorksheetForm({
   const {
     refreshProgress
   } = useOnboardingProgress();
+
+  // v6.9.15a — pending Next Steps count for the currently selected student (powers StudentContextHint).
+  const activeStudentId = selectedStudentId !== 'no-student' ? selectedStudentId : null;
+  const nextStepsCount = useStudentNextStepsCount(activeStudentId);
 
   // Build current draft snapshot for persistence (24h localStorage TTL).
   const draftSnapshot: WorksheetDraft = {
@@ -843,6 +849,17 @@ export default function WorksheetForm({
                     </div>
                   </Card>
                 </div>
+
+                {/* v6.9.15a — Contextual hint about student selection state */}
+                {userId && students.length === 0 && (
+                  <StudentContextHint variant="no-students" />
+                )}
+                {userId && students.length > 0 && selectedStudentId === 'no-student' && (
+                  <StudentContextHint variant="no-selection" />
+                )}
+                {userId && activeStudentId && nextStepsCount === 0 && (
+                  <StudentContextHint variant="no-next-steps" studentId={activeStudentId} />
+                )}
 
                 {/* Card Content - Full Width Below Headers */}
                 {activeTab === 'exercises' && <Card className="border-2 border-worksheet-purple">
