@@ -378,6 +378,12 @@ Adult/professional tone. No school-like content. CLT anchoring mandatory.`;
       goals_count: goals.length,
       knowledge_count: knowledge.length,
       generated_at: new Date().toISOString(),
+      // v6.9.15a — surface partial-success / truncation so frontend can warn the user.
+      finish_reason: finishReason || null,
+      warning: suggestions.length < count
+        ? (finishReason === 'length' ? 'truncated' : 'partial')
+        : null,
+      requested_count: count,
     };
 
     console.log('generate-timeline:', finalMode, 'returned', suggestions.length, 'suggestions');
