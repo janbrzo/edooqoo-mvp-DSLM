@@ -17,6 +17,8 @@ import { useOnboardingProgress } from "@/hooks/useOnboardingProgress";
 import { useWorksheetFormPersistence, type WorksheetDraft } from "@/hooks/useWorksheetFormPersistence";
 import { normalizeSuggestionPrefill } from "@/lib/dslm/normalizeSuggestionPrefill";
 import { NextStepsPresetBanner, type PresetPayload } from "./NextStepsPresetBanner";
+import { StudentContextHint } from "./StudentContextHint";
+import { useStudentNextStepsCount } from "@/hooks/useStudentNextStepsCount";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Shuffle, Brain, MousePointer, ChevronDown, Image, Headphones, Lock, Eraser, Plus } from "lucide-react";
 import { devLog, devWarn } from '@/utils/logger';
