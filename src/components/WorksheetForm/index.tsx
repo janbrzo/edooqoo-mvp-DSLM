@@ -93,6 +93,10 @@ export default function WorksheetForm({
     refreshProgress
   } = useOnboardingProgress();
 
+  // v6.9.15a — pending Next Steps count for the currently selected student (powers StudentContextHint).
+  const activeStudentId = selectedStudentId !== 'no-student' ? selectedStudentId : null;
+  const nextStepsCount = useStudentNextStepsCount(activeStudentId);
+
   // Build current draft snapshot for persistence (24h localStorage TTL).
   const draftSnapshot: WorksheetDraft = {
     lessonTime, lessonTopic, lessonGoal, grammarFocus, additionalInformation,
