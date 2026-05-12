@@ -850,6 +850,17 @@ export default function WorksheetForm({
                   </Card>
                 </div>
 
+                {/* v6.9.15a — Contextual hint about student selection state */}
+                {userId && students.length === 0 && (
+                  <StudentContextHint variant="no-students" />
+                )}
+                {userId && students.length > 0 && selectedStudentId === 'no-student' && (
+                  <StudentContextHint variant="no-selection" />
+                )}
+                {userId && activeStudentId && nextStepsCount === 0 && (
+                  <StudentContextHint variant="no-next-steps" studentId={activeStudentId} />
+                )}
+
                 {/* Card Content - Full Width Below Headers */}
                 {activeTab === 'exercises' && <Card className="border-2 border-worksheet-purple">
                     <div className="p-4">
