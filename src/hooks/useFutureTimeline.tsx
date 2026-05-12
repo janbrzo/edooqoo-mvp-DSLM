@@ -225,8 +225,9 @@ export const useFutureTimeline = ({ studentId, teacherId }: UseFutureTimelinePro
         toast.error('Too many AI requests. Wait a moment and retry.');
       } else if (status === 502) {
         // v6.9.15a — backend now returns 502 for AI Gateway errors with diagnostic detail.
+        const reqCount = opts.count ?? 3;
         toast.error(
-          requestedCount > 1
+          reqCount > 1
             ? 'AI generator overloaded for batch requests — try generating 1 step at a time.'
             : 'AI generator is temporarily unavailable. Please retry in a moment.',
           { duration: 7000 }
