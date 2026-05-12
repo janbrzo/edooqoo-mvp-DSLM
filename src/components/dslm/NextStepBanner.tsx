@@ -146,10 +146,11 @@ export const NextStepBanner: React.FC<NextStepBannerProps> = ({
             </div>
           )}
 
-          <div className="flex flex-wrap gap-2 pt-1">
+          {/* v6.9.15a — single-row action bar; secondary actions shrink to icon+short label, full text in tooltips. */}
+          <div className="flex flex-wrap sm:flex-nowrap items-center gap-1.5 pt-1 sm:overflow-x-auto">
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button size="sm" className="bg-white text-blue-700 hover:bg-white/90 h-8" onClick={() => onUseAndGenerate(suggestion)}>
+                <Button size="sm" className="bg-white text-blue-700 hover:bg-white/90 h-8 shrink-0" onClick={() => onUseAndGenerate(suggestion)}>
                   Generate worksheet ↗
                 </Button>
               </TooltipTrigger>
@@ -157,42 +158,63 @@ export const NextStepBanner: React.FC<NextStepBannerProps> = ({
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button size="sm" variant="ghost" className="text-primary-foreground hover:bg-white/20 h-8" onClick={() => onUse(suggestion)}>
-                  <ClipboardCopy className="h-3.5 w-3.5 mr-1" /> Use this
+                <Button size="sm" variant="ghost" className="text-primary-foreground hover:bg-white/20 h-8 px-2 shrink-0" onClick={() => onUse(suggestion)}>
+                  <ClipboardCopy className="h-3.5 w-3.5 mr-1" /> Use
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>Copy to form & edit before generating</TooltipContent>
+              <TooltipContent>Use this — copy to form &amp; edit before generating</TooltipContent>
             </Tooltip>
-            <Button size="sm" variant="ghost" className="text-primary-foreground hover:bg-white/20 h-8" onClick={() => onEdit(suggestion)}>
-              <Edit className="h-3.5 w-3.5 mr-1" /> Edit
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button size="sm" variant="ghost" className="text-primary-foreground hover:bg-white/20 h-8 px-2 shrink-0" onClick={() => onEdit(suggestion)}>
+                  <Edit className="h-3.5 w-3.5 mr-1" /> Edit
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Edit suggestion details</TooltipContent>
+            </Tooltip>
             {onRegenerateWithComment && (
-              <Button
-                size="sm" variant="ghost"
-                className="text-primary-foreground hover:bg-white/20 h-8"
-                onClick={() => onRegenerateWithComment(suggestion)}
-                disabled={generating}
-              >
-                <MessageSquarePlus className="h-3.5 w-3.5 mr-1" /> Regenerate with comment
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="sm" variant="ghost"
+                    className="text-primary-foreground hover:bg-white/20 h-8 px-2 shrink-0"
+                    onClick={() => onRegenerateWithComment(suggestion)}
+                    disabled={generating}
+                  >
+                    <MessageSquarePlus className="h-3.5 w-3.5 mr-1" /> Comment
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Regenerate with comment</TooltipContent>
+              </Tooltip>
             )}
             {onMarkUsed && (
-              <Button
-                size="sm" variant="ghost"
-                className="text-primary-foreground hover:bg-white/20 h-8"
-                onClick={() => onMarkUsed(suggestion.id)}
-              >
-                <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Mark as already used
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="sm" variant="ghost"
+                    className="text-primary-foreground hover:bg-white/20 h-8 px-2 shrink-0"
+                    onClick={() => onMarkUsed(suggestion.id)}
+                  >
+                    <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Used
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Mark as already used</TooltipContent>
+              </Tooltip>
             )}
             {onDelete && (
-              <Button
-                size="sm" variant="ghost"
-                className="text-primary-foreground hover:bg-white/20 h-8"
-                onClick={() => setConfirmDeleteOpen(true)}
-              >
-                <Trash2 className="h-3.5 w-3.5 mr-1" /> Remove
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="icon" variant="ghost"
+                    className="text-primary-foreground hover:bg-white/20 h-8 w-8 shrink-0"
+                    onClick={() => setConfirmDeleteOpen(true)}
+                    aria-label="Remove"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Remove</TooltipContent>
+              </Tooltip>
             )}
           </div>
 
