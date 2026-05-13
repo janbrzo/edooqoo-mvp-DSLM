@@ -21,6 +21,7 @@ import { Check, ChevronDown, Sparkles, Loader2, Plus, Edit2, Trash2, Map, Messag
 import { cn } from '@/lib/utils';
 import { computePhaseConfidence } from '@/lib/dslm/confidenceScore';
 import { ConfidenceBadge } from './ConfidenceBadge';
+import { ConfirmTypeToDeleteDialog } from './ConfirmTypeToDeleteDialog';
 
 /**
  * v6.9.12 — Recommend 1 step per week of the phase length, clamped 1–6.
@@ -523,20 +524,26 @@ export const MacroTimeline: React.FC<MacroTimelineProps> = ({
       </Dialog>
 
       {/* Phase delete confirmation */}
-      <Dialog open={!!deletingPhase} onOpenChange={(o) => !o && setDeletingPhase(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Delete {deletingPhase ? `Phase ${deletingPhase.sequence_number}: ${deletingPhase.title}` : 'phase'}?</DialogTitle>
-            <DialogDescription>
-              Removing a phase deletes its plan and unlinks any phase-bound next steps. This cannot be undone.
-            </DialogDescription>
-          </DialogHeader>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setDeletingPhase(null)}>Cancel</Button>
-            <Button variant="destructive" onClick={async () => { if (deletingPhase) await deletePhase(deletingPhase.id); setDeletingPhase(null); }}>Delete</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* v6.9.15b — type-to-confirm delete (per project memory: ConfirmTypeToDeleteDialog
+          is required for any destructive curriculum/step action). */}
+      {deletingPhase && (
+        <ConfirmTypeToDeleteDialog
+          open={!!deletingPhase}
+          onOpenChange={(o) => !o && setDeletingPhase(null)}
+          label={`Phase ${deletingPhase.sequence_number}`}
+          expectedText={`Phase ${deletingPhase.sequence_number}`}
+          description="Removing a phase deletes its plan and unlinks any phase-bound next steps. This cannot be undone."
+          onConfirm={async () => {
+            const id = deletingPhase.id;
+            await deletePhase(id);
+            // v6.9.15b — clear local UI state tied to the deleted phase id.
+            if (expandedPhaseId === id) setExpandedPhaseId(null);
+            setPhaseQuickCount(p => { const { [id]: _, ...rest } = p; return rest; });
+            setPhaseStepsOpen(p => { const { [id]: _, ...rest } = p; return rest; });
+            setDeletingPhase(null);
+          }}
+        />
+      )}
     </div>
   );
 };
