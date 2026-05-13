@@ -160,3 +160,14 @@ Goals → generate-curriculum-phases (macro phases, dslm_curriculum_phases)
 - `WorksheetForm`: new `StudentContextHint` (3 variants) + `useStudentNextStepsCount` hook.
 
 **RAG Keywords**: generate-timeline batch 500, max_tokens dynamic, finish_reason truncated, phase delete renumber sequence_number, GenerateStepsDialog stale phaseId, StudentContextHint no-students no-selection no-next-steps, useStudentNextStepsCount.
+
+## v6.9.15b — generate-timeline schema fix + phase sync hardening
+- `generate-timeline`: removed enums and item bounds from AI tool schema (Gemini "too many states" rejection on count>1). Backend sanitizer remains authoritative. Non-OK responses include `schemaRejected: boolean`.
+- `useFutureTimeline`: 502 toast distinguishes schema rejection from generic gateway failure.
+- `useCurriculumPhases`: `dslm:phasesUpdated` emitted after every mutation; `deletePhase` now refetches and reassigns `sequence_number = idx + 1` deterministically.
+- `PathwayView.onGenerateMore`: validates `phaseId` against current `phaseOptions` to block stale ids from open dialogs.
+- `MacroTimeline`: phase delete uses `ConfirmTypeToDeleteDialog` (`expectedText="Phase {seq}"`); local UI state for the deleted id is cleared post-confirm.
+- `NextStepBanner`: labels restored to `Use this Step` and `Regenerate with comment`.
+- `WorksheetForm`: removed redundant `StudentContextHint variant="no-next-steps"` (`NextStepsPresetBanner` already covers the same case).
+
+**RAG Keywords**: Gemini schema too many states, INVALID_ARGUMENT, schemaRejected, generate-timeline batch 502, dslm:phasesUpdated every mutation, deterministic phase renumber, ConfirmTypeToDeleteDialog phase, NextStepBanner Use this Step, WorksheetForm duplicate hint removal.
