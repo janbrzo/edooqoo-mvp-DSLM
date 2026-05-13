@@ -180,8 +180,9 @@ TBLT TITLE RULE: 'topic' is a real adult task, not a grammar label.
 
 Return EXACTLY ${count} suggestions. NO MORE, NO LESS. The tool call schema enforces minItems=maxItems=${count}. Each suggestion must include:
 - topic (TBLT-style adult task), goal (outcome the student can perform after), additionalInfo, grammarFocus
-- exercises: array of EXACTLY ${LESSON_EXERCISE_COUNT} exercise types from this list ONLY: ${VALID_EXERCISES.join(', ')}
-- exerciseFocusMap: object mapping each exercise type to "vocabulary" | "grammar" | "none" (one entry PER exercise)
+- exercises: array of EXACTLY ${LESSON_EXERCISE_COUNT} exercise IDs from this allowed list ONLY: ${VALID_EXERCISES.join(', ')}
+  Backend will validate, normalize, and pad/truncate to exactly ${LESSON_EXERCISE_COUNT}.
+- exerciseFocusMap: object mapping each exercise ID to one of "vocabulary" | "grammar" | "none"
 
 MEDIA FAMILY RULE: each suggestion may use AT MOST ONE media family — picture-* OR audio-* OR none. Never mix picture and audio in the same step.
 
@@ -220,10 +221,14 @@ Adult/professional tone. No school-like content. CLT anchoring mandatory.`;
                       goal: { type: 'string' },
                       additionalInfo: { type: 'string' },
                       grammarFocus: { type: 'string' },
-                      exercises: { type: 'array', items: { type: 'string', enum: VALID_EXERCISES }, minItems: 8, maxItems: 8 },
+                      // v6.9.15b — schema simplified: no enum, no minItems/maxItems.
+                      // Google AI Studio rejected the previous constrained schema with
+                      // INVALID_ARGUMENT "too many states for serving" when count > 1.
+                      // Backend sanitizer below enforces all hard constraints.
+                      exercises: { type: 'array', items: { type: 'string' } },
                       exerciseFocusMap: {
                         type: 'object',
-                        additionalProperties: { type: 'string', enum: FOCUS_VALUES as unknown as string[] }
+                        additionalProperties: { type: 'string' }
                       },
                       rationale: { type: 'string' },
                       focusSkills: { type: 'array', items: { type: 'string' } },
@@ -232,8 +237,6 @@ Adult/professional tone. No school-like content. CLT anchoring mandatory.`;
                     },
                     required: ['topic', 'exercises']
                   },
-                  minItems: count,
-                  maxItems: count,
                 }
               },
               required: ['suggestions']
@@ -250,11 +253,15 @@ Adult/professional tone. No school-like content. CLT anchoring mandatory.`;
     if (!aiResponse.ok) {
       const errorText = await aiResponse.text();
       console.error('AI Gateway error:', errorText);
+      // v6.9.15b — surface schema-rejection cause to the frontend so it can
+      // show a precise toast instead of generic 5xx.
+      const isSchemaRejection = /too many states|INVALID_ARGUMENT/i.test(errorText);
       return new Response(
         JSON.stringify({
-          error: 'AI Gateway error',
+          error: isSchemaRejection ? 'AI schema rejected' : 'AI Gateway error',
           status: aiResponse.status,
           detail: errorText.slice(0, 500),
+          schemaRejected: isSchemaRejection,
           count,
           mode: finalMode,
           suggestions: [],
