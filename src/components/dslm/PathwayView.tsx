@@ -264,11 +264,16 @@ export const PathwayView: React.FC<PathwayViewProps> = ({
         defaultTargetPhaseId={recommendedTargetPhaseId}
         showPhaseSelector={useRoadmap}
         onGenerateMore={(count, excludeIds, phaseId) =>
-          generateNextSteps({
-            mode: excludeIds.length > 0 ? 'add' : 'replace',
-            count, excludeIds,
-            phaseId: useRoadmap ? phaseId : null,
-          })
+          {
+            // v6.9.15b — final guard against stale phaseId from a dialog opened
+            // before a phase deletion landed in this hook instance.
+            const validPhaseId = phaseId && phaseOptions.some(p => p.id === phaseId) ? phaseId : null;
+            return generateNextSteps({
+              mode: excludeIds.length > 0 ? 'add' : 'replace',
+              count, excludeIds,
+              phaseId: useRoadmap ? validPhaseId : null,
+            });
+          }
         }
         onRegenerateOne={regenerateOne}
       />

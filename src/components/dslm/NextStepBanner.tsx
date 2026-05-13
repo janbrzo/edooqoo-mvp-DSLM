@@ -159,7 +159,7 @@ export const NextStepBanner: React.FC<NextStepBannerProps> = ({
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button size="sm" variant="ghost" className="text-primary-foreground hover:bg-white/20 h-8 px-2 shrink-0" onClick={() => onUse(suggestion)}>
-                  <ClipboardCopy className="h-3.5 w-3.5 mr-1" /> Use
+                  <ClipboardCopy className="h-3.5 w-3.5 mr-1" /> Use this Step
                 </Button>
               </TooltipTrigger>
               <TooltipContent>Use this — copy to form &amp; edit before generating</TooltipContent>
@@ -181,7 +181,7 @@ export const NextStepBanner: React.FC<NextStepBannerProps> = ({
                     onClick={() => onRegenerateWithComment(suggestion)}
                     disabled={generating}
                   >
-                    <MessageSquarePlus className="h-3.5 w-3.5 mr-1" /> Comment
+                    <MessageSquarePlus className="h-3.5 w-3.5 mr-1" /> Regenerate with comment
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>Regenerate with comment</TooltipContent>
