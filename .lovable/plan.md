@@ -1,233 +1,497 @@
-## Plan v6.9.15a — naprawa Next Steps + przywrócenie generateWorksheet
+# Plan wdrożenia v6.9.15b
 
-Cel: rozwiązać 4 błędy z bieżącego ekranu Pathway/Next Steps oraz dać Ci dokładną instrukcję przywrócenia promptu `generateWorksheet` do repo. Zero zmian w działającym promptcie worksheet (Sanctity), zmiany w `generate-timeline` ograniczone do mechaniki (token budget, walidacja, lepsze błędy) — bez przepisywania wordingu.
+## Diagnoza główna
 
----
+Poprzednia poprawka dla `generate-timeline` celowała w zbyt mały `max_tokens`, ale aktualne logi Supabase pokazują inną przyczynę błędu 502:
 
-### Problem 1 — `generate-timeline` zwraca 500 dla `count > 1` przy phase target
-
-**Diagnoza (potwierdzona w kodzie):**
-
-- `supabase/functions/generate-timeline/index.ts` linia 245 ma `max_tokens: 3500` na sztywno.
-- Jedna sugestia = ~800–1100 tokenów (8 exercises + focus map + rationale + estimatedImpact + grammar). Tool-calling Gemini 2.5 Flash dolicza tokeny rozumowania.
-- Dla `count=1` mieści się; dla `count≥2` model trafia w `finish_reason: "length"` → tool call jest niekompletny → `JSON.parse` rzuca → catch ustawia `suggestions = []` → po sanityzacji 0 sugestii. Ale `throw` na tool error nie ma — więc skąd 500? 500 leci, gdy `aiResponse.ok === false` (przekroczenie limitu tokenów wyjściowych po stronie gateway także zwraca błąd, a model przy `tool_choice: required` + obciętym output rzuca też 4xx/5xx). Druga przyczyna 500: timeout edge function przy `count=3` z dużym promptem.
-- Ścieżka błędu w UI: `useFutureTimeline` linie 142–152 — gdy phase-bound 500, retry jako `next_steps` (też 500 z tej samej przyczyny) → toast „Generator returned an error".
-
-**Edooqoo.com Solution (mechanika, bez ruszania wordingu promptu):**
-
-A. **Dynamiczny `max_tokens**` w `generate-timeline/index.ts` linia 245:
-
-```ts
-max_tokens: Math.min(8192, 1800 + 2000 * count),
+```text
+Google AI Studio INVALID_ARGUMENT:
+"The specified schema produces a constraint that has too many states for serving..."
 ```
 
-Dla `count=1` → 3800, `count=3` → 7800, `count=6` → 8192. Gemini 2.5 Flash dopuszcza do 8192 wyjściowych.
+To oznacza, że Gemini odrzuca zbyt złożony `tools.function.parameters` schema, szczególnie przy `count > 1`: mamy tablicę sugestii z `minItems=maxItems=count`, każda sugestia ma tablicę 8 ćwiczeń z dużym `enum`, plus `exerciseFocusMap` z enumami. Problem nie jest w UI ani w fazach — serwer odrzuca sam kontrakt schema zanim realnie wygeneruje wynik.
 
-B. **Diagnostyka błędu** — zamiast `throw new Error('AI Gateway error: ...')` zwróć `502` z payloadem `{ error, status, finish_reason, raw_message_preview, count, mode }`. To pozwoli w przyszłości zobaczyć dokładną przyczynę bez polowania w logach.
+## Dlaczego to rozwiązanie
 
-C. **Wykrycie obciętego tool-call** — po `JSON.parse` w bloku catch dodaj log `finish_reason` z `aiData.choices[0].finish_reason`. Jeśli `length`, zwróć dedykowany komunikat: `"AI output truncated — try lower count"`.
+Najbezpieczniej nie zmieniać dydaktycznej logiki Next Steps, tylko uprościć techniczny format odpowiedzi AI i zostawić walidację po stronie naszego Edge Function. To skaluje lepiej, bo model nie musi obsługiwać ciężkiego constrained schema, a aplikacja nadal sama wymusza: poprawne exercise IDs, dokładnie 8 ćwiczeń, jeden typ mediów, focus tags i licznik sugestii.
 
-D. **Walidacja minItems przy braku sugestii** — jeśli po sanityzacji `suggestions.length < count`, zwróć `200` z tym co jest + ostrzeżenie w `generationContext.warning = "partial"` zamiast 500. Frontend już ma `slice(0, requestedCount)` (useFutureTimeline:158), więc partial OK.
+Alternatywy rozważone:
 
-E. **Frontend `useFutureTimeline**` (linie 141–153): gdy retry jako free step też failuje, pokaż konkretny toast `"AI generator overloaded — try generating 1 step at a time"` zamiast generycznego błędu.
+1. **Generowanie pojedynczo w pętli `count` razy**
+   - Plus: omija batch schema.
+   - Minus: więcej zapytań AI, większy koszt, wolniej, trudniejsza spójność między krokami.
 
-**Świadomie pominięte:** zmiana modelu, asynchroniczne kolejki, `EdgeRuntime.waitUntil` (overkill — problem to tylko token budget). Wording promptu nietknięty.
+2. **Kolejka/background worker**
+   - Plus: najlepsze dla timeoutów.
+   - Minus: tu logi pokazują `INVALID_ARGUMENT`, nie timeout; kolejka dodałaby migracje i złożoność bez naprawy root cause.
 
----
-
-### Problem 2 — pasek akcji w `NextStepBanner` łamie się do drugiej linii
-
-**Diagnoza:** `src/components/dslm/NextStepBanner.tsx` linie 149–197. Sześć przycisków (`Generate worksheet ↗`, `Use this`, `Edit`, `Regenerate with comment`, `Mark as already used`, `Remove`) z pełnymi etykietami + ikona, w kontenerze `flex flex-wrap gap-2`. Przy szerokości karty ~860 px sumaryczna szerokość przekracza dostępne miejsce → `Remove` ląduje w drugim wierszu.
-
-**Edooqoo.com Solution:** progresywne skracanie etykiet drugorzędnych akcji — primary CTA (`Generate worksheet ↗`) zostaje pełna, reszta przechodzi w warianty „icon + krótki label" z tooltipem zachowującym pełny opis.
-
-Zmiany w `NextStepBanner.tsx` linie 149–197:
-
-- Kontener: `flex flex-wrap gap-2 pt-1` → `flex flex-nowrap items-center gap-1.5 pt-1 overflow-x-auto` (na desktop powinno się zmieścić bez scrolla; mobile dostaje horizontal scroll zamiast łamania).
-- `Use this` → `Use` (pozostaje ikona ClipboardCopy).
-- `Regenerate with comment` → `Comment` (ikona MessageSquarePlus zostaje, tooltip „Regenerate with comment").
-- `Mark as already used` → `Used` (ikona CheckCircle2, tooltip „Mark as already used").
-- `Remove` → tylko ikona Trash2 z tooltipem `Remove` (size="icon", `h-8 w-8`).
-- Wszystkie drugorzędne przyciski: `className="text-primary-foreground hover:bg-white/20 h-8 px-2 shrink-0"`.
-- Owinąć każdy w `<Tooltip>` (już jest TooltipProvider w komponencie).
-
-**Mobile fallback:** zachowane `flex-wrap` poniżej `sm`: dodać `sm:flex-nowrap`.
+3. **Wybrana ścieżka: uproszczenie AI response schema + backend sanitizer**
+   - Plus: najmniejsza zmiana, bez migracji, bez naruszania worksheet engine, zachowuje obecną architekturę.
+   - Minus: odpowiedź AI może być mniej rygorystyczna, więc backend sanitizer musi być źródłem prawdy.
 
 ---
 
-### Problem 3 — po usunięciu fazy modal sugeruje usuniętą fazę + numeracja nie przeskakuje
+# Problem 1: `generate-timeline` 502 przy generowaniu więcej niż 1 Next Step
 
-**Diagnoza A (stale phase w modalu):**
+## Edooqoo.com Solution
 
-- `useCurriculumPhases.deletePhase` (linie 123–139) tylko ustawia `deleted_at` i robi `setPhases(prev => prev.filter(...))` — lista lokalnie się aktualizuje.
-- `GenerateStepsDialog` dostaje `defaultTargetPhaseId` z parenta (`NextStepsSection` / `MacroTimeline`). To pole jest cache'owane (najpewniej w stanie sekcji i nie reagujące na zmianę `phases`).
-- Po skasowaniu `defaultTargetPhaseId` wciąż wskazuje na usunięte UUID → useEffect linia 54–64 ustawia `phaseValue = defaultTargetPhaseId`. `phaseOptions.find()` zwraca undefined, ale Select pokazuje pustą wartość lub starą etykietę z poprzedniego renderu.
+Zmienimy kontrakt AI w `supabase/functions/generate-timeline/index.ts`, żeby Gemini nie dostawał zbyt złożonego schema. Edge Function ma nadal zwracać ten sam kształt do frontendu: `{ suggestions, generationContext, mode, phaseId }`.
 
-**Diagnoza B (numeracja):** `deletePhase` nie robi `UPDATE ... sequence_number = sequence_number - 1 WHERE sequence_number > deleted.sequence_number`. Pozostają luki (faza 1 usunięta → 2 i 3 zostają jako 2 i 3, nie spadają na 1 i 2).
+Nie dotykamy `generateWorksheet` ani promptu worksheet generation engine.
 
-**Edooqoo.com Solution:**
+## Technical Mechanics
 
-A. **Renumeracja sequence_number po delete** — w `useCurriculumPhases.tsx` linie 123–139:
+### Plik
+
+- `supabase/functions/generate-timeline/index.ts`
+
+### Konkretna zmiana
+
+1. Zastąpić obecne `tools: [{ function.parameters: ... }]` uproszczonym kontraktem.
+
+Obecnie problematyczne elementy:
+
+- `suggestions.minItems = count`
+- `suggestions.maxItems = count`
+- `exercises.items.enum = VALID_EXERCISES`
+- `exercises.minItems = 8`
+- `exercises.maxItems = 8`
+- `exerciseFocusMap.additionalProperties.enum = FOCUS_VALUES`
+
+Planowana wersja:
+
+- `suggestions` jako zwykła tablica bez `minItems/maxItems` zależnych od `count`.
+- `exercises` jako `array<string>` bez enum i bez twardego `minItems/maxItems` w schema.
+- `exerciseFocusMap` jako zwykły object/string map bez enum w schema.
+- Twarde wymagania zostają w prompt text i w sanitizerze po odpowiedzi.
+
+2. Dodać do promptu jasną, techniczną instrukcję output contract, ale bez rozbudowanego constrained schema:
+
+```text
+Return JSON-compatible tool arguments with suggestions array.
+Target count: {count}.
+Each suggestion should include 8 exercise IDs from the allowed list.
+Backend will validate and normalize exercise IDs.
+```
+
+3. Zachować obecny sanitizer z linii 286-363:
+
+- filtruje `VALID_EXERCISES`,
+- uzupełnia do 8 ćwiczeń fallbackami,
+- ucina powyżej 8,
+- naprawia `exerciseFocusMap`,
+- wymusza minimum vocabulary/grammar,
+- usuwa miks picture/audio,
+- filtruje puste tematy.
+
+4. Poprawić obsługę błędów AI Gateway:
+
+- Jeżeli Gateway zwraca 400 z tekstem `too many states`, odpowiedź Edge Function powinna zawierać diagnostykę:
+
+```json
+{
+  "error": "AI schema rejected",
+  "status": 400,
+  "detail": "schema too complex",
+  "count": 3,
+  "mode": "phase_steps"
+}
+```
+
+- Status HTTP może pozostać 502, ale frontend dostanie czytelny `detail`.
+
+5. Dodać fallback parse path:
+
+- jeśli `tool_calls[0].function.arguments` istnieje, parsować jak dziś;
+- jeśli nie istnieje, parsować `message.content` jako JSON;
+- jeśli AI zwróci mniej niż `count`, przyjąć partial success zamiast full failure, jeśli `suggestions.length > 0`.
+
+6. Nie implementować kolejki w tej iteracji.
+
+Powód: obecny błąd to schema rejection, nie timeout. Kolejka byłaby architektonicznie cięższa, wymagałaby tabeli, RLS, worker logic i UI polling, a nie rozwiązuje bezpośrednio błędu `too many states`.
+
+## Frontend behavior
+
+### Plik
+
+- `src/hooks/useFutureTimeline.tsx`
+
+### Zmiany
+
+1. Zachować retry phase-bound -> free step tylko jako degradację dla realnych 5xx.
+2. Jeżeli backend zwróci `detail` zawierające schema/AI rejection, toast powinien mówić:
+
+```text
+AI could not return this batch. Try generating fewer steps, or generate one step at a time.
+```
+
+3. Nie usuwać istniejących sugestii przed potwierdzeniem, że backend zwrócił co najmniej 1 nową sugestię.
+
+To już jest prawie spełnione, bo soft-delete istniejących sugestii następuje dopiero po `rawSuggestions`, ale w implementacji trzeba to zostawić bez zmian.
+
+## Regression guard
+
+- Request `count=1` musi działać jak wcześniej.
+- Request `count=2-6` nie może powodować Google schema error.
+- Phase-bound generation musi zapisywać `suggestion_kind='phase_step'` i `phase_id=targetPhaseId`.
+- Free generation musi zapisywać `suggestion_kind='next_step'` i `phase_id=null`.
+- Sanitizer nadal musi wymuszać dokładnie 8 ćwiczeń.
+
+---
+
+# Problem 2: etykiety w `NextStepBanner`
+
+## Edooqoo.com Solution
+
+Przywrócić pełne etykiety akcji na pierwszym Next Step:
+
+- `Use` -> `Use this Step`
+- `Comment` -> `Regenerate with comment`
+
+## Technical Mechanics
+
+### Plik
+
+- `src/components/dslm/NextStepBanner.tsx`
+
+### Konkretna zmiana
+
+1. W przycisku `onUse(suggestion)` zmienić label:
+
+```tsx
+<ClipboardCopy ... /> Use this Step
+```
+
+2. W przycisku `onRegenerateWithComment(suggestion)` zmienić label:
+
+```tsx
+<MessageSquarePlus ... /> Regenerate with comment
+```
+
+3. Zachować tooltips.
+4. Żeby uniknąć powrotu problemu z zawijaniem:
+
+- zostawić `sm:flex-nowrap` i `sm:overflow-x-auto`,
+- na mobile pozwolić na `flex-wrap`,
+- nie zmieniać logiki przycisków.
+
+## Regression guard
+
+- Przycisk `Generate worksheet ↗` dalej działa jako auto-generate.
+- `Use this Step` tylko prefille formę, bez auto-generate.
+- `Regenerate with comment` dalej otwiera dialog komentarza dla jednej sugestii.
+
+---
+
+# Problem 3: usunięta faza nadal sugerowana w modal + numeracja faz 2 -> 1 nie zawsze przeskakuje
+
+## Root cause
+
+W `PathwayView` i `MacroTimeline` działają dwie niezależne instancje `useCurriculumPhases`:
+
+- `PathwayView` buduje `phaseOptions` i `recommendedTargetPhaseId` dla `GenerateStepsDialog`.
+- `MacroTimeline` obsługuje usuwanie faz.
+
+Po usunięciu fazy lokalny stan aktualizuje się w instancji `MacroTimeline`, ale instancja `PathwayView` może nadal mieć stary snapshot, bo `deletePhase`, `updatePhase` i `addPhase` nie emitują globalnego eventu `dslm:phasesUpdated`. W kodzie event jest obecnie emitowany tylko po `generatePhases`, mimo że dokumentacja już zakłada, że ma być po każdej mutacji.
+
+## Edooqoo.com Solution
+
+Wprowadzić konsekwentną synchronizację faz po każdej mutacji oraz deterministycznie przeliczać numerację z aktualnego stanu po refetchu.
+
+## Technical Mechanics
+
+### Pliki
+
+- `src/hooks/dslm/useCurriculumPhases.tsx`
+- `src/components/dslm/GenerateStepsDialog.tsx`
+- `src/components/dslm/PathwayView.tsx`
+- `src/components/dslm/MacroTimeline.tsx`
+
+### Zmiana A: jeden helper do synchronizacji
+
+W `useCurriculumPhases.tsx` dodać lokalny helper:
 
 ```ts
-const deletePhase = async (id: string): Promise<boolean> => {
-  const phaseToDelete = phases.find(p => p.id === id);
-  if (!phaseToDelete) return false;
-  const deletedSeq = phaseToDelete.sequence_number;
-  // Soft delete
-  const { error } = await supabase.from('dslm_curriculum_phases')
-    .update({ deleted_at: new Date().toISOString() })
-    .eq('id', id).eq('teacher_id', teacherId);
-  if (error) { /* toast + return false */ }
-  // Renumber remaining (only NOT deleted, same student)
-  const toShift = phases.filter(p => p.id !== id && p.sequence_number > deletedSeq);
-  for (const p of toShift) {
-    await supabase.from('dslm_curriculum_phases')
-      .update({ sequence_number: p.sequence_number - 1 })
-      .eq('id', p.id).eq('teacher_id', teacherId);
+const emitPhasesUpdated = useCallback(() => {
+  window.dispatchEvent(new CustomEvent('dslm:phasesUpdated', { detail: { studentId } }));
+}, [studentId]);
+```
+
+Użyć go po sukcesie:
+
+- `generatePhases`,
+- `updatePhase`,
+- `deletePhase`,
+- `addPhase`.
+
+Dodatkowo po mutacjach wywołać `await fetchPhases()` tam, gdzie dziś jest tylko lokalny `setPhases`, żeby komponent opierał się na realnym stanie DB.
+
+### Zmiana B: renumeracja faz po delete jako operacja deterministyczna
+
+Obecny kod przesuwa tylko fazy `sequence_number > deletedSeq`. To logicznie powinno działać, ale przy dwóch instancjach hooka UI może pokazywać stary snapshot.
+
+Planowana stabilizacja:
+
+1. Po soft-delete pobrać aktualne nieusunięte fazy dla `studentId + teacherId` posortowane po `sequence_number`.
+2. Nadać im numery `idx + 1`.
+3. Zaktualizować tylko te rekordy, których `sequence_number !== idx + 1`.
+4. Dopiero potem `await fetchPhases()` i `emitPhasesUpdated()`.
+
+Pseudokod:
+
+```ts
+await softDelete(id)
+const { data: remaining } = await supabase
+  .from('dslm_curriculum_phases')
+  .select('id, sequence_number')
+  .eq('student_id', studentId)
+  .eq('teacher_id', teacherId)
+  .is('deleted_at', null)
+  .order('sequence_number', { ascending: true })
+
+for (const [idx, p] of remaining.entries()) {
+  const nextSeq = idx + 1
+  if (p.sequence_number !== nextSeq) {
+    await supabase
+      .from('dslm_curriculum_phases')
+      .update({ sequence_number: nextSeq })
+      .eq('id', p.id)
+      .eq('teacher_id', teacherId)
   }
-  setPhases(prev => prev
-    .filter(p => p.id !== id)
-    .map(p => p.sequence_number > deletedSeq
-      ? { ...p, sequence_number: p.sequence_number - 1 }
-      : p
-    ));
-  toast.success('Phase removed');
-  return true;
-};
+}
+
+await fetchPhases()
+emitPhasesUpdated()
 ```
 
-Bez migracji DB — tylko UPDATE-y (tabela już ma kolumnę). Jeśli liczba faz potrafi przekroczyć ~10, można w przyszłości zoptymalizować pojedynczym `RPC`, ale na razie sekwencyjne UPDATE wystarczy.
+Ta wersja naprawia przypadek `2 -> 1`, nawet jeśli wcześniejsza numeracja była już częściowo niespójna.
 
-B. **Walidacja `defaultTargetPhaseId` w GenerateStepsDialog** — w `useEffect` linie 54–64:
+### Zmiana C: modal nie może otworzyć się ze starym `defaultTargetPhaseId`
+
+`GenerateStepsDialog.tsx` już waliduje `defaultTargetPhaseId`, ale jeśli `phaseOptions` z parenta są stare, walidacja też widzi stare dane. Dlatego główna poprawka to synchronizacja hooków.
+
+Dodatkowo w `PathwayView.tsx` dodać finalny guard w `onGenerateMore`:
 
 ```ts
-useEffect(() => {
-  if (!open) return;
-  const validId = defaultTargetPhaseId && phaseOptions.some(p => p.id === defaultTargetPhaseId)
-    ? defaultTargetPhaseId
-    : null;
-  const initialPhaseId = validId ?? FREE_VALUE;
-  setPhaseValue(initialPhaseId);
-  setCountTouched(false);
-  const recPhase = phaseOptions.find(p => p.id === validId);
-  const initialCount = recPhase
-    ? Math.min(6, Math.max(1, recPhase.need - recPhase.have))
-    : defaultCount;
-  setCount(initialCount);
-}, [open, defaultCount, defaultTargetPhaseId, phaseOptions]);
+const validPhaseId = phaseId && phaseOptions.some(p => p.id === phaseId) ? phaseId : null;
+generateNextSteps({ ..., phaseId: useRoadmap ? validPhaseId : null })
 ```
 
-Dodatkowo zmienna `recommendedId` (linia 93) → `recommendedId = validId` (ten sam guard).
+To blokuje wysłanie usuniętego `phaseId` nawet jeśli modal był otwarty w trakcie usuwania.
 
-C. **Sortowanie i wyświetlanie** — `MacroTimeline` i `PathwayView` sortują już po `sequence_number ASC`, więc po renumeracji UI naturalnie pokaże 1, 2, 3.
+### Zmiana D: zamknięcie/wyczyszczenie lokalnych stanów po delete
 
-**Świadomie pominięte:** twarde unique-constraint na `(student_id, sequence_number)` — dodawałoby ryzyko race conditions przy równoległych zapisach. Soft delete + sekwencyjny UPDATE wystarczy.
+W `MacroTimeline.tsx` po skutecznym usunięciu fazy:
 
----
+- jeśli `expandedPhaseId === deletedId`, ustawić `expandedPhaseId=null`,
+- usunąć wpisy z `phaseQuickCount` i `phaseStepsOpen` dla deletedId,
+- zamknąć dialog delete.
 
-### Problem 4 — info-boxy w sekcji wyboru studenta na formularzu
+### Zmiana E: delete phase confirmation zgodny z pamięcią projektu
 
-**Diagnoza:** `src/components/WorksheetForm/index.tsx` linie 654–705. Trzy ścieżki wyboru studenta. Brakuje informacji kontekstowej dla:
+Projektowa pamięć mówi, że destrukcyjne działania DSLM mają używać `ConfirmTypeToDeleteDialog`. Obecnie `MacroTimeline.tsx` ma zwykły delete dialog. W tej poprawce, przy okazji dotykania delete flow, należy podmienić go na istniejący `ConfirmTypeToDeleteDialog` bez zmiany logiki biznesowej.
 
-- (a) zalogowany, ma studentów, ale wybrał `no-student` — jest tylko 1-linijkowy tekst pod selectem.
-- (b) zalogowany, ma studentów, wybrał konkretnego, ale ten student nie ma żadnych Next Steps — brak komunikatu (NextStepsPresetBanner po prostu się nie renderuje).
-- (c) zalogowany bez studentów — jest CTA `Add your first student`, ale bez wyjaśnienia *dlaczego* warto.
+Wymagane expected text:
 
-**Edooqoo.com Solution:** Dodać uniwersalny komponent `<StudentContextHint variant="..." />` renderowany pod selectem (dla a/b) lub pod CTA (dla c). Jeden plik: `src/components/WorksheetForm/StudentContextHint.tsx`.
+```text
+Phase {sequence_number}
+```
 
-Warianty i copy (EN — zgodnie z regułą „aplikacja po angielsku"):
+Opis dialogu pozostaje merytorycznie ten sam: usuwa fazę i odpina/pozostawia do obsługi phase-bound steps zgodnie z obecną logiką aplikacji.
 
+## Regression guard
 
-| Wariant         | Warunek                                                                | Tekst                                                                                                                                                            |
-| --------------- | ---------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `no-students`   | `userId && students.length === 0`                                      | „Worksheets without a student are generic. Add your first student to unlock personalized goals, level matching, and AI Next Steps."                              |
-| `no-selection`  | `userId && students.length > 0 && selectedStudentId === 'no-student'`  | „You have students but none is selected. Pick one above to personalize the worksheet to their level, goals, and pacing."                                         |
-| `no-next-steps` | `userId && selectedStudentId !== 'no-student' && nextStepsCount === 0` | „This student has no Next Steps yet. Open their Pathway to generate AI-recommended next worksheets, or continue with manual setup below." + link `/student/{id}` |
-
-
-**Style:** karty w stylu `Card` z `border-amber-300 bg-amber-50/30 dark:bg-amber-950/20 text-xs px-3 py-2 rounded-md` z ikoną `Info` (lucide). Dla `no-next-steps` ikona `Sparkles` + przycisk-link `Open Pathway →`.
-
-**Źródło `nextStepsCount`:**
-
-- Najprościej: dodać krótki hook `useStudentNextStepsCount(studentId)` → `select count(id) from future_worksheet_suggestions where student_id=? and is_used=false and deleted_at is null` (limit 1 wystarcza do flagi 0/>0).
-- Alternatywa: re-use `useFutureTimeline` (cięższe). Zalecam dedykowany lekki hook żeby nie ładować całej historii.
-
-**Miejsce wstawienia w `WorksheetForm/index.tsx`:**
-
-- Pod blokiem 655–705 (poza wewnętrznym `<div w-[23%]>`) wstawić cały rząd `<div className="w-full mt-2">{hint}</div>` zanim zaczną się kolejne karty (Exercise Types itd.). Hint pojawia się tylko gdy któryś warunek jest spełniony.
+- Po usunięciu Phase 1 z listy `[1,2,3,4]` UI bez refreshu pokazuje `[1,2,3]`.
+- `Generate next steps` modal nie pokazuje usuniętej fazy.
+- `recommendedTargetPhaseId` wskazuje tylko fazę istniejącą w aktualnym `phaseOptions`.
+- Next Steps przypięte do istniejących faz nadal sortują się według aktualnej numeracji faz.
+- Nie zmieniamy schematu DB i nie robimy migracji.
 
 ---
 
-### Problem 5 — przywrócenie `generateWorksheet` do repo
+# Problem 4: zbędny komunikat `This student has no Next Steps yet...` w WorksheetForm
 
-**Stan obecny:**
+## Root cause
 
-- Twoje archiwum z PowerShell (63 funkcje) **nie zawiera** `generateWorksheet`, bo nie było jej na liście. W repo tej funkcji wciąż brakuje.
-- W produkcji Supabase `generateWorksheet` ma 627 deploymentów, datowana „a year ago / 12 days ago" — istnieje i działa.
-- Sanctity Rule zabrania mi modyfikować wording promptu — ale samo *przywrócenie pliku 1:1* z produkcji nie jest modyfikacją (to bit-perfect copy z prawdziwego runtime).
+Aktualnie są dwa komunikaty dla podobnego stanu:
 
-**Co zrobić — krok po kroku po Twojej stronie:**
+1. `NextStepsPresetBanner` pokazuje większy amber CTA:
 
-1. W PowerShell w katalogu projektu uruchom:
-  ```powershell
-   supabase functions download generateWorksheet
-  ```
-2. CLI utworzy `supabase/functions/generateWorksheet/index.ts` (ewentualnie z plikami pomocniczymi w tym katalogu, jeśli funkcja je ma).
-3. Sprawdź czy poza `index.ts` są jakieś inne pliki w `supabase/functions/generateWorksheet/`. Jeśli tak — zachowaj je.
-4. Spakuj cały folder `supabase/functions/generateWorksheet/` (z całą zawartością) do `generateWorksheet.zip` i wrzuć mi. ściągnąłem i wrzucam generateWorksheet.rar
-5. Ja:
-  - rozpakuję,
-  - skopiuję 1:1 do `supabase/functions/generateWorksheet/`,
-  - **nie zmienię ani jednej linii promptu** (zgodnie z Sanctity Rule),
-  - zrobię tylko spot-check że `index.ts` zaczyna się od `Deno.serve`/`serve`/`import` i ma poprawne CORS,
-  - po deploy potwierdzę że istniejące wywołania `generateWorksheet` z frontu (`worksheetService/apiService.ts`, `exerciseRegenerationService.ts` linia 6) wciąż działają (no-op funkcjonalne — kod = produkcja).
+```text
+No learning plan for James yet...
+Open Learning Plan
+```
 
-**Co NIE zostanie zrobione w tej iteracji:**
+2. `StudentContextHint` pokazuje dodatkowo:
 
-- Żadne edycje promptu generowania worksheet.
-- Żadne governance / 4-warstwowa polityka Sanctity (osobna iteracja v6.9.15b).
-- Żadne audyty A/B/C (osobna iteracja v6.9.15c).
+```text
+This student has no Next Steps yet... Open Pathway →
+```
+
+Użytkownik wskazał, że drugi komunikat jest zbędny tylko w sytuacji, gdy pierwszy już jest widoczny. Pozostałe hinty mają zostać.
+
+## Edooqoo.com Solution
+
+Usunąć renderowanie wariantu `no-next-steps` z `WorksheetForm`, ale zostawić:
+
+- `no-students`,
+- `no-selection`.
+
+Sam komponent `StudentContextHint` może zostać, ale wariant `no-next-steps` nie powinien być używany w tym formularzu, bo dubluje `NextStepsPresetBanner`.
+
+## Technical Mechanics
+
+### Pliki
+
+- `src/components/WorksheetForm/index.tsx`
+- opcjonalnie `src/components/WorksheetForm/StudentContextHint.tsx`
+- opcjonalnie `src/hooks/useStudentNextStepsCount.ts`
+
+### Minimalna zmiana
+
+1. W `WorksheetForm/index.tsx` usunąć logikę renderującą:
+
+```tsx
+<StudentContextHint variant="no-next-steps" ... />
+```
+
+2. Usunąć import i wywołanie `useStudentNextStepsCount`, jeśli po tej zmianie nie jest już używany.
+
+3. Zostawić hinty:
+
+- gdy nauczyciel ma 0 studentów,
+- gdy nauczyciel ma studentów, ale wybrano `No student (generic)`.
+
+4. Jeśli `StudentContextHint.tsx` po usunięciu wariantu `no-next-steps` nadal ma nieużywany kod, są dwie opcje:
+
+- zachować komponent bez zmian, żeby nie zwiększać diffu;
+- albo usunąć wariant i hook, jeśli TypeScript pokaże dead imports.
+
+Preferowana ścieżka: usunąć z formularza użycie i import hooka, zostawić komponent z wariantem dla kompatybilności, chyba że build wskaże inaczej.
+
+## Regression guard
+
+- Amber banner `No learning plan for James yet` nadal się pojawia nad Exercise Selection Cards.
+- `Open Learning Plan` dalej prowadzi do `/student/{id}?tab=dslm&view=pathway`.
+- Brak studentów nadal pokazuje CTA/add first student i/lub hint.
+- `No student (generic)` nadal ostrzega, że worksheet będzie generyczny.
 
 ---
 
-### Mapa zmian w plikach
+# Dokumentacja RAG
 
+## Edooqoo.com Solution
 
-| Plik                                                  | Zmiana                                                                                | Problem |
-| ----------------------------------------------------- | ------------------------------------------------------------------------------------- | ------- |
-| `supabase/functions/generate-timeline/index.ts`       | dynamic `max_tokens`, lepsze błędy (502 + finish_reason), partial-success zamiast 500 | 1       |
-| `src/hooks/useFutureTimeline.tsx`                     | lepszy toast po retry-fail                                                            | 1       |
-| `src/components/dslm/NextStepBanner.tsx`              | refaktor paska akcji (skrót etykiet, nowrap, tooltips, Remove jako icon-only)         | 2       |
-| `src/hooks/dslm/useCurriculumPhases.tsx`              | renumeracja `sequence_number` po `deletePhase`                                        | 3       |
-| `src/components/dslm/GenerateStepsDialog.tsx`         | walidacja `defaultTargetPhaseId` względem `phaseOptions`                              | 3       |
-| `src/components/WorksheetForm/StudentContextHint.tsx` | NOWY komponent z 3 wariantami                                                         | 4       |
-| `src/components/WorksheetForm/index.tsx`              | wstawienie `<StudentContextHint>` pod sekcją wyboru studenta                          | 4       |
-| `src/hooks/useStudentNextStepsCount.ts`               | NOWY lekki hook (count 0 / >0)                                                        | 4       |
-| `supabase/functions/generateWorksheet/...`            | bit-perfect copy z produkcji (po Twoim ZIP-ie)                                        | 5       |
-| `docs/llm-context.md` + `llms.txt`                    | wpis v6.9.15a (Problem → Solution → Mechanics + RAG keywords)                         | RAG     |
+Po implementacji równolegle zaktualizować:
 
+- `docs/llm-context.md`
+- `llms.txt`
+
+Nie marketingowo. Gęsty Markdown. Struktura:
+
+```text
+Problem -> Edooqoo.com Solution -> Technical Mechanics
+RAG Keywords
+```
+
+## Technical Mechanics
+
+Dodać nową sekcję `v6.9.15b` opisującą:
+
+1. `generate-timeline` schema rejection root cause:
+   - Google AI Studio `INVALID_ARGUMENT`,
+   - `too many states`,
+   - złożone tool schema przy batch `count > 1`,
+   - rozwiązanie: uproszczony schema + backend sanitizer.
+
+2. NextStepBanner labels:
+   - `Use this Step`,
+   - `Regenerate with comment`.
+
+3. Phase sync:
+   - `dslm:phasesUpdated` po każdej mutacji,
+   - deterministic renumber after delete,
+   - stale `defaultTargetPhaseId` guard.
+
+4. WorksheetForm duplicate hint removal:
+   - `NextStepsPresetBanner` jest jedynym CTA dla braku Learning Plan,
+   - `StudentContextHint no-next-steps` nie jest renderowany w formularzu.
+
+## RAG Keywords do dodania
+
+```text
+RAG Keywords: generate-timeline 502, Gemini schema too many states, Google AI Studio INVALID_ARGUMENT, tool schema too complex, batch next steps, count greater than 1, phase_steps generation, next_steps generation, exercise enum schema, backend sanitizer, exactly 8 exercises, phase delete stale modal, deleted phase still selected, defaultTargetPhaseId stale, dslm:phasesUpdated, curriculum phase renumber, sequence_number 2 to 1, NextStepBanner Use this Step, Regenerate with comment, WorksheetForm duplicate no next steps hint, NextStepsPresetBanner no learning plan.
+```
 
 ---
 
-### Kolejność wdrożenia (po Twojej akceptacji)
+# Kolejność implementacji
 
-1. Problem 3 (renumeracja + walidacja modalu) — najszybciej, izolowane.
-2. Problem 2 (pasek akcji) — pure UI, zero ryzyka.
-3. Problem 4 (info-boxy + hook) — nowe pliki, brak wpływu na istniejące.
-4. Problem 1 (edge function `max_tokens` + diagnostyka) — wymaga deploy i obserwacji 1–2 generacji.
-5. Update `docs/llm-context.md` + `llms.txt`.
-6. Problem 5 — czekam na Twój ZIP z `generateWorksheet`, potem osobny copy + deploy.
+1. `generate-timeline/index.ts`
+   - uprościć AI tool schema,
+   - zachować sanitizer,
+   - poprawić diagnostykę błędów.
 
-Czas wykonania 1–5: ~15–20 min implementacji + auto-deploy edge function. Problem 5 osobno po ZIP-ie.
+2. `useFutureTimeline.tsx`
+   - doprecyzować toast dla 502/schema/batch,
+   - nie zmieniać kolejności insert/delete.
+
+3. `useCurriculumPhases.tsx`
+   - dodać `emitPhasesUpdated`,
+   - użyć po każdej mutacji,
+   - przerobić delete na refetch + deterministic renumber.
+
+4. `PathwayView.tsx`
+   - dodać finalny guard `phaseId` w `onGenerateMore`.
+
+5. `MacroTimeline.tsx`
+   - wyczyścić lokalne stany po delete,
+   - użyć `ConfirmTypeToDeleteDialog` dla phase delete.
+
+6. `NextStepBanner.tsx`
+   - zmienić labels.
+
+7. `WorksheetForm/index.tsx`
+   - usunąć renderowanie zbędnego `no-next-steps` hintu,
+   - usunąć nieużywany hook/import, jeśli dotyczy.
+
+8. `docs/llm-context.md` i `llms.txt`
+   - dodać sekcję `v6.9.15b` w strukturze RAG.
 
 ---
 
-### Ryzyka i mitygacje
+# Weryfikacja po implementacji
 
-- **Renumeracja faz, race condition:** jeśli dwie osoby usuwają fazy równocześnie, sequence może się nakładać. Mitygacja: dla MVP akceptowalne (1-on-1 tutoring, 1 nauczyciel = 1 student). Docelowo RPC z transakcją.
-- `**max_tokens=8192` koszt:** marginalnie więcej tokenów wyjściowych przy `count=6`. Akceptowalne — i tak rzadkie.
-- **Skrócone etykiety mogą być niejasne:** mitygacja — pełne tooltips na każdym przycisku.
-- `**useStudentNextStepsCount` dodatkowy query:** lekki count(*) z indexem, ~5 ms, akceptowalne.
+1. Sprawdzić logi `generate-timeline` po próbie `count=2` lub `count=3`:
+   - brak `too many states`,
+   - brak 502 z Google schema rejection.
 
-Czekam na akceptację — wdrażam dokładnie w powyższej kolejności.
+2. W UI:
+   - wygenerować 2+ Next Steps dla fazy,
+   - wygenerować 2+ free Next Steps,
+   - sprawdzić, że powstałe sugestie mają 8 ćwiczeń.
+
+3. Usunąć Phase 1 z kilku faz:
+   - bez odświeżania sprawdzić numerację,
+   - otworzyć `Generate next steps`,
+   - potwierdzić, że dropdown nie zawiera usuniętej fazy.
+
+4. Sprawdzić `NextStepBanner`:
+   - widoczne `Use this Step`,
+   - widoczne `Regenerate with comment`,
+   - brak regresji działania.
+
+5. Sprawdzić `WorksheetForm`:
+   - gdy brak Learning Plan, widoczny tylko amber `No learning plan... Open Learning Plan`,
+   - brak dodatkowego `This student has no Next Steps yet...`.
+
+---
+
+# Zakres bezpieczeństwa
+
+- Brak migracji DB.
+- Brak zmian w RLS.
+- Brak zmian w `generateWorksheet` i jego promptach.
+- Brak zmian w worksheet generation engine.
+- Brak nowych sekretów.
+- Zmiany ograniczone do `generate-timeline`, DSLM phase sync, etykiet UI, jednego duplicate hintu i dokumentacji RAG.

@@ -62,6 +62,13 @@ export const useCurriculumPhases = ({ studentId, teacherId }: UseCurriculumPhase
 
   useEffect(() => { fetchPhases(); }, [fetchPhases]);
 
+  // v6.9.15b — single helper to broadcast phase mutations across hook instances.
+  const emitPhasesUpdated = useCallback(() => {
+    try {
+      window.dispatchEvent(new CustomEvent('dslm:phasesUpdated', { detail: { studentId } }));
+    } catch { /* ignore */ }
+  }, [studentId]);
+
   // v6.9.14 — cross-instance sync: when one hook generates phases,
   // other instances (e.g. PathwayView vs MacroTimeline) refetch.
   useEffect(() => {
@@ -89,7 +96,7 @@ export const useCurriculumPhases = ({ studentId, teacherId }: UseCurriculumPhase
         return false;
       }
       await fetchPhases();
-      window.dispatchEvent(new CustomEvent('dslm:phasesUpdated', { detail: { studentId } }));
+      emitPhasesUpdated();
       toast.success(`Generated ${newPhases.length} curriculum phases`);
       return true;
     } catch (e: any) {
@@ -110,6 +117,7 @@ export const useCurriculumPhases = ({ studentId, teacherId }: UseCurriculumPhase
         .eq('teacher_id', teacherId);
       if (error) throw error;
       setPhases(prev => prev.map(p => p.id === id ? { ...p, ...fields } as CurriculumPhase : p));
+      emitPhasesUpdated();
       return true;
     } catch (e) {
       console.error('Error updating phase:', e);
@@ -124,29 +132,40 @@ export const useCurriculumPhases = ({ studentId, teacherId }: UseCurriculumPhase
     try {
       const phaseToDelete = phases.find(p => p.id === id);
       if (!phaseToDelete) return false;
-      const deletedSeq = phaseToDelete.sequence_number;
       const { error } = await supabase
         .from('dslm_curriculum_phases')
         .update({ deleted_at: new Date().toISOString() })
         .eq('id', id)
         .eq('teacher_id', teacherId);
       if (error) throw error;
-      // v6.9.15a — renumber remaining phases so sequence_number stays contiguous (1..N).
-      const toShift = phases.filter(p => p.id !== id && p.sequence_number > deletedSeq);
-      for (const p of toShift) {
-        const { error: shiftErr } = await supabase
-          .from('dslm_curriculum_phases')
-          .update({ sequence_number: p.sequence_number - 1 })
-          .eq('id', p.id)
-          .eq('teacher_id', teacherId);
-        if (shiftErr) console.error('Failed to renumber phase', p.id, shiftErr);
+      // v6.9.15b — deterministic renumber: re-read remaining rows from DB and
+      // assign sequence_number = idx+1 in order. Fixes the "2 -> 1" edge case
+      // where the legacy delta-shift left phases out of order.
+      const { data: remaining, error: readErr } = await supabase
+        .from('dslm_curriculum_phases')
+        .select('id, sequence_number')
+        .eq('student_id', studentId)
+        .eq('teacher_id', teacherId)
+        .is('deleted_at', null)
+        .order('sequence_number', { ascending: true });
+      if (readErr) {
+        console.error('Failed to read remaining phases for renumber', readErr);
+      } else if (remaining) {
+        for (let idx = 0; idx < remaining.length; idx++) {
+          const p = remaining[idx];
+          const nextSeq = idx + 1;
+          if (p.sequence_number !== nextSeq) {
+            const { error: shiftErr } = await supabase
+              .from('dslm_curriculum_phases')
+              .update({ sequence_number: nextSeq })
+              .eq('id', p.id)
+              .eq('teacher_id', teacherId);
+            if (shiftErr) console.error('Failed to renumber phase', p.id, shiftErr);
+          }
+        }
       }
-      setPhases(prev => prev
-        .filter(p => p.id !== id)
-        .map(p => p.sequence_number > deletedSeq
-          ? { ...p, sequence_number: p.sequence_number - 1 }
-          : p
-        ));
+      await fetchPhases();
+      emitPhasesUpdated();
       toast.success('Phase removed');
       return true;
     } catch (e) {
@@ -177,6 +196,7 @@ export const useCurriculumPhases = ({ studentId, teacherId }: UseCurriculumPhase
       if (error) throw error;
       const phase = data as CurriculumPhase;
       setPhases(prev => [...prev, phase]);
+      emitPhasesUpdated();
       toast.success('Phase added');
       return phase;
     } catch (e) {
