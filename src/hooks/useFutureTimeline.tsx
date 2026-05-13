@@ -224,14 +224,25 @@ export const useFutureTimeline = ({ studentId, teacherId }: UseFutureTimelinePro
       } else if (status === 429) {
         toast.error('Too many AI requests. Wait a moment and retry.');
       } else if (status === 502) {
-        // v6.9.15a — backend now returns 502 for AI Gateway errors with diagnostic detail.
+        // v6.9.15b — distinguish AI schema rejection (Gemini "too many states")
+        // from generic gateway failures so the teacher sees actionable copy.
         const reqCount = opts.count ?? 3;
-        toast.error(
-          reqCount > 1
-            ? 'AI generator overloaded for batch requests — try generating 1 step at a time.'
-            : 'AI generator is temporarily unavailable. Please retry in a moment.',
-          { duration: 7000 }
-        );
+        const ctx: any = (error as any)?.context;
+        const detail = String(ctx?.body?.detail || ctx?.detail || (error as any)?.message || '');
+        const schemaRejected = ctx?.body?.schemaRejected === true || /too many states|INVALID_ARGUMENT|schema/i.test(detail);
+        if (schemaRejected) {
+          toast.error(
+            'AI could not return this batch. Try generating fewer steps, or generate one step at a time.',
+            { duration: 8000 }
+          );
+        } else {
+          toast.error(
+            reqCount > 1
+              ? 'AI generator overloaded for batch requests — try generating 1 step at a time.'
+              : 'AI generator is temporarily unavailable. Please retry in a moment.',
+            { duration: 7000 }
+          );
+        }
       } else if (status === 500) {
         toast.error(
           'Generator returned an error. Try without phase target, or reduce existing steps and retry.',
