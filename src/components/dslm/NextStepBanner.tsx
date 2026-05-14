@@ -15,7 +15,7 @@ import { Sparkles, Edit, Loader2, ArrowRight, ChevronDown, ClipboardCopy, Messag
 import { cn } from '@/lib/utils';
 import { computeConfidence } from '@/lib/dslm/confidenceScore';
 import { ConfidenceBadge } from './ConfidenceBadge';
-import { ConfirmTypeToDeleteDialog } from './ConfirmTypeToDeleteDialog';
+import { ConfirmDeleteDialog } from './ConfirmDeleteDialog';
 
 interface NextStepBannerProps {
   suggestion: any | null;
@@ -248,11 +248,10 @@ export const NextStepBanner: React.FC<NextStepBannerProps> = ({
         </CardContent>
       </Card>
       {onDelete && (
-        <ConfirmTypeToDeleteDialog
+        <ConfirmDeleteDialog
           open={confirmDeleteOpen}
           onOpenChange={setConfirmDeleteOpen}
           label="Next Step #1"
-          expectedText="Next Step #1"
           description="This will remove the top-priority next step. You can regenerate later."
           onConfirm={() => onDelete(suggestion.id)}
         />

@@ -21,7 +21,8 @@ import { Check, ChevronDown, Sparkles, Loader2, Plus, Edit2, Trash2, Map, Messag
 import { cn } from '@/lib/utils';
 import { computePhaseConfidence } from '@/lib/dslm/confidenceScore';
 import { ConfidenceBadge } from './ConfidenceBadge';
-import { ConfirmTypeToDeleteDialog } from './ConfirmTypeToDeleteDialog';
+import { ConfirmDeleteDialog } from './ConfirmDeleteDialog';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 /**
  * v6.9.12 — Recommend 1 step per week of the phase length, clamped 1–6.
@@ -377,9 +378,22 @@ export const MacroTimeline: React.FC<MacroTimelineProps> = ({
                               Start phase
                             </Button>
                           )}
-                          <Button size="sm" variant="ghost" className="h-7 text-xs text-destructive hover:text-destructive" onClick={() => setDeletingPhase(phase)}>
-                            <Trash2 className="h-3 w-3 mr-1" /> Remove
-                          </Button>
+                          <TooltipProvider delayDuration={200}>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  size="icon"
+                                  variant="ghost"
+                                  className="h-7 w-7 text-destructive hover:text-destructive"
+                                  onClick={() => setDeletingPhase(phase)}
+                                  aria-label="Remove phase"
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>Remove phase</TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
                         </div>
                       </div>
                     </CollapsibleContent>
@@ -523,16 +537,13 @@ export const MacroTimeline: React.FC<MacroTimelineProps> = ({
         </DialogContent>
       </Dialog>
 
-      {/* Phase delete confirmation */}
-      {/* v6.9.15b — type-to-confirm delete (per project memory: ConfirmTypeToDeleteDialog
-          is required for any destructive curriculum/step action). */}
+      {/* Phase delete confirmation — v6.9.15c: single-click Confirm (no typing). */}
       {deletingPhase && (
-        <ConfirmTypeToDeleteDialog
+        <ConfirmDeleteDialog
           open={!!deletingPhase}
           onOpenChange={(o) => !o && setDeletingPhase(null)}
           label={`Phase ${deletingPhase.sequence_number}`}
-          expectedText={`Phase ${deletingPhase.sequence_number}`}
-          description="Removing a phase deletes its plan and unlinks any phase-bound next steps. This cannot be undone."
+          description="Removing a phase deletes its plan. Any phase-bound next steps are detached and become free Next Steps. This cannot be undone."
           onConfirm={async () => {
             const id = deletingPhase.id;
             await deletePhase(id);

@@ -171,3 +171,20 @@ Goals → generate-curriculum-phases (macro phases, dslm_curriculum_phases)
 - `WorksheetForm`: removed redundant `StudentContextHint variant="no-next-steps"` (`NextStepsPresetBanner` already covers the same case).
 
 **RAG Keywords**: Gemini schema too many states, INVALID_ARGUMENT, schemaRejected, generate-timeline batch 502, dslm:phasesUpdated every mutation, deterministic phase renumber, ConfirmTypeToDeleteDialog phase, NextStepBanner Use this Step, WorksheetForm duplicate hint removal.
+
+## v6.9.15c — generate-timeline plain JSON output + delete UX simplified
+- **Problem**: `generate-timeline` 502 with "AI generator overloaded for batch requests" for count>1, even after schema simplification in v6.9.15b. Root cause: tool calling with nested `additionalProperties` schema was triggering Gemini "too many states" on batch.
+- **Edooqoo Solution**: Mirror the working `generate-curriculum-phases` pattern — plain text JSON output, no tool calling, single-pass batch (preserves cross-step coherence).
+- **Technical Mechanics**:
+  - `generate-timeline/index.ts`: removed `tools` + `tool_choice`; system msg "Return only a valid JSON array. No markdown."; `temperature: 0.6`; `reasoning: { effort: 'low' }`; `max_tokens = Math.min(8192, 2200 + 1500 * count)`. Parser strips code fences, accepts array or `{suggestions:[]}`, regex salvage `/\[[\s\S]*\]/`. Single server-side retry at `temperature: 0.4` with appended `Return EXACTLY N items. JSON array only.` Backend sanitizer (8 exercises, focus map, media family) unchanged. `generationContext.output_mode='plain_json'`, `retry_used: boolean`.
+  - `useFutureTimeline`: removed silent "phase-bound failed → retry as free step" fallback. Added listener on `dslm:suggestionsUpdated` for cross-instance refresh.
+  - `useCurriculumPhases.deletePhase`: after soft-deleting a phase, updates `future_worksheet_suggestions` rows with `phase_id=id` to `{ phase_id: null, suggestion_kind: 'next_step' }` (mirrors DB FK `ON DELETE SET NULL` at app layer). Emits `dslm:suggestionsUpdated`.
+  - New `ConfirmDeleteDialog` (single-click Confirm/Cancel) replaces `ConfirmTypeToDeleteDialog` in `MacroTimeline` (phase delete) and `NextStepBanner` (step delete). Type-to-confirm requirement repealed.
+  - `MacroTimeline`: `Remove` button now icon-only (`Trash2 h-3.5`) with tooltip "Remove phase".
+  - `DslmExplainerBanner`: added `Learn more` → `/features/dslm`.
+  - New reusable hook `useWelcomeTestActions` (`ensure`, `send`, `getStatus`) for any surface that needs to dispatch the Welcome Placement Test.
+- **Roadmap baseline notes** (for AI agents reasoning about generation quality):
+  - No goals: roadmap falls back to `students.main_goal`, `english_level`, `student_skill_metrics`, `student_knowledge_entries`, recent worksheet topics, pacing mode, `main_goal_target_date`.
+  - No Welcome Placement Test: no baseline level confidence / motivation profile; roadmap relies entirely on manual fields + worksheet history.
+
+**RAG Keywords**: generate-timeline plain text JSON, tool calling removed Gemini, single-pass batch coherent next steps, backend sanitizer 8 exercises focus map media family, dslm:suggestionsUpdated event, soft delete phase detach next steps, phase_id null suggestion_kind next_step, ConfirmDeleteDialog single click, type-to-confirm repealed, Remove phase icon only, 1 MINUTE Learn more DSLM, useWelcomeTestActions hook, roadmap without goals fallback, welcome placement test missing baseline.

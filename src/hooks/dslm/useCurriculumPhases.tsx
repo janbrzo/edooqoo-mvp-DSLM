@@ -138,6 +138,17 @@ export const useCurriculumPhases = ({ studentId, teacherId }: UseCurriculumPhase
         .eq('id', id)
         .eq('teacher_id', teacherId);
       if (error) throw error;
+      // v6.9.15c — detach phase-bound next steps so they become free steps.
+      // The DB FK is ON DELETE SET NULL, but soft delete bypasses it; we mirror
+      // that semantic at the application layer for active and used suggestions.
+      const { error: detachErr } = await supabase
+        .from('future_worksheet_suggestions')
+        .update({ phase_id: null, suggestion_kind: 'next_step' })
+        .eq('phase_id', id)
+        .eq('teacher_id', teacherId);
+      if (detachErr) {
+        console.error('Failed to detach next steps from deleted phase', detachErr);
+      }
       // v6.9.15b — deterministic renumber: re-read remaining rows from DB and
       // assign sequence_number = idx+1 in order. Fixes the "2 -> 1" edge case
       // where the legacy delta-shift left phases out of order.
@@ -166,6 +177,10 @@ export const useCurriculumPhases = ({ studentId, teacherId }: UseCurriculumPhase
       }
       await fetchPhases();
       emitPhasesUpdated();
+      // v6.9.15c — notify timeline hook instances to refetch suggestions
+      try {
+        window.dispatchEvent(new CustomEvent('dslm:suggestionsUpdated', { detail: { studentId } }));
+      } catch { /* ignore */ }
       toast.success('Phase removed');
       return true;
     } catch (e) {
