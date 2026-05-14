@@ -103,6 +103,17 @@ export const useFutureTimeline = ({ studentId, teacherId }: UseFutureTimelinePro
 
   useEffect(() => { fetchSuggestions(); }, [fetchSuggestions]);
 
+  // v6.9.15c — cross-instance refresh trigger. Emitted e.g. by `useCurriculumPhases.deletePhase`
+  // after detaching phase-bound suggestions, so any mounted timeline reflects them as free steps.
+  useEffect(() => {
+    const h = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (!detail || detail.studentId === studentId) fetchSuggestions();
+    };
+    window.addEventListener('dslm:suggestionsUpdated', h);
+    return () => window.removeEventListener('dslm:suggestionsUpdated', h);
+  }, [studentId, fetchSuggestions]);
+
   // Selectors
   const nextSteps = useMemo(
     () => suggestions.filter(s => (s.suggestion_kind ?? 'next_step') === 'next_step'),
@@ -137,20 +148,10 @@ export const useFutureTimeline = ({ studentId, teacherId }: UseFutureTimelinePro
         teacherComment: opts.teacherComment ?? '',
         excludeIds: safeExcludeIds,
       };
-      let response = await supabase.functions.invoke('generate-timeline', { body: invokePayload });
-      // v6.9.14 — degradation retry: if phase-bound call fails with 5xx, retry as free step.
-      if (response.error && isPhaseBound) {
-        const retryStatus = (response.error as any)?.context?.status;
-        if (!retryStatus || retryStatus >= 500) {
-          console.warn('[generate-timeline] phase-bound failed, retrying as free step', retryStatus);
-          response = await supabase.functions.invoke('generate-timeline', {
-            body: { ...invokePayload, mode: 'next_steps', phaseId: null }
-          });
-          if (!response.error) {
-            toast.info('Phase-bound generation failed; created a free step instead.');
-          }
-        }
-      }
+      // v6.9.15c — single call only. The previous "phase-bound failed → retry as free step"
+      // fallback silently changed user intent. Edge Function now performs its own retry
+      // server-side (plain JSON output) and surfaces precise error metadata.
+      const response = await supabase.functions.invoke('generate-timeline', { body: invokePayload });
       if (response.error) throw response.error;
       const rawSuggestions = response.data?.suggestions || [];
       const generationContext = response.data?.generationContext || {};
