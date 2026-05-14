@@ -113,13 +113,15 @@ serve(async (req) => {
     const pacing = computePacingIndex(student as any, weeksUntilDeadline);
     const pLabel = pacingLabel(pacing);
 
+    // v6.9.15c — trim per-section limits to keep prompt compact for batch (count>1)
+    // generation. Sanitizer downstream still enforces hard guarantees.
     const scientificFramework = buildScientificPrinciplesBlock((student as any).english_level, pacing);
     const studentProfile = buildStudentProfileBlock(student as any, pacing);
-    const weakBlock = buildWeakAreasBlock(metrics, 10);
-    const knowledgeBlock = buildKnowledgeBlock(knowledge, 8);
+    const weakBlock = buildWeakAreasBlock(metrics, 8);
+    const knowledgeBlock = buildKnowledgeBlock(knowledge, 6);
     const goalsBlock = buildGoalsBlock(goals);
-    const worksheetHistory = buildWorksheetHistoryBlock(recentWorksheets, 10);
-    const existingStepsBlock = buildExistingStepsBlock(existingSteps, 20);
+    const worksheetHistory = buildWorksheetHistoryBlock(recentWorksheets, 8);
+    const existingStepsBlock = buildExistingStepsBlock(existingSteps, 10);
     const exerciseRules = getAdaptiveExerciseRules(pacing);
 
     const mainDeadline = (student as any).main_goal_target_date
@@ -178,7 +180,7 @@ PACING RULES:
 TBLT TITLE RULE: 'topic' is a real adult task, not a grammar label.
   WRONG: "Past Simple Practice"   RIGHT: "Reporting Last Sprint's Outcomes to Stakeholders"
 
-Return EXACTLY ${count} suggestions. NO MORE, NO LESS. The tool call schema enforces minItems=maxItems=${count}. Each suggestion must include:
+Return EXACTLY ${count} suggestions. NO MORE, NO LESS. Each suggestion must include:
 - topic (TBLT-style adult task), goal (outcome the student can perform after), additionalInfo, grammarFocus
 - exercises: array of EXACTLY ${LESSON_EXERCISE_COUNT} exercise IDs from this allowed list ONLY: ${VALID_EXERCISES.join(', ')}
   Backend will validate, normalize, and pad/truncate to exactly ${LESSON_EXERCISE_COUNT}.
@@ -189,105 +191,112 @@ MEDIA FAMILY RULE: each suggestion may use AT MOST ONE media family — picture-
 FOCUS DISTRIBUTION RULE: do NOT mark all exercises as "none". When grammarFocus is set, at least 2 exercises must be tagged "grammar". At least 2 exercises must be tagged "vocabulary". Remaining may be "none".
 - rationale (cite student data: weak skill, deadline, complementarity), focusSkills, difficulty (CEFR level), estimatedImpact
 
-Adult/professional tone. No school-like content. CLT anchoring mandatory.`;
+Adult/professional tone. No school-like content. CLT anchoring mandatory.
 
-    // Tool calling for reliable JSON
-    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
+Return ONLY a valid JSON array of EXACTLY ${count} objects (no markdown, no commentary, no code fences). EXACT shape per object:
+{
+  "topic": "string",
+  "goal": "string",
+  "additionalInfo": "string",
+  "grammarFocus": "string",
+  "exercises": ["id1","id2","id3","id4","id5","id6","id7","id8"],
+  "exerciseFocusMap": { "id1": "vocabulary|grammar|none" },
+  "rationale": "string",
+  "focusSkills": ["..."],
+  "difficulty": "CEFR level",
+  "estimatedImpact": { "key": "value" }
+}`;
+
+    // v6.9.15c — plain text JSON output (mirrors generate-curriculum-phases which works
+    // reliably for batches). Tool calling with `additionalProperties` on nested object
+    // schemas was triggering Gemini "too many states" / INVALID_ARGUMENT for count>1.
+    const buildAiBody = (temp: number, extraInstruction?: string) => ({
+      model: 'google/gemini-2.5-flash',
+      messages: [
+        { role: 'system', content: 'You are an expert ESL curriculum planner. Return only a valid JSON array. No markdown, no commentary.' },
+        { role: 'user', content: extraInstruction ? `${prompt}\n\n${extraInstruction}` : prompt }
+      ],
+      temperature: temp,
+      reasoning: { effort: 'low' },
+      max_tokens: Math.min(8192, 2200 + 1500 * count)
+    });
+
+    const callGateway = (body: any) => fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${Deno.env.get('LOVABLE_API_KEY')}`
       },
-      body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
-        messages: [
-          { role: 'system', content: 'You are an expert ESL curriculum planner. Use the generate_suggestions tool to return suggestions.' },
-          { role: 'user', content: prompt }
-        ],
-        tools: [{
-          type: 'function',
-          function: {
-            name: 'generate_suggestions',
-            description: 'Return worksheet suggestions',
-            parameters: {
-              type: 'object',
-              properties: {
-                suggestions: {
-                  type: 'array',
-                  items: {
-                    type: 'object',
-                    properties: {
-                      topic: { type: 'string' },
-                      goal: { type: 'string' },
-                      additionalInfo: { type: 'string' },
-                      grammarFocus: { type: 'string' },
-                      // v6.9.15b — schema simplified: no enum, no minItems/maxItems.
-                      // Google AI Studio rejected the previous constrained schema with
-                      // INVALID_ARGUMENT "too many states for serving" when count > 1.
-                      // Backend sanitizer below enforces all hard constraints.
-                      exercises: { type: 'array', items: { type: 'string' } },
-                      exerciseFocusMap: {
-                        type: 'object',
-                        additionalProperties: { type: 'string' }
-                      },
-                      rationale: { type: 'string' },
-                      focusSkills: { type: 'array', items: { type: 'string' } },
-                      difficulty: { type: 'string' },
-                      estimatedImpact: { type: 'object', additionalProperties: { type: 'string' } },
-                    },
-                    required: ['topic', 'exercises']
-                  },
-                }
-              },
-              required: ['suggestions']
-            }
-          }
-        }],
-        tool_choice: { type: 'function', function: { name: 'generate_suggestions' } },
-        temperature: 0.85,
-        // v6.9.15a — scale token budget with requested count to avoid truncation (was hardcoded 3500).
-        max_tokens: Math.min(8192, 1800 + 2000 * count)
-      })
+      body: JSON.stringify(body)
     });
 
-    if (!aiResponse.ok) {
-      const errorText = await aiResponse.text();
-      console.error('AI Gateway error:', errorText);
-      // v6.9.15b — surface schema-rejection cause to the frontend so it can
-      // show a precise toast instead of generic 5xx.
-      const isSchemaRejection = /too many states|INVALID_ARGUMENT/i.test(errorText);
+    const parseSuggestionsFromContent = (content: string): any[] => {
+      if (!content) return [];
+      const cleaned = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+      try {
+        const parsed = JSON.parse(cleaned);
+        if (Array.isArray(parsed)) return parsed;
+        if (parsed && Array.isArray(parsed.suggestions)) return parsed.suggestions;
+        return [];
+      } catch {
+        // Salvage: extract the first top-level JSON array.
+        const m = cleaned.match(/\[[\s\S]*\]/);
+        if (!m) return [];
+        try {
+          const parsed = JSON.parse(m[0]);
+          return Array.isArray(parsed) ? parsed : [];
+        } catch { return []; }
+      }
+    };
+
+    let aiResponse = await callGateway(buildAiBody(0.6));
+    let aiData: any = null;
+    let finishReason: string | undefined;
+    let suggestions: any[] = [];
+    let retryUsed = false;
+    let lastErrorText = '';
+
+    if (aiResponse.ok) {
+      aiData = await aiResponse.json();
+      finishReason = aiData?.choices?.[0]?.finish_reason;
+      const content = aiData?.choices?.[0]?.message?.content || '';
+      suggestions = parseSuggestionsFromContent(content);
+    } else {
+      lastErrorText = await aiResponse.text();
+      console.error('AI Gateway error (attempt 1):', aiResponse.status, lastErrorText.slice(0, 500));
+    }
+
+    // v6.9.15c — single retry with stricter temperature + explicit final reminder.
+    if (!aiResponse.ok || suggestions.length === 0) {
+      retryUsed = true;
+      const retryHint = `Return EXACTLY ${count} items. JSON array only. No prose. No markdown.`;
+      aiResponse = await callGateway(buildAiBody(0.4, retryHint));
+      if (aiResponse.ok) {
+        aiData = await aiResponse.json();
+        finishReason = aiData?.choices?.[0]?.finish_reason;
+        const content = aiData?.choices?.[0]?.message?.content || '';
+        suggestions = parseSuggestionsFromContent(content);
+      } else {
+        lastErrorText = await aiResponse.text();
+        console.error('AI Gateway error (attempt 2):', aiResponse.status, lastErrorText.slice(0, 500));
+      }
+    }
+
+    if (!aiResponse.ok && suggestions.length === 0) {
+      const isSchemaRejection = /too many states|INVALID_ARGUMENT/i.test(lastErrorText);
       return new Response(
         JSON.stringify({
           error: isSchemaRejection ? 'AI schema rejected' : 'AI Gateway error',
           status: aiResponse.status,
-          detail: errorText.slice(0, 500),
+          detail: lastErrorText.slice(0, 500),
           schemaRejected: isSchemaRejection,
           count,
           mode: finalMode,
+          retry_used: retryUsed,
           suggestions: [],
         }),
         { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
-    }
-
-    const aiData = await aiResponse.json();
-    const finishReason = aiData.choices?.[0]?.finish_reason;
-    let suggestions: any[] = [];
-    try {
-      const toolCall = aiData.choices?.[0]?.message?.tool_calls?.[0];
-      if (toolCall?.function?.arguments) {
-        const parsed = JSON.parse(toolCall.function.arguments);
-        suggestions = Array.isArray(parsed.suggestions) ? parsed.suggestions : [];
-      } else {
-        // Fallback: try parsing content
-        const content = aiData.choices?.[0]?.message?.content || '[]';
-        const cleaned = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-        const parsed = JSON.parse(cleaned);
-        suggestions = Array.isArray(parsed) ? parsed : (parsed.suggestions || []);
-      }
-    } catch (e) {
-      console.error('Failed to parse AI response', { finishReason, error: String(e) });
-      suggestions = [];
     }
 
     // Sanitize: enforce exactly 8 exercises per suggestion (defense in depth)
@@ -391,6 +400,9 @@ Adult/professional tone. No school-like content. CLT anchoring mandatory.`;
         ? (finishReason === 'length' ? 'truncated' : 'partial')
         : null,
       requested_count: count,
+      // v6.9.15c — output diagnostics
+      output_mode: 'plain_json',
+      retry_used: retryUsed,
     };
 
     console.log('generate-timeline:', finalMode, 'returned', suggestions.length, 'suggestions');
