@@ -4,6 +4,7 @@ description: Reusable ConfirmTypeToDeleteDialog gating all destructive curriculu
 type: feature
 ---
 
-Any destructive action on `dslm_curriculum_phases` or `future_worksheet_suggestions` (delete phase, delete next-step) MUST use `src/components/dslm/ConfirmTypeToDeleteDialog.tsx`. The dialog requires the user to type the exact `itemLabel` (e.g. `Phase 2`, `Next Step #1`) before the confirm button enables. This prevents one-click data loss.
+v6.9.15c — type-to-confirm requirement REPEALED by product owner. New rule:
+Destructive DSLM actions (delete phase, delete next-step) MUST use `src/components/dslm/ConfirmDeleteDialog.tsx`: a single-click `Cancel` / `Confirm` modal with destructive variant. No typed confirmation.
 
-Wired into: `MacroTimeline.tsx` (phase delete), `NextStepBanner.tsx` (step delete). Future destructive UI MUST follow this pattern — do not introduce raw `confirm()` or single-click delete buttons.
+Wired into: `MacroTimeline.tsx` (phase delete), `NextStepBanner.tsx` (step delete). `ConfirmTypeToDeleteDialog` remains in the codebase but should not be used for new destructive UI.
