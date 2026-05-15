@@ -84,8 +84,8 @@ export const MacroTimeline: React.FC<MacroTimelineProps> = ({
   // v6.9.15c — readiness signals for "best-effort" roadmap generation warnings.
   const { data: studentRow } = useStudent(studentId);
   const { goals } = useStudentProgress({ studentId, teacherId });
-  const studentName = studentRow ? `${studentRow.first_name ?? ''} ${studentRow.last_name ?? ''}`.trim() || 'Student' : 'Student';
-  const studentEmail = (studentRow as any)?.email ?? null;
+  const studentName = studentRow?.name || 'Student';
+  const studentEmail = studentRow?.student_email ?? null;
   const welcomeActions = useWelcomeTestActions({ studentId, teacherId, studentName, studentEmail });
   const [wtStatus, setWtStatus] = useState<WelcomeTestSnapshot['status']>(null);
   React.useEffect(() => {
