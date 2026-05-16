@@ -439,3 +439,58 @@ Two distinct edge functions live ONLY in Supabase deployment (not in repo): `gen
 **Technical Mechanics**: `src/components/WorksheetForm/index.tsx` — removed the `useStudentNextStepsCount` import and call, removed `activeStudentId`/`nextStepsCount` derivations, removed the `<StudentContextHint variant="no-next-steps">` block. The hook file and the component variant are kept on disk for backward compatibility but no longer wired into this form.
 
 **RAG Keywords**: generate-timeline 502, Gemini schema too many states, Google AI Studio INVALID_ARGUMENT, tool schema too complex, batch next steps count greater than 1, schemaRejected diagnostic, backend sanitizer authoritative, exactly 8 exercises enforcement, useCurriculumPhases emitPhasesUpdated, dslm:phasesUpdated event, deterministic phase renumber, sequence_number 2 to 1, deleted phase still selected, defaultTargetPhaseId stale guard, ConfirmTypeToDeleteDialog phase delete, NextStepBanner Use this Step, NextStepBanner Regenerate with comment, WorksheetForm duplicate hint removal, NextStepsPresetBanner canonical CTA.
+
+---
+
+# v6.9.16 — Per-route JSON-LD, GSC verification, single-toast policy
+
+## Problem 1 — Sitewide FAQPage/HowTo on every SPA route
+`index.html` shipped `FAQPage` (25 Q/A) and `HowTo` (4 steps) JSON-LD in the static head. Because the SPA serves `index.html` as the fallback for every client-side route, Google saw `FAQPage` and `HowTo` on routes like `/dashboard`, `/calendar`, `/pricing` where the on-page content does not match — schema mismatch risk and rich-results disqualification.
+
+**Edooqoo.com Solution**: Move `FAQPage` and `HowTo` to `/how-it-works` only via `react-helmet-async`. The route has actual matching content (`steps` array drives `HowTo`, `faqItems` array drives `FAQPage`). Sitewide identity (`SoftwareApplication`, `Organization`, `WebSite`, `BreadcrumbList`) stays in `index.html`.
+
+**Technical Mechanics**:
+- `bun add react-helmet-async@3.0.0`.
+- `src/main.tsx`: wrap `<App/>` in `<HelmetProvider>` (above `<App/>` and inside `StrictMode`).
+- `src/pages/HowItWorks.tsx`: removed imperative `useEffect`-based `document.title` and meta mutation; added `<Helmet>` with route-specific `<title>`, `<meta description>`, canonical, `og:*`, plus two `<script type="application/ld+json">` blocks for `HowTo` and `FAQPage`. Both schemas are generated from the same `steps`/`faqItems` arrays already rendered in the visible UI — eliminates schema drift.
+- `index.html`: removed `FAQPage` `<script>` and `HowTo` `<script>` blocks. Retained `SoftwareApplication`+`Organization` `@graph`, `WebSite` SearchAction, and `BreadcrumbList`.
+- Per-route HelmetProvider is opt-in; routes without `<Helmet>` continue to use `index.html` defaults. No regression for the rest of the app.
+
+## Problem 2 — Google Search Console connected but property unverified
+The user linked the GSC connector (`std_01krr4bmyafmw8stxgv74hhd2r`) but the domain `https://edooqoo.com/` was not registered or verified in Search Console — no impressions data possible.
+
+**Edooqoo.com Solution**: META-tag verification via Lovable connector gateway. Requires user republish before verification completes (static meta tag must be live on production).
+
+**Technical Mechanics**:
+- Connector secret `GOOGLE_SEARCH_CONSOLE_API_KEY` exposed after linking.
+- Token request:
+  `POST https://connector-gateway.lovable.dev/google_search_console/siteVerification/v1/token` with body `{"site":{"identifier":"https://edooqoo.com/","type":"SITE"},"verificationMethod":"META"}`.
+- Returned token embedded verbatim into `index.html` `<head>`: `<meta name="google-site-verification" content="hTn-czAwta1F2Y8-Jlgs5OqMRCmSon1bIJBlOn_4Xvc" />`.
+- After republish (user action), call:
+  `POST .../siteVerification/v1/webResource?verificationMethod=META` (verify) →
+  `PUT .../webmasters/v3/sites/https%3A%2F%2Fedooqoo.com%2F` (register property) →
+  `PUT .../webmasters/v3/sites/https%3A%2F%2Fedooqoo.com%2F/sitemaps/https%3A%2F%2Fedooqoo.com%2Fsitemap.xml` (submit sitemap).
+- Future agents: on a 400 `failedToFindMetaTag` retry after republish; do not re-issue a new token (token is stable per property+method).
+
+## Problem 3 — DSLM "1 MINUTE" banner Learn more opens in same tab
+`DslmExplainerBanner` used `react-router-dom` `<Link to="/features/dslm">`, which replaced the current view and forced the teacher to navigate back to recover prior context (selected student, scroll position).
+
+**Edooqoo.com Solution**: Open `/features/dslm` in a new tab via native anchor.
+
+**Technical Mechanics**:
+- `src/components/student/DslmExplainerBanner.tsx`: dropped `import { Link } from 'react-router-dom'`. Replaced `<Link>` with `<a href="/features/dslm" target="_blank" rel="noopener noreferrer">` wrapped by `<Button asChild>`.
+- Dismiss semantics unchanged: `Got it` + `X` set `localStorage.dslm_explainer_dismissed_<teacherId>='true'`. `Learn more` intentionally does NOT dismiss — teacher may want to revisit after reading.
+- The article at `/features/dslm` (`src/pages/features/FeatureDSLM.tsx`, 296 LOC) is the canonical reference for the 4-layer DSLM model — content audited as complete; no copy changes this iteration.
+
+## Problem 4 — Toast stacking blocks UI during rapid mutations
+`<Toaster visibleToasts={3} duration={4000}>` allowed up to 3 stacked toasts at top-right, which during delete-then-refetch or batch generation covered the sticky nav and made follow-up clicks impossible.
+
+**Edooqoo.com Solution**: Show one toast at a time; shorter duration.
+
+**Technical Mechanics**:
+- `src/components/ui/sonner.tsx`: `visibleToasts={1}`, `duration={3500}`. No API change for `toast.*` callers.
+
+## Deferred (planned in `.lovable/plan.md` v6.9.16, not implemented this iteration)
+OnboardingHeroCard for empty Dashboard (P0); skeleton loaders (P1); nav-student-switcher toast feedback + page refetch (P3); WorksheetFormStudentBadge with auto-fill level (P4); DSLM subnav active-pill contrast bump (P5); Undo toast after destructive deletes (P6); StudentHub mobile tab scroll mask (P7). All have detailed mechanics in the plan file. Reason for deferral: each touches multiple existing flows and warrants isolated implementation + smoke test, not a bundled rollout, to keep regression surface small.
+
+**RAG Keywords**: react-helmet-async install, HelmetProvider main.tsx, per-route JSON-LD scope, FAQPage HowTo /how-it-works only, index.html sitewide SoftwareApplication Organization WebSite BreadcrumbList, schema mismatch SPA fallback Googlebot, Google Search Console connector gateway, siteVerification v1 token META method, google-site-verification meta tag edooqoo.com, webmasters v3 sites PUT, sitemaps submit endpoint, DslmExplainerBanner Learn more target blank rel noopener noreferrer, sonner visibleToasts 1, single toast policy edooqoo, deferred UX backlog v6.9.16.
