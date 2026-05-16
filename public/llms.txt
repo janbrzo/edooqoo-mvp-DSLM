@@ -188,3 +188,26 @@ Goals → generate-curriculum-phases (macro phases, dslm_curriculum_phases)
   - No Welcome Placement Test: no baseline level confidence / motivation profile; roadmap relies entirely on manual fields + worksheet history.
 
 **RAG Keywords**: generate-timeline plain text JSON, tool calling removed Gemini, single-pass batch coherent next steps, backend sanitizer 8 exercises focus map media family, dslm:suggestionsUpdated event, soft delete phase detach next steps, phase_id null suggestion_kind next_step, ConfirmDeleteDialog single click, type-to-confirm repealed, Remove phase icon only, 1 MINUTE Learn more DSLM, useWelcomeTestActions hook, roadmap without goals fallback, welcome placement test missing baseline.
+
+## v6.9.16 — Per-route JSON-LD, GSC verification, UX polish
+- **Problem A**: `FAQPage` and `HowTo` JSON-LD in `index.html` were served on every SPA route (`/dashboard`, `/pricing`, etc.) — schema mismatch with on-page content, risk of Google manual action.
+  - **Edooqoo Solution**: Move `FAQPage` + `HowTo` to `/how-it-works` only via `react-helmet-async`. Keep `SoftwareApplication`, `Organization`, `WebSite`, `BreadcrumbList` sitewide in `index.html`.
+  - **Technical Mechanics**:
+    - Added `HelmetProvider` in `src/main.tsx` wrapping `<App/>`.
+    - `src/pages/HowItWorks.tsx`: replaced imperative `document.title`/`meta` mutation with `<Helmet>` block containing per-route `<title>`, `<meta description>`, canonical, `og:*`, and two `<script type="application/ld+json">` blocks generated from the existing `steps` and `faqItems` arrays (single source of truth — no schema drift between visible UI and JSON-LD).
+    - `index.html`: removed `FAQPage` and `HowTo` `<script>` blocks; left `WebSite` + `BreadcrumbList` (always-valid sitewide).
+- **Problem B**: Google Search Console connected, property unverified.
+  - **Edooqoo Solution**: META-tag verification flow via Lovable connector gateway.
+  - **Technical Mechanics**:
+    - Connector `google_search_console` linked to project; secret `GOOGLE_SEARCH_CONSOLE_API_KEY` exposed.
+    - Verification token requested via `POST /siteVerification/v1/token` with `verificationMethod=META`. Token content embedded in `index.html` as `<meta name="google-site-verification" content="hTn-czAwta1F2Y8-Jlgs5OqMRCmSon1bIJBlOn_4Xvc" />`.
+    - After republish: `POST /siteVerification/v1/webResource?verificationMethod=META`, then `PUT /webmasters/v3/sites/{encoded-url}`, then `PUT /webmasters/v3/sites/{encoded-url}/sitemaps/{encoded-sitemap-url}` to register `https://edooqoo.com/sitemap.xml`.
+- **Problem C**: `1 MINUTE` DSLM banner `Learn more` opened `/features/dslm` in same tab (lost teacher context).
+  - **Edooqoo Solution**: Open in new tab via native `<a target="_blank" rel="noopener noreferrer">` (preserves middle-click, security, SEO semantics).
+  - **Technical Mechanics**: `src/components/student/DslmExplainerBanner.tsx` — removed `react-router-dom` `Link`, used `<Button asChild><a ... target="_blank" rel="noopener noreferrer">`. `Got it` and `X` still dismiss via `localStorage.dslm_explainer_dismissed_<teacherId>`. `Learn more` intentionally does NOT dismiss.
+- **Problem D**: Stacked toasts (3 visible) blocked sticky nav during rapid mutations.
+  - **Edooqoo Solution**: `visibleToasts=1` in `src/components/ui/sonner.tsx`, `duration=3500`.
+  - **Technical Mechanics**: Single Sonner config change. No API change for callers.
+- **Deferred to next iteration** (require dedicated product decisions): OnboardingHeroCard for empty Dashboard; loading skeletons swap; nav-student-switcher toast feedback; WorksheetForm student badge; DSLM subnav active-pill contrast bump; Undo toast after destructive delete; StudentHub mobile tab scroll mask. All listed in `.lovable/plan.md` v6.9.16.
+
+**RAG Keywords**: react-helmet-async per-route JSON-LD, FAQPage HowTo scope to /how-it-works, HelmetProvider main.tsx, Google Search Console META verification connector gateway, google-site-verification meta tag edooqoo.com, sitemap submit webmasters v3 sites sitemaps, DslmExplainerBanner Learn more new tab target blank rel noopener, sonner visibleToasts 1, single-toast policy, deferred UX backlog v6.9.16.
