@@ -6,7 +6,6 @@
  */
 import React, { useState } from 'react';
 import { Brain, X, ExternalLink } from 'lucide-react';
-import { Link } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
@@ -60,9 +59,9 @@ export const DslmExplainerBanner: React.FC<Props> = ({ teacherId }) => {
                 Got it
               </Button>
               <Button asChild variant="link" size="sm" className="px-0 h-auto text-xs">
-                <Link to="/features/dslm">
+                <a href="/features/dslm" target="_blank" rel="noopener noreferrer">
                   Learn more <ExternalLink className="h-3 w-3 ml-1" />
-                </Link>
+                </a>
               </Button>
             </div>
           </div>
