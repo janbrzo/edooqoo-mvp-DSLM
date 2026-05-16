@@ -1,6 +1,7 @@
 
 import React, { useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
+import { Helmet } from 'react-helmet-async';
 
 const steps = [
   { number: 1, title: "Sign Up for Free", description: "Create your Edooqoo account in 30 seconds. No credit card required. You receive 2 free tokens to generate your first worksheets immediately.", benefits: ["Free account with 2 worksheet tokens", "All 29 exercise types available", "No installation — works in your browser"] },
@@ -28,14 +29,44 @@ const HowItWorks = () => {
   const fromPath = (location.state as { from?: string } | null)?.from;
   const handleBack = () => navigate(fromPath ?? '/');
 
-  useEffect(() => {
-    document.title = "How Edooqoo Works — Step-by-Step Guide for English Teachers";
-    const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute("content", "Step-by-step guide to using Edooqoo: sign up, add students, generate AI worksheets, assign homework, track progress. 8 steps from first login to full teaching workflow.");
-  }, []);
+  const faqJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: faqItems.map(({ q, a }) => ({
+      '@type': 'Question',
+      name: q,
+      acceptedAnswer: { '@type': 'Answer', text: a },
+    })),
+  };
+
+  const howToJsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'HowTo',
+    name: 'How to Use Edooqoo to Teach English with AI Worksheets',
+    description: "Step-by-step guide to running an English teaching workflow on Edooqoo — from sign-up to progress tracking.",
+    totalTime: 'PT5M',
+    tool: { '@type': 'HowToTool', name: 'Edooqoo AI Worksheet Generator' },
+    step: steps.map(s => ({
+      '@type': 'HowToStep',
+      position: s.number,
+      name: s.title,
+      text: s.description,
+    })),
+  };
 
   return (
     <div className="min-h-screen bg-background">
+      <Helmet>
+        <title>How Edooqoo Works — AI Worksheet Generator in 8 Steps</title>
+        <meta name="description" content="Step-by-step guide to Edooqoo: sign up, add students, generate AI worksheets, assign homework with AI grading, and track progress automatically." />
+        <link rel="canonical" href="https://edooqoo.com/how-it-works" />
+        <meta property="og:title" content="How Edooqoo Works — AI Worksheet Generator in 8 Steps" />
+        <meta property="og:description" content="Step-by-step guide to Edooqoo: sign up, add students, generate AI worksheets, assign homework with AI grading, and track progress automatically." />
+        <meta property="og:url" content="https://edooqoo.com/how-it-works" />
+        <meta property="og:type" content="article" />
+        <script type="application/ld+json">{JSON.stringify(howToJsonLd)}</script>
+        <script type="application/ld+json">{JSON.stringify(faqJsonLd)}</script>
+      </Helmet>
       <div className="container mx-auto px-4 py-12 max-w-4xl">
         <div className="mb-8">
           <button onClick={handleBack} className="text-primary hover:underline text-sm">
