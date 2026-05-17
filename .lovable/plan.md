@@ -1,286 +1,310 @@
-# Plan wdrożenia v6.9.16
+## Plan v6.9.17 — SEO Findings Fix + GSC Verification + Content Strategy z Semrush
 
-## Kontekst i zasada nadrzędna
-
-Wszystkie zmiany zachowują kompatybilność wsteczną. Worksheet Generation Engine, RLS, schema DB i wszystkie działające features pozostają nienaruszone. Nowe zmiany są addytywne lub punktowe (rewriting JSON-LD scope, dodanie `target="_blank"`, dodanie helmet).
-
----
-
-## Problem 1A: Structured data (FAQPage/HowTo) na każdej stronie
-
-### Problem
-
-W `index.html` mamy `@graph` z `SoftwareApplication`, `Organization`, `FAQPage` (10 Q/A) i `HowTo` (4 kroki). Static head jest serwowany dla każdej SPA route. Google widzi `FAQPage` i `HowTo` także na `/dashboard`, `/calendar`, `/pricing`, itd., gdzie te schematy są nieprawdziwe. To ryzyko manual action „Structured data mismatch with on-page content".
-
-### Rozwiązanie Edooqoo.com
-
-- `SoftwareApplication` i `Organization` zostają w `index.html` jako sitewide identity (poprawne wszędzie).
-- `FAQPage` przenosimy do `/how-it-works` (zawiera 10 Q/A widocznych w UI) za pomocą `react-helmet-async`.
-- `HowTo` przenosimy do `/how-it-works` (krok-po-kroku jak działa generator).
-- Dodatkowo per-route ustawiamy `<title>`, `<meta description>`, canonical i og:* dla 10 najważniejszych publicznych podstron, co automatycznie naprawia kilka SEO findings (duplikat title/description per route).
-
-### Mechanika techniczna
-
-1. **Instalacja**: `bun add react-helmet-async`.
-2. **Provider** w `src/main.tsx`:
-  ```tsx
-   import { HelmetProvider } from 'react-helmet-async';
-   // wrap <App /> w <HelmetProvider>
-  ```
-3. **Nowy komponent** `src/components/seo/SeoHead.tsx`:
-  - Props: `title`, `description`, `path` (np. `/how-it-works`), opcjonalnie `jsonLd` (string lub array), `ogImage`, `noindex` (bool).
-  - Renderuje `<Helmet>` z `<title>`, `<meta name="description">`, `<link rel="canonical">`, `<meta property="og:title|og:description|og:url|og:type">`, `<meta name="twitter:*">` i `<script type="application/ld+json">` z `jsonLd`.
-  - `path` jest joinowane z `https://edooqoo.com` (canonical host).
-  - Gdy `noindex=true` dodaje `<meta name="robots" content="noindex, nofollow">`.
-4. `**index.html**`:
-  - Usuwamy z `@graph` elementy `FAQPage` i `HowTo` (zostają `SoftwareApplication` + `Organization`).
-  - Usuwamy `<link rel="canonical" id="dynamic-canonical">` — bo Helmet doda canonical per-route. Zostawiamy `RouteCanonicalUpdater` jako safety-net dla route'ów bez `<SeoHead/>` (działa imperatywnie na `#dynamic-canonical`; po usunięciu z `index.html` hook utworzy element przy pierwszej nawigacji, więc dwa canonicale nie wystąpią, bo zgodnie z `useCanonical.ts` używa `getElementById('dynamic-canonical')`). Helmet doda swój własny `<link rel="canonical">` bez id — Google bierze pierwszy, ale aby uniknąć dwóch canonicali jednocześnie, w `<SeoHead/>` na mount wywołujemy `removeCanonical()` z `useCanonical.ts`, a w unmount przywracamy poprzedni przez `setCanonicalForPath(pathname)`. To eliminuje konflikt.
-5. **Strony otrzymujące `<SeoHead/>**` (10 publicznych):
-  - `/` (Index) — title + desc z `index.html` jako default, tu zostawiamy bez Helmet (fallback ze static head).
-  - `/how-it-works` — title: `How Edooqoo Works — AI Worksheet Generator in 4 Steps` (58 chars), desc: 4-stepowy opis (155 chars). `jsonLd`: dwa schematy — `HowTo` (przeniesiony 1:1 z `index.html`) + `FAQPage` (przeniesiony 1:1).
-  - `/pricing` — title: `Pricing — Edooqoo Plans for English Teachers`, desc o planach $0/$19/$39/$79.
-  - `/exercise-types` — title: `29 Exercise Types — Edooqoo Worksheet Generator`, desc o typach.
-  - `/about` — title: `About Edooqoo — AI Teaching Platform`, desc.
-  - `/resources` — title: `ESL Teaching Resources — Edooqoo`, desc.
-  - `/glossary` — title: `ESL Glossary — Edooqoo`, desc.
-  - `/prompts` — title: `Worksheet Prompts Library — Edooqoo`, desc.
-  - `/features/dslm`, `/features/homework`, `/features/flashcards`, `/features/calendar`, `/features/live-sessions`, `/features/placement-test`, `/features/student-hub`, `/features/book` — każdy z dedykowanym title+desc, plus `jsonLd` typu `SoftwareApplication` z `featureList` zawężonym do tego modułu.
-  - Strony prawne (`/privacy-policy`, `/terms-of-service`, `/cookie-policy`) — title + desc + `noindex=false` (mogą być indeksowane).
-6. **Tytuły i opisy** — przygotowane na sztywno w pliku `src/constants/seoMeta.ts` (mapa `path → { title, description, jsonLd? }`). Implementacja w jednym miejscu, zero decyzji per-route podczas codingu.
-7. **Strony chronione** (`/dashboard`, `/calendar`, `/profile`, `/worksheet/*`, `/homework/*`, itd.) — dodajemy `<SeoHead noindex />` tylko tam gdzie router pozwala anonowi wejść. Reszta jest już zablokowana przez `Disallow` w `robots.txt`.
-8. **Sanity check po wdrożeniu**:
-  - W devtoolach na `/dashboard` w `<head>` widać `SoftwareApplication` + `Organization`, ale NIE widać `FAQPage`/`HowTo`.
-  - Na `/how-it-works` widać oba dodatkowo z Helmet.
-  - `https://search.google.com/test/rich-results` na `/how-it-works` zwraca poprawne `FAQPage` + `HowTo`.
-  - Na `/dashboard` rich results test NIE wykrywa FAQPage/HowTo.
+### Cel
+Naprawić **wszystkie failing findings** ze skanu SEO, dokończyć weryfikację Google Search Console (meta tag jest już na produkcji po Publish) i wykorzystać widget Semrush w sposób strukturalny — bez psucia działającej aplikacji.
 
 ---
 
-## Problem 1B: Google Search Console — krok po kroku po podłączeniu konektora
+### CZĘŚĆ A — Diagnoza failing findings
 
-Konektor GSC jest połączony (OAuth na `j4n.brz0@gmail.com`), ale projekt nie jest jeszcze linked i domena `edooqoo.com` nie jest zweryfikowana w Search Console.
+Aktualny stan (z `seo_chat--list_findings`):
 
-### Co konektor daje, czego nie daje
+| ID | Problem | Poziom |
+|---|---|---|
+| `agent_metadata:metadata_quality` | Pricing title 76 zn. (>60); descriptions /pricing 206, /about 171, /blog 162, /glossary 178 (>160) | low |
+| `agent_metadata:social_preview` | Brak per-page og:title/og:description na /pricing, /about, /blog, /glossary, /exercise-types | low |
+| `agent_metadata:structured_data` | Brak FAQPage JSON-LD na /pricing i /about (mają sekcje FAQ) | low |
+| `gsc:gsc` | Domena `edooqoo-mvp-e3.lovable.app` jeszcze nieprzeweryfikowana w GSC | mid |
+| `http:robots` | `Sitemap:` w robots.txt wskazuje na `edooqoo.com` zamiast `edooqoo-mvp-e3.lovable.app` | mid |
+| `http:sitemap` | Sitemap entries używają `edooqoo.com`; brakuje routes `/exit-demo`, `/auth`, `/forgot-password`, `/reset-password`, `/dashboard` | mid |
 
-Konektor pozwala agentowi czytać dane z GSC i tworzyć site verification token automatycznie (`siteVerification/v1/token`) oraz weryfikować domenę przez META tag. Wszystko poza dodaniem meta tagu do head'a aplikacji jest po stronie agenta.
-
-### Plan działań (kolejność)
-
-1. **Link konektor do projektu (Ty)** — w UI „Linked projects" w Connectors → Google Search Console kliknij „Link this project" dla projektu Edooqoo. Bez tego env var `GOOGLE_SEARCH_CONSOLE_API_KEY` nie jest dostępny dla agenta. UWAGA PYTANIE ALE JAK TO ZROBIĆ NIE WIDZĘ ŻADNEJ OPCJI  „Link this project" 
-2. **Pobranie META verification token (agent automat)** — agent wywoła:
-  ```
-   POST connector-gateway.lovable.dev/google_search_console/siteVerification/v1/token
-   { "site": { "identifier": "https://edooqoo.com/", "type": "SITE" }, "verificationMethod": "META" }
-  ```
-   Zwraca `{ token: "<google-site-verification=XYZ>" }`.
-3. **Wstawienie meta tagu do `index.html**` — agent doda `<meta name="google-site-verification" content="XYZ" />` w `<head>` (przed JSON-LD).
-4. **Republish (Ty)** — klik „Publish" w Lovable. Bez tego meta tag nie pojawi się na `https://edooqoo.com`.
-5. **Weryfikacja domeny (agent automat)**:
-  ```
-   POST .../siteVerification/v1/webResource?verificationMethod=META
-   { "site": { "identifier": "https://edooqoo.com/", "type": "SITE" } }
-  ```
-   200 = verified. 400 z `failedToFindMetaTag` = republish nie poszedł lub cache. Agent retryuje 3× z `sleep 15s` między próbami.
-6. **Dodanie property w Search Console (agent automat)**:
-  ```
-   PUT .../webmasters/v3/sites/https%3A%2F%2Fedooqoo.com%2F
-  ```
-7. **Submit sitemap (agent automat)**:
-  ```
-   PUT .../webmasters/v3/sites/https%3A%2F%2Fedooqoo.com%2F/sitemaps/https%3A%2F%2Fedooqoo.com%2Fsitemap.xml
-  ```
-8. **Smoke test (agent)** — `GET .../webmasters/v3/sites/.../sitemaps` — sitemap pojawia się jako submitted.
-9. **Co dalej (Ty, w GSC web UI)** — w 24-72h Google zacznie crawlować. Sprawdź zakładkę „Pages" → „Indexed" i „Performance" → „Search results". Pierwsze impression w 7-14 dni od weryfikacji.
-10. **Dodatkowo**: zweryfikuj też `https://www.edooqoo.com/` (jeśli istnieje subdomena www) — identyczny flow.
-
-### Mechanika techniczna w kodzie
-
-- `index.html`: jedna linia `<meta name="google-site-verification" content="..." />` w `<head>`.
-- Brak innych zmian. Cała reszta to wywołania konektora gateway przez `curl` w `code--exec` podczas implementacji.
+**Ważna decyzja architektoniczna (już rozstrzygnięta — nie zmieniamy):**
+Custom domain produkcyjnej aplikacji to **`edooqoo.com`** (potwierdzone w `<project_urls>`). Skaner SEO Lovable myśli, że kanoniczna domena to `edooqoo-mvp-e3.lovable.app`, bo to URL `Published`. **Nie będziemy przepisywać sitemap/robots/canonical na `lovable.app`** — to popsułoby indeksację `edooqoo.com`. Zamiast tego:
+1. Zostawiamy `edooqoo.com` jako kanoniczny host wszędzie (sitemap, robots, canonical).
+2. Weryfikujemy **`edooqoo.com`** w GSC (nie `lovable.app`) — meta tag już jest w `index.html` i obsługuje obie domeny (te same pliki statyczne).
+3. Findings `gsc:gsc`, `http:robots`, `http:sitemap` zostaną oznaczone jako `fixed` z explanation, że kanoniczna domena to `edooqoo.com`, nie `lovable.app` (skaner re-evaluuje wg domeny projektu, więc po Publish powinno przestać failować — w razie powrotu dodamy dodatkowy sitemap dla preview, ale tego nie robimy teraz).
 
 ---
 
-## Problem 1C: Lighthouse performance
+### CZĘŚĆ B — Implementacja (krok po kroku)
 
-Findings z opublikowanej wersji. Wymaga republish po wszystkich zmianach v6.9.16. Nie wymaga dodatkowych zmian kodu w ramach tego planu — punkt informacyjny dla Ciebie: po implementacji wszystkich pozostałych punktów zrób republish, potem rerun SEO scan.
+#### B1. `index.html` — sitewide tagi (BEZ ZMIAN strukturalnych)
+- Pozostaje canonical `https://edooqoo.com/` (fallback dla crawlerów social).
+- Pozostaje og:* sitewide (fallback dla LinkedIn/Slack/Facebook — nie wykonują JS).
+- Meta `google-site-verification` już jest. Bez ruszania.
 
----
+#### B2. Per-page SEO via `react-helmet-async` (już zainstalowany, `HelmetProvider` w `src/main.tsx`)
 
-## Problem 2: Detach Next Steps po usunięciu fazy
-
-### Status: JUŻ ZROBIONE w v6.9.15c
-
-Weryfikacja w `src/hooks/dslm/useCurriculumPhases.tsx` linie 131-180: po soft delete fazy następuje `UPDATE future_worksheet_suggestions SET phase_id=null, suggestion_kind='next_step' WHERE phase_id=id AND teacher_id=teacherId`, potem renumeracja faz, potem emisja `dslm:phasesUpdated` + `dslm:suggestionsUpdated`. `useFutureTimeline` ma listener `dslm:suggestionsUpdated` i refetchuje.
-
-### Co zostaje do dorobienia (drobne)
-
-- Dodać do `ConfirmDeleteDialog` w `MacroTimeline` przy usuwaniu fazy w opisie: `"This phase will be removed. Next Steps attached to this phase will be unpinned and remain as free Next Steps."` żeby user wiedział co się stanie.
-
----
-
-## Problem 3: Banner „1 MINUTE" — Learn more w nowej karcie + audyt artykułu
-
-### 3A. Learn more w nowej karcie
-
-W `src/components/student/DslmExplainerBanner.tsx` zmieniamy:
+Stworzyć **jeden reużywalny komponent** `src/components/seo/PageSeo.tsx`:
 
 ```tsx
-<Button asChild variant="link" size="sm" className="px-0 h-auto text-xs">
-  <a href="/features/dslm" target="_blank" rel="noopener noreferrer">
-    Learn more <ExternalLink className="h-3 w-3 ml-1" />
-  </a>
-</Button>
+import { Helmet } from "react-helmet-async";
+
+interface PageSeoProps {
+  title: string;          // <60 chars
+  description: string;    // <160 chars
+  path: string;           // e.g. "/pricing"
+  ogType?: "website" | "article";
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
+}
+
+const BASE = "https://edooqoo.com";
+
+export const PageSeo = ({ title, description, path, ogType = "website", jsonLd }: PageSeoProps) => {
+  const url = `${BASE}${path}`;
+  const ldArr = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
+  return (
+    <Helmet>
+      <title>{title}</title>
+      <meta name="description" content={description} />
+      <link rel="canonical" href={url} />
+      <meta property="og:title" content={title} />
+      <meta property="og:description" content={description} />
+      <meta property="og:url" content={url} />
+      <meta property="og:type" content={ogType} />
+      {ldArr.map((ld, i) => (
+        <script key={i} type="application/ld+json">{JSON.stringify(ld)}</script>
+      ))}
+    </Helmet>
+  );
+};
 ```
 
-Powód użycia `<a>` zamiast `<Link>`: `target="_blank"` na `<Link>` z react-router działa, ale traci semantykę middle-click i nie korzysta z prerender. Native `<a>` z `rel="noopener noreferrer"` to standard SEO/security.
+**Uwaga o konflikcie canonical:** `index.html` zawiera `<link rel="canonical" id="dynamic-canonical">`. Aby uniknąć duplikatu, w `PageSeo` użyjemy Helmet — Helmet **deduplikuje canonical** po dodaniu unikalnego klucza, ale dla pewności należy **usunąć z `index.html` linię `<link rel="canonical" id="dynamic-canonical" href="https://edooqoo.com/" />`** — canonical będzie ustawiany per-page przez Helmet (na `/` przez `Index.tsx` z PageSeo, na pozostałych stronach analogicznie). To zgodne z doktryną z `head-meta` skill.
 
-### 3B. Kiedy banner się wyświetla / kiedy znika
+**Plik `src/constants/seoMeta.ts` — centralna mapa metadanych** (gotowe teksty, dokładnie pod limity skanera):
 
-Z kodu `DslmExplainerBanner.tsx`:
+```ts
+export const SEO_META = {
+  home: {
+    title: "Edooqoo — AI Worksheets for ESL & EFL Teachers",
+    description: "AI worksheet generator for English teachers. 29 exercise types, CEFR A1–C2, AI homework grading, flashcards, student progress tracking.",
+    path: "/",
+  },
+  pricing: {
+    title: "Edooqoo Pricing — Free, Side-Gig & Full-Time Plans",  // 52 chars
+    description: "Edooqoo pricing: Free, Side-Gig ($9/mo), Full-Time (from $19/mo). All plans include 29 exercise types for CEFR A1–C2 English teaching.",  // 144
+    path: "/pricing",
+  },
+  about: {
+    title: "About Edooqoo — Built by English Teachers, for Teachers",
+    description: "Edooqoo helps English teachers create personalized worksheets, assign AI-graded homework, and track CEFR A1–C2 progress with 29 exercise types.",  // 154
+    path: "/about",
+  },
+  blog: {
+    title: "Edooqoo Blog — Teaching Tips for English Tutors",
+    description: "Articles for English teachers: AI teaching tips, worksheet creation guides, classroom management, CEFR assessment strategies.",  // 132
+    path: "/blog",
+  },
+  glossary: {
+    title: "ESL/EFL Glossary — Edooqoo Teaching Terms",
+    description: "Glossary of ELT terms including CEFR, ESL, spaced repetition, andragogy. Learn how Edooqoo supports these English teaching concepts.",  // 138
+    path: "/glossary",
+  },
+  exerciseTypes: {
+    title: "29 Exercise Types for English Teachers — Edooqoo",
+    description: "Guide to all 29 Edooqoo exercise types: 20 basic, 5 audio, 4 picture. Each with CEFR levels and ESL/EFL use cases.",  // 124
+    path: "/exercise-types",
+  },
+  howItWorks: {
+    title: "How Edooqoo Works — AI Worksheets in 60 Seconds",
+    description: "How Edooqoo generates personalized English worksheets in 60 seconds. From student profile to AI-graded homework — full teacher workflow.",  // 145
+    path: "/how-it-works",
+  },
+  resources: {
+    title: "Free ESL Resources for English Teachers — Edooqoo",
+    description: "Free resources for English teachers: worksheet templates, CEFR guides, lesson plan ideas, andragogical teaching tips.",  // 122
+    path: "/resources",
+  },
+  prompts: {
+    title: "AI Prompts for English Teachers — Edooqoo",
+    description: "Curated AI prompts for English teachers: worksheet generation, role-plays, grammar drills, business English scenarios.",  // 122
+    path: "/prompts",
+  },
+};
+```
 
-- Wyświetla się ZAWSZE, gdy `localStorage.dslm_explainer_dismissed_<teacherId>` ≠ `'true'`.
-- Znika po kliknięciu `X` (top-right) lub `Got it` lub `Learn more` (obecny kod wywołuje `handleDismiss` na „Got it"; „Learn more" tylko otwiera link, nie zamyka).
-- Per-teacher, persistent w localStorage. Reset = wyczyszczenie storage w devtools.
-- Renderowany w komponencie DSLM tab (powyżej zakładek), więc znika też jak teacher zmieni tab.
+#### B3. Wstrzyknięcie `<PageSeo>` do każdej strony
 
-### 3C. Audyt artykułu `/features/dslm`
+| Plik | Akcja |
+|---|---|
+| `src/pages/Index.tsx` | Dodać `<PageSeo {...SEO_META.home} />` na górze JSX |
+| `src/pages/Pricing.tsx` | Dodać `<PageSeo {...SEO_META.pricing} jsonLd={faqPageLd} />` (FAQ JSON-LD generowany z `faqItems`) |
+| `src/pages/About.tsx` | Dodać `<PageSeo {...SEO_META.about} jsonLd={faqPageLd} />` (jeśli About ma FAQ; jeśli nie — bez `jsonLd`) |
+| `src/pages/Blog.tsx` | Dodać `<PageSeo {...SEO_META.blog} />` |
+| `src/pages/Glossary.tsx` | Dodać `<PageSeo {...SEO_META.glossary} />` |
+| `src/pages/ExerciseTypes.tsx` | Dodać `<PageSeo {...SEO_META.exerciseTypes} />` i USUNĄĆ ręczne `document.title` z useEffect |
+| `src/pages/HowItWorks.tsx` | Sprawdzić — już ma Helmet z FAQPage/HowTo. Zostawiamy bez zmian, ewentualnie zsynchronizować title z `SEO_META.howItWorks` |
+| `src/pages/Resources.tsx` | Dodać `<PageSeo {...SEO_META.resources} />` |
+| `src/pages/Prompts.tsx` | Dodać `<PageSeo {...SEO_META.prompts} />` |
 
-Strona istnieje (`src/pages/features/FeatureDSLM.tsx`, 296 linii) z hero, radar chart mockup, nano-skills mockup, sekcje benefits, steps, FAQ, CTA. Treść jest poprawna i kompletna w opisie 4-warstwowego DSLM (declarative, procedural, behavioral, motivational).
+**FAQPage JSON-LD helper** w `src/components/seo/PageSeo.tsx`:
 
-**Co dorobimy w tym sprincie (małe poprawki, nie refaktor)**:
+```ts
+export const buildFaqPageLd = (items: { question: string; answer: string }[]) => ({
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: items.map(i => ({
+    "@type": "Question",
+    name: i.question,
+    acceptedAnswer: { "@type": "Answer", text: i.answer },
+  })),
+});
+```
 
-1. Dodać sekcję nagłówkową „What is 1 MINUTE?" jako pierwszy paragraf po hero, dokładnie z tekstem z bannera, plus rozszerzenie: „1 minute = czas potrzebny teacherowi by przeczytać AI-generated briefing przed lekcją. Briefing pokazuje co poszło, co poszło źle, co warto powtórzyć, jaki Next Step zaproponować."
-2. Dodać `<SeoHead/>` z `FeatureDSLM`-specific JSON-LD `Article` (headline, datePublished, dateModified, author=Edooqoo, image).
-3. Banner DslmExplainerBanner — nie zmieniamy treści (jest spójna z artykułem), tylko link.
+W `Pricing.tsx` / `About.tsx` zaimportować `faqItems` z `src/constants/faqItems.ts` (już istnieje) i przekazać `jsonLd={buildFaqPageLd(faqItems)}`.
+
+#### B4. GSC verification
+**Stan:** Meta tag `google-site-verification` jest w `index.html` od poprzedniego loopa. Po dzisiejszym Publish powinien być live na `edooqoo.com`.
+
+**Akcja implementacyjna (jeden curl, nie zmienia plików):**
+```bash
+curl -s -X POST "https://connector-gateway.lovable.dev/google_search_console/siteVerification/v1/webResource?verificationMethod=META" \
+  -H "Authorization: Bearer $LOVABLE_API_KEY" \
+  -H "X-Connection-Api-Key: $GOOGLE_SEARCH_CONSOLE_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"site":{"identifier":"https://edooqoo.com/","type":"SITE"}}'
+```
+Jeśli 200 → potwierdzone. Następnie:
+```bash
+curl -s -X PUT "https://connector-gateway.lovable.dev/google_search_console/webmasters/v3/sites/https%3A%2F%2Fedooqoo.com%2F" \
+  -H "Authorization: Bearer $LOVABLE_API_KEY" \
+  -H "X-Connection-Api-Key: $GOOGLE_SEARCH_CONSOLE_API_KEY"
+```
+I submit sitemap (już zrobione poprzednio, ale powtórzymy z prawidłową domeną):
+```bash
+curl -s -X PUT "https://connector-gateway.lovable.dev/google_search_console/webmasters/v3/sites/https%3A%2F%2Fedooqoo.com%2F/sitemaps/https%3A%2F%2Fedooqoo.com%2Fsitemap.xml" \
+  -H "Authorization: Bearer $LOVABLE_API_KEY" \
+  -H "X-Connection-Api-Key: $GOOGLE_SEARCH_CONSOLE_API_KEY"
+```
+
+**Plan B** jeśli verify zwróci `failedToFindMetaTag`: poczekać 2–5 min na propagację CDN i powtórzyć. Jeśli dalej fail → sprawdzić `curl -s https://edooqoo.com/ | grep google-site-verification`.
+
+#### B5. Sitemap + robots — bez zmian struktury, drobny audyt
+- `public/sitemap.xml` — pozostaje `https://edooqoo.com/...` (poprawnie, to nasza kanoniczna domena). Skaner finding `http:sitemap` jest **false positive** wynikający z różnicy między custom domain a published URL. **Nie dodajemy** `/auth`, `/forgot-password`, `/reset-password`, `/dashboard`, `/exit-demo` — to strony interakcyjne, nie do indeksacji.
+- `public/robots.txt` — pozostaje `Sitemap: https://edooqoo.com/sitemap.xml`.
+- Findings `http:sitemap`, `http:robots`, `gsc:gsc` oznaczamy `fixed` z explanation, że kanoniczna domena to edooqoo.com i sitemap/robots prawidłowo na nią wskazują.
+
+#### B6. Oznaczenie findings jako fixed
+Po implementacji wywołać `seo_chat--update_findings` z 6 wpisami (po jednym na każde failing finding) i odpowiednimi explanations.
 
 ---
 
-## Problem 4: Audyt UX/UI — top 8 priorytetów
+### CZĘŚĆ C — Strategia treści z Semrush (osobny deliverable, BEZ kodu)
 
-Przejrzane: `Dashboard.tsx`, `WorksheetForm`, `StudentPage`, DSLM tabs, `CalendarPage`, `StudentHub*`. Lista od najważniejszych:
+Widget "Research SEO with Lovable" w SEO Review pokazuje ~15 sugerowanych zapytań Semrush. Z poprzedniej iteracji zidentyfikowaliśmy zwycięzcę: **`esl worksheets`** (1 300/mc, KDI 43 — możliwy).
 
-### P0 — Empty states na Dashboard po pierwszym signupie
+**Akcja w tym loopie:** stworzyć plik `docs/seo/keyword-strategy.md` z tabelą priorytetowych keywords + rekomendacje stron do utworzenia w przyszłości (NIE budujemy ich teraz):
 
-**Problem**: Nowy nauczyciel po signupie widzi pusty `Dashboard` z `CompactStatsBar` pokazującym 0/0/0/0. Brak czytelnego „start here" CTA.
-**Rozwiązanie**: Hero empty-state card pod statsbarem: `"Welcome to Edooqoo. Start with: 1) Add your first student, 2) Send Welcome Test, 3) Generate first worksheet."` z trzema przyciskami inline. Już istnieje demo student seeding (`mem/features/onboarding/demo-student-seeding`), więc dla nowych teacherów de facto będzie 1 student — wtedy pokazujemy: `"Try generating a worksheet for [Demo Student Name]"`.
-**Wpływ**: time-to-first-worksheet ↓ z ~5 min do ~30 s; aktywacja użytkownika ↑.
-**Mechanika**: nowy komponent `src/components/dashboard/OnboardingHeroCard.tsx`, mount conditional w `Dashboard.tsx` gdy `students.length <= 1 && worksheets.length === 0`.
+| Priorytet | Keyword | Wolumen | KDI | Sugerowana strona (BACKLOG) |
+|---|---|---|---|---|
+| P0 | esl worksheets | 1 300 | 43 | `/esl-worksheets` |
+| P1 | english games for english learners | 2 900 | low | `/blog/english-games-for-learners` |
+| P1 | esl games | 2 400 | low | `/blog/esl-games-for-teachers` |
+| P2 | teach english online | 4 400 | mid | `/blog/teach-english-online-guide` |
+| P2 | english tutor | 3 600 | mid | landing dla tutorów |
+| P3 | esl class / english as a second language classes | 3 700 | low | `/resources/esl-class-toolkit` |
 
-### P1 — Loading skeletons zamiast spinnerów na Dashboard / StudentPage
-
-**Problem**: W kilku miejscach (Dashboard stats, StudentPage Overview, DSLM tab) widać centralny spinner zamiast skeletonów. Czas TTI > 2 s = user widzi pusty ekran.
-**Rozwiązanie**: Zamiana `<Loader2 />` na `<Skeleton />` z shadcn dopasowane do final layoutu (statsbar = 4 skeleton boxes, student card = 1 large skeleton). Już mamy `src/components/ui/skeleton.tsx`.
-**Wpływ**: perceived performance ↑↑, CLS się nie zmienia bo skeleton ma te same wymiary co final.
-**Mechanika**: ~6 miejsc, każde to swap `if (loading) return <Spinner/>` na `if (loading) return <SkeletonLayout/>`.
-
-### P2 — Toast positioning i density
-
-**Problem**: Toasty pojawiają się top-right i stackują się — przy szybkich operacjach (delete, generate) 3-4 toasty zasłaniają sticky nav i nie da się klikać.
-**Rozwiązanie**: Limit do 1 toast naraz (`<Toaster duration={3000} richColors closeButton expand={false} visibleToasts={1} />` w `src/components/ui/sonner.tsx`). Alternatywnie bottom-right, dalej od głównego flow.
-**Wpływ**: redukcja blokowania UI o ~80%.
-**Mechanika**: 1 props change w `sonner.tsx`.
-
-### P3 — Sticky nav student switcher — brak feedbacku po wyborze
-
-**Problem**: `mem/features/navigation/nav-student-switcher` — switcher zmienia studenta globalnie, ale nawigacja nie odświeża wizualnie wybranego studenta (np. na `/calendar` nadal pokazuje poprzedniego).
-**Rozwiązanie**: Po zmianie studenta w switcherze emitujemy istniejący event `dslm:studentChanged` i strony powiązane (`StudentPage`, `CalendarPage`, `HomeworkPage`) nasłuchują i refetchują. Plus toast `"Switched to [Student Name]"`.
-**Wpływ**: eliminacja confusion „dlaczego nadal widzę Annę a wybrałem Janka".
-**Mechanika**: dodanie listenera w 3 stronach, emit w `NavStudentSwitcher`.
-
-### P4 — Worksheet form — kolejność pól nie odpowiada flow myślenia teachera
-
-**Problem**: Obecnie: Topic → Grammar → Level → Goal → ExerciseTypes. Teacher zwykle myśli: Student → Topic → Level (z profilu) → reszta.
-**Rozwiązanie**: Już mamy NavStudentSwitcher i NextStepsPresetBanner. Dodać na samej górze formularza explicit „For: [Student Name]" badge z możliwością zmiany — żeby zawsze było jasne dla kogo generujemy. Plus auto-fill `level` z `student.english_level` przy zmianie studenta.
-**Wpływ**: redukcja błędów „wygenerowałem dla złego studenta" o ~90%.
-**Mechanika**: nowy komponent `WorksheetFormStudentBadge.tsx` mounted on top of form, hook `useEffect([selectedStudent]) → setLevel(student.english_level)`.
-
-### P5 — DSLM tabs — sub-nav nie pokazuje aktywności
-
-**Problem**: `mem/features/dslm/always-visible-subsections` mówi że pills są zawsze widoczne. Ale border-primary jest słabo widoczny w dark mode (kontrast 1.8:1).
-**Rozwiązanie**: Aktywny pill = `bg-primary/10 text-primary border-primary` (3-warstwowy highlight), nieaktywny = `bg-muted/30 border-transparent`.
-**Wpływ**: A11y kontrast > 4.5:1, user szybciej rozpoznaje gdzie jest.
-**Mechanika**: 2 linie Tailwind w komponencie sub-nav.
-
-### P6 — Confirm delete — brak undo
-
-**Problem**: Po single-click confirm delete (v6.9.15c) nie ma już type-to-confirm, ale też nie ma undo. Jeden klik = strata danych.
-**Rozwiązanie**: Po delete pokazujemy toast z `Undo` button (5 s timeout). Soft delete jest już w DB (`deleted_at`), więc undo = `UPDATE SET deleted_at=null`. Implementacja generyczna w `ConfirmDeleteDialog` przez callback `onUndo` opcjonalny.
-**Wpływ**: redukcja ticketów support „pomyłkowo usunąłem fazę" o ~100%.
-**Mechanika**: w `useCurriculumPhases.deletePhase` zwracamy `{ success, undo: () => UPDATE deleted_at=null }`. W `MacroTimeline` po delete: `toast.success("Phase deleted", { action: { label: 'Undo', onClick: undo }})`. Analogicznie `NextStepBanner`.
-
-### P7 — StudentHub mobile — taby przewijalne ale brak indykatora
-
-**Problem**: Na mobile w StudentHub taby (Worksheets/Homework/Flashcards/Lessons) przewijają się horyzontalnie, ale brak shadow/gradient po prawej sugerującego scroll.
-**Rozwiązanie**: Dodać `mask-image: linear-gradient(to right, black 90%, transparent)` na containerze tabów.
-**Wpływ**: discoverability mobile features ↑.
-**Mechanika**: 1 klasa CSS.
+**Brak akcji kodowej w tym loopie** — to tylko dokument strategiczny. Nowe strony zostaną zaplanowane w v6.9.18.
 
 ---
 
-## Dokumentacja RAG
+### CZĘŚĆ D — Aktualizacja dokumentacji RAG
 
-Pliki: `docs/llm-context.md`, `llms.txt`. Dodajemy sekcję `v6.9.16` strukturyzowaną:
+#### D1. `docs/llm-context.md` — dopisać sekcję:
 
+```markdown
+## SEO v6.9.17 — Per-Route Metadata Layer
+
+**Problem:** Lovable SEO scanner flagged 6 failing findings (oversized titles/descriptions, missing per-route og:*, missing FAQPage schema on /pricing and /about, GSC unverified, sitemap/robots host mismatch with preview URL).
+
+**Edooqoo.com Solution:**
+- Introduced reusable `<PageSeo>` component (react-helmet-async) for per-route title, description, canonical, og:*, JSON-LD.
+- Centralized all marketing-page metadata in `src/constants/seoMeta.ts` (single source of truth, hard length limits).
+- Added FAQPage JSON-LD to /pricing and /about via `buildFaqPageLd(faqItems)` helper.
+- Verified `edooqoo.com` in Google Search Console (META method) and submitted sitemap.
+- Confirmed sitemap/robots correctly target canonical domain `edooqoo.com`, NOT the Lovable preview URL.
+
+**Technical Mechanics:**
+- Component: `src/components/seo/PageSeo.tsx` — props: title, description, path, ogType, jsonLd.
+- Constants: `src/constants/seoMeta.ts` — typed map keyed by page slug.
+- Pages wired: Index, Pricing, About, Blog, Glossary, ExerciseTypes, Resources, Prompts. HowItWorks already had Helmet from v6.9.16.
+- Canonical: removed static `<link rel="canonical">` from `index.html` to prevent duplication with Helmet.
+- GSC verification: curl to `connector-gateway.lovable.dev/google_search_console/siteVerification/v1/webResource` with `META` method, identifier `https://edooqoo.com/`.
+- Sitemap submission: PUT to `/webmasters/v3/sites/https%3A%2F%2Fedooqoo.com%2F/sitemaps/...`.
+
+**RAG Keywords:** SEO, per-route metadata, react-helmet-async, PageSeo, seoMeta, FAQPage JSON-LD, Google Search Console verification, GSC, canonical URL, og:title, og:description, sitemap submission, edooqoo.com canonical, Semrush keyword strategy, esl worksheets keyword, scanner findings, metadata length limits, social preview tags.
 ```
-### v6.9.16 — SEO refactor, GSC verification, UX polish
 
-#### Problem: FAQPage/HowTo JSON-LD on every SPA route
-**Edooqoo.com Solution**: Per-route JSON-LD via react-helmet-async; index.html keeps only SoftwareApplication + Organization.
-**Technical Mechanics**: HelmetProvider in main.tsx; <SeoHead/> component in src/components/seo/SeoHead.tsx; meta map in src/constants/seoMeta.ts; FAQPage+HowTo moved to /how-it-works only.
-
-#### Problem: Google Search Console connected but property not verified
-**Edooqoo.com Solution**: META tag verification via gateway; PUT site; submit sitemap.xml.
-**Technical Mechanics**: <meta name="google-site-verification" content="..."> in index.html <head>; siteVerification/v1/token → webResource?verificationMethod=META → webmasters/v3/sites PUT → sitemaps PUT.
-
-#### Problem: "1 MINUTE" Learn more opens in same tab
-**Edooqoo.com Solution**: native <a target="_blank" rel="noopener noreferrer"> to /features/dslm.
-**Technical Mechanics**: DslmExplainerBanner.tsx swaps <Link> for <a>; Got it dismisses, X dismisses, Learn more does NOT dismiss (intentional: teacher may want to revisit).
-
-#### Problem: Empty Dashboard for new teachers
-**Edooqoo.com Solution**: OnboardingHeroCard with 3-step CTA shown when students.length <= 1 && worksheets.length === 0.
-**Technical Mechanics**: src/components/dashboard/OnboardingHeroCard.tsx; conditional mount in Dashboard.tsx.
-
-#### Problem: Destructive delete with no undo
-**Edooqoo.com Solution**: 5-second Undo toast after soft delete.
-**Technical Mechanics**: deletePhase returns { undo: () => UPDATE deleted_at=null }; sonner toast.action.
-
-[+ pozostałe punkty UX]
-
-RAG Keywords:
-react-helmet-async per-route JSON-LD, FAQPage HowTo SoftwareApplication scope, Google Search Console META verification connector gateway, edooqoo.com site verification, 1 MINUTE DSLM banner Learn more new tab, OnboardingHeroCard empty state Dashboard, soft delete undo toast, sonner visibleToasts limit, nav student switcher dslm:studentChanged event, worksheet form student badge auto-fill level, DSLM sub-nav active pill contrast a11y, StudentHub mobile tabs scroll mask.
+#### D2. `llms.txt` i `public/llms.txt` — dopisać krótki entry pod sekcją Updates:
 ```
+- v6.9.17 (2026-05-17): Per-route SEO metadata via react-helmet-async + PageSeo component, FAQPage JSON-LD on /pricing and /about, GSC verification for edooqoo.com complete.
+```
+
+#### D3. Memory `mem://seo/per-route-metadata-pattern.md` — nowy wpis:
+```yaml
+---
+name: Per-route SEO metadata pattern
+description: PageSeo component + seoMeta constants — single source of truth for per-route title/description/canonical/og/JSON-LD.
+type: feature
+---
+- Reusable `<PageSeo>` from `src/components/seo/PageSeo.tsx` wraps react-helmet-async.
+- All marketing-page metadata in `src/constants/seoMeta.ts` (typed, length-capped).
+- Title <60 chars, description <160 chars enforced manually (no runtime check).
+- FAQPage JSON-LD generated via `buildFaqPageLd(faqItems)`.
+- Static `<link rel="canonical">` REMOVED from `index.html` — canonical owned per-page by Helmet to prevent duplication.
+- Sitewide og:* in `index.html` stays as fallback for non-JS social crawlers.
+- Canonical domain: `edooqoo.com` (NOT lovable.app preview URL).
+```
+
+Plus update `mem://index.md` Memories section (dodać linię).
 
 ---
 
-## Kolejność implementacji
+### CZĘŚĆ E — Wpływ na działającą aplikację (zero-regression check)
 
-1. `bun add react-helmet-async`, `HelmetProvider` w `main.tsx`.
-2. `src/components/seo/SeoHead.tsx` + `src/constants/seoMeta.ts`.
-3. `index.html`: usunąć `FAQPage` i `HowTo` z `@graph`, usunąć static canonical link, dodać meta `google-site-verification` (placeholder do podmiany w kroku 7).
-4. Mount `<SeoHead/>` w 10 publicznych stronach.
-5. `DslmExplainerBanner`: zmienić `<Link>` na `<a target="_blank" rel="noopener noreferrer">`.
-6. P0–P7 UX (osobne PR-y wewnątrz iteracji, każdy ≤ 1 plik dotknięty).
-7. **Manual + agent**: link konektora GSC (Ty) → agent: pobierz token → wstaw do `index.html` → republish (Ty) → agent: verify + PUT site + submit sitemap.
-8. Confirm delete copy update + Undo toast w `MacroTimeline` i `NextStepBanner`.
-9. `docs/llm-context.md` + `llms.txt` sekcja v6.9.16.
+| Ryzyko | Mitygacja |
+|---|---|
+| Duplikat canonical | Usunięcie statycznego `<link rel="canonical">` z `index.html` |
+| Konflikt z istniejącym Helmet w HowItWorks | HowItWorks już używa Helmet — `PageSeo` to ten sam mechanizm, brak konfliktu |
+| Pricing.tsx ma własne useEffect dla document.title? | Sprawdzić podczas implementacji; jeśli tak — usunąć useEffect |
+| ExerciseTypes.tsx ma `document.title =` w useEffect | Usunąć (zastąpione przez PageSeo) |
+| Demo mode | PageSeo to czysta prezentacja, brak interakcji z Supabase/demo |
+| `index.html` `og:url` ma brakujący `/` na końcu (`https://edooqoo.com`) | Drobna kosmetyka — można naprawić przy okazji, ale nie krytyczne |
+| GSC verify może zwrócić 400 | Plan B opisany w B4 — retry po propagacji |
 
-## Czego NIE ruszamy
+---
 
-- Worksheet Generation Engine, `format-worksheet-prompt`, `generate-curriculum-phases`, `generate-timeline`.
-- DB schema (poza odczytami `deleted_at`).
-- RLS.
-- Existing public routes — tylko dodajemy `<SeoHead/>`, nie zmieniamy logiki.
+### CZĘŚĆ F — Kolejność wykonania w implementacji
 
-## Kryteria akceptacji
+1. **Install check** — `react-helmet-async` już zainstalowane (v6.9.16).
+2. Stworzyć `src/components/seo/PageSeo.tsx` + helper `buildFaqPageLd`.
+3. Stworzyć `src/constants/seoMeta.ts`.
+4. Usunąć statyczny `<link rel="canonical" id="dynamic-canonical">` z `index.html`.
+5. Wstrzyknąć `<PageSeo>` do 8 plików stron (lista w B3).
+6. Uruchomić **GSC verify curl** (B4) + add site + submit sitemap.
+7. Stworzyć `docs/seo/keyword-strategy.md` z tabelą Semrush.
+8. Update `docs/llm-context.md`, `llms.txt`, `public/llms.txt`.
+9. Stworzyć `mem://seo/per-route-metadata-pattern.md` + update `mem://index.md`.
+10. `seo_chat--update_findings` — oznaczyć 6 findings jako fixed.
+11. Końcowy raport do usera: lista zmienionych plików, status GSC, link do strategii Semrush.
 
-- Google Rich Results Test na `/dashboard` NIE wykrywa FAQPage/HowTo.
-- Rich Results Test na `/how-it-works` wykrywa FAQPage (10 Q) + HowTo (4 kroki).
-- Każda z 10 publicznych stron ma unikalny `<title>` i `<meta description>` w devtools head.
-- `https://edooqoo.com` jest zweryfikowane w Search Console (status: Verified).
-- Sitemap `https://edooqoo.com/sitemap.xml` jest submitted w GSC.
-- Klik „Learn more" w bannerze DSLM otwiera `/features/dslm` w nowej karcie.
-- Banner DSLM nadal dismisses przez `X` i `Got it`, persistence per-teacher w localStorage.
-- Nowy nauczyciel widzi `OnboardingHeroCard` na Dashboard.
-- Delete fazy pokazuje Undo toast 5 s; klik Undo przywraca fazę i Next Steps.
-- Wszystkie istniejące features dalej działają (smoke test: generate worksheet, send welcome test, create phase, generate Next Steps).
-- `docs/llm-context.md` + `llms.txt` zaktualizowane.
+---
+
+### Pliki do utworzenia/edycji (podsumowanie)
+
+**Nowe (4):**
+- `src/components/seo/PageSeo.tsx`
+- `src/constants/seoMeta.ts`
+- `docs/seo/keyword-strategy.md`
+- `mem/seo/per-route-metadata-pattern.md`
+
+**Edycja (12):**
+- `index.html` (usunięcie canonical)
+- `src/pages/Index.tsx`, `Pricing.tsx`, `About.tsx`, `Blog.tsx`, `Glossary.tsx`, `ExerciseTypes.tsx`, `Resources.tsx`, `Prompts.tsx`
+- `docs/llm-context.md`, `llms.txt`, `public/llms.txt`, `mem/index.md`
+
+**Curl calls (3):** GSC verify + add site + submit sitemap.
+**Tool calls (1):** `seo_chat--update_findings` z 6 wpisami.
+
+Czeka na Twoje zatwierdzenie planu.

@@ -1,6 +1,8 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
+import { PageSeo } from '@/components/seo/PageSeo';
+import { SEO_META } from '@/constants/seoMeta';
 
 interface BlogPost {
   title: string;
@@ -280,32 +282,20 @@ const blogPosts: BlogPost[] = [
 ];
 
 const Blog = () => {
-  useEffect(() => {
-    document.title = "Edooqoo Blog — Tips, Guides & Resources for English Teachers";
-    const meta = document.querySelector('meta[name="description"]');
-    if (meta) {
-      meta.setAttribute('content', 'Practical articles for English teachers: AI teaching tips, worksheet creation guides, classroom management, CEFR assessment strategies, and ESL/EFL best practices.');
-    }
-
-    const script = document.createElement('script');
-    script.type = 'application/ld+json';
-    script.text = JSON.stringify({
-      "@context": "https://schema.org",
-      "@type": "Blog",
-      "name": "Edooqoo Blog",
-      "description": "Practical articles for English teachers: AI teaching tips, worksheet creation guides, CEFR assessment strategies, and ESL/EFL best practices.",
-      "url": "https://edooqoo.com/blog",
-      "publisher": { "@type": "Organization", "name": "Edooqoo", "url": "https://edooqoo.com" },
-      "blogPost": blogPosts.map(p => ({
-        "@type": "BlogPosting",
-        "headline": p.title,
-        "url": `https://edooqoo.com${p.href}`,
-        "datePublished": p.date
-      }))
-    });
-    document.head.appendChild(script);
-    return () => { document.head.removeChild(script); };
-  }, []);
+  const blogLd = {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    name: "Edooqoo Blog",
+    description: SEO_META.blog.description,
+    url: "https://edooqoo.com/blog",
+    publisher: { "@type": "Organization", name: "Edooqoo", url: "https://edooqoo.com" },
+    blogPost: blogPosts.map((p) => ({
+      "@type": "BlogPosting",
+      headline: p.title,
+      url: `https://edooqoo.com${p.href}`,
+      datePublished: p.date,
+    })),
+  };
 
   const categories = [...new Set(blogPosts.map(p => p.category))];
 
@@ -320,6 +310,7 @@ const Blog = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <PageSeo {...SEO_META.blog} jsonLd={blogLd} />
       <header className="border-b bg-background/95 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link to="/" className="text-xl font-bold text-primary">Edooqoo</Link>

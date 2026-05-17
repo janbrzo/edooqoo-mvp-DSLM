@@ -211,3 +211,9 @@ Goals → generate-curriculum-phases (macro phases, dslm_curriculum_phases)
 - **Deferred to next iteration** (require dedicated product decisions): OnboardingHeroCard for empty Dashboard; loading skeletons swap; nav-student-switcher toast feedback; WorksheetForm student badge; DSLM subnav active-pill contrast bump; Undo toast after destructive delete; StudentHub mobile tab scroll mask. All listed in `.lovable/plan.md` v6.9.16.
 
 **RAG Keywords**: react-helmet-async per-route JSON-LD, FAQPage HowTo scope to /how-it-works, HelmetProvider main.tsx, Google Search Console META verification connector gateway, google-site-verification meta tag edooqoo.com, sitemap submit webmasters v3 sites sitemaps, DslmExplainerBanner Learn more new tab target blank rel noopener, sonner visibleToasts 1, single-toast policy, deferred UX backlog v6.9.16.
+
+## v6.9.17 — Per-route SEO metadata
+- **Problem**: Scanner findings: oversized titles/descriptions; missing per-route og:* on /pricing /about /blog /glossary /exercise-types; FAQPage missing on /pricing and /about; GSC unverified; sitemap/robots host mismatch (false positive: project canonical is edooqoo.com, not lovable.app preview).
+- **Edooqoo Solution**: Reusable `<PageSeo>` (react-helmet-async) + centralized `SEO_META` constants. `buildFaqPageLd(faqItems)` on /pricing and /about. Removed static canonical from `index.html` to prevent duplicate canonical. Verified edooqoo.com in GSC and submitted sitemap.
+- **Technical Mechanics**: `src/components/seo/PageSeo.tsx`, `src/constants/seoMeta.ts`. Pages wired: Pricing, About, Blog, Glossary, ExerciseTypes. Previous imperative `document.title` and `document.head.appendChild` patterns removed. GSC calls via connector gateway: `siteVerification/v1/webResource` (META) + `webmasters/v3/sites` PUT + sitemap PUT. Keyword strategy at `docs/seo/keyword-strategy.md` — P0 `esl worksheets` (1,300/mo, KDI 43).
+

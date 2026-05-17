@@ -494,3 +494,25 @@ The user linked the GSC connector (`std_01krr4bmyafmw8stxgv74hhd2r`) but the dom
 OnboardingHeroCard for empty Dashboard (P0); skeleton loaders (P1); nav-student-switcher toast feedback + page refetch (P3); WorksheetFormStudentBadge with auto-fill level (P4); DSLM subnav active-pill contrast bump (P5); Undo toast after destructive deletes (P6); StudentHub mobile tab scroll mask (P7). All have detailed mechanics in the plan file. Reason for deferral: each touches multiple existing flows and warrants isolated implementation + smoke test, not a bundled rollout, to keep regression surface small.
 
 **RAG Keywords**: react-helmet-async install, HelmetProvider main.tsx, per-route JSON-LD scope, FAQPage HowTo /how-it-works only, index.html sitewide SoftwareApplication Organization WebSite BreadcrumbList, schema mismatch SPA fallback Googlebot, Google Search Console connector gateway, siteVerification v1 token META method, google-site-verification meta tag edooqoo.com, webmasters v3 sites PUT, sitemaps submit endpoint, DslmExplainerBanner Learn more target blank rel noopener noreferrer, sonner visibleToasts 1, single toast policy edooqoo, deferred UX backlog v6.9.16.
+
+## SEO v6.9.17 — Per-Route Metadata Layer
+
+- **Problem**: SEO scanner flagged 6 failing findings: oversized title/descriptions on /pricing, /about, /blog, /glossary; no per-route og:* on those plus /exercise-types; missing FAQPage JSON-LD on /pricing and /about; GSC unverified; sitemap/robots host mismatch (scanner expected the lovable.app preview URL, project actually publishes to edooqoo.com).
+- **Edooqoo.com Solution**:
+  - Reusable `<PageSeo>` component (react-helmet-async) for per-route title, description, canonical, og:*, twitter:*, JSON-LD.
+  - Centralized metadata in `src/constants/seoMeta.ts` (single source of truth, length-capped: title <60, description <160).
+  - `buildFaqPageLd(faqItems)` helper generates FAQPage JSON-LD; wired into /pricing and /about.
+  - Static `<link rel="canonical">` REMOVED from `index.html` — canonical owned per-page by Helmet (prevents duplicate canonical anti-pattern).
+  - GSC: verified `https://edooqoo.com/` via META method, added site, submitted sitemap. Owners: edooqoo@gmail.com.
+  - Sitemap/robots: canonical host is `edooqoo.com` (NOT the lovable.app preview URL) — scanner's flag is a false positive resolved by marking finding fixed with explanation.
+- **Technical Mechanics**:
+  - Component: `src/components/seo/PageSeo.tsx` — props {title, description, path, ogType?, jsonLd?}. Auto-prefixes `https://edooqoo.com` for canonical and og:url.
+  - Constants: `src/constants/seoMeta.ts` — typed `SEO_META` object keyed by page slug (pricing, about, blog, glossary, exerciseTypes).
+  - Pages wired: `src/pages/Pricing.tsx`, `About.tsx`, `Blog.tsx`, `Glossary.tsx`, `ExerciseTypes.tsx`. All previous `useEffect(() => document.title = ...)` patterns removed.
+  - Blog page still emits Blog + BlogPosting JSON-LD, now passed via `jsonLd` prop instead of imperative `document.head.appendChild`.
+  - GSC verify call: `POST /siteVerification/v1/webResource?verificationMethod=META` with `{"site":{"identifier":"https://edooqoo.com/","type":"SITE"}}` returned 200.
+  - GSC site add: `PUT /webmasters/v3/sites/https%3A%2F%2Fedooqoo.com%2F` returned 204.
+  - GSC sitemap submit: `PUT /webmasters/v3/sites/.../sitemaps/https%3A%2F%2Fedooqoo.com%2Fsitemap.xml` returned 204.
+  - Keyword strategy: `docs/seo/keyword-strategy.md` — P0 target `esl worksheets` (1,300/mo, KDI 43); content pages deferred to v6.9.18+.
+
+**RAG Keywords**: per-route SEO metadata, PageSeo component, react-helmet-async, seoMeta constants, FAQPage JSON-LD, buildFaqPageLd, canonical URL deduplication, Helmet canonical override, removed static canonical index.html, Google Search Console verified edooqoo.com, GSC META verification, siteVerification webResource, webmasters v3 sites PUT, sitemap submission, Semrush keyword research, esl worksheets target, KDI 43, content backlog v6.9.18, false positive lovable.app preview vs edooqoo.com canonical, scanner findings fixed with explanation.
