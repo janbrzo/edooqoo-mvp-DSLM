@@ -330,6 +330,7 @@ const Pricing = () => {
 
   return (
     <Wrapper>
+      <PageSeo {...SEO_META.pricing} jsonLd={buildFaqPageLd(faqItems)} />
       <StickyNav isRegisteredUser={!!isRegisteredUser} tokenLeft={tokenLeft} user={user} />
       <div className="max-w-6xl mx-auto p-4">
 
