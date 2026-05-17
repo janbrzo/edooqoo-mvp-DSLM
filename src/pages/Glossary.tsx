@@ -1,6 +1,8 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
+import { PageSeo } from '@/components/seo/PageSeo';
+import { SEO_META } from '@/constants/seoMeta';
 
 const glossaryTerms = [
   { term: "CEFR", definition: "Common European Framework of Reference for Languages. A 6-level scale (A1-C2) for describing language proficiency. Edooqoo generates worksheets calibrated to all CEFR levels." },
@@ -58,14 +60,9 @@ const glossaryTerms = [
 const alphabet = [...new Set(glossaryTerms.map(t => t.term[0].toUpperCase()))].sort();
 
 const Glossary = () => {
-  useEffect(() => {
-    document.title = "ELT Glossary — English Teaching Terms | Edooqoo";
-    const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute("content", "Complete glossary of English Language Teaching (ELT) terms. 50+ definitions including CEFR, ESL, EFL, TEFL, spaced repetition, scaffolding, and more. Learn how Edooqoo supports each concept.");
-  }, []);
-
   return (
     <div className="min-h-screen bg-background">
+      <PageSeo {...SEO_META.glossary} />
       <div className="container mx-auto px-4 py-12 max-w-4xl">
         <div className="mb-8">
           <Link to="/" className="text-primary hover:underline text-sm">← Back to Edooqoo</Link>
