@@ -57,6 +57,12 @@ const ExerciseTypes = lazy(() => import("./pages/ExerciseTypes"));
 const HowItWorks = lazy(() => import("./pages/HowItWorks"));
 const Resources = lazy(() => import("./pages/Resources"));
 const Blog = lazy(() => import("./pages/Blog"));
+const EslWorksheets = lazy(() => import("./pages/seo/EslWorksheets"));
+const EnglishGamesForLearners = lazy(() => import("./pages/seo/EnglishGamesForLearners"));
+const EslGamesForTeachers = lazy(() => import("./pages/seo/EslGamesForTeachers"));
+const TeachEnglishOnlineGuide = lazy(() => import("./pages/seo/TeachEnglishOnlineGuide"));
+const ForEnglishTutors = lazy(() => import("./pages/seo/ForEnglishTutors"));
+const EslClassToolkit = lazy(() => import("./pages/seo/EslClassToolkit"));
 const StudentHubLanding = lazy(() => import("./pages/StudentHubLanding"));
 const StudentHubDashboard = lazy(() => import("./pages/StudentHubDashboard"));
 const StudentHubFlashcards = lazy(() => import("./pages/StudentHubFlashcards"));
@@ -150,6 +156,12 @@ const App = () => (
               <Route path="/how-it-works" element={<HowItWorks />} />
               <Route path="/resources" element={<Resources />} />
               <Route path="/blog" element={<Blog />} />
+              <Route path="/esl-worksheets" element={<EslWorksheets />} />
+              <Route path="/blog/english-games-for-learners" element={<EnglishGamesForLearners />} />
+              <Route path="/blog/esl-games-for-teachers" element={<EslGamesForTeachers />} />
+              <Route path="/blog/teach-english-online-guide" element={<TeachEnglishOnlineGuide />} />
+              <Route path="/for-english-tutors" element={<ForEnglishTutors />} />
+              <Route path="/resources/esl-class-toolkit" element={<EslClassToolkit />} />
               <Route path="/features/dslm" element={<FeatureDSLM />} />
               <Route path="/features/homework" element={<FeatureHomework />} />
               <Route path="/features/flashcards" element={<FeatureFlashcards />} />
