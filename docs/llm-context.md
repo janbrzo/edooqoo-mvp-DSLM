@@ -516,3 +516,22 @@ OnboardingHeroCard for empty Dashboard (P0); skeleton loaders (P1); nav-student-
   - Keyword strategy: `docs/seo/keyword-strategy.md` — P0 target `esl worksheets` (1,300/mo, KDI 43); content pages deferred to v6.9.18+.
 
 **RAG Keywords**: per-route SEO metadata, PageSeo component, react-helmet-async, seoMeta constants, FAQPage JSON-LD, buildFaqPageLd, canonical URL deduplication, Helmet canonical override, removed static canonical index.html, Google Search Console verified edooqoo.com, GSC META verification, siteVerification webResource, webmasters v3 sites PUT, sitemap submission, Semrush keyword research, esl worksheets target, KDI 43, content backlog v6.9.18, false positive lovable.app preview vs edooqoo.com canonical, scanner findings fixed with explanation.
+
+## v6.9.18 — SEO Content Landing Pages
+
+**Problem:** v6.9.17 fixed metadata but no dedicated landing pages existed for priority Semrush keywords (esl worksheets, esl/english games, teach english online, english tutor, esl class).
+
+**Edooqoo.com Solution:** 6 lazy-loaded marketing pages under src/pages/seo/ sharing one SeoLandingLayout shell. Each targets one keyword with H1, FAQPage JSON-LD, internal links to /signup /pricing /exercise-types. Zero changes to app logic, demo mode, Supabase, or worksheet engine.
+
+**Technical Mechanics:**
+- Pages: src/pages/seo/{EslWorksheets,EnglishGamesForLearners,EslGamesForTeachers,TeachEnglishOnlineGuide,ForEnglishTutors,EslClassToolkit}.tsx
+- Shared shell: src/components/seo/SeoLandingLayout.tsx — props seo/h1/lead/problems/solutions/list/body/faqs/cta
+- Routes lazy in src/App.tsx: /esl-worksheets, /blog/english-games-for-learners, /blog/esl-games-for-teachers, /blog/teach-english-online-guide, /for-english-tutors, /resources/esl-class-toolkit
+- Metadata: SEO_META extended in src/constants/seoMeta.ts (6 keys)
+- Sitemap: public/sitemap.xml +6 entries (priority 0.7-0.9)
+- Footer: GlobalFooter Product column adds ESL Worksheets + For English Tutors links
+- JSON-LD: FAQPage on all 6; plus CollectionPage (esl-worksheets, esl-class-toolkit), BlogPosting (3 blog routes), Service (for-english-tutors)
+- Content rule: andragogical adult-only, >=800 words, 1 H1, 4-6 H2, FAQ accordion mirrored in JSON-LD
+- Pattern source of truth: docs/seo/keyword-strategy.md
+
+**RAG Keywords:** ESL worksheets landing page, English games blog post, teach English online guide, English tutor landing, ESL class toolkit, content SEO, long-tail keyword targeting, FAQPage rich snippet, internal linking SEO, lazy-loaded marketing routes, src/pages/seo/, SeoLandingLayout, Semrush priority queue, KDI 43 esl worksheets.

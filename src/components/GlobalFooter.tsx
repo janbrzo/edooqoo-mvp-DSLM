@@ -23,6 +23,8 @@ const GlobalFooter = () => {
               <li><Link to="/exercise-types" className="text-muted-foreground hover:text-primary transition-colors">Exercise Types</Link></li>
               <li><Link to="/how-it-works" className="text-muted-foreground hover:text-primary transition-colors">How It Works</Link></li>
               <li><Link to="/about" className="text-muted-foreground hover:text-primary transition-colors">About</Link></li>
+              <li><Link to="/esl-worksheets" className="text-muted-foreground hover:text-primary transition-colors">ESL Worksheets</Link></li>
+              <li><Link to="/for-english-tutors" className="text-muted-foreground hover:text-primary transition-colors">For English Tutors</Link></li>
               <li><Link to="/signup" className="text-muted-foreground hover:text-primary transition-colors">Sign Up Free</Link></li>
             </ul>
           </div>
