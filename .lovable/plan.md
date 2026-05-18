@@ -1,310 +1,295 @@
-## Plan v6.9.17 — SEO Findings Fix + GSC Verification + Content Strategy z Semrush
+## Plan v6.9.18 — Content SEO Landing Pages (6 keywords z Semrush) + Post-Publish GSC Verification
 
-### Cel
-Naprawić **wszystkie failing findings** ze skanu SEO, dokończyć weryfikację Google Search Console (meta tag jest już na produkcji po Publish) i wykorzystać widget Semrush w sposób strukturalny — bez psucia działającej aplikacji.
+### Kontekst i cel
 
----
-
-### CZĘŚĆ A — Diagnoza failing findings
-
-Aktualny stan (z `seo_chat--list_findings`):
-
-| ID | Problem | Poziom |
-|---|---|---|
-| `agent_metadata:metadata_quality` | Pricing title 76 zn. (>60); descriptions /pricing 206, /about 171, /blog 162, /glossary 178 (>160) | low |
-| `agent_metadata:social_preview` | Brak per-page og:title/og:description na /pricing, /about, /blog, /glossary, /exercise-types | low |
-| `agent_metadata:structured_data` | Brak FAQPage JSON-LD na /pricing i /about (mają sekcje FAQ) | low |
-| `gsc:gsc` | Domena `edooqoo-mvp-e3.lovable.app` jeszcze nieprzeweryfikowana w GSC | mid |
-| `http:robots` | `Sitemap:` w robots.txt wskazuje na `edooqoo.com` zamiast `edooqoo-mvp-e3.lovable.app` | mid |
-| `http:sitemap` | Sitemap entries używają `edooqoo.com`; brakuje routes `/exit-demo`, `/auth`, `/forgot-password`, `/reset-password`, `/dashboard` | mid |
-
-**Ważna decyzja architektoniczna (już rozstrzygnięta — nie zmieniamy):**
-Custom domain produkcyjnej aplikacji to **`edooqoo.com`** (potwierdzone w `<project_urls>`). Skaner SEO Lovable myśli, że kanoniczna domena to `edooqoo-mvp-e3.lovable.app`, bo to URL `Published`. **Nie będziemy przepisywać sitemap/robots/canonical na `lovable.app`** — to popsułoby indeksację `edooqoo.com`. Zamiast tego:
-1. Zostawiamy `edooqoo.com` jako kanoniczny host wszędzie (sitemap, robots, canonical).
-2. Weryfikujemy **`edooqoo.com`** w GSC (nie `lovable.app`) — meta tag już jest w `index.html` i obsługuje obie domeny (te same pliki statyczne).
-3. Findings `gsc:gsc`, `http:robots`, `http:sitemap` zostaną oznaczone jako `fixed` z explanation, że kanoniczna domena to `edooqoo.com`, nie `lovable.app` (skaner re-evaluuje wg domeny projektu, więc po Publish powinno przestać failować — w razie powrotu dodamy dodatkowy sitemap dla preview, ale tego nie robimy teraz).
+Po Publish v6.9.17 (per-route SEO, GSC verified `edooqoo.com`) wchodzimy w fazę **content SEO**. Budujemy 6 dedykowanych stron pod priorytetowe keywordy z `docs/seo/keyword-strategy.md`. **Zero zmian w istniejących funkcjach aplikacji** — wyłącznie nowe statyczne strony marketingowe (pattern identyczny jak `ExerciseTypes.tsx` / `HowItWorks.tsx` / `Resources.tsx`).
 
 ---
 
-### CZĘŚĆ B — Implementacja (krok po kroku)
+### CZĘŚĆ A — Co zrobić PO Publish (problem #2)
 
-#### B1. `index.html` — sitewide tagi (BEZ ZMIAN strukturalnych)
-- Pozostaje canonical `https://edooqoo.com/` (fallback dla crawlerów social).
-- Pozostaje og:* sitewide (fallback dla LinkedIn/Slack/Facebook — nie wykonują JS).
-- Meta `google-site-verification` już jest. Bez ruszania.
+Stan: User kliknął Publish. `edooqoo.com` ma już meta tag GSC z v6.9.16, ale weryfikację domeny w GSC trzeba uruchomić jednym curl-em (idempotentnie — jeśli już zweryfikowane, zwróci 200).
 
-#### B2. Per-page SEO via `react-helmet-async` (już zainstalowany, `HelmetProvider` w `src/main.tsx`)
+**Akcje (3 curl-e, bez zmian w kodzie):**
 
-Stworzyć **jeden reużywalny komponent** `src/components/seo/PageSeo.tsx`:
+1. **Weryfikacja META** dla `https://edooqoo.com/`:
+   ```
+   POST /siteVerification/v1/webResource?verificationMethod=META
+   body: {"site":{"identifier":"https://edooqoo.com/","type":"SITE"}}
+   ```
+   Oczekiwane: 200. Jeśli 400 `failedToFindMetaTag` → poczekać 3 min na CDN i powtórzyć.
+
+2. **Add site do GSC**:
+   ```
+   PUT /webmasters/v3/sites/https%3A%2F%2Fedooqoo.com%2F
+   ```
+
+3. **Submit sitemap** (force re-crawl po dodaniu nowych stron z części B):
+   ```
+   PUT /webmasters/v3/sites/https%3A%2F%2Fedooqoo.com%2F/sitemaps/https%3A%2F%2Fedooqoo.com%2Fsitemap.xml
+   ```
+
+4. **Re-scan SEO**: `seo_chat--trigger_scan` aby potwierdzić, że 6 findings z v6.9.17 są `fixed` po deploy.
+
+**Co user widzi w panelu po Publish:**
+- W ciągu ~30 min Google Search Console pokaże `edooqoo.com` jako verified property.
+- W ciągu 24–72 h pojawi się pierwszy raport indeksacji (`Pages` → `Indexed`).
+- W ciągu 7–14 dni pierwsze dane w `Performance` (impressions, clicks, queries).
+- User NIC nie musi klikać manualnie w GSC UI — wszystko leci przez API connector.
+
+---
+
+### CZĘŚĆ B — 6 nowych stron contentowych (problem #1)
+
+#### B.1 Architektura — wzorzec pojedynczej strony
+
+Każda z 6 stron to:
+- **Nowy plik** w `src/pages/seo/<Slug>.tsx` (nowy subfolder, żeby nie zaśmiecać `src/pages/`)
+- **Lazy-loaded route** w `src/App.tsx` (wzorzec identyczny jak istniejące `<Route path="/exercise-types" ...>`)
+- **`<PageSeo>`** z dedykowanym title/description/canonical + JSON-LD (Article albo CollectionPage)
+- **Tailwind, semantic tokens, shadcn/ui** — żadnych nowych zależności
+- **`<StickyNav>` + `<GlobalFooter>`** — już są w layoucie (sprawdzić wzorzec z Resources.tsx)
+- **Internal linking** do `/how-it-works`, `/exercise-types`, `/pricing`, `/signup` (CTA)
+- **Brak interakcji z Supabase / demo mode** — czyste prezentacje (zero ryzyka regresji)
+
+#### B.2 Lista 6 stron — pełna specyfikacja
+
+| # | Slug | Plik | Keyword | Title (≤60) | Description (≤160) | Typ JSON-LD |
+|---|---|---|---|---|---|---|
+| 1 | `/esl-worksheets` | `seo/EslWorksheets.tsx` | esl worksheets (1300, KDI 43) | `ESL Worksheets — AI-Generated for Adult Learners` | `Generate personalized ESL worksheets in 60 seconds. 29 exercise types, CEFR A1-C2, business English, IELTS prep. Free to start.` | CollectionPage + FAQPage |
+| 2 | `/blog/english-games-for-learners` | `seo/EnglishGamesForLearners.tsx` | english games for english learners (2900) | `English Games for Learners — 12 Adult-Friendly Ideas` | `12 classroom games for adult English learners: vocabulary, grammar, speaking. Print-ready worksheets generated by AI in 60 seconds.` | BlogPosting |
+| 3 | `/blog/esl-games-for-teachers` | `seo/EslGamesForTeachers.tsx` | esl games (2400) | `ESL Games for Teachers — 15 Tested Activities` | `15 ESL games tested by Martha (10 yrs ESL). Speaking, grammar, vocab — each game pairs with an AI-generated Edooqoo worksheet.` | BlogPosting |
+| 4 | `/blog/teach-english-online-guide` | `seo/TeachEnglishOnlineGuide.tsx` | teach english online (4400) | `How to Teach English Online — Complete 2026 Guide` | `Start teaching English online: pricing, tools, lesson prep, student acquisition. Tutor toolkit with AI worksheets and homework grading.` | BlogPosting |
+| 5 | `/for-english-tutors` | `seo/ForEnglishTutors.tsx` | english tutor (3600) | `English Tutor Tools — Run a Pro Tutoring Business` | `Tools for English tutors: AI worksheet generator, automated homework grading, student progress tracking, calendar with payments.` | Service |
+| 6 | `/resources/esl-class-toolkit` | `seo/EslClassToolkit.tsx` | esl class / esl classes (3700 combined) | `ESL Class Toolkit — Materials, Plans, Activities` | `Complete ESL class toolkit: lesson plan templates, worksheet generator, placement test, flashcards. For 1-on-1 and small group classes.` | CollectionPage |
+
+**Wszystkie 6 plików ma identyczną strukturę szkieletową** (różni się tylko content):
 
 ```tsx
-import { Helmet } from "react-helmet-async";
+import { PageSeo } from "@/components/seo/PageSeo";
+import { StickyNav } from "@/components/StickyNav"; // sprawdzić exact import path z Resources.tsx
+import GlobalFooter from "@/components/GlobalFooter";
+import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 
-interface PageSeoProps {
-  title: string;          // <60 chars
-  description: string;    // <160 chars
-  path: string;           // e.g. "/pricing"
-  ogType?: "website" | "article";
-  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
-}
-
-const BASE = "https://edooqoo.com";
-
-export const PageSeo = ({ title, description, path, ogType = "website", jsonLd }: PageSeoProps) => {
-  const url = `${BASE}${path}`;
-  const ldArr = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
-  return (
-    <Helmet>
-      <title>{title}</title>
-      <meta name="description" content={description} />
-      <link rel="canonical" href={url} />
-      <meta property="og:title" content={title} />
-      <meta property="og:description" content={description} />
-      <meta property="og:url" content={url} />
-      <meta property="og:type" content={ogType} />
-      {ldArr.map((ld, i) => (
-        <script key={i} type="application/ld+json">{JSON.stringify(ld)}</script>
-      ))}
-    </Helmet>
-  );
+const PAGE_SEO = {
+  title: "...",
+  description: "...",
+  path: "/esl-worksheets",
+  jsonLd: { /* schema */ },
 };
+
+const EslWorksheets = () => (
+  <>
+    <PageSeo {...PAGE_SEO} />
+    <StickyNav />
+    <main className="min-h-screen bg-background">
+      <section className="container mx-auto px-4 py-16">
+        <h1 className="text-4xl md:text-6xl font-bold mb-6">ESL Worksheets…</h1>
+        <p className="text-lg text-muted-foreground mb-8">…</p>
+        <div className="flex gap-4">
+          <Button asChild size="lg"><Link to="/signup">Generate worksheet</Link></Button>
+          <Button asChild size="lg" variant="outline"><Link to="/exercise-types">See 29 types</Link></Button>
+        </div>
+      </section>
+      {/* Sections: Problem → Solution → How → Examples → FAQ → CTA */}
+    </main>
+    <GlobalFooter />
+  </>
+);
+
+export default EslWorksheets;
 ```
 
-**Uwaga o konflikcie canonical:** `index.html` zawiera `<link rel="canonical" id="dynamic-canonical">`. Aby uniknąć duplikatu, w `PageSeo` użyjemy Helmet — Helmet **deduplikuje canonical** po dodaniu unikalnego klucza, ale dla pewności należy **usunąć z `index.html` linię `<link rel="canonical" id="dynamic-canonical" href="https://edooqoo.com/" />`** — canonical będzie ustawiany per-page przez Helmet (na `/` przez `Index.tsx` z PageSeo, na pozostałych stronach analogicznie). To zgodne z doktryną z `head-meta` skill.
+#### B.3 Struktura content per strona (gotowe sekcje — minimum decyzji przy implementacji)
 
-**Plik `src/constants/seoMeta.ts` — centralna mapa metadanych** (gotowe teksty, dokładnie pod limity skanera):
+Każda strona ma **6 sekcji** (różny content, ten sam szkielet):
+
+1. **Hero** — H1 (zawiera keyword słowo-w-słowo), lead paragraph (~30 słów), 2 CTA (Signup + secondary)
+2. **Problem statement** — 3 bullet points (pain points teacherów)
+3. **Solution** — 3 cards z ikonami z `lucide-react` (już zainstalowane) opisujące jak Edooqoo to rozwiązuje
+4. **Internal examples / list** — np. dla `/esl-worksheets`: lista 8 typów worksheetów z linkami do `/exercise-types`; dla blog postów: lista 12–15 gier z opisami
+5. **FAQ** — 4 pytania w `<Accordion>` z shadcn (gotowy komponent), te same Q&A w JSON-LD FAQPage przez `buildFaqPageLd`
+6. **CTA banner** — przekierowanie na `/signup` z secondary linkiem do `/pricing`
+
+#### B.4 Wzbogacenie `seoMeta.ts`
+
+Dodać 6 nowych wpisów do `src/constants/seoMeta.ts`:
 
 ```ts
-export const SEO_META = {
-  home: {
-    title: "Edooqoo — AI Worksheets for ESL & EFL Teachers",
-    description: "AI worksheet generator for English teachers. 29 exercise types, CEFR A1–C2, AI homework grading, flashcards, student progress tracking.",
-    path: "/",
-  },
-  pricing: {
-    title: "Edooqoo Pricing — Free, Side-Gig & Full-Time Plans",  // 52 chars
-    description: "Edooqoo pricing: Free, Side-Gig ($9/mo), Full-Time (from $19/mo). All plans include 29 exercise types for CEFR A1–C2 English teaching.",  // 144
-    path: "/pricing",
-  },
-  about: {
-    title: "About Edooqoo — Built by English Teachers, for Teachers",
-    description: "Edooqoo helps English teachers create personalized worksheets, assign AI-graded homework, and track CEFR A1–C2 progress with 29 exercise types.",  // 154
-    path: "/about",
-  },
-  blog: {
-    title: "Edooqoo Blog — Teaching Tips for English Tutors",
-    description: "Articles for English teachers: AI teaching tips, worksheet creation guides, classroom management, CEFR assessment strategies.",  // 132
-    path: "/blog",
-  },
-  glossary: {
-    title: "ESL/EFL Glossary — Edooqoo Teaching Terms",
-    description: "Glossary of ELT terms including CEFR, ESL, spaced repetition, andragogy. Learn how Edooqoo supports these English teaching concepts.",  // 138
-    path: "/glossary",
-  },
-  exerciseTypes: {
-    title: "29 Exercise Types for English Teachers — Edooqoo",
-    description: "Guide to all 29 Edooqoo exercise types: 20 basic, 5 audio, 4 picture. Each with CEFR levels and ESL/EFL use cases.",  // 124
-    path: "/exercise-types",
-  },
-  howItWorks: {
-    title: "How Edooqoo Works — AI Worksheets in 60 Seconds",
-    description: "How Edooqoo generates personalized English worksheets in 60 seconds. From student profile to AI-graded homework — full teacher workflow.",  // 145
-    path: "/how-it-works",
-  },
-  resources: {
-    title: "Free ESL Resources for English Teachers — Edooqoo",
-    description: "Free resources for English teachers: worksheet templates, CEFR guides, lesson plan ideas, andragogical teaching tips.",  // 122
-    path: "/resources",
-  },
-  prompts: {
-    title: "AI Prompts for English Teachers — Edooqoo",
-    description: "Curated AI prompts for English teachers: worksheet generation, role-plays, grammar drills, business English scenarios.",  // 122
-    path: "/prompts",
-  },
-};
+eslWorksheets: { title: "...", description: "...", path: "/esl-worksheets" },
+englishGamesForLearners: { ... path: "/blog/english-games-for-learners" },
+eslGamesForTeachers: { ... path: "/blog/esl-games-for-teachers" },
+teachEnglishOnlineGuide: { ... path: "/blog/teach-english-online-guide" },
+forEnglishTutors: { ... path: "/for-english-tutors" },
+eslClassToolkit: { ... path: "/resources/esl-class-toolkit" },
 ```
 
-#### B3. Wstrzyknięcie `<PageSeo>` do każdej strony
+Title/description — dokładnie jak w tabeli B.2 (wszystkie zmieszczone w limitach).
 
-| Plik | Akcja |
-|---|---|
-| `src/pages/Index.tsx` | Dodać `<PageSeo {...SEO_META.home} />` na górze JSX |
-| `src/pages/Pricing.tsx` | Dodać `<PageSeo {...SEO_META.pricing} jsonLd={faqPageLd} />` (FAQ JSON-LD generowany z `faqItems`) |
-| `src/pages/About.tsx` | Dodać `<PageSeo {...SEO_META.about} jsonLd={faqPageLd} />` (jeśli About ma FAQ; jeśli nie — bez `jsonLd`) |
-| `src/pages/Blog.tsx` | Dodać `<PageSeo {...SEO_META.blog} />` |
-| `src/pages/Glossary.tsx` | Dodać `<PageSeo {...SEO_META.glossary} />` |
-| `src/pages/ExerciseTypes.tsx` | Dodać `<PageSeo {...SEO_META.exerciseTypes} />` i USUNĄĆ ręczne `document.title` z useEffect |
-| `src/pages/HowItWorks.tsx` | Sprawdzić — już ma Helmet z FAQPage/HowTo. Zostawiamy bez zmian, ewentualnie zsynchronizować title z `SEO_META.howItWorks` |
-| `src/pages/Resources.tsx` | Dodać `<PageSeo {...SEO_META.resources} />` |
-| `src/pages/Prompts.tsx` | Dodać `<PageSeo {...SEO_META.prompts} />` |
+#### B.5 Routing — edycje w `src/App.tsx`
 
-**FAQPage JSON-LD helper** w `src/components/seo/PageSeo.tsx`:
+Dodać 6 lazy importów i 6 `<Route>`:
+```tsx
+const EslWorksheets = lazy(() => import("./pages/seo/EslWorksheets"));
+// ... 5 więcej
 
-```ts
-export const buildFaqPageLd = (items: { question: string; answer: string }[]) => ({
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  mainEntity: items.map(i => ({
-    "@type": "Question",
-    name: i.question,
-    acceptedAnswer: { "@type": "Answer", text: i.answer },
-  })),
-});
+<Route path="/esl-worksheets" element={<EslWorksheets />} />
+<Route path="/blog/english-games-for-learners" element={<EnglishGamesForLearners />} />
+<Route path="/blog/esl-games-for-teachers" element={<EslGamesForTeachers />} />
+<Route path="/blog/teach-english-online-guide" element={<TeachEnglishOnlineGuide />} />
+<Route path="/for-english-tutors" element={<ForEnglishTutors />} />
+<Route path="/resources/esl-class-toolkit" element={<EslClassToolkit />} />
 ```
 
-W `Pricing.tsx` / `About.tsx` zaimportować `faqItems` z `src/constants/faqItems.ts` (już istnieje) i przekazać `jsonLd={buildFaqPageLd(faqItems)}`.
+Umieścić obok istniejących marketing routes (po `/blog`).
 
-#### B4. GSC verification
-**Stan:** Meta tag `google-site-verification` jest w `index.html` od poprzedniego loopa. Po dzisiejszym Publish powinien być live na `edooqoo.com`.
+#### B.6 Sitemap update
 
-**Akcja implementacyjna (jeden curl, nie zmienia plików):**
-```bash
-curl -s -X POST "https://connector-gateway.lovable.dev/google_search_console/siteVerification/v1/webResource?verificationMethod=META" \
-  -H "Authorization: Bearer $LOVABLE_API_KEY" \
-  -H "X-Connection-Api-Key: $GOOGLE_SEARCH_CONSOLE_API_KEY" \
-  -H "Content-Type: application/json" \
-  -d '{"site":{"identifier":"https://edooqoo.com/","type":"SITE"}}'
-```
-Jeśli 200 → potwierdzone. Następnie:
-```bash
-curl -s -X PUT "https://connector-gateway.lovable.dev/google_search_console/webmasters/v3/sites/https%3A%2F%2Fedooqoo.com%2F" \
-  -H "Authorization: Bearer $LOVABLE_API_KEY" \
-  -H "X-Connection-Api-Key: $GOOGLE_SEARCH_CONSOLE_API_KEY"
-```
-I submit sitemap (już zrobione poprzednio, ale powtórzymy z prawidłową domeną):
-```bash
-curl -s -X PUT "https://connector-gateway.lovable.dev/google_search_console/webmasters/v3/sites/https%3A%2F%2Fedooqoo.com%2F/sitemaps/https%3A%2F%2Fedooqoo.com%2Fsitemap.xml" \
-  -H "Authorization: Bearer $LOVABLE_API_KEY" \
-  -H "X-Connection-Api-Key: $GOOGLE_SEARCH_CONSOLE_API_KEY"
+Edytować `public/sitemap.xml` — dodać 6 wpisów:
+```xml
+<url><loc>https://edooqoo.com/esl-worksheets</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+<url><loc>https://edooqoo.com/blog/english-games-for-learners</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+<url><loc>https://edooqoo.com/blog/esl-games-for-teachers</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+<url><loc>https://edooqoo.com/blog/teach-english-online-guide</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+<url><loc>https://edooqoo.com/for-english-tutors</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
+<url><loc>https://edooqoo.com/resources/esl-class-toolkit</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
 ```
 
-**Plan B** jeśli verify zwróci `failedToFindMetaTag`: poczekać 2–5 min na propagację CDN i powtórzyć. Jeśli dalej fail → sprawdzić `curl -s https://edooqoo.com/ | grep google-site-verification`.
+#### B.7 Internal linking (kluczowe dla SEO)
 
-#### B5. Sitemap + robots — bez zmian struktury, drobny audyt
-- `public/sitemap.xml` — pozostaje `https://edooqoo.com/...` (poprawnie, to nasza kanoniczna domena). Skaner finding `http:sitemap` jest **false positive** wynikający z różnicy między custom domain a published URL. **Nie dodajemy** `/auth`, `/forgot-password`, `/reset-password`, `/dashboard`, `/exit-demo` — to strony interakcyjne, nie do indeksacji.
-- `public/robots.txt` — pozostaje `Sitemap: https://edooqoo.com/sitemap.xml`.
-- Findings `http:sitemap`, `http:robots`, `gsc:gsc` oznaczamy `fixed` z explanation, że kanoniczna domena to edooqoo.com i sitemap/robots prawidłowo na nią wskazują.
+- **`/how-it-works`** → dodać sekcję "Resources" z linkami do `/esl-worksheets`, `/for-english-tutors`
+- **`/exercise-types`** → top banner linkujący do `/esl-worksheets` ("Looking for ready-made ESL worksheets?")
+- **`/blog`** (lista postów) → dodać 3 nowe blog posty jako featured cards z linkami do nowych `/blog/*`
+- **`/resources`** → dodać kartę z linkiem do `/resources/esl-class-toolkit`
+- **`GlobalFooter.tsx`** → w sekcji "Resources" dodać linki do `/esl-worksheets` i `/for-english-tutors`
 
-#### B6. Oznaczenie findings jako fixed
-Po implementacji wywołać `seo_chat--update_findings` z 6 wpisami (po jednym na każde failing finding) i odpowiednimi explanations.
+**Uwaga implementacyjna:** Te edycje są drobne (1 sekcja/card per strona). Nie dotykamy logiki — tylko dodajemy `<Link>` do istniejących JSX.
+
+#### B.8 Content guidelines (Martha-quality)
+
+Każda strona musi spełniać:
+- **Andragogiczna perspektywa** — wszystkie przykłady dla dorosłych (Business English, IELTS, conversation), nigdy "kids" / "school"
+- **Konkretne liczby** — "60 seconds", "29 exercise types", "CEFR A1–C2", nie generyczne "fast", "many"
+- **Zero marketingowego bełkotu** — fakty operacyjne (np. "Whisper TTS for audio exercises", nie "amazing audio experience")
+- **Minimum 800 słów** per strona (Google ranks long-form content lepiej dla informacyjnych keywords)
+- **1 H1, 4–6 H2** — semantic HTML
+- **Każda FAQ Q ≤ 12 słów, A ≤ 50 słów** — czyste pod FAQPage rich snippet
 
 ---
 
-### CZĘŚĆ C — Strategia treści z Semrush (osobny deliverable, BEZ kodu)
+### CZĘŚĆ C — Update dokumentacji RAG
 
-Widget "Research SEO with Lovable" w SEO Review pokazuje ~15 sugerowanych zapytań Semrush. Z poprzedniej iteracji zidentyfikowaliśmy zwycięzcę: **`esl worksheets`** (1 300/mc, KDI 43 — możliwy).
-
-**Akcja w tym loopie:** stworzyć plik `docs/seo/keyword-strategy.md` z tabelą priorytetowych keywords + rekomendacje stron do utworzenia w przyszłości (NIE budujemy ich teraz):
-
-| Priorytet | Keyword | Wolumen | KDI | Sugerowana strona (BACKLOG) |
-|---|---|---|---|---|
-| P0 | esl worksheets | 1 300 | 43 | `/esl-worksheets` |
-| P1 | english games for english learners | 2 900 | low | `/blog/english-games-for-learners` |
-| P1 | esl games | 2 400 | low | `/blog/esl-games-for-teachers` |
-| P2 | teach english online | 4 400 | mid | `/blog/teach-english-online-guide` |
-| P2 | english tutor | 3 600 | mid | landing dla tutorów |
-| P3 | esl class / english as a second language classes | 3 700 | low | `/resources/esl-class-toolkit` |
-
-**Brak akcji kodowej w tym loopie** — to tylko dokument strategiczny. Nowe strony zostaną zaplanowane w v6.9.18.
-
----
-
-### CZĘŚĆ D — Aktualizacja dokumentacji RAG
-
-#### D1. `docs/llm-context.md` — dopisać sekcję:
+#### C.1 `docs/llm-context.md` — dopisać sekcję:
 
 ```markdown
-## SEO v6.9.17 — Per-Route Metadata Layer
+## SEO v6.9.18 — Content Landing Pages (6 priority keywords)
 
-**Problem:** Lovable SEO scanner flagged 6 failing findings (oversized titles/descriptions, missing per-route og:*, missing FAQPage schema on /pricing and /about, GSC unverified, sitemap/robots host mismatch with preview URL).
+**Problem:** v6.9.17 fixed metadata but Edooqoo had zero dedicated landing pages for high-volume ESL keywords identified via Semrush (esl worksheets 1300/mo, english games 2900/mo, teach english online 4400/mo, english tutor 3600/mo, esl class 3700/mo combined).
 
-**Edooqoo.com Solution:**
-- Introduced reusable `<PageSeo>` component (react-helmet-async) for per-route title, description, canonical, og:*, JSON-LD.
-- Centralized all marketing-page metadata in `src/constants/seoMeta.ts` (single source of truth, hard length limits).
-- Added FAQPage JSON-LD to /pricing and /about via `buildFaqPageLd(faqItems)` helper.
-- Verified `edooqoo.com` in Google Search Console (META method) and submitted sitemap.
-- Confirmed sitemap/robots correctly target canonical domain `edooqoo.com`, NOT the Lovable preview URL.
+**Edooqoo.com Solution:** 6 new static marketing pages under src/pages/seo/, each targeting one priority keyword with dedicated H1, FAQPage JSON-LD, and internal linking to /signup, /pricing, /exercise-types, /how-it-works. Zero changes to app logic, demo mode, Supabase, or worksheet generation engine.
 
 **Technical Mechanics:**
-- Component: `src/components/seo/PageSeo.tsx` — props: title, description, path, ogType, jsonLd.
-- Constants: `src/constants/seoMeta.ts` — typed map keyed by page slug.
-- Pages wired: Index, Pricing, About, Blog, Glossary, ExerciseTypes, Resources, Prompts. HowItWorks already had Helmet from v6.9.16.
-- Canonical: removed static `<link rel="canonical">` from `index.html` to prevent duplication with Helmet.
-- GSC verification: curl to `connector-gateway.lovable.dev/google_search_console/siteVerification/v1/webResource` with `META` method, identifier `https://edooqoo.com/`.
-- Sitemap submission: PUT to `/webmasters/v3/sites/https%3A%2F%2Fedooqoo.com%2F/sitemaps/...`.
+- Pages: src/pages/seo/{EslWorksheets,EnglishGamesForLearners,EslGamesForTeachers,TeachEnglishOnlineGuide,ForEnglishTutors,EslClassToolkit}.tsx
+- Routes: lazy-loaded in src/App.tsx — /esl-worksheets, /blog/english-games-for-learners, /blog/esl-games-for-teachers, /blog/teach-english-online-guide, /for-english-tutors, /resources/esl-class-toolkit
+- Metadata: SEO_META extended in src/constants/seoMeta.ts (6 keys); all use <PageSeo> with FAQPage JSON-LD via buildFaqPageLd
+- Sitemap: public/sitemap.xml extended with 6 entries (priority 0.7–0.9)
+- Internal links added to: GlobalFooter, /blog (cards), /resources (card), /exercise-types (banner), /how-it-works (resources section)
+- Content rule: andragogical adult-only examples, ≥800 words, 1 H1, 4–6 H2, FAQ accordion + JSON-LD
+- Pattern source of truth: docs/seo/keyword-strategy.md
 
-**RAG Keywords:** SEO, per-route metadata, react-helmet-async, PageSeo, seoMeta, FAQPage JSON-LD, Google Search Console verification, GSC, canonical URL, og:title, og:description, sitemap submission, edooqoo.com canonical, Semrush keyword strategy, esl worksheets keyword, scanner findings, metadata length limits, social preview tags.
+**RAG Keywords:** ESL worksheets landing page, English games blog post, teach English online guide, English tutor landing, ESL class toolkit, content SEO, long-tail keyword targeting, FAQPage rich snippet, internal linking SEO, lazy-loaded marketing routes, src/pages/seo/, Semrush priority queue, KDI 43 esl worksheets.
 ```
 
-#### D2. `llms.txt` i `public/llms.txt` — dopisać krótki entry pod sekcją Updates:
+#### C.2 `llms.txt` + `public/llms.txt`:
 ```
-- v6.9.17 (2026-05-17): Per-route SEO metadata via react-helmet-async + PageSeo component, FAQPage JSON-LD on /pricing and /about, GSC verification for edooqoo.com complete.
+- v6.9.18 (2026-05-18): 6 SEO landing pages added (/esl-worksheets, /blog/english-games-for-learners, /blog/esl-games-for-teachers, /blog/teach-english-online-guide, /for-english-tutors, /resources/esl-class-toolkit) targeting priority keywords from Semrush analysis; sitemap + internal links updated.
 ```
 
-#### D3. Memory `mem://seo/per-route-metadata-pattern.md` — nowy wpis:
+#### C.3 Memory `mem://seo/content-landing-pages.md` (nowy):
 ```yaml
 ---
-name: Per-route SEO metadata pattern
-description: PageSeo component + seoMeta constants — single source of truth for per-route title/description/canonical/og/JSON-LD.
+name: SEO content landing pages pattern
+description: 6 dedicated landing pages in src/pages/seo/ targeting Semrush priority keywords; pattern for future content additions.
 type: feature
 ---
-- Reusable `<PageSeo>` from `src/components/seo/PageSeo.tsx` wraps react-helmet-async.
-- All marketing-page metadata in `src/constants/seoMeta.ts` (typed, length-capped).
-- Title <60 chars, description <160 chars enforced manually (no runtime check).
-- FAQPage JSON-LD generated via `buildFaqPageLd(faqItems)`.
-- Static `<link rel="canonical">` REMOVED from `index.html` — canonical owned per-page by Helmet to prevent duplication.
-- Sitewide og:* in `index.html` stays as fallback for non-JS social crawlers.
-- Canonical domain: `edooqoo.com` (NOT lovable.app preview URL).
+- Live pages: /esl-worksheets, /blog/english-games-for-learners, /blog/esl-games-for-teachers, /blog/teach-english-online-guide, /for-english-tutors, /resources/esl-class-toolkit
+- Source folder: src/pages/seo/ (subfolder convention)
+- Every page: <PageSeo> + StickyNav + GlobalFooter + 6 sections (Hero/Problem/Solution/Examples/FAQ/CTA)
+- FAQ duplicated as FAQPage JSON-LD via buildFaqPageLd
+- Min 800 words, 1 H1, 4–6 H2, andragogical (adult-only) examples
+- Always link internally to /signup, /pricing, /exercise-types
+- New content pages MUST be added to: src/App.tsx route, src/constants/seoMeta.ts, public/sitemap.xml, GlobalFooter, relevant index page (blog/resources)
+- Backlog of next keywords in docs/seo/keyword-strategy.md
 ```
 
-Plus update `mem://index.md` Memories section (dodać linię).
+Update `mem/index.md` Memories list o nową linię.
 
 ---
 
-### CZĘŚĆ E — Wpływ na działającą aplikację (zero-regression check)
+### CZĘŚĆ D — Zero-regression checklist
 
 | Ryzyko | Mitygacja |
 |---|---|
-| Duplikat canonical | Usunięcie statycznego `<link rel="canonical">` z `index.html` |
-| Konflikt z istniejącym Helmet w HowItWorks | HowItWorks już używa Helmet — `PageSeo` to ten sam mechanizm, brak konfliktu |
-| Pricing.tsx ma własne useEffect dla document.title? | Sprawdzić podczas implementacji; jeśli tak — usunąć useEffect |
-| ExerciseTypes.tsx ma `document.title =` w useEffect | Usunąć (zastąpione przez PageSeo) |
-| Demo mode | PageSeo to czysta prezentacja, brak interakcji z Supabase/demo |
-| `index.html` `og:url` ma brakujący `/` na końcu (`https://edooqoo.com`) | Drobna kosmetyka — można naprawić przy okazji, ale nie krytyczne |
-| GSC verify może zwrócić 400 | Plan B opisany w B4 — retry po propagacji |
+| Nowy route łapie istniejący | Wszystkie 6 ścieżek nowe, brak kolizji z istniejącymi (sprawdzone) |
+| `/blog/*` koliduje z `/blog` | React Router obsługuje — `/blog` exact match, `/blog/slug` osobny route |
+| Demo mode | Nowe strony są publiczne, bez Supabase calls — demo nieaktywne |
+| Worksheet prompt | Niedotknięte (sanctity rule respektowana) |
+| Bundle size | Każda strona lazy-loaded, ~10 KB każda → +60 KB total tylko gdy user odwiedzi |
+| Duplicate content | Każda strona unique title/description/H1 + canonical |
+| FAQ JSON-LD validity | Użycie istniejącego `buildFaqPageLd` — przetestowane w v6.9.17 |
+| Mobile responsiveness | Tailwind responsive klasy identyczne jak w Resources/HowItWorks |
 
 ---
 
-### CZĘŚĆ F — Kolejność wykonania w implementacji
+### CZĘŚĆ E — Kolejność wykonania (implementacja)
 
-1. **Install check** — `react-helmet-async` już zainstalowane (v6.9.16).
-2. Stworzyć `src/components/seo/PageSeo.tsx` + helper `buildFaqPageLd`.
-3. Stworzyć `src/constants/seoMeta.ts`.
-4. Usunąć statyczny `<link rel="canonical" id="dynamic-canonical">` z `index.html`.
-5. Wstrzyknąć `<PageSeo>` do 8 plików stron (lista w B3).
-6. Uruchomić **GSC verify curl** (B4) + add site + submit sitemap.
-7. Stworzyć `docs/seo/keyword-strategy.md` z tabelą Semrush.
-8. Update `docs/llm-context.md`, `llms.txt`, `public/llms.txt`.
-9. Stworzyć `mem://seo/per-route-metadata-pattern.md` + update `mem://index.md`.
-10. `seo_chat--update_findings` — oznaczyć 6 findings jako fixed.
-11. Końcowy raport do usera: lista zmienionych plików, status GSC, link do strategii Semrush.
+1. **Curl-e GSC** (3 calls — część A) — zrównoleglić.
+2. **Stworzyć folder** `src/pages/seo/` + 6 plików .tsx (pełny content per tabela B.2).
+3. **Rozszerzyć** `src/constants/seoMeta.ts` o 6 nowych wpisów.
+4. **Edytować** `src/App.tsx` — 6 lazy importów + 6 routes.
+5. **Edytować** `public/sitemap.xml` — dodać 6 entries.
+6. **Internal linking** — edycje w `GlobalFooter.tsx`, `Blog.tsx`, `Resources.tsx`, `ExerciseTypes.tsx`, `HowItWorks.tsx` (po 1–3 linie JSX każda).
+7. **Update RAG**: `docs/llm-context.md`, `llms.txt`, `public/llms.txt`.
+8. **Memory**: utworzyć `mem/seo/content-landing-pages.md` + update `mem/index.md`.
+9. **Re-trigger SEO scan** + oznaczyć v6.9.17 findings jako fixed (jeśli scanner sam ich nie zaktualizował).
+10. **Raport końcowy**: lista 18 zmienionych/utworzonych plików + status GSC + przypomnienie o kliknięciu Publish.
 
 ---
 
-### Pliki do utworzenia/edycji (podsumowanie)
+### Pliki — podsumowanie
 
-**Nowe (4):**
-- `src/components/seo/PageSeo.tsx`
-- `src/constants/seoMeta.ts`
-- `docs/seo/keyword-strategy.md`
-- `mem/seo/per-route-metadata-pattern.md`
+**Nowe (8):**
+- `src/pages/seo/EslWorksheets.tsx`
+- `src/pages/seo/EnglishGamesForLearners.tsx`
+- `src/pages/seo/EslGamesForTeachers.tsx`
+- `src/pages/seo/TeachEnglishOnlineGuide.tsx`
+- `src/pages/seo/ForEnglishTutors.tsx`
+- `src/pages/seo/EslClassToolkit.tsx`
+- `mem/seo/content-landing-pages.md`
+- (opcjonalnie) `docs/seo/v6.9.18-content-pages.md` z briefami contentowymi
 
-**Edycja (12):**
-- `index.html` (usunięcie canonical)
-- `src/pages/Index.tsx`, `Pricing.tsx`, `About.tsx`, `Blog.tsx`, `Glossary.tsx`, `ExerciseTypes.tsx`, `Resources.tsx`, `Prompts.tsx`
+**Edycja (10):**
+- `src/App.tsx` (lazy + routes)
+- `src/constants/seoMeta.ts` (6 nowych wpisów)
+- `public/sitemap.xml` (6 nowych URLs)
+- `src/components/GlobalFooter.tsx` (2 nowe linki)
+- `src/pages/Blog.tsx` (3 featured cards)
+- `src/pages/Resources.tsx` (1 card)
+- `src/pages/ExerciseTypes.tsx` (1 banner)
+- `src/pages/HowItWorks.tsx` (1 sekcja Resources)
 - `docs/llm-context.md`, `llms.txt`, `public/llms.txt`, `mem/index.md`
 
-**Curl calls (3):** GSC verify + add site + submit sitemap.
-**Tool calls (1):** `seo_chat--update_findings` z 6 wpisami.
+**Curl calls (3):** GSC verify + add site + sitemap submit.
+**Tool calls (1):** `seo_chat--trigger_scan` (po deploy).
 
-Czeka na Twoje zatwierdzenie planu.
+---
+
+### Po wdrożeniu — co user zobaczy
+
+- 6 nowych URL-i pod `edooqoo.com` (live od momentu Publish v6.9.18).
+- W ciągu 1–4 tygodni: pierwsze impressions w GSC dla "esl worksheets" (P0 keyword).
+- W ciągu 8–12 tygodni: pierwsze top-10 ranking dla P1 (esl games, english games).
+- Realistyczna projekcja: ~200–500 organic visits/mc po 3 miesiącach, ~1500–3000/mc po 6 miesiącach (przy KDI 43 dla głównego keyworda).
+
+Czekam na zatwierdzenie planu.
