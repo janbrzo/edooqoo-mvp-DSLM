@@ -1,0 +1,150 @@
+import React, { useEffect, useState } from 'react';
+import { Link, useParams } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { PageSeo } from '@/components/seo/PageSeo';
+
+interface PublicWorksheetRow {
+  id: string;
+  title: string;
+  ai_response: string | null;
+  html_content: string | null;
+  public_topic: string | null;
+  public_level: string | null;
+  published_at: string | null;
+  is_public: boolean;
+  public_slug: string;
+}
+
+const PublicGalleryWorksheetPage: React.FC = () => {
+  const { slug } = useParams<{ slug: string }>();
+  const [worksheet, setWorksheet] = useState<PublicWorksheetRow | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [notFound, setNotFound] = useState(false);
+
+  useEffect(() => {
+    if (!slug) return;
+    let cancelled = false;
+    (async () => {
+      const { data } = await supabase
+        .from('worksheets')
+        .select('id, title, ai_response, html_content, public_topic, public_level, published_at, is_public, public_slug')
+        .eq('public_slug', slug)
+        .maybeSingle();
+      if (cancelled) return;
+      if (!data) {
+        setNotFound(true);
+      } else {
+        setWorksheet(data as PublicWorksheetRow);
+        // Best-effort view counter increment via RPC-less update path.
+        // Public users have SELECT only; skip increment to respect RLS.
+      }
+      setLoading(false);
+    })();
+    return () => { cancelled = true; };
+  }, [slug]);
+
+  if (loading) {
+    return <div className="min-h-screen flex items-center justify-center text-muted-foreground">Loading…</div>;
+  }
+
+  if (notFound || !worksheet) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 p-6 text-center">
+        <h1 className="text-3xl font-bold">Worksheet not found</h1>
+        <p className="text-muted-foreground">This worksheet may have been unpublished by its author.</p>
+        <Link to="/gallery" className="text-primary underline">Back to gallery</Link>
+      </div>
+    );
+  }
+
+  // Unpublished-but-slug-known → soft "removed" notice (better than 404 for SEO equity).
+  if (!worksheet.is_public) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4 p-6 text-center">
+        <PageSeo title="Worksheet no longer public — Edooqoo" description="This worksheet has been unpublished." path={`/gallery/${slug}`} />
+        <h1 className="text-3xl font-bold">This worksheet is no longer public</h1>
+        <p className="text-muted-foreground">The author has removed it from the gallery.</p>
+        <Link to="/gallery" className="text-primary underline">Browse other worksheets</Link>
+      </div>
+    );
+  }
+
+  let parsed: any = null;
+  try { parsed = worksheet.ai_response ? JSON.parse(worksheet.ai_response) : null; } catch (_) { /* ignore */ }
+
+  const learningResourceLd = {
+    '@context': 'https://schema.org',
+    '@type': 'LearningResource',
+    name: worksheet.title,
+    inLanguage: 'en',
+    educationalLevel: worksheet.public_level || undefined,
+    about: worksheet.public_topic || undefined,
+    learningResourceType: 'Worksheet',
+    datePublished: worksheet.published_at || undefined,
+    url: `https://edooqoo.com/gallery/${worksheet.public_slug}`,
+    isAccessibleForFree: true,
+    publisher: { '@type': 'Organization', name: 'Edooqoo' },
+  };
+
+  return (
+    <div className="min-h-screen bg-background">
+      <PageSeo
+        title={`${worksheet.title} — Free ESL Worksheet`}
+        description={`Free ${worksheet.public_level || ''} English worksheet about ${worksheet.public_topic || 'general topics'}. Published on Edooqoo gallery.`.slice(0, 158)}
+        path={`/gallery/${worksheet.public_slug}`}
+        jsonLd={learningResourceLd}
+      />
+      <article className="container mx-auto px-4 py-10 max-w-4xl">
+        <nav className="text-sm text-muted-foreground mb-4">
+          <Link to="/gallery" className="hover:underline">← Gallery</Link>
+        </nav>
+        <header className="mb-6">
+          <h1 className="text-3xl md:text-4xl font-bold text-foreground">{worksheet.title}</h1>
+          <div className="mt-3 flex flex-wrap gap-2 text-sm">
+            {worksheet.public_level && <span className="rounded bg-secondary px-2 py-1">{worksheet.public_level}</span>}
+            {worksheet.public_topic && <span className="rounded bg-muted px-2 py-1">{worksheet.public_topic}</span>}
+          </div>
+        </header>
+
+        <aside aria-label="Summary" className="mb-6 rounded-md border-l-4 border-primary bg-muted/40 p-4 text-sm">
+          <strong>TL;DR:</strong> Read-only preview of a teacher-published worksheet. Sign up free to create, edit and download your own.
+        </aside>
+
+        {parsed?.exercises && Array.isArray(parsed.exercises) ? (
+          <ol className="space-y-6">
+            {parsed.exercises.map((ex: any, i: number) => (
+              <li key={i} className="rounded-lg border bg-card p-5">
+                <h2 className="text-lg font-semibold mb-2">
+                  {i + 1}. {ex.title || ex.type || 'Exercise'}
+                </h2>
+                {ex.instructions && <p className="text-sm text-muted-foreground mb-2">{ex.instructions}</p>}
+                {ex.content && typeof ex.content === 'string' && (
+                  <p className="text-sm whitespace-pre-wrap">{ex.content}</p>
+                )}
+                {Array.isArray(ex.questions) && (
+                  <ul className="mt-2 space-y-1 text-sm list-decimal pl-5">
+                    {ex.questions.map((q: any, qi: number) => (
+                      <li key={qi}>{typeof q === 'string' ? q : (q.text || q.question || JSON.stringify(q))}</li>
+                    ))}
+                  </ul>
+                )}
+              </li>
+            ))}
+          </ol>
+        ) : (
+          <p className="text-muted-foreground">Worksheet content unavailable in preview format.</p>
+        )}
+
+        <div className="mt-10 rounded-lg border bg-primary/5 p-6 text-center">
+          <h2 className="text-xl font-bold mb-2">Build your own worksheet in 30 seconds</h2>
+          <p className="text-sm text-muted-foreground mb-4">Free Edooqoo account — generate fully editable worksheets tailored to your adult 1-on-1 student.</p>
+          <Link to="/auth?mode=signup" className="inline-block rounded-md bg-primary px-5 py-2 text-primary-foreground font-semibold">
+            Sign up free
+          </Link>
+        </div>
+      </article>
+    </div>
+  );
+};
+
+export default PublicGalleryWorksheetPage;
