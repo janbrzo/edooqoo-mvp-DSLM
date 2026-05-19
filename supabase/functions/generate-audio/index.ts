@@ -57,53 +57,83 @@ CRITICAL RULES:
 
 OUTPUT FORMAT: Return ONLY the spoken text (no JSON, no markdown).`;
 
-    // Call OpenAI Chat Completions with audio modality
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+    // STEP A — Generate transcript via stable chat.completions (gpt-4o-mini)
+    // 2-step pipeline replaces deprecated/unavailable gpt-4o-audio-preview.
+    // Transcript returned to client === literal TTS input → guaranteed parity.
+    const scriptResponse = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
         "Authorization": `Bearer ${OPENAI_API_KEY}`,
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gpt-4o-audio-preview",
-        modalities: ["audio", "text"],
-        audio: { voice: randomVoice, format: "mp3" },
+        model: "gpt-4o-mini",
+        temperature: 0.7,
+        max_tokens: 800,
         messages: [
           { role: "system", content: systemPrompt },
-          { 
-            role: "user", 
-            content: `Generate a ${duration}-second audio scenario based on the requirements above.` 
-          }
-        ]
-      })
+          {
+            role: "user",
+            content: `Generate a ${duration}-second audio scenario based on the requirements above. Return ONLY spoken text — no stage directions, no markdown, no JSON.`,
+          },
+        ],
+      }),
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error("❌ [AUDIO] OpenAI API error:", errorText);
-      throw new Error(`OpenAI API error: ${response.status}`);
+    if (!scriptResponse.ok) {
+      const errorText = await scriptResponse.text();
+      console.error("❌ [AUDIO] Script generation failed:", errorText);
+      throw new Error(`Script generation failed (${scriptResponse.status}): ${errorText.substring(0, 300)}`);
     }
 
-    const data = await response.json();
-    console.log("✅ [AUDIO] OpenAI response received");
-    
-    // Extract audio and transcript (check multiple possible locations)
-    const audioBase64 = data.choices[0]?.message?.audio?.data;
-    const transcript = data.choices[0]?.message?.audio?.transcript || 
-                      data.choices[0]?.message?.content || 
-                      "";
-    
-    // DEBUG: Log transcript extraction
-    console.log('🎵 [AUDIO] Transcript extracted:', {
-      hasTranscript: !!transcript,
-      length: transcript.length,
-      preview: transcript.substring(0, 150),
-      source: data.choices[0]?.message?.audio?.transcript ? 'audio.transcript' : 'content'
-    });
-    
-    if (!audioBase64) {
-      throw new Error("No audio data in OpenAI response");
+    const scriptData = await scriptResponse.json();
+    const transcript = (scriptData.choices?.[0]?.message?.content || "").trim();
+    if (!transcript) {
+      throw new Error("transcript_generation_empty");
     }
+    console.log(`✅ [AUDIO] Transcript generated: ${transcript.length} chars`);
+
+    // STEP B — Synthesize speech via /v1/audio/speech with fallback chain
+    async function generateTTS(model: string): Promise<ArrayBuffer> {
+      const r = await fetch("https://api.openai.com/v1/audio/speech", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${OPENAI_API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model,
+          voice: randomVoice,
+          input: transcript,
+          response_format: "mp3",
+        }),
+      });
+      if (!r.ok) {
+        const errBody = await r.text();
+        throw new Error(`TTS ${model} failed (${r.status}): ${errBody.substring(0, 300)}`);
+      }
+      return r.arrayBuffer();
+    }
+
+    let audioBuffer: ArrayBuffer;
+    let ttsModel = "gpt-4o-mini-tts";
+    try {
+      audioBuffer = await generateTTS("gpt-4o-mini-tts");
+    } catch (e) {
+      console.warn(`⚠️ [AUDIO] gpt-4o-mini-tts failed, falling back to tts-1:`, (e as Error).message);
+      ttsModel = "tts-1";
+      audioBuffer = await generateTTS("tts-1");
+    }
+    console.log(`✅ [AUDIO] TTS generated via ${ttsModel}: ${audioBuffer.byteLength} bytes`);
+
+    // Chunked base64 conversion to avoid stack overflow for large payloads
+    const bytes = new Uint8Array(audioBuffer);
+    let binary = "";
+    const CHUNK = 8192;
+    for (let i = 0; i < bytes.length; i += CHUNK) {
+      binary += String.fromCharCode(...bytes.subarray(i, i + CHUNK));
+    }
+    const audioBase64 = btoa(binary);
     
     // ✅ OPT 3 FIXED: Upload to R2 and wait for URL before returning
     const timestamp = Date.now();
@@ -151,7 +181,7 @@ OUTPUT FORMAT: Return ONLY the spoken text (no JSON, no markdown).`;
           ai_generated_audio_url: finalAudioUrl,
           transcript: transcript,
           duration: duration,
-          source: 'openai-tts-generated',
+          source: `openai-2step-${ttsModel}`,
           voice: randomVoice
         }
       }),
@@ -160,6 +190,28 @@ OUTPUT FORMAT: Return ONLY the spoken text (no JSON, no markdown).`;
 
   } catch (error) {
     console.error("❌ [AUDIO] Error:", error);
+    // Fire-and-forget failure notification (do not await — keep 500 fast)
+    try {
+      const supabaseUrl = Deno.env.get("SUPABASE_URL");
+      const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+      if (supabaseUrl && serviceKey) {
+        fetch(`${supabaseUrl}/functions/v1/notify-generation-failure`, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${serviceKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            errorType: "audio",
+            errorMessage: error instanceof Error ? error.message : String(error),
+            model: "openai-2step",
+            timestamp: new Date().toISOString(),
+          }),
+        }).catch((e) => console.error("notify-failure dispatch error:", e));
+      }
+    } catch (notifyErr) {
+      console.error("Failed to dispatch audio failure notification:", notifyErr);
+    }
     return new Response(
       JSON.stringify({ error: error.message }),
       { 
