@@ -88,6 +88,8 @@ const ToolsIndex = lazy(() => import("./pages/tools/ToolsIndex"));
 const CefrLevelTest = lazy(() => import("./pages/tools/CefrLevelTest"));
 const LessonPlanGenerator = lazy(() => import("./pages/tools/LessonPlanGenerator"));
 const VocabCefrChecker = lazy(() => import("./pages/tools/VocabCefrChecker"));
+const PublicGalleryIndex = lazy(() => import("./pages/gallery/PublicGalleryIndex"));
+const PublicGalleryWorksheetPage = lazy(() => import("./pages/gallery/PublicGalleryWorksheetPage"));
 
 // Suspense fallback: empty min-h-screen div to prevent CLS during chunk load.
 const RouteFallback = () => <div className="min-h-screen" aria-hidden="true" />;
@@ -176,6 +178,8 @@ const App = () => (
               <Route path="/tools/cefr-level-test" element={<CefrLevelTest />} />
               <Route path="/tools/lesson-plan-generator" element={<LessonPlanGenerator />} />
               <Route path="/tools/vocab-cefr-checker" element={<VocabCefrChecker />} />
+              <Route path="/gallery" element={<PublicGalleryIndex />} />
+              <Route path="/gallery/:slug" element={<PublicGalleryWorksheetPage />} />
               <Route path="/features/dslm" element={<FeatureDSLM />} />
               <Route path="/features/homework" element={<FeatureHomework />} />
               <Route path="/features/flashcards" element={<FeatureFlashcards />} />
