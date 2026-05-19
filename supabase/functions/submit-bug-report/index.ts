@@ -46,6 +46,7 @@ serve(async (req) => {
     ? resendSandboxRecipient
     : (Deno.env.get("BUG_REPORT_EMAIL") || resendSandboxRecipient);
   const resendKey = Deno.env.get("RESEND_API_KEY");
+  const appBaseUrl = Deno.env.get("APP_BASE_URL") || "https://edooqoo.com";
 
   const sbAdmin = createClient(supabaseUrl, serviceKey);
 
@@ -177,6 +178,16 @@ serve(async (req) => {
             ${attachmentsHtml}
             <h4 style="margin-top:20px;">Recent console errors</h4>
             ${consoleHtml}
+            <div style="margin-top:24px; text-align:center;">
+              <a href="${appBaseUrl}/admin/error-logs?bugId=${inserted.id}"
+                 style="display:inline-block; padding:12px 24px; background:#7c3aed; color:white; border-radius:6px; text-decoration:none; font-weight:600; margin:4px;">
+                🛡️ Open in Admin Error Logs
+              </a>
+              <a href="https://supabase.com/dashboard/project/bvfrkzdlklyvnhlpleck/functions/generateWorksheet/logs"
+                 style="display:inline-block; padding:12px 24px; background:#2563eb; color:white; border-radius:6px; text-decoration:none; font-weight:600; margin:4px;">
+                🔍 Edge Function Logs
+              </a>
+            </div>
           </div>`;
 
         const emailResp = await fetch("https://api.resend.com/emails", {

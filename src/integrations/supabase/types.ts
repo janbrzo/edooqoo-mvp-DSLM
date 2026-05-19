@@ -3160,9 +3160,16 @@ export type Database = {
           html_content: string
           id: string
           ip_address: string | null
+          is_public: boolean
           last_modified_at: string
           media_metadata: Json | null
           prompt: string
+          public_exercise_types: string[] | null
+          public_level: string | null
+          public_slug: string | null
+          public_topic: string | null
+          public_view_count: number
+          published_at: string | null
           referrer_url: string | null
           selected_audio: Json | null
           selected_image: Json | null
@@ -3195,9 +3202,16 @@ export type Database = {
           html_content: string
           id?: string
           ip_address?: string | null
+          is_public?: boolean
           last_modified_at?: string
           media_metadata?: Json | null
           prompt: string
+          public_exercise_types?: string[] | null
+          public_level?: string | null
+          public_slug?: string | null
+          public_topic?: string | null
+          public_view_count?: number
+          published_at?: string | null
           referrer_url?: string | null
           selected_audio?: Json | null
           selected_image?: Json | null
@@ -3230,9 +3244,16 @@ export type Database = {
           html_content?: string
           id?: string
           ip_address?: string | null
+          is_public?: boolean
           last_modified_at?: string
           media_metadata?: Json | null
           prompt?: string
+          public_exercise_types?: string[] | null
+          public_level?: string | null
+          public_slug?: string | null
+          public_topic?: string | null
+          public_view_count?: number
+          published_at?: string | null
           referrer_url?: string | null
           selected_audio?: Json | null
           selected_image?: Json | null
@@ -3397,6 +3418,10 @@ export type Database = {
       }
       generate_homework_share_token: {
         Args: { p_homework_id: string; p_teacher_id: string }
+        Returns: string
+      }
+      generate_public_slug: {
+        Args: { p_id: string; p_title: string }
         Returns: string
       }
       generate_test_share_token: {

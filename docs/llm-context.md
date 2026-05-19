@@ -577,3 +577,34 @@ OnboardingHeroCard for empty Dashboard (P0); skeleton loaders (P1); nav-student-
 - **SANCTITY:** zero changes to worksheet generation prompt, zero new Supabase tables/columns, zero new edge functions, zero AI Gateway calls. Tools are pure frontend → safe to deploy without DB migration approval.
 
 **RAG Keywords:** free tools, link magnets, CEFR level test, English level test 25 questions, ESL lesson plan generator, andragogical stages, vocab CEFR checker, EVP English Vocabulary Profile lemmas, lookupCefr, guessCefr, analyzeVocab, scoreCefr, Quiz JSON-LD, HowTo JSON-LD, SoftwareApplication JSON-LD, ItemList JSON-LD, browser-only tools, no backend, no AI Gateway, navigator.clipboard, Blob download HTML, TL;DR aside AEO, Resources footer column, Sprint 4 Plan v6.9.19, edooqoo backlink strategy.
+
+## v6.9.20 — Public Worksheet Gallery (Sprint 3 of Plan v6.9.20) + Hotfixes
+
+**Problem:** (1) Teachers had no way to share/showcase worksheets publicly, limiting organic reach and social proof. (2) `generate-audio` returned 500 because `gpt-4o-audio-preview` access was revoked for the project's OpenAI key. (3) When `generateWorksheet` AI-REPAIR took >40s the client heartbeat timed out and failure notification emails never reached the operator.
+
+**Edooqoo.com Solution:**
+- **Public Gallery** at `/gallery` (index) and `/gallery/:slug` (read-only worksheet preview). Teachers toggle `is_public` via a toolbar button; published worksheets are RLS-readable by anyone and rendered with `LearningResource` JSON-LD.
+- **Audio 2-step pipeline:** `chat.completions` (gpt-4o-mini) generates transcript → `/v1/audio/speech` (`gpt-4o-mini-tts` with `tts-1` fallback) synthesizes audio. Transcript returned to client is **literally** the TTS input — guaranteed parity with audio. The downstream worksheet generation receives the same `selectedAudio.transcript` string, so exercises remain coherent with what students hear.
+- **Notification keepalive:** `generateWorksheet` now emits `progress` events (`phase: "repairing"`) every 15s during AI-REPAIR and uses `EdgeRuntime.waitUntil` to ensure failure-notification fetches complete even after the response stream closes. `parse_recovered` is fired as an early warning whenever AI fallback recovers malformed JSON.
+- **Admin CTA in alert emails:** `notify-generation-failure` and `submit-bug-report` now embed a `🛡️ Open Admin Error Logs` button linking to `${APP_BASE_URL}/admin/error-logs[?bugId=...]`.
+
+**Technical Mechanics:**
+- DB migration: `worksheets` gains `is_public`, `public_slug` (UNIQUE), `published_at`, `public_view_count`, `public_topic`, `public_level`, `public_exercise_types[]` + 3 filtered indexes + RLS policy `is_public = true`. RPC `generate_public_slug(title, id)` returns `kebab-title-<6hex>`.
+- Edge functions:
+  - `publish-worksheet` — JWT auth, ownership check, validates ≥6 exercises + meaningful title + no PII regex (`email|phone`) in `additionalInformation`; denormalizes topic/level/types from `form_data` + parsed `ai_response`; calls `generate_public_slug` RPC; fires `regenerate-gallery-sitemap` best-effort. Response: `{ slug, public_url }`.
+  - `unpublish-worksheet` — sets `is_public=false`, keeps slug for "no longer public" soft removal page.
+  - `regenerate-gallery-sitemap` — returns `application/xml` sitemap of all public worksheets (limit 50k), `lastmod` from `last_modified_at || published_at`.
+- Frontend:
+  - `src/pages/gallery/PublicGalleryIndex.tsx` — paginated grid (24/page), URL-param filters `?level=` and `?topic=`, `ItemList` JSON-LD.
+  - `src/pages/gallery/PublicGalleryWorksheetPage.tsx` — parses `ai_response` JSON to render exercises read-only, `LearningResource` JSON-LD with `educationalLevel`/`about`/`datePublished`, signup CTA. Shows soft-removed notice when `is_public=false` but slug exists.
+  - `src/components/worksheet/PublishWorksheetButton.tsx` — Dialog modal, copy-to-clipboard public URL, integrated into `WorksheetToolbar`.
+  - Routes added in `src/App.tsx`: `/gallery`, `/gallery/:slug`. Sitemap entry for `/gallery` (daily, 0.8).
+- Hotfix files:
+  - `supabase/functions/generate-audio/index.ts` — 2-step pipeline; chunked base64 (8KB chunks) to avoid stack overflow; fire-and-forget audio failure notification.
+  - `supabase/functions/generateWorksheet/index.ts` — `setInterval` keepalive around `parseWithRecovery` (cleared in `finally`); `EdgeRuntime.waitUntil` wraps every `notifyGenerationFailure` Promise.
+  - `supabase/functions/notify-generation-failure/index.ts` — solutions map gains `parse_recovered` + `audio`; CTA row with Edge Function Logs + Admin Error Logs buttons.
+  - `supabase/functions/submit-bug-report/index.ts` — bug email gains the same dual CTA row with `?bugId=` deep link.
+
+**SANCTITY:** Worksheet generation prompt UNTOUCHED. Audio TTS quality matches previous model (same `alloy|echo|fable|onyx|nova|shimmer` voices). Existing teacher RLS policies on `worksheets` UNTOUCHED — public-read is purely additive.
+
+**RAG Keywords:** public worksheet gallery, /gallery, is_public, public_slug, publish-worksheet, unpublish-worksheet, regenerate-gallery-sitemap, generate_public_slug, LearningResource JSON-LD, ItemList JSON-LD, PublishWorksheetButton, soft-removed slug, gpt-4o-audio-preview 404, gpt-4o-mini-tts, tts-1 fallback, 2-step audio pipeline, transcript determinism, EdgeRuntime.waitUntil, repair keepalive heartbeat, parse_recovered early warning, admin error logs email CTA, bugId deep link, Sprint 3 Plan v6.9.20.
