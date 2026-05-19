@@ -63,6 +63,9 @@ const EslGamesForTeachers = lazy(() => import("./pages/seo/EslGamesForTeachers")
 const TeachEnglishOnlineGuide = lazy(() => import("./pages/seo/TeachEnglishOnlineGuide"));
 const ForEnglishTutors = lazy(() => import("./pages/seo/ForEnglishTutors"));
 const EslClassToolkit = lazy(() => import("./pages/seo/EslClassToolkit"));
+const TopicLevelPage = lazy(() => import("./pages/seo/programmatic/TopicLevelPage"));
+const ExerciseTopicPage = lazy(() => import("./pages/seo/programmatic/ExerciseTopicPage"));
+const PersonaPage = lazy(() => import("./pages/seo/programmatic/PersonaPage"));
 const StudentHubLanding = lazy(() => import("./pages/StudentHubLanding"));
 const StudentHubDashboard = lazy(() => import("./pages/StudentHubDashboard"));
 const StudentHubFlashcards = lazy(() => import("./pages/StudentHubFlashcards"));
@@ -162,6 +165,9 @@ const App = () => (
               <Route path="/blog/teach-english-online-guide" element={<TeachEnglishOnlineGuide />} />
               <Route path="/for-english-tutors" element={<ForEnglishTutors />} />
               <Route path="/resources/esl-class-toolkit" element={<EslClassToolkit />} />
+              <Route path="/esl-worksheets/:topic/:level" element={<TopicLevelPage />} />
+              <Route path="/worksheets/:exerciseType/:topic" element={<ExerciseTopicPage />} />
+              <Route path="/english-for/:persona" element={<PersonaPage />} />
               <Route path="/features/dslm" element={<FeatureDSLM />} />
               <Route path="/features/homework" element={<FeatureHomework />} />
               <Route path="/features/flashcards" element={<FeatureFlashcards />} />
