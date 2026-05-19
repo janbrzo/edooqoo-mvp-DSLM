@@ -535,3 +535,25 @@ OnboardingHeroCard for empty Dashboard (P0); skeleton loaders (P1); nav-student-
 - Pattern source of truth: docs/seo/keyword-strategy.md
 
 **RAG Keywords:** ESL worksheets landing page, English games blog post, teach English online guide, English tutor landing, ESL class toolkit, content SEO, long-tail keyword targeting, FAQPage rich snippet, internal linking SEO, lazy-loaded marketing routes, src/pages/seo/, SeoLandingLayout, Semrush priority queue, KDI 43 esl worksheets.
+
+## v6.9.19 — Programmatic SEO Engine (pSEO)
+
+**Problem:** Static SEO landing pages cap ranking potential. Competitors (islcollective ~36% traffic, eslbrains ~70% from `/lesson_*` paths) win via SCALE of indexable URLs auto-generated from a content database. Edooqoo has the same advantage latent (worksheet engine) but only shipped ~30 indexable URLs.
+
+**Edooqoo.com Solution:** Three dynamic React Router routes that render 1,425 unique pSEO landing pages from one shared layout, each targeting longtail ESL queries. Zero per-page files; all content interpolated from a typed matrix.
+
+**Technical Mechanics:**
+- Matrix: `src/constants/pseoMatrix.ts` — 40 TOPICS × 6 LEVELS × 29 EXERCISE_TYPES × 25 PERSONAS with typed helpers (findTopic, findLevel, findExerciseType, findPersona) and path generators (ALL_TOPIC_LEVEL_PATHS, ALL_EXERCISE_TOPIC_PATHS, ALL_PERSONA_PATHS).
+- Layout: `src/components/seo/ProgrammaticSeoLayout.tsx` — props seo/breadcrumbs/h1/lead/primaryCta/whatsInside/howItWorks/trustNumbers/related/faqs/extraJsonLd. Emits FAQPage + BreadcrumbList JSON-LD plus optional LearningResource. Includes TL;DR aside (AEO snippet bait).
+- Templates (3 dynamic routes, lazy in `src/App.tsx`):
+  - `/esl-worksheets/:topic/:level` → `TopicLevelPage` (240 URLs)
+  - `/worksheets/:exerciseType/:topic` → `ExerciseTopicPage` (1,160 URLs)
+  - `/english-for/:persona` → `PersonaPage` (25 URLs)
+- Unknown slug → `<Navigate>` redirect to the closest hub page (`/esl-worksheets`, `/exercise-types`, `/for-english-tutors`).
+- Internal linking graph: every page emits 10+ related links (other levels of same topic, other topics in same category, exercise-types, personas) — anchor text = exact target keyword.
+- Sitemap: `public/sitemap.xml` enumerates all 1,454 URLs (29 static + 1,425 pSEO). Single file (<10 MB, well under Google's 50 MB / 50k cap). Sitemap split into index format is reserved for Phase 2 (~5,000 URLs).
+- CTAs: `/signup?topic=...&level=...&exerciseType=...&persona=...` query params seed the worksheet form (handled by existing NextStepsPresetBanner pattern).
+- SANCTITY: NO change to worksheet generation prompt. NO new Supabase tables. NO new edge functions in Sprint 1+2. Public Gallery (Sprint 3) and Free Tools (Sprint 4) are separate phases.
+- Crawlability: Vite SPA — Googlebot executes JS and reads Helmet head. Prerendering (react-snap) deferred to Sprint 2 if indexation lags.
+
+**RAG Keywords:** programmatic SEO, pSEO, dynamic landing pages, URL matrix, topic-level-grid, exercise-type-topic, persona pages, English for nurses, English for software engineers, IELTS Writing Task 2, present perfect b1, conditionals worksheet, business email B2, ProgrammaticSeoLayout, pseoMatrix.ts, findTopic, findLevel, findExerciseType, findPersona, ALL_TOPIC_LEVEL_PATHS, BreadcrumbList JSON-LD, LearningResource schema, TL;DR snippet, AEO, LLMO, answer engine optimization, internal linking graph, anchor text exact match, 1454 sitemap entries, react-helmet-async Helmet, react-snap deferred, signup query param preset, sanctity worksheet prompt unchanged, edooqoo competitive moat scale.
