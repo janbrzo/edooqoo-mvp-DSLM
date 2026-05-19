@@ -52,6 +52,10 @@ const GlobalFooter = () => {
               <li><Link to="/resources" className="text-muted-foreground hover:text-primary transition-colors">All Resources</Link></li>
               <li><Link to="/blog" className="text-muted-foreground hover:text-primary transition-colors">Blog</Link></li>
               <li><a href="/cefr-worksheet-generator.html" className="text-muted-foreground hover:text-primary transition-colors">CEFR Guide</a></li>
+              <li><Link to="/tools" className="text-muted-foreground hover:text-primary transition-colors">Free Tools</Link></li>
+              <li><Link to="/tools/cefr-level-test" className="text-muted-foreground hover:text-primary transition-colors">CEFR Level Test</Link></li>
+              <li><Link to="/tools/lesson-plan-generator" className="text-muted-foreground hover:text-primary transition-colors">Lesson Plan Generator</Link></li>
+              <li><Link to="/tools/vocab-cefr-checker" className="text-muted-foreground hover:text-primary transition-colors">Vocab CEFR Checker</Link></li>
             </ul>
           </div>
 
