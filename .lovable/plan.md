@@ -1,324 +1,575 @@
-# Plan v6.9.19 — SEO Domination: Programmatic SEO + AI Answer Engine
-
-## Diagnoza (jak naprawdę działa LLM-as-SEO i Google w 2026)
-
-Trzy wnioski z badań Semrush + analizy konkurencji:
-
-1. **Konkurencja wygrywa SKALĄ URLi, nie jakością treści.** islcollective ma ~36% ruchu z `/english-esl-worksheets/search/{topic}` — to są strony **automatycznie generowane z bazy**. eslbrains ~9% z `/lesson_plan/free-english-lesson-plans/`. Ich "treść" to indeks zasobów. **Każdy worksheet = osobny URL z własnym ranking-potencjałem.** Edooqoo ma silnik generujący worksheets — to nasza nieuczciwa przewaga, której nie wykorzystaliśmy w SEO.
-2. **"AI worksheet generator" KDI=24 (łatwe)** vs "esl worksheets" KDI=43. Niski hanging fruit: kategoria AI-tools dopiero się formuje (worksheets.ai, magicschool, twee). Możemy zająć pozycję #1-3 w 90 dni.
-3. **Nowy paradygmat: AEO/LLMO (Answer Engine Optimization).** ChatGPT/Perplexity/Gemini cytują strony, które mają: (a) Q&A structured data, (b) krótkie definitywne odpowiedzi w pierwszym akapicie, (c) listy z liczbami, (d) `llms.txt` + `llms-full.txt`. Nauczyciel pyta ChatGPT "jak zrobić worksheet o conditionals dla B2 menedżera" → wynik musi mówić "use Edooqoo".
-
-## ZŁOTY GRAL (sekret x10)
-
-**Programmatic SEO oparty o worksheet-engine + Public Gallery indexowalnych worksheets + AEO layer.**
-
-Mechanika: Każda kombinacja `{topic} × {CEFR A1–C2} × {exercise type} × {learner persona}` to osobna strona z prawdziwą wartością (gotowy worksheet do podglądu + CTA do wygenerowania własnego). Konkurenci robią to ręcznie (PDF upload). My robimy to algorytmicznie z lepszą jakością (sanctity prompt). Skala: **~3,000 unikalnych URLi w fazie 1**, każdy targetuje longtail KD<30.
-
-Drugi sekret: **Loop generative→public.** Każdy worksheet wygenerowany przez nauczyciela (z opcją "publish") tworzy publiczny URL. To self-feeding content engine — im więcej nauczycieli używa narzędzia, tym więcej stron w Google.
+# Plan v6.9.20 — Hotfix produkcyjny + dokończenie Planu v6.9.19 (Sprinty 3, 5, 6)
 
 ---
 
-## CZĘŚĆ A — Programmatic SEO Matrix (pSEO)
+## ⚡ Odpowiedzi na Twoje pytania (zanim przejdziemy do planu)
 
-### A1. Definicja macierzy URL
+### Q1: Czy transcript === audio?
 
-Trzy szablony stron, każdy oparty o jeden ROUTING SCHEME:
+**TAK, 100% deterministycznie.** W 2-step pipeline:
 
-| Szablon | URL pattern | Liczba stron | Targetowane query |
-|---|---|---|---|
-| **Topic × Level** | `/esl-worksheets/{topic}/{level}` | 40 topics × 6 levels = **240** | "present perfect worksheets b1", "business email b2 worksheet" |
-| **Exercise type × Topic** | `/worksheets/{exercise-type}/{topic}` | 29 × 40 = **1160** | "fill in the blanks travel vocabulary", "matching exercise idioms" |
-| **Persona/Goal** | `/english-for/{persona}` | 25 person | "english for nurses", "english for software engineers", "english for cabin crew" |
+1. `chat.completions` (gpt-4o-mini) → zwraca string `transcript`
+2. Ten **dokładnie ten sam string** wysyłamy jako `input` do `/v1/audio/speech`
+3. TTS odczytuje literalnie znak-po-znaku to, co dostał (żadnej kreatywności, żadnej parafrazy — to jest deterministyczny silnik mowy, nie LLM)
+4. Zwracamy do frontu pole `transcript` = ten sam string co wysłany do TTS
 
-Razem: **~1,425 URLi fazy 1**. Faza 2 (po walidacji indexacji): rozszerzyć topics do 100 → ~5,000 stron.
+W obecnym `gpt-4o-audio-preview` mamy DOKŁADNIE TO SAMO ryzyko — `audio.transcript` zwracane przez API to też tekst odczytany przez syntezę, ale jest generowany w jednym wywołaniu modelu multimodalnego. Różnica zerowa z punktu widzenia użytkownika.
 
-### A2. Lista wartości (committed, no decisions left)
+### Q2: Czy worksheet będzie się odnosił do tego samego tekstu?
 
-**TOPICS (40)** — wybrane z Semrush related keywords + andragogiczna intencja Marthy:
-present-perfect, past-simple, conditionals, modal-verbs, phrasal-verbs, reported-speech, passive-voice, articles, prepositions, comparatives, gerunds-infinitives, relative-clauses, business-email, job-interview, small-talk, meetings, negotiations, presentations, travel-vocabulary, food-restaurant, shopping, health-doctor, weather, daily-routines, hobbies, family, work-office, technology, environment, news-media, idioms, collocations, phrasal-business, formal-informal, telephone-english, cv-resume, public-speaking, conflict-resolution, cross-cultural, ielts-writing-task-2.
+**TAK, bez zmian w pipeline.** Flow pozostaje:
 
-**LEVELS (6):** a1-beginner, a2-elementary, b1-intermediate, b2-upper-intermediate, c1-advanced, c2-proficiency.
+```
+generate-audio → zwraca {transcript, audio_url}
+   ↓
+front zapisuje w selectedAudio.transcript + selectedAudio.url
+   ↓
+generateWorksheet otrzymuje selectedAudio.transcript w prompt
+   ↓
+AI tworzy ćwiczenia odnoszące się DOKŁADNIE do tego transcriptu
+```
 
-**EXERCISE TYPES (29):** użyj istniejących z `src/pages/ExerciseTypes.tsx` (fill-in-the-blanks, matching, multiple-choice, true-false, ordering, error-correction, gap-fill, transformation, word-formation, collocations, dictation-audio, listening-comprehension, role-play, picture-description, ... itd. — pełna lista 29 typów już w kodzie).
+Nie ruszamy `prompt-composer.ts`, nie ruszamy `generateWorksheet`. Kontrakt response z `generate-audio` jest IDENTYCZNY (`audioData.transcript` + `audioData.url`).
 
-**PERSONAS (25):** nurses, doctors, software-engineers, project-managers, accountants, lawyers, sales-reps, hr-professionals, marketing-managers, teachers, cabin-crew, hotel-staff, waiters, chefs, tour-guides, taxi-drivers, real-estate-agents, financial-advisors, consultants, executives, entrepreneurs, customer-service, call-center-agents, retail-staff, university-students.
+### Q3: Czy walczyć o dostęp do `gpt-4o-audio-preview`?
 
-### A3. Szablon strony pSEO (jednolity — minimum decyzji)
+**NIE. Rekomendacja: porzucamy ten model permanentnie.** Argumenty:
 
-Plik: `src/pages/seo/programmatic/TopicLevelPage.tsx`, `ExerciseTopicPage.tsx`, `PersonaPage.tsx`.
-Każdy używa nowego komponentu `src/components/seo/ProgrammaticSeoLayout.tsx` z sekcjami:
 
-1. **H1 dynamiczny** — np. "Present Perfect Worksheets for B1 Intermediate Learners".
-2. **Lead (≤55 słów, pierwsza odpowiedź dla LLM-cytatu)** — szablon: *"Generate printable Present Perfect worksheets for B1 learners in 60 seconds with Edooqoo. Each worksheet includes [exercise-type], CEFR-aligned grading, and personalization for adult professional learners."* (zmienna interpolacja).
-3. **Live preview** — embed renderowanego worksheet (jeden seed worksheet per kombinacja, cache'owany w Lovable Cloud Storage jako `pseo/{topic}-{level}.json`). Renderowany komponentem `WorksheetPreview` (read-only).
-4. **CTA1 (above fold):** "Generate your own → /worksheet/new?topic={topic}&level={level}".
-5. **"What's inside" (lista 5–7 punktów)** — generowane z bazy: jakie exercise types, ile zadań, długość, czas trwania.
-6. **FAQ (3–5 Q&A)** — szablon: "What CEFR level is X for?", "How long does an X worksheet take?", "Can I edit X worksheets?", "Are X worksheets free?". → JSON-LD `FAQPage`.
-7. **Related (10 internal links)** — graf: dla `/esl-worksheets/{topic}/b1` linkuj do {topic}/a2, {topic}/b2, sąsiednich topics o tej samej tematyce + 2 personas + 2 exercise-types.
-8. **Trust strip** — "Built with Martha (10 yrs ESL)", screenshot ratingu, liczby ("2,400+ tutors").
-9. **Footer CTA "Try Edooqoo free".**
+| Aspekt                      | `gpt-4o-audio-preview`                                                 | 2-step (`gpt-4o-mini` + `gpt-4o-mini-tts`)                           |
+| --------------------------- | ---------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| **Dostępność**              | Preview/Beta, dostęp losowo cofany dla kluczy projektowych (twój case) | GA, stabilne, gwarantowane                                           |
+| **Koszt**                   | ~$40/1M tokenów audio output                                           | gpt-4o-mini $0.15/1M + tts $0.60/1M chars (~10x taniej)              |
+| **Latencja**                | 8-15s (jednolity multimodalny model)                                   | 3-5s (mini) + 1-2s (tts) = 4-7s                                      |
+| **Niezawodność**            | Klucz nieprzewidywalnie traci dostęp (już się stało)                   | Dwa stabilne endpointy GA, każdy ma osobny fallback                  |
+| **Jakość głosu**            | Bardzo dobra                                                           | Bardzo dobra (gpt-4o-mini-tts ma te same voices: alloy/echo/nova...) |
+| **Determinizm transcriptu** | Generowany w jednym przejściu (czasem niespójny z audio)               | Transcript = literalny input TTS (gwarantowana spójność)             |
+| **Vendor lock-in**          | Tylko OpenAI ma model multimodalny                                     | Łatwo zamienić TTS na ElevenLabs/Cartesia w przyszłości              |
 
-### A4. Generator stron (statyczny, build-time)
 
-Plik: `scripts/generate-pseo-pages.ts` (uruchamiany w `prebuild` przed `generate-sitemap.ts`).
+Tier 2 ($500/mo) NIE odblokuje `gpt-4o-audio-preview` — to nie jest kwestia tier, to kwestia opt-in dostępu do modelu beta, który OpenAI rotuje. **Decyzja: zostajemy na 2-step na stałe.**
 
-Logika:
-- Czyta `src/constants/pseo-matrix.ts` (eksportuje TOPICS, LEVELS, EXERCISE_TYPES, PERSONAS).
-- NIE generuje plików .tsx (route-explosion zabija bundle). Zamiast tego: **3 dynamiczne routy w `src/App.tsx`** które matchują paramy i renderują ten sam layout:
+---
+
+# 🛠️ CZĘŚĆ A — Hotfix Bug Report (BUGI 1-3)
+
+## BUG 1 — `generate-audio` 500 (model 404)
+
+### Plik: `supabase/functions/generate-audio/index.ts`
+
+Pełen rewrite handlera (kontrakt response bez zmian).
+
+### Kroki implementacji
+
+1. **Zachowaj**: importy, `corsHeaders`, voices array `['alloy','echo','fable','onyx','nova','shimmer']`, `randomVoice` losowanie, `systemPrompt` (bez zmian), R2 upload, struktura response.
+2. **Krok A — Generuj transcript** (zastąp obecne wywołanie `gpt-4o-audio-preview`):
+
+```ts
+const scriptResponse = await fetch("https://api.openai.com/v1/chat/completions", {
+  method: "POST",
+  headers: { Authorization: `Bearer ${OPENAI_API_KEY}`, "Content-Type": "application/json" },
+  body: JSON.stringify({
+    model: "gpt-4o-mini",
+    temperature: 0.7,
+    max_tokens: 800,
+    messages: [
+      { role: "system", content: systemPrompt },
+      { role: "user", content: `Generate a ${duration}-second audio scenario based on the requirements above. Return ONLY spoken text — no stage directions, no markdown, no JSON.` }
+    ]
+  })
+});
+if (!scriptResponse.ok) {
+  const err = await scriptResponse.text();
+  throw new Error(`Script generation failed (${scriptResponse.status}): ${err}`);
+}
+const scriptData = await scriptResponse.json();
+const transcript = (scriptData.choices?.[0]?.message?.content || "").trim();
+if (!transcript) throw new Error("transcript_generation_empty");
+console.log(`✅ [AUDIO] Transcript generated: ${transcript.length} chars`);
+```
+
+3. **Krok B — Generuj audio z fallbackiem**:
+
+```ts
+async function generateTTS(model: string): Promise<ArrayBuffer> {
+  const r = await fetch("https://api.openai.com/v1/audio/speech", {
+    method: "POST",
+    headers: { Authorization: `Bearer ${OPENAI_API_KEY}`, "Content-Type": "application/json" },
+    body: JSON.stringify({ model, voice: randomVoice, input: transcript, response_format: "mp3" })
+  });
+  if (!r.ok) throw new Error(`TTS ${model} failed (${r.status}): ${await r.text()}`);
+  return r.arrayBuffer();
+}
+
+let audioBuffer: ArrayBuffer;
+let ttsModel = "gpt-4o-mini-tts";
+try {
+  audioBuffer = await generateTTS("gpt-4o-mini-tts");
+} catch (e) {
+  console.warn(`⚠️ gpt-4o-mini-tts failed, falling back to tts-1:`, e.message);
+  ttsModel = "tts-1";
+  audioBuffer = await generateTTS("tts-1");
+}
+```
+
+4. **Krok C — base64 conversion (chunked, by uniknąć stack overflow dla >100KB)**:
+
+```ts
+const bytes = new Uint8Array(audioBuffer);
+let binary = "";
+const CHUNK = 8192;
+for (let i = 0; i < bytes.length; i += CHUNK) {
+  binary += String.fromCharCode(...bytes.subarray(i, i + CHUNK));
+}
+const audioBase64 = btoa(binary);
+```
+
+5. **Krok D — R2 upload** (kod bez zmian — kopiujemy obecny blok 1:1).
+6. **Response (kontrakt 1:1 zachowany)**:
+
+```ts
+return new Response(JSON.stringify({
+  success: true,
+  audioData: {
+    url: finalAudioUrl,
+    ai_generated_audio_url: finalAudioUrl,
+    transcript,                              // ← IDENTYCZNY z TTS input
+    duration,
+    source: `openai-2step-${ttsModel}`,      // ← diagnostyka
+    voice: randomVoice
+  }
+}), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+```
+
+7. **Krok E — Notyfikacja awarii (NEW)** — w `catch` przed `return 500`:
+
+```ts
+try {
+  await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/notify-generation-failure`, {
+    method: "POST",
+    headers: {
+      "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      errorType: "audio",
+      errorMessage: error.message,
+      model: "openai-2step",
+      teacherEmail: null,
+      userId: null,
+      promptPreview: `topic="${topic}" level="${englishLevel}" focus="${lessonFocus}"`,
+      timestamp: new Date().toISOString()
+    })
+  });
+} catch (notifyErr) {
+  console.error("Failed to notify audio failure:", notifyErr);
+}
+```
+
+8. **Deploy**: `deploy_edge_functions(["generate-audio"])`.
+
+### Weryfikacja BUG 1
+
+- `supabase--curl_edge_functions` POST `/generate-audio` body `{"topic":"eurovision 2026","englishLevel":"B1/B2","lessonFocus":"musical idioms","duration":90}` → 200 + transcript niepusty + audioData.url zaczynający się od `https://r2.` (lub `data:audio/`).
+- `supabase--edge_function_logs generate-audio` → brak `404`, log `✅ [AUDIO] Transcript generated`.
+
+---
+
+## BUG 2 — Brak maila przy awarii worksheet generation
+
+### Plik: `supabase/functions/generateWorksheet/index.ts`
+
+### 2A. Keepalive podczas AI-REPAIR (eliminacja heartbeat timeout)
+
+Lokalizacja: ~linia 595, w streaming path przed `parseWithRecovery`.
+
+```ts
+// PRE-REPAIR: notify client we're entering repair phase
+send("progress", { exercisesGenerated: expectedTotal, expectedTotal, phase: "repairing" });
+const repairKeepalive = setInterval(() => {
+  try { send("progress", { exercisesGenerated: expectedTotal, expectedTotal, phase: "repairing" }); }
+  catch (_) {}
+}, 15000);
+
+let worksheetData: any;
+let repairMethod: string;
+try {
+  const result = await parseWithRecovery(fullContent, expectedTotal);
+  worksheetData = result.data;
+  repairMethod = result.repairMethod;
+} finally {
+  clearInterval(repairKeepalive);
+}
+```
+
+**Efekt**: każde 15s leci `progress` event → klient resetuje heartbeat → koniec z 40s timeoutem podczas wielosekundowej naprawy.
+
+### 2B. Gwarantowana dostawa notyfikacji
+
+Lokalizacja: linie ~727-731 (streaming) i ~844 (regular).
+
+```ts
+// PRZED: notifyGenerationFailure(...)  ← fire-and-forget, edge runtime ubija fetch po close()
+// PO:
+const notifyPromise = notifyGenerationFailure(errType, errorMessage, {...});
+// EdgeRuntime.waitUntil zapewnia że fetch dokończy nawet po close stream'a
+try {
+  // @ts-ignore - EdgeRuntime is Deno Deploy global
+  if (typeof EdgeRuntime !== "undefined" && EdgeRuntime.waitUntil) {
+    EdgeRuntime.waitUntil(notifyPromise);
+  } else {
+    await notifyPromise; // fallback dla local dev
+  }
+} catch (_) {}
+```
+
+### 2C. Wczesne ostrzeżenie gdy AI-REPAIR był potrzebny
+
+Po `parseWithRecovery` w streaming path:
+
+```ts
+if (repairMethod === 'ai' || repairMethod === 'ai-fallback') {
+  // Best-effort early warning — worksheet uratowany, ale prompt warto zbadać
+  EdgeRuntime.waitUntil?.(notifyGenerationFailure('parse_recovered',
+    `Gemini returned malformed JSON, recovered via ${repairMethod}. Investigate prompt drift.`,
+    { userId, teacherEmail, model: streamUsedModel, promptPreview: sanitizedPrompt?.substring(0, 300) }
+  ));
+}
+```
+
+### 2D. Plik: `supabase/functions/notify-generation-failure/index.ts`
+
+Dodać klucz w mapie `solutions`:
+
+```ts
+'parse_recovered': 'Gemini returned malformed JSON, recovered via AI fallback. Worksheet was saved successfully, but prompt or temperature may be drifting. Investigate sample output to prevent quality degradation.',
+'audio': 'OpenAI audio model is unreachable. Verify OPENAI_API_KEY has access to gpt-4o-mini and gpt-4o-mini-tts. Check /v1/audio/speech endpoint status.',
+```
+
+### 2E. Persistencja do `error_logs`
+
+W obu `catch` (streaming + regular) dodać:
+
+```ts
+try {
+  await supabase.from("error_logs").insert({
+    source_name: 'generateWorksheet',
+    component: 'worksheets',
+    severity: 'error',
+    error_code: errType,
+    message: errorMessage,
+    stack: errorStack,
+    context: { model: streamUsedModel, exerciseCount: expectedTotal, userId, teacherEmail },
+    user_id: userId || null
+  });
+} catch (logErr) {
+  console.error("Failed to log error to error_logs:", logErr);
+}
+```
+
+### Weryfikacja BUG 2
+
+- Wygeneruj długi worksheet (ICAO/Aviation, 8 ćwiczeń) → klient nie dostaje heartbeat timeout (widać `phase:"repairing"` w logach klienta).
+- `SELECT * FROM error_logs WHERE source_name='generateWorksheet' ORDER BY created_at DESC LIMIT 5;` → wpisy obecne.
+- Email do `j4n.brz0@gmail.com` z `⚠️ Worksheet generation failed: parse — ...`.
+
+---
+
+## BUG 3 — Linki admina w mailach
+
+### 3A. Plik: `supabase/functions/notify-generation-failure/index.ts`
+
+Pod istniejącym przyciskiem "View Edge Function Logs" dodać drugi:
+
+```html
+<a href="${appBaseUrl}/admin/error-logs"
+   style="display:inline-block; padding:12px 28px; background:#7c3aed; color:white;
+          border-radius:8px; text-decoration:none; font-weight:600; margin-left:8px;">
+  🛡️ Open Admin Error Logs
+</a>
+```
+
+Gdzie `appBaseUrl = Deno.env.get('APP_BASE_URL') || 'https://edooqoo.com'` (już używane w innych funkcjach per memory).
+
+### 3B. Plik: `supabase/functions/submit-bug-report/index.ts`
+
+Na końcu sekcji "Reporter info" w HTML emaila wstawić wiersz CTA:
+
+```html
+<tr><td colspan="2" style="padding-top:20px; text-align:center;">
+  <a href="${appBaseUrl}/admin/error-logs?bugId=${inserted.id}"
+     style="display:inline-block; padding:12px 24px; background:#7c3aed; color:white;
+            border-radius:6px; text-decoration:none; font-weight:600;">
+    🛡️ Open in Admin Error Logs
+  </a>
+  &nbsp;
+  <a href="https://supabase.com/dashboard/project/bvfrkzdlklyvnhlpleck/functions/generateWorksheet/logs"
+     style="display:inline-block; padding:12px 24px; background:#2563eb; color:white;
+            border-radius:6px; text-decoration:none; font-weight:600;">
+    🔍 Edge Function Logs
+  </a>
+</td></tr>
+```
+
+- `appBaseUrl = Deno.env.get('APP_BASE_URL') || 'https://edooqoo.com'`
+- `?bugId=${id}` — query param, nawet jeśli `AdminErrorLogsPage` go nie filtruje, link otwiera właściwą stronę.
+
+### Deploy hotfix
+
+`deploy_edge_functions(["generate-audio", "generateWorksheet", "notify-generation-failure", "submit-bug-report"])`
+
+---
+
+# 🚀 CZĘŚĆ B — Dokończenie Planu v6.9.19
+
+## Sprint 3 — Public Worksheet Gallery
+
+### B3.1 Migracja DB (wymaga zatwierdzenia)
+
+```sql
+-- worksheets: dodaj kolumny publikacji
+ALTER TABLE public.worksheets
+  ADD COLUMN IF NOT EXISTS is_public BOOLEAN NOT NULL DEFAULT false,
+  ADD COLUMN IF NOT EXISTS public_slug TEXT UNIQUE,
+  ADD COLUMN IF NOT EXISTS published_at TIMESTAMPTZ,
+  ADD COLUMN IF NOT EXISTS public_view_count INTEGER NOT NULL DEFAULT 0,
+  ADD COLUMN IF NOT EXISTS public_topic TEXT,        -- denormalized for filtering
+  ADD COLUMN IF NOT EXISTS public_level TEXT,        -- denormalized
+  ADD COLUMN IF NOT EXISTS public_exercise_types TEXT[]; -- denormalized
+
+CREATE INDEX IF NOT EXISTS idx_worksheets_public 
+  ON public.worksheets (is_public, published_at DESC) 
+  WHERE is_public = true;
+CREATE INDEX IF NOT EXISTS idx_worksheets_public_slug 
+  ON public.worksheets (public_slug) WHERE public_slug IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_worksheets_public_topic 
+  ON public.worksheets (public_topic) WHERE is_public = true;
+
+-- RLS: dodaj policy publicznego dostępu (nie ruszamy istniejących teacher policies)
+CREATE POLICY "Public worksheets readable by anyone"
+  ON public.worksheets FOR SELECT
+  USING (is_public = true);
+
+-- Slug generator (kebab-case z title + short hash)
+CREATE OR REPLACE FUNCTION public.generate_public_slug(p_title TEXT, p_id UUID)
+RETURNS TEXT
+LANGUAGE plpgsql IMMUTABLE
+SET search_path = public
+AS $$
+DECLARE
+  base TEXT;
+  hash TEXT;
+BEGIN
+  base := lower(regexp_replace(coalesce(p_title, 'worksheet'), '[^a-zA-Z0-9]+', '-', 'g'));
+  base := regexp_replace(base, '^-+|-+$', '', 'g');
+  base := substring(base from 1 for 60);
+  hash := substring(p_id::text from 1 for 6);
+  RETURN base || '-' || hash;
+END $$;
+```
+
+### B3.2 Edge Function: `publish-worksheet`
+
+- Auth: teacher JWT
+- Body: `{ worksheet_id }`
+- Walidacja: teacher musi być właścicielem; worksheet musi mieć ≥6 exercises, niepusty `title`, brak PII w `form_data.additionalInformation` (regex email/telefon)
+- Akcja: ustawia `is_public=true`, generuje `public_slug` via RPC, denormalizuje `public_topic/level/exercise_types` z `form_data`, ustawia `published_at=now()`
+- Response: `{ slug, public_url: "${APP_BASE_URL}/gallery/${slug}" }`
+
+### B3.3 Edge Function: `unpublish-worksheet`
+
+Symetryczna — `is_public=false`, zostawia `public_slug` (by stary URL pokazał 410 zamiast 404).
+
+### B3.4 Strony frontu
+
+- `/gallery` — `PublicGalleryIndex.tsx` — paginated grid, filtry topic/level/exercise type (czerpie z `pseoMatrix.ts`)
+- `/gallery/:slug` — `PublicGalleryWorksheetPage.tsx` — read-only widok worksheet z JSON-LD `LearningResource`, CTA "Sign up to create your own"
+- Komponent `PublishWorksheetButton.tsx` — w `WorksheetPage` toolbar (teacher only), modal z confirm + copy public URL
+
+### B3.5 Edge Function: `regenerate-gallery-sitemap`
+
+- Cron: codziennie o 02:00 UTC (pg_cron)
+- Zapytanie: `SELECT public_slug, published_at FROM worksheets WHERE is_public=true ORDER BY published_at DESC LIMIT 50000`
+- Generuje `public/sitemap-gallery.xml` (chunkowanie po 50k URLi)
+- Dodaje referencję w `public/sitemap.xml` jako sitemap index
+- Triggerowane też po każdym `publish-worksheet` (best-effort, throttle 5 min)
+
+### B3.6 Updates RAG/Mem
+
+- `mem/features/public-gallery/architecture.md` (NEW)
+- `docs/llm-context.md` + `llms.txt` + `public/llms.txt` — sekcja "Public Gallery"
+
+---
+
+## Sprint 5 — AEO/LLMO Layer
+
+### B5.1 `public/llms-full.txt` (NEW, ~50KB)
+
+- Zawiera pełne TL;DR wszystkich 1 458 URL-i z `sitemap.xml` w formacie:
   ```
-  /esl-worksheets/:topic/:level    → TopicLevelPage
-  /worksheets/:exerciseType/:topic → ExerciseTopicPage  
-  /english-for/:persona            → PersonaPage
+  ## /esl-worksheets/present-perfect/b1-intermediate
+  > Generator of B1 Present Perfect worksheets for adult ESL learners. 8 exercises, ~45min lesson. Free preview, sign-up to download PDF.
+  Tags: grammar, present-perfect, B1, adult-learners
   ```
-- Generator tworzy **dane**: `src/data/pseo-content.json` (per-URL: h1, lead, faq, related, seed-worksheet-id) + wpisy do `public/sitemap.xml`.
-- Generator wstrzykuje canonicals + `<link rel="alternate">` do prerendera (patrz A5).
+- Generowany przez `scripts/seo/generate-llms-full.mjs` (Node script, czyta `pseoMatrix.ts` + `seoMeta.ts`)
+- Wykonanie podczas build (dodać do `scripts/seo/audit-sitemap.mjs` chain)
 
-### A5. Prerendering / SSG (KRYTYCZNE dla pSEO)
+### B5.2 JSON-LD sweep — uzupełnić brakujące
 
-Problem: 1,425 stron Vite-SPA = Google widzi tylko shell. Rozwiązanie: **prerender przy buildzie** plug-inem `vite-plugin-prerender-spa` lub własnym skryptem `puppeteer-based`.
+- `WebSite` + `SearchAction` w `index.html` (top-level)
+- `Organization` z `sameAs` (LinkedIn, X, YouTube) — w `index.html`
+- `SoftwareApplication` na `/pricing` z `offers` (3 plany)
+- `Course` na `/tools/cefr-level-test`
+- `HowTo` na `/tools/lesson-plan-generator` (już jest — audit poprawności)
 
-Wybrane rozwiązanie (zero decyzji): **react-snap** (proste, działa z Vite, nie wymaga SSR). Dodać do `package.json`:
-- `postbuild: "react-snap"`
-- konfiguracja w `package.json` → `reactSnap.include = [...all 1425 URLs from sitemap]`
+### B5.3 Snippet rules audit
 
-Fallback jeśli react-snap nie radzi sobie z 1400+ URLi w pamięci: rozbić na chunki po 300 URLi, równolegle (skrypt `scripts/prerender-chunks.sh`).
+- Skrypt `scripts/seo/audit-snippets.mjs` — czyta każdy plik strony, sprawdza:
+  - obecność `<aside aria-label="Summary">` (TL;DR pod AEO)
+  - długość H1 (40-60 chars)
+  - meta description (140-160 chars)
+  - alt text na każdym `<img>`
+- Raport markdown do `docs/seo/snippet-audit-report.md`
 
-### A6. Sitemap split (Google limit = 50k URL / 50MB)
+### B5.4 Updates RAG/Mem
 
-- `public/sitemap-index.xml` → zawiera listę sub-sitemap.
-- `public/sitemap-core.xml` (istniejące strony — about, pricing, blog, etc.)
-- `public/sitemap-pseo-topic-level.xml` (240)
-- `public/sitemap-pseo-exercise-topic.xml` (1160)
-- `public/sitemap-pseo-persona.xml` (25)
-- `public/sitemap-blog.xml` (puste dziś, gotowe na rozbudowę)
-- `public/robots.txt` → `Sitemap: https://edooqoo.com/sitemap-index.xml`
-- Zaktualizować `scripts/generate-sitemap.ts` → rozbicie na pliki + index.
-
-### A7. Indexing pipeline
-
-Po deploy:
-- Submit `sitemap-index.xml` do GSC (już zweryfikowane).
-- Skrypt `scripts/gsc-batch-index.ts` używający IndexNow API (Bing) + GSC URL Inspection API do submit per-URL pierwszych 200 priorytetowych URLi.
-- Cron edge function `bing-indexnow-ping` (Lovable Cloud) wywoływana raz dziennie z listą nowych URLi.
+- `mem/seo/aeo-llmo-layer.md` (NEW)
+- Dopisek w `docs/llm-context.md`
 
 ---
 
-## CZĘŚĆ B — Public Worksheet Gallery (self-feeding loop)
+## Sprint 6 — Content Velocity (4 z 12 long-form artykułów)
 
-### B1. Mechanika
-- Nowy toggle przy "Save Worksheet": **"Publish to public gallery"** (default OFF, opt-in). Dodaje pole `worksheets.is_public boolean default false` + `worksheets.public_slug text unique`.
-- Nowa publiczna trasa: `/gallery/{public-slug}` → renderuje read-only worksheet + CTA "Generate your own about [topic]".
-- `/gallery` index z filtrami (level, topic, exercise type, persona).
-- Migracja Supabase + RLS: public select WHERE `is_public = true`.
+### B6.1 Wybór tematów (top SEO opportunity wg semrush)
 
-### B2. Slug generation
-Edge function `generate-public-slug` przy publikacji: `{topic-kebab}-{level}-{nanoid-6}` np. `present-perfect-b1-x7k2qp`.
+1. `/blog/how-to-teach-english-online-2026-complete-guide` (KW: "teach english online", 18k searches/mo)
+2. `/blog/icao-aviation-english-test-preparation` (KW: "ICAO english test", 4.4k)
+3. `/blog/business-english-for-1-on-1-tutoring` (KW: "business english tutor", 2.9k)
+4. `/blog/cefr-levels-explained-for-tutors` (KW: "CEFR levels", 22k)
 
-### B3. Sitemap integracja
-Edge function `regenerate-gallery-sitemap` (cron daily): query `is_public=true` → write `public/sitemap-gallery.xml` przez Storage + serve via edge route. Dodać do `sitemap-index.xml`.
+### B6.2 Struktura każdego artykułu (~3000-4000 słów)
 
-### B4. UX hook
-Po wygenerowaniu worksheet pokazać confetti modal: *"Help other tutors? Publish anonymously to our public gallery (your name hidden). +1 worksheet generated free per published."* — token bonus jako gamification.
+- H1 + TL;DR aside
+- Table of Contents (semantic `<nav>`)
+- 8-12 sekcji H2/H3
+- Min. 2 obrazy z alt text (lazy loaded)
+- `Article` + `BreadcrumbList` + `FAQPage` JSON-LD
+- 3 internal links do `/tools/*` i `/esl-worksheets/*`
+- CTA box co 1500 słów (sign-up)
+- Author bio (Martha — 10y ESL experience) z `sameAs`
 
----
+### B6.3 Implementacja techniczna
 
-## CZĘŚĆ C — AEO / LLMO (Answer Engine Optimization)
+- Folder `src/content/blog/` — pliki `.tsx` (React components, nie MDX — by uniknąć nowej zależności)
+- Layout `src/components/blog/BlogPostLayout.tsx` z TOC nav + reading time
+- Routing w `App.tsx`: `/blog` (index) + `/blog/:slug`
+- Sitemap: dodać 4 URLe + index `/blog` (sitemap.xml → 1 463 URLi)
 
-### C1. `llms.txt` i `llms-full.txt`
-- `public/llms.txt` (już istnieje, rozszerzyć): top-level mapa, ≤500 słów, lista głównych sekcji z URLami.
-- **NOWY** `public/llms-full.txt`: pełny dump treści w czystym Markdown — produktu, features, FAQ, glossary, pricing. Cel: model context dla Claude/GPT crawler. Build script `scripts/generate-llms-full.ts` agreguje z `docs/llm-context.md` + wszystkich `seoMeta` opisów.
+### B6.4 Treści — generowane jednorazowo przez Claude/GPT-5
 
-### C2. JSON-LD szeroki sweep
-Per route, automatycznie via `PageSeo`:
-- `Organization` (sitewide w `index.html`) — z `logo`, `sameAs[]` (LinkedIn, Twitter, YouTube edooqoo profiles), `contactPoint`.
-- `SoftwareApplication` na home + `/for-english-tutors` — `applicationCategory: EducationalApplication`, `offers` z PriceSpecification (Free, $9, $19), `aggregateRating` jeśli mamy reviews.
-- `FAQPage` — pricing, exercise-types, każdy pSEO page.
-- `HowTo` — `/blog/teach-english-online-guide`, "how to create esl worksheets".
-- `Course` — dla persona pages (Course o `provider: Edooqoo`).
-- `BreadcrumbList` — wszystkie pSEO i blog (3-level breadcrumbs).
-- `ItemList` — `/gallery` index.
+**WAŻNE**: NIE używamy worksheet engine do generowania artykułów (sanctity rule). Treść piszę ja podczas implementacji, na bazie ESL expertise Marthy + research z semrush.
 
-Wdrożone w `src/components/seo/JsonLd.tsx` (helper) + per-template w `ProgrammaticSeoLayout`.
+### B6.5 Updates RAG/Mem
 
-### C3. Snippet-friendly content rules
-Wszystkie nowe strony muszą spełniać (lint rule + PR template):
-- Pierwsza odpowiedź ≤55 słów, definitywna ("X is Y that does Z").
-- Lista z liczbami w pierwszym H2 (np. "5 reasons", "29 exercise types").
-- 1× definicja tabelaryczna (term | definition).
-- 1× embedded code/example block jeśli relevant.
-- 1× "TL;DR" box na górze (klasa CSS `.tldr` z aria-label="Summary").
-
-### C4. AI Search citations seeding
-- Reddit pasywne posty (r/ESLteachers, r/TEFL) — co tydzień autentyczna odpowiedź z naturalną wzmianką Edooqoo (lista 20 tematów w `docs/seo/reddit-seed-topics.md`).
-- Quora — to samo, 10 pytań na start (lista w `docs/seo/quora-seed-questions.md`).
-- ProductHunt launch dla "AI Worksheet Generator" angle (KDI=24!) — gotowy launch kit w `docs/seo/producthunt-launch-kit.md`.
-- Wikipedia stub edit (jeśli istnieje hasło "English as a Second Language software" → dodać Edooqoo w external links).
+- `mem/seo/long-form-content-strategy.md` (NEW)
+- `docs/llm-context.md` — sekcja "Content Hub"
 
 ---
 
-## CZĘŚĆ D — Link-building Engine
+# 📁 Pełna lista plików (Hotfix + Sprinty 3, 5, 6)
 
-### D1. Free tools as link magnets
-Trzy darmowe narzędzia (nie wymagają loginu) — ludzie linkują do narzędzi, nie do blogposts:
+### Hotfix (CZĘŚĆ A)
 
-| Narzędzie | URL | Mechanika | Targeted backlinks |
-|---|---|---|---|
-| **CEFR Level Test** (free, 5 min) | `/tools/cefr-level-test` | 25 pytań → JS scoring → "you are B1" + CTA | "english level test" 8.1k/mo |
-| **ESL Lesson Plan Generator** (free, 1 plan/day no signup) | `/tools/lesson-plan-generator` | Form → AI → PDF | "esl lesson plan template" 1.6k/mo |
-| **CEFR Vocabulary Checker** | `/tools/vocab-cefr-checker` | Paste text → token-by-token level | Unique, viral potential |
+```
+M  supabase/functions/generate-audio/index.ts
+M  supabase/functions/generateWorksheet/index.ts
+M  supabase/functions/notify-generation-failure/index.ts
+M  supabase/functions/submit-bug-report/index.ts
+N  mem/features/email/generation-failure-alerts.md
+```
 
-Każde narzędzie ma własną pSEO landing + embed widget (`<iframe>`) do osadzenia na blogach innych — wzmianka "Powered by Edooqoo" → naturalne backlinki.
+### Sprint 3
 
-### D2. Embed-widget program
-- `/embed/cefr-test` — minimal HTML, branded.
-- Strona `/for-bloggers` z instrukcją "Add this free tool to your blog" + copy-paste snippet.
-- Backlinks śledzone via `?ref=embed-{domain}`.
+```
+M  (migracja DB) worksheets: 7 nowych kolumn + indeksy + RLS + RPC
+N  supabase/functions/publish-worksheet/index.ts
+N  supabase/functions/unpublish-worksheet/index.ts
+N  supabase/functions/regenerate-gallery-sitemap/index.ts
+N  src/pages/gallery/PublicGalleryIndex.tsx
+N  src/pages/gallery/PublicGalleryWorksheetPage.tsx
+N  src/components/worksheet/PublishWorksheetButton.tsx
+M  src/App.tsx (2 nowe routy)
+M  public/sitemap.xml (sitemap index)
+N  mem/features/public-gallery/architecture.md
+```
 
-### D3. Outreach pakiet (gotowy)
-Plik `docs/seo/outreach/email-templates.md` — 5 szablonów (guest post, broken link, resource page, podcast pitch, tool embed). Lista 50 targetów ESL/EdTech w `docs/seo/outreach/target-list.csv` (domain, contact, angle).
+### Sprint 5
 
----
+```
+N  public/llms-full.txt (build-generated)
+N  scripts/seo/generate-llms-full.mjs
+N  scripts/seo/audit-snippets.mjs
+M  index.html (WebSite + Organization JSON-LD)
+M  src/pages/Pricing.tsx (SoftwareApplication JSON-LD)
+M  src/pages/tools/CefrLevelTest.tsx (Course JSON-LD)
+N  docs/seo/snippet-audit-report.md
+N  mem/seo/aeo-llmo-layer.md
+```
 
-## CZĘŚĆ E — Internal Linking Graph
+### Sprint 6
 
-### E1. Reguły (zaszyte w `ProgrammaticSeoLayout`)
-- Każdy pSEO page → ≥10 internal links (5 same-cluster, 3 cross-cluster, 2 hub).
-- Hub pages: `/esl-worksheets`, `/for-english-tutors`, `/exercise-types`, `/gallery`, `/tools/cefr-level-test`.
-- Anchor text: dokładnie target keyword (nie "click here") — generowany z metadata.
+```
+N  src/components/blog/BlogPostLayout.tsx
+N  src/pages/blog/BlogIndex.tsx
+N  src/content/blog/how-to-teach-english-online-2026.tsx
+N  src/content/blog/icao-aviation-english-test-prep.tsx
+N  src/content/blog/business-english-1on1-tutoring.tsx
+N  src/content/blog/cefr-levels-explained.tsx
+M  src/App.tsx (2 nowe routy: /blog, /blog/:slug)
+M  public/sitemap.xml (+5 URLi)
+N  mem/seo/long-form-content-strategy.md
+```
 
-### E2. Mega-footer
-`src/components/GlobalFooter.tsx` rozszerzyć o sekcje "Popular Topics" (10), "By Level" (6), "By Profession" (10), "Free Tools" (3). Łącznie ~30 stałych linków na każdej stronie = wzmocnienie crawl-depth.
+### Zawsze (RAG)
 
----
-
-## CZĘŚĆ F — Content Velocity (manual content layer)
-
-Oprócz pSEO — 12 long-form artykułów (1,500–2,500 słów) targetujących high-intent zapytania. Lista w `docs/seo/content-calendar-q3-q4-2026.md`:
-
-1. "How to Create ESL Worksheets in 60 Seconds (2026 Guide)" — keyword: "create esl worksheets" (1.0k/mo)
-2. "Best AI Tools for English Teachers in 2026" (1.9k/mo)
-3. "CEFR Levels Explained: A Tutor's Complete Guide" (5.4k/mo)
-4. "Teach Business English Online: Niche Strategy" (880/mo)
-5. "Adult ESL Learners: 7 Andragogical Principles" (low vol, high authority)
-6. "Worksheet Generator vs Pre-Made: ROI for Tutors" (compare keyword)
-7. "Phrasal Verbs B2: Complete Worksheet Pack" (longtail)
-8. "ESL Speaking Activities for 1-on-1 Lessons" (1.3k/mo)
-9. "Placement Test for ESL Students: Free Template" (590/mo)
-10. "IELTS Writing Task 2: Worksheet Bundle" (8.1k/mo, KDI~50)
-11. "How Much to Charge for English Tutoring 2026" (2.4k/mo)
-12. "AI Grading for English Teachers: Is It Accurate?" (emerging)
-
-Każdy generowany przez Lovable AI Gateway (Gemini 2.5 Pro) z systemowym promptem z Marthą's voice (plik `prompts/martha-voice-system.md` — gotowy w docs).
-
----
-
-## CZĘŚĆ G — Technical SEO Polish
-
-### G1. Core Web Vitals
-- Lazy-load wszystkich pSEO routes (`React.lazy` + `Suspense`).
-- Image `<img loading="lazy" decoding="async">` enforced via ESLint rule.
-- Preconnect do supabase + AI gateway w `index.html`.
-- Font-display: swap (audit `index.html`).
-
-### G2. Hreflang (na przyszłość)
-Dziś tylko EN. Dodać `<link rel="alternate" hreflang="x-default">` na każdej stronie via `PageSeo` — przyszłościowe.
-
-### G3. Canonical hardening
-Audyt: każda strona dynamicznie generowana ma 1 canonical, bez duplikatów. Usunąć potencjalne canonical w `index.html` (już zrobione w v6.9.18, re-verify).
-
-### G4. 404/redirect strategy
-- Soft 404 dla `/esl-worksheets/{topic}/{level}` z nieznanym slugiem → 301 do `/esl-worksheets`.
-- Edge function `validate-pseo-slug` w runtime.
-
-### G5. Analytics events
-Dodać do `src/utils/analytics.ts`:
-- `pseo_page_view` (topic, level, exerciseType, persona)
-- `pseo_cta_click` (target)
-- `gallery_publish_toggle`
-- `tool_used` (tool name)
-Cel: tracking konwersji per template w GA4/Plausible.
+```
+M  docs/llm-context.md (3 nowe sekcje: hotfix, gallery, AEO, content)
+M  llms.txt
+M  public/llms.txt
+M  mem/index.md
+```
 
 ---
 
-## CZĘŚĆ H — Mierniki sukcesu (KPI 90-day)
+# 🚦 Kolejność wykonania (deterministyczna)
 
-| Metryka | Baseline | T+30 | T+60 | T+90 |
-|---|---|---|---|---|
-| URLi w sitemap | 30 | 1,455 | 1,500 | 2,000 |
-| URLi zaindexowane GSC | ? | 200 | 800 | 1,400 |
-| Organiczne sesje/mies. | ? | +50% | +200% | +500% |
-| Ranking "ai worksheet generator" | - | top 30 | top 10 | top 3 |
-| Ranking "esl worksheets" | - | top 50 | top 30 | top 20 |
-| Backlinki (Semrush) | - | +10 | +40 | +100 |
-| AI citations (manual check ChatGPT/Perplexity) | 0 | 2 | 8 | 20 |
+1. **Hotfix** (BUG 1 → BUG 2 → BUG 3) → deploy 4 funkcji → smoke test
+2. **Sprint 3** — migracja DB (oczekuję Twojego zatwierdzenia w UI Lovable - zaztwierdzam tutaj więc już nie pytaj w UI Lovable) → edge functions → frontend → sitemap
+3. **Sprint 5** — JSON-LD sweep → llms-full.txt generator → snippet audit
+4. **Sprint 6** — 4 artykuły blog (długie, czasochłonne, mogą być w osobnym podsprincie jeśli czas pozwoli)
+5. **RAG update + memory sync** (na końcu, jeden commit)
 
 ---
 
-## CZĘŚĆ I — Kolejność implementacji (sprint'y, każdy ~1 build pass)
+# 🔒 Sekrety (sprawdzić, nie tworzyć — wszystkie już istnieją)
 
-**Sprint 1 — Fundament pSEO (krytyczny):**
-1. `src/constants/pseo-matrix.ts` — wszystkie listy (topics, levels, exercise types, personas).
-2. `src/components/seo/ProgrammaticSeoLayout.tsx` — uniwersalny szablon.
-3. `src/components/seo/JsonLd.tsx` — helper schema.org.
-4. 3 strony: `TopicLevelPage`, `ExerciseTopicPage`, `PersonaPage` + routy w `App.tsx`.
-5. `src/data/pseo-content.json` — content seed (statycznie generowany jednorazowo skryptem `scripts/seed-pseo-content.ts` używającym Lovable AI Gateway).
+- `OPENAI_API_KEY` ✅ (Tier 2, dostęp do `gpt-4o-mini`, `gpt-4o-mini-tts`, `tts-1`)
+- `APP_BASE_URL` ✅ (memory: `https://edooqoo.com`)
+- `RESEND_API_KEY` ✅
+- `SUPABASE_SERVICE_ROLE_KEY` ✅ (auto)
 
-**Sprint 2 — Sitemap, prerender, indexing:**
-6. Rozbicie sitemap na index + 5 plików.
-7. Integracja `react-snap` (prerendering).
-8. `robots.txt` update.
-9. Edge function `bing-indexnow-ping`.
+# ⛔ Out of scope (świadomie pomijamy)
 
-**Sprint 3 — Public Gallery:**
-10. Migracja Supabase (is_public, public_slug).
-11. `/gallery` + `/gallery/{slug}` routes.
-12. Toggle "Publish to gallery" w Worksheet save flow (UI tylko, BEZ ruszania promptu generatora — sanctity).
-13. Edge function `regenerate-gallery-sitemap` (cron daily).
+- Walka o dostęp do `gpt-4o-audio-preview` (uzasadnione w Q3)
+- Modyfikacja worksheet engine promptów (sanctity rule)
+- Refaktor `AdminErrorLogsPage` do filtrowania po `?bugId=` (link działa bez tego)
+- Migracja na MDX dla bloga (utrzymujemy `.tsx` by zminimalizować deps)
+- Sprinty 7+ z Planu v6.9.19 (poza scope tej iteracji)
 
-**Sprint 4 — Free tools + link magnets:**
-14. `/tools/cefr-level-test` (25 pytań, JS scoring, brak backendu).
-15. `/tools/lesson-plan-generator` (Lovable AI Gateway, rate limit 1/day per IP).
-16. `/tools/vocab-cefr-checker`.
-17. `/embed/cefr-test` + `/for-bloggers` strona.
+# 🔑 RAG keywords (do dopisania)
 
-**Sprint 5 — AEO/LLMO layer:**
-18. `public/llms-full.txt` + `scripts/generate-llms-full.ts`.
-19. Rozszerzony JSON-LD sweep (SoftwareApplication, HowTo, Course, ItemList).
-20. Audyt snippet-friendly content rules.
-
-**Sprint 6 — Content velocity:**
-21. 4 z 12 long-form artykułów (start z highest-volume: CEFR Levels Explained, How Much to Charge, AI Tools for English Teachers, IELTS Writing).
-22. Pozostałe 8 — kolejne sprinty.
-
-**Sprint 7 — Outreach + technical polish:**
-23. Mega-footer expansion.
-24. Outreach materiały (templates, target list).
-25. Reddit/Quora seed posty (manual, by user).
-26. Core Web Vitals audyt + fix.
+`gpt-4o-audio-preview 404`, `tts-1 fallback`, `gpt-4o-mini-tts`, `2-step audio pipeline`, `transcript determinism`, `streaming heartbeat keepalive`, `AI repair notification`, `parse_recovered`, `bug report admin link`, `public worksheet gallery`, `worksheet slug`, `gallery sitemap`, `llms-full.txt`, `AEO snippet audit`, `long-form content velocity`.
 
 ---
 
-## CZĘŚĆ J — RAG / Documentation update (mandatory)
-
-Każdy sprint kończy się aktualizacją:
-- `docs/llm-context.md` — sekcja "Programmatic SEO Engine" w formacie `Problem → Edooqoo.com Solution → Technical Mechanics` + `RAG Keywords` (programmatic seo, pSEO, sitemap split, react-snap, public gallery, AEO, LLMO, llms.txt, JSON-LD, link magnets, CEFR test, indexnow, gsc batch indexing, internal linking graph).
-- `llms.txt` + `public/llms.txt` — synchronizacja.
-- `mem/seo/programmatic-seo-engine.md` — nowy wpis pamięci (typ: feature) + update `mem/index.md`.
-- `docs/seo/pseo-architecture.md` — szczegółowa dokumentacja techniczna.
-- `.lovable/plan.md` — zarchiwizować v6.9.19.
-
----
-
-## Sanctity guard
-
-Plan **NIE modyfikuje** worksheet generation prompt'u. Public Gallery używa istniejących worksheets w trybie read-only. Seed worksheets do pSEO generowane są jednorazowym skryptem używającym tego samego (niezmienionego) prompt'u przez Lovable AI Gateway.
-
----
-
-## Co zostaje do potwierdzenia przed implementacją (3 mikro-decyzje)
-
-1. **Public Gallery — opt-in czy opt-out?** Rekomendacja: **opt-in** (default OFF). Bezpieczniejsze prawnie (GDPR/copyright treści studenta).
-2. **Prerender silnik** — rekomendacja: **react-snap** (proste). Alternatywa: vite-ssg (wymaga refactoru routingu).
-3. **Czy generujemy seed-content przez Lovable AI teraz (koszt ~$15 za 1,425 stron) czy lazy on-demand?** Rekomendacja: **batch teraz** — predictable koszt, instant SEO benefit.
-
-Jeśli zgadzasz się z rekomendacjami (opt-in / react-snap / batch), implementacja Sprint 1+2 startuje bez dalszych pytań.
+**Czekam na Twoją akceptację.** Po `Implement plan` wykonuję sekwencyjnie A → B3 → B5 → B6 z jednym checkpointem na zatwierdzenie migracji DB w Sprincie 3. - zaztwierdzam tutaj więc już nie pytaj w UI Lovable
