@@ -84,6 +84,10 @@ const FeaturePlacementTest = lazy(() => import("./pages/features/FeaturePlacemen
 const FeatureStudentHub = lazy(() => import("./pages/features/FeatureStudentHub"));
 const DemoEntry = lazy(() => import("./pages/DemoEntry"));
 const ExitDemo = lazy(() => import("./pages/ExitDemo"));
+const ToolsIndex = lazy(() => import("./pages/tools/ToolsIndex"));
+const CefrLevelTest = lazy(() => import("./pages/tools/CefrLevelTest"));
+const LessonPlanGenerator = lazy(() => import("./pages/tools/LessonPlanGenerator"));
+const VocabCefrChecker = lazy(() => import("./pages/tools/VocabCefrChecker"));
 
 // Suspense fallback: empty min-h-screen div to prevent CLS during chunk load.
 const RouteFallback = () => <div className="min-h-screen" aria-hidden="true" />;
@@ -168,6 +172,10 @@ const App = () => (
               <Route path="/esl-worksheets/:topic/:level" element={<TopicLevelPage />} />
               <Route path="/worksheets/:exerciseType/:topic" element={<ExerciseTopicPage />} />
               <Route path="/english-for/:persona" element={<PersonaPage />} />
+              <Route path="/tools" element={<ToolsIndex />} />
+              <Route path="/tools/cefr-level-test" element={<CefrLevelTest />} />
+              <Route path="/tools/lesson-plan-generator" element={<LessonPlanGenerator />} />
+              <Route path="/tools/vocab-cefr-checker" element={<VocabCefrChecker />} />
               <Route path="/features/dslm" element={<FeatureDSLM />} />
               <Route path="/features/homework" element={<FeatureHomework />} />
               <Route path="/features/flashcards" element={<FeatureFlashcards />} />

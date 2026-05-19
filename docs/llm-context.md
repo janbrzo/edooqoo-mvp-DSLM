@@ -557,3 +557,23 @@ OnboardingHeroCard for empty Dashboard (P0); skeleton loaders (P1); nav-student-
 - Crawlability: Vite SPA — Googlebot executes JS and reads Helmet head. Prerendering (react-snap) deferred to Sprint 2 if indexation lags.
 
 **RAG Keywords:** programmatic SEO, pSEO, dynamic landing pages, URL matrix, topic-level-grid, exercise-type-topic, persona pages, English for nurses, English for software engineers, IELTS Writing Task 2, present perfect b1, conditionals worksheet, business email B2, ProgrammaticSeoLayout, pseoMatrix.ts, findTopic, findLevel, findExerciseType, findPersona, ALL_TOPIC_LEVEL_PATHS, BreadcrumbList JSON-LD, LearningResource schema, TL;DR snippet, AEO, LLMO, answer engine optimization, internal linking graph, anchor text exact match, 1454 sitemap entries, react-helmet-async Helmet, react-snap deferred, signup query param preset, sanctity worksheet prompt unchanged, edooqoo competitive moat scale.
+
+## v6.9.20 — Free Tools (Sprint 4 of Plan v6.9.19): browser-only link magnets
+
+**Problem:** Static SEO landing pages do not earn organic backlinks. Bloggers, teacher forums, and AI answer engines link to *utilities* (try it now, free, no login), not to explainer pages. Edooqoo needed indexable, embeddable tools that demonstrate ESL/CEFR competency and funnel users into the signup flow.
+
+**Edooqoo.com Solution:** Three zero-backend tools mounted under `/tools/*` plus a `/tools` hub. Every tool runs entirely in the browser (no Supabase writes, no AI Gateway calls, no rate limiting required), so prerender + AEO crawlers see the full UI and the result logic. Each tool ends with a CTA into `/signup`.
+
+**Technical Mechanics:**
+- Routes (lazy in `src/App.tsx`): `/tools` → `ToolsIndex`, `/tools/cefr-level-test` → `CefrLevelTest`, `/tools/lesson-plan-generator` → `LessonPlanGenerator`, `/tools/vocab-cefr-checker` → `VocabCefrChecker`.
+- Files: `src/pages/tools/ToolsIndex.tsx`, `src/pages/tools/CefrLevelTest.tsx`, `src/pages/tools/LessonPlanGenerator.tsx`, `src/pages/tools/VocabCefrChecker.tsx`, `src/data/cefrLevelTestQuestions.ts`, `src/data/cefrWordlist.ts`.
+- CEFR Level Test: 25 multiple-choice items distributed 4/4/5/5/4/3 across A1–C2 (`CEFR_TEST_QUESTIONS`). `scoreCefr(answers)` thresholds: pct≥0.92→C2, ≥0.80→C1, ≥0.66→B2, ≥0.50→B1, ≥0.32→A2, else A1. Result CTA → `/signup?level=<lower>`. JSON-LD: `Quiz` + `FAQPage`.
+- Lesson Plan Generator: form (topic, level, duration ∈ {30,45,60,90}, goal, persona) → `buildStages(form)` produces 6 andragogical stages with minute split scaled to duration (warm 8%, lead-in 12%, presentation 18%, controlled practice 28%, freer production 22%, wrap-up = remainder). Output supports Copy text (`navigator.clipboard`) and Download HTML (`Blob` + anchor). JSON-LD: `HowTo` + `FAQPage`. No network.
+- Vocab CEFR Checker: tokenizes via `/[a-z']+/g`; lookup uses a Map built from `src/data/cefrWordlist.ts` (~480 EVP lemmas across A1–C1; lower levels never overwritten by higher). Unknown words → `guessCefr` heuristic (advanced suffixes `tion|ity|ous|ive|ate|ize|ise|ence|ance|able|ible|ical|graphy|ology|cracy` + length≥9 ⇒ C1; otherwise length buckets ≤4 A1, ≤6 A2, ≤8 B1, ≤10 B2, else C1). `analyzeVocab(text)` returns `{ totalTokens, uniqueWords, byLevel, estimatedLevel, tokens }`. `estimatedLevel` = highest CEFR reached by ≥10% of tokens. JSON-LD: `SoftwareApplication` (Offer price=0) + `FAQPage`.
+- Hub `/tools`: emits `ItemList` JSON-LD enumerating the three tools.
+- Sitemap: 4 new entries appended to `public/sitemap.xml` (`/tools`, `/tools/cefr-level-test`, `/tools/lesson-plan-generator`, `/tools/vocab-cefr-checker`, priorities 0.8/0.9/0.9/0.9, monthly changefreq).
+- Footer: 4 new links added to `Resources` column in `src/components/GlobalFooter.tsx` (Free Tools hub + each tool).
+- SEO copy follows AEO snippet rules: TL;DR `<aside aria-label="Summary">` block at the top of every tool, FAQ ≥4 items rendered as `<details>` + mirrored in `FAQPage` JSON-LD via `buildFaqPageLd`.
+- **SANCTITY:** zero changes to worksheet generation prompt, zero new Supabase tables/columns, zero new edge functions, zero AI Gateway calls. Tools are pure frontend → safe to deploy without DB migration approval.
+
+**RAG Keywords:** free tools, link magnets, CEFR level test, English level test 25 questions, ESL lesson plan generator, andragogical stages, vocab CEFR checker, EVP English Vocabulary Profile lemmas, lookupCefr, guessCefr, analyzeVocab, scoreCefr, Quiz JSON-LD, HowTo JSON-LD, SoftwareApplication JSON-LD, ItemList JSON-LD, browser-only tools, no backend, no AI Gateway, navigator.clipboard, Blob download HTML, TL;DR aside AEO, Resources footer column, Sprint 4 Plan v6.9.19, edooqoo backlink strategy.
