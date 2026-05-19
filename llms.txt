@@ -219,3 +219,13 @@ Goals → generate-curriculum-phases (macro phases, dslm_curriculum_phases)
 
 
 - v6.9.18 (2026-05-18): 6 SEO landing pages added (/esl-worksheets, /blog/english-games-for-learners, /blog/esl-games-for-teachers, /blog/teach-english-online-guide, /for-english-tutors, /resources/esl-class-toolkit) targeting priority keywords from Semrush analysis; SeoLandingLayout shared shell; sitemap + footer links updated.
+
+## v6.9.19 — Programmatic SEO Engine (pSEO)
+Problem: Static pages cap SEO ceiling. Competitors win via URL scale.
+Solution: 1,425 dynamic routes from 3 templates + typed matrix.
+Routes: /esl-worksheets/:topic/:level (240) | /worksheets/:exerciseType/:topic (1160) | /english-for/:persona (25).
+Files: src/constants/pseoMatrix.ts, src/components/seo/ProgrammaticSeoLayout.tsx, src/pages/seo/programmatic/{TopicLevelPage,ExerciseTopicPage,PersonaPage}.tsx.
+JSON-LD: BreadcrumbList + FAQPage + LearningResource per page.
+Sitemap: public/sitemap.xml = 1,454 URLs (29 static + 1,425 pSEO).
+Sanctity: NO worksheet prompt change. NO new tables. NO new edge functions.
+RAG: programmatic SEO, pSEO, dynamic landing pages, ProgrammaticSeoLayout, pseoMatrix, AEO, LLMO, BreadcrumbList, LearningResource, signup query preset, edooqoo SEO moat.
