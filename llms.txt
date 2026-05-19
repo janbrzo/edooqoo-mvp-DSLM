@@ -229,3 +229,17 @@ JSON-LD: BreadcrumbList + FAQPage + LearningResource per page.
 Sitemap: public/sitemap.xml = 1,454 URLs (29 static + 1,425 pSEO).
 Sanctity: NO worksheet prompt change. NO new tables. NO new edge functions.
 RAG: programmatic SEO, pSEO, dynamic landing pages, ProgrammaticSeoLayout, pseoMatrix, AEO, LLMO, BreadcrumbList, LearningResource, signup query preset, edooqoo SEO moat.
+
+## v6.9.20 — Free Tools (link magnets, Sprint 4 of Plan v6.9.19)
+Problem: SEO landing pages alone do not earn backlinks; embeddable utilities do.
+Edooqoo Solution: 3 zero-backend browser tools + /tools hub, each indexable and shareable. No login, no Supabase writes, no AI Gateway calls — fully client-side so prerender + AEO crawlers see the full UI and the result logic.
+Technical Mechanics:
+- Routes (all lazy): /tools (ToolsIndex), /tools/cefr-level-test (CefrLevelTest), /tools/lesson-plan-generator (LessonPlanGenerator), /tools/vocab-cefr-checker (VocabCefrChecker).
+- Files: src/pages/tools/{ToolsIndex,CefrLevelTest,LessonPlanGenerator,VocabCefrChecker}.tsx; src/data/cefrLevelTestQuestions.ts (25 Qs + scoreCefr); src/data/cefrWordlist.ts (~480 EVP lemmas A1–C1 + heuristic fallback + analyzeVocab).
+- JSON-LD per tool via PageSeo: ItemList (hub), Quiz (CEFR test), HowTo (lesson plan), SoftwareApplication (vocab checker), FAQPage on every tool.
+- CEFR test scoring thresholds (25 Qs, 4/4/5/5/4/3 distribution): pct≥0.92→C2, 0.80→C1, 0.66→B2, 0.50→B1, 0.32→A2, else A1.
+- Lesson Plan Generator builds 6 andragogical stages (warm-up, lead-in, presentation, controlled practice, freer production, wrap-up) with minute split scaled to duration; offers Copy text + Download HTML (Blob) — no network.
+- Vocab Checker tokenizes /[a-z']+/g, looks up lowercase lemma in Map, falls back to length/suffix heuristic; estimated overall level = highest CEFR reached by ≥10% of tokens.
+- Sitemap: 4 new URLs in public/sitemap.xml. Footer: 4 new links in Resources column. CTAs route to /signup (free plan).
+Sanctity: NO worksheet prompt change. NO Supabase tables. NO edge functions. NO AI Gateway calls. Pure frontend.
+RAG: free tools, CEFR level test, ESL lesson plan generator, vocab CEFR checker, link magnets, embeddable widgets, EVP wordlist, andragogical stages, Quiz JSON-LD, HowTo JSON-LD, SoftwareApplication JSON-LD, ItemList JSON-LD, browser-only tools, Sprint 4 Plan v6.9.19.
