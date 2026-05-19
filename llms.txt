@@ -243,3 +243,14 @@ Technical Mechanics:
 - Sitemap: 4 new URLs in public/sitemap.xml. Footer: 4 new links in Resources column. CTAs route to /signup (free plan).
 Sanctity: NO worksheet prompt change. NO Supabase tables. NO edge functions. NO AI Gateway calls. Pure frontend.
 RAG: free tools, CEFR level test, ESL lesson plan generator, vocab CEFR checker, link magnets, embeddable widgets, EVP wordlist, andragogical stages, Quiz JSON-LD, HowTo JSON-LD, SoftwareApplication JSON-LD, ItemList JSON-LD, browser-only tools, Sprint 4 Plan v6.9.19.
+
+## v6.9.20 Sprint 3 + Hotfix
+- /gallery + /gallery/:slug — public worksheet gallery. RLS: worksheets.is_public=true readable by anyone.
+- Edge fns: publish-worksheet (validates ≥6 ex, no PII, generates slug), unpublish-worksheet (soft removal), regenerate-gallery-sitemap.
+- DB: worksheets gains is_public, public_slug UNIQUE, published_at, public_view_count, public_topic, public_level, public_exercise_types[]. RPC generate_public_slug.
+- PublishWorksheetButton in WorksheetToolbar (teachers only).
+- HOTFIX: generate-audio rewritten as 2-step (gpt-4o-mini transcript → gpt-4o-mini-tts speech, tts-1 fallback). Transcript === TTS input → identical to audio.
+- HOTFIX: generateWorksheet emits repair-phase progress every 15s during AI-REPAIR, waitUntil for failure notify fetches. Adds parse_recovered early warning.
+- HOTFIX: notify-generation-failure + submit-bug-report emails include /admin/error-logs CTA button.
+Sanctity: worksheet prompt UNTOUCHED. Existing teacher RLS UNTOUCHED.
+RAG: public gallery, is_public, public_slug, LearningResource JSON-LD, 2-step audio TTS, gpt-4o-mini-tts, EdgeRuntime.waitUntil, repair keepalive, parse_recovered, admin error logs email link, Sprint 3 Plan v6.9.20.
