@@ -398,6 +398,7 @@ export default function GeneratingModal({
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
