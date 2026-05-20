@@ -1,575 +1,434 @@
-# Plan v6.9.20 — Hotfix produkcyjny + dokończenie Planu v6.9.19 (Sprinty 3, 5, 6)
+# Plan v6.9.21 — Naprawa Post-Sprint 3 + Audyty wieloprovider + Linki + Maile + UI + LinkedIn
+
+Plan napisany od zera, łączy wszystkie 7 problemów. Zachowuje to co już działa po v6.9.20 (audio 2-step, keepalive, CTA do `/admin/error-logs`, Public Gallery infra). Korekty względem wcześniejszych draftów: (a) wszystkie linki `.html` — nie tylko stopka, ale Blog.tsx + Resources.tsx + Footer; (b) audyt modeli pokrywa **wszystkich** providerów (OpenAI, Google Gemini, Anthropic, ElevenLabs, Lovable AI Gateway), nie tylko OpenAI; (c) LinkedIn outreach w stylu „build-in-public" zamiast „kup gotowy DSLM".
 
 ---
 
-## ⚡ Odpowiedzi na Twoje pytania (zanim przejdziemy do planu)
+## SPRINT G — Gallery Rendering Completeness (Problem 1A + 1B)
 
-### Q1: Czy transcript === audio?
+### G.1 Diagnoza
+Obecny `src/pages/gallery/PublicGalleryWorksheetPage.tsx` renderuje tylko: `ex.title`, `ex.instructions`, `ex.content` jako string oraz `ex.questions[]` jako prosta lista. W naszej taksonomii mamy 29 typów ćwiczeń (`src/lib/exerciseTaxonomy.ts`) z różnymi shape'ami payloadu (`items[]`, `pairs[]`, `options[]`, `categories[]`, `transcript`, `imageUrl`, `prompts[]`, `sentences[]`, `words[]`, `dialogue[]`, `gaps[]`, etc.). Stąd „tylko sam tekst" — pozostałe pola są ignorowane.
 
-**TAK, 100% deterministycznie.** W 2-step pipeline:
+### G.2 Rozwiązanie: dedykowany read-only renderer
 
-1. `chat.completions` (gpt-4o-mini) → zwraca string `transcript`
-2. Ten **dokładnie ten sam string** wysyłamy jako `input` do `/v1/audio/speech`
-3. TTS odczytuje literalnie znak-po-znaku to, co dostał (żadnej kreatywności, żadnej parafrazy — to jest deterministyczny silnik mowy, nie LLM)
-4. Zwracamy do frontu pole `transcript` = ten sam string co wysłany do TTS
+Nowy komponent `src/components/gallery/GalleryExerciseRenderer.tsx`:
 
-W obecnym `gpt-4o-audio-preview` mamy DOKŁADNIE TO SAMO ryzyko — `audio.transcript` zwracane przez API to też tekst odczytany przez syntezę, ale jest generowany w jednym wywołaniu modelu multimodalnego. Różnica zerowa z punktu widzenia użytkownika.
+- Wejście: `exercise: any, index: number`.
+- Wewnętrzny switch po `normalizeExerciseType(exercise.type)` (re-eksport helpera z `ExerciseSection.tsx` lub minimalny lokalny — usuwa sufiksy `-picture`/`-audio`).
+- Każdy case renderuje **wyłącznie wizualnie** (zero state'u, zero `<input>`, zero API). Mapa:
+  - `reading`/`gap-text` → `<p whitespace-pre-wrap>` + lista `comprehension_questions[]` numerowana
+  - `fill-in-blanks`/`fill-in-blanks-audio` → `sentences[]` z `___` (placeholder bez inputu) + lista `word_bank[]` jako badge'y
+  - `multiple-choice`/`multiple-choice-picture`/`multiple-choice-audio` → pytania + `options[]` jako lista A/B/C/D (bez radio)
+  - `true-false`/`true-false-picture`/`true-false-audio` → `statements[]` z badge'em „True/False" zamiast inputu
+  - `matching` → tabela 2-kolumnowa `left | right` z `pairs[]`
+  - `matching-halves` → tabela 2-kolumnowa `first | second`
+  - `dialogue` → `speakers[]` jako bullet list `**Speaker:** line`
+  - `answer-questions`/`answer-questions-picture`/`answer-questions-audio`/`discussion` → ol z `questions[]`
+  - `error-correction` → tabela `incorrect | correction` (jeśli jest answer key — pokaż jako szary)
+  - `odd-one-out` → grupa słów rzędem, brak akcji
+  - `word-order` → linia ze słowami w boxach (shuffled)
+  - `negative-prefixes`/`complete-word`/`synonyms`/`antonyms`/`paraphrasing` → tabela 2-kolumnowa input/answer
+  - `categorize` → `categories[]` jako grid kolumn, `items[]` jako badge'y nieprzypisane
+  - `describe-picture`/`answer-questions-picture` → `<img>` z `imageUrl` (lub `image_url`) + prompty
+  - `listening-comprehension` (i `-audio` warianty) → `<audio controls>` z `audio_url` jeśli jest, plus transcript jako szary blok zwijany + pytania
+  - default fallback → JSON.stringify w `<pre>` z ostrzeżeniem „Preview not supported"
 
-### Q2: Czy worksheet będzie się odnosił do tego samego tekstu?
+### G.3 TL;DR/edu banner (Problem 1B — wytłumaczenie formy)
 
-**TAK, bez zmian w pipeline.** Flow pozostaje:
-
+Strona galerii to **preview SEO-friendly**, nie interaktywny worksheet — pokazuje treść by Google/Bing/LLM-crawler mógł zaindeksować pełny content, a człowiek-nauczyciel dostaje smak treści i CTA do rejestracji. Dlatego forma „read-only tekst + struktura" jest świadoma. Dodajemy na górze (`PublicGalleryWorksheetPage.tsx`, nad `<article>`) jasny info-banner:
+```tsx
+<aside className="container mx-auto max-w-4xl px-4 pt-6">
+  <div className="rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+    <strong>Preview mode.</strong> This is a static read-only preview of a worksheet a teacher published. Interactive answers, AI grading, audio playback and downloads are available only in the full editor — <Link to="/auth?mode=signup" className="underline font-semibold">sign up free</Link> to generate or open this worksheet interactively.
+  </div>
+</aside>
 ```
-generate-audio → zwraca {transcript, audio_url}
-   ↓
-front zapisuje w selectedAudio.transcript + selectedAudio.url
-   ↓
-generateWorksheet otrzymuje selectedAudio.transcript w prompt
-   ↓
-AI tworzy ćwiczenia odnoszące się DOKŁADNIE do tego transcriptu
-```
+Plus drobne polerowanie wizualne: każdy `<li>` ćwiczenia dostaje `border-l-4 border-l-primary/40 pl-4`, badge'e typu ćwiczenia w prawym górnym rogu karty.
 
-Nie ruszamy `prompt-composer.ts`, nie ruszamy `generateWorksheet`. Kontrakt response z `generate-audio` jest IDENTYCZNY (`audioData.transcript` + `audioData.url`).
-
-### Q3: Czy walczyć o dostęp do `gpt-4o-audio-preview`?
-
-**NIE. Rekomendacja: porzucamy ten model permanentnie.** Argumenty:
-
-
-| Aspekt                      | `gpt-4o-audio-preview`                                                 | 2-step (`gpt-4o-mini` + `gpt-4o-mini-tts`)                           |
-| --------------------------- | ---------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| **Dostępność**              | Preview/Beta, dostęp losowo cofany dla kluczy projektowych (twój case) | GA, stabilne, gwarantowane                                           |
-| **Koszt**                   | ~$40/1M tokenów audio output                                           | gpt-4o-mini $0.15/1M + tts $0.60/1M chars (~10x taniej)              |
-| **Latencja**                | 8-15s (jednolity multimodalny model)                                   | 3-5s (mini) + 1-2s (tts) = 4-7s                                      |
-| **Niezawodność**            | Klucz nieprzewidywalnie traci dostęp (już się stało)                   | Dwa stabilne endpointy GA, każdy ma osobny fallback                  |
-| **Jakość głosu**            | Bardzo dobra                                                           | Bardzo dobra (gpt-4o-mini-tts ma te same voices: alloy/echo/nova...) |
-| **Determinizm transcriptu** | Generowany w jednym przejściu (czasem niespójny z audio)               | Transcript = literalny input TTS (gwarantowana spójność)             |
-| **Vendor lock-in**          | Tylko OpenAI ma model multimodalny                                     | Łatwo zamienić TTS na ElevenLabs/Cartesia w przyszłości              |
-
-
-Tier 2 ($500/mo) NIE odblokuje `gpt-4o-audio-preview` — to nie jest kwestia tier, to kwestia opt-in dostępu do modelu beta, który OpenAI rotuje. **Decyzja: zostajemy na 2-step na stałe.**
+### G.4 Plik do edycji
+- **Edycja** `src/pages/gallery/PublicGalleryWorksheetPage.tsx`: zamienia w pętli `parsed.exercises.map(...)` aktualne renderowanie na `<GalleryExerciseRenderer exercise={ex} index={i} />`.
+- **Nowy plik** `src/components/gallery/GalleryExerciseRenderer.tsx`.
+- Bez zmian w DB, bez zmian w `publish-worksheet`/`unpublish-worksheet`. Bez zmian w edytorze nauczyciela.
 
 ---
 
-# 🛠️ CZĘŚĆ A — Hotfix Bug Report (BUGI 1-3)
+## SPRINT H — CTA Copy Fix (Problem 1C)
 
-## BUG 1 — `generate-audio` 500 (model 404)
+W `PublicGalleryWorksheetPage.tsx` blok końcowy `Build your own worksheet in 30 seconds`:
+- Zmieniamy tytuł: **„From idea to ready-to-teach worksheet in under 1 minute"**.
+- Sub-copy: **„Edooqoo's DSLM 1-Minute Prep turns your student's goals into a tailored worksheet — fully editable, with audio, images and AI-grading built in. Free to start, no credit card."**
+- Button label: **„Try 1-Minute Prep free"** → `/auth?mode=signup`.
+- Identyczna podmiana w `src/pages/gallery/PublicGalleryIndex.tsx` jeśli ma analogiczny CTA (do potwierdzenia w implementacji — jeśli ma „30 seconds", podmienić).
 
-### Plik: `supabase/functions/generate-audio/index.ts`
+Nie zmieniamy `featurePromptCopy.ts` ani nigdzie indziej w aplikacji w tej turze — tylko Galeria.
 
-Pełen rewrite handlera (kontrakt response bez zmian).
+---
 
-### Kroki implementacji
+## SPRINT I — SEO Cloaking decyzja (Problem 1D — „pokazać Google, schować człowiekowi")
 
-1. **Zachowaj**: importy, `corsHeaders`, voices array `['alloy','echo','fable','onyx','nova','shimmer']`, `randomVoice` losowanie, `systemPrompt` (bez zmian), R2 upload, struktura response.
-2. **Krok A — Generuj transcript** (zastąp obecne wywołanie `gpt-4o-audio-preview`):
+### Stanowisko (do akceptacji)
+**Odradzam pełny cloaking** (different content for Googlebot vs human). Google klasyfikuje to jako manipulację indeksu, kara to deindexacja całej domeny — ryzyko nieproporcjonalne do korzyści. Nasza domena ma 1k+ landing pages programatycznych, wszystkie mogą zostać dotknięte. Nie warto.
 
+### Co możemy zrobić bezpiecznie zamiast cloakingu
+**Wariant „Open Index, Gated Detail"** (akceptowalny SEO i UX):
+1. Lista wszystkich worksheetów teachers (publish=true) — w galerii widoczna jak teraz.
+2. Drugi typ: **„Catalog page"** dla niepublishedowanych — generowane automatycznie na `/catalog/{slug}` z:
+   - Tytułem, levelem, topikiem, lista exercise types, ~30-word summary (extract z transcript/title).
+   - **Bez pełnej treści ćwiczeń** — tylko meta + zachęta.
+   - JSON-LD `LearningResource` + canonical do `/catalog/{slug}`.
+   - W footerze CTA: „This worksheet was created by a teacher. Sign up to generate your own version with the same parameters."
+   - Klikalne dla człowieka, indexable dla Google. Bez cloakingu, bez ryzyka.
+3. Wymaga: nowej kolumny `worksheets.catalog_eligible BOOLEAN DEFAULT true` (teacher może opt-out w settings), nowej edge function `generate-catalog-summary` (jednorazowo per worksheet) i nowego route'u. **Decyzja: NIE wdrażamy w tym sprincie** — wymaga osobnej dyskusji (PII, opt-out flow, polityka prywatności). Dodajemy do `.lovable/plan.md` BACKLOG jako „Worksheet Catalog SEO Layer — Plan v6.10".
+
+### Co robimy teraz (bez Sprint I implementacji)
+Tylko dokumentujemy w `docs/llm-context.md` decyzję i ryzyko cloakingu, by przyszły agent nie wpadł na pomysł realizacji.
+
+---
+
+## SPRINT J — Naprawa wszystkich linków `.html` (Problem 2)
+
+### J.1 Skala
+Skan repo: ~330 wystąpień `.html` w `src/`. Główne źródła:
+- `src/pages/Blog.tsx` — 36 wpisów, wszystkie `/blog/{slug}.html`. Realne route'y istnieją tylko dla 3 (`english-games-for-learners`, `esl-games-for-teachers`, `teach-english-online-guide`). **33 linki → 404.**
+- `src/pages/Resources.tsx` — ~40 linków, część do `/blog/*.html` (duplikat z Blog), część do `/{slug}.html` top-level (generatory, CEFR-poziomy, comparisons).
+- `src/components/GlobalFooter.tsx` — 16 linków do `/{slug}.html` (CEFR Guide, Present Simple, Past Simple, modal verbs, edooqoo-vs-*).
+- Łącznie unikalnych broken: ~80+ URL-i.
+- `public/sitemap.xml` — zawiera część z nich → Google indeksuje 404 → tracimy crawl budget.
+
+### J.2 Strategia: 3 kubełki
+
+**Kubełek 1 — MAPOWANIE do istniejących programatic SEO routes** (działa od razu, bez nowego contentu):
+Tworzymy `src/data/legacyLinkMap.ts`:
 ```ts
-const scriptResponse = await fetch("https://api.openai.com/v1/chat/completions", {
-  method: "POST",
-  headers: { Authorization: `Bearer ${OPENAI_API_KEY}`, "Content-Type": "application/json" },
-  body: JSON.stringify({
-    model: "gpt-4o-mini",
-    temperature: 0.7,
-    max_tokens: 800,
-    messages: [
-      { role: "system", content: systemPrompt },
-      { role: "user", content: `Generate a ${duration}-second audio scenario based on the requirements above. Return ONLY spoken text — no stage directions, no markdown, no JSON.` }
-    ]
-  })
-});
-if (!scriptResponse.ok) {
-  const err = await scriptResponse.text();
-  throw new Error(`Script generation failed (${scriptResponse.status}): ${err}`);
-}
-const scriptData = await scriptResponse.json();
-const transcript = (scriptData.choices?.[0]?.message?.content || "").trim();
-if (!transcript) throw new Error("transcript_generation_empty");
-console.log(`✅ [AUDIO] Transcript generated: ${transcript.length} chars`);
+export const LEGACY_LINK_MAP: Record<string, string> = {
+  // Resources → existing programmatic SEO
+  "/cefr-worksheet-generator.html": "/esl-worksheets",
+  "/grammar-worksheet-generator.html": "/esl-worksheets/grammar",
+  "/vocabulary-exercise-generator.html": "/esl-worksheets/vocabulary",
+  "/reading-comprehension-worksheet-maker.html": "/esl-worksheets/reading",
+  "/fill-in-the-blanks-worksheet-generator.html": "/esl-worksheets/fill-in-blanks",
+  "/multiple-choice-quiz-generator-english.html": "/esl-worksheets/multiple-choice",
+  "/listening-comprehension-exercises-esl.html": "/esl-worksheets/listening",
+  "/a1-beginner-english-worksheets.html": "/esl-worksheets/grammar/a1-beginner",
+  "/a2-elementary-english-worksheets.html": "/esl-worksheets/grammar/a2-elementary",
+  "/b1-intermediate-english-worksheets.html": "/esl-worksheets/grammar/b1-intermediate",
+  "/b2-upper-intermediate-english-worksheets.html": "/esl-worksheets/grammar/b2-upper-intermediate",
+  "/c1-advanced-english-worksheets.html": "/esl-worksheets/grammar/c1-advanced",
+  "/c2-proficiency-english-worksheets.html": "/esl-worksheets/grammar/c2-proficiency",
+  "/present-simple-worksheets.html": "/esl-worksheets/present-simple/b1-intermediate",
+  "/past-simple-worksheets.html": "/esl-worksheets/past-simple/b1-intermediate",
+  "/modal-verbs-worksheets-esl.html": "/esl-worksheets/modal-verbs/b1-intermediate",
+  "/business-english-worksheet-generator.html": "/esl-worksheets/business-english/b2-upper-intermediate",
+  "/exam-preparation-worksheets-cambridge-ielts.html": "/esl-worksheets",
+  "/ai-worksheet-generator-for-english-teachers.html": "/",
+  "/ai-lesson-planning-for-english-teachers.html": "/resources",
+  "/online-english-teaching-tools.html": "/blog/teach-english-online-guide",
+  "/esl-student-progress-tracking-tool.html": "/features/dslm",
+  "/esl-homework-grading-tool.html": "/features/homework",
+  "/ai-grading-tool-for-english-homework.html": "/features/homework",
+  "/spaced-repetition-flashcards-esl.html": "/features/flashcards",
+  "/how-to-save-time-as-english-teacher.html": "/blog/teach-english-online-guide",
+  "/how-to-create-english-worksheets-with-ai.html": "/blog/teach-english-online-guide",
+  "/best-ai-tools-for-esl-teachers.html": "/resources",
+  "/ai-tools-for-private-english-tutors.html": "/for-english-tutors",
+  "/worksheet-generator-for-language-schools.html": "/for-english-tutors",
+  "/ai-tools-for-online-esl-teachers.html": "/blog/teach-english-online-guide",
+  // Blog .html → 3 real posts (keep slug, drop .html)
+  "/blog/english-games-for-learners.html": "/blog/english-games-for-learners",
+  "/blog/esl-games-for-teachers.html": "/blog/esl-games-for-teachers",
+  "/blog/teaching-english-online-complete-guide.html": "/blog/teach-english-online-guide",
+};
 ```
+(Końcowa lista mapowań — pełna 80+ pozycji — generowana w implementacji przez `rg` i ręczny review każdej pozycji vs `App.tsx` routes oraz `src/constants/pseoMatrix.ts`. Każde mapowanie wskazuje na **istniejący** route. Jeśli target nie istnieje → przechodzi do Kubełka 3.)
 
-3. **Krok B — Generuj audio z fallbackiem**:
+**Kubełek 2 — REAL** (3 posty bloga): aktualizujemy `Blog.tsx` żeby ich `href` był czystym slugiem bez `.html`.
 
+**Kubełek 3 — COMING SOON** (33 posty bloga bez treści + 4 comparisons `edooqoo-vs-*`): **NIE linkujemy**. UI renderuje kafelek bez `<a>`, z badgem „Coming soon", `cursor-not-allowed`, `opacity-60`, tooltipem „Full article shipping soon". To eliminuje 404, nie tworzy fake stub-pages (Martha quality rule), zachowuje listę tytułów dla scan/SEO discovery wewnątrz `/blog` index.
+
+### J.3 Helper i refaktor
+
+Nowy plik `src/lib/resolveLegacyHref.ts`:
 ```ts
-async function generateTTS(model: string): Promise<ArrayBuffer> {
-  const r = await fetch("https://api.openai.com/v1/audio/speech", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${OPENAI_API_KEY}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ model, voice: randomVoice, input: transcript, response_format: "mp3" })
-  });
-  if (!r.ok) throw new Error(`TTS ${model} failed (${r.status}): ${await r.text()}`);
-  return r.arrayBuffer();
-}
-
-let audioBuffer: ArrayBuffer;
-let ttsModel = "gpt-4o-mini-tts";
-try {
-  audioBuffer = await generateTTS("gpt-4o-mini-tts");
-} catch (e) {
-  console.warn(`⚠️ gpt-4o-mini-tts failed, falling back to tts-1:`, e.message);
-  ttsModel = "tts-1";
-  audioBuffer = await generateTTS("tts-1");
-}
-```
-
-4. **Krok C — base64 conversion (chunked, by uniknąć stack overflow dla >100KB)**:
-
-```ts
-const bytes = new Uint8Array(audioBuffer);
-let binary = "";
-const CHUNK = 8192;
-for (let i = 0; i < bytes.length; i += CHUNK) {
-  binary += String.fromCharCode(...bytes.subarray(i, i + CHUNK));
-}
-const audioBase64 = btoa(binary);
-```
-
-5. **Krok D — R2 upload** (kod bez zmian — kopiujemy obecny blok 1:1).
-6. **Response (kontrakt 1:1 zachowany)**:
-
-```ts
-return new Response(JSON.stringify({
-  success: true,
-  audioData: {
-    url: finalAudioUrl,
-    ai_generated_audio_url: finalAudioUrl,
-    transcript,                              // ← IDENTYCZNY z TTS input
-    duration,
-    source: `openai-2step-${ttsModel}`,      // ← diagnostyka
-    voice: randomVoice
-  }
-}), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-```
-
-7. **Krok E — Notyfikacja awarii (NEW)** — w `catch` przed `return 500`:
-
-```ts
-try {
-  await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/notify-generation-failure`, {
-    method: "POST",
-    headers: {
-      "Authorization": `Bearer ${Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")}`,
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      errorType: "audio",
-      errorMessage: error.message,
-      model: "openai-2step",
-      teacherEmail: null,
-      userId: null,
-      promptPreview: `topic="${topic}" level="${englishLevel}" focus="${lessonFocus}"`,
-      timestamp: new Date().toISOString()
-    })
-  });
-} catch (notifyErr) {
-  console.error("Failed to notify audio failure:", notifyErr);
+import { LEGACY_LINK_MAP } from "@/data/legacyLinkMap";
+export type ResolvedHref = { url: string; comingSoon: boolean };
+export function resolveLegacyHref(href: string): ResolvedHref {
+  if (href in LEGACY_LINK_MAP) return { url: LEGACY_LINK_MAP[href], comingSoon: false };
+  if (href.endsWith(".html")) return { url: href, comingSoon: true };
+  return { url: href, comingSoon: false };
 }
 ```
 
-8. **Deploy**: `deploy_edge_functions(["generate-audio"])`.
+Edycje:
+- `src/pages/Blog.tsx` — w mapowaniu kart: `const r = resolveLegacyHref(item.href);` → jeśli `comingSoon` to `<div role="listitem" class="opacity-60 cursor-not-allowed">...<Badge variant="secondary">Coming soon</Badge>` (bez `<a>`); inaczej `<Link to={r.url}>` z react-router-dom (zamiana `<a href>` na `<Link>`).
+- `src/pages/Resources.tsx` — identyczny refaktor w pętli `items.map`.
+- `src/components/GlobalFooter.tsx` — refaktor wszystkich `<a href="...html">`: jeśli mapowane → `<Link to={r.url}>`; jeśli niemapowane → **usuwamy z DOM** (footer nie powinien mieć kafelków Coming Soon — zaśmieca). Usuwamy całą kolumnę „Compare" (4 `/edooqoo-vs-*.html` — brak treści, brak planu). Grid footera przechodzi z 5 na 4 kolumny — zaktualizować klasy Tailwind `md:grid-cols-4`.
+- `public/sitemap.xml` — usunąć wszystkie URL `.html` które nie mają mapowania. Zostawić wyłącznie URL-e prowadzące do istniejących stron + Public Gallery URL-e.
+- `scripts/seo/audit-sitemap.mjs` — jeśli istnieje i robi link check, dopisać assertion: `expect(no .html broken links)`.
 
-### Weryfikacja BUG 1
-
-- `supabase--curl_edge_functions` POST `/generate-audio` body `{"topic":"eurovision 2026","englishLevel":"B1/B2","lessonFocus":"musical idioms","duration":90}` → 200 + transcript niepusty + audioData.url zaczynający się od `https://r2.` (lub `data:audio/`).
-- `supabase--edge_function_logs generate-audio` → brak `404`, log `✅ [AUDIO] Transcript generated`.
+### J.4 Test
+Po implementacji: ręczny click-test `/blog`, `/resources`, footer na 5 losowych stronach (`/`, `/features/dslm`, `/esl-worksheets`, `/glossary`, `/pricing`) — 0 linków zwracających 404.
 
 ---
 
-## BUG 2 — Brak maila przy awarii worksheet generation
+## SPRINT K — Multi-provider Model Audit (Problem 3, część A)
 
-### Plik: `supabase/functions/generateWorksheet/index.ts`
+### K.1 Inwentaryzacja modeli (jednorazowy skan)
+Skrypt `scripts/audit-llm-models.ts` (Deno):
+1. Skan `supabase/functions/**/*.ts` regexami:
+   - `gpt-[\w.-]+`, `o[1-4][\w.-]*`, `tts-\d+`, `whisper-[\w.-]+`, `dall-e-\d`, `gpt-4o[-\w]*tts`, `gpt-4o-audio[-\w]*` → OpenAI
+   - `gemini-[\w.-]+`, `google/[\w.-]+` → Google AI Studio (direct) / Lovable AI Gateway (jeśli URL zawiera `ai.gateway.lovable`)
+   - `claude-[\w.-]+`, `anthropic/[\w.-]+` → Anthropic
+   - `elevenlabs[\/_-][\w.-]+` → ElevenLabs
+2. Output etap 1: tabela `model | provider | files[]` w `docs/closed-loops/LLM_MODEL_INVENTORY.md`.
 
-### 2A. Keepalive podczas AI-REPAIR (eliminacja heartbeat timeout)
+### K.2 Live-check per provider
+Per model uruchamiamy:
+- **OpenAI**: `GET https://api.openai.com/v1/models/{id}` z `Authorization: Bearer ${OPENAI_API_KEY}` → status 200 OK; 404 = deprecated.
+- **Google AI Studio**: `GET https://generativelanguage.googleapis.com/v1beta/models/{id}?key=${GEMINI_API_KEY}`.
+- **Anthropic**: minimalny `POST https://api.anthropic.com/v1/messages` z body `{model, max_tokens:1, messages:[{role:"user",content:"ping"}]}`, headers `x-api-key`, `anthropic-version: 2023-06-01`. Sukces lub `model_not_found`.
+- **ElevenLabs**: `GET https://api.elevenlabs.io/v1/models` (zwraca pełną listę — sprawdzamy obecność `model_id`).
+- **Lovable AI Gateway**: `POST {GATEWAY}/v1/chat/completions` z `Authorization: Bearer ${LOVABLE_API_KEY}`, `{model, messages:[{role:"user",content:"ping"}], max_tokens:1}`.
 
-Lokalizacja: ~linia 595, w streaming path przed `parseWithRecovery`.
+### K.3 Procedure B (rozszerzona) — `docs/prompts/AUDIT_PROCEDURES.md`
+Aktualizujemy istniejący plik (lub tworzymy jeśli nie istnieje):
 
+```markdown
+## Procedure B — Monthly Multi-Provider Model Audit (1st day of month, ~20 min)
+
+### Step 1: Run inventory
+`deno run --allow-net --allow-env --allow-read --allow-write scripts/audit-llm-models.ts`
+Generates `docs/closed-loops/LLM_MODEL_INVENTORY.md`.
+
+### Step 2: Live-check all models
+The same script live-pings each model against its provider. Output:
+`docs/closed-loops/STATUS_LIVE.md` with columns: model | provider | http_status | last_checked | files[] | severity.
+
+### Step 3: Manual deprecation page scan (browser)
+Open and Ctrl-F each model name from inventory in:
+- OpenAI: https://platform.openai.com/docs/deprecations
+- Google: https://ai.google.dev/gemini-api/docs/models#model-versions
+- Anthropic: https://docs.anthropic.com/en/docs/about-claude/models/all-models#model-deprecations
+- ElevenLabs: https://elevenlabs.io/docs/models
+- Lovable AI Gateway: https://docs.lovable.dev/features/ai
+
+Each match → add row to STATUS_LIVE.md with deprecation_date and migration_target.
+
+### Step 4: File tickets
+For each model with severity ≥ warning:
+- Append entry to `.lovable/plan.md` BACKLOG: `[CRITICAL] Migrate {model} ({provider}) — used in: {files}. Deprecation: {date}. Suggested replacement: {target}.`
+- INSERT into `error_logs` (severity='critical', error_type='model_deprecation', model_name, source_files JSON).
+- Send notification email via `notify-generation-failure` with errorType='model_deprecation'.
+
+### Step 5: Pricing shift check
+For each provider, check pricing page diff vs `docs/closed-loops/PRICING_BASELINE.md`. Shift ≥25% → BACKLOG ticket.
+```
+
+### K.4 Auto-log w runtime (Problem 3 część B — `/admin/error-logs` i `/status`)
+
+Dodajemy w **każdej edge function** wywołującej OpenAI/Gemini/Anthropic/ElevenLabs uniform helper `logModelFailure(model, status, errorBody)`:
+
+Nowy `supabase/functions/_shared/modelFailureLogger.ts`:
 ```ts
-// PRE-REPAIR: notify client we're entering repair phase
-send("progress", { exercisesGenerated: expectedTotal, expectedTotal, phase: "repairing" });
-const repairKeepalive = setInterval(() => {
-  try { send("progress", { exercisesGenerated: expectedTotal, expectedTotal, phase: "repairing" }); }
-  catch (_) {}
-}, 15000);
-
-let worksheetData: any;
-let repairMethod: string;
-try {
-  const result = await parseWithRecovery(fullContent, expectedTotal);
-  worksheetData = result.data;
-  repairMethod = result.repairMethod;
-} finally {
-  clearInterval(repairKeepalive);
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+export async function logModelFailure(opts: {
+  model: string; provider: string; status: number; endpoint: string; error: string; functionName: string;
+}) {
+  const url = Deno.env.get("SUPABASE_URL");
+  const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!url || !key) return;
+  const sb = createClient(url, key);
+  const severity = opts.status === 404 || opts.status === 410 ? "critical" : opts.status >= 500 ? "warning" : "info";
+  const errorType = opts.status === 404 || opts.status === 410 ? "model_deprecation" : "model_failure";
+  await sb.from("error_logs").insert({
+    severity, error_type: errorType, source_name: opts.functionName,
+    message: `${opts.provider} ${opts.model} → ${opts.status}`,
+    context: { model: opts.model, provider: opts.provider, endpoint: opts.endpoint, error: opts.error.substring(0, 1000) },
+  }).then(() => {}, (e) => console.error("logModelFailure insert error:", e));
 }
 ```
 
-**Efekt**: każde 15s leci `progress` event → klient resetuje heartbeat → koniec z 40s timeoutem podczas wielosekundowej naprawy.
+Wpinamy w `catch` w: `generate-audio`, `generateWorksheet`, `verify-open-answers`, `translate-flashcard`, `process-welcome-test`, `suggest-exercises`, `generate-welcome-test-audio`, `classify-knowledge-entry`, `generate-curriculum-phases`, `generate-media-exercises`, `generate-image`, `generate-timeline`. Każdy 404/410/5xx z provider API → INSERT do `error_logs`.
 
-### 2B. Gwarantowana dostawa notyfikacji
+`/status` page (`src/pages/StatusPage.tsx`) i `/admin/error-logs` już czytają z `error_logs` → auto-podchwycą nowe wpisy. Dodatkowo na `StatusPage.tsx` dodajemy sekcję „Active model issues" filtrującą `error_logs` po `error_type IN ('model_deprecation', 'model_failure') AND created_at > now() - interval '24h'` — jeśli niepuste, pokazuje czerwony banner „We're investigating an issue with {provider} {model}. Audio/worksheet generation may be temporarily affected."
 
-Lokalizacja: linie ~727-731 (streaming) i ~844 (regular).
+Migracja DB: brak — `error_logs` już istnieje. Jeśli nie ma kolumn `context jsonb` lub `source_name` → migration to dodać (do potwierdzenia w implementacji przez `supabase--read_query` na `information_schema`).
 
+---
+
+## SPRINT L — Email Alerts (Problem 4)
+
+### L.1 notify-generation-failure
+W `supabase/functions/notify-generation-failure/index.ts` linia 9:
 ```ts
-// PRZED: notifyGenerationFailure(...)  ← fire-and-forget, edge runtime ubija fetch po close()
-// PO:
-const notifyPromise = notifyGenerationFailure(errType, errorMessage, {...});
-// EdgeRuntime.waitUntil zapewnia że fetch dokończy nawet po close stream'a
-try {
-  // @ts-ignore - EdgeRuntime is Deno Deploy global
-  if (typeof EdgeRuntime !== "undefined" && EdgeRuntime.waitUntil) {
-    EdgeRuntime.waitUntil(notifyPromise);
-  } else {
-    await notifyPromise; // fallback dla local dev
-  }
-} catch (_) {}
+const ALERT_EMAILS = ["j4n.brz0@gmail.com", "edooqoo@gmail.com"];
 ```
+W body fetch do Resend: `to: ALERT_EMAILS,` (zamiast `[ALERT_EMAIL]`).
 
-### 2C. Wczesne ostrzeżenie gdy AI-REPAIR był potrzebny
+### L.2 submit-bug-report
+W `supabase/functions/submit-bug-report/index.ts`:
+- Znaleźć tablicę adresatów (`bugEmails` lub analogiczna). Dodać `"edooqoo@gmail.com"`.
+- Jeśli używa zmiennej env `BUG_REPORT_FROM_EMAIL` — sprawdzić czy jest, jeśli nie to skonfigurować (sekret). Defaultowy `From: "Edooqoo Bugs <notifications@edooqoo.com>"` jeśli sekret pusty.
 
-Po `parseWithRecovery` w streaming path:
+### L.3 Sekret
+Dodać sekret `BUG_REPORT_FROM_EMAIL = "Edooqoo Bugs <notifications@edooqoo.com>"`. (Akcja przez `secrets--add_secret` w implementacji — wymagana aprobata.)
 
-```ts
-if (repairMethod === 'ai' || repairMethod === 'ai-fallback') {
-  // Best-effort early warning — worksheet uratowany, ale prompt warto zbadać
-  EdgeRuntime.waitUntil?.(notifyGenerationFailure('parse_recovered',
-    `Gemini returned malformed JSON, recovered via ${repairMethod}. Investigate prompt drift.`,
-    { userId, teacherEmail, model: streamUsedModel, promptPreview: sanitizedPrompt?.substring(0, 300) }
-  ));
-}
+### L.4 Walidacja
+Smoke-test po deploy:
 ```
-
-### 2D. Plik: `supabase/functions/notify-generation-failure/index.ts`
-
-Dodać klucz w mapie `solutions`:
-
-```ts
-'parse_recovered': 'Gemini returned malformed JSON, recovered via AI fallback. Worksheet was saved successfully, but prompt or temperature may be drifting. Investigate sample output to prevent quality degradation.',
-'audio': 'OpenAI audio model is unreachable. Verify OPENAI_API_KEY has access to gpt-4o-mini and gpt-4o-mini-tts. Check /v1/audio/speech endpoint status.',
+curl -X POST {SUPABASE_URL}/functions/v1/notify-generation-failure -H "Authorization: Bearer {SERVICE_KEY}" -H "Content-Type: application/json" -d '{"errorType":"audio","errorMessage":"test","timestamp":"...","teacherEmail":"test@x.com"}'
 ```
-
-### 2E. Persistencja do `error_logs`
-
-W obu `catch` (streaming + regular) dodać:
-
-```ts
-try {
-  await supabase.from("error_logs").insert({
-    source_name: 'generateWorksheet',
-    component: 'worksheets',
-    severity: 'error',
-    error_code: errType,
-    message: errorMessage,
-    stack: errorStack,
-    context: { model: streamUsedModel, exerciseCount: expectedTotal, userId, teacherEmail },
-    user_id: userId || null
-  });
-} catch (logErr) {
-  console.error("Failed to log error to error_logs:", logErr);
-}
-```
-
-### Weryfikacja BUG 2
-
-- Wygeneruj długi worksheet (ICAO/Aviation, 8 ćwiczeń) → klient nie dostaje heartbeat timeout (widać `phase:"repairing"` w logach klienta).
-- `SELECT * FROM error_logs WHERE source_name='generateWorksheet' ORDER BY created_at DESC LIMIT 5;` → wpisy obecne.
-- Email do `j4n.brz0@gmail.com` z `⚠️ Worksheet generation failed: parse — ...`.
+Oczekiwane: 200, oba adresy w logu Resend.
 
 ---
 
-## BUG 3 — Linki admina w mailach
+## SPRINT M — UI Layering Fix (Problem 5)
 
-### 3A. Plik: `supabase/functions/notify-generation-failure/index.ts`
+### M.1 Diagnoza
+`src/components/GeneratingModal.tsx` renderuje modal w drzewie React lokalnie. `src/components/GlobalFooter.tsx` (i potencjalnie Sticky Nav) używa `backdrop-blur`, który tworzy nowy stacking context — zasłania modal mimo wysokiego `z-index`.
 
-Pod istniejącym przyciskiem "View Edge Function Logs" dodać drugi:
+### M.2 Rozwiązanie
 
-```html
-<a href="${appBaseUrl}/admin/error-logs"
-   style="display:inline-block; padding:12px 28px; background:#7c3aed; color:white;
-          border-radius:8px; text-decoration:none; font-weight:600; margin-left:8px;">
-  🛡️ Open Admin Error Logs
-</a>
+**Edycja `src/components/GeneratingModal.tsx`**:
+```tsx
+import { createPortal } from "react-dom";
+// W returnie:
+return createPortal(
+  <div className="fixed inset-0 z-[100] flex items-center justify-center ...">
+    {/* dotychczasowa treść modala */}
+  </div>,
+  document.body
+);
 ```
 
-Gdzie `appBaseUrl = Deno.env.get('APP_BASE_URL') || 'https://edooqoo.com'` (już używane w innych funkcjach per memory).
+**Edycja `src/components/GlobalFooter.tsx`**: root `<footer>` dostaje `className="... relative z-0"` — explicit niższy z-index niż portal.
 
-### 3B. Plik: `supabase/functions/submit-bug-report/index.ts`
+**Edycja `src/components/Sidebar.tsx`** (jeśli też używa backdrop-blur i tworzy stacking context): identyczny `relative z-0` na root.
 
-Na końcu sekcji "Reporter info" w HTML emaila wstawić wiersz CTA:
-
-```html
-<tr><td colspan="2" style="padding-top:20px; text-align:center;">
-  <a href="${appBaseUrl}/admin/error-logs?bugId=${inserted.id}"
-     style="display:inline-block; padding:12px 24px; background:#7c3aed; color:white;
-            border-radius:6px; text-decoration:none; font-weight:600;">
-    🛡️ Open in Admin Error Logs
-  </a>
-  &nbsp;
-  <a href="https://supabase.com/dashboard/project/bvfrkzdlklyvnhlpleck/functions/generateWorksheet/logs"
-     style="display:inline-block; padding:12px 24px; background:#2563eb; color:white;
-            border-radius:6px; text-decoration:none; font-weight:600;">
-    🔍 Edge Function Logs
-  </a>
-</td></tr>
-```
-
-- `appBaseUrl = Deno.env.get('APP_BASE_URL') || 'https://edooqoo.com'`
-- `?bugId=${id}` — query param, nawet jeśli `AdminErrorLogsPage` go nie filtruje, link otwiera właściwą stronę.
-
-### Deploy hotfix
-
-`deploy_edge_functions(["generate-audio", "generateWorksheet", "notify-generation-failure", "submit-bug-report"])`
+### M.3 Walidacja
+Smoke-test wizualny: na `/` (anonimowy user) kliknąć generator → modal pojawia się i widać całość, footer pod spodem. Powtórzyć na `/dashboard` (logged in) i `/student-hub`.
 
 ---
 
-# 🚀 CZĘŚĆ B — Dokończenie Planu v6.9.19
+## SPRINT N — LinkedIn outreach copy (Problem 6) — build-in-public
 
-## Sprint 3 — Public Worksheet Gallery
+**3 warianty** napisane w stylu „buduję, oto co już działa, oto co dowożę, zostań testerem" — NIE „mam gotowy DSLM". Każdy wariant zostaje w `.lovable/plan.md` jako template do skopiowania. **Nie wdrażamy do kodu aplikacji.**
 
-### B3.1 Migracja DB (wymaga zatwierdzenia)
+### Wariant 1 — Founder, krótki (neutralny build-in-public)
+> Hi [name], for the past 9 months I've been building Edooqoo — a tool for 1-on-1 English teachers working with adult learners. What's already shipping: AI-generated worksheets tailored to each student's goal (29 exercise types), auto-graded homework, per-skill mastery tracking, integrated calendar with Google Meet. What we're rolling out in July: DSLM 1-Minute Prep — 60 seconds from "I have a lesson in 5 min" to a ready, student-tailored worksheet. I'm looking for 20 teachers for a 4-week pilot — free access, honest feedback in return. Interested?
 
-```sql
--- worksheets: dodaj kolumny publikacji
-ALTER TABLE public.worksheets
-  ADD COLUMN IF NOT EXISTS is_public BOOLEAN NOT NULL DEFAULT false,
-  ADD COLUMN IF NOT EXISTS public_slug TEXT UNIQUE,
-  ADD COLUMN IF NOT EXISTS published_at TIMESTAMPTZ,
-  ADD COLUMN IF NOT EXISTS public_view_count INTEGER NOT NULL DEFAULT 0,
-  ADD COLUMN IF NOT EXISTS public_topic TEXT,        -- denormalized for filtering
-  ADD COLUMN IF NOT EXISTS public_level TEXT,        -- denormalized
-  ADD COLUMN IF NOT EXISTS public_exercise_types TEXT[]; -- denormalized
+### Wariant 2 — Pain-point hook (build-in-public, prowokacyjny)
+> [name], how many hours a week do you spend prepping materials for adult Business English / Cambridge / IELTS students? For Martha (10 yrs ESL, co-founder) it was 8h/week. That's why we've been building Edooqoo for the last 9 months. What works today: AI worksheet generator tied to your student's actual goal, auto-grading, mastery tracking, teacher calendar. What's next (July release): DSLM 1-Minute Prep — full lesson prep in under 60 seconds. We're onboarding 20 teachers as early testers — free access, you tell us what sucks. In?
 
-CREATE INDEX IF NOT EXISTS idx_worksheets_public 
-  ON public.worksheets (is_public, published_at DESC) 
-  WHERE is_public = true;
-CREATE INDEX IF NOT EXISTS idx_worksheets_public_slug 
-  ON public.worksheets (public_slug) WHERE public_slug IS NOT NULL;
-CREATE INDEX IF NOT EXISTS idx_worksheets_public_topic 
-  ON public.worksheets (public_topic) WHERE is_public = true;
+### Wariant 3 — Low-pressure (soft build-in-public)
+> Hi [name], saw on your profile that you teach [Business English / adults / online]. I'm building Edooqoo (with Martha — 10 yrs ESL background) for 1-on-1 adult ESL teachers. Happy to send a 2-minute demo of what's already working (worksheet generator + grading + mastery tracking) and what we're shipping in July (DSLM 1-Minute Prep). Zero sales pitch — just gathering teacher feedback before the bigger launch. OK if I send the link?
 
--- RLS: dodaj policy publicznego dostępu (nie ruszamy istniejących teacher policies)
-CREATE POLICY "Public worksheets readable by anyone"
-  ON public.worksheets FOR SELECT
-  USING (is_public = true);
-
--- Slug generator (kebab-case z title + short hash)
-CREATE OR REPLACE FUNCTION public.generate_public_slug(p_title TEXT, p_id UUID)
-RETURNS TEXT
-LANGUAGE plpgsql IMMUTABLE
-SET search_path = public
-AS $$
-DECLARE
-  base TEXT;
-  hash TEXT;
-BEGIN
-  base := lower(regexp_replace(coalesce(p_title, 'worksheet'), '[^a-zA-Z0-9]+', '-', 'g'));
-  base := regexp_replace(base, '^-+|-+$', '', 'g');
-  base := substring(base from 1 for 60);
-  hash := substring(p_id::text from 1 for 6);
-  RETURN base || '-' || hash;
-END $$;
-```
-
-### B3.2 Edge Function: `publish-worksheet`
-
-- Auth: teacher JWT
-- Body: `{ worksheet_id }`
-- Walidacja: teacher musi być właścicielem; worksheet musi mieć ≥6 exercises, niepusty `title`, brak PII w `form_data.additionalInformation` (regex email/telefon)
-- Akcja: ustawia `is_public=true`, generuje `public_slug` via RPC, denormalizuje `public_topic/level/exercise_types` z `form_data`, ustawia `published_at=now()`
-- Response: `{ slug, public_url: "${APP_BASE_URL}/gallery/${slug}" }`
-
-### B3.3 Edge Function: `unpublish-worksheet`
-
-Symetryczna — `is_public=false`, zostawia `public_slug` (by stary URL pokazał 410 zamiast 404).
-
-### B3.4 Strony frontu
-
-- `/gallery` — `PublicGalleryIndex.tsx` — paginated grid, filtry topic/level/exercise type (czerpie z `pseoMatrix.ts`)
-- `/gallery/:slug` — `PublicGalleryWorksheetPage.tsx` — read-only widok worksheet z JSON-LD `LearningResource`, CTA "Sign up to create your own"
-- Komponent `PublishWorksheetButton.tsx` — w `WorksheetPage` toolbar (teacher only), modal z confirm + copy public URL
-
-### B3.5 Edge Function: `regenerate-gallery-sitemap`
-
-- Cron: codziennie o 02:00 UTC (pg_cron)
-- Zapytanie: `SELECT public_slug, published_at FROM worksheets WHERE is_public=true ORDER BY published_at DESC LIMIT 50000`
-- Generuje `public/sitemap-gallery.xml` (chunkowanie po 50k URLi)
-- Dodaje referencję w `public/sitemap.xml` jako sitemap index
-- Triggerowane też po każdym `publish-worksheet` (best-effort, throttle 5 min)
-
-### B3.6 Updates RAG/Mem
-
-- `mem/features/public-gallery/architecture.md` (NEW)
-- `docs/llm-context.md` + `llms.txt` + `public/llms.txt` — sekcja "Public Gallery"
+**Tracking**: każdy link `?utm_source=linkedin&utm_campaign=invite_2026q3&utm_content=v1|v2|v3`. Po 2 tygodniach `/admin/analytics` decyduje który skalujemy do 1000.
 
 ---
 
-## Sprint 5 — AEO/LLMO Layer
+## SPRINT O — Dokumentacja RAG (obowiązkowa)
 
-### B5.1 `public/llms-full.txt` (NEW, ~50KB)
+W tym samym commicie aktualizujemy:
 
-- Zawiera pełne TL;DR wszystkich 1 458 URL-i z `sitemap.xml` w formacie:
-  ```
-  ## /esl-worksheets/present-perfect/b1-intermediate
-  > Generator of B1 Present Perfect worksheets for adult ESL learners. 8 exercises, ~45min lesson. Free preview, sign-up to download PDF.
-  Tags: grammar, present-perfect, B1, adult-learners
-  ```
-- Generowany przez `scripts/seo/generate-llms-full.mjs` (Node script, czyta `pseoMatrix.ts` + `seoMeta.ts`)
-- Wykonanie podczas build (dodać do `scripts/seo/audit-sitemap.mjs` chain)
+### `docs/llm-context.md` — dopisać sekcje:
 
-### B5.2 JSON-LD sweep — uzupełnić brakujące
+```markdown
+## Public Gallery Exercise Renderer (v6.9.21)
 
-- `WebSite` + `SearchAction` w `index.html` (top-level)
-- `Organization` z `sameAs` (LinkedIn, X, YouTube) — w `index.html`
-- `SoftwareApplication` na `/pricing` z `offers` (3 plany)
-- `Course` na `/tools/cefr-level-test`
-- `HowTo` na `/tools/lesson-plan-generator` (już jest — audit poprawności)
+**Problem:** v6.9.20 Public Gallery rendered only `title`/`instructions`/`content`/`questions` per exercise, ignoring shape variations across 29 exercise types — students/teachers saw "text-only" preview missing tables, options, dialogs, audio players.
 
-### B5.3 Snippet rules audit
+**Edooqoo.com Solution:** Dedicated read-only renderer `GalleryExerciseRenderer.tsx` with switch over `normalizeExerciseType(ex.type)`, mapping each type to its visual structure (table for matching, A/B/C/D list for multiple-choice, audio player + transcript for listening, etc.). Zero state, zero inputs, zero API — pure presentation. SEO-friendly (full content rendered for crawlers), human-friendly (structure preserved). Top banner clarifies "Preview mode — sign up for interactive editor."
 
-- Skrypt `scripts/seo/audit-snippets.mjs` — czyta każdy plik strony, sprawdza:
-  - obecność `<aside aria-label="Summary">` (TL;DR pod AEO)
-  - długość H1 (40-60 chars)
-  - meta description (140-160 chars)
-  - alt text na każdym `<img>`
-- Raport markdown do `docs/seo/snippet-audit-report.md`
+**Technical Mechanics:**
+- `src/components/gallery/GalleryExerciseRenderer.tsx` — switch on normalized type, fallback to `<pre>{JSON.stringify(ex)}</pre>` for unknown types.
+- `src/pages/gallery/PublicGalleryWorksheetPage.tsx` — renders banner + uses GalleryExerciseRenderer in map.
+- CTA copy updated to DSLM 1-Minute Prep narrative (not "30 seconds worksheet").
 
-### B5.4 Updates RAG/Mem
+**RAG Keywords:** public gallery, worksheet preview, read-only renderer, exercise types, SEO worksheet, 1-Minute Prep CTA.
 
-- `mem/seo/aeo-llmo-layer.md` (NEW)
-- Dopisek w `docs/llm-context.md`
+## Legacy .html Link Resolver (v6.9.21)
+
+**Problem:** Historical SEO landing pages used `.html` suffix (~330 hrefs across `Blog.tsx`, `Resources.tsx`, `GlobalFooter.tsx`). ~80 unique targets never existed → 404 storm hurting crawl budget and UX. Examples: `/blog/reading-comprehension-activities-english.html`, `/modal-verbs-worksheets-esl.html`, `/edooqoo-vs-magicschool.html`.
+
+**Edooqoo.com Solution:** Three-bucket strategy: (1) `src/data/legacyLinkMap.ts` maps ~50 legacy `.html` hrefs to existing programmatic routes; (2) 3 real blog posts use clean slugs; (3) 33 unwritten blog posts + 4 comparisons render as non-clickable "Coming soon" tiles. Sitemap pruned to live URLs only. Footer "Compare" column removed.
+
+**Technical Mechanics:**
+- `src/data/legacyLinkMap.ts` — exhaustive map.
+- `src/lib/resolveLegacyHref.ts` — `(href) => {url, comingSoon}`.
+- `Blog.tsx`/`Resources.tsx`/`GlobalFooter.tsx` — consume resolver; `<Link>` for mapped, disabled tile for comingSoon, removed from DOM in footer.
+- `public/sitemap.xml` pruned.
+
+**RAG Keywords:** broken links, 404, coming soon tiles, legacy redirects, sitemap pruning, .html cleanup, SEO crawl budget.
+
+## Multi-Provider LLM Model Audit (v6.9.21)
+
+**Problem:** OpenAI removed `gpt-4o-audio-preview` access without notification → `generate-audio` returned 500 for weeks. No systematic monitoring across OpenAI, Google Gemini, Anthropic, ElevenLabs, Lovable AI Gateway. `/admin/error-logs` and `/status` didn't surface provider model issues.
+
+**Edooqoo.com Solution:** (1) Monthly Procedure B audit script (`scripts/audit-llm-models.ts`) inventories all model refs in `supabase/functions/**`, live-pings each provider, writes `docs/closed-loops/STATUS_LIVE.md`, files BACKLOG tickets for deprecations. (2) Runtime auto-logging via `_shared/modelFailureLogger.ts` — every provider 404/410/5xx inserts `error_logs` row with `error_type='model_deprecation'` or `'model_failure'`. (3) `StatusPage.tsx` reads `error_logs` last 24h and shows banner when active model issues exist. (4) Notification email sent on critical severity.
+
+**Technical Mechanics:**
+- Regex scope: OpenAI (gpt-/o[1-4]/tts/whisper/dall-e), Google (gemini-/google/), Anthropic (claude-/anthropic/), ElevenLabs (elevenlabs*), Lovable Gateway (via URL detection).
+- Live checks: provider-specific endpoints (see `AUDIT_PROCEDURES.md` Procedure B).
+- `_shared/modelFailureLogger.ts` wired into 12 edge functions catch blocks.
+- StatusPage banner queries `error_logs WHERE error_type IN ('model_deprecation','model_failure') AND created_at > now() - interval '24h'`.
+
+**RAG Keywords:** model deprecation, LLM audit, multi-provider monitoring, gpt-4o-audio-preview, status page banner, error_logs, Procedure B, runtime model logging.
+
+## Bug Alert Email Recipients (v6.9.21)
+
+**Problem:** Bug reports and generation failures sent only to founder's personal Gmail — secondary monitoring mailbox not notified.
+
+**Edooqoo.com Solution:** Both `notify-generation-failure` and `submit-bug-report` send to `["j4n.brz0@gmail.com", "edooqoo@gmail.com"]`. Sender configurable via `BUG_REPORT_FROM_EMAIL` secret (default `"Edooqoo Bugs <notifications@edooqoo.com>"`).
+
+**RAG Keywords:** bug alerts, email recipients, notifications@edooqoo.com, Resend, alert escalation.
+
+## Modal Stacking Context Fix (v6.9.21)
+
+**Problem:** `GlobalFooter` `backdrop-blur` created a new stacking context that visually covered `GeneratingModal` and other in-page modals despite high z-index.
+
+**Edooqoo.com Solution:** `GeneratingModal.tsx` portals to `document.body` via `createPortal` with `z-[100]`. Footer/sidebar root elements explicitly get `relative z-0`.
+
+**RAG Keywords:** modal layering, createPortal, backdrop-blur stacking context, z-index conflict, GeneratingModal.
+```
+
+### `llms.txt` + `public/llms.txt` — dopisać te 5 sekcji jako bullets w „Updates v6.9.21".
+
+### `mem/index.md` — dopisać:
+```
+- [Gallery Exercise Renderer](mem://features/public-gallery/gallery-exercise-renderer) — Read-only switch by exercise type for /gallery/:slug
+- [Legacy HTML Link Resolver](mem://infrastructure/legacy-html-link-resolver) — Three-bucket strategy for .html cleanup
+- [Multi-Provider Model Audit](mem://infrastructure/multi-provider-model-audit) — Procedure B + runtime logger for all LLM providers
+- [Modal Portal Pattern](mem://ux/modal-portal-pattern) — createPortal + z-100 to escape backdrop-blur stacking
+```
+plus 4 nowe pliki memów (każdy ~10 linii skrótu z `docs/llm-context.md`).
 
 ---
 
-## Sprint 6 — Content Velocity (4 z 12 long-form artykułów)
+## Kolejność implementacji (1 tura)
+1. **Sprint M** (UI fix — natychmiastowy UX impact).
+2. **Sprint L** (emaile + sekret).
+3. **Sprint J** (linki .html — legacyLinkMap + resolver + refaktor Blog/Resources/Footer + sitemap).
+4. **Sprint G** (GalleryExerciseRenderer + edycja PublicGalleryWorksheetPage).
+5. **Sprint H** (CTA copy w galerii).
+6. **Sprint K** (scripts/audit-llm-models.ts + _shared/modelFailureLogger.ts + wpięcie w 12 funkcji + Procedure B w AUDIT_PROCEDURES.md + StatusPage banner).
+7. **Sprint O** (RAG docs + mem index + 4 mem files).
+8. **Sprint N** (TYLKO copy do `.lovable/plan.md`, brak edycji aplikacji).
+9. **Sprint I** — tylko dokumentacja decyzji (brak kodu).
 
-### B6.1 Wybór tematów (top SEO opportunity wg semrush)
+## Nie wchodzi w tę turę
+- Catalog SEO Layer (Sprint I implementacja) — wymaga osobnej dyskusji prywatności.
+- Sprint 5 (AEO/LLMO) — następna tura.
+- Sprint 6 (4 long-form artykuły) — 4 osobne tury.
+- GH Action dla model audit — Plan v6.10 BACKLOG.
 
-1. `/blog/how-to-teach-english-online-2026-complete-guide` (KW: "teach english online", 18k searches/mo)
-2. `/blog/icao-aviation-english-test-preparation` (KW: "ICAO english test", 4.4k)
-3. `/blog/business-english-for-1-on-1-tutoring` (KW: "business english tutor", 2.9k)
-4. `/blog/cefr-levels-explained-for-tutors` (KW: "CEFR levels", 22k)
+## Walidacja końcowa
+- `/gallery/choosing-your-adventure-...` → wszystkie ćwiczenia widoczne strukturalnie, banner Preview u góry, CTA „Try 1-Minute Prep free" na dole.
+- `/blog` i `/resources` — 0 linków 404 (klick-test 100% pozycji).
+- Footer — 4 kolumny, bez Compare.
+- `/admin/error-logs` — log z błędem modelu po wymuszonym 404 OpenAI.
+- `/status` — banner gdy świeży `model_deprecation` w bazie.
+- Email z bug-report dochodzi do obu adresów.
+- `GeneratingModal` nad footerem na każdej stronie.
+- `scripts/audit-llm-models.ts` odpalony lokalnie → produkuje `STATUS_LIVE.md`.
 
-### B6.2 Struktura każdego artykułu (~3000-4000 słów)
-
-- H1 + TL;DR aside
-- Table of Contents (semantic `<nav>`)
-- 8-12 sekcji H2/H3
-- Min. 2 obrazy z alt text (lazy loaded)
-- `Article` + `BreadcrumbList` + `FAQPage` JSON-LD
-- 3 internal links do `/tools/*` i `/esl-worksheets/*`
-- CTA box co 1500 słów (sign-up)
-- Author bio (Martha — 10y ESL experience) z `sameAs`
-
-### B6.3 Implementacja techniczna
-
-- Folder `src/content/blog/` — pliki `.tsx` (React components, nie MDX — by uniknąć nowej zależności)
-- Layout `src/components/blog/BlogPostLayout.tsx` z TOC nav + reading time
-- Routing w `App.tsx`: `/blog` (index) + `/blog/:slug`
-- Sitemap: dodać 4 URLe + index `/blog` (sitemap.xml → 1 463 URLi)
-
-### B6.4 Treści — generowane jednorazowo przez Claude/GPT-5
-
-**WAŻNE**: NIE używamy worksheet engine do generowania artykułów (sanctity rule). Treść piszę ja podczas implementacji, na bazie ESL expertise Marthy + research z semrush.
-
-### B6.5 Updates RAG/Mem
-
-- `mem/seo/long-form-content-strategy.md` (NEW)
-- `docs/llm-context.md` — sekcja "Content Hub"
-
----
-
-# 📁 Pełna lista plików (Hotfix + Sprinty 3, 5, 6)
-
-### Hotfix (CZĘŚĆ A)
-
-```
-M  supabase/functions/generate-audio/index.ts
-M  supabase/functions/generateWorksheet/index.ts
-M  supabase/functions/notify-generation-failure/index.ts
-M  supabase/functions/submit-bug-report/index.ts
-N  mem/features/email/generation-failure-alerts.md
-```
-
-### Sprint 3
-
-```
-M  (migracja DB) worksheets: 7 nowych kolumn + indeksy + RLS + RPC
-N  supabase/functions/publish-worksheet/index.ts
-N  supabase/functions/unpublish-worksheet/index.ts
-N  supabase/functions/regenerate-gallery-sitemap/index.ts
-N  src/pages/gallery/PublicGalleryIndex.tsx
-N  src/pages/gallery/PublicGalleryWorksheetPage.tsx
-N  src/components/worksheet/PublishWorksheetButton.tsx
-M  src/App.tsx (2 nowe routy)
-M  public/sitemap.xml (sitemap index)
-N  mem/features/public-gallery/architecture.md
-```
-
-### Sprint 5
-
-```
-N  public/llms-full.txt (build-generated)
-N  scripts/seo/generate-llms-full.mjs
-N  scripts/seo/audit-snippets.mjs
-M  index.html (WebSite + Organization JSON-LD)
-M  src/pages/Pricing.tsx (SoftwareApplication JSON-LD)
-M  src/pages/tools/CefrLevelTest.tsx (Course JSON-LD)
-N  docs/seo/snippet-audit-report.md
-N  mem/seo/aeo-llmo-layer.md
-```
-
-### Sprint 6
-
-```
-N  src/components/blog/BlogPostLayout.tsx
-N  src/pages/blog/BlogIndex.tsx
-N  src/content/blog/how-to-teach-english-online-2026.tsx
-N  src/content/blog/icao-aviation-english-test-prep.tsx
-N  src/content/blog/business-english-1on1-tutoring.tsx
-N  src/content/blog/cefr-levels-explained.tsx
-M  src/App.tsx (2 nowe routy: /blog, /blog/:slug)
-M  public/sitemap.xml (+5 URLi)
-N  mem/seo/long-form-content-strategy.md
-```
-
-### Zawsze (RAG)
-
-```
-M  docs/llm-context.md (3 nowe sekcje: hotfix, gallery, AEO, content)
-M  llms.txt
-M  public/llms.txt
-M  mem/index.md
-```
-
----
-
-# 🚦 Kolejność wykonania (deterministyczna)
-
-1. **Hotfix** (BUG 1 → BUG 2 → BUG 3) → deploy 4 funkcji → smoke test
-2. **Sprint 3** — migracja DB (oczekuję Twojego zatwierdzenia w UI Lovable - zaztwierdzam tutaj więc już nie pytaj w UI Lovable) → edge functions → frontend → sitemap
-3. **Sprint 5** — JSON-LD sweep → llms-full.txt generator → snippet audit
-4. **Sprint 6** — 4 artykuły blog (długie, czasochłonne, mogą być w osobnym podsprincie jeśli czas pozwoli)
-5. **RAG update + memory sync** (na końcu, jeden commit)
-
----
-
-# 🔒 Sekrety (sprawdzić, nie tworzyć — wszystkie już istnieją)
-
-- `OPENAI_API_KEY` ✅ (Tier 2, dostęp do `gpt-4o-mini`, `gpt-4o-mini-tts`, `tts-1`)
-- `APP_BASE_URL` ✅ (memory: `https://edooqoo.com`)
-- `RESEND_API_KEY` ✅
-- `SUPABASE_SERVICE_ROLE_KEY` ✅ (auto)
-
-# ⛔ Out of scope (świadomie pomijamy)
-
-- Walka o dostęp do `gpt-4o-audio-preview` (uzasadnione w Q3)
-- Modyfikacja worksheet engine promptów (sanctity rule)
-- Refaktor `AdminErrorLogsPage` do filtrowania po `?bugId=` (link działa bez tego)
-- Migracja na MDX dla bloga (utrzymujemy `.tsx` by zminimalizować deps)
-- Sprinty 7+ z Planu v6.9.19 (poza scope tej iteracji)
-
-# 🔑 RAG keywords (do dopisania)
-
-`gpt-4o-audio-preview 404`, `tts-1 fallback`, `gpt-4o-mini-tts`, `2-step audio pipeline`, `transcript determinism`, `streaming heartbeat keepalive`, `AI repair notification`, `parse_recovered`, `bug report admin link`, `public worksheet gallery`, `worksheet slug`, `gallery sitemap`, `llms-full.txt`, `AEO snippet audit`, `long-form content velocity`.
-
----
-
-**Czekam na Twoją akceptację.** Po `Implement plan` wykonuję sekwencyjnie A → B3 → B5 → B6 z jednym checkpointem na zatwierdzenie migracji DB w Sprincie 3. - zaztwierdzam tutaj więc już nie pytaj w UI Lovable
+Daj zielone światło, ruszamy z implementacją w następnej turze. Sprint 5 i 6 trzymamy na osobne tury — sugeruję każdy artykuł content z Sprintu 6 jako osobna tura (jakość > prędkość, zgodnie z regułą Marthy).

@@ -5,7 +5,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const ALERT_EMAIL = "j4n.brz0@gmail.com";
+const ALERT_EMAILS = ["j4n.brz0@gmail.com", "edooqoo@gmail.com"];
 const APP_BASE_URL = Deno.env.get('APP_BASE_URL') || 'https://edooqoo.com';
 
 serve(async (req) => {
@@ -120,7 +120,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         from: 'EDOQOO Alerts <notifications@edooqoo.com>',
-        to: [ALERT_EMAIL],
+        to: ALERT_EMAILS,
         subject: `⚠️ Worksheet generation failed: ${errorType} — ${teacherEmail || 'anonymous'}`,
         html,
       }),

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { PageSeo } from '@/components/seo/PageSeo';
+import GalleryExerciseRenderer from '@/components/gallery/GalleryExerciseRenderer';
 
 interface PublicWorksheetRow {
   id: string;
@@ -106,28 +107,15 @@ const PublicGalleryWorksheetPage: React.FC = () => {
           </div>
         </header>
 
-        <aside aria-label="Summary" className="mb-6 rounded-md border-l-4 border-primary bg-muted/40 p-4 text-sm">
-          <strong>TL;DR:</strong> Read-only preview of a teacher-published worksheet. Sign up free to create, edit and download your own.
+        <aside aria-label="Preview notice" className="mb-6 rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+          <strong>Preview mode.</strong> This is a static read-only preview of a worksheet a teacher published. Interactive answers, AI grading, audio playback and downloads are available only in the full editor — <Link to="/signup" className="font-semibold underline">sign up free</Link> to generate or open this worksheet interactively.
         </aside>
 
         {parsed?.exercises && Array.isArray(parsed.exercises) ? (
           <ol className="space-y-6">
             {parsed.exercises.map((ex: any, i: number) => (
-              <li key={i} className="rounded-lg border bg-card p-5">
-                <h2 className="text-lg font-semibold mb-2">
-                  {i + 1}. {ex.title || ex.type || 'Exercise'}
-                </h2>
-                {ex.instructions && <p className="text-sm text-muted-foreground mb-2">{ex.instructions}</p>}
-                {ex.content && typeof ex.content === 'string' && (
-                  <p className="text-sm whitespace-pre-wrap">{ex.content}</p>
-                )}
-                {Array.isArray(ex.questions) && (
-                  <ul className="mt-2 space-y-1 text-sm list-decimal pl-5">
-                    {ex.questions.map((q: any, qi: number) => (
-                      <li key={qi}>{typeof q === 'string' ? q : (q.text || q.question || JSON.stringify(q))}</li>
-                    ))}
-                  </ul>
-                )}
+              <li key={i}>
+                <GalleryExerciseRenderer exercise={ex} index={i} />
               </li>
             ))}
           </ol>
@@ -136,10 +124,13 @@ const PublicGalleryWorksheetPage: React.FC = () => {
         )}
 
         <div className="mt-10 rounded-lg border bg-primary/5 p-6 text-center">
-          <h2 className="text-xl font-bold mb-2">Build your own worksheet in 30 seconds</h2>
-          <p className="text-sm text-muted-foreground mb-4">Free Edooqoo account — generate fully editable worksheets tailored to your adult 1-on-1 student.</p>
-          <Link to="/auth?mode=signup" className="inline-block rounded-md bg-primary px-5 py-2 text-primary-foreground font-semibold">
-            Sign up free
+          <h2 className="text-xl font-bold mb-2">From idea to ready-to-teach worksheet in under 1 minute</h2>
+          <p className="text-sm text-muted-foreground mb-4">
+            Edooqoo's DSLM 1-Minute Prep turns your student's goals into a tailored worksheet —
+            fully editable, with audio, images and AI-grading built in. Free to start, no credit card.
+          </p>
+          <Link to="/signup" className="inline-block rounded-md bg-primary px-5 py-2 text-primary-foreground font-semibold">
+            Try 1-Minute Prep free
           </Link>
         </div>
       </article>

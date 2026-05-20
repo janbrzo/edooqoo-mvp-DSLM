@@ -3,6 +3,25 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { PageSeo } from '@/components/seo/PageSeo';
 import { SEO_META } from '@/constants/seoMeta';
+import { resolveLegacyHref } from '@/lib/resolveLegacyHref';
+
+// v6.9.21 — Wrapper so post tiles either link or render a "Coming soon" tile.
+const PostLink: React.FC<{ href: string; className: string; children: React.ReactNode }> = ({ href, className, children }) => {
+  const r = resolveLegacyHref(href);
+  if (r.comingSoon) {
+    return (
+      <div className={`${className} opacity-60 cursor-not-allowed`} title="Full article shipping soon">
+        {children}
+        <div className="mt-2 inline-block rounded bg-secondary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Coming soon</div>
+      </div>
+    );
+  }
+  return (
+    <Link to={r.url} className={className}>
+      {children}
+    </Link>
+  );
+};
 
 interface BlogPost {
   title: string;
@@ -334,7 +353,7 @@ const Blog = () => {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {recentPosts.map(post => (
-              <a
+              <PostLink
                 key={post.href}
                 href={post.href}
                 className="block rounded-lg border bg-card p-3 hover:shadow-md hover:border-violet-200 transition-all"
@@ -342,7 +361,7 @@ const Blog = () => {
                 <div className="text-[10px] uppercase tracking-wider text-violet-600 font-semibold mb-1">{post.category}</div>
                 <div className="font-medium text-foreground text-sm leading-snug mb-1">{post.title}</div>
                 <div className="text-xs text-muted-foreground">{post.date}</div>
-              </a>
+              </PostLink>
             ))}
           </div>
         </section>
@@ -352,7 +371,7 @@ const Blog = () => {
             <h2 className="text-2xl font-semibold text-foreground mb-6">{cat}</h2>
             <div className="space-y-4">
               {blogPosts.filter(p => p.category === cat).map(post => (
-                <a
+                <PostLink
                   key={post.href}
                   href={post.href}
                   className="block rounded-lg border bg-card p-5 hover:shadow-md transition-shadow"
@@ -364,7 +383,7 @@ const Blog = () => {
                     </div>
                     <span className="text-xs text-muted-foreground whitespace-nowrap">{post.date}</span>
                   </div>
-                </a>
+                </PostLink>
               ))}
             </div>
           </section>

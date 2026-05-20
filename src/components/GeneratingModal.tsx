@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import { Progress } from "@/components/ui/progress";
 import { Circle, Loader2, CheckCircle2, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -266,7 +267,7 @@ export default function GeneratingModal({
 
   // ERROR STATE
   if (errorMessage) {
-    return (
+    return createPortal(
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] p-4 overflow-y-auto">
         <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-[520px] mx-4 space-y-6 max-h-[calc(100vh-2rem)] overflow-y-auto">
           <div className="flex flex-col items-center gap-3">
@@ -302,12 +303,13 @@ export default function GeneratingModal({
             Error: {errorMessage}
           </p>
         </div>
-      </div>
+      </div>,
+      document.body
     );
   }
 
   // NORMAL PROGRESS STATE
-  return (
+  return createPortal(
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] p-4 overflow-y-auto">
       <div
         className={cn(
@@ -396,6 +398,7 @@ export default function GeneratingModal({
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
