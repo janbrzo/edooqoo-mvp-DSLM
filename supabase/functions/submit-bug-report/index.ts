@@ -40,11 +40,16 @@ serve(async (req) => {
   // still be configured for the future verified-domain path, so ignore it while
   // the sender remains sandboxed. This prevents repeated HTTP 403 failures.
   const bugReportFrom = Deno.env.get("BUG_REPORT_FROM_EMAIL") || "Edooqoo Bugs <onboarding@resend.dev>";
+  // v6.9.21 — both monitoring inboxes always notified when sender is verified.
+  // In Resend sandbox mode only the account owner inbox can receive mail.
   const resendSandboxRecipient = "j4n.brz0@gmail.com";
   const isSandboxSender = bugReportFrom.includes("onboarding@resend.dev");
-  const bugEmail = isSandboxSender
-    ? resendSandboxRecipient
-    : (Deno.env.get("BUG_REPORT_EMAIL") || resendSandboxRecipient);
+  const bugEmails: string[] = isSandboxSender
+    ? [resendSandboxRecipient]
+    : Array.from(new Set([
+        Deno.env.get("BUG_REPORT_EMAIL") || resendSandboxRecipient,
+        "edooqoo@gmail.com",
+      ]));
   const resendKey = Deno.env.get("RESEND_API_KEY");
   const appBaseUrl = Deno.env.get("APP_BASE_URL") || "https://edooqoo.com";
 
@@ -198,7 +203,7 @@ serve(async (req) => {
           },
           body: JSON.stringify({
             from: bugReportFrom,
-            to: [bugEmail],
+            to: bugEmails,
             reply_to: userEmail,
             subject: `[Bug] ${title.slice(0, 120)}`,
             html,
