@@ -254,3 +254,10 @@ RAG: free tools, CEFR level test, ESL lesson plan generator, vocab CEFR checker,
 - HOTFIX: notify-generation-failure + submit-bug-report emails include /admin/error-logs CTA button.
 Sanctity: worksheet prompt UNTOUCHED. Existing teacher RLS UNTOUCHED.
 RAG: public gallery, is_public, public_slug, LearningResource JSON-LD, 2-step audio TTS, gpt-4o-mini-tts, EdgeRuntime.waitUntil, repair keepalive, parse_recovered, admin error logs email link, Sprint 3 Plan v6.9.20.
+
+## v6.9.21 Updates
+- Gallery renderer: `GalleryExerciseRenderer.tsx` renders all 29 exercise types read-only; CTA = "1-Minute Prep".
+- Legacy .html links: `legacyLinkMap.ts` + `resolveLegacyHref.ts` — 3 buckets (mapped / live slug / Coming Soon). Footer "Compare" removed.
+- Multi-provider model audit: `scripts/audit-llm-models.ts` + `_shared/modelFailureLogger.ts` + `get_active_model_issues()` RPC + StatusPage banner.
+- Alerts go to j4n.brz0@gmail.com + edooqoo@gmail.com.
+- `GeneratingModal` uses createPortal + z-[100] to escape footer backdrop-blur stacking.

@@ -608,3 +608,36 @@ OnboardingHeroCard for empty Dashboard (P0); skeleton loaders (P1); nav-student-
 **SANCTITY:** Worksheet generation prompt UNTOUCHED. Audio TTS quality matches previous model (same `alloy|echo|fable|onyx|nova|shimmer` voices). Existing teacher RLS policies on `worksheets` UNTOUCHED — public-read is purely additive.
 
 **RAG Keywords:** public worksheet gallery, /gallery, is_public, public_slug, publish-worksheet, unpublish-worksheet, regenerate-gallery-sitemap, generate_public_slug, LearningResource JSON-LD, ItemList JSON-LD, PublishWorksheetButton, soft-removed slug, gpt-4o-audio-preview 404, gpt-4o-mini-tts, tts-1 fallback, 2-step audio pipeline, transcript determinism, EdgeRuntime.waitUntil, repair keepalive heartbeat, parse_recovered early warning, admin error logs email CTA, bugId deep link, Sprint 3 Plan v6.9.20.
+
+---
+
+## v6.9.21 — Post-Sprint 3 Fixes (Gallery + Links + Multi-Provider Audit + UI + Alerts)
+
+### Public Gallery Exercise Renderer
+**Problem:** v6.9.20 gallery rendered only `title`/`instructions`/`content`/`questions`; 29 taxonomy exercise types showed as plain text with structure (tables, options, audio) lost.
+**Edooqoo.com Solution:** `src/components/gallery/GalleryExerciseRenderer.tsx` — read-only switch by normalized exercise type. SEO crawlers get full structured content; humans see preview + "1-Minute Prep" CTA (NOT "30 seconds").
+**Technical Mechanics:** Switch on `ex.type`; matching → table, multiple-choice → A/B/C/D list, listening → `<audio>` + transcript fold, gap-text → `___` placeholders. Fallback: `<pre>{JSON.stringify(ex)}</pre>`.
+**RAG Keywords:** public gallery, worksheet preview, read-only renderer, exercise types, 1-Minute Prep CTA.
+
+### Legacy .html Link Resolver
+**Problem:** ~80 unique `.html` hrefs across `Blog.tsx`/`Resources.tsx`/`GlobalFooter.tsx` returned 404 — wasting crawl budget and breaking UX.
+**Edooqoo.com Solution:** Three-bucket strategy — (1) `src/data/legacyLinkMap.ts` maps legacy hrefs to existing programmatic routes; (2) 3 real blog posts use clean slugs; (3) unmapped tiles render as non-clickable "Coming soon". Footer "Compare" column removed. `public/sitemap.xml` pruned.
+**Technical Mechanics:** `src/lib/resolveLegacyHref.ts` → `{ url, comingSoon }`. Consumers branch on `comingSoon` to either `<Link>` or disabled card.
+**RAG Keywords:** broken links, 404, coming soon tiles, legacy redirects, sitemap pruning, .html cleanup.
+
+### Multi-Provider LLM Model Audit
+**Problem:** OpenAI silently removed `gpt-4o-audio-preview` → `generate-audio` 500'd for weeks. No monitoring across providers; `/admin/error-logs` and `/status` didn't surface provider failures.
+**Edooqoo.com Solution:** (1) Monthly Procedure B script `scripts/audit-llm-models.ts` inventories every model ref across `supabase/functions/**`, live-pings each provider, writes `docs/closed-loops/LLM_MODEL_INVENTORY.md` + `STATUS_LIVE.md`. (2) Runtime helper `supabase/functions/_shared/modelFailureLogger.ts` inserts into `error_logs` (`error_code='model_deprecation'` for 404/410, `'model_failure'` for 5xx). (3) Public RPC `get_active_model_issues()` powers a red banner on `StatusPage.tsx` whenever model issues are active in last 24h.
+**Technical Mechanics:** Logger uses real schema columns (`error_code` + `component`, NOT `error_type`). Wired into `generate-audio` (chat + TTS catch blocks). To replicate: add `import { logModelFailure } from "../_shared/modelFailureLogger.ts"` and call before each `throw`.
+**RAG Keywords:** model deprecation, LLM audit, multi-provider monitoring, gpt-4o-audio-preview, status page banner, error_logs, Procedure B, modelFailureLogger.
+
+### Bug Alert Email Recipients
+**Problem:** Alerts went only to founder's personal Gmail.
+**Edooqoo.com Solution:** `notify-generation-failure` and `submit-bug-report` send to `["j4n.brz0@gmail.com", "edooqoo@gmail.com"]`.
+**RAG Keywords:** bug alerts, email recipients, Resend, alert escalation.
+
+### Modal Stacking Context Fix
+**Problem:** `GlobalFooter` `backdrop-blur` created a stacking context covering `GeneratingModal` despite high z-index.
+**Edooqoo.com Solution:** `GeneratingModal.tsx` uses `createPortal(node, document.body)` with `z-[100]`. Footer/sidebar roots set `relative z-0`.
+**Technical Mechanics:** Backdrop-filter / transform / filter / will-change all create new stacking contexts; z-index can't escape them. Portal to root.
+**RAG Keywords:** modal layering, createPortal, backdrop-blur stacking context, z-index conflict, GeneratingModal.
