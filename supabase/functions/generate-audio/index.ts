@@ -1,5 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { logModelFailure } from "../_shared/modelFailureLogger.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -83,6 +84,14 @@ OUTPUT FORMAT: Return ONLY the spoken text (no JSON, no markdown).`;
     if (!scriptResponse.ok) {
       const errorText = await scriptResponse.text();
       console.error("❌ [AUDIO] Script generation failed:", errorText);
+      await logModelFailure({
+        model: "gpt-4o-mini",
+        provider: "openai",
+        status: scriptResponse.status,
+        endpoint: "/v1/chat/completions",
+        error: errorText,
+        functionName: "generate-audio",
+      });
       throw new Error(`Script generation failed (${scriptResponse.status}): ${errorText.substring(0, 300)}`);
     }
 
@@ -110,6 +119,14 @@ OUTPUT FORMAT: Return ONLY the spoken text (no JSON, no markdown).`;
       });
       if (!r.ok) {
         const errBody = await r.text();
+        await logModelFailure({
+          model,
+          provider: "openai",
+          status: r.status,
+          endpoint: "/v1/audio/speech",
+          error: errBody,
+          functionName: "generate-audio",
+        });
         throw new Error(`TTS ${model} failed (${r.status}): ${errBody.substring(0, 300)}`);
       }
       return r.arrayBuffer();
