@@ -21,17 +21,20 @@ export async function logModelFailure(opts: {
       opts.status === 404 || opts.status === 410 ? "critical"
       : opts.status >= 500 ? "warning"
       : "info";
-    const errorType =
+    const errorCode =
       opts.status === 404 || opts.status === 410 ? "model_deprecation" : "model_failure";
     await sb.from("error_logs").insert({
       severity,
-      error_type: errorType,
+      source: "edge-function",
       source_name: opts.functionName,
+      component: opts.provider,
+      error_code: errorCode,
       message: `${opts.provider} ${opts.model} → HTTP ${opts.status}`,
       context: {
         model: opts.model,
         provider: opts.provider,
         endpoint: opts.endpoint,
+        status: opts.status,
         error: String(opts.error).slice(0, 1000),
       },
     });
