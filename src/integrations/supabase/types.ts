@@ -3440,6 +3440,15 @@ export type Database = {
         }
         Returns: string
       }
+      get_active_model_issues: {
+        Args: never
+        Returns: {
+          count: number
+          last_seen: string
+          model: string
+          provider: string
+        }[]
+      }
       get_flashcard_cards_for_learning: {
         Args: { p_learner_identifier: string; p_set_id: string }
         Returns: {
