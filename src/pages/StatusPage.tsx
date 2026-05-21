@@ -112,7 +112,7 @@ export default function StatusPage() {
                   <ul className="text-xs text-red-700 dark:text-red-300 space-y-1">
                     {modelIssues.map((m) => (
                       <li key={`${m.provider}-${m.model}`}>
-                        <span className="font-mono">{m.provider}</span> · {m.model} — {m.count} incident{m.count === 1n || m.count === 1 ? '' : 's'} (last {new Date(m.last_seen).toLocaleTimeString()})
+                        <span className="font-mono">{m.provider}</span> · {m.model} — {Number(m.count)} incident{Number(m.count) === 1 ? '' : 's'} (last {new Date(m.last_seen).toLocaleTimeString()})
                       </li>
                     ))}
                   </ul>
