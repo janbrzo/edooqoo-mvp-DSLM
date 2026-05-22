@@ -15,6 +15,7 @@ import { generateAudioForWorksheet, generateImageForWorksheet } from '@/services
 import { streamWorksheetGeneration } from '@/services/worksheetStreamService';
 import { markWorksheetForClaim } from '@/hooks/useWorksheetClaim';
 import { devLog, devWarn } from '@/utils/logger';
+import { useDemoContext } from '@/contexts/DemoContext';
 
 export const useWorksheetGeneration = (
   userId: string | null,
@@ -33,8 +34,14 @@ export const useWorksheetGeneration = (
   const { toast } = useToast();
   const { trackEvent } = useEventTracking(userId);
   const { tokenLeft, hasTokens, isDemo, consumeToken } = useTokenSystem(userId);
+  const { isDemoMode, showDemoBlockedToast } = useDemoContext();
 
   const generateWorksheetHandler = async (data: FormData) => {
+    // v6.9.7-patch — hard demo guard before any work or navigation
+    if (isDemoMode) {
+      showDemoBlockedToast('Generating worksheets');
+      return;
+    }
     // Guard against double-click / duplicate requests
     if (isGenerating) {
       devWarn('⚠️ Generation already in progress, ignoring duplicate click');

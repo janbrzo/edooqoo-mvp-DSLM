@@ -34,7 +34,7 @@ const HeroHeadline: React.FC = () => {
   return (
     <section className="relative pt-12 pb-4 px-2 sm:px-4 overflow-hidden">
       {/* Background decoration */}
-      <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-violet-100/50 via-background to-background"></div>
+      <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-violet-100/30 via-transparent to-transparent pointer-events-none"></div>
 
       <div className="max-w-5xl mx-auto text-center">
         {/* Headline */}

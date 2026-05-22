@@ -208,6 +208,11 @@ export function SlotDetailModal({ open, onOpenChange, slot, studentName, student
   const handleCancel = () => { resetChanges(); onOpenChange(false); };
 
   const handleSave = async () => {
+    // v6.9.8 — demo guard (modal can open in demo, save is blocked)
+    if (typeof window !== 'undefined' && localStorage.getItem('edooqoo_demo_mode') === 'true') {
+      toast.info('Demo mode — Saving slot changes is disabled.');
+      return;
+    }
     setSaving(true);
     const updates: any = {
       slot_date: editDate, start_time: editStartTime, end_time: editEndTime, notes: editNotes || null,

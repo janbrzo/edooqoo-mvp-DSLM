@@ -103,6 +103,17 @@ export const useFutureTimeline = ({ studentId, teacherId }: UseFutureTimelinePro
 
   useEffect(() => { fetchSuggestions(); }, [fetchSuggestions]);
 
+  // v6.9.15c — cross-instance refresh trigger. Emitted e.g. by `useCurriculumPhases.deletePhase`
+  // after detaching phase-bound suggestions, so any mounted timeline reflects them as free steps.
+  useEffect(() => {
+    const h = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (!detail || detail.studentId === studentId) fetchSuggestions();
+    };
+    window.addEventListener('dslm:suggestionsUpdated', h);
+    return () => window.removeEventListener('dslm:suggestionsUpdated', h);
+  }, [studentId, fetchSuggestions]);
+
   // Selectors
   const nextSteps = useMemo(
     () => suggestions.filter(s => (s.suggestion_kind ?? 'next_step') === 'next_step'),
@@ -118,24 +129,36 @@ export const useFutureTimeline = ({ studentId, teacherId }: UseFutureTimelinePro
   // only suggestions of that phase. Otherwise behaves as before (next_step, no phase).
   const generateNextSteps = async (opts: GenerateNextStepsOpts): Promise<boolean> => {
     try {
+      if (!studentId || !teacherId) {
+        toast.error('Missing student or teacher context.');
+        return false;
+      }
       setGenerating(true);
       const targetPhaseId = opts.phaseId ?? null;
       const isPhaseBound = !!targetPhaseId;
       const requestedCount = opts.count ?? 3;
+      // v6.9.14 — defensive: cap excludeIds payload (large UUID arrays caused 500s).
+      const safeExcludeIds = (opts.excludeIds ?? []).slice(0, 25);
 
-      const response = await supabase.functions.invoke('generate-timeline', {
-        body: {
-          studentId, teacherId,
-          mode: isPhaseBound ? 'phase_steps' : 'next_steps',
-          count: requestedCount,
-          phaseId: targetPhaseId,
-          teacherComment: opts.teacherComment ?? '',
-          excludeIds: opts.excludeIds ?? [],
-        }
-      });
+      const invokePayload = {
+        studentId, teacherId,
+        mode: isPhaseBound ? 'phase_steps' : 'next_steps',
+        count: requestedCount,
+        phaseId: targetPhaseId,
+        teacherComment: opts.teacherComment ?? '',
+        excludeIds: safeExcludeIds,
+      };
+      // v6.9.15c — single call only. The previous "phase-bound failed → retry as free step"
+      // fallback silently changed user intent. Edge Function now performs its own retry
+      // server-side (plain JSON output) and surfaces precise error metadata.
+      const response = await supabase.functions.invoke('generate-timeline', { body: invokePayload });
       if (response.error) throw response.error;
       const rawSuggestions = response.data?.suggestions || [];
       const generationContext = response.data?.generationContext || {};
+      // v6.9.15a — warn when AI returned fewer than requested (truncation / partial).
+      if (generationContext?.warning && rawSuggestions.length > 0 && rawSuggestions.length < requestedCount) {
+        toast.info(`AI returned only ${rawSuggestions.length}/${requestedCount} steps (${generationContext.warning}). Try a smaller count for full output.`);
+      }
       // Defense in depth: enforce exact count on the client too.
       const newSuggestions = rawSuggestions.slice(0, requestedCount);
       if (newSuggestions.length === 0) {
@@ -195,7 +218,40 @@ export const useFutureTimeline = ({ studentId, teacherId }: UseFutureTimelinePro
       return true;
     } catch (error) {
       console.error('Error generating next steps:', error);
-      toast.error('Failed to generate next steps');
+      // v6.9.11: distinguish gateway 402 (no credits) / 429 (rate limit) / generic 5xx.
+      const status = (error as any)?.context?.status ?? (error as any)?.status;
+      if (status === 402) {
+        toast.error('AI credits exhausted. Add credits in Workspace settings.');
+      } else if (status === 429) {
+        toast.error('Too many AI requests. Wait a moment and retry.');
+      } else if (status === 502) {
+        // v6.9.15b — distinguish AI schema rejection (Gemini "too many states")
+        // from generic gateway failures so the teacher sees actionable copy.
+        const reqCount = opts.count ?? 3;
+        const ctx: any = (error as any)?.context;
+        const detail = String(ctx?.body?.detail || ctx?.detail || (error as any)?.message || '');
+        const schemaRejected = ctx?.body?.schemaRejected === true || /too many states|INVALID_ARGUMENT|schema/i.test(detail);
+        if (schemaRejected) {
+          toast.error(
+            'AI could not return this batch. Try generating fewer steps, or generate one step at a time.',
+            { duration: 8000 }
+          );
+        } else {
+          toast.error(
+            reqCount > 1
+              ? 'AI generator overloaded for batch requests — try generating 1 step at a time.'
+              : 'AI generator is temporarily unavailable. Please retry in a moment.',
+            { duration: 7000 }
+          );
+        }
+      } else if (status === 500) {
+        toast.error(
+          'Generator returned an error. Try without phase target, or reduce existing steps and retry.',
+          { duration: 7000 }
+        );
+      } else {
+        toast.error('Failed to generate next steps. Please try again.');
+      }
       return false;
     } finally {
       setGenerating(false);

@@ -45,7 +45,7 @@ export const PricingTeaser: React.FC<PricingTeaserProps> = ({ onSeeFullPricing }
   };
 
   return (
-    <section className="py-12 px-4 bg-gradient-to-b from-background to-secondary/20">
+    <section className="py-12 px-4 bg-background/50 backdrop-blur-sm">
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-8">
           <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-2">

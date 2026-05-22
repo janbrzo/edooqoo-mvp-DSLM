@@ -64,10 +64,10 @@ export const EmailConfirmationModal: React.FC<EmailConfirmationModalProps> = ({
           <div className="text-sm text-muted-foreground space-y-1">
             <p><strong>What's next:</strong></p>
             <ol className="list-decimal list-inside space-y-1">
-              <li>Check your email inbox (and spam folder)</li>
-              <li>Click the confirmation link</li>
-              <li>Sign in to your account</li>
-              <li>Start generating worksheets!</li>
+              <li>Check your inbox for the confirmation email from Supabase (and spam folder)</li>
+              <li>Click the confirmation link to activate your account</li>
+              <li>You'll then receive a welcome email from <strong>hello@edooqoo.com</strong> with next steps</li>
+              <li>Sign in and start generating worksheets!</li>
             </ol>
           </div>
 
