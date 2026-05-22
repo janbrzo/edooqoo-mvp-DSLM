@@ -1,9 +1,9 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { PageSeo } from '@/components/seo/PageSeo';
 import { SEO_META } from '@/constants/seoMeta';
-import { BLOG_POSTS, BLOG_CATEGORIES, type BlogPostMeta } from '@/data/blogIndex';
+import { BLOG_POSTS as AUTO_BLOG_POSTS } from '@/data/blogIndex';
 
 // v6.9.22 — Post tiles always render as <a> for full-page nav to static .html files.
 const PostLink: React.FC<{ href: string; className: string; children: React.ReactNode }> = ({ href, className, children }) => {
@@ -307,7 +307,22 @@ const Blog = () => {
     })),
   };
 
-  const categories = [...new Set(blogPosts.map(p => p.category))];
+  // v6.9.22 — Keep only posts whose .html file exists in public/blog/.
+  // Eliminates ~50 dangling links to deleted files (the original 404 source).
+  const validHrefs = useMemo(() => new Set(AUTO_BLOG_POSTS.map(p => p.url)), []);
+  const livePosts = useMemo(() => blogPosts.filter(p => validHrefs.has(p.href)), [validHrefs]);
+
+  // Add any file that exists but wasn't in the curated list, using auto-extracted meta.
+  const curatedHrefs = useMemo(() => new Set(blogPosts.map(p => p.href)), []);
+  const orphanFromFiles = useMemo(() =>
+    AUTO_BLOG_POSTS
+      .filter(p => !curatedHrefs.has(p.url))
+      .map(p => ({ title: p.title, description: p.description, href: p.url, category: p.category, date: p.date || '2026-01-01' })),
+    [curatedHrefs]
+  );
+  const allPosts = useMemo(() => [...livePosts, ...orphanFromFiles], [livePosts, orphanFromFiles]);
+
+  const categories = [...new Set(allPosts.map(p => p.category))];
 
   // v6.9.1 — Internal linking widget for newest posts. GSC reports newly
   // published blog posts as "Discovered – currently not indexed" because
