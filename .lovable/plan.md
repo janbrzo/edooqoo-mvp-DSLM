@@ -1,255 +1,188 @@
-# Plan wdrożenia v6.9.15c (rev. 2)
+# Plan dokończenia v6.9.7 — Resend zamiast Lovable Emails
 
-## Co się zmienia względem poprzedniej wersji
-Rezygnujemy z pomysłu sekwencyjnych requestów `count=1`. Powód jest słuszny: AI nie miałoby pełnego kontekstu pozostałych kroków podczas generacji każdego osobno, więc Next Stepy traciłyby spójność i komplementarność. Zamiast tego naprawiamy realną przyczynę regresji w `generate-timeline`, która pojawiła się w ostatnich tygodniach, tak żeby pojedyncze wywołanie z `count > 1` znów działało stabilnie w jednym requeście.
+## Kontekst i decyzja
 
-Pozostałe punkty (2A, 2B, 3, 4, 5, 6, dokumentacja RAG) zostają bez zmian merytorycznych — tylko Problem 1 ma nowe rozwiązanie.
+Tak — możemy i powinniśmy użyć Resend. Masz `RESEND_API_KEY` w secrets, używamy go już w innych edge functions projektu (np. send-homework-email, bug report). Domena `edooqoo.com` jest zweryfikowana w Resend, więc nie potrzebujemy konfigurować subdomeny `notify.edooqoo.com` ani nameserverów Lovable.
 
----
+**Korzyści:**
+- Brak delegacji NS (Twoja domena zostaje w pełni Twoja)
+- Brak nowej infrastruktury (pgmq, cron, vault) — wszystko leci synchronicznie przez API Resend
+- Spójność z istniejącymi mailami w aplikacji (homework, bug report)
+- Szybciej, mniej ruchomych części, mniej rzeczy do popsucia
 
-## Problem 1: `AI generator overloaded for batch requests` przy więcej niż 1 Next Step
-
-### Analiza regresji (co popsuliśmy ~2 tygodnie temu)
-Porównanie obecnego `generate-timeline` z bliźniaczym, działającym `generate-curriculum-phases`:
-
-| Element | `generate-curriculum-phases` (działa) | `generate-timeline` (psuje się dla `count>1`) |
-|---|---|---|
-| Format wyjścia | plain text JSON array, `JSON.parse` z czyszczeniem `code fences` | tool calling przez `tools[].function.parameters` z `additionalProperties` i zagnieżdżonymi obiektami |
-| `temperature` | 0.6 | 0.85 |
-| `reasoning` | `{ effort: 'low' }` | brak |
-| `max_tokens` | 2500 stałe, prosty schema | dynamiczny 1800 + 2000 × count, ale duży schema na poziomie tool |
-| Wielkość promptu | umiarkowana | dodatkowy `existingStepsBlock` do 20 wpisów + bogaty `exerciseFocusMap` + lista 30+ exercise IDs |
-| Schemat outputu | prosty array z polami płaskimi | array z `exerciseFocusMap: { additionalProperties: { type: 'string' } }`, którego Gemini przy `count>1` często odrzuca lub obcina |
-| Tryb wywołania toola | `tool_choice` wymuszony | `tool_choice` wymuszony — przy złożonym schemacie i większej liczbie elementów Gateway zwraca 5xx / `INVALID_ARGUMENT` / `too many states` |
-
-W praktyce wszystkie te elementy były dokładane do `generate-timeline` w ostatnich iteracjach (max_tokens, dodatkowy context, FocusMap, exclude, phaseId). Pojedynczy step mieści się i wraca poprawnie, ale `count>1` przekracza tolerancję modelu na złożone tool schema z forsowanym `tool_choice`. Stąd 502 i komunikat z toasta.
-
-Działający wzorzec mamy obok — `generate-curriculum-phases` zwraca array w `message.content` jako plain text JSON, bez tool calling, i działa stabilnie nawet dla 5–8 elementów. Wracamy do tego wzorca w `generate-timeline`.
-
-### Rozwiązanie Edooqoo.com
-Naprawiamy przyczynę, nie symptom. Jedno wywołanie `generate-timeline` musi nadal generować cały batch w jednym przejściu, żeby Next Stepy były spójne i komplementarne. Robimy to przez:
-
-1. Wyłączenie tool callingu i przejście na plain text JSON output (jak w `generate-curriculum-phases`).
-2. Zachowanie pełnego sanitizera (8 ćwiczeń, focusMap, media family, etc.) po stronie Edge Function — kontrakt zwracany do frontendu się nie zmienia.
-3. Dodanie `reasoning.effort='low'` i obniżenie `temperature` do 0.6, żeby Gemini lepiej trzymał strukturę.
-4. Lekkie odchudzenie promptu w sekcjach, które nie wpływają na jakość generacji (limity dla weak areas, knowledge, recent worksheets, existing steps), bez ruszania logiki worksheet generation engine.
-5. Dodanie pojedynczego retry z `temperature=0.4` i jeszcze prostszą instrukcją w razie 5xx, zanim wrzucimy frontendowi błąd.
-
-To NIE jest sekwencyjny batch — cały zestaw kroków powstaje w jednym requeście, co zachowuje spójność.
-
-### Mechanika techniczna
-
-#### Plik: `supabase/functions/generate-timeline/index.ts`
-
-1. Usunąć `tools` i `tool_choice`. Zostawić wywołanie AI Gateway przez `chat/completions`.
-2. Body request:
-   - `model: 'google/gemini-2.5-flash'`
-   - `messages`: system + user (system: „You are an expert ESL curriculum planner. Return only a valid JSON array. No markdown, no commentary.")
-   - `temperature: 0.6`
-   - `reasoning: { effort: 'low' }`
-   - `max_tokens: Math.min(8192, 2200 + 1500 * count)`
-   - bez `response_format`, żeby nie zaostrzać schematu (Gemini i tak akceptuje czysty JSON output, gdy o to wyraźnie poprosimy w prompcie — to samo robi `generate-curriculum-phases`).
-3. Prompt:
-   - Końcówka promptu wymusza format wyjścia. Wzorzec:
-     ```text
-     Return ONLY a valid JSON array of exactly N objects (no markdown, no commentary), with this EXACT shape per object:
-     {
-       "topic": "string (TBLT-style adult task)",
-       "goal": "string",
-       "additionalInfo": "string",
-       "grammarFocus": "string",
-       "exercises": ["id1", "id2", "id3", "id4", "id5", "id6", "id7", "id8"],
-       "exerciseFocusMap": { "id1": "vocabulary|grammar|none", ... },
-       "rationale": "string",
-       "focusSkills": ["..."],
-       "difficulty": "CEFR level string",
-       "estimatedImpact": { "key": "value" }
-     }
-     ```
-   - Lista valid exercise IDs zostaje, ale skracamy istniejący `existingStepsBlock` z 20 do 10 wpisów i `WeakAreas` do 8, `Knowledge` do 6, `Worksheet history` do 8. To są limity prompt-fit, nie mają wpływu na worksheet generation engine.
-4. Parser:
-   - `aiData.choices[0].message.content` → strip `code fences` → `JSON.parse`.
-   - Jeśli to obiekt z polem `suggestions`, użyj `parsed.suggestions`. Jeśli to array, użyj wprost. Jeśli parsowanie pada, fallback: spróbuj wyciąć największy `[...]` regexem (`/\[[\s\S]*\]/`).
-5. Sanitizer (TARGET_EX_COUNT = 8, focus map enforcement, media family) zostaje BEZ ZMIAN. To jest „defense in depth” i właśnie dlatego frontend dostaje stabilny kontrakt mimo, że schema na wejściu modelu jest luźna.
-6. Retry on 5xx (jeden, bez sekwencji per step):
-   - jeśli `aiResponse.ok === false` ALBO suggestions.length === 0 po sparsowaniu, wykonujemy DRUGIE wywołanie Gateway:
-     - `temperature: 0.4`
-     - prompt z dopiskiem na końcu: `Return EXACTLY ${count} items. JSON array only. No prose.`
-     - tych samych pozostałych parametrów.
-   - Jeśli i to padnie, dopiero wtedy zwracamy 502 z dotychczasowym `schemaRejected` heurystycznym (`/too many states|INVALID_ARGUMENT/i`).
-7. `generationContext` rozszerzamy o:
-   - `output_mode: 'plain_json'`
-   - `retry_used: boolean`
-   - `requested_count`, `finish_reason`, `warning` zostają jak były.
-8. Ważne: NIE dotykamy żadnego promptu worksheet generation engine ani `format-worksheet-prompt`. Zmiana dotyczy wyłącznie sposobu, w jaki Gemini ma zwrócić pre-worksheet suggestions.
-
-#### Plik: `src/hooks/useFutureTimeline.tsx`
-
-1. Usunąć fallback „phase-bound failed → retry as free step” dla batchy. Powód: cichy fallback maskował problem i tworzył free stepy zamiast phase stepów. Po naprawie Edge Function nie powinien być potrzebny. Jeśli phase-bound generation zwróci 5xx mimo retry serwerowego, frontend pokazuje precyzyjny toast i nie zmienia phaseId.
-2. Zachować obsługę:
-   - 402 → „AI credits exhausted…”
-   - 429 → „Too many AI requests…”
-   - 502 z `schemaRejected` → „AI could not return this batch. Try generating fewer steps, or generate one step at a time.”
-   - 502 generic → „AI generator is temporarily unavailable. Please retry in a moment.”
-   - 500 → istniejący komunikat
-3. Po sukcesie zostawić obecny insert i `fetchSuggestions`.
-
-#### Plik: `supabase/functions/generate-curriculum-phases/index.ts`
-Bez zmian. Jest naszym wzorcem.
-
-### Dlaczego to przywróci stan sprzed regresji
-- Wcześniej działający batch korzystał z prostszego promptu i mniej rozbudowanego outputu. Powrót do plain text JSON i ograniczenie kontekstu odtwarza ten stan, jednocześnie zachowując nowe sanitizery i pola, które już są używane przez resztę aplikacji.
-- Plain text JSON nie podlega Gemini Tool Schema „too many states” — to jest dokładnie ta klasa błędu, którą obecny tryb tool calling generował dla `count>1`.
-- Backend sanitizer nadal gwarantuje 8 ćwiczeń, focusMap i media family, więc dane w DB nie tracą jakości.
-
-### Weryfikacja
-- W UI: Generate 1 / 2 / 3 / 6 Next Steps jako free steps.
-- W UI: Generate 1 / 2 / 3 dla każdej fazy.
-- Edge Function logs: brak `INVALID_ARGUMENT`, brak `too many states`.
-- Console nie pokazuje `phase-bound failed, retrying as free step`.
-- DB: `phase_id` i `suggestion_kind` zgodne z wyborem nauczyciela.
+**Trade-off (świadomy):** Brak kolejki retry/DLQ jak w Lovable Emails. Dla welcome maila to akceptowalne — jeśli pierwszy strzał padnie, mamy alert w `email_send_log` i ręczny resend.
 
 ---
 
-## Problem 2A: brak goals przy `Generate Learning Roadmap` (bez zmian)
+## Status zastany (po audycie)
 
-### Pytanie użytkownika
-„Jeżeli nie ma goals, na jakiej podstawie wygeneruje się Roadmap i fazy?”
+| Blok | Status |
+|---|---|
+| A. Edge Function `format-worksheet-prompt` | DONE — istnieje `supabase/functions/format-worksheet-prompt/index.ts`, klient woła `await formatPromptForAI`, sourcemaps off, debugger drop |
+| B. Lazy demo content | DONE — `buildDemoData` async, dynamic import `demoWorksheetContent` i mocków |
+| C. Welcome email pipeline | NOT DONE — brak edge function, triggera, szablonu |
+| D. Dokumentacja | CZĘŚCIOWO — `docs/llm-context.md`, `llms.txt`, `mem://features/security/ip-protection-hardening` zrobione. Brak wpisu o welcome email |
 
-Roadmapa nadal może powstać, ale na słabszych źródłach: `students.main_goal`, `students.english_level`, `student_skill_metrics`, `student_knowledge_entries`, ostatnie worksheet topics, pacing mode, `main_goal_target_date`. Bez `student_progress_goals` plan jest mniej spersonalizowany — to tryb awaryjny, nie pełnoprawny workflow.
-
-### Rozwiązanie Edooqoo.com
-Przed generacją roadmapy bez aktywnych goals pokazujemy ostrzeżenie i pytamy o potwierdzenie, dając jednocześnie szybkie ścieżki dodania celu.
-
-### Mechanika techniczna
-Pliki: `src/components/dslm/MacroTimeline.tsx`, `src/components/dslm/PathwayView.tsx`, `src/components/dslm/DSLMTab.tsx`, `src/components/dslm/GoalsView.tsx`.
-
-1. `PathwayView` ma już `useStudentProgress` i tym samym `goals`. Przekazujemy `hasActiveGoals={goals.length > 0}` do `MacroTimeline`.
-2. W empty state `MacroTimeline` (`No curriculum plan yet`) i przy klikalnym przycisku `Generate Learning Roadmap` w przypadku braku goals dodajemy widoczny komunikat:
-   - tekst: `Add goals first for better worksheet suggestions.`
-   - przycisk: `Add goal` → emituje `dslm:openSubsection` z `id='goals-supporting'`, dzięki czemu istniejący `CollapsibleSection` rozwinie sekcję i przewinie do niej.
-3. Klik `Generate Learning Roadmap` przy braku goals NIE wywołuje od razu `generatePhases`. Otwieramy AlertDialog:
-   - Tytuł: `Generate roadmap without goals?`
-   - Opis: krótkie info, że plan będzie best-effort na podstawie main goal, level, metrics, notes, worksheet history.
-   - Przyciski:
-     - `Cancel` — zamyka dialog
-     - `Confirm` — wywołuje `generatePhases('replace')`
-     - `Add Supporting goal` — emituje `dslm:addGoal` z `{ type: 'supporting' }`
-     - `Add Additional goal` — emituje `dslm:addGoal` z `{ type: 'additional' }`
-4. `GoalsView` nasłuchuje `dslm:addGoal`. Po otrzymaniu eventu ustawia `newGoal.type` i `showAddGoal=true`, więc otwiera istniejący Add Goal dialog bez duplikowania logiki.
+Do dokończenia: **Blok C + uzupełnienie dokumentacji**.
 
 ---
 
-## Problem 2B: brak ukończonego placement / Welcome Test (bez zmian)
+## Blok C — Welcome Email przez Resend
 
-### Pytanie użytkownika
-„Jeżeli nie ma goals i nie ukończono placement, na jakiej podstawie wygeneruje się Roadmap?”
+### 1. Edge Function: `supabase/functions/send-welcome-email/index.ts`
 
-Bez goals i bez ukończonego Welcome Placement Test plan jest oparty na minimum: `main_goal`, `english_level` ustawiony ręcznie, ewentualne notatki, ewentualne worksheet history, ewentualne metrics. To nadal działa, ale precyzja diagnozy jest niska.
+- `verify_jwt = false` (woła ją trigger DB / webhook, nie zalogowany user)
+- W kodzie: walidacja shared secret w nagłówku `x-internal-secret` (nowy secret `WELCOME_EMAIL_SECRET`) — chroni przed publicznym spamem
+- Body (Zod): `{ email: string, firstName?: string, signupSource: 'email' | 'google' }`
+- Idempotencja: sprawdza `email_send_log` (`template_name='welcome_email' AND recipient_email=$1`) — jeśli już `sent`, zwraca 200 bez ponownej wysyłki
+- Wywołanie Resend REST API: `POST https://api.resend.com/emails` z `Authorization: Bearer ${RESEND_API_KEY}`
+  - `from: "Edooqoo <hello@edooqoo.com>"`
+  - `reply_to: "hello@edooqoo.com"`
+  - `subject: "Welcome to Edooqoo, {firstName} 👋"`
+  - `html`: render React Email template (poniżej)
+- Loguje wynik do `email_send_log` (status `sent` / `failed`, `error_message`, `provider_message_id`)
+- CORS: standard z `@supabase/supabase-js/cors`
+- Używa `APP_BASE_URL` do linków w mailu (zgodnie z core memory rule)
 
-### Rozwiązanie Edooqoo.com
-Drugie ostrzeżenie obok Roadmapy z CTA do wysłania Welcome Placement Test, używając istniejącego flow.
+### 2. Szablon: `supabase/functions/_shared/email-templates/welcome.tsx`
 
-### Mechanika techniczna
-1. W `PathwayView` lub `MacroTimeline` lekkie zapytanie do `student_tests` (`student_id`, `teacher_id`, `test_type='welcome'`, `deleted_at IS NULL`, latest):
-   - completed jeśli `status in ('completed','reviewed')`.
-2. Jeśli nieukończony, pokazujemy info-banner: `Send the Welcome Placement Test for a stronger roadmap baseline.` + przycisk `Send test`.
-3. Reusable hook `src/hooks/useWelcomeTestActions.ts` zbudowany z funkcji już istniejących w `WelcomeTestSuggestion.tsx` (`ensureWelcomeTest`, `handleSend`, `handleCopy`, `handlePreview`, `handleRefreshLink`). `WelcomeTestSuggestion` zostaje przepisany na ten hook bez zmiany zachowania. Nowe miejsce użycia w roadmapie korzysta tylko z `send`.
-4. Brak emaila ucznia → istniejące zachowanie: link kopiowany do clipboardu z odpowiednim toastem.
+React Email template w stylu marki Edooqoo:
+- Tło `#ffffff`
+- Akcent: kolor primary z `index.css` (przeczytam i zastosuję inline)
+- Heading: powitanie + imię (jeśli jest)
+- Sekcja 1: "What you can do now" — 3 bullety (generate worksheet, add student, share homework)
+- CTA Button → `${APP_BASE_URL}/dashboard`
+- Sekcja 2: zasoby (link do How it works, Glossary)
+- Stopka: kontakt + adres firmy (wymaganie CAN-SPAM przy mailach od domeny brandowej)
+- Bez unsubscribe (welcome jest transactional/jednorazowy, recipient właśnie się zarejestrował)
+
+### 3. Tabela: `email_send_log` (jeśli nie istnieje)
+
+Sprawdzę przez `supabase--read_query` czy tabela już jest (od istniejących maili Resend). Jeśli nie — migracja:
+
+```
+- email_send_log (id uuid pk, recipient_email text, template_name text,
+  status text check in ('pending','sent','failed'),
+  provider_message_id text, error_message text, sent_at timestamptz,
+  created_at timestamptz default now())
+- index na (recipient_email, template_name)
+- RLS: tylko service_role read/write (zero dostępu z klienta)
+```
+
+### 4. Trigger DB: wysyłka po potwierdzeniu emaila
+
+Strategia (sprawdzona w innych projektach Lovable, kompatybilna):
+
+**Trigger na `auth.users` AFTER UPDATE** — gdy `email_confirmed_at` przechodzi z NULL na NOT NULL:
+
+```sql
+CREATE OR REPLACE FUNCTION public.handle_email_confirmed()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_url text;
+  v_signup_source text;
+BEGIN
+  IF OLD.email_confirmed_at IS NULL AND NEW.email_confirmed_at IS NOT NULL THEN
+    v_signup_source := COALESCE(NEW.raw_app_meta_data->>'provider', 'email');
+    -- Wywołanie edge function przez net.http_post (pg_net)
+    PERFORM net.http_post(
+      url := current_setting('app.settings.welcome_email_url'),
+      headers := jsonb_build_object(
+        'Content-Type','application/json',
+        'x-internal-secret', current_setting('app.settings.welcome_email_secret')
+      ),
+      body := jsonb_build_object(
+        'email', NEW.email,
+        'firstName', NEW.raw_user_meta_data->>'first_name',
+        'signupSource', v_signup_source
+      )
+    );
+  END IF;
+  RETURN NEW;
+END;
+$$;
+
+CREATE TRIGGER on_user_email_confirmed
+AFTER UPDATE OF email_confirmed_at ON auth.users
+FOR EACH ROW EXECUTE FUNCTION public.handle_email_confirmed();
+```
+
+**Timing rozróżnienie email vs Google OAuth:**
+- Email signup: `email_confirmed_at` ustawia się po kliknięciu w link → mail leci natychmiast (to jest moment, w którym user "wszedł")
+- Google OAuth: Supabase ustawia `email_confirmed_at` od razu przy callbacku → mail leci natychmiast (5-min opóźnienie z poprzedniej iteracji planu odpada — użytkownik OAuth nie potrzebuje "remindera o sprawdzeniu skrzynki")
+
+Jeśli użytkownik usunie konto i założy ponownie — `email_send_log` zapobiegnie duplikatowi (idempotencja per email).
+
+### 5. Settings DB
+
+`ALTER DATABASE` ustawia:
+- `app.settings.welcome_email_url` = `https://bvfrkzdlklyvnhlpleck.supabase.co/functions/v1/send-welcome-email`
+- `app.settings.welcome_email_secret` = wartość z `WELCOME_EMAIL_SECRET` (przekażę w migracji jako placeholder, wartość ustawi user przez add_secret)
+
+### 6. Sekret
+
+Nowy secret `WELCOME_EMAIL_SECRET` (random 32-char) — używany do walidacji `x-internal-secret` w edge function. Poproszę przez `add_secret` po zatwierdzeniu planu.
+
+### 7. Test end-to-end
+
+Po wdrożeniu:
+- `supabase--curl_edge_functions` z poprawnym `x-internal-secret` → status 200, log w `email_send_log`
+- Bez secretu → 401
+- Powtórne wywołanie z tym samym emailem → 200 z `{ skipped: true }` (idempotencja)
+- Manualny test trigger: `UPDATE auth.users SET email_confirmed_at=now() WHERE id='...'` na test userze → mail przychodzi
 
 ---
 
-## Problem 3: po usunięciu fazy Next Steps mają się odpiąć (bez zmian)
+## Blok D — Dokumentacja
 
-### Diagnoza
-W DB FK to `ON DELETE SET NULL`, ale aplikacja używa soft delete (`deleted_at`), więc constraint się nie odpala. Trzeba odpiąć aplikacyjnie.
+### 1. `docs/llm-context.md`
 
-### Rozwiązanie Edooqoo.com
-Przy soft delete fazy wszystkie powiązane Next Stepy (aktywne i `is_used`) dostają `phase_id = null` i `suggestion_kind = 'next_step'`. Stają się wolnymi stepami i zostają w planie.
+Nowa sekcja w v6.9.7:
+- **Problem:** New users had no personalized onboarding email; Supabase default confirmation email was generic
+- **Edooqoo Solution:** Branded welcome email via Resend, fired on email confirmation, idempotent per recipient
+- **Technical Mechanics:** trigger `on_user_email_confirmed` → `pg_net.http_post` → `send-welcome-email` edge function → Resend REST API → log in `email_send_log`. Source rozróżnia email/google OAuth via `raw_app_meta_data->>'provider'`.
+- **RAG Keywords:** welcome email, post-signup, email confirmation, transactional email, Resend, onboarding mail, hello@edooqoo.com
 
-### Mechanika techniczna
-Plik: `src/hooks/dslm/useCurriculumPhases.tsx`.
+### 2. `llms.txt`
 
-1. W `deletePhase(id)` po soft delete fazy wykonujemy update na `future_worksheet_suggestions` filtrowanym po `phase_id=id` i `teacher_id=teacherId` z setem `{ phase_id: null, suggestion_kind: 'next_step' }`.
-2. Renumeracja faz pozostaje jak jest (sequential 1..N).
-3. Emitujemy:
-   - `dslm:phasesUpdated` (już istnieje),
-   - nowy `dslm:suggestionsUpdated` z `studentId`.
-4. `useFutureTimeline` dostaje listener `dslm:suggestionsUpdated` i wywołuje `fetchSuggestions`, dzięki czemu Next Steps natychmiast widać jako wolne.
+Aktualizacja sekcji "Latest version" — dodać Welcome Email do v6.9.7.
 
----
+### 3. Memory
 
-## Problem 4: przy fazach `Remove` tylko jako ikona (bez zmian)
+Nowy plik `mem://features/email/welcome-email-pipeline`:
+- Trigger DB jest jedynym źródłem wysyłki — nie wywoływać `send-welcome-email` z klienta
+- `email_send_log` zapewnia idempotencję — nigdy nie ścierać tej tabeli
+- Resend `from` musi pozostać `hello@edooqoo.com` (zweryfikowana skrzynka)
+- Sekret `WELCOME_EMAIL_SECRET` chroni endpoint — nigdy nie hardcodować
 
-W `MacroTimeline.tsx` zamieniamy przycisk `Remove` z tekstem na icon-only z tooltipem `Remove phase` i `aria-label="Remove phase"`. Zachowujemy obecny destrukcyjny styl i odstępy, żeby nie psuć layoutu wiersza akcji.
-
----
-
-## Problem 5: confirm bez wpisywania tekstu (bez zmian)
-
-Tworzymy nowy `src/components/dslm/ConfirmDeleteDialog.tsx`:
-
-- Props: `open`, `onOpenChange`, `label`, `description`, `onConfirm`, opcjonalnie `confirmLabel='Confirm'`.
-- UI: tytuł `Delete {label}?`, krótki opis, przyciski `Cancel` i `Confirm` (variant `destructive`).
-- Zamieniamy użycia `ConfirmTypeToDeleteDialog` w `MacroTimeline.tsx` (delete fazy) i `NextStepBanner.tsx` (delete next step) na nowy komponent.
-- Aktualizujemy `mem/features/dslm/type-to-confirm-delete.md` i `mem://index.md`: nowa reguła to „destructive DSLM actions use a single-click Confirm modal; type-to-confirm wymaganie zostało wycofane na życzenie product ownera”.
+Aktualizacja `mem://index.md` — dodać wpis do Memories.
 
 ---
 
-## Problem 6: `1 MINUTE` + `Learn More` (bez zmian)
+## Brak regresji — checklist
 
-Nie mamy dedykowanego artykułu „What is 1 MINUTE?”. Mamy `/features/dslm`, który tłumaczy DSLM i jego warstwy. W tej iteracji `Learn More` w `DslmExplainerBanner.tsx` linkuje do `/features/dslm` jako `<Button asChild><Link to="/features/dslm">Learn more</Link></Button>`. W dokumentacji odnotowujemy, że dedykowany artykuł „1 MINUTE briefing” może powstać w osobnym tasku (poza zakresem tej iteracji).
-
----
-
-## Dokumentacja RAG
-
-Pliki: `docs/llm-context.md`, `llms.txt`. Dodajemy sekcję `v6.9.15c (rev. 2)` w formacie:
-
-`Problem -> Edooqoo.com Solution -> Technical Mechanics` + `RAG Keywords`.
-
-Zawartość merytoryczna:
-- `generate-timeline` używa plain text JSON output, NIE tool calling, dla obsługi `count>1`.
-- `temperature=0.6`, `reasoning.effort='low'`, `max_tokens=Math.min(8192, 2200 + 1500*count)`.
-- Backend sanitizer (8 ćwiczeń, focusMap, media family) jest źródłem prawdy o kontrakcie zwracanym do frontendu.
-- Single-pass batch generation jest zachowane → spójność i komplementarność Next Steps utrzymana.
-- Phase-bound batch nie wpada już w cichy fallback do free steps.
-- Roadmapa bez goals: best-effort na podstawie main goal, level, metrics, notes, worksheet history.
-- Roadmapa bez Welcome Placement Test: jeszcze niższy baseline; UI ostrzega i daje CTA.
-- Soft delete fazy: `phase_id=null`, `suggestion_kind='next_step'` na powiązanych `future_worksheet_suggestions`; emituje `dslm:suggestionsUpdated`.
-- Confirm delete bez wpisywania tekstu (replaces type-to-confirm).
-- `1 MINUTE` banner: `Learn more` → `/features/dslm`.
-
-RAG keywords (przykłady):
-`generate-timeline plain text JSON`, `tool calling removed Gemini`, `Gemini too many states tool schema`, `single-pass batch coherent next steps`, `backend sanitizer 8 exercises focus map media family`, `roadmap without goals fallback`, `welcome placement test missing baseline`, `soft delete phase detach next steps`, `phase_id null suggestion_kind next_step`, `dslm:suggestionsUpdated event`, `Confirm delete without typing`, `ConfirmDeleteDialog`, `1 MINUTE Learn more DSLM`.
+- Trigger działa tylko AFTER UPDATE OF `email_confirmed_at` (NULL → NOT NULL) — istniejący userzy z już potwierdzonym mailem NIE dostaną maila przy żadnej innej zmianie
+- Edge function jest niezależna — żadne istniejące funkcje nie są modyfikowane
+- `email_send_log` (jeśli już istnieje od homework/bug report) — używamy istniejącej, dodajemy tylko `template_name='welcome_email'`
+- Jeśli `pg_net` extension nie jest aktywne — migracja je włączy (`CREATE EXTENSION IF NOT EXISTS pg_net`)
+- Resend rate limit (10 req/sec na default) — welcome ma <1 req/min realnie, brak ryzyka
+- Brak zmian w `format-worksheet-prompt`, demo lazy loading, vite config, sourcemap, logger
 
 ---
 
-## Czego NIE ruszamy
-- Worksheet Generation Engine, `format-worksheet-prompt`, `generate-curriculum-phases` — bez zmian.
-- Schema DB — bez migracji.
-- RLS — bez zmian.
-- Marketing routes poza dodaniem linku do istniejącej `/features/dslm`.
+## Kolejność wykonania
 
-## Kolejność implementacji
-1. Aktualizacja project memory dot. delete confirmation.
-2. Refactor `generate-timeline` na plain text JSON output + retry serwerowy.
-3. `useFutureTimeline`: usunięcie cichego fallbacku phase→free dla batchy, listener `dslm:suggestionsUpdated`.
-4. `useCurriculumPhases.deletePhase`: odpinanie Next Steps, emit `dslm:suggestionsUpdated`.
-5. `ConfirmDeleteDialog` + podmiana użyć w fazach i NextStepBanner.
-6. `MacroTimeline`: Remove jako ikona z tooltipem.
-7. Roadmap warningi + AlertDialog (goals, welcome test) + reusable `useWelcomeTestActions`.
-8. `Learn more` w `DslmExplainerBanner`.
-9. `docs/llm-context.md` i `llms.txt` — sekcja v6.9.15c (rev. 2).
+1. Migracja DB: `email_send_log` (jeśli brak) + `pg_net` extension + trigger + GUC settings
+2. `add_secret` → `WELCOME_EMAIL_SECRET`
+3. Stworzenie `_shared/email-templates/welcome.tsx`
+4. Stworzenie `send-welcome-email/index.ts` + wpis w `config.toml`
+5. Deploy `send-welcome-email`
+6. Aktualizacja `app.settings.welcome_email_secret` (osobna migracja po dodaniu secretu)
+7. Test curl + test trigger na test userze
+8. Aktualizacja docs (llm-context, llms.txt, mem)
 
-## Kryteria akceptacji
-- Generowanie 2 / 3 / 6 Next Steps idzie jednym requestem do `generate-timeline` (count = N) i wraca z N stepami spójnymi i komplementarnymi.
-- Edge Function logs nie zawierają `INVALID_ARGUMENT` ani `too many states` przy normalnym użyciu.
-- Phase-bound batch tworzy tylko phase-bound steps, bez free-step fallbacku.
-- Roadmapa bez goals wymaga potwierdzenia lub pozwala dodać Supporting / Additional goal.
-- Brak ukończonego Welcome Test pokazuje CTA Send test.
-- Delete fazy nie kasuje Next Steps; odpina je jako wolne.
-- Remove fazy = ikona + tooltip.
-- Delete fazy / Next Step = jeden klik Confirm w modalu.
-- `1 MINUTE` banner ma `Learn more` → `/features/dslm`.
-- `docs/llm-context.md` i `llms.txt` mają sekcję v6.9.15c (rev. 2) zgodną z RAG.
+Po Twojej zgodzie wykonam wszystko w jednej sesji build mode.

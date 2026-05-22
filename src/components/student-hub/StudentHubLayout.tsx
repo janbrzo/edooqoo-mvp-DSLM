@@ -3,8 +3,6 @@ import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { BookOpen, ClipboardList, FileText, Calendar, LayoutDashboard, LogOut, Settings, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { clearHubEmail, getSavedHubEmail } from '@/hooks/useStudentHubData';
-import { AppBackground } from '@/components/ui/AppBackground';
-import { BackgroundPatternSwitcher } from '@/components/ui/BackgroundPatternSwitcher';
 
 interface StudentHubLayoutProps {
   children: React.ReactNode;
@@ -36,9 +34,9 @@ export function StudentHubLayout({ children, studentName, teacherName }: Student
   };
 
   return (
-    <AppBackground className="min-h-screen flex flex-col">
+    <div className="min-h-screen bg-background flex flex-col">
       {/* Sticky header */}
-      <header className="sticky top-0 z-10 bg-background/80 backdrop-blur-sm border-b">
+      <header className="sticky top-0 z-10 bg-background border-b">
         <div className="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button onClick={() => navigate(`/my/${teacherToken}`)} className="font-bold text-lg text-primary hover:opacity-80 transition-opacity">
@@ -94,7 +92,6 @@ export function StudentHubLayout({ children, studentName, teacherName }: Student
       <footer className="border-t py-4 text-center text-xs text-muted-foreground">
         Powered by edooqoo
       </footer>
-      <BackgroundPatternSwitcher />
-    </AppBackground>
+    </div>
   );
 }

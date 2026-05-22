@@ -1,8 +1,7 @@
-import { Eye, Pencil, Trash2, ExternalLink, Archive, ArchiveRestore, ChevronDown, ChevronUp, Sparkles, CheckCircle2, Clock } from 'lucide-react';
+import { Eye, Pencil, Trash2, ExternalLink, Archive, ArchiveRestore, ChevronDown, ChevronUp } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useState } from 'react';
 import {
   AlertDialog,
@@ -16,7 +15,7 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { StudentKnowledgeEntry, getCategoryMetadata, formatTagForDisplay } from '@/types/studentKnowledge';
-import { format, differenceInDays } from 'date-fns';
+import { format } from 'date-fns';
 
 interface StudentKnowledgeEntryCardProps {
   entry: StudentKnowledgeEntry;
@@ -25,8 +24,6 @@ interface StudentKnowledgeEntryCardProps {
   onDelete: (entryId: string) => void;
   onMarkOutdated: (entryId: string) => void;
   onMarkCurrent: (entryId: string) => void;
-  onArchive?: (entryId: string) => void;
-  onConfirmCurrent?: (entryId: string) => void;
   worksheetTitle?: string;
 }
 
@@ -37,27 +34,10 @@ export const StudentKnowledgeEntryCard = ({
   onDelete,
   onMarkOutdated,
   onMarkCurrent,
-  onArchive,
-  onConfirmCurrent,
   worksheetTitle,
 }: StudentKnowledgeEntryCardProps) => {
   const categoryMeta = getCategoryMetadata(entry.category);
   const [isExpanded, setIsExpanded] = useState(false);
-
-  // v6.9.10 — Stale freshness check (client-side only, zero infra).
-  // Uses max(created_at, metadata.last_confirmed_at) as the "freshness anchor".
-  const STALE_AFTER_DAYS = 90;
-  const STALE_CATEGORIES: ReadonlyArray<string> = ['Personal', 'Skill Assessment', 'Goals'];
-  const lastConfirmedAt = (entry.metadata as any)?.last_confirmed_at as string | undefined;
-  const freshnessAnchor = lastConfirmedAt
-    ? new Date(Math.max(new Date(entry.created_at).getTime(), new Date(lastConfirmedAt).getTime()))
-    : new Date(entry.created_at);
-  const ageDays = differenceInDays(new Date(), freshnessAnchor);
-  const isStale =
-    !entry.is_outdated &&
-    !entry.archived_at &&
-    STALE_CATEGORIES.includes(entry.category) &&
-    ageDays >= STALE_AFTER_DAYS;
 
   // Check if content has more than 4 lines (estimate: ~80 chars per line)
   const contentLength = entry.content.length;
@@ -83,27 +63,7 @@ export const StudentKnowledgeEntryCard = ({
               <span className="text-sm">{categoryMeta?.icon}</span>
               <span className="text-xs font-medium">{categoryMeta?.label}</span>
             </Badge>
-
-            {entry.ai_classified && typeof entry.ai_confidence === 'number' && entry.ai_confidence >= 0.6 && (
-              <TooltipProvider delayDuration={200}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Badge variant="secondary" className="gap-1 px-1.5 py-0.5 text-[10px]">
-                      <Sparkles className="h-3 w-3 text-primary" />
-                      AI organized
-                    </Badge>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <span className="text-xs">Auto-classified · confidence {(entry.ai_confidence * 100).toFixed(0)}%</span>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            )}
-
-            {entry.archived_at && (
-              <Badge variant="secondary" className="text-xs px-2 py-0.5">Used</Badge>
-            )}
-
+            
             {entry.is_outdated && (
               <Badge variant="secondary" className="text-xs px-2 py-0.5">
                 Outdated
@@ -112,23 +72,6 @@ export const StudentKnowledgeEntryCard = ({
           </div>
 
           <div className="flex items-center gap-1">
-            {onArchive && entry.category === 'Next Lesson Ideas' && !entry.archived_at && (
-              <TooltipProvider delayDuration={200}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 w-8 p-0 text-emerald-600 hover:text-emerald-700"
-                      onClick={() => onArchive(entry.id)}
-                    >
-                      <CheckCircle2 className="h-4 w-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent><span className="text-xs">Mark as used in worksheet</span></TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            )}
             <Button
               variant="ghost"
               size="sm"
@@ -271,36 +214,6 @@ export const StudentKnowledgeEntryCard = ({
                 {formatTagForDisplay(tag)}
               </Badge>
             ))}
-          </div>
-        )}
-
-        {/* v6.9.10 — Stale freshness prompt */}
-        {isStale && (
-          <div className="mb-3 flex items-center justify-between gap-2 rounded-md border border-amber-300/60 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-700/50 px-2.5 py-1.5">
-            <div className="flex items-center gap-1.5 text-xs text-amber-800 dark:text-amber-200">
-              <Clock className="h-3.5 w-3.5" />
-              <span>Stale ({ageDays}d old) — still true?</span>
-            </div>
-            <div className="flex items-center gap-1">
-              {onConfirmCurrent && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-6 px-2 text-xs text-emerald-700 hover:text-emerald-800 dark:text-emerald-300"
-                  onClick={() => onConfirmCurrent(entry.id)}
-                >
-                  Yes, still current
-                </Button>
-              )}
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-6 px-2 text-xs text-orange-700 hover:text-orange-800 dark:text-orange-300"
-                onClick={() => onMarkOutdated(entry.id)}
-              >
-                Mark outdated
-              </Button>
-            </div>
           </div>
         )}
 

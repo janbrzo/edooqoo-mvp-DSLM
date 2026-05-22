@@ -5,8 +5,7 @@
  * v6.8.4 — Problem 5: rebrand DSLM tab to "1 MINUTE" with concept explanation.
  */
 import React, { useState } from 'react';
-import { Brain, X, ExternalLink } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Brain, X } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 
@@ -55,16 +54,9 @@ export const DslmExplainerBanner: React.FC<Props> = ({ teacherId }) => {
               Learning Model), which tracks 4 layers: declarative knowledge,
               procedural skills, behavioral patterns, and motivation.
             </p>
-            <div className="flex items-center gap-3 mt-1">
-              <Button variant="link" size="sm" className="px-0 h-auto text-xs" onClick={handleDismiss}>
-                Got it
-              </Button>
-              <Button asChild variant="link" size="sm" className="px-0 h-auto text-xs">
-                <Link to="/features/dslm">
-                  Learn more <ExternalLink className="h-3 w-3 ml-1" />
-                </Link>
-              </Button>
-            </div>
+            <Button variant="link" size="sm" className="px-0 h-auto mt-1 text-xs" onClick={handleDismiss}>
+              Got it
+            </Button>
           </div>
         </div>
       </CardContent>

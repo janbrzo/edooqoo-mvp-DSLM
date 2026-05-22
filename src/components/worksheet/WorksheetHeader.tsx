@@ -12,7 +12,6 @@ import RenameDialog from "@/components/RenameDialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { devLog } from '@/utils/logger';
-import { useDemoContext } from '@/contexts/DemoContext';
 
 interface WorksheetHeaderProps {
   onBack: () => void;
@@ -44,7 +43,6 @@ function WorksheetHeader({
   onTitleChange
 }: WorksheetHeaderProps) {
   const { isRegisteredUser } = useAuthFlow();
-  const { isDemoMode, showDemoBlockedToast } = useDemoContext();
   const navigate = useNavigate();
   const [isRenameOpen, setIsRenameOpen] = useState(false);
   
@@ -61,7 +59,6 @@ function WorksheetHeader({
   };
 
   const handleGenerateNewWorksheet = () => {
-    if (isDemoMode) { showDemoBlockedToast('Generating worksheets'); return; }
     sessionStorage.setItem('forceNewWorksheet', 'true');
     navigate('/?forceNew=' + Date.now());
   };
@@ -79,7 +76,6 @@ function WorksheetHeader({
   
   const handleRenameWorksheet = async (newTitle: string) => {
     if (!worksheetId) return;
-    if (isDemoMode) { showDemoBlockedToast('Renaming worksheets'); return; }
     
     try {
       const { error } = await supabase

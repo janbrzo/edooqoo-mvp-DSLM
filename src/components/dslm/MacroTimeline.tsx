@@ -18,34 +18,9 @@ import { useCurriculumPhases, type CurriculumPhase, type PhaseStatus } from '@/h
 import { CompactSuggestionCard } from './CompactSuggestionCard';
 import { ScrollableStepList } from './ScrollableStepList';
 import { Check, ChevronDown, Sparkles, Loader2, Plus, Edit2, Trash2, Map, MessageSquarePlus } from 'lucide-react';
-import { AlertTriangle, Send, Target } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { computePhaseConfidence } from '@/lib/dslm/confidenceScore';
 import { ConfidenceBadge } from './ConfidenceBadge';
-import { ConfirmDeleteDialog } from './ConfirmDeleteDialog';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { useStudent } from '@/hooks/useStudent';
-import { useStudentProgress } from '@/hooks/useStudentProgress';
-import { useWelcomeTestActions, type WelcomeTestSnapshot } from '@/hooks/useWelcomeTestActions';
-
-/**
- * v6.9.12 — Recommend 1 step per week of the phase length, clamped 1–6.
- * Falls back to 3 (rolling 3-lesson plan) when weeks are not set.
- */
-export function recommendedStepsForPhase(phase: CurriculumPhase): number {
-  const start = phase.estimated_weeks_start;
-  const end = phase.estimated_weeks_end;
-  if (!start || !end || end < start) return 3;
-  const weeks = end - start + 1;
-  return Math.max(1, Math.min(6, weeks));
-}
-export function phaseWeeks(phase: CurriculumPhase): number | null {
-  const s = phase.estimated_weeks_start;
-  const e = phase.estimated_weeks_end;
-  if (!s || !e || e < s) return null;
-  return e - s + 1;
-}
 
 interface MacroTimelineProps {
   studentId: string;
@@ -81,34 +56,10 @@ export const MacroTimeline: React.FC<MacroTimelineProps> = ({
   onRegenerateOne, onGenerateForPhase, onMarkUsed,
 }) => {
   const { phases, loading, generating, generatePhases, updatePhase, deletePhase, addPhase } = useCurriculumPhases({ studentId, teacherId });
-  // v6.9.15c — readiness signals for "best-effort" roadmap generation warnings.
-  const { data: studentRow } = useStudent(studentId);
-  const { goals } = useStudentProgress({ studentId, teacherId });
-  const studentName = studentRow?.name || 'Student';
-  const studentEmail = studentRow?.student_email ?? null;
-  const welcomeActions = useWelcomeTestActions({ studentId, teacherId, studentName, studentEmail });
-  const [wtStatus, setWtStatus] = useState<WelcomeTestSnapshot['status']>(null);
-  React.useEffect(() => {
-    let cancelled = false;
-    welcomeActions.getStatus().then(s => { if (!cancelled) setWtStatus(s.status); }).catch(() => {});
-    return () => { cancelled = true; };
-  }, [studentId, teacherId, welcomeActions]);
-  const hasGoals = (goals?.length ?? 0) > 0;
-  const wtCompleted = wtStatus === 'completed' || wtStatus === 'reviewed';
-  // Pending generate-phases action — confirmed via AlertDialog when goals are missing.
-  const [pendingGenerate, setPendingGenerate] = useState<null | { mode: 'replace' | 'add'; count?: number }>(null);
-  const requestGeneratePhases = (mode: 'replace' | 'add', count?: number) => {
-    if (!hasGoals) { setPendingGenerate({ mode, count }); return; }
-    void generatePhases(mode, count ? { count } : undefined);
-  };
-  const dispatchAddGoal = () => {
-    window.dispatchEvent(new CustomEvent('dslm:addGoal', { detail: { studentId } }));
-  };
   const [expandedPhaseId, setExpandedPhaseId] = useState<string | null>(null);
   const [userTouchedExpand, setUserTouchedExpand] = useState(false);
   const [editingPhase, setEditingPhase] = useState<CurriculumPhase | null>(null);
   const [editForm, setEditForm] = useState({ title: '', description: '', status: 'planned' as PhaseStatus, weeks_start: '', weeks_end: '' });
-  const [deletingPhase, setDeletingPhase] = useState<CurriculumPhase | null>(null);
 
   // Phase comment dialog (regenerate steps for phase)
   const [phaseCommentDialog, setPhaseCommentDialog] = useState<{ open: boolean; phaseId: string | null }>({ open: false, phaseId: null });
@@ -199,8 +150,7 @@ export const MacroTimeline: React.FC<MacroTimelineProps> = ({
 
   const openPhaseCommentDialog = (phaseId: string) => {
     setPhaseComment('');
-    const phase = phases.find(p => p.id === phaseId);
-    setPhaseCommentCount(phase ? recommendedStepsForPhase(phase) : 3);
+    setPhaseCommentCount(3);
     setPhaseCommentDialog({ open: true, phaseId });
   };
   const submitPhaseComment = async () => {
@@ -213,77 +163,26 @@ export const MacroTimeline: React.FC<MacroTimelineProps> = ({
   };
 
 
-  const getPhaseQuickCount = (id: string) => {
-    if (phaseQuickCount[id] !== undefined) return phaseQuickCount[id];
-    const phase = phases.find(p => p.id === id);
-    return phase ? recommendedStepsForPhase(phase) : 3;
-  };
+  const getPhaseQuickCount = (id: string) => phaseQuickCount[id] ?? 3;
   const setPhaseQuickCountFor = (id: string, n: number) =>
     setPhaseQuickCount(p => ({ ...p, [id]: Math.min(6, Math.max(1, n)) }));
 
   // Empty state
   if (!loading && phases.length === 0) {
     return (
-      <>
-        <Card className="border-dashed border-2 border-muted-foreground/20">
-          <CardContent className="pt-6 text-center space-y-3">
-            <Map className="h-10 w-10 mx-auto text-muted-foreground/60" />
-            <h3 className="text-base font-semibold">No curriculum plan yet</h3>
-            <p className="text-sm text-muted-foreground max-w-md mx-auto">
-              Generate 3-5 macro learning phases that map out the student's journey toward their goal.
-            </p>
-            {(!hasGoals || !wtCompleted) && (
-              <div className="text-left max-w-md mx-auto rounded-md border border-amber-500/40 bg-amber-500/5 p-3 space-y-2">
-                <div className="flex items-center gap-2 text-xs font-semibold text-amber-700 dark:text-amber-400">
-                  <AlertTriangle className="h-3.5 w-3.5" /> For a sharper roadmap, add this first
-                </div>
-                <ul className="text-xs text-muted-foreground space-y-1.5">
-                  {!hasGoals && (
-                    <li className="flex items-center justify-between gap-2">
-                      <span>No learning goals set — AI will infer from main goal only.</span>
-                      <Button size="sm" variant="outline" className="h-6 text-[10px]" onClick={dispatchAddGoal}>
-                        <Target className="h-3 w-3 mr-1" /> Add goal
-                      </Button>
-                    </li>
-                  )}
-                  {!wtCompleted && (
-                    <li className="flex items-center justify-between gap-2">
-                      <span>Welcome Placement Test not completed — level signals are weaker.</span>
-                      <Button size="sm" variant="outline" className="h-6 text-[10px]" onClick={() => welcomeActions.send()} disabled={welcomeActions.busy}>
-                        <Send className="h-3 w-3 mr-1" /> Send test
-                      </Button>
-                    </li>
-                  )}
-                </ul>
-              </div>
-            )}
-            <Button onClick={() => requestGeneratePhases('replace')} disabled={generating}>
-              {generating ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Sparkles className="h-4 w-4 mr-2" />}
-              Generate Learning Roadmap
-            </Button>
-          </CardContent>
-        </Card>
-        <AlertDialog open={!!pendingGenerate} onOpenChange={(o) => { if (!o) setPendingGenerate(null); }}>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Generate roadmap without goals?</AlertDialogTitle>
-              <AlertDialogDescription>
-                This student has no learning goals defined. The AI will fall back to the main goal and English level only, which usually produces a more generic plan. You can add a goal first for a sharper roadmap.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Cancel</AlertDialogCancel>
-              <Button variant="outline" onClick={() => { setPendingGenerate(null); dispatchAddGoal(); }}>
-                <Target className="h-4 w-4 mr-1" /> Add goal first
-              </Button>
-              <AlertDialogAction onClick={() => {
-                const p = pendingGenerate; setPendingGenerate(null);
-                if (p) void generatePhases(p.mode, p.count ? { count: p.count } : undefined);
-              }}>Generate anyway</AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      </>
+      <Card className="border-dashed border-2 border-muted-foreground/20">
+        <CardContent className="pt-6 text-center space-y-3">
+          <Map className="h-10 w-10 mx-auto text-muted-foreground/60" />
+          <h3 className="text-base font-semibold">No curriculum plan yet</h3>
+          <p className="text-sm text-muted-foreground max-w-md mx-auto">
+            Generate 3-5 macro learning phases that map out the student's journey toward their goal.
+          </p>
+          <Button onClick={() => generatePhases('replace')} disabled={generating}>
+            {generating ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Sparkles className="h-4 w-4 mr-2" />}
+            Generate Learning Roadmap
+          </Button>
+        </CardContent>
+      </Card>
     );
   }
 
@@ -411,19 +310,6 @@ export const MacroTimeline: React.FC<MacroTimelineProps> = ({
                                 onChange={(e) => setPhaseQuickCountFor(phase.id, parseInt(e.target.value) || 1)}
                                 className="h-8"
                               />
-                              {(() => {
-                                const w = phaseWeeks(phase);
-                                const rec = recommendedStepsForPhase(phase);
-                                return w ? (
-                                  <p className="text-[10px] text-muted-foreground leading-snug">
-                                    Suggested: {rec} (one per week of {w}-week phase).
-                                  </p>
-                                ) : (
-                                  <p className="text-[10px] text-muted-foreground leading-snug">
-                                    Suggested: 3 (set phase weeks for a smarter default).
-                                  </p>
-                                );
-                              })()}
                               <Button
                                 size="sm" className="w-full"
                                 onClick={() => onGenerateForPhase(phase.id, getPhaseQuickCount(phase.id), '')}
@@ -453,22 +339,9 @@ export const MacroTimeline: React.FC<MacroTimelineProps> = ({
                               Start phase
                             </Button>
                           )}
-                          <TooltipProvider delayDuration={200}>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button
-                                  size="icon"
-                                  variant="ghost"
-                                  className="h-7 w-7 text-destructive hover:text-destructive"
-                                  onClick={() => setDeletingPhase(phase)}
-                                  aria-label="Remove phase"
-                                >
-                                  <Trash2 className="h-3.5 w-3.5" />
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>Remove phase</TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
+                          <Button size="sm" variant="ghost" className="h-7 text-xs text-destructive hover:text-destructive" onClick={() => deletePhase(phase.id)}>
+                            <Trash2 className="h-3 w-3 mr-1" /> Remove
+                          </Button>
                         </div>
                       </div>
                     </CollapsibleContent>
@@ -482,27 +355,6 @@ export const MacroTimeline: React.FC<MacroTimelineProps> = ({
 
       {/* Global roadmap toolbar */}
       <div className="flex flex-wrap gap-2 pt-2 border-t">
-        {(!hasGoals || !wtCompleted) && (
-          <div className="w-full rounded-md border border-amber-500/40 bg-amber-500/5 p-2 mb-1 flex flex-wrap items-center gap-2 text-[11px]">
-            <AlertTriangle className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
-            {!hasGoals && (
-              <>
-                <span className="text-muted-foreground">No goals — roadmap is best-effort.</span>
-                <Button size="sm" variant="outline" className="h-6 text-[10px]" onClick={dispatchAddGoal}>
-                  <Target className="h-3 w-3 mr-1" /> Add goal
-                </Button>
-              </>
-            )}
-            {!wtCompleted && (
-              <>
-                <span className="text-muted-foreground">Welcome Test not completed.</span>
-                <Button size="sm" variant="outline" className="h-6 text-[10px]" onClick={() => welcomeActions.send()} disabled={welcomeActions.busy}>
-                  <Send className="h-3 w-3 mr-1" /> Send Welcome Placement Test
-                </Button>
-              </>
-            )}
-          </div>
-        )}
         <Button variant="outline" size="sm" onClick={() => setAddDialog(true)}>
           <Plus className="h-4 w-4 mr-2" /> Add phase
         </Button>
@@ -517,7 +369,7 @@ export const MacroTimeline: React.FC<MacroTimelineProps> = ({
             <Input type="number" min="1" max="8" value={phaseCount}
               onChange={(e) => setPhaseCount(Math.min(8, Math.max(1, parseInt(e.target.value) || 1)))}
               className="h-8" />
-            <Button size="sm" className="w-full" onClick={() => requestGeneratePhases('add', phaseCount)}>
+            <Button size="sm" className="w-full" onClick={() => generatePhases('add', { count: phaseCount })}>
               Add {phaseCount} phase{phaseCount > 1 ? 's' : ''}
             </Button>
           </DropdownMenuContent>
@@ -632,46 +484,6 @@ export const MacroTimeline: React.FC<MacroTimelineProps> = ({
           </DialogFooter>
         </DialogContent>
       </Dialog>
-
-      {/* Phase delete confirmation — v6.9.15c: single-click Confirm (no typing). */}
-      {deletingPhase && (
-        <ConfirmDeleteDialog
-          open={!!deletingPhase}
-          onOpenChange={(o) => !o && setDeletingPhase(null)}
-          label={`Phase ${deletingPhase.sequence_number}`}
-          description="Removing a phase deletes its plan. Any phase-bound next steps are detached and become free Next Steps. This cannot be undone."
-          onConfirm={async () => {
-            const id = deletingPhase.id;
-            await deletePhase(id);
-            // v6.9.15b — clear local UI state tied to the deleted phase id.
-            if (expandedPhaseId === id) setExpandedPhaseId(null);
-            setPhaseQuickCount(p => { const { [id]: _, ...rest } = p; return rest; });
-            setPhaseStepsOpen(p => { const { [id]: _, ...rest } = p; return rest; });
-            setDeletingPhase(null);
-          }}
-        />
-      )}
-      {/* Generate-without-goals confirmation (non-empty state). */}
-      <AlertDialog open={!!pendingGenerate} onOpenChange={(o) => { if (!o) setPendingGenerate(null); }}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Generate roadmap without goals?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This student has no learning goals defined. The AI will fall back to the main goal and English level only, which usually produces a more generic plan. You can add a goal first for a sharper roadmap.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <Button variant="outline" onClick={() => { setPendingGenerate(null); dispatchAddGoal(); }}>
-              <Target className="h-4 w-4 mr-1" /> Add goal first
-            </Button>
-            <AlertDialogAction onClick={() => {
-              const p = pendingGenerate; setPendingGenerate(null);
-              if (p) void generatePhases(p.mode, p.count ? { count: p.count } : undefined);
-            }}>Generate anyway</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </div>
   );
 };

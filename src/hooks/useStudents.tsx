@@ -16,8 +16,8 @@ export const useStudents = () => {
   const teacherId = user?.id;
 
   const studentsQuery = useQuery<Student[]>({
-    queryKey: ['students', teacherId, isDemoMode, !!demoData],
-    enabled: isDemoMode ? !!demoData : !!teacherId,
+    queryKey: ['students', teacherId, isDemoMode],
+    enabled: isDemoMode ? true : !!teacherId,
     queryFn: async () => {
       if (isDemoMode && demoData) {
         return demoData.students as unknown as Student[];
@@ -36,10 +36,7 @@ export const useStudents = () => {
   });
 
   const students = studentsQuery.data || [];
-  // v6.9.8 — in demo mode the query is disabled until demoData arrives; expose
-  // a synthetic loading state so consumers (Dashboard / AllWorksheets) don't
-  // treat "no students yet" as the empty state.
-  const loading = (isDemoMode && !demoData) || studentsQuery.isLoading;
+  const loading = studentsQuery.isLoading;
 
   const invalidate = useCallback((studentId?: string) => {
     queryClient.invalidateQueries({ queryKey: ['students'] });
