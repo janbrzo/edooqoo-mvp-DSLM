@@ -28,8 +28,8 @@ const GlobalFooter = () => {
           <p className="text-sm text-muted-foreground mt-1">AI Worksheet Generator for English Teachers</p>
         </div>
 
-        {/* 5-column grid (Compare column removed in v6.9.21) */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-8">
+        {/* 6-column grid (Compare column restored in v6.9.22) */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 mb-8">
           {/* Column 1: Product */}
           <div>
             <h3 className="font-semibold text-foreground mb-3 text-sm">Product</h3>
