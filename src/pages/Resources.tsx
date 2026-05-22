@@ -1,7 +1,6 @@
 
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { resolveLegacyHref } from '@/lib/resolveLegacyHref';
 
 interface ResourceCard {
   title: string;
@@ -11,26 +10,23 @@ interface ResourceCard {
 }
 
 const ResourceCardItem = ({ card }: { card: ResourceCard }) => {
-  const r = resolveLegacyHref(card.href);
   const body = (
     <>
       <span className="inline-block text-xs font-medium bg-primary/10 text-primary px-2 py-0.5 rounded mb-2">{card.badge}</span>
       <h3 className="font-semibold text-foreground text-sm mb-1">{card.title}</h3>
       <p className="text-xs text-muted-foreground">{card.description}</p>
-      {r.comingSoon && (
-        <div className="mt-2 inline-block rounded bg-secondary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Coming soon</div>
-      )}
     </>
   );
-  if (r.comingSoon) {
+  // v6.9.22 — .html → static file (full-page nav); clean path → React Router.
+  if (card.href.endsWith('.html')) {
     return (
-      <div className="block rounded-lg border bg-card p-5 opacity-60 cursor-not-allowed" title="Full page shipping soon">
+      <a href={card.href} className="block rounded-lg border bg-card p-5 hover:shadow-md transition-shadow">
         {body}
-      </div>
+      </a>
     );
   }
   return (
-    <Link to={r.url} className="block rounded-lg border bg-card p-5 hover:shadow-md transition-shadow">
+    <Link to={card.href} className="block rounded-lg border bg-card p-5 hover:shadow-md transition-shadow">
       {body}
     </Link>
   );

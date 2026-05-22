@@ -1,26 +1,17 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { PageSeo } from '@/components/seo/PageSeo';
 import { SEO_META } from '@/constants/seoMeta';
-import { resolveLegacyHref } from '@/lib/resolveLegacyHref';
+import { BLOG_POSTS as AUTO_BLOG_POSTS } from '@/data/blogIndex';
 
-// v6.9.21 — Wrapper so post tiles either link or render a "Coming soon" tile.
+// v6.9.22 — Post tiles always render as <a> for full-page nav to static .html files.
 const PostLink: React.FC<{ href: string; className: string; children: React.ReactNode }> = ({ href, className, children }) => {
-  const r = resolveLegacyHref(href);
-  if (r.comingSoon) {
-    return (
-      <div className={`${className} opacity-60 cursor-not-allowed`} title="Full article shipping soon">
-        {children}
-        <div className="mt-2 inline-block rounded bg-secondary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Coming soon</div>
-      </div>
-    );
+  // .html → static file (browser nav); clean path → React Router
+  if (href.endsWith('.html')) {
+    return <a href={href} className={className}>{children}</a>;
   }
-  return (
-    <Link to={r.url} className={className}>
-      {children}
-    </Link>
-  );
+  return <Link to={href} className={className}>{children}</Link>;
 };
 
 interface BlogPost {
@@ -301,6 +292,23 @@ const blogPosts: BlogPost[] = [
 ];
 
 const Blog = () => {
+  // v6.9.22 — Keep only posts whose .html file exists in public/blog/.
+  // Eliminates ~50 dangling links to deleted files (the original 404 source).
+  const validHrefs = useMemo(() => new Set(AUTO_BLOG_POSTS.map(p => p.url)), []);
+  const livePosts = useMemo(() => blogPosts.filter(p => validHrefs.has(p.href)), [validHrefs]);
+
+  // Add any file that exists but wasn't in the curated list, using auto-extracted meta.
+  const curatedHrefs = useMemo(() => new Set(blogPosts.map(p => p.href)), []);
+  const orphanFromFiles = useMemo(() =>
+    AUTO_BLOG_POSTS
+      .filter(p => !curatedHrefs.has(p.url))
+      .map(p => ({ title: p.title, description: p.description, href: p.url, category: p.category, date: p.date || '2026-01-01' })),
+    [curatedHrefs]
+  );
+  const allPosts = useMemo(() => [...livePosts, ...orphanFromFiles], [livePosts, orphanFromFiles]);
+
+  const categories = [...new Set(allPosts.map(p => p.category))];
+
   const blogLd = {
     "@context": "https://schema.org",
     "@type": "Blog",
@@ -308,7 +316,7 @@ const Blog = () => {
     description: SEO_META.blog.description,
     url: "https://edooqoo.com/blog",
     publisher: { "@type": "Organization", name: "Edooqoo", url: "https://edooqoo.com" },
-    blogPost: blogPosts.map((p) => ({
+    blogPost: allPosts.map((p) => ({
       "@type": "BlogPosting",
       headline: p.title,
       url: `https://edooqoo.com${p.href}`,
@@ -316,14 +324,12 @@ const Blog = () => {
     })),
   };
 
-  const categories = [...new Set(blogPosts.map(p => p.category))];
-
   // v6.9.1 — Internal linking widget for newest posts. GSC reports newly
   // published blog posts as "Discovered – currently not indexed" because
   // sitemap lists them but no on-site link points to them. Showing the
   // 8 most recent posts at the top of /blog gives Googlebot a fresh
   // internal link path on the next crawl.
-  const recentPosts = [...blogPosts]
+  const recentPosts = [...allPosts]
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     .slice(0, 8);
 
@@ -370,7 +376,7 @@ const Blog = () => {
           <section key={cat} className="mb-12">
             <h2 className="text-2xl font-semibold text-foreground mb-6">{cat}</h2>
             <div className="space-y-4">
-              {blogPosts.filter(p => p.category === cat).map(post => (
+              {allPosts.filter(p => p.category === cat).map(post => (
                 <PostLink
                   key={post.href}
                   href={post.href}

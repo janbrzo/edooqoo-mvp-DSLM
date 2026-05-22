@@ -4,6 +4,22 @@ import React from "react";
 const normalize = (t: string): string =>
   String(t || "").replace(/-picture$/, "").replace(/-audio$/, "");
 
+// v6.9.22 — Defensive: extract plain text from string|number|object so
+// objects like { text: "..." } never render as "[object Object]".
+const toText = (v: unknown): string => {
+  if (v == null) return "";
+  if (typeof v === "string" || typeof v === "number") return String(v);
+  if (typeof v === "object") {
+    const o = v as Record<string, unknown>;
+    const candidate =
+      o.text ?? o.word ?? o.label ?? o.value ?? o.term ?? o.left ?? o.right ??
+      o.line ?? o.name ?? o.answer ?? o.option ?? o.sentence ?? o.statement;
+    if (candidate != null) return String(candidate);
+    return JSON.stringify(o);
+  }
+  return String(v);
+};
+
 const Label: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <span className="inline-block rounded bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
     {children}

@@ -1,14 +1,18 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { resolveLegacyHref } from '@/lib/resolveLegacyHref';
 
-// v6.9.21 — Footer link helper. Mapped legacy .html → <Link>; unmapped → omitted.
+// v6.9.22 — Footer link helper. .html → static file (full-page nav); clean path → SPA Link.
 const FooterLink: React.FC<{ href: string; children: React.ReactNode }> = ({ href, children }) => {
-  const r = resolveLegacyHref(href);
-  if (r.comingSoon) return null;
+  if (href.endsWith('.html')) {
+    return (
+      <a href={href} className="text-muted-foreground hover:text-primary transition-colors">
+        {children}
+      </a>
+    );
+  }
   return (
-    <Link to={r.url} className="text-muted-foreground hover:text-primary transition-colors">
+    <Link to={href} className="text-muted-foreground hover:text-primary transition-colors">
       {children}
     </Link>
   );
@@ -24,8 +28,8 @@ const GlobalFooter = () => {
           <p className="text-sm text-muted-foreground mt-1">AI Worksheet Generator for English Teachers</p>
         </div>
 
-        {/* 5-column grid (Compare column removed in v6.9.21) */}
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-8 mb-8">
+        {/* 6-column grid (Compare column restored in v6.9.22) */}
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 mb-8">
           {/* Column 1: Product */}
           <div>
             <h3 className="font-semibold text-foreground mb-3 text-sm">Product</h3>
@@ -99,7 +103,20 @@ const GlobalFooter = () => {
             </ul>
           </div>
 
-          {/* Compare column removed — pages were never built (v6.9.21) */}
+          {/* Column 5: Compare (restored v6.9.22 — all .html files exist) */}
+          <div>
+            <h3 className="font-semibold text-foreground mb-3 text-sm">Compare</h3>
+            <ul className="space-y-2 text-sm">
+              <li><FooterLink href="/edooqoo-vs-islcollective.html">vs ISLCollective</FooterLink></li>
+              <li><FooterLink href="/edooqoo-vs-liveworksheets.html">vs Liveworksheets</FooterLink></li>
+              <li><FooterLink href="/edooqoo-vs-twee.html">vs Twee</FooterLink></li>
+              <li><FooterLink href="/edooqoo-vs-magicschool.html">vs MagicSchool</FooterLink></li>
+              <li><FooterLink href="/edooqoo-vs-busyteacher.html">vs BusyTeacher</FooterLink></li>
+              <li><FooterLink href="/edooqoo-vs-kahoot.html">vs Kahoot</FooterLink></li>
+              <li><FooterLink href="/edooqoo-vs-quizlet.html">vs Quizlet</FooterLink></li>
+              <li><FooterLink href="/edooqoo-vs-wordwall.html">vs Wordwall</FooterLink></li>
+            </ul>
+          </div>
         </div>
 
         {/* Bottom bar */}
