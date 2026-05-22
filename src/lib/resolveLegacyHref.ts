@@ -1,13 +1,8 @@
-// v6.9.21 — Legacy .html href resolver.
-// - Mapped → returns target URL, clickable
-// - Unmapped + .html → returns "comingSoon" so callers can render a disabled tile
-// - Anything else → passes through unchanged
-import { LEGACY_LINK_MAP } from "@/data/legacyLinkMap";
-
-export type ResolvedHref = { url: string; comingSoon: boolean };
+// v6.9.22 — Resolver simplified: every legacy .html is now a real static file in public/.
+// `comingSoon` is permanently false (Martha quality rule: no stub tiles).
+// `isStatic` tells consumers to render <a href> for full-page nav instead of <Link to>.
+export type ResolvedHref = { url: string; comingSoon: false; isStatic: boolean };
 
 export function resolveLegacyHref(href: string): ResolvedHref {
-  if (href in LEGACY_LINK_MAP) return { url: LEGACY_LINK_MAP[href], comingSoon: false };
-  if (href.endsWith(".html")) return { url: href, comingSoon: true };
-  return { url: href, comingSoon: false };
+  return { url: href, comingSoon: false, isStatic: href.endsWith(".html") };
 }

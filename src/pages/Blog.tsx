@@ -1,26 +1,17 @@
 
-import React from 'react';
+import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { PageSeo } from '@/components/seo/PageSeo';
 import { SEO_META } from '@/constants/seoMeta';
-import { resolveLegacyHref } from '@/lib/resolveLegacyHref';
+import { BLOG_POSTS, BLOG_CATEGORIES, type BlogPostMeta } from '@/data/blogIndex';
 
-// v6.9.21 — Wrapper so post tiles either link or render a "Coming soon" tile.
+// v6.9.22 — Post tiles always render as <a> for full-page nav to static .html files.
 const PostLink: React.FC<{ href: string; className: string; children: React.ReactNode }> = ({ href, className, children }) => {
-  const r = resolveLegacyHref(href);
-  if (r.comingSoon) {
-    return (
-      <div className={`${className} opacity-60 cursor-not-allowed`} title="Full article shipping soon">
-        {children}
-        <div className="mt-2 inline-block rounded bg-secondary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Coming soon</div>
-      </div>
-    );
+  // .html → static file (browser nav); clean path → React Router
+  if (href.endsWith('.html')) {
+    return <a href={href} className={className}>{children}</a>;
   }
-  return (
-    <Link to={r.url} className={className}>
-      {children}
-    </Link>
-  );
+  return <Link to={href} className={className}>{children}</Link>;
 };
 
 interface BlogPost {
