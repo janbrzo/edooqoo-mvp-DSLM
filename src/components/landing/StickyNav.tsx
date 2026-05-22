@@ -10,7 +10,6 @@ import { Menu, GraduationCap, User, Plus, Eye } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useDemoContext } from '@/contexts/DemoContext';
 import FeatureNavPills from '@/components/landing/FeatureNavPills';
-import { NavStudentSwitcher } from '@/components/landing/NavStudentSwitcher';
 
 interface StickyNavProps {
   isRegisteredUser: boolean;
@@ -35,10 +34,6 @@ const StickyNav: React.FC<StickyNavProps> = ({ isRegisteredUser, tokenLeft, user
   const location = useLocation();
   const isDashboard = location.pathname === '/dashboard';
   const isProfile = location.pathname === '/profile';
-  const isCalendar = location.pathname === '/calendar';
-  const isStudentPage = /^\/student\//.test(location.pathname);
-  // v6.9.13 — show NavStudentSwitcher on every authenticated page except dashboard/profile
-  const showStudentSwitcher = isRegisteredUser && !isDashboard && !isProfile && !isStudentPage;
   const { isDemoMode, exitDemo } = useDemoContext();
 
   // Position class for ANON nav (non-sticky on worksheet pages, sticky elsewhere)
@@ -80,26 +75,10 @@ const StickyNav: React.FC<StickyNavProps> = ({ isRegisteredUser, tokenLeft, user
             {leftContent}
           </div>
           <div className="flex items-center gap-2">
-            {showStudentSwitcher && <NavStudentSwitcher />}
-            {onGenerateWorksheet && isDashboard && (
+            {onGenerateWorksheet && (
               <Button size="sm" onClick={onGenerateWorksheet} className="h-8 text-xs">
                 <Plus className="h-3.5 w-3.5 mr-1" />
                 Generate
-              </Button>
-            )}
-            {onGenerateWorksheet && !isDashboard && (
-              <Button asChild size="sm" className="h-8 text-xs">
-                <a
-                  href="/"
-                  onClick={(e) => {
-                    if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
-                    e.preventDefault();
-                    onGenerateWorksheet();
-                  }}
-                >
-                  <Plus className="h-3.5 w-3.5 mr-1" />
-                  Generate
-                </a>
               </Button>
             )}
             {subscriptionType && (
@@ -147,26 +126,10 @@ const StickyNav: React.FC<StickyNavProps> = ({ isRegisteredUser, tokenLeft, user
           {leftContent}
         </div>
         <div className="flex items-center gap-3">
-          {showStudentSwitcher && <NavStudentSwitcher />}
-          {onGenerateWorksheet && isDashboard && (
+          {onGenerateWorksheet && (
             <Button size="sm" onClick={onGenerateWorksheet}>
               <Plus className="h-4 w-4 mr-2" />
               Generate Worksheet
-            </Button>
-          )}
-          {onGenerateWorksheet && !isDashboard && (
-            <Button asChild size="sm">
-              <a
-                href="/"
-                onClick={(e) => {
-                  if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
-                  e.preventDefault();
-                  onGenerateWorksheet();
-                }}
-              >
-                <Plus className="h-4 w-4 mr-2" />
-                Generate Worksheet
-              </a>
             </Button>
           )}
           {subscriptionType && (

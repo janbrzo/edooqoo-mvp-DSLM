@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { AuthenticatedPageShell } from "@/components/AuthenticatedPageShell";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,7 +14,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { StudentCard } from "@/components/dashboard/StudentCard";
 import { StudentSelector } from "@/components/StudentSelector";
 import { useProfile } from "@/hooks/useProfile";
-import { useDemoContext } from "@/contexts/DemoContext";
 import { format } from "date-fns";
 import { 
   Users, 
@@ -59,11 +58,9 @@ const Dashboard = () => {
   const { worksheets, loading: historyLoading, refetch: refetchWorksheets, deleteWorksheet } = useWorksheetHistory(undefined, true, true);
   const { thisMonthCount, loading: statsLoading } = useWorksheetStats();
   const { profile: userProfile } = useProfile();
-  const { isDemoMode, showDemoBlockedToast } = useDemoContext();
   
   const [addStudentModalOpen, setAddStudentModalOpen] = useState(false);
   const navigate = useNavigate();
-  const [searchParams, setSearchParams] = useSearchParams();
   const [selectedTimeFrame, setSelectedTimeFrame] = useState("month");
   const [renameWorksheetData, setRenameWorksheetData] = useState<{id: string; title: string} | null>(null);
   const [studentSearch, setStudentSearch] = useState("");
@@ -76,16 +73,6 @@ const Dashboard = () => {
   const worksheetIds = worksheets.map(w => w.id);
   const { homeworkByWorksheet, loading: homeworkLoading } = useAllWorksheetHomework(worksheetIds);
   const { count: upcomingLessonsCount } = useUpcomingLessonsCount();
-
-  // v6.9.8 — auto-open Add Student dialog when arriving from Welcome email CTA
-  useEffect(() => {
-    if (searchParams.get('action') === 'add-student' && isRegisteredUser && !isDemoMode) {
-      setAddStudentModalOpen(true);
-      const next = new URLSearchParams(searchParams);
-      next.delete('action');
-      setSearchParams(next, { replace: true });
-    }
-  }, [searchParams, isRegisteredUser, isDemoMode, setSearchParams]);
 
   // ✅ FIX: Mark as loaded once all data is ready (only first time)
   useEffect(() => {
@@ -126,15 +113,12 @@ const Dashboard = () => {
   const totalWorksheetsCreated = profile?.total_worksheets_created || 0;
 
   const handleGenerateWorksheet = () => {
-    // v6.9.8 — navigation handler MUST NOT block in demo (Generate button on dashboard
-    // only navigates to the form; the actual generation guard lives in useWorksheetGeneration)
     sessionStorage.setItem('forceNewWorksheet', 'true');
     navigate('/');
   };
 
   const handleRenameWorksheet = async (newTitle: string) => {
     if (!renameWorksheetData) return;
-    if (isDemoMode) { showDemoBlockedToast('Renaming worksheets'); return; }
     
     try {
       const { error } = await supabase

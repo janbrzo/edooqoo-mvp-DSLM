@@ -66,7 +66,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
     <div className="space-y-3">
       {/* AI Summary — open by default if exists */}
       {aiSummary && (
-        <CollapsibleSection id="profile-ai-summary" title="AI Summary" icon={Sparkles} badge="PLACEMENT TEST" defaultOpen>
+        <CollapsibleSection title="AI Summary" icon={Sparkles} badge="PLACEMENT TEST" defaultOpen>
           <div className="space-y-2 text-sm">
             <p>{aiSummary.summary || aiSummary}</p>
             {aiSummary.key_observations?.length > 0 && (
@@ -94,7 +94,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
       )}
 
       {/* Psychological Profile — open by default */}
-      <CollapsibleSection id="profile-psych" title="Psychological Profile" icon={Brain} badge="PLACEMENT TEST" defaultOpen>
+      <CollapsibleSection title="Psychological Profile" icon={Brain} badge="PLACEMENT TEST" defaultOpen>
         {profileLoading ? (
           <div className="h-16 flex items-center justify-center">
             <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-primary" />
@@ -157,7 +157,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
       </CollapsibleSection>
 
       {/* Behavioral Stats — collapsed (key info already in nav badge) */}
-      <CollapsibleSection id="profile-behavioral" title="Behavioral Stats" icon={ActivityIcon} badge="CALCULATED">
+      <CollapsibleSection title="Behavioral Stats" icon={ActivityIcon} badge="CALCULATED">
         <BehavioralStatsCard
           stats={behavioralStats || {
             lessonsPerWeek: null, totalLessons: 0, cancellationRate: null,
@@ -170,7 +170,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
       </CollapsibleSection>
 
       {/* Personal Notes — collapsed */}
-      <CollapsibleSection id="profile-personal" title="Personal Notes" icon={User} count={personalNotes.length}>
+      <CollapsibleSection title="Personal Notes" icon={User} count={personalNotes.length}>
         {personalNotes.length === 0 ? (
           <p className="text-xs text-muted-foreground text-center py-2">No personal notes yet</p>
         ) : (
@@ -188,7 +188,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
       </CollapsibleSection>
 
       {/* All Notes — collapsed */}
-      <CollapsibleSection id="profile-all-notes" title="All Notes" icon={StickyNote} count={knowledge.totalCount}>
+      <CollapsibleSection title="All Notes" icon={StickyNote} count={knowledge.totalCount}>
         <StudentKnowledgeSection
           studentId={studentId}
           teacherId={teacherId}
@@ -197,7 +197,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
       </CollapsibleSection>
 
       {/* Event Log — collapsed debug */}
-      <CollapsibleSection id="profile-debug" title="Debug: Event Log" icon={Bug}>
+      <CollapsibleSection title="Debug: Event Log" icon={Bug}>
         <EventLogPanel studentId={studentId} teacherId={teacherId} />
       </CollapsibleSection>
     </div>

@@ -8,8 +8,8 @@ const stats = [
 
 const StatsBar: React.FC = () => {
   return (
-    <section className="bg-background/60 backdrop-blur-sm border-y border-border py-10 relative overflow-hidden">
-      <div className="absolute inset-0 bg-gradient-to-r from-violet-50/20 via-transparent to-indigo-50/20 pointer-events-none"></div>
+    <section className="bg-background border-y border-border py-10 relative overflow-hidden">
+      <div className="absolute inset-0 bg-gradient-to-r from-violet-50/30 via-transparent to-indigo-50/30"></div>
       <div className="max-w-5xl mx-auto px-4 flex flex-col md:flex-row items-center justify-center gap-10 md:gap-0 relative z-10">
         {stats.map((stat, i) => (
           <React.Fragment key={stat.label}>
