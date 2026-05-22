@@ -594,45 +594,10 @@ serve(async (req) => {
           console.log(`📊 Streaming used model: ${streamUsedModel}`);
           console.log("✅ Streaming completed, parsing final JSON...");
 
-          // Parse final JSON with full recovery pipeline.
-          // AI-REPAIR can take 10-30s of silent Gemini work → emit keepalive
-          // progress events every 15s so the client heartbeat (40s) does not trip.
-          send("progress", { exercisesGenerated: expectedTotal, expectedTotal, phase: "repairing" });
-          const repairKeepalive = setInterval(() => {
-            try {
-              send("progress", { exercisesGenerated: expectedTotal, expectedTotal, phase: "repairing" });
-            } catch (_) { /* stream closed */ }
-          }, 15000);
-
-          let worksheetData: any;
-          let repairMethod: string;
-          try {
-            const result = await parseWithRecovery(fullContent, expectedTotal);
-            worksheetData = result.data;
-            repairMethod = result.repairMethod;
-          } finally {
-            clearInterval(repairKeepalive);
-          }
+          // Parse final JSON with full recovery pipeline
+          const { data: worksheetData, repairMethod } = await parseWithRecovery(fullContent, expectedTotal);
           if (repairMethod !== 'none') {
             console.log(`🔧 [STREAMING] JSON was repaired using: ${repairMethod}`);
-            // Best-effort early warning — worksheet uratowany, but prompt may be drifting.
-            if (repairMethod === 'ai' || repairMethod === 'ai-fallback') {
-              const earlyWarnPromise = notifyGenerationFailure(
-                'parse_recovered',
-                `Gemini returned malformed JSON, recovered via ${repairMethod}. Investigate prompt drift.`,
-                {
-                  userId, teacherEmail, model: streamUsedModel,
-                  promptPreview: sanitizedPrompt?.substring(0, 300),
-                }
-              );
-              try {
-                // @ts-ignore - EdgeRuntime is a Deno Deploy global
-                if (typeof EdgeRuntime !== "undefined" && EdgeRuntime.waitUntil) {
-                  // @ts-ignore
-                  EdgeRuntime.waitUntil(earlyWarnPromise);
-                }
-              } catch (_) { /* ignore */ }
-            }
           }
 
           if (!worksheetData.title || !worksheetData.exercises || !Array.isArray(worksheetData.exercises)) {
@@ -759,25 +724,10 @@ serve(async (req) => {
           } catch (_) { /* ignore logging errors */ }
           console.error("❌ Streaming generation FAILED:", errorContext);
           const errType = classifyErrorType(error);
-          const notifyPromise = notifyGenerationFailure(
-            errType,
-            error instanceof Error ? error.message : String(error),
-            {
-              userId, teacherEmail, model: streamUsedModel,
-              promptPreview: sanitizedPrompt?.substring(0, 300),
-            }
-          );
-          // EdgeRuntime.waitUntil keeps the notification fetch alive even after
-          // the response stream is closed — otherwise Deno Deploy kills it.
-          try {
-            // @ts-ignore - EdgeRuntime is a Deno Deploy global
-            if (typeof EdgeRuntime !== "undefined" && EdgeRuntime.waitUntil) {
-              // @ts-ignore
-              EdgeRuntime.waitUntil(notifyPromise);
-            } else {
-              await notifyPromise;
-            }
-          } catch (_) { /* ignore */ }
+          notifyGenerationFailure(errType, error instanceof Error ? error.message : String(error), {
+            userId, teacherEmail, model: streamUsedModel,
+            promptPreview: sanitizedPrompt?.substring(0, 300),
+          });
           send("error", { message: error instanceof Error ? error.message : "Unknown error" });
         } finally {
           close();

@@ -1,7 +1,6 @@
 
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { resolveLegacyHref } from '@/lib/resolveLegacyHref';
 
 interface ResourceCard {
   title: string;
@@ -10,37 +9,21 @@ interface ResourceCard {
   badge: string;
 }
 
-const ResourceCardItem = ({ card }: { card: ResourceCard }) => {
-  const r = resolveLegacyHref(card.href);
-  const body = (
-    <>
-      <span className="inline-block text-xs font-medium bg-primary/10 text-primary px-2 py-0.5 rounded mb-2">{card.badge}</span>
-      <h3 className="font-semibold text-foreground text-sm mb-1">{card.title}</h3>
-      <p className="text-xs text-muted-foreground">{card.description}</p>
-      {r.comingSoon && (
-        <div className="mt-2 inline-block rounded bg-secondary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Coming soon</div>
-      )}
-    </>
-  );
-  if (r.comingSoon) {
-    return (
-      <div className="block rounded-lg border bg-card p-5 opacity-60 cursor-not-allowed" title="Full page shipping soon">
-        {body}
-      </div>
-    );
-  }
-  return (
-    <Link to={r.url} className="block rounded-lg border bg-card p-5 hover:shadow-md transition-shadow">
-      {body}
-    </Link>
-  );
-};
-
 const ResourceSection = ({ title, cards }: { title: string; cards: ResourceCard[] }) => (
   <section className="mb-12">
     <h2 className="text-2xl font-semibold text-foreground mb-6">{title}</h2>
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {cards.map((card) => <ResourceCardItem key={card.href} card={card} />)}
+      {cards.map((card) => (
+        <a
+          key={card.href}
+          href={card.href}
+          className="block rounded-lg border bg-card p-5 hover:shadow-md transition-shadow"
+        >
+          <span className="inline-block text-xs font-medium bg-primary/10 text-primary px-2 py-0.5 rounded mb-2">{card.badge}</span>
+          <h3 className="font-semibold text-foreground text-sm mb-1">{card.title}</h3>
+          <p className="text-xs text-muted-foreground">{card.description}</p>
+        </a>
+      ))}
     </div>
   </section>
 );

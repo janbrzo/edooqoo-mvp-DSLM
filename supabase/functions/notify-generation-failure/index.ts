@@ -5,8 +5,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-const ALERT_EMAILS = ["j4n.brz0@gmail.com", "edooqoo@gmail.com"];
-const APP_BASE_URL = Deno.env.get('APP_BASE_URL') || 'https://edooqoo.com';
+const ALERT_EMAIL = "j4n.brz0@gmail.com";
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -29,8 +28,6 @@ serve(async (req) => {
       'validation': 'Prompt validation failed — likely empty or malformed prompt. Check frontend for race conditions or double-click issues.',
       'timeout': 'Generation timed out. Consider reducing exercise count or simplifying prompt.',
       'parse': 'AI returned invalid JSON. Model may need temperature adjustment or JSON mode enforcement.',
-      'parse_recovered': 'Gemini returned malformed JSON, recovered via AI fallback. Worksheet was saved successfully, but prompt or temperature may be drifting. Investigate sample output to prevent quality degradation.',
-      'audio': 'OpenAI audio model is unreachable. Verify OPENAI_API_KEY has access to gpt-4o-mini and gpt-4o-mini-tts. Check /v1/audio/speech endpoint status.',
       'network': 'Network error connecting to AI provider. Check API key validity and provider status page.',
       'database': 'Failed to save worksheet to database. Check Supabase connection, RLS policies, and table constraints.',
       'default': 'Unknown error. Check edge function logs for full stack trace.',
@@ -92,13 +89,9 @@ serve(async (req) => {
         ` : ''}
 
         <div style="text-align:center; margin-top:24px;">
-          <a href="https://supabase.com/dashboard/project/bvfrkzdlklyvnhlpleck/functions/generateWorksheet/logs"
-             style="display:inline-block; padding:12px 24px; background:#2563eb; color:white; border-radius:8px; text-decoration:none; font-weight:600; font-size:14px; margin:4px;">
-            🔍 Edge Function Logs
-          </a>
-          <a href="${APP_BASE_URL}/admin/error-logs"
-             style="display:inline-block; padding:12px 24px; background:#7c3aed; color:white; border-radius:8px; text-decoration:none; font-weight:600; font-size:14px; margin:4px;">
-            🛡️ Admin Error Logs
+          <a href="https://supabase.com/dashboard/project/bvfrkzdlklyvnhlpleck/functions/generateWorksheet/logs" 
+             style="display:inline-block; padding:12px 28px; background:#2563eb; color:white; border-radius:8px; text-decoration:none; font-weight:600; font-size:14px;">
+            🔍 View Edge Function Logs
           </a>
         </div>
       </div>
@@ -120,7 +113,7 @@ serve(async (req) => {
       },
       body: JSON.stringify({
         from: 'EDOQOO Alerts <notifications@edooqoo.com>',
-        to: ALERT_EMAILS,
+        to: [ALERT_EMAIL],
         subject: `⚠️ Worksheet generation failed: ${errorType} — ${teacherEmail || 'anonymous'}`,
         html,
       }),

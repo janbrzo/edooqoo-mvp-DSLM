@@ -1,8 +1,6 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { PageSeo } from '@/components/seo/PageSeo';
-import { SEO_META } from '@/constants/seoMeta';
 
 const exerciseTypes = [
   { category: "Basic Exercises", types: [
@@ -43,9 +41,14 @@ const exerciseTypes = [
 ];
 
 const ExerciseTypes = () => {
+  useEffect(() => {
+    document.title = "29 Exercise Types for English Teachers — Edooqoo";
+    const meta = document.querySelector('meta[name="description"]');
+    if (meta) meta.setAttribute("content", "Detailed guide to all 29 exercise types in Edooqoo: 20 basic, 5 audio, 4 picture exercises. Each with description, CEFR levels, and use cases for ESL/EFL teachers.");
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
-      <PageSeo {...SEO_META.exerciseTypes} />
       <div className="container mx-auto px-4 py-12 max-w-4xl">
         <div className="mb-8">
           <Link to="/" className="text-primary hover:underline text-sm">← Back to Edooqoo</Link>

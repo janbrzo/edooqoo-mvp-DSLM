@@ -7,7 +7,6 @@ import { isFreeCustomDemoWeek } from "@/utils/promoUtils";
 import PaymentPopup from "@/components/PaymentPopup";
 import ShareWorksheetModal from "@/components/ShareWorksheetModal";
 import { DuplicateWorksheetButton } from "@/components/DuplicateWorksheetButton";
-import { PublishWorksheetButton } from "@/components/worksheet/PublishWorksheetButton";
 import { LoginRequiredModal } from "@/components/LoginRequiredModal";
 import { exportAsHTML } from "@/utils/htmlExport";
 
@@ -343,13 +342,6 @@ const WorksheetToolbar = ({
                       </TooltipContent>
                     </Tooltip>
                   )
-                )}
-
-                {/* Sprint 3 (Plan v6.9.20) — Publish to public gallery (teachers only) */}
-                {worksheetId && isRegisteredUser && (
-                  <span className="mr-2">
-                    <PublishWorksheetButton worksheetId={worksheetId} />
-                  </span>
                 )}
                 
                 {/* Share button - visible for all, disabled for anonymous */}

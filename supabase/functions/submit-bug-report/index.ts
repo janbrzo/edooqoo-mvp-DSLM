@@ -40,18 +40,12 @@ serve(async (req) => {
   // still be configured for the future verified-domain path, so ignore it while
   // the sender remains sandboxed. This prevents repeated HTTP 403 failures.
   const bugReportFrom = Deno.env.get("BUG_REPORT_FROM_EMAIL") || "Edooqoo Bugs <onboarding@resend.dev>";
-  // v6.9.21 — both monitoring inboxes always notified when sender is verified.
-  // In Resend sandbox mode only the account owner inbox can receive mail.
   const resendSandboxRecipient = "j4n.brz0@gmail.com";
   const isSandboxSender = bugReportFrom.includes("onboarding@resend.dev");
-  const bugEmails: string[] = isSandboxSender
-    ? [resendSandboxRecipient]
-    : Array.from(new Set([
-        Deno.env.get("BUG_REPORT_EMAIL") || resendSandboxRecipient,
-        "edooqoo@gmail.com",
-      ]));
+  const bugEmail = isSandboxSender
+    ? resendSandboxRecipient
+    : (Deno.env.get("BUG_REPORT_EMAIL") || resendSandboxRecipient);
   const resendKey = Deno.env.get("RESEND_API_KEY");
-  const appBaseUrl = Deno.env.get("APP_BASE_URL") || "https://edooqoo.com";
 
   const sbAdmin = createClient(supabaseUrl, serviceKey);
 
@@ -183,16 +177,6 @@ serve(async (req) => {
             ${attachmentsHtml}
             <h4 style="margin-top:20px;">Recent console errors</h4>
             ${consoleHtml}
-            <div style="margin-top:24px; text-align:center;">
-              <a href="${appBaseUrl}/admin/error-logs?bugId=${inserted.id}"
-                 style="display:inline-block; padding:12px 24px; background:#7c3aed; color:white; border-radius:6px; text-decoration:none; font-weight:600; margin:4px;">
-                🛡️ Open in Admin Error Logs
-              </a>
-              <a href="https://supabase.com/dashboard/project/bvfrkzdlklyvnhlpleck/functions/generateWorksheet/logs"
-                 style="display:inline-block; padding:12px 24px; background:#2563eb; color:white; border-radius:6px; text-decoration:none; font-weight:600; margin:4px;">
-                🔍 Edge Function Logs
-              </a>
-            </div>
           </div>`;
 
         const emailResp = await fetch("https://api.resend.com/emails", {
@@ -203,7 +187,7 @@ serve(async (req) => {
           },
           body: JSON.stringify({
             from: bugReportFrom,
-            to: bugEmails,
+            to: [bugEmail],
             reply_to: userEmail,
             subject: `[Bug] ${title.slice(0, 120)}`,
             html,

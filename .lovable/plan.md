@@ -1,434 +1,255 @@
-# Plan v6.9.21 — Naprawa Post-Sprint 3 + Audyty wieloprovider + Linki + Maile + UI + LinkedIn
+# Plan wdrożenia v6.9.15c (rev. 2)
 
-Plan napisany od zera, łączy wszystkie 7 problemów. Zachowuje to co już działa po v6.9.20 (audio 2-step, keepalive, CTA do `/admin/error-logs`, Public Gallery infra). Korekty względem wcześniejszych draftów: (a) wszystkie linki `.html` — nie tylko stopka, ale Blog.tsx + Resources.tsx + Footer; (b) audyt modeli pokrywa **wszystkich** providerów (OpenAI, Google Gemini, Anthropic, ElevenLabs, Lovable AI Gateway), nie tylko OpenAI; (c) LinkedIn outreach w stylu „build-in-public" zamiast „kup gotowy DSLM".
+## Co się zmienia względem poprzedniej wersji
+Rezygnujemy z pomysłu sekwencyjnych requestów `count=1`. Powód jest słuszny: AI nie miałoby pełnego kontekstu pozostałych kroków podczas generacji każdego osobno, więc Next Stepy traciłyby spójność i komplementarność. Zamiast tego naprawiamy realną przyczynę regresji w `generate-timeline`, która pojawiła się w ostatnich tygodniach, tak żeby pojedyncze wywołanie z `count > 1` znów działało stabilnie w jednym requeście.
 
----
-
-## SPRINT G — Gallery Rendering Completeness (Problem 1A + 1B)
-
-### G.1 Diagnoza
-Obecny `src/pages/gallery/PublicGalleryWorksheetPage.tsx` renderuje tylko: `ex.title`, `ex.instructions`, `ex.content` jako string oraz `ex.questions[]` jako prosta lista. W naszej taksonomii mamy 29 typów ćwiczeń (`src/lib/exerciseTaxonomy.ts`) z różnymi shape'ami payloadu (`items[]`, `pairs[]`, `options[]`, `categories[]`, `transcript`, `imageUrl`, `prompts[]`, `sentences[]`, `words[]`, `dialogue[]`, `gaps[]`, etc.). Stąd „tylko sam tekst" — pozostałe pola są ignorowane.
-
-### G.2 Rozwiązanie: dedykowany read-only renderer
-
-Nowy komponent `src/components/gallery/GalleryExerciseRenderer.tsx`:
-
-- Wejście: `exercise: any, index: number`.
-- Wewnętrzny switch po `normalizeExerciseType(exercise.type)` (re-eksport helpera z `ExerciseSection.tsx` lub minimalny lokalny — usuwa sufiksy `-picture`/`-audio`).
-- Każdy case renderuje **wyłącznie wizualnie** (zero state'u, zero `<input>`, zero API). Mapa:
-  - `reading`/`gap-text` → `<p whitespace-pre-wrap>` + lista `comprehension_questions[]` numerowana
-  - `fill-in-blanks`/`fill-in-blanks-audio` → `sentences[]` z `___` (placeholder bez inputu) + lista `word_bank[]` jako badge'y
-  - `multiple-choice`/`multiple-choice-picture`/`multiple-choice-audio` → pytania + `options[]` jako lista A/B/C/D (bez radio)
-  - `true-false`/`true-false-picture`/`true-false-audio` → `statements[]` z badge'em „True/False" zamiast inputu
-  - `matching` → tabela 2-kolumnowa `left | right` z `pairs[]`
-  - `matching-halves` → tabela 2-kolumnowa `first | second`
-  - `dialogue` → `speakers[]` jako bullet list `**Speaker:** line`
-  - `answer-questions`/`answer-questions-picture`/`answer-questions-audio`/`discussion` → ol z `questions[]`
-  - `error-correction` → tabela `incorrect | correction` (jeśli jest answer key — pokaż jako szary)
-  - `odd-one-out` → grupa słów rzędem, brak akcji
-  - `word-order` → linia ze słowami w boxach (shuffled)
-  - `negative-prefixes`/`complete-word`/`synonyms`/`antonyms`/`paraphrasing` → tabela 2-kolumnowa input/answer
-  - `categorize` → `categories[]` jako grid kolumn, `items[]` jako badge'y nieprzypisane
-  - `describe-picture`/`answer-questions-picture` → `<img>` z `imageUrl` (lub `image_url`) + prompty
-  - `listening-comprehension` (i `-audio` warianty) → `<audio controls>` z `audio_url` jeśli jest, plus transcript jako szary blok zwijany + pytania
-  - default fallback → JSON.stringify w `<pre>` z ostrzeżeniem „Preview not supported"
-
-### G.3 TL;DR/edu banner (Problem 1B — wytłumaczenie formy)
-
-Strona galerii to **preview SEO-friendly**, nie interaktywny worksheet — pokazuje treść by Google/Bing/LLM-crawler mógł zaindeksować pełny content, a człowiek-nauczyciel dostaje smak treści i CTA do rejestracji. Dlatego forma „read-only tekst + struktura" jest świadoma. Dodajemy na górze (`PublicGalleryWorksheetPage.tsx`, nad `<article>`) jasny info-banner:
-```tsx
-<aside className="container mx-auto max-w-4xl px-4 pt-6">
-  <div className="rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-    <strong>Preview mode.</strong> This is a static read-only preview of a worksheet a teacher published. Interactive answers, AI grading, audio playback and downloads are available only in the full editor — <Link to="/auth?mode=signup" className="underline font-semibold">sign up free</Link> to generate or open this worksheet interactively.
-  </div>
-</aside>
-```
-Plus drobne polerowanie wizualne: każdy `<li>` ćwiczenia dostaje `border-l-4 border-l-primary/40 pl-4`, badge'e typu ćwiczenia w prawym górnym rogu karty.
-
-### G.4 Plik do edycji
-- **Edycja** `src/pages/gallery/PublicGalleryWorksheetPage.tsx`: zamienia w pętli `parsed.exercises.map(...)` aktualne renderowanie na `<GalleryExerciseRenderer exercise={ex} index={i} />`.
-- **Nowy plik** `src/components/gallery/GalleryExerciseRenderer.tsx`.
-- Bez zmian w DB, bez zmian w `publish-worksheet`/`unpublish-worksheet`. Bez zmian w edytorze nauczyciela.
+Pozostałe punkty (2A, 2B, 3, 4, 5, 6, dokumentacja RAG) zostają bez zmian merytorycznych — tylko Problem 1 ma nowe rozwiązanie.
 
 ---
 
-## SPRINT H — CTA Copy Fix (Problem 1C)
+## Problem 1: `AI generator overloaded for batch requests` przy więcej niż 1 Next Step
 
-W `PublicGalleryWorksheetPage.tsx` blok końcowy `Build your own worksheet in 30 seconds`:
-- Zmieniamy tytuł: **„From idea to ready-to-teach worksheet in under 1 minute"**.
-- Sub-copy: **„Edooqoo's DSLM 1-Minute Prep turns your student's goals into a tailored worksheet — fully editable, with audio, images and AI-grading built in. Free to start, no credit card."**
-- Button label: **„Try 1-Minute Prep free"** → `/auth?mode=signup`.
-- Identyczna podmiana w `src/pages/gallery/PublicGalleryIndex.tsx` jeśli ma analogiczny CTA (do potwierdzenia w implementacji — jeśli ma „30 seconds", podmienić).
+### Analiza regresji (co popsuliśmy ~2 tygodnie temu)
+Porównanie obecnego `generate-timeline` z bliźniaczym, działającym `generate-curriculum-phases`:
 
-Nie zmieniamy `featurePromptCopy.ts` ani nigdzie indziej w aplikacji w tej turze — tylko Galeria.
+| Element | `generate-curriculum-phases` (działa) | `generate-timeline` (psuje się dla `count>1`) |
+|---|---|---|
+| Format wyjścia | plain text JSON array, `JSON.parse` z czyszczeniem `code fences` | tool calling przez `tools[].function.parameters` z `additionalProperties` i zagnieżdżonymi obiektami |
+| `temperature` | 0.6 | 0.85 |
+| `reasoning` | `{ effort: 'low' }` | brak |
+| `max_tokens` | 2500 stałe, prosty schema | dynamiczny 1800 + 2000 × count, ale duży schema na poziomie tool |
+| Wielkość promptu | umiarkowana | dodatkowy `existingStepsBlock` do 20 wpisów + bogaty `exerciseFocusMap` + lista 30+ exercise IDs |
+| Schemat outputu | prosty array z polami płaskimi | array z `exerciseFocusMap: { additionalProperties: { type: 'string' } }`, którego Gemini przy `count>1` często odrzuca lub obcina |
+| Tryb wywołania toola | `tool_choice` wymuszony | `tool_choice` wymuszony — przy złożonym schemacie i większej liczbie elementów Gateway zwraca 5xx / `INVALID_ARGUMENT` / `too many states` |
 
----
+W praktyce wszystkie te elementy były dokładane do `generate-timeline` w ostatnich iteracjach (max_tokens, dodatkowy context, FocusMap, exclude, phaseId). Pojedynczy step mieści się i wraca poprawnie, ale `count>1` przekracza tolerancję modelu na złożone tool schema z forsowanym `tool_choice`. Stąd 502 i komunikat z toasta.
 
-## SPRINT I — SEO Cloaking decyzja (Problem 1D — „pokazać Google, schować człowiekowi")
+Działający wzorzec mamy obok — `generate-curriculum-phases` zwraca array w `message.content` jako plain text JSON, bez tool calling, i działa stabilnie nawet dla 5–8 elementów. Wracamy do tego wzorca w `generate-timeline`.
 
-### Stanowisko (do akceptacji)
-**Odradzam pełny cloaking** (different content for Googlebot vs human). Google klasyfikuje to jako manipulację indeksu, kara to deindexacja całej domeny — ryzyko nieproporcjonalne do korzyści. Nasza domena ma 1k+ landing pages programatycznych, wszystkie mogą zostać dotknięte. Nie warto.
+### Rozwiązanie Edooqoo.com
+Naprawiamy przyczynę, nie symptom. Jedno wywołanie `generate-timeline` musi nadal generować cały batch w jednym przejściu, żeby Next Stepy były spójne i komplementarne. Robimy to przez:
 
-### Co możemy zrobić bezpiecznie zamiast cloakingu
-**Wariant „Open Index, Gated Detail"** (akceptowalny SEO i UX):
-1. Lista wszystkich worksheetów teachers (publish=true) — w galerii widoczna jak teraz.
-2. Drugi typ: **„Catalog page"** dla niepublishedowanych — generowane automatycznie na `/catalog/{slug}` z:
-   - Tytułem, levelem, topikiem, lista exercise types, ~30-word summary (extract z transcript/title).
-   - **Bez pełnej treści ćwiczeń** — tylko meta + zachęta.
-   - JSON-LD `LearningResource` + canonical do `/catalog/{slug}`.
-   - W footerze CTA: „This worksheet was created by a teacher. Sign up to generate your own version with the same parameters."
-   - Klikalne dla człowieka, indexable dla Google. Bez cloakingu, bez ryzyka.
-3. Wymaga: nowej kolumny `worksheets.catalog_eligible BOOLEAN DEFAULT true` (teacher może opt-out w settings), nowej edge function `generate-catalog-summary` (jednorazowo per worksheet) i nowego route'u. **Decyzja: NIE wdrażamy w tym sprincie** — wymaga osobnej dyskusji (PII, opt-out flow, polityka prywatności). Dodajemy do `.lovable/plan.md` BACKLOG jako „Worksheet Catalog SEO Layer — Plan v6.10".
+1. Wyłączenie tool callingu i przejście na plain text JSON output (jak w `generate-curriculum-phases`).
+2. Zachowanie pełnego sanitizera (8 ćwiczeń, focusMap, media family, etc.) po stronie Edge Function — kontrakt zwracany do frontendu się nie zmienia.
+3. Dodanie `reasoning.effort='low'` i obniżenie `temperature` do 0.6, żeby Gemini lepiej trzymał strukturę.
+4. Lekkie odchudzenie promptu w sekcjach, które nie wpływają na jakość generacji (limity dla weak areas, knowledge, recent worksheets, existing steps), bez ruszania logiki worksheet generation engine.
+5. Dodanie pojedynczego retry z `temperature=0.4` i jeszcze prostszą instrukcją w razie 5xx, zanim wrzucimy frontendowi błąd.
 
-### Co robimy teraz (bez Sprint I implementacji)
-Tylko dokumentujemy w `docs/llm-context.md` decyzję i ryzyko cloakingu, by przyszły agent nie wpadł na pomysł realizacji.
+To NIE jest sekwencyjny batch — cały zestaw kroków powstaje w jednym requeście, co zachowuje spójność.
 
----
+### Mechanika techniczna
 
-## SPRINT J — Naprawa wszystkich linków `.html` (Problem 2)
+#### Plik: `supabase/functions/generate-timeline/index.ts`
 
-### J.1 Skala
-Skan repo: ~330 wystąpień `.html` w `src/`. Główne źródła:
-- `src/pages/Blog.tsx` — 36 wpisów, wszystkie `/blog/{slug}.html`. Realne route'y istnieją tylko dla 3 (`english-games-for-learners`, `esl-games-for-teachers`, `teach-english-online-guide`). **33 linki → 404.**
-- `src/pages/Resources.tsx` — ~40 linków, część do `/blog/*.html` (duplikat z Blog), część do `/{slug}.html` top-level (generatory, CEFR-poziomy, comparisons).
-- `src/components/GlobalFooter.tsx` — 16 linków do `/{slug}.html` (CEFR Guide, Present Simple, Past Simple, modal verbs, edooqoo-vs-*).
-- Łącznie unikalnych broken: ~80+ URL-i.
-- `public/sitemap.xml` — zawiera część z nich → Google indeksuje 404 → tracimy crawl budget.
+1. Usunąć `tools` i `tool_choice`. Zostawić wywołanie AI Gateway przez `chat/completions`.
+2. Body request:
+   - `model: 'google/gemini-2.5-flash'`
+   - `messages`: system + user (system: „You are an expert ESL curriculum planner. Return only a valid JSON array. No markdown, no commentary.")
+   - `temperature: 0.6`
+   - `reasoning: { effort: 'low' }`
+   - `max_tokens: Math.min(8192, 2200 + 1500 * count)`
+   - bez `response_format`, żeby nie zaostrzać schematu (Gemini i tak akceptuje czysty JSON output, gdy o to wyraźnie poprosimy w prompcie — to samo robi `generate-curriculum-phases`).
+3. Prompt:
+   - Końcówka promptu wymusza format wyjścia. Wzorzec:
+     ```text
+     Return ONLY a valid JSON array of exactly N objects (no markdown, no commentary), with this EXACT shape per object:
+     {
+       "topic": "string (TBLT-style adult task)",
+       "goal": "string",
+       "additionalInfo": "string",
+       "grammarFocus": "string",
+       "exercises": ["id1", "id2", "id3", "id4", "id5", "id6", "id7", "id8"],
+       "exerciseFocusMap": { "id1": "vocabulary|grammar|none", ... },
+       "rationale": "string",
+       "focusSkills": ["..."],
+       "difficulty": "CEFR level string",
+       "estimatedImpact": { "key": "value" }
+     }
+     ```
+   - Lista valid exercise IDs zostaje, ale skracamy istniejący `existingStepsBlock` z 20 do 10 wpisów i `WeakAreas` do 8, `Knowledge` do 6, `Worksheet history` do 8. To są limity prompt-fit, nie mają wpływu na worksheet generation engine.
+4. Parser:
+   - `aiData.choices[0].message.content` → strip `code fences` → `JSON.parse`.
+   - Jeśli to obiekt z polem `suggestions`, użyj `parsed.suggestions`. Jeśli to array, użyj wprost. Jeśli parsowanie pada, fallback: spróbuj wyciąć największy `[...]` regexem (`/\[[\s\S]*\]/`).
+5. Sanitizer (TARGET_EX_COUNT = 8, focus map enforcement, media family) zostaje BEZ ZMIAN. To jest „defense in depth” i właśnie dlatego frontend dostaje stabilny kontrakt mimo, że schema na wejściu modelu jest luźna.
+6. Retry on 5xx (jeden, bez sekwencji per step):
+   - jeśli `aiResponse.ok === false` ALBO suggestions.length === 0 po sparsowaniu, wykonujemy DRUGIE wywołanie Gateway:
+     - `temperature: 0.4`
+     - prompt z dopiskiem na końcu: `Return EXACTLY ${count} items. JSON array only. No prose.`
+     - tych samych pozostałych parametrów.
+   - Jeśli i to padnie, dopiero wtedy zwracamy 502 z dotychczasowym `schemaRejected` heurystycznym (`/too many states|INVALID_ARGUMENT/i`).
+7. `generationContext` rozszerzamy o:
+   - `output_mode: 'plain_json'`
+   - `retry_used: boolean`
+   - `requested_count`, `finish_reason`, `warning` zostają jak były.
+8. Ważne: NIE dotykamy żadnego promptu worksheet generation engine ani `format-worksheet-prompt`. Zmiana dotyczy wyłącznie sposobu, w jaki Gemini ma zwrócić pre-worksheet suggestions.
 
-### J.2 Strategia: 3 kubełki
+#### Plik: `src/hooks/useFutureTimeline.tsx`
 
-**Kubełek 1 — MAPOWANIE do istniejących programatic SEO routes** (działa od razu, bez nowego contentu):
-Tworzymy `src/data/legacyLinkMap.ts`:
-```ts
-export const LEGACY_LINK_MAP: Record<string, string> = {
-  // Resources → existing programmatic SEO
-  "/cefr-worksheet-generator.html": "/esl-worksheets",
-  "/grammar-worksheet-generator.html": "/esl-worksheets/grammar",
-  "/vocabulary-exercise-generator.html": "/esl-worksheets/vocabulary",
-  "/reading-comprehension-worksheet-maker.html": "/esl-worksheets/reading",
-  "/fill-in-the-blanks-worksheet-generator.html": "/esl-worksheets/fill-in-blanks",
-  "/multiple-choice-quiz-generator-english.html": "/esl-worksheets/multiple-choice",
-  "/listening-comprehension-exercises-esl.html": "/esl-worksheets/listening",
-  "/a1-beginner-english-worksheets.html": "/esl-worksheets/grammar/a1-beginner",
-  "/a2-elementary-english-worksheets.html": "/esl-worksheets/grammar/a2-elementary",
-  "/b1-intermediate-english-worksheets.html": "/esl-worksheets/grammar/b1-intermediate",
-  "/b2-upper-intermediate-english-worksheets.html": "/esl-worksheets/grammar/b2-upper-intermediate",
-  "/c1-advanced-english-worksheets.html": "/esl-worksheets/grammar/c1-advanced",
-  "/c2-proficiency-english-worksheets.html": "/esl-worksheets/grammar/c2-proficiency",
-  "/present-simple-worksheets.html": "/esl-worksheets/present-simple/b1-intermediate",
-  "/past-simple-worksheets.html": "/esl-worksheets/past-simple/b1-intermediate",
-  "/modal-verbs-worksheets-esl.html": "/esl-worksheets/modal-verbs/b1-intermediate",
-  "/business-english-worksheet-generator.html": "/esl-worksheets/business-english/b2-upper-intermediate",
-  "/exam-preparation-worksheets-cambridge-ielts.html": "/esl-worksheets",
-  "/ai-worksheet-generator-for-english-teachers.html": "/",
-  "/ai-lesson-planning-for-english-teachers.html": "/resources",
-  "/online-english-teaching-tools.html": "/blog/teach-english-online-guide",
-  "/esl-student-progress-tracking-tool.html": "/features/dslm",
-  "/esl-homework-grading-tool.html": "/features/homework",
-  "/ai-grading-tool-for-english-homework.html": "/features/homework",
-  "/spaced-repetition-flashcards-esl.html": "/features/flashcards",
-  "/how-to-save-time-as-english-teacher.html": "/blog/teach-english-online-guide",
-  "/how-to-create-english-worksheets-with-ai.html": "/blog/teach-english-online-guide",
-  "/best-ai-tools-for-esl-teachers.html": "/resources",
-  "/ai-tools-for-private-english-tutors.html": "/for-english-tutors",
-  "/worksheet-generator-for-language-schools.html": "/for-english-tutors",
-  "/ai-tools-for-online-esl-teachers.html": "/blog/teach-english-online-guide",
-  // Blog .html → 3 real posts (keep slug, drop .html)
-  "/blog/english-games-for-learners.html": "/blog/english-games-for-learners",
-  "/blog/esl-games-for-teachers.html": "/blog/esl-games-for-teachers",
-  "/blog/teaching-english-online-complete-guide.html": "/blog/teach-english-online-guide",
-};
-```
-(Końcowa lista mapowań — pełna 80+ pozycji — generowana w implementacji przez `rg` i ręczny review każdej pozycji vs `App.tsx` routes oraz `src/constants/pseoMatrix.ts`. Każde mapowanie wskazuje na **istniejący** route. Jeśli target nie istnieje → przechodzi do Kubełka 3.)
+1. Usunąć fallback „phase-bound failed → retry as free step” dla batchy. Powód: cichy fallback maskował problem i tworzył free stepy zamiast phase stepów. Po naprawie Edge Function nie powinien być potrzebny. Jeśli phase-bound generation zwróci 5xx mimo retry serwerowego, frontend pokazuje precyzyjny toast i nie zmienia phaseId.
+2. Zachować obsługę:
+   - 402 → „AI credits exhausted…”
+   - 429 → „Too many AI requests…”
+   - 502 z `schemaRejected` → „AI could not return this batch. Try generating fewer steps, or generate one step at a time.”
+   - 502 generic → „AI generator is temporarily unavailable. Please retry in a moment.”
+   - 500 → istniejący komunikat
+3. Po sukcesie zostawić obecny insert i `fetchSuggestions`.
 
-**Kubełek 2 — REAL** (3 posty bloga): aktualizujemy `Blog.tsx` żeby ich `href` był czystym slugiem bez `.html`.
+#### Plik: `supabase/functions/generate-curriculum-phases/index.ts`
+Bez zmian. Jest naszym wzorcem.
 
-**Kubełek 3 — COMING SOON** (33 posty bloga bez treści + 4 comparisons `edooqoo-vs-*`): **NIE linkujemy**. UI renderuje kafelek bez `<a>`, z badgem „Coming soon", `cursor-not-allowed`, `opacity-60`, tooltipem „Full article shipping soon". To eliminuje 404, nie tworzy fake stub-pages (Martha quality rule), zachowuje listę tytułów dla scan/SEO discovery wewnątrz `/blog` index.
+### Dlaczego to przywróci stan sprzed regresji
+- Wcześniej działający batch korzystał z prostszego promptu i mniej rozbudowanego outputu. Powrót do plain text JSON i ograniczenie kontekstu odtwarza ten stan, jednocześnie zachowując nowe sanitizery i pola, które już są używane przez resztę aplikacji.
+- Plain text JSON nie podlega Gemini Tool Schema „too many states” — to jest dokładnie ta klasa błędu, którą obecny tryb tool calling generował dla `count>1`.
+- Backend sanitizer nadal gwarantuje 8 ćwiczeń, focusMap i media family, więc dane w DB nie tracą jakości.
 
-### J.3 Helper i refaktor
-
-Nowy plik `src/lib/resolveLegacyHref.ts`:
-```ts
-import { LEGACY_LINK_MAP } from "@/data/legacyLinkMap";
-export type ResolvedHref = { url: string; comingSoon: boolean };
-export function resolveLegacyHref(href: string): ResolvedHref {
-  if (href in LEGACY_LINK_MAP) return { url: LEGACY_LINK_MAP[href], comingSoon: false };
-  if (href.endsWith(".html")) return { url: href, comingSoon: true };
-  return { url: href, comingSoon: false };
-}
-```
-
-Edycje:
-- `src/pages/Blog.tsx` — w mapowaniu kart: `const r = resolveLegacyHref(item.href);` → jeśli `comingSoon` to `<div role="listitem" class="opacity-60 cursor-not-allowed">...<Badge variant="secondary">Coming soon</Badge>` (bez `<a>`); inaczej `<Link to={r.url}>` z react-router-dom (zamiana `<a href>` na `<Link>`).
-- `src/pages/Resources.tsx` — identyczny refaktor w pętli `items.map`.
-- `src/components/GlobalFooter.tsx` — refaktor wszystkich `<a href="...html">`: jeśli mapowane → `<Link to={r.url}>`; jeśli niemapowane → **usuwamy z DOM** (footer nie powinien mieć kafelków Coming Soon — zaśmieca). Usuwamy całą kolumnę „Compare" (4 `/edooqoo-vs-*.html` — brak treści, brak planu). Grid footera przechodzi z 5 na 4 kolumny — zaktualizować klasy Tailwind `md:grid-cols-4`.
-- `public/sitemap.xml` — usunąć wszystkie URL `.html` które nie mają mapowania. Zostawić wyłącznie URL-e prowadzące do istniejących stron + Public Gallery URL-e.
-- `scripts/seo/audit-sitemap.mjs` — jeśli istnieje i robi link check, dopisać assertion: `expect(no .html broken links)`.
-
-### J.4 Test
-Po implementacji: ręczny click-test `/blog`, `/resources`, footer na 5 losowych stronach (`/`, `/features/dslm`, `/esl-worksheets`, `/glossary`, `/pricing`) — 0 linków zwracających 404.
+### Weryfikacja
+- W UI: Generate 1 / 2 / 3 / 6 Next Steps jako free steps.
+- W UI: Generate 1 / 2 / 3 dla każdej fazy.
+- Edge Function logs: brak `INVALID_ARGUMENT`, brak `too many states`.
+- Console nie pokazuje `phase-bound failed, retrying as free step`.
+- DB: `phase_id` i `suggestion_kind` zgodne z wyborem nauczyciela.
 
 ---
 
-## SPRINT K — Multi-provider Model Audit (Problem 3, część A)
+## Problem 2A: brak goals przy `Generate Learning Roadmap` (bez zmian)
 
-### K.1 Inwentaryzacja modeli (jednorazowy skan)
-Skrypt `scripts/audit-llm-models.ts` (Deno):
-1. Skan `supabase/functions/**/*.ts` regexami:
-   - `gpt-[\w.-]+`, `o[1-4][\w.-]*`, `tts-\d+`, `whisper-[\w.-]+`, `dall-e-\d`, `gpt-4o[-\w]*tts`, `gpt-4o-audio[-\w]*` → OpenAI
-   - `gemini-[\w.-]+`, `google/[\w.-]+` → Google AI Studio (direct) / Lovable AI Gateway (jeśli URL zawiera `ai.gateway.lovable`)
-   - `claude-[\w.-]+`, `anthropic/[\w.-]+` → Anthropic
-   - `elevenlabs[\/_-][\w.-]+` → ElevenLabs
-2. Output etap 1: tabela `model | provider | files[]` w `docs/closed-loops/LLM_MODEL_INVENTORY.md`.
+### Pytanie użytkownika
+„Jeżeli nie ma goals, na jakiej podstawie wygeneruje się Roadmap i fazy?”
 
-### K.2 Live-check per provider
-Per model uruchamiamy:
-- **OpenAI**: `GET https://api.openai.com/v1/models/{id}` z `Authorization: Bearer ${OPENAI_API_KEY}` → status 200 OK; 404 = deprecated.
-- **Google AI Studio**: `GET https://generativelanguage.googleapis.com/v1beta/models/{id}?key=${GEMINI_API_KEY}`.
-- **Anthropic**: minimalny `POST https://api.anthropic.com/v1/messages` z body `{model, max_tokens:1, messages:[{role:"user",content:"ping"}]}`, headers `x-api-key`, `anthropic-version: 2023-06-01`. Sukces lub `model_not_found`.
-- **ElevenLabs**: `GET https://api.elevenlabs.io/v1/models` (zwraca pełną listę — sprawdzamy obecność `model_id`).
-- **Lovable AI Gateway**: `POST {GATEWAY}/v1/chat/completions` z `Authorization: Bearer ${LOVABLE_API_KEY}`, `{model, messages:[{role:"user",content:"ping"}], max_tokens:1}`.
+Roadmapa nadal może powstać, ale na słabszych źródłach: `students.main_goal`, `students.english_level`, `student_skill_metrics`, `student_knowledge_entries`, ostatnie worksheet topics, pacing mode, `main_goal_target_date`. Bez `student_progress_goals` plan jest mniej spersonalizowany — to tryb awaryjny, nie pełnoprawny workflow.
 
-### K.3 Procedure B (rozszerzona) — `docs/prompts/AUDIT_PROCEDURES.md`
-Aktualizujemy istniejący plik (lub tworzymy jeśli nie istnieje):
+### Rozwiązanie Edooqoo.com
+Przed generacją roadmapy bez aktywnych goals pokazujemy ostrzeżenie i pytamy o potwierdzenie, dając jednocześnie szybkie ścieżki dodania celu.
 
-```markdown
-## Procedure B — Monthly Multi-Provider Model Audit (1st day of month, ~20 min)
+### Mechanika techniczna
+Pliki: `src/components/dslm/MacroTimeline.tsx`, `src/components/dslm/PathwayView.tsx`, `src/components/dslm/DSLMTab.tsx`, `src/components/dslm/GoalsView.tsx`.
 
-### Step 1: Run inventory
-`deno run --allow-net --allow-env --allow-read --allow-write scripts/audit-llm-models.ts`
-Generates `docs/closed-loops/LLM_MODEL_INVENTORY.md`.
-
-### Step 2: Live-check all models
-The same script live-pings each model against its provider. Output:
-`docs/closed-loops/STATUS_LIVE.md` with columns: model | provider | http_status | last_checked | files[] | severity.
-
-### Step 3: Manual deprecation page scan (browser)
-Open and Ctrl-F each model name from inventory in:
-- OpenAI: https://platform.openai.com/docs/deprecations
-- Google: https://ai.google.dev/gemini-api/docs/models#model-versions
-- Anthropic: https://docs.anthropic.com/en/docs/about-claude/models/all-models#model-deprecations
-- ElevenLabs: https://elevenlabs.io/docs/models
-- Lovable AI Gateway: https://docs.lovable.dev/features/ai
-
-Each match → add row to STATUS_LIVE.md with deprecation_date and migration_target.
-
-### Step 4: File tickets
-For each model with severity ≥ warning:
-- Append entry to `.lovable/plan.md` BACKLOG: `[CRITICAL] Migrate {model} ({provider}) — used in: {files}. Deprecation: {date}. Suggested replacement: {target}.`
-- INSERT into `error_logs` (severity='critical', error_type='model_deprecation', model_name, source_files JSON).
-- Send notification email via `notify-generation-failure` with errorType='model_deprecation'.
-
-### Step 5: Pricing shift check
-For each provider, check pricing page diff vs `docs/closed-loops/PRICING_BASELINE.md`. Shift ≥25% → BACKLOG ticket.
-```
-
-### K.4 Auto-log w runtime (Problem 3 część B — `/admin/error-logs` i `/status`)
-
-Dodajemy w **każdej edge function** wywołującej OpenAI/Gemini/Anthropic/ElevenLabs uniform helper `logModelFailure(model, status, errorBody)`:
-
-Nowy `supabase/functions/_shared/modelFailureLogger.ts`:
-```ts
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-export async function logModelFailure(opts: {
-  model: string; provider: string; status: number; endpoint: string; error: string; functionName: string;
-}) {
-  const url = Deno.env.get("SUPABASE_URL");
-  const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
-  if (!url || !key) return;
-  const sb = createClient(url, key);
-  const severity = opts.status === 404 || opts.status === 410 ? "critical" : opts.status >= 500 ? "warning" : "info";
-  const errorType = opts.status === 404 || opts.status === 410 ? "model_deprecation" : "model_failure";
-  await sb.from("error_logs").insert({
-    severity, error_type: errorType, source_name: opts.functionName,
-    message: `${opts.provider} ${opts.model} → ${opts.status}`,
-    context: { model: opts.model, provider: opts.provider, endpoint: opts.endpoint, error: opts.error.substring(0, 1000) },
-  }).then(() => {}, (e) => console.error("logModelFailure insert error:", e));
-}
-```
-
-Wpinamy w `catch` w: `generate-audio`, `generateWorksheet`, `verify-open-answers`, `translate-flashcard`, `process-welcome-test`, `suggest-exercises`, `generate-welcome-test-audio`, `classify-knowledge-entry`, `generate-curriculum-phases`, `generate-media-exercises`, `generate-image`, `generate-timeline`. Każdy 404/410/5xx z provider API → INSERT do `error_logs`.
-
-`/status` page (`src/pages/StatusPage.tsx`) i `/admin/error-logs` już czytają z `error_logs` → auto-podchwycą nowe wpisy. Dodatkowo na `StatusPage.tsx` dodajemy sekcję „Active model issues" filtrującą `error_logs` po `error_type IN ('model_deprecation', 'model_failure') AND created_at > now() - interval '24h'` — jeśli niepuste, pokazuje czerwony banner „We're investigating an issue with {provider} {model}. Audio/worksheet generation may be temporarily affected."
-
-Migracja DB: brak — `error_logs` już istnieje. Jeśli nie ma kolumn `context jsonb` lub `source_name` → migration to dodać (do potwierdzenia w implementacji przez `supabase--read_query` na `information_schema`).
+1. `PathwayView` ma już `useStudentProgress` i tym samym `goals`. Przekazujemy `hasActiveGoals={goals.length > 0}` do `MacroTimeline`.
+2. W empty state `MacroTimeline` (`No curriculum plan yet`) i przy klikalnym przycisku `Generate Learning Roadmap` w przypadku braku goals dodajemy widoczny komunikat:
+   - tekst: `Add goals first for better worksheet suggestions.`
+   - przycisk: `Add goal` → emituje `dslm:openSubsection` z `id='goals-supporting'`, dzięki czemu istniejący `CollapsibleSection` rozwinie sekcję i przewinie do niej.
+3. Klik `Generate Learning Roadmap` przy braku goals NIE wywołuje od razu `generatePhases`. Otwieramy AlertDialog:
+   - Tytuł: `Generate roadmap without goals?`
+   - Opis: krótkie info, że plan będzie best-effort na podstawie main goal, level, metrics, notes, worksheet history.
+   - Przyciski:
+     - `Cancel` — zamyka dialog
+     - `Confirm` — wywołuje `generatePhases('replace')`
+     - `Add Supporting goal` — emituje `dslm:addGoal` z `{ type: 'supporting' }`
+     - `Add Additional goal` — emituje `dslm:addGoal` z `{ type: 'additional' }`
+4. `GoalsView` nasłuchuje `dslm:addGoal`. Po otrzymaniu eventu ustawia `newGoal.type` i `showAddGoal=true`, więc otwiera istniejący Add Goal dialog bez duplikowania logiki.
 
 ---
 
-## SPRINT L — Email Alerts (Problem 4)
+## Problem 2B: brak ukończonego placement / Welcome Test (bez zmian)
 
-### L.1 notify-generation-failure
-W `supabase/functions/notify-generation-failure/index.ts` linia 9:
-```ts
-const ALERT_EMAILS = ["j4n.brz0@gmail.com", "edooqoo@gmail.com"];
-```
-W body fetch do Resend: `to: ALERT_EMAILS,` (zamiast `[ALERT_EMAIL]`).
+### Pytanie użytkownika
+„Jeżeli nie ma goals i nie ukończono placement, na jakiej podstawie wygeneruje się Roadmap?”
 
-### L.2 submit-bug-report
-W `supabase/functions/submit-bug-report/index.ts`:
-- Znaleźć tablicę adresatów (`bugEmails` lub analogiczna). Dodać `"edooqoo@gmail.com"`.
-- Jeśli używa zmiennej env `BUG_REPORT_FROM_EMAIL` — sprawdzić czy jest, jeśli nie to skonfigurować (sekret). Defaultowy `From: "Edooqoo Bugs <notifications@edooqoo.com>"` jeśli sekret pusty.
+Bez goals i bez ukończonego Welcome Placement Test plan jest oparty na minimum: `main_goal`, `english_level` ustawiony ręcznie, ewentualne notatki, ewentualne worksheet history, ewentualne metrics. To nadal działa, ale precyzja diagnozy jest niska.
 
-### L.3 Sekret
-Dodać sekret `BUG_REPORT_FROM_EMAIL = "Edooqoo Bugs <notifications@edooqoo.com>"`. (Akcja przez `secrets--add_secret` w implementacji — wymagana aprobata.)
+### Rozwiązanie Edooqoo.com
+Drugie ostrzeżenie obok Roadmapy z CTA do wysłania Welcome Placement Test, używając istniejącego flow.
 
-### L.4 Walidacja
-Smoke-test po deploy:
-```
-curl -X POST {SUPABASE_URL}/functions/v1/notify-generation-failure -H "Authorization: Bearer {SERVICE_KEY}" -H "Content-Type: application/json" -d '{"errorType":"audio","errorMessage":"test","timestamp":"...","teacherEmail":"test@x.com"}'
-```
-Oczekiwane: 200, oba adresy w logu Resend.
+### Mechanika techniczna
+1. W `PathwayView` lub `MacroTimeline` lekkie zapytanie do `student_tests` (`student_id`, `teacher_id`, `test_type='welcome'`, `deleted_at IS NULL`, latest):
+   - completed jeśli `status in ('completed','reviewed')`.
+2. Jeśli nieukończony, pokazujemy info-banner: `Send the Welcome Placement Test for a stronger roadmap baseline.` + przycisk `Send test`.
+3. Reusable hook `src/hooks/useWelcomeTestActions.ts` zbudowany z funkcji już istniejących w `WelcomeTestSuggestion.tsx` (`ensureWelcomeTest`, `handleSend`, `handleCopy`, `handlePreview`, `handleRefreshLink`). `WelcomeTestSuggestion` zostaje przepisany na ten hook bez zmiany zachowania. Nowe miejsce użycia w roadmapie korzysta tylko z `send`.
+4. Brak emaila ucznia → istniejące zachowanie: link kopiowany do clipboardu z odpowiednim toastem.
 
 ---
 
-## SPRINT M — UI Layering Fix (Problem 5)
+## Problem 3: po usunięciu fazy Next Steps mają się odpiąć (bez zmian)
 
-### M.1 Diagnoza
-`src/components/GeneratingModal.tsx` renderuje modal w drzewie React lokalnie. `src/components/GlobalFooter.tsx` (i potencjalnie Sticky Nav) używa `backdrop-blur`, który tworzy nowy stacking context — zasłania modal mimo wysokiego `z-index`.
+### Diagnoza
+W DB FK to `ON DELETE SET NULL`, ale aplikacja używa soft delete (`deleted_at`), więc constraint się nie odpala. Trzeba odpiąć aplikacyjnie.
 
-### M.2 Rozwiązanie
+### Rozwiązanie Edooqoo.com
+Przy soft delete fazy wszystkie powiązane Next Stepy (aktywne i `is_used`) dostają `phase_id = null` i `suggestion_kind = 'next_step'`. Stają się wolnymi stepami i zostają w planie.
 
-**Edycja `src/components/GeneratingModal.tsx`**:
-```tsx
-import { createPortal } from "react-dom";
-// W returnie:
-return createPortal(
-  <div className="fixed inset-0 z-[100] flex items-center justify-center ...">
-    {/* dotychczasowa treść modala */}
-  </div>,
-  document.body
-);
-```
+### Mechanika techniczna
+Plik: `src/hooks/dslm/useCurriculumPhases.tsx`.
 
-**Edycja `src/components/GlobalFooter.tsx`**: root `<footer>` dostaje `className="... relative z-0"` — explicit niższy z-index niż portal.
-
-**Edycja `src/components/Sidebar.tsx`** (jeśli też używa backdrop-blur i tworzy stacking context): identyczny `relative z-0` na root.
-
-### M.3 Walidacja
-Smoke-test wizualny: na `/` (anonimowy user) kliknąć generator → modal pojawia się i widać całość, footer pod spodem. Powtórzyć na `/dashboard` (logged in) i `/student-hub`.
+1. W `deletePhase(id)` po soft delete fazy wykonujemy update na `future_worksheet_suggestions` filtrowanym po `phase_id=id` i `teacher_id=teacherId` z setem `{ phase_id: null, suggestion_kind: 'next_step' }`.
+2. Renumeracja faz pozostaje jak jest (sequential 1..N).
+3. Emitujemy:
+   - `dslm:phasesUpdated` (już istnieje),
+   - nowy `dslm:suggestionsUpdated` z `studentId`.
+4. `useFutureTimeline` dostaje listener `dslm:suggestionsUpdated` i wywołuje `fetchSuggestions`, dzięki czemu Next Steps natychmiast widać jako wolne.
 
 ---
 
-## SPRINT N — LinkedIn outreach copy (Problem 6) — build-in-public
+## Problem 4: przy fazach `Remove` tylko jako ikona (bez zmian)
 
-**3 warianty** napisane w stylu „buduję, oto co już działa, oto co dowożę, zostań testerem" — NIE „mam gotowy DSLM". Każdy wariant zostaje w `.lovable/plan.md` jako template do skopiowania. **Nie wdrażamy do kodu aplikacji.**
-
-### Wariant 1 — Founder, krótki (neutralny build-in-public)
-> Hi [name], for the past 9 months I've been building Edooqoo — a tool for 1-on-1 English teachers working with adult learners. What's already shipping: AI-generated worksheets tailored to each student's goal (29 exercise types), auto-graded homework, per-skill mastery tracking, integrated calendar with Google Meet. What we're rolling out in July: DSLM 1-Minute Prep — 60 seconds from "I have a lesson in 5 min" to a ready, student-tailored worksheet. I'm looking for 20 teachers for a 4-week pilot — free access, honest feedback in return. Interested?
-
-### Wariant 2 — Pain-point hook (build-in-public, prowokacyjny)
-> [name], how many hours a week do you spend prepping materials for adult Business English / Cambridge / IELTS students? For Martha (10 yrs ESL, co-founder) it was 8h/week. That's why we've been building Edooqoo for the last 9 months. What works today: AI worksheet generator tied to your student's actual goal, auto-grading, mastery tracking, teacher calendar. What's next (July release): DSLM 1-Minute Prep — full lesson prep in under 60 seconds. We're onboarding 20 teachers as early testers — free access, you tell us what sucks. In?
-
-### Wariant 3 — Low-pressure (soft build-in-public)
-> Hi [name], saw on your profile that you teach [Business English / adults / online]. I'm building Edooqoo (with Martha — 10 yrs ESL background) for 1-on-1 adult ESL teachers. Happy to send a 2-minute demo of what's already working (worksheet generator + grading + mastery tracking) and what we're shipping in July (DSLM 1-Minute Prep). Zero sales pitch — just gathering teacher feedback before the bigger launch. OK if I send the link?
-
-**Tracking**: każdy link `?utm_source=linkedin&utm_campaign=invite_2026q3&utm_content=v1|v2|v3`. Po 2 tygodniach `/admin/analytics` decyduje który skalujemy do 1000.
+W `MacroTimeline.tsx` zamieniamy przycisk `Remove` z tekstem na icon-only z tooltipem `Remove phase` i `aria-label="Remove phase"`. Zachowujemy obecny destrukcyjny styl i odstępy, żeby nie psuć layoutu wiersza akcji.
 
 ---
 
-## SPRINT O — Dokumentacja RAG (obowiązkowa)
+## Problem 5: confirm bez wpisywania tekstu (bez zmian)
 
-W tym samym commicie aktualizujemy:
+Tworzymy nowy `src/components/dslm/ConfirmDeleteDialog.tsx`:
 
-### `docs/llm-context.md` — dopisać sekcje:
-
-```markdown
-## Public Gallery Exercise Renderer (v6.9.21)
-
-**Problem:** v6.9.20 Public Gallery rendered only `title`/`instructions`/`content`/`questions` per exercise, ignoring shape variations across 29 exercise types — students/teachers saw "text-only" preview missing tables, options, dialogs, audio players.
-
-**Edooqoo.com Solution:** Dedicated read-only renderer `GalleryExerciseRenderer.tsx` with switch over `normalizeExerciseType(ex.type)`, mapping each type to its visual structure (table for matching, A/B/C/D list for multiple-choice, audio player + transcript for listening, etc.). Zero state, zero inputs, zero API — pure presentation. SEO-friendly (full content rendered for crawlers), human-friendly (structure preserved). Top banner clarifies "Preview mode — sign up for interactive editor."
-
-**Technical Mechanics:**
-- `src/components/gallery/GalleryExerciseRenderer.tsx` — switch on normalized type, fallback to `<pre>{JSON.stringify(ex)}</pre>` for unknown types.
-- `src/pages/gallery/PublicGalleryWorksheetPage.tsx` — renders banner + uses GalleryExerciseRenderer in map.
-- CTA copy updated to DSLM 1-Minute Prep narrative (not "30 seconds worksheet").
-
-**RAG Keywords:** public gallery, worksheet preview, read-only renderer, exercise types, SEO worksheet, 1-Minute Prep CTA.
-
-## Legacy .html Link Resolver (v6.9.21)
-
-**Problem:** Historical SEO landing pages used `.html` suffix (~330 hrefs across `Blog.tsx`, `Resources.tsx`, `GlobalFooter.tsx`). ~80 unique targets never existed → 404 storm hurting crawl budget and UX. Examples: `/blog/reading-comprehension-activities-english.html`, `/modal-verbs-worksheets-esl.html`, `/edooqoo-vs-magicschool.html`.
-
-**Edooqoo.com Solution:** Three-bucket strategy: (1) `src/data/legacyLinkMap.ts` maps ~50 legacy `.html` hrefs to existing programmatic routes; (2) 3 real blog posts use clean slugs; (3) 33 unwritten blog posts + 4 comparisons render as non-clickable "Coming soon" tiles. Sitemap pruned to live URLs only. Footer "Compare" column removed.
-
-**Technical Mechanics:**
-- `src/data/legacyLinkMap.ts` — exhaustive map.
-- `src/lib/resolveLegacyHref.ts` — `(href) => {url, comingSoon}`.
-- `Blog.tsx`/`Resources.tsx`/`GlobalFooter.tsx` — consume resolver; `<Link>` for mapped, disabled tile for comingSoon, removed from DOM in footer.
-- `public/sitemap.xml` pruned.
-
-**RAG Keywords:** broken links, 404, coming soon tiles, legacy redirects, sitemap pruning, .html cleanup, SEO crawl budget.
-
-## Multi-Provider LLM Model Audit (v6.9.21)
-
-**Problem:** OpenAI removed `gpt-4o-audio-preview` access without notification → `generate-audio` returned 500 for weeks. No systematic monitoring across OpenAI, Google Gemini, Anthropic, ElevenLabs, Lovable AI Gateway. `/admin/error-logs` and `/status` didn't surface provider model issues.
-
-**Edooqoo.com Solution:** (1) Monthly Procedure B audit script (`scripts/audit-llm-models.ts`) inventories all model refs in `supabase/functions/**`, live-pings each provider, writes `docs/closed-loops/STATUS_LIVE.md`, files BACKLOG tickets for deprecations. (2) Runtime auto-logging via `_shared/modelFailureLogger.ts` — every provider 404/410/5xx inserts `error_logs` row with `error_type='model_deprecation'` or `'model_failure'`. (3) `StatusPage.tsx` reads `error_logs` last 24h and shows banner when active model issues exist. (4) Notification email sent on critical severity.
-
-**Technical Mechanics:**
-- Regex scope: OpenAI (gpt-/o[1-4]/tts/whisper/dall-e), Google (gemini-/google/), Anthropic (claude-/anthropic/), ElevenLabs (elevenlabs*), Lovable Gateway (via URL detection).
-- Live checks: provider-specific endpoints (see `AUDIT_PROCEDURES.md` Procedure B).
-- `_shared/modelFailureLogger.ts` wired into 12 edge functions catch blocks.
-- StatusPage banner queries `error_logs WHERE error_type IN ('model_deprecation','model_failure') AND created_at > now() - interval '24h'`.
-
-**RAG Keywords:** model deprecation, LLM audit, multi-provider monitoring, gpt-4o-audio-preview, status page banner, error_logs, Procedure B, runtime model logging.
-
-## Bug Alert Email Recipients (v6.9.21)
-
-**Problem:** Bug reports and generation failures sent only to founder's personal Gmail — secondary monitoring mailbox not notified.
-
-**Edooqoo.com Solution:** Both `notify-generation-failure` and `submit-bug-report` send to `["j4n.brz0@gmail.com", "edooqoo@gmail.com"]`. Sender configurable via `BUG_REPORT_FROM_EMAIL` secret (default `"Edooqoo Bugs <notifications@edooqoo.com>"`).
-
-**RAG Keywords:** bug alerts, email recipients, notifications@edooqoo.com, Resend, alert escalation.
-
-## Modal Stacking Context Fix (v6.9.21)
-
-**Problem:** `GlobalFooter` `backdrop-blur` created a new stacking context that visually covered `GeneratingModal` and other in-page modals despite high z-index.
-
-**Edooqoo.com Solution:** `GeneratingModal.tsx` portals to `document.body` via `createPortal` with `z-[100]`. Footer/sidebar root elements explicitly get `relative z-0`.
-
-**RAG Keywords:** modal layering, createPortal, backdrop-blur stacking context, z-index conflict, GeneratingModal.
-```
-
-### `llms.txt` + `public/llms.txt` — dopisać te 5 sekcji jako bullets w „Updates v6.9.21".
-
-### `mem/index.md` — dopisać:
-```
-- [Gallery Exercise Renderer](mem://features/public-gallery/gallery-exercise-renderer) — Read-only switch by exercise type for /gallery/:slug
-- [Legacy HTML Link Resolver](mem://infrastructure/legacy-html-link-resolver) — Three-bucket strategy for .html cleanup
-- [Multi-Provider Model Audit](mem://infrastructure/multi-provider-model-audit) — Procedure B + runtime logger for all LLM providers
-- [Modal Portal Pattern](mem://ux/modal-portal-pattern) — createPortal + z-100 to escape backdrop-blur stacking
-```
-plus 4 nowe pliki memów (każdy ~10 linii skrótu z `docs/llm-context.md`).
+- Props: `open`, `onOpenChange`, `label`, `description`, `onConfirm`, opcjonalnie `confirmLabel='Confirm'`.
+- UI: tytuł `Delete {label}?`, krótki opis, przyciski `Cancel` i `Confirm` (variant `destructive`).
+- Zamieniamy użycia `ConfirmTypeToDeleteDialog` w `MacroTimeline.tsx` (delete fazy) i `NextStepBanner.tsx` (delete next step) na nowy komponent.
+- Aktualizujemy `mem/features/dslm/type-to-confirm-delete.md` i `mem://index.md`: nowa reguła to „destructive DSLM actions use a single-click Confirm modal; type-to-confirm wymaganie zostało wycofane na życzenie product ownera”.
 
 ---
 
-## Kolejność implementacji (1 tura)
-1. **Sprint M** (UI fix — natychmiastowy UX impact).
-2. **Sprint L** (emaile + sekret).
-3. **Sprint J** (linki .html — legacyLinkMap + resolver + refaktor Blog/Resources/Footer + sitemap).
-4. **Sprint G** (GalleryExerciseRenderer + edycja PublicGalleryWorksheetPage).
-5. **Sprint H** (CTA copy w galerii).
-6. **Sprint K** (scripts/audit-llm-models.ts + _shared/modelFailureLogger.ts + wpięcie w 12 funkcji + Procedure B w AUDIT_PROCEDURES.md + StatusPage banner).
-7. **Sprint O** (RAG docs + mem index + 4 mem files).
-8. **Sprint N** (TYLKO copy do `.lovable/plan.md`, brak edycji aplikacji).
-9. **Sprint I** — tylko dokumentacja decyzji (brak kodu).
+## Problem 6: `1 MINUTE` + `Learn More` (bez zmian)
 
-## Nie wchodzi w tę turę
-- Catalog SEO Layer (Sprint I implementacja) — wymaga osobnej dyskusji prywatności.
-- Sprint 5 (AEO/LLMO) — następna tura.
-- Sprint 6 (4 long-form artykuły) — 4 osobne tury.
-- GH Action dla model audit — Plan v6.10 BACKLOG.
+Nie mamy dedykowanego artykułu „What is 1 MINUTE?”. Mamy `/features/dslm`, który tłumaczy DSLM i jego warstwy. W tej iteracji `Learn More` w `DslmExplainerBanner.tsx` linkuje do `/features/dslm` jako `<Button asChild><Link to="/features/dslm">Learn more</Link></Button>`. W dokumentacji odnotowujemy, że dedykowany artykuł „1 MINUTE briefing” może powstać w osobnym tasku (poza zakresem tej iteracji).
 
-## Walidacja końcowa
-- `/gallery/choosing-your-adventure-...` → wszystkie ćwiczenia widoczne strukturalnie, banner Preview u góry, CTA „Try 1-Minute Prep free" na dole.
-- `/blog` i `/resources` — 0 linków 404 (klick-test 100% pozycji).
-- Footer — 4 kolumny, bez Compare.
-- `/admin/error-logs` — log z błędem modelu po wymuszonym 404 OpenAI.
-- `/status` — banner gdy świeży `model_deprecation` w bazie.
-- Email z bug-report dochodzi do obu adresów.
-- `GeneratingModal` nad footerem na każdej stronie.
-- `scripts/audit-llm-models.ts` odpalony lokalnie → produkuje `STATUS_LIVE.md`.
+---
 
-Daj zielone światło, ruszamy z implementacją w następnej turze. Sprint 5 i 6 trzymamy na osobne tury — sugeruję każdy artykuł content z Sprintu 6 jako osobna tura (jakość > prędkość, zgodnie z regułą Marthy).
+## Dokumentacja RAG
+
+Pliki: `docs/llm-context.md`, `llms.txt`. Dodajemy sekcję `v6.9.15c (rev. 2)` w formacie:
+
+`Problem -> Edooqoo.com Solution -> Technical Mechanics` + `RAG Keywords`.
+
+Zawartość merytoryczna:
+- `generate-timeline` używa plain text JSON output, NIE tool calling, dla obsługi `count>1`.
+- `temperature=0.6`, `reasoning.effort='low'`, `max_tokens=Math.min(8192, 2200 + 1500*count)`.
+- Backend sanitizer (8 ćwiczeń, focusMap, media family) jest źródłem prawdy o kontrakcie zwracanym do frontendu.
+- Single-pass batch generation jest zachowane → spójność i komplementarność Next Steps utrzymana.
+- Phase-bound batch nie wpada już w cichy fallback do free steps.
+- Roadmapa bez goals: best-effort na podstawie main goal, level, metrics, notes, worksheet history.
+- Roadmapa bez Welcome Placement Test: jeszcze niższy baseline; UI ostrzega i daje CTA.
+- Soft delete fazy: `phase_id=null`, `suggestion_kind='next_step'` na powiązanych `future_worksheet_suggestions`; emituje `dslm:suggestionsUpdated`.
+- Confirm delete bez wpisywania tekstu (replaces type-to-confirm).
+- `1 MINUTE` banner: `Learn more` → `/features/dslm`.
+
+RAG keywords (przykłady):
+`generate-timeline plain text JSON`, `tool calling removed Gemini`, `Gemini too many states tool schema`, `single-pass batch coherent next steps`, `backend sanitizer 8 exercises focus map media family`, `roadmap without goals fallback`, `welcome placement test missing baseline`, `soft delete phase detach next steps`, `phase_id null suggestion_kind next_step`, `dslm:suggestionsUpdated event`, `Confirm delete without typing`, `ConfirmDeleteDialog`, `1 MINUTE Learn more DSLM`.
+
+---
+
+## Czego NIE ruszamy
+- Worksheet Generation Engine, `format-worksheet-prompt`, `generate-curriculum-phases` — bez zmian.
+- Schema DB — bez migracji.
+- RLS — bez zmian.
+- Marketing routes poza dodaniem linku do istniejącej `/features/dslm`.
+
+## Kolejność implementacji
+1. Aktualizacja project memory dot. delete confirmation.
+2. Refactor `generate-timeline` na plain text JSON output + retry serwerowy.
+3. `useFutureTimeline`: usunięcie cichego fallbacku phase→free dla batchy, listener `dslm:suggestionsUpdated`.
+4. `useCurriculumPhases.deletePhase`: odpinanie Next Steps, emit `dslm:suggestionsUpdated`.
+5. `ConfirmDeleteDialog` + podmiana użyć w fazach i NextStepBanner.
+6. `MacroTimeline`: Remove jako ikona z tooltipem.
+7. Roadmap warningi + AlertDialog (goals, welcome test) + reusable `useWelcomeTestActions`.
+8. `Learn more` w `DslmExplainerBanner`.
+9. `docs/llm-context.md` i `llms.txt` — sekcja v6.9.15c (rev. 2).
+
+## Kryteria akceptacji
+- Generowanie 2 / 3 / 6 Next Steps idzie jednym requestem do `generate-timeline` (count = N) i wraca z N stepami spójnymi i komplementarnymi.
+- Edge Function logs nie zawierają `INVALID_ARGUMENT` ani `too many states` przy normalnym użyciu.
+- Phase-bound batch tworzy tylko phase-bound steps, bez free-step fallbacku.
+- Roadmapa bez goals wymaga potwierdzenia lub pozwala dodać Supporting / Additional goal.
+- Brak ukończonego Welcome Test pokazuje CTA Send test.
+- Delete fazy nie kasuje Next Steps; odpina je jako wolne.
+- Remove fazy = ikona + tooltip.
+- Delete fazy / Next Step = jeden klik Confirm w modalu.
+- `1 MINUTE` banner ma `Learn more` → `/features/dslm`.
+- `docs/llm-context.md` i `llms.txt` mają sekcję v6.9.15c (rev. 2) zgodną z RAG.

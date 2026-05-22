@@ -1,16 +1,21 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { faqItems } from '@/constants/faqItems';
 import GlobalFooter from '@/components/GlobalFooter';
 import { BookOpen, ClipboardCheck, Brain, Calendar, GraduationCap, Users, BarChart3, ChevronRight } from 'lucide-react';
-import { PageSeo, buildFaqPageLd } from '@/components/seo/PageSeo';
-import { SEO_META } from '@/constants/seoMeta';
 
 const About = () => {
+  useEffect(() => {
+    document.title = 'About Edooqoo — AI Worksheet Generator for English Teachers';
+    const meta = document.querySelector('meta[name="description"]');
+    if (meta) {
+      meta.setAttribute('content', 'Learn how Edooqoo helps English teachers create personalized worksheets, manage students, assign homework with AI grading, and track progress. 29 exercise types, CEFR A1-C2.');
+    }
+  }, []);
+
   return (
     <div className="min-h-screen bg-background">
-      <PageSeo {...SEO_META.about} jsonLd={buildFaqPageLd(faqItems)} />
       {/* Header */}
       <header className="border-b bg-background/95 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">

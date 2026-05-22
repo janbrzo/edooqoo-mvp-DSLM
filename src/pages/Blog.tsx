@@ -1,27 +1,6 @@
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { PageSeo } from '@/components/seo/PageSeo';
-import { SEO_META } from '@/constants/seoMeta';
-import { resolveLegacyHref } from '@/lib/resolveLegacyHref';
-
-// v6.9.21 — Wrapper so post tiles either link or render a "Coming soon" tile.
-const PostLink: React.FC<{ href: string; className: string; children: React.ReactNode }> = ({ href, className, children }) => {
-  const r = resolveLegacyHref(href);
-  if (r.comingSoon) {
-    return (
-      <div className={`${className} opacity-60 cursor-not-allowed`} title="Full article shipping soon">
-        {children}
-        <div className="mt-2 inline-block rounded bg-secondary px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Coming soon</div>
-      </div>
-    );
-  }
-  return (
-    <Link to={r.url} className={className}>
-      {children}
-    </Link>
-  );
-};
 
 interface BlogPost {
   title: string;
@@ -301,20 +280,32 @@ const blogPosts: BlogPost[] = [
 ];
 
 const Blog = () => {
-  const blogLd = {
-    "@context": "https://schema.org",
-    "@type": "Blog",
-    name: "Edooqoo Blog",
-    description: SEO_META.blog.description,
-    url: "https://edooqoo.com/blog",
-    publisher: { "@type": "Organization", name: "Edooqoo", url: "https://edooqoo.com" },
-    blogPost: blogPosts.map((p) => ({
-      "@type": "BlogPosting",
-      headline: p.title,
-      url: `https://edooqoo.com${p.href}`,
-      datePublished: p.date,
-    })),
-  };
+  useEffect(() => {
+    document.title = "Edooqoo Blog — Tips, Guides & Resources for English Teachers";
+    const meta = document.querySelector('meta[name="description"]');
+    if (meta) {
+      meta.setAttribute('content', 'Practical articles for English teachers: AI teaching tips, worksheet creation guides, classroom management, CEFR assessment strategies, and ESL/EFL best practices.');
+    }
+
+    const script = document.createElement('script');
+    script.type = 'application/ld+json';
+    script.text = JSON.stringify({
+      "@context": "https://schema.org",
+      "@type": "Blog",
+      "name": "Edooqoo Blog",
+      "description": "Practical articles for English teachers: AI teaching tips, worksheet creation guides, CEFR assessment strategies, and ESL/EFL best practices.",
+      "url": "https://edooqoo.com/blog",
+      "publisher": { "@type": "Organization", "name": "Edooqoo", "url": "https://edooqoo.com" },
+      "blogPost": blogPosts.map(p => ({
+        "@type": "BlogPosting",
+        "headline": p.title,
+        "url": `https://edooqoo.com${p.href}`,
+        "datePublished": p.date
+      }))
+    });
+    document.head.appendChild(script);
+    return () => { document.head.removeChild(script); };
+  }, []);
 
   const categories = [...new Set(blogPosts.map(p => p.category))];
 
@@ -329,7 +320,6 @@ const Blog = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      <PageSeo {...SEO_META.blog} jsonLd={blogLd} />
       <header className="border-b bg-background/95 backdrop-blur-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link to="/" className="text-xl font-bold text-primary">Edooqoo</Link>
@@ -353,7 +343,7 @@ const Blog = () => {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             {recentPosts.map(post => (
-              <PostLink
+              <a
                 key={post.href}
                 href={post.href}
                 className="block rounded-lg border bg-card p-3 hover:shadow-md hover:border-violet-200 transition-all"
@@ -361,7 +351,7 @@ const Blog = () => {
                 <div className="text-[10px] uppercase tracking-wider text-violet-600 font-semibold mb-1">{post.category}</div>
                 <div className="font-medium text-foreground text-sm leading-snug mb-1">{post.title}</div>
                 <div className="text-xs text-muted-foreground">{post.date}</div>
-              </PostLink>
+              </a>
             ))}
           </div>
         </section>
@@ -371,7 +361,7 @@ const Blog = () => {
             <h2 className="text-2xl font-semibold text-foreground mb-6">{cat}</h2>
             <div className="space-y-4">
               {blogPosts.filter(p => p.category === cat).map(post => (
-                <PostLink
+                <a
                   key={post.href}
                   href={post.href}
                   className="block rounded-lg border bg-card p-5 hover:shadow-md transition-shadow"
@@ -383,7 +373,7 @@ const Blog = () => {
                     </div>
                     <span className="text-xs text-muted-foreground whitespace-nowrap">{post.date}</span>
                   </div>
-                </PostLink>
+                </a>
               ))}
             </div>
           </section>
