@@ -25,6 +25,7 @@ import { AuthenticatedPageShell } from "@/components/AuthenticatedPageShell";
 import PricingTeaser from "@/components/landing/PricingTeaser";
 import AnonPostWorksheetLandingPage from "@/components/anon/AnonPostWorksheetLandingPage";
 import WelcomeBackBanner from "@/components/anon/WelcomeBackBanner";
+import ParticlesBackground from "@/components/landing/ParticlesBackground";
 import { markWorksheetForClaim } from "@/hooks/useWorksheetClaim";
 import { devLog, devWarn } from '@/utils/logger';
 
@@ -335,7 +336,8 @@ const Index = () => {
   }
 
   return (
-    <div className="min-h-screen relative bg-gradient-to-br from-background to-secondary/20">
+    <div className="min-h-screen relative">
+      <ParticlesBackground />
       <FreeWeekBanner />
       <WelcomeBackBanner shouldShow={showWelcomeBackModal} />
       
@@ -351,7 +353,7 @@ const Index = () => {
       {!bothWorksheetsReady ? (
         <>
           <HeroHeadline />
-          <div id="worksheet-form" className="scroll-mt-16 bg-gradient-to-b from-background to-secondary/30 pb-16">
+          <div id="worksheet-form" className="scroll-mt-16 pb-16">
             <FormView 
               onSubmit={handleGenerateWorksheet} 
               userId={user?.id || null} 

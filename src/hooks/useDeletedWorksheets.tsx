@@ -30,6 +30,7 @@ export const useDeletedWorksheets = (
 
   useEffect(() => {
     if (isDemoMode) {
+      // Demo has no deleted worksheets — resolve immediately to clear loading.
       setDeletedWorksheets([]);
       setTotalCount(0);
       setLoading(false);

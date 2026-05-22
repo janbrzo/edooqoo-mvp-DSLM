@@ -19,6 +19,7 @@ function escapeHtml(s: string): string {
 
 function renderWelcomeHtml(firstName: string, signupSource: string): string {
   const safeName = escapeHtml(firstName)
+  const addStudentUrl = `${APP_BASE_URL}/dashboard?action=add-student`
   const dashboardUrl = `${APP_BASE_URL}/dashboard`
   const howItWorksUrl = `${APP_BASE_URL}/how-it-works`
   const glossaryUrl = `${APP_BASE_URL}/glossary`
@@ -47,14 +48,17 @@ function renderWelcomeHtml(firstName: string, signupSource: string): string {
         <tr><td style="padding:24px 32px 8px;">
           <h2 style="margin:0 0 12px;font-size:16px;color:#0b1220;font-weight:700;">What you can do right now</h2>
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
+            <tr><td style="padding:6px 0;font-size:14px;line-height:1.6;color:#374151;"><strong>👤&nbsp;&nbsp;Add your first student</strong> — capture their professional goals (start here)</td></tr>
+            <tr><td style="padding:6px 0;font-size:14px;line-height:1.6;color:#374151;">📊&nbsp;&nbsp;Run the Welcome Placement Test to map their level &amp; gaps</td></tr>
+            <tr><td style="padding:6px 0;font-size:14px;line-height:1.6;color:#374151;">📅&nbsp;&nbsp;Set your calendar availability so students can book lessons</td></tr>
             <tr><td style="padding:6px 0;font-size:14px;line-height:1.6;color:#374151;">📝&nbsp;&nbsp;Generate a fully editable, goal‑specific worksheet</td></tr>
-            <tr><td style="padding:6px 0;font-size:14px;line-height:1.6;color:#374151;">👤&nbsp;&nbsp;Add your first student and capture their professional goals</td></tr>
             <tr><td style="padding:6px 0;font-size:14px;line-height:1.6;color:#374151;">🚀&nbsp;&nbsp;Send interactive homework with auto‑grading</td></tr>
           </table>
         </td></tr>
 
         <tr><td align="center" style="padding:24px 32px 8px;">
-          <a href="${dashboardUrl}" style="display:inline-block;background-color:#5E3FD9;color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:12px 24px;border-radius:8px;">Open your dashboard</a>
+          <a href="${addStudentUrl}" style="display:inline-block;background-color:#5E3FD9;color:#ffffff;text-decoration:none;font-weight:600;font-size:15px;padding:12px 24px;border-radius:8px;">Add your first student</a>
+          <div style="margin-top:10px;font-size:12px;color:#6b7280;">or just <a href="${dashboardUrl}" style="color:#5E3FD9;text-decoration:underline;">open the dashboard</a></div>
         </td></tr>
 
         <tr><td style="padding:24px 32px 8px;">
@@ -62,8 +66,8 @@ function renderWelcomeHtml(firstName: string, signupSource: string): string {
         </td></tr>
 
         <tr><td style="padding:20px 32px 28px;border-top:1px solid #f1f5f9;">
-          <p style="margin:0 0 4px;font-size:12px;line-height:1.6;color:#9ca3af;">Questions? Just reply to this email — a real human reads it.</p>
-          <p style="margin:0;font-size:12px;line-height:1.6;color:#9ca3af;">Edooqoo · hello@edooqoo.com</p>
+          <p style="margin:0 0 4px;font-size:12px;line-height:1.6;color:#9ca3af;">Questions? Just reply to this email — we read every message.</p>
+          <p style="margin:0;font-size:12px;line-height:1.6;color:#9ca3af;">Edooqoo · helping English tutors save prep time</p>
         </td></tr>
       </table>
     </td></tr>
@@ -145,7 +149,7 @@ Deno.serve(async (req) => {
       body: JSON.stringify({
         from: 'Edooqoo <hello@edooqoo.com>',
         to: [email],
-        reply_to: 'hello@edooqoo.com',
+        reply_to: 'edooqoo@gmail.com',
         subject,
         html,
       }),

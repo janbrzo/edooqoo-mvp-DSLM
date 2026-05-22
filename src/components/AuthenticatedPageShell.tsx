@@ -1,6 +1,8 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { BackgroundPatternSwitcher } from '@/components/ui/BackgroundPatternSwitcher';
 import { BugReportButton } from '@/components/bug-report/BugReportButton';
+import { useDemoContext } from '@/contexts/DemoContext';
+import { AppBackground } from '@/components/ui/AppBackground';
 
 interface Props {
   children: React.ReactNode;
@@ -8,19 +10,15 @@ interface Props {
 }
 
 export const AuthenticatedPageShell: React.FC<Props> = ({ children, className = '' }) => {
-  useEffect(() => {
-    const saved = localStorage.getItem('edooqoo-bg-pattern');
-    const shell = document.querySelector('.auth-bg-shell');
-    if (shell && saved) {
-      shell.setAttribute('data-pattern', saved);
-    }
-  }, []);
-
+  const { isDemoMode } = useDemoContext();
   return (
-    <div className={`min-h-screen auth-bg-shell ${className}`}>
+    <AppBackground
+      className={`min-h-screen ${className}`}
+      style={isDemoMode ? { paddingTop: '36px' } : undefined}
+    >
       {children}
       <BackgroundPatternSwitcher />
       <BugReportButton />
-    </div>
+    </AppBackground>
   );
 };

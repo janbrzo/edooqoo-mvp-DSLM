@@ -22,6 +22,8 @@ import { StudentSelector } from '@/components/StudentSelector';
 import { StudentKnowledgeSection } from '@/components/student-knowledge/StudentKnowledgeSection';
 import { useStudentKnowledge } from '@/hooks/useStudentKnowledge';
 import { StudentKnowledgeEntryCard } from '@/components/student-knowledge/StudentKnowledgeEntryCard';
+import { StudentKnowledgeQuickAddModal } from '@/components/student-knowledge/StudentKnowledgeQuickAddModal';
+import { OneMinutePrepCard } from '@/components/student-knowledge/OneMinutePrepCard';
 import { useAllWorksheetHomework } from '@/hooks/useAllWorksheetHomework';
 import { WorksheetHomeworkSection } from '@/components/worksheet/WorksheetHomeworkSection';
 import { StudentHomeworkTab } from '@/components/student-homework/StudentHomeworkTab';
@@ -239,7 +241,7 @@ const StudentPage = () => {
   const navigate = useNavigate();
   const { user, isRegisteredUser } = useAuthFlow();
   const { tokenLeft } = useTokenSystem(user?.id);
-  const { isDemoMode } = useDemoContext();
+  const { isDemoMode, showDemoBlockedToast } = useDemoContext();
   const [searchParams, setSearchParams] = useSearchParams();
   const { students, updateStudent, deleteStudent, loading: studentsLoading } = useStudents();
   const [currentPage, setCurrentPage] = useState(1);
@@ -321,6 +323,9 @@ const StudentPage = () => {
   // Rename worksheet state
   const [renameWorksheetData, setRenameWorksheetData] = useState<{id: string; title: string} | null>(null);
 
+  // v6.9.13 — local Add-Note quick modal triggered from overview tab.
+  const [quickAddNoteOpen, setQuickAddNoteOpen] = useState(false);
+
   // Get recent notes for overview
   const studentKnowledge = useStudentKnowledge({
     studentId: id || '',
@@ -397,6 +402,7 @@ const StudentPage = () => {
   
   // Rename worksheet handler
   const handleRenameWorksheet = async (worksheetId: string, newTitle: string) => {
+    if (isDemoMode) { showDemoBlockedToast('Renaming worksheets'); return; }
     try {
       const { error } = await supabase
         .from('worksheets')
@@ -503,6 +509,12 @@ const StudentPage = () => {
               studentName={student.name}
               studentEmail={student.student_email}
               surface="overview"
+            />
+            {/* v6.9.8 — Quick Prep digest (Personal hooks + Focus on + Lesson ideas) */}
+            <OneMinutePrepCard
+              studentId={student.id}
+              teacherId={student.teacher_id}
+              studentName={student.name}
             />
             {student.student_email && (
               <div className="bg-muted/50 border border-border rounded-md p-3 text-sm mb-4 flex items-start gap-3">
@@ -723,7 +735,7 @@ const StudentPage = () => {
                   <div className="flex gap-2">
                     <Button 
                       size="sm"
-                      onClick={() => handleTabChange('knowledge')}
+                      onClick={() => setQuickAddNoteOpen(true)}
                       className="flex-1"
                     >
                       <Plus className="h-4 w-4 mr-1" />
@@ -770,7 +782,7 @@ const StudentPage = () => {
                     <StickyNote className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
                     <p className="text-muted-foreground">No notes added yet</p>
                     <Button 
-                      onClick={() => handleTabChange('knowledge')} 
+                      onClick={() => setQuickAddNoteOpen(true)} 
                       className="mt-4" 
                       size="sm"
                     >
@@ -1213,6 +1225,14 @@ const StudentPage = () => {
             type="worksheet"
           />
         )}
+
+        {/* v6.9.13 — Quick Add Note (from overview tab) */}
+        <StudentKnowledgeQuickAddModal
+          isOpen={quickAddNoteOpen}
+          onClose={() => setQuickAddNoteOpen(false)}
+          onAdd={async (entry) => { await studentKnowledge.addEntry(entry); }}
+          suggestedTags={studentKnowledge.suggestedTags || []}
+        />
       </div>
     </AuthenticatedPageShell>
   );

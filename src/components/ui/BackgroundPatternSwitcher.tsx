@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Paintbrush, Sun, Moon, Monitor } from 'lucide-react';
+import { Paintbrush, Sun, Moon, Monitor, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Slider } from '@/components/ui/slider';
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/hooks/useTheme';
 
 const PATTERNS = [
+  { id: 'particles', label: 'Particles', preview: '✦' },
   { id: 'isometric', label: 'Isometric Grid', preview: '◇' },
   { id: 'dots', label: 'Dots', preview: '·' },
   { id: 'waves', label: 'Waves', preview: '~' },
@@ -16,6 +18,7 @@ const PATTERNS = [
 type PatternId = typeof PATTERNS[number]['id'];
 
 const STORAGE_KEY = 'edooqoo-bg-pattern';
+const OPACITY_KEY = 'edooqoo-bg-opacity';
 
 const THEMES = [
   { id: 'system' as const, label: 'System', icon: Monitor },
@@ -24,19 +27,30 @@ const THEMES = [
 ];
 
 export const BackgroundPatternSwitcher: React.FC = () => {
-  const [activePattern, setActivePattern] = useState<PatternId>('isometric');
+  const [activePattern, setActivePattern] = useState<PatternId>('particles');
+  const [opacity, setOpacity] = useState<number>(1);
   const [open, setOpen] = useState(false);
   const { theme, setTheme } = useTheme();
 
   // Load saved pattern on mount
   useEffect(() => {
+    // One-time migration: force Particles as default for all existing users
+    const MIGRATION_KEY = 'edooqoo-bg-pattern-migrated-v1';
+    if (!localStorage.getItem(MIGRATION_KEY)) {
+      localStorage.setItem(STORAGE_KEY, 'particles');
+      localStorage.setItem(MIGRATION_KEY, '1');
+    }
     const saved = localStorage.getItem(STORAGE_KEY) as PatternId | null;
     if (saved && PATTERNS.some(p => p.id === saved)) {
       setActivePattern(saved);
       applyPattern(saved);
     } else {
-      applyPattern('isometric');
+      applyPattern('particles');
     }
+    const savedOpacity = parseFloat(localStorage.getItem(OPACITY_KEY) || '1');
+    const o = isNaN(savedOpacity) ? 1 : Math.min(1, Math.max(0, savedOpacity));
+    setOpacity(o);
+    applyOpacity(o);
   }, []);
 
   const applyPattern = (pattern: PatternId) => {
@@ -44,6 +58,20 @@ export const BackgroundPatternSwitcher: React.FC = () => {
     if (shell) {
       shell.setAttribute('data-pattern', pattern);
     }
+    window.dispatchEvent(new CustomEvent('edooqoo-bg-pattern-changed', { detail: pattern }));
+  };
+
+  const applyOpacity = (o: number) => {
+    const shell = document.querySelector('.auth-bg-shell') as HTMLElement | null;
+    if (shell) shell.style.setProperty('--bg-pattern-opacity', String(o));
+    window.dispatchEvent(new CustomEvent('edooqoo-bg-opacity-changed', { detail: o }));
+  };
+
+  const handleOpacity = (vals: number[]) => {
+    const o = vals[0] / 100;
+    setOpacity(o);
+    localStorage.setItem(OPACITY_KEY, String(o));
+    applyOpacity(o);
   };
 
   const handleSelect = (pattern: PatternId) => {
@@ -83,6 +111,20 @@ export const BackgroundPatternSwitcher: React.FC = () => {
               {pattern.label}
             </Button>
           ))}
+        </div>
+        <div className="border-t mt-2 pt-2">
+          <div className="flex items-center justify-between mb-2 px-1">
+            <p className="text-xs font-medium text-muted-foreground">Opacity</p>
+            <span className="text-xs text-muted-foreground tabular-nums">{Math.round(opacity * 100)}%</span>
+          </div>
+          <Slider
+            value={[Math.round(opacity * 100)]}
+            min={0}
+            max={100}
+            step={5}
+            onValueChange={handleOpacity}
+            className="px-1"
+          />
         </div>
         <div className="border-t mt-2 pt-2">
           <p className="text-xs font-medium text-muted-foreground mb-2 px-1">Theme</p>

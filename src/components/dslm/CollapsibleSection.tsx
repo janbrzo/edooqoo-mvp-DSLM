@@ -2,7 +2,7 @@
  * CollapsibleSection — compact section wrapper with header trigger.
  * Used in Goals/Skills/Profile to densify layout while keeping content discoverable.
  */
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -11,6 +11,8 @@ import { ChevronDown, type LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface CollapsibleSectionProps {
+  /** v6.9.13: stable id used by `dslm:openSubsection` events for sub-nav scrolling. */
+  id?: string;
   title: string;
   icon?: LucideIcon;
   count?: number;
@@ -23,11 +25,28 @@ interface CollapsibleSectionProps {
 }
 
 export const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
-  title, icon: Icon, count, badge, defaultOpen = false, rightSlot, description, children, className,
+  id, title, icon: Icon, count, badge, defaultOpen = false, rightSlot, description, children, className,
 }) => {
   const [open, setOpen] = useState(defaultOpen);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  // v6.9.13 — open + scroll into view when a sub-nav button targets this section.
+  useEffect(() => {
+    if (!id) return;
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail as { id?: string } | undefined;
+      if (!detail || detail.id !== id) return;
+      setOpen(true);
+      requestAnimationFrame(() => {
+        cardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    };
+    window.addEventListener('dslm:openSubsection', handler as EventListener);
+    return () => window.removeEventListener('dslm:openSubsection', handler as EventListener);
+  }, [id]);
+
   return (
-    <Card className={cn('overflow-hidden', className)}>
+    <Card ref={cardRef} id={id ? `dslm-sub-${id}` : undefined} className={cn('overflow-hidden scroll-mt-24', className)}>
       <Collapsible open={open} onOpenChange={setOpen}>
         <div className="flex items-center justify-between gap-2 px-3 py-2 border-b border-transparent data-[state=open]:border-border" data-state={open ? 'open' : 'closed'}>
           <CollapsibleTrigger asChild>

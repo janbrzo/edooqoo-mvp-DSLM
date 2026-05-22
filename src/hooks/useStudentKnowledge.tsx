@@ -105,6 +105,51 @@ export const useStudentKnowledge = ({ studentId, teacherId }: UseStudentKnowledg
         .select()
         .single();
       if (error) throw error;
+      // v6.9.8 — fire-and-forget AI classification (only when teacher didn't pick a specific category)
+      if (entry.category === 'Notes' && data?.id) {
+        (async () => {
+          try {
+            // Lightweight student context (best-effort)
+            const { data: stu } = await supabase
+              .from('students')
+              .select('english_level, main_goal')
+              .eq('id', studentId)
+              .maybeSingle();
+            const { data: clsRes } = await supabase.functions.invoke('classify-knowledge-entry', {
+              body: {
+                content: entry.content,
+                englishLevel: stu?.english_level || '',
+                mainGoal: stu?.main_goal || '',
+              },
+            });
+            const c = (clsRes as any)?.classification;
+            if (!c) return;
+            const conf = typeof c.confidence === 'number' ? c.confidence : 0;
+            const acceptCategory = conf >= 0.6 && c.category && c.category !== 'Notes';
+            const newMetadata: Record<string, unknown> = { ...(insertData.metadata as any) };
+            if (c.skill_subtype) newMetadata.skill_subtype = c.skill_subtype;
+            if (c.element_type) newMetadata.element_type = c.element_type;
+            if (c.nano_skill) newMetadata.nano_skill = c.nano_skill;
+            if (typeof c.suggested_mastery === 'number') newMetadata.mastery = c.suggested_mastery;
+            if (c.sub_category) newMetadata.sub_category = c.sub_category;
+            const mergedTags = Array.from(new Set([...(insertData.tags as string[]), ...((c.tags as string[]) || [])])).slice(0, 8);
+            await supabase
+              .from('student_knowledge_entries')
+              .update({
+                category: acceptCategory ? c.category : 'Notes',
+                tags: mergedTags,
+                metadata: newMetadata as any,
+                ai_classified: true,
+                ai_confidence: conf,
+              } as any)
+              .eq('id', data.id);
+            queryClient.invalidateQueries({ queryKey: ['knowledge', 'entries', studentId, teacherId] });
+          } catch (e) {
+            // Silent: classification is best-effort
+            console.warn('[v6.9.8] knowledge classify failed', e);
+          }
+        })();
+      }
       return data;
     },
     onSuccess: () => {
@@ -197,6 +242,59 @@ export const useStudentKnowledge = ({ studentId, teacherId }: UseStudentKnowledg
     },
   });
 
+  // v6.9.9 — manual archive (e.g. Next Lesson Idea used in a worksheet)
+  const archiveMutation = useMutation({
+    mutationFn: async ({ entryId, worksheetId }: { entryId: string; worksheetId?: string | null }) => {
+      const update: Record<string, unknown> = { archived_at: new Date().toISOString() };
+      if (worksheetId) update.used_in_worksheet_id = worksheetId;
+      const { error } = await supabase
+        .from('student_knowledge_entries')
+        .update(update as any)
+        .eq('id', entryId)
+        .eq('teacher_id', teacherId);
+      if (error) throw error;
+      return true;
+    },
+    onSuccess: () => {
+      invalidateAll();
+      queryClient.invalidateQueries({ queryKey: ['one-minute-prep', studentId, teacherId] });
+      toast({ title: 'Archived', description: 'Marked as used' });
+    },
+    onError: (err: any) => {
+      toast({ title: 'Error', description: err?.message || 'Failed', variant: 'destructive' });
+    },
+  });
+
+  // v6.9.10 — confirm a stale note is still current (resets the staleness clock
+  // by writing metadata.last_confirmed_at). No DB schema change required.
+  const confirmCurrentMutation = useMutation({
+    mutationFn: async (entryId: string) => {
+      const { data: row, error: readErr } = await supabase
+        .from('student_knowledge_entries')
+        .select('metadata')
+        .eq('id', entryId)
+        .eq('teacher_id', teacherId)
+        .maybeSingle();
+      if (readErr) throw readErr;
+      const prevMeta = (row?.metadata as Record<string, unknown> | null) || {};
+      const newMeta = { ...prevMeta, last_confirmed_at: new Date().toISOString() };
+      const { error } = await supabase
+        .from('student_knowledge_entries')
+        .update({ metadata: newMeta as any })
+        .eq('id', entryId)
+        .eq('teacher_id', teacherId);
+      if (error) throw error;
+      return true;
+    },
+    onSuccess: () => {
+      invalidateAll();
+      toast({ title: 'Confirmed', description: 'Marked as still current' });
+    },
+    onError: (err: any) => {
+      toast({ title: 'Error', description: err?.message || 'Failed', variant: 'destructive' });
+    },
+  });
+
   const entries = entriesQuery.data?.entries || [];
   const totalCount = entriesQuery.data?.totalCount || 0;
   const limit = filters.limit || DEFAULT_FILTERS.limit!;
@@ -226,7 +324,7 @@ export const useStudentKnowledge = ({ studentId, teacherId }: UseStudentKnowledg
     setFiltersState(DEFAULT_FILTERS);
   }, []);
 
-  const isMutating = addMutation.isPending || updateMutation.isPending || deleteMutation.isPending || markOutdatedMutation.isPending || markCurrentMutation.isPending;
+  const isMutating = addMutation.isPending || updateMutation.isPending || deleteMutation.isPending || markOutdatedMutation.isPending || markCurrentMutation.isPending || archiveMutation.isPending || confirmCurrentMutation.isPending;
 
   return {
     entries,
@@ -243,6 +341,8 @@ export const useStudentKnowledge = ({ studentId, teacherId }: UseStudentKnowledg
     deleteEntry: (entryId: string) => deleteMutation.mutateAsync(entryId),
     markAsOutdated: (entryId: string, reason?: string) => markOutdatedMutation.mutateAsync({ entryId, reason }),
     markAsCurrent: (entryId: string) => markCurrentMutation.mutateAsync(entryId),
+    archiveEntry: (entryId: string, worksheetId?: string | null) => archiveMutation.mutateAsync({ entryId, worksheetId }),
+    confirmCurrent: (entryId: string) => confirmCurrentMutation.mutateAsync(entryId),
     loadMore,
     resetFilters,
     setFilters,

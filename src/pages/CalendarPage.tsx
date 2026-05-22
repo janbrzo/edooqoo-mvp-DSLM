@@ -164,7 +164,6 @@ const CalendarPage = () => {
   }, [filteredSlots]);
 
   const handleAddSlot = (date?: Date, startTime?: string) => {
-    if (isDemoMode) { showDemoBlockedToast('Adding lessons'); return; }
     setAddModalDate(date);
     setAddModalStartTime(startTime);
     setAddModalOpen(true);
@@ -181,7 +180,7 @@ const CalendarPage = () => {
   };
 
   const handleSlotClick = (slot: CalendarSlot) => {
-    if (isDemoMode && !selectionMode) { showDemoBlockedToast('Editing lessons'); return; }
+    // v6.9.8 — demo: opening modals is allowed (read-only preview); blocking happens on Save
     if (selectionMode) {
       const slotType = getSlotSelectionType(slot);
       if (selectionType && slotType !== selectionType) return;
@@ -554,6 +553,7 @@ const CalendarPage = () => {
         studentMap={studentMap}
         teacherId={user?.id}
         onLinkWorksheet={handleUnifiedModalLinkWorksheet}
+        demoMode={isDemoMode}
       />
 
       <SlotDetailModal
