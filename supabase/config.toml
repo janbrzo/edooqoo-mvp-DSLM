@@ -5,3 +5,6 @@ verify_jwt = false
 
 [functions.send-welcome-email]
 verify_jwt = false
+
+[functions.classify-knowledge-entry]
+verify_jwt = false

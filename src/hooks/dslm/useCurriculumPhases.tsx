@@ -62,6 +62,24 @@ export const useCurriculumPhases = ({ studentId, teacherId }: UseCurriculumPhase
 
   useEffect(() => { fetchPhases(); }, [fetchPhases]);
 
+  // v6.9.15b — single helper to broadcast phase mutations across hook instances.
+  const emitPhasesUpdated = useCallback(() => {
+    try {
+      window.dispatchEvent(new CustomEvent('dslm:phasesUpdated', { detail: { studentId } }));
+    } catch { /* ignore */ }
+  }, [studentId]);
+
+  // v6.9.14 — cross-instance sync: when one hook generates phases,
+  // other instances (e.g. PathwayView vs MacroTimeline) refetch.
+  useEffect(() => {
+    const h = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail?.studentId === studentId) fetchPhases();
+    };
+    window.addEventListener('dslm:phasesUpdated', h);
+    return () => window.removeEventListener('dslm:phasesUpdated', h);
+  }, [studentId, fetchPhases]);
+
   const generatePhases = async (
     mode: 'replace' | 'add' = 'replace',
     opts: { count?: number; teacherComment?: string } = {}
@@ -78,6 +96,7 @@ export const useCurriculumPhases = ({ studentId, teacherId }: UseCurriculumPhase
         return false;
       }
       await fetchPhases();
+      emitPhasesUpdated();
       toast.success(`Generated ${newPhases.length} curriculum phases`);
       return true;
     } catch (e: any) {
@@ -98,6 +117,7 @@ export const useCurriculumPhases = ({ studentId, teacherId }: UseCurriculumPhase
         .eq('teacher_id', teacherId);
       if (error) throw error;
       setPhases(prev => prev.map(p => p.id === id ? { ...p, ...fields } as CurriculumPhase : p));
+      emitPhasesUpdated();
       return true;
     } catch (e) {
       console.error('Error updating phase:', e);
@@ -110,13 +130,57 @@ export const useCurriculumPhases = ({ studentId, teacherId }: UseCurriculumPhase
 
   const deletePhase = async (id: string): Promise<boolean> => {
     try {
+      const phaseToDelete = phases.find(p => p.id === id);
+      if (!phaseToDelete) return false;
       const { error } = await supabase
         .from('dslm_curriculum_phases')
         .update({ deleted_at: new Date().toISOString() })
         .eq('id', id)
         .eq('teacher_id', teacherId);
       if (error) throw error;
-      setPhases(prev => prev.filter(p => p.id !== id));
+      // v6.9.15c — detach phase-bound next steps so they become free steps.
+      // The DB FK is ON DELETE SET NULL, but soft delete bypasses it; we mirror
+      // that semantic at the application layer for active and used suggestions.
+      const { error: detachErr } = await supabase
+        .from('future_worksheet_suggestions')
+        .update({ phase_id: null, suggestion_kind: 'next_step' })
+        .eq('phase_id', id)
+        .eq('teacher_id', teacherId);
+      if (detachErr) {
+        console.error('Failed to detach next steps from deleted phase', detachErr);
+      }
+      // v6.9.15b — deterministic renumber: re-read remaining rows from DB and
+      // assign sequence_number = idx+1 in order. Fixes the "2 -> 1" edge case
+      // where the legacy delta-shift left phases out of order.
+      const { data: remaining, error: readErr } = await supabase
+        .from('dslm_curriculum_phases')
+        .select('id, sequence_number')
+        .eq('student_id', studentId)
+        .eq('teacher_id', teacherId)
+        .is('deleted_at', null)
+        .order('sequence_number', { ascending: true });
+      if (readErr) {
+        console.error('Failed to read remaining phases for renumber', readErr);
+      } else if (remaining) {
+        for (let idx = 0; idx < remaining.length; idx++) {
+          const p = remaining[idx];
+          const nextSeq = idx + 1;
+          if (p.sequence_number !== nextSeq) {
+            const { error: shiftErr } = await supabase
+              .from('dslm_curriculum_phases')
+              .update({ sequence_number: nextSeq })
+              .eq('id', p.id)
+              .eq('teacher_id', teacherId);
+            if (shiftErr) console.error('Failed to renumber phase', p.id, shiftErr);
+          }
+        }
+      }
+      await fetchPhases();
+      emitPhasesUpdated();
+      // v6.9.15c — notify timeline hook instances to refetch suggestions
+      try {
+        window.dispatchEvent(new CustomEvent('dslm:suggestionsUpdated', { detail: { studentId } }));
+      } catch { /* ignore */ }
       toast.success('Phase removed');
       return true;
     } catch (e) {
@@ -147,6 +211,7 @@ export const useCurriculumPhases = ({ studentId, teacherId }: UseCurriculumPhase
       if (error) throw error;
       const phase = data as CurriculumPhase;
       setPhases(prev => [...prev, phase]);
+      emitPhasesUpdated();
       toast.success('Phase added');
       return phase;
     } catch (e) {

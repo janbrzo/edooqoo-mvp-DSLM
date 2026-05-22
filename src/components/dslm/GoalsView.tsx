@@ -187,6 +187,7 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
 
       {/* Supporting Goals — open by default */}
       <CollapsibleSection
+        id="goals-supporting"
         title="Supporting Goals"
         icon={Target}
         count={supportingGoals.length}
@@ -205,6 +206,7 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
 
       {/* Additional Goals — collapsed by default */}
       <CollapsibleSection
+        id="goals-additional"
         title="Additional Goals"
         icon={BookOpen}
         count={additionalGoals.length}
@@ -222,7 +224,7 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
 
       {/* v5.0: Achieved Goals — collapsed by default */}
       {achievedGoals.length > 0 && (
-        <CollapsibleSection title="Achieved Goals" icon={CheckCircle2} count={achievedGoals.length}>
+        <CollapsibleSection id="goals-achieved" title="Achieved Goals" icon={CheckCircle2} count={achievedGoals.length}>
           <div className="grid md:grid-cols-2 gap-3">
             {achievedGoals.map(renderGoalCard)}
           </div>
@@ -231,7 +233,7 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
 
       {/* v5.0: Archived Goals — collapsed by default */}
       {archivedGoals.length > 0 && (
-        <CollapsibleSection title="Archived Goals" icon={Archive} count={archivedGoals.length}>
+        <CollapsibleSection id="goals-archived" title="Archived Goals" icon={Archive} count={archivedGoals.length}>
           <div className="grid md:grid-cols-2 gap-3">
             {archivedGoals.map(renderGoalCard)}
           </div>
@@ -239,7 +241,7 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
       )}
 
       {/* Goal Notes — collapsed */}
-      <CollapsibleSection title="Goal Notes" icon={StickyNote} count={goalNotesEntries.length}>
+      <CollapsibleSection id="goals-notes" title="Goal Notes" icon={StickyNote} count={goalNotesEntries.length}>
         {goalNotesEntries.length === 0 ? (
           <p className="text-xs text-muted-foreground text-center py-2">No goal notes yet</p>
         ) : (

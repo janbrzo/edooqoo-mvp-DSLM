@@ -11,10 +11,11 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Sparkles, Edit, Loader2, ArrowRight, ChevronDown, ClipboardCopy, MessageSquarePlus, CheckCircle2 } from 'lucide-react';
+import { Sparkles, Edit, Loader2, ArrowRight, ChevronDown, ClipboardCopy, MessageSquarePlus, CheckCircle2, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { computeConfidence } from '@/lib/dslm/confidenceScore';
 import { ConfidenceBadge } from './ConfidenceBadge';
+import { ConfirmDeleteDialog } from './ConfirmDeleteDialog';
 
 interface NextStepBannerProps {
   suggestion: any | null;
@@ -27,6 +28,8 @@ interface NextStepBannerProps {
   onRegenerateWithComment?: (suggestion: any) => void;
   /** v4.8: mark this suggestion as already used (manual flag, no worksheet link). */
   onMarkUsed?: (suggestionId: string) => void;
+  /** v6.9.14 — delete the #1 next step (with type-to-confirm). */
+  onDelete?: (suggestionId: string) => void;
   generating: boolean;
   hasGoals: boolean;
 }
@@ -40,11 +43,13 @@ export const NextStepBanner: React.FC<NextStepBannerProps> = ({
   onGenerate,
   onRegenerateWithComment,
   onMarkUsed,
+  onDelete,
   generating,
   hasGoals,
 }) => {
   const storageKey = `dslm.nextStep.detailsOpen.${studentId}`;
   const [detailsOpen, setDetailsOpen] = useState(false);
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
   useEffect(() => {
     try {
@@ -62,15 +67,29 @@ export const NextStepBanner: React.FC<NextStepBannerProps> = ({
     return (
       <Card className="border-dashed border-2 border-muted-foreground/20">
         <CardContent className="pt-6 text-center space-y-3">
-          <p className="text-muted-foreground">
-            {hasGoals
-              ? 'No next step yet. Generate AI-powered worksheet suggestions.'
-              : 'Add goals first for better worksheet suggestions.'}
-          </p>
-          <Button onClick={onGenerate} disabled={generating || !hasGoals}>
-            {generating ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Sparkles className="h-4 w-4 mr-2" />}
-            Generate next steps
-          </Button>
+          <div className="space-y-1">
+            <p className="text-muted-foreground">
+              {hasGoals
+                ? 'No next step yet. Generate AI-powered worksheet suggestions.'
+                : 'Add goals first for better worksheet suggestions.'}
+            </p>
+            {!hasGoals && (
+              <p className="text-[11px] opacity-70">
+                Just added some? Refresh the page to see them.
+              </p>
+            )}
+          </div>
+          <div className="flex items-center justify-center gap-2">
+            <Button onClick={onGenerate} disabled={generating || !hasGoals}>
+              {generating ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Sparkles className="h-4 w-4 mr-2" />}
+              Generate next steps
+            </Button>
+            {!hasGoals && (
+              <Button variant="ghost" size="sm" onClick={() => window.location.reload()}>
+                Refresh
+              </Button>
+            )}
+          </div>
         </CardContent>
       </Card>
     );
@@ -127,10 +146,11 @@ export const NextStepBanner: React.FC<NextStepBannerProps> = ({
             </div>
           )}
 
-          <div className="flex flex-wrap gap-2 pt-1">
+          {/* v6.9.15a — single-row action bar; secondary actions shrink to icon+short label, full text in tooltips. */}
+          <div className="flex flex-wrap sm:flex-nowrap items-center gap-1.5 pt-1 sm:overflow-x-auto">
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button size="sm" className="bg-white text-blue-700 hover:bg-white/90 h-8" onClick={() => onUseAndGenerate(suggestion)}>
+                <Button size="sm" className="bg-white text-blue-700 hover:bg-white/90 h-8 shrink-0" onClick={() => onUseAndGenerate(suggestion)}>
                   Generate worksheet ↗
                 </Button>
               </TooltipTrigger>
@@ -138,33 +158,63 @@ export const NextStepBanner: React.FC<NextStepBannerProps> = ({
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button size="sm" variant="ghost" className="text-primary-foreground hover:bg-white/20 h-8" onClick={() => onUse(suggestion)}>
-                  <ClipboardCopy className="h-3.5 w-3.5 mr-1" /> Use this
+                <Button size="sm" variant="ghost" className="text-primary-foreground hover:bg-white/20 h-8 px-2 shrink-0" onClick={() => onUse(suggestion)}>
+                  <ClipboardCopy className="h-3.5 w-3.5 mr-1" /> Use this Step
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>Copy to form & edit before generating</TooltipContent>
+              <TooltipContent>Use this — copy to form &amp; edit before generating</TooltipContent>
             </Tooltip>
-            <Button size="sm" variant="ghost" className="text-primary-foreground hover:bg-white/20 h-8" onClick={() => onEdit(suggestion)}>
-              <Edit className="h-3.5 w-3.5 mr-1" /> Edit
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button size="sm" variant="ghost" className="text-primary-foreground hover:bg-white/20 h-8 px-2 shrink-0" onClick={() => onEdit(suggestion)}>
+                  <Edit className="h-3.5 w-3.5 mr-1" /> Edit
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>Edit suggestion details</TooltipContent>
+            </Tooltip>
             {onRegenerateWithComment && (
-              <Button
-                size="sm" variant="ghost"
-                className="text-primary-foreground hover:bg-white/20 h-8"
-                onClick={() => onRegenerateWithComment(suggestion)}
-                disabled={generating}
-              >
-                <MessageSquarePlus className="h-3.5 w-3.5 mr-1" /> Regenerate with comment
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="sm" variant="ghost"
+                    className="text-primary-foreground hover:bg-white/20 h-8 px-2 shrink-0"
+                    onClick={() => onRegenerateWithComment(suggestion)}
+                    disabled={generating}
+                  >
+                    <MessageSquarePlus className="h-3.5 w-3.5 mr-1" /> Regenerate with comment
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Regenerate with comment</TooltipContent>
+              </Tooltip>
             )}
             {onMarkUsed && (
-              <Button
-                size="sm" variant="ghost"
-                className="text-primary-foreground hover:bg-white/20 h-8"
-                onClick={() => onMarkUsed(suggestion.id)}
-              >
-                <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Mark as already used
-              </Button>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="sm" variant="ghost"
+                    className="text-primary-foreground hover:bg-white/20 h-8 px-2 shrink-0"
+                    onClick={() => onMarkUsed(suggestion.id)}
+                  >
+                    <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Used
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Mark as already used</TooltipContent>
+              </Tooltip>
+            )}
+            {onDelete && (
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    size="icon" variant="ghost"
+                    className="text-primary-foreground hover:bg-white/20 h-8 w-8 shrink-0"
+                    onClick={() => setConfirmDeleteOpen(true)}
+                    aria-label="Remove"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>Remove</TooltipContent>
+              </Tooltip>
             )}
           </div>
 
@@ -197,6 +247,15 @@ export const NextStepBanner: React.FC<NextStepBannerProps> = ({
           </Collapsible>
         </CardContent>
       </Card>
+      {onDelete && (
+        <ConfirmDeleteDialog
+          open={confirmDeleteOpen}
+          onOpenChange={setConfirmDeleteOpen}
+          label="Next Step #1"
+          description="This will remove the top-priority next step. You can regenerate later."
+          onConfirm={() => onDelete(suggestion.id)}
+        />
+      )}
     </TooltipProvider>
   );
 };
