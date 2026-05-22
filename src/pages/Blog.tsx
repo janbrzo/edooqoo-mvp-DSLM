@@ -292,21 +292,6 @@ const blogPosts: BlogPost[] = [
 ];
 
 const Blog = () => {
-  const blogLd = {
-    "@context": "https://schema.org",
-    "@type": "Blog",
-    name: "Edooqoo Blog",
-    description: SEO_META.blog.description,
-    url: "https://edooqoo.com/blog",
-    publisher: { "@type": "Organization", name: "Edooqoo", url: "https://edooqoo.com" },
-    blogPost: allPostsForLd.map((p) => ({
-      "@type": "BlogPosting",
-      headline: p.title,
-      url: `https://edooqoo.com${p.href}`,
-      datePublished: p.date,
-    })),
-  };
-
   // v6.9.22 — Keep only posts whose .html file exists in public/blog/.
   // Eliminates ~50 dangling links to deleted files (the original 404 source).
   const validHrefs = useMemo(() => new Set(AUTO_BLOG_POSTS.map(p => p.url)), []);
@@ -323,6 +308,21 @@ const Blog = () => {
   const allPosts = useMemo(() => [...livePosts, ...orphanFromFiles], [livePosts, orphanFromFiles]);
 
   const categories = [...new Set(allPosts.map(p => p.category))];
+
+  const blogLd = {
+    "@context": "https://schema.org",
+    "@type": "Blog",
+    name: "Edooqoo Blog",
+    description: SEO_META.blog.description,
+    url: "https://edooqoo.com/blog",
+    publisher: { "@type": "Organization", name: "Edooqoo", url: "https://edooqoo.com" },
+    blogPost: allPosts.map((p) => ({
+      "@type": "BlogPosting",
+      headline: p.title,
+      url: `https://edooqoo.com${p.href}`,
+      datePublished: p.date,
+    })),
+  };
 
   // v6.9.1 — Internal linking widget for newest posts. GSC reports newly
   // published blog posts as "Discovered – currently not indexed" because
