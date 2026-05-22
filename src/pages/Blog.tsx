@@ -299,7 +299,7 @@ const Blog = () => {
     description: SEO_META.blog.description,
     url: "https://edooqoo.com/blog",
     publisher: { "@type": "Organization", name: "Edooqoo", url: "https://edooqoo.com" },
-    blogPost: blogPosts.map((p) => ({
+    blogPost: allPostsForLd.map((p) => ({
       "@type": "BlogPosting",
       headline: p.title,
       url: `https://edooqoo.com${p.href}`,
@@ -329,7 +329,7 @@ const Blog = () => {
   // sitemap lists them but no on-site link points to them. Showing the
   // 8 most recent posts at the top of /blog gives Googlebot a fresh
   // internal link path on the next crawl.
-  const recentPosts = [...blogPosts]
+  const recentPosts = [...allPosts]
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
     .slice(0, 8);
 
@@ -376,7 +376,7 @@ const Blog = () => {
           <section key={cat} className="mb-12">
             <h2 className="text-2xl font-semibold text-foreground mb-6">{cat}</h2>
             <div className="space-y-4">
-              {blogPosts.filter(p => p.category === cat).map(post => (
+              {allPosts.filter(p => p.category === cat).map(post => (
                 <PostLink
                   key={post.href}
                   href={post.href}
