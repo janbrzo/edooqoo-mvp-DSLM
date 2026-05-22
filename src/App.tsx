@@ -57,6 +57,15 @@ const ExerciseTypes = lazy(() => import("./pages/ExerciseTypes"));
 const HowItWorks = lazy(() => import("./pages/HowItWorks"));
 const Resources = lazy(() => import("./pages/Resources"));
 const Blog = lazy(() => import("./pages/Blog"));
+const EslWorksheets = lazy(() => import("./pages/seo/EslWorksheets"));
+const EnglishGamesForLearners = lazy(() => import("./pages/seo/EnglishGamesForLearners"));
+const EslGamesForTeachers = lazy(() => import("./pages/seo/EslGamesForTeachers"));
+const TeachEnglishOnlineGuide = lazy(() => import("./pages/seo/TeachEnglishOnlineGuide"));
+const ForEnglishTutors = lazy(() => import("./pages/seo/ForEnglishTutors"));
+const EslClassToolkit = lazy(() => import("./pages/seo/EslClassToolkit"));
+const TopicLevelPage = lazy(() => import("./pages/seo/programmatic/TopicLevelPage"));
+const ExerciseTopicPage = lazy(() => import("./pages/seo/programmatic/ExerciseTopicPage"));
+const PersonaPage = lazy(() => import("./pages/seo/programmatic/PersonaPage"));
 const StudentHubLanding = lazy(() => import("./pages/StudentHubLanding"));
 const StudentHubDashboard = lazy(() => import("./pages/StudentHubDashboard"));
 const StudentHubFlashcards = lazy(() => import("./pages/StudentHubFlashcards"));
@@ -75,6 +84,12 @@ const FeaturePlacementTest = lazy(() => import("./pages/features/FeaturePlacemen
 const FeatureStudentHub = lazy(() => import("./pages/features/FeatureStudentHub"));
 const DemoEntry = lazy(() => import("./pages/DemoEntry"));
 const ExitDemo = lazy(() => import("./pages/ExitDemo"));
+const ToolsIndex = lazy(() => import("./pages/tools/ToolsIndex"));
+const CefrLevelTest = lazy(() => import("./pages/tools/CefrLevelTest"));
+const LessonPlanGenerator = lazy(() => import("./pages/tools/LessonPlanGenerator"));
+const VocabCefrChecker = lazy(() => import("./pages/tools/VocabCefrChecker"));
+const PublicGalleryIndex = lazy(() => import("./pages/gallery/PublicGalleryIndex"));
+const PublicGalleryWorksheetPage = lazy(() => import("./pages/gallery/PublicGalleryWorksheetPage"));
 
 // Suspense fallback: empty min-h-screen div to prevent CLS during chunk load.
 const RouteFallback = () => <div className="min-h-screen" aria-hidden="true" />;
@@ -150,6 +165,21 @@ const App = () => (
               <Route path="/how-it-works" element={<HowItWorks />} />
               <Route path="/resources" element={<Resources />} />
               <Route path="/blog" element={<Blog />} />
+              <Route path="/esl-worksheets" element={<EslWorksheets />} />
+              <Route path="/blog/english-games-for-learners" element={<EnglishGamesForLearners />} />
+              <Route path="/blog/esl-games-for-teachers" element={<EslGamesForTeachers />} />
+              <Route path="/blog/teach-english-online-guide" element={<TeachEnglishOnlineGuide />} />
+              <Route path="/for-english-tutors" element={<ForEnglishTutors />} />
+              <Route path="/resources/esl-class-toolkit" element={<EslClassToolkit />} />
+              <Route path="/esl-worksheets/:topic/:level" element={<TopicLevelPage />} />
+              <Route path="/worksheets/:exerciseType/:topic" element={<ExerciseTopicPage />} />
+              <Route path="/english-for/:persona" element={<PersonaPage />} />
+              <Route path="/tools" element={<ToolsIndex />} />
+              <Route path="/tools/cefr-level-test" element={<CefrLevelTest />} />
+              <Route path="/tools/lesson-plan-generator" element={<LessonPlanGenerator />} />
+              <Route path="/tools/vocab-cefr-checker" element={<VocabCefrChecker />} />
+              <Route path="/gallery" element={<PublicGalleryIndex />} />
+              <Route path="/gallery/:slug" element={<PublicGalleryWorksheetPage />} />
               <Route path="/features/dslm" element={<FeatureDSLM />} />
               <Route path="/features/homework" element={<FeatureHomework />} />
               <Route path="/features/flashcards" element={<FeatureFlashcards />} />

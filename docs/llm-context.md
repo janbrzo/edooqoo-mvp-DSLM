@@ -439,3 +439,205 @@ Two distinct edge functions live ONLY in Supabase deployment (not in repo): `gen
 **Technical Mechanics**: `src/components/WorksheetForm/index.tsx` — removed the `useStudentNextStepsCount` import and call, removed `activeStudentId`/`nextStepsCount` derivations, removed the `<StudentContextHint variant="no-next-steps">` block. The hook file and the component variant are kept on disk for backward compatibility but no longer wired into this form.
 
 **RAG Keywords**: generate-timeline 502, Gemini schema too many states, Google AI Studio INVALID_ARGUMENT, tool schema too complex, batch next steps count greater than 1, schemaRejected diagnostic, backend sanitizer authoritative, exactly 8 exercises enforcement, useCurriculumPhases emitPhasesUpdated, dslm:phasesUpdated event, deterministic phase renumber, sequence_number 2 to 1, deleted phase still selected, defaultTargetPhaseId stale guard, ConfirmTypeToDeleteDialog phase delete, NextStepBanner Use this Step, NextStepBanner Regenerate with comment, WorksheetForm duplicate hint removal, NextStepsPresetBanner canonical CTA.
+
+---
+
+# v6.9.16 — Per-route JSON-LD, GSC verification, single-toast policy
+
+## Problem 1 — Sitewide FAQPage/HowTo on every SPA route
+`index.html` shipped `FAQPage` (25 Q/A) and `HowTo` (4 steps) JSON-LD in the static head. Because the SPA serves `index.html` as the fallback for every client-side route, Google saw `FAQPage` and `HowTo` on routes like `/dashboard`, `/calendar`, `/pricing` where the on-page content does not match — schema mismatch risk and rich-results disqualification.
+
+**Edooqoo.com Solution**: Move `FAQPage` and `HowTo` to `/how-it-works` only via `react-helmet-async`. The route has actual matching content (`steps` array drives `HowTo`, `faqItems` array drives `FAQPage`). Sitewide identity (`SoftwareApplication`, `Organization`, `WebSite`, `BreadcrumbList`) stays in `index.html`.
+
+**Technical Mechanics**:
+- `bun add react-helmet-async@3.0.0`.
+- `src/main.tsx`: wrap `<App/>` in `<HelmetProvider>` (above `<App/>` and inside `StrictMode`).
+- `src/pages/HowItWorks.tsx`: removed imperative `useEffect`-based `document.title` and meta mutation; added `<Helmet>` with route-specific `<title>`, `<meta description>`, canonical, `og:*`, plus two `<script type="application/ld+json">` blocks for `HowTo` and `FAQPage`. Both schemas are generated from the same `steps`/`faqItems` arrays already rendered in the visible UI — eliminates schema drift.
+- `index.html`: removed `FAQPage` `<script>` and `HowTo` `<script>` blocks. Retained `SoftwareApplication`+`Organization` `@graph`, `WebSite` SearchAction, and `BreadcrumbList`.
+- Per-route HelmetProvider is opt-in; routes without `<Helmet>` continue to use `index.html` defaults. No regression for the rest of the app.
+
+## Problem 2 — Google Search Console connected but property unverified
+The user linked the GSC connector (`std_01krr4bmyafmw8stxgv74hhd2r`) but the domain `https://edooqoo.com/` was not registered or verified in Search Console — no impressions data possible.
+
+**Edooqoo.com Solution**: META-tag verification via Lovable connector gateway. Requires user republish before verification completes (static meta tag must be live on production).
+
+**Technical Mechanics**:
+- Connector secret `GOOGLE_SEARCH_CONSOLE_API_KEY` exposed after linking.
+- Token request:
+  `POST https://connector-gateway.lovable.dev/google_search_console/siteVerification/v1/token` with body `{"site":{"identifier":"https://edooqoo.com/","type":"SITE"},"verificationMethod":"META"}`.
+- Returned token embedded verbatim into `index.html` `<head>`: `<meta name="google-site-verification" content="hTn-czAwta1F2Y8-Jlgs5OqMRCmSon1bIJBlOn_4Xvc" />`.
+- After republish (user action), call:
+  `POST .../siteVerification/v1/webResource?verificationMethod=META` (verify) →
+  `PUT .../webmasters/v3/sites/https%3A%2F%2Fedooqoo.com%2F` (register property) →
+  `PUT .../webmasters/v3/sites/https%3A%2F%2Fedooqoo.com%2F/sitemaps/https%3A%2F%2Fedooqoo.com%2Fsitemap.xml` (submit sitemap).
+- Future agents: on a 400 `failedToFindMetaTag` retry after republish; do not re-issue a new token (token is stable per property+method).
+
+## Problem 3 — DSLM "1 MINUTE" banner Learn more opens in same tab
+`DslmExplainerBanner` used `react-router-dom` `<Link to="/features/dslm">`, which replaced the current view and forced the teacher to navigate back to recover prior context (selected student, scroll position).
+
+**Edooqoo.com Solution**: Open `/features/dslm` in a new tab via native anchor.
+
+**Technical Mechanics**:
+- `src/components/student/DslmExplainerBanner.tsx`: dropped `import { Link } from 'react-router-dom'`. Replaced `<Link>` with `<a href="/features/dslm" target="_blank" rel="noopener noreferrer">` wrapped by `<Button asChild>`.
+- Dismiss semantics unchanged: `Got it` + `X` set `localStorage.dslm_explainer_dismissed_<teacherId>='true'`. `Learn more` intentionally does NOT dismiss — teacher may want to revisit after reading.
+- The article at `/features/dslm` (`src/pages/features/FeatureDSLM.tsx`, 296 LOC) is the canonical reference for the 4-layer DSLM model — content audited as complete; no copy changes this iteration.
+
+## Problem 4 — Toast stacking blocks UI during rapid mutations
+`<Toaster visibleToasts={3} duration={4000}>` allowed up to 3 stacked toasts at top-right, which during delete-then-refetch or batch generation covered the sticky nav and made follow-up clicks impossible.
+
+**Edooqoo.com Solution**: Show one toast at a time; shorter duration.
+
+**Technical Mechanics**:
+- `src/components/ui/sonner.tsx`: `visibleToasts={1}`, `duration={3500}`. No API change for `toast.*` callers.
+
+## Deferred (planned in `.lovable/plan.md` v6.9.16, not implemented this iteration)
+OnboardingHeroCard for empty Dashboard (P0); skeleton loaders (P1); nav-student-switcher toast feedback + page refetch (P3); WorksheetFormStudentBadge with auto-fill level (P4); DSLM subnav active-pill contrast bump (P5); Undo toast after destructive deletes (P6); StudentHub mobile tab scroll mask (P7). All have detailed mechanics in the plan file. Reason for deferral: each touches multiple existing flows and warrants isolated implementation + smoke test, not a bundled rollout, to keep regression surface small.
+
+**RAG Keywords**: react-helmet-async install, HelmetProvider main.tsx, per-route JSON-LD scope, FAQPage HowTo /how-it-works only, index.html sitewide SoftwareApplication Organization WebSite BreadcrumbList, schema mismatch SPA fallback Googlebot, Google Search Console connector gateway, siteVerification v1 token META method, google-site-verification meta tag edooqoo.com, webmasters v3 sites PUT, sitemaps submit endpoint, DslmExplainerBanner Learn more target blank rel noopener noreferrer, sonner visibleToasts 1, single toast policy edooqoo, deferred UX backlog v6.9.16.
+
+## SEO v6.9.17 — Per-Route Metadata Layer
+
+- **Problem**: SEO scanner flagged 6 failing findings: oversized title/descriptions on /pricing, /about, /blog, /glossary; no per-route og:* on those plus /exercise-types; missing FAQPage JSON-LD on /pricing and /about; GSC unverified; sitemap/robots host mismatch (scanner expected the lovable.app preview URL, project actually publishes to edooqoo.com).
+- **Edooqoo.com Solution**:
+  - Reusable `<PageSeo>` component (react-helmet-async) for per-route title, description, canonical, og:*, twitter:*, JSON-LD.
+  - Centralized metadata in `src/constants/seoMeta.ts` (single source of truth, length-capped: title <60, description <160).
+  - `buildFaqPageLd(faqItems)` helper generates FAQPage JSON-LD; wired into /pricing and /about.
+  - Static `<link rel="canonical">` REMOVED from `index.html` — canonical owned per-page by Helmet (prevents duplicate canonical anti-pattern).
+  - GSC: verified `https://edooqoo.com/` via META method, added site, submitted sitemap. Owners: edooqoo@gmail.com.
+  - Sitemap/robots: canonical host is `edooqoo.com` (NOT the lovable.app preview URL) — scanner's flag is a false positive resolved by marking finding fixed with explanation.
+- **Technical Mechanics**:
+  - Component: `src/components/seo/PageSeo.tsx` — props {title, description, path, ogType?, jsonLd?}. Auto-prefixes `https://edooqoo.com` for canonical and og:url.
+  - Constants: `src/constants/seoMeta.ts` — typed `SEO_META` object keyed by page slug (pricing, about, blog, glossary, exerciseTypes).
+  - Pages wired: `src/pages/Pricing.tsx`, `About.tsx`, `Blog.tsx`, `Glossary.tsx`, `ExerciseTypes.tsx`. All previous `useEffect(() => document.title = ...)` patterns removed.
+  - Blog page still emits Blog + BlogPosting JSON-LD, now passed via `jsonLd` prop instead of imperative `document.head.appendChild`.
+  - GSC verify call: `POST /siteVerification/v1/webResource?verificationMethod=META` with `{"site":{"identifier":"https://edooqoo.com/","type":"SITE"}}` returned 200.
+  - GSC site add: `PUT /webmasters/v3/sites/https%3A%2F%2Fedooqoo.com%2F` returned 204.
+  - GSC sitemap submit: `PUT /webmasters/v3/sites/.../sitemaps/https%3A%2F%2Fedooqoo.com%2Fsitemap.xml` returned 204.
+  - Keyword strategy: `docs/seo/keyword-strategy.md` — P0 target `esl worksheets` (1,300/mo, KDI 43); content pages deferred to v6.9.18+.
+
+**RAG Keywords**: per-route SEO metadata, PageSeo component, react-helmet-async, seoMeta constants, FAQPage JSON-LD, buildFaqPageLd, canonical URL deduplication, Helmet canonical override, removed static canonical index.html, Google Search Console verified edooqoo.com, GSC META verification, siteVerification webResource, webmasters v3 sites PUT, sitemap submission, Semrush keyword research, esl worksheets target, KDI 43, content backlog v6.9.18, false positive lovable.app preview vs edooqoo.com canonical, scanner findings fixed with explanation.
+
+## v6.9.18 — SEO Content Landing Pages
+
+**Problem:** v6.9.17 fixed metadata but no dedicated landing pages existed for priority Semrush keywords (esl worksheets, esl/english games, teach english online, english tutor, esl class).
+
+**Edooqoo.com Solution:** 6 lazy-loaded marketing pages under src/pages/seo/ sharing one SeoLandingLayout shell. Each targets one keyword with H1, FAQPage JSON-LD, internal links to /signup /pricing /exercise-types. Zero changes to app logic, demo mode, Supabase, or worksheet engine.
+
+**Technical Mechanics:**
+- Pages: src/pages/seo/{EslWorksheets,EnglishGamesForLearners,EslGamesForTeachers,TeachEnglishOnlineGuide,ForEnglishTutors,EslClassToolkit}.tsx
+- Shared shell: src/components/seo/SeoLandingLayout.tsx — props seo/h1/lead/problems/solutions/list/body/faqs/cta
+- Routes lazy in src/App.tsx: /esl-worksheets, /blog/english-games-for-learners, /blog/esl-games-for-teachers, /blog/teach-english-online-guide, /for-english-tutors, /resources/esl-class-toolkit
+- Metadata: SEO_META extended in src/constants/seoMeta.ts (6 keys)
+- Sitemap: public/sitemap.xml +6 entries (priority 0.7-0.9)
+- Footer: GlobalFooter Product column adds ESL Worksheets + For English Tutors links
+- JSON-LD: FAQPage on all 6; plus CollectionPage (esl-worksheets, esl-class-toolkit), BlogPosting (3 blog routes), Service (for-english-tutors)
+- Content rule: andragogical adult-only, >=800 words, 1 H1, 4-6 H2, FAQ accordion mirrored in JSON-LD
+- Pattern source of truth: docs/seo/keyword-strategy.md
+
+**RAG Keywords:** ESL worksheets landing page, English games blog post, teach English online guide, English tutor landing, ESL class toolkit, content SEO, long-tail keyword targeting, FAQPage rich snippet, internal linking SEO, lazy-loaded marketing routes, src/pages/seo/, SeoLandingLayout, Semrush priority queue, KDI 43 esl worksheets.
+
+## v6.9.19 — Programmatic SEO Engine (pSEO)
+
+**Problem:** Static SEO landing pages cap ranking potential. Competitors (islcollective ~36% traffic, eslbrains ~70% from `/lesson_*` paths) win via SCALE of indexable URLs auto-generated from a content database. Edooqoo has the same advantage latent (worksheet engine) but only shipped ~30 indexable URLs.
+
+**Edooqoo.com Solution:** Three dynamic React Router routes that render 1,425 unique pSEO landing pages from one shared layout, each targeting longtail ESL queries. Zero per-page files; all content interpolated from a typed matrix.
+
+**Technical Mechanics:**
+- Matrix: `src/constants/pseoMatrix.ts` — 40 TOPICS × 6 LEVELS × 29 EXERCISE_TYPES × 25 PERSONAS with typed helpers (findTopic, findLevel, findExerciseType, findPersona) and path generators (ALL_TOPIC_LEVEL_PATHS, ALL_EXERCISE_TOPIC_PATHS, ALL_PERSONA_PATHS).
+- Layout: `src/components/seo/ProgrammaticSeoLayout.tsx` — props seo/breadcrumbs/h1/lead/primaryCta/whatsInside/howItWorks/trustNumbers/related/faqs/extraJsonLd. Emits FAQPage + BreadcrumbList JSON-LD plus optional LearningResource. Includes TL;DR aside (AEO snippet bait).
+- Templates (3 dynamic routes, lazy in `src/App.tsx`):
+  - `/esl-worksheets/:topic/:level` → `TopicLevelPage` (240 URLs)
+  - `/worksheets/:exerciseType/:topic` → `ExerciseTopicPage` (1,160 URLs)
+  - `/english-for/:persona` → `PersonaPage` (25 URLs)
+- Unknown slug → `<Navigate>` redirect to the closest hub page (`/esl-worksheets`, `/exercise-types`, `/for-english-tutors`).
+- Internal linking graph: every page emits 10+ related links (other levels of same topic, other topics in same category, exercise-types, personas) — anchor text = exact target keyword.
+- Sitemap: `public/sitemap.xml` enumerates all 1,454 URLs (29 static + 1,425 pSEO). Single file (<10 MB, well under Google's 50 MB / 50k cap). Sitemap split into index format is reserved for Phase 2 (~5,000 URLs).
+- CTAs: `/signup?topic=...&level=...&exerciseType=...&persona=...` query params seed the worksheet form (handled by existing NextStepsPresetBanner pattern).
+- SANCTITY: NO change to worksheet generation prompt. NO new Supabase tables. NO new edge functions in Sprint 1+2. Public Gallery (Sprint 3) and Free Tools (Sprint 4) are separate phases.
+- Crawlability: Vite SPA — Googlebot executes JS and reads Helmet head. Prerendering (react-snap) deferred to Sprint 2 if indexation lags.
+
+**RAG Keywords:** programmatic SEO, pSEO, dynamic landing pages, URL matrix, topic-level-grid, exercise-type-topic, persona pages, English for nurses, English for software engineers, IELTS Writing Task 2, present perfect b1, conditionals worksheet, business email B2, ProgrammaticSeoLayout, pseoMatrix.ts, findTopic, findLevel, findExerciseType, findPersona, ALL_TOPIC_LEVEL_PATHS, BreadcrumbList JSON-LD, LearningResource schema, TL;DR snippet, AEO, LLMO, answer engine optimization, internal linking graph, anchor text exact match, 1454 sitemap entries, react-helmet-async Helmet, react-snap deferred, signup query param preset, sanctity worksheet prompt unchanged, edooqoo competitive moat scale.
+
+## v6.9.20 — Free Tools (Sprint 4 of Plan v6.9.19): browser-only link magnets
+
+**Problem:** Static SEO landing pages do not earn organic backlinks. Bloggers, teacher forums, and AI answer engines link to *utilities* (try it now, free, no login), not to explainer pages. Edooqoo needed indexable, embeddable tools that demonstrate ESL/CEFR competency and funnel users into the signup flow.
+
+**Edooqoo.com Solution:** Three zero-backend tools mounted under `/tools/*` plus a `/tools` hub. Every tool runs entirely in the browser (no Supabase writes, no AI Gateway calls, no rate limiting required), so prerender + AEO crawlers see the full UI and the result logic. Each tool ends with a CTA into `/signup`.
+
+**Technical Mechanics:**
+- Routes (lazy in `src/App.tsx`): `/tools` → `ToolsIndex`, `/tools/cefr-level-test` → `CefrLevelTest`, `/tools/lesson-plan-generator` → `LessonPlanGenerator`, `/tools/vocab-cefr-checker` → `VocabCefrChecker`.
+- Files: `src/pages/tools/ToolsIndex.tsx`, `src/pages/tools/CefrLevelTest.tsx`, `src/pages/tools/LessonPlanGenerator.tsx`, `src/pages/tools/VocabCefrChecker.tsx`, `src/data/cefrLevelTestQuestions.ts`, `src/data/cefrWordlist.ts`.
+- CEFR Level Test: 25 multiple-choice items distributed 4/4/5/5/4/3 across A1–C2 (`CEFR_TEST_QUESTIONS`). `scoreCefr(answers)` thresholds: pct≥0.92→C2, ≥0.80→C1, ≥0.66→B2, ≥0.50→B1, ≥0.32→A2, else A1. Result CTA → `/signup?level=<lower>`. JSON-LD: `Quiz` + `FAQPage`.
+- Lesson Plan Generator: form (topic, level, duration ∈ {30,45,60,90}, goal, persona) → `buildStages(form)` produces 6 andragogical stages with minute split scaled to duration (warm 8%, lead-in 12%, presentation 18%, controlled practice 28%, freer production 22%, wrap-up = remainder). Output supports Copy text (`navigator.clipboard`) and Download HTML (`Blob` + anchor). JSON-LD: `HowTo` + `FAQPage`. No network.
+- Vocab CEFR Checker: tokenizes via `/[a-z']+/g`; lookup uses a Map built from `src/data/cefrWordlist.ts` (~480 EVP lemmas across A1–C1; lower levels never overwritten by higher). Unknown words → `guessCefr` heuristic (advanced suffixes `tion|ity|ous|ive|ate|ize|ise|ence|ance|able|ible|ical|graphy|ology|cracy` + length≥9 ⇒ C1; otherwise length buckets ≤4 A1, ≤6 A2, ≤8 B1, ≤10 B2, else C1). `analyzeVocab(text)` returns `{ totalTokens, uniqueWords, byLevel, estimatedLevel, tokens }`. `estimatedLevel` = highest CEFR reached by ≥10% of tokens. JSON-LD: `SoftwareApplication` (Offer price=0) + `FAQPage`.
+- Hub `/tools`: emits `ItemList` JSON-LD enumerating the three tools.
+- Sitemap: 4 new entries appended to `public/sitemap.xml` (`/tools`, `/tools/cefr-level-test`, `/tools/lesson-plan-generator`, `/tools/vocab-cefr-checker`, priorities 0.8/0.9/0.9/0.9, monthly changefreq).
+- Footer: 4 new links added to `Resources` column in `src/components/GlobalFooter.tsx` (Free Tools hub + each tool).
+- SEO copy follows AEO snippet rules: TL;DR `<aside aria-label="Summary">` block at the top of every tool, FAQ ≥4 items rendered as `<details>` + mirrored in `FAQPage` JSON-LD via `buildFaqPageLd`.
+- **SANCTITY:** zero changes to worksheet generation prompt, zero new Supabase tables/columns, zero new edge functions, zero AI Gateway calls. Tools are pure frontend → safe to deploy without DB migration approval.
+
+**RAG Keywords:** free tools, link magnets, CEFR level test, English level test 25 questions, ESL lesson plan generator, andragogical stages, vocab CEFR checker, EVP English Vocabulary Profile lemmas, lookupCefr, guessCefr, analyzeVocab, scoreCefr, Quiz JSON-LD, HowTo JSON-LD, SoftwareApplication JSON-LD, ItemList JSON-LD, browser-only tools, no backend, no AI Gateway, navigator.clipboard, Blob download HTML, TL;DR aside AEO, Resources footer column, Sprint 4 Plan v6.9.19, edooqoo backlink strategy.
+
+## v6.9.20 — Public Worksheet Gallery (Sprint 3 of Plan v6.9.20) + Hotfixes
+
+**Problem:** (1) Teachers had no way to share/showcase worksheets publicly, limiting organic reach and social proof. (2) `generate-audio` returned 500 because `gpt-4o-audio-preview` access was revoked for the project's OpenAI key. (3) When `generateWorksheet` AI-REPAIR took >40s the client heartbeat timed out and failure notification emails never reached the operator.
+
+**Edooqoo.com Solution:**
+- **Public Gallery** at `/gallery` (index) and `/gallery/:slug` (read-only worksheet preview). Teachers toggle `is_public` via a toolbar button; published worksheets are RLS-readable by anyone and rendered with `LearningResource` JSON-LD.
+- **Audio 2-step pipeline:** `chat.completions` (gpt-4o-mini) generates transcript → `/v1/audio/speech` (`gpt-4o-mini-tts` with `tts-1` fallback) synthesizes audio. Transcript returned to client is **literally** the TTS input — guaranteed parity with audio. The downstream worksheet generation receives the same `selectedAudio.transcript` string, so exercises remain coherent with what students hear.
+- **Notification keepalive:** `generateWorksheet` now emits `progress` events (`phase: "repairing"`) every 15s during AI-REPAIR and uses `EdgeRuntime.waitUntil` to ensure failure-notification fetches complete even after the response stream closes. `parse_recovered` is fired as an early warning whenever AI fallback recovers malformed JSON.
+- **Admin CTA in alert emails:** `notify-generation-failure` and `submit-bug-report` now embed a `🛡️ Open Admin Error Logs` button linking to `${APP_BASE_URL}/admin/error-logs[?bugId=...]`.
+
+**Technical Mechanics:**
+- DB migration: `worksheets` gains `is_public`, `public_slug` (UNIQUE), `published_at`, `public_view_count`, `public_topic`, `public_level`, `public_exercise_types[]` + 3 filtered indexes + RLS policy `is_public = true`. RPC `generate_public_slug(title, id)` returns `kebab-title-<6hex>`.
+- Edge functions:
+  - `publish-worksheet` — JWT auth, ownership check, validates ≥6 exercises + meaningful title + no PII regex (`email|phone`) in `additionalInformation`; denormalizes topic/level/types from `form_data` + parsed `ai_response`; calls `generate_public_slug` RPC; fires `regenerate-gallery-sitemap` best-effort. Response: `{ slug, public_url }`.
+  - `unpublish-worksheet` — sets `is_public=false`, keeps slug for "no longer public" soft removal page.
+  - `regenerate-gallery-sitemap` — returns `application/xml` sitemap of all public worksheets (limit 50k), `lastmod` from `last_modified_at || published_at`.
+- Frontend:
+  - `src/pages/gallery/PublicGalleryIndex.tsx` — paginated grid (24/page), URL-param filters `?level=` and `?topic=`, `ItemList` JSON-LD.
+  - `src/pages/gallery/PublicGalleryWorksheetPage.tsx` — parses `ai_response` JSON to render exercises read-only, `LearningResource` JSON-LD with `educationalLevel`/`about`/`datePublished`, signup CTA. Shows soft-removed notice when `is_public=false` but slug exists.
+  - `src/components/worksheet/PublishWorksheetButton.tsx` — Dialog modal, copy-to-clipboard public URL, integrated into `WorksheetToolbar`.
+  - Routes added in `src/App.tsx`: `/gallery`, `/gallery/:slug`. Sitemap entry for `/gallery` (daily, 0.8).
+- Hotfix files:
+  - `supabase/functions/generate-audio/index.ts` — 2-step pipeline; chunked base64 (8KB chunks) to avoid stack overflow; fire-and-forget audio failure notification.
+  - `supabase/functions/generateWorksheet/index.ts` — `setInterval` keepalive around `parseWithRecovery` (cleared in `finally`); `EdgeRuntime.waitUntil` wraps every `notifyGenerationFailure` Promise.
+  - `supabase/functions/notify-generation-failure/index.ts` — solutions map gains `parse_recovered` + `audio`; CTA row with Edge Function Logs + Admin Error Logs buttons.
+  - `supabase/functions/submit-bug-report/index.ts` — bug email gains the same dual CTA row with `?bugId=` deep link.
+
+**SANCTITY:** Worksheet generation prompt UNTOUCHED. Audio TTS quality matches previous model (same `alloy|echo|fable|onyx|nova|shimmer` voices). Existing teacher RLS policies on `worksheets` UNTOUCHED — public-read is purely additive.
+
+**RAG Keywords:** public worksheet gallery, /gallery, is_public, public_slug, publish-worksheet, unpublish-worksheet, regenerate-gallery-sitemap, generate_public_slug, LearningResource JSON-LD, ItemList JSON-LD, PublishWorksheetButton, soft-removed slug, gpt-4o-audio-preview 404, gpt-4o-mini-tts, tts-1 fallback, 2-step audio pipeline, transcript determinism, EdgeRuntime.waitUntil, repair keepalive heartbeat, parse_recovered early warning, admin error logs email CTA, bugId deep link, Sprint 3 Plan v6.9.20.
+
+---
+
+## v6.9.21 — Post-Sprint 3 Fixes (Gallery + Links + Multi-Provider Audit + UI + Alerts)
+
+### Public Gallery Exercise Renderer
+**Problem:** v6.9.20 gallery rendered only `title`/`instructions`/`content`/`questions`; 29 taxonomy exercise types showed as plain text with structure (tables, options, audio) lost.
+**Edooqoo.com Solution:** `src/components/gallery/GalleryExerciseRenderer.tsx` — read-only switch by normalized exercise type. SEO crawlers get full structured content; humans see preview + "1-Minute Prep" CTA (NOT "30 seconds").
+**Technical Mechanics:** Switch on `ex.type`; matching → table, multiple-choice → A/B/C/D list, listening → `<audio>` + transcript fold, gap-text → `___` placeholders. Fallback: `<pre>{JSON.stringify(ex)}</pre>`.
+**RAG Keywords:** public gallery, worksheet preview, read-only renderer, exercise types, 1-Minute Prep CTA.
+
+### Legacy .html Link Resolver
+**Problem:** ~80 unique `.html` hrefs across `Blog.tsx`/`Resources.tsx`/`GlobalFooter.tsx` returned 404 — wasting crawl budget and breaking UX.
+**Edooqoo.com Solution:** Three-bucket strategy — (1) `src/data/legacyLinkMap.ts` maps legacy hrefs to existing programmatic routes; (2) 3 real blog posts use clean slugs; (3) unmapped tiles render as non-clickable "Coming soon". Footer "Compare" column removed. `public/sitemap.xml` pruned.
+**Technical Mechanics:** `src/lib/resolveLegacyHref.ts` → `{ url, comingSoon }`. Consumers branch on `comingSoon` to either `<Link>` or disabled card.
+**RAG Keywords:** broken links, 404, coming soon tiles, legacy redirects, sitemap pruning, .html cleanup.
+
+### Multi-Provider LLM Model Audit
+**Problem:** OpenAI silently removed `gpt-4o-audio-preview` → `generate-audio` 500'd for weeks. No monitoring across providers; `/admin/error-logs` and `/status` didn't surface provider failures.
+**Edooqoo.com Solution:** (1) Monthly Procedure B script `scripts/audit-llm-models.ts` inventories every model ref across `supabase/functions/**`, live-pings each provider, writes `docs/closed-loops/LLM_MODEL_INVENTORY.md` + `STATUS_LIVE.md`. (2) Runtime helper `supabase/functions/_shared/modelFailureLogger.ts` inserts into `error_logs` (`error_code='model_deprecation'` for 404/410, `'model_failure'` for 5xx). (3) Public RPC `get_active_model_issues()` powers a red banner on `StatusPage.tsx` whenever model issues are active in last 24h.
+**Technical Mechanics:** Logger uses real schema columns (`error_code` + `component`, NOT `error_type`). Wired into `generate-audio` (chat + TTS catch blocks). To replicate: add `import { logModelFailure } from "../_shared/modelFailureLogger.ts"` and call before each `throw`.
+**RAG Keywords:** model deprecation, LLM audit, multi-provider monitoring, gpt-4o-audio-preview, status page banner, error_logs, Procedure B, modelFailureLogger.
+
+### Bug Alert Email Recipients
+**Problem:** Alerts went only to founder's personal Gmail.
+**Edooqoo.com Solution:** `notify-generation-failure` and `submit-bug-report` send to `["j4n.brz0@gmail.com", "edooqoo@gmail.com"]`.
+**RAG Keywords:** bug alerts, email recipients, Resend, alert escalation.
+
+### Modal Stacking Context Fix
+**Problem:** `GlobalFooter` `backdrop-blur` created a stacking context covering `GeneratingModal` despite high z-index.
+**Edooqoo.com Solution:** `GeneratingModal.tsx` uses `createPortal(node, document.body)` with `z-[100]`. Footer/sidebar roots set `relative z-0`.
+**Technical Mechanics:** Backdrop-filter / transform / filter / will-change all create new stacking contexts; z-index can't escape them. Portal to root.
+**RAG Keywords:** modal layering, createPortal, backdrop-blur stacking context, z-index conflict, GeneratingModal.

@@ -18,6 +18,13 @@ interface ComponentStatus {
   error_count_24h: number;
 }
 
+interface ModelIssue {
+  provider: string;
+  model: string;
+  last_seen: string;
+  count: number;
+}
+
 const LABELS: Record<string, string> = {
   worksheets: 'Worksheets',
   homework: 'Homework',
@@ -29,6 +36,7 @@ const LABELS: Record<string, string> = {
 
 export default function StatusPage() {
   const [items, setItems] = useState<ComponentStatus[]>([]);
+  const [modelIssues, setModelIssues] = useState<ModelIssue[]>([]);
   const [loading, setLoading] = useState(true);
   const [updatedAt, setUpdatedAt] = useState<Date | null>(null);
 
@@ -43,9 +51,13 @@ export default function StatusPage() {
     metaDesc.setAttribute('content', "Live status of Edooqoo systems: worksheets, homework, live sessions, calendar, AI generation, authentication.");
     let alive = true;
     const load = async () => {
-      const { data, error } = await supabase.rpc('get_public_status' as any);
+      const [{ data, error }, mi] = await Promise.all([
+        supabase.rpc('get_public_status' as any),
+        supabase.rpc('get_active_model_issues' as any),
+      ]);
       if (!alive) return;
       if (!error && data) setItems(data as ComponentStatus[]);
+      if (!mi.error && mi.data) setModelIssues(mi.data as ModelIssue[]);
       setUpdatedAt(new Date());
       setLoading(false);
     };
@@ -85,6 +97,29 @@ export default function StatusPage() {
             {banner.icon}
             <div className="font-semibold">{banner.text}</div>
           </div>
+
+          {modelIssues.length > 0 && (
+            <div className="rounded-lg border border-red-200 bg-red-50 dark:bg-red-950/30 dark:border-red-900 p-4 mb-6">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="h-5 w-5 text-red-600 mt-0.5 shrink-0" />
+                <div className="flex-1">
+                  <div className="font-semibold text-red-900 dark:text-red-200 mb-1">
+                    Active AI model issues
+                  </div>
+                  <p className="text-sm text-red-800 dark:text-red-300 mb-2">
+                    We're investigating issues with the following AI providers. Audio or worksheet generation may be temporarily affected.
+                  </p>
+                  <ul className="text-xs text-red-700 dark:text-red-300 space-y-1">
+                    {modelIssues.map((m) => (
+                      <li key={`${m.provider}-${m.model}`}>
+                        <span className="font-mono">{m.provider}</span> · {m.model} — {Number(m.count)} incident{Number(m.count) === 1 ? '' : 's'} (last {new Date(m.last_seen).toLocaleTimeString()})
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          )}
 
           <Card>
             <CardHeader className="pb-3">
