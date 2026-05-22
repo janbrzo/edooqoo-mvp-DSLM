@@ -61,11 +61,6 @@ export interface StudentKnowledgeEntry {
   outdated_at: string | null;
   outdated_reason: string | null;
   metadata?: KnowledgeMetadata;
-  // v6.9.8/9.9 additions (nullable on legacy rows)
-  ai_classified?: boolean | null;
-  ai_confidence?: number | null;
-  archived_at?: string | null;
-  used_in_worksheet_id?: string | null;
 }
 
 export interface NewKnowledgeEntry {
