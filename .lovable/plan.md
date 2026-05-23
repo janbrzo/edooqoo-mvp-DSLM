@@ -1,177 +1,252 @@
-# Plan v6.9.22 (rev2) — Restore 279 stron + hotfix Sprint 3 + dokończenie monitoringu
-
-## Założenia (po weryfikacji archiwum `public.rar`)
-
-Wbrew wcześniejszej diagnozie, archiwum zawiera **279 plików HTML z pełną treścią**, nie placeholdery:
-
-| Bucket | Liczba | Przykład | Średni rozmiar |
-|---|---|---|---|
-| `public/blog/*.html` | 207 | `ai-generated-listening-exercises-esl.html` | ~9 KB, h1+h2×8+tabele+FAQ+JSON-LD BlogPosting |
-| `public/*.html` (top-level) | 72 | `a1-beginner-english-worksheets.html`, `edooqoo-vs-magicschool.html` | ~6–7 KB, samodzielne landingi |
-
-Wszystkie pliki mają poprawny `<link rel="canonical">` wskazujący na `.html`, własny JSON-LD, nawigację do `/blog` i CTA do `/signup`. **Google najpewniej zindeksował znaczną część** — wycofanie tych URL-i = bezpowrotna utrata SEO. Reguła naprawcza: **przywracamy wszystko jako pliki statyczne**, NIE generujemy stubów, NIE robimy "Coming Soon".
-
-Lovable hosting serwuje pliki z `public/` przed SPA fallback — wstawienie `public/blog/foo.html` automatycznie obsłuży `https://edooqoo.com/blog/foo.html` z HTTP 200 (sprawdzone w skill `spa-routing-and-redirects`). Vite kopiuje `public/` → `dist/` w buildzie.
+# Plan v6.9.23 (rev3) — Dokończenie H2–H8 + wyjaśnienie GSC sitemap
 
 ---
 
-## Sprint H1 — Restore static HTML (priorytet 0)
+## Część A — Wyjaśnienie sprawy z Google Search Console (Twoje pytanie)
 
-### H1.1. Przywróć pliki z archiwum
+### Co widzę na Twoich zrzutach
 
-Skrypt `scripts/restore-legacy-html.sh` (uruchomić raz, ręcznie):
+**Zrzut 1 (image-187):** masz już dodaną mapę witryny `https://edooqoo.com/sitemap.xml`, przesłaną i odczytaną przez Google **18 maja 2026**, status **"Sukces"**, **23 wykryte strony**.
 
-```bash
-# 1) Rozpakuj archiwum (już wykonane do /tmp/oldpub/public/)
-# 2) Skopiuj blog wholesale
-cp /tmp/oldpub/public/blog/*.html public/blog/
-# 3) Skopiuj top-level (72 pliki) — z wyjątkiem zduplikowanych z istniejącymi React route'ami
-cp /tmp/oldpub/public/*.html public/
-# 4) Skopiuj brakujące assety
-cp -n /tmp/oldpub/public/lovable-uploads/*.png public/lovable-uploads/ 2>/dev/null || true
+**Zrzut 2 (image-188):** próbujesz dodać drugą mapę wpisując tylko `sitemap.xml` — Google odpowiada **"Nieprawidłowy adres mapy witryny"**.
+
+### Dlaczego pojawia się błąd
+
+Twoja właściwość w GSC to **Domain property** (`sc-domain:edooqoo.com`), nie URL-prefix. Dla Domain property Google wymaga w polu wpisania:
+
+- albo pełnego URL: `https://edooqoo.com/sitemap.xml`
+- albo ścieżki ze slashem na początku: `/sitemap.xml`
+
+Sam `sitemap.xml` (bez slasha) jest interpretowany jako URL względny → niepoprawny → błąd. To **nie jest** problem z plikiem na serwerze — plik istnieje, jest serwowany z HTTP 200 i już raz został odczytany.
+
+### Co realnie trzeba zrobić (a czego NIE trzeba)
+
+**NIE musisz** dodawać sitemap drugi raz. Już istnieje wpis dla `https://edooqoo.com/sitemap.xml`. Google co kilka dni automatycznie sam pobiera ten plik ponownie i indeksuje nowe URL-e.
+
+**Liczba "23 wykryte strony"** to **stary stan** sitemap sprzed naszych zmian — pochodzi z odczytu 18 maja 2026, kiedy plik zawierał ~23 URL-e (głównie core React routes). Po naszym deploy plik zawiera 1736 URL-i, ale Google **jeszcze nie pobrał** zaktualizowanej wersji.
+
+### Trzy opcje (od najmniej do najbardziej agresywnej)
+
+**Opcja A — Nic nie rób, poczekaj (rekomendacja):**
+
+- Google sam re-fetchuje sitemap co 1–7 dni.
+- Liczba "Wykryte strony" zaktualizuje się automatycznie do ~1736 w ciągu tygodnia.
+- Plus: nie ryzykujesz pomyłki w GSC.
+- Minus: czekanie do 7 dni na zauważenie przez Google nowych URL-i.
+
+**Opcja B — Wymuś re-fetch ręcznie (zalecane jeśli ci pilno):**
+
+1. Na liście "Przesłane mapy witryn" kliknij **trzy kropki ⋮** po prawej stronie wpisu `https://edooqoo.com/sitemap.xml`.
+2. Wybierz **"Usuń mapę witryny"** ("Remove sitemap"). To tylko czyści zapis o przesłaniu, nie kasuje pliku z serwera.
+3. W polu "Dodaj nową mapę witryny" wpisz `**https://edooqoo.com/sitemap.xml**` (pełny URL — to ważne, bo `sitemap.xml` samodzielnie nie działa dla Domain property — to właśnie ten błąd, który widziałeś).
+4. Klik **PRZEŚLIJ**.
+5. Status powinien przejść na "Sukces" w 5–30 minut, "Wykryte strony" w 24–72h zaktualizuje się na liczbę bliską 1736.
+
+**Opcja C — Pójście dalej (do rozważenia za 2–4 tygodnie po H1):** dodać dodatkowo dynamiczną sitemap galerii jako osobny wpis:
+
+- `https://abc.supabase.co/functions/v1/regenerate-gallery-sitemap` (już istnieje, sprawdziłem w `supabase/functions/regenerate-gallery-sitemap/index.ts`).
+- To pokaże Google strony `/gallery/<slug>` publikowane przez nauczycieli, oddzielnie od głównej sitemap.
+- Ale nie pilne — najpierw stabilizujemy 1736 URL-i z głównej sitemap.
+
+### Co zrobimy w kodzie w tym sprincie
+
+**Nic specjalnego dla GSC** — plik `public/sitemap.xml` już jest, już ma 1736 URL-i, już jest serwowany z HTTP 200. Akcja w GSC to **wyłącznie Twoja ręczna interakcja** po deploy. Dodam za to do dokumentacji `mem://seo/google-search-console-sitemap-workflow.md` notatkę: dla Domain property zawsze wpisywać pełny URL, nie samo "sitemap.xml".
+
+---
+
+## Część B — Stan obecny (co już zrobione w v6.9.21 i v6.9.22)
+
+### Plan v6.9.21 — wykonany w pełni:
+
+- `GalleryExerciseRenderer.tsx` (29 typów ćwiczeń, read-only).
+- `legacyLinkMap.ts` + `resolveLegacyHref.ts` (v1, potem uproszczone w v6.9.22 do passthrough).
+- `supabase/functions/_shared/modelFailureLogger.ts` — istnieje, wpięty w `generate-audio`.
+- `scripts/audit-llm-models.ts` (Procedure B, Deno).
+- Migracja: `error_code='model_deprecation'/'model_failure'` w `error_logs` + RPC `get_active_model_issues()`.
+- Czerwony baner na `StatusPage.tsx` (aktywne issues z ostatnich 24h).
+- `submit-bug-report` — funkcja edge istnieje, gotowa na ENV.
+
+### Plan v6.9.22 — Sprint H1 wykonany:
+
+- **277 statycznych HTML** przywróconych w `public/blog/` (207) i `public/` (70).
+- `scripts/seo/build-blog-index.mjs` — skrypt istnieje.
+- `public/sitemap.xml` → **1736 URL-i** (1459 React/pSEO + 277 static HTML).
+- `Blog.tsx`, `Resources.tsx`, `GlobalFooter.tsx` używają `<a href>` dla `.html` (full-page nav, opuszcza SPA).
+- `resolveLegacyHref.ts` uproszczony do passthrough, bez `comingSoon`.
+- `toText()` helper w `GalleryExerciseRenderer.tsx` — częściowo (sweep w H3 tego sprintu).
+
+### Weryfikacja produkcji (zrobiona):
+
+
+| URL                                                   | HTTP  |
+| ----------------------------------------------------- | ----- |
+| `/modal-verbs-worksheets-esl.html`                    | 200 ✅ |
+| `/blog/reading-comprehension-activities-english.html` | 200 ✅ |
+| `/business-english-worksheet-generator.html`          | 200 ✅ |
+| `/edooqoo-vs-magicschool.html`                        | 200 ✅ |
+
+
+**Wniosek: Problem 4 (legacy SEO) rozwiązany na produkcji.**
+
+---
+
+## Część C — Sprinty H2–H8 do wykonania (pełna specyfikacja)
+
+### H2 — Persystencja stanu Publish (Problem 1A)
+
+**Co jest źle:** po publikacji worksheetu i odświeżeniu strony przycisk "Public" wraca do "Publish". `PublishWorksheetButton` przyjmuje propsy `isPublic` i `publicSlug`, ale callsite nie przekazuje danych z bazy.
+
+**Diagnoza:** kolumny `worksheets.is_public` (bool), `worksheets.public_slug` (text), `worksheets.published_at` (timestamptz) istnieją (migracja Sprint 3). Hook `useWorksheetState` ładuje rekord, ale nie wyłuskuje tych pól; `WorksheetPage` renderuje button bez nich; button ma lokalny stan, który nie jest hydratowany przy mount.
+
+**Zmiany (3 pliki):**
+
+1. `**src/hooks/useWorksheetState.tsx**` — rozszerzyć stan o `isPublic: boolean` i `publicSlug: string | null`; w mapperze worksheet → state wyciągnąć `is_public` i `public_slug` z rekordu; zwrócić w obiekcie hooka.
+2. `**src/pages/WorksheetPage.tsx**` (potwierdzić callsite przez `rg "PublishWorksheetButton"`) — wyciągnąć `isPublic`, `publicSlug` z hooka i przekazać jako propsy do `<PublishWorksheetButton>`.
+3. `**src/components/worksheet/PublishWorksheetButton.tsx**` — dodać `useEffect(() => { setPub(isPublic); setSlug(publicSlug); }, [isPublic, publicSlug])` żeby button re-syncował się przy hydratacji propsów.
+
+**Test akceptacyjny:** Publish → F5 → button pokazuje "Public" + otwiera dialog z opcją Unpublish.
+
+---
+
+### H3 — Dokończenie `toText()` w GalleryExerciseRenderer (Problem 1B)
+
+**Co jest źle:** strona galerii pokazuje `[object Object]` w zadaniach typu `categorize`. AI generuje items jako obiekty `{ text: "museum", category: "places" }`, a JSX renderuje surowo `{item}` → React stringifikuje to jako `[object Object]`.
+
+**Zmiany (1 plik, `src/components/gallery/GalleryExerciseRenderer.tsx`):**
+
+Sweep wszystkich miejsc, gdzie renderowany jest element tablicy z `ex.items/pairs/options/lines/steps/statements`:
+
+
+| Case                  | Pole           | Fix                                            |
+| --------------------- | -------------- | ---------------------------------------------- |
+| `categorize`          | `items[]`      | `{toText(it)}`                                 |
+| `matching`            | `pairs[]`      | `{toText(pair.left)}` ↔ `{toText(pair.right)}` |
+| `dialogue`            | `lines[]`      | `{toText(l.speaker)}: {toText(l.text)}`        |
+| `sequence`/`ordering` | `steps[]`      | `{toText(step)}`                               |
+| `true-false`          | `statements[]` | `{toText(s.text                                |
+| `multiple-choice`     | `options[]`    | `{toText(opt)}` (prewencyjnie)                 |
+
+
+Reguła: każde `{var}` w JSX wewnątrz tego pliku, gdzie `var` może być obiektem AI-generated → opakować w `toText()`.
+
+**Test akceptacyjny:** `/gallery/choosing-your-adventure-activities-in-a-new-city-8d1f6a` → brak `[object Object]`.
+
+---
+
+### H4 — Signup return-to flow (Problem 2)
+
+**Co jest źle:** "sign up free" na `/gallery/...` → modal `/signup` → X → ląduje na `/` zamiast wrócić na `/gallery/...`. Tracimy kontekst i intencję użytkownika.
+
+**Rozwiązanie:**
+
+1. **Nowy hook `src/hooks/useSignupLinkState.ts`:**
+
+```ts
+import { useLocation, useNavigate } from 'react-router-dom';
+
+export function useSignupLinkState() {
+  const loc = useLocation();
+  const nav = useNavigate();
+  const goToSignup = (opts?: { replace?: boolean }) =>
+    nav('/signup', {
+      state: { from: loc.pathname + loc.search },
+      replace: opts?.replace
+    });
+  return { goToSignup, currentPath: loc.pathname + loc.search };
+}
 ```
 
-**Lista wykluczeń** (NIE kopiować, bo kolidują z istniejącym index lub React route'em):
-- `public/blog.html` → pomiń, mamy `/blog` jako React (`Blog.tsx`)
-- `public/about.html` → pomiń, mamy `/about`
-- `public/index.html` w `/public/blog/` → już istnieje (sprawdzić różnicę; jeśli stary jest listingiem, zachować pod inną nazwą lub nadpisać tylko jeśli identyczny zamysł)
+2. `**src/pages/Signup.tsx**` — w handlerze close/X:
 
-**Weryfikacja po kopiowaniu**: `ls public/blog/*.html | wc -l` musi dać 207 (lub 207+1 jeśli zachowamy istniejący `index.html`). `ls public/*.html | wc -l` musi dać ≥70.
+```ts
+const location = useLocation();
+const from = (location.state as any)?.from || '/';
+const handleClose = () => nav(from, { replace: true });
+```
 
-### H1.2. Cofnij niszczące zmiany v6.9.21 dla mapowanych linków
+Również po pomyślnej rejestracji: jeśli `from` istnieje, redirect tam; inaczej zachowanie obecne (`/dashboard`).
 
-W `src/data/legacyLinkMap.ts`:
-- **Usuń wszystkie wpisy** mapujące `.html → React route` dla URL-i, które TERAZ istnieją jako prawdziwy plik (czyli wszystkie 72 top-level z archiwum). Po restore, link `/a1-beginner-english-worksheets.html` ma trafiać na ten plik, nie na `/esl-worksheets`.
-- Zostaw `LEGACY_LINK_MAP` **tylko** dla URL-i, których NIE ma w archiwum (jeśli takie są — zweryfikować `diff` między listą `LEGACY_LINK_MAP` a `ls public/*.html` po restore).
-- Jeśli mapa po czyszczeniu jest pusta → usuń plik i `resolveLegacyHref.ts` oraz odwołania w `Blog.tsx`/`Resources.tsx`/`GlobalFooter.tsx`.
+3. **Callsite'y (~16 miejsc)** — wszystkie `<Link to="/signup">` i `navigate('/signup')` zamienić na `goToSignup()`. Priorytetowo:
+  - `src/pages/gallery/PublicGalleryWorksheetPage.tsx` (CTA "Try 1-Minute Prep free" i "sign up free")
+  - `src/pages/WorksheetPage.tsx` (anon CTA)
+  - `src/pages/PublicBookingPage.tsx`
+  - `src/components/GlobalFooter.tsx`, `StickyNav.tsx`, hero CTA, anon banery
+  - Pełny zbiór: `rg "/signup" src/ -l`
 
-W `src/lib/resolveLegacyHref.ts`:
-- Wynik `comingSoon: true` jest zabroniony przez "Martha quality rule" (raised by user) — **całkowicie usuń branchgalerii Coming Soon**.
-- Po H1.1 każdy `.html` ma realny plik → resolver staje się zbędny. Linki w `Blog.tsx`/`Resources.tsx`/`GlobalFooter.tsx` renderujemy jako zwykłe `<a href="...html">` (target nawigacji przeglądarki, NIE `<Link>`, bo to są strony spoza SPA).
-
-### H1.3. Odbuduj `/blog` (React listing) z pełnej listy 207 postów
-
-`src/pages/Blog.tsx`:
-- Wygeneruj `BLOG_POSTS` jako tablicę 207 wpisów odczytanych z `public/blog/*.html` (parsowanie `<title>` + `<meta name="description">` + datePublished z JSON-LD).
-- Skrypt budujący tablicę: `scripts/seo/build-blog-index.mjs` → odczytuje wszystkie `.html`, wyciąga title/description/date/canonical, zapisuje `src/data/blogIndex.ts` jako `export const BLOG_POSTS: BlogPostMeta[] = [...]`.
-- Dodaj do `package.json`: `"prebuild": "node scripts/seo/build-blog-index.mjs && bunx tsx scripts/generate-sitemap.ts"` (zachowując istniejący prebuild jeśli jest).
-- `Blog.tsx` renderuje karty z linkami `<a href={post.url}>` (gdzie `post.url` = `/blog/foo.html`), grupowane po kategoriach (tagujemy heurystycznie z tytułu: AI, CEFR, Grammar, Business, Listening, Speaking, Writing, Reading, Vocabulary, Methodology, Tools, Tips).
-- Search input filtrujący po title/description (jak dziś).
-- 3 istniejące React route'y blog (`english-games-for-learners`, `esl-games-for-teachers`, `teach-english-online-guide`) **zostawiamy bez zmian** — to są bogate React strony; w listingu pokazujemy je z `url: '/blog/english-games-for-learners'` (bez `.html`).
-
-### H1.4. Odbuduj `/resources` linki
-
-`src/pages/Resources.tsx`:
-- Wszystkie obecne `comingSoon: true` zamień na realne linki `.html`.
-- Lista zasobów: zsynchronizuj z plikami z archiwum, które są tematycznie "resource" (np. `best-ai-tools-for-esl-teachers.html`, `ai-lesson-planning-for-english-teachers.html`).
-
-### H1.5. Odbuduj `GlobalFooter.tsx`
-
-- Przywróć **kolumnę "Compare"** (8 linków `/edooqoo-vs-*.html`) — pliki istnieją z prawdziwą treścią, kolumna była usunięta błędnie.
-- Przywróć kolumnę "CEFR Levels" (6 linków `a1`..`c2`).
-- Przywróć kolumnę "Grammar Topics" (8 linków).
-- Wszystkie linki jako `<a href>` (nie `<Link>`).
-
-### H1.6. Sitemap.xml — pełna inwentaryzacja
-
-`scripts/generate-sitemap.ts`:
-- Po istniejących 1454 URL-ach pSEO dodać blok "Legacy HTML":
-  - 207 × `/blog/{slug}.html`
-  - 72 × `/{slug}.html`
-- Łącznie sitemap = **~1733 URL-i**.
-- `lastmod` z `datePublished` z JSON-LD pliku (parsowanie w skrypcie).
-- Walidacja: `scripts/seo/audit-sitemap.mjs` musi przejść bez 404 (HEAD każdy URL produkcyjny po deploy).
-
-### H1.7. Robots.txt
-
-`public/robots.txt` — sprawdź czy nie blokuje `/blog/*.html`. Jeśli jest `Disallow: /*.html` → usuń.
-
-### H1.8. NotFound.tsx — bez catch-all redirectu dla .html
-
-Plan v6.9.22 rev1 zakładał, że `NotFound` przechwytuje `.html` i robi 301/Coming Soon. **Anuluj tę zmianę** — pliki teraz istnieją, hosting serwuje je natywnie, SPA fallback nie odpala dla `.html`. `NotFound.tsx` zostaje w obecnej formie (noindex + soft-404 hint).
+**Test akceptacyjny:** klik z `/gallery/...` → modal → X → wracam dokładnie tam. To samo z `/pricing`.
 
 ---
 
-## Sprint H2 — Publish state persistence (z planu rev1)
+### H5 — SSE heartbeat + silent retry (Problem 6)
 
-**Problem 1A**: po refresh "Publish" wraca do stanu "Publish" zamiast "Public".
+**Co jest źle:** stream `generateWorksheet` umiera po 40s ciszy → fałszywy modal "Connection lost — server stopped responding for 40s". Token nie jest zużywany, ale UX = zły.
 
-`src/components/worksheet/PublishWorksheetButton.tsx` już akceptuje `isPublic` + `publicSlug`. Trzeba je przekazać:
+**Dwustronne rozwiązanie:**
 
-1. `src/hooks/useWorksheetState.tsx` — w fetchu worksheetu dociągnąć `is_public, public_slug` z `worksheets`.
-2. `src/components/worksheet/WorksheetToolbar.tsx` (lub odpowiednik renderujący `PublishWorksheetButton`) — przekaż prop'y `isPublic={worksheet.is_public}` i `publicSlug={worksheet.public_slug}`.
-3. Zweryfikuj typy w `src/integrations/supabase/types.ts` (kolumny już są od Sprint 3).
+#### H5a — Serwer: heartbeat
 
----
+`**supabase/functions/generateWorksheet/index.ts**` (część SSE writer) — co 15s wysyłka komentarza SSE (`: keepalive`), który parser klienta ignoruje, ale TCP keep-alive jest zachowany:
 
-## Sprint H3 — Gallery renderer `[object Object]` fix
+```ts
+const heartbeat = setInterval(() => {
+  try { writer.write(encoder.encode(`: keepalive ${Date.now()}\n\n`)); }
+  catch { clearInterval(heartbeat); }
+}, 15000);
+try {
+  // ... istniejąca logika streamingu
+} finally {
+  clearInterval(heartbeat);
+  await writer.close();
+}
+```
 
-**Problem 1B**: w `categorize`/`matching`/`dialogue` items renderują się jako `[object Object]`.
+#### H5b — Klient: silent retry
 
-`src/components/gallery/GalleryExerciseRenderer.tsx`:
-- Dodaj helper:
-  ```ts
-  const toText = (v: unknown): string => {
-    if (v == null) return '';
-    if (typeof v === 'string' || typeof v === 'number') return String(v);
-    if (typeof v === 'object') {
-      const o = v as Record<string, unknown>;
-      return String(o.text ?? o.word ?? o.label ?? o.value ?? o.term ?? o.left ?? o.right ?? o.line ?? JSON.stringify(o));
-    }
-    return String(v);
-  };
-  ```
-- Owin wszystkie miejsca renderowania `item`, `pair.left`, `pair.right`, `dialogue.line.text`, `category.items[i]` przez `toText(...)`.
-- Smoketest: galeria `/gallery/choosing-your-adventure-activities-in-a-new-city-8d1f6a` (z screenshota) musi pokazać sensowny tekst w sekcjach 2/3.
+`**src/services/worksheetStreamService.ts**`:
 
----
+- Watchdog timeout 40s → **45s** (margines dla 3× heartbeat).
+- Dodać `retryCount` w closure.
+- Pierwszy timeout I `retryCount === 0` → **cicho** zrestartuj request (bez `onError`, bez toast), inkrementuj `retryCount`.
+- Drugi timeout → standardowy `onError` → modal jak teraz.
+- Refaktor: wydzielić logikę startującą stream do `startStream()`, żeby retry mógł ją wywołać ponownie.
 
-## Sprint H4 — Signup return-to flow
+**Test akceptacyjny:**
 
-**Problem**: po zamknięciu modala signup użytkownik wraca na `/` zamiast tam skąd przyszedł.
-
-1. `src/hooks/useSignupLinkState.ts` (nowy):
-   ```ts
-   import { useLocation } from 'react-router-dom';
-   export const useSignupLinkState = () => {
-     const loc = useLocation();
-     return { state: { from: loc.pathname + loc.search } };
-   };
-   ```
-2. We wszystkich miejscach `<Link to="/signup">` / `navigate('/signup')` (~16 plików, ustalić `rg -l "to=\"/signup\"|navigate\\('/signup'"`) podmień na:
-   ```tsx
-   const linkState = useSignupLinkState();
-   <Link to="/signup" state={linkState.state}>...</Link>
-   ```
-3. `src/pages/Signup.tsx` — po close/skip:
-   ```ts
-   const navigate = useNavigate();
-   const { state } = useLocation() as { state?: { from?: string } };
-   const onClose = () => navigate(state?.from ?? '/', { replace: true });
-   ```
+- Symulacja: `await new Promise(r => setTimeout(r, 30000))` w środku `generateWorksheet` → klient nie pokazuje modala.
+- Symulacja: kill edge function pośrodku → klient cicho retryuje raz, drugi fail → modal.
 
 ---
 
-## Sprint H5 — Stream heartbeat tuning
+### H6 — Monitoring modeli LLM kompleksowo (Problem 5)
 
-**Problem**: generacja worksheetu timeout-uje po ~40 s na slabym łączu.
+**Rekonstrukcja A–Z, dlaczego deprecation `gpt-4o-audio-preview` zaskoczył:**
 
-1. `supabase/functions/generateWorksheet/index.ts` — w pętli streamingu dodaj keep-alive co 15 s:
-   ```ts
-   const heartbeat = setInterval(() => controller.enqueue(encoder.encode(': keep-alive\n\n')), 15000);
-   // w finally: clearInterval(heartbeat);
-   ```
-2. `src/services/worksheetStreamService.ts` — silent retry once on premature close:
-   - Flaga `retried = false` w closure.
-   - W `onerror`/timeout: jeśli `!retried && bytesReceived < expectedMin` → `retried = true; reconnect()`. Bez UI toastu (cichy retry zgodnie z user preference).
+A. Nauczyciel zgłosił bug: nie działa generowanie audio.
+B. Diagnoza: `generate-audio` używało `gpt-4o-audio-preview` → OpenAI go zdeprecjonowało bez ostrzeżenia.
+C. Bugfix (już zrobiony): rozdzielenie na `gpt-4o-mini` (transcript) + `tts-1` (TTS). Działa.
+D. Plan v6.9.21 dodał: `logModelFailure`, RPC, baner na `/status`, skrypt audytu.
+E. Co realnie działa: infrastruktura zbudowana, ale logger wpięty tylko w 1 z 12 funkcji, skrypt audytu manualny (nikt go nie uruchamia), brak tabeli historii.
+F. Co naprawiamy w H6: dystrybucja loggera, tabela `model_health_checks`, codzienny cron 06:00 UTC.
 
----
+#### H6a — `logModelFailure` w 11 pozostałych funkcjach
 
-## Sprint H6 — Dokończenie multi-provider monitoringu (Sprint K z rev1)
+Wzór: w bloku `catch` po fetch do providera lub przed `throw` gdy `!response.ok`:
 
-### H6.1. Wpięcie `logModelFailure` do 11 pozostałych edge functions
+```ts
+if (response.status === 404 || response.status === 410 || response.status >= 500) {
+  await logModelFailure({
+    model,
+    provider: 'openai', // lub 'google', 'anthropic', 'elevenlabs', 'lovable-gateway'
+    status: response.status,
+    endpoint: '/v1/chat/completions',
+    error: errorText,
+    functionName: 'generateWorksheet'
+  });
+}
+```
 
-Lista (patrz `mem/infrastructure/multi-provider-model-audit.md`):
+Funkcje do wpięcia (11):
+
 1. `generateWorksheet`
 2. `verify-open-answers`
 3. `translate-flashcard`
@@ -184,119 +259,159 @@ Lista (patrz `mem/infrastructure/multi-provider-model-audit.md`):
 10. `generate-image`
 11. `generate-timeline`
 
-Wzorzec (skopiowany z `generate-audio`):
+#### H6b — Tabela `model_health_checks` (migracja)
+
+```sql
+CREATE TABLE public.model_health_checks (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  checked_at timestamptz NOT NULL DEFAULT now(),
+  provider text NOT NULL,
+  model text NOT NULL,
+  http_status int,
+  severity text NOT NULL CHECK (severity IN ('ok','warning','critical','skipped')),
+  details jsonb
+);
+
+ALTER TABLE public.model_health_checks ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "service_role_only" ON public.model_health_checks
+  FOR ALL USING (false);
+
+CREATE INDEX idx_mhc_checked_at ON public.model_health_checks(checked_at DESC);
+CREATE INDEX idx_mhc_severity ON public.model_health_checks(severity)
+  WHERE severity IN ('critical','warning');
+```
+
+#### H6c — Nowa edge function `audit-llm-models`
+
+`supabase/functions/audit-llm-models/index.ts`:
+
+- Port logiki ze skryptu Deno do edge function.
+- Live-check przeciw OpenAI / Google / Anthropic / ElevenLabs / Lovable.
+- Dla każdego modelu wpis do `model_health_checks`.
+- Gdy `severity='critical'` (HTTP 404/410) → dodatkowo `logModelFailure()`, żeby baner na `/status` zaświecił się natychmiast.
+- Zwraca JSON: `{checked: N, critical: X, warning: Y, ok: Z}`.
+
+#### H6d — Cron daily 06:00 UTC
+
+```sql
+SELECT cron.schedule(
+  'daily-llm-model-audit',
+  '0 6 * * *',
+  $$
+  SELECT net.http_post(
+    url := 'https://<project-ref>.supabase.co/functions/v1/audit-llm-models',
+    headers := jsonb_build_object(
+      'Content-Type', 'application/json',
+      'Authorization', 'Bearer <SERVICE_ROLE_KEY>'
+    ),
+    body := '{}'::jsonb
+  ) AS request_id;
+  $$
+);
+```
+
+**Test akceptacyjny:** ręcznie `POST /functions/v1/audit-llm-models` → JSON. `SELECT * FROM model_health_checks ORDER BY checked_at DESC LIMIT 20;` → wpisy widoczne.
+
+---
+
+### H7 — `BUG_REPORT_FROM_EMAIL` (Problem 3)
+
+**Stan:** sekret dodany; funkcja `submit-bug-report` go nie czyta.
+
+**Zmiana (1 plik, `supabase/functions/submit-bug-report/index.ts`):**
+
 ```ts
-import { logModelFailure } from '../_shared/modelFailureLogger.ts';
-// w catch po fetchu providera:
-if (resp.status === 404 || resp.status === 410 || resp.status >= 500) {
-  await logModelFailure({
-    model, provider: 'openai'|'google'|'anthropic'|'elevenlabs'|'lovable-gateway',
-    status: resp.status, endpoint: '<url>', error: await resp.text(),
-    functionName: '<funcName>'
-  });
-}
+const fromAddr = Deno.env.get('BUG_REPORT_FROM_EMAIL')
+              || 'Edooqoo Bugs <notifications@edooqoo.com>';
+// w body do Resend:
+from: fromAddr,
 ```
 
-### H6.2. Cron audit (Procedure B)
-
-1. Migracja: tabela `model_health_checks` (`id`, `checked_at timestamptz default now()`, `provider text`, `model text`, `status int`, `severity text`). RLS: tylko service_role.
-2. Edge function `supabase/functions/cron-audit-llm-models/index.ts` — port logiki `scripts/audit-llm-models.ts` do Deno edge, insert do `model_health_checks`.
-3. `supabase/config.toml` — schedule cron daily 06:00 UTC.
-4. RPC `get_active_model_issues()` rozszerz o JOIN z `model_health_checks` (ostatnie 24h), żeby banner na `/status` pokazywał też issues z cron-u (nie tylko z runtime'u).
+**Test akceptacyjny:** wyślij bug → mail z `From: Edooqoo Bugs <notifications@edooqoo.com>`.
 
 ---
 
-## Sprint H7 — Alerty mailowe (rozszerzenie z rev1)
+### H8 — Dokumentacja, memory, sprzątanie
 
-- `supabase/functions/_shared/alertEmails.ts` (lub stała w istniejących): potwierdź `ALERT_EMAILS = ['edooqoo@gmail.com', 'jan@edooqoo.com']`.
-- Sekret `BUG_REPORT_FROM_EMAIL=alerts@edooqoo.com` — instrukcja w planie do ustawienia ręcznie przez usera (sekret zarządzany).
+#### H8a — Uruchomienie skryptu blog index
 
----
+`bun scripts/seo/build-blog-index.mjs` → wygeneruje `src/data/blogIndex.ts` z 277 wpisami; `Blog.tsx` automatycznie pokaże pełną listę.
 
-## Sprint H8 — RAG/Memory update
+#### H8b — RAG injection do `docs/llm-context.md` + `llms.txt` + `public/llms.txt`
 
-### `docs/llm-context.md` + `llms.txt` (oba pliki, identyczny diff)
+Format: **Problem → Edooqoo.com Solution → Technical Mechanics + RAG Keywords**
 
-Sekcja: **"Static HTML SEO Pages (v6.9.22)"** w formacie Problem → Edooqoo.com Solution → Technical Mechanics:
+Nowe sekcje:
 
-```
-## Static HTML SEO Pages
+1. **Publish State Persistence** — prop drilling z DB → hook → button, `useEffect` re-sync.
+2. **Signup Return-To Navigation** — hook `useSignupLinkState`, `state.from`, `nav(from, {replace})`.
+3. **SSE Keepalive (15s heartbeat + 1 silent retry)** — server `: keepalive`, client `retryCount`, watchdog 45s.
+4. **Multi-Provider Model Monitoring** — trójwarstwowe: passive (`logModelFailure` w 12 funkcjach) + active (cron 06:00 UTC `audit-llm-models`) + surfacing (RPC + baner `/status`); tabela `model_health_checks` jako historia.
+5. **Static HTML SEO Sanctity** — 277 stron w `public/`, nigdy nie kasować, sitemap zawiera wszystkie.
+6. **Google Search Console Sitemap Workflow** — dla Domain property wpisywać pełny URL `https://edooqoo.com/sitemap.xml`, nigdy `sitemap.xml`; istniejący wpis Google sam refreshuje co 1–7 dni; przyspieszenie = remove+re-add przez ⋮ menu.
 
-### Problem
-Sprint v6.9.21 incorrectly assumed 279 hand-crafted .html landing pages
-were placeholders and removed their links/sitemap entries. The files
-contained full content (h1, h2×8, tables, FAQ, JSON-LD BlogPosting) and
-were likely indexed by Google.
+#### H8c — Nowe pliki memory (`mem/`)
 
-### Edooqoo.com Solution
-v6.9.22 restored all 279 files as static assets in `public/`. They are
-served directly by Lovable hosting before SPA fallback (HTTP 200, no
-React render). Their `<link rel="canonical">` self-references the .html
-URL. The React app links to them via plain `<a href>` (NOT react-router
-`<Link>`), causing full-page navigation out of SPA scope.
-
-### Technical Mechanics
-- 207 blog posts: `public/blog/{slug}.html`
-- 72 landings: `public/{slug}.html` (CEFR levels, grammar topics,
-  comparisons, personas)
-- Index generation: `scripts/seo/build-blog-index.mjs` parses titles +
-  meta + JSON-LD datePublished → writes `src/data/blogIndex.ts`
-- Listing UI: `src/pages/Blog.tsx` reads `BLOG_POSTS`, groups by
-  heuristic category, search filter on title/description
-- Sitemap: `scripts/generate-sitemap.ts` enumerates ~1733 URLs (1454
-  pSEO + 207 blog .html + 72 landing .html)
-- Hosting: Vite copies `public/` → `dist/`; Lovable serves real files
-  before SPA fallback
-- DO NOT add comingSoon stubs (Martha quality rule)
-- DO NOT add NotFound catch-all for .html — files exist, fallback never
-  fires for them
-
-### RAG Keywords
-static html landing pages, legacy seo, blog restore, .html canonical,
-google indexed pages, public/blog, public/{slug}.html, SPA fallback
-order, lovable static hosting, edooqoo-vs-* comparison pages, CEFR
-landing pages, grammar topic landings, BlogPosting JSON-LD
-```
-
-### Memory updates
-
-1. **Aktualizuj** `mem/infrastructure/legacy-html-link-resolver.md`:
-   - Zmień nazwę pliku na `mem/seo/static-html-landing-pages.md`.
-   - Treść: nowa polityka (restore-not-redirect), 279 plików, build-blog-index.mjs, sanctity: "never delete a .html with content".
-   - Usuń wzmiankę o `legacyLinkMap` / "Coming Soon" (zabronione).
-
-2. **Nowy** `mem/features/worksheet/publish-button-state.md` — flow `is_public`/`public_slug` od DB do toolbara.
-
-3. **Nowy** `mem/features/auth/signup-return-to-flow.md` — `useSignupLinkState` + `state.from`.
-
-4. **Nowy** `mem/infrastructure/sse-keepalive-and-retry.md` — 15 s heartbeat + silent retry.
-
-5. **Aktualizuj** `mem/infrastructure/multi-provider-model-audit.md` — dodaj wpięcie do 11 funkcji + cron + `model_health_checks`.
-
-6. **Aktualizuj** `mem/index.md` — Core dopisz: `"Never delete a .html in public/ that has real content — Google may index it."`
+1. `mem/features/worksheet/publish-state-persistence.md` (feature)
+2. `mem/features/navigation/signup-return-to-state.md` (feature)
+3. `mem/infrastructure/sse-keepalive-pattern.md` (feature)
+4. `mem/infrastructure/model-health-monitoring.md` (uzupełnia istniejący `multi-provider-model-audit.md` o cron + tabelę)
+5. `mem/seo/google-search-console-sitemap-workflow.md` (preference/reference) — Domain property requires full URL; existing sitemap entry auto-refreshes; force re-fetch via remove+re-add.
+6. Update `mem/index.md` — dopisać 5 wpisów (zachowując całą istniejącą zawartość, bo `code--write` zastępuje plik).
 
 ---
 
-## Smoketesty (po implementacji)
+## Część D — Kolejność wykonania
 
-1. `curl -I https://edooqoo.com/blog/ai-generated-listening-exercises-esl.html` → 200, `content-type: text/html`.
-2. `curl -I https://edooqoo.com/edooqoo-vs-magicschool.html` → 200.
-3. `curl -s https://edooqoo.com/blog | grep -c 'href="/blog/'` → ≥207.
-4. `curl -s https://edooqoo.com/sitemap.xml | grep -c '<loc>'` → ~1733.
-5. Otwórz `/gallery/choosing-your-adventure-activities-in-a-new-city-8d1f6a` → sekcje 2/3 nie pokazują `[object Object]`.
-6. Otwórz worksheet jako teacher → Publish → reload → przycisk pokazuje "Public".
-7. Z `/pricing` kliknij signup → zamknij modal → wracasz na `/pricing`.
-8. Wygeneruj worksheet z dropthrottled connection (DevTools Slow 3G) → kończy się sukcesem (heartbeat + retry).
-9. `/status` → jeśli w ostatnich 24 h był insert do `error_logs` z `error_code='model_deprecation'`, widać czerwony banner.
-10. `scripts/seo/audit-sitemap.mjs` → 0 błędów 404.
+
+| #   | Sprint | Pliki                               | Ryzyko                |
+| --- | ------ | ----------------------------------- | --------------------- |
+| 1   | H7     | 1                                   | minimalne             |
+| 2   | H3     | 1                                   | niskie                |
+| 3   | H2     | 3                                   | niskie                |
+| 4   | H8a    | 1 cmd                               | minimalne             |
+| 5   | H6a    | 11                                  | niskie                |
+| 6   | H4     | 17                                  | średnie (regresja UX) |
+| 7   | H5     | 2                                   | średnie (timing)      |
+| 8   | H6b–d  | migracja + edge function + cron SQL | średnie               |
+| 9   | H8b+c  | docs + 5 mem + index                | minimalne             |
+
+
+Razem: ~38 plików, 1 migracja, 1 cron, 1 nowa edge function.
 
 ---
 
-## Pytania do potwierdzenia (przed startem implementacji)
+## Część E — Smoke testy po deploy
 
-1. **`edooqoo-vs-*.html`**: czy w treści wymieniają konkretnych konkurentów po nazwie (potencjalne ryzyko prawne)? Sprawdziłem `edooqoo-vs-magicschool.html` (7 KB) — używają nazw konkurentów w porównaniu. Czy zostawiamy bez zmian, czy chcesz wcześniej review? **(rekomendacja: zostawiamy — to legalne porównanie funkcjonalne, każdy SaaS to robi)**.
-2. **Konflikty nazw**: jeśli archiwum zawiera `public/about.html`, ale mamy React `/about` — pomijamy `.html` (rekomendacja) czy zachowujemy oba? **(rekomendacja: pomijamy, React wygrywa)**.
-3. **`public/blog/index.html`**: archiwum ma jakąś wersję, my mamy obecną (1 plik). Czy nadpisać starym, czy zachować obecny? **(rekomendacja: zachowaj obecny, listing i tak generuje React `/blog`)**.
-4. **Cron-audit codzienny czy tygodniowy?** **(rekomendacja: codziennie 06:00 UTC, providerzy deprecate'ują modele bez ostrzeżenia)**.
+1. **H1 (już live):** `curl -I /edooqoo-vs-magicschool.html` → 200 ✅ / `/blog/ai-generated-listening-exercises-esl.html` → 200 ✅.
+2. **H2:** publish → F5 → button = "Public".
+3. **H3:** `/gallery/<dowolny>` → brak `[object Object]`.
+4. **H4:** `/gallery/...` → klik "sign up free" → modal → X → wracasz na `/gallery/...`.
+5. **H5:** wygenerowanie worksheet z ~60s opóźnieniem → brak modala "Connection lost".
+6. **H6:** ręcznie `POST /functions/v1/audit-llm-models` → wpisy w `model_health_checks`.
+7. **H7:** bug report → mail z `notifications@edooqoo.com`.
+8. **H8:** `/blog` → > 200 wpisów.
 
-Jeżeli akceptujesz rekomendacje (1)–(4), nie ma żadnych dodatkowych decyzji do podjęcia podczas implementacji.
+---
+
+## Część F — Akcje po Twojej stronie (manual, po deploy)
+
+1. **Google Search Console** — opcja B (rekomendowana):
+  1. Wejdź: [https://search.google.com/search-console/sitemaps?resource_id=sc-domain%3Aedooqoo.com](https://search.google.com/search-console/sitemaps?resource_id=sc-domain%3Aedooqoo.com)
+  2. Klik ⋮ przy `https://edooqoo.com/sitemap.xml` → "Usuń mapę witryny". zrobiłem przed chwilą
+  3. W polu wpisz **pełny URL** `https://edooqoo.com/sitemap.xml` (nie samo `sitemap.xml` — to powoduje błąd, który widziałeś). zrobiłem przed chwilą
+  4. PRZEŚLIJ → status "Sukces" w 5–30 min → "Wykryte strony" rośnie do ~1736 w 24–72h.
+2. (Po 2 tyg.) Sprawdzenie zakładki "Strony" w GSC → ile "Indexed" vs "Discovered – not indexed". Cel: 60–80% z 1736 w 4–8 tyg.
+3. Akceptacja planu → implementacja od H7 → H3 → H2 → H8a → H6a → H4 → H5 → H6b-d → H8b+c.
+
+---
+
+## Część G — Czego NIE robimy w tym sprincie
+
+- ❌ Sprint 5 (AEO/LLMO, `llms-full.txt`, JSON-LD sweep) — osobna tura.
+- ❌ Sprint 6 (4 long-form artykuły Marthy) — ręczny copywriting.
+- ❌ sitemap-index.xml (rozdzielenie głównej + gallery dynamic) — przy >50k URL-i.
+- ❌ Dalsza ekspansja pSEO (>3000 URL-i) — po obserwacji indexacji 4–6 tyg.
+
+**Akceptujesz? Po Twoim "tak" zaczynam od H7 (1 plik, najtrywialniejszy) i lecę w dół.**
