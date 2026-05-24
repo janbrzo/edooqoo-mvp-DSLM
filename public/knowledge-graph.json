@@ -1,0 +1,95 @@
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://edooqoo.com/#organization",
+      "name": "Edooqoo",
+      "url": "https://edooqoo.com/",
+      "sameAs": [
+        "https://edooqoo.com"
+      ]
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://edooqoo.com/#website",
+      "url": "https://edooqoo.com/",
+      "name": "Edooqoo.com",
+      "publisher": {
+        "@id": "https://edooqoo.com/#organization"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://edooqoo.com/#software",
+      "name": "Edooqoo",
+      "applicationCategory": "EducationalApplication",
+      "operatingSystem": "Web",
+      "url": "https://edooqoo.com/",
+      "publisher": {
+        "@id": "https://edooqoo.com/#organization"
+      },
+      "audience": [
+        {
+          "@type": "Audience",
+          "audienceType": "ESL teachers"
+        },
+        {
+          "@type": "Audience",
+          "audienceType": "English tutors"
+        },
+        {
+          "@type": "Audience",
+          "audienceType": "Language-school teachers"
+        }
+      ],
+      "featureList": [
+        "ESL worksheet generation",
+        "CEFR-oriented teaching materials",
+        "Homework workflows",
+        "Flashcards",
+        "Lesson organization",
+        "Student Hub",
+        "Public worksheet gallery",
+        "Browser-only teacher tools"
+      ]
+    },
+    {
+      "@type": "CollectionPage",
+      "@id": "https://edooqoo.com/esl-worksheets#webpage",
+      "url": "https://edooqoo.com/esl-worksheets",
+      "name": "ESL Worksheets",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "about": {
+        "@id": "https://edooqoo.com/#software"
+      }
+    },
+    {
+      "@type": "CollectionPage",
+      "@id": "https://edooqoo.com/tools#webpage",
+      "url": "https://edooqoo.com/tools",
+      "name": "Free Tools for English Teachers",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "about": {
+        "@id": "https://edooqoo.com/#software"
+      }
+    },
+    {
+      "@type": "CollectionPage",
+      "@id": "https://edooqoo.com/gallery#webpage",
+      "url": "https://edooqoo.com/gallery",
+      "name": "Public Worksheet Gallery",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "about": {
+        "@id": "https://edooqoo.com/#software"
+      }
+    }
+  ]
+}

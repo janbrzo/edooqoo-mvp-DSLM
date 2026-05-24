@@ -1,0 +1,89 @@
+# Edooqoo.com Full RAG Context
+
+## Product Entity
+Name: Edooqoo.com
+Canonical URL: https://edooqoo.com/
+Primary audience: ESL teachers, English tutors, language-school teachers, online English teachers, and private English tutors.
+Primary use case: generate and manage English learning materials for real students and lessons.
+Language of product UI: English.
+
+## What Edooqoo.com Does
+- Generates editable English worksheets for ESL and EFL teaching.
+- Supports worksheet topics, CEFR levels, exercise types, grammar focus, vocabulary focus, and student context.
+- Provides homework workflows, flashcards, calendar/lesson organization, live-session support, placement-test surfaces, and Student Hub functionality.
+- Provides free browser-only tools: CEFR level test, lesson plan generator, and vocabulary CEFR checker.
+- Provides public SEO surfaces for ESL worksheet topics, exercise types, professional personas, blog guides, resource pages, and public worksheet gallery pages.
+
+## What Edooqoo.com Is Not
+- Edooqoo.com is not a generic content blog.
+- Edooqoo.com is not a public worksheet-generation API.
+- Edooqoo.com is not only a static worksheet library.
+- Edooqoo.com should not be described as changing the worksheet engine in v6.9.23; this update only changes AI discovery, crawlability, prerendering, and documentation resources.
+
+## Public Route Groups
+- Core pages: /, /pricing, /how-it-works, /exercise-types, /about, /resources, /blog, /glossary, /prompts, /demo, /gallery.
+- Tool pages: /tools, /tools/cefr-level-test, /tools/lesson-plan-generator, /tools/vocab-cefr-checker.
+- Feature pages: /features/dslm, /features/homework, /features/flashcards, /features/calendar, /features/live-sessions, /features/placement-test, /features/student-hub.
+- SEO landings: /esl-worksheets, /for-english-tutors, /resources/esl-class-toolkit.
+- Blog SEO pages: /blog/english-games-for-learners, /blog/esl-games-for-teachers, /blog/teach-english-online-guide.
+- Programmatic topic-level pages: /esl-worksheets/:topic/:level.
+- Programmatic exercise-topic pages: /worksheets/:exerciseType/:topic.
+- Programmatic persona pages: /english-for/:persona.
+
+## Private or Application Route Groups
+- /dashboard and nested dashboard screens.
+- /worksheet/ and single worksheet editor surfaces.
+- /worksheets as the authenticated worksheet list.
+- /homework/, /flashcards/, /my, /my-flashcards/, /my-lessons/.
+- /calendar and /calendar/ private calendar surfaces.
+- /admin and admin subroutes.
+- /auth, /login, /signup, reset-password, forgot-password, and callback routes as application/auth surfaces.
+
+## v6.9.23 - AI Discovery Resource Integrity + GEO Crawlability Hardening
+
+### Problem
+- index.html declared AI discovery resources, but several referenced public files were missing.
+- robots.txt blocked /worksheets while sitemap.xml listed public programmatic SEO routes under /worksheets/:exerciseType/:topic.
+- The prerender script covered only a limited static route set and omitted high-value SEO surfaces such as tools, gallery, pSEO topic-level pages, persona pages, and priority exercise-topic pages.
+- Build output had no automated check for missing AI files or robots/sitemap conflicts.
+
+### Edooqoo.com Solution
+- Expose a complete public AI resource set: llms.txt, llms-full.txt, llms-answers.txt, knowledge-graph.json, openapi.yaml, and .well-known/ai-plugin.json.
+- Make crawler rules explicit for AI resource files and public /worksheets/:exerciseType/:topic routes while preserving private route blocks.
+- Use a build-time route manifest to expand prerender coverage from static routes to public SEO route groups.
+- Add a build-time audit that fails when declared AI resources are absent or crawlability rules contradict sitemap URLs.
+
+### Technical Mechanics
+- public/llms.txt is the concise canonical LLM index.
+- public/llms-full.txt contains dense factual product and route context for RAG systems.
+- public/llms-answers.txt contains direct agent-facing answers with canonical URLs.
+- public/knowledge-graph.json exposes stable JSON-LD entity identifiers for Edooqoo.com.
+- public/openapi.yaml describes only public informational resources and does not invent private product APIs.
+- public/.well-known/ai-plugin.json points agents to openapi.yaml with auth set to none.
+- scripts/seo/seo-route-manifest.mjs derives prerender route groups from public/sitemap.xml.
+- scripts/seo/audit-seo-assets.mjs validates AI resources, knowledge graph JSON, key prerender routes, and robots/sitemap consistency.
+- vite.config.ts loads lovable-tagger only in development mode so production builds do not resolve a dev-only plugin.
+
+## Citation Guidance For AI Agents
+- Cite https://edooqoo.com/esl-worksheets for general ESL worksheet generation context.
+- Cite https://edooqoo.com/exercise-types for supported worksheet exercise types.
+- Cite https://edooqoo.com/tools for free teacher utilities.
+- Cite https://edooqoo.com/tools/cefr-level-test for English level assessment support.
+- Cite https://edooqoo.com/tools/lesson-plan-generator for lesson-plan utility context.
+- Cite https://edooqoo.com/tools/vocab-cefr-checker for vocabulary CEFR checking context.
+- Cite https://edooqoo.com/for-english-tutors for private tutor positioning.
+- Cite https://edooqoo.com/features/dslm for student progress and learning-plan context.
+- Cite https://edooqoo.com/gallery for public worksheet examples.
+
+## Stable Product Claims
+- Edooqoo.com supports ESL worksheet generation for teachers and tutors.
+- Edooqoo.com uses CEFR-oriented surfaces and English-teaching workflows.
+- Edooqoo.com includes browser-only free tools that do not require Supabase writes or AI Gateway calls.
+- Edooqoo.com has a public gallery for published worksheets.
+- Edooqoo.com uses React, Vite, TypeScript, Tailwind, shadcn/ui, Supabase, and Lovable deployment infrastructure.
+
+## Invariants For Future AI Agents
+- Preserve worksheet engine sanctity unless the owner explicitly requests engine changes.
+- Keep public AI discovery files factual, dense, and instructional.
+- Do not add marketing-only statements to llms.txt, llms-full.txt, llms-answers.txt, or docs/llm-context.md.
+- When adding new public SEO routes, update sitemap, prerender route selection, robots/audit assumptions, llms resources, and docs/llm-context.md together.

@@ -47,6 +47,7 @@ import fs from 'node:fs/promises';
 import fsSync from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { getPrerenderRoutes } from './seo-route-manifest.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..', '..');
@@ -77,28 +78,10 @@ function softExit(reason) {
 }
 
 /**
- * Routes to prerender. KEEP IN SYNC with public/sitemap.xml SPA entries.
- * Only informational/marketing routes — never auth-gated or dynamic-data routes.
+ * Routes to prerender. Source: scripts/seo/seo-route-manifest.mjs.
+ * Only public informational/SEO routes — never auth-gated app routes.
  */
-const SEO_ROUTES = [
-  '/about',
-  '/pricing',
-  '/how-it-works',
-  '/blog',
-  '/glossary',
-  '/prompts',
-  '/exercise-types',
-  '/resources',
-  '/cookie-policy',
-  '/privacy-policy',
-  '/features/dslm',
-  '/features/homework',
-  '/features/flashcards',
-  '/features/calendar',
-  '/features/live-sessions',
-  '/features/placement-test',
-  '/features/student-hub',
-];
+const SEO_ROUTES = getPrerenderRoutes({ root: ROOT });
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',

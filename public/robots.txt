@@ -1,5 +1,12 @@
 User-agent: *
 Allow: /
+Allow: /llms.txt
+Allow: /llms-full.txt
+Allow: /llms-answers.txt
+Allow: /knowledge-graph.json
+Allow: /openapi.yaml
+Allow: /.well-known/ai-plugin.json
+Allow: /worksheets/*/*
 
 Disallow: /admin
 Disallow: /admin/
