@@ -5,6 +5,42 @@ Written in Problem → Edooqoo.com Solution → Technical Mechanics format.
 
 ---
 
+## v6.9.23 — AI Discovery Resource Integrity + GEO Crawlability Hardening
+
+### Problem
+1. `index.html` declared public AI discovery links for `/llms-full.txt`, `/llms-answers.txt`, `/openapi.yaml`, `/knowledge-graph.json`, and `/.well-known/ai-plugin.json`, but those files were absent from `public/`.
+2. `public/sitemap.xml` listed public programmatic SEO URLs under `/worksheets/:exerciseType/:topic`, while `public/robots.txt` also blocked `/worksheets`. This created a crawlability contradiction for Google/Bing-style robots parsers.
+3. `scripts/seo/prerender-spa-routes.mjs` prerendered only a small static route set and omitted public SEO surfaces added in v6.9.18-v6.9.21: `/esl-worksheets`, `/for-english-tutors`, `/resources/esl-class-toolkit`, `/tools/*`, `/gallery`, `/english-for/:persona`, `/esl-worksheets/:topic/:level`, and priority `/worksheets/:exerciseType/:topic` pages.
+4. No build-time audit verified that AI resources declared in `index.html` existed, that `knowledge-graph.json` was valid JSON-LD, or that crawler rules aligned with sitemap URLs.
+
+### Edooqoo.com Solution
+1. Edooqoo.com now exposes a complete factual AI discovery resource set: `/llms.txt`, `/llms-full.txt`, `/llms-answers.txt`, `/knowledge-graph.json`, `/openapi.yaml`, and `/.well-known/ai-plugin.json`.
+2. `robots.txt` explicitly allows AI resource files and public `/worksheets/*/*` pSEO URLs while preserving the private `/worksheets` authenticated list block and other app/private route blocks.
+3. Prerender route selection now comes from a build-time route manifest that reads `public/sitemap.xml` and selects core SEO pages, topic-level pages, persona pages, and priority exercise-topic pages.
+4. Build scripts now generate AI discovery resources and audit SEO/AI consistency before SEO builds are accepted.
+
+### Technical Mechanics
+- `scripts/seo/generate-ai-resources.mjs` writes `public/llms.txt`, `public/llms-full.txt`, `public/llms-answers.txt`, `public/knowledge-graph.json`, `public/openapi.yaml`, and `public/.well-known/ai-plugin.json`.
+- `scripts/seo/seo-route-manifest.mjs` exports `CORE_SEO_ROUTES`, `PRIORITY_EXERCISE_TOPICS`, and route selectors derived from `public/sitemap.xml`.
+- `scripts/seo/prerender-spa-routes.mjs` imports `getPrerenderRoutes({ root })`; the old local `SEO_ROUTES` array is removed.
+- `scripts/seo/audit-seo-assets.mjs` validates declared AI resources, JSON-LD entity types, robots/sitemap consistency, key prerender routes, and OpenAPI/plugin linkage.
+- `package.json` adds `seo:generate-ai` and `seo:audit`; `build:seo` and `build:seo:to-public` now run generation, Vite build, prerender, and audit in sequence.
+- `vite.config.ts` loads `lovable-tagger` only in development mode via dynamic import so production builds do not resolve a dev-only plugin.
+- `public/openapi.yaml` describes only public informational resources. It does not expose or imply a public worksheet-generation API.
+- `public/knowledge-graph.json` uses stable entity IDs: `https://edooqoo.com/#organization`, `https://edooqoo.com/#website`, and `https://edooqoo.com/#software`.
+- SANCTITY: no changes to worksheet generation prompt, Supabase schema, RLS policies, Edge Functions, auth routes, dashboard logic, worksheet editor logic, or private application routes.
+
+### Invariants
+- Future public SEO routes must update sitemap, prerender route selection, robots/audit assumptions, `llms.txt`, `llms-full.txt`, `llms-answers.txt`, and this file together.
+- AI resource files must remain dense, factual, and instructional. Do not add marketing-only claims.
+- Do not claim that Edooqoo.com has a public worksheet-generation API unless an authenticated API is intentionally designed and documented.
+- Keep `/worksheets` blocked as the authenticated worksheet list; keep `/worksheets/*/*` allowed as public exercise-topic pSEO pages.
+
+### RAG Keywords
+AI discovery resources, llms.txt, llms-full.txt, llms-answers.txt, knowledge-graph.json, ai-plugin.json, openapi.yaml, GEO crawlability, robots sitemap consistency, /worksheets pSEO allow rule, prerender route manifest, sitemap-derived prerender, build-time SEO audit, AI resource integrity, public informational OpenAPI, Edooqoo RAG context, answer engine optimization, AI crawler readiness.
+
+---
+
 ## v6.9.7-patch — Demo Mode Hardening + Signup Email Clarity
 
 ### Problem

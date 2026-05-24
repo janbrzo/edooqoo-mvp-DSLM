@@ -1,263 +1,46 @@
-# Edooqoo
+# Edooqoo.com
 
-AI-powered ecosystem for English tutors specializing in 1-on-1 adult education.
-Generates editable worksheets, interactive homework, flashcards, and live sessions.
+## Canonical AI Discovery Resources
+- Website: https://edooqoo.com/
+- LLM index: https://edooqoo.com/llms.txt
+- Full RAG context: https://edooqoo.com/llms-full.txt
+- Agent answers: https://edooqoo.com/llms-answers.txt
+- Knowledge graph: https://edooqoo.com/knowledge-graph.json
+- OpenAPI description: https://edooqoo.com/openapi.yaml
+- Sitemap: https://edooqoo.com/sitemap.xml
+- Robots: https://edooqoo.com/robots.txt
 
-## Canonical RAG context
-- /docs/llm-context.md — full feature/architecture reference (Problem → Solution → Mechanics)
-- /mem/index.md — project memory index (per-feature notes)
+## Core Definition
+Edooqoo.com is an English-language platform for ESL teachers and tutors to generate, organize, assign, reuse, and deliver English learning materials. The product includes worksheet generation, homework workflows, flashcards, lesson organization, student context, calendar-based lesson work, free browser tools, programmatic SEO pages, and a public worksheet gallery.
 
-## Latest version
-v6.9.7-patch — Demo Mode hardening + signup email clarity. Calendar slot/lesson creation now blocks INSIDE `UnifiedSlotModal` via `demoMode` prop (modal opens, save shows demo toast). `AllWorksheetsPage.handleBulkDelete` guarded. Demo data hooks (`useStudents`, `useWorksheetHistory`, `useDeletedWorksheets`) await `demoData` before resolving `loading=false`. `AuthenticatedPageShell` adds `paddingTop:36px` when demo banner is visible. `EmailConfirmationModal` and `/how-it-works` FAQ now explain the two-email flow (Supabase confirm → Edooqoo welcome from `hello@edooqoo.com`). `demoData.subscription_type` set to `'Full-Time 30'`.
-v6.9.7 — IP Protection Hardening (part 1) + Welcome Email Pipeline (part 2). Prompt formatting moved to `format-worksheet-prompt` edge function; dev-only logger neutralizes `console.log`/`console.warn` in prod; demo/mock content lazy-loaded; production source maps disabled; `debugger` stripped. Branded post-signup welcome email via Resend (`hello@edooqoo.com`), fired by `auth.users` trigger `on_user_email_confirmed` (NULL → NOT NULL on `email_confirmed_at`), idempotent per recipient via `email_send_log`, internal-secret-protected `send-welcome-email` edge function.
-v6.9.6 — Demo Mode Lockdown, Dashboard Compact Stats Bar, Landing mobile light-theme guard.
-See `docs/llm-context.md` § v6.9.7 / § v6.9.6 for full details.
+## v6.9.23 - AI Discovery Resource Integrity + GEO Crawlability Hardening
 
-## Stack
-React 18 + Vite 5 + TypeScript 5 + Tailwind 3 + shadcn/ui. Supabase (Lovable Cloud) backend with RLS. Lovable AI Gateway for generation.
+### Problem
+- index.html declared AI discovery resources, but several referenced public files were missing.
+- robots.txt blocked /worksheets while sitemap.xml listed public programmatic SEO routes under /worksheets/:exerciseType/:topic.
+- The prerender script covered only a limited static route set and omitted high-value SEO surfaces such as tools, gallery, pSEO topic-level pages, persona pages, and priority exercise-topic pages.
+- Build output had no automated check for missing AI files or robots/sitemap conflicts.
 
-## Rules for AI agents
-- Never modify the worksheet generation engine prompt unless explicitly asked.
-- All UI in English; planning chat with user in Polish.
-- Use `src/utils/logger.ts` for logging.
-- Use `APP_BASE_URL` secret in Edge Functions; never hardcode domains.
-- All mutating UI handlers MUST guard `isDemoMode` before Supabase calls.
-- All client logging MUST go through `src/utils/logger.ts` (`devLog`/`devWarn`).
-- Worksheet prompt formatting lives in `format-worksheet-prompt` edge function — never move it back to client.
-- Welcome email is sent ONLY by the DB trigger `on_user_email_confirmed`. Never invoke `send-welcome-email` from client code. `email_send_log` enforces idempotency.
-- Resend sender for transactional emails is `hello@edooqoo.com` (verified). Internal endpoint secret lives in `app_internal_config.welcome_email_secret`.
+### Edooqoo.com Solution
+- Expose a complete public AI resource set: llms.txt, llms-full.txt, llms-answers.txt, knowledge-graph.json, openapi.yaml, and .well-known/ai-plugin.json.
+- Make crawler rules explicit for AI resource files and public /worksheets/:exerciseType/:topic routes while preserving private route blocks.
+- Use a build-time route manifest to expand prerender coverage from static routes to public SEO route groups.
+- Add a build-time audit that fails when declared AI resources are absent or crawlability rules contradict sitemap URLs.
 
-## v6.9.8 (2026-05-06)
+### Technical Mechanics
+- public/llms.txt is the concise canonical LLM index.
+- public/llms-full.txt contains dense factual product and route context for RAG systems.
+- public/llms-answers.txt contains direct agent-facing answers with canonical URLs.
+- public/knowledge-graph.json exposes stable JSON-LD entity identifiers for Edooqoo.com.
+- public/openapi.yaml describes only public informational resources and does not invent private product APIs.
+- public/.well-known/ai-plugin.json points agents to openapi.yaml with auth set to none.
+- scripts/seo/seo-route-manifest.mjs derives prerender route groups from public/sitemap.xml.
+- scripts/seo/audit-seo-assets.mjs validates AI resources, knowledge graph JSON, key prerender routes, and robots/sitemap consistency.
+- vite.config.ts loads lovable-tagger only in development mode so production builds do not resolve a dev-only plugin.
 
-**Problem → Solution → Mechanics**
-
-1. **Student Knowledge friction**: required category+subtype on every add → teachers skipped tool. Solution: frictionless Quick Add (textarea only) + AI auto-classify in background. Mechanics: `StudentKnowledgeQuickAddModal` simplified to text+tags. `useStudentKnowledge.addEntry` saves as `category='Notes'` then fires `supabase.functions.invoke('classify-knowledge-entry')` (Lovable AI Gateway, `google/gemini-2.5-flash`, tool-call schema). If `confidence>=0.6` patches row with category+metadata. New columns: `ai_classified`, `ai_confidence`, `archived_at`, `used_in_worksheet_id`.
-
-2. **Welcome email CTA misaligned**: led to dashboard instead of Add Student. Solution: primary CTA = "Add your first student" → `/dashboard?action=add-student`; Dashboard auto-opens AddStudentDialog from this query. Reorder list (add Welcome Placement Test, Calendar availability). Removed "a real human reads it" line. `reply_to: 'edooqoo@gmail.com'` (admin inbox).
-
-3. **Particles landing background**: added `tsparticles` slim build. `src/components/landing/ParticlesBackground.tsx` rendered only on anon Index page (250 particles desktop / 80 mobile, color `#643cdd`, links `#9d8af5`, hover grab, click push). Fixed `-z-10`, `pointer-events-none`.
-
-4. **Demo /worksheet Save UUID error**: `WorksheetContent.saveWorksheetChanges` now early-returns in demo with toast.
-
-5. **Demo students/worksheets empty**: `useStudents.loading` now `(isDemoMode && !demoData) || query.isLoading` so consumers wait for demoData.
-
-6. **Demo Calendar UX**: `handleSlotClick` no longer guards on demo (modal opens read-only). `SlotDetailModal.handleSave` blocks with toast. `UnifiedSlotModal.handleSubmit` already guarded.
-
-7. **Demo Dashboard Generate Worksheet**: navigation handler — guard removed. Actual generation guard remains in `useWorksheetGeneration`.
-
-**Invariants**:
-- Welcome email `from=hello@edooqoo.com`, `reply_to=edooqoo@gmail.com`. Never swap.
-- Particles only when `!isRegisteredUser`. Never `particles.js` jQuery legacy.
-- Quick Add saves immediately as Notes, AI classifies async; never block teacher.
-- Demo navigation handlers MUST NOT guard `isDemoMode`. Modals MAY open. Save handlers MUST guard.
-
-## v6.9.9
-- Knowledge tabs: Timeline / By Skill (group by nano_skill) / For Next Lesson (shares useOneMinutePrep). Manual `archiveEntry` button on Next Lesson Ideas. AI badge on cards when ai_confidence>=0.6.
-- Email footers: removed literal `hello@edooqoo.com` from Supabase confirm template and Resend welcome footer. Confirm template personalized via `{{ .Data.first_name }}`.
-- ParticlesBackground accepts `interactive` prop; AuthenticatedPageShell passes `false`.
-- Sanctity: worksheet engine NOT touched; `used_in_worksheet_id` only set via manual archive button.
-
-## v6.9.10
-
-**Problem → Solution → Mechanics**
-
-1. **Worksheet form ignores existing learning plan**: teacher generating a worksheet for a student didn't see the previously generated `next_steps` / `phase_steps` from `useFutureTimeline` → produced ad-hoc topics, plan went unused, materials lost cohesion.
-   - Solution: thin banner above Exercise Selection Cards on `WorksheetForm` showing up to 3 suggested next-step chips for the selected student. Click prefills topic/goal/additionalInfo/grammarFocus/exercises/focusMap. Empty state shows soft CTA "Open Learning Plan" → `/student/{id}?tab=progress`. Hidden when no student selected.
-   - Mechanics: `src/components/WorksheetForm/NextStepsPresetBanner.tsx` consumes `useFutureTimeline({studentId, teacherId})`; presets = `[...phaseSteps, ...nextSteps].slice(0,3)` (phase-bound first). Apply path: writes setters via parent's `applyPreset`, calls `normalizeSuggestionPrefill` (single source of truth shared with DSLM prefill). Tracks origin via `sessionStorage.appliedPresetSuggestionId`; on `worksheetGenerationSuccess` event, WorksheetForm re-emits `markPresetUsed` with `{suggestionId, worksheetId}`; banner listener invokes `useSuggestion(id, worksheetId)` to flip `is_used` in `future_worksheet_suggestions`. Sanctity: zero changes to worksheet generation prompt or edge functions.
-
-2. **Stale knowledge entries trusted as fresh**: notes in Personal/Skill Assessment/Goals older than 90 days may be obsolete (job change, mastered skill) but UI gave no signal.
-   - Solution: client-side amber badge "Stale ({age}d old) — still true?" with two inline actions: `Yes, still current` (resets freshness clock via `metadata.last_confirmed_at`) and `Mark outdated` (existing `markAsOutdated`).
-   - Mechanics: `StudentKnowledgeEntryCard` computes `freshnessAnchor = max(created_at, metadata.last_confirmed_at)`. New mutation `confirmCurrent(entryId)` in `useStudentKnowledge` patches `metadata.last_confirmed_at = now()`. Zero cron, zero edge function, zero schema change.
-
-**Mental model — Knowledge ↔ Plan ↔ Worksheet** (for future agents):
-```
-Goals → generate-curriculum-phases (macro phases, dslm_curriculum_phases)
-      → generate-timeline (concrete worksheet ideas, future_worksheet_suggestions, kinds: next_step | phase_step)
-      → WorksheetForm preset chip → worksheet generation engine (UNTOUCHED prompt)
-```
-`generate-curriculum-phases` produces 3-6 multi-week macro phases. `generate-timeline` produces 1-3 worksheet-ready suggestions, optionally bound to a phase via `phaseId`. Both invoked from hooks (`useCurriculumPhases`, `useFutureTimeline`); their edge function source lives only in Supabase.
-
-**Invariants v6.9.10**:
-- WorksheetForm preset chips MUST use `normalizeSuggestionPrefill`. Never duplicate the media/exercise normalization.
-- `applyPreset` MUST write `sessionStorage.appliedPresetSuggestionId` so the post-success dispatch can fire `markPresetUsed`.
-- Stale badge is purely client-side derived. Never persist `is_stale`.
-- `confirmCurrent` MUST only patch `metadata.last_confirmed_at`; never touch `created_at`.
-- Sanctity: do NOT modify worksheet generation prompt, `format-worksheet-prompt`, `generate-curriculum-phases`, or `generate-timeline` edge functions.
-
-**RAG Keywords**: next step preset, suggestion chip, learning plan banner, worksheet form preset, prefill from suggestion, future timeline preset, phase step preset, stale note badge, knowledge freshness, last confirmed at, 90 days outdated, confirm current, knowledge audit, mental model curriculum vs timeline, mark preset used.
-
-**v6.9.11**:
-- WorksheetForm preset banner: header `Next Steps from Learning Plan` (Map icon) + `View plan ↗`. Chips sorted by (currentPhase first, phaseOrder ASC, sequence_number ASC) — matches Profile/Pathway. `displayIndex` per-phase. Tooltip = Step #N • Phase, full topic, goal, why.
-- Sliding-window carousel (3-of-N, advance by 1) replaces hard `slice(0,3)`. Resets on student change & after `applyPreset`.
-- Empty-state CTA expanded with strong didactic copy (no fake percentages); button → `/student/{id}?tab=progress`.
-- WorksheetForm student select: amber border + "Pick a student to unlock…" hint when `no-student`. Placeholder `Choose a student`. Item label `Generic worksheet (no student)` (value unchanged).
-- NextStepBanner empty state: "Just added some? Refresh the page to see them." + Refresh button when `!hasGoals`.
-- NextStepsSection: first-time generate now opens count Dialog (1-6, default 3) — parity with "Generate more".
-- useFutureTimeline: catch differentiates 402 (credits) / 429 (rate) / generic.
-
-**Counts rationale**: 3-6 phases = quarter-to-semester arc (12-24w); 1-3 next steps = rolling 3-lesson plan (4+ becomes stale after 2 lessons). AI picks within band based on goals + nearest deadline + mainGoal breadth.
-
-**Critical fix v6.9.11**: `useGoalProgress` moved ABOVE `if (loading) return ...` in `StudentProgressTab.tsx` to satisfy Rules of Hooks (was causing React #310 → blank `/student/{id}?tab=progress`). New core invariant: never call hooks below early returns.
-
-**Student Knowledge status v6.9.11**: implemented = quick capture + AI background classify (≥0.65 conf), Stale Badge (90d) for Personal/Skill Assessment/Goals, DSLM integration, Next Lesson Ideas in PathwayView. Deferred (separate iteration v6.9.12+) = pg_cron auto-suggest "still current?", auto-link `used_in_worksheet_id`, sentiment trend chart.
-
-**v6.9.12 — Worksheet form preset polish + phase-aware step counts**:
-- Chip label `S{seq}•P{phaseSeq} topic` (phase-bound) / `S{seq} topic` (free). Source: `phaseOrderById` from `useCurriculumPhases`.
-- Edit button on chip + tooltip → `/student/{id}?tab=dslm&view=pathway&editSuggestion={suggId}`. PathwayView `useEffect` reads param, opens shared `SuggestionEditDialog`, strips param. Single edit source of truth.
-- View plan / Open Learning Plan now link to `?tab=dslm&view=pathway` (canonical). Old `?tab=progress` redirect kept.
-- Per-phase step count: `recommendedStepsForPhase = clamp(end-start+1, 1..6)`; 1 step ≈ 1 weekly lesson. Used in `MacroTimeline` quick dropdown and `Generate steps with comment`. Free next-steps stay default 3. Helper text in dropdown.
-- KNOWN: `generate-curriculum-phases` prompt does not cap total weeks by goal deadline — 90-day goal can yield 20-week plan. Flagged; sanctity rule applies.
-
-**v6.9.13 — Deadline-fit curriculum + DSLM sub-navigation**:
-- `generate-curriculum-phases` now ENFORCES deadline. Two layers:
-  1. Prompt block `HARD CONSTRAINT — DEADLINE FIT` declares exact totalWeeks budget (=`weeksUntilDeadline` for replace; =`weeksUntilDeadline − consumed` for add) and demands contiguous integer ranges.
-  2. Server-side `fitPhasesToDeadline(phases, targetWeeks)` rescales any AI overflow proportionally (minWeeks=2) and rebases to contiguous ranges from week 1. `generation_context.deadline_fit_adjusted=true` when scaling fired. `target_total_weeks` recorded.
-- `existingPhases` query selects `estimated_weeks_start/end` so add-mode subtracts already-consumed weeks. Worksheet-generation prompt UNTOUCHED (sanctity).
-- DSLM sub-navigation: `CollapsibleSection` accepts `id`; listens for `window` event `dslm:openSubsection`; sets `open=true` and `scrollIntoView`. `DSLMTab` sub-nav map: goals (supporting/additional/achieved/archived/notes), skills (heatmap/micro/notes), profile (ai-summary/psych/behavioral/personal/all-notes/debug). Pathway has no subs. Sub-buttons render under active top section. Sticky-nav offset via `scroll-mt-24`.
-- All call-sites in `GoalsView/SkillsView/ProfileView` tagged with stable `id` props.
-
-## v6.9.14 (2026-05-11)
-
-**Problem → Solution → Mechanics**
-
-1. **Deadline data missing on student**: `generate-curriculum-phases` only read `students.deadline`. When teacher set a target date on a goal (`student_progress_goals.target_date`) but not on the student record, AI got no totalWeeks budget → produced 5×4-week phases regardless of 90-day deadline.
-   - Solution: edge function fallback to earliest goal deadline.
-   - Mechanics: `effectiveDeadline = student.deadline ?? min(goals[].target_date)`. Telemetry `generation_context.deadline_source = 'student' | 'goal' | null`. Prompt now includes worked example: `"90 days = ~13 weeks → e.g. 3 phases of 3 weeks + 1 phase of 4 weeks"`.
-
-2. **Bulk-delete by accident** in MacroTimeline / NextStepBanner. Solution: `ConfirmTypeToDeleteDialog` requiring user to type the exact item label ("Phase 2", "Next Step #1") before destructive action. Reusable component in `src/components/dslm/`.
-
-3. **Phase state desync**: pathway view and timeline view rendered different `dslm_curriculum_phases` snapshots after add/delete. Solution: `useCurriculumPhases` dispatches `dslm:phasesUpdated` window event after every mutation; sibling instances refetch.
-
-4. **Future-timeline 500 errors**: `excludeIds` array unbounded → request body too large. Solution: cap at 25 most recent IDs in `useFutureTimeline`. Phase-bound generation falls back to free `next_step` on retry when all phase steps fail validation.
-
-5. **GenerateStepsDialog stale count**: dialog reopened with previous count even when student already had enough. Solution: reset to `recommendedCount = clamp(need - have, 1, 6)` on open.
-
-6. **DSLM sub-nav hidden until top-section click**: confusing first-time UX. Solution: `DSLMTab` renders sub-section buttons for ALL categories simultaneously; active section highlighted via `border-primary` ring.
-
-7. **StickyNav redundant Calendar buttons**: standalone Calendar link duplicated `GCalStatusButton`. Solution: removed standalone; `GCalStatusButton` rewritten as `<Button asChild><a href="/calendar" onClick={modifierAware}>` to support middle-click → new tab natively.
-
-8. **WorksheetForm "Generate Worksheet" CTA bypassed pre-selection**: clicking nav button on non-`/` pages did `navigate('/')` only, losing the selected-student context. Solution: `StickyNav` calls `onGenerateWorksheet()` callback which routes to `/` with the student pre-selected; anchor wrapper preserves middle-click new-tab.
-
-9. **WorksheetForm clipped student labels + locked CTA dead-end**: long labels overflowed; teachers with 0 students saw a non-clickable "Add students first" lock. Solution: shortened to `No student (generic)`, added `truncate`; teachers-with-zero-students see clickable `Add your first student` CTA → `/dashboard?action=add-student` (Dashboard already auto-opens AddStudentDialog from this query — see v6.9.8).
-
-10. **NavStudentSwitcher level placement**: english level on its own line wasted vertical space. Solution: inline pill badge (`text-[10px] uppercase`) right of the name in popover items.
-
-**Invariants v6.9.14**:
-- `effectiveDeadline` fallback in `generate-curriculum-phases` MUST stay (student.deadline → goals min target_date → null). Worksheet engine still UNTOUCHED.
-- `ConfirmTypeToDeleteDialog` required for any new destructive curriculum/step action.
-- `dslm:phasesUpdated` event MUST fire after every mutation in `useCurriculumPhases`.
-- All nav buttons that route to `/calendar`, `/student/:id`, or `/` MUST use the modifier-aware anchor pattern (see `mem/features/navigation/middle-click-anchor-pattern.md`).
-- Locked student selector in WorksheetForm is reserved for ANON users only. Authenticated teachers with zero students get the clickable Add CTA.
-
-**RAG Keywords**: deadline fit goal fallback, curriculum total weeks, type to confirm delete, phases updated event, future timeline 500 cap, generate steps recommended count, dslm always-visible subnav, gcal middle click, worksheet form add first student CTA, generic worksheet label.
-
-## v6.9.15a — Next Steps generator hardening + UX hints
-- `generate-timeline`: dynamic `max_tokens = min(8192, 1800 + 2000 * count)`; AI Gateway errors return 502 with `{status,detail,finish_reason}`; partial output → 200 with `generationContext.warning ∈ {"truncated","partial"}`.
-- `useFutureTimeline`: 502 branch toasts batch-overload guidance; partial-success info toast.
-- `NextStepBanner`: single-row action bar with shortened labels + tooltips; `Remove` is icon-only.
-- `useCurriculumPhases.deletePhase`: shifts `sequence_number -= 1` for phases above deleted seq (no DB migration).
-- `GenerateStepsDialog`: validates stale `defaultTargetPhaseId` against current `phaseOptions`.
-- `WorksheetForm`: new `StudentContextHint` (3 variants) + `useStudentNextStepsCount` hook.
-
-**RAG Keywords**: generate-timeline batch 500, max_tokens dynamic, finish_reason truncated, phase delete renumber sequence_number, GenerateStepsDialog stale phaseId, StudentContextHint no-students no-selection no-next-steps, useStudentNextStepsCount.
-
-## v6.9.15b — generate-timeline schema fix + phase sync hardening
-- `generate-timeline`: removed enums and item bounds from AI tool schema (Gemini "too many states" rejection on count>1). Backend sanitizer remains authoritative. Non-OK responses include `schemaRejected: boolean`.
-- `useFutureTimeline`: 502 toast distinguishes schema rejection from generic gateway failure.
-- `useCurriculumPhases`: `dslm:phasesUpdated` emitted after every mutation; `deletePhase` now refetches and reassigns `sequence_number = idx + 1` deterministically.
-- `PathwayView.onGenerateMore`: validates `phaseId` against current `phaseOptions` to block stale ids from open dialogs.
-- `MacroTimeline`: phase delete uses `ConfirmTypeToDeleteDialog` (`expectedText="Phase {seq}"`); local UI state for the deleted id is cleared post-confirm.
-- `NextStepBanner`: labels restored to `Use this Step` and `Regenerate with comment`.
-- `WorksheetForm`: removed redundant `StudentContextHint variant="no-next-steps"` (`NextStepsPresetBanner` already covers the same case).
-
-**RAG Keywords**: Gemini schema too many states, INVALID_ARGUMENT, schemaRejected, generate-timeline batch 502, dslm:phasesUpdated every mutation, deterministic phase renumber, ConfirmTypeToDeleteDialog phase, NextStepBanner Use this Step, WorksheetForm duplicate hint removal.
-
-## v6.9.15c — generate-timeline plain JSON output + delete UX simplified
-- **Problem**: `generate-timeline` 502 with "AI generator overloaded for batch requests" for count>1, even after schema simplification in v6.9.15b. Root cause: tool calling with nested `additionalProperties` schema was triggering Gemini "too many states" on batch.
-- **Edooqoo Solution**: Mirror the working `generate-curriculum-phases` pattern — plain text JSON output, no tool calling, single-pass batch (preserves cross-step coherence).
-- **Technical Mechanics**:
-  - `generate-timeline/index.ts`: removed `tools` + `tool_choice`; system msg "Return only a valid JSON array. No markdown."; `temperature: 0.6`; `reasoning: { effort: 'low' }`; `max_tokens = Math.min(8192, 2200 + 1500 * count)`. Parser strips code fences, accepts array or `{suggestions:[]}`, regex salvage `/\[[\s\S]*\]/`. Single server-side retry at `temperature: 0.4` with appended `Return EXACTLY N items. JSON array only.` Backend sanitizer (8 exercises, focus map, media family) unchanged. `generationContext.output_mode='plain_json'`, `retry_used: boolean`.
-  - `useFutureTimeline`: removed silent "phase-bound failed → retry as free step" fallback. Added listener on `dslm:suggestionsUpdated` for cross-instance refresh.
-  - `useCurriculumPhases.deletePhase`: after soft-deleting a phase, updates `future_worksheet_suggestions` rows with `phase_id=id` to `{ phase_id: null, suggestion_kind: 'next_step' }` (mirrors DB FK `ON DELETE SET NULL` at app layer). Emits `dslm:suggestionsUpdated`.
-  - New `ConfirmDeleteDialog` (single-click Confirm/Cancel) replaces `ConfirmTypeToDeleteDialog` in `MacroTimeline` (phase delete) and `NextStepBanner` (step delete). Type-to-confirm requirement repealed.
-  - `MacroTimeline`: `Remove` button now icon-only (`Trash2 h-3.5`) with tooltip "Remove phase".
-  - `DslmExplainerBanner`: added `Learn more` → `/features/dslm`.
-  - New reusable hook `useWelcomeTestActions` (`ensure`, `send`, `getStatus`) for any surface that needs to dispatch the Welcome Placement Test.
-- **Roadmap baseline notes** (for AI agents reasoning about generation quality):
-  - No goals: roadmap falls back to `students.main_goal`, `english_level`, `student_skill_metrics`, `student_knowledge_entries`, recent worksheet topics, pacing mode, `main_goal_target_date`.
-  - No Welcome Placement Test: no baseline level confidence / motivation profile; roadmap relies entirely on manual fields + worksheet history.
-
-**RAG Keywords**: generate-timeline plain text JSON, tool calling removed Gemini, single-pass batch coherent next steps, backend sanitizer 8 exercises focus map media family, dslm:suggestionsUpdated event, soft delete phase detach next steps, phase_id null suggestion_kind next_step, ConfirmDeleteDialog single click, type-to-confirm repealed, Remove phase icon only, 1 MINUTE Learn more DSLM, useWelcomeTestActions hook, roadmap without goals fallback, welcome placement test missing baseline.
-
-## v6.9.16 — Per-route JSON-LD, GSC verification, UX polish
-- **Problem A**: `FAQPage` and `HowTo` JSON-LD in `index.html` were served on every SPA route (`/dashboard`, `/pricing`, etc.) — schema mismatch with on-page content, risk of Google manual action.
-  - **Edooqoo Solution**: Move `FAQPage` + `HowTo` to `/how-it-works` only via `react-helmet-async`. Keep `SoftwareApplication`, `Organization`, `WebSite`, `BreadcrumbList` sitewide in `index.html`.
-  - **Technical Mechanics**:
-    - Added `HelmetProvider` in `src/main.tsx` wrapping `<App/>`.
-    - `src/pages/HowItWorks.tsx`: replaced imperative `document.title`/`meta` mutation with `<Helmet>` block containing per-route `<title>`, `<meta description>`, canonical, `og:*`, and two `<script type="application/ld+json">` blocks generated from the existing `steps` and `faqItems` arrays (single source of truth — no schema drift between visible UI and JSON-LD).
-    - `index.html`: removed `FAQPage` and `HowTo` `<script>` blocks; left `WebSite` + `BreadcrumbList` (always-valid sitewide).
-- **Problem B**: Google Search Console connected, property unverified.
-  - **Edooqoo Solution**: META-tag verification flow via Lovable connector gateway.
-  - **Technical Mechanics**:
-    - Connector `google_search_console` linked to project; secret `GOOGLE_SEARCH_CONSOLE_API_KEY` exposed.
-    - Verification token requested via `POST /siteVerification/v1/token` with `verificationMethod=META`. Token content embedded in `index.html` as `<meta name="google-site-verification" content="hTn-czAwta1F2Y8-Jlgs5OqMRCmSon1bIJBlOn_4Xvc" />`.
-    - After republish: `POST /siteVerification/v1/webResource?verificationMethod=META`, then `PUT /webmasters/v3/sites/{encoded-url}`, then `PUT /webmasters/v3/sites/{encoded-url}/sitemaps/{encoded-sitemap-url}` to register `https://edooqoo.com/sitemap.xml`.
-- **Problem C**: `1 MINUTE` DSLM banner `Learn more` opened `/features/dslm` in same tab (lost teacher context).
-  - **Edooqoo Solution**: Open in new tab via native `<a target="_blank" rel="noopener noreferrer">` (preserves middle-click, security, SEO semantics).
-  - **Technical Mechanics**: `src/components/student/DslmExplainerBanner.tsx` — removed `react-router-dom` `Link`, used `<Button asChild><a ... target="_blank" rel="noopener noreferrer">`. `Got it` and `X` still dismiss via `localStorage.dslm_explainer_dismissed_<teacherId>`. `Learn more` intentionally does NOT dismiss.
-- **Problem D**: Stacked toasts (3 visible) blocked sticky nav during rapid mutations.
-  - **Edooqoo Solution**: `visibleToasts=1` in `src/components/ui/sonner.tsx`, `duration=3500`.
-  - **Technical Mechanics**: Single Sonner config change. No API change for callers.
-- **Deferred to next iteration** (require dedicated product decisions): OnboardingHeroCard for empty Dashboard; loading skeletons swap; nav-student-switcher toast feedback; WorksheetForm student badge; DSLM subnav active-pill contrast bump; Undo toast after destructive delete; StudentHub mobile tab scroll mask. All listed in `.lovable/plan.md` v6.9.16.
-
-**RAG Keywords**: react-helmet-async per-route JSON-LD, FAQPage HowTo scope to /how-it-works, HelmetProvider main.tsx, Google Search Console META verification connector gateway, google-site-verification meta tag edooqoo.com, sitemap submit webmasters v3 sites sitemaps, DslmExplainerBanner Learn more new tab target blank rel noopener, sonner visibleToasts 1, single-toast policy, deferred UX backlog v6.9.16.
-
-## v6.9.17 — Per-route SEO metadata
-- **Problem**: Scanner findings: oversized titles/descriptions; missing per-route og:* on /pricing /about /blog /glossary /exercise-types; FAQPage missing on /pricing and /about; GSC unverified; sitemap/robots host mismatch (false positive: project canonical is edooqoo.com, not lovable.app preview).
-- **Edooqoo Solution**: Reusable `<PageSeo>` (react-helmet-async) + centralized `SEO_META` constants. `buildFaqPageLd(faqItems)` on /pricing and /about. Removed static canonical from `index.html` to prevent duplicate canonical. Verified edooqoo.com in GSC and submitted sitemap.
-- **Technical Mechanics**: `src/components/seo/PageSeo.tsx`, `src/constants/seoMeta.ts`. Pages wired: Pricing, About, Blog, Glossary, ExerciseTypes. Previous imperative `document.title` and `document.head.appendChild` patterns removed. GSC calls via connector gateway: `siteVerification/v1/webResource` (META) + `webmasters/v3/sites` PUT + sitemap PUT. Keyword strategy at `docs/seo/keyword-strategy.md` — P0 `esl worksheets` (1,300/mo, KDI 43).
-
-
-- v6.9.18 (2026-05-18): 6 SEO landing pages added (/esl-worksheets, /blog/english-games-for-learners, /blog/esl-games-for-teachers, /blog/teach-english-online-guide, /for-english-tutors, /resources/esl-class-toolkit) targeting priority keywords from Semrush analysis; SeoLandingLayout shared shell; sitemap + footer links updated.
-
-## v6.9.19 — Programmatic SEO Engine (pSEO)
-Problem: Static pages cap SEO ceiling. Competitors win via URL scale.
-Solution: 1,425 dynamic routes from 3 templates + typed matrix.
-Routes: /esl-worksheets/:topic/:level (240) | /worksheets/:exerciseType/:topic (1160) | /english-for/:persona (25).
-Files: src/constants/pseoMatrix.ts, src/components/seo/ProgrammaticSeoLayout.tsx, src/pages/seo/programmatic/{TopicLevelPage,ExerciseTopicPage,PersonaPage}.tsx.
-JSON-LD: BreadcrumbList + FAQPage + LearningResource per page.
-Sitemap: public/sitemap.xml = 1,454 URLs (29 static + 1,425 pSEO).
-Sanctity: NO worksheet prompt change. NO new tables. NO new edge functions.
-RAG: programmatic SEO, pSEO, dynamic landing pages, ProgrammaticSeoLayout, pseoMatrix, AEO, LLMO, BreadcrumbList, LearningResource, signup query preset, edooqoo SEO moat.
-
-## v6.9.20 — Free Tools (link magnets, Sprint 4 of Plan v6.9.19)
-Problem: SEO landing pages alone do not earn backlinks; embeddable utilities do.
-Edooqoo Solution: 3 zero-backend browser tools + /tools hub, each indexable and shareable. No login, no Supabase writes, no AI Gateway calls — fully client-side so prerender + AEO crawlers see the full UI and the result logic.
-Technical Mechanics:
-- Routes (all lazy): /tools (ToolsIndex), /tools/cefr-level-test (CefrLevelTest), /tools/lesson-plan-generator (LessonPlanGenerator), /tools/vocab-cefr-checker (VocabCefrChecker).
-- Files: src/pages/tools/{ToolsIndex,CefrLevelTest,LessonPlanGenerator,VocabCefrChecker}.tsx; src/data/cefrLevelTestQuestions.ts (25 Qs + scoreCefr); src/data/cefrWordlist.ts (~480 EVP lemmas A1–C1 + heuristic fallback + analyzeVocab).
-- JSON-LD per tool via PageSeo: ItemList (hub), Quiz (CEFR test), HowTo (lesson plan), SoftwareApplication (vocab checker), FAQPage on every tool.
-- CEFR test scoring thresholds (25 Qs, 4/4/5/5/4/3 distribution): pct≥0.92→C2, 0.80→C1, 0.66→B2, 0.50→B1, 0.32→A2, else A1.
-- Lesson Plan Generator builds 6 andragogical stages (warm-up, lead-in, presentation, controlled practice, freer production, wrap-up) with minute split scaled to duration; offers Copy text + Download HTML (Blob) — no network.
-- Vocab Checker tokenizes /[a-z']+/g, looks up lowercase lemma in Map, falls back to length/suffix heuristic; estimated overall level = highest CEFR reached by ≥10% of tokens.
-- Sitemap: 4 new URLs in public/sitemap.xml. Footer: 4 new links in Resources column. CTAs route to /signup (free plan).
-Sanctity: NO worksheet prompt change. NO Supabase tables. NO edge functions. NO AI Gateway calls. Pure frontend.
-RAG: free tools, CEFR level test, ESL lesson plan generator, vocab CEFR checker, link magnets, embeddable widgets, EVP wordlist, andragogical stages, Quiz JSON-LD, HowTo JSON-LD, SoftwareApplication JSON-LD, ItemList JSON-LD, browser-only tools, Sprint 4 Plan v6.9.19.
-
-## v6.9.20 Sprint 3 + Hotfix
-- /gallery + /gallery/:slug — public worksheet gallery. RLS: worksheets.is_public=true readable by anyone.
-- Edge fns: publish-worksheet (validates ≥6 ex, no PII, generates slug), unpublish-worksheet (soft removal), regenerate-gallery-sitemap.
-- DB: worksheets gains is_public, public_slug UNIQUE, published_at, public_view_count, public_topic, public_level, public_exercise_types[]. RPC generate_public_slug.
-- PublishWorksheetButton in WorksheetToolbar (teachers only).
-- HOTFIX: generate-audio rewritten as 2-step (gpt-4o-mini transcript → gpt-4o-mini-tts speech, tts-1 fallback). Transcript === TTS input → identical to audio.
-- HOTFIX: generateWorksheet emits repair-phase progress every 15s during AI-REPAIR, waitUntil for failure notify fetches. Adds parse_recovered early warning.
-- HOTFIX: notify-generation-failure + submit-bug-report emails include /admin/error-logs CTA button.
-Sanctity: worksheet prompt UNTOUCHED. Existing teacher RLS UNTOUCHED.
-RAG: public gallery, is_public, public_slug, LearningResource JSON-LD, 2-step audio TTS, gpt-4o-mini-tts, EdgeRuntime.waitUntil, repair keepalive, parse_recovered, admin error logs email link, Sprint 3 Plan v6.9.20.
-
-## v6.9.21 Updates
-- Gallery renderer: `GalleryExerciseRenderer.tsx` renders all 29 exercise types read-only; CTA = "1-Minute Prep".
-- Legacy .html links: `legacyLinkMap.ts` + `resolveLegacyHref.ts` — 3 buckets (mapped / live slug / Coming Soon). Footer "Compare" removed.
-- Multi-provider model audit: `scripts/audit-llm-models.ts` + `_shared/modelFailureLogger.ts` + `get_active_model_issues()` RPC + StatusPage banner.
-- Alerts go to j4n.brz0@gmail.com + edooqoo@gmail.com.
-- `GeneratingModal` uses createPortal + z-[100] to escape footer backdrop-blur stacking.
+## Agent Rules
+- Do not modify the worksheet generation engine prompt unless explicitly requested.
+- Do not claim a public worksheet-generation API exists.
+- Treat /dashboard, /worksheet/, /worksheets, /homework/, /flashcards/, /my, /calendar, /admin, and auth routes as private application surfaces.
+- Treat /esl-worksheets/:topic/:level, /worksheets/:exerciseType/:topic, /english-for/:persona, /tools/*, /gallery, and static SEO pages as public discovery surfaces.
+- User-facing application copy is English. Planning conversation with the owner may be Polish.

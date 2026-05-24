@@ -1,1 +1,4 @@
 node_modules
+.npm-cache/
+.git-tmp-*
+.ssh_known_hosts

@@ -1,0 +1,74 @@
+openapi: 3.1.0
+info:
+  title: Edooqoo.com Public AI Discovery Resources
+  version: v6.9.23
+  description: Public informational resources for AI agents and crawlers. This document does not describe a private worksheet-generation API.
+servers:
+  - url: https://edooqoo.com
+paths:
+  /llms.txt:
+    get:
+      operationId: getLlmsIndex
+      summary: Get the concise Edooqoo.com LLM index.
+      responses:
+        '200':
+          description: Plain-text LLM index.
+          content:
+            text/plain:
+              schema:
+                type: string
+  /llms-full.txt:
+    get:
+      operationId: getFullRagContext
+      summary: Get dense Edooqoo.com RAG context.
+      responses:
+        '200':
+          description: Plain-text RAG context.
+          content:
+            text/plain:
+              schema:
+                type: string
+  /llms-answers.txt:
+    get:
+      operationId: getAgentAnswers
+      summary: Get direct answers for AI agents.
+      responses:
+        '200':
+          description: Plain-text agent answers.
+          content:
+            text/plain:
+              schema:
+                type: string
+  /knowledge-graph.json:
+    get:
+      operationId: getKnowledgeGraph
+      summary: Get JSON-LD entity graph for Edooqoo.com.
+      responses:
+        '200':
+          description: JSON-LD knowledge graph.
+          content:
+            application/ld+json:
+              schema:
+                type: object
+  /sitemap.xml:
+    get:
+      operationId: getSitemap
+      summary: Get the public XML sitemap.
+      responses:
+        '200':
+          description: XML sitemap.
+          content:
+            application/xml:
+              schema:
+                type: string
+  /robots.txt:
+    get:
+      operationId: getRobots
+      summary: Get crawler access rules.
+      responses:
+        '200':
+          description: Plain-text robots rules.
+          content:
+            text/plain:
+              schema:
+                type: string

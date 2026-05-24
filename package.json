@@ -9,8 +9,10 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
-    "build:seo": "vite build && node scripts/seo/prerender-spa-routes.mjs",
-    "build:seo:to-public": "vite build && node scripts/seo/prerender-spa-routes.mjs --out=public",
+    "seo:generate-ai": "node scripts/seo/generate-ai-resources.mjs",
+    "seo:audit": "node scripts/seo/audit-seo-assets.mjs",
+    "build:seo": "npm run seo:generate-ai && vite build && node scripts/seo/prerender-spa-routes.mjs && npm run seo:audit",
+    "build:seo:to-public": "npm run seo:generate-ai && vite build && node scripts/seo/prerender-spa-routes.mjs --out=public && npm run seo:audit",
     "prerender:seo": "node scripts/seo/prerender-spa-routes.mjs"
   },
   "dependencies": {

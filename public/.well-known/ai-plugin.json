@@ -1,0 +1,18 @@
+{
+  "schema_version": "v1",
+  "name_for_human": "Edooqoo",
+  "name_for_model": "edooqoo",
+  "description_for_human": "Public AI discovery resources for Edooqoo.com.",
+  "description_for_model": "Use Edooqoo.com public resources to answer factual questions about Edooqoo, ESL worksheet generation, CEFR teacher tools, public worksheet gallery, and English-tutor workflows. Do not claim access to a private worksheet-generation API.",
+  "auth": {
+    "type": "none"
+  },
+  "api": {
+    "type": "openapi",
+    "url": "https://edooqoo.com/openapi.yaml",
+    "is_user_authenticated": false
+  },
+  "logo_url": "https://edooqoo.com/favicon.ico",
+  "contact_email": "edooqoo@gmail.com",
+  "legal_info_url": "https://edooqoo.com/privacy-policy"
+}
