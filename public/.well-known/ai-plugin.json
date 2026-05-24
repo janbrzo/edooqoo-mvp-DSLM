@@ -3,7 +3,7 @@
   "name_for_human": "Edooqoo",
   "name_for_model": "edooqoo",
   "description_for_human": "Public AI discovery resources for Edooqoo.com.",
-  "description_for_model": "Use Edooqoo.com public resources to answer factual questions about Edooqoo, ESL worksheet generation, CEFR teacher tools, public worksheet gallery, and English-tutor workflows. Do not claim access to a private worksheet-generation API.",
+  "description_for_model": "Use Edooqoo.com public resources to answer factual questions about Edooqoo, ESL worksheet generation, CEFR teacher tools, public worksheet gallery, English-tutor workflows, and public citation pages. Do not claim access to a private worksheet-generation API.",
   "auth": {
     "type": "none"
   },

@@ -1,5 +1,5 @@
-import { readdirSync, readFileSync, writeFileSync, statSync } from 'fs';
-import { join } from 'path';
+import { readdirSync, readFileSync, writeFileSync } from 'fs';
+import { basename, join } from 'path';
 
 const BLOG_DIR = 'public/blog';
 const TOP_DIR = 'public';
@@ -9,7 +9,7 @@ function parseHtml(filepath, slugBase) {
   const title = (html.match(/<title>([^<]+)<\/title>/i)?.[1] || '').replace(/\s+—\s+Edooqoo.*$/i, '').trim();
   const desc = (html.match(/<meta\s+name="description"\s+content="([^"]+)"/i)?.[1] || '').trim();
   const date = (html.match(/"datePublished"\s*:\s*"([^"]+)"/)?.[1] || '').trim();
-  const slug = filepath.split('/').pop();
+  const slug = basename(filepath);
   return { title, description: desc, url: slugBase + '/' + slug, date };
 }
 
@@ -52,7 +52,7 @@ const landings = topFiles.map(fp => {
   const html = readFileSync(fp, 'utf8');
   const title = (html.match(/<title>([^<]+)<\/title>/i)?.[1] || '').replace(/\s+\|\s+Edooqoo.*$/i, '').replace(/\s+—\s+Edooqoo.*$/i, '').trim();
   const desc = (html.match(/<meta\s+name="description"\s+content="([^"]+)"/i)?.[1] || '').trim();
-  const slug = fp.split('/').pop();
+  const slug = basename(fp);
   return { title, description: desc, url: '/' + slug };
 }).filter(p => p.title);
 
@@ -89,8 +89,9 @@ console.log('Wrote src/data/blogIndex.ts');
 const sitemapPath = 'public/sitemap.xml';
 let sitemap = readFileSync(sitemapPath, 'utf8');
 
-// Strip any prior html entries (idempotent)
-sitemap = sitemap.replace(/  <url><loc>https:\/\/edooqoo\.com\/[^<]*\.html<\/loc>[^<]*<\/url>\n/g, '');
+// Strip any prior html entries (idempotent). This catches both old single-line
+// entries and accidental Windows-path entries produced by older script runs.
+sitemap = sitemap.replace(/\s*<url>\s*<loc>https:\/\/edooqoo\.com\/[^<]*\.html<\/loc>[\s\S]*?<\/url>\s*/g, '\n');
 
 const htmlEntries = [
   ...posts.map(p => `  <url><loc>https://edooqoo.com${p.url}</loc>${p.date ? `<lastmod>${p.date}</lastmod>` : ''}<changefreq>monthly</changefreq><priority>0.7</priority></url>`),
