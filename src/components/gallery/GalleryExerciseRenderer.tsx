@@ -68,12 +68,12 @@ const GalleryExerciseRenderer: React.FC<Props> = ({ exercise, index }) => {
           <>
             {wordBank.length > 0 && (
               <div className="mb-3 flex flex-wrap gap-1.5">
-                {wordBank.map((w: any, i: number) => <Label key={i}>{String(w)}</Label>)}
+                {wordBank.map((w: any, i: number) => <Label key={i}>{toText(w)}</Label>)}
               </div>
             )}
             <ol className="list-decimal space-y-1 pl-5 text-sm">
               {sentences.map((s: any, i: number) => (
-                <li key={i}>{typeof s === "string" ? s : (s.text || s.sentence || s.question || JSON.stringify(s))}</li>
+                <li key={i}>{toText(s)}</li>
               ))}
             </ol>
           </>
@@ -85,10 +85,10 @@ const GalleryExerciseRenderer: React.FC<Props> = ({ exercise, index }) => {
           <ol className="list-decimal space-y-3 pl-5 text-sm">
             {qs.map((q: any, i: number) => (
               <li key={i}>
-                <div>{q.question || q.text || q.prompt}</div>
+                <div>{toText(q.question || q.text || q.prompt || q)}</div>
                 {Array.isArray(q.options) && (
                   <ul className="mt-1 list-[upper-alpha] space-y-0.5 pl-6 text-muted-foreground">
-                    {q.options.map((o: any, oi: number) => <li key={oi}>{typeof o === "string" ? o : (o.text || o.label || JSON.stringify(o))}</li>)}
+                    {q.options.map((o: any, oi: number) => <li key={oi}>{toText(o)}</li>)}
                   </ul>
                 )}
               </li>
@@ -102,7 +102,7 @@ const GalleryExerciseRenderer: React.FC<Props> = ({ exercise, index }) => {
           <ol className="list-decimal space-y-1 pl-5 text-sm">
             {stmts.map((s: any, i: number) => (
               <li key={i} className="flex items-start gap-2">
-                <span className="flex-1">{typeof s === "string" ? s : (s.text || s.statement || s.question)}</span>
+                <span className="flex-1">{toText(s)}</span>
                 <Label>True / False</Label>
               </li>
             ))}
@@ -117,8 +117,8 @@ const GalleryExerciseRenderer: React.FC<Props> = ({ exercise, index }) => {
             <tbody>
               {pairs.map((p: any, i: number) => (
                 <tr key={i} className="border-b border-border/40">
-                  <td className="py-1.5 pr-3 font-medium">{p.left || p.first || p.term || p.a}</td>
-                  <td className="py-1.5 text-muted-foreground">{p.right || p.second || p.definition || p.b}</td>
+                  <td className="py-1.5 pr-3 font-medium">{toText(p.left ?? p.first ?? p.term ?? p.a ?? p)}</td>
+                  <td className="py-1.5 text-muted-foreground">{toText(p.right ?? p.second ?? p.definition ?? p.b)}</td>
                 </tr>
               ))}
             </tbody>
@@ -131,8 +131,8 @@ const GalleryExerciseRenderer: React.FC<Props> = ({ exercise, index }) => {
           <div className="space-y-1 text-sm">
             {lines.map((l: any, i: number) => (
               <p key={i}>
-                <strong className="text-foreground">{l.speaker || l.name || `Speaker ${i + 1}`}:</strong>{" "}
-                <span>{l.line || l.text || (typeof l === "string" ? l : "")}</span>
+                <strong className="text-foreground">{toText(l?.speaker || l?.name || `Speaker ${i + 1}`)}:</strong>{" "}
+                <span>{toText(l?.line ?? l?.text ?? l)}</span>
               </p>
             ))}
           </div>
@@ -157,8 +157,8 @@ const GalleryExerciseRenderer: React.FC<Props> = ({ exercise, index }) => {
             <tbody>
               {items.map((it: any, i: number) => (
                 <tr key={i} className="border-b border-border/40">
-                  <td className="py-1.5 pr-3">{it.incorrect || it.original || it.text || it.sentence}</td>
-                  <td className="py-1.5 text-muted-foreground">{it.correction || it.correct || it.answer || ""}</td>
+                  <td className="py-1.5 pr-3">{toText(it?.incorrect ?? it?.original ?? it?.text ?? it?.sentence ?? it)}</td>
+                  <td className="py-1.5 text-muted-foreground">{toText(it?.correction ?? it?.correct ?? it?.answer ?? "")}</td>
                 </tr>
               ))}
             </tbody>
@@ -172,7 +172,7 @@ const GalleryExerciseRenderer: React.FC<Props> = ({ exercise, index }) => {
             {groups.map((g: any, i: number) => (
               <li key={i}>
                 <div className="flex flex-wrap gap-1.5">
-                  {(g.words || g.options || g.items || []).map((w: any, wi: number) => <Label key={wi}>{String(w)}</Label>)}
+                  {(g.words || g.options || g.items || []).map((w: any, wi: number) => <Label key={wi}>{toText(w)}</Label>)}
                 </div>
               </li>
             ))}
@@ -186,7 +186,7 @@ const GalleryExerciseRenderer: React.FC<Props> = ({ exercise, index }) => {
             {items.map((it: any, i: number) => (
               <li key={i} className="flex flex-wrap gap-1.5">
                 {(it.words || it.shuffled || (typeof it === "string" ? it.split(/\s+/) : [])).map((w: string, wi: number) => (
-                  <Label key={wi}>{w}</Label>
+                  <Label key={wi}>{toText(w)}</Label>
                 ))}
               </li>
             ))}
@@ -205,8 +205,8 @@ const GalleryExerciseRenderer: React.FC<Props> = ({ exercise, index }) => {
             <tbody>
               {items.map((it: any, i: number) => (
                 <tr key={i} className="border-b border-border/40">
-                  <td className="py-1.5 pr-3 font-medium">{it.prompt || it.word || it.input || it.text || it.question}</td>
-                  <td className="py-1.5 text-muted-foreground">{it.answer || it.target || it.solution || ""}</td>
+                  <td className="py-1.5 pr-3 font-medium">{toText(it?.prompt ?? it?.word ?? it?.input ?? it?.text ?? it?.question ?? it)}</td>
+                  <td className="py-1.5 text-muted-foreground">{toText(it?.answer ?? it?.target ?? it?.solution ?? "")}</td>
                 </tr>
               ))}
             </tbody>
@@ -223,13 +223,13 @@ const GalleryExerciseRenderer: React.FC<Props> = ({ exercise, index }) => {
           <>
             {items.length > 0 && (
               <div className="mb-3 flex flex-wrap gap-1.5">
-                {items.map((w: any, i: number) => <Label key={i}>{String(w)}</Label>)}
+                {items.map((w: any, i: number) => <Label key={i}>{toText(w)}</Label>)}
               </div>
             )}
             <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
               {(Array.isArray(categories) ? categories : Object.keys(categories || {})).map((c: any, i: number) => (
                 <div key={i} className="rounded border border-border/60 p-2 text-sm">
-                  <div className="font-semibold">{typeof c === "string" ? c : (c.name || c.label || `Category ${i + 1}`)}</div>
+                  <div className="font-semibold">{toText(typeof c === "string" ? c : (c?.name ?? c?.label ?? `Category ${i + 1}`))}</div>
                 </div>
               ))}
             </div>
