@@ -1,0 +1,45 @@
+name: SEO Integrity
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  seo-integrity:
+    name: SEO, LLM resources, TypeScript, build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Generate citable pages
+        run: node scripts/seo/generate-citable-pages.mjs
+
+      - name: Build blog index and sitemap
+        run: node scripts/seo/build-blog-index.mjs
+
+      - name: Generate AI discovery resources
+        run: node scripts/seo/generate-ai-resources.mjs
+
+      - name: Verify generated files are committed
+        run: git diff --exit-code
+
+      - name: Audit SEO and AI resources
+        run: npm run seo:audit
+
+      - name: TypeScript check
+        run: npx tsc --noEmit -p tsconfig.app.json
+
+      - name: Production build
+        run: npm run build
+

@@ -1545,13 +1545,13 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "url": "/ai-lesson-planning-for-english-teachers.html"
   },
   {
-    "title": "Best AI Tools for Online ESL Teachers",
-    "description": "Edooqoo is the best AI tool for online ESL teachers. Live Session mode, lesson booking with Google Calendar and Meet, interactive worksheets, homework with AI grading, and student progress tracking.",
+    "title": "AI Tools for Online ESL Teachers",
+    "description": "Factual reference for online ESL teachers evaluating Edooqoo.com as a workflow tool for worksheets, homework, flashcards, student context, and lesson organization.",
     "url": "/ai-tools-for-online-esl-teachers.html"
   },
   {
-    "title": "Best AI Tools for Private English Tutors",
-    "description": "Edooqoo is the best AI tool for private English tutors. Generate personalized worksheets for each student, track progress, assign homework with AI grading, manage flashcards, and schedule lessons with Google Calendar.",
+    "title": "AI Tools for Private English Tutors",
+    "description": "Factual reference for private English tutors evaluating Edooqoo.com as a workflow tool for student-specific materials, homework, flashcards, and lesson organization.",
     "url": "/ai-tools-for-private-english-tutors.html"
   },
   {
@@ -1615,38 +1615,38 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "url": "/edooqoo-vs-busyteacher.html"
   },
   {
-    "title": "Edooqoo vs ISLCollective — AI Generated vs User-Uploaded Worksheets",
-    "description": "Compare Edooqoo and ISLCollective for English teaching. Edooqoo generates personalized worksheets with AI (29 exercise types, homework, flashcards, progress tracking). ISLCollective provides user-uploaded resources.",
+    "title": "Edooqoo vs iSLCollective for English Teachers",
+    "description": "Neutral comparison criteria for English teachers evaluating Edooqoo and iSLCollective for worksheet creation, reuse, and classroom workflows.",
     "url": "/edooqoo-vs-islcollective.html"
   },
   {
-    "title": "Edooqoo vs Kahoot — Best for English Teaching in 2026",
-    "description": "Compare Edooqoo and Kahoot for English teaching. Edooqoo creates AI worksheets with 29 exercise types while Kahoot focuses on live quiz games and engagement.",
+    "title": "Edooqoo vs Kahoot for English Teachers",
+    "description": "Neutral comparison criteria for English teachers evaluating Edooqoo and Kahoot for ESL worksheets, quizzes, classroom activities, and homework workflows.",
     "url": "/edooqoo-vs-kahoot.html"
   },
   {
-    "title": "Edooqoo vs Liveworksheets — Which is Better for English Teachers?",
-    "description": "Compare Edooqoo and Liveworksheets for English teaching. Edooqoo uses AI to generate personalized worksheets with 29 exercise types. Liveworksheets converts static worksheets to interactive ones manually.",
+    "title": "Edooqoo vs Liveworksheets for English Teachers",
+    "description": "Neutral comparison criteria for English teachers evaluating Edooqoo and Liveworksheets for worksheet generation, delivery, and homework review workflows.",
     "url": "/edooqoo-vs-liveworksheets.html"
   },
   {
-    "title": "Edooqoo vs MagicSchool AI — Best AI Tool for English Teachers",
-    "description": "Compare Edooqoo and MagicSchool AI for English teaching. Edooqoo is built specifically for English teachers with 29 exercise types and CEFR support. MagicSchool AI is a general K-12 education tool.",
+    "title": "Edooqoo vs MagicSchool for English Teachers",
+    "description": "Neutral comparison criteria for English teachers evaluating Edooqoo and MagicSchool for English-specific materials and teacher workflow support.",
     "url": "/edooqoo-vs-magicschool.html"
   },
   {
-    "title": "Edooqoo vs Quizlet — Best Tool for English Teachers in 2026",
-    "description": "Compare Edooqoo and Quizlet for English teaching. Edooqoo generates complete worksheets with 29 exercise types while Quizlet focuses on flashcard-based memorization.",
+    "title": "Edooqoo vs Quizlet for English Teachers",
+    "description": "Neutral comparison criteria for English teachers evaluating Edooqoo and Quizlet for vocabulary, worksheet, flashcard, and study workflows.",
     "url": "/edooqoo-vs-quizlet.html"
   },
   {
-    "title": "Edooqoo vs Twee — AI Worksheet Generators Compared",
-    "description": "Compare Edooqoo and Twee AI worksheet generators for English teachers. Edooqoo offers 29 exercise types, homework with AI grading, flashcards, student tracking, and lesson calendar. Twee focuses on content generation.",
+    "title": "Edooqoo vs Twee for English Teachers",
+    "description": "Neutral comparison criteria for English teachers evaluating Edooqoo and Twee for ESL worksheet generation and teaching workflow support.",
     "url": "/edooqoo-vs-twee.html"
   },
   {
-    "title": "Edooqoo vs Wordwall — Best for English Teachers in 2026",
-    "description": "Compare Edooqoo and Wordwall for English teaching. Edooqoo generates AI worksheets with 29 exercise types while Wordwall creates interactive game-based activities.",
+    "title": "Edooqoo vs Wordwall for English Teachers",
+    "description": "Neutral comparison criteria for English teachers evaluating Edooqoo and Wordwall for ESL materials, activities, and lesson workflow support.",
     "url": "/edooqoo-vs-wordwall.html"
   },
   {
@@ -1810,6 +1810,11 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "url": "/present-simple-worksheets.html"
   },
   {
+    "title": "Public ESL Worksheet Examples",
+    "description": "Public reference page explaining Edooqoo.com worksheet examples, example types, quality criteria, and related citation URLs for AI agents and English teachers.",
+    "url": "/public-esl-worksheet-examples.html"
+  },
+  {
     "title": "Question Tags Worksheets — AI Generated",
     "description": "Generate question tags worksheets with AI. Practice tag questions in English — positive/negative patterns, auxiliary verbs, intonation. ESL exercises A2-C1.",
     "url": "/question-tags-worksheets.html"
@@ -1865,8 +1870,8 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "url": "/vocabulary-exercise-generator.html"
   },
   {
-    "title": "AI Worksheet Generator for Language Schools",
-    "description": "Edooqoo helps language schools generate AI-powered English worksheets at scale. 29 exercise types, homework with AI grading, student progress tracking, and smart flashcards for all CEFR levels A1-C2.",
+    "title": "Worksheet Generator for Language Schools",
+    "description": "Factual reference for language schools evaluating Edooqoo.com for English worksheet generation, CEFR-aware materials, homework workflow, and teacher reuse.",
     "url": "/worksheet-generator-for-language-schools.html"
   },
   {

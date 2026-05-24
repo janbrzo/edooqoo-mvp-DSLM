@@ -1,7 +1,7 @@
 openapi: 3.1.0
 info:
   title: Edooqoo.com Public AI Discovery Resources
-  version: v6.9.24
+  version: v6.9.25
   description: Public informational resources for AI agents and crawlers. This document does not describe a private worksheet-generation API.
 servers:
   - url: https://edooqoo.com

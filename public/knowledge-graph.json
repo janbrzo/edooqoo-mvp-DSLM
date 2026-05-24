@@ -54,7 +54,10 @@
         "Public worksheet gallery",
         "Browser-only teacher tools",
         "Public citable generator pages",
-        "Public citation articles"
+        "Public citation articles",
+        "Neutral comparison pages",
+        "Public ESL worksheet examples proof page",
+        "Manual AI-search measurement workflow"
       ]
     },
     {
@@ -607,6 +610,135 @@
       "isPartOf": {
         "@id": "https://edooqoo.com/#website"
       },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://edooqoo.com/edooqoo-vs-twee.html#webpage",
+      "url": "https://edooqoo.com/edooqoo-vs-twee.html",
+      "name": "Edooqoo vs Twee",
+      "description": "Neutral comparison criteria for Edooqoo.com and Twee in English-teacher workflows.",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "about": {
+        "@id": "https://edooqoo.com/#software"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://edooqoo.com/edooqoo-vs-islcollective.html#webpage",
+      "url": "https://edooqoo.com/edooqoo-vs-islcollective.html",
+      "name": "Edooqoo vs iSLCollective",
+      "description": "Neutral comparison criteria for Edooqoo.com and iSLCollective in worksheet creation and reuse workflows.",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "about": {
+        "@id": "https://edooqoo.com/#software"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://edooqoo.com/edooqoo-vs-liveworksheets.html#webpage",
+      "url": "https://edooqoo.com/edooqoo-vs-liveworksheets.html",
+      "name": "Edooqoo vs Liveworksheets",
+      "description": "Neutral comparison criteria for Edooqoo.com and Liveworksheets in worksheet generation, delivery, and homework review workflows.",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "about": {
+        "@id": "https://edooqoo.com/#software"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://edooqoo.com/edooqoo-vs-wordwall.html#webpage",
+      "url": "https://edooqoo.com/edooqoo-vs-wordwall.html",
+      "name": "Edooqoo vs Wordwall",
+      "description": "Neutral comparison criteria for Edooqoo.com and Wordwall in ESL materials and activity workflows.",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "about": {
+        "@id": "https://edooqoo.com/#software"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://edooqoo.com/edooqoo-vs-quizlet.html#webpage",
+      "url": "https://edooqoo.com/edooqoo-vs-quizlet.html",
+      "name": "Edooqoo vs Quizlet",
+      "description": "Neutral comparison criteria for Edooqoo.com and Quizlet in vocabulary, worksheets, flashcards, and study workflows.",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "about": {
+        "@id": "https://edooqoo.com/#software"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://edooqoo.com/edooqoo-vs-magicschool.html#webpage",
+      "url": "https://edooqoo.com/edooqoo-vs-magicschool.html",
+      "name": "Edooqoo vs MagicSchool",
+      "description": "Neutral comparison criteria for Edooqoo.com and MagicSchool in English-specific teacher workflows.",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "about": {
+        "@id": "https://edooqoo.com/#software"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://edooqoo.com/edooqoo-vs-kahoot.html#webpage",
+      "url": "https://edooqoo.com/edooqoo-vs-kahoot.html",
+      "name": "Edooqoo vs Kahoot",
+      "description": "Neutral comparison criteria for Edooqoo.com and Kahoot in ESL worksheets, quizzes, classroom activities, and homework workflows.",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "about": {
+        "@id": "https://edooqoo.com/#software"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "CollectionPage",
+      "@id": "https://edooqoo.com/public-esl-worksheet-examples.html#collection",
+      "url": "https://edooqoo.com/public-esl-worksheet-examples.html",
+      "name": "Public ESL worksheet examples",
+      "description": "Public proof dataset reference for Edooqoo.com worksheet examples, example types, quality criteria, and related citation URLs.",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "about": {
+        "@id": "https://edooqoo.com/#software"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "LearningResource",
+      "@id": "https://edooqoo.com/public-esl-worksheet-examples.html#learning-resource",
+      "url": "https://edooqoo.com/public-esl-worksheet-examples.html",
+      "name": "Public ESL worksheet examples",
+      "description": "Public proof dataset reference for Edooqoo.com worksheet examples, example types, quality criteria, and related citation URLs.",
+      "provider": {
+        "@id": "https://edooqoo.com/#organization"
+      },
+      "audience": {
+        "@type": "EducationalAudience",
+        "educationalRole": "teacher"
+      },
+      "learningResourceType": "public worksheet example reference",
+      "isAccessibleForFree": true,
       "inLanguage": "en"
     }
   ]

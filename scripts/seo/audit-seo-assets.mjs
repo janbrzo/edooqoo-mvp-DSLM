@@ -55,6 +55,37 @@ const REQUIRED_CITATION_ARTICLES = [
   '/blog/public-esl-worksheet-gallery-quality-standards.html',
 ];
 
+const REQUIRED_COMPARISON_PAGES = [
+  '/edooqoo-vs-twee.html',
+  '/edooqoo-vs-islcollective.html',
+  '/edooqoo-vs-liveworksheets.html',
+  '/edooqoo-vs-wordwall.html',
+  '/edooqoo-vs-quizlet.html',
+  '/edooqoo-vs-magicschool.html',
+  '/edooqoo-vs-kahoot.html',
+];
+
+const REQUIRED_PROOF_PAGES = [
+  '/public-esl-worksheet-examples.html',
+];
+
+const CLAIM_INTEGRITY_PAGES = [
+  '/ai-tools-for-online-esl-teachers.html',
+  '/ai-tools-for-private-english-tutors.html',
+  '/worksheet-generator-for-language-schools.html',
+  ...REQUIRED_COMPARISON_PAGES,
+  '/best-ai-tools-for-esl-teachers.html',
+];
+
+const UNSUPPORTED_CLAIM_PATTERNS = [
+  [/Edooqoo\s+is\s+the\s+best/i, 'unsupported "Edooqoo is the best" claim'],
+  [/Best AI Tool for English Teachers/i, 'unsupported title-style best-tool claim'],
+  [/Which is Better for English Teachers/i, 'unsupported better-than comparison claim'],
+  [/best AI tool(?!s for ESL teachers)/i, 'unsupported singular best-tool claim'],
+  [/saves hours/i, 'unsupported time-savings claim'],
+  [/in under 60 seconds/i, 'unsupported speed claim'],
+];
+
 function fail(message) {
   console.error(`[seo:audit] FAIL ${message}`);
   process.exitCode = 1;
@@ -150,6 +181,21 @@ function auditKnowledgeGraph() {
       if (!ids.has(id)) fail(`knowledge-graph.json missing article node ${id}`);
       else pass(`knowledge-graph.json contains article node ${route}`);
     }
+
+    for (const route of REQUIRED_COMPARISON_PAGES) {
+      const id = `${BASE_URL}${route}#webpage`;
+      if (!ids.has(id)) fail(`knowledge-graph.json missing comparison page node ${id}`);
+      else pass(`knowledge-graph.json contains comparison page node ${route}`);
+    }
+
+    for (const route of REQUIRED_PROOF_PAGES) {
+      const collectionId = `${BASE_URL}${route}#collection`;
+      const resourceId = `${BASE_URL}${route}#learning-resource`;
+      if (!ids.has(collectionId)) fail(`knowledge-graph.json missing proof collection node ${collectionId}`);
+      else pass(`knowledge-graph.json contains proof collection node ${route}`);
+      if (!ids.has(resourceId)) fail(`knowledge-graph.json missing proof learning-resource node ${resourceId}`);
+      else pass(`knowledge-graph.json contains proof learning-resource node ${route}`);
+    }
   } catch (err) {
     fail(`knowledge-graph.json is invalid JSON: ${err.message}`);
   }
@@ -234,6 +280,48 @@ function auditCitablePages() {
     if (count !== 1) fail(`sitemap.xml must contain ${url} exactly once, found ${count}`);
     else pass(`sitemap.xml contains ${route} exactly once`);
   }
+
+  for (const route of REQUIRED_COMPARISON_PAGES) {
+    auditStaticCitationPage(route, ['WebPage', 'FAQPage', 'BreadcrumbList']);
+    for (const heading of ['Comparison Criteria', 'When to cite this page']) {
+      const html = readPublic(route);
+      if (!html.includes(`>${heading}<`)) fail(`public${route} missing ${heading} section`);
+      else pass(`public${route} contains ${heading}`);
+    }
+    const url = `${BASE_URL}${route}`;
+    const count = countUrl(sitemapUrls, url);
+    if (count !== 1) fail(`sitemap.xml must contain ${url} exactly once, found ${count}`);
+    else pass(`sitemap.xml contains ${route} exactly once`);
+  }
+
+  for (const route of REQUIRED_PROOF_PAGES) {
+    auditStaticCitationPage(route, ['CollectionPage', 'LearningResource', 'BreadcrumbList']);
+    for (const heading of ['Example Types', 'Quality Criteria', 'Related Citation URLs']) {
+      const html = readPublic(route);
+      if (!html.includes(`>${heading}<`)) fail(`public${route} missing ${heading} section`);
+      else pass(`public${route} contains ${heading}`);
+    }
+    const url = `${BASE_URL}${route}`;
+    const count = countUrl(sitemapUrls, url);
+    if (count !== 1) fail(`sitemap.xml must contain ${url} exactly once, found ${count}`);
+    else pass(`sitemap.xml contains ${route} exactly once`);
+  }
+}
+
+function auditPublicClaimIntegrity() {
+  for (const route of CLAIM_INTEGRITY_PAGES) {
+    const file = publicPath(route);
+    if (!fs.existsSync(file)) {
+      fail(`Claim-integrity page missing public${route}`);
+      continue;
+    }
+
+    const html = readPublic(route);
+    for (const [pattern, label] of UNSUPPORTED_CLAIM_PATTERNS) {
+      if (pattern.test(html)) fail(`public${route} contains ${label}`);
+    }
+    pass(`public${route} passes public claim-integrity scan`);
+  }
 }
 
 function auditPrerenderManifest() {
@@ -274,6 +362,7 @@ auditDeclaredAiResources();
 auditKnowledgeGraph();
 auditRobotsAndSitemap();
 auditCitablePages();
+auditPublicClaimIntegrity();
 auditPrerenderManifest();
 auditOpenApiAndPlugin();
 
