@@ -1,5 +1,15 @@
 # Plan v6.9.23 (rev3) — Dokończenie H2–H8 + wyjaśnienie GSC sitemap
 
+## Status implementacji (live)
+- ✅ H2 — Publish state hydratacja z DB w `PublishWorksheetButton` (useEffect + supabase.select). Test: Publish → F5 → button = "Public".
+- ✅ H3 — `toText()` zaaplikowany w fill-in-blanks, multiple-choice, true-false, matching, dialogue, error-correction, odd-one-out, word-order, synonyms/antonyms/paraphrasing/negative-prefixes/complete-word/word-formation, categorize. Brak `[object Object]`.
+- ✅ H7 — Sekret `BUG_REPORT_FROM_EMAIL` dodany. Funkcja `submit-bug-report` już go czyta od v6.8.6.
+- ✅ H8a — `bun scripts/seo/build-blog-index.mjs` → 207 blog posts + 70 landings parsed, sitemap +277 URL.
+- ⏳ H4 — do osobnej tury (17 callsites, ryzyko regresji UX).
+- ⏳ H5 — do osobnej tury (timing SSE, ryzyko crashu generatora).
+- ⏳ H6b–d — do osobnej tury (migracja + edge function + cron).
+- ⏳ H8b+c — do tury razem z H6 (docs odzwierciedlają finalny stan).
+
 ---
 
 ## Część A — Wyjaśnienie sprawy z Google Search Console (Twoje pytanie)
