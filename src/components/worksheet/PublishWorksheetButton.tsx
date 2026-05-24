@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
@@ -25,6 +25,28 @@ export const PublishWorksheetButton: React.FC<Props> = ({ worksheetId, isPublic 
   const [pub, setPub] = useState(isPublic);
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
+
+  // v6.9.23 — Hydrate publish state from DB so the button stays "Public"
+  // after page reload (sessionStorage doesn't persist is_public/public_slug).
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      if (!worksheetId) return;
+      const { data, error } = await supabase
+        .from('worksheets')
+        .select('is_public, public_slug')
+        .eq('id', worksheetId)
+        .maybeSingle();
+      if (cancelled || error || !data) return;
+      setPub(Boolean(data.is_public));
+      setSlug(data.public_slug ?? null);
+    })();
+    return () => { cancelled = true; };
+  }, [worksheetId]);
+
+  // Re-sync if parent ever passes hydrated props.
+  useEffect(() => { setPub(isPublic); }, [isPublic]);
+  useEffect(() => { setSlug(publicSlug); }, [publicSlug]);
 
   const publicUrl = slug ? `${APP_BASE_URL}/gallery/${slug}` : null;
 
