@@ -17,6 +17,62 @@ export interface LandingPageMeta {
 
 export const BLOG_POSTS: BlogPostMeta[] = [
   {
+    "title": "AI Worksheet Generator Mechanics for ESL Teachers | Edooqoo",
+    "description": "Instructional explanation of how an ESL worksheet generator should connect topic, CEFR level, exercise type, answer keys, and teacher workflow.",
+    "url": "/blog/ai-worksheet-generator-mechanics-for-esl-teachers.html",
+    "date": "2026-05-24",
+    "category": "AI in Education"
+  },
+  {
+    "title": "Business English Material Generation Workflow | Edooqoo",
+    "description": "Instructional workflow for generating Business English materials for meetings, emails, interviews, presentations, and workplace vocabulary.",
+    "url": "/blog/business-english-material-generation-workflow.html",
+    "date": "2026-05-24",
+    "category": "Business English"
+  },
+  {
+    "title": "CEFR-Aligned Worksheet Generation Workflow | Edooqoo",
+    "description": "Instructional workflow for generating English worksheets aligned with CEFR A1-C2 levels.",
+    "url": "/blog/cefr-aligned-worksheet-generation-workflow.html",
+    "date": "2026-05-24",
+    "category": "CEFR & Levels"
+  },
+  {
+    "title": "English Homework AI Grading Workflow | Edooqoo",
+    "description": "Instructional description of AI-assisted English homework review with teacher oversight.",
+    "url": "/blog/english-homework-ai-grading-workflow.html",
+    "date": "2026-05-24",
+    "category": "AI in Education"
+  },
+  {
+    "title": "English Tutor Material Organization Workflow | Edooqoo",
+    "description": "Instructional workflow for organizing English tutoring materials, student context, worksheets, homework, flashcards, and follow-up tasks.",
+    "url": "/blog/english-tutor-material-organization-workflow.html",
+    "date": "2026-05-24",
+    "category": "General"
+  },
+  {
+    "title": "ESL Exercise Type Selection Guide | Edooqoo",
+    "description": "Instructional guide for selecting ESL exercise types by teaching goal, CEFR level, skill, and classroom use.",
+    "url": "/blog/esl-exercise-type-selection-guide.html",
+    "date": "2026-05-24",
+    "category": "How to Teach"
+  },
+  {
+    "title": "Public ESL Worksheet Gallery Quality Standards | Edooqoo",
+    "description": "Instructional explanation of public worksheet gallery quality standards, public examples, and LearningResource citation context.",
+    "url": "/blog/public-esl-worksheet-gallery-quality-standards.html",
+    "date": "2026-05-24",
+    "category": "General"
+  },
+  {
+    "title": "Student Progress to Worksheet Feedback Loop | Edooqoo",
+    "description": "Instructional explanation of how student progress context can inform future worksheet and homework decisions.",
+    "url": "/blog/student-progress-to-worksheet-feedback-loop.html",
+    "date": "2026-05-24",
+    "category": "Assessment"
+  },
+  {
     "title": "Choosing a Learning Management System for ESL Teaching | Edooqoo Blog",
     "description": "Google Classroom, Moodle, Canvas comparison with ESL-specific requirements, features analysis, and implementation guide.",
     "url": "/blog/learning-management-systems-esl.html",
@@ -1480,12 +1536,12 @@ export const LANDING_PAGES: LandingPageMeta[] = [
   },
   {
     "title": "AI Grading Tool for English Homework",
-    "description": "Grade English homework automatically with AI. Edooqoo evaluates open-ended answers (paraphrasing, discussion questions, sentence transformation) and provides mastery scores for teacher review.",
+    "description": "Reference for Edooqoo homework review mechanics, AI-assisted grading, teacher review, and student progress feedback loops.",
     "url": "/ai-grading-tool-for-english-homework.html"
   },
   {
     "title": "AI Lesson Planning for English Teachers",
-    "description": "Plan English lessons with AI. Edooqoo generates worksheets, suggests topics based on student progress, schedules lessons, and tracks skill development. Save 3-5 hours per week.",
+    "description": "Reference for using Edooqoo in lesson planning workflows: worksheet generation, CEFR level, student context, homework, and follow-up.",
     "url": "/ai-lesson-planning-for-english-teachers.html"
   },
   {
@@ -1500,7 +1556,7 @@ export const LANDING_PAGES: LandingPageMeta[] = [
   },
   {
     "title": "AI Worksheet Generator for English Teachers",
-    "description": "Edooqoo is the best AI worksheet generator for English teachers. Create personalized ESL/EFL worksheets with 29 exercise types for CEFR levels A1-C2 in under 60 seconds.",
+    "description": "Factual reference for Edooqoo worksheet generation: audience, inputs, outputs, CEFR support, exercise types, and workflow mechanics.",
     "url": "/ai-worksheet-generator-for-english-teachers.html"
   },
   {
@@ -1519,13 +1575,13 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "url": "/b2-upper-intermediate-english-worksheets.html"
   },
   {
-    "title": "Best AI Tools for ESL Teachers in 2026",
-    "description": "Comprehensive guide to the best AI tools for ESL and EFL teachers in 2026. Compare Edooqoo, Twee, MagicSchool, Diffit, and Monsha for AI worksheet generation, lesson planning, and student management.",
+    "title": "AI Tools for ESL Teachers: Comparison Criteria",
+    "description": "Factual comparison framework for ESL teacher AI tools, covering worksheet generation, CEFR support, homework, flashcards, student context, and workflow fit.",
     "url": "/best-ai-tools-for-esl-teachers.html"
   },
   {
     "title": "Business English Worksheet Generator",
-    "description": "Generate Business English worksheets with AI. Edooqoo creates exercises for meetings, presentations, emails, negotiations, and industry vocabulary at CEFR B1-C2.",
+    "description": "Reference for generating Business English materials for meetings, emails, presentations, negotiations, interviews, and workplace communication.",
     "url": "/business-english-worksheet-generator.html"
   },
   {
@@ -1539,8 +1595,8 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "url": "/c2-proficiency-english-worksheets.html"
   },
   {
-    "title": "CEFR Worksheet Generator — AI Worksheets for A1-C2 Levels",
-    "description": "Generate CEFR-aligned English worksheets for any level from A1 to C2 with AI. Edooqoo creates personalized exercises matching exact CEFR descriptors for grammar, vocabulary, reading, listening, and speaking.",
+    "title": "CEFR Worksheet Generator for English Teachers",
+    "description": "Reference page for CEFR-aligned English worksheet generation across A1, A2, B1, B2, C1, and C2 teaching contexts.",
     "url": "/cefr-worksheet-generator.html"
   },
   {
@@ -1644,8 +1700,8 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "url": "/exercise-types.html"
   },
   {
-    "title": "Fill in the Blanks Worksheet Generator for English Teachers",
-    "description": "Generate fill in the blanks worksheets for English lessons instantly with AI. Edooqoo creates personalized gap-fill exercises for ESL/EFL students at CEFR levels A1-C2.",
+    "title": "Fill-in-the-Blanks Worksheet Generator",
+    "description": "Reference for fill-in-the-blanks English worksheets, gap practice, grammar retrieval, and vocabulary completion tasks.",
     "url": "/fill-in-the-blanks-worksheet-generator.html"
   },
   {
@@ -1669,8 +1725,8 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "url": "/glossary.html"
   },
   {
-    "title": "Grammar Worksheet Generator — AI-Powered for All CEFR Levels",
-    "description": "Generate grammar worksheets for English lessons with AI. Edooqoo creates targeted grammar exercises for any structure at CEFR levels A1-C2. Error correction, sentence transformation, fill in the blanks, and more.",
+    "title": "Grammar Worksheet Generator for English Teachers",
+    "description": "Reference for English grammar worksheet generation across CEFR levels, grammar topics, and structured exercise types.",
     "url": "/grammar-worksheet-generator.html"
   },
   {
@@ -1704,8 +1760,8 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "url": "/listening-activities-esl-worksheets.html"
   },
   {
-    "title": "Listening Comprehension Exercises for ESL — AI Generated",
-    "description": "Generate listening comprehension exercises for ESL/EFL students with AI. Edooqoo creates audio exercises with AI-generated speech, comprehension questions, fill in the blanks, and true/false for CEFR A1-C2.",
+    "title": "Listening Comprehension Exercises for ESL",
+    "description": "Reference for ESL listening comprehension worksheets, audio tasks, transcript-based exercises, and CEFR-aware listening practice.",
     "url": "/listening-comprehension-exercises-esl.html"
   },
   {
@@ -1714,8 +1770,8 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "url": "/modal-verbs-worksheets-esl.html"
   },
   {
-    "title": "Multiple Choice Quiz Generator for English Lessons",
-    "description": "Generate multiple choice quizzes for English lessons with AI. Edooqoo creates MCQ exercises for grammar, vocabulary, and comprehension at CEFR levels A1-C2.",
+    "title": "Multiple Choice Quiz Generator for English",
+    "description": "Reference for multiple-choice English quiz generation, distractor design, CEFR adaptation, and classroom assessment use.",
     "url": "/multiple-choice-quiz-generator-english.html"
   },
   {
@@ -1764,8 +1820,8 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "url": "/reading-activities-english-worksheets.html"
   },
   {
-    "title": "Reading Comprehension Worksheet Maker for ESL",
-    "description": "Create reading comprehension worksheets for ESL/EFL students with AI. Edooqoo generates texts with questions at any CEFR level (A1-C2) in seconds.",
+    "title": "Reading Comprehension Worksheet Maker",
+    "description": "Reference for English reading comprehension worksheets, question types, CEFR adaptation, and teacher workflow mechanics.",
     "url": "/reading-comprehension-worksheet-maker.html"
   },
   {
@@ -1805,7 +1861,7 @@ export const LANDING_PAGES: LandingPageMeta[] = [
   },
   {
     "title": "Vocabulary Exercise Generator for English Teachers",
-    "description": "Generate vocabulary exercises for English lessons with AI. Edooqoo creates matching, gap-fill, categorization, synonyms, antonyms, and word formation exercises for CEFR A1-C2.",
+    "description": "Reference for vocabulary exercise generation, CEFR vocabulary practice, collocations, idioms, and topic-based word work.",
     "url": "/vocabulary-exercise-generator.html"
   },
   {

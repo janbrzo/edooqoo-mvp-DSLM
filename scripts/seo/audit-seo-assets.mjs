@@ -7,6 +7,7 @@ import { getPrerenderRoutes, getPriorityExerciseTopicRoutes } from './seo-route-
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..', '..');
 const PUBLIC = path.resolve(ROOT, 'public');
+const BASE_URL = 'https://edooqoo.com';
 
 const REQUIRED_AI_RESOURCES = [
   'llms.txt',
@@ -28,6 +29,32 @@ const REQUIRED_PRERENDER_ROUTES = [
   '/gallery',
 ];
 
+const REQUIRED_CITABLE_PAGES = [
+  '/ai-worksheet-generator-for-english-teachers.html',
+  '/cefr-worksheet-generator.html',
+  '/business-english-worksheet-generator.html',
+  '/grammar-worksheet-generator.html',
+  '/vocabulary-exercise-generator.html',
+  '/fill-in-the-blanks-worksheet-generator.html',
+  '/reading-comprehension-worksheet-maker.html',
+  '/listening-comprehension-exercises-esl.html',
+  '/multiple-choice-quiz-generator-english.html',
+  '/ai-lesson-planning-for-english-teachers.html',
+  '/ai-grading-tool-for-english-homework.html',
+  '/best-ai-tools-for-esl-teachers.html',
+];
+
+const REQUIRED_CITATION_ARTICLES = [
+  '/blog/ai-worksheet-generator-mechanics-for-esl-teachers.html',
+  '/blog/cefr-aligned-worksheet-generation-workflow.html',
+  '/blog/business-english-material-generation-workflow.html',
+  '/blog/english-homework-ai-grading-workflow.html',
+  '/blog/english-tutor-material-organization-workflow.html',
+  '/blog/esl-exercise-type-selection-guide.html',
+  '/blog/student-progress-to-worksheet-feedback-loop.html',
+  '/blog/public-esl-worksheet-gallery-quality-standards.html',
+];
+
 function fail(message) {
   console.error(`[seo:audit] FAIL ${message}`);
   process.exitCode = 1;
@@ -37,8 +64,50 @@ function pass(message) {
   console.log(`[seo:audit] OK   ${message}`);
 }
 
+function publicPath(relOrUrlPath) {
+  return path.join(PUBLIC, relOrUrlPath.replace(/^\//, ''));
+}
+
 function existsPublic(rel) {
   return fs.existsSync(path.join(PUBLIC, rel));
+}
+
+function readPublic(relOrUrlPath) {
+  return fs.readFileSync(publicPath(relOrUrlPath), 'utf8');
+}
+
+function getSitemapUrls() {
+  const sitemap = readPublic('/sitemap.xml');
+  return [...sitemap.matchAll(/<loc>([^<]+)<\/loc>/g)].map((match) => match[1].trim());
+}
+
+function countUrl(urls, url) {
+  return urls.filter((item) => item === url).length;
+}
+
+function extractCanonical(html) {
+  return html.match(/<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)["']/i)?.[1] || null;
+}
+
+function extractLdTypes(html) {
+  const scripts = [...html.matchAll(/<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)];
+  const types = new Set();
+
+  for (const script of scripts) {
+    try {
+      const json = JSON.parse(script[1].trim());
+      const nodes = Array.isArray(json?.['@graph']) ? json['@graph'] : [json];
+      for (const node of nodes) {
+        const type = node?.['@type'];
+        if (Array.isArray(type)) type.forEach((item) => types.add(item));
+        else if (type) types.add(type);
+      }
+    } catch (err) {
+      fail(`Invalid JSON-LD block: ${err.message}`);
+    }
+  }
+
+  return types;
 }
 
 function auditDeclaredAiResources() {
@@ -61,10 +130,25 @@ function auditKnowledgeGraph() {
   const kgPath = path.join(PUBLIC, 'knowledge-graph.json');
   try {
     const graph = JSON.parse(fs.readFileSync(kgPath, 'utf8'));
-    const types = new Set((graph['@graph'] || []).map((node) => node['@type']));
+    const nodes = graph['@graph'] || [];
+    const types = new Set(nodes.map((node) => node['@type']));
+    const ids = new Set(nodes.map((node) => node['@id']).filter(Boolean));
+
     for (const type of ['Organization', 'WebSite', 'SoftwareApplication']) {
       if (!types.has(type)) fail(`knowledge-graph.json missing ${type}`);
       else pass(`knowledge-graph.json contains ${type}`);
+    }
+
+    for (const route of REQUIRED_CITABLE_PAGES) {
+      const id = `${BASE_URL}${route}#webpage`;
+      if (!ids.has(id)) fail(`knowledge-graph.json missing citable page node ${id}`);
+      else pass(`knowledge-graph.json contains citable page node ${route}`);
+    }
+
+    for (const route of REQUIRED_CITATION_ARTICLES) {
+      const id = `${BASE_URL}${route}#article`;
+      if (!ids.has(id)) fail(`knowledge-graph.json missing article node ${id}`);
+      else pass(`knowledge-graph.json contains article node ${route}`);
     }
   } catch (err) {
     fail(`knowledge-graph.json is invalid JSON: ${err.message}`);
@@ -72,8 +156,8 @@ function auditKnowledgeGraph() {
 }
 
 function auditRobotsAndSitemap() {
-  const robots = fs.readFileSync(path.join(PUBLIC, 'robots.txt'), 'utf8');
-  const sitemap = fs.readFileSync(path.join(PUBLIC, 'sitemap.xml'), 'utf8');
+  const robots = readPublic('/robots.txt');
+  const sitemap = readPublic('/sitemap.xml');
 
   if (!robots.includes('Allow: /worksheets/*/*')) {
     fail('robots.txt must explicitly allow public /worksheets/:exerciseType/:topic routes');
@@ -101,6 +185,57 @@ function auditRobotsAndSitemap() {
   }
 }
 
+function auditStaticCitationPage(route, requiredTypes) {
+  const file = publicPath(route);
+  const url = `${BASE_URL}${route}`;
+
+  if (!fs.existsSync(file)) {
+    fail(`Missing public${route}`);
+    return;
+  }
+  pass(`public${route} exists`);
+
+  const html = readPublic(route);
+  const canonical = extractCanonical(html);
+  if (canonical !== url) fail(`public${route} canonical must be ${url}, got ${canonical || 'none'}`);
+  else pass(`public${route} has self-canonical`);
+
+  for (const heading of ['Summary', 'Problem', 'Edooqoo.com Solution', 'Technical Mechanics']) {
+    if (!html.includes(`>${heading}<`)) fail(`public${route} missing ${heading} section`);
+    else pass(`public${route} contains ${heading}`);
+  }
+
+  const types = extractLdTypes(html);
+  for (const type of requiredTypes) {
+    if (!types.has(type)) fail(`public${route} missing JSON-LD ${type}`);
+    else pass(`public${route} contains JSON-LD ${type}`);
+  }
+
+  if (/Edooqoo\s+is\s+the\s+best/i.test(html)) {
+    fail(`public${route} contains unsupported best-claim wording`);
+  }
+}
+
+function auditCitablePages() {
+  const sitemapUrls = getSitemapUrls();
+
+  for (const route of REQUIRED_CITABLE_PAGES) {
+    auditStaticCitationPage(route, ['WebPage', 'LearningResource', 'FAQPage', 'BreadcrumbList']);
+    const url = `${BASE_URL}${route}`;
+    const count = countUrl(sitemapUrls, url);
+    if (count !== 1) fail(`sitemap.xml must contain ${url} exactly once, found ${count}`);
+    else pass(`sitemap.xml contains ${route} exactly once`);
+  }
+
+  for (const route of REQUIRED_CITATION_ARTICLES) {
+    auditStaticCitationPage(route, ['Article', 'FAQPage', 'BreadcrumbList']);
+    const url = `${BASE_URL}${route}`;
+    const count = countUrl(sitemapUrls, url);
+    if (count !== 1) fail(`sitemap.xml must contain ${url} exactly once, found ${count}`);
+    else pass(`sitemap.xml contains ${route} exactly once`);
+  }
+}
+
 function auditPrerenderManifest() {
   const routes = getPrerenderRoutes({ root: ROOT });
   for (const route of REQUIRED_PRERENDER_ROUTES) {
@@ -113,13 +248,19 @@ function auditPrerenderManifest() {
 }
 
 function auditOpenApiAndPlugin() {
-  const openApi = fs.readFileSync(path.join(PUBLIC, 'openapi.yaml'), 'utf8');
-  const plugin = JSON.parse(fs.readFileSync(path.join(PUBLIC, '.well-known', 'ai-plugin.json'), 'utf8'));
+  const openApi = readPublic('/openapi.yaml');
+  const plugin = JSON.parse(readPublic('/.well-known/ai-plugin.json'));
 
   if (!openApi.includes('/llms.txt') || !openApi.includes('/knowledge-graph.json')) {
     fail('openapi.yaml missing required informational resource paths');
   } else {
     pass('openapi.yaml describes public AI resources');
+  }
+
+  if (openApi.includes('generateWorksheet') || openApi.includes('/generate-worksheet')) {
+    fail('openapi.yaml must not expose a private worksheet-generation API');
+  } else {
+    pass('openapi.yaml does not expose worksheet generation API');
   }
 
   if (plugin?.api?.url !== 'https://edooqoo.com/openapi.yaml') {
@@ -132,6 +273,7 @@ function auditOpenApiAndPlugin() {
 auditDeclaredAiResources();
 auditKnowledgeGraph();
 auditRobotsAndSitemap();
+auditCitablePages();
 auditPrerenderManifest();
 auditOpenApiAndPlugin();
 

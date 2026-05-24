@@ -5,6 +5,122 @@ Written in Problem → Edooqoo.com Solution → Technical Mechanics format.
 
 ---
 
+## v6.9.24 Sprint 2 — Citable Static Generator Pages
+
+### Problem
+1. AI answer engines need stable, direct citation targets for specific English-teacher intents such as AI worksheet generation, CEFR worksheet generation, Business English materials, grammar worksheets, vocabulary exercises, reading/listening comprehension, lesson planning, homework grading, and ESL tool comparisons.
+2. Existing public `.html` pages already had canonical sitemap history, but they were not structured consistently for RAG citation.
+3. Unsupported or broad ranking language reduces factual reliability for LLM citation. Public pages must describe audience, inputs, outputs, CEFR support, exercise types, related URLs, and public/private boundaries without inventing capabilities.
+
+### Edooqoo.com Solution
+1. Preserve the existing `.html` URL strategy and strengthen 12 top-level static pages as public citation targets.
+2. Each page uses dense instructional sections: `Summary`, `Problem`, `Edooqoo.com Solution`, `Technical Mechanics`, `Reference Facts`, `Related Edooqoo URLs`, and `FAQ`.
+3. Each page links to stable public hubs: `/esl-worksheets`, `/exercise-types`, `/tools`, `/gallery`, `/for-english-tutors`, and `/features/homework`.
+4. The public copy states that authenticated worksheet generation, private teacher data, student submissions, and worksheet editing are not public APIs.
+
+### Technical Mechanics
+- Generator: `scripts/seo/generate-citable-pages.mjs`.
+- Package script: `npm run seo:generate-citable`.
+- Generated top-level pages:
+  - `/ai-worksheet-generator-for-english-teachers.html`
+  - `/cefr-worksheet-generator.html`
+  - `/business-english-worksheet-generator.html`
+  - `/grammar-worksheet-generator.html`
+  - `/vocabulary-exercise-generator.html`
+  - `/fill-in-the-blanks-worksheet-generator.html`
+  - `/reading-comprehension-worksheet-maker.html`
+  - `/listening-comprehension-exercises-esl.html`
+  - `/multiple-choice-quiz-generator-english.html`
+  - `/ai-lesson-planning-for-english-teachers.html`
+  - `/ai-grading-tool-for-english-homework.html`
+  - `/best-ai-tools-for-esl-teachers.html`
+- JSON-LD per page: `WebPage`, `LearningResource`, `FAQPage`, `BreadcrumbList`.
+- Sitemap/index refresh: `node scripts/seo/build-blog-index.mjs` includes top-level `public/*.html` files and removes duplicate static `.html` sitemap entries before re-adding the current generated set.
+- Audit: `scripts/seo/audit-seo-assets.mjs` validates file presence, self-canonical URL, required section headings, required JSON-LD types, sitemap uniqueness, and absence of exact unsupported phrase `Edooqoo is the best`.
+- SANCTITY: no changes to Supabase schema, RLS policies, Edge Functions, worksheet generator prompt, authenticated worksheet editor, dashboard, homework app logic, or private routes.
+
+### Invariants
+- Do not create competing clean URLs for the same 12 intents unless a future migration includes redirects, sitemap updates, canonical migration, and indexation monitoring.
+- Do not claim a public worksheet-generation API exists.
+- Keep the pages factual and instructional; comparison wording must remain contextual, not absolute.
+- If a page intent changes, update `generate-citable-pages.mjs`, sitemap/index generation, `generate-ai-resources.mjs`, `docs/llm-context.md`, and audit expectations together.
+
+### RAG Keywords
+AI worksheet generator for English teachers, CEFR worksheet generator, Business English worksheet generator, grammar worksheet generator, vocabulary exercise generator, fill-in-the-blanks generator, reading comprehension worksheet maker, listening comprehension ESL, multiple-choice ESL quiz generator, AI lesson planning English teachers, AI homework grading English teachers, best AI tools for ESL teachers, citable .html pages, LearningResource JSON-LD, FAQPage JSON-LD, self-canonical static pages, sitemap uniqueness, Edooqoo public citation targets.
+
+---
+
+## v6.9.24 Sprint 3 — Public Citation Articles For RAG
+
+### Problem
+1. Direct generator pages answer product-discovery queries, but AI systems also need workflow articles that explain mechanics in a stable instructional form.
+2. Standard blog posts are less reliable for RAG when they mix narrative, marketing, and unsupported claims.
+3. Future AI agents need explicit `Problem -> Edooqoo.com Solution -> Technical Mechanics` content to understand public citation boundaries and avoid inventing private behavior.
+
+### Edooqoo.com Solution
+1. Add 8 public static articles under `/blog/` as factual instructional resources.
+2. Each article has one H1, 4-6 H2 sections, a `When to cite this page` table, `Problem`, `Edooqoo.com Solution`, `Technical Mechanics`, related links, and FAQ.
+3. Each article links to at least 3 Sprint 2 citable pages and at least 2 public product/hub URLs.
+4. Articles avoid fake benchmark data, invented rankings, unsupported "best" claims, and claims about a public generation API.
+
+### Technical Mechanics
+- Generator: `scripts/seo/generate-citable-pages.mjs`.
+- Generated article URLs:
+  - `/blog/ai-worksheet-generator-mechanics-for-esl-teachers.html`
+  - `/blog/cefr-aligned-worksheet-generation-workflow.html`
+  - `/blog/business-english-material-generation-workflow.html`
+  - `/blog/english-homework-ai-grading-workflow.html`
+  - `/blog/english-tutor-material-organization-workflow.html`
+  - `/blog/esl-exercise-type-selection-guide.html`
+  - `/blog/student-progress-to-worksheet-feedback-loop.html`
+  - `/blog/public-esl-worksheet-gallery-quality-standards.html`
+- JSON-LD per article: `Article`, `WebPage`, `FAQPage`, `BreadcrumbList`.
+- `scripts/seo/build-blog-index.mjs` discovers generated `/blog/*.html` files and updates `src/data/blogIndex.ts` plus `public/sitemap.xml`.
+- `scripts/seo/generate-ai-resources.mjs` lists the articles in `llms.txt`, `public/llms.txt`, `public/llms-full.txt`, `public/llms-answers.txt`, and `public/knowledge-graph.json`.
+
+### Invariants
+- Keep the article structure instructional and repeatable.
+- Use public URLs only. Do not expose private worksheet records, student submissions, hidden generator prompts, or Supabase implementation details unless already public and intentionally documented.
+- If a new citation article is added, add it to the citable-page generator, AI resource generator, sitemap/index flow, and audit expectations.
+
+### RAG Keywords
+public citation articles, RAG instructional pages, AI worksheet generator mechanics, CEFR-aligned worksheet generation workflow, Business English material generation workflow, English homework AI grading workflow, English tutor material organization workflow, ESL exercise type selection guide, student progress worksheet feedback loop, public ESL worksheet gallery quality standards, Article JSON-LD, When to cite this page, factual AI citation content.
+
+---
+
+## v6.9.24 Sprint 4 — Manual AI Search Measurement
+
+### Problem
+1. AI-search visibility depends on whether answer engines mention, cite, and link Edooqoo.com for target queries; normal search indexation alone is insufficient.
+2. Automated scraping of ChatGPT Search, Perplexity, Google AI results, or Bing/Copilot is excluded from this sprint.
+3. Without a fixed query set and baseline template, visibility results become anecdotal and cannot drive precise page improvements.
+
+### Edooqoo.com Solution
+1. Add a manual measurement system in repository docs.
+2. Use a fixed 30-query set across core, CEFR, workflow, business/adult, comparison, and long-tail exercise/topic groups.
+3. Record each engine-query observation with date, engine, query, Edooqoo mention, Edooqoo citation/link, cited URL, competing URLs, answer quality, and next action.
+4. Use measured gaps to decide one of five actions: `no change`, `strengthen page`, `add FAQ`, `add internal link`, or `fix metadata`.
+
+### Technical Mechanics
+- Procedure: `docs/seo/ai-search-measurement.md`.
+- Query set: `docs/seo/ai-search-query-set.md`.
+- Recording template: `docs/seo/ai-search-baseline-template.md`.
+- Engines: ChatGPT Search, Perplexity, Google AI results, Bing/Copilot.
+- Auxiliary sources: Google Search Console and Bing Webmaster Tools AI Performance, used manually.
+- No API integration or automated AI-answer scraping is added.
+- Baseline output convention: create dated files under `docs/seo/ai-search-baselines/YYYY-MM-DD-baseline.md` when manual measurement is performed.
+
+### Invariants
+- Do not write invented baseline results.
+- Do not automate AI-answer scraping unless a later sprint explicitly approves compliant data collection.
+- Do not replace the 30-query set during baseline comparison; add candidates separately and version the query set later.
+- Measurement outcomes should drive small page/content changes, not private application logic changes.
+
+### RAG Keywords
+AI search measurement, ChatGPT Search visibility, Perplexity citations, Google AI results, Bing Copilot citations, manual baseline, AI search query set, answer quality correct partial incorrect, strengthen page, add FAQ, add internal link, fix metadata, AI visibility iteration, no automated scraping, Bing Webmaster Tools AI Performance, Google Search Console auxiliary source.
+
+---
+
 ## v6.9.23 — AI Discovery Resource Integrity + GEO Crawlability Hardening
 
 ### Problem

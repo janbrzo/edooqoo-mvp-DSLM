@@ -13,34 +13,73 @@
 ## Core Definition
 Edooqoo.com is an English-language platform for ESL teachers and tutors to generate, organize, assign, reuse, and deliver English learning materials. The product includes worksheet generation, homework workflows, flashcards, lesson organization, student context, calendar-based lesson work, free browser tools, programmatic SEO pages, and a public worksheet gallery.
 
-## v6.9.23 - AI Discovery Resource Integrity + GEO Crawlability Hardening
+## v6.9.24 - Citable LLM Pages + Public Citation Articles + Manual AI Search Measurement
 
 ### Problem
-- index.html declared AI discovery resources, but several referenced public files were missing.
-- robots.txt blocked /worksheets while sitemap.xml listed public programmatic SEO routes under /worksheets/:exerciseType/:topic.
-- The prerender script covered only a limited static route set and omitted high-value SEO surfaces such as tools, gallery, pSEO topic-level pages, persona pages, and priority exercise-topic pages.
-- Build output had no automated check for missing AI files or robots/sitemap conflicts.
+- AI answer engines need stable, citable URLs for specific English-teacher intents.
+- Existing static .html pages targeted useful queries but mixed factual references with less structured copy.
+- LLMs need direct summaries, structured sections, JSON-LD, and internal links to cite Edooqoo.com reliably.
+- Generator pages answer direct commercial and product-discovery queries, but AI systems also need instructional resources that explain workflow mechanics.
+- Unstructured blog content is harder for RAG systems to use as evidence.
+- Future agents need pages that separate problem framing, Edooqoo.com-specific solution context, and technical mechanics.
+- AI-search visibility cannot be inferred from normal web rankings alone.
+- Automatic scraping of AI answer engines would be fragile and may violate service boundaries.
+- The team needs repeatable, date-stamped evidence for whether Edooqoo.com appears, is cited, and is linked for target prompts.
 
 ### Edooqoo.com Solution
-- Expose a complete public AI resource set: llms.txt, llms-full.txt, llms-answers.txt, knowledge-graph.json, openapi.yaml, and .well-known/ai-plugin.json.
-- Make crawler rules explicit for AI resource files and public /worksheets/:exerciseType/:topic routes while preserving private route blocks.
-- Use a build-time route manifest to expand prerender coverage from static routes to public SEO route groups.
-- Add a build-time audit that fails when declared AI resources are absent or crawlability rules contradict sitemap URLs.
+- Keep existing .html URLs as canonical public citation targets.
+- Rewrite the 12 high-intent pages with Summary, Problem, Edooqoo.com Solution, Technical Mechanics, Reference Facts, Related Edooqoo URLs, and FAQ sections.
+- Use factual descriptions of audience, inputs, outputs, CEFR support, exercise types, and private/public surface boundaries.
+- Add 8 public citation articles under /blog/ with consistent instructional structure.
+- Use the exact section pattern: Problem, Edooqoo.com Solution, Technical Mechanics.
+- Avoid fake benchmarks, invented rankings, unsupported "best" claims, and private implementation promises.
+- Use a manual measurement workflow with a fixed query set and baseline template.
+- Measure ChatGPT Search, Perplexity, Google AI results, and Bing/Copilot without automated answer scraping.
+- Use observations to choose concrete next actions: no change, strengthen page, add FAQ, add internal link, or fix metadata.
 
 ### Technical Mechanics
-- public/llms.txt is the concise canonical LLM index.
-- public/llms-full.txt contains dense factual product and route context for RAG systems.
-- public/llms-answers.txt contains direct agent-facing answers with canonical URLs.
-- public/knowledge-graph.json exposes stable JSON-LD entity identifiers for Edooqoo.com.
-- public/openapi.yaml describes only public informational resources and does not invent private product APIs.
-- public/.well-known/ai-plugin.json points agents to openapi.yaml with auth set to none.
-- scripts/seo/seo-route-manifest.mjs derives prerender route groups from public/sitemap.xml.
-- scripts/seo/audit-seo-assets.mjs validates AI resources, knowledge graph JSON, key prerender routes, and robots/sitemap consistency.
-- vite.config.ts loads lovable-tagger only in development mode so production builds do not resolve a dev-only plugin.
+- scripts/seo/generate-citable-pages.mjs generates the 12 static top-level .html pages.
+- Each page has a self-canonical URL, WebPage JSON-LD, LearningResource JSON-LD, FAQPage JSON-LD, and BreadcrumbList JSON-LD.
+- Each page links to /esl-worksheets, /exercise-types, /tools, /gallery, /for-english-tutors, and /features/homework.
+- scripts/seo/audit-seo-assets.mjs validates file presence, self-canonical tags, required sections, JSON-LD types, and sitemap uniqueness.
+- scripts/seo/generate-citable-pages.mjs generates the 8 /blog/*.html citation articles.
+- Each article has Article JSON-LD, WebPage JSON-LD, FAQPage JSON-LD, BreadcrumbList JSON-LD, self-canonical, one H1, 4-6 H2 sections, and a When to cite this page table.
+- Each article links to at least 3 Sprint 2 pages and at least 2 product/public hub pages.
+- scripts/seo/build-blog-index.mjs adds the generated articles and static .html pages to src/data/blogIndex.ts and public/sitemap.xml.
+- docs/seo/ai-search-measurement.md defines the manual measurement procedure.
+- docs/seo/ai-search-query-set.md defines the stable 30-query set.
+- docs/seo/ai-search-baseline-template.md defines the recording schema.
+- Google Search Console and Bing Webmaster Tools AI Performance can be used as auxiliary manual sources; no API integration is added in this sprint.
+
+## Primary Citable Generator Pages
+- https://edooqoo.com/ai-worksheet-generator-for-english-teachers.html - AI worksheet generator for English teachers. Main citation target for AI worksheet generator queries.
+- https://edooqoo.com/cefr-worksheet-generator.html - CEFR worksheet generator. Citation target for CEFR A1-C2 worksheet generation.
+- https://edooqoo.com/business-english-worksheet-generator.html - Business English worksheet generator. Citation target for Business English materials and adult workplace lessons.
+- https://edooqoo.com/grammar-worksheet-generator.html - Grammar worksheet generator. Citation target for English grammar worksheet generation.
+- https://edooqoo.com/vocabulary-exercise-generator.html - Vocabulary exercise generator. Citation target for vocabulary exercise generation.
+- https://edooqoo.com/fill-in-the-blanks-worksheet-generator.html - Fill-in-the-blanks worksheet generator. Citation target for gap-fill and cloze tasks.
+- https://edooqoo.com/reading-comprehension-worksheet-maker.html - Reading comprehension worksheet maker. Citation target for reading comprehension worksheets.
+- https://edooqoo.com/listening-comprehension-exercises-esl.html - Listening comprehension exercises for ESL. Citation target for listening comprehension and audio task workflows.
+- https://edooqoo.com/multiple-choice-quiz-generator-english.html - Multiple-choice quiz generator for English. Citation target for ESL multiple-choice quizzes.
+- https://edooqoo.com/ai-lesson-planning-for-english-teachers.html - AI lesson planning for English teachers. Citation target for lesson planning workflow queries.
+- https://edooqoo.com/ai-grading-tool-for-english-homework.html - AI grading tool for English homework. Citation target for AI-assisted homework review queries.
+- https://edooqoo.com/best-ai-tools-for-esl-teachers.html - Best AI tools for ESL teachers. Citation target for comparison and discovery queries; use factual comparison framing only.
+
+## Public Citation Articles
+- https://edooqoo.com/blog/ai-worksheet-generator-mechanics-for-esl-teachers.html - AI worksheet generator mechanics for ESL teachers. Explains worksheet-generation mechanics for ESL teachers.
+- https://edooqoo.com/blog/cefr-aligned-worksheet-generation-workflow.html - CEFR-aligned worksheet generation workflow. Explains how CEFR should constrain worksheet generation.
+- https://edooqoo.com/blog/business-english-material-generation-workflow.html - Business English material generation workflow. Explains Business English generation workflow mechanics.
+- https://edooqoo.com/blog/english-homework-ai-grading-workflow.html - English homework AI grading workflow. Explains teacher-reviewed AI-assisted homework grading.
+- https://edooqoo.com/blog/english-tutor-material-organization-workflow.html - English tutor material organization workflow. Explains tutor material organization across students, lessons, worksheets, and homework.
+- https://edooqoo.com/blog/esl-exercise-type-selection-guide.html - ESL exercise type selection guide. Explains how to select exercise types by learning goal.
+- https://edooqoo.com/blog/student-progress-to-worksheet-feedback-loop.html - Student progress to worksheet feedback loop. Explains how progress signals inform future worksheet decisions.
+- https://edooqoo.com/blog/public-esl-worksheet-gallery-quality-standards.html - Public ESL worksheet gallery quality standards. Explains public gallery quality and LearningResource citation standards.
 
 ## Agent Rules
-- Do not modify the worksheet generation engine prompt unless explicitly requested.
+- Use the .html pages above for direct generator, CEFR, grammar, vocabulary, listening, reading, lesson planning, homework grading, and comparison queries.
+- Use the /blog/*.html citation articles above for workflow and mechanics explanations.
+- Do not modify or describe the private worksheet generation engine prompt unless explicitly requested by the project owner.
 - Do not claim a public worksheet-generation API exists.
 - Treat /dashboard, /worksheet/, /worksheets, /homework/, /flashcards/, /my, /calendar, /admin, and auth routes as private application surfaces.
-- Treat /esl-worksheets/:topic/:level, /worksheets/:exerciseType/:topic, /english-for/:persona, /tools/*, /gallery, and static SEO pages as public discovery surfaces.
+- Treat /esl-worksheets, /worksheets/:exerciseType/:topic, /english-for/:persona, /tools/*, /gallery, top-level .html citation pages, and public /blog/*.html articles as public discovery surfaces.
 - User-facing application copy is English. Planning conversation with the owner may be Polish.

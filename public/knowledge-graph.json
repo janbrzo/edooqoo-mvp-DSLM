@@ -52,7 +52,9 @@
         "Lesson organization",
         "Student Hub",
         "Public worksheet gallery",
-        "Browser-only teacher tools"
+        "Browser-only teacher tools",
+        "Public citable generator pages",
+        "Public citation articles"
       ]
     },
     {
@@ -90,6 +92,522 @@
       "about": {
         "@id": "https://edooqoo.com/#software"
       }
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://edooqoo.com/ai-worksheet-generator-for-english-teachers.html#webpage",
+      "url": "https://edooqoo.com/ai-worksheet-generator-for-english-teachers.html",
+      "name": "AI worksheet generator for English teachers",
+      "description": "Main citation target for AI worksheet generator queries.",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "about": {
+        "@id": "https://edooqoo.com/#software"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "LearningResource",
+      "@id": "https://edooqoo.com/ai-worksheet-generator-for-english-teachers.html#learning-resource",
+      "url": "https://edooqoo.com/ai-worksheet-generator-for-english-teachers.html",
+      "name": "AI worksheet generator for English teachers",
+      "description": "Main citation target for AI worksheet generator queries.",
+      "provider": {
+        "@id": "https://edooqoo.com/#organization"
+      },
+      "audience": {
+        "@type": "EducationalAudience",
+        "educationalRole": "teacher"
+      },
+      "learningResourceType": "instructional reference",
+      "isAccessibleForFree": true,
+      "inLanguage": "en"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://edooqoo.com/cefr-worksheet-generator.html#webpage",
+      "url": "https://edooqoo.com/cefr-worksheet-generator.html",
+      "name": "CEFR worksheet generator",
+      "description": "Citation target for CEFR A1-C2 worksheet generation.",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "about": {
+        "@id": "https://edooqoo.com/#software"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "LearningResource",
+      "@id": "https://edooqoo.com/cefr-worksheet-generator.html#learning-resource",
+      "url": "https://edooqoo.com/cefr-worksheet-generator.html",
+      "name": "CEFR worksheet generator",
+      "description": "Citation target for CEFR A1-C2 worksheet generation.",
+      "provider": {
+        "@id": "https://edooqoo.com/#organization"
+      },
+      "audience": {
+        "@type": "EducationalAudience",
+        "educationalRole": "teacher"
+      },
+      "learningResourceType": "instructional reference",
+      "isAccessibleForFree": true,
+      "inLanguage": "en"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://edooqoo.com/business-english-worksheet-generator.html#webpage",
+      "url": "https://edooqoo.com/business-english-worksheet-generator.html",
+      "name": "Business English worksheet generator",
+      "description": "Citation target for Business English materials and adult workplace lessons.",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "about": {
+        "@id": "https://edooqoo.com/#software"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "LearningResource",
+      "@id": "https://edooqoo.com/business-english-worksheet-generator.html#learning-resource",
+      "url": "https://edooqoo.com/business-english-worksheet-generator.html",
+      "name": "Business English worksheet generator",
+      "description": "Citation target for Business English materials and adult workplace lessons.",
+      "provider": {
+        "@id": "https://edooqoo.com/#organization"
+      },
+      "audience": {
+        "@type": "EducationalAudience",
+        "educationalRole": "teacher"
+      },
+      "learningResourceType": "instructional reference",
+      "isAccessibleForFree": true,
+      "inLanguage": "en"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://edooqoo.com/grammar-worksheet-generator.html#webpage",
+      "url": "https://edooqoo.com/grammar-worksheet-generator.html",
+      "name": "Grammar worksheet generator",
+      "description": "Citation target for English grammar worksheet generation.",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "about": {
+        "@id": "https://edooqoo.com/#software"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "LearningResource",
+      "@id": "https://edooqoo.com/grammar-worksheet-generator.html#learning-resource",
+      "url": "https://edooqoo.com/grammar-worksheet-generator.html",
+      "name": "Grammar worksheet generator",
+      "description": "Citation target for English grammar worksheet generation.",
+      "provider": {
+        "@id": "https://edooqoo.com/#organization"
+      },
+      "audience": {
+        "@type": "EducationalAudience",
+        "educationalRole": "teacher"
+      },
+      "learningResourceType": "instructional reference",
+      "isAccessibleForFree": true,
+      "inLanguage": "en"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://edooqoo.com/vocabulary-exercise-generator.html#webpage",
+      "url": "https://edooqoo.com/vocabulary-exercise-generator.html",
+      "name": "Vocabulary exercise generator",
+      "description": "Citation target for vocabulary exercise generation.",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "about": {
+        "@id": "https://edooqoo.com/#software"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "LearningResource",
+      "@id": "https://edooqoo.com/vocabulary-exercise-generator.html#learning-resource",
+      "url": "https://edooqoo.com/vocabulary-exercise-generator.html",
+      "name": "Vocabulary exercise generator",
+      "description": "Citation target for vocabulary exercise generation.",
+      "provider": {
+        "@id": "https://edooqoo.com/#organization"
+      },
+      "audience": {
+        "@type": "EducationalAudience",
+        "educationalRole": "teacher"
+      },
+      "learningResourceType": "instructional reference",
+      "isAccessibleForFree": true,
+      "inLanguage": "en"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://edooqoo.com/fill-in-the-blanks-worksheet-generator.html#webpage",
+      "url": "https://edooqoo.com/fill-in-the-blanks-worksheet-generator.html",
+      "name": "Fill-in-the-blanks worksheet generator",
+      "description": "Citation target for gap-fill and cloze tasks.",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "about": {
+        "@id": "https://edooqoo.com/#software"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "LearningResource",
+      "@id": "https://edooqoo.com/fill-in-the-blanks-worksheet-generator.html#learning-resource",
+      "url": "https://edooqoo.com/fill-in-the-blanks-worksheet-generator.html",
+      "name": "Fill-in-the-blanks worksheet generator",
+      "description": "Citation target for gap-fill and cloze tasks.",
+      "provider": {
+        "@id": "https://edooqoo.com/#organization"
+      },
+      "audience": {
+        "@type": "EducationalAudience",
+        "educationalRole": "teacher"
+      },
+      "learningResourceType": "instructional reference",
+      "isAccessibleForFree": true,
+      "inLanguage": "en"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://edooqoo.com/reading-comprehension-worksheet-maker.html#webpage",
+      "url": "https://edooqoo.com/reading-comprehension-worksheet-maker.html",
+      "name": "Reading comprehension worksheet maker",
+      "description": "Citation target for reading comprehension worksheets.",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "about": {
+        "@id": "https://edooqoo.com/#software"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "LearningResource",
+      "@id": "https://edooqoo.com/reading-comprehension-worksheet-maker.html#learning-resource",
+      "url": "https://edooqoo.com/reading-comprehension-worksheet-maker.html",
+      "name": "Reading comprehension worksheet maker",
+      "description": "Citation target for reading comprehension worksheets.",
+      "provider": {
+        "@id": "https://edooqoo.com/#organization"
+      },
+      "audience": {
+        "@type": "EducationalAudience",
+        "educationalRole": "teacher"
+      },
+      "learningResourceType": "instructional reference",
+      "isAccessibleForFree": true,
+      "inLanguage": "en"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://edooqoo.com/listening-comprehension-exercises-esl.html#webpage",
+      "url": "https://edooqoo.com/listening-comprehension-exercises-esl.html",
+      "name": "Listening comprehension exercises for ESL",
+      "description": "Citation target for listening comprehension and audio task workflows.",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "about": {
+        "@id": "https://edooqoo.com/#software"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "LearningResource",
+      "@id": "https://edooqoo.com/listening-comprehension-exercises-esl.html#learning-resource",
+      "url": "https://edooqoo.com/listening-comprehension-exercises-esl.html",
+      "name": "Listening comprehension exercises for ESL",
+      "description": "Citation target for listening comprehension and audio task workflows.",
+      "provider": {
+        "@id": "https://edooqoo.com/#organization"
+      },
+      "audience": {
+        "@type": "EducationalAudience",
+        "educationalRole": "teacher"
+      },
+      "learningResourceType": "instructional reference",
+      "isAccessibleForFree": true,
+      "inLanguage": "en"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://edooqoo.com/multiple-choice-quiz-generator-english.html#webpage",
+      "url": "https://edooqoo.com/multiple-choice-quiz-generator-english.html",
+      "name": "Multiple-choice quiz generator for English",
+      "description": "Citation target for ESL multiple-choice quizzes.",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "about": {
+        "@id": "https://edooqoo.com/#software"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "LearningResource",
+      "@id": "https://edooqoo.com/multiple-choice-quiz-generator-english.html#learning-resource",
+      "url": "https://edooqoo.com/multiple-choice-quiz-generator-english.html",
+      "name": "Multiple-choice quiz generator for English",
+      "description": "Citation target for ESL multiple-choice quizzes.",
+      "provider": {
+        "@id": "https://edooqoo.com/#organization"
+      },
+      "audience": {
+        "@type": "EducationalAudience",
+        "educationalRole": "teacher"
+      },
+      "learningResourceType": "instructional reference",
+      "isAccessibleForFree": true,
+      "inLanguage": "en"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://edooqoo.com/ai-lesson-planning-for-english-teachers.html#webpage",
+      "url": "https://edooqoo.com/ai-lesson-planning-for-english-teachers.html",
+      "name": "AI lesson planning for English teachers",
+      "description": "Citation target for lesson planning workflow queries.",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "about": {
+        "@id": "https://edooqoo.com/#software"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "LearningResource",
+      "@id": "https://edooqoo.com/ai-lesson-planning-for-english-teachers.html#learning-resource",
+      "url": "https://edooqoo.com/ai-lesson-planning-for-english-teachers.html",
+      "name": "AI lesson planning for English teachers",
+      "description": "Citation target for lesson planning workflow queries.",
+      "provider": {
+        "@id": "https://edooqoo.com/#organization"
+      },
+      "audience": {
+        "@type": "EducationalAudience",
+        "educationalRole": "teacher"
+      },
+      "learningResourceType": "instructional reference",
+      "isAccessibleForFree": true,
+      "inLanguage": "en"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://edooqoo.com/ai-grading-tool-for-english-homework.html#webpage",
+      "url": "https://edooqoo.com/ai-grading-tool-for-english-homework.html",
+      "name": "AI grading tool for English homework",
+      "description": "Citation target for AI-assisted homework review queries.",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "about": {
+        "@id": "https://edooqoo.com/#software"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "LearningResource",
+      "@id": "https://edooqoo.com/ai-grading-tool-for-english-homework.html#learning-resource",
+      "url": "https://edooqoo.com/ai-grading-tool-for-english-homework.html",
+      "name": "AI grading tool for English homework",
+      "description": "Citation target for AI-assisted homework review queries.",
+      "provider": {
+        "@id": "https://edooqoo.com/#organization"
+      },
+      "audience": {
+        "@type": "EducationalAudience",
+        "educationalRole": "teacher"
+      },
+      "learningResourceType": "instructional reference",
+      "isAccessibleForFree": true,
+      "inLanguage": "en"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://edooqoo.com/best-ai-tools-for-esl-teachers.html#webpage",
+      "url": "https://edooqoo.com/best-ai-tools-for-esl-teachers.html",
+      "name": "Best AI tools for ESL teachers",
+      "description": "Citation target for comparison and discovery queries; use factual comparison framing only.",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "about": {
+        "@id": "https://edooqoo.com/#software"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "LearningResource",
+      "@id": "https://edooqoo.com/best-ai-tools-for-esl-teachers.html#learning-resource",
+      "url": "https://edooqoo.com/best-ai-tools-for-esl-teachers.html",
+      "name": "Best AI tools for ESL teachers",
+      "description": "Citation target for comparison and discovery queries; use factual comparison framing only.",
+      "provider": {
+        "@id": "https://edooqoo.com/#organization"
+      },
+      "audience": {
+        "@type": "EducationalAudience",
+        "educationalRole": "teacher"
+      },
+      "learningResourceType": "instructional reference",
+      "isAccessibleForFree": true,
+      "inLanguage": "en"
+    },
+    {
+      "@type": "Article",
+      "@id": "https://edooqoo.com/blog/ai-worksheet-generator-mechanics-for-esl-teachers.html#article",
+      "url": "https://edooqoo.com/blog/ai-worksheet-generator-mechanics-for-esl-teachers.html",
+      "headline": "AI worksheet generator mechanics for ESL teachers",
+      "description": "Explains worksheet-generation mechanics for ESL teachers.",
+      "author": {
+        "@id": "https://edooqoo.com/#organization"
+      },
+      "publisher": {
+        "@id": "https://edooqoo.com/#organization"
+      },
+      "mainEntityOfPage": "https://edooqoo.com/blog/ai-worksheet-generator-mechanics-for-esl-teachers.html#webpage",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "Article",
+      "@id": "https://edooqoo.com/blog/cefr-aligned-worksheet-generation-workflow.html#article",
+      "url": "https://edooqoo.com/blog/cefr-aligned-worksheet-generation-workflow.html",
+      "headline": "CEFR-aligned worksheet generation workflow",
+      "description": "Explains how CEFR should constrain worksheet generation.",
+      "author": {
+        "@id": "https://edooqoo.com/#organization"
+      },
+      "publisher": {
+        "@id": "https://edooqoo.com/#organization"
+      },
+      "mainEntityOfPage": "https://edooqoo.com/blog/cefr-aligned-worksheet-generation-workflow.html#webpage",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "Article",
+      "@id": "https://edooqoo.com/blog/business-english-material-generation-workflow.html#article",
+      "url": "https://edooqoo.com/blog/business-english-material-generation-workflow.html",
+      "headline": "Business English material generation workflow",
+      "description": "Explains Business English generation workflow mechanics.",
+      "author": {
+        "@id": "https://edooqoo.com/#organization"
+      },
+      "publisher": {
+        "@id": "https://edooqoo.com/#organization"
+      },
+      "mainEntityOfPage": "https://edooqoo.com/blog/business-english-material-generation-workflow.html#webpage",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "Article",
+      "@id": "https://edooqoo.com/blog/english-homework-ai-grading-workflow.html#article",
+      "url": "https://edooqoo.com/blog/english-homework-ai-grading-workflow.html",
+      "headline": "English homework AI grading workflow",
+      "description": "Explains teacher-reviewed AI-assisted homework grading.",
+      "author": {
+        "@id": "https://edooqoo.com/#organization"
+      },
+      "publisher": {
+        "@id": "https://edooqoo.com/#organization"
+      },
+      "mainEntityOfPage": "https://edooqoo.com/blog/english-homework-ai-grading-workflow.html#webpage",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "Article",
+      "@id": "https://edooqoo.com/blog/english-tutor-material-organization-workflow.html#article",
+      "url": "https://edooqoo.com/blog/english-tutor-material-organization-workflow.html",
+      "headline": "English tutor material organization workflow",
+      "description": "Explains tutor material organization across students, lessons, worksheets, and homework.",
+      "author": {
+        "@id": "https://edooqoo.com/#organization"
+      },
+      "publisher": {
+        "@id": "https://edooqoo.com/#organization"
+      },
+      "mainEntityOfPage": "https://edooqoo.com/blog/english-tutor-material-organization-workflow.html#webpage",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "Article",
+      "@id": "https://edooqoo.com/blog/esl-exercise-type-selection-guide.html#article",
+      "url": "https://edooqoo.com/blog/esl-exercise-type-selection-guide.html",
+      "headline": "ESL exercise type selection guide",
+      "description": "Explains how to select exercise types by learning goal.",
+      "author": {
+        "@id": "https://edooqoo.com/#organization"
+      },
+      "publisher": {
+        "@id": "https://edooqoo.com/#organization"
+      },
+      "mainEntityOfPage": "https://edooqoo.com/blog/esl-exercise-type-selection-guide.html#webpage",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "Article",
+      "@id": "https://edooqoo.com/blog/student-progress-to-worksheet-feedback-loop.html#article",
+      "url": "https://edooqoo.com/blog/student-progress-to-worksheet-feedback-loop.html",
+      "headline": "Student progress to worksheet feedback loop",
+      "description": "Explains how progress signals inform future worksheet decisions.",
+      "author": {
+        "@id": "https://edooqoo.com/#organization"
+      },
+      "publisher": {
+        "@id": "https://edooqoo.com/#organization"
+      },
+      "mainEntityOfPage": "https://edooqoo.com/blog/student-progress-to-worksheet-feedback-loop.html#webpage",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "Article",
+      "@id": "https://edooqoo.com/blog/public-esl-worksheet-gallery-quality-standards.html#article",
+      "url": "https://edooqoo.com/blog/public-esl-worksheet-gallery-quality-standards.html",
+      "headline": "Public ESL worksheet gallery quality standards",
+      "description": "Explains public gallery quality and LearningResource citation standards.",
+      "author": {
+        "@id": "https://edooqoo.com/#organization"
+      },
+      "publisher": {
+        "@id": "https://edooqoo.com/#organization"
+      },
+      "mainEntityOfPage": "https://edooqoo.com/blog/public-esl-worksheet-gallery-quality-standards.html#webpage",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "inLanguage": "en"
     }
   ]
 }
