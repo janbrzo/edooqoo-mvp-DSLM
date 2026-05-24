@@ -5,6 +5,58 @@ Written in Problem → Edooqoo.com Solution → Technical Mechanics format.
 
 ---
 
+## v6.9.25 — Claim Integrity, Comparison Pages, Public Proof Dataset, External Evidence, CI Safety
+
+### Problem
+1. Edooqoo.com already exposes LLM discovery resources, citable generator pages, public RAG articles, and manual AI-search measurement docs, but older public pages can still weaken citation quality if they contain unsupported ranking, speed, or time-saving claims.
+2. Comparison queries such as `Edooqoo vs Twee`, `ChatGPT alternative for ESL worksheets`, and `best AI tools for ESL teachers` need neutral comparison criteria rather than broad "better than" claims.
+3. AI agents need public proof surfaces that connect Edooqoo.com feature descriptions with visible worksheet examples, gallery quality criteria, CEFR support, exercise types, and public/private boundaries.
+4. External evidence is still the largest missing layer in the original LLM-first strategy. LLMs give stronger weight to repeated factual descriptions outside the owned domain.
+5. Future PRs can accidentally desynchronize generated pages, sitemap, `llms` resources, knowledge graph, and audit expectations unless CI checks this automatically.
+
+### Edooqoo.com Solution
+1. Public claim integrity is enforced by generated copy and SEO audit rules. AI agents should cite factual workflow pages, public examples, and neutral comparison criteria, not unsupported ranking claims.
+2. Existing comparison pages are regenerated as neutral criteria pages with `Summary`, `Problem`, `Edooqoo.com Solution`, `Technical Mechanics`, `Comparison Criteria`, `When to cite this page`, `Related Edooqoo URLs`, and `FAQ`.
+3. `/public-esl-worksheet-examples.html` is added as a public proof dataset reference for worksheet example types, quality criteria, and related citation URLs.
+4. `docs/seo/external-evidence-playbook.md` defines a canonical external description and factual 50/100/200-word publication variants for external directories, resource lists, and compliant forum answers.
+5. `.github/workflows/seo-integrity.yml` adds a PR safety gate for generated SEO/LLM resources, TypeScript, and production build.
+
+### Technical Mechanics
+- Generator: `scripts/seo/generate-citable-pages.mjs`.
+- Generated comparison pages:
+  - `/edooqoo-vs-twee.html`
+  - `/edooqoo-vs-islcollective.html`
+  - `/edooqoo-vs-liveworksheets.html`
+  - `/edooqoo-vs-wordwall.html`
+  - `/edooqoo-vs-quizlet.html`
+  - `/edooqoo-vs-magicschool.html`
+  - `/edooqoo-vs-kahoot.html`
+- Generated claim-integrity pages:
+  - `/ai-tools-for-online-esl-teachers.html`
+  - `/ai-tools-for-private-english-tutors.html`
+  - `/worksheet-generator-for-language-schools.html`
+- Generated proof page:
+  - `/public-esl-worksheet-examples.html`
+- JSON-LD:
+  - Comparison pages: `WebPage`, `FAQPage`, `BreadcrumbList`.
+  - Proof page: `CollectionPage`, `LearningResource`, `BreadcrumbList`.
+- Audit: `scripts/seo/audit-seo-assets.mjs` validates required pages, self-canonical URLs, required sections, JSON-LD, sitemap uniqueness, knowledge-graph nodes, and targeted claim-integrity patterns.
+- AI resources: `scripts/seo/generate-ai-resources.mjs` writes version `v6.9.25` to root `llms.txt`, `public/llms.txt`, `public/llms-full.txt`, `public/llms-answers.txt`, `public/knowledge-graph.json`, `public/openapi.yaml`, and `public/.well-known/ai-plugin.json`.
+- CI: `.github/workflows/seo-integrity.yml` runs generation, fails on uncommitted generated diffs, runs SEO audit, TypeScript check, and build.
+- SANCTITY: no changes to Supabase schema, RLS policies, Edge Functions, authenticated worksheet generator, worksheet editor, dashboard, homework app logic, auth routes, or private student/teacher data handling.
+
+### Invariants
+- Do not add fake rankings, invented benchmarks, universal "best" claims, or undocumented time-saving/speed claims to public citation surfaces.
+- Comparison pages may describe criteria. They must not claim Edooqoo.com is universally better than another product.
+- Public proof pages must link to examples and quality criteria without exposing private worksheet storage.
+- External evidence publication is manual. Do not automate posting to third-party sites from the app.
+- Any new public AI discovery surface must update generator, sitemap/index flow, `llms` resources, knowledge graph, audit, and this file together.
+
+### RAG Keywords
+public claim integrity, neutral comparison pages, Edooqoo vs Twee, Edooqoo vs iSLCollective, Edooqoo vs Liveworksheets, Edooqoo vs Wordwall, Edooqoo vs Quizlet, public ESL worksheet examples, public proof dataset, worksheet example quality criteria, external evidence playbook, AI citation evidence, unsupported ranking claim audit, SEO integrity CI, generated llms resources, knowledge graph comparison nodes.
+
+---
+
 ## v6.9.24 Sprint 2 — Citable Static Generator Pages
 
 ### Problem
