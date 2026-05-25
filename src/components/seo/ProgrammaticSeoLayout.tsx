@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { PageSeo, buildFaqPageLd } from '@/components/seo/PageSeo';
 
 export interface PseoFaq {
@@ -59,6 +59,10 @@ const ProgrammaticSeoLayout: React.FC<ProgrammaticSeoLayoutProps> = ({
   faqs,
   extraJsonLd,
 }) => {
+  const location = useLocation();
+  const ctaState = primaryCta.to.startsWith('/signup') || primaryCta.to.startsWith('/login')
+    ? { from: location.pathname + location.search }
+    : undefined;
   const faqLd = buildFaqPageLd(faqs);
   const crumbLd = buildBreadcrumbLd(breadcrumbs);
   const ld: Record<string, unknown>[] = [crumbLd, faqLd];
