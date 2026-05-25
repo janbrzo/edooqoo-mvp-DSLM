@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { PageSeo, buildFaqPageLd } from '@/components/seo/PageSeo';
 import { CEFR_TEST_QUESTIONS, scoreCefr, type CefrTestLevel } from '@/data/cefrLevelTestQuestions';
 
@@ -20,6 +20,8 @@ const LEVEL_LABELS: Record<CefrTestLevel, string> = {
 };
 
 const CefrLevelTest: React.FC = () => {
+  const location = useLocation();
+  const fromState = { from: location.pathname + location.search };
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [submitted, setSubmitted] = useState(false);
 
@@ -89,6 +91,7 @@ const CefrLevelTest: React.FC = () => {
             <div className="flex flex-wrap gap-3">
               <Link
                 to={`/signup?level=${result.level.toLowerCase()}`}
+                state={fromState}
                 className="inline-block bg-primary text-primary-foreground px-5 py-2.5 rounded-lg font-semibold hover:opacity-90"
               >
                 Generate a worksheet for {result.level}
@@ -176,6 +179,7 @@ const CefrLevelTest: React.FC = () => {
           </p>
           <Link
             to="/signup"
+            state={fromState}
             className="inline-block bg-primary text-primary-foreground px-6 py-3 rounded-lg font-semibold hover:opacity-90"
           >
             Try Edooqoo free

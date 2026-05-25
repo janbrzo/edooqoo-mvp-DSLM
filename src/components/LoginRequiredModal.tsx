@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Lock, UserPlus, LogIn } from "lucide-react";
@@ -18,15 +18,17 @@ export const LoginRequiredModal: React.FC<LoginRequiredModalProps> = ({
   description
 }) => {
   const navigate = useNavigate();
+  const location = useLocation();
+  const fromState = { from: location.pathname + location.search };
 
   const handleSignUp = () => {
     onOpenChange(false);
-    navigate('/signup');
+    navigate('/signup', { state: fromState });
   };
 
   const handleLogin = () => {
     onOpenChange(false);
-    navigate('/login');
+    navigate('/login', { state: fromState });
   };
 
   return (

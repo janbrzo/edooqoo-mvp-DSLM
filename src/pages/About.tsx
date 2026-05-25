@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { faqItems } from '@/constants/faqItems';
 import GlobalFooter from '@/components/GlobalFooter';
 import { BookOpen, ClipboardCheck, Brain, Calendar, GraduationCap, Users, BarChart3, ChevronRight } from 'lucide-react';
@@ -8,6 +8,8 @@ import { PageSeo, buildFaqPageLd } from '@/components/seo/PageSeo';
 import { SEO_META } from '@/constants/seoMeta';
 
 const About = () => {
+  const location = useLocation();
+  const fromState = { from: location.pathname + location.search };
   return (
     <div className="min-h-screen bg-background">
       <PageSeo {...SEO_META.about} jsonLd={buildFaqPageLd(faqItems)} />
@@ -17,7 +19,7 @@ const About = () => {
           <Link to="/" className="text-xl font-bold text-primary">Edooqoo</Link>
           <div className="flex items-center gap-4">
             <Link to="/pricing" className="text-sm text-muted-foreground hover:text-primary transition-colors">Pricing</Link>
-            <Link to="/signup" className="text-sm bg-primary text-primary-foreground px-4 py-2 rounded-md hover:opacity-90 transition-opacity">Sign Up Free</Link>
+            <Link to="/signup" state={fromState} className="text-sm bg-primary text-primary-foreground px-4 py-2 rounded-md hover:opacity-90 transition-opacity">Sign Up Free</Link>
           </div>
         </div>
       </header>
@@ -222,7 +224,7 @@ const About = () => {
         <section className="text-center py-8 border rounded-lg bg-card mb-12">
           <h2 className="text-2xl font-semibold text-foreground mb-2">Ready to Try Edooqoo?</h2>
           <p className="text-muted-foreground mb-6">Sign up free and get 2 worksheets to start.</p>
-          <Link to="/signup" className="bg-primary text-primary-foreground px-8 py-3 rounded-md text-lg font-semibold hover:opacity-90 transition-opacity">
+          <Link to="/signup" state={fromState} className="bg-primary text-primary-foreground px-8 py-3 rounded-md text-lg font-semibold hover:opacity-90 transition-opacity">
             Sign Up Free
           </Link>
         </section>

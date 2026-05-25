@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -13,6 +13,8 @@ import { PricingCalculator } from '@/components/PricingCalculator';
 import { faqItems } from '@/constants/faqItems';
 
 export const PricingSection = () => {
+  const location = useLocation();
+  const fromState = { from: location.pathname + location.search };
   const { user, isRegisteredUser } = useAuthFlow();
   const { tokenLeft, profile } = useTokenSystem(user?.id);
   const { currentPlan, plans, canUpgradeTo, getUpgradePrice, getUpgradeTokens, getRecommendedFullTimePlan, getRecommendedPlanByLessons } = usePlanLogic(profile?.subscription_type);
@@ -187,7 +189,7 @@ export const PricingSection = () => {
                 asChild
                 disabled={isButtonDisabled('free')}
               >
-                <Link to="/signup">{getButtonText('free')}</Link>
+                <Link to="/signup" state={fromState}>{getButtonText('free')}</Link>
               </Button>
             </CardContent>
           </Card>
@@ -275,7 +277,7 @@ export const PricingSection = () => {
                 asChild
                 disabled={isButtonDisabled('side-gig')}
               >
-                <Link to="/signup">{getButtonText('side-gig')}</Link>
+                <Link to="/signup" state={fromState}>{getButtonText('side-gig')}</Link>
               </Button>
             </CardContent>
           </Card>
@@ -383,7 +385,7 @@ export const PricingSection = () => {
                 asChild
                 disabled={isButtonDisabled('full-time')}
               >
-                <Link to="/signup">{getButtonText('full-time')}</Link>
+                <Link to="/signup" state={fromState}>{getButtonText('full-time')}</Link>
               </Button>
             </CardContent>
           </Card>

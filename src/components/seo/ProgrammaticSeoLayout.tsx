@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { PageSeo, buildFaqPageLd } from '@/components/seo/PageSeo';
 
 export interface PseoFaq {
@@ -59,6 +59,10 @@ const ProgrammaticSeoLayout: React.FC<ProgrammaticSeoLayoutProps> = ({
   faqs,
   extraJsonLd,
 }) => {
+  const location = useLocation();
+  const ctaState = primaryCta.to.startsWith('/signup') || primaryCta.to.startsWith('/login')
+    ? { from: location.pathname + location.search }
+    : undefined;
   const faqLd = buildFaqPageLd(faqs);
   const crumbLd = buildBreadcrumbLd(breadcrumbs);
   const ld: Record<string, unknown>[] = [crumbLd, faqLd];
@@ -90,6 +94,7 @@ const ProgrammaticSeoLayout: React.FC<ProgrammaticSeoLayoutProps> = ({
           <p className="text-lg text-muted-foreground mb-6">{lead}</p>
           <Link
             to={primaryCta.to}
+            state={ctaState}
             className="inline-block bg-primary text-primary-foreground px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity"
           >
             {primaryCta.label}
@@ -173,6 +178,7 @@ const ProgrammaticSeoLayout: React.FC<ProgrammaticSeoLayoutProps> = ({
           <div className="flex flex-wrap gap-3 justify-center">
             <Link
               to={primaryCta.to}
+              state={ctaState}
               className="inline-block bg-primary text-primary-foreground px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity"
             >
               {primaryCta.label}

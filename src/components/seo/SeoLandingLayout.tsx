@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { PageSeo, buildFaqPageLd } from '@/components/seo/PageSeo';
 
 export interface SeoFaq {
@@ -61,6 +61,11 @@ const SeoLandingLayout: React.FC<SeoLandingLayoutProps> = ({
   ctaTitle = 'Ready to save 5+ hours per week?',
   ctaBody = 'Generate your first personalized worksheet in 60 seconds. Free plan includes 2 worksheets, no credit card required.',
 }) => {
+  const location = useLocation();
+  const ctaState = (to: string) =>
+    to.startsWith('/signup') || to.startsWith('/login')
+      ? { from: location.pathname + location.search }
+      : undefined;
   const faqLd = buildFaqPageLd(faqs);
   const jsonLd = seo.extraJsonLd
     ? Array.isArray(seo.extraJsonLd)
@@ -88,12 +93,14 @@ const SeoLandingLayout: React.FC<SeoLandingLayoutProps> = ({
           <div className="flex flex-wrap gap-3">
             <Link
               to={primaryCta.to}
+              state={ctaState(primaryCta.to)}
               className="inline-block bg-primary text-primary-foreground px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity"
             >
               {primaryCta.label}
             </Link>
             <Link
               to={secondaryCta.to}
+              state={ctaState(secondaryCta.to)}
               className="inline-block border border-input px-6 py-3 rounded-lg font-semibold text-foreground hover:bg-accent transition-colors"
             >
               {secondaryCta.label}
@@ -162,6 +169,7 @@ const SeoLandingLayout: React.FC<SeoLandingLayoutProps> = ({
           <div className="flex flex-wrap gap-3 justify-center">
             <Link
               to="/signup"
+              state={ctaState('/signup')}
               className="inline-block bg-primary text-primary-foreground px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity"
             >
               Sign up free — 2 worksheets included

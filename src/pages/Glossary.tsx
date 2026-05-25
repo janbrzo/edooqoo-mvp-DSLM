@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { PageSeo } from '@/components/seo/PageSeo';
 import { SEO_META } from '@/constants/seoMeta';
 
@@ -60,6 +60,8 @@ const glossaryTerms = [
 const alphabet = [...new Set(glossaryTerms.map(t => t.term[0].toUpperCase()))].sort();
 
 const Glossary = () => {
+  const location = useLocation();
+  const fromState = { from: location.pathname + location.search };
   return (
     <div className="min-h-screen bg-background">
       <PageSeo {...SEO_META.glossary} />
@@ -102,7 +104,7 @@ const Glossary = () => {
         <div className="mt-12 p-6 bg-primary/5 rounded-lg text-center">
           <p className="text-lg font-semibold text-foreground mb-2">Ready to put these concepts into practice?</p>
           <p className="text-muted-foreground mb-4">Edooqoo helps English teachers apply ELT best practices with AI-powered worksheet generation.</p>
-          <Link to="/signup" className="inline-block bg-primary text-primary-foreground px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity">
+          <Link to="/signup" state={fromState} className="inline-block bg-primary text-primary-foreground px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity">
             Try Edooqoo Free — 2 Worksheets Included
           </Link>
         </div>

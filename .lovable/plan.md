@@ -1,275 +1,296 @@
-# Plan v6.9.23 (rev3) — Dokończenie H2–H8 + wyjaśnienie GSC sitemap
 
-## Status implementacji (live)
-- ✅ H2 — Publish state hydratacja z DB w `PublishWorksheetButton` (useEffect + supabase.select). Test: Publish → F5 → button = "Public".
-- ✅ H3 — `toText()` zaaplikowany w fill-in-blanks, multiple-choice, true-false, matching, dialogue, error-correction, odd-one-out, word-order, synonyms/antonyms/paraphrasing/negative-prefixes/complete-word/word-formation, categorize. Brak `[object Object]`.
-- ✅ H7 — Sekret `BUG_REPORT_FROM_EMAIL` dodany. Funkcja `submit-bug-report` już go czyta od v6.8.6.
-- ✅ H8a — `bun scripts/seo/build-blog-index.mjs` → 207 blog posts + 70 landings parsed, sitemap +277 URL.
-- ⏳ H4 — do osobnej tury (17 callsites, ryzyko regresji UX).
-- ⏳ H5 — do osobnej tury (timing SSE, ryzyko crashu generatora).
-- ⏳ H6b–d — do osobnej tury (migracja + edge function + cron).
-- ⏳ H8b+c — do tury razem z H6 (docs odzwierciedlają finalny stan).
+# Plan v6.9.24 — Wdrożenie H4 + H5 + H6 + H8
+
+Bazuje na zatwierdzonym v6.9.23. H2/H3/H7/H8a już live.
 
 ---
 
-## Część A — Wyjaśnienie sprawy z Google Search Console (Twoje pytanie)
+## H4 — Signup Return-To Flow
 
-### Co widzę na Twoich zrzutach
+**Problem:** klik `sign up free` na `/gallery/...`, `/pricing`, `/blog`, landing pSEO → modal `/signup` → X lub login → ląduje na `/` lub `/dashboard` zamiast wrócić na poprzednią stronę.
 
-**Zrzut 1 (image-187):** masz już dodaną mapę witryny `https://edooqoo.com/sitemap.xml`, przesłaną i odczytaną przez Google **18 maja 2026**, status **"Sukces"**, **23 wykryte strony**.
+**Stan obecny (sprawdzone w kodzie):**
+- `Signup.tsx` JUŻ czyta `location.state.from` (linia 36: `fromPath = location.state?.from || '/'`) i po sukcesie robi `navigate(fromPath !== '/' ? fromPath : '/dashboard')` (linia 53).
+- `Login.tsx` JUŻ ma analogiczny `fromPath` (linia 24, 47).
+- Część callsite'ów już przekazuje `state` (StickyNav, AnonPreWorksheetBanner, AnonPostWorksheetCTA, FeatureNavPills, SignupPromptDialog).
+- **Brakuje:** propagacji `state.from` w ~25 pozostałych callsite'ach + brak `handleClose` w Signup (X w dialogu obecnie nie istnieje — Signup to pełna strona, nie modal). Trzeba dodać przycisk powrotu (`<ArrowLeft>` w nagłówku) jak w Login.
 
-**Zrzut 2 (image-188):** próbujesz dodać drugą mapę wpisując tylko `sitemap.xml` — Google odpowiada **"Nieprawidłowy adres mapy witryny"**.
-
-### Dlaczego pojawia się błąd
-
-Twoja właściwość w GSC to **Domain property** (`sc-domain:edooqoo.com`), nie URL-prefix. Dla Domain property Google wymaga w polu wpisania:
-
-- albo pełnego URL: `https://edooqoo.com/sitemap.xml`
-- albo ścieżki ze slashem na początku: `/sitemap.xml`
-
-Sam `sitemap.xml` (bez slasha) jest interpretowany jako URL względny → niepoprawny → błąd. To **nie jest** problem z plikiem na serwerze — plik istnieje, jest serwowany z HTTP 200 i już raz został odczytany.
-
-### Co realnie trzeba zrobić (a czego NIE trzeba)
-
-**NIE musisz** dodawać sitemap drugi raz. Już istnieje wpis dla `https://edooqoo.com/sitemap.xml`. Google co kilka dni automatycznie sam pobiera ten plik ponownie i indeksuje nowe URL-e.
-
-**Liczba "23 wykryte strony"** to **stary stan** sitemap sprzed naszych zmian — pochodzi z odczytu 18 maja 2026, kiedy plik zawierał ~23 URL-e (głównie core React routes). Po naszym deploy plik zawiera 1736 URL-i, ale Google **jeszcze nie pobrał** zaktualizowanej wersji.
-
-### Trzy opcje (od najmniej do najbardziej agresywnej)
-
-**Opcja A — Nic nie rób, poczekaj (rekomendacja):**
-
-- Google sam re-fetchuje sitemap co 1–7 dni.
-- Liczba "Wykryte strony" zaktualizuje się automatycznie do ~1736 w ciągu tygodnia.
-- Plus: nie ryzykujesz pomyłki w GSC.
-- Minus: czekanie do 7 dni na zauważenie przez Google nowych URL-i.
-
-**Opcja B — Wymuś re-fetch ręcznie (zalecane jeśli ci pilno):**
-
-1. Na liście "Przesłane mapy witryn" kliknij **trzy kropki ⋮** po prawej stronie wpisu `https://edooqoo.com/sitemap.xml`.
-2. Wybierz **"Usuń mapę witryny"** ("Remove sitemap"). To tylko czyści zapis o przesłaniu, nie kasuje pliku z serwera.
-3. W polu "Dodaj nową mapę witryny" wpisz `**https://edooqoo.com/sitemap.xml**` (pełny URL — to ważne, bo `sitemap.xml` samodzielnie nie działa dla Domain property — to właśnie ten błąd, który widziałeś).
-4. Klik **PRZEŚLIJ**.
-5. Status powinien przejść na "Sukces" w 5–30 minut, "Wykryte strony" w 24–72h zaktualizuje się na liczbę bliską 1736.
-
-**Opcja C — Pójście dalej (do rozważenia za 2–4 tygodnie po H1):** dodać dodatkowo dynamiczną sitemap galerii jako osobny wpis:
-
-- `https://abc.supabase.co/functions/v1/regenerate-gallery-sitemap` (już istnieje, sprawdziłem w `supabase/functions/regenerate-gallery-sitemap/index.ts`).
-- To pokaże Google strony `/gallery/<slug>` publikowane przez nauczycieli, oddzielnie od głównej sitemap.
-- Ale nie pilne — najpierw stabilizujemy 1736 URL-i z głównej sitemap.
-
-### Co zrobimy w kodzie w tym sprincie
-
-**Nic specjalnego dla GSC** — plik `public/sitemap.xml` już jest, już ma 1736 URL-i, już jest serwowany z HTTP 200. Akcja w GSC to **wyłącznie Twoja ręczna interakcja** po deploy. Dodam za to do dokumentacji `mem://seo/google-search-console-sitemap-workflow.md` notatkę: dla Domain property zawsze wpisywać pełny URL, nie samo "sitemap.xml".
-
----
-
-## Część B — Stan obecny (co już zrobione w v6.9.21 i v6.9.22)
-
-### Plan v6.9.21 — wykonany w pełni:
-
-- `GalleryExerciseRenderer.tsx` (29 typów ćwiczeń, read-only).
-- `legacyLinkMap.ts` + `resolveLegacyHref.ts` (v1, potem uproszczone w v6.9.22 do passthrough).
-- `supabase/functions/_shared/modelFailureLogger.ts` — istnieje, wpięty w `generate-audio`.
-- `scripts/audit-llm-models.ts` (Procedure B, Deno).
-- Migracja: `error_code='model_deprecation'/'model_failure'` w `error_logs` + RPC `get_active_model_issues()`.
-- Czerwony baner na `StatusPage.tsx` (aktywne issues z ostatnich 24h).
-- `submit-bug-report` — funkcja edge istnieje, gotowa na ENV.
-
-### Plan v6.9.22 — Sprint H1 wykonany:
-
-- **277 statycznych HTML** przywróconych w `public/blog/` (207) i `public/` (70).
-- `scripts/seo/build-blog-index.mjs` — skrypt istnieje.
-- `public/sitemap.xml` → **1736 URL-i** (1459 React/pSEO + 277 static HTML).
-- `Blog.tsx`, `Resources.tsx`, `GlobalFooter.tsx` używają `<a href>` dla `.html` (full-page nav, opuszcza SPA).
-- `resolveLegacyHref.ts` uproszczony do passthrough, bez `comingSoon`.
-- `toText()` helper w `GalleryExerciseRenderer.tsx` — częściowo (sweep w H3 tego sprintu).
-
-### Weryfikacja produkcji (zrobiona):
-
-
-| URL                                                   | HTTP  |
-| ----------------------------------------------------- | ----- |
-| `/modal-verbs-worksheets-esl.html`                    | 200 ✅ |
-| `/blog/reading-comprehension-activities-english.html` | 200 ✅ |
-| `/business-english-worksheet-generator.html`          | 200 ✅ |
-| `/edooqoo-vs-magicschool.html`                        | 200 ✅ |
-
-
-**Wniosek: Problem 4 (legacy SEO) rozwiązany na produkcji.**
-
----
-
-## Część C — Sprinty H2–H8 do wykonania (pełna specyfikacja)
-
-### H2 — Persystencja stanu Publish (Problem 1A)
-
-**Co jest źle:** po publikacji worksheetu i odświeżeniu strony przycisk "Public" wraca do "Publish". `PublishWorksheetButton` przyjmuje propsy `isPublic` i `publicSlug`, ale callsite nie przekazuje danych z bazy.
-
-**Diagnoza:** kolumny `worksheets.is_public` (bool), `worksheets.public_slug` (text), `worksheets.published_at` (timestamptz) istnieją (migracja Sprint 3). Hook `useWorksheetState` ładuje rekord, ale nie wyłuskuje tych pól; `WorksheetPage` renderuje button bez nich; button ma lokalny stan, który nie jest hydratowany przy mount.
-
-**Zmiany (3 pliki):**
-
-1. `**src/hooks/useWorksheetState.tsx**` — rozszerzyć stan o `isPublic: boolean` i `publicSlug: string | null`; w mapperze worksheet → state wyciągnąć `is_public` i `public_slug` z rekordu; zwrócić w obiekcie hooka.
-2. `**src/pages/WorksheetPage.tsx**` (potwierdzić callsite przez `rg "PublishWorksheetButton"`) — wyciągnąć `isPublic`, `publicSlug` z hooka i przekazać jako propsy do `<PublishWorksheetButton>`.
-3. `**src/components/worksheet/PublishWorksheetButton.tsx**` — dodać `useEffect(() => { setPub(isPublic); setSlug(publicSlug); }, [isPublic, publicSlug])` żeby button re-syncował się przy hydratacji propsów.
-
-**Test akceptacyjny:** Publish → F5 → button pokazuje "Public" + otwiera dialog z opcją Unpublish.
-
----
-
-### H3 — Dokończenie `toText()` w GalleryExerciseRenderer (Problem 1B)
-
-**Co jest źle:** strona galerii pokazuje `[object Object]` w zadaniach typu `categorize`. AI generuje items jako obiekty `{ text: "museum", category: "places" }`, a JSX renderuje surowo `{item}` → React stringifikuje to jako `[object Object]`.
-
-**Zmiany (1 plik, `src/components/gallery/GalleryExerciseRenderer.tsx`):**
-
-Sweep wszystkich miejsc, gdzie renderowany jest element tablicy z `ex.items/pairs/options/lines/steps/statements`:
-
-
-| Case                  | Pole           | Fix                                            |
-| --------------------- | -------------- | ---------------------------------------------- |
-| `categorize`          | `items[]`      | `{toText(it)}`                                 |
-| `matching`            | `pairs[]`      | `{toText(pair.left)}` ↔ `{toText(pair.right)}` |
-| `dialogue`            | `lines[]`      | `{toText(l.speaker)}: {toText(l.text)}`        |
-| `sequence`/`ordering` | `steps[]`      | `{toText(step)}`                               |
-| `true-false`          | `statements[]` | `{toText(s.text                                |
-| `multiple-choice`     | `options[]`    | `{toText(opt)}` (prewencyjnie)                 |
-
-
-Reguła: każde `{var}` w JSX wewnątrz tego pliku, gdzie `var` może być obiektem AI-generated → opakować w `toText()`.
-
-**Test akceptacyjny:** `/gallery/choosing-your-adventure-activities-in-a-new-city-8d1f6a` → brak `[object Object]`.
-
----
-
-### H4 — Signup return-to flow (Problem 2)
-
-**Co jest źle:** "sign up free" na `/gallery/...` → modal `/signup` → X → ląduje na `/` zamiast wrócić na `/gallery/...`. Tracimy kontekst i intencję użytkownika.
-
-**Rozwiązanie:**
-
-1. **Nowy hook `src/hooks/useSignupLinkState.ts`:**
+### H4.1 — Nowy hook `src/hooks/useSignupLinkState.ts`
 
 ```ts
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useCallback } from 'react';
 
+/**
+ * Centralizes "remember where user came from" before /signup or /login.
+ * Used by every CTA button that links into the auth flow.
+ *
+ * Usage:
+ *   const { signupTo, signupState, goToSignup } = useSignupLinkState();
+ *   <Link to={signupTo} state={signupState}>Sign up</Link>
+ *   // or imperative: onClick={() => goToSignup()}
+ *
+ * NOTE: signupTo defaults to '/signup'. Pass query-string overrides as arg
+ * to goToSignup or build manually: `${signupTo}?level=B1`.
+ */
 export function useSignupLinkState() {
   const loc = useLocation();
   const nav = useNavigate();
-  const goToSignup = (opts?: { replace?: boolean }) =>
-    nav('/signup', {
-      state: { from: loc.pathname + loc.search },
-      replace: opts?.replace
-    });
-  return { goToSignup, currentPath: loc.pathname + loc.search };
+  const from = loc.pathname + loc.search;
+  const signupState = { from };
+  const goToSignup = useCallback(
+    (to: string = '/signup') => nav(to, { state: signupState }),
+    [nav, from]
+  );
+  const goToLogin = useCallback(
+    () => nav('/login', { state: signupState }),
+    [nav, from]
+  );
+  return { signupTo: '/signup', loginTo: '/login', signupState, from, goToSignup, goToLogin };
 }
 ```
 
-2. `**src/pages/Signup.tsx**` — w handlerze close/X:
+### H4.2 — `Signup.tsx`: dodanie "Back" CTA
 
-```ts
-const location = useLocation();
-const from = (location.state as any)?.from || '/';
-const handleClose = () => nav(from, { replace: true });
+W nagłówku karty obok loga dodać:
+```tsx
+{fromPath !== '/' && (
+  <Button variant="ghost" size="sm" onClick={() => navigate(fromPath)} className="absolute left-4 top-4">
+    <ArrowLeft className="mr-1 h-4 w-4" /> Back
+  </Button>
+)}
 ```
+Import `ArrowLeft` z `lucide-react`. Identyczna logika w `Login.tsx` (już ma navigation, dodać widoczny `<ArrowLeft>` jeśli go nie ma — sprawdzić linia 24).
 
-Również po pomyślnej rejestracji: jeśli `from` istnieje, redirect tam; inaczej zachowanie obecne (`/dashboard`).
+### H4.3 — Sweep callsites (29 plików, mechanicznie)
 
-3. **Callsite'y (~16 miejsc)** — wszystkie `<Link to="/signup">` i `navigate('/signup')` zamienić na `goToSignup()`. Priorytetowo:
-  - `src/pages/gallery/PublicGalleryWorksheetPage.tsx` (CTA "Try 1-Minute Prep free" i "sign up free")
-  - `src/pages/WorksheetPage.tsx` (anon CTA)
-  - `src/pages/PublicBookingPage.tsx`
-  - `src/components/GlobalFooter.tsx`, `StickyNav.tsx`, hero CTA, anon banery
-  - Pełny zbiór: `rg "/signup" src/ -l`
+**Zasada:** zachowaj istniejące query stringi (np. `?level=B1`, `?topic=...&level=...`). Tylko dodaj `state={{ from: location.pathname + location.search }}` do `<Link>` lub `state` do `navigate()`.
 
-**Test akceptacyjny:** klik z `/gallery/...` → modal → X → wracam dokładnie tam. To samo z `/pricing`.
+Plik → linia → zmiana (wszystkie wymagają `useLocation()` jeśli brak; albo zastosowanie hooka `useSignupLinkState()`):
+
+| Plik | Linie | Akcja |
+|---|---|---|
+| `src/components/anon/WelcomeBackBanner.tsx` | 54 | Dodać `state={fromState}` (już ma pattern z `state` w innych anon banerach) |
+| `src/components/PricingSection.tsx` | 190, 278, 386 | Dodać `state={{from: location.pathname}}` |
+| `src/components/LoginRequiredModal.tsx` | 24 | `navigate('/signup', { state: { from: location.pathname } })` |
+| `src/components/GlobalFooter.tsx` | 44 | `state` na `<Link to="/signup">` |
+| `src/components/landing/StickyNav.tsx` | 57 | `navigate('/signup', { state: { from: location.pathname } })` |
+| `src/pages/Pricing.tsx` | 144, 200, 323 | `navigate('/signup', { state })` |
+| `src/pages/gallery/PublicGalleryWorksheetPage.tsx` | 111, 132 | `state` na `<Link>` |
+| `src/pages/About.tsx` | 20, 225 | `state` |
+| `src/pages/Blog.tsx` | 344 | `state` |
+| `src/pages/Resources.tsx` | 145 | `state` |
+| `src/pages/Glossary.tsx` | 105 | `state` |
+| `src/pages/HowItWorks.tsx` | 118 | `state` |
+| `src/pages/ExerciseTypes.tsx` | 82 | `state` |
+| `src/pages/Prompts.tsx` | 204 | Zamiana `<a href>` na `<Link to>` + `state` |
+| `src/pages/WorksheetExpiredPage.tsx` | 46 | `state` |
+| `src/pages/tools/VocabCefrChecker.tsx` | 154 | `state` |
+| `src/pages/tools/LessonPlanGenerator.tsx` | 288 | `state` |
+| `src/pages/tools/CefrLevelTest.tsx` | 91, 178 | `state` (zachować `?level=`) |
+| `src/pages/seo/programmatic/TopicLevelPage.tsx` | 74 | `state` |
+| `src/pages/seo/programmatic/PersonaPage.tsx` | 45 | `state` |
+| `src/pages/seo/programmatic/ExerciseTopicPage.tsx` | 55 | `state` |
+| `src/components/features/FeaturePageLayout.tsx` | 35 | `state` |
+| `src/components/features/FeatureHero.tsx` | 22 (default) | Akceptować `state` z propsa, przekazywać do `<Link>` |
+| `src/components/features/FeatureCTA.tsx` | 17 (default) | jak wyżej |
+| `src/components/seo/SeoLandingLayout.tsx` | 50, 164 | `state` |
+| `src/constants/anonFeaturesShowcase.ts` | 31–71 | Constants — bez zmian. Komponent konsumujący (znajdę przez `rg "ctaHref"`) dostaje już-string i sam dodaje `state`. |
+
+### H4.4 — Test akceptacyjny
+
+- `/gallery/<dowolny>` → klik "sign up free" → URL `/signup` → klik nowy "Back" → wraca na `/gallery/<dowolny>`.
+- `/pricing` → "Start free" → `/signup` → "Back" → `/pricing`.
+- `/blog/<slug>.html` — statyczny HTML, nie ma React Routera; jego CTA już są `<a href>`, return-to nie dotyczy.
+
+**Pliki zmienione:** ~28 + 1 nowy hook + 2 page'e (Signup, Login).
 
 ---
 
-### H5 — SSE heartbeat + silent retry (Problem 6)
+## H5 — SSE Heartbeat + Silent Retry
 
-**Co jest źle:** stream `generateWorksheet` umiera po 40s ciszy → fałszywy modal "Connection lost — server stopped responding for 40s". Token nie jest zużywany, ale UX = zły.
+**Problem:** `generateWorksheet` często traci 40s ciszy → false-positive modal "Connection lost".
 
-**Dwustronne rozwiązanie:**
+**Stan obecny (sprawdzone):**
+- `src/services/worksheetStreamService.ts` ma `HEARTBEAT_MS = 40000`, resetowany na każdy `chunk`, ale brak server-side keepalive.
+- `supabase/functions/generateWorksheet/streaming.ts` eksportuje `createSSEStream()` z metodami `send/close`.
+- W `generateWorksheet/index.ts` (1140 linii) wywołanie `sseStream.send('progress', ...)` istnieje na progressie generowania.
 
-#### H5a — Serwer: heartbeat
+### H5a — Serwer: heartbeat co 15s
 
-`**supabase/functions/generateWorksheet/index.ts**` (część SSE writer) — co 15s wysyłka komentarza SSE (`: keepalive`), który parser klienta ignoruje, ale TCP keep-alive jest zachowany:
+**`supabase/functions/generateWorksheet/streaming.ts`** — dopisać metodę `heartbeat()` do interfejsu `SSEStream`:
 
 ```ts
-const heartbeat = setInterval(() => {
-  try { writer.write(encoder.encode(`: keepalive ${Date.now()}\n\n`)); }
-  catch { clearInterval(heartbeat); }
-}, 15000);
-try {
-  // ... istniejąca logika streamingu
-} finally {
-  clearInterval(heartbeat);
-  await writer.close();
+export interface SSEStream {
+  readable: ReadableStream;
+  send: (event: string, data: any) => void;
+  heartbeat: () => void;   // ← NEW
+  close: () => void;
 }
 ```
 
-#### H5b — Klient: silent retry
+W ciele `createSSEStream()` przed `return {`:
+```ts
+const heartbeat = () => {
+  try {
+    controller.enqueue(new TextEncoder().encode(`event: keepalive\ndata: {"t":${Date.now()}}\n\n`));
+  } catch (e) {
+    console.warn('SSE heartbeat skipped (controller closed)', e);
+  }
+};
+return { readable, send, heartbeat, close: ... };
+```
 
-`**src/services/worksheetStreamService.ts**`:
+**`supabase/functions/generateWorksheet/index.ts`** — znaleźć miejsce, gdzie tworzony jest `sseStream` (w handlerze streamingowym). Tuż po utworzeniu dodać:
+```ts
+const hbInterval = setInterval(() => sseStream.heartbeat(), 15000);
+```
+W `finally` (przed `sseStream.close()`):
+```ts
+clearInterval(hbInterval);
+```
+Jeśli kod ma wiele `try/catch/return`, ujednolicić w jeden `try { ... } finally { clearInterval(hbInterval); sseStream.close(); }`.
 
-- Watchdog timeout 40s → **45s** (margines dla 3× heartbeat).
-- Dodać `retryCount` w closure.
-- Pierwszy timeout I `retryCount === 0` → **cicho** zrestartuj request (bez `onError`, bez toast), inkrementuj `retryCount`.
-- Drugi timeout → standardowy `onError` → modal jak teraz.
-- Refaktor: wydzielić logikę startującą stream do `startStream()`, żeby retry mógł ją wywołać ponownie.
+### H5b — Klient: ignorowanie keepalive + silent retry
 
-**Test akceptacyjny:**
+**`src/services/worksheetStreamService.ts`**:
 
-- Symulacja: `await new Promise(r => setTimeout(r, 30000))` w środku `generateWorksheet` → klient nie pokazuje modala.
-- Symulacja: kill edge function pośrodku → klient cicho retryuje raz, drugi fail → modal.
+1. **Heartbeat timeout** → `45000` ms (margines dla 3× 15s + sieć).
+2. **Obsługa `keepalive`** w switchu (zignoruj — server-side `event: keepalive` już resetuje `resetHeartbeat()` przez sam fakt nadejścia chunka, bo `resetHeartbeat()` jest wywoływane przed pętlą `for (const event of events)`).
+3. **Silent retry** — pierwszy `AbortError` z heartbeat-timeout NIE wywołuje `onError`, tylko cicho restartuje `fetch(GENERATE_WORKSHEET_URL, ...)`. Drugi → `onError` jak dzisiaj.
+
+Refaktor (skrót — pełna funkcja będzie ~190 linii vs obecnie 148):
+
+```ts
+export function streamWorksheetGeneration(formData, userId, callbacks): AbortController {
+  let retryCount = 0;
+  let activeController = new AbortController();
+
+  const startStream = (): AbortController => {
+    const controller = new AbortController();
+    activeController = controller;
+    let lastProgress = { exercisesGenerated: 0, expectedTotal: 0 };
+    let heartbeatTimer: ReturnType<typeof setTimeout> | null = null;
+
+    const HEARTBEAT_MS = 45000;
+    const onSilentTimeout = () => {
+      if (retryCount < 1) {
+        retryCount++;
+        devLog('🔁 Heartbeat timeout — silent retry attempt 1');
+        try { controller.abort(); } catch {}
+        startStream();  // restart
+      } else {
+        // Second timeout → surface to user
+        const detail = lastProgress.exercisesGenerated > 0
+          ? `Connection lost — generated ${lastProgress.exercisesGenerated}/${lastProgress.expectedTotal || '?'} exercises. Please retry.`
+          : 'Connection lost — server unresponsive. Please retry.';
+        callbacks.onError?.(new Error(detail));
+      }
+    };
+    const resetHeartbeat = () => {
+      if (heartbeatTimer) clearTimeout(heartbeatTimer);
+      heartbeatTimer = setTimeout(onSilentTimeout, HEARTBEAT_MS);
+    };
+    resetHeartbeat();
+
+    fetch(GENERATE_WORKSHEET_URL, { /* same body */ signal: controller.signal })
+      .then(/* SAME parsing loop, dodaj case 'keepalive': break; */)
+      .catch(error => {
+        if (heartbeatTimer) clearTimeout(heartbeatTimer);
+        if (error.name === 'AbortError' && retryCount >= 1) {
+          // silent retry path — nie wywołuj onError
+          return;
+        }
+        if (error.name === 'AbortError') return;  // user abort
+        callbacks.onError?.(error);
+      })
+      .finally(() => { if (heartbeatTimer) clearTimeout(heartbeatTimer); });
+
+    return controller;
+  };
+
+  startStream();
+
+  // Public AbortController — abort() forwards to currently-active stream
+  const publicController = new AbortController();
+  publicController.signal.addEventListener('abort', () => {
+    try { activeController.abort(); } catch {}
+  });
+  return publicController;
+}
+```
+
+**Kluczowe założenie bezpieczeństwa:** silent retry powtarza tylko request HTTP — backend `generateWorksheet` jest idempotentny per worksheetId? **NIE** — może wygenerować drugi worksheet. **Mitigacja:** retry tylko gdy `lastProgress.exercisesGenerated === 0` (nic jeszcze nie dotarło) → wtedy retry. Jeśli już są dane → user surface error (lepiej pokazać błąd niż wygenerować duplikat i odjąć token).
+
+Zmodyfikuj `onSilentTimeout`:
+```ts
+const onSilentTimeout = () => {
+  if (retryCount < 1 && lastProgress.exercisesGenerated === 0) {
+    retryCount++;
+    /* silent retry */
+  } else {
+    /* surface error */
+  }
+};
+```
+
+### H5c — Test akceptacyjny
+
+1. Manualnie: wstaw `await new Promise(r => setTimeout(r, 25000))` w `generateWorksheet/index.ts` w środku pętli generującej → klient nie pokaże modala (heartbeat keepalive co 15s spłaszcza).
+2. Manualnie: na chwilę zatrzymać edge function (uncaught throw przed pierwszym `send('progress')`) → klient cicho retryuje raz, drugi timeout → modal.
+3. Regresja: zwykłe generowanie 6-ćwiczeniowe → bez zmian UX.
+
+**Pliki zmienione:** 2 (`streaming.ts`, `worksheetStreamService.ts`) + 1 fragment w `generateWorksheet/index.ts` (setInterval/clearInterval).
 
 ---
 
-### H6 — Monitoring modeli LLM kompleksowo (Problem 5)
+## H6 — Multi-Provider Model Monitoring
 
-**Rekonstrukcja A–Z, dlaczego deprecation `gpt-4o-audio-preview` zaskoczył:**
+**Cel:** wcześnie wykrywać deprecation modeli (jak `gpt-4o-audio-preview` w v6.9.21).
 
-A. Nauczyciel zgłosił bug: nie działa generowanie audio.
-B. Diagnoza: `generate-audio` używało `gpt-4o-audio-preview` → OpenAI go zdeprecjonowało bez ostrzeżenia.
-C. Bugfix (już zrobiony): rozdzielenie na `gpt-4o-mini` (transcript) + `tts-1` (TTS). Działa.
-D. Plan v6.9.21 dodał: `logModelFailure`, RPC, baner na `/status`, skrypt audytu.
-E. Co realnie działa: infrastruktura zbudowana, ale logger wpięty tylko w 1 z 12 funkcji, skrypt audytu manualny (nikt go nie uruchamia), brak tabeli historii.
-F. Co naprawiamy w H6: dystrybucja loggera, tabela `model_health_checks`, codzienny cron 06:00 UTC.
+### H6a — Wpięcie `logModelFailure` w 11 funkcji edge
 
-#### H6a — `logModelFailure` w 11 pozostałych funkcjach
-
-Wzór: w bloku `catch` po fetch do providera lub przed `throw` gdy `!response.ok`:
+Dla każdej funkcji w liście poniżej: znaleźć blok `catch` po `fetch` do providera (lub po `openai.chat.completions.create`, lub po `model.generateContent`), dodać:
 
 ```ts
-if (response.status === 404 || response.status === 410 || response.status >= 500) {
+import { logModelFailure } from '../_shared/modelFailureLogger.ts';
+
+// w catch:
+const status = (err as any)?.status ?? (err as any)?.response?.status ?? 0;
+const model = '<hardcoded-or-from-variable>';
+if (status === 404 || status === 410 || status >= 500) {
   await logModelFailure({
-    model,
-    provider: 'openai', // lub 'google', 'anthropic', 'elevenlabs', 'lovable-gateway'
-    status: response.status,
-    endpoint: '/v1/chat/completions',
-    error: errorText,
-    functionName: 'generateWorksheet'
+    model, provider: '<provider>', status,
+    endpoint: '<endpoint-path>',
+    error: err instanceof Error ? err.message : String(err),
+    functionName: '<this-fn-name>'
   });
 }
+throw err;  // ← zachować istniejący flow
 ```
 
-Funkcje do wpięcia (11):
+**Lista funkcji** (po skanie `rg -ln "OPENAI_API_KEY|GEMINI_API_KEY|..."`):
 
-1. `generateWorksheet`
-2. `verify-open-answers`
-3. `translate-flashcard`
-4. `process-welcome-test`
-5. `suggest-exercises`
-6. `generate-welcome-test-audio`
-7. `classify-knowledge-entry`
-8. `generate-curriculum-phases`
-9. `generate-media-exercises`
-10. `generate-image`
-11. `generate-timeline`
+| # | Funkcja | Provider(y) | Model(e) |
+|---|---|---|---|
+| 1 | `generateWorksheet` | google + openai | gemini-2.5-flash, gpt-4o-mini (repair) |
+| 2 | `verify-open-answers` | google | gemini-2.5-flash |
+| 3 | `translate-flashcard` | google | gemini-2.5-flash |
+| 4 | `process-welcome-test` | google | gemini-2.5-flash |
+| 5 | `suggest-exercises` | google | gemini-2.5-flash |
+| 6 | `generate-welcome-test-audio` | openai | tts-1 |
+| 7 | `classify-knowledge-entry` | google | gemini-2.5-flash |
+| 8 | `generate-curriculum-phases` | google | gemini-2.5-flash |
+| 9 | `generate-media-exercises` | google | gemini-2.5-flash |
+| 10 | `generate-image` | openai | gpt-image-1 (lub inny — sprawdzić w pliku) |
+| 11 | `generate-timeline` | google | gemini-2.5-flash |
+| 12 | `transcribe-audio` | openai | whisper-1 |
 
-#### H6b — Tabela `model_health_checks` (migracja)
+(`generate-audio` już ma wpiety logger od v6.9.21 — pomijamy.)
+
+**Wzór dla każdego pliku:** 5–10 dodanych linii. Ryzyko regresji minimalne (try/catch tylko wrapuje istniejący błąd, nie zmienia flow).
+
+### H6b — Migracja: tabela `model_health_checks`
 
 ```sql
 CREATE TABLE public.model_health_checks (
@@ -281,147 +302,222 @@ CREATE TABLE public.model_health_checks (
   severity text NOT NULL CHECK (severity IN ('ok','warning','critical','skipped')),
   details jsonb
 );
-
 ALTER TABLE public.model_health_checks ENABLE ROW LEVEL SECURITY;
-
-CREATE POLICY "service_role_only" ON public.model_health_checks
-  FOR ALL USING (false);
-
+CREATE POLICY "service_role_only_read" ON public.model_health_checks
+  FOR SELECT USING (public.has_role(auth.uid(), 'admin'::app_role));
 CREATE INDEX idx_mhc_checked_at ON public.model_health_checks(checked_at DESC);
-CREATE INDEX idx_mhc_severity ON public.model_health_checks(severity)
+CREATE INDEX idx_mhc_severity_active ON public.model_health_checks(severity)
   WHERE severity IN ('critical','warning');
 ```
 
-#### H6c — Nowa edge function `audit-llm-models`
+Uwaga: brak `INSERT` policy → tylko `service_role` (omija RLS) może wpisywać. Admini mogą czytać przez panel `/admin/error-logs` (rozszerzymy view w osobnej turze; na razie SQL Editor wystarczy).
+
+### H6c — Nowa edge function `audit-llm-models`
 
 `supabase/functions/audit-llm-models/index.ts`:
 
-- Port logiki ze skryptu Deno do edge function.
-- Live-check przeciw OpenAI / Google / Anthropic / ElevenLabs / Lovable.
-- Dla każdego modelu wpis do `model_health_checks`.
-- Gdy `severity='critical'` (HTTP 404/410) → dodatkowo `logModelFailure()`, żeby baner na `/status` zaświecił się natychmiast.
-- Zwraca JSON: `{checked: N, critical: X, warning: Y, ok: Z}`.
+```ts
+import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { logModelFailure } from "../_shared/modelFailureLogger.ts";
 
-#### H6d — Cron daily 06:00 UTC
+const corsHeaders = { /* same */ };
+const TARGETS = [
+  { provider: 'openai',  model: 'gpt-4o-mini',         endpoint: 'https://api.openai.com/v1/chat/completions' },
+  { provider: 'openai',  model: 'tts-1',               endpoint: 'https://api.openai.com/v1/audio/speech' },
+  { provider: 'openai',  model: 'whisper-1',           endpoint: 'https://api.openai.com/v1/models/whisper-1' },
+  { provider: 'openai',  model: 'gpt-image-1',         endpoint: 'https://api.openai.com/v1/models/gpt-image-1' },
+  { provider: 'google',  model: 'gemini-2.5-flash',    endpoint: 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash' },
+];
+
+serve(async (req) => {
+  if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
+  const sb = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
+  const results: any[] = [];
+  let critical = 0, warning = 0, ok = 0;
+
+  for (const t of TARGETS) {
+    let status = 0, severity: 'ok'|'warning'|'critical'|'skipped' = 'skipped', detail: any = null;
+    try {
+      let url = t.endpoint;
+      const headers: Record<string,string> = {};
+      if (t.provider === 'openai') {
+        const key = Deno.env.get('OPENAI_API_KEY');
+        if (!key) { severity = 'skipped'; detail = { reason: 'no_api_key' }; throw 0; }
+        headers['Authorization'] = `Bearer ${key}`;
+      } else if (t.provider === 'google') {
+        const key = Deno.env.get('GEMINI_API_KEY');
+        if (!key) { severity = 'skipped'; detail = { reason: 'no_api_key' }; throw 0; }
+        url = `${t.endpoint}?key=${key}`;
+      }
+      // GET model meta — istnieje? Cheap call, no token cost.
+      const resp = await fetch(url, { method: 'GET', headers });
+      status = resp.status;
+      if (status === 404 || status === 410) { severity = 'critical'; critical++; }
+      else if (status >= 500) { severity = 'warning'; warning++; }
+      else if (status >= 200 && status < 300) { severity = 'ok'; ok++; }
+      else { severity = 'warning'; warning++; detail = { body: (await resp.text()).slice(0, 300) }; }
+
+      if (severity === 'critical') {
+        await logModelFailure({
+          model: t.model, provider: t.provider, status,
+          endpoint: t.endpoint, error: `audit detected ${status}`,
+          functionName: 'audit-llm-models',
+        });
+      }
+    } catch (e) {
+      if (severity !== 'skipped') { severity = 'warning'; warning++; detail = { error: String(e).slice(0, 300) }; }
+    }
+    await sb.from('model_health_checks').insert({
+      provider: t.provider, model: t.model, http_status: status, severity, details: detail,
+    });
+    results.push({ ...t, status, severity });
+  }
+
+  return new Response(JSON.stringify({
+    checked: TARGETS.length, critical, warning, ok, results,
+  }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+});
+```
+
+**Uwagi:**
+- Dla OpenAI używamy `GET /v1/models/<id>` (404 jeśli zdeprecjonowany).
+- Dla Google `GET /v1beta/models/<id>?key=...` (404 jeśli deprec).
+- Endpointy `tts-1` i `chat/completions` testujemy via `/v1/models/<id>` zamiast prawdziwego call — żeby nie palić tokenów.
+- `whisper-1` przez `/v1/models/whisper-1`.
+- ElevenLabs/Anthropic: nieużywane obecnie — nie dodajemy. Lista TARGETS = tylko realnie używane.
+
+### H6d — Cron daily 06:00 UTC
 
 ```sql
+-- pg_cron + pg_net (już włączone w v6.9.21)
 SELECT cron.schedule(
   'daily-llm-model-audit',
   '0 6 * * *',
   $$
   SELECT net.http_post(
-    url := 'https://<project-ref>.supabase.co/functions/v1/audit-llm-models',
+    url := 'https://bvfrkzdlklyvnhlpleck.supabase.co/functions/v1/audit-llm-models',
     headers := jsonb_build_object(
       'Content-Type', 'application/json',
-      'Authorization', 'Bearer <SERVICE_ROLE_KEY>'
+      'Authorization', 'Bearer ' || (SELECT decrypted_secret FROM vault.decrypted_secrets WHERE name = 'service_role_key' LIMIT 1)
     ),
     body := '{}'::jsonb
-  ) AS request_id;
+  );
   $$
 );
 ```
 
-**Test akceptacyjny:** ręcznie `POST /functions/v1/audit-llm-models` → JSON. `SELECT * FROM model_health_checks ORDER BY checked_at DESC LIMIT 20;` → wpisy widoczne.
+**Uwaga o vault.decrypted_secrets:** jeśli sekret `service_role_key` nie jest w Vault, dodać go (jednorazowo, ręcznie w SQL Editorze przez `select vault.create_secret(...)` lub w cron użyć anon key z `verify_jwt=false` na funkcji). Drugi wariant bezpieczniejszy: w `supabase/config.toml` ustawić `verify_jwt = false` dla `audit-llm-models` i wysyłać bez auth z crona — bo funkcja sama nic destrukcyjnego nie robi (tylko czyta external API + INSERT do `model_health_checks` jako service_role z env).
 
----
-
-### H7 — `BUG_REPORT_FROM_EMAIL` (Problem 3)
-
-**Stan:** sekret dodany; funkcja `submit-bug-report` go nie czyta.
-
-**Zmiana (1 plik, `supabase/functions/submit-bug-report/index.ts`):**
-
-```ts
-const fromAddr = Deno.env.get('BUG_REPORT_FROM_EMAIL')
-              || 'Edooqoo Bugs <notifications@edooqoo.com>';
-// w body do Resend:
-from: fromAddr,
+Polecane: `verify_jwt = false` + brak `Authorization` header w cronie. Edit `supabase/config.toml`:
+```toml
+[functions.audit-llm-models]
+verify_jwt = false
 ```
 
-**Test akceptacyjny:** wyślij bug → mail z `From: Edooqoo Bugs <notifications@edooqoo.com>`.
+### H6e — Test akceptacyjny
+
+- Ręcznie: `POST /functions/v1/audit-llm-models` → JSON `{checked:5, critical:0, warning:0, ok:5, results:[...]}`.
+- `SELECT * FROM model_health_checks ORDER BY checked_at DESC LIMIT 5;` → 5 wpisów `severity='ok'`.
+- Symulacja deprecation: `TARGETS` dodać fake `gpt-4o-audio-preview` → audit zwraca `critical:1`, `error_logs` dostaje wpis `model_deprecation`, baner na `/status` zaświeca się.
+- Cron: `SELECT * FROM cron.job WHERE jobname = 'daily-llm-model-audit';` → istnieje. Po 06:00 UTC następnego dnia: nowe 5 wpisów w `model_health_checks`.
+
+**Pliki zmienione:** 12 funkcji (logger) + 1 nowa funkcja (`audit-llm-models/index.ts`) + 1 migracja + 1 cron SQL + 1 update `supabase/config.toml`.
 
 ---
 
-### H8 — Dokumentacja, memory, sprzątanie
+## H8 — Dokumentacja i memory
 
-#### H8a — Uruchomienie skryptu blog index
+### H8b — RAG injection do `docs/llm-context.md` + `llms.txt` + `public/llms.txt`
 
-`bun scripts/seo/build-blog-index.mjs` → wygeneruje `src/data/blogIndex.ts` z 277 wpisami; `Blog.tsx` automatycznie pokaże pełną listę.
+Sprawdzić, czy `docs/llm-context.md`, `llms.txt`, `public/llms.txt` istnieją (jeśli nie — utworzyć). Dopisać sekcje (format: Problem → Solution → Technical Mechanics + RAG Keywords):
 
-#### H8b — RAG injection do `docs/llm-context.md` + `llms.txt` + `public/llms.txt`
+1. **Publish State Persistence**
+   - **Problem:** Teacher publishes a worksheet; after page reload the button reverts to "Publish".
+   - **Solution:** PublishWorksheetButton hydrates `is_public`/`public_slug` from `worksheets` table on mount.
+   - **Mechanics:** `useEffect([worksheetId])` → `supabase.from('worksheets').select('is_public, public_slug').eq('id', worksheetId).maybeSingle()` → `setPub`/`setSlug`. Two extra `useEffect` re-sync if parent passes props.
+   - **RAG Keywords:** publish state, hydration, worksheet visibility, gallery slug, public flag persistence, page refresh button state
 
-Format: **Problem → Edooqoo.com Solution → Technical Mechanics + RAG Keywords**
+2. **Signup Return-To Navigation**
+   - **Problem:** "Sign up free" CTA on /gallery/x → /signup → success → user lands on /dashboard instead of returning to /gallery/x.
+   - **Solution:** `useSignupLinkState` hook centralizes `location.state.from`; Signup.tsx reads it; Login.tsx already did. 28 callsites updated.
+   - **Mechanics:** Hook returns `{ signupTo, signupState: { from: pathname+search }, goToSignup }`. CTAs use `<Link to={signupTo} state={signupState}>`. Signup post-signup redirect: `nav(fromPath !== '/' ? fromPath : '/dashboard')`.
+   - **RAG Keywords:** return-to navigation, location state, post-signup redirect, deep-link auth flow, CTA persistence
 
-Nowe sekcje:
+3. **SSE Keepalive + Silent Retry**
+   - **Problem:** generateWorksheet stream sometimes silent >40s → false-positive "Connection lost".
+   - **Solution:** Server `event: keepalive` every 15s; client watchdog 45s; first timeout = silent retry (only if 0 exercises received); second = surface error.
+   - **Mechanics:** `streaming.ts.heartbeat()` enqueues `event: keepalive\ndata: {"t":...}\n\n`. `setInterval(heartbeat, 15000)` in handler; cleared in `finally`. Client: `startStream()` factory + `retryCount` closure; silent retry guarded by `lastProgress.exercisesGenerated === 0` to prevent double-charge.
+   - **RAG Keywords:** SSE heartbeat, server-sent events keepalive, stream retry, watchdog timeout, idempotent retry guard
 
-1. **Publish State Persistence** — prop drilling z DB → hook → button, `useEffect` re-sync.
-2. **Signup Return-To Navigation** — hook `useSignupLinkState`, `state.from`, `nav(from, {replace})`.
-3. **SSE Keepalive (15s heartbeat + 1 silent retry)** — server `: keepalive`, client `retryCount`, watchdog 45s.
-4. **Multi-Provider Model Monitoring** — trójwarstwowe: passive (`logModelFailure` w 12 funkcjach) + active (cron 06:00 UTC `audit-llm-models`) + surfacing (RPC + baner `/status`); tabela `model_health_checks` jako historia.
-5. **Static HTML SEO Sanctity** — 277 stron w `public/`, nigdy nie kasować, sitemap zawiera wszystkie.
-6. **Google Search Console Sitemap Workflow** — dla Domain property wpisywać pełny URL `https://edooqoo.com/sitemap.xml`, nigdy `sitemap.xml`; istniejący wpis Google sam refreshuje co 1–7 dni; przyspieszenie = remove+re-add przez ⋮ menu.
+4. **Multi-Provider Model Monitoring**
+   - **Problem:** OpenAI deprecated `gpt-4o-audio-preview` without warning → live audio generation broke.
+   - **Solution:** 3-layer monitoring: (1) passive — `logModelFailure` in 12 edge functions writes to `error_logs` on 404/410/5xx; (2) active — daily cron 06:00 UTC calls `audit-llm-models` which GETs each model's metadata endpoint; (3) surfacing — RPC `get_active_model_issues()` + red banner on `StatusPage.tsx`.
+   - **Mechanics:** `model_health_checks` table (provider, model, http_status, severity, details, checked_at). `audit-llm-models` iterates `TARGETS = [{provider, model, endpoint}]` and inserts row + escalates 404/410 to `logModelFailure` for instant banner. Cron via `pg_cron + pg_net + verify_jwt=false`.
+   - **RAG Keywords:** model deprecation, LLM health check, provider monitoring, daily audit, error_logs, status page banner, gpt-4o-audio-preview deprecation
 
-#### H8c — Nowe pliki memory (`mem/`)
+5. **Static HTML SEO Sanctity**
+   - **Problem:** Removing static `.html` pages from `public/` would drop hundreds of Google-indexed URLs (~277 pages, mostly long-tail keywords).
+   - **Solution:** Never delete files under `public/blog/*.html` or `public/*.html`. Each is a fully-rendered SEO landing serving HTTP 200. React Router never owns these paths because Lovable hosting serves static files first.
+   - **Mechanics:** `scripts/seo/build-blog-index.mjs` scans these files and generates `src/data/blogIndex.ts` for the React Blog list. `sitemap.xml` includes all 277 + 1459 pSEO + 29 core React routes = 1736 URLs total. CTAs in static HTML use plain `<a>` (full page nav).
+   - **RAG Keywords:** legacy HTML, static SEO pages, long-tail keywords, blog index, sitemap, SPA fallback, public folder
+
+6. **Google Search Console Sitemap Workflow**
+   - **Problem:** GSC sitemap submission with bare `sitemap.xml` for Domain property returns "Invalid sitemap URL".
+   - **Solution:** Domain property (`sc-domain:edooqoo.com`) requires full URL `https://edooqoo.com/sitemap.xml`. Existing entries auto-refresh every 1–7 days. Force re-fetch via remove + re-add through ⋮ menu.
+   - **Mechanics:** GSC fetches sitemap on its own cadence. "Discovered URLs" count updates 24–72h after refetch.
+   - **RAG Keywords:** Google Search Console, sitemap submission, domain property, full URL, refetch, indexed URLs
+
+### H8c — Memory files (`mem/`)
+
+5 nowych plików + update `mem/index.md` (zachowując całą istniejącą listę 40+ wpisów):
 
 1. `mem/features/worksheet/publish-state-persistence.md` (feature)
 2. `mem/features/navigation/signup-return-to-state.md` (feature)
 3. `mem/infrastructure/sse-keepalive-pattern.md` (feature)
-4. `mem/infrastructure/model-health-monitoring.md` (uzupełnia istniejący `multi-provider-model-audit.md` o cron + tabelę)
-5. `mem/seo/google-search-console-sitemap-workflow.md` (preference/reference) — Domain property requires full URL; existing sitemap entry auto-refreshes; force re-fetch via remove+re-add.
-6. Update `mem/index.md` — dopisać 5 wpisów (zachowując całą istniejącą zawartość, bo `code--write` zastępuje plik).
+4. `mem/infrastructure/model-health-monitoring.md` (feature)
+5. `mem/seo/google-search-console-sitemap-workflow.md` (preference)
+
+Każdy z YAML frontmatter (name, description, type) + 3–8 linii treści w stylu "Problem / Rule / How to apply".
+
+Update `mem/index.md` — dopisać 5 nowych wpisów do listy "## Memories", zachowując sekcję "## Core" w 100%.
 
 ---
 
-## Część D — Kolejność wykonania
+## Kolejność wykonania w build mode
 
+1. **H4** (29 plików + 1 hook + 1 nowy widget Back) — niskie ryzyko, pure UI.
+2. **H6a** (12 plików, logger wpięcie) — niskie ryzyko, additive.
+3. **H6b** (1 migracja) — wymaga zatwierdzenia migracji.
+4. **H6c** (1 nowa edge function) — auto-deploy.
+5. **H6d** (1 cron SQL + 1 update config.toml) — wymaga insert (nie migracja, bo zawiera env-specific).
+6. **H5** (2 pliki + 1 fragment) — średnie ryzyko (timing). Testować lokalnie najpierw.
+7. **H8b** (3 pliki docs) — minimalne ryzyko.
+8. **H8c** (5 mem + 1 update index) — minimalne ryzyko.
 
-| #   | Sprint | Pliki                               | Ryzyko                |
-| --- | ------ | ----------------------------------- | --------------------- |
-| 1   | H7     | 1                                   | minimalne             |
-| 2   | H3     | 1                                   | niskie                |
-| 3   | H2     | 3                                   | niskie                |
-| 4   | H8a    | 1 cmd                               | minimalne             |
-| 5   | H6a    | 11                                  | niskie                |
-| 6   | H4     | 17                                  | średnie (regresja UX) |
-| 7   | H5     | 2                                   | średnie (timing)      |
-| 8   | H6b–d  | migracja + edge function + cron SQL | średnie               |
-| 9   | H8b+c  | docs + 5 mem + index                | minimalne             |
-
-
-Razem: ~38 plików, 1 migracja, 1 cron, 1 nowa edge function.
+**Razem:** ~50 plików, 1 migracja, 1 cron, 1 nowa edge function.
 
 ---
 
-## Część E — Smoke testy po deploy
+## Smoke testy końcowe (po deploy)
 
-1. **H1 (już live):** `curl -I /edooqoo-vs-magicschool.html` → 200 ✅ / `/blog/ai-generated-listening-exercises-esl.html` → 200 ✅.
-2. **H2:** publish → F5 → button = "Public".
-3. **H3:** `/gallery/<dowolny>` → brak `[object Object]`.
-4. **H4:** `/gallery/...` → klik "sign up free" → modal → X → wracasz na `/gallery/...`.
-5. **H5:** wygenerowanie worksheet z ~60s opóźnieniem → brak modala "Connection lost".
-6. **H6:** ręcznie `POST /functions/v1/audit-llm-models` → wpisy w `model_health_checks`.
-7. **H7:** bug report → mail z `notifications@edooqoo.com`.
-8. **H8:** `/blog` → > 200 wpisów.
-
----
-
-## Część F — Akcje po Twojej stronie (manual, po deploy)
-
-1. **Google Search Console** — opcja B (rekomendowana):
-  1. Wejdź: [https://search.google.com/search-console/sitemaps?resource_id=sc-domain%3Aedooqoo.com](https://search.google.com/search-console/sitemaps?resource_id=sc-domain%3Aedooqoo.com)
-  2. Klik ⋮ przy `https://edooqoo.com/sitemap.xml` → "Usuń mapę witryny". zrobiłem przed chwilą
-  3. W polu wpisz **pełny URL** `https://edooqoo.com/sitemap.xml` (nie samo `sitemap.xml` — to powoduje błąd, który widziałeś). zrobiłem przed chwilą
-  4. PRZEŚLIJ → status "Sukces" w 5–30 min → "Wykryte strony" rośnie do ~1736 w 24–72h.
-2. (Po 2 tyg.) Sprawdzenie zakładki "Strony" w GSC → ile "Indexed" vs "Discovered – not indexed". Cel: 60–80% z 1736 w 4–8 tyg.
-3. Akceptacja planu → implementacja od H7 → H3 → H2 → H8a → H6a → H4 → H5 → H6b-d → H8b+c.
+| Test | Oczekiwane |
+|---|---|
+| `/gallery/<x>` → "sign up free" → "Back" | wraca na `/gallery/<x>` |
+| `/pricing` → "Start Free" → signup success | redirect na `/pricing` |
+| Generowanie worksheetu (normalny flow) | bez regresji |
+| Symulacja 30s ciszy w `generateWorksheet` | brak modala "Connection lost" |
+| `POST /functions/v1/audit-llm-models` | JSON `{checked:5, ok:5}` + 5 wpisów w `model_health_checks` |
+| Bug report z UI | mail z `From: notifications@edooqoo.com` (po wdrożeniu sekretu) |
+| Publish worksheet → F5 | button = "Public" |
+| `/gallery/<categorize-quiz>` | brak `[object Object]` |
+| `/blog/<dowolny-z-207>.html` | HTTP 200 + treść |
 
 ---
 
-## Część G — Czego NIE robimy w tym sprincie
+## Czego NIE robimy
 
-- ❌ Sprint 5 (AEO/LLMO, `llms-full.txt`, JSON-LD sweep) — osobna tura.
-- ❌ Sprint 6 (4 long-form artykuły Marthy) — ręczny copywriting.
-- ❌ sitemap-index.xml (rozdzielenie głównej + gallery dynamic) — przy >50k URL-i.
-- ❌ Dalsza ekspansja pSEO (>3000 URL-i) — po obserwacji indexacji 4–6 tyg.
-
-**Akceptujesz? Po Twoim "tak" zaczynam od H7 (1 plik, najtrywialniejszy) i lecę w dół.**
+- ❌ Anthropic/ElevenLabs targets w audit (nieużywane).
+- ❌ Email z `[Audit] critical detected` — po prostu wpis w `error_logs` zaświeca baner na `/status`.
+- ❌ UI dla `model_health_checks` history — admin patrzy w SQL Editor lub w osobnej turze dodamy `/admin/model-health`.
+- ❌ Sprint 5 (AEO/LLMO), Sprint 6 (long-form articles).

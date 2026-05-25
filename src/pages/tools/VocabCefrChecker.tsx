@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { PageSeo, buildFaqPageLd } from '@/components/seo/PageSeo';
 import { analyzeVocab, type CefrWordLevel } from '@/data/cefrWordlist';
 
@@ -22,6 +22,8 @@ const LEVEL_COLORS: Record<CefrWordLevel, string> = {
 const SAMPLE = "If the proposal had been clearer, the team would have endorsed it without hesitation. Several stakeholders remain skeptical, citing the ambiguous timeline and the lack of measurable milestones.";
 
 const VocabCefrChecker: React.FC = () => {
+  const location = useLocation();
+  const fromState = { from: location.pathname + location.search };
   const [text, setText] = useState('');
   const result = useMemo(() => (text.trim() ? analyzeVocab(text) : null), [text]);
 
@@ -151,7 +153,7 @@ const VocabCefrChecker: React.FC = () => {
           <p className="text-muted-foreground mb-6">
             Edooqoo generates printable worksheets at any CEFR level in 60 seconds.
           </p>
-          <Link to="/signup" className="inline-block bg-primary text-primary-foreground px-6 py-3 rounded-lg font-semibold hover:opacity-90">
+          <Link to="/signup" state={fromState} className="inline-block bg-primary text-primary-foreground px-6 py-3 rounded-lg font-semibold hover:opacity-90">
             Try Edooqoo free
           </Link>
         </section>

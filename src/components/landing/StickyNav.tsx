@@ -54,7 +54,7 @@ const StickyNav: React.FC<StickyNavProps> = ({ isRegisteredUser, tokenLeft, user
     <div className="fixed top-0 left-0 right-0 z-[60] bg-amber-400 text-amber-900 text-center text-sm font-medium py-1.5 flex items-center justify-center gap-3">
       <Eye className="h-4 w-4" />
       <span>DEMO MODE — Explore freely!</span>
-      <Button size="sm" variant="outline" className="h-6 text-xs bg-white/80 border-amber-600 text-amber-900 hover:bg-white" onClick={() => navigate('/signup')}>
+      <Button size="sm" variant="outline" className="h-6 text-xs bg-white/80 border-amber-600 text-amber-900 hover:bg-white" onClick={() => navigate('/signup', { state: fromState })}>
         Sign Up Free →
       </Button>
       <Button size="sm" variant="outline" className="h-6 text-xs bg-red-100 border-red-400 text-red-800 hover:bg-red-200" onClick={() => { exitDemo(); }}>

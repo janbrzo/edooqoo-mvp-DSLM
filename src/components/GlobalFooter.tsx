@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 
 // v6.9.22 — Footer link helper. .html → static file (full-page nav); clean path → SPA Link.
 const FooterLink: React.FC<{ href: string; children: React.ReactNode }> = ({ href, children }) => {
@@ -19,6 +19,8 @@ const FooterLink: React.FC<{ href: string; children: React.ReactNode }> = ({ hre
 };
 
 const GlobalFooter = () => {
+  const location = useLocation();
+  const fromState = { from: location.pathname + location.search };
   return (
     <footer className="relative z-0 border-t bg-background/95 backdrop-blur-sm">
       <div className="container mx-auto px-4 py-10">
@@ -41,7 +43,7 @@ const GlobalFooter = () => {
               <li><Link to="/about" className="text-muted-foreground hover:text-primary transition-colors">About</Link></li>
               <li><Link to="/esl-worksheets" className="text-muted-foreground hover:text-primary transition-colors">ESL Worksheets</Link></li>
               <li><Link to="/for-english-tutors" className="text-muted-foreground hover:text-primary transition-colors">For English Tutors</Link></li>
-              <li><Link to="/signup" className="text-muted-foreground hover:text-primary transition-colors">Sign Up Free</Link></li>
+              <li><Link to="/signup" state={fromState} className="text-muted-foreground hover:text-primary transition-colors">Sign Up Free</Link></li>
             </ul>
           </div>
 

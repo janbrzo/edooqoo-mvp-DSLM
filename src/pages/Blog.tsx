@@ -1,6 +1,6 @@
 
 import React, { useMemo } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { PageSeo } from '@/components/seo/PageSeo';
 import { SEO_META } from '@/constants/seoMeta';
 import { BLOG_POSTS as AUTO_BLOG_POSTS } from '@/data/blogIndex';
@@ -292,6 +292,8 @@ const blogPosts: BlogPost[] = [
 ];
 
 const Blog = () => {
+  const location = useLocation();
+  const fromState = { from: location.pathname + location.search };
   // v6.9.22 — Keep only posts whose .html file exists in public/blog/.
   // Eliminates ~50 dangling links to deleted files (the original 404 source).
   const validHrefs = useMemo(() => new Set(AUTO_BLOG_POSTS.map(p => p.url)), []);
@@ -341,7 +343,7 @@ const Blog = () => {
           <Link to="/" className="text-xl font-bold text-primary">Edooqoo</Link>
           <div className="flex items-center gap-4">
             <Link to="/pricing" className="text-sm text-muted-foreground hover:text-primary transition-colors">Pricing</Link>
-            <Link to="/signup" className="text-sm bg-primary text-primary-foreground px-4 py-2 rounded-md hover:opacity-90 transition-opacity">Sign Up Free</Link>
+            <Link to="/signup" state={fromState} className="text-sm bg-primary text-primary-foreground px-4 py-2 rounded-md hover:opacity-90 transition-opacity">Sign Up Free</Link>
           </div>
         </div>
       </header>

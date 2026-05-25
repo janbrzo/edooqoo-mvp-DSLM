@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 
@@ -10,6 +10,8 @@ interface FeaturePageLayoutProps {
 }
 
 const FeaturePageLayout: React.FC<FeaturePageLayoutProps> = ({ title, metaDescription, children }) => {
+  const location = useLocation();
+  const fromState = { from: location.pathname + location.search };
   useEffect(() => {
     document.title = title;
     const meta = document.querySelector('meta[name="description"]');
@@ -32,7 +34,7 @@ const FeaturePageLayout: React.FC<FeaturePageLayoutProps> = ({ title, metaDescri
           <div className="flex items-center gap-3">
             <Link to="/pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Pricing</Link>
             <Button size="sm" asChild>
-              <Link to="/signup">Start Free <ArrowRight className="h-3 w-3" /></Link>
+              <Link to="/signup" state={fromState}>Start Free <ArrowRight className="h-3 w-3" /></Link>
             </Button>
           </div>
         </div>

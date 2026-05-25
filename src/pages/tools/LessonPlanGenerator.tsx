@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { PageSeo, buildFaqPageLd } from '@/components/seo/PageSeo';
 
 const LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'] as const;
@@ -95,6 +95,8 @@ ${stages.map((s) => `<tr><td>${s.name}</td><td>${s.minutes}</td><td>${s.descript
 }
 
 const LessonPlanGenerator: React.FC = () => {
+  const location = useLocation();
+  const fromState = { from: location.pathname + location.search };
   const [form, setForm] = useState<FormState>({
     topic: '',
     level: 'B1',
@@ -285,7 +287,7 @@ const LessonPlanGenerator: React.FC = () => {
           <p className="text-muted-foreground mb-6">
             Edooqoo generates personalized worksheets in 60 seconds — drop them straight into your plan.
           </p>
-          <Link to="/signup" className="inline-block bg-primary text-primary-foreground px-6 py-3 rounded-lg font-semibold hover:opacity-90">
+          <Link to="/signup" state={fromState} className="inline-block bg-primary text-primary-foreground px-6 py-3 rounded-lg font-semibold hover:opacity-90">
             Try Edooqoo free
           </Link>
         </section>

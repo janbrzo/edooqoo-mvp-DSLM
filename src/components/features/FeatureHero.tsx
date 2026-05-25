@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowRight } from 'lucide-react';
 
@@ -21,7 +21,12 @@ const FeatureHero: React.FC<FeatureHeroProps> = ({
   ctaText = 'Try Free — No Credit Card',
   ctaLink = '/signup',
   children,
-}) => (
+}) => {
+  const location = useLocation();
+  const ctaState = ctaLink.startsWith('/signup') || ctaLink.startsWith('/login')
+    ? { from: location.pathname + location.search }
+    : undefined;
+  return (
   <section className="py-16 md:py-24 bg-gradient-to-b from-background to-secondary/30">
     <div className="max-w-6xl mx-auto px-4">
       <div className="text-center max-w-3xl mx-auto mb-12">
@@ -37,7 +42,7 @@ const FeatureHero: React.FC<FeatureHeroProps> = ({
           {subheadline}
         </p>
         <Button size="lg" asChild>
-          <Link to={ctaLink}>{ctaText} <ArrowRight className="h-4 w-4" /></Link>
+          <Link to={ctaLink} state={ctaState}>{ctaText} <ArrowRight className="h-4 w-4" /></Link>
         </Button>
       </div>
       {children && (
@@ -49,6 +54,7 @@ const FeatureHero: React.FC<FeatureHeroProps> = ({
       )}
     </div>
   </section>
-);
+  );
+};
 
 export default FeatureHero;

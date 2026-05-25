@@ -1,5 +1,6 @@
 
 import React, { useEffect, useState } from 'react';
+import { Link, useLocation } from 'react-router-dom';
 import { Copy, Check, Search, BookOpen, MessageSquare, Headphones, Briefcase, GraduationCap, PenTool } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -90,6 +91,8 @@ const categoryIcons: Record<string, React.ReactNode> = {
 };
 
 const Prompts = () => {
+  const location = useLocation();
+  const fromState = { from: location.pathname + location.search };
   const [search, setSearch] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
@@ -201,7 +204,7 @@ const Prompts = () => {
           <h2 className="text-2xl font-bold text-foreground mb-2">Ready to Create Your Worksheet?</h2>
           <p className="text-muted-foreground mb-4">Copy any prompt above and paste it into Edooqoo. Your first 2 worksheets are free.</p>
           <Button asChild size="lg">
-            <a href="/signup">Sign Up Free — 2 Worksheets Included</a>
+            <Link to="/signup" state={fromState}>Sign Up Free — 2 Worksheets Included</Link>
           </Button>
         </div>
       </main>
