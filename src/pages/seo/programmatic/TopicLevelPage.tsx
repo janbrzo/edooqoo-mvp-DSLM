@@ -1,5 +1,5 @@
 import React from 'react';
-import { useParams, Navigate } from 'react-router-dom';
+import { useParams, Navigate, useLocation } from 'react-router-dom';
 import ProgrammaticSeoLayout from '@/components/seo/ProgrammaticSeoLayout';
 import {
   findTopic,
