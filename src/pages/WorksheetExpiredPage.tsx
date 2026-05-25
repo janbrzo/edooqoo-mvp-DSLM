@@ -1,8 +1,10 @@
-import { Link } from "react-router-dom";
+import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Clock, LogIn, UserPlus, FileText } from "lucide-react";
 
 export default function WorksheetExpiredPage() {
+  const location = useLocation();
+  const fromState = { from: location.pathname + location.search };
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 p-4">
       <div className="max-w-md w-full bg-white rounded-2xl shadow-xl p-8 text-center space-y-6">
@@ -43,14 +45,14 @@ export default function WorksheetExpiredPage() {
 
         {/* Action buttons */}
         <div className="flex flex-col gap-3">
-          <Link to="/signup" className="w-full">
+          <Link to="/signup" state={fromState} className="w-full">
             <Button className="w-full bg-primary hover:bg-primary/90" size="lg">
               <UserPlus className="mr-2 h-5 w-5" />
               Create Free Account
             </Button>
           </Link>
           
-          <Link to="/login" className="w-full">
+          <Link to="/login" state={fromState} className="w-full">
             <Button variant="outline" className="w-full" size="lg">
               <LogIn className="mr-2 h-5 w-5" />
               Log In
