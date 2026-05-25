@@ -94,6 +94,7 @@ const ProgrammaticSeoLayout: React.FC<ProgrammaticSeoLayoutProps> = ({
           <p className="text-lg text-muted-foreground mb-6">{lead}</p>
           <Link
             to={primaryCta.to}
+            state={ctaState}
             className="inline-block bg-primary text-primary-foreground px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity"
           >
             {primaryCta.label}
@@ -177,6 +178,7 @@ const ProgrammaticSeoLayout: React.FC<ProgrammaticSeoLayoutProps> = ({
           <div className="flex flex-wrap gap-3 justify-center">
             <Link
               to={primaryCta.to}
+              state={ctaState}
               className="inline-block bg-primary text-primary-foreground px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity"
             >
               {primaryCta.label}
