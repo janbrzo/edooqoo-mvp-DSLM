@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { X, CheckCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
@@ -19,6 +19,8 @@ interface WelcomeBackBannerProps {
 
 export const WelcomeBackBanner: React.FC<WelcomeBackBannerProps> = ({ shouldShow }) => {
   const [visible, setVisible] = useState(false);
+  const location = useLocation();
+  const fromState = { from: location.pathname + location.search };
 
   useEffect(() => {
     if (!shouldShow) return;
@@ -51,12 +53,12 @@ export const WelcomeBackBanner: React.FC<WelcomeBackBannerProps> = ({ shouldShow
         </div>
         <div className="flex items-center gap-2">
           <Button asChild size="sm" className="h-8 px-3 text-xs rounded-full">
-            <Link to="/signup" onClick={handleDismiss}>
+            <Link to="/signup" state={fromState} onClick={handleDismiss}>
               Create Free Account
             </Link>
           </Button>
           <Button asChild variant="ghost" size="sm" className="h-8 px-3 text-xs">
-            <Link to="/login" onClick={handleDismiss}>
+            <Link to="/login" state={fromState} onClick={handleDismiss}>
               Log in
             </Link>
           </Button>

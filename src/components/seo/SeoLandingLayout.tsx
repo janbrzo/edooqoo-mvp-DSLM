@@ -93,12 +93,14 @@ const SeoLandingLayout: React.FC<SeoLandingLayoutProps> = ({
           <div className="flex flex-wrap gap-3">
             <Link
               to={primaryCta.to}
+              state={ctaState(primaryCta.to)}
               className="inline-block bg-primary text-primary-foreground px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity"
             >
               {primaryCta.label}
             </Link>
             <Link
               to={secondaryCta.to}
+              state={ctaState(secondaryCta.to)}
               className="inline-block border border-input px-6 py-3 rounded-lg font-semibold text-foreground hover:bg-accent transition-colors"
             >
               {secondaryCta.label}
@@ -167,6 +169,7 @@ const SeoLandingLayout: React.FC<SeoLandingLayoutProps> = ({
           <div className="flex flex-wrap gap-3 justify-center">
             <Link
               to="/signup"
+              state={ctaState('/signup')}
               className="inline-block bg-primary text-primary-foreground px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity"
             >
               Sign up free — 2 worksheets included
