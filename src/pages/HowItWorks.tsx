@@ -27,6 +27,7 @@ const HowItWorks = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const fromPath = (location.state as { from?: string } | null)?.from;
+  const fromState = { from: location.pathname + location.search };
   const handleBack = () => navigate(fromPath ?? '/');
 
   const faqJsonLd = {
@@ -115,7 +116,7 @@ const HowItWorks = () => {
         <div className="mt-12 p-6 bg-primary/5 rounded-lg text-center">
           <p className="text-lg font-semibold text-foreground mb-2">Ready to get started?</p>
           <p className="text-muted-foreground mb-4">Sign up free and generate your first worksheet in under 5 minutes.</p>
-          <Link to="/signup" className="inline-block bg-primary text-primary-foreground px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity">
+          <Link to="/signup" state={fromState} className="inline-block bg-primary text-primary-foreground px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity">
             Try Edooqoo Free — 2 Worksheets Included
           </Link>
         </div>
