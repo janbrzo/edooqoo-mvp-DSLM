@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { PageSeo, buildFaqPageLd } from '@/components/seo/PageSeo';
 
 export interface SeoFaq {
@@ -61,6 +61,11 @@ const SeoLandingLayout: React.FC<SeoLandingLayoutProps> = ({
   ctaTitle = 'Ready to save 5+ hours per week?',
   ctaBody = 'Generate your first personalized worksheet in 60 seconds. Free plan includes 2 worksheets, no credit card required.',
 }) => {
+  const location = useLocation();
+  const ctaState = (to: string) =>
+    to.startsWith('/signup') || to.startsWith('/login')
+      ? { from: location.pathname + location.search }
+      : undefined;
   const faqLd = buildFaqPageLd(faqs);
   const jsonLd = seo.extraJsonLd
     ? Array.isArray(seo.extraJsonLd)
