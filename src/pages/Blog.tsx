@@ -292,6 +292,8 @@ const blogPosts: BlogPost[] = [
 ];
 
 const Blog = () => {
+  const location = useLocation();
+  const fromState = { from: location.pathname + location.search };
   // v6.9.22 — Keep only posts whose .html file exists in public/blog/.
   // Eliminates ~50 dangling links to deleted files (the original 404 source).
   const validHrefs = useMemo(() => new Set(AUTO_BLOG_POSTS.map(p => p.url)), []);
