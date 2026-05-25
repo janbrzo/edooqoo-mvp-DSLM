@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { PageSeo } from '@/components/seo/PageSeo';
 import GalleryExerciseRenderer from '@/components/gallery/GalleryExerciseRenderer';
@@ -18,6 +18,8 @@ interface PublicWorksheetRow {
 
 const PublicGalleryWorksheetPage: React.FC = () => {
   const { slug } = useParams<{ slug: string }>();
+  const location = useLocation();
+  const fromState = { from: location.pathname + location.search };
   const [worksheet, setWorksheet] = useState<PublicWorksheetRow | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
@@ -108,7 +110,7 @@ const PublicGalleryWorksheetPage: React.FC = () => {
         </header>
 
         <aside aria-label="Preview notice" className="mb-6 rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-          <strong>Preview mode.</strong> This is a static read-only preview of a worksheet a teacher published. Interactive answers, AI grading, audio playback and downloads are available only in the full editor — <Link to="/signup" className="font-semibold underline">sign up free</Link> to generate or open this worksheet interactively.
+          <strong>Preview mode.</strong> This is a static read-only preview of a worksheet a teacher published. Interactive answers, AI grading, audio playback and downloads are available only in the full editor — <Link to="/signup" state={fromState} className="font-semibold underline">sign up free</Link> to generate or open this worksheet interactively.
         </aside>
 
         {parsed?.exercises && Array.isArray(parsed.exercises) ? (
@@ -129,7 +131,7 @@ const PublicGalleryWorksheetPage: React.FC = () => {
             Edooqoo's DSLM 1-Minute Prep turns your student's goals into a tailored worksheet —
             fully editable, with audio, images and AI-grading built in. Free to start, no credit card.
           </p>
-          <Link to="/signup" className="inline-block rounded-md bg-primary px-5 py-2 text-primary-foreground font-semibold">
+          <Link to="/signup" state={fromState} className="inline-block rounded-md bg-primary px-5 py-2 text-primary-foreground font-semibold">
             Try 1-Minute Prep free
           </Link>
         </div>

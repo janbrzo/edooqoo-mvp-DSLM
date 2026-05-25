@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { AuthenticatedPageShell } from '@/components/AuthenticatedPageShell';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -28,6 +28,8 @@ const Pricing = () => {
   const { currentPlan, plans, canUpgradeTo, getUpgradePrice, getUpgradeTokens, getRecommendedFullTimePlan, getRecommendedPlanByLessons } = usePlanLogic(profile?.subscription_type);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const location = useLocation();
+  const fromState = { from: location.pathname + location.search };
   const [selectedFullTimePlan, setSelectedFullTimePlan] = useState(getRecommendedFullTimePlan());
   const [isLoading, setIsLoading] = useState<string | null>(null);
   const [recommendedPlan, setRecommendedPlan] = useState<'side-gig' | 'full-time'>('side-gig');
@@ -141,7 +143,7 @@ const Pricing = () => {
         description: "Please sign up to subscribe to a plan.",
         variant: "destructive"
       });
-      navigate('/signup');
+      navigate('/signup', { state: fromState });
       return;
     }
 
@@ -197,7 +199,7 @@ const Pricing = () => {
         description: "Please sign up to manage subscriptions.",
         variant: "destructive"
       });
-      navigate('/signup');
+      navigate('/signup', { state: fromState });
       return;
     }
 
@@ -320,7 +322,7 @@ const Pricing = () => {
   const handleFreeSignup = () => {
     if (!isRegisteredUser) {
       setShowEmailConfirmationModal(true);
-      navigate('/signup');
+      navigate('/signup', { state: fromState });
     }
   };
 
