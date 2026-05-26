@@ -1,10 +1,10 @@
-import { defineConfig } from "vite";
+import { defineConfig, type PluginOption } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 
 // https://vitejs.dev/config/
 export default defineConfig(async ({ mode }) => {
-  const plugins = [react()];
+  const plugins: PluginOption[] = [react()];
 
   if (mode === 'development') {
     const { componentTagger } = await import('lovable-tagger');
@@ -32,7 +32,7 @@ export default defineConfig(async ({ mode }) => {
       // together because Router pulls React internals.
       rollupOptions: {
         output: {
-          manualChunks: (id) => {
+          manualChunks: (id: string) => {
             // v6.9.7 — isolate demo + mock content into lazy chunks. They are
             // only required by /demo and dev tooling; keeping them out of the
             // main bundle reduces what plagiarists can scrape from a casual
