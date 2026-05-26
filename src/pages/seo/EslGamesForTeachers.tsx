@@ -60,7 +60,7 @@ const EslGamesForTeachers = () => (
         <p>Pair every game with a follow-up worksheet. The game produces fluency; the worksheet locks in accuracy. After Idiom Charades, assign a 10-minute Idiom Matching exercise from Edooqoo as homework. The AI grades it. The student sees their errors before the next lesson. Three lessons later, the same 8 idioms reappear in a Reading Comprehension generated automatically by the DSLM layer — spaced repetition without manual tracking.</p>
         <h2 className="text-xl font-bold text-foreground">How to time games in a 60-minute lesson</h2>
         <p>Warm-up game (5–7 min). Main input + controlled practice (25 min). Production game (10 min). Worksheet preview + homework assignment (5 min). Closing (3 min). The two games sandwich the lesson — opening to lower the affective filter, closing to apply new language. See our <Link to="/blog/english-games-for-learners" className="text-primary hover:underline">12 games for learners</Link> for a similar list framed for student perspective.</p>
-        <p>Want the matching worksheet for any game on this list? Generate it in 60 seconds with Edooqoo — see <Link to="/exercise-types" className="text-primary hover:underline">all 29 exercise types</Link> or jump to the <Link to="/esl-worksheets" className="text-primary hover:underline">ESL worksheets generator</Link>.</p>
+        <p>Want the matching worksheet for any game on this list? Create it through Edooqoo's structured worksheet workflow — see <Link to="/exercise-types" className="text-primary hover:underline">all 29 exercise types</Link> or jump to the <Link to="/esl-worksheets" className="text-primary hover:underline">ESL worksheets generator</Link>.</p>
       </>
     }
     faqs={[
@@ -70,7 +70,7 @@ const EslGamesForTeachers = () => (
       { question: 'Are these suitable for group lessons?', answer: 'Most are. Auctions, charades, hot seats, and telephone games scale to 2-6 learners with minor adjustments.' },
     ]}
     ctaTitle="Match every game with a printable worksheet"
-    ctaBody="Sign up free, pick the exercise type listed next to each game, and generate the matching worksheet in 60 seconds."
+    ctaBody="Sign up free, pick the exercise type listed next to each game, and create the matching worksheet for teacher review."
   />
 );
 

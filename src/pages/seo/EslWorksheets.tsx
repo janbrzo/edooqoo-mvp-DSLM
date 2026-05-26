@@ -14,12 +14,12 @@ const EslWorksheets = () => (
   <SeoLandingLayout
     seo={{
       title: 'ESL Worksheets — AI-Generated for Adult Learners',
-      description: 'Generate personalized ESL worksheets in 60 seconds. 29 exercise types, CEFR A1-C2, business English, IELTS prep. Free to start.',
+      description: 'Create personalized ESL worksheets with 29 exercise types, CEFR A1-C2 labels, business English, and IELTS prep workflows. Free to start.',
       path: '/esl-worksheets',
       extraJsonLd: collectionLd,
     }}
     h1="ESL Worksheets — AI-Generated for Adult Learners"
-    lead="Stop spending Sunday nights formatting PDFs. Edooqoo generates fully personalized ESL worksheets for adult learners in 60 seconds — 29 exercise types, CEFR A1 through C2, Business English, IELTS, conversation, grammar, vocabulary."
+    lead="Edooqoo creates personalized ESL worksheets for adult learners through a structured teacher workflow: 29 exercise types, CEFR A1 through C2 labels, Business English, IELTS, conversation, grammar, and vocabulary."
     problems={[
       'Static PDF libraries (esl-brains, teach-this, Daves ESL Cafe) give you the same generic worksheet every adult learner sees — zero personalization to a banker preparing for an IELTS interview vs. a software engineer needing meeting English.',
       'Manual worksheet creation in Word or Google Docs eats 60–90 minutes per lesson. Multiply by 10 students and you lose your evenings.',

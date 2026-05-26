@@ -28,14 +28,14 @@ const EslClassToolkit = () => (
     solutionHeading="Five components every ESL class needs"
     solutions={[
       { title: 'Placement test', body: '49-question Welcome Test producing CEFR estimation, skill radar, and personalized Learning Path.' },
-      { title: 'Worksheets', body: '29 exercise types generated in 60 seconds, personalized to each learner profile.' },
+      { title: 'Worksheets', body: '29 exercise types generated from teacher inputs and learner profile context.' },
       { title: 'Homework with grading', body: 'Assign exercises with deadlines. AI grades open + closed answers overnight.' },
     ]}
     listHeading="The complete ESL class toolkit"
     listIntro="Each component links to its dedicated page. Start with the placement test, generate the first worksheet, assign homework, track DSLM metrics."
     list={[
       { title: 'Welcome Test (49-question placement)', body: 'Grammar, vocabulary, reading, listening, speaking. Whisper TTS for audio sections. Outputs a Learning Profile with CEFR estimation and identified weaknesses.', href: '/features/placement-test' },
-      { title: 'Worksheet generator (29 exercise types)', body: '20 basic + 5 audio + 4 picture exercises. CEFR A1-C2. Generated in 60 seconds with student personalization.', href: '/exercise-types' },
+      { title: 'Worksheet generator (29 exercise types)', body: '20 basic + 5 audio + 4 picture exercises. CEFR A1-C2 labels with student-context personalization.', href: '/exercise-types' },
       { title: 'Lesson plan templates', body: 'Use Edooqoo worksheets as the lesson plan. Each worksheet doubles as material + structure for a 60-90 minute class.', href: '/blog/english-games-for-learners' },
       { title: 'Homework engine with AI grading', body: 'Select exercises, set deadline, AI grades on submission. Teacher review in 30 seconds. Email reminders automated.', href: '/features/homework' },
       { title: 'Vocabulary flashcards (SM-2 spaced repetition)', body: 'Auto-generated from worksheet vocabulary. Students review in Student Hub. Mastery feeds back into DSLM.', href: '/features/flashcards' },

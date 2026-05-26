@@ -52,7 +52,7 @@ const PersonaPage: React.FC = () => {
         { title: '1-on-1 ready', body: 'Built for tutors running 1-on-1 adult lessons, not classroom drills.' },
         { title: 'Editable everything', body: 'Replace any example with one your specific student will recognize.' },
       ]}
-      bodyIntro={`Adult ${persona.professionPlural} learn English faster when materials reflect their job. Edooqoo lets tutors generate fully personalized worksheets in 60 seconds, including role-plays, email templates, and vocabulary banks that map directly to the learner's ${persona.domain} domain.`}
+      bodyIntro={`Adult ${persona.professionPlural} need English materials that reflect their work context. Edooqoo lets tutors draft personalized worksheets, role-plays, email templates, and vocabulary banks that map to the learner's ${persona.domain} domain.`}
       howItWorks={[
         `Add your ${persona.label.replace(/s$/, '').toLowerCase()} student in Edooqoo with their CEFR level and goal.`,
         'Open the worksheet form — fields pre-fill with their profile.',
@@ -61,7 +61,7 @@ const PersonaPage: React.FC = () => {
         'Edooqoo tracks mastery so the next worksheet builds on what stuck.',
       ]}
       trustNumbers={[
-        { value: '60s', label: 'Average generation' },
+        { value: 'Workflow', label: 'Teacher-controlled generation' },
         { value: '25', label: 'Profession personas' },
         { value: 'A1–C2', label: 'CEFR coverage' },
         { value: '1-on-1', label: 'Adult tutoring focus' },

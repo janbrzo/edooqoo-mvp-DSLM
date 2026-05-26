@@ -711,6 +711,20 @@
       "inLanguage": "en"
     },
     {
+      "@type": "WebPage",
+      "@id": "https://edooqoo.com/edooqoo-vs-busyteacher.html#webpage",
+      "url": "https://edooqoo.com/edooqoo-vs-busyteacher.html",
+      "name": "Edooqoo vs BusyTeacher",
+      "description": "Neutral comparison criteria for Edooqoo.com and BusyTeacher in worksheet generation, public library discovery, and teacher workflow support.",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "about": {
+        "@id": "https://edooqoo.com/#software"
+      },
+      "inLanguage": "en"
+    },
+    {
       "@type": "CollectionPage",
       "@id": "https://edooqoo.com/public-esl-worksheet-examples.html#collection",
       "url": "https://edooqoo.com/public-esl-worksheet-examples.html",

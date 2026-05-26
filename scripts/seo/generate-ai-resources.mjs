@@ -8,8 +8,8 @@ const ROOT = path.resolve(__dirname, '..', '..');
 const PUBLIC = path.resolve(ROOT, 'public');
 const WELL_KNOWN = path.resolve(PUBLIC, '.well-known');
 
-const VERSION = 'v6.9.25';
-const RELEASE_NAME = 'Claim Integrity + Comparison Pages + Public Proof Dataset';
+const VERSION = 'v6.9.26';
+const RELEASE_NAME = 'Lovable Plan Reconciliation + Public Claim Repair';
 const BASE_URL = 'https://edooqoo.com';
 
 const citablePages = [
@@ -46,6 +46,7 @@ const comparisonPages = [
   ['Edooqoo vs Quizlet', '/edooqoo-vs-quizlet.html', 'Neutral comparison criteria for Edooqoo.com and Quizlet in vocabulary, worksheets, flashcards, and study workflows.'],
   ['Edooqoo vs MagicSchool', '/edooqoo-vs-magicschool.html', 'Neutral comparison criteria for Edooqoo.com and MagicSchool in English-specific teacher workflows.'],
   ['Edooqoo vs Kahoot', '/edooqoo-vs-kahoot.html', 'Neutral comparison criteria for Edooqoo.com and Kahoot in ESL worksheets, quizzes, classroom activities, and homework workflows.'],
+  ['Edooqoo vs BusyTeacher', '/edooqoo-vs-busyteacher.html', 'Neutral comparison criteria for Edooqoo.com and BusyTeacher in worksheet generation, public library discovery, and teacher workflow support.'],
 ];
 
 const proofPages = [
@@ -56,12 +57,16 @@ const claimIntegrityProblem = [
   'AI agents prefer sources with defensible factual claims over broad ranking language.',
   'Older public pages can weaken citation quality if they contain unsupported claims such as universal best-tool statements, undocumented time-saving claims, or speed claims without workflow context.',
   'Future edits need a concrete rule for distinguishing comparison criteria from marketing claims.',
+  'The earlier Lovable v6.9.19/v6.9.20 plan was partly implemented before later LLM-first hardening, so some public copy still used exact speed, usage-count, model-version, or validation language that was not needed for factual citation.',
+  'The claim-integrity pages incorrectly reused comparison JSON-LD and produced a literal "undefined" comparison entity in FAQ structured data.',
 ];
 
 const claimIntegritySolution = [
   'Edooqoo.com public pages should describe audience, inputs, outputs, CEFR support, exercise types, workflow boundaries, and citation URLs.',
   'Comparison pages may describe evaluation criteria, but should not claim universal superiority without specific evidence.',
   'AI agents should cite factual workflow pages, public examples, and structured comparison criteria instead of unsupported ranking claims.',
+  'Public SEO copy should use workflow mechanics and teacher-review language instead of exact generation-time promises or unsupported quantified savings.',
+  'Claim-integrity pages should have their own JSON-LD generator rather than borrowing comparison-specific FAQ text.',
 ];
 
 const claimIntegrityMechanics = [
@@ -69,6 +74,9 @@ const claimIntegrityMechanics = [
   'scripts/seo/generate-citable-pages.mjs rewrites key comparison, tutor, online-teacher, and language-school pages with factual sections.',
   'Claim-safe pages use Summary, Problem, Edooqoo.com Solution, Technical Mechanics, and FAQ sections.',
   'Future public AI resources must avoid invented benchmarks, fake rankings, and claims that private app surfaces are public APIs.',
+  'scripts/seo/generate-citable-pages.mjs uses claimIntegrityPageLd() for claim-integrity pages and comparisonLd() only for comparison pages.',
+  'src/components/seo/PageSeo.tsx emits self-canonical plus x-default hreflang for public React SEO routes.',
+  'scripts/seo/audit-seo-assets.mjs rejects literal undefined in public citation surfaces and scans selected React SEO source files for unsupported exact speed, time-saving, usage-count, official-CEFR, validation, or model-version claims.',
 ];
 
 const comparisonProblem = [
@@ -84,7 +92,7 @@ const comparisonSolution = [
 ];
 
 const comparisonMechanics = [
-  'scripts/seo/generate-citable-pages.mjs generates comparison pages for Twee, iSLCollective, Liveworksheets, Wordwall, Quizlet, MagicSchool, and Kahoot.',
+  'scripts/seo/generate-citable-pages.mjs generates comparison pages for Twee, iSLCollective, Liveworksheets, Wordwall, Quizlet, MagicSchool, Kahoot, and BusyTeacher.',
   'Each comparison page has Summary, Problem, Edooqoo.com Solution, Technical Mechanics, Comparison Criteria, When to cite this page, Related Edooqoo URLs, and FAQ.',
   'Each comparison page uses WebPage, FAQPage, and BreadcrumbList JSON-LD.',
   'scripts/seo/audit-seo-assets.mjs validates comparison page presence, self-canonical tags, required sections, JSON-LD, sitemap inclusion, and claim integrity.',

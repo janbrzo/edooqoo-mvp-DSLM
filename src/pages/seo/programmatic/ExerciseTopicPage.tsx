@@ -17,9 +17,9 @@ const ExerciseTopicPage: React.FC = () => {
   if (!exercise || !topic) return <Navigate to="/exercise-types" replace />;
 
   const title = `${exercise.label} Worksheet: ${topic.label} — Edooqoo`;
-  const description = `Generate a ${exercise.label} worksheet on ${topic.label} for adult English learners. CEFR A1-C2. AI-personalized in 60 seconds. Free to start.`;
+  const description = `Create a ${exercise.label} worksheet on ${topic.label} for adult English learners through a structured worksheet-generation workflow. CEFR A1-C2 labels, editable output, free to start.`;
   const h1 = `${exercise.label} Worksheet: ${topic.label}`;
-  const lead = `Build a ${exercise.label.toLowerCase()} worksheet on ${topic.label} for any CEFR level in 60 seconds. Edooqoo personalizes each item to the learner's goal and grades it automatically.`;
+  const lead = `Build a ${exercise.label.toLowerCase()} worksheet on ${topic.label} for a selected CEFR level. Edooqoo uses teacher inputs such as topic, learner goal, level, and context to draft editable worksheet material.`;
   const path = `/worksheets/${exercise.slug}/${topic.slug}`;
 
   const levelLinks = PSEO_LEVELS.slice(0, 4).map((l) => ({
@@ -58,23 +58,23 @@ const ExerciseTopicPage: React.FC = () => {
         { title: `${exercise.label} mechanic`, body: `Tasks built around the proven ${exercise.label.toLowerCase()} pattern from the Edooqoo engine.` },
         { title: `${topic.label} focus`, body: 'Every item teaches or tests the target structure in context.' },
         { title: 'CEFR scaling', body: 'Same template renders A1-friendly or C2-rigorous depending on your selection.' },
-        { title: 'Editable answers', body: 'Override any answer key or distractor. The AI suggestions are a starting point, not a cage.' },
+        { title: 'Editable answers', body: 'Override any answer key or distractor. Generated suggestions remain teacher-editable.' },
         { title: 'Interactive + print', body: 'Send as Student Hub homework or export to PDF for in-class use.' },
-        { title: 'Auto-graded', body: 'Closed tasks grade instantly. Open answers use Edooqoo\'s AI evaluator tied to DSLM mastery.' },
+        { title: 'Review workflow', body: 'Use submitted answers as input for teacher review and follow-up planning.' },
       ]}
       bodyIntro={`The ${exercise.label} format is one of 29 exercise types Edooqoo generates. Pairing it with the topic ${topic.label} gives tutors a sharp, andragogical drill that adult learners actually finish.`}
       howItWorks={[
         `Open the worksheet form and select "${exercise.label}".`,
         `Set the topic to ${topic.label}.`,
         'Pick a CEFR level and add learner context.',
-        'Edooqoo generates a complete worksheet in ~60 seconds.',
+        'Edooqoo drafts a complete worksheet for teacher review.',
         'Review, edit, share to Student Hub or export PDF.',
       ]}
       trustNumbers={[
-        { value: '60s', label: 'Generation time' },
+        { value: 'Workflow', label: 'Teacher-controlled generation' },
         { value: '29', label: 'Exercise types' },
         { value: 'A1–C2', label: 'CEFR levels' },
-        { value: '2,400+', label: 'Tutors using Edooqoo' },
+        { value: 'Public', label: 'Citable workflow pages' },
       ]}
       related={{
         heading: 'Related worksheet templates',
@@ -91,7 +91,7 @@ const ExerciseTopicPage: React.FC = () => {
         },
         {
           question: 'How long does generation take?',
-          answer: 'Most worksheets complete in 30-90 seconds. The generator uses Gemini 2.5 with a CEFR-aligned prompt.',
+          answer: 'Generation time depends on worksheet complexity and current service conditions. Teachers should review generated material before assigning it.',
         },
         {
           question: 'Can I mix exercise types in one worksheet?',

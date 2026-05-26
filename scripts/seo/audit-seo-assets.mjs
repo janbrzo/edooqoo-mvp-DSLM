@@ -63,6 +63,7 @@ const REQUIRED_COMPARISON_PAGES = [
   '/edooqoo-vs-quizlet.html',
   '/edooqoo-vs-magicschool.html',
   '/edooqoo-vs-kahoot.html',
+  '/edooqoo-vs-busyteacher.html',
 ];
 
 const REQUIRED_PROOF_PAGES = [
@@ -83,7 +84,48 @@ const UNSUPPORTED_CLAIM_PATTERNS = [
   [/Which is Better for English Teachers/i, 'unsupported better-than comparison claim'],
   [/best AI tool(?!s for ESL teachers)/i, 'unsupported singular best-tool claim'],
   [/saves hours/i, 'unsupported time-savings claim'],
+  [/save\s+\d+\+?\s+hours/i, 'unsupported quantified time-savings claim'],
+  [/saving significant time/i, 'unsupported quantified time-savings claim'],
   [/in under 60 seconds/i, 'unsupported speed claim'],
+  [/\b60 seconds\b/i, 'unsupported exact speed claim'],
+  [/under 1 minute/i, 'unsupported exact speed claim'],
+  [/2,400\+/i, 'unsupported usage-count claim'],
+  [/official\s+[A-Z0-9-]*\s*CEFR/i, 'unsupported official CEFR claim'],
+  [/Martha[^.]*validated/i, 'unsupported external validation claim'],
+  [/Gemini\s+2(?:\.5)?/i, 'unnecessary public model-version claim'],
+];
+
+const CLAIM_INTEGRITY_SOURCE_FILES = [
+  'index.html',
+  'src/constants/seoMeta.ts',
+  'src/constants/faqItems.ts',
+  'src/components/seo/SeoLandingLayout.tsx',
+  'src/components/seo/PageSeo.tsx',
+  'src/pages/HowItWorks.tsx',
+  'src/pages/features/FeatureHomework.tsx',
+  'src/pages/gallery/PublicGalleryWorksheetPage.tsx',
+  'src/pages/tools/CefrLevelTest.tsx',
+  'src/pages/tools/LessonPlanGenerator.tsx',
+  'src/pages/tools/VocabCefrChecker.tsx',
+  'src/pages/seo/EslClassToolkit.tsx',
+  'src/pages/seo/EslGamesForTeachers.tsx',
+  'src/pages/seo/EslWorksheets.tsx',
+  'src/pages/seo/EnglishGamesForLearners.tsx',
+  'src/pages/seo/ForEnglishTutors.tsx',
+  'src/pages/seo/TeachEnglishOnlineGuide.tsx',
+  'src/pages/seo/programmatic/ExerciseTopicPage.tsx',
+  'src/pages/seo/programmatic/PersonaPage.tsx',
+  'src/pages/seo/programmatic/TopicLevelPage.tsx',
+];
+
+const HIGH_RISK_PUBLIC_CLAIM_PAGES = [
+  '/online-english-teaching-tools.html',
+  '/esl-homework-grading-tool.html',
+  '/how-to-save-time-as-english-teacher.html',
+  '/blog/ai-homework-grading-for-english-teachers.html',
+  '/blog/how-to-create-grammar-worksheets-with-ai.html',
+  '/blog/differentiated-instruction-english-classroom.html',
+  '/blog/reading-comprehension-activities-english.html',
 ];
 
 function fail(message) {
@@ -260,6 +302,10 @@ function auditStaticCitationPage(route, requiredTypes) {
   if (/Edooqoo\s+is\s+the\s+best/i.test(html)) {
     fail(`public${route} contains unsupported best-claim wording`);
   }
+
+  if (/\bundefined\b/i.test(html)) {
+    fail(`public${route} contains literal undefined`);
+  }
 }
 
 function auditCitablePages() {
@@ -317,10 +363,39 @@ function auditPublicClaimIntegrity() {
     }
 
     const html = readPublic(route);
+    if (/\bundefined\b/i.test(html)) fail(`public${route} contains literal undefined`);
     for (const [pattern, label] of UNSUPPORTED_CLAIM_PATTERNS) {
       if (pattern.test(html)) fail(`public${route} contains ${label}`);
     }
     pass(`public${route} passes public claim-integrity scan`);
+  }
+
+  for (const rel of CLAIM_INTEGRITY_SOURCE_FILES) {
+    const file = path.join(ROOT, rel);
+    if (!fs.existsSync(file)) {
+      fail(`Claim-integrity source missing ${rel}`);
+      continue;
+    }
+
+    const text = fs.readFileSync(file, 'utf8');
+    for (const [pattern, label] of UNSUPPORTED_CLAIM_PATTERNS) {
+      if (pattern.test(text)) fail(`${rel} contains ${label}`);
+    }
+    pass(`${rel} passes source claim-integrity scan`);
+  }
+
+  for (const route of HIGH_RISK_PUBLIC_CLAIM_PAGES) {
+    const file = publicPath(route);
+    if (!fs.existsSync(file)) {
+      fail(`High-risk public claim page missing public${route}`);
+      continue;
+    }
+
+    const html = readPublic(route);
+    for (const [pattern, label] of UNSUPPORTED_CLAIM_PATTERNS) {
+      if (pattern.test(html)) fail(`public${route} contains ${label}`);
+    }
+    pass(`public${route} passes high-risk public claim-integrity scan`);
   }
 }
 

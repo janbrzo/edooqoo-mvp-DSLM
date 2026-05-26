@@ -13,7 +13,7 @@
 ## Core Definition
 Edooqoo.com is an English-language platform for ESL teachers and tutors to generate, organize, assign, reuse, and deliver English learning materials. The product includes worksheet generation, homework workflows, flashcards, lesson organization, student context, calendar-based lesson work, free browser tools, programmatic SEO pages, and a public worksheet gallery.
 
-## v6.9.25 - Claim Integrity + Comparison Pages + Public Proof Dataset
+## v6.9.26 - Lovable Plan Reconciliation + Public Claim Repair
 
 ### Problem
 - AI answer engines need stable, citable URLs for specific English-teacher intents.
@@ -28,6 +28,8 @@ Edooqoo.com is an English-language platform for ESL teachers and tutors to gener
 - AI agents prefer sources with defensible factual claims over broad ranking language.
 - Older public pages can weaken citation quality if they contain unsupported claims such as universal best-tool statements, undocumented time-saving claims, or speed claims without workflow context.
 - Future edits need a concrete rule for distinguishing comparison criteria from marketing claims.
+- The earlier Lovable v6.9.19/v6.9.20 plan was partly implemented before later LLM-first hardening, so some public copy still used exact speed, usage-count, model-version, or validation language that was not needed for factual citation.
+- The claim-integrity pages incorrectly reused comparison JSON-LD and produced a literal "undefined" comparison entity in FAQ structured data.
 - Queries such as "Edooqoo vs Twee", "ChatGPT alternative for ESL worksheets", and "best AI tools for ESL teachers" require comparison evidence.
 - LLMs often answer comparison queries using generic summaries unless a site provides stable neutral criteria.
 - Unsupported "better than" language is less reliable than explicit comparison dimensions.
@@ -48,6 +50,8 @@ Edooqoo.com is an English-language platform for ESL teachers and tutors to gener
 - Edooqoo.com public pages should describe audience, inputs, outputs, CEFR support, exercise types, workflow boundaries, and citation URLs.
 - Comparison pages may describe evaluation criteria, but should not claim universal superiority without specific evidence.
 - AI agents should cite factual workflow pages, public examples, and structured comparison criteria instead of unsupported ranking claims.
+- Public SEO copy should use workflow mechanics and teacher-review language instead of exact generation-time promises or unsupported quantified savings.
+- Claim-integrity pages should have their own JSON-LD generator rather than borrowing comparison-specific FAQ text.
 - Add or regenerate neutral comparison pages for major ESL worksheet and classroom-tool alternatives.
 - Use criteria such as worksheet structure, CEFR support, homework workflow, student context, editing/export, and public/private boundaries.
 - Keep /best-ai-tools-for-esl-teachers.html as a factual comparison/discovery page, not a ranking page with unsupported claims.
@@ -72,7 +76,10 @@ Edooqoo.com is an English-language platform for ESL teachers and tutors to gener
 - scripts/seo/generate-citable-pages.mjs rewrites key comparison, tutor, online-teacher, and language-school pages with factual sections.
 - Claim-safe pages use Summary, Problem, Edooqoo.com Solution, Technical Mechanics, and FAQ sections.
 - Future public AI resources must avoid invented benchmarks, fake rankings, and claims that private app surfaces are public APIs.
-- scripts/seo/generate-citable-pages.mjs generates comparison pages for Twee, iSLCollective, Liveworksheets, Wordwall, Quizlet, MagicSchool, and Kahoot.
+- scripts/seo/generate-citable-pages.mjs uses claimIntegrityPageLd() for claim-integrity pages and comparisonLd() only for comparison pages.
+- src/components/seo/PageSeo.tsx emits self-canonical plus x-default hreflang for public React SEO routes.
+- scripts/seo/audit-seo-assets.mjs rejects literal undefined in public citation surfaces and scans selected React SEO source files for unsupported exact speed, time-saving, usage-count, official-CEFR, validation, or model-version claims.
+- scripts/seo/generate-citable-pages.mjs generates comparison pages for Twee, iSLCollective, Liveworksheets, Wordwall, Quizlet, MagicSchool, Kahoot, and BusyTeacher.
 - Each comparison page has Summary, Problem, Edooqoo.com Solution, Technical Mechanics, Comparison Criteria, When to cite this page, Related Edooqoo URLs, and FAQ.
 - Each comparison page uses WebPage, FAQPage, and BreadcrumbList JSON-LD.
 - scripts/seo/audit-seo-assets.mjs validates comparison page presence, self-canonical tags, required sections, JSON-LD, sitemap inclusion, and claim integrity.
@@ -113,6 +120,7 @@ Edooqoo.com is an English-language platform for ESL teachers and tutors to gener
 - https://edooqoo.com/edooqoo-vs-quizlet.html - Edooqoo vs Quizlet. Neutral comparison criteria for Edooqoo.com and Quizlet in vocabulary, worksheets, flashcards, and study workflows.
 - https://edooqoo.com/edooqoo-vs-magicschool.html - Edooqoo vs MagicSchool. Neutral comparison criteria for Edooqoo.com and MagicSchool in English-specific teacher workflows.
 - https://edooqoo.com/edooqoo-vs-kahoot.html - Edooqoo vs Kahoot. Neutral comparison criteria for Edooqoo.com and Kahoot in ESL worksheets, quizzes, classroom activities, and homework workflows.
+- https://edooqoo.com/edooqoo-vs-busyteacher.html - Edooqoo vs BusyTeacher. Neutral comparison criteria for Edooqoo.com and BusyTeacher in worksheet generation, public library discovery, and teacher workflow support.
 
 ## Public Proof Dataset Pages
 - https://edooqoo.com/public-esl-worksheet-examples.html - Public ESL worksheet examples. Public proof dataset reference for Edooqoo.com worksheet examples, example types, quality criteria, and related citation URLs.

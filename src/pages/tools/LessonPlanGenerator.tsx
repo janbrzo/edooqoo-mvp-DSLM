@@ -145,7 +145,7 @@ const LessonPlanGenerator: React.FC = () => {
           {
             '@context': 'https://schema.org',
             '@type': 'HowTo',
-            name: 'How to create an ESL lesson plan in 60 seconds',
+            name: 'How to create a structured ESL lesson plan',
             step: [
               { '@type': 'HowToStep', name: 'Enter the lesson topic' },
               { '@type': 'HowToStep', name: 'Pick CEFR level and duration' },
@@ -285,7 +285,7 @@ const LessonPlanGenerator: React.FC = () => {
         <section className="p-8 bg-primary/5 rounded-lg text-center">
           <h2 className="text-2xl font-bold text-foreground mb-2">Fill the practice stage automatically</h2>
           <p className="text-muted-foreground mb-6">
-            Edooqoo generates personalized worksheets in 60 seconds — drop them straight into your plan.
+            Edooqoo creates personalized worksheets that teachers can review and place into the plan.
           </p>
           <Link to="/signup" state={fromState} className="inline-block bg-primary text-primary-foreground px-6 py-3 rounded-lg font-semibold hover:opacity-90">
             Try Edooqoo free

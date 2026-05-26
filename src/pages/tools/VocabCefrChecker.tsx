@@ -151,7 +151,7 @@ const VocabCefrChecker: React.FC = () => {
         <section className="p-8 bg-primary/5 rounded-lg text-center">
           <h2 className="text-2xl font-bold text-foreground mb-2">Lock the level for your next worksheet</h2>
           <p className="text-muted-foreground mb-6">
-            Edooqoo generates printable worksheets at any CEFR level in 60 seconds.
+            Edooqoo creates printable worksheets using teacher-selected CEFR levels.
           </p>
           <Link to="/signup" state={fromState} className="inline-block bg-primary text-primary-foreground px-6 py-3 rounded-lg font-semibold hover:opacity-90">
             Try Edooqoo free
