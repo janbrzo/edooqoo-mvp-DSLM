@@ -610,6 +610,22 @@ serve(async (req) => {
         .eq('id', test_id);
     }
 
+    // WT-4 (v6.9.27): explicitly mark the test completed so the UI never gets
+    // stuck on 'assigned'/'in_progress' if calculate_test_results silently
+    // fails. Skip 'reviewed' rows (teacher already actioned them).
+    try {
+      await supabase
+        .from('student_tests')
+        .update({
+          status: 'completed',
+          completed_at: new Date().toISOString(),
+        })
+        .eq('id', test_id)
+        .neq('status', 'reviewed');
+    } catch (statusErr) {
+      console.error('[process-welcome-test] WT-4 status update failed', statusErr);
+    }
+
     // Note: welcome_test_completed event removed - only test_answer_submitted events are logged per-question
 
     // --- Point 6: Create notification for teacher ---

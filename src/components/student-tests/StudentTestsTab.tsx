@@ -34,12 +34,22 @@ export function StudentTestsTab({ studentId, teacherId, studentName }: StudentTe
   const [showComparison, setShowComparison] = useState(false);
   const stats = getTestStats();
 
-  const welcomeTest = useMemo(() => tests.find(t => t.test_type === 'welcome'), [tests]);
+  // WT-3 (v6.9.27): prefer completed/reviewed > in_progress > others so the
+  // surfaced welcome test is the meaningful one, not an empty duplicate.
+  const welcomeTest = useMemo(() => {
+    const ws = tests.filter(t => t.test_type === 'welcome');
+    return ws.find(t => t.status === 'completed' || t.status === 'reviewed')
+        ?? ws.find(t => t.status === 'in_progress')
+        ?? ws[0];
+  }, [tests]);
   const hasWelcomeTest = !!welcomeTest;
 
-  // v6.2: count welcome attempts to decide whether to show the Compare button
+  // WT-6 (v6.9.27): only count COMPLETED/reviewed attempts so the Compare
+  // button no longer surfaces "2 tests" when only one is actually finished.
   const welcomeAttemptsCount = useMemo(
-    () => tests.filter(t => t.test_type === 'welcome').length,
+    () => tests.filter(t =>
+      t.test_type === 'welcome' && (t.status === 'completed' || t.status === 'reviewed')
+    ).length,
     [tests],
   );
 

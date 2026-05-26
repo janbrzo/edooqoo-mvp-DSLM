@@ -53,10 +53,14 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
   const dismissTimerRef = useRef<number | null>(null);
   // Cached pre-dismiss status so Undo can restore the previous state.
   const preDismissStatusRef = useRef<typeof status>('loading');
+  // WT-2 (v6.9.27): tracks the in-flight initial DB check so that any action
+  // (Copy/Send/Preview/Refresh Link) waits for it instead of racing and
+  // creating a duplicate welcome test row.
+  const checkPromiseRef = useRef<Promise<void> | null>(null);
   const { createTest, addQuestions, generateShareToken } = useStudentTests({ studentId, teacherId });
 
   useEffect(() => {
-    checkWelcomeTest();
+    checkPromiseRef.current = checkWelcomeTest();
   }, [studentId, teacherId]);
 
   // Poll for progress when pending/in_progress
@@ -68,7 +72,7 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
     }
   }, [status, testId]);
 
-  const checkWelcomeTest = async () => {
+  const checkWelcomeTest = async (): Promise<void> => {
     const DISMISS_KEY = `welcome_test_dismissed_${surface}_${studentId}`;
     if (localStorage.getItem(DISMISS_KEY) === 'true') {
       setStatus('hidden');
@@ -77,18 +81,22 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
     try {
       const { data } = await supabase
         .from('student_tests')
-        .select('id, status, share_token, total_questions, answered_count')
+        .select('id, status, share_token, total_questions, answered_count, created_at')
         .eq('student_id', studentId)
         .eq('teacher_id', teacherId)
         .eq('test_type', 'welcome')
         .is('deleted_at', null)
-        .order('created_at', { ascending: false })
-        .limit(1);
+        .order('created_at', { ascending: false });
 
       if (!data || data.length === 0) {
         setStatus('no_test');
       } else {
-        const test = data[0];
+        // WT-3 (v6.9.27): prefer completed/reviewed > in_progress > others.
+        // Avoids surfacing a stale empty duplicate over the real result.
+        const test =
+          data.find((t: any) => t.status === 'completed' || t.status === 'reviewed') ??
+          data.find((t: any) => t.status === 'in_progress') ??
+          data[0];
         setTestId(test.id);
         setTotalQuestions(test.total_questions || 0);
         setAnsweredCount((test as any).answered_count || 0);
@@ -136,6 +144,10 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
    * Returns the testId + token so caller can act immediately.
    */
   const ensureWelcomeTest = async (): Promise<{ testId: string; token: string } | null> => {
+    // WT-2: wait for initial DB check before any create-or-reuse decision.
+    if (checkPromiseRef.current) {
+      try { await checkPromiseRef.current; } catch { /* ignore */ }
+    }
     // Already initialised
     if (testId && shareUrl) {
       const existingToken = shareUrl.split('/').pop() ?? '';

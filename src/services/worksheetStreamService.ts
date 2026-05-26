@@ -20,31 +20,61 @@ export function streamWorksheetGeneration(
   userId: string | null,
   callbacks: StreamCallbacks
 ): AbortController {
-  const controller = new AbortController();
+  // Outer controller: returned to the caller (so they can still abort the
+  // overall request). The inner controller is rebuilt on silent retry.
+  const outerController = new AbortController();
+  let innerController = new AbortController();
+  let retryAttempted = false;
   
   // Use the same URL as regular generation
   const GENERATE_WORKSHEET_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/generateWorksheet`;
-  
+
   devLog('🚀 Starting streaming worksheet generation...', { hasUserId: !!userId });
 
-  // v5.1: heartbeat — abort if no chunk arrives for 40s.
-  const HEARTBEAT_MS = 40000;
+  // H5 (v6.9.27): heartbeat raised to 45s and now backed by a server-side
+  // keepalive comment frame every 15s. Before tearing the stream down we try
+  // a single silent retry if no exercise has streamed yet.
+  const HEARTBEAT_MS = 45000;
   let lastProgress = { exercisesGenerated: 0, expectedTotal: 0 };
   let heartbeatTimer: ReturnType<typeof setTimeout> | null = null;
-  const resetHeartbeat = () => {
+
+  const cleanupHeartbeat = () => {
     if (heartbeatTimer) clearTimeout(heartbeatTimer);
+    heartbeatTimer = null;
+  };
+
+  const resetHeartbeat = () => {
+    cleanupHeartbeat();
     heartbeatTimer = setTimeout(() => {
-      console.error('⏱️ Heartbeat timeout — aborting stream after 40s of silence');
-      try { controller.abort(); } catch {}
+      if (lastProgress.exercisesGenerated === 0 && !retryAttempted) {
+        // Silent retry: nothing was streamed yet, so the user did not see any
+        // partial state. Tear down the inner stream and start a fresh one.
+        retryAttempted = true;
+        console.warn('⏱️ Heartbeat timeout before first exercise — silent retry');
+        try { innerController.abort(); } catch {}
+        innerController = new AbortController();
+        startRequest();
+        return;
+      }
+      console.error('⏱️ Heartbeat timeout — aborting stream after 45s of silence');
+      try { innerController.abort(); } catch {}
+      try { outerController.abort(); } catch {}
       const detail = lastProgress.exercisesGenerated > 0
         ? `Connection lost — generated ${lastProgress.exercisesGenerated}/${lastProgress.expectedTotal || '?'} exercises before disconnect. Please retry.`
-        : 'Connection lost — server stopped responding for 40s. Please retry.';
+        : 'Connection lost — server stopped responding for 45s. Please retry.';
       callbacks.onError?.(new Error(detail));
     }, HEARTBEAT_MS);
   };
-  resetHeartbeat();
-  
-  fetch(GENERATE_WORKSHEET_URL, {
+
+  // Forward an outer abort to the active inner request.
+  outerController.signal.addEventListener('abort', () => {
+    try { innerController.abort(); } catch {}
+    cleanupHeartbeat();
+  });
+
+  const startRequest = () => {
+    resetHeartbeat();
+    fetch(GENERATE_WORKSHEET_URL, {
     method: 'POST',
     headers: { 
       'Content-Type': 'application/json',
@@ -55,7 +85,7 @@ export function streamWorksheetGeneration(
       enableStreaming: true,  // ← KEY FLAG: enables streaming mode
       userId: userId || null  // ← FIXED: Pass null for anonymous mode (edge function accepts it)
     }),
-    signal: controller.signal
+    signal: innerController.signal
   }).then(async response => {
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -132,17 +162,20 @@ export function streamWorksheetGeneration(
       callbacks.onError?.(new Error(detail));
     }
   }).catch(error => {
-    if (heartbeatTimer) { clearTimeout(heartbeatTimer); heartbeatTimer = null; }
+    cleanupHeartbeat();
     if (error.name === 'AbortError') {
       devLog('🛑 Stream aborted by user');
       return;
     }
-    
+
     console.error('❌ Stream error:', error);
     callbacks.onError?.(error);
   }).finally(() => {
-    if (heartbeatTimer) { clearTimeout(heartbeatTimer); heartbeatTimer = null; }
+    cleanupHeartbeat();
   });
-  
-  return controller;
+  };
+
+  startRequest();
+
+  return outerController;
 }

@@ -12,15 +12,41 @@ export interface SSEStream {
 /**
  * Creates a Server-Sent Events (SSE) stream
  * Used to send real-time progress updates to the frontend
+ *
+ * H5 (v6.9.27): emits SSE comment frames (`: keepalive\n\n`) every 15s so the
+ * client's heartbeat watchdog doesn't trip when the upstream model pauses
+ * between chunks. Comments are ignored by the SSE event parser but count as
+ * bytes on the wire and reset the client read watchdog.
  */
 export function createSSEStream(): SSEStream {
   let controller: ReadableStreamDefaultController;
+  const encoder = new TextEncoder();
+  let keepaliveTimer: number | undefined;
+  let closed = false;
+
+  const stopKeepalive = () => {
+    if (keepaliveTimer !== undefined) {
+      clearInterval(keepaliveTimer);
+      keepaliveTimer = undefined;
+    }
+  };
   
   const readable = new ReadableStream({
-    start(c) { 
-      controller = c; 
+    start(c) {
+      controller = c;
+      // H5 server keepalive — emit a comment frame every 15s.
+      keepaliveTimer = setInterval(() => {
+        if (closed) return;
+        try {
+          controller.enqueue(encoder.encode(`: keepalive ${Date.now()}\n\n`));
+        } catch {
+          stopKeepalive();
+        }
+      }, 15000) as unknown as number;
     },
-    cancel() { 
+    cancel() {
+      closed = true;
+      stopKeepalive();
       console.log('🔴 SSE stream cancelled by client');
     }
   });
@@ -30,7 +56,7 @@ export function createSSEStream(): SSEStream {
     send: (event: string, data: any) => {
       try {
         const sseMessage = `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
-        controller.enqueue(new TextEncoder().encode(sseMessage));
+        controller.enqueue(encoder.encode(sseMessage));
         console.log(`📡 SSE sent: ${event}`, data);
       } catch (error) {
         console.error('❌ Failed to send SSE message:', error);
@@ -38,6 +64,8 @@ export function createSSEStream(): SSEStream {
     },
     close: () => {
       try {
+        closed = true;
+        stopKeepalive();
         controller.close();
         console.log('✅ SSE stream closed');
       } catch (error) {

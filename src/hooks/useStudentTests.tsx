@@ -67,6 +67,29 @@ export function useStudentTests({ studentId, teacherId }: UseStudentTestsProps) 
     if (!teacherId) return null;
 
     try {
+      // WT-1 (v6.9.27): idempotent guard for welcome tests.
+      // Prevents duplicate rows when ensureWelcomeTest() races with the
+      // initial DB fetch in WelcomeTestSuggestion / StudentTestsTab.
+      // Re-takes (with previous_attempt_id) are allowed through.
+      if (testData.test_type === 'welcome' && !testData.previous_attempt_id) {
+        const { data: existing } = await supabase
+          .from('student_tests')
+          .select('*')
+          .eq('student_id', testData.student_id)
+          .eq('teacher_id', teacherId)
+          .eq('test_type', 'welcome')
+          .is('deleted_at', null)
+          .order('attempt_number', { ascending: false })
+          .order('created_at', { ascending: false })
+          .limit(1);
+        const last = existing?.[0] as StudentTest | undefined;
+        if (last) {
+          // Surface to local state so subsequent reads see it.
+          setTests(prev => (prev.some(t => t.id === last.id) ? prev : [last, ...prev]));
+          return last;
+        }
+      }
+
       const { data, error: createError } = await supabase
         .from('student_tests')
         .insert({
