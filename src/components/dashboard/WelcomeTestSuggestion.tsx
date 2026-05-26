@@ -144,6 +144,10 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
    * Returns the testId + token so caller can act immediately.
    */
   const ensureWelcomeTest = async (): Promise<{ testId: string; token: string } | null> => {
+    // WT-2: wait for initial DB check before any create-or-reuse decision.
+    if (checkPromiseRef.current) {
+      try { await checkPromiseRef.current; } catch { /* ignore */ }
+    }
     // Already initialised
     if (testId && shareUrl) {
       const existingToken = shareUrl.split('/').pop() ?? '';
