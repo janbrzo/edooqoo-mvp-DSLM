@@ -30,7 +30,7 @@ const ForEnglishTutors = () => (
     ]}
     solutionHeading="One platform replaces the typical 5-tool stack"
     solutions={[
-      { title: 'AI worksheet generator', body: '29 exercise types, CEFR A1-C2, generated in 60 seconds per worksheet. Personalized to each students profile.' },
+      { title: 'AI worksheet generator', body: '29 exercise types, CEFR A1-C2 labels, and worksheet drafts personalized to each student profile.' },
       { title: 'Automated homework grading', body: 'AI grades closed AND open-answer homework — including emails, essays, speaking transcripts. Teacher reviews in 30 seconds.' },
       { title: 'Booking + payment + calendar', body: 'Public booking page with Stripe. Google Calendar sync. Vacation blocks. Automated student reminders.' },
     ]}

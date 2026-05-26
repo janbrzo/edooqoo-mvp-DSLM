@@ -126,9 +126,9 @@ const PublicGalleryWorksheetPage: React.FC = () => {
         )}
 
         <div className="mt-10 rounded-lg border bg-primary/5 p-6 text-center">
-          <h2 className="text-xl font-bold mb-2">From idea to ready-to-teach worksheet in under 1 minute</h2>
+          <h2 className="text-xl font-bold mb-2">From idea to a teacher-reviewed worksheet workflow</h2>
           <p className="text-sm text-muted-foreground mb-4">
-            Edooqoo's DSLM 1-Minute Prep turns your student's goals into a tailored worksheet —
+            Edooqoo's DSLM workflow turns your student's goals into a tailored worksheet —
             fully editable, with audio, images and AI-grading built in. Free to start, no credit card.
           </p>
           <Link to="/signup" state={fromState} className="inline-block rounded-md bg-primary px-5 py-2 text-primary-foreground font-semibold">

@@ -63,7 +63,7 @@ export const faqItems: FaqItem[] = [
   },
   {
     question: "How long does worksheet generation take?",
-    answer: "Worksheet generation typically takes 30-60 seconds. The AI creates custom content based on your specifications like English level, lesson topic, learning goals, and student context."
+    answer: "Worksheet generation time depends on worksheet complexity and current service conditions. The workflow uses your specifications such as English level, lesson topic, learning goals, and student context."
   },
   {
     question: "Can I cancel my subscription anytime?",
@@ -111,7 +111,7 @@ export const faqItems: FaqItem[] = [
   },
   {
     question: "How does AI Evaluation work?",
-    answer: "AI automatically evaluates open-ended student answers — such as sentence transformation, paraphrasing, discussion questions, and descriptions — and pre-fills mastery scores (0-100) for each item. Teachers can review, adjust, and confirm the AI scores. This works across worksheet review, homework submissions, and live sessions, saving significant time on manual evaluation."
+    answer: "AI can evaluate open-ended student answers — such as sentence transformation, paraphrasing, discussion questions, and descriptions — and pre-fill mastery scores (0-100) for each item. Teachers can review, adjust, and confirm the AI scores across worksheet review, homework submissions, and live sessions."
   },
   {
     question: "What is Google Calendar integration?",

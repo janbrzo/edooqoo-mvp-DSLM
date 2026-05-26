@@ -18,9 +18,9 @@ const TopicLevelPage: React.FC = () => {
   if (!topic || !level) return <Navigate to="/esl-worksheets" replace />;
 
   const title = `${topic.label} Worksheets for ${level.label} Learners — Edooqoo`;
-  const description = `Generate ${topic.label} worksheets for ${level.label} (${level.cefr}) adult learners in 60 seconds. AI-personalized, CEFR-aligned, printable PDF. Free to start.`;
+  const description = `Create ${topic.label} worksheets for ${level.label} (${level.cefr}) adult learners through a structured worksheet-generation workflow. Editable, printable, and free to start.`;
   const h1 = `${topic.label} Worksheets for ${level.label} Learners`;
-  const lead = `Edooqoo generates printable ${topic.label} worksheets for ${level.cefr} learners in 60 seconds. Each worksheet is AI-personalized to the student's goal, CEFR-aligned, and ready to assign as homework with automatic grading.`;
+  const lead = `Edooqoo creates printable ${topic.label} worksheets for ${level.cefr} learners from teacher-selected topic, level, goal, and student context. Each worksheet can be edited, exported, or assigned as homework with teacher review.`;
 
   const path = `/esl-worksheets/${topic.slug}/${level.slug}`;
 
@@ -74,23 +74,23 @@ const TopicLevelPage: React.FC = () => {
         to: `/signup?topic=${topic.slug}&level=${level.cefr}`,
       }}
       whatsInside={[
-        { title: 'CEFR-aligned tasks', body: `Every exercise calibrated to ${level.cefr} difficulty by Martha (10 yrs ESL).` },
+        { title: 'CEFR-oriented tasks', body: `Exercises use ${level.cefr} as the selected difficulty label and can be reviewed by the teacher before use.` },
         { title: '29 exercise types', body: 'Mix fill-in-the-blanks, matching, error correction, dictation, picture description.' },
-        { title: 'Auto-graded homework', body: 'Assign to your student. Edooqoo grades open answers with AI and feeds DSLM mastery.' },
+        { title: 'Homework review workflow', body: 'Assign to your student, review submitted answers, and use results as input for follow-up planning.' },
         { title: 'Printable + interactive', body: 'Download PDF or share an interactive link. Works on phone and laptop.' },
         { title: 'Personalized to goal', body: 'Specify business email, IELTS, travel — examples adapt to the student\'s profession.' },
-        { title: 'Editable in seconds', body: 'Click any question to edit text, answer, or distractors. No template lock-in.' },
+        { title: 'Editable after generation', body: 'Click any question to edit text, answer, or distractors before teaching or assigning.' },
       ]}
-      bodyIntro={`Most ${level.cefr} learners need ${topic.label} practice that is calibrated, varied, and tied to a real goal. Generic textbook drills bore adult students. Edooqoo solves this with AI-personalized worksheets that match the learner's profession and level.`}
+      bodyIntro={`Most ${level.cefr} learners need ${topic.label} practice that is level-aware, varied, and tied to a real goal. Edooqoo supports this with worksheet-generation inputs for learner context, profession, topic, and selected CEFR level.`}
       howItWorks={[
         `Pick "${topic.label}" and CEFR level ${level.cefr} in the worksheet form.`,
         'Add 1-2 lines about the student (e.g., "B1 nurse preparing for night shifts").',
-        'Edooqoo generates 8-12 exercises across the 29 types in ~60 seconds.',
+        'Edooqoo drafts a worksheet across selected exercise types.',
         'Edit any question, then share as PDF or interactive homework link.',
-        'Student completes it; AI grades open answers and updates the DSLM mastery map.',
+        'Student completes it; teacher-reviewed results can inform the next worksheet.',
       ]}
       trustNumbers={[
-        { value: '60s', label: 'Average generation time' },
+        { value: 'Workflow', label: 'Teacher-controlled generation' },
         { value: '29', label: 'Exercise types' },
         { value: 'A1–C2', label: 'Full CEFR coverage' },
         { value: '2', label: 'Free worksheets / month' },
@@ -106,7 +106,7 @@ const TopicLevelPage: React.FC = () => {
         },
         {
           question: `Are the worksheets aligned to ${level.cefr} CEFR descriptors?`,
-          answer: `Every worksheet is generated against the official ${level.cefr} CEFR can-do descriptors. Martha (10 yrs ESL) validated the rubric.`,
+          answer: `The worksheet form uses ${level.cefr} as the selected CEFR-oriented difficulty label. Teachers should review generated material before using it for formal assessment.`,
         },
         {
           question: 'Can I edit the generated questions?',

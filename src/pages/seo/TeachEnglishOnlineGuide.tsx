@@ -31,7 +31,7 @@ const TeachEnglishOnlineGuide = () => (
     solutionHeading="The independent online tutor stack in 2026"
     solutions={[
       { title: 'Direct booking + payment', body: 'Public booking page with Stripe checkout. No platform commission. Set your own hourly rate.' },
-      { title: 'AI worksheet generation', body: 'Edooqoo generates personalized worksheets in 60 seconds. Eliminate the 60-minute lesson prep.' },
+      { title: 'AI worksheet generation', body: 'Edooqoo creates personalized worksheet drafts from teacher inputs, learner goals, and selected CEFR labels.' },
       { title: 'Automated homework grading', body: 'AI grades closed and open-answer homework overnight. Teacher reviews in 30 seconds.' },
     ]}
     listHeading="9 steps to launch an online English tutoring business"
@@ -55,7 +55,7 @@ const TeachEnglishOnlineGuide = () => (
         <h2 className="text-xl font-bold text-foreground">Pricing benchmarks for online English tutors in 2026</h2>
         <p>General English conversation: $25-40/hour. Business English (banking, tech, M&A, legal): $40-80/hour. IELTS or Cambridge exam prep: $50-100/hour. Academic English (university applications, dissertations): $60-120/hour. Pricing scales with measurable outcomes — a tutor who can guarantee +0.5 IELTS band in 10 weeks charges 3x a general conversation tutor.</p>
         <h2 className="text-xl font-bold text-foreground">The lesson workflow that saves 8 hours per week</h2>
-        <p>1. The night before: open Edooqoo, pick the student, generate a worksheet for the next lesson (60 seconds). 2. Share the link with the student via email or Student Hub. 3. During the lesson: screen-share the worksheet, work through 4-6 exercises live. 4. End of lesson: select 2-3 unused exercises, assign as homework with a 5-day deadline. 5. AI grades the homework overnight. 6. Before the next lesson: review the auto-generated student progress dashboard (30 seconds). Total prep + admin time: 5 minutes per lesson, down from 75 minutes.</p>
+        <p>1. The night before: open Edooqoo, pick the student, and draft a worksheet for the next lesson. 2. Share the link with the student via email or Student Hub. 3. During the lesson: screen-share the worksheet and work through 4-6 exercises live. 4. End of lesson: select 2-3 unused exercises, assign as homework with a deadline. 5. Use AI-assisted evaluation and teacher review for submitted answers. 6. Before the next lesson: review the student progress dashboard and choose the next focus.</p>
         <p>For the full tutor toolkit see <Link to="/for-english-tutors" className="text-primary hover:underline">English tutor tools</Link> and <Link to="/pricing" className="text-primary hover:underline">Edooqoo pricing</Link>.</p>
       </>
     }
@@ -65,7 +65,7 @@ const TeachEnglishOnlineGuide = () => (
       { question: 'Can I teach English online without a website?', answer: 'Yes, in year one. Use Edooqoo public booking page + LinkedIn/Instagram for client acquisition. Build a website in year two for SEO.' },
       { question: 'What is the best tool stack for independent online tutors?', answer: 'Video: Zoom or Google Meet. Worksheets + homework + booking: Edooqoo. Payment: Stripe (built into Edooqoo). Total monthly cost under $40.' },
     ]}
-    ctaTitle="Cut lesson prep from 60 minutes to 60 seconds"
+    ctaTitle="Create a repeatable online lesson workflow"
     ctaBody="Edooqoo generates personalized worksheets, grades homework with AI, and handles booking + payment. Free plan includes 2 worksheets."
   />
 );

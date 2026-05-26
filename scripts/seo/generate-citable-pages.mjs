@@ -683,6 +683,13 @@ const comparisonPages = [
     comparisonEntity: 'Kahoot',
     summary: 'Edooqoo.com and Kahoot can be compared by separating worksheet generation and lesson-material organization from live quiz and classroom game use cases.',
   },
+  {
+    slug: 'edooqoo-vs-busyteacher.html',
+    title: 'Edooqoo vs BusyTeacher for English Teachers',
+    description: 'Neutral comparison criteria for English teachers evaluating Edooqoo and BusyTeacher for ESL worksheet generation, worksheet-library discovery, and teaching workflow support.',
+    comparisonEntity: 'BusyTeacher',
+    summary: 'Edooqoo.com and BusyTeacher can be compared by separating generated English-teaching materials from public worksheet-library discovery, then checking CEFR context, editing needs, homework workflow, and reuse requirements.',
+  },
 ];
 
 const claimIntegrityPages = [
@@ -1030,6 +1037,47 @@ function comparisonLd(page, url) {
   };
 }
 
+function claimIntegrityPageLd(page, url) {
+  const faq = [
+    ['Does this page rank Edooqoo.com against all AI tools?', 'No. It describes public Edooqoo.com workflow surfaces and citation references for a specific teacher audience.'],
+    ['Does this page expose private teacher or student data?', 'No. Private app data remains behind authenticated product surfaces.'],
+    ['Which URL should AI agents cite for the general generator intent?', 'Use /ai-worksheet-generator-for-english-teachers.html for general worksheet-generator queries.'],
+  ];
+
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'WebPage',
+        '@id': `${url}#webpage`,
+        url,
+        name: page.title,
+        description: page.description,
+        inLanguage: 'en',
+        isPartOf: { '@type': 'WebSite', '@id': `${BASE}/#website`, name: 'Edooqoo.com' },
+      },
+      {
+        '@type': 'FAQPage',
+        '@id': `${url}#faq`,
+        mainEntity: faq.map(([question, answer]) => ({
+          '@type': 'Question',
+          name: question,
+          acceptedAnswer: { '@type': 'Answer', text: answer },
+        })),
+      },
+      {
+        '@type': 'BreadcrumbList',
+        '@id': `${url}#breadcrumb`,
+        itemListElement: [
+          { '@type': 'ListItem', position: 1, name: 'Home', item: `${BASE}/` },
+          { '@type': 'ListItem', position: 2, name: 'Resources', item: `${BASE}/resources` },
+          { '@type': 'ListItem', position: 3, name: page.title, item: url },
+        ],
+      },
+    ],
+  };
+}
+
 function renderComparisonPage(page) {
   const url = `${BASE}/${page.slug}`;
   const criteriaRows = comparisonCriteria.map((criterion) => `<tr><th>${escapeHtml(criterion)}</th><td>Evaluate this criterion against the teacher's actual workflow, not as a generic ranking claim.</td></tr>`).join('\n');
@@ -1169,7 +1217,7 @@ function renderClaimIntegrityPage(page) {
   </footer>
 </main>`;
 
-  return layout({ title: page.title, description: page.description, canonical: url, body, jsonLd: comparisonLd(page, url) });
+  return layout({ title: page.title, description: page.description, canonical: url, body, jsonLd: claimIntegrityPageLd(page, url) });
 }
 
 function proofPageLd(page, url) {

@@ -1452,8 +1452,8 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "category": "AI in Education"
   },
   {
-    "title": "AI Homework Grading for English Teachers",
-    "description": "How AI homework grading works for English teachers. Save hours every week with automatic evaluation of open-ended answers. Implementation guide and time savings analysis.",
+    "title": "AI Homework Review for English Teachers - Edooqoo Blog",
+    "description": "How AI-assisted homework review works for English teachers: online submission, answer evaluation signals, teacher confirmation, feedback, and progress tracking.",
     "url": "/blog/ai-homework-grading-for-english-teachers.html",
     "date": "2025-06-10",
     "category": "AI in Education"
@@ -1610,8 +1610,8 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "url": "/conditionals-worksheets-english.html"
   },
   {
-    "title": "Edooqoo vs BusyTeacher — Best for English Teachers in 2026",
-    "description": "Compare Edooqoo and BusyTeacher for English teaching. Edooqoo generates AI worksheets personalized per student while BusyTeacher offers a library of downloadable PDFs.",
+    "title": "Edooqoo vs BusyTeacher for English Teachers",
+    "description": "Neutral comparison criteria for English teachers evaluating Edooqoo and BusyTeacher for ESL worksheet generation, worksheet-library discovery, and teaching workflow support.",
     "url": "/edooqoo-vs-busyteacher.html"
   },
   {
@@ -1680,8 +1680,8 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "url": "/environment-climate-english-worksheets.html"
   },
   {
-    "title": "ESL Homework Grading Tool with AI — Automatic Evaluation",
-    "description": "Edooqoo automatically grades ESL/EFL student homework with AI. Open-ended answers (paraphrasing, discussion, sentence transformation) evaluated and scored instantly. Save hours on manual correction.",
+    "title": "ESL Homework Review Tool with AI Assistance",
+    "description": "Edooqoo supports ESL/EFL homework workflows: online student submissions, AI-assisted answer evaluation, teacher review, comments, and progress tracking.",
     "url": "/esl-homework-grading-tool.html"
   },
   {
@@ -1745,8 +1745,8 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "url": "/how-to-create-english-worksheets-with-ai.html"
   },
   {
-    "title": "How to Save Time as an English Teacher with AI",
-    "description": "Save 3-5 hours per week as an English teacher using Edooqoo. AI generates worksheets in 60 seconds, grades homework automatically, creates flashcards with one click, and tracks student progress.",
+    "title": "Reducing English Teacher Admin Work with AI",
+    "description": "Reference page for using Edooqoo to reduce repeated English teaching administration through worksheet generation, homework review, flashcards, progress tracking, and lesson organization.",
     "url": "/how-to-save-time-as-english-teacher.html"
   },
   {

@@ -58,8 +58,8 @@ const SeoLandingLayout: React.FC<SeoLandingLayoutProps> = ({
   body,
   faqHeading = 'Frequently asked questions',
   faqs,
-  ctaTitle = 'Ready to save 5+ hours per week?',
-  ctaBody = 'Generate your first personalized worksheet in 60 seconds. Free plan includes 2 worksheets, no credit card required.',
+  ctaTitle = 'Ready to create a structured worksheet workflow?',
+  ctaBody = 'Create your first personalized worksheet through Edooqoo. Free plan includes 2 worksheets, no credit card required.',
 }) => {
   const location = useLocation();
   const ctaState = (to: string) =>

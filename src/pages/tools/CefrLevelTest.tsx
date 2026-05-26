@@ -175,7 +175,7 @@ const CefrLevelTest: React.FC = () => {
         <section className="p-8 bg-primary/5 rounded-lg text-center">
           <h2 className="text-2xl font-bold text-foreground mb-2">Turn the result into a lesson</h2>
           <p className="text-muted-foreground mb-6">
-            Edooqoo generates printable worksheets calibrated to any CEFR level in 60 seconds. Free plan, no credit card.
+            Edooqoo creates printable worksheets using teacher-selected CEFR levels. Free plan, no credit card.
           </p>
           <Link
             to="/signup"

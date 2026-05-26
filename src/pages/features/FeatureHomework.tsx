@@ -44,14 +44,14 @@ const HomeworkMockup = () => (
 );
 
 const benefits = [
-  { icon: Clock, title: 'Save 2+ hours per week', description: 'AI grades open-ended answers, vocabulary, grammar, and reading exercises automatically. You review, not correct.' },
+  { icon: Clock, title: 'Structured review workflow', description: 'AI can pre-evaluate open-ended answers, vocabulary, grammar, and reading exercises. You review and confirm results.' },
   { icon: Zap, title: 'Instant feedback', description: 'Students see their results immediately after submitting. No waiting for the next lesson to know how they did.' },
   { icon: CheckCircle, title: 'Consistent grading', description: 'AI applies the same rubric every time. No more "I was tired, I graded too easy" inconsistency.' },
   { icon: BarChart3, title: 'DSLM integration', description: 'Every graded answer feeds into the student\'s nano-skill mastery profile automatically.' },
 ];
 
 const steps = [
-  { number: 1, title: 'Generate a worksheet', description: 'Create a worksheet for your student with any combination of 29 exercise types. Takes under 60 seconds.' },
+  { number: 1, title: 'Generate a worksheet', description: 'Create a worksheet for your student with any combination of 29 exercise types, then review it before assignment.' },
   { number: 2, title: 'Assign as homework', description: 'Click "Send as Homework." Set a deadline, add optional notes. Student receives an email with a direct link.' },
   { number: 3, title: 'Student completes it online', description: 'Interactive interface — fill gaps, drag & drop, write essays, record audio. Progress auto-saves.' },
   { number: 4, title: 'AI grades automatically', description: 'Objective exercises are auto-checked. Open-ended answers (writing, explanations) evaluated by AI with detailed feedback.' },
@@ -79,13 +79,13 @@ const comparisonRows = [
 const FeatureHomework: React.FC = () => (
   <FeaturePageLayout
     title="AI Homework Grading for ESL Teachers — Automatic Evaluation | Edooqoo"
-    metaDescription="Assign homework in 30 seconds. AI grades open-ended answers automatically. Students submit online, you review results. Save 2+ hours per week."
+    metaDescription="Assign homework, let students submit online, and review AI-assisted evaluations of open-ended answers in Edooqoo."
   >
     <FeatureHero
       badge="Auto-Grade"
       badgeColor="bg-amber-100 text-amber-700 border-amber-200"
-      headline="Assign homework in 30 seconds. AI grades it for you."
-      subheadline="Stop spending evenings correcting worksheets. Edooqoo's AI evaluates student answers — including open-ended writing — so you only review, not grade from scratch."
+      headline="Assign homework and review AI-assisted evaluation."
+      subheadline="Edooqoo supports homework submission, AI-assisted answer evaluation, and teacher review for open-ended writing and structured exercises."
     >
       <HomeworkMockup />
     </FeatureHero>
@@ -110,7 +110,7 @@ const FeatureHomework: React.FC = () => (
             <div className="text-xs text-red-600 mt-1">answers to check manually</div>
           </div>
         </div>
-        <p className="text-sm text-muted-foreground mt-6">With Edooqoo, AI handles the grading. You spend 5 minutes reviewing instead of 2 hours correcting.</p>
+        <p className="text-sm text-muted-foreground mt-6">With Edooqoo, AI-assisted evaluation gives teachers a review surface instead of a blank correction workflow.</p>
       </div>
     </section>
 
