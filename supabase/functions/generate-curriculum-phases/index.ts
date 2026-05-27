@@ -10,6 +10,7 @@
  */
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+import { logModelFailure } from "../_shared/modelFailureLogger.ts";
 
 // v6.9.13 — helpers inlined (previously imported from ../_shared/dslmPromptCore.ts).
 // Inlined to keep deploy self-contained. Behavior preserved.
@@ -406,6 +407,14 @@ Return ONLY a valid JSON array (no markdown), with this exact format:
     if (!aiResponse.ok) {
       const errorText = await aiResponse.text();
       console.error('AI Gateway error:', errorText);
+      await logModelFailure({
+        model: 'google/gemini-2.5-flash',
+        provider: 'lovable-gateway',
+        status: aiResponse.status,
+        endpoint: '/v1/chat/completions',
+        error: errorText,
+        functionName: 'generate-curriculum-phases',
+      });
       throw new Error(`AI Gateway error: ${aiResponse.status}`);
     }
 

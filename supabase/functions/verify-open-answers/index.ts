@@ -1,5 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { logModelFailure } from "../_shared/modelFailureLogger.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -158,6 +159,14 @@ Return exactly ${answers.length} evaluation objects in a JSON array:
     if (!aiResponse.ok) {
       const errorText = await aiResponse.text();
       console.error("[verify-open-answers] AI API error:", errorText);
+      await logModelFailure({
+        model: "google/gemini-2.5-flash",
+        provider: "lovable-gateway",
+        status: aiResponse.status,
+        endpoint: "/v1/chat/completions",
+        error: errorText,
+        functionName: "verify-open-answers",
+      });
       return new Response(JSON.stringify({ error: "AI evaluation failed", details: errorText }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },

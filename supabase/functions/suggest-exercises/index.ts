@@ -1,6 +1,7 @@
 // Smart exercise selection via Lovable AI Gateway
 // Returns { exercises: string[], focusMap: Record<string,'vocabulary'|'grammar'> }
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { logModelFailure } from "../_shared/modelFailureLogger.ts";
 import {
   NO_MEDIA_EXERCISE_IDS,
   PICTURE_EXERCISE_IDS,
@@ -145,6 +146,14 @@ ${hasAudio ? 'Include 2 audio exercises.' : ''}${autoMediaBlock}`;
       }
       const t = await aiResp.text();
       console.error('AI gateway error', aiResp.status, t);
+      await logModelFailure({
+        model: 'google/gemini-2.5-flash',
+        provider: 'lovable-gateway',
+        status: aiResp.status,
+        endpoint: '/v1/chat/completions',
+        error: t,
+        functionName: 'suggest-exercises',
+      });
       throw new Error(`AI gateway ${aiResp.status}`);
     }
 

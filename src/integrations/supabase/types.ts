@@ -1678,6 +1678,39 @@ export type Database = {
           },
         ]
       }
+      model_health_checks: {
+        Row: {
+          checked_at: string
+          error: string | null
+          id: string
+          latency_ms: number | null
+          model: string
+          ok: boolean
+          provider: string
+          status: number
+        }
+        Insert: {
+          checked_at?: string
+          error?: string | null
+          id?: string
+          latency_ms?: number | null
+          model: string
+          ok: boolean
+          provider: string
+          status: number
+        }
+        Update: {
+          checked_at?: string
+          error?: string | null
+          id?: string
+          latency_ms?: number | null
+          model?: string
+          ok?: boolean
+          provider?: string
+          status?: number
+        }
+        Relationships: []
+      }
       pacing_proposals: {
         Row: {
           created_at: string
