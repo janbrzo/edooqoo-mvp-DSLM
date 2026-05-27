@@ -18,10 +18,10 @@ const FinalCTA: React.FC = () => {
       
       <div className="relative z-10 max-w-3xl mx-auto px-4">
         <h2 className="text-4xl md:text-5xl font-extrabold text-white mb-6 tracking-tight">
-          Ready to save hours every week?
+          Stop prepping from a blank prompt.
         </h2>
         <p className="text-xl text-violet-100 mb-10 max-w-2xl mx-auto">
-          Experience the difference in your next class. Your students will love it, and you'll love having your free time back.
+          Set up the student context once, let Edooqoo collect learning signals, and generate the next worksheet from a concrete recommendation.
         </p>
         
         <div className="flex flex-col items-center gap-6">
@@ -30,7 +30,7 @@ const FinalCTA: React.FC = () => {
             size="lg"
             className="h-14 px-10 text-lg bg-white text-violet-900 hover:bg-violet-50 rounded-full font-bold shadow-2xl hover:-translate-y-1 transition-all duration-200"
           >
-            Create Your First Worksheet — Free
+            Start 1-Minute Prep Free
             <ArrowUp className="h-5 w-5 ml-2" />
           </Button>
           
@@ -41,11 +41,11 @@ const FinalCTA: React.FC = () => {
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4 text-violet-300" />
-              <span>No signup needed to try</span>
+              <span>2 worksheets free</span>
             </div>
             <div className="flex items-center gap-2">
               <CheckCircle2 className="h-4 w-4 text-violet-300" />
-              <span>Ready in 2 minutes</span>
+              <span>Teacher review stays in control</span>
             </div>
           </div>
         </div>

@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { GraduationCap, ClipboardCheck, Calendar, Radio, Layers, Users } from 'lucide-react';
+import { Brain, GraduationCap, ClipboardCheck, Calendar, Radio, Layers, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import SignupPromptDialog from '@/components/landing/SignupPromptDialog';
+import { useEventTracking } from '@/hooks/useEventTracking';
 
 /**
  * Feature pills for anonymous nav. v6.9.4 behavior:
@@ -22,6 +23,7 @@ export interface FeaturePillItem {
 }
 
 export const FEATURE_PILLS: FeaturePillItem[] = [
+  { label: '1-Minute Prep', icon: Brain, anchorId: 'feature-one-minute-prep' },
   { label: 'Placement Test', icon: GraduationCap, anchorId: 'feature-placement-test' },
   { label: 'Homework', icon: ClipboardCheck, anchorId: 'feature-homework' },
   { label: 'Calendar', icon: Calendar, anchorId: 'feature-calendar' },
@@ -52,6 +54,7 @@ const FeatureNavPills: React.FC<FeatureNavPillsProps> = ({
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { trackEvent } = useEventTracking();
   const timeoutRef = useRef<number | null>(null);
   const [dialogState, setDialogState] = useState<{ open: boolean; feature: FeaturePillItem | null }>({
     open: false,
@@ -71,6 +74,10 @@ const FeatureNavPills: React.FC<FeatureNavPillsProps> = ({
   const handleClick = (anchorId: string) => {
     onItemClick?.();
     const item = FEATURE_PILLS.find((p) => p.anchorId === anchorId) || null;
+    trackEvent({
+      eventType: anchorId === 'feature-one-minute-prep' ? 'one_minute_dslm_card_click' : 'one_minute_feature_pill_click',
+      eventData: { anchorId, label: item?.label || null, location: location.pathname },
+    });
     // If already on landing, just scroll. Otherwise navigate to /signup with deep-link.
     if (location.pathname === '/') {
       const el = document.getElementById(anchorId);

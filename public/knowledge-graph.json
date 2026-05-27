@@ -27,6 +27,7 @@
       "applicationCategory": "EducationalApplication",
       "operatingSystem": "Web",
       "url": "https://edooqoo.com/",
+      "description": "1-Minute Prep system for recurring 1:1 English teachers that combines student context, DSLM next-step signals, and worksheet generation.",
       "publisher": {
         "@id": "https://edooqoo.com/#organization"
       },
@@ -45,6 +46,9 @@
         }
       ],
       "featureList": [
+        "1-Minute Prep workflow target",
+        "DSLM next-step signals",
+        "Student context for recurring 1:1 English lessons",
         "ESL worksheet generation",
         "CEFR-oriented teaching materials",
         "Homework workflows",

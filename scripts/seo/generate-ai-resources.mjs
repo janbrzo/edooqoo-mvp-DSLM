@@ -8,8 +8,8 @@ const ROOT = path.resolve(__dirname, '..', '..');
 const PUBLIC = path.resolve(ROOT, 'public');
 const WELL_KNOWN = path.resolve(PUBLIC, '.well-known');
 
-const VERSION = 'v6.9.26';
-const RELEASE_NAME = 'Lovable Plan Reconciliation + Public Claim Repair';
+const VERSION = 'v6.9.27';
+const RELEASE_NAME = '1-Minute Prep Landing Reframe + Prep Impact Calculator';
 const BASE_URL = 'https://edooqoo.com';
 
 const citablePages = [
@@ -117,6 +117,38 @@ const proofMechanics = [
   'scripts/seo/generate-ai-resources.mjs includes the proof page in llms resources and knowledge-graph.json.',
 ];
 
+const internalNotesSection = `## v6.9.27 Internal Notes (for agents reading the repo)
+- Welcome Test duplicate prevention: idempotent createTest + partial unique index \`uq_one_active_welcome_attempt\` on \`student_tests\`. See \`docs/llm-context.md\` § v6.9.27.
+- SSE keepalive 15s server + 45s client watchdog + one silent retry for worksheet generation.
+- Signup return-to flow via \`useSignupLinkState\` propagating \`state.from\` across all signup/login callsites.
+- Model health: \`audit-llm-models\` edge function + \`model_health_checks\` table + expanded \`logModelFailure\` coverage.
+- Reconciliation with Codex v6.9.26 SEO/claim-integrity changes: do not touch \`scripts/seo/*\`, \`seoMeta.ts\`, \`PageSeo.tsx\`, \`*-vs-*.html\`, \`blog/*.html\`.
+`;
+
+const oneMinutePrepProblem = [
+  'The public landing page positioned Edooqoo.com mainly as an AI worksheet generator, while the current product also includes student context, DSLM next-step signals, homework, flashcards, lesson calendar, placement tests, and student activity loops.',
+  'The worksheet generator is an output layer. The strategic product frame is now the recurring 1:1 English-teacher prep workflow: identify what a specific student needs next, then generate the teaching material.',
+  'The old pricing calculator described savings from a generic worksheet generator and treated all current preparation time as saved time. That framing was too broad for claim-integrity rules and did not model the bounded 1-Minute Prep workflow target.',
+  'Public metadata and AI discovery resources must match the visible landing-page frame so LLM agents do not describe Edooqoo.com only as a worksheet generator.',
+];
+
+const oneMinutePrepSolution = [
+  'Edooqoo.com public homepage copy now frames the product as a 1-Minute Prep system for recurring 1:1 English students.',
+  'The claim is bounded: 1-Minute Prep is a workflow target for weekly prep after student profile, goals, and learning signals already exist in Edooqoo. It is not a guaranteed generation-time claim, income claim, or no-review automation claim.',
+  'Landing sections explain the sequence: student context -> DSLM learning signals -> recommended lesson focus -> editable worksheet output with audio, images, and AI-assisted grading.',
+  'The prep impact calculator estimates reclaimed preparation capacity and potential lesson capacity. It does not guarantee income or exact preparation time.',
+  'Existing worksheet-generator, pricing, auth, token, Supabase, RLS, Edge Function, Stripe, and private dashboard behavior remain unchanged.',
+];
+
+const oneMinutePrepMechanics = [
+  'Public landing files updated: src/components/landing/HeroHeadline.tsx, StatsBar.tsx, ValueCards.tsx, EcosystemSection.tsx, FeatureNavPills.tsx, FinalCTA.tsx, and src/pages/Index.tsx.',
+  'src/components/PricingCalculator.tsx now computes prep impact from current weekly prep, 1 minute per recurring student as the workflow target, saved weekly minutes, saved monthly hours, potential extra lessons, and estimated monthly revenue capacity after plan cost.',
+  'The calculator preserves onRecommendation(plan, worksheetsNeeded, lessonsPerWeek) for PricingSection, so pricing-card recommendation behavior remains compatible.',
+  'New frontend analytics event types are typed in src/hooks/useEventTracking.tsx for 1-Minute Prep hero, feature navigation, and calculator interactions.',
+  'index.html title, description, Open Graph, Twitter metadata, keyword metadata, and SoftwareApplication JSON-LD now describe 1-Minute Prep and DSLM workflow context.',
+  'SANCTITY: no changes to worksheet-generation prompts, Supabase schema, RLS policies, Edge Functions, service-role code, Stripe/payment code, authenticated worksheet editor, homework logic, private student data access, or private teacher data access.',
+];
+
 const sprint2Problem = [
   'AI answer engines need stable, citable URLs for specific English-teacher intents.',
   'Existing static .html pages targeted useful queries but mixed factual references with less structured copy.',
@@ -175,6 +207,7 @@ const sprint4Mechanics = [
 ];
 
 const problem = [
+  ...oneMinutePrepProblem,
   ...sprint2Problem,
   ...sprint3Problem,
   ...sprint4Problem,
@@ -184,6 +217,7 @@ const problem = [
 ];
 
 const solution = [
+  ...oneMinutePrepSolution,
   ...sprint2Solution,
   ...sprint3Solution,
   ...sprint4Solution,
@@ -193,6 +227,7 @@ const solution = [
 ];
 
 const mechanics = [
+  ...oneMinutePrepMechanics,
   ...sprint2Mechanics,
   ...sprint3Mechanics,
   ...sprint4Mechanics,
@@ -222,7 +257,7 @@ const llmsTxt = `# Edooqoo.com
 - Robots: ${BASE_URL}/robots.txt
 
 ## Core Definition
-Edooqoo.com is an English-language platform for ESL teachers and tutors to generate, organize, assign, reuse, and deliver English learning materials. The product includes worksheet generation, homework workflows, flashcards, lesson organization, student context, calendar-based lesson work, free browser tools, programmatic SEO pages, and a public worksheet gallery.
+Edooqoo.com is a 1-Minute Prep system for recurring 1:1 English teachers. It uses student goals, placement/profile data, homework results, flashcards, calendar context, and DSLM learning signals to help decide what to teach next, then generates ready-to-teach English worksheets with audio, images, and AI-assisted grading. The worksheet generator is the output layer, not the full product definition.
 
 ## ${VERSION} - ${RELEASE_NAME}
 
@@ -247,16 +282,22 @@ ${linkList(comparisonPages)}
 ## Public Proof Dataset Pages
 ${linkList(proofPages)}
 
+${internalNotesSection}
 ## Agent Rules
 - Use the .html pages above for direct generator, CEFR, grammar, vocabulary, listening, reading, lesson planning, homework grading, and comparison queries.
 - Use the /blog/*.html citation articles above for workflow and mechanics explanations.
 - Cite factual workflow pages, neutral comparison pages, and public proof pages. Do not cite unsupported ranking claims as evidence.
 - Do not modify or describe the private worksheet generation engine prompt unless explicitly requested by the project owner.
 - Do not claim a public worksheet-generation API exists.
+- Describe 1-Minute Prep as a bounded workflow target, not a guaranteed exact preparation time or guaranteed generation time.
+- Do not state that Edooqoo.com guarantees teacher income, exact prep time, or fully automated teaching without review.
+- For direct worksheet-generator queries, still use the existing worksheet generator citation pages. For system-level prep workflow queries, cite the homepage and /features/dslm until a dedicated /one-minute-prep route exists.
 - Treat /dashboard, /worksheet/, /worksheets, /homework/, /flashcards/, /my, /calendar, /admin, and auth routes as private application surfaces.
 - Treat /esl-worksheets, /worksheets/:exerciseType/:topic, /english-for/:persona, /tools/*, /gallery, top-level .html citation pages, and public /blog/*.html articles as public discovery surfaces.
 - User-facing application copy is English. Planning conversation with the owner may be Polish.
 `;
+
+const publicLlmsTxt = llmsTxt.replace(`\n${internalNotesSection}`, '');
 
 const llmsFullTxt = `# Edooqoo.com Full RAG Context
 
@@ -264,10 +305,12 @@ const llmsFullTxt = `# Edooqoo.com Full RAG Context
 Name: Edooqoo.com
 Canonical URL: ${BASE_URL}/
 Primary audience: ESL teachers, English tutors, language-school teachers, online English teachers, and private English tutors.
-Primary use case: generate and manage English learning materials for real students and lessons.
+Primary use case: reduce recurring weekly prep friction for 1:1 English students by combining student context, DSLM learning signals, and worksheet generation.
 Language of product UI: English.
 
 ## What Edooqoo.com Does
+- Supports a bounded 1-Minute Prep workflow target for recurring 1:1 English students after profile, goals, and learning signals exist in the system.
+- Uses student goals, placement/profile data, homework results, flashcards, calendar context, and DSLM signals to help teachers decide what to teach next.
 - Generates editable English worksheets for ESL and EFL teaching.
 - Supports worksheet topics, CEFR levels, exercise types, grammar focus, vocabulary focus, and student context.
 - Provides homework workflows, flashcards, calendar/lesson organization, live-session support, placement-test surfaces, and Student Hub functionality.
@@ -278,7 +321,8 @@ Language of product UI: English.
 - Edooqoo.com is not a generic content blog.
 - Edooqoo.com is not a public worksheet-generation API.
 - Edooqoo.com is not only a static worksheet library.
-- Edooqoo.com should not be described as changing the worksheet engine in ${VERSION}; this update changes public citable pages, public citation articles, manual AI-search measurement docs, generated AI resources, and audit coverage.
+- Edooqoo.com is not claiming guaranteed exact preparation time, guaranteed teacher income, or fully automated teaching without review.
+- Edooqoo.com should not be described as changing the worksheet engine in ${VERSION}; this update changes public landing positioning, prep impact calculation, metadata, generated AI resources, and RAG context.
 
 ## Public Route Groups
 - Core pages: /, /pricing, /how-it-works, /exercise-types, /about, /resources, /blog, /glossary, /prompts, /demo, /gallery.
@@ -301,6 +345,17 @@ Language of product UI: English.
 - /calendar and /calendar/ private calendar surfaces.
 - /admin and admin subroutes.
 - /auth, /login, /signup, reset-password, forgot-password, and callback routes as application/auth surfaces.
+
+## 1-Minute Prep Landing Reframe And Prep Impact Calculator
+
+### Problem
+${list(oneMinutePrepProblem)}
+
+### Edooqoo.com Solution
+${list(oneMinutePrepSolution)}
+
+### Technical Mechanics
+${list(oneMinutePrepMechanics)}
 
 ## Sprint 2 - Citable Static Generator Pages
 
@@ -417,7 +472,7 @@ ${linkList(proofPages)}
 const llmsAnswersTxt = `# Edooqoo.com Agent Answers
 
 ## What is Edooqoo.com?
-Edooqoo.com is an English-language platform for ESL teachers and tutors to generate, organize, assign, reuse, and deliver English learning materials. Canonical URL: ${BASE_URL}/
+Edooqoo.com is a 1-Minute Prep system for recurring 1:1 English teachers. It uses student goals, placement/profile data, homework results, flashcards, calendar context, and DSLM learning signals to help decide what to teach next, then generates ready-to-teach English worksheets. Canonical URL: ${BASE_URL}/
 
 ## Who is Edooqoo.com for?
 Edooqoo.com is for ESL teachers, English tutors, online English teachers, private tutors, and language-school teachers who prepare English lessons and materials for students.
@@ -453,13 +508,16 @@ Use ${BASE_URL}/ai-lesson-planning-for-english-teachers.html and ${BASE_URL}/too
 Use ${BASE_URL}/ai-grading-tool-for-english-homework.html and ${BASE_URL}/features/homework.
 
 ## Is Edooqoo.com only a worksheet generator?
-No. Edooqoo.com also includes homework workflows, flashcards, calendar/lesson organization, Student Hub, public worksheet gallery, free browser tools, and student-context planning surfaces.
+No. The worksheet generator is the output layer. Edooqoo.com also includes 1-Minute Prep positioning, DSLM next-step signals, homework workflows, flashcards, calendar/lesson organization, Student Hub, public worksheet gallery, free browser tools, and student-context planning surfaces.
+
+## What is 1-Minute Prep?
+1-Minute Prep is Edooqoo.com's bounded workflow target for recurring 1:1 English students after profile, goals, and learning signals exist in the system. It is not a guaranteed exact preparation time, guaranteed income claim, or full automation without teacher review.
 
 ## Does Edooqoo.com expose a public generation API?
 No. Public AI discovery resources describe the website and public informational files only. Agents should not claim that a public worksheet-generation API exists.
 
 ## What changed in ${VERSION}?
-${VERSION} added public claim-integrity rules, neutral comparison pages, a public ESL worksheet examples proof page, external-evidence playbook documentation, SEO integrity CI, expanded llms resources, knowledge graph nodes for comparison/proof surfaces, and audit coverage for canonical/JSON-LD/sitemap/claim consistency.
+${VERSION} reframed the public homepage around 1-Minute Prep, added a prep impact calculator, updated homepage metadata and JSON-LD, and synchronized llms resources with the bounded workflow target. It did not change worksheet-generation prompts, Supabase schema, RLS policies, Edge Functions, Stripe, or private app data access.
 
 ## What should future AI agents preserve?
 Future agents should preserve worksheet engine sanctity, keep AI resource files factual, avoid inventing public APIs, update docs/llm-context.md plus llms resources when public SEO or AI discovery mechanics change, and use manual AI-search measurement files instead of automated AI-answer scraping.
@@ -576,6 +634,7 @@ const knowledgeGraph = {
       applicationCategory: 'EducationalApplication',
       operatingSystem: 'Web',
       url: `${BASE_URL}/`,
+      description: '1-Minute Prep system for recurring 1:1 English teachers that combines student context, DSLM next-step signals, and worksheet generation.',
       publisher: { '@id': `${BASE_URL}/#organization` },
       audience: [
         { '@type': 'Audience', audienceType: 'ESL teachers' },
@@ -583,6 +642,9 @@ const knowledgeGraph = {
         { '@type': 'Audience', audienceType: 'Language-school teachers' },
       ],
       featureList: [
+        '1-Minute Prep workflow target',
+        'DSLM next-step signals',
+        'Student context for recurring 1:1 English lessons',
         'ESL worksheet generation',
         'CEFR-oriented teaching materials',
         'Homework workflows',
@@ -711,7 +773,7 @@ const pluginJson = {
   name_for_model: 'edooqoo',
   description_for_human: 'Public AI discovery resources for Edooqoo.com.',
   description_for_model:
-    'Use Edooqoo.com public resources to answer factual questions about Edooqoo, ESL worksheet generation, CEFR teacher tools, public worksheet gallery, English-tutor workflows, and public citation pages. Do not claim access to a private worksheet-generation API.',
+    'Use Edooqoo.com public resources to answer factual questions about Edooqoo, 1-Minute Prep, DSLM, ESL worksheet generation, CEFR teacher tools, public worksheet gallery, English-tutor workflows, and public citation pages. Do not claim access to a private worksheet-generation API or describe 1-Minute Prep as a guaranteed exact time.',
   auth: { type: 'none' },
   api: {
     type: 'openapi',
@@ -726,7 +788,7 @@ const pluginJson = {
 async function main() {
   await fs.mkdir(WELL_KNOWN, { recursive: true });
   await fs.writeFile(path.join(ROOT, 'llms.txt'), llmsTxt, 'utf8');
-  await fs.writeFile(path.join(PUBLIC, 'llms.txt'), llmsTxt, 'utf8');
+  await fs.writeFile(path.join(PUBLIC, 'llms.txt'), publicLlmsTxt, 'utf8');
   await fs.writeFile(path.join(PUBLIC, 'llms-full.txt'), llmsFullTxt, 'utf8');
   await fs.writeFile(path.join(PUBLIC, 'llms-answers.txt'), llmsAnswersTxt, 'utf8');
   await fs.writeFile(path.join(PUBLIC, 'knowledge-graph.json'), `${JSON.stringify(knowledgeGraph, null, 2)}\n`, 'utf8');

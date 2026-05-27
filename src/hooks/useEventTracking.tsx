@@ -40,7 +40,14 @@ export interface TrackingEvent {
     | 'download_attempt_locked' 
     | 'download_attempt_unlocked'
     | 'payment_button_click'
-    | 'stripe_payments_success';
+    | 'stripe_payments_success'
+    | 'one_minute_hero_cta_click'
+    | 'one_minute_secondary_cta_click'
+    | 'one_minute_feature_pill_click'
+    | 'one_minute_dslm_card_click'
+    | 'one_minute_calculator_input_change'
+    | 'one_minute_calculator_cta_click'
+    | 'one_minute_calculator_pricing_click';
   eventData?: any;
   userIdentifier?: string;
 }

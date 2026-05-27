@@ -5,18 +5,18 @@ import { useScrollAnimation } from '@/hooks/useScrollAnimation';
 const cards = [
   {
     icon: Lightbulb,
-    title: 'Never run out of lesson ideas',
-    description: 'With 29 exercise types including gap-fill, matching, listening, and discussion — every lesson feels fresh and engaging.',
+    title: 'Start from student context',
+    description: 'Profiles, goals, placement data, notes and recent activity give the system a starting point before you prepare.',
   },
   {
     icon: Workflow,
-    title: 'Zero admin work for you',
-    description: 'Students get their own portal with worksheets, interactive flashcards, automated homework, and seamless lesson booking.',
+    title: 'See what to teach next',
+    description: 'DSLM turns learning signals into suggested focus areas before the next worksheet is generated.',
   },
   {
     icon: Target,
-    title: 'Know exactly what to teach',
-    description: 'CEFR-tagged skill tracking and analytics. See exactly what each student has mastered and what to focus on next.',
+    title: 'Generate the worksheet',
+    description: 'The final output is an editable worksheet with exercises, audio, images and AI-assisted grading.',
   },
 ];
 
@@ -28,10 +28,10 @@ const ValueCards: React.FC = () => {
       <div className="max-w-6xl mx-auto px-4">
         <div className={`text-center mb-16 animate-fade-up ${isVisible ? 'visible' : ''}`}>
           <h2 className="text-3xl md:text-4xl font-bold text-foreground mb-4">
-            Everything you need to teach better
+            1-Minute Prep starts before the worksheet
           </h2>
           <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-            A complete toolkit designed specifically for 1-on-1 language tutors.
+            Edooqoo connects student context, learning signals and material generation into one weekly prep loop for 1-on-1 English lessons.
           </p>
         </div>
 

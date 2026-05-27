@@ -11,6 +11,7 @@ import FormView from "@/components/worksheet/FormView";
 import GenerationView from "@/components/worksheet/GenerationView";
 import { TokenPaywallModal } from "@/components/TokenPaywallModal";
 import { PricingSection } from "@/components/PricingSection";
+import { PricingCalculator } from "@/components/PricingCalculator";
 import { FreeWeekBanner } from "@/components/FreeWeekBanner";
 import { deepFixTextObjects } from "@/utils/textObjectFixer";
 import { CheckCircle } from "lucide-react";
@@ -112,6 +113,13 @@ const Index = () => {
     const pricingSection = document.getElementById('pricing-section');
     if (pricingSection) {
       pricingSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
+  const scrollToWorksheetForm = () => {
+    const formSection = document.getElementById('worksheet-form');
+    if (formSection) {
+      formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   };
 
@@ -353,6 +361,15 @@ const Index = () => {
       {!bothWorksheetsReady ? (
         <>
           <HeroHeadline />
+          <section className="px-4 pt-4 pb-2 bg-background/40 backdrop-blur-sm">
+            <div className="max-w-6xl mx-auto">
+              <PricingCalculator
+                variant="landing"
+                onPrimaryCta={scrollToWorksheetForm}
+                onSecondaryCta={scrollToPricing}
+              />
+            </div>
+          </section>
           <div id="worksheet-form" className="scroll-mt-16 pb-16">
             <FormView 
               onSubmit={handleGenerateWorksheet} 

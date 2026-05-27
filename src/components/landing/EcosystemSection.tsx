@@ -157,14 +157,45 @@ const ShareMockup = () => (
   </div>
 );
 
+const OneMinutePrepMockup = () => (
+  <div className="bg-background rounded-xl border border-border shadow-sm p-3 text-xs space-y-2">
+    <div className="flex items-center justify-between">
+      <span className="font-semibold text-foreground text-[11px]">Julia K. · B2 Business English</span>
+      <span className="bg-violet-50 border border-violet-200 text-violet-700 rounded-full px-2 py-0.5 text-[10px] font-medium">~1 min target</span>
+    </div>
+    <div className="grid grid-cols-2 gap-1.5">
+      {['Profile ready', 'Goals set', 'Homework scored', 'Flashcards active'].map((item) => (
+        <div key={item} className="bg-muted/40 rounded-md px-2 py-1 text-[10px] text-muted-foreground">
+          <span className="text-green-600 font-bold">✓</span> {item}
+        </div>
+      ))}
+    </div>
+    <div className="bg-violet-50 border border-violet-100 rounded-lg px-2 py-1.5 text-[10px] text-violet-700">
+      <span className="font-semibold">Next focus:</span> email structure + hedging
+    </div>
+    <div className="h-2 bg-muted rounded-full overflow-hidden">
+      <div className="h-full bg-violet-500 rounded-full" style={{ width: '78%' }}></div>
+    </div>
+  </div>
+);
+
 /* ─── Feature data ────────────────────────────────── */
 
 const features = [
   {
+    badge: 'Core',
+    badgeColor: 'bg-violet-50 text-violet-600 border-violet-200',
+    title: '1-Minute Prep + DSLM',
+    description: 'Student goals, profile data and learning signals help define the next lesson focus before worksheet generation.',
+    mockup: <OneMinutePrepMockup />,
+    link: '/features/dslm',
+    anchorId: 'feature-one-minute-prep',
+  },
+  {
     badge: 'Live',
     badgeColor: 'bg-red-50 text-red-600 border-red-200',
     title: 'Live Sessions',
-    description: 'Teach with the worksheet open. Real-time scoring, timer per exercise, AI evaluation of open answers.',
+    description: 'Teach with the worksheet open. Live responses and review moments can feed the next lesson focus.',
     mockup: <LiveSessionsMockup />,
     link: '/features/live-sessions',
     anchorId: 'feature-live-sessions',
@@ -173,7 +204,7 @@ const features = [
     badge: 'Auto',
     badgeColor: 'bg-amber-50 text-amber-600 border-amber-200',
     title: 'Homework + AI Grading',
-    description: 'Assign exercises with deadlines. Students submit online. AI scores automatically — you review and adjust.',
+    description: 'Assign exercises with deadlines. AI-assisted grading gives review data for the next student-specific worksheet.',
     mockup: <HomeworkMockup />,
     link: '/features/homework',
     anchorId: 'feature-homework',
@@ -182,7 +213,7 @@ const features = [
     badge: 'SM-2',
     badgeColor: 'bg-violet-50 text-violet-600 border-violet-200',
     title: 'Smart Flashcards',
-    description: 'Auto-generated from every worksheet. Spaced repetition algorithm. Students study through their Hub.',
+    description: 'Auto-generated flashcards and spaced repetition activity add vocabulary signals to the student context.',
     mockup: <FlashcardMockup />,
     link: '/features/flashcards',
     anchorId: 'feature-flashcards',
@@ -191,7 +222,7 @@ const features = [
     badge: 'Sync',
     badgeColor: 'bg-green-50 text-green-600 border-green-200',
     title: 'Lesson Calendar',
-    description: 'Students book lessons through your public page. Auto-syncs with Google Calendar. Reminders included.',
+    description: 'Lesson cadence and bookings keep weekly prep tied to the students you actually teach next.',
     mockup: <CalendarMockup />,
     link: '/features/calendar',
     anchorId: 'feature-calendar',
@@ -200,7 +231,7 @@ const features = [
     badge: 'AI',
     badgeColor: 'bg-blue-50 text-blue-600 border-blue-200',
     title: 'Welcome Placement Test',
-    description: 'New student? Send a placement test. AI assesses their level automatically so you know where to start.',
+    description: 'New student? Send a placement test to initialize level, goals and starting context before lesson one.',
     mockup: <WelcomeTestMockup />,
     link: '/features/placement-test',
     anchorId: 'feature-placement-test',
@@ -208,8 +239,8 @@ const features = [
   {
     badge: 'Link',
     badgeColor: 'bg-indigo-50 text-indigo-600 border-indigo-200',
-    title: 'Share & Collaborate',
-    description: 'Share interactive worksheet links. Students solve exercises online. Track who completed what.',
+    title: 'Student Hub',
+    description: 'Students work through shared materials online, giving you completion context for follow-up prep.',
     mockup: <ShareMockup />,
     link: '/features/student-hub',
     anchorId: 'feature-student-hub',
@@ -226,10 +257,10 @@ const EcosystemSection: React.FC = () => {
       <div className="max-w-5xl mx-auto px-4">
         <div className="text-center mb-10">
           <h2 className={`text-2xl font-bold text-foreground mb-2 animate-fade-up ${isVisible ? 'visible' : ''}`}>
-            Your complete teaching toolkit
+            The system behind 1-Minute Prep
           </h2>
           <p className={`text-sm text-muted-foreground max-w-2xl mx-auto animate-fade-up stagger-1 ${isVisible ? 'visible' : ''}`}>
-            Everything you need to run professional 1-on-1 lessons — built into one platform.
+            Each feature adds context or turns that context into the next ready-to-teach worksheet.
           </p>
         </div>
 
