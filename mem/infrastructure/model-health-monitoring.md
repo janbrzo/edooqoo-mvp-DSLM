@@ -1,0 +1,15 @@
+---
+name: Model Health Monitoring v6.9.27
+description: audit-llm-models edge function + model_health_checks table + expanded logModelFailure wiring across AI edge functions
+type: feature
+---
+
+## v6.9.27 — Multi-provider audit (extends v6.9.21)
+
+- Table `public.model_health_checks` (service-role only): `provider, model, status, latency_ms, ok, error, checked_at`. Index on `(provider, model, checked_at DESC)`.
+- Edge function `audit-llm-models` pings Lovable Gateway (`google/gemini-2.5-flash`, `gemini-2.5-flash-lite`, `openai/gpt-5-mini`) and OpenAI (`gpt-4o-mini` via `/v1/models/<id>`). Each ping → row in `model_health_checks`; 404/410/5xx also calls `logModelFailure` so StatusPage banner picks it up.
+- Auth: `verify_jwt=false` in `supabase/config.toml`; in-code check `x-cron-secret == CRON_SECRET`. CRON_SECRET must exist in project secrets before scheduling.
+- Recommended schedule: pg_cron daily 06:00 UTC (operator-owned SQL — contains anon key/URL, not in migrations).
+- `logModelFailure` wired into: `generate-audio`, `verify-open-answers`, `suggest-exercises`, `classify-knowledge-entry`, `generate-curriculum-phases`, `translate-flashcard` (Lovable + OpenAI fallback). Pattern: log BEFORE throw / error response.
+
+**Why:** v6.9.21 logger existed but only 1 function used it; deprecations elsewhere went silent.
