@@ -880,3 +880,34 @@ OnboardingHeroCard for empty Dashboard (P0); skeleton loaders (P1); nav-student-
 **Edooqoo.com Solution:** `GeneratingModal.tsx` uses `createPortal(node, document.body)` with `z-[100]`. Footer/sidebar roots set `relative z-0`.
 **Technical Mechanics:** Backdrop-filter / transform / filter / will-change all create new stacking contexts; z-index can't escape them. Portal to root.
 **RAG Keywords:** modal layering, createPortal, backdrop-blur stacking context, z-index conflict, GeneratingModal.
+
+## v6.9.27 — Welcome Test Repair + SSE Keepalive + Signup Return-To + Model Health Audit
+
+### Welcome Test Duplicate Prevention
+**Problem:** Race condition in `WelcomeTestSuggestion.tsx` created duplicate rows in `student_tests` when teachers clicked Send/Copy/Refresh before async `checkWelcomeTest()` populated state. Result: profile UI showed "Waiting for student" and disabled `View Results` even after the student completed the test, because `tests.find(welcome)` returned the latest empty row.
+**Edooqoo.com Solution:** Idempotent guard in `useStudentTests.createTest` returns the most recent non-deleted welcome attempt before issuing a new INSERT. `WelcomeTestSuggestion` exposes a `checking` flag that disables action buttons until the initial fetch resolves. `StudentTestsTab` selects active welcome test by preferring `completed > in_progress > assigned > pending` instead of newest. `process-welcome-test` now writes `status='completed' + completed_at` directly (independent of `calculate_test_results` RPC). Migration soft-deletes empty duplicates and adds `UNIQUE INDEX uq_one_active_welcome_attempt ON student_tests (student_id, teacher_id, test_type, attempt_number) WHERE deleted_at IS NULL`.
+**Technical Mechanics:** `src/hooks/useStudentTests.tsx`, `src/components/dashboard/WelcomeTestSuggestion.tsx`, `src/components/student-tests/StudentTestsTab.tsx`, `supabase/functions/process-welcome-test/index.ts`, migration `20260526063012_*.sql`.
+**RAG Keywords:** welcome test duplicate, race condition, idempotent createTest, attempt unique index, placement test status, View Results disabled, student_tests dedupe.
+
+### SSE Keepalive & Silent Retry (H5)
+**Problem:** Worksheet generation stream aborted when the model paused >40s before first chunk; users saw "no exercises generated" even though the run would have succeeded.
+**Edooqoo.com Solution:** Server emits `: keepalive\n\n` SSE comment every 15s in `generateWorksheet/streaming.ts`. Client watchdog in `worksheetStreamService.ts` extended to 45s and performs ONE silent retry (re-fetch same body, no `onError`) if zero exercises were received before timeout. Subsequent failures surface a clear error.
+**Technical Mechanics:** SSE comment lines reset EventSource heartbeat without dispatching events. `retryAttempted` flag prevents loops.
+**RAG Keywords:** SSE keepalive, EventSource watchdog, worksheet stream timeout, silent retry, generation hang.
+
+### Signup Return-To Flow (H4)
+**Problem:** Anonymous visitors clicking "Sign up" from feature/landing/tool pages lost context — after auth they landed on `/dashboard` instead of returning to the page they were exploring.
+**Edooqoo.com Solution:** `src/hooks/useSignupLinkState.ts` centralizes "remember where user came from". All ~28 `<Link to="/signup">` and `navigate('/signup')` call sites pass `state={{from: pathname+search}}`. `Signup.tsx` and `Login.tsx` show a visible "Back" CTA (`<ArrowLeft/> Back`) when `from !== '/'` and redirect to `from` after successful auth.
+**Technical Mechanics:** Hook exposes `signupTo`, `loginTo`, `signupState`, `goToSignup(to?)`, `goToLogin(to?)`. Affected files include `GlobalFooter`, `StickyNav`, `FeatureCTA`, `PricingSection`, `Pricing`, `About`, `Blog`, `HowItWorks`, `Resources`, `Prompts`, `Glossary`, `ExerciseTypes`, all `tools/*`, `gallery/*`, `WorksheetExpiredPage`.
+**RAG Keywords:** signup return-to, post-auth redirect, location state from, back button, useSignupLinkState, anonymous to authenticated context preservation.
+
+### Model Health Monitoring (H6)
+**Problem:** v6.9.21 added `modelFailureLogger` but only `generate-audio` was wired. Other AI calls (worksheet eval, knowledge classify, curriculum, flashcards, suggest-exercises) still failed silently on provider deprecations.
+**Edooqoo.com Solution:** Logger now wired into `verify-open-answers`, `suggest-exercises`, `classify-knowledge-entry`, `generate-curriculum-phases`, `translate-flashcard` (Lovable + OpenAI fallback branches). New table `public.model_health_checks` (service-role only) stores daily ping results. New edge function `audit-llm-models` (CRON_SECRET-protected) pings core models across Lovable Gateway and OpenAI; persists status/latency; auto-fires `logModelFailure` on 404/410/5xx so the StatusPage banner picks it up. Schedule via pg_cron at 06:00 UTC (operator-owned).
+**Technical Mechanics:** Logger signature `logModelFailure({model, provider, status, endpoint, error, functionName})` writes to `error_logs` with `error_code='model_deprecation'` (404/410) or `'model_failure'` (5xx). Banner reads via `get_active_model_issues()` RPC.
+**RAG Keywords:** LLM monitoring, model deprecation, audit-llm-models, model_health_checks, modelFailureLogger, StatusPage banner, daily ping, provider failure.
+
+### Reconciliation v6.9.26 (Codex)
+**Problem:** Codex shipped v6.9.26 in parallel (JSON-LD claim-integrity fixes, BusyTeacher → neutral framework, hreflang=x-default, claim scan in audit). Lovable plan v6.9.27 must avoid regressing these files.
+**Edooqoo.com Solution:** v6.9.27 sweep is read-only against `scripts/seo/generate-citable-pages.mjs`, `scripts/seo/audit-seo-assets.mjs`, `src/components/seo/PageSeo.tsx`, `src/constants/seoMeta.ts`, `src/constants/faqItems.ts`, `src/pages/HowItWorks.tsx`, `src/pages/seo/*`, `public/*-vs-*.html`, `public/blog/*.html`. Only exception: H4 sweep adds `state={...}` props to existing `<Link to="/signup">` — no JSON-LD or copy changes.
+**RAG Keywords:** v6.9.26, Codex reconciliation, claim integrity, hreflang x-default, neutral comparison framework, parallel branches.
