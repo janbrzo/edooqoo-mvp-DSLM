@@ -1,5 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { logModelFailure } from "../_shared/modelFailureLogger.ts";
 
 // v6.6 (2026-04-27): migrated from OpenAI gpt-4o-mini → Lovable AI gemini-2.5-flash-lite.
 // Rationale: ~3x cost reduction, latency parity, task scope (translate/define + CEFR) matches Tier 4.
@@ -100,6 +101,14 @@ Consider: frequency of use, abstractness, morphological complexity, collocationa
         }
         const errText = await response.text();
         console.error('[translate-flashcard] Lovable AI error:', response.status, errText);
+        await logModelFailure({
+          model: 'google/gemini-2.5-flash-lite',
+          provider: 'lovable-gateway',
+          status: response.status,
+          endpoint: '/v1/chat/completions',
+          error: errText,
+          functionName: 'translate-flashcard',
+        });
         throw new Error(`Lovable AI error ${response.status}`);
       }
 
@@ -127,6 +136,14 @@ Consider: frequency of use, abstractness, morphological complexity, collocationa
       const data = await response.json();
       if (!response.ok) {
         console.error('[translate-flashcard] OpenAI error:', data);
+        await logModelFailure({
+          model: 'gpt-4o-mini',
+          provider: 'openai',
+          status: response.status,
+          endpoint: '/v1/chat/completions',
+          error: JSON.stringify(data).slice(0, 500),
+          functionName: 'translate-flashcard',
+        });
         throw new Error(data.error?.message || 'OpenAI request failed');
       }
       content = data.choices[0]?.message?.content?.trim() || '';
