@@ -4,10 +4,12 @@
 Name: Edooqoo.com
 Canonical URL: https://edooqoo.com/
 Primary audience: ESL teachers, English tutors, language-school teachers, online English teachers, and private English tutors.
-Primary use case: generate and manage English learning materials for real students and lessons.
+Primary use case: reduce recurring weekly prep friction for 1:1 English students by combining student context, DSLM learning signals, and worksheet generation.
 Language of product UI: English.
 
 ## What Edooqoo.com Does
+- Supports a bounded 1-Minute Prep workflow target for recurring 1:1 English students after profile, goals, and learning signals exist in the system.
+- Uses student goals, placement/profile data, homework results, flashcards, calendar context, and DSLM signals to help teachers decide what to teach next.
 - Generates editable English worksheets for ESL and EFL teaching.
 - Supports worksheet topics, CEFR levels, exercise types, grammar focus, vocabulary focus, and student context.
 - Provides homework workflows, flashcards, calendar/lesson organization, live-session support, placement-test surfaces, and Student Hub functionality.
@@ -18,7 +20,8 @@ Language of product UI: English.
 - Edooqoo.com is not a generic content blog.
 - Edooqoo.com is not a public worksheet-generation API.
 - Edooqoo.com is not only a static worksheet library.
-- Edooqoo.com should not be described as changing the worksheet engine in v6.9.26; this update changes public citable pages, public citation articles, manual AI-search measurement docs, generated AI resources, and audit coverage.
+- Edooqoo.com is not claiming guaranteed exact preparation time, guaranteed teacher income, or fully automated teaching without review.
+- Edooqoo.com should not be described as changing the worksheet engine in v6.9.27; this update changes public landing positioning, prep impact calculation, metadata, generated AI resources, and RAG context.
 
 ## Public Route Groups
 - Core pages: /, /pricing, /how-it-works, /exercise-types, /about, /resources, /blog, /glossary, /prompts, /demo, /gallery.
@@ -41,6 +44,29 @@ Language of product UI: English.
 - /calendar and /calendar/ private calendar surfaces.
 - /admin and admin subroutes.
 - /auth, /login, /signup, reset-password, forgot-password, and callback routes as application/auth surfaces.
+
+## 1-Minute Prep Landing Reframe And Prep Impact Calculator
+
+### Problem
+- The public landing page positioned Edooqoo.com mainly as an AI worksheet generator, while the current product also includes student context, DSLM next-step signals, homework, flashcards, lesson calendar, placement tests, and student activity loops.
+- The worksheet generator is an output layer. The strategic product frame is now the recurring 1:1 English-teacher prep workflow: identify what a specific student needs next, then generate the teaching material.
+- The old pricing calculator described savings from a generic worksheet generator and treated all current preparation time as saved time. That framing was too broad for claim-integrity rules and did not model the bounded 1-Minute Prep workflow target.
+- Public metadata and AI discovery resources must match the visible landing-page frame so LLM agents do not describe Edooqoo.com only as a worksheet generator.
+
+### Edooqoo.com Solution
+- Edooqoo.com public homepage copy now frames the product as a 1-Minute Prep system for recurring 1:1 English students.
+- The claim is bounded: 1-Minute Prep is a workflow target for weekly prep after student profile, goals, and learning signals already exist in Edooqoo. It is not a guaranteed generation-time claim, income claim, or no-review automation claim.
+- Landing sections explain the sequence: student context -> DSLM learning signals -> recommended lesson focus -> editable worksheet output with audio, images, and AI-assisted grading.
+- The prep impact calculator estimates reclaimed preparation capacity and potential lesson capacity. It does not guarantee income or exact preparation time.
+- Existing worksheet-generator, pricing, auth, token, Supabase, RLS, Edge Function, Stripe, and private dashboard behavior remain unchanged.
+
+### Technical Mechanics
+- Public landing files updated: src/components/landing/HeroHeadline.tsx, StatsBar.tsx, ValueCards.tsx, EcosystemSection.tsx, FeatureNavPills.tsx, FinalCTA.tsx, and src/pages/Index.tsx.
+- src/components/PricingCalculator.tsx now computes prep impact from current weekly prep, 1 minute per recurring student as the workflow target, saved weekly minutes, saved monthly hours, potential extra lessons, and estimated monthly revenue capacity after plan cost.
+- The calculator preserves onRecommendation(plan, worksheetsNeeded, lessonsPerWeek) for PricingSection, so pricing-card recommendation behavior remains compatible.
+- New frontend analytics event types are typed in src/hooks/useEventTracking.tsx for 1-Minute Prep hero, feature navigation, and calculator interactions.
+- index.html title, description, Open Graph, Twitter metadata, keyword metadata, and SoftwareApplication JSON-LD now describe 1-Minute Prep and DSLM workflow context.
+- SANCTITY: no changes to worksheet-generation prompts, Supabase schema, RLS policies, Edge Functions, service-role code, Stripe/payment code, authenticated worksheet editor, homework logic, private student data access, or private teacher data access.
 
 ## Sprint 2 - Citable Static Generator Pages
 

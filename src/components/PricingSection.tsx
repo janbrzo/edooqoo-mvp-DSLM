@@ -116,7 +116,7 @@ export const PricingSection = () => {
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-8">
           <h2 className="text-3xl font-bold mb-4">Choose Your Plan</h2>
-          <p className="text-muted-foreground">See how much you can save with our worksheet generator</p>
+          <p className="text-muted-foreground">Estimate how 1-Minute Prep can affect recurring student prep and worksheet usage</p>
         </div>
 
         <PricingCalculator onRecommendation={handleRecommendation} />

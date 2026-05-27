@@ -5,6 +5,40 @@ Written in Problem → Edooqoo.com Solution → Technical Mechanics format.
 
 ---
 
+## v6.9.27 — 1-Minute Prep Landing Reframe + Prep Impact Calculator
+
+### Problem
+1. The public landing page positioned Edooqoo.com mainly as an AI worksheet generator, while the current product also includes student context, DSLM next-step signals, homework, flashcards, lesson calendar, placement tests, and student activity loops.
+2. The worksheet generator is an output layer. The strategic product frame is now the recurring 1:1 English-teacher prep workflow: identify what a specific student needs next, then generate the teaching material.
+3. The old pricing calculator described savings from a generic worksheet generator and treated all current preparation time as saved time. That framing was too broad for claim-integrity rules and did not model the bounded 1-Minute Prep workflow target.
+4. Public metadata and AI discovery resources must match the visible landing-page frame so LLM agents do not describe Edooqoo.com only as a worksheet generator.
+
+### Edooqoo.com Solution
+1. Edooqoo.com public homepage copy now frames the product as a 1-Minute Prep system for recurring 1:1 English students.
+2. The claim is bounded: 1-Minute Prep is a workflow target for weekly prep after student profile, goals, and learning signals already exist in Edooqoo. It is not a guaranteed generation-time claim, income claim, or no-review automation claim.
+3. Landing sections explain the sequence: student context -> DSLM learning signals -> recommended lesson focus -> editable worksheet output with audio, images, and AI-assisted grading.
+4. The prep impact calculator estimates reclaimed preparation capacity and potential lesson capacity. It does not guarantee income or exact preparation time.
+5. Existing worksheet-generator, pricing, auth, token, Supabase, RLS, Edge Function, Stripe, and private dashboard behavior remain unchanged.
+
+### Technical Mechanics
+- Public landing files updated: `src/components/landing/HeroHeadline.tsx`, `StatsBar.tsx`, `ValueCards.tsx`, `EcosystemSection.tsx`, `FeatureNavPills.tsx`, `FinalCTA.tsx`, and `src/pages/Index.tsx`.
+- `src/components/PricingCalculator.tsx` now computes prep impact with `currentWeeklyPrepMinutes = prepMinutesPerStudent * studentsPerWeek`, `targetWeeklyPrepMinutes = studentsPerWeek`, `savedWeeklyMinutes = max(0, currentWeeklyPrepMinutes - targetWeeklyPrepMinutes)`, `savedMonthlyHours = savedWeeklyMinutes * 4.33 / 60`, `extraLessonsPerWeek = floor(savedWeeklyMinutes / lessonLengthMinutes)`, and `potentialMonthlyRevenue = max(0, extraLessonsPerWeek * lessonPrice * 4.33 - monthlyPlanCost)`.
+- The calculator preserves `onRecommendation(plan, worksheetsNeeded, lessonsPerWeek)` for `PricingSection`, so pricing-card recommendation behavior remains compatible.
+- New frontend analytics event types are typed in `src/hooks/useEventTracking.tsx`: `one_minute_hero_cta_click`, `one_minute_secondary_cta_click`, `one_minute_feature_pill_click`, `one_minute_dslm_card_click`, `one_minute_calculator_input_change`, `one_minute_calculator_cta_click`, and `one_minute_calculator_pricing_click`.
+- `index.html` title, description, Open Graph, Twitter metadata, keyword metadata, and SoftwareApplication JSON-LD now describe 1-Minute Prep and DSLM workflow context.
+- `scripts/seo/generate-ai-resources.mjs`, root `llms.txt`, `public/llms.txt`, `public/llms-full.txt`, `public/llms-answers.txt`, `public/knowledge-graph.json`, and `public/openapi.yaml` must stay synchronized after this update.
+- SANCTITY: no changes to worksheet-generation prompts, Supabase schema, RLS policies, Edge Functions, service-role code, Stripe/payment code, authenticated worksheet editor, homework logic, private student data access, or private teacher data access.
+
+### Invariants
+- Do not describe 1-Minute Prep as a guaranteed exact time, a guaranteed revenue outcome, or full automation without teacher review.
+- Do not replace the existing AI worksheet generator SEO pages; keep them as acquisition pages for direct generator queries.
+- Use the homepage and `/features/dslm` for system-level prep workflow context until a dedicated `/one-minute-prep` public route is intentionally added.
+
+### RAG Keywords
+1-Minute Prep, bounded workflow target, recurring 1:1 English students, weekly prep workflow, DSLM next-step signals, student context to worksheet output, prep impact calculator, potential lesson capacity, teacher review retained, worksheet generator output layer, landing reframe, claim-safe public copy, no Supabase change, no RLS change, no Edge Function change, no Stripe change.
+
+---
+
 ## v6.9.26 — Lovable Plan Reconciliation + Public Claim Repair
 
 ### Problem

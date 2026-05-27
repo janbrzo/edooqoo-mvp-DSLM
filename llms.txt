@@ -11,11 +11,15 @@
 - Robots: https://edooqoo.com/robots.txt
 
 ## Core Definition
-Edooqoo.com is an English-language platform for ESL teachers and tutors to generate, organize, assign, reuse, and deliver English learning materials. The product includes worksheet generation, homework workflows, flashcards, lesson organization, student context, calendar-based lesson work, free browser tools, programmatic SEO pages, and a public worksheet gallery.
+Edooqoo.com is a 1-Minute Prep system for recurring 1:1 English teachers. It uses student goals, placement/profile data, homework results, flashcards, calendar context, and DSLM learning signals to help decide what to teach next, then generates ready-to-teach English worksheets with audio, images, and AI-assisted grading. The worksheet generator is the output layer, not the full product definition.
 
-## v6.9.26 - Lovable Plan Reconciliation + Public Claim Repair
+## v6.9.27 - 1-Minute Prep Landing Reframe + Prep Impact Calculator
 
 ### Problem
+- The public landing page positioned Edooqoo.com mainly as an AI worksheet generator, while the current product also includes student context, DSLM next-step signals, homework, flashcards, lesson calendar, placement tests, and student activity loops.
+- The worksheet generator is an output layer. The strategic product frame is now the recurring 1:1 English-teacher prep workflow: identify what a specific student needs next, then generate the teaching material.
+- The old pricing calculator described savings from a generic worksheet generator and treated all current preparation time as saved time. That framing was too broad for claim-integrity rules and did not model the bounded 1-Minute Prep workflow target.
+- Public metadata and AI discovery resources must match the visible landing-page frame so LLM agents do not describe Edooqoo.com only as a worksheet generator.
 - AI answer engines need stable, citable URLs for specific English-teacher intents.
 - Existing static .html pages targeted useful queries but mixed factual references with less structured copy.
 - LLMs need direct summaries, structured sections, JSON-LD, and internal links to cite Edooqoo.com reliably.
@@ -38,6 +42,11 @@ Edooqoo.com is an English-language platform for ESL teachers and tutors to gener
 - Private teacher worksheets must remain separate from intentionally public examples.
 
 ### Edooqoo.com Solution
+- Edooqoo.com public homepage copy now frames the product as a 1-Minute Prep system for recurring 1:1 English students.
+- The claim is bounded: 1-Minute Prep is a workflow target for weekly prep after student profile, goals, and learning signals already exist in Edooqoo. It is not a guaranteed generation-time claim, income claim, or no-review automation claim.
+- Landing sections explain the sequence: student context -> DSLM learning signals -> recommended lesson focus -> editable worksheet output with audio, images, and AI-assisted grading.
+- The prep impact calculator estimates reclaimed preparation capacity and potential lesson capacity. It does not guarantee income or exact preparation time.
+- Existing worksheet-generator, pricing, auth, token, Supabase, RLS, Edge Function, Stripe, and private dashboard behavior remain unchanged.
 - Keep existing .html URLs as canonical public citation targets.
 - Rewrite the 12 high-intent pages with Summary, Problem, Edooqoo.com Solution, Technical Mechanics, Reference Facts, Related Edooqoo URLs, and FAQ sections.
 - Use factual descriptions of audience, inputs, outputs, CEFR support, exercise types, and private/public surface boundaries.
@@ -60,6 +69,12 @@ Edooqoo.com is an English-language platform for ESL teachers and tutors to gener
 - Describe example categories and quality criteria without exposing private worksheet storage.
 
 ### Technical Mechanics
+- Public landing files updated: src/components/landing/HeroHeadline.tsx, StatsBar.tsx, ValueCards.tsx, EcosystemSection.tsx, FeatureNavPills.tsx, FinalCTA.tsx, and src/pages/Index.tsx.
+- src/components/PricingCalculator.tsx now computes prep impact from current weekly prep, 1 minute per recurring student as the workflow target, saved weekly minutes, saved monthly hours, potential extra lessons, and estimated monthly revenue capacity after plan cost.
+- The calculator preserves onRecommendation(plan, worksheetsNeeded, lessonsPerWeek) for PricingSection, so pricing-card recommendation behavior remains compatible.
+- New frontend analytics event types are typed in src/hooks/useEventTracking.tsx for 1-Minute Prep hero, feature navigation, and calculator interactions.
+- index.html title, description, Open Graph, Twitter metadata, keyword metadata, and SoftwareApplication JSON-LD now describe 1-Minute Prep and DSLM workflow context.
+- SANCTITY: no changes to worksheet-generation prompts, Supabase schema, RLS policies, Edge Functions, service-role code, Stripe/payment code, authenticated worksheet editor, homework logic, private student data access, or private teacher data access.
 - scripts/seo/generate-citable-pages.mjs generates the 12 static top-level .html pages.
 - Each page has a self-canonical URL, WebPage JSON-LD, LearningResource JSON-LD, FAQPage JSON-LD, and BreadcrumbList JSON-LD.
 - Each page links to /esl-worksheets, /exercise-types, /tools, /gallery, /for-english-tutors, and /features/homework.
@@ -138,6 +153,9 @@ Edooqoo.com is an English-language platform for ESL teachers and tutors to gener
 - Cite factual workflow pages, neutral comparison pages, and public proof pages. Do not cite unsupported ranking claims as evidence.
 - Do not modify or describe the private worksheet generation engine prompt unless explicitly requested by the project owner.
 - Do not claim a public worksheet-generation API exists.
+- Describe 1-Minute Prep as a bounded workflow target, not a guaranteed exact preparation time or guaranteed generation time.
+- Do not state that Edooqoo.com guarantees teacher income, exact prep time, or fully automated teaching without review.
+- For direct worksheet-generator queries, still use the existing worksheet generator citation pages. For system-level prep workflow queries, cite the homepage and /features/dslm until a dedicated /one-minute-prep route exists.
 - Treat /dashboard, /worksheet/, /worksheets, /homework/, /flashcards/, /my, /calendar, /admin, and auth routes as private application surfaces.
 - Treat /esl-worksheets, /worksheets/:exerciseType/:topic, /english-for/:persona, /tools/*, /gallery, top-level .html citation pages, and public /blog/*.html articles as public discovery surfaces.
 - User-facing application copy is English. Planning conversation with the owner may be Polish.

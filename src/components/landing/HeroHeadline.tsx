@@ -1,30 +1,27 @@
-import React, { useState, useEffect } from 'react';
-import { ArrowDown, BookOpen, Brain, Calendar, BarChart2, ClipboardCheck, Share2, Bell } from 'lucide-react';
+import React from 'react';
+import { ArrowDown, BookOpen, Brain, Calendar, BarChart2, ClipboardCheck, Share2, Bell, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useEventTracking } from '@/hooks/useEventTracking';
 
 const unlockFeatures = [
-{ icon: BookOpen, label: 'Homework & AI Grading' },
-{ icon: Brain, label: 'Smart Flashcards' },
-{ icon: Calendar, label: 'Smart Lesson Calendar' },
-{ icon: Bell, label: 'Auto Lesson Reminders' },
-{ icon: BarChart2, label: 'Student Progress Tracking' },
-{ icon: ClipboardCheck, label: 'Placement Tests' },
-{ icon: Share2, label: 'Interactive Sharing' }];
-
-
-const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  { icon: Brain, label: 'DSLM next-step signals' },
+  { icon: ClipboardCheck, label: 'Placement Tests' },
+  { icon: BookOpen, label: 'Homework & AI Grading' },
+  { icon: BarChart2, label: 'Student Progress Tracking' },
+  { icon: Brain, label: 'Smart Flashcards' },
+  { icon: Calendar, label: 'Smart Lesson Calendar' },
+  { icon: Bell, label: 'Auto Lesson Reminders' },
+  { icon: Share2, label: 'Interactive Sharing' },
+];
 
 const HeroHeadline: React.FC = () => {
-  const [dayIndex, setDayIndex] = useState(0);
+  const { trackEvent } = useEventTracking();
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setDayIndex((i) => (i + 1) % 7);
-    }, 2200);
-    return () => clearInterval(interval);
-  }, []);
-
-  const scrollToForm = () => {
+  const scrollToForm = (source: 'primary' | 'secondary' = 'primary') => {
+    trackEvent({
+      eventType: source === 'primary' ? 'one_minute_hero_cta_click' : 'one_minute_secondary_cta_click',
+      eventData: { target: 'worksheet-form' },
+    });
     const formSection = document.getElementById('worksheet-form');
     if (formSection) {
       formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -32,29 +29,16 @@ const HeroHeadline: React.FC = () => {
   };
 
   return (
-    <section className="relative pt-12 pb-4 px-2 sm:px-4 overflow-hidden">
+    <section className="relative pt-12 pb-6 px-2 sm:px-4 overflow-hidden">
       {/* Background decoration */}
       <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-violet-100/30 via-transparent to-transparent pointer-events-none"></div>
 
       <div className="max-w-5xl mx-auto text-center">
         {/* Headline */}
         <h1 className="text-[2rem] sm:text-5xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-foreground mb-5 leading-[1.1]">
-          <span className="block sm:inline">Stop wasting</span>
-          <span className="hidden sm:inline">{' '}</span>
-          <span className="block sm:inline whitespace-nowrap">
-            <span
-              className="relative inline-block overflow-hidden whitespace-nowrap align-baseline"
-              style={{ height: '1.1em', minWidth: '4.2em' }}>
-              <span
-                key={dayIndex}
-                className="inline-block animate-day-enter text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-indigo-600">
-                {days[dayIndex]}
-              </span>
-            </span>
-            {' '}evenings
-          </span>
+          <span className="block">1-Minute Prep</span>
           <span className="block text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-indigo-600">
-            on lesson prep.
+            for every 1:1 English student.
           </span>
         </h1>
 
@@ -64,20 +48,35 @@ const HeroHeadline: React.FC = () => {
           // @ts-expect-error fetchpriority is valid HTML but not yet typed in React
           fetchpriority="high"
         >
-          AI creates complete, fully personalized worksheets for your 1-on-1 lessons. 29 exercise types. Ready in under 90 seconds.
-        
+          Edooqoo uses student goals, lesson notes, homework, flashcards and DSLM signals to help you decide what to teach next, then generate a ready-to-teach worksheet with audio, images and AI grading.
+        </p>
+
+        <p className="text-sm sm:text-base text-foreground/80 mb-8 max-w-2xl mx-auto font-medium">
+          The worksheet generator is the output. The system starts with the student.
         </p>
 
         {/* CTA Area */}
-        <div className="flex flex-col items-center gap-6 mb-10">
+        <div className="flex flex-col items-center gap-4 mb-8">
           <Button
-            onClick={scrollToForm}
+            onClick={() => scrollToForm('primary')}
             size="lg"
             className="h-12 sm:h-14 px-5 sm:px-8 text-base sm:text-lg max-w-full whitespace-normal sm:whitespace-nowrap font-semibold rounded-full shadow-lg shadow-violet-500/20 hover:shadow-violet-500/30 hover:-translate-y-0.5 transition-all duration-200">
-            <span className="sm:hidden">Generate Free Worksheet</span>
-            <span className="hidden sm:inline">Generate Your First Worksheet — Free</span>
+            <span className="sm:hidden">Start Free</span>
+            <span className="hidden sm:inline">Start 1-Minute Prep Free</span>
             <ArrowDown className="ml-2 h-5 w-5" />
           </Button>
+          <button
+            type="button"
+            onClick={() => scrollToForm('secondary')}
+            className="text-sm font-semibold text-primary hover:text-primary/80 underline-offset-4 hover:underline"
+          >
+            Try the worksheet generator
+          </button>
+          <div className="flex flex-wrap justify-center gap-x-5 gap-y-2 text-xs sm:text-sm text-muted-foreground">
+            <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4 text-violet-500" />No credit card</span>
+            <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4 text-violet-500" />2 worksheets free</span>
+            <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4 text-violet-500" />Best with profile + goals</span>
+          </div>
         </div>
 
         {/* Unlock features ticker */}
