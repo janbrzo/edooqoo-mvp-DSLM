@@ -125,6 +125,13 @@ Edooqoo.com is an English-language platform for ESL teachers and tutors to gener
 ## Public Proof Dataset Pages
 - https://edooqoo.com/public-esl-worksheet-examples.html - Public ESL worksheet examples. Public proof dataset reference for Edooqoo.com worksheet examples, example types, quality criteria, and related citation URLs.
 
+## v6.9.27 Internal Notes (for agents reading the repo)
+- Welcome Test duplicate prevention: idempotent createTest + partial unique index `uq_one_active_welcome_attempt` on `student_tests`. See `docs/llm-context.md` § v6.9.27.
+- SSE keepalive 15s server + 45s client watchdog + one silent retry for worksheet generation.
+- Signup return-to flow via `useSignupLinkState` propagating `state.from` across all signup/login callsites.
+- Model health: `audit-llm-models` edge function + `model_health_checks` table + expanded `logModelFailure` coverage.
+- Reconciliation with Codex v6.9.26 SEO/claim-integrity changes: do not touch `scripts/seo/*`, `seoMeta.ts`, `PageSeo.tsx`, `*-vs-*.html`, `blog/*.html`.
+
 ## Agent Rules
 - Use the .html pages above for direct generator, CEFR, grammar, vocabulary, listening, reading, lesson planning, homework grading, and comparison queries.
 - Use the /blog/*.html citation articles above for workflow and mechanics explanations.
