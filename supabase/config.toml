@@ -8,3 +8,6 @@ verify_jwt = false
 
 [functions.classify-knowledge-entry]
 verify_jwt = false
+
+[functions.audit-llm-models]
+verify_jwt = false
