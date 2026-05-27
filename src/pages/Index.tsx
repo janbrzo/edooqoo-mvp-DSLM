@@ -1,20 +1,18 @@
 import React, { useState, useEffect } from "react";
-import { Link, useSearchParams, useLocation, useNavigate } from "react-router-dom";
+import { useSearchParams, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useAuthFlow } from "@/hooks/useAuthFlow";
 import { useWorksheetState } from "@/hooks/useWorksheetState";
 import { useWorksheetGeneration } from "@/hooks/useWorksheetGeneration";
 import { useTokenSystem } from "@/hooks/useTokenSystem";
-import { Button } from "@/components/ui/button";
 import GeneratingModal from "@/components/GeneratingModal";
 import FormView from "@/components/worksheet/FormView";
 import GenerationView from "@/components/worksheet/GenerationView";
 import { TokenPaywallModal } from "@/components/TokenPaywallModal";
 import { PricingSection } from "@/components/PricingSection";
-import { PricingCalculator } from "@/components/PricingCalculator";
+import { DEFAULT_ONE_MINUTE_PREP_CALCULATOR_INPUT, type OneMinutePrepCalculatorInput } from "@/components/PricingCalculator";
 import { FreeWeekBanner } from "@/components/FreeWeekBanner";
 import { deepFixTextObjects } from "@/utils/textObjectFixer";
-import { CheckCircle } from "lucide-react";
 import StickyNav from "@/components/landing/StickyNav";
 import HeroHeadline from "@/components/landing/HeroHeadline";
 import StatsBar from "@/components/landing/StatsBar";
@@ -27,10 +25,9 @@ import PricingTeaser from "@/components/landing/PricingTeaser";
 import AnonPostWorksheetLandingPage from "@/components/anon/AnonPostWorksheetLandingPage";
 import WelcomeBackBanner from "@/components/anon/WelcomeBackBanner";
 import ParticlesBackground from "@/components/landing/ParticlesBackground";
+import StartOneMinutePrepDialog from "@/components/landing/StartOneMinutePrepDialog";
 import { markWorksheetForClaim } from "@/hooks/useWorksheetClaim";
 import { devLog, devWarn } from '@/utils/logger';
-
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 /**
  * Main Index page component that handles worksheet generation and display
@@ -81,6 +78,10 @@ const Index = () => {
   const { tokenLeft, hasTokens, canGenerateWorksheet, isDemo, profile, loading: tokensLoading } = useTokenSystem(user?.id || null);
   const [showTokenModal, setShowTokenModal] = useState(false);
   const [showWelcomeBackModal, setShowWelcomeBackModal] = useState(false);
+  const [showOneMinutePrepDialog, setShowOneMinutePrepDialog] = useState(false);
+  const [oneMinutePrepCalculator, setOneMinutePrepCalculator] = useState<OneMinutePrepCalculatorInput>(
+    DEFAULT_ONE_MINUTE_PREP_CALCULATOR_INPUT
+  );
 
   // Welcome Back Modal - show for returning anonymous users who have visited before
   useEffect(() => {
@@ -360,16 +361,12 @@ const Index = () => {
       
       {!bothWorksheetsReady ? (
         <>
-          <HeroHeadline />
-          <section className="px-4 pt-4 pb-2 bg-background/40 backdrop-blur-sm">
-            <div className="max-w-6xl mx-auto">
-              <PricingCalculator
-                variant="landing"
-                onPrimaryCta={scrollToWorksheetForm}
-                onSecondaryCta={scrollToPricing}
-              />
-            </div>
-          </section>
+          <HeroHeadline
+            calculatorValue={oneMinutePrepCalculator}
+            onCalculatorChange={setOneMinutePrepCalculator}
+            onStartOneMinutePrep={() => setShowOneMinutePrepDialog(true)}
+            onTryWorksheetGenerator={scrollToWorksheetForm}
+          />
           <div id="worksheet-form" className="scroll-mt-16 pb-16">
             <FormView 
               onSubmit={handleGenerateWorksheet} 
@@ -386,9 +383,12 @@ const Index = () => {
           <EcosystemSection />
           <TestimonialsRow />
           <div id="pricing-section">
-            <PricingSection />
+            <PricingSection
+              calculatorValue={oneMinutePrepCalculator}
+              onCalculatorChange={setOneMinutePrepCalculator}
+            />
           </div>
-          <FinalCTA />
+          <FinalCTA onStartOneMinutePrep={() => setShowOneMinutePrepDialog(true)} />
         </>
       ) : (
         <>
@@ -428,6 +428,12 @@ const Index = () => {
         onUpgrade={() => {
           setShowTokenModal(false);
         }}
+      />
+
+      <StartOneMinutePrepDialog
+        open={showOneMinutePrepDialog}
+        onOpenChange={setShowOneMinutePrepDialog}
+        onTryWorksheetGenerator={scrollToWorksheetForm}
       />
 
     </div>

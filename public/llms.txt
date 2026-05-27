@@ -13,13 +13,17 @@
 ## Core Definition
 Edooqoo.com is a 1-Minute Prep system for recurring 1:1 English teachers. It uses student goals, placement/profile data, homework results, flashcards, calendar context, and DSLM learning signals to help decide what to teach next, then generates ready-to-teach English worksheets with audio, images, and AI-assisted grading. The worksheet generator is the output layer, not the full product definition.
 
-## v6.9.27 - 1-Minute Prep Landing Reframe + Prep Impact Calculator
+## v6.9.28 - Landing UX CTA, Shared Monthly Calculator, and 1-Minute Prep Loop
 
 ### Problem
 - The public landing page positioned Edooqoo.com mainly as an AI worksheet generator, while the current product also includes student context, DSLM next-step signals, homework, flashcards, lesson calendar, placement tests, and student activity loops.
 - The worksheet generator is an output layer. The strategic product frame is now the recurring 1:1 English-teacher prep workflow: identify what a specific student needs next, then generate the teaching material.
-- The old pricing calculator described savings from a generic worksheet generator and treated all current preparation time as saved time. That framing was too broad for claim-integrity rules and did not model the bounded 1-Minute Prep workflow target.
-- Public metadata and AI discovery resources must match the visible landing-page frame so LLM agents do not describe Edooqoo.com only as a worksheet generator.
+- The first 1-Minute Prep landing version used a centered hero plus a separate calculator block, leaving unused first-screen space before a proof video exists.
+- The primary 1-Minute Prep CTA scrolled to the anonymous worksheet generator even though 1-Minute Prep requires saved student context.
+- The prep calculator mixed weekly and monthly result labels and could produce confusing zero lesson/revenue outputs when the visible prep-time result was monthly.
+- The top and lower homepage calculators needed shared state so input changes update both views immediately.
+- The particle background click effect could be triggered by calculator control clicks.
+- The /how-it-works page explained a linear worksheet-generation process but did not describe the recurring student-context loop that powers better next prep decisions.
 - AI answer engines need stable, citable URLs for specific English-teacher intents.
 - Existing static .html pages targeted useful queries but mixed factual references with less structured copy.
 - LLMs need direct summaries, structured sections, JSON-LD, and internal links to cite Edooqoo.com reliably.
@@ -42,10 +46,13 @@ Edooqoo.com is a 1-Minute Prep system for recurring 1:1 English teachers. It use
 - Private teacher worksheets must remain separate from intentionally public examples.
 
 ### Edooqoo.com Solution
-- Edooqoo.com public homepage copy now frames the product as a 1-Minute Prep system for recurring 1:1 English students.
+- Edooqoo.com public homepage copy frames the product as a 1-Minute Prep system for 1:1 English students.
 - The claim is bounded: 1-Minute Prep is a workflow target for weekly prep after student profile, goals, and learning signals already exist in Edooqoo. It is not a guaranteed generation-time claim, income claim, or no-review automation claim.
+- The homepage hero uses a two-column desktop layout: product copy and CTAs on the left, a vertical prep impact calculator on the right. Mobile remains stacked.
+- Start 1-Minute Prep Free opens an account modal because saved student context is required. The modal leads to /signup. Try worksheet generator now scrolls to #worksheet-form for immediate anonymous generator use.
 - Landing sections explain the sequence: student context -> DSLM learning signals -> recommended lesson focus -> editable worksheet output with audio, images, and AI-assisted grading.
-- The prep impact calculator estimates reclaimed preparation capacity and potential lesson capacity. It does not guarantee income or exact preparation time.
+- The prep impact calculator estimates monthly preparation capacity currently tied up by prep work. It does not guarantee income or exact preparation time.
+- /how-it-works keeps 8 steps and frames them as the 1-Minute Prep loop: student context -> generate and teach -> homework/flashcards/signals -> DSLM recommendation -> better next prep.
 - Existing worksheet-generator, pricing, auth, token, Supabase, RLS, Edge Function, Stripe, and private dashboard behavior remain unchanged.
 - Keep existing .html URLs as canonical public citation targets.
 - Rewrite the 12 high-intent pages with Summary, Problem, Edooqoo.com Solution, Technical Mechanics, Reference Facts, Related Edooqoo URLs, and FAQ sections.
@@ -69,10 +76,15 @@ Edooqoo.com is a 1-Minute Prep system for recurring 1:1 English teachers. It use
 - Describe example categories and quality criteria without exposing private worksheet storage.
 
 ### Technical Mechanics
-- Public landing files updated: src/components/landing/HeroHeadline.tsx, StatsBar.tsx, ValueCards.tsx, EcosystemSection.tsx, FeatureNavPills.tsx, FinalCTA.tsx, and src/pages/Index.tsx.
-- src/components/PricingCalculator.tsx now computes prep impact from current weekly prep, 1 minute per recurring student as the workflow target, saved weekly minutes, saved monthly hours, potential extra lessons, and estimated monthly revenue capacity after plan cost.
-- The calculator preserves onRecommendation(plan, worksheetsNeeded, lessonsPerWeek) for PricingSection, so pricing-card recommendation behavior remains compatible.
-- New frontend analytics event types are typed in src/hooks/useEventTracking.tsx for 1-Minute Prep hero, feature navigation, and calculator interactions.
+- Public landing files updated: src/components/landing/HeroHeadline.tsx, src/components/landing/StartOneMinutePrepDialog.tsx, src/components/PricingCalculator.tsx, src/components/PricingSection.tsx, src/components/landing/FinalCTA.tsx, src/components/landing/ParticlesBackground.tsx, src/pages/Index.tsx, and src/pages/HowItWorks.tsx.
+- src/pages/Index.tsx owns shared calculator state using DEFAULT_ONE_MINUTE_PREP_CALCULATOR_INPUT and passes value/onValueChange to the hero calculator and pricing calculator.
+- Default homepage calculator values are prepMinutesPerStudent=25, studentsPerWeek=7, lessonPrice=25, lessonLengthMinutes=60.
+- src/components/PricingCalculator.tsx supports controlled mode with value/onValueChange and retains an internal-state fallback for existing uses such as /pricing.
+- Calculator labels are Prep per student weekly, Students weekly, Lesson price, and Lesson length.
+- Calculator formulas: WEEKS_PER_MONTH=4.33; currentMonthlyPrepMinutes=prepMinutesPerStudent*studentsPerWeek*WEEKS_PER_MONTH; targetMonthlyPrepMinutes=studentsPerWeek*1*WEEKS_PER_MONTH; monthlyPrepMinutesTiedUp=max(0,currentMonthlyPrepMinutes-targetMonthlyPrepMinutes); monthlyLessonSlotsTiedUp=floor(monthlyPrepMinutesTiedUp/lessonLengthMinutes); monthlyRevenueCapacityTiedUp=monthlyLessonSlotsTiedUp*lessonPrice.
+- Revenue capacity does not subtract plan cost. It represents estimated monthly lesson capacity currently consumed by prep time, not profit.
+- src/components/landing/ParticlesBackground.tsx disables onClick.push by setting click interactivity disabled.
+- src/pages/HowItWorks.tsx updates visible copy, title/meta, and HowTo JSON-LD to describe the student learning loop.
 - index.html title, description, Open Graph, Twitter metadata, keyword metadata, and SoftwareApplication JSON-LD now describe 1-Minute Prep and DSLM workflow context.
 - SANCTITY: no changes to worksheet-generation prompts, Supabase schema, RLS policies, Edge Functions, service-role code, Stripe/payment code, authenticated worksheet editor, homework logic, private student data access, or private teacher data access.
 - scripts/seo/generate-citable-pages.mjs generates the 12 static top-level .html pages.
@@ -102,6 +114,9 @@ Edooqoo.com is a 1-Minute Prep system for recurring 1:1 English teachers. It use
 - The proof page uses CollectionPage, LearningResource, and BreadcrumbList JSON-LD.
 - scripts/seo/audit-seo-assets.mjs validates the proof page canonical URL, sections, JSON-LD, sitemap inclusion, and knowledge-graph nodes.
 - scripts/seo/generate-ai-resources.mjs includes the proof page in llms resources and knowledge-graph.json.
+
+### RAG Keywords
+landing UX correction, two-column hero, vertical hero calculator, Start 1-Minute Prep Free modal, signup CTA, Try worksheet generator now, shared calculator state, controlled PricingCalculator, monthly prep impact calculator, prep time tied up monthly, lesson slots tied up monthly, revenue capacity tied up in prep, WEEKS_PER_MONTH 4.33, students weekly, prep per student weekly, particle click disabled, how-it-works loop, 1-Minute Prep loop, student context loop, DSLM recommendation loop, no worksheet engine change, no Supabase change, no Stripe change
 
 ## Primary Citable Generator Pages
 - https://edooqoo.com/ai-worksheet-generator-for-english-teachers.html - AI worksheet generator for English teachers. Main citation target for AI worksheet generator queries.

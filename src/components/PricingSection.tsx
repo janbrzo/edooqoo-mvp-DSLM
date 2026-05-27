@@ -9,10 +9,15 @@ import { Check, User, GraduationCap, Zap, Users, Gift, ChevronDown, ChevronUp } 
 import { useAuthFlow } from '@/hooks/useAuthFlow';
 import { useTokenSystem } from '@/hooks/useTokenSystem';
 import { usePlanLogic } from '@/hooks/usePlanLogic';
-import { PricingCalculator } from '@/components/PricingCalculator';
+import { PricingCalculator, type OneMinutePrepCalculatorInput } from '@/components/PricingCalculator';
 import { faqItems } from '@/constants/faqItems';
 
-export const PricingSection = () => {
+interface PricingSectionProps {
+  calculatorValue?: OneMinutePrepCalculatorInput;
+  onCalculatorChange?: (value: OneMinutePrepCalculatorInput) => void;
+}
+
+export const PricingSection: React.FC<PricingSectionProps> = ({ calculatorValue, onCalculatorChange }) => {
   const location = useLocation();
   const fromState = { from: location.pathname + location.search };
   const { user, isRegisteredUser } = useAuthFlow();
@@ -119,7 +124,11 @@ export const PricingSection = () => {
           <p className="text-muted-foreground">Estimate how 1-Minute Prep can affect recurring student prep and worksheet usage</p>
         </div>
 
-        <PricingCalculator onRecommendation={handleRecommendation} />
+        <PricingCalculator
+          value={calculatorValue}
+          onValueChange={onCalculatorChange}
+          onRecommendation={handleRecommendation}
+        />
 
         <div className="grid lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
           

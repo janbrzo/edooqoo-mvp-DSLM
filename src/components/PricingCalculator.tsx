@@ -6,9 +6,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Calculator, TrendingUp, Clock, Plus, Minus, Info, Users } from "lucide-react";
+import { cn } from "@/lib/utils";
 import { useEventTracking } from "@/hooks/useEventTracking";
 
 type RecommendedPlan = "side-gig" | "full-time";
+type CalculatorVariant = "pricing" | "landing" | "hero";
 
 export interface OneMinutePrepCalculatorInput {
   prepMinutesPerStudent: number;
@@ -24,6 +26,12 @@ export interface OneMinutePrepCalculatorResult {
   savedMonthlyHours: number;
   extraLessonsPerWeek: number;
   potentialMonthlyRevenue: number;
+  currentMonthlyPrepMinutes: number;
+  targetMonthlyPrepMinutes: number;
+  monthlyPrepMinutesTiedUp: number;
+  monthlyPrepHoursTiedUp: number;
+  monthlyLessonSlotsTiedUp: number;
+  monthlyRevenueCapacityTiedUp: number;
   recommendedPlan: RecommendedPlan;
   recommendedWorksheets: number;
   monthlyPlanCost: number;
@@ -31,10 +39,24 @@ export interface OneMinutePrepCalculatorResult {
 
 interface PricingCalculatorProps {
   onRecommendation?: (plan: RecommendedPlan, worksheetsNeeded: number, lessonsPerWeek?: number) => void;
-  variant?: "pricing" | "landing";
+  variant?: CalculatorVariant;
+  value?: OneMinutePrepCalculatorInput;
+  defaultValue?: OneMinutePrepCalculatorInput;
+  onValueChange?: (value: OneMinutePrepCalculatorInput) => void;
   onPrimaryCta?: () => void;
   onSecondaryCta?: () => void;
+  className?: string;
 }
+
+const WEEKS_PER_MONTH = 4.33;
+const TARGET_PREP_MINUTES_PER_STUDENT_PER_WEEK = 1;
+
+export const DEFAULT_ONE_MINUTE_PREP_CALCULATOR_INPUT: OneMinutePrepCalculatorInput = {
+  prepMinutesPerStudent: 25,
+  studentsPerWeek: 7,
+  lessonPrice: 25,
+  lessonLengthMinutes: 60,
+};
 
 const FULL_TIME_PLANS = [
   { worksheets: 30, cost: 19 },
@@ -45,6 +67,11 @@ const FULL_TIME_PLANS = [
 
 const formatCurrency = (value: number) =>
   new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 }).format(value);
+
+const clampNumber = (value: number, min: number, max: number) => {
+  if (Number.isNaN(value)) return min;
+  return Math.max(min, Math.min(max, value));
+};
 
 const getPlanForWorksheets = (worksheetsNeeded: number) => {
   if (worksheetsNeeded <= 15) {
@@ -65,22 +92,31 @@ export const calculateOneMinutePrepImpact = ({
   lessonPrice,
   lessonLengthMinutes,
 }: OneMinutePrepCalculatorInput): OneMinutePrepCalculatorResult => {
-  const worksheetsNeeded = Math.ceil(studentsPerWeek * 4);
+  const worksheetsNeeded = Math.ceil(studentsPerWeek * WEEKS_PER_MONTH);
   const plan = getPlanForWorksheets(worksheetsNeeded);
   const currentWeeklyPrepMinutes = prepMinutesPerStudent * studentsPerWeek;
-  const targetWeeklyPrepMinutes = studentsPerWeek;
+  const targetWeeklyPrepMinutes = studentsPerWeek * TARGET_PREP_MINUTES_PER_STUDENT_PER_WEEK;
   const savedWeeklyMinutes = Math.max(0, currentWeeklyPrepMinutes - targetWeeklyPrepMinutes);
-  const savedMonthlyHours = savedWeeklyMinutes * 4.33 / 60;
-  const extraLessonsPerWeek = Math.floor(savedWeeklyMinutes / lessonLengthMinutes);
-  const potentialMonthlyRevenue = Math.max(0, extraLessonsPerWeek * lessonPrice * 4.33 - plan.monthlyPlanCost);
+  const currentMonthlyPrepMinutes = currentWeeklyPrepMinutes * WEEKS_PER_MONTH;
+  const targetMonthlyPrepMinutes = targetWeeklyPrepMinutes * WEEKS_PER_MONTH;
+  const monthlyPrepMinutesTiedUp = Math.max(0, currentMonthlyPrepMinutes - targetMonthlyPrepMinutes);
+  const monthlyPrepHoursTiedUp = monthlyPrepMinutesTiedUp / 60;
+  const monthlyLessonSlotsTiedUp = Math.floor(monthlyPrepMinutesTiedUp / lessonLengthMinutes);
+  const monthlyRevenueCapacityTiedUp = Math.max(0, monthlyLessonSlotsTiedUp * lessonPrice);
 
   return {
     currentWeeklyPrepMinutes,
     targetWeeklyPrepMinutes,
     savedWeeklyMinutes,
-    savedMonthlyHours,
-    extraLessonsPerWeek,
-    potentialMonthlyRevenue,
+    savedMonthlyHours: monthlyPrepHoursTiedUp,
+    extraLessonsPerWeek: Math.floor(savedWeeklyMinutes / lessonLengthMinutes),
+    potentialMonthlyRevenue: monthlyRevenueCapacityTiedUp,
+    currentMonthlyPrepMinutes,
+    targetMonthlyPrepMinutes,
+    monthlyPrepMinutesTiedUp,
+    monthlyPrepHoursTiedUp,
+    monthlyLessonSlotsTiedUp,
+    monthlyRevenueCapacityTiedUp,
     ...plan,
   };
 };
@@ -88,77 +124,64 @@ export const calculateOneMinutePrepImpact = ({
 export const PricingCalculator: React.FC<PricingCalculatorProps> = ({
   onRecommendation,
   variant = "pricing",
+  value,
+  defaultValue = DEFAULT_ONE_MINUTE_PREP_CALCULATOR_INPUT,
+  onValueChange,
   onPrimaryCta,
   onSecondaryCta,
+  className,
 }) => {
-  const [prepTime, setPrepTime] = useState(25);
-  const [lessonPrice, setLessonPrice] = useState(25);
-  const [studentsPerWeek, setStudentsPerWeek] = useState(7);
-  const [lessonLength, setLessonLength] = useState(60);
+  const [internalValue, setInternalValue] = useState<OneMinutePrepCalculatorInput>(defaultValue);
   const { trackEvent } = useEventTracking();
+  const calculatorValue = value ?? internalValue;
+  const isHero = variant === "hero";
 
-  const result = useMemo(
-    () =>
-      calculateOneMinutePrepImpact({
-        prepMinutesPerStudent: prepTime,
-        studentsPerWeek,
-        lessonPrice,
-        lessonLengthMinutes: lessonLength,
-      }),
-    [prepTime, studentsPerWeek, lessonPrice, lessonLength]
-  );
+  const result = useMemo(() => calculateOneMinutePrepImpact(calculatorValue), [calculatorValue]);
 
   useEffect(() => {
-    onRecommendation?.(result.recommendedPlan, result.recommendedWorksheets, studentsPerWeek);
-  }, [onRecommendation, result.recommendedPlan, result.recommendedWorksheets, studentsPerWeek]);
+    onRecommendation?.(result.recommendedPlan, result.recommendedWorksheets, calculatorValue.studentsPerWeek);
+  }, [onRecommendation, result.recommendedPlan, result.recommendedWorksheets, calculatorValue.studentsPerWeek]);
 
-  const trackCalculatorCta = (target: "worksheet-form" | "pricing") => {
+  const updateValue = (patch: Partial<OneMinutePrepCalculatorInput>) => {
+    const next = { ...calculatorValue, ...patch };
+    if (!value) setInternalValue(next);
+    onValueChange?.(next);
+  };
+
+  const trackCalculatorCta = (target: "signup-modal" | "worksheet-form" | "pricing") => {
     trackEvent({
-      eventType: target === "worksheet-form" ? "one_minute_calculator_cta_click" : "one_minute_calculator_pricing_click",
+      eventType: target === "pricing" ? "one_minute_calculator_pricing_click" : "one_minute_calculator_cta_click",
       eventData: {
         target,
-        prepMinutesPerStudent: prepTime,
-        studentsPerWeek,
-        lessonPrice,
-        lessonLengthMinutes: lessonLength,
-        savedMonthlyHours: Number(result.savedMonthlyHours.toFixed(1)),
-        extraLessonsPerWeek: result.extraLessonsPerWeek,
-        potentialMonthlyRevenue: Math.round(result.potentialMonthlyRevenue),
+        variant,
+        ...calculatorValue,
+        monthlyPrepHoursTiedUp: Number(result.monthlyPrepHoursTiedUp.toFixed(1)),
+        monthlyLessonSlotsTiedUp: result.monthlyLessonSlotsTiedUp,
+        monthlyRevenueCapacityTiedUp: Math.round(result.monthlyRevenueCapacityTiedUp),
         recommendedPlan: result.recommendedPlan,
       },
     });
   };
 
-  const handleIncrement = (field: "prepTime" | "lessonPrice" | "studentsPerWeek") => {
-    switch (field) {
-      case "prepTime":
-        setPrepTime((prev) => Math.min(prev + 5, 120));
-        break;
-      case "lessonPrice":
-        setLessonPrice((prev) => Math.min(prev + 5, 200));
-        break;
-      case "studentsPerWeek":
-        setStudentsPerWeek((prev) => Math.min(prev + 1, 50));
-        break;
-    }
+  const handleIncrement = (field: "prepMinutesPerStudent" | "lessonPrice" | "studentsPerWeek") => {
+    const step = field === "studentsPerWeek" ? 1 : 5;
+    const max = field === "prepMinutesPerStudent" ? 120 : field === "lessonPrice" ? 200 : 50;
+    updateValue({ [field]: clampNumber(calculatorValue[field] + step, 1, max) });
   };
 
-  const handleDecrement = (field: "prepTime" | "lessonPrice" | "studentsPerWeek") => {
-    switch (field) {
-      case "prepTime":
-        setPrepTime((prev) => Math.max(prev - 5, 1));
-        break;
-      case "lessonPrice":
-        setLessonPrice((prev) => Math.max(prev - 5, 1));
-        break;
-      case "studentsPerWeek":
-        setStudentsPerWeek((prev) => Math.max(prev - 1, 1));
-        break;
-    }
+  const handleDecrement = (field: "prepMinutesPerStudent" | "lessonPrice" | "studentsPerWeek") => {
+    const step = field === "studentsPerWeek" ? 1 : 5;
+    const max = field === "prepMinutesPerStudent" ? 120 : field === "lessonPrice" ? 200 : 50;
+    updateValue({ [field]: clampNumber(calculatorValue[field] - step, 1, max) });
+  };
+
+  const handleNumberChange = (field: "prepMinutesPerStudent" | "lessonPrice" | "studentsPerWeek", rawValue: string) => {
+    const max = field === "prepMinutesPerStudent" ? 120 : field === "lessonPrice" ? 200 : 50;
+    updateValue({ [field]: clampNumber(Number(rawValue), 1, max) });
   };
 
   const handlePrimaryCta = () => {
-    trackCalculatorCta("worksheet-form");
+    trackCalculatorCta("signup-modal");
     onPrimaryCta?.();
   };
 
@@ -167,209 +190,227 @@ export const PricingCalculator: React.FC<PricingCalculatorProps> = ({
     onSecondaryCta?.();
   };
 
+  const inputControls = (
+    <div className={cn("grid gap-4", isHero ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2")}>
+      <div className="space-y-1">
+        <div className="flex items-center gap-1">
+          <Label htmlFor={`prep-time-${variant}`} className="text-sm text-gray-900">
+            Prep per student weekly
+          </Label>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Info className="h-3 w-3 text-muted-foreground cursor-help" />
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>How many minutes do you usually spend preparing for one student each week?</p>
+            </TooltipContent>
+          </Tooltip>
+        </div>
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-9 w-8 p-0 bg-primary text-primary-foreground hover:bg-primary/90 border-none"
+            onClick={() => handleDecrement("prepMinutesPerStudent")}
+            aria-label="Decrease weekly prep time per student"
+          >
+            <Minus className="h-3 w-3" />
+          </Button>
+          <Input
+            id={`prep-time-${variant}`}
+            type="number"
+            value={calculatorValue.prepMinutesPerStudent}
+            onChange={(e) => handleNumberChange("prepMinutesPerStudent", e.target.value)}
+            min="1"
+            max="120"
+            className="h-9 w-full min-w-0 text-center [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
+            aria-label="Weekly prep minutes per student"
+          />
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-9 w-8 p-0 bg-primary text-primary-foreground hover:bg-primary/90 border-none"
+            onClick={() => handleIncrement("prepMinutesPerStudent")}
+            aria-label="Increase weekly prep time per student"
+          >
+            <Plus className="h-3 w-3" />
+          </Button>
+        </div>
+      </div>
+
+      <div className="space-y-1">
+        <div className="flex items-center gap-1">
+          <Label htmlFor={`students-week-${variant}`} className="text-sm text-gray-900">
+            Students weekly
+          </Label>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Info className="h-3 w-3 text-muted-foreground cursor-help" />
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>How many 1:1 students do you prepare for each week? Include repeat and one-off students if you prepare materials for them.</p>
+            </TooltipContent>
+          </Tooltip>
+        </div>
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-9 w-8 p-0 bg-primary text-primary-foreground hover:bg-primary/90 border-none"
+            onClick={() => handleDecrement("studentsPerWeek")}
+            aria-label="Decrease weekly students"
+          >
+            <Minus className="h-3 w-3" />
+          </Button>
+          <Input
+            id={`students-week-${variant}`}
+            type="number"
+            value={calculatorValue.studentsPerWeek}
+            onChange={(e) => handleNumberChange("studentsPerWeek", e.target.value)}
+            min="1"
+            max="50"
+            className="h-9 w-full min-w-0 text-center [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
+            aria-label="Students weekly"
+          />
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-9 w-8 p-0 bg-primary text-primary-foreground hover:bg-primary/90 border-none"
+            onClick={() => handleIncrement("studentsPerWeek")}
+            aria-label="Increase weekly students"
+          >
+            <Plus className="h-3 w-3" />
+          </Button>
+        </div>
+      </div>
+
+      <div className="space-y-1">
+        <div className="flex items-center gap-1">
+          <Label htmlFor={`lesson-price-${variant}`} className="text-sm text-gray-900">
+            Lesson price
+          </Label>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Info className="h-3 w-3 text-muted-foreground cursor-help" />
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>What do you charge for one lesson?</p>
+            </TooltipContent>
+          </Tooltip>
+        </div>
+        <div className="flex items-center gap-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-9 w-8 p-0 bg-primary text-primary-foreground hover:bg-primary/90 border-none"
+            onClick={() => handleDecrement("lessonPrice")}
+            aria-label="Decrease lesson price"
+          >
+            <Minus className="h-3 w-3" />
+          </Button>
+          <Input
+            id={`lesson-price-${variant}`}
+            type="number"
+            value={calculatorValue.lessonPrice}
+            onChange={(e) => handleNumberChange("lessonPrice", e.target.value)}
+            min="1"
+            max="200"
+            className="h-9 w-full min-w-0 text-center [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
+            aria-label="Lesson price in dollars"
+          />
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-9 w-8 p-0 bg-primary text-primary-foreground hover:bg-primary/90 border-none"
+            onClick={() => handleIncrement("lessonPrice")}
+            aria-label="Increase lesson price"
+          >
+            <Plus className="h-3 w-3" />
+          </Button>
+        </div>
+      </div>
+
+      <div className="space-y-1">
+        <Label htmlFor={`lesson-length-${variant}`} className="text-sm text-gray-900">
+          Lesson length
+        </Label>
+        <select
+          id={`lesson-length-${variant}`}
+          value={calculatorValue.lessonLengthMinutes}
+          onChange={(e) => updateValue({ lessonLengthMinutes: Number(e.target.value) })}
+          className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm text-gray-900"
+          aria-label="Lesson length in minutes"
+        >
+          <option value={30}>30 min</option>
+          <option value={45}>45 min</option>
+          <option value={60}>60 min</option>
+          <option value={90}>90 min</option>
+        </select>
+      </div>
+    </div>
+  );
+
   return (
-    <Card className="mb-6 bg-white border-2 shadow-md" style={{ backgroundColor: "white", opacity: 1 }}>
-      <CardHeader className="text-center pb-3 bg-white rounded-none">
+    <Card
+      className={cn(
+        "w-full max-w-full overflow-hidden bg-white border-2 shadow-md",
+        isHero ? "mb-0 border-violet-100 shadow-xl shadow-violet-500/10" : "mb-6",
+        className
+      )}
+      style={{ backgroundColor: "white", opacity: 1 }}
+    >
+      <CardHeader className={cn("text-center bg-white rounded-none", isHero ? "pb-2 px-4 pt-4" : "pb-3")}>
         <div className="flex flex-col items-center gap-1 mb-2">
           <div className="flex items-center gap-2">
             <Calculator className="h-5 w-5 text-primary" />
-            <CardTitle className="text-lg text-gray-900">Calculate your 1-Minute Prep impact</CardTitle>
+            <CardTitle className={cn("text-gray-900", isHero ? "text-base" : "text-lg")}>Calculate your 1-Minute Prep impact</CardTitle>
           </div>
-          <p className="text-gray-600 text-sm max-w-2xl">
-            Compare your current weekly prep with a workflow designed around about 1 focused minute per recurring student.
+          <p className={cn("text-gray-600 text-sm", isHero ? "max-w-sm" : "max-w-2xl")}>
+            Compare your weekly inputs with a monthly estimate based on about 1 focused prep minute per student.
           </p>
         </div>
       </CardHeader>
 
-      <CardContent className="bg-white">
-        <div className="grid grid-cols-1 xl:grid-cols-[1.2fr_1fr] gap-6">
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="space-y-1">
-              <div className="flex items-center gap-1">
-                <Label htmlFor="prep-time" className="text-sm text-gray-900">
-                  Prep per student
-                </Label>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Info className="h-3 w-3 text-muted-foreground cursor-help" />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>How many minutes do you usually spend preparing for one recurring student each week?</p>
-                  </TooltipContent>
-                </Tooltip>
-              </div>
-              <div className="flex items-center gap-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-9 w-8 p-0 bg-primary text-primary-foreground hover:bg-primary/90 border-none"
-                  onClick={() => handleDecrement("prepTime")}
-                  aria-label="Decrease prep time"
-                >
-                  <Minus className="h-3 w-3" />
-                </Button>
-                <Input
-                  id="prep-time"
-                  type="number"
-                  value={prepTime}
-                  onChange={(e) => setPrepTime(Math.max(1, Math.min(120, Number(e.target.value))))}
-                  min="1"
-                  max="120"
-                  className="h-9 w-16 text-center [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
-                  aria-label="Prep minutes per student"
-                />
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-9 w-8 p-0 bg-primary text-primary-foreground hover:bg-primary/90 border-none"
-                  onClick={() => handleIncrement("prepTime")}
-                  aria-label="Increase prep time"
-                >
-                  <Plus className="h-3 w-3" />
-                </Button>
-              </div>
-            </div>
-
-            <div className="space-y-1">
-              <div className="flex items-center gap-1">
-                <Label htmlFor="students-week" className="text-sm text-gray-900">
-                  Recurring students
-                </Label>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Info className="h-3 w-3 text-muted-foreground cursor-help" />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>How many recurring 1:1 students do you prepare for each week?</p>
-                  </TooltipContent>
-                </Tooltip>
-              </div>
-              <div className="flex items-center gap-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-9 w-8 p-0 bg-primary text-primary-foreground hover:bg-primary/90 border-none"
-                  onClick={() => handleDecrement("studentsPerWeek")}
-                  aria-label="Decrease recurring students"
-                >
-                  <Minus className="h-3 w-3" />
-                </Button>
-                <Input
-                  id="students-week"
-                  type="number"
-                  value={studentsPerWeek}
-                  onChange={(e) => setStudentsPerWeek(Math.max(1, Math.min(50, Number(e.target.value))))}
-                  min="1"
-                  max="50"
-                  className="h-9 w-16 text-center [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
-                  aria-label="Recurring students per week"
-                />
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-9 w-8 p-0 bg-primary text-primary-foreground hover:bg-primary/90 border-none"
-                  onClick={() => handleIncrement("studentsPerWeek")}
-                  aria-label="Increase recurring students"
-                >
-                  <Plus className="h-3 w-3" />
-                </Button>
-              </div>
-            </div>
-
-            <div className="space-y-1">
-              <div className="flex items-center gap-1">
-                <Label htmlFor="lesson-price" className="text-sm text-gray-900">
-                  Lesson price
-                </Label>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Info className="h-3 w-3 text-muted-foreground cursor-help" />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>What do you charge for one lesson?</p>
-                  </TooltipContent>
-                </Tooltip>
-              </div>
-              <div className="flex items-center gap-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-9 w-8 p-0 bg-primary text-primary-foreground hover:bg-primary/90 border-none"
-                  onClick={() => handleDecrement("lessonPrice")}
-                  aria-label="Decrease lesson price"
-                >
-                  <Minus className="h-3 w-3" />
-                </Button>
-                <Input
-                  id="lesson-price"
-                  type="number"
-                  value={lessonPrice}
-                  onChange={(e) => setLessonPrice(Math.max(1, Math.min(200, Number(e.target.value))))}
-                  min="1"
-                  max="200"
-                  className="h-9 w-16 text-center [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none [-moz-appearance:textfield]"
-                  aria-label="Lesson price in dollars"
-                />
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-9 w-8 p-0 bg-primary text-primary-foreground hover:bg-primary/90 border-none"
-                  onClick={() => handleIncrement("lessonPrice")}
-                  aria-label="Increase lesson price"
-                >
-                  <Plus className="h-3 w-3" />
-                </Button>
-              </div>
-            </div>
-
-            <div className="space-y-1">
-              <Label htmlFor="lesson-length" className="text-sm text-gray-900">
-                Lesson length
-              </Label>
-              <select
-                id="lesson-length"
-                value={lessonLength}
-                onChange={(e) => setLessonLength(Number(e.target.value))}
-                className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm text-gray-900"
-                aria-label="Lesson length in minutes"
-              >
-                <option value={30}>30 min</option>
-                <option value={45}>45 min</option>
-                <option value={60}>60 min</option>
-                <option value={90}>90 min</option>
-              </select>
-            </div>
+      <CardContent className={cn("bg-white", isHero ? "px-4 pb-4" : "")}>
+        <div className={cn("grid gap-6", isHero ? "grid-cols-1" : "grid-cols-1 xl:grid-cols-[1fr_1fr]")}>
+          <div className={cn(isHero ? "space-y-4" : "rounded-lg border border-gray-100 bg-gray-50/60 p-4")}>
+            {inputControls}
+            {!isHero && (
+              <p className="text-xs text-muted-foreground leading-relaxed mt-4">
+                Based on your weekly inputs. Results are normalized to a monthly estimate using 4.33 weeks per month.
+              </p>
+            )}
           </div>
 
           <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border border-green-200 dark:border-green-800">
             <div className="flex items-center justify-between gap-2 mb-3">
               <div className="flex items-center gap-2">
                 <TrendingUp className="h-4 w-4 text-green-600" />
-                <span className="font-medium text-green-800 dark:text-green-200 text-sm">Estimated prep impact</span>
+                <span className="font-medium text-green-800 dark:text-green-200 text-sm">Estimated monthly prep impact</span>
               </div>
               <Badge variant="secondary" className="bg-white text-green-800 border-green-200">
                 {result.recommendedPlan === "side-gig" ? "Side-Gig" : "Full-Time"} fit
               </Badge>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className={cn("grid gap-3", isHero ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-3")}>
               <div className="text-center bg-white/70 rounded-md p-3 border border-green-100">
                 <div className="flex items-center justify-center gap-1 text-green-600">
                   <Clock className="h-4 w-4" />
-                  <span className="text-2xl font-bold">{result.savedMonthlyHours.toFixed(1)}h</span>
+                  <span className="text-2xl font-bold">{result.monthlyPrepHoursTiedUp.toFixed(1)}h</span>
                 </div>
-                <div className="text-xs text-green-700 dark:text-green-400">prep time you can reclaim monthly</div>
+                <div className="text-xs text-green-700 dark:text-green-400">prep time currently tied up monthly</div>
               </div>
               <div className="text-center bg-white/70 rounded-md p-3 border border-green-100">
                 <div className="flex items-center justify-center gap-1 text-green-600">
                   <Users className="h-4 w-4" />
-                  <span className="text-2xl font-bold">{result.extraLessonsPerWeek}</span>
+                  <span className="text-2xl font-bold">{result.monthlyLessonSlotsTiedUp}</span>
                 </div>
-                <div className="text-xs text-green-700 dark:text-green-400">potential extra lessons weekly</div>
+                <div className="text-xs text-green-700 dark:text-green-400">lesson slots tied up monthly</div>
               </div>
               <div className="text-center bg-white/70 rounded-md p-3 border border-green-100">
-                <div className="text-2xl font-bold text-green-600">{formatCurrency(result.potentialMonthlyRevenue)}</div>
-                <div className="text-xs text-green-700 dark:text-green-400">estimated monthly revenue capacity</div>
+                <div className="text-2xl font-bold text-green-600">{formatCurrency(result.monthlyRevenueCapacityTiedUp)}</div>
+                <div className="text-xs text-green-700 dark:text-green-400">monthly revenue capacity tied up in prep</div>
               </div>
             </div>
 
