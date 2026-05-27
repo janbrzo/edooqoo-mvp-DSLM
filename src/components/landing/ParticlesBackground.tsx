@@ -59,7 +59,7 @@ export default function ParticlesBackground({ interactive = true, opacity = 1 }:
         detectsOn: 'window' as const,
         events: {
           onHover: { enable: interactive, mode: 'grab' },
-          onClick: { enable: interactive, mode: 'push' },
+          onClick: { enable: false },
           resize: { enable: true },
         },
         modes: {

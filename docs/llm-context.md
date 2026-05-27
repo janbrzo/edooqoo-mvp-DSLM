@@ -5,6 +5,49 @@ Written in Problem → Edooqoo.com Solution → Technical Mechanics format.
 
 ---
 
+## v6.9.28 — Landing UX CTA, Shared Monthly Calculator, and 1-Minute Prep Loop
+
+### Problem
+1. The public homepage used a large centered hero and a separate calculator block, leaving unused first-screen space before the product has a proof video.
+2. The primary CTA used 1-Minute Prep language but scrolled to the anonymous worksheet generator, which misrepresented 1-Minute Prep as only generation.
+3. The prep calculator mixed weekly and monthly output labels and could show non-actionable zero lesson/revenue values when the time result was monthly but the lesson-slot result was weekly.
+4. The top and lower calculators used independent state, so changing inputs in one calculator did not update the other.
+5. Calculator clicks activated the particle background click effect, adding unnecessary visual noise and possible interaction lag.
+6. `/how-it-works` explained a linear worksheet-generation process but did not describe the 1-Minute Prep data loop: each student interaction should improve the next prep decision.
+
+### Edooqoo.com Solution
+1. The anonymous homepage hero now uses a two-column desktop layout: left side product copy and CTAs, right side a vertical prep impact calculator. Mobile remains stacked.
+2. The H1 remains `1-Minute Prep` / `for every 1:1 English student.` and the subheadline states the full student-context-to-worksheet workflow.
+3. `Start 1-Minute Prep Free` opens a lightweight account modal because saved student context is required. The modal leads to `/signup`. `Try worksheet generator now` remains the immediate no-account path and scrolls to `#worksheet-form`.
+4. The hero ticker explicitly states `Create a free account to unlock 1-Minute Prep`.
+5. Calculator outputs are monthly opportunity-cost estimates only: prep hours tied up monthly, lesson slots tied up monthly, and monthly revenue capacity tied up in prep. The output is not an income guarantee.
+6. `/how-it-works` keeps the 8-step structure but frames it as the 1-Minute Prep loop: student context -> generate and teach -> homework/flashcards/signals -> DSLM recommendation -> better next prep.
+
+### Technical Mechanics
+- Public files changed: `src/components/landing/HeroHeadline.tsx`, `src/components/landing/StartOneMinutePrepDialog.tsx`, `src/components/PricingCalculator.tsx`, `src/components/PricingSection.tsx`, `src/components/landing/FinalCTA.tsx`, `src/components/landing/ParticlesBackground.tsx`, `src/pages/Index.tsx`, and `src/pages/HowItWorks.tsx`.
+- `Index.tsx` owns shared calculator state using `DEFAULT_ONE_MINUTE_PREP_CALCULATOR_INPUT` and passes `value/onValueChange` to the hero calculator and pricing calculator.
+- Default landing calculator values: `prepMinutesPerStudent = 25`, `studentsPerWeek = 7`, `lessonPrice = 25`, `lessonLengthMinutes = 60`.
+- `PricingCalculator` supports controlled mode through `value` and `onValueChange`; when no controlled value is provided it falls back to internal state for existing pages such as `/pricing`.
+- Calculator formulas: `WEEKS_PER_MONTH = 4.33`; `currentMonthlyPrepMinutes = prepMinutesPerStudent * studentsPerWeek * WEEKS_PER_MONTH`; `targetMonthlyPrepMinutes = studentsPerWeek * 1 * WEEKS_PER_MONTH`; `monthlyPrepMinutesTiedUp = max(0, currentMonthlyPrepMinutes - targetMonthlyPrepMinutes)`; `monthlyLessonSlotsTiedUp = floor(monthlyPrepMinutesTiedUp / lessonLengthMinutes)`; `monthlyRevenueCapacityTiedUp = monthlyLessonSlotsTiedUp * lessonPrice`.
+- Revenue capacity no longer subtracts subscription plan cost. It is an estimate of lesson capacity currently consumed by prep time, not profit.
+- Calculator labels are `Prep per student weekly`, `Students weekly`, `Lesson price`, and `Lesson length`.
+- `ParticlesBackground.tsx` disables `onClick.push` by setting particle click interactivity to disabled.
+- `/how-it-works` updates title/meta and HowTo JSON-LD to describe the student learning loop, not only worksheet generation.
+- `scripts/seo/generate-ai-resources.mjs`, root `llms.txt`, `public/llms.txt`, `public/llms-full.txt`, `public/llms-answers.txt`, `public/knowledge-graph.json`, `public/openapi.yaml`, and `public/.well-known/ai-plugin.json` must stay synchronized after this update.
+- SANCTITY: no changes to worksheet-generation prompts, Supabase schema, RLS policies, Edge Functions, service-role code, Stripe/payment code, authenticated worksheet editor, homework logic, private student data access, or private teacher data access.
+
+### Invariants
+- Do not route 1-Minute Prep CTAs directly to the anonymous generator unless the CTA explicitly says worksheet generator.
+- Do not describe the monthly calculator as guaranteed savings, guaranteed earnings, profit, or exact preparation time.
+- Keep `/pricing` compatible with the uncontrolled `PricingCalculator` fallback.
+- Keep the hero calculator and pricing calculator synchronized from `Index.tsx` when both appear on the homepage.
+- Keep particle click interactivity disabled on the landing background while calculator controls are present above it.
+
+### RAG Keywords
+landing UX correction, two-column hero, vertical hero calculator, Start 1-Minute Prep Free modal, create account modal, signup CTA, Try worksheet generator now, shared calculator state, controlled PricingCalculator, monthly prep impact calculator, prep time tied up monthly, lesson slots tied up monthly, revenue capacity tied up in prep, WEEKS_PER_MONTH 4.33, students weekly, prep per student weekly, particle click disabled, how-it-works loop, 1-Minute Prep loop, student context loop, DSLM recommendation loop, no worksheet engine change, no Supabase change, no Stripe change.
+
+---
+
 ## v6.9.27 — 1-Minute Prep Landing Reframe + Prep Impact Calculator
 
 ### Problem
@@ -22,7 +65,7 @@ Written in Problem → Edooqoo.com Solution → Technical Mechanics format.
 
 ### Technical Mechanics
 - Public landing files updated: `src/components/landing/HeroHeadline.tsx`, `StatsBar.tsx`, `ValueCards.tsx`, `EcosystemSection.tsx`, `FeatureNavPills.tsx`, `FinalCTA.tsx`, and `src/pages/Index.tsx`.
-- `src/components/PricingCalculator.tsx` now computes prep impact with `currentWeeklyPrepMinutes = prepMinutesPerStudent * studentsPerWeek`, `targetWeeklyPrepMinutes = studentsPerWeek`, `savedWeeklyMinutes = max(0, currentWeeklyPrepMinutes - targetWeeklyPrepMinutes)`, `savedMonthlyHours = savedWeeklyMinutes * 4.33 / 60`, `extraLessonsPerWeek = floor(savedWeeklyMinutes / lessonLengthMinutes)`, and `potentialMonthlyRevenue = max(0, extraLessonsPerWeek * lessonPrice * 4.33 - monthlyPlanCost)`.
+- `src/components/PricingCalculator.tsx` was introduced as the 1-Minute Prep impact calculator. Current calculator mechanics are superseded by v6.9.28: monthly-only outputs, shared homepage state, and no subscription-plan subtraction from revenue capacity.
 - The calculator preserves `onRecommendation(plan, worksheetsNeeded, lessonsPerWeek)` for `PricingSection`, so pricing-card recommendation behavior remains compatible.
 - New frontend analytics event types are typed in `src/hooks/useEventTracking.tsx`: `one_minute_hero_cta_click`, `one_minute_secondary_cta_click`, `one_minute_feature_pill_click`, `one_minute_dslm_card_click`, `one_minute_calculator_input_change`, `one_minute_calculator_cta_click`, and `one_minute_calculator_pricing_click`.
 - `index.html` title, description, Open Graph, Twitter metadata, keyword metadata, and SoftwareApplication JSON-LD now describe 1-Minute Prep and DSLM workflow context.

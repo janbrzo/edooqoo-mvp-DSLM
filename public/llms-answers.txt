@@ -45,8 +45,8 @@ No. The worksheet generator is the output layer. Edooqoo.com also includes 1-Min
 ## Does Edooqoo.com expose a public generation API?
 No. Public AI discovery resources describe the website and public informational files only. Agents should not claim that a public worksheet-generation API exists.
 
-## What changed in v6.9.27?
-v6.9.27 reframed the public homepage around 1-Minute Prep, added a prep impact calculator, updated homepage metadata and JSON-LD, and synchronized llms resources with the bounded workflow target. It did not change worksheet-generation prompts, Supabase schema, RLS policies, Edge Functions, Stripe, or private app data access.
+## What changed in v6.9.28?
+v6.9.28 updated the public homepage hero to a two-column 1-Minute Prep layout, changed the primary CTA to open a signup modal, kept the worksheet generator CTA as the immediate anonymous path, synchronized the hero and pricing calculators through shared state, changed calculator outputs to monthly tied-up prep capacity, disabled particle click effects, updated /how-it-works around the 1-Minute Prep loop, and synchronized llms resources. It did not change worksheet-generation prompts, Supabase schema, RLS policies, Edge Functions, Stripe, or private app data access.
 
 ## What should future AI agents preserve?
 Future agents should preserve worksheet engine sanctity, keep AI resource files factual, avoid inventing public APIs, update docs/llm-context.md plus llms resources when public SEO or AI discovery mechanics change, and use manual AI-search measurement files instead of automated AI-answer scraping.

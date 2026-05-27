@@ -1,15 +1,12 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { ArrowUp, CheckCircle2 } from 'lucide-react';
+import { ArrowRight, CheckCircle2 } from 'lucide-react';
 
-const FinalCTA: React.FC = () => {
-  const scrollToForm = () => {
-    const formSection = document.getElementById('worksheet-form');
-    if (formSection) {
-      formSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    }
-  };
+interface FinalCTAProps {
+  onStartOneMinutePrep?: () => void;
+}
 
+const FinalCTA: React.FC<FinalCTAProps> = ({ onStartOneMinutePrep }) => {
   return (
     <section className="relative py-24 text-center overflow-hidden">
       {/* Dynamic Background */}
@@ -26,12 +23,12 @@ const FinalCTA: React.FC = () => {
         
         <div className="flex flex-col items-center gap-6">
           <Button
-            onClick={scrollToForm}
+            onClick={onStartOneMinutePrep}
             size="lg"
             className="h-14 px-10 text-lg bg-white text-violet-900 hover:bg-violet-50 rounded-full font-bold shadow-2xl hover:-translate-y-1 transition-all duration-200"
           >
             Start 1-Minute Prep Free
-            <ArrowUp className="h-5 w-5 ml-2" />
+            <ArrowRight className="h-5 w-5 ml-2" />
           </Button>
           
           <div className="flex flex-wrap justify-center gap-x-8 gap-y-3 text-sm font-medium text-violet-200">

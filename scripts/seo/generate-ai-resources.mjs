@@ -8,8 +8,8 @@ const ROOT = path.resolve(__dirname, '..', '..');
 const PUBLIC = path.resolve(ROOT, 'public');
 const WELL_KNOWN = path.resolve(PUBLIC, '.well-known');
 
-const VERSION = 'v6.9.27';
-const RELEASE_NAME = '1-Minute Prep Landing Reframe + Prep Impact Calculator';
+const VERSION = 'v6.9.28';
+const RELEASE_NAME = 'Landing UX CTA, Shared Monthly Calculator, and 1-Minute Prep Loop';
 const BASE_URL = 'https://edooqoo.com';
 
 const citablePages = [
@@ -128,25 +128,63 @@ const internalNotesSection = `## v6.9.27 Internal Notes (for agents reading the 
 const oneMinutePrepProblem = [
   'The public landing page positioned Edooqoo.com mainly as an AI worksheet generator, while the current product also includes student context, DSLM next-step signals, homework, flashcards, lesson calendar, placement tests, and student activity loops.',
   'The worksheet generator is an output layer. The strategic product frame is now the recurring 1:1 English-teacher prep workflow: identify what a specific student needs next, then generate the teaching material.',
-  'The old pricing calculator described savings from a generic worksheet generator and treated all current preparation time as saved time. That framing was too broad for claim-integrity rules and did not model the bounded 1-Minute Prep workflow target.',
-  'Public metadata and AI discovery resources must match the visible landing-page frame so LLM agents do not describe Edooqoo.com only as a worksheet generator.',
+  'The first 1-Minute Prep landing version used a centered hero plus a separate calculator block, leaving unused first-screen space before a proof video exists.',
+  'The primary 1-Minute Prep CTA scrolled to the anonymous worksheet generator even though 1-Minute Prep requires saved student context.',
+  'The prep calculator mixed weekly and monthly result labels and could produce confusing zero lesson/revenue outputs when the visible prep-time result was monthly.',
+  'The top and lower homepage calculators needed shared state so input changes update both views immediately.',
+  'The particle background click effect could be triggered by calculator control clicks.',
+  'The /how-it-works page explained a linear worksheet-generation process but did not describe the recurring student-context loop that powers better next prep decisions.',
 ];
 
 const oneMinutePrepSolution = [
-  'Edooqoo.com public homepage copy now frames the product as a 1-Minute Prep system for recurring 1:1 English students.',
+  'Edooqoo.com public homepage copy frames the product as a 1-Minute Prep system for 1:1 English students.',
   'The claim is bounded: 1-Minute Prep is a workflow target for weekly prep after student profile, goals, and learning signals already exist in Edooqoo. It is not a guaranteed generation-time claim, income claim, or no-review automation claim.',
+  'The homepage hero uses a two-column desktop layout: product copy and CTAs on the left, a vertical prep impact calculator on the right. Mobile remains stacked.',
+  'Start 1-Minute Prep Free opens an account modal because saved student context is required. The modal leads to /signup. Try worksheet generator now scrolls to #worksheet-form for immediate anonymous generator use.',
   'Landing sections explain the sequence: student context -> DSLM learning signals -> recommended lesson focus -> editable worksheet output with audio, images, and AI-assisted grading.',
-  'The prep impact calculator estimates reclaimed preparation capacity and potential lesson capacity. It does not guarantee income or exact preparation time.',
+  'The prep impact calculator estimates monthly preparation capacity currently tied up by prep work. It does not guarantee income or exact preparation time.',
+  '/how-it-works keeps 8 steps and frames them as the 1-Minute Prep loop: student context -> generate and teach -> homework/flashcards/signals -> DSLM recommendation -> better next prep.',
   'Existing worksheet-generator, pricing, auth, token, Supabase, RLS, Edge Function, Stripe, and private dashboard behavior remain unchanged.',
 ];
 
 const oneMinutePrepMechanics = [
-  'Public landing files updated: src/components/landing/HeroHeadline.tsx, StatsBar.tsx, ValueCards.tsx, EcosystemSection.tsx, FeatureNavPills.tsx, FinalCTA.tsx, and src/pages/Index.tsx.',
-  'src/components/PricingCalculator.tsx now computes prep impact from current weekly prep, 1 minute per recurring student as the workflow target, saved weekly minutes, saved monthly hours, potential extra lessons, and estimated monthly revenue capacity after plan cost.',
-  'The calculator preserves onRecommendation(plan, worksheetsNeeded, lessonsPerWeek) for PricingSection, so pricing-card recommendation behavior remains compatible.',
-  'New frontend analytics event types are typed in src/hooks/useEventTracking.tsx for 1-Minute Prep hero, feature navigation, and calculator interactions.',
+  'Public landing files updated: src/components/landing/HeroHeadline.tsx, src/components/landing/StartOneMinutePrepDialog.tsx, src/components/PricingCalculator.tsx, src/components/PricingSection.tsx, src/components/landing/FinalCTA.tsx, src/components/landing/ParticlesBackground.tsx, src/pages/Index.tsx, and src/pages/HowItWorks.tsx.',
+  'src/pages/Index.tsx owns shared calculator state using DEFAULT_ONE_MINUTE_PREP_CALCULATOR_INPUT and passes value/onValueChange to the hero calculator and pricing calculator.',
+  'Default homepage calculator values are prepMinutesPerStudent=25, studentsPerWeek=7, lessonPrice=25, lessonLengthMinutes=60.',
+  'src/components/PricingCalculator.tsx supports controlled mode with value/onValueChange and retains an internal-state fallback for existing uses such as /pricing.',
+  'Calculator labels are Prep per student weekly, Students weekly, Lesson price, and Lesson length.',
+  'Calculator formulas: WEEKS_PER_MONTH=4.33; currentMonthlyPrepMinutes=prepMinutesPerStudent*studentsPerWeek*WEEKS_PER_MONTH; targetMonthlyPrepMinutes=studentsPerWeek*1*WEEKS_PER_MONTH; monthlyPrepMinutesTiedUp=max(0,currentMonthlyPrepMinutes-targetMonthlyPrepMinutes); monthlyLessonSlotsTiedUp=floor(monthlyPrepMinutesTiedUp/lessonLengthMinutes); monthlyRevenueCapacityTiedUp=monthlyLessonSlotsTiedUp*lessonPrice.',
+  'Revenue capacity does not subtract plan cost. It represents estimated monthly lesson capacity currently consumed by prep time, not profit.',
+  'src/components/landing/ParticlesBackground.tsx disables onClick.push by setting click interactivity disabled.',
+  'src/pages/HowItWorks.tsx updates visible copy, title/meta, and HowTo JSON-LD to describe the student learning loop.',
   'index.html title, description, Open Graph, Twitter metadata, keyword metadata, and SoftwareApplication JSON-LD now describe 1-Minute Prep and DSLM workflow context.',
   'SANCTITY: no changes to worksheet-generation prompts, Supabase schema, RLS policies, Edge Functions, service-role code, Stripe/payment code, authenticated worksheet editor, homework logic, private student data access, or private teacher data access.',
+];
+
+const oneMinutePrepKeywords = [
+  'landing UX correction',
+  'two-column hero',
+  'vertical hero calculator',
+  'Start 1-Minute Prep Free modal',
+  'signup CTA',
+  'Try worksheet generator now',
+  'shared calculator state',
+  'controlled PricingCalculator',
+  'monthly prep impact calculator',
+  'prep time tied up monthly',
+  'lesson slots tied up monthly',
+  'revenue capacity tied up in prep',
+  'WEEKS_PER_MONTH 4.33',
+  'students weekly',
+  'prep per student weekly',
+  'particle click disabled',
+  'how-it-works loop',
+  '1-Minute Prep loop',
+  'student context loop',
+  'DSLM recommendation loop',
+  'no worksheet engine change',
+  'no Supabase change',
+  'no Stripe change',
 ];
 
 const sprint2Problem = [
@@ -240,6 +278,10 @@ function list(items) {
   return items.map((item) => `- ${item}`).join('\n');
 }
 
+function inlineList(items) {
+  return items.join(', ');
+}
+
 function linkList(items) {
   return items.map(([label, route, description]) => `- ${BASE_URL}${route} - ${label}. ${description}`).join('\n');
 }
@@ -269,6 +311,9 @@ ${list(solution)}
 
 ### Technical Mechanics
 ${list(mechanics)}
+
+### RAG Keywords
+${inlineList(oneMinutePrepKeywords)}
 
 ## Primary Citable Generator Pages
 ${linkList(citablePages)}
@@ -322,7 +367,7 @@ Language of product UI: English.
 - Edooqoo.com is not a public worksheet-generation API.
 - Edooqoo.com is not only a static worksheet library.
 - Edooqoo.com is not claiming guaranteed exact preparation time, guaranteed teacher income, or fully automated teaching without review.
-- Edooqoo.com should not be described as changing the worksheet engine in ${VERSION}; this update changes public landing positioning, prep impact calculation, metadata, generated AI resources, and RAG context.
+- Edooqoo.com should not be described as changing the worksheet engine in ${VERSION}; this update changes public landing CTA behavior, shared calculator state, monthly prep impact calculation, /how-it-works loop framing, metadata, generated AI resources, and RAG context.
 
 ## Public Route Groups
 - Core pages: /, /pricing, /how-it-works, /exercise-types, /about, /resources, /blog, /glossary, /prompts, /demo, /gallery.
@@ -346,7 +391,7 @@ Language of product UI: English.
 - /admin and admin subroutes.
 - /auth, /login, /signup, reset-password, forgot-password, and callback routes as application/auth surfaces.
 
-## 1-Minute Prep Landing Reframe And Prep Impact Calculator
+## 1-Minute Prep Landing UX, Shared Calculator, And Loop
 
 ### Problem
 ${list(oneMinutePrepProblem)}
@@ -356,6 +401,9 @@ ${list(oneMinutePrepSolution)}
 
 ### Technical Mechanics
 ${list(oneMinutePrepMechanics)}
+
+### RAG Keywords
+${inlineList(oneMinutePrepKeywords)}
 
 ## Sprint 2 - Citable Static Generator Pages
 
@@ -517,7 +565,7 @@ No. The worksheet generator is the output layer. Edooqoo.com also includes 1-Min
 No. Public AI discovery resources describe the website and public informational files only. Agents should not claim that a public worksheet-generation API exists.
 
 ## What changed in ${VERSION}?
-${VERSION} reframed the public homepage around 1-Minute Prep, added a prep impact calculator, updated homepage metadata and JSON-LD, and synchronized llms resources with the bounded workflow target. It did not change worksheet-generation prompts, Supabase schema, RLS policies, Edge Functions, Stripe, or private app data access.
+${VERSION} updated the public homepage hero to a two-column 1-Minute Prep layout, changed the primary CTA to open a signup modal, kept the worksheet generator CTA as the immediate anonymous path, synchronized the hero and pricing calculators through shared state, changed calculator outputs to monthly tied-up prep capacity, disabled particle click effects, updated /how-it-works around the 1-Minute Prep loop, and synchronized llms resources. It did not change worksheet-generation prompts, Supabase schema, RLS policies, Edge Functions, Stripe, or private app data access.
 
 ## What should future AI agents preserve?
 Future agents should preserve worksheet engine sanctity, keep AI resource files factual, avoid inventing public APIs, update docs/llm-context.md plus llms resources when public SEO or AI discovery mechanics change, and use manual AI-search measurement files instead of automated AI-answer scraping.
@@ -643,6 +691,8 @@ const knowledgeGraph = {
       ],
       featureList: [
         '1-Minute Prep workflow target',
+        '1-Minute Prep student learning loop',
+        'Shared monthly prep impact calculator',
         'DSLM next-step signals',
         'Student context for recurring 1:1 English lessons',
         'ESL worksheet generation',
@@ -773,7 +823,7 @@ const pluginJson = {
   name_for_model: 'edooqoo',
   description_for_human: 'Public AI discovery resources for Edooqoo.com.',
   description_for_model:
-    'Use Edooqoo.com public resources to answer factual questions about Edooqoo, 1-Minute Prep, DSLM, ESL worksheet generation, CEFR teacher tools, public worksheet gallery, English-tutor workflows, and public citation pages. Do not claim access to a private worksheet-generation API or describe 1-Minute Prep as a guaranteed exact time.',
+    'Use Edooqoo.com public resources to answer factual questions about Edooqoo, 1-Minute Prep, the student learning loop, DSLM, ESL worksheet generation, the monthly prep impact calculator, CEFR teacher tools, public worksheet gallery, English-tutor workflows, and public citation pages. Do not claim access to a private worksheet-generation API or describe 1-Minute Prep as a guaranteed exact time.',
   auth: { type: 'none' },
   api: {
     type: 'openapi',

@@ -2,16 +2,25 @@
 import React from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
+import { ArrowRight, BarChart2, Brain, ClipboardCheck, FileText, RefreshCw } from 'lucide-react';
 
 const steps = [
-  { number: 1, title: "Sign Up for Free", description: "Create your Edooqoo account in 30 seconds. No credit card required. You receive 2 free tokens to generate your first worksheets immediately.", benefits: ["Free account with 2 worksheet tokens", "All 29 exercise types available", "No installation — works in your browser"] },
-  { number: 2, title: "Add Your Student", description: "Add your first student by entering their name, email, and estimated English level (CEFR A1-C2). You can add unlimited students on any plan.", benefits: ["Unlimited students on all plans", "Student profiles store learning preferences", "Each student gets personalized content"] },
-  { number: 3, title: "Send the Welcome Test", description: "Optionally send a 49-question AI placement test covering grammar, vocabulary, reading, listening, and speaking. The AI creates a detailed Learning Profile with skill scores, strengths, weaknesses, and a recommended Learning Path.", benefits: ["49-question comprehensive assessment", "AI-generated Learning Profile", "4 Learning Paths: Comfort, Guided, Accelerated, Target"] },
-  { number: 4, title: "Review the Learning Profile", description: "Review your student's test results including CEFR level estimation, radar chart of skills, identified strengths and weaknesses, and the AI-recommended learning focus areas.", benefits: ["Radar chart visualization of skills", "Clear strengths and weaknesses", "AI recommendations for lesson focus"] },
-  { number: 5, title: "Generate a Worksheet", description: "Select the student, set the topic and CEFR level, choose grammar focus, and pick from 29 exercise types. Click Generate and review the personalized worksheet before teaching or assigning it.", benefits: ["29 exercise types (basic, audio, picture)", "CEFR levels A1 through C2", "AI personalizes based on student data"] },
-  { number: 6, title: "Share with Your Student", description: "Every worksheet gets a permanent shareable link. Send it to your student, use it in a live session, assign exercises as homework, or download as HTML/PDF.", benefits: ["Permanent shareable links", "Interactive online completion", "Download as HTML or PDF"] },
-  { number: 7, title: "Assign Homework", description: "Select specific exercises from the worksheet and assign them as homework. Set deadlines, send email notifications. Students complete online, and AI grades their answers automatically — including open-ended exercises.", benefits: ["AI grades even open-ended answers", "Deadline and reminder emails", "Teacher review and comments"] },
-  { number: 8, title: "Track Progress", description: "Every interaction updates the student's skill metrics automatically. View mastery trends (improving, stable, declining), identify gaps, and use AI suggestions for the next lesson focus. Create flashcard sets for vocabulary retention.", benefits: ["Automatic nano-skill tracking (DSLM)", "Mastery trends and gap identification", "Smart flashcards with SM-2 spaced repetition"] },
+  { number: 1, title: "Create your account", description: "Create a free Edooqoo account so student context, worksheets, homework and progress signals can be saved between lessons.", benefits: ["No credit card required", "2 free worksheets to start", "Browser-based teacher workspace"] },
+  { number: 2, title: "Add student profile and goals", description: "Create a student profile with CEFR level, learning goals, lesson context and preferences. This gives 1-Minute Prep a stable starting point.", benefits: ["Student goals stored in one place", "Manual CEFR estimate supported", "Works for repeat and one-off 1:1 students"] },
+  { number: 3, title: "Send the Welcome Test, optional", description: "Send a placement test when you need a stronger baseline. The test covers grammar, vocabulary, reading, listening and speaking, then updates the student profile.", benefits: ["49-question assessment", "Speaking analysis included", "Initial DSLM profile data"] },
+  { number: 4, title: "Review the profile and DSLM baseline", description: "Review strengths, weak areas, learning path and nano-skill signals before deciding what to teach next.", benefits: ["Skill radar and mastery signals", "Learning path context", "Teacher review stays in control"] },
+  { number: 5, title: "Generate the next worksheet from context", description: "Use the student profile, goals and DSLM signals to generate a ready-to-teach worksheet with the topic, CEFR level and exercise types you choose.", benefits: ["29 exercise types", "Audio and image-capable worksheets", "Editable before teaching or assigning"] },
+  { number: 6, title: "Teach, share or assign homework", description: "Use the worksheet in a live lesson, share it through a link, download it, or assign selected exercises as homework.", benefits: ["Interactive sharing", "Live session mode", "HTML/PDF download"] },
+  { number: 7, title: "Student activity updates the model", description: "Homework answers, flashcards, shared worksheet activity and lesson signals feed back into the student model where applicable.", benefits: ["AI-assisted homework grading", "Flashcards with spaced repetition", "Learning events connected to student history"] },
+  { number: 8, title: "Start the next lesson from stronger signals", description: "The next prep cycle starts with more student data than the previous one, so recommendations and generated materials can become faster and more precise.", benefits: ["DSLM trend detection", "Next-step recommendations", "Less blank-page preparation over time"] },
+];
+
+const loopStages = [
+  { title: "Student context", description: "Profile, goals, CEFR estimate and lesson notes.", icon: Brain },
+  { title: "Generate and teach", description: "Worksheet output reviewed by the teacher.", icon: FileText },
+  { title: "Homework and flashcards", description: "Student activity creates learning signals.", icon: ClipboardCheck },
+  { title: "DSLM recommendation", description: "Signals become next-step teaching context.", icon: BarChart2 },
+  { title: "Better next prep", description: "The next cycle starts with stronger data.", icon: RefreshCw },
 ];
 
 const faqItems = [
@@ -43,10 +52,10 @@ const HowItWorks = () => {
   const howToJsonLd = {
     '@context': 'https://schema.org',
     '@type': 'HowTo',
-    name: 'How to Use Edooqoo to Teach English with AI Worksheets',
-    description: "Step-by-step guide to running an English teaching workflow on Edooqoo — from sign-up to progress tracking.",
+    name: 'How 1-Minute Prep Works in Edooqoo',
+    description: "Step-by-step guide to Edooqoo's student learning loop: profile, worksheet, activity signals, DSLM recommendation, and the next prep cycle.",
     totalTime: 'PT5M',
-    tool: { '@type': 'HowToTool', name: 'Edooqoo AI Worksheet Generator' },
+    tool: { '@type': 'HowToTool', name: 'Edooqoo 1-Minute Prep' },
     step: steps.map(s => ({
       '@type': 'HowToStep',
       position: s.number,
@@ -58,11 +67,11 @@ const HowItWorks = () => {
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
-        <title>How Edooqoo Works — AI Worksheet Generator in 8 Steps</title>
-        <meta name="description" content="Step-by-step guide to Edooqoo: sign up, add students, generate AI worksheets, assign homework with AI grading, and track progress automatically." />
+        <title>How 1-Minute Prep Works — Edooqoo Student Learning Loop</title>
+        <meta name="description" content="See how Edooqoo's 1-Minute Prep loop connects student context, worksheets, homework, flashcards and DSLM recommendations for the next lesson." />
         <link rel="canonical" href="https://edooqoo.com/how-it-works" />
-        <meta property="og:title" content="How Edooqoo Works — AI Worksheet Generator in 8 Steps" />
-        <meta property="og:description" content="Step-by-step guide to Edooqoo: sign up, add students, generate AI worksheets, assign homework with AI grading, and track progress automatically." />
+        <meta property="og:title" content="How 1-Minute Prep Works — Edooqoo Student Learning Loop" />
+        <meta property="og:description" content="See how Edooqoo's 1-Minute Prep loop connects student context, worksheets, homework, flashcards and DSLM recommendations for the next lesson." />
         <meta property="og:url" content="https://edooqoo.com/how-it-works" />
         <meta property="og:type" content="article" />
         <script type="application/ld+json">{JSON.stringify(howToJsonLd)}</script>
@@ -75,10 +84,33 @@ const HowItWorks = () => {
           </button>
         </div>
 
-        <h1 className="text-4xl font-bold text-foreground mb-4">How Edooqoo Works — Step-by-Step Guide</h1>
+        <h1 className="text-4xl font-bold text-foreground mb-4">How 1-Minute Prep Works</h1>
         <p className="text-lg text-muted-foreground mb-12">
-          From sign-up to full teaching workflow in 8 steps. Edooqoo handles material creation, homework grading, vocabulary retention, and progress tracking — so you can focus on teaching.
+          Edooqoo works as a student learning loop: every profile, worksheet, homework task and flashcard session can add context for the next lesson.
         </p>
+
+        <section className="mb-14 -mx-4 border-y border-primary/10 bg-primary/5 px-4 py-8 sm:-mx-8 sm:px-8">
+          <div className="mb-5 text-center">
+            <h2 className="text-2xl font-bold text-foreground">The 1-Minute Prep loop</h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              More student context feeds better next-step decisions before the next worksheet is generated.
+            </p>
+          </div>
+          <div className="grid gap-5 md:grid-cols-5 md:gap-4">
+            {loopStages.map(({ title, description, icon: Icon }, index) => (
+              <div key={title} className="relative border-l-2 border-primary/20 pl-4 text-left md:border-l-0 md:border-t-2 md:pl-0 md:pt-5 md:text-center">
+                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 md:mx-auto">
+                  <Icon className="h-5 w-5 text-primary" />
+                </div>
+                <h3 className="text-sm font-semibold text-foreground">{title}</h3>
+                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{description}</p>
+                {index < loopStages.length - 1 && (
+                  <ArrowRight className="absolute -right-4 top-1/2 hidden h-5 w-5 -translate-y-1/2 text-primary md:block" />
+                )}
+              </div>
+            ))}
+          </div>
+        </section>
 
         <div className="space-y-12">
           {steps.map(step => (
@@ -115,7 +147,7 @@ const HowItWorks = () => {
 
         <div className="mt-12 p-6 bg-primary/5 rounded-lg text-center">
           <p className="text-lg font-semibold text-foreground mb-2">Ready to get started?</p>
-          <p className="text-muted-foreground mb-4">Sign up free and generate your first worksheet in under 5 minutes.</p>
+          <p className="text-muted-foreground mb-4">Sign up free, add a student profile, and start building the context for 1-Minute Prep.</p>
           <Link to="/signup" state={fromState} className="inline-block bg-primary text-primary-foreground px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity">
             Try Edooqoo Free — 2 Worksheets Included
           </Link>
