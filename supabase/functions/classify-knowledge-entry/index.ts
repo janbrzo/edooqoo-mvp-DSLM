@@ -1,6 +1,7 @@
 // v6.9.8 — Auto-classify a Student Knowledge entry via Lovable AI Gateway.
 // Fire-and-forget: called from useStudentKnowledge after a Quick Add.
 // Returns a category + structured metadata + confidence; client patches the row.
+import { logModelFailure } from "../_shared/modelFailureLogger.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -94,6 +95,14 @@ Deno.serve(async (req) => {
     }
     if (!aiResp.ok) {
       const t = await aiResp.text()
+      await logModelFailure({
+        model: 'google/gemini-2.5-flash',
+        provider: 'lovable-gateway',
+        status: aiResp.status,
+        endpoint: '/v1/chat/completions',
+        error: t,
+        functionName: 'classify-knowledge-entry',
+      })
       return new Response(JSON.stringify({ error: 'ai_error', detail: t.slice(0, 300) }), { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     }
     const data = await aiResp.json()
