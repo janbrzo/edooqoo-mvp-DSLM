@@ -1,240 +1,241 @@
+# Plan v6.9.28 — Loss-framing + finalizacja monitoringu
 
-# Plan v6.9.27 — Welcome Test repair + H4 weryfikacja + H5/H6/H8 + reconciliation v6.9.26
+## Analiza pytania (a) vs (b)
 
-Plan łączy: (NOWE) naprawę błędów Welcome Test, (PUNKT 2) weryfikację H1–H4, (PUNKT 3) przyjęcie do wiadomości v6.9.26 z Codex + uzupełnienie RAG, oraz pełną kontynuację H5/H6/H8 z poprzedniego planu (bez skracania).
-
-Sanctity rule: nie ruszamy `generateWorksheet` promptu ani logiki tokenów/płatności.
+**To są 2 OSOBNE kwestie**, nie alternatywa. (a) jest warunkiem koniecznym do działania `audit-llm-models` (bez `CRON_SECRET` w sekretach + bez wpisu pg_cron funkcja nigdy nie zostanie wywołana). (b) jest dokończeniem sweepa z poprzedniej tury — bez tego ~5 funkcji AI nadal po cichu połknie 404/410 z gateway. Robimy **obie** w jednej iteracji, bo razem dopinają H6 do końca.
 
 ---
 
-## NOWE — Welcome Test repair (P0)
+## Sekcja 1 — H6 finalizacja (CRON_SECRET + sweep loggera)
 
-### Root cause (potwierdzone w bazie)
-W `student_tests` dla studenta `f1383aac…1d1` istnieją 2 wiersze:
-- `fda2b76a…` — attempt 1, `status=completed`, `answered_count=58`, completed 18:41:18
-- `19e9cd52…` — attempt 1, `status=assigned`, `answered_count=0`, utworzony 18:42:33 (POZNIEJ niż completed)
+### 1A. Sekret `CRON_SECRET`
 
-Duplikat powstał przez **race condition** w `src/components/dashboard/WelcomeTestSuggestion.tsx`:
-1. `checkWelcomeTest()` jest async i ustawia `testId/shareUrl` w state.
-2. Jeżeli nauczyciel kliknie którykolwiek przycisk (Copy/Send/Preview/Refresh Link) **zanim** stan zostanie wypełniony, `ensureWelcomeTest()` widzi `testId == null` i tworzy nowy wiersz `student_tests` z nowymi pytaniami i tokenem.
-3. Po stronie listy `tests` (w `StudentTestsTab`) `tests.find(t => t.test_type==='welcome')` zwraca latest (pusty), więc:
-   - banner pokazuje „Welcome (placement) Test sent / Waiting for student",
-   - `panelState` jest `pending`, więc `View Results` jest disabled,
-   - `TestDetailsView` pokazuje AI Analysis (bo to globalny rekord `student_learning_profiles` per student), ale `0/58 Answered` (bo to liczba na konkretnym pustym teście).
+Dodajemy projektowy sekret `CRON_SECRET` przez `secrets--add_secret` (interaktywny formularz — użytkownik wkleja losową wartość, np. 32-bajtowy hex z `openssl rand -hex 32`). Funkcja `audit-llm-models` już go odczytuje (`Deno.env.get("CRON_SECRET")`); bez sekretu zwraca 401 dla każdego wywołania, więc samo dodanie zera regresji. `config.toml` (`verify_jwt=false`) już jest.
 
-Dodatkowo `process-welcome-test` aktualizuje tylko `answered_count`, a `status='completed' + completed_at` zależy w pełni od RPC `calculate_test_results`. Jeśli RPC zawiedzie cicho → status zostaje `in_progress`/`assigned`.
+### 1B. SQL pg_cron (ręcznie, NIE w migracji)
 
-### Fix WT-1 — Twarda ochrona przed duplikatami w `useStudentTests.createTest`
-W `src/hooks/useStudentTests.tsx` przed `INSERT` dla `test_type='welcome'` zrobić atomic guard:
-```ts
-const { data: existing } = await supabase
-  .from('student_tests')
-  .select('id, share_token, status, attempt_number')
-  .eq('student_id', testData.student_id)
-  .eq('teacher_id', teacherId)
-  .eq('test_type','welcome')
-  .is('deleted_at', null)
-  .order('attempt_number', { ascending: false })
-  .order('created_at', { ascending: false })
-  .limit(1);
-const last = existing?.[0];
-const isRetake = testData.previous_attempt_id != null;
-if (last && !isRetake) return last as any;   // idempotent — zwróć istniejący
+W planie podajemy gotowy snippet do uruchomienia przez użytkownika w SQL editorze (zawiera anon URL + sekret — nie wchodzi do `supabase/migrations/`). Plik referencyjny tworzymy jako `docs/operational/audit-llm-models-cron.md`:
+
+```sql
+-- Run ONCE in Supabase SQL editor. Requires pg_cron + pg_net extensions enabled.
+create extension if not exists pg_cron;
+create extension if not exists pg_net;
+
+select cron.schedule(
+  'audit-llm-models-daily',
+  '0 6 * * *',  -- 06:00 UTC daily
+  $$
+  select net.http_post(
+    url     := 'https://bvfrkzdlklyvnhlpleck.supabase.co/functions/v1/audit-llm-models',
+    headers := jsonb_build_object(
+      'Content-Type',   'application/json',
+      'x-cron-secret',  '<PASTE_CRON_SECRET_VALUE_HERE>'
+    ),
+    body    := '{}'::jsonb
+  );
+  $$
+);
+
+-- To unschedule later: select cron.unschedule('audit-llm-models-daily');
+-- To inspect runs: select * from cron.job_run_details where jobname = 'audit-llm-models-daily' order by start_time desc limit 10;
 ```
-Dzięki temu `ensureWelcomeTest` w obu miejscach (WelcomeTestSuggestion + StudentTestsTab + useWelcomeTestActions) staje się idempotentny niezależnie od race conditions w state React.
 
-### Fix WT-2 — `WelcomeTestSuggestion.tsx`: blokada akcji do końca `checkWelcomeTest`
-- Dodać `checking: boolean` (init `true`, false po `checkWelcomeTest` finally).
-- `WelcomeTestActionsPanel` dostaje `sending={creating || checking}` aby przyciski były neutralizowane do czasu fetcha.
-- W `ensureWelcomeTest()` jeżeli `checking===true` → `await` jednorazowego `checkPromiseRef.current` zanim cokolwiek robi.
+Doc instruuje też, jak ręcznie odpalić jednorazowy smoke-test przez `curl -H "x-cron-secret: ..." https://.../functions/v1/audit-llm-models` i co sprawdzić w tabeli `model_health_checks`.
 
-### Fix WT-3 — Wybór „aktywnego" welcomeTest preferuje completed
-W `StudentTestsTab.tsx` (linia 37) i w hookach gdzie wybieramy 1 welcome test:
+### 1C. Sweep loggera w pozostałych funkcjach AI
+
+Brakujące funkcje (potwierdzone `rg`):
+
+1. `generateWorksheet` — główny pipeline Gemini 2.5; każdy nie-OK status z gateway musi wołać `logModelFailure` przed throw.
+2. `generate-image` — Lovable Gateway (gemini-2.5-flash-image / nano-banana).
+3. `generate-media-exercises` — generacja exercises pod media.
+4. `generate-timeline` — pomocnicze AI.
+5. `generate-welcome-test-audio` — OpenAI Whisper TTS (provider `openai`).
+6. `process-pending-ai-evaluations` — batch evaluator (cron).
+7. `process-welcome-test` — scoring placement testu (provider Gemini przez gateway).
+
+**Wzorzec wpięcia** (identyczny jak w `verify-open-answers` z poprzedniej tury):
+
 ```ts
-const welcomeTest = useMemo(() => {
-  const ws = tests.filter(t => t.test_type==='welcome');
-  return ws.find(t => t.status==='completed' || t.status==='reviewed')
-      ?? ws.find(t => t.status==='in_progress')
-      ?? ws[0];
-}, [tests]);
-```
-Analogicznie w `WelcomeTestSuggestion.checkWelcomeTest` zmienić zapytanie:
-```ts
-.order('status',{ascending:true})  // 'completed' < 'in_progress' < 'pending' alfa? — zamiast tego osobne 2 query
-```
-Bezpieczniej: jedno query `select(...)` bez `limit(1)`, w JS wybrać completed > in_progress > assigned > pending (najnowsze w obrębie kategorii).
+import { logModelFailure } from "../_shared/modelFailureLogger.ts";
 
-### Fix WT-4 — `process-welcome-test` jawnie ustawia completed
-W `supabase/functions/process-welcome-test/index.ts` po `upsert profileData` (linia ~603) i przed notyfikacją dodać:
-```ts
-await supabase.from('student_tests').update({
-  status: 'completed',
-  completed_at: new Date().toISOString(),
-  answered_count: answered_count ?? undefined,
-}).eq('id', test_id).neq('status','reviewed');
-```
-Niezależnie od `calculate_test_results` RPC.
-
-### Fix WT-5 — Migration: dedupe + soft-delete starych pustych duplikatów
-Nowa migracja:
-1. Soft-delete: dla każdej pary (student_id, teacher_id, test_type='welcome', attempt_number) jeśli istnieje `status='completed'` → wszystkie inne wiersze z `answered_count=0 AND status IN ('assigned','pending')` ustaw `deleted_at=now()`.
-2. Dodać partial unique index: `CREATE UNIQUE INDEX IF NOT EXISTS uq_one_active_welcome_attempt ON student_tests (student_id, teacher_id, test_type, attempt_number) WHERE deleted_at IS NULL;` — gwarantuje, że nigdy nie powstanie drugi wiersz tego samego attemptu.
-
-### Fix WT-6 — UI guard „Compare attempts"
-W `StudentTestsTab` pokazuj `Compare (N)` tylko gdy `tests.filter(welcome && status in [completed, reviewed]).length >= 2`. Inaczej ukryj — to usunie wprowadzający w błąd licznik „2 tests" przy 1 ukończeniu.
-
-### Fix WT-7 — `View Results` enable
-`WelcomeTestActionsPanel` ma `onViewResults` zależne od `panelState==='completed'`. Po WT-3 banner będzie odnosił się do completed → przycisk się aktywuje. Dodatkowo: jeżeli istnieje JAKIKOLWIEK welcome test z `status=completed` dla studenta, `View Results` ma być zawsze klikalny (route `/student/:id?tab=tests&testId=<completedId>`).
-
-### Akceptacja
-- Otworzyć profil Johny Bravo → banner pokazuje „Completed", `View Results` klikalne.
-- Tab Tests → lista 1 attempt (ten completed). Drugi (pusty) ukryty (soft-deleted).
-- Re-send Email z bannera nie tworzy nowego wiersza (idempotent).
-
----
-
-## PUNKT 2 — Weryfikacja H1–H4
-
-H1 (SEO sitemap fix), H2 (sygnały pSEO), H3 (canonical/hreflang) — wdrożone w v6.9.21–v6.9.26 (Codex). Weryfikacja w ramach reconciliation (RAG niżej).
-
-H4 — Signup return-to:
-- Zweryfikować przez `rg "to=\"/signup\"|to='/signup'|navigate\\(['\"]/signup"` że KAŻDY callsite ma `state={{from:...}}`. Lista 25 plików z planu v6.9.24 została zaktualizowana — sprawdzić po build: nie powinno być warningów TS dotyczących brakujących propsów `state` w `FeatureCTA`, `FeatureHero`.
-- Naprawa odkryć: jeśli w `Prompts.tsx`, `Resources.tsx`, `BookLandingPage.tsx`, `StudentHubLanding.tsx` (jeśli linkuje do /signup) brakuje state — uzupełnić używając `useSignupLinkState()`.
-- Dodać visible „Back" CTA w `Signup.tsx` i `Login.tsx` (jeśli `fromPath !== '/'`) — `<Button variant="ghost" size="sm" onClick={()=>navigate(fromPath)} className="absolute left-4 top-4"><ArrowLeft/> Back</Button>`. Sprawdzić, że ten przycisk jest, a nie tylko logika redirect po sukcesie.
-- Test: z `/gallery/<slug>` → klik „Sign up free" → modal/strona /signup → klik Back → wraca na ten sam slug. Z `/pricing`, `/blog`, `/tools/cefr-level-test` analogicznie.
-
----
-
-## PUNKT 3 — Reconciliation v6.9.26 (Codex)
-
-Codex zmergował PR #4: naprawa undefined w JSON-LD claim-integrity, BusyTeacher → neutralny framework, hreflang=x-default, claim scan w audit. **Nie powielamy** — tylko upewniamy się, że nasze wdrożenia H4+ nie regresują tych plików:
-- nie modyfikujemy `scripts/seo/generate-citable-pages.mjs`, `scripts/seo/audit-seo-assets.mjs`, `src/components/seo/PageSeo.tsx`, `src/constants/seoMeta.ts`, `src/constants/faqItems.ts`, `src/pages/HowItWorks.tsx`, `src/pages/seo/*`, `public/*-vs-*.html`, `public/blog/*.html`,
-- WYJĄTEK: w sweepie H4 dodajemy WYŁĄCZNIE `state={...}` do istniejących `<Link to="/signup">` — to nie koliduje z claim-integrity.
-- Zaktualizować RAG z notką, że v6.9.26 jest stabilna i nie powtarzamy jej w v6.9.27.
-
----
-
-## H5 — SSE keepalive + silent retry (z v6.9.24, pełna treść)
-
-**Problem:** Stream worksheet generation gubi się przy długich pauzach modelu (>40s), bo nie ma heartbeatu po stronie serwera, a klient aborten natychmiast po watchdogu.
-
-### H5.1 Server keepalive
-W `supabase/functions/generateWorksheet/streaming.ts` (lub odpowiedniku, sprawdzić ścieżkę przy implementacji) dodać interval co 15s emitujący komentarz SSE `: keepalive\n\n`, czyszczony w `finally` po zakończeniu generacji. Komentarze SSE nie są parsowane jako event, ale RESETUJĄ heartbeat klienta.
-
-### H5.2 Client watchdog 45s + silent retry
-W `src/services/worksheetStreamService.ts`:
-- Zmienić `HEARTBEAT_MS` z 40000 → 45000.
-- Dodać `retryAttempted = false` i licznik `exercisesGenerated`. W timeout handlerze:
-  - jeśli `exercisesGenerated === 0 && !retryAttempted` → `retryAttempted=true`, zrobić **silent retry**: stworzyć nowy `AbortController`, `fetch` ponownie z identycznym body, NIE wywoływać `onError`, kontynuować pętlę odczytu na nowym strumieniu.
-  - jeśli już > 0 albo retry był → `controller.abort()` + `onError(...)` jak teraz (komunikat z liczbą).
-
-### H5.3 Akceptacja
-- Symulacja: edge function śpi 30s przed pierwszym chunkiem → keepalive trzyma stream, klient nie abortuje. Po retry max 1×, jeśli upadnie — user widzi czytelny error.
-
----
-
-## H6 — Multi-provider model audit & monitoring (z v6.9.24, pełna treść)
-
-### H6.1 Wpiąć `modelFailureLogger` w 12 edge functions
-Plik: `supabase/functions/_shared/modelFailureLogger.ts` istnieje (v6.9.21). Dodać `try/catch` z wywołaniem `logModelFailure({provider, model, endpoint, status, error})` w katchach każdej z funkcji wołających model:
-- `generateWorksheet/index.ts` (OpenAI/Gemini calls)
-- `verify-open-answers/index.ts`
-- `translate-flashcard/index.ts`
-- `process-welcome-test/index.ts` (już ma częściowo — uzupełnić wszystkie catch)
-- `suggest-exercises/index.ts`
-- `generate-welcome-test-audio/index.ts`
-- `classify-knowledge-entry/index.ts`
-- `generate-curriculum-phases/index.ts`
-- `generate-media-exercises/index.ts`
-- `generate-image/index.ts`
-- `generate-timeline/index.ts`
-- `generate-audio/index.ts` (już — zostawić)
-
-Wzór:
-```ts
-} catch (e) {
-  await logModelFailure(supabase, { provider:'openai', model:'gpt-5', endpoint:'chat.completions', status:e?.status, error:String(e?.message||e) });
-  throw e;
+const response = await fetch(GATEWAY_URL, { ... });
+if (!response.ok) {
+  const errBody = await response.text().catch(() => "");
+  await logModelFailure({
+    model: MODEL_NAME,
+    provider: "lovable-gateway", // lub "openai"
+    status: response.status,
+    endpoint: GATEWAY_URL,
+    error: errBody.slice(0, 500),
+    functionName: "<nazwa-funkcji>",
+  });
+  // istniejące zachowanie throw / fallback — BEZ ZMIAN
+  throw new Error(`AI gateway failed: ${response.status}`);
 }
 ```
 
-### H6.2 Migration: tabela `model_health_checks`
-```sql
-CREATE TABLE public.model_health_checks (
-  id uuid primary key default gen_random_uuid(),
-  provider text not null,
-  model text not null,
-  status int not null,
-  latency_ms int,
-  ok boolean not null,
-  error text,
-  checked_at timestamptz not null default now()
-);
-ALTER TABLE public.model_health_checks ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "service role only" ON public.model_health_checks FOR ALL TO service_role USING (true) WITH CHECK (true);
-CREATE INDEX idx_mhc_recent ON public.model_health_checks (provider, model, checked_at DESC);
-```
+**Zasady kompatybilności (zero regresji):**
 
-### H6.3 Nowa edge `audit-llm-models`
-`supabase/functions/audit-llm-models/index.ts` — ping minimal request do:
-- `openai/gpt-5-mini` przez Lovable AI Gateway
-- `google/gemini-3-flash-preview`
-- (rozszerzalne)
+- Logger jest `await`-owany przed `throw` — nigdy nie zastępuje istniejącej obsługi błędu.
+- Nie modyfikujemy promptów (SACRED — Worksheet Generation Engine; tylko `if (!response.ok)` branch w `generateWorksheet/aiService.ts` lub odpowiednim wraperze fetch, nie w `streaming.ts` jeśli to zmieni prompt).
+- Dla `generateWorksheet` szukamy istniejących `if (!response.ok)` w wraperze gateway (`aiService.ts` / `geminiClient.ts`) — wpinamy tylko tam, nie w streaming SSE handlerze.
+- Jeśli funkcja ma fallback OpenAI po Lovable Gateway, logujemy oba etapy (jak w `translate-flashcard`).
+- Brak nowych migracji DB w tej sekcji.
 
-Każdy ping mierzy latency, zapisuje 1 row w `model_health_checks`. CORS off (`verify_jwt=false`, ale chronione X-CRON-SECRET headerem z env).
+### Deploy
 
-### H6.4 pg_cron 06:00 UTC daily
-```sql
-SELECT cron.schedule('audit-llm-models-daily','0 6 * * *', $$
-  SELECT net.http_post(
-    url:='https://bvfrkzdlklyvnhlpleck.supabase.co/functions/v1/audit-llm-models',
-    headers:= jsonb_build_object('content-type','application/json','x-cron-secret', current_setting('app.cron_secret', true))
-  );
-$$);
-```
-(Sekret `CRON_SECRET` dodany przez tool secrets.)
-
-### H6.5 StatusPage banner — już istnieje (v6.9.21). Tylko weryfikujemy że `get_active_model_issues()` widzi nowe wpisy z `error_logs`.
+Po edycji: `supabase--deploy_edge_functions` z listą wszystkich 7 nazw + już istniejącym `audit-llm-models`.
 
 ---
 
-## H8 — Dokumentacja RAG (z v6.9.24, pełna treść)
+## Sekcja 2 — Kompaktowy kalkulator w wariancie `hero`
 
-### H8.1 `docs/llm-context.md` — dodać 6 sekcji (struktura Problem → Solution → Mechanics + RAG Keywords)
-1. **v6.9.27 Welcome Test Duplicate Repair** — opis race condition, fix WT-1..WT-7, partial unique index, jawny update status w process-welcome-test.
-2. **v6.9.24 Signup Return-To Flow** — `useSignupLinkState`, propagacja `state.from`, lista 25 callsites, „Back" CTA.
-3. **v6.9.24 SSE Keepalive & Silent Retry** — serwer 15s keepalive, klient 45s watchdog, silent retry przed pierwszym exercise.
-4. **v6.9.24 Model Health Monitoring** — `modelFailureLogger`, `model_health_checks`, `audit-llm-models`, pg_cron 06:00 UTC, StatusPage RPC.
-5. **v6.9.26 Reconciliation (Codex)** — przyjęcie zmian: JSON-LD claim-integrity, BusyTeacher neutral, hreflang x-default, claim scan. Wskazanie że v6.9.27 nie powtarza tych zmian.
-6. **RAG Keywords** sekcja dla każdej z powyższych (np. „welcome test duplicate, race condition, idempotent createTest, attempt unique index").
+**Plik:** `src/components/PricingCalculator.tsx` (jedyna zmiana w komponencie).
 
-### H8.2 `llms.txt` (root + public/) — dodać 6 jednolinijkowych entry odsyłających do sekcji w `llm-context.md`.
+### 2A. Inputy 2×2 zamiast 1-kolumny w hero
 
-### H8.3 Nowe pliki `mem/`
-- `mem/features/welcome-test/duplicate-prevention.md`
-- `mem/infrastructure/sse-keepalive-pattern.md`
-- `mem/infrastructure/model-health-monitoring.md`
-- `mem/features/auth/signup-return-to-flow.md`
-- `mem/decisions/reconciliation-v6926-codex.md`
+Linia 194: `grid grid-cols-1` → w trybie `isHero` użyć `grid-cols-2 gap-3` (na bardzo wąskich ekranach <380px wracamy do 1 kolumny via `grid-cols-1 xs:grid-cols-2`, ale ponieważ Tailwind nie ma `xs`, używamy `grid-cols-1 sm:grid-cols-2` także dla hero — Twój viewport 1229px to bez problemu obsłuży, mobile 360px pójdzie w 1 kolumnie). Dokładna zmiana:
 
-Każdy plik z YAML frontmatter (name/description/type) i krótką treścią. Aktualizacja `mem/index.md` (zachować WSZYSTKIE istniejące wpisy + dodać 5 nowych w sekcji Memories).
+```tsx
+<div className={cn("grid gap-3", isHero ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1 sm:grid-cols-2")}>
+```
+
+(efektywnie zawsze 2 kolumny od `sm`+; w hero 4 pola tworzą siatkę 2×2: Prep/Students w pierwszym rzędzie, Lesson price/Lesson length w drugim).
+
+### 2B. Wyniki: 2 KPI w jednym rzędzie + revenue pod spodem
+
+Linia 396: obecna siatka `isHero ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-3"`.
+
+Refaktor na **2 wiersze** w trybie hero:
+
+- Wiersz 1: `monthlyPrepHoursTiedUp` (4.9h) + `monthlyLessonSlotsTiedUp` (4) — `grid-cols-2 gap-3`.
+- Wiersz 2: `monthlyRevenueCapacityTiedUp` ($100) — pełna szerokość (`col-span-2`).
+
+Implementacja: zostawiamy jeden `div className="grid grid-cols-1 sm:grid-cols-2 gap-3"` i trzecia karta dostaje `sm:col-span-2`:
+
+```tsx
+<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+  <div>{/* hours tile */}</div>
+  <div>{/* slots tile */}</div>
+  <div className="sm:col-span-2">{/* revenue tile */}</div>
+</div>
+```
+
+Dla wariantu `pricing`/`landing` zachowujemy `sm:grid-cols-3` (revenue w trzeciej kolumnie obok, BEZ zmiany layoutu) — ternary po `isHero`.
+
+### 2C. Zmniejszenie paddingu/textu w hero (mieści się na 1 ekranie)
+
+- Kafelki KPI (linie 397/404/411): w hero `p-2` zamiast `p-3`; wartości `text-xl` zamiast `text-2xl`.
+- Sub-label: `text-[10px]` zamiast `text-xs` w hero.
+- Disclaimer (linia 417): w hero zwijamy do 1 linii `text-[10px] mt-2`.
+- Header CardHeader (linia 362): w hero `pb-1 pt-3` zamiast `pb-2 pt-4`; subtitle (linia 368) `text-xs` zamiast `text-sm`.
+
+Wszystkie zmiany przez `cn(..., isHero ? "..." : "...")` — żadnych side-effects dla `pricing`/`landing`.
 
 ---
 
-## Kolejność implementacji
-1. **WT-1..WT-7** (P0 — naraża dane studentów) — bez deploy edge: najpierw kod + migracja, potem edge function deploy.
-2. **H4 weryfikacja** — sweep `rg` i uzupełnienie brakujących `state`.
-3. **H5** — server keepalive + client watchdog.
-4. **H6** — logger w 12 funkcjach, migracja `model_health_checks`, edge `audit-llm-models`, pg_cron.
-5. **H8** — `docs/llm-context.md`, `llms.txt`, 5 plików `mem/`, update `mem/index.md`.
+## Sekcja 3 — Loss-framing copy (utrata > zysk)
 
-## Ryzyko i mitygacja
-- Migracja unique index może upaść jeśli już istnieją duplikaty z `deleted_at IS NULL` i nieukończonym statusem. Mitygacja: krok 1 migracji to soft-delete pustych duplikatów PRZED utworzeniem indeksu.
-- `process-welcome-test` deploy: bez wpływu na klienta (idempotentny update).
-- Sweep H4 jest mechaniczny (dodanie propsa) — ryzyko regresji minimalne; build TS to wyłapie.
+Psychologia: prospect theory Kahneman & Tversky — strata waży ~2.25× bardziej niż zysk. Obecne copy ma już bazę („tied up monthly") ale gdzieniegdzie miesza pozytywne („impact"). Przesuwamy 100% w stronę utraty.  
+  
+UWAGA to wprowadzam zmiany w kilku miejscach ponieważ zbytt agresywne komunikaty zaproponowałeś UWAGA
 
-## Co NIE jest robione
-- Brak modyfikacji promptu `generateWorksheet`.
-- Brak ruszania `public/*-vs-*.html`, `scripts/seo/*`, `seoMeta.ts` (w gestii Codex/v6.9.26).
-- Brak rebuildu sitemap (1745 URL stabilne).
-- Brak nowych feature'ów; tylko fixy i monitoring.
+### 3A. PricingCalculator.tsx
+
+
+| Lokalizacja (linia)           | Obecnie                                                                                                | Zmiana                                                                                                                           |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------- |
+| 366 — CardTitle               | `Calculate your 1-Minute Prep impact`                                                                  | `See how much prep is silently costing you`                                                                                      |
+| 369 — opis                    | `Compare your weekly inputs with a monthly estimate based on about 1 focused prep minute per student.` | `See how many hours, lessons and dollars you currently lose to prep every month. Benchmark: about 1 focused minute per student.` |
+| 389 — sekcja wyników nagłówek | `Estimated monthly prep impact`                                                                        | `What prep is costing you monthly`                                                                                               |
+| 402 — label                   | `prep time currently tied up monthly`                                                                  | `hours lost to prep every month`                                                                                                 |
+| 409 — label                   | `lesson slots tied up monthly`                                                                         | `paid lessons you can't fit in`                                                                                                  |
+| 413 — label                   | `monthly revenue capacity tied up in prep`                                                             | `revenue you leave on the table monthly`                                                                                         |
+| 418 — disclaimer              | bez zmian (legal)                                                                                      | bez zmian                                                                                                                        |
+| 392 — badge                   | `Side-Gig fit` / `Full-Time fit`                                                                       | bez zmian (kategoria planu, neutralne)                                                                                           |
+| 424 — CTA primary             | `Start 1-Minute Prep Free`                                                                             | bez zmian                                                                                                                        |
+| 427 — CTA secondary           | `See plans`                                                                                            | bez zmian                                                                                                                        |
+
+
+### 3B. HeroHeadline.tsx (sekcja niżej na stronie głównej)
+
+
+| Linia                         | Obecnie                                                                                                                                                                                              | Zmiana                          |
+| ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
+| 73-75 (subheadline)           | `Edooqoo uses student goals, lesson notes, homework, flashcards and DSLM signals to help you decide what to teach next, then generate a ready-to-teach worksheet with audio, images and AI grading.` | bez zmian                       |
+| 78                            | `The worksheet generator is still available instantly. 1-Minute Prep starts when you create a student profile.`                                                                                      | bez zmian                       |
+| 113 (ticker pre-label)        | `Create a free account to unlock 1-Minute Prep`                                                                                                                                                      | bez zmian                       |
+| 99 — chip „2 worksheets free" | bez zmian                                                                                                                                                                                            | bez zmian (neutralna obietnica) |
+
+
+### 3C. PricingSection.tsx
+
+| Linia 124 | `Estimate how 1-Minute Prep can affect recurring student prep and worksheet usage` | `Estimate how much recurring prep is costing you — and how much you stop losing with 1-Minute Prep.` |
+
+**Zasada bezpieczeństwa copy:** nie ruszamy żadnych komunikatów w `featurePromptCopy.ts`, page'ach SEO, `seoMeta.ts` (Codex-owned, patrz `mem/decisions/reconciliation-v6926-codex.md`), `WelcomeBackBanner`, generator promptów. Loss-framing tylko na 3 plikach: kalkulator + hero + pricing section.
+
+---
+
+## Sekcja 4 — Dokumentacja RAG
+
+### 4A. `docs/llm-context.md` — nowa sekcja `## v6.9.28 — Loss-framing landing & H6 finalization`
+
+Trzy podsekcje w formacie Problem → Solution → Mechanics:
+
+1. **Hero calculator visual density**
+  - Problem: hero variant kalkulatora wymagał 4 wierszy inputów + 3 wierszy KPI → przewijanie poniżej fold-line.
+  - Solution: 2×2 grid inputów, KPI hours+slots w jednym rzędzie, revenue jako span-2 niżej.
+  - Mechanics: `PricingCalculator.tsx`, `cn(..., isHero ? "grid-cols-2" : ...)`, `sm:col-span-2` na revenue tile, paddingi/typografia zmniejszone w hero. Layouty `pricing`/`landing` nietknięte.
+  - RAG Keywords: pricing calculator, hero variant, 1-minute prep, kpi tiles, responsive grid, sm:col-span-2
+2. **Loss-aversion copy framework**
+  - Problem: dotychczasowe copy obiecywało zysk/oszczędność („save", „impact") — prospect theory wskazuje że strata waży ~2.25× silniej.
+  - Solution: przemapowanie 9 labelek na narrację utraty bez zmian numerycznych metryk. Nie dotyka SEO/page metadata.
+  - Mechanics: edycje wyłącznie w `PricingCalculator.tsx`, `HeroHeadline.tsx`, `PricingSection.tsx`. Brak migracji, brak zmian eventów `useEventTracking` (event names stałe).
+  - RAG Keywords: loss aversion, prospect theory, copywriting, calculator labels, hero subhead, landing copy
+3. **H6 monitoring fully wired**
+  - Problem: po v6.9.27 logger `logModelFailure` był wpięty w 5 funkcji; 7 pozostałych połykało 404/410 z gateway w ciszy. Brak `CRON_SECRET` + brak pg_cron blokował uruchomienie `audit-llm-models`.
+  - Solution: sweep w 7 funkcjach (`generateWorksheet`, `generate-image`, `generate-media-exercises`, `generate-timeline`, `generate-welcome-test-audio`, `process-pending-ai-evaluations`, `process-welcome-test`); dodanie sekretu `CRON_SECRET`; instrukcja pg_cron w `docs/operational/audit-llm-models-cron.md`.
+  - Mechanics: wzorzec `await logModelFailure(...)` przed `throw` w bloku `if (!response.ok)`. Cron snippet używa `pg_net` + `cron.schedule` z headerem `x-cron-secret`. Tabela `model_health_checks` + StatusPage banner czyta wyniki bez zmian.
+  - RAG Keywords: model failure logger, gateway 410, deprecation alert, pg_cron, cron secret, edge function audit, status page banner
+
+### 4B. `llms.txt` — analogiczny update (gęsty, bez marketingu)
+
+Trzy bloki H2 odpowiadające 4A, z 1-2 zdaniami każdy + lista plików dotkniętych.
+
+### 4C. Memory `mem/`
+
+- `mem/features/landing/loss-framing-copy.md` (preference): zasada „all hero/pricing copy uses loss framing; never re-introduce gain-only phrasing" + tabela mapowań przed/po.
+- `mem/infrastructure/cron-audit-llm-models.md` (feature): jak wystartować pg_cron, jak ręcznie odpalić curl, jak debugować przez `cron.job_run_details`.
+- Update `mem/index.md` — 2 nowe wpisy w `## Memories` + 1 linia w `## Core`: „Hero/landing copy uses loss-aversion framing; do not revert to gain-only phrasing."
+
+---
+
+## Sekcja 5 — Kolejność wykonania (build mode)
+
+1. **Sekret** — `secrets--add_secret(["CRON_SECRET"])` (user wkleja wartość).
+2. **Sweep loggera** — 7 plików edge w jednej batchowej apply_patch, każdy edytowany chirurgicznie tylko w `if (!response.ok)`.
+3. **Deploy** — `supabase--deploy_edge_functions` z 7 nazwami.
+4. **Kalkulator** — jeden `apply_patch` na `PricingCalculator.tsx` (grid inputów + grid wyników + paddingi).
+5. **Copy loss-framing** — `apply_patch` na `PricingCalculator.tsx` (kontynuacja), `HeroHeadline.tsx`, `PricingSection.tsx`.
+6. **Docs operational** — utworzenie `docs/operational/audit-llm-models-cron.md`.
+7. **Docs RAG** — update `docs/llm-context.md`, `llms.txt`.
+8. **Memory** — 2 nowe pliki `mem/` + update `mem/index.md`.
+9. **Weryfikacja**: `rg "1-Minute Prep impact|tied up monthly|save hours every week"` — żadnych pozostałości starych fraz w 3 edytowanych plikach. Screenshot preview w viewport 1229×754 — kalkulator mieści się nad fold-line.
+
+---
+
+## Sekcja 6 — Ryzyka i mitygacja
+
+- **Worksheet Engine Sanctity**: `generateWorksheet` ruszamy WYŁĄCZNIE w bloku `if (!response.ok)` w wraperze fetch — zero zmian w promptach, system messages, output parsingu. Przed edycją czytamy plik i pokazujemy diff jednego bloku.
+- **Codex-owned files**: pomijamy `seoMeta.ts`, `faqItems.ts`, `HowItWorks.tsx`, page'y SEO, public/*.html (zgodnie z `mem/decisions/reconciliation-v6926-codex.md`).
+- **i18n**: aplikacja jest 100% EN — copy zmieniamy tylko po angielsku, żadnych plików tłumaczeń.
+- **Event tracking**: `eventType` w `trackCalculatorCta` zostaje (`one_minute_calculator_cta_click`) — nie psujemy analytics.
+- **Mobile**: 2×2 grid inputów na 360px=11rem/kolumna może być ciasny dla input number + 2 buttonów; zostawiamy fallback `grid-cols-1 sm:grid-cols-2` (od ≥640px 2 kolumny).
+- **CRON_SECRET rotation**: instrukcja w doc mówi jak unschedule i ponownie zaplanować po rotacji sekretu.
+
+---
+
+## Akceptacja?
+
+Po Twoim „tak" wykonuję sekcje 1→9 sekwencyjnie w jednej turze. Sekret `CRON_SECRET` poprosi Cię o wartość w bezpiecznym formularzu — możesz wygenerować `openssl rand -hex 32` po swojej stronie.
