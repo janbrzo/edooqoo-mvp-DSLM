@@ -121,7 +121,7 @@ export const PricingSection: React.FC<PricingSectionProps> = ({ calculatorValue,
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-8">
           <h2 className="text-3xl font-bold mb-4">Choose Your Plan</h2>
-          <p className="text-muted-foreground">Estimate how 1-Minute Prep can affect recurring student prep and worksheet usage</p>
+          <p className="text-muted-foreground">Estimate how much recurring prep is costing you — and how much you stop losing with 1-Minute Prep.</p>
         </div>
 
         <PricingCalculator

@@ -13,6 +13,23 @@
 ## Core Definition
 Edooqoo.com is a 1-Minute Prep system for recurring 1:1 English teachers. It uses student goals, placement/profile data, homework results, flashcards, calendar context, and DSLM learning signals to help decide what to teach next, then generates ready-to-teach English worksheets with audio, images, and AI-assisted grading. The worksheet generator is the output layer, not the full product definition.
 
+## v6.9.28b - Loss-framing copy & H6 monitoring finalization
+
+### Problem
+- Hero variant of `PricingCalculator` rendered 4 inputs and 3 KPI tiles stacked, pushing CTAs below the fold.
+- Calculator/landing copy used gain framing while prospect theory shows losses convert ~2.25x stronger.
+- `logModelFailure` was wired into only 5/12 AI edge functions; `audit-llm-models` had no CRON_SECRET and no schedule.
+
+### Edooqoo.com Solution
+- Hero calculator: 2x2 inputs, KPI hours+lessons in one row, revenue spans 2 cols below. Non-hero variants unchanged.
+- Calculator/PricingSection copy rewritten as losses ("hours lost to prep every month", "paid lessons you can't fit in", "revenue you leave on the table monthly"). Hero subhead and CTAs unchanged.
+- `logModelFailure` wired into `generate-welcome-test-audio`, `generate-image`, `generate-timeline` (both retries), `process-welcome-test` (AI summary + evolution_summary). CRON_SECRET added; pg_cron daily 06:00 UTC documented in `docs/operational/audit-llm-models-cron.md`.
+
+### Files
+- `src/components/PricingCalculator.tsx`, `src/components/PricingSection.tsx`
+- `supabase/functions/generate-welcome-test-audio/index.ts`, `supabase/functions/generate-image/index.ts`, `supabase/functions/generate-timeline/index.ts`, `supabase/functions/process-welcome-test/index.ts`
+- `docs/operational/audit-llm-models-cron.md` (new)
+
 ## v6.9.28 - Landing UX CTA, Shared Monthly Calculator, and 1-Minute Prep Loop
 
 ### Problem

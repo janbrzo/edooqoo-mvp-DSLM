@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai@0.21.0";
 import { create, getNumericDate } from "https://deno.land/x/djwt@v3.0.2/mod.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { logModelFailure } from "../_shared/modelFailureLogger.ts";
 
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
 const GEMINI_VERTEX_API_KEY = Deno.env.get("GEMINI_VERTEX_API_KEY");
@@ -105,6 +106,14 @@ serve(async (req) => {
     if (!imageResponse.ok) {
       const errorText = await imageResponse.text();
       console.error(`[GENERATE-IMAGE] Vertex AI error: ${imageResponse.status} - ${errorText}`);
+      await logModelFailure({
+        model: 'imagen-4.0-fast-generate-001',
+        provider: 'google',
+        status: imageResponse.status,
+        endpoint: vertexEndpoint,
+        error: errorText.slice(0, 500),
+        functionName: 'generate-image',
+      });
       throw new Error(`Image generation failed: ${imageResponse.status} - ${errorText}`);
     }
 

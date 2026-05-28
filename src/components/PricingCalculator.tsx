@@ -191,7 +191,7 @@ export const PricingCalculator: React.FC<PricingCalculatorProps> = ({
   };
 
   const inputControls = (
-    <div className={cn("grid gap-4", isHero ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-2")}>
+    <div className={cn("grid gap-3", "grid-cols-1 sm:grid-cols-2")}>
       <div className="space-y-1">
         <div className="flex items-center gap-1">
           <Label htmlFor={`prep-time-${variant}`} className="text-sm text-gray-900">
@@ -359,14 +359,14 @@ export const PricingCalculator: React.FC<PricingCalculatorProps> = ({
       )}
       style={{ backgroundColor: "white", opacity: 1 }}
     >
-      <CardHeader className={cn("text-center bg-white rounded-none", isHero ? "pb-2 px-4 pt-4" : "pb-3")}>
+      <CardHeader className={cn("text-center bg-white rounded-none", isHero ? "pb-1 px-4 pt-3" : "pb-3")}>
         <div className="flex flex-col items-center gap-1 mb-2">
           <div className="flex items-center gap-2">
             <Calculator className="h-5 w-5 text-primary" />
-            <CardTitle className={cn("text-gray-900", isHero ? "text-base" : "text-lg")}>Calculate your 1-Minute Prep impact</CardTitle>
+            <CardTitle className={cn("text-gray-900", isHero ? "text-base" : "text-lg")}>See how much prep is silently costing you</CardTitle>
           </div>
-          <p className={cn("text-gray-600 text-sm", isHero ? "max-w-sm" : "max-w-2xl")}>
-            Compare your weekly inputs with a monthly estimate based on about 1 focused prep minute per student.
+          <p className={cn("text-gray-600", isHero ? "text-xs max-w-sm" : "text-sm max-w-2xl")}>
+            See how many hours, lessons and dollars you currently lose to prep every month. Benchmark: about 1 focused minute per student.
           </p>
         </div>
       </CardHeader>
@@ -382,39 +382,39 @@ export const PricingCalculator: React.FC<PricingCalculatorProps> = ({
             )}
           </div>
 
-          <div className="bg-green-50 dark:bg-green-900/20 p-4 rounded-lg border border-green-200 dark:border-green-800">
+          <div className={cn("bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800", isHero ? "p-3" : "p-4")}>
             <div className="flex items-center justify-between gap-2 mb-3">
               <div className="flex items-center gap-2">
                 <TrendingUp className="h-4 w-4 text-green-600" />
-                <span className="font-medium text-green-800 dark:text-green-200 text-sm">Estimated monthly prep impact</span>
+                <span className="font-medium text-green-800 dark:text-green-200 text-sm">What prep is costing you monthly</span>
               </div>
               <Badge variant="secondary" className="bg-white text-green-800 border-green-200">
                 {result.recommendedPlan === "side-gig" ? "Side-Gig" : "Full-Time"} fit
               </Badge>
             </div>
 
-            <div className={cn("grid gap-3", isHero ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-3")}>
-              <div className="text-center bg-white/70 rounded-md p-3 border border-green-100">
+            <div className={cn("grid gap-2", isHero ? "grid-cols-2" : "grid-cols-1 sm:grid-cols-3")}>
+              <div className={cn("text-center bg-white/70 rounded-md border border-green-100", isHero ? "p-2" : "p-3")}>
                 <div className="flex items-center justify-center gap-1 text-green-600">
                   <Clock className="h-4 w-4" />
-                  <span className="text-2xl font-bold">{result.monthlyPrepHoursTiedUp.toFixed(1)}h</span>
+                  <span className={cn("font-bold", isHero ? "text-xl" : "text-2xl")}>{result.monthlyPrepHoursTiedUp.toFixed(1)}h</span>
                 </div>
-                <div className="text-xs text-green-700 dark:text-green-400">prep time currently tied up monthly</div>
+                <div className={cn("text-green-700 dark:text-green-400", isHero ? "text-[10px] leading-tight" : "text-xs")}>hours lost to prep every month</div>
               </div>
-              <div className="text-center bg-white/70 rounded-md p-3 border border-green-100">
+              <div className={cn("text-center bg-white/70 rounded-md border border-green-100", isHero ? "p-2" : "p-3")}>
                 <div className="flex items-center justify-center gap-1 text-green-600">
                   <Users className="h-4 w-4" />
-                  <span className="text-2xl font-bold">{result.monthlyLessonSlotsTiedUp}</span>
+                  <span className={cn("font-bold", isHero ? "text-xl" : "text-2xl")}>{result.monthlyLessonSlotsTiedUp}</span>
                 </div>
-                <div className="text-xs text-green-700 dark:text-green-400">lesson slots tied up monthly</div>
+                <div className={cn("text-green-700 dark:text-green-400", isHero ? "text-[10px] leading-tight" : "text-xs")}>paid lessons you can't fit in</div>
               </div>
-              <div className="text-center bg-white/70 rounded-md p-3 border border-green-100">
-                <div className="text-2xl font-bold text-green-600">{formatCurrency(result.monthlyRevenueCapacityTiedUp)}</div>
-                <div className="text-xs text-green-700 dark:text-green-400">monthly revenue capacity tied up in prep</div>
+              <div className={cn("text-center bg-white/70 rounded-md border border-green-100", isHero ? "p-2 col-span-2" : "p-3")}>
+                <div className={cn("font-bold text-green-600", isHero ? "text-xl" : "text-2xl")}>{formatCurrency(result.monthlyRevenueCapacityTiedUp)}</div>
+                <div className={cn("text-green-700 dark:text-green-400", isHero ? "text-[10px] leading-tight" : "text-xs")}>revenue you leave on the table monthly</div>
               </div>
             </div>
 
-            <p className="text-[11px] leading-relaxed text-green-800/80 mt-3">
+            <p className={cn("leading-relaxed text-green-800/80", isHero ? "text-[10px] mt-2" : "text-[11px] mt-3")}>
               Estimate only. Edooqoo does not guarantee income or exact prep time. Results depend on student setup quality, lesson format, teacher review and plan usage.
             </p>
 

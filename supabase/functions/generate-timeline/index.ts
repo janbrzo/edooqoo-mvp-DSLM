@@ -20,6 +20,7 @@ import {
   buildExistingStepsBlock,
   getAdaptiveExerciseRules,
 } from "../_shared/dslmPromptCore.ts";
+import { logModelFailure } from "../_shared/modelFailureLogger.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -264,6 +265,14 @@ Return ONLY a valid JSON array of EXACTLY ${count} objects (no markdown, no comm
     } else {
       lastErrorText = await aiResponse.text();
       console.error('AI Gateway error (attempt 1):', aiResponse.status, lastErrorText.slice(0, 500));
+      await logModelFailure({
+        model: 'google/gemini-2.5-flash',
+        provider: 'lovable-gateway',
+        status: aiResponse.status,
+        endpoint: 'https://ai.gateway.lovable.dev/v1/chat/completions',
+        error: lastErrorText.slice(0, 500),
+        functionName: 'generate-timeline',
+      });
     }
 
     // v6.9.15c — single retry with stricter temperature + explicit final reminder.
@@ -279,6 +288,14 @@ Return ONLY a valid JSON array of EXACTLY ${count} objects (no markdown, no comm
       } else {
         lastErrorText = await aiResponse.text();
         console.error('AI Gateway error (attempt 2):', aiResponse.status, lastErrorText.slice(0, 500));
+        await logModelFailure({
+          model: 'google/gemini-2.5-flash',
+          provider: 'lovable-gateway',
+          status: aiResponse.status,
+          endpoint: 'https://ai.gateway.lovable.dev/v1/chat/completions',
+          error: lastErrorText.slice(0, 500),
+          functionName: 'generate-timeline',
+        });
       }
     }
 

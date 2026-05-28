@@ -5,6 +5,31 @@ Written in Problem → Edooqoo.com Solution → Technical Mechanics format.
 
 ---
 
+## v6.9.28 — Loss-framing landing & H6 monitoring finalization
+
+### Problem
+1. Hero variant of `PricingCalculator` rendered 4 inputs stacked + 3 KPI tiles stacked, pushing CTAs below the fold on 1280×800 desktops.
+2. Calculator + landing copy promised gains ("impact", "save"). Prospect theory (Kahneman & Tversky) shows losses weigh ≈2.25× heavier; gain-only framing under-converts.
+3. After v6.9.27 the `logModelFailure` helper was wired into only 5 of 12 AI-touching edge functions; deprecation/5xx responses elsewhere went silent. `audit-llm-models` shipped but had no `CRON_SECRET` secret and no pg_cron schedule, so it never ran.
+
+### Edooqoo.com Solution
+1. Hero calculator becomes 2×2 input grid + 2-up KPI tiles (hours + lessons) with revenue tile spanning full width below. Non-hero variants (`pricing`, `landing`) keep the existing 3-up KPI layout.
+2. Calculator headline, results header and 3 KPI labels are rewritten as losses: "See how much prep is silently costing you" / "hours lost to prep every month" / "paid lessons you can't fit in" / "revenue you leave on the table monthly". `PricingSection` lead-in mirrors the loss frame. Hero subhead and CTAs are unchanged.
+3. `logModelFailure` is wired into 4 additional edge functions; `CRON_SECRET` secret is added; pg_cron one-time setup is documented in `docs/operational/audit-llm-models-cron.md` (kept out of `supabase/migrations/` because it embeds the secret value).
+
+### Technical Mechanics
+- UI files changed: `src/components/PricingCalculator.tsx` (inputs grid `grid-cols-1 sm:grid-cols-2` for all variants; results grid `isHero ? "grid-cols-2" : "sm:grid-cols-3"` with `col-span-2` on revenue tile in hero; reduced paddings/typography in hero via `cn(..., isHero ? ... : ...)`), `src/components/PricingSection.tsx` (header copy). `HeroHeadline.tsx` unchanged.
+- Edge functions wired with `logModelFailure` in v6.9.28: `generate-welcome-test-audio` (OpenAI TTS-1), `generate-image` (Vertex AI imagen-4.0-fast), `generate-timeline` (both retry branches, Lovable Gateway gemini-2.5-flash), `process-welcome-test` (AI summary + evolution_summary branches, Lovable Gateway). Pattern: `await logModelFailure({ model, provider, status, endpoint, error: text.slice(0,500), functionName })` before existing throw/return — never replaces existing error handling.
+- `generateWorksheet` and `generate-media-exercises` use SDK clients (`@google/generative-ai`, `openai`) that throw instead of returning `Response.ok`; explicit logger calls would require touching the SACRED Worksheet Engine try/catch and are intentionally deferred. Existing SDK errors still propagate through their catch blocks.
+- `process-pending-ai-evaluations` delegates to `verify-open-answers` and `transcribe-audio`, both already logged at their own edge function boundary; no double logging needed.
+- Cron schedule defined in `docs/operational/audit-llm-models-cron.md`: pg_net POST every day 06:00 UTC with header `x-cron-secret`. `audit-llm-models` already reads `Deno.env.get("CRON_SECRET")` and returns 401 when mismatched.
+- No DB migrations. No prompt changes. Event names in `useEventTracking` (`one_minute_calculator_cta_click`) unchanged — analytics continuity preserved.
+
+### RAG Keywords
+pricing calculator hero layout, sm:col-span-2, kpi tiles 2-up, loss aversion copy, prospect theory, calculator labels, hours lost to prep, revenue you leave on the table, logModelFailure sweep, audit-llm-models, CRON_SECRET, pg_cron pg_net, x-cron-secret header, model_health_checks, status page banner, Vertex AI imagen, OpenAI TTS-1, Lovable Gateway gemini-2.5-flash, deprecation 404 410
+
+---
+
 ## v6.9.28 — Landing UX CTA, Shared Monthly Calculator, and 1-Minute Prep Loop
 
 ### Problem
