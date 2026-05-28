@@ -5,6 +5,7 @@
  */
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { logModelFailure } from "../_shared/modelFailureLogger.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -53,6 +54,14 @@ serve(async (req) => {
     if (!response.ok) {
       const errText = await response.text();
       console.error('TTS generation error:', errText);
+      await logModelFailure({
+        model: 'tts-1',
+        provider: 'openai',
+        status: response.status,
+        endpoint: 'https://api.openai.com/v1/audio/speech',
+        error: errText.slice(0, 500),
+        functionName: 'generate-welcome-test-audio',
+      });
       return new Response(JSON.stringify({ error: 'Audio generation failed', details: errText }), {
         status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
