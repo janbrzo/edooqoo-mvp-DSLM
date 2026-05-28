@@ -21,6 +21,20 @@
       "inLanguage": "en"
     },
     {
+      "@type": "WebPage",
+      "@id": "https://edooqoo.com/one-minute-prep#webpage",
+      "url": "https://edooqoo.com/one-minute-prep",
+      "name": "1-Minute Prep for 1:1 English teachers",
+      "description": "Canonical public route for Edooqoo.com 1-Minute Prep workflow, student context loop, DSLM suggestions, and worksheet generator output layer.",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "about": {
+        "@id": "https://edooqoo.com/#software"
+      },
+      "inLanguage": "en"
+    },
+    {
       "@type": "SoftwareApplication",
       "@id": "https://edooqoo.com/#software",
       "name": "Edooqoo",
@@ -46,6 +60,7 @@
         }
       ],
       "featureList": [
+        "Canonical /one-minute-prep route",
         "1-Minute Prep workflow target",
         "1-Minute Prep student learning loop",
         "Shared monthly prep impact calculator",

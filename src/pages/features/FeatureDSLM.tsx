@@ -7,6 +7,7 @@ import FeatureFAQ from '@/components/features/FeatureFAQ';
 import FeatureCTA from '@/components/features/FeatureCTA';
 import RelatedFeatures from '@/components/features/RelatedFeatures';
 import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
 import { Brain, TrendingUp, Target, Layers, BookCheck, Layers3, CalendarDays, Radio, ClipboardCheck, GraduationCap, ArrowRight } from 'lucide-react';
 
 /* ─── Inline Mockups ─── */
@@ -246,6 +247,24 @@ const FeatureDSLM: React.FC = () => (
         </div>
       </div>
     </FeatureHero>
+
+    <section className="py-8 bg-background border-b border-border">
+      <div className="max-w-4xl mx-auto px-4">
+        <div className="rounded-xl border border-primary/15 bg-primary/5 p-5 md:flex md:items-center md:justify-between md:gap-6">
+          <div>
+            <h2 className="text-lg font-semibold text-foreground">DSLM is the decision layer inside 1-Minute Prep.</h2>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Use the canonical workflow page to see how student context, DSLM signals, and worksheet output fit together.
+            </p>
+          </div>
+          <Button asChild variant="outline" className="mt-4 shrink-0 md:mt-0">
+            <Link to="/one-minute-prep">
+              Open 1-Minute Prep <ArrowRight className="h-4 w-4" />
+            </Link>
+          </Button>
+        </div>
+      </div>
+    </section>
 
     <FeatureBenefits benefits={benefits} />
 

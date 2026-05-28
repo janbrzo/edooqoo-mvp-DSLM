@@ -12,7 +12,7 @@ import { Trash2 } from 'lucide-react';
 interface Props {
   open: boolean;
   onOpenChange: (next: boolean) => void;
-  /** Human label of what is being deleted, e.g. "Next Step #1" or "Phase 2". */
+  /** Human label of what is being deleted, e.g. "Suggestion #1" or "Phase 2". */
   label: string;
   /** Optional extra description above the buttons. */
   description?: string;

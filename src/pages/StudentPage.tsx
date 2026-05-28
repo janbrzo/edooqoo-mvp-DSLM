@@ -510,11 +510,13 @@ const StudentPage = () => {
               studentEmail={student.student_email}
               surface="overview"
             />
-            {/* v6.9.8 — Quick Prep digest (Personal hooks + Focus on + Lesson ideas) */}
+            {/* v6.9.29 — 1-Minute Prep digest (Personal hooks + Focus on + Lesson ideas) */}
             <OneMinutePrepCard
               studentId={student.id}
               teacherId={student.teacher_id}
               studentName={student.name}
+              profileReady={Boolean(student.english_level || student.main_goal || student.student_email)}
+              hasMainGoal={Boolean(student.main_goal)}
             />
             {student.student_email && (
               <div className="bg-muted/50 border border-border rounded-md p-3 text-sm mb-4 flex items-start gap-3">

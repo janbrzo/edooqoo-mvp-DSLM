@@ -1,7 +1,7 @@
 /**
  * v6.9.14 — Reusable type-to-confirm delete modal.
  * Used for destructive ops where accidental click would lose user work
- * (Next Step #1, Curriculum Phase, etc.).
+ * (Suggestion #1, Curriculum Phase, etc.).
  */
 import React, { useEffect, useState } from 'react';
 import {
@@ -15,7 +15,7 @@ import { Trash2 } from 'lucide-react';
 interface Props {
   open: boolean;
   onOpenChange: (next: boolean) => void;
-  /** Human label of what is being deleted, e.g. "Next Step #1" or "Phase 2". */
+  /** Human label of what is being deleted, e.g. "Suggestion #1" or "Phase 2". */
   label: string;
   /** Exact text the user must type (case-sensitive) to confirm. */
   expectedText: string;

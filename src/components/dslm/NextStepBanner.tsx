@@ -1,5 +1,5 @@
 /**
- * NextStepBanner v4 — prominent #1 card.
+ * NextStepBanner v4 — prominent #1 suggestion card.
  * Buttons:
  *  - "Generate worksheet ↗" → onUseAndGenerate (auto-start generation)
  *  - "Use this" → onUse (prefill only)
@@ -70,8 +70,8 @@ export const NextStepBanner: React.FC<NextStepBannerProps> = ({
           <div className="space-y-1">
             <p className="text-muted-foreground">
               {hasGoals
-                ? 'No next step yet. Generate AI-powered worksheet suggestions.'
-                : 'Add goals first for better worksheet suggestions.'}
+                ? 'No 1-Minute Prep suggestion yet. Generate AI-powered worksheet suggestions.'
+                : 'Add goals first for better 1-Minute Prep suggestions.'}
             </p>
             {!hasGoals && (
               <p className="text-[11px] opacity-70">
@@ -82,7 +82,7 @@ export const NextStepBanner: React.FC<NextStepBannerProps> = ({
           <div className="flex items-center justify-center gap-2">
             <Button onClick={onGenerate} disabled={generating || !hasGoals}>
               {generating ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Sparkles className="h-4 w-4 mr-2" />}
-              Generate next steps
+              Generate 1-Minute Prep suggestions
             </Button>
             {!hasGoals && (
               <Button variant="ghost" size="sm" onClick={() => window.location.reload()}>
@@ -106,7 +106,7 @@ export const NextStepBanner: React.FC<NextStepBannerProps> = ({
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <ArrowRight className="h-4 w-4" />
-              <span className="text-[11px] font-semibold uppercase tracking-wider opacity-90">Next Step #1</span>
+              <span className="text-[11px] font-semibold uppercase tracking-wider opacity-90">1-Minute Prep suggestion #1</span>
               <ConfidenceBadge
                 score={confidence.score}
                 label={confidence.label}
@@ -159,7 +159,7 @@ export const NextStepBanner: React.FC<NextStepBannerProps> = ({
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button size="sm" variant="ghost" className="text-primary-foreground hover:bg-white/20 h-8 px-2 shrink-0" onClick={() => onUse(suggestion)}>
-                  <ClipboardCopy className="h-3.5 w-3.5 mr-1" /> Use this Step
+                  <ClipboardCopy className="h-3.5 w-3.5 mr-1" /> Use this
                 </Button>
               </TooltipTrigger>
               <TooltipContent>Use this — copy to form &amp; edit before generating</TooltipContent>
@@ -251,8 +251,8 @@ export const NextStepBanner: React.FC<NextStepBannerProps> = ({
         <ConfirmDeleteDialog
           open={confirmDeleteOpen}
           onOpenChange={setConfirmDeleteOpen}
-          label="Next Step #1"
-          description="This will remove the top-priority next step. You can regenerate later."
+          label="1-Minute Prep suggestion #1"
+          description="This will remove the top-priority suggestion. You can regenerate later."
           onConfirm={() => onDelete(suggestion.id)}
         />
       )}

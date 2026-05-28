@@ -4,6 +4,7 @@ import path from 'node:path';
 export const CORE_SEO_ROUTES = [
   '/about',
   '/pricing',
+  '/one-minute-prep',
   '/how-it-works',
   '/blog',
   '/glossary',

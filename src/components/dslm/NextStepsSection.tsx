@@ -2,7 +2,7 @@
  * NextStepsSection — DSLM Pathway v4.1
  * Shows: prominent banner (#1) + collapsible compact list (#2..N) using shared
  * CompactSuggestionCard. Numbering uses stable displayIndex (computed by parent).
- * Toolbar: [+ Generate more next steps] (with phase info).
+ * Toolbar: [+ Generate more suggestions] (with phase info).
  * "Regenerate all steps" REMOVED — only per-step regeneration via comment dialog.
  */
 import React, { useState } from 'react';
@@ -41,7 +41,7 @@ interface NextStepsSectionProps {
   onRegenerateOne: (id: string, teacherComment: string) => Promise<boolean> | boolean;
   /** v4.8: mark suggestion as already used (no worksheet link). */
   onMarkUsed?: (id: string) => void;
-  /** v4.8: history of used suggestions for the negative-numbered Used Steps section. */
+  /** v4.8: history of used suggestions for the negative-numbered used suggestions section. */
   usedSteps?: any[];
   /** v5.0: restore the most recent used step back to active list. */
   onRestore?: (id: string) => void;
@@ -99,7 +99,7 @@ export const NextStepsSection: React.FC<NextStepsSectionProps> = ({
     <div className="space-y-2">
       <div className="flex items-center justify-between flex-wrap gap-2">
         <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-          Next Steps {items.length > 0 && `(${items.length})`}
+          1-Minute Prep suggestions {items.length > 0 && `(${items.length})`}
         </h3>
         {currentPhaseLabel && (
           <Badge variant="secondary" className="text-[10px]">{currentPhaseLabel}</Badge>
@@ -123,7 +123,7 @@ export const NextStepsSection: React.FC<NextStepsSectionProps> = ({
       {rest.length > 0 && (
         <Collapsible open={moreListOpen} onOpenChange={setMoreListOpen}>
           <CollapsibleTrigger asChild>
-            {/* v4.6: high-contrast bar so it doesn't get lost under the blue Next Step #1 banner. */}
+            {/* v4.6: high-contrast bar so it doesn't get lost under the top suggestion banner. */}
             <Button
               variant="outline"
               size="sm"
@@ -131,10 +131,10 @@ export const NextStepsSection: React.FC<NextStepsSectionProps> = ({
             >
               <span className="flex flex-col items-start text-left">
                 <span className="font-semibold">
-                  {moreListOpen ? 'Hide' : 'Show'} {rest.length} more next step{rest.length > 1 ? 's' : ''}
+                  {moreListOpen ? 'Hide' : 'Show'} {rest.length} more suggestion{rest.length > 1 ? 's' : ''}
                 </span>
                 <span className="text-[10px] opacity-80 font-normal">
-                  Queued recommendations beyond the top priority step
+                  Queued recommendations beyond the top priority suggestion
                 </span>
               </span>
               <span className="flex items-center gap-2 shrink-0">
@@ -174,7 +174,7 @@ export const NextStepsSection: React.FC<NextStepsSectionProps> = ({
             onClick={() => { setGenMode('more'); setGenDialogOpen(true); }}
           >
             {generating ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Plus className="h-4 w-4 mr-2" />}
-            Generate more next steps
+            Generate more suggestions
           </Button>
         </div>
       )}
@@ -183,9 +183,9 @@ export const NextStepsSection: React.FC<NextStepsSectionProps> = ({
       <Dialog open={commentDialog.open} onOpenChange={(open) => !open && setCommentDialog({ open: false })}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Regenerate this next step</DialogTitle>
+            <DialogTitle>Regenerate this suggestion</DialogTitle>
             <DialogDescription>
-              Tell the AI what to change. Leave empty to regenerate with default logic. Only this single step will be replaced.
+              Tell the AI what to change. Leave empty to regenerate with default logic. Only this single suggestion will be replaced.
             </DialogDescription>
           </DialogHeader>
           <Textarea
@@ -223,14 +223,14 @@ export const NextStepsSection: React.FC<NextStepsSectionProps> = ({
         }}
       />
 
-      {/* v4.8: Used Steps history (negative-numbered) */}
+      {/* v4.8: used suggestions history (negative-numbered) */}
       {usedSteps.length > 0 && (
         <Collapsible open={usedOpen} onOpenChange={setUsedOpen}>
           <CollapsibleTrigger asChild>
             <Button variant="ghost" size="sm" className="w-full justify-between text-muted-foreground">
               <span className="flex items-center gap-2">
                 <History className="h-4 w-4" />
-                Used Steps ({usedSteps.length})
+              Used suggestions ({usedSteps.length})
               </span>
               <ChevronDown className={cn('h-4 w-4 transition-transform', usedOpen && 'rotate-180')} />
             </Button>
