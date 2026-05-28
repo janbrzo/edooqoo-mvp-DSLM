@@ -47,14 +47,14 @@ const HeroHeadline: React.FC<HeroHeadlineProps> = ({
   };
 
   return (
-    <section className="relative px-4 pt-8 pb-4 sm:pt-10 lg:pt-12 lg:pb-6 overflow-hidden">
+    <section className="relative px-4 pt-16 pb-16 sm:pt-20 lg:pt-24 lg:pb-24 overflow-hidden">
       {/* Background decoration */}
       <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-violet-100/30 via-transparent to-transparent pointer-events-none"></div>
 
-      <div className="w-full min-w-0 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(340px,420px)] gap-8 lg:gap-10 items-start">
+      <div className="w-full min-w-0 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(340px,420px)] gap-10 lg:gap-14 items-start">
         <div className="min-w-0 max-w-full text-center lg:text-left">
           {/* Headline */}
-          <h1 className="max-w-full break-words text-[2rem] sm:text-5xl md:text-5xl lg:text-[3.25rem] xl:text-6xl font-extrabold tracking-tight text-foreground mb-4 leading-[1.1]">
+          <h1 className="max-w-full break-words text-[2rem] sm:text-5xl md:text-5xl lg:text-[3.25rem] xl:text-6xl font-extrabold tracking-tight text-foreground mb-6 leading-[1.1]">
             <span className="block">1-Minute Prep</span>
             <span className="block max-w-full whitespace-normal text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-indigo-600">
               for every 1:1 English student.
@@ -63,19 +63,19 @@ const HeroHeadline: React.FC<HeroHeadlineProps> = ({
 
           {/* Subheadline — LCP element, hint browser to prioritize */}
           <p
-            className="max-w-full text-base sm:text-lg text-muted-foreground mb-4 sm:max-w-2xl mx-auto lg:mx-0 leading-relaxed"
+            className="max-w-full text-base sm:text-lg text-muted-foreground mb-6 sm:max-w-2xl mx-auto lg:mx-0 leading-relaxed"
             // @ts-expect-error fetchpriority is valid HTML but not yet typed in React
             fetchpriority="high"
           >
             Edooqoo uses student goals, lesson notes, homework, flashcards and DSLM signals to help you decide what to teach next, then generate a ready-to-teach worksheet with audio, images and AI grading.
           </p>
 
-          <p className="max-w-full text-sm text-foreground/80 mb-5 sm:max-w-2xl mx-auto lg:mx-0 font-medium">
+          <p className="max-w-full text-sm text-foreground/80 mb-8 sm:max-w-2xl mx-auto lg:mx-0 font-medium">
             The worksheet generator is still available instantly. 1-Minute Prep starts when you create a student profile.
           </p>
 
           {/* CTA Area */}
-          <div className="flex max-w-full flex-col items-center lg:items-start gap-3 mb-5">
+          <div className="flex max-w-full flex-col items-center lg:items-start gap-4 mb-8">
             <div className="flex w-full max-w-full flex-col sm:w-auto sm:flex-row gap-3">
               <Button
                 onClick={handlePrimaryCta}
@@ -104,7 +104,7 @@ const HeroHeadline: React.FC<HeroHeadlineProps> = ({
           </div>
 
           {/* Unlock features ticker */}
-          <div className="w-full max-w-full sm:max-w-2xl mx-auto lg:mx-0 overflow-hidden border border-border rounded-2xl bg-secondary/60 py-2 mt-2">
+          <div className="w-full max-w-full sm:max-w-2xl mx-auto lg:mx-0 overflow-hidden border border-border rounded-2xl bg-secondary/60 py-3 mt-4">
             <p className="text-xs font-semibold tracking-wide text-center mb-1 px-4 text-muted-foreground">
               Create a free account to unlock 1-Minute Prep
             </p>
