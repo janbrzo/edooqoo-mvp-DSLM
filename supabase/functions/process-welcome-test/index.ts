@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+import { logModelFailure } from "../_shared/modelFailureLogger.ts";
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
 const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
@@ -916,6 +917,16 @@ ${openAnswers}`
             } catch {
               aiSummary = JSON.stringify({ summary: content, recommendations: [], writing_quality: 'unknown', key_observations: [] });
             }
+          } else {
+            const errText = await aiResponse.text().catch(() => '');
+            await logModelFailure({
+              model: 'google/gemini-2.5-flash',
+              provider: 'lovable-gateway',
+              status: aiResponse.status,
+              endpoint: 'https://ai.gateway.lovable.dev/v1/chat/completions',
+              error: errText.slice(0, 500),
+              functionName: 'process-welcome-test',
+            });
           }
         }
 
@@ -1131,6 +1142,15 @@ ${openAnswers}`
           }
         } else {
           console.warn('[process-welcome-test] evolution_summary generation failed:', evoResp.status);
+          const errText = await evoResp.text().catch(() => '');
+          await logModelFailure({
+            model: 'google/gemini-2.5-flash',
+            provider: 'lovable-gateway',
+            status: evoResp.status,
+            endpoint: 'https://ai.gateway.lovable.dev/v1/chat/completions',
+            error: errText.slice(0, 500),
+            functionName: 'process-welcome-test',
+          });
         }
       }
     } catch (evoErr) {
