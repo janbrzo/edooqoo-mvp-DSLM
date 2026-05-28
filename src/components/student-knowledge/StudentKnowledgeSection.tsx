@@ -195,7 +195,7 @@ export const StudentKnowledgeSection = ({
         <TabsList className="grid w-full grid-cols-3 max-w-md">
           <TabsTrigger value="timeline">Timeline</TabsTrigger>
           <TabsTrigger value="skill">By Skill</TabsTrigger>
-          <TabsTrigger value="next">For Next Lesson</TabsTrigger>
+          <TabsTrigger value="next">1-Minute Prep</TabsTrigger>
         </TabsList>
 
         <TabsContent value="timeline" className="mt-4 space-y-6">

@@ -5,6 +5,40 @@ Written in Problem → Edooqoo.com Solution → Technical Mechanics format.
 
 ---
 
+## v6.9.29 — Canonical /one-minute-prep Route and In-App Terminology Alignment
+
+### Problem
+1. Edooqoo.com needed a single canonical public URL for the system-level `1-Minute Prep` workflow. Before this update, AI agents had to infer the workflow from the homepage and `/features/dslm`, which mixed product framing with technical DSLM explanation.
+2. `/features/dslm` must remain the technical Dynamic Student Learning Model page. Redirecting it or replacing it with broader prep copy would reduce clarity for agents and humans researching DSLM mechanics.
+3. Authenticated app surfaces still used older teacher-facing labels such as `Quick Prep`, `For Next Lesson`, and `Next Steps from Learning Plan`, while the public narrative now uses `1-Minute Prep`.
+4. Renaming database tables, enum/category strings, `suggestion_kind` values, Supabase functions, RLS policies, or worksheet-generation prompt logic would increase regression risk without improving the public workflow model.
+
+### Edooqoo.com Solution
+1. Add `/one-minute-prep` as the canonical public route for 1-Minute Prep. Use it for questions about recurring-student prep workflow, student context loops, and the worksheet generator as output layer.
+2. Keep `/features/dslm` canonical and unchanged as the technical page for nano-skill mastery, trend detection, and DSLM recommendation mechanics.
+3. Public copy on `/one-minute-prep` is claim-safe: first setup is not one minute; weak or missing student data produces more generic output; teachers review and edit before use; no income, exact-time, public API, or full-automation guarantee is made.
+4. In-app terminology is aligned read-only: teacher-facing labels refer to `1-Minute Prep`, `1-Minute Prep suggestions`, and student-context readiness, while existing data sources and write flows remain unchanged.
+5. Student readiness is displayed as four status labels: `Profile`, `Goals`, `Recent signal`, and `Next step`. These statuses explain context quality and do not persist readiness state to the database.
+
+### Technical Mechanics
+- `src/App.tsx`: lazy route `/one-minute-prep -> src/pages/OneMinutePrep.tsx`.
+- `src/pages/OneMinutePrep.tsx`: public page using `PageSeo`; emits `SoftwareApplication`, `FAQPage`, and `BreadcrumbList` JSON-LD; FAQ schema matches visible FAQ content.
+- `/one-minute-prep` page structure: hero, `What 1-Minute Prep means`, `When it works best`, `Technical loop`, `Generator as output layer`, `Boundaries`, and FAQ. CTAs route to `/signup` with `state.from`, `/how-it-works`, and `/#worksheet-form`.
+- Internal links: `src/components/GlobalFooter.tsx` Product column includes `/one-minute-prep`; `src/pages/HowItWorks.tsx` links to `/one-minute-prep`; `src/pages/features/FeatureDSLM.tsx` links to `/one-minute-prep` while preserving `/features/dslm` as the DSLM technical page.
+- SEO route registration: `scripts/seo/seo-route-manifest.mjs` includes `/one-minute-prep`; `public/sitemap.xml` includes canonical `https://edooqoo.com/one-minute-prep`.
+- `src/components/student-knowledge/OneMinutePrepCard.tsx`: title is `1-Minute Prep — {studentName}`. Empty state is `Add a placement test, goal, or lesson note to make 1-Minute Prep useful for this student.`
+- `OneMinutePrepCard` readiness strip uses existing read-only data only: `profileReady` and `hasMainGoal` props from `StudentPage`; `useStudentProgress` for progress goals; `useOneMinutePrep` for personal hooks, weaknesses, and lesson ideas; `useFutureTimeline` for next steps or phase steps. Status values are `Ready`, `Missing`, and `Loading`.
+- `src/components/student-knowledge/StudentKnowledgeSection.tsx`: tab label changes from `For Next Lesson` to `1-Minute Prep`; tab value remains `next`.
+- `src/components/WorksheetForm/NextStepsPresetBanner.tsx`: visible copy changes to `1-Minute Prep suggestions from DSLM`; empty copy uses the same placement/goal/lesson-note instruction; CTA is `Open student context`. `onApplyPreset`, `normalizeSuggestionPrefill`, `useFutureTimeline`, and `useCurriculumPhases` are preserved.
+- DSLM UI copy-only changes: `NextStepsSection.tsx`, `GenerateStepsDialog.tsx`, and `NextStepBanner.tsx` use `1-Minute Prep suggestions` / `Generate more suggestions` / `Generate 1-Minute Prep suggestions` labels.
+- Preserved technical identifiers: `future_worksheet_suggestions`, `suggestion_kind`, `next_step`, `phase_step`, `['one-minute-prep', ...]` query key shape, `useFutureTimeline`, `useCurriculumPhases`, `normalizeSuggestionPrefill`, worksheet form prefill flow, and generated worksheet prompt flow.
+- SANCTITY: no database migration, no Supabase/RLS change, no Edge Function change, no Stripe/payment change, no service-role change, no worksheet-generation prompt/parameter/logic change.
+
+### RAG Keywords
+1-Minute Prep canonical route, /one-minute-prep, recurring 1:1 English students, worksheet generator output layer, DSLM suggestions, student context loop, profile goals recent signal next step, Quick Prep rename, Next Steps rename, no DB migration, no RLS change, no worksheet engine change
+
+---
+
 ## v6.9.28 — Loss-framing landing & H6 monitoring finalization
 
 ### Problem
@@ -100,7 +134,7 @@ landing UX correction, two-column hero, vertical hero calculator, Start 1-Minute
 ### Invariants
 - Do not describe 1-Minute Prep as a guaranteed exact time, a guaranteed revenue outcome, or full automation without teacher review.
 - Do not replace the existing AI worksheet generator SEO pages; keep them as acquisition pages for direct generator queries.
-- Use the homepage and `/features/dslm` for system-level prep workflow context until a dedicated `/one-minute-prep` public route is intentionally added.
+- Superseded by v6.9.29: use `/one-minute-prep` for system-level 1-Minute Prep workflow context and `/features/dslm` for technical DSLM mechanics.
 
 ### RAG Keywords
 1-Minute Prep, bounded workflow target, recurring 1:1 English students, weekly prep workflow, DSLM next-step signals, student context to worksheet output, prep impact calculator, potential lesson capacity, teacher review retained, worksheet generator output layer, landing reframe, claim-safe public copy, no Supabase change, no RLS change, no Edge Function change, no Stripe change.

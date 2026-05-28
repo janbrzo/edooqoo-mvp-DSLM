@@ -55,6 +55,7 @@ const Prompts = lazy(() => import("./pages/Prompts"));
 const Glossary = lazy(() => import("./pages/Glossary"));
 const ExerciseTypes = lazy(() => import("./pages/ExerciseTypes"));
 const HowItWorks = lazy(() => import("./pages/HowItWorks"));
+const OneMinutePrep = lazy(() => import("./pages/OneMinutePrep"));
 const Resources = lazy(() => import("./pages/Resources"));
 const Blog = lazy(() => import("./pages/Blog"));
 const EslWorksheets = lazy(() => import("./pages/seo/EslWorksheets"));
@@ -163,6 +164,7 @@ const App = () => (
               <Route path="/glossary" element={<Glossary />} />
               <Route path="/exercise-types" element={<ExerciseTypes />} />
               <Route path="/how-it-works" element={<HowItWorks />} />
+              <Route path="/one-minute-prep" element={<OneMinutePrep />} />
               <Route path="/resources" element={<Resources />} />
               <Route path="/blog" element={<Blog />} />
               <Route path="/esl-worksheets" element={<EslWorksheets />} />

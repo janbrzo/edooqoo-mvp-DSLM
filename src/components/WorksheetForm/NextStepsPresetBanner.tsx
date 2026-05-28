@@ -195,11 +195,10 @@ export function NextStepsPresetBanner({
             <Lightbulb className="h-4 w-4 flex-shrink-0 mt-0.5" />
             <div className="space-y-1">
               <div>
-                💡 No learning plan for <strong>{studentName || 'this student'}</strong> yet.
+                No 1-Minute Prep suggestions for <strong>{studentName || 'this student'}</strong> yet.
               </div>
               <div className="text-[12px] opacity-90 leading-snug">
-                Students with a structured Learning Plan (Phases + Next Steps) get worksheets that
-                build on each other instead of being standalone exercises. <strong>Strongly recommended.</strong>
+                Add a placement test, goal, or lesson note to make 1-Minute Prep useful for this student.
               </div>
             </div>
           </div>
@@ -210,7 +209,7 @@ export function NextStepsPresetBanner({
             className="h-8 gap-1 border-amber-400 text-amber-900 hover:bg-amber-100 dark:text-amber-100 self-center"
             onClick={() => navigate(`/student/${studentId}?tab=dslm&view=pathway`)}
           >
-            Open Learning Plan
+            Open student context
             <ArrowUpRight className="h-3.5 w-3.5" />
           </Button>
         </div>
@@ -226,7 +225,7 @@ export function NextStepsPresetBanner({
           <div className="flex items-center justify-between gap-2 mb-1.5">
             <div className="flex items-center gap-1.5 text-xs font-semibold text-worksheet-purpleDark dark:text-purple-200">
               <Map className="h-3.5 w-3.5" />
-              Next Steps from Learning Plan
+              1-Minute Prep suggestions from DSLM
             </div>
             <button
               type="button"

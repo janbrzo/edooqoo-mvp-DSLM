@@ -38,6 +38,7 @@ const GlobalFooter = () => {
             <ul className="space-y-2 text-sm">
               <li><Link to="/" className="text-muted-foreground hover:text-primary transition-colors">Home</Link></li>
               <li><Link to="/pricing" className="text-muted-foreground hover:text-primary transition-colors">Pricing</Link></li>
+              <li><Link to="/one-minute-prep" className="text-muted-foreground hover:text-primary transition-colors">1-Minute Prep</Link></li>
               <li><Link to="/exercise-types" className="text-muted-foreground hover:text-primary transition-colors">Exercise Types</Link></li>
               <li><Link to="/how-it-works" className="text-muted-foreground hover:text-primary transition-colors">How It Works</Link></li>
               <li><Link to="/about" className="text-muted-foreground hover:text-primary transition-colors">About</Link></li>

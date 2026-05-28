@@ -1,5 +1,5 @@
 /**
- * v6.9.13 — Shared "Generate steps" dialog with phase target selector.
+ * v6.9.29 — Shared "Generate 1-Minute Prep suggestions" dialog with phase target selector.
  * Used by NextStepsSection for both first-time and "Generate more" flows.
  */
 import React, { useEffect, useMemo, useState } from 'react';
@@ -108,12 +108,12 @@ export const GenerateStepsDialog: React.FC<GenerateStepsDialogProps> = ({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>
-            {mode === 'first' ? 'Generate next steps' : 'Add more next steps'}
+            {mode === 'first' ? 'Generate 1-Minute Prep suggestions' : 'Add more 1-Minute Prep suggestions'}
           </DialogTitle>
           <DialogDescription>
             {mode === 'first'
-              ? 'How many AI-generated next steps should we create?'
-              : 'How many additional next steps should we add?'}
+              ? 'How many AI-generated suggestions should we create?'
+              : 'How many additional suggestions should we add?'}
           </DialogDescription>
         </DialogHeader>
 
@@ -178,7 +178,7 @@ export const GenerateStepsDialog: React.FC<GenerateStepsDialogProps> = ({
             {generating
               ? <Loader2 className="h-4 w-4 mr-2 animate-spin" />
               : <Plus className="h-4 w-4 mr-2" />}
-            {mode === 'first' ? 'Generate' : 'Add'} {count} step{count > 1 ? 's' : ''}
+            {mode === 'first' ? 'Generate' : 'Add'} {count} suggestion{count > 1 ? 's' : ''}
           </Button>
         </DialogFooter>
       </DialogContent>

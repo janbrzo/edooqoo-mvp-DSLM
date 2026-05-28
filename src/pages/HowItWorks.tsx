@@ -88,6 +88,13 @@ const HowItWorks = () => {
         <p className="text-lg text-muted-foreground mb-12">
           Edooqoo works as a student learning loop: every profile, worksheet, homework task and flashcard session can add context for the next lesson.
         </p>
+        <p className="text-sm text-muted-foreground mb-10">
+          For the bounded workflow definition, read the{' '}
+          <Link to="/one-minute-prep" className="font-medium text-primary hover:underline">
+            canonical 1-Minute Prep page
+          </Link>
+          .
+        </p>
 
         <section className="mb-14 -mx-4 border-y border-primary/10 bg-primary/5 px-4 py-8 sm:-mx-8 sm:px-8">
           <div className="mb-5 text-center">

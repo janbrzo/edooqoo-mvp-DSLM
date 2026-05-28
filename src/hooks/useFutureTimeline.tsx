@@ -250,7 +250,7 @@ export const useFutureTimeline = ({ studentId, teacherId }: UseFutureTimelinePro
           { duration: 7000 }
         );
       } else {
-        toast.error('Failed to generate next steps. Please try again.');
+        toast.error('Failed to generate suggestions. Please try again.');
       }
       return false;
     } finally {
@@ -389,7 +389,7 @@ export const useFutureTimeline = ({ studentId, teacherId }: UseFutureTimelinePro
 
   /**
    * v4.8: accepts worksheetId === null for "Mark as already used" (manual flag, no link).
-   * Refetches usedSteps so the new entry shows up in the Used Steps section.
+   * Refetches usedSteps so the new entry shows up in the used suggestions section.
    */
   const useSuggestion = async (suggestionId: string, worksheetId: string | null): Promise<boolean> => {
     try {
