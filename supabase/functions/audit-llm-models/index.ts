@@ -145,7 +145,7 @@ serve(async (req) => {
           </tr></thead>
           <tbody>${rows}</tbody>
         </table>`;
-      fetch(`${url}/functions/v1/send-model-audit-email`, {
+      const emailPromise = fetch(`${url}/functions/v1/send-model-audit-email`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -156,7 +156,16 @@ serve(async (req) => {
           summary: { total: results.length, ok: okCount, failed: failedCount },
           generatedAt: new Date().toISOString(),
         }),
-      }).catch(e => console.error("[audit-llm-models] email dispatch failed", e));
+      })
+        .then(async (r) => console.log("[audit-llm-models] email dispatch status", r.status, (await r.text()).slice(0, 300)))
+        .catch((e) => console.error("[audit-llm-models] email dispatch failed", e));
+      // @ts-ignore EdgeRuntime is provided by Supabase Edge runtime
+      if (typeof EdgeRuntime !== "undefined" && EdgeRuntime?.waitUntil) {
+        // @ts-ignore
+        EdgeRuntime.waitUntil(emailPromise);
+      } else {
+        await emailPromise;
+      }
     } catch (e) {
       console.error("[audit-llm-models] monthly email build failed", e);
     }
