@@ -1,6 +1,6 @@
 // v6.9.29 — Sends a "thanks for completing" email to the student after Welcome Test.
 // Idempotent via student_tests.completion_email_sent_at. Reply-To = teacher email.
-// Resend via connector gateway (LOVABLE_API_KEY + RESEND_API_KEY).
+// Resend direct API (RESEND_API_KEY). Matches send-welcome-email pattern.
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { renderWelcomeTestCompletionEmail } from "../_shared/emailTemplates/welcomeTestCompletion.ts";
@@ -10,7 +10,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const GATEWAY_URL = "https://connector-gateway.lovable.dev/resend";
+const RESEND_URL = "https://api.resend.com/emails";
 
 serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
@@ -46,10 +46,9 @@ serve(async (req) => {
       });
     }
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-    if (!LOVABLE_API_KEY || !RESEND_API_KEY) {
-      return new Response(JSON.stringify({ error: "missing email credentials" }), {
+    if (!RESEND_API_KEY) {
+      return new Response(JSON.stringify({ error: "missing RESEND_API_KEY" }), {
         status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -60,7 +59,7 @@ serve(async (req) => {
     });
 
     const payload: Record<string, unknown> = {
-      from: "Edooqoo <onboarding@resend.dev>",
+      from: "Edooqoo <hello@edooqoo.com>",
       to: [studentEmail],
       subject,
       html,
@@ -68,12 +67,11 @@ serve(async (req) => {
     };
     if (teacherEmail) payload.reply_to = teacherEmail;
 
-    const r = await fetch(`${GATEWAY_URL}/emails`, {
+    const r = await fetch(RESEND_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "X-Connection-Api-Key": RESEND_API_KEY,
+        Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify(payload),
     });

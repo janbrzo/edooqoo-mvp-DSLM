@@ -7,7 +7,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-internal-call",
 };
 
-const GATEWAY_URL = "https://connector-gateway.lovable.dev/resend";
+const RESEND_URL = "https://api.resend.com/emails";
 const RECIPIENT = "edooqoo@gmail.com";
 
 serve(async (req) => {
@@ -23,10 +23,9 @@ serve(async (req) => {
 
   try {
     const { reportHtml, summary, generatedAt } = await req.json();
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
     const RESEND_API_KEY = Deno.env.get("RESEND_API_KEY");
-    if (!LOVABLE_API_KEY || !RESEND_API_KEY) {
-      return new Response(JSON.stringify({ error: "missing email credentials" }), {
+    if (!RESEND_API_KEY) {
+      return new Response(JSON.stringify({ error: "missing RESEND_API_KEY" }), {
         status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
@@ -44,15 +43,14 @@ serve(async (req) => {
   <p style="color:#6b7280; font-size:12px; margin-top: 24px;">Source: audit-llm-models (mode=monthly). Inspect model_health_checks for raw rows.</p>
 </div>`.trim();
 
-    const r = await fetch(`${GATEWAY_URL}/emails`, {
+    const r = await fetch(RESEND_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "X-Connection-Api-Key": RESEND_API_KEY,
+        Authorization: `Bearer ${RESEND_API_KEY}`,
       },
       body: JSON.stringify({
-        from: "Edooqoo Monitoring <onboarding@resend.dev>",
+        from: "Edooqoo Monitoring <hello@edooqoo.com>",
         to: [RECIPIENT],
         subject,
         html,
