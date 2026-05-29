@@ -11,3 +11,12 @@ verify_jwt = false
 
 [functions.audit-llm-models]
 verify_jwt = false
+
+[functions.send-welcome-test-completion-email]
+verify_jwt = false
+
+[functions.send-model-audit-email]
+verify_jwt = false
+
+[functions.test-model-failure-logger]
+verify_jwt = false
