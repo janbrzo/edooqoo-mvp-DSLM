@@ -33,6 +33,9 @@ interface GoalsViewProps {
   mainGoalTargetDate: string | null;
   onMainGoalChange?: (newGoal: string) => void;
   onMainGoalTargetDateChange?: (date: string | null) => void;
+  /** v6.9.29 — set by DSLMTab when window event `dslm:addGoal` fires from Roadmap. */
+  pendingAddGoal?: boolean;
+  onConsumePendingAddGoal?: () => void;
 }
 
 export const GoalsView: React.FC<GoalsViewProps> = ({
@@ -44,6 +47,8 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
   mainGoalTargetDate,
   onMainGoalChange,
   onMainGoalTargetDateChange,
+  pendingAddGoal,
+  onConsumePendingAddGoal,
 }) => {
   const { goals, loading, addGoal, updateGoal, deleteGoal, archiveGoal, unarchiveGoal, addElement, updateElementRating, deleteElement } = useStudentProgress({ studentId, teacherId });
   const goalNotes = useStudentKnowledge({ studentId, teacherId });
@@ -66,6 +71,14 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
 
   const { map: progressMap, mainAggregate } = useGoalProgress(goals as any, studentId, teacherId);
   const editingGoal = editingGoalId ? (goals.find(g => g.id === editingGoalId) || null) : null;
+
+  // v6.9.29 — open Add-Goal modal when DSLMTab signals a pending request.
+  React.useEffect(() => {
+    if (pendingAddGoal) {
+      setShowAddGoal(true);
+      onConsumePendingAddGoal?.();
+    }
+  }, [pendingAddGoal, onConsumePendingAddGoal]);
 
   const renderGoalCard = (goal: any) => {
     const r = progressMap.get(goal.id);

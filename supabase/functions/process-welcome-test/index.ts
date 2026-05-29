@@ -627,6 +627,87 @@ serve(async (req) => {
       console.error('[process-welcome-test] WT-4 status update failed', statusErr);
     }
 
+    // v6.9.29 — Auto-apply skill ratings to student_learning_elements.
+    // Mirrors the manual "Apply Results to Progress" path so DSLM has fresh
+    // mastery data without teacher intervention. Failure does NOT roll back
+    // 'completed' — UI fallback button lets teacher retry manually.
+    try {
+      const { data: skillResults } = await supabase
+        .from('test_skill_results')
+        .select('id, applied_to_element_id, suggested_rating')
+        .eq('student_test_id', test_id)
+        .is('applied_at', null);
+
+      if (skillResults && skillResults.length > 0) {
+        for (const r of skillResults) {
+          if (r.applied_to_element_id && r.suggested_rating != null) {
+            await supabase
+              .from('student_learning_elements')
+              .update({
+                current_rating: r.suggested_rating,
+                last_rated_at: new Date().toISOString(),
+              })
+              .eq('id', r.applied_to_element_id);
+          }
+        }
+        await supabase
+          .from('test_skill_results')
+          .update({ applied_at: new Date().toISOString() })
+          .in('id', skillResults.map((r: any) => r.id));
+        await supabase
+          .from('student_tests')
+          .update({ status: 'reviewed', reviewed_at: new Date().toISOString() })
+          .eq('id', test_id);
+      }
+    } catch (autoApplyErr) {
+      console.error('[process-welcome-test] auto-apply failed', autoApplyErr);
+      try {
+        await supabase.from('error_logs').insert({
+          severity: 'warning',
+          source: 'edge-function',
+          source_name: 'process-welcome-test',
+          component: 'welcome-test-auto-apply',
+          error_code: 'welcome_auto_apply_failed',
+          message: `auto-apply failed for test ${test_id}`,
+          context: { testId: test_id, error: String((autoApplyErr as Error)?.message || autoApplyErr).slice(0, 500) },
+        });
+      } catch { /* swallow */ }
+    }
+
+    // v6.9.29 — Fire-and-forget thank-you email to the student. Idempotent server-side.
+    try {
+      const { data: studentRow } = await supabase
+        .from('students')
+        .select('name, email')
+        .eq('id', student_id)
+        .maybeSingle();
+      const { data: teacherRow } = await supabase
+        .from('profiles')
+        .select('first_name, last_name, email')
+        .eq('id', teacher_id)
+        .maybeSingle();
+      const studentEmail = studentRow?.email;
+      if (studentEmail) {
+        const teacherName = [teacherRow?.first_name, teacherRow?.last_name].filter(Boolean).join(' ').trim() || 'your teacher';
+        fetch(`${supabaseUrl}/functions/v1/send-welcome-test-completion-email`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${supabaseKey}`,
+          },
+          body: JSON.stringify({
+            testId: test_id,
+            studentEmail,
+            studentName: studentRow?.name || 'there',
+            teacherName,
+            teacherEmail: teacherRow?.email || null,
+          }),
+        }).catch((e: any) => console.warn('[process-welcome-test] thank-you email dispatch failed', e));
+      }
+    } catch (mailErr) {
+      console.warn('[process-welcome-test] thank-you email pre-dispatch failed', mailErr);
+    }
+
     // Note: welcome_test_completed event removed - only test_answer_submitted events are logged per-question
 
     // --- Point 6: Create notification for teacher ---

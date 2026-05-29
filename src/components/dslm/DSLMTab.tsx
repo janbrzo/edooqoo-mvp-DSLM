@@ -106,6 +106,7 @@ export const DSLMTab: React.FC<DSLMTabProps> = ({
   const [searchParams, setSearchParams] = useSearchParams();
   const isMobile = useIsMobile();
   const [activeSection, setActiveSection] = useState<ViewId>('pathway');
+  const [pendingAddGoal, setPendingAddGoal] = useState(false);
   const isScrollingRef = useRef(false);
   const { data: stats } = useBehavioralStats({ studentId, teacherId });
   const { proposals: pacingProposals } = usePacingProposals(studentId);
@@ -178,6 +179,17 @@ export const DSLMTab: React.FC<DSLMTabProps> = ({
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // v6.9.29 — Roadmap "Add goal" buttons dispatch `dslm:addGoal`. Switch to
+  // Goals section and signal GoalsView to open its add-goal modal.
+  useEffect(() => {
+    const handler = () => {
+      handleScrollTo('goals');
+      setPendingAddGoal(true);
+    };
+    window.addEventListener('dslm:addGoal', handler);
+    return () => window.removeEventListener('dslm:addGoal', handler);
+  }, [handleScrollTo]);
+
   const sectionHeader = (label: string, rightSlot?: React.ReactNode) => (
     <div className="flex items-end justify-between gap-3 border-b border-border pb-2 mb-4">
       <h2 className="text-lg font-semibold text-foreground">{label}</h2>
@@ -241,6 +253,8 @@ export const DSLMTab: React.FC<DSLMTabProps> = ({
             mainGoalTargetDate={mainGoalTargetDate}
             onMainGoalChange={onMainGoalChange}
             onMainGoalTargetDateChange={onMainGoalTargetDateChange}
+            pendingAddGoal={pendingAddGoal}
+            onConsumePendingAddGoal={() => setPendingAddGoal(false)}
           />
         </LazySection>
       </div>

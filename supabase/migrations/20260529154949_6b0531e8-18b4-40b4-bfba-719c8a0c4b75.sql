@@ -1,0 +1,1 @@
+ALTER TABLE public.student_tests ADD COLUMN IF NOT EXISTS completion_email_sent_at TIMESTAMPTZ;

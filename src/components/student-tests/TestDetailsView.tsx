@@ -323,16 +323,28 @@ export function TestDetailsView({ testId, teacherId, studentId, onBack }: TestDe
         <WelcomeTestResults testId={testId} studentId={studentId} teacherId={teacherId} />
       )}
 
-      {/* Actions for completed tests */}
+      {/* v6.9.29 — Results are auto-applied by process-welcome-test (status=reviewed).
+          If auto-apply failed, the test stays in 'completed' and we expose a manual
+          fallback button so the teacher can retry once. */}
+      {test.status === 'reviewed' && (
+        <Card className="border-green-500/40 bg-green-500/5">
+          <CardContent className="py-3">
+            <div className="flex items-center gap-3">
+              <CheckCircle className="h-5 w-5 text-green-600" />
+              <p className="text-sm font-medium">Results automatically applied to student's skill ratings.</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
       {test.status === 'completed' && (
-        <Card className="border-primary/50 bg-primary/5">
+        <Card className="border-amber-500/40 bg-amber-500/5">
           <CardContent className="py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <TrendingUp className="h-5 w-5 text-primary" />
+                <TrendingUp className="h-5 w-5 text-amber-600" />
                 <div>
-                  <p className="font-medium">Apply Results to Progress</p>
-                  <p className="text-sm text-muted-foreground">Update student's skill ratings based on test performance</p>
+                  <p className="font-medium">Auto-apply did not complete</p>
+                  <p className="text-sm text-muted-foreground">Apply skill ratings to Progress manually.</p>
                 </div>
               </div>
               <Button onClick={handleApplyResults}>Apply to Progress</Button>
