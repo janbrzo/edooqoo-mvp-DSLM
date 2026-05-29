@@ -6,6 +6,7 @@ import { devLog, devWarn } from '@/utils/logger';
 import { useDemoContext } from '@/contexts/DemoContext';
 import { claimPendingWorksheets, getPendingClaimIds } from '@/hooks/useWorksheetClaim';
 import { toast } from 'sonner';
+import { useQueryClient } from '@tanstack/react-query';
 
 export type AccountType = 'demo' | 'side-gig' | 'full-time' | null;
 
@@ -26,6 +27,7 @@ export function useAuthFlow() {
   const [loading, setLoading] = useState(true);
   const [isAnonymous, setIsAnonymous] = useState(false);
   const { isDemoMode, exitDemo } = useDemoContext();
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     // Demo mode: return synthetic user, skip Supabase
@@ -45,6 +47,9 @@ export function useAuthFlow() {
       setUser(session?.user ?? null);
       setIsAnonymous(anonymous);
       setLoading(false);
+      // v6.9.29 — sync TanStack cache so hooks reading ['auth-user'] (staleTime Infinity)
+      // see the new identity immediately and the dashboard renders without F5.
+      queryClient.setQueryData(['auth-user'], session?.user ?? null);
 
       // v6.1: claim worksheets generated while anonymous, AFTER sign-in /
       // sign-up of a real account. Wrapped in setTimeout(_, 0) to avoid
@@ -79,10 +84,11 @@ export function useAuthFlow() {
       setUser(session?.user ?? null);
       setIsAnonymous(session?.user?.is_anonymous === true);
       setLoading(false);
+      queryClient.setQueryData(['auth-user'], session?.user ?? null);
     });
 
     return () => subscription.unsubscribe();
-  }, [isDemoMode]);
+  }, [isDemoMode, queryClient]);
 
   const signOut = async () => {
     if (isDemoMode) {

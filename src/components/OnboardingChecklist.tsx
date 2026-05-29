@@ -86,7 +86,7 @@ export const OnboardingChecklist = () => {
           gravity={0.3}
         />
       )}
-      <div className={`fixed bottom-6 left-6 z-[70] transition-opacity duration-1000 ${
+      <div className={`fixed bottom-6 right-6 z-30 transition-opacity duration-1000 ${
         progress.completed && completionAnimation ? 'opacity-100' : 'animate-fade-in opacity-100'
       }`}>
         <Card className="shadow-lg border-2 border-primary/20 bg-white/95 backdrop-blur-sm">
