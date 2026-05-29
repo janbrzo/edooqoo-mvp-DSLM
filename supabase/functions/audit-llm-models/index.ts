@@ -16,11 +16,23 @@ const corsHeaders = {
 type Provider = "lovable-gateway" | "openai" | "google";
 interface Target { provider: Provider; model: string; endpoint: string; }
 
-const TARGETS: Target[] = [
+// Daily set — cheap, fast, covers the hottest paths.
+const TARGETS_DAILY: Target[] = [
   { provider: "lovable-gateway", model: "google/gemini-2.5-flash",      endpoint: "https://ai.gateway.lovable.dev/v1/chat/completions" },
   { provider: "lovable-gateway", model: "google/gemini-2.5-flash-lite", endpoint: "https://ai.gateway.lovable.dev/v1/chat/completions" },
   { provider: "lovable-gateway", model: "openai/gpt-5-mini",            endpoint: "https://ai.gateway.lovable.dev/v1/chat/completions" },
   { provider: "openai",          model: "gpt-4o-mini",                  endpoint: "https://api.openai.com/v1/models/gpt-4o-mini" },
+];
+
+// Monthly set — full breadth. When adding a new model anywhere in the app,
+// append it here. See docs/closed-loops/LLM_MODEL_INVENTORY.md (when present).
+const TARGETS_MONTHLY: Target[] = [
+  ...TARGETS_DAILY,
+  { provider: "openai",          model: "gpt-4o-mini",                  endpoint: "https://api.openai.com/v1/models/gpt-4o-mini" },
+  { provider: "openai",          model: "gpt-4o-mini-tts",              endpoint: "https://api.openai.com/v1/models/gpt-4o-mini-tts" },
+  { provider: "openai",          model: "gpt-4.1-2025-04-14",           endpoint: "https://api.openai.com/v1/models/gpt-4.1-2025-04-14" },
+  { provider: "openai",          model: "gpt-5-mini-2025-08-07",        endpoint: "https://api.openai.com/v1/models/gpt-5-mini-2025-08-07" },
+  { provider: "lovable-gateway", model: "google/gemini-2.0-flash",      endpoint: "https://ai.gateway.lovable.dev/v1/chat/completions" },
 ];
 
 async function ping(target: Target): Promise<{ status: number; latency_ms: number; error: string | null }> {
@@ -33,16 +45,19 @@ async function ping(target: Target): Promise<{ status: number; latency_ms: numbe
       const err = r.ok ? null : (await r.text()).slice(0, 500);
       return { status: r.status, latency_ms: Date.now() - t0, error: err };
     }
-    // Lovable gateway: minimal chat completion
+    // Lovable gateway: minimal chat completion.
+    // GPT-5 family rejects `max_tokens`; requires `max_completion_tokens` instead.
     const key = Deno.env.get("LOVABLE_API_KEY");
     if (!key) return { status: -1, latency_ms: 0, error: "missing LOVABLE_API_KEY" };
+    const isGpt5Family = target.model.startsWith("openai/gpt-5");
+    const tokenField = isGpt5Family ? "max_completion_tokens" : "max_tokens";
     const r = await fetch(target.endpoint, {
       method: "POST",
       headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
       body: JSON.stringify({
         model: target.model,
         messages: [{ role: "user", content: "ping" }],
-        max_tokens: 1,
+        [tokenField]: 1,
       }),
     });
     const err = r.ok ? null : (await r.text()).slice(0, 500);
@@ -64,12 +79,21 @@ serve(async (req) => {
     });
   }
 
+  let mode: "daily" | "monthly" = "daily";
+  try {
+    if (req.method === "POST") {
+      const body = await req.json().catch(() => ({}));
+      if (body?.mode === "monthly") mode = "monthly";
+    }
+  } catch { /* ignore */ }
+
   const url = Deno.env.get("SUPABASE_URL")!;
   const srk = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
   const sb = createClient(url, srk);
 
-  const results = [];
-  for (const target of TARGETS) {
+  const targets = mode === "monthly" ? TARGETS_MONTHLY : TARGETS_DAILY;
+  const results: Array<Target & { status: number; latency_ms: number; error: string | null; ok: boolean }> = [];
+  for (const target of targets) {
     const r = await ping(target);
     const ok = r.status >= 200 && r.status < 300;
     results.push({ ...target, ...r, ok });
@@ -95,7 +119,50 @@ serve(async (req) => {
     }
   }
 
-  return new Response(JSON.stringify({ ok: true, checked: results.length, results }, null, 2), {
+  // Monthly mode → fire-and-forget email report.
+  if (mode === "monthly") {
+    try {
+      const okCount = results.filter(r => r.ok).length;
+      const failedCount = results.length - okCount;
+      const rows = results.map(r => `
+        <tr>
+          <td style="padding:6px 10px;border-bottom:1px solid #e5e7eb;">${r.provider}</td>
+          <td style="padding:6px 10px;border-bottom:1px solid #e5e7eb;"><code>${r.model}</code></td>
+          <td style="padding:6px 10px;border-bottom:1px solid #e5e7eb;text-align:right;">${r.status}</td>
+          <td style="padding:6px 10px;border-bottom:1px solid #e5e7eb;text-align:right;">${r.latency_ms} ms</td>
+          <td style="padding:6px 10px;border-bottom:1px solid #e5e7eb;color:${r.ok ? '#16a34a' : '#dc2626'};">${r.ok ? 'OK' : 'FAIL'}</td>
+          <td style="padding:6px 10px;border-bottom:1px solid #e5e7eb;font-size:11px;color:#6b7280;">${(r.error || '').slice(0, 120)}</td>
+        </tr>`).join("");
+      const reportHtml = `
+        <table style="border-collapse:collapse;width:100%;font-size:13px;">
+          <thead><tr style="background:#f3f4f6;">
+            <th style="padding:6px 10px;text-align:left;">Provider</th>
+            <th style="padding:6px 10px;text-align:left;">Model</th>
+            <th style="padding:6px 10px;text-align:right;">HTTP</th>
+            <th style="padding:6px 10px;text-align:right;">Latency</th>
+            <th style="padding:6px 10px;text-align:left;">Status</th>
+            <th style="padding:6px 10px;text-align:left;">Error</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>`;
+      fetch(`${url}/functions/v1/send-model-audit-email`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-internal-call": expected || "",
+        },
+        body: JSON.stringify({
+          reportHtml,
+          summary: { total: results.length, ok: okCount, failed: failedCount },
+          generatedAt: new Date().toISOString(),
+        }),
+      }).catch(e => console.error("[audit-llm-models] email dispatch failed", e));
+    } catch (e) {
+      console.error("[audit-llm-models] monthly email build failed", e);
+    }
+  }
+
+  return new Response(JSON.stringify({ ok: true, mode, checked: results.length, results }, null, 2), {
     headers: { ...corsHeaders, "Content-Type": "application/json" },
   });
 });
