@@ -1,241 +1,405 @@
-# Plan v6.9.28 — Loss-framing + finalizacja monitoringu
+# Plan v6.9.29 (rev 4) — Final — Welcome Test + UX + zamknięcie monitoringu modeli
 
-## Analiza pytania (a) vs (b)
-
-**To są 2 OSOBNE kwestie**, nie alternatywa. (a) jest warunkiem koniecznym do działania `audit-llm-models` (bez `CRON_SECRET` w sekretach + bez wpisu pg_cron funkcja nigdy nie zostanie wywołana). (b) jest dokończeniem sweepa z poprzedniej tury — bez tego ~5 funkcji AI nadal po cichu połknie 404/410 z gateway. Robimy **obie** w jednej iteracji, bo razem dopinają H6 do końca.
+Status diagnozy: **smoke-test OK, cron `audit-llm-models-daily` zapisany w bazie (jobid=10), tabela `model_health_checks` zasilona 8 wierszami**. Pozostają dwie sprawy do dokończenia w monitoringu (sekcja 0) plus pełna lista 8 problemów funkcjonalnych (sekcje 1–9). Plan jest addytywny — sanctity worksheet engine i scoring Welcome Test pozostają nietknięte.
 
 ---
 
-## Sekcja 1 — H6 finalizacja (CRON_SECRET + sweep loggera)
+## 0. Monitoring modeli — stan po Twoich testach + co jeszcze trzeba
 
-### 1A. Sekret `CRON_SECRET`
+### 0.1 Co już DZIAŁA (potwierdzone w bazie, nic nie ruszamy)
 
-Dodajemy projektowy sekret `CRON_SECRET` przez `secrets--add_secret` (interaktywny formularz — użytkownik wkleja losową wartość, np. 32-bajtowy hex z `openssl rand -hex 32`). Funkcja `audit-llm-models` już go odczytuje (`Deno.env.get("CRON_SECRET")`); bez sekretu zwraca 401 dla każdego wywołania, więc samo dodanie zera regresji. `config.toml` (`verify_jwt=false`) już jest.
+- Cron `audit-llm-models-daily` istnieje (jobid=10, schedule `0 6 * * *`, active=true). Codziennie 06:00 UTC pinguje 4 modele i wpisuje wynik do `model_health_checks`.
+- Edge function `audit-llm-models` autoryzuje przez `x-cron-secret` (sprawdzone — 401 dla literału, 200 dla prawdziwej wartości).
+- Tabela `model_health_checks` ma 8 wierszy z dwóch przebiegów (smoke-test + cron-once-now). Logger Poziom 3 działa.
 
-### 1B. SQL pg_cron (ręcznie, NIE w migracji)
+### 0.2 Co WYKRYŁY testy i wymaga naprawy w kodzie
 
-W planie podajemy gotowy snippet do uruchomienia przez użytkownika w SQL editorze (zawiera anon URL + sekret — nie wchodzi do `supabase/migrations/`). Plik referencyjny tworzymy jako `docs/operational/audit-llm-models-cron.md`:
+**PROBLEM (widoczny w Twoich wynikach):** `openai/gpt-5-mini` przez Lovable Gateway zwraca **HTTP 400 — `"Unsupported parameter: max_tokens"**`. To **false positive** w audycie (model żyje, tylko parametr się zmienił dla rodziny GPT-5 → musi być `max_completion_tokens`).
+
+**Fix w `supabase/functions/audit-llm-models/index.ts**` (funkcja `ping`, gałąź Lovable Gateway): rozróżnij body po rodzinie modelu:
+
+```ts
+const isGpt5Family = target.model.startsWith("openai/gpt-5");
+const body = isGpt5Family
+  ? { model: target.model, messages: [{ role: "user", content: "ping" }], max_completion_tokens: 1 }
+  : { model: target.model, messages: [{ role: "user", content: "ping" }], max_tokens: 1 };
+```
+
+Po wdrożeniu kolejny przebieg cron-once-now wykaże `ok=true` dla `openai/gpt-5-mini`. Bez tej poprawki audyt codziennie generuje fałszywy alarm w `error_logs` przez `logModelFailure` (4xx > 400 nie loguje, ale w przyszłości łatwo o false-positive).
+
+### 0.3 Co dorabiamy: tryb miesięczny + e-mail do `edooqoo@gmail.com`
+
+**A) Rozszerzenie `audit-llm-models/index.ts`:**
+
+- Czytaj `{ mode?: "daily" | "monthly" }` z body (default `"daily"`).
+- `TARGETS_DAILY` = obecne 4 (po fixie z 0.2).
+- `TARGETS_MONTHLY` = pełna lista hardkodowana w pliku, wygenerowana z `LLM_MODEL_INVENTORY.md`. Każdy wpis: `{ provider, model, endpoint, family }` żeby `ping` wybrał właściwe body. Komentarz: "When adding a new model anywhere, append it here — see LLM_MODEL_INVENTORY.md".
+- Po przebiegu, jeśli `mode === "monthly"`: zbuduj HTML (tabela: provider, model, status, latency, ok, error skrót) + summary `{ total, ok, failed }` → fire-and-forget POST do `send-model-audit-email`.
+
+**B) Nowa funkcja `supabase/functions/send-model-audit-email/index.ts`:**
+
+- `verify_jwt = false` w `config.toml`. In-code: wymaga headera `x-internal-call == CRON_SECRET`.
+- Body: `{ reportHtml, summary, generatedAt }`.
+- Wysyłka przez Resend (connector gateway, wzorzec z `<resend>` w kontekście):
+  - `To`: `edooqoo@gmail.com`
+  - `From`: domyślnie `Edooqoo Monitoring <onboarding@resend.dev>` (bezpieczny fallback). Jeśli `email_domain--list_email_domains` pokaże zweryfikowane `edooqoo.com` → `Edooqoo Monitoring <audits@edooqoo.com>` (zweryfikuję przed implementacją).
+  - `Subject`: `[Edooqoo] Monthly LLM Audit — YYYY-MM-DD — {failed}/{total} failed`
+  - HTML: nagłówek summary + tabela.
+
+**C) Cron miesięczny (Krok D — DO WYKONANIA PRZEZ CIEBIE po implementacji):**
 
 ```sql
--- Run ONCE in Supabase SQL editor. Requires pg_cron + pg_net extensions enabled.
-create extension if not exists pg_cron;
-create extension if not exists pg_net;
-
 select cron.schedule(
-  'audit-llm-models-daily',
-  '0 6 * * *',  -- 06:00 UTC daily
+  'audit-llm-models-monthly',
+  '0 7 1 * *',                      -- 07:00 UTC, pierwszy dzień miesiąca
   $$
   select net.http_post(
     url     := 'https://bvfrkzdlklyvnhlpleck.supabase.co/functions/v1/audit-llm-models',
-    headers := jsonb_build_object(
-      'Content-Type',   'application/json',
-      'x-cron-secret',  '<PASTE_CRON_SECRET_VALUE_HERE>'
-    ),
-    body    := '{}'::jsonb
+    headers := jsonb_build_object('Content-Type','application/json','x-cron-secret','TUTAJ_REALNA_WARTOSC_CRON_SECRET'),
+    body    := '{"mode":"monthly"}'::jsonb
   );
   $$
 );
-
--- To unschedule later: select cron.unschedule('audit-llm-models-daily');
--- To inspect runs: select * from cron.job_run_details where jobname = 'audit-llm-models-daily' order by start_time desc limit 10;
 ```
 
-Doc instruuje też, jak ręcznie odpalić jednorazowy smoke-test przez `curl -H "x-cron-secret: ..." https://.../functions/v1/audit-llm-models` i co sprawdzić w tabeli `model_health_checks`.
+Plus jednorazowy test (`audit-llm-models-monthly-once-now` analogicznie do Kroku E) żeby zweryfikować że mail przyjdzie bez czekania miesiąca.
 
-### 1C. Sweep loggera w pozostałych funkcjach AI
+### 0.4 Logger Poziom 2 — sweep + smoke-test
 
-Brakujące funkcje (potwierdzone `rg`):
+**Stan obecny:** `logModelFailure` istnieje w `_shared/modelFailureLogger.ts` i jest wpięty w 10 z 12 funkcji LLM. Brakuje go w `generateWorksheet/**` i `generate-media-exercises/index.ts`. **Świadoma Twoja decyzja (poprzednie wiadomości):** wpinamy go tam mimo Sanctity Rule — TYLKO opakowanie istniejących `fetch` w obserwację `if (!r.ok && (r.status===404||r.status===410||r.status>=500)) await logModelFailure({...})`. ZERO zmian w promptach, parametrach, parsowaniu, scoringu.
 
-1. `generateWorksheet` — główny pipeline Gemini 2.5; każdy nie-OK status z gateway musi wołać `logModelFailure` przed throw.
-2. `generate-image` — Lovable Gateway (gemini-2.5-flash-image / nano-banana).
-3. `generate-media-exercises` — generacja exercises pod media.
-4. `generate-timeline` — pomocnicze AI.
-5. `generate-welcome-test-audio` — OpenAI Whisper TTS (provider `openai`).
-6. `process-pending-ai-evaluations` — batch evaluator (cron).
-7. `process-welcome-test` — scoring placement testu (provider Gemini przez gateway).
+**Smoke-test loggera (jednorazowy):** nowa funkcja `supabase/functions/test-model-failure-logger/index.ts` (`verify_jwt=false`, in-code `x-cron-secret`). Po wdrożeniu Lovable AI sam ją wywoła przez `supabase--curl_edge_functions`, zweryfikuje wiersz w `error_logs` (source_name=`test-model-failure-logger`) i go usunie. Funkcja zostaje w repo jako debug tool.
 
-**Wzorzec wpięcia** (identyczny jak w `verify-open-answers` z poprzedniej tury):
+### 0.5 Dokumentacja operacyjna
+
+`**docs/operational/audit-llm-models-cron.md**` — przepisany na podstawie tego co już zadziałało:
+
+- **Pogrubione ostrzeżenie** na górze: "NIGDY nie wklejaj literalnie `WKLEJ_TUTAJ_SECRET`. Najpierw skopiuj wartość `CRON_SECRET` z Lovable Cloud → Settings → Secrets."
+- Sekcje: Pobranie sekretu → Smoke-test przez `pg_net` (nie curl, bo curl wymaga terminala) → `cron.schedule('audit-llm-models-daily', ...)` → `cron.schedule('audit-llm-models-monthly', ...)` → weryfikacja `cron.job` + `cron.job_run_details` + `model_health_checks` → procedura proaktywnego testu przez `'* * * * *'`+unschedule.
+
+---
+
+## 1. Welcome Test → Auto-apply do Progress
+
+### 1.1 Tło (Twoje pytanie z poprzedniej iteracji)
+
+Dwie OSOBNE ścieżki danych z testu:
+
+- `**student_events**` — timeline aktywności, zasilane automatycznie podczas testu, nie wymaga akcji.
+- `**student_learning_elements.current_rating**` — mastery score per nano-skill, napędza DSLM (sugestie, roadmapę). DZISIAJ powstaje przez kliknięcie "Apply Results to Progress": `process-welcome-test` liczy `suggested_rating` → zapisuje do `test_skill_results` → nauczyciel klika → kopiowanie do `student_learning_elements.current_rating`. **Bez kliknięcia DSLM ma stare dane.**
+
+**Auto-apply = ten drugi krok wykonujemy automatycznie wewnątrz `process-welcome-test`.**
+
+### 1.2 Wycofujemy "Re-apply"
+
+Pojęcie niejasne. Retake = nowy test = nowy auto-apply.
+
+- **Sukces auto-apply** (status `reviewed`): zielony statyczny chip "✓ Results automatically applied to student's skill ratings."
+- **Fallback** (auto-apply padł, status pozostał `completed`): żółta karta + przycisk **"Apply to Progress"** (jednorazowy retry, wywołuje istniejący `applyResultsToProgress` z `useStudentTests.tsx`, którego NIE usuwamy).
+
+### 1.3 Implementacja
+
+**A) `supabase/functions/process-welcome-test/index.ts**` — po istniejącym `UPDATE student_tests SET status='completed'` dopisujemy:
 
 ```ts
-import { logModelFailure } from "../_shared/modelFailureLogger.ts";
+try {
+  const { data: skillResults } = await sb
+    .from('test_skill_results')
+    .select('id, applied_to_element_id, suggested_rating')
+    .eq('student_test_id', testId)
+    .is('applied_at', null);
 
-const response = await fetch(GATEWAY_URL, { ... });
-if (!response.ok) {
-  const errBody = await response.text().catch(() => "");
-  await logModelFailure({
-    model: MODEL_NAME,
-    provider: "lovable-gateway", // lub "openai"
-    status: response.status,
-    endpoint: GATEWAY_URL,
-    error: errBody.slice(0, 500),
-    functionName: "<nazwa-funkcji>",
+  if (skillResults?.length) {
+    for (const r of skillResults) {
+      if (r.applied_to_element_id && r.suggested_rating != null) {
+        await sb.from('student_learning_elements')
+          .update({ current_rating: r.suggested_rating, last_rated_at: new Date().toISOString() })
+          .eq('id', r.applied_to_element_id);
+      }
+    }
+    await sb.from('test_skill_results')
+      .update({ applied_at: new Date().toISOString() })
+      .in('id', skillResults.map(r => r.id));
+
+    await sb.from('student_tests')
+      .update({ status: 'reviewed', reviewed_at: new Date().toISOString() })
+      .eq('id', testId);
+  }
+} catch (autoApplyErr) {
+  await sb.from('error_logs').insert({
+    severity: 'warning', source: 'edge-function', source_name: 'process-welcome-test',
+    component: 'welcome-test-auto-apply', error_code: 'welcome_auto_apply_failed',
+    message: `auto-apply failed for test ${testId}`,
+    context: { testId, error: String(autoApplyErr).slice(0, 500) },
   });
-  // istniejące zachowanie throw / fallback — BEZ ZMIAN
-  throw new Error(`AI gateway failed: ${response.status}`);
+  // NIE rollback completed → fallback UI pozwoli ręcznie retry
 }
 ```
 
-**Zasady kompatybilności (zero regresji):**
+**B) `src/components/student-tests/TestDetailsView.tsx` (linie 326–342)** — podmiana bloku Apply Results na chip+fallback (kod w sekcji 2.3 rev 3 — bez zmian).
 
-- Logger jest `await`-owany przed `throw` — nigdy nie zastępuje istniejącej obsługi błędu.
-- Nie modyfikujemy promptów (SACRED — Worksheet Generation Engine; tylko `if (!response.ok)` branch w `generateWorksheet/aiService.ts` lub odpowiednim wraperze fetch, nie w `streaming.ts` jeśli to zmieni prompt).
-- Dla `generateWorksheet` szukamy istniejących `if (!response.ok)` w wraperze gateway (`aiService.ts` / `geminiClient.ts`) — wpinamy tylko tam, nie w streaming SSE handlerze.
-- Jeśli funkcja ma fallback OpenAI po Lovable Gateway, logujemy oba etapy (jak w `translate-flashcard`).
-- Brak nowych migracji DB w tej sekcji.
+**C) `useStudentTests.tsx**` — `applyResultsToProgress` bez zmian (używany przez fallback i retake).
 
-### Deploy
+### 1.4 Co się NIE zmienia
 
-Po edycji: `supabase--deploy_edge_functions` z listą wszystkich 7 nazw + już istniejącym `audit-llm-models`.
+Algorytm scoringu w `process-welcome-test`, `student_events`, retake flow, DSLM logic.
 
 ---
 
-## Sekcja 2 — Kompaktowy kalkulator w wariancie `hero`
+## 2. Brakujące tłumaczenia w Welcome Test
 
-**Plik:** `src/components/PricingCalculator.tsx` (jedyna zmiana w komponencie).
+Rozszerzamy `src/data/welcomeTestTranslations.ts` o ID profilujące (psychology/scenarios/communication) z `welcomeTestQuestions.ts` linie 512–869, w 10 językach: pl, es, fr, de, it, pt, ru, uk, tr, zh.
 
-### 2A. Inputy 2×2 zamiast 1-kolumny w hero
+Lista 21 ID: `wt_q18, wt_q19, wt_q20, wt_q21, wt_q22, wt_q23, wt_q24, wt_q25, wt_q26, wt_q27, wt_q28, wt_q29, wt_q30, wt_q31, wt_q32, wt_q33, wt_q34, wt_q35, wt_q37, wt_q38, wt_q39`.
 
-Linia 194: `grid grid-cols-1` → w trybie `isHero` użyć `grid-cols-2 gap-3` (na bardzo wąskich ekranach <380px wracamy do 1 kolumny via `grid-cols-1 xs:grid-cols-2`, ale ponieważ Tailwind nie ma `xs`, używamy `grid-cols-1 sm:grid-cols-2` także dla hero — Twój viewport 1229px to bez problemu obsłuży, mobile 360px pójdzie w 1 kolumnie). Dokładna zmiana:
+Pytania gramatyka/vocabulary pozostają po angielsku (testują znajomość angielskiego). Renderer ma fallback EN — brak tłumaczenia nie wywala UI.
+
+---
+
+## 3. "Stupid game" w pauzie Welcome Test (Memory Pairs)
+
+Nowy komponent `src/components/welcome-test/BrainResetGame.tsx`:
+
+- Memory Pairs 2×3 (6 kart, 3 pary emoji: 🐶🐱🦊).
+- Pure React `useState`, zero deps.
+- Klik → odsłoń, dwie odsłonięte → match albo zakryj po 800 ms. Po 3 parach: "Nice reset! Continue."
+
+Integracja w `src/pages/WelcomeTestPage.tsx` w stage `paused`, schowane pod `<details>`:
 
 ```tsx
-<div className={cn("grid gap-3", isHero ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1 sm:grid-cols-2")}>
+<details className="text-left max-w-sm mx-auto">
+  <summary className="cursor-pointer text-sm text-muted-foreground hover:text-foreground py-2">
+    🎮 Play a stupid game to reset your mind (optional)
+  </summary>
+  <BrainResetGame />
+</details>
 ```
 
-(efektywnie zawsze 2 kolumny od `sm`+; w hero 4 pola tworzą siatkę 2×2: Prep/Students w pierwszym rzędzie, Lesson price/Lesson length w drugim).
+Zero wpływu na timer/scoring/sesję.
 
-### 2B. Wyniki: 2 KPI w jednym rzędzie + revenue pod spodem
+---
 
-Linia 396: obecna siatka `isHero ? "grid-cols-1" : "grid-cols-1 sm:grid-cols-3"`.
+## 4. Email do studenta po ukończeniu Welcome Testu
 
-Refaktor na **2 wiersze** w trybie hero:
+### 4.1 Treść (bez obietnicy czasu)
 
-- Wiersz 1: `monthlyPrepHoursTiedUp` (4.9h) + `monthlyLessonSlotsTiedUp` (4) — `grid-cols-2 gap-3`.
-- Wiersz 2: `monthlyRevenueCapacityTiedUp` ($100) — pełna szerokość (`col-span-2`).
+- Subject: `Thanks for completing your Welcome Test, {studentName}!`
+- Body:
+  > Hi {studentName},
+  >
+  > You've finished your Welcome Test — great job.
+  >
+  > Your teacher {teacherName} will review your results and reach out to plan your next steps. In the meantime, no action needed.
+  >
+  > — Edooqoo
+- `Reply-To`: `{teacherEmail}`.
 
-Implementacja: zostawiamy jeden `div className="grid grid-cols-1 sm:grid-cols-2 gap-3"` i trzecia karta dostaje `sm:col-span-2`:
+### 4.2 Mechanizm
+
+**A) Migracja:** `ALTER TABLE public.student_tests ADD COLUMN IF NOT EXISTS completion_email_sent_at TIMESTAMPTZ;`
+
+**B) Edge function `supabase/functions/send-welcome-test-completion-email/index.ts`:**
+
+- `verify_jwt=false`, in-code wymaga `Authorization: Bearer <SERVICE_ROLE_KEY>`.
+- Body: `{ testId, studentEmail, studentName, teacherName, teacherEmail }`.
+- Idempotencja: jeśli `student_tests.completion_email_sent_at` nie null → `{ skipped: true }`.
+- Resend przez connector gateway (wzorzec `<resend>`). `From` jak w 0.3.B (fallback `onboarding@resend.dev`).
+- Po sukcesie: `UPDATE student_tests SET completion_email_sent_at = now()`.
+- Po porażce: `error_logs` z `error_code='welcome_test_email_failed'`.
+
+**C) Szablon:** `supabase/functions/_shared/emailTemplates/welcomeTestCompletion.ts` (`renderWelcomeTestCompletionEmail({ studentName, teacherName })`).
+
+**D) Wywołanie w `process-welcome-test/index.ts**` po auto-apply, fire-and-forget:
+
+```ts
+if (student?.email) {
+  fetch(`${SUPABASE_URL}/functions/v1/send-welcome-test-completion-email`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${SERVICE_ROLE_KEY}` },
+    body: JSON.stringify({ testId, studentEmail: student.email, studentName, teacherName, teacherEmail })
+  }).catch(e => console.error('thank-you email send failed', e));
+}
+```
+
+**E) `supabase/config.toml`:** dodać `verify_jwt = false` dla `send-welcome-test-completion-email`, `send-model-audit-email`, `test-model-failure-logger`.
+
+---
+
+## 5. "Add Goal" modal nie otwiera się z Roadmap
+
+**Root cause:** `dispatchAddGoal` w `MacroTimeline.tsx:104` emituje `CustomEvent('dslm:addGoal')` — nikt nie nasłuchuje.
+
+**Fix:**
+
+**A) `src/components/dslm/DSLMTab.tsx**` — dodać:
 
 ```tsx
-<div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-  <div>{/* hours tile */}</div>
-  <div>{/* slots tile */}</div>
-  <div className="sm:col-span-2">{/* revenue tile */}</div>
-</div>
+const [pendingAddGoal, setPendingAddGoal] = useState(false);
+useEffect(() => {
+  const handler = () => { setActiveSubTab('goals'); setPendingAddGoal(true); };
+  window.addEventListener('dslm:addGoal', handler);
+  return () => window.removeEventListener('dslm:addGoal', handler);
+}, []);
+// render: <GoalsView ... pendingAddGoal={pendingAddGoal} onConsumePendingAddGoal={() => setPendingAddGoal(false)} />
 ```
 
-Dla wariantu `pricing`/`landing` zachowujemy `sm:grid-cols-3` (revenue w trzeciej kolumnie obok, BEZ zmiany layoutu) — ternary po `isHero`.
+(Przed implementacją sprawdzić czy nazwa subtaba to 'goals' czy 'Goals' w bieżącym kodzie.)
 
-### 2C. Zmniejszenie paddingu/textu w hero (mieści się na 1 ekranie)
+**B) `src/components/dslm/GoalsView.tsx**` — dodać props i efekt:
 
-- Kafelki KPI (linie 397/404/411): w hero `p-2` zamiast `p-3`; wartości `text-xl` zamiast `text-2xl`.
-- Sub-label: `text-[10px]` zamiast `text-xs` w hero.
-- Disclaimer (linia 417): w hero zwijamy do 1 linii `text-[10px] mt-2`.
-- Header CardHeader (linia 362): w hero `pb-1 pt-3` zamiast `pb-2 pt-4`; subtitle (linia 368) `text-xs` zamiast `text-sm`.
+```tsx
+interface Props { /* ... */ pendingAddGoal?: boolean; onConsumePendingAddGoal?: () => void; }
+useEffect(() => {
+  if (pendingAddGoal) { setShowAddGoal(true); onConsumePendingAddGoal?.(); }
+}, [pendingAddGoal]);
+```
 
-Wszystkie zmiany przez `cn(..., isHero ? "..." : "...")` — żadnych side-effects dla `pricing`/`landing`.
-
----
-
-## Sekcja 3 — Loss-framing copy (utrata > zysk)
-
-Psychologia: prospect theory Kahneman & Tversky — strata waży ~2.25× bardziej niż zysk. Obecne copy ma już bazę („tied up monthly") ale gdzieniegdzie miesza pozytywne („impact"). Przesuwamy 100% w stronę utraty.  
-  
-UWAGA to wprowadzam zmiany w kilku miejscach ponieważ zbytt agresywne komunikaty zaproponowałeś UWAGA
-
-### 3A. PricingCalculator.tsx
-
-
-| Lokalizacja (linia)           | Obecnie                                                                                                | Zmiana                                                                                                                           |
-| ----------------------------- | ------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------- |
-| 366 — CardTitle               | `Calculate your 1-Minute Prep impact`                                                                  | `See how much prep is silently costing you`                                                                                      |
-| 369 — opis                    | `Compare your weekly inputs with a monthly estimate based on about 1 focused prep minute per student.` | `See how many hours, lessons and dollars you currently lose to prep every month. Benchmark: about 1 focused minute per student.` |
-| 389 — sekcja wyników nagłówek | `Estimated monthly prep impact`                                                                        | `What prep is costing you monthly`                                                                                               |
-| 402 — label                   | `prep time currently tied up monthly`                                                                  | `hours lost to prep every month`                                                                                                 |
-| 409 — label                   | `lesson slots tied up monthly`                                                                         | `paid lessons you can't fit in`                                                                                                  |
-| 413 — label                   | `monthly revenue capacity tied up in prep`                                                             | `revenue you leave on the table monthly`                                                                                         |
-| 418 — disclaimer              | bez zmian (legal)                                                                                      | bez zmian                                                                                                                        |
-| 392 — badge                   | `Side-Gig fit` / `Full-Time fit`                                                                       | bez zmian (kategoria planu, neutralne)                                                                                           |
-| 424 — CTA primary             | `Start 1-Minute Prep Free`                                                                             | bez zmian                                                                                                                        |
-| 427 — CTA secondary           | `See plans`                                                                                            | bez zmian                                                                                                                        |
-
-
-### 3B. HeroHeadline.tsx (sekcja niżej na stronie głównej)
-
-
-| Linia                         | Obecnie                                                                                                                                                                                              | Zmiana                          |
-| ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
-| 73-75 (subheadline)           | `Edooqoo uses student goals, lesson notes, homework, flashcards and DSLM signals to help you decide what to teach next, then generate a ready-to-teach worksheet with audio, images and AI grading.` | bez zmian                       |
-| 78                            | `The worksheet generator is still available instantly. 1-Minute Prep starts when you create a student profile.`                                                                                      | bez zmian                       |
-| 113 (ticker pre-label)        | `Create a free account to unlock 1-Minute Prep`                                                                                                                                                      | bez zmian                       |
-| 99 — chip „2 worksheets free" | bez zmian                                                                                                                                                                                            | bez zmian (neutralna obietnica) |
-
-
-### 3C. PricingSection.tsx
-
-| Linia 124 | `Estimate how 1-Minute Prep can affect recurring student prep and worksheet usage` | `Estimate how much recurring prep is costing you — and how much you stop losing with 1-Minute Prep.` |
-
-**Zasada bezpieczeństwa copy:** nie ruszamy żadnych komunikatów w `featurePromptCopy.ts`, page'ach SEO, `seoMeta.ts` (Codex-owned, patrz `mem/decisions/reconciliation-v6926-codex.md`), `WelcomeBackBanner`, generator promptów. Loss-framing tylko na 3 plikach: kalkulator + hero + pricing section.
+**C) Walidacja:** klik "Add goal" z Pathway → tab Goals + modal. Klik "Add goal first" w AlertDialog → to samo.
 
 ---
 
-## Sekcja 4 — Dokumentacja RAG
+## 6. Pusty Dashboard po zalogowaniu (wymaga F5)
 
-### 4A. `docs/llm-context.md` — nowa sekcja `## v6.9.28 — Loss-framing landing & H6 finalization`
+**Root cause potwierdzony auth-logs (sekcja `<auth-logs>` z 28 wpisami 403 `bad_jwt`):** po logowaniu wiele równoległych requestów `/user` leci ze starym/pustym tokenem — sub claim nie jest jeszcze ustawiony w cache TanStack Query. `useAuthUser` ma `staleTime: Infinity`, więc nigdy się nie odświeża sam.
 
-Trzy podsekcje w formacie Problem → Solution → Mechanics:
+**Fix w `src/hooks/useAuthFlow.tsx`:**
 
-1. **Hero calculator visual density**
-  - Problem: hero variant kalkulatora wymagał 4 wierszy inputów + 3 wierszy KPI → przewijanie poniżej fold-line.
-  - Solution: 2×2 grid inputów, KPI hours+slots w jednym rzędzie, revenue jako span-2 niżej.
-  - Mechanics: `PricingCalculator.tsx`, `cn(..., isHero ? "grid-cols-2" : ...)`, `sm:col-span-2` na revenue tile, paddingi/typografia zmniejszone w hero. Layouty `pricing`/`landing` nietknięte.
-  - RAG Keywords: pricing calculator, hero variant, 1-minute prep, kpi tiles, responsive grid, sm:col-span-2
-2. **Loss-aversion copy framework**
-  - Problem: dotychczasowe copy obiecywało zysk/oszczędność („save", „impact") — prospect theory wskazuje że strata waży ~2.25× silniej.
-  - Solution: przemapowanie 9 labelek na narrację utraty bez zmian numerycznych metryk. Nie dotyka SEO/page metadata.
-  - Mechanics: edycje wyłącznie w `PricingCalculator.tsx`, `HeroHeadline.tsx`, `PricingSection.tsx`. Brak migracji, brak zmian eventów `useEventTracking` (event names stałe).
-  - RAG Keywords: loss aversion, prospect theory, copywriting, calculator labels, hero subhead, landing copy
-3. **H6 monitoring fully wired**
-  - Problem: po v6.9.27 logger `logModelFailure` był wpięty w 5 funkcji; 7 pozostałych połykało 404/410 z gateway w ciszy. Brak `CRON_SECRET` + brak pg_cron blokował uruchomienie `audit-llm-models`.
-  - Solution: sweep w 7 funkcjach (`generateWorksheet`, `generate-image`, `generate-media-exercises`, `generate-timeline`, `generate-welcome-test-audio`, `process-pending-ai-evaluations`, `process-welcome-test`); dodanie sekretu `CRON_SECRET`; instrukcja pg_cron w `docs/operational/audit-llm-models-cron.md`.
-  - Mechanics: wzorzec `await logModelFailure(...)` przed `throw` w bloku `if (!response.ok)`. Cron snippet używa `pg_net` + `cron.schedule` z headerem `x-cron-secret`. Tabela `model_health_checks` + StatusPage banner czyta wyniki bez zmian.
-  - RAG Keywords: model failure logger, gateway 410, deprecation alert, pg_cron, cron secret, edge function audit, status page banner
+```ts
+import { useQueryClient } from '@tanstack/react-query';
+const queryClient = useQueryClient();
 
-### 4B. `llms.txt` — analogiczny update (gęsty, bez marketingu)
+// w onAuthStateChange callback, po setLoading(false):
+queryClient.setQueryData(['auth-user'], session?.user ?? null);
 
-Trzy bloki H2 odpowiadające 4A, z 1-2 zdaniami każdy + lista plików dotkniętych.
+// w getSession().then(...), po setLoading(false):
+queryClient.setQueryData(['auth-user'], session?.user ?? null);
+```
 
-### 4C. Memory `mem/`
+`setQueryData` (nie `invalidateQueries`) — natychmiastowy zapis do cache, bez round-tripa. `useStudents` widzi `teacherId` od razu → query enabled → dashboard renderuje studentów bez F5.
 
-- `mem/features/landing/loss-framing-copy.md` (preference): zasada „all hero/pricing copy uses loss framing; never re-introduce gain-only phrasing" + tabela mapowań przed/po.
-- `mem/infrastructure/cron-audit-llm-models.md` (feature): jak wystartować pg_cron, jak ręcznie odpalić curl, jak debugować przez `cron.job_run_details`.
-- Update `mem/index.md` — 2 nowe wpisy w `## Memories` + 1 linia w `## Core`: „Hero/landing copy uses loss-aversion framing; do not revert to gain-only phrasing."
+**Test:** logout → login → dashboard pełny bez odświeżania.
 
 ---
 
-## Sekcja 5 — Kolejność wykonania (build mode)
+## 7. Onboarding zasłania Bug Button + tło
 
-1. **Sekret** — `secrets--add_secret(["CRON_SECRET"])` (user wkleja wartość).
-2. **Sweep loggera** — 7 plików edge w jednej batchowej apply_patch, każdy edytowany chirurgicznie tylko w `if (!response.ok)`.
-3. **Deploy** — `supabase--deploy_edge_functions` z 7 nazwami.
-4. **Kalkulator** — jeden `apply_patch` na `PricingCalculator.tsx` (grid inputów + grid wyników + paddingi).
-5. **Copy loss-framing** — `apply_patch` na `PricingCalculator.tsx` (kontynuacja), `HeroHeadline.tsx`, `PricingSection.tsx`.
-6. **Docs operational** — utworzenie `docs/operational/audit-llm-models-cron.md`.
-7. **Docs RAG** — update `docs/llm-context.md`, `llms.txt`.
-8. **Memory** — 2 nowe pliki `mem/` + update `mem/index.md`.
-9. **Weryfikacja**: `rg "1-Minute Prep impact|tied up monthly|save hours every week"` — żadnych pozostałości starych fraz w 3 edytowanych plikach. Screenshot preview w viewport 1229×754 — kalkulator mieści się nad fold-line.
+**Problem:** `OnboardingChecklist.tsx:89` → `fixed bottom-6 left-6 z-[70]`. `BugReportButton.tsx:36` → `fixed bottom-4 left-16 z-40`. Kolizja w bottom-left, onboarding z wyższym z-index zasłania FAB i podświetla się przezroczystym tłem.
+
+**Fix:**
+
+- `OnboardingChecklist.tsx:89` → `fixed bottom-6 right-6 z-30 ...`. Po wdrożeniu sprawdzić w preview czy w prawym-dolnym nie ma innego FAB; jeśli tak → `bottom-24 right-6`.
+- Z-index `z-[70]` → `z-30` (pod FAB-ami `z-40`, nad treścią `z-10`, pod modalami `z-50`).
+- Karta: `max-w-sm bg-card/95 backdrop-blur` żeby nie była przezroczysta.
 
 ---
 
-## Sekcja 6 — Ryzyka i mitygacja
+## 8. Dokumentacja & memory (RAG injection)
 
-- **Worksheet Engine Sanctity**: `generateWorksheet` ruszamy WYŁĄCZNIE w bloku `if (!response.ok)` w wraperze fetch — zero zmian w promptach, system messages, output parsingu. Przed edycją czytamy plik i pokazujemy diff jednego bloku.
-- **Codex-owned files**: pomijamy `seoMeta.ts`, `faqItems.ts`, `HowItWorks.tsx`, page'y SEO, public/*.html (zgodnie z `mem/decisions/reconciliation-v6926-codex.md`).
-- **i18n**: aplikacja jest 100% EN — copy zmieniamy tylko po angielsku, żadnych plików tłumaczeń.
-- **Event tracking**: `eventType` w `trackCalculatorCta` zostaje (`one_minute_calculator_cta_click`) — nie psujemy analytics.
-- **Mobile**: 2×2 grid inputów na 360px=11rem/kolumna może być ciasny dla input number + 2 buttonów; zostawiamy fallback `grid-cols-1 sm:grid-cols-2` (od ≥640px 2 kolumny).
-- **CRON_SECRET rotation**: instrukcja w doc mówi jak unschedule i ponownie zaplanować po rotacji sekretu.
+### 8.1 `docs/llm-context.md`
+
+Nowa sekcja v6.9.29 na początku, dla każdego z 8 problemów format:
+
+- **Problem:** opis kontekstu i co zawodziło
+- **Edooqoo.com Solution:** co dokładnie wdrożone
+- **Technical Mechanics:** pliki, funkcje, tabele, eventy, kontrakty
+- **RAG Keywords:** synonimy i terminy nauczycielskie
+
+### 8.2 `llms.txt`
+
+2–3 linijki summary v6.9.29: monitoring monthly+email, welcome test auto-apply+email+game+i18n, DSLM event listener, auth cache sync, onboarding positioning.
+
+### 8.3 Nowe pliki memory
+
+1. `mem/features/welcome-test/auto-apply-results.md` — process-welcome-test auto-stosuje skill ratings; UI: chip `reviewed` lub fallback przy `completed`; brak Re-apply.
+2. `mem/features/welcome-test/student-completion-email.md` — kontrakt funkcji, idempotencja przez `completion_email_sent_at`, treść bez obietnicy czasu, reply-to do nauczyciela.
+3. `mem/features/welcome-test/brain-reset-game.md` — minigame w `paused`, schowana w `<details>`, zero deps.
+4. `mem/features/dslm/add-goal-event-listener.md` — kontrakt `window event 'dslm:addGoal'` konsumowany w `DSLMTab.tsx`.
+5. `mem/features/auth/query-cache-sync.md` — `useAuthFlow` MUSI wywoływać `queryClient.setQueryData(['auth-user'], user)`.
+6. `mem/features/onboarding/positioning.md` — `bottom-6 right-6 z-30`, nigdy kolizja z FAB (z-40).
+7. **UPDATE** `mem/infrastructure/model-health-monitoring.md` — dopisać: tryb monthly + email; full logger sweep (12/12); smoke-test loggera; ostrzeżenie o literałach w smoke-teście; **uwaga o GPT-5 family wymagającym `max_completion_tokens**`.
+
+`mem/index.md` — dorzucić linki do 6 nowych + odnotować update istniejącego.
+
+### 8.4 `docs/operational/audit-llm-models-cron.md`
+
+Przepisany w/g 0.5.
 
 ---
 
-## Akceptacja?
+## 9. Kolejność implementacji (atomowa, deterministyczna)
 
-Po Twoim „tak" wykonuję sekcje 1→9 sekwencyjnie w jednej turze. Sekret `CRON_SECRET` poprosi Cię o wartość w bezpiecznym formularzu — możesz wygenerować `openssl rand -hex 32` po swojej stronie.
+1. **Migracja:** `ALTER TABLE student_tests ADD COLUMN completion_email_sent_at TIMESTAMPTZ`.
+2. `**_shared/emailTemplates/welcomeTestCompletion.ts**` — szablon HTML.
+3. **Edge function `send-welcome-test-completion-email**` + `config.toml`.
+4. **Edge function `process-welcome-test**` — auto-apply + fire-and-forget email.
+5. `**TestDetailsView.tsx**` — chip `reviewed` + fallback `completed`.
+6. `**welcomeTestTranslations.ts**` — 21 ID × 10 języków.
+7. `**BrainResetGame.tsx**` — nowy komponent.
+8. `**WelcomeTestPage.tsx**` — integracja gry w `paused`.
+9. `**DSLMTab.tsx` + `GoalsView.tsx**` — event listener + `pendingAddGoal`.
+10. `**useAuthFlow.tsx**` — `queryClient.setQueryData(['auth-user'], user)`.
+11. `**OnboardingChecklist.tsx**` — `right-6 z-30 bg-card/95`.
+12. **Logger sweep** — `logModelFailure` w `generateWorksheet/**` (każdy plik z `fetch`) i `generate-media-exercises/index.ts`.
+13. `**audit-llm-models/index.ts**` — fix gpt-5 (`max_completion_tokens`) + `mode` + `TARGETS_MONTHLY` + wywołanie email.
+14. **Edge function `send-model-audit-email**` + `config.toml`.
+15. **Edge function `test-model-failure-logger**` + `config.toml`.
+16. **Docs:** `llm-context.md`, `llms.txt`, 6 nowych + 1 update memory + `mem/index.md` + `docs/operational/audit-llm-models-cron.md`.
+
+---
+
+## 10. Walidacja po implementacji (Lovable AI wykonuje sam)
+
+1. `supabase--curl_edge_functions audit-llm-models` z `x-cron-secret` → status 200, `gpt-5-mini` ma teraz `ok=true`.
+2. `supabase--curl_edge_functions audit-llm-models` z body `{"mode":"monthly"}` → mail przyszedł (Ty potwierdzasz odbiór).
+3. `supabase--curl_edge_functions test-model-failure-logger` → wiersz w `error_logs` → usunąć.
+4. Auth refresh: logout → login → dashboard bez F5.
+5. Welcome Test E2E: mail + `student_learning_elements.current_rating` zaktualizowane + zielony chip.
+6. Add goal: klik "Add goal" w Roadmap → tab Goals + modal.
+7. Pause game: wstrzymaj test → rozwiń "🎮 Play a stupid game" → działa.
+8. Translations: PL w Welcome Test → scenarios/communication po polsku.
+9. Onboarding: prawy dolny, nie zasłania FAB.
+
+---
+
+## 11. Akcje OPERATORA (Ty, PO implementacji)
+
+W SQL Editorze, z REALNYM `CRON_SECRET` (jak w Twoim sukcesie z Krok B/C):
+
+**Krok D — miesięczny cron:**
+
+```sql
+select cron.schedule(
+  'audit-llm-models-monthly',
+  '0 7 1 * *',
+  $$
+  select net.http_post(
+    url     := 'https://bvfrkzdlklyvnhlpleck.supabase.co/functions/v1/audit-llm-models',
+    headers := jsonb_build_object('Content-Type','application/json','x-cron-secret','<TWOJA_WARTOSC_CRON_SECRET>'),
+    body    := '{"mode":"monthly"}'::jsonb
+  );
+  $$
+);
+```
+
+**Krok F — jednorazowy test maila miesięcznego (analogicznie do Twojego Kroku E):**
+
+```sql
+select cron.schedule('audit-llm-models-monthly-once-now', '* * * * *', $$ <ten sam http_post co wyżej> $$);
+-- poczekaj 60-90 sekund, sprawdź skrzynkę edooqoo@gmail.com
+select cron.unschedule('audit-llm-models-monthly-once-now');
+```
+
+To wszystko — żadnych innych ręcznych SQL po Twojej stronie.
+
+---
+
+## 12. Ryzyka i guard-rails
+
+- **Sanctity Worksheet Engine:** tylko `logModelFailure` w catch — ZERO zmian merytorycznych.
+- **Codex-owned files** (`mem/decisions/reconciliation-v6926-codex.md`): nieruszane.
+- **Welcome Test scoring:** auto-apply działa na wynikach, nie modyfikuje algorytmu.
+- **Auto-apply fail-safe:** błąd NIE rollbackuje `completed`, fallback UI pozwala retry.
+- **Email idempotency:** `completion_email_sent_at` blokuje duplikaty.
+- **Translations:** brak tłumaczenia → fallback EN, UI się nie wywala.
+- **Audit GPT-5 fix:** rozróżnienie body po `target.model.startsWith('openai/gpt-5')` — backwards-compatible dla pozostałych modeli.
+- **Cron docs:** explicite ostrzeżenie przed literałami w smoke-teście (Twój 401 to przekonał).
