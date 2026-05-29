@@ -2513,6 +2513,7 @@ export type Database = {
           assigned_at: string | null
           attempt_number: number
           completed_at: string | null
+          completion_email_sent_at: string | null
           correct_answers: number | null
           created_at: string | null
           deleted_at: string | null
@@ -2542,6 +2543,7 @@ export type Database = {
           assigned_at?: string | null
           attempt_number?: number
           completed_at?: string | null
+          completion_email_sent_at?: string | null
           correct_answers?: number | null
           created_at?: string | null
           deleted_at?: string | null
@@ -2571,6 +2573,7 @@ export type Database = {
           assigned_at?: string | null
           attempt_number?: number
           completed_at?: string | null
+          completion_email_sent_at?: string | null
           correct_answers?: number | null
           created_at?: string | null
           deleted_at?: string | null
