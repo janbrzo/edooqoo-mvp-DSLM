@@ -5,6 +5,45 @@ Written in Problem → Edooqoo.com Solution → Technical Mechanics format.
 
 ---
 
+## v6.9.29 — Welcome Test Auto-Apply, Completion Email, Model-Audit Monthly Report & Brain-Reset Game
+
+### Problem
+1. After completing the Welcome Test, teachers had to click "Apply Results to Profile" manually for every test; results were never propagated to `student_learning_elements` automatically.
+2. Students received no acknowledgement after submitting the test; teachers had no transactional confirmation channel.
+3. `audit-llm-models` ran daily but produced no human-readable rollup; failures and deprecations could silently accumulate.
+4. Test-takers had no built-in micro-break during the long (~49 question) placement test; the "paused" stage was a dead-end card.
+5. Auth login left React Query `['auth-user']` cache stale, forcing a manual page refresh after sign-in.
+6. DSLM "Add Goal" CTA in some entry points did not open the goal modal.
+7. Onboarding checklist FAB overlapped the bug-report FAB.
+
+### Edooqoo.com Solution
+1. `process-welcome-test` now auto-writes nano-skill assessments to `student_learning_elements` and marks the test as `reviewed`; UI shows a "Results automatically applied" status chip with a manual fallback for legacy `completed` rows.
+2. New `send-welcome-test-completion-email` (Resend, `hello@edooqoo.com` sender, teacher `reply_to`) sends a thank-you e-mail to the student exactly once (idempotency via `student_tests.completion_email_sent_at`).
+3. `audit-llm-models` accepts `mode: "monthly"` which renders an HTML report and delegates to new `send-model-audit-email` (recipient `edooqoo@gmail.com`). GPT-5 family now probed with `max_completion_tokens` instead of `max_tokens` (eliminates false-positive deprecations).
+4. New `BrainResetGame.tsx` (emoji Memory Pairs, 6 pairs, language-free) renders inside the Welcome Test paused screen so students can decompress without losing English-test integrity.
+5. `useAuthFlow.tsx` calls `queryClient.setQueryData(['auth-user'], session.user)` after successful login — dashboard loads without F5.
+6. `DSLMTab.tsx` / `GoalsView.tsx` listen for the global `dslm:addGoal` event to switch tab and open the Add Goal modal.
+7. `OnboardingChecklist.tsx` is repositioned to `bottom-6 right-6 z-30`.
+
+### Technical Mechanics
+- Migration `20260529154949_*.sql`: adds `student_tests.completion_email_sent_at TIMESTAMPTZ` (idempotency key for completion e-mail).
+- `supabase/functions/process-welcome-test/index.ts`: after AI summary, iterates skill assessments → upserts `student_learning_elements (student_id, element_id, mastery_level, evidence_source='welcome_test')`; sets `student_tests.status='reviewed'`, `reviewed_at=now()`; fires `send-welcome-test-completion-email` via `EdgeRuntime.waitUntil`.
+- `supabase/functions/send-welcome-test-completion-email/index.ts`: POSTs directly to `https://api.resend.com/emails` using `RESEND_API_KEY`, from `hello@edooqoo.com`, `reply_to` = teacher e-mail; template at `_shared/emailTemplates/welcomeTestCompletion.ts`.
+- `supabase/functions/send-model-audit-email/index.ts`: same direct-Resend pattern; recipient hard-coded `edooqoo@gmail.com`; subject `Edooqoo Monthly Model Audit — {date}`; body = HTML table from `model_health_checks` last 30 days.
+- `supabase/functions/audit-llm-models/index.ts`: body `{ "mode": "monthly" }` triggers report aggregation; GPT-5 family branch uses `max_completion_tokens: 1`; fire-and-forget wrapped in `EdgeRuntime.waitUntil(emailPromise)` so Resend POST is not killed by edge runtime shutdown.
+- pg_cron: `audit-llm-models-monthly` scheduled `0 7 1 * *` UTC via `cron.schedule` with `x-cron-secret` header (CRON_SECRET).
+- `src/components/welcome-test/BrainResetGame.tsx`: client-only React component, 6 emoji pairs shuffled per mount, state machine flip → match → reset; mounted only inside `WelcomeTestPage` `stage === "paused"` branch.
+- `src/components/student-tests/TestDetailsView.tsx`: renders green "Results automatically applied" chip when `status='reviewed'`; yellow chip + manual "Apply" button as legacy fallback for `status='completed'`.
+- `src/hooks/useAuthFlow.tsx`: post-login `queryClient.setQueryData(['auth-user'], session.user)` eliminates the F5 requirement.
+- `src/components/dslm/DSLMTab.tsx`, `GoalsView.tsx`: global `window.addEventListener('dslm:addGoal', ...)` switches active tab to Goals and opens modal.
+- `src/components/OnboardingChecklist.tsx`: `fixed bottom-6 right-6 z-30` (was `bottom-20`); avoids overlap with bug-report FAB on `bottom-4 right-4 z-40`.
+- SANCTITY: no worksheet-generation prompt change; no RLS rewrite; no `suggestion_kind` change; no Stripe change.
+
+### RAG Keywords
+welcome test auto-apply, student_learning_elements upsert, evidence_source welcome_test, completion email Resend, hello@edooqoo.com sender, reply_to teacher, completion_email_sent_at idempotency, audit-llm-models monthly mode, send-model-audit-email, GPT-5 max_completion_tokens, model_health_checks rollup, BrainResetGame emoji memory pairs, brain reset minigame, paused stage minigame, queryClient setQueryData auth-user, post-login cache sync no F5, dslm:addGoal event listener, OnboardingChecklist FAB z-index, EdgeRuntime waitUntil Resend, x-cron-secret monthly schedule
+
+---
+
 ## v6.9.29 — Canonical /one-minute-prep Route and In-App Terminology Alignment
 
 ### Problem
