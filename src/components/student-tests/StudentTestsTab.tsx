@@ -15,6 +15,8 @@ import type { StudentTest } from '@/types/studentTests';
 import { TestDetailsView } from './TestDetailsView';
 import { WelcomeTestComparisonView } from '@/components/welcome-test/WelcomeTestComparisonView';
 import { ALL_WELCOME_TEST_QUESTIONS } from '@/data/welcomeTestQuestions';
+import { getWelcomeTestTotal } from '@/utils/welcomeTestNumbering';
+import { TestDates } from './TestDates';
 import { toast } from 'sonner';
 import {
   WelcomeTestActionsPanel,
@@ -280,17 +282,25 @@ export function StudentTestsTab({ studentId, teacherId, studentName }: StudentTe
               <div>
                 <h3 className="font-semibold">{welcomeTest?.title ?? 'Welcome (placement) Test'}</h3>
                 <p className="text-sm text-muted-foreground">
-                  Welcome Test • {welcomeTest?.total_questions || ALL_WELCOME_TEST_QUESTIONS.length} questions
+                  Welcome Test • {welcomeTest ? getWelcomeTestTotal(welcomeTest) : ALL_WELCOME_TEST_QUESTIONS.length} questions
                   {welcomeTest && (welcomeTest as any).attempt_number > 1 && (
                     <span className="ml-2 text-primary">· Attempt #{(welcomeTest as any).attempt_number}</span>
                   )}
                 </p>
+                {welcomeTest && (
+                  <TestDates
+                    createdAt={welcomeTest.created_at}
+                    completedAt={(welcomeTest as any).completed_at}
+                    reviewedAt={(welcomeTest as any).reviewed_at}
+                    className="mt-1"
+                  />
+                )}
               </div>
             </div>
             <div className="flex items-center gap-2 flex-wrap">
               {welcomeTest && welcomeTest.score_percentage !== null && (
                 <div className="text-right mr-2">
-                  <div className="text-lg font-bold">{welcomeAnsweredCount}/{welcomeTest.total_questions}</div>
+                  <div className="text-lg font-bold">{welcomeAnsweredCount}/{getWelcomeTestTotal(welcomeTest)}</div>
                   <div className="text-xs text-muted-foreground">answered</div>
                 </div>
               )}
@@ -377,8 +387,14 @@ function TestCard({ test, onClick }: TestCardProps) {
             <div>
               <h3 className="font-semibold">{test.title}</h3>
               <p className="text-sm text-muted-foreground">
-                {isWelcome ? 'Welcome (placement) Test' : test.test_type} • {test.total_questions || 0} questions
+                {isWelcome ? 'Welcome (placement) Test' : test.test_type} • {isWelcome ? getWelcomeTestTotal(test) : (test.total_questions || 0)} questions
               </p>
+              <TestDates
+                createdAt={test.created_at}
+                completedAt={(test as any).completed_at}
+                reviewedAt={(test as any).reviewed_at}
+                className="mt-1"
+              />
             </div>
           </div>
           <div className="flex items-center gap-3">
@@ -386,7 +402,7 @@ function TestCard({ test, onClick }: TestCardProps) {
               <div className="text-right">
                 {isWelcome ? (
                   <>
-                    <div className="text-lg font-bold">{test.answered_count || test.correct_answers || 0}/{test.total_questions}</div>
+                    <div className="text-lg font-bold">{test.answered_count || test.correct_answers || 0}/{getWelcomeTestTotal(test)}</div>
                     <div className="text-xs text-muted-foreground">answered</div>
                   </>
                 ) : (

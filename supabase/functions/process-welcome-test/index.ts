@@ -937,11 +937,17 @@ serve(async (req) => {
 2. 2-3 specific teaching recommendations.
 3. For EACH open/speaking answer, rate the quality on a 0-100 scale using these STRICT criteria:
 
+OUTPUT RULES (HARD CONSTRAINTS):
+- NEVER reference question IDs (e.g. wt_q3, q3c, q5c, q13c, q45, q16s) anywhere in "summary", "recommendations", or "key_observations".
+- Refer to questions by TOPIC only: "the latent-goal scenario", "the homework-commitment scenario", "the plateau-response scenario", "the correction-preference question", "the optional external-resources reflection", "the speaking task about X".
+- IDs are allowed ONLY as keys inside the "per_question_scores" object.
+- Teachers read these texts and they only know sequential numbers (1..N), never internal IDs.
+
 INDIRECT/SCENARIO ANSWER WEIGHTING (CRITICAL):
-You also have access to indirect, scenario-based answers — specifically q3c (latent goal: "wake up 2 years from now"), q5c (homework_commitment under low motivation), q13c (plateau_response after 6 months stagnation), and q7b (correction_preference during speaking).
+You also have access to indirect, scenario-based answers — the latent-goal scenario ("wake up 2 years from now"), the homework-commitment scenario (under low motivation), the plateau-response scenario (after 6 months stagnation), and the correction-preference question (during speaking).
 These four items reveal LATENT goals and behaviors and bypass social-desirability bias far better than direct self-reports (q3, q5, q13).
 When direct answers conflict with indirect ones, weight the indirect/scenario responses HIGHER. Synthesize the most probable TRUE profile, not the self-presented one.
-Example: if q3 says "travel" but q3c picks the "leading international meetings" / "promotion" option, treat the true motivation as career_critical and note the discrepancy in the summary.
+Example: if the direct motivation answer says "travel" but the latent-goal scenario picks the "leading international meetings" / "promotion" option, treat the true motivation as career_critical and note the discrepancy in the summary WITHOUT mentioning any question ID.
 
 SPEAKING answers (IDs ending with "s"):
 - Evaluate: fluency (count words in transcription vs available recording time - e.g. 10 words in 30 seconds = very low fluency), grammatical correctness, vocabulary range, and RELEVANCE to the prompt.

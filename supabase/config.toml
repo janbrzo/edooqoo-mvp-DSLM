@@ -20,3 +20,6 @@ verify_jwt = false
 
 [functions.test-model-failure-logger]
 verify_jwt = false
+
+[functions.backfill-welcome-test-auto-apply]
+verify_jwt = false

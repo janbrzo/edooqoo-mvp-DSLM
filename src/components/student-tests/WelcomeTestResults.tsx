@@ -14,11 +14,21 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
 import type { LearningProfile } from '@/types/welcomeTest';
+import { sanitizeAiText, sanitizeAiList } from '@/utils/sanitizeAiSummary';
+
+interface TestQuestionLike {
+  element_type?: string | null;
+  is_correct?: boolean | null;
+  student_answer?: unknown;
+}
 
 interface WelcomeTestResultsProps {
   testId: string;
   studentId: string;
   teacherId: string;
+  /** Optional — when provided, listening/other skills can fall back to a
+   *  per-question computation if `test_skill_results` lacks an entry. */
+  questions?: TestQuestionLike[];
 }
 
 interface AiSummaryData {
@@ -35,7 +45,7 @@ interface SkillResultData {
   score_percentage: number;
 }
 
-export function WelcomeTestResults({ testId, studentId, teacherId }: WelcomeTestResultsProps) {
+export function WelcomeTestResults({ testId, studentId, teacherId, questions }: WelcomeTestResultsProps) {
   const [profile, setProfile] = useState<LearningProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [aiSummary, setAiSummary] = useState<AiSummaryData | null>(null);
@@ -125,13 +135,13 @@ export function WelcomeTestResults({ testId, studentId, teacherId }: WelcomeTest
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <p className="text-sm leading-relaxed">{aiSummary.summary}</p>
+            <p className="text-sm leading-relaxed">{sanitizeAiText(aiSummary.summary)}</p>
             
             {aiSummary.key_observations && aiSummary.key_observations.length > 0 && (
               <div>
                 <p className="text-xs font-medium text-muted-foreground mb-1.5">Key Observations</p>
                 <ul className="space-y-1">
-                  {aiSummary.key_observations.map((obs, i) => (
+                  {sanitizeAiList(aiSummary.key_observations).map((obs, i) => (
                     <li key={i} className="text-sm flex items-start gap-1.5">
                       <span className="text-primary mt-0.5">•</span>
                       {obs}
@@ -147,7 +157,7 @@ export function WelcomeTestResults({ testId, studentId, teacherId }: WelcomeTest
                   <Lightbulb className="h-3 w-3" /> Recommendations
                 </p>
                 <ul className="space-y-1">
-                  {aiSummary.recommendations.map((rec, i) => (
+                  {sanitizeAiList(aiSummary.recommendations).map((rec, i) => (
                     <li key={i} className="text-sm flex items-start gap-1.5">
                       <span className="text-amber-500 mt-0.5">💡</span>
                       {rec}
@@ -227,14 +237,37 @@ export function WelcomeTestResults({ testId, studentId, teacherId }: WelcomeTest
                 {SKILL_DISPLAY.map(({ label, profileKey, useAiScore, skill }) => {
                   const result = skillResults.find(r => r.element_type === skill);
                   const aiScore = profileKey ? (profile as any)[profileKey] : null;
-                  
+                  // Fallback: compute from raw questions when test_skill_results
+                  // lacks an entry (common for listening when aggregation skipped).
+                  let fallbackComputed: { score: number; correct: number; total: number; attempted: number } | null = null;
+                  if (!result && questions && questions.length > 0) {
+                    const qs = questions.filter(q => (q.element_type || '') === skill);
+                    const total = qs.length;
+                    const attempted = qs.filter(q => q.student_answer !== null && q.student_answer !== undefined && q.student_answer !== '').length;
+                    const correct = qs.filter(q => q.is_correct === true).length;
+                    if (total > 0) {
+                      fallbackComputed = {
+                        total,
+                        attempted,
+                        correct,
+                        score: attempted > 0 ? Math.round((correct / total) * 100) : 0,
+                      };
+                    }
+                  }
+
                   // For MC-heavy skills: prefer test_skill_results; for open-ended: prefer AI score
                   let displayScore: number | null;
                   if (useAiScore) {
                     displayScore = aiScore ?? (result ? result.score_percentage : null);
                   } else {
-                    displayScore = result ? result.score_percentage : (aiScore ?? null);
+                    displayScore = result
+                      ? result.score_percentage
+                      : (fallbackComputed ? fallbackComputed.score : (aiScore ?? null));
                   }
+
+                  // Hide row entirely when there is zero signal anywhere.
+                  if (!result && !fallbackComputed && displayScore === null) return null;
+                  const isSkipped = !result && fallbackComputed && fallbackComputed.attempted === 0;
                   
                   mergedScores.push({ label, score: displayScore });
                   
@@ -245,11 +278,16 @@ export function WelcomeTestResults({ testId, studentId, teacherId }: WelcomeTest
                         <Progress value={displayScore || 0} className="h-2" />
                       </div>
                       <span className="w-12 text-right text-sm font-medium">
-                        {displayScore !== null ? `${Math.round(displayScore)}%` : '—'}
+                        {isSkipped ? '—' : (displayScore !== null ? `${Math.round(displayScore)}%` : '—')}
                       </span>
                       {result && (
                         <span className="w-14 text-right text-xs text-muted-foreground">
                           ({result.correct_answers}/{result.total_questions})
+                        </span>
+                      )}
+                      {!result && fallbackComputed && (
+                        <span className="w-14 text-right text-xs text-muted-foreground">
+                          {isSkipped ? 'Skipped' : `(${fallbackComputed.correct}/${fallbackComputed.total})`}
                         </span>
                       )}
                       {useAiScore && !result && displayScore !== null && (
