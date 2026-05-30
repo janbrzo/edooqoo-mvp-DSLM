@@ -14,11 +14,21 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
 import type { LearningProfile } from '@/types/welcomeTest';
+import { sanitizeAiText, sanitizeAiList } from '@/utils/sanitizeAiSummary';
+
+interface TestQuestionLike {
+  element_type?: string | null;
+  is_correct?: boolean | null;
+  student_answer?: unknown;
+}
 
 interface WelcomeTestResultsProps {
   testId: string;
   studentId: string;
   teacherId: string;
+  /** Optional — when provided, listening/other skills can fall back to a
+   *  per-question computation if `test_skill_results` lacks an entry. */
+  questions?: TestQuestionLike[];
 }
 
 interface AiSummaryData {
@@ -35,7 +45,7 @@ interface SkillResultData {
   score_percentage: number;
 }
 
-export function WelcomeTestResults({ testId, studentId, teacherId }: WelcomeTestResultsProps) {
+export function WelcomeTestResults({ testId, studentId, teacherId, questions }: WelcomeTestResultsProps) {
   const [profile, setProfile] = useState<LearningProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [aiSummary, setAiSummary] = useState<AiSummaryData | null>(null);
