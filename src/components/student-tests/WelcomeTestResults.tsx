@@ -237,14 +237,37 @@ export function WelcomeTestResults({ testId, studentId, teacherId, questions }: 
                 {SKILL_DISPLAY.map(({ label, profileKey, useAiScore, skill }) => {
                   const result = skillResults.find(r => r.element_type === skill);
                   const aiScore = profileKey ? (profile as any)[profileKey] : null;
-                  
+                  // Fallback: compute from raw questions when test_skill_results
+                  // lacks an entry (common for listening when aggregation skipped).
+                  let fallbackComputed: { score: number; correct: number; total: number; attempted: number } | null = null;
+                  if (!result && questions && questions.length > 0) {
+                    const qs = questions.filter(q => (q.element_type || '') === skill);
+                    const total = qs.length;
+                    const attempted = qs.filter(q => q.student_answer !== null && q.student_answer !== undefined && q.student_answer !== '').length;
+                    const correct = qs.filter(q => q.is_correct === true).length;
+                    if (total > 0) {
+                      fallbackComputed = {
+                        total,
+                        attempted,
+                        correct,
+                        score: attempted > 0 ? Math.round((correct / total) * 100) : 0,
+                      };
+                    }
+                  }
+
                   // For MC-heavy skills: prefer test_skill_results; for open-ended: prefer AI score
                   let displayScore: number | null;
                   if (useAiScore) {
                     displayScore = aiScore ?? (result ? result.score_percentage : null);
                   } else {
-                    displayScore = result ? result.score_percentage : (aiScore ?? null);
+                    displayScore = result
+                      ? result.score_percentage
+                      : (fallbackComputed ? fallbackComputed.score : (aiScore ?? null));
                   }
+
+                  // Hide row entirely when there is zero signal anywhere.
+                  if (!result && !fallbackComputed && displayScore === null) return null;
+                  const isSkipped = !result && fallbackComputed && fallbackComputed.attempted === 0;
                   
                   mergedScores.push({ label, score: displayScore });
                   
@@ -255,11 +278,16 @@ export function WelcomeTestResults({ testId, studentId, teacherId, questions }: 
                         <Progress value={displayScore || 0} className="h-2" />
                       </div>
                       <span className="w-12 text-right text-sm font-medium">
-                        {displayScore !== null ? `${Math.round(displayScore)}%` : '—'}
+                        {isSkipped ? '—' : (displayScore !== null ? `${Math.round(displayScore)}%` : '—')}
                       </span>
                       {result && (
                         <span className="w-14 text-right text-xs text-muted-foreground">
                           ({result.correct_answers}/{result.total_questions})
+                        </span>
+                      )}
+                      {!result && fallbackComputed && (
+                        <span className="w-14 text-right text-xs text-muted-foreground">
+                          {isSkipped ? 'Skipped' : `(${fallbackComputed.correct}/${fallbackComputed.total})`}
                         </span>
                       )}
                       {useAiScore && !result && displayScore !== null && (
