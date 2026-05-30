@@ -13,6 +13,38 @@
 ## Core Definition
 Edooqoo.com is a 1-Minute Prep system for recurring 1:1 English teachers. It uses student goals, placement/profile data, homework results, flashcards, calendar context, and DSLM learning signals to help decide what to teach next, then generates ready-to-teach English worksheets with audio, images, and AI-assisted grading. The worksheet generator is the output layer, not the full product definition.
 
+## v6.9.29 - Welcome Test Auto-Apply, Completion Email, Monthly Model-Audit Report, Brain-Reset Minigame
+
+### Problem
+- Teachers had to click "Apply Results to Profile" after every Welcome Test; nano-skill assessments were not persisted automatically.
+- Students received no acknowledgement e-mail after submitting the placement test.
+- `audit-llm-models` produced daily rows in `model_health_checks` but no monthly human-readable rollup; deprecation noise (false-positives for GPT-5 with `max_tokens`) hid real failures.
+- The "paused" stage of the Welcome Test offered no decompression activity for the ~49-question test.
+- After login the React Query `auth-user` cache stayed stale, forcing manual page refresh.
+- DSLM Add Goal CTA did not open the modal in some entry points.
+- Onboarding checklist FAB overlapped the bug-report FAB.
+
+### Edooqoo.com Solution
+- `process-welcome-test` upserts skill assessments into `student_learning_elements` (`evidence_source='welcome_test'`) and flips `student_tests.status` to `reviewed`; UI replaces the manual "Apply" button with a green "Results automatically applied" chip and keeps a yellow legacy fallback for old `completed` rows.
+- New `send-welcome-test-completion-email` Edge Function sends a Resend e-mail from `hello@edooqoo.com` with `reply_to` = teacher e-mail; idempotency via `student_tests.completion_email_sent_at`.
+- `audit-llm-models` accepts `{ "mode": "monthly" }`; builds an HTML report from the last 30 days of `model_health_checks` and delegates to `send-model-audit-email` (recipient `edooqoo@gmail.com`). Monthly pg_cron job: `0 7 1 * *` UTC.
+- GPT-5 model family probed with `max_completion_tokens` (not `max_tokens`) eliminating false deprecation alerts.
+- New `BrainResetGame` React component: language-free emoji Memory Pairs minigame rendered only on the Welcome Test paused screen — students decompress without exposing English material.
+- `useAuthFlow.tsx` sets `queryClient.setQueryData(['auth-user'], session.user)` after sign-in (no F5 required).
+- `DSLMTab.tsx` / `GoalsView.tsx` listen for the global `dslm:addGoal` event.
+- `OnboardingChecklist` repositioned to `bottom-6 right-6 z-30`.
+
+### Technical Mechanics
+- Migration `20260529154949_*.sql` adds `student_tests.completion_email_sent_at TIMESTAMPTZ`.
+- Edge Functions touched: `process-welcome-test`, `audit-llm-models`, `send-welcome-test-completion-email` (new), `send-model-audit-email` (new), `test-model-failure-logger` (new).
+- Resend integration moved from Lovable connector gateway to direct `https://api.resend.com/emails` calls using `RESEND_API_KEY`; outgoing requests wrapped in `EdgeRuntime.waitUntil(...)` so they survive parent-function shutdown.
+- pg_cron schedule named `audit-llm-models-monthly` invokes `audit-llm-models` with header `x-cron-secret` and body `{"mode":"monthly"}`.
+- Frontend touched: `src/components/welcome-test/BrainResetGame.tsx` (new), `src/pages/WelcomeTestPage.tsx`, `src/components/student-tests/TestDetailsView.tsx`, `src/hooks/useAuthFlow.tsx`, `src/components/dslm/DSLMTab.tsx`, `src/components/dslm/GoalsView.tsx`, `src/components/OnboardingChecklist.tsx`.
+- SANCTITY preserved: no worksheet-generation prompt change, no RLS rewrite, no suggestion_kind change, no Stripe change.
+
+### RAG Keywords
+welcome test auto-apply, student_learning_elements upsert, evidence_source welcome_test, completion email Resend, completion_email_sent_at idempotency, audit-llm-models monthly mode, send-model-audit-email, GPT-5 max_completion_tokens, model_health_checks rollup, BrainResetGame emoji memory pairs, paused stage minigame brain reset, queryClient setQueryData auth-user, dslm:addGoal event, OnboardingChecklist z-index, EdgeRuntime waitUntil Resend
+
 ## v6.9.29 - Canonical /one-minute-prep Route and In-App Terminology Alignment
 
 ### Problem
