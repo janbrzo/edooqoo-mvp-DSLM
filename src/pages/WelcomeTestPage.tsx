@@ -504,19 +504,22 @@ export default function WelcomeTestPage() {
   if (stage === "paused") {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-secondary/20 p-4">
-        <Card className="max-w-md w-full">
-          <CardContent className="py-8 text-center space-y-4">
-            <Pause className="h-12 w-12 text-muted-foreground mx-auto" />
-            <h2 className="text-xl font-semibold">Test Paused</h2>
-            <p className="text-sm text-muted-foreground">
-              Your progress is saved ({answeredCount}/{totalQuestions} answered). You can close this page and come back
-              anytime.
-            </p>
-            <Button onClick={resumeTest} size="lg" className="min-h-[48px]">
-              Resume Test
-            </Button>
-          </CardContent>
-        </Card>
+        <div className="max-w-md w-full space-y-4">
+          <Card>
+            <CardContent className="py-8 text-center space-y-4">
+              <Pause className="h-12 w-12 text-muted-foreground mx-auto" />
+              <h2 className="text-xl font-semibold">Test Paused</h2>
+              <p className="text-sm text-muted-foreground">
+                Your progress is saved ({answeredCount}/{totalQuestions} answered). You can close this page and come back
+                anytime.
+              </p>
+              <Button onClick={resumeTest} size="lg" className="min-h-[48px]">
+                Resume Test
+              </Button>
+            </CardContent>
+          </Card>
+          <BrainResetGame />
+        </div>
       </div>
     );
   }
