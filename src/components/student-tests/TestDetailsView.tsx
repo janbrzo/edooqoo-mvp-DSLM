@@ -35,6 +35,7 @@ import { toast } from 'sonner';
 import { ShareTestModal } from './ShareTestModal';
 import { supabase } from '@/integrations/supabase/client';
 import { WelcomeTestResults } from './WelcomeTestResults';
+import { TestDates } from './TestDates';
 import { ALL_WELCOME_TEST_QUESTIONS } from '@/data/welcomeTestQuestions';
 import { 
   TEST_STATUS_CONFIG, 
@@ -266,6 +267,12 @@ export function TestDetailsView({ testId, teacherId, studentId, onBack }: TestDe
             <div>
               <CardTitle className="text-xl">{test.title}</CardTitle>
               <p className="text-muted-foreground">{test.description}</p>
+              <TestDates
+                createdAt={(test as any).created_at}
+                completedAt={(test as any).completed_at}
+                reviewedAt={(test as any).reviewed_at}
+                className="mt-2"
+              />
             </div>
             <Badge className={`${statusConfig.bgColor} ${statusConfig.color}`}>
               {statusConfig.label}
@@ -320,7 +327,7 @@ export function TestDetailsView({ testId, teacherId, studentId, onBack }: TestDe
 
       {/* Welcome Test Learning Profile - FIX 2.2: always show, even before completion */}
       {isWelcomeTest && (
-        <WelcomeTestResults testId={testId} studentId={studentId} teacherId={teacherId} />
+        <WelcomeTestResults testId={testId} studentId={studentId} teacherId={teacherId} questions={questions} />
       )}
 
       {/* v6.9.29 — Results are auto-applied by process-welcome-test (status=reviewed).
