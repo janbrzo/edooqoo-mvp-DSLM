@@ -25,3 +25,18 @@ export const QUESTION_CANONICAL_MAP: Record<string, string> = (() => {
 
 export const toCanonicalId = (legacyOrCanonical: string): string =>
   QUESTION_CANONICAL_MAP[legacyOrCanonical] ?? legacyOrCanonical;
+
+/**
+ * Returns the most accurate "total questions" value for a welcome test,
+ * defending against drift between `student_tests.total_questions` (snapshot at
+ * creation time) and the actual count of seeded `student_test_questions` rows
+ * (which grows when the canonical question list is extended).
+ */
+export const getWelcomeTestTotal = (test: {
+  total_questions?: number | null;
+  answered_count?: number | null;
+}): number => {
+  const total = test.total_questions ?? 0;
+  const answered = test.answered_count ?? 0;
+  return Math.max(total, answered, ALL_WELCOME_TEST_QUESTIONS.length);
+};
