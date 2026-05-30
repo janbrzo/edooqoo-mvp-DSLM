@@ -15,6 +15,8 @@ import type { StudentTest } from '@/types/studentTests';
 import { TestDetailsView } from './TestDetailsView';
 import { WelcomeTestComparisonView } from '@/components/welcome-test/WelcomeTestComparisonView';
 import { ALL_WELCOME_TEST_QUESTIONS } from '@/data/welcomeTestQuestions';
+import { getWelcomeTestTotal } from '@/utils/welcomeTestNumbering';
+import { TestDates } from './TestDates';
 import { toast } from 'sonner';
 import {
   WelcomeTestActionsPanel,
