@@ -135,13 +135,13 @@ export function WelcomeTestResults({ testId, studentId, teacherId, questions }: 
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <p className="text-sm leading-relaxed">{aiSummary.summary}</p>
+            <p className="text-sm leading-relaxed">{sanitizeAiText(aiSummary.summary)}</p>
             
             {aiSummary.key_observations && aiSummary.key_observations.length > 0 && (
               <div>
                 <p className="text-xs font-medium text-muted-foreground mb-1.5">Key Observations</p>
                 <ul className="space-y-1">
-                  {aiSummary.key_observations.map((obs, i) => (
+                  {sanitizeAiList(aiSummary.key_observations).map((obs, i) => (
                     <li key={i} className="text-sm flex items-start gap-1.5">
                       <span className="text-primary mt-0.5">•</span>
                       {obs}
@@ -157,7 +157,7 @@ export function WelcomeTestResults({ testId, studentId, teacherId, questions }: 
                   <Lightbulb className="h-3 w-3" /> Recommendations
                 </p>
                 <ul className="space-y-1">
-                  {aiSummary.recommendations.map((rec, i) => (
+                  {sanitizeAiList(aiSummary.recommendations).map((rec, i) => (
                     <li key={i} className="text-sm flex items-start gap-1.5">
                       <span className="text-amber-500 mt-0.5">💡</span>
                       {rec}
