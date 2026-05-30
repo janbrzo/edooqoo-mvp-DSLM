@@ -1,405 +1,198 @@
-# Plan v6.9.29 (rev 4) — Final — Welcome Test + UX + zamknięcie monitoringu modeli
+## Diagnoza problemów
 
-Status diagnozy: **smoke-test OK, cron `audit-llm-models-daily` zapisany w bazie (jobid=10), tabela `model_health_checks` zasilona 8 wierszami**. Pozostają dwie sprawy do dokończenia w monitoringu (sekcja 0) plus pełna lista 8 problemów funkcjonalnych (sekcje 1–9). Plan jest addytywny — sanctity worksheet engine i scoring Welcome Test pozostają nietknięte.
+### Problem 1 — "Auto-apply did not complete"
+**Przyczyna:** Wynik Wiktorii powstał ZANIM wdrożyliśmy auto-apply (v6.9.29). Jej `student_tests.status = 'completed'`, dlatego UI pokazuje żółty banner. Auto-apply uruchamia się tylko podczas `process-welcome-test` — historyczne testy nie zostały reprocessowane. To NIE jest bug w nowych testach (Johny ma `reviewed` — bez bannera), ale UX dla starych testów jest mylący i wymaga jednego z dwóch działań:
+- ręcznego kliknięcia "Apply to Progress" (działa, ale niewygodne), albo
+- backfillu: jednorazowo wywołać auto-apply dla wszystkich starych testów ze statusem `completed`.
 
----
+**Decyzja:** zrobimy obie rzeczy — UI bez zmian (fallback nadal potrzebny na wypadek przyszłych awarii AI), + jednorazowy backfill który przeprocesuje istniejące `completed` testy.
 
-## 0. Monitoring modeli — stan po Twoich testach + co jeszcze trzeba
+### Problem 2 — "58/54 answered"
+**Przyczyna:** `student_tests.total_questions` zapisywane jest w momencie tworzenia testu (DB row Wiktorii ma 54). Później dodaliśmy nowe pytania do `ALL_WELCOME_TEST_QUESTIONS` (jest ich 58) i seedują się do `student_test_questions`, ale stara wartość `total_questions = 54` została. Stąd `58/54`.
 
-### 0.1 Co już DZIAŁA (potwierdzone w bazie, nic nie ruszamy)
+**Decyzja:** 
+- Frontend: zawsze używać `Math.max(answered_count, total_questions)` lub `questions.length` (rzeczywista liczba zseedowanych pytań) jako mianownika.
+- Migracja jednorazowa: `UPDATE student_tests SET total_questions = (SELECT COUNT(*) FROM student_test_questions WHERE test_id = student_tests.id) WHERE test_type='welcome'`.
 
-- Cron `audit-llm-models-daily` istnieje (jobid=10, schedule `0 6 * * *`, active=true). Codziennie 06:00 UTC pinguje 4 modele i wpisuje wynik do `model_health_checks`.
-- Edge function `audit-llm-models` autoryzuje przez `x-cron-secret` (sprawdzone — 401 dla literału, 200 dla prawdziwej wartości).
-- Tabela `model_health_checks` ma 8 wierszy z dwóch przebiegów (smoke-test + cron-once-now). Logger Poziom 3 działa.
+### Problem 3 — Brak dat utworzenia/wypełnienia
+**Stan:** Tabela `student_tests` ma `created_at`, `started_at`, `completed_at`, `reviewed_at`. Karty w `StudentTestsTab.tsx` i nagłówek w `TestDetailsView.tsx` nie wyświetlają żadnej z nich.
 
-### 0.2 Co WYKRYŁY testy i wymaga naprawy w kodzie
+**Decyzja:** Dodać dwie linie w trzech miejscach:
+- Welcome Test card (linia ~282): pod opisem dodać `Created: dd Mmm yyyy · Completed: dd Mmm yyyy` (lub "—" jeśli null).
+- `TestCard` (linia ~379): analogicznie.
+- `TestDetailsView` header (linia ~267): w `<p className="text-muted-foreground">` po opisie dodać linijkę z datami.
 
-**PROBLEM (widoczny w Twoich wynikach):** `openai/gpt-5-mini` przez Lovable Gateway zwraca **HTTP 400 — `"Unsupported parameter: max_tokens"**`. To **false positive** w audycie (model żyje, tylko parametr się zmienił dla rodziny GPT-5 → musi być `max_completion_tokens`).
+Format: `format(date, 'dd MMM yyyy, HH:mm')` z `date-fns` (już używane w projekcie).
 
-**Fix w `supabase/functions/audit-llm-models/index.ts**` (funkcja `ping`, gałąź Lovable Gateway): rozróżnij body po rodzinie modelu:
+### Problem 4 — Listening: "—" zamiast %
+**Przyczyna:** W `WelcomeTestResults.tsx` (linia 217) Listening ma `profileKey: null, useAiScore: false`. Jeśli `test_skill_results` nie zawiera wiersza dla listening (np. uczeń pominął pytanie audio lub agregacja nie powstała), wyświetla się "—". Confidence (1-5) niżej działa, bo to oddzielne dane (`profile.confidence_listening` z Q44).
 
-```ts
-const isGpt5Family = target.model.startsWith("openai/gpt-5");
-const body = isGpt5Family
-  ? { model: target.model, messages: [{ role: "user", content: "ping" }], max_completion_tokens: 1 }
-  : { model: target.model, messages: [{ role: "user", content: "ping" }], max_tokens: 1 };
+**Decyzja:** W `WelcomeTestResults.tsx`:
+1. Dla listening (i dla wszystkich skill rows): jeśli brak `test_skill_results`, policz na bieżąco z `student_test_questions` filtrując `element_type='listening'` i licząc `is_correct === true / total z odpowiedziami`. Wymaga przekazania `questions` propem (już jest w `TestDetailsView`).
+2. Jeśli element istnieje w teście ale ZERO odpowiedzi → wyświetlić chip "Skipped" zamiast "—".
+3. Jeśli elementu w teście brak → ukryć wiersz (brak pomiaru = brak danych).
+
+To wymaga drobnego refactoru: `WelcomeTestResults` musi dostać `questions` (np. przez prop lub osobny query).
+
+### Problem 5 — AI Analysis odwołuje się do "q3c", "q45"
+**Przyczyna:** Prompt w `process-welcome-test/index.ts` (linia 935-968) jawnie pozwala AI cytować `wt_q3c`, `wt_q45` itd. To są ID systemowe — nauczyciel widzi numery sekwencyjne 1-58.
+
+**Decyzja:** dwuwarstwowa naprawa:
+1. **Prompt (twarda zasada):** dodać instrukcję: *"NEVER mention question IDs (wt_qXX, q3c, q45, etc.) in summary, recommendations, or key_observations. Refer to questions by topic only (e.g. 'the latent-goal scenario', 'the homework-commitment question'). per_question_scores keys still use wt_qXX format — that is the only place IDs are allowed."*
+2. **Sanitizer (bezpiecznik):** w `WelcomeTestResults.tsx` (lub w funkcji renderującej AI summary) przed wyświetleniem usuń regexem `\b(wt_)?q\d+[a-z]?\b` zastępując pustą stringiem oraz wyczyść podwójne spacje / dangling "in ", "from " (najprostszy regex: zamienić "in q3c" / "from q45" / "(q3c)" na "in this scenario" / pusty).
+
+Najczystsze: prompt wystarczy w 95% przypadków, a sanitizer to safety net dla starych rekordów (które już są w DB i nie chcemy ich reprocessować dla samego tekstu).
+
+### Problem 6 — Tłumaczenia
+**Realny stan:** sprawdziłem plik `welcomeTestTranslations.ts` — z **58 unikalnych ID pytań** przetłumaczone są **tylko 29**. Brakuje:
 ```
+wt_q3c, wt_q5c, wt_q7b, wt_q13c, wt_q16s, wt_q18, wt_q18l, wt_q19,
+wt_q20, wt_q21, wt_q22, wt_q23, wt_q24, wt_q25, wt_q26, wt_q27, wt_q28,
+wt_q29, wt_q30, wt_q31, wt_q32, wt_q33, wt_q34, wt_q35, wt_q36s, wt_q37,
+wt_q38, wt_q39, wt_q41s
+```
+To 29 ID × 10 języków = 290 pełnych bloków do dodania. UWAGA: część z nich to pytania ściśle testowe (gramatyka/słownictwo) których nie tłumaczymy z założenia (komentarz na początku pliku: *"Grammar/vocabulary test items are NOT translated"*). Należy oddzielić:
+- **Profilowe (TŁUMACZYĆ):** `wt_q3c, wt_q5c, wt_q7b, wt_q13c, wt_q37, wt_q38, wt_q39` (scenariusze i refleksje).
+- **Skill (NIE TŁUMACZYMY treści, ale możemy dodać samo `description` — instrukcję typu "Choose the correct answer"):** `wt_q18-q35` (grammar/vocab MC), `wt_q16s, wt_q36s, wt_q41s` (speaking — prompt tłumaczymy, bo to instrukcja co powiedzieć), `wt_q18l` (listening — instrukcję tłumaczymy, audio NIE).
 
-Po wdrożeniu kolejny przebieg cron-once-now wykaże `ok=true` dla `openai/gpt-5-mini`. Bez tej poprawki audyt codziennie generuje fałszywy alarm w `error_logs` przez `logModelFailure` (4xx > 400 nie loguje, ale w przyszłości łatwo o false-positive).
+**Decyzja:** dodać tłumaczenia w dwóch turach:
+1. **Tura A (profilowe, pełne):** 7 pytań × 10 języków = 70 bloków (question + options + description).
+2. **Tura B (instrukcje do skill):** dla każdego skill question dodajemy tylko `description` w 10 językach (instrukcja typu "Wybierz prawidłową odpowiedź", "Posłuchaj nagrania i odpowiedz", "Nagraj swoją odpowiedź"). To NIE jest tłumaczenie testu, tylko pomoc proceduralna.
 
-### 0.3 Co dorabiamy: tryb miesięczny + e-mail do `edooqoo@gmail.com`
+## Plan implementacji (kolejność wykonania)
 
-**A) Rozszerzenie `audit-llm-models/index.ts`:**
-
-- Czytaj `{ mode?: "daily" | "monthly" }` z body (default `"daily"`).
-- `TARGETS_DAILY` = obecne 4 (po fixie z 0.2).
-- `TARGETS_MONTHLY` = pełna lista hardkodowana w pliku, wygenerowana z `LLM_MODEL_INVENTORY.md`. Każdy wpis: `{ provider, model, endpoint, family }` żeby `ping` wybrał właściwe body. Komentarz: "When adding a new model anywhere, append it here — see LLM_MODEL_INVENTORY.md".
-- Po przebiegu, jeśli `mode === "monthly"`: zbuduj HTML (tabela: provider, model, status, latency, ok, error skrót) + summary `{ total, ok, failed }` → fire-and-forget POST do `send-model-audit-email`.
-
-**B) Nowa funkcja `supabase/functions/send-model-audit-email/index.ts`:**
-
-- `verify_jwt = false` w `config.toml`. In-code: wymaga headera `x-internal-call == CRON_SECRET`.
-- Body: `{ reportHtml, summary, generatedAt }`.
-- Wysyłka przez Resend (connector gateway, wzorzec z `<resend>` w kontekście):
-  - `To`: `edooqoo@gmail.com`
-  - `From`: domyślnie `Edooqoo Monitoring <onboarding@resend.dev>` (bezpieczny fallback). Jeśli `email_domain--list_email_domains` pokaże zweryfikowane `edooqoo.com` → `Edooqoo Monitoring <audits@edooqoo.com>` (zweryfikuję przed implementacją).
-  - `Subject`: `[Edooqoo] Monthly LLM Audit — YYYY-MM-DD — {failed}/{total} failed`
-  - HTML: nagłówek summary + tabela.
-
-**C) Cron miesięczny (Krok D — DO WYKONANIA PRZEZ CIEBIE po implementacji):**
-
+### Krok 1 — Migracja DB (jednorazowa)
 ```sql
-select cron.schedule(
-  'audit-llm-models-monthly',
-  '0 7 1 * *',                      -- 07:00 UTC, pierwszy dzień miesiąca
-  $$
-  select net.http_post(
-    url     := 'https://bvfrkzdlklyvnhlpleck.supabase.co/functions/v1/audit-llm-models',
-    headers := jsonb_build_object('Content-Type','application/json','x-cron-secret','TUTAJ_REALNA_WARTOSC_CRON_SECRET'),
-    body    := '{"mode":"monthly"}'::jsonb
-  );
-  $$
-);
+UPDATE public.student_tests
+SET total_questions = sub.cnt
+FROM (
+  SELECT test_id, COUNT(*)::int AS cnt
+  FROM public.student_test_questions
+  GROUP BY test_id
+) sub
+WHERE sub.test_id = public.student_tests.id
+  AND test_type = 'welcome'
+  AND (total_questions IS NULL OR total_questions <> sub.cnt);
 ```
+Naprawia rozjazd 58/54 dla istniejących rekordów. Brak zmian schematu.
 
-Plus jednorazowy test (`audit-llm-models-monthly-once-now` analogicznie do Kroku E) żeby zweryfikować że mail przyjdzie bez czekania miesiąca.
+### Krok 2 — Backfill auto-apply dla historycznych testów
+Nowa funkcja jednorazowa `backfill-welcome-test-auto-apply` (edge function, secured `x-cron-secret`). Logika:
+1. Wybiera wszystkie `student_tests WHERE test_type='welcome' AND status='completed' AND deleted_at IS NULL` (limit 50/run, paginacja po `created_at`).
+2. Dla każdego wywołuje wewnętrznie ten sam pipeline co `process-welcome-test` (refaktor: wyciągnąć funkcję `applyResultsToProgress(testId)` z `process-welcome-test/index.ts` do shared modułu).
+3. Po sukcesie ustawia `status='reviewed', reviewed_at=now()`.
+4. Loguje błędy do `error_logs` (severity='warning').
 
-### 0.4 Logger Poziom 2 — sweep + smoke-test
+Uruchamiamy ręcznie raz przez SQL Editor (`select net.http_post(...)`). Nie dodajemy crona — to jednorazówka.
 
-**Stan obecny:** `logModelFailure` istnieje w `_shared/modelFailureLogger.ts` i jest wpięty w 10 z 12 funkcji LLM. Brakuje go w `generateWorksheet/**` i `generate-media-exercises/index.ts`. **Świadoma Twoja decyzja (poprzednie wiadomości):** wpinamy go tam mimo Sanctity Rule — TYLKO opakowanie istniejących `fetch` w obserwację `if (!r.ok && (r.status===404||r.status===410||r.status>=500)) await logModelFailure({...})`. ZERO zmian w promptach, parametrach, parsowaniu, scoringu.
+### Krok 3 — Frontend: total_questions consistency
+Pliki: `src/components/student-tests/StudentTestsTab.tsx`, `src/components/student-tests/TestDetailsView.tsx`.
+- Wprowadzić helper `getTotal(test) = Math.max(test.answered_count ?? 0, test.total_questions ?? 0)` w `src/utils/welcomeTestNumbering.ts`.
+- Podmienić wszystkie miejsca wyświetlające `{x}/{total_questions}`.
+- W `TestDetailsView` zachować `questions.length` (już jest źródłem prawdy dla widoku szczegółów).
 
-**Smoke-test loggera (jednorazowy):** nowa funkcja `supabase/functions/test-model-failure-logger/index.ts` (`verify_jwt=false`, in-code `x-cron-secret`). Po wdrożeniu Lovable AI sam ją wywoła przez `supabase--curl_edge_functions`, zweryfikuje wiersz w `error_logs` (source_name=`test-model-failure-logger`) i go usunie. Funkcja zostaje w repo jako debug tool.
-
-### 0.5 Dokumentacja operacyjna
-
-`**docs/operational/audit-llm-models-cron.md**` — przepisany na podstawie tego co już zadziałało:
-
-- **Pogrubione ostrzeżenie** na górze: "NIGDY nie wklejaj literalnie `WKLEJ_TUTAJ_SECRET`. Najpierw skopiuj wartość `CRON_SECRET` z Lovable Cloud → Settings → Secrets."
-- Sekcje: Pobranie sekretu → Smoke-test przez `pg_net` (nie curl, bo curl wymaga terminala) → `cron.schedule('audit-llm-models-daily', ...)` → `cron.schedule('audit-llm-models-monthly', ...)` → weryfikacja `cron.job` + `cron.job_run_details` + `model_health_checks` → procedura proaktywnego testu przez `'* * * * *'`+unschedule.
-
----
-
-## 1. Welcome Test → Auto-apply do Progress
-
-### 1.1 Tło (Twoje pytanie z poprzedniej iteracji)
-
-Dwie OSOBNE ścieżki danych z testu:
-
-- `**student_events**` — timeline aktywności, zasilane automatycznie podczas testu, nie wymaga akcji.
-- `**student_learning_elements.current_rating**` — mastery score per nano-skill, napędza DSLM (sugestie, roadmapę). DZISIAJ powstaje przez kliknięcie "Apply Results to Progress": `process-welcome-test` liczy `suggested_rating` → zapisuje do `test_skill_results` → nauczyciel klika → kopiowanie do `student_learning_elements.current_rating`. **Bez kliknięcia DSLM ma stare dane.**
-
-**Auto-apply = ten drugi krok wykonujemy automatycznie wewnątrz `process-welcome-test`.**
-
-### 1.2 Wycofujemy "Re-apply"
-
-Pojęcie niejasne. Retake = nowy test = nowy auto-apply.
-
-- **Sukces auto-apply** (status `reviewed`): zielony statyczny chip "✓ Results automatically applied to student's skill ratings."
-- **Fallback** (auto-apply padł, status pozostał `completed`): żółta karta + przycisk **"Apply to Progress"** (jednorazowy retry, wywołuje istniejący `applyResultsToProgress` z `useStudentTests.tsx`, którego NIE usuwamy).
-
-### 1.3 Implementacja
-
-**A) `supabase/functions/process-welcome-test/index.ts**` — po istniejącym `UPDATE student_tests SET status='completed'` dopisujemy:
-
-```ts
-try {
-  const { data: skillResults } = await sb
-    .from('test_skill_results')
-    .select('id, applied_to_element_id, suggested_rating')
-    .eq('student_test_id', testId)
-    .is('applied_at', null);
-
-  if (skillResults?.length) {
-    for (const r of skillResults) {
-      if (r.applied_to_element_id && r.suggested_rating != null) {
-        await sb.from('student_learning_elements')
-          .update({ current_rating: r.suggested_rating, last_rated_at: new Date().toISOString() })
-          .eq('id', r.applied_to_element_id);
-      }
-    }
-    await sb.from('test_skill_results')
-      .update({ applied_at: new Date().toISOString() })
-      .in('id', skillResults.map(r => r.id));
-
-    await sb.from('student_tests')
-      .update({ status: 'reviewed', reviewed_at: new Date().toISOString() })
-      .eq('id', testId);
-  }
-} catch (autoApplyErr) {
-  await sb.from('error_logs').insert({
-    severity: 'warning', source: 'edge-function', source_name: 'process-welcome-test',
-    component: 'welcome-test-auto-apply', error_code: 'welcome_auto_apply_failed',
-    message: `auto-apply failed for test ${testId}`,
-    context: { testId, error: String(autoApplyErr).slice(0, 500) },
-  });
-  // NIE rollback completed → fallback UI pozwoli ręcznie retry
+### Krok 4 — Frontend: daty utworzenia/wypełnienia
+Nowy komponent `src/components/student-tests/TestDates.tsx`:
+```tsx
+export function TestDates({ createdAt, completedAt, reviewedAt }: Props) {
+  // wyświetla "Created: dd MMM yyyy · Completed: dd MMM yyyy" / "—"
+  // używa date-fns format
 }
 ```
+Wpięcie:
+- `StudentTestsTab.tsx` linia ~287 (Welcome card) i linia ~381 (TestCard).
+- `TestDetailsView.tsx` linia ~268 (pod opisem).
 
-**B) `src/components/student-tests/TestDetailsView.tsx` (linie 326–342)** — podmiana bloku Apply Results na chip+fallback (kod w sekcji 2.3 rev 3 — bez zmian).
+### Krok 5 — Listening: spójność danych
+`src/components/student-tests/WelcomeTestResults.tsx`:
+1. Dodać prop `questions: StudentTestQuestion[]` przekazywany z `TestDetailsView`.
+2. Helper `computeSkillFromQuestions(questions, elementType)` → zwraca `{score, correct, total, attempted}`.
+3. Dla wiersza Listening (i fallback dla pozostałych): jeśli brak `test_skill_results`, fallback do helpera.
+4. Render reguły:
+   - `attempted > 0` → `{score}% ({correct}/{total})`,
+   - `total > 0 && attempted == 0` → chip `Skipped`,
+   - `total == 0` → ukryj wiersz.
 
-**C) `useStudentTests.tsx**` — `applyResultsToProgress` bez zmian (używany przez fallback i retake).
+### Krok 6 — AI Analysis bez ID w tekście
+1. **Prompt update** w `supabase/functions/process-welcome-test/index.ts` (linie ~935-968):
+   - Dodać blok `OUTPUT RULES`: *"NEVER reference question IDs (e.g. wt_q3, q3c, q45) in `summary`, `recommendations`, or `key_observations`. Use topical paraphrases ('the latent-goal scenario', 'the homework-commitment scenario', 'the optional external-resources question'). IDs are allowed ONLY as keys inside `per_question_scores`."*
+   - W przykładach existujących (q3c, q5c, q13c, q7b) zmienić tekst objaśniający tak, by nie sugerował AI cytowania ID.
+2. **Sanitizer (runtime, frontend):** nowy util `src/utils/sanitizeAiSummary.ts`:
+   ```ts
+   const ID_RE = /\b(?:in |from |\()?(?:wt_)?q\d+[a-z]?\)?/gi;
+   export const sanitizeAiText = (s: string) => s.replace(ID_RE, '').replace(/\s{2,}/g, ' ').replace(/\s+([.,])/g, '$1').trim();
+   ```
+   Zastosować w `WelcomeTestResults.tsx` przed renderowaniem `summary`, `recommendations[]`, `key_observations[]`.
 
-### 1.4 Co się NIE zmienia
+### Krok 7 — Tłumaczenia (Tura A: profilowe)
+Rozszerzenie `src/data/welcomeTestTranslations.ts` o 7 ID × 10 języków:
+- `wt_q3c` (latent goal scenario — "wake up 2 years from now")
+- `wt_q5c` (homework commitment scenario)
+- `wt_q7b` (correction preference)
+- `wt_q13c` (plateau response)
+- `wt_q37` (open reflection)
+- `wt_q38` (preference choice)
+- `wt_q39` (preference choice)
 
-Algorytm scoringu w `process-welcome-test`, `student_events`, retake flow, DSLM logic.
+Treść każdego: `question`, `options[]`, `description?` — kopiowane z `welcomeTestQuestions.ts` i tłumaczone przez AI Gateway (`google/gemini-2.5-flash`, jednorazowy skrypt `scripts/translate-welcome-test.ts` z weryfikacją wizualną). 10 języków: PL, ES, DE, FR, PT, IT, TR, RU, CS, UK.
 
----
+### Krok 8 — Tłumaczenia (Tura B: instrukcje skill questions)
+Dla 22 skill ID dodajemy tylko `description` (instrukcja):
+- Grammar/Vocabulary MC (`wt_q18..wt_q35`): "Wybierz prawidłową odpowiedź" / equivalent.
+- Listening (`wt_q18l`): "Posłuchaj nagrania i wybierz prawidłową odpowiedź. Treść audio pozostaje po angielsku."
+- Speaking (`wt_q16s, wt_q36s, wt_q41s`): tłumaczenie polecenia + uwaga "Nagraj odpowiedź po angielsku."
 
-## 2. Brakujące tłumaczenia w Welcome Test
+Treść `question` skill items pozostaje po angielsku (zgodnie z istniejącą zasadą — testujemy znajomość angielskiego).
 
-Rozszerzamy `src/data/welcomeTestTranslations.ts` o ID profilujące (psychology/scenarios/communication) z `welcomeTestQuestions.ts` linie 512–869, w 10 językach: pl, es, fr, de, it, pt, ru, uk, tr, zh.
+### Krok 9 — Dokumentacja RAG
+Zaktualizować zgodnie z formułą `Problem → Edooqoo Solution → Technical Mechanics`:
+- `docs/llm-context.md` — sekcje:
+  1. Welcome Test Auto-Apply Backfill (Problem: legacy completed tests; Solution: backfill function; Mechanics: edge fn + shared `applyResultsToProgress`).
+  2. total_questions Consistency (Problem: rozjazd seed/DB; Solution: migracja + frontend helper).
+  3. Test Card Timestamps (Problem: brak dat; Solution: komponent TestDates).
+  4. Listening Score Fallback (Problem: pusta wartość; Solution: compute z questions).
+  5. AI Analysis ID-Free Output (Problem: cytowanie ID; Solution: prompt rule + sanitizer).
+  6. Welcome Test Translation Coverage (Problem: 29 brakujących ID; Solution: Tura A profilowych + Tura B instrukcji).
+- `llms.txt` — analogicznie, krótsze entries.
+- `mem/features/welcome-test/auto-apply-and-brain-reset.md` — uzupełnić o backfill i sanitizer; dodać sekcję `RAG Keywords`.
 
-Lista 21 ID: `wt_q18, wt_q19, wt_q20, wt_q21, wt_q22, wt_q23, wt_q24, wt_q25, wt_q26, wt_q27, wt_q28, wt_q29, wt_q30, wt_q31, wt_q32, wt_q33, wt_q34, wt_q35, wt_q37, wt_q38, wt_q39`.
+## Pliki do zmiany / dodania
 
-Pytania gramatyka/vocabulary pozostają po angielsku (testują znajomość angielskiego). Renderer ma fallback EN — brak tłumaczenia nie wywala UI.
+```text
+NEW    supabase/functions/backfill-welcome-test-auto-apply/index.ts
+NEW    supabase/functions/_shared/applyWelcomeTestResults.ts   (wyciągnięte z process-welcome-test)
+EDIT   supabase/functions/process-welcome-test/index.ts        (prompt + import shared)
+NEW    supabase/migrations/<ts>_backfill_welcome_total_questions.sql
 
----
+NEW    src/utils/sanitizeAiSummary.ts
+NEW    src/components/student-tests/TestDates.tsx
+EDIT   src/components/student-tests/StudentTestsTab.tsx        (TestDates + helper getTotal)
+EDIT   src/components/student-tests/TestDetailsView.tsx        (TestDates + przekazanie questions)
+EDIT   src/components/student-tests/WelcomeTestResults.tsx     (listening fallback + sanitizer)
+EDIT   src/utils/welcomeTestNumbering.ts                       (helper getTotal)
 
-## 3. "Stupid game" w pauzie Welcome Test (Memory Pairs)
+EDIT   src/data/welcomeTestTranslations.ts                     (Tura A + Tura B, 10 języków)
+NEW    scripts/translate-welcome-test.ts                       (jednorazowy generator tłumaczeń przez AI)
 
-Nowy komponent `src/components/welcome-test/BrainResetGame.tsx`:
-
-- Memory Pairs 2×3 (6 kart, 3 pary emoji: 🐶🐱🦊).
-- Pure React `useState`, zero deps.
-- Klik → odsłoń, dwie odsłonięte → match albo zakryj po 800 ms. Po 3 parach: "Nice reset! Continue."
-
-Integracja w `src/pages/WelcomeTestPage.tsx` w stage `paused`, schowane pod `<details>`:
-
-```tsx
-<details className="text-left max-w-sm mx-auto">
-  <summary className="cursor-pointer text-sm text-muted-foreground hover:text-foreground py-2">
-    🎮 Play a stupid game to reset your mind (optional)
-  </summary>
-  <BrainResetGame />
-</details>
+EDIT   docs/llm-context.md
+EDIT   llms.txt
+EDIT   mem/features/welcome-test/auto-apply-and-brain-reset.md
+EDIT   mem/index.md
 ```
 
-Zero wpływu na timer/scoring/sesję.
-
----
-
-## 4. Email do studenta po ukończeniu Welcome Testu
-
-### 4.1 Treść (bez obietnicy czasu)
-
-- Subject: `Thanks for completing your Welcome Test, {studentName}!`
-- Body:
-  > Hi {studentName},
-  >
-  > You've finished your Welcome Test — great job.
-  >
-  > Your teacher {teacherName} will review your results and reach out to plan your next steps. In the meantime, no action needed.
-  >
-  > — Edooqoo
-- `Reply-To`: `{teacherEmail}`.
-
-### 4.2 Mechanizm
-
-**A) Migracja:** `ALTER TABLE public.student_tests ADD COLUMN IF NOT EXISTS completion_email_sent_at TIMESTAMPTZ;`
-
-**B) Edge function `supabase/functions/send-welcome-test-completion-email/index.ts`:**
-
-- `verify_jwt=false`, in-code wymaga `Authorization: Bearer <SERVICE_ROLE_KEY>`.
-- Body: `{ testId, studentEmail, studentName, teacherName, teacherEmail }`.
-- Idempotencja: jeśli `student_tests.completion_email_sent_at` nie null → `{ skipped: true }`.
-- Resend przez connector gateway (wzorzec `<resend>`). `From` jak w 0.3.B (fallback `onboarding@resend.dev`).
-- Po sukcesie: `UPDATE student_tests SET completion_email_sent_at = now()`.
-- Po porażce: `error_logs` z `error_code='welcome_test_email_failed'`.
-
-**C) Szablon:** `supabase/functions/_shared/emailTemplates/welcomeTestCompletion.ts` (`renderWelcomeTestCompletionEmail({ studentName, teacherName })`).
-
-**D) Wywołanie w `process-welcome-test/index.ts**` po auto-apply, fire-and-forget:
-
-```ts
-if (student?.email) {
-  fetch(`${SUPABASE_URL}/functions/v1/send-welcome-test-completion-email`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${SERVICE_ROLE_KEY}` },
-    body: JSON.stringify({ testId, studentEmail: student.email, studentName, teacherName, teacherEmail })
-  }).catch(e => console.error('thank-you email send failed', e));
-}
-```
-
-**E) `supabase/config.toml`:** dodać `verify_jwt = false` dla `send-welcome-test-completion-email`, `send-model-audit-email`, `test-model-failure-logger`.
-
----
-
-## 5. "Add Goal" modal nie otwiera się z Roadmap
-
-**Root cause:** `dispatchAddGoal` w `MacroTimeline.tsx:104` emituje `CustomEvent('dslm:addGoal')` — nikt nie nasłuchuje.
-
-**Fix:**
-
-**A) `src/components/dslm/DSLMTab.tsx**` — dodać:
-
-```tsx
-const [pendingAddGoal, setPendingAddGoal] = useState(false);
-useEffect(() => {
-  const handler = () => { setActiveSubTab('goals'); setPendingAddGoal(true); };
-  window.addEventListener('dslm:addGoal', handler);
-  return () => window.removeEventListener('dslm:addGoal', handler);
-}, []);
-// render: <GoalsView ... pendingAddGoal={pendingAddGoal} onConsumePendingAddGoal={() => setPendingAddGoal(false)} />
-```
-
-(Przed implementacją sprawdzić czy nazwa subtaba to 'goals' czy 'Goals' w bieżącym kodzie.)
-
-**B) `src/components/dslm/GoalsView.tsx**` — dodać props i efekt:
-
-```tsx
-interface Props { /* ... */ pendingAddGoal?: boolean; onConsumePendingAddGoal?: () => void; }
-useEffect(() => {
-  if (pendingAddGoal) { setShowAddGoal(true); onConsumePendingAddGoal?.(); }
-}, [pendingAddGoal]);
-```
-
-**C) Walidacja:** klik "Add goal" z Pathway → tab Goals + modal. Klik "Add goal first" w AlertDialog → to samo.
-
----
-
-## 6. Pusty Dashboard po zalogowaniu (wymaga F5)
-
-**Root cause potwierdzony auth-logs (sekcja `<auth-logs>` z 28 wpisami 403 `bad_jwt`):** po logowaniu wiele równoległych requestów `/user` leci ze starym/pustym tokenem — sub claim nie jest jeszcze ustawiony w cache TanStack Query. `useAuthUser` ma `staleTime: Infinity`, więc nigdy się nie odświeża sam.
-
-**Fix w `src/hooks/useAuthFlow.tsx`:**
-
-```ts
-import { useQueryClient } from '@tanstack/react-query';
-const queryClient = useQueryClient();
-
-// w onAuthStateChange callback, po setLoading(false):
-queryClient.setQueryData(['auth-user'], session?.user ?? null);
-
-// w getSession().then(...), po setLoading(false):
-queryClient.setQueryData(['auth-user'], session?.user ?? null);
-```
-
-`setQueryData` (nie `invalidateQueries`) — natychmiastowy zapis do cache, bez round-tripa. `useStudents` widzi `teacherId` od razu → query enabled → dashboard renderuje studentów bez F5.
-
-**Test:** logout → login → dashboard pełny bez odświeżania.
-
----
-
-## 7. Onboarding zasłania Bug Button + tło
-
-**Problem:** `OnboardingChecklist.tsx:89` → `fixed bottom-6 left-6 z-[70]`. `BugReportButton.tsx:36` → `fixed bottom-4 left-16 z-40`. Kolizja w bottom-left, onboarding z wyższym z-index zasłania FAB i podświetla się przezroczystym tłem.
-
-**Fix:**
-
-- `OnboardingChecklist.tsx:89` → `fixed bottom-6 right-6 z-30 ...`. Po wdrożeniu sprawdzić w preview czy w prawym-dolnym nie ma innego FAB; jeśli tak → `bottom-24 right-6`.
-- Z-index `z-[70]` → `z-30` (pod FAB-ami `z-40`, nad treścią `z-10`, pod modalami `z-50`).
-- Karta: `max-w-sm bg-card/95 backdrop-blur` żeby nie była przezroczysta.
-
----
-
-## 8. Dokumentacja & memory (RAG injection)
-
-### 8.1 `docs/llm-context.md`
-
-Nowa sekcja v6.9.29 na początku, dla każdego z 8 problemów format:
-
-- **Problem:** opis kontekstu i co zawodziło
-- **Edooqoo.com Solution:** co dokładnie wdrożone
-- **Technical Mechanics:** pliki, funkcje, tabele, eventy, kontrakty
-- **RAG Keywords:** synonimy i terminy nauczycielskie
-
-### 8.2 `llms.txt`
-
-2–3 linijki summary v6.9.29: monitoring monthly+email, welcome test auto-apply+email+game+i18n, DSLM event listener, auth cache sync, onboarding positioning.
-
-### 8.3 Nowe pliki memory
-
-1. `mem/features/welcome-test/auto-apply-results.md` — process-welcome-test auto-stosuje skill ratings; UI: chip `reviewed` lub fallback przy `completed`; brak Re-apply.
-2. `mem/features/welcome-test/student-completion-email.md` — kontrakt funkcji, idempotencja przez `completion_email_sent_at`, treść bez obietnicy czasu, reply-to do nauczyciela.
-3. `mem/features/welcome-test/brain-reset-game.md` — minigame w `paused`, schowana w `<details>`, zero deps.
-4. `mem/features/dslm/add-goal-event-listener.md` — kontrakt `window event 'dslm:addGoal'` konsumowany w `DSLMTab.tsx`.
-5. `mem/features/auth/query-cache-sync.md` — `useAuthFlow` MUSI wywoływać `queryClient.setQueryData(['auth-user'], user)`.
-6. `mem/features/onboarding/positioning.md` — `bottom-6 right-6 z-30`, nigdy kolizja z FAB (z-40).
-7. **UPDATE** `mem/infrastructure/model-health-monitoring.md` — dopisać: tryb monthly + email; full logger sweep (12/12); smoke-test loggera; ostrzeżenie o literałach w smoke-teście; **uwaga o GPT-5 family wymagającym `max_completion_tokens**`.
-
-`mem/index.md` — dorzucić linki do 6 nowych + odnotować update istniejącego.
-
-### 8.4 `docs/operational/audit-llm-models-cron.md`
-
-Przepisany w/g 0.5.
-
----
-
-## 9. Kolejność implementacji (atomowa, deterministyczna)
-
-1. **Migracja:** `ALTER TABLE student_tests ADD COLUMN completion_email_sent_at TIMESTAMPTZ`.
-2. `**_shared/emailTemplates/welcomeTestCompletion.ts**` — szablon HTML.
-3. **Edge function `send-welcome-test-completion-email**` + `config.toml`.
-4. **Edge function `process-welcome-test**` — auto-apply + fire-and-forget email.
-5. `**TestDetailsView.tsx**` — chip `reviewed` + fallback `completed`.
-6. `**welcomeTestTranslations.ts**` — 21 ID × 10 języków.
-7. `**BrainResetGame.tsx**` — nowy komponent.
-8. `**WelcomeTestPage.tsx**` — integracja gry w `paused`.
-9. `**DSLMTab.tsx` + `GoalsView.tsx**` — event listener + `pendingAddGoal`.
-10. `**useAuthFlow.tsx**` — `queryClient.setQueryData(['auth-user'], user)`.
-11. `**OnboardingChecklist.tsx**` — `right-6 z-30 bg-card/95`.
-12. **Logger sweep** — `logModelFailure` w `generateWorksheet/**` (każdy plik z `fetch`) i `generate-media-exercises/index.ts`.
-13. `**audit-llm-models/index.ts**` — fix gpt-5 (`max_completion_tokens`) + `mode` + `TARGETS_MONTHLY` + wywołanie email.
-14. **Edge function `send-model-audit-email**` + `config.toml`.
-15. **Edge function `test-model-failure-logger**` + `config.toml`.
-16. **Docs:** `llm-context.md`, `llms.txt`, 6 nowych + 1 update memory + `mem/index.md` + `docs/operational/audit-llm-models-cron.md`.
-
----
-
-## 10. Walidacja po implementacji (Lovable AI wykonuje sam)
-
-1. `supabase--curl_edge_functions audit-llm-models` z `x-cron-secret` → status 200, `gpt-5-mini` ma teraz `ok=true`.
-2. `supabase--curl_edge_functions audit-llm-models` z body `{"mode":"monthly"}` → mail przyszedł (Ty potwierdzasz odbiór).
-3. `supabase--curl_edge_functions test-model-failure-logger` → wiersz w `error_logs` → usunąć.
-4. Auth refresh: logout → login → dashboard bez F5.
-5. Welcome Test E2E: mail + `student_learning_elements.current_rating` zaktualizowane + zielony chip.
-6. Add goal: klik "Add goal" w Roadmap → tab Goals + modal.
-7. Pause game: wstrzymaj test → rozwiń "🎮 Play a stupid game" → działa.
-8. Translations: PL w Welcome Test → scenarios/communication po polsku.
-9. Onboarding: prawy dolny, nie zasłania FAB.
-
----
-
-## 11. Akcje OPERATORA (Ty, PO implementacji)
-
-W SQL Editorze, z REALNYM `CRON_SECRET` (jak w Twoim sukcesie z Krok B/C):
-
-**Krok D — miesięczny cron:**
-
-```sql
-select cron.schedule(
-  'audit-llm-models-monthly',
-  '0 7 1 * *',
-  $$
-  select net.http_post(
-    url     := 'https://bvfrkzdlklyvnhlpleck.supabase.co/functions/v1/audit-llm-models',
-    headers := jsonb_build_object('Content-Type','application/json','x-cron-secret','<TWOJA_WARTOSC_CRON_SECRET>'),
-    body    := '{"mode":"monthly"}'::jsonb
-  );
-  $$
-);
-```
-
-**Krok F — jednorazowy test maila miesięcznego (analogicznie do Twojego Kroku E):**
-
-```sql
-select cron.schedule('audit-llm-models-monthly-once-now', '* * * * *', $$ <ten sam http_post co wyżej> $$);
--- poczekaj 60-90 sekund, sprawdź skrzynkę edooqoo@gmail.com
-select cron.unschedule('audit-llm-models-monthly-once-now');
-```
-
-To wszystko — żadnych innych ręcznych SQL po Twojej stronie.
-
----
-
-## 12. Ryzyka i guard-rails
-
-- **Sanctity Worksheet Engine:** tylko `logModelFailure` w catch — ZERO zmian merytorycznych.
-- **Codex-owned files** (`mem/decisions/reconciliation-v6926-codex.md`): nieruszane.
-- **Welcome Test scoring:** auto-apply działa na wynikach, nie modyfikuje algorytmu.
-- **Auto-apply fail-safe:** błąd NIE rollbackuje `completed`, fallback UI pozwala retry.
-- **Email idempotency:** `completion_email_sent_at` blokuje duplikaty.
-- **Translations:** brak tłumaczenia → fallback EN, UI się nie wywala.
-- **Audit GPT-5 fix:** rozróżnienie body po `target.model.startsWith('openai/gpt-5')` — backwards-compatible dla pozostałych modeli.
-- **Cron docs:** explicite ostrzeżenie przed literałami w smoke-teście (Twój 401 to przekonał).
+## Co użytkownik wykona ręcznie po implementacji
+1. Uruchomi SQL w Supabase SQL Editor: `select net.http_post(... 'backfill-welcome-test-auto-apply' ...)` z `x-cron-secret` (instrukcja w komentarzu migracji).
+2. Otworzy stary test (Wiktoria) i potwierdzi że banner zmienił się na zielony "Results automatically applied".
+3. Otworzy uczniów z różnymi językami i sprawdzi wizualnie tłumaczenia nowych pytań.
+
+## Co NIE wchodzi w zakres
+- Reprocessing AI Analysis dla starych testów (drogie, niepotrzebne — sanitizer ukryje ID).
+- Tłumaczenie treści gramatyczno-słownikowej skill questions (świadoma decyzja produktowa).
+- Zmiany w prompt'cie generującym worksheety (sanctity rule).
+
+## Bezpieczeństwo regresji
+- Backfill: idempotentny — sprawdza `status='completed'` przed reprocessingiem.
+- Migracja: tylko `UPDATE`, bez zmian schematu, bez wpływu na nowe testy.
+- Frontend: helper `getTotal` zwraca starą wartość gdy `answered_count` jest 0, więc nie zepsuje testów `pending`.
+- Sanitizer: czysta funkcja string→string, bez wpływu na zapis DB.
+- Tłumaczenia: dodawane jako nowe klucze, fallback do EN nadal działa.
