@@ -519,7 +519,7 @@ export default function WelcomeTestPage() {
               </Button>
             </CardContent>
           </Card>
-          <BrainResetGame />
+          <BrainResetGames />
         </div>
       </div>
     );
