@@ -2,7 +2,8 @@ import React from 'react';
 import { ArrowDown, ArrowRight, BookOpen, Brain, Calendar, BarChart2, ClipboardCheck, Share2, Bell, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useEventTracking } from '@/hooks/useEventTracking';
-import { PricingCalculator, type OneMinutePrepCalculatorInput } from '@/components/PricingCalculator';
+import type { OneMinutePrepCalculatorInput } from '@/components/PricingCalculator';
+import OneMinutePrepHeroProofSwitcher from '@/components/landing/OneMinutePrepHeroProofSwitcher';
 
 const unlockFeatures = [
   { icon: Brain, label: 'DSLM next-step signals' },
@@ -51,7 +52,7 @@ const HeroHeadline: React.FC<HeroHeadlineProps> = ({
       {/* Background decoration */}
       <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-violet-100/30 via-transparent to-transparent pointer-events-none"></div>
 
-      <div className="w-full min-w-0 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(340px,420px)] gap-10 lg:gap-14 items-start">
+      <div className="w-full min-w-0 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(360px,460px)] gap-10 lg:gap-14 items-start">
         <div className="min-w-0 max-w-full text-center lg:text-left">
           {/* Headline */}
           <h1 className="max-w-full break-words text-[2rem] sm:text-5xl md:text-5xl lg:text-[3.25rem] xl:text-6xl font-extrabold tracking-tight text-foreground mb-6 leading-[1.1]">
@@ -122,11 +123,10 @@ const HeroHeadline: React.FC<HeroHeadlineProps> = ({
           </div>
         </div>
 
-        <div className="w-full max-w-full sm:max-w-[430px] mx-auto lg:mx-0 lg:justify-self-end">
-          <PricingCalculator
-            variant="hero"
-            value={calculatorValue}
-            onValueChange={onCalculatorChange}
+        <div className="w-full max-w-full sm:max-w-[460px] mx-auto lg:mx-0 lg:justify-self-end">
+          <OneMinutePrepHeroProofSwitcher
+            calculatorValue={calculatorValue}
+            onCalculatorChange={onCalculatorChange}
           />
         </div>
       </div>
