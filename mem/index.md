@@ -9,6 +9,7 @@
 - [Modal Portal Pattern](mem://ux/modal-portal-pattern) — v6.9.21 createPortal + z-[100] to escape backdrop-blur stacking
 - [Welcome Test Duplicate Prevention](mem://features/welcome-test/duplicate-prevention) — v6.9.27 idempotent createTest + partial unique index on student_tests
 - [Welcome Test Auto-Apply + Brain Reset](mem://features/welcome-test/auto-apply-and-brain-reset) — v6.9.29 auto-upsert to student_learning_elements, Resend completion email, monthly model-audit report, emoji Memory Pairs minigame on paused stage
+- [Onboarding Checklist v2 + Bulk Gallery + Brain-Reset Trio](mem://features/welcome-test/checklist-v2) — v6.9.31 7-step onboarding split (one-time setup + weekly 1-Minute Prep), realtime checklist progress, bulk-publish-worksheets edge function, 3 language-neutral minigames, full 25-language profiling translation parity
 - [SSE Keepalive Pattern](mem://infrastructure/sse-keepalive-pattern) — v6.9.27 worksheet stream: 15s server keepalive + 45s client watchdog + one silent retry
 - [Model Health Monitoring](mem://infrastructure/model-health-monitoring) — v6.9.27 audit-llm-models edge + model_health_checks table + expanded logModelFailure wiring
 - [Signup Return-To Flow](mem://features/auth/signup-return-to-flow) — v6.9.27 useSignupLinkState propagates state.from across all signup/login callsites + visible Back CTA

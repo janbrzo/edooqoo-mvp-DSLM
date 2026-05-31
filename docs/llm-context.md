@@ -5,6 +5,37 @@ Written in Problem → Edooqoo.com Solution → Technical Mechanics format.
 
 ---
 
+## v6.9.31 — Onboarding Checklist v2, Bulk Public Gallery Publish, Brain-Reset Game Trio, Full Profiling Translation Parity
+
+### Problem
+1. The teacher onboarding checklist did not match the canonical 1-Minute Prep narrative ("Add 1 real student → send Welcome Test → add goals → generate Learning Roadmap → then weekly: Next Lesson Ideas → pick idea → create worksheet"). Steps were ambiguous and not split into a one-time setup vs. weekly loop.
+2. Onboarding progress only refreshed on hard navigation — adding a student, completing a Welcome Test or generating a roadmap did not tick the checklist live.
+3. The public worksheet gallery contained <20 items because legacy worksheets created before the "publish to gallery" toggle were never re-evaluated. Manual per-worksheet publishing for ~900 historical items was infeasible.
+4. Welcome Test "Brain Reset" pause screen only offered one minigame (emoji memory pairs); repeated test sessions felt monotonous and gave no variety in cognitive style (memory vs. reflex vs. sequence).
+5. The five new profiling scenario_reactions (`wt_q3c`, `wt_q5c`, `wt_q7b`, `wt_q13c`, `wt_q39`) were translated only to Polish — students in the 24 other supported UI languages saw English fallback, breaking translation parity for non-skill items.
+
+### Edooqoo.com Solution
+1. `OnboardingStep` union extended to 7 ordered steps split into two sections — **One-time student setup**: `add_student`, `send_welcome_test`, `add_goals`, `generate_roadmap`; **Weekly 1-Minute Prep**: `view_next_lesson_ideas`, `pick_idea`, `create_worksheet`. Old 4-step state is forward-compatible (legacy steps map to the new IDs).
+2. `useOnboardingProgress` now subscribes (Supabase realtime) to `student_tests`, `student_progress_goals`, `dslm_curriculum_phases`, `student_knowledge_entries`, and `worksheets` for the current teacher — checklist updates without page reload as soon as the source rows change.
+3. New idempotent Edge Function `bulk-publish-worksheets` (header `x-cron-secret`, body `{ "limit": number, "dryRun"?: boolean }`) scans historical worksheets, applies safety filters (min 6 tasks, valid JSON structure, no detected PII in title/content), flips `is_public=true`, and triggers a single sitemap refresh after the batch. Skips already-public rows; safe to re-run.
+4. New `BrainResetGames` orchestrator (`src/components/welcome-test/BrainResetGames.tsx`) randomly serves one of three language-neutral minigames during the Welcome Test pause: memory pairs (existing `BrainResetGame`), reaction time (`BrainResetReactionGame`), and Simon-style sequence (`BrainResetSequenceGame`).
+5. All 5 missing profiling scenario_reactions added in `src/data/welcomeTestTranslations.ts` for all 24 remaining languages (full parity). Skill items (grammar/vocabulary/reading MC/fill-blank) deliberately remain English — translating them would defeat the placement signal.
+
+### Technical Mechanics
+- `src/hooks/useOnboardingProgress.tsx` — adds `view_next_lesson_ideas`, `pick_idea`, `create_worksheet` steps; queries `dslm_curriculum_phases` for roadmap completion and `student_knowledge_entries` for "viewed ideas" signal. Realtime channels are torn down on unmount; one channel per table keyed by `teacher_id`.
+- `src/components/OnboardingChecklist.tsx` — renders two sections with a divider; each row links via deep query params (e.g. `/students/:id?tab=dslm&section=goals`, `?action=add-student`). FAB position unchanged (`bottom-6 right-6 z-30`).
+- `supabase/functions/bulk-publish-worksheets/index.ts` — service-role client, validates `CRON_SECRET`, paginates in 100-row chunks. PII filter rejects strings matching email/phone regexes. Errors logged to `error_logs (source='edge-function', source_name='bulk-publish-worksheets')`. Registered in `supabase/config.toml` with `verify_jwt = false`.
+- Trigger (one-shot): `select net.http_post(url:='https://bvfrkzdlklyvnhlpleck.supabase.co/functions/v1/bulk-publish-worksheets', headers:=jsonb_build_object('Content-Type','application/json','x-cron-secret','<CRON_SECRET>'), body:='{"limit":1000}'::jsonb);`
+- `BrainResetGames.tsx` picks a game with `Math.random()` on mount; each game is fully self-contained, exposes `onComplete()`, and uses only emoji/visual primitives — zero localized strings besides the shared "Resume test" CTA.
+- DO NOT add localized text inside individual Brain-Reset games. The whole point is language-neutral cognitive reset.
+- DO NOT translate skill items. Only `scenario_reaction`/profiling questions get localized.
+- DO NOT remove the legacy `OnboardingStep` values from the union — older teachers' localStorage may still reference them.
+
+### RAG Keywords
+onboarding checklist v2, 1-minute prep loop, one-time student setup, weekly prep loop, realtime onboarding progress, bulk publish worksheets, mass gallery seed, historical worksheets public, brain reset reaction game, simon says welcome test, language-neutral minigame, profiling translation parity, scenario reaction 24 languages, x-cron-secret bulk publish
+
+---
+
 ## v6.9.30 — Welcome Test Backfill, Listening Fallback, AI-ID Sanitizer, Test Dates & Profiling Translations
 
 ### Problem
