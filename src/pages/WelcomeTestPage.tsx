@@ -49,7 +49,7 @@ import { InstructionScreen } from "@/components/welcome-test/InstructionScreen";
 import { SpeakingRecorder } from "@/components/welcome-test/SpeakingRecorder";
 import { ListeningPlayer } from "@/components/welcome-test/ListeningPlayer";
 import { TRANSLATION_LANGUAGES, getTranslation, hasTranslation } from "@/data/welcomeTestTranslations";
-import { BrainResetGame } from "@/components/welcome-test/BrainResetGame";
+import { BrainResetGames } from "@/components/welcome-test/BrainResetGames";
 import { WELCOME_TEST_SECTIONS_WITH_QUESTIONS } from "@/data/welcomeTestQuestions";
 import type { WelcomeTestQuestionDef } from "@/types/welcomeTest";
 
