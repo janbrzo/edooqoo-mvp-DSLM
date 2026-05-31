@@ -1,198 +1,306 @@
-## Diagnoza problemów
 
-### Problem 1 — "Auto-apply did not complete"
-**Przyczyna:** Wynik Wiktorii powstał ZANIM wdrożyliśmy auto-apply (v6.9.29). Jej `student_tests.status = 'completed'`, dlatego UI pokazuje żółty banner. Auto-apply uruchamia się tylko podczas `process-welcome-test` — historyczne testy nie zostały reprocessowane. To NIE jest bug w nowych testach (Johny ma `reviewed` — bez bannera), ale UX dla starych testów jest mylący i wymaga jednego z dwóch działań:
-- ręcznego kliknięcia "Apply to Progress" (działa, ale niewygodne), albo
-- backfillu: jednorazowo wywołać auto-apply dla wszystkich starych testów ze statusem `completed`.
+# Plan v6.9.31 — Onboarding + Gallery Backfill + Brain-Reset Games + WT Translations
 
-**Decyzja:** zrobimy obie rzeczy — UI bez zmian (fallback nadal potrzebny na wypadek przyszłych awarii AI), + jednorazowy backfill który przeprocesuje istniejące `completed` testy.
+## Kontekst i diagnoza
 
-### Problem 2 — "58/54 answered"
-**Przyczyna:** `student_tests.total_questions` zapisywane jest w momencie tworzenia testu (DB row Wiktorii ma 54). Później dodaliśmy nowe pytania do `ALL_WELCOME_TEST_QUESTIONS` (jest ich 58) i seedują się do `student_test_questions`, ale stara wartość `total_questions = 54` została. Stąd `58/54`.
+Zweryfikowałem w bazie i kodzie:
 
-**Decyzja:** 
-- Frontend: zawsze używać `Math.max(answered_count, total_questions)` lub `questions.length` (rzeczywista liczba zseedowanych pytań) jako mianownika.
-- Migracja jednorazowa: `UPDATE student_tests SET total_questions = (SELECT COUNT(*) FROM student_test_questions WHERE test_id = student_tests.id) WHERE test_type='welcome'`.
+- **Onboarding** (`src/components/OnboardingChecklist.tsx` + `src/hooks/useOnboardingProgress.tsx`) ma dziś 4 kroki: `add_student → generate_worksheet → share_worksheet → create_homework`. Nie pokrywa się z Twoim flow „Setup (Add student → Welcome Test → Goals → Roadmap) + Weekly 1-Minute Prep (Next Lesson Ideas → wybór → worksheet)".
+- **Gallery** (`/gallery`, edge `publish-worksheet`, `regenerate-gallery-sitemap`) działa, ale tylko **5/927** worksheetów jest `is_public=true`. Kandydatów z tytułem ≥3 znaków i `ai_response` jest **922**. Część `ai_response` ma niepoprawny JSON — bulk publisher musi to obsłużyć (skip + log).
+- **Brain Reset Game** to dziś jeden komponent `BrainResetGame.tsx` (memory pairs). Trzeba dorzucić 1–2 dodatkowe gry i pozwolić użytkownikowi przełączać.
+- **Tłumaczenia** — w `src/data/welcomeTestTranslations.ts` 5 dodatkowych pytań profilujących (`wt_q3c, wt_q5c, wt_q7b, wt_q13c, wt_q39`) jest dziś **tylko w POLISH**. Pozostałe 24 języki (Spanish, German, French, Portuguese, Italian, Turkish, Russian, Czech, Ukrainian, Dutch, Japanese, Korean, Chinese, Arabic, Hungarian, Romanian, Greek, Croatian, Swedish, Hindi, Vietnamese, Thai, Norwegian, Danish) wpadają w fallback do angielskiego. Trzeba dodać te 5 pytań we wszystkich 24 językach (skill items `wt_q18–wt_q35, wt_q37, wt_q38` zostają po angielsku — to nie podlega tłumaczeniu zgodnie z istniejącą zasadą).
 
-### Problem 3 — Brak dat utworzenia/wypełnienia
-**Stan:** Tabela `student_tests` ma `created_at`, `started_at`, `completed_at`, `reviewed_at`. Karty w `StudentTestsTab.tsx` i nagłówek w `TestDetailsView.tsx` nie wyświetlają żadnej z nich.
+Sanctity rule: **nie ruszamy promptu generacji worksheetów** ani logiki engine — wszystkie zmiany są w UI, edge functions, danych statycznych i RAG.
 
-**Decyzja:** Dodać dwie linie w trzech miejscach:
-- Welcome Test card (linia ~282): pod opisem dodać `Created: dd Mmm yyyy · Completed: dd Mmm yyyy` (lub "—" jeśli null).
-- `TestCard` (linia ~379): analogicznie.
-- `TestDetailsView` header (linia ~267): w `<p className="text-muted-foreground">` po opisie dodać linijkę z datami.
+---
 
-Format: `format(date, 'dd MMM yyyy, HH:mm')` z `date-fns` (już używane w projekcie).
+## Część 1 — Nowy Onboarding Checklist (7 kroków, 2 sekcje)
 
-### Problem 4 — Listening: "—" zamiast %
-**Przyczyna:** W `WelcomeTestResults.tsx` (linia 217) Listening ma `profileKey: null, useAiScore: false`. Jeśli `test_skill_results` nie zawiera wiersza dla listening (np. uczeń pominął pytanie audio lub agregacja nie powstała), wyświetla się "—". Confidence (1-5) niżej działa, bo to oddzielne dane (`profile.confidence_listening` z Q44).
+### 1.1 Nowy model danych
 
-**Decyzja:** W `WelcomeTestResults.tsx`:
-1. Dla listening (i dla wszystkich skill rows): jeśli brak `test_skill_results`, policz na bieżąco z `student_test_questions` filtrując `element_type='listening'` i licząc `is_correct === true / total z odpowiedziami`. Wymaga przekazania `questions` propem (już jest w `TestDetailsView`).
-2. Jeśli element istnieje w teście ale ZERO odpowiedzi → wyświetlić chip "Skipped" zamiast "—".
-3. Jeśli elementu w teście brak → ukryć wiersz (brak pomiaru = brak danych).
+Rozszerzamy `OnboardingStep` w `src/hooks/useOnboardingProgress.tsx`. Zachowujemy stare klucze, aby nie zepsuć istniejących userów (mają zapisany `onboarding_progress` w `profiles`).
 
-To wymaga drobnego refactoru: `WelcomeTestResults` musi dostać `questions` (np. przez prop lub osobny query).
-
-### Problem 5 — AI Analysis odwołuje się do "q3c", "q45"
-**Przyczyna:** Prompt w `process-welcome-test/index.ts` (linia 935-968) jawnie pozwala AI cytować `wt_q3c`, `wt_q45` itd. To są ID systemowe — nauczyciel widzi numery sekwencyjne 1-58.
-
-**Decyzja:** dwuwarstwowa naprawa:
-1. **Prompt (twarda zasada):** dodać instrukcję: *"NEVER mention question IDs (wt_qXX, q3c, q45, etc.) in summary, recommendations, or key_observations. Refer to questions by topic only (e.g. 'the latent-goal scenario', 'the homework-commitment question'). per_question_scores keys still use wt_qXX format — that is the only place IDs are allowed."*
-2. **Sanitizer (bezpiecznik):** w `WelcomeTestResults.tsx` (lub w funkcji renderującej AI summary) przed wyświetleniem usuń regexem `\b(wt_)?q\d+[a-z]?\b` zastępując pustą stringiem oraz wyczyść podwójne spacje / dangling "in ", "from " (najprostszy regex: zamienić "in q3c" / "from q45" / "(q3c)" na "in this scenario" / pusty).
-
-Najczystsze: prompt wystarczy w 95% przypadków, a sanitizer to safety net dla starych rekordów (które już są w DB i nie chcemy ich reprocessować dla samego tekstu).
-
-### Problem 6 — Tłumaczenia
-**Realny stan:** sprawdziłem plik `welcomeTestTranslations.ts` — z **58 unikalnych ID pytań** przetłumaczone są **tylko 29**. Brakuje:
-```
-wt_q3c, wt_q5c, wt_q7b, wt_q13c, wt_q16s, wt_q18, wt_q18l, wt_q19,
-wt_q20, wt_q21, wt_q22, wt_q23, wt_q24, wt_q25, wt_q26, wt_q27, wt_q28,
-wt_q29, wt_q30, wt_q31, wt_q32, wt_q33, wt_q34, wt_q35, wt_q36s, wt_q37,
-wt_q38, wt_q39, wt_q41s
-```
-To 29 ID × 10 języków = 290 pełnych bloków do dodania. UWAGA: część z nich to pytania ściśle testowe (gramatyka/słownictwo) których nie tłumaczymy z założenia (komentarz na początku pliku: *"Grammar/vocabulary test items are NOT translated"*). Należy oddzielić:
-- **Profilowe (TŁUMACZYĆ):** `wt_q3c, wt_q5c, wt_q7b, wt_q13c, wt_q37, wt_q38, wt_q39` (scenariusze i refleksje).
-- **Skill (NIE TŁUMACZYMY treści, ale możemy dodać samo `description` — instrukcję typu "Choose the correct answer"):** `wt_q18-q35` (grammar/vocab MC), `wt_q16s, wt_q36s, wt_q41s` (speaking — prompt tłumaczymy, bo to instrukcja co powiedzieć), `wt_q18l` (listening — instrukcję tłumaczymy, audio NIE).
-
-**Decyzja:** dodać tłumaczenia w dwóch turach:
-1. **Tura A (profilowe, pełne):** 7 pytań × 10 języków = 70 bloków (question + options + description).
-2. **Tura B (instrukcje do skill):** dla każdego skill question dodajemy tylko `description` w 10 językach (instrukcja typu "Wybierz prawidłową odpowiedź", "Posłuchaj nagrania i odpowiedz", "Nagraj swoją odpowiedź"). To NIE jest tłumaczenie testu, tylko pomoc proceduralna.
-
-## Plan implementacji (kolejność wykonania)
-
-### Krok 1 — Migracja DB (jednorazowa)
-```sql
-UPDATE public.student_tests
-SET total_questions = sub.cnt
-FROM (
-  SELECT test_id, COUNT(*)::int AS cnt
-  FROM public.student_test_questions
-  GROUP BY test_id
-) sub
-WHERE sub.test_id = public.student_tests.id
-  AND test_type = 'welcome'
-  AND (total_questions IS NULL OR total_questions <> sub.cnt);
-```
-Naprawia rozjazd 58/54 dla istniejących rekordów. Brak zmian schematu.
-
-### Krok 2 — Backfill auto-apply dla historycznych testów
-Nowa funkcja jednorazowa `backfill-welcome-test-auto-apply` (edge function, secured `x-cron-secret`). Logika:
-1. Wybiera wszystkie `student_tests WHERE test_type='welcome' AND status='completed' AND deleted_at IS NULL` (limit 50/run, paginacja po `created_at`).
-2. Dla każdego wywołuje wewnętrznie ten sam pipeline co `process-welcome-test` (refaktor: wyciągnąć funkcję `applyResultsToProgress(testId)` z `process-welcome-test/index.ts` do shared modułu).
-3. Po sukcesie ustawia `status='reviewed', reviewed_at=now()`.
-4. Loguje błędy do `error_logs` (severity='warning').
-
-Uruchamiamy ręcznie raz przez SQL Editor (`select net.http_post(...)`). Nie dodajemy crona — to jednorazówka.
-
-### Krok 3 — Frontend: total_questions consistency
-Pliki: `src/components/student-tests/StudentTestsTab.tsx`, `src/components/student-tests/TestDetailsView.tsx`.
-- Wprowadzić helper `getTotal(test) = Math.max(test.answered_count ?? 0, test.total_questions ?? 0)` w `src/utils/welcomeTestNumbering.ts`.
-- Podmienić wszystkie miejsca wyświetlające `{x}/{total_questions}`.
-- W `TestDetailsView` zachować `questions.length` (już jest źródłem prawdy dla widoku szczegółów).
-
-### Krok 4 — Frontend: daty utworzenia/wypełnienia
-Nowy komponent `src/components/student-tests/TestDates.tsx`:
-```tsx
-export function TestDates({ createdAt, completedAt, reviewedAt }: Props) {
-  // wyświetla "Created: dd MMM yyyy · Completed: dd MMM yyyy" / "—"
-  // używa date-fns format
+```ts
+interface OnboardingStep {
+  // Setup section
+  add_student: boolean;            // existing — keep
+  send_welcome_test: boolean;      // NEW
+  add_goals: boolean;              // NEW
+  generate_roadmap: boolean;       // NEW
+  // Weekly 1-Minute Prep section
+  generate_next_ideas: boolean;    // NEW
+  pick_idea: boolean;              // NEW
+  generate_worksheet: boolean;     // existing — keep (was step 2; teraz część prep flow)
+  // DEPRECATED — ukryte w UI ale zostają w typie dla wstecznej kompatybilności:
+  share_worksheet?: boolean;
+  create_homework?: boolean;
 }
 ```
-Wpięcie:
-- `StudentTestsTab.tsx` linia ~287 (Welcome card) i linia ~381 (TestCard).
-- `TestDetailsView.tsx` linia ~268 (pod opisem).
 
-### Krok 5 — Listening: spójność danych
-`src/components/student-tests/WelcomeTestResults.tsx`:
-1. Dodać prop `questions: StudentTestQuestion[]` przekazywany z `TestDetailsView`.
-2. Helper `computeSkillFromQuestions(questions, elementType)` → zwraca `{score, correct, total, attempted}`.
-3. Dla wiersza Listening (i fallback dla pozostałych): jeśli brak `test_skill_results`, fallback do helpera.
-4. Render reguły:
-   - `attempted > 0` → `{score}% ({correct}/{total})`,
-   - `total > 0 && attempted == 0` → chip `Skipped`,
-   - `total == 0` → ukryj wiersz.
+`defaultProgress.steps` dostaje wszystkie nowe pola = `false`. Stary stan z DB (4 pola) zostaje zmergowany z domyślnym przez `{ ...defaultProgress.steps, ...savedProgress.steps }` w obu miejscach gdzie czytamy (`useEffect` na profile + `useEffect` na localStorage). To gwarantuje brak `undefined` errors u istniejących userów.
 
-### Krok 6 — AI Analysis bez ID w tekście
-1. **Prompt update** w `supabase/functions/process-welcome-test/index.ts` (linie ~935-968):
-   - Dodać blok `OUTPUT RULES`: *"NEVER reference question IDs (e.g. wt_q3, q3c, q45) in `summary`, `recommendations`, or `key_observations`. Use topical paraphrases ('the latent-goal scenario', 'the homework-commitment scenario', 'the optional external-resources question'). IDs are allowed ONLY as keys inside `per_question_scores`."*
-   - W przykładach existujących (q3c, q5c, q13c, q7b) zmienić tekst objaśniający tak, by nie sugerował AI cytowania ID.
-2. **Sanitizer (runtime, frontend):** nowy util `src/utils/sanitizeAiSummary.ts`:
-   ```ts
-   const ID_RE = /\b(?:in |from |\()?(?:wt_)?q\d+[a-z]?\)?/gi;
-   export const sanitizeAiText = (s: string) => s.replace(ID_RE, '').replace(/\s{2,}/g, ' ').replace(/\s+([.,])/g, '$1').trim();
+`getCompletionPercentage()` liczy tylko klucze widoczne w UI (7 nowych); deprecated nie wliczają się. Robimy to przez `const ACTIVE_KEYS = ['add_student','send_welcome_test','add_goals','generate_roadmap','generate_next_ideas','pick_idea','generate_worksheet']` i iterujemy po tym.
+
+### 1.2 Detekcja stanu kroków w `checkSteps()`
+
+Dodajemy do istniejącego `checkSteps` kolejne zapytania do Supabase (równolegle przez `Promise.all`, żeby nie zwiększać latencji):
+
+| Krok | Detekcja |
+|---|---|
+| `add_student` | bez zmian: `students` po `teacher_id` |
+| `send_welcome_test` | `select id from student_tests where teacher_id=? and test_type='welcome' limit 1` (status nieistotny — wystarczy że nauczyciel wysłał) |
+| `add_goals` | `select id from student_goals where teacher_id=? limit 1` (jeśli tabela istnieje; jeśli inna nazwa — zweryfikuję w implementacji po `src/components/dslm/GoalsView.tsx`) |
+| `generate_roadmap` | `select id from curriculum_phases where teacher_id=? limit 1` (hook `useCurriculumPhases` już używa tej tabeli) |
+| `generate_next_ideas` | `select id from student_knowledge_entries where teacher_id=? and category='Next Lesson Ideas' and deleted_at is null limit 1` |
+| `pick_idea` | `select id from student_knowledge_entries where teacher_id=? and category='Next Lesson Ideas' and (used_in_worksheet_id is not null or archived_at is not null) limit 1` |
+| `generate_worksheet` | bez zmian: `worksheets` |
+
+Jeżeli któreś query zwróci błąd (np. brakuje kolumny), traktujemy jako `false` i zapisujemy w `devLog` — nigdy nie blokujemy checklistu.
+
+Real-time subskrypcje (`postgres_changes`) rozszerzamy o tabele `student_tests`, `curriculum_phases`, `student_knowledge_entries` (insert + update) z filtrem `teacher_id=eq.${profile.id}`. Każdy event → `setTimeout(checkSteps, 500)`.
+
+### 1.3 UI w `src/components/OnboardingChecklist.tsx`
+
+Zmiany czysto prezentacyjne:
+
+- Tytuł karty: `Get started with Edooqoo 🚀` zostaje.
+- Dodajemy 2 separatory sekcji wewnątrz listy kroków:
+  - Nagłówek **"1. One-time student setup"** (text-xs uppercase, muted) nad krokami: Add student / Send Welcome Test / Add goals / Generate Learning Roadmap.
+  - Nagłówek **"2. Weekly 1-Minute Prep"** nad: Generate Next Lesson Ideas / Pick one idea / Create a worksheet.
+- Pod nagłówkami krótki, jednoliniowy opis muted-text (po angielsku, bo cała apka jest po angielsku):
+  - Setup: *"Teach Edooqoo about your student — one-time."*
+  - Prep: *"Your weekly lesson prep flow — under a minute."*
+- Każdy krok ma swoją ikonę i akcję:
+
+| Klucz | Label | Ikona (lucide) | Action (button click) |
+|---|---|---|---|
+| `add_student` | `Add your first real student` | `User` | otwiera `AddStudentDialog` (jak dziś) |
+| `send_welcome_test` | `Send Welcome Test` | `ClipboardCheck` | `navigate('/dashboard')` (banner `WelcomeTestSuggestion` już istnieje); jeśli student jest w `useStudents()` jeden — `navigate('/student/${id}?tab=tests')` |
+| `add_goals` | `Add learning goals` | `Target` | jeśli 1 student → `navigate('/student/${id}?tab=dslm&section=goals')`, w przeciwnym razie `/dashboard` |
+| `generate_roadmap` | `Generate Learning Roadmap` | `Map` | `navigate('/student/${id}?tab=dslm&section=phases')` (PathwayView/GoalsView) |
+| `generate_next_ideas` | `Generate Next Lesson Ideas` | `Lightbulb` | `navigate('/student/${id}?tab=dslm&section=next-steps')` |
+| `pick_idea` | `Pick one idea` | `MousePointerClick` | jak wyżej, opisowo wskazuje na sekcję |
+| `generate_worksheet` | `Create a worksheet` | `FileText` | `navigate('/')` (WorksheetForm — `NextStepsPresetBanner` automatycznie podpowie) |
+
+Każdy "Start" guzik tylko gdy `!completed`. Treści po angielsku, bo cała aplikacja jest po angielsku.
+
+- `progress.completed` triggeruje istniejące confetti — pozostawiamy.
+
+### 1.4 Pomocnicze
+
+- Wersjonowanie kompatybilności: w `useOnboardingProgress` przy migracji ze starego stanu (4-pola → 7+ pól), jeżeli `add_student && generate_worksheet` to ustawiamy `generate_worksheet=true` (i tak go zachowujemy), ale **nie** zaznaczamy nowych kroków jako wykonanych — niech się sprawdzą w pierwszym `checkSteps()` (Supabase i tak je zweryfikuje).
+
+---
+
+## Część 2 — Bulk publish 922 worksheetów do `/gallery`
+
+### 2.1 Nowa edge function `bulk-publish-worksheets`
+
+Plik: `supabase/functions/bulk-publish-worksheets/index.ts`. Wzór: `backfill-welcome-test-auto-apply` (verify_jwt=false + `x-cron-secret` w nagłówku, identyczny pattern co w naszym memie `infrastructure/edge-function-cors-pattern.md`).
+
+Logika:
+
+1. CORS + walidacja `x-cron-secret` (env `CRON_SECRET`).
+2. Parse body: `{ limit?: number = 1000, dry_run?: boolean = false, only_teacher_id?: string }`. Zwraca też `cursor` (UUID) dla paginacji.
+3. Query batch:
+   ```sql
+   select id, title, teacher_id, user_id, form_data, ai_response, public_slug
+   from public.worksheets
+   where deleted_at is null
+     and is_public is not true
+     and ai_response is not null
+     and length(coalesce(title,'')) >= 3
+   order by id
+   limit $limit;
    ```
-   Zastosować w `WelcomeTestResults.tsx` przed renderowaniem `summary`, `recommendations[]`, `key_observations[]`.
+4. Dla każdego rekordu w pętli (sekwencyjnie po 50 na batch wewnątrz funkcji, żeby nie zatkać Supabase):
+   - Parse `ai_response` w `try/catch`. Jeżeli błąd parse → skip (zaloguj w `skipped_invalid_json++`).
+   - Wymuszamy **wszystkie** wymagania zgodne z `publish-worksheet`:
+     - `exerciseCount = exercises.length`. Jeśli `< 6` → skip (`skipped_too_short++`).
+     - PII regex (`/(\b[\w._%+-]+@[\w.-]+\.[A-Za-z]{2,}\b|\+?\d[\d\s().-]{7,}\d)/`) na `form_data.additionalInformation`. Jeśli wykryje → skip (`skipped_pii++`).
+   - Denormalizacja `public_topic`, `public_level`, `public_exercise_types` — kod 1:1 z `publish-worksheet`.
+   - Slug: jeśli `public_slug` istnieje, reuse; inaczej `rpc('generate_public_slug', {p_title, p_id})`.
+   - `update` z `is_public=true, public_slug, published_at=now(), public_topic, public_level, public_exercise_types`.
+   - Liczniki: `published++`, `errors[]` (max 100 ostatnich).
+5. Po pętli: best-effort `fetch(... regenerate-gallery-sitemap)` raz na całość (nie per worksheet).
+6. Response JSON: `{ ok: true, scanned, published, skipped_invalid_json, skipped_too_short, skipped_pii, errors: [...] }`.
 
-### Krok 7 — Tłumaczenia (Tura A: profilowe)
-Rozszerzenie `src/data/welcomeTestTranslations.ts` o 7 ID × 10 języków:
-- `wt_q3c` (latent goal scenario — "wake up 2 years from now")
-- `wt_q5c` (homework commitment scenario)
-- `wt_q7b` (correction preference)
-- `wt_q13c` (plateau response)
-- `wt_q37` (open reflection)
-- `wt_q38` (preference choice)
-- `wt_q39` (preference choice)
+User wykona ręcznie w SQL Editorze (analogicznie do backfill auto-apply):
 
-Treść każdego: `question`, `options[]`, `description?` — kopiowane z `welcomeTestQuestions.ts` i tłumaczone przez AI Gateway (`google/gemini-2.5-flash`, jednorazowy skrypt `scripts/translate-welcome-test.ts` z weryfikacją wizualną). 10 języków: PL, ES, DE, FR, PT, IT, TR, RU, CS, UK.
-
-### Krok 8 — Tłumaczenia (Tura B: instrukcje skill questions)
-Dla 22 skill ID dodajemy tylko `description` (instrukcja):
-- Grammar/Vocabulary MC (`wt_q18..wt_q35`): "Wybierz prawidłową odpowiedź" / equivalent.
-- Listening (`wt_q18l`): "Posłuchaj nagrania i wybierz prawidłową odpowiedź. Treść audio pozostaje po angielsku."
-- Speaking (`wt_q16s, wt_q36s, wt_q41s`): tłumaczenie polecenia + uwaga "Nagraj odpowiedź po angielsku."
-
-Treść `question` skill items pozostaje po angielsku (zgodnie z istniejącą zasadą — testujemy znajomość angielskiego).
-
-### Krok 9 — Dokumentacja RAG
-Zaktualizować zgodnie z formułą `Problem → Edooqoo Solution → Technical Mechanics`:
-- `docs/llm-context.md` — sekcje:
-  1. Welcome Test Auto-Apply Backfill (Problem: legacy completed tests; Solution: backfill function; Mechanics: edge fn + shared `applyResultsToProgress`).
-  2. total_questions Consistency (Problem: rozjazd seed/DB; Solution: migracja + frontend helper).
-  3. Test Card Timestamps (Problem: brak dat; Solution: komponent TestDates).
-  4. Listening Score Fallback (Problem: pusta wartość; Solution: compute z questions).
-  5. AI Analysis ID-Free Output (Problem: cytowanie ID; Solution: prompt rule + sanitizer).
-  6. Welcome Test Translation Coverage (Problem: 29 brakujących ID; Solution: Tura A profilowych + Tura B instrukcji).
-- `llms.txt` — analogicznie, krótsze entries.
-- `mem/features/welcome-test/auto-apply-and-brain-reset.md` — uzupełnić o backfill i sanitizer; dodać sekcję `RAG Keywords`.
-
-## Pliki do zmiany / dodania
-
-```text
-NEW    supabase/functions/backfill-welcome-test-auto-apply/index.ts
-NEW    supabase/functions/_shared/applyWelcomeTestResults.ts   (wyciągnięte z process-welcome-test)
-EDIT   supabase/functions/process-welcome-test/index.ts        (prompt + import shared)
-NEW    supabase/migrations/<ts>_backfill_welcome_total_questions.sql
-
-NEW    src/utils/sanitizeAiSummary.ts
-NEW    src/components/student-tests/TestDates.tsx
-EDIT   src/components/student-tests/StudentTestsTab.tsx        (TestDates + helper getTotal)
-EDIT   src/components/student-tests/TestDetailsView.tsx        (TestDates + przekazanie questions)
-EDIT   src/components/student-tests/WelcomeTestResults.tsx     (listening fallback + sanitizer)
-EDIT   src/utils/welcomeTestNumbering.ts                       (helper getTotal)
-
-EDIT   src/data/welcomeTestTranslations.ts                     (Tura A + Tura B, 10 języków)
-NEW    scripts/translate-welcome-test.ts                       (jednorazowy generator tłumaczeń przez AI)
-
-EDIT   docs/llm-context.md
-EDIT   llms.txt
-EDIT   mem/features/welcome-test/auto-apply-and-brain-reset.md
-EDIT   mem/index.md
+```sql
+select net.http_post(
+  url     := 'https://bvfrkzdlklyvnhlpleck.supabase.co/functions/v1/bulk-publish-worksheets',
+  headers := jsonb_build_object('Content-Type','application/json','x-cron-secret','<CRON_SECRET>'),
+  body    := '{"limit": 1000}'::jsonb
+);
 ```
 
-## Co użytkownik wykona ręcznie po implementacji
-1. Uruchomi SQL w Supabase SQL Editor: `select net.http_post(... 'backfill-welcome-test-auto-apply' ...)` z `x-cron-secret` (instrukcja w komentarzu migracji).
-2. Otworzy stary test (Wiktoria) i potwierdzi że banner zmienił się na zielony "Results automatically applied".
-3. Otworzy uczniów z różnymi językami i sprawdzi wizualnie tłumaczenia nowych pytań.
+Funkcja jest **idempotentna**: kolejne wywołania pomijają już opublikowane (`is_public is not true` filter). Można uruchamiać wielokrotnie.
 
-## Co NIE wchodzi w zakres
-- Reprocessing AI Analysis dla starych testów (drogie, niepotrzebne — sanitizer ukryje ID).
-- Tłumaczenie treści gramatyczno-słownikowej skill questions (świadoma decyzja produktowa).
-- Zmiany w prompt'cie generującym worksheety (sanctity rule).
+### 2.2 Konfig
 
-## Bezpieczeństwo regresji
-- Backfill: idempotentny — sprawdza `status='completed'` przed reprocessingiem.
-- Migracja: tylko `UPDATE`, bez zmian schematu, bez wpływu na nowe testy.
-- Frontend: helper `getTotal` zwraca starą wartość gdy `answered_count` jest 0, więc nie zepsuje testów `pending`.
-- Sanitizer: czysta funkcja string→string, bez wpływu na zapis DB.
-- Tłumaczenia: dodawane jako nowe klucze, fallback do EN nadal działa.
+- `supabase/config.toml`: dodać sekcję `[functions.bulk-publish-worksheets]` z `verify_jwt = false`.
+- Sekret `CRON_SECRET` już istnieje (używany przez `audit-llm-models`, `backfill-welcome-test-auto-apply`) — nie tworzymy nowego.
+
+### 2.3 Walidacja po wykonaniu
+
+Po requeście instruuję Cię, byś sprawdził:
+```sql
+select count(*) from public.worksheets where is_public=true;
+-- oczekiwane ~900+ (z 922 kandydatów odpadną przypadki invalid_json / <6 exercises / PII)
+```
+Następnie wizualne sprawdzenie `https://edooqoo.com/gallery` (paginacja 24/strona).
+
+---
+
+## Część 3 — 2 nowe gry w „pause" Welcome Testu
+
+### 3.1 Architektura — selektor gier
+
+Tworzymy nowy komponent **`src/components/welcome-test/BrainResetGames.tsx`** (orchestrator). Zachowuje API obecnego `BrainResetGame` (drop-in replacement w `WelcomeTestPage.tsx`).
+
+```tsx
+type GameKey = 'memory' | 'reaction' | 'sequence';
+```
+
+UI: na górze 3 pigułki (Tabs / SegmentedControl z shadcn — `Tabs` jest już używany w aplikacji), pod spodem aktywna gra. Domyślnie losowo wybrana spośród 3, żeby user nie zawsze widział to samo.
+
+Renderuje:
+- `'memory'` → istniejący `BrainResetGame` (zostawiamy bez zmian).
+- `'reaction'` → **`BrainResetReactionGame.tsx`** (nowa).
+- `'sequence'` → **`BrainResetSequenceGame.tsx`** (nowa).
+
+W `WelcomeTestPage.tsx` zamieniamy `<BrainResetGame />` na `<BrainResetGames />` — jedna jednoliniowa zmiana.
+
+### 3.2 Gra 2 — Reaction Tap (`BrainResetReactionGame.tsx`)
+
+Zasada: na ekranie pojawia się 1 świecące koło w losowej pozycji w siatce 4×4 po losowym opóźnieniu 600–1800 ms. User klika jak najszybciej. Mierzymy średni czas reakcji z 10 prób.
+
+Implementacja:
+- Stan: `round (0–10)`, `target (idx 0–15 | null)`, `startAt (number)`, `times: number[]`.
+- `useEffect` po każdym zresetowaniu `target=null` → `setTimeout(losowo, 600–1800)` ustawia target i startAt = performance.now().
+- Klik w kafelek: jeśli `idx===target` → `times.push(now-startAt)`, `target=null`, `round++`. Jeśli zły kafelek → ignoruj (lub mała kara +200ms).
+- Po round===10 → ekran wyników: `Avg: 412 ms` + przycisk `Play again`.
+- 100% wizualne, brak języka. Używa semantic tokens (`bg-primary`, `bg-muted`).
+
+### 3.3 Gra 3 — Color Sequence (`BrainResetSequenceGame.tsx`)
+
+Klasyczny Simon Says — 4 kolorowe pady (primary, secondary, accent, muted-foreground). System pokazuje sekwencję migająć padami (po 500 ms + 200 ms przerwy), user powtarza klikając. Po sukcesie sekwencja rośnie o 1.
+
+- Stan: `sequence: number[]`, `playerIndex`, `mode: 'watch'|'input'|'gameover'`, `round`.
+- Start: `sequence=[random()]`.
+- `watch` mode: iterujemy z `setTimeout` po sequence, podświetlając kolejny pad.
+- `input` mode: każdy klik porównujemy z `sequence[playerIndex]`. Match → `playerIndex++`; jeśli `playerIndex===sequence.length` → `sequence.push(random())`, wracamy do `watch`. Mismatch → `gameover` + final round.
+- Wynik: `You reached round X` + `Try again`.
+- Zero języka. Pełna zgodność z design system.
+
+### 3.4 Copy w `BrainResetGames.tsx`
+
+Header: `Quick brain reset · Pick a game` (po angielsku, bez tłumaczeń — krótkie i neutralne). Pod selektorem: `No English required — just relax for a minute.`
+
+---
+
+## Część 4 — Tłumaczenia 5 pytań profilujących na 24 języki
+
+### 4.1 Zakres
+
+Dodajemy do **każdego** z 24 setów (`SPANISH`, `GERMAN`, `FRENCH`, `PORTUGUESE`, `ITALIAN`, `TURKISH`, `RUSSIAN`, `CZECH`, `UKRAINIAN`, `DUTCH`, `JAPANESE`, `KOREAN`, `CHINESE`, `ARABIC`, `HUNGARIAN`, `ROMANIAN`, `GREEK`, `CROATIAN`, `SWEDISH`, `HINDI`, `VIETNAMESE`, `THAI`, `NORWEGIAN`, `DANISH`) klucze:
+
+- `wt_q3c` — scenariusz „budzisz się za 2 lata" (5 opcji + description).
+- `wt_q5c` — „środa wieczór, ciężki dzień" (5 opcji, bez description).
+- `wt_q7b` — „korekta po błędzie mówienia" (5 opcji, bez description).
+- `wt_q13c` — „6 miesięcy nauki bez postępów" (5 opcji, bez description).
+- `wt_q39` — „spóźnienie na spotkanie" (4 opcje, bez description) — **uwaga**: opcje to tłumaczone formuły grzecznościowe. To NIE jest klasyczny test skillu gramatycznego/słownikowego — to scenariusz pragmatyki. Tłumaczymy.
+
+Wzorzec tekstu polskiego (linie 85–89) służy jako prawda źródłowa do tłumaczenia. Tłumaczenia wykonywane ręcznie (przeze mnie w build mode) zgodnie z tonalnością istniejących już tłumaczeń w danym secie (sprawdzę 2–3 sąsiednie klucze, by zachować rejestr).
+
+### 4.2 Lokalizacja zmian
+
+Plik: `src/data/welcomeTestTranslations.ts`. Po ostatnim kluczu w każdym secie (przed `};`) dorzucamy 5 nowych wpisów. To czysto addytywna zmiana — żadnych modyfikacji istniejących kluczy.
+
+### 4.3 Sanity check
+
+Nie ma `wt_q39` w polskim secie po `wt_q5b/q13b/q17b/q41b` ułożone tematycznie — ale obecna struktura traktuje je jako mapę kluczy, kolejność nie ma znaczenia (lookup po ID). Po wdrożeniu uruchomimy:
+
+```bash
+node -e "const t=require('./src/data/welcomeTestTranslations.ts'); ..."
+```
+(albo prościej — `rg "wt_q39'" src/data/welcomeTestTranslations.ts | wc -l` musi dać **25** = Polish + 24 nowe).
+
+---
+
+## Część 5 — RAG: aktualizacja `docs/llm-context.md` i `llms.txt`
+
+Dodajemy 4 sekcje w formacie *Problem → Edooqoo Solution → Technical Mechanics → RAG Keywords*:
+
+1. **Onboarding Checklist v2 — Setup + 1-Minute Prep**  
+   Tech: `useOnboardingProgress.tsx` rozszerzony o 5 nowych kroków, real-time subscriptions do `student_tests`, `curriculum_phases`, `student_knowledge_entries`. Zachowanie backward-compat dla starych stanów w `profiles.onboarding_progress`. Keywords: onboarding, checklist, weekly prep, welcome test step, learning roadmap step, next lesson ideas step.
+
+2. **Bulk Gallery Publish Backfill**  
+   Tech: `bulk-publish-worksheets` edge function (verify_jwt=false + x-cron-secret), reużywa walidacji z `publish-worksheet`, idempotentna, paginowana. Sitemap odświeżany raz po batchu. Keywords: gallery backfill, bulk publish, is_public, public_slug, mass publish worksheets, gallery seeding.
+
+3. **Welcome Test Brain Reset Games (3 minigames)**  
+   Tech: `BrainResetGames.tsx` orchestrator z 3 grami (memory pairs, reaction tap, color sequence). Wszystkie language-free, zero persistence, zero impact na test scoring. Keywords: brain reset, paused test, minigame, reaction game, simon says, memory pairs.
+
+4. **Welcome Test Translations Coverage (5 profiling Qs × 25 langs)**  
+   Tech: `welcomeTestTranslations.ts` — dodane `wt_q3c, wt_q5c, wt_q7b, wt_q13c, wt_q39` we wszystkich 24 nie-polskich setach. Skill items (`wt_q18–wt_q35, wt_q37, wt_q38`) celowo pozostają po angielsku — tłumaczenie zaburzyłoby pomiar znajomości języka. Keywords: welcome test translations, profiling questions, multi-language, skill items english-only, fallback policy.
+
+Update `mem/index.md` — dopisać do sekcji `## Memories` jeden link do zaktualizowanego `mem/features/welcome-test/auto-apply-and-brain-reset.md` (do tego pliku dopiszemy sekcję o 3 grach i pełnym pokryciu tłumaczeń) oraz nowy `mem/features/onboarding/checklist-v2.md` opisujący 7 kroków, 2 sekcje, backward-compat.
+
+---
+
+## Lista plików (zmienianych / tworzonych)
+
+**Nowe:**
+- `supabase/functions/bulk-publish-worksheets/index.ts`
+- `src/components/welcome-test/BrainResetGames.tsx`
+- `src/components/welcome-test/BrainResetReactionGame.tsx`
+- `src/components/welcome-test/BrainResetSequenceGame.tsx`
+- `mem/features/onboarding/checklist-v2.md`
+
+**Edytowane:**
+- `src/hooks/useOnboardingProgress.tsx` (rozszerzony typ + nowe queries + nowe subskrypcje + ACTIVE_KEYS w %).
+- `src/components/OnboardingChecklist.tsx` (2 sekcje, 7 kroków, nowe akcje + ikony).
+- `src/data/welcomeTestTranslations.ts` (24 × 5 nowych wpisów).
+- `src/pages/WelcomeTestPage.tsx` (`<BrainResetGame />` → `<BrainResetGames />`).
+- `supabase/config.toml` (nowa sekcja `[functions.bulk-publish-worksheets]`).
+- `docs/llm-context.md`, `llms.txt` (4 nowe sekcje RAG).
+- `mem/index.md` (2 nowe linki).
+- `mem/features/welcome-test/auto-apply-and-brain-reset.md` (sekcja o 3 grach + pełne pokrycie tłumaczeń).
+
+**Nieruszane:**
+- Wszystkie prompty generacji worksheetów (engine sanctity).
+- `publish-worksheet/index.ts` (zostaje per-worksheet flow z UI).
+- Stary `BrainResetGame.tsx` (pozostaje, tylko opakowany).
+
+---
+
+## Akcje wymagające Twojego udziału po implementacji
+
+1. **Uruchom bulk publish** (jednorazowo, w SQL Editorze Supabase):
+   ```sql
+   select net.http_post(
+     url     := 'https://bvfrkzdlklyvnhlpleck.supabase.co/functions/v1/bulk-publish-worksheets',
+     headers := jsonb_build_object('Content-Type','application/json','x-cron-secret','<TWÓJ_CRON_SECRET>'),
+     body    := '{"limit": 1000}'::jsonb
+   );
+   ```
+   Funkcja zwróci `{ scanned, published, skipped_* }`. Jeśli `scanned == limit`, uruchom ponownie (idempotentna).
+
+2. **Werifikacja**: `select count(*) from worksheets where is_public=true;` (oczekiwane ~900).
+
+3. **Test gier** w trakcie pause Welcome Testu — sprawdź wszystkie 3 zakładki.
+
+---
+
+## Ryzyka i mitygacje
+
+| Ryzyko | Mitygacja |
+|---|---|
+| Stary `onboarding_progress` w `profiles` ma 4 pola — nowe komponenty mogą crashnąć na `undefined` | Merge `{ ...defaultProgress.steps, ...savedProgress.steps }` w obu setterach + ACTIVE_KEYS-based %. |
+| Bulk publish trafi worksheet z corrupt JSON | try/catch + `skipped_invalid_json` licznik; nigdy nie rzuca. |
+| Real-time subskrypcje × 5 tabel zwiększają liczbę kanałów | Zostawiamy istniejący throttling (3s debounce, 30s error backoff) — to wystarczy. |
+| Bulk publish wygeneruje 900× hit do `regenerate-gallery-sitemap` | Sitemap regenerujemy **raz** na końcu batcha, nie per worksheet. |
+| `wt_q39` jako „pragmatyka" mogłaby być zaliczona do skill — tłumaczenie wpłynie na pomiar | Opcje to formuły grzecznościowe (rejestr formal/informal), nie test gramatyki — pragmatyka skaluje się przez kulturę → tłumaczenie jest poprawne andragogicznie. |
+
+Po Twoim ack przechodzę do implementacji w jednym ciągu (najpierw migracja edge function + UI hook, potem komponenty UI/games, na końcu masowe tłumaczenia + RAG).
