@@ -15,6 +15,35 @@ Edooqoo.com is a 1-Minute Prep system for recurring 1:1 English teachers. It use
 
 ## v6.9.29 - Welcome Test Auto-Apply, Completion Email, Monthly Model-Audit Report, Brain-Reset Minigame
 
+## v6.9.30 - Welcome Test Backfill, AI-ID Sanitizer, Listening Fallback, Test Dates, Profiling Translations
+
+### Problem
+- Historical `completed` Welcome Tests still displayed the "Auto-apply did not complete" banner.
+- `student_tests.total_questions` drifted from seeded `student_test_questions` count (UI showed "58/54").
+- AI summaries leaked internal IDs (`wt_q3c`, `q45`, `q18l`).
+- Listening sub-score rendered `0` when aggregated `skill_results` row was missing.
+- Created/completed timestamps were not visible in test list/detail.
+- Five profiling scenario_reactions had no Polish translation.
+
+### Edooqoo.com Solution
+- New Edge Function `backfill-welcome-test-auto-apply` (auth: `x-cron-secret`; body `{limit?, testId?}`) — idempotent: copies `test_skill_results.suggested_rating` into `student_learning_elements.current_rating`, stamps `applied_at`, promotes status to `reviewed`.
+- `getWelcomeTestTotal()` helper uses `max(total_questions, answered_count, ALL_WELCOME_TEST_QUESTIONS.length)`; migration backfills `student_tests.total_questions`.
+- `sanitizeAiText` / `sanitizeAiList` strip `(wt_)?q\d+[a-z]?` tokens from existing summaries; prompt updated to forbid IDs in newly-generated text.
+- `WelcomeTestResults.tsx` falls back to in-memory skill calculation from `questions` prop when DB aggregates are missing.
+- `TestDates.tsx` shows Created/Completed in `StudentTestsTab` and `TestDetailsView`.
+- Polish translations added for `wt_q3c`, `wt_q5c`, `wt_q7b`, `wt_q13c`, `wt_q39`. Skill items remain English by design (test integrity).
+
+### Technical Mechanics
+- Files: `supabase/functions/backfill-welcome-test-auto-apply/index.ts`, `src/utils/sanitizeAiSummary.ts`, `src/utils/welcomeTestNumbering.ts`, `src/components/student-tests/TestDates.tsx`, `src/components/student-tests/WelcomeTestResults.tsx`, `src/data/welcomeTestTranslations.ts`, migration `20260530195549_*.sql`.
+- Constraints: do NOT translate grammar/vocabulary/reading MC items; do NOT remove the legacy manual Apply fallback in `TestDetailsView.tsx`; always go through `getWelcomeTestTotal` for progress denominators.
+
+### RAG Keywords
+welcome test backfill, auto-apply legacy banner, completion banner stuck, 58 of 54 mismatch, ai id leak, sanitize ai summary, listening score 0, test created completed dates, scenario reaction polish translation, skill item english only, x-cron-secret edge function
+
+---
+
+## v6.9.29 - Welcome Test Auto-Apply, Completion Email, Monthly Model-Audit Report, Brain-Reset Minigame (continued)
+
 ### Problem
 - Teachers had to click "Apply Results to Profile" after every Welcome Test; nano-skill assessments were not persisted automatically.
 - Students received no acknowledgement e-mail after submitting the placement test.

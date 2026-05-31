@@ -5,6 +5,37 @@ Written in Problem → Edooqoo.com Solution → Technical Mechanics format.
 
 ---
 
+## v6.9.30 — Welcome Test Backfill, Listening Fallback, AI-ID Sanitizer, Test Dates & Profiling Translations
+
+### Problem
+1. Historical Welcome Tests (`status='completed'`, pre-v6.9.29) still showed "Auto-apply did not complete" because nano-skills had never been propagated.
+2. `total_questions` snapshot taken at test creation drifted from the actual seeded `student_test_questions` rows when the canonical question list grew (e.g. "58/54" mismatch in progress).
+3. AI-generated welcome summaries leaked internal IDs like `wt_q3c`, `(q45)`, `q18l` into teacher-facing text.
+4. Listening sub-score sometimes rendered as `0` when the aggregated row was missing in DB, even though answers existed in memory.
+5. `StudentTestsTab` / `TestDetailsView` showed no created/completed dates, making chronology guesswork.
+6. Five profiling scenario_reactions (`wt_q3c`, `wt_q5c`, `wt_q7b`, `wt_q13c`, `wt_q39`) had no Polish translation; non-skill items must be localized to keep self-report bias low (skill items remain English by design).
+
+### Edooqoo.com Solution
+1. New idempotent Edge Function `backfill-welcome-test-auto-apply` (header `x-cron-secret`, body `{ "limit": 100, "testId"?: uuid }`) — copies `test_skill_results.suggested_rating` into `student_learning_elements.current_rating`, stamps `applied_at`, promotes `student_tests.status` → `reviewed`. Safe to re-run; skips rows already applied.
+2. Helper `getWelcomeTestTotal(test)` in `src/utils/welcomeTestNumbering.ts` returns `Math.max(total_questions, answered_count, ALL_WELCOME_TEST_QUESTIONS.length)` — single source of truth for the denominator in progress UI. Migration `20260530195549_*.sql` retroactively syncs `student_tests.total_questions` to the canonical question count.
+3. `src/utils/sanitizeAiSummary.ts` (`sanitizeAiText`, `sanitizeAiList`) strips `(wt_)?q\d+[a-z]?` tokens and dangling fillers (`in`, `from`, `on`…) from existing summaries; prompt in `process-welcome-test/index.ts` now explicitly bans question IDs in generated text.
+4. `WelcomeTestResults.tsx` falls back to on-the-fly skill calculation from the `questions` prop when DB-aggregated `skill_results` rows are missing.
+5. New `TestDates.tsx` component renders Created / Completed timestamps in `StudentTestsTab.tsx` and `TestDetailsView.tsx`.
+6. Polish translations added for the five missing profiling scenario_reactions in `src/data/welcomeTestTranslations.ts`. Skill items (grammar/vocabulary/listening MC/fill-blank) remain English by design — `getTranslation` returns `null` → renderer falls back to original English text.
+
+### Technical Mechanics
+- `supabase/functions/backfill-welcome-test-auto-apply/index.ts` — service-role client, validates `CRON_SECRET`, batches up to 500 tests. Errors logged to `error_logs (source='edge-function', source_name='backfill-welcome-test-auto-apply')`.
+- Trigger: `select net.http_post(url:='https://bvfrkzdlklyvnhlpleck.supabase.co/functions/v1/backfill-welcome-test-auto-apply', headers:=jsonb_build_object('Content-Type','application/json','x-cron-secret','<CRON_SECRET>'), body:='{"limit":200}'::jsonb);`
+- `sanitizeAiText` regex: `/\(?(?:wt_)?q\d+[a-z]?\)?/gi` + filler cleanup + double-space/space-before-punct compaction.
+- `getWelcomeTestTotal` MUST be used everywhere progress is rendered to prevent "58/54" regressions.
+- DO NOT translate skill items (grammar/vocabulary/reading MC). They test English knowledge — translation defeats the placement signal.
+- DO NOT remove the legacy "Apply" fallback in `TestDetailsView.tsx`; pre-v6.9.29 tests without `test_skill_results` rows still need it.
+
+### RAG Keywords
+welcome test backfill, auto-apply legacy, completion banner stuck, total_questions mismatch, 58 of 54 questions, AI id leak wt_q3c, sanitize ai summary, listening score 0 fallback, test dates UI, profiling translations Polish, scenario reaction translation, skill item not translated, x-cron-secret backfill
+
+---
+
 ## v6.9.29 — Welcome Test Auto-Apply, Completion Email, Model-Audit Monthly Report & Brain-Reset Game
 
 ### Problem
