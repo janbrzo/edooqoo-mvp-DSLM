@@ -298,6 +298,19 @@ export const useOnboardingProgress = () => {
       )
       .subscribe();
 
+    // v6.9.31 — track student_tests, goals, roadmap phases and next-lesson-ideas
+    const extraChannel = supabase
+      .channel('onboarding-extras')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'student_tests', filter: `teacher_id=eq.${profile.id}` },
+        () => setTimeout(checkSteps, 500))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'student_progress_goals', filter: `teacher_id=eq.${profile.id}` },
+        () => setTimeout(checkSteps, 500))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'dslm_curriculum_phases', filter: `teacher_id=eq.${profile.id}` },
+        () => setTimeout(checkSteps, 500))
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'student_knowledge_entries', filter: `teacher_id=eq.${profile.id}` },
+        () => setTimeout(checkSteps, 500))
+      .subscribe();
+
     // Periodic safety net — realtime is the primary trigger
     intervalRef.current = setInterval(() => {
       checkSteps();
@@ -313,6 +326,7 @@ export const useOnboardingProgress = () => {
     return () => {
       supabase.removeChannel(worksheetChannel);
       supabase.removeChannel(studentChannel);
+      supabase.removeChannel(extraChannel);
       window.removeEventListener('focus', handleWindowFocus);  // ADDED: cleanup
       if (intervalRef.current) {
         clearInterval(intervalRef.current);

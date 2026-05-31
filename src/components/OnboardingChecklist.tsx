@@ -4,10 +4,11 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { useOnboardingProgress } from '@/hooks/useOnboardingProgress';
-import { ChevronUp, ChevronDown, Check, User, FileText, Share2, X, BookOpen } from 'lucide-react';
+import { ChevronDown, Check, User, FileText, X, ClipboardCheck, Target, Map, Lightbulb, MousePointerClick } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Confetti from 'react-confetti';
 import { AddStudentDialog } from '@/components/dashboard/AddStudentDialog';
+import { useStudents } from '@/hooks/useStudents';
 
 export const OnboardingChecklist = () => {
   const [isExpanded, setIsExpanded] = useState(true);
@@ -16,6 +17,7 @@ export const OnboardingChecklist = () => {
   const [isTemporarilyDismissed, setIsTemporarilyDismissed] = useState(false);
   const [addStudentModalOpen, setAddStudentModalOpen] = useState(false);
   const { progress, loading, dismissOnboarding, getCompletionPercentage, shouldShow, refreshProgress } = useOnboardingProgress();
+  const { students } = useStudents();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -44,36 +46,105 @@ export const OnboardingChecklist = () => {
 
   const completionPercentage = getCompletionPercentage();
 
-  const steps = [
+  // Pick a target student for deep links — first real (non-demo) student if available.
+  const firstStudentId = students?.[0]?.id;
+  const studentDeepLink = (suffix: string) =>
+    firstStudentId ? `/student/${firstStudentId}${suffix}` : '/dashboard';
+
+  type Step = {
+    key: string;
+    label: string;
+    icon: typeof User;
+    completed: boolean;
+    action: () => void;
+  };
+
+  const setupSteps: Step[] = [
     {
       key: 'add_student',
-      label: 'Add your first student',
+      label: 'Add your first real student',
       icon: User,
-      completed: progress.steps.add_student,
-      action: () => setAddStudentModalOpen(true)
+      completed: !!progress.steps.add_student,
+      action: () => setAddStudentModalOpen(true),
+    },
+    {
+      key: 'send_welcome_test',
+      label: 'Send Welcome Test',
+      icon: ClipboardCheck,
+      completed: !!progress.steps.send_welcome_test,
+      action: () => navigate(studentDeepLink('?tab=tests')),
+    },
+    {
+      key: 'add_goals',
+      label: 'Add learning goals',
+      icon: Target,
+      completed: !!progress.steps.add_goals,
+      action: () => navigate(studentDeepLink('?tab=dslm&section=goals')),
+    },
+    {
+      key: 'generate_roadmap',
+      label: 'Generate Learning Roadmap',
+      icon: Map,
+      completed: !!progress.steps.generate_roadmap,
+      action: () => navigate(studentDeepLink('?tab=dslm&section=phases')),
+    },
+  ];
+
+  const prepSteps: Step[] = [
+    {
+      key: 'generate_next_ideas',
+      label: 'Generate Next Lesson Ideas',
+      icon: Lightbulb,
+      completed: !!progress.steps.generate_next_ideas,
+      action: () => navigate(studentDeepLink('?tab=dslm&section=next-steps')),
+    },
+    {
+      key: 'pick_idea',
+      label: 'Pick one idea',
+      icon: MousePointerClick,
+      completed: !!progress.steps.pick_idea,
+      action: () => navigate(studentDeepLink('?tab=dslm&section=next-steps')),
     },
     {
       key: 'generate_worksheet',
-      label: 'Generate your first worksheet',
+      label: 'Create a worksheet',
       icon: FileText,
-      completed: progress.steps.generate_worksheet,
-      action: () => navigate('/')
+      completed: !!progress.steps.generate_worksheet,
+      action: () => navigate('/'),
     },
-    {
-      key: 'share_worksheet',
-      label: 'Share the worksheet',
-      icon: Share2,
-      completed: progress.steps.share_worksheet,
-      action: () => navigate('/dashboard')
-    },
-    {
-      key: 'create_homework',
-      label: 'Create homework assignment',
-      icon: BookOpen,
-      completed: progress.steps.create_homework,
-      action: () => navigate('/dashboard')
-    }
   ];
+
+  const renderStep = (step: Step) => {
+    const IconComponent = step.icon;
+    return (
+      <div
+        key={step.key}
+        className={`flex items-center justify-between p-3 rounded-lg border transition-all ${
+          step.completed
+            ? 'bg-green-50 border-green-200'
+            : 'bg-muted/20 border-border hover:bg-muted/40'
+        }`}
+      >
+        <div className="flex items-center space-x-3">
+          <div className={`p-2 rounded-full ${step.completed ? 'bg-green-100' : 'bg-muted'}`}>
+            {step.completed ? (
+              <Check className="h-4 w-4 text-green-600" />
+            ) : (
+              <IconComponent className="h-4 w-4 text-muted-foreground" />
+            )}
+          </div>
+          <span className={`text-sm ${step.completed ? 'text-green-700 line-through' : 'text-foreground'}`}>
+            {step.label}
+          </span>
+        </div>
+        {!step.completed && (
+          <Button size="sm" variant="outline" onClick={step.action} className="h-8 text-xs">
+            {step.key === 'add_student' ? 'Add' : 'Start'}
+          </Button>
+        )}
+      </div>
+    );
+  };
 
   return (
     <>
@@ -144,7 +215,7 @@ export const OnboardingChecklist = () => {
           )}
 
           {isExpanded && (
-            <CardContent className="pt-0 animate-accordion-down">
+            <CardContent className="pt-0 animate-accordion-down max-h-[70vh] overflow-y-auto">
               <div className="space-y-3">
                 {progress.completed && (
                   <div className={`text-center p-4 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg border-2 border-green-200 transition-all duration-500 ${
@@ -159,47 +230,25 @@ export const OnboardingChecklist = () => {
                   </div>
                 )}
 
-                {steps.map((step) => {
-                  const IconComponent = step.icon;
-                  return (
-                    <div
-                      key={step.key}
-                      className={`flex items-center justify-between p-3 rounded-lg border transition-all ${
-                        step.completed 
-                          ? 'bg-green-50 border-green-200' 
-                          : 'bg-muted/20 border-border hover:bg-muted/40'
-                      }`}
-                    >
-                      <div className="flex items-center space-x-3">
-                        <div className={`p-2 rounded-full ${
-                          step.completed ? 'bg-green-100' : 'bg-muted'
-                        }`}>
-                          {step.completed ? (
-                            <Check className="h-4 w-4 text-green-600" />
-                          ) : (
-                            <IconComponent className="h-4 w-4 text-muted-foreground" />
-                          )}
-                        </div>
-                        <span className={`text-sm ${
-                          step.completed ? 'text-green-700 line-through' : 'text-foreground'
-                        }`}>
-                          {step.label}
-                        </span>
-                      </div>
-                      
-                      {!step.completed && (
-                        <Button
-                          size="sm"
-                          variant="outline"
-                          onClick={step.action}
-                          className="h-8 text-xs"
-                        >
-                          {step.key === 'add_student' ? 'Add' : 'Start'}
-                        </Button>
-                      )}
-                    </div>
-                  );
-                })}
+                <div>
+                  <div className="text-xs uppercase tracking-wide text-muted-foreground font-semibold mb-1">
+                    1. One-time student setup
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-2">
+                    Teach Edooqoo about your student — one-time.
+                  </p>
+                  <div className="space-y-2">{setupSteps.map(renderStep)}</div>
+                </div>
+
+                <div>
+                  <div className="text-xs uppercase tracking-wide text-muted-foreground font-semibold mb-1">
+                    2. Weekly 1-Minute Prep
+                  </div>
+                  <p className="text-xs text-muted-foreground mb-2">
+                    Your weekly lesson prep flow — under a minute.
+                  </p>
+                  <div className="space-y-2">{prepSteps.map(renderStep)}</div>
+                </div>
 
                 {!progress.completed && (
                   <div className="pt-2 border-t">
