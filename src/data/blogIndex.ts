@@ -59,6 +59,13 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "category": "How to Teach"
   },
   {
+    "title": "1-Minute Prep Workflow for ESL Tutors | Edooqoo",
+    "description": "Instructional reference for testing the Edooqoo.com 1-Minute Prep workflow with one real student, setup boundaries, and weekly worksheet output.",
+    "url": "/blog/one-minute-prep-workflow-for-esl-tutors.html",
+    "date": "2026-05-24",
+    "category": "General"
+  },
+  {
     "title": "Public ESL Worksheet Gallery Quality Standards | Edooqoo",
     "description": "Instructional explanation of public worksheet gallery quality standards, public examples, and LearningResource citation context.",
     "url": "/blog/public-esl-worksheet-gallery-quality-standards.html",
@@ -1773,6 +1780,11 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "title": "Multiple Choice Quiz Generator for English",
     "description": "Reference for multiple-choice English quiz generation, distractor design, CEFR adaptation, and classroom assessment use.",
     "url": "/multiple-choice-quiz-generator-english.html"
+  },
+  {
+    "title": "1-Minute Prep for English Tutors",
+    "description": "Factual reference for Edooqoo.com 1-Minute Prep: setup boundaries, student-context loop, DSLM suggestions, and worksheet generator output layer.",
+    "url": "/one-minute-prep-for-english-tutors.html"
   },
   {
     "title": "Best Online English Teaching Tools 2025",

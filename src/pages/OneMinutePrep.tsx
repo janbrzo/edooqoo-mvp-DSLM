@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   ArrowRight,
@@ -14,6 +14,11 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { PageSeo, buildFaqPageLd } from '@/components/seo/PageSeo';
+import OneMinutePrepProofSection from '@/components/landing/OneMinutePrepProofSection';
+import {
+  DEFAULT_ONE_MINUTE_PREP_CALCULATOR_INPUT,
+  type OneMinutePrepCalculatorInput,
+} from '@/components/PricingCalculator';
 
 const BASE_URL = 'https://edooqoo.com';
 
@@ -100,10 +105,13 @@ const softwareLd = {
     { '@type': 'Audience', audienceType: '1:1 adult English teachers' },
   ],
   featureList: [
-    'Student profile and goal context',
-    'DSLM next-step suggestions',
-    'Editable worksheet generation output',
-    'Homework and flashcard learning signals',
+    '1-Minute Prep workflow',
+    'DSLM student context loop',
+    'Welcome Test setup',
+    'Learning Roadmap',
+    'Next Lesson Ideas',
+    'Editable worksheet output',
+    'Homework, flashcard, and live-session signals',
     'Teacher review before teaching or assigning',
   ],
 };
@@ -120,6 +128,9 @@ const breadcrumbLd = {
 const OneMinutePrep: React.FC = () => {
   const location = useLocation();
   const fromState = { from: location.pathname + location.search };
+  const [oneMinutePrepCalculator, setOneMinutePrepCalculator] = useState<OneMinutePrepCalculatorInput>(
+    DEFAULT_ONE_MINUTE_PREP_CALCULATOR_INPUT
+  );
 
   return (
     <div className="min-h-screen bg-background">
@@ -201,6 +212,11 @@ const OneMinutePrep: React.FC = () => {
             </Card>
           </div>
         </section>
+
+        <OneMinutePrepProofSection
+          calculatorValue={oneMinutePrepCalculator}
+          onCalculatorChange={setOneMinutePrepCalculator}
+        />
 
         <section className="py-16">
           <div className="mx-auto max-w-6xl px-4">

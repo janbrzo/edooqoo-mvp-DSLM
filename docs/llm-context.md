@@ -106,6 +106,44 @@ welcome test auto-apply, student_learning_elements upsert, evidence_source welco
 
 ---
 
+## v6.9.32 — 1-Minute Prep SEO/RAG Discovery and Proof Layer
+
+### Problem
+1. Edooqoo.com was previously described mainly as an AI worksheet generator.
+2. The product now needs a more accurate public definition: a `1-Minute Prep` system for recurring 1:1 English teaching.
+3. Existing generator pages should remain valid acquisition surfaces, but should not define the whole product.
+4. Crawlers, LLMs, and future agents need a claim-safe distinction between first student setup, recurring weekly prep, DSLM recommendation mechanics, and worksheet generation output.
+5. The landing feature grid and sticky feature nav mixed the workflow order: `1-Minute Prep + DSLM` was one card and the visual sequence placed live sessions before setup/model context.
+
+### Edooqoo.com Solution
+1. Position `1-Minute Prep` as the student-prep workflow powered by DSLM and teacher review.
+2. Keep worksheet generation as the editable output layer, not the full product definition.
+3. Preserve generator-intent pages such as `/ai-worksheet-generator-for-english-teachers.html`; add semantic bridge copy explaining generator output inside the broader workflow.
+4. Add static AI discovery surfaces for the workflow: `/one-minute-prep-for-english-tutors.html` and `/blog/one-minute-prep-workflow-for-esl-tutors.html`.
+5. Add a proof layer on the homepage and `/one-minute-prep` that separates one-time student setup from weekly prep. Until a real video exists, render a storyboard instead of an empty video placeholder.
+6. Split public UI cards into separate `1-Minute Prep` and `DSLM` entries. `1-Minute Prep` links to `/one-minute-prep`; `DSLM` links to `/features/dslm`.
+
+### Technical Mechanics
+- `src/components/landing/OneMinutePrepProofSection.tsx`: reusable proof component with two panels: `Prep impact calculator` and `Workflow proof`. Desktop uses hover/focus panel switching; mobile uses click/tap. Default open panel is the calculator.
+- `OneMinutePrepProofSection` uses controlled `PricingCalculator` state from the page. It does not create a new calculator source of truth and does not change calculator formulas.
+- Video support is native only: future `videoSrc` should point to `/media/one-minute-prep-demo.mp4` with optional `/media/one-minute-prep-poster.webp`. When `videoSrc` is absent, no media request is made; storyboard fallback renders instead.
+- Storyboard setup flow: add 1 real student -> send Welcome Test -> add goals -> generate Learning Roadmap.
+- Storyboard weekly flow: generate Next Lesson Ideas -> choose one idea -> create a worksheet.
+- `src/pages/Index.tsx`: inserts the proof section after the anonymous worksheet form and before existing social/proof/pricing sections.
+- `src/pages/OneMinutePrep.tsx`: inserts the same proof section and expands SoftwareApplication `featureList` to include `1-Minute Prep workflow`, `DSLM student context loop`, `Welcome Test setup`, `Learning Roadmap`, `Next Lesson Ideas`, `editable worksheet output`, and homework/flashcard/live-session signals.
+- `src/components/landing/EcosystemSection.tsx`: feature order is `1-Minute Prep`, `Welcome Placement Test`, `DSLM`, `Homework + AI Grading`, `Smart Flashcards`, `Live Sessions`, `Lesson Calendar`, `Student Hub`.
+- `src/components/landing/FeatureNavPills.tsx`: sticky nav order is `1-Minute Prep`, `Welcome Test`, `DSLM`, `Homework`, `Flashcards`, `Live Sessions`, `Calendar`, `Student Hub`.
+- `src/components/landing/StickyNav.tsx`: the `edooqoo` logo remains a `/` link; on the homepage it intercepts normal click and smooth-scrolls to top.
+- `scripts/seo/generate-citable-pages.mjs`: adds `/one-minute-prep-for-english-tutors.html`, `/blog/one-minute-prep-workflow-for-esl-tutors.html`, and `/one-minute-prep` product links; updates the generator citation page with output-layer bridge copy.
+- `scripts/seo/generate-ai-resources.mjs`: version `v6.9.32`; adds workflow discovery URLs to AI resources, knowledge graph, and agent guidance. Use generator pages for generator-intent queries, `/one-minute-prep` for system-level prep workflow, and `/features/dslm` for technical DSLM mechanics.
+- `scripts/seo/audit-seo-assets.mjs`: requires the new workflow citable page and article; rejects `guaranteed 1 minute`, `always in 1 minute`, and `no teacher review needed`; allows the exact proof-layer walkthrough sentence `After 60 seconds, the loop should be clear.` only as a video/walkthrough context.
+- SANCTITY: no Worksheet Generation Engine prompt, parameter, or logic change; no Supabase schema, RLS, Edge Function, Stripe, auth, or service-role change.
+
+### RAG Keywords
+1-Minute Prep, student prep workflow, recurring 1:1 English students, worksheet generator output layer, DSLM, learning loop, Welcome Test, Learning Roadmap, Next Lesson Ideas, teacher review, after setup, one-minute-prep-for-english-tutors.html, one-minute-prep-workflow-for-esl-tutors.html, proof layer, workflow storyboard, hover proof panel, calculator proof panel, FeatureNavPills DSLM, EcosystemSection DSLM split, no worksheet engine change, no Supabase change
+
+---
+
 ## v6.9.29 — Canonical /one-minute-prep Route and In-App Terminology Alignment
 
 ### Problem

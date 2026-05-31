@@ -61,8 +61,14 @@
       ],
       "featureList": [
         "Canonical /one-minute-prep route",
+        "1-Minute Prep workflow",
         "1-Minute Prep workflow target",
-        "1-Minute Prep student learning loop",
+        "DSLM student context loop",
+        "Welcome Test setup",
+        "Learning Roadmap",
+        "Next Lesson Ideas",
+        "Editable worksheet output",
+        "Homework, flashcard, and live-session signals",
         "Shared monthly prep impact calculator",
         "DSLM next-step signals",
         "Student context for recurring 1:1 English lessons",
@@ -137,6 +143,37 @@
       "url": "https://edooqoo.com/ai-worksheet-generator-for-english-teachers.html",
       "name": "AI worksheet generator for English teachers",
       "description": "Main citation target for AI worksheet generator queries.",
+      "provider": {
+        "@id": "https://edooqoo.com/#organization"
+      },
+      "audience": {
+        "@type": "EducationalAudience",
+        "educationalRole": "teacher"
+      },
+      "learningResourceType": "instructional reference",
+      "isAccessibleForFree": true,
+      "inLanguage": "en"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://edooqoo.com/one-minute-prep-for-english-tutors.html#webpage",
+      "url": "https://edooqoo.com/one-minute-prep-for-english-tutors.html",
+      "name": "1-Minute Prep for English tutors",
+      "description": "Citation target for 1-Minute Prep workflow, setup boundaries, student context loop, and generator-as-output-layer queries.",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "about": {
+        "@id": "https://edooqoo.com/#software"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "LearningResource",
+      "@id": "https://edooqoo.com/one-minute-prep-for-english-tutors.html#learning-resource",
+      "url": "https://edooqoo.com/one-minute-prep-for-english-tutors.html",
+      "name": "1-Minute Prep for English tutors",
+      "description": "Citation target for 1-Minute Prep workflow, setup boundaries, student context loop, and generator-as-output-layer queries.",
       "provider": {
         "@id": "https://edooqoo.com/#organization"
       },
@@ -502,6 +539,24 @@
         "@id": "https://edooqoo.com/#organization"
       },
       "mainEntityOfPage": "https://edooqoo.com/blog/ai-worksheet-generator-mechanics-for-esl-teachers.html#webpage",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "Article",
+      "@id": "https://edooqoo.com/blog/one-minute-prep-workflow-for-esl-tutors.html#article",
+      "url": "https://edooqoo.com/blog/one-minute-prep-workflow-for-esl-tutors.html",
+      "headline": "1-Minute Prep workflow for ESL tutors",
+      "description": "Explains one-time setup, recurring weekly prep flow, DSLM context, and worksheet output.",
+      "author": {
+        "@id": "https://edooqoo.com/#organization"
+      },
+      "publisher": {
+        "@id": "https://edooqoo.com/#organization"
+      },
+      "mainEntityOfPage": "https://edooqoo.com/blog/one-minute-prep-workflow-for-esl-tutors.html#webpage",
       "isPartOf": {
         "@id": "https://edooqoo.com/#website"
       },

@@ -179,26 +179,65 @@ const OneMinutePrepMockup = () => (
   </div>
 );
 
+const DslmMockup = () => (
+  <div className="bg-background rounded-xl border border-border shadow-sm p-3 text-xs space-y-2">
+    <div className="flex items-center justify-between">
+      <span className="font-semibold text-foreground text-[11px]">DSLM signals</span>
+      <span className="bg-blue-50 border border-blue-200 text-blue-700 rounded-full px-2 py-0.5 text-[10px] font-medium">Model</span>
+    </div>
+    {[
+      { label: 'Email structure', value: '38%', trend: 'rising' },
+      { label: 'Business collocations', value: '71%', trend: 'stable' },
+      { label: 'Reported speech', value: '22%', trend: 'target' },
+    ].map((skill, index) => (
+      <div key={skill.label} className="space-y-1">
+        <div className="flex items-center justify-between text-[10px]">
+          <span className="text-muted-foreground">{skill.label}</span>
+          <span className={index === 2 ? 'font-semibold text-red-600' : 'font-semibold text-violet-600'}>{skill.value}</span>
+        </div>
+        <div className="h-1.5 overflow-hidden rounded-full bg-muted">
+          <div
+            className={index === 2 ? 'h-full rounded-full bg-red-400' : 'h-full rounded-full bg-violet-500'}
+            style={{ width: skill.value }}
+          />
+        </div>
+      </div>
+    ))}
+    <div className="rounded-lg border border-violet-100 bg-violet-50 px-2 py-1.5 text-[10px] text-violet-700">
+      <span className="font-semibold">Suggestion:</span> target reported speech in next prep
+    </div>
+  </div>
+);
+
 /* ─── Feature data ────────────────────────────────── */
 
 const features = [
   {
-    badge: 'Core',
+    badge: 'Workflow',
     badgeColor: 'bg-violet-50 text-violet-600 border-violet-200',
-    title: '1-Minute Prep + DSLM',
-    description: 'Student goals, profile data and learning signals help define the next lesson focus before worksheet generation.',
+    title: '1-Minute Prep',
+    description: 'Use student context, choose a next lesson idea, then generate the ready-to-teach worksheet output.',
     mockup: <OneMinutePrepMockup />,
-    link: '/features/dslm',
+    link: '/one-minute-prep',
     anchorId: 'feature-one-minute-prep',
   },
   {
-    badge: 'Live',
-    badgeColor: 'bg-red-50 text-red-600 border-red-200',
-    title: 'Live Sessions',
-    description: 'Teach with the worksheet open. Live responses and review moments can feed the next lesson focus.',
-    mockup: <LiveSessionsMockup />,
-    link: '/features/live-sessions',
-    anchorId: 'feature-live-sessions',
+    badge: 'AI',
+    badgeColor: 'bg-blue-50 text-blue-600 border-blue-200',
+    title: 'Welcome Placement Test',
+    description: 'New student? Send a placement test to initialize level, goals and starting context before lesson one.',
+    mockup: <WelcomeTestMockup />,
+    link: '/features/placement-test',
+    anchorId: 'feature-placement-test',
+  },
+  {
+    badge: 'Model',
+    badgeColor: 'bg-blue-50 text-blue-600 border-blue-200',
+    title: 'DSLM',
+    description: 'Nano-skill signals and trends turn student activity into next-step suggestions for the next prep cycle.',
+    mockup: <DslmMockup />,
+    link: '/features/dslm',
+    anchorId: 'feature-dslm',
   },
   {
     badge: 'Auto',
@@ -219,6 +258,15 @@ const features = [
     anchorId: 'feature-flashcards',
   },
   {
+    badge: 'Live',
+    badgeColor: 'bg-red-50 text-red-600 border-red-200',
+    title: 'Live Sessions',
+    description: 'Teach with the worksheet open. Live responses and review moments can feed the next lesson focus.',
+    mockup: <LiveSessionsMockup />,
+    link: '/features/live-sessions',
+    anchorId: 'feature-live-sessions',
+  },
+  {
     badge: 'Sync',
     badgeColor: 'bg-green-50 text-green-600 border-green-200',
     title: 'Lesson Calendar',
@@ -226,15 +274,6 @@ const features = [
     mockup: <CalendarMockup />,
     link: '/features/calendar',
     anchorId: 'feature-calendar',
-  },
-  {
-    badge: 'AI',
-    badgeColor: 'bg-blue-50 text-blue-600 border-blue-200',
-    title: 'Welcome Placement Test',
-    description: 'New student? Send a placement test to initialize level, goals and starting context before lesson one.',
-    mockup: <WelcomeTestMockup />,
-    link: '/features/placement-test',
-    anchorId: 'feature-placement-test',
   },
   {
     badge: 'Link',
