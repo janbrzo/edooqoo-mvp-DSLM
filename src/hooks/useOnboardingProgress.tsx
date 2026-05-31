@@ -8,10 +8,18 @@ import { useAuthUser } from '@/hooks/useAuthUser';
 import { devLog } from '@/utils/logger';
 
 interface OnboardingStep {
+  // Section 1 — One-time student setup
   add_student: boolean;
+  send_welcome_test: boolean;
+  add_goals: boolean;
+  generate_roadmap: boolean;
+  // Section 2 — Weekly 1-Minute Prep
+  generate_next_ideas: boolean;
+  pick_idea: boolean;
   generate_worksheet: boolean;
-  share_worksheet: boolean;
-  create_homework: boolean;
+  // Deprecated — kept for backward compatibility with stored profile state
+  share_worksheet?: boolean;
+  create_homework?: boolean;
 }
 
 interface OnboardingProgress {
@@ -23,13 +31,31 @@ interface OnboardingProgress {
 const defaultProgress: OnboardingProgress = {
   steps: {
     add_student: false,
+    send_welcome_test: false,
+    add_goals: false,
+    generate_roadmap: false,
+    generate_next_ideas: false,
+    pick_idea: false,
     generate_worksheet: false,
-    share_worksheet: false,
-    create_homework: false
   },
   completed: false,
   dismissed: false
 };
+
+// Keys that count toward UI completion percentage and rendered steps.
+const ACTIVE_KEYS: Array<keyof OnboardingStep> = [
+  'add_student',
+  'send_welcome_test',
+  'add_goals',
+  'generate_roadmap',
+  'generate_next_ideas',
+  'pick_idea',
+  'generate_worksheet',
+];
+
+function mergeSteps(saved?: Partial<OnboardingStep>): OnboardingStep {
+  return { ...defaultProgress.steps, ...(saved || {}) };
+}
 
 export const useOnboardingProgress = () => {
   const [progress, setProgress] = useState<OnboardingProgress>(defaultProgress);
@@ -52,14 +78,19 @@ export const useOnboardingProgress = () => {
     if (profileWithOnboarding?.onboarding_progress) {
       try {
         const savedProgress = profileWithOnboarding.onboarding_progress as OnboardingProgress;
-        setProgress(savedProgress);
+        setProgress({
+          ...defaultProgress,
+          ...savedProgress,
+          steps: mergeSteps(savedProgress?.steps),
+        });
       } catch (error) {
         console.error('Error parsing onboarding progress:', error);
         // Fallback to localStorage
         const localProgress = localStorage.getItem('onboarding_progress');
         if (localProgress) {
           try {
-            setProgress(JSON.parse(localProgress));
+            const parsed = JSON.parse(localProgress);
+            setProgress({ ...defaultProgress, ...parsed, steps: mergeSteps(parsed?.steps) });
           } catch (e) {
             setProgress(defaultProgress);
           }
@@ -70,7 +101,8 @@ export const useOnboardingProgress = () => {
       const localProgress = localStorage.getItem('onboarding_progress');
       if (localProgress) {
         try {
-          setProgress(JSON.parse(localProgress));
+          const parsed = JSON.parse(localProgress);
+          setProgress({ ...defaultProgress, ...parsed, steps: mergeSteps(parsed?.steps) });
         } catch (error) {
           setProgress(defaultProgress);
         }
@@ -93,59 +125,66 @@ export const useOnboardingProgress = () => {
     devLog('[Onboarding] Checking steps from database', { studentsCount: students.length });
 
     try {
-      // CRITICAL: Always check students directly from database for real-time accuracy
-      const { data: dbStudents, error: studentsError } = await supabase
-        .from('students')
-        .select('id')
-        .eq('teacher_id', profile.id);
-        
-      if (studentsError) {
-        devLog('[Onboarding] Error checking students from DB:', studentsError);
-        errorBackoffUntilRef.current = Date.now() + 30000;
-        return;
-      }
-      
-      const studentsCount = dbStudents?.length || 0;
+      // Run all detection queries in parallel — each is treated as `false` on error
+      // so a single broken query never blocks the whole checklist.
+      const teacherId = profile.id;
+      const [
+        studentsRes,
+        worksheetsRes,
+        testsRes,
+        goalsRes,
+        phasesRes,
+        ideasRes,
+        ideasUsedRes,
+      ] = await Promise.all([
+        supabase.from('students').select('id', { head: true, count: 'exact' }).eq('teacher_id', teacherId),
+        supabase
+          .from('worksheets')
+          .select('id', { head: true, count: 'exact' })
+          .eq('teacher_id', teacherId)
+          .is('deleted_at', null),
+        supabase
+          .from('student_tests')
+          .select('id', { head: true, count: 'exact' })
+          .eq('teacher_id', teacherId)
+          .eq('test_type', 'welcome'),
+        supabase
+          .from('student_progress_goals')
+          .select('id', { head: true, count: 'exact' })
+          .eq('teacher_id', teacherId)
+          .is('deleted_at', null),
+        supabase
+          .from('dslm_curriculum_phases')
+          .select('id', { head: true, count: 'exact' })
+          .eq('teacher_id', teacherId),
+        supabase
+          .from('student_knowledge_entries')
+          .select('id', { head: true, count: 'exact' })
+          .eq('teacher_id', teacherId)
+          .eq('category', 'Next Lesson Ideas')
+          .is('deleted_at', null),
+        supabase
+          .from('student_knowledge_entries')
+          .select('id', { head: true, count: 'exact' })
+          .eq('teacher_id', teacherId)
+          .eq('category', 'Next Lesson Ideas')
+          .is('deleted_at', null)
+          .not('used_in_worksheet_id', 'is', null),
+      ]);
 
-      // CRITICAL: Always check worksheets directly from database for real-time accuracy
-      const { data: dbWorksheets, error: worksheetsError } = await supabase
-        .from('worksheets')
-        .select('id, share_token')
-        .eq('teacher_id', profile.id)
-        .is('deleted_at', null);
-        
-      if (worksheetsError) {
-        devLog('[Onboarding] Error checking worksheets from DB:', worksheetsError);
-        errorBackoffUntilRef.current = Date.now() + 30000;
-        return;
-      }
-      
-      const worksheetsCount = dbWorksheets?.length || 0;
-      const sharedWorksheetsCount = dbWorksheets?.filter(w => w.share_token)?.length || 0;
-      
-      // Check homework
-      const { data: dbHomework, error: homeworkError } = await supabase
-        .from('homework_assignments')
-        .select('id')
-        .eq('teacher_id', profile.id)
-        .limit(1);
-        
-      if (homeworkError) {
-        devLog('[Onboarding] Error checking homework from DB:', homeworkError);
-        errorBackoffUntilRef.current = Date.now() + 30000;
-        return;
-      }
-      
-      const homeworkCount = dbHomework?.length || 0;
+      const safeCount = (res: any): number => (res?.error ? 0 : res?.count ?? 0);
 
       const newSteps: OnboardingStep = {
-        add_student: studentsCount > 0,
-        generate_worksheet: worksheetsCount > 0,
-        share_worksheet: sharedWorksheetsCount > 0,
-        create_homework: homeworkCount > 0
+        add_student: safeCount(studentsRes) > 0,
+        send_welcome_test: safeCount(testsRes) > 0,
+        add_goals: safeCount(goalsRes) > 0,
+        generate_roadmap: safeCount(phasesRes) > 0,
+        generate_next_ideas: safeCount(ideasRes) > 0,
+        pick_idea: safeCount(ideasUsedRes) > 0,
+        generate_worksheet: safeCount(worksheetsRes) > 0,
       };
 
-      const allCompleted = Object.values(newSteps).every(step => step);
+      const allCompleted = ACTIVE_KEYS.every((k) => !!newSteps[k]);
       
       // CRITICAL: Force refresh onboarding progress from database immediately after checking steps
       const { data: currentOnboardingData } = await supabase
@@ -177,7 +216,7 @@ export const useOnboardingProgress = () => {
         if (hasChanges || (allCompleted && !currentProgress.completed) || dismissedChanged) {
           const newProgress: OnboardingProgress = {
             ...currentProgress,
-            steps: newSteps,
+            steps: { ...currentProgress.steps, ...newSteps },
             completed: allCompleted,
             dismissed: dbProgress?.dismissed || currentProgress.dismissed // Sync dismissed state from DB
           };
@@ -311,9 +350,8 @@ export const useOnboardingProgress = () => {
   };
 
   const getCompletionPercentage = () => {
-    const completedSteps = Object.values(progress.steps).filter(Boolean).length;
-    const totalSteps = Object.keys(progress.steps).length;
-    return Math.round((completedSteps / totalSteps) * 100);
+    const completedSteps = ACTIVE_KEYS.filter((k) => !!progress.steps[k]).length;
+    return Math.round((completedSteps / ACTIVE_KEYS.length) * 100);
   };
 
   const shouldShow = () => {
