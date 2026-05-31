@@ -38,3 +38,11 @@ type: feature
 - `src/pages/WelcomeTestPage.tsx`
 - `src/components/student-tests/TestDetailsView.tsx`
 - `src/hooks/useAuthFlow.tsx`
+
+## v6.9.30 Follow-ups
+- `backfill-welcome-test-auto-apply` Edge Function: one-shot/idempotent backfill of legacy `completed` tests. Auth via `x-cron-secret`. Copies `test_skill_results.suggested_rating` → `student_learning_elements.current_rating`, stamps `applied_at`, promotes `student_tests.status` → `reviewed`.
+- `getWelcomeTestTotal()` in `src/utils/welcomeTestNumbering.ts` is the SINGLE source of truth for the progress denominator (fixes "58/54" drift).
+- `sanitizeAiText` / `sanitizeAiList` in `src/utils/sanitizeAiSummary.ts` scrub `(wt_)?q\d+[a-z]?` IDs + dangling fillers from legacy AI summaries; new `process-welcome-test` prompt forbids IDs at generation time.
+- `WelcomeTestResults.tsx` recalculates listening/reading/etc. from the `questions` prop when DB aggregates are missing (avoids spurious `0` scores).
+- `TestDates.tsx` renders Created/Completed timestamps in StudentTestsTab and TestDetailsView.
+- Polish translations added for `wt_q3c`, `wt_q5c`, `wt_q7b`, `wt_q13c`, `wt_q39`. SKILL items (grammar/vocab/reading MC/fill-blank/listening MC) MUST stay English — translating them defeats the placement signal.
