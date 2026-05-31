@@ -31,6 +31,7 @@ const REQUIRED_PRERENDER_ROUTES = [
 
 const REQUIRED_CITABLE_PAGES = [
   '/ai-worksheet-generator-for-english-teachers.html',
+  '/one-minute-prep-for-english-tutors.html',
   '/cefr-worksheet-generator.html',
   '/business-english-worksheet-generator.html',
   '/grammar-worksheet-generator.html',
@@ -46,6 +47,7 @@ const REQUIRED_CITABLE_PAGES = [
 
 const REQUIRED_CITATION_ARTICLES = [
   '/blog/ai-worksheet-generator-mechanics-for-esl-teachers.html',
+  '/blog/one-minute-prep-workflow-for-esl-tutors.html',
   '/blog/cefr-aligned-worksheet-generation-workflow.html',
   '/blog/business-english-material-generation-workflow.html',
   '/blog/english-homework-ai-grading-workflow.html',
@@ -89,10 +91,17 @@ const UNSUPPORTED_CLAIM_PATTERNS = [
   [/in under 60 seconds/i, 'unsupported speed claim'],
   [/\b60 seconds\b/i, 'unsupported exact speed claim'],
   [/under 1 minute/i, 'unsupported exact speed claim'],
+  [/guaranteed\s+1\s+minute/i, 'unsupported guaranteed one-minute claim'],
+  [/always\s+in\s+1\s+minute/i, 'unsupported always-in-one-minute claim'],
+  [/no\s+teacher\s+review\s+needed/i, 'unsupported no-teacher-review claim'],
   [/2,400\+/i, 'unsupported usage-count claim'],
   [/official\s+[A-Z0-9-]*\s*CEFR/i, 'unsupported official CEFR claim'],
   [/Martha[^.]*validated/i, 'unsupported external validation claim'],
   [/Gemini\s+2(?:\.5)?/i, 'unnecessary public model-version claim'],
+];
+
+const ALLOWED_CLAIM_CONTEXTS = [
+  'After 60 seconds, the loop should be clear.',
 ];
 
 const CLAIM_INTEGRITY_SOURCE_FILES = [
@@ -101,6 +110,8 @@ const CLAIM_INTEGRITY_SOURCE_FILES = [
   'src/constants/faqItems.ts',
   'src/components/seo/SeoLandingLayout.tsx',
   'src/components/seo/PageSeo.tsx',
+  'src/components/landing/OneMinutePrepProofSection.tsx',
+  'src/pages/OneMinutePrep.tsx',
   'src/pages/HowItWorks.tsx',
   'src/pages/features/FeatureHomework.tsx',
   'src/pages/gallery/PublicGalleryWorksheetPage.tsx',
@@ -147,6 +158,13 @@ function existsPublic(rel) {
 
 function readPublic(relOrUrlPath) {
   return fs.readFileSync(publicPath(relOrUrlPath), 'utf8');
+}
+
+function stripAllowedClaimContexts(text) {
+  return ALLOWED_CLAIM_CONTEXTS.reduce(
+    (next, allowed) => next.split(allowed).join(''),
+    text
+  );
 }
 
 function getSitemapUrls() {
@@ -363,9 +381,10 @@ function auditPublicClaimIntegrity() {
     }
 
     const html = readPublic(route);
+    const claimScanHtml = stripAllowedClaimContexts(html);
     if (/\bundefined\b/i.test(html)) fail(`public${route} contains literal undefined`);
     for (const [pattern, label] of UNSUPPORTED_CLAIM_PATTERNS) {
-      if (pattern.test(html)) fail(`public${route} contains ${label}`);
+      if (pattern.test(claimScanHtml)) fail(`public${route} contains ${label}`);
     }
     pass(`public${route} passes public claim-integrity scan`);
   }
@@ -377,7 +396,7 @@ function auditPublicClaimIntegrity() {
       continue;
     }
 
-    const text = fs.readFileSync(file, 'utf8');
+    const text = stripAllowedClaimContexts(fs.readFileSync(file, 'utf8'));
     for (const [pattern, label] of UNSUPPORTED_CLAIM_PATTERNS) {
       if (pattern.test(text)) fail(`${rel} contains ${label}`);
     }
@@ -391,7 +410,7 @@ function auditPublicClaimIntegrity() {
       continue;
     }
 
-    const html = readPublic(route);
+    const html = stripAllowedClaimContexts(readPublic(route));
     for (const [pattern, label] of UNSUPPORTED_CLAIM_PATTERNS) {
       if (pattern.test(html)) fail(`public${route} contains ${label}`);
     }

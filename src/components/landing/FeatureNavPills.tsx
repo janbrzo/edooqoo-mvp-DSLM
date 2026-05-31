@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Brain, GraduationCap, ClipboardCheck, Calendar, Radio, Layers, Users } from 'lucide-react';
+import { Brain, BrainCircuit, GraduationCap, ClipboardCheck, Calendar, Radio, Layers, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import SignupPromptDialog from '@/components/landing/SignupPromptDialog';
 import { useEventTracking } from '@/hooks/useEventTracking';
@@ -24,11 +24,12 @@ export interface FeaturePillItem {
 
 export const FEATURE_PILLS: FeaturePillItem[] = [
   { label: '1-Minute Prep', icon: Brain, anchorId: 'feature-one-minute-prep' },
-  { label: 'Placement Test', icon: GraduationCap, anchorId: 'feature-placement-test' },
+  { label: 'Welcome Test', icon: GraduationCap, anchorId: 'feature-placement-test' },
+  { label: 'DSLM', icon: BrainCircuit, anchorId: 'feature-dslm' },
   { label: 'Homework', icon: ClipboardCheck, anchorId: 'feature-homework' },
-  { label: 'Calendar', icon: Calendar, anchorId: 'feature-calendar' },
-  { label: 'Live Sessions', icon: Radio, anchorId: 'feature-live-sessions' },
   { label: 'Flashcards', icon: Layers, anchorId: 'feature-flashcards' },
+  { label: 'Live Sessions', icon: Radio, anchorId: 'feature-live-sessions' },
+  { label: 'Calendar', icon: Calendar, anchorId: 'feature-calendar' },
   { label: 'Student Hub', icon: Users, anchorId: 'feature-student-hub' },
 ];
 
