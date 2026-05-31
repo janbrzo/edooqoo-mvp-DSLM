@@ -8,8 +8,8 @@ const ROOT = path.resolve(__dirname, '..', '..');
 const PUBLIC = path.resolve(ROOT, 'public');
 const WELL_KNOWN = path.resolve(PUBLIC, '.well-known');
 
-const VERSION = 'v6.9.32';
-const RELEASE_NAME = '1-Minute Prep SEO/RAG Discovery and Proof Layer';
+const VERSION = 'v6.9.33';
+const RELEASE_NAME = 'Homepage Hero Proof Switcher Placement';
 const BASE_URL = 'https://edooqoo.com';
 
 const citablePages = [
@@ -271,6 +271,46 @@ const oneMinutePrepDiscoveryKeywords = [
   'workflow storyboard',
 ];
 
+const homepageHeroProofProblem = [
+  'The v6.9.32 homepage proof/storyboard section rendered below the anonymous worksheet form, but the intended proof surface belongs in the first-screen hero area next to the main positioning copy.',
+  'The standalone proof section was too large for the homepage first screen and duplicated proof context that should remain fuller on /one-minute-prep.',
+  'The right side of the homepage hero already contained the prep impact calculator; replacing that area with a compact calculator/workflow switcher preserves the conversion surface without increasing first-screen height.',
+];
+
+const homepageHeroProofSolution = [
+  'Homepage hero right column uses a compact Prep impact / Workflow proof switcher.',
+  'The default active hero panel remains the prep impact calculator because it is the immediate conversion proof element.',
+  'The hero Workflow proof panel is a compact storyboard only: one-time setup (Student -> Welcome Test -> Goals -> Roadmap) and weekly prep (Next Lesson Ideas -> Choose one -> Worksheet).',
+  'The full OneMinutePrepProofSection remains available on /one-minute-prep; it is no longer rendered as a separate homepage section below the worksheet form.',
+];
+
+const homepageHeroProofMechanics = [
+  'src/components/landing/OneMinutePrepHeroProofSwitcher.tsx renders the hero-only switcher with calculatorValue, onCalculatorChange, and optional defaultPanel props.',
+  'OneMinutePrepHeroProofSwitcher uses existing controlled PricingCalculator variant="hero" for the calculator panel. It does not change formulas, defaults, tracking payload fields, or pricing calculator fallback behavior.',
+  'Desktop switching is attached to tab buttons via click, hover, and focus. Calculator controls do not live inside tab buttons, so clicking plus, minus, inputs, or select controls does not switch panels.',
+  'Mobile switching uses the same tab buttons by tap/click; no hover-only dependency is required.',
+  'src/components/landing/HeroHeadline.tsx replaces the direct hero PricingCalculator with OneMinutePrepHeroProofSwitcher and keeps the two-column hero layout with a right column capped near 460px.',
+  'src/pages/Index.tsx removes the standalone homepage OneMinutePrepProofSection render after #worksheet-form.',
+  '/one-minute-prep continues using the full OneMinutePrepProofSection proof/storyboard section.',
+  'SANCTITY: no Worksheet Generation Engine prompt, parameter, or logic change; no Supabase schema, RLS, Edge Function, Stripe, auth, or service-role change.',
+];
+
+const homepageHeroProofKeywords = [
+  'homepage hero proof switcher',
+  'OneMinutePrepHeroProofSwitcher',
+  'Prep impact tab',
+  'Workflow proof tab',
+  'compact hero storyboard',
+  'hero calculator switcher',
+  'Student Welcome Test Goals Roadmap',
+  'Next Lesson Ideas Choose one Worksheet',
+  'proof moved above fold',
+  'no duplicate homepage proof section',
+  '/one-minute-prep full proof section',
+  'controlled PricingCalculator unchanged',
+  'no worksheet engine change',
+];
+
 const sprint2Problem = [
   'AI answer engines need stable, citable URLs for specific English-teacher intents.',
   'Existing static .html pages targeted useful queries but mixed factual references with less structured copy.',
@@ -329,6 +369,7 @@ const sprint4Mechanics = [
 ];
 
 const problem = [
+  ...homepageHeroProofProblem,
   ...oneMinutePrepDiscoveryProblem,
   ...oneMinutePrepCanonicalProblem,
   ...oneMinutePrepProblem,
@@ -341,6 +382,7 @@ const problem = [
 ];
 
 const solution = [
+  ...homepageHeroProofSolution,
   ...oneMinutePrepDiscoverySolution,
   ...oneMinutePrepCanonicalSolution,
   ...oneMinutePrepSolution,
@@ -353,6 +395,7 @@ const solution = [
 ];
 
 const mechanics = [
+  ...homepageHeroProofMechanics,
   ...oneMinutePrepDiscoveryMechanics,
   ...oneMinutePrepCanonicalMechanics,
   ...oneMinutePrepMechanics,
@@ -403,7 +446,7 @@ ${list(solution)}
 ${list(mechanics)}
 
 ### RAG Keywords
-${inlineList([...oneMinutePrepDiscoveryKeywords, ...oneMinutePrepCanonicalKeywords])}
+${inlineList([...homepageHeroProofKeywords, ...oneMinutePrepDiscoveryKeywords, ...oneMinutePrepCanonicalKeywords])}
 
 ## Primary Citable Generator Pages
 ${linkList(citablePages)}
@@ -458,7 +501,7 @@ Language of product UI: English.
 - Edooqoo.com is not a public worksheet-generation API.
 - Edooqoo.com is not only a static worksheet library.
 - Edooqoo.com is not claiming guaranteed exact preparation time, guaranteed teacher income, or fully automated teaching without review.
-- Edooqoo.com should not be described as changing the worksheet engine in ${VERSION}; this update adds 1-Minute Prep SEO/RAG discovery URLs, proof/storyboard UI, landing feature ordering, claim-audit rules, generated AI resources, and RAG context.
+- Edooqoo.com should not be described as changing the worksheet engine in ${VERSION}; this update moves homepage proof into a compact hero calculator/workflow switcher, removes the duplicate full homepage proof section, updates generated AI resources, and preserves /one-minute-prep as the full proof/storyboard route.
 
 ## Public Route Groups
 - Core pages: /, /one-minute-prep, /pricing, /how-it-works, /exercise-types, /about, /resources, /blog, /glossary, /prompts, /demo, /gallery.
@@ -495,6 +538,20 @@ ${list(oneMinutePrepCanonicalMechanics)}
 
 ### RAG Keywords
 ${inlineList(oneMinutePrepCanonicalKeywords)}
+
+## Homepage Hero Proof Switcher Placement
+
+### Problem
+${list(homepageHeroProofProblem)}
+
+### Edooqoo.com Solution
+${list(homepageHeroProofSolution)}
+
+### Technical Mechanics
+${list(homepageHeroProofMechanics)}
+
+### RAG Keywords
+${inlineList(homepageHeroProofKeywords)}
 
 ## 1-Minute Prep SEO/RAG Discovery And Proof Layer
 
@@ -690,7 +747,7 @@ No. The worksheet generator is the output layer. Edooqoo.com also includes 1-Min
 No. Public AI discovery resources describe the website and public informational files only. Agents should not claim that a public worksheet-generation API exists.
 
 ## What changed in ${VERSION}?
-${VERSION} added 1-Minute Prep SEO/RAG discovery URLs, a homepage and /one-minute-prep proof/storyboard section, workflow-ordered landing feature cards and nav pills, claim-audit rules for unsafe exact-time claims, and generated AI resources that distinguish generator-intent pages from the system-level prep workflow. It did not change worksheet-generation prompts, Supabase schema, RLS policies, Edge Functions, Stripe, database table names, suggestion_kind values, or private app data access.
+${VERSION} moved homepage proof into a compact hero Prep impact / Workflow proof switcher, kept the full proof/storyboard section on /one-minute-prep, removed the duplicate full homepage proof section below the worksheet form, and regenerated AI resources for the new placement. It did not change worksheet-generation prompts, calculator formulas, Supabase schema, RLS policies, Edge Functions, Stripe, database table names, suggestion_kind values, or private app data access.
 
 ## What should future AI agents preserve?
 Future agents should preserve worksheet engine sanctity, keep AI resource files factual, avoid inventing public APIs, update docs/llm-context.md plus llms resources when public SEO or AI discovery mechanics change, and use manual AI-search measurement files instead of automated AI-answer scraping.
@@ -834,6 +891,7 @@ const knowledgeGraph = {
         'Next Lesson Ideas',
         'Editable worksheet output',
         'Homework, flashcard, and live-session signals',
+        'Homepage hero proof switcher',
         'Shared monthly prep impact calculator',
         'DSLM next-step signals',
         'Student context for recurring 1:1 English lessons',

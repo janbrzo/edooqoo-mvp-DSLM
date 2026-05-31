@@ -26,7 +26,6 @@ import AnonPostWorksheetLandingPage from "@/components/anon/AnonPostWorksheetLan
 import WelcomeBackBanner from "@/components/anon/WelcomeBackBanner";
 import ParticlesBackground from "@/components/landing/ParticlesBackground";
 import StartOneMinutePrepDialog from "@/components/landing/StartOneMinutePrepDialog";
-import OneMinutePrepProofSection from "@/components/landing/OneMinutePrepProofSection";
 import { markWorksheetForClaim } from "@/hooks/useWorksheetClaim";
 import { devLog, devWarn } from '@/utils/logger';
 
@@ -378,10 +377,6 @@ const Index = () => {
               variant="landing"
             />
           </div>
-          <OneMinutePrepProofSection
-            calculatorValue={oneMinutePrepCalculator}
-            onCalculatorChange={setOneMinutePrepCalculator}
-          />
           <StatsBar />
           <ValueCards />
           <PricingTeaser />

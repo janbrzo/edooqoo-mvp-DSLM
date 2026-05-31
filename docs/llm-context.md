@@ -5,6 +5,34 @@ Written in Problem → Edooqoo.com Solution → Technical Mechanics format.
 
 ---
 
+## v6.9.33 — Homepage Hero Proof Switcher Placement
+
+### Problem
+1. The v6.9.32 homepage proof/storyboard section rendered below the anonymous worksheet form, but the intended proof surface belongs in the first-screen hero area next to the main positioning copy.
+2. The standalone proof section was too large for the homepage first screen and duplicated proof context that should remain fuller on `/one-minute-prep`.
+3. The right side of the homepage hero already contained the prep impact calculator; replacing that area with a compact calculator/workflow switcher preserves the conversion surface without increasing first-screen height.
+
+### Edooqoo.com Solution
+1. Homepage hero right column uses a compact `Prep impact` / `Workflow proof` switcher.
+2. The default active hero panel remains the prep impact calculator because it is the immediate conversion proof element.
+3. The hero `Workflow proof` panel is a compact storyboard only: one-time setup (`Student -> Welcome Test -> Goals -> Roadmap`) and weekly prep (`Next Lesson Ideas -> Choose one -> Worksheet`).
+4. The full `OneMinutePrepProofSection` remains available on `/one-minute-prep`; it is no longer rendered as a separate homepage section below the worksheet form.
+
+### Technical Mechanics
+- `src/components/landing/OneMinutePrepHeroProofSwitcher.tsx` renders the hero-only switcher. Props: `calculatorValue`, `onCalculatorChange`, optional `defaultPanel`.
+- `OneMinutePrepHeroProofSwitcher` uses existing controlled `PricingCalculator variant="hero"` for the calculator panel. It does not change formulas, defaults, tracking payload fields, or pricing calculator fallback behavior.
+- Desktop switching is attached to the tab buttons via click, hover, and focus. Calculator controls do not live inside the tab buttons, so clicking `+`, `-`, inputs, or select controls does not switch panels.
+- Mobile switching uses the same tab buttons by tap/click; no hover-only dependency is required.
+- `src/components/landing/HeroHeadline.tsx` replaces the direct hero `PricingCalculator` with `OneMinutePrepHeroProofSwitcher` and keeps the two-column hero layout with a right column capped near 460px.
+- `src/pages/Index.tsx` removes the standalone homepage `OneMinutePrepProofSection` render after `#worksheet-form`.
+- `/one-minute-prep` continues using the full `OneMinutePrepProofSection` proof/storyboard section.
+- SANCTITY: no Worksheet Generation Engine prompt, parameter, or logic change; no Supabase schema, RLS, Edge Function, Stripe, auth, or service-role change.
+
+### RAG Keywords
+homepage hero proof switcher, OneMinutePrepHeroProofSwitcher, Prep impact tab, Workflow proof tab, compact hero storyboard, hero calculator switcher, Student Welcome Test Goals Roadmap, Next Lesson Ideas Choose one Worksheet, proof moved above fold, no duplicate homepage proof section, /one-minute-prep full proof section, controlled PricingCalculator unchanged, no worksheet engine change
+
+---
+
 ## v6.9.31 — Onboarding Checklist v2, Bulk Public Gallery Publish, Brain-Reset Game Trio, Full Profiling Translation Parity
 
 ### Problem
@@ -129,7 +157,7 @@ welcome test auto-apply, student_learning_elements upsert, evidence_source welco
 - Video support is native only: future `videoSrc` should point to `/media/one-minute-prep-demo.mp4` with optional `/media/one-minute-prep-poster.webp`. When `videoSrc` is absent, no media request is made; storyboard fallback renders instead.
 - Storyboard setup flow: add 1 real student -> send Welcome Test -> add goals -> generate Learning Roadmap.
 - Storyboard weekly flow: generate Next Lesson Ideas -> choose one idea -> create a worksheet.
-- `src/pages/Index.tsx`: inserts the proof section after the anonymous worksheet form and before existing social/proof/pricing sections.
+- `src/pages/Index.tsx`: v6.9.32 originally inserted the full proof section after the anonymous worksheet form. v6.9.33 supersedes homepage placement: the homepage now uses the compact hero switcher, while the full proof section remains on `/one-minute-prep`.
 - `src/pages/OneMinutePrep.tsx`: inserts the same proof section and expands SoftwareApplication `featureList` to include `1-Minute Prep workflow`, `DSLM student context loop`, `Welcome Test setup`, `Learning Roadmap`, `Next Lesson Ideas`, `editable worksheet output`, and homework/flashcard/live-session signals.
 - `src/components/landing/EcosystemSection.tsx`: feature order is `1-Minute Prep`, `Welcome Placement Test`, `DSLM`, `Homework + AI Grading`, `Smart Flashcards`, `Live Sessions`, `Lesson Calendar`, `Student Hub`.
 - `src/components/landing/FeatureNavPills.tsx`: sticky nav order is `1-Minute Prep`, `Welcome Test`, `DSLM`, `Homework`, `Flashcards`, `Live Sessions`, `Calendar`, `Student Hub`.
