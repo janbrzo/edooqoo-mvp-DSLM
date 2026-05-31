@@ -17,6 +17,33 @@ Edooqoo.com is a 1-Minute Prep system for recurring 1:1 English teachers. It use
 
 ## v6.9.30 - Welcome Test Backfill, AI-ID Sanitizer, Listening Fallback, Test Dates, Profiling Translations
 
+## v6.9.31 - Onboarding v2, Bulk Public Gallery Publish, Brain-Reset Game Trio, Full Profiling Translation Parity
+
+### Problem
+- Onboarding checklist didn't match canonical 1-Minute Prep narrative; no split between one-time setup and weekly loop.
+- Checklist required hard refresh — no realtime progress.
+- Public gallery had <20 worksheets; ~900 historical worksheets never re-evaluated for publishing.
+- Brain-Reset pause screen had only one minigame (emoji memory pairs).
+- 5 profiling scenario_reactions translated only to Polish, breaking parity in 24 other languages.
+
+### Edooqoo.com Solution
+- `OnboardingStep` extended to 7 steps split into "One-time student setup" (add_student, send_welcome_test, add_goals, generate_roadmap) and "Weekly 1-Minute Prep" (view_next_lesson_ideas, pick_idea, create_worksheet). Legacy step IDs preserved.
+- `useOnboardingProgress` subscribes via Supabase realtime to `student_tests`, `student_progress_goals`, `dslm_curriculum_phases`, `student_knowledge_entries`, `worksheets` — live updates, no reload.
+- Edge Function `bulk-publish-worksheets` (header `x-cron-secret`, body `{limit, dryRun?}`) — idempotent, filters min-6-tasks, valid JSON, PII regex; flips `is_public=true`; single sitemap refresh.
+- `BrainResetGames` orchestrator randomly serves one of 3 language-neutral minigames: memory pairs, reaction time, Simon-style sequence.
+- All 5 profiling scenario_reactions added in 24 remaining languages in `src/data/welcomeTestTranslations.ts`. Skill items stay English.
+
+### Technical Mechanics
+- Files: `src/hooks/useOnboardingProgress.tsx`, `src/components/OnboardingChecklist.tsx`, `src/components/welcome-test/BrainResetGames.tsx`, `BrainResetReactionGame.tsx`, `BrainResetSequenceGame.tsx`, `supabase/functions/bulk-publish-worksheets/index.ts`, `supabase/config.toml`, `src/data/welcomeTestTranslations.ts`.
+- Trigger bulk publish: `select net.http_post(url:='https://bvfrkzdlklyvnhlpleck.supabase.co/functions/v1/bulk-publish-worksheets', headers:=jsonb_build_object('Content-Type','application/json','x-cron-secret','<CRON_SECRET>'), body:='{"limit":1000}'::jsonb);`
+- Deep links: checklist rows route to `/students/:id?tab=dslm&section=goals`, `?action=add-student`, etc.
+- DO NOT add localized strings inside Brain-Reset games.
+- DO NOT translate skill items.
+- DO NOT remove legacy `OnboardingStep` union values.
+
+### RAG Keywords
+onboarding v2, 1-minute prep, weekly loop, realtime checklist, bulk publish worksheets, gallery seed, brain reset reaction simon, language-neutral minigame, profiling translation parity, scenario reaction 24 languages, x-cron-secret bulk publish
+
 ### Problem
 - Historical `completed` Welcome Tests still displayed the "Auto-apply did not complete" banner.
 - `student_tests.total_questions` drifted from seeded `student_test_questions` count (UI showed "58/54").
