@@ -1,306 +1,356 @@
 
-# Plan v6.9.31 — Onboarding + Gallery Backfill + Brain-Reset Games + WT Translations
+# Plan v6.9.32 — Onboarding Spotlight + Add Student v2 + Gallery Backfill
 
-## Kontekst i diagnoza
+## Kontekst diagnostyczny (co znalazłem)
 
-Zweryfikowałem w bazie i kodzie:
+1. **Deep-linki w `OnboardingChecklist.tsx` używają `?section=...`**, ale `DSLMTab.tsx` czyta `searchParams.get('view')` i jeszcze rozpoznaje sub-sekcje przez własny event `dslm:openSubsection`. Stąd "linkuje na górę" zamiast scrollować.
+2. **Onboarding nie ma mechanizmu "spotlight"** — kliknięcie kroku tylko nawiguje, nie przyciąga uwagi do celu.
+3. **`AddStudentDialog`** ma `max-h-[85vh] overflow-y-auto` — przy zwykłym laptopie pojawia się scroll. Pola CEFR i Main Goal są wymagane bez opcji "uzupełnię po teście".
+4. **Po dodaniu ucznia** `handleSubmit` nawiguje na `?tab=overview` (linia 162) — chcemy `?tab=dslm` + spotlight albo auto-otwarcie Add Goals.
+5. **`Reset Onboarding`** w `Profile.tsx` wywołuje `resetOnboarding()`, ale `checkSteps()` natychmiast wykrywa istniejące dane w DB i ponownie ustawia `completed=true` → checklist znika. Brakuje override flagi.
+6. **`NavStudentSwitcher`** popover nie ma przycisku "Add Student" obok nagłówka "Switch to student".
+7. **Bulk-publish galerii**: DB pokazuje 927 worksheetów (`deleted_at is null`), z czego tylko **5 jest publicznych**. Edge function `bulk-publish-worksheets` istnieje i jest poprawny, ale wymaga prawidłowego `x-cron-secret`. Wywołanie z dosłownym `<TWÓJ_CRON_SECRET>` zwróciło 401 → faktycznie nic nie zostało opublikowane. Musimy: (a) zweryfikować że secret istnieje, (b) wystawić bezpieczny, autoryzowany sposób uruchomienia (migracja SQL przez `service_role` zamiast HTTP), (c) wykonać batch z paginacją.
 
-- **Onboarding** (`src/components/OnboardingChecklist.tsx` + `src/hooks/useOnboardingProgress.tsx`) ma dziś 4 kroki: `add_student → generate_worksheet → share_worksheet → create_homework`. Nie pokrywa się z Twoim flow „Setup (Add student → Welcome Test → Goals → Roadmap) + Weekly 1-Minute Prep (Next Lesson Ideas → wybór → worksheet)".
-- **Gallery** (`/gallery`, edge `publish-worksheet`, `regenerate-gallery-sitemap`) działa, ale tylko **5/927** worksheetów jest `is_public=true`. Kandydatów z tytułem ≥3 znaków i `ai_response` jest **922**. Część `ai_response` ma niepoprawny JSON — bulk publisher musi to obsłużyć (skip + log).
-- **Brain Reset Game** to dziś jeden komponent `BrainResetGame.tsx` (memory pairs). Trzeba dorzucić 1–2 dodatkowe gry i pozwolić użytkownikowi przełączać.
-- **Tłumaczenia** — w `src/data/welcomeTestTranslations.ts` 5 dodatkowych pytań profilujących (`wt_q3c, wt_q5c, wt_q7b, wt_q13c, wt_q39`) jest dziś **tylko w POLISH**. Pozostałe 24 języki (Spanish, German, French, Portuguese, Italian, Turkish, Russian, Czech, Ukrainian, Dutch, Japanese, Korean, Chinese, Arabic, Hungarian, Romanian, Greek, Croatian, Swedish, Hindi, Vietnamese, Thai, Norwegian, Danish) wpadają w fallback do angielskiego. Trzeba dodać te 5 pytań we wszystkich 24 językach (skill items `wt_q18–wt_q35, wt_q37, wt_q38` zostają po angielsku — to nie podlega tłumaczeniu zgodnie z istniejącą zasadą).
+## Zakres pracy — pliki
 
-Sanctity rule: **nie ruszamy promptu generacji worksheetów** ani logiki engine — wszystkie zmiany są w UI, edge functions, danych statycznych i RAG.
+```text
+NOWE:
+  src/components/onboarding/SpotlightOverlay.tsx
+  src/hooks/useSpotlight.ts
+  supabase/migrations/<ts>_bulk_publish_worksheets.sql   (idempotentna SQL)
+
+EDYCJE:
+  src/components/OnboardingChecklist.tsx       (deep-linki + spotlight params)
+  src/components/dashboard/AddStudentDialog.tsx (compact layout + 2 nowe opcje + nawigacja)
+  src/components/landing/NavStudentSwitcher.tsx (przycisk Add Student w popover)
+  src/components/dslm/DSLMTab.tsx              (parsowanie ?focus= + dispatch spotlight)
+  src/components/welcome-test/WelcomeTestPanel.tsx  (data-spotlight="send-welcome-test")
+  src/components/dslm/PathwayView.tsx          (data-spotlight na "1-MINUTE PREP SUGGESTIONS")
+  src/components/dslm/GoalsView.tsx            (data-spotlight + obsługa ?focus=add-goal -> otwórz modal)
+  src/components/student-tests/WelcomeTestResults.tsx (Apply CEFR-from-test CTA gdy student nie ma poziomu)
+  src/hooks/useOnboardingProgress.tsx          (shouldShow override + reset wymusza force-show)
+  src/pages/StudentPage.tsx                    (po dodaniu ucznia: domyślny tab=dslm gdy ?focus jest w URL)
+  src/constants/studentGoals.ts                (Custom Goal jako pierwsza opcja)
+  docs/llm-context.md, llms.txt, mem/index.md, mem/features/onboarding/spotlight-v2.md (RAG)
+```
+
+Nie ruszamy: prompta worksheet generator, RLS, schemy DSLM, logiki testów (poza dodaniem przycisku Apply CEFR).
 
 ---
 
-## Część 1 — Nowy Onboarding Checklist (7 kroków, 2 sekcje)
+## 1. Spotlight Overlay — uniwersalny mechanizm "zwróć uwagę"
 
-### 1.1 Nowy model danych
-
-Rozszerzamy `OnboardingStep` w `src/hooks/useOnboardingProgress.tsx`. Zachowujemy stare klucze, aby nie zepsuć istniejących userów (mają zapisany `onboarding_progress` w `profiles`).
+### 1.1 `useSpotlight.ts` (nowy)
+Globalny hook + event-bus:
 
 ```ts
-interface OnboardingStep {
-  // Setup section
-  add_student: boolean;            // existing — keep
-  send_welcome_test: boolean;      // NEW
-  add_goals: boolean;              // NEW
-  generate_roadmap: boolean;       // NEW
-  // Weekly 1-Minute Prep section
-  generate_next_ideas: boolean;    // NEW
-  pick_idea: boolean;              // NEW
-  generate_worksheet: boolean;     // existing — keep (was step 2; teraz część prep flow)
-  // DEPRECATED — ukryte w UI ale zostają w typie dla wstecznej kompatybilności:
-  share_worksheet?: boolean;
-  create_homework?: boolean;
+type SpotlightId = 'send-welcome-test' | 'next-lesson-ideas' | 'pick-idea' | 'add-goal-modal';
+
+window.dispatchEvent(new CustomEvent('app:spotlight', { detail: { id, durationMs?: 8000 } }));
+```
+
+Hook: nasłuchuje eventu, zwraca `{ activeId, clear() }`. Auto-clear po `durationMs` lub na ESC / klik tła.
+
+### 1.2 `SpotlightOverlay.tsx` (nowy, mount w `App.tsx`)
+- Renderuje **portal** z półprzezroczystym `bg-black/60` na całym viewport.
+- Znajduje element `[data-spotlight="${activeId}"]`, oblicza jego `getBoundingClientRect()`.
+- Renderuje "okno" (radial mask SVG z dziurą) wokół elementu + obramowanie `ring-4 ring-primary animate-pulse` + tooltip "Click here to continue" pod elementem.
+- Klik wewnątrz dziury przechodzi do elementu (pointer-events: none na masce nad dziurą).
+- Auto-scroll do elementu: `el.scrollIntoView({ block: 'center', behavior: 'smooth' })`.
+- Na resize/scroll: re-kalkulacja co `requestAnimationFrame`.
+- Nasłuchuje URL param `?focus=<id>` (poprzez `useSearchParams`): po pojawieniu się, dispatch `app:spotlight`, następnie czyści `focus` z URL (`setSearchParams` bez param) żeby kolejne nawigacje nie reaktywowały.
+
+**Dlaczego portal + URL param**: pozwala na wskazanie celu zarówno z `OnboardingChecklist` (przez nawigację `?focus=...`) jak i z lokalnych komponentów (po akcji w aplikacji, np. po wysłaniu Welcome Test).
+
+### 1.3 Mount
+W `src/App.tsx` (lub główny layout teacher-only) dodać `<SpotlightOverlay />` zaraz po `<Toaster />`.
+
+---
+
+## 2. Naprawa deep-linków w `OnboardingChecklist.tsx`
+
+Zmiana wszystkich linków na `?tab=dslm&view=<ID>&focus=<spotlight>`:
+
+| Krok                       | Nowy deep-link                                                       | Akcja dodatkowa                              |
+|----------------------------|----------------------------------------------------------------------|----------------------------------------------|
+| A. Add first real student  | otwiera `AddStudentDialog` (już działa — bez zmian)                  | sprawdź `triggerButton={false}`              |
+| B. Send Welcome Test       | `/student/{id}?tab=overview&focus=send-welcome-test`                 | scroll + spotlight na panel Welcome Test     |
+| C. Add learning goals      | `/student/{id}?tab=dslm&view=goals&focus=add-goal-modal`             | spotlight + auto-open Add Goal modal         |
+| D. Generate Learning Roadmap | `/student/{id}?tab=dslm&view=pathway&focus=learning-roadmap`       | spotlight na sekcję "Learning Roadmap"       |
+| E. Generate Next Lesson Ideas | `/student/{id}?tab=dslm&view=pathway&focus=next-lesson-ideas`     | spotlight na "1-MINUTE PREP SUGGESTIONS" generator |
+| F. Pick one idea → przemianować na **"Use one suggestion"** | `/student/{id}?tab=dslm&view=pathway&focus=pick-idea` | spotlight na pierwszą kartę sugestii (zielony przycisk "Use this") |
+| G. Create a worksheet      | `/` (bez zmian)                                                      | —                                            |
+
+Etykieta F: `label: 'Use one Next Lesson suggestion'`, ikona bez zmian.
+
+W `DSLMTab.tsx` w bloku "On mount, scroll to URL view param" dodać:
+```ts
+const focus = searchParams.get('focus');
+if (focus) {
+  // Daj DOM-owi czas na render i scroll
+  setTimeout(() => window.dispatchEvent(new CustomEvent('app:spotlight', { detail: { id: focus } })), 600);
 }
 ```
 
-`defaultProgress.steps` dostaje wszystkie nowe pola = `false`. Stary stan z DB (4 pola) zostaje zmergowany z domyślnym przez `{ ...defaultProgress.steps, ...savedProgress.steps }` w obu miejscach gdzie czytamy (`useEffect` na profile + `useEffect` na localStorage). To gwarantuje brak `undefined` errors u istniejących userów.
-
-`getCompletionPercentage()` liczy tylko klucze widoczne w UI (7 nowych); deprecated nie wliczają się. Robimy to przez `const ACTIVE_KEYS = ['add_student','send_welcome_test','add_goals','generate_roadmap','generate_next_ideas','pick_idea','generate_worksheet']` i iterujemy po tym.
-
-### 1.2 Detekcja stanu kroków w `checkSteps()`
-
-Dodajemy do istniejącego `checkSteps` kolejne zapytania do Supabase (równolegle przez `Promise.all`, żeby nie zwiększać latencji):
-
-| Krok | Detekcja |
-|---|---|
-| `add_student` | bez zmian: `students` po `teacher_id` |
-| `send_welcome_test` | `select id from student_tests where teacher_id=? and test_type='welcome' limit 1` (status nieistotny — wystarczy że nauczyciel wysłał) |
-| `add_goals` | `select id from student_goals where teacher_id=? limit 1` (jeśli tabela istnieje; jeśli inna nazwa — zweryfikuję w implementacji po `src/components/dslm/GoalsView.tsx`) |
-| `generate_roadmap` | `select id from curriculum_phases where teacher_id=? limit 1` (hook `useCurriculumPhases` już używa tej tabeli) |
-| `generate_next_ideas` | `select id from student_knowledge_entries where teacher_id=? and category='Next Lesson Ideas' and deleted_at is null limit 1` |
-| `pick_idea` | `select id from student_knowledge_entries where teacher_id=? and category='Next Lesson Ideas' and (used_in_worksheet_id is not null or archived_at is not null) limit 1` |
-| `generate_worksheet` | bez zmian: `worksheets` |
-
-Jeżeli któreś query zwróci błąd (np. brakuje kolumny), traktujemy jako `false` i zapisujemy w `devLog` — nigdy nie blokujemy checklistu.
-
-Real-time subskrypcje (`postgres_changes`) rozszerzamy o tabele `student_tests`, `curriculum_phases`, `student_knowledge_entries` (insert + update) z filtrem `teacher_id=eq.${profile.id}`. Każdy event → `setTimeout(checkSteps, 500)`.
-
-### 1.3 UI w `src/components/OnboardingChecklist.tsx`
-
-Zmiany czysto prezentacyjne:
-
-- Tytuł karty: `Get started with Edooqoo 🚀` zostaje.
-- Dodajemy 2 separatory sekcji wewnątrz listy kroków:
-  - Nagłówek **"1. One-time student setup"** (text-xs uppercase, muted) nad krokami: Add student / Send Welcome Test / Add goals / Generate Learning Roadmap.
-  - Nagłówek **"2. Weekly 1-Minute Prep"** nad: Generate Next Lesson Ideas / Pick one idea / Create a worksheet.
-- Pod nagłówkami krótki, jednoliniowy opis muted-text (po angielsku, bo cała apka jest po angielsku):
-  - Setup: *"Teach Edooqoo about your student — one-time."*
-  - Prep: *"Your weekly lesson prep flow — under a minute."*
-- Każdy krok ma swoją ikonę i akcję:
-
-| Klucz | Label | Ikona (lucide) | Action (button click) |
-|---|---|---|---|
-| `add_student` | `Add your first real student` | `User` | otwiera `AddStudentDialog` (jak dziś) |
-| `send_welcome_test` | `Send Welcome Test` | `ClipboardCheck` | `navigate('/dashboard')` (banner `WelcomeTestSuggestion` już istnieje); jeśli student jest w `useStudents()` jeden — `navigate('/student/${id}?tab=tests')` |
-| `add_goals` | `Add learning goals` | `Target` | jeśli 1 student → `navigate('/student/${id}?tab=dslm&section=goals')`, w przeciwnym razie `/dashboard` |
-| `generate_roadmap` | `Generate Learning Roadmap` | `Map` | `navigate('/student/${id}?tab=dslm&section=phases')` (PathwayView/GoalsView) |
-| `generate_next_ideas` | `Generate Next Lesson Ideas` | `Lightbulb` | `navigate('/student/${id}?tab=dslm&section=next-steps')` |
-| `pick_idea` | `Pick one idea` | `MousePointerClick` | jak wyżej, opisowo wskazuje na sekcję |
-| `generate_worksheet` | `Create a worksheet` | `FileText` | `navigate('/')` (WorksheetForm — `NextStepsPresetBanner` automatycznie podpowie) |
-
-Każdy "Start" guzik tylko gdy `!completed`. Treści po angielsku, bo cała aplikacja jest po angielsku.
-
-- `progress.completed` triggeruje istniejące confetti — pozostawiamy.
-
-### 1.4 Pomocnicze
-
-- Wersjonowanie kompatybilności: w `useOnboardingProgress` przy migracji ze starego stanu (4-pola → 7+ pól), jeżeli `add_student && generate_worksheet` to ustawiamy `generate_worksheet=true` (i tak go zachowujemy), ale **nie** zaznaczamy nowych kroków jako wykonanych — niech się sprawdzą w pierwszym `checkSteps()` (Supabase i tak je zweryfikuje).
+Targety `data-spotlight`:
+- `send-welcome-test` → panel "Send a Welcome (placement) Test" na Overview tab.
+- `learning-roadmap` → wrapper sekcji "Learning Roadmap" w `PathwayView.tsx`.
+- `next-lesson-ideas` → blok "Generate 1-Minute Prep suggestions" (przycisk + heading) w `PathwayView.tsx`.
+- `pick-idea` → pierwsza karta `1-MINUTE PREP SUGGESTION #1` (klasa już istnieje — atrybut na pierwszym elemencie listy).
+- `add-goal-modal` → sekcja Goals header + auto-open modal Add Goal (GoalsView nasłuchuje na `focus=add-goal-modal` i klika own "Add Goal" trigger).
 
 ---
 
-## Część 2 — Bulk publish 922 worksheetów do `/gallery`
+## 3. `AddStudentDialog` v2 — compact + 2 nowe opcje
 
-### 2.1 Nowa edge function `bulk-publish-worksheets`
+### 3.1 Layout (mieści się na 1 ekranie)
+- `DialogContent`: `sm:max-w-[480px]`, **usuń** `max-h-[85vh] overflow-y-auto`. Zostaw `max-h-[90vh] overflow-y-auto` tylko jako safety net dla bardzo małych ekranów.
+- Zmniejsz odstępy: `space-y-4` → `space-y-3`, etykiety bez separacji `space-y-2` → `space-y-1`, removal of opisów pomocniczych pod polami (przenieść w tooltipy `?`).
+- Zgrupuj `Native Language` i `Send overdue` jako dwa rzędy 2-kolumnowe (`grid grid-cols-2 gap-3`).
 
-Plik: `supabase/functions/bulk-publish-worksheets/index.ts`. Wzór: `backfill-welcome-test-auto-apply` (verify_jwt=false + `x-cron-secret` w nagłówku, identyczny pattern co w naszym memie `infrastructure/edge-function-cors-pattern.md`).
-
-Logika:
-
-1. CORS + walidacja `x-cron-secret` (env `CRON_SECRET`).
-2. Parse body: `{ limit?: number = 1000, dry_run?: boolean = false, only_teacher_id?: string }`. Zwraca też `cursor` (UUID) dla paginacji.
-3. Query batch:
-   ```sql
-   select id, title, teacher_id, user_id, form_data, ai_response, public_slug
-   from public.worksheets
-   where deleted_at is null
-     and is_public is not true
-     and ai_response is not null
-     and length(coalesce(title,'')) >= 3
-   order by id
-   limit $limit;
-   ```
-4. Dla każdego rekordu w pętli (sekwencyjnie po 50 na batch wewnątrz funkcji, żeby nie zatkać Supabase):
-   - Parse `ai_response` w `try/catch`. Jeżeli błąd parse → skip (zaloguj w `skipped_invalid_json++`).
-   - Wymuszamy **wszystkie** wymagania zgodne z `publish-worksheet`:
-     - `exerciseCount = exercises.length`. Jeśli `< 6` → skip (`skipped_too_short++`).
-     - PII regex (`/(\b[\w._%+-]+@[\w.-]+\.[A-Za-z]{2,}\b|\+?\d[\d\s().-]{7,}\d)/`) na `form_data.additionalInformation`. Jeśli wykryje → skip (`skipped_pii++`).
-   - Denormalizacja `public_topic`, `public_level`, `public_exercise_types` — kod 1:1 z `publish-worksheet`.
-   - Slug: jeśli `public_slug` istnieje, reuse; inaczej `rpc('generate_public_slug', {p_title, p_id})`.
-   - `update` z `is_public=true, public_slug, published_at=now(), public_topic, public_level, public_exercise_types`.
-   - Liczniki: `published++`, `errors[]` (max 100 ostatnich).
-5. Po pętli: best-effort `fetch(... regenerate-gallery-sitemap)` raz na całość (nie per worksheet).
-6. Response JSON: `{ ok: true, scanned, published, skipped_invalid_json, skipped_too_short, skipped_pii, errors: [...] }`.
-
-User wykona ręcznie w SQL Editorze (analogicznie do backfill auto-apply):
-
-```sql
-select net.http_post(
-  url     := 'https://bvfrkzdlklyvnhlpleck.supabase.co/functions/v1/bulk-publish-worksheets',
-  headers := jsonb_build_object('Content-Type','application/json','x-cron-secret','<CRON_SECRET>'),
-  body    := '{"limit": 1000}'::jsonb
-);
+### 3.2 English Level — opcja "I'll fill after Welcome Test"
+Pod selectem dodać:
+```
+[ ] I'll set level after Welcome Test
+    ↳ when checked:
+       - select disabled, value=''
+       - pokazuje sub-checkbox: [x] Automatically send Welcome Test now
 ```
 
-Funkcja jest **idempotentna**: kolejne wywołania pomijają już opublikowane (`is_public is not true` filter). Można uruchamiać wielokrotnie.
+Validation: jeśli `deferLevel === true`, `englishLevel` nie jest wymagane. W payloadzie do `addStudent` przekazujemy `english_level: null` (DB pozwala — zweryfikuj NOT NULL; jeśli jest NOT NULL → migracja: `ALTER TABLE students ALTER COLUMN english_level DROP NOT NULL` w wpisie poniżej).
 
-### 2.2 Konfig
+### 3.3 Main Goal — Custom pierwszy + deadline + "I'll fill later"
+- W `src/constants/studentGoals.ts`: przenieść `{ value: 'custom', label: 'Custom goal…' }` na pozycję 0.
+- Dodać checkbox `[ ] I'll set goal after Welcome Test` (analogicznie do CEFR).
+- Dodać pole `Deadline (optional)` → `<Input type="date" />`. Zapisz jako `main_goal_deadline` (data) — kolumna musi istnieć; jeśli nie, migracja `ALTER TABLE students ADD COLUMN main_goal_deadline date`.
+- Jeśli oba defery zaznaczone → ukryj sub-checkbox auto-send (wystarczy jedno).
 
-- `supabase/config.toml`: dodać sekcję `[functions.bulk-publish-worksheets]` z `verify_jwt = false`.
-- Sekret `CRON_SECRET` już istnieje (używany przez `audit-llm-models`, `backfill-welcome-test-auto-apply`) — nie tworzymy nowego.
-
-### 2.3 Walidacja po wykonaniu
-
-Po requeście instruuję Cię, byś sprawdził:
-```sql
-select count(*) from public.worksheets where is_public=true;
--- oczekiwane ~900+ (z 922 kandydatów odpadną przypadki invalid_json / <6 exercises / PII)
+### 3.4 Nawigacja po dodaniu (`handleSubmit`)
+Logika decyzyjna:
+```ts
+const autoSend = deferLevel || deferGoal ? autoSendWelcomeTest : false;
+if (autoSend) {
+  await sendWelcomeTest(newStudent.id);  // istniejąca akcja (useWelcomeTestActions)
+  navigate(`/student/${newStudent.id}?tab=dslm&view=goals&focus=add-goal-modal`);
+} else {
+  // student ma pełne dane → kieruj do DSLM i podświetl Welcome Test panel
+  navigate(`/student/${newStudent.id}?tab=overview&focus=send-welcome-test`);
+}
 ```
-Następnie wizualne sprawdzenie `https://edooqoo.com/gallery` (paginacja 24/strona).
+
+### 3.5 Brak CEFR — globalne podpowiedzi
+W miejscach gdzie wyświetlamy `english_level` (np. `StudentDetails`, `NavStudentSwitcher` badge, `OnboardingProgressList`) dodać warunek:
+```tsx
+{student.english_level
+  ? <Badge>{student.english_level}</Badge>
+  : <Badge variant="outline" className="text-amber-600">Set level →</Badge>}
+```
+Klik w taki badge → `navigate(?tab=overview&focus=send-welcome-test)`.
+
+### 3.6 `WelcomeTestResults.tsx` — przycisk "Apply suggested level"
+Jeśli `student.english_level == null` lub różni się od wyniku testu, pokaż CTA:
+```
+Suggested CEFR from test: B1   [ Apply to student ]
+```
+Klik → `update students set english_level='B1' where id=...` + toast. Mechanika identyczna jak istniejący auto-apply (już w `mem://features/welcome-test/auto-apply-and-brain-reset`), tylko ręczny trigger.
 
 ---
 
-## Część 3 — 2 nowe gry w „pause" Welcome Testu
+## 4. Reset Onboarding — naprawdę działa
 
-### 3.1 Architektura — selektor gier
+W `useOnboardingProgress.tsx`:
 
-Tworzymy nowy komponent **`src/components/welcome-test/BrainResetGames.tsx`** (orchestrator). Zachowuje API obecnego `BrainResetGame` (drop-in replacement w `WelcomeTestPage.tsx`).
+```ts
+const resetOnboarding = async () => {
+  localStorage.setItem('onboarding_force_show', '1');
+  sessionStorage.removeItem('onboarding-temp-dismissed');
+  const newProgress: OnboardingProgress = { ...defaultProgress, dismissed: false, completed: false };
+  setProgress(newProgress);
+  await saveProgress(newProgress);
+};
+
+const shouldShow = () => {
+  if (isDemoMode || isAnonymousUser) return false;
+  const isAnonymous = !profile?.email || profile.email === '';
+  if (isAnonymous || !profile?.id) return false;
+  if (localStorage.getItem('onboarding_force_show') === '1') return true;   // ← override
+  return !progress.dismissed && !progress.completed;
+};
+```
+
+Klik "Dismiss checklist" usuwa `onboarding_force_show`. Klik "X" (temp dismiss) zostawia override (znika do końca sesji). Po wykonaniu wszystkich kroków: jeśli `force_show` aktywne i `completed=true`, pokaż gratulacje + przycisk "Hide" który usuwa flagę.
+
+---
+
+## 5. `NavStudentSwitcher` — przycisk "+ Add" w popover
+
+Edytuj nagłówek popover:
 
 ```tsx
-type GameKey = 'memory' | 'reaction' | 'sequence';
+<div className="flex items-center justify-between px-3 py-2 border-b">
+  <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+    Switch to student
+  </span>
+  <Button size="sm" variant="ghost" className="h-6 px-2 gap-1 text-xs"
+          onClick={() => { setOpen(false); setAddOpen(true); }}>
+    <Plus className="h-3 w-3" /> Add
+  </Button>
+</div>
+…
+<AddStudentDialog triggerButton={false} open={addOpen} onOpenChange={setAddOpen} />
 ```
 
-UI: na górze 3 pigułki (Tabs / SegmentedControl z shadcn — `Tabs` jest już używany w aplikacji), pod spodem aktywna gra. Domyślnie losowo wybrana spośród 3, żeby user nie zawsze widział to samo.
-
-Renderuje:
-- `'memory'` → istniejący `BrainResetGame` (zostawiamy bez zmian).
-- `'reaction'` → **`BrainResetReactionGame.tsx`** (nowa).
-- `'sequence'` → **`BrainResetSequenceGame.tsx`** (nowa).
-
-W `WelcomeTestPage.tsx` zamieniamy `<BrainResetGame />` na `<BrainResetGames />` — jedna jednoliniowa zmiana.
-
-### 3.2 Gra 2 — Reaction Tap (`BrainResetReactionGame.tsx`)
-
-Zasada: na ekranie pojawia się 1 świecące koło w losowej pozycji w siatce 4×4 po losowym opóźnieniu 600–1800 ms. User klika jak najszybciej. Mierzymy średni czas reakcji z 10 prób.
-
-Implementacja:
-- Stan: `round (0–10)`, `target (idx 0–15 | null)`, `startAt (number)`, `times: number[]`.
-- `useEffect` po każdym zresetowaniu `target=null` → `setTimeout(losowo, 600–1800)` ustawia target i startAt = performance.now().
-- Klik w kafelek: jeśli `idx===target` → `times.push(now-startAt)`, `target=null`, `round++`. Jeśli zły kafelek → ignoruj (lub mała kara +200ms).
-- Po round===10 → ekran wyników: `Avg: 412 ms` + przycisk `Play again`.
-- 100% wizualne, brak języka. Używa semantic tokens (`bg-primary`, `bg-muted`).
-
-### 3.3 Gra 3 — Color Sequence (`BrainResetSequenceGame.tsx`)
-
-Klasyczny Simon Says — 4 kolorowe pady (primary, secondary, accent, muted-foreground). System pokazuje sekwencję migająć padami (po 500 ms + 200 ms przerwy), user powtarza klikając. Po sukcesie sekwencja rośnie o 1.
-
-- Stan: `sequence: number[]`, `playerIndex`, `mode: 'watch'|'input'|'gameover'`, `round`.
-- Start: `sequence=[random()]`.
-- `watch` mode: iterujemy z `setTimeout` po sequence, podświetlając kolejny pad.
-- `input` mode: każdy klik porównujemy z `sequence[playerIndex]`. Match → `playerIndex++`; jeśli `playerIndex===sequence.length` → `sequence.push(random())`, wracamy do `watch`. Mismatch → `gameover` + final round.
-- Wynik: `You reached round X` + `Try again`.
-- Zero języka. Pełna zgodność z design system.
-
-### 3.4 Copy w `BrainResetGames.tsx`
-
-Header: `Quick brain reset · Pick a game` (po angielsku, bez tłumaczeń — krótkie i neutralne). Pod selektorem: `No English required — just relax for a minute.`
+Zmień warunek `if (!loading && sorted.length === 0) return null;` na: zawsze renderuj (potrzebny przycisk Add nawet gdy 0 studentów) — komponent jest już używany tylko dla zalogowanych nauczycieli.
 
 ---
 
-## Część 4 — Tłumaczenia 5 pytań profilujących na 24 języki
+## 6. Gallery — dokończenie bulk-publish (927 → ~900 public)
 
-### 4.1 Zakres
+### 6.1 Diagnoza: dlaczego dotychczas tylko 5
+Wywołanie z literalnym `<TWÓJ_CRON_SECRET>` w SQL zwróciło 401. Edge function nigdy nie przetworzyła rekordów.
 
-Dodajemy do **każdego** z 24 setów (`SPANISH`, `GERMAN`, `FRENCH`, `PORTUGUESE`, `ITALIAN`, `TURKISH`, `RUSSIAN`, `CZECH`, `UKRAINIAN`, `DUTCH`, `JAPANESE`, `KOREAN`, `CHINESE`, `ARABIC`, `HUNGARIAN`, `ROMANIAN`, `GREEK`, `CROATIAN`, `SWEDISH`, `HINDI`, `VIETNAMESE`, `THAI`, `NORWEGIAN`, `DANISH`) klucze:
+### 6.2 Rozwiązanie — migracja SQL idempotentna (zero zależności od CRON_SECRET)
 
-- `wt_q3c` — scenariusz „budzisz się za 2 lata" (5 opcji + description).
-- `wt_q5c` — „środa wieczór, ciężki dzień" (5 opcji, bez description).
-- `wt_q7b` — „korekta po błędzie mówienia" (5 opcji, bez description).
-- `wt_q13c` — „6 miesięcy nauki bez postępów" (5 opcji, bez description).
-- `wt_q39` — „spóźnienie na spotkanie" (4 opcje, bez description) — **uwaga**: opcje to tłumaczone formuły grzecznościowe. To NIE jest klasyczny test skillu gramatycznego/słownikowego — to scenariusz pragmatyki. Tłumaczymy.
+Tworzymy migrację SQL która replikuje walidację:
 
-Wzorzec tekstu polskiego (linie 85–89) służy jako prawda źródłowa do tłumaczenia. Tłumaczenia wykonywane ręcznie (przeze mnie w build mode) zgodnie z tonalnością istniejących już tłumaczeń w danym secie (sprawdzę 2–3 sąsiednie klucze, by zachować rejestr).
-
-### 4.2 Lokalizacja zmian
-
-Plik: `src/data/welcomeTestTranslations.ts`. Po ostatnim kluczu w każdym secie (przed `};`) dorzucamy 5 nowych wpisów. To czysto addytywna zmiana — żadnych modyfikacji istniejących kluczy.
-
-### 4.3 Sanity check
-
-Nie ma `wt_q39` w polskim secie po `wt_q5b/q13b/q17b/q41b` ułożone tematycznie — ale obecna struktura traktuje je jako mapę kluczy, kolejność nie ma znaczenia (lookup po ID). Po wdrożeniu uruchomimy:
-
-```bash
-node -e "const t=require('./src/data/welcomeTestTranslations.ts'); ..."
+```sql
+-- Backfill: publish all eligible worksheets (>= 6 exercises, valid JSON, no PII)
+WITH eligible AS (
+  SELECT
+    w.id,
+    w.title,
+    COALESCE(w.public_slug, public.generate_public_slug(w.title, w.id)) AS slug,
+    LOWER(COALESCE(w.form_data->>'topic', 'general')) AS topic,
+    COALESCE(w.form_data->>'englishLevel', w.form_data->>'cefr', 'B1') AS lvl,
+    ARRAY(
+      SELECT DISTINCT (e->>'type')
+      FROM jsonb_array_elements((w.ai_response::jsonb)->'exercises') e
+      WHERE e->>'type' IS NOT NULL
+      LIMIT 12
+    ) AS ex_types
+  FROM public.worksheets w
+  WHERE w.deleted_at IS NULL
+    AND w.ai_response IS NOT NULL
+    AND (w.is_public IS NULL OR w.is_public = FALSE)
+    AND length(trim(w.title)) >= 3
+    AND jsonb_typeof((w.ai_response::jsonb)->'exercises') = 'array'
+    AND jsonb_array_length((w.ai_response::jsonb)->'exercises') >= 6
+    AND COALESCE(w.form_data->>'additionalInformation', '') !~ '(\m[\w._%+-]+@[\w.-]+\.[A-Za-z]{2,}\M|\+?\d[\d\s().-]{7,}\d)'
+)
+UPDATE public.worksheets w
+   SET is_public = TRUE,
+       public_slug = e.slug,
+       published_at = COALESCE(w.published_at, now()),
+       public_topic = LEFT(e.topic, 120),
+       public_level = LEFT(e.lvl, 20),
+       public_exercise_types = e.ex_types
+  FROM eligible e
+ WHERE w.id = e.id;
 ```
-(albo prościej — `rg "wt_q39'" src/data/welcomeTestTranslations.ts | wc -l` musi dać **25** = Polish + 24 nowe).
+
+Walidacje SQL = lustro logiki TS w `bulk-publish-worksheets/index.ts` (>= 6 exercises, title >= 3, regex PII).
+Idempotent: filtruje `is_public IS NULL OR FALSE`. Bezpieczna: tylko własna funkcja `generate_public_slug` (już istnieje).
+
+### 6.3 Po migracji
+- Wywołaj edge function `regenerate-gallery-sitemap` z poziomu UI (admin) lub przez SQL `select net.http_get(...)` (już istnieje wzorzec). Jeśli przeszkoda — pominąć, sitemap regeneruje się przy następnym buildzie SEO workflow.
+
+### 6.4 Edge function `bulk-publish-worksheets` zostaje
+Jako narzędzie do **przyrostowego** uruchamiania (np. cron co dobę). Naprawiamy tylko dokumentację: dodajemy notkę w `docs/llm-context.md` że **właściwy** sposób one-shot backfillu to migracja SQL, bo HTTP wymaga ważnego CRON_SECRET.
 
 ---
 
-## Część 5 — RAG: aktualizacja `docs/llm-context.md` i `llms.txt`
+## 7. Migracje DB (jeden plik)
 
-Dodajemy 4 sekcje w formacie *Problem → Edooqoo Solution → Technical Mechanics → RAG Keywords*:
+```sql
+-- 1. Pozwól na pusty english_level i goal (deferred)
+ALTER TABLE public.students ALTER COLUMN english_level DROP NOT NULL;
+ALTER TABLE public.students ADD COLUMN IF NOT EXISTS main_goal_deadline date;
+-- (main_goal już dopuszcza NULL — zweryfikować; jeśli NOT NULL → DROP NOT NULL)
 
-1. **Onboarding Checklist v2 — Setup + 1-Minute Prep**  
-   Tech: `useOnboardingProgress.tsx` rozszerzony o 5 nowych kroków, real-time subscriptions do `student_tests`, `curriculum_phases`, `student_knowledge_entries`. Zachowanie backward-compat dla starych stanów w `profiles.onboarding_progress`. Keywords: onboarding, checklist, weekly prep, welcome test step, learning roadmap step, next lesson ideas step.
+-- 2. Bulk-publish backfill (sekcja 6.2)
+… (jak wyżej)
+```
 
-2. **Bulk Gallery Publish Backfill**  
-   Tech: `bulk-publish-worksheets` edge function (verify_jwt=false + x-cron-secret), reużywa walidacji z `publish-worksheet`, idempotentna, paginowana. Sitemap odświeżany raz po batchu. Keywords: gallery backfill, bulk publish, is_public, public_slug, mass publish worksheets, gallery seeding.
-
-3. **Welcome Test Brain Reset Games (3 minigames)**  
-   Tech: `BrainResetGames.tsx` orchestrator z 3 grami (memory pairs, reaction tap, color sequence). Wszystkie language-free, zero persistence, zero impact na test scoring. Keywords: brain reset, paused test, minigame, reaction game, simon says, memory pairs.
-
-4. **Welcome Test Translations Coverage (5 profiling Qs × 25 langs)**  
-   Tech: `welcomeTestTranslations.ts` — dodane `wt_q3c, wt_q5c, wt_q7b, wt_q13c, wt_q39` we wszystkich 24 nie-polskich setach. Skill items (`wt_q18–wt_q35, wt_q37, wt_q38`) celowo pozostają po angielsku — tłumaczenie zaburzyłoby pomiar znajomości języka. Keywords: welcome test translations, profiling questions, multi-language, skill items english-only, fallback policy.
-
-Update `mem/index.md` — dopisać do sekcji `## Memories` jeden link do zaktualizowanego `mem/features/welcome-test/auto-apply-and-brain-reset.md` (do tego pliku dopiszemy sekcję o 3 grach i pełnym pokryciu tłumaczeń) oraz nowy `mem/features/onboarding/checklist-v2.md` opisujący 7 kroków, 2 sekcje, backward-compat.
+GRANT-y dla `students` istnieją (tabela już używana). Brak nowych RLS — kolumny tylko dodawane.
 
 ---
 
-## Lista plików (zmienianych / tworzonych)
+## 8. RAG Documentation Update (Problem → Solution → Mechanics)
 
-**Nowe:**
-- `supabase/functions/bulk-publish-worksheets/index.ts`
-- `src/components/welcome-test/BrainResetGames.tsx`
-- `src/components/welcome-test/BrainResetReactionGame.tsx`
-- `src/components/welcome-test/BrainResetSequenceGame.tsx`
-- `mem/features/onboarding/checklist-v2.md`
+### 8.1 `docs/llm-context.md` — nowa sekcja **v6.9.32 — Spotlight Onboarding + Add Student v2 + Gallery Backfill**
 
-**Edytowane:**
-- `src/hooks/useOnboardingProgress.tsx` (rozszerzony typ + nowe queries + nowe subskrypcje + ACTIVE_KEYS w %).
-- `src/components/OnboardingChecklist.tsx` (2 sekcje, 7 kroków, nowe akcje + ikony).
-- `src/data/welcomeTestTranslations.ts` (24 × 5 nowych wpisów).
-- `src/pages/WelcomeTestPage.tsx` (`<BrainResetGame />` → `<BrainResetGames />`).
-- `supabase/config.toml` (nowa sekcja `[functions.bulk-publish-worksheets]`).
-- `docs/llm-context.md`, `llms.txt` (4 nowe sekcje RAG).
-- `mem/index.md` (2 nowe linki).
-- `mem/features/welcome-test/auto-apply-and-brain-reset.md` (sekcja o 3 grach + pełne pokrycie tłumaczeń).
+```
+### Problem
+Teachers click onboarding steps but land at the wrong scroll position or without
+visual cue what to do next. Add Student modal forces CEFR/Main Goal even when
+teacher hasn't met student yet. Gallery shows only 5/927 worksheets because
+bulk-publish HTTP call returned 401 (cron secret literal).
 
-**Nieruszane:**
-- Wszystkie prompty generacji worksheetów (engine sanctity).
-- `publish-worksheet/index.ts` (zostaje per-worksheet flow z UI).
-- Stary `BrainResetGame.tsx` (pozostaje, tylko opakowany).
+### Edooqoo.com Solution
+- Global SpotlightOverlay (radial mask + ring-pulse) driven by URL `?focus=<id>`
+  and `app:spotlight` events.
+- Onboarding deep-links use `?tab=dslm&view=<id>&focus=<spotlight>` instead of
+  legacy `?section=`.
+- AddStudentDialog supports `defer_level` / `defer_goal` with auto-send Welcome
+  Test. Custom Goal is first. Compact single-screen layout.
+- After add: navigate to DSLM with spotlight or auto-open Add Goal modal.
+- Reset Onboarding sets `localStorage.onboarding_force_show=1` so checklist
+  re-appears even though steps re-detect as completed.
+- NavStudentSwitcher exposes inline `[+ Add]` next to "Switch to student".
+- Bulk gallery publish executed via idempotent SQL migration (CTE) instead of
+  HTTP — same validation (>=6 exercises, title>=3, PII regex).
+
+### Technical Mechanics
+- Components: SpotlightOverlay.tsx (portal), useSpotlight.ts (event bus).
+- Targets: data-spotlight="send-welcome-test|learning-roadmap|next-lesson-ideas|pick-idea|add-goal-modal".
+- DSLMTab reads `?focus=` once on mount → dispatches event after 600ms.
+- Migration: WITH eligible AS (...) UPDATE worksheets SET is_public=true.
+- DB: students.english_level → nullable, +main_goal_deadline date.
+
+### RAG Keywords
+onboarding spotlight, focus highlight, dim background, Add Student modal, defer
+CEFR, defer goal, auto-send welcome test, reset onboarding, gallery backfill,
+bulk publish worksheets, public_slug, generate_public_slug, force_show.
+```
+
+### 8.2 `llms.txt`
+Skrócony kondensat (≤30 linii) z listą plików zmienianych + link do migracji.
+
+### 8.3 `mem/features/onboarding/spotlight-v2.md` (nowy)
+Pełen opis 7 spotlight-targets i protokołu URL `?focus=`. + Sanctity rule: nie zmieniać prompta worksheet.
+
+### 8.4 `mem/index.md`
+Dodać wpis: `- [Onboarding Spotlight v2](mem://features/onboarding/spotlight-v2) — Spotlight overlay + ?focus= URL param + AddStudent defer fields`.
 
 ---
 
-## Akcje wymagające Twojego udziału po implementacji
+## 9. Kolejność wdrożenia (atomowe commity)
 
-1. **Uruchom bulk publish** (jednorazowo, w SQL Editorze Supabase):
-   ```sql
-   select net.http_post(
-     url     := 'https://bvfrkzdlklyvnhlpleck.supabase.co/functions/v1/bulk-publish-worksheets',
-     headers := jsonb_build_object('Content-Type','application/json','x-cron-secret','<TWÓJ_CRON_SECRET>'),
-     body    := '{"limit": 1000}'::jsonb
-   );
-   ```
-   Funkcja zwróci `{ scanned, published, skipped_* }`. Jeśli `scanned == limit`, uruchom ponownie (idempotentna).
+```text
+1) Migracja SQL (students nullable + bulk-publish CTE)
+2) useSpotlight + SpotlightOverlay + mount w App.tsx
+3) data-spotlight markers w 4 komponentach (WelcomeTestPanel, PathwayView, GoalsView)
+4) DSLMTab — parse ?focus= → dispatch event
+5) OnboardingChecklist — przepisanie deep-linków (section→view + focus)
+6) AddStudentDialog v2 (defer CEFR/Goal, compact, deadline, custom first, nawigacja)
+7) useOnboardingProgress — force_show flag w resetOnboarding + shouldShow
+8) NavStudentSwitcher — przycisk Add
+9) WelcomeTestResults — Apply CEFR CTA
+10) RAG: docs/llm-context.md, llms.txt, mem/index.md, mem/features/onboarding/spotlight-v2.md
+```
 
-2. **Werifikacja**: `select count(*) from worksheets where is_public=true;` (oczekiwane ~900).
+## 10. Test plan (po implementacji)
 
-3. **Test gier** w trakcie pause Welcome Testu — sprawdź wszystkie 3 zakładki.
+- [ ] Reset onboarding z `/profile` → checklist pojawia się natychmiast nawet gdy wszystkie kroki ukończone.
+- [ ] Klik każdego z 7 kroków checklisty → poprawny scroll + widoczny spotlight na właściwym elemencie.
+- [ ] Add Student bez CEFR (defer) + auto-send → uczeń utworzony, test wysłany, redirect na `?tab=dslm&view=goals&focus=add-goal-modal`, modal otwarty.
+- [ ] Add Student z pełnymi danymi → redirect na `?tab=overview&focus=send-welcome-test`, spotlight na panelu Welcome Test.
+- [ ] Apply CEFR z Test Results aktualizuje `students.english_level`.
+- [ ] NavStudentSwitcher → przycisk "+ Add" otwiera modal.
+- [ ] `/gallery` po migracji: liczba publicznych ≈ liczba spełniających kryteria (oczekiwane ~850–920).
+- [ ] Reset onboarding nie psuje progresji — checklist znika po kliknięciu "Hide / Dismiss".
+- [ ] Brak regresji w demo mode i student hub.
 
 ---
 
-## Ryzyka i mitygacje
-
-| Ryzyko | Mitygacja |
-|---|---|
-| Stary `onboarding_progress` w `profiles` ma 4 pola — nowe komponenty mogą crashnąć na `undefined` | Merge `{ ...defaultProgress.steps, ...savedProgress.steps }` w obu setterach + ACTIVE_KEYS-based %. |
-| Bulk publish trafi worksheet z corrupt JSON | try/catch + `skipped_invalid_json` licznik; nigdy nie rzuca. |
-| Real-time subskrypcje × 5 tabel zwiększają liczbę kanałów | Zostawiamy istniejący throttling (3s debounce, 30s error backoff) — to wystarczy. |
-| Bulk publish wygeneruje 900× hit do `regenerate-gallery-sitemap` | Sitemap regenerujemy **raz** na końcu batcha, nie per worksheet. |
-| `wt_q39` jako „pragmatyka" mogłaby być zaliczona do skill — tłumaczenie wpłynie na pomiar | Opcje to formuły grzecznościowe (rejestr formal/informal), nie test gramatyki — pragmatyka skaluje się przez kulturę → tłumaczenie jest poprawne andragogicznie. |
-
-Po Twoim ack przechodzę do implementacji w jednym ciągu (najpierw migracja edge function + UI hook, potem komponenty UI/games, na końcu masowe tłumaczenia + RAG).
+**Po Twojej akceptacji** przechodzę w build mode i wykonuję pkt 1–10 w wymienionej kolejności. Wszystkie zmiany są addytywne; pozostawiamy stare wartości `section=` jako fallback (`DSLMTab` traktuje `section` jako alias dla `view` przez 1 wersję), więc istniejące zakładki/linki w innych miejscach kodu nie zostaną zepsute.

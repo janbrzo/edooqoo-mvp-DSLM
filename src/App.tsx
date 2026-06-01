@@ -15,6 +15,7 @@ import GlobalFooter from "./components/GlobalFooter";
 import OnboardingChecklist from "./components/OnboardingChecklist";
 import AdminImpersonationBanner from "./components/AdminImpersonationBanner";
 import RouteCanonicalUpdater from "./components/RouteCanonicalUpdater";
+import SpotlightOverlay from "./components/onboarding/SpotlightOverlay";
 
 // v6.9.0 — Route-level code splitting via React.lazy. Eager: Index, Login,
 // Signup, NotFound (critical entry & auth flows). Everything else lazy → cuts
@@ -213,6 +214,7 @@ const App = () => (
           </main>
           <GlobalFooter />
           <OnboardingChecklist />
+          <SpotlightOverlay />
         </div>
         </DemoProvider>
         <CookieBanner />

@@ -426,7 +426,7 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
   }
 
   return (
-    <Card className="border-primary/30 bg-primary/5 mb-6 relative">
+    <Card data-spotlight="send-welcome-test" className="border-primary/30 bg-primary/5 mb-6 relative">
       <CardContent className="py-4">
         {/* Always-on dismiss button — hides the banner from Overview only.
             The Welcome Test remains accessible in the Tests tab. */}

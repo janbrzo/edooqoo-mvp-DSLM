@@ -2634,14 +2634,15 @@ export type Database = {
           deleted_at: string | null
           dslm_pacing_mode: number
           dslm_use_roadmap: boolean
-          english_level: string
+          english_level: string | null
           hub_password_hash: string | null
           id: string
           is_demo_student: boolean
           last_pacing_reasoning: Json | null
           last_pacing_recalc_at: string | null
           last_pacing_set_manually: boolean | null
-          main_goal: string
+          main_goal: string | null
+          main_goal_deadline: string | null
           main_goal_target_date: string | null
           name: string
           native_language: string | null
@@ -2656,14 +2657,15 @@ export type Database = {
           deleted_at?: string | null
           dslm_pacing_mode?: number
           dslm_use_roadmap?: boolean
-          english_level: string
+          english_level?: string | null
           hub_password_hash?: string | null
           id?: string
           is_demo_student?: boolean
           last_pacing_reasoning?: Json | null
           last_pacing_recalc_at?: string | null
           last_pacing_set_manually?: boolean | null
-          main_goal: string
+          main_goal?: string | null
+          main_goal_deadline?: string | null
           main_goal_target_date?: string | null
           name: string
           native_language?: string | null
@@ -2678,14 +2680,15 @@ export type Database = {
           deleted_at?: string | null
           dslm_pacing_mode?: number
           dslm_use_roadmap?: boolean
-          english_level?: string
+          english_level?: string | null
           hub_password_hash?: string | null
           id?: string
           is_demo_student?: boolean
           last_pacing_reasoning?: Json | null
           last_pacing_recalc_at?: string | null
           last_pacing_set_manually?: boolean | null
-          main_goal?: string
+          main_goal?: string | null
+          main_goal_deadline?: string | null
           main_goal_target_date?: string | null
           name?: string
           native_language?: string | null
@@ -3925,6 +3928,7 @@ export type Database = {
         }
         Returns: string
       }
+      try_parse_jsonb: { Args: { input: string }; Returns: Json }
       verify_homework_student_email: {
         Args: { p_email: string; p_homework_id: string }
         Returns: boolean
