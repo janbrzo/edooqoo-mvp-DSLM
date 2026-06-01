@@ -20,7 +20,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useStudentTests } from '@/hooks/useStudentTests';
 import { ALL_WELCOME_TEST_QUESTIONS } from '@/data/welcomeTestQuestions';
 import { toast } from 'sonner';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   WelcomeTestActionsPanel,
   type WelcomeTestActionsState,
@@ -41,6 +41,7 @@ interface WelcomeTestSuggestionProps {
 
 export function WelcomeTestSuggestion({ studentId, teacherId, studentName, studentEmail, surface = 'overview' }: WelcomeTestSuggestionProps) {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [status, setStatus] = useState<'loading' | 'no_test' | 'pending' | 'in_progress' | 'completed' | 'hidden'>('loading');
   const [creating, setCreating] = useState(false);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
