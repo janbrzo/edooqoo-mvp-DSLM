@@ -371,9 +371,14 @@ export const useOnboardingProgress = () => {
   const shouldShow = () => {
     if (isDemoMode) return false;
     if (isAnonymousUser) return false;
-    // Nie pokazuj onboarding dla anonimowych użytkowników (bez email)
     const isAnonymous = !profile?.email || profile.email === '';
-    return !progress.dismissed && !progress.completed && profile?.id && !isAnonymous;
+    if (!profile?.id || isAnonymous) return false;
+    // Force-show flag overrides dismissed/completed so the "Reset Onboarding"
+    // button in /profile re-displays the checklist even when all steps are
+    // already detected (data still exists in DB).
+    const forceShow = localStorage.getItem('onboarding_force_show') === 'true';
+    if (forceShow) return true;
+    return !progress.dismissed && !progress.completed;
   };
 
   // Manual refresh function to trigger from components
@@ -392,9 +397,11 @@ export const useOnboardingProgress = () => {
     
     setProgress(newProgress);
     await saveProgress(newProgress);
-    
-    // Clear session storage
+
+    // Clear session + force-show on next visit so the checklist re-renders
+    // even if checkSteps re-marks every step as completed.
     sessionStorage.removeItem('onboarding-temp-dismissed');
+    localStorage.setItem('onboarding_force_show', 'true');
     
     devLog('[Onboarding] Reset completed - onboarding will show again');
   };
