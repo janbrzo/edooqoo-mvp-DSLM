@@ -274,6 +274,31 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
     window.open(`${window.location.origin}/welcome-test/${ensured.token}?preview=1`, '_blank');
   };
 
+  // Auto-send when invoked from AddStudentDialog with ?autosend=1.
+  // Runs once after the initial check resolves and only when no test exists
+  // yet. Strips the param afterwards so refresh/back doesn't retrigger.
+  const autosendFiredRef = useRef(false);
+  useEffect(() => {
+    if (autosendFiredRef.current) return;
+    if (searchParams.get('autosend') !== '1') return;
+    if (status === 'loading' || status === 'hidden') return;
+    if (status !== 'no_test') {
+      // already sent / in progress / completed → clear param silently
+      autosendFiredRef.current = true;
+      const next = new URLSearchParams(searchParams);
+      next.delete('autosend');
+      setSearchParams(next, { replace: true });
+      return;
+    }
+    autosendFiredRef.current = true;
+    void (async () => {
+      await handleSend();
+      const next = new URLSearchParams(searchParams);
+      next.delete('autosend');
+      setSearchParams(next, { replace: true });
+    })();
+  }, [status, searchParams]);
+
   const handleRefreshLink = async (): Promise<string | null> => {
     // Lazily create the test if it does not yet exist so Refresh works on day 0.
     const ensured = await ensureWelcomeTest();
