@@ -214,6 +214,7 @@ const App = () => (
           </main>
           <GlobalFooter />
           <OnboardingChecklist />
+          <SpotlightOverlay />
         </div>
         </DemoProvider>
         <CookieBanner />
