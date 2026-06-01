@@ -15,6 +15,7 @@ export const NavStudentSwitcher: React.FC = () => {
   const navigate = useNavigate();
   const { students = [], loading } = useStudents();
   const [open, setOpen] = React.useState(false);
+  const [addOpen, setAddOpen] = React.useState(false);
 
   const sorted = React.useMemo(
     () => [...students].sort(
@@ -23,9 +24,8 @@ export const NavStudentSwitcher: React.FC = () => {
     [students]
   );
 
-  if (!loading && sorted.length === 0) return null;
-
   return (
+    <>
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button variant="outline" size="sm" className="gap-1.5">
