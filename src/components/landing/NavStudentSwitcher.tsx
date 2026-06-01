@@ -42,6 +42,11 @@ export const NavStudentSwitcher: React.FC = () => {
           {loading && (
             <div className="px-3 py-2 text-sm text-muted-foreground">Loading…</div>
           )}
+          {!loading && sorted.length === 0 && (
+            <div className="px-3 py-3 text-xs text-muted-foreground">
+              No students yet. Add your first one below.
+            </div>
+          )}
           {!loading && sorted.map((s: any) => (
             <a
               key={s.id}
@@ -67,7 +72,23 @@ export const NavStudentSwitcher: React.FC = () => {
             </a>
           ))}
         </div>
+        <div className="border-t p-1">
+          <button
+            type="button"
+            onClick={() => { setOpen(false); setAddOpen(true); }}
+            className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-primary hover:bg-primary/10 transition-colors"
+          >
+            <Plus className="h-4 w-4" />
+            Add new student
+          </button>
+        </div>
       </PopoverContent>
     </Popover>
+    <AddStudentDialog
+      triggerButton={false}
+      open={addOpen}
+      onOpenChange={setAddOpen}
+    />
+    </>
   );
 };
