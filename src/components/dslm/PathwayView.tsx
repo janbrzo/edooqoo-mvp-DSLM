@@ -246,7 +246,7 @@ export const PathwayView: React.FC<PathwayViewProps> = ({
           ))}
         </div>
       )}
-      <div id="pathway-next-steps" className="scroll-mt-24">
+      <div id="pathway-next-steps" data-spotlight="next-lesson-ideas" className="scroll-mt-24">
       <NextStepsSection
         items={allActiveItems}
         studentId={studentId}
@@ -280,7 +280,7 @@ export const PathwayView: React.FC<PathwayViewProps> = ({
       </div>
 
       <Collapsible open={roadmapOpen} onOpenChange={setRoadmapOpen}>
-        <div id="pathway-roadmap" className="scroll-mt-24" />
+        <div id="pathway-roadmap" data-spotlight="learning-roadmap" className="scroll-mt-24" />
         <div className="flex items-center justify-between gap-2">
           <CollapsibleTrigger asChild>
             <Button variant="ghost" className="flex-1 justify-between text-muted-foreground">
