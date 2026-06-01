@@ -174,8 +174,18 @@ export const DSLMTab: React.FC<DSLMTabProps> = ({
   // On mount, scroll to URL view param
   useEffect(() => {
     const urlView = searchParams.get('view') as ViewId | null;
+    // v6.9.32 — accept legacy `?section=` as alias for `?view=`.
+    const legacy = searchParams.get('section');
+    const effectiveView = (urlView || (legacy as ViewId | null)) as ViewId | null;
     if (urlView && VIEWS.some(v => v.id === urlView) && urlView !== 'pathway') {
       setTimeout(() => handleScrollTo(urlView), 100);
+    } else if (effectiveView && VIEWS.some(v => v.id === effectiveView) && effectiveView !== 'pathway') {
+      setTimeout(() => handleScrollTo(effectiveView), 100);
+    }
+    // v6.9.32 — `?focus=add-goal-modal` reuses existing `dslm:addGoal` event.
+    const focus = searchParams.get('focus');
+    if (focus === 'add-goal-modal') {
+      setTimeout(() => window.dispatchEvent(new CustomEvent('dslm:addGoal')), 400);
     }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
