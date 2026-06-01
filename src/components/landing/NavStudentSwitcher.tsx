@@ -2,8 +2,9 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Users, ChevronDown } from 'lucide-react';
+import { Users, ChevronDown, Plus } from 'lucide-react';
 import { useStudents } from '@/hooks/useStudents';
+import { AddStudentDialog } from '@/components/dashboard/AddStudentDialog';
 
 /**
  * v6.9.13 — Global student switcher in StickyNav.
@@ -14,6 +15,7 @@ export const NavStudentSwitcher: React.FC = () => {
   const navigate = useNavigate();
   const { students = [], loading } = useStudents();
   const [open, setOpen] = React.useState(false);
+  const [addOpen, setAddOpen] = React.useState(false);
 
   const sorted = React.useMemo(
     () => [...students].sort(
@@ -22,9 +24,8 @@ export const NavStudentSwitcher: React.FC = () => {
     [students]
   );
 
-  if (!loading && sorted.length === 0) return null;
-
   return (
+    <>
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
         <Button variant="outline" size="sm" className="gap-1.5">
@@ -40,6 +41,11 @@ export const NavStudentSwitcher: React.FC = () => {
         <div className="max-h-80 overflow-y-auto p-1">
           {loading && (
             <div className="px-3 py-2 text-sm text-muted-foreground">Loading…</div>
+          )}
+          {!loading && sorted.length === 0 && (
+            <div className="px-3 py-3 text-xs text-muted-foreground">
+              No students yet. Add your first one below.
+            </div>
           )}
           {!loading && sorted.map((s: any) => (
             <a
@@ -66,7 +72,23 @@ export const NavStudentSwitcher: React.FC = () => {
             </a>
           ))}
         </div>
+        <div className="border-t p-1">
+          <button
+            type="button"
+            onClick={() => { setOpen(false); setAddOpen(true); }}
+            className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-primary hover:bg-primary/10 transition-colors"
+          >
+            <Plus className="h-4 w-4" />
+            Add new student
+          </button>
+        </div>
       </PopoverContent>
     </Popover>
+    <AddStudentDialog
+      triggerButton={false}
+      open={addOpen}
+      onOpenChange={setAddOpen}
+    />
+    </>
   );
 };

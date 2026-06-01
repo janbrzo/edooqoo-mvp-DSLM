@@ -12,6 +12,8 @@ import { useNavigate } from 'react-router-dom';
 import { Plus } from 'lucide-react';
 import { NATIVE_LANGUAGES } from '@/types/flashcards';
 import { MAIN_GOALS, ENGLISH_LEVELS } from '@/constants/studentGoals';
+import { DeadlinePicker } from '@/components/shared/DeadlinePicker';
+import { Checkbox } from '@/components/ui/checkbox';
 import { devLog } from '@/utils/logger';
 
 const ADD_STUDENT_DRAFT_KEY = 'add-student-dialog-draft';
@@ -45,11 +47,14 @@ export const AddStudentDialog = ({
   const setOpen = externalOnOpenChange || setInternalOpen;
   const [name, setName] = useState('');
   const [englishLevel, setEnglishLevel] = useState('');
-  const [mainGoal, setMainGoal] = useState('');
+  const [mainGoal, setMainGoal] = useState<string>('custom');
   const [customGoal, setCustomGoal] = useState('');
   const [studentEmail, setStudentEmail] = useState('');
   const [sendOverdueEmails, setSendOverdueEmails] = useState(true);
   const [nativeLanguage, setNativeLanguage] = useState('Spanish');
+  const [deferProfile, setDeferProfile] = useState(true);
+  const [mainGoalDeadline, setMainGoalDeadline] = useState<string>('');
+  const [autoSendWelcomeTest, setAutoSendWelcomeTest] = useState(true);
   const [loading, setLoading] = useState(false);
   const { addStudent, refetch } = useStudents();
   const { refreshProgress } = useOnboardingProgress();
@@ -123,22 +128,35 @@ export const AddStudentDialog = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const finalGoal = mainGoal === 'custom' ? customGoal : mainGoal;
-    if (!name || !englishLevel || !finalGoal || !studentEmail) return;
+    const finalLevel = deferProfile ? null : englishLevel;
+    const finalGoal = deferProfile
+      ? null
+      : (mainGoal === 'custom' ? customGoal : mainGoal);
+    if (!name || !studentEmail) return;
+    if (!deferProfile && (!englishLevel || !finalGoal)) return;
 
     setLoading(true);
     try {
-      // PROBLEM 7: addStudent returns the new student data
-      const newStudent = await addStudent(name, englishLevel, finalGoal, studentEmail || undefined, sendOverdueEmails, nativeLanguage);
+      const newStudent = await addStudent(
+        name,
+        finalLevel,
+        finalGoal,
+        studentEmail || undefined,
+        sendOverdueEmails,
+        nativeLanguage,
+        deferProfile ? null : (mainGoalDeadline || null)
+      );
       
       // Reset form and close dialog
       setName('');
       setEnglishLevel('');
-      setMainGoal('');
+      setMainGoal('custom');
       setCustomGoal('');
       setStudentEmail('');
       setSendOverdueEmails(true);
       setNativeLanguage('Spanish');
+      setDeferProfile(true);
+      setMainGoalDeadline('');
       sessionStorage.removeItem(ADD_STUDENT_DRAFT_KEY);
       setOpen(false);
       
@@ -156,10 +174,14 @@ export const AddStudentDialog = ({
         onStudentAdded();
       }
       
-      // PROBLEM 7: Navigate to new student's page with overview tab
+      // Navigate to new student page; optionally auto-send Welcome Test.
       if (newStudent?.id) {
-        devLog('🚀 Navigating to new student page:', newStudent.id);
-        navigate(`/student/${newStudent.id}?tab=overview`);
+        const params = new URLSearchParams({ tab: 'overview' });
+        if (autoSendWelcomeTest) {
+          params.set('focus', 'send-welcome-test');
+          params.set('autosend', '1');
+        }
+        navigate(`/student/${newStudent.id}?${params.toString()}`);
       }
     } catch (error) {
       // Error handled in hook
@@ -178,112 +200,167 @@ export const AddStudentDialog = ({
           </Button>
         </DialogTrigger>
       )}
-      <DialogContent className="sm:max-w-[500px] max-h-[85vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[480px] max-h-[88vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Add New Student</DialogTitle>
+          <DialogTitle>Add Student</DialogTitle>
           <DialogDescription>
-            Add a new student to your class. You can update their information later.
+            Only name + email are required. Defer level &amp; goal until after the Welcome Test if you prefer.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">Student Name <span className="text-destructive">*</span></Label>
-            <Input
-              id="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Enter student's name"
-              required
-              autoFocus
-            />
+        <form onSubmit={handleSubmit} className="space-y-3">
+          {/* Row 1: name + email */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="space-y-1">
+              <Label htmlFor="name" className="text-xs">Name <span className="text-destructive">*</span></Label>
+              <Input
+                id="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="Student's name"
+                required
+                autoFocus
+                className="h-9"
+              />
+            </div>
+            <div className="space-y-1">
+              <Label htmlFor="email" className="text-xs">Email <span className="text-destructive">*</span></Label>
+              <Input
+                id="email"
+                type="email"
+                value={studentEmail}
+                onChange={(e) => setStudentEmail(e.target.value)}
+                placeholder="student@example.com"
+                required
+                className="h-9"
+              />
+            </div>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="level">English Level (CEFR) <span className="text-destructive">*</span></Label>
-            <Select value={englishLevel} onValueChange={setEnglishLevel} required>
-              <SelectTrigger>
-                <SelectValue placeholder="Select English level" />
-              </SelectTrigger>
-              <SelectContent>
-                {ENGLISH_LEVELS.map((level) => (
-                  <SelectItem key={level.value} value={level.value}>
-                    {level.label}
-                  </SelectItem>
-                ))}
-            </SelectContent>
-          </Select>
-        </div>
 
-        <div>
-          <Label htmlFor="native-language">Native Language</Label>
-          <Select value={nativeLanguage} onValueChange={setNativeLanguage}>
-            <SelectTrigger id="native-language" className="mt-1.5">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {NATIVE_LANGUAGES.map((lang) => (
-                <SelectItem key={lang.value} value={lang.value}>
-                  {lang.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-          <div className="space-y-2">
-            <Label htmlFor="goal">Main Goal <span className="text-destructive">*</span></Label>
-            <Select value={mainGoal} onValueChange={setMainGoal} required>
-              <SelectTrigger>
-                <SelectValue placeholder="Select main learning goal" />
+          {/* Row 2: native language (always shown — short) */}
+          <div className="space-y-1">
+            <Label htmlFor="native-language" className="text-xs">Native Language</Label>
+            <Select value={nativeLanguage} onValueChange={setNativeLanguage}>
+              <SelectTrigger id="native-language" className="h-9">
+                <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {MAIN_GOALS.map((goal) => (
-                  <SelectItem key={goal.value} value={goal.value}>
-                    {goal.label}
+                {NATIVE_LANGUAGES.map((lang) => (
+                  <SelectItem key={lang.value} value={lang.value}>
+                    {lang.label}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-            {mainGoal === 'custom' && (
-              <Input
-                placeholder="Enter custom learning goal"
-                value={customGoal}
-                onChange={(e) => setCustomGoal(e.target.value)}
-                required={mainGoal === 'custom'}
-              />
-            )}
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="email">Student Email <span className="text-destructive">*</span></Label>
-            <Input
-              id="email"
-              type="email"
-              value={studentEmail}
-              onChange={(e) => setStudentEmail(e.target.value)}
-              placeholder="student@example.com"
-              required
+
+          {/* Defer toggle */}
+          <div className="flex items-start gap-2 rounded-md border bg-muted/30 p-2.5">
+            <Checkbox
+              id="defer-profile"
+              checked={deferProfile}
+              onCheckedChange={(v) => setDeferProfile(!!v)}
+              className="mt-0.5"
             />
-            <p className="text-xs text-muted-foreground">
-              Email will be used for homework notifications, shared worksheets, and Student Hub access.
-            </p>
-          </div>
-          <div className="flex items-center justify-between space-x-2">
-            <div className="space-y-0.5">
-              <Label htmlFor="send-overdue-new">Send overdue homework emails</Label>
-              <p className="text-xs text-muted-foreground">
-                Automatically send reminders when homework is overdue
+            <div className="flex-1">
+              <Label htmlFor="defer-profile" className="text-xs font-medium cursor-pointer">
+                I'll set level &amp; goal after the Welcome Test
+              </Label>
+              <p className="text-[11px] text-muted-foreground mt-0.5">
+                Recommended. Edooqoo will infer level, goals and a learning roadmap from the test answers.
               </p>
             </div>
-            <Switch 
-              id="send-overdue-new" 
-              checked={sendOverdueEmails} 
-              onCheckedChange={setSendOverdueEmails} 
+          </div>
+
+          {/* Level + Goal + Deadline — collapsed when deferred */}
+          {!deferProfile && (
+            <div className="space-y-3 border-l-2 border-primary/30 pl-3">
+              <div className="space-y-1">
+                <Label htmlFor="level" className="text-xs">English Level (CEFR) <span className="text-destructive">*</span></Label>
+                <Select value={englishLevel} onValueChange={setEnglishLevel} required>
+                  <SelectTrigger className="h-9">
+                    <SelectValue placeholder="Select level" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ENGLISH_LEVELS.map((level) => (
+                      <SelectItem key={level.value} value={level.value}>{level.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-1">
+                <Label htmlFor="goal" className="text-xs">Main Goal <span className="text-destructive">*</span></Label>
+                <Select value={mainGoal} onValueChange={setMainGoal} required>
+                  <SelectTrigger className="h-9">
+                    <SelectValue placeholder="Select main goal" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {MAIN_GOALS.map((goal) => (
+                      <SelectItem key={goal.value} value={goal.value}>{goal.label}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {mainGoal === 'custom' && (
+                  <Input
+                    placeholder="Describe the custom goal"
+                    value={customGoal}
+                    onChange={(e) => setCustomGoal(e.target.value)}
+                    required
+                    className="h-9 mt-1"
+                  />
+                )}
+              </div>
+              <div className="space-y-1">
+                <Label className="text-xs">Goal Deadline (optional)</Label>
+                <DeadlinePicker value={mainGoalDeadline} onChange={setMainGoalDeadline} compact />
+              </div>
+            </div>
+          )}
+
+          {/* Send Welcome Test toggle */}
+          <div className="flex items-start gap-2 rounded-md border border-primary/30 bg-primary/5 p-2.5">
+            <Checkbox
+              id="autosend-wt"
+              checked={autoSendWelcomeTest}
+              onCheckedChange={(v) => setAutoSendWelcomeTest(!!v)}
+              className="mt-0.5"
+            />
+            <div className="flex-1">
+              <Label htmlFor="autosend-wt" className="text-xs font-medium cursor-pointer">
+                Send the Welcome Test right after creating
+              </Label>
+              <p className="text-[11px] text-muted-foreground mt-0.5">
+                Emails the test link to the student and copies it to your clipboard.
+              </p>
+            </div>
+          </div>
+
+          {/* Overdue email toggle — compact row */}
+          <div className="flex items-center justify-between gap-2 pt-1">
+            <Label htmlFor="send-overdue-new" className="text-xs text-muted-foreground cursor-pointer">
+              Send overdue homework reminders
+            </Label>
+            <Switch
+              id="send-overdue-new"
+              checked={sendOverdueEmails}
+              onCheckedChange={setSendOverdueEmails}
             />
           </div>
-          <div className="flex justify-end space-x-2 pt-4">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+
+          <div className="flex justify-end gap-2 pt-2">
+            <Button type="button" variant="outline" onClick={() => setOpen(false)} size="sm">
               Cancel
             </Button>
-            <Button type="submit" disabled={loading || !name || !englishLevel || !mainGoal || (mainGoal === 'custom' && !customGoal) || !studentEmail}>
-              {loading ? 'Adding...' : 'Add Student'}
+            <Button
+              type="submit"
+              size="sm"
+              disabled={
+                loading ||
+                !name ||
+                !studentEmail ||
+                (!deferProfile && (!englishLevel || !mainGoal || (mainGoal === 'custom' && !customGoal)))
+              }
+            >
+              {loading ? 'Adding…' : (autoSendWelcomeTest ? 'Add & Send Test' : 'Add Student')}
             </Button>
           </div>
         </form>

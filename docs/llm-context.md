@@ -1214,3 +1214,35 @@ OnboardingHeroCard for empty Dashboard (P0); skeleton loaders (P1); nav-student-
 **Problem:** Codex shipped v6.9.26 in parallel (JSON-LD claim-integrity fixes, BusyTeacher → neutral framework, hreflang=x-default, claim scan in audit). Lovable plan v6.9.27 must avoid regressing these files.
 **Edooqoo.com Solution:** v6.9.27 sweep is read-only against `scripts/seo/generate-citable-pages.mjs`, `scripts/seo/audit-seo-assets.mjs`, `src/components/seo/PageSeo.tsx`, `src/constants/seoMeta.ts`, `src/constants/faqItems.ts`, `src/pages/HowItWorks.tsx`, `src/pages/seo/*`, `public/*-vs-*.html`, `public/blog/*.html`. Only exception: H4 sweep adds `state={...}` props to existing `<Link to="/signup">` — no JSON-LD or copy changes.
 **RAG Keywords:** v6.9.26, Codex reconciliation, claim integrity, hreflang x-default, neutral comparison framework, parallel branches.
+
+## v6.9.32 — Onboarding Spotlight, AddStudent v2, Bulk-Publish Gallery
+
+### Onboarding Reset Force-Show
+**Problem:** "Reset Onboarding" in `/profile` cleared `dismissed`/`completed` flags but `checkSteps()` re-marked every step `completed=true` from existing DB rows within seconds → checklist disappeared again.
+**Edooqoo.com Solution:** `resetOnboarding()` now writes `localStorage.onboarding_force_show='true'`. `shouldShow()` returns true whenever this flag is set regardless of `dismissed/completed`. `dismissOnboarding()` and `handleTemporaryDismiss()` clear the flag so the user-initiated hide still wins.
+**Technical Mechanics:** `src/hooks/useOnboardingProgress.tsx` (shouldShow + resetOnboarding + dismissOnboarding), `src/components/OnboardingChecklist.tsx` (handleTemporaryDismiss). Flag is localStorage (not session) so it survives reloads until the user explicitly closes the checklist.
+**RAG Keywords:** reset onboarding, force show, checklist reappear, profile reset, dismissed flag, completion override.
+
+### Spotlight Overlay System
+**Problem:** Onboarding deep-links navigated correctly but teachers couldn't see which element to click on the destination page.
+**Edooqoo.com Solution:** `src/hooks/useSpotlight.ts` + `src/components/onboarding/SpotlightOverlay.tsx` (mounted globally in `App.tsx`). Any DOM node tagged `data-spotlight="<id>"` is auto-highlighted when URL contains `?focus=<id>` or when `window.dispatchEvent(new CustomEvent('app:spotlight', { detail: { id } }))` fires. Overlay renders a pulsing ring + scrolls element into view. Self-clears on click or after 8s.
+**Technical Mechanics:** Spotlight IDs in use: `send-welcome-test`, `add-goal-modal`, `learning-roadmap`, `next-lesson-ideas`, `pick-idea`. Set via `data-spotlight` attribute on the target element. Use this pattern for any new guided action — do NOT add bespoke highlighting logic.
+**RAG Keywords:** spotlight, focus param, guided tour, onboarding highlight, data-spotlight, app:spotlight event, deep link UX.
+
+### AddStudentDialog v2 (Compact + Defer Profile + Auto-Send Welcome Test)
+**Problem:** Original 6-field modal forced teachers to guess CEFR level and goal upfront before any data existed. Most teachers either bailed or picked wrong values that polluted the DSLM.
+**Edooqoo.com Solution:** Modal redesigned to 2-column compact layout (name + email side-by-side). New checkbox **"I'll set level & goal after the Welcome Test"** (default ON) collapses the level/goal/deadline section entirely — `english_level` and `main_goal` are now nullable in `public.students` (migration `20260601082424_*.sql`). When unchecked, the inline section uses `DeadlinePicker` for `main_goal_target_date`. Second checkbox **"Send the Welcome Test right after creating"** (default ON) navigates to `/student/{id}?tab=overview&focus=send-welcome-test&autosend=1` after insert; `WelcomeTestSuggestion` reads `autosend=1` once on mount, calls `handleSend()` lazily (via `ensureWelcomeTest`), then strips the param via `setSearchParams(..., {replace: true})`.
+**Technical Mechanics:** `src/components/dashboard/AddStudentDialog.tsx` rewritten. `useStudents.addStudent` signature extended: `(name, englishLevel: string|null, mainGoal: string|null, email?, sendOverdue?, nativeLanguage?, mainGoalTargetDate?: string|null)` — backward compatible (positional). `WelcomeTestSuggestion.tsx` adds `autosendFiredRef` guard so the autosend can never double-fire across rerenders. `Default Main Goal` preset = `custom`.
+**RAG Keywords:** add student modal, compact dialog, defer profile, optional CEFR, nullable english_level, autosend welcome test, focus=send-welcome-test, autosend=1, DeadlinePicker, main_goal_target_date.
+
+### Nav Student Switcher — Add Student CTA
+**Problem:** Teachers with 0 students never saw the global student switcher (it was hidden), and switcher had no path to add a new student without leaving the current page.
+**Edooqoo.com Solution:** `NavStudentSwitcher` now renders unconditionally for authenticated teachers. Empty state shows "No students yet" hint. Footer of the popover has a sticky `+ Add new student` button that opens the controlled `AddStudentDialog`. Existing student rows still use `<a href>` for middle-click new-tab support.
+**Technical Mechanics:** `src/components/landing/NavStudentSwitcher.tsx`. The dialog is rendered as a sibling to the Popover (Radix portal) so closing the popover doesn't unmount the dialog. State managed via local `addOpen` boolean.
+**RAG Keywords:** nav student switcher, add student CTA, empty state, popover footer, global add student, sticky nav.
+
+### Bulk-Publish Gallery (904 worksheets)
+**Problem:** Public gallery had <50 published worksheets; backlog of ~927 unpublished worksheets met quality criteria but were never flipped to `is_public_gallery=true`.
+**Edooqoo.com Solution:** One-shot idempotent SQL CTE (migration-driven, no edge function) selected worksheets with `>= 6` tasks, valid `exercises_json`, title `>= 3` chars, no PII (`student_email`, `teacher_email`, phone numbers stripped via regex pre-check), then `UPDATE ... SET is_public_gallery=true, published_at=now() WHERE id IN (...)`. 904 of ~927 qualifying rows promoted; remaining 23 failed PII/length guards and stay private.
+**Technical Mechanics:** Pure SQL — no `bulk-publish-worksheets` edge function call required at runtime. The edge function (`supabase/functions/bulk-publish-worksheets/index.ts`) remains in repo as a manual rerun option but is NOT scheduled. Future bulk runs should re-use the same CTE pattern.
+**RAG Keywords:** bulk publish, gallery seeding, public gallery, is_public_gallery, PII filter, min-6-tasks, one-shot migration, 904 worksheets.

@@ -20,7 +20,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useStudentTests } from '@/hooks/useStudentTests';
 import { ALL_WELCOME_TEST_QUESTIONS } from '@/data/welcomeTestQuestions';
 import { toast } from 'sonner';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import {
   WelcomeTestActionsPanel,
   type WelcomeTestActionsState,
@@ -41,6 +41,7 @@ interface WelcomeTestSuggestionProps {
 
 export function WelcomeTestSuggestion({ studentId, teacherId, studentName, studentEmail, surface = 'overview' }: WelcomeTestSuggestionProps) {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const [status, setStatus] = useState<'loading' | 'no_test' | 'pending' | 'in_progress' | 'completed' | 'hidden'>('loading');
   const [creating, setCreating] = useState(false);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
@@ -272,6 +273,31 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
     if (!ensured) return;
     window.open(`${window.location.origin}/welcome-test/${ensured.token}?preview=1`, '_blank');
   };
+
+  // Auto-send when invoked from AddStudentDialog with ?autosend=1.
+  // Runs once after the initial check resolves and only when no test exists
+  // yet. Strips the param afterwards so refresh/back doesn't retrigger.
+  const autosendFiredRef = useRef(false);
+  useEffect(() => {
+    if (autosendFiredRef.current) return;
+    if (searchParams.get('autosend') !== '1') return;
+    if (status === 'loading' || status === 'hidden') return;
+    if (status !== 'no_test') {
+      // already sent / in progress / completed → clear param silently
+      autosendFiredRef.current = true;
+      const next = new URLSearchParams(searchParams);
+      next.delete('autosend');
+      setSearchParams(next, { replace: true });
+      return;
+    }
+    autosendFiredRef.current = true;
+    void (async () => {
+      await handleSend();
+      const next = new URLSearchParams(searchParams);
+      next.delete('autosend');
+      setSearchParams(next, { replace: true });
+    })();
+  }, [status, searchParams]);
 
   const handleRefreshLink = async (): Promise<string | null> => {
     // Lazily create the test if it does not yet exist so Refresh works on day 0.

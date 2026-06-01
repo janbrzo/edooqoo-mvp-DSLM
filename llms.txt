@@ -223,3 +223,11 @@ homepage hero proof switcher, OneMinutePrepHeroProofSwitcher, Prep impact tab, W
 - Treat /dashboard, /worksheet/, /worksheets, /homework/, /flashcards/, /my, /calendar, /admin, and auth routes as private application surfaces.
 - Treat /esl-worksheets, /worksheets/:exerciseType/:topic, /english-for/:persona, /tools/*, /gallery, top-level .html citation pages, and public /blog/*.html articles as public discovery surfaces.
 - User-facing application copy is English. Planning conversation with the owner may be Polish.
+
+## v6.9.32 — Onboarding Spotlight, AddStudent v2, Bulk-Publish
+- `useOnboardingProgress.resetOnboarding()` sets `localStorage.onboarding_force_show='true'`; `shouldShow()` honors flag → checklist reappears after Reset; dismiss/temp-dismiss clears flag.
+- Spotlight: `data-spotlight="<id>"` + `?focus=<id>` (or `app:spotlight` CustomEvent) auto-highlights via global `<SpotlightOverlay/>` in `App.tsx`. IDs: send-welcome-test, add-goal-modal, learning-roadmap, next-lesson-ideas, pick-idea.
+- `AddStudentDialog` v2: 2-col compact, `english_level`/`main_goal` nullable, default "Defer until after Welcome Test" + "Send Welcome Test now" → `?autosend=1` consumed once by `WelcomeTestSuggestion`.
+- `useStudents.addStudent(name, level|null, goal|null, email?, sendOverdue?, native?, mainGoalTargetDate?)`.
+- `NavStudentSwitcher` always rendered; popover footer = `+ Add new student` → opens AddStudentDialog.
+- Bulk-publish: 904 worksheets promoted to public gallery via one-shot SQL CTE (min 6 tasks, no PII).

@@ -42,6 +42,9 @@ export const OnboardingChecklist = () => {
   const handleTemporaryDismiss = () => {
     setIsTemporarilyDismissed(true);
     sessionStorage.setItem('onboarding-temp-dismissed', 'true');
+    // User explicitly hid the checklist → clear the force-show flag so the
+    // next reload respects dismissed/completed state again.
+    localStorage.removeItem('onboarding_force_show');
   };
 
   const completionPercentage = getCompletionPercentage();

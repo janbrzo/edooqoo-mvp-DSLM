@@ -52,11 +52,12 @@ export const useStudents = () => {
 
   const addStudent = async (
     name: string,
-    englishLevel: string,
-    mainGoal: string,
+    englishLevel: string | null,
+    mainGoal: string | null,
     studentEmail?: string,
     sendOverdueEmails: boolean = true,
-    nativeLanguage: string = 'Spanish'
+    nativeLanguage: string = 'Spanish',
+    mainGoalTargetDate?: string | null
   ) => {
     try {
       if (!user) throw new Error('User not authenticated');
@@ -80,8 +81,9 @@ export const useStudents = () => {
         .from('students')
         .insert([{
           name,
-          english_level: englishLevel,
-          main_goal: mainGoal,
+          english_level: englishLevel || null,
+          main_goal: mainGoal || null,
+          main_goal_target_date: mainGoalTargetDate || null,
           teacher_id: user.id,
           teacher_email: user.email,
           student_email: studentEmail?.toLowerCase().trim() || null,
