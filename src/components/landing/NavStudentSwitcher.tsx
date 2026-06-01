@@ -2,8 +2,9 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Users, ChevronDown } from 'lucide-react';
+import { Users, ChevronDown, Plus } from 'lucide-react';
 import { useStudents } from '@/hooks/useStudents';
+import { AddStudentDialog } from '@/components/dashboard/AddStudentDialog';
 
 /**
  * v6.9.13 — Global student switcher in StickyNav.
