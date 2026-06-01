@@ -72,21 +72,21 @@ export const OnboardingChecklist = () => {
       label: 'Send Welcome Test',
       icon: ClipboardCheck,
       completed: !!progress.steps.send_welcome_test,
-      action: () => navigate(studentDeepLink('?tab=tests')),
+      action: () => navigate(studentDeepLink('?tab=overview&focus=send-welcome-test')),
     },
     {
       key: 'add_goals',
       label: 'Add learning goals',
       icon: Target,
       completed: !!progress.steps.add_goals,
-      action: () => navigate(studentDeepLink('?tab=dslm&section=goals')),
+      action: () => navigate(studentDeepLink('?tab=dslm&view=goals&focus=add-goal-modal')),
     },
     {
       key: 'generate_roadmap',
       label: 'Generate Learning Roadmap',
       icon: Map,
       completed: !!progress.steps.generate_roadmap,
-      action: () => navigate(studentDeepLink('?tab=dslm&section=phases')),
+      action: () => navigate(studentDeepLink('?tab=dslm&view=pathway&focus=learning-roadmap')),
     },
   ];
 
@@ -96,14 +96,14 @@ export const OnboardingChecklist = () => {
       label: 'Generate Next Lesson Ideas',
       icon: Lightbulb,
       completed: !!progress.steps.generate_next_ideas,
-      action: () => navigate(studentDeepLink('?tab=dslm&section=next-steps')),
+      action: () => navigate(studentDeepLink('?tab=dslm&view=pathway&focus=next-lesson-ideas')),
     },
     {
       key: 'pick_idea',
-      label: 'Pick one idea',
+      label: 'Use one Next Lesson suggestion',
       icon: MousePointerClick,
       completed: !!progress.steps.pick_idea,
-      action: () => navigate(studentDeepLink('?tab=dslm&section=next-steps')),
+      action: () => navigate(studentDeepLink('?tab=dslm&view=pathway&focus=pick-idea')),
     },
     {
       key: 'generate_worksheet',
