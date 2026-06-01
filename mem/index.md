@@ -14,3 +14,4 @@
 - [Model Health Monitoring](mem://infrastructure/model-health-monitoring) — v6.9.27 audit-llm-models edge + model_health_checks table + expanded logModelFailure wiring
 - [Signup Return-To Flow](mem://features/auth/signup-return-to-flow) — v6.9.27 useSignupLinkState propagates state.from across all signup/login callsites + visible Back CTA
 - [Reconciliation Codex v6.9.26](mem://decisions/reconciliation-v6926-codex) — Files owned by Codex SEO branch; do not modify
+- [Onboarding Spotlight v2](mem://features/onboarding/spotlight-v2) — v6.9.32 Global SpotlightOverlay (data-spotlight + ?focus=), force-show reset flag, AddStudent v2 (deferred level/goal + autosend WT), NavSwitcher +Add CTA, 904 bulk-publish
