@@ -361,6 +361,7 @@ export const useOnboardingProgress = () => {
     
     setProgress(newProgress);
     await saveProgress(newProgress);
+    localStorage.removeItem('onboarding_force_show');
   };
 
   const getCompletionPercentage = () => {
