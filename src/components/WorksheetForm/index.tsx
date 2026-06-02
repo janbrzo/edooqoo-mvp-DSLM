@@ -23,6 +23,7 @@ import { Shuffle, Brain, MousePointer, ChevronDown, Image, Headphones, Lock, Era
 import { devLog, devWarn } from '@/utils/logger';
 
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
+import { AddStudentDialog } from "@/components/dashboard/AddStudentDialog";
 import type { MediaType } from './types';
 export type { FormData };
 interface ImageSuggestion {
