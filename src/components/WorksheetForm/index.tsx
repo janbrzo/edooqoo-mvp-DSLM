@@ -921,5 +921,17 @@ export default function WorksheetForm({
           </form>
         </CardContent>
       </Card>
+      {/* v6.9.33 — inline Add Student dialog: caller controls post-add navigation
+          (auto-select the new student instead of navigating to /student/:id). */}
+      <AddStudentDialog
+        triggerButton={false}
+        open={inlineAddStudentOpen}
+        onOpenChange={setInlineAddStudentOpen}
+        onStudentAdded={(s) => {
+          refetchStudents();
+          if (s?.id) setSelectedStudentId(s.id);
+          setInlineAddStudentOpen(false);
+        }}
+      />
     </div>;
 }
