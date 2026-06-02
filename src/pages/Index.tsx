@@ -28,6 +28,7 @@ import ParticlesBackground from "@/components/landing/ParticlesBackground";
 import StartOneMinutePrepDialog from "@/components/landing/StartOneMinutePrepDialog";
 import { markWorksheetForClaim } from "@/hooks/useWorksheetClaim";
 import { devLog, devWarn } from '@/utils/logger';
+import { AddStudentDialog } from "@/components/dashboard/AddStudentDialog";
 
 /**
  * Main Index page component that handles worksheet generation and display
@@ -79,6 +80,18 @@ const Index = () => {
   const [showTokenModal, setShowTokenModal] = useState(false);
   const [showWelcomeBackModal, setShowWelcomeBackModal] = useState(false);
   const [showOneMinutePrepDialog, setShowOneMinutePrepDialog] = useState(false);
+  // v6.9.33 — open Add Student modal on `?action=add-student` (sent by Signup
+  // page right after first-time login, and by other deep links).
+  const [addStudentOpen, setAddStudentOpen] = useState(false);
+  useEffect(() => {
+    if (!isRegisteredUser) return;
+    if (searchParams.get('action') === 'add-student') {
+      setAddStudentOpen(true);
+      const next = new URLSearchParams(searchParams);
+      next.delete('action');
+      setSearchParams(next, { replace: true });
+    }
+  }, [searchParams, isRegisteredUser, setSearchParams]);
   const [oneMinutePrepCalculator, setOneMinutePrepCalculator] = useState<OneMinutePrepCalculatorInput>(
     DEFAULT_ONE_MINUTE_PREP_CALCULATOR_INPUT
   );
