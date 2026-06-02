@@ -664,7 +664,16 @@ export default function WorksheetForm({
                   {/* Student Selection - Lock icon for anonymous/no students, dropdown for authenticated with students */}
                   {userId && students.length > 0 ? (
                     <div className={`${isMobile ? 'w-full' : 'w-[23%]'} flex flex-col justify-center`}>
-                      <Select value={selectedStudentId} onValueChange={setSelectedStudentId}>
+                      <Select
+                        value={selectedStudentId}
+                        onValueChange={(v) => {
+                          if (v === '__add_student__') {
+                            setInlineAddStudentOpen(true);
+                            return;
+                          }
+                          setSelectedStudentId(v);
+                        }}
+                      >
                         <SelectTrigger
                           className={`w-full ${selectedStudentId === 'no-student'
                             ? 'border-amber-400 ring-1 ring-amber-300 bg-amber-50/40 dark:bg-amber-900/10'
@@ -674,6 +683,9 @@ export default function WorksheetForm({
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="no-student">No student (generic)</SelectItem>
+                          <SelectItem value="__add_student__" className="text-primary font-medium">
+                            + Add Student
+                          </SelectItem>
                           {students.map(student => <SelectItem key={student.id} value={student.id}>
                               <span className="truncate">{student.name} ({student.english_level})</span>
                             </SelectItem>)}
