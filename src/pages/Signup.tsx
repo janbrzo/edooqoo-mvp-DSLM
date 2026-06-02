@@ -117,7 +117,8 @@ const Signup = () => {
           title: "Success",
           description: "Account created and signed in successfully!",
         });
-        navigate('/');
+        // v6.9.33 — open Add Student dialog immediately on the generator.
+        navigate('/?action=add-student');
       }
 
     } catch (error: any) {
