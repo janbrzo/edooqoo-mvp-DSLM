@@ -265,26 +265,39 @@ export const AddStudentDialog = ({
             </Select>
           </div>
 
-          {/* Defer toggle */}
-          <div className="flex items-start gap-2 rounded-md border bg-muted/30 p-2.5">
-            <Checkbox
-              id="defer-profile"
-              checked={deferProfile}
-              onCheckedChange={(v) => setDeferProfile(!!v)}
-              className="mt-0.5"
-            />
-            <div className="flex-1">
-              <Label htmlFor="defer-profile" className="text-xs font-medium cursor-pointer">
-                I'll set level &amp; goal after the Welcome Test
+          {/* v6.9.33 — 3-mode setup */}
+          <RadioGroup value={mode} onValueChange={(v: any) => setMode(v)} className="space-y-1.5">
+            <div className="flex items-start gap-2 rounded-md border bg-muted/30 p-2.5">
+              <RadioGroupItem id="mode-know" value="know" className="mt-0.5" />
+              <Label htmlFor="mode-know" className="flex-1 cursor-pointer">
+                <span className="text-xs font-medium block">I already know my student</span>
+                <span className="text-[11px] text-muted-foreground">
+                  Set CEFR level and main goal now. Roadmap and Next Steps unlock immediately.
+                </span>
               </Label>
-              <p className="text-[11px] text-muted-foreground mt-0.5">
-                Recommended. Edooqoo will infer level, goals and a learning roadmap from the test answers.
-              </p>
             </div>
-          </div>
+            <div className="flex items-start gap-2 rounded-md border border-primary/30 bg-primary/5 p-2.5">
+              <RadioGroupItem id="mode-defer" value="defer" className="mt-0.5" />
+              <Label htmlFor="mode-defer" className="flex-1 cursor-pointer">
+                <span className="text-xs font-medium block">I don't know my student yet — fill from Welcome Test</span>
+                <span className="text-[11px] text-muted-foreground">
+                  Recommended. The test is sent right after creating. Roadmap + Next Steps unlock once the student completes it (usually 1–3 days). Use generic worksheets in the meantime.
+                </span>
+              </Label>
+            </div>
+            <div className="flex items-start gap-2 rounded-md border bg-muted/30 p-2.5">
+              <RadioGroupItem id="mode-manual" value="manual" className="mt-0.5" />
+              <Label htmlFor="mode-manual" className="flex-1 cursor-pointer">
+                <span className="text-xs font-medium block">Skip Welcome Test — I'll set everything manually later</span>
+                <span className="text-[11px] text-muted-foreground">
+                  You can add level, goals and roadmap any time from the student's page.
+                </span>
+              </Label>
+            </div>
+          </RadioGroup>
 
           {/* Level + Goal + Deadline — collapsed when deferred */}
-          {!deferProfile && (
+          {mode === 'know' && (
             <div className="space-y-3 border-l-2 border-primary/30 pl-3">
               <div className="space-y-1">
                 <Label htmlFor="level" className="text-xs">English Level (CEFR) <span className="text-destructive">*</span></Label>
@@ -300,7 +313,21 @@ export const AddStudentDialog = ({
                 </Select>
               </div>
               <div className="space-y-1">
-                <Label htmlFor="goal" className="text-xs">Main Goal <span className="text-destructive">*</span></Label>
+                <Label htmlFor="goal" className="text-xs flex items-center gap-1.5">
+                  Main Goal <span className="text-destructive">*</span>
+                  <TooltipProvider delayDuration={150}>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <button type="button" className="text-muted-foreground hover:text-foreground" aria-label="What is Main Goal?">
+                          <Info className="h-3 w-3" />
+                        </button>
+                      </TooltipTrigger>
+                      <TooltipContent side="right" className="max-w-xs">
+                        Main Goal is the student's primary outcome (e.g. job interview in English, B2 exam). You'll be able to add Supporting Goals (sub-skills) and Additional Goals (side topics) later from the student's Goals tab.
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                </Label>
                 <Select value={mainGoal} onValueChange={setMainGoal} required>
                   <SelectTrigger className="h-9">
                     <SelectValue placeholder="Select main goal" />
@@ -325,26 +352,19 @@ export const AddStudentDialog = ({
                 <Label className="text-xs">Goal Deadline (optional)</Label>
                 <DeadlinePicker value={mainGoalDeadline} onChange={setMainGoalDeadline} compact />
               </div>
+              <div className="flex items-start gap-2 rounded-md border bg-muted/30 p-2 mt-2">
+                <Checkbox
+                  id="send-test-known"
+                  checked={sendTestWhenKnown}
+                  onCheckedChange={(v) => setSendTestWhenKnown(!!v)}
+                  className="mt-0.5"
+                />
+                <Label htmlFor="send-test-known" className="text-[11px] cursor-pointer">
+                  Also send the Welcome Test (refines learning profile)
+                </Label>
+              </div>
             </div>
           )}
-
-          {/* Send Welcome Test toggle */}
-          <div className="flex items-start gap-2 rounded-md border border-primary/30 bg-primary/5 p-2.5">
-            <Checkbox
-              id="autosend-wt"
-              checked={autoSendWelcomeTest}
-              onCheckedChange={(v) => setAutoSendWelcomeTest(!!v)}
-              className="mt-0.5"
-            />
-            <div className="flex-1">
-              <Label htmlFor="autosend-wt" className="text-xs font-medium cursor-pointer">
-                Send the Welcome Test right after creating
-              </Label>
-              <p className="text-[11px] text-muted-foreground mt-0.5">
-                Emails the test link to the student and copies it to your clipboard.
-              </p>
-            </div>
-          </div>
 
           {/* Overdue email toggle — compact row */}
           <div className="flex items-center justify-between gap-2 pt-1">
