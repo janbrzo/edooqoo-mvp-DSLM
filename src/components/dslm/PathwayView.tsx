@@ -58,6 +58,7 @@ const EMPTY_EDIT: SuggestionEditValue = {
 export const PathwayView: React.FC<PathwayViewProps> = ({
   studentId,
   teacherId,
+  studentName,
   useRoadmap = true,
   onUseRoadmapChange,
   pacingMode = 50,
