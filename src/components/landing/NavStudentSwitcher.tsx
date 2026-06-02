@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Users, ChevronDown, Plus } from 'lucide-react';
@@ -13,6 +13,7 @@ import { AddStudentDialog } from '@/components/dashboard/AddStudentDialog';
  */
 export const NavStudentSwitcher: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { students = [], loading } = useStudents();
   const [open, setOpen] = React.useState(false);
   const [addOpen, setAddOpen] = React.useState(false);
@@ -24,19 +25,38 @@ export const NavStudentSwitcher: React.FC = () => {
     [students]
   );
 
+  // v6.9.33 — show current student name when we're on /student/:id.
+  const currentStudentId = React.useMemo(() => {
+    const m = location.pathname.match(/^\/student\/([^/?#]+)/);
+    return m ? m[1] : null;
+  }, [location.pathname]);
+  const currentStudent = currentStudentId
+    ? students.find((s: any) => s.id === currentStudentId)
+    : null;
+
   return (
     <>
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-1.5">
-          <Users className="h-4 w-4" />
-          Students
-          <ChevronDown className="h-3 w-3 opacity-60" />
+        <Button variant="outline" size="sm" className="gap-1.5 max-w-[200px]">
+          <Users className="h-4 w-4 flex-shrink-0" />
+          <span className="truncate">{currentStudent?.name || 'Students'}</span>
+          <ChevronDown className="h-3 w-3 opacity-60 flex-shrink-0" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-72 p-0" align="end">
-        <div className="px-3 py-2 border-b text-xs font-semibold text-muted-foreground uppercase tracking-wider">
-          Switch to student
+        <div className="px-3 py-2 border-b flex items-center justify-between gap-2">
+          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            Switch to student
+          </span>
+          <button
+            type="button"
+            onClick={() => { setOpen(false); setAddOpen(true); }}
+            className="flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-medium text-primary hover:bg-primary/10 transition-colors"
+          >
+            <Plus className="h-3 w-3" />
+            Add
+          </button>
         </div>
         <div className="max-h-80 overflow-y-auto p-1">
           {loading && (
@@ -71,16 +91,6 @@ export const NavStudentSwitcher: React.FC = () => {
               </div>
             </a>
           ))}
-        </div>
-        <div className="border-t p-1">
-          <button
-            type="button"
-            onClick={() => { setOpen(false); setAddOpen(true); }}
-            className="w-full flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium text-primary hover:bg-primary/10 transition-colors"
-          >
-            <Plus className="h-4 w-4" />
-            Add new student
-          </button>
         </div>
       </PopoverContent>
     </Popover>
