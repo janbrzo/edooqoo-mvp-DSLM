@@ -27,7 +27,12 @@ const StartOneMinutePrepDialog: React.FC<StartOneMinutePrepDialogProps> = ({
 
   const handleSignup = () => {
     onOpenChange(false);
-    navigate('/signup', { state: { from: location.pathname + location.search } });
+    navigate('/signup', {
+      state: {
+        from: location.pathname + location.search,
+        startOneMinutePrep: true,
+      },
+    });
   };
 
   const handleTryGenerator = () => {

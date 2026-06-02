@@ -56,6 +56,7 @@ const args = process.argv.slice(2);
 const distArg = args.find((a) => a.startsWith('--dist='));
 const portArg = args.find((a) => a.startsWith('--port='));
 const outArg = args.find((a) => a.startsWith('--out='));
+const startAtArg = args.find((a) => a.startsWith('--start-at='));
 const SOFT_FAIL = args.includes('--soft-fail');
 const DIST = path.resolve(ROOT, distArg ? distArg.split('=')[1] : 'dist');
 const PORT = portArg ? parseInt(portArg.split('=')[1], 10) : 4173;
@@ -82,6 +83,14 @@ function softExit(reason) {
  * Only public informational/SEO routes — never auth-gated app routes.
  */
 const SEO_ROUTES = getPrerenderRoutes({ root: ROOT });
+const SEO_ROUTE_SET = new Set(
+  SEO_ROUTES.map((route) => route === '/' ? '/' : route.replace(/\/+$/, ''))
+);
+const START_AT_ROUTE = startAtArg ? startAtArg.split('=')[1] : null;
+const START_AT_INDEX = START_AT_ROUTE ? SEO_ROUTES.indexOf(START_AT_ROUTE) : -1;
+const RENDER_ROUTES = START_AT_ROUTE && START_AT_INDEX >= 0
+  ? SEO_ROUTES.slice(START_AT_INDEX)
+  : SEO_ROUTES;
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -113,15 +122,25 @@ function startStaticServer(distDir, port) {
           return res.end('Forbidden');
         }
 
-        let stat;
-        try { stat = fsSync.statSync(filePath); } catch { stat = null; }
+        const normalizedRoute = urlPath === '/' ? '/' : urlPath.replace(/\/+$/, '');
+        const isPrerenderRoute = SEO_ROUTE_SET.has(normalizedRoute);
 
-        if (stat && stat.isDirectory()) {
-          const idx = path.join(filePath, 'index.html');
-          if (fsSync.existsSync(idx)) filePath = idx;
-        } else if (!stat) {
-          // SPA fallback
+        if (isPrerenderRoute) {
+          // Existing public/<route>/index.html snapshots are copied into dist by Vite.
+          // Prerender SEO routes from the current SPA bundle so stale snapshots cannot
+          // shadow updated React content during regeneration.
           filePath = path.join(distDir, 'index.html');
+        } else {
+          let stat;
+          try { stat = fsSync.statSync(filePath); } catch { stat = null; }
+
+          if (stat && stat.isDirectory()) {
+            const idx = path.join(filePath, 'index.html');
+            if (fsSync.existsSync(idx)) filePath = idx;
+          } else if (!stat) {
+            // SPA fallback
+            filePath = path.join(distDir, 'index.html');
+          }
         }
 
         const ext = path.extname(filePath).toLowerCase();
@@ -157,6 +176,9 @@ async function main() {
 
   console.log(`[prerender] Starting static server on http://127.0.0.1:${PORT} serving ${DIST}`);
   console.log(`[prerender] Writing snapshots to ${OUT_DIR} (mode=${OUT_MODE})`);
+  if (START_AT_ROUTE) {
+    console.log(`[prerender] Resuming from ${START_AT_ROUTE} (${RENDER_ROUTES.length}/${SEO_ROUTES.length} routes)`);
+  }
   const server = await startStaticServer(DIST, PORT);
 
   let browser;
@@ -174,7 +196,7 @@ async function main() {
   let failCount = 0;
 
   try {
-    for (const route of SEO_ROUTES) {
+    for (const route of RENDER_ROUTES) {
       const url = `http://127.0.0.1:${PORT}${route}`;
       const page = await browser.newPage();
       try {
@@ -220,11 +242,15 @@ async function main() {
       }
     }
   } finally {
-    await browser.close();
+    try {
+      await browser.close();
+    } catch (err) {
+      console.warn(`[prerender] WARN browser cleanup failed: ${err.message}`);
+    }
     server.close();
   }
 
-  console.log(`\n[prerender] Done. ok=${okCount} fail=${failCount} total=${SEO_ROUTES.length}`);
+  console.log(`\n[prerender] Done. ok=${okCount} fail=${failCount} total=${RENDER_ROUTES.length}`);
   if (failCount > 0 && okCount === 0) {
     return softExit(`All ${failCount} routes failed.`);
   }

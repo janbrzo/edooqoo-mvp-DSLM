@@ -24,7 +24,7 @@ Use these 30 queries for every baseline round. Keep query wording unchanged unle
 | 9 | CEFR | B1 grammar worksheet generator | `https://edooqoo.com/grammar-worksheet-generator.html` |
 | 10 | CEFR | B2 business English worksheet generator | `https://edooqoo.com/business-english-worksheet-generator.html` |
 | 11 | workflow | tool for English tutors to organize teaching materials | `https://edooqoo.com/for-english-tutors` |
-| 12 | workflow | AI homework grading for English teachers | `https://edooqoo.com/ai-grading-tool-for-english-homework.html` |
+| 12 | workflow | AI-assisted homework review for English teachers | `https://edooqoo.com/ai-grading-tool-for-english-homework.html` |
 | 13 | workflow | lesson plan generator for ESL teachers | `https://edooqoo.com/ai-lesson-planning-for-english-teachers.html` |
 | 14 | workflow | worksheet generator with answer key for ESL teachers | `https://edooqoo.com/ai-worksheet-generator-for-english-teachers.html` |
 | 15 | workflow | AI tool for assigning English homework | `https://edooqoo.com/features/homework` |

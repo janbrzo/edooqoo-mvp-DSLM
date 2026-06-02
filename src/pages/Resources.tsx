@@ -92,8 +92,8 @@ const Resources = () => {
     { title: "Online English Teaching Tools", description: "Essential tools for online ESL instruction.", href: "/online-english-teaching-tools.html", badge: "Online" },
     { title: "How to Save Time as English Teacher", description: "Time-saving strategies with AI assistance.", href: "/how-to-save-time-as-english-teacher.html", badge: "Productivity" },
     { title: "ESL Student Progress Tracking", description: "Track student skills and mastery over time.", href: "/esl-student-progress-tracking-tool.html", badge: "Tracking" },
-    { title: "ESL Homework Grading Tool", description: "AI-powered automatic homework grading.", href: "/esl-homework-grading-tool.html", badge: "Grading" },
-    { title: "AI Grading Tool", description: "Automatic evaluation of open-ended answers.", href: "/ai-grading-tool-for-english-homework.html", badge: "AI" },
+    { title: "ESL Homework Review Tool", description: "AI-assisted homework evaluation with teacher review.", href: "/esl-homework-grading-tool.html", badge: "Review" },
+    { title: "AI-Assisted Homework Review Tool", description: "Teacher-reviewed evaluation of open-ended answers.", href: "/ai-grading-tool-for-english-homework.html", badge: "AI" },
     { title: "Spaced Repetition Flashcards", description: "SM-2 algorithm flashcards for vocabulary retention.", href: "/spaced-repetition-flashcards-esl.html", badge: "Flashcards" },
   ];
 
@@ -129,7 +129,7 @@ const Resources = () => {
     { title: "Teaching English Online Guide", description: "Complete guide for online ESL teachers.", href: "/blog/teaching-english-online-complete-guide.html", badge: "Blog" },
     { title: "Spaced Repetition for Vocabulary", description: "The science and practice of spaced repetition.", href: "/blog/spaced-repetition-vocabulary-learning.html", badge: "Blog" },
     { title: "Best AI Tools for English Teachers 2026", description: "Compare all AI tools for ELT.", href: "/blog/ai-tools-for-english-teachers-2026.html", badge: "Blog" },
-    { title: "AI Homework Grading Guide", description: "Save hours with AI-powered grading.", href: "/blog/ai-homework-grading-for-english-teachers.html", badge: "Blog" },
+    { title: "AI-Assisted Homework Review Guide", description: "Use teacher-reviewed AI support for homework feedback.", href: "/blog/ai-homework-grading-for-english-teachers.html", badge: "Blog" },
     { title: "AI-Generated Listening Exercises", description: "How TTS changes language teaching.", href: "/blog/ai-generated-listening-exercises-esl.html", badge: "Blog" },
     { title: "Personalized Learning in English", description: "From theory to AI-powered practice.", href: "/blog/personalized-learning-english-teaching.html", badge: "Blog" },
     { title: "Cambridge Exam Preparation Tips", description: "Worksheet strategies for Cambridge exams.", href: "/blog/cambridge-exam-preparation-tips-teachers.html", badge: "Blog" },

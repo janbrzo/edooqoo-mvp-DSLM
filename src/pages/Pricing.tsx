@@ -612,7 +612,7 @@ const Pricing = () => {
           <CardHeader className="text-center">
             <CardTitle className="text-2xl">Frequently Asked Questions</CardTitle>
             <CardDescription>
-              Everything you need to know about our worksheet generator
+              How Edooqoo plans, worksheet credits, and 1-Minute Prep fit together
             </CardDescription>
           </CardHeader>
           <CardContent>

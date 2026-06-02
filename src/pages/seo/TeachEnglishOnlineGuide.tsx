@@ -6,7 +6,7 @@ const blogPostingLd = {
   '@context': 'https://schema.org',
   '@type': 'BlogPosting',
   headline: 'How to Teach English Online — Complete 2026 Guide',
-  description: 'Complete 2026 guide to teaching English online: pricing, tools, lesson prep, student acquisition, AI worksheet generation and homework grading.',
+  description: 'Complete 2026 guide to teaching English online: pricing, tools, lesson prep, student acquisition, worksheet generation and AI-assisted homework review.',
   author: { '@type': 'Organization', name: 'Edooqoo' },
   publisher: { '@type': 'Organization', name: 'Edooqoo' },
   datePublished: '2026-05-18',
@@ -17,7 +17,7 @@ const TeachEnglishOnlineGuide = () => (
   <SeoLandingLayout
     seo={{
       title: 'How to Teach English Online — Complete 2026 Guide',
-      description: 'Start teaching English online: pricing, tools, lesson prep, student acquisition. Tutor toolkit with AI worksheets and homework grading.',
+      description: 'Start teaching English online: pricing, tools, lesson prep, student acquisition. Tutor toolkit with AI worksheets and AI-assisted homework review.',
       path: '/blog/teach-english-online-guide',
       extraJsonLd: blogPostingLd,
     }}
@@ -25,14 +25,14 @@ const TeachEnglishOnlineGuide = () => (
     lead="A practical 2026 guide to setting up, pricing, and running an online English tutoring business. Written for independent tutors (not platforms like Cambly or italki) who want to keep 100% of revenue."
     problems={[
       'Most teach English online guides on the internet are affiliate funnels for low-paying platforms (Cambly, Preply, italki) that take 20-30% commission and lock you into their pricing.',
-      'New online tutors lose 10-15 hours per week to lesson preparation and homework grading — destroying their effective hourly rate.',
+      'New online tutors lose 10-15 hours per week to lesson preparation and homework review — destroying their effective hourly rate.',
       'Independent tutors with no website or booking system rely on WhatsApp scheduling and bank transfers — losing professionalism and students.',
     ]}
     solutionHeading="The independent online tutor stack in 2026"
     solutions={[
       { title: 'Direct booking + payment', body: 'Public booking page with Stripe checkout. No platform commission. Set your own hourly rate.' },
       { title: 'AI worksheet generation', body: 'Edooqoo creates personalized worksheet drafts from teacher inputs, learner goals, and selected CEFR labels.' },
-      { title: 'Automated homework grading', body: 'AI grades closed and open-answer homework overnight. Teacher reviews in 30 seconds.' },
+      { title: 'AI-assisted homework review', body: 'Objective homework can be checked automatically. Open answers can receive AI-assisted evaluation for teacher review.' },
     ]}
     listHeading="9 steps to launch an online English tutoring business"
     listIntro="A practical sequence from zero to first paying student. Estimated total time: 8-12 hours of setup."
@@ -43,15 +43,15 @@ const TeachEnglishOnlineGuide = () => (
       { title: 'Set up a booking + payment page', body: 'Use Edooqoo public booking page or Calendly + Stripe. Avoid WhatsApp-only scheduling.' },
       { title: 'Create a placement test workflow', body: 'Send every new student a placement test before lesson 1. Edooqoo Welcome Test takes 20-30 minutes and generates a Learning Profile automatically.', href: '/features/placement-test' },
       { title: 'Build a worksheet generation routine', body: 'Generate the worksheet 24 hours before each lesson. Share the link with the student. Use it on screen-share during the live session.', href: '/esl-worksheets' },
-      { title: 'Assign homework after every lesson', body: 'Pick 2-4 exercises from the lesson worksheet, set a 5-day deadline. AI grades on submission.', href: '/features/homework' },
-      { title: 'Track progress with DSLM', body: 'Every exercise updates nano-skill metrics automatically. Review the dashboard before each lesson — no manual notes required.', href: '/features/dslm' },
+      { title: 'Assign homework after every lesson', body: 'Pick 2-4 exercises from the lesson worksheet, set a 5-day deadline. Use objective auto-checking and AI-assisted review where supported.', href: '/features/homework' },
+      { title: 'Track progress with DSLM', body: 'Available exercise results, profile context, and teacher notes can support DSLM next-step suggestions before each lesson.', href: '/features/dslm' },
       { title: 'Market on 1-2 channels only', body: 'LinkedIn (Business English niche), Instagram + TikTok (conversation/IELTS), Reddit r/EnglishLearning (general). Pick 1-2 and post 3x/week.' },
     ]}
     body={
       <>
         <h2 className="text-xl font-bold text-foreground mt-0">Why platforms like Cambly and Preply destroy your rate</h2>
-        <p>Cambly pays $0.17/minute ($10.20/hour) with no scheduling control. Preply takes 18-33% commission on every lesson and 100% of the first lesson with each new student. italki charges 15% commission. Working independently with 5-10 weekly students at $30-50/hour replaces a $10/hour platform job in roughly 3 months. The bottleneck is not student supply — there is enormous demand. The bottleneck is the time cost of running the business yourself: marketing, scheduling, payments, lesson prep, homework grading.</p>
-        <p>Edooqoo eliminates the two biggest time costs (lesson prep and homework grading) and bundles a public booking page so you do not need Calendly. That collapses the independent-tutor stack from 5 tools (Calendly + Stripe + Zoom + Notion + Google Docs) to 2 (Edooqoo + video platform).</p>
+        <p>Cambly pays $0.17/minute ($10.20/hour) with no scheduling control. Preply takes 18-33% commission on every lesson and 100% of the first lesson with each new student. italki charges 15% commission. Working independently with 5-10 weekly students at $30-50/hour replaces a $10/hour platform job in roughly 3 months. The bottleneck is not student supply — there is enormous demand. The bottleneck is the time cost of running the business yourself: marketing, scheduling, payments, lesson prep, homework review.</p>
+        <p>Edooqoo reduces the two biggest time costs (lesson prep and homework review) and bundles a public booking page so you do not need Calendly. That collapses the independent-tutor stack from 5 tools (Calendly + Stripe + Zoom + Notion + Google Docs) to 2 (Edooqoo + video platform).</p>
         <h2 className="text-xl font-bold text-foreground">Pricing benchmarks for online English tutors in 2026</h2>
         <p>General English conversation: $25-40/hour. Business English (banking, tech, M&A, legal): $40-80/hour. IELTS or Cambridge exam prep: $50-100/hour. Academic English (university applications, dissertations): $60-120/hour. Pricing scales with measurable outcomes — a tutor who can guarantee +0.5 IELTS band in 10 weeks charges 3x a general conversation tutor.</p>
         <h2 className="text-xl font-bold text-foreground">The lesson workflow that saves 8 hours per week</h2>
@@ -66,7 +66,7 @@ const TeachEnglishOnlineGuide = () => (
       { question: 'What is the best tool stack for independent online tutors?', answer: 'Video: Zoom or Google Meet. Worksheets + homework + booking: Edooqoo. Payment: Stripe (built into Edooqoo). Total monthly cost under $40.' },
     ]}
     ctaTitle="Create a repeatable online lesson workflow"
-    ctaBody="Edooqoo generates personalized worksheets, grades homework with AI, and handles booking + payment. Free plan includes 2 worksheets."
+    ctaBody="Edooqoo generates personalized worksheets, supports AI-assisted homework review, and handles booking + payment. Free plan includes 2 worksheets."
   />
 );
 

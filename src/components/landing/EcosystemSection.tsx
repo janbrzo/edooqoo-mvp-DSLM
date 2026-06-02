@@ -36,15 +36,15 @@ const HomeworkMockup = () => (
     </div>
     <div className="space-y-1.5">
       {[
-        { label: 'Fill in the gaps', status: 'ai', score: '9/10' },
-        { label: 'Vocabulary match', status: 'ai', score: '7/10' },
+        { label: 'Fill in the gaps', status: 'reviewed', score: '9/10' },
+        { label: 'Vocabulary match', status: 'reviewed', score: '7/10' },
         { label: 'Writing task', status: 'pending', score: '' },
       ].map((ex) => (
         <div key={ex.label} className="flex items-center justify-between bg-muted/40 rounded-lg px-2 py-1.5">
           <span className="text-muted-foreground">{ex.label}</span>
-          {ex.status === 'ai' ? (
+          {ex.status === 'reviewed' ? (
             <span className="flex items-center gap-1 text-[10px] text-green-700 font-medium">
-              <span className="bg-green-100 border border-green-200 rounded-full px-1.5 py-0.5">✓ AI graded</span>
+              <span className="bg-green-100 border border-green-200 rounded-full px-1.5 py-0.5">AI-assisted review</span>
               <span className="font-bold">{ex.score}</span>
             </span>
           ) : (
@@ -164,7 +164,7 @@ const OneMinutePrepMockup = () => (
       <span className="bg-violet-50 border border-violet-200 text-violet-700 rounded-full px-2 py-0.5 text-[10px] font-medium">~1 min target</span>
     </div>
     <div className="grid grid-cols-2 gap-1.5">
-      {['Profile ready', 'Goals set', 'Homework scored', 'Flashcards active'].map((item) => (
+      {['Profile ready', 'Goals set', 'Homework reviewed', 'Flashcards active'].map((item) => (
         <div key={item} className="bg-muted/40 rounded-md px-2 py-1 text-[10px] text-muted-foreground">
           <span className="text-green-600 font-bold">✓</span> {item}
         </div>
@@ -240,10 +240,10 @@ const features = [
     anchorId: 'feature-dslm',
   },
   {
-    badge: 'Auto',
+    badge: 'Review',
     badgeColor: 'bg-amber-50 text-amber-600 border-amber-200',
-    title: 'Homework + AI Grading',
-    description: 'Assign exercises with deadlines. AI-assisted grading gives review data for the next student-specific worksheet.',
+    title: 'Homework Review',
+    description: 'Assign exercises with deadlines. AI-assisted evaluation gives teacher-review data for the next student-specific worksheet.',
     mockup: <HomeworkMockup />,
     link: '/features/homework',
     anchorId: 'feature-homework',

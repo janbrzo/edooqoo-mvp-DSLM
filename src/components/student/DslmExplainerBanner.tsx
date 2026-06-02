@@ -47,12 +47,12 @@ export const DslmExplainerBanner: React.FC<Props> = ({ teacherId }) => {
           <div className="text-sm leading-relaxed">
             <p className="font-semibold mb-1">What is "1 MINUTE"?</p>
             <p className="text-muted-foreground">
-              This is your weekly 1-minute briefing per student — the Edooqoo promise
-              of ~1 minute weekly prep instead of 1–2 hours. We aggregate every signal
-              (mastery decay, behavioral patterns, recent worksheet performance) into
-              actionable next steps. Powered by <strong>DSLM</strong> (Dynamic Student
-              Learning Model), which tracks 4 layers: declarative knowledge,
-              procedural skills, behavioral patterns, and motivation.
+              Edooqoo is designed to move weekly prep toward 1 minute per student
+              instead of 1–2 hours, once profile, goals, and learning signals are in
+              place. This briefing uses available DSLM context to surface actionable
+              next steps. Use it to choose, edit, and approve the next lesson direction.
+              Powered by <strong>DSLM</strong> (Dynamic Student Learning Model), the
+              student context layer behind 1-Minute Prep.
             </p>
             <div className="flex items-center gap-3 mt-1">
               <Button variant="link" size="sm" className="px-0 h-auto text-xs" onClick={handleDismiss}>

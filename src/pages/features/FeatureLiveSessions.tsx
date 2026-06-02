@@ -57,33 +57,33 @@ const LiveSessionMockup = () => (
 
 const benefits = [
   { icon: Radio, title: 'Real-time monitoring', description: 'See student answers as they type. Timer per exercise. Running score updates live.' },
-  { icon: Plus, title: 'Add exercises on-the-fly', description: 'Need an extra practice? Add exercises during the lesson without interrupting the flow.' },
+  { icon: Plus, title: 'Flexible lesson flow', description: 'Use the worksheet as a live teaching surface and respond to what the student does during the lesson.' },
   { icon: PenTool, title: 'Drawing canvas', description: 'Annotate worksheets during online lessons. Circle errors, underline patterns, draw diagrams.' },
-  { icon: Zap, title: 'Instant AI evaluation', description: 'Open-ended answers get AI feedback in real-time. Discuss results with the student immediately.' },
+  { icon: Zap, title: 'AI-assisted review', description: 'Open-ended answers can receive AI-assisted evaluation where supported, with teacher review before conclusions.' },
 ];
 
 const faqItems = [
   { question: 'What is Live Session mode?', answer: 'Live Session transforms any worksheet into a real-time teaching tool. You start a session, and the student works through exercises one by one. You see their answers in real-time, with a timer per exercise and a running score.' },
-  { question: 'Can I add exercises during the lesson?', answer: 'Yes. If you notice a student needs more practice on a specific area, you can add exercises on-the-fly without leaving the session. The new exercise appears immediately in the student\'s view.' },
+  { question: 'Can I adapt during the lesson?', answer: 'Yes. Live Session gives you a shared worksheet surface, real-time answers, drawing tools, and review context so you can adjust how you teach the material during the lesson.' },
   { question: 'What is the drawing canvas?', answer: 'The drawing canvas lets you annotate the worksheet during online lessons — circle errors, underline patterns, draw diagrams. Essential for screen-sharing during Zoom/Meet lessons.' },
-  { question: 'How does Live Session connect to DSLM?', answer: 'Every answer submitted during a live session generates immediate learning events. Unlike homework (which may take days), live session data updates the student\'s DSLM profile in real-time — you see skill changes during the lesson.' },
+  { question: 'How does Live Session connect to DSLM?', answer: 'Live answers, teacher notes, and supported evaluation signals can inform future prep. Edooqoo uses available lesson signals as context, while teacher review remains responsible for final lesson decisions.' },
 ];
 
 const FeatureLiveSessions: React.FC = () => (
   <FeaturePageLayout
     title="Interactive Live Worksheet Sessions for ESL — Real-Time Teaching | Edooqoo"
-    metaDescription="Teach live with real-time student answer monitoring. Timer per exercise, on-the-fly exercise addition, drawing canvas, and instant AI evaluation."
+    metaDescription="Teach live with real-time student answer monitoring, timer per exercise, drawing canvas, and AI-assisted review where supported."
   >
     <FeatureHero
       badge="LIVE"
       badgeColor="bg-red-100 text-red-700 border-red-200"
       headline="Teach live. See answers in real-time."
-      subheadline="Turn any worksheet into an interactive lesson. Monitor student answers live, add exercises on-the-fly, annotate with drawing tools — all in real-time."
+      subheadline="Turn any worksheet into an interactive lesson. Monitor student answers live, annotate with drawing tools, review responses, and keep signals for future prep."
     >
       <LiveSessionMockup />
     </FeatureHero>
 
-    <DSLMBadge feature="Live Sessions" description="Live session answers generate immediate DSLM updates — skill changes happen in real-time during the lesson." />
+    <DSLMBadge feature="Live Sessions" description="Live answers and teacher review signals can become context for future DSLM suggestions and the next prep cycle." />
     <FeatureBenefits benefits={benefits} />
     <FeatureFAQ items={faqItems} />
     <FeatureCTA headline="Make every lesson interactive" subheadline="Real-time teaching tools. Start with 2 free worksheets." />

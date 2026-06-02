@@ -8,7 +8,7 @@ import OneMinutePrepHeroProofSwitcher from '@/components/landing/OneMinutePrepHe
 const unlockFeatures = [
   { icon: Brain, label: 'DSLM next-step signals' },
   { icon: ClipboardCheck, label: 'Placement Tests' },
-  { icon: BookOpen, label: 'Homework & AI Grading' },
+  { icon: BookOpen, label: 'Homework Review' },
   { icon: BarChart2, label: 'Student Progress Tracking' },
   { icon: Brain, label: 'Smart Flashcards' },
   { icon: Calendar, label: 'Smart Lesson Calendar' },
@@ -68,7 +68,7 @@ const HeroHeadline: React.FC<HeroHeadlineProps> = ({
             // @ts-expect-error fetchpriority is valid HTML but not yet typed in React
             fetchpriority="high"
           >
-            Edooqoo uses student goals, lesson notes, homework, flashcards and DSLM signals to help you decide what to teach next, then generate a ready-to-teach worksheet with audio, images and AI grading.
+            Edooqoo uses student goals, lesson notes, homework, flashcards and DSLM signals to help you decide what to teach next, then generate a ready-to-teach worksheet with audio, images and AI-assisted review.
           </p>
 
           <p className="max-w-full text-sm text-foreground/80 mb-8 sm:max-w-2xl mx-auto lg:mx-0 font-medium">

@@ -16,7 +16,7 @@ const cards = [
   {
     icon: Target,
     title: 'Generate the worksheet',
-    description: 'The final output is an editable worksheet with exercises, audio, images and AI-assisted grading.',
+    description: 'The final output is an editable worksheet with exercises, audio, images and AI-assisted review where applicable.',
   },
 ];
 

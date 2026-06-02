@@ -556,7 +556,7 @@ function checkAnswer(question: TestQuestion, studentAnswer: unknown): boolean {
       return false;
 
     case 'open_ended':
-      // Open-ended requires AI grading, default to needs review
+      // Open-ended requires AI-assisted evaluation, default to needs review
       return false;
 
     default:

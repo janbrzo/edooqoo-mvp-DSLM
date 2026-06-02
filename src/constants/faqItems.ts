@@ -31,7 +31,7 @@ export const faqItems: FaqItem[] = [
   },
   {
     question: "What is Live Session mode?",
-    answer: "Live Session mode allows you to conduct real-time lessons. You can see all students' answers as they type, add exercises on-the-fly (up to 12 per session), and view nano-skill mastery ratings per exercise. AI evaluation assists with scoring open-ended exercises like paraphrasing and discussion questions, making it perfect for online group classes or tutoring sessions."
+    answer: "Live Session mode allows you to conduct real-time lessons from an interactive worksheet. You can see student answers as they type, use drawing tools, review responses, and use supported AI-assisted evaluation for open-ended exercises where applicable. Teacher review remains responsible for final conclusions."
   },
   {
     question: "How do Flashcards work?",
@@ -39,11 +39,11 @@ export const faqItems: FaqItem[] = [
   },
   {
     question: "What is Student Knowledge tracking?",
-    answer: "Student Knowledge lets you record important notes about each student - their strengths, weaknesses, interests, and preferences. This information is automatically fed to the AI when generating worksheets, creating more personalized and relevant content for each student."
+    answer: "Student Knowledge lets you record important notes about each student - their strengths, weaknesses, interests, goals, and preferences. This information can be used as context when generating worksheets and planning the next lesson."
   },
   {
     question: "How does Homework Assignments work?",
-    answer: "You can assign any worksheet or specific exercises as homework. Set deadlines, send email notifications to students, track completion status, and add teacher comments. Students can complete homework interactively online — either through the direct link or via the Student Hub portal. AI automatically evaluates open-ended answers and pre-fills mastery scores for teacher review."
+    answer: "You can assign any worksheet or specific exercises as homework. Set deadlines, send email notifications to students, track completion status, and add teacher comments. Students can complete homework interactively online — either through the direct link or via the Student Hub portal. AI can pre-evaluate supported open-ended answers and pre-fill scores for teacher review."
   },
   {
     question: "Can I draw on worksheets?",
@@ -107,7 +107,7 @@ export const faqItems: FaqItem[] = [
   },
   {
     question: "How does Student Progress tracking work?",
-    answer: "Student skills are tracked at the nano-skill level with CEFR tags across categories: grammar, vocabulary, speaking, listening, reading, and writing. Mastery metrics update automatically from worksheet completions, homework submissions, flashcard reviews, and teacher evaluations. Teachers can view mastery trends (improving, stable, or declining), filter by time period and CEFR level, and get AI-generated suggestions for future worksheets based on skill gaps."
+    answer: "Student skills can be tracked at the nano-skill level with CEFR tags across categories: grammar, vocabulary, speaking, listening, reading, and writing. Worksheet completions, homework submissions, flashcard reviews, and teacher evaluations can contribute signals. Teachers can view mastery trends, filter by time period and CEFR level, and get AI-generated suggestions for future worksheets based on available context."
   },
   {
     question: "How does AI Evaluation work?",

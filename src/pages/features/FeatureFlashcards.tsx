@@ -75,9 +75,9 @@ const ForgettingCurveDiagram = () => (
 );
 
 const benefits = [
-  { icon: Brain, title: 'SM-2 algorithm', description: 'Scientifically proven spaced repetition. Cards appear right before you forget them — maximizing retention.' },
+  { icon: Brain, title: 'SM-2 scheduling logic', description: 'Spaced-repetition scheduling based on SM-2 logic. Cards the student struggles with appear more often.' },
   { icon: Repeat, title: 'Auto-generated from worksheets', description: 'One click creates a flashcard set from any worksheet. Vocabulary, key phrases, grammar patterns — extracted automatically.' },
-  { icon: Link2, title: 'Ecosystem integration', description: 'Flashcard performance feeds into DSLM. Vocabulary mastery updates automatically as students study.' },
+  { icon: Link2, title: 'Ecosystem integration', description: 'Flashcard performance can become a vocabulary signal for DSLM and future prep decisions.' },
   { icon: Zap, title: 'Student Hub access', description: 'Students study through their Hub — no app needed. Share via link. Track progress in real-time.' },
 ];
 
@@ -85,15 +85,15 @@ const steps = [
   { number: 1, title: 'Generate a worksheet', description: 'Create any worksheet with vocabulary, grammar, or mixed exercises.' },
   { number: 2, title: 'Create flashcards with one click', description: 'Click "Create Flashcards" — Edooqoo extracts key vocabulary and creates a set automatically. You can edit, add, or remove cards.' },
   { number: 3, title: 'Share with the student', description: 'Send a link or let students access through Student Hub. No account needed — just email-based access.' },
-  { number: 4, title: 'SM-2 handles the rest', description: 'The algorithm schedules reviews at optimal intervals. Students rate difficulty (Again/Hard/Good/Easy) and the system adapts.' },
+  { number: 4, title: 'SM-2 schedules reviews', description: 'Students rate difficulty (Again/Hard/Good/Easy), and the system schedules harder cards more frequently.' },
 ];
 
 const faqItems = [
-  { question: 'What is the SM-2 algorithm?', answer: 'SM-2 (SuperMemo 2) is a spaced repetition algorithm developed by Piotr Wozniak. It calculates the optimal time to review each card based on your previous performance. Cards you find easy appear less frequently; cards you struggle with appear more often. This maximizes long-term retention with minimum study time.' },
+  { question: 'What is the SM-2 algorithm?', answer: 'SM-2 (SuperMemo 2) is a spaced repetition algorithm developed by Piotr Wozniak. It schedules review intervals from the student\'s previous performance: easier cards appear less frequently, and harder cards appear more often.' },
   { question: 'Can I create flashcards manually?', answer: 'Yes. While auto-generation from worksheets is the fastest method, you can also create cards manually. Set the front text, back text, example sentence, and CEFR level for each card.' },
   { question: 'Do students need an account?', answer: 'No. Students access flashcards through a shared link or their Student Hub. Access is email-based — no registration, no password, no app to install.' },
   { question: 'Can flashcards be bidirectional?', answer: 'Yes. You can enable bidirectional mode so students practice both directions: English → translation and translation → English. Each direction is tracked separately in the SM-2 algorithm.' },
-  { question: 'How do flashcards connect to DSLM?', answer: 'Every flashcard review generates learning events. If a student consistently rates "vocabulary: business collocations" as Easy, their vocabulary mastery for business collocations increases in DSLM. If they keep hitting Again, DSLM flags it as a declining skill.' },
+  { question: 'How do flashcards connect to DSLM?', answer: 'Flashcard reviews can generate vocabulary learning signals. If a student repeatedly struggles with business collocations, that signal can support more relevant future prep and worksheet suggestions.' },
 ];
 
 const comparisonRows = [
@@ -114,19 +114,19 @@ const FeatureFlashcards: React.FC = () => (
     <FeatureHero
       badge="SM-2"
       badgeColor="bg-violet-100 text-violet-700 border-violet-200"
-      headline="Vocabulary that sticks. SM-2 spaced repetition, integrated with your lessons."
-      subheadline="Auto-generate flashcard sets from any worksheet. Students study through their Hub with scientifically-proven spaced repetition. Every review feeds into DSLM."
+      headline="Vocabulary review that feeds future prep."
+      subheadline="Auto-generate flashcard sets from any worksheet. Students study through their Hub with SM-2 scheduling logic, and review activity can become a vocabulary signal for DSLM."
     >
       <FlashcardHeroMockup />
     </FeatureHero>
 
-    <DSLMBadge feature="Flashcards" description="Flashcard performance feeds directly into DSLM, updating vocabulary mastery scores and informing future worksheet suggestions." />
+    <DSLMBadge feature="Flashcards" description="Flashcard performance can add vocabulary signals to DSLM, helping future worksheet suggestions reflect what the student actually reviews." />
 
     {/* Forgetting curve */}
     <section className="py-16 bg-background">
       <div className="max-w-3xl mx-auto px-4">
         <h2 className="text-2xl font-bold text-foreground mb-2 text-center">Why spaced repetition works</h2>
-        <p className="text-sm text-muted-foreground text-center mb-8">Without review, you forget 80% within a week. SM-2 reviews at the right time to keep memory strong.</p>
+        <p className="text-sm text-muted-foreground text-center mb-8">Spaced repetition helps students revisit difficult cards more often and keep vocabulary active between lessons.</p>
         <ForgettingCurveDiagram />
       </div>
     </section>
@@ -139,7 +139,7 @@ const FeatureFlashcards: React.FC = () => (
       rows={comparisonRows}
     />
     <FeatureFAQ items={faqItems} />
-    <FeatureCTA headline="Vocabulary that actually sticks" subheadline="Auto-generate flashcards from your worksheets. Start free." />
+    <FeatureCTA headline="Build vocabulary continuity between lessons" subheadline="Auto-generate flashcards from your worksheets and use review signals for future prep. Start free." />
     <RelatedFeatures currentPath="/features/flashcards" />
   </FeaturePageLayout>
 );

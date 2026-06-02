@@ -469,8 +469,8 @@
       "@type": "WebPage",
       "@id": "https://edooqoo.com/ai-grading-tool-for-english-homework.html#webpage",
       "url": "https://edooqoo.com/ai-grading-tool-for-english-homework.html",
-      "name": "AI grading tool for English homework",
-      "description": "Citation target for AI-assisted homework review queries.",
+      "name": "AI-assisted homework review tool",
+      "description": "Citation target for teacher-reviewed AI-assisted homework review queries.",
       "isPartOf": {
         "@id": "https://edooqoo.com/#website"
       },
@@ -483,8 +483,8 @@
       "@type": "LearningResource",
       "@id": "https://edooqoo.com/ai-grading-tool-for-english-homework.html#learning-resource",
       "url": "https://edooqoo.com/ai-grading-tool-for-english-homework.html",
-      "name": "AI grading tool for English homework",
-      "description": "Citation target for AI-assisted homework review queries.",
+      "name": "AI-assisted homework review tool",
+      "description": "Citation target for teacher-reviewed AI-assisted homework review queries.",
       "provider": {
         "@id": "https://edooqoo.com/#organization"
       },
@@ -603,8 +603,8 @@
       "@type": "Article",
       "@id": "https://edooqoo.com/blog/english-homework-ai-grading-workflow.html#article",
       "url": "https://edooqoo.com/blog/english-homework-ai-grading-workflow.html",
-      "headline": "English homework AI grading workflow",
-      "description": "Explains teacher-reviewed AI-assisted homework grading.",
+      "headline": "English homework AI-assisted review workflow",
+      "description": "Explains teacher-reviewed AI-assisted homework review.",
       "author": {
         "@id": "https://edooqoo.com/#organization"
       },

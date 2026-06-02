@@ -48,7 +48,7 @@ const PersonaPage: React.FC = () => {
         { title: 'Profession-specific vocabulary', body: `Lexis drawn from real ${persona.domain} contexts, not generic textbooks.` },
         { title: 'Role-play dialogues', body: `Conversations modeled after the situations ${persona.professionPlural} actually face.` },
         { title: 'CEFR alignment', body: 'Same template scales from A1 survival English to C1 negotiation.' },
-        { title: 'Auto-graded homework', body: 'Assign via Student Hub. AI grades open answers and tracks mastery in DSLM.' },
+        { title: 'Homework review workflow', body: 'Assign via Student Hub. Objective answers can be checked automatically and open answers can use AI-assisted review.' },
         { title: '1-on-1 ready', body: 'Built for tutors running 1-on-1 adult lessons, not classroom drills.' },
         { title: 'Editable everything', body: 'Replace any example with one your specific student will recognize.' },
       ]}
@@ -58,7 +58,7 @@ const PersonaPage: React.FC = () => {
         'Open the worksheet form — fields pre-fill with their profile.',
         `Choose a topic (e.g., meetings, telephone English, ${persona.domain} vocabulary).`,
         'Generate. Review. Share to Student Hub or export PDF.',
-        'Edooqoo tracks mastery so the next worksheet builds on what stuck.',
+        'Edooqoo organizes available learning signals so the next worksheet can build on what stuck.',
       ]}
       trustNumbers={[
         { value: 'Workflow', label: 'Teacher-controlled generation' },

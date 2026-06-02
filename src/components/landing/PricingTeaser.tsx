@@ -27,7 +27,7 @@ const TIERS = [
     name: 'Full-Time',
     price: 'from $19',
     cadence: '/ month',
-    bullets: ['30–120 worksheets', 'AI homework grading', 'Student Hub branding'],
+    bullets: ['30–120 worksheets', 'AI-assisted homework review', 'Student Hub branding'],
     highlight: false,
   },
 ];

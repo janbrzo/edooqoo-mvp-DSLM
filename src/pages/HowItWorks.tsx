@@ -11,7 +11,7 @@ const steps = [
   { number: 4, title: "Review the profile and DSLM baseline", description: "Review strengths, weak areas, learning path and nano-skill signals before deciding what to teach next.", benefits: ["Skill radar and mastery signals", "Learning path context", "Teacher review stays in control"] },
   { number: 5, title: "Generate the next worksheet from context", description: "Use the student profile, goals and DSLM signals to generate a ready-to-teach worksheet with the topic, CEFR level and exercise types you choose.", benefits: ["29 exercise types", "Audio and image-capable worksheets", "Editable before teaching or assigning"] },
   { number: 6, title: "Teach, share or assign homework", description: "Use the worksheet in a live lesson, share it through a link, download it, or assign selected exercises as homework.", benefits: ["Interactive sharing", "Live session mode", "HTML/PDF download"] },
-  { number: 7, title: "Student activity updates the model", description: "Homework answers, flashcards, shared worksheet activity and lesson signals feed back into the student model where applicable.", benefits: ["AI-assisted homework grading", "Flashcards with spaced repetition", "Learning events connected to student history"] },
+  { number: 7, title: "Student activity updates the model", description: "Homework answers, flashcards, shared worksheet activity and lesson signals feed back into the student model where applicable.", benefits: ["AI-assisted homework review", "Flashcards with spaced repetition", "Learning events connected to student history"] },
   { number: 8, title: "Start the next lesson from stronger signals", description: "The next prep cycle starts with more student data than the previous one, so recommendations and generated materials can become faster and more precise.", benefits: ["DSLM trend detection", "Next-step recommendations", "Less blank-page preparation over time"] },
 ];
 
@@ -24,7 +24,7 @@ const loopStages = [
 ];
 
 const faqItems = [
-  { q: "How long does the entire setup take?", a: "You can go from sign-up to generating your first worksheet in under 5 minutes. Adding a student takes 30 seconds. The Welcome Test is optional and takes students 20-30 minutes to complete." },
+  { q: "Is first setup the same as 1-Minute Prep?", a: "No. First setup is separate. You create the account, add a student, add known context or send the Welcome Test, then build the signal base that moves recurring weekly prep toward 1 minute per student." },
   { q: "What emails will I receive after signing up?", a: "Two emails. First, a confirmation email from Supabase (no-reply) with an activation link — click it to activate your account. After confirming, you'll receive a branded welcome email from hello@edooqoo.com with quick-start guidance and a link to your dashboard." },
   { q: "Do students need to create accounts?", a: "No. Students access everything via links or the Student Hub portal using just their email. No account creation, no password, no app installation needed." },
   { q: "Can I skip the Welcome Test?", a: "Yes. The Welcome Test is optional. You can start generating worksheets immediately by manually setting the student's CEFR level. The test is recommended for new students where you want a detailed skill assessment." },
@@ -54,7 +54,6 @@ const HowItWorks = () => {
     '@type': 'HowTo',
     name: 'How 1-Minute Prep Works in Edooqoo',
     description: "Step-by-step guide to Edooqoo's student learning loop: profile, worksheet, activity signals, DSLM recommendation, and the next prep cycle.",
-    totalTime: 'PT5M',
     tool: { '@type': 'HowToTool', name: 'Edooqoo 1-Minute Prep' },
     step: steps.map(s => ({
       '@type': 'HowToStep',
@@ -86,7 +85,7 @@ const HowItWorks = () => {
 
         <h1 className="text-4xl font-bold text-foreground mb-4">How 1-Minute Prep Works</h1>
         <p className="text-lg text-muted-foreground mb-12">
-          Edooqoo works as a student learning loop: every profile, worksheet, homework task and flashcard session can add context for the next lesson.
+          Edooqoo works as a student learning loop: first setup builds context, then each profile, worksheet, homework task and flashcard session can add context for the next lesson.
         </p>
         <p className="text-sm text-muted-foreground mb-10">
           For the bounded workflow definition, read the{' '}
@@ -100,7 +99,7 @@ const HowItWorks = () => {
           <div className="mb-5 text-center">
             <h2 className="text-2xl font-bold text-foreground">The 1-Minute Prep loop</h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              More student context feeds better next-step decisions before the next worksheet is generated.
+              Edooqoo is designed to move recurring weekly prep toward 1 minute per student as context and learning signals accumulate.
             </p>
           </div>
           <div className="grid gap-5 md:grid-cols-5 md:gap-4">
