@@ -244,7 +244,6 @@ const StudentPage = () => {
   const { students, updateStudent, deleteStudent, loading: studentsLoading } = useStudents();
   const [currentPage, setCurrentPage] = useState(1);
   const [deletedCurrentPage, setDeletedCurrentPage] = useState(1);
-  const [oneMinuteTipOpen, setOneMinuteTipOpen] = useState(false);
   // v6.8.4 — "1 MINUTE" (DSLM) is now the default tab. The Edooqoo promise:
   // ~1 minute weekly prep per student instead of 1–2 hours. Backward-compat:
   // existing `?tab=overview` links still open the Overview tab as before.
