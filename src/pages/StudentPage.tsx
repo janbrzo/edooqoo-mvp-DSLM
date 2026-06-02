@@ -10,7 +10,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useStudents } from '@/hooks/useStudents';
 import { useStudent } from '@/hooks/useStudent';
 import { useWorksheetHistory } from '@/hooks/useWorksheetHistory';
@@ -56,7 +55,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import ShareWorksheetModal from '@/components/ShareWorksheetModal';
 import RenameDialog from '@/components/RenameDialog';
-import { StudentSwitcherPopover } from '@/components/StudentSwitcherPopover';
 import { toast } from 'sonner';
 import { Label } from '@/components/ui/label';
 
