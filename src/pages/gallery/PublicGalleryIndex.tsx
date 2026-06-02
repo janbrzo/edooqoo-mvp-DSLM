@@ -83,6 +83,29 @@ const PublicGalleryIndex: React.FC = () => {
           </aside>
         </header>
 
+        {/* v6.9.33 — quick CEFR chips (matches public_level values stored by form_data.englishLevel). */}
+        <div className="flex flex-wrap items-center gap-2 mb-3">
+          <span className="text-xs uppercase tracking-wider text-muted-foreground font-semibold mr-1">CEFR:</span>
+          {[
+            { label: 'All', value: '' },
+            { label: 'A1/A2', value: 'A1/A2' },
+            { label: 'B1/B2', value: 'B1/B2' },
+            { label: 'C1/C2', value: 'C1/C2' },
+          ].map((opt) => (
+            <button
+              key={opt.value || 'all'}
+              type="button"
+              onClick={() => setFilter('level', opt.value)}
+              className={`rounded-full border px-3 py-1 text-xs transition-colors ${
+                (levelFilter || '') === opt.value
+                  ? 'bg-primary text-primary-foreground border-primary'
+                  : 'bg-background hover:bg-muted text-muted-foreground'
+              }`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
         <div className="flex flex-wrap gap-3 mb-6">
           <select
             value={levelFilter}
