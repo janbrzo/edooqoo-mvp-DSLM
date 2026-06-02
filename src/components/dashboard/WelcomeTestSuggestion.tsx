@@ -37,9 +37,11 @@ interface WelcomeTestSuggestionProps {
    * NOT also hide it in 1 MINUTE (and vice versa). v6.8.5.
    */
   surface?: 'overview' | 'oneMinute';
+  /** v6.9.33 — compact layout for embedding inside DSLM Pathway. */
+  compact?: boolean;
 }
 
-export function WelcomeTestSuggestion({ studentId, teacherId, studentName, studentEmail, surface = 'overview' }: WelcomeTestSuggestionProps) {
+export function WelcomeTestSuggestion({ studentId, teacherId, studentName, studentEmail, surface = 'overview', compact = false }: WelcomeTestSuggestionProps) {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [status, setStatus] = useState<'loading' | 'no_test' | 'pending' | 'in_progress' | 'completed' | 'hidden'>('loading');
