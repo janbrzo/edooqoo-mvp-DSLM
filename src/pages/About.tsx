@@ -27,20 +27,20 @@ const About = () => {
       <main className="container mx-auto px-4 py-12 max-w-4xl">
         {/* H1 */}
         <h1 className="text-4xl font-bold text-foreground mb-6">
-          Edooqoo — AI Worksheet Generator for English Teachers
+          Edooqoo — 1-Minute Prep for 1:1 English Teachers
         </h1>
 
         {/* What is Edooqoo */}
         <section className="mb-12">
           <h2 className="text-2xl font-semibold text-foreground mb-4">What is Edooqoo?</h2>
           <p className="text-muted-foreground mb-4 leading-relaxed">
-            Edooqoo is an AI-powered platform built specifically for English teachers. It generates personalized worksheets tailored to each student in under 2 minutes, with 29 exercise types covering all CEFR levels from A1 to C2. Unlike generic worksheet libraries, Edooqoo creates unique, custom content every time — based on your student's level, interests, learning goals, and actual skill data.
+            Edooqoo is a 1-Minute Prep system built for 1:1 English teachers. It helps teachers move recurring weekly prep toward one focused minute per student by combining student profile, goals, Welcome Test context, homework, flashcards, live lesson signals, calendar rhythm, and DSLM next-step suggestions.
           </p>
           <p className="text-muted-foreground mb-4 leading-relaxed">
-            But Edooqoo is more than a worksheet generator. It's a complete teaching ecosystem: assign homework with automatic AI grading, create smart flashcards with spaced repetition, schedule lessons with Google Calendar sync, run placement tests, and track student progress at the nano-skill level. Your students get their own portal — the Student Hub — where they study independently.
+            The worksheet generator remains a core output layer. After the teacher chooses or confirms the next teaching focus, Edooqoo generates editable worksheets with 29 exercise types across CEFR A1-C2, including audio and picture-capable exercises where applicable.
           </p>
           <p className="text-muted-foreground leading-relaxed">
-            Edooqoo is used by private English tutors, ESL/EFL instructors, Business English coaches, language school teachers, online English teachers, and corporate language trainers worldwide. It works entirely in the browser — no downloads, no installations.
+            Edooqoo is used by private English tutors, ESL/EFL instructors, Business English coaches, language-school teachers, online English teachers, and corporate language trainers. It works in the browser and keeps teacher review, editing, and lesson decisions in the teacher's hands.
           </p>
         </section>
 
@@ -49,12 +49,12 @@ const About = () => {
           <h2 className="text-2xl font-semibold text-foreground mb-6">Who is Edooqoo For?</h2>
           <div className="grid gap-4 sm:grid-cols-2">
             {[
-              { title: 'Private English Tutors', desc: 'Generate personalized worksheets for each student. Track individual progress and assign homework between lessons.' },
-              { title: 'Language School Teachers', desc: 'Quickly create varied materials for different class levels. Save hours on material preparation and homework grading.' },
-              { title: 'Business English Coaches', desc: 'Create industry-specific worksheets for corporate clients. Track professional development with detailed skill metrics.' },
-              { title: 'Online ESL/EFL Teachers', desc: 'Use Live Session mode for real-time online lessons. Manage bookings across time zones with the lesson calendar.' },
-              { title: 'Exam Preparation Tutors', desc: 'Select exercise types matching exam formats. Identify weak areas with nano-skill progress tracking.' },
-              { title: 'Corporate Language Trainers', desc: 'Schedule sessions, generate company-specific content, and provide progress reports to HR departments.' },
+              { title: 'Private English Tutors', desc: 'Build per-student context, generate targeted worksheets, and use homework or flashcards to strengthen the next prep cycle.' },
+              { title: 'Language School Teachers', desc: 'Create varied English materials while keeping student goals, worksheet history, and review signals connected.' },
+              { title: 'Business English Coaches', desc: 'Prepare workplace-specific lessons from student goals, professional context, and recurring performance signals.' },
+              { title: 'Online ESL/EFL Teachers', desc: 'Use live worksheet sessions, Student Hub, and calendar workflows to keep online 1:1 lessons organized.' },
+              { title: 'Exam Preparation Tutors', desc: 'Select exercise types that match exam skills while using student context to decide what needs review next.' },
+              { title: 'Corporate Language Trainers', desc: 'Schedule sessions, generate company-specific content, and maintain continuity across professional learners.' },
             ].map((persona) => (
               <div key={persona.title} className="border rounded-lg p-4 bg-card">
                 <h3 className="font-semibold text-foreground mb-1">{persona.title}</h3>
@@ -69,13 +69,14 @@ const About = () => {
           <h2 className="text-2xl font-semibold text-foreground mb-6">Features</h2>
           <div className="space-y-8">
             {[
-              { icon: BookOpen, title: 'AI Worksheet Generator', desc: 'Generate complete, personalized worksheets in under 2 minutes. Choose from 29 exercise types across 3 categories (basic, audio, picture). The AI uses student context — level, interests, skill gaps — to create unique content every time. Download as HTML or PDF, share via permanent link, or use in live sessions.', bullets: ['29 exercise types including audio and picture exercises', 'CEFR levels A1 through C2', 'AI personalizes content using student learning data', 'Download as HTML/PDF or share interactive link'] },
-              { icon: ClipboardCheck, title: 'Homework System', desc: 'Assign any worksheet or specific exercises as homework. Students complete exercises interactively online. AI automatically grades open-ended answers like paraphrasing, sentence transformation, and discussion questions.', bullets: ['Automatic AI grading of open-ended answers', 'Set deadlines with email reminders', 'Teacher review with comments per exercise', 'Track completion status in real-time'] },
-              { icon: Brain, title: 'Smart Flashcards', desc: 'Create flashcard sets from worksheet vocabulary or manually. Students study using the SM-2 spaced repetition algorithm for optimal long-term retention.', bullets: ['SM-2 spaced repetition algorithm', 'Auto-generate from worksheet vocabulary', 'Bidirectional study mode', 'Accessible via Student Hub'] },
+              { icon: Brain, title: '1-Minute Prep + DSLM', desc: 'Build student context once, then use DSLM signals and teacher review to move weekly prep toward one focused minute per recurring student.', bullets: ['Student profile, goals, Welcome Test, and observations', 'Next-step suggestions before worksheet generation', 'Teacher chooses, edits, and approves direction', 'Best with recurring 1:1 adult English students'] },
+              { icon: BookOpen, title: 'Worksheet Generator Output Layer', desc: 'Generate complete, editable worksheets after the teacher chooses or confirms the next focus. Choose from 29 exercise types across basic, audio, and picture categories.', bullets: ['29 exercise types including audio and picture exercises', 'CEFR levels A1 through C2', 'Student context can inform generated material', 'Download as HTML/PDF or share interactive link'] },
+              { icon: ClipboardCheck, title: 'Homework System', desc: 'Assign any worksheet or specific exercises as homework. Students complete exercises interactively online. AI can pre-evaluate supported open-ended answers for teacher review.', bullets: ['AI-assisted review for supported answers', 'Set deadlines with email reminders', 'Teacher review with comments per exercise', 'Homework results can feed the next prep cycle'] },
+              { icon: Brain, title: 'Smart Flashcards', desc: 'Create flashcard sets from worksheet vocabulary or manually. Students study using SM-2 scheduling logic, and review activity can become vocabulary context for future prep.', bullets: ['SM-2 spaced repetition scheduling logic', 'Auto-generate from worksheet vocabulary', 'Bidirectional study mode', 'Accessible via Student Hub'] },
               { icon: Calendar, title: 'Lesson Calendar & Booking', desc: 'Teachers set availability, students book via a public booking page. Supports one-time and recurring weekly bookings with Google Calendar two-way sync.', bullets: ['Public booking page with shareable link', 'Google Calendar sync + Google Meet auto-generation', 'Recurring weekly bookings', 'Payment tracking per lesson'] },
-              { icon: GraduationCap, title: 'Welcome Placement Test', desc: 'A comprehensive 49-question AI-powered assessment covering grammar, vocabulary, reading, listening, and speaking. AI creates a detailed Learning Profile with one of 4 Learning Paths.', bullets: ['49 questions across 5 skill categories', 'AI-analyzed Learning Profile', '4 Learning Paths: Comfort, Guided, Accelerated, Target', 'CEFR level estimation with confidence score'] },
-              { icon: Users, title: 'Student Hub Portal', desc: 'A dedicated portal for students at edooqoo.com/my. Students enter their email, select their teacher, and access worksheets, flashcards, homework, and lesson booking — all without needing a teacher account.', bullets: ['Personal dashboard with quick stats', 'Browse and study flashcard sets', 'Complete homework assignments', 'Book and manage lessons with Google Calendar sync'] },
-              { icon: BarChart3, title: 'Student Progress Tracking (DSLM)', desc: 'The Dynamic Student Learning Model tracks skills at the nano-skill level with CEFR tags. Every interaction updates metrics automatically. Teachers see mastery trends and AI-generated suggestions.', bullets: ['Nano-skill mastery tracking (e.g., B1.grammar.present_perfect)', 'Trend detection: improving, stable, declining', 'Category view: grammar, vocabulary, speaking, listening, reading, writing', 'AI suggestions for future worksheets'] },
+              { icon: GraduationCap, title: 'Welcome Placement Test', desc: 'A 49-question CEFR-oriented diagnostic covering grammar, vocabulary, reading, listening, and speaking. Results become profile input and a DSLM starting point for teacher review.', bullets: ['49 questions across 5 skill categories', 'AI-analyzed Learning Profile', '4 Learning Paths: Comfort, Guided, Accelerated, Target', 'CEFR level estimation with confidence score'] },
+              { icon: Users, title: 'Student Hub Portal', desc: 'A dedicated portal for students at edooqoo.com/my. Students enter their email, select their teacher, and access worksheets, flashcards, homework, and lesson booking without needing a teacher account.', bullets: ['Personal dashboard with quick stats', 'Browse and study flashcard sets', 'Complete homework assignments', 'Supported activity can add learning signals'] },
+              { icon: BarChart3, title: 'Student Progress Tracking (DSLM)', desc: 'The Dynamic Student Learning Model organizes available signals at the nano-skill level with CEFR tags. Teachers see mastery trends and AI-generated suggestions for future worksheets.', bullets: ['Nano-skill mastery tracking (e.g., B1.grammar.present_perfect)', 'Trend detection: improving, stable, declining', 'Category view: grammar, vocabulary, speaking, listening, reading, writing', 'Teacher-reviewed suggestions for future worksheets'] },
             ].map(({ icon: Icon, title, desc, bullets }) => (
               <div key={title} className="border rounded-lg p-6 bg-card">
                 <div className="flex items-start gap-3 mb-3">
@@ -126,10 +127,10 @@ const About = () => {
           <h2 className="text-2xl font-semibold text-foreground mb-6">How It Works</h2>
           <div className="grid gap-4 sm:grid-cols-2">
             {[
-              { step: '1', title: 'Add Your Student', desc: 'Enter student name, email, and English level. Optionally send a Welcome Test to assess their abilities.' },
-              { step: '2', title: 'Generate a Worksheet', desc: 'Select topic, level, exercise types, and learning goals. AI generates a complete worksheet in under 2 minutes.' },
-              { step: '3', title: 'Share with Your Student', desc: 'Use the permanent link, assign as homework, or use in a live session. Students complete exercises interactively online.' },
-              { step: '4', title: 'Track Progress', desc: 'View nano-skill mastery trends, review AI-graded homework, study flashcards, and get AI suggestions for the next lesson.' },
+              { step: '1', title: 'Add Your Student', desc: 'Enter student details, CEFR estimate, goals, and known lesson context. Optionally send a Welcome Test.' },
+              { step: '2', title: 'Review Next-Step Context', desc: 'Use profile, goals, DSLM signals, homework, flashcards, and teacher observations to choose the next focus.' },
+              { step: '3', title: 'Generate the Worksheet', desc: 'Create an editable worksheet from the confirmed focus, then review and adjust before teaching or assigning.' },
+              { step: '4', title: 'Strengthen the Next Prep Cycle', desc: 'Use homework, flashcards, live work, and teacher review to build more context for the next recurring prep.' },
             ].map(({ step, title, desc }) => (
               <div key={step} className="border rounded-lg p-4 bg-card">
                 <div className="flex items-center gap-3 mb-2">
@@ -200,7 +201,7 @@ const About = () => {
                 {[
                   ['AI-generated worksheets', '✅', '❌', '❌', '❌'],
                   ['29 exercise types', '✅', 'Varies', 'Limited', 'Varies'],
-                  ['AI homework grading', '✅', '❌', '❌', '❌'],
+                  ['AI-assisted homework review', '✅', '❌', '❌', '❌'],
                   ['Student progress tracking', '✅', '❌', 'Basic', '❌'],
                   ['Flashcards (SM-2)', '✅', '❌', '❌', '❌'],
                   ['Lesson calendar', '✅', '❌', '❌', '❌'],

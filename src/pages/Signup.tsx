@@ -16,9 +16,9 @@ import { devLog } from '@/utils/logger';
 
 const Signup = () => {
   useEffect(() => {
-    document.title = "Sign Up Free — Edooqoo AI Worksheet Generator | 2 Free Worksheets";
+    document.title = "Start 1-Minute Prep Free — Edooqoo | 2 Free Worksheets";
     const meta = document.querySelector('meta[name="description"]');
-    if (meta) meta.setAttribute('content', 'Create your free Edooqoo account. Get 2 free worksheet tokens to generate personalized English worksheets with 29 exercise types for CEFR A1-C2. No credit card required.');
+    if (meta) meta.setAttribute('content', 'Create your free Edooqoo account, add your first student, and start building the context for 1-Minute Prep. Includes 2 free worksheets. No credit card required.');
   }, []);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -33,7 +33,10 @@ const Signup = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const location = useLocation();
-  const fromPath = (location.state as { from?: string } | null)?.from || '/';
+  const signupState = location.state as { from?: string; startOneMinutePrep?: boolean } | null;
+  const fromPath = signupState?.from || '/';
+  const shouldStartOneMinutePrep = signupState?.startOneMinutePrep === true || fromPath.startsWith('/one-minute-prep');
+  const postSignupPath = shouldStartOneMinutePrep ? '/?action=add-student' : (fromPath !== '/' ? fromPath : '/dashboard');
   const hasPendingClaims = getPendingClaimIds().length > 0;
 
   // After auth completes (including email-confirmed sessions returning here),
@@ -50,12 +53,12 @@ const Signup = () => {
           );
           navigate(`/worksheet/${claimedIds[0]}`);
         } else {
-          navigate(fromPath !== '/' ? fromPath : '/dashboard');
+          navigate(postSignupPath);
         }
       }
     });
     return () => subscription.unsubscribe();
-  }, [navigate, fromPath]);
+  }, [navigate, postSignupPath]);
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -85,7 +88,7 @@ const Signup = () => {
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/`,
+          emailRedirectTo: `${window.location.origin}${shouldStartOneMinutePrep ? '/?action=add-student' : '/'}`,
           data: {
             first_name: firstName,
             last_name: lastName,
@@ -117,8 +120,7 @@ const Signup = () => {
           title: "Success",
           description: "Account created and signed in successfully!",
         });
-        // v6.9.33 — open Add Student dialog immediately on the generator.
-        navigate('/?action=add-student');
+        navigate(postSignupPath);
       }
 
     } catch (error: any) {
@@ -149,7 +151,7 @@ const Signup = () => {
             <CardHeader className="space-y-1">
               <CardTitle className="text-2xl font-bold text-center">Create Account</CardTitle>
               <CardDescription className="text-center">
-                Create Worksheets Tailored to your students. In seconds.
+                Add your first student and start building context for 1-Minute Prep.
               </CardDescription>
             </CardHeader>
             <CardContent>

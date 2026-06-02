@@ -153,7 +153,7 @@ export const calculateItemMastery = (
     }
   }
 
-  // Open-ended exercises can't be auto-graded
+  // Open-ended exercises require teacher-reviewed evaluation.
   if (!isClosedExerciseType(exerciseType)) {
     return null;
   }

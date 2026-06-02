@@ -57,7 +57,7 @@ const EslGamesForTeachers = () => (
       <>
         <h2 className="text-xl font-bold text-foreground mt-0">Martha's rule for adult ESL games</h2>
         <p>Martha (10 years adult ESL, our internal quality benchmark) has one rule: if a game would make a 40-year-old CFO feel patronized, do not run it. That eliminates 80% of the games on the typical ESL-resources internet. What is left is short, cognitively engaging, and produces measurable language output.</p>
-        <p>Pair every game with a follow-up worksheet. The game produces fluency; the worksheet locks in accuracy. After Idiom Charades, assign a 10-minute Idiom Matching exercise from Edooqoo as homework. The AI grades it. The student sees their errors before the next lesson. Three lessons later, the same 8 idioms reappear in a Reading Comprehension generated automatically by the DSLM layer — spaced repetition without manual tracking.</p>
+        <p>Pair every game with a follow-up worksheet. The game produces fluency; the worksheet locks in accuracy. After Idiom Charades, assign a 10-minute Idiom Matching exercise from Edooqoo as homework. Objective answers can be checked automatically, and teacher-reviewed results can inform future prep. Three lessons later, the same 8 idioms can reappear in a Reading Comprehension because the teacher uses vocabulary signals in the DSLM layer.</p>
         <h2 className="text-xl font-bold text-foreground">How to time games in a 60-minute lesson</h2>
         <p>Warm-up game (5–7 min). Main input + controlled practice (25 min). Production game (10 min). Worksheet preview + homework assignment (5 min). Closing (3 min). The two games sandwich the lesson — opening to lower the affective filter, closing to apply new language. See our <Link to="/blog/english-games-for-learners" className="text-primary hover:underline">12 games for learners</Link> for a similar list framed for student perspective.</p>
         <p>Want the matching worksheet for any game on this list? Create it through Edooqoo's structured worksheet workflow — see <Link to="/exercise-types" className="text-primary hover:underline">all 29 exercise types</Link> or jump to the <Link to="/esl-worksheets" className="text-primary hover:underline">ESL worksheets generator</Link>.</p>
@@ -66,7 +66,7 @@ const EslGamesForTeachers = () => (
     faqs={[
       { question: 'How many games should I use per lesson?', answer: 'Two: one as warm-up, one as production. Both under 10 minutes. More than 2 turns the lesson into entertainment with no language gain.' },
       { question: 'Do these work over Zoom?', answer: 'Yes. Every game on this list runs in a video lesson. Pronunciation and charades games need camera-on; the rest work either way.' },
-      { question: 'Can I assign the matching worksheets as homework?', answer: 'Yes. Edooqoo lets you mark specific exercises as homework with a deadline. The AI grades open and closed answers automatically.' },
+      { question: 'Can I assign the matching worksheets as homework?', answer: 'Yes. Edooqoo lets you mark specific exercises as homework with a deadline. Objective answers can be checked automatically, and open answers can use AI-assisted evaluation for teacher review.' },
       { question: 'Are these suitable for group lessons?', answer: 'Most are. Auctions, charades, hot seats, and telephone games scale to 2-6 learners with minor adjustments.' },
     ]}
     ctaTitle="Match every game with a printable worksheet"

@@ -4,7 +4,7 @@ import { ArrowRight, Brain, BookCheck, Layers3, CalendarDays, Radio, ClipboardCh
 
 const allFeatures = [
   { path: '/features/dslm', title: 'DSLM Progress Tracking', icon: Brain, color: 'text-violet-600' },
-  { path: '/features/homework', title: 'Homework + AI Grading', icon: BookCheck, color: 'text-amber-600' },
+  { path: '/features/homework', title: 'Homework Review', icon: BookCheck, color: 'text-amber-600' },
   { path: '/features/flashcards', title: 'Smart Flashcards', icon: Layers3, color: 'text-blue-600' },
   { path: '/features/calendar', title: 'Lesson Calendar', icon: CalendarDays, color: 'text-green-600' },
   { path: '/features/live-sessions', title: 'Live Sessions', icon: Radio, color: 'text-red-600' },

@@ -24,7 +24,7 @@ const Login = () => {
   const fromPath = (location.state as { from?: string } | null)?.from || '/';
 
   useEffect(() => {
-    document.title = "Log In — Edooqoo AI Worksheet Generator for English Teachers";
+    document.title = "Log In — Edooqoo 1-Minute Prep for English Teachers";
     // SEO: auth form has no value in Google index
     const cleanup = setRobotsMeta("noindex, follow");
     return cleanup;

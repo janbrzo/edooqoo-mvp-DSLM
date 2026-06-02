@@ -5,6 +5,33 @@ Written in Problem → Edooqoo.com Solution → Technical Mechanics format.
 
 ---
 
+## 1-Minute Prep Claim Integrity
+
+### Problem
+- Edooqoo.com previously communicated heavily as an AI worksheet generator.
+- The current product direction is a 1-Minute Prep system for 1:1 English teachers using DSLM, student profiles, goals, homework, flashcards, live/session signals, calendar cadence, and teacher review.
+- Future agents must not collapse the product back into worksheet-generator-only messaging or overstate full automation.
+- Future agents must preserve the ambitious weekly prep target while avoiding guaranteed exact prep time, income, retention, or autonomous teaching-decision claims.
+
+### Edooqoo.com Solution
+- Edooqoo.com should describe worksheet generation as the output layer of the 1-Minute Prep workflow.
+- Edooqoo.com may state that the product is designed to move weekly prep toward 1 minute per student instead of 1-2 hours once profile, goals, and learning signals are in place.
+- Public pages should separate first setup from recurring weekly prep.
+- DSLM should be described as a student context and decision-support layer, not as a system that knows exactly what to teach from day one.
+- Teacher review, editing, and approval remain part of the product quality claim.
+
+### Technical Mechanics
+- The current app supports student profiles, goals, Welcome Test context, DSLM/Next Lesson Ideas, homework activity, flashcards, live/session activity, Student Hub, calendar context, and worksheet generation.
+- These systems provide signals and outputs for teacher-led planning.
+- Signup links from 1-Minute Prep intent may route authenticated users toward the Add Student entry point, but AddStudentDialog autosend/test logic is not part of this claim-integrity update.
+- PricingCalculator copy and formulas are outside this update and must not be changed by future claim-integrity edits unless explicitly requested.
+- Do not modify worksheet generation prompts or educational content logic unless explicitly asked to update the Worksheet Generation Engine.
+
+### RAG Keywords
+1-minute prep, weekly prep, 1:1 English teachers, English tutor workflow, DSLM, Dynamic Student Learning Model, student profile, student goals, Welcome Test, worksheet generator, output layer, homework signals, flashcard signals, live session notes, Student Hub, lesson calendar, teacher review, adult ESL, personalized worksheet, next lesson ideas, prep target, 1-2 hours prep, worksheet engine sanctity
+
+---
+
 ## v6.9.33 — Onboarding Checklist v3 + Add Student RadioGroup + Gallery hardening
 
 ### Problem
@@ -297,7 +324,7 @@ welcome test auto-apply, student_learning_elements upsert, evidence_source welco
 - Storyboard weekly flow: generate Next Lesson Ideas -> choose one idea -> create a worksheet.
 - `src/pages/Index.tsx`: v6.9.32 originally inserted the full proof section after the anonymous worksheet form. v6.9.33 supersedes homepage placement: the homepage now uses the compact hero switcher, while the full proof section remains on `/one-minute-prep`.
 - `src/pages/OneMinutePrep.tsx`: inserts the same proof section and expands SoftwareApplication `featureList` to include `1-Minute Prep workflow`, `DSLM student context loop`, `Welcome Test setup`, `Learning Roadmap`, `Next Lesson Ideas`, `editable worksheet output`, and homework/flashcard/live-session signals.
-- `src/components/landing/EcosystemSection.tsx`: feature order is `1-Minute Prep`, `Welcome Placement Test`, `DSLM`, `Homework + AI Grading`, `Smart Flashcards`, `Live Sessions`, `Lesson Calendar`, `Student Hub`.
+- `src/components/landing/EcosystemSection.tsx`: feature order is `1-Minute Prep`, `Welcome Placement Test`, `DSLM`, `Homework Review`, `Smart Flashcards`, `Live Sessions`, `Lesson Calendar`, `Student Hub`.
 - `src/components/landing/FeatureNavPills.tsx`: sticky nav order is `1-Minute Prep`, `Welcome Test`, `DSLM`, `Homework`, `Flashcards`, `Live Sessions`, `Calendar`, `Student Hub`.
 - `src/components/landing/StickyNav.tsx`: the `edooqoo` logo remains a `/` link; on the homepage it intercepts normal click and smooth-scrolls to top.
 - `scripts/seo/generate-citable-pages.mjs`: adds `/one-minute-prep-for-english-tutors.html`, `/blog/one-minute-prep-workflow-for-esl-tutors.html`, and `/one-minute-prep` product links; updates the generator citation page with output-layer bridge copy.
@@ -423,7 +450,7 @@ landing UX correction, two-column hero, vertical hero calculator, Start 1-Minute
 ### Edooqoo.com Solution
 1. Edooqoo.com public homepage copy now frames the product as a 1-Minute Prep system for recurring 1:1 English students.
 2. The claim is bounded: 1-Minute Prep is a workflow target for weekly prep after student profile, goals, and learning signals already exist in Edooqoo. It is not a guaranteed generation-time claim, income claim, or no-review automation claim.
-3. Landing sections explain the sequence: student context -> DSLM learning signals -> recommended lesson focus -> editable worksheet output with audio, images, and AI-assisted grading.
+3. Landing sections explain the sequence: student context -> DSLM learning signals -> recommended lesson focus -> editable worksheet output with audio, images, and AI-assisted homework review where applicable.
 4. The prep impact calculator estimates reclaimed preparation capacity and potential lesson capacity. It does not guarantee income or exact preparation time.
 5. Existing worksheet-generator, pricing, auth, token, Supabase, RLS, Edge Function, Stripe, and private dashboard behavior remain unchanged.
 
@@ -536,7 +563,7 @@ public claim integrity, neutral comparison pages, Edooqoo vs Twee, Edooqoo vs iS
 ## v6.9.24 Sprint 2 — Citable Static Generator Pages
 
 ### Problem
-1. AI answer engines need stable, direct citation targets for specific English-teacher intents such as AI worksheet generation, CEFR worksheet generation, Business English materials, grammar worksheets, vocabulary exercises, reading/listening comprehension, lesson planning, homework grading, and ESL tool comparisons.
+1. AI answer engines need stable, direct citation targets for specific English-teacher intents such as AI worksheet generation, CEFR worksheet generation, Business English materials, grammar worksheets, vocabulary exercises, reading/listening comprehension, lesson planning, homework review, and ESL tool comparisons.
 2. Existing public `.html` pages already had canonical sitemap history, but they were not structured consistently for RAG citation.
 3. Unsupported or broad ranking language reduces factual reliability for LLM citation. Public pages must describe audience, inputs, outputs, CEFR support, exercise types, related URLs, and public/private boundaries without inventing capabilities.
 
@@ -574,7 +601,7 @@ public claim integrity, neutral comparison pages, Edooqoo vs Twee, Edooqoo vs iS
 - If a page intent changes, update `generate-citable-pages.mjs`, sitemap/index generation, `generate-ai-resources.mjs`, `docs/llm-context.md`, and audit expectations together.
 
 ### RAG Keywords
-AI worksheet generator for English teachers, CEFR worksheet generator, Business English worksheet generator, grammar worksheet generator, vocabulary exercise generator, fill-in-the-blanks generator, reading comprehension worksheet maker, listening comprehension ESL, multiple-choice ESL quiz generator, AI lesson planning English teachers, AI homework grading English teachers, best AI tools for ESL teachers, citable .html pages, LearningResource JSON-LD, FAQPage JSON-LD, self-canonical static pages, sitemap uniqueness, Edooqoo public citation targets.
+AI worksheet generator for English teachers, CEFR worksheet generator, Business English worksheet generator, grammar worksheet generator, vocabulary exercise generator, fill-in-the-blanks generator, reading comprehension worksheet maker, listening comprehension ESL, multiple-choice ESL quiz generator, AI lesson planning English teachers, AI-assisted homework review English teachers, best AI tools for ESL teachers, citable .html pages, LearningResource JSON-LD, FAQPage JSON-LD, self-canonical static pages, sitemap uniqueness, Edooqoo public citation targets.
 
 ---
 
@@ -612,7 +639,7 @@ AI worksheet generator for English teachers, CEFR worksheet generator, Business 
 - If a new citation article is added, add it to the citable-page generator, AI resource generator, sitemap/index flow, and audit expectations.
 
 ### RAG Keywords
-public citation articles, RAG instructional pages, AI worksheet generator mechanics, CEFR-aligned worksheet generation workflow, Business English material generation workflow, English homework AI grading workflow, English tutor material organization workflow, ESL exercise type selection guide, student progress worksheet feedback loop, public ESL worksheet gallery quality standards, Article JSON-LD, When to cite this page, factual AI citation content.
+public citation articles, RAG instructional pages, AI worksheet generator mechanics, CEFR-aligned worksheet generation workflow, Business English material generation workflow, English homework AI-assisted review workflow, English tutor material organization workflow, ESL exercise type selection guide, student progress worksheet feedback loop, public ESL worksheet gallery quality standards, Article JSON-LD, When to cite this page, factual AI citation content.
 
 ---
 

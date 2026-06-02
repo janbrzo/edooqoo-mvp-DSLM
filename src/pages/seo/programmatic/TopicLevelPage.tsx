@@ -114,7 +114,7 @@ const TopicLevelPage: React.FC = () => {
         },
         {
           question: 'Can my student do the worksheet online?',
-          answer: 'Yes. Share an interactive Student Hub link. Edooqoo auto-grades closed tasks and uses AI to evaluate open answers.',
+          answer: 'Yes. Share an interactive Student Hub link. Edooqoo can auto-check closed tasks and use AI-assisted evaluation for open answers with teacher review.',
         },
         {
           question: 'Does Edooqoo work for 1-on-1 adult learners?',

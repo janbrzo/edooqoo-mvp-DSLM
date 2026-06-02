@@ -69,7 +69,7 @@ const boundaryItems = [
 const faqItems = [
   {
     question: 'Is the first lesson also one minute?',
-    answer: 'No. First setup requires profile, goals, and student signals.',
+    answer: 'No. First setup requires profile, goals, and student signals. Edooqoo is designed to move recurring weekly prep toward one focused minute after that context exists.',
   },
   {
     question: 'Is Edooqoo still a worksheet generator?',
@@ -171,7 +171,7 @@ const OneMinutePrep: React.FC = () => {
                 1-Minute Prep for 1:1 English teachers
               </h1>
               <p className="mt-5 max-w-2xl text-lg leading-8 text-muted-foreground">
-                1-Minute Prep is a workflow target for recurring students after Edooqoo has student profile, goals, and learning signals. The worksheet generator is the output layer.
+                1-Minute Prep is Edooqoo's workflow target for recurring students: move weekly prep toward one focused minute after student profile, goals, and learning signals exist. The worksheet generator is the output layer.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Button size="lg" asChild>
@@ -223,7 +223,7 @@ const OneMinutePrep: React.FC = () => {
             <div className="max-w-3xl">
               <h2 className="text-2xl font-bold text-foreground">What 1-Minute Prep means</h2>
               <p className="mt-3 text-muted-foreground">
-                The first student setup is a separate step. Recurring prep becomes faster after profile, goals, notes, and learning signals exist in Edooqoo. The teacher still chooses the focus, reviews the output, and edits before use.
+                The first student setup is a separate step. Edooqoo is designed to move recurring weekly prep toward one focused minute after profile, goals, notes, and learning signals exist. The teacher still chooses the focus, reviews the output, and edits before use.
               </p>
             </div>
             <div className="mt-8 grid gap-4 md:grid-cols-3">
@@ -247,7 +247,7 @@ const OneMinutePrep: React.FC = () => {
                 <CardContent className="p-5">
                   <h3 className="font-semibold text-foreground">Worksheet output</h3>
                   <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                    Generate an editable worksheet with exercises, audio, images, and AI-assisted grading where applicable.
+                    Generate an editable worksheet with exercises, audio, images, and AI-assisted review where applicable.
                   </p>
                 </CardContent>
               </Card>

@@ -77,7 +77,7 @@ const steps = [
   { number: 1, title: 'Set your availability', description: 'Define weekly recurring slots (e.g., Monday 9:00–10:00, Thursday 14:00–15:00). Set buffer time between lessons.' },
   { number: 2, title: 'Share your booking page', description: 'Send students your public booking link. They see available slots and book directly — no messages needed.' },
   { number: 3, title: 'Manage bookings', description: 'Confirm or reject bookings. Handle reschedule requests. Use bulk actions for batch operations. Everything syncs to Google Calendar.' },
-  { number: 4, title: 'Teach and track', description: 'Mark lessons as completed or no-show. Calendar data feeds into DSLM for consistency tracking.' },
+  { number: 4, title: 'Teach and track', description: 'Mark lessons as completed or no-show. Lesson cadence and attendance context can support future planning.' },
 ];
 
 const faqItems = [
@@ -85,7 +85,7 @@ const faqItems = [
   { question: 'Can students book without creating an account?', answer: 'Yes. Students access the public booking page via a link. They select a slot, enter their name and email, and the booking is confirmed. No registration required.' },
   { question: 'How does rescheduling work?', answer: 'Students can request a reschedule through their Student Hub or a direct link. You see the request in your calendar notifications and can confirm, reject, or suggest an alternative. All changes sync automatically to both Google Calendars.' },
   { question: 'Can I set different prices per student?', answer: 'Yes. Calendar supports per-student pricing, prepaid lesson packages, and payment tracking. You can set a default price and override it per student.' },
-  { question: 'How does the calendar connect to DSLM?', answer: 'Lesson frequency and consistency are tracked by DSLM. If a student has regular weekly lessons, DSLM can plan more continuous skill development. Irregular schedules get more review-focused suggestions.' },
+  { question: 'How does the calendar connect to DSLM?', answer: 'Lesson cadence and attendance context can support planning. Regular students usually give Edooqoo a steadier prep rhythm, while irregular schedules may need more review and teacher judgement.' },
 ];
 
 const FeatureCalendar: React.FC = () => (
@@ -97,12 +97,12 @@ const FeatureCalendar: React.FC = () => (
       badge="GCal Sync"
       badgeColor="bg-green-100 text-green-700 border-green-200"
       headline="Students book. Calendar syncs. You teach."
-      subheadline="Your personal booking page, bidirectional Google Calendar sync, reschedule management, and payment tracking — no more Calendly, spreadsheets, or WhatsApp messages."
+      subheadline="Your personal booking page, bidirectional Google Calendar sync, reschedule management, and payment tracking inside the same tutoring workflow."
     >
       <CalendarHeroMockup />
     </FeatureHero>
 
-    <DSLMBadge feature="Calendar" description="Lesson frequency and consistency feed into DSLM, enabling adaptive planning based on how regularly each student attends." />
+    <DSLMBadge feature="Calendar" description="Lesson cadence and attendance context can support DSLM planning by showing how regularly each student works with you." />
     <FeatureBenefits benefits={benefits} />
     <FeatureSteps steps={steps} />
     <FeatureFAQ items={faqItems} />

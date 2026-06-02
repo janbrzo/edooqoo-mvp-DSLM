@@ -38,7 +38,7 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "category": "CEFR & Levels"
   },
   {
-    "title": "English Homework AI Grading Workflow | Edooqoo",
+    "title": "English Homework AI-Assisted Review Workflow | Edooqoo",
     "description": "Instructional description of AI-assisted English homework review with teacher oversight.",
     "url": "/blog/english-homework-ai-grading-workflow.html",
     "date": "2026-05-24",
@@ -850,7 +850,7 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "category": "How to Teach"
   },
   {
-    "title": "Best Digital Homework Tools for ESL Teachers in 2026",
+    "title": "Best Digital Homework Tools for ESL Teachers in 2026 â€” Edooqoo",
     "description": "Platform comparison for assigning, tracking, and grading ESL homework online. Find the best digital tools for your teaching workflow.",
     "url": "/blog/digital-homework-tools-esl-teachers.html",
     "date": "2025-09-05",
@@ -878,7 +878,7 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "category": "General"
   },
   {
-    "title": "Effective ESL Homework Strategies That Students Actually Do",
+    "title": "Effective ESL Homework Strategies That Students Actually Do â€” Edooqoo",
     "description": "Design meaningful ESL homework with accountability systems and feedback loops. Practical strategies for homework that students complete and learn from.",
     "url": "/blog/effective-esl-homework-strategies.html",
     "date": "2025-09-01",
@@ -1025,7 +1025,7 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "category": "Reading & Writing"
   },
   {
-    "title": "Teaching English One-to-One — Private Lesson Guide",
+    "title": "Teaching English One-to-One â€” Private Lesson Guide â€” Edooqoo",
     "description": "Complete guide to teaching private English lessons. Needs analysis, lesson structure, pacing, rapport building, and tools for one-to-one ESL tutoring.",
     "url": "/blog/teaching-english-one-to-one.html",
     "date": "2025-08-11",
@@ -1060,7 +1060,7 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "category": "General"
   },
   {
-    "title": "AI Lesson Planning Strategies for English Teachers",
+    "title": "AI Lesson Planning Strategies for English Teachers â€” Edooqoo",
     "description": "How to use AI for lesson planning in English teaching. Strategies for generating content, differentiating materials, and saving time with AI-powered tools.",
     "url": "/blog/ai-lesson-planning-strategies.html",
     "date": "2025-08-06",
@@ -1074,22 +1074,22 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "category": "How to Teach"
   },
   {
-    "title": "Creating Interactive Worksheets Online — Tools and Tips",
+    "title": "Creating Interactive Worksheets Online â€” Tools and Tips â€” Edooqoo",
     "description": "How to create engaging interactive worksheets online. Compare tools, platforms, and techniques for making digital worksheets that students love.",
     "url": "/blog/creating-interactive-worksheets-online.html",
     "date": "2025-08-04",
     "category": "How to Teach"
   },
   {
-    "title": "Using Google Workspace for ESL Teachers",
+    "title": "Using Google Workspace for ESL Teachers â€” Edooqoo",
     "description": "How ESL teachers can use Google Docs, Slides, Forms, and Classroom. Practical workflows for lesson planning, worksheet sharing, and student management.",
     "url": "/blog/using-google-workspace-esl-teachers.html",
     "date": "2025-08-03",
     "category": "General"
   },
   {
-    "title": "Best Apps for Learning English in 2026",
-    "description": "Complete comparison of the best English learning apps in 2026. Duolingo, Babbel, Edooqoo, Anki, and more — features, pricing, and teacher recommendations.",
+    "title": "Best Apps for Learning English in 2026 â€” Edooqoo",
+    "description": "Complete comparison of the best English learning apps in 2026. Duolingo, Babbel, Edooqoo, Anki, and more â€” features, pricing, and teacher recommendations.",
     "url": "/blog/best-apps-learning-english-2026.html",
     "date": "2025-08-02",
     "category": "Tools"
@@ -1137,8 +1137,8 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "category": "Business English"
   },
   {
-    "title": "Using AI to Boost Teacher Productivity in 2026",
-    "description": "How ESL teachers can use AI tools in 2026: worksheet generation, automated grading, lesson planning, student tracking, and administrative automation.",
+    "title": "Using AI to Boost Teacher Productivity in 2026 â€” Edooqoo",
+    "description": "How ESL teachers can use AI tools in 2026: worksheet generation, teacher-reviewed homework support, lesson planning, student tracking, and administrative automation.",
     "url": "/blog/using-ai-teacher-productivity.html",
     "date": "2025-07-26",
     "category": "AI in Education"
@@ -1151,7 +1151,7 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "category": "Assessment"
   },
   {
-    "title": "Preventing Teacher Burnout — Strategies for ESL Teachers",
+    "title": "Preventing Teacher Burnout â€” Strategies for ESL Teachers â€” Edooqoo",
     "description": "Practical strategies to prevent ESL teacher burnout: workload management, boundaries, self-care routines, and sustainable teaching practices.",
     "url": "/blog/teacher-burnout-prevention-esl.html",
     "date": "2025-07-24",
@@ -1228,14 +1228,14 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "category": "Assessment"
   },
   {
-    "title": "How to Create Effective English Tests — Teacher's Guide",
+    "title": "How to Create Effective English Tests â€” Teacher's Guide â€” Edooqoo",
     "description": "Guide to creating effective English tests: test design principles, item types, scoring methods, validity, reliability, and AI-assisted test creation.",
     "url": "/blog/creating-english-tests-guide.html",
     "date": "2025-07-13",
     "category": "Assessment"
   },
   {
-    "title": "Error Correction Techniques for ESL Teachers",
+    "title": "Error Correction Techniques for ESL Teachers â€” Edooqoo",
     "description": "Effective error correction strategies for ESL: self-correction, peer correction, delayed correction, reformulation, and when to correct vs. ignore errors.",
     "url": "/blog/error-correction-techniques-esl.html",
     "date": "2025-07-12",
@@ -1340,7 +1340,7 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "category": "Young Learners"
   },
   {
-    "title": "Classroom Management Tips for ESL Teachers",
+    "title": "Classroom Management Tips for ESL Teachers â€” Edooqoo",
     "description": "Practical classroom management strategies for ESL/EFL teachers. Engagement techniques, behavior management, routines, energy management, and maintaining motivation in language classes.",
     "url": "/blog/classroom-management-esl-tips.html",
     "date": "2025-06-27",
@@ -1375,15 +1375,15 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "category": "Listening & Speaking"
   },
   {
-    "title": "How to Teach English Grammar Effectively",
+    "title": "How to Teach English Grammar Effectively â€” Edooqoo",
     "description": "Proven grammar teaching strategies for ESL/EFL teachers. Inductive vs deductive approaches, PPP framework, error correction techniques, and AI worksheet examples for all CEFR levels.",
     "url": "/blog/how-to-teach-english-grammar-effectively.html",
     "date": "2025-06-22",
     "category": "Grammar"
   },
   {
-    "title": "Formative Assessment in English Teaching — Strategies & Tools | Edooqoo",
-    "description": "How to use formative assessment in ESL/EFL teaching. Exit tickets, self-assessment, peer feedback, AI-graded homework, and progress tracking strategies for English teachers.",
+    "title": "Formative Assessment in English Teaching â€” Strategies & Tools | Edooqoo",
+    "description": "How to use formative assessment in ESL/EFL teaching. Exit tickets, self-assessment, peer feedback, AI-assisted homework, and progress tracking strategies for English teachers.",
     "url": "/blog/formative-assessment-english-teaching.html",
     "date": "2025-06-21",
     "category": "Assessment"
@@ -1403,7 +1403,7 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "category": "Methodology"
   },
   {
-    "title": "Flipped Classroom for English Teaching — Complete Guide | Edooqoo",
+    "title": "Flipped Classroom for English Teaching â€” Complete Guide | Edooqoo",
     "description": "How to implement the flipped classroom model in ESL/EFL teaching. Pre-class worksheets, in-class activities, and AI tools for creating flipped learning materials.",
     "url": "/blog/flipped-classroom-english-teaching.html",
     "date": "2025-06-18",
@@ -1438,21 +1438,21 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "category": "Business English"
   },
   {
-    "title": "Cambridge Exam Preparation Tips for Teachers",
+    "title": "Cambridge Exam Preparation Tips for Teachers â€” Edooqoo Blog",
     "description": "Cambridge exam preparation tips and worksheet strategies for teachers. KET, PET, FCE, CAE, CPE exercise types, AI practice materials, study schedules, and mock tests.",
     "url": "/blog/cambridge-exam-preparation-tips-teachers.html",
     "date": "2025-06-13",
     "category": "Exam Prep"
   },
   {
-    "title": "Personalized Learning in English Teaching",
+    "title": "Personalized Learning in English Teaching â€” Edooqoo Blog",
     "description": "From theory to AI-powered practice. How personalized learning works in English teaching with student profiles, nano-skill tracking, and AI-driven worksheet generation.",
     "url": "/blog/personalized-learning-english-teaching.html",
     "date": "2025-06-12",
     "category": "General"
   },
   {
-    "title": "AI-Generated Listening Exercises for ESL",
+    "title": "AI-Generated Listening Exercises for ESL â€” Edooqoo Blog",
     "description": "How AI text-to-speech changes ESL listening instruction. 5 types of listening exercises, scaffolding by level, and comparing AI TTS vs native recordings.",
     "url": "/blog/ai-generated-listening-exercises-esl.html",
     "date": "2025-06-11",
@@ -1466,7 +1466,7 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "category": "AI in Education"
   },
   {
-    "title": "Best AI Tools for English Teachers in 2026",
+    "title": "Best AI Tools for English Teachers in 2026 â€” Edooqoo Blog",
     "description": "Complete guide to the best AI tools for English teachers in 2026. Compare Edooqoo, ChatGPT, Twee, MagicSchool, Quizlet across 8 criteria for ESL/EFL teaching.",
     "url": "/blog/ai-tools-for-english-teachers-2026.html",
     "date": "2025-06-09",
@@ -1480,7 +1480,7 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "category": "Vocabulary"
   },
   {
-    "title": "Teaching English Online in 2026 — Complete Guide",
+    "title": "Teaching English Online in 2026 â€” Complete Guide â€” Edooqoo Blog",
     "description": "Complete guide to teaching English online in 2026. Setup, tools, engagement techniques, scheduling, assessment, and growing your online tutoring business.",
     "url": "/blog/teaching-english-online-complete-guide.html",
     "date": "2025-06-07",
@@ -1494,14 +1494,14 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "category": "CEFR & Levels"
   },
   {
-    "title": "Differentiated Instruction in the English Classroom",
+    "title": "Differentiated Instruction in the English Classroom â€” Edooqoo Blog",
     "description": "Practical guide to differentiated instruction in the English classroom. 6 strategies for ESL/EFL teachers with AI personalization examples and assessment approaches.",
     "url": "/blog/differentiated-instruction-english-classroom.html",
     "date": "2025-06-05",
     "category": "Methodology"
   },
   {
-    "title": "Fill in the Blanks Exercises — Best Practices for English Teachers",
+    "title": "Fill in the Blanks Exercises â€” Best Practices for English Teachers â€” Edooqoo Blog",
     "description": "Best practices for creating fill in the blanks exercises. Types of gap-fill, creating effective distractors, scaffolding by CEFR level, and AI vs manual creation.",
     "url": "/blog/fill-in-the-blanks-exercises-best-practices.html",
     "date": "2025-06-04",
@@ -1522,7 +1522,7 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "category": "Vocabulary"
   },
   {
-    "title": "How to Create Grammar Worksheets with AI in 2026",
+    "title": "How to Create Grammar Worksheets with AI in 2026 â€” Edooqoo Blog",
     "description": "Step-by-step guide to creating grammar worksheets with AI. Best grammar topics by CEFR level, common mistakes teachers make, and tips for effective grammar practice.",
     "url": "/blog/how-to-create-grammar-worksheets-with-ai.html",
     "date": "2025-06-01",
@@ -1537,13 +1537,13 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "url": "/a1-beginner-english-worksheets.html"
   },
   {
-    "title": "A2 Elementary English Worksheets — AI Generated",
+    "title": "A2 Elementary English Worksheets â€” AI Generated â€” Edooqoo",
     "description": "Generate A2 elementary English worksheets with AI. Edooqoo creates personalized exercises for elementary learners covering past simple, comparatives, and everyday topics. CEFR A2.",
     "url": "/a2-elementary-english-worksheets.html"
   },
   {
-    "title": "AI Grading Tool for English Homework",
-    "description": "Reference for Edooqoo homework review mechanics, AI-assisted grading, teacher review, and student progress feedback loops.",
+    "title": "AI-Assisted Homework Review Tool",
+    "description": "Reference for Edooqoo homework review mechanics, AI-assisted evaluation, teacher review, and student progress feedback loops.",
     "url": "/ai-grading-tool-for-english-homework.html"
   },
   {
@@ -1567,17 +1567,17 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "url": "/ai-worksheet-generator-for-english-teachers.html"
   },
   {
-    "title": "Articles A/An/The Worksheets for ESL — AI Generator",
-    "description": "Generate articles (a, an, the) worksheets for ESL with AI. Definite, indefinite, zero article rules. Common errors, exceptions, CEFR A1-C1. Ready in 60 seconds.",
+    "title": "Articles A/An/The Worksheets for ESL â€” AI Generator â€” Edooqoo",
+    "description": "Generate articles (a, an, the) worksheets for ESL with AI. Definite, indefinite, zero article rules. Common errors, exceptions, CEFR A1-C1. Teacher-reviewed output.",
     "url": "/articles-a-an-the-worksheets.html"
   },
   {
-    "title": "B1 Intermediate English Worksheets — AI Generated",
+    "title": "B1 Intermediate English Worksheets â€” AI Generated â€” Edooqoo",
     "description": "Generate B1 intermediate English worksheets with AI. Edooqoo creates exercises covering present perfect, conditionals, passive voice, and real-world topics for CEFR B1 learners.",
     "url": "/b1-intermediate-english-worksheets.html"
   },
   {
-    "title": "B2 Upper Intermediate English Worksheets — AI Generated",
+    "title": "B2 Upper Intermediate English Worksheets â€” AI Generated â€” Edooqoo",
     "description": "Generate B2 upper intermediate English worksheets with AI. Edooqoo creates exercises for all conditionals, reported speech, complex tenses, and professional topics at CEFR B2.",
     "url": "/b2-upper-intermediate-english-worksheets.html"
   },
@@ -1662,7 +1662,7 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "url": "/english-worksheets-for-adults.html"
   },
   {
-    "title": "English Worksheets for Corporate Training — AI Generator",
+    "title": "English Worksheets for Corporate Training â€” AI Generator â€” Edooqoo",
     "description": "Generate English worksheets for corporate training with AI. Business communication, meetings, presentations, email writing, negotiations. CEFR B1-C1.",
     "url": "/english-worksheets-for-corporate-training.html"
   },
@@ -1672,8 +1672,8 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "url": "/english-worksheets-for-exam-prep.html"
   },
   {
-    "title": "English Worksheets for Kids — AI Generator",
-    "description": "Generate English worksheets for kids with AI. Age-appropriate vocabulary, simple grammar, fun activities, picture exercises. CEFR A1-A2. Ready in 60 seconds.",
+    "title": "English Worksheets for Kids â€” AI Generator â€” Edooqoo",
+    "description": "Generate English worksheets for kids with AI. Age-appropriate vocabulary, simple grammar, fun activities, picture exercises. CEFR A1-A2. Teacher-reviewed output.",
     "url": "/english-worksheets-for-kids.html"
   },
   {
@@ -1692,18 +1692,18 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "url": "/esl-homework-grading-tool.html"
   },
   {
-    "title": "ESL Student Progress Tracking Tool",
+    "title": "ESL Student Progress Tracking Tool â€” Edooqoo",
     "description": "Track ESL student progress with Edooqoo's nano-skill mastery system. DSLM tracks grammar, vocabulary, reading, writing, speaking, and listening skills with CEFR tags and trend analysis.",
     "url": "/esl-student-progress-tracking-tool.html"
   },
   {
-    "title": "Exam Preparation Worksheets — Cambridge & IELTS",
+    "title": "Exam Preparation Worksheets â€” Cambridge & IELTS â€” Edooqoo",
     "description": "Generate exam preparation worksheets for Cambridge (KET, PET, FCE, CAE, CPE) and IELTS with AI. Edooqoo creates exam-format exercises at the correct CEFR level.",
     "url": "/exam-preparation-worksheets-cambridge-ielts.html"
   },
   {
-    "title": "29 English Exercise Types — AI Worksheet Generator",
-    "description": "Explore all 29 exercise types available in Edooqoo's AI worksheet generator. From fill-in-the-blanks to listening comprehension — generate any exercise for CEFR A1-C2 in under 2 minutes.",
+    "title": "29 English Exercise Types â€” AI Worksheet Generator",
+    "description": "Explore all 29 exercise types available in Edooqoo's worksheet output layer. From fill-in-the-blanks to listening comprehension, each type supports CEFR A1-C2 lesson workflows.",
     "url": "/exercise-types.html"
   },
   {
@@ -1727,7 +1727,7 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "url": "/gerunds-infinitives-worksheets.html"
   },
   {
-    "title": "ELT Glossary — English Teaching Terms",
+    "title": "ELT Glossary â€” English Teaching Terms",
     "description": "Complete glossary of English Language Teaching (ELT) terms. 50+ definitions including CEFR, ESL, EFL, TEFL, spaced repetition, scaffolding, and more. Learn how Edooqoo supports each concept.",
     "url": "/glossary.html"
   },
@@ -1737,18 +1737,18 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "url": "/grammar-worksheet-generator.html"
   },
   {
-    "title": "Health and Body English Worksheets — AI Generator",
-    "description": "Generate Health and Body English worksheets with AI. Body parts, symptoms, doctor visits, healthy lifestyle vocabulary. CEFR A1-B2. Ready in 60 seconds.",
+    "title": "Health and Body English Worksheets â€” AI Generator â€” Edooqoo",
+    "description": "Generate Health and Body English worksheets with AI. Body parts, symptoms, doctor visits, healthy lifestyle vocabulary. CEFR A1-B2. Teacher-reviewed output.",
     "url": "/health-and-body-english-worksheets.html"
   },
   {
-    "title": "How Edooqoo Works — 8 Steps to AI-Powered Teaching",
-    "description": "Learn how Edooqoo works in 8 simple steps. From adding students to tracking progress — see how AI transforms your English teaching workflow.",
+    "title": "How Edooqoo Works â€” 8 Steps to AI-Powered Teaching",
+    "description": "Learn how Edooqoo works in 8 simple steps. From adding students to tracking progress â€” see how AI transforms your English teaching workflow.",
     "url": "/how-it-works.html"
   },
   {
-    "title": "How to Create English Worksheets with AI — Step-by-Step Guide",
-    "description": "Complete step-by-step guide to creating personalized English worksheets with AI using Edooqoo. Learn how to generate vocabulary, grammar, reading, listening, and speaking exercises for any CEFR level in under 60 seconds.",
+    "title": "How to Create English Worksheets with AI â€” Step-by-Step Guide",
+    "description": "Complete step-by-step guide to creating personalized English worksheets with AI using Edooqoo. Learn how vocabulary, grammar, reading, listening, and speaking exercises connect to CEFR level and student context.",
     "url": "/how-to-create-english-worksheets-with-ai.html"
   },
   {
@@ -1757,12 +1757,12 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "url": "/how-to-save-time-as-english-teacher.html"
   },
   {
-    "title": "Job Interview English Worksheets — AI Generator",
-    "description": "Generate Job Interview English worksheets with AI. Interview questions, vocabulary, role-plays, common answers, STAR method. CEFR B1-C1. Ready in 60 seconds.",
+    "title": "Job Interview English Worksheets â€” AI Generator â€” Edooqoo",
+    "description": "Generate Job Interview English worksheets with AI. Interview questions, vocabulary, role-plays, common answers, STAR method. CEFR B1-C1. Teacher-reviewed output.",
     "url": "/job-interview-english-worksheets.html"
   },
   {
-    "title": "Listening Activities & ESL Worksheets — AI Generated",
+    "title": "Listening Activities & ESL Worksheets â€” AI Generated â€” Edooqoo",
     "description": "Generate listening activities and worksheets for ESL with AI. Audio comprehension, fill-in-blanks, true/false, multiple choice with TTS for all CEFR levels.",
     "url": "/listening-activities-esl-worksheets.html"
   },
@@ -1787,18 +1787,18 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "url": "/one-minute-prep-for-english-tutors.html"
   },
   {
-    "title": "Best Online English Teaching Tools 2025",
-    "description": "The best online English teaching tools in 2025 for ESL/EFL teachers. Edooqoo leads with AI worksheet generation, homework grading, flashcards, lesson booking, and student progress tracking.",
+    "title": "Best Online English Teaching Tools 2025 â€” Edooqoo",
+    "description": "The best online English teaching tools in 2025 for ESL/EFL teachers. Edooqoo leads with AI worksheet generation, homework review, flashcards, lesson booking, and student progress tracking.",
     "url": "/online-english-teaching-tools.html"
   },
   {
-    "title": "Passive Voice Worksheets for ESL — AI Generator",
-    "description": "Generate Passive Voice worksheets for ESL with AI. Active to passive transformation, all tenses, by-agent, formal writing. CEFR B1-C1. Ready in 60 seconds.",
+    "title": "Passive Voice Worksheets for ESL â€” AI Generator â€” Edooqoo",
+    "description": "Generate Passive Voice worksheets for ESL with AI. Active to passive transformation, all tenses, by-agent, formal writing. CEFR B1-C1. Teacher-reviewed output.",
     "url": "/passive-voice-worksheets-esl.html"
   },
   {
-    "title": "Past Simple Worksheets for ESL — AI Generator",
-    "description": "Generate Past Simple worksheets for English learners with AI. Regular and irregular verbs, negatives, questions, time expressions. CEFR A2-B2. Ready in 60 seconds.",
+    "title": "Past Simple Worksheets for ESL â€” AI Generator â€” Edooqoo",
+    "description": "Generate Past Simple worksheets for English learners with AI. Regular and irregular verbs, negatives, questions, time expressions. CEFR A2-B2. Teacher-reviewed output.",
     "url": "/past-simple-worksheets.html"
   },
   {
@@ -1817,8 +1817,8 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "url": "/present-perfect-worksheets.html"
   },
   {
-    "title": "Present Simple Worksheets for ESL — AI Generator",
-    "description": "Generate Present Simple worksheets for ESL students with AI. Exercises for affirmative, negative, questions, adverbs of frequency. CEFR A1-B1. Ready in 60 seconds.",
+    "title": "Present Simple Worksheets for ESL â€” AI Generator â€” Edooqoo",
+    "description": "Generate Present Simple worksheets for ESL students with AI. Exercises for affirmative, negative, questions, adverbs of frequency. CEFR A1-B1. Teacher-reviewed output.",
     "url": "/present-simple-worksheets.html"
   },
   {
@@ -1847,18 +1847,18 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "url": "/relative-clauses-worksheets.html"
   },
   {
-    "title": "Reported Speech Worksheets — AI Generator for ESL",
-    "description": "Generate Reported Speech worksheets for ESL with AI. Direct to indirect speech, tense backshift, reporting verbs, say/tell. CEFR B2-C1. Ready in 60 seconds.",
+    "title": "Reported Speech Worksheets â€” AI Generator for ESL â€” Edooqoo",
+    "description": "Generate Reported Speech worksheets for ESL with AI. Direct to indirect speech, tense backshift, reporting verbs, say/tell. CEFR B2-C1. Teacher-reviewed output.",
     "url": "/reported-speech-worksheets.html"
   },
   {
-    "title": "English Teaching Resources — AI Worksheets, Guides & Tools",
+    "title": "English Teaching Resources â€” AI Worksheets, Guides & Tools",
     "description": "Free resources for English teachers: AI worksheet generators, CEFR level guides, exercise tutorials, tool comparisons, blog articles, and teaching tips. Browse 60+ resources.",
     "url": "/resources.html"
   },
   {
     "title": "Spaced Repetition Flashcards for ESL Students",
-    "description": "Create spaced repetition flashcards for ESL students with Edooqoo. SM-2 algorithm, auto-generated from worksheets, bidirectional study, Student Hub access. Optimize vocabulary retention.",
+    "description": "Create spaced repetition flashcards for ESL students with Edooqoo. SM-2 scheduling logic, worksheet vocabulary, bidirectional study, Student Hub access, and vocabulary continuity.",
     "url": "/spaced-repetition-flashcards-esl.html"
   },
   {
@@ -1867,13 +1867,13 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "url": "/speaking-activities-esl-worksheets.html"
   },
   {
-    "title": "Technology English Worksheets — AI Generator for ESL",
-    "description": "Generate Technology English worksheets with AI. Tech vocabulary, digital literacy, social media, AI, gadgets. CEFR A2-C1. Ready in 60 seconds.",
+    "title": "Technology English Worksheets â€” AI Generator for ESL â€” Edooqoo",
+    "description": "Generate Technology English worksheets with AI. Tech vocabulary, digital literacy, social media, AI, gadgets. CEFR A2-C1. Teacher-reviewed output.",
     "url": "/technology-english-worksheets.html"
   },
   {
-    "title": "Travel English Worksheets — AI Generator for ESL",
-    "description": "Generate Travel English worksheets with AI. Airport vocabulary, hotel booking, directions, restaurants, transport. CEFR A2-B2. Ready in 60 seconds.",
+    "title": "Travel English Worksheets â€” AI Generator for ESL â€” Edooqoo",
+    "description": "Generate Travel English worksheets with AI. Airport vocabulary, hotel booking, directions, restaurants, transport. CEFR A2-B2. Teacher-reviewed output.",
     "url": "/travel-english-worksheets.html"
   },
   {

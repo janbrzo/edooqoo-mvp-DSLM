@@ -2,13 +2,13 @@ export const SEO_META = {
   pricing: {
     title: "Edooqoo Pricing — Free, Side-Gig & Full-Time Plans",
     description:
-      "Edooqoo pricing: Free, Side-Gig ($9/mo), Full-Time (from $19/mo). All plans include 29 exercise types for CEFR A1-C2 English teaching.",
+      "Edooqoo pricing: Free, Side-Gig ($9/mo), Full-Time (from $19/mo). Worksheet credits are the output layer inside the 1-Minute Prep workflow.",
     path: "/pricing",
   },
   about: {
-    title: "About Edooqoo — Built by English Teachers, for Teachers",
+    title: "About Edooqoo — 1-Minute Prep for English Teachers",
     description:
-      "Edooqoo helps English teachers create personalized worksheets, assign AI-graded homework, and track CEFR A1-C2 progress with 29 exercise types.",
+      "Edooqoo is a 1-Minute Prep system for 1:1 English teachers, combining student context, DSLM suggestions, and editable worksheet output.",
     path: "/about",
   },
   blog: {
@@ -50,13 +50,13 @@ export const SEO_META = {
   teachEnglishOnlineGuide: {
     title: "How to Teach English Online — Complete 2026 Guide",
     description:
-      "Start teaching English online: pricing, tools, lesson prep, student acquisition. Tutor toolkit with AI worksheets and homework grading.",
+      "Start teaching English online: pricing, tools, lesson prep, student acquisition. Tutor toolkit with AI worksheets and homework review.",
     path: "/blog/teach-english-online-guide",
   },
   forEnglishTutors: {
     title: "English Tutor Tools — Run a Pro Tutoring Business",
     description:
-      "Tools for English tutors: AI worksheet generator, automated homework grading, student progress tracking, calendar with payments.",
+      "Tools for English tutors: 1-Minute Prep workflow, worksheet output, AI-assisted homework review, student context, and calendar with payments.",
     path: "/for-english-tutors",
   },
   eslClassToolkit: {

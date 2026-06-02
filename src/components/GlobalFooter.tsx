@@ -27,7 +27,7 @@ const GlobalFooter = () => {
         {/* Brand */}
         <div className="mb-8">
           <Link to="/" className="text-xl font-bold text-primary">Edooqoo</Link>
-          <p className="text-sm text-muted-foreground mt-1">AI Worksheet Generator for English Teachers</p>
+          <p className="text-sm text-muted-foreground mt-1">1-Minute Prep for 1:1 English teachers</p>
         </div>
 
         {/* 6-column grid (Compare column restored in v6.9.22) */}
@@ -53,7 +53,7 @@ const GlobalFooter = () => {
             <h3 className="font-semibold text-foreground mb-3 text-sm">Features</h3>
             <ul className="space-y-2 text-sm">
               <li><Link to="/features/dslm" className="text-muted-foreground hover:text-primary transition-colors">DSLM Progress Tracking</Link></li>
-              <li><Link to="/features/homework" className="text-muted-foreground hover:text-primary transition-colors">Homework + AI Grading</Link></li>
+              <li><Link to="/features/homework" className="text-muted-foreground hover:text-primary transition-colors">Homework Review</Link></li>
               <li><Link to="/features/flashcards" className="text-muted-foreground hover:text-primary transition-colors">Smart Flashcards</Link></li>
               <li><Link to="/features/calendar" className="text-muted-foreground hover:text-primary transition-colors">Lesson Calendar</Link></li>
               <li><Link to="/features/live-sessions" className="text-muted-foreground hover:text-primary transition-colors">Live Sessions</Link></li>

@@ -88,9 +88,9 @@ const NanoSkillsMockup = () => {
 const LayersDiagram = () => {
   const layers = [
     { letter: 'A', name: 'Event Log', desc: 'Raw learning events from homework, flashcards, live sessions, tests', color: 'bg-blue-100 border-blue-300 text-blue-800' },
-    { letter: 'B', name: 'Metrics Engine', desc: 'Nano-skill mastery scores, trend detection, forgetting curves', color: 'bg-green-100 border-green-300 text-green-800' },
+    { letter: 'B', name: 'Metrics Engine', desc: 'Nano-skill mastery scores, trend detection, review signals', color: 'bg-green-100 border-green-300 text-green-800' },
     { letter: 'C', name: 'Student Profile', desc: 'CEFR level, strengths/weaknesses, learning preferences', color: 'bg-amber-100 border-amber-300 text-amber-800' },
-    { letter: 'D', name: 'Decision Engine', desc: 'AI-powered worksheet suggestions with estimated impact', color: 'bg-violet-100 border-violet-300 text-violet-800' },
+    { letter: 'D', name: 'Decision Support', desc: 'Next-step suggestions for teacher review before worksheet output', color: 'bg-violet-100 border-violet-300 text-violet-800' },
   ];
 
   return (
@@ -138,12 +138,12 @@ const LearningPathCards = () => {
 
 const EcosystemDiagram = () => {
   const nodes = [
-    { path: '/features/homework', title: 'Homework', icon: BookCheck, desc: 'AI-graded answers feed mastery scores' },
-    { path: '/features/flashcards', title: 'Flashcards', icon: Layers3, desc: 'SM-2 performance updates vocabulary skills' },
-    { path: '/features/calendar', title: 'Calendar', icon: CalendarDays, desc: 'Lesson frequency tracks consistency' },
-    { path: '/features/live-sessions', title: 'Live Sessions', icon: Radio, desc: 'Real-time answers update skills instantly' },
-    { path: '/features/placement-test', title: 'Placement Test', icon: ClipboardCheck, desc: 'Initializes the student DSLM profile' },
-    { path: '/features/student-hub', title: 'Student Hub', icon: GraduationCap, desc: 'All student activity auto-tracked' },
+    { path: '/features/homework', title: 'Homework', icon: BookCheck, desc: 'Reviewed homework answers can become planning signals' },
+    { path: '/features/flashcards', title: 'Flashcards', icon: Layers3, desc: 'SM-2 practice can inform vocabulary continuity' },
+    { path: '/features/calendar', title: 'Calendar', icon: CalendarDays, desc: 'Lesson cadence supports recurring prep context' },
+    { path: '/features/live-sessions', title: 'Live Sessions', icon: Radio, desc: 'Live answers and notes can inform future prep' },
+    { path: '/features/placement-test', title: 'Placement Test', icon: ClipboardCheck, desc: 'Creates an initial diagnostic baseline' },
+    { path: '/features/student-hub', title: 'Student Hub', icon: GraduationCap, desc: 'Supported student activity can add context' },
   ];
 
   return (
@@ -203,38 +203,38 @@ const TrackingTable = () => {
 /* ─── Page ─── */
 
 const faqItems = [
-  { question: 'What is DSLM?', answer: 'DSLM (Dynamic Student Learning Model) is Edooqoo\'s 4-layer system that automatically tracks what each student knows, identifies gaps, detects trends, and recommends exactly what to teach next — at the nano-skill level.' },
-  { question: 'Do I need to set up DSLM manually?', answer: 'No. DSLM works automatically. Every homework submission, flashcard review, live session answer, and placement test result feeds data into the model. You can also add manual observations through the Student Knowledge system.' },
-  { question: 'What are nano-skills?', answer: 'Nano-skills are the smallest measurable units of language ability — for example, "Present Perfect vs Past Simple" or "Business email opening phrases." DSLM tracks mastery at this granular level, not just broad categories like "Grammar."' },
-  { question: 'How does trend detection work?', answer: 'DSLM analyzes mastery changes over time. If a student\'s score on a nano-skill improves across multiple interactions, it\'s marked as "improving" (↑). Declining scores trigger "declining" (↓) alerts so you can intervene early.' },
-  { question: 'Can DSLM suggest what to teach next?', answer: 'Yes. Layer D (Decision Engine) uses an AI mega-prompt that prioritizes low-mastery areas (0-30%), declining trends, and avoids repeating topics from the last 10 lessons. It generates worksheet suggestions with estimated impact scores.' },
+  { question: 'What is DSLM?', answer: 'DSLM (Dynamic Student Learning Model) is Edooqoo\'s student-context and decision-support layer. It organizes available profile, goal, activity, and teacher-observation signals so teachers can make clearer next-step decisions before generating a worksheet.' },
+  { question: 'Do I need to set up DSLM manually?', answer: 'DSLM needs student context. The guided setup starts with a student profile, goals, optional Welcome Test data, and supported learning signals. Teachers can also add manual observations through the Student Knowledge system.' },
+  { question: 'What are nano-skills?', answer: 'Nano-skills are small language ability areas — for example, "Present Perfect vs Past Simple" or "Business email opening phrases." DSLM can track these more granularly than broad categories like "Grammar."' },
+  { question: 'How does trend detection work?', answer: 'DSLM can compare available mastery and activity signals over time. Improving, stable, or declining indicators help teachers decide whether to review, maintain, or push a skill further.' },
+  { question: 'Can DSLM suggest what to teach next?', answer: 'Yes. DSLM can generate next-step suggestions from available student context and recent signals. The teacher still chooses, edits, and approves the lesson direction before using the worksheet output.' },
   { question: 'Is my students\' data private?', answer: 'Absolutely. All DSLM data is scoped to your account. Students cannot see each other\'s data. The system only stores learning metrics — never personal information beyond what you enter in the student profile.' },
 ];
 
 const benefits = [
   { icon: Brain, title: 'Nano-skill Precision', description: 'Track mastery at the most granular level — not just "Grammar" but "3rd Conditional in negative form."' },
   { icon: TrendingUp, title: 'Trend Detection', description: 'See which skills are improving, stable, or declining. Intervene before small gaps become big problems.' },
-  { icon: Target, title: 'AI Suggestions', description: 'Get worksheet recommendations based on actual data — not guesswork. Each suggestion includes estimated impact.' },
-  { icon: Layers, title: 'Zero Setup', description: 'Works automatically from day one. Every interaction feeds the model. No spreadsheets, no manual tracking.' },
+  { icon: Target, title: 'Next-step Suggestions', description: 'Use available student context to generate clearer worksheet recommendations for teacher review.' },
+  { icon: Layers, title: 'Guided Setup', description: 'Start with profile, goals, optional Welcome Test data, and teacher observations. Edooqoo becomes more useful as context accumulates.' },
 ];
 
 const steps = [
-  { number: 1, title: 'Student completes an activity', description: 'Homework, flashcard review, live session, or placement test — any interaction generates learning events automatically.', mockup: undefined },
-  { number: 2, title: 'DSLM processes the data', description: 'Events flow through 4 layers: raw events → metrics calculation → profile update → AI recommendations. All automatic, real-time.' },
-  { number: 3, title: 'You see the full picture', description: 'Open any student\'s profile to see their radar chart, nano-skill mastery bars, trend indicators, and AI-generated worksheet suggestions.' },
-  { number: 4, title: 'Teach with precision', description: 'Use DSLM suggestions to generate the next worksheet, or choose your own focus — informed by data, not guesswork.' },
+  { number: 1, title: 'Student context is created', description: 'Profile, goals, Welcome Test results, homework, flashcards, live work, or teacher observations provide the starting signals.', mockup: undefined },
+  { number: 2, title: 'DSLM organizes available signals', description: 'The system turns raw activity and teacher context into profile, mastery, trend, and planning information.' },
+  { number: 3, title: 'You review the next-step view', description: 'Open the student profile to see radar charts, nano-skill signals, trend indicators, and suggested worksheet directions.' },
+  { number: 4, title: 'Teach with teacher control', description: 'Use DSLM suggestions to generate the next worksheet, or choose your own focus — then review and edit before use.' },
 ];
 
 const FeatureDSLM: React.FC = () => (
   <FeaturePageLayout
-    title="DSLM — AI Student Progress Tracking for ESL Teachers | Edooqoo"
-    metaDescription="Track student progress at nano-skill level with Edooqoo's Dynamic Student Learning Model. 4-layer AI system: events, metrics, profiles, and intelligent suggestions."
+    title="DSLM — Student Context for 1-Minute Prep | Edooqoo"
+    metaDescription="Use Edooqoo's Dynamic Student Learning Model to organize student context, learning signals, and teacher-reviewed next-step suggestions for 1:1 English lessons."
   >
     <FeatureHero
       badge="DSLM"
       badgeColor="bg-violet-100 text-violet-700 border-violet-200"
-      headline="Know exactly what to teach next. Every lesson, every student."
-      subheadline="The Dynamic Student Learning Model tracks mastery at nano-skill level, detects trends, and recommends precisely what each student needs — automatically."
+      headline="Organize student signals before the next lesson."
+      subheadline="The Dynamic Student Learning Model supports 1-Minute Prep by turning profile, goals, lesson notes, homework, flashcards and teacher observations into clearer next-step suggestions."
     >
       <div className="p-6 md:p-8 grid md:grid-cols-2 gap-8">
         <div>
@@ -272,7 +272,7 @@ const FeatureDSLM: React.FC = () => (
     <section className="py-16 bg-secondary/20">
       <div className="max-w-3xl mx-auto px-4">
         <h2 className="text-2xl font-bold text-foreground mb-2 text-center">The 4-Layer Architecture</h2>
-        <p className="text-sm text-muted-foreground text-center mb-10">From raw events to intelligent teaching decisions — fully automatic.</p>
+        <p className="text-sm text-muted-foreground text-center mb-10">From raw events to teacher-reviewed next-step suggestions.</p>
         <LayersDiagram />
       </div>
     </section>
@@ -281,7 +281,7 @@ const FeatureDSLM: React.FC = () => (
     <section className="py-16 bg-background">
       <div className="max-w-4xl mx-auto px-4">
         <h2 className="text-2xl font-bold text-foreground mb-2 text-center">What DSLM Tracks</h2>
-        <p className="text-sm text-muted-foreground text-center mb-8">Six skill areas, dozens of nano-skills — all tracked automatically.</p>
+        <p className="text-sm text-muted-foreground text-center mb-8">Six skill areas, dozens of nano-skills — clearer when student context and learning signals exist.</p>
         <TrackingTable />
       </div>
     </section>
@@ -290,7 +290,7 @@ const FeatureDSLM: React.FC = () => (
     <section className="py-16 bg-secondary/20">
       <div className="max-w-3xl mx-auto px-4">
         <h2 className="text-2xl font-bold text-foreground mb-2 text-center">4 Learning Paths</h2>
-        <p className="text-sm text-muted-foreground text-center mb-8">DSLM suggests the right difficulty level for each student.</p>
+        <p className="text-sm text-muted-foreground text-center mb-8">DSLM can suggest a difficulty direction for teacher review.</p>
         <LearningPathCards />
       </div>
     </section>
@@ -301,13 +301,13 @@ const FeatureDSLM: React.FC = () => (
     <section className="py-16 bg-background">
       <div className="max-w-4xl mx-auto px-4">
         <h2 className="text-2xl font-bold text-foreground mb-2 text-center">How DSLM Powers Every Feature</h2>
-        <p className="text-sm text-muted-foreground text-center mb-8">Every feature feeds data into DSLM. Every suggestion is powered by DSLM.</p>
+        <p className="text-sm text-muted-foreground text-center mb-8">Supported student activity and teacher observations can add context for better recurring prep.</p>
         <EcosystemDiagram />
       </div>
     </section>
 
     <FeatureFAQ items={faqItems} />
-    <FeatureCTA headline="Start tracking student progress today" subheadline="2 free worksheets. DSLM starts working from the first interaction." />
+    <FeatureCTA headline="Start building student context today" subheadline="2 free worksheets. Build the context that moves weekly prep toward 1 minute per student." />
     <RelatedFeatures currentPath="/features/dslm" />
   </FeaturePageLayout>
 );

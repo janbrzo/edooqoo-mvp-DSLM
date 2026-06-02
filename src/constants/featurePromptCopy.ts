@@ -16,12 +16,12 @@ export interface FeaturePromptCopy {
 export const FEATURE_PROMPT_COPY: Record<string, FeaturePromptCopy> = {
   'feature-placement-test': {
     headline: 'Place new students at the right CEFR level — in 12 minutes.',
-    subline: 'AI-graded speaking, writing, listening and grammar. No spreadsheets, no guesswork.',
+    subline: 'Multi-skill diagnostic signals for speaking, writing, listening and grammar. No spreadsheets, no guesswork.',
     cta: 'Try Placement Test — Free',
   },
   'feature-homework': {
-    headline: 'Send interactive homework that grades itself.',
-    subline: 'Auto-corrected exercises, audio answers transcribed, results in your dashboard.',
+    headline: 'Send interactive homework and review it faster.',
+    subline: 'Auto-checked objective exercises, AI-assisted open-answer review, results in your dashboard.',
     cta: 'Create Free Homework',
   },
   'feature-calendar': {

@@ -110,7 +110,7 @@ const PublicGalleryWorksheetPage: React.FC = () => {
         </header>
 
         <aside aria-label="Preview notice" className="mb-6 rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-          <strong>Preview mode.</strong> This is a static read-only preview of a worksheet a teacher published. Interactive answers, AI grading, audio playback and downloads are available only in the full editor — <Link to="/signup" state={fromState} className="font-semibold underline">sign up free</Link> to generate or open this worksheet interactively.
+          <strong>Preview mode.</strong> This is a static read-only preview of a worksheet a teacher published. Interactive answers, AI-assisted review, audio playback and downloads are available only in the full editor — <Link to="/signup" state={fromState} className="font-semibold underline">sign up free</Link> to generate or open this worksheet interactively.
         </aside>
 
         {parsed?.exercises && Array.isArray(parsed.exercises) ? (

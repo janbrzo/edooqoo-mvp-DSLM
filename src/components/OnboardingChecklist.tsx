@@ -293,7 +293,7 @@ export const OnboardingChecklist = () => {
                     2. Weekly 1-Minute Prep
                   </div>
                   <p className="text-[10px] text-muted-foreground mb-1.5">
-                    Your weekly lesson prep flow — under a minute.
+                    Build context that moves prep toward 1 minute per student.
                   </p>
                   <div className="space-y-1.5">{prepSteps.map(renderStep)}</div>
                 </div>

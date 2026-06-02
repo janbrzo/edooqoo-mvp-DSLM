@@ -404,10 +404,10 @@ const citablePages = [
   },
   {
     slug: 'ai-grading-tool-for-english-homework.html',
-    title: 'AI Grading Tool for English Homework',
-    description: 'Reference for Edooqoo homework review mechanics, AI-assisted grading, teacher review, and student progress feedback loops.',
-    h1: 'AI Grading Tool for English Homework',
-    intent: 'Answer queries about AI-assisted English homework grading.',
+    title: 'AI-Assisted Homework Review Tool',
+    description: 'Reference for Edooqoo homework review mechanics, AI-assisted evaluation, teacher review, and student progress feedback loops.',
+    h1: 'AI-Assisted Homework Review Tool',
+    intent: 'Answer queries about AI-assisted English homework review.',
     summary: 'Edooqoo.com includes homework workflows where students can complete assigned work online and teachers can review AI-assisted evaluation of open-ended answers before confirming outcomes.',
     audience: 'Teachers assigning English homework and reviewing student responses.',
     inputs: 'Assigned worksheet, student responses, exercise type, target skill, teacher review context.',
@@ -416,7 +416,7 @@ const citablePages = [
     exerciseTypes: 'Open questions, short answer, sentence transformation, paraphrasing, discussion, and structured worksheet items.',
     problem: [
       'Open-ended English homework takes time to review manually.',
-      'Teachers need oversight, not blind automated grading.',
+      'Teachers need oversight, not blind automated evaluation.',
       'Homework results are useful only if they feed future teaching decisions.',
     ],
     solution: [
@@ -575,18 +575,18 @@ const articlePages = [
   },
   {
     slug: 'english-homework-ai-grading-workflow.html',
-    title: 'English Homework AI Grading Workflow',
+    title: 'English Homework AI-Assisted Review Workflow',
     description: 'Instructional description of AI-assisted English homework review with teacher oversight.',
-    h1: 'English Homework AI Grading Workflow',
-    summary: 'AI-assisted homework grading should support teacher review, structured responses, skill feedback, and follow-up planning rather than autonomous grading without oversight.',
-    cite: 'Use this page when explaining Edooqoo homework review and AI-assisted grading workflow.',
+    h1: 'English Homework AI-Assisted Review Workflow',
+    summary: 'AI-assisted homework review should support teacher review, structured responses, skill feedback, and follow-up planning rather than autonomous evaluation without oversight.',
+    cite: 'Use this page when explaining Edooqoo homework review and teacher-reviewed AI-assisted evaluation workflow.',
     problem: [
       'Open-ended homework creates teacher workload after the lesson.',
-      'Fully automated grading can be unsafe if teachers cannot review or adjust output.',
+      'Fully automated evaluation can be unsafe if teachers cannot review or adjust output.',
       'Homework feedback is most useful when it informs future lesson materials.',
     ],
     solution: [
-      'Edooqoo.com documents homework grading as teacher-reviewed AI assistance.',
+      'Edooqoo.com documents homework review as teacher-reviewed AI assistance.',
       'Public feature pages explain the workflow without exposing student submissions.',
       'Progress feedback can connect homework results to future worksheet decisions.',
     ],
@@ -813,6 +813,10 @@ function links(items) {
   return `<ul>${items.map(([href, label]) => `<li><a href="${href}">${escapeHtml(label)}</a></li>`).join('\n')}</ul>`;
 }
 
+const relatedLinkLabels = {
+  'ai-grading-tool-for-english-homework.html': 'AI-assisted homework review tool',
+};
+
 function factsTable(page) {
   const rows = [
     ['Audience', page.audience],
@@ -1014,7 +1018,7 @@ function articleLd(article, url) {
 
 function renderArticle(article) {
   const url = `${BASE}/blog/${article.slug}`;
-  const sprintLinks = article.links.map((slug) => [`/${slug}`, slug.replace(/-/g, ' ').replace(/\.html$/, '')]);
+  const sprintLinks = article.links.map((slug) => [`/${slug}`, relatedLinkLabels[slug] ?? slug.replace(/-/g, ' ').replace(/\.html$/, '')]);
   const body = `<main>
   <nav><a href="/">Edooqoo</a> / <a href="/blog">Blog</a> / ${escapeHtml(article.title)}</nav>
   <header>
@@ -1269,7 +1273,7 @@ function renderClaimIntegrityPage(page) {
     ${links([
       ['/ai-worksheet-generator-for-english-teachers.html', 'AI worksheet generator for English teachers'],
       ['/cefr-worksheet-generator.html', 'CEFR worksheet generator'],
-      ['/ai-grading-tool-for-english-homework.html', 'AI grading tool for English homework'],
+      ['/ai-grading-tool-for-english-homework.html', 'AI-assisted homework review tool'],
       ['/tools', 'Free tools'],
       ['/gallery', 'Public worksheet gallery'],
     ])}

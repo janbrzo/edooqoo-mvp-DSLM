@@ -64,7 +64,7 @@ const faqItems = [
   { question: 'What can students see in the Hub?', answer: 'Students see their assigned worksheets, pending and completed homework, flashcard sets with study interface, upcoming lessons, and basic settings. They cannot see other students\' data or your internal notes.' },
   { question: 'Do students need to create an account?', answer: 'No. Access is email-based. When you add a student, they receive a link to their Hub. They can bookmark it for easy access. No password, no registration form.' },
   { question: 'Can students sync with Google Calendar?', answer: 'Yes. Students can connect their own Google Calendar through the Hub settings. Lessons sync automatically with customizable event colors per status (upcoming, completed, cancelled).' },
-  { question: 'How does Student Hub connect to DSLM?', answer: 'Every action a student takes in the Hub — completing homework, reviewing flashcards, viewing worksheets — generates learning events that feed into DSLM. The Hub is both a learning tool and a data source for personalization.' },
+  { question: 'How does Student Hub connect to DSLM?', answer: 'Supported Hub activity — such as homework completion, flashcard review, and worksheet access — can contribute learning signals for future prep. The Hub is both a student workspace and a source of context for teacher-reviewed planning.' },
 ];
 
 const FeatureStudentHub: React.FC = () => (
@@ -76,12 +76,12 @@ const FeatureStudentHub: React.FC = () => (
       badge="Student Portal"
       badgeColor="bg-teal-100 text-teal-700 border-teal-200"
       headline="Your students' personal learning space."
-      subheadline="One link gives students access to all their materials — worksheets, homework, flashcards, and lessons. No app, no account. Everything tracked automatically for DSLM."
+      subheadline="One link gives students access to all their materials — worksheets, homework, flashcards, and lessons. No app, no account. Supported activity can add learning signals for DSLM."
     >
       <StudentHubMockup />
     </FeatureHero>
 
-    <DSLMBadge feature="Student Hub" description="All student activity in the Hub is automatically tracked by DSLM — completing homework, reviewing flashcards, and attending lessons all feed the learning model." />
+    <DSLMBadge feature="Student Hub" description="Supported Student Hub activity can add learning signals for DSLM and help future prep start from stronger context." />
     <FeatureBenefits benefits={benefits} />
     <FeatureFAQ items={faqItems} />
     <FeatureCTA headline="Give your students their own space" subheadline="Student Hub is included in every plan. Start free." />

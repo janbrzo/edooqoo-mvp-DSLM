@@ -74,7 +74,7 @@ function buildStages(form: FormState): Stage[] {
     {
       name: 'Wrap-up & homework',
       minutes: wrap,
-      description: `Recap key items. Assign 1 homework item from Edooqoo (auto-graded). Confirm next session’s focus.`,
+      description: `Recap key items. Assign 1 homework item from Edooqoo for teacher-reviewed follow-up. Confirm next session’s focus.`,
       materials: ['Homework link (Edooqoo)', '3-line learner reflection'],
     },
   ];
