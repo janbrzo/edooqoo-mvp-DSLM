@@ -14,12 +14,17 @@ import { NATIVE_LANGUAGES } from '@/types/flashcards';
 import { MAIN_GOALS, ENGLISH_LEVELS } from '@/constants/studentGoals';
 import { DeadlinePicker } from '@/components/shared/DeadlinePicker';
 import { Checkbox } from '@/components/ui/checkbox';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Info } from 'lucide-react';
 import { devLog } from '@/utils/logger';
 
 const ADD_STUDENT_DRAFT_KEY = 'add-student-dialog-draft';
 
 interface AddStudentDialogProps {
-  onStudentAdded?: () => void;
+  /** If provided, the dialog will NOT navigate to /student/:id on success —
+   *  the caller takes over (e.g. WorksheetForm auto-selects the new student). */
+  onStudentAdded?: (newStudent?: { id: string; name: string }) => void;
   triggerButton?: boolean;
   open?: boolean;
   onOpenChange?: (open: boolean) => void;
@@ -52,9 +57,14 @@ export const AddStudentDialog = ({
   const [studentEmail, setStudentEmail] = useState('');
   const [sendOverdueEmails, setSendOverdueEmails] = useState(true);
   const [nativeLanguage, setNativeLanguage] = useState('Spanish');
-  const [deferProfile, setDeferProfile] = useState(true);
+  // v6.9.33 — 3-mode flow: `know` (teacher fills level+goal now),
+  // `defer` (recommended; level/goal inferred from Welcome Test),
+  // `manual` (skip test, set everything later).
+  const [mode, setMode] = useState<'know' | 'defer' | 'manual'>('defer');
+  const deferProfile = mode !== 'know';
   const [mainGoalDeadline, setMainGoalDeadline] = useState<string>('');
-  const [autoSendWelcomeTest, setAutoSendWelcomeTest] = useState(true);
+  const [sendTestWhenKnown, setSendTestWhenKnown] = useState(false);
+  const autoSendWelcomeTest = mode === 'defer' ? true : (mode === 'know' ? sendTestWhenKnown : false);
   const [loading, setLoading] = useState(false);
   const { addStudent, refetch } = useStudents();
   const { refreshProgress } = useOnboardingProgress();
@@ -155,7 +165,8 @@ export const AddStudentDialog = ({
       setStudentEmail('');
       setSendOverdueEmails(true);
       setNativeLanguage('Spanish');
-      setDeferProfile(true);
+      setMode('defer');
+      setSendTestWhenKnown(false);
       setMainGoalDeadline('');
       sessionStorage.removeItem(ADD_STUDENT_DRAFT_KEY);
       setOpen(false);
@@ -169,19 +180,20 @@ export const AddStudentDialog = ({
       refreshProgress();
       
       // Notify parent component that student was added
+      // v6.9.33 — when caller provides onStudentAdded it owns next navigation
+      // (e.g. WorksheetForm auto-selects the new student without page nav).
       if (onStudentAdded) {
-        devLog('🔄 Calling onStudentAdded callback...');
-        onStudentAdded();
-      }
-      
-      // Navigate to new student page; optionally auto-send Welcome Test.
-      if (newStudent?.id) {
-        const params = new URLSearchParams({ tab: 'overview' });
+        devLog('🔄 Calling onStudentAdded callback (caller-controlled nav) ...');
+        onStudentAdded(newStudent ? { id: newStudent.id, name: newStudent.name } : undefined);
+      } else if (newStudent?.id) {
+        // Default flow: navigate to DSLM tab. After auto-send, jump straight
+        // to Add Goal modal; otherwise focus the (compact) Welcome Test banner.
+        const ts = Date.now();
         if (autoSendWelcomeTest) {
-          params.set('focus', 'send-welcome-test');
-          params.set('autosend', '1');
+          navigate(`/student/${newStudent.id}?tab=dslm&view=goals&focus=add-goal-modal&_=${ts}`);
+        } else {
+          navigate(`/student/${newStudent.id}?tab=dslm&view=pathway&focus=send-welcome-test&autosend=0&_=${ts}`);
         }
-        navigate(`/student/${newStudent.id}?${params.toString()}`);
       }
     } catch (error) {
       // Error handled in hook
