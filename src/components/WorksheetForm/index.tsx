@@ -87,11 +87,15 @@ export default function WorksheetForm({
   // would be saved under the user's id but read back under 'anon' after refresh.
   const userId = userIdProp ?? null;
   const {
-    students
+    students,
+    refetch: refetchStudents
   } = useStudents();
   const {
     refreshProgress
   } = useOnboardingProgress();
+
+  // v6.9.33 — inline "+ Add Student" SelectItem opens this dialog.
+  const [inlineAddStudentOpen, setInlineAddStudentOpen] = useState(false);
 
   // v6.9.15b — `no-next-steps` hint removed from this form because
   // NextStepsPresetBanner already shows the canonical "No learning plan" CTA
