@@ -37,8 +37,9 @@ const StickyNav: React.FC<StickyNavProps> = ({ isRegisteredUser, tokenLeft, user
   const isProfile = location.pathname === '/profile';
   const isCalendar = location.pathname === '/calendar';
   const isStudentPage = /^\/student\//.test(location.pathname);
-  // v6.9.13 — show NavStudentSwitcher on every authenticated page except dashboard/profile
-  const showStudentSwitcher = isRegisteredUser && !isDashboard && !isProfile && !isStudentPage;
+  // v6.9.33 — show NavStudentSwitcher on every authenticated page except
+  // dashboard / profile (incl. /student/:id where it replaces the local popover).
+  const showStudentSwitcher = isRegisteredUser && !isDashboard && !isProfile;
   const { isDemoMode, exitDemo } = useDemoContext();
 
   // Position class for ANON nav (non-sticky on worksheet pages, sticky elsewhere)
@@ -88,10 +89,10 @@ const StickyNav: React.FC<StickyNavProps> = ({ isRegisteredUser, tokenLeft, user
         <nav className={`sticky ${isDemoMode ? 'top-[36px]' : 'top-0'} z-50 bg-background/90 backdrop-blur-md border-b border-border h-14 px-4 flex items-center justify-between`}>
           <div className="flex items-center gap-2 min-w-0">
             <Logo />
+            {showStudentSwitcher && <NavStudentSwitcher />}
             {leftContent}
           </div>
           <div className="flex items-center gap-2">
-            {showStudentSwitcher && <NavStudentSwitcher />}
             {onGenerateWorksheet && isDashboard && (
               <Button size="sm" onClick={onGenerateWorksheet} className="h-8 text-xs">
                 <Plus className="h-3.5 w-3.5 mr-1" />
@@ -155,10 +156,10 @@ const StickyNav: React.FC<StickyNavProps> = ({ isRegisteredUser, tokenLeft, user
       <nav className={`sticky ${isDemoMode ? 'top-[36px]' : 'top-0'} z-50 bg-background/90 backdrop-blur-md border-b border-border h-14 px-6 flex items-center justify-between`}>
         <div className="flex items-center gap-3 min-w-0">
           <Logo />
+          {showStudentSwitcher && <NavStudentSwitcher />}
           {leftContent}
         </div>
         <div className="flex items-center gap-3">
-          {showStudentSwitcher && <NavStudentSwitcher />}
           {onGenerateWorksheet && isDashboard && (
             <Button size="sm" onClick={onGenerateWorksheet}>
               <Plus className="h-4 w-4 mr-2" />
