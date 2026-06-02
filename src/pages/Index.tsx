@@ -449,6 +449,13 @@ const Index = () => {
         onTryWorksheetGenerator={scrollToWorksheetForm}
       />
 
+      {/* v6.9.33 — first-time Add Student dialog after signup. */}
+      <AddStudentDialog
+        triggerButton={false}
+        open={addStudentOpen}
+        onOpenChange={setAddStudentOpen}
+      />
+
     </div>
   );
 };
