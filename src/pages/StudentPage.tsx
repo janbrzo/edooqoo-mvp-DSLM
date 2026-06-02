@@ -10,7 +10,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useStudents } from '@/hooks/useStudents';
 import { useStudent } from '@/hooks/useStudent';
 import { useWorksheetHistory } from '@/hooks/useWorksheetHistory';
@@ -56,7 +55,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import ShareWorksheetModal from '@/components/ShareWorksheetModal';
 import RenameDialog from '@/components/RenameDialog';
-import { StudentSwitcherPopover } from '@/components/StudentSwitcherPopover';
 import { toast } from 'sonner';
 import { Label } from '@/components/ui/label';
 
@@ -246,7 +244,6 @@ const StudentPage = () => {
   const { students, updateStudent, deleteStudent, loading: studentsLoading } = useStudents();
   const [currentPage, setCurrentPage] = useState(1);
   const [deletedCurrentPage, setDeletedCurrentPage] = useState(1);
-  const [oneMinuteTipOpen, setOneMinuteTipOpen] = useState(false);
   // v6.8.4 — "1 MINUTE" (DSLM) is now the default tab. The Edooqoo promise:
   // ~1 minute weekly prep per student instead of 1–2 hours. Backward-compat:
   // existing `?tab=overview` links still open the Overview tab as before.
@@ -435,13 +432,6 @@ const StudentPage = () => {
                 <span className="hidden sm:inline">Back</span>
               </Link>
             </Button>
-            <span className="text-border">|</span>
-            <StudentSwitcherPopover 
-              students={students} 
-              currentStudentId={student.id} 
-              onSelect={(sid) => navigate(`/student/${sid}`)} 
-            />
-            <span className="font-semibold text-sm truncate max-w-[150px]">{student.name}</span>
           </>
         }
       />
@@ -457,27 +447,18 @@ const StudentPage = () => {
               <User className="h-4 w-4" />
               <span className="hidden lg:inline">Overview</span>
             </TabsTrigger>
-            <TooltipProvider delayDuration={300} disableHoverableContent>
-              <Tooltip open={oneMinuteTipOpen} onOpenChange={() => { /* controlled — ignore focus-driven opens */ }}>
-                <TooltipTrigger asChild>
-                  <TabsTrigger
-                    value="dslm"
-                    className="flex items-center gap-2"
-                    aria-label="1 MINUTE"
-                    onMouseEnter={() => setOneMinuteTipOpen(true)}
-                    onMouseLeave={() => setOneMinuteTipOpen(false)}
-                    onFocus={(e) => e.preventDefault()}
-                    onBlur={() => setOneMinuteTipOpen(false)}
-                  >
-                    <Brain className="h-4 w-4" />
-                    <span className="hidden lg:inline">1 MINUTE</span>
-                  </TabsTrigger>
-                </TooltipTrigger>
-                <TooltipContent className="max-w-xs">
-                  <strong>1 MINUTE</strong> — Edooqoo's promise: ~1 minute weekly prep per student instead of 1–2 hours. Powered by DSLM (Dynamic Student Learning Model).
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            {/* v6.9.33 — separate TabsTrigger from Tooltip so Radix `data-state`
+                propagation isn't broken by `TooltipTrigger asChild`. The Tooltip
+                wraps a transparent overlay span instead of the trigger itself. */}
+            <TabsTrigger
+              value="dslm"
+              className="flex items-center gap-2 relative"
+              aria-label="1 MINUTE"
+              title="1 MINUTE — Edooqoo's promise: ~1 minute weekly prep per student"
+            >
+              <Brain className="h-4 w-4" />
+              <span className="hidden lg:inline">1 MINUTE</span>
+            </TabsTrigger>
             <TabsTrigger value="worksheets" className="flex items-center gap-2" aria-label="Worksheets" title="Worksheets">
               <FileText className="h-4 w-4" />
               <span className="hidden lg:inline">Worksheets</span>

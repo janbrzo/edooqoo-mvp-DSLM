@@ -1,21 +1,45 @@
 import React from "react";
 
 // Strip -picture / -audio suffix so we render by base type.
-const normalize = (t: string): string =>
-  String(t || "").replace(/-picture$/, "").replace(/-audio$/, "");
+// Also collapse common aliases so renderer cases stay short.
+const normalize = (t: string): string => {
+  const base = String(t || "").replace(/-picture$/, "").replace(/-audio$/, "");
+  const aliases: Record<string, string> = {
+    "synonyms-antonyms": "synonyms",
+    "antonyms-synonyms": "synonyms",
+    "synonyms_antonyms": "synonyms",
+    "matching-halves": "matching",
+    "match-halves": "matching",
+    "word_order": "word-order",
+    "complete_word": "complete-word",
+    "negative_prefixes": "negative-prefixes",
+    "word_formation": "word-formation",
+    "fill-in-blanks": "fill-in-the-blanks",
+  };
+  return aliases[base] || base;
+};
 
-// v6.9.22 — Defensive: extract plain text from string|number|object so
-// objects like { text: "..." } never render as "[object Object]".
+// v6.9.33 — Defensive: extract plain text from string|number|object so
+// objects like { text: "..." } never render as "[object Object]" or raw JSON.
+// Also filters out nano-skill metadata objects which sometimes leak into
+// exercise items (`{name, mastery, reason}` shape).
 const toText = (v: unknown): string => {
   if (v == null) return "";
   if (typeof v === "string" || typeof v === "number") return String(v);
   if (typeof v === "object") {
     const o = v as Record<string, unknown>;
+    // Skip nano-skill rating shapes — they don't belong in exercise content.
+    if ("mastery" in o || "reason" in o) {
+      return typeof o.name === "string" ? o.name as string : "";
+    }
     const candidate =
-      o.text ?? o.word ?? o.label ?? o.value ?? o.term ?? o.left ?? o.right ??
-      o.line ?? o.name ?? o.answer ?? o.option ?? o.sentence ?? o.statement;
-    if (candidate != null) return String(candidate);
-    return JSON.stringify(o);
+      o.text ?? o.word ?? o.label ?? o.value ?? o.term ?? o.prompt ??
+      o.input ?? o.base ?? o.gapped ?? o.masked ?? o.first ?? o.a ??
+      o.left ?? o.right ?? o.line ?? o.name ?? o.answer ?? o.option ??
+      o.sentence ?? o.statement ?? o.question;
+    if (candidate != null && typeof candidate !== "object") return String(candidate);
+    // Last-resort: silently swallow rather than dumping raw JSON.
+    return "";
   }
   return String(v);
 };
@@ -28,7 +52,7 @@ const Label: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 
 const QuestionText = (q: any): string => {
   if (typeof q === "string") return q;
-  if (q && typeof q === "object") return q.text || q.question || q.prompt || JSON.stringify(q);
+  if (q && typeof q === "object") return toText(q);
   return String(q ?? "");
 };
 
@@ -117,8 +141,8 @@ const GalleryExerciseRenderer: React.FC<Props> = ({ exercise, index }) => {
             <tbody>
               {pairs.map((p: any, i: number) => (
                 <tr key={i} className="border-b border-border/40">
-                  <td className="py-1.5 pr-3 font-medium">{toText(p.left ?? p.first ?? p.term ?? p.a ?? p)}</td>
-                  <td className="py-1.5 text-muted-foreground">{toText(p.right ?? p.second ?? p.definition ?? p.b)}</td>
+                  <td className="py-1.5 pr-3 font-medium">{toText(p?.left ?? p?.first ?? p?.term ?? p?.a ?? p?.word ?? p)}</td>
+                  <td className="py-1.5 text-muted-foreground">{toText(p?.right ?? p?.second ?? p?.definition ?? p?.b ?? p?.match ?? p?.pair ?? p?.synonym ?? p?.antonym)}</td>
                 </tr>
               ))}
             </tbody>
@@ -185,9 +209,16 @@ const GalleryExerciseRenderer: React.FC<Props> = ({ exercise, index }) => {
           <ol className="list-decimal space-y-1.5 pl-5 text-sm">
             {items.map((it: any, i: number) => (
               <li key={i} className="flex flex-wrap gap-1.5">
-                {(it.words || it.shuffled || (typeof it === "string" ? it.split(/\s+/) : [])).map((w: string, wi: number) => (
-                  <Label key={wi}>{toText(w)}</Label>
-                ))}
+                {(() => {
+                  const words =
+                    it?.words ?? it?.shuffled ?? it?.tokens ??
+                    (typeof it === "string" ? it.split(/\s+/) :
+                      (typeof it?.sentence === "string" ? it.sentence.split(/\s+/) :
+                        (typeof it?.scrambled === "string" ? it.scrambled.split(/\s+/) : [])));
+                  return (words as any[]).map((w: any, wi: number) => (
+                    <Label key={wi}>{toText(w)}</Label>
+                  ));
+                })()}
               </li>
             ))}
           </ol>
@@ -205,8 +236,12 @@ const GalleryExerciseRenderer: React.FC<Props> = ({ exercise, index }) => {
             <tbody>
               {items.map((it: any, i: number) => (
                 <tr key={i} className="border-b border-border/40">
-                  <td className="py-1.5 pr-3 font-medium">{toText(it?.prompt ?? it?.word ?? it?.input ?? it?.text ?? it?.question ?? it)}</td>
-                  <td className="py-1.5 text-muted-foreground">{toText(it?.answer ?? it?.target ?? it?.solution ?? "")}</td>
+                  <td className="py-1.5 pr-3 font-medium">
+                    {toText(it?.term ?? it?.prompt ?? it?.word ?? it?.base ?? it?.input ?? it?.gapped ?? it?.masked ?? it?.text ?? it?.question ?? it)}
+                  </td>
+                  <td className="py-1.5 text-muted-foreground">
+                    {toText(it?.definition ?? it?.answer ?? it?.target ?? it?.solution ?? it?.synonym ?? it?.antonym ?? it?.completed ?? "")}
+                  </td>
                 </tr>
               ))}
             </tbody>

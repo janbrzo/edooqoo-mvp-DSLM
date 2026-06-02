@@ -4,7 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { useOnboardingProgress } from '@/hooks/useOnboardingProgress';
-import { ChevronDown, Check, User, FileText, X, ClipboardCheck, Target, Map, Lightbulb, MousePointerClick } from 'lucide-react';
+import { ChevronDown, Check, User, FileText, X, ClipboardCheck, Target, Map, Lightbulb, MousePointerClick, Calendar, Lock } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Confetti from 'react-confetti';
 import { AddStudentDialog } from '@/components/dashboard/AddStudentDialog';
@@ -51,8 +52,14 @@ export const OnboardingChecklist = () => {
 
   // Pick a target student for deep links — first real (non-demo) student if available.
   const firstStudentId = students?.[0]?.id;
-  const studentDeepLink = (suffix: string) =>
-    firstStudentId ? `/student/${firstStudentId}${suffix}` : '/dashboard';
+  // v6.9.33 — append cache-buster so React Router fires a fresh navigation
+  // even when the user clicks the same focus link twice in a row.
+  const studentDeepLink = (suffix: string) => {
+    if (!firstStudentId) return '/dashboard';
+    const sep = suffix.includes('?') ? '&' : '?';
+    return `/student/${firstStudentId}${suffix}${sep}_=${Date.now()}`;
+  };
+  const hasStudent = !!firstStudentId;
 
   type Step = {
     key: string;
@@ -60,6 +67,7 @@ export const OnboardingChecklist = () => {
     icon: typeof User;
     completed: boolean;
     action: () => void;
+    requiresStudent?: boolean;
   };
 
   const setupSteps: Step[] = [
@@ -75,7 +83,8 @@ export const OnboardingChecklist = () => {
       label: 'Send Welcome Test',
       icon: ClipboardCheck,
       completed: !!progress.steps.send_welcome_test,
-      action: () => navigate(studentDeepLink('?tab=overview&focus=send-welcome-test')),
+      action: () => navigate(studentDeepLink('?tab=dslm&view=pathway&focus=send-welcome-test')),
+      requiresStudent: true,
     },
     {
       key: 'add_goals',
@@ -83,6 +92,7 @@ export const OnboardingChecklist = () => {
       icon: Target,
       completed: !!progress.steps.add_goals,
       action: () => navigate(studentDeepLink('?tab=dslm&view=goals&focus=add-goal-modal')),
+      requiresStudent: true,
     },
     {
       key: 'generate_roadmap',
@@ -90,6 +100,7 @@ export const OnboardingChecklist = () => {
       icon: Map,
       completed: !!progress.steps.generate_roadmap,
       action: () => navigate(studentDeepLink('?tab=dslm&view=pathway&focus=learning-roadmap')),
+      requiresStudent: true,
     },
   ];
 
@@ -100,6 +111,7 @@ export const OnboardingChecklist = () => {
       icon: Lightbulb,
       completed: !!progress.steps.generate_next_ideas,
       action: () => navigate(studentDeepLink('?tab=dslm&view=pathway&focus=next-lesson-ideas')),
+      requiresStudent: true,
     },
     {
       key: 'pick_idea',
@@ -107,6 +119,7 @@ export const OnboardingChecklist = () => {
       icon: MousePointerClick,
       completed: !!progress.steps.pick_idea,
       action: () => navigate(studentDeepLink('?tab=dslm&view=pathway&focus=pick-idea')),
+      requiresStudent: true,
     },
     {
       key: 'generate_worksheet',
@@ -115,35 +128,67 @@ export const OnboardingChecklist = () => {
       completed: !!progress.steps.generate_worksheet,
       action: () => navigate('/'),
     },
+    {
+      key: 'setup_calendar',
+      label: 'Set up your calendar for lesson bookings',
+      icon: Calendar,
+      completed: !!(progress.steps as any).setup_calendar,
+      action: () => navigate('/calendar'),
+    },
   ];
 
   const renderStep = (step: Step) => {
     const IconComponent = step.icon;
+    const locked = !!step.requiresStudent && !hasStudent && !step.completed;
     return (
       <div
         key={step.key}
-        className={`flex items-center justify-between p-3 rounded-lg border transition-all ${
+        className={`flex items-center justify-between p-2 rounded-lg border transition-all ${
           step.completed
             ? 'bg-green-50 border-green-200'
+            : locked
+            ? 'bg-muted/10 border-border opacity-70'
             : 'bg-muted/20 border-border hover:bg-muted/40'
         }`}
       >
-        <div className="flex items-center space-x-3">
-          <div className={`p-2 rounded-full ${step.completed ? 'bg-green-100' : 'bg-muted'}`}>
+        <div className="flex items-center gap-2 min-w-0">
+          <div className={`p-1.5 rounded-full flex-shrink-0 ${step.completed ? 'bg-green-100' : 'bg-muted'}`}>
             {step.completed ? (
-              <Check className="h-4 w-4 text-green-600" />
+              <Check className="h-3.5 w-3.5 text-green-600" />
+            ) : locked ? (
+              <Lock className="h-3.5 w-3.5 text-muted-foreground" />
             ) : (
-              <IconComponent className="h-4 w-4 text-muted-foreground" />
+              <IconComponent className="h-3.5 w-3.5 text-muted-foreground" />
             )}
           </div>
-          <span className={`text-sm ${step.completed ? 'text-green-700 line-through' : 'text-foreground'}`}>
-            {step.label}
-          </span>
+          <div className="min-w-0">
+            <span className={`text-[12px] block leading-tight ${step.completed ? 'text-green-700 line-through' : 'text-foreground'}`}>
+              {step.label}
+            </span>
+            {locked && (
+              <span className="text-[10px] text-muted-foreground">Add a student first</span>
+            )}
+          </div>
         </div>
         {!step.completed && (
-          <Button size="sm" variant="outline" onClick={step.action} className="h-8 text-xs">
-            {step.key === 'add_student' ? 'Add' : 'Start'}
-          </Button>
+          locked ? (
+            <TooltipProvider delayDuration={200}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <span tabIndex={0}>
+                    <Button size="sm" variant="outline" disabled className="h-7 text-[11px] px-2">
+                      Start
+                    </Button>
+                  </span>
+                </TooltipTrigger>
+                <TooltipContent side="left">Add a student first</TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
+          ) : (
+            <Button size="sm" variant="outline" onClick={step.action} className="h-7 text-[11px] px-2 flex-shrink-0">
+              {step.key === 'add_student' ? 'Add' : 'Start'}
+            </Button>
+          )
         )}
       </div>
     );
@@ -163,15 +208,15 @@ export const OnboardingChecklist = () => {
       <div className={`fixed bottom-6 right-6 z-30 transition-opacity duration-1000 ${
         progress.completed && completionAnimation ? 'opacity-100' : 'animate-fade-in opacity-100'
       }`}>
-        <Card className="shadow-lg border-2 border-primary/20 bg-white/95 backdrop-blur-sm">
+        <Card className="shadow-lg border-2 border-primary/20 bg-white/95 backdrop-blur-sm max-w-[280px]">
           {!isExpanded ? (
             // Minimized view - compact with only icon and percentage
             <div 
-              className="p-3 flex items-center gap-2 cursor-pointer hover:bg-muted/50 transition-colors rounded-lg" 
+              className="p-2 flex items-center gap-2 cursor-pointer hover:bg-muted/50 transition-colors rounded-lg" 
               onClick={() => setIsExpanded(true)}
             >
-              <span className="text-2xl">🚀</span>
-              <Badge variant="secondary" className="text-sm font-semibold">
+              <span className="text-lg">🚀</span>
+              <Badge variant="secondary" className="text-[11px] font-semibold">
                 {completionPercentage}%
               </Badge>
             </div>
@@ -179,12 +224,12 @@ export const OnboardingChecklist = () => {
             // Expanded view - full content
             <>
               <CardHeader 
-                className="pb-3 cursor-pointer hover:bg-muted/50 transition-colors"
+                className="pb-2 px-3 pt-3 cursor-pointer hover:bg-muted/50 transition-colors"
                 onClick={() => setIsExpanded(!isExpanded)}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center flex-1 min-w-0">
-                    <CardTitle className="text-sm whitespace-nowrap truncate">Get started with Edooqoo 🚀</CardTitle>
+                    <CardTitle className="text-xs whitespace-nowrap truncate">Get started with Edooqoo 🚀</CardTitle>
                   </div>
                   <div className="flex items-center flex-shrink-0">
                     <Button
@@ -194,22 +239,22 @@ export const OnboardingChecklist = () => {
                         e.stopPropagation();
                         handleTemporaryDismiss();
                       }}
-                      className="h-6 w-6 p-0 mr-2 hover:bg-destructive/20"
+                      className="h-5 w-5 p-0 mr-1 hover:bg-destructive/20"
                     >
                       <X className="h-3 w-3" />
                     </Button>
                     <Button
                       variant="ghost"
                       size="sm"
-                      className="h-6 w-6 p-0"
+                      className="h-5 w-5 p-0"
                     >
-                      <ChevronDown className="h-4 w-4" />
+                      <ChevronDown className="h-3.5 w-3.5" />
                     </Button>
                   </div>
                 </div>
                 <div className="flex items-center justify-between">
                   <Progress value={completionPercentage} className="h-2 flex-1" />
-                  <Badge variant="secondary" className="text-xs ml-2 flex-shrink-0">
+                  <Badge variant="secondary" className="text-[10px] ml-2 flex-shrink-0">
                     {completionPercentage}%
                   </Badge>
                 </div>
@@ -218,8 +263,8 @@ export const OnboardingChecklist = () => {
           )}
 
           {isExpanded && (
-            <CardContent className="pt-0 animate-accordion-down max-h-[70vh] overflow-y-auto">
-              <div className="space-y-3">
+            <CardContent className="pt-0 px-3 pb-3 animate-accordion-down max-h-[70vh] overflow-y-auto">
+              <div className="space-y-2">
                 {progress.completed && (
                   <div className={`text-center p-4 bg-gradient-to-r from-green-50 to-blue-50 rounded-lg border-2 border-green-200 transition-all duration-500 ${
                     completionAnimation ? 'animate-scale-in' : ''
@@ -234,23 +279,23 @@ export const OnboardingChecklist = () => {
                 )}
 
                 <div>
-                  <div className="text-xs uppercase tracking-wide text-muted-foreground font-semibold mb-1">
+                  <div className="text-[10px] uppercase tracking-wide text-muted-foreground font-semibold mb-0.5">
                     1. One-time student setup
                   </div>
-                  <p className="text-xs text-muted-foreground mb-2">
+                  <p className="text-[10px] text-muted-foreground mb-1.5">
                     Teach Edooqoo about your student — one-time.
                   </p>
-                  <div className="space-y-2">{setupSteps.map(renderStep)}</div>
+                  <div className="space-y-1.5">{setupSteps.map(renderStep)}</div>
                 </div>
 
                 <div>
-                  <div className="text-xs uppercase tracking-wide text-muted-foreground font-semibold mb-1">
+                  <div className="text-[10px] uppercase tracking-wide text-muted-foreground font-semibold mb-0.5">
                     2. Weekly 1-Minute Prep
                   </div>
-                  <p className="text-xs text-muted-foreground mb-2">
+                  <p className="text-[10px] text-muted-foreground mb-1.5">
                     Your weekly lesson prep flow — under a minute.
                   </p>
-                  <div className="space-y-2">{prepSteps.map(renderStep)}</div>
+                  <div className="space-y-1.5">{prepSteps.map(renderStep)}</div>
                 </div>
 
                 {!progress.completed && (
@@ -259,7 +304,7 @@ export const OnboardingChecklist = () => {
                       variant="ghost"
                       size="sm"
                       onClick={dismissOnboarding}
-                      className="w-full text-xs text-muted-foreground hover:text-foreground"
+                      className="w-full text-[11px] h-7 text-muted-foreground hover:text-foreground"
                     >
                       Dismiss checklist
                     </Button>

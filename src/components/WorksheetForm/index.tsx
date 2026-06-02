@@ -23,6 +23,7 @@ import { Shuffle, Brain, MousePointer, ChevronDown, Image, Headphones, Lock, Era
 import { devLog, devWarn } from '@/utils/logger';
 
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from "@/components/ui/tooltip";
+import { AddStudentDialog } from "@/components/dashboard/AddStudentDialog";
 import type { MediaType } from './types';
 export type { FormData };
 interface ImageSuggestion {
@@ -86,11 +87,15 @@ export default function WorksheetForm({
   // would be saved under the user's id but read back under 'anon' after refresh.
   const userId = userIdProp ?? null;
   const {
-    students
+    students,
+    refetch: refetchStudents
   } = useStudents();
   const {
     refreshProgress
   } = useOnboardingProgress();
+
+  // v6.9.33 — inline "+ Add Student" SelectItem opens this dialog.
+  const [inlineAddStudentOpen, setInlineAddStudentOpen] = useState(false);
 
   // v6.9.15b — `no-next-steps` hint removed from this form because
   // NextStepsPresetBanner already shows the canonical "No learning plan" CTA
@@ -659,7 +664,16 @@ export default function WorksheetForm({
                   {/* Student Selection - Lock icon for anonymous/no students, dropdown for authenticated with students */}
                   {userId && students.length > 0 ? (
                     <div className={`${isMobile ? 'w-full' : 'w-[23%]'} flex flex-col justify-center`}>
-                      <Select value={selectedStudentId} onValueChange={setSelectedStudentId}>
+                      <Select
+                        value={selectedStudentId}
+                        onValueChange={(v) => {
+                          if (v === '__add_student__') {
+                            setInlineAddStudentOpen(true);
+                            return;
+                          }
+                          setSelectedStudentId(v);
+                        }}
+                      >
                         <SelectTrigger
                           className={`w-full ${selectedStudentId === 'no-student'
                             ? 'border-amber-400 ring-1 ring-amber-300 bg-amber-50/40 dark:bg-amber-900/10'
@@ -669,6 +683,9 @@ export default function WorksheetForm({
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="no-student">No student (generic)</SelectItem>
+                          <SelectItem value="__add_student__" className="text-primary font-medium">
+                            + Add Student
+                          </SelectItem>
                           {students.map(student => <SelectItem key={student.id} value={student.id}>
                               <span className="truncate">{student.name} ({student.english_level})</span>
                             </SelectItem>)}
@@ -904,5 +921,17 @@ export default function WorksheetForm({
           </form>
         </CardContent>
       </Card>
+      {/* v6.9.33 — inline Add Student dialog: caller controls post-add navigation
+          (auto-select the new student instead of navigating to /student/:id). */}
+      <AddStudentDialog
+        triggerButton={false}
+        open={inlineAddStudentOpen}
+        onOpenChange={setInlineAddStudentOpen}
+        onStudentAdded={(s) => {
+          refetchStudents();
+          if (s?.id) setSelectedStudentId(s.id);
+          setInlineAddStudentOpen(false);
+        }}
+      />
     </div>;
 }

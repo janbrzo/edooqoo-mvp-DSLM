@@ -182,12 +182,31 @@ export const DSLMTab: React.FC<DSLMTabProps> = ({
     } else if (effectiveView && VIEWS.some(v => v.id === effectiveView) && effectiveView !== 'pathway') {
       setTimeout(() => handleScrollTo(effectiveView), 100);
     }
-    // v6.9.32 — `?focus=add-goal-modal` reuses existing `dslm:addGoal` event.
-    const focus = searchParams.get('focus');
-    if (focus === 'add-goal-modal') {
-      setTimeout(() => window.dispatchEvent(new CustomEvent('dslm:addGoal')), 400);
-    }
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // v6.9.33 — Re-fire focus handlers EVERY time `focus` param changes
+  // (including same-value re-navigation thanks to cache-buster `_=ts`).
+  // After handling we strip both `focus` and `_` so the next click on the
+  // same deep link still triggers a state transition.
+  const focusParam = searchParams.get('focus');
+  useEffect(() => {
+    if (!focusParam) return;
+    const t = setTimeout(() => {
+      if (focusParam === 'add-goal-modal') {
+        window.dispatchEvent(new CustomEvent('dslm:addGoal'));
+      } else if (focusParam === 'pick-idea') {
+        handleScrollTo('pathway');
+        window.dispatchEvent(new CustomEvent('pathway:pickIdea'));
+      }
+      // Strip focus + cache-buster so a repeat click re-triggers.
+      const next = new URLSearchParams(searchParams);
+      next.delete('focus');
+      next.delete('_');
+      setSearchParams(next, { replace: true });
+    }, 500);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [focusParam, searchParams.get('_')]);
 
   // v6.9.29 — Roadmap "Add goal" buttons dispatch `dslm:addGoal`. Switch to
   // Goals section and signal GoalsView to open its add-goal modal.

@@ -17,6 +17,8 @@ interface OnboardingStep {
   generate_next_ideas: boolean;
   pick_idea: boolean;
   generate_worksheet: boolean;
+  // Section 2 — final step (v6.9.33)
+  setup_calendar: boolean;
   // Deprecated — kept for backward compatibility with stored profile state
   share_worksheet?: boolean;
   create_homework?: boolean;
@@ -37,6 +39,7 @@ const defaultProgress: OnboardingProgress = {
     generate_next_ideas: false,
     pick_idea: false,
     generate_worksheet: false,
+    setup_calendar: false,
   },
   completed: false,
   dismissed: false
@@ -51,6 +54,7 @@ const ACTIVE_KEYS: Array<keyof OnboardingStep> = [
   'generate_next_ideas',
   'pick_idea',
   'generate_worksheet',
+  'setup_calendar',
 ];
 
 function mergeSteps(saved?: Partial<OnboardingStep>): OnboardingStep {
@@ -136,6 +140,7 @@ export const useOnboardingProgress = () => {
         phasesRes,
         ideasRes,
         ideasUsedRes,
+        calendarRes,
       ] = await Promise.all([
         supabase.from('students').select('id', { head: true, count: 'exact' }).eq('teacher_id', teacherId),
         supabase
@@ -170,11 +175,15 @@ export const useOnboardingProgress = () => {
           .eq('category', 'Next Lesson Ideas')
           .is('deleted_at', null)
           .not('used_in_worksheet_id', 'is', null),
+        supabase
+          .from('calendar_slots')
+          .select('id', { head: true, count: 'exact' })
+          .eq('teacher_id', teacherId),
       ]);
 
       const safeCount = (res: any): number => (res?.error ? 0 : res?.count ?? 0);
 
-      const newSteps: OnboardingStep = {
+      let newSteps: OnboardingStep = {
         add_student: safeCount(studentsRes) > 0,
         send_welcome_test: safeCount(testsRes) > 0,
         add_goals: safeCount(goalsRes) > 0,
@@ -182,7 +191,30 @@ export const useOnboardingProgress = () => {
         generate_next_ideas: safeCount(ideasRes) > 0,
         pick_idea: safeCount(ideasUsedRes) > 0,
         generate_worksheet: safeCount(worksheetsRes) > 0,
+        setup_calendar: safeCount(calendarRes) > 0,
       };
+
+      // v6.9.33 — Reset window: for 5 minutes after `Reset Onboarding`,
+      // zero out detected steps (except objective `add_student`) so the
+      // teacher actually sees an empty checklist instead of an instantly
+      // re-completed one. Window auto-expires.
+      const resetAtRaw = localStorage.getItem('onboarding_reset_at');
+      const resetAt = resetAtRaw ? parseInt(resetAtRaw, 10) : 0;
+      const withinResetWindow = resetAt > 0 && Date.now() - resetAt < 5 * 60 * 1000;
+      if (withinResetWindow) {
+        newSteps = {
+          ...newSteps,
+          send_welcome_test: false,
+          add_goals: false,
+          generate_roadmap: false,
+          generate_next_ideas: false,
+          pick_idea: false,
+          generate_worksheet: false,
+          setup_calendar: false,
+        };
+      } else if (resetAtRaw) {
+        localStorage.removeItem('onboarding_reset_at');
+      }
 
       const allCompleted = ACTIVE_KEYS.every((k) => !!newSteps[k]);
       
@@ -403,6 +435,10 @@ export const useOnboardingProgress = () => {
     // even if checkSteps re-marks every step as completed.
     sessionStorage.removeItem('onboarding-temp-dismissed');
     localStorage.setItem('onboarding_force_show', 'true');
+    // v6.9.33 — open a 5-min window where checkSteps zeroes detected steps.
+    localStorage.setItem('onboarding_reset_at', String(Date.now()));
+    // Block the next automatic checkSteps so the empty state renders first.
+    lastRunRef.current = Date.now();
     
     devLog('[Onboarding] Reset completed - onboarding will show again');
   };

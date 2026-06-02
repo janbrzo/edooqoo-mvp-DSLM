@@ -28,6 +28,7 @@ import { useStudentProgress } from '@/hooks/useStudentProgress';
 import { PacingProposalCard } from './PacingProposalCard';
 import { usePacingProposals } from '@/hooks/usePacingProposals';
 import { cn } from '@/lib/utils';
+import { WelcomeTestSuggestion } from '@/components/dashboard/WelcomeTestSuggestion';
 
 interface PathwayViewProps {
   studentId: string;
@@ -57,6 +58,7 @@ const EMPTY_EDIT: SuggestionEditValue = {
 export const PathwayView: React.FC<PathwayViewProps> = ({
   studentId,
   teacherId,
+  studentName,
   useRoadmap = true,
   onUseRoadmapChange,
   pacingMode = 50,
@@ -239,6 +241,16 @@ export const PathwayView: React.FC<PathwayViewProps> = ({
 
   return (
     <div className="space-y-4">
+      {/* v6.9.33 — compact Welcome Test banner mounted at top of Pathway so
+          the Onboarding Spotlight (focus=send-welcome-test) lands here. The
+          component is idempotent and self-hides once a welcome test is completed. */}
+      <WelcomeTestSuggestion
+        studentId={studentId}
+        teacherId={teacherId}
+        studentName={studentName}
+        surface="oneMinute"
+        compact
+      />
       {pacingProposals.length > 0 && (
         <div className="space-y-2">
           {pacingProposals.map(p => (
@@ -279,8 +291,8 @@ export const PathwayView: React.FC<PathwayViewProps> = ({
       />
       </div>
 
-      <Collapsible open={roadmapOpen} onOpenChange={setRoadmapOpen}>
-        <div id="pathway-roadmap" data-spotlight="learning-roadmap" className="scroll-mt-24" />
+      <Collapsible open={roadmapOpen} onOpenChange={setRoadmapOpen} data-spotlight="learning-roadmap">
+        <div id="pathway-roadmap" className="scroll-mt-24" />
         <div className="flex items-center justify-between gap-2">
           <CollapsibleTrigger asChild>
             <Button variant="ghost" className="flex-1 justify-between text-muted-foreground">

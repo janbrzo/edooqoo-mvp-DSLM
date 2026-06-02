@@ -15,3 +15,4 @@
 - [Signup Return-To Flow](mem://features/auth/signup-return-to-flow) — v6.9.27 useSignupLinkState propagates state.from across all signup/login callsites + visible Back CTA
 - [Reconciliation Codex v6.9.26](mem://decisions/reconciliation-v6926-codex) — Files owned by Codex SEO branch; do not modify
 - [Onboarding Spotlight v2](mem://features/onboarding/spotlight-v2) — v6.9.32 Global SpotlightOverlay (data-spotlight + ?focus=), force-show reset flag, AddStudent v2 (deferred level/goal + autosend WT), NavSwitcher +Add CTA, 904 bulk-publish
+- [Onboarding Checklist v3](mem://features/onboarding/checklist-v3) — v6.9.33 8-step checklist + setup_calendar + locked states, DSLM-anchored Welcome Test spotlight, re-clickable focus deep links, 5-min reset window, 3-mode Add Student RadioGroup, single global student switcher (left, on /student too), gallery renderer alias + toText hardening, CEFR chip filter

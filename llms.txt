@@ -13,6 +13,47 @@
 ## Core Definition
 Edooqoo.com is a 1-Minute Prep system for recurring 1:1 English teachers. It uses student goals, placement/profile data, homework results, flashcards, calendar context, and DSLM learning signals to help decide what to teach next, then generates ready-to-teach English worksheets with audio, images, and AI-assisted grading. The worksheet generator is the output layer, not the full product definition.
 
+## v6.9.33 - Onboarding Checklist v3, Add Student RadioGroup, Gallery hardening
+
+### Problem
+- Teachers stalled between adding a student and reaching 1-Minute Prep because onboarding deep links opened the wrong tab, Spotlight targeted zero-size sentinels, the Welcome Test banner was hidden by the floating onboarding card, the Add Student modal forced a binary choice that left teachers without a roadmap during the 1-3 day Welcome Test wait, and Reset Onboarding did not re-show steps because the live step checker immediately re-flagged them complete.
+- The public worksheet gallery rendered exercise types synonyms-antonyms, complete-word, word-order, matching-halves, and negative-prefixes as raw JSON because type aliases were not normalised and the text fallback fell through to JSON.stringify.
+- The 1 MINUTE tab on /student/:id lost its active border because Radix Tooltip wrapping TabsTrigger asChild stripped the data-state attribute.
+- Two parallel student switchers existed (NavStudentSwitcher in StickyNav and StudentSwitcherPopover in StudentPage) and the /student page placed the Add button in an unexpected location.
+
+### Edooqoo.com Solution
+- Onboarding Checklist v3 has 8 steps including setup_calendar (last weekly step). Steps that require a student are visually locked with Lock icon and Add a student first tooltip until the first student exists.
+- Welcome Test banner is now mounted on the DSLM Pathway tab (compact variant) in addition to the Overview tab so the Spotlight focus=send-welcome-test lands on the same surface the rest of 1-Minute Prep uses.
+- Floating Get Started card resized roughly 30 percent (max width 280px, smaller paddings and typography) so the spotlight hole no longer overlaps it.
+- Add Student modal switched from two checkboxes to a 3-mode RadioGroup: know (level + goal now), defer (recommended; auto-send Welcome Test and infer profile from answers), manual (skip test). Main Goal label has an info tooltip clarifying Main vs Supporting vs Additional Goals.
+- Spotlight markers moved from zero-size sentinels onto real visible cards: learning-roadmap on the Collapsible itself, pick-idea wrapping the first NextStepBanner.
+- Focus deep links are re-clickable: every checklist row appends &_=ts cache buster, the DSLMTab effect depends on focus and _, fires the right event, then strips both params.
+- Reset Onboarding writes localStorage.onboarding_reset_at; for 5 minutes the live step checker zeroes every step except objective add_student so the teacher actually sees an empty checklist.
+- After student creation navigation goes to DSLM: ?tab=dslm&view=pathway&focus=send-welcome-test (manual send) or ?tab=dslm&view=goals&focus=add-goal-modal (auto-send was checked).
+- When AddStudentDialog receives onStudentAdded it skips the default navigation; WorksheetForm uses this to auto-select the new student via an inline + Add Student SelectItem without leaving the generator.
+- Public gallery: CEFR chip filter (A1/A2, B1/B2, C1/C2) added above the existing dropdown; renderer normalises type aliases and the toText helper covers many more keys plus silently swallows leftover objects including nano-skill metadata.
+- Sticky-nav student switcher is now the SINGLE switcher; rendered on /student/:id too, anchored on the LEFT next to the logo, with the current student name as the trigger label. + Add lives in the popover header.
+- The 1 MINUTE TabsTrigger and the explanatory Tooltip are now siblings rather than asChild composition, restoring the active-state border.
+- After signup the user lands on /?action=add-student; Index opens the dialog and strips the param.
+
+### Technical Mechanics
+- useOnboardingProgress.tsx: adds setup_calendar step (calendar_slots count by teacher_id), adds onboarding_reset_at 5-minute window, resetOnboarding blocks the next checkSteps.
+- OnboardingChecklist.tsx: 8 steps, locked states with disabled Start + tooltip, calendar CTA, compact layout (max-w-[280px], h-7 buttons, text-xs), every deep link carries &_=Date.now().
+- DSLMTab.tsx: new useEffect keyed by focus and _; handles add-goal-modal and pick-idea (dispatches pathway:pickIdea), strips params afterwards.
+- PathwayView.tsx: accepts studentName, mounts compact WelcomeTestSuggestion at top, data-spotlight=learning-roadmap on the Collapsible.
+- NextStepsSection.tsx: wraps first NextStepBanner in [data-spotlight=pick-idea], handles pathway:pickIdea (opens generation dialog when items=0, scrolls to spotlight otherwise).
+- WelcomeTestSuggestion.tsx: compact prop trims padding and margins.
+- AddStudentDialog.tsx: RadioGroup with know|defer|manual; Main Goal tooltip; onStudentAdded(newStudent) skips default navigation; default mode remains defer.
+- Signup.tsx: immediate-login branch navigates to /?action=add-student.
+- Index.tsx: opens AddStudentDialog on ?action=add-student for authenticated users and removes the param.
+- StickyNav.tsx: showStudentSwitcher no longer excludes /student/:id; switcher placed in the LEFT cluster (right after Logo) on both mobile and desktop.
+- NavStudentSwitcher.tsx: trigger shows current student name when URL matches /student/:id; + Add lives in the popover header.
+- StudentPage.tsx: removed local StudentSwitcherPopover; rewrote 1 MINUTE tab without TooltipTrigger asChild wrapping.
+- WorksheetForm/index.tsx: + Add Student SelectItem opens AddStudentDialog with onStudentAdded that refetches and auto-selects.
+- GalleryExerciseRenderer.tsx: normalize() maps aliases (synonyms-antonyms, matching-halves, word_order, etc.); toText() expanded key set and silent fallback; QuestionText delegates to toText; word-order accepts tokens/scrambled/sentence; matching pairs accept word/match/pair/synonym/antonym.
+- PublicGalleryIndex.tsx: CEFR chip filter row above existing controls, sharing the same ?level= query param.
+- SANCTITY: no Worksheet Generation Engine prompt, parameter, or logic change; no Supabase schema, RLS, Edge Function, Stripe, auth, or service-role change; bulk-publish edge function and public_level data untouched.
+
 ## v6.9.33 - Homepage Hero Proof Switcher Placement
 
 ### Problem

@@ -37,9 +37,11 @@ interface WelcomeTestSuggestionProps {
    * NOT also hide it in 1 MINUTE (and vice versa). v6.8.5.
    */
   surface?: 'overview' | 'oneMinute';
+  /** v6.9.33 — compact layout for embedding inside DSLM Pathway. */
+  compact?: boolean;
 }
 
-export function WelcomeTestSuggestion({ studentId, teacherId, studentName, studentEmail, surface = 'overview' }: WelcomeTestSuggestionProps) {
+export function WelcomeTestSuggestion({ studentId, teacherId, studentName, studentEmail, surface = 'overview', compact = false }: WelcomeTestSuggestionProps) {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const [status, setStatus] = useState<'loading' | 'no_test' | 'pending' | 'in_progress' | 'completed' | 'hidden'>('loading');
@@ -452,8 +454,8 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
   }
 
   return (
-    <Card data-spotlight="send-welcome-test" className="border-primary/30 bg-primary/5 mb-6 relative">
-      <CardContent className="py-4">
+    <Card data-spotlight="send-welcome-test" className={`border-primary/30 bg-primary/5 ${compact ? 'mb-3' : 'mb-6'} relative`}>
+      <CardContent className={compact ? 'py-2 px-3' : 'py-4'}>
         {/* Always-on dismiss button — hides the banner from Overview only.
             The Welcome Test remains accessible in the Tests tab. */}
         <TooltipProvider delayDuration={200}>

@@ -5,6 +5,144 @@ Written in Problem → Edooqoo.com Solution → Technical Mechanics format.
 
 ---
 
+## v6.9.33 — Onboarding Checklist v3 + Add Student RadioGroup + Gallery hardening
+
+### Problem
+Teachers stalled between adding a student and reaching 1-Minute Prep.
+Deep links opened wrong tabs, Spotlight pointed to zero-size sentinels,
+the Welcome Test banner was hidden by the floating onboarding card,
+the Add Student modal forced a binary choice that left teachers without
+a roadmap during the 1–3 day Welcome Test wait, "Reset Onboarding" did
+not re-show steps because `checkSteps` immediately re-flagged them
+complete, and the public gallery rendered exercises like
+`synonyms-antonyms`, `complete-word`, `word-order`, `matching-halves`
+and `negative-prefixes` as raw JSON because the type aliases were not
+normalised and `toText`/`QuestionText` fell back to `JSON.stringify`.
+
+### Edooqoo.com Solution
+- 8-step checklist includes `setup_calendar` as the final 1-Minute Prep step.
+- Steps that depend on a student are visually locked (`Lock` icon + disabled
+  `Start` button + "Add a student first" tooltip) until the first student exists.
+- Welcome Test banner is mounted on the DSLM Pathway tab as a `compact`
+  variant in addition to the Overview tab — the Onboarding Spotlight
+  (`focus=send-welcome-test`) now lands on the same surface DSLM uses for
+  1-Minute Prep.
+- Floating onboarding card resized ~30 % (`max-w-[280px]`, smaller paddings
+  and typography) so the spotlight hole no longer overlaps it.
+- Add Student modal uses a 3-mode `RadioGroup`: `know` (level + goal now),
+  `defer` (recommended — auto-send Welcome Test, infer profile), `manual`
+  (skip test entirely). Main Goal label carries an info tooltip explaining
+  Main vs Supporting vs Additional Goals.
+- Spotlight markers moved off zero-size `<div>` sentinels onto real, visible
+  cards: `learning-roadmap` is now on the `<Collapsible>` itself, and
+  `pick-idea` wraps the first `NextStepBanner`.
+- Focus deep links are re-clickable: `useEffect` depends on
+  `searchParams.get('focus')` (and a `_=ts` cache-buster) and strips both
+  params after firing, so clicking the same checklist row twice always
+  re-triggers the event.
+- Reset Onboarding sets `localStorage.onboarding_reset_at`; for 5 minutes
+  `checkSteps` zeroes every step except objective `add_student`, so the
+  teacher actually sees an empty checklist instead of an instantly
+  re-completed one.
+- After student creation, navigation goes to DSLM (not Overview):
+  `?tab=dslm&view=pathway&focus=send-welcome-test&_=ts` (manual send) or
+  `?tab=dslm&view=goals&focus=add-goal-modal&_=ts` (auto-send was checked).
+- Caller-controlled mode: when `AddStudentDialog` receives `onStudentAdded`,
+  it does NOT navigate to `/student/:id`; `WorksheetForm`'s inline
+  `+ Add Student` SelectItem uses this to auto-select the new student
+  without leaving the generator.
+- Public gallery: CEFR chip filter (`A1/A2`, `B1/B2`, `C1/C2`) above the
+  existing `<select>`; renderer normalises type aliases
+  (`synonyms-antonyms` → `synonyms`, `match-halves` → `matching`,
+  `word_order` → `word-order`, etc.); `toText` and `QuestionText` use a
+  much wider key candidate list (`term`, `prompt`, `base`, `gapped`,
+  `masked`, `first`, `match`, `synonym`, `antonym`, …) and silently
+  swallow leftover objects (including nano-skill `{name, mastery, reason}`
+  metadata) instead of dumping JSON.
+- Sticky-nav student switcher is now the SINGLE switcher; rendered on
+  `/student/:id` too, anchored on the LEFT next to the logo, with the
+  current student name as label. The local `StudentSwitcherPopover`
+  in `StudentPage` is gone.
+- The `1 MINUTE` tab no longer loses its active-state border because the
+  `TooltipTrigger asChild` wrapper was stripping Radix `data-state` from
+  `TabsTrigger`; Tooltip and TabsTrigger are now siblings.
+- After signup the user lands on `/?action=add-student`; `Index.tsx` opens
+  the dialog and strips the param.
+
+### Technical Mechanics
+- `src/hooks/useOnboardingProgress.tsx` — `setup_calendar` step counts rows
+  in `calendar_slots` by `teacher_id`; `onboarding_reset_at` opens a 5-min
+  window where every step except `add_student` is forced to `false`;
+  `resetOnboarding()` blocks the next `checkSteps` and writes the flag.
+- `src/components/OnboardingChecklist.tsx` — 8 steps, locked states with
+  `Lock` icon + tooltip when `students.length === 0`, calendar CTA
+  (`navigate('/calendar')`), compact layout (`max-w-[280px]`, `text-xs`,
+  `h-7` buttons), every deep-link carries `&_=Date.now()`.
+- `src/components/onboarding/SpotlightOverlay.tsx` — unchanged; the spotlight
+  hole is now visible because targets moved to non-zero-size elements.
+- `src/components/dslm/DSLMTab.tsx` — new `useEffect` keyed by
+  `searchParams.get('focus')` and `searchParams.get('_')` handles
+  `add-goal-modal` and `pick-idea` (dispatch `pathway:pickIdea`), then
+  strips `focus` + `_` from the URL.
+- `src/components/dslm/PathwayView.tsx` — accepts `studentName`; mounts
+  `<WelcomeTestSuggestion … compact />` at the top of Pathway;
+  `data-spotlight="learning-roadmap"` lives on the `<Collapsible>` itself.
+- `src/components/dslm/NextStepsSection.tsx` — wraps the first
+  `NextStepBanner` in `<div data-spotlight="pick-idea">`; listens for
+  `pathway:pickIdea` and opens the GenerateStepsDialog when there are 0
+  suggestions or scrolls to the spotlight target otherwise.
+- `src/components/dashboard/WelcomeTestSuggestion.tsx` — `compact` prop
+  (`py-2 px-3`, `mb-3`); the existing `?autosend=1` flow still applies.
+- `src/components/dashboard/AddStudentDialog.tsx` — `RadioGroup` with
+  `know|defer|manual`; Main Goal label uses a Tooltip with the info text;
+  `onStudentAdded(newStudent)` skips the default navigation; default mode
+  remains `defer`.
+- `src/pages/Signup.tsx` — immediate-login branch navigates to
+  `/?action=add-student`.
+- `src/pages/Index.tsx` — opens `AddStudentDialog` on `?action=add-student`
+  for authenticated users and removes the param.
+- `src/components/landing/StickyNav.tsx` — `showStudentSwitcher` no longer
+  excludes `/student/:id`; switcher rendered in the LEFT cluster (right
+  after `<Logo />`) on both mobile and desktop.
+- `src/components/landing/NavStudentSwitcher.tsx` — trigger shows current
+  student name when URL matches `/student/:id`; `+ Add` lives in the
+  popover header, next to "Switch to student".
+- `src/pages/StudentPage.tsx` — removed local `StudentSwitcherPopover`
+  and the back-bar label; rewrote the `1 MINUTE` tab without
+  `TooltipTrigger asChild`.
+- `src/components/WorksheetForm/index.tsx` — student `<Select>` includes
+  `<SelectItem value="__add_student__">+ Add Student</SelectItem>` and
+  mounts `<AddStudentDialog onStudentAdded={...} triggerButton={false} />`
+  so the new student is auto-selected without page navigation.
+- `src/components/gallery/GalleryExerciseRenderer.tsx` — `normalize()` maps
+  aliases (`synonyms-antonyms`, `matching-halves`, `word_order`, etc.);
+  `toText()` covers a wider key set and silently returns `""` for
+  unmappable objects and `{name, mastery, reason}` metadata;
+  `QuestionText()` delegates to `toText()`; `word-order` accepts
+  `tokens`, `scrambled`, and `sentence`; matching pairs accept `word`,
+  `match`, `pair`, `synonym`, `antonym`.
+- `src/pages/gallery/PublicGalleryIndex.tsx` — CEFR chip filter row above
+  the existing `<select>` + topic input, syncing the same `?level=` query
+  param.
+- SANCTITY: no Worksheet Generation Engine prompt, parameter, or logic
+  change; no Supabase schema, RLS, Edge Function, Stripe, auth, or
+  service-role change. The bulk-publish edge function and existing
+  `public_level` data are untouched.
+
+### RAG Keywords
+onboarding, onboarding checklist v3, get started, 1-minute prep,
+welcome test, send welcome test, add student modal, radio group,
+i know my student, defer profile, manual mode, main goal, spotlight,
+deep link, focus param, cache buster, learning roadmap, next lesson ideas,
+pick idea, reset onboarding, calendar setup, calendar_slots, student
+switcher, sticky nav, nav student switcher, 1 minute tab border,
+TabsTrigger data-state, public gallery, gallery renderer, synonyms,
+antonyms, synonyms-antonyms, complete word, word order, matching halves,
+negative prefixes, cefr filter, A1/A2, B1/B2, C1/C2, toText hardening,
+nano-skill leakage.
+
+---
+
 ## v6.9.33 — Homepage Hero Proof Switcher Placement
 
 ### Problem
