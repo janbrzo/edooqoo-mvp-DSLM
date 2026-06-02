@@ -5,7 +5,7 @@
  * Toolbar: [+ Generate more suggestions] (with phase info).
  * "Regenerate all steps" REMOVED — only per-step regeneration via comment dialog.
  */
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -80,6 +80,23 @@ export const NextStepsSection: React.FC<NextStepsSectionProps> = ({
   const [genDialogOpen, setGenDialogOpen] = useState(false);
   const [genMode, setGenMode] = useState<'first' | 'more'>('first');
 
+  // v6.9.33 — Onboarding "Use one Next Lesson suggestion" deep-link: if there
+  // are no suggestions yet, open the generation dialog so the teacher has a
+  // visible next action; otherwise scroll to the top banner.
+  useEffect(() => {
+    const handler = () => {
+      if (items.length === 0) {
+        setGenMode('first');
+        setGenDialogOpen(true);
+      } else {
+        const el = document.querySelector('[data-spotlight="pick-idea"]') as HTMLElement | null;
+        el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    };
+    window.addEventListener('pathway:pickIdea', handler);
+    return () => window.removeEventListener('pathway:pickIdea', handler);
+  }, [items.length]);
+
   const allIds = items.map(it => it.s.id);
   const first = items[0] || null;
   const rest = items.slice(1);
@@ -106,6 +123,7 @@ export const NextStepsSection: React.FC<NextStepsSectionProps> = ({
         )}
       </div>
 
+      <div data-spotlight="pick-idea">
       <NextStepBanner
         suggestion={first?.s ?? null}
         studentId={studentId}
@@ -119,6 +137,7 @@ export const NextStepsSection: React.FC<NextStepsSectionProps> = ({
         generating={generating}
         hasGoals={hasGoals}
       />
+      </div>
 
       {rest.length > 0 && (
         <Collapsible open={moreListOpen} onOpenChange={setMoreListOpen}>
