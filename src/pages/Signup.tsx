@@ -92,7 +92,7 @@ const Signup = () => {
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}${shouldStartOneMinutePrep ? '/?action=add-student' : '/'}`,
+          emailRedirectTo: `${window.location.origin}/?action=add-student`,
           data: {
             first_name: firstName,
             last_name: lastName,
