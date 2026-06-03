@@ -10,6 +10,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import Confetti from 'react-confetti';
 import { AddStudentDialog } from '@/components/dashboard/AddStudentDialog';
 import { useStudents } from '@/hooks/useStudents';
+import { triggerSpotlight } from '@/hooks/useSpotlight';
 
 export const OnboardingChecklist = () => {
   const [isExpanded, setIsExpanded] = useState(true);
@@ -60,6 +61,17 @@ export const OnboardingChecklist = () => {
     return `/student/${firstStudentId}${suffix}${sep}_=${Date.now()}`;
   };
   const hasStudent = !!firstStudentId;
+
+  // v6.9.34 — navigate AND re-fire the spotlight from the click handler.
+  // This eliminates the "second click does nothing" bug where the URL was
+  // already cleaned by a prior visit so the URL-driven effect no-ops.
+  // We also kick off a `refreshProgress()` ~1.8s later so a completed
+  // action (e.g. Generate Next Lesson Ideas) updates the checklist quickly.
+  const navAndSpotlight = (suffix: string, focusId: string) => {
+    navigate(studentDeepLink(suffix));
+    setTimeout(() => triggerSpotlight({ id: focusId }), 700);
+    setTimeout(() => { try { refreshProgress(); } catch {} }, 1800);
+  };
 
   type Step = {
     key: string;
