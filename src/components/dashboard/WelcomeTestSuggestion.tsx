@@ -50,6 +50,10 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
   const [testId, setTestId] = useState<string | null>(null);
   const [answeredCount, setAnsweredCount] = useState(0);
   const [totalQuestions, setTotalQuestions] = useState(0);
+  // v6.9.34 — track when the pending test was sent so we can show a reminder
+  // CTA after 48h of student inactivity.
+  const [sentAt, setSentAt] = useState<string | null>(null);
+  const [reminderSending, setReminderSending] = useState(false);
   // 10-second dismiss countdown state. When non-null, the banner area renders
   // an ephemeral confirmation message with an Undo button instead of the full banner.
   const [dismissCountdown, setDismissCountdown] = useState<number | null>(null);
