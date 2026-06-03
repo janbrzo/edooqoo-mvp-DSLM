@@ -33,6 +33,7 @@ export interface ProgrammaticSeoLayoutProps {
 }
 
 const BASE = 'https://edooqoo.com';
+const isStaticHtmlRoute = (to: string) => to.endsWith('.html') || to.startsWith('/blog/');
 
 const buildBreadcrumbLd = (items: PseoBreadcrumb[]) => ({
   '@context': 'https://schema.org',
@@ -150,9 +151,15 @@ const ProgrammaticSeoLayout: React.FC<ProgrammaticSeoLayoutProps> = ({
           <ul className="grid grid-cols-1 md:grid-cols-2 gap-2">
             {related.items.map((r, i) => (
               <li key={i}>
-                <Link to={r.to} className="text-primary hover:underline text-sm">
-                  → {r.label}
-                </Link>
+                {isStaticHtmlRoute(r.to) ? (
+                  <a href={r.to} className="text-primary hover:underline text-sm">
+                    - {r.label}
+                  </a>
+                ) : (
+                  <Link to={r.to} className="text-primary hover:underline text-sm">
+                    - {r.label}
+                  </Link>
+                )}
               </li>
             ))}
           </ul>

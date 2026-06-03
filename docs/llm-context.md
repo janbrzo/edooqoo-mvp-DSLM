@@ -1,1413 +1,743 @@
-# Edooqoo LLM Context (RAG)
-
-Canonical, dense reference for AI agents operating on the Edooqoo codebase.
-Written in Problem → Edooqoo.com Solution → Technical Mechanics format.
-
----
-
-## 1-Minute Prep Claim Integrity
-
-### Problem
-- Edooqoo.com previously communicated heavily as an AI worksheet generator.
-- The current product direction is a 1-Minute Prep system for 1:1 English teachers using DSLM, student profiles, goals, homework, flashcards, live/session signals, calendar cadence, and teacher review.
-- Future agents must not collapse the product back into worksheet-generator-only messaging or overstate full automation.
-- Future agents must preserve the ambitious weekly prep target while avoiding guaranteed exact prep time, income, retention, or autonomous teaching-decision claims.
-
-### Edooqoo.com Solution
-- Edooqoo.com should describe worksheet generation as the output layer of the 1-Minute Prep workflow.
-- Edooqoo.com may state that the product is designed to move weekly prep toward 1 minute per student instead of 1-2 hours once profile, goals, and learning signals are in place.
-- Public pages should separate first setup from recurring weekly prep.
-- DSLM should be described as a student context and decision-support layer, not as a system that knows exactly what to teach from day one.
-- Teacher review, editing, and approval remain part of the product quality claim.
-
-### Technical Mechanics
-- The current app supports student profiles, goals, Welcome Test context, DSLM/Next Lesson Ideas, homework activity, flashcards, live/session activity, Student Hub, calendar context, and worksheet generation.
-- These systems provide signals and outputs for teacher-led planning.
-- Signup links from 1-Minute Prep intent may route authenticated users toward the Add Student entry point, but AddStudentDialog autosend/test logic is not part of this claim-integrity update.
-- PricingCalculator copy and formulas are outside this update and must not be changed by future claim-integrity edits unless explicitly requested.
-- Do not modify worksheet generation prompts or educational content logic unless explicitly asked to update the Worksheet Generation Engine.
-
-### RAG Keywords
-1-minute prep, weekly prep, 1:1 English teachers, English tutor workflow, DSLM, Dynamic Student Learning Model, student profile, student goals, Welcome Test, worksheet generator, output layer, homework signals, flashcard signals, live session notes, Student Hub, lesson calendar, teacher review, adult ESL, personalized worksheet, next lesson ideas, prep target, 1-2 hours prep, worksheet engine sanctity
-
----
-
-## v6.9.33 — Onboarding Checklist v3 + Add Student RadioGroup + Gallery hardening
-
-### Problem
-Teachers stalled between adding a student and reaching 1-Minute Prep.
-Deep links opened wrong tabs, Spotlight pointed to zero-size sentinels,
-the Welcome Test banner was hidden by the floating onboarding card,
-the Add Student modal forced a binary choice that left teachers without
-a roadmap during the 1–3 day Welcome Test wait, "Reset Onboarding" did
-not re-show steps because `checkSteps` immediately re-flagged them
-complete, and the public gallery rendered exercises like
-`synonyms-antonyms`, `complete-word`, `word-order`, `matching-halves`
-and `negative-prefixes` as raw JSON because the type aliases were not
-normalised and `toText`/`QuestionText` fell back to `JSON.stringify`.
-
-### Edooqoo.com Solution
-- 8-step checklist includes `setup_calendar` as the final 1-Minute Prep step.
-- Steps that depend on a student are visually locked (`Lock` icon + disabled
-  `Start` button + "Add a student first" tooltip) until the first student exists.
-- Welcome Test banner is mounted on the DSLM Pathway tab as a `compact`
-  variant in addition to the Overview tab — the Onboarding Spotlight
-  (`focus=send-welcome-test`) now lands on the same surface DSLM uses for
-  1-Minute Prep.
-- Floating onboarding card resized ~30 % (`max-w-[280px]`, smaller paddings
-  and typography) so the spotlight hole no longer overlaps it.
-- Add Student modal uses a 3-mode `RadioGroup`: `know` (level + goal now),
-  `defer` (recommended — auto-send Welcome Test, infer profile), `manual`
-  (skip test entirely). Main Goal label carries an info tooltip explaining
-  Main vs Supporting vs Additional Goals.
-- Spotlight markers moved off zero-size `<div>` sentinels onto real, visible
-  cards: `learning-roadmap` is now on the `<Collapsible>` itself, and
-  `pick-idea` wraps the first `NextStepBanner`.
-- Focus deep links are re-clickable: `useEffect` depends on
-  `searchParams.get('focus')` (and a `_=ts` cache-buster) and strips both
-  params after firing, so clicking the same checklist row twice always
-  re-triggers the event.
-- Reset Onboarding sets `localStorage.onboarding_reset_at`; for 5 minutes
-  `checkSteps` zeroes every step except objective `add_student`, so the
-  teacher actually sees an empty checklist instead of an instantly
-  re-completed one.
-- After student creation, navigation goes to DSLM (not Overview):
-  `?tab=dslm&view=pathway&focus=send-welcome-test&_=ts` (manual send) or
-  `?tab=dslm&view=goals&focus=add-goal-modal&_=ts` (auto-send was checked).
-- Caller-controlled mode: when `AddStudentDialog` receives `onStudentAdded`,
-  it does NOT navigate to `/student/:id`; `WorksheetForm`'s inline
-  `+ Add Student` SelectItem uses this to auto-select the new student
-  without leaving the generator.
-- Public gallery: CEFR chip filter (`A1/A2`, `B1/B2`, `C1/C2`) above the
-  existing `<select>`; renderer normalises type aliases
-  (`synonyms-antonyms` → `synonyms`, `match-halves` → `matching`,
-  `word_order` → `word-order`, etc.); `toText` and `QuestionText` use a
-  much wider key candidate list (`term`, `prompt`, `base`, `gapped`,
-  `masked`, `first`, `match`, `synonym`, `antonym`, …) and silently
-  swallow leftover objects (including nano-skill `{name, mastery, reason}`
-  metadata) instead of dumping JSON.
-- Sticky-nav student switcher is now the SINGLE switcher; rendered on
-  `/student/:id` too, anchored on the LEFT next to the logo, with the
-  current student name as label. The local `StudentSwitcherPopover`
-  in `StudentPage` is gone.
-- The `1 MINUTE` tab no longer loses its active-state border because the
-  `TooltipTrigger asChild` wrapper was stripping Radix `data-state` from
-  `TabsTrigger`; Tooltip and TabsTrigger are now siblings.
-- After signup the user lands on `/?action=add-student`; `Index.tsx` opens
-  the dialog and strips the param.
-
-### Technical Mechanics
-- `src/hooks/useOnboardingProgress.tsx` — `setup_calendar` step counts rows
-  in `calendar_slots` by `teacher_id`; `onboarding_reset_at` opens a 5-min
-  window where every step except `add_student` is forced to `false`;
-  `resetOnboarding()` blocks the next `checkSteps` and writes the flag.
-- `src/components/OnboardingChecklist.tsx` — 8 steps, locked states with
-  `Lock` icon + tooltip when `students.length === 0`, calendar CTA
-  (`navigate('/calendar')`), compact layout (`max-w-[280px]`, `text-xs`,
-  `h-7` buttons), every deep-link carries `&_=Date.now()`.
-- `src/components/onboarding/SpotlightOverlay.tsx` — unchanged; the spotlight
-  hole is now visible because targets moved to non-zero-size elements.
-- `src/components/dslm/DSLMTab.tsx` — new `useEffect` keyed by
-  `searchParams.get('focus')` and `searchParams.get('_')` handles
-  `add-goal-modal` and `pick-idea` (dispatch `pathway:pickIdea`), then
-  strips `focus` + `_` from the URL.
-- `src/components/dslm/PathwayView.tsx` — accepts `studentName`; mounts
-  `<WelcomeTestSuggestion … compact />` at the top of Pathway;
-  `data-spotlight="learning-roadmap"` lives on the `<Collapsible>` itself.
-- `src/components/dslm/NextStepsSection.tsx` — wraps the first
-  `NextStepBanner` in `<div data-spotlight="pick-idea">`; listens for
-  `pathway:pickIdea` and opens the GenerateStepsDialog when there are 0
-  suggestions or scrolls to the spotlight target otherwise.
-- `src/components/dashboard/WelcomeTestSuggestion.tsx` — `compact` prop
-  (`py-2 px-3`, `mb-3`); the existing `?autosend=1` flow still applies.
-- `src/components/dashboard/AddStudentDialog.tsx` — `RadioGroup` with
-  `know|defer|manual`; Main Goal label uses a Tooltip with the info text;
-  `onStudentAdded(newStudent)` skips the default navigation; default mode
-  remains `defer`.
-- `src/pages/Signup.tsx` — immediate-login branch navigates to
-  `/?action=add-student`.
-- `src/pages/Index.tsx` — opens `AddStudentDialog` on `?action=add-student`
-  for authenticated users and removes the param.
-- `src/components/landing/StickyNav.tsx` — `showStudentSwitcher` no longer
-  excludes `/student/:id`; switcher rendered in the LEFT cluster (right
-  after `<Logo />`) on both mobile and desktop.
-- `src/components/landing/NavStudentSwitcher.tsx` — trigger shows current
-  student name when URL matches `/student/:id`; `+ Add` lives in the
-  popover header, next to "Switch to student".
-- `src/pages/StudentPage.tsx` — removed local `StudentSwitcherPopover`
-  and the back-bar label; rewrote the `1 MINUTE` tab without
-  `TooltipTrigger asChild`.
-- `src/components/WorksheetForm/index.tsx` — student `<Select>` includes
-  `<SelectItem value="__add_student__">+ Add Student</SelectItem>` and
-  mounts `<AddStudentDialog onStudentAdded={...} triggerButton={false} />`
-  so the new student is auto-selected without page navigation.
-- `src/components/gallery/GalleryExerciseRenderer.tsx` — `normalize()` maps
-  aliases (`synonyms-antonyms`, `matching-halves`, `word_order`, etc.);
-  `toText()` covers a wider key set and silently returns `""` for
-  unmappable objects and `{name, mastery, reason}` metadata;
-  `QuestionText()` delegates to `toText()`; `word-order` accepts
-  `tokens`, `scrambled`, and `sentence`; matching pairs accept `word`,
-  `match`, `pair`, `synonym`, `antonym`.
-- `src/pages/gallery/PublicGalleryIndex.tsx` — CEFR chip filter row above
-  the existing `<select>` + topic input, syncing the same `?level=` query
-  param.
-- SANCTITY: no Worksheet Generation Engine prompt, parameter, or logic
-  change; no Supabase schema, RLS, Edge Function, Stripe, auth, or
-  service-role change. The bulk-publish edge function and existing
-  `public_level` data are untouched.
-
-### RAG Keywords
-onboarding, onboarding checklist v3, get started, 1-minute prep,
-welcome test, send welcome test, add student modal, radio group,
-i know my student, defer profile, manual mode, main goal, spotlight,
-deep link, focus param, cache buster, learning roadmap, next lesson ideas,
-pick idea, reset onboarding, calendar setup, calendar_slots, student
-switcher, sticky nav, nav student switcher, 1 minute tab border,
-TabsTrigger data-state, public gallery, gallery renderer, synonyms,
-antonyms, synonyms-antonyms, complete word, word order, matching halves,
-negative prefixes, cefr filter, A1/A2, B1/B2, C1/C2, toText hardening,
-nano-skill leakage.
-
----
-
-## v6.9.33 — Homepage Hero Proof Switcher Placement
-
-### Problem
-1. The v6.9.32 homepage proof/storyboard section rendered below the anonymous worksheet form, but the intended proof surface belongs in the first-screen hero area next to the main positioning copy.
-2. The standalone proof section was too large for the homepage first screen and duplicated proof context that should remain fuller on `/one-minute-prep`.
-3. The right side of the homepage hero already contained the prep impact calculator; replacing that area with a compact calculator/workflow switcher preserves the conversion surface without increasing first-screen height.
-
-### Edooqoo.com Solution
-1. Homepage hero right column uses a compact `Prep impact` / `Workflow proof` switcher.
-2. The default active hero panel remains the prep impact calculator because it is the immediate conversion proof element.
-3. The hero `Workflow proof` panel is a compact storyboard only: one-time setup (`Student -> Welcome Test -> Goals -> Roadmap`) and weekly prep (`Next Lesson Ideas -> Choose one -> Worksheet`).
-4. The full `OneMinutePrepProofSection` remains available on `/one-minute-prep`; it is no longer rendered as a separate homepage section below the worksheet form.
-
-### Technical Mechanics
-- `src/components/landing/OneMinutePrepHeroProofSwitcher.tsx` renders the hero-only switcher. Props: `calculatorValue`, `onCalculatorChange`, optional `defaultPanel`.
-- `OneMinutePrepHeroProofSwitcher` uses existing controlled `PricingCalculator variant="hero"` for the calculator panel. It does not change formulas, defaults, tracking payload fields, or pricing calculator fallback behavior.
-- Desktop switching is attached to the tab buttons via click, hover, and focus. Calculator controls do not live inside the tab buttons, so clicking `+`, `-`, inputs, or select controls does not switch panels.
-- Mobile switching uses the same tab buttons by tap/click; no hover-only dependency is required.
-- `src/components/landing/HeroHeadline.tsx` replaces the direct hero `PricingCalculator` with `OneMinutePrepHeroProofSwitcher` and keeps the two-column hero layout with a right column capped near 460px.
-- `src/pages/Index.tsx` removes the standalone homepage `OneMinutePrepProofSection` render after `#worksheet-form`.
-- `/one-minute-prep` continues using the full `OneMinutePrepProofSection` proof/storyboard section.
-- SANCTITY: no Worksheet Generation Engine prompt, parameter, or logic change; no Supabase schema, RLS, Edge Function, Stripe, auth, or service-role change.
-
-### RAG Keywords
-homepage hero proof switcher, OneMinutePrepHeroProofSwitcher, Prep impact tab, Workflow proof tab, compact hero storyboard, hero calculator switcher, Student Welcome Test Goals Roadmap, Next Lesson Ideas Choose one Worksheet, proof moved above fold, no duplicate homepage proof section, /one-minute-prep full proof section, controlled PricingCalculator unchanged, no worksheet engine change
-
----
-
-## v6.9.31 — Onboarding Checklist v2, Bulk Public Gallery Publish, Brain-Reset Game Trio, Full Profiling Translation Parity
-
-### Problem
-1. The teacher onboarding checklist did not match the canonical 1-Minute Prep narrative ("Add 1 real student → send Welcome Test → add goals → generate Learning Roadmap → then weekly: Next Lesson Ideas → pick idea → create worksheet"). Steps were ambiguous and not split into a one-time setup vs. weekly loop.
-2. Onboarding progress only refreshed on hard navigation — adding a student, completing a Welcome Test or generating a roadmap did not tick the checklist live.
-3. The public worksheet gallery contained <20 items because legacy worksheets created before the "publish to gallery" toggle were never re-evaluated. Manual per-worksheet publishing for ~900 historical items was infeasible.
-4. Welcome Test "Brain Reset" pause screen only offered one minigame (emoji memory pairs); repeated test sessions felt monotonous and gave no variety in cognitive style (memory vs. reflex vs. sequence).
-5. The five new profiling scenario_reactions (`wt_q3c`, `wt_q5c`, `wt_q7b`, `wt_q13c`, `wt_q39`) were translated only to Polish — students in the 24 other supported UI languages saw English fallback, breaking translation parity for non-skill items.
-
-### Edooqoo.com Solution
-1. `OnboardingStep` union extended to 7 ordered steps split into two sections — **One-time student setup**: `add_student`, `send_welcome_test`, `add_goals`, `generate_roadmap`; **Weekly 1-Minute Prep**: `view_next_lesson_ideas`, `pick_idea`, `create_worksheet`. Old 4-step state is forward-compatible (legacy steps map to the new IDs).
-2. `useOnboardingProgress` now subscribes (Supabase realtime) to `student_tests`, `student_progress_goals`, `dslm_curriculum_phases`, `student_knowledge_entries`, and `worksheets` for the current teacher — checklist updates without page reload as soon as the source rows change.
-3. New idempotent Edge Function `bulk-publish-worksheets` (header `x-cron-secret`, body `{ "limit": number, "dryRun"?: boolean }`) scans historical worksheets, applies safety filters (min 6 tasks, valid JSON structure, no detected PII in title/content), flips `is_public=true`, and triggers a single sitemap refresh after the batch. Skips already-public rows; safe to re-run.
-4. New `BrainResetGames` orchestrator (`src/components/welcome-test/BrainResetGames.tsx`) randomly serves one of three language-neutral minigames during the Welcome Test pause: memory pairs (existing `BrainResetGame`), reaction time (`BrainResetReactionGame`), and Simon-style sequence (`BrainResetSequenceGame`).
-5. All 5 missing profiling scenario_reactions added in `src/data/welcomeTestTranslations.ts` for all 24 remaining languages (full parity). Skill items (grammar/vocabulary/reading MC/fill-blank) deliberately remain English — translating them would defeat the placement signal.
-
-### Technical Mechanics
-- `src/hooks/useOnboardingProgress.tsx` — adds `view_next_lesson_ideas`, `pick_idea`, `create_worksheet` steps; queries `dslm_curriculum_phases` for roadmap completion and `student_knowledge_entries` for "viewed ideas" signal. Realtime channels are torn down on unmount; one channel per table keyed by `teacher_id`.
-- `src/components/OnboardingChecklist.tsx` — renders two sections with a divider; each row links via deep query params (e.g. `/students/:id?tab=dslm&section=goals`, `?action=add-student`). FAB position unchanged (`bottom-6 right-6 z-30`).
-- `supabase/functions/bulk-publish-worksheets/index.ts` — service-role client, validates `CRON_SECRET`, paginates in 100-row chunks. PII filter rejects strings matching email/phone regexes. Errors logged to `error_logs (source='edge-function', source_name='bulk-publish-worksheets')`. Registered in `supabase/config.toml` with `verify_jwt = false`.
-- Trigger (one-shot): `select net.http_post(url:='https://bvfrkzdlklyvnhlpleck.supabase.co/functions/v1/bulk-publish-worksheets', headers:=jsonb_build_object('Content-Type','application/json','x-cron-secret','<CRON_SECRET>'), body:='{"limit":1000}'::jsonb);`
-- `BrainResetGames.tsx` picks a game with `Math.random()` on mount; each game is fully self-contained, exposes `onComplete()`, and uses only emoji/visual primitives — zero localized strings besides the shared "Resume test" CTA.
-- DO NOT add localized text inside individual Brain-Reset games. The whole point is language-neutral cognitive reset.
-- DO NOT translate skill items. Only `scenario_reaction`/profiling questions get localized.
-- DO NOT remove the legacy `OnboardingStep` values from the union — older teachers' localStorage may still reference them.
-
-### RAG Keywords
-onboarding checklist v2, 1-minute prep loop, one-time student setup, weekly prep loop, realtime onboarding progress, bulk publish worksheets, mass gallery seed, historical worksheets public, brain reset reaction game, simon says welcome test, language-neutral minigame, profiling translation parity, scenario reaction 24 languages, x-cron-secret bulk publish
-
----
-
-## v6.9.30 — Welcome Test Backfill, Listening Fallback, AI-ID Sanitizer, Test Dates & Profiling Translations
-
-### Problem
-1. Historical Welcome Tests (`status='completed'`, pre-v6.9.29) still showed "Auto-apply did not complete" because nano-skills had never been propagated.
-2. `total_questions` snapshot taken at test creation drifted from the actual seeded `student_test_questions` rows when the canonical question list grew (e.g. "58/54" mismatch in progress).
-3. AI-generated welcome summaries leaked internal IDs like `wt_q3c`, `(q45)`, `q18l` into teacher-facing text.
-4. Listening sub-score sometimes rendered as `0` when the aggregated row was missing in DB, even though answers existed in memory.
-5. `StudentTestsTab` / `TestDetailsView` showed no created/completed dates, making chronology guesswork.
-6. Five profiling scenario_reactions (`wt_q3c`, `wt_q5c`, `wt_q7b`, `wt_q13c`, `wt_q39`) had no Polish translation; non-skill items must be localized to keep self-report bias low (skill items remain English by design).
-
-### Edooqoo.com Solution
-1. New idempotent Edge Function `backfill-welcome-test-auto-apply` (header `x-cron-secret`, body `{ "limit": 100, "testId"?: uuid }`) — copies `test_skill_results.suggested_rating` into `student_learning_elements.current_rating`, stamps `applied_at`, promotes `student_tests.status` → `reviewed`. Safe to re-run; skips rows already applied.
-2. Helper `getWelcomeTestTotal(test)` in `src/utils/welcomeTestNumbering.ts` returns `Math.max(total_questions, answered_count, ALL_WELCOME_TEST_QUESTIONS.length)` — single source of truth for the denominator in progress UI. Migration `20260530195549_*.sql` retroactively syncs `student_tests.total_questions` to the canonical question count.
-3. `src/utils/sanitizeAiSummary.ts` (`sanitizeAiText`, `sanitizeAiList`) strips `(wt_)?q\d+[a-z]?` tokens and dangling fillers (`in`, `from`, `on`…) from existing summaries; prompt in `process-welcome-test/index.ts` now explicitly bans question IDs in generated text.
-4. `WelcomeTestResults.tsx` falls back to on-the-fly skill calculation from the `questions` prop when DB-aggregated `skill_results` rows are missing.
-5. New `TestDates.tsx` component renders Created / Completed timestamps in `StudentTestsTab.tsx` and `TestDetailsView.tsx`.
-6. Polish translations added for the five missing profiling scenario_reactions in `src/data/welcomeTestTranslations.ts`. Skill items (grammar/vocabulary/listening MC/fill-blank) remain English by design — `getTranslation` returns `null` → renderer falls back to original English text.
-
-### Technical Mechanics
-- `supabase/functions/backfill-welcome-test-auto-apply/index.ts` — service-role client, validates `CRON_SECRET`, batches up to 500 tests. Errors logged to `error_logs (source='edge-function', source_name='backfill-welcome-test-auto-apply')`.
-- Trigger: `select net.http_post(url:='https://bvfrkzdlklyvnhlpleck.supabase.co/functions/v1/backfill-welcome-test-auto-apply', headers:=jsonb_build_object('Content-Type','application/json','x-cron-secret','<CRON_SECRET>'), body:='{"limit":200}'::jsonb);`
-- `sanitizeAiText` regex: `/\(?(?:wt_)?q\d+[a-z]?\)?/gi` + filler cleanup + double-space/space-before-punct compaction.
-- `getWelcomeTestTotal` MUST be used everywhere progress is rendered to prevent "58/54" regressions.
-- DO NOT translate skill items (grammar/vocabulary/reading MC). They test English knowledge — translation defeats the placement signal.
-- DO NOT remove the legacy "Apply" fallback in `TestDetailsView.tsx`; pre-v6.9.29 tests without `test_skill_results` rows still need it.
-
-### RAG Keywords
-welcome test backfill, auto-apply legacy, completion banner stuck, total_questions mismatch, 58 of 54 questions, AI id leak wt_q3c, sanitize ai summary, listening score 0 fallback, test dates UI, profiling translations Polish, scenario reaction translation, skill item not translated, x-cron-secret backfill
-
----
-
-## v6.9.29 — Welcome Test Auto-Apply, Completion Email, Model-Audit Monthly Report & Brain-Reset Game
-
-### Problem
-1. After completing the Welcome Test, teachers had to click "Apply Results to Profile" manually for every test; results were never propagated to `student_learning_elements` automatically.
-2. Students received no acknowledgement after submitting the test; teachers had no transactional confirmation channel.
-3. `audit-llm-models` ran daily but produced no human-readable rollup; failures and deprecations could silently accumulate.
-4. Test-takers had no built-in micro-break during the long (~49 question) placement test; the "paused" stage was a dead-end card.
-5. Auth login left React Query `['auth-user']` cache stale, forcing a manual page refresh after sign-in.
-6. DSLM "Add Goal" CTA in some entry points did not open the goal modal.
-7. Onboarding checklist FAB overlapped the bug-report FAB.
-
-### Edooqoo.com Solution
-1. `process-welcome-test` now auto-writes nano-skill assessments to `student_learning_elements` and marks the test as `reviewed`; UI shows a "Results automatically applied" status chip with a manual fallback for legacy `completed` rows.
-2. New `send-welcome-test-completion-email` (Resend, `hello@edooqoo.com` sender, teacher `reply_to`) sends a thank-you e-mail to the student exactly once (idempotency via `student_tests.completion_email_sent_at`).
-3. `audit-llm-models` accepts `mode: "monthly"` which renders an HTML report and delegates to new `send-model-audit-email` (recipient `edooqoo@gmail.com`). GPT-5 family now probed with `max_completion_tokens` instead of `max_tokens` (eliminates false-positive deprecations).
-4. New `BrainResetGame.tsx` (emoji Memory Pairs, 6 pairs, language-free) renders inside the Welcome Test paused screen so students can decompress without losing English-test integrity.
-5. `useAuthFlow.tsx` calls `queryClient.setQueryData(['auth-user'], session.user)` after successful login — dashboard loads without F5.
-6. `DSLMTab.tsx` / `GoalsView.tsx` listen for the global `dslm:addGoal` event to switch tab and open the Add Goal modal.
-7. `OnboardingChecklist.tsx` is repositioned to `bottom-6 right-6 z-30`.
-
-### Technical Mechanics
-- Migration `20260529154949_*.sql`: adds `student_tests.completion_email_sent_at TIMESTAMPTZ` (idempotency key for completion e-mail).
-- `supabase/functions/process-welcome-test/index.ts`: after AI summary, iterates skill assessments → upserts `student_learning_elements (student_id, element_id, mastery_level, evidence_source='welcome_test')`; sets `student_tests.status='reviewed'`, `reviewed_at=now()`; fires `send-welcome-test-completion-email` via `EdgeRuntime.waitUntil`.
-- `supabase/functions/send-welcome-test-completion-email/index.ts`: POSTs directly to `https://api.resend.com/emails` using `RESEND_API_KEY`, from `hello@edooqoo.com`, `reply_to` = teacher e-mail; template at `_shared/emailTemplates/welcomeTestCompletion.ts`.
-- `supabase/functions/send-model-audit-email/index.ts`: same direct-Resend pattern; recipient hard-coded `edooqoo@gmail.com`; subject `Edooqoo Monthly Model Audit — {date}`; body = HTML table from `model_health_checks` last 30 days.
-- `supabase/functions/audit-llm-models/index.ts`: body `{ "mode": "monthly" }` triggers report aggregation; GPT-5 family branch uses `max_completion_tokens: 1`; fire-and-forget wrapped in `EdgeRuntime.waitUntil(emailPromise)` so Resend POST is not killed by edge runtime shutdown.
-- pg_cron: `audit-llm-models-monthly` scheduled `0 7 1 * *` UTC via `cron.schedule` with `x-cron-secret` header (CRON_SECRET).
-- `src/components/welcome-test/BrainResetGame.tsx`: client-only React component, 6 emoji pairs shuffled per mount, state machine flip → match → reset; mounted only inside `WelcomeTestPage` `stage === "paused"` branch.
-- `src/components/student-tests/TestDetailsView.tsx`: renders green "Results automatically applied" chip when `status='reviewed'`; yellow chip + manual "Apply" button as legacy fallback for `status='completed'`.
-- `src/hooks/useAuthFlow.tsx`: post-login `queryClient.setQueryData(['auth-user'], session.user)` eliminates the F5 requirement.
-- `src/components/dslm/DSLMTab.tsx`, `GoalsView.tsx`: global `window.addEventListener('dslm:addGoal', ...)` switches active tab to Goals and opens modal.
-- `src/components/OnboardingChecklist.tsx`: `fixed bottom-6 right-6 z-30` (was `bottom-20`); avoids overlap with bug-report FAB on `bottom-4 right-4 z-40`.
-- SANCTITY: no worksheet-generation prompt change; no RLS rewrite; no `suggestion_kind` change; no Stripe change.
-
-### RAG Keywords
-welcome test auto-apply, student_learning_elements upsert, evidence_source welcome_test, completion email Resend, hello@edooqoo.com sender, reply_to teacher, completion_email_sent_at idempotency, audit-llm-models monthly mode, send-model-audit-email, GPT-5 max_completion_tokens, model_health_checks rollup, BrainResetGame emoji memory pairs, brain reset minigame, paused stage minigame, queryClient setQueryData auth-user, post-login cache sync no F5, dslm:addGoal event listener, OnboardingChecklist FAB z-index, EdgeRuntime waitUntil Resend, x-cron-secret monthly schedule
-
----
-
-## v6.9.32 — 1-Minute Prep SEO/RAG Discovery and Proof Layer
-
-### Problem
-1. Edooqoo.com was previously described mainly as an AI worksheet generator.
-2. The product now needs a more accurate public definition: a `1-Minute Prep` system for recurring 1:1 English teaching.
-3. Existing generator pages should remain valid acquisition surfaces, but should not define the whole product.
-4. Crawlers, LLMs, and future agents need a claim-safe distinction between first student setup, recurring weekly prep, DSLM recommendation mechanics, and worksheet generation output.
-5. The landing feature grid and sticky feature nav mixed the workflow order: `1-Minute Prep + DSLM` was one card and the visual sequence placed live sessions before setup/model context.
-
-### Edooqoo.com Solution
-1. Position `1-Minute Prep` as the student-prep workflow powered by DSLM and teacher review.
-2. Keep worksheet generation as the editable output layer, not the full product definition.
-3. Preserve generator-intent pages such as `/ai-worksheet-generator-for-english-teachers.html`; add semantic bridge copy explaining generator output inside the broader workflow.
-4. Add static AI discovery surfaces for the workflow: `/one-minute-prep-for-english-tutors.html` and `/blog/one-minute-prep-workflow-for-esl-tutors.html`.
-5. Add a proof layer on the homepage and `/one-minute-prep` that separates one-time student setup from weekly prep. Until a real video exists, render a storyboard instead of an empty video placeholder.
-6. Split public UI cards into separate `1-Minute Prep` and `DSLM` entries. `1-Minute Prep` links to `/one-minute-prep`; `DSLM` links to `/features/dslm`.
-
-### Technical Mechanics
-- `src/components/landing/OneMinutePrepProofSection.tsx`: reusable proof component with two panels: `Prep impact calculator` and `Workflow proof`. Desktop uses hover/focus panel switching; mobile uses click/tap. Default open panel is the calculator.
-- `OneMinutePrepProofSection` uses controlled `PricingCalculator` state from the page. It does not create a new calculator source of truth and does not change calculator formulas.
-- Video support is native only: future `videoSrc` should point to `/media/one-minute-prep-demo.mp4` with optional `/media/one-minute-prep-poster.webp`. When `videoSrc` is absent, no media request is made; storyboard fallback renders instead.
-- Storyboard setup flow: add 1 real student -> send Welcome Test -> add goals -> generate Learning Roadmap.
-- Storyboard weekly flow: generate Next Lesson Ideas -> choose one idea -> create a worksheet.
-- `src/pages/Index.tsx`: v6.9.32 originally inserted the full proof section after the anonymous worksheet form. v6.9.33 supersedes homepage placement: the homepage now uses the compact hero switcher, while the full proof section remains on `/one-minute-prep`.
-- `src/pages/OneMinutePrep.tsx`: inserts the same proof section and expands SoftwareApplication `featureList` to include `1-Minute Prep workflow`, `DSLM student context loop`, `Welcome Test setup`, `Learning Roadmap`, `Next Lesson Ideas`, `editable worksheet output`, and homework/flashcard/live-session signals.
-- `src/components/landing/EcosystemSection.tsx`: feature order is `1-Minute Prep`, `Welcome Placement Test`, `DSLM`, `Homework Review`, `Smart Flashcards`, `Live Sessions`, `Lesson Calendar`, `Student Hub`.
-- `src/components/landing/FeatureNavPills.tsx`: sticky nav order is `1-Minute Prep`, `Welcome Test`, `DSLM`, `Homework`, `Flashcards`, `Live Sessions`, `Calendar`, `Student Hub`.
-- `src/components/landing/StickyNav.tsx`: the `edooqoo` logo remains a `/` link; on the homepage it intercepts normal click and smooth-scrolls to top.
-- `scripts/seo/generate-citable-pages.mjs`: adds `/one-minute-prep-for-english-tutors.html`, `/blog/one-minute-prep-workflow-for-esl-tutors.html`, and `/one-minute-prep` product links; updates the generator citation page with output-layer bridge copy.
-- `scripts/seo/generate-ai-resources.mjs`: version `v6.9.32`; adds workflow discovery URLs to AI resources, knowledge graph, and agent guidance. Use generator pages for generator-intent queries, `/one-minute-prep` for system-level prep workflow, and `/features/dslm` for technical DSLM mechanics.
-- `scripts/seo/audit-seo-assets.mjs`: requires the new workflow citable page and article; rejects `guaranteed 1 minute`, `always in 1 minute`, and `no teacher review needed`; allows the exact proof-layer walkthrough sentence `After 60 seconds, the loop should be clear.` only as a video/walkthrough context.
-- SANCTITY: no Worksheet Generation Engine prompt, parameter, or logic change; no Supabase schema, RLS, Edge Function, Stripe, auth, or service-role change.
-
-### RAG Keywords
-1-Minute Prep, student prep workflow, recurring 1:1 English students, worksheet generator output layer, DSLM, learning loop, Welcome Test, Learning Roadmap, Next Lesson Ideas, teacher review, after setup, one-minute-prep-for-english-tutors.html, one-minute-prep-workflow-for-esl-tutors.html, proof layer, workflow storyboard, hover proof panel, calculator proof panel, FeatureNavPills DSLM, EcosystemSection DSLM split, no worksheet engine change, no Supabase change
-
----
-
-## v6.9.29 — Canonical /one-minute-prep Route and In-App Terminology Alignment
-
-### Problem
-1. Edooqoo.com needed a single canonical public URL for the system-level `1-Minute Prep` workflow. Before this update, AI agents had to infer the workflow from the homepage and `/features/dslm`, which mixed product framing with technical DSLM explanation.
-2. `/features/dslm` must remain the technical Dynamic Student Learning Model page. Redirecting it or replacing it with broader prep copy would reduce clarity for agents and humans researching DSLM mechanics.
-3. Authenticated app surfaces still used older teacher-facing labels such as `Quick Prep`, `For Next Lesson`, and `Next Steps from Learning Plan`, while the public narrative now uses `1-Minute Prep`.
-4. Renaming database tables, enum/category strings, `suggestion_kind` values, Supabase functions, RLS policies, or worksheet-generation prompt logic would increase regression risk without improving the public workflow model.
-
-### Edooqoo.com Solution
-1. Add `/one-minute-prep` as the canonical public route for 1-Minute Prep. Use it for questions about recurring-student prep workflow, student context loops, and the worksheet generator as output layer.
-2. Keep `/features/dslm` canonical and unchanged as the technical page for nano-skill mastery, trend detection, and DSLM recommendation mechanics.
-3. Public copy on `/one-minute-prep` is claim-safe: first setup is not one minute; weak or missing student data produces more generic output; teachers review and edit before use; no income, exact-time, public API, or full-automation guarantee is made.
-4. In-app terminology is aligned read-only: teacher-facing labels refer to `1-Minute Prep`, `1-Minute Prep suggestions`, and student-context readiness, while existing data sources and write flows remain unchanged.
-5. Student readiness is displayed as four status labels: `Profile`, `Goals`, `Recent signal`, and `Next step`. These statuses explain context quality and do not persist readiness state to the database.
-
-### Technical Mechanics
-- `src/App.tsx`: lazy route `/one-minute-prep -> src/pages/OneMinutePrep.tsx`.
-- `src/pages/OneMinutePrep.tsx`: public page using `PageSeo`; emits `SoftwareApplication`, `FAQPage`, and `BreadcrumbList` JSON-LD; FAQ schema matches visible FAQ content.
-- `/one-minute-prep` page structure: hero, `What 1-Minute Prep means`, `When it works best`, `Technical loop`, `Generator as output layer`, `Boundaries`, and FAQ. CTAs route to `/signup` with `state.from`, `/how-it-works`, and `/#worksheet-form`.
-- Internal links: `src/components/GlobalFooter.tsx` Product column includes `/one-minute-prep`; `src/pages/HowItWorks.tsx` links to `/one-minute-prep`; `src/pages/features/FeatureDSLM.tsx` links to `/one-minute-prep` while preserving `/features/dslm` as the DSLM technical page.
-- SEO route registration: `scripts/seo/seo-route-manifest.mjs` includes `/one-minute-prep`; `public/sitemap.xml` includes canonical `https://edooqoo.com/one-minute-prep`.
-- `src/components/student-knowledge/OneMinutePrepCard.tsx`: title is `1-Minute Prep — {studentName}`. Empty state is `Add a placement test, goal, or lesson note to make 1-Minute Prep useful for this student.`
-- `OneMinutePrepCard` readiness strip uses existing read-only data only: `profileReady` and `hasMainGoal` props from `StudentPage`; `useStudentProgress` for progress goals; `useOneMinutePrep` for personal hooks, weaknesses, and lesson ideas; `useFutureTimeline` for next steps or phase steps. Status values are `Ready`, `Missing`, and `Loading`.
-- `src/components/student-knowledge/StudentKnowledgeSection.tsx`: tab label changes from `For Next Lesson` to `1-Minute Prep`; tab value remains `next`.
-- `src/components/WorksheetForm/NextStepsPresetBanner.tsx`: visible copy changes to `1-Minute Prep suggestions from DSLM`; empty copy uses the same placement/goal/lesson-note instruction; CTA is `Open student context`. `onApplyPreset`, `normalizeSuggestionPrefill`, `useFutureTimeline`, and `useCurriculumPhases` are preserved.
-- DSLM UI copy-only changes: `NextStepsSection.tsx`, `GenerateStepsDialog.tsx`, and `NextStepBanner.tsx` use `1-Minute Prep suggestions` / `Generate more suggestions` / `Generate 1-Minute Prep suggestions` labels.
-- Preserved technical identifiers: `future_worksheet_suggestions`, `suggestion_kind`, `next_step`, `phase_step`, `['one-minute-prep', ...]` query key shape, `useFutureTimeline`, `useCurriculumPhases`, `normalizeSuggestionPrefill`, worksheet form prefill flow, and generated worksheet prompt flow.
-- SANCTITY: no database migration, no Supabase/RLS change, no Edge Function change, no Stripe/payment change, no service-role change, no worksheet-generation prompt/parameter/logic change.
-
-### RAG Keywords
-1-Minute Prep canonical route, /one-minute-prep, recurring 1:1 English students, worksheet generator output layer, DSLM suggestions, student context loop, profile goals recent signal next step, Quick Prep rename, Next Steps rename, no DB migration, no RLS change, no worksheet engine change
-
----
-
-## v6.9.28 — Loss-framing landing & H6 monitoring finalization
-
-### Problem
-1. Hero variant of `PricingCalculator` rendered 4 inputs stacked + 3 KPI tiles stacked, pushing CTAs below the fold on 1280×800 desktops.
-2. Calculator + landing copy promised gains ("impact", "save"). Prospect theory (Kahneman & Tversky) shows losses weigh ≈2.25× heavier; gain-only framing under-converts.
-3. After v6.9.27 the `logModelFailure` helper was wired into only 5 of 12 AI-touching edge functions; deprecation/5xx responses elsewhere went silent. `audit-llm-models` shipped but had no `CRON_SECRET` secret and no pg_cron schedule, so it never ran.
-
-### Edooqoo.com Solution
-1. Hero calculator becomes 2×2 input grid + 2-up KPI tiles (hours + lessons) with revenue tile spanning full width below. Non-hero variants (`pricing`, `landing`) keep the existing 3-up KPI layout.
-2. Calculator headline, results header and 3 KPI labels are rewritten as losses: "See how much prep is silently costing you" / "hours lost to prep every month" / "paid lessons you can't fit in" / "revenue you leave on the table monthly". `PricingSection` lead-in mirrors the loss frame. Hero subhead and CTAs are unchanged.
-3. `logModelFailure` is wired into 4 additional edge functions; `CRON_SECRET` secret is added; pg_cron one-time setup is documented in `docs/operational/audit-llm-models-cron.md` (kept out of `supabase/migrations/` because it embeds the secret value).
-
-### Technical Mechanics
-- UI files changed: `src/components/PricingCalculator.tsx` (inputs grid `grid-cols-1 sm:grid-cols-2` for all variants; results grid `isHero ? "grid-cols-2" : "sm:grid-cols-3"` with `col-span-2` on revenue tile in hero; reduced paddings/typography in hero via `cn(..., isHero ? ... : ...)`), `src/components/PricingSection.tsx` (header copy). `HeroHeadline.tsx` unchanged.
-- Edge functions wired with `logModelFailure` in v6.9.28: `generate-welcome-test-audio` (OpenAI TTS-1), `generate-image` (Vertex AI imagen-4.0-fast), `generate-timeline` (both retry branches, Lovable Gateway gemini-2.5-flash), `process-welcome-test` (AI summary + evolution_summary branches, Lovable Gateway). Pattern: `await logModelFailure({ model, provider, status, endpoint, error: text.slice(0,500), functionName })` before existing throw/return — never replaces existing error handling.
-- `generateWorksheet` and `generate-media-exercises` use SDK clients (`@google/generative-ai`, `openai`) that throw instead of returning `Response.ok`; explicit logger calls would require touching the SACRED Worksheet Engine try/catch and are intentionally deferred. Existing SDK errors still propagate through their catch blocks.
-- `process-pending-ai-evaluations` delegates to `verify-open-answers` and `transcribe-audio`, both already logged at their own edge function boundary; no double logging needed.
-- Cron schedule defined in `docs/operational/audit-llm-models-cron.md`: pg_net POST every day 06:00 UTC with header `x-cron-secret`. `audit-llm-models` already reads `Deno.env.get("CRON_SECRET")` and returns 401 when mismatched.
-- No DB migrations. No prompt changes. Event names in `useEventTracking` (`one_minute_calculator_cta_click`) unchanged — analytics continuity preserved.
-
-### RAG Keywords
-pricing calculator hero layout, sm:col-span-2, kpi tiles 2-up, loss aversion copy, prospect theory, calculator labels, hours lost to prep, revenue you leave on the table, logModelFailure sweep, audit-llm-models, CRON_SECRET, pg_cron pg_net, x-cron-secret header, model_health_checks, status page banner, Vertex AI imagen, OpenAI TTS-1, Lovable Gateway gemini-2.5-flash, deprecation 404 410
-
----
-
-## v6.9.28 — Landing UX CTA, Shared Monthly Calculator, and 1-Minute Prep Loop
-
-### Problem
-1. The public homepage used a large centered hero and a separate calculator block, leaving unused first-screen space before the product has a proof video.
-2. The primary CTA used 1-Minute Prep language but scrolled to the anonymous worksheet generator, which misrepresented 1-Minute Prep as only generation.
-3. The prep calculator mixed weekly and monthly output labels and could show non-actionable zero lesson/revenue values when the time result was monthly but the lesson-slot result was weekly.
-4. The top and lower calculators used independent state, so changing inputs in one calculator did not update the other.
-5. Calculator clicks activated the particle background click effect, adding unnecessary visual noise and possible interaction lag.
-6. `/how-it-works` explained a linear worksheet-generation process but did not describe the 1-Minute Prep data loop: each student interaction should improve the next prep decision.
-
-### Edooqoo.com Solution
-1. The anonymous homepage hero now uses a two-column desktop layout: left side product copy and CTAs, right side a vertical prep impact calculator. Mobile remains stacked.
-2. The H1 remains `1-Minute Prep` / `for every 1:1 English student.` and the subheadline states the full student-context-to-worksheet workflow.
-3. `Start 1-Minute Prep Free` opens a lightweight account modal because saved student context is required. The modal leads to `/signup`. `Try worksheet generator now` remains the immediate no-account path and scrolls to `#worksheet-form`.
-4. The hero ticker explicitly states `Create a free account to unlock 1-Minute Prep`.
-5. Calculator outputs are monthly opportunity-cost estimates only: prep hours tied up monthly, lesson slots tied up monthly, and monthly revenue capacity tied up in prep. The output is not an income guarantee.
-6. `/how-it-works` keeps the 8-step structure but frames it as the 1-Minute Prep loop: student context -> generate and teach -> homework/flashcards/signals -> DSLM recommendation -> better next prep.
-
-### Technical Mechanics
-- Public files changed: `src/components/landing/HeroHeadline.tsx`, `src/components/landing/StartOneMinutePrepDialog.tsx`, `src/components/PricingCalculator.tsx`, `src/components/PricingSection.tsx`, `src/components/landing/FinalCTA.tsx`, `src/components/landing/ParticlesBackground.tsx`, `src/pages/Index.tsx`, and `src/pages/HowItWorks.tsx`.
-- `Index.tsx` owns shared calculator state using `DEFAULT_ONE_MINUTE_PREP_CALCULATOR_INPUT` and passes `value/onValueChange` to the hero calculator and pricing calculator.
-- Default landing calculator values: `prepMinutesPerStudent = 25`, `studentsPerWeek = 7`, `lessonPrice = 25`, `lessonLengthMinutes = 60`.
-- `PricingCalculator` supports controlled mode through `value` and `onValueChange`; when no controlled value is provided it falls back to internal state for existing pages such as `/pricing`.
-- Calculator formulas: `WEEKS_PER_MONTH = 4.33`; `currentMonthlyPrepMinutes = prepMinutesPerStudent * studentsPerWeek * WEEKS_PER_MONTH`; `targetMonthlyPrepMinutes = studentsPerWeek * 1 * WEEKS_PER_MONTH`; `monthlyPrepMinutesTiedUp = max(0, currentMonthlyPrepMinutes - targetMonthlyPrepMinutes)`; `monthlyLessonSlotsTiedUp = floor(monthlyPrepMinutesTiedUp / lessonLengthMinutes)`; `monthlyRevenueCapacityTiedUp = monthlyLessonSlotsTiedUp * lessonPrice`.
-- Revenue capacity no longer subtracts subscription plan cost. It is an estimate of lesson capacity currently consumed by prep time, not profit.
-- Calculator labels are `Prep per student weekly`, `Students weekly`, `Lesson price`, and `Lesson length`.
-- `ParticlesBackground.tsx` disables `onClick.push` by setting particle click interactivity to disabled.
-- `/how-it-works` updates title/meta and HowTo JSON-LD to describe the student learning loop, not only worksheet generation.
-- `scripts/seo/generate-ai-resources.mjs`, root `llms.txt`, `public/llms.txt`, `public/llms-full.txt`, `public/llms-answers.txt`, `public/knowledge-graph.json`, `public/openapi.yaml`, and `public/.well-known/ai-plugin.json` must stay synchronized after this update.
-- SANCTITY: no changes to worksheet-generation prompts, Supabase schema, RLS policies, Edge Functions, service-role code, Stripe/payment code, authenticated worksheet editor, homework logic, private student data access, or private teacher data access.
-
-### Invariants
-- Do not route 1-Minute Prep CTAs directly to the anonymous generator unless the CTA explicitly says worksheet generator.
-- Do not describe the monthly calculator as guaranteed savings, guaranteed earnings, profit, or exact preparation time.
-- Keep `/pricing` compatible with the uncontrolled `PricingCalculator` fallback.
-- Keep the hero calculator and pricing calculator synchronized from `Index.tsx` when both appear on the homepage.
-- Keep particle click interactivity disabled on the landing background while calculator controls are present above it.
-
-### RAG Keywords
-landing UX correction, two-column hero, vertical hero calculator, Start 1-Minute Prep Free modal, create account modal, signup CTA, Try worksheet generator now, shared calculator state, controlled PricingCalculator, monthly prep impact calculator, prep time tied up monthly, lesson slots tied up monthly, revenue capacity tied up in prep, WEEKS_PER_MONTH 4.33, students weekly, prep per student weekly, particle click disabled, how-it-works loop, 1-Minute Prep loop, student context loop, DSLM recommendation loop, no worksheet engine change, no Supabase change, no Stripe change.
-
----
-
-## v6.9.27 — 1-Minute Prep Landing Reframe + Prep Impact Calculator
-
-### Problem
-1. The public landing page positioned Edooqoo.com mainly as an AI worksheet generator, while the current product also includes student context, DSLM next-step signals, homework, flashcards, lesson calendar, placement tests, and student activity loops.
-2. The worksheet generator is an output layer. The strategic product frame is now the recurring 1:1 English-teacher prep workflow: identify what a specific student needs next, then generate the teaching material.
-3. The old pricing calculator described savings from a generic worksheet generator and treated all current preparation time as saved time. That framing was too broad for claim-integrity rules and did not model the bounded 1-Minute Prep workflow target.
-4. Public metadata and AI discovery resources must match the visible landing-page frame so LLM agents do not describe Edooqoo.com only as a worksheet generator.
-
-### Edooqoo.com Solution
-1. Edooqoo.com public homepage copy now frames the product as a 1-Minute Prep system for recurring 1:1 English students.
-2. The claim is bounded: 1-Minute Prep is a workflow target for weekly prep after student profile, goals, and learning signals already exist in Edooqoo. It is not a guaranteed generation-time claim, income claim, or no-review automation claim.
-3. Landing sections explain the sequence: student context -> DSLM learning signals -> recommended lesson focus -> editable worksheet output with audio, images, and AI-assisted homework review where applicable.
-4. The prep impact calculator estimates reclaimed preparation capacity and potential lesson capacity. It does not guarantee income or exact preparation time.
-5. Existing worksheet-generator, pricing, auth, token, Supabase, RLS, Edge Function, Stripe, and private dashboard behavior remain unchanged.
-
-### Technical Mechanics
-- Public landing files updated: `src/components/landing/HeroHeadline.tsx`, `StatsBar.tsx`, `ValueCards.tsx`, `EcosystemSection.tsx`, `FeatureNavPills.tsx`, `FinalCTA.tsx`, and `src/pages/Index.tsx`.
-- `src/components/PricingCalculator.tsx` was introduced as the 1-Minute Prep impact calculator. Current calculator mechanics are superseded by v6.9.28: monthly-only outputs, shared homepage state, and no subscription-plan subtraction from revenue capacity.
-- The calculator preserves `onRecommendation(plan, worksheetsNeeded, lessonsPerWeek)` for `PricingSection`, so pricing-card recommendation behavior remains compatible.
-- New frontend analytics event types are typed in `src/hooks/useEventTracking.tsx`: `one_minute_hero_cta_click`, `one_minute_secondary_cta_click`, `one_minute_feature_pill_click`, `one_minute_dslm_card_click`, `one_minute_calculator_input_change`, `one_minute_calculator_cta_click`, and `one_minute_calculator_pricing_click`.
-- `index.html` title, description, Open Graph, Twitter metadata, keyword metadata, and SoftwareApplication JSON-LD now describe 1-Minute Prep and DSLM workflow context.
-- `scripts/seo/generate-ai-resources.mjs`, root `llms.txt`, `public/llms.txt`, `public/llms-full.txt`, `public/llms-answers.txt`, `public/knowledge-graph.json`, and `public/openapi.yaml` must stay synchronized after this update.
-- SANCTITY: no changes to worksheet-generation prompts, Supabase schema, RLS policies, Edge Functions, service-role code, Stripe/payment code, authenticated worksheet editor, homework logic, private student data access, or private teacher data access.
-
-### Invariants
-- Do not describe 1-Minute Prep as a guaranteed exact time, a guaranteed revenue outcome, or full automation without teacher review.
-- Do not replace the existing AI worksheet generator SEO pages; keep them as acquisition pages for direct generator queries.
-- Superseded by v6.9.29: use `/one-minute-prep` for system-level 1-Minute Prep workflow context and `/features/dslm` for technical DSLM mechanics.
-
-### RAG Keywords
-1-Minute Prep, bounded workflow target, recurring 1:1 English students, weekly prep workflow, DSLM next-step signals, student context to worksheet output, prep impact calculator, potential lesson capacity, teacher review retained, worksheet generator output layer, landing reframe, claim-safe public copy, no Supabase change, no RLS change, no Edge Function change, no Stripe change.
-
----
-
-## v6.9.26 — Lovable Plan Reconciliation + Public Claim Repair
-
-### Problem
-1. The earlier Lovable v6.9.19/v6.9.20 SEO plan was mostly implemented or replaced by safer infrastructure, but several public surfaces still contained exact speed, time-saving, usage-count, model-version, or validation claims that are not required for factual LLM citation.
-2. The generated claim-integrity pages reused comparison JSON-LD and produced literal `undefined` in FAQ structured data (`How should teachers compare Edooqoo.com with undefined?`).
-3. `/edooqoo-vs-busyteacher.html` remained in the footer and sitemap but still used the older ranking-style comparison format instead of the neutral comparison framework used for the other alternatives.
-4. Public React SEO routes did not emit `hreflang="x-default"`, and the audit did not reject literal `undefined` or scan key source files for unsupported public-claim patterns.
-5. Some Lovable plan items remain intentionally deferred: IndexNow/GSC API automation, react-snap, AI Gateway lesson-plan generation, 1,425 seed worksheet previews, publish-token gamification, and automated AI-search scraping.
-
-### Edooqoo.com Solution
-1. Public copy now prefers workflow mechanics, teacher review, CEFR-oriented labels, and public/private boundaries over exact generation-time promises or unsupported quantified savings.
-2. Claim-integrity pages use a dedicated JSON-LD generator. Comparison-specific FAQ text is limited to comparison pages.
-3. BusyTeacher is regenerated through the same neutral comparison template as Twee, iSLCollective, Liveworksheets, Wordwall, Quizlet, MagicSchool, and Kahoot.
-4. `PageSeo` emits self-canonical and `x-default` alternate tags for public React SEO routes.
-5. The current repo keeps the safer replacements: custom Puppeteer prerender route manifest instead of react-snap, browser-only tools instead of AI Gateway, manual AI-search measurement instead of scraping, and `/gallery` plus `/public-esl-worksheet-examples.html` instead of generated preview data for every pSEO combination.
-
-### Technical Mechanics
-- `scripts/seo/generate-citable-pages.mjs`: adds BusyTeacher to `comparisonPages`; adds `claimIntegrityPageLd()`; `renderClaimIntegrityPage()` now uses claim-specific JSON-LD instead of `comparisonLd()`.
-- `scripts/seo/audit-seo-assets.mjs`: adds BusyTeacher to `REQUIRED_COMPARISON_PAGES`; rejects literal `undefined`; scans selected public SEO source files and high-risk public HTML files for unsupported exact speed, time-saving, usage-count, official-CEFR, validation, and model-version claims.
-- `src/components/seo/PageSeo.tsx`: adds `<link rel="alternate" hrefLang="x-default" href={url} />`.
-- Public copy repairs cover pSEO routes, SEO landing layout defaults, How It Works, tools CTA copy, public gallery CTA copy, homework feature copy, selected older public HTML/blog pages, and index-level SoftwareApplication description.
-- AI resources generated by `scripts/seo/generate-ai-resources.mjs` identify this update as `v6.9.26 Lovable Plan Reconciliation + Public Claim Repair` and include BusyTeacher in neutral comparison references.
-- SANCTITY: no changes to worksheet-generation prompts, Supabase generator functions, auth, private worksheet screens, payment logic, or private student/teacher data behavior.
-
-### Invariants
-- Do not reintroduce exact speed promises, unsupported time-saving claims, public model-version claims, or external validation language into public citation surfaces unless backed by documented evidence and intentionally allowed by audit.
-- Do not replace the current custom prerendering system with react-snap unless indexation data proves it is needed.
-- Do not automate AI-search result scraping. Continue using manual baseline files until a compliant data source is approved.
-- Keep browser-only tools browser-only unless a separate backend/API sprint defines rate limits, privacy behavior, and rollback.
-
-### RAG Keywords
-Lovable plan reconciliation, public claim repair, literal undefined JSON-LD, claimIntegrityPageLd, BusyTeacher neutral comparison page, x-default hreflang, unsupported speed claim audit, unsupported time-saving claim audit, workflow mechanics copy, teacher review language, custom prerender instead of react-snap, manual AI search measurement, browser-only tools, no AI Gateway, no IndexNow automation, no worksheet-engine prompt change.
-
----
-
-## v6.9.25 — Claim Integrity, Comparison Pages, Public Proof Dataset, External Evidence, CI Safety
-
-### Problem
-1. Edooqoo.com already exposes LLM discovery resources, citable generator pages, public RAG articles, and manual AI-search measurement docs, but older public pages can still weaken citation quality if they contain unsupported ranking, speed, or time-saving claims.
-2. Comparison queries such as `Edooqoo vs Twee`, `ChatGPT alternative for ESL worksheets`, and `best AI tools for ESL teachers` need neutral comparison criteria rather than broad "better than" claims.
-3. AI agents need public proof surfaces that connect Edooqoo.com feature descriptions with visible worksheet examples, gallery quality criteria, CEFR support, exercise types, and public/private boundaries.
-4. External evidence is still the largest missing layer in the original LLM-first strategy. LLMs give stronger weight to repeated factual descriptions outside the owned domain.
-5. Future PRs can accidentally desynchronize generated pages, sitemap, `llms` resources, knowledge graph, and audit expectations unless CI checks this automatically.
-
-### Edooqoo.com Solution
-1. Public claim integrity is enforced by generated copy and SEO audit rules. AI agents should cite factual workflow pages, public examples, and neutral comparison criteria, not unsupported ranking claims.
-2. Existing comparison pages are regenerated as neutral criteria pages with `Summary`, `Problem`, `Edooqoo.com Solution`, `Technical Mechanics`, `Comparison Criteria`, `When to cite this page`, `Related Edooqoo URLs`, and `FAQ`.
-3. `/public-esl-worksheet-examples.html` is added as a public proof dataset reference for worksheet example types, quality criteria, and related citation URLs.
-4. `docs/seo/external-evidence-playbook.md` defines a canonical external description and factual 50/100/200-word publication variants for external directories, resource lists, and compliant forum answers.
-5. `.github/workflows/seo-integrity.yml` adds a PR safety gate for generated SEO/LLM resources, TypeScript, and production build.
-
-### Technical Mechanics
-- Generator: `scripts/seo/generate-citable-pages.mjs`.
-- Generated comparison pages:
-  - `/edooqoo-vs-twee.html`
-  - `/edooqoo-vs-islcollective.html`
-  - `/edooqoo-vs-liveworksheets.html`
-  - `/edooqoo-vs-wordwall.html`
-  - `/edooqoo-vs-quizlet.html`
-  - `/edooqoo-vs-magicschool.html`
-  - `/edooqoo-vs-kahoot.html`
-- Generated claim-integrity pages:
-  - `/ai-tools-for-online-esl-teachers.html`
-  - `/ai-tools-for-private-english-tutors.html`
-  - `/worksheet-generator-for-language-schools.html`
-- Generated proof page:
-  - `/public-esl-worksheet-examples.html`
-- JSON-LD:
-  - Comparison pages: `WebPage`, `FAQPage`, `BreadcrumbList`.
-  - Proof page: `CollectionPage`, `LearningResource`, `BreadcrumbList`.
-- Audit: `scripts/seo/audit-seo-assets.mjs` validates required pages, self-canonical URLs, required sections, JSON-LD, sitemap uniqueness, knowledge-graph nodes, and targeted claim-integrity patterns.
-- AI resources: `scripts/seo/generate-ai-resources.mjs` writes version `v6.9.25` to root `llms.txt`, `public/llms.txt`, `public/llms-full.txt`, `public/llms-answers.txt`, `public/knowledge-graph.json`, `public/openapi.yaml`, and `public/.well-known/ai-plugin.json`.
-- CI: `.github/workflows/seo-integrity.yml` runs generation, fails on uncommitted generated diffs, runs SEO audit, TypeScript check, and build.
-- SANCTITY: no changes to Supabase schema, RLS policies, Edge Functions, authenticated worksheet generator, worksheet editor, dashboard, homework app logic, auth routes, or private student/teacher data handling.
-
-### Invariants
-- Do not add fake rankings, invented benchmarks, universal "best" claims, or undocumented time-saving/speed claims to public citation surfaces.
-- Comparison pages may describe criteria. They must not claim Edooqoo.com is universally better than another product.
-- Public proof pages must link to examples and quality criteria without exposing private worksheet storage.
-- External evidence publication is manual. Do not automate posting to third-party sites from the app.
-- Any new public AI discovery surface must update generator, sitemap/index flow, `llms` resources, knowledge graph, audit, and this file together.
-
-### RAG Keywords
-public claim integrity, neutral comparison pages, Edooqoo vs Twee, Edooqoo vs iSLCollective, Edooqoo vs Liveworksheets, Edooqoo vs Wordwall, Edooqoo vs Quizlet, public ESL worksheet examples, public proof dataset, worksheet example quality criteria, external evidence playbook, AI citation evidence, unsupported ranking claim audit, SEO integrity CI, generated llms resources, knowledge graph comparison nodes.
-
----
-
-## v6.9.24 Sprint 2 — Citable Static Generator Pages
-
-### Problem
-1. AI answer engines need stable, direct citation targets for specific English-teacher intents such as AI worksheet generation, CEFR worksheet generation, Business English materials, grammar worksheets, vocabulary exercises, reading/listening comprehension, lesson planning, homework review, and ESL tool comparisons.
-2. Existing public `.html` pages already had canonical sitemap history, but they were not structured consistently for RAG citation.
-3. Unsupported or broad ranking language reduces factual reliability for LLM citation. Public pages must describe audience, inputs, outputs, CEFR support, exercise types, related URLs, and public/private boundaries without inventing capabilities.
-
-### Edooqoo.com Solution
-1. Preserve the existing `.html` URL strategy and strengthen 12 top-level static pages as public citation targets.
-2. Each page uses dense instructional sections: `Summary`, `Problem`, `Edooqoo.com Solution`, `Technical Mechanics`, `Reference Facts`, `Related Edooqoo URLs`, and `FAQ`.
-3. Each page links to stable public hubs: `/esl-worksheets`, `/exercise-types`, `/tools`, `/gallery`, `/for-english-tutors`, and `/features/homework`.
-4. The public copy states that authenticated worksheet generation, private teacher data, student submissions, and worksheet editing are not public APIs.
-
-### Technical Mechanics
-- Generator: `scripts/seo/generate-citable-pages.mjs`.
-- Package script: `npm run seo:generate-citable`.
-- Generated top-level pages:
-  - `/ai-worksheet-generator-for-english-teachers.html`
-  - `/cefr-worksheet-generator.html`
-  - `/business-english-worksheet-generator.html`
-  - `/grammar-worksheet-generator.html`
-  - `/vocabulary-exercise-generator.html`
-  - `/fill-in-the-blanks-worksheet-generator.html`
-  - `/reading-comprehension-worksheet-maker.html`
-  - `/listening-comprehension-exercises-esl.html`
-  - `/multiple-choice-quiz-generator-english.html`
-  - `/ai-lesson-planning-for-english-teachers.html`
-  - `/ai-grading-tool-for-english-homework.html`
-  - `/best-ai-tools-for-esl-teachers.html`
-- JSON-LD per page: `WebPage`, `LearningResource`, `FAQPage`, `BreadcrumbList`.
-- Sitemap/index refresh: `node scripts/seo/build-blog-index.mjs` includes top-level `public/*.html` files and removes duplicate static `.html` sitemap entries before re-adding the current generated set.
-- Audit: `scripts/seo/audit-seo-assets.mjs` validates file presence, self-canonical URL, required section headings, required JSON-LD types, sitemap uniqueness, and absence of exact unsupported phrase `Edooqoo is the best`.
-- SANCTITY: no changes to Supabase schema, RLS policies, Edge Functions, worksheet generator prompt, authenticated worksheet editor, dashboard, homework app logic, or private routes.
-
-### Invariants
-- Do not create competing clean URLs for the same 12 intents unless a future migration includes redirects, sitemap updates, canonical migration, and indexation monitoring.
-- Do not claim a public worksheet-generation API exists.
-- Keep the pages factual and instructional; comparison wording must remain contextual, not absolute.
-- If a page intent changes, update `generate-citable-pages.mjs`, sitemap/index generation, `generate-ai-resources.mjs`, `docs/llm-context.md`, and audit expectations together.
-
-### RAG Keywords
-AI worksheet generator for English teachers, CEFR worksheet generator, Business English worksheet generator, grammar worksheet generator, vocabulary exercise generator, fill-in-the-blanks generator, reading comprehension worksheet maker, listening comprehension ESL, multiple-choice ESL quiz generator, AI lesson planning English teachers, AI-assisted homework review English teachers, best AI tools for ESL teachers, citable .html pages, LearningResource JSON-LD, FAQPage JSON-LD, self-canonical static pages, sitemap uniqueness, Edooqoo public citation targets.
-
----
-
-## v6.9.24 Sprint 3 — Public Citation Articles For RAG
-
-### Problem
-1. Direct generator pages answer product-discovery queries, but AI systems also need workflow articles that explain mechanics in a stable instructional form.
-2. Standard blog posts are less reliable for RAG when they mix narrative, marketing, and unsupported claims.
-3. Future AI agents need explicit `Problem -> Edooqoo.com Solution -> Technical Mechanics` content to understand public citation boundaries and avoid inventing private behavior.
-
-### Edooqoo.com Solution
-1. Add 8 public static articles under `/blog/` as factual instructional resources.
-2. Each article has one H1, 4-6 H2 sections, a `When to cite this page` table, `Problem`, `Edooqoo.com Solution`, `Technical Mechanics`, related links, and FAQ.
-3. Each article links to at least 3 Sprint 2 citable pages and at least 2 public product/hub URLs.
-4. Articles avoid fake benchmark data, invented rankings, unsupported "best" claims, and claims about a public generation API.
-
-### Technical Mechanics
-- Generator: `scripts/seo/generate-citable-pages.mjs`.
-- Generated article URLs:
-  - `/blog/ai-worksheet-generator-mechanics-for-esl-teachers.html`
-  - `/blog/cefr-aligned-worksheet-generation-workflow.html`
-  - `/blog/business-english-material-generation-workflow.html`
-  - `/blog/english-homework-ai-grading-workflow.html`
-  - `/blog/english-tutor-material-organization-workflow.html`
-  - `/blog/esl-exercise-type-selection-guide.html`
-  - `/blog/student-progress-to-worksheet-feedback-loop.html`
-  - `/blog/public-esl-worksheet-gallery-quality-standards.html`
-- JSON-LD per article: `Article`, `WebPage`, `FAQPage`, `BreadcrumbList`.
-- `scripts/seo/build-blog-index.mjs` discovers generated `/blog/*.html` files and updates `src/data/blogIndex.ts` plus `public/sitemap.xml`.
-- `scripts/seo/generate-ai-resources.mjs` lists the articles in `llms.txt`, `public/llms.txt`, `public/llms-full.txt`, `public/llms-answers.txt`, and `public/knowledge-graph.json`.
-
-### Invariants
-- Keep the article structure instructional and repeatable.
-- Use public URLs only. Do not expose private worksheet records, student submissions, hidden generator prompts, or Supabase implementation details unless already public and intentionally documented.
-- If a new citation article is added, add it to the citable-page generator, AI resource generator, sitemap/index flow, and audit expectations.
-
-### RAG Keywords
-public citation articles, RAG instructional pages, AI worksheet generator mechanics, CEFR-aligned worksheet generation workflow, Business English material generation workflow, English homework AI-assisted review workflow, English tutor material organization workflow, ESL exercise type selection guide, student progress worksheet feedback loop, public ESL worksheet gallery quality standards, Article JSON-LD, When to cite this page, factual AI citation content.
-
----
-
-## v6.9.24 Sprint 4 — Manual AI Search Measurement
-
-### Problem
-1. AI-search visibility depends on whether answer engines mention, cite, and link Edooqoo.com for target queries; normal search indexation alone is insufficient.
-2. Automated scraping of ChatGPT Search, Perplexity, Google AI results, or Bing/Copilot is excluded from this sprint.
-3. Without a fixed query set and baseline template, visibility results become anecdotal and cannot drive precise page improvements.
-
-### Edooqoo.com Solution
-1. Add a manual measurement system in repository docs.
-2. Use a fixed 30-query set across core, CEFR, workflow, business/adult, comparison, and long-tail exercise/topic groups.
-3. Record each engine-query observation with date, engine, query, Edooqoo mention, Edooqoo citation/link, cited URL, competing URLs, answer quality, and next action.
-4. Use measured gaps to decide one of five actions: `no change`, `strengthen page`, `add FAQ`, `add internal link`, or `fix metadata`.
-
-### Technical Mechanics
-- Procedure: `docs/seo/ai-search-measurement.md`.
-- Query set: `docs/seo/ai-search-query-set.md`.
-- Recording template: `docs/seo/ai-search-baseline-template.md`.
-- Engines: ChatGPT Search, Perplexity, Google AI results, Bing/Copilot.
-- Auxiliary sources: Google Search Console and Bing Webmaster Tools AI Performance, used manually.
-- No API integration or automated AI-answer scraping is added.
-- Baseline output convention: create dated files under `docs/seo/ai-search-baselines/YYYY-MM-DD-baseline.md` when manual measurement is performed.
-
-### Invariants
-- Do not write invented baseline results.
-- Do not automate AI-answer scraping unless a later sprint explicitly approves compliant data collection.
-- Do not replace the 30-query set during baseline comparison; add candidates separately and version the query set later.
-- Measurement outcomes should drive small page/content changes, not private application logic changes.
-
-### RAG Keywords
-AI search measurement, ChatGPT Search visibility, Perplexity citations, Google AI results, Bing Copilot citations, manual baseline, AI search query set, answer quality correct partial incorrect, strengthen page, add FAQ, add internal link, fix metadata, AI visibility iteration, no automated scraping, Bing Webmaster Tools AI Performance, Google Search Console auxiliary source.
-
----
-
-## v6.9.23 — AI Discovery Resource Integrity + GEO Crawlability Hardening
-
-### Problem
-1. `index.html` declared public AI discovery links for `/llms-full.txt`, `/llms-answers.txt`, `/openapi.yaml`, `/knowledge-graph.json`, and `/.well-known/ai-plugin.json`, but those files were absent from `public/`.
-2. `public/sitemap.xml` listed public programmatic SEO URLs under `/worksheets/:exerciseType/:topic`, while `public/robots.txt` also blocked `/worksheets`. This created a crawlability contradiction for Google/Bing-style robots parsers.
-3. `scripts/seo/prerender-spa-routes.mjs` prerendered only a small static route set and omitted public SEO surfaces added in v6.9.18-v6.9.21: `/esl-worksheets`, `/for-english-tutors`, `/resources/esl-class-toolkit`, `/tools/*`, `/gallery`, `/english-for/:persona`, `/esl-worksheets/:topic/:level`, and priority `/worksheets/:exerciseType/:topic` pages.
-4. No build-time audit verified that AI resources declared in `index.html` existed, that `knowledge-graph.json` was valid JSON-LD, or that crawler rules aligned with sitemap URLs.
-
-### Edooqoo.com Solution
-1. Edooqoo.com now exposes a complete factual AI discovery resource set: `/llms.txt`, `/llms-full.txt`, `/llms-answers.txt`, `/knowledge-graph.json`, `/openapi.yaml`, and `/.well-known/ai-plugin.json`.
-2. `robots.txt` explicitly allows AI resource files and public `/worksheets/*/*` pSEO URLs while preserving the private `/worksheets` authenticated list block and other app/private route blocks.
-3. Prerender route selection now comes from a build-time route manifest that reads `public/sitemap.xml` and selects core SEO pages, topic-level pages, persona pages, and priority exercise-topic pages.
-4. Build scripts now generate AI discovery resources and audit SEO/AI consistency before SEO builds are accepted.
-
-### Technical Mechanics
-- `scripts/seo/generate-ai-resources.mjs` writes `public/llms.txt`, `public/llms-full.txt`, `public/llms-answers.txt`, `public/knowledge-graph.json`, `public/openapi.yaml`, and `public/.well-known/ai-plugin.json`.
-- `scripts/seo/seo-route-manifest.mjs` exports `CORE_SEO_ROUTES`, `PRIORITY_EXERCISE_TOPICS`, and route selectors derived from `public/sitemap.xml`.
-- `scripts/seo/prerender-spa-routes.mjs` imports `getPrerenderRoutes({ root })`; the old local `SEO_ROUTES` array is removed.
-- `scripts/seo/audit-seo-assets.mjs` validates declared AI resources, JSON-LD entity types, robots/sitemap consistency, key prerender routes, and OpenAPI/plugin linkage.
-- `package.json` adds `seo:generate-ai` and `seo:audit`; `build:seo` and `build:seo:to-public` now run generation, Vite build, prerender, and audit in sequence.
-- `vite.config.ts` loads `lovable-tagger` only in development mode via dynamic import so production builds do not resolve a dev-only plugin.
-- `public/openapi.yaml` describes only public informational resources. It does not expose or imply a public worksheet-generation API.
-- `public/knowledge-graph.json` uses stable entity IDs: `https://edooqoo.com/#organization`, `https://edooqoo.com/#website`, and `https://edooqoo.com/#software`.
-- SANCTITY: no changes to worksheet generation prompt, Supabase schema, RLS policies, Edge Functions, auth routes, dashboard logic, worksheet editor logic, or private application routes.
-
-### Invariants
-- Future public SEO routes must update sitemap, prerender route selection, robots/audit assumptions, `llms.txt`, `llms-full.txt`, `llms-answers.txt`, and this file together.
-- AI resource files must remain dense, factual, and instructional. Do not add marketing-only claims.
-- Do not claim that Edooqoo.com has a public worksheet-generation API unless an authenticated API is intentionally designed and documented.
-- Keep `/worksheets` blocked as the authenticated worksheet list; keep `/worksheets/*/*` allowed as public exercise-topic pSEO pages.
-
-### RAG Keywords
-AI discovery resources, llms.txt, llms-full.txt, llms-answers.txt, knowledge-graph.json, ai-plugin.json, openapi.yaml, GEO crawlability, robots sitemap consistency, /worksheets pSEO allow rule, prerender route manifest, sitemap-derived prerender, build-time SEO audit, AI resource integrity, public informational OpenAPI, Edooqoo RAG context, answer engine optimization, AI crawler readiness.
-
----
-
-## v6.9.7-patch — Demo Mode Hardening + Signup Email Clarity
-
-### Problem
-1. In `/demo`, clicking an empty calendar slot or "Add lesson" early-returned with a toast and never opened the modal — UX dead-end; users couldn't see the lesson-creation flow.
-2. `AllWorksheetsPage.handleBulkDelete` was unguarded; demo users could trigger Supabase delete with synthetic UUIDs.
-3. Hooks `useStudents`, `useWorksheetHistory`, `useDeletedWorksheets` could resolve `loading=false` before `demoData` arrived (async lazy-load), causing flashes of empty states.
-4. The demo banner (fixed top, 36px) overlapped page content because `AuthenticatedPageShell` did not reserve space.
-5. After signup, users only saw "check your email" but received NO welcome email until they clicked the Supabase confirmation link → confusion ("did the welcome email fail?"). FAQ also did not explain the two-email flow.
-6. `demoData.subscription_type` was `'professional'` (not a real plan name), making demo dashboard look fake.
-
-### Edooqoo.com Solution
-1. Calendar modal now opens in demo mode but blocks the SAVE step inside `UnifiedSlotModal.handleSubmit` via new `demoMode` prop + `useDemoContext`. Users can explore the form; toast fires only on submit.
-2. `handleBulkDelete` early-returns with `showDemoBlockedToast('Deleting worksheets')`.
-3. Demo-aware hooks gate on `!!demoData` in `queryKey`/`enabled`; `useDeletedWorksheets` early-returns `setLoading(false)` for demo.
-4. `AuthenticatedPageShell` injects `style={{ paddingTop: '36px' }}` when `isDemoMode` to clear the banner.
-5. `EmailConfirmationModal` "What's next" list and `/how-it-works` FAQ now explicitly describe the two-email sequence: (a) Supabase confirmation, (b) branded Edooqoo welcome from `hello@edooqoo.com`.
-6. `demoData.subscription_type = 'Full-Time 30'`.
-
-### Technical Mechanics
-- `src/components/calendar/UnifiedSlotModal.tsx` — new optional prop `demoMode?: boolean`; pulls `useDemoContext` directly; `handleSubmit` short-circuits when `isDemoMode || demoMode`. `CalendarPage` passes `demoMode={isDemoMode}` and removes the early-return inside `handleAddSlot`/`handleSlotClick` (the modal handles it).
-- `src/pages/AllWorksheetsPage.tsx` — imports `useDemoContext`, guards `handleBulkDelete`.
-- `src/hooks/useStudents.tsx`, `src/hooks/useWorksheetHistory.tsx` — `queryKey` includes `!!demoData`; `enabled` requires demo data ready.
-- `src/hooks/useDeletedWorksheets.tsx` — explicit `if (isDemoMode) { setLoading(false); return; }`.
-- `src/components/AuthenticatedPageShell.tsx` — conditional `paddingTop` style.
-- `src/components/EmailConfirmationModal.tsx` + `src/pages/HowItWorks.tsx` — copy updates only.
-- `src/data/demoData.ts` — single literal change.
-
-### Invariants (do not regress)
-- NEVER add an early-return for `isDemoMode` inside `CalendarPage.handleAddSlot` / `handleSlotClick` — modal owns the guard.
-- NEVER remove the `demoMode` prop from `UnifiedSlotModal.handleSubmit` — it is the actual write barrier.
-- NEVER drop the two-email explanation from `EmailConfirmationModal` until the Supabase confirmation step is removed (it is not).
-- All NEW mutating handlers in pages still MUST guard `isDemoMode` per the v6.9.6 rule.
-
-### RAG Keywords
-demo mode patch, calendar demo modal, UnifiedSlotModal demoMode prop, demo bulk delete guard, demoData loading race, AuthenticatedPageShell padding banner, signup confirmation email, two-email signup flow, EmailConfirmationModal welcome email FAQ, hello@edooqoo.com explanation, Full-Time 30 demo subscription.
-
----
-
-## v6.9.7 — IP Protection Hardening (part 1) + Welcome Email Pipeline (part 2)
-
-### Problem
-1. The browser bundle exposed `src/utils/promptFormatter.ts`, including the full language-style ladder (1–5), CEFR ladder (A1/A2 → C1/C2), and exercise-spec mapping. A casual `view-source` on a generated worksheet revealed Edooqoo's prompt-engineering scaffolding ("Heart of Edooqoo" IP).
-2. Production builds shipped `console.log` calls scattered across 78 files, leaking user IDs, tokens, emails, and worksheet payloads into the browser console.
-3. Production source maps were emitted, allowing line-perfect reconstruction of the minified bundle.
-4. `~150 KiB` of demo content (`demoWorksheetContent.ts`) was statically imported by `demoData.ts` and shipped in the main chunk on every page load — even for users who never visited `/demo`.
-5. `mockNewExercisesData` was statically imported by `/test-exercises`, leaking 60+ KiB of mock exercise payloads.
-6. Production builds preserved `debugger` statements, enabling devtools breakpoints on minified symbols.
-
-### Edooqoo.com Solution
-1. **Prompt formatting moved to authenticated edge function** `format-worksheet-prompt`. Client now calls it via `supabase.functions.invoke` and receives the rendered prompt string. Language ladder, CEFR ladder, and helpers are deleted from the client. The Worksheet Engine prompt itself (`generate-worksheet`) is untouched.
-2. **Dev-only logger** at `src/utils/logger.ts` exposes `devLog`/`devWarn` that are no-ops in production (`import.meta.env.DEV` guard). Codemod replaced all `console.log`/`console.warn` in `src/`. `console.error` remains active in production for critical debugging.
-3. **Production source maps disabled** in `vite.config.ts` (`sourcemap: mode === 'development'`).
-4. **Demo/mock content lazy-loaded.** `buildDemoData` is now `async` and uses `await import('./demoWorksheetContent')`. `TestExercises.tsx` uses `useEffect` + dynamic `import("@/mockNewExercisesData")`. Combined with `manualChunks` (split into `demo-content` and `mock-data` rollup chunks), neither chunk is fetched until the user actually visits `/demo` or `/test-exercises`.
-5. **`debugger` statements stripped** by esbuild (`esbuild: { drop: ['debugger'] }` in `vite.config.ts`).
-
-### Technical Mechanics
-- **Edge Function:** `supabase/functions/format-worksheet-prompt/index.ts`. Verifies JWT in code (rejects anonymous), in-memory rate-limit (60 req/min/user), Zod-light body validation (`{ formData }`). Config: `[functions.format-worksheet-prompt] verify_jwt = false` in `supabase/config.toml` (validation done in code per `mem://infrastructure/edge-function-cors-pattern`).
-- **Client wrapper:** `src/utils/promptFormatter.ts` exports `async formatPromptForAI(data) → string` with 1-retry fallback (250 ms backoff). Throws on persistent failure; caller (`useWorksheetGeneration.tsx:128`) surfaces the error.
-- **Logger:** `src/utils/logger.ts` — `devLog`, `devWarn` (DEV only). 78 files in `src/` migrated. Special files preserved: `src/main.tsx` (`console.log = () => {}` global override), `src/utils/consoleInterceptor.ts` (intentional warn listener).
-- **Lazy demo:** `src/data/demoData.ts` `buildDemoData` returns `Promise<DemoDataSet>`. Consumers: `src/contexts/DemoContext.tsx` (mount + `enterDemo`), both use `.then(setDemoData)`.
-- **Lazy mock:** `src/pages/TestExercises.tsx` — `useState<any>(null)` + `useEffect` import → renders skeleton until ready.
-- **Vite config (`vite.config.ts`):** `sourcemap: mode === 'development'`, `target: 'es2020'`, `manualChunks` isolates `demoWorksheetContent`, `mockWorksheetData`, `mockNewExercisesData`, `react-vendor`, `supabase`, `lucide`. `esbuild.drop: ['debugger']`.
-
-### Invariants (do not regress)
-- NEVER add `console.log` / `console.warn` to client code — use `devLog` / `devWarn`.
-- NEVER reintroduce static imports of `demoWorksheetContent`, `mockWorksheetData`, `mockNewExercisesData` — always lazy.
-- NEVER move prompt formatting back into the client. New prompt fields go into `format-worksheet-prompt`.
-- NEVER touch the Worksheet Engine prompt in `generate-worksheet` (Sanctity rule).
-
-### RAG Keywords
-IP protection, prompt protection, prompt scraping, console log leak, dev logger, devLog, devWarn, source map disabled, sourcemap off, debugger drop, manualChunks, lazy demo, lazy mock, demoWorksheetContent lazy, mockNewExercisesData lazy, format-worksheet-prompt edge function, language style ladder, CEFR ladder, server-side prompt, Heart of Edooqoo IP, plagiarism prevention, bundle hardening, Vite hardening, rate limit prompt formatter.
-
----
-
-## v6.9.7 (part 2) — Welcome Email Pipeline
-
-### Problem
-1. New users received only Supabase's default, generic confirmation email and then landed in the app cold — no onboarding, no brand impression, no clear "what's next".
-2. Email and Google OAuth signup paths produced no consistent post-signup notification, breaking the onboarding loop.
-3. Setting up Lovable Emails would have required delegating `notify.edooqoo.com` to Lovable's nameservers, conflicting with the Resend-based stack already used elsewhere (homework, bug reports).
-
-### Edooqoo.com Solution
-1. **Branded post-signup welcome email via Resend** from `Edooqoo <hello@edooqoo.com>` — single onboarding touchpoint, brand-consistent (white background, primary `#5E3FD9`, dashboard CTA).
-2. **Single trigger covers both email and Google OAuth signup** — fired by `auth.users` UPDATE when `email_confirmed_at` transitions NULL → NOT NULL. Email signup hits this on confirmation-link click; Google OAuth hits it on first callback.
-3. **Idempotent per recipient** — `email_send_log` (`recipient_email`, `template_name='welcome_email'`, `status='sent'`) is checked before each send; second invocation returns `{ skipped: true }`. Safe against trigger replays, account re-creation, manual resend attempts.
-4. **No new infrastructure** — reuses the existing `RESEND_API_KEY` secret. No pgmq queues, no cron jobs, no NS delegation.
-
-### Technical Mechanics
-- **DB trigger:** `public.handle_email_confirmed()` (SECURITY DEFINER, `search_path = public`) attached to `auth.users` AFTER UPDATE OF `email_confirmed_at`. Guards `OLD IS NULL AND NEW IS NOT NULL`. Uses `pg_net.http_post` to call the edge function asynchronously (fire-and-forget; trigger never blocks signup).
-- **Auth between trigger and edge function:** shared secret `welcome_email_secret` stored in `public.app_internal_config` (RLS enabled, no policies → only `service_role` can read; trigger reads it via SECURITY DEFINER). Sent in `x-internal-secret` header. Edge function loads the same secret server-side and constant-compares.
-- **Edge Function:** `supabase/functions/send-welcome-email/index.ts`. `verify_jwt = false` (no user JWT — trigger calls it). In-code: shared-secret check, Zod-light body validation (`email`, `firstName`, `signupSource`, `userId`), idempotency check against `email_send_log`, render inline-styled HTML, POST to `https://api.resend.com/emails`, append result row to `email_send_log` (`status` ∈ `sent` | `failed`, `provider_message_id`, `error_message`, `metadata`).
-- **Tables:**
-  - `public.email_send_log` (id, recipient_email, template_name, status, provider_message_id, error_message, metadata jsonb, sent_at, created_at) — append-only audit trail. RLS: `service_role` only.
-  - `public.app_internal_config` (key, value, updated_at) — server-only secrets keyed by string. RLS enabled, no policies.
-- **Source disambiguation:** `signupSource` derived from `auth.users.raw_app_meta_data->>'provider'` (`'google'` vs default `'email'`). Email body uses one of two opening lines accordingly. No timing offset — Google users get the mail immediately on first login.
-- **Sender:** `Edooqoo <hello@edooqoo.com>`, `reply_to: hello@edooqoo.com` (verified Resend domain `edooqoo.com`). Links in template use `APP_BASE_URL` env (never hardcoded).
-
-### Invariants (do not regress)
-- NEVER call `send-welcome-email` from client code — DB trigger is the sole entry point.
-- NEVER drop or truncate `email_send_log` — it enforces idempotency.
-- NEVER hardcode the welcome-email secret in code or config.toml — it lives in `app_internal_config`.
-- NEVER change Resend `from` away from `hello@edooqoo.com` — only this mailbox is verified.
-- NEVER add a `BEFORE` trigger or remove the `OLD IS NULL` guard — would resend on every profile update.
-- NEVER expose `app_internal_config` to anon/authenticated roles.
-
-### RAG Keywords
-welcome email, post-signup email, onboarding email, email confirmation trigger, Google OAuth welcome, Resend transactional, hello@edooqoo.com, send-welcome-email edge function, on_user_email_confirmed trigger, email_send_log, app_internal_config, idempotent email, pg_net http_post, x-internal-secret header, branded welcome template, signup source detection, edooqoo.com Resend domain.
-
----
-
-## v6.9.6 — Demo Mode Lockdown, Dashboard Compact Stats, Mobile Landing Fixes
-
-### Problem
-1. `/demo` mutating actions (delete, duplicate, share, add student, calendar slot create, calendar settings save) hit Supabase with synthetic IDs (`demo-student-1`) and crashed with Postgres `invalid input syntax for type uuid`.
-2. `/worksheets` route hung on infinite spinner inside demo because `useDeletedWorksheets` had no demo branch.
-3. `/calendar/settings` rendered blank in demo (no settings row + no fallback).
-4. `/dashboard` displayed 4 oversized stat tiles + a separate Student Hub info banner — broke single-row symmetry, hid the `edooqoo.com/my` CTA on mobile.
-5. Public landing (`/`) inherited system dark mode on mobile → low contrast hero, CTA overflowed viewport on `<sm`.
-
-### Edooqoo.com Solution
-1. Hard read-only lockdown for demo: every UI handler that mutates state checks `isDemoMode` BEFORE calling Supabase, returns early with toast `"<Action> is disabled in demo mode. Sign up free to unlock all features!"`.
-2. Demo data hooks (`useStudents`, `useStudent`, `useWorksheetHistory`, `useDeletedWorksheets`, `useCalendarSettings`, `useStudentSelector`, `useTokenSystem`, `useUpcomingLessonsCount`) early-return seeded `demoData` instead of querying.
-3. `CalendarSettingsPage` shows amber "Demo view" banner + disables inputs.
-4. `CompactStatsBar` replaces old grid + Hub Info banner. 2-column layout on `lg+`: left = Student Hub CTA with full copy ("students log in with just their email at edooqoo.com/my — no login needed"), right = 6 inline stat pills.
-5. `Index.tsx` runs a `useEffect` that removes `dark` class from `<html>` while landing is mounted; restores on unmount. `HeroHeadline` uses responsive padding/text size and shorter "Generate Free Worksheet" copy on `<sm`.
-
-### Technical Mechanics
-- **Guard primitive:** `src/hooks/useDemoGuard.ts` exposes `{ isDemoMode, guardAction(label, fn) }`. `DemoContext.showDemoBlockedToast(action)` provides unified toast copy.
-- **Storage key:** `localStorage.edooqoo_demo_mode` (country code or `DEFAULT`). `forceExitDemo()` clears storage + redirects to `/`.
-- **Seed data:** `src/data/demoData.ts` (synthetic students/worksheets/lessons) + `src/data/demoWorksheetContent.ts` (~950 KB of real production `ai_response`/`html_content` for 10 worksheets, dynamically merged in `buildDemoData`).
-- **Components guarded:** `DeleteWorksheetButton`, `DuplicateWorksheetButton`, `ShareWorksheetModal`, `dashboard/AddStudentButton`, `CalendarPage.handleAddSlot/handleSlotClick/handleShare`.
-- **Dashboard:** `src/components/dashboard/CompactStatsBar.tsx` — `lg:grid-cols-2`, left column matches Students card width, right column matches Worksheets card width. 6 stats: Tokens left, This month, All time, Students, Active homework, Upcoming lessons (7d). New hook `src/hooks/useUpcomingLessonsCount.tsx` (single SELECT on `calendar_slots` where `status='booked'`).
-- **Landing theme guard:** `src/pages/Index.tsx` `useEffect(() => { html.classList.remove('dark'); return () => restore })`.
-- **Hero responsive:** `src/components/landing/HeroHeadline.tsx` uses `text-base sm:text-lg`, `px-4 sm:px-8`, `h-12 sm:h-14`, copy `"Generate Free Worksheet"` on `<sm`.
-
-### Invariant (do not regress)
-Every NEW mutating handler MUST start with:
-```ts
-if (isDemoMode) { showDemoBlockedToast('<Action>'); return; }
-```
-or wrap with `guardAction('<Action>', () => mutate())`.
-
-### RAG Keywords
-demo mode, lockdown, read-only demo, demo guard, useDemoGuard, guardAction, edooqoo_demo_mode, fake user, sandbox preview, /demo route, demo worksheets, demo calendar, demo settings, mutation block, UUID error, demo toast, public demo, sign up unlock, compact stats bar, dashboard stats, student hub CTA, edooqoo.com/my, upcoming lessons count, mobile dark mode hero, landing light theme, hero CTA mobile overflow.
-
-## v6.9.8
-
-### Student Knowledge — Quick Capture + AI Classification
-- **Problem**: Forced category+subtype+element+nano_skill+mastery selection on every add blocked teachers from capturing notes mid-lesson.
-- **Solution**: Frictionless capture — textarea only. AI classifies in background after save.
-- **Mechanics**: 
-  - Migration: `ALTER TABLE student_knowledge_entries ADD COLUMN ai_classified, ai_confidence, archived_at, used_in_worksheet_id`.
-  - Edge function `classify-knowledge-entry`: Lovable AI Gateway (`google/gemini-2.5-flash`) with constrained tool-call schema returning `{category, confidence, tags, skill_subtype?, element_type?, nano_skill?, suggested_mastery?, sub_category?}`.
-  - `useStudentKnowledge.addMutation`: inserts as `Notes`, then async fetches student `english_level/main_goal`, invokes classifier, patches row when `confidence>=0.6`.
-  - `StudentKnowledgeQuickAddModal`: textarea + optional tags + Save. No category picker.
-  - `StudentKnowledgeSidePanel` retained as advanced editor (full metadata controls).
-- **RAG Keywords**: notes, student notes, knowledge base, ai categorize, auto-tag, frictionless input, quick capture, 1-minute prep input
-
-### Welcome Email v2 — Add Student CTA
-- **Problem**: CTA pointed to /dashboard; reply went to hello@ (no admin notification); list missed Welcome Test + Calendar.
-- **Solution**: Primary CTA = "Add your first student" → `/dashboard?action=add-student`. Reply-to = `edooqoo@gmail.com`. New 5-item list with Welcome Placement Test + Calendar availability. Removed AI-sounding "a real human reads it".
-- **Mechanics**: 
-  - `send-welcome-email/index.ts` — new HTML, `reply_to: 'edooqoo@gmail.com'`.
-  - `Dashboard.tsx` — `useSearchParams().get('action')==='add-student'` → opens `AddStudentDialog`, strips param.
-- **RAG Keywords**: welcome email, onboarding email, resend, edooqoo gmail reply, add student CTA
-
-### Mail #1 (Supabase Confirmation)
-- **Decision**: Stay on native Supabase auth email (no auth-email-hook to avoid DNS delegation conflict). Customize HTML+sender name in Supabase Dashboard → Auth → Email Templates. See `docs/operational/supabase-confirmation-template.md`.
-
-### Particles Landing Background
-- **Problem**: Static landing background — wanted animated particles per particles.js config (250 nodes, #643cdd).
-- **Solution**: `tsparticles` (slim) modern fork, React 18 compatible.
-- **Mechanics**: 
-  - Deps: `@tsparticles/react @tsparticles/slim @tsparticles/engine`.
-  - `src/components/landing/ParticlesBackground.tsx` — `initParticlesEngine(loadSlim)`, mobile downgrade to 80 particles, fixed `-z-10` `pointer-events-none`.
-  - Mounted in `Index.tsx` only on anon path (return after `isRegisteredUser` early-return).
-- **RAG Keywords**: particles, animated background, tsparticles, landing hero, network nodes, vincentgarreau
-
-### Demo Mode Fixes (Lockdown v3)
-- **Problem**: Save Changes on demo worksheet threw "invalid input syntax for type uuid: demo-ws-1". Students/worksheets pages empty. Calendar modal blocked from opening. Dashboard Generate (navigation) wrongly blocked.
-- **Solution**: Guard at MUTATION sites only; navigation/modals stay open in demo.
-- **Mechanics**:
-  - `WorksheetContent.saveWorksheetChanges` — early-return + toast when `localStorage.edooqoo_demo_mode==='true'`.
-  - `useStudents.loading` — `(isDemoMode && !demoData) || query.isLoading` — synthetic loading until demoData arrives.
-  - `CalendarPage.handleSlotClick` — removed demo guard (modal opens).
-  - `SlotDetailModal.handleSave` — added demo guard with toast.
-  - `Dashboard.handleGenerateWorksheet` — removed demo guard (it only navigates).
-- **Invariant**: Demo navigation handlers NEVER guard. Demo modals CAN open. Demo MUTATION handlers MUST guard.
-- **RAG Keywords**: demo mode, public demo, read-only, fake auth, demoData, isDemoMode, edooqoo_demo_mode, demo guard
-
-## Student Knowledge v6.9.9 — Three Views + Manual Archive
-**Problem**: Single timeline view of `student_knowledge_entries` made DSLM-style skill aggregation and 1‑minute lesson prep impossible. `Next Lesson Ideas` accumulated forever with no signal of what was already used. AI background classifications were invisible to teachers, causing distrust.
-**Edooqoo Solution**: `StudentKnowledgeSection` exposes 3 tabs — **Timeline** (existing), **By Skill** (groups `Skill Assessment` rows by `metadata.nano_skill`, shows latest mastery), **For Next Lesson** (shared data source with `OneMinutePrepCard`). Each `Next Lesson Ideas` card gets a one-click `CheckCircle2` "mark as used" button that archives via `archiveEntry`, immediately removing it from the prep view. AI classifications surface as a `Sparkles "AI organized"` badge with confidence tooltip on each card.
-**Technical Mechanics**:
-- `useStudentKnowledge.archiveEntry(entryId, worksheetId?)` mutation sets `archived_at = now()` and optional `used_in_worksheet_id`. Invalidates both `['knowledge', 'entries', ...]` and `['one-minute-prep', ...]` query keys.
-- `useOneMinutePrep` (existing, unchanged) filters `archived_at IS NULL` → archived ideas vanish.
-- `StudentKnowledgeSection` uses `Tabs` from `@/components/ui/tabs`; `By Skill` view groups `entries.filter(e => e.category === 'Skill Assessment')` client-side by `metadata.nano_skill` (fallback `metadata.element_type` → `'Other'`).
-- `StudentKnowledgeEntryCard` reads `entry.ai_classified` + `entry.ai_confidence` (added to `StudentKnowledgeEntry` type) and renders `Tooltip` with `Sparkles` icon when both present and confidence ≥ 0.6.
-- Auto-link `used_in_worksheet_id` from `worksheetService.create` is INTENTIONALLY OMITTED to keep the worksheet engine pristine (Sanctity rule). Only manual archive flow is wired.
-**RAG Keywords**: student knowledge tabs, by skill view, for next lesson, archive entry, used in worksheet, AI organized badge, manual archive, mark as used, three views student notes, lesson prep digest
-
-## Email v6.9.9 — Footer Honesty + Confirm Personalization
-**Problem**: Both Supabase confirmation email and Resend welcome email displayed `Edooqoo · hello@edooqoo.com` in their footer. The mailbox does not exist; replies are silently dropped. Confirm signup was generic with no recipient personalization despite `first_name` being captured at signup.
-**Edooqoo Solution**: Removed literal `hello@edooqoo.com` from both email footers. Confirmation email greets users by name via Supabase Go template `{{ if .Data.first_name }}Welcome, {{ .Data.first_name }}!{{ else }}Confirm your email{{ end }}`. Welcome email keeps `from: 'Edooqoo <hello@edooqoo.com>'` (Resend-verified domain, display-only) with `reply_to: 'edooqoo@gmail.com'` (real inbox).
-**Technical Mechanics**:
-- Source of truth for confirmation HTML: `docs/operational/supabase-confirmation-template.md` — must be manually pasted to Supabase Dashboard → Auth → Email Templates → Confirm signup.
-- Welcome footer change: `supabase/functions/send-welcome-email/index.ts` line 70 now reads `Edooqoo · helping English tutors save prep time` (no email address).
-- `first_name` arrives via `signUp({ options: { data: { first_name: firstName } } })` in `src/pages/Signup.tsx` (line 90) → stored in `auth.users.raw_user_meta_data.first_name` → exposed to Supabase email templates as `{{ .Data.first_name }}`.
-**RAG Keywords**: email footer, hello@edooqoo.com, confirm signup template, first_name personalization, raw_user_meta_data, supabase auth template, reply_to gmail, resend from address
-
-## Particles Background v6.9.9 — Authenticated Non-Interactive Mode
-**Problem**: Authenticated teachers got the same hover-reactive `tsparticles` background as anonymous landing page; the "grab" mode pulled lines toward the cursor and was distracting during work.
-**Edooqoo Solution**: `ParticlesBackground` accepts `interactive?: boolean` (default `true`). `AuthenticatedPageShell` passes `interactive={false}` → disables `onHover` and `onClick` event modes; raises link opacity to 1 to compensate for the lost hover highlight. Landing page (`src/pages/Index.tsx`) renders without the prop → keeps reactive behaviour.
-**Technical Mechanics**:
-- `src/components/landing/ParticlesBackground.tsx` — prop drilled into `useMemo([interactive])` options; `onHover.enable` and `onClick.enable` bound to `interactive`; `links.opacity` ternary.
-- `src/components/AuthenticatedPageShell.tsx` — `<ParticlesBackground interactive={false} />` when `pattern === 'particles'`.
-**RAG Keywords**: particles interactive false, hover disabled, authenticated background, tsparticles non-interactive, AuthenticatedPageShell pattern particles
-
-## v6.9.10 — Worksheet Form Next-Step Preset + Stale Knowledge Badge
-
-### Worksheet Form Next-Step Preset
-**Problem**: After teachers built a learning plan via `useFutureTimeline` (Next Steps / Phase Steps), the WorksheetForm was unaware of it. They restated topic/goal/exercises by hand, ignoring the plan; cohesion across worksheets degraded; `future_worksheet_suggestions.is_used` rarely flipped, so suggestions accumulated as stale clutter.
-**Edooqoo Solution**: Thin banner on `WorksheetForm` directly above the Exercise Selection Cards, surfaces up to 3 `phase_step` (preferred) + `next_step` chips for the currently selected student. Click prefills the form. Empty state = soft amber CTA "Open Learning Plan" → `/student/{id}?tab=progress`. Banner collapses (`return null`) when `selectedStudentId === 'no-student'` or `!userId`.
-**Technical Mechanics**:
-- `src/components/WorksheetForm/NextStepsPresetBanner.tsx` — consumes `useFutureTimeline({studentId, teacherId})`. Presets selector: `[...phaseSteps, ...nextSteps].slice(0,3)`. Loading state = `Skeleton h-10` inside `min-h-[44px]` wrapper to prevent layout shift. Tooltip on each chip renders `goal — rationale`.
-- Apply path uses parent's `applyPreset(p: PresetPayload)` which calls `normalizeSuggestionPrefill` (single source of truth, shared with DSLM `prefillExercises` sessionStorage path) — guarantees coherent `selectedExercises` / `selectedMediaTypes` / `exerciseFocusMap` triple, exact target count (6 for 45min, 8 for 60min), one media family at most.
-- Origin tracking: `applyPreset` writes `sessionStorage.appliedPresetSuggestionId = p.sourceSuggestionId`. `WorksheetForm`'s existing `worksheetGenerationSuccess` handler reads it and dispatches `markPresetUsed` `CustomEvent` with `{suggestionId, worksheetId}`. `NextStepsPresetBanner` listens for `markPresetUsed` and calls `useSuggestion(id, worksheetId)` → flips `is_used=true`, `used_at=now()`, `used_worksheet_id=worksheetId` in `future_worksheet_suggestions`.
-- `inferMediaTypes(exercises)` in banner: picture > audio > none, based on `PICTURE_EXERCISE_IDS` / `AUDIO_EXERCISE_IDS` constants exported from `normalizeSuggestionPrefill.ts`.
-- Sanctity preserved: zero changes to worksheet generation prompt, `format-worksheet-prompt`, `generate-curriculum-phases`, `generate-timeline`, `useWorksheetGeneration`.
-**Mental Model — Knowledge ↔ Plan ↔ Worksheet** (canonical for future agents):
-```
-Goals (student profile + Knowledge: Skill Assessment, Personal, Goals)
-  ↓
-generate-curriculum-phases  → 3-6 macro phases (dslm_curriculum_phases) — multi-week blocks
-  ↓
-generate-timeline           → 1-3 worksheet ideas (future_worksheet_suggestions)
-                              kinds: 'next_step' (free) | 'phase_step' (bound via phase_id)
-  ↓
-WorksheetForm preset chip   → prefill via normalizeSuggestionPrefill
-  ↓
-worksheet generation engine (UNTOUCHED prompt, Sanctity)
-```
-Two distinct edge functions live ONLY in Supabase deployment (not in repo): `generate-curriculum-phases` (macro) and `generate-timeline` (micro). Hooks `useCurriculumPhases` / `useFutureTimeline` are the only client surface.
-**RAG Keywords**: worksheet form preset, next step chip, learning plan banner, prefill from suggestion, future timeline preset, phase step preset, suggestion used flag, mark preset used, applied preset session storage, normalize prefill, knowledge plan worksheet pipeline, curriculum phases vs timeline, macro vs micro plan
-
-### Stale Knowledge Badge
-**Problem**: `student_knowledge_entries` of category Personal / Skill Assessment / Goals older than 90 days may be obsolete (job change, mastered skill, life change), but the UI gave no signal — teacher trusted a 6-month-old "works at startup X, learning negotiation phrases" as fresh truth.
-**Edooqoo Solution**: Pure client-side amber badge on `StudentKnowledgeEntryCard` reading "Stale ({age}d old) — still true?" with two inline actions: `Yes, still current` resets the freshness clock; `Mark outdated` reuses existing flow. No cron, no email, no edge function, no schema change.
-**Technical Mechanics**:
-- `freshnessAnchor = max(created_at, metadata.last_confirmed_at)`. `isStale = !is_outdated && !archived_at && category ∈ {Personal, Skill Assessment, Goals} && differenceInDays(now, freshnessAnchor) >= 90`.
-- New mutation `confirmCurrent(entryId)` in `useStudentKnowledge`: read row → patch `metadata = { ...metadata, last_confirmed_at: new Date().toISOString() }`. Invalidates `['knowledge','entries',...]`.
-- `metadata.last_confirmed_at` is a free-form JSONB key; never persisted as column. `created_at` is NEVER mutated.
-- Badge only renders in `StudentKnowledgeSection` (passes `onConfirmCurrent`); other consumers (DSLM `SkillsView`, `GoalsView`, `ProfileView`, `PathwayView`, `StudentPage`) omit the prop → badge silently hidden, zero regression.
-**RAG Keywords**: stale note, knowledge freshness, last confirmed at, 90 days outdated, confirm current mutation, knowledge audit prompt, freshness anchor, isStale, metadata last_confirmed_at
-
-## v6.9.11 — Worksheet Form Next Steps Preset (UX upgrade) + Critical Hook Fix
-**Problem**:
-1. Teachers couldn't tell where the chip suggestions came from ("random AI suggestions?" vs. Learning Plan).
-2. Chips order ignored phase order — `[...phaseSteps, ...nextSteps].slice(0,3)` showed Phase 4 before Phase 1.
-3. Only 3 chips visible with no way to browse N>3.
-4. Empty state ("no learning plan") had weak CTA.
-5. `StudentProgressTab` crashed white-screen with React error #310 because `useGoalProgress` was called below an early `return` when `loading`.
-
-**Edooqoo Solution**:
-1. Banner header now reads `Next Steps from Learning Plan` (Map icon) + `View plan ↗` link to `/student/{id}?tab=progress`. Each chip shows `#displayIndex topic` and tooltip with `Step #N • Phase X / Free step`, full topic, goal, rationale.
-2. Banner imports `useCurriculumPhases` and replicates `PathwayView` sort: currentPhase first → phaseOrder ASC → sequence_number ASC. `displayIndex` is per-phase (matches Profile UI).
-3. Sliding-window carousel (3 visible, advance by 1) with `<` `>` arrows + `windowStart+1–end of total` label. `windowStart` resets to 0 on `studentId` change and after `applyPreset`.
-4. Empty state expanded to 2-line copy: "No learning plan… Students with a structured Learning Plan get worksheets that build on each other instead of being standalone exercises. Strongly recommended." + `Open Learning Plan ↗` button.
-5. Hook `useGoalProgress(...)` moved above `if (loading) return ...` in `StudentProgressTab.tsx`. `useGoalProgress` already handles empty `goals` safely.
-
-**Technical Mechanics**:
-- `NextStepsPresetBanner.tsx`: now uses `useFutureTimeline` + `useCurriculumPhases`. `useState<number>(windowStart=0)`. Memoizes `sortedItems` containing `{ s, displayIndex, phaseLabel }`. Visible slice = `sortedItems.slice(windowStart, windowStart+3)`. Carousel controls disabled at boundaries.
-- `WorksheetForm/index.tsx`: student select trigger gets `border-amber-400 ring-1 ring-amber-300 bg-amber-50/40` when `selectedStudentId === 'no-student'`. Placeholder: `Choose a student`. Item label: `Generic worksheet (no student)` (value still `'no-student'` for back-compat). Subtle amber hint paragraph below.
-- `NextStepBanner.tsx`: empty state adds "Just added some? Refresh the page to see them." + `Refresh` ghost button when `!hasGoals`.
-- `NextStepsSection.tsx`: empty-state generate now opens a count Dialog (1-6, default 3) before calling `onGenerateMore`. Identical UX to "Generate more next steps" dropdown.
-- `useFutureTimeline.tsx`: `generateNextSteps` catch differentiates 402 / 429 / generic via `error.context?.status` and shows specific toast.
-
-## Pathway Generation Counts (Why 3-6 Phases, 1-3 Next Steps)
-**Problem**: Why these specific ranges? Are they arbitrary?
-
-**Edooqoo Solution**:
-- **3-6 phases (`generate-curriculum-phases`)**: Maps to a typical course/B2B cycle — 3 phases × 4 weeks ≈ a quarter, 6 phases × 4-6 weeks ≈ a semester (12-24 weeks). <3 = no narrative arc (student can't feel progress); >6 = phases collapse into single lessons, contradicting the definition of "phase" as a 3-6 week block. Actual count is AI-selected within the band, driven by: number of student goals, `nearest_goal_deadline` horizon, breadth of `mainGoal`.
-- **1-3 next steps (`generate-timeline` default)**: 1 = the always-visible Banner #1; 3 = optimal short-horizon planning ("rolling 3-lesson plan"). >3 hard-coded = staleness risk: by lesson 2, items 4-5 are stale because feedback has shifted context. Teacher can override via dialog (1/2/3/5/6).
-
-**Technical Mechanics**: Counts are enforced by the AI prompt (in the deployed edge function — sanctity, not in repo). UI now offers count picker for first generation too (parity with "Generate more").
-
-**RAG Keywords**: phase count rationale, why 3 to 6 phases, next steps count, rolling 3 lesson plan, semester pacing, curriculum block size, AI suggestion count, worksheet horizon, dydaktyczny powod liczby faz
-
-## Critical Fix v6.9.11: useGoalProgress Hook Order
-**Problem**: `/student/{id}?tab=progress` rendered as a blank page. Console: `Minified React error #310: Rendered more hooks than during the previous render`. Root cause: `useGoalProgress(...)` was called on line 154, AFTER `if (loading) return <Loader/>` on line 148. First render returned early (1 hook fewer); second render after data loaded had 1 more hook → React aborted.
-
-**Edooqoo Solution**: Move the `useGoalProgress` call above the early return. The hook already returns an empty `Map` when `goals` is empty, so no behavioral change.
-
-**Technical Mechanics**: Single edit in `src/components/student-progress/StudentProgressTab.tsx`. New invariant in `mem://index.md` Core: "Hooks must be called above any early return."
-
-**RAG Keywords**: react error 310, rules of hooks, conditional hook call, white screen progress tab, useGoalProgress crash, early return before hook
-
-## v6.9.12 — Worksheet Form Preset Polish + Phase-Aware Step Counts
-
-**Problem 1**: Banner chips in `NextStepsPresetBanner` showed `#N topic` — no phase context, identical to free steps.
-**Edooqoo Solution**: Chip label = `S{seq}•P{phaseSeq} topic` for phase-bound steps; `S{seq} topic` for free (legacy `next_step` without `phase_id`). Tooltip header unchanged (`Step #N • Phase X / Free step`).
-**Technical Mechanics**: `useMemo` in `NextStepsPresetBanner.tsx` extends each item with `phaseSeq` from `phaseOrderById` (already built from `useCurriculumPhases`). Label assembled inline at render.
-
-**Problem 2**: Tooltip rationale truncated; no edit affordance from the worksheet form.
-**Edooqoo Solution**: Added `Edit2` button on chip (split-button pattern, right segment) and full `Edit suggestion` button in tooltip. Both navigate to `/student/{studentId}?tab=dslm&view=pathway&editSuggestion={suggestionId}`.
-**Technical Mechanics**: `PathwayView.tsx` mounts `useEffect` that reads `searchParams.get('editSuggestion')`, finds the suggestion in `[...phaseSteps, ...nextSteps]`, calls existing `handleEditSuggestion(target)` (single source of truth — same `SuggestionEditDialog`), then strips the param via `setSearchParams(..., {replace:true})`. No new edit modal in the form. Chip click handler uses `e.stopPropagation()` so the Edit button does not fire `applyPreset`.
-
-**Problem 3**: `View plan` and `Open Learning Plan` linked to deprecated `?tab=progress`.
-**Edooqoo Solution**: Both links navigate to canonical `?tab=dslm&view=pathway`. The redirect in `StudentPage.tsx` (`progress` → `dslm&view=pathway`) is retained for backward compatibility with old emails/notifications.
-
-**Problem 4**: "Generate steps for this phase" defaulted to 3 regardless of phase length. For a 4-week phase with weekly lessons this under-recommends.
-**Edooqoo Solution**: Recommendation = `(estimated_weeks_end - estimated_weeks_start + 1)`, clamped 1-6 (1 step ≈ 1 weekly lesson). Free next-steps (no phase) keep 3 (rolling lesson plan). Teacher overrides preserved per-phase.
-**Technical Mechanics**: `recommendedStepsForPhase(phase)` helper + `phaseWeeks(phase)` in `MacroTimeline.tsx`. `getPhaseQuickCount(id)` returns recommended fallback when teacher hasn't overridden. `openPhaseCommentDialog` initializes `phaseCommentCount` from recommendation. New dropdown helper text: `Suggested: {N} (one per week of {W}-week phase)`. `NextStepsSection` first-gen dialog copy updated to explain the difference between free and phase-bound steps.
-
-**Phase Count Rationale (sanctity reminder)**: `generate-curriculum-phases` prompt is hard-coded 3-6 phases. AI picks within band based on goal count + deadlines + skill-gap breadth — NOT random. KNOWN LIMITATION: prompt does not enforce student goal deadline as upper bound on total weeks (90-day deadline can still yield 5×4w=20w plan = ~7w over). Acceptable as didactic horizon (buffer beyond deadline). Flagged for future engine update; sanctity rule blocks prompt edits without explicit approval.
-
-**RAG Keywords**: S P chip label, edit suggestion from worksheet form, editSuggestion search param, pathway tab url, recommended steps per phase, one step per week, phase length steps, recommendedStepsForPhase, phase weeks, deadline horizon limitation, view plan link, open learning plan link
-
-## v6.9.13 — Deadline-Fit Curriculum + DSLM Sub-Navigation
-
-**Problem A (Deadline overflow)**: `generate-curriculum-phases` historically produced 5×4w=20w plans for 13-week (90-day) deadlines because the AI prompt asked for "~totalWeeks" without a hard cap and there was no server-side validator. Phases regularly extended past the student's main goal deadline.
-**Edooqoo Solution**: Two-layer enforcement.
-  1. **Prompt-level**: New `HARD CONSTRAINT — DEADLINE FIT` block injected when `weeksUntilDeadline` is known. Tells the model the EXACT total-week budget and that contiguous ranges must sum to that budget (min 2 weeks/phase). For `mode='replace'`, budget = `weeksUntilDeadline`; for `mode='add'`, budget = `weeksUntilDeadline − weeks consumed by existing non-done phases`.
-  2. **Server-level safety net**: `fitPhasesToDeadline(phases, targetWeeks)` rescales every AI response. If `sum(durations) > targetWeeks` it scales each phase proportionally while honoring `minWeeks=2` (or 1 when budget is too tight). Always rebases to contiguous integer ranges from week 1, no gaps. `generation_context.deadline_fit_adjusted` flags whether scaling fired.
-**Technical Mechanics**: `supabase/functions/generate-curriculum-phases/index.ts`. New helpers: `fitPhasesToDeadline(phases, targetWeeks)` and `rebase(phases, durations)`. New context field: `target_total_weeks`. `existingPhases` query now selects `estimated_weeks_start/end` so add-mode can subtract consumed weeks. Worksheet generation prompt is UNTOUCHED (sanctity rule). `useCurriculumPhases.tsx` is unchanged — the hook just calls the function; budget logic is fully server-side.
-
-**Problem D (DSLM nav has no subsections)**: Sidebar links jumped only to four top-level sections (Pathway / Goals / Skills / Profile). Teachers had to scroll inside Goals/Skills/Profile to find specific accordions (e.g. "Skills Heat Map", "Achieved Goals", "Behavioral Stats").
-**Edooqoo Solution**: Sub-nav rendered under the active top section. Click → top section scroll → `dslm:openSubsection` event → matching `CollapsibleSection` opens AND scrolls itself into view.
-**Technical Mechanics**: `CollapsibleSection.tsx` accepts new `id` prop, registers a `window.addEventListener('dslm:openSubsection', ...)` listener that compares `detail.id`, sets `open=true`, and calls `cardRef.current.scrollIntoView({block:'start'})` inside `requestAnimationFrame`. `scroll-mt-24` ensures the sticky nav doesn't cover the heading. `DSLMTab.tsx` declares a static `SUBSECTIONS: Record<ViewId, {id,label}[]>` map (goals: supporting/additional/achieved/archived/notes; skills: heatmap/micro/notes; profile: ai-summary/psych/behavioral/personal/all-notes/debug). Sub-buttons render under the active top section with `border-l border-border pl-2`. All existing `CollapsibleSection` call-sites were tagged with stable `id` props in `GoalsView.tsx`, `SkillsView.tsx`, `ProfileView.tsx`. Pathway has no subsections (single-flow view).
-
-**RAG Keywords**: deadline fit, curriculum scaling, fitPhasesToDeadline, hard constraint deadline, weeksUntilDeadline, target_total_weeks, deadline_fit_adjusted, generate-curriculum-phases prompt, phase budget, contiguous weeks, dslm subsection navigation, openSubsection event, CollapsibleSection id, sub-nav sidebar, scroll into view accordion, SUBSECTIONS map, skills heat map link, achieved goals link, behavioral stats link
-
-## v6.9.14 — Goal-Deadline Fallback + Safe Deletes + Nav Cleanup
-
-**Problem 1 — AI ignores 90-day deadline when stored on goal not student**: `generate-curriculum-phases` only read `students.deadline`. Teachers commonly leave the student-level deadline blank but set `target_date` on each `student_progress_goals` row. Result: `weeksUntilDeadline = null` → no `HARD CONSTRAINT — DEADLINE FIT` block → AI defaults to ~20-week plan even for 13-week goals.
-**Edooqoo Solution**: Edge function falls back to the EARLIEST `student_progress_goals.target_date` when student-level deadline is missing. Telemetry `generation_context.deadline_source = 'student' | 'goal' | null` allows future audit. Prompt example reinforces scaling: `"90 days = ~13 weeks → 3 phases of 3 weeks + 1 phase of 4 weeks"`.
-**Technical Mechanics**: `supabase/functions/generate-curriculum-phases/index.ts` — `effectiveDeadline = student.deadline ?? min(activeGoals.map(g => g.target_date))`. `weeksUntilDeadline` and `target_total_weeks` derive from `effectiveDeadline`. Server-side `fitPhasesToDeadline` (v6.9.13) still applies. Worksheet engine UNTOUCHED.
-
-**Problem 2 — Accidental destructive actions**: Single-click delete on phases / next-step banner caused unrecoverable data loss.
-**Edooqoo Solution**: Reusable `ConfirmTypeToDeleteDialog` requiring user to type the exact item label (e.g. `Phase 2`, `Next Step #1`) before destruction is enabled.
-**Technical Mechanics**: `src/components/dslm/ConfirmTypeToDeleteDialog.tsx` accepts `{itemLabel, onConfirm, trigger}`. Wired into `MacroTimeline.tsx` (phase delete) and `NextStepBanner.tsx` (step delete).
-
-**Problem 3 — Phase state desync between Pathway and Timeline**: Two component instances of `useCurriculumPhases` held independent React-Query caches; mutating one didn't refetch the other.
-**Edooqoo Solution**: Global `dslm:phasesUpdated` window event after every mutation. Sibling instances listen + invalidate.
-**Technical Mechanics**: `src/hooks/dslm/useCurriculumPhases.tsx` — `dispatchEvent(new CustomEvent('dslm:phasesUpdated', {detail:{studentId}}))` after add/update/delete; `useEffect` listener invokes `refetch()` when `detail.studentId` matches.
-
-**Problem 4 — `useFutureTimeline` 500 errors with long suggestion histories**: `excludeIds` array passed to edge function grew unbounded, exceeding request body limits.
-**Edooqoo Solution**: Cap at 25 most-recent IDs. Phase-bound generation that fails validation retries as a free `next_step`.
-**Technical Mechanics**: `src/hooks/useFutureTimeline.tsx` — `excludeIds = recentSuggestions.slice(0, 25).map(s => s.id)`. Catch block: 402 → credits toast, 429 → rate-limit toast, otherwise generic.
-
-**Problem 5 — Generate-Steps dialog stale count**: Reopening the dialog for a phase that already had steps still defaulted to 3 (recommended on first generation), confusing teachers.
-**Edooqoo Solution**: On open, compute `recommendedCount = clamp(neededForPhase - currentlyHave, 1, 6)`.
-
-**Problem 6 — DSLM sub-nav hidden until top click**: First-time UX confused teachers who didn't realize sub-sections existed.
-**Edooqoo Solution**: `DSLMTab.tsx` renders sub-section buttons for ALL categories simultaneously; active section ring via `border-primary`.
-
-**Problem 7 — StickyNav redundant Calendar buttons + lost middle-click**: Standalone "Calendar" button duplicated `GCalStatusButton`, and both used `onClick={() => navigate('/calendar')}` — middle-click did nothing.
-**Edooqoo Solution**: Removed standalone. `GCalStatusButton` rewritten as `<Button asChild><a href="/calendar" onClick={modifierAware}>` — plain click → SPA navigate; middle/Ctrl/Shift/Cmd click → browser default (new tab).
-**Technical Mechanics**: `src/components/calendar/GCalStatusButton.tsx`. Pattern documented in `mem/features/navigation/middle-click-anchor-pattern.md`.
-
-**Problem 8 — "Generate Worksheet" CTA bypassed pre-selection on non-`/` pages**: `StickyNav` did `navigate('/')` only, dropping the selected student. Teacher had to re-pick after every nav.
-**Edooqoo Solution**: `StickyNav` always invokes `onGenerateWorksheet()` callback, which routes to `/` with the student pre-selected via parent state. Anchor wrapper preserves middle-click new-tab.
-
-**Problem 9 — WorksheetForm clipped labels + dead-end locked CTA**: Long student labels (e.g. "Generic worksheet (no student)") overflowed the 23%-width selector. Teachers with zero students saw a non-clickable lock with the cryptic message "Add students first".
-**Edooqoo Solution**: Shortened to `No student (generic)`, all selector items use `truncate`. Authenticated teachers with `students.length === 0` get a clickable dashed-border CTA `<a href="/dashboard?action=add-student">Add your first student</a>` (Dashboard already auto-opens AddStudentDialog from this query — see v6.9.8). Anonymous users still see the lock tooltip.
-**Technical Mechanics**: `src/components/WorksheetForm/index.tsx` — split the previous else-branch into `userId ? <AddCTA/> : <Lock/>`.
-
-**Problem 10 — NavStudentSwitcher wasted vertical space**: English level on its own line forced popover to ~80px per item.
-**Edooqoo Solution**: Inline pill badge (`text-[10px] uppercase bg-muted`) right of the name. Halves item height; level still scannable.
-
-**Invariants**:
-- `effectiveDeadline` fallback chain MUST stay (student → goal → null). Worksheet engine still UNTOUCHED.
-- Any new destructive curriculum/step UI MUST use `ConfirmTypeToDeleteDialog`.
-- `dslm:phasesUpdated` MUST fire after every `useCurriculumPhases` mutation.
-- All nav buttons routing to `/calendar`, `/student/:id`, `/` MUST use the modifier-aware anchor pattern.
-- Locked student selector in WorksheetForm reserved for anon users only; authenticated teachers with zero students get the clickable Add CTA.
-
-**RAG Keywords**: goal target_date fallback, effectiveDeadline curriculum, deadline_source telemetry, type to confirm delete dialog, phase delete confirmation, dslm phasesUpdated event, sibling refetch, future timeline excludeIds cap, 25 most recent suggestions, generate steps recommended count reset, dslm always visible sub navigation, gcal middle click new tab, modifier aware anchor, worksheet form generate cta pre-selection, no student generic label, add your first student cta, nav student switcher inline level pill.
-
-## v6.9.15a — Next Steps generator hardening + UX hints
-
-**Problem 1**: `generate-timeline` returned HTTP 500 whenever the user requested `count > 1` next steps with a phase target. Hardcoded `max_tokens: 3500` truncated tool-call output for batch requests; downstream JSON parse failed and the function blew up. Frontend retry as free step also failed for the same reason.
-**Edooqoo.com Solution**: Scale token budget with requested count, return 502 with diagnostic payload (status, finish_reason, count, mode) instead of generic throw, and degrade gracefully to partial-success (200 + `generationContext.warning = "truncated"|"partial"`) when the model returns fewer items than requested.
-**Technical Mechanics**:
-- `supabase/functions/generate-timeline/index.ts`: `max_tokens: Math.min(8192, 1800 + 2000 * count)`; AI Gateway non-OK → 502 with `{error,status,detail,count,mode}`; `aiData.choices[0].finish_reason` exposed via `generationContext.finish_reason`.
-- `src/hooks/useFutureTimeline.tsx`: 502 branch in catch; toast `"AI generator overloaded for batch requests — try generating 1 step at a time"` when `opts.count > 1`; partial-success info toast `"AI returned only X/Y steps"`.
-
-**Problem 2**: Six action buttons in `NextStepBanner` (`Generate worksheet ↗`, `Use this`, `Edit`, `Regenerate with comment`, `Mark as already used`, `Remove`) wrapped to a second line on desktop.
-**Edooqoo.com Solution**: Single-row action bar with progressive label shortening; full text moved to tooltips.
-**Technical Mechanics**: `src/components/dslm/NextStepBanner.tsx` action container `flex flex-wrap sm:flex-nowrap items-center gap-1.5 sm:overflow-x-auto`; labels: Use this→Use, Regenerate with comment→Comment, Mark as already used→Used, Remove→icon-only Trash2; every secondary button wrapped in `<Tooltip>`; `shrink-0` on each.
-
-**Problem 3a**: Deleting a phase did not renumber remaining phases — gaps appeared (e.g. delete Phase 1, remaining stayed as 2 and 3).
-**Problem 3b**: After deleting a phase, the "Generate next steps" modal still pre-selected the deleted phase id in the dropdown.
-**Edooqoo.com Solution 3a**: After soft-delete (`deleted_at`), shift `sequence_number -= 1` for all phases with greater sequence.
-**Edooqoo.com Solution 3b**: In `GenerateStepsDialog`, validate `defaultTargetPhaseId` against current `phaseOptions` before treating it as recommended; fall back to FREE_VALUE if stale.
-**Technical Mechanics**:
-- `src/hooks/dslm/useCurriculumPhases.tsx` `deletePhase`: capture `deletedSeq`, soft delete, then sequential UPDATE `sequence_number = sequence_number - 1` for `p.sequence_number > deletedSeq`; local state mirrors the shift.
-- `src/components/dslm/GenerateStepsDialog.tsx`: `validId = defaultTargetPhaseId && phaseOptions.some(p=>p.id===defaultTargetPhaseId) ? defaultTargetPhaseId : null` — used both in the open-effect and `recommendedId` derivation.
-
-**Problem 4**: WorksheetForm student selector lacked context info for: (a) teacher with no students, (b) teacher with students who did not select one, (c) selected student with zero pending Next Steps.
-**Edooqoo.com Solution**: New `StudentContextHint` component + `useStudentNextStepsCount` hook rendered below the selector row.
-**Technical Mechanics**:
-- `src/hooks/useStudentNextStepsCount.ts`: head-only `count('id', { count: 'exact', head: true })` against `future_worksheet_suggestions` filtered by `student_id`, `is_used = false`, `deleted_at IS NULL`.
-- `src/components/WorksheetForm/StudentContextHint.tsx`: three variants `no-students`, `no-selection`, `no-next-steps`; the third variant links to `/student/{studentId}` (Open Pathway).
-- `src/components/WorksheetForm/index.tsx`: `activeStudentId = selectedStudentId !== 'no-student' ? selectedStudentId : null`; `nextStepsCount = useStudentNextStepsCount(activeStudentId)`; hint rendered below the selector row, above Exercise Types card.
-
-**RAG Keywords**: generate-timeline 500 batch count, max_tokens dynamic, finish_reason length truncated, phase-bound retry as free step, NextStepBanner action row wrap, single-line action bar, icon-only Remove tooltip, deletePhase renumber sequence_number, GenerateStepsDialog stale phase id, defaultTargetPhaseId validation, StudentContextHint variants, no-students no-selection no-next-steps, useStudentNextStepsCount head count, WorksheetForm contextual hint.
-
----
-
-## v6.9.15b — generate-timeline schema rejection fix + phase sync hardening
-
-**Problem 1**: `generate-timeline` returned HTTP 502 whenever `count > 1`. Edge function logs showed Google AI Studio rejecting the request with `INVALID_ARGUMENT: "The specified schema produces a constraint that has too many states for serving"`. Root cause: the constrained tool schema combined `suggestions.minItems=maxItems=count`, `exercises.items.enum=ALL_EXERCISE_IDS` with `minItems=maxItems=8`, and `exerciseFocusMap.additionalProperties.enum=FOCUS_VALUES`. Gemini's serving layer refused the schema before any generation occurred. v6.9.15a's `max_tokens` increase did not address this — it was a different failure mode.
-**Edooqoo.com Solution**: Strip enums and tight item bounds from the AI tool schema. Keep the existing backend sanitizer as the single source of truth for exercise IDs, exact 8-exercise count, focus map normalization, picture/audio family enforcement, and per-vocabulary/grammar minima. Surface schema rejection back to the client with `schemaRejected: true` so the toast is precise.
-**Technical Mechanics**:
-- `supabase/functions/generate-timeline/index.ts`: `tools[0].function.parameters.properties.suggestions` no longer has `minItems`/`maxItems`. `exercises` is `{type:'array', items:{type:'string'}}` (no enum, no length bounds). `exerciseFocusMap` is `{type:'object', additionalProperties:{type:'string'}}` (no enum). Hard requirements (allowed IDs, exactly 8, focus minima, single media family) are reasserted in the prompt body and enforced by the existing post-response sanitizer (lines ~286-363, unchanged). Non-OK Gateway responses now include `schemaRejected: boolean` derived from `/too many states|INVALID_ARGUMENT/i.test(errorText)`.
-- `src/hooks/useFutureTimeline.tsx`: 502 branch reads `error.context.body.schemaRejected` (or falls back to detail-string regex) and shows `"AI could not return this batch. Try generating fewer steps, or generate one step at a time."` Otherwise the existing batch-overload toast is preserved.
-
-**Problem 2**: `NextStepBanner` labels `Use` and `Comment` were too terse and lost meaning.
-**Edooqoo.com Solution**: Restore full labels `Use this Step` and `Regenerate with comment`. Single-row layout and tooltips are preserved.
-**Technical Mechanics**: `src/components/dslm/NextStepBanner.tsx` — only the visible text inside the two `<Button>` children was changed; tooltips, icons, `shrink-0`, and `sm:flex-nowrap sm:overflow-x-auto` container untouched.
-
-**Problem 3**: After deleting Phase 1, the `Generate next steps` modal still pre-selected the deleted phase id, and the remaining sequence sometimes failed to collapse `2 -> 1`. Root cause: `useCurriculumPhases` is mounted twice (`PathwayView`, `MacroTimeline`); only `generatePhases` emitted `dslm:phasesUpdated`. Mutations in one instance were not visible in the other before the next user interaction. The legacy delete also used a delta-shift on stale local state.
-**Edooqoo.com Solution**: Emit `dslm:phasesUpdated` after every mutation. After delete, refetch remaining phases from DB and reassign `sequence_number = idx + 1`. Add a final guard in `PathwayView` so generation never sends a stale `phaseId`. Replace the plain delete dialog with `ConfirmTypeToDeleteDialog` (per project memory).
-**Technical Mechanics**:
-- `src/hooks/dslm/useCurriculumPhases.tsx`: new memoized helper `emitPhasesUpdated()`; called from `generatePhases`, `updatePhase`, `deletePhase`, `addPhase`. `deletePhase` now: soft-delete → `select id, sequence_number where deleted_at is null order by sequence_number asc` → for each `(idx, p)` issue `update sequence_number = idx + 1` only when it changed → `await fetchPhases()` → `emitPhasesUpdated()`.
-- `src/components/dslm/PathwayView.tsx`: `onGenerateMore` derives `validPhaseId = phaseId && phaseOptions.some(p=>p.id===phaseId) ? phaseId : null` and forwards it (still gated by `useRoadmap`).
-- `src/components/dslm/MacroTimeline.tsx`: `ConfirmTypeToDeleteDialog` with `expectedText="Phase {sequence_number}"`. After confirm: `deletePhase(id)`, then clear `expandedPhaseId`/`phaseQuickCount`/`phaseStepsOpen` entries for the deleted id.
-
-**Problem 4**: `WorksheetForm` showed two overlapping CTAs for the same condition (no Learning Plan): the amber `NextStepsPresetBanner` ("No learning plan for {name} yet … Open Learning Plan") and the secondary `StudentContextHint variant="no-next-steps"` ("This student has no Next Steps yet … Open Pathway →"). The second was redundant.
-**Edooqoo.com Solution**: Remove the `no-next-steps` rendering from `WorksheetForm`. Keep the `no-students` and `no-selection` variants. `NextStepsPresetBanner` remains the canonical CTA.
-**Technical Mechanics**: `src/components/WorksheetForm/index.tsx` — removed the `useStudentNextStepsCount` import and call, removed `activeStudentId`/`nextStepsCount` derivations, removed the `<StudentContextHint variant="no-next-steps">` block. The hook file and the component variant are kept on disk for backward compatibility but no longer wired into this form.
-
-**RAG Keywords**: generate-timeline 502, Gemini schema too many states, Google AI Studio INVALID_ARGUMENT, tool schema too complex, batch next steps count greater than 1, schemaRejected diagnostic, backend sanitizer authoritative, exactly 8 exercises enforcement, useCurriculumPhases emitPhasesUpdated, dslm:phasesUpdated event, deterministic phase renumber, sequence_number 2 to 1, deleted phase still selected, defaultTargetPhaseId stale guard, ConfirmTypeToDeleteDialog phase delete, NextStepBanner Use this Step, NextStepBanner Regenerate with comment, WorksheetForm duplicate hint removal, NextStepsPresetBanner canonical CTA.
-
----
-
-# v6.9.16 — Per-route JSON-LD, GSC verification, single-toast policy
-
-## Problem 1 — Sitewide FAQPage/HowTo on every SPA route
-`index.html` shipped `FAQPage` (25 Q/A) and `HowTo` (4 steps) JSON-LD in the static head. Because the SPA serves `index.html` as the fallback for every client-side route, Google saw `FAQPage` and `HowTo` on routes like `/dashboard`, `/calendar`, `/pricing` where the on-page content does not match — schema mismatch risk and rich-results disqualification.
-
-**Edooqoo.com Solution**: Move `FAQPage` and `HowTo` to `/how-it-works` only via `react-helmet-async`. The route has actual matching content (`steps` array drives `HowTo`, `faqItems` array drives `FAQPage`). Sitewide identity (`SoftwareApplication`, `Organization`, `WebSite`, `BreadcrumbList`) stays in `index.html`.
-
-**Technical Mechanics**:
-- `bun add react-helmet-async@3.0.0`.
-- `src/main.tsx`: wrap `<App/>` in `<HelmetProvider>` (above `<App/>` and inside `StrictMode`).
-- `src/pages/HowItWorks.tsx`: removed imperative `useEffect`-based `document.title` and meta mutation; added `<Helmet>` with route-specific `<title>`, `<meta description>`, canonical, `og:*`, plus two `<script type="application/ld+json">` blocks for `HowTo` and `FAQPage`. Both schemas are generated from the same `steps`/`faqItems` arrays already rendered in the visible UI — eliminates schema drift.
-- `index.html`: removed `FAQPage` `<script>` and `HowTo` `<script>` blocks. Retained `SoftwareApplication`+`Organization` `@graph`, `WebSite` SearchAction, and `BreadcrumbList`.
-- Per-route HelmetProvider is opt-in; routes without `<Helmet>` continue to use `index.html` defaults. No regression for the rest of the app.
-
-## Problem 2 — Google Search Console connected but property unverified
-The user linked the GSC connector (`std_01krr4bmyafmw8stxgv74hhd2r`) but the domain `https://edooqoo.com/` was not registered or verified in Search Console — no impressions data possible.
-
-**Edooqoo.com Solution**: META-tag verification via Lovable connector gateway. Requires user republish before verification completes (static meta tag must be live on production).
-
-**Technical Mechanics**:
-- Connector secret `GOOGLE_SEARCH_CONSOLE_API_KEY` exposed after linking.
-- Token request:
-  `POST https://connector-gateway.lovable.dev/google_search_console/siteVerification/v1/token` with body `{"site":{"identifier":"https://edooqoo.com/","type":"SITE"},"verificationMethod":"META"}`.
-- Returned token embedded verbatim into `index.html` `<head>`: `<meta name="google-site-verification" content="hTn-czAwta1F2Y8-Jlgs5OqMRCmSon1bIJBlOn_4Xvc" />`.
-- After republish (user action), call:
-  `POST .../siteVerification/v1/webResource?verificationMethod=META` (verify) →
-  `PUT .../webmasters/v3/sites/https%3A%2F%2Fedooqoo.com%2F` (register property) →
-  `PUT .../webmasters/v3/sites/https%3A%2F%2Fedooqoo.com%2F/sitemaps/https%3A%2F%2Fedooqoo.com%2Fsitemap.xml` (submit sitemap).
-- Future agents: on a 400 `failedToFindMetaTag` retry after republish; do not re-issue a new token (token is stable per property+method).
-
-## Problem 3 — DSLM "1 MINUTE" banner Learn more opens in same tab
-`DslmExplainerBanner` used `react-router-dom` `<Link to="/features/dslm">`, which replaced the current view and forced the teacher to navigate back to recover prior context (selected student, scroll position).
-
-**Edooqoo.com Solution**: Open `/features/dslm` in a new tab via native anchor.
-
-**Technical Mechanics**:
-- `src/components/student/DslmExplainerBanner.tsx`: dropped `import { Link } from 'react-router-dom'`. Replaced `<Link>` with `<a href="/features/dslm" target="_blank" rel="noopener noreferrer">` wrapped by `<Button asChild>`.
-- Dismiss semantics unchanged: `Got it` + `X` set `localStorage.dslm_explainer_dismissed_<teacherId>='true'`. `Learn more` intentionally does NOT dismiss — teacher may want to revisit after reading.
-- The article at `/features/dslm` (`src/pages/features/FeatureDSLM.tsx`, 296 LOC) is the canonical reference for the 4-layer DSLM model — content audited as complete; no copy changes this iteration.
-
-## Problem 4 — Toast stacking blocks UI during rapid mutations
-`<Toaster visibleToasts={3} duration={4000}>` allowed up to 3 stacked toasts at top-right, which during delete-then-refetch or batch generation covered the sticky nav and made follow-up clicks impossible.
-
-**Edooqoo.com Solution**: Show one toast at a time; shorter duration.
-
-**Technical Mechanics**:
-- `src/components/ui/sonner.tsx`: `visibleToasts={1}`, `duration={3500}`. No API change for `toast.*` callers.
-
-## Deferred (planned in `.lovable/plan.md` v6.9.16, not implemented this iteration)
-OnboardingHeroCard for empty Dashboard (P0); skeleton loaders (P1); nav-student-switcher toast feedback + page refetch (P3); WorksheetFormStudentBadge with auto-fill level (P4); DSLM subnav active-pill contrast bump (P5); Undo toast after destructive deletes (P6); StudentHub mobile tab scroll mask (P7). All have detailed mechanics in the plan file. Reason for deferral: each touches multiple existing flows and warrants isolated implementation + smoke test, not a bundled rollout, to keep regression surface small.
-
-**RAG Keywords**: react-helmet-async install, HelmetProvider main.tsx, per-route JSON-LD scope, FAQPage HowTo /how-it-works only, index.html sitewide SoftwareApplication Organization WebSite BreadcrumbList, schema mismatch SPA fallback Googlebot, Google Search Console connector gateway, siteVerification v1 token META method, google-site-verification meta tag edooqoo.com, webmasters v3 sites PUT, sitemaps submit endpoint, DslmExplainerBanner Learn more target blank rel noopener noreferrer, sonner visibleToasts 1, single toast policy edooqoo, deferred UX backlog v6.9.16.
-
-## SEO v6.9.17 — Per-Route Metadata Layer
-
-- **Problem**: SEO scanner flagged 6 failing findings: oversized title/descriptions on /pricing, /about, /blog, /glossary; no per-route og:* on those plus /exercise-types; missing FAQPage JSON-LD on /pricing and /about; GSC unverified; sitemap/robots host mismatch (scanner expected the lovable.app preview URL, project actually publishes to edooqoo.com).
-- **Edooqoo.com Solution**:
-  - Reusable `<PageSeo>` component (react-helmet-async) for per-route title, description, canonical, og:*, twitter:*, JSON-LD.
-  - Centralized metadata in `src/constants/seoMeta.ts` (single source of truth, length-capped: title <60, description <160).
-  - `buildFaqPageLd(faqItems)` helper generates FAQPage JSON-LD; wired into /pricing and /about.
-  - Static `<link rel="canonical">` REMOVED from `index.html` — canonical owned per-page by Helmet (prevents duplicate canonical anti-pattern).
-  - GSC: verified `https://edooqoo.com/` via META method, added site, submitted sitemap. Owners: edooqoo@gmail.com.
-  - Sitemap/robots: canonical host is `edooqoo.com` (NOT the lovable.app preview URL) — scanner's flag is a false positive resolved by marking finding fixed with explanation.
-- **Technical Mechanics**:
-  - Component: `src/components/seo/PageSeo.tsx` — props {title, description, path, ogType?, jsonLd?}. Auto-prefixes `https://edooqoo.com` for canonical and og:url.
-  - Constants: `src/constants/seoMeta.ts` — typed `SEO_META` object keyed by page slug (pricing, about, blog, glossary, exerciseTypes).
-  - Pages wired: `src/pages/Pricing.tsx`, `About.tsx`, `Blog.tsx`, `Glossary.tsx`, `ExerciseTypes.tsx`. All previous `useEffect(() => document.title = ...)` patterns removed.
-  - Blog page still emits Blog + BlogPosting JSON-LD, now passed via `jsonLd` prop instead of imperative `document.head.appendChild`.
-  - GSC verify call: `POST /siteVerification/v1/webResource?verificationMethod=META` with `{"site":{"identifier":"https://edooqoo.com/","type":"SITE"}}` returned 200.
-  - GSC site add: `PUT /webmasters/v3/sites/https%3A%2F%2Fedooqoo.com%2F` returned 204.
-  - GSC sitemap submit: `PUT /webmasters/v3/sites/.../sitemaps/https%3A%2F%2Fedooqoo.com%2Fsitemap.xml` returned 204.
-  - Keyword strategy: `docs/seo/keyword-strategy.md` — P0 target `esl worksheets` (1,300/mo, KDI 43); content pages deferred to v6.9.18+.
-
-**RAG Keywords**: per-route SEO metadata, PageSeo component, react-helmet-async, seoMeta constants, FAQPage JSON-LD, buildFaqPageLd, canonical URL deduplication, Helmet canonical override, removed static canonical index.html, Google Search Console verified edooqoo.com, GSC META verification, siteVerification webResource, webmasters v3 sites PUT, sitemap submission, Semrush keyword research, esl worksheets target, KDI 43, content backlog v6.9.18, false positive lovable.app preview vs edooqoo.com canonical, scanner findings fixed with explanation.
-
-## v6.9.18 — SEO Content Landing Pages
-
-**Problem:** v6.9.17 fixed metadata but no dedicated landing pages existed for priority Semrush keywords (esl worksheets, esl/english games, teach english online, english tutor, esl class).
-
-**Edooqoo.com Solution:** 6 lazy-loaded marketing pages under src/pages/seo/ sharing one SeoLandingLayout shell. Each targets one keyword with H1, FAQPage JSON-LD, internal links to /signup /pricing /exercise-types. Zero changes to app logic, demo mode, Supabase, or worksheet engine.
-
-**Technical Mechanics:**
-- Pages: src/pages/seo/{EslWorksheets,EnglishGamesForLearners,EslGamesForTeachers,TeachEnglishOnlineGuide,ForEnglishTutors,EslClassToolkit}.tsx
-- Shared shell: src/components/seo/SeoLandingLayout.tsx — props seo/h1/lead/problems/solutions/list/body/faqs/cta
-- Routes lazy in src/App.tsx: /esl-worksheets, /blog/english-games-for-learners, /blog/esl-games-for-teachers, /blog/teach-english-online-guide, /for-english-tutors, /resources/esl-class-toolkit
-- Metadata: SEO_META extended in src/constants/seoMeta.ts (6 keys)
-- Sitemap: public/sitemap.xml +6 entries (priority 0.7-0.9)
-- Footer: GlobalFooter Product column adds ESL Worksheets + For English Tutors links
-- JSON-LD: FAQPage on all 6; plus CollectionPage (esl-worksheets, esl-class-toolkit), BlogPosting (3 blog routes), Service (for-english-tutors)
-- Content rule: andragogical adult-only, >=800 words, 1 H1, 4-6 H2, FAQ accordion mirrored in JSON-LD
-- Pattern source of truth: docs/seo/keyword-strategy.md
-
-**RAG Keywords:** ESL worksheets landing page, English games blog post, teach English online guide, English tutor landing, ESL class toolkit, content SEO, long-tail keyword targeting, FAQPage rich snippet, internal linking SEO, lazy-loaded marketing routes, src/pages/seo/, SeoLandingLayout, Semrush priority queue, KDI 43 esl worksheets.
-
-## v6.9.19 — Programmatic SEO Engine (pSEO)
-
-**Problem:** Static SEO landing pages cap ranking potential. Competitors (islcollective ~36% traffic, eslbrains ~70% from `/lesson_*` paths) win via SCALE of indexable URLs auto-generated from a content database. Edooqoo has the same advantage latent (worksheet engine) but only shipped ~30 indexable URLs.
-
-**Edooqoo.com Solution:** Three dynamic React Router routes that render 1,425 unique pSEO landing pages from one shared layout, each targeting longtail ESL queries. Zero per-page files; all content interpolated from a typed matrix.
-
-**Technical Mechanics:**
-- Matrix: `src/constants/pseoMatrix.ts` — 40 TOPICS × 6 LEVELS × 29 EXERCISE_TYPES × 25 PERSONAS with typed helpers (findTopic, findLevel, findExerciseType, findPersona) and path generators (ALL_TOPIC_LEVEL_PATHS, ALL_EXERCISE_TOPIC_PATHS, ALL_PERSONA_PATHS).
-- Layout: `src/components/seo/ProgrammaticSeoLayout.tsx` — props seo/breadcrumbs/h1/lead/primaryCta/whatsInside/howItWorks/trustNumbers/related/faqs/extraJsonLd. Emits FAQPage + BreadcrumbList JSON-LD plus optional LearningResource. Includes TL;DR aside (AEO snippet bait).
-- Templates (3 dynamic routes, lazy in `src/App.tsx`):
-  - `/esl-worksheets/:topic/:level` → `TopicLevelPage` (240 URLs)
-  - `/worksheets/:exerciseType/:topic` → `ExerciseTopicPage` (1,160 URLs)
-  - `/english-for/:persona` → `PersonaPage` (25 URLs)
-- Unknown slug → `<Navigate>` redirect to the closest hub page (`/esl-worksheets`, `/exercise-types`, `/for-english-tutors`).
-- Internal linking graph: every page emits 10+ related links (other levels of same topic, other topics in same category, exercise-types, personas) — anchor text = exact target keyword.
-- Sitemap: `public/sitemap.xml` enumerates all 1,454 URLs (29 static + 1,425 pSEO). Single file (<10 MB, well under Google's 50 MB / 50k cap). Sitemap split into index format is reserved for Phase 2 (~5,000 URLs).
-- CTAs: `/signup?topic=...&level=...&exerciseType=...&persona=...` query params seed the worksheet form (handled by existing NextStepsPresetBanner pattern).
-- SANCTITY: NO change to worksheet generation prompt. NO new Supabase tables. NO new edge functions in Sprint 1+2. Public Gallery (Sprint 3) and Free Tools (Sprint 4) are separate phases.
-- Crawlability: Vite SPA — Googlebot executes JS and reads Helmet head. Prerendering (react-snap) deferred to Sprint 2 if indexation lags.
-
-**RAG Keywords:** programmatic SEO, pSEO, dynamic landing pages, URL matrix, topic-level-grid, exercise-type-topic, persona pages, English for nurses, English for software engineers, IELTS Writing Task 2, present perfect b1, conditionals worksheet, business email B2, ProgrammaticSeoLayout, pseoMatrix.ts, findTopic, findLevel, findExerciseType, findPersona, ALL_TOPIC_LEVEL_PATHS, BreadcrumbList JSON-LD, LearningResource schema, TL;DR snippet, AEO, LLMO, answer engine optimization, internal linking graph, anchor text exact match, 1454 sitemap entries, react-helmet-async Helmet, react-snap deferred, signup query param preset, sanctity worksheet prompt unchanged, edooqoo competitive moat scale.
-
-## v6.9.20 — Free Tools (Sprint 4 of Plan v6.9.19): browser-only link magnets
-
-**Problem:** Static SEO landing pages do not earn organic backlinks. Bloggers, teacher forums, and AI answer engines link to *utilities* (try it now, free, no login), not to explainer pages. Edooqoo needed indexable, embeddable tools that demonstrate ESL/CEFR competency and funnel users into the signup flow.
-
-**Edooqoo.com Solution:** Three zero-backend tools mounted under `/tools/*` plus a `/tools` hub. Every tool runs entirely in the browser (no Supabase writes, no AI Gateway calls, no rate limiting required), so prerender + AEO crawlers see the full UI and the result logic. Each tool ends with a CTA into `/signup`.
-
-**Technical Mechanics:**
-- Routes (lazy in `src/App.tsx`): `/tools` → `ToolsIndex`, `/tools/cefr-level-test` → `CefrLevelTest`, `/tools/lesson-plan-generator` → `LessonPlanGenerator`, `/tools/vocab-cefr-checker` → `VocabCefrChecker`.
-- Files: `src/pages/tools/ToolsIndex.tsx`, `src/pages/tools/CefrLevelTest.tsx`, `src/pages/tools/LessonPlanGenerator.tsx`, `src/pages/tools/VocabCefrChecker.tsx`, `src/data/cefrLevelTestQuestions.ts`, `src/data/cefrWordlist.ts`.
-- CEFR Level Test: 25 multiple-choice items distributed 4/4/5/5/4/3 across A1–C2 (`CEFR_TEST_QUESTIONS`). `scoreCefr(answers)` thresholds: pct≥0.92→C2, ≥0.80→C1, ≥0.66→B2, ≥0.50→B1, ≥0.32→A2, else A1. Result CTA → `/signup?level=<lower>`. JSON-LD: `Quiz` + `FAQPage`.
-- Lesson Plan Generator: form (topic, level, duration ∈ {30,45,60,90}, goal, persona) → `buildStages(form)` produces 6 andragogical stages with minute split scaled to duration (warm 8%, lead-in 12%, presentation 18%, controlled practice 28%, freer production 22%, wrap-up = remainder). Output supports Copy text (`navigator.clipboard`) and Download HTML (`Blob` + anchor). JSON-LD: `HowTo` + `FAQPage`. No network.
-- Vocab CEFR Checker: tokenizes via `/[a-z']+/g`; lookup uses a Map built from `src/data/cefrWordlist.ts` (~480 EVP lemmas across A1–C1; lower levels never overwritten by higher). Unknown words → `guessCefr` heuristic (advanced suffixes `tion|ity|ous|ive|ate|ize|ise|ence|ance|able|ible|ical|graphy|ology|cracy` + length≥9 ⇒ C1; otherwise length buckets ≤4 A1, ≤6 A2, ≤8 B1, ≤10 B2, else C1). `analyzeVocab(text)` returns `{ totalTokens, uniqueWords, byLevel, estimatedLevel, tokens }`. `estimatedLevel` = highest CEFR reached by ≥10% of tokens. JSON-LD: `SoftwareApplication` (Offer price=0) + `FAQPage`.
-- Hub `/tools`: emits `ItemList` JSON-LD enumerating the three tools.
-- Sitemap: 4 new entries appended to `public/sitemap.xml` (`/tools`, `/tools/cefr-level-test`, `/tools/lesson-plan-generator`, `/tools/vocab-cefr-checker`, priorities 0.8/0.9/0.9/0.9, monthly changefreq).
-- Footer: 4 new links added to `Resources` column in `src/components/GlobalFooter.tsx` (Free Tools hub + each tool).
-- SEO copy follows AEO snippet rules: TL;DR `<aside aria-label="Summary">` block at the top of every tool, FAQ ≥4 items rendered as `<details>` + mirrored in `FAQPage` JSON-LD via `buildFaqPageLd`.
-- **SANCTITY:** zero changes to worksheet generation prompt, zero new Supabase tables/columns, zero new edge functions, zero AI Gateway calls. Tools are pure frontend → safe to deploy without DB migration approval.
-
-**RAG Keywords:** free tools, link magnets, CEFR level test, English level test 25 questions, ESL lesson plan generator, andragogical stages, vocab CEFR checker, EVP English Vocabulary Profile lemmas, lookupCefr, guessCefr, analyzeVocab, scoreCefr, Quiz JSON-LD, HowTo JSON-LD, SoftwareApplication JSON-LD, ItemList JSON-LD, browser-only tools, no backend, no AI Gateway, navigator.clipboard, Blob download HTML, TL;DR aside AEO, Resources footer column, Sprint 4 Plan v6.9.19, edooqoo backlink strategy.
-
-## v6.9.20 — Public Worksheet Gallery (Sprint 3 of Plan v6.9.20) + Hotfixes
-
-**Problem:** (1) Teachers had no way to share/showcase worksheets publicly, limiting organic reach and social proof. (2) `generate-audio` returned 500 because `gpt-4o-audio-preview` access was revoked for the project's OpenAI key. (3) When `generateWorksheet` AI-REPAIR took >40s the client heartbeat timed out and failure notification emails never reached the operator.
-
-**Edooqoo.com Solution:**
-- **Public Gallery** at `/gallery` (index) and `/gallery/:slug` (read-only worksheet preview). Teachers toggle `is_public` via a toolbar button; published worksheets are RLS-readable by anyone and rendered with `LearningResource` JSON-LD.
-- **Audio 2-step pipeline:** `chat.completions` (gpt-4o-mini) generates transcript → `/v1/audio/speech` (`gpt-4o-mini-tts` with `tts-1` fallback) synthesizes audio. Transcript returned to client is **literally** the TTS input — guaranteed parity with audio. The downstream worksheet generation receives the same `selectedAudio.transcript` string, so exercises remain coherent with what students hear.
-- **Notification keepalive:** `generateWorksheet` now emits `progress` events (`phase: "repairing"`) every 15s during AI-REPAIR and uses `EdgeRuntime.waitUntil` to ensure failure-notification fetches complete even after the response stream closes. `parse_recovered` is fired as an early warning whenever AI fallback recovers malformed JSON.
-- **Admin CTA in alert emails:** `notify-generation-failure` and `submit-bug-report` now embed a `🛡️ Open Admin Error Logs` button linking to `${APP_BASE_URL}/admin/error-logs[?bugId=...]`.
-
-**Technical Mechanics:**
-- DB migration: `worksheets` gains `is_public`, `public_slug` (UNIQUE), `published_at`, `public_view_count`, `public_topic`, `public_level`, `public_exercise_types[]` + 3 filtered indexes + RLS policy `is_public = true`. RPC `generate_public_slug(title, id)` returns `kebab-title-<6hex>`.
-- Edge functions:
-  - `publish-worksheet` — JWT auth, ownership check, validates ≥6 exercises + meaningful title + no PII regex (`email|phone`) in `additionalInformation`; denormalizes topic/level/types from `form_data` + parsed `ai_response`; calls `generate_public_slug` RPC; fires `regenerate-gallery-sitemap` best-effort. Response: `{ slug, public_url }`.
-  - `unpublish-worksheet` — sets `is_public=false`, keeps slug for "no longer public" soft removal page.
-  - `regenerate-gallery-sitemap` — returns `application/xml` sitemap of all public worksheets (limit 50k), `lastmod` from `last_modified_at || published_at`.
-- Frontend:
-  - `src/pages/gallery/PublicGalleryIndex.tsx` — paginated grid (24/page), URL-param filters `?level=` and `?topic=`, `ItemList` JSON-LD.
-  - `src/pages/gallery/PublicGalleryWorksheetPage.tsx` — parses `ai_response` JSON to render exercises read-only, `LearningResource` JSON-LD with `educationalLevel`/`about`/`datePublished`, signup CTA. Shows soft-removed notice when `is_public=false` but slug exists.
-  - `src/components/worksheet/PublishWorksheetButton.tsx` — Dialog modal, copy-to-clipboard public URL, integrated into `WorksheetToolbar`.
-  - Routes added in `src/App.tsx`: `/gallery`, `/gallery/:slug`. Sitemap entry for `/gallery` (daily, 0.8).
-- Hotfix files:
-  - `supabase/functions/generate-audio/index.ts` — 2-step pipeline; chunked base64 (8KB chunks) to avoid stack overflow; fire-and-forget audio failure notification.
-  - `supabase/functions/generateWorksheet/index.ts` — `setInterval` keepalive around `parseWithRecovery` (cleared in `finally`); `EdgeRuntime.waitUntil` wraps every `notifyGenerationFailure` Promise.
-  - `supabase/functions/notify-generation-failure/index.ts` — solutions map gains `parse_recovered` + `audio`; CTA row with Edge Function Logs + Admin Error Logs buttons.
-  - `supabase/functions/submit-bug-report/index.ts` — bug email gains the same dual CTA row with `?bugId=` deep link.
-
-**SANCTITY:** Worksheet generation prompt UNTOUCHED. Audio TTS quality matches previous model (same `alloy|echo|fable|onyx|nova|shimmer` voices). Existing teacher RLS policies on `worksheets` UNTOUCHED — public-read is purely additive.
-
-**RAG Keywords:** public worksheet gallery, /gallery, is_public, public_slug, publish-worksheet, unpublish-worksheet, regenerate-gallery-sitemap, generate_public_slug, LearningResource JSON-LD, ItemList JSON-LD, PublishWorksheetButton, soft-removed slug, gpt-4o-audio-preview 404, gpt-4o-mini-tts, tts-1 fallback, 2-step audio pipeline, transcript determinism, EdgeRuntime.waitUntil, repair keepalive heartbeat, parse_recovered early warning, admin error logs email CTA, bugId deep link, Sprint 3 Plan v6.9.20.
-
----
-
-## v6.9.21 — Post-Sprint 3 Fixes (Gallery + Links + Multi-Provider Audit + UI + Alerts)
-
-### Public Gallery Exercise Renderer
-**Problem:** v6.9.20 gallery rendered only `title`/`instructions`/`content`/`questions`; 29 taxonomy exercise types showed as plain text with structure (tables, options, audio) lost.
-**Edooqoo.com Solution:** `src/components/gallery/GalleryExerciseRenderer.tsx` — read-only switch by normalized exercise type. SEO crawlers get full structured content; humans see preview + "1-Minute Prep" CTA (NOT "30 seconds").
-**Technical Mechanics:** Switch on `ex.type`; matching → table, multiple-choice → A/B/C/D list, listening → `<audio>` + transcript fold, gap-text → `___` placeholders. Fallback: `<pre>{JSON.stringify(ex)}</pre>`.
-**RAG Keywords:** public gallery, worksheet preview, read-only renderer, exercise types, 1-Minute Prep CTA.
-
-### Legacy .html Link Resolver
-**Problem:** ~80 unique `.html` hrefs across `Blog.tsx`/`Resources.tsx`/`GlobalFooter.tsx` returned 404 — wasting crawl budget and breaking UX.
-**Edooqoo.com Solution:** Three-bucket strategy — (1) `src/data/legacyLinkMap.ts` maps legacy hrefs to existing programmatic routes; (2) 3 real blog posts use clean slugs; (3) unmapped tiles render as non-clickable "Coming soon". Footer "Compare" column removed. `public/sitemap.xml` pruned.
-**Technical Mechanics:** `src/lib/resolveLegacyHref.ts` → `{ url, comingSoon }`. Consumers branch on `comingSoon` to either `<Link>` or disabled card.
-**RAG Keywords:** broken links, 404, coming soon tiles, legacy redirects, sitemap pruning, .html cleanup.
-
-### Multi-Provider LLM Model Audit
-**Problem:** OpenAI silently removed `gpt-4o-audio-preview` → `generate-audio` 500'd for weeks. No monitoring across providers; `/admin/error-logs` and `/status` didn't surface provider failures.
-**Edooqoo.com Solution:** (1) Monthly Procedure B script `scripts/audit-llm-models.ts` inventories every model ref across `supabase/functions/**`, live-pings each provider, writes `docs/closed-loops/LLM_MODEL_INVENTORY.md` + `STATUS_LIVE.md`. (2) Runtime helper `supabase/functions/_shared/modelFailureLogger.ts` inserts into `error_logs` (`error_code='model_deprecation'` for 404/410, `'model_failure'` for 5xx). (3) Public RPC `get_active_model_issues()` powers a red banner on `StatusPage.tsx` whenever model issues are active in last 24h.
-**Technical Mechanics:** Logger uses real schema columns (`error_code` + `component`, NOT `error_type`). Wired into `generate-audio` (chat + TTS catch blocks). To replicate: add `import { logModelFailure } from "../_shared/modelFailureLogger.ts"` and call before each `throw`.
-**RAG Keywords:** model deprecation, LLM audit, multi-provider monitoring, gpt-4o-audio-preview, status page banner, error_logs, Procedure B, modelFailureLogger.
-
-### Bug Alert Email Recipients
-**Problem:** Alerts went only to founder's personal Gmail.
-**Edooqoo.com Solution:** `notify-generation-failure` and `submit-bug-report` send to `["j4n.brz0@gmail.com", "edooqoo@gmail.com"]`.
-**RAG Keywords:** bug alerts, email recipients, Resend, alert escalation.
-
-### Modal Stacking Context Fix
-**Problem:** `GlobalFooter` `backdrop-blur` created a stacking context covering `GeneratingModal` despite high z-index.
-**Edooqoo.com Solution:** `GeneratingModal.tsx` uses `createPortal(node, document.body)` with `z-[100]`. Footer/sidebar roots set `relative z-0`.
-**Technical Mechanics:** Backdrop-filter / transform / filter / will-change all create new stacking contexts; z-index can't escape them. Portal to root.
-**RAG Keywords:** modal layering, createPortal, backdrop-blur stacking context, z-index conflict, GeneratingModal.
-
-## v6.9.27 — Welcome Test Repair + SSE Keepalive + Signup Return-To + Model Health Audit
-
-### Welcome Test Duplicate Prevention
-**Problem:** Race condition in `WelcomeTestSuggestion.tsx` created duplicate rows in `student_tests` when teachers clicked Send/Copy/Refresh before async `checkWelcomeTest()` populated state. Result: profile UI showed "Waiting for student" and disabled `View Results` even after the student completed the test, because `tests.find(welcome)` returned the latest empty row.
-**Edooqoo.com Solution:** Idempotent guard in `useStudentTests.createTest` returns the most recent non-deleted welcome attempt before issuing a new INSERT. `WelcomeTestSuggestion` exposes a `checking` flag that disables action buttons until the initial fetch resolves. `StudentTestsTab` selects active welcome test by preferring `completed > in_progress > assigned > pending` instead of newest. `process-welcome-test` now writes `status='completed' + completed_at` directly (independent of `calculate_test_results` RPC). Migration soft-deletes empty duplicates and adds `UNIQUE INDEX uq_one_active_welcome_attempt ON student_tests (student_id, teacher_id, test_type, attempt_number) WHERE deleted_at IS NULL`.
-**Technical Mechanics:** `src/hooks/useStudentTests.tsx`, `src/components/dashboard/WelcomeTestSuggestion.tsx`, `src/components/student-tests/StudentTestsTab.tsx`, `supabase/functions/process-welcome-test/index.ts`, migration `20260526063012_*.sql`.
-**RAG Keywords:** welcome test duplicate, race condition, idempotent createTest, attempt unique index, placement test status, View Results disabled, student_tests dedupe.
-
-### SSE Keepalive & Silent Retry (H5)
-**Problem:** Worksheet generation stream aborted when the model paused >40s before first chunk; users saw "no exercises generated" even though the run would have succeeded.
-**Edooqoo.com Solution:** Server emits `: keepalive\n\n` SSE comment every 15s in `generateWorksheet/streaming.ts`. Client watchdog in `worksheetStreamService.ts` extended to 45s and performs ONE silent retry (re-fetch same body, no `onError`) if zero exercises were received before timeout. Subsequent failures surface a clear error.
-**Technical Mechanics:** SSE comment lines reset EventSource heartbeat without dispatching events. `retryAttempted` flag prevents loops.
-**RAG Keywords:** SSE keepalive, EventSource watchdog, worksheet stream timeout, silent retry, generation hang.
-
-### Signup Return-To Flow (H4)
-**Problem:** Anonymous visitors clicking "Sign up" from feature/landing/tool pages lost context — after auth they landed on `/dashboard` instead of returning to the page they were exploring.
-**Edooqoo.com Solution:** `src/hooks/useSignupLinkState.ts` centralizes "remember where user came from". All ~28 `<Link to="/signup">` and `navigate('/signup')` call sites pass `state={{from: pathname+search}}`. `Signup.tsx` and `Login.tsx` show a visible "Back" CTA (`<ArrowLeft/> Back`) when `from !== '/'` and redirect to `from` after successful auth.
-**Technical Mechanics:** Hook exposes `signupTo`, `loginTo`, `signupState`, `goToSignup(to?)`, `goToLogin(to?)`. Affected files include `GlobalFooter`, `StickyNav`, `FeatureCTA`, `PricingSection`, `Pricing`, `About`, `Blog`, `HowItWorks`, `Resources`, `Prompts`, `Glossary`, `ExerciseTypes`, all `tools/*`, `gallery/*`, `WorksheetExpiredPage`.
-**RAG Keywords:** signup return-to, post-auth redirect, location state from, back button, useSignupLinkState, anonymous to authenticated context preservation.
-
-### Model Health Monitoring (H6)
-**Problem:** v6.9.21 added `modelFailureLogger` but only `generate-audio` was wired. Other AI calls (worksheet eval, knowledge classify, curriculum, flashcards, suggest-exercises) still failed silently on provider deprecations.
-**Edooqoo.com Solution:** Logger now wired into `verify-open-answers`, `suggest-exercises`, `classify-knowledge-entry`, `generate-curriculum-phases`, `translate-flashcard` (Lovable + OpenAI fallback branches). New table `public.model_health_checks` (service-role only) stores daily ping results. New edge function `audit-llm-models` (CRON_SECRET-protected) pings core models across Lovable Gateway and OpenAI; persists status/latency; auto-fires `logModelFailure` on 404/410/5xx so the StatusPage banner picks it up. Schedule via pg_cron at 06:00 UTC (operator-owned).
-**Technical Mechanics:** Logger signature `logModelFailure({model, provider, status, endpoint, error, functionName})` writes to `error_logs` with `error_code='model_deprecation'` (404/410) or `'model_failure'` (5xx). Banner reads via `get_active_model_issues()` RPC.
-**RAG Keywords:** LLM monitoring, model deprecation, audit-llm-models, model_health_checks, modelFailureLogger, StatusPage banner, daily ping, provider failure.
-
-### Reconciliation v6.9.26 (Codex)
-**Problem:** Codex shipped v6.9.26 in parallel (JSON-LD claim-integrity fixes, BusyTeacher → neutral framework, hreflang=x-default, claim scan in audit). Lovable plan v6.9.27 must avoid regressing these files.
-**Edooqoo.com Solution:** v6.9.27 sweep is read-only against `scripts/seo/generate-citable-pages.mjs`, `scripts/seo/audit-seo-assets.mjs`, `src/components/seo/PageSeo.tsx`, `src/constants/seoMeta.ts`, `src/constants/faqItems.ts`, `src/pages/HowItWorks.tsx`, `src/pages/seo/*`, `public/*-vs-*.html`, `public/blog/*.html`. Only exception: H4 sweep adds `state={...}` props to existing `<Link to="/signup">` — no JSON-LD or copy changes.
-**RAG Keywords:** v6.9.26, Codex reconciliation, claim integrity, hreflang x-default, neutral comparison framework, parallel branches.
-
-## v6.9.32 — Onboarding Spotlight, AddStudent v2, Bulk-Publish Gallery
-
-### Onboarding Reset Force-Show
-**Problem:** "Reset Onboarding" in `/profile` cleared `dismissed`/`completed` flags but `checkSteps()` re-marked every step `completed=true` from existing DB rows within seconds → checklist disappeared again.
-**Edooqoo.com Solution:** `resetOnboarding()` now writes `localStorage.onboarding_force_show='true'`. `shouldShow()` returns true whenever this flag is set regardless of `dismissed/completed`. `dismissOnboarding()` and `handleTemporaryDismiss()` clear the flag so the user-initiated hide still wins.
-**Technical Mechanics:** `src/hooks/useOnboardingProgress.tsx` (shouldShow + resetOnboarding + dismissOnboarding), `src/components/OnboardingChecklist.tsx` (handleTemporaryDismiss). Flag is localStorage (not session) so it survives reloads until the user explicitly closes the checklist.
-**RAG Keywords:** reset onboarding, force show, checklist reappear, profile reset, dismissed flag, completion override.
-
-### Spotlight Overlay System
-**Problem:** Onboarding deep-links navigated correctly but teachers couldn't see which element to click on the destination page.
-**Edooqoo.com Solution:** `src/hooks/useSpotlight.ts` + `src/components/onboarding/SpotlightOverlay.tsx` (mounted globally in `App.tsx`). Any DOM node tagged `data-spotlight="<id>"` is auto-highlighted when URL contains `?focus=<id>` or when `window.dispatchEvent(new CustomEvent('app:spotlight', { detail: { id } }))` fires. Overlay renders a pulsing ring + scrolls element into view. Self-clears on click or after 8s.
-**Technical Mechanics:** Spotlight IDs in use: `send-welcome-test`, `add-goal-modal`, `learning-roadmap`, `next-lesson-ideas`, `pick-idea`. Set via `data-spotlight` attribute on the target element. Use this pattern for any new guided action — do NOT add bespoke highlighting logic.
-**RAG Keywords:** spotlight, focus param, guided tour, onboarding highlight, data-spotlight, app:spotlight event, deep link UX.
-
-### AddStudentDialog v2 (Compact + Defer Profile + Auto-Send Welcome Test)
-**Problem:** Original 6-field modal forced teachers to guess CEFR level and goal upfront before any data existed. Most teachers either bailed or picked wrong values that polluted the DSLM.
-**Edooqoo.com Solution:** Modal redesigned to 2-column compact layout (name + email side-by-side). New checkbox **"I'll set level & goal after the Welcome Test"** (default ON) collapses the level/goal/deadline section entirely — `english_level` and `main_goal` are now nullable in `public.students` (migration `20260601082424_*.sql`). When unchecked, the inline section uses `DeadlinePicker` for `main_goal_target_date`. Second checkbox **"Send the Welcome Test right after creating"** (default ON) navigates to `/student/{id}?tab=overview&focus=send-welcome-test&autosend=1` after insert; `WelcomeTestSuggestion` reads `autosend=1` once on mount, calls `handleSend()` lazily (via `ensureWelcomeTest`), then strips the param via `setSearchParams(..., {replace: true})`.
-**Technical Mechanics:** `src/components/dashboard/AddStudentDialog.tsx` rewritten. `useStudents.addStudent` signature extended: `(name, englishLevel: string|null, mainGoal: string|null, email?, sendOverdue?, nativeLanguage?, mainGoalTargetDate?: string|null)` — backward compatible (positional). `WelcomeTestSuggestion.tsx` adds `autosendFiredRef` guard so the autosend can never double-fire across rerenders. `Default Main Goal` preset = `custom`.
-**RAG Keywords:** add student modal, compact dialog, defer profile, optional CEFR, nullable english_level, autosend welcome test, focus=send-welcome-test, autosend=1, DeadlinePicker, main_goal_target_date.
-
-### Nav Student Switcher — Add Student CTA
-**Problem:** Teachers with 0 students never saw the global student switcher (it was hidden), and switcher had no path to add a new student without leaving the current page.
-**Edooqoo.com Solution:** `NavStudentSwitcher` now renders unconditionally for authenticated teachers. Empty state shows "No students yet" hint. Footer of the popover has a sticky `+ Add new student` button that opens the controlled `AddStudentDialog`. Existing student rows still use `<a href>` for middle-click new-tab support.
-**Technical Mechanics:** `src/components/landing/NavStudentSwitcher.tsx`. The dialog is rendered as a sibling to the Popover (Radix portal) so closing the popover doesn't unmount the dialog. State managed via local `addOpen` boolean.
-**RAG Keywords:** nav student switcher, add student CTA, empty state, popover footer, global add student, sticky nav.
-
-### Bulk-Publish Gallery (904 worksheets)
-**Problem:** Public gallery had <50 published worksheets; backlog of ~927 unpublished worksheets met quality criteria but were never flipped to `is_public_gallery=true`.
-**Edooqoo.com Solution:** One-shot idempotent SQL CTE (migration-driven, no edge function) selected worksheets with `>= 6` tasks, valid `exercises_json`, title `>= 3` chars, no PII (`student_email`, `teacher_email`, phone numbers stripped via regex pre-check), then `UPDATE ... SET is_public_gallery=true, published_at=now() WHERE id IN (...)`. 904 of ~927 qualifying rows promoted; remaining 23 failed PII/length guards and stay private.
-**Technical Mechanics:** Pure SQL — no `bulk-publish-worksheets` edge function call required at runtime. The edge function (`supabase/functions/bulk-publish-worksheets/index.ts`) remains in repo as a manual rerun option but is NOT scheduled. Future bulk runs should re-use the same CTE pattern.
-**RAG Keywords:** bulk publish, gallery seeding, public gallery, is_public_gallery, PII filter, min-6-tasks, one-shot migration, 904 worksheets.
+# Edooqoo RAG Context Audit
+
+Generated from the synced local source tree. This file is an instruction manual for future AI agents extending edooqoo.com. It documents code-verifiable behavior only. It does not reproduce the protected worksheet generation prompt text.
+
+Audit counts:
+- Features documented: 28
+- Components mapped: 332
+- Page modules mapped: 76
+- Routes mapped: 78
+- Hooks mapped: 74
+- Services mapped: 11
+- Supabase Edge Function endpoints recorded: 77
+- Typed database tables recorded: 56
+
+Status vocabulary:
+- PRODUCTION: route, component, hook, table, or endpoint is present and wired in the current codebase.
+- BETA: code is present and partially wired, but completeness depends on scheduler/external execution not visible in the React source.
+- ROADMAP: not used in this audit because roadmap-only claims are excluded unless code exists.
+
+## Table of Contents
+- [Product Runtime and Routing](#product-runtime-and-routing) - PRODUCTION
+- [Authentication Anonymous Sessions and Account Claiming](#authentication-anonymous-sessions-and-account-claiming) - PRODUCTION
+- [Teacher Dashboard and Student CRM](#teacher-dashboard-and-student-crm) - PRODUCTION
+- [Worksheet Generation Form and One Minute Prep Entry](#worksheet-generation-form-and-one-minute-prep-entry) - PRODUCTION
+- [Worksheet Generation Runtime and Media Pipeline](#worksheet-generation-runtime-and-media-pipeline) - PRODUCTION
+- [Worksheet Editor Display Export and Downloads](#worksheet-editor-display-export-and-downloads) - PRODUCTION
+- [Worksheet History Soft Delete and Recovery](#worksheet-history-soft-delete-and-recovery) - PRODUCTION
+- [Public Shared Worksheets and Live Session Drawing](#public-shared-worksheets-and-live-session-drawing) - PRODUCTION
+- [Homework Assignment and Interactive Submission](#homework-assignment-and-interactive-submission) - PRODUCTION
+- [Flashcards and Spaced Repetition](#flashcards-and-spaced-repetition) - PRODUCTION
+- [Digital Student Learning Model and One Minute Prep](#digital-student-learning-model-and-one-minute-prep) - PRODUCTION
+- [Student Knowledge Base and Self Profile](#student-knowledge-base-and-self-profile) - PRODUCTION
+- [Welcome Test and Placement Diagnostics](#welcome-test-and-placement-diagnostics) - PRODUCTION
+- [Teacher Calendar Public Booking and Google Calendar](#teacher-calendar-public-booking-and-google-calendar) - PRODUCTION
+- [Student Hub](#student-hub) - PRODUCTION
+- [Billing Tokens Subscriptions and Export Payments](#billing-tokens-subscriptions-and-export-payments) - PRODUCTION
+- [Public Gallery and Worksheet Publishing](#public-gallery-and-worksheet-publishing) - PRODUCTION
+- [SEO Content Static Resources and AI Discovery Assets](#seo-content-static-resources-and-ai-discovery-assets) - PRODUCTION
+- [SEO and AI Visibility Retrieval Map](#seo-and-ai-visibility-retrieval-map) - PRODUCTION
+- [Free Browser Tools](#free-browser-tools) - PRODUCTION
+- [Admin Dashboard Error Logs and Bug Reports](#admin-dashboard-error-logs-and-bug-reports) - PRODUCTION
+- [Teacher Alerts and Closed Loop Monitoring](#teacher-alerts-and-closed-loop-monitoring) - BETA
+- [Demo Mode](#demo-mode) - PRODUCTION
+- [Data Model and Supabase Schema](#data-model-and-supabase-schema) - PRODUCTION
+- [Edge Functions APIs and RPC Calls](#edge-functions-apis-and-rpc-calls) - PRODUCTION
+- [Integrations and External Services](#integrations-and-external-services) - PRODUCTION
+- [Frontend Component Inventory](#frontend-component-inventory) - PRODUCTION
+- [State Management Hooks and Services Inventory](#state-management-hooks-and-services-inventory) - PRODUCTION
+- [Configuration Build and Deployment Assets](#configuration-build-and-deployment-assets) - PRODUCTION
+
+## Product Runtime and Routing
+STATUS: PRODUCTION
+
+PROBLEM: Teachers need one application surface that separates anonymous generation, authenticated teaching work, student-facing links, public SEO pages, and admin-only operations without mixing access rules.
+
+EDOOQOO SOLUTION: App.tsx defines the route table and lazy imports page modules for dashboard, student details, worksheets, homework, flashcards, calendar, student hub, welcome tests, public gallery, SEO pages, tools, pricing, legal pages, auth pages, and admin pages. AuthenticatedPageShell, StickyNav, useAuthFlow, DemoContext, QueryClientProvider, TooltipProvider, HelmetProvider, and BrowserRouter wrap the runtime. The application uses English UI copy in the audited routes.
+
+TECHNICAL MECHANICS: Core files: src/App.tsx, src/main.tsx, src/integrations/supabase/client.ts, vite.config.ts. Route count recorded from App.tsx: 78. Page modules recorded under src/pages: 76. The Supabase client uses project bvfrkzdlklyvnhlpleck, persistent localStorage auth, auto-refresh tokens, and typed Database definitions from src/integrations/supabase/types.ts. Public route groups include /, /demo, /pricing, /about, /prompts, /glossary, /exercise-types, /how-it-works, /one-minute-prep, /resources, /blog, /tools/*, /gallery, /features/*, /book/:token, /shared/:token, /homework/:token, /flashcards/:token, /welcome-test/:token, /test/:token, and /my*. Teacher routes include /dashboard, /student/:id, /worksheets, /worksheet/:id, /calendar, /calendar/settings, /calendar/logs, /teacher/alerts, /profile, /admin, and /admin/error-logs. Route inventory:
+- / -> Index (./pages/Index)
+- /demo -> DemoEntry (./pages/DemoEntry)
+- /exit-demo -> ExitDemo (./pages/ExitDemo)
+- /login -> Login (./pages/Login)
+- /signup -> Signup (./pages/Signup)
+- /forgot-password -> ForgotPassword (./pages/ForgotPassword)
+- /reset-password -> ResetPassword (./pages/ResetPassword)
+- /dashboard -> Dashboard (./pages/Dashboard)
+- /profile -> Profile (./pages/Profile)
+- /pricing -> Pricing (./pages/Pricing)
+- /privacy-policy -> PrivacyPolicy (./pages/PrivacyPolicy)
+- /privacy -> PrivacyPolicy (./pages/PrivacyPolicy)
+- /terms -> TermsOfService (./pages/TermsOfService)
+- /cookie-policy -> CookiePolicy (./pages/CookiePolicy)
+- /student/:id -> StudentPage (./pages/StudentPage)
+- /worksheets -> AllWorksheetsPage (./pages/AllWorksheetsPage)
+- /worksheet/:id -> WorksheetPage (./pages/WorksheetPage)
+- /worksheet-expired -> WorksheetExpiredPage (./pages/WorksheetExpiredPage)
+- /homework/:token -> HomeworkPage (./pages/HomeworkPage)
+- /homework/:id/review -> HomeworkReviewPage (./pages/HomeworkReviewPage)
+- /flashcards/:token -> FlashcardsLearning (./pages/FlashcardsLearning)
+- /my-flashcards/:studentEmail -> StudentPortal (./pages/StudentPortal)
+- /test/:token -> StudentTestPage (./pages/StudentTestPage)
+- /welcome-test/:token -> WelcomeTestPage (./pages/WelcomeTestPage)
+- /success -> PaymentSuccess (./pages/PaymentSuccess)
+- /payment-success -> PaymentSuccess (./pages/PaymentSuccess)
+- /shared/:token -> SharedWorksheet (./pages/SharedWorksheet)
+- /test-exercises -> TestExercises (./pages/TestExercises)
+- /calendar -> CalendarPage (./pages/CalendarPage)
+- /calendar/settings -> CalendarSettingsPage (./pages/CalendarSettingsPage)
+- /calendar/logs -> CalendarLogHistoryPage (./components/calendar/CalendarLogHistoryPage)
+- /about -> About (./pages/About)
+- /prompts -> Prompts (./pages/Prompts)
+- /glossary -> Glossary (./pages/Glossary)
+- /exercise-types -> ExerciseTypes (./pages/ExerciseTypes)
+- /how-it-works -> HowItWorks (./pages/HowItWorks)
+- /one-minute-prep -> OneMinutePrep (./pages/OneMinutePrep)
+- /resources -> Resources (./pages/Resources)
+- /blog -> Blog (./pages/Blog)
+- /esl-worksheets -> EslWorksheets (./pages/seo/EslWorksheets)
+- /blog/english-games-for-learners -> EnglishGamesForLearners (./pages/seo/EnglishGamesForLearners)
+- /blog/esl-games-for-teachers -> EslGamesForTeachers (./pages/seo/EslGamesForTeachers)
+- /blog/teach-english-online-guide -> TeachEnglishOnlineGuide (./pages/seo/TeachEnglishOnlineGuide)
+- /for-english-tutors -> ForEnglishTutors (./pages/seo/ForEnglishTutors)
+- /resources/esl-class-toolkit -> EslClassToolkit (./pages/seo/EslClassToolkit)
+- /esl-worksheets/:topic/:level -> TopicLevelPage (./pages/seo/programmatic/TopicLevelPage)
+- /worksheets/:exerciseType/:topic -> ExerciseTopicPage (./pages/seo/programmatic/ExerciseTopicPage)
+- /english-for/:persona -> PersonaPage (./pages/seo/programmatic/PersonaPage)
+- /tools -> ToolsIndex (./pages/tools/ToolsIndex)
+- /tools/cefr-level-test -> CefrLevelTest (./pages/tools/CefrLevelTest)
+- /tools/lesson-plan-generator -> LessonPlanGenerator (./pages/tools/LessonPlanGenerator)
+- /tools/vocab-cefr-checker -> VocabCefrChecker (./pages/tools/VocabCefrChecker)
+- /gallery -> PublicGalleryIndex (./pages/gallery/PublicGalleryIndex)
+- /gallery/:slug -> PublicGalleryWorksheetPage (./pages/gallery/PublicGalleryWorksheetPage)
+- /features/dslm -> FeatureDSLM (./pages/features/FeatureDSLM)
+- /features/homework -> FeatureHomework (./pages/features/FeatureHomework)
+- /features/flashcards -> FeatureFlashcards (./pages/features/FeatureFlashcards)
+- /features/calendar -> FeatureCalendar (./pages/features/FeatureCalendar)
+- /features/live-sessions -> FeatureLiveSessions (./pages/features/FeatureLiveSessions)
+- /features/placement-test -> FeaturePlacementTest (./pages/features/FeaturePlacementTest)
+- /features/student-hub -> FeatureStudentHub (./pages/features/FeatureStudentHub)
+- /book -> BookLandingPage (./pages/BookLandingPage)
+- /book/:token -> PublicBookingPage (./pages/PublicBookingPage)
+- /my -> StudentHubLanding (./pages/StudentHubLanding)
+- /my/:teacherToken -> StudentHubDashboard (./pages/StudentHubDashboard)
+- /my/:teacherToken/flashcards -> StudentHubFlashcards (./pages/StudentHubFlashcards)
+- /my/:teacherToken/homework -> StudentHubHomework (./pages/StudentHubHomework)
+- /my/:teacherToken/worksheets -> StudentHubWorksheets (./pages/StudentHubWorksheets)
+- /my/:teacherToken/lessons -> StudentHubLessons (./pages/StudentHubLessons)
+- /my/:teacherToken/settings -> StudentHubSettings (./pages/StudentHubSettings)
+- /my/:teacherToken/profile -> StudentHubProfile (./pages/StudentHubProfile)
+- /gcal-student-callback -> GCalStudentCallback (./pages/GCalStudentCallback)
+- /my-lessons/:token -> StudentLessonsPage (./pages/StudentLessonsPage)
+- /admin -> AdminDashboardPage (./pages/AdminDashboardPage)
+- /admin/error-logs -> AdminErrorLogsPage (./pages/AdminErrorLogsPage)
+- /status -> StatusPage (./pages/StatusPage)
+- /teacher/alerts -> TeacherAlertsPage (./pages/TeacherAlertsPage)
+- * -> NotFound (./pages/NotFound)
+
+RAG KEYWORDS: React Router, Vite React, Supabase client, authenticated route, public route, student route, admin route, ESL app shell, teacher dashboard route, worksheet route, student hub route, SEO route, route audit, SPA architecture
+
+## Authentication Anonymous Sessions and Account Claiming
+STATUS: PRODUCTION
+
+PROBLEM: Teachers can start generating before committing to an account, but they must not lose the worksheet when they later register.
+
+EDOOQOO SOLUTION: useAuthFlow centralizes Supabase auth state, registered-user detection, anonymous-user detection, demo-user handling, and pending worksheet claim checks. Auth.tsx, Signup.tsx, Login.tsx, ForgotPassword.tsx, ResetPassword.tsx, GoogleSignInButton, EmailConfirmationModal, claimPendingWorksheets, markWorksheetForClaim, and claim-anonymous-worksheets provide account creation, login, reset, Google sign-in, and post-signup transfer of anonymous worksheet ownership.
+
+TECHNICAL MECHANICS: Auth state is loaded through supabase.auth.getSession and onAuthStateChange. Signup.tsx redirects back to the 1-Minute Prep flow when the user arrived from /one-minute-prep or state.startOneMinutePrep. Auth.tsx supports plan-first registration and invokes create-subscription for paid plans before registration when selected. Anonymous worksheet IDs are stored client-side by useWorksheetClaim, then transferred through claimPendingWorksheets after a non-anonymous session appears. add-tokens grants Free Demo welcome tokens through an Edge Function. Database tables include profiles, worksheets, user_roles, token_transactions, subscriptions, and subscription_events. Edge Functions involved: add-tokens, claim-anonymous-worksheets, create-subscription, check-subscription-status, customer-portal, delete-account, verify-subscription-payment.
+
+RAG KEYWORDS: Supabase Auth, anonymous worksheet, worksheet claim, Google sign-in, email confirmation, password reset, teacher account, signup redirect, Free Demo tokens, account conversion, ESL teacher login, authentication flow, registration, session storage
+
+## Teacher Dashboard and Student CRM
+STATUS: PRODUCTION
+
+PROBLEM: A 1-on-1 adult English teacher needs a fast operational view of students, worksheet history, and follow-up tasks before preparing the next lesson.
+
+EDOOQOO SOLUTION: Dashboard.tsx combines useStudents, useWorksheetHistory, useDeletedWorksheets, useWorksheetStats, useAllWorksheetHomework, useUpcomingLessonsCount, useTokenSystem, useOnboardingProgress, StudentList, RecentWorksheets, AddStudentDialog, WorksheetHomeworkList, and dashboard cards. StudentPage.tsx deepens the CRM view with tabs for overview, 1-Minute Prep/DSLM, homework, tests, flashcards, calendar, progress, skills, and events.
+
+TECHNICAL MECHANICS: useStudents reads active rows from students by teacher_id, inserts new students with level, native language, main goal, target date, overdue-email flag, and default dslm_pacing_mode 30, rejects duplicate emails, soft-deletes via soft_delete_student RPC, updates students and triggers recalculate-pacing on meaningful goal/deadline changes, and emits studentUpdated. StudentPage.tsx uses useStudent, useStudents, useWorksheetHistory, useDeletedWorksheets, useStudentKnowledge, and useAllWorksheetHomework. Student creation can invoke gcal-sync to create permanent meeting rooms when calendar integration allows it. Tables include students, worksheets, homework_assignments, calendar_slots, calendar_settings, calendar_student_settings, student_events, student_learning_profiles, student_skill_metrics, student_progress_goals, and future_worksheet_suggestions.
+
+RAG KEYWORDS: student management, ESL CRM, EFL learner profile, adult learner goal, student dashboard, worksheet history, lesson prep, student tab, teacher workflow, soft delete student, learner context, CEFR level, main goal, private tutor CRM
+
+## Worksheet Generation Form and One Minute Prep Entry
+STATUS: PRODUCTION
+
+PROBLEM: Teachers waste prep time translating student goals into a complete worksheet input set before the generation step even starts.
+
+EDOOQOO SOLUTION: WorksheetForm/index.tsx, AdvancedOptions, EnglishLevelSelector, ExerciseSelector, LanguageStyleSlider, StudentContextHint, TypewriterHint, NextStepsPresetBanner, TrackingFormWrapper, useWorksheetFormPersistence, useStudentSelector, useFutureTimeline, and useOneMinutePrep coordinate manual, random, smart, and DSLM-prefilled worksheet requests. The Index route opens the usable generator first and can auto-open AddStudentDialog from signup or 1-Minute Prep entry paths.
+
+TECHNICAL MECHANICS: Form fields include lessonTime, lessonTopic, lessonGoal, grammarFocus, additionalInfo, englishLevel A1/A2, B1/B2, or C1/C2, languageStyle, selectedStudentId, exercises, selectedMediaFamily, and media mode picture/audio. The form supports manual exercise selection, random selection, and smart selection via suggest-exercises. It reads DSLM prefill keys from sessionStorage: prefillWorksheet, prefillExercises, prefillExerciseFocusMap, prefillMediaTypes, and autoGenerateWorksheet. It pads exercises to six or eight depending on lesson time. It persists drafts per user or anonymous session through useWorksheetFormPersistence. It never modifies the internal worksheet prompt engine; future prompt edits require an explicit request to update the Worksheet Generation Engine.
+
+RAG KEYWORDS: 1-Minute Prep, worksheet form, ESL worksheet generator, CEFR selector, language style, exercise selector, smart exercises, lesson goal, grammar focus, adult ESL prep, private tutor prep, student context, session prefill, worksheet request
+
+## Worksheet Generation Runtime and Media Pipeline
+STATUS: PRODUCTION
+
+PROBLEM: A teacher needs the generator to fail transparently, preserve entitlement rules, and return a usable worksheet without manually coordinating AI, media, database writes, and UI progress.
+
+EDOOQOO SOLUTION: useWorksheetGeneration.tsx orchestrates the runtime; worksheetStreamService.ts posts to generateWorksheet with server-sent events; mediaService.ts invokes generate-audio and generate-image; processGeneratedWorksheet, exercise validation utilities, and WorksheetDisplay consume the resulting structured worksheet. The prompt wording and generation logic under supabase/functions/generateWorksheet is treated as protected IP and is not reproduced here.
+
+TECHNICAL MECHANICS: The flow guards demo mode, duplicate clicks, token entitlement, and stale worksheet state. It calls check-subscription-status, pre-generates audio/image through generate-audio and generate-image when selected, then POSTs to /functions/v1/generateWorksheet with enableStreaming true, Authorization using the Supabase anon key, and body fields from the form plus userId. worksheetStreamService parses SSE events start, progress, done, and error, applies a 45-second heartbeat, and performs one silent retry only if no exercise has streamed. On success it validates exercise count, builds fallback vocabulary when needed, persists current worksheet state, updates the browser URL to /worksheet/:id, dispatches worksheetGenerationSuccess, consumes a token with useTokenSystem, and marks a used future_worksheet_suggestions record when generated from DSLM.
+
+RAG KEYWORDS: worksheet generation, SSE streaming, Supabase Edge Function, generateWorksheet, audio generation, image generation, token entitlement, AI worksheet, ESL materials, adult learning worksheet, media exercise, generation progress, Gemini, Lovable AI Gateway
+
+## Worksheet Editor Display Export and Downloads
+STATUS: PRODUCTION
+
+PROBLEM: Teachers need to edit generated materials and export usable student/teacher versions without losing the worksheet during navigation, payment return, or page reload.
+
+EDOOQOO SOLUTION: WorksheetPage.tsx fetches a worksheet by ID; WorksheetDisplay, WorksheetContent, WorksheetToolbar, WorksheetHeader, ExerciseNavSidebar, MediaBadges, exercise renderer components, useWorksheetState, useWorksheetNavigation, useExerciseRegeneration, useSectionRegeneration, downloadSessionService, and PaymentSuccess.tsx implement viewing, editing, regeneration, navigation, and download unlocks.
+
+TECHNICAL MECHANICS: WorksheetPage.tsx selects worksheets by id, enforces teacher ownership for registered users, allows ownerless anonymous worksheets for 24 hours, parses ai_response, and falls back to html_content. useWorksheetState stores currentWorksheet, currentEditableWorksheet, currentInputParams, currentGenerationTime, currentSourceCount, and currentWorksheetId in sessionStorage and clears download tokens separately. Download unlocks are tied to download_sessions and export_payments through create-export-payment, verify-export-payment, and sessionStorage downloadToken/downloadTokenExpiry. Exercise renderers under src/components/worksheet cover generated exercise types including fill blanks, multiple choice, matching, phrase matching, role play, grammar rules, vocabulary, audio, image, media exercises, speaking prompts, transformation, and summary sections.
+
+RAG KEYWORDS: worksheet editor, editable worksheet, teacher version, student version, HTML export, PDF export, download session, worksheet toolbar, exercise renderer, media pin, worksheet restore, regenerate exercise, ESL worksheet display, generated materials
+
+## Worksheet History Soft Delete and Recovery
+STATUS: PRODUCTION
+
+PROBLEM: A teacher with many 1-on-1 students needs fast recovery and filtering when worksheets accumulate across lessons.
+
+EDOOQOO SOLUTION: AllWorksheetsPage.tsx uses useWorksheetHistory, useDeletedWorksheets, useAllWorksheetHomework, DeleteWorksheetButton, MediaBadges, WorksheetHomeworkList, filters, sorting, pagination, active/deleted tabs, and restore actions.
+
+TECHNICAL MECHANICS: useWorksheetHistory reads worksheets by teacher_id with deleted_at null, supports server-side student filtering including unassigned, listView select projections, exact counts, pagination, lightweight recent mode, soft_delete_worksheet RPC deletion, and restore by setting deleted_at null. useDeletedWorksheets reads worksheets where deleted_at is not null and restores the same way. AllWorksheetsPage keeps currentPage, searchQuery, selectedStudent, sortBy, sortOrder, selectedWorksheets, activeTab, and per-row homework collapsibles. Related tables: worksheets, homework_assignments, students, worksheet_student_answers, download_sessions, export_payments.
+
+RAG KEYWORDS: worksheet library, deleted worksheets, restore worksheet, soft delete, worksheet archive, student filter, worksheet search, teacher materials library, homework per worksheet, ESL worksheet management, unassigned worksheet, pagination
+
+## Public Shared Worksheets and Live Session Drawing
+STATUS: PRODUCTION
+
+PROBLEM: Students need to work on shared worksheets without full accounts, while teachers need live-session control and review visibility.
+
+EDOOQOO SOLUTION: SharedWorksheet.tsx, SharedWorksheetContent, SharedWorksheetEmailVerification, StudyModeButton, SharedWorksheetProgressBar, useInteractiveSharedWorksheet, ExerciseNavSidebar, DrawingToggleButton, DrawingToolbar, DrawingOverlay, and drawing types implement the shared worksheet experience.
+
+TECHNICAL MECHANICS: SharedWorksheet loads data through get_worksheet_by_share_token RPC, checks if the current Supabase user owns the worksheet, bypasses email verification for the teacher, verifies students with verify_worksheet_student_email RPC, remembers verified email for 48 hours by token, and blocks unassigned worksheet access for non-teachers. useInteractiveSharedWorksheet loads answers through get_worksheet_student_answers, saves answers through save_worksheet_answer, tracks active time per exercise excluding inactive tab time, autosaves after 1.5 seconds, saves audio answer URLs, queues open-ended AI evaluations through needs_ai_evaluation and queue_worksheet_ai_evaluation, invokes process-pending-ai-evaluations after 10-minute inactivity, and polls evaluation state every 30 seconds. Teacher live mode can edit ai_response directly and draw over content using worksheet_drawings.
+
+RAG KEYWORDS: shared worksheet, live session, student email verification, autosave answers, worksheet drawing, teacher edit mode, interactive worksheet, AI evaluation, answer visibility, study mode, ESL homework link, speaking answer, worksheet share token
+
+## Homework Assignment and Interactive Submission
+STATUS: PRODUCTION
+
+PROBLEM: Adult learners need homework tied to the lesson, and teachers need submissions plus feedback signals without manually rebuilding the worksheet.
+
+EDOOQOO SOLUTION: CreateHomeworkModal, HomeworkPage.tsx, HomeworkReviewPage.tsx, HomeworkExerciseRenderer, HomeworkProgressBar, HomeworkSpeakingRecorder, StudentEmailVerification, SendHomeworkEmailDialog, AiEvaluationBadge, AiEvalFeedbackButtons, useInteractiveHomework, useHomeworkExerciseGeneration, useHomeworkNotifications, and StudentHomeworkTab implement assignment, student work, and teacher review.
+
+TECHNICAL MECHANICS: CreateHomeworkModal selects a student, deadline date/time, reminder hours, worksheet exercises, optional extra generated exercises, send-teacher-copy flag, and share link copying. It writes homework_assignments, generates share tokens through generate_homework_share_token RPC, and invokes send-homework-email. useInteractiveHomework verifies email through verify_homework_student_email, loads/saves answers through get_student_homework_answers and save_homework_answer, tracks active time, supports audio answers and transcriptions, computes local mastery, submits through submit_homework_answers, emits student_events through add_student_event, invokes verify-open-answers for open and speaking answers, stores ai_evaluation on homework_student_answers, and triggers insert_homework_submission_notification. Reminder support uses homework_notifications and send-homework-reminders.
+
+RAG KEYWORDS: interactive homework, ESL homework, homework assignment, student submission, AI grading, open answer verification, speaking homework, homework reminder, teacher review, share token, adult learner follow-up, mastery score, homework email
+
+## Flashcards and Spaced Repetition
+STATUS: PRODUCTION
+
+PROBLEM: Vocabulary from adult lessons decays quickly unless students get structured review connected to their real worksheet content.
+
+EDOOQOO SOLUTION: FlashcardSetsSection, CreateFlashcardSetModal, AddFlashcardModal, ImportFromVocabularyModal, QuickImportToFlashcardsModal, QuickAddWordToFlashcardsModal, FlashcardSetEditor, FlashcardDisplay, LearningProgress, SessionSummary, ShareFlashcardSetModal, ShareAllFlashcardSetsModal, FlashcardsLearning.tsx, and hooks useFlashcardSets, useFlashcardCards, useFlashcardLearning, useFlashcardDefinition, useFlashcardTranslation power the module.
+
+TECHNICAL MECHANICS: useFlashcardSets reads flashcard_sets with student, teacher, cards, and progress aggregates, creates/updates sets, soft-deletes through soft_delete_flashcard_set, and creates one-year share tokens through generate_flashcard_share_token. useFlashcardCards reads flashcard_cards, adds/updates/deletes/reorders cards, and bulk imports normalized vocabulary_sheet data from worksheets. FlashcardsLearning resolves get_flashcard_set_by_share_token, asks for learner email unless passed by Student Hub, supports browse and study modes, and routes back by returnTo. useFlashcardLearning calls get_flashcard_cards_for_learning, filters due/new/mistakes/all cards, duplicates cards for bidirectional sets, shuffles, applies SM-2 intervals, stores flashcard_progress by card_id, learner_identifier, and direction, and records last_response_time_ms and last_quality_rating.
+
+RAG KEYWORDS: flashcards, spaced repetition, SM-2, vocabulary review, ESL vocabulary, bidirectional cards, learner email, flashcard set, vocabulary sheet import, CEFR vocabulary, memorization, retrieval practice, private English tutor
+
+## Digital Student Learning Model and One Minute Prep
+STATUS: PRODUCTION
+
+PROBLEM: The teacher needs the next lesson to be based on the student's trajectory, not on generic topic lists or school-style unit plans.
+
+EDOOQOO SOLUTION: DSLMTab, PathwayView, GoalsView, SkillsView, ProfileView, LearningTimeline, MacroTimeline, NextStepsSection, SuggestionEditorDialog, GenerateStepsDialog, BehavioralStatsCard, ConfidenceBadge, useFutureTimeline, useCurriculumPhases, useStudentProgress, usePacingProposals, useBehavioralStats, useSkillMetrics, generate-timeline, generate-curriculum-phases, recalculate-pacing, and pacing-periodic-check implement the 1-Minute Prep context layer.
+
+TECHNICAL MECHANICS: DSLMTab has Pathway, Goals, Skills, and Profile sections with mobile horizontal nav and desktop sticky sidebar. useFutureTimeline manages future_worksheet_suggestions with next_step or phase_step type, generation, replacement, add, edit, mark used, restore, delete, and active suggestion padding to eight exercises. generate-timeline reads students, student_skill_metrics, student_knowledge_entries, student_progress_goals, worksheets, optional dslm_curriculum_phases, and existing suggestions, then returns sanitized suggestions with exercise focus map and media family. useCurriculumPhases reads/inserts/updates/soft-deletes dslm_curriculum_phases and invokes generate-curriculum-phases. recalculate-pacing computes dslm_pacing_mode from goals, deadlines, level, skill metrics, welcome profile traits, and self-profile entries; proposal mode writes pacing_proposals instead of mutating students. The internal prompt text is not reproduced.
+
+RAG KEYWORDS: DSLM, Digital Student Learning Model, 1-Minute Prep, next lesson suggestion, ESL pathway, curriculum phases, adult learning goals, pacing mode, learner profile, skill metrics, CEFR progression, worksheet recommendation, andragogy
+
+## Student Knowledge Base and Self Profile
+STATUS: PRODUCTION
+
+PROBLEM: Adult ESL lessons become generic when the teacher cannot preserve professional context, preferences, constraints, recurring mistakes, and real-life goals.
+
+EDOOQOO SOLUTION: StudentKnowledgeTab, AddEntryModal, EditEntryModal, KnowledgeEntryCard, KnowledgeFilters, StudentContextPanel, StudentProfileSummary, StudentHubProfile.tsx, constants/studentSelfProfile, useStudentKnowledge, useStudentProgress, get-student-self-profile, update-student-self-profile, and classify-knowledge-entry capture and organize learner context.
+
+TECHNICAL MECHANICS: useStudentKnowledge reads student_knowledge_entries with filters and tags from get_student_tags RPC, adds/updates/deletes entries, soft-deletes through soft_delete_knowledge_entry, marks current/outdated through RPCs, archives used entries, and confirms current entries through metadata. New Notes entries trigger classify-knowledge-entry as a best-effort Edge Function. StudentHubProfile loads self-profile fields through get-student-self-profile and saves each field group through update-student-self-profile. Self-profile data is stored as student_knowledge_entries category Self-Profile. useStudentProgress manages student_progress_goals and student_learning_elements, including add/update/delete/archive/unarchive and pacing recalculation proposals on goal changes.
+
+RAG KEYWORDS: student knowledge, learner context, adult ESL profile, self-profile, professional goals, learning preferences, recurring mistakes, knowledge entry, student goal, learning element, tutor notes, learner biography, andragogical context
+
+## Welcome Test and Placement Diagnostics
+STATUS: PRODUCTION
+
+PROBLEM: A teacher needs diagnostic evidence for level, skills, traits, and starting path before building a personalized adult ESL plan.
+
+EDOOQOO SOLUTION: StudentTestsTab, StudentTestPage.tsx, WelcomeTestPage.tsx, WelcomeTestSuggestion, WelcomeTestHistory, TestProgress, SectionCelebration, BrainResetGames, SpeakingRecorder, ListeningPlayer, useStudentTests, useWelcomeTest, useWelcomeTestActions, useWelcomeTestHistory, generate-welcome-test-audio, process-welcome-test, transcribe-audio, send-welcome-test-completion-email, and backfill-welcome-test-auto-apply implement tests.
+
+TECHNICAL MECHANICS: useStudentTests manages student_tests, student_test_questions, and test_skill_results, creates welcome tests idempotently unless retake, generates share tokens through generate_test_share_token RPC, sets a 90-day TTL for welcome tests and 30 days for other tests, and calculates results through calculate_test_results. WelcomeTestPage verifies email against students.student_email, stores local 24-hour token email, handles teacher preview/read-only, instructions, test, paused, completed, and section celebration states. useWelcomeTest loads test data with get_test_by_share_token, updates status assigned to in_progress, saves answers, tracks tab visibility adjusted time, uploads speaking recordings, emits student_events with nano-skill ratings and traits, completes through calculate_test_results, and invokes process-welcome-test. process-welcome-test writes profile, skill metrics, events, AI summary, retake evolution, notification email, transcription, and pacing recalculation. Prompt text is not reproduced.
+
+RAG KEYWORDS: welcome test, placement test, diagnostic test, CEFR placement, ESL assessment, speaking recorder, listening test, learner traits, skill metrics, test share token, adult English level, onboarding assessment, proficiency diagnostics
+
+## Teacher Calendar Public Booking and Google Calendar
+STATUS: PRODUCTION
+
+PROBLEM: 1-on-1 tutors need scheduling, lesson links, student booking, payment tracking, and worksheet context in one operational calendar.
+
+EDOOQOO SOLUTION: CalendarPage.tsx, CalendarSettingsPage.tsx, CalendarLogHistoryPage, CalendarDayView, CalendarWeekView, CalendarMonthView, CalendarScheduleView, CalendarToolbar, UnifiedSlotModal, SlotDetailModal, LinkWorksheetModal, RecurringBookingModal, PaymentHistoryModal, StudentBookingsSection, StudentCalendarTab, PublicBookingPage.tsx, useCalendarSlots, useCalendarSettings, useCalendarRecurrence, useCalendarVacations, useCalendarNotifications, usePublicBooking, and Google Calendar Edge Functions implement the module.
+
+TECHNICAL MECHANICS: useCalendarSlots reads calendar_slots by date range, view mode day/week/month/schedule, optional student_id, and showDeleted. It auto-marks past booked and confirmed slots as needs_review, prevents overlaps, deletes available slots when a lesson is booked into them, applies per-student default meeting links from calendar_student_settings, writes calendar_slot_logs, inserts calendar_notifications, invokes send-calendar-notification-email, and conditionally invokes gcal-sync. useCalendarSettings creates default settings with public_calendar_token if missing and stores booking mode, slot limits, public calendar flag, reminders, payment settings, Google Calendar options, timezone, display hours, reschedule rules, buffer minutes, and email notification flags. usePublicBooking resolves hub_token, public_calendar_token, or slug, shows available and pending slots, books by email, uses find_student_by_email RPC, writes booking status and notifications, emails teacher/student, invokes gcal-sync and student-gcal-sync, and polls/realtime-refreshes. Calendar export uses calendar-export-csv.
+
+RAG KEYWORDS: teacher calendar, lesson booking, public booking, Google Calendar sync, Google Meet link, recurring lesson, booking confirmation, payment tracking, calendar slot, student reschedule, ESL scheduling, online English lesson, private tutor calendar
+
+## Student Hub
+STATUS: PRODUCTION
+
+PROBLEM: Adult learners need a simple portal for lessons, homework, worksheets, flashcards, and self-profile without creating a full teacher account.
+
+EDOOQOO SOLUTION: StudentHubLanding, StudentHubDashboard, StudentHubFlashcards, StudentHubHomework, StudentHubWorksheets, StudentHubLessons, StudentHubProfile, StudentHubSettings, StudentHubLayout, StudentHubStats, HubGoogleSignInButton, useStudentHubData, find-teachers-by-student-email, get-student-hub-data, get-student-self-profile, and update-student-self-profile implement the hub.
+
+TECHNICAL MECHANICS: StudentHubLanding stores student_hub_email in localStorage for 30 days, finds teachers by student email through find-teachers-by-student-email, supports multiple teacher selection, optional password checks and verification through get-student-hub-data actions, and Google email resolution. useStudentHubData invokes get-student-hub-data with token and email and returns teacherName, teacherEmail, studentName, studentId, studentEmail, englishLevel, flashcardSets, homeworks, sharedWorksheets, upcomingLessons, and aggregate stats. StudentHubDashboard links into flashcard browse/study URLs with email and returnTo, homework share links, shared worksheet links, lesson booking, Google Calendar template creation, worksheet links attached to lessons, and Join buttons for meeting links.
+
+RAG KEYWORDS: student hub, learner portal, student materials, homework dashboard, flashcard portal, shared worksheets, lesson portal, email access, hub token, adult learner portal, ESL student access, teacher token, self-profile
+
+## Billing Tokens Subscriptions and Export Payments
+STATUS: PRODUCTION
+
+PROBLEM: A worksheet generator needs clear usage limits, paid plan management, rollover accounting, and export payment recovery without blocking legitimate teacher work.
+
+EDOOQOO SOLUTION: useTokenSystem, usePlanLogic, useSubscriptionSync, Pricing.tsx, Profile.tsx, PaymentSuccess.tsx, PricingCalculator, ConfirmDowngradeDialog, FreeWeekBanner, create-subscription, stripe-webhook, check-subscription-status, customer-portal, downgrade-subscription, finalize-upgrade, verify-subscription-payment, repair-subscriptions, create-export-payment, verify-export-payment, and downloadSessionService implement billing.
+
+TECHNICAL MECHANICS: useTokenSystem reads profiles fields including available_tokens, subscription_type, monthly_worksheet_limit, monthly_worksheets_used, is_tokens_frozen, rollover_tokens, and total_worksheets_created, then allows generation when tokens remain or monthly limit remains and tokens are not frozen. consumeToken calls consume_token RPC. usePlanLogic defines Free Demo 2, Side-Gig 15 at 9 USD, and Full-Time 30/60/90/120 at 19/39/59/79 USD, calculates upgrades, lower plan states, and recommendations by lessons per week. Pricing/Profile invoke create-subscription for checkout and customer-portal for management; lower plans call downgrade-subscription after ConfirmDowngradeDialog. Profile handles Stripe return through finalize-upgrade and check-subscription-status. Export payments write export_payments and download_sessions; PaymentSuccess verifies Stripe session and stores downloadToken in sessionStorage.
+
+RAG KEYWORDS: billing, Stripe, worksheet tokens, subscription, Side-Gig plan, Full-Time plan, rollover tokens, export payment, download unlock, customer portal, downgrade plan, subscription status, token economy, ESL SaaS billing
+
+## Public Gallery and Worksheet Publishing
+STATUS: PRODUCTION
+
+PROBLEM: Public examples help teachers inspect output quality without exposing private student work or interactive answer workflows.
+
+EDOOQOO SOLUTION: PublicGalleryIndex.tsx, PublicGalleryWorksheetPage.tsx, GalleryExerciseRenderer, publish-worksheet, unpublish-worksheet, bulk-publish-worksheets, regenerate-gallery-sitemap, sitemap-xml, and worksheet public fields implement the gallery surface.
+
+TECHNICAL MECHANICS: PublicGalleryIndex reads worksheets where is_public is true, selects id, public_slug, title, public_topic, public_level, public_exercise_types, published_at, and public_view_count, filters by public_level and topic, paginates 24 items, and emits ItemList JSON-LD. PublicGalleryWorksheetPage resolves public_slug, shows soft removal when is_public is false, parses ai_response for static exercise previews, emits LearningResource JSON-LD, and links visitors to signup for interactive generation. Publishing functions mutate worksheet public fields and gallery sitemap generation. Tables: worksheets. Public access is read-only; student answers, teacher edits, downloads, and AI review are not exposed in gallery preview.
+
+RAG KEYWORDS: public worksheet gallery, ESL worksheet examples, free worksheet preview, CEFR filter, worksheet publishing, public_slug, LearningResource schema, static worksheet, gallery sitemap, teacher-published worksheet, public ESL materials
+
+## SEO Content Static Resources and AI Discovery Assets
+STATUS: PRODUCTION
+
+PROBLEM: Teachers and AI agents need crawlable factual pages that explain capabilities and point back to the real product modules.
+
+EDOOQOO SOLUTION: PageSeo, SEO_META, About, Blog, Prompts, Glossary, ExerciseTypes, HowItWorks, OneMinutePrep, Resources, seo pages, features pages, scripts/seo/generate-citable-pages.mjs, generate-ai-resources.mjs, build-blog-index.mjs, prerender-spa-routes.mjs, audit-seo-assets.mjs, public/llms.txt, public/llms-full.txt, public/llms-answers.txt, public/knowledge-graph.json, public/openapi.yaml, public/sitemap.xml, and public/.well-known/ai-plugin.json implement discovery.
+
+TECHNICAL MECHANICS: App.tsx exposes SEO routes for /about, /prompts, /glossary, /exercise-types, /how-it-works, /one-minute-prep, /resources, /blog, /esl-worksheets, /for-english-tutors, /resources/esl-class-toolkit, /teach-english-online, /esl-games-for-teachers, /english-games-for-learners, /features/*, /tools/*, and programmatic worksheet/persona routes. package.json build:seo runs citable generation, blog index build, AI resource generation, Vite build, SPA prerendering, and SEO audit. The current audit overwrites docs/llm-context.md, public/llms.txt, and root llms.txt as the requested RAG source of truth.
+
+RAG KEYWORDS: SEO, llms.txt, AI discovery, citable pages, sitemap, schema.org, FAQ JSON-LD, ESL content, programmatic SEO, teacher resources, search landing page, public route, AI agent documentation
+
+## SEO and AI Visibility Retrieval Map
+STATUS: PRODUCTION
+
+PROBLEM: English teachers search by workflow pain, not by Edooqoo feature names.
+
+EDOOQOO SOLUTION: Edooqoo maps lesson prep, material generation, homework review, vocabulary practice, student management, progress tracking, booking, and student access to canonical public URLs.
+
+TECHNICAL MECHANICS: public/llms.txt, public/llms-full.txt, public/llms-answers.txt, public/knowledge-graph.json, public/openapi.yaml, public/sitemap.xml, scripts/seo/generate-citable-pages.mjs, scripts/seo/generate-ai-resources.mjs, scripts/seo/seo-route-manifest.mjs, and scripts/seo/audit-seo-assets.mjs expose the retrieval map. Each public page must include direct-answer text, visible mechanics, self-canonical URL, JSON-LD matching visible content, and internal links to its hub page. src/components/landing/HeroHeadline.tsx exposes the homepage canonical workflow links to /one-minute-prep, /ai-worksheet-generator-for-english-teachers.html, /esl-student-progress-tracking-tool.html, /ai-grading-tool-for-english-homework.html, and /vocabulary-exercise-generator.html. scripts/seo/generate-citable-pages.mjs generates citation-first static pages for worksheet generation, 1-Minute Prep, CEFR, Business English, grammar, vocabulary, homework review, editable worksheet output, tutor CRM, Student Hub, calendar booking, progress tracking, and adult Business English prep. scripts/seo/generate-ai-resources.mjs writes root llms.txt and public/llms.txt with production-only feature lines, search-intent clusters, docs/llm-context.md anchors, and canonical public URLs. scripts/seo/audit-seo-assets.mjs rejects BETA or ROADMAP entries in public/llms.txt, checks llm-context.md anchor resolution, validates citable-page sections, validates JSON-LD types, validates sitemap uniqueness, and rejects private app routes in public sitemap output.
+
+RAG KEYWORDS: AI Overview citation, Perplexity citation, ChatGPT Browse, llms.txt, answer engine optimization, ESL worksheet generator, English tutor workflow, CEFR progress tracking, homework grading, private tutor CRM, AI lesson prep, citation-ready page
+
+## Free Browser Tools
+STATUS: PRODUCTION
+
+PROBLEM: Teachers sometimes need quick standalone teaching utilities without logging into the full worksheet workflow.
+
+EDOOQOO SOLUTION: ToolsIndex.tsx, LessonPlanGenerator.tsx, VocabCefrChecker.tsx, CefrLevelTest.tsx, PageSeo, and related tool routes implement the public tools.
+
+TECHNICAL MECHANICS: LessonPlanGenerator runs locally in browser state, accepts topic, CEFR level, duration, learner goal, and learner persona, generates six timed stages, supports copying text and downloading HTML, and emits FAQ and HowTo JSON-LD. VocabCefrChecker and CefrLevelTest are separate route modules under src/pages/tools. Tools are linked from /tools and do not write Supabase rows in the audited code paths. They are public SEO utilities and not the same as the authenticated worksheet generation engine.
+
+RAG KEYWORDS: ESL tools, lesson plan generator, CEFR checker, vocabulary level, free teaching tool, adult ESL lesson plan, browser utility, no signup tool, EFL tool, lesson stages, printable plan, teacher resource
+
+## Admin Dashboard Error Logs and Bug Reports
+STATUS: PRODUCTION
+
+PROBLEM: The operator needs to diagnose account, subscription, generation, and UI problems without guessing from user reports.
+
+EDOOQOO SOLUTION: AdminDashboardPage.tsx, AdminErrorLogsPage.tsx, submit-bug-report, submitFeedback, admin-impersonate, cleanup-anonymous-users, test-model-failure-logger, audit-llm-models, send-model-audit-email, and user_roles implement operational controls.
+
+TECHNICAL MECHANICS: AdminDashboardPage checks user_roles for role admin, redirects non-admins to /dashboard, reads profiles, hides anonymous accounts from the teacher list, shows teacher counts, active subscriptions, total worksheets, total tokens, opens admin-impersonate URLs, and invokes cleanup-anonymous-users. AdminErrorLogsPage gates by admin role, reads error_logs and bug_reports, hydrates reporter profiles from profiles, creates signed URLs for bug-reports storage attachments, filters by severity/component/status/search, marks error_logs resolved, and updates bug report statuses new, triaged, in_progress, resolved, or wontfix with resolution notes. Tables: user_roles, profiles, error_logs, bug_reports, admin_activity_log.
+
+RAG KEYWORDS: admin dashboard, error logs, bug report, teacher impersonation, user roles, support operations, system diagnostics, issue triage, Supabase storage signed URL, admin-only route, anonymous cleanup, production support
+
+## Teacher Alerts and Closed Loop Monitoring
+STATUS: BETA
+
+PROBLEM: Teachers need actionable system signals when student engagement, pacing, quality, or token usage needs intervention.
+
+EDOOQOO SOLUTION: TeacherAlertsPage.tsx, useTeacherAlerts, CalendarNotificationBell, teacher_alerts, closed_loop_signals, loop-pacing-aggregator, loop-student-engagement, loop-token-economy, loop-worksheet-quality, pacing-periodic-check, process-pending-ai-evaluations, notify-generation-failure, and system_health_metrics provide the monitoring layer.
+
+TECHNICAL MECHANICS: useTeacherAlerts reads teacher_alerts for the authenticated teacher, excludes dismissed alerts, orders by created_at, polls every 60 seconds, and exposes unreadCount, markRead, dismiss, and markAllRead. TeacherAlertsPage displays severity low/medium/high, source_loop_id, CTA URL, created time, read state, and dismiss controls. Closed-loop Edge Functions are present in supabase/functions and write/read signals across teacher_alerts, closed_loop_signals, student_events, student_skill_metrics, pacing_proposals, system_health_metrics, token_transactions, and pending_worksheet_ai_evaluations. This is marked BETA because the user-facing alert inbox is wired, but background loop completeness depends on scheduled invocation configuration outside the React source.
+
+RAG KEYWORDS: teacher alerts, closed loop, student engagement, pacing alert, worksheet quality, token economy, system signal, teacher notification, student risk, ESL analytics, learning analytics, background monitor, alert inbox
+
+## Demo Mode
+STATUS: PRODUCTION
+
+PROBLEM: A prospective teacher needs to inspect the product before sign-up, while production data and paid actions must remain protected.
+
+EDOOQOO SOLUTION: DemoEntry.tsx, ExitDemo.tsx, DemoContext, useDemoGuard, demo data modules, DashboardPreviewBackground, and demo-aware hooks such as useAuthFlow, useStudents, useWorksheetHistory, useDeletedWorksheets, useFlashcardSets, useProfile, useCalendarSettings, useCalendarSlots, useTeacherAlerts, and useTokenSystem implement read-only demonstration paths.
+
+TECHNICAL MECHANICS: Demo mode supplies synthetic teacher/profile/student/worksheet/flashcard data, returns early from Supabase reads in demo-aware hooks, blocks mutating actions with showDemoBlockedToast, and allows some read-only modal previews. /demo enters demo mode and /exit-demo exits. The Vite build isolates demoWorksheetContent, mockWorksheetData, and mockNewExercisesData into demo-content and mock-data chunks so demo assets are separated from the main bundle. Demo mode is not a production data source and does not create database rows.
+
+RAG KEYWORDS: demo mode, product preview, read-only demo, mock worksheet, sample student, no signup preview, ESL SaaS demo, blocked action, synthetic data, dashboard preview, anonymous trial, teacher demo
+
+## Data Model and Supabase Schema
+STATUS: PRODUCTION
+
+PROBLEM: Future agents need table-level field names and relationship cues before changing any feature that persists teaching or learner data.
+
+EDOOQOO SOLUTION: src/integrations/supabase/types.ts is the generated typed source for table fields and relationships; supabase/migrations contains SQL for tables, indexes, policies, RPCs, and operational changes. This section maps every typed table found in the codebase.
+
+TECHNICAL MECHANICS: Typed table count: 56. Frontend table calls recorded: 37. Edge Function table calls recorded: 50. Migration indexes recorded: 8. Migration RPC/function definitions recorded: 4. Table field catalog:
+- admin_activity_log: fields: . Relationships: no generated foreign-key relationship listed in types.ts.
+- app_internal_config: fields: . Relationships: no generated foreign-key relationship listed in types.ts.
+- bug_reports: fields: . Relationships: no generated foreign-key relationship listed in types.ts.
+- calendar_gcal_tokens: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
+- calendar_notifications: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
+- calendar_payment_records: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
+- calendar_recurrence_rules: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
+- calendar_settings: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
+- calendar_slot_logs: fields: . Relationships: no generated foreign-key relationship listed in types.ts.
+- calendar_slots: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
+- calendar_student_settings: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
+- calendar_teacher_vacations: fields: . Relationships: no generated foreign-key relationship listed in types.ts.
+- closed_loop_signals: fields: . Relationships: no generated foreign-key relationship listed in types.ts.
+- download_sessions: fields: . Relationships: no generated foreign-key relationship listed in types.ts.
+- dslm_curriculum_phases: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
+- email_send_log: fields: . Relationships: no generated foreign-key relationship listed in types.ts.
+- error_logs: fields: . Relationships: no generated foreign-key relationship listed in types.ts.
+- export_payments: fields: . Relationships: no generated foreign-key relationship listed in types.ts.
+- feedbacks: fields: . Relationships: no generated foreign-key relationship listed in types.ts.
+- flashcard_cards: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
+- flashcard_progress: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
+- flashcard_sets: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
+- future_worksheet_suggestions: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
+- geolocation_cache: fields: . Relationships: no generated foreign-key relationship listed in types.ts.
+- homework_assignments: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
+- homework_notifications: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
+- homework_student_answers: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
+- homework_teacher_comments: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
+- homework_teacher_corrections: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
+- model_health_checks: fields: . Relationships: no generated foreign-key relationship listed in types.ts.
+- pacing_proposals: fields: . Relationships: no generated foreign-key relationship listed in types.ts.
+- pending_worksheet_ai_evaluations: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
+- processed_upgrade_sessions: fields: . Relationships: no generated foreign-key relationship listed in types.ts.
+- profiles: fields: . Relationships: no generated foreign-key relationship listed in types.ts.
+- student_events: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
+- student_gcal_tokens: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
+- student_knowledge_entries: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
+- student_learning_elements: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
+- student_learning_profiles: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
+- student_progress_goals: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
+- student_skill_metrics: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
+- student_test_questions: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
+- student_tests: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
+- students: fields: . Relationships: no generated foreign-key relationship listed in types.ts.
+- subscription_events: fields: . Relationships: no generated foreign-key relationship listed in types.ts.
+- subscriptions: fields: . Relationships: no generated foreign-key relationship listed in types.ts.
+- system_health_metrics: fields: . Relationships: no generated foreign-key relationship listed in types.ts.
+- teacher_ai_eval_feedback: fields: . Relationships: no generated foreign-key relationship listed in types.ts.
+- teacher_alerts: fields: . Relationships: no generated foreign-key relationship listed in types.ts.
+- test_skill_results: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
+- token_transactions: fields: . Relationships: no generated foreign-key relationship listed in types.ts.
+- user_events: fields: . Relationships: no generated foreign-key relationship listed in types.ts.
+- user_roles: fields: . Relationships: no generated foreign-key relationship listed in types.ts.
+- worksheet_drawings: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
+- worksheet_student_answers: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
+- worksheets: fields: . Relationships: no generated foreign-key relationship listed in types.ts.
+
+Index catalog from migrations:
+- idx_email_send_log_recipient_template: supabase/migrations/20260505064801_45a8e80c-6a10-4530-9c60-06c0e31371cf.sql
+- idx_mhc_recent: supabase/migrations/20260527053649_4e525edd-877a-497e-8a53-710465c11cc3.sql
+- idx_ske_archived_at: supabase/migrations/20260506081856_5f5e0e5d-baaa-44b7-b197-35340563d261.sql
+- idx_ske_used_in_worksheet: supabase/migrations/20260506081856_5f5e0e5d-baaa-44b7-b197-35340563d261.sql
+- idx_worksheets_public: supabase/migrations/20260519195659_1d0dda8d-dc80-427b-9c7b-9c562e694f90.sql
+- idx_worksheets_public_slug: supabase/migrations/20260519195659_1d0dda8d-dc80-427b-9c7b-9c562e694f90.sql
+- idx_worksheets_public_topic: supabase/migrations/20260519195659_1d0dda8d-dc80-427b-9c7b-9c562e694f90.sql
+- uq_one_active_welcome_attempt: supabase/migrations/20260526063012_1afc9ce1-e369-4341-acfb-7c1b60e6e5d9.sql
+
+RAG KEYWORDS: Supabase schema, database tables, RLS, foreign keys, typed Database, Postgres, ESL app data model, worksheet table, student table, homework table, flashcard table, calendar table, billing table, migration index
+
+## Edge Functions APIs and RPC Calls
+STATUS: PRODUCTION
+
+PROBLEM: Future agents need to know which endpoints exist and which features depend on them before changing API names, payloads, or response expectations.
+
+EDOOQOO SOLUTION: supabase/functions contains Edge Functions for worksheet generation, media, DSLM, tests, homework, flashcards, calendar, billing, public SEO, admin, alerts, tracking, and maintenance. Frontend invokes use supabase.functions.invoke or direct /functions/v1/generateWorksheet streaming; RPCs are called through supabase.rpc.
+
+TECHNICAL MECHANICS: Endpoint count: 77. Edge Functions are HTTP Supabase Functions; browser invocations through supabase.functions.invoke are POST requests with JSON bodies unless the function handles callbacks/webhooks or the streaming service posts directly. generateWorksheet is called by worksheetStreamService with a streaming POST body including form fields, userId, and enableStreaming true, returning SSE events. API endpoint catalog:
+- add-rls-policies: Edge Function endpoint in supabase/functions/add-rls-policies; frontend callers: none found in src; may be webhook, cron, admin, or server-to-server.
+- add-tokens: Edge Function endpoint in supabase/functions/add-tokens; frontend callers: src/pages/Auth.tsx.
+- admin-impersonate: Edge Function endpoint in supabase/functions/admin-impersonate; frontend callers: src/pages/AdminDashboardPage.tsx.
+- audit-llm-models: Edge Function endpoint in supabase/functions/audit-llm-models; frontend callers: none found in src; may be webhook, cron, admin, or server-to-server.
+- backfill-welcome-test-auto-apply: Edge Function endpoint in supabase/functions/backfill-welcome-test-auto-apply; frontend callers: none found in src; may be webhook, cron, admin, or server-to-server.
+- bulk-publish-worksheets: Edge Function endpoint in supabase/functions/bulk-publish-worksheets; frontend callers: none found in src; may be webhook, cron, admin, or server-to-server.
+- calendar-export-csv: Edge Function endpoint in supabase/functions/calendar-export-csv; frontend callers: src/pages/CalendarPage.tsx, src/pages/CalendarSettingsPage.tsx.
+- calendar-handle-reschedule-decision: Edge Function endpoint in supabase/functions/calendar-handle-reschedule-decision; frontend callers: src/components/calendar/SlotDetailModal.tsx.
+- check-subscription-status: Edge Function endpoint in supabase/functions/check-subscription-status; frontend callers: src/hooks/useProfile.tsx, src/hooks/useSubscriptionSync.tsx, src/hooks/useWorksheetGeneration.tsx, src/pages/Pricing.tsx, src/pages/Profile.tsx.
+- claim-anonymous-worksheets: Edge Function endpoint in supabase/functions/claim-anonymous-worksheets; frontend callers: src/hooks/useWorksheetClaim.ts.
+- classify-knowledge-entry: Edge Function endpoint in supabase/functions/classify-knowledge-entry; frontend callers: src/hooks/useStudentKnowledge.tsx.
+- cleanup-anonymous-users: Edge Function endpoint in supabase/functions/cleanup-anonymous-users; frontend callers: src/pages/AdminDashboardPage.tsx.
+- create-export-payment: Edge Function endpoint in supabase/functions/create-export-payment; frontend callers: src/components/PaymentPopup.tsx.
+- create-subscription: Edge Function endpoint in supabase/functions/create-subscription; frontend callers: src/components/worksheet/FormView.tsx, src/pages/Auth.tsx, src/pages/Pricing.tsx, src/pages/Profile.tsx.
+- customer-portal: Edge Function endpoint in supabase/functions/customer-portal; frontend callers: src/pages/Pricing.tsx, src/pages/Profile.tsx.
+- delete-account: Edge Function endpoint in supabase/functions/delete-account; frontend callers: none found in src; may be webhook, cron, admin, or server-to-server.
+- downgrade-subscription: Edge Function endpoint in supabase/functions/downgrade-subscription; frontend callers: src/pages/Pricing.tsx, src/pages/Profile.tsx.
+- fetch-media: Edge Function endpoint in supabase/functions/fetch-media; frontend callers: none found in src; may be webhook, cron, admin, or server-to-server.
+- finalize-upgrade: Edge Function endpoint in supabase/functions/finalize-upgrade; frontend callers: src/pages/Profile.tsx.
+- find-teachers-by-student-email: Edge Function endpoint in supabase/functions/find-teachers-by-student-email; frontend callers: src/pages/BookLandingPage.tsx, src/pages/StudentHubLanding.tsx.
+- format-worksheet-prompt: Edge Function endpoint in supabase/functions/format-worksheet-prompt; frontend callers: src/utils/promptFormatter.ts.
+- gcal-auth-callback: Edge Function endpoint in supabase/functions/gcal-auth-callback; frontend callers: src/pages/CalendarSettingsPage.tsx.
+- gcal-auth-start: Edge Function endpoint in supabase/functions/gcal-auth-start; frontend callers: src/pages/CalendarSettingsPage.tsx.
+- gcal-sync: Edge Function endpoint in supabase/functions/gcal-sync; frontend callers: src/components/calendar/RecurringBookingModal.tsx, src/components/calendar/SlotDetailModal.tsx, src/hooks/useCalendarSlots.tsx, src/hooks/usePublicBooking.tsx, src/hooks/useStudents.tsx, src/pages/CalendarPage.tsx, src/pages/CalendarSettingsPage.tsx, src/pages/StudentPage.tsx.
+- generate-audio: Edge Function endpoint in supabase/functions/generate-audio; frontend callers: src/services/mediaService.ts.
+- generate-curriculum-phases: Edge Function endpoint in supabase/functions/generate-curriculum-phases; frontend callers: src/hooks/dslm/useCurriculumPhases.tsx.
+- generate-image: Edge Function endpoint in supabase/functions/generate-image; frontend callers: src/services/mediaService.ts.
+- generate-media-exercises: Edge Function endpoint in supabase/functions/generate-media-exercises; frontend callers: none found in src; may be webhook, cron, admin, or server-to-server.
+- generate-timeline: Edge Function endpoint in supabase/functions/generate-timeline; frontend callers: src/hooks/useFutureTimeline.tsx.
+- generate-welcome-test-audio: Edge Function endpoint in supabase/functions/generate-welcome-test-audio; frontend callers: none found in src; may be webhook, cron, admin, or server-to-server.
+- generateWorksheet: Edge Function endpoint in supabase/functions/generateWorksheet; frontend callers: src/components/worksheet/AddExerciseModal.tsx, src/hooks/useHomeworkExerciseGeneration.tsx, src/services/exerciseRegenerationService.ts, src/services/worksheetService/apiService.ts, src/services/worksheetStreamService.ts.
+- get-demo-locale: Edge Function endpoint in supabase/functions/get-demo-locale; frontend callers: src/pages/DemoEntry.tsx.
+- get-student-bookings: Edge Function endpoint in supabase/functions/get-student-bookings; frontend callers: src/components/calendar/StudentBookingsSection.tsx, src/pages/StudentHubLessons.tsx.
+- get-student-hub-data: Edge Function endpoint in supabase/functions/get-student-hub-data; frontend callers: src/hooks/useStudentHubData.tsx, src/pages/StudentHubLanding.tsx, src/pages/StudentHubSettings.tsx.
+- get-student-self-profile: Edge Function endpoint in supabase/functions/get-student-self-profile; frontend callers: src/pages/StudentHubProfile.tsx.
+- loop-pacing-aggregator: Edge Function endpoint in supabase/functions/loop-pacing-aggregator; frontend callers: none found in src; may be webhook, cron, admin, or server-to-server.
+- loop-student-engagement: Edge Function endpoint in supabase/functions/loop-student-engagement; frontend callers: none found in src; may be webhook, cron, admin, or server-to-server.
+- loop-token-economy: Edge Function endpoint in supabase/functions/loop-token-economy; frontend callers: none found in src; may be webhook, cron, admin, or server-to-server.
+- loop-worksheet-quality: Edge Function endpoint in supabase/functions/loop-worksheet-quality; frontend callers: none found in src; may be webhook, cron, admin, or server-to-server.
+- notify-generation-failure: Edge Function endpoint in supabase/functions/notify-generation-failure; frontend callers: none found in src; may be webhook, cron, admin, or server-to-server.
+- pacing-periodic-check: Edge Function endpoint in supabase/functions/pacing-periodic-check; frontend callers: none found in src; may be webhook, cron, admin, or server-to-server.
+- process-pending-ai-evaluations: Edge Function endpoint in supabase/functions/process-pending-ai-evaluations; frontend callers: src/components/WorksheetDisplay.tsx, src/hooks/useInteractiveSharedWorksheet.tsx, src/hooks/useLiveSessionAnswers.tsx.
+- process-welcome-test: Edge Function endpoint in supabase/functions/process-welcome-test; frontend callers: src/hooks/useWelcomeTest.tsx.
+- publish-worksheet: Edge Function endpoint in supabase/functions/publish-worksheet; frontend callers: src/components/worksheet/PublishWorksheetButton.tsx.
+- recalculate-pacing: Edge Function endpoint in supabase/functions/recalculate-pacing; frontend callers: src/components/dslm/PacingModeSlider.tsx, src/hooks/useStudentProgress.tsx, src/hooks/useStudents.tsx.
+- regenerate-gallery-sitemap: Edge Function endpoint in supabase/functions/regenerate-gallery-sitemap; frontend callers: none found in src; may be webhook, cron, admin, or server-to-server.
+- repair-subscriptions: Edge Function endpoint in supabase/functions/repair-subscriptions; frontend callers: none found in src; may be webhook, cron, admin, or server-to-server.
+- send-calendar-notification-email: Edge Function endpoint in supabase/functions/send-calendar-notification-email; frontend callers: src/components/calendar/RecurringBookingModal.tsx, src/components/calendar/SlotDetailModal.tsx, src/hooks/useCalendarSlots.tsx, src/hooks/usePublicBooking.tsx.
+- send-flashcard-email: Edge Function endpoint in supabase/functions/send-flashcard-email; frontend callers: src/components/flashcards/ShareAllFlashcardSetsModal.tsx, src/components/flashcards/ShareFlashcardSetModal.tsx.
+- send-homework-email: Edge Function endpoint in supabase/functions/send-homework-email; frontend callers: src/components/homework/CreateHomeworkModal.tsx, src/components/homework/SendHomeworkEmailDialog.tsx.
+- send-homework-reminders: Edge Function endpoint in supabase/functions/send-homework-reminders; frontend callers: none found in src; may be webhook, cron, admin, or server-to-server.
+- send-model-audit-email: Edge Function endpoint in supabase/functions/send-model-audit-email; frontend callers: none found in src; may be webhook, cron, admin, or server-to-server.
+- send-test-email: Edge Function endpoint in supabase/functions/send-test-email; frontend callers: src/components/dashboard/WelcomeTestSuggestion.tsx, src/components/student-tests/ShareTestModal.tsx, src/components/student-tests/StudentTestsTab.tsx, src/hooks/useWelcomeTestActions.ts.
+- send-welcome-email: Edge Function endpoint in supabase/functions/send-welcome-email; frontend callers: none found in src; may be webhook, cron, admin, or server-to-server.
+- send-welcome-test-completion-email: Edge Function endpoint in supabase/functions/send-welcome-test-completion-email; frontend callers: none found in src; may be webhook, cron, admin, or server-to-server.
+- send-worksheet-email: Edge Function endpoint in supabase/functions/send-worksheet-email; frontend callers: src/components/ShareWorksheetModal.tsx.
+- sitemap-xml: Edge Function endpoint in supabase/functions/sitemap-xml; frontend callers: none found in src; may be webhook, cron, admin, or server-to-server.
+- stripe-webhook: Edge Function endpoint in supabase/functions/stripe-webhook; frontend callers: none found in src; may be webhook, cron, admin, or server-to-server.
+- student-gcal-auth-callback: Edge Function endpoint in supabase/functions/student-gcal-auth-callback; frontend callers: src/pages/GCalStudentCallback.tsx.
+- student-gcal-auth-start: Edge Function endpoint in supabase/functions/student-gcal-auth-start; frontend callers: src/pages/StudentHubSettings.tsx.
+- student-gcal-sync: Edge Function endpoint in supabase/functions/student-gcal-sync; frontend callers: src/components/calendar/RecurringBookingModal.tsx, src/components/calendar/SlotDetailModal.tsx, src/hooks/usePublicBooking.tsx, src/pages/CalendarPage.tsx.
+- submit-bug-report: Edge Function endpoint in supabase/functions/submit-bug-report; frontend callers: src/components/bug-report/BugReportModal.tsx.
+- submitFeedback: Edge Function endpoint in supabase/functions/submitFeedback; frontend callers: src/services/worksheetService/feedbackService.ts.
+- suggest-exercises: Edge Function endpoint in supabase/functions/suggest-exercises; frontend callers: src/components/WorksheetForm/index.tsx.
+- test-model-failure-logger: Edge Function endpoint in supabase/functions/test-model-failure-logger; frontend callers: none found in src; may be webhook, cron, admin, or server-to-server.
+- test-send-reminder: Edge Function endpoint in supabase/functions/test-send-reminder; frontend callers: none found in src; may be webhook, cron, admin, or server-to-server.
+- test-webhook: Edge Function endpoint in supabase/functions/test-webhook; frontend callers: none found in src; may be webhook, cron, admin, or server-to-server.
+- track-student-event: Edge Function endpoint in supabase/functions/track-student-event; frontend callers: none found in src; may be webhook, cron, admin, or server-to-server.
+- track-user-event: Edge Function endpoint in supabase/functions/track-user-event; frontend callers: none found in src; may be webhook, cron, admin, or server-to-server.
+- transcribe-audio: Edge Function endpoint in supabase/functions/transcribe-audio; frontend callers: src/utils/audioEvalUtils.ts.
+- translate-flashcard: Edge Function endpoint in supabase/functions/translate-flashcard; frontend callers: src/components/flashcards/ImportFromVocabularyModal.tsx, src/components/flashcards/QuickAddWordToFlashcardsModal.tsx, src/components/flashcards/QuickImportToFlashcardsModal.tsx, src/hooks/useFlashcardDefinition.tsx, src/hooks/useFlashcardTranslation.tsx.
+- unpublish-worksheet: Edge Function endpoint in supabase/functions/unpublish-worksheet; frontend callers: src/components/worksheet/PublishWorksheetButton.tsx.
+- update-student-self-profile: Edge Function endpoint in supabase/functions/update-student-self-profile; frontend callers: src/pages/StudentHubProfile.tsx.
+- upload-to-r2: Edge Function endpoint in supabase/functions/upload-to-r2; frontend callers: src/components/welcome-test/SpeakingRecorder.tsx.
+- verify-export-payment: Edge Function endpoint in supabase/functions/verify-export-payment; frontend callers: src/pages/PaymentSuccess.tsx.
+- verify-open-answers: Edge Function endpoint in supabase/functions/verify-open-answers; frontend callers: src/components/worksheet/ExerciseSection.tsx, src/hooks/useInteractiveHomework.tsx.
+- verify-subscription-payment: Edge Function endpoint in supabase/functions/verify-subscription-payment; frontend callers: none found in src; may be webhook, cron, admin, or server-to-server.
+
+RPC call catalog:
+- add_student_event: called from src/components/worksheet/ExerciseSection.tsx, src/hooks/dslm/useStudentEvents.tsx, src/hooks/useInteractiveHomework.tsx, src/hooks/useWelcomeTest.tsx, supabase/functions/track-student-event/index.ts.
+- add_tokens: called from supabase/functions/add-tokens/index.ts, supabase/functions/stripe-webhook/index.ts, supabase/functions/verify-subscription-payment/index.ts.
+- calculate_test_results: called from src/hooks/useStudentTests.tsx, src/hooks/useWelcomeTest.tsx, supabase/functions/process-welcome-test/index.ts.
+- consume_token: called from src/hooks/useTokenSystem.tsx.
+- exec_sql: called from supabase/functions/add-rls-policies/index.ts.
+- find_student_by_email: called from src/hooks/usePublicBooking.tsx.
+- generate_flashcard_share_token: called from src/hooks/useFlashcardSets.tsx.
+- generate_homework_share_token: called from src/components/homework/CreateHomeworkModal.tsx.
+- generate_public_slug: called from supabase/functions/bulk-publish-worksheets/index.ts, supabase/functions/publish-worksheet/index.ts.
+- generate_test_share_token: called from src/hooks/useStudentTests.tsx.
+- generate_worksheet_share_token: called from src/components/ShareWorksheetModal.tsx.
+- get_active_model_issues: called from src/pages/StatusPage.tsx.
+- get_flashcard_cards_for_learning: called from src/hooks/useFlashcardLearning.tsx.
+- get_flashcard_set_by_share_token: called from src/pages/FlashcardsLearning.tsx.
+- get_homework_by_share_token: called from src/pages/HomeworkPage.tsx.
+- get_homework_comments: called from src/pages/HomeworkReviewPage.tsx.
+- get_public_status: called from src/pages/StatusPage.tsx.
+- get_student_homework_answers: called from src/hooks/useInteractiveHomework.tsx.
+- get_student_meeting_link: called from src/hooks/usePublicBooking.tsx.
+- get_student_tags: called from src/hooks/useStudentKnowledge.tsx.
+- get_test_by_share_token: called from src/hooks/useStudentTests.tsx, src/hooks/useWelcomeTest.tsx.
+- get_test_status_by_share_token: called from src/pages/WelcomeTestPage.tsx.
+- get_worksheet_by_share_token: called from src/pages/SharedWorksheet.tsx.
+- get_worksheet_live_answers: called from src/hooks/useLiveSessionAnswers.tsx.
+- get_worksheet_student_answers: called from src/hooks/useInteractiveSharedWorksheet.tsx.
+- increment_worksheet_download_count: called from src/services/worksheetService/trackingService.ts.
+- insert_homework_submission_notification: called from src/hooks/useInteractiveHomework.tsx.
+- mark_homework_completed: called from src/components/dashboard/WorksheetHomeworkList.tsx, src/components/student-homework/StudentHomeworkTab.tsx, src/pages/HomeworkPage.tsx.
+- mark_knowledge_current: called from src/hooks/useStudentKnowledge.tsx.
+- mark_knowledge_outdated: called from src/hooks/useStudentKnowledge.tsx.
+- needs_ai_evaluation: called from src/hooks/useInteractiveSharedWorksheet.tsx, supabase/functions/process-pending-ai-evaluations/index.ts.
+- queue_worksheet_ai_evaluation: called from src/hooks/useInteractiveSharedWorksheet.tsx.
+- save_homework_answer: called from src/hooks/useInteractiveHomework.tsx.
+- save_teacher_comment: called from src/pages/HomeworkReviewPage.tsx.
+- save_worksheet_answer: called from src/hooks/useInteractiveSharedWorksheet.tsx.
+- soft_delete_flashcard_set: called from src/hooks/useFlashcardSets.tsx.
+- soft_delete_knowledge_entry: called from src/hooks/useStudentKnowledge.tsx.
+- soft_delete_student: called from src/hooks/useStudents.tsx.
+- soft_delete_user_account: called from supabase/functions/delete-account/index.ts.
+- soft_delete_worksheet: called from src/hooks/useWorksheetHistory.tsx.
+- submit_homework_answers: called from src/hooks/useInteractiveHomework.tsx.
+- track_user_event: called from supabase/functions/track-user-event/index.ts, supabase/functions/verify-export-payment/index.ts.
+- verify_homework_student_email: called from src/hooks/useInteractiveHomework.tsx.
+- verify_worksheet_student_email: called from src/hooks/useInteractiveSharedWorksheet.tsx.
+
+RAG KEYWORDS: Supabase Edge Function, API endpoint, RPC, generateWorksheet, webhook, serverless function, ESL SaaS backend, function payload, response shape, database RPC, API audit, function catalog
+
+## Integrations and External Services
+STATUS: PRODUCTION
+
+PROBLEM: A teacher-facing SaaS fails if external dependencies are invisible, because generation, payment, email, media, calendar, and storage behavior become hard to debug.
+
+EDOOQOO SOLUTION: Supabase is the database/auth/storage/function layer; Lovable AI Gateway model calls appear in generation and analysis functions; Stripe powers subscriptions/export payments; Resend-style email functions send student and teacher emails; Google Calendar and Google OAuth support calendar sync; upload-to-r2 and fetch-media support media; React Query, React Router, Tailwind, Radix, Shadcn, lucide-react, date-fns, fabric, html2pdf.js, and react-helmet-async support the frontend.
+
+TECHNICAL MECHANICS: Supabase URL and anon key are hardcoded in src/integrations/supabase/client.ts. VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are used by worksheetStreamService for the streaming function call. Stripe Edge Functions include create-subscription, stripe-webhook, customer-portal, downgrade-subscription, finalize-upgrade, verify-subscription-payment, create-export-payment, and verify-export-payment. Calendar integration functions include gcal-auth-start, gcal-auth-callback, gcal-sync, student-gcal-auth-start, student-gcal-auth-callback, and student-gcal-sync. Email functions include send-homework-email, send-flashcard-email, send-calendar-notification-email, send-welcome-email, send-welcome-test-completion-email, send-test-email, send-worksheet-email, send-homework-reminders, send-model-audit-email, and notify-generation-failure.
+
+RAG KEYWORDS: Supabase integration, Stripe integration, Google Calendar, Google OAuth, email service, Resend, Lovable AI Gateway, AI model, R2 storage, media upload, React Query, Tailwind, Radix UI, SaaS integration
+
+## Frontend Component Inventory
+STATUS: PRODUCTION
+
+PROBLEM: Future agents need a component map before changing UI behavior, because many workflows share worksheet, student, calendar, and homework primitives.
+
+EDOOQOO SOLUTION: Components are grouped by folder and feature area; detailed props and state are defined in the individual TypeScript modules, while this inventory tells agents where each module belongs before opening the source.
+
+TECHNICAL MECHANICS: Component file count: 332. Component groups:
+- Worksheet Display (61): src/components/worksheet/AddExerciseModal.tsx, src/components/worksheet/AudioPlayer.tsx, src/components/worksheet/DemoWatermark.tsx, src/components/worksheet/DraftTeacherNotes.tsx, src/components/worksheet/ExerciseAnswerQuestions.tsx, src/components/worksheet/ExerciseAnswerQuestionsAudio.tsx, src/components/worksheet/ExerciseCategorize.tsx, src/components/worksheet/ExerciseCompleteWord.tsx, src/components/worksheet/ExerciseContent.tsx, src/components/worksheet/ExerciseDescribe.tsx, src/components/worksheet/ExerciseDialogue.tsx, src/components/worksheet/ExerciseErrorCorrection.tsx, src/components/worksheet/ExerciseFillInBlanks.tsx, src/components/worksheet/ExerciseFillInBlanksAudio.tsx, src/components/worksheet/ExerciseGapText.tsx, src/components/worksheet/ExerciseHeader.tsx, src/components/worksheet/ExerciseListeningComprehension.tsx, src/components/worksheet/ExerciseMatching.tsx, src/components/worksheet/ExerciseMatchingHalves.tsx, src/components/worksheet/ExerciseMultipleChoice.tsx, src/components/worksheet/ExerciseMultipleChoiceAudio.tsx, src/components/worksheet/ExerciseNavSidebar.tsx, src/components/worksheet/ExerciseNegativePrefixes.tsx, src/components/worksheet/ExerciseOddOneOut.tsx, src/components/worksheet/ExerciseParaphrasing.tsx, src/components/worksheet/ExerciseReading.tsx, src/components/worksheet/ExerciseRegenerateModal.tsx, src/components/worksheet/ExerciseSection.tsx, src/components/worksheet/ExerciseSectionUtils.tsx, src/components/worksheet/ExerciseSentenceTransformation.tsx, src/components/worksheet/ExerciseSynonymsAntonyms.tsx, src/components/worksheet/ExerciseTrueFalseAudio.tsx, src/components/worksheet/ExerciseWordOrder.tsx, src/components/worksheet/ExerciseWritingTask.tsx, src/components/worksheet/FeedbackDialog.tsx, src/components/worksheet/FormView.tsx, src/components/worksheet/GenerationView.tsx, src/components/worksheet/GrammarRules.tsx, src/components/worksheet/InputParamsCard.tsx, src/components/worksheet/LiveAudioPlayer.tsx, src/components/worksheet/LiveSessionQuickNotes.tsx, src/components/worksheet/MediaBadges.tsx, src/components/worksheet/MediaDisplay.tsx, src/components/worksheet/MediaSection.tsx, src/components/worksheet/NanoSkillBadge.tsx, src/components/worksheet/NanoSkillMasteryModal.tsx, src/components/worksheet/PublishWorksheetButton.tsx, src/components/worksheet/RatingButtons.tsx, src/components/worksheet/RatingSection.tsx, src/components/worksheet/SectionRegenerateModal.tsx, src/components/worksheet/SelectWordMode.tsx, src/components/worksheet/TeacherNotes.tsx, src/components/worksheet/TeacherTipSection.tsx, src/components/worksheet/VocabularySheet.tsx, src/components/worksheet/WarmupSection.tsx, src/components/worksheet/WorksheetContainer.tsx, src/components/worksheet/WorksheetContent.tsx, src/components/worksheet/WorksheetHeader.tsx, src/components/worksheet/WorksheetHomeworkSection.tsx, src/components/worksheet/WorksheetToolbar.tsx, src/components/worksheet/WorksheetViewTracking.tsx
+- Worksheet Form (14): src/components/WorksheetForm/AdvancedOptions.tsx, src/components/WorksheetForm/EnglishLevelSelector.tsx, src/components/WorksheetForm/ExerciseSelector.tsx, src/components/WorksheetForm/FormField.tsx, src/components/WorksheetForm/LanguageStyleSlider.tsx, src/components/WorksheetForm/NextStepsPresetBanner.tsx, src/components/WorksheetForm/StudentContextHint.tsx, src/components/WorksheetForm/TrackingFormWrapper.tsx, src/components/WorksheetForm/TypewriterHint.tsx, src/components/WorksheetForm/constants.ts, src/components/WorksheetForm/index.tsx, src/components/WorksheetForm/placeholderSets.ts, src/components/WorksheetForm/suggestionSets.ts, src/components/WorksheetForm/types.ts
+- DSLM (29): src/components/dslm/BehavioralStatsCard.tsx, src/components/dslm/CollapsibleSection.tsx, src/components/dslm/CompactSuggestionCard.tsx, src/components/dslm/ConfidenceBadge.tsx, src/components/dslm/ConfirmDeleteDialog.tsx, src/components/dslm/ConfirmTypeToDeleteDialog.tsx, src/components/dslm/DSLMTab.tsx, src/components/dslm/EditExerciseSelector.tsx, src/components/dslm/EventLogPanel.tsx, src/components/dslm/GenerateStepsDialog.tsx, src/components/dslm/GoalsView.tsx, src/components/dslm/LazySection.tsx, src/components/dslm/LearningTimeline.tsx, src/components/dslm/MacroTimeline.tsx, src/components/dslm/MasterySparkline.tsx, src/components/dslm/NextStepBanner.tsx, src/components/dslm/NextStepsSection.tsx, src/components/dslm/PacingModeSlider.tsx, src/components/dslm/PacingProposalCard.tsx, src/components/dslm/PacingProposalsBell.tsx, src/components/dslm/PathwayView.tsx, src/components/dslm/ProfileView.tsx, src/components/dslm/ScrollableStepList.tsx, src/components/dslm/SectionSkeleton.tsx, src/components/dslm/SkillsOverviewPanel.tsx, src/components/dslm/SkillsView.tsx, src/components/dslm/StudentNavBadges.tsx, src/components/dslm/StudentPathwayBadges.tsx, src/components/dslm/SuggestionEditDialog.tsx
+- Dashboard (8): src/components/dashboard/AddStudentButton.tsx, src/components/dashboard/AddStudentDialog.tsx, src/components/dashboard/CompactStatsBar.tsx, src/components/dashboard/HomeworkOverviewWidget.tsx, src/components/dashboard/StudentCard.tsx, src/components/dashboard/StudentPaymentMeetingCard.tsx, src/components/dashboard/WelcomeTestSuggestion.tsx, src/components/dashboard/WorksheetHomeworkList.tsx
+- Homework (11): src/components/homework/AiEvalFeedbackButtons.tsx, src/components/homework/AiEvalFeedbackModal.tsx, src/components/homework/AiEvaluationBadge.tsx, src/components/homework/CreateHomeworkModal.tsx, src/components/homework/HomeworkExerciseRenderer.tsx, src/components/homework/HomeworkNotificationBadge.tsx, src/components/homework/HomeworkProgressBar.tsx, src/components/homework/HomeworkSpeakingRecorder.tsx, src/components/homework/InteractiveExerciseWrapper.tsx, src/components/homework/SendHomeworkEmailDialog.tsx, src/components/homework/StudentEmailVerification.tsx
+- Flashcards (16): src/components/flashcards/AddFlashcardModal.tsx, src/components/flashcards/CreateFlashcardSetModal.tsx, src/components/flashcards/DeleteFlashcardSetModal.tsx, src/components/flashcards/FlashcardDisplay.tsx, src/components/flashcards/FlashcardFABs.tsx, src/components/flashcards/FlashcardSetCard.tsx, src/components/flashcards/FlashcardSetEditor.tsx, src/components/flashcards/FlashcardSetsSection.tsx, src/components/flashcards/ImportFromVocabularyModal.tsx, src/components/flashcards/LearningProgress.tsx, src/components/flashcards/QuickAddWordToFlashcardsModal.tsx, src/components/flashcards/QuickImportToFlashcardsModal.tsx, src/components/flashcards/SessionSummary.tsx, src/components/flashcards/ShareAllFlashcardSetsModal.tsx, src/components/flashcards/ShareFlashcardSetModal.tsx, src/components/flashcards/ViewFlashcardSetsModal.tsx
+- Calendar (16): src/components/calendar/CalendarDayView.tsx, src/components/calendar/CalendarLogHistoryPage.tsx, src/components/calendar/CalendarMonthView.tsx, src/components/calendar/CalendarNotificationBell.tsx, src/components/calendar/CalendarScheduleView.tsx, src/components/calendar/CalendarSlotCard.tsx, src/components/calendar/CalendarToolbar.tsx, src/components/calendar/CalendarWeekView.tsx, src/components/calendar/GCalStatusButton.tsx, src/components/calendar/LinkWorksheetModal.tsx, src/components/calendar/PaymentHistoryModal.tsx, src/components/calendar/RecurringBookingModal.tsx, src/components/calendar/SlotDetailModal.tsx, src/components/calendar/StudentBookingsSection.tsx, src/components/calendar/StudentCalendarTab.tsx, src/components/calendar/UnifiedSlotModal.tsx
+- Student Hub (3): src/components/student-hub/HubGoogleSignInButton.tsx, src/components/student-hub/StudentHubLayout.tsx, src/components/student-hub/StudentHubStats.tsx
+- Welcome Test (9): src/components/welcome-test/BrainResetGame.tsx, src/components/welcome-test/BrainResetGames.tsx, src/components/welcome-test/BrainResetReactionGame.tsx, src/components/welcome-test/BrainResetSequenceGame.tsx, src/components/welcome-test/InstructionScreen.tsx, src/components/welcome-test/ListeningPlayer.tsx, src/components/welcome-test/SpeakingRecorder.tsx, src/components/welcome-test/WelcomeTestActionsPanel.tsx, src/components/welcome-test/WelcomeTestComparisonView.tsx
+- Student Knowledge (12): src/components/student-knowledge/OneMinutePrepCard.tsx, src/components/student-knowledge/StudentKnowledgeEditDialog.tsx, src/components/student-knowledge/StudentKnowledgeEntryCard.tsx, src/components/student-knowledge/StudentKnowledgeFAB.tsx, src/components/student-knowledge/StudentKnowledgeFilterBar.tsx, src/components/student-knowledge/StudentKnowledgeFloatingPanel.tsx, src/components/student-knowledge/StudentKnowledgeLessonIdeasButton.tsx, src/components/student-knowledge/StudentKnowledgeMiniList.tsx, src/components/student-knowledge/StudentKnowledgeQuickAddModal.tsx, src/components/student-knowledge/StudentKnowledgeSection.tsx, src/components/student-knowledge/StudentKnowledgeSidePanel.tsx, src/components/student-knowledge/StudentKnowledgeToggleButton.tsx
+- Landing (15): src/components/landing/EcosystemSection.tsx, src/components/landing/FeatureNavPills.tsx, src/components/landing/FinalCTA.tsx, src/components/landing/HeroHeadline.tsx, src/components/landing/NavStudentSwitcher.tsx, src/components/landing/OneMinutePrepHeroProofSwitcher.tsx, src/components/landing/OneMinutePrepProofSection.tsx, src/components/landing/ParticlesBackground.tsx, src/components/landing/PricingTeaser.tsx, src/components/landing/SignupPromptDialog.tsx, src/components/landing/StartOneMinutePrepDialog.tsx, src/components/landing/StatsBar.tsx, src/components/landing/StickyNav.tsx, src/components/landing/TestimonialsRow.tsx, src/components/landing/ValueCards.tsx
+- SEO (3): src/components/seo/PageSeo.tsx, src/components/seo/ProgrammaticSeoLayout.tsx, src/components/seo/SeoLandingLayout.tsx
+- Feature Marketing (9): src/components/features/DSLMBadge.tsx, src/components/features/FeatureBenefits.tsx, src/components/features/FeatureCTA.tsx, src/components/features/FeatureComparisonTable.tsx, src/components/features/FeatureFAQ.tsx, src/components/features/FeatureHero.tsx, src/components/features/FeaturePageLayout.tsx, src/components/features/FeatureSteps.tsx, src/components/features/RelatedFeatures.tsx
+- Shared Worksheet (5): src/components/shared/DeadlinePicker.tsx, src/components/shared/SharedWorksheetContent.tsx, src/components/shared/SharedWorksheetEmailVerification.tsx, src/components/shared/SharedWorksheetProgressBar.tsx, src/components/shared/StudyModeButton.tsx
+- Drawing (7): src/components/drawing/DrawingColorPicker.tsx, src/components/drawing/DrawingOverlay.tsx, src/components/drawing/DrawingStrokeWidth.tsx, src/components/drawing/DrawingToggleButton.tsx, src/components/drawing/DrawingToolButton.tsx, src/components/drawing/DrawingToolbar.tsx, src/components/drawing/index.ts
+- Profile (2): src/components/profile/DeleteAccountDialog.tsx, src/components/profile/EditableProfileField.tsx
+- UI Primitives (55): src/components/ui/AppBackground.tsx, src/components/ui/AutoResizeTextarea.tsx, src/components/ui/BackgroundPatternSwitcher.tsx, src/components/ui/accordion.tsx, src/components/ui/alert-dialog.tsx, src/components/ui/alert.tsx, src/components/ui/aspect-ratio.tsx, src/components/ui/avatar.tsx, src/components/ui/badge.tsx, src/components/ui/breadcrumb.tsx, src/components/ui/button.tsx, src/components/ui/calendar.tsx, src/components/ui/card.tsx, src/components/ui/carousel.tsx, src/components/ui/chart.tsx, src/components/ui/checkbox.tsx, src/components/ui/collapsible.tsx, src/components/ui/command.tsx, src/components/ui/context-menu.tsx, src/components/ui/dialog.tsx, src/components/ui/draggable-dialog.tsx, src/components/ui/drawer.tsx, src/components/ui/dropdown-menu.tsx, src/components/ui/empty-state.tsx, src/components/ui/form.tsx, src/components/ui/hover-card.tsx, src/components/ui/input-otp.tsx, src/components/ui/input.tsx, src/components/ui/label.tsx, src/components/ui/loading-button.tsx, src/components/ui/menubar.tsx, src/components/ui/navigation-menu.tsx, src/components/ui/pagination.tsx, src/components/ui/popover.tsx, src/components/ui/progress.tsx, src/components/ui/radio-group.tsx, src/components/ui/resizable.tsx, src/components/ui/scroll-area.tsx, src/components/ui/select.tsx, src/components/ui/separator.tsx, src/components/ui/sheet.tsx, src/components/ui/sidebar.tsx, src/components/ui/skeleton.tsx, src/components/ui/slider.tsx, src/components/ui/sonner.tsx, src/components/ui/switch.tsx, src/components/ui/table.tsx, src/components/ui/tabs.tsx, src/components/ui/textarea.tsx, src/components/ui/toast.tsx, src/components/ui/toaster.tsx, src/components/ui/toggle-group.tsx, src/components/ui/toggle.tsx, src/components/ui/tooltip.tsx, src/components/ui/use-toast.ts
+- Other Components (57): src/components/AdminImpersonationBanner.tsx, src/components/AuthenticatedPageShell.tsx, src/components/ConfirmDowngradeDialog.tsx, src/components/CookieBanner.tsx, src/components/DashboardPreviewBackground.tsx, src/components/DeleteWorksheetButton.tsx, src/components/DuplicateWorksheetButton.tsx, src/components/DuplicateWorksheetModal.tsx, src/components/EmailConfirmationModal.tsx, src/components/FreeWeekBanner.tsx, src/components/GeneratingModal.tsx, src/components/GlobalFooter.tsx, src/components/GoogleSignInButton.tsx, src/components/IsometricBackground.tsx, src/components/LoginRequiredModal.tsx, src/components/OnboardingChecklist.tsx, src/components/PaymentPopup.tsx, src/components/PricingCalculator.tsx, src/components/PricingSection.tsx, src/components/RatingSection.tsx, src/components/RenameDialog.tsx, src/components/RouteCanonicalUpdater.tsx, src/components/ShareWorksheetModal.tsx, src/components/Sidebar.tsx, src/components/StudentEditDialog.tsx, src/components/StudentRequiredModal.tsx, src/components/StudentSelector.tsx, src/components/StudentSwitcherPopover.tsx, src/components/TeacherTipBox.tsx, src/components/TokenPaywall.tsx, src/components/TokenPaywallModal.tsx, src/components/WorksheetDisplay.tsx, src/components/WorksheetRating.tsx, src/components/anon/AnonFeatureCarousel.tsx, src/components/anon/AnonFeatureMockup.tsx, src/components/anon/AnonPostWorksheetCTA.tsx, src/components/anon/AnonPostWorksheetLandingPage.tsx, src/components/anon/AnonPreWorksheetBanner.tsx, src/components/anon/MiniFeatureGrid.tsx, src/components/anon/WelcomeBackBanner.tsx, src/components/bug-report/BugReportButton.tsx, src/components/bug-report/BugReportModal.tsx, src/components/gallery/GalleryExerciseRenderer.tsx, src/components/notifications/UnifiedBell.tsx, src/components/onboarding/SpotlightOverlay.tsx, src/components/student-homework/StudentHomeworkTab.tsx, src/components/student-progress/EditGoalDialog.tsx, src/components/student-progress/GoalCard.tsx, src/components/student-progress/GoalProgressBar.tsx, src/components/student-progress/StudentProgressTab.tsx, src/components/student-tests/ShareTestModal.tsx, src/components/student-tests/StudentTestsTab.tsx, src/components/student-tests/TestDates.tsx, src/components/student-tests/TestDetailsView.tsx, src/components/student-tests/WelcomeTestResults.tsx, src/components/student/DslmExplainerBanner.tsx, src/components/teacher/TeacherAlertsBell.tsx
+
+RAG KEYWORDS: component inventory, React component, props, state, UI module, worksheet component, DSLM component, homework component, flashcard component, calendar component, student hub component, shadcn component, lucide icon, ESL UI
+
+## State Management Hooks and Services Inventory
+STATUS: PRODUCTION
+
+PROBLEM: Changing state in one area can corrupt worksheet recovery, student context, auth, billing, or shared-link behavior if hooks are not mapped first.
+
+EDOOQOO SOLUTION: Hooks under src/hooks and services under src/services are the state and side-effect boundary. Feature code prefers hooks over global stores; browser storage is used intentionally for worksheet recovery, hub email persistence, signup redirects, and share-link verification memory.
+
+TECHNICAL MECHANICS: Hook count: 74. Service count: 11. Hook inventory:
+- src/hooks/dslm/useBehavioralStats.tsx
+- src/hooks/dslm/useCurriculumPhases.tsx
+- src/hooks/dslm/useStudentEvents.tsx
+- src/hooks/dslm/useStudentProfile.tsx
+- src/hooks/use-mobile.tsx
+- src/hooks/use-toast.ts
+- src/hooks/useAllWorksheetHomework.tsx
+- src/hooks/useAnonymousAuth.tsx
+- src/hooks/useAuthFlow.tsx
+- src/hooks/useAuthUser.tsx
+- src/hooks/useCalendarNotifications.tsx
+- src/hooks/useCalendarRecurrence.tsx
+- src/hooks/useCalendarSettings.tsx
+- src/hooks/useCalendarSlotLogs.tsx
+- src/hooks/useCalendarSlots.tsx
+- src/hooks/useCalendarVacations.tsx
+- src/hooks/useCanonical.ts
+- src/hooks/useDeletedWorksheets.tsx
+- src/hooks/useDemoGuard.ts
+- src/hooks/useDownloadStatus.tsx
+- src/hooks/useDownloadTracking.tsx
+- src/hooks/useDrawingCanvas.ts
+- src/hooks/useEventTracking.tsx
+- src/hooks/useExerciseRegeneration.tsx
+- src/hooks/useFlashcardCards.tsx
+- src/hooks/useFlashcardDefinition.tsx
+- src/hooks/useFlashcardLearning.tsx
+- src/hooks/useFlashcardSets.tsx
+- src/hooks/useFlashcardTranslation.tsx
+- src/hooks/useFutureTimeline.tsx
+- src/hooks/useGoalProgress.ts
+- src/hooks/useHomeworkExerciseGeneration.tsx
+- src/hooks/useHomeworkNotifications.tsx
+- src/hooks/useInteractiveHomework.tsx
+- src/hooks/useInteractiveSharedWorksheet.tsx
+- src/hooks/useLiveSessionAnswers.tsx
+- src/hooks/useOnboardingProgress.tsx
+- src/hooks/useOneMinutePrep.tsx
+- src/hooks/usePacingProposals.tsx
+- src/hooks/usePaymentTracking.tsx
+- src/hooks/usePlanLogic.tsx
+- src/hooks/useProfile.tsx
+- src/hooks/usePublicBooking.tsx
+- src/hooks/useScrollAnimation.ts
+- src/hooks/useSectionRegeneration.tsx
+- src/hooks/useSignupLinkState.ts
+- src/hooks/useSkillMetrics.tsx
+- src/hooks/useSpotlight.ts
+- src/hooks/useStudent.tsx
+- src/hooks/useStudentHubData.tsx
+- src/hooks/useStudentKnowledge.tsx
+- src/hooks/useStudentNextStepsCount.ts
+- src/hooks/useStudentProgress.tsx
+- src/hooks/useStudentSelector.tsx
+- src/hooks/useStudentTests.tsx
+- src/hooks/useStudents.tsx
+- src/hooks/useSubscriptionSync.tsx
+- src/hooks/useTeacherAlerts.tsx
+- src/hooks/useTheme.ts
+- src/hooks/useTokenSystem.tsx
+- src/hooks/useUpcomingLessonsCount.tsx
+- src/hooks/useWelcomeTest.tsx
+- src/hooks/useWelcomeTestActions.ts
+- src/hooks/useWelcomeTestHistory.tsx
+- src/hooks/useWorksheetClaim.ts
+- src/hooks/useWorksheetFormPersistence.ts
+- src/hooks/useWorksheetGeneration.tsx
+- src/hooks/useWorksheetGenerationTracking.tsx
+- src/hooks/useWorksheetHistory.tsx
+- src/hooks/useWorksheetNavigation.tsx
+- src/hooks/useWorksheetRating.ts
+- src/hooks/useWorksheetState.tsx
+- src/hooks/useWorksheetStats.tsx
+- src/hooks/useWorksheetTimes.ts
+
+Service inventory:
+- src/services/downloadSessionService.ts
+- src/services/exerciseRegenerationService.ts
+- src/services/mediaService.ts
+- src/services/worksheetService.ts
+- src/services/worksheetService/apiService.ts
+- src/services/worksheetService/duplicateService.ts
+- src/services/worksheetService/feedbackService.ts
+- src/services/worksheetService/index.ts
+- src/services/worksheetService/trackingService.ts
+- src/services/worksheetService/updateService.ts
+- src/services/worksheetStreamService.ts
+
+Primary storage keys include currentWorksheet, currentEditableWorksheet, currentInputParams, currentGenerationTime, currentSourceCount, currentWorksheetId, forceNewWorksheet, returningFromPayment, downloadToken, downloadTokenExpiry, prefillWorksheet, prefillExercises, prefillExerciseFocusMap, prefillMediaTypes, autoGenerateWorksheet, student_hub_email, worksheet_email_token, pending worksheet claim IDs, and signup navigation state. Supabase realtime is used for calendar slots and public booking updates.
+
+RAG KEYWORDS: React hook, state management, service layer, sessionStorage, localStorage, Supabase realtime, worksheet state, auth state, token state, student state, calendar state, homework state, RAG hook map, frontend data flow
+
+## Configuration Build and Deployment Assets
+STATUS: PRODUCTION
+
+PROBLEM: Teachers experience regressions when build, SEO, function, or bundle behavior changes without understanding the deployment mechanics.
+
+EDOOQOO SOLUTION: package.json, vite.config.ts, tailwind.config.ts, postcss.config.js, tsconfig files, supabase/config.toml, scripts/seo, public assets, and generated dist assets define the build system. build:seo is the main SEO-aware production build script.
+
+TECHNICAL MECHANICS: package.json defines dev, build, build:dev, lint, preview, seo:generate-citable, seo:generate-ai, seo:audit, build:seo, build:seo:to-public, and prerender:seo. Vite uses @vitejs/plugin-react-swc, @ alias to src, dev server host :: on port 8080, es2020 target, sourcemap only in development, debugger dropping in production, manual chunks for demo-content, mock-data, react-vendor, supabase, and lucide, and Lovable componentTagger only in development. supabase/config.toml sets project_id bvfrkzdlklyvnhlpleck and disables JWT verification for selected public/admin maintenance functions. SEO build scripts generate citable pages, blog index, AI resources, prerendered SPA routes, and audit assets.
+
+RAG KEYWORDS: Vite build, Tailwind, TypeScript, Supabase config, SEO build, prerender, bundle chunks, deployment assets, Lovable tagger, build script, production source maps, ESL SaaS deployment, public assets
+

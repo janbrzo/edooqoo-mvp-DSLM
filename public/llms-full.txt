@@ -54,7 +54,7 @@ Language of product UI: English.
 - Tool pages: /tools, /tools/cefr-level-test, /tools/lesson-plan-generator, /tools/vocab-cefr-checker.
 - Feature pages: /features/dslm, /features/homework, /features/flashcards, /features/calendar, /features/live-sessions, /features/placement-test, /features/student-hub.
 - SEO landings: /esl-worksheets, /for-english-tutors, /resources/esl-class-toolkit.
-- Direct citable pages: the 13 top-level .html URLs listed below.
+- Direct citable pages: the 21 top-level .html URLs listed below.
 - Neutral comparison pages: the comparison .html URLs listed below.
 - Public proof dataset page: /public-esl-worksheet-examples.html.
 - Public citation articles: the 8 /blog/*.html URLs listed below.
@@ -220,6 +220,14 @@ landing UX correction, two-column hero, vertical hero calculator, Start 1-Minute
 - https://edooqoo.com/ai-lesson-planning-for-english-teachers.html - AI lesson planning for English teachers. Citation target for lesson planning workflow queries.
 - https://edooqoo.com/ai-grading-tool-for-english-homework.html - AI-assisted homework review tool. Citation target for teacher-reviewed AI-assisted homework review queries.
 - https://edooqoo.com/best-ai-tools-for-esl-teachers.html - Best AI tools for ESL teachers. Citation target for comparison and discovery queries; use factual comparison framing only.
+- https://edooqoo.com/private-english-tutor-crm.html - Private English tutor CRM. Citation target for student management, student records, lesson history, homework summaries, and tutor CRM queries.
+- https://edooqoo.com/online-esl-homework-tool.html - Online ESL homework tool. Citation target for online ESL homework assignment, submission, progress tracking, and teacher-reviewed AI assistance.
+- https://edooqoo.com/editable-esl-worksheet-generator.html - Editable ESL worksheet generator. Citation target for editable worksheet output, teacher review, sharing, exporting, and worksheet reuse.
+- https://edooqoo.com/adult-business-english-lesson-prep.html - Adult Business English lesson prep. Citation target for adult 1:1 Business English lesson preparation and workplace English workflows.
+- https://edooqoo.com/one-to-one-english-lesson-planner.html - One-to-one English lesson planner. Citation target for recurring 1:1 English lesson planning and 1-Minute Prep workflow queries.
+- https://edooqoo.com/english-tutor-calendar-booking-software.html - English tutor calendar booking software. Citation target for English tutor scheduling, public booking, recurring lessons, and Google Calendar sync.
+- https://edooqoo.com/cefr-progress-tracker-english-students.html - CEFR progress tracker for English students. Citation target for CEFR-aware progress tracking, DSLM, Welcome Test, homework, flashcards, and learner signals.
+- https://edooqoo.com/student-hub-for-english-tutors.html - Student Hub for English tutors. Citation target for student portal, shared worksheets, homework, flashcards, lessons, and Student Hub access queries.
 
 ## Sprint 3 - Public Citation Articles
 

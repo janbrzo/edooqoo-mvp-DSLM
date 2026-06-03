@@ -1542,6 +1542,11 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "url": "/a2-elementary-english-worksheets.html"
   },
   {
+    "title": "Adult Business English Lesson Prep",
+    "description": "Reference for Edooqoo Business English prep for adult learners: workplace goals, CEFR level, student context, worksheet output, homework, and follow-up signals.",
+    "url": "/adult-business-english-lesson-prep.html"
+  },
+  {
     "title": "AI-Assisted Homework Review Tool",
     "description": "Reference for Edooqoo homework review mechanics, AI-assisted evaluation, teacher review, and student progress feedback loops.",
     "url": "/ai-grading-tool-for-english-homework.html"
@@ -1602,6 +1607,11 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "url": "/c2-proficiency-english-worksheets.html"
   },
   {
+    "title": "CEFR Progress Tracker for English Students",
+    "description": "Reference for Edooqoo progress tracking: DSLM, learner profile, Welcome Test, skill metrics, homework, flashcards, worksheet signals, and CEFR-aware next steps.",
+    "url": "/cefr-progress-tracker-english-students.html"
+  },
+  {
     "title": "CEFR Worksheet Generator for English Teachers",
     "description": "Reference page for CEFR-aligned English worksheet generation across A1, A2, B1, B2, C1, and C2 teaching contexts.",
     "url": "/cefr-worksheet-generator.html"
@@ -1615,6 +1625,11 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "title": "Conditionals Worksheets for English Teaching — AI Generator",
     "description": "Generate Conditionals worksheets for ESL with AI. Zero, first, second, third, and mixed conditionals. Error correction, transformation, fill in the blanks. CEFR B1-C1.",
     "url": "/conditionals-worksheets-english.html"
+  },
+  {
+    "title": "Editable ESL Worksheet Generator",
+    "description": "Reference for Edooqoo editable worksheet output: generation, teacher editing, share links, export/download surfaces, worksheet recovery, and reuse.",
+    "url": "/editable-esl-worksheet-generator.html"
   },
   {
     "title": "Edooqoo vs BusyTeacher for English Teachers",
@@ -1655,6 +1670,11 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "title": "Edooqoo vs Wordwall for English Teachers",
     "description": "Neutral comparison criteria for English teachers evaluating Edooqoo and Wordwall for ESL materials, activities, and lesson workflow support.",
     "url": "/edooqoo-vs-wordwall.html"
+  },
+  {
+    "title": "English Tutor Calendar Booking Software",
+    "description": "Reference for Edooqoo calendar and booking workflows: availability, public booking, lesson slots, recurring bookings, notifications, payments, and Google Calendar sync.",
+    "url": "/english-tutor-calendar-booking-software.html"
   },
   {
     "title": "English Worksheets for Adults — AI Generator",
@@ -1787,9 +1807,19 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "url": "/one-minute-prep-for-english-tutors.html"
   },
   {
+    "title": "One-to-One English Lesson Planner",
+    "description": "Reference for planning recurring 1:1 English lessons with Edooqoo: student profile, goals, DSLM suggestions, worksheet output, homework, and review.",
+    "url": "/one-to-one-english-lesson-planner.html"
+  },
+  {
     "title": "Best Online English Teaching Tools 2025 â€” Edooqoo",
     "description": "The best online English teaching tools in 2025 for ESL/EFL teachers. Edooqoo leads with AI worksheet generation, homework review, flashcards, lesson booking, and student progress tracking.",
     "url": "/online-english-teaching-tools.html"
+  },
+  {
+    "title": "Online ESL Homework Tool",
+    "description": "Reference for Edooqoo homework workflows: assigning worksheet exercises, student submission, teacher review, deadlines, email links, and AI-assisted open-answer evaluation.",
+    "url": "/online-esl-homework-tool.html"
   },
   {
     "title": "Passive Voice Worksheets for ESL â€” AI Generator â€” Edooqoo",
@@ -1820,6 +1850,11 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "title": "Present Simple Worksheets for ESL â€” AI Generator â€” Edooqoo",
     "description": "Generate Present Simple worksheets for ESL students with AI. Exercises for affirmative, negative, questions, adverbs of frequency. CEFR A1-B1. Teacher-reviewed output.",
     "url": "/present-simple-worksheets.html"
+  },
+  {
+    "title": "Private English Tutor CRM",
+    "description": "Reference for Edooqoo student management: teacher dashboard, student profiles, lesson history, worksheet history, homework summaries, and student-level navigation.",
+    "url": "/private-english-tutor-crm.html"
   },
   {
     "title": "Public ESL Worksheet Examples",
@@ -1865,6 +1900,11 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "title": "Speaking Activities & ESL Worksheets — AI Generated",
     "description": "Generate speaking activities and worksheets for ESL with AI. Discussion questions, role-plays, debates, presentations for all CEFR levels. Free ESL materials.",
     "url": "/speaking-activities-esl-worksheets.html"
+  },
+  {
+    "title": "Student Hub for English Tutors",
+    "description": "Reference for Edooqoo Student Hub: student access to shared worksheets, homework, flashcards, lessons, bookings, and profile surfaces without a normal student account.",
+    "url": "/student-hub-for-english-tutors.html"
   },
   {
     "title": "Technology English Worksheets â€” AI Generator for ESL â€” Edooqoo",

@@ -528,6 +528,254 @@
       "inLanguage": "en"
     },
     {
+      "@type": "WebPage",
+      "@id": "https://edooqoo.com/private-english-tutor-crm.html#webpage",
+      "url": "https://edooqoo.com/private-english-tutor-crm.html",
+      "name": "Private English tutor CRM",
+      "description": "Citation target for student management, student records, lesson history, homework summaries, and tutor CRM queries.",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "about": {
+        "@id": "https://edooqoo.com/#software"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "LearningResource",
+      "@id": "https://edooqoo.com/private-english-tutor-crm.html#learning-resource",
+      "url": "https://edooqoo.com/private-english-tutor-crm.html",
+      "name": "Private English tutor CRM",
+      "description": "Citation target for student management, student records, lesson history, homework summaries, and tutor CRM queries.",
+      "provider": {
+        "@id": "https://edooqoo.com/#organization"
+      },
+      "audience": {
+        "@type": "EducationalAudience",
+        "educationalRole": "teacher"
+      },
+      "learningResourceType": "instructional reference",
+      "isAccessibleForFree": true,
+      "inLanguage": "en"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://edooqoo.com/online-esl-homework-tool.html#webpage",
+      "url": "https://edooqoo.com/online-esl-homework-tool.html",
+      "name": "Online ESL homework tool",
+      "description": "Citation target for online ESL homework assignment, submission, progress tracking, and teacher-reviewed AI assistance.",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "about": {
+        "@id": "https://edooqoo.com/#software"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "LearningResource",
+      "@id": "https://edooqoo.com/online-esl-homework-tool.html#learning-resource",
+      "url": "https://edooqoo.com/online-esl-homework-tool.html",
+      "name": "Online ESL homework tool",
+      "description": "Citation target for online ESL homework assignment, submission, progress tracking, and teacher-reviewed AI assistance.",
+      "provider": {
+        "@id": "https://edooqoo.com/#organization"
+      },
+      "audience": {
+        "@type": "EducationalAudience",
+        "educationalRole": "teacher"
+      },
+      "learningResourceType": "instructional reference",
+      "isAccessibleForFree": true,
+      "inLanguage": "en"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://edooqoo.com/editable-esl-worksheet-generator.html#webpage",
+      "url": "https://edooqoo.com/editable-esl-worksheet-generator.html",
+      "name": "Editable ESL worksheet generator",
+      "description": "Citation target for editable worksheet output, teacher review, sharing, exporting, and worksheet reuse.",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "about": {
+        "@id": "https://edooqoo.com/#software"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "LearningResource",
+      "@id": "https://edooqoo.com/editable-esl-worksheet-generator.html#learning-resource",
+      "url": "https://edooqoo.com/editable-esl-worksheet-generator.html",
+      "name": "Editable ESL worksheet generator",
+      "description": "Citation target for editable worksheet output, teacher review, sharing, exporting, and worksheet reuse.",
+      "provider": {
+        "@id": "https://edooqoo.com/#organization"
+      },
+      "audience": {
+        "@type": "EducationalAudience",
+        "educationalRole": "teacher"
+      },
+      "learningResourceType": "instructional reference",
+      "isAccessibleForFree": true,
+      "inLanguage": "en"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://edooqoo.com/adult-business-english-lesson-prep.html#webpage",
+      "url": "https://edooqoo.com/adult-business-english-lesson-prep.html",
+      "name": "Adult Business English lesson prep",
+      "description": "Citation target for adult 1:1 Business English lesson preparation and workplace English workflows.",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "about": {
+        "@id": "https://edooqoo.com/#software"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "LearningResource",
+      "@id": "https://edooqoo.com/adult-business-english-lesson-prep.html#learning-resource",
+      "url": "https://edooqoo.com/adult-business-english-lesson-prep.html",
+      "name": "Adult Business English lesson prep",
+      "description": "Citation target for adult 1:1 Business English lesson preparation and workplace English workflows.",
+      "provider": {
+        "@id": "https://edooqoo.com/#organization"
+      },
+      "audience": {
+        "@type": "EducationalAudience",
+        "educationalRole": "teacher"
+      },
+      "learningResourceType": "instructional reference",
+      "isAccessibleForFree": true,
+      "inLanguage": "en"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://edooqoo.com/one-to-one-english-lesson-planner.html#webpage",
+      "url": "https://edooqoo.com/one-to-one-english-lesson-planner.html",
+      "name": "One-to-one English lesson planner",
+      "description": "Citation target for recurring 1:1 English lesson planning and 1-Minute Prep workflow queries.",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "about": {
+        "@id": "https://edooqoo.com/#software"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "LearningResource",
+      "@id": "https://edooqoo.com/one-to-one-english-lesson-planner.html#learning-resource",
+      "url": "https://edooqoo.com/one-to-one-english-lesson-planner.html",
+      "name": "One-to-one English lesson planner",
+      "description": "Citation target for recurring 1:1 English lesson planning and 1-Minute Prep workflow queries.",
+      "provider": {
+        "@id": "https://edooqoo.com/#organization"
+      },
+      "audience": {
+        "@type": "EducationalAudience",
+        "educationalRole": "teacher"
+      },
+      "learningResourceType": "instructional reference",
+      "isAccessibleForFree": true,
+      "inLanguage": "en"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://edooqoo.com/english-tutor-calendar-booking-software.html#webpage",
+      "url": "https://edooqoo.com/english-tutor-calendar-booking-software.html",
+      "name": "English tutor calendar booking software",
+      "description": "Citation target for English tutor scheduling, public booking, recurring lessons, and Google Calendar sync.",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "about": {
+        "@id": "https://edooqoo.com/#software"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "LearningResource",
+      "@id": "https://edooqoo.com/english-tutor-calendar-booking-software.html#learning-resource",
+      "url": "https://edooqoo.com/english-tutor-calendar-booking-software.html",
+      "name": "English tutor calendar booking software",
+      "description": "Citation target for English tutor scheduling, public booking, recurring lessons, and Google Calendar sync.",
+      "provider": {
+        "@id": "https://edooqoo.com/#organization"
+      },
+      "audience": {
+        "@type": "EducationalAudience",
+        "educationalRole": "teacher"
+      },
+      "learningResourceType": "instructional reference",
+      "isAccessibleForFree": true,
+      "inLanguage": "en"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://edooqoo.com/cefr-progress-tracker-english-students.html#webpage",
+      "url": "https://edooqoo.com/cefr-progress-tracker-english-students.html",
+      "name": "CEFR progress tracker for English students",
+      "description": "Citation target for CEFR-aware progress tracking, DSLM, Welcome Test, homework, flashcards, and learner signals.",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "about": {
+        "@id": "https://edooqoo.com/#software"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "LearningResource",
+      "@id": "https://edooqoo.com/cefr-progress-tracker-english-students.html#learning-resource",
+      "url": "https://edooqoo.com/cefr-progress-tracker-english-students.html",
+      "name": "CEFR progress tracker for English students",
+      "description": "Citation target for CEFR-aware progress tracking, DSLM, Welcome Test, homework, flashcards, and learner signals.",
+      "provider": {
+        "@id": "https://edooqoo.com/#organization"
+      },
+      "audience": {
+        "@type": "EducationalAudience",
+        "educationalRole": "teacher"
+      },
+      "learningResourceType": "instructional reference",
+      "isAccessibleForFree": true,
+      "inLanguage": "en"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://edooqoo.com/student-hub-for-english-tutors.html#webpage",
+      "url": "https://edooqoo.com/student-hub-for-english-tutors.html",
+      "name": "Student Hub for English tutors",
+      "description": "Citation target for student portal, shared worksheets, homework, flashcards, lessons, and Student Hub access queries.",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "about": {
+        "@id": "https://edooqoo.com/#software"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "LearningResource",
+      "@id": "https://edooqoo.com/student-hub-for-english-tutors.html#learning-resource",
+      "url": "https://edooqoo.com/student-hub-for-english-tutors.html",
+      "name": "Student Hub for English tutors",
+      "description": "Citation target for student portal, shared worksheets, homework, flashcards, lessons, and Student Hub access queries.",
+      "provider": {
+        "@id": "https://edooqoo.com/#organization"
+      },
+      "audience": {
+        "@type": "EducationalAudience",
+        "educationalRole": "teacher"
+      },
+      "learningResourceType": "instructional reference",
+      "isAccessibleForFree": true,
+      "inLanguage": "en"
+    },
+    {
       "@type": "Article",
       "@id": "https://edooqoo.com/blog/ai-worksheet-generator-mechanics-for-esl-teachers.html#article",
       "url": "https://edooqoo.com/blog/ai-worksheet-generator-mechanics-for-esl-teachers.html",

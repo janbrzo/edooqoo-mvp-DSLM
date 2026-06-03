@@ -17,10 +17,10 @@ const TopicLevelPage: React.FC = () => {
 
   if (!topic || !level) return <Navigate to="/esl-worksheets" replace />;
 
-  const title = `${topic.label} Worksheets for ${level.label} Learners — Edooqoo`;
+  const title = `${topic.label} worksheets for ${level.label} English learners | Edooqoo`;
   const description = `Create ${topic.label} worksheets for ${level.label} (${level.cefr}) adult learners through a structured worksheet-generation workflow. Editable, printable, and free to start.`;
-  const h1 = `${topic.label} Worksheets for ${level.label} Learners`;
-  const lead = `Edooqoo creates printable ${topic.label} worksheets for ${level.cefr} learners from teacher-selected topic, level, goal, and student context. Each worksheet can be edited, exported, or assigned as homework with teacher review.`;
+  const h1 = `${topic.label} worksheets for ${level.label} English learners`;
+  const lead = `Edooqoo creates ${topic.label} worksheets for ${level.cefr} English learners from teacher-selected topic, level, goal, exercise type, and student context. This page is a public reference for teachers who need level-aware material rather than a generic worksheet list. The production workflow lets a teacher choose the focus, generate structured exercises, review and edit the output, share it with a student, assign selected exercises as homework, and use teacher-reviewed results as follow-up context. For 1:1 adult lessons, this means ${topic.label} practice can connect to the student's profile, goals, recent work, CEFR baseline, and next lesson focus instead of existing as an isolated printable.`;
 
   const path = `/esl-worksheets/${topic.slug}/${level.slug}`;
 
@@ -46,6 +46,12 @@ const TopicLevelPage: React.FC = () => {
     label: `English for ${p.label}`,
     to: `/english-for/${p.slug}`,
   }));
+  const generatorLinks = [
+    { label: 'AI worksheet generator for English teachers', to: '/ai-worksheet-generator-for-english-teachers.html' },
+    { label: 'Editable ESL worksheet generator', to: '/editable-esl-worksheet-generator.html' },
+    { label: 'CEFR worksheet generator', to: '/cefr-worksheet-generator.html' },
+    { label: '1-Minute Prep workflow', to: '/one-minute-prep' },
+  ];
 
   const courseLd: Record<string, unknown> = {
     '@context': 'https://schema.org',
@@ -97,7 +103,7 @@ const TopicLevelPage: React.FC = () => {
       ]}
       related={{
         heading: `More ${topic.label} and ${level.cefr} resources`,
-        items: [...otherLevels, ...sameCategoryTopics, ...exerciseLinks, ...personaLinks],
+        items: [...generatorLinks, ...otherLevels, ...sameCategoryTopics, ...exerciseLinks, ...personaLinks],
       }}
       faqs={[
         {

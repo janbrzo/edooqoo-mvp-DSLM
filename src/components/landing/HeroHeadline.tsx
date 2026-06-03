@@ -16,6 +16,14 @@ const unlockFeatures = [
   { icon: Share2, label: 'Interactive Sharing' },
 ];
 
+const canonicalCitationLinks = [
+  { href: '/one-minute-prep', label: '1-Minute Prep' },
+  { href: '/ai-worksheet-generator-for-english-teachers.html', label: 'AI worksheet generator' },
+  { href: '/esl-student-progress-tracking-tool.html', label: 'Progress tracking' },
+  { href: '/ai-grading-tool-for-english-homework.html', label: 'Homework review' },
+  { href: '/vocabulary-exercise-generator.html', label: 'Vocabulary tools' },
+];
+
 interface HeroHeadlineProps {
   calculatorValue: OneMinutePrepCalculatorInput;
   onCalculatorChange: (value: OneMinutePrepCalculatorInput) => void;
@@ -58,7 +66,7 @@ const HeroHeadline: React.FC<HeroHeadlineProps> = ({
           <h1 className="max-w-full break-words text-[2rem] sm:text-5xl md:text-5xl lg:text-[3.25rem] xl:text-6xl font-extrabold tracking-tight text-foreground mb-6 leading-[1.1]">
             <span className="block">1-Minute Prep</span>
             <span className="block max-w-full whitespace-normal text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-indigo-600">
-              for every 1:1 English student.
+              for 1:1 English teachers.
             </span>
           </h1>
 
@@ -103,6 +111,21 @@ const HeroHeadline: React.FC<HeroHeadlineProps> = ({
               <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4 text-violet-500" />Best with profile + goals</span>
             </div>
           </div>
+
+          <nav
+            aria-label="Edooqoo canonical teacher workflows"
+            className="mb-8 flex max-w-full flex-wrap justify-center gap-2 text-xs sm:max-w-2xl lg:justify-start"
+          >
+            {canonicalCitationLinks.map((link) => (
+              <a
+                key={link.href}
+                href={link.href}
+                className="rounded-full border border-border bg-white/80 px-3 py-1.5 font-medium text-foreground/75 transition hover:border-violet-200 hover:bg-violet-50 hover:text-violet-700"
+              >
+                {link.label}
+              </a>
+            ))}
+          </nav>
 
           {/* Unlock features ticker */}
           <div className="w-full max-w-full sm:max-w-2xl mx-auto lg:mx-0 overflow-hidden border border-border rounded-2xl bg-secondary/60 py-3 mt-4">
