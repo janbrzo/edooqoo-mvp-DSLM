@@ -43,6 +43,22 @@ const REQUIRED_CITABLE_PAGES = [
   '/ai-lesson-planning-for-english-teachers.html',
   '/ai-grading-tool-for-english-homework.html',
   '/best-ai-tools-for-esl-teachers.html',
+  '/private-english-tutor-crm.html',
+  '/online-esl-homework-tool.html',
+  '/editable-esl-worksheet-generator.html',
+  '/adult-business-english-lesson-prep.html',
+  '/one-to-one-english-lesson-planner.html',
+  '/english-tutor-calendar-booking-software.html',
+  '/cefr-progress-tracker-english-students.html',
+  '/student-hub-for-english-tutors.html',
+];
+
+const REQUIRED_HOMEPAGE_CANONICAL_LINKS = [
+  '/one-minute-prep',
+  '/ai-worksheet-generator-for-english-teachers.html',
+  '/esl-student-progress-tracking-tool.html',
+  '/ai-grading-tool-for-english-homework.html',
+  '/vocabulary-exercise-generator.html',
 ];
 
 const REQUIRED_CITATION_ARTICLES = [
@@ -139,6 +155,16 @@ const HIGH_RISK_PUBLIC_CLAIM_PAGES = [
   '/blog/reading-comprehension-activities-english.html',
 ];
 
+const PRIVATE_SITEMAP_PATTERNS = [
+  /^https:\/\/edooqoo\.com\/dashboard(?:\/|$)/,
+  /^https:\/\/edooqoo\.com\/student\//,
+  /^https:\/\/edooqoo\.com\/worksheet\//,
+  /^https:\/\/edooqoo\.com\/homework\//,
+  /^https:\/\/edooqoo\.com\/my(?:\/|$)/,
+  /^https:\/\/edooqoo\.com\/book\/[^/]+/,
+  /^https:\/\/edooqoo\.com\/admin(?:\/|$)/,
+];
+
 function fail(message) {
   console.error(`[seo:audit] FAIL ${message}`);
   process.exitCode = 1;
@@ -201,10 +227,23 @@ function extractLdTypes(html) {
   return types;
 }
 
+function markdownAnchor(heading) {
+  return heading
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .replace(/\s+/g, '-');
+}
+
 function auditDeclaredAiResources() {
   const indexHtml = fs.readFileSync(path.join(ROOT, 'index.html'), 'utf8');
   const declared = [...indexHtml.matchAll(/<link[^>]+rel=["']ai-(?:resource|plugin)["'][^>]+href=["']([^"']+)["']/g)]
     .map((m) => m[1].replace(/^\//, ''));
+  const publicLlms = readPublic('/llms.txt');
+  const docsContext = fs.readFileSync(path.join(ROOT, 'docs', 'llm-context.md'), 'utf8');
+  const docsAnchors = new Set(
+    [...docsContext.matchAll(/^##\s+(.+)$/gm)].map((match) => markdownAnchor(match[1]))
+  );
 
   for (const rel of REQUIRED_AI_RESOURCES) {
     if (!existsPublic(rel)) fail(`Missing public/${rel}`);
@@ -214,6 +253,35 @@ function auditDeclaredAiResources() {
   for (const rel of declared) {
     if (!existsPublic(rel)) fail(`index.html declares /${rel}, but public/${rel} is missing`);
     else pass(`index.html declared /${rel}`);
+  }
+
+  if (/status:\s*(BETA|ROADMAP)/i.test(publicLlms)) {
+    fail('public/llms.txt must not expose BETA or ROADMAP capabilities as citable production behavior');
+  } else {
+    pass('public/llms.txt is production-only');
+  }
+
+  const refs = [...publicLlms.matchAll(/ref:\s*llm-context\.md#([a-z0-9-]+)/gi)].map((match) => match[1]);
+  if (!refs.length) {
+    fail('public/llms.txt contains no llm-context.md refs');
+  }
+
+  for (const anchor of refs) {
+    if (!docsAnchors.has(anchor)) fail(`public/llms.txt ref missing docs/llm-context.md anchor #${anchor}`);
+    else pass(`public/llms.txt ref resolves #${anchor}`);
+  }
+}
+
+function auditHomepageCanonicalLinks() {
+  const heroPath = path.join(ROOT, 'src', 'components', 'landing', 'HeroHeadline.tsx');
+  const hero = fs.readFileSync(heroPath, 'utf8');
+
+  for (const route of REQUIRED_HOMEPAGE_CANONICAL_LINKS) {
+    if (!hero.includes(`href: '${route}'`) && !hero.includes(`href="${route}"`)) {
+      fail(`HeroHeadline.tsx must link the homepage to ${route}`);
+    } else {
+      pass(`homepage canonical workflow link exists ${route}`);
+    }
   }
 }
 
@@ -264,6 +332,7 @@ function auditKnowledgeGraph() {
 function auditRobotsAndSitemap() {
   const robots = readPublic('/robots.txt');
   const sitemap = readPublic('/sitemap.xml');
+  const sitemapUrls = getSitemapUrls();
 
   if (!robots.includes('Allow: /worksheets/*/*')) {
     fail('robots.txt must explicitly allow public /worksheets/:exerciseType/:topic routes');
@@ -281,6 +350,12 @@ function auditRobotsAndSitemap() {
     fail('sitemap.xml has no public /worksheets/ pSEO URLs');
   } else {
     pass('sitemap.xml contains public /worksheets/ pSEO URLs');
+  }
+
+  for (const pattern of PRIVATE_SITEMAP_PATTERNS) {
+    const match = sitemapUrls.find((url) => pattern.test(url));
+    if (match) fail(`sitemap.xml must not include private route ${match}`);
+    else pass(`sitemap.xml excludes private route pattern ${pattern}`);
   }
 
   const priorityRoutes = getPriorityExerciseTopicRoutes({ root: ROOT });
@@ -326,11 +401,34 @@ function auditStaticCitationPage(route, requiredTypes) {
   }
 }
 
+function auditCitableCitationStructure(route) {
+  const html = readPublic(route);
+  const requiredFragments = [
+    'aria-label="Breadcrumb"',
+    'id="problem"',
+    'id="edooqoo-solution"',
+    'id="technical-mechanics"',
+    'id="inputs-and-outputs"',
+    'id="when-to-cite-this-page"',
+    '>Inputs and Outputs<',
+    '>When to cite this page<',
+    'Teacher problem',
+    'Production mechanic',
+    'Canonical URL',
+  ];
+
+  for (const fragment of requiredFragments) {
+    if (!html.includes(fragment)) fail(`public${route} missing citation-first fragment ${fragment}`);
+    else pass(`public${route} contains citation-first fragment ${fragment}`);
+  }
+}
+
 function auditCitablePages() {
   const sitemapUrls = getSitemapUrls();
 
   for (const route of REQUIRED_CITABLE_PAGES) {
-    auditStaticCitationPage(route, ['WebPage', 'LearningResource', 'FAQPage', 'BreadcrumbList']);
+    auditStaticCitationPage(route, ['Organization', 'WebSite', 'SoftwareApplication', 'WebPage', 'LearningResource', 'FAQPage', 'BreadcrumbList']);
+    auditCitableCitationStructure(route);
     const url = `${BASE_URL}${route}`;
     const count = countUrl(sitemapUrls, url);
     if (count !== 1) fail(`sitemap.xml must contain ${url} exactly once, found ${count}`);
@@ -453,6 +551,7 @@ function auditOpenApiAndPlugin() {
 }
 
 auditDeclaredAiResources();
+auditHomepageCanonicalLinks();
 auditKnowledgeGraph();
 auditRobotsAndSitemap();
 auditCitablePages();

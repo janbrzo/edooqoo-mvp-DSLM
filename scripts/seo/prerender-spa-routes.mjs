@@ -57,6 +57,7 @@ const distArg = args.find((a) => a.startsWith('--dist='));
 const portArg = args.find((a) => a.startsWith('--port='));
 const outArg = args.find((a) => a.startsWith('--out='));
 const startAtArg = args.find((a) => a.startsWith('--start-at='));
+const onlyArg = args.find((a) => a.startsWith('--only='));
 const SOFT_FAIL = args.includes('--soft-fail');
 const DIST = path.resolve(ROOT, distArg ? distArg.split('=')[1] : 'dist');
 const PORT = portArg ? parseInt(portArg.split('=')[1], 10) : 4173;
@@ -68,6 +69,11 @@ const PORT = portArg ? parseInt(portArg.split('=')[1], 10) : 4173;
  */
 const OUT_MODE = outArg ? outArg.split('=')[1] : 'dist';
 const OUT_DIR = OUT_MODE === 'public' ? path.resolve(ROOT, 'public') : DIST;
+const MAX_ROUTE_ATTEMPTS = 3;
+
+function delay(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 function softExit(reason) {
   if (SOFT_FAIL) {
@@ -87,8 +93,13 @@ const SEO_ROUTE_SET = new Set(
   SEO_ROUTES.map((route) => route === '/' ? '/' : route.replace(/\/+$/, ''))
 );
 const START_AT_ROUTE = startAtArg ? startAtArg.split('=')[1] : null;
+const ONLY_ROUTES = onlyArg
+  ? onlyArg.split('=')[1].split(',').map((route) => route.trim()).filter(Boolean)
+  : [];
 const START_AT_INDEX = START_AT_ROUTE ? SEO_ROUTES.indexOf(START_AT_ROUTE) : -1;
-const RENDER_ROUTES = START_AT_ROUTE && START_AT_INDEX >= 0
+const RENDER_ROUTES = ONLY_ROUTES.length > 0
+  ? ONLY_ROUTES
+  : START_AT_ROUTE && START_AT_INDEX >= 0
   ? SEO_ROUTES.slice(START_AT_INDEX)
   : SEO_ROUTES;
 
@@ -156,6 +167,21 @@ function startStaticServer(distDir, port) {
   });
 }
 
+function closeServer(server) {
+  return new Promise((resolve) => {
+    let resolved = false;
+    const done = () => {
+      if (!resolved) {
+        resolved = true;
+        resolve();
+      }
+    };
+    server.close(done);
+    server.closeAllConnections?.();
+    setTimeout(done, 1000);
+  });
+}
+
 async function main() {
   // Validate dist exists
   try {
@@ -179,78 +205,144 @@ async function main() {
   if (START_AT_ROUTE) {
     console.log(`[prerender] Resuming from ${START_AT_ROUTE} (${RENDER_ROUTES.length}/${SEO_ROUTES.length} routes)`);
   }
+  if (ONLY_ROUTES.length > 0) {
+    console.log(`[prerender] Rendering only ${ONLY_ROUTES.length} requested route(s)`);
+  }
   const server = await startStaticServer(DIST, PORT);
 
-  let browser;
-  try {
-    browser = await puppeteer.launch({
+  const launchBrowser = () =>
+    puppeteer.launch({
       headless: 'new',
       args: ['--no-sandbox', '--disable-setuid-sandbox'],
     });
+
+  const closeBrowser = async (targetBrowser) => {
+    if (!targetBrowser) return;
+    const browserProcess = typeof targetBrowser.process === 'function'
+      ? targetBrowser.process()
+      : null;
+    try {
+      await Promise.race([
+        targetBrowser.close(),
+        delay(3000).then(() => {
+          throw new Error('browser close timeout');
+        }),
+      ]);
+    } catch (err) {
+      console.warn(`[prerender] WARN browser cleanup failed: ${err.message}`);
+      try {
+        if (browserProcess && !browserProcess.killed) browserProcess.kill('SIGKILL');
+      } catch {}
+    }
+  };
+
+  let browser;
+  try {
+    browser = await launchBrowser();
   } catch (err) {
-    server.close();
+    await closeServer(server);
     return softExit(`Failed to launch headless Chromium: ${err.message}`);
   }
 
   let okCount = 0;
-  let failCount = 0;
+  const failedRoutes = [];
+  const renderRoute = async (route, attempt) => {
+    const url = `http://127.0.0.1:${PORT}${route}`;
+    let page;
+    try {
+      page = await browser.newPage();
+    } catch (err) {
+      console.warn(`[prerender] FAIL ${route} attempt ${attempt}/${MAX_ROUTE_ATTEMPTS} — cannot open new page: ${err.message}`);
+      await closeBrowser(browser);
+      try {
+        browser = await launchBrowser();
+        console.warn('[prerender] WARN relaunched Chromium after connection loss');
+      } catch (launchErr) {
+        return softExit(`Failed to relaunch headless Chromium: ${launchErr.message}`);
+      }
+      return false;
+    }
+
+    try {
+      await page.setUserAgent('Mozilla/5.0 (compatible; EdooqooPrerender/1.0)');
+      const resp = await page.goto(url, { waitUntil: 'networkidle0', timeout: 30000 });
+      if (!resp || !resp.ok()) {
+        console.warn(`[prerender] SKIP ${route} attempt ${attempt}/${MAX_ROUTE_ATTEMPTS} — status ${resp?.status() ?? 'no-response'}`);
+        return false;
+      }
+      // Extra wait for canonical hook + lazy components
+      await delay(1500);
+
+      // Snapshot full HTML (includes hydrated DOM + updated canonical)
+      const html = await page.content();
+
+      // Write to <OUT_DIR>/<route>/index.html
+      const outDir = path.join(OUT_DIR, route.replace(/^\//, ''));
+      await fs.mkdir(outDir, { recursive: true });
+      const outFile = path.join(outDir, 'index.html');
+      await fs.writeFile(outFile, html, 'utf8');
+
+      // Sanity check: did canonical get rewritten to this route?
+      const canonicalMatch = html.match(/<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)["']/i);
+      const titleMatch = html.match(/<title[^>]*>([^<]*)<\/title>/i);
+      const wordCount = html
+        .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+        .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+        .replace(/<[^>]+>/g, ' ')
+        .split(/\s+/).filter(Boolean).length;
+
+      console.log(
+        `[prerender] OK   ${route.padEnd(32)} canonical=${canonicalMatch?.[1] ?? 'MISSING'} ` +
+        `title="${(titleMatch?.[1] ?? '').slice(0, 40)}" words=${wordCount}`
+      );
+      return true;
+    } catch (err) {
+      console.warn(`[prerender] FAIL ${route} attempt ${attempt}/${MAX_ROUTE_ATTEMPTS} — ${err.message}`);
+      if (/detached|connection|timeout/i.test(err.message)) {
+        await closeBrowser(browser);
+        try {
+          browser = await launchBrowser();
+          console.warn('[prerender] WARN relaunched Chromium after route failure');
+        } catch (launchErr) {
+          return softExit(`Failed to relaunch headless Chromium: ${launchErr.message}`);
+        }
+      }
+      return false;
+    } finally {
+      try {
+        if (page && !page.isClosed()) await page.close();
+      } catch (err) {
+        console.warn(`[prerender] WARN ${route} page cleanup failed: ${err.message}`);
+      }
+    }
+  };
 
   try {
     for (const route of RENDER_ROUTES) {
-      const url = `http://127.0.0.1:${PORT}${route}`;
-      const page = await browser.newPage();
-      try {
-        await page.setUserAgent('Mozilla/5.0 (compatible; EdooqooPrerender/1.0)');
-        const resp = await page.goto(url, { waitUntil: 'networkidle0', timeout: 30000 });
-        if (!resp || !resp.ok()) {
-          console.warn(`[prerender] SKIP ${route} — status ${resp?.status() ?? 'no-response'}`);
-          failCount++;
-          await page.close();
-          continue;
+      let rendered = false;
+      for (let attempt = 1; attempt <= MAX_ROUTE_ATTEMPTS; attempt++) {
+        rendered = await renderRoute(route, attempt);
+        if (rendered) break;
+        if (attempt < MAX_ROUTE_ATTEMPTS) {
+          console.warn(`[prerender] RETRY ${route} — next attempt ${attempt + 1}/${MAX_ROUTE_ATTEMPTS}`);
         }
-        // Extra wait for canonical hook + lazy components
-        await new Promise((r) => setTimeout(r, 1500));
-
-        // Snapshot full HTML (includes hydrated DOM + updated canonical)
-        const html = await page.content();
-
-        // Write to <OUT_DIR>/<route>/index.html
-        const outDir = path.join(OUT_DIR, route.replace(/^\//, ''));
-        await fs.mkdir(outDir, { recursive: true });
-        const outFile = path.join(outDir, 'index.html');
-        await fs.writeFile(outFile, html, 'utf8');
-
-        // Sanity check: did canonical get rewritten to this route?
-        const canonicalMatch = html.match(/<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)["']/i);
-        const titleMatch = html.match(/<title[^>]*>([^<]*)<\/title>/i);
-        const wordCount = html
-          .replace(/<script[\s\S]*?<\/script>/gi, ' ')
-          .replace(/<style[\s\S]*?<\/style>/gi, ' ')
-          .replace(/<[^>]+>/g, ' ')
-          .split(/\s+/).filter(Boolean).length;
-
-        console.log(
-          `[prerender] OK   ${route.padEnd(32)} canonical=${canonicalMatch?.[1] ?? 'MISSING'} ` +
-          `title="${(titleMatch?.[1] ?? '').slice(0, 40)}" words=${wordCount}`
-        );
+      }
+      if (rendered) {
         okCount++;
-      } catch (err) {
-        console.warn(`[prerender] FAIL ${route} — ${err.message}`);
-        failCount++;
-      } finally {
-        await page.close();
+      } else {
+        failedRoutes.push(route);
       }
     }
   } finally {
-    try {
-      await browser.close();
-    } catch (err) {
-      console.warn(`[prerender] WARN browser cleanup failed: ${err.message}`);
-    }
-    server.close();
+    await closeBrowser(browser);
+    await closeServer(server);
   }
 
+  const failCount = failedRoutes.length;
   console.log(`\n[prerender] Done. ok=${okCount} fail=${failCount} total=${RENDER_ROUTES.length}`);
+  if (failCount > 0) {
+    console.warn(`[prerender] Failed routes: ${failedRoutes.join(', ')}`);
+  }
   if (failCount > 0 && okCount === 0) {
     return softExit(`All ${failCount} routes failed.`);
   }

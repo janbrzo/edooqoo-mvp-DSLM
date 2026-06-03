@@ -195,7 +195,7 @@ const OneMinutePrep: React.FC = () => {
             <Card className="border-primary/15 bg-background shadow-sm">
               <CardContent className="space-y-5 p-6">
                 <div>
-                  <h2 className="text-lg font-semibold text-foreground">What changes after setup</h2>
+                  <h2 className="text-lg font-semibold text-foreground">How Student Context Changes The Worksheet</h2>
                   <p className="mt-2 text-sm leading-6 text-muted-foreground">
                     Edooqoo stops treating each worksheet as a blank-page task. It keeps student context visible, then uses DSLM signals to suggest a focused next step before the worksheet is generated.
                   </p>
@@ -221,7 +221,7 @@ const OneMinutePrep: React.FC = () => {
         <section className="py-16">
           <div className="mx-auto max-w-6xl px-4">
             <div className="max-w-3xl">
-              <h2 className="text-2xl font-bold text-foreground">What 1-Minute Prep means</h2>
+              <h2 className="text-2xl font-bold text-foreground">What 1-Minute Prep Uses</h2>
               <p className="mt-3 text-muted-foreground">
                 The first student setup is a separate step. Edooqoo is designed to move recurring weekly prep toward one focused minute after profile, goals, notes, and learning signals exist. The teacher still chooses the focus, reviews the output, and edits before use.
               </p>
@@ -257,7 +257,7 @@ const OneMinutePrep: React.FC = () => {
 
         <section className="border-y bg-secondary/20 py-16">
           <div className="mx-auto max-w-6xl px-4">
-            <h2 className="text-2xl font-bold text-foreground">When it works best</h2>
+            <h2 className="text-2xl font-bold text-foreground">What The Teacher Gets</h2>
             <div className="mt-6 grid gap-3 md:grid-cols-2">
               {bestFitItems.map((item) => (
                 <div key={item} className="flex gap-3 rounded-md bg-background p-4 text-sm shadow-sm">
@@ -272,7 +272,7 @@ const OneMinutePrep: React.FC = () => {
         <section className="py-16">
           <div className="mx-auto max-w-6xl px-4">
             <div className="mb-8 max-w-3xl">
-              <h2 className="text-2xl font-bold text-foreground">Technical loop</h2>
+              <h2 className="text-2xl font-bold text-foreground">Where Homework And Progress Signals Enter</h2>
               <p className="mt-3 text-muted-foreground">
                 The system works as a student-context loop, not a single worksheet prompt.
               </p>
