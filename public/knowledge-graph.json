@@ -7,7 +7,9 @@
       "name": "Edooqoo",
       "url": "https://edooqoo.com/",
       "sameAs": [
-        "https://edooqoo.com"
+        "https://edooqoo.com",
+        "https://www.linkedin.com/company/edooqoo",
+        "https://twitter.com/edooqoo"
       ]
     },
     {
@@ -17,6 +19,36 @@
       "name": "Edooqoo.com",
       "publisher": {
         "@id": "https://edooqoo.com/#organization"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://edooqoo.com/#webpage",
+      "url": "https://edooqoo.com/",
+      "name": "Edooqoo | 1-Minute Prep for 1:1 English Teachers",
+      "description": "Root public page for Edooqoo.com, a 1-Minute Prep system for recurring 1:1 English teachers that combines student context, DSLM learning signals, and editable worksheet output.",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "about": {
+        "@id": "https://edooqoo.com/#software"
+      },
+      "mainEntity": {
+        "@id": "https://edooqoo.com/#root-faq"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://edooqoo.com/#root-faq",
+      "name": "Edooqoo root FAQ",
+      "url": "https://edooqoo.com/",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "about": {
+        "@id": "https://edooqoo.com/#software"
       },
       "inLanguage": "en"
     },
