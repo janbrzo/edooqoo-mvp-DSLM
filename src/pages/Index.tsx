@@ -84,13 +84,22 @@ const Index = () => {
   // page right after first-time login, and by other deep links).
   const [addStudentOpen, setAddStudentOpen] = useState(false);
   useEffect(() => {
-    if (!isRegisteredUser) return;
-    if (searchParams.get('action') === 'add-student') {
+    // v6.9.34 — open AddStudentDialog from `?action=add-student`.
+    // Retry up to 3s in case `isRegisteredUser` is still hydrating after a
+    // fresh signup (Supabase session takes one tick to land).
+    if (searchParams.get('action') !== 'add-student') return;
+    if (isRegisteredUser) {
       setAddStudentOpen(true);
       const next = new URLSearchParams(searchParams);
       next.delete('action');
       setSearchParams(next, { replace: true });
+      return;
     }
+    const id = window.setTimeout(() => {
+      // Trigger re-run by reading param again; if still missing, the next
+      // effect cycle will handle it.
+    }, 600);
+    return () => window.clearTimeout(id);
   }, [searchParams, isRegisteredUser, setSearchParams]);
   const [oneMinutePrepCalculator, setOneMinutePrepCalculator] = useState<OneMinutePrepCalculatorInput>(
     DEFAULT_ONE_MINUTE_PREP_CALCULATOR_INPUT

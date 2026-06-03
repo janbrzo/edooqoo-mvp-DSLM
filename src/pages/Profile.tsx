@@ -701,6 +701,9 @@ const Profile = () => {
                         title: "Onboarding Reset",
                         description: "The onboarding checklist will appear again when you visit the dashboard.",
                       });
+                      // v6.9.34 — navigate to dashboard so user immediately
+                      // sees the freshly-reset checklist.
+                      navigate('/dashboard');
                     }}
                     size="sm"
                   >

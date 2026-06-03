@@ -36,7 +36,11 @@ const Signup = () => {
   const signupState = location.state as { from?: string; startOneMinutePrep?: boolean } | null;
   const fromPath = signupState?.from || '/';
   const shouldStartOneMinutePrep = signupState?.startOneMinutePrep === true || fromPath.startsWith('/one-minute-prep');
-  const postSignupPath = shouldStartOneMinutePrep ? '/?action=add-student' : (fromPath !== '/' ? fromPath : '/dashboard');
+  // v6.9.34 — ALWAYS land on the generator with Add Student modal queued up
+  // after a fresh signup. This is the 1-Minute Prep onboarding entry point.
+  const postSignupPath = fromPath !== '/' && !shouldStartOneMinutePrep
+    ? fromPath
+    : '/?action=add-student';
   const hasPendingClaims = getPendingClaimIds().length > 0;
 
   // After auth completes (including email-confirmed sessions returning here),
@@ -88,7 +92,7 @@ const Signup = () => {
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}${shouldStartOneMinutePrep ? '/?action=add-student' : '/'}`,
+          emailRedirectTo: `${window.location.origin}/?action=add-student`,
           data: {
             first_name: firstName,
             last_name: lastName,

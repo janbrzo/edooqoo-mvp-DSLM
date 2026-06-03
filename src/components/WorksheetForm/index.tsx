@@ -273,18 +273,36 @@ export default function WorksheetForm({
     // nothing happens" race condition.
     const shouldAutoGenerate = sessionStorage.getItem('autoGenerateWorksheet') === 'true';
     if (shouldAutoGenerate) {
-      sessionStorage.removeItem('autoGenerateWorksheet');
-      setTimeout(() => {
-        requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            if (formRef.current) {
-              devLog('🚀 [WorksheetForm] Auto-submitting from DSLM autoGenerate flag (v4.7 timing)');
-              formRef.current.requestSubmit();
-            }
-          });
-        });
-      }, 600);
+      // v6.9.34 — keep the flag in sessionStorage until we ACTUALLY submit.
+      // The previous version deleted it on mount, so if the first submit
+      // attempt failed (stale student/topic state), the retry never fired.
+      // The submit-effect below clears the flag right before requestSubmit.
+      devLog('🚀 [WorksheetForm] autoGenerate flag detected; submit will fire when topic + student are ready');
     }
+  }, []);
+
+  // v6.9.34 — robust auto-submit: re-runs whenever lessonTopic / student
+  // selection change after hydration, until either succeeds or 8s timeout.
+  useEffect(() => {
+    if (sessionStorage.getItem('autoGenerateWorksheet') !== 'true') return;
+    if (!lessonTopic) return; // wait for prefill to hydrate topic
+    const t = setTimeout(() => {
+      if (sessionStorage.getItem('autoGenerateWorksheet') !== 'true') return;
+      if (formRef.current) {
+        sessionStorage.removeItem('autoGenerateWorksheet');
+        devLog('🚀 [WorksheetForm] Auto-submitting (v6.9.34 retry-effect)');
+        formRef.current.requestSubmit();
+      }
+    }, 500);
+    return () => clearTimeout(t);
+  }, [lessonTopic, selectedStudentId]);
+
+  // Safety net: if flag survives 10s without firing, drop it.
+  useEffect(() => {
+    const cleanup = setTimeout(() => {
+      sessionStorage.removeItem('autoGenerateWorksheet');
+    }, 10000);
+    return () => clearTimeout(cleanup);
   }, []);
   useEffect(() => {
     if (selectedStudentId && selectedStudentId !== "no-student") {

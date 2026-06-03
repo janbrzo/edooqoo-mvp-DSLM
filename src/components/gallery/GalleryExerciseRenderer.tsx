@@ -135,14 +135,23 @@ const GalleryExerciseRenderer: React.FC<Props> = ({ exercise, index }) => {
       }
       case "matching":
       case "matching-halves": {
-        const pairs = ex.pairs || ex.items || [];
+        // v6.9.34 — accept `pairs`, `items`, OR parallel `left/right`,
+        // `first/second`, `halves` arrays (used by "Matching Halves").
+        let pairs: any[] = ex.pairs || ex.items || ex.matches || [];
+        if (pairs.length === 0) {
+          const left = ex.left || ex.first || ex.halves_left || ex.starts || [];
+          const right = ex.right || ex.second || ex.halves_right || ex.endings || [];
+          if (Array.isArray(left) && Array.isArray(right) && left.length) {
+            pairs = left.map((l: any, i: number) => ({ left: l, right: right[i] }));
+          }
+        }
         return (
           <table className="w-full text-sm">
             <tbody>
               {pairs.map((p: any, i: number) => (
                 <tr key={i} className="border-b border-border/40">
                   <td className="py-1.5 pr-3 font-medium">{toText(p?.left ?? p?.first ?? p?.term ?? p?.a ?? p?.word ?? p)}</td>
-                  <td className="py-1.5 text-muted-foreground">{toText(p?.right ?? p?.second ?? p?.definition ?? p?.b ?? p?.match ?? p?.pair ?? p?.synonym ?? p?.antonym)}</td>
+                  <td className="py-1.5 text-muted-foreground">{toText(p?.right ?? p?.second ?? p?.definition ?? p?.b ?? p?.match ?? p?.pair ?? p?.synonym ?? p?.antonym ?? p?.ending ?? p?.completion)}</td>
                 </tr>
               ))}
             </tbody>
@@ -204,21 +213,31 @@ const GalleryExerciseRenderer: React.FC<Props> = ({ exercise, index }) => {
         );
       }
       case "word-order": {
-        const items = ex.sentences || ex.items || ex.questions || [];
+        const items = ex.sentences || ex.items || ex.questions || ex.scrambled_sentences || [];
         return (
           <ol className="list-decimal space-y-1.5 pl-5 text-sm">
             {items.map((it: any, i: number) => (
               <li key={i} className="flex flex-wrap gap-1.5">
                 {(() => {
-                  const words =
-                    it?.words ?? it?.shuffled ?? it?.tokens ??
-                    (typeof it === "string" ? it.split(/\s+/) :
-                      (typeof it?.sentence === "string" ? it.sentence.split(/\s+/) :
-                        (typeof it?.scrambled === "string" ? it.scrambled.split(/\s+/) : [])));
+                  // v6.9.34 — accept tokens|scrambled|shuffled|words as
+                  // arrays OR delimited strings (' | ', ' / ', ' , ', spaces).
+                  const splitStr = (s: string) =>
+                    s.split(/\s*[|/,]\s*/).filter(Boolean).length > 1
+                      ? s.split(/\s*[|/,]\s*/).filter(Boolean)
+                      : s.split(/\s+/).filter(Boolean);
+                  let words: any[] = [];
+                  const raw =
+                    it?.words ?? it?.shuffled ?? it?.tokens ?? it?.scrambled ??
+                    it?.sentence ?? it?.prompt ?? (typeof it === 'string' ? it : null);
+                  if (Array.isArray(raw)) words = raw;
+                  else if (typeof raw === 'string') words = splitStr(raw);
                   return (words as any[]).map((w: any, wi: number) => (
                     <Label key={wi}>{toText(w)}</Label>
                   ));
                 })()}
+                {it?.answer && (
+                  <span className="ml-2 text-xs text-muted-foreground italic">→ {toText(it.answer)}</span>
+                )}
               </li>
             ))}
           </ol>
@@ -230,17 +249,17 @@ const GalleryExerciseRenderer: React.FC<Props> = ({ exercise, index }) => {
       case "negative-prefixes":
       case "complete-word":
       case "word-formation": {
-        const items = ex.items || ex.questions || ex.sentences || [];
+        const items = ex.items || ex.questions || ex.sentences || ex.words || ex.pairs || [];
         return (
           <table className="w-full text-sm">
             <tbody>
               {items.map((it: any, i: number) => (
                 <tr key={i} className="border-b border-border/40">
                   <td className="py-1.5 pr-3 font-medium">
-                    {toText(it?.term ?? it?.prompt ?? it?.word ?? it?.base ?? it?.input ?? it?.gapped ?? it?.masked ?? it?.text ?? it?.question ?? it)}
+                    {toText(it?.term ?? it?.prompt ?? it?.word ?? it?.base ?? it?.input ?? it?.gapped ?? it?.masked ?? it?.text ?? it?.question ?? it?.root ?? it?.original ?? it?.stem ?? it)}
                   </td>
                   <td className="py-1.5 text-muted-foreground">
-                    {toText(it?.definition ?? it?.answer ?? it?.target ?? it?.solution ?? it?.synonym ?? it?.antonym ?? it?.completed ?? "")}
+                    {toText(it?.definition ?? it?.answer ?? it?.target ?? it?.solution ?? it?.synonym ?? it?.antonym ?? it?.completed ?? it?.negative ?? it?.opposite ?? it?.transformed ?? it?.full ?? "")}
                   </td>
                 </tr>
               ))}

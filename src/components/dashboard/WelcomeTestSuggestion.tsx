@@ -50,6 +50,10 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
   const [testId, setTestId] = useState<string | null>(null);
   const [answeredCount, setAnsweredCount] = useState(0);
   const [totalQuestions, setTotalQuestions] = useState(0);
+  // v6.9.34 — track when the pending test was sent so we can show a reminder
+  // CTA after 48h of student inactivity.
+  const [sentAt, setSentAt] = useState<string | null>(null);
+  const [reminderSending, setReminderSending] = useState(false);
   // 10-second dismiss countdown state. When non-null, the banner area renders
   // an ephemeral confirmation message with an Undo button instead of the full banner.
   const [dismissCountdown, setDismissCountdown] = useState<number | null>(null);
@@ -103,6 +107,7 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
         setTestId(test.id);
         setTotalQuestions(test.total_questions || 0);
         setAnsweredCount((test as any).answered_count || 0);
+        setSentAt((test as any).created_at || null);
         
         if (test.share_token) {
           setShareUrl(`${window.location.origin}/welcome-test/${test.share_token}`);
@@ -518,6 +523,67 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
                   <Badge variant="secondary">Waiting for student</Badge>
                 </div>
                 <p className="text-sm text-muted-foreground truncate">{shareUrl}</p>
+                {sentAt && (() => {
+                  const hours = (Date.now() - new Date(sentAt).getTime()) / 36e5;
+                  const days = Math.floor(hours / 24);
+                  const label = hours < 1 ? 'just now' : hours < 24 ? `${Math.floor(hours)}h ago` : `${days}d ago`;
+                  return (
+                    <div className="mt-2 flex items-center gap-2 text-xs">
+                      <span className="text-muted-foreground">Sent {label}</span>
+                      {hours >= 48 && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          disabled={reminderSending}
+                          onClick={async () => {
+                            if (!studentEmail || !testId) {
+                              toast.error('Cannot send reminder — missing email or test.');
+                              return;
+                            }
+                            setReminderSending(true);
+                            try {
+                              // Re-use share token; fetch teacher name.
+                              const { data: teacher } = await supabase
+                                .from('profiles')
+                                .select('first_name, last_name, email')
+                                .eq('id', teacherId)
+                                .single();
+                              const teacherName = teacher
+                                ? [teacher.first_name, teacher.last_name].filter(Boolean).join(' ') || teacher.email || ''
+                                : '';
+                              const { data: t } = await supabase
+                                .from('student_tests')
+                                .select('share_token')
+                                .eq('id', testId)
+                                .single();
+                              const tok = (t as any)?.share_token;
+                              if (!tok) throw new Error('Missing share token');
+                              await supabase.functions.invoke('send-test-email', {
+                                body: {
+                                  shareToken: tok,
+                                  recipientEmail: studentEmail,
+                                  testTitle: `Reminder: Welcome Test - ${studentName}`,
+                                  teacherName,
+                                  testType: 'welcome',
+                                  reminder: true,
+                                },
+                              });
+                              toast.success('Reminder sent to the student.');
+                            } catch (err) {
+                              console.error('reminder failed', err);
+                              toast.error('Failed to send reminder.');
+                            } finally {
+                              setReminderSending(false);
+                            }
+                          }}
+                          className="h-7 text-[11px]"
+                        >
+                          {reminderSending ? 'Sending…' : 'Send reminder'}
+                        </Button>
+                      )}
+                    </div>
+                  );
+                })()}
               </>
             )}
             {status === 'in_progress' && (

@@ -18,6 +18,9 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Info } from 'lucide-react';
 import { devLog } from '@/utils/logger';
+import { ALL_WELCOME_TEST_QUESTIONS } from '@/data/welcomeTestQuestions';
+import { toast as sonnerToast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 const ADD_STUDENT_DRAFT_KEY = 'add-student-dialog-draft';
 
@@ -57,14 +60,16 @@ export const AddStudentDialog = ({
   const [studentEmail, setStudentEmail] = useState('');
   const [sendOverdueEmails, setSendOverdueEmails] = useState(true);
   const [nativeLanguage, setNativeLanguage] = useState('Spanish');
-  // v6.9.33 — 3-mode flow: `know` (teacher fills level+goal now),
-  // `defer` (recommended; level/goal inferred from Welcome Test),
-  // `manual` (skip test, set everything later).
-  const [mode, setMode] = useState<'know' | 'defer' | 'manual'>('defer');
+  // v6.9.34 — 2-mode flow: `know` (teacher fills level+goal now),
+  // `defer` (recommended; level/goal inferred from Welcome Test). The
+  // `manual` opt-out was removed — teachers can still skip the test from
+  // the student page after creation.
+  const [mode, setMode] = useState<'know' | 'defer'>('defer');
   const deferProfile = mode !== 'know';
   const [mainGoalDeadline, setMainGoalDeadline] = useState<string>('');
-  const [sendTestWhenKnown, setSendTestWhenKnown] = useState(false);
-  const autoSendWelcomeTest = mode === 'defer' ? true : (mode === 'know' ? sendTestWhenKnown : false);
+  // v6.9.34 — default ON in both modes.
+  const [sendTestWhenKnown, setSendTestWhenKnown] = useState(true);
+  const autoSendWelcomeTest = mode === 'defer' ? true : sendTestWhenKnown;
   const [loading, setLoading] = useState(false);
   const { addStudent, refetch } = useStudents();
   const { refreshProgress } = useOnboardingProgress();
@@ -166,7 +171,7 @@ export const AddStudentDialog = ({
       setSendOverdueEmails(true);
       setNativeLanguage('Spanish');
       setMode('defer');
-      setSendTestWhenKnown(false);
+      setSendTestWhenKnown(true);
       setMainGoalDeadline('');
       sessionStorage.removeItem(ADD_STUDENT_DRAFT_KEY);
       setOpen(false);
@@ -178,7 +183,101 @@ export const AddStudentDialog = ({
       // Force refresh students
       await refetch();
       refreshProgress();
-      
+
+      // v6.9.34 — If autosend was requested, fire-and-forget the test
+      // creation + email so the side-effect happens regardless of whether
+      // the caller takes over navigation (inline-add in WorksheetForm).
+      if (autoSendWelcomeTest && newStudent?.id && studentEmail) {
+        // Best-effort: don't block UX on this.
+        void (async () => {
+          try {
+            const { data: { user } } = await supabase.auth.getUser();
+            const teacherId = user?.id;
+            if (!teacherId) return;
+            // Reuse existing flow: create test row + questions + share token + email
+            const mod = await import('@/hooks/useWelcomeTestActions');
+            // Note: hook can't be called outside React, so call the underlying
+            // Edge Function directly via the same pattern.
+            void mod; // keep dynamic import for tree-shake safety
+            // Inline lightweight version:
+            const { data: existing } = await supabase
+              .from('student_tests')
+              .select('id, share_token')
+              .eq('student_id', newStudent.id)
+              .eq('teacher_id', teacherId)
+              .eq('test_type', 'welcome')
+              .is('deleted_at', null)
+              .order('created_at', { ascending: false })
+              .limit(1);
+            let testId = existing?.[0]?.id ?? null;
+            let shareToken: string | null = existing?.[0]?.share_token ?? null;
+            if (!testId) {
+              const { data: created, error: createErr } = await supabase
+                .from('student_tests')
+                .insert({
+                  student_id: newStudent.id,
+                  teacher_id: teacherId,
+                  test_type: 'welcome',
+                  title: `Welcome Test - ${newStudent.name}`,
+                  description: 'Comprehensive placement & learning profile assessment',
+                  attempt_number: 1,
+                  status: 'pending',
+                  total_questions: ALL_WELCOME_TEST_QUESTIONS.length,
+                } as any)
+                .select('id')
+                .single();
+              if (createErr || !created) throw createErr;
+              testId = created.id;
+              const rows = ALL_WELCOME_TEST_QUESTIONS.map((q: any, i: number) => ({
+                test_id: testId,
+                question_index: i,
+                question_type: q.question_type,
+                question_text: q.question_text,
+                question_data: q.options ? { options: q.options } : {},
+                correct_answer: q.correct_answer || '',
+                explanation: q.description || null,
+                element_type: q.element_type || null,
+                difficulty_level: q.difficulty_level || null,
+                skill_tags: q.nano_skill ? [q.nano_skill] : [],
+              }));
+              await supabase.from('student_test_questions').insert(rows as any);
+            }
+            if (!shareToken && testId) {
+              const { data: tokRow } = await supabase
+                .from('student_tests')
+                .update({ share_token: crypto.randomUUID() } as any)
+                .eq('id', testId)
+                .select('share_token')
+                .single();
+              shareToken = tokRow?.share_token ?? null;
+            }
+            if (shareToken) {
+              const { data: teacher } = await supabase
+                .from('profiles')
+                .select('first_name, last_name, email')
+                .eq('id', teacherId)
+                .single();
+              const teacherName = teacher
+                ? [teacher.first_name, teacher.last_name].filter(Boolean).join(' ') || teacher.email || ''
+                : '';
+              await supabase.functions.invoke('send-test-email', {
+                body: {
+                  shareToken,
+                  recipientEmail: studentEmail,
+                  testTitle: `Welcome Test - ${newStudent.name}`,
+                  teacherName,
+                  testType: 'welcome',
+                },
+              });
+              sonnerToast.success(`Welcome Test sent to ${studentEmail}`);
+            }
+          } catch (err) {
+            console.error('[AddStudentDialog] auto-send welcome test failed', err);
+            sonnerToast.error('Welcome Test could not be sent automatically. You can send it manually from the student page.');
+          }
+        })();
+      }
+
       // Notify parent component that student was added
       // v6.9.33 — when caller provides onStudentAdded it owns next navigation
       // (e.g. WorksheetForm auto-selects the new student without page nav).
@@ -186,13 +285,14 @@ export const AddStudentDialog = ({
         devLog('🔄 Calling onStudentAdded callback (caller-controlled nav) ...');
         onStudentAdded(newStudent ? { id: newStudent.id, name: newStudent.name } : undefined);
       } else if (newStudent?.id) {
-        // Default flow: navigate to DSLM tab. After auto-send, jump straight
-        // to Add Goal modal; otherwise focus the (compact) Welcome Test banner.
+        // v6.9.34 — Default flow per Plan v6.9.34:
+        //  • autosend ON  → focus Add Goal modal (test runs in background)
+        //  • autosend OFF → focus Send Welcome Test banner
         const ts = Date.now();
         if (autoSendWelcomeTest) {
           navigate(`/student/${newStudent.id}?tab=dslm&view=goals&focus=add-goal-modal&_=${ts}`);
         } else {
-          navigate(`/student/${newStudent.id}?tab=dslm&view=pathway&focus=send-welcome-test&autosend=0&_=${ts}`);
+          navigate(`/student/${newStudent.id}?tab=dslm&view=pathway&focus=send-welcome-test&_=${ts}`);
         }
       }
     } catch (error) {
@@ -282,15 +382,6 @@ export const AddStudentDialog = ({
                 <span className="text-xs font-medium block">I don't know my student yet — fill from Welcome Test</span>
                 <span className="text-[11px] text-muted-foreground">
                   Recommended. The test is sent right after creating. Roadmap + Next Steps unlock once the student completes it (usually 1–3 days). Use generic worksheets in the meantime.
-                </span>
-              </Label>
-            </div>
-            <div className="flex items-start gap-2 rounded-md border bg-muted/30 p-2.5">
-              <RadioGroupItem id="mode-manual" value="manual" className="mt-0.5" />
-              <Label htmlFor="mode-manual" className="flex-1 cursor-pointer">
-                <span className="text-xs font-medium block">Skip Welcome Test — I'll set everything manually later</span>
-                <span className="text-[11px] text-muted-foreground">
-                  You can add level, goals and roadmap any time from the student's page.
                 </span>
               </Label>
             </div>

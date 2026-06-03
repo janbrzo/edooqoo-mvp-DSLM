@@ -32,7 +32,9 @@ const TARGETS_MONTHLY: Target[] = [
   { provider: "openai",          model: "gpt-4o-mini-tts",              endpoint: "https://api.openai.com/v1/models/gpt-4o-mini-tts" },
   { provider: "openai",          model: "gpt-4.1-2025-04-14",           endpoint: "https://api.openai.com/v1/models/gpt-4.1-2025-04-14" },
   { provider: "openai",          model: "gpt-5-mini-2025-08-07",        endpoint: "https://api.openai.com/v1/models/gpt-5-mini-2025-08-07" },
-  { provider: "lovable-gateway", model: "google/gemini-2.0-flash",      endpoint: "https://ai.gateway.lovable.dev/v1/chat/completions" },
+  // v6.9.34 — `google/gemini-2.0-flash` was removed from Lovable AI Gateway.
+  // Replaced with current default preview model.
+  { provider: "lovable-gateway", model: "google/gemini-3-flash-preview", endpoint: "https://ai.gateway.lovable.dev/v1/chat/completions" },
 ];
 
 async function ping(target: Target): Promise<{ status: number; latency_ms: number; error: string | null }> {
@@ -57,7 +59,10 @@ async function ping(target: Target): Promise<{ status: number; latency_ms: numbe
       body: JSON.stringify({
         model: target.model,
         messages: [{ role: "user", content: "ping" }],
-        [tokenField]: 1,
+        // v6.9.34 — GPT-5 family consumes reasoning tokens before output;
+        // a limit of 1 always trips the "max_tokens reached" error. Use 16
+        // for GPT-5 to leave room for the reasoning step.
+        [tokenField]: isGpt5Family ? 16 : 1,
       }),
     });
     const err = r.ok ? null : (await r.text()).slice(0, 500);

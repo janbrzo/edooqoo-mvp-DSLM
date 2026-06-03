@@ -10,6 +10,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import Confetti from 'react-confetti';
 import { AddStudentDialog } from '@/components/dashboard/AddStudentDialog';
 import { useStudents } from '@/hooks/useStudents';
+import { triggerSpotlight } from '@/hooks/useSpotlight';
 
 export const OnboardingChecklist = () => {
   const [isExpanded, setIsExpanded] = useState(true);
@@ -26,6 +27,14 @@ export const OnboardingChecklist = () => {
     const tempDismissed = sessionStorage.getItem('onboarding-temp-dismissed') === 'true';
     setIsTemporarilyDismissed(tempDismissed);
   }, []);
+
+  // v6.9.34 — allow any component to request a checklist refresh:
+  //   window.dispatchEvent(new CustomEvent('onboarding:refresh'))
+  useEffect(() => {
+    const h = () => { try { refreshProgress(); } catch {} };
+    window.addEventListener('onboarding:refresh', h);
+    return () => window.removeEventListener('onboarding:refresh', h);
+  }, [refreshProgress]);
 
   useEffect(() => {
     if (progress.completed && !completionAnimation) {
@@ -61,6 +70,17 @@ export const OnboardingChecklist = () => {
   };
   const hasStudent = !!firstStudentId;
 
+  // v6.9.34 — navigate AND re-fire the spotlight from the click handler.
+  // This eliminates the "second click does nothing" bug where the URL was
+  // already cleaned by a prior visit so the URL-driven effect no-ops.
+  // We also kick off a `refreshProgress()` ~1.8s later so a completed
+  // action (e.g. Generate Next Lesson Ideas) updates the checklist quickly.
+  const navAndSpotlight = (suffix: string, focusId: string) => {
+    navigate(studentDeepLink(suffix));
+    setTimeout(() => triggerSpotlight({ id: focusId }), 700);
+    setTimeout(() => { try { refreshProgress(); } catch {} }, 1800);
+  };
+
   type Step = {
     key: string;
     label: string;
@@ -83,7 +103,7 @@ export const OnboardingChecklist = () => {
       label: 'Send Welcome Test',
       icon: ClipboardCheck,
       completed: !!progress.steps.send_welcome_test,
-      action: () => navigate(studentDeepLink('?tab=dslm&view=pathway&focus=send-welcome-test')),
+      action: () => navAndSpotlight('?tab=dslm&view=pathway&focus=send-welcome-test', 'send-welcome-test'),
       requiresStudent: true,
     },
     {
@@ -91,7 +111,7 @@ export const OnboardingChecklist = () => {
       label: 'Add learning goals',
       icon: Target,
       completed: !!progress.steps.add_goals,
-      action: () => navigate(studentDeepLink('?tab=dslm&view=goals&focus=add-goal-modal')),
+      action: () => navAndSpotlight('?tab=dslm&view=goals&focus=add-goal-modal', 'add-goal-modal'),
       requiresStudent: true,
     },
     {
@@ -99,7 +119,7 @@ export const OnboardingChecklist = () => {
       label: 'Generate Learning Roadmap',
       icon: Map,
       completed: !!progress.steps.generate_roadmap,
-      action: () => navigate(studentDeepLink('?tab=dslm&view=pathway&focus=learning-roadmap')),
+      action: () => navAndSpotlight('?tab=dslm&view=pathway&focus=learning-roadmap', 'learning-roadmap'),
       requiresStudent: true,
     },
   ];
@@ -110,7 +130,7 @@ export const OnboardingChecklist = () => {
       label: 'Generate Next Lesson Ideas',
       icon: Lightbulb,
       completed: !!progress.steps.generate_next_ideas,
-      action: () => navigate(studentDeepLink('?tab=dslm&view=pathway&focus=next-lesson-ideas')),
+      action: () => navAndSpotlight('?tab=dslm&view=pathway&focus=next-lesson-ideas', 'next-lesson-ideas'),
       requiresStudent: true,
     },
     {
@@ -118,7 +138,7 @@ export const OnboardingChecklist = () => {
       label: 'Use one Next Lesson suggestion',
       icon: MousePointerClick,
       completed: !!progress.steps.pick_idea,
-      action: () => navigate(studentDeepLink('?tab=dslm&view=pathway&focus=pick-idea')),
+      action: () => navAndSpotlight('?tab=dslm&view=pathway&focus=pick-idea', 'pick-idea'),
       requiresStudent: true,
     },
     {
