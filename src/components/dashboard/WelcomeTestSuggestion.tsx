@@ -107,6 +107,7 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
         setTestId(test.id);
         setTotalQuestions(test.total_questions || 0);
         setAnsweredCount((test as any).answered_count || 0);
+        setSentAt((test as any).created_at || null);
         
         if (test.share_token) {
           setShareUrl(`${window.location.origin}/welcome-test/${test.share_token}`);
