@@ -385,15 +385,6 @@ export const AddStudentDialog = ({
                 </span>
               </Label>
             </div>
-            <div className="flex items-start gap-2 rounded-md border bg-muted/30 p-2.5">
-              <RadioGroupItem id="mode-manual" value="manual" className="mt-0.5" />
-              <Label htmlFor="mode-manual" className="flex-1 cursor-pointer">
-                <span className="text-xs font-medium block">Skip Welcome Test — I'll set everything manually later</span>
-                <span className="text-[11px] text-muted-foreground">
-                  You can add level, goals and roadmap any time from the student's page.
-                </span>
-              </Label>
-            </div>
           </RadioGroup>
 
           {/* Level + Goal + Deadline — collapsed when deferred */}
