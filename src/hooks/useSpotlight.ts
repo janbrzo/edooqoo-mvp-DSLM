@@ -18,11 +18,17 @@ export interface SpotlightDetail {
   id: SpotlightId | string;
   /** Auto-clear after N ms (default 8000). Pass 0 to disable. */
   durationMs?: number;
+  /** Internal timestamp — used by SpotlightOverlay to force a re-render
+   *  even when the same id is triggered twice in a row. Set automatically
+   *  by `triggerSpotlight`. */
+  at?: number;
 }
 
 export function triggerSpotlight(detail: SpotlightDetail) {
   if (typeof window === 'undefined') return;
-  window.dispatchEvent(new CustomEvent('app:spotlight', { detail }));
+  window.dispatchEvent(
+    new CustomEvent('app:spotlight', { detail: { ...detail, at: Date.now() } }),
+  );
 }
 
 export function useSpotlight() {
