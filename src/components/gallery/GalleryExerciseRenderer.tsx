@@ -213,21 +213,31 @@ const GalleryExerciseRenderer: React.FC<Props> = ({ exercise, index }) => {
         );
       }
       case "word-order": {
-        const items = ex.sentences || ex.items || ex.questions || [];
+        const items = ex.sentences || ex.items || ex.questions || ex.scrambled_sentences || [];
         return (
           <ol className="list-decimal space-y-1.5 pl-5 text-sm">
             {items.map((it: any, i: number) => (
               <li key={i} className="flex flex-wrap gap-1.5">
                 {(() => {
-                  const words =
-                    it?.words ?? it?.shuffled ?? it?.tokens ??
-                    (typeof it === "string" ? it.split(/\s+/) :
-                      (typeof it?.sentence === "string" ? it.sentence.split(/\s+/) :
-                        (typeof it?.scrambled === "string" ? it.scrambled.split(/\s+/) : [])));
+                  // v6.9.34 — accept tokens|scrambled|shuffled|words as
+                  // arrays OR delimited strings (' | ', ' / ', ' , ', spaces).
+                  const splitStr = (s: string) =>
+                    s.split(/\s*[|/,]\s*/).filter(Boolean).length > 1
+                      ? s.split(/\s*[|/,]\s*/).filter(Boolean)
+                      : s.split(/\s+/).filter(Boolean);
+                  let words: any[] = [];
+                  const raw =
+                    it?.words ?? it?.shuffled ?? it?.tokens ?? it?.scrambled ??
+                    it?.sentence ?? it?.prompt ?? (typeof it === 'string' ? it : null);
+                  if (Array.isArray(raw)) words = raw;
+                  else if (typeof raw === 'string') words = splitStr(raw);
                   return (words as any[]).map((w: any, wi: number) => (
                     <Label key={wi}>{toText(w)}</Label>
                   ));
                 })()}
+                {it?.answer && (
+                  <span className="ml-2 text-xs text-muted-foreground italic">→ {toText(it.answer)}</span>
+                )}
               </li>
             ))}
           </ol>
