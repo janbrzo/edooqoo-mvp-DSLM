@@ -18,6 +18,9 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Info } from 'lucide-react';
 import { devLog } from '@/utils/logger';
+import { ALL_WELCOME_TEST_QUESTIONS } from '@/data/welcomeTestQuestions';
+import { toast as sonnerToast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
 
 const ADD_STUDENT_DRAFT_KEY = 'add-student-dialog-draft';
 
@@ -57,14 +60,16 @@ export const AddStudentDialog = ({
   const [studentEmail, setStudentEmail] = useState('');
   const [sendOverdueEmails, setSendOverdueEmails] = useState(true);
   const [nativeLanguage, setNativeLanguage] = useState('Spanish');
-  // v6.9.33 — 3-mode flow: `know` (teacher fills level+goal now),
-  // `defer` (recommended; level/goal inferred from Welcome Test),
-  // `manual` (skip test, set everything later).
-  const [mode, setMode] = useState<'know' | 'defer' | 'manual'>('defer');
+  // v6.9.34 — 2-mode flow: `know` (teacher fills level+goal now),
+  // `defer` (recommended; level/goal inferred from Welcome Test). The
+  // `manual` opt-out was removed — teachers can still skip the test from
+  // the student page after creation.
+  const [mode, setMode] = useState<'know' | 'defer'>('defer');
   const deferProfile = mode !== 'know';
   const [mainGoalDeadline, setMainGoalDeadline] = useState<string>('');
-  const [sendTestWhenKnown, setSendTestWhenKnown] = useState(false);
-  const autoSendWelcomeTest = mode === 'defer' ? true : (mode === 'know' ? sendTestWhenKnown : false);
+  // v6.9.34 — default ON in both modes.
+  const [sendTestWhenKnown, setSendTestWhenKnown] = useState(true);
+  const autoSendWelcomeTest = mode === 'defer' ? true : sendTestWhenKnown;
   const [loading, setLoading] = useState(false);
   const { addStudent, refetch } = useStudents();
   const { refreshProgress } = useOnboardingProgress();
