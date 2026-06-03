@@ -135,14 +135,23 @@ const GalleryExerciseRenderer: React.FC<Props> = ({ exercise, index }) => {
       }
       case "matching":
       case "matching-halves": {
-        const pairs = ex.pairs || ex.items || [];
+        // v6.9.34 — accept `pairs`, `items`, OR parallel `left/right`,
+        // `first/second`, `halves` arrays (used by "Matching Halves").
+        let pairs: any[] = ex.pairs || ex.items || ex.matches || [];
+        if (pairs.length === 0) {
+          const left = ex.left || ex.first || ex.halves_left || ex.starts || [];
+          const right = ex.right || ex.second || ex.halves_right || ex.endings || [];
+          if (Array.isArray(left) && Array.isArray(right) && left.length) {
+            pairs = left.map((l: any, i: number) => ({ left: l, right: right[i] }));
+          }
+        }
         return (
           <table className="w-full text-sm">
             <tbody>
               {pairs.map((p: any, i: number) => (
                 <tr key={i} className="border-b border-border/40">
                   <td className="py-1.5 pr-3 font-medium">{toText(p?.left ?? p?.first ?? p?.term ?? p?.a ?? p?.word ?? p)}</td>
-                  <td className="py-1.5 text-muted-foreground">{toText(p?.right ?? p?.second ?? p?.definition ?? p?.b ?? p?.match ?? p?.pair ?? p?.synonym ?? p?.antonym)}</td>
+                  <td className="py-1.5 text-muted-foreground">{toText(p?.right ?? p?.second ?? p?.definition ?? p?.b ?? p?.match ?? p?.pair ?? p?.synonym ?? p?.antonym ?? p?.ending ?? p?.completion)}</td>
                 </tr>
               ))}
             </tbody>
