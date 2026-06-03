@@ -291,3 +291,14 @@ homepage hero proof switcher, OneMinutePrepHeroProofSwitcher, Prep impact tab, W
 - Treat /dashboard, /worksheet/, /worksheets, /homework/, /flashcards/, /my, /calendar, /admin, and auth routes as private application surfaces.
 - Treat /esl-worksheets, /worksheets/:exerciseType/:topic, /english-for/:persona, /tools/*, /gallery, top-level .html citation pages, and public /blog/*.html articles as public discovery surfaces.
 - User-facing application copy is English. Planning conversation with the owner may be Polish.
+
+## v6.9.34
+- Spotlight dim panels are non-interactive; close via ESC, × button, or click on highlighted element.
+- Onboarding checklist deep-links re-fire spotlight directly + refresh state after action.
+- AddStudentDialog has 2 modes (know, defer); Welcome Test sends automatically in defer mode regardless of caller.
+- Signup always lands on /?action=add-student.
+- Worksheet generator auto-starts from 1-Minute Prep via retry-based useEffect with 10 s safety timer.
+- Pending Welcome Test shows "Send reminder" button after 48 h.
+- Public gallery uses single CEFR chip row (A1..C2) with ilike query (matches composite levels).
+- Gallery renderers cover more key aliases for matching halves, word order, complete word, negative prefixes.
+- audit-llm-models uses max_completion_tokens=16 for GPT-5 family; replaces retired gemini-2.0-flash with gemini-3-flash-preview.
