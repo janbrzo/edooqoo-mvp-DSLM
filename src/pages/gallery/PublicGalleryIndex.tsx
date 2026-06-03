@@ -36,7 +36,9 @@ const PublicGalleryIndex: React.FC = () => {
         .eq('is_public', true)
         .order('published_at', { ascending: false })
         .range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE);
-      if (levelFilter) q = q.eq('public_level', levelFilter);
+      // v6.9.34 — use ilike so a single CEFR (e.g. "A1") matches stored
+      // composite values like "A1/A2".
+      if (levelFilter) q = q.ilike('public_level', `%${levelFilter}%`);
       if (topicFilter) q = q.ilike('public_topic', `%${topicFilter}%`);
       const { data } = await q;
       if (cancelled) return;
@@ -83,14 +85,19 @@ const PublicGalleryIndex: React.FC = () => {
           </aside>
         </header>
 
-        {/* v6.9.33 — quick CEFR chips (matches public_level values stored by form_data.englishLevel). */}
+        {/* v6.9.34 — single granular CEFR chip row. Old composite chips
+            (A1/A2 …) and the legacy dropdown were removed because they
+            collided with each other and produced empty results. */}
         <div className="flex flex-wrap items-center gap-2 mb-3">
           <span className="text-xs uppercase tracking-wider text-muted-foreground font-semibold mr-1">CEFR:</span>
           {[
             { label: 'All', value: '' },
-            { label: 'A1/A2', value: 'A1/A2' },
-            { label: 'B1/B2', value: 'B1/B2' },
-            { label: 'C1/C2', value: 'C1/C2' },
+            { label: 'A1', value: 'A1' },
+            { label: 'A2', value: 'A2' },
+            { label: 'B1', value: 'B1' },
+            { label: 'B2', value: 'B2' },
+            { label: 'C1', value: 'C1' },
+            { label: 'C2', value: 'C2' },
           ].map((opt) => (
             <button
               key={opt.value || 'all'}
@@ -107,15 +114,6 @@ const PublicGalleryIndex: React.FC = () => {
           ))}
         </div>
         <div className="flex flex-wrap gap-3 mb-6">
-          <select
-            value={levelFilter}
-            onChange={(e) => setFilter('level', e.target.value)}
-            className="rounded-md border bg-background px-3 py-2 text-sm"
-            aria-label="Filter by CEFR level"
-          >
-            <option value="">All levels</option>
-            {['A1','A2','B1','B1/B2','B2','C1','C2'].map(l => <option key={l} value={l}>{l}</option>)}
-          </select>
           <input
             type="text"
             placeholder="Filter by topic…"
