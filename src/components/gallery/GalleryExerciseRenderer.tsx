@@ -249,17 +249,17 @@ const GalleryExerciseRenderer: React.FC<Props> = ({ exercise, index }) => {
       case "negative-prefixes":
       case "complete-word":
       case "word-formation": {
-        const items = ex.items || ex.questions || ex.sentences || [];
+        const items = ex.items || ex.questions || ex.sentences || ex.words || ex.pairs || [];
         return (
           <table className="w-full text-sm">
             <tbody>
               {items.map((it: any, i: number) => (
                 <tr key={i} className="border-b border-border/40">
                   <td className="py-1.5 pr-3 font-medium">
-                    {toText(it?.term ?? it?.prompt ?? it?.word ?? it?.base ?? it?.input ?? it?.gapped ?? it?.masked ?? it?.text ?? it?.question ?? it)}
+                    {toText(it?.term ?? it?.prompt ?? it?.word ?? it?.base ?? it?.input ?? it?.gapped ?? it?.masked ?? it?.text ?? it?.question ?? it?.root ?? it?.original ?? it?.stem ?? it)}
                   </td>
                   <td className="py-1.5 text-muted-foreground">
-                    {toText(it?.definition ?? it?.answer ?? it?.target ?? it?.solution ?? it?.synonym ?? it?.antonym ?? it?.completed ?? "")}
+                    {toText(it?.definition ?? it?.answer ?? it?.target ?? it?.solution ?? it?.synonym ?? it?.antonym ?? it?.completed ?? it?.negative ?? it?.opposite ?? it?.transformed ?? it?.full ?? "")}
                   </td>
                 </tr>
               ))}
