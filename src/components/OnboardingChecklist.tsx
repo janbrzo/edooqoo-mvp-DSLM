@@ -95,7 +95,7 @@ export const OnboardingChecklist = () => {
       label: 'Send Welcome Test',
       icon: ClipboardCheck,
       completed: !!progress.steps.send_welcome_test,
-      action: () => navigate(studentDeepLink('?tab=dslm&view=pathway&focus=send-welcome-test')),
+      action: () => navAndSpotlight('?tab=dslm&view=pathway&focus=send-welcome-test', 'send-welcome-test'),
       requiresStudent: true,
     },
     {
@@ -103,7 +103,7 @@ export const OnboardingChecklist = () => {
       label: 'Add learning goals',
       icon: Target,
       completed: !!progress.steps.add_goals,
-      action: () => navigate(studentDeepLink('?tab=dslm&view=goals&focus=add-goal-modal')),
+      action: () => navAndSpotlight('?tab=dslm&view=goals&focus=add-goal-modal', 'add-goal-modal'),
       requiresStudent: true,
     },
     {
@@ -111,7 +111,7 @@ export const OnboardingChecklist = () => {
       label: 'Generate Learning Roadmap',
       icon: Map,
       completed: !!progress.steps.generate_roadmap,
-      action: () => navigate(studentDeepLink('?tab=dslm&view=pathway&focus=learning-roadmap')),
+      action: () => navAndSpotlight('?tab=dslm&view=pathway&focus=learning-roadmap', 'learning-roadmap'),
       requiresStudent: true,
     },
   ];
@@ -122,7 +122,7 @@ export const OnboardingChecklist = () => {
       label: 'Generate Next Lesson Ideas',
       icon: Lightbulb,
       completed: !!progress.steps.generate_next_ideas,
-      action: () => navigate(studentDeepLink('?tab=dslm&view=pathway&focus=next-lesson-ideas')),
+      action: () => navAndSpotlight('?tab=dslm&view=pathway&focus=next-lesson-ideas', 'next-lesson-ideas'),
       requiresStudent: true,
     },
     {
@@ -130,7 +130,7 @@ export const OnboardingChecklist = () => {
       label: 'Use one Next Lesson suggestion',
       icon: MousePointerClick,
       completed: !!progress.steps.pick_idea,
-      action: () => navigate(studentDeepLink('?tab=dslm&view=pathway&focus=pick-idea')),
+      action: () => navAndSpotlight('?tab=dslm&view=pathway&focus=pick-idea', 'pick-idea'),
       requiresStudent: true,
     },
     {
