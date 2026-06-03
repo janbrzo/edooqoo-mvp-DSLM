@@ -28,6 +28,14 @@ export const OnboardingChecklist = () => {
     setIsTemporarilyDismissed(tempDismissed);
   }, []);
 
+  // v6.9.34 — allow any component to request a checklist refresh:
+  //   window.dispatchEvent(new CustomEvent('onboarding:refresh'))
+  useEffect(() => {
+    const h = () => { try { refreshProgress(); } catch {} };
+    window.addEventListener('onboarding:refresh', h);
+    return () => window.removeEventListener('onboarding:refresh', h);
+  }, [refreshProgress]);
+
   useEffect(() => {
     if (progress.completed && !completionAnimation) {
       setShowConfetti(true);
