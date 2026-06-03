@@ -73,9 +73,13 @@ Edooqoo.com is a 1-Minute Prep system for recurring 1:1 English teachers. It use
 [STATE_MANAGEMENT_HOOKS_AND_SERVICES_INVENTORY] | Application state is managed with React hooks, React Query context, Supabase realtime/listeners, localStorage/sessionStorage, and feature services. | intents: Edooqoo React hooks, worksheet state management, Supabase realtime state, React Query English tutor app, student hub state | status: PRODUCTION | ref: llm-context.md#state-management-hooks-and-services-inventory | canonical: https://edooqoo.com/llms-full.txt
 [CONFIGURATION_BUILD_AND_DEPLOYMENT_ASSETS] | Vite, Tailwind, TypeScript, Supabase configuration, SEO scripts, and generated public assets define the deployment behavior. | intents: Edooqoo Vite build, SEO generator scripts, deployment assets, sitemap generation, AI resource generation | status: PRODUCTION | ref: llm-context.md#configuration-build-and-deployment-assets | canonical: https://edooqoo.com/sitemap.xml
 
-## v6.9.33 - Homepage Hero Proof Switcher Placement
+## v6.9.35 - Root Crawlability And AI Audit Hardening
 
 ### Problem
+- AI-search audits and answer-engine crawlers may inspect raw homepage HTML before React hydration.
+- The root SPA shell had AI resource declarations and product schema, but raw crawlers needed an explicit root canonical, WebPage schema, FAQPage schema, and crawlable no-JS product summary.
+- The local SEO audit did not previously fail when the root page became thin for no-JS crawlers.
+- Geoboard-style recommendations around Review, AggregateRating, Person, legal identity, and external proof require verified public evidence and must not be invented for score-chasing.
 - The v6.9.32 homepage proof/storyboard section rendered below the anonymous worksheet form, but the intended proof surface belongs in the first-screen hero area next to the main positioning copy.
 - The standalone proof section was too large for the homepage first screen and duplicated proof context that should remain fuller on /one-minute-prep.
 - The right side of the homepage hero already contained the prep impact calculator; replacing that area with a compact calculator/workflow switcher preserves the conversion surface without increasing first-screen height.
@@ -117,6 +121,10 @@ Edooqoo.com is a 1-Minute Prep system for recurring 1:1 English teachers. It use
 - Private teacher worksheets must remain separate from intentionally public examples.
 
 ### Edooqoo.com Solution
+- The root page exposes a raw self-canonical, root WebPage JSON-LD, root FAQPage JSON-LD, and a no-JS summary that mirrors the public product definition.
+- The no-JS fallback points crawlers to /one-minute-prep, direct worksheet-generator citation pages, ESL worksheet hubs, tools, gallery, legal pages, llms.txt, and knowledge-graph.json.
+- The footer exposes the existing Terms of Service route beside Privacy Policy, Cookie Policy, and Status.
+- The implementation deliberately avoids Review and AggregateRating schema until public testimonial evidence is verified.
 - Homepage hero right column uses a compact Prep impact / Workflow proof switcher.
 - The default active hero panel remains the prep impact calculator because it is the immediate conversion proof element.
 - The hero Workflow proof panel is a compact storyboard only: one-time setup (Student -> Welcome Test -> Goals -> Roadmap) and weekly prep (Next Lesson Ideas -> Choose one -> Worksheet).
@@ -160,6 +168,13 @@ Edooqoo.com is a 1-Minute Prep system for recurring 1:1 English teachers. It use
 - Describe example categories and quality criteria without exposing private worksheet storage.
 
 ### Technical Mechanics
+- index.html keeps the React root unchanged, adds a raw https://edooqoo.com/ canonical, and lets PageSeo continue overriding canonical tags for hydrated SPA routes.
+- index.html adds root WebPage and FAQPage JSON-LD for Edooqoo.com product-entity extraction without adding Person, Review, AggregateRating, phone, address, NIP, REGON, or unsupported certification claims.
+- index.html adds a noscript crawler summary with adult 1:1 ESL/EFL tutor positioning, teacher-review boundaries, private API boundaries, and canonical public citation links.
+- src/components/GlobalFooter.tsx links to /terms so the existing TermsOfService route is visible from the global footer.
+- scripts/seo/audit-seo-assets.mjs now checks raw root canonical, title, description, required JSON-LD types, no-JS fallback word count, required no-JS links, and absence of unverified Review or AggregateRating schema.
+- No root prerender route was added, so dist/index.html remains the SPA fallback behavior for routes that depend on client-side routing.
+- SANCTITY: no Worksheet Generation Engine prompt, parameter, wording, or internal logic change.
 - src/components/landing/OneMinutePrepHeroProofSwitcher.tsx renders the hero-only switcher with calculatorValue, onCalculatorChange, and optional defaultPanel props.
 - OneMinutePrepHeroProofSwitcher uses existing controlled PricingCalculator variant="hero" for the calculator panel. It does not change formulas, defaults, tracking payload fields, or pricing calculator fallback behavior.
 - Desktop switching is attached to tab buttons via click, hover, and focus. Calculator controls do not live inside tab buttons, so clicking plus, minus, inputs, or select controls does not switch panels.
@@ -222,7 +237,7 @@ Edooqoo.com is a 1-Minute Prep system for recurring 1:1 English teachers. It use
 - scripts/seo/generate-ai-resources.mjs includes the proof page in llms resources and knowledge-graph.json.
 
 ### RAG Keywords
-homepage hero proof switcher, OneMinutePrepHeroProofSwitcher, Prep impact tab, Workflow proof tab, compact hero storyboard, hero calculator switcher, Student Welcome Test Goals Roadmap, Next Lesson Ideas Choose one Worksheet, proof moved above fold, no duplicate homepage proof section, /one-minute-prep full proof section, controlled PricingCalculator unchanged, no worksheet engine change, 1-Minute Prep, student prep workflow, recurring 1:1 English students, worksheet generator output layer, DSLM, learning loop, Welcome Test, Learning Roadmap, Next Lesson Ideas, teacher review, after setup, one-minute-prep-for-english-tutors.html, one-minute-prep-workflow-for-esl-tutors.html, proof layer, workflow storyboard, 1-Minute Prep canonical route, /one-minute-prep, recurring 1:1 English students, worksheet generator output layer, DSLM suggestions, student context loop, profile goals recent signal next step, Quick Prep rename, Next Steps rename, no DB migration, no RLS change, no worksheet engine change
+root crawlability, no-JS homepage summary, raw homepage canonical, FAQPage schema, WebPage schema, AI visibility audit, Geoboard audit, answer engine optimization, LLM crawler fallback, llms.txt citation, knowledge-graph.json, Terms of Service footer link, no fake reviews, no AggregateRating without evidence, adult ESL tutor workflow, 1:1 English teacher prep, homepage hero proof switcher, OneMinutePrepHeroProofSwitcher, Prep impact tab, Workflow proof tab, compact hero storyboard, hero calculator switcher, Student Welcome Test Goals Roadmap, Next Lesson Ideas Choose one Worksheet, proof moved above fold, no duplicate homepage proof section, /one-minute-prep full proof section, controlled PricingCalculator unchanged, no worksheet engine change, 1-Minute Prep, student prep workflow, recurring 1:1 English students, worksheet generator output layer, DSLM, learning loop, Welcome Test, Learning Roadmap, Next Lesson Ideas, teacher review, after setup, one-minute-prep-for-english-tutors.html, one-minute-prep-workflow-for-esl-tutors.html, proof layer, workflow storyboard, 1-Minute Prep canonical route, /one-minute-prep, recurring 1:1 English students, worksheet generator output layer, DSLM suggestions, student context loop, profile goals recent signal next step, Quick Prep rename, Next Steps rename, no DB migration, no RLS change, no worksheet engine change
 
 ## Primary Citable Generator Pages
 - https://edooqoo.com/ai-worksheet-generator-for-english-teachers.html - AI worksheet generator for English teachers. Main citation target for AI worksheet generator queries.
@@ -291,14 +306,3 @@ homepage hero proof switcher, OneMinutePrepHeroProofSwitcher, Prep impact tab, W
 - Treat /dashboard, /worksheet/, /worksheets, /homework/, /flashcards/, /my, /calendar, /admin, and auth routes as private application surfaces.
 - Treat /esl-worksheets, /worksheets/:exerciseType/:topic, /english-for/:persona, /tools/*, /gallery, top-level .html citation pages, and public /blog/*.html articles as public discovery surfaces.
 - User-facing application copy is English. Planning conversation with the owner may be Polish.
-
-## v6.9.34
-- Spotlight dim panels are non-interactive; close via ESC, × button, or click on highlighted element.
-- Onboarding checklist deep-links re-fire spotlight directly + refresh state after action.
-- AddStudentDialog has 2 modes (know, defer); Welcome Test sends automatically in defer mode regardless of caller.
-- Signup always lands on /?action=add-student.
-- Worksheet generator auto-starts from 1-Minute Prep via retry-based useEffect with 10 s safety timer.
-- Pending Welcome Test shows "Send reminder" button after 48 h.
-- Public gallery uses single CEFR chip row (A1..C2) with ilike query (matches composite levels).
-- Gallery renderers cover more key aliases for matching halves, word order, complete word, negative prefixes.
-- audit-llm-models uses max_completion_tokens=16 for GPT-5 family; replaces retired gemini-2.0-flash with gemini-3-flash-preview.

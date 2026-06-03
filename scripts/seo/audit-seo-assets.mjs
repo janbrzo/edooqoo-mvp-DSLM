@@ -18,6 +18,35 @@ const REQUIRED_AI_RESOURCES = [
   '.well-known/ai-plugin.json',
 ];
 
+const ROOT_RAW_REQUIRED_SCHEMA_TYPES = [
+  'SoftwareApplication',
+  'Organization',
+  'WebSite',
+  'BreadcrumbList',
+  'WebPage',
+  'FAQPage',
+];
+
+const ROOT_FORBIDDEN_EVIDENCE_SCHEMA_TYPES = [
+  'AggregateRating',
+  'Review',
+];
+
+const ROOT_NOSCRIPT_REQUIRED_LINKS = [
+  'href="/one-minute-prep"',
+  'href="/ai-worksheet-generator-for-english-teachers.html"',
+  'href="/esl-worksheets"',
+  'href="/exercise-types"',
+  'href="/tools"',
+  'href="/gallery"',
+  'href="/terms"',
+  'href="/privacy-policy"',
+  'href="/llms.txt"',
+  'href="/knowledge-graph.json"',
+];
+
+const ROOT_NOSCRIPT_MIN_WORDS = 250;
+
 const REQUIRED_PRERENDER_ROUTES = [
   '/esl-worksheets',
   '/for-english-tutors',
@@ -227,6 +256,28 @@ function extractLdTypes(html) {
   return types;
 }
 
+function stripHtmlTags(html) {
+  return html
+    .replace(/<script[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<[^>]+>/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function wordCount(text) {
+  if (!text) return 0;
+  return text.split(/\s+/).filter(Boolean).length;
+}
+
+function extractNoscriptText(html) {
+  return [...html.matchAll(/<noscript\b[^>]*>([\s\S]*?)<\/noscript>/gi)]
+    .map((match) => stripHtmlTags(match[1]))
+    .join(' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 function markdownAnchor(heading) {
   return heading
     .toLowerCase()
@@ -269,6 +320,52 @@ function auditDeclaredAiResources() {
   for (const anchor of refs) {
     if (!docsAnchors.has(anchor)) fail(`public/llms.txt ref missing docs/llm-context.md anchor #${anchor}`);
     else pass(`public/llms.txt ref resolves #${anchor}`);
+  }
+}
+
+function auditRootRawHtml() {
+  const indexPath = path.join(ROOT, 'index.html');
+  const html = fs.readFileSync(indexPath, 'utf8');
+  const rootUrl = `${BASE_URL}/`;
+  const canonical = extractCanonical(html);
+
+  if (canonical !== rootUrl) fail(`index.html root canonical must be ${rootUrl}, got ${canonical || 'none'}`);
+  else pass('index.html root has raw self-canonical');
+
+  if (!/<title>[^<]*1-Minute Prep for 1:1 English Teachers[^<]*<\/title>/i.test(html)) {
+    fail('index.html title must define the root product entity');
+  } else {
+    pass('index.html title defines the root product entity');
+  }
+
+  if (!/<meta\s+name=["']description["'][^>]+1-Minute Prep for 1:1 English teachers/i.test(html)) {
+    fail('index.html meta description must describe the root product entity');
+  } else {
+    pass('index.html meta description describes the root product entity');
+  }
+
+  const types = extractLdTypes(html);
+  for (const type of ROOT_RAW_REQUIRED_SCHEMA_TYPES) {
+    if (!types.has(type)) fail(`index.html raw root missing JSON-LD ${type}`);
+    else pass(`index.html raw root contains JSON-LD ${type}`);
+  }
+
+  for (const type of ROOT_FORBIDDEN_EVIDENCE_SCHEMA_TYPES) {
+    if (types.has(type)) fail(`index.html must not include ${type} without verified public evidence`);
+    else pass(`index.html avoids unverified ${type} schema`);
+  }
+
+  const noscriptText = extractNoscriptText(html);
+  const words = wordCount(noscriptText);
+  if (words < ROOT_NOSCRIPT_MIN_WORDS) {
+    fail(`index.html noscript fallback must contain at least ${ROOT_NOSCRIPT_MIN_WORDS} words, got ${words}`);
+  } else {
+    pass(`index.html noscript fallback word count: ${words}`);
+  }
+
+  for (const link of ROOT_NOSCRIPT_REQUIRED_LINKS) {
+    if (!html.includes(link)) fail(`index.html noscript fallback missing ${link}`);
+    else pass(`index.html noscript fallback contains ${link}`);
   }
 }
 
@@ -551,6 +648,7 @@ function auditOpenApiAndPlugin() {
 }
 
 auditDeclaredAiResources();
+auditRootRawHtml();
 auditHomepageCanonicalLinks();
 auditKnowledgeGraph();
 auditRobotsAndSitemap();

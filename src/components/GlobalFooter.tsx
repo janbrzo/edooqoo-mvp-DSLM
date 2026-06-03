@@ -126,6 +126,7 @@ const GlobalFooter = () => {
         <div className="border-t pt-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <span className="text-sm text-muted-foreground">© {new Date().getFullYear()} Edooqoo. All rights reserved.</span>
           <div className="flex items-center gap-4 text-sm">
+            <Link to="/terms" className="text-muted-foreground hover:text-primary transition-colors">Terms of Service</Link>
             <Link to="/privacy-policy" className="text-muted-foreground hover:text-primary transition-colors">Privacy Policy</Link>
             <Link to="/cookie-policy" className="text-muted-foreground hover:text-primary transition-colors">Cookie Policy</Link>
             <Link to="/status" className="text-muted-foreground hover:text-primary transition-colors">Status</Link>
