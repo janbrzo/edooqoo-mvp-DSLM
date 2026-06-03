@@ -171,7 +171,7 @@ export const AddStudentDialog = ({
       setSendOverdueEmails(true);
       setNativeLanguage('Spanish');
       setMode('defer');
-      setSendTestWhenKnown(false);
+      setSendTestWhenKnown(true);
       setMainGoalDeadline('');
       sessionStorage.removeItem(ADD_STUDENT_DRAFT_KEY);
       setOpen(false);
