@@ -20,6 +20,11 @@ export const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
 
   const handleGoogleSignIn = async () => {
     try {
+      // v6.9.35 — persist post-signup intent so Index can open AddStudent
+      // modal after OAuth roundtrip (separate from short-lived ?action= param).
+      if (mode === 'signup') {
+        try { localStorage.setItem('post-signup-add-student', '1'); } catch {}
+      }
       // If there are pending anon worksheets to claim, return the user to
       // the worksheet page they came from so the post-OAuth claim handler
       // (in Signup/Login) runs and redirects to the claimed worksheet.
