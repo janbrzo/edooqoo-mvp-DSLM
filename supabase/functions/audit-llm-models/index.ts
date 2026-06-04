@@ -20,20 +20,20 @@ interface Target { provider: Provider; model: string; endpoint: string; }
 const TARGETS_DAILY: Target[] = [
   { provider: "lovable-gateway", model: "google/gemini-2.5-flash",      endpoint: "https://ai.gateway.lovable.dev/v1/chat/completions" },
   { provider: "lovable-gateway", model: "google/gemini-2.5-flash-lite", endpoint: "https://ai.gateway.lovable.dev/v1/chat/completions" },
-  { provider: "lovable-gateway", model: "openai/gpt-5-mini",            endpoint: "https://ai.gateway.lovable.dev/v1/chat/completions" },
+  // v6.9.36 — Removed `lovable-gateway/openai/gpt-5-mini`: not used by app
+  // runtime (real fallback uses direct OpenAI `gpt-5-mini-2025-08-07`) and
+  // its minimal chat probe consistently tripped GPT-5 reasoning-token caps.
+  // Direct OpenAI checks below cover actual production paths.
   { provider: "openai",          model: "gpt-4o-mini",                  endpoint: "https://api.openai.com/v1/models/gpt-4o-mini" },
+  { provider: "openai",          model: "gpt-5-mini-2025-08-07",        endpoint: "https://api.openai.com/v1/models/gpt-5-mini-2025-08-07" },
 ];
 
 // Monthly set — full breadth. When adding a new model anywhere in the app,
 // append it here. See docs/closed-loops/LLM_MODEL_INVENTORY.md (when present).
 const TARGETS_MONTHLY: Target[] = [
   ...TARGETS_DAILY,
-  { provider: "openai",          model: "gpt-4o-mini",                  endpoint: "https://api.openai.com/v1/models/gpt-4o-mini" },
   { provider: "openai",          model: "gpt-4o-mini-tts",              endpoint: "https://api.openai.com/v1/models/gpt-4o-mini-tts" },
   { provider: "openai",          model: "gpt-4.1-2025-04-14",           endpoint: "https://api.openai.com/v1/models/gpt-4.1-2025-04-14" },
-  { provider: "openai",          model: "gpt-5-mini-2025-08-07",        endpoint: "https://api.openai.com/v1/models/gpt-5-mini-2025-08-07" },
-  // v6.9.34 — `google/gemini-2.0-flash` was removed from Lovable AI Gateway.
-  // Replaced with current default preview model.
   { provider: "lovable-gateway", model: "google/gemini-3-flash-preview", endpoint: "https://ai.gateway.lovable.dev/v1/chat/completions" },
 ];
 
