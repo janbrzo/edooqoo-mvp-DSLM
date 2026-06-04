@@ -1687,6 +1687,7 @@ export type Database = {
           model: string
           ok: boolean
           provider: string
+          purpose: string | null
           status: number
         }
         Insert: {
@@ -1697,6 +1698,7 @@ export type Database = {
           model: string
           ok: boolean
           provider: string
+          purpose?: string | null
           status: number
         }
         Update: {
@@ -1707,6 +1709,7 @@ export type Database = {
           model?: string
           ok?: boolean
           provider?: string
+          purpose?: string | null
           status?: number
         }
         Relationships: []

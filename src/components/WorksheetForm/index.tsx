@@ -277,9 +277,16 @@ export default function WorksheetForm({
     if (shouldAutoGenerate) {
       try {
         const raw = sessionStorage.getItem('autoGenerateWorksheetRequest');
-        if (raw) autoSubmitRequestRef.current = JSON.parse(raw);
+        if (raw) {
+          const req = JSON.parse(raw);
+          autoSubmitRequestRef.current = req;
+          // v6.9.37 — bypass prop race: pin student immediately from the request.
+          if (req?.studentId && typeof req.studentId === 'string') {
+            setSelectedStudentId(req.studentId);
+          }
+        }
       } catch { /* ignore */ }
-      devLog('🚀 [WorksheetForm] autoGenerate flag detected; submit will fire when topic + student are ready');
+      devLog('🚀 [WorksheetForm v6.9.37] autoGenerate flag detected; readiness gate armed');
     }
   }, []);
 
@@ -289,11 +296,14 @@ export default function WorksheetForm({
   useEffect(() => {
     if (autoSubmitFiredRef.current) return;
     if (sessionStorage.getItem('autoGenerateWorksheet') !== 'true') return;
-    if (!lessonTopic || !lessonTopic.trim()) return;
-    if (!selectedExercises || selectedExercises.length === 0) return;
-    if (!formRef.current) return;
     const req = autoSubmitRequestRef.current;
-    if (req?.studentId && selectedStudentId !== req.studentId) return; // wait for student hydration
+    if (!lessonTopic || !lessonTopic.trim()) { devLog('[autoSubmit] waiting: lessonTopic empty'); return; }
+    if (!selectedExercises || selectedExercises.length === 0) { devLog('[autoSubmit] waiting: no exercises'); return; }
+    if (!formRef.current) { devLog('[autoSubmit] waiting: no formRef'); return; }
+    if (req?.studentId && selectedStudentId !== req.studentId) {
+      devLog('[autoSubmit] waiting: student not hydrated', { want: req.studentId, have: selectedStudentId });
+      return;
+    }
     autoSubmitFiredRef.current = true;
     sessionStorage.removeItem('autoGenerateWorksheet');
     sessionStorage.removeItem('autoGenerateWorksheetRequest');
@@ -301,7 +311,7 @@ export default function WorksheetForm({
     window.setTimeout(() => {
       requestAnimationFrame(() => {
         try {
-          devLog('🚀 [WorksheetForm] Auto-submitting (v6.9.36 readiness gate)');
+          devLog('🚀 [WorksheetForm v6.9.37] Auto-submitting');
           formRef.current?.requestSubmit();
         } catch (e) {
           devWarn('[WorksheetForm] requestSubmit threw', e);
@@ -310,16 +320,27 @@ export default function WorksheetForm({
     }, 0);
   }, [lessonTopic, selectedStudentId, selectedExercises, selectedMediaTypes, exerciseFocusMap]);
 
-  // v6.9.36 — last-resort safety: drop both flags after 30s of inactivity.
+  // v6.9.37 — last-resort: 5s watchdog. If topic+exercises present but student
+  // never hydrated, force submit anyway. Otherwise drop the stale flags.
   useEffect(() => {
-    const cleanup = setTimeout(() => {
-      if (sessionStorage.getItem('autoGenerateWorksheet') === 'true') {
-        devWarn('[WorksheetForm] auto-generate watchdog: dropping stale flag after 30s');
+    const t = setTimeout(() => {
+      if (autoSubmitFiredRef.current) return;
+      if (sessionStorage.getItem('autoGenerateWorksheet') !== 'true') return;
+      const ok = !!lessonTopic?.trim() && (selectedExercises?.length ?? 0) > 0 && !!formRef.current;
+      if (ok) {
+        autoSubmitFiredRef.current = true;
+        sessionStorage.removeItem('autoGenerateWorksheet');
+        sessionStorage.removeItem('autoGenerateWorksheetRequest');
+        devWarn('[WorksheetForm v6.9.37] watchdog force-submit (student hydration timed out)');
+        formRef.current?.requestSubmit();
+      } else {
+        devWarn('[WorksheetForm v6.9.37] watchdog dropping flag (form not ready)');
+        sessionStorage.removeItem('autoGenerateWorksheet');
+        sessionStorage.removeItem('autoGenerateWorksheetRequest');
       }
-      sessionStorage.removeItem('autoGenerateWorksheet');
-      sessionStorage.removeItem('autoGenerateWorksheetRequest');
-    }, 30000);
-    return () => clearTimeout(cleanup);
+    }, 5000);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   useEffect(() => {
     if (selectedStudentId && selectedStudentId !== "no-student") {

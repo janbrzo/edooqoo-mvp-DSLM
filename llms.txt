@@ -326,3 +326,10 @@ root crawlability, no-JS homepage summary, raw homepage canonical, FAQPage schem
 - GalleryExerciseRenderer: normalization helpers (`asArray`, `splitTokens`, `maskWordFromAnswer`) handle non-standard JSON shapes for word-order, matching-halves, complete-word — no more empty cards.
 - HeroHeadline: leading + padding fix prevents descender clipping (e.g. "g").
 - audit-llm-models: removed unused `lovable-gateway/openai/gpt-5-mini` daily probe; added direct `openai/gpt-5-mini-2025-08-07` model check. Daily smoke test: 4/4 OK (latencies 600–950 ms).
+
+## Changelog v6.9.37
+- WorksheetForm auto-submit hard-fix: on mount the form now pins `selectedStudentId` directly from `autoGenerateWorksheetRequest` (bypassing the `preSelectedStudent` prop race). Readiness gate logs each block reason. Watchdog cut from 30 s to 5 s with a force-submit fallback when topic+exercises are present but the student never hydrated.
+- DSLMTab: GoalsView eager-mounts when `focus=add-goal-modal` is in the URL, and the `pendingAddGoal` consume callback is memoized via `useCallback`. Add Goal modal now opens reliably after Add-Student autosend navigation.
+- Login modal: removed "🎯 Try Demo — explore without signing up" CTA. `/demo` route remains directly accessible.
+- Restored `/blog/learning-pacing-scientific-vs-pragmatic-esl.html` as a meta-refresh redirect to `/blog/teaching-english-one-to-one.html` (canonical to target, noindex). Source content was not recoverable from repo or sitemap.
+- audit-llm-models: emails sent in BOTH daily and monthly modes; subject prefixed with mode label (`[Edooqoo] Daily LLM Audit — …` / `[Edooqoo] Monthly LLM Audit — …`). Added `purpose` column on `model_health_checks` (migration `20260604195117`); each TARGETS_DAILY/MONTHLY row carries a human description; audit email gained a "Used for" column.

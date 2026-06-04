@@ -14,27 +14,32 @@ const corsHeaders = {
 };
 
 type Provider = "lovable-gateway" | "openai" | "google";
-interface Target { provider: Provider; model: string; endpoint: string; }
+interface Target { provider: Provider; model: string; endpoint: string; purpose: string; }
 
 // Daily set — cheap, fast, covers the hottest paths.
 const TARGETS_DAILY: Target[] = [
-  { provider: "lovable-gateway", model: "google/gemini-2.5-flash",      endpoint: "https://ai.gateway.lovable.dev/v1/chat/completions" },
-  { provider: "lovable-gateway", model: "google/gemini-2.5-flash-lite", endpoint: "https://ai.gateway.lovable.dev/v1/chat/completions" },
+  { provider: "lovable-gateway", model: "google/gemini-2.5-flash",      endpoint: "https://ai.gateway.lovable.dev/v1/chat/completions",
+    purpose: "Primary worksheet generation (generateWorksheet, suggest-exercises)" },
+  { provider: "lovable-gateway", model: "google/gemini-2.5-flash-lite", endpoint: "https://ai.gateway.lovable.dev/v1/chat/completions",
+    purpose: "Lightweight classification (classify-knowledge-entry, translate-flashcard)" },
   // v6.9.36 — Removed `lovable-gateway/openai/gpt-5-mini`: not used by app
-  // runtime (real fallback uses direct OpenAI `gpt-5-mini-2025-08-07`) and
-  // its minimal chat probe consistently tripped GPT-5 reasoning-token caps.
-  // Direct OpenAI checks below cover actual production paths.
-  { provider: "openai",          model: "gpt-4o-mini",                  endpoint: "https://api.openai.com/v1/models/gpt-4o-mini" },
-  { provider: "openai",          model: "gpt-5-mini-2025-08-07",        endpoint: "https://api.openai.com/v1/models/gpt-5-mini-2025-08-07" },
+  // runtime (real fallback uses direct OpenAI `gpt-5-mini-2025-08-07`).
+  { provider: "openai",          model: "gpt-4o-mini",                  endpoint: "https://api.openai.com/v1/models/gpt-4o-mini",
+    purpose: "OpenAI fallback for verify-open-answers, generate-curriculum-phases" },
+  { provider: "openai",          model: "gpt-5-mini-2025-08-07",        endpoint: "https://api.openai.com/v1/models/gpt-5-mini-2025-08-07",
+    purpose: "Direct OpenAI premium fallback (welcome-test scoring)" },
 ];
 
 // Monthly set — full breadth. When adding a new model anywhere in the app,
 // append it here. See docs/closed-loops/LLM_MODEL_INVENTORY.md (when present).
 const TARGETS_MONTHLY: Target[] = [
   ...TARGETS_DAILY,
-  { provider: "openai",          model: "gpt-4o-mini-tts",              endpoint: "https://api.openai.com/v1/models/gpt-4o-mini-tts" },
-  { provider: "openai",          model: "gpt-4.1-2025-04-14",           endpoint: "https://api.openai.com/v1/models/gpt-4.1-2025-04-14" },
-  { provider: "lovable-gateway", model: "google/gemini-3-flash-preview", endpoint: "https://ai.gateway.lovable.dev/v1/chat/completions" },
+  { provider: "openai",          model: "gpt-4o-mini-tts",              endpoint: "https://api.openai.com/v1/models/gpt-4o-mini-tts",
+    purpose: "TTS for generate-audio and welcome-test audio prompts" },
+  { provider: "openai",          model: "gpt-4.1-2025-04-14",           endpoint: "https://api.openai.com/v1/models/gpt-4.1-2025-04-14",
+    purpose: "Legacy reasoning fallback (kept for audit only)" },
+  { provider: "lovable-gateway", model: "google/gemini-3-flash-preview", endpoint: "https://ai.gateway.lovable.dev/v1/chat/completions",
+    purpose: "Default chat/text model (per Lovable AI catalog)" },
 ];
 
 async function ping(target: Target): Promise<{ status: number; latency_ms: number; error: string | null }> {
@@ -108,6 +113,7 @@ serve(async (req) => {
       latency_ms: r.latency_ms,
       ok,
       error: r.error,
+      purpose: target.purpose,
     });
     // Critical (deprecation 404/410) or 5xx → also log to error_logs so the
     // StatusPage banner picks it up immediately.
@@ -123,8 +129,9 @@ serve(async (req) => {
     }
   }
 
-  // Monthly mode → fire-and-forget email report.
-  if (mode === "monthly") {
+  // v6.9.37 — fire-and-forget email report in BOTH daily and monthly modes.
+  // Subject is prefixed by mode in send-model-audit-email.
+  {
     try {
       const okCount = results.filter(r => r.ok).length;
       const failedCount = results.length - okCount;
@@ -132,6 +139,7 @@ serve(async (req) => {
         <tr>
           <td style="padding:6px 10px;border-bottom:1px solid #e5e7eb;">${r.provider}</td>
           <td style="padding:6px 10px;border-bottom:1px solid #e5e7eb;"><code>${r.model}</code></td>
+          <td style="padding:6px 10px;border-bottom:1px solid #e5e7eb;">${(r as any).purpose || ''}</td>
           <td style="padding:6px 10px;border-bottom:1px solid #e5e7eb;text-align:right;">${r.status}</td>
           <td style="padding:6px 10px;border-bottom:1px solid #e5e7eb;text-align:right;">${r.latency_ms} ms</td>
           <td style="padding:6px 10px;border-bottom:1px solid #e5e7eb;color:${r.ok ? '#16a34a' : '#dc2626'};">${r.ok ? 'OK' : 'FAIL'}</td>
@@ -142,6 +150,7 @@ serve(async (req) => {
           <thead><tr style="background:#f3f4f6;">
             <th style="padding:6px 10px;text-align:left;">Provider</th>
             <th style="padding:6px 10px;text-align:left;">Model</th>
+            <th style="padding:6px 10px;text-align:left;">Used for</th>
             <th style="padding:6px 10px;text-align:right;">HTTP</th>
             <th style="padding:6px 10px;text-align:right;">Latency</th>
             <th style="padding:6px 10px;text-align:left;">Status</th>
@@ -159,6 +168,7 @@ serve(async (req) => {
           reportHtml,
           summary: { total: results.length, ok: okCount, failed: failedCount },
           generatedAt: new Date().toISOString(),
+          mode,
         }),
       })
         .then(async (r) => console.log("[audit-llm-models] email dispatch status", r.status, (await r.text()).slice(0, 300)))
@@ -171,7 +181,7 @@ serve(async (req) => {
         await emailPromise;
       }
     } catch (e) {
-      console.error("[audit-llm-models] monthly email build failed", e);
+      console.error("[audit-llm-models] email build failed", e);
     }
   }
 
