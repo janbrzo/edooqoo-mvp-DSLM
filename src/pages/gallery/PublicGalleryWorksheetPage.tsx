@@ -75,6 +75,17 @@ const PublicGalleryWorksheetPage: React.FC = () => {
 
   let parsed: any = null;
   try { parsed = worksheet.ai_response ? JSON.parse(worksheet.ai_response) : null; } catch (_) { /* ignore */ }
+  // v6.9.36 — accept legacy/alternate JSON shapes so the gallery preview is
+  // never blank for valid worksheets. Storage is not changed.
+  const exercises: any[] = (() => {
+    if (!parsed) return [];
+    if (Array.isArray(parsed.exercises)) return parsed.exercises;
+    if (parsed.worksheet && Array.isArray(parsed.worksheet.exercises)) return parsed.worksheet.exercises;
+    if (Array.isArray(parsed.sections)) {
+      return parsed.sections.flatMap((s: any) => Array.isArray(s?.exercises) ? s.exercises : []);
+    }
+    return [];
+  })();
 
   const learningResourceLd = {
     '@context': 'https://schema.org',
@@ -115,9 +126,9 @@ const PublicGalleryWorksheetPage: React.FC = () => {
           <strong>Preview mode.</strong> This is a static read-only preview of a worksheet a teacher published. Interactive answers, AI-assisted review, audio playback and downloads are available only in the full editor — <Link to="/signup" state={fromState} className="font-semibold underline">sign up free</Link> to generate or open this worksheet interactively.
         </aside>
 
-        {parsed?.exercises && Array.isArray(parsed.exercises) ? (
+        {exercises.length > 0 ? (
           <ol className="space-y-6">
-            {parsed.exercises.map((ex: any, i: number) => (
+            {exercises.map((ex: any, i: number) => (
               <li key={i}>
                 <GalleryExerciseRenderer exercise={ex} index={i} />
               </li>

@@ -75,6 +75,9 @@ export default function WorksheetForm({
   const [activeTab, setActiveTab] = useState<'exercises' | 'advanced' | null>(null);
   const [showMoreFields, setShowMoreFields] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
+  // v6.9.36 — auto-submit readiness refs (deterministic gate, not timeout).
+  const autoSubmitFiredRef = useRef(false);
+  const autoSubmitRequestRef = useRef<{ studentId: string | null; suggestionId: string | null; createdAt: number } | null>(null);
   const {
     toast
   } = useToast();
@@ -266,45 +269,55 @@ export default function WorksheetForm({
       }
     }
 
-    // v4.7: auto-submit if DSLM "Generate worksheet ↗" was clicked.
-    // Wait 600ms + 2× requestAnimationFrame so React fully flushes the prefill
-    // setState batch (topic + exercises + media + focus) BEFORE handleSubmit
-    // reads state through closure. Eliminates the silent "form filled but
-    // nothing happens" race condition.
+    // v6.9.36 — auto-submit if DSLM "Generate worksheet ↗" was clicked.
+    // The readiness gate (see below useEffect) waits until topic + intended
+    // student + exercises are committed, then submits once. Eliminates the
+    // silent "form filled but nothing happens" race.
     const shouldAutoGenerate = sessionStorage.getItem('autoGenerateWorksheet') === 'true';
     if (shouldAutoGenerate) {
-      // v6.9.34 — keep the flag in sessionStorage until we ACTUALLY submit.
-      // The previous version deleted it on mount, so if the first submit
-      // attempt failed (stale student/topic state), the retry never fired.
-      // The submit-effect below clears the flag right before requestSubmit.
+      try {
+        const raw = sessionStorage.getItem('autoGenerateWorksheetRequest');
+        if (raw) autoSubmitRequestRef.current = JSON.parse(raw);
+      } catch { /* ignore */ }
       devLog('🚀 [WorksheetForm] autoGenerate flag detected; submit will fire when topic + student are ready');
     }
   }, []);
 
-  // v6.9.34 — robust auto-submit: re-runs whenever lessonTopic / student
-  // selection change after hydration, until either succeeds or 8s timeout.
+  // v6.9.36 — deterministic readiness gate. Re-runs on every hydration tick.
+  // Submits exactly once when ALL of: flag present, topic hydrated, intended
+  // student selected (when request specifies one), exercises non-empty.
   useEffect(() => {
+    if (autoSubmitFiredRef.current) return;
     if (sessionStorage.getItem('autoGenerateWorksheet') !== 'true') return;
-    if (!lessonTopic) return; // wait for prefill to hydrate topic
-    // v6.9.35 — wait 2× rAF for React commit, then submit. setTimeout was
-    // being cancelled by rapid dep changes (lessonTopic hydrates in 2 batches),
-    // so the submit never fired.
-    let cancelled = false;
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-      if (cancelled) return;
-      if (sessionStorage.getItem('autoGenerateWorksheet') !== 'true') return;
-      if (!formRef.current) return;
-      sessionStorage.removeItem('autoGenerateWorksheet');
-      devLog('🚀 [WorksheetForm] Auto-submitting (v6.9.35 rAF)');
-      formRef.current.requestSubmit();
-    }));
-    return () => { cancelled = true; };
-  }, [lessonTopic, selectedStudentId]);
+    if (!lessonTopic || !lessonTopic.trim()) return;
+    if (!selectedExercises || selectedExercises.length === 0) return;
+    if (!formRef.current) return;
+    const req = autoSubmitRequestRef.current;
+    if (req?.studentId && selectedStudentId !== req.studentId) return; // wait for student hydration
+    autoSubmitFiredRef.current = true;
+    sessionStorage.removeItem('autoGenerateWorksheet');
+    sessionStorage.removeItem('autoGenerateWorksheetRequest');
+    // One microtask + rAF so React commit lands before requestSubmit reads state via closure.
+    window.setTimeout(() => {
+      requestAnimationFrame(() => {
+        try {
+          devLog('🚀 [WorksheetForm] Auto-submitting (v6.9.36 readiness gate)');
+          formRef.current?.requestSubmit();
+        } catch (e) {
+          devWarn('[WorksheetForm] requestSubmit threw', e);
+        }
+      });
+    }, 0);
+  }, [lessonTopic, selectedStudentId, selectedExercises, selectedMediaTypes, exerciseFocusMap]);
 
-  // v6.9.35 — last-resort safety: drop flag after 30s of inactivity.
+  // v6.9.36 — last-resort safety: drop both flags after 30s of inactivity.
   useEffect(() => {
     const cleanup = setTimeout(() => {
+      if (sessionStorage.getItem('autoGenerateWorksheet') === 'true') {
+        devWarn('[WorksheetForm] auto-generate watchdog: dropping stale flag after 30s');
+      }
       sessionStorage.removeItem('autoGenerateWorksheet');
+      sessionStorage.removeItem('autoGenerateWorksheetRequest');
     }, 30000);
     return () => clearTimeout(cleanup);
   }, []);

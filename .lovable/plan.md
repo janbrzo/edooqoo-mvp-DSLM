@@ -1,459 +1,615 @@
-# Plan v6.9.35 — Onboarding Click-through, AddStudent Nav, Gallery Nav & Audit Hardening
+# Plan v6.9.36 — Problem Resolution Cycle
 
-Wszystkie zmiany są chirurgiczne, poza obszarem Worksheet Generation Engine. Każdy problem ma własny: dependency scan, root cause, wybrane rozwiązanie + uzasadnienie, dokładny diff/treść kodu, weryfikacja.
+Zakres jest zamknięty do 8 zgłoszonych problemów. Nie dotykamy Worksheet Generation Engine, promptów generowania worksheetów, Stripe, RLS ani schematu bazy poza odczytową diagnostyką. Wszystkie zmiany w kodzie i dokumentacji będą po angielsku.
 
----
+## Global dependency scan
 
-## Problem 1.1 — Spotlight blokuje klikanie wyróżnionego elementu
+Affected surface:
+- `src/components/dashboard/AddStudentDialog.tsx`
+- `src/hooks/useWelcomeTestActions.ts`
+- `src/hooks/useStudentTests.tsx` — tylko jeśli trzeba usunąć istniejący filtr `deleted_at` z hooka współdzielonego
+- `src/components/dashboard/WelcomeTestSuggestion.tsx` — tylko jeśli trzeba ujednolicić ensure/send z nowym helperem
+- `src/pages/Index.tsx`
+- `src/pages/Signup.tsx`
+- `src/components/GoogleSignInButton.tsx`
+- `src/components/WorksheetForm/index.tsx`
+- `src/pages/StudentPage.tsx`
+- `src/components/dslm/DSLMTab.tsx`
+- `src/components/dslm/GoalsView.tsx`
+- `src/components/gallery/GalleryExerciseRenderer.tsx`
+- `src/pages/gallery/PublicGalleryWorksheetPage.tsx`
+- `src/components/landing/HeroHeadline.tsx`
+- `supabase/functions/audit-llm-models/index.ts`
+- `supabase/functions/send-model-audit-email/index.ts` — tylko weryfikacja / drobne logowanie, jeśli potrzebne
+- `docs/llm-context.md`
+- `public/llms.txt`
+- opcjonalnie nowa pamięć `mem/features/onboarding/v6936-runtime-hardening.md`
 
-**Affected surface:** `src/components/onboarding/SpotlightOverlay.tsx`.
-
-**Root cause:** kontener `<div className="fixed inset-0 z-[100]">` (linia 113) pokrywa całą stronę i nie ma `pointer-events-none`. Choć 4 panele dim są nieinteraktywne, sam wrapper przechwytuje kliknięcia w całym viewportcie — także wewnątrz „dziury" wokół podświetlonego przycisku.
-
-**Solution options:**
-1. Dodać `pointer-events-none` do wrappera i `pointer-events-auto` tylko na tooltipie (już ma).
-2. Zrezygnować z wrappera, renderować 4 panele + tooltip jako rodzeństwo w portalu.
-
-**Wybrane: #1** — minimalna zmiana, zero regresji, zachowuje `aria-live` i z-index stacking.
-
-**Implementacja (jedna linia):**
-```diff
--    <div className="fixed inset-0 z-[100]" aria-live="polite">
-+    <div className="fixed inset-0 z-[100] pointer-events-none" aria-live="polite">
-```
-Tooltip ma już `pointer-events-auto` (linia 131), więc `×` i ESC dalej działają.
-
-**Verification:** otwórz spotlight na „Send Welcome Test" → kliknięcie przycisku wywołuje akcję bez wcześniejszego ESC. Tooltip „×" nadal klikalny.
-
----
-
-## Problem 1.2 — Autosend Welcome Test rzuca „auto-send welcome test failed"
-
-**Affected surface:** `src/components/dashboard/AddStudentDialog.tsx` (linie 187–278), `supabase/functions/send-test-email/index.ts`.
-
-**Root cause:** w konsoli: `GET /rest/v1/student_tests?select=id 400`. Zapytanie używa kombinacji `.eq('test_type','welcome').is('deleted_at', null)` na kolumnie `deleted_at`, której tabela `student_tests` może nie mieć (brak w typach Supabase wygenerowanych klientowi → PostgREST zwraca 400). Dodatkowo `UPDATE … set share_token = crypto.randomUUID()` w zapytaniu `.select('share_token').single()` po update zwraca tablicę gdy share_token był już ustawiony przez trigger, co tu nie problem ale można uprościć. Główny winowajca to filtr `deleted_at`.
-
-**Solution options:**
-1. Usunąć `.is('deleted_at', null)` z zapytania (kolumna nie istnieje w tym kontekście; idempotencję trzymamy przez `order created_at desc limit 1`).
-2. Zostawić, ale czytać kolumnę warunkowo — nadkomplikacja.
-
-**Wybrane: #1.**
-
-**Implementacja:** w `AddStudentDialog.tsx` linia ~210:
-```diff
-       .eq('test_type', 'welcome')
--      .is('deleted_at', null)
-       .order('created_at', { ascending: false })
-       .limit(1);
-```
-Dodatkowo: gdy `existing?.[0]?.id` istnieje ale share_token jest null, generujemy token via update + select w jednym kroku — kod już to robi (linie 245–253), zostawiamy bez zmian.
-
-**Verification:** Add Student z autosend ON → toast „Welcome Test sent to …", brak błędu w konsoli, w tabeli `student_tests` pojawia się rekord; brak warning'a 400 na `student_tests?select=id`.
+Zero regressions confirmed before implementation:
+- no Worksheet Generation Engine prompt/logic/parameter changes
+- no database migration planned
+- no RLS/policy changes planned
+- no Stripe/token/payment changes planned
+- no auth provider config changes planned
+- no changes to public/private data boundaries
+- UI copy remains English
 
 ---
 
-## Problem 2 — „Generate worksheet ↗" z 1-Minute Prep nie startuje generowania automatycznie
+## Problem 1 — Add Student + automatic Welcome Test still fails
 
-**Affected surface:** `src/pages/StudentPage.tsx` (linia 1086 ustawia `autoGenerateWorksheet` w sessionStorage), `src/components/WorksheetForm/index.tsx` (linie 274–306 — auto-submit effect), `src/components/dslm/NextStepBanner.tsx` (przekazuje `onUseAndGenerate`).
+### Dependency scan
+Affected surface:
+- `AddStudentDialog.tsx` inline autosend block, lines around current `student_tests` select/insert/update/function invoke
+- `student_tests` table constraints verified from Supabase: status check allows only `draft`, `assigned`, `in_progress`, `completed`, `reviewed`
+- `generate_test_share_token` RPC usage pattern in `useStudentTests.tsx`
+- `send-test-email` Edge Function
+- `profiles` read for teacher name
 
-**Root cause:** Effect auto-submitu (linie 286–298) ma zależność `[lessonTopic, selectedStudentId]`. Po nawigacji `navigate('/')` formularz hydratuje `lessonTopic` z `prefillWorksheet` w innym efekcie. Jednak `setTimeout(500ms)` wewnątrz effectu jest jednorazowy — gdy `lessonTopic` zmienia się dwukrotnie (pierwsza hydracja → potem normalizacja exercises ustawia inny placeholder/topic), pierwszy timeout się czyści (`return () => clearTimeout(t)`) zanim zdążył wystrzelić. Dodatkowo cleanup w drugim efekcie (linia 301–305) usuwa flagę po 10s nawet jeśli effect właśnie próbuje wystrzelić.
+Runtime facts found:
+- `student_tests.deleted_at` exists in DB, so the previous plan’s “column missing” diagnosis is incomplete.
+- The autosend insert currently writes `status: 'pending'`, but the real DB constraint rejects it. Allowed statuses do not include `pending`.
+- The frontend then catches the failure and shows: “Welcome Test could not be sent automatically…”
+- 406 console noise is likely from `.single()` on profiles/session-type calls where zero rows can happen; the critical autosend failure path is the `student_tests` write/query flow.
 
-Konkretnie: timeout 500ms + cleanup z effecta zostawia okno wyścigu; gdy depend zmienia się szybciej niż 500ms, flaga zostaje, ale `formRef.current.requestSubmit()` nie wywoła się, bo poprzedni timeout został cleared. Jednocześnie watchdog 10s usuwa flagę.
+### Root cause
+Root cause: `AddStudentDialog` duplicated the Welcome Test creation flow manually and drifted from the canonical database workflow, using invalid `student_tests.status = 'pending'` instead of creating a draft/assigned test via the same status/RPC mechanics used elsewhere.
 
-**Solution options:**
-1. Wystrzelić `requestSubmit()` natychmiast (bez setTimeout) gdy `lessonTopic && flag === 'true' && formRef.current`. Użyć `requestAnimationFrame` tylko żeby poczekać na pełen commit.
-2. Trzymać flagę dopóki rzeczywiście nie zostanie wykonana submit i usunąć watchdog 10s.
-3. Połączyć oba.
+### Solution options
+| Option | Approach | Tradeoff | Regression risk |
+|---|---|---|---|
+| A. Patch only invalid status | Change inserted status from `pending` to `draft`, then call token RPC/update to `assigned`. | Smallest diff, but leaves duplicated Welcome Test logic in `AddStudentDialog`. | Medium |
+| B. Extract a shared non-hook helper | Create a plain async helper for ensure + questions + token + email and use it from `AddStudentDialog`, optionally later from hooks. | Slightly more code, removes drift and makes future fixes single-source. | Low |
+| C. Navigate first and let `WelcomeTestSuggestion` autosend | Add `autosend=1` to URL and remove inline send. | Simpler client dialog, but depends on page mount timing and does not help inline-add contexts. | Medium |
 
-**Wybrane: #3** — natychmiastowy submit po hydracji + usunięcie watchdoga 10s; bezpiecznik: flagę usuwamy w submit handlerze (już istnieje przed `requestSubmit()`).
+### Selected solution + why
+Selected: Option B. The structural problem is duplicated workflow logic inside a UI dialog; fixing one status string is too fragile. A plain helper preserves existing UX, supports inline callers, uses canonical RPC `generate_test_share_token`, and avoids calling React hooks outside React.
 
-**Implementacja w `src/components/WorksheetForm/index.tsx`:**
+### Impact analysis
+Expected impact:
+- Add Student with autosend ON creates or reuses one welcome test.
+- Test status becomes `assigned`, not `pending`.
+- Questions are seeded once.
+- Email send happens after token generation.
+- Existing manual Welcome Test buttons remain unchanged.
 
-```diff
-   useEffect(() => {
-     if (sessionStorage.getItem('autoGenerateWorksheet') !== 'true') return;
-     if (!lessonTopic) return;
--    const t = setTimeout(() => {
--      if (sessionStorage.getItem('autoGenerateWorksheet') !== 'true') return;
--      if (formRef.current) {
--        sessionStorage.removeItem('autoGenerateWorksheet');
--        devLog('🚀 [WorksheetForm] Auto-submitting (v6.9.34 retry-effect)');
--        formRef.current.requestSubmit();
--      }
--    }, 500);
--    return () => clearTimeout(t);
-+    // v6.9.35 — wait 2× rAF for React commit, then submit. No setTimeout
-+    // because rapidly changing deps were cancelling pending timers and the
-+    // submit never fired.
-+    let cancelled = false;
-+    requestAnimationFrame(() => requestAnimationFrame(() => {
-+      if (cancelled) return;
-+      if (sessionStorage.getItem('autoGenerateWorksheet') !== 'true') return;
-+      if (!formRef.current) return;
-+      sessionStorage.removeItem('autoGenerateWorksheet');
-+      devLog('🚀 [WorksheetForm] Auto-submitting (v6.9.35 rAF)');
-+      formRef.current.requestSubmit();
-+    }));
-+    return () => { cancelled = true; };
-   }, [lessonTopic, selectedStudentId]);
+Zero regressions confirmed:
+- no schema change
+- no RLS change
+- no email template rewrite beyond existing `send-test-email`
+- no student creation behavior change except fixing autosend
 
--  // Safety net: if flag survives 10s without firing, drop it.
--  useEffect(() => {
--    const cleanup = setTimeout(() => {
--      sessionStorage.removeItem('autoGenerateWorksheet');
--    }, 10000);
--    return () => clearTimeout(cleanup);
--  }, []);
-+  // v6.9.35 — last-resort safety: drop flag after 30s of inactivity so a
-+  // stuck user navigating away doesn't auto-generate on next /generator visit.
-+  useEffect(() => {
-+    const cleanup = setTimeout(() => {
-+      sessionStorage.removeItem('autoGenerateWorksheet');
-+    }, 30000);
-+    return () => clearTimeout(cleanup);
-+  }, []);
-```
+### Full implementation plan
+1. Add a new utility file, for example `src/lib/welcomeTest/ensureWelcomeTest.ts`, with English code:
+   - export `ensureWelcomeTest({ studentId, teacherId, studentName })`
+   - query latest welcome test with `.select('id, share_token, status')`, `.eq(student_id)`, `.eq(teacher_id)`, `.eq(test_type, 'welcome')`, `.is('deleted_at', null)`, `.order('created_at', { ascending: false })`, `.limit(1)`
+   - do not use `.single()`; use array first row or `.maybeSingle()` only when uniqueness is guaranteed
+   - if no row: insert `student_tests` with `status: 'draft'`, `attempt_number: 1`, `total_questions: ALL_WELCOME_TEST_QUESTIONS.length`
+   - seed `student_test_questions` only after checking if count for `test_id` is zero
+   - generate token using `supabase.rpc('generate_test_share_token', { p_test_id: testId, p_teacher_id: teacherId, p_expires_hours: 90 * 24 })`
+   - after token RPC, update status to `assigned` and `assigned_at` if RPC does not already do it
+   - return `{ testId, token, shareUrl }`
+2. Add `sendWelcomeTestEmail({ token, recipientEmail, studentName, teacherId })` helper in same file or adjacent file:
+   - fetch teacher profile using `.maybeSingle()` instead of `.single()`
+   - invoke `send-test-email` with existing body shape
+   - if invoke returns `{ error }`, throw an explicit error with function response details
+3. Replace the inline autosend block in `AddStudentDialog.tsx`:
+   - remove dynamic import of `useWelcomeTestActions`
+   - call the helper inside the existing best-effort async block
+   - keep existing success/error toasts
+   - keep default navigation logic after add
+4. Keep `send-test-email` Edge Function unchanged unless logs show email body/function-level failure.
+5. Optional hardening in `useWelcomeTestActions.ts`: replace `.single()` profile read with `.maybeSingle()` to remove avoidable 406 console noise.
 
-**Verification:** w 1-Minute Prep klikam „Generate worksheet ↗" → trafiam na `/`, formularz uzupełnia się, generowanie startuje samo w < 1s.
-
----
-
-## Problem 3 — Usunąć „Try Demo First" z modalu Create Account
-
-**Affected surface:** `src/pages/Signup.tsx`.
-
-**Implementacja:** `rg -n "Try Demo First" src/pages/Signup.tsx` → usunąć cały link/wiersz (potencjalnie linie ~250–260). Plan: skasować pojedynczy `<Link to="/demo">…</Link>` lub `<p>` zawierający tekst. Zachować separator i „Sign in here".
-
-```diff
--          <p className="text-center text-sm text-muted-foreground">
--            🎯 Try Demo First — explore without signing up
--          </p>
-```
-
-**Verification:** modal Create Account nie zawiera napisu „Try Demo First".
+### Verification checklist
+- Add student with autosend ON creates `student_tests.status = assigned`.
+- `student_test_questions` count equals canonical Welcome Test question count.
+- `share_token` is non-null.
+- `send-test-email` receives a valid token and returns success.
+- Toast is success, not fallback error.
+- No `student_tests?select=id` 400 in browser network.
+- No duplicate welcome test row for the same student/teacher on repeated click.
 
 ---
 
-## Problem 4 — Po potwierdzeniu maila nie otwiera się modal Add Student
+## Problem 2 — 1-Minute Prep “Generate worksheet ↗” fills form but does not auto-start
 
-**Affected surface:** `src/pages/Signup.tsx`, `src/pages/Index.tsx` (linie 86–103).
+### Dependency scan
+Affected surface:
+- `PathwayView.tsx` sets `autoGenerate` through `onUseWorksheetSuggestion`
+- `StudentPage.tsx` writes `preSelectedStudent`, `prefillWorksheet`, `prefillExercises`, `autoGenerateWorksheet`
+- `Index.tsx` reads `preSelectedStudent` and passes `preSelectedStudent` to `WorksheetForm`
+- `WorksheetForm/index.tsx` hydrates state and requests submit
+- `useWorksheetGeneration` consumes submitted form data
 
-**Root cause:** Effect w `Index.tsx` czyta `searchParams.get('action')`, ale gdy `isRegisteredUser` jest jeszcze `false` (sesja po e-mailowym potwierdzeniu hydratuje się w 1–3 ticki), early-return zostawia jedynie nieaktywny `setTimeout(600ms)`, który niczego nie wywołuje (`re-run by reading param again` — nigdy nie jest re-readowany, bo zależność to `searchParams` referencja, która się nie zmienia). Gdy `isRegisteredUser` przechodzi w `true`, effect uruchamia się ponownie — TYLKO jeśli `searchParams` zawiera `action=add-student`. Problem: w niektórych flow Supabase po `emailRedirectTo` strica `?token_hash=…&type=signup` zamiast `?action=add-student` (lub nadpisuje query). Dodatkowo, jeśli user trafia na `/` przed wczytaniem sesji i `isRegisteredUser` jest false, `action` przetrwa, OK — ale jeśli inna ścieżka oczyściła query, znika.
+### Root cause
+Root cause: auto-start is tied to React state hydration (`lessonTopic`, `selectedStudentId`) but the effect can fire before `selectedStudentId` is committed from `preSelectedStudent`, and the flag is removed before the real “student + topic + exercises ready” state is guaranteed.
 
-**Solution options:**
-1. Wprowadzić trwały flag `localStorage.setItem('post-signup-add-student','1')` w `Signup.tsx` zaraz po wywołaniu `supabase.auth.signUp(...)`. W `Index.tsx` otwierać modal gdy flag istnieje + `isRegisteredUser === true`, następnie kasować flag.
-2. Polegać tylko na `?action=add-student` — kruche.
+### Solution options
+| Option | Approach | Tradeoff | Regression risk |
+|---|---|---|---|
+| A. More timeouts/rAF | Increase delays and retry more. | Quick but repeats the same race-condition pattern. | Medium |
+| B. Queue-based readiness gate | Store one structured auto-generate request ID/payload, wait until topic + intended student + exercises are hydrated, then submit once. | Slightly more code, deterministic. | Low |
+| C. Submit directly from StudentPage without form | Bypass form and call generation handler with payload. | Fastest UX but bypasses visible form validation and current form behavior. | High |
 
-**Wybrane: #1** — odporne na zgubienie query przez przekierowanie e-mail confirm/OAuth.
+### Selected solution + why
+Selected: Option B. The bug is not insufficient delay; it is missing deterministic readiness. A structured queue keeps the current form UX but makes submit conditional on exact required state.
 
-**Implementacja:**
+### Impact analysis
+Expected impact:
+- Clicking `Generate worksheet ↗` navigates to `/`.
+- Form fields populate.
+- Generation starts automatically only after the intended student and topic are present.
+- Manual `Use this` remains prefill-only.
 
-`src/pages/Signup.tsx` — w handlerze sukcesu rejestracji (zarówno signUp z `emailRedirectTo` jak i Google OAuth):
-```ts
-try { localStorage.setItem('post-signup-add-student', '1'); } catch {}
-```
-Dodać przed `navigate(...)` w 2 miejscach (form submit + OAuth callback).
+Zero regressions confirmed:
+- no worksheet prompt changes
+- no exercise selection algorithm changes
+- no token/paywall changes
+- no anonymous form behavior change unless `autoGenerateWorksheet` exists
 
-`src/pages/Index.tsx` — rozszerzyć efekt (linia 86):
-```diff
-   useEffect(() => {
--    if (searchParams.get('action') !== 'add-student') return;
--    if (isRegisteredUser) {
--      setAddStudentOpen(true);
--      const next = new URLSearchParams(searchParams);
--      next.delete('action');
--      setSearchParams(next, { replace: true });
--      return;
--    }
--    const id = window.setTimeout(() => {}, 600);
--    return () => window.clearTimeout(id);
-+    const hasFlag =
-+      searchParams.get('action') === 'add-student' ||
-+      (() => { try { return localStorage.getItem('post-signup-add-student') === '1'; } catch { return false; } })();
-+    if (!hasFlag) return;
-+    if (!isRegisteredUser) return; // wait until session hydrates
-+    setAddStudentOpen(true);
-+    try { localStorage.removeItem('post-signup-add-student'); } catch {}
-+    if (searchParams.get('action') === 'add-student') {
-+      const next = new URLSearchParams(searchParams);
-+      next.delete('action');
-+      setSearchParams(next, { replace: true });
-+    }
-   }, [searchParams, isRegisteredUser, setSearchParams]);
-```
+### Full implementation plan
+1. In `StudentPage.tsx`, when `autoGenerate === true`, write a richer marker:
+   - keep `sessionStorage.setItem('autoGenerateWorksheet', 'true')` for backward compatibility
+   - add `sessionStorage.setItem('autoGenerateWorksheetRequest', JSON.stringify({ studentId: student.id, suggestionId, createdAt: Date.now() }))`
+2. In `WorksheetForm/index.tsx`:
+   - add refs: `autoSubmitFiredRef`, `autoSubmitAttemptsRef`, `autoSubmitTimerRef`
+   - parse `autoGenerateWorksheetRequest` safely
+   - readiness conditions:
+     - `autoGenerateWorksheet === 'true'`
+     - `lessonTopic.trim().length > 0`
+     - if request has `studentId`, `selectedStudentId === request.studentId`
+     - if request has no studentId, allow existing selected student/no-student flow
+     - `selectedExercises.length >= 1`
+     - `formRef.current` exists
+   - if not ready, do nothing; effect reruns on `[lessonTopic, selectedStudentId, selectedExercises.length, selectedMediaTypes.length, exerciseFocusMap]`
+   - when ready, schedule one micro-delay: `window.setTimeout(..., 0)` plus one `requestAnimationFrame`, then call `requestSubmit()`
+   - remove flags only immediately before `requestSubmit()`
+   - if `requestSubmit()` throws or formRef missing, keep the flag until watchdog expires
+3. Increase watchdog to be semantic:
+   - after 30s, remove `autoGenerateWorksheet` and `autoGenerateWorksheetRequest`
+   - log via `devWarn`, not `console.error`
+4. In `handleSubmit`, if generation proceeds, no change.
+5. Preserve existing DOM fallback for `lessonTopic`.
 
-**Verification:** zarejestruj się → potwierdź email → lądowanie na `/` → modal Add Student otwiera się natychmiast po hydracji sesji.
-
----
-
-## Problem 5 — Brak nawigacji + brak focus po dodaniu ucznia
-
-**Affected surface:** `src/pages/Dashboard.tsx` (linie 504–512), `src/components/dashboard/AddStudentDialog.tsx` (linie 282–297).
-
-**Root cause:** Dashboard przekazuje `onStudentAdded={() => { setAddStudentModalOpen(false); refetchStudents(); }}`. Skutek: dialog wchodzi w gałąź „caller-controlled nav" i NIE wywołuje `navigate(...)`. Użytkownik zostaje na `/dashboard`. To samo dotyczy modalu otwartego z `/?action=add-student` na Index — ale tam `<AddStudentDialog>` nie ma `onStudentAdded`, więc działa OK. Bug jest w Dashboard.
-
-**Solution options:**
-1. Usunąć `onStudentAdded` z dashboardowego `<AddStudentDialog>` (default flow weźmie nawigację po side `addStudent` z env).
-2. Przekazać `onStudentAdded` który sam wykonuje nawigację zgodną z autosend.
-
-**Wybrane: #1** — minimal i spójne z innymi punktami wywołania (Index, OnboardingChecklist). `refetchStudents` i tak odpali się przez efekt `useStudents` po zmianie + onboarding refresh, którego dialog już wywołuje (linie 181, 185).
-
-**Implementacja `src/pages/Dashboard.tsx`:**
-```diff
-       <AddStudentDialog 
-         triggerButton={false}
-         open={addStudentModalOpen}
-         onOpenChange={setAddStudentModalOpen}
--        onStudentAdded={() => {
--          setAddStudentModalOpen(false);
--          refetchStudents();
--        }}
-       />
-```
-Dialog sam zamknie się (`setOpen(false)`) i sam zrobi `refetch()` (linia 184).
-
-**A. Nawigacja:** Default flow w `AddStudentDialog` (linie 287–297) już teraz robi nawigację na `/student/:id?tab=dslm&...` z odpowiednim `focus`. Po naszej zmianie zadziała.
-
-**B. Brak autosend → focus „Send Welcome Test"** — już zaimplementowane: `navigate('/student/:id?tab=dslm&view=pathway&focus=send-welcome-test&_=ts')`.
-
-**C. Z autosend → modal Add Goal** — DialogContent oczekiwany w PathwayView/DSLMTab. Sprawdzamy: `focus=add-goal-modal` — używamy istniejącego identyfikatora. Jeśli komponent na DSLMTab `view=goals` nasłuchuje `focus`, otwiera modal Add Goal; jeśli nasłuchiwacza nie ma, dodajemy.
-
-Dodatkowo w `DSLMTab.tsx` upewniamy się, że gdy `searchParams.get('focus') === 'add-goal-modal'`, otwieramy modal dodawania celu. Implementacja:
-```ts
-// DSLMTab.tsx (Goals view)
-useEffect(() => {
-  if (searchParams.get('focus') === 'add-goal-modal') {
-    setAddGoalDialogOpen(true);
-    const next = new URLSearchParams(searchParams);
-    next.delete('focus'); next.delete('_');
-    setSearchParams(next, { replace: true });
-  }
-}, [searchParams]);
-```
-(Jeśli już istnieje analogiczny handler, pomijamy.)
-
-**Verification:**
-- Add Student (autosend OFF) → ląduję na `/student/:id?tab=dslm&view=pathway` z aktywnym spotlightem na „Send Welcome Test".
-- Add Student (autosend ON) → ląduję na `/student/:id?tab=dslm&view=goals`, otwiera się modal Add Goal.
+### Verification checklist
+- Click top banner `Generate worksheet ↗` → form opens, selected student is correct, generation modal starts automatically.
+- Click compact card play icon → same.
+- Click phase step play icon → same.
+- Click `Use this` → fills form but does not auto-submit.
+- If teacher has no tokens, auto-submit reaches existing paywall behavior instead of silently doing nothing.
+- Suggestion is marked used only after `worksheetGenerationSuccess`, unchanged.
 
 ---
 
-## Problem 6 — Reminder email = ten sam email co pierwotny
+## Problem 3 — after signup/email confirmation first login should open Add Student modal
 
-**Affected surface:** `supabase/functions/send-test-email/index.ts`. Klient już przekazuje `reminder: true` w body.
+### Dependency scan
+Affected surface:
+- `Signup.tsx`
+- `GoogleSignInButton.tsx`
+- `Index.tsx`
+- Supabase redirect behavior after email confirmation/OAuth
 
-**Root cause:** Edge function ignoruje pole `reminder` — zawsze renderuje treść pierwotnego zaproszenia.
+### Root cause
+Root cause: the post-signup intent is split between URL param and localStorage, but OAuth currently redirects signup users to `/dashboard`, and `Index.tsx` renders the AddStudentDialog only in the anonymous/public branch, not in the authenticated branch.
 
-**Implementacja `supabase/functions/send-test-email/index.ts`:**
-```diff
--    const { shareToken, recipientEmail, testTitle, teacherName, testType } = await req.json();
-+    const { shareToken, recipientEmail, testTitle, teacherName, testType, reminder } = await req.json();
-```
-Dodać nowy blok HTML dla `reminder === true && isWelcomeTest`:
-```ts
-const reminderBody = `
-  <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-    <h2 style="color: #7c3aed;">⏰ Friendly reminder — Welcome Test</h2>
-    <p>Hello,</p>
-    <p><strong>${teacherName || "Your teacher"}</strong> noticed you haven't completed the Welcome Test yet.</p>
-    <p>It only takes 20–30 minutes and helps your teacher tailor every lesson to you.</p>
-    <a href="${shareUrl}" style="display:inline-block;background:#7c3aed;color:#fff;padding:14px 28px;text-decoration:none;border-radius:8px;font-weight:bold;margin:20px 0;">Resume Welcome Test</a>
-    <p style="color:#6b7280;font-size:13px;">If you've already started, this link picks up where you left off.</p>
-    <p style="color:#6b7280;font-size:12px;margin-top:20px;">Or copy and paste this URL: ${shareUrl}</p>
-  </div>`;
-```
-Oraz:
-```ts
-const subject = reminder && isWelcomeTest
-  ? `Reminder: please complete your Welcome Test from ${teacherName || "your teacher"}`
-  : isWelcomeTest
-    ? `${teacherName || "Your teacher"} invited you to take a Welcome Test`
-    : `${teacherName || "Your teacher"} assigned you a test: ${testTitle}`;
+### Solution options
+| Option | Approach | Tradeoff | Regression risk |
+|---|---|---|---|
+| A. Force all signup redirects to `/?action=add-student` | Minimal route fix. | Does not fix authenticated branch if modal is mounted only in public branch. | Medium |
+| B. Mount AddStudentDialog for both authenticated and public Index branches + redirect Google signup to `/` | Fixes both email/password and Google. | Small UI mount duplication or shared render helper. | Low |
+| C. Open modal on `/dashboard` instead | Align Google redirect with dashboard. | User requested generator page + modal; changes intended onboarding surface. | Medium |
 
-const html = reminder && isWelcomeTest ? reminderBody : emailBody;
-```
-i podmienić `html: emailBody` na `html`.
+### Selected solution + why
+Selected: Option B. The modal state already exists in `Index.tsx`; the real blocker is that authenticated rendering returns before the modal JSX. Moving the dialog outside branch-specific returns or adding it to authenticated branch fixes the actual runtime path.
 
-**Verification:** kliknięcie „Send reminder" → mail z tematem „Reminder: please complete your Welcome Test…" i innym body.
+### Impact analysis
+Expected impact:
+- Email signup after confirmation lands on `/` and opens Add Student.
+- Google signup lands on `/` and opens Add Student.
+- Existing login/signin mode remains unchanged.
+- Users with pending anonymous worksheet claims still go to claimed worksheet, preserving current ownership flow.
 
----
+Zero regressions confirmed:
+- no auth configuration changes
+- no profile schema changes
+- no dashboard behavior change for normal logged-in users without post-signup flag
 
-## Problem 7 — Brak sticky nav w `/gallery` + renderery Word Order / Complete the Word / Matching Halves
+### Full implementation plan
+1. In `GoogleSignInButton.tsx`:
+   - if `mode === 'signup'` and no pending worksheet claim, set `redirectPath = '/?action=add-student'`, not `/dashboard`
+   - keep signin mode redirect unchanged
+2. In `Index.tsx`:
+   - render `<AddStudentDialog triggerButton={false} open={addStudentOpen} onOpenChange={setAddStudentOpen} />` inside authenticated branch too, after `TokenPaywallModal`
+   - or create a small `addStudentDialogNode` constant and include it in both branches
+3. Strengthen the effect:
+   - if flag exists but `authLoading` is true, wait
+   - if `isRegisteredUser` is true, open modal
+   - clear localStorage only after setting open true
+   - strip `action` param after open
+4. Keep existing `Signup.tsx` `emailRedirectTo` and localStorage flag.
 
-### 7A. Sticky nav
-
-**Affected surface:** `src/pages/gallery/PublicGalleryIndex.tsx`, `src/pages/gallery/PublicGalleryWorksheetPage.tsx`, `src/components/landing/StickyNav.tsx` (już istnieje).
-
-**Solution:** dodać `<StickyNav nonSticky={false} isRegisteredUser={!!user} … />` na górze obu stron. Aby nie tworzyć zależności od hooków auth na publicznych stronach, użyjemy uproszczonej wersji — minimalny header z linkami: logo → `/`, „Gallery" → `/gallery`, „Sign in" → `/login`, „Get started" → `/signup`. Niech to będzie nowy lekki komponent `src/components/public/PublicTopNav.tsx`.
-
-**Plik `src/components/public/PublicTopNav.tsx` (nowy):**
-```tsx
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-
-export const PublicTopNav: React.FC = () => (
-  <header className="sticky top-0 z-40 w-full border-b bg-background/80 backdrop-blur">
-    <div className="container mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
-      <Link to="/" className="text-lg font-bold text-primary">Edooqoo</Link>
-      <nav className="flex items-center gap-2 text-sm">
-        <Link to="/gallery" className="text-muted-foreground hover:text-foreground px-2">Gallery</Link>
-        <Link to="/exercise-types" className="text-muted-foreground hover:text-foreground px-2 hidden sm:inline">Exercises</Link>
-        <Link to="/login"><Button variant="ghost" size="sm">Sign in</Button></Link>
-        <Link to="/signup"><Button size="sm">Get started</Button></Link>
-      </nav>
-    </div>
-  </header>
-);
-export default PublicTopNav;
-```
-
-Dodać `<PublicTopNav />` jako pierwszy element w JSX obu stron galerii (przed `<article>`/`<PageSeo>` content wrappera).
-
-### 7B. Renderer Word Order / Complete Word / Matching Halves
-
-`GalleryExerciseRenderer.tsx` ma już aliasy + obsługę halves/word-order. Realny problem: pola w danych z worksheetu nazywają się inaczej. Brakuje obsługi:
-- `matching-halves`: niektóre worksheety przechowują `prompts` jako tablicę obiektów `{prompt, options}` (multiple choice w przebraniu) — w takim wypadku traktować jak multiple-choice. Dodać fallback:
-  ```ts
-  case "matching":
-  case "matching-halves": {
-    let pairs: any[] = ex.pairs || ex.items || ex.matches || ex.questions || [];
-    // ... istniejący kod
-    if (pairs.length && pairs[0]?.options && pairs[0]?.prompt) {
-      // multiple-choice fallback
-      return (
-        <ol className="list-decimal space-y-2 pl-5 text-sm">
-          {pairs.map((q: any, i: number) => (
-            <li key={i}>
-              <div>{toText(q.prompt)}</div>
-              <ul className="mt-1 list-[upper-alpha] pl-6 text-muted-foreground">
-                {(q.options || []).map((o: any, oi: number) => <li key={oi}>{toText(o)}</li>)}
-              </ul>
-            </li>
-          ))}
-        </ol>
-      );
-    }
-    // ... istniejący table render
-  }
-  ```
-- `word-order`: dodać akceptację `it?.shuffled_sentence`, `it?.scrambled_sentence`, oraz wartości typu `{ words: ["The","cat","..."], answer: "..." }`.
-  - Rozszerzyć `raw`:
-  ```ts
-  const raw =
-    it?.words ?? it?.shuffled ?? it?.tokens ?? it?.scrambled ??
-    it?.shuffled_sentence ?? it?.scrambled_sentence ?? it?.sentence ??
-    it?.prompt ?? (typeof it === 'string' ? it : null);
-  ```
-- `complete-word` (oraz `negative-prefixes`, `word-formation`): dodać do listy źródeł kolumny lewej `it?.before`, `it?.context`, `it?.sentence`, `it?.clue`, a do prawej `it?.after`, `it?.result`, `it?.full_word`, `it?.complete`.
-
-**Implementacja diff (case "synonyms" … gałąź):**
-```diff
--                    {toText(it?.term ?? it?.prompt ?? it?.word ?? it?.base ?? it?.input ?? it?.gapped ?? it?.masked ?? it?.text ?? it?.question ?? it?.root ?? it?.original ?? it?.stem ?? it)}
-+                    {toText(it?.term ?? it?.prompt ?? it?.word ?? it?.base ?? it?.input ?? it?.gapped ?? it?.masked ?? it?.text ?? it?.question ?? it?.root ?? it?.original ?? it?.stem ?? it?.before ?? it?.context ?? it?.clue ?? it?.sentence ?? it)}
--                    {toText(it?.definition ?? it?.answer ?? it?.target ?? it?.solution ?? it?.synonym ?? it?.antonym ?? it?.completed ?? it?.negative ?? it?.opposite ?? it?.transformed ?? it?.full ?? "")}
-+                    {toText(it?.definition ?? it?.answer ?? it?.target ?? it?.solution ?? it?.synonym ?? it?.antonym ?? it?.completed ?? it?.negative ?? it?.opposite ?? it?.transformed ?? it?.full ?? it?.full_word ?? it?.complete ?? it?.after ?? it?.result ?? "")}
-```
-
-**Verification:** otwórz dowolny worksheet w galerii z Word Order / Matching Halves / Complete the Word — wyświetla token chips lub tabelę zamiast JSON.
+### Verification checklist
+- New email signup with confirmation → `/` authenticated generator view appears and Add Student modal is open.
+- Google signup → `/` authenticated generator view appears and Add Student modal is open.
+- Normal visit to `/` as registered user without flag → modal does not open.
+- Pending worksheet claim still redirects to claimed worksheet.
 
 ---
 
-## Problem 8 — Audyt LLM: GPT-5-mini 400 (max_tokens), legacy gemini-2.0 alias + smoke test
+## Problem 4 — after autosent Welcome Test, Student page scrolls to Goals but Add Learning Goals modal does not open
 
-**Affected surface:** `supabase/functions/audit-llm-models/index.ts`.
+### Dependency scan
+Affected surface:
+- `AddStudentDialog.tsx` navigation target: `/student/:id?tab=dslm&view=goals&focus=add-goal-modal&_={ts}`
+- `StudentPage.tsx` tab param handling
+- `DSLMTab.tsx` focus param handling
+- `GoalsView.tsx` `pendingAddGoal` prop and modal state
 
-**Root cause:**
-- `max_completion_tokens: 16` to wciąż za mało dla GPT-5-mini (reasoning tokens > 16). Podnosimy do `128`.
-- Raport e-mailowy pokazał `google/gemini-2.0-flash`, ale w kodzie już tego nie ma → to STARY mailing (sprzed deploy). Robimy ręczny smoke test (curl) żeby potwierdzić, że obecna konfiguracja przechodzi.
+### Root cause
+Root cause: `DSLMTab` dispatches the add-goal focus before `GoalsView` is reliably mounted through `LazySection`, so scrolling works but the one-time modal signal can be lost.
 
-**Implementacja:**
-```diff
--        [tokenField]: isGpt5Family ? 16 : 1,
-+        [tokenField]: isGpt5Family ? 128 : 1,
-```
+### Solution options
+| Option | Approach | Tradeoff | Regression risk |
+|---|---|---|---|
+| A. Increase timeout before dispatch | Small diff. | Still race-prone with lazy render/slow devices. | Medium |
+| B. State-driven pending focus | Convert focus into React state (`pendingAddGoal`) and keep it true until `GoalsView` consumes it. | Deterministic and already partially supported. | Low |
+| C. Pass URL params directly to GoalsView | Direct but spreads router concern into child component. | Medium |
 
-**Smoke test (po deploy):**
-```
-supabase--deploy_edge_functions(["audit-llm-models"])
-supabase--curl_edge_functions(
-  path: "/audit-llm-models", method: "POST",
-  headers: { "x-cron-secret": "<CRON_SECRET>", "Content-Type":"application/json" },
-  body: '{"mode":"monthly"}')
-```
-Oczekiwane: wszystkie 9 modeli `ok: true`. Jeśli `openai/gpt-5-mini` znowu 400 → podnieść `128` → `256`.
+### Selected solution + why
+Selected: Option B. `GoalsView` already supports `pendingAddGoal`; the fix is to avoid relying on a transient window event for URL-driven focus.
 
-**Verification:** odpowiedź zwraca `failed: 0`. Brak `google/gemini-2.0-flash` w wynikach.
+### Impact analysis
+Expected impact:
+- Autosend ON navigation opens Add Goal modal.
+- Existing Roadmap “Add goal” event still works.
+- Repeated same action works because `_` cache-buster remains supported.
 
----
+Zero regressions confirmed:
+- no goal table changes
+- no DSLM generation logic changes
+- no Roadmap/Pathway behavior removal
 
-## RAG injection — `docs/llm-context.md` + `public/llms.txt`
+### Full implementation plan
+1. In `DSLMTab.tsx`, change `focusParam === 'add-goal-modal'` handling:
+   - call `handleScrollTo('goals')`
+   - call `setPendingAddGoal(true)` directly
+   - do not dispatch `dslm:addGoal` for URL focus path
+2. Keep `window.dispatchEvent('dslm:addGoal')` for other non-URL internal calls if still needed.
+3. Delay URL cleanup until after `setPendingAddGoal(true)` and scroll has started.
+4. In `GoalsView.tsx`, keep existing effect, but add one defensive line:
+   - when `pendingAddGoal` becomes true, set `newGoal.type = 'supporting'` before `setShowAddGoal(true)` so the modal opens in the expected “supporting goal” mode.
 
-Dopisać blok:
-
-```
-### v6.9.35 — Onboarding click-through & post-signup nav
-
-PROBLEM: Spotlight overlay swallowed clicks on highlighted element; Welcome Test autosend failed with student_tests 400; "Generate worksheet ↗" from 1-Minute Prep filled form but never submitted; Dashboard add-student stayed on /dashboard without focus hand-off; post-signup AddStudent modal failed to open when Supabase confirmation stripped ?action; Welcome Test reminder email reused initial invitation copy; /gallery had no header nav and Word Order/Matching Halves/Complete-Word renderers fell through to JSON dump; audit-llm-models still failed for openai/gpt-5-mini due to insufficient max_completion_tokens.
-
-EDOOQOO SOLUTION:
-- SpotlightOverlay wrapper marked pointer-events-none; only the tooltip stays interactive. Highlighted element clicks now fire normally.
-- AddStudentDialog autosend query no longer filters by non-existent deleted_at column.
-- WorksheetForm auto-submit waits 2× rAF after lessonTopic hydrates and fires synchronously; 10s flag watchdog extended to 30s and only clears stale flags on next mount.
-- Dashboard's AddStudentDialog no longer passes onStudentAdded so default navigation (focus add-goal-modal or send-welcome-test) runs.
-- Signup persists localStorage flag `post-signup-add-student=1`; Index opens AddStudentDialog when flag OR `?action=add-student` AND session hydrated.
-- send-test-email accepts `reminder: true` and renders a distinct "Friendly reminder" body + subject.
-- New PublicTopNav component mounted on /gallery and /gallery/:slug.
-- GalleryExerciseRenderer matching/halves accepts {prompt, options} multiple-choice fallback; word-order accepts shuffled_sentence/scrambled_sentence; complete-word adds before/after/context/clue/full_word/complete keys.
-- audit-llm-models GPT-5 family probe uses max_completion_tokens=128.
-
-TECHNICAL MECHANICS:
-- Files: SpotlightOverlay.tsx, AddStudentDialog.tsx, WorksheetForm/index.tsx, Dashboard.tsx, Signup.tsx, Index.tsx, DSLMTab.tsx (focus=add-goal-modal listener), send-test-email/index.ts, audit-llm-models/index.ts, gallery/PublicGalleryIndex.tsx, gallery/PublicGalleryWorksheetPage.tsx, components/public/PublicTopNav.tsx (new), GalleryExerciseRenderer.tsx.
-- No DB migrations, no RLS changes, no Worksheet Generation Engine changes.
-
-RAG KEYWORDS: spotlight clickthrough, pointer-events-none overlay, welcome test autosend 400, student_tests deleted_at, autoGenerateWorksheet rAF, 1-minute prep generate worksheet, post-signup add student modal, supabase emailRedirectTo flag, dashboard add student navigation, welcome test reminder email, gallery sticky nav, public top nav, word order renderer, matching halves fallback, complete-word context, gpt-5-mini max_completion_tokens.
-```
-
-Analogiczny krótszy wpis w `public/llms.txt` (sekcja Changelog).
-
-Utworzyć też `mem/features/onboarding/v6935-clickthrough-and-nav.md` z sekcjami: Spotlight pointer-events, AddStudent autosend query, WorksheetForm rAF auto-submit, Dashboard nav handoff, post-signup localStorage flag, reminder email body, PublicTopNav scope, gallery renderer fallbacks, audit GPT-5 token bump.
+### Verification checklist
+- Add student with autosend ON → navigates to DSLM Goals and Add Learning Goal dialog opens.
+- Closing modal leaves user on Goals section.
+- Repeating Add Student on another student opens modal again.
+- Manual Roadmap add-goal buttons still open the same modal.
 
 ---
 
-## Final change report (po implementacji)
+## Problem 5 — `/gallery` renderer still fails for Word Order, Complete the Word, Matching Halves
 
-Zmodyfikowane pliki:
-1. `src/components/onboarding/SpotlightOverlay.tsx`
-2. `src/components/dashboard/AddStudentDialog.tsx`
-3. `src/components/WorksheetForm/index.tsx`
-4. `src/pages/Dashboard.tsx`
-5. `src/pages/Signup.tsx`
-6. `src/pages/Index.tsx`
-7. `src/components/dslm/DSLMTab.tsx` (focus=add-goal-modal handler — tylko jeśli nie istnieje)
-8. `supabase/functions/send-test-email/index.ts`
-9. `supabase/functions/audit-llm-models/index.ts`
-10. `src/pages/gallery/PublicGalleryIndex.tsx`
-11. `src/pages/gallery/PublicGalleryWorksheetPage.tsx`
-12. `src/components/gallery/GalleryExerciseRenderer.tsx`
+### Dependency scan
+Affected surface:
+- `GalleryExerciseRenderer.tsx`
+- `PublicGalleryWorksheetPage.tsx` parsing of `ai_response`
+- public worksheet stored JSON shapes
+- screenshots show two failure classes:
+  - blank body for `word-order`
+  - blank body for `matching-halves`
+  - `complete-word` renders full answers rather than visible missing-letter prompts in some cases
 
-Nowe:
-13. `src/components/public/PublicTopNav.tsx`
-14. `mem/features/onboarding/v6935-clickthrough-and-nav.md`
+### Root cause
+Root cause: the gallery preview renderer is a separate static renderer with incomplete normalization for generated worksheet JSON variants; it does not share the robust private worksheet renderers and treats several valid stored shapes as empty arrays.
 
-Dokumentacja: `docs/llm-context.md`, `public/llms.txt`, `mem/index.md` (dopis linka).
+### Solution options
+| Option | Approach | Tradeoff | Regression risk |
+|---|---|---|---|
+| A. Add more aliases to current switch | Small targeted fix. | May need repeated patches as shapes appear. | Low-medium |
+| B. Add normalization helpers per exercise type | Keep current renderer but normalize `items` centrally for affected types. | More robust without importing interactive worksheet UI. | Low |
+| C. Reuse private worksheet exercise renderers | Best fidelity, but private renderers may include editing/interactive assumptions. | High |
 
-Out of scope (zalogowane do późniejszego sprintu):
-- 406 na `/rest/v1/subscriptions` (RLS lub brak rekordu) — wymaga osobnej decyzji.
-- `MaxListenersExceededWarning` z rozszerzenia MetaMask — szum, nie nasz kod.
+### Selected solution + why
+Selected: Option B. The public gallery must stay static/read-only, so importing private worksheet components creates regression risk. Normalizers fix the exact static preview failures safely.
 
-Verification checklist:
-- [ ] Spotlight: klik w „Send Welcome Test" działa bez ESC.
-- [ ] Add Student z autosend ON nie loguje błędu 400 i wysyła test.
-- [ ] „Generate worksheet ↗" z 1-Minute Prep auto-startuje generowanie.
-- [ ] Modal Create Account nie zawiera „Try Demo First".
-- [ ] Po potwierdzeniu emaila → modal Add Student otwiera się na `/`.
-- [ ] Po dodaniu ucznia z dashboardu → przejście na `/student/...?tab=dslm` z poprawnym focusem (Send Welcome Test / Add Goal modal).
-- [ ] Reminder mail ma temat „Reminder: please complete your Welcome Test…".
-- [ ] `/gallery` i `/gallery/:slug` mają sticky header z linkami do logowania.
-- [ ] Word Order, Matching Halves, Complete the Word renderują się jako chipy/tabela, nie JSON.
-- [ ] audit-llm-models smoke test → `failed: 0`.
+### Impact analysis
+Expected impact:
+- Matching Halves never renders a blank card when valid data exists.
+- Word Order renders shuffled tokens from array/string/object variants.
+- Complete the Word renders clue + masked/incomplete word, not only full answer.
+- Unknown types still degrade safely.
+
+Zero regressions confirmed:
+- no publishing workflow change
+- no private worksheet editor change
+- no database change
+- public preview remains read-only
+
+### Full implementation plan
+1. In `GalleryExerciseRenderer.tsx`, add helper functions:
+   - `asArray(value)` — returns array for arrays, object values, or empty array
+   - `firstNonEmpty(...values)`
+   - `splitTokens(value)` — handles arrays, `|`, `/`, commas, whitespace
+   - `maskWordFromAnswer(answer)` — vowels or middle letters replaced with underscores when no explicit masked form exists
+2. Matching normalizer:
+   - accept `ex.pairs`, `ex.items`, `ex.matches`, `ex.questions`, `ex.sentences`
+   - accept `ex.halves`, `ex.matching_halves`, `ex.sentence_halves`
+   - accept object maps like `{ left: [...], right: [...] }`, `{ starts: [...], endings: [...] }`
+   - accept item keys `start`, `ending`, `first_half`, `second_half`, `sentence_start`, `sentence_end`, `answer`
+   - if only prompts/options exist, render MC list
+   - if no pairs but `word_bank` exists, render starts + word bank, not blank
+3. Word Order normalizer:
+   - accept top-level `ex.sentences`, `ex.items`, `ex.questions`, `ex.scrambled_sentences`, `ex.word_order`, `ex.prompts`
+   - item keys: `words`, `tokens`, `scrambled`, `shuffled`, `shuffled_words`, `scrambled_words`, `shuffled_sentence`, `scrambled_sentence`, `sentence`, `prompt`
+   - for sentence strings, split into token chips
+   - if answer exists, render it as muted answer preview
+   - if no tokens, render the original prompt as a text line rather than blank
+4. Complete Word normalizer:
+   - accept `items`, `questions`, `words`, `prompts`, `vocabulary`
+   - left column: clue/definition/context/sentence/prompt
+   - right column: masked word from `gapped`, `masked`, `incomplete`, `before + blank + after`, or generated mask from `answer/full_word/word`
+   - show full answer muted only if preview policy wants teacher answer visible; otherwise keep current gallery behavior consistent with existing answer previews.
+5. In `PublicGalleryWorksheetPage.tsx`, add defensive parsing for `ai_response` shapes:
+   - if `parsed.exercises` missing but `parsed.worksheet.exercises` or `parsed.sections` exists, normalize to an exercise array
+   - do not change storage.
+
+### Verification checklist
+- Screenshot case `Matching Halves` shows rows or MC options, not blank.
+- Screenshot case `Word Order` shows token chips, not blank.
+- Screenshot case `Complete the Word` shows clue + missing-letter word/answer consistently.
+- Public gallery page still loads with nav and SEO metadata.
+- Unknown exercise type still shows safe fallback.
+
+---
+
+## Problem 6 — homepage headline clips the letter “g”
+
+### Dependency scan
+Affected surface:
+- `src/components/landing/HeroHeadline.tsx`
+- H1 typography classes and hero section overflow
+
+### Root cause
+Root cause: gradient-clipped text (`text-transparent bg-clip-text`) with tight `leading-[1.1]` inside a large heading leaves too little descender space for lowercase “g” on some browser/font combinations.
+
+### Solution options
+| Option | Approach | Tradeoff | Regression risk |
+|---|---|---|---|
+| A. Increase H1 line-height | Simple, safe. | Moves hero slightly. | Low |
+| B. Add bottom padding to gradient span | Fixes descender without changing full H1 rhythm much. | Needs precise small padding. | Low |
+| C. Reduce font size | Avoids clipping but weakens hero. | Low visually undesirable |
+
+### Selected solution + why
+Selected: Option B plus tiny line-height relaxation if needed. It addresses only the clipped gradient span and preserves the hero composition.
+
+### Impact analysis
+Expected impact:
+- “English teachers.” displays full descenders.
+- No layout shift large enough to cover CTA/calculator.
+
+Zero regressions confirmed:
+- no content rewrite
+- no SEO/head changes
+- no calculator changes
+
+### Full implementation plan
+1. In `HeroHeadline.tsx`, update H1/span classes:
+   - H1 from `leading-[1.1]` to `leading-[1.14]` or keep H1 and add span padding.
+   - gradient span add `pb-1` and possibly `leading-[1.16]`.
+   - if clipping is caused by section overflow, keep section `overflow-hidden` only for background but ensure text block itself is not clipped. Current clipping appears text-line based, not section-based.
+2. Do not alter copy.
+
+### Verification checklist
+- Desktop hero screenshot: lowercase “g” fully visible.
+- Mobile H1 still wraps cleanly.
+- Hero CTA and right calculator remain visible.
+
+---
+
+## Problem 7 — LLM audit smoke test, CRON_SECRET, daily model error, email reporting
+
+### Dependency scan
+Affected surface:
+- `audit-llm-models/index.ts`
+- `send-model-audit-email/index.ts`
+- `model_health_checks` table
+- `docs/operational/audit-llm-models-cron.md`
+- Supabase deployed function call with `x-cron-secret`
+
+Runtime facts found:
+- Daily audit still fails on `lovable-gateway/openai/gpt-5-mini` with `Could not finish the message because max_tokens or model output limit was reached`.
+- Direct OpenAI model checks pass, including `gpt-5-mini-2025-08-07`.
+- Project code search shows `openai/gpt-5-mini` via Lovable Gateway appears only in the audit/docs, while real generation code uses direct OpenAI `gpt-5-mini-2025-08-07` and Gemini gateway models.
+- Monthly mode already attempts to send email through `send-model-audit-email` to `edooqoo@gmail.com`.
+
+Security note:
+- The pasted CRON value is an authentication secret even if it is not a user password. I will not hardcode it or repeat it in docs/code. In implementation, I can use it once as a request header for a smoke test, but it should later be rotated because it was pasted into chat.
+
+### Root cause
+Root cause: the audit monitors a Gateway alias (`openai/gpt-5-mini`) that is not actually used by the app runtime and whose minimal chat completion probe is incompatible with GPT-5 reasoning-token behavior, so daily monitoring creates a persistent false failure.
+
+### Solution options
+| Option | Approach | Tradeoff | Regression risk |
+|---|---|---|---|
+| A. Increase Gateway GPT-5 token cap to 512/1024 | Keeps same target. | Still probes a non-runtime alias and may keep failing/cost more. | Medium |
+| B. Remove Gateway GPT-5 alias from daily targets; monitor real direct OpenAI model instead | Aligns audit with actual code paths. | Loses Gateway OpenAI alias coverage that is not used. | Low |
+| C. Change probe from chat completion to model listing | Avoids generation tokens. | Gateway may not expose equivalent model endpoint; less representative for chat calls. | Medium |
+
+### Selected solution + why
+Selected: Option B. Monitoring should protect real production paths, not create noise for an unused alias. Direct OpenAI model checks already pass and reflect actual fallback/runtime usage.
+
+### Impact analysis
+Expected impact:
+- Daily `model_health_checks` no longer records recurring false GPT-5 Gateway 400.
+- Monthly audit email continues to send summary.
+- Status page only surfaces meaningful model failures.
+
+Zero regressions confirmed:
+- no generation model changes
+- no worksheet prompt changes
+- no secrets in code
+- no table/schema changes
+
+### Full implementation plan
+1. In `audit-llm-models/index.ts`:
+   - remove `{ provider: 'lovable-gateway', model: 'openai/gpt-5-mini' }` from `TARGETS_DAILY`
+   - keep `google/gemini-2.5-flash` and `google/gemini-2.5-flash-lite`
+   - add/keep direct OpenAI `gpt-4o-mini` and direct OpenAI `gpt-5-mini-2025-08-07` if daily coverage is desired
+   - de-duplicate monthly list so `gpt-4o-mini` is not checked twice
+   - keep `google/gemini-3-flash-preview` monthly
+2. Keep GPT-5 Gateway request compatibility code only if another target still starts with `openai/gpt-5`; otherwise leave harmless.
+3. In `send-model-audit-email/index.ts`:
+   - keep recipient `edooqoo@gmail.com`
+   - optionally add `text` fallback so Resend email is easier to inspect
+4. Deploy edge function(s) after code changes.
+5. Smoke test after deploy using Supabase function call:
+   - call `/audit-llm-models` with header `x-cron-secret` and body `{ "mode": "monthly" }`
+   - do not print the secret
+   - inspect returned `results` and `failed` count
+   - inspect `send-model-audit-email` logs for dispatch status
+6. Documentation update:
+   - `docs/operational/audit-llm-models-cron.md` should list current monitored targets and state monthly mode sends email.
+
+### Verification checklist
+- Manual monthly smoke test returns `ok: true`.
+- No Gateway `openai/gpt-5-mini` false failure in new result rows.
+- Email dispatch logs show 200 from `send-model-audit-email` or explicit Resend error.
+- If email fails due to domain/API key, report exact cause and do not hide it.
+
+---
+
+## Problem 8 — DSLM/nano-skills explanation for future rebrand/content work, no code change yet
+
+### Dependency scan
+Affected surface for analysis only:
+- `docs/llm-context.md` already documents DSLM at a high level.
+- `public/llms.txt` mentions DSLM but not enough nano-skill mechanics.
+- Code references found:
+  - `student_skill_metrics`
+  - `student_events`
+  - `student_learning_profiles`
+  - `student_progress_goals`
+  - `student_learning_elements`
+  - `future_worksheet_suggestions`
+  - `student_knowledge_entries`
+  - Welcome Test question `nano_skill`
+  - `student_test_questions.skill_tags`
+  - `process-welcome-test` nano-skill ratings/events
+  - homework/open-answer evaluation emits student events
+  - flashcard progress and worksheet vocabulary feed student context indirectly
+
+### Root cause
+Root cause: the code contains DSLM mechanics across many tables/hooks/functions, but the public/product documentation abstracts them as “DSLM signals” and does not explain the nano-skill event graph clearly enough for another LLM to reconstruct the system from code alone.
+
+### Solution options
+| Option | Approach | Tradeoff | Regression risk |
+|---|---|---|---|
+| A. No code/docs now; provide standalone explanation in final report | Satisfies “na razie nie zmieniaj”. | Not reusable by future agents unless copied. | None |
+| B. Add RAG docs now only | Future agents benefit. | User asked content input, but global requirement also asks RAG update. | Low |
+| C. Change UI/product copy now | Too early; user said this will be done elsewhere. | High scope creep |
+
+### Selected solution + why
+Selected: A for product/UI, B only for mandatory RAG injection about implemented fixes. I will not change UI copy for DSLM/nano-skills now. In the implementation report I will provide a detailed Polish explanation for the user and English RAG notes only for what was technically changed.
+
+### Impact analysis
+Expected output:
+- A clear, non-marketing DSLM/nano-skills explanation for use in another LLM.
+- No app behavior changes.
+- No user-facing content changes unless separately requested later.
+
+Zero regressions confirmed:
+- no DSLM algorithm changes
+- no prompt changes
+- no SEO/public copy rewrite now
+
+### Full explanation to provide after implementation
+I will include a dedicated section in the final report:
+
+1. What DSLM is in Edooqoo:
+   - not a single model file
+   - a student-specific signal graph built from goals, tests, worksheet history, homework, flashcards, knowledge notes, pacing, and events
+2. What nano-skills are:
+   - atomic skill labels such as grammar/vocabulary/communication subskills
+   - stored as question skill tags, event payload ratings, and skill metric records
+   - used to transform broad CEFR/student goals into concrete next-lesson focus
+3. Where signals enter:
+   - Welcome Test: static questions include `nano_skill`; completion emits event payloads and profile/skill metrics
+   - Homework/shared worksheet answers: answer evaluations emit mastery-like signals
+   - Flashcards: card/progress data supplies vocabulary retention context
+   - Student Knowledge/Notes: teacher notes become classified context entries
+   - Goals/Learning Elements: teacher target objectives become structured progress goals
+   - Worksheets/future suggestions: generated/used materials close the loop
+4. Where signals are stored:
+   - `student_events`
+   - `student_skill_metrics`
+   - `student_learning_profiles`
+   - `student_knowledge_entries`
+   - `student_progress_goals`
+   - `student_learning_elements`
+   - `future_worksheet_suggestions`
+5. How 1-Minute Prep uses it:
+   - `generate-timeline` reads student profile, skill metrics, knowledge entries, goals, worksheets, phases, existing suggestions
+   - it writes next worksheet suggestions with topic, goal, grammar focus, additional info, exercise list, and exercise focus map
+   - teacher selects or edits suggestion
+   - worksheet is generated as output layer
+   - successful generation marks suggestion used
+6. What is not inferable from code:
+   - exact protected worksheet generation prompt
+   - full pedagogical weighting logic if embedded inside protected Edge Function prompts
+   - strategic product narrative unless documented
+
+### Verification checklist
+- Final report includes “czy da się to zrozumieć z kodu?” answer.
+- No UI/content changes for DSLM unless separately approved.
+- RAG docs do not expose protected worksheet prompt text.
+
+---
+
+## Combined RAG injection update
+
+### Files
+- `docs/llm-context.md`
+- `public/llms.txt`
+- optional `mem/features/onboarding/v6936-runtime-hardening.md`
+
+### Required structure
+For the new update section, use English dense factual Markdown:
+
+```markdown
+## v6.9.36 - Onboarding Runtime Hardening, Gallery Static Rendering, Model Audit Alignment
+
+PROBLEM: ...
+EDOOQOO SOLUTION: ...
+TECHNICAL MECHANICS: ...
+RAG KEYWORDS: ...
+```
+
+### RAG content to include
+- Welcome Test autosend uses canonical draft → questions → share token → assigned → email path.
+- Auto-generation from 1-Minute Prep uses structured readiness gate, not timeout-only submit.
+- Post-signup AddStudent modal opens for authenticated Index route.
+- Add Goal modal is state-driven from URL focus.
+- Gallery renderer normalizes Word Order, Matching Halves, Complete Word static preview shapes.
+- Hero descender clipping fixed by spacing adjustment.
+- Model audit now monitors actual runtime model paths and monthly email report can be smoke-tested with `x-cron-secret` without storing the secret.
+- No Worksheet Generation Engine change.
+
+---
+
+## Final change report template after implementation
+
+- Summary of implemented changes
+- Files modified
+- Documentation updated: YES
+- Edge functions deployed/tested: list names
+- Out of scope issues flagged:
+  - Supabase CRON_SECRET was pasted in chat; rotate it later.
+  - Browser extension `contentscript.js MaxListenersExceededWarning` is likely from an extension, not Edooqoo app code.
+  - If Resend email dispatch fails, it will be reported separately with exact logs.
+- Verification result: PASS/FAIL per problem
+
+## Martha Test gate
+
+All education-facing changes here pass the Martha Test because they do not generate new lesson content and they reduce teacher operational friction for adult 1:1 workflows. Gallery rendering changes only make already-published worksheet previews readable; they do not alter worksheet pedagogy or generation logic.

@@ -75,6 +75,9 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
   // v6.9.29 — open Add-Goal modal when DSLMTab signals a pending request.
   React.useEffect(() => {
     if (pendingAddGoal) {
+      // v6.9.36 — default new goal type to 'supporting' so the modal opens
+      // in the expected mode (matches the Add button used elsewhere).
+      setNewGoal((prev) => ({ ...prev, type: 'supporting' }));
       setShowAddGoal(true);
       onConsumePendingAddGoal?.();
     }

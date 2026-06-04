@@ -63,9 +63,11 @@ const HeroHeadline: React.FC<HeroHeadlineProps> = ({
       <div className="w-full min-w-0 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(360px,460px)] gap-10 lg:gap-14 items-start">
         <div className="min-w-0 max-w-full text-center lg:text-left">
           {/* Headline */}
-          <h1 className="max-w-full break-words text-[2rem] sm:text-5xl md:text-5xl lg:text-[3.25rem] xl:text-6xl font-extrabold tracking-tight text-foreground mb-6 leading-[1.1]">
+          {/* v6.9.36 — leading + span padding so gradient-clipped descenders
+              (lowercase "g" in "teachers") are not cut on Safari/Chrome. */}
+          <h1 className="max-w-full break-words text-[2rem] sm:text-5xl md:text-5xl lg:text-[3.25rem] xl:text-6xl font-extrabold tracking-tight text-foreground mb-6 leading-[1.18]">
             <span className="block">1-Minute Prep</span>
-            <span className="block max-w-full whitespace-normal text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-indigo-600">
+            <span className="block max-w-full whitespace-normal text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-indigo-600 pb-1 leading-[1.2]">
               for 1:1 English teachers.
             </span>
           </h1>

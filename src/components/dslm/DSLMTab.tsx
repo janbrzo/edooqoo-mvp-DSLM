@@ -193,7 +193,12 @@ export const DSLMTab: React.FC<DSLMTabProps> = ({
     if (!focusParam) return;
     const t = setTimeout(() => {
       if (focusParam === 'add-goal-modal') {
-        window.dispatchEvent(new CustomEvent('dslm:addGoal'));
+        // v6.9.36 — state-driven (not event-driven) for URL focus. GoalsView
+        // reads `pendingAddGoal` and opens the dialog as soon as it mounts,
+        // even when it sits behind LazySection. Avoids the prior race where
+        // the one-shot `dslm:addGoal` event fired before the listener mounted.
+        handleScrollTo('goals');
+        setPendingAddGoal(true);
       } else if (focusParam === 'pick-idea') {
         handleScrollTo('pathway');
         window.dispatchEvent(new CustomEvent('pathway:pickIdea'));

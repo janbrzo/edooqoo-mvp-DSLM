@@ -1083,7 +1083,20 @@ const StudentPage = () => {
                 if (exerciseFocusMap && Object.keys(exerciseFocusMap).length > 0) {
                   sessionStorage.setItem('prefillExerciseFocusMap', JSON.stringify(exerciseFocusMap));
                 }
-                if (autoGenerate) sessionStorage.setItem('autoGenerateWorksheet', 'true');
+                if (autoGenerate) {
+                  sessionStorage.setItem('autoGenerateWorksheet', 'true');
+                  // v6.9.36 — structured readiness gate for WorksheetForm
+                  // auto-submit. The form waits until selectedStudentId matches
+                  // request.studentId before firing requestSubmit(), avoiding
+                  // the prior race where submit ran before student hydrated.
+                  try {
+                    sessionStorage.setItem('autoGenerateWorksheetRequest', JSON.stringify({
+                      studentId: student.id,
+                      suggestionId: suggestionId || null,
+                      createdAt: Date.now(),
+                    }));
+                  } catch { /* ignore quota */ }
+                }
                 sessionStorage.setItem('forceNewWorksheet', 'true');
                 navigate('/');
               }}
