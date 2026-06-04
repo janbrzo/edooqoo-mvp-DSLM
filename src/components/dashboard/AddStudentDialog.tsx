@@ -18,9 +18,9 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Info } from 'lucide-react';
 import { devLog } from '@/utils/logger';
-import { ALL_WELCOME_TEST_QUESTIONS } from '@/data/welcomeTestQuestions';
 import { toast as sonnerToast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
+import { ensureWelcomeTest, sendWelcomeTestEmail } from '@/lib/welcomeTest/ensureWelcomeTest';
 
 const ADD_STUDENT_DRAFT_KEY = 'add-student-dialog-draft';
 
@@ -194,82 +194,22 @@ export const AddStudentDialog = ({
             const { data: { user } } = await supabase.auth.getUser();
             const teacherId = user?.id;
             if (!teacherId) return;
-            // Reuse existing flow: create test row + questions + share token + email
-            const mod = await import('@/hooks/useWelcomeTestActions');
-            // Note: hook can't be called outside React, so call the underlying
-            // Edge Function directly via the same pattern.
-            void mod; // keep dynamic import for tree-shake safety
-            // Inline lightweight version:
-            const { data: existing } = await supabase
-              .from('student_tests')
-              .select('id, share_token')
-              .eq('student_id', newStudent.id)
-              .eq('teacher_id', teacherId)
-              .eq('test_type', 'welcome')
-              .order('created_at', { ascending: false })
-              .limit(1);
-            let testId = existing?.[0]?.id ?? null;
-            let shareToken: string | null = existing?.[0]?.share_token ?? null;
-            if (!testId) {
-              const { data: created, error: createErr } = await supabase
-                .from('student_tests')
-                .insert({
-                  student_id: newStudent.id,
-                  teacher_id: teacherId,
-                  test_type: 'welcome',
-                  title: `Welcome Test - ${newStudent.name}`,
-                  description: 'Comprehensive placement & learning profile assessment',
-                  attempt_number: 1,
-                  status: 'pending',
-                  total_questions: ALL_WELCOME_TEST_QUESTIONS.length,
-                } as any)
-                .select('id')
-                .single();
-              if (createErr || !created) throw createErr;
-              testId = created.id;
-              const rows = ALL_WELCOME_TEST_QUESTIONS.map((q: any, i: number) => ({
-                test_id: testId,
-                question_index: i,
-                question_type: q.question_type,
-                question_text: q.question_text,
-                question_data: q.options ? { options: q.options } : {},
-                correct_answer: q.correct_answer || '',
-                explanation: q.description || null,
-                element_type: q.element_type || null,
-                difficulty_level: q.difficulty_level || null,
-                skill_tags: q.nano_skill ? [q.nano_skill] : [],
-              }));
-              await supabase.from('student_test_questions').insert(rows as any);
-            }
-            if (!shareToken && testId) {
-              const { data: tokRow } = await supabase
-                .from('student_tests')
-                .update({ share_token: crypto.randomUUID() } as any)
-                .eq('id', testId)
-                .select('share_token')
-                .single();
-              shareToken = tokRow?.share_token ?? null;
-            }
-            if (shareToken) {
-              const { data: teacher } = await supabase
-                .from('profiles')
-                .select('first_name, last_name, email')
-                .eq('id', teacherId)
-                .single();
-              const teacherName = teacher
-                ? [teacher.first_name, teacher.last_name].filter(Boolean).join(' ') || teacher.email || ''
-                : '';
-              await supabase.functions.invoke('send-test-email', {
-                body: {
-                  shareToken,
-                  recipientEmail: studentEmail,
-                  testTitle: `Welcome Test - ${newStudent.name}`,
-                  teacherName,
-                  testType: 'welcome',
-                },
-              });
-              sonnerToast.success(`Welcome Test sent to ${studentEmail}`);
-            }
+            // v6.9.36 — canonical helper (status='draft' → seed questions →
+            // share token → status='assigned') eliminates the previous
+            // invalid `status: 'pending'` and `.single()`-on-update paths
+            // that caused the autosend 400.
+            const ensured = await ensureWelcomeTest({
+              studentId: newStudent.id,
+              teacherId,
+              studentName: newStudent.name,
+            });
+            await sendWelcomeTestEmail({
+              token: ensured.token,
+              recipientEmail: studentEmail,
+              studentName: newStudent.name,
+              teacherId,
+            });
+            sonnerToast.success(`Welcome Test sent to ${studentEmail}`);
           } catch (err) {
             console.error('[AddStudentDialog] auto-send welcome test failed', err);
             sonnerToast.error('Welcome Test could not be sent automatically. You can send it manually from the student page.');
