@@ -107,6 +107,8 @@ export const DSLMTab: React.FC<DSLMTabProps> = ({
   const isMobile = useIsMobile();
   const [activeSection, setActiveSection] = useState<ViewId>('pathway');
   const [pendingAddGoal, setPendingAddGoal] = useState(false);
+  // v6.9.37 — stable consume callback to avoid effect re-fires in GoalsView.
+  const handleConsumePendingAddGoal = useCallback(() => setPendingAddGoal(false), []);
   const isScrollingRef = useRef(false);
   const { data: stats } = useBehavioralStats({ studentId, teacherId });
   const { proposals: pacingProposals } = usePacingProposals(studentId);
@@ -277,7 +279,9 @@ export const DSLMTab: React.FC<DSLMTabProps> = ({
 
       <div ref={sectionRefs.goals} data-section="goals" className="scroll-mt-4 pt-8">
         {sectionHeader('Goals')}
-        <LazySection>
+        {/* v6.9.37 — eager-mount when arriving via focus=add-goal-modal so the
+            modal opens immediately instead of waiting for IntersectionObserver. */}
+        <LazySection eager={pendingAddGoal || searchParams.get('focus') === 'add-goal-modal'}>
           <GoalsView
             studentId={studentId}
             teacherId={teacherId}
@@ -288,7 +292,7 @@ export const DSLMTab: React.FC<DSLMTabProps> = ({
             onMainGoalChange={onMainGoalChange}
             onMainGoalTargetDateChange={onMainGoalTargetDateChange}
             pendingAddGoal={pendingAddGoal}
-            onConsumePendingAddGoal={() => setPendingAddGoal(false)}
+            onConsumePendingAddGoal={handleConsumePendingAddGoal}
           />
         </LazySection>
       </div>

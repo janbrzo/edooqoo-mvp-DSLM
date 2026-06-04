@@ -191,15 +191,6 @@ const Login = () => {
                 >
                   Don't have an account? Get started
                 </button>
-                <div>
-                  <button
-                    type="button"
-                    className="text-sm text-muted-foreground hover:text-foreground hover:underline"
-                    onClick={() => navigate('/demo')}
-                  >
-                    🎯 Try Demo — explore without signing up
-                  </button>
-                </div>
               </div>
             </CardContent>
           </Card>
