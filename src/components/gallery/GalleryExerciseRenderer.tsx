@@ -137,13 +137,33 @@ const GalleryExerciseRenderer: React.FC<Props> = ({ exercise, index }) => {
       case "matching-halves": {
         // v6.9.34 — accept `pairs`, `items`, OR parallel `left/right`,
         // `first/second`, `halves` arrays (used by "Matching Halves").
-        let pairs: any[] = ex.pairs || ex.items || ex.matches || [];
+        let pairs: any[] = ex.pairs || ex.items || ex.matches || ex.questions || [];
         if (pairs.length === 0) {
           const left = ex.left || ex.first || ex.halves_left || ex.starts || [];
           const right = ex.right || ex.second || ex.halves_right || ex.endings || [];
           if (Array.isArray(left) && Array.isArray(right) && left.length) {
             pairs = left.map((l: any, i: number) => ({ left: l, right: right[i] }));
           }
+        }
+        // v6.9.35 — multiple-choice variant of "matching halves": rows look
+        // like `{ prompt, options }`. Render as A/B/C list instead of a 2-col
+        // table so the question + endings are both visible.
+        if (pairs.length && pairs[0] && typeof pairs[0] === 'object'
+            && Array.isArray((pairs[0] as any).options) && (pairs[0] as any).prompt != null) {
+          return (
+            <ol className="list-decimal space-y-2 pl-5 text-sm">
+              {pairs.map((q: any, i: number) => (
+                <li key={i}>
+                  <div>{toText(q.prompt)}</div>
+                  <ul className="mt-1 list-[upper-alpha] pl-6 text-muted-foreground">
+                    {(q.options || []).map((o: any, oi: number) => (
+                      <li key={oi}>{toText(o)}</li>
+                    ))}
+                  </ul>
+                </li>
+              ))}
+            </ol>
+          );
         }
         return (
           <table className="w-full text-sm">
@@ -228,6 +248,7 @@ const GalleryExerciseRenderer: React.FC<Props> = ({ exercise, index }) => {
                   let words: any[] = [];
                   const raw =
                     it?.words ?? it?.shuffled ?? it?.tokens ?? it?.scrambled ??
+                    it?.shuffled_sentence ?? it?.scrambled_sentence ??
                     it?.sentence ?? it?.prompt ?? (typeof it === 'string' ? it : null);
                   if (Array.isArray(raw)) words = raw;
                   else if (typeof raw === 'string') words = splitStr(raw);
@@ -256,10 +277,10 @@ const GalleryExerciseRenderer: React.FC<Props> = ({ exercise, index }) => {
               {items.map((it: any, i: number) => (
                 <tr key={i} className="border-b border-border/40">
                   <td className="py-1.5 pr-3 font-medium">
-                    {toText(it?.term ?? it?.prompt ?? it?.word ?? it?.base ?? it?.input ?? it?.gapped ?? it?.masked ?? it?.text ?? it?.question ?? it?.root ?? it?.original ?? it?.stem ?? it)}
+                    {toText(it?.term ?? it?.prompt ?? it?.word ?? it?.base ?? it?.input ?? it?.gapped ?? it?.masked ?? it?.text ?? it?.question ?? it?.root ?? it?.original ?? it?.stem ?? it?.before ?? it?.context ?? it?.clue ?? it?.sentence ?? it)}
                   </td>
                   <td className="py-1.5 text-muted-foreground">
-                    {toText(it?.definition ?? it?.answer ?? it?.target ?? it?.solution ?? it?.synonym ?? it?.antonym ?? it?.completed ?? it?.negative ?? it?.opposite ?? it?.transformed ?? it?.full ?? "")}
+                    {toText(it?.definition ?? it?.answer ?? it?.target ?? it?.solution ?? it?.synonym ?? it?.antonym ?? it?.completed ?? it?.negative ?? it?.opposite ?? it?.transformed ?? it?.full ?? it?.full_word ?? it?.complete ?? it?.after ?? it?.result ?? "")}
                   </td>
                 </tr>
               ))}
