@@ -286,22 +286,26 @@ export default function WorksheetForm({
   useEffect(() => {
     if (sessionStorage.getItem('autoGenerateWorksheet') !== 'true') return;
     if (!lessonTopic) return; // wait for prefill to hydrate topic
-    const t = setTimeout(() => {
+    // v6.9.35 — wait 2× rAF for React commit, then submit. setTimeout was
+    // being cancelled by rapid dep changes (lessonTopic hydrates in 2 batches),
+    // so the submit never fired.
+    let cancelled = false;
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      if (cancelled) return;
       if (sessionStorage.getItem('autoGenerateWorksheet') !== 'true') return;
-      if (formRef.current) {
-        sessionStorage.removeItem('autoGenerateWorksheet');
-        devLog('🚀 [WorksheetForm] Auto-submitting (v6.9.34 retry-effect)');
-        formRef.current.requestSubmit();
-      }
-    }, 500);
-    return () => clearTimeout(t);
+      if (!formRef.current) return;
+      sessionStorage.removeItem('autoGenerateWorksheet');
+      devLog('🚀 [WorksheetForm] Auto-submitting (v6.9.35 rAF)');
+      formRef.current.requestSubmit();
+    }));
+    return () => { cancelled = true; };
   }, [lessonTopic, selectedStudentId]);
 
-  // Safety net: if flag survives 10s without firing, drop it.
+  // v6.9.35 — last-resort safety: drop flag after 30s of inactivity.
   useEffect(() => {
     const cleanup = setTimeout(() => {
       sessionStorage.removeItem('autoGenerateWorksheet');
-    }, 10000);
+    }, 30000);
     return () => clearTimeout(cleanup);
   }, []);
   useEffect(() => {
