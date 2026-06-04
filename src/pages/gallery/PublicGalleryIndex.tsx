@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { PageSeo } from '@/components/seo/PageSeo';
+import PublicTopNav from '@/components/public/PublicTopNav';
 
 interface PublicWorksheet {
   id: string;
@@ -70,6 +71,7 @@ const PublicGalleryIndex: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <PublicTopNav />
       <PageSeo
         title="Public ESL Worksheets Gallery — Edooqoo"
         description="Browse free, ready-to-use English worksheets shared by tutors. Filter by CEFR level (A1–C2) and topic. No sign-up required."
