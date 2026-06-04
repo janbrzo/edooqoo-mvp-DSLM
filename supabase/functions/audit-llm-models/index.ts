@@ -59,10 +59,9 @@ async function ping(target: Target): Promise<{ status: number; latency_ms: numbe
       body: JSON.stringify({
         model: target.model,
         messages: [{ role: "user", content: "ping" }],
-        // v6.9.34 — GPT-5 family consumes reasoning tokens before output;
-        // a limit of 1 always trips the "max_tokens reached" error. Use 16
-        // for GPT-5 to leave room for the reasoning step.
-        [tokenField]: isGpt5Family ? 16 : 1,
+        // v6.9.35 — GPT-5 family burns reasoning tokens before any output.
+        // 16 was still tripping the cap; 128 leaves room for a short ping.
+        [tokenField]: isGpt5Family ? 128 : 1,
       }),
     });
     const err = r.ok ? null : (await r.text()).slice(0, 500);

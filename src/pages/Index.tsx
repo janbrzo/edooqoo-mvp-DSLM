@@ -84,22 +84,21 @@ const Index = () => {
   // page right after first-time login, and by other deep links).
   const [addStudentOpen, setAddStudentOpen] = useState(false);
   useEffect(() => {
-    // v6.9.34 — open AddStudentDialog from `?action=add-student`.
-    // Retry up to 3s in case `isRegisteredUser` is still hydrating after a
-    // fresh signup (Supabase session takes one tick to land).
-    if (searchParams.get('action') !== 'add-student') return;
-    if (isRegisteredUser) {
-      setAddStudentOpen(true);
+    // v6.9.35 — open AddStudentDialog from `?action=add-student` OR persisted
+    // localStorage flag (`post-signup-add-student=1`). Flag is more robust
+    // than the query param which Supabase email confirmation can strip.
+    const hasFlag =
+      searchParams.get('action') === 'add-student' ||
+      (() => { try { return localStorage.getItem('post-signup-add-student') === '1'; } catch { return false; } })();
+    if (!hasFlag) return;
+    if (!isRegisteredUser) return; // wait until session hydrates
+    setAddStudentOpen(true);
+    try { localStorage.removeItem('post-signup-add-student'); } catch {}
+    if (searchParams.get('action') === 'add-student') {
       const next = new URLSearchParams(searchParams);
       next.delete('action');
       setSearchParams(next, { replace: true });
-      return;
     }
-    const id = window.setTimeout(() => {
-      // Trigger re-run by reading param again; if still missing, the next
-      // effect cycle will handle it.
-    }, 600);
-    return () => window.clearTimeout(id);
   }, [searchParams, isRegisteredUser, setSearchParams]);
   const [oneMinutePrepCalculator, setOneMinutePrepCalculator] = useState<OneMinutePrepCalculatorInput>(
     DEFAULT_ONE_MINUTE_PREP_CALCULATOR_INPUT

@@ -505,10 +505,6 @@ const Dashboard = () => {
         triggerButton={false}
         open={addStudentModalOpen}
         onOpenChange={setAddStudentModalOpen}
-        onStudentAdded={() => {
-          setAddStudentModalOpen(false);
-          refetchStudents();
-        }}
       />
       
       {/* Rename Worksheet Dialog */}

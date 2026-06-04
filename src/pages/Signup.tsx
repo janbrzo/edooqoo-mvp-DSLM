@@ -115,11 +115,13 @@ const Signup = () => {
 
       if (data?.user && !data.session) {
         // Email confirmation required
+        try { localStorage.setItem('post-signup-add-student', '1'); } catch {}
         setRegisteredEmail(email);
         setShowEmailModal(true);
         devLog('Account created, email confirmation required');
       } else if (data?.session) {
         // Immediate login (shouldn't happen with email confirmation enabled)
+        try { localStorage.setItem('post-signup-add-student', '1'); } catch {}
         toast({
           title: "Success",
           description: "Account created and signed in successfully!",
@@ -243,15 +245,6 @@ const Signup = () => {
                   <Link to="/login" className="text-worksheet-purple hover:underline font-medium">
                     Sign in here
                   </Link>
-                </p>
-                <p>
-                  <button
-                    type="button"
-                    className="text-sm text-muted-foreground hover:text-foreground hover:underline"
-                    onClick={() => navigate('/demo')}
-                  >
-                    🎯 Try Demo First — explore without signing up
-                  </button>
                 </p>
               </div>
             </CardContent>

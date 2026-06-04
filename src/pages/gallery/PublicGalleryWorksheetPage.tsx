@@ -3,6 +3,7 @@ import { Link, useParams, useLocation } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { PageSeo } from '@/components/seo/PageSeo';
 import GalleryExerciseRenderer from '@/components/gallery/GalleryExerciseRenderer';
+import PublicTopNav from '@/components/public/PublicTopNav';
 
 interface PublicWorksheetRow {
   id: string;
@@ -91,6 +92,7 @@ const PublicGalleryWorksheetPage: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-background">
+      <PublicTopNav />
       <PageSeo
         title={`${worksheet.title} — Free ESL Worksheet`}
         description={`Free ${worksheet.public_level || ''} English worksheet about ${worksheet.public_topic || 'general topics'}. Published on Edooqoo gallery.`.slice(0, 158)}
