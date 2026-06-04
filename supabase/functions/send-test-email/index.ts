@@ -18,7 +18,7 @@ serve(async (req) => {
   }
 
   try {
-    const { shareToken, recipientEmail, testTitle, teacherName, testType } = await req.json();
+    const { shareToken, recipientEmail, testTitle, teacherName, testType, reminder } = await req.json();
 
     if (!shareToken || !recipientEmail) {
       return new Response(JSON.stringify({ error: "Missing shareToken or recipientEmail" }), {
@@ -32,6 +32,20 @@ serve(async (req) => {
     const shareUrl = isWelcomeTest ? `${origin}/welcome-test/${shareToken}` : `${origin}/test/${shareToken}`;
 
     console.log("[send-test-email] Sending to:", recipientEmail, "type:", testType || "regular");
+
+    const reminderBody = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+        <h2 style="color: #7c3aed;">⏰ Friendly reminder — Welcome Test</h2>
+        <p>Hello,</p>
+        <p><strong>${teacherName || "Your teacher"}</strong> noticed you haven't completed the Welcome Test yet.</p>
+        <p>It only takes 20–30 minutes and helps your teacher tailor every lesson to you.</p>
+        <a href="${shareUrl}"
+           style="display:inline-block;background:#7c3aed;color:#fff;padding:14px 28px;text-decoration:none;border-radius:8px;font-weight:bold;margin:20px 0;font-size:16px;">
+          Resume Welcome Test
+        </a>
+        <p style="color:#6b7280;font-size:13px;">If you've already started, this link picks up where you left off.</p>
+        <p style="color:#6b7280;font-size:12px;margin-top:20px;">Or copy and paste this URL: ${shareUrl}</p>
+      </div>`;
 
     const emailBody = isWelcomeTest
       ? `
@@ -82,9 +96,13 @@ serve(async (req) => {
       </div>
     `;
 
-    const subject = isWelcomeTest
+    const subject = reminder && isWelcomeTest
+      ? `Reminder: please complete your Welcome Test from ${teacherName || "your teacher"}`
+      : isWelcomeTest
       ? `${teacherName || "Your teacher"} invited you to take a Welcome Test`
       : `${teacherName || "Your teacher"} assigned you a test: ${testTitle}`;
+
+    const html = reminder && isWelcomeTest ? reminderBody : emailBody;
 
     const emailResponse = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -96,7 +114,7 @@ serve(async (req) => {
         from: "EDOOQOO <noreply@edooqoo.com>",
         to: [recipientEmail],
         subject,
-        html: emailBody,
+        html,
       }),
     });
 
