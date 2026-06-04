@@ -110,7 +110,7 @@ export const SpotlightOverlay: React.FC = () => {
   const dim = 'fixed bg-black/60 pointer-events-none transition-opacity duration-200';
 
   return createPortal(
-    <div className="fixed inset-0 z-[100]" aria-live="polite">
+    <div className="fixed inset-0 z-[100] pointer-events-none" aria-live="polite">
       {/* top */}
       <div className={dim} style={{ top: 0, left: 0, width: vw, height: rect.top }} />
       {/* bottom */}
