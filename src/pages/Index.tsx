@@ -361,6 +361,16 @@ const Index = () => {
           }}
         />
 
+        {/* v6.9.36 — post-signup AddStudent modal also mounted in the
+            authenticated branch (previously only public branch). Without
+            this, email/Google signups landing on `/` as registered users
+            never saw the dialog because Index returned the auth shell early. */}
+        <AddStudentDialog
+          triggerButton={false}
+          open={addStudentOpen}
+          onOpenChange={setAddStudentOpen}
+        />
+
       </AuthenticatedPageShell>
     );
   }
