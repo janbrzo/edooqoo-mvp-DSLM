@@ -56,6 +56,33 @@ const QuestionText = (q: any): string => {
   return String(q ?? "");
 };
 
+// v6.9.36 — defensive normalizers shared across exercise types.
+const asArray = (v: unknown): any[] => {
+  if (Array.isArray(v)) return v;
+  if (v && typeof v === "object") return Object.values(v as Record<string, unknown>);
+  return [];
+};
+const firstNonEmptyArr = (...values: unknown[]): any[] => {
+  for (const v of values) {
+    const arr = asArray(v);
+    if (arr.length > 0) return arr;
+  }
+  return [];
+};
+const splitTokens = (raw: unknown): string[] => {
+  if (Array.isArray(raw)) return raw.map((x) => toText(x)).filter(Boolean);
+  if (typeof raw !== "string") return [];
+  const delimited = raw.split(/\s*[|/,]\s*/).filter(Boolean);
+  if (delimited.length > 1) return delimited;
+  return raw.split(/\s+/).filter(Boolean);
+};
+const maskWordFromAnswer = (answer: unknown): string => {
+  const word = toText(answer);
+  if (!word) return "";
+  // Replace vowels with underscores (matches "fill missing vowels" pattern).
+  return word.replace(/[aeiouyAEIOUY]/g, "_");
+};
+
 interface Props { exercise: any; index: number }
 
 const GalleryExerciseRenderer: React.FC<Props> = ({ exercise, index }) => {
@@ -135,16 +162,22 @@ const GalleryExerciseRenderer: React.FC<Props> = ({ exercise, index }) => {
       }
       case "matching":
       case "matching-halves": {
-        // v6.9.34 — accept `pairs`, `items`, OR parallel `left/right`,
-        // `first/second`, `halves` arrays (used by "Matching Halves").
-        let pairs: any[] = ex.pairs || ex.items || ex.matches || ex.questions || [];
+        // v6.9.36 — broader normalization. Accepts paired rows, parallel
+        // arrays (left/right, first/second, halves_left/halves_right,
+        // starts/endings, sentence_start/sentence_end), nested `halves` /
+        // `matching_halves`, and rich item shapes for MC variant.
+        let pairs: any[] = firstNonEmptyArr(
+          ex.pairs, ex.items, ex.matches, ex.questions, ex.sentences,
+          ex.halves, ex.matching_halves, ex.sentence_halves,
+        );
         if (pairs.length === 0) {
-          const left = ex.left || ex.first || ex.halves_left || ex.starts || [];
-          const right = ex.right || ex.second || ex.halves_right || ex.endings || [];
-          if (Array.isArray(left) && Array.isArray(right) && left.length) {
+          const left = firstNonEmptyArr(ex.left, ex.first, ex.halves_left, ex.starts, ex.sentence_starts);
+          const right = firstNonEmptyArr(ex.right, ex.second, ex.halves_right, ex.endings, ex.sentence_ends);
+          if (left.length && right.length) {
             pairs = left.map((l: any, i: number) => ({ left: l, right: right[i] }));
           }
         }
+        if (pairs.length === 0) return null;
         // v6.9.35 — multiple-choice variant of "matching halves": rows look
         // like `{ prompt, options }`. Render as A/B/C list instead of a 2-col
         // table so the question + endings are both visible.
@@ -170,8 +203,8 @@ const GalleryExerciseRenderer: React.FC<Props> = ({ exercise, index }) => {
             <tbody>
               {pairs.map((p: any, i: number) => (
                 <tr key={i} className="border-b border-border/40">
-                  <td className="py-1.5 pr-3 font-medium">{toText(p?.left ?? p?.first ?? p?.term ?? p?.a ?? p?.word ?? p)}</td>
-                  <td className="py-1.5 text-muted-foreground">{toText(p?.right ?? p?.second ?? p?.definition ?? p?.b ?? p?.match ?? p?.pair ?? p?.synonym ?? p?.antonym ?? p?.ending ?? p?.completion)}</td>
+                  <td className="py-1.5 pr-3 font-medium">{toText(p?.left ?? p?.first ?? p?.first_half ?? p?.start ?? p?.sentence_start ?? p?.term ?? p?.a ?? p?.word ?? p?.prompt ?? p)}</td>
+                  <td className="py-1.5 text-muted-foreground">{toText(p?.right ?? p?.second ?? p?.second_half ?? p?.ending ?? p?.sentence_end ?? p?.definition ?? p?.b ?? p?.match ?? p?.pair ?? p?.synonym ?? p?.antonym ?? p?.completion ?? p?.answer)}</td>
                 </tr>
               ))}
             </tbody>
@@ -233,26 +266,35 @@ const GalleryExerciseRenderer: React.FC<Props> = ({ exercise, index }) => {
         );
       }
       case "word-order": {
-        const items = ex.sentences || ex.items || ex.questions || ex.scrambled_sentences || [];
+        // v6.9.36 — accept many container keys and any item shape, including
+        // a plain shuffled string at top level (`ex.scrambled_sentence`).
+        let items: any[] = firstNonEmptyArr(
+          ex.sentences, ex.items, ex.questions, ex.scrambled_sentences,
+          ex.word_order, ex.prompts,
+        );
+        if (items.length === 0) {
+          const single = ex.scrambled_sentence ?? ex.shuffled_sentence ?? ex.sentence ?? ex.prompt;
+          if (typeof single === "string" && single.trim()) items = [single];
+        }
+        if (items.length === 0) return null;
         return (
           <ol className="list-decimal space-y-1.5 pl-5 text-sm">
             {items.map((it: any, i: number) => (
               <li key={i} className="flex flex-wrap gap-1.5">
                 {(() => {
-                  // v6.9.34 — accept tokens|scrambled|shuffled|words as
-                  // arrays OR delimited strings (' | ', ' / ', ' , ', spaces).
-                  const splitStr = (s: string) =>
-                    s.split(/\s*[|/,]\s*/).filter(Boolean).length > 1
-                      ? s.split(/\s*[|/,]\s*/).filter(Boolean)
-                      : s.split(/\s+/).filter(Boolean);
-                  let words: any[] = [];
                   const raw =
-                    it?.words ?? it?.shuffled ?? it?.tokens ?? it?.scrambled ??
+                    it?.words ?? it?.tokens ?? it?.shuffled ?? it?.scrambled ??
+                    it?.shuffled_words ?? it?.scrambled_words ??
                     it?.shuffled_sentence ?? it?.scrambled_sentence ??
                     it?.sentence ?? it?.prompt ?? (typeof it === 'string' ? it : null);
-                  if (Array.isArray(raw)) words = raw;
-                  else if (typeof raw === 'string') words = splitStr(raw);
-                  return (words as any[]).map((w: any, wi: number) => (
+                  const words = splitTokens(raw);
+                  // If we have no tokens at all, fall back to rendering the
+                  // original prompt as plain text so the card is not blank.
+                  if (words.length === 0) {
+                    const fallback = toText(it?.prompt ?? it);
+                    return fallback ? <span>{fallback}</span> : null;
+                  }
+                  return words.map((w, wi) => (
                     <Label key={wi}>{toText(w)}</Label>
                   ));
                 })()}
@@ -270,20 +312,54 @@ const GalleryExerciseRenderer: React.FC<Props> = ({ exercise, index }) => {
       case "negative-prefixes":
       case "complete-word":
       case "word-formation": {
-        const items = ex.items || ex.questions || ex.sentences || ex.words || ex.pairs || [];
+        const items: any[] = firstNonEmptyArr(
+          ex.items, ex.questions, ex.sentences, ex.words, ex.pairs, ex.vocabulary, ex.prompts,
+        );
+        if (items.length === 0) return null;
         return (
           <table className="w-full text-sm">
             <tbody>
-              {items.map((it: any, i: number) => (
+              {items.map((it: any, i: number) => {
+                const left = toText(
+                  it?.term ?? it?.prompt ?? it?.clue ?? it?.definition ?? it?.context ??
+                  it?.sentence ?? it?.text ?? it?.question ?? it?.word ?? it?.base ??
+                  it?.input ?? it?.root ?? it?.original ?? it?.stem ?? it?.before
+                );
+                // v6.9.36 — for complete-word/negative-prefixes show masked
+                // form when available, otherwise generate one from the answer
+                // so the preview shows the actual exercise prompt, not just
+                // the solution.
+                const explicitMasked = toText(
+                  it?.gapped ?? it?.masked ?? it?.incomplete ?? it?.blank ?? it?.partial
+                );
+                const composedMasked = (() => {
+                  const before = toText(it?.before);
+                  const after = toText(it?.after);
+                  if (before || after) return `${before}___${after}`;
+                  return "";
+                })();
+                const answer = toText(
+                  it?.definition ?? it?.answer ?? it?.target ?? it?.solution ??
+                  it?.synonym ?? it?.antonym ?? it?.completed ?? it?.negative ??
+                  it?.opposite ?? it?.transformed ?? it?.full ?? it?.full_word ??
+                  it?.complete ?? it?.result
+                );
+                const showMask = type === "complete-word" || type === "negative-prefixes" || type === "word-formation";
+                const rightPrimary = showMask
+                  ? (explicitMasked || composedMasked || maskWordFromAnswer(answer) || answer)
+                  : answer;
+                return (
                 <tr key={i} className="border-b border-border/40">
-                  <td className="py-1.5 pr-3 font-medium">
-                    {toText(it?.term ?? it?.prompt ?? it?.word ?? it?.base ?? it?.input ?? it?.gapped ?? it?.masked ?? it?.text ?? it?.question ?? it?.root ?? it?.original ?? it?.stem ?? it?.before ?? it?.context ?? it?.clue ?? it?.sentence ?? it)}
-                  </td>
+                  <td className="py-1.5 pr-3 font-medium">{left || toText(it)}</td>
                   <td className="py-1.5 text-muted-foreground">
-                    {toText(it?.definition ?? it?.answer ?? it?.target ?? it?.solution ?? it?.synonym ?? it?.antonym ?? it?.completed ?? it?.negative ?? it?.opposite ?? it?.transformed ?? it?.full ?? it?.full_word ?? it?.complete ?? it?.after ?? it?.result ?? "")}
+                    <span>{rightPrimary || "—"}</span>
+                    {showMask && answer && rightPrimary !== answer && (
+                      <span className="ml-2 text-[11px] opacity-60 italic">→ {answer}</span>
+                    )}
                   </td>
                 </tr>
-              ))}
+                );
+              })}
             </tbody>
           </table>
         );
