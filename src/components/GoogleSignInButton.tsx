@@ -30,7 +30,12 @@ export const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
       // (in Signup/Login) runs and redirects to the claimed worksheet.
       const hasClaims = getPendingClaimIds().length > 0;
       const fromPath = (location.state as { from?: string } | null)?.from;
-      const redirectPath = hasClaims && fromPath ? fromPath : '/dashboard';
+      // v6.9.36 — signup mode without pending claims lands on the generator
+      // page with `?action=add-student` so Index opens AddStudentDialog after
+      // OAuth roundtrip. Existing signin and claim flows are unchanged.
+      const redirectPath = hasClaims && fromPath
+        ? fromPath
+        : (mode === 'signup' ? '/?action=add-student' : '/dashboard');
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
