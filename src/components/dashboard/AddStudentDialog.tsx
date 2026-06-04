@@ -206,7 +206,6 @@ export const AddStudentDialog = ({
               .eq('student_id', newStudent.id)
               .eq('teacher_id', teacherId)
               .eq('test_type', 'welcome')
-              .is('deleted_at', null)
               .order('created_at', { ascending: false })
               .limit(1);
             let testId = existing?.[0]?.id ?? null;
