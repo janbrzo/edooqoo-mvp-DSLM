@@ -317,3 +317,12 @@ root crawlability, no-JS homepage summary, raw homepage canonical, FAQPage schem
 - /gallery and /gallery/:slug now have a sticky public header (Gallery, Exercises, Sign in, Get started).
 - GalleryExerciseRenderer: matching-halves {prompt,options} renders as A/B/C; word-order accepts shuffled_sentence; complete-word accepts before/after/full_word.
 - audit-llm-models: openai/gpt-5-mini probe uses max_completion_tokens=128.
+
+## Changelog v6.9.36
+- Welcome Test autosend hardened via shared `ensureWelcomeTest` helper (draft → seed questions → RPC `generate_test_share_token` → assigned). Eliminates 400 "invalid status pending" on student creation.
+- WorksheetForm auto-submit moved from setTimeout to deterministic readiness gate (selectedStudentId + lessonTopic match `autoGenerateWorksheetRequest` from sessionStorage, then rAF submit). No more race conditions on /student → 1-Minute Prep handoff.
+- Post-signup Add-Student flow: Google sign-in routes new users to `/?action=add-student`; `Index.tsx` mounts AddStudentDialog for authenticated users too.
+- DSLM/Goals: `pendingAddGoal` window-scoped state replaces transient events so "Add Goal" modal opens reliably after lazy DSLMTab mount.
+- GalleryExerciseRenderer: normalization helpers (`asArray`, `splitTokens`, `maskWordFromAnswer`) handle non-standard JSON shapes for word-order, matching-halves, complete-word — no more empty cards.
+- HeroHeadline: leading + padding fix prevents descender clipping (e.g. "g").
+- audit-llm-models: removed unused `lovable-gateway/openai/gpt-5-mini` daily probe; added direct `openai/gpt-5-mini-2025-08-07` model check. Daily smoke test: 4/4 OK (latencies 600–950 ms).
