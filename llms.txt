@@ -306,3 +306,14 @@ root crawlability, no-JS homepage summary, raw homepage canonical, FAQPage schem
 - Treat /dashboard, /worksheet/, /worksheets, /homework/, /flashcards/, /my, /calendar, /admin, and auth routes as private application surfaces.
 - Treat /esl-worksheets, /worksheets/:exerciseType/:topic, /english-for/:persona, /tools/*, /gallery, top-level .html citation pages, and public /blog/*.html articles as public discovery surfaces.
 - User-facing application copy is English. Planning conversation with the owner may be Polish.
+
+## Changelog v6.9.35
+- Spotlight overlay no longer blocks clicks on the highlighted element (root div pointer-events-none).
+- Add Student autosend Welcome Test fixed (dropped invalid deleted_at filter on student_tests).
+- "Generate worksheet ↗" from 1-Minute Prep now auto-starts generation (2× rAF after lessonTopic hydrates).
+- Dashboard Add Student now navigates to /student/:id?tab=dslm with focus=add-goal-modal or focus=send-welcome-test.
+- Post-signup AddStudent modal opens reliably (localStorage post-signup-add-student flag survives email confirmation/OAuth).
+- Welcome Test reminder email uses distinct body + subject ("Reminder: please complete your Welcome Test from <teacher>").
+- /gallery and /gallery/:slug now have a sticky public header (Gallery, Exercises, Sign in, Get started).
+- GalleryExerciseRenderer: matching-halves {prompt,options} renders as A/B/C; word-order accepts shuffled_sentence; complete-word accepts before/after/full_word.
+- audit-llm-models: openai/gpt-5-mini probe uses max_completion_tokens=128.
