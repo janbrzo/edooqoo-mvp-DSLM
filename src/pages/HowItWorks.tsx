@@ -1,26 +1,115 @@
-
 import React from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
-import { ArrowRight, BarChart2, Brain, ClipboardCheck, FileText, RefreshCw } from 'lucide-react';
+import {
+  ArrowRight,
+  BarChart2,
+  Brain,
+  CalendarDays,
+  CheckCircle2,
+  ClipboardCheck,
+  FileText,
+  Goal,
+  Lightbulb,
+  Map,
+  Send,
+  UserPlus,
+} from 'lucide-react';
 
 const steps = [
-  { number: 1, title: "Create your account", description: "Create a free Edooqoo account so student context, worksheets, homework and progress signals can be saved between lessons.", benefits: ["No credit card required", "2 free worksheets to start", "Browser-based teacher workspace"] },
-  { number: 2, title: "Add student profile and goals", description: "Create a student profile with CEFR level, learning goals, lesson context and preferences. This gives 1-Minute Prep a stable starting point.", benefits: ["Student goals stored in one place", "Manual CEFR estimate supported", "Works for repeat and one-off 1:1 students"] },
-  { number: 3, title: "Send the Welcome Test, optional", description: "Send a placement test when you need a stronger baseline. The test covers grammar, vocabulary, reading, listening and speaking, then updates the student profile.", benefits: ["49-question assessment", "Speaking analysis included", "Initial DSLM profile data"] },
-  { number: 4, title: "Review the profile and DSLM baseline", description: "Review strengths, weak areas, learning path and nano-skill signals before deciding what to teach next.", benefits: ["Skill radar and mastery signals", "Learning path context", "Teacher review stays in control"] },
-  { number: 5, title: "Generate the next worksheet from context", description: "Use the student profile, goals and DSLM nano-skill evidence to generate a ready-to-teach worksheet with the topic, CEFR level and exercise types you choose.", benefits: ["29 exercise types", "Audio and image-capable worksheets", "Editable before teaching or assigning"] },
-  { number: 6, title: "Teach, share or assign homework", description: "Use the worksheet in a live lesson, share it through a link, download it, or assign selected exercises as homework.", benefits: ["Interactive sharing", "Live session mode", "HTML/PDF download"] },
-  { number: 7, title: "Student activity updates the model", description: "Homework answers, flashcards, shared worksheet activity and lesson signals feed back into the student model where applicable.", benefits: ["AI-assisted homework review", "Flashcards with spaced repetition", "Learning events connected to student history"] },
-  { number: 8, title: "Start the next lesson from stronger signals", description: "The next prep cycle starts with more student data than the previous one, so recommendations and generated materials can become faster and more precise.", benefits: ["DSLM trend detection", "Next-step recommendations", "Less blank-page preparation over time"] },
+  {
+    number: 1,
+    phase: 'setup',
+    icon: UserPlus,
+    title: "Create your account",
+    description: "Create a free Edooqoo account so student context, worksheets, homework and progress signals can be saved between lessons.",
+    benefits: ["No credit card required", "2 free worksheets to start", "Browser-based teacher workspace"],
+  },
+  {
+    number: 2,
+    phase: 'setup',
+    icon: Goal,
+    title: "Add student profile and goals",
+    description: "Create a student profile with CEFR level, learning goals, lesson context and preferences. This gives 1-Minute Prep a stable starting point.",
+    benefits: ["Student goals stored in one place", "Manual CEFR estimate supported", "Works for repeat and one-off 1:1 students"],
+  },
+  {
+    number: 3,
+    phase: 'setup',
+    icon: Send,
+    title: "Send the Welcome Test, optional",
+    description: "Send a placement test when you need a stronger baseline. The test covers grammar, vocabulary, reading, listening and speaking, then updates the student profile.",
+    benefits: ["49-question assessment", "Speaking analysis included", "Initial DSLM profile data"],
+  },
+  {
+    number: 4,
+    phase: 'setup',
+    icon: BarChart2,
+    title: "Review the profile and DSLM baseline",
+    description: "Review strengths, weak areas, learning path and nano-skill signals before deciding what to teach next.",
+    benefits: ["Skill radar and mastery signals", "Learning path context", "Teacher review stays in control"],
+  },
+  {
+    number: 5,
+    phase: 'weekly',
+    icon: Lightbulb,
+    title: "Generate Next Lesson Ideas",
+    description: "Use the student profile, goals, notes, roadmap context and recent signals to generate candidate next-lesson ideas before creating a worksheet.",
+    benefits: ["Suggestion-first prep", "Student-specific context", "Less blank-page topic search"],
+  },
+  {
+    number: 6,
+    phase: 'weekly',
+    icon: CalendarDays,
+    title: "Use booking context, optional",
+    description: "Optional when you use Edooqoo Calendar: confirmed booking time, lesson timing, and schedule context can inform the prep decision.",
+    benefits: ["Calendar-aware planning context", "No requirement to use the calendar", "Useful for recurring lessons"],
+  },
+  {
+    number: 7,
+    phase: 'weekly',
+    icon: FileText,
+    title: "Choose the next focus and generate the worksheet",
+    description: "Review or edit the suggested focus, then generate a ready-to-teach worksheet with the topic, CEFR level and exercise types you choose.",
+    benefits: ["29 exercise types", "Audio and image-capable worksheets", "Editable before teaching or assigning"],
+  },
+  {
+    number: 8,
+    phase: 'weekly',
+    icon: ClipboardCheck,
+    title: "Teach, assign, and let signals update the next cycle",
+    description: "Use the worksheet in a live lesson, share it through a link, assign selected exercises as homework, and let activity signals inform the next prep cycle where applicable.",
+    benefits: ["Interactive sharing", "AI-assisted homework review", "Learning events connected to student history"],
+  },
 ];
 
-const loopStages = [
-  { title: "Student context", description: "Profile, goals, CEFR estimate and lesson notes.", icon: Brain },
-  { title: "Generate and teach", description: "Worksheet output reviewed by the teacher.", icon: FileText },
-  { title: "Homework and flashcards", description: "Student activity creates learning signals.", icon: ClipboardCheck },
-  { title: "DSLM recommendation", description: "Signals become next-step teaching context.", icon: BarChart2 },
-  { title: "Better next prep", description: "The next cycle starts with stronger data.", icon: RefreshCw },
+const phaseSummaries = [
+  {
+    eyebrow: 'Phase 1: One-time student setup',
+    title: 'Build the learner context once',
+    description: 'One-time setup is not the 1-minute claim. It creates the student context Edooqoo needs before recurring prep can become faster and more precise.',
+    icon: Brain,
+    tone: 'setup',
+    steps: [
+      { icon: UserPlus, label: 'Create account' },
+      { icon: Goal, label: 'Add student profile and goals' },
+      { icon: Send, label: 'Send Welcome Test, optional' },
+      { icon: Map, label: 'Generate Learning Roadmap' },
+    ],
+  },
+  {
+    eyebrow: 'Phase 2: Weekly 1-Minute Prep',
+    title: 'Run the recurring prep loop',
+    description: 'Weekly prep is the recurring workflow Edooqoo is designed to make fast once student context and learning signals exist.',
+    icon: Lightbulb,
+    tone: 'weekly',
+    steps: [
+      { icon: Lightbulb, label: 'Generate Next Lesson Ideas' },
+      { icon: CalendarDays, label: 'Use booking context, optional' },
+      { icon: CheckCircle2, label: 'Choose the next focus' },
+      { icon: FileText, label: 'Create the worksheet output' },
+    ],
+  },
 ];
 
 const faqItems = [
@@ -38,6 +127,9 @@ const HowItWorks = () => {
   const fromPath = (location.state as { from?: string } | null)?.from;
   const fromState = { from: location.pathname + location.search };
   const handleBack = () => navigate(fromPath ?? '/');
+
+  const setupDetailSteps = steps.filter((step) => step.phase === 'setup');
+  const weeklyDetailSteps = steps.filter((step) => step.phase === 'weekly');
 
   const faqJsonLd = {
     '@context': 'https://schema.org',
@@ -63,6 +155,33 @@ const HowItWorks = () => {
     })),
   };
 
+  const renderStep = (step: typeof steps[number]) => {
+    const Icon = step.icon;
+
+    return (
+      <div key={step.number} className="flex gap-5">
+        <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-primary text-xl font-bold text-primary-foreground">
+          {step.number}
+        </div>
+        <div className="flex-1">
+          <div className="mb-2 flex items-center gap-2">
+            <Icon className="h-5 w-5 text-primary" />
+            <h3 className="text-2xl font-bold text-foreground">{step.title}</h3>
+          </div>
+          <p className="mb-4 text-muted-foreground">{step.description}</p>
+          <ul className="space-y-1">
+            {step.benefits.map((benefit, index) => (
+              <li key={index} className="flex items-start gap-2 text-sm text-muted-foreground">
+                <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                <span>{benefit}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
@@ -76,18 +195,18 @@ const HowItWorks = () => {
         <script type="application/ld+json">{JSON.stringify(howToJsonLd)}</script>
         <script type="application/ld+json">{JSON.stringify(faqJsonLd)}</script>
       </Helmet>
-      <div className="container mx-auto px-4 py-12 max-w-4xl">
+      <div className="container mx-auto max-w-4xl px-4 py-12">
         <div className="mb-8">
-          <button onClick={handleBack} className="text-primary hover:underline text-sm">
+          <button onClick={handleBack} className="text-sm text-primary hover:underline">
             ← Back to Edooqoo
           </button>
         </div>
 
-        <h1 className="text-4xl font-bold text-foreground mb-4">How 1-Minute Prep Works</h1>
-        <p className="text-lg text-muted-foreground mb-12">
+        <h1 className="mb-4 text-4xl font-bold text-foreground">How 1-Minute Prep Works</h1>
+        <p className="mb-12 text-lg text-muted-foreground">
           Edooqoo works as a student learning loop: first setup builds context, then each profile, worksheet, homework task and flashcard session can add context for the next lesson.
         </p>
-        <p className="text-sm text-muted-foreground mb-10">
+        <p className="mb-10 text-sm text-muted-foreground">
           For the bounded workflow definition, read the{' '}
           <Link to="/one-minute-prep" className="font-medium text-primary hover:underline">
             canonical 1-Minute Prep page
@@ -96,65 +215,99 @@ const HowItWorks = () => {
         </p>
 
         <section className="mb-14 -mx-4 border-y border-primary/10 bg-primary/5 px-4 py-8 sm:-mx-8 sm:px-8">
-          <div className="mb-5 text-center">
-            <h2 className="text-2xl font-bold text-foreground">The 1-Minute Prep loop</h2>
+          <div className="mb-6 text-center">
+            <h2 className="text-2xl font-bold text-foreground">The 1-Minute Prep workflow has two phases</h2>
             <p className="mt-2 text-sm text-muted-foreground">
-              Edooqoo is designed to move recurring weekly prep toward 1 minute per student as context and learning signals accumulate.
+              The setup phase builds the learner context. The weekly phase is the recurring prep workflow Edooqoo is designed to make fast.
             </p>
           </div>
-          <div className="grid gap-5 md:grid-cols-5 md:gap-4">
-            {loopStages.map(({ title, description, icon: Icon }, index) => (
-              <div key={title} className="relative border-l-2 border-primary/20 pl-4 text-left md:border-l-0 md:border-t-2 md:pl-0 md:pt-5 md:text-center">
-                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 md:mx-auto">
-                  <Icon className="h-5 w-5 text-primary" />
+
+          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_3rem_minmax(0,1fr)] lg:items-stretch">
+            {phaseSummaries.map(({ eyebrow, title, description, icon: Icon, tone, steps: phaseSteps }, index) => (
+              <React.Fragment key={title}>
+                <div
+                  className={
+                    tone === 'setup'
+                      ? 'rounded-xl border border-violet-100 bg-background p-5 shadow-sm'
+                      : 'rounded-xl border border-primary/20 bg-primary/10 p-5 shadow-sm'
+                  }
+                >
+                  <div className="mb-4 flex items-center gap-3">
+                    <div className={tone === 'setup' ? 'rounded-lg bg-violet-100 p-2' : 'rounded-lg bg-primary/15 p-2'}>
+                      <Icon className="h-5 w-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-wider text-primary">{eyebrow}</p>
+                      <h3 className="text-xl font-bold text-foreground">{title}</h3>
+                    </div>
+                  </div>
+                  <p className="text-sm leading-6 text-muted-foreground">{description}</p>
+                  <div className="mt-4 grid gap-2">
+                    {phaseSteps.map(({ icon: StepIcon, label }) => (
+                      <div key={label} className="flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground">
+                        <StepIcon className="h-4 w-4 shrink-0 text-primary" />
+                        <span>{label}</span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-                <h3 className="text-sm font-semibold text-foreground">{title}</h3>
-                <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{description}</p>
-                {index < loopStages.length - 1 && (
-                  <ArrowRight className="absolute -right-4 top-1/2 hidden h-5 w-5 -translate-y-1/2 text-primary md:block" />
-                )}
-              </div>
+
+                {index === 0 ? (
+                  <div className="hidden items-center justify-center lg:flex">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full border border-primary/20 bg-background shadow-sm">
+                      <ArrowRight className="h-5 w-5 text-primary" />
+                    </div>
+                  </div>
+                ) : null}
+              </React.Fragment>
             ))}
           </div>
         </section>
 
-        <div className="space-y-12">
-          {steps.map(step => (
-            <div key={step.number} className="flex gap-6">
-              <div className="flex-shrink-0 w-12 h-12 rounded-full bg-primary text-primary-foreground flex items-center justify-center text-xl font-bold">
-                {step.number}
-              </div>
-              <div className="flex-1">
-                <h2 className="text-2xl font-bold text-foreground mb-2">{step.title}</h2>
-                <p className="text-muted-foreground mb-4">{step.description}</p>
-                <ul className="space-y-1">
-                  {step.benefits.map((b, i) => (
-                    <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
-                      <span className="text-primary mt-1">✓</span> {b}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+        <div className="space-y-14">
+          <section>
+            <div className="mb-6 rounded-xl border border-violet-100 bg-violet-50/50 p-4">
+              <p className="text-xs font-semibold uppercase tracking-wider text-violet-700">Phase 1: One-time student setup</p>
+              <h2 className="mt-1 text-2xl font-bold text-foreground">One-time student setup</h2>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                This phase creates the learner record, baseline and goals. It is separate from the recurring 1-Minute Prep promise.
+              </p>
             </div>
-          ))}
+            <div className="space-y-8">
+              {setupDetailSteps.map(renderStep)}
+            </div>
+          </section>
+
+          <section>
+            <div className="mb-6 rounded-xl border border-primary/20 bg-primary/10 p-4">
+              <p className="text-xs font-semibold uppercase tracking-wider text-primary">Phase 2: Weekly 1-Minute Prep</p>
+              <h2 className="mt-1 text-2xl font-bold text-foreground">Weekly 1-Minute Prep</h2>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                This is the recurring prep loop: generate candidate next steps, use optional booking context, choose the focus, then create the worksheet output.
+              </p>
+            </div>
+            <div className="space-y-8">
+              {weeklyDetailSteps.map(renderStep)}
+            </div>
+          </section>
         </div>
 
         <div className="mt-16">
-          <h2 className="text-2xl font-bold text-foreground mb-6 border-b pb-2">Frequently Asked Questions</h2>
+          <h2 className="mb-6 border-b pb-2 text-2xl font-bold text-foreground">Frequently Asked Questions</h2>
           <div className="space-y-4">
             {faqItems.map(({ q, a }) => (
-              <details key={q} className="border rounded-lg p-4">
-                <summary className="font-semibold text-foreground cursor-pointer">{q}</summary>
+              <details key={q} className="rounded-lg border p-4">
+                <summary className="cursor-pointer font-semibold text-foreground">{q}</summary>
                 <p className="mt-2 text-muted-foreground">{a}</p>
               </details>
             ))}
           </div>
         </div>
 
-        <div className="mt-12 p-6 bg-primary/5 rounded-lg text-center">
-          <p className="text-lg font-semibold text-foreground mb-2">Ready to get started?</p>
-          <p className="text-muted-foreground mb-4">Sign up free, add a student profile, and start building the context for 1-Minute Prep.</p>
-          <Link to="/signup" state={fromState} className="inline-block bg-primary text-primary-foreground px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity">
+        <div className="mt-12 rounded-lg bg-primary/5 p-6 text-center">
+          <p className="mb-2 text-lg font-semibold text-foreground">Ready to get started?</p>
+          <p className="mb-4 text-muted-foreground">Sign up free, add a student profile, and start building the context for 1-Minute Prep.</p>
+          <Link to="/signup" state={fromState} className="inline-block rounded-lg bg-primary px-6 py-3 font-semibold text-primary-foreground transition-opacity hover:opacity-90">
             Try Edooqoo Free — 2 Worksheets Included
           </Link>
         </div>

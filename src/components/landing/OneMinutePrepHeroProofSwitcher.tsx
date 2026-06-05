@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {
   Calculator,
+  CalendarDays,
   CheckCircle2,
   ClipboardList,
   FileText,
@@ -8,6 +9,8 @@ import {
   Lightbulb,
   Map,
   PlayCircle,
+  Send,
+  UserPlus,
 } from 'lucide-react';
 import {
   PricingCalculator,
@@ -15,7 +18,8 @@ import {
 } from '@/components/PricingCalculator';
 import { cn } from '@/lib/utils';
 
-type HeroProofPanel = 'calculator' | 'workflow';
+type HeroProofPanel = 'calculator' | 'workflow' | 'evidence';
+type ProofIcon = React.ComponentType<{ className?: string }>;
 
 interface OneMinutePrepHeroProofSwitcherProps {
   calculatorValue: OneMinutePrepCalculatorInput;
@@ -39,18 +43,93 @@ const evidenceSteps = [
   { icon: FileText, label: 'Worksheet' },
 ];
 
-const FlowStep = ({ icon: Icon, label }: { icon: React.ComponentType<{ className?: string }>; label: string }) => (
-  <div className="flex items-center gap-2 rounded-lg border border-border bg-white px-3 py-2 text-xs font-medium text-foreground shadow-sm">
+const setupSteps = [
+  { icon: UserPlus, label: 'Add 1 real student' },
+  { icon: Send, label: 'Send Welcome Test' },
+  { icon: Goal, label: 'Add goals' },
+  { icon: Map, label: 'Generate Learning Roadmap' },
+];
+
+const weeklyWorkflowSteps = [
+  { icon: Lightbulb, label: 'Generate Next Lesson Ideas' },
+  { icon: CalendarDays, label: 'Use booking context', badge: 'optional' },
+  { icon: CheckCircle2, label: 'Choose one idea' },
+  { icon: FileText, label: 'Create a worksheet' },
+];
+
+const FlowStep = ({
+  icon: Icon,
+  label,
+  badge,
+}: {
+  icon: ProofIcon;
+  label: string;
+  badge?: string;
+}) => (
+  <div className="flex min-w-0 items-center gap-2 rounded-lg border border-border bg-white px-3 py-2 text-xs font-medium text-foreground shadow-sm">
     <Icon className="h-3.5 w-3.5 shrink-0 text-primary" />
-    <span className="min-w-0">{label}</span>
+    <span className="min-w-0 flex-1 leading-snug">{label}</span>
+    {badge ? (
+      <span className="shrink-0 rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-primary">
+        {badge}
+      </span>
+    ) : null}
   </div>
 );
 
-const CompactWorkflowProof = () => (
+const CompactWorkflowProofPanel = () => (
   <div
     id="one-minute-hero-workflow-panel"
     role="tabpanel"
     aria-labelledby="one-minute-hero-workflow-tab"
+    className="rounded-2xl border-2 border-violet-100 bg-white p-4 shadow-xl shadow-violet-500/10"
+  >
+    <div className="flex items-center gap-2">
+      <PlayCircle className="h-5 w-5 text-primary" />
+      <div>
+        <h2 className="text-base font-semibold text-gray-900">Workflow proof</h2>
+        <p className="text-xs text-muted-foreground">Setup is separate from weekly prep.</p>
+      </div>
+    </div>
+
+    <div className="mt-4 space-y-3">
+      <div className="rounded-xl border border-violet-100 bg-violet-50/70 p-3">
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-violet-700">One-time student setup</p>
+        <p className="mt-1 text-xs leading-5 text-muted-foreground">
+          First create the learner context that the recurring prep flow can use.
+        </p>
+        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+          {setupSteps.map((step) => (
+            <FlowStep key={step.label} {...step} />
+          ))}
+        </div>
+      </div>
+
+      <div className="rounded-xl border border-green-100 bg-green-50/70 p-3">
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-green-700">Weekly 1-Minute Prep flow</p>
+        <p className="mt-1 text-xs leading-5 text-muted-foreground">
+          Then use stored context to choose the next focus before the worksheet is generated.
+        </p>
+        <div className="mt-3 grid gap-2">
+          {weeklyWorkflowSteps.map((step) => (
+            <FlowStep key={step.label} {...step} />
+          ))}
+        </div>
+      </div>
+
+      <div className="flex items-start gap-2 rounded-xl border border-border bg-muted/30 p-3 text-xs leading-5 text-muted-foreground">
+        <CalendarDays className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
+        <span>Booking context is optional when the teacher uses Edooqoo Calendar.</span>
+      </div>
+    </div>
+  </div>
+);
+
+const CompactEvidenceStackPanel = () => (
+  <div
+    id="one-minute-hero-evidence-panel"
+    role="tabpanel"
+    aria-labelledby="one-minute-hero-evidence-tab"
     className="rounded-2xl border-2 border-violet-100 bg-white p-4 shadow-xl shadow-violet-500/10"
   >
     <div className="flex items-center gap-2">
@@ -109,7 +188,7 @@ const OneMinutePrepHeroProofSwitcher: React.FC<OneMinutePrepHeroProofSwitcherPro
 
   const tabClassName = (panel: HeroProofPanel) =>
     cn(
-      'flex h-9 items-center justify-center gap-2 rounded-full px-3 text-xs font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+      'flex h-9 min-w-0 items-center justify-center gap-1.5 rounded-full px-2 text-[11px] font-semibold leading-tight transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 sm:gap-2 sm:px-3 sm:text-xs',
       activePanel === panel
         ? 'bg-primary text-primary-foreground shadow-sm'
         : 'text-muted-foreground hover:bg-violet-50 hover:text-primary'
@@ -118,7 +197,7 @@ const OneMinutePrepHeroProofSwitcher: React.FC<OneMinutePrepHeroProofSwitcherPro
   return (
     <div className="w-full max-w-[460px]">
       <div
-        className="mb-3 grid grid-cols-2 gap-1 rounded-full border border-violet-100 bg-white/90 p-1 shadow-sm"
+        className="mb-3 grid grid-cols-3 gap-1 rounded-full border border-violet-100 bg-white/90 p-1 shadow-sm"
         role="tablist"
         aria-label="1-Minute Prep hero proof"
       >
@@ -133,8 +212,8 @@ const OneMinutePrepHeroProofSwitcher: React.FC<OneMinutePrepHeroProofSwitcherPro
           onMouseEnter={() => activatePanel('calculator')}
           onFocus={() => activatePanel('calculator')}
         >
-          <Calculator className="h-3.5 w-3.5" />
-          Prep impact
+          <Calculator className="h-3.5 w-3.5 shrink-0" />
+          <span className="min-w-0">Prep impact</span>
         </button>
         <button
           id="one-minute-hero-workflow-tab"
@@ -147,8 +226,22 @@ const OneMinutePrepHeroProofSwitcher: React.FC<OneMinutePrepHeroProofSwitcherPro
           onMouseEnter={() => activatePanel('workflow')}
           onFocus={() => activatePanel('workflow')}
         >
-          <PlayCircle className="h-3.5 w-3.5" />
-          Evidence stack
+          <PlayCircle className="h-3.5 w-3.5 shrink-0" />
+          <span className="min-w-0">Workflow proof</span>
+        </button>
+        <button
+          id="one-minute-hero-evidence-tab"
+          type="button"
+          role="tab"
+          aria-selected={activePanel === 'evidence'}
+          aria-controls="one-minute-hero-evidence-panel"
+          className={tabClassName('evidence')}
+          onClick={() => activatePanel('evidence')}
+          onMouseEnter={() => activatePanel('evidence')}
+          onFocus={() => activatePanel('evidence')}
+        >
+          <ClipboardList className="h-3.5 w-3.5 shrink-0" />
+          <span className="min-w-0">Evidence stack</span>
         </button>
       </div>
 
@@ -164,8 +257,10 @@ const OneMinutePrepHeroProofSwitcher: React.FC<OneMinutePrepHeroProofSwitcherPro
             onValueChange={onCalculatorChange}
           />
         </div>
+      ) : activePanel === 'workflow' ? (
+        <CompactWorkflowProofPanel />
       ) : (
-        <CompactWorkflowProof />
+        <CompactEvidenceStackPanel />
       )}
     </div>
   );

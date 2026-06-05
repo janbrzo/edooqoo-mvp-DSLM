@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   ArrowRight,
@@ -164,6 +164,11 @@ const OneMinutePrep: React.FC = () => {
   const [oneMinutePrepCalculator, setOneMinutePrepCalculator] = useState<OneMinutePrepCalculatorInput>(
     DEFAULT_ONE_MINUTE_PREP_CALCULATOR_INPUT
   );
+
+  useEffect(() => {
+    if (location.hash) return;
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  }, [location.hash, location.pathname, location.search]);
 
   return (
     <div className="min-h-screen bg-background">
