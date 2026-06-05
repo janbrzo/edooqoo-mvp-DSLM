@@ -174,6 +174,10 @@ const oneMinutePrepProblem = [
   'The particle background click effect could be triggered by calculator control clicks.',
   'The /how-it-works page explained a linear worksheet-generation process but did not describe the recurring student-context loop that powers better next prep decisions.',
   'The 1-Minute Prep narrative described DSLM too generally and did not show the evidence stack behind next-step suggestions: nano-skills, confidence context, pacing, roadmap phase, goals, notes, homework, and worksheet history.',
+  'The homepage hero proof switcher collapsed Workflow proof and Evidence stack into one panel even though teachers need to see both the workflow sequence and the evidence mechanism.',
+  'The /one-minute-prep route could open at the proof/calculator section because the SPA route did not reset scroll position for clean non-hash navigation.',
+  'The /how-it-works page did not make the one-time setup vs weekly 1-Minute Prep split visually obvious enough for scanning teachers.',
+  'The weekly prep storyboard skipped the optional Edooqoo Calendar booking-context step between Next Lesson Ideas and choosing the next focus.',
 ];
 
 const oneMinutePrepSolution = [
@@ -185,7 +189,10 @@ const oneMinutePrepSolution = [
   'Public and authenticated surfaces now explain DSLM as a student-specific signal graph built from stored learner evidence, not as a single model file.',
   'The proof path is Signals -> Nano-skills -> Pacing/Roadmap -> Next focus -> Worksheet, with teacher review before use.',
   'The prep impact calculator estimates monthly preparation capacity currently tied up by prep work. It does not guarantee income or exact preparation time.',
-  '/how-it-works keeps 8 steps and frames them as the 1-Minute Prep loop: student context -> generate and teach -> homework/flashcards/signals -> DSLM recommendation -> better next prep.',
+  'Homepage hero proof tabs now separate Prep impact, Workflow proof, and Evidence stack so workflow order and DSLM evidence are not conflated.',
+  '/one-minute-prep opens at the top on clean navigation and uses three proof tabs in this order: Workflow proof, Evidence stack, Prep impact calculator.',
+  '/how-it-works keeps 8 steps but visually splits them into Phase 1: One-time student setup and Phase 2: Weekly 1-Minute Prep.',
+  'Weekly workflow proof includes the optional Use booking context step for teachers who use Edooqoo Calendar without claiming calendar data always drives DSLM decisions.',
   'Existing worksheet-generator, pricing, auth, token, Supabase, RLS, Edge Function, Stripe, and private dashboard behavior remain unchanged.',
 ];
 
@@ -198,12 +205,14 @@ const oneMinutePrepMechanics = [
   'Calculator formulas: WEEKS_PER_MONTH=4.33; currentMonthlyPrepMinutes=prepMinutesPerStudent*studentsPerWeek*WEEKS_PER_MONTH; targetMonthlyPrepMinutes=studentsPerWeek*1*WEEKS_PER_MONTH; monthlyPrepMinutesTiedUp=max(0,currentMonthlyPrepMinutes-targetMonthlyPrepMinutes); monthlyLessonSlotsTiedUp=floor(monthlyPrepMinutesTiedUp/lessonLengthMinutes); monthlyRevenueCapacityTiedUp=monthlyLessonSlotsTiedUp*lessonPrice.',
   'Revenue capacity does not subtract plan cost. It represents estimated monthly lesson capacity currently consumed by prep time, not profit.',
   'src/components/landing/ParticlesBackground.tsx disables onClick.push by setting click interactivity disabled.',
-  'src/components/landing/OneMinutePrepHeroProofSwitcher.tsx and src/components/landing/OneMinutePrepProofSection.tsx show the DSLM evidence stack instead of a simple setup-to-worksheet storyboard.',
+  'src/components/landing/OneMinutePrepHeroProofSwitcher.tsx uses three hero tabs: Prep impact, Workflow proof, and Evidence stack. The default active hero panel remains the controlled PricingCalculator variant="hero".',
+  'src/components/landing/OneMinutePrepProofSection.tsx uses three full proof tabs ordered as Workflow proof, Evidence stack, and Prep impact calculator. Its defaultPanel is workflow and the calculator remains the controlled PricingCalculator variant="pricing".',
+  'src/pages/OneMinutePrep.tsx performs a route-local window.scrollTo top reset only when location.hash is empty, preserving hash/deep-link behavior.',
   'src/pages/OneMinutePrep.tsx includes a "Why DSLM can choose a better next step" section covering nano-skill evidence, student goal, pacing mode, roadmap phase, recent activity, teacher review, and worksheet output.',
   'src/pages/features/FeatureDSLM.tsx defines nano-skills as atomic labels such as ns.grammar.present_perfect_continuous, ns.writing.formal_narrative, and ns.listening.detail_extraction.',
   'src/components/dslm/NextStepBanner.tsx and src/components/dslm/CompactSuggestionCard.tsx expose a "Why this suggestion" panel from existing suggestion fields: focus_skill_names, generation_context, difficulty_level, estimated_impact, and confidence reasons.',
   'src/components/student/DslmExplainerBanner.tsx explains DSLM as stored signals, nano-skills, pacing, roadmap phases, and teacher approval before worksheet output.',
-  'src/pages/HowItWorks.tsx updates visible copy, title/meta, and HowTo JSON-LD to describe the student learning loop.',
+  'src/pages/HowItWorks.tsx renders the 1-Minute Prep workflow as two visible phases and splits the 8-step detail into setup steps and weekly prep steps, including the optional booking-context step.',
   'index.html title, description, Open Graph, Twitter metadata, keyword metadata, and SoftwareApplication JSON-LD now describe 1-Minute Prep and DSLM workflow context.',
   'SANCTITY: no changes to worksheet-generation prompts, Supabase schema, RLS policies, Edge Functions, service-role code, Stripe/payment code, authenticated worksheet editor, homework logic, private student data access, or private teacher data access.',
 ];
@@ -227,6 +236,14 @@ const oneMinutePrepKeywords = [
   'particle click disabled',
   'how-it-works loop',
   '1-Minute Prep loop',
+  '1-Minute Prep proof tabs',
+  'Workflow proof',
+  'Evidence stack',
+  'Prep impact calculator',
+  'one-minute-prep scroll reset',
+  'one-time student setup',
+  'weekly 1-Minute Prep flow',
+  'Edooqoo Calendar booking context',
   'student context loop',
   'DSLM recommendation loop',
   'DSLM signal graph',
@@ -305,7 +322,7 @@ const oneMinutePrepDiscoveryMechanics = [
   'AI resources describe 1-Minute Prep as a workflow claim with setup boundaries, teacher review, and no guaranteed one-minute benchmark.',
   'New static citation URL: /one-minute-prep-for-english-tutors.html.',
   'New citation article URL: /blog/one-minute-prep-workflow-for-esl-tutors.html.',
-  'src/components/landing/OneMinutePrepProofSection.tsx renders the calculator/storyboard proof layer with native video support reserved for /media/one-minute-prep-demo.mp4.',
+  'src/components/landing/OneMinutePrepProofSection.tsx renders Workflow proof, Evidence stack, and Prep impact calculator tabs with native video support reserved for /media/one-minute-prep-demo.mp4.',
   'scripts/seo/audit-seo-assets.mjs rejects unsafe exact-time and teacher-review-removal claims.',
 ];
 
@@ -334,9 +351,10 @@ const homepageHeroProofProblem = [
 ];
 
 const homepageHeroProofSolution = [
-  'Homepage hero right column uses a compact Prep impact / Workflow proof switcher.',
+  'Homepage hero right column uses a compact Prep impact / Workflow proof / Evidence stack switcher.',
   'The default active hero panel remains the prep impact calculator because it is the immediate conversion proof element.',
-  'The hero Workflow proof panel is a compact storyboard only: one-time setup (Student -> Welcome Test -> Goals -> Roadmap) and weekly prep (Next Lesson Ideas -> Choose one -> Worksheet).',
+  'The hero Workflow proof panel is a compact storyboard only: one-time setup (Student -> Welcome Test -> Goals -> Roadmap) and weekly prep (Next Lesson Ideas -> optional booking context -> Choose one -> Worksheet).',
+  'The hero Evidence stack panel separately explains stored learner evidence, DSLM signals, nano-skills, pacing/roadmap, next focus, and worksheet output after teacher review.',
   'The full OneMinutePrepProofSection remains available on /one-minute-prep; it is no longer rendered as a separate homepage section below the worksheet form.',
 ];
 
@@ -347,7 +365,7 @@ const homepageHeroProofMechanics = [
   'Mobile switching uses the same tab buttons by tap/click; no hover-only dependency is required.',
   'src/components/landing/HeroHeadline.tsx replaces the direct hero PricingCalculator with OneMinutePrepHeroProofSwitcher and keeps the two-column hero layout with a right column capped near 460px.',
   'src/pages/Index.tsx removes the standalone homepage OneMinutePrepProofSection render after #worksheet-form.',
-  '/one-minute-prep continues using the full OneMinutePrepProofSection proof/storyboard section.',
+  '/one-minute-prep continues using the full OneMinutePrepProofSection proof/storyboard section with Workflow proof, Evidence stack, and Prep impact calculator tabs.',
   'SANCTITY: no Worksheet Generation Engine prompt, parameter, or logic change; no Supabase schema, RLS, Edge Function, Stripe, auth, or service-role change.',
 ];
 
@@ -356,10 +374,11 @@ const homepageHeroProofKeywords = [
   'OneMinutePrepHeroProofSwitcher',
   'Prep impact tab',
   'Workflow proof tab',
+  'Evidence stack tab',
   'compact hero storyboard',
   'hero calculator switcher',
   'Student Welcome Test Goals Roadmap',
-  'Next Lesson Ideas Choose one Worksheet',
+  'Next Lesson Ideas booking context Choose one Worksheet',
   'proof moved above fold',
   'no duplicate homepage proof section',
   '/one-minute-prep full proof section',
