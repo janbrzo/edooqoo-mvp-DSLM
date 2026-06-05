@@ -50,13 +50,35 @@ export default function WorksheetForm({
   userId: userIdProp,
 }: ExtendedWorksheetFormProps) {
   const [lessonTime, setLessonTime] = useState<LessonTime>("60min");
-  const [lessonTopic, setLessonTopic] = useState("");
+  // v6.9.38 — read autoGenerate intent + prefill topic synchronously so the
+  // readiness gate has a deterministic snapshot on the very first render.
+  const readAutoGenerateIntent = () => {
+    if (typeof window === 'undefined') return null;
+    try {
+      if (sessionStorage.getItem('autoGenerateWorksheet') !== 'true') return null;
+      const raw = sessionStorage.getItem('autoGenerateWorksheetRequest');
+      return raw ? (JSON.parse(raw) as { studentId?: string; suggestionId?: string | null }) : {};
+    } catch { return null; }
+  };
+  const readPrefillTopic = () => {
+    if (typeof window === 'undefined') return '';
+    try {
+      const raw = sessionStorage.getItem('prefillWorksheet');
+      if (!raw) return '';
+      const p = JSON.parse(raw);
+      return typeof p?.topic === 'string' ? p.topic : '';
+    } catch { return ''; }
+  };
+  const initialAutoIntentRef = useRef<{ studentId?: string; suggestionId?: string | null } | null>(readAutoGenerateIntent());
+  const [lessonTopic, setLessonTopic] = useState<string>(() => readPrefillTopic());
   const [lessonGoal, setLessonGoal] = useState("");
   const [grammarFocus, setGrammarFocus] = useState("");
   const [additionalInformation, setAdditionalInformation] = useState("");
   const [englishLevel, setEnglishLevel] = useState<EnglishLevel>("B1/B2");
   const [languageStyle, setLanguageStyle] = useState<number>(3); // Default neutral style
-  const [selectedStudentId, setSelectedStudentId] = useState<string>("no-student");
+  const [selectedStudentId, setSelectedStudentId] = useState<string>(
+    () => (initialAutoIntentRef.current?.studentId as string) || preSelectedStudent?.id || "no-student"
+  );
 
   // Initialize selectedExercises based on lessonTime and selectionMode
   const getInitialExercises = (): string[] => {
@@ -77,7 +99,6 @@ export default function WorksheetForm({
   const formRef = useRef<HTMLFormElement>(null);
   // v6.9.36 — auto-submit readiness refs (deterministic gate, not timeout).
   const autoSubmitFiredRef = useRef(false);
-  const autoSubmitRequestRef = useRef<{ studentId: string | null; suggestionId: string | null; createdAt: number } | null>(null);
   const {
     toast
   } = useToast();
