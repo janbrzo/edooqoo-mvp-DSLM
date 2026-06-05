@@ -336,3 +336,10 @@ root crawlability, no-JS homepage summary, raw homepage canonical, FAQPage schem
 - Treat /dashboard, /worksheet/, /worksheets, /homework/, /flashcards/, /my, /calendar, /admin, and auth routes as private application surfaces.
 - Treat /esl-worksheets, /worksheets/:exerciseType/:topic, /english-for/:persona, /tools/*, /gallery, top-level .html citation pages, and public /blog/*.html articles as public discovery surfaces.
 - User-facing application copy is English. Planning conversation with the owner may be Polish.
+
+## v6.9.38 Notes
+- WorksheetForm auto-submit from "Generate worksheet ↗" uses lazy useState/useRef snapshot of sessionStorage; readiness gate watches [lessonTopic, selectedExercises]; flags cleared after requestSubmit; watchdog 1500ms. See docs/llm-context.md § v6.9.38.
+- DSLMTab focus-param handler uses requestAnimationFrame + focusHandledRef dedupe; LazySection now honors late `eager` flips (Add-Goal modal opens after Welcome Test autosend).
+- audit-llm-models prepends explicit Daily vs Monthly banner to report HTML; subject already differs.
+- /blog/learning-pacing-scientific-vs-pragmatic-esl.html cites Krashen Natural Order Hypothesis, Input Hypothesis i+1, TBLT, Lexical Approach — aligned with `supabase/functions/_shared/dslmPromptCore.ts`.
+- /blog/teaching-english-one-to-one.html mojibake purged, UTF-8 clean, no BOM.

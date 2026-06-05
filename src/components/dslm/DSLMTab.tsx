@@ -191,27 +191,27 @@ export const DSLMTab: React.FC<DSLMTabProps> = ({
   // After handling we strip both `focus` and `_` so the next click on the
   // same deep link still triggers a state transition.
   const focusParam = searchParams.get('focus');
+  // v6.9.38 — guard against multiple rerenders cancelling the action via cleanup.
+  const focusHandledRef = useRef<string | null>(null);
   useEffect(() => {
     if (!focusParam) return;
-    const t = setTimeout(() => {
+    const cacheKey = `${focusParam}:${searchParams.get('_') || ''}`;
+    if (focusHandledRef.current === cacheKey) return;
+    focusHandledRef.current = cacheKey;
+    const raf = requestAnimationFrame(() => {
       if (focusParam === 'add-goal-modal') {
-        // v6.9.36 — state-driven (not event-driven) for URL focus. GoalsView
-        // reads `pendingAddGoal` and opens the dialog as soon as it mounts,
-        // even when it sits behind LazySection. Avoids the prior race where
-        // the one-shot `dslm:addGoal` event fired before the listener mounted.
         handleScrollTo('goals');
         setPendingAddGoal(true);
       } else if (focusParam === 'pick-idea') {
         handleScrollTo('pathway');
         window.dispatchEvent(new CustomEvent('pathway:pickIdea'));
       }
-      // Strip focus + cache-buster so a repeat click re-triggers.
       const next = new URLSearchParams(searchParams);
       next.delete('focus');
       next.delete('_');
       setSearchParams(next, { replace: true });
-    }, 500);
-    return () => clearTimeout(t);
+    });
+    return () => cancelAnimationFrame(raf);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [focusParam, searchParams.get('_')]);
 

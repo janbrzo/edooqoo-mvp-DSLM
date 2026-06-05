@@ -50,13 +50,35 @@ export default function WorksheetForm({
   userId: userIdProp,
 }: ExtendedWorksheetFormProps) {
   const [lessonTime, setLessonTime] = useState<LessonTime>("60min");
-  const [lessonTopic, setLessonTopic] = useState("");
+  // v6.9.38 — read autoGenerate intent + prefill topic synchronously so the
+  // readiness gate has a deterministic snapshot on the very first render.
+  const readAutoGenerateIntent = () => {
+    if (typeof window === 'undefined') return null;
+    try {
+      if (sessionStorage.getItem('autoGenerateWorksheet') !== 'true') return null;
+      const raw = sessionStorage.getItem('autoGenerateWorksheetRequest');
+      return raw ? (JSON.parse(raw) as { studentId?: string; suggestionId?: string | null }) : {};
+    } catch { return null; }
+  };
+  const readPrefillTopic = () => {
+    if (typeof window === 'undefined') return '';
+    try {
+      const raw = sessionStorage.getItem('prefillWorksheet');
+      if (!raw) return '';
+      const p = JSON.parse(raw);
+      return typeof p?.topic === 'string' ? p.topic : '';
+    } catch { return ''; }
+  };
+  const initialAutoIntentRef = useRef<{ studentId?: string; suggestionId?: string | null } | null>(readAutoGenerateIntent());
+  const [lessonTopic, setLessonTopic] = useState<string>(() => readPrefillTopic());
   const [lessonGoal, setLessonGoal] = useState("");
   const [grammarFocus, setGrammarFocus] = useState("");
   const [additionalInformation, setAdditionalInformation] = useState("");
   const [englishLevel, setEnglishLevel] = useState<EnglishLevel>("B1/B2");
   const [languageStyle, setLanguageStyle] = useState<number>(3); // Default neutral style
-  const [selectedStudentId, setSelectedStudentId] = useState<string>("no-student");
+  const [selectedStudentId, setSelectedStudentId] = useState<string>(
+    () => (initialAutoIntentRef.current?.studentId as string) || preSelectedStudent?.id || "no-student"
+  );
 
   // Initialize selectedExercises based on lessonTime and selectionMode
   const getInitialExercises = (): string[] => {
@@ -77,7 +99,6 @@ export default function WorksheetForm({
   const formRef = useRef<HTMLFormElement>(null);
   // v6.9.36 — auto-submit readiness refs (deterministic gate, not timeout).
   const autoSubmitFiredRef = useRef(false);
-  const autoSubmitRequestRef = useRef<{ studentId: string | null; suggestionId: string | null; createdAt: number } | null>(null);
   const {
     toast
   } = useToast();
@@ -270,75 +291,60 @@ export default function WorksheetForm({
     }
 
     // v6.9.36 — auto-submit if DSLM "Generate worksheet ↗" was clicked.
-    // The readiness gate (see below useEffect) waits until topic + intended
-    // student + exercises are committed, then submits once. Eliminates the
-    // silent "form filled but nothing happens" race.
-    const shouldAutoGenerate = sessionStorage.getItem('autoGenerateWorksheet') === 'true';
-    if (shouldAutoGenerate) {
-      try {
-        const raw = sessionStorage.getItem('autoGenerateWorksheetRequest');
-        if (raw) {
-          const req = JSON.parse(raw);
-          autoSubmitRequestRef.current = req;
-          // v6.9.37 — bypass prop race: pin student immediately from the request.
-          if (req?.studentId && typeof req.studentId === 'string') {
-            setSelectedStudentId(req.studentId);
-          }
-        }
-      } catch { /* ignore */ }
-      devLog('🚀 [WorksheetForm v6.9.37] autoGenerate flag detected; readiness gate armed');
+    // v6.9.38 — intent + studentId + lessonTopic are now read synchronously
+    // via lazy useState/useRef initializers above, so the readiness gate
+    // has a deterministic snapshot on the very first render. Nothing else
+    // is needed here.
+    if (initialAutoIntentRef.current) {
+      devLog('🚀 [WorksheetForm v6.9.38] autoGenerate intent detected (lazy init)');
     }
   }, []);
 
-  // v6.9.36 — deterministic readiness gate. Re-runs on every hydration tick.
-  // Submits exactly once when ALL of: flag present, topic hydrated, intended
-  // student selected (when request specifies one), exercises non-empty.
+  // v6.9.38 — simplified readiness gate. Lazy init guarantees topic +
+  // studentId snapshot on first render, so the gate only waits for the
+  // exercises array to be normalized and the form ref to mount.
   useEffect(() => {
     if (autoSubmitFiredRef.current) return;
-    if (sessionStorage.getItem('autoGenerateWorksheet') !== 'true') return;
-    const req = autoSubmitRequestRef.current;
+    if (!initialAutoIntentRef.current) return;
     if (!lessonTopic || !lessonTopic.trim()) { devLog('[autoSubmit] waiting: lessonTopic empty'); return; }
     if (!selectedExercises || selectedExercises.length === 0) { devLog('[autoSubmit] waiting: no exercises'); return; }
     if (!formRef.current) { devLog('[autoSubmit] waiting: no formRef'); return; }
-    if (req?.studentId && selectedStudentId !== req.studentId) {
-      devLog('[autoSubmit] waiting: student not hydrated', { want: req.studentId, have: selectedStudentId });
-      return;
-    }
     autoSubmitFiredRef.current = true;
-    sessionStorage.removeItem('autoGenerateWorksheet');
-    sessionStorage.removeItem('autoGenerateWorksheetRequest');
-    // One microtask + rAF so React commit lands before requestSubmit reads state via closure.
     window.setTimeout(() => {
       requestAnimationFrame(() => {
         try {
-          devLog('🚀 [WorksheetForm v6.9.37] Auto-submitting');
+          devLog('🚀 [WorksheetForm v6.9.38] Auto-submit firing');
           formRef.current?.requestSubmit();
         } catch (e) {
           devWarn('[WorksheetForm] requestSubmit threw', e);
         }
+        // v6.9.38 — clear flags AFTER dispatching submit, not before.
+        sessionStorage.removeItem('autoGenerateWorksheet');
+        sessionStorage.removeItem('autoGenerateWorksheetRequest');
       });
     }, 0);
-  }, [lessonTopic, selectedStudentId, selectedExercises, selectedMediaTypes, exerciseFocusMap]);
+  }, [lessonTopic, selectedExercises]);
 
-  // v6.9.37 — last-resort: 5s watchdog. If topic+exercises present but student
-  // never hydrated, force submit anyway. Otherwise drop the stale flags.
+  // v6.9.38 — last-resort watchdog (1500 ms). If lazy init detected an
+  // intent but the gate never fired, force submit if minimally ready,
+  // otherwise drop the stale sessionStorage flags so manual edits work.
   useEffect(() => {
     const t = setTimeout(() => {
       if (autoSubmitFiredRef.current) return;
-      if (sessionStorage.getItem('autoGenerateWorksheet') !== 'true') return;
+      if (!initialAutoIntentRef.current) return;
       const ok = !!lessonTopic?.trim() && (selectedExercises?.length ?? 0) > 0 && !!formRef.current;
       if (ok) {
         autoSubmitFiredRef.current = true;
+        devWarn('[WorksheetForm v6.9.38] watchdog force-submit');
+        formRef.current?.requestSubmit();
         sessionStorage.removeItem('autoGenerateWorksheet');
         sessionStorage.removeItem('autoGenerateWorksheetRequest');
-        devWarn('[WorksheetForm v6.9.37] watchdog force-submit (student hydration timed out)');
-        formRef.current?.requestSubmit();
       } else {
-        devWarn('[WorksheetForm v6.9.37] watchdog dropping flag (form not ready)');
+        devWarn('[WorksheetForm v6.9.38] watchdog dropping flag (form not ready)');
         sessionStorage.removeItem('autoGenerateWorksheet');
         sessionStorage.removeItem('autoGenerateWorksheetRequest');
       }
-    }, 5000);
+    }, 1500);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

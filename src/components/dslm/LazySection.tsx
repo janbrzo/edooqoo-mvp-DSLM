@@ -41,5 +41,10 @@ export const LazySection: React.FC<LazySectionProps> = ({
     return () => obs.disconnect();
   }, [shouldRender, rootMargin]);
 
+  // v6.9.38 — honor late eager flips (e.g. add-goal-modal deep link).
+  useEffect(() => {
+    if (eager && !shouldRender) setShouldRender(true);
+  }, [eager, shouldRender]);
+
   return <div ref={ref}>{shouldRender ? children : <SectionSkeleton />}</div>;
 };
