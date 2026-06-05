@@ -51,7 +51,7 @@ const StartOneMinutePrepDialog: React.FC<StartOneMinutePrepDialogProps> = ({
             Create a free account to unlock 1-Minute Prep
           </DialogTitle>
           <DialogDescription className="pt-1 text-center">
-            1-Minute Prep needs saved student context: profile, goals, lesson notes, homework, flashcards and DSLM signals. The worksheet generator remains available without setup.
+            1-Minute Prep needs saved student context: profile, goals, lesson notes, homework, flashcard progress and DSLM nano-skill evidence. The worksheet generator remains available without setup.
           </DialogDescription>
         </DialogHeader>
 
@@ -67,7 +67,7 @@ const StartOneMinutePrepDialog: React.FC<StartOneMinutePrepDialogProps> = ({
             </div>
             <div className="flex items-start gap-2">
               <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-violet-600" />
-              <span>DSLM next-step signals before worksheet generation.</span>
+              <span>DSLM evidence stack before worksheet generation.</span>
             </div>
             <div className="flex items-start gap-2">
               <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-violet-600" />

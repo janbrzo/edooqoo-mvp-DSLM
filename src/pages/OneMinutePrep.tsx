@@ -29,24 +29,57 @@ const loopStages = [
     icon: Brain,
   },
   {
-    title: 'Generate and teach',
-    description: 'The teacher reviews the focus, generates a worksheet, edits it, and uses it in a lesson.',
-    icon: FileText,
+    title: 'Nano-skill evidence',
+    description: 'Tagged questions, worksheet checks, homework evaluations, and teacher ratings create skill-level evidence.',
+    icon: BarChart2,
   },
   {
-    title: 'Homework, flashcards, signals',
-    description: 'Student activity creates signals through homework, flashcards, shared worksheets, or live work.',
+    title: 'Pacing and roadmap',
+    description: 'Goals, deadlines, profile traits, and skill metrics shape the pacing mode and roadmap influence.',
     icon: ClipboardCheck,
   },
   {
     title: 'DSLM recommendation',
-    description: 'DSLM turns the signals into next-step teaching context for the specific student.',
+    description: 'DSLM turns stored evidence into a next focus, exercise mix, rationale, and confidence context.',
     icon: BarChart2,
   },
   {
-    title: 'Better next prep',
-    description: 'The next prep cycle starts with more context than the previous one.',
+    title: 'Worksheet output',
+    description: 'The teacher reviews or edits the suggestion, then generates the worksheet as the output layer.',
+    icon: FileText,
+  },
+];
+
+const evidenceStackItems = [
+  {
+    title: 'Nano-skill evidence',
+    description: 'Welcome Test items and worksheet exercises carry atomic labels such as grammar, vocabulary, writing, speaking, listening, and reading subskills.',
+    icon: BarChart2,
+  },
+  {
+    title: 'Student goal',
+    description: 'Main goals, progress goals, target dates, and learning elements keep the next step tied to the adult learner outcome.',
+    icon: ClipboardCheck,
+  },
+  {
+    title: 'Pacing mode',
+    description: 'Scientific, balanced, or pragmatic pacing changes how much input, output, review, and domain context the next step should use.',
     icon: RefreshCw,
+  },
+  {
+    title: 'Roadmap phase',
+    description: 'Curriculum phases and existing suggestions stop each worksheet from becoming an isolated one-off task.',
+    icon: Brain,
+  },
+  {
+    title: 'Recent activity',
+    description: 'Homework, worksheet history, skill metrics, knowledge notes, and flashcard progress provide current context where available.',
+    icon: CheckCircle2,
+  },
+  {
+    title: 'Teacher review',
+    description: 'The teacher still selects, edits, approves, and teaches the material. DSLM supports the decision; it does not replace it.',
+    icon: ShieldCheck,
   },
 ];
 
@@ -98,7 +131,7 @@ const softwareLd = {
   operatingSystem: 'Web',
   url: `${BASE_URL}/one-minute-prep`,
   description:
-    '1-Minute Prep workflow for recurring 1:1 English teachers that combines student context, DSLM signals, and editable worksheet generation.',
+    '1-Minute Prep workflow for recurring 1:1 English teachers that combines student context, DSLM nano-skill evidence, pacing, and editable worksheet generation.',
   audience: [
     { '@type': 'Audience', audienceType: 'ESL teachers' },
     { '@type': 'Audience', audienceType: 'English tutors' },
@@ -136,7 +169,7 @@ const OneMinutePrep: React.FC = () => {
     <div className="min-h-screen bg-background">
       <PageSeo
         title="1-Minute Prep for 1:1 English Teachers | Edooqoo"
-        description="Canonical Edooqoo 1-Minute Prep workflow: student context, DSLM suggestions, and editable worksheet output for recurring 1:1 English students."
+        description="Canonical Edooqoo 1-Minute Prep workflow: student context, DSLM nano-skill evidence, pacing, and editable worksheet output for recurring 1:1 English students."
         path="/one-minute-prep"
         jsonLd={[softwareLd, buildFaqPageLd(faqItems), breadcrumbLd]}
       />
@@ -197,7 +230,7 @@ const OneMinutePrep: React.FC = () => {
                 <div>
                   <h2 className="text-lg font-semibold text-foreground">How Student Context Changes The Worksheet</h2>
                   <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                    Edooqoo stops treating each worksheet as a blank-page task. It keeps student context visible, then uses DSLM signals to suggest a focused next step before the worksheet is generated.
+                    Edooqoo stops treating each worksheet as a blank-page task. It keeps student context visible, then uses DSLM nano-skill evidence to suggest a focused next step before the worksheet is generated.
                   </p>
                 </div>
                 <div className="grid gap-3">
@@ -217,6 +250,30 @@ const OneMinutePrep: React.FC = () => {
           calculatorValue={oneMinutePrepCalculator}
           onCalculatorChange={setOneMinutePrepCalculator}
         />
+
+        <section className="border-y bg-secondary/20 py-16">
+          <div className="mx-auto max-w-6xl px-4">
+            <div className="max-w-3xl">
+              <h2 className="text-2xl font-bold text-foreground">Why DSLM can choose a better next step</h2>
+              <p className="mt-3 text-muted-foreground">
+                DSLM is not a single model file. It is a student-specific signal graph built from stored learner evidence. The value is not that Edooqoo makes a generic worksheet faster; the value is that each recurring prep cycle starts from goals, nano-skill evidence, pacing, roadmap context, and recent activity before the worksheet is generated.
+              </p>
+            </div>
+            <div className="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {evidenceStackItems.map(({ title, description, icon: Icon }) => (
+                <Card key={title}>
+                  <CardContent className="p-5">
+                    <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-md bg-primary/10">
+                      <Icon className="h-5 w-5 text-primary" />
+                    </div>
+                    <h3 className="font-semibold text-foreground">{title}</h3>
+                    <p className="mt-2 text-sm leading-6 text-muted-foreground">{description}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </section>
 
         <section className="py-16">
           <div className="mx-auto max-w-6xl px-4">
@@ -297,7 +354,7 @@ const OneMinutePrep: React.FC = () => {
               <FileText className="mb-4 h-8 w-8 text-primary" />
               <h2 className="text-2xl font-bold text-foreground">Generator as output layer</h2>
               <p className="mt-3 leading-7 text-muted-foreground">
-                Edooqoo still generates worksheets. The difference is that 1-Minute Prep treats worksheet generation as the final output after student context, DSLM suggestions, and teacher choice define the next focus.
+                Edooqoo still generates worksheets. The difference is that 1-Minute Prep treats worksheet generation as the final output after student context, DSLM nano-skill evidence, pacing, and teacher choice define the next focus.
               </p>
             </div>
             <div>

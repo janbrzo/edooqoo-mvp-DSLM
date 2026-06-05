@@ -83,7 +83,7 @@ const FeatureLiveSessions: React.FC = () => (
       <LiveSessionMockup />
     </FeatureHero>
 
-    <DSLMBadge feature="Live Sessions" description="Live answers and teacher review signals can become context for future DSLM suggestions and the next prep cycle." />
+    <DSLMBadge feature="Live Sessions" description="Live answers and teacher review signals can become context for future DSLM next-focus suggestions and the next prep cycle." />
     <FeatureBenefits benefits={benefits} />
     <FeatureFAQ items={faqItems} />
     <FeatureCTA headline="Make every lesson interactive" subheadline="Real-time teaching tools. Start with 2 free worksheets." />

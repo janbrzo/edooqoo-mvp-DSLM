@@ -54,12 +54,12 @@ const RadarChartMockup = () => {
 
 const NanoSkillsMockup = () => {
   const skills = [
-    { name: 'Present Perfect vs Past Simple', mastery: 85, trend: '↑', trendColor: 'text-green-600' },
-    { name: 'Conditional Type 2', mastery: 42, trend: '↓', trendColor: 'text-red-500' },
-    { name: 'Business collocations', mastery: 71, trend: '→', trendColor: 'text-muted-foreground' },
-    { name: 'Passive voice', mastery: 63, trend: '↑', trendColor: 'text-green-600' },
-    { name: 'Email writing structure', mastery: 38, trend: '↑', trendColor: 'text-green-600' },
-    { name: 'Reported speech', mastery: 22, trend: '↓', trendColor: 'text-red-500' },
+    { name: 'ns.grammar.present_perfect_continuous', mastery: 85, trend: '↑', trendColor: 'text-green-600' },
+    { name: 'ns.writing.formal_narrative', mastery: 42, trend: '↓', trendColor: 'text-red-500' },
+    { name: 'ns.listening.detail_extraction', mastery: 71, trend: '→', trendColor: 'text-muted-foreground' },
+    { name: 'ns.vocabulary.collocation_do_make', mastery: 63, trend: '↑', trendColor: 'text-green-600' },
+    { name: 'ns.writing.pragmatic_appropriacy', mastery: 38, trend: '↑', trendColor: 'text-green-600' },
+    { name: 'ns.reading.inference_from_text', mastery: 22, trend: '↓', trendColor: 'text-red-500' },
   ];
 
   return (
@@ -70,7 +70,7 @@ const NanoSkillsMockup = () => {
       </div>
       {skills.map(s => (
         <div key={s.name} className="flex items-center gap-3 bg-muted/40 rounded-lg px-3 py-2">
-          <span className="flex-1 text-foreground text-[11px]">{s.name}</span>
+          <span className="flex-1 break-all text-foreground text-[11px]">{s.name}</span>
           <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
             <div
               className="h-full rounded-full bg-primary"
@@ -87,10 +87,10 @@ const NanoSkillsMockup = () => {
 
 const LayersDiagram = () => {
   const layers = [
-    { letter: 'A', name: 'Event Log', desc: 'Raw learning events from homework, flashcards, live sessions, tests', color: 'bg-blue-100 border-blue-300 text-blue-800' },
-    { letter: 'B', name: 'Metrics Engine', desc: 'Nano-skill mastery scores, trend detection, review signals', color: 'bg-green-100 border-green-300 text-green-800' },
-    { letter: 'C', name: 'Student Profile', desc: 'CEFR level, strengths/weaknesses, learning preferences', color: 'bg-amber-100 border-amber-300 text-amber-800' },
-    { letter: 'D', name: 'Decision Support', desc: 'Next-step suggestions for teacher review before worksheet output', color: 'bg-violet-100 border-violet-300 text-violet-800' },
+    { letter: 'A', name: 'Signal Log', desc: 'Welcome Test answers, worksheet events, homework evaluations, teacher notes, goals, and available activity context', color: 'bg-blue-100 border-blue-300 text-blue-800' },
+    { letter: 'B', name: 'Nano-skill Metrics', desc: 'Atomic labels, mastery values, trend indicators, event counts, and last-activity timestamps', color: 'bg-green-100 border-green-300 text-green-800' },
+    { letter: 'C', name: 'Learner Profile', desc: 'CEFR baseline, profile traits, self-profile notes, goals, deadlines, and pacing mode', color: 'bg-amber-100 border-amber-300 text-amber-800' },
+    { letter: 'D', name: 'Decision Support', desc: 'Roadmap phases and next-step worksheet suggestions for teacher review before worksheet output', color: 'bg-violet-100 border-violet-300 text-violet-800' },
   ];
 
   return (
@@ -170,12 +170,12 @@ const EcosystemDiagram = () => {
 
 const TrackingTable = () => {
   const data = [
-    { skill: 'Grammar', examples: 'Present Perfect, Conditionals, Passive Voice, Reported Speech' },
-    { skill: 'Vocabulary', examples: 'Business collocations, Phrasal verbs, Academic register' },
-    { skill: 'Reading', examples: 'Skimming, Scanning, Inference, Main idea identification' },
-    { skill: 'Writing', examples: 'Email structure, Essay coherence, Register consistency' },
-    { skill: 'Speaking', examples: 'Pronunciation patterns, Fluency, Turn-taking, Hedging' },
-    { skill: 'Listening', examples: 'Gist comprehension, Detail extraction, Accent adaptation' },
+    { skill: 'Grammar', examples: 'ns.grammar.present_perfect_continuous, ns.grammar.third_conditional, ns.grammar.passive_voice_past' },
+    { skill: 'Vocabulary', examples: 'ns.vocabulary.collocation_do_make, ns.vocabulary.word_formation_adverb, ns.vocabulary.idiom_comprehension' },
+    { skill: 'Reading', examples: 'ns.reading.identify_main_idea, ns.reading.inference_from_text' },
+    { skill: 'Writing', examples: 'ns.writing.formal_narrative, ns.writing.pragmatic_appropriacy, ns.writing.complaint_register' },
+    { skill: 'Speaking', examples: 'ns.speaking.complaint_oral, ns.speaking.pragmatic_declining_oral' },
+    { skill: 'Listening', examples: 'ns.listening.detail_extraction' },
   ];
 
   return (
@@ -191,7 +191,7 @@ const TrackingTable = () => {
           {data.map((d, i) => (
             <tr key={d.skill} className={i % 2 === 0 ? 'bg-card' : 'bg-secondary/20'}>
               <td className="p-3 font-medium text-foreground">{d.skill}</td>
-              <td className="p-3 text-xs text-muted-foreground">{d.examples}</td>
+              <td className="p-3 text-xs text-muted-foreground break-words">{d.examples}</td>
             </tr>
           ))}
         </tbody>
@@ -203,26 +203,26 @@ const TrackingTable = () => {
 /* ─── Page ─── */
 
 const faqItems = [
-  { question: 'What is DSLM?', answer: 'DSLM (Dynamic Student Learning Model) is Edooqoo\'s student-context and decision-support layer. It organizes available profile, goal, activity, and teacher-observation signals so teachers can make clearer next-step decisions before generating a worksheet.' },
+  { question: 'What is DSLM?', answer: 'DSLM (Dynamic Student Learning Model) is Edooqoo\'s student-specific signal graph and decision-support layer. It organizes stored profile, goal, nano-skill, activity, pacing, roadmap, and teacher-observation evidence so teachers can make clearer next-step decisions before generating a worksheet.' },
   { question: 'Do I need to set up DSLM manually?', answer: 'DSLM needs student context. The guided setup starts with a student profile, goals, optional Welcome Test data, and supported learning signals. Teachers can also add manual observations through the Student Knowledge system.' },
-  { question: 'What are nano-skills?', answer: 'Nano-skills are small language ability areas — for example, "Present Perfect vs Past Simple" or "Business email opening phrases." DSLM can track these more granularly than broad categories like "Grammar."' },
+  { question: 'What are nano-skills?', answer: 'Nano-skills are atomic grammar, vocabulary, reading, writing, speaking, listening, or communication labels. Examples in Edooqoo include ns.grammar.present_perfect_continuous, ns.writing.formal_narrative, and ns.listening.detail_extraction. They are more useful than broad labels like "Grammar" because each signal can point to a concrete next lesson focus.' },
   { question: 'How does trend detection work?', answer: 'DSLM can compare available mastery and activity signals over time. Improving, stable, or declining indicators help teachers decide whether to review, maintain, or push a skill further.' },
   { question: 'Can DSLM suggest what to teach next?', answer: 'Yes. DSLM can generate next-step suggestions from available student context and recent signals. The teacher still chooses, edits, and approves the lesson direction before using the worksheet output.' },
   { question: 'Is my students\' data private?', answer: 'Absolutely. All DSLM data is scoped to your account. Students cannot see each other\'s data. The system only stores learning metrics — never personal information beyond what you enter in the student profile.' },
 ];
 
 const benefits = [
-  { icon: Brain, title: 'Nano-skill Precision', description: 'Track mastery at the most granular level — not just "Grammar" but "3rd Conditional in negative form."' },
+  { icon: Brain, title: 'Nano-skill Precision', description: 'Track evidence at the atomic level: grammar forms, vocabulary patterns, reading inference, writing register, speaking tasks, and listening detail extraction.' },
   { icon: TrendingUp, title: 'Trend Detection', description: 'See which skills are improving, stable, or declining. Intervene before small gaps become big problems.' },
-  { icon: Target, title: 'Next-step Suggestions', description: 'Use available student context to generate clearer worksheet recommendations for teacher review.' },
-  { icon: Layers, title: 'Guided Setup', description: 'Start with profile, goals, optional Welcome Test data, and teacher observations. Edooqoo becomes more useful as context accumulates.' },
+  { icon: Target, title: 'Next-step Suggestions', description: 'Use available student context, pacing, roadmap phase, and skill metrics to generate clearer worksheet recommendations for teacher review.' },
+  { icon: Layers, title: 'Signal Graph', description: 'Profile, goals, tests, worksheets, homework, notes, flashcards, pacing, and events become a student-specific context layer over time.' },
 ];
 
 const steps = [
   { number: 1, title: 'Student context is created', description: 'Profile, goals, Welcome Test results, homework, flashcards, live work, or teacher observations provide the starting signals.', mockup: undefined },
-  { number: 2, title: 'DSLM organizes available signals', description: 'The system turns raw activity and teacher context into profile, mastery, trend, and planning information.' },
-  { number: 3, title: 'You review the next-step view', description: 'Open the student profile to see radar charts, nano-skill signals, trend indicators, and suggested worksheet directions.' },
-  { number: 4, title: 'Teach with teacher control', description: 'Use DSLM suggestions to generate the next worksheet, or choose your own focus — then review and edit before use.' },
+  { number: 2, title: 'DSLM organizes available signals', description: 'The system turns raw activity and teacher context into profile, nano-skill mastery, trend, pacing, and planning information.' },
+  { number: 3, title: 'You review the next-step view', description: 'Open the student profile to see nano-skill signals, trend indicators, confidence context, and suggested worksheet directions.' },
+  { number: 4, title: 'Teach with teacher control', description: 'Use DSLM next-focus suggestions to generate the next worksheet, or choose your own focus — then review and edit before use.' },
 ];
 
 const FeatureDSLM: React.FC = () => (
@@ -233,8 +233,8 @@ const FeatureDSLM: React.FC = () => (
     <FeatureHero
       badge="DSLM"
       badgeColor="bg-violet-100 text-violet-700 border-violet-200"
-      headline="Organize student signals before the next lesson."
-      subheadline="The Dynamic Student Learning Model supports 1-Minute Prep by turning profile, goals, lesson notes, homework, flashcards and teacher observations into clearer next-step suggestions."
+      headline="Turn stored learner evidence into the next lesson focus."
+      subheadline="The Dynamic Student Learning Model supports 1-Minute Prep by organizing profile, goals, nano-skill metrics, pacing, roadmap phases, notes, homework, flashcards, and teacher observations before worksheet output."
     >
       <div className="p-6 md:p-8 grid md:grid-cols-2 gap-8">
         <div>
@@ -254,7 +254,7 @@ const FeatureDSLM: React.FC = () => (
           <div>
             <h2 className="text-lg font-semibold text-foreground">DSLM is the decision layer inside 1-Minute Prep.</h2>
             <p className="mt-1 text-sm text-muted-foreground">
-              Use the canonical workflow page to see how student context, DSLM signals, and worksheet output fit together.
+              Use the canonical workflow page to see how student context, DSLM nano-skill evidence, pacing, and worksheet output fit together.
             </p>
           </div>
           <Button asChild variant="outline" className="mt-4 shrink-0 md:mt-0">
@@ -272,7 +272,7 @@ const FeatureDSLM: React.FC = () => (
     <section className="py-16 bg-secondary/20">
       <div className="max-w-3xl mx-auto px-4">
         <h2 className="text-2xl font-bold text-foreground mb-2 text-center">The 4-Layer Architecture</h2>
-        <p className="text-sm text-muted-foreground text-center mb-10">From raw events to teacher-reviewed next-step suggestions.</p>
+        <p className="text-sm text-muted-foreground text-center mb-10">From stored learner evidence to teacher-reviewed next-step suggestions.</p>
         <LayersDiagram />
       </div>
     </section>
@@ -281,7 +281,7 @@ const FeatureDSLM: React.FC = () => (
     <section className="py-16 bg-background">
       <div className="max-w-4xl mx-auto px-4">
         <h2 className="text-2xl font-bold text-foreground mb-2 text-center">What DSLM Tracks</h2>
-        <p className="text-sm text-muted-foreground text-center mb-8">Six skill areas, dozens of nano-skills — clearer when student context and learning signals exist.</p>
+        <p className="text-sm text-muted-foreground text-center mb-8">Six skill areas with atomic nano-skill labels. The labels become more useful when mastery and trend signals accumulate.</p>
         <TrackingTable />
       </div>
     </section>

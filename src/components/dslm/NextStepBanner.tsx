@@ -17,6 +17,14 @@ import { computeConfidence } from '@/lib/dslm/confidenceScore';
 import { ConfidenceBadge } from './ConfidenceBadge';
 import { ConfirmDeleteDialog } from './ConfirmDeleteDialog';
 
+const formatSkillLabel = (skill: string) =>
+  skill.replace(/^ns\.[A-C][12]\./, '').replace(/^ns\./, '').replace(/[._]/g, ' ');
+
+const toCount = (value: unknown) => {
+  const n = Number(value || 0);
+  return Number.isFinite(n) ? n : 0;
+};
+
 interface NextStepBannerProps {
   suggestion: any | null;
   studentId: string;
@@ -98,6 +106,17 @@ export const NextStepBanner: React.FC<NextStepBannerProps> = ({
   const focusMap: Record<string, string> = suggestion.suggested_exercise_focus_map || {};
   const exercises: string[] = suggestion.suggested_exercises || [];
   const confidence = computeConfidence({ suggestion });
+  const generationContext = suggestion.generation_context || {};
+  const focusSkills: string[] = Array.isArray(suggestion.focus_skill_names) ? suggestion.focus_skill_names : [];
+  const contextStats = [
+    { label: 'Skill metrics', value: toCount(generationContext.metrics_count) },
+    { label: 'Goals', value: toCount(generationContext.goals_count) },
+    { label: 'Knowledge notes', value: toCount(generationContext.knowledge_count) },
+    { label: 'Existing steps', value: toCount(generationContext.existing_steps_count) },
+  ];
+  const impactEntries = suggestion.estimated_impact && typeof suggestion.estimated_impact === 'object'
+    ? Object.entries(suggestion.estimated_impact).slice(0, 4)
+    : [];
 
   return (
     <TooltipProvider>
@@ -234,11 +253,48 @@ export const NextStepBanner: React.FC<NextStepBannerProps> = ({
               {suggestion.rationale && (
                 <p className="text-xs opacity-80 italic">{suggestion.rationale}</p>
               )}
-              {suggestion.focus_skill_names?.length > 0 && (
+              <div className="rounded-md border border-white/20 bg-white/10 p-3">
+                <p className="text-xs font-semibold uppercase tracking-wider opacity-90">Why this suggestion</p>
+                <div className="mt-2 grid gap-1.5 sm:grid-cols-2">
+                  {contextStats.map((item) => (
+                    <div key={item.label} className="flex items-center justify-between rounded bg-white/10 px-2 py-1 text-[11px]">
+                      <span className="opacity-80">{item.label}</span>
+                      <span className="font-semibold">{item.value}</span>
+                    </div>
+                  ))}
+                  {generationContext.pacing_label && (
+                    <div className="flex items-center justify-between rounded bg-white/10 px-2 py-1 text-[11px]">
+                      <span className="opacity-80">Pacing</span>
+                      <span className="font-semibold">{generationContext.pacing_label}</span>
+                    </div>
+                  )}
+                  {suggestion.difficulty_level && (
+                    <div className="flex items-center justify-between rounded bg-white/10 px-2 py-1 text-[11px]">
+                      <span className="opacity-80">Difficulty</span>
+                      <span className="font-semibold">{suggestion.difficulty_level}</span>
+                    </div>
+                  )}
+                </div>
+                {confidence.reasons.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-1">
+                    {confidence.reasons.map((reason) => (
+                      <Badge key={reason} className="bg-white/15 text-primary-foreground border-0 text-[10px]">
+                        {reason}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+                {impactEntries.length > 0 && (
+                  <p className="mt-2 text-[11px] opacity-80">
+                    Expected: {impactEntries.map(([key, value]) => `${key} ${String(value)}`).join(', ')}
+                  </p>
+                )}
+              </div>
+              {focusSkills.length > 0 && (
                 <div className="flex flex-wrap gap-1">
-                  {suggestion.focus_skill_names.slice(0, 6).map((skill: string) => (
+                  {focusSkills.slice(0, 6).map((skill: string) => (
                     <Badge key={skill} className="bg-white/20 text-primary-foreground border-0 text-[10px]">
-                      {skill.replace(/^ns\.[A-C][12]\./, '').replace(/[._]/g, ' ')}
+                      {formatSkillLabel(skill)}
                     </Badge>
                   ))}
                 </div>

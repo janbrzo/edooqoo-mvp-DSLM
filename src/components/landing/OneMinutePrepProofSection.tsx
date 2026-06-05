@@ -8,7 +8,6 @@ import {
   Lightbulb,
   Map,
   PlayCircle,
-  UserPlus,
 } from 'lucide-react';
 import {
   PricingCalculator,
@@ -26,17 +25,22 @@ interface OneMinutePrepProofSectionProps {
   defaultPanel?: ProofPanel;
 }
 
-const setupSteps = [
-  { icon: UserPlus, label: 'Add 1 real student' },
-  { icon: ClipboardList, label: 'Send Welcome Test' },
-  { icon: Goal, label: 'Add goals' },
-  { icon: Map, label: 'Generate Learning Roadmap' },
+const signalInputs = [
+  'Welcome Test answers',
+  'Student goals',
+  'Homework evaluations',
+  'Teacher notes',
+  'Worksheet history',
+  'Flashcard progress',
 ];
 
-const weeklySteps = [
-  { icon: Lightbulb, label: 'Generate Next Lesson Ideas' },
-  { icon: CheckCircle2, label: 'Choose one idea' },
-  { icon: FileText, label: 'Create a worksheet' },
+const evidenceSteps = [
+  { icon: ClipboardList, label: 'Signals enter' },
+  { icon: Goal, label: 'Nano-skills are rated' },
+  { icon: Map, label: 'Pacing and roadmap shape priority' },
+  { icon: Lightbulb, label: 'Next focus is suggested' },
+  { icon: CheckCircle2, label: 'Teacher chooses or edits' },
+  { icon: FileText, label: 'Worksheet is generated as output' },
 ];
 
 const StepPill = ({ icon: Icon, label }: { icon: React.ComponentType<{ className?: string }>; label: string }) => (
@@ -49,33 +53,35 @@ const StepPill = ({ icon: Icon, label }: { icon: React.ComponentType<{ className
 const StoryboardFallback = () => (
   <div className="space-y-5">
     <div className="rounded-xl border border-violet-100 bg-violet-50/70 p-4">
-      <p className="text-xs font-semibold uppercase tracking-wider text-violet-700">One-time student setup</p>
+      <p className="text-xs font-semibold uppercase tracking-wider text-violet-700">Stored learner evidence</p>
       <p className="mt-2 text-sm leading-6 text-muted-foreground">
-        First, do the one-time student setup: add 1 real student → send Welcome Test → add goals → generate Learning Roadmap.
+        DSLM is not a single model file. It is a student-specific signal graph built from profile, goals, activity, and teacher-reviewed evidence.
       </p>
-      <div className="mt-4 grid gap-2 sm:grid-cols-2">
-        {setupSteps.map((step) => (
-          <StepPill key={step.label} {...step} />
+      <div className="mt-4 flex flex-wrap gap-2">
+        {signalInputs.map((input) => (
+          <span key={input} className="rounded-full border border-violet-200 bg-background px-3 py-1.5 text-xs font-medium text-violet-800">
+            {input}
+          </span>
         ))}
       </div>
     </div>
 
     <div className="rounded-xl border border-green-100 bg-green-50/70 p-4">
-      <p className="text-xs font-semibold uppercase tracking-wider text-green-700">Weekly 1-Minute Prep flow</p>
+      <p className="text-xs font-semibold uppercase tracking-wider text-green-700">Decision path</p>
       <p className="mt-2 text-sm leading-6 text-muted-foreground">
-        Then test the weekly 1-Minute Prep flow: generate Next Lesson Ideas → choose one idea → create a worksheet.
+        Nano-skill evidence, pacing mode, roadmap phase, and recent activity narrow the next lesson focus before material generation.
       </p>
-      <div className="mt-4 grid gap-2 sm:grid-cols-3">
-        {weeklySteps.map((step) => (
+      <div className="mt-4 grid gap-2 sm:grid-cols-2">
+        {evidenceSteps.map((step) => (
           <StepPill key={step.label} {...step} />
         ))}
       </div>
     </div>
 
     <div className="rounded-xl border border-border bg-background p-4 text-sm leading-6 text-muted-foreground">
-      <p>The setup helps Edooqoo understand the student.</p>
+      <p>The teacher still reviews and edits the recommendation.</p>
       <p className="mt-2">
-        The 1-Minute Prep part is the weekly lesson preparation flow we want to make extremely fast.
+        The worksheet generator is the editable output layer after the next focus has been selected.
       </p>
     </div>
   </div>
@@ -104,10 +110,10 @@ const OneMinutePrepProofSection: React.FC<OneMinutePrepProofSectionProps> = ({
             Workflow proof
           </div>
           <h2 id="one-minute-prep-proof-heading" className="text-2xl font-bold text-foreground sm:text-3xl">
-            See the 1-Minute Prep loop before the video is ready
+            See the evidence stack behind 1-Minute Prep
           </h2>
           <p className="mt-3 text-sm leading-6 text-muted-foreground sm:text-base">
-            Before the video, Edooqoo may look like a worksheet generator. After 60 seconds, the loop should be clear.
+            Edooqoo may look like a worksheet generator from the outside. The decision layer is the stored student evidence that shapes what should be taught next.
           </p>
         </div>
 

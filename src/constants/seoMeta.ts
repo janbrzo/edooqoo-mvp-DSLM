@@ -8,7 +8,7 @@ export const SEO_META = {
   about: {
     title: "About Edooqoo — 1-Minute Prep for English Teachers",
     description:
-      "Edooqoo is a 1-Minute Prep system for 1:1 English teachers, combining student context, DSLM suggestions, and editable worksheet output.",
+      "Edooqoo is a 1-Minute Prep system for 1:1 English teachers, combining student context, DSLM nano-skill evidence, and editable worksheet output.",
     path: "/about",
   },
   blog: {

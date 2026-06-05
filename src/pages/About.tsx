@@ -34,7 +34,7 @@ const About = () => {
         <section className="mb-12">
           <h2 className="text-2xl font-semibold text-foreground mb-4">What is Edooqoo?</h2>
           <p className="text-muted-foreground mb-4 leading-relaxed">
-            Edooqoo is a 1-Minute Prep system built for 1:1 English teachers. It helps teachers move recurring weekly prep toward one focused minute per student by combining student profile, goals, Welcome Test context, homework, flashcards, live lesson signals, calendar rhythm, and DSLM next-step suggestions.
+            Edooqoo is a 1-Minute Prep system built for 1:1 English teachers. It helps teachers move recurring weekly prep toward one focused minute per student by combining student profile, goals, Welcome Test context, homework, flashcard progress, live lesson signals, calendar rhythm, and DSLM nano-skill evidence.
           </p>
           <p className="text-muted-foreground mb-4 leading-relaxed">
             The worksheet generator remains a core output layer. After the teacher chooses or confirms the next teaching focus, Edooqoo generates editable worksheets with 29 exercise types across CEFR A1-C2, including audio and picture-capable exercises where applicable.
@@ -69,7 +69,7 @@ const About = () => {
           <h2 className="text-2xl font-semibold text-foreground mb-6">Features</h2>
           <div className="space-y-8">
             {[
-              { icon: Brain, title: '1-Minute Prep + DSLM', desc: 'Build student context once, then use DSLM signals and teacher review to move weekly prep toward one focused minute per recurring student.', bullets: ['Student profile, goals, Welcome Test, and observations', 'Next-step suggestions before worksheet generation', 'Teacher chooses, edits, and approves direction', 'Best with recurring 1:1 adult English students'] },
+              { icon: Brain, title: '1-Minute Prep + DSLM', desc: 'Build student context once, then use DSLM nano-skill evidence and teacher review to move weekly prep toward one focused minute per recurring student.', bullets: ['Student profile, goals, Welcome Test, and observations', 'Next-step suggestions before worksheet generation', 'Teacher chooses, edits, and approves direction', 'Best with recurring 1:1 adult English students'] },
               { icon: BookOpen, title: 'Worksheet Generator Output Layer', desc: 'Generate complete, editable worksheets after the teacher chooses or confirms the next focus. Choose from 29 exercise types across basic, audio, and picture categories.', bullets: ['29 exercise types including audio and picture exercises', 'CEFR levels A1 through C2', 'Student context can inform generated material', 'Download as HTML/PDF or share interactive link'] },
               { icon: ClipboardCheck, title: 'Homework System', desc: 'Assign any worksheet or specific exercises as homework. Students complete exercises interactively online. AI can pre-evaluate supported open-ended answers for teacher review.', bullets: ['AI-assisted review for supported answers', 'Set deadlines with email reminders', 'Teacher review with comments per exercise', 'Homework results can feed the next prep cycle'] },
               { icon: Brain, title: 'Smart Flashcards', desc: 'Create flashcard sets from worksheet vocabulary or manually. Students study using SM-2 scheduling logic, and review activity can become vocabulary context for future prep.', bullets: ['SM-2 spaced repetition scheduling logic', 'Auto-generate from worksheet vocabulary', 'Bidirectional study mode', 'Accessible via Student Hub'] },
@@ -128,7 +128,7 @@ const About = () => {
           <div className="grid gap-4 sm:grid-cols-2">
             {[
               { step: '1', title: 'Add Your Student', desc: 'Enter student details, CEFR estimate, goals, and known lesson context. Optionally send a Welcome Test.' },
-              { step: '2', title: 'Review Next-Step Context', desc: 'Use profile, goals, DSLM signals, homework, flashcards, and teacher observations to choose the next focus.' },
+              { step: '2', title: 'Review Next-Step Context', desc: 'Use profile, goals, DSLM nano-skill evidence, homework, flashcard progress, and teacher observations to choose the next focus.' },
               { step: '3', title: 'Generate the Worksheet', desc: 'Create an editable worksheet from the confirmed focus, then review and adjust before teaching or assigning.' },
               { step: '4', title: 'Strengthen the Next Prep Cycle', desc: 'Use homework, flashcards, live work, and teacher review to build more context for the next recurring prep.' },
             ].map(({ step, title, desc }) => (

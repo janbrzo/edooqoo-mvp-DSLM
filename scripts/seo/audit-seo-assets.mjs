@@ -130,12 +130,12 @@ const UNSUPPORTED_CLAIM_PATTERNS = [
   [/Best AI Tool for English Teachers/i, 'unsupported title-style best-tool claim'],
   [/Which is Better for English Teachers/i, 'unsupported better-than comparison claim'],
   [/best AI tool(?!s for ESL teachers)/i, 'unsupported singular best-tool claim'],
-  [/saves hours/i, 'unsupported time-savings claim'],
+  [/saves\s+hours/i, 'unsupported time-savings claim'],
   [/save\s+\d+\+?\s+hours/i, 'unsupported quantified time-savings claim'],
   [/saving significant time/i, 'unsupported quantified time-savings claim'],
-  [/in under 60 seconds/i, 'unsupported speed claim'],
+  [/in\s+under\s+60\s+seconds/i, 'unsupported speed claim'],
   [/\b60 seconds\b/i, 'unsupported exact speed claim'],
-  [/under 1 minute/i, 'unsupported exact speed claim'],
+  [/under\s+1\s+minute/i, 'unsupported exact speed claim'],
   [/guaranteed\s+1\s+minute/i, 'unsupported guaranteed one-minute claim'],
   [/always\s+in\s+1\s+minute/i, 'unsupported always-in-one-minute claim'],
   [/no\s+teacher\s+review\s+needed/i, 'unsupported no-teacher-review claim'],
@@ -145,9 +145,7 @@ const UNSUPPORTED_CLAIM_PATTERNS = [
   [/Gemini\s+2(?:\.5)?/i, 'unnecessary public model-version claim'],
 ];
 
-const ALLOWED_CLAIM_CONTEXTS = [
-  'After 60 seconds, the loop should be clear.',
-];
+const ALLOWED_CLAIM_CONTEXTS = [];
 
 const CLAIM_INTEGRITY_SOURCE_FILES = [
   'index.html',
