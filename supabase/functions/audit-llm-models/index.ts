@@ -145,7 +145,17 @@ serve(async (req) => {
           <td style="padding:6px 10px;border-bottom:1px solid #e5e7eb;color:${r.ok ? '#16a34a' : '#dc2626'};">${r.ok ? 'OK' : 'FAIL'}</td>
           <td style="padding:6px 10px;border-bottom:1px solid #e5e7eb;font-size:11px;color:#6b7280;">${(r.error || '').slice(0, 120)}</td>
         </tr>`).join("");
-      const reportHtml = `
+      // v6.9.38 — explicit cadence banner so daily and monthly reports are
+      // visually distinguishable in the inbox even when the model counts
+      // happen to overlap.
+      const modeBannerHtml = mode === 'monthly'
+        ? `<div style="padding:10px 14px;border-radius:6px;background:#eef2ff;border:1px solid #c7d2fe;color:#3730a3;font-size:13px;margin:0 0 12px;">
+             <b>Monthly LLM Audit</b> — full inventory (${results.length} models, including TTS and legacy fallbacks). Runs on the 1st of each month.
+           </div>`
+        : `<div style="padding:10px 14px;border-radius:6px;background:#ecfeff;border:1px solid #a5f3fc;color:#155e75;font-size:13px;margin:0 0 12px;">
+             <b>Daily LLM Audit</b> — hot-path subset (${results.length} models powering live worksheet generation, classification, OpenAI fallback). Runs daily at 06:00 UTC.
+           </div>`;
+      const reportHtml = `${modeBannerHtml}
         <table style="border-collapse:collapse;width:100%;font-size:13px;">
           <thead><tr style="background:#f3f4f6;">
             <th style="padding:6px 10px;text-align:left;">Provider</th>
