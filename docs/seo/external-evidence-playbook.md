@@ -50,6 +50,6 @@ Edooqoo.com separates public discovery resources from private application surfac
 - The target page is relevant to ESL teachers, English tutors, education technology, worksheet generation, or teacher workflow tools.
 - The submission uses one of the factual descriptions above or a shorter derivative.
 - The submission links to a public Edooqoo.com URL, not a private application route.
-- The text does not include unsupported claims such as "best", "guaranteed", "saves hours", or exact speed claims unless backed by a cited workflow explanation.
+- The text does not include unsupported claims such as "best", "guaranteed", unsupported time-savings phrases, or exact speed claims unless backed by a cited workflow explanation.
 - The publication complies with the target site's rules.
 

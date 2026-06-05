@@ -8,7 +8,6 @@ import {
   Lightbulb,
   Map,
   PlayCircle,
-  UserPlus,
 } from 'lucide-react';
 import {
   PricingCalculator,
@@ -24,16 +23,19 @@ interface OneMinutePrepHeroProofSwitcherProps {
   defaultPanel?: HeroProofPanel;
 }
 
-const setupSteps = [
-  { icon: UserPlus, label: 'Student' },
-  { icon: ClipboardList, label: 'Welcome Test' },
-  { icon: Goal, label: 'Goals' },
-  { icon: Map, label: 'Roadmap' },
+const signalInputs = [
+  'Welcome Test',
+  'Goals',
+  'Homework',
+  'Notes',
+  'Flashcards',
 ];
 
-const weeklySteps = [
-  { icon: Lightbulb, label: 'Next Lesson Ideas' },
-  { icon: CheckCircle2, label: 'Choose one' },
+const evidenceSteps = [
+  { icon: ClipboardList, label: 'Signals' },
+  { icon: Goal, label: 'Nano-skills' },
+  { icon: Map, label: 'Pacing/Roadmap' },
+  { icon: Lightbulb, label: 'Next focus' },
   { icon: FileText, label: 'Worksheet' },
 ];
 
@@ -54,38 +56,41 @@ const CompactWorkflowProof = () => (
     <div className="flex items-center gap-2">
       <PlayCircle className="h-5 w-5 text-primary" />
       <div>
-        <h2 className="text-base font-semibold text-gray-900">Workflow proof</h2>
-        <p className="text-xs text-muted-foreground">The loop behind weekly prep.</p>
+        <h2 className="text-base font-semibold text-gray-900">Evidence stack</h2>
+        <p className="text-xs text-muted-foreground">Why the next focus is not guessed from scratch.</p>
       </div>
     </div>
 
     <div className="mt-4 space-y-3">
       <div className="rounded-xl border border-violet-100 bg-violet-50/70 p-3">
-        <p className="text-[11px] font-semibold uppercase tracking-wider text-violet-700">One-time setup</p>
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-violet-700">Stored learner evidence</p>
         <p className="mt-1 text-xs leading-5 text-muted-foreground">
-          Student -&gt; Welcome Test -&gt; Goals -&gt; Roadmap
+          DSLM reads available student-specific signals before the worksheet prompt is used.
         </p>
-        <div className="mt-3 grid grid-cols-2 gap-2">
-          {setupSteps.map((step) => (
-            <FlowStep key={step.label} {...step} />
+        <div className="mt-3 flex flex-wrap gap-1.5">
+          {signalInputs.map((input) => (
+            <span key={input} className="rounded-full border border-violet-200 bg-white px-2 py-1 text-[11px] font-medium text-violet-800">
+              {input}
+            </span>
           ))}
         </div>
       </div>
 
       <div className="rounded-xl border border-green-100 bg-green-50/70 p-3">
-        <p className="text-[11px] font-semibold uppercase tracking-wider text-green-700">Weekly prep</p>
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-green-700">Decision path</p>
         <p className="mt-1 text-xs leading-5 text-muted-foreground">
-          Next Lesson Ideas -&gt; Choose one -&gt; Worksheet
+          Signals become nano-skill evidence, pacing context, and a teacher-reviewed next focus.
         </p>
         <div className="mt-3 grid gap-2">
-          {weeklySteps.map((step) => (
+          {evidenceSteps.map((step) => (
             <FlowStep key={step.label} {...step} />
           ))}
         </div>
       </div>
 
-      <div className="rounded-xl border border-border bg-muted/30 p-3 text-xs leading-5 text-muted-foreground">
-        Setup builds student context. Weekly prep uses that context.
+      <div className="flex items-start gap-2 rounded-xl border border-border bg-muted/30 p-3 text-xs leading-5 text-muted-foreground">
+        <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
+        <span>Worksheet generation remains the output layer after teacher review.</span>
       </div>
     </div>
   </div>
@@ -143,7 +148,7 @@ const OneMinutePrepHeroProofSwitcher: React.FC<OneMinutePrepHeroProofSwitcherPro
           onFocus={() => activatePanel('workflow')}
         >
           <PlayCircle className="h-3.5 w-3.5" />
-          Workflow proof
+          Evidence stack
         </button>
       </div>
 

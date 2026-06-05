@@ -47,7 +47,7 @@ const EslClassToolkit = () => (
       <>
         <h2 className="text-xl font-bold text-foreground mt-0">Why most ESL class toolkits fail</h2>
         <p>The internet has thousands of free ESL PDFs but no system to assemble them into a coherent class. The teacher ends up gluing PDFs together in Google Docs, manually tracking which student saw which exercise, manually reviewing homework over WhatsApp, and rebuilding flashcards in Quizlet. By month 3 the system collapses and the teacher reverts to ad-hoc lesson prep.</p>
-        <p>Edooqoo replaces the toolkit with one workflow: placement test produces Learning Profile input, the Profile supports worksheet generation, worksheets become lesson material and homework, reviewed homework results update planning context, and the teacher uses DSLM suggestions to choose the next worksheet focus.</p>
+        <p>Edooqoo replaces the toolkit with one workflow: placement test produces Learning Profile input, the Profile supports worksheet generation, worksheets become lesson material and homework, reviewed homework results update planning context, and the teacher uses DSLM next-focus suggestions to choose the next worksheet focus.</p>
         <h2 className="text-xl font-bold text-foreground">Toolkit for 1-on-1 vs small groups (2-6 learners)</h2>
         <p>1-on-1: full personalization. Every worksheet targets the individual Learning Profile. Homework review and DSLM tracking work per-student. This is the optimal use case.</p>
         <p>Small group (2-6): generate one worksheet at the groups average CEFR level. Run live exercises during the lesson. Assign homework individually (each learner gets the same worksheet but progress tracking stays per-student). DSLM continues to track each learner separately.</p>

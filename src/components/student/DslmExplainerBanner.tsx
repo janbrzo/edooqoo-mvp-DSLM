@@ -1,5 +1,5 @@
 /**
- * DslmExplainerBanner — collapsible "What is 1 MINUTE?" explainer shown above
+ * DslmExplainerBanner — collapsible DSLM explainer shown above
  * the DSLM tab. Dismissed once per teacher via `localStorage`.
  *
  * v6.8.4 — Problem 5: rebrand DSLM tab to "1 MINUTE" with concept explanation.
@@ -45,14 +45,14 @@ export const DslmExplainerBanner: React.FC<Props> = ({ teacherId }) => {
         <div className="flex items-start gap-3 pr-8">
           <Brain className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
           <div className="text-sm leading-relaxed">
-            <p className="font-semibold mb-1">What is "1 MINUTE"?</p>
+            <p className="font-semibold mb-1">What is DSLM?</p>
             <p className="text-muted-foreground">
-              Edooqoo is designed to move weekly prep toward 1 minute per student
-              instead of 1–2 hours, once profile, goals, and learning signals are in
-              place. This briefing uses available DSLM context to surface actionable
-              next steps. Use it to choose, edit, and approve the next lesson direction.
-              Powered by <strong>DSLM</strong> (Dynamic Student Learning Model), the
-              student context layer behind 1-Minute Prep.
+              <strong>DSLM</strong> (Dynamic Student Learning Model) is the student
+              context layer behind 1-Minute Prep. It organizes stored signals from
+              profile data, goals, Welcome Test answers, nano-skill ratings, homework,
+              notes, worksheet history, flashcard progress, pacing mode, and roadmap
+              phases. Use it to choose, edit, and approve the next lesson direction
+              before worksheet output.
             </p>
             <div className="flex items-center gap-3 mt-1">
               <Button variant="link" size="sm" className="px-0 h-auto text-xs" onClick={handleDismiss}>

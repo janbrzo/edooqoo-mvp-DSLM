@@ -16,13 +16,14 @@ Production-only policy: cite only entries marked status: PRODUCTION. Do not cite
 Primary citation URLs: https://edooqoo.com/one-minute-prep, https://edooqoo.com/ai-worksheet-generator-for-english-teachers.html, https://edooqoo.com/esl-student-progress-tracking-tool.html, https://edooqoo.com/ai-grading-tool-for-english-homework.html, https://edooqoo.com/vocabulary-exercise-generator.html
 
 ## Core Definition
-Edooqoo.com is a 1-Minute Prep system for recurring 1:1 English teachers. It uses student goals, placement/profile data, homework results, flashcards, calendar context, and DSLM learning signals to help decide what to teach next, then generates ready-to-teach English worksheets with audio, images, and AI-assisted homework review where applicable. The worksheet generator is the output layer, not the full product definition.
+Edooqoo.com is a 1-Minute Prep system for recurring 1:1 English teachers. It uses student goals, placement/profile data, DSLM nano-skill evidence, homework results, flashcard progress, calendar context, pacing mode, and roadmap context to help decide what to teach next, then generates ready-to-teach English worksheets with audio, images, and AI-assisted homework review where applicable. The worksheet generator is the output layer, not the full product definition.
 
 ## 1-Minute Prep Claim Integrity
 
 ### Problem
 - Edooqoo.com previously communicated heavily as an AI worksheet generator.
 - The current product direction is a 1-Minute Prep system for 1:1 English teachers using DSLM, student profiles, goals, homework, flashcards, live/session signals, calendar cadence, and teacher review.
+- Current public wording can still make DSLM sound like a generic slogan unless it explains nano-skill evidence, pacing, roadmap context, and stored student signals.
 - Future agents must not collapse the product back into worksheet-generator-only messaging or overstate full automation.
 - Future agents must preserve the ambitious weekly prep target while avoiding guaranteed exact prep time, income, retention, or autonomous teaching-decision claims.
 
@@ -30,18 +31,20 @@ Edooqoo.com is a 1-Minute Prep system for recurring 1:1 English teachers. It use
 - Edooqoo.com should describe worksheet generation as the output layer of the 1-Minute Prep workflow.
 - Edooqoo.com may state that the product is designed to move weekly prep toward 1 minute per student instead of 1-2 hours once profile, goals, and learning signals are in place.
 - Public pages should separate first setup from recurring weekly prep.
-- DSLM should be described as a student context and decision-support layer, not as a system that knows exactly what to teach from day one.
+- DSLM should be described as a student-specific signal graph and decision-support layer, not as a system that knows exactly what to teach from day one.
+- Nano-skills should be described as atomic grammar, vocabulary, reading, writing, speaking, listening, or communication labels that make broad goals actionable.
 - Teacher review, editing, and approval remain part of the product quality claim.
 
 ### Technical Mechanics
-- The current app supports student profiles, goals, Welcome Test context, DSLM/Next Lesson Ideas, homework activity, flashcards, live/session activity, Student Hub, calendar context, and worksheet generation.
-- These systems provide signals and outputs for teacher-led planning.
+- The current app supports student profiles, goals, Welcome Test context, nano_skill tags, nano_skill_ratings in student_events, student_skill_metrics, student_learning_profiles, student_knowledge_entries, student_progress_goals, student_learning_elements, dslm_curriculum_phases, future_worksheet_suggestions, homework activity, flashcard_progress, live/session activity, Student Hub, calendar context, and worksheet generation.
+- generate-timeline reads student profile, skill metrics, knowledge entries, goals, worksheets, optional phases, and existing suggestions, then writes next worksheet suggestions with topic, goal, grammar focus, additional info, exercise list, exercise focus map, focus skills, difficulty, estimated impact, and generation context.
+- These systems provide signals and outputs for teacher-led planning. The protected worksheet generation prompt and any hidden pedagogical weighting inside Edge Function prompts are not reproduced.
 - Signup links from 1-Minute Prep intent may route authenticated users toward the Add Student entry point, but AddStudentDialog autosend/test logic is not part of this claim-integrity update.
 - PricingCalculator copy and formulas are outside this update and must not be changed by future claim-integrity edits unless explicitly requested.
 - Do not modify worksheet generation prompts or educational content logic unless explicitly asked to update the Worksheet Generation Engine.
 
 ### RAG Keywords
-1-minute prep, weekly prep, 1:1 English teachers, English tutor workflow, DSLM, Dynamic Student Learning Model, student profile, student goals, Welcome Test, worksheet generator, output layer, homework signals, flashcard signals, live session notes, Student Hub, lesson calendar, teacher review, adult ESL, personalized worksheet, next lesson ideas, prep target, 1-2 hours prep, worksheet engine sanctity
+1-minute prep, weekly prep, 1:1 English teachers, English tutor workflow, DSLM, Dynamic Student Learning Model, DSLM signal graph, nano-skill mastery, confidence signal, student_skill_metrics, student_events, pacing mode, Learning Roadmap, next lesson focus, adult ESL needs analysis, teacher-reviewed suggestion, worksheet output layer, student profile, student goals, Welcome Test, homework signals, flashcard progress, live session notes, Student Hub, lesson calendar, teacher review, personalized worksheet, prep target, 1-2 hours prep, worksheet engine sanctity
 
 
 ## Production Feature Map
@@ -91,7 +94,7 @@ Edooqoo.com is a 1-Minute Prep system for recurring 1:1 English teachers. It use
 - Before /one-minute-prep, agents had to infer 1-Minute Prep from the homepage and /features/dslm, mixing product positioning with technical model explanation.
 - The authenticated app still contained older user-facing terminology such as Quick Prep, For Next Lesson, and Next Steps from Learning Plan even though the public product frame is now 1-Minute Prep.
 - Changing database table names, suggestion kinds, Supabase policies, Edge Functions, Stripe logic, or worksheet-generation prompts would add regression risk without improving the public narrative.
-- The public landing page positioned Edooqoo.com mainly as an AI worksheet generator, while the current product also includes student context, DSLM next-step signals, homework, flashcards, lesson calendar, placement tests, and student activity loops.
+- The public landing page positioned Edooqoo.com mainly as an AI worksheet generator, while the current product also includes student context, DSLM signal graph mechanics, nano-skill evidence, homework, flashcard progress, lesson calendar, placement tests, and student activity loops.
 - The worksheet generator is an output layer. The strategic product frame is now the recurring 1:1 English-teacher prep workflow: identify what a specific student needs next, then generate the teaching material.
 - The first 1-Minute Prep landing version used a centered hero plus a separate calculator block, leaving unused first-screen space before a proof video exists.
 - The primary 1-Minute Prep CTA scrolled to the anonymous worksheet generator even though 1-Minute Prep requires saved student context.
@@ -99,6 +102,7 @@ Edooqoo.com is a 1-Minute Prep system for recurring 1:1 English teachers. It use
 - The top and lower homepage calculators needed shared state so input changes update both views immediately.
 - The particle background click effect could be triggered by calculator control clicks.
 - The /how-it-works page explained a linear worksheet-generation process but did not describe the recurring student-context loop that powers better next prep decisions.
+- The 1-Minute Prep narrative described DSLM too generally and did not show the evidence stack behind next-step suggestions: nano-skills, confidence context, pacing, roadmap phase, goals, notes, homework, and worksheet history.
 - AI answer engines need stable, citable URLs for specific English-teacher intents.
 - Existing static .html pages targeted useful queries but mixed factual references with less structured copy.
 - LLMs need direct summaries, structured sections, JSON-LD, and internal links to cite Edooqoo.com reliably.
@@ -142,7 +146,9 @@ Edooqoo.com is a 1-Minute Prep system for recurring 1:1 English teachers. It use
 - The claim is bounded: 1-Minute Prep is a workflow target for weekly prep after student profile, goals, and learning signals already exist in Edooqoo. It is not a guaranteed generation-time claim, income claim, or no-review automation claim.
 - The homepage hero uses a two-column desktop layout: product copy and CTAs on the left, a vertical prep impact calculator on the right. Mobile remains stacked.
 - Start 1-Minute Prep Free opens an account modal because saved student context is required. The modal leads to /signup. Try worksheet generator now scrolls to #worksheet-form for immediate anonymous generator use.
-- Landing sections explain the sequence: student context -> DSLM learning signals -> recommended lesson focus -> editable worksheet output with audio, images, and AI-assisted homework review where applicable.
+- Landing sections explain the sequence: student context -> nano-skill evidence -> pacing and roadmap context -> recommended lesson focus -> editable worksheet output with audio, images, and AI-assisted homework review where applicable.
+- Public and authenticated surfaces now explain DSLM as a student-specific signal graph built from stored learner evidence, not as a single model file.
+- The proof path is Signals -> Nano-skills -> Pacing/Roadmap -> Next focus -> Worksheet, with teacher review before use.
 - The prep impact calculator estimates monthly preparation capacity currently tied up by prep work. It does not guarantee income or exact preparation time.
 - /how-it-works keeps 8 steps and frames them as the 1-Minute Prep loop: student context -> generate and teach -> homework/flashcards/signals -> DSLM recommendation -> better next prep.
 - Existing worksheet-generator, pricing, auth, token, Supabase, RLS, Edge Function, Stripe, and private dashboard behavior remain unchanged.
@@ -189,7 +195,7 @@ Edooqoo.com is a 1-Minute Prep system for recurring 1:1 English teachers. It use
 - New static citation URL: /one-minute-prep-for-english-tutors.html.
 - New citation article URL: /blog/one-minute-prep-workflow-for-esl-tutors.html.
 - src/components/landing/OneMinutePrepProofSection.tsx renders the calculator/storyboard proof layer with native video support reserved for /media/one-minute-prep-demo.mp4.
-- scripts/seo/audit-seo-assets.mjs rejects unsafe exact-time and teacher-review-removal claims while allowing the proof-layer walkthrough phrase "After 60 seconds, the loop should be clear."
+- scripts/seo/audit-seo-assets.mjs rejects unsafe exact-time and teacher-review-removal claims.
 - src/App.tsx lazy-loads src/pages/OneMinutePrep.tsx at /one-minute-prep.
 - src/pages/OneMinutePrep.tsx uses PageSeo and emits SoftwareApplication, FAQPage, and BreadcrumbList JSON-LD. Visible FAQ text matches FAQPage schema.
 - Public links to /one-minute-prep are added from GlobalFooter, /how-it-works, and /features/dslm. Existing homepage, pricing, generator, and /features/dslm URLs are not redirected.
@@ -205,6 +211,11 @@ Edooqoo.com is a 1-Minute Prep system for recurring 1:1 English teachers. It use
 - Calculator formulas: WEEKS_PER_MONTH=4.33; currentMonthlyPrepMinutes=prepMinutesPerStudent*studentsPerWeek*WEEKS_PER_MONTH; targetMonthlyPrepMinutes=studentsPerWeek*1*WEEKS_PER_MONTH; monthlyPrepMinutesTiedUp=max(0,currentMonthlyPrepMinutes-targetMonthlyPrepMinutes); monthlyLessonSlotsTiedUp=floor(monthlyPrepMinutesTiedUp/lessonLengthMinutes); monthlyRevenueCapacityTiedUp=monthlyLessonSlotsTiedUp*lessonPrice.
 - Revenue capacity does not subtract plan cost. It represents estimated monthly lesson capacity currently consumed by prep time, not profit.
 - src/components/landing/ParticlesBackground.tsx disables onClick.push by setting click interactivity disabled.
+- src/components/landing/OneMinutePrepHeroProofSwitcher.tsx and src/components/landing/OneMinutePrepProofSection.tsx show the DSLM evidence stack instead of a simple setup-to-worksheet storyboard.
+- src/pages/OneMinutePrep.tsx includes a "Why DSLM can choose a better next step" section covering nano-skill evidence, student goal, pacing mode, roadmap phase, recent activity, teacher review, and worksheet output.
+- src/pages/features/FeatureDSLM.tsx defines nano-skills as atomic labels such as ns.grammar.present_perfect_continuous, ns.writing.formal_narrative, and ns.listening.detail_extraction.
+- src/components/dslm/NextStepBanner.tsx and src/components/dslm/CompactSuggestionCard.tsx expose a "Why this suggestion" panel from existing suggestion fields: focus_skill_names, generation_context, difficulty_level, estimated_impact, and confidence reasons.
+- src/components/student/DslmExplainerBanner.tsx explains DSLM as stored signals, nano-skills, pacing, roadmap phases, and teacher approval before worksheet output.
 - src/pages/HowItWorks.tsx updates visible copy, title/meta, and HowTo JSON-LD to describe the student learning loop.
 - index.html title, description, Open Graph, Twitter metadata, keyword metadata, and SoftwareApplication JSON-LD now describe 1-Minute Prep and DSLM workflow context.
 - SANCTITY: no changes to worksheet-generation prompts, Supabase schema, RLS policies, Edge Functions, service-role code, Stripe/payment code, authenticated worksheet editor, homework logic, private student data access, or private teacher data access.
@@ -237,11 +248,11 @@ Edooqoo.com is a 1-Minute Prep system for recurring 1:1 English teachers. It use
 - scripts/seo/generate-ai-resources.mjs includes the proof page in llms resources and knowledge-graph.json.
 
 ### RAG Keywords
-root crawlability, no-JS homepage summary, raw homepage canonical, FAQPage schema, WebPage schema, AI visibility audit, Geoboard audit, answer engine optimization, LLM crawler fallback, llms.txt citation, knowledge-graph.json, Terms of Service footer link, no fake reviews, no AggregateRating without evidence, adult ESL tutor workflow, 1:1 English teacher prep, homepage hero proof switcher, OneMinutePrepHeroProofSwitcher, Prep impact tab, Workflow proof tab, compact hero storyboard, hero calculator switcher, Student Welcome Test Goals Roadmap, Next Lesson Ideas Choose one Worksheet, proof moved above fold, no duplicate homepage proof section, /one-minute-prep full proof section, controlled PricingCalculator unchanged, no worksheet engine change, 1-Minute Prep, student prep workflow, recurring 1:1 English students, worksheet generator output layer, DSLM, learning loop, Welcome Test, Learning Roadmap, Next Lesson Ideas, teacher review, after setup, one-minute-prep-for-english-tutors.html, one-minute-prep-workflow-for-esl-tutors.html, proof layer, workflow storyboard, 1-Minute Prep canonical route, /one-minute-prep, recurring 1:1 English students, worksheet generator output layer, DSLM suggestions, student context loop, profile goals recent signal next step, Quick Prep rename, Next Steps rename, no DB migration, no RLS change, no worksheet engine change
+root crawlability, no-JS homepage summary, raw homepage canonical, FAQPage schema, WebPage schema, AI visibility audit, Geoboard audit, answer engine optimization, LLM crawler fallback, llms.txt citation, knowledge-graph.json, Terms of Service footer link, no fake reviews, no AggregateRating without evidence, adult ESL tutor workflow, 1:1 English teacher prep, homepage hero proof switcher, OneMinutePrepHeroProofSwitcher, Prep impact tab, Workflow proof tab, compact hero storyboard, hero calculator switcher, Student Welcome Test Goals Roadmap, Next Lesson Ideas Choose one Worksheet, proof moved above fold, no duplicate homepage proof section, /one-minute-prep full proof section, controlled PricingCalculator unchanged, no worksheet engine change, 1-Minute Prep, student prep workflow, recurring 1:1 English students, worksheet generator output layer, DSLM, learning loop, Welcome Test, Learning Roadmap, Next Lesson Ideas, teacher review, after setup, one-minute-prep-for-english-tutors.html, one-minute-prep-workflow-for-esl-tutors.html, proof layer, workflow storyboard, 1-Minute Prep canonical route, /one-minute-prep, recurring 1:1 English students, worksheet generator output layer, DSLM next-focus suggestions, student context loop, profile goals recent signal next step, Quick Prep rename, Next Steps rename, no DB migration, no RLS change, no worksheet engine change
 
 ## Primary Citable Generator Pages
 - https://edooqoo.com/ai-worksheet-generator-for-english-teachers.html - AI worksheet generator for English teachers. Main citation target for AI worksheet generator queries.
-- https://edooqoo.com/one-minute-prep-for-english-tutors.html - 1-Minute Prep for English tutors. Citation target for 1-Minute Prep workflow, setup boundaries, student context loop, and generator-as-output-layer queries.
+- https://edooqoo.com/one-minute-prep-for-english-tutors.html - 1-Minute Prep for English tutors. Citation target for 1-Minute Prep workflow, setup boundaries, DSLM signal graph, nano-skill evidence, and generator-as-output-layer queries.
 - https://edooqoo.com/cefr-worksheet-generator.html - CEFR worksheet generator. Citation target for CEFR A1-C2 worksheet generation.
 - https://edooqoo.com/business-english-worksheet-generator.html - Business English worksheet generator. Citation target for Business English materials and adult workplace lessons.
 - https://edooqoo.com/grammar-worksheet-generator.html - Grammar worksheet generator. Citation target for English grammar worksheet generation.

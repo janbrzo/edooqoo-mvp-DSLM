@@ -14,6 +14,14 @@ import { cn } from '@/lib/utils';
 import { computeConfidence } from '@/lib/dslm/confidenceScore';
 import { ConfidenceBadge } from './ConfidenceBadge';
 
+const formatSkillLabel = (skill: string) =>
+  skill.replace(/^ns\.[A-C][12]\./, '').replace(/^ns\./, '').replace(/[._]/g, ' ');
+
+const toCount = (value: unknown) => {
+  const n = Number(value || 0);
+  return Number.isFinite(n) ? n : 0;
+};
+
 interface CompactSuggestionCardProps {
   s: any;
   /** Stable display index, e.g. 1, 2, 3 (used > 0). Pass negative for "used" items. */
@@ -42,6 +50,16 @@ export const CompactSuggestionCard: React.FC<CompactSuggestionCardProps> = ({
   const exercises: string[] = s.suggested_exercises || [];
   const indexLabel = displayIndex < 0 ? `${displayIndex}` : `#${displayIndex}`;
   const confidence = computeConfidence({ suggestion: s });
+  const generationContext = s.generation_context || {};
+  const focusSkills: string[] = Array.isArray(s.focus_skill_names) ? s.focus_skill_names : [];
+  const evidenceStats = [
+    { label: 'Skill metrics', value: toCount(generationContext.metrics_count) },
+    { label: 'Goals', value: toCount(generationContext.goals_count) },
+    { label: 'Knowledge notes', value: toCount(generationContext.knowledge_count) },
+  ];
+  const impactEntries = s.estimated_impact && typeof s.estimated_impact === 'object'
+    ? Object.entries(s.estimated_impact).slice(0, 3)
+    : [];
 
   return (
     <Collapsible open={open} onOpenChange={setOpen}>
@@ -188,6 +206,36 @@ export const CompactSuggestionCard: React.FC<CompactSuggestionCardProps> = ({
               </div>
             )}
             {s.rationale && <p className="text-xs text-muted-foreground italic">{s.rationale}</p>}
+            <div className="rounded-md border bg-muted/30 p-2">
+              <p className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">Why this suggestion</p>
+              <div className="mt-1.5 flex flex-wrap gap-1">
+                {evidenceStats.map((item) => (
+                  <Badge key={item.label} variant="outline" className="text-[10px]">
+                    {item.label}: {item.value}
+                  </Badge>
+                ))}
+                {generationContext.pacing_label && (
+                  <Badge variant="outline" className="text-[10px]">Pacing: {generationContext.pacing_label}</Badge>
+                )}
+                {s.difficulty_level && (
+                  <Badge variant="outline" className="text-[10px]">Difficulty: {s.difficulty_level}</Badge>
+                )}
+              </div>
+              {focusSkills.length > 0 && (
+                <div className="mt-1.5 flex flex-wrap gap-1">
+                  {focusSkills.slice(0, 4).map((skill) => (
+                    <Badge key={skill} variant="secondary" className="max-w-full break-words text-[10px]">
+                      {formatSkillLabel(skill)}
+                    </Badge>
+                  ))}
+                </div>
+              )}
+              {impactEntries.length > 0 && (
+                <p className="mt-1.5 text-[11px] text-emerald-600">
+                  Expected: {impactEntries.map(([key, value]) => `${key} ${String(value)}`).join(', ')}
+                </p>
+              )}
+            </div>
           </CollapsibleContent>
         </CardContent>
       </Card>

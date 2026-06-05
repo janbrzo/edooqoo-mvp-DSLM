@@ -182,7 +182,7 @@ const OneMinutePrepMockup = () => (
 const DslmMockup = () => (
   <div className="bg-background rounded-xl border border-border shadow-sm p-3 text-xs space-y-2">
     <div className="flex items-center justify-between">
-      <span className="font-semibold text-foreground text-[11px]">DSLM signals</span>
+      <span className="font-semibold text-foreground text-[11px]">Nano-skill evidence</span>
       <span className="bg-blue-50 border border-blue-200 text-blue-700 rounded-full px-2 py-0.5 text-[10px] font-medium">Model</span>
     </div>
     {[

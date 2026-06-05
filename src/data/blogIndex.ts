@@ -60,7 +60,7 @@ export const BLOG_POSTS: BlogPostMeta[] = [
   },
   {
     "title": "1-Minute Prep Workflow for ESL Tutors | Edooqoo",
-    "description": "Instructional reference for testing the Edooqoo.com 1-Minute Prep workflow with one real student, setup boundaries, and weekly worksheet output.",
+    "description": "Instructional reference for testing the Edooqoo.com 1-Minute Prep workflow with one real student, DSLM signal evidence, setup boundaries, and worksheet output.",
     "url": "/blog/one-minute-prep-workflow-for-esl-tutors.html",
     "date": "2026-05-24",
     "category": "General"
@@ -1527,6 +1527,13 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "url": "/blog/how-to-create-grammar-worksheets-with-ai.html",
     "date": "2025-06-01",
     "category": "AI in Education"
+  },
+  {
+    "title": "Learning Pacing — Scientific vs Pragmatic ESL",
+    "description": "This post has moved. Read our updated guide on one-to-one English lesson pacing.",
+    "url": "/blog/learning-pacing-scientific-vs-pragmatic-esl.html",
+    "date": "",
+    "category": "General"
   }
 ];
 
@@ -1803,12 +1810,12 @@ export const LANDING_PAGES: LandingPageMeta[] = [
   },
   {
     "title": "1-Minute Prep for English Tutors",
-    "description": "Factual reference for Edooqoo.com 1-Minute Prep: setup boundaries, student-context loop, DSLM suggestions, and worksheet generator output layer.",
+    "description": "Factual reference for Edooqoo.com 1-Minute Prep: setup boundaries, DSLM signal graph, nano-skill evidence, teacher review, and worksheet output layer.",
     "url": "/one-minute-prep-for-english-tutors.html"
   },
   {
     "title": "One-to-One English Lesson Planner",
-    "description": "Reference for planning recurring 1:1 English lessons with Edooqoo: student profile, goals, DSLM suggestions, worksheet output, homework, and review.",
+    "description": "Reference for planning recurring 1:1 English lessons with Edooqoo: student profile, goals, DSLM nano-skill evidence, worksheet output, homework, and review.",
     "url": "/one-to-one-english-lesson-planner.html"
   },
   {

@@ -27,7 +27,7 @@
       "@id": "https://edooqoo.com/#webpage",
       "url": "https://edooqoo.com/",
       "name": "Edooqoo | 1-Minute Prep for 1:1 English Teachers",
-      "description": "Root public page for Edooqoo.com, a 1-Minute Prep system for recurring 1:1 English teachers that combines student context, DSLM learning signals, and editable worksheet output.",
+      "description": "Root public page for Edooqoo.com, a 1-Minute Prep system for recurring 1:1 English teachers that combines student context, DSLM nano-skill evidence, pacing, and editable worksheet output.",
       "isPartOf": {
         "@id": "https://edooqoo.com/#website"
       },
@@ -57,7 +57,7 @@
       "@id": "https://edooqoo.com/one-minute-prep#webpage",
       "url": "https://edooqoo.com/one-minute-prep",
       "name": "1-Minute Prep for 1:1 English teachers",
-      "description": "Canonical public route for Edooqoo.com 1-Minute Prep workflow, student context loop, DSLM suggestions, and worksheet generator output layer.",
+      "description": "Canonical public route for Edooqoo.com 1-Minute Prep workflow, DSLM signal graph, nano-skill evidence, teacher-reviewed next focus, and worksheet generator output layer.",
       "isPartOf": {
         "@id": "https://edooqoo.com/#website"
       },
@@ -73,7 +73,7 @@
       "applicationCategory": "EducationalApplication",
       "operatingSystem": "Web",
       "url": "https://edooqoo.com/",
-      "description": "1-Minute Prep system for recurring 1:1 English teachers that combines student context, DSLM next-step signals, and worksheet generation.",
+      "description": "1-Minute Prep system for recurring 1:1 English teachers that combines student context, DSLM signal graph mechanics, nano-skill evidence, teacher-reviewed next-step signals, and worksheet generation.",
       "publisher": {
         "@id": "https://edooqoo.com/#organization"
       },
@@ -96,6 +96,10 @@
         "1-Minute Prep workflow",
         "1-Minute Prep workflow target",
         "DSLM student context loop",
+        "DSLM signal graph",
+        "Nano-skill evidence",
+        "Teacher-reviewed next focus",
+        "Pacing mode",
         "Welcome Test setup",
         "Learning Roadmap",
         "Next Lesson Ideas",
@@ -103,7 +107,7 @@
         "Homework, flashcard, and live-session signals",
         "Homepage hero proof switcher",
         "Shared monthly prep impact calculator",
-        "DSLM next-step signals",
+        "DSLM nano-skill evidence",
         "Student context for recurring 1:1 English lessons",
         "ESL worksheet generation",
         "CEFR-oriented teaching materials",
@@ -192,7 +196,7 @@
       "@id": "https://edooqoo.com/one-minute-prep-for-english-tutors.html#webpage",
       "url": "https://edooqoo.com/one-minute-prep-for-english-tutors.html",
       "name": "1-Minute Prep for English tutors",
-      "description": "Citation target for 1-Minute Prep workflow, setup boundaries, student context loop, and generator-as-output-layer queries.",
+      "description": "Citation target for 1-Minute Prep workflow, setup boundaries, DSLM signal graph, nano-skill evidence, and generator-as-output-layer queries.",
       "isPartOf": {
         "@id": "https://edooqoo.com/#website"
       },
@@ -206,7 +210,7 @@
       "@id": "https://edooqoo.com/one-minute-prep-for-english-tutors.html#learning-resource",
       "url": "https://edooqoo.com/one-minute-prep-for-english-tutors.html",
       "name": "1-Minute Prep for English tutors",
-      "description": "Citation target for 1-Minute Prep workflow, setup boundaries, student context loop, and generator-as-output-layer queries.",
+      "description": "Citation target for 1-Minute Prep workflow, setup boundaries, DSLM signal graph, nano-skill evidence, and generator-as-output-layer queries.",
       "provider": {
         "@id": "https://edooqoo.com/#organization"
       },
