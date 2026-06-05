@@ -14,6 +14,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { PageSeo, buildFaqPageLd } from '@/components/seo/PageSeo';
+import LessonSignalCaptureSection from '@/components/landing/LessonSignalCaptureSection';
 import OneMinutePrepProofSection from '@/components/landing/OneMinutePrepProofSection';
 import {
   DEFAULT_ONE_MINUTE_PREP_CALCULATOR_INPUT,
@@ -73,7 +74,7 @@ const evidenceStackItems = [
   },
   {
     title: 'Recent activity',
-    description: 'Homework, worksheet history, skill metrics, knowledge notes, and flashcard progress provide current context where available.',
+    description: 'Live Session answers, homework, worksheet history, skill metrics, knowledge notes, and flashcard progress provide current context where available.',
     icon: CheckCircle2,
   },
   {
@@ -257,6 +258,12 @@ const OneMinutePrep: React.FC = () => {
         />
 
         <section className="border-y bg-secondary/20 py-16">
+          <div className="mx-auto max-w-6xl px-4">
+            <LessonSignalCaptureSection />
+          </div>
+        </section>
+
+        <section className="py-16">
           <div className="mx-auto max-w-6xl px-4">
             <div className="max-w-3xl">
               <h2 className="text-2xl font-bold text-foreground">Why DSLM can choose a better next step</h2>

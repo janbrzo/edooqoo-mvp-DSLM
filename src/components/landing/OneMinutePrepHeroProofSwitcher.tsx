@@ -30,6 +30,7 @@ interface OneMinutePrepHeroProofSwitcherProps {
 const signalInputs = [
   'Welcome Test',
   'Goals',
+  'Live Session',
   'Homework',
   'Notes',
   'Flashcards',
@@ -47,7 +48,7 @@ const setupSteps = [
   { icon: UserPlus, label: 'Add 1 real student' },
   { icon: Send, label: 'Send Welcome Test' },
   { icon: Goal, label: 'Add goals' },
-  { icon: Map, label: 'Generate Learning Roadmap' },
+  { icon: Map, label: 'Generate Learning Roadmap', nowrap: true },
 ];
 
 const weeklyWorkflowSteps = [
@@ -61,14 +62,16 @@ const FlowStep = ({
   icon: Icon,
   label,
   badge,
+  nowrap,
 }: {
   icon: ProofIcon;
   label: string;
   badge?: string;
+  nowrap?: boolean;
 }) => (
   <div className="flex min-w-0 items-center gap-2 rounded-lg border border-border bg-white px-3 py-2 text-xs font-medium text-foreground shadow-sm">
     <Icon className="h-3.5 w-3.5 shrink-0 text-primary" />
-    <span className="min-w-0 flex-1 leading-snug">{label}</span>
+    <span className={cn('min-w-0 flex-1 leading-snug', nowrap && 'whitespace-nowrap text-[11px] sm:text-xs')}>{label}</span>
     {badge ? (
       <span className="shrink-0 rounded-full bg-primary/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase text-primary">
         {badge}

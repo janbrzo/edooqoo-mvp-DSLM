@@ -849,6 +849,24 @@
     },
     {
       "@type": "Article",
+      "@id": "https://edooqoo.com/blog/learning-pacing-scientific-vs-pragmatic-esl.html#article",
+      "url": "https://edooqoo.com/blog/learning-pacing-scientific-vs-pragmatic-esl.html",
+      "headline": "Learning Pacing in adult ESL",
+      "description": "Explains Scientific, Balanced, and Pragmatic Learning Pacing for teacher-reviewed 1-Minute Prep decisions.",
+      "author": {
+        "@id": "https://edooqoo.com/#organization"
+      },
+      "publisher": {
+        "@id": "https://edooqoo.com/#organization"
+      },
+      "mainEntityOfPage": "https://edooqoo.com/blog/learning-pacing-scientific-vs-pragmatic-esl.html#webpage",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "Article",
       "@id": "https://edooqoo.com/blog/cefr-aligned-worksheet-generation-workflow.html#article",
       "url": "https://edooqoo.com/blog/cefr-aligned-worksheet-generation-workflow.html",
       "headline": "CEFR-aligned worksheet generation workflow",

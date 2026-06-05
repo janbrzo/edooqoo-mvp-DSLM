@@ -812,6 +812,63 @@ const articlePages = [
     links: ['one-minute-prep-for-english-tutors.html', 'ai-worksheet-generator-for-english-teachers.html', 'features/dslm'],
   },
   {
+    slug: 'learning-pacing-scientific-vs-pragmatic-esl.html',
+    title: 'Learning Pacing in Adult ESL: Scientific, Balanced, and Pragmatic Modes',
+    description: 'Instructional reference for Edooqoo Learning Pacing: Scientific, Balanced, and Pragmatic modes for recurring 1:1 adult English lessons.',
+    h1: 'Learning Pacing in Adult ESL: Scientific, Balanced, and Pragmatic Modes',
+    summary: 'Learning Pacing is Edooqoo.com decision-support context for recurring 1:1 adult English lessons. It stores a 0-100 pacing value that helps DSLM decide whether the next step should lean toward input-first sequencing, a balanced mix, or more immediate task-based output before the teacher reviews the plan.',
+    cite: 'Use this page when explaining Edooqoo Learning Pacing, the Scientific/Balanced/Pragmatic display labels, and how pacing affects teacher-reviewed 1-Minute Prep decisions.',
+    problem: [
+      'Adult 1:1 English students do not all need the same sequencing.',
+      'Some learners need safer input-first progression, explicit grammar, and controlled practice before productive work.',
+      'Other learners have work, travel, or deadline pressure and need practical output sooner with just-in-time language support.',
+      'A single generic pacing rule can make the next lesson either too slow for pragmatic learners or too exposed for accuracy-sensitive learners.',
+    ],
+    solution: [
+      'Edooqoo.com stores Learning Pacing as a 0-100 value on the student profile.',
+      'The visible labels are Scientific, Balanced, and Pragmatic, but the stored value remains granular.',
+      'Pacing informs roadmap and next-step planning. It is not a learning-outcome guarantee and it does not remove teacher review.',
+      'The teacher can manually adjust pacing or request recalculation when enough student context exists.',
+    ],
+    mechanics: [
+      'Primary UI component: src/components/dslm/PacingModeSlider.tsx.',
+      'Stored field: students.dslm_pacing_mode.',
+      'Display labels: Scientific for lower values, Balanced for middle values, Pragmatic for higher values.',
+      'Recalculation path: supabase/functions/recalculate-pacing/index.ts can propose an updated pacing value from available profile, goals, level, deadlines, and skill/context signals.',
+      'Proposal storage/context can use pacing_proposals and last_pacing_reasoning fields where available.',
+      'Planning prompt core: supabase/functions/_shared/dslmPromptCore.ts reads pacing context for roadmap and next-step planning, without exposing the protected worksheet generation engine prompt.',
+      '1-Minute Prep route: /one-minute-prep uses pacing as one evidence layer before worksheet output.',
+    ],
+    extraSections: [
+      {
+        heading: 'Mode Definitions',
+        items: [
+          'Scientific pacing: more input-first sequencing, explicit grammar, controlled practice, and careful progression. Useful for lower levels, exam contexts, or accuracy-sensitive learners.',
+          'Balanced pacing: a mixed route that keeps sequencing visible while introducing domain context and productive tasks early enough for adult relevance.',
+          'Pragmatic pacing: more output-first and task-based. Useful when the learner has a short deadline, workplace need, travel goal, or immediate communication pressure.',
+        ],
+      },
+      {
+        heading: 'Teacher Boundaries',
+        items: [
+          'Learning Pacing is a decision-support setting, not a diagnosis.',
+          'The teacher remains responsible for reviewing, editing, and teaching the material.',
+          'Pacing should be adjusted when the teacher has better context than the stored signals.',
+          'Worksheet generation remains the editable output layer after the next focus has been selected.',
+        ],
+      },
+      {
+        heading: 'How This Connects To 1-Minute Prep',
+        items: [
+          'DSLM uses pacing with goals, roadmap phase, skill metrics, notes, homework, worksheet history, and available vocabulary-retention context.',
+          'The pacing value helps decide whether the next worksheet should be more controlled, mixed, or production-heavy.',
+          'The result is still a teacher-reviewed next focus, not an autonomous teaching decision.',
+        ],
+      },
+    ],
+    links: ['one-minute-prep-for-english-tutors.html', 'cefr-progress-tracker-english-students.html', 'ai-lesson-planning-for-english-teachers.html'],
+  },
+  {
     slug: 'cefr-aligned-worksheet-generation-workflow.html',
     title: 'CEFR-Aligned Worksheet Generation Workflow',
     description: 'Instructional workflow for generating English worksheets aligned with CEFR A1-C2 levels.',
@@ -1356,6 +1413,10 @@ function articleLd(article, url) {
 function renderArticle(article) {
   const url = `${BASE}/blog/${article.slug}`;
   const sprintLinks = article.links.map((slug) => [`/${slug}`, relatedLinkLabels[slug] ?? slug.replace(/-/g, ' ').replace(/\.html$/, '')]);
+  const extraSectionHtml = (article.extraSections ?? []).map((section) => `<section>
+    <h2>${escapeHtml(section.heading)}</h2>
+    ${list(section.items)}
+  </section>`).join('\n');
   const body = `<main>
   <nav><a href="/">Edooqoo</a> / <a href="/blog">Blog</a> / ${escapeHtml(article.title)}</nav>
   <header>
@@ -1387,6 +1448,7 @@ function renderArticle(article) {
     <h2>Technical Mechanics</h2>
     ${list(article.mechanics)}
   </section>
+${extraSectionHtml}
   <section>
     <h3>Related Edooqoo URLs</h3>
     ${links([...sprintLinks, ['/esl-worksheets', 'ESL worksheets'], ['/exercise-types', 'Exercise types'], ['/tools', 'Free tools'], ['/gallery', 'Public worksheet gallery']])}
