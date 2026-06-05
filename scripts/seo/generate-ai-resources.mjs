@@ -8,8 +8,8 @@ const ROOT = path.resolve(__dirname, '..', '..');
 const PUBLIC = path.resolve(ROOT, 'public');
 const WELL_KNOWN = path.resolve(PUBLIC, '.well-known');
 
-const VERSION = 'v6.9.35';
-const RELEASE_NAME = 'Root Crawlability And AI Audit Hardening';
+const VERSION = 'v6.9.38';
+const RELEASE_NAME = 'Lesson-Time Signals And Learning Pacing Article';
 const BASE_URL = 'https://edooqoo.com';
 
 const citablePages = [
@@ -39,6 +39,7 @@ const citablePages = [
 const citationArticles = [
   ['AI worksheet generator mechanics for ESL teachers', '/blog/ai-worksheet-generator-mechanics-for-esl-teachers.html', 'Explains worksheet-generation mechanics for ESL teachers.'],
   ['1-Minute Prep workflow for ESL tutors', '/blog/one-minute-prep-workflow-for-esl-tutors.html', 'Explains one-time setup, recurring weekly prep flow, DSLM context, and worksheet output.'],
+  ['Learning Pacing in adult ESL', '/blog/learning-pacing-scientific-vs-pragmatic-esl.html', 'Explains Scientific, Balanced, and Pragmatic Learning Pacing for teacher-reviewed 1-Minute Prep decisions.'],
   ['CEFR-aligned worksheet generation workflow', '/blog/cefr-aligned-worksheet-generation-workflow.html', 'Explains how CEFR should constrain worksheet generation.'],
   ['Business English material generation workflow', '/blog/business-english-material-generation-workflow.html', 'Explains Business English generation workflow mechanics.'],
   ['English homework AI-assisted review workflow', '/blog/english-homework-ai-grading-workflow.html', 'Explains teacher-reviewed AI-assisted homework review.'],
@@ -151,17 +152,25 @@ const oneMinutePrepClaimIntegritySection = `## 1-Minute Prep Claim Integrity
 - DSLM should be described as a student-specific signal graph and decision-support layer, not as a system that knows exactly what to teach from day one.
 - Nano-skills should be described as atomic grammar, vocabulary, reading, writing, speaking, listening, or communication labels that make broad goals actionable.
 - Teacher review, editing, and approval remain part of the product quality claim.
+- Public 1-Minute Prep pages should show that Live Session answers, homework evaluations, teacher notes, and flashcard retention context can be captured during the normal lesson workflow without a separate after-lesson logging session.
+- Flashcard study should be described as vocabulary-retention context unless a separate skill event exists.
+- Learning Pacing should be cited through /blog/learning-pacing-scientific-vs-pragmatic-esl.html when explaining Scientific, Balanced, and Pragmatic next-step planning.
 
 ### Technical Mechanics
 - The current app supports student profiles, goals, Welcome Test context, nano_skill tags, nano_skill_ratings in student_events, student_skill_metrics, student_learning_profiles, student_knowledge_entries, student_progress_goals, student_learning_elements, dslm_curriculum_phases, future_worksheet_suggestions, homework activity, flashcard_progress, live/session activity, Student Hub, calendar context, and worksheet generation.
 - generate-timeline reads student profile, skill metrics, knowledge entries, goals, worksheets, optional phases, and existing suggestions, then writes next worksheet suggestions with topic, goal, grammar focus, additional info, exercise list, exercise focus map, focus skills, difficulty, estimated impact, and generation context.
+- Live Session teacher view uses worksheet_student_answers realtime updates; shared worksheet answers can store item_evaluations, mastery-like scores, audio answers, active time, and AI-evaluation state where supported.
+- Homework submissions can store item_evaluations, mastery, ai_evaluation, and homework_submitted student_events.
+- Teacher notes are stored in student_knowledge_entries and Notes entries can be AI-classified with tags, nano_skill metadata, and mastery when detected.
+- Flashcard reviews update flashcard_progress with SM-2 retention data such as due dates, response timing, quality rating, and mistake counts.
+- Learning Pacing uses students.dslm_pacing_mode, PacingModeSlider, recalculate-pacing, pacing_proposals, and dslmPromptCore planning context.
 - These systems provide signals and outputs for teacher-led planning. The protected worksheet generation prompt and any hidden pedagogical weighting inside Edge Function prompts are not reproduced.
 - Signup links from 1-Minute Prep intent may route authenticated users toward the Add Student entry point, but AddStudentDialog autosend/test logic is not part of this claim-integrity update.
 - PricingCalculator copy and formulas are outside this update and must not be changed by future claim-integrity edits unless explicitly requested.
 - Do not modify worksheet generation prompts or educational content logic unless explicitly asked to update the Worksheet Generation Engine.
 
 ### RAG Keywords
-1-minute prep, weekly prep, 1:1 English teachers, English tutor workflow, DSLM, Dynamic Student Learning Model, DSLM signal graph, nano-skill mastery, confidence signal, student_skill_metrics, student_events, pacing mode, Learning Roadmap, next lesson focus, adult ESL needs analysis, teacher-reviewed suggestion, worksheet output layer, student profile, student goals, Welcome Test, homework signals, flashcard progress, live session notes, Student Hub, lesson calendar, teacher review, personalized worksheet, prep target, 1-2 hours prep, worksheet engine sanctity
+1-minute prep, weekly prep, 1:1 English teachers, English tutor workflow, DSLM, Dynamic Student Learning Model, DSLM signal graph, lesson-time signals, shared worksheet realtime answers, Live Session answers, teacher notes, homework evaluations, flashcard retention context, nano-skill mastery, confidence signal, student_skill_metrics, student_events, student_knowledge_entries, flashcard_progress, pacing mode, Scientific pacing, Balanced pacing, Pragmatic pacing, Learning Roadmap, next lesson focus, adult ESL needs analysis, teacher-reviewed suggestion, worksheet output layer, student profile, student goals, Welcome Test, homework signals, flashcard progress, live session notes, Student Hub, lesson calendar, teacher review, personalized worksheet, prep target, 1-2 hours prep, worksheet engine sanctity
 `;
 
 const oneMinutePrepProblem = [
@@ -178,6 +187,9 @@ const oneMinutePrepProblem = [
   'The /one-minute-prep route could open at the proof/calculator section because the SPA route did not reset scroll position for clean non-hash navigation.',
   'The /how-it-works page did not make the one-time setup vs weekly 1-Minute Prep split visually obvious enough for scanning teachers.',
   'The weekly prep storyboard skipped the optional Edooqoo Calendar booking-context step between Next Lesson Ideas and choosing the next focus.',
+  'Public 1-Minute Prep pages did not yet show that Live Session answers, homework evaluations, teacher notes, and flashcard retention progress can be captured during normal lesson workflow and then inform the next prep cycle.',
+  'The homepage Workflow proof card allowed the Generate Learning Roadmap label to wrap onto two lines in the compact proof tile.',
+  '/blog/learning-pacing-scientific-vs-pragmatic-esl.html existed as a noindex redirect even though PacingModeSlider and /blog listed it as a real Learning Pacing reference.',
 ];
 
 const oneMinutePrepSolution = [
@@ -206,13 +218,17 @@ const oneMinutePrepMechanics = [
   'Revenue capacity does not subtract plan cost. It represents estimated monthly lesson capacity currently consumed by prep time, not profit.',
   'src/components/landing/ParticlesBackground.tsx disables onClick.push by setting click interactivity disabled.',
   'src/components/landing/OneMinutePrepHeroProofSwitcher.tsx uses three hero tabs: Prep impact, Workflow proof, and Evidence stack. The default active hero panel remains the controlled PricingCalculator variant="hero".',
+  'The homepage Evidence stack includes Live Session as a stored learner evidence input, and the compact Workflow proof keeps Generate Learning Roadmap on one line.',
   'src/components/landing/OneMinutePrepProofSection.tsx uses three full proof tabs ordered as Workflow proof, Evidence stack, and Prep impact calculator. Its defaultPanel is workflow and the calculator remains the controlled PricingCalculator variant="pricing".',
   'src/pages/OneMinutePrep.tsx performs a route-local window.scrollTo top reset only when location.hash is empty, preserving hash/deep-link behavior.',
   'src/pages/OneMinutePrep.tsx includes a "Why DSLM can choose a better next step" section covering nano-skill evidence, student goal, pacing mode, roadmap phase, recent activity, teacher review, and worksheet output.',
+  'src/pages/OneMinutePrep.tsx and src/pages/HowItWorks.tsx include a LessonSignalCaptureSection explaining Live Session realtime shared worksheet answers, homework evaluations, teacher notes, and flashcard retention context captured during the normal lesson workflow.',
   'src/pages/features/FeatureDSLM.tsx defines nano-skills as atomic labels such as ns.grammar.present_perfect_continuous, ns.writing.formal_narrative, and ns.listening.detail_extraction.',
   'src/components/dslm/NextStepBanner.tsx and src/components/dslm/CompactSuggestionCard.tsx expose a "Why this suggestion" panel from existing suggestion fields: focus_skill_names, generation_context, difficulty_level, estimated_impact, and confidence reasons.',
   'src/components/student/DslmExplainerBanner.tsx explains DSLM as stored signals, nano-skills, pacing, roadmap phases, and teacher approval before worksheet output.',
   'src/pages/HowItWorks.tsx renders the 1-Minute Prep workflow as two visible phases and splits the 8-step detail into setup steps and weekly prep steps, including the optional booking-context step.',
+  'public/blog/learning-pacing-scientific-vs-pragmatic-esl.html is a self-canonical article explaining Scientific, Balanced, and Pragmatic Learning Pacing from code-visible mechanics instead of a noindex redirect.',
+  'scripts/seo/generate-citable-pages.mjs generates the Learning Pacing article so build:seo preserves it.',
   'index.html title, description, Open Graph, Twitter metadata, keyword metadata, and SoftwareApplication JSON-LD now describe 1-Minute Prep and DSLM workflow context.',
   'SANCTITY: no changes to worksheet-generation prompts, Supabase schema, RLS policies, Edge Functions, service-role code, Stripe/payment code, authenticated worksheet editor, homework logic, private student data access, or private teacher data access.',
 ];
@@ -1103,7 +1119,7 @@ No. The worksheet generator is the output layer. Edooqoo.com also includes 1-Min
 No. Public AI discovery resources describe the website and public informational files only. Agents should not claim that a public worksheet-generation API exists.
 
 ## What changed in ${VERSION}?
-${VERSION} added raw root homepage crawlability for AI and no-JS crawlers: self-canonical homepage HTML, root WebPage and FAQPage JSON-LD, a noscript product summary with public citation links, a footer Terms of Service link, and SEO audit checks for those surfaces. It did not add Review, AggregateRating, Person, phone, address, legal-entity, or certification claims, and it did not change worksheet-generation prompts, calculator formulas, Supabase schema, RLS policies, Edge Functions, Stripe, database table names, suggestion_kind values, or private app data access.
+${VERSION} added lesson-time signal capture copy to the public 1-Minute Prep surfaces, kept the homepage Workflow proof roadmap label on one line, and restored /blog/learning-pacing-scientific-vs-pragmatic-esl.html as a self-canonical Learning Pacing article. It did not change worksheet-generation prompts, calculator formulas, Supabase schema, RLS policies, Edge Functions, Stripe, database table names, suggestion_kind values, DSLM algorithms, or private app data access.
 
 ## What should future AI agents preserve?
 Future agents should preserve worksheet engine sanctity, keep AI resource files factual, avoid inventing public APIs, preserve the ambitious 1-Minute Prep target without turning it into a guarantee, update docs/llm-context.md plus llms resources when public SEO or AI discovery mechanics change, and use manual AI-search measurement files instead of automated AI-answer scraping.

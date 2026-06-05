@@ -32,6 +32,7 @@ interface OneMinutePrepProofSectionProps {
 const signalInputs = [
   'Welcome Test answers',
   'Student goals',
+  'Live Session answers',
   'Homework evaluations',
   'Teacher notes',
   'Worksheet history',

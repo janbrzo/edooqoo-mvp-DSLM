@@ -59,6 +59,13 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "category": "How to Teach"
   },
   {
+    "title": "Learning Pacing in Adult ESL: Scientific, Balanced, and Pragmatic Modes | Edooqoo",
+    "description": "Instructional reference for Edooqoo Learning Pacing: Scientific, Balanced, and Pragmatic modes for recurring 1:1 adult English lessons.",
+    "url": "/blog/learning-pacing-scientific-vs-pragmatic-esl.html",
+    "date": "2026-05-24",
+    "category": "General"
+  },
+  {
     "title": "1-Minute Prep Workflow for ESL Tutors | Edooqoo",
     "description": "Instructional reference for testing the Edooqoo.com 1-Minute Prep workflow with one real student, DSLM signal evidence, setup boundaries, and worksheet output.",
     "url": "/blog/one-minute-prep-workflow-for-esl-tutors.html",
@@ -1527,13 +1534,6 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "url": "/blog/how-to-create-grammar-worksheets-with-ai.html",
     "date": "2025-06-01",
     "category": "AI in Education"
-  },
-  {
-    "title": "Learning Pacing — Scientific vs Pragmatic ESL",
-    "description": "This post has moved. Read our updated guide on one-to-one English lesson pacing.",
-    "url": "/blog/learning-pacing-scientific-vs-pragmatic-esl.html",
-    "date": "",
-    "category": "General"
   }
 ];
 

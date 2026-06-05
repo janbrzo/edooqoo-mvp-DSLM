@@ -15,6 +15,7 @@ import {
   Send,
   UserPlus,
 } from 'lucide-react';
+import LessonSignalCaptureSection from '@/components/landing/LessonSignalCaptureSection';
 
 const steps = [
   {
@@ -186,10 +187,10 @@ const HowItWorks = () => {
     <div className="min-h-screen bg-background">
       <Helmet>
         <title>How 1-Minute Prep Works — Edooqoo Student Learning Loop</title>
-        <meta name="description" content="See how Edooqoo's 1-Minute Prep loop connects student context, worksheets, homework, flashcards and DSLM recommendations for the next lesson." />
+        <meta name="description" content="See how Edooqoo's 1-Minute Prep loop connects student context, Live Session answers, homework, teacher notes, flashcards and DSLM recommendations for the next lesson." />
         <link rel="canonical" href="https://edooqoo.com/how-it-works" />
         <meta property="og:title" content="How 1-Minute Prep Works — Edooqoo Student Learning Loop" />
-        <meta property="og:description" content="See how Edooqoo's 1-Minute Prep loop connects student context, worksheets, homework, flashcards and DSLM recommendations for the next lesson." />
+        <meta property="og:description" content="See how Edooqoo's 1-Minute Prep loop connects student context, Live Session answers, homework, teacher notes, flashcards and DSLM recommendations for the next lesson." />
         <meta property="og:url" content="https://edooqoo.com/how-it-works" />
         <meta property="og:type" content="article" />
         <script type="application/ld+json">{JSON.stringify(howToJsonLd)}</script>
@@ -204,7 +205,7 @@ const HowItWorks = () => {
 
         <h1 className="mb-4 text-4xl font-bold text-foreground">How 1-Minute Prep Works</h1>
         <p className="mb-12 text-lg text-muted-foreground">
-          Edooqoo works as a student learning loop: first setup builds context, then each profile, worksheet, homework task and flashcard session can add context for the next lesson.
+          Edooqoo works as a student learning loop: first setup builds context, then Live Session answers, homework, teacher notes and flashcard progress can add context for the next lesson.
         </p>
         <p className="mb-10 text-sm text-muted-foreground">
           For the bounded workflow definition, read the{' '}
@@ -263,6 +264,11 @@ const HowItWorks = () => {
             ))}
           </div>
         </section>
+
+        <LessonSignalCaptureSection
+          compact
+          className="mb-14 rounded-2xl border border-border bg-secondary/20 p-5 sm:p-6"
+        />
 
         <div className="space-y-14">
           <section>
