@@ -28,7 +28,6 @@ import { useStudentProgress } from '@/hooks/useStudentProgress';
 import { PacingProposalCard } from './PacingProposalCard';
 import { usePacingProposals } from '@/hooks/usePacingProposals';
 import { cn } from '@/lib/utils';
-import { WelcomeTestSuggestion } from '@/components/dashboard/WelcomeTestSuggestion';
 
 interface PathwayViewProps {
   studentId: string;
@@ -241,16 +240,6 @@ export const PathwayView: React.FC<PathwayViewProps> = ({
 
   return (
     <div className="space-y-4">
-      {/* v6.9.33 — compact Welcome Test banner mounted at top of Pathway so
-          the Onboarding Spotlight (focus=send-welcome-test) lands here. The
-          component is idempotent and self-hides once a welcome test is completed. */}
-      <WelcomeTestSuggestion
-        studentId={studentId}
-        teacherId={teacherId}
-        studentName={studentName}
-        surface="oneMinute"
-        compact
-      />
       {pacingProposals.length > 0 && (
         <div className="space-y-2">
           {pacingProposals.map(p => (
