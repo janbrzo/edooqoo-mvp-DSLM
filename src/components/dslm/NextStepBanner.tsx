@@ -40,6 +40,12 @@ interface NextStepBannerProps {
   onDelete?: (suggestionId: string) => void;
   generating: boolean;
   hasGoals: boolean;
+  /** v6.9.40 P5 — readiness signals for the empty state. */
+  wtCompleted?: boolean;
+  hasPhases?: boolean;
+  onAddGoal?: () => void;
+  onSendWelcomeTest?: () => void;
+  onGoToRoadmap?: () => void;
 }
 
 export const NextStepBanner: React.FC<NextStepBannerProps> = ({
@@ -54,6 +60,11 @@ export const NextStepBanner: React.FC<NextStepBannerProps> = ({
   onDelete,
   generating,
   hasGoals,
+  wtCompleted = true,
+  hasPhases = true,
+  onAddGoal,
+  onSendWelcomeTest,
+  onGoToRoadmap,
 }) => {
   const storageKey = `dslm.nextStep.detailsOpen.${studentId}`;
   const [detailsOpen, setDetailsOpen] = useState(false);
@@ -72,6 +83,7 @@ export const NextStepBanner: React.FC<NextStepBannerProps> = ({
   };
 
   if (!suggestion) {
+    const showReadiness = !hasGoals || !wtCompleted || !hasPhases;
     return (
       <Card className="border-dashed border-2 border-muted-foreground/20">
         <CardContent className="pt-6 text-center space-y-3">
@@ -87,6 +99,33 @@ export const NextStepBanner: React.FC<NextStepBannerProps> = ({
               </p>
             )}
           </div>
+          {showReadiness && (
+            <div className="text-left max-w-md mx-auto rounded-md border border-amber-500/40 bg-amber-500/5 p-3 space-y-2">
+              <div className="text-xs font-semibold text-amber-700 dark:text-amber-400">
+                For sharper 1-Minute Prep suggestions, add this first
+              </div>
+              <ul className="text-xs text-muted-foreground space-y-1.5">
+                {!hasGoals && onAddGoal && (
+                  <li className="flex items-center justify-between gap-2">
+                    <span>No learning goals set — AI will infer from main goal only.</span>
+                    <button className="text-[11px] underline hover:no-underline" onClick={onAddGoal}>Add goal</button>
+                  </li>
+                )}
+                {!wtCompleted && onSendWelcomeTest && (
+                  <li className="flex items-center justify-between gap-2">
+                    <span>Welcome Placement Test not completed — level signals are weaker.</span>
+                    <button className="text-[11px] underline hover:no-underline" onClick={onSendWelcomeTest}>Send test</button>
+                  </li>
+                )}
+                {!hasPhases && onGoToRoadmap && (
+                  <li className="flex items-center justify-between gap-2">
+                    <span>No curriculum plan yet — optional, but strongly recommended for recurring students.</span>
+                    <button className="text-[11px] underline hover:no-underline" onClick={onGoToRoadmap}>Go to roadmap</button>
+                  </li>
+                )}
+              </ul>
+            </div>
+          )}
           <div className="flex items-center justify-center gap-2">
             <Button onClick={onGenerate} disabled={generating || !hasGoals}>
               {generating ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Sparkles className="h-4 w-4 mr-2" />}

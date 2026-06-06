@@ -82,12 +82,27 @@ export const useCurriculumPhases = ({ studentId, teacherId }: UseCurriculumPhase
 
   const generatePhases = async (
     mode: 'replace' | 'add' = 'replace',
-    opts: { count?: number; teacherComment?: string } = {}
+    opts: {
+      count?: number;
+      teacherComment?: string;
+      weeksPerPhase?: number;
+      phaseWeekTargets?: number[];
+      focusedGoalIds?: string[];
+    } = {}
   ): Promise<boolean> => {
     try {
       setGenerating(true);
       const response = await supabase.functions.invoke('generate-curriculum-phases', {
-        body: { studentId, teacherId, mode, count: opts.count, teacherComment: opts.teacherComment ?? '' }
+        body: {
+          studentId,
+          teacherId,
+          mode,
+          count: opts.count,
+          teacherComment: opts.teacherComment ?? '',
+          weeksPerPhase: opts.weeksPerPhase,
+          phaseWeekTargets: opts.phaseWeekTargets,
+          focusedGoalIds: opts.focusedGoalIds,
+        }
       });
       if (response.error) throw response.error;
       const newPhases = response.data?.phases || [];

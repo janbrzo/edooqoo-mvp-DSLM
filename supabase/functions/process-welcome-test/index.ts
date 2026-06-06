@@ -643,7 +643,7 @@ serve(async (req) => {
       const { data: skillResults } = await supabase
         .from('test_skill_results')
         .select('id, element_type, applied_to_element_id, suggested_rating')
-        .eq('student_test_id', test_id)
+        .eq('test_id', test_id)
         .is('applied_at', null);
 
       const appliedIds: string[] = [];
@@ -712,30 +712,71 @@ serve(async (req) => {
     }
 
     // v6.9.39 P5 — Auto-fill student level + suggest goals from Welcome Test.
-    // Only writes when the student record has no prior level / goals set, so
-    // teachers who configured the student themselves are never overwritten.
+    // v6.9.40 P4 — Also auto-fill students.main_goal when missing/unknown,
+    // and ALWAYS insert 2-3 goal suggestions tied to this specific test_id
+    // (skip when suggestions for the same test already exist).
     try {
       const { data: studentRowForAutoFill } = await supabase
         .from('students')
-        .select('english_level')
+        .select('english_level, main_goal')
         .eq('id', student_id)
         .maybeSingle();
       const currentLevel = (studentRowForAutoFill as any)?.english_level;
-      if (!currentLevel || String(currentLevel).trim() === '') {
+      const isMissingLevel =
+        !currentLevel || String(currentLevel).trim() === '' || String(currentLevel).trim().toLowerCase() === 'unknown';
+      if (isMissingLevel) {
         await supabase
           .from('students')
           .update({ english_level: estimatedLevel })
           .eq('id', student_id);
       }
 
-      const { count: existingGoalCount } = await supabase
+      // v6.9.40 — derive a suggested main_goal from motivation/interests and
+      // auto-apply when students.main_goal is missing. Custom-only/empty are
+      // treated as missing; otherwise we keep teacher's choice.
+      const VALID_MAIN_GOALS = new Set([
+        'work','exam','general','travel','academic',
+        'social-conversation','personal-development','fun-entertainment',
+      ]);
+      const motivation = String(traits.motivation_type || '').toLowerCase();
+      const career = String(traits.career_english_importance || '').toLowerCase();
+      const timeline = String(traits.learning_timeline || '').toLowerCase();
+      const interestsLower = (interestTopics || []).map((t: any) => String(t).toLowerCase());
+      let suggestedMainGoal = 'general';
+      if (timeline === 'urgent_specific' && /exam|ielts|cambridge|toefl/i.test(JSON.stringify(answers || {}))) {
+        suggestedMainGoal = 'exam';
+      } else if (career === 'critical' || career === 'high' || motivation === 'instrumental') {
+        suggestedMainGoal = 'work';
+      } else if (interestsLower.some((t: string) => /travel/.test(t))) {
+        suggestedMainGoal = 'travel';
+      } else if (interestsLower.some((t: string) => /academ|study|university/.test(t))) {
+        suggestedMainGoal = 'academic';
+      } else if (motivation === 'integrative') {
+        suggestedMainGoal = 'social-conversation';
+      }
+      if (!VALID_MAIN_GOALS.has(suggestedMainGoal)) suggestedMainGoal = 'general';
+      const currentMainGoal = (studentRowForAutoFill as any)?.main_goal;
+      const isMissingMainGoal =
+        !currentMainGoal ||
+        String(currentMainGoal).trim() === '' ||
+        String(currentMainGoal).trim().toLowerCase() === 'custom';
+      if (isMissingMainGoal) {
+        await supabase
+          .from('students')
+          .update({ main_goal: suggestedMainGoal })
+          .eq('id', student_id);
+      }
+
+      // Skip insert if we already created suggestions for this exact test_id
+      // (prevents duplicates when process-welcome-test reruns).
+      const { count: existingForThisTest } = await supabase
         .from('student_progress_goals')
         .select('id', { count: 'exact', head: true })
         .eq('student_id', student_id)
-        .is('deleted_at', null)
-        .is('archived_at', null);
+        .eq('source', 'welcome_test_auto')
+        .contains('metadata', { test_id });
 
-      if ((existingGoalCount ?? 0) === 0) {
+      if ((existingForThisTest ?? 0) === 0) {
         // Build 2-3 suggested goals from the just-computed profile signals.
         const suggestions: Array<{ goal_type: string; title: string; description: string; meta: Record<string, unknown> }> = [];
         const skillLabel = (s: string | null) => {
@@ -752,15 +793,15 @@ serve(async (req) => {
             goal_type: 'supporting',
             title: `Improve ${skillLabel(weakest)}`,
             description: `Welcome Test marked ${skillLabel(weakest)} as the weakest skill. Focused practice should lift overall CEFR confidence.`,
-            meta: { from: 'welcome_test', signal: 'weakest_skill', value: weakest },
+            meta: { from: 'welcome_test', test_id, signal: 'weakest_skill', value: weakest, estimated_level: estimatedLevel, suggested_main_goal: suggestedMainGoal },
           });
         }
         if (strongest && strongest !== weakest) {
           suggestions.push({
             goal_type: 'supporting',
-            title: `Leverage ${skillLabel(strongest)}`,
+            title: `Build confidence from ${skillLabel(strongest)}`,
             description: `Welcome Test marked ${skillLabel(strongest)} as the strongest skill. Use it as a confidence anchor while building weaker areas.`,
-            meta: { from: 'welcome_test', signal: 'strongest_skill', value: strongest },
+            meta: { from: 'welcome_test', test_id, signal: 'strongest_skill', value: strongest, estimated_level: estimatedLevel, suggested_main_goal: suggestedMainGoal },
           });
         }
         if (Array.isArray(interestTopics) && interestTopics.length > 0) {
@@ -769,7 +810,7 @@ serve(async (req) => {
             goal_type: 'additional',
             title: `Practice English around ${topic}`,
             description: `Welcome Test surfaced "${topic}" as an interest area. Anchoring lessons here boosts motivation.`,
-            meta: { from: 'welcome_test', signal: 'interest_topic', value: topic },
+            meta: { from: 'welcome_test', test_id, signal: 'interest_topic', value: topic, estimated_level: estimatedLevel, suggested_main_goal: suggestedMainGoal },
           });
         }
 

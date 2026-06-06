@@ -51,6 +51,12 @@ interface NextStepsSectionProps {
   defaultTargetPhaseId?: string | null;
   /** v6.9.13 — when false, hide phase selector (roadmap disabled). */
   showPhaseSelector?: boolean;
+  /** v6.9.40 P5 — readiness signals for empty state of #1 banner. */
+  wtCompleted?: boolean;
+  hasPhases?: boolean;
+  onAddGoal?: () => void;
+  onSendWelcomeTest?: () => void;
+  onGoToRoadmap?: () => void;
 }
 
 export const NextStepsSection: React.FC<NextStepsSectionProps> = ({
@@ -71,6 +77,11 @@ export const NextStepsSection: React.FC<NextStepsSectionProps> = ({
   phaseOptions = [],
   defaultTargetPhaseId = null,
   showPhaseSelector = true,
+  wtCompleted = true,
+  hasPhases = true,
+  onAddGoal,
+  onSendWelcomeTest,
+  onGoToRoadmap,
 }) => {
   const [moreListOpen, setMoreListOpen] = useState(false);
   const [usedOpen, setUsedOpen] = useState(false);
@@ -136,6 +147,11 @@ export const NextStepsSection: React.FC<NextStepsSectionProps> = ({
         onDelete={onDelete}
         generating={generating}
         hasGoals={hasGoals}
+        wtCompleted={wtCompleted}
+        hasPhases={hasPhases}
+        onAddGoal={onAddGoal}
+        onSendWelcomeTest={onSendWelcomeTest}
+        onGoToRoadmap={onGoToRoadmap}
       />
       </div>
 

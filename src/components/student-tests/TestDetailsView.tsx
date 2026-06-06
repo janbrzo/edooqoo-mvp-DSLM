@@ -64,6 +64,9 @@ export function TestDetailsView({ testId, teacherId, studentId, onBack }: TestDe
   const [studentEmail, setStudentEmail] = useState<string>('');
   const [teacherName, setTeacherName] = useState<string>('');
   const [retaking, setRetaking] = useState(false);
+  // v6.9.40 P3 — Track whether the teacher just clicked "Apply to Progress"
+  // so the success card stops claiming results were applied "automatically".
+  const [manualApplyCompleted, setManualApplyCompleted] = useState(false);
 
   useEffect(() => {
     loadTest();
@@ -120,7 +123,10 @@ export function TestDetailsView({ testId, teacherId, studentId, onBack }: TestDe
   const handleApplyResults = async () => {
     if (!test?.skill_results) return;
     const success = await applyResultsToProgress(testId, test.skill_results);
-    if (success) loadTest();
+    if (success) {
+      setManualApplyCompleted(true);
+      loadTest();
+    }
   };
 
   const handleCalculateResults = async () => {
@@ -340,7 +346,11 @@ export function TestDetailsView({ testId, teacherId, studentId, onBack }: TestDe
           <CardContent className="py-3">
             <div className="flex items-center gap-3">
               <CheckCircle className="h-5 w-5 text-green-600" />
-              <p className="text-sm font-medium">Results automatically applied to student's skill ratings.</p>
+              <p className="text-sm font-medium">
+                {manualApplyCompleted
+                  ? "Results manually applied to student's skill ratings."
+                  : "Results applied to student's skill ratings."}
+              </p>
             </div>
           </CardContent>
         </Card>
