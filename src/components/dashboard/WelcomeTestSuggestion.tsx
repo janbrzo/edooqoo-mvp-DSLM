@@ -653,6 +653,25 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
         </div>
         )}
       </CardContent>
+      <AlertDialog open={confirmRetakeOpen} onOpenChange={setConfirmRetakeOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Create another Welcome Test attempt?</AlertDialogTitle>
+            <AlertDialogDescription>
+              The current attempt is not completed yet. Re-take usually makes sense
+              about 30 days after the previous test is finished — that's enough time
+              for new learning signals to accumulate. Creating another attempt now
+              will leave the previous one open and may cause confusion.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => { setConfirmRetakeOpen(false); void runRetake(); }}>
+              Create new attempt anyway
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 }
