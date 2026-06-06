@@ -64,6 +64,8 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
   // CTA after 48h of student inactivity.
   const [sentAt, setSentAt] = useState<string | null>(null);
   const [reminderSending, setReminderSending] = useState(false);
+  // v6.9.40 P2C — track latest attempt number so banners can label retakes.
+  const [attemptNumber, setAttemptNumber] = useState<number>(1);
   // 10-second dismiss countdown state. When non-null, the banner area renders
   // an ephemeral confirmation message with an Undo button instead of the full banner.
   const [dismissCountdown, setDismissCountdown] = useState<number | null>(null);
@@ -98,7 +100,7 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
     try {
       const { data } = await supabase
         .from('student_tests')
-        .select('id, status, share_token, total_questions, answered_count, created_at')
+        .select('id, status, share_token, total_questions, answered_count, created_at, attempt_number')
         .eq('student_id', studentId)
         .eq('teacher_id', teacherId)
         .eq('test_type', 'welcome')
@@ -122,6 +124,7 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
         setTotalQuestions(test.total_questions || 0);
         setAnsweredCount((test as any).answered_count || 0);
         setSentAt((test as any).created_at || null);
+        setAttemptNumber(((test as any).attempt_number ?? 1));
         
         if (test.share_token) {
           setShareUrl(`${window.location.origin}/welcome-test/${test.share_token}`);
@@ -374,7 +377,7 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
       const newTest = await createTest({
         student_id: studentId,
         test_type: 'welcome',
-        title: `Welcome Test - ${studentName} (Attempt #${nextAttempt})`,
+        title: `Welcome Test - ${studentName} (Retake ${nextAttempt - 1})`,
         description: 'Re-take — comparing growth against the previous attempt',
         attempt_number: nextAttempt,
         previous_attempt_id: testId,
@@ -401,7 +404,8 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
       setTotalQuestions(questionsToAdd.length);
       setAnsweredCount(0);
       setStatus('pending');
-      toast.success(`Attempt #${nextAttempt} created. Send the new link to the student.`);
+      setAttemptNumber(nextAttempt);
+      toast.success(`Retake ${nextAttempt - 1} created. Send the new link to the student.`);
       // v6.9.39 P2 — notify Tests tab list so the new attempt card appears
       // immediately without waiting for re-poll.
       window.dispatchEvent(new CustomEvent('student-tests:refresh', { detail: { studentId } }));
@@ -414,6 +418,7 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
   };
 
   if (status === 'loading' || status === 'hidden') return null;
+  const retakeLabel = attemptNumber > 1 ? `retake ${attemptNumber - 1}` : null;
 
   const progressPercent = totalQuestions > 0 ? Math.round((answeredCount / totalQuestions) * 100) : 0;
 
@@ -546,7 +551,11 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
             {status === 'pending' && (
               <>
                 <div className="flex items-center gap-2">
-                  <p className="font-medium">Welcome (placement) Test sent</p>
+                  <p className="font-medium">
+                    {retakeLabel
+                      ? `Welcome Test ${retakeLabel} sent`
+                      : 'Welcome (placement) Test sent'}
+                  </p>
                   <Badge variant="secondary">Waiting for student</Badge>
                 </div>
                 <p className="text-sm text-muted-foreground truncate">{shareUrl}</p>
@@ -616,7 +625,9 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
             {status === 'in_progress' && (
               <>
                 <div className="flex items-center gap-2">
-                  <p className="font-medium">Student is taking the test</p>
+                  <p className="font-medium">
+                    {retakeLabel ? `Student is taking ${retakeLabel}` : 'Student is taking the test'}
+                  </p>
                   <Badge variant="secondary">{answeredCount}/{totalQuestions} answered</Badge>
                 </div>
                 <Progress value={progressPercent} className="h-2 mt-2" />
@@ -625,7 +636,11 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
             {status === 'completed' && (
               <>
                 <div className="flex items-center gap-2">
-                  <p className="font-medium">Welcome (placement) Test completed!</p>
+                  <p className="font-medium">
+                    {retakeLabel
+                      ? `Welcome Test ${retakeLabel} completed!`
+                      : 'Welcome (placement) Test completed!'}
+                  </p>
                   <Badge variant="default">Completed</Badge>
                 </div>
                 <p className="text-sm text-muted-foreground">
@@ -656,18 +671,18 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
       <AlertDialog open={confirmRetakeOpen} onOpenChange={setConfirmRetakeOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Create another Welcome Test attempt?</AlertDialogTitle>
+            <AlertDialogTitle>Create another Welcome Test retake?</AlertDialogTitle>
             <AlertDialogDescription>
-              The current attempt is not completed yet. Re-take usually makes sense
-              about 30 days after the previous test is finished — that's enough time
-              for new learning signals to accumulate. Creating another attempt now
-              will leave the previous one open and may cause confusion.
+              The latest attempt is still open. Retakes are usually useful after
+              8–12 weeks of lessons or after a clear learning block has finished.
+              Creating another one now will leave multiple unfinished links active
+              and can confuse the student.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>Keep current attempt</AlertDialogCancel>
             <AlertDialogAction onClick={() => { setConfirmRetakeOpen(false); void runRetake(); }}>
-              Create new attempt anyway
+              Create retake anyway
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
