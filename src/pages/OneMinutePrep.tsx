@@ -242,6 +242,8 @@ const OneMinutePrep: React.FC = () => {
           onCalculatorChange={setOneMinutePrepCalculator}
         />
 
+        <FeatureWorkflowMap activeKey="one-minute-prep" />
+
         <section className="border-y bg-secondary/20 py-16">
           <div className="mx-auto max-w-6xl px-4">
             <LessonSignalCaptureSection />
