@@ -46,15 +46,25 @@ export function StudentTestsTab({ studentId, teacherId, studentName }: StudentTe
   const [showComparison, setShowComparison] = useState(false);
   const stats = getTestStats();
 
-  // WT-3 (v6.9.27): prefer completed/reviewed > in_progress > others so the
-  // surfaced welcome test is the meaningful one, not an empty duplicate.
-  const welcomeTest = useMemo(() => {
+  // v6.9.40 P2 — Each Welcome Test attempt is now its own card. The
+  // "latest" attempt (highest attempt_number, fallback created_at) owns the
+  // action panel for sending/retake; older ones are read-only entries.
+  const welcomeAttempts = useMemo(() => {
     const ws = tests.filter(t => t.test_type === 'welcome');
-    return ws.find(t => t.status === 'completed' || t.status === 'reviewed')
-        ?? ws.find(t => t.status === 'in_progress')
-        ?? ws[0];
+    return [...ws].sort((a, b) => {
+      const an = (a as any).attempt_number ?? 1;
+      const bn = (b as any).attempt_number ?? 1;
+      if (an !== bn) return bn - an;
+      return new Date(b.created_at || '').getTime() - new Date(a.created_at || '').getTime();
+    });
   }, [tests]);
+  const welcomeTest = welcomeAttempts[0]; // latest attempt drives banners + retake
   const hasWelcomeTest = !!welcomeTest;
+
+  const welcomeCardTitle = (t: StudentTest): string => {
+    const n = (t as any).attempt_number ?? 1;
+    return n <= 1 ? 'Initial Welcome Test' : `Welcome Test — Retake ${n - 1}`;
+  };
 
   // WT-6 (v6.9.27): only count COMPLETED/reviewed attempts so the Compare
   // button no longer surfaces "2 tests" when only one is actually finished.
@@ -169,9 +179,9 @@ export function StudentTestsTab({ studentId, teacherId, studentName }: StudentTe
     return newToken;
   };
 
-  /** Plan v6.1 — Re-take: clones the welcome test as a new attempt linked to the previous one. */
+  /** v6.9.40 — Re-take always uses the latest attempt as previous, and asks
+   *  for confirmation when the latest attempt is not yet completed. */
   const [retaking, setRetaking] = useState(false);
-  // v6.9.39 P2 — confirmation modal when the current attempt isn't completed.
   const [confirmRetakeOpen, setConfirmRetakeOpen] = useState(false);
   const handleRetake = () => {
     if (!welcomeTest) return;
@@ -186,13 +196,19 @@ export function StudentTestsTab({ studentId, teacherId, studentName }: StudentTe
     if (!welcomeTest) return;
     setRetaking(true);
     try {
-      const nextAttempt = ((welcomeTest as any).attempt_number ?? 1) + 1;
+      // Always derive next attempt from the MAX across all welcome rows
+      // (not just the currently-displayed completed one). Prevents collisions
+      // when older retakes exist as separate cards.
+      const maxAttempt = welcomeAttempts.reduce(
+        (m, t) => Math.max(m, ((t as any).attempt_number ?? 1)), 0,
+      );
+      const nextAttempt = maxAttempt + 1;
       const { data: student } = await supabase
         .from('students').select('name').eq('id', studentId).maybeSingle();
       const newTest = await createTest({
         student_id: studentId,
         test_type: 'welcome',
-        title: `Welcome Test - ${student?.name || studentName || 'Student'} (Attempt #${nextAttempt})`,
+        title: `Welcome Test - ${student?.name || studentName || 'Student'} (Retake ${nextAttempt - 1})`,
         description: 'Re-take — comparing growth against the previous attempt',
         attempt_number: nextAttempt,
         previous_attempt_id: welcomeTest.id,
@@ -211,7 +227,7 @@ export function StudentTestsTab({ studentId, teacherId, studentName }: StudentTe
       await addQuestions(newTest.id, questionsToAdd);
       await generateShareToken(newTest.id, 'welcome');
       refetch();
-      toast.success(`Attempt #${nextAttempt} created. Use Send/Copy to share with the student.`);
+      toast.success(`Retake ${nextAttempt - 1} created. Send the new link to the student.`);
       window.dispatchEvent(new CustomEvent('student-tests:refresh', { detail: { studentId } }));
     } catch (err) {
       console.error('handleRetake failed', err);
