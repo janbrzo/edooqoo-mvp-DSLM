@@ -111,6 +111,31 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
     } finally { setDismissingAll(false); }
   };
 
+  // v6.9.41 P4 — per-suggestion Accept / Dismiss handlers.
+  const acceptSuggested = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('student_progress_goals')
+        .update({ accepted_at: new Date().toISOString() })
+        .eq('id', id);
+      if (error) throw error;
+      toast.success('Suggestion accepted.');
+      window.dispatchEvent(new CustomEvent('student-progress:refresh'));
+    } catch (err) {
+      console.error('acceptSuggested failed', err);
+      toast.error('Could not accept suggestion.');
+    }
+  };
+  const dismissSuggested = async (id: string) => {
+    try {
+      await deleteGoal(id);
+      toast.success('Suggestion dismissed.');
+    } catch (err) {
+      console.error('dismissSuggested failed', err);
+      toast.error('Could not dismiss suggestion.');
+    }
+  };
+
   const { map: progressMap, mainAggregate } = useGoalProgress(goals as any, studentId, teacherId);
   const editingGoal = editingGoalId ? (goals.find(g => g.id === editingGoalId) || null) : null;
 
