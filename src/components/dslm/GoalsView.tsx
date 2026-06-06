@@ -23,6 +23,9 @@ import { DeadlinePicker } from '@/components/shared/DeadlinePicker';
 import { EditGoalDialog } from '@/components/student-progress/EditGoalDialog';
 import { useGoalProgress } from '@/hooks/useGoalProgress';
 import { GoalProgressBar } from '@/components/student-progress/GoalProgressBar';
+import { Sparkles } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface GoalsViewProps {
   studentId: string;
