@@ -81,7 +81,7 @@ export function StudentTestsTab({ studentId, teacherId, studentName }: StudentTe
     let testToUse = welcomeTest;
     if (!testToUse) {
       const { data: student } = await supabase
-        .from('students').select('name').eq('id', studentId).maybeSingle();
+        .from('students').select('name, student_email').eq('id', studentId).maybeSingle();
       testToUse = await createTest({
         student_id: studentId,
         test_type: 'welcome',
