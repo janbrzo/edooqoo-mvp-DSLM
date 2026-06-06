@@ -248,26 +248,6 @@ export function StudentTestsTab({ studentId, teacherId, studentName }: StudentTe
     return () => window.removeEventListener('student-tests:refresh', handler as EventListener);
   }, [studentId, refetch]);
 
-  const welcomeShareUrl = welcomeTest?.share_token
-    ? `${window.location.origin}/welcome-test/${welcomeTest.share_token}`
-    : null;
-
-  const welcomePanelState: WelcomeTestActionsState = welcomeTest
-    ? (welcomeTest.status === 'completed' || welcomeTest.status === 'reviewed'
-        ? 'completed'
-        : welcomeTest.status === 'in_progress'
-          ? 'in_progress'
-          : 'pending')
-    : 'no_test';
-
-  const welcomeAnsweredCount = welcomeTest?.answered_count ?? 0;
-  const welcomeStatusLabel = welcomeTest
-    ? TEST_STATUS_CONFIG[welcomeTest.status]?.label
-    : 'Not sent yet';
-  const welcomeStatusClass = welcomeTest
-    ? `${TEST_STATUS_CONFIG[welcomeTest.status]?.bgColor} ${TEST_STATUS_CONFIG[welcomeTest.status]?.color}`
-    : 'bg-muted text-muted-foreground';
-
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
