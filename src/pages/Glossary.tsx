@@ -38,7 +38,7 @@ const glossaryTerms = [
   { term: "Formative Assessment", definition: "Ongoing evaluation during learning to provide feedback and adjust instruction. Edooqoo's homework and live session features support formative assessment." },
   { term: "Summative Assessment", definition: "Evaluation at the end of a learning period to measure achievement. Edooqoo's progress tracking and Welcome Test provide summative data." },
   { term: "Placement Test", definition: "An assessment to determine a student's current language level. Edooqoo's Welcome Test is a 49-question AI placement test covering all skills." },
-  { term: "Learning Path", definition: "A structured sequence of learning activities based on student needs. Edooqoo's Welcome Test assigns one of 4 paths: Comfort, Guided, Accelerated, or Target." },
+  { term: "Learning Roadmap", definition: "A structured sequence of next learning steps based on student goals, skill evidence, pacing context, and teacher review." },
   { term: "Exponential Decay", definition: "A mathematical model where recent data is weighted more heavily than older data. Edooqoo's DSLM uses exponential decay to ensure mastery scores reflect current ability." },
   { term: "Productive Skills", definition: "Speaking and writing — skills where students produce language. Edooqoo exercises like paraphrasing, discussion questions, and describe picture develop productive skills." },
   { term: "Receptive Skills", definition: "Reading and listening — skills where students receive and understand language. Edooqoo's reading and listening comprehension exercises develop receptive skills." },

@@ -8,6 +8,8 @@ import FeatureCTA from '@/components/features/FeatureCTA';
 import DSLMBadge from '@/components/features/DSLMBadge';
 import RelatedFeatures from '@/components/features/RelatedFeatures';
 import FeatureComparisonTable from '@/components/features/FeatureComparisonTable';
+import FeatureScreenshotFrame from '@/components/features/FeatureScreenshotFrame';
+import FeatureWorkflowMap from '@/components/features/FeatureWorkflowMap';
 import { Clock, Zap, BarChart3, CheckCircle } from 'lucide-react';
 
 const HomeworkMockup = () => (
@@ -73,7 +75,7 @@ const comparisonRows = [
   { feature: 'Email notifications', edooqoo: true, competitors: [true, false] },
   { feature: 'Deadline management', edooqoo: true, competitors: [true, true] },
   { feature: 'No student account needed', edooqoo: true, competitors: [false, false] },
-  { feature: 'Nano-skill mastery updates', edooqoo: true, competitors: [false, false] },
+  { feature: 'Homework review signals for DSLM', edooqoo: true, competitors: [false, false] },
 ];
 
 const FeatureHomework: React.FC = () => (
@@ -87,30 +89,51 @@ const FeatureHomework: React.FC = () => (
       headline="Assign homework and review AI-assisted evaluation."
       subheadline="Edooqoo supports homework submission, AI-assisted answer evaluation, and teacher review for open-ended writing and structured exercises."
     >
-      <HomeworkMockup />
+      <div className="grid gap-4 p-4 md:grid-cols-2">
+        <FeatureScreenshotFrame
+          src="/features/homework-assignments.png"
+          alt="Homework assignments list with completed homework and source worksheet links"
+          caption="Teacher view: assignments, completion, source worksheet, and share actions."
+          imageClassName="h-72"
+          objectPosition="center top"
+          loading="eager"
+        />
+        <FeatureScreenshotFrame
+          src="/features/homework-student.png"
+          alt="Student homework page with submitted exercises and progress"
+          caption="Student view: homework is completed online and saved as follow-up evidence."
+          imageClassName="h-72"
+          objectPosition="center top"
+          loading="eager"
+        />
+      </div>
     </FeatureHero>
+
+    <FeatureWorkflowMap activeKey="homework" />
 
     <DSLMBadge feature="Homework" description="Reviewed homework results can feed the Dynamic Student Learning Model, giving Edooqoo more context for the next prep cycle." />
 
-    {/* The Problem */}
+    {/* Signal role */}
     <section className="py-16 bg-background">
-      <div className="max-w-3xl mx-auto px-4 text-center">
-        <h2 className="text-2xl font-bold text-foreground mb-4">The problem with manual grading</h2>
-        <div className="grid grid-cols-3 gap-6">
-          <div className="p-4 rounded-xl bg-red-50 border border-red-200">
-            <div className="text-3xl font-bold text-red-700">10</div>
-            <div className="text-xs text-red-600 mt-1">students per week</div>
-          </div>
-          <div className="p-4 rounded-xl bg-red-50 border border-red-200">
-            <div className="text-3xl font-bold text-red-700">×8</div>
-            <div className="text-xs text-red-600 mt-1">exercises each</div>
-          </div>
-          <div className="p-4 rounded-xl bg-red-50 border border-red-200">
-            <div className="text-3xl font-bold text-red-700">=80</div>
-            <div className="text-xs text-red-600 mt-1">answers to check manually</div>
-          </div>
+      <div className="max-w-5xl mx-auto px-4">
+        <div className="mx-auto mb-8 max-w-3xl text-center">
+          <h2 className="text-2xl font-bold text-foreground mb-2">Homework closes the lesson loop</h2>
+          <p className="text-sm text-muted-foreground">
+            The teacher can assign selected lesson exercises or generated follow-up exercises. Submitted answers, item evaluations, mastery-like scores, and teacher review become context for the next prep cycle where supported.
+          </p>
         </div>
-        <p className="text-sm text-muted-foreground mt-6">With Edooqoo, AI-assisted evaluation gives teachers a review surface instead of a blank correction workflow.</p>
+        <div className="grid gap-4 md:grid-cols-3">
+          {[
+            ['From lesson', 'Choose worksheet exercises or generate follow-up practice from the lesson focus.'],
+            ['Student submission', 'The student answers online, with progress and supported AI-assisted evaluation state saved.'],
+            ['Teacher review', 'The teacher reviews the result before using it as evidence for the next decision.'],
+          ].map(([title, description]) => (
+            <div key={title} className="rounded-xl border border-border bg-card p-5">
+              <h3 className="font-semibold text-foreground">{title}</h3>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">{description}</p>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
 

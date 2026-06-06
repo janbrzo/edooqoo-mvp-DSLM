@@ -16,6 +16,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { PageSeo, buildFaqPageLd } from '@/components/seo/PageSeo';
 import LessonSignalCaptureSection from '@/components/landing/LessonSignalCaptureSection';
 import OneMinutePrepProofSection from '@/components/landing/OneMinutePrepProofSection';
+import PublicWorkflowNav from '@/components/public/PublicWorkflowNav';
 import {
   DEFAULT_ONE_MINUTE_PREP_CALCULATOR_INPUT,
   type OneMinutePrepCalculatorInput,
@@ -180,24 +181,7 @@ const OneMinutePrep: React.FC = () => {
         jsonLd={[softwareLd, buildFaqPageLd(faqItems), breadcrumbLd]}
       />
 
-      <header className="sticky top-0 z-50 border-b border-border bg-background/95 backdrop-blur-sm">
-        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4">
-          <Link to="/" className="text-xl font-bold text-primary">edooqoo</Link>
-          <nav className="flex items-center gap-4 text-sm">
-            <Link to="/how-it-works" className="hidden text-muted-foreground transition-colors hover:text-foreground sm:inline">
-              How it works
-            </Link>
-            <Link to="/features/dslm" className="hidden text-muted-foreground transition-colors hover:text-foreground sm:inline">
-              DSLM
-            </Link>
-            <Button size="sm" asChild>
-              <Link to="/signup" state={fromState}>
-                Start Free <ArrowRight className="h-3 w-3" />
-              </Link>
-            </Button>
-          </nav>
-        </div>
-      </header>
+      <PublicWorkflowNav />
 
       <main>
         <section className="border-b bg-gradient-to-b from-primary/5 to-background">

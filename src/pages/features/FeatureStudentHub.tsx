@@ -6,6 +6,8 @@ import FeatureFAQ from '@/components/features/FeatureFAQ';
 import FeatureCTA from '@/components/features/FeatureCTA';
 import DSLMBadge from '@/components/features/DSLMBadge';
 import RelatedFeatures from '@/components/features/RelatedFeatures';
+import FeatureScreenshotFrame from '@/components/features/FeatureScreenshotFrame';
+import FeatureWorkflowMap from '@/components/features/FeatureWorkflowMap';
 import { GraduationCap, MailOpen, Shield, CalendarDays } from 'lucide-react';
 
 const StudentHubMockup = () => (
@@ -75,12 +77,30 @@ const FeatureStudentHub: React.FC = () => (
     <FeatureHero
       badge="Student Portal"
       badgeColor="bg-teal-100 text-teal-700 border-teal-200"
-      headline="Your students' personal learning space."
-      subheadline="One link gives students access to all their materials — worksheets, homework, flashcards, and lessons. No app, no account. Supported activity can add learning signals for DSLM."
+      headline="The student workspace behind the loop."
+      subheadline="One link gives students access to worksheets, homework, flashcards, bookings, and tests. Supported activity can add context for teacher-reviewed future prep."
     >
-      <StudentHubMockup />
+      <div className="grid gap-4 p-4 md:grid-cols-2">
+        <FeatureScreenshotFrame
+          src="/features/student-dashboard.png"
+          alt="Student Hub dashboard with worksheets, homework, flashcards, and next lesson"
+          caption="Student dashboard: one place for active work, flashcards, homework, worksheets, and the next lesson."
+          imageClassName="h-72"
+          objectPosition="center top"
+          loading="eager"
+        />
+        <FeatureScreenshotFrame
+          src="/features/student-bookings.png"
+          alt="Student Hub lessons and booking calendar with available and pending slots"
+          caption="Lessons and booking: students can see schedule context without needing a separate app."
+          imageClassName="h-72"
+          objectPosition="center top"
+          loading="eager"
+        />
+      </div>
     </FeatureHero>
 
+    <FeatureWorkflowMap activeKey="student-hub" />
     <DSLMBadge feature="Student Hub" description="Supported Student Hub activity can add learning signals for DSLM and help future prep start from stronger context." />
     <FeatureBenefits benefits={benefits} />
     <FeatureFAQ items={faqItems} />

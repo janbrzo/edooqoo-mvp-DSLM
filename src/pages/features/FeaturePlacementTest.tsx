@@ -7,6 +7,8 @@ import FeatureFAQ from '@/components/features/FeatureFAQ';
 import FeatureCTA from '@/components/features/FeatureCTA';
 import DSLMBadge from '@/components/features/DSLMBadge';
 import RelatedFeatures from '@/components/features/RelatedFeatures';
+import FeatureScreenshotFrame from '@/components/features/FeatureScreenshotFrame';
+import FeatureWorkflowMap from '@/components/features/FeatureWorkflowMap';
 import { ClipboardCheck, Brain, Route, Mic } from 'lucide-react';
 
 const PlacementTestMockup = () => (
@@ -57,8 +59,8 @@ const PlacementTestMockup = () => (
 
 const benefits = [
   { icon: ClipboardCheck, title: '49-question assessment', description: 'Multi-skill, CEFR-oriented diagnostic covering grammar, vocabulary, reading, listening, and speaking.' },
-  { icon: Brain, title: 'AI-generated profile input', description: 'Detailed learning profile with per-skill CEFR indicators, strengths, weaknesses, and recommended learning path for teacher review.' },
-  { icon: Route, title: '4 learning paths', description: 'Based on results, DSLM can suggest one of 4 paths: Comfort, Guided, Accelerated, or Target — guiding your teaching approach.' },
+  { icon: Brain, title: 'AI-generated profile input', description: 'Detailed learning profile with per-skill CEFR indicators, strengths, weaknesses, and pacing context for teacher review.' },
+  { icon: Route, title: 'Roadmap starting point', description: 'Results can initialize profile context, skill scores, confidence signals, and a starting point for pacing and roadmap review.' },
   { icon: Mic, title: 'Speaking & listening', description: 'Not just grammar and vocabulary — the test includes audio comprehension and speaking tasks for a complete assessment.' },
 ];
 
@@ -66,7 +68,7 @@ const steps = [
   { number: 1, title: 'Send the test link', description: 'Generate a unique test link for your new student. They can take it on any device — phone, tablet, or computer.' },
   { number: 2, title: 'Student completes 49 questions', description: '20-30 minutes. Questions cover grammar, vocabulary, reading, listening, and speaking sections across CEFR-oriented difficulty bands.' },
   { number: 3, title: 'AI analyzes results', description: 'AI evaluates answers including open-ended speaking tasks and generates a detailed learning profile for teacher review.' },
-  { number: 4, title: 'You review the profile', description: 'See the breakdown: strengths, weaknesses, confidence levels, and recommended learning path. Test results become a starting input for DSLM.' },
+  { number: 4, title: 'You review the profile', description: 'See the breakdown: strengths, weaknesses, confidence levels, and starting profile context. Test results become a starting input for DSLM.' },
 ];
 
 const faqItems = [
@@ -86,11 +88,29 @@ const FeaturePlacementTest: React.FC = () => (
       badge="49 Questions"
       badgeColor="bg-indigo-100 text-indigo-700 border-indigo-200"
       headline="Know your student's level before the first lesson."
-      subheadline="A 49-question AI assessment covering grammar, vocabulary, reading, listening, and speaking. Results become a detailed learning profile and DSLM starting point for teacher review."
+      subheadline="A 49-question AI assessment covering grammar, vocabulary, reading, listening, and speaking. Results become a detailed learning profile and DSLM baseline for teacher review."
     >
-      <PlacementTestMockup />
+      <div className="grid gap-4 p-4 md:grid-cols-2">
+        <FeatureScreenshotFrame
+          src="/features/welcome-test.png"
+          alt="Welcome Test question screen with sections and progress"
+          caption="Student view: a structured Welcome Test creates the baseline before recurring prep."
+          imageClassName="h-72"
+          objectPosition="center top"
+          loading="eager"
+        />
+        <FeatureScreenshotFrame
+          src="/features/profile-placement-test-summary.png"
+          alt="Placement Test profile summary with level assessment, skill scores, and preferences"
+          caption="Teacher view: AI summary, skill scores, self-assessment, and profile context for review."
+          imageClassName="h-72"
+          objectPosition="center top"
+          loading="eager"
+        />
+      </div>
     </FeatureHero>
 
+    <FeatureWorkflowMap activeKey="placement-test" />
     <DSLMBadge feature="Placement Test" description="Test results can initialize the student's DSLM profile and provide baseline context before the first recurring prep cycle." />
     <FeatureBenefits benefits={benefits} />
     <FeatureSteps steps={steps} />

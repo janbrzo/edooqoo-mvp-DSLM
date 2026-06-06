@@ -21,6 +21,7 @@ import { faqItems } from '@/constants/faqItems';
 import StickyNav from '@/components/landing/StickyNav';
 import { PageSeo, buildFaqPageLd } from '@/components/seo/PageSeo';
 import { SEO_META } from '@/constants/seoMeta';
+import PublicWorkflowNav from '@/components/public/PublicWorkflowNav';
 
 const Pricing = () => {
   const { user, isRegisteredUser } = useAuthFlow();
@@ -333,10 +334,36 @@ const Pricing = () => {
   return (
     <Wrapper>
       <PageSeo {...SEO_META.pricing} jsonLd={buildFaqPageLd(faqItems)} />
-      <StickyNav isRegisteredUser={!!isRegisteredUser} tokenLeft={tokenLeft} user={user} />
+      {isRegisteredUser ? (
+        <StickyNav isRegisteredUser={!!isRegisteredUser} tokenLeft={tokenLeft} user={user} />
+      ) : (
+        <PublicWorkflowNav />
+      )}
       <div className="max-w-6xl mx-auto p-4">
 
         <PricingCalculator onRecommendation={handleRecommendation} />
+
+        <section className="mx-auto mb-10 max-w-5xl rounded-2xl border border-primary/15 bg-primary/5 p-5">
+          <div className="mb-4">
+            <h2 className="text-xl font-bold text-foreground">Every plan covers the same 1-Minute Prep workflow</h2>
+            <p className="mt-2 text-sm leading-6 text-muted-foreground">
+              Worksheet credits are the output layer. The workflow also includes student context, DSLM evidence, Live Sessions, Homework, Flashcards, Calendar context, and Student Hub access.
+            </p>
+          </div>
+          <div className="grid gap-3 md:grid-cols-4">
+            {[
+              'Student profile, goals, and Welcome Test baseline',
+              'DSLM nano-skill evidence and Learning Roadmap context',
+              'Lesson-time signals from shared worksheets and notes',
+              'Homework, flashcard retention, booking, and Hub activity',
+            ].map((item) => (
+              <div key={item} className="flex gap-2 rounded-xl border border-border bg-background p-3 text-sm">
+                <Check className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
+                <span>{item}</span>
+              </div>
+            ))}
+          </div>
+        </section>
 
         <div className="grid lg:grid-cols-3 gap-6 max-w-5xl mx-auto mb-12">
           
@@ -381,7 +408,7 @@ const Pricing = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <Check className="h-4 w-4 text-green-500" />
-                  <span className="text-sm">Flashcards auto-synced</span>
+                  <span className="text-sm">Flashcards + SM-2 progress</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Check className="h-4 w-4 text-green-500" />
@@ -397,7 +424,7 @@ const Pricing = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <Check className="h-4 w-4 text-green-500" />
-                  <span className="text-sm">Student Knowledge tracking</span>
+                  <span className="text-sm">Student Knowledge / teacher notes</span>
                 </div>
               </div>
               
@@ -473,7 +500,7 @@ const Pricing = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <Check className="h-4 w-4 text-green-500" />
-                  <span className="text-sm">Flashcards auto-synced</span>
+                  <span className="text-sm">Flashcards + SM-2 progress</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Check className="h-4 w-4 text-green-500" />
@@ -485,7 +512,7 @@ const Pricing = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <Check className="h-4 w-4 text-green-500" />
-                  <span className="text-sm">Student Knowledge tracking</span>
+                  <span className="text-sm">Student Knowledge / teacher notes</span>
                 </div>
               </div>
               
@@ -581,7 +608,7 @@ const Pricing = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <Check className="h-4 w-4 text-green-500" />
-                  <span className="text-sm">Flashcards auto-synced</span>
+                  <span className="text-sm">Flashcards + SM-2 progress</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Check className="h-4 w-4 text-green-500" />
@@ -593,7 +620,7 @@ const Pricing = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <Check className="h-4 w-4 text-green-500" />
-                  <span className="text-sm">Student Knowledge tracking</span>
+                  <span className="text-sm">Student Knowledge / teacher notes</span>
                 </div>
               </div>
               

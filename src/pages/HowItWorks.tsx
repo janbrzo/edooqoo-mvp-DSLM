@@ -2,20 +2,19 @@ import React from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Helmet } from 'react-helmet-async';
 import {
-  ArrowRight,
   BarChart2,
-  Brain,
   CalendarDays,
   CheckCircle2,
   ClipboardCheck,
   FileText,
   Goal,
   Lightbulb,
-  Map,
   Send,
   UserPlus,
 } from 'lucide-react';
 import LessonSignalCaptureSection from '@/components/landing/LessonSignalCaptureSection';
+import PublicWorkflowNav from '@/components/public/PublicWorkflowNav';
+import TwoPhaseWorkflowSection from '@/components/landing/TwoPhaseWorkflowSection';
 
 const steps = [
   {
@@ -81,35 +80,6 @@ const steps = [
     title: "Teach, assign, and let signals update the next cycle",
     description: "Use the worksheet in a live lesson, share it through a link, assign selected exercises as homework, and let activity signals inform the next prep cycle where applicable.",
     benefits: ["Interactive sharing", "AI-assisted homework review", "Learning events connected to student history"],
-  },
-];
-
-const phaseSummaries = [
-  {
-    eyebrow: 'Phase 1: One-time student setup',
-    title: 'Build the learner context once',
-    description: 'One-time setup is not the 1-minute claim. It creates the student context Edooqoo needs before recurring prep can become faster and more precise.',
-    icon: Brain,
-    tone: 'setup',
-    steps: [
-      { icon: UserPlus, label: 'Create account' },
-      { icon: Goal, label: 'Add student profile and goals' },
-      { icon: Send, label: 'Send Welcome Test, optional' },
-      { icon: Map, label: 'Generate Learning Roadmap' },
-    ],
-  },
-  {
-    eyebrow: 'Phase 2: Weekly 1-Minute Prep',
-    title: 'Run the recurring prep loop',
-    description: 'Weekly prep is the recurring workflow Edooqoo is designed to make fast once student context and learning signals exist.',
-    icon: Lightbulb,
-    tone: 'weekly',
-    steps: [
-      { icon: Lightbulb, label: 'Generate Next Lesson Ideas' },
-      { icon: CalendarDays, label: 'Use booking context, optional' },
-      { icon: CheckCircle2, label: 'Choose the next focus' },
-      { icon: FileText, label: 'Create the worksheet output' },
-    ],
   },
 ];
 
@@ -196,6 +166,7 @@ const HowItWorks = () => {
         <script type="application/ld+json">{JSON.stringify(howToJsonLd)}</script>
         <script type="application/ld+json">{JSON.stringify(faqJsonLd)}</script>
       </Helmet>
+      <PublicWorkflowNav />
       <div className="container mx-auto max-w-4xl px-4 py-12">
         <div className="mb-8">
           <button onClick={handleBack} className="text-sm text-primary hover:underline">
@@ -215,55 +186,7 @@ const HowItWorks = () => {
           .
         </p>
 
-        <section className="mb-14 -mx-4 border-y border-primary/10 bg-primary/5 px-4 py-8 sm:-mx-8 sm:px-8">
-          <div className="mb-6 text-center">
-            <h2 className="text-2xl font-bold text-foreground">The 1-Minute Prep workflow has two phases</h2>
-            <p className="mt-2 text-sm text-muted-foreground">
-              The setup phase builds the learner context. The weekly phase is the recurring prep workflow Edooqoo is designed to make fast.
-            </p>
-          </div>
-
-          <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_3rem_minmax(0,1fr)] lg:items-stretch">
-            {phaseSummaries.map(({ eyebrow, title, description, icon: Icon, tone, steps: phaseSteps }, index) => (
-              <React.Fragment key={title}>
-                <div
-                  className={
-                    tone === 'setup'
-                      ? 'rounded-xl border border-violet-100 bg-background p-5 shadow-sm'
-                      : 'rounded-xl border border-primary/20 bg-primary/10 p-5 shadow-sm'
-                  }
-                >
-                  <div className="mb-4 flex items-center gap-3">
-                    <div className={tone === 'setup' ? 'rounded-lg bg-violet-100 p-2' : 'rounded-lg bg-primary/15 p-2'}>
-                      <Icon className="h-5 w-5 text-primary" />
-                    </div>
-                    <div>
-                      <p className="text-xs font-semibold uppercase tracking-wider text-primary">{eyebrow}</p>
-                      <h3 className="text-xl font-bold text-foreground">{title}</h3>
-                    </div>
-                  </div>
-                  <p className="text-sm leading-6 text-muted-foreground">{description}</p>
-                  <div className="mt-4 grid gap-2">
-                    {phaseSteps.map(({ icon: StepIcon, label }) => (
-                      <div key={label} className="flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground">
-                        <StepIcon className="h-4 w-4 shrink-0 text-primary" />
-                        <span>{label}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {index === 0 ? (
-                  <div className="hidden items-center justify-center lg:flex">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-full border border-primary/20 bg-background shadow-sm">
-                      <ArrowRight className="h-5 w-5 text-primary" />
-                    </div>
-                  </div>
-                ) : null}
-              </React.Fragment>
-            ))}
-          </div>
-        </section>
+        <TwoPhaseWorkflowSection className="mb-14 -mx-4 sm:-mx-8" />
 
         <LessonSignalCaptureSection
           compact

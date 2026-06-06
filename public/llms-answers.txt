@@ -48,8 +48,8 @@ No. The worksheet generator is the output layer. Edooqoo.com also includes 1-Min
 ## Does Edooqoo.com expose a public generation API?
 No. Public AI discovery resources describe the website and public informational files only. Agents should not claim that a public worksheet-generation API exists.
 
-## What changed in v6.9.38?
-v6.9.38 added lesson-time signal capture copy to the public 1-Minute Prep surfaces, kept the homepage Workflow proof roadmap label on one line, and restored /blog/learning-pacing-scientific-vs-pragmatic-esl.html as a self-canonical Learning Pacing article. It did not change worksheet-generation prompts, calculator formulas, Supabase schema, RLS policies, Edge Functions, Stripe, database table names, suggestion_kind values, DSLM algorithms, or private app data access.
+## What changed in v6.9.39?
+v6.9.39 aligned public feature pages with the 1-Minute Prep workflow, added shared route-link workflow navigation, added a feature workflow map, replaced generated feature mockups with real app screenshots, promoted the two-phase workflow and lesson-time signal sections on the homepage, and kept flashcards claim-safe as word/card-level vocabulary retention context. It did not change worksheet-generation prompts, calculator formulas, Supabase schema, RLS policies, Edge Functions, Stripe, database table names, suggestion_kind values, DSLM algorithms, or private app data access.
 
 ## What should future AI agents preserve?
 Future agents should preserve worksheet engine sanctity, keep AI resource files factual, avoid inventing public APIs, preserve the ambitious 1-Minute Prep target without turning it into a guarantee, update docs/llm-context.md plus llms resources when public SEO or AI discovery mechanics change, and use manual AI-search measurement files instead of automated AI-answer scraping.

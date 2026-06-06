@@ -30,7 +30,7 @@ const lessonSignalItems = [
   {
     title: 'Flashcards',
     description:
-      'The teacher can add vocabulary to flashcards and share sets with the student. Student reviews update SM-2 retention progress, due dates, response time, quality rating, and mistake counts for vocabulary-retention context.',
+      'The teacher can add vocabulary to flashcards and share sets with the student. Each word/card can act as a vocabulary nano-skill context item while student reviews update SM-2 retention progress, due dates, response time, quality rating, and mistake counts.',
     icon: Layers,
   },
 ];
@@ -71,7 +71,7 @@ const LessonSignalCaptureSection: React.FC<LessonSignalCaptureSectionProps> = ({
     </div>
 
     <div className="rounded-xl border border-border bg-muted/30 p-4 text-sm leading-6 text-muted-foreground">
-      Flashcard study is retention context unless a separate skill event exists. Teacher review remains part of the loop.
+      Flashcard study supplies word/card-level vocabulary retention context. Teacher review remains part of the loop.
     </div>
   </section>
 );

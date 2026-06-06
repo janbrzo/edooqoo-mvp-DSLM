@@ -7,6 +7,8 @@ import FeatureFAQ from '@/components/features/FeatureFAQ';
 import FeatureCTA from '@/components/features/FeatureCTA';
 import DSLMBadge from '@/components/features/DSLMBadge';
 import RelatedFeatures from '@/components/features/RelatedFeatures';
+import FeatureScreenshotFrame from '@/components/features/FeatureScreenshotFrame';
+import FeatureWorkflowMap from '@/components/features/FeatureWorkflowMap';
 import { CalendarDays, RefreshCcw, Video, Globe } from 'lucide-react';
 
 const CalendarHeroMockup = () => {
@@ -96,13 +98,31 @@ const FeatureCalendar: React.FC = () => (
     <FeatureHero
       badge="GCal Sync"
       badgeColor="bg-green-100 text-green-700 border-green-200"
-      headline="Students book. Calendar syncs. You teach."
-      subheadline="Your personal booking page, bidirectional Google Calendar sync, reschedule management, and payment tracking inside the same tutoring workflow."
+      headline="Booking context for recurring prep."
+      subheadline="Your personal booking page, bidirectional Google Calendar sync, reschedule management, and lesson cadence context inside the same tutoring workflow."
     >
-      <CalendarHeroMockup />
+      <div className="grid gap-4 p-4 md:grid-cols-2">
+        <FeatureScreenshotFrame
+          src="/features/calendar-teacher.png"
+          alt="Teacher calendar with availability, booked lessons, pending bookings, and completed lessons"
+          caption="Teacher view: availability, bookings, statuses, logs, sharing, and Google Calendar connection."
+          imageClassName="h-72"
+          objectPosition="center top"
+          loading="eager"
+        />
+        <FeatureScreenshotFrame
+          src="/features/booking-pending.png"
+          alt="Pending lesson booking modal with confirm and reject controls"
+          caption="Booking context is optional, but useful when the weekly prep decision should reflect confirmed lesson timing."
+          imageClassName="h-72"
+          objectPosition="center top"
+          loading="eager"
+        />
+      </div>
     </FeatureHero>
 
-    <DSLMBadge feature="Calendar" description="Lesson cadence and attendance context can support DSLM planning by showing how regularly each student works with you." />
+    <FeatureWorkflowMap activeKey="calendar" />
+    <DSLMBadge feature="Calendar" description="Lesson cadence and confirmed booking context can support planning when the teacher uses Edooqoo Calendar. It is optional, not a requirement for DSLM." />
     <FeatureBenefits benefits={benefits} />
     <FeatureSteps steps={steps} />
     <FeatureFAQ items={faqItems} />

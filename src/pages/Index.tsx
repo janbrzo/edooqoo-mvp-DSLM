@@ -18,6 +18,8 @@ import HeroHeadline from "@/components/landing/HeroHeadline";
 import StatsBar from "@/components/landing/StatsBar";
 import ValueCards from "@/components/landing/ValueCards";
 import EcosystemSection from "@/components/landing/EcosystemSection";
+import LessonSignalCaptureSection from "@/components/landing/LessonSignalCaptureSection";
+import TwoPhaseWorkflowSection from "@/components/landing/TwoPhaseWorkflowSection";
 import TestimonialsRow from "@/components/landing/TestimonialsRow";
 import FinalCTA from "@/components/landing/FinalCTA";
 import { AuthenticatedPageShell } from "@/components/AuthenticatedPageShell";
@@ -49,10 +51,8 @@ const Index = () => {
     return () => { if (wasDark) html.classList.add('dark'); };
   }, []);
 
-  // v6.9.1 — deep-link scroll from feature pills (anon nav). When the user
-  // clicks a pill on the landing or returns from /signup, location.state may
-  // contain { scrollTo: 'feature-xxx' }. We scroll once and clear the state
-  // so refreshes don't re-trigger.
+  // Legacy deep-link support: older feature-pill links could return with
+  // { scrollTo: 'feature-xxx' }. Keep the handler so saved links do not break.
   useEffect(() => {
     const target = (location.state as { scrollTo?: string } | null)?.scrollTo;
     if (!target) return;
@@ -409,6 +409,12 @@ const Index = () => {
             />
           </div>
           <StatsBar />
+          <TwoPhaseWorkflowSection compact className="bg-background/75 backdrop-blur-sm" />
+          <section className="bg-secondary/20 py-14">
+            <div className="mx-auto max-w-6xl px-4">
+              <LessonSignalCaptureSection compact />
+            </div>
+          </section>
           <ValueCards />
           <PricingTeaser />
           <EcosystemSection />
