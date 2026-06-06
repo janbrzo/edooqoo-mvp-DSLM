@@ -28,6 +28,9 @@ import { useStudentProgress } from '@/hooks/useStudentProgress';
 import { PacingProposalCard } from './PacingProposalCard';
 import { usePacingProposals } from '@/hooks/usePacingProposals';
 import { cn } from '@/lib/utils';
+import { useWelcomeTestActions } from '@/hooks/useWelcomeTestActions';
+import { useStudent } from '@/hooks/useStudent';
+import { supabase } from '@/integrations/supabase/client';
 
 interface PathwayViewProps {
   studentId: string;
@@ -73,6 +76,39 @@ export const PathwayView: React.FC<PathwayViewProps> = ({
   const { goals } = useStudentProgress({ studentId, teacherId });
   const planningNotes = useStudentKnowledge({ studentId, teacherId });
   const { proposals: pacingProposals } = usePacingProposals(studentId);
+
+  // v6.9.40 P5 — Readiness signals for the 1-Minute Prep empty state.
+  const { data: studentRow } = useStudent(studentId);
+  const welcomeActions = useWelcomeTestActions({
+    studentId,
+    teacherId,
+    studentName: studentName || studentRow?.name || 'Student',
+    studentEmail: (studentRow as any)?.student_email ?? null,
+  });
+  const [wtCompleted, setWtCompleted] = useState<boolean>(false);
+  useEffect(() => {
+    let cancelled = false;
+    supabase
+      .from('student_tests')
+      .select('id', { count: 'exact', head: true })
+      .eq('student_id', studentId)
+      .eq('teacher_id', teacherId)
+      .eq('test_type', 'welcome')
+      .in('status', ['completed', 'reviewed'])
+      .is('deleted_at', null)
+      .then(({ count }) => { if (!cancelled) setWtCompleted((count ?? 0) > 0); });
+    return () => { cancelled = true; };
+  }, [studentId, teacherId]);
+  const hasPhases = phases.length > 0;
+  const handleAddGoal = () => window.dispatchEvent(new CustomEvent('dslm:addGoal', { detail: { studentId } }));
+  const handleSendWelcomeTest = () => { void welcomeActions.send(); };
+  const handleGoToRoadmap = () => {
+    setRoadmapOpen(true);
+    requestAnimationFrame(() => {
+      const el = document.getElementById('pathway-roadmap');
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  };
 
   const [editingSuggestionId, setEditingSuggestionId] = useState<string | null>(null);
   const [editedSuggestion, setEditedSuggestion] = useState<SuggestionEditValue>(EMPTY_EDIT);
@@ -264,6 +300,11 @@ export const PathwayView: React.FC<PathwayViewProps> = ({
         phaseOptions={phaseOptions}
         defaultTargetPhaseId={recommendedTargetPhaseId}
         showPhaseSelector={useRoadmap}
+        wtCompleted={wtCompleted}
+        hasPhases={hasPhases}
+        onAddGoal={handleAddGoal}
+        onSendWelcomeTest={handleSendWelcomeTest}
+        onGoToRoadmap={handleGoToRoadmap}
         onGenerateMore={(count, excludeIds, phaseId) =>
           {
             // v6.9.15b — final guard against stale phaseId from a dialog opened
