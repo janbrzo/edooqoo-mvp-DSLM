@@ -283,12 +283,20 @@ export const MacroTimeline: React.FC<MacroTimelineProps> = ({
                 </ul>
               </div>
             )}
-            <Button onClick={() => requestGeneratePhases('replace')} disabled={generating}>
+            <Button onClick={() => hasGoals ? openGuidedDialog('replace') : requestGeneratePhases('replace')} disabled={generating}>
               {generating ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Sparkles className="h-4 w-4 mr-2" />}
               Generate Learning Roadmap
             </Button>
           </CardContent>
         </Card>
+        <GenerateRoadmapDialog
+          open={guidedDialog?.mode === 'replace'}
+          onOpenChange={(o) => { if (!o) setGuidedDialog(null); }}
+          mode="replace"
+          goals={guidedGoalOptions}
+          generating={generating}
+          onConfirm={async (opts) => { await generatePhases('replace', opts); }}
+        />
         <AlertDialog open={!!pendingGenerate} onOpenChange={(o) => { if (!o) setPendingGenerate(null); }}>
           <AlertDialogContent>
             <AlertDialogHeader>
