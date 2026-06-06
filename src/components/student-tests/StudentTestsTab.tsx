@@ -320,57 +320,119 @@ export function StudentTestsTab({ studentId, teacherId, studentName }: StudentTe
         </div>
       </div>
 
-      {/* Plan v6.0 — single Welcome Test card, always rendered with all 5 actions */}
-      <Card className={`border-primary/30 ${!hasWelcomeTest ? 'border-dashed' : ''}`}>
-        <CardContent className="py-4">
-          <div className="flex items-center justify-between flex-wrap gap-3">
-            <div className="flex items-center gap-3 cursor-pointer" onClick={() => welcomeTest && setSelectedTestId(welcomeTest.id)}>
-              <div className="p-2 rounded-lg bg-primary/10 text-primary">
-                <Sparkles className="h-5 w-5" />
-              </div>
-              <div>
-                <h3 className="font-semibold">{welcomeTest?.title ?? 'Welcome (placement) Test'}</h3>
-                <p className="text-sm text-muted-foreground">
-                  Welcome Test • {welcomeTest ? getWelcomeTestTotal(welcomeTest) : ALL_WELCOME_TEST_QUESTIONS.length} questions
-                  {welcomeTest && (welcomeTest as any).attempt_number > 1 && (
-                    <span className="ml-2 text-primary">· Attempt #{(welcomeTest as any).attempt_number}</span>
-                  )}
-                </p>
-                {welcomeTest && (
-                  <TestDates
-                    createdAt={welcomeTest.created_at}
-                    completedAt={(welcomeTest as any).completed_at}
-                    reviewedAt={(welcomeTest as any).reviewed_at}
-                    className="mt-1"
-                  />
-                )}
-              </div>
-            </div>
-            <div className="flex items-center gap-2 flex-wrap">
-              {welcomeTest && welcomeTest.score_percentage !== null && (
-                <div className="text-right mr-2">
-                  <div className="text-lg font-bold">{welcomeAnsweredCount}/{getWelcomeTestTotal(welcomeTest)}</div>
-                  <div className="text-xs text-muted-foreground">answered</div>
+      {/* v6.9.40 P2 — one card per Welcome Test attempt. Latest attempt owns
+          the full WelcomeTestActionsPanel; older attempts are read-only. */}
+      {!hasWelcomeTest && (
+        <Card className="border-primary/30 border-dashed">
+          <CardContent className="py-4">
+            <div className="flex items-center justify-between flex-wrap gap-3">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                  <Sparkles className="h-5 w-5" />
                 </div>
-              )}
-              <Badge className={welcomeStatusClass}>{welcomeStatusLabel}</Badge>
-              <WelcomeTestActionsPanel
-                state={welcomePanelState}
-                shareUrl={welcomeShareUrl}
-                hasAnyAnswer={welcomeAnsweredCount > 0}
-                onCopy={handleCopyLink}
-                onSend={handleSendEmail}
-                onRefreshLink={handleRefreshWelcomeLink}
-                onPreview={handlePreviewTest}
-                onViewResults={welcomeTest ? () => setSelectedTestId(welcomeTest.id) : undefined}
-                onRetake={welcomeTest ? handleRetake : undefined}
-                sending={creatingPreview}
-                retaking={retaking}
-              />
+                <div>
+                  <h3 className="font-semibold">Welcome (placement) Test</h3>
+                  <p className="text-sm text-muted-foreground">
+                    Welcome Test • {ALL_WELCOME_TEST_QUESTIONS.length} questions
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <Badge className="bg-muted text-muted-foreground">Not sent yet</Badge>
+                <WelcomeTestActionsPanel
+                  state="no_test"
+                  shareUrl={null}
+                  hasAnyAnswer={false}
+                  onCopy={handleCopyLink}
+                  onSend={handleSendEmail}
+                  onRefreshLink={handleRefreshWelcomeLink}
+                  onPreview={handlePreviewTest}
+                  sending={creatingPreview}
+                />
+              </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
+
+      {welcomeAttempts.map((attempt, idx) => {
+        const isLatest = idx === 0;
+        const attemptNumber = (attempt as any).attempt_number ?? 1;
+        const cardTitle = welcomeCardTitle(attempt);
+        const statusCfg = TEST_STATUS_CONFIG[attempt.status];
+        const statusLabel = statusCfg?.label ?? attempt.status;
+        const statusClass = `${statusCfg?.bgColor ?? 'bg-muted'} ${statusCfg?.color ?? 'text-muted-foreground'}`;
+        const answered = attempt.answered_count ?? 0;
+        const total = getWelcomeTestTotal(attempt);
+        const shareUrl = attempt.share_token
+          ? `${window.location.origin}/welcome-test/${attempt.share_token}`
+          : null;
+        const panelState: WelcomeTestActionsState =
+          attempt.status === 'completed' || attempt.status === 'reviewed' ? 'completed'
+          : attempt.status === 'in_progress' ? 'in_progress'
+          : 'pending';
+        return (
+          <Card key={attempt.id} className={`border-primary/30 ${isLatest ? '' : 'opacity-90'}`}>
+            <CardContent className="py-4">
+              <div className="flex items-center justify-between flex-wrap gap-3">
+                <div className="flex items-center gap-3 cursor-pointer" onClick={() => setSelectedTestId(attempt.id)}>
+                  <div className="p-2 rounded-lg bg-primary/10 text-primary">
+                    <Sparkles className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold">
+                      {cardTitle}
+                      {isLatest && welcomeAttempts.length > 1 && (
+                        <Badge variant="outline" className="ml-2 text-[10px]">Latest</Badge>
+                      )}
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      Welcome Test • {total} questions
+                      {attemptNumber > 1 && (
+                        <span className="ml-2 text-primary">· Attempt #{attemptNumber}</span>
+                      )}
+                    </p>
+                    <TestDates
+                      createdAt={attempt.created_at}
+                      completedAt={(attempt as any).completed_at}
+                      reviewedAt={(attempt as any).reviewed_at}
+                      className="mt-1"
+                    />
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 flex-wrap">
+                  {attempt.score_percentage !== null && (
+                    <div className="text-right mr-2">
+                      <div className="text-lg font-bold">{answered}/{total}</div>
+                      <div className="text-xs text-muted-foreground">answered</div>
+                    </div>
+                  )}
+                  <Badge className={statusClass}>{statusLabel}</Badge>
+                  {isLatest ? (
+                    <WelcomeTestActionsPanel
+                      state={panelState}
+                      shareUrl={shareUrl}
+                      hasAnyAnswer={answered > 0}
+                      onCopy={handleCopyLink}
+                      onSend={handleSendEmail}
+                      onRefreshLink={handleRefreshWelcomeLink}
+                      onPreview={handlePreviewTest}
+                      onViewResults={() => setSelectedTestId(attempt.id)}
+                      onRetake={handleRetake}
+                      sending={creatingPreview}
+                      retaking={retaking}
+                    />
+                  ) : (
+                    <Button variant="outline" size="sm" onClick={() => setSelectedTestId(attempt.id)}>
+                      <Eye className="h-4 w-4 mr-1" /> View
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        );
+      })}
 
       {/* Tests list (non-welcome) */}
       {sortedTests.filter(t => t.test_type !== 'welcome').length === 0 && !hasWelcomeTest ? (
@@ -413,18 +475,18 @@ export function StudentTestsTab({ studentId, teacherId, studentName }: StudentTe
       <AlertDialog open={confirmRetakeOpen} onOpenChange={setConfirmRetakeOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Create another Welcome Test attempt?</AlertDialogTitle>
+            <AlertDialogTitle>Create another Welcome Test retake?</AlertDialogTitle>
             <AlertDialogDescription>
-              The current attempt is not completed yet. Re-take usually makes sense
-              about 30 days after the previous test is finished — that's enough time
-              for new learning signals to accumulate. Creating another attempt now
-              will leave the previous one open and may cause confusion.
+              The latest attempt is still open. Retakes are usually useful after
+              8–12 weeks of lessons or after a clear learning block has finished.
+              Creating another one now will leave multiple unfinished links active
+              and can confuse the student.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogCancel>Keep current attempt</AlertDialogCancel>
             <AlertDialogAction onClick={() => { setConfirmRetakeOpen(false); void runRetake(); }}>
-              Create new attempt anyway
+              Create retake anyway
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
