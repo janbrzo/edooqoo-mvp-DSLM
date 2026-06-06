@@ -279,7 +279,7 @@ export function WelcomeTestActionsPanel({
           </Tooltip>
         )}
 
-        {isCompleted && onRetake && (
+        {onRetake && (
           <Tooltip>
             <TooltipTrigger asChild>
               <Button size={size} onClick={() => onRetake()} disabled={retaking} className={compactCls}>
@@ -288,11 +288,11 @@ export function WelcomeTestActionsPanel({
                 ) : (
                   <RotateCcw className={iconCls} />
                 )}
-                Re-take Test
+                {isCompleted ? "Re-take Test" : "Create retake"}
               </Button>
             </TooltipTrigger>
             <TooltipContent className="max-w-xs">
-              Create a new attempt of the Welcome Test. We'll compare growth against the previous attempt.
+              Create a new attempt. Recommended after 8–12 weeks of lessons or when a clear learning block ends.
             </TooltipContent>
           </Tooltip>
         )}
