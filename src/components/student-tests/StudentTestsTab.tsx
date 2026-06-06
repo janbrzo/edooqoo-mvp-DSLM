@@ -378,13 +378,13 @@ export function StudentTestsTab({ studentId, teacherId, studentName }: StudentTe
         return (
           <Card key={attempt.id} className={`border-primary/30 ${isLatest ? '' : 'opacity-90'}`}>
             <CardContent className="py-4">
-              <div className="flex items-center justify-between flex-wrap gap-3">
-                <div className="flex items-center gap-3 cursor-pointer" onClick={() => setSelectedTestId(attempt.id)}>
+              <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] items-start gap-3">
+                <div className="flex items-start gap-3 cursor-pointer min-w-0" onClick={() => setSelectedTestId(attempt.id)}>
                   <div className="p-2 rounded-lg bg-primary/10 text-primary">
                     <Sparkles className="h-5 w-5" />
                   </div>
-                  <div>
-                    <h3 className="font-semibold">
+                  <div className="min-w-0">
+                    <h3 className="font-semibold break-words">
                       {cardTitle}
                       {isLatest && welcomeAttempts.length > 1 && (
                         <Badge variant="outline" className="ml-2 text-[10px]">Latest</Badge>
@@ -404,7 +404,7 @@ export function StudentTestsTab({ studentId, teacherId, studentName }: StudentTe
                     />
                   </div>
                 </div>
-                <div className="flex items-center gap-2 flex-wrap">
+                <div className="flex items-center gap-2 flex-wrap lg:justify-end w-full lg:w-auto">
                   {attempt.score_percentage !== null && (
                     <div className="text-right mr-2">
                       <div className="text-lg font-bold">{answered}/{total}</div>
@@ -425,6 +425,7 @@ export function StudentTestsTab({ studentId, teacherId, studentName }: StudentTe
                       onRetake={handleRetake}
                       sending={creatingPreview}
                       retaking={retaking}
+                      className="justify-start lg:justify-end"
                     />
                   ) : (
                     <Button variant="outline" size="sm" onClick={() => setSelectedTestId(attempt.id)}>
