@@ -98,7 +98,6 @@ const FeaturePlacementTest: React.FC = () => (
           imageClassName="h-72"
           objectPosition="center top"
           loading="eager"
-          objectFit="contain"
         />
         <FeatureScreenshotFrame
           src="/features/profile-placement-test-summary.png"
@@ -107,7 +106,6 @@ const FeaturePlacementTest: React.FC = () => (
           imageClassName="h-72"
           objectPosition="center top"
           loading="eager"
-          objectFit="contain"
         />
       </div>
     </FeatureHero>
