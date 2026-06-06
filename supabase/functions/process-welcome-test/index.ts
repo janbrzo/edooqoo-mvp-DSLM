@@ -643,7 +643,7 @@ serve(async (req) => {
       const { data: skillResults } = await supabase
         .from('test_skill_results')
         .select('id, element_type, applied_to_element_id, suggested_rating')
-        .eq('student_test_id', test_id)
+        .eq('test_id', test_id)
         .is('applied_at', null);
 
       const appliedIds: string[] = [];

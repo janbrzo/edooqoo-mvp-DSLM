@@ -1,216 +1,473 @@
-# Plan v6.9.39 — Welcome Test, DSLM Pathway & Public Nav fixes
+# Plan v6.9.40 — Welcome Test retake loop, auto-apply repair, readiness guidance, guided roadmap generation
 
-Wszystkie zmiany operują na warstwie prezentacji + DSLM/Welcome Test bez dotykania Worksheet Generation Engine. Każdy fix ma określony root cause, wybrane rozwiązanie i pliki.
-
----
-
-## P1 — Duplikat banera Welcome Test w Pathway (zakładka `?tab=dslm`)
-
-**Root cause.** Na ekranie `1 MINUTE` baner pojawia się dwa razy: górny renderuje `DSLMTab` (`surface="oneMinute"`), a drugi wmontowany jest u góry `PathwayView` (`src/components/dslm/PathwayView.tsx:247-253`, `surface="oneMinute"` z `compact`). Dodano go w v6.9.33 jako kotwicę dla Onboarding Spotlight, ale teraz duplikuje informację.
-
-**Decyzja.** Usunąć drugą instancję wewnątrz `PathwayView`. Spotlight i tak celuje w górny baner (ten sam `data-spotlight="send-welcome-test"`).
-
-**Implementacja.** W `src/components/dslm/PathwayView.tsx`:
-- usunąć blok `<WelcomeTestSuggestion ... compact />` (linie ok. 244-253),
-- usunąć import `WelcomeTestSuggestion` (linia 31).
-
-**Weryfikacja.** Na `/student/:id?tab=dslm` widoczny tylko 1 baner u góry. Spotlight dalej znajduje element po `data-spotlight`.
+## Decyzja strategiczna na start
+Nie dotykamy Worksheet Generation Engine. Zmiany dotyczą wyłącznie Welcome Test, DSLM/Pathway, Learning Roadmap, UI statusów i dokumentacji RAG.
 
 ---
 
-## P2 — Retake test: znika po refresh, brak nowej karty w Tests, brak guardu przy nieukończonym teście
+## Problem 1 — Wyjaśnienie wcześniejszych “out of scope” punktów
 
-**Root cause.** `handleRetake` w `WelcomeTestSuggestion.tsx` (linie 336-387) tworzy nowy `student_tests` row, ale lokalnie ustawia `setStatus('pending')` i `setTestId(newTest.id)` — po reloadzie `checkWelcomeTest` (linie 82-128) preferuje `completed/reviewed > in_progress > others`, więc cofa się do starego ukończonego attemptu zamiast pokazać nowy `assigned/pending`. Po drugie: `StudentTestsTab` używa własnego strumienia (`useStudentTests`), ale w niektórych przypadkach lista nie odświeża się natychmiast — guard. Po trzecie: brak modala potwierdzenia, gdy ostatni test nie jest ukończony, co prowadzi do mnożenia attemptów.
+### Dependency scan
+Affected surface:
+- `src/components/dslm/StudentNavBadges.tsx`
+- `src/components/dslm/GoalsView.tsx`
+- `src/components/dslm/MacroTimeline.tsx`
+- `src/components/dslm/PathwayView.tsx`
+- `supabase/functions/process-welcome-test/index.ts`
+- `docs/llm-context.md`
+- `public/llms.txt`
+- pre-existing Supabase security linter findings
 
-**Decyzja.**
-1. Zmienić logikę priorytetu w `checkWelcomeTest`: gdy najnowszy attempt ma `attempt_number > 1` i status w (`assigned`, `pending`, `in_progress`), traktować go jako aktywny zamiast spadać do starego completed. Reguła: **najnowszy attempt zawsze wygrywa, jeżeli nie jest `cancelled`/`deleted`** — completed pokazujemy tylko gdy nie ma nowszego niewykonanego.
-2. W `WelcomeTestSuggestion` przed `handleRetake` sprawdzić, czy istnieje attempt o statusie nie-completed/nie-reviewed; jeżeli tak, pokazać `AlertDialog` z komunikatem: *"Last attempt is not completed yet. Re-take usually makes sense ~30 days after the previous test is completed. Create another one anyway?"* (próg 30 dni przyjęty na bazie standardów ESL re-assessment cycle — krótko uzasadnione w treści). CTA: `Cancel` / `Create new attempt`.
-3. Po `handleRetake` wywołać `window.dispatchEvent(new CustomEvent('student-tests:refresh', { detail: { studentId } }))` i nasłuchać tego w `StudentTestsTab` aby wymusić re-fetch listy (idempotentne, dodaje brakującą kartę bez czekania na poll).
-4. W `StudentTestsTab` po `handleRetake` (linie 162+) dodać ten sam event dispatch i ten sam guard modal — to zsynchronizuje obie ścieżki (z baneru i z `TestDetailsView`/`StudentTestsTab`).
+### Root cause
+W poprzednim raporcie zmieszałem trzy różne kategorie: realny brak danych produktowych, pre-existing security backlog oraz niespójność dokumentacyjną — dlatego brzmiało to jak jedna lista rzeczy do natychmiastowego zrobienia.
 
-**Implementacja — pliki.**
-- `src/components/dashboard/WelcomeTestSuggestion.tsx`
-  - zmodyfikować `checkWelcomeTest`: liczyć najnowszy non-cancelled rekord; gdy `status in ('assigned','pending','in_progress')` traktować jako aktywny (nie spadać do completed).
-  - dodać stan `confirmRetakeOpen` + `AlertDialog` (re-używamy `@/components/ui/alert-dialog`).
-  - W `handleRetake` na początku: jeżeli `status === 'completed' || 'reviewed'` → kontynuuj normalnie; w przeciwnym razie → otwórz modal. Faktyczny insert wykonać dopiero po potwierdzeniu (split na `confirmAndRetake`).
-  - Po sukcesie: `window.dispatchEvent(new CustomEvent('student-tests:refresh'))`.
+### Solution options
+| Option | Approach | Tradeoff | Regression risk |
+|---|---|---|---|
+| A | Dodać `target_level` na roadmap phases i przywrócić `B1 → B2` | Za wcześnie; nie mamy jeszcze pewnego źródła target level | High |
+| B | Nie dodawać fake target_level; naprawić realny Welcome Test level/goals flow i dokumentację numeracji | Usuwa przyczynę obecnych problemów bez tworzenia sztucznego sygnału | Low |
+| C | Rozwiązać 197 linter findings teraz | Ogromny scope, ryzyko naruszenia RLS i regresji | High |
+
+### Selected solution + why
+Wybieram B. `B1 → B2` wróci dopiero, gdy będziemy mieli evidence-based target signal, np. z zaakceptowanej sugestii poziomu, celu egzaminacyjnego albo explicit `target_level`. Linter 197 zostaje jako oddzielny security-hardening cycle, bo mieszanie go z Welcome Test naprawą byłoby nieodpowiedzialne.
+
+### Impact analysis
+Zero regressions confirmed:
+- Nie przywracamy fake progression badge.
+- Nie modyfikujemy RLS w tym cyklu.
+- Konsolidujemy tylko dokumentację release/RAG, żeby przyszłe agenty nie powielały chaosu numeracji.
+
+### Full implementation
+- W finalnym raporcie oznaczę:
+  - `target_level`: not implemented now; blocked until real evidence source exists.
+  - `197 linter warnings`: separate security cycle, not this product fix.
+  - `llms.txt v6.9.39 mismatch`: fix documentation section during RAG injection.
+
+### Verification checklist
+- [ ] Raport końcowy rozdziela backlog od realnych bugów.
+- [ ] `docs/llm-context.md` i `public/llms.txt` opisują v6.9.40, nie mylą go z v6.9.39.
+
+---
+
+## Problem 2 — Retake Test: nowe karty, modal guard, retake labels
+
+### Dependency scan
+Affected surface:
 - `src/components/student-tests/StudentTestsTab.tsx`
-  - dodać `useEffect` z listenerem `student-tests:refresh` → wywołać istniejący `fetchTests` (lub odpowiednik z `useStudentTests`).
-  - dodać ten sam AlertDialog dla retake (linie 162+).
 - `src/components/student-tests/TestDetailsView.tsx`
-  - w `handleRetake` dispatch tego samego eventu po sukcesie, by lista odświeżyła się po `onBack()`.
+- `src/components/welcome-test/WelcomeTestActionsPanel.tsx`
+- `src/components/dashboard/WelcomeTestSuggestion.tsx`
+- `src/hooks/useStudentTests.tsx`
+- `src/types/studentTests.ts`
+- `student_tests`: `attempt_number`, `previous_attempt_id`, `status`, `share_token`, `completed_at`, `reviewed_at`
 
-**Weryfikacja.** Klik retake → modal jeśli stary niewykończony → po confirm: toast `Attempt #N created`, w Tests pojawia się nowa karta, po refresh strony nadal widać nowy attempt jako aktywny baner.
+Live DB fact for the reported student:
+- Attempt #1 reviewed.
+- Attempt #2 assigned.
+- Attempt #3 assigned.
+- Attempt #4 reviewed.
+- Tests tab did not show new retake cards because UI filters welcome tests out of the list and renders only one special card.
 
----
+### Root cause
+Retake rows are being created, but `StudentTestsTab` collapses all Welcome Test attempts into one “welcomeTest” card and explicitly filters `test_type === 'welcome'` out of the normal test list.
 
-## P3 — Po retake fallback "Welcome Placement Test not completed" w `No curriculum plan yet`
+### Solution options
+| Option | Approach | Tradeoff | Regression risk |
+|---|---|---|---|
+| A | Keep one Welcome card and add a dropdown history | Compact, but user explicitly asked for cards | Medium |
+| B | Render every Welcome Test attempt as its own card, labelled Initial / Retake 1 / Retake 2 | Directly matches teacher expectation | Low |
+| C | Create a separate Retake tab | More UI, unnecessary | Medium |
 
-**Root cause.** `MacroTimeline.tsx:249-255` warunkuje komunikat na fladze `!wtCompleted`. Po retake mamy 1 ukończony + 1 pending, więc `wtCompleted` może być wyliczane na podstawie *najnowszego* attemptu (pending) zamiast *jakiegokolwiek* ukończonego.
+### Selected solution + why
+Wybieram B. Każdy attempt będzie widoczny jako osobna karta, więc nauczyciel natychmiast widzi, ile testów istnieje i który jest aktywny. To eliminuje strukturalnie problem “retake istnieje w DB, ale UI udaje, że go nie ma”.
 
-**Decyzja.** Zmienić semantykę `wtCompleted` na: *czy istnieje JAKIKOLWIEK welcome test ze statusem `completed` lub `reviewed` (deleted_at IS NULL)*. Jeżeli tak → ukryć całe `<li>` z "Send test" (linie 249-256), nawet jeśli istnieje nowszy pending retake.
+### Impact analysis
+Zero regressions confirmed:
+- Existing non-welcome tests still render normally.
+- Compare attempts still counts only completed/reviewed attempts.
+- Share/copy/preview actions remain on Welcome Test attempts.
+- No deletion of existing duplicate attempts; history remains auditable.
 
-**Implementacja.** Znaleźć źródło `wtCompleted` (propaguje do `MacroTimeline` z `DSLMTab` / hooka). 
-- W `src/components/dslm/DSLMTab.tsx` (lub miejsce, gdzie liczymy `wtCompleted` przekazywane do `MacroTimeline`): zmienić zapytanie na `.eq('test_type','welcome').in('status', ['completed','reviewed']).is('deleted_at', null).limit(1)` — `wtCompleted = (count ?? 0) > 0`.
-- W `MacroTimeline.tsx` zachować obecny render warunkowy (już poprawny). Dodać `data-testid="welcome-test-suggestion-line"` dla łatwego QA.
+### Full implementation
+1. `StudentTestsTab.tsx`
+   - Replace current single Welcome Test card with `welcomeAttempts = tests.filter(test_type === 'welcome').sort(created_at desc)`.
+   - Render all `welcomeAttempts` as cards.
+   - Label rules:
+     - `attempt_number <= 1`: `Initial Welcome Test`.
+     - `attempt_number > 1`: `Retake {attempt_number - 1}`.
+   - Card title examples:
+     - `Initial Welcome Test — 58 questions`
+     - `Retake 1 — 58 questions`
+     - `Retake 3 — 58 questions`
+   - Latest attempt receives the full `WelcomeTestActionsPanel`; older attempts receive view/open actions only.
+   - `welcomeTest` selection changes from “completed first” to “latest authoritative attempt” for retake and banner logic.
+   - Fix `nextAttempt` calculation to use max attempt number across all welcome rows, not the currently displayed completed row.
 
-**Weryfikacja.** Po retake na widoku `No curriculum plan yet` linia "Welcome Placement Test not completed" nie pojawia się.
+2. `WelcomeTestActionsPanel.tsx`
+   - Allow `Re-take Test` to be visible for any existing attempt when `onRetake` is provided, not only when state is completed.
+   - Keep `Send/Re-send Email` available for pending/in-progress.
 
----
+3. `StudentTestsTab.tsx` and `WelcomeTestSuggestion.tsx`
+   - Guard modal opens whenever the latest attempt is not `completed` or `reviewed`.
+   - Modal copy:
+     - Title: `Create another Welcome Test retake?`
+     - Body: `The latest attempt is still open. Retakes are usually useful after 8–12 weeks of lessons or after a clear learning block has finished. Creating another one now will leave multiple unfinished links active and can confuse the student.`
+   - Confirm button: `Create retake anyway`.
+   - Cancel button: `Keep current attempt`.
 
-## P4 — Auto-apply nie zadziałał (baner "Apply to Progress" zamiast `reviewed`)
+4. Retake naming
+   - DB `attempt_number` remains 1, 2, 3, 4.
+   - UI displays retake count as `attempt_number - 1`.
+   - New retake title becomes `Welcome Test - {Student} (Retake {nextAttempt - 1})`.
+   - Toast becomes `Retake {nextAttempt - 1} created. Send the new link to the student.`
 
-**Root cause.** `supabase/functions/process-welcome-test/index.ts:634-661` próbuje wczytać `test_skill_results` z polem `applied_to_element_id`/`suggested_rating`, ale w nowym flow (po dodaniu pytań do 58) `calculate_test_results` / pipeline AI może NIE generować `applied_to_element_id` dla pytań speaking/listening/open. Jeśli `r.applied_to_element_id` jest `null` dla wszystkich rekordów, pętla nic nie zapisuje i `status` zostaje na `completed`. Brakuje też fallbacku: kiedy `applied_to_element_id` jest puste, należy zmapować po `element_type` ze `student_learning_elements` per student.
+5. `WelcomeTestSuggestion.tsx`
+   - Store `attemptNumber` in state from selected/latest test row.
+   - Pending banner copy:
+     - initial: `Welcome (placement) Test sent`
+     - retake: `Welcome Test retake {attemptNumber - 1} sent`
+   - In-progress copy:
+     - initial: `Student is taking the test`
+     - retake: `Student is taking retake {attemptNumber - 1}`
+   - Completed copy:
+     - initial: `Welcome (placement) Test completed!`
+     - retake: `Welcome Test retake {attemptNumber - 1} completed!`
 
-**Decyzja.**
-1. W edge function dodać **fallback mapping**: dla każdego `test_skill_results` bez `applied_to_element_id` wyszukać `student_learning_elements` po `(student_id, element_type)` i użyć pierwszego trafionego. Jeśli nie ma elementu — utworzyć go (`upsert` z `current_rating = suggested_rating`).
-2. Po procesie zawsze ustawić `status = 'reviewed'`, jeżeli liczba zaaplikowanych skill_results > 0. Jeżeli faktycznie 0 wyników (brak skill_results w ogóle), zostawić `completed` i zapisać do `error_logs` z konkretnym powodem (`no_skill_results`, `no_matching_elements`), aby diagnostyka była jednoznaczna.
-3. Dodatkowo: na froncie w `TestDetailsView` przycisk `Apply to Progress` zostaje jako *manualny fallback* (idempotentny) — bez zmian.
-
-**Implementacja.**
-- `supabase/functions/process-welcome-test/index.ts` (sekcja v6.9.29 auto-apply, linie ~634-675):
-```ts
-const { data: skillResults } = await supabase
-  .from('test_skill_results')
-  .select('id, element_type, applied_to_element_id, suggested_rating')
-  .eq('student_test_id', test_id)
-  .is('applied_at', null);
-
-const applied: string[] = [];
-if (skillResults?.length) {
-  for (const r of skillResults) {
-    if (r.suggested_rating == null) continue;
-    let elementId = r.applied_to_element_id;
-    if (!elementId && r.element_type) {
-      const { data: existingEl } = await supabase
-        .from('student_learning_elements')
-        .select('id')
-        .eq('student_id', student_id)
-        .eq('element_type', r.element_type)
-        .maybeSingle();
-      if (existingEl) {
-        elementId = existingEl.id;
-      } else {
-        const { data: inserted } = await supabase
-          .from('student_learning_elements')
-          .insert({ student_id, element_type: r.element_type, current_rating: r.suggested_rating })
-          .select('id').single();
-        elementId = inserted?.id ?? null;
-      }
-    }
-    if (!elementId) continue;
-    await supabase.from('student_learning_elements')
-      .update({ current_rating: r.suggested_rating, last_rated_at: new Date().toISOString() })
-      .eq('id', elementId);
-    await supabase.from('test_skill_results')
-      .update({ applied_at: new Date().toISOString(), applied_to_element_id: elementId })
-      .eq('id', r.id);
-    applied.push(r.id);
-  }
-}
-if (applied.length > 0) {
-  await supabase.from('student_tests')
-    .update({ status: 'reviewed', reviewed_at: new Date().toISOString() })
-    .eq('id', test_id);
-}
-```
-
-**Weryfikacja.** Po `process-welcome-test` dla nowego ucznia `status = 'reviewed'`, baner "Auto-apply did not complete" znika, `student_learning_elements` dostają ratingi.
-
----
-
-## P5 — Brak auto-przypisania level/goals po teście (flow „I don't know my student yet")
-
-**Root cause.** `process-welcome-test` tworzy `student_learning_profiles`, ale nie zapisuje wynikowego CEFR do `students.english_level` ani nie tworzy/sugeruje rekordów `student_goals`. UI nie pokazuje też propozycji.
-
-**Decyzja.** Dwie ścieżki:
-- **Auto-apply level** gdy `students.english_level` jest `NULL` lub puste → wpisać CEFR wyznaczony przez Learning Path Score (zmienna `learningPathResult` już istnieje w funkcji, linie ~1247-1255). Gdy poziom już istnieje i się różni → utworzyć rekord `pacing_proposals` typu `level_change` lub miękką notyfikację (NIE nadpisywać).
-- **Auto-create suggested goals**: jeżeli student ma 0 aktywnych `student_goals` (poza main goal), wziąć `recommended_focus_areas` z `student_learning_profiles` (już generowane przez AI summary, pole istnieje) i wstawić 1× `main` (jeśli brak), 2× `supporting`, 1× `additional`. Każdy goal w statusie `suggested` (nowa wartość enum, OR użyć `is_ai_suggested = true`), tak by UI pokazał je jako *do akceptacji*. Jeżeli enum nie wspiera — fallback: zwykłe `active` z flagą `source = 'welcome_test_auto'` w `metadata`.
-- **UI sugestii** w `GoalsView.tsx`: gdy istnieją goals z `metadata.source = 'welcome_test_auto'` i `accepted_at IS NULL`, renderować nad listą banner *"Suggested from Welcome Test"* z przyciskami `Accept all` / `Edit` / `Dismiss`.
-
-**Implementacja.**
-- Migration: dodać kolumnę `student_goals.metadata jsonb default '{}'::jsonb` jeżeli nie istnieje, oraz `accepted_at timestamptz` (nullable). Zachowuje wstecz-kompatybilność. GRANTy bez zmian (tabela istniejąca).
-- Edge function `process-welcome-test/index.ts`: dodać sekcję `auto-apply level + suggest goals` PO sekcji auto-apply skill_results.
-  - Odczyt `students.english_level`; jeżeli puste → update.
-  - Odczyt aktywnych goals; jeżeli 0 → insert 4 sugerowane na bazie `recommended_focus_areas` + main goal z testu.
-- Front `src/components/dslm/GoalsView.tsx`: dodać sekcję `SuggestedGoalsBanner` z 3 akcjami.
-- Front `WelcomeTestSuggestion.tsx` (status `completed`): dodać krótki tekst *"Level + goal suggestions applied"* z linkiem do `?tab=dslm&focus=goals`.
-
-**Weryfikacja.** Nowy uczeń kończy test → na DSLM widoczne sugerowane goals + ustawiony poziom + (gdy poziom różny) badge propozycji zmiany.
+### Verification checklist
+- [ ] Creating retake creates a new visible card in Tests.
+- [ ] Card label says Retake 1 / Retake 2 / Retake 3 based on `attempt_number - 1`.
+- [ ] Clicking retake while latest attempt is open shows confirmation modal.
+- [ ] Clicking retake after completed attempt still warns about recommended 8–12 week interval in copy/context.
+- [ ] Overview and 1 MINUTE banners mention retake number when active attempt is retake.
 
 ---
 
-## P6 — Skąd "B1 → B2" na nagłówku ucznia?
+## Problem 3 — “Auto-apply did not complete” and wrong “automatically” after manual apply
 
-**Root cause.** `src/components/dslm/StudentNavBadges.tsx:14-35` zawiera twardo zakodowaną mapę `LEVEL_PROGRESSION = {A1:'A2', ...}` i ZAWSZE pokazuje strzałkę do następnego CEFR, nawet bez jakichkolwiek sygnałów postępu. To wprowadza w błąd — wygląda jak rzeczywista predykcja modelu.
+### Dependency scan
+Affected surface:
+- `supabase/functions/process-welcome-test/index.ts`
+- `src/hooks/useStudentTests.tsx`
+- `src/components/student-tests/TestDetailsView.tsx`
+- `student_tests`
+- `test_skill_results`
+- `student_learning_profiles`
+- `student_learning_elements`
 
-**Decyzja.** Pokazywać `current → next` TYLKO wtedy, gdy istnieje realny sygnał: aktywny `pacing_proposal` typu `level_change` lub aktywna faza w `curriculum_phases` z `target_level` różnym od aktualnego. W każdym innym przypadku — sam `current`.
+Confirmed schema fact:
+- `test_skill_results` has column `test_id`.
+- Current repo code in `process-welcome-test` queries `.eq('student_test_id', test_id)`, which is wrong.
 
-**Implementacja.**
-- `src/components/dslm/StudentNavBadges.tsx`: przyjąć nowy prop `targetLevel?: string | null`. Render: `englishLevel === targetLevel || !targetLevel` → tylko `englishLevel`; inaczej `englishLevel → targetLevel`. Dodać `<Tooltip>` wyjaśniający źródło ("Inferred from current learning roadmap phase" / "Suggested by pacing proposal").
-- Wywołanie w `StudentPage.tsx` (lub gdziekolwiek mount): wyliczyć `targetLevel` z `useCurriculumPhases` (faza in_progress → `target_level`) lub `usePacingProposals` (typ `level_change` → `proposed_level`). Usunąć `LEVEL_PROGRESSION` jako *fallback* (nigdy nie używać auto-następnego CEFR bez evidence).
+### Root cause
+Auto-apply backend uses a non-existent column name (`student_test_id`) while the table and UI use `test_id`, and the Edge Function deployment must be refreshed after the fix.
 
-**Weryfikacja.** Johny Bravo (B1, brak fazy / propozycji) → widoczne tylko `B1`. Po wygenerowaniu roadmapy z `target_level=B2` → `B1 → B2` z tooltipem.
+### Solution options
+| Option | Approach | Tradeoff | Regression risk |
+|---|---|---|---|
+| A | Only hide the warning in UI | Masks bug; data remains wrong | Medium |
+| B | Fix backend query to `test_id`, deploy function, and make manual UI copy source-aware | Fixes root cause and misleading copy | Low |
+| C | Add new audit table for apply source | Strong but too much scope | Medium |
+
+### Selected solution + why
+Wybieram B. Backend must process future tests correctly; UI copy must stop implying automatic apply after a teacher manually clicked the fallback button.
+
+### Impact analysis
+Zero regressions confirmed:
+- Existing manual Apply button remains as fallback.
+- `student_learning_profiles` still stores per-skill results even when no learning elements exist.
+- No worksheet generation logic touched.
+
+### Full implementation
+1. `process-welcome-test/index.ts`
+   - Change auto-apply query from `.eq('student_test_id', test_id)` to `.eq('test_id', test_id)`.
+   - Keep fallback behavior:
+     - If matching `student_learning_elements` exists, update rating and backfill `applied_to_element_id`.
+     - If no element exists, mark `test_skill_results.applied_at` so the warning does not keep reappearing.
+   - Keep status promotion to `reviewed` after profile upsert and skill result processing.
+
+2. Deploy Edge Function
+   - Deploy `process-welcome-test` after code change.
+   - Check recent function logs for new test processing errors.
+
+3. `TestDetailsView.tsx`
+   - Add local state `manualApplyCompleted`.
+   - In `handleApplyResults`, after success set `manualApplyCompleted=true`.
+   - Reviewed card copy:
+     - If `manualApplyCompleted`: `Results manually applied to student's skill ratings.`
+     - Else: `Results applied to student's skill ratings.` or `Results automatically applied...` only when auto source is trustworthy.
+   - This directly fixes the user-facing moment after clicking `Apply to Progress`.
+
+4. Limited data repair for reported test
+   - For `test_id=94c76ba5-7cc0-47d7-be04-832f1207dafa`, skill rows already have `applied_at`, so no destructive change is needed.
+   - Do not delete or recreate skill rows.
+
+### Verification checklist
+- [ ] Edge Function uses `test_id` everywhere for `test_skill_results`.
+- [ ] New completed Welcome Test moves to reviewed when processing succeeds.
+- [ ] Manual fallback shows manually-applied wording after click.
+- [ ] No “Auto-apply did not complete” banner appears after successful auto processing.
 
 ---
 
-## P7 — Brakuje "Where this feature fits in Edooqoo" na `/one-minute-prep` i `/`
+## Problem 4 — Welcome Test should fill/suggest level and goals
 
-**Root cause.** Komponent `FeatureWorkflowMap` jest renderowany na podstronach feature (`/features/*`), ale nie na `/one-minute-prep` (`src/pages/OneMinutePrep.tsx`) ani na landingu (`src/pages/Index.tsx`).
+### Dependency scan
+Affected surface:
+- `supabase/functions/process-welcome-test/index.ts`
+- `src/components/dslm/GoalsView.tsx`
+- `src/pages/StudentPage.tsx`
+- `src/hooks/useStudent.tsx`
+- `src/hooks/useStudentProgress.tsx`
+- `src/constants/studentGoals.ts`
+- `students.english_level`
+- `students.main_goal`
+- `student_learning_profiles`
+- `student_progress_goals`
 
-**Decyzja.** Wmontować `<FeatureWorkflowMap />` (bez `activeKey` — wersja "ogólna") na:
-1. `/one-minute-prep` — pomiędzy hero a `OneMinutePrepProofSection` (przed linią 239) z `activeKey="one-minute-prep"` (lub bez activeKey, jeżeli feature key nie istnieje w mapie — sprawdzić `PUBLIC_FEATURE_WORKFLOW` w `src/constants/publicFeatureWorkflow.ts`).
-2. `/` — w `src/pages/Index.tsx` wewnątrz dolnej sekcji marketingowej dla zalogowanych użytkowników anonimowych (po hero, przed sekcjami feature pills). Wersja bez `activeKey` — neutralna.
+Live DB fact for reported student:
+- `students.english_level` is still `null`.
+- `students.main_goal` is still `null`.
+- `student_progress_goals` has no active suggestions.
+- latest profile says `estimated_level=A1`, strongest=`reading`, weakest=`writing`, interests=`Travel & Culture`, `Health & Lifestyle`.
 
-**Implementacja.**
-- W `src/pages/OneMinutePrep.tsx` dodać import + `<FeatureWorkflowMap activeKey="one-minute-prep" />` (jeżeli klucz nie istnieje, dodać go do `publicFeatureWorkflow.ts` z poprawnym labelem i ścieżką).
-- W `src/pages/Index.tsx` dodać `<FeatureWorkflowMap />` w wybranym miejscu (między hero a Feature Pills) — sekcja widoczna tylko dla anon (warunek `!isRegisteredUser` jeśli komponent landingowy go ma; inaczej zawsze).
+### Root cause
+The current auto-fill path is too narrow and likely not deployed; it only handles missing level/goals partially, does not handle `unknown`, does not assign `main_goal`, and only inserts goal suggestions when active goal count is zero.
 
-**Weryfikacja.** Obie strony renderują sekcję; linki w mapie kierują do `/features/*`.
+### Solution options
+| Option | Approach | Tradeoff | Regression risk |
+|---|---|---|---|
+| A | Only auto-fill when no level and no goals | Simple but fails existing-student suggestion requirement | Medium |
+| B | Auto-fill missing fields; if fields exist, create teacher-review suggestions | Matches requested behavior | Low |
+| C | Auto-overwrite existing level/goals | Faster but dangerous | High |
+
+### Selected solution + why
+Wybieram B. Edooqoo should be useful without silently overwriting teacher decisions. Missing data can be filled; existing data gets a clear suggestion.
+
+### Impact analysis
+Zero regressions confirmed:
+- Existing teacher-set level/main goal will not be overwritten automatically.
+- Suggestions remain teacher-reviewable.
+- Existing `GoalsView` suggestion banner pattern is reused.
+
+### Full implementation
+1. `process-welcome-test/index.ts`
+   - Treat level as missing if `null`, empty string, or `unknown`.
+   - If missing: update `students.english_level = estimatedLevel`.
+   - Derive `suggestedMainGoal` from answers/profile:
+     - exam motivation -> `exam`
+     - work/career/professional usage -> `work`
+     - travel interest/usage -> `travel`
+     - academic signals -> `academic`
+     - social conversation -> `social-conversation`
+     - otherwise -> `general`
+   - If `students.main_goal` is missing/null/empty/custom unknown: update it.
+   - Always create 2–3 `student_progress_goals` suggestions from Welcome Test if no identical suggestion exists for the same `test_id`:
+     - supporting: weakest skill, e.g. `Improve writing fluency`
+     - supporting: strongest skill as confidence anchor, e.g. `Use reading comprehension as a confidence anchor`
+     - additional: first interest topic, e.g. `Practice English around Travel & Culture`
+   - Store metadata:
+     - `from: welcome_test`
+     - `test_id`
+     - `signal`
+     - `estimated_level`
+     - `suggested_main_goal`
+   - Keep `source='welcome_test_auto'`, `accepted_at=null`.
+
+2. `GoalsView.tsx`
+   - Existing `Suggested from Welcome Test` banner remains.
+   - Add a compact “Welcome Test profile update” banner when latest profile suggests level/main goal different from current props:
+     - `Welcome Test suggests level A1` with Accept action.
+     - `Welcome Test suggests main goal Travel` with Accept action.
+   - Accept level updates `students.english_level`.
+   - Accept main goal calls existing `onMainGoalChange`.
+   - Dismiss uses localStorage keyed by `studentId + welcome_test_id` to avoid repeated nagging.
+
+3. `useStudent.tsx`
+   - Add listener for a custom `student:refresh` event to refetch current student query.
+   - `GoalsView` dispatches it after accepting level/main-goal suggestion.
+
+4. Backfill for reported student
+   - Set `students.english_level = 'A1'`.
+   - Set `students.main_goal = 'travel'` based on `Travel & Culture` and missing main goal.
+   - Insert Welcome Test suggested goals:
+     - supporting: `Improve writing fluency`
+     - supporting: `Build confidence from reading comprehension`
+     - additional: `Practice English around Travel & Culture`
+   - Mark them as `source='welcome_test_auto'`, `accepted_at=null`, metadata referencing test `94c76ba5-7cc0-47d7-be04-832f1207dafa`.
+
+### Verification checklist
+- [ ] New tests auto-fill missing level.
+- [ ] New tests auto-fill missing main goal.
+- [ ] New tests create supporting/additional goal suggestions.
+- [ ] Existing level/main goal receives suggestion, not silent overwrite.
+- [ ] Reported student receives A1 + travel + three suggested goals.
 
 ---
 
-## P8 — Sticky nav ściśnięty na `/features/*` i `/one-minute-prep`; przenieść pills w lewo
+## Problem 5 — Add readiness guidance to 1-Minute Prep suggestions
 
-**Root cause.** W `StickyNav.tsx` (linia 253 i sąsiednie) dla wariantu zalogowanego/anonimowego renderujemy `<FeatureNavPills />` w bloku po prawej. Pills mają `className="hidden items-center gap-1 lg:flex"` (FeatureNavPills.tsx:85) i są wpychane między logo a prawe akcje, co powoduje ścisk.
+### Dependency scan
+Affected surface:
+- `src/components/dslm/PathwayView.tsx`
+- `src/components/dslm/NextStepsSection.tsx`
+- `src/components/dslm/NextStepBanner.tsx`
+- `src/components/dslm/MacroTimeline.tsx`
+- `src/hooks/useWelcomeTestActions.ts`
+- `student_progress_goals`
+- `student_tests`
+- `dslm_curriculum_phases`
 
-**Decyzja.** Przenieść `FeatureNavPills` do lewego bloku (obok logo), tak samo jak na `/`. Konkretnie: w gałęzi anon desktop (linie 253+) struktura już ma `flex items-center justify-between` — wystarczy umieścić `<FeatureNavPills />` wewnątrz lewego `<div>` z logo, NIE prawego.
+### Root cause
+Readiness warnings exist only inside the Learning Roadmap empty state, while 1-Minute Prep suggestions has a much weaker empty state and does not explain missing goals/test/roadmap context.
 
-**Implementacja.**
-- W `src/components/landing/StickyNav.tsx`:
-  - W każdym desktopowym renderze nav (anon i zalogowany) upewnić się, że `<FeatureNavPills />` znajduje się w lewym kontenerze obok `<Logo />`. Usunąć z prawego.
-  - Dla mobilnego (sheet) — bez zmian (już stacked w drawerze).
+### Solution options
+| Option | Approach | Tradeoff | Regression risk |
+|---|---|---|---|
+| A | Duplicate the roadmap warning component manually | Fast but duplicates logic | Medium |
+| B | Move readiness signals to `PathwayView` and pass them into both sections | Shared source, less drift | Low |
+| C | Add global onboarding banner | Too broad and noisy | Medium |
 
-**Weryfikacja.** Na `/`, `/features/*`, `/one-minute-prep` pills są wyrównane do lewej, prawa strona ma tylko CTA + login.
+### Selected solution + why
+Wybieram B. Readiness is Pathway-level context, not Roadmap-only context.
+
+### Impact analysis
+Zero regressions confirmed:
+- Existing “Generate 1-Minute Prep suggestions” action remains.
+- Roadmap still optional; copy says strongly recommended, not mandatory.
+- Add goal and send test actions reuse existing handlers.
+
+### Full implementation
+1. `PathwayView.tsx`
+   - Compute:
+     - `hasGoals`
+     - `hasPhases`
+     - `wtCompleted` using the same count-query semantics as MacroTimeline: any completed/reviewed attempt counts.
+   - Provide actions:
+     - `onAddGoal`: dispatch `dslm:addGoal`.
+     - `onSendWelcomeTest`: call `useWelcomeTestActions.send()`.
+     - `onScrollToRoadmap`: open roadmap collapsible, then scroll to `#pathway-roadmap` / empty roadmap card.
+
+2. `NextStepsSection.tsx` / `NextStepBanner.tsx`
+   - Empty state gets readiness panel:
+     - Header: `For sharper 1-Minute Prep suggestions, add this first`
+     - `No learning goals set — AI will infer from main goal only.` + Add goal button
+     - `Welcome Placement Test not completed — level signals are weaker.` + Send test button
+     - `No curriculum plan yet — optional, but strongly recommended for recurring students.` + Go to roadmap button
+   - Button `Go to roadmap` scrolls to the “No curriculum plan yet” section and opens the roadmap collapsible.
+
+### Verification checklist
+- [ ] 1-Minute Prep empty state shows goals/test/roadmap readiness info.
+- [ ] Add goal opens the same Goals modal.
+- [ ] Send test uses existing Welcome Test flow.
+- [ ] Go to roadmap scrolls to Learning Roadmap empty state.
 
 ---
 
-## Po implementacji — RAG injection + change report
+## Problem 6 — Guided “Generate Learning Roadmap” modal
 
-1. Aktualizacja `docs/llm-context.md` i `public/llms.txt` z sekcją v6.9.39:
-   - PROBLEM / EDOOQOO SOLUTION / TECHNICAL MECHANICS / RAG KEYWORDS (po 1 bloku na P1..P8 lub zbiorczo).
-2. Nowy plik memory `mem/features/onboarding/v6939-welcome-test-and-nav.md` (typ feature) + wpis w `mem/index.md` (Memories).
-3. Final change report: lista zmienionych plików, status weryfikacji per problem, lista *out of scope* (jeśli się pojawi cokolwiek), informacja że Worksheet Generation Engine nie został tknięty.
+### Dependency scan
+Affected surface:
+- `src/components/dslm/MacroTimeline.tsx`
+- `src/hooks/dslm/useCurriculumPhases.tsx`
+- `supabase/functions/generate-curriculum-phases/index.ts`
+- `student_progress_goals`
+- `dslm_curriculum_phases`
+
+### Root cause
+`Generate Learning Roadmap` currently sends generation immediately, so teachers cannot guide phase count, duration, priority goals, or hidden context before the AI builds the macro plan.
+
+### Solution options
+| Option | Approach | Tradeoff | Regression risk |
+|---|---|---|---|
+| A | Add only a comment textarea | Minimal, but misses requested controls | Low |
+| B | Add full guided modal with auto/manual controls | Matches request; moderate UI/backend work | Medium-low |
+| C | Build a multi-step wizard | Too heavy for this workflow | Medium |
+
+### Selected solution + why
+Wybieram B. Roadmap generation is a high-leverage planning moment; one modal with sensible defaults gives control without slowing the default path.
+
+### Impact analysis
+Zero regressions confirmed:
+- Default path remains identical: auto phase count, auto weeks, auto goals, empty comment.
+- Existing `generatePhases('replace')` behavior remains available under the modal’s Generate button.
+- Edge function gets additive payload fields only.
+
+### Full implementation
+1. `MacroTimeline.tsx`
+   - Replace direct `Generate Learning Roadmap` click with `setRoadmapDialogOpen(true)`.
+   - Add `GenerateRoadmapDialog` inside same file or new component if cleaner.
+   - Modal sections:
+     1. Phase count
+        - Toggle: `Auto-fit phase count` default ON.
+        - Explanation: macro phases are 2–6 larger learning blocks, not individual lessons.
+        - If OFF: numeric input 1–8.
+        - Suggestion helper: based on deadline, goals, and current pacing.
+     2. Weeks per phase
+        - Toggle: `Auto-fit timing` default ON.
+        - If OFF: numeric average weeks per phase.
+        - If phase count manual: optional `Customize each phase` reveals per-phase week inputs.
+     3. Priority goals
+        - Toggle: `Let AI balance goals` default ON.
+        - If OFF: checkbox list of active goals.
+     4. Teacher guidance
+        - Textarea default empty.
+        - Placeholder: `e.g., Prioritize client meetings first. Avoid exam-style grammar drills. Student has a conference in March.`
+   - Generate button sends options into `generatePhases`.
+
+2. `useCurriculumPhases.tsx`
+   - Extend `generatePhases(mode, opts)` with:
+     - `count?: number`
+     - `teacherComment?: string`
+     - `weeksPerPhase?: number`
+     - `phaseWeekTargets?: number[]`
+     - `focusedGoalIds?: string[]`
+   - Preserve current behavior when opts are empty.
+
+3. `generate-curriculum-phases/index.ts`
+   - Parse additive fields.
+   - Fetch goal `id` along with title/description/type/date.
+   - If `focusedGoalIds` present, add `TEACHER-PRIORITIZED GOALS` block.
+   - If manual phase count present, use it exactly within 1–8.
+   - If `weeksPerPhase` present and no hard deadline conflict, set `totalWeeks = phaseCount * weeksPerPhase`.
+   - If `phaseWeekTargets` present, instruct and sanitize output to those durations where possible.
+   - If deadline exists, deadline remains hard wall; manual weeks are clipped/scaled if they exceed deadline.
+   - Store new values in `generation_context`.
+
+### Verification checklist
+- [ ] Clicking Generate Learning Roadmap opens modal, not immediate generation.
+- [ ] Default Generate produces same behavior as before.
+- [ ] Manual phase count is reflected in generated phase count.
+- [ ] Manual weeks influence `estimated_weeks_start/end` and `generation_context`.
+- [ ] Selected goals appear in Edge Function context and generation context.
+- [ ] Teacher comment is passed to prompt.
 
 ---
 
-## Pliki które zostaną zmienione (skrót)
+## RAG injection update
+Files:
+- `docs/llm-context.md`
+- `public/llms.txt`
+- new memory file: `mem/features/onboarding/v6940-welcome-test-retake-roadmap.md`
+- `mem/index.md`
 
-- `src/components/dslm/PathwayView.tsx` (P1)
-- `src/components/dashboard/WelcomeTestSuggestion.tsx` (P2, P5)
-- `src/components/student-tests/StudentTestsTab.tsx` (P2)
-- `src/components/student-tests/TestDetailsView.tsx` (P2)
-- `src/components/dslm/MacroTimeline.tsx` + `DSLMTab.tsx` (P3)
-- `supabase/functions/process-welcome-test/index.ts` (P4, P5)
-- `supabase/migrations/<timestamp>_welcome_test_suggested_goals.sql` (P5)
-- `src/components/dslm/GoalsView.tsx` (P5)
-- `src/components/dslm/StudentNavBadges.tsx` + `StudentPage.tsx` (P6)
-- `src/pages/OneMinutePrep.tsx`, `src/pages/Index.tsx`, `src/constants/publicFeatureWorkflow.ts` (P7)
-- `src/components/landing/StickyNav.tsx` (P8)
-- `docs/llm-context.md`, `public/llms.txt`, `mem/index.md`, `mem/features/onboarding/v6939-welcome-test-and-nav.md` (RAG + memory)
+Documentation block format:
+- PROBLEM: Welcome Test retakes were collapsed into one UI card; auto-apply used wrong skill-results column; missing Welcome Test level/goals did not reliably fill or suggest; 1-Minute Prep lacked readiness guidance; roadmap generation lacked teacher control.
+- EDOOQOO SOLUTION: visible retake cards, noncompleted retake guard, retake-aware banners, fixed auto-apply, auto/suggested level+goals, 1-Minute Prep readiness panel, guided roadmap generation modal.
+- TECHNICAL MECHANICS: list exact components/hooks/functions/tables.
+- RAG KEYWORDS: Welcome Test retake, retake card, attempt_number, previous_attempt_id, test_id, auto apply, manual apply, student level suggestion, main goal suggestion, student_progress_goals, 1-Minute Prep readiness, Learning Roadmap modal, guided curriculum phases, focused goals, weeks per phase.
 
-Zero dotknięć: `generate-worksheet*`, prompty, `useWorksheetGenerationTracking`, kalkulatory, RLS poza dodaniem kolumn `metadata`/`accepted_at` w `student_goals`.
+---
 
-## Wymagana decyzja
+## Final change report format after implementation
+- Summary of what was implemented
+- Files modified
+- Database changes/data repair performed
+- Edge functions deployed: YES/NO
+- Documentation updated: YES/NO
+- Out of scope issues flagged
+- Verification result: PASS/FAIL
 
-Zatwierdzasz Plan v6.9.39 do wdrożenia? Po zatwierdzeniu wykonuję wszystkie 8 napraw w jednej iteracji, kończąc raportem zmian.
+## Out of scope issues noted
+- Full security linter backlog remains separate.
+- Evidence-based `target_level`/`current → target` progression remains separate until a real target signal is designed.
+- No cleanup/deletion of already-created duplicate incomplete retakes unless explicitly requested.
