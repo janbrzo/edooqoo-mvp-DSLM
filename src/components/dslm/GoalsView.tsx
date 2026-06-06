@@ -125,6 +125,19 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
     }
   }, [pendingAddGoal, onConsumePendingAddGoal]);
 
+  // v6.9.41 P2 — also open via window event so late mounts (LazySection) still
+  // catch the request after focus=add-goal-modal has already been consumed.
+  React.useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail?.studentId && detail.studentId !== studentId) return;
+      setNewGoal((prev) => ({ ...prev, type: 'supporting' }));
+      setShowAddGoal(true);
+    };
+    window.addEventListener('dslm:addGoal', handler as EventListener);
+    return () => window.removeEventListener('dslm:addGoal', handler as EventListener);
+  }, [studentId]);
+
   const renderGoalCard = (goal: any) => {
     const r = progressMap.get(goal.id);
     return (
