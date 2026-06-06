@@ -171,7 +171,16 @@ serve(async (req) => {
   }
 
   try {
-    const { studentId, teacherId, mode = 'replace', count: rawCount, teacherComment = '' } = await req.json();
+    const {
+      studentId,
+      teacherId,
+      mode = 'replace',
+      count: rawCount,
+      teacherComment = '',
+      weeksPerPhase: rawWeeksPerPhase,
+      phaseWeekTargets: rawPhaseWeekTargets,
+      focusedGoalIds: rawFocusedGoalIds,
+    } = await req.json();
 
     if (!studentId || !teacherId) {
       return new Response(
@@ -275,12 +284,24 @@ serve(async (req) => {
     const pacing = computePacingIndex(student as any, weeksUntilDeadline);
     const pLabel = pacingLabel(pacing);
 
-    // Phase count strategy — explicit count from request takes precedence
+    // v6.9.41 P6 — guided overrides take precedence over auto-fit heuristics.
+    const phaseWeekTargets: number[] | null = Array.isArray(rawPhaseWeekTargets) && rawPhaseWeekTargets.length > 0
+      ? rawPhaseWeekTargets
+          .map((n: any) => Math.max(1, Math.min(12, Number.parseInt(String(n), 10) || 0)))
+          .filter((n: number) => n > 0)
+      : null;
+    const explicitWeeksPerPhase = Number.isFinite(rawWeeksPerPhase)
+      ? Math.max(1, Math.min(12, Number.parseInt(String(rawWeeksPerPhase), 10)))
+      : null;
     const requestedCount = Number.isInteger(rawCount) ? Math.min(8, Math.max(1, rawCount)) : null;
-    const phaseCount = requestedCount ?? (weeksUntilDeadline
-      ? Math.min(5, Math.max(3, Math.round(weeksUntilDeadline / 4)))
-      : 5);
-    const avgWeeksPerPhase = weeksUntilDeadline ? Math.max(2, Math.round(weeksUntilDeadline / phaseCount)) : 4;
+    const phaseCount = (phaseWeekTargets?.length)
+      ?? requestedCount
+      ?? (weeksUntilDeadline ? Math.min(5, Math.max(3, Math.round(weeksUntilDeadline / 4))) : 5);
+    const avgWeeksPerPhase = explicitWeeksPerPhase
+      ?? (weeksUntilDeadline ? Math.max(2, Math.round(weeksUntilDeadline / phaseCount)) : 4);
+    const focusedGoalIds: string[] = Array.isArray(rawFocusedGoalIds)
+      ? rawFocusedGoalIds.filter((x: any) => typeof x === 'string' && x.length > 0)
+      : [];
     // v6.9.13: when deadline exists, totalWeeks is HARD-CAPPED at weeksUntilDeadline.
     // For mode='add', we need the remaining budget after already-existing phases.
     let remainingBudget: number | null = null;
@@ -294,18 +315,29 @@ serve(async (req) => {
             return Math.max(acc, e || s || 0);
           }, 0);
         remainingBudget = Math.max(phaseCount, weeksUntilDeadline - consumed);
-      } else {
+    } else if (phaseWeekTargets) {
+      remainingBudget = phaseWeekTargets.reduce((a, b) => a + b, 0);
+    } else if (explicitWeeksPerPhase) {
+      remainingBudget = explicitWeeksPerPhase * phaseCount;
+    } else {
         // 'replace' rebuilds from week 1 — use full deadline budget.
         remainingBudget = weeksUntilDeadline;
       }
     }
     const totalWeeks = remainingBudget ?? phaseCount * avgWeeksPerPhase;
 
+    // Build focused-goal subset for the prompt (rest still informs pacing).
+    const focusedGoals = focusedGoalIds.length > 0
+      ? goals.filter((g: any) => focusedGoalIds.includes((g as any).id))
+      : [];
+
     const scientificFramework = buildScientificPrinciplesBlock(student.english_level, pacing);
     const studentProfile = buildStudentProfileBlock(student as any, pacing);
     const weakBlock = buildWeakAreasBlock(metrics, 12);
     const knowledgeBlock = buildKnowledgeBlock(knowledge, 10);
-    const goalsBlock = buildGoalsBlock(goals);
+    const goalsBlock = focusedGoals.length > 0
+      ? `PRIORITY GOALS (teacher-selected — these MUST drive phase design):\n${buildGoalsBlock(focusedGoals)}\n\nOther active goals (context only, do not let them dominate):\n${buildGoalsBlock(goals.filter((g: any) => !focusedGoalIds.includes((g as any).id)))}`
+      : buildGoalsBlock(goals);
     const worksheetHistory = buildWorksheetHistoryBlock(worksheets, 10);
     const existingPlan = buildExistingPhasesBlock(existingPhases);
 
@@ -448,8 +480,14 @@ Return ONLY a valid JSON array (no markdown), with this exact format:
       rationale: p.rationale ? String(p.rationale).slice(0, 600) : null,
     }));
 
-    // v6.9.13 — HARD DEADLINE FIT safety net (server-side scaling/clipping).
-    const fit = fitPhasesToDeadline(phases, remainingBudget);
+    // v6.9.41 P6 — when teacher set explicit per-phase week targets, honor them deterministically.
+    let fit: { phases: any[]; adjusted: boolean };
+    if (phaseWeekTargets && phases.length === phaseWeekTargets.length) {
+      fit = { phases: rebase(phases, phaseWeekTargets), adjusted: true };
+    } else {
+      // v6.9.13 — HARD DEADLINE FIT safety net (server-side scaling/clipping).
+      fit = fitPhasesToDeadline(phases, remainingBudget);
+    }
     phases = fit.phases;
 
     // Soft-delete existing un-done phases on replace
@@ -480,6 +518,13 @@ Return ONLY a valid JSON array (no markdown), with this exact format:
       goals_count: goals.length,
       knowledge_count: knowledge.length,
       worksheet_count: worksheets.length,
+      teacher_overrides: {
+        explicit_count: requestedCount ?? null,
+        explicit_weeks_per_phase: explicitWeeksPerPhase ?? null,
+        phase_week_targets: phaseWeekTargets ?? null,
+        focused_goal_ids: focusedGoalIds.length > 0 ? focusedGoalIds : null,
+        has_teacher_comment: Boolean(teacherComment && teacherComment.trim().length > 0),
+      },
       generated_at: new Date().toISOString(),
     };
 
