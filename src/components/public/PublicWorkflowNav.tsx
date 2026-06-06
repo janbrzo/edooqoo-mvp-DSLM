@@ -18,7 +18,7 @@ const PublicWorkflowNav: React.FC<PublicWorkflowNavProps> = ({ className }) => {
   const active = getPublicFeatureByPath(location.pathname);
 
   const WorkflowLinks = ({ stacked = false }: { stacked?: boolean }) => (
-    <div className={stacked ? 'flex flex-col gap-1' : 'hidden items-center gap-1 xl:flex'}>
+    <div className={stacked ? 'flex flex-col gap-1' : 'hidden items-center gap-1 lg:flex'}>
       {PUBLIC_FEATURE_WORKFLOW.map(({ key, label, path, icon: Icon }) => {
         const isActive = active?.key === key || location.pathname === path;
         return (
@@ -44,8 +44,11 @@ const PublicWorkflowNav: React.FC<PublicWorkflowNavProps> = ({ className }) => {
 
   return (
     <nav className={cn('sticky top-0 z-50 border-b border-border bg-background/90 backdrop-blur-md', className)}>
-      <div className="mx-auto flex h-14 max-w-7xl items-center justify-between gap-3 px-4 lg:px-6">
-        <div className="flex min-w-0 items-center gap-3">
+      {/* v6.9.39 P8 — full-width container + flex-1 left block pushes
+          feature pills to the left next to the logo so the action cluster
+          on the right no longer crushes them at ~1200px viewports. */}
+      <div className="flex h-14 items-center justify-between gap-3 px-4 lg:px-6">
+        <div className="flex min-w-0 flex-1 items-center gap-3">
           <Link
             to="/"
             className="shrink-0 bg-gradient-to-r from-violet-600 to-indigo-600 bg-clip-text text-lg font-bold text-transparent"
