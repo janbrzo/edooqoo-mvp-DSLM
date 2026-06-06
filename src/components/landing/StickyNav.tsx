@@ -154,13 +154,9 @@ const StickyNav: React.FC<StickyNavProps> = ({ isRegisteredUser, tokenLeft, user
       <>
       <DemoBanner />
       <nav className={`sticky ${isDemoMode ? 'top-[36px]' : 'top-0'} z-50 bg-background/90 backdrop-blur-md border-b border-border h-14 px-6 flex items-center justify-between`}>
-        <div className="flex items-center gap-3 min-w-0 flex-1">
+        <div className="flex items-center gap-3 min-w-0">
           <Logo />
           {showStudentSwitcher && <NavStudentSwitcher />}
-          {/* v6.9.39 P8 — feature pills live on the left next to the logo
-              on every authenticated page so the right action cluster does
-              not get crushed (matches the public `/` layout). */}
-          <FeatureNavPills className="hidden xl:flex" />
           {leftContent}
         </div>
         <div className="flex items-center gap-3">
