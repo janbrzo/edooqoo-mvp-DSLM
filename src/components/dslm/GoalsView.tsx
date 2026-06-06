@@ -243,6 +243,37 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
         </CardContent>
       </Card>
 
+      {suggestedGoals.length > 0 && (
+        <Card className="border-primary/40 bg-primary/5">
+          <CardContent className="py-3 space-y-2">
+            <div className="flex items-center gap-2 flex-wrap">
+              <Sparkles className="h-4 w-4 text-primary" />
+              <span className="text-sm font-semibold">Suggested from Welcome Test</span>
+              <Badge variant="secondary" className="text-[10px]">{suggestedGoals.length}</Badge>
+              <div className="ml-auto flex items-center gap-1">
+                <Button size="sm" variant="default" className="h-7 text-xs" onClick={acceptAllSuggested} disabled={acceptingAll}>
+                  <Check className="h-3 w-3 mr-1" /> Accept all
+                </Button>
+                <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={dismissAllSuggested} disabled={dismissingAll}>
+                  <X className="h-3 w-3 mr-1" /> Dismiss all
+                </Button>
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              These goals were inferred from the student's Welcome Test results. Accept to keep them on the Pathway, dismiss to remove, or edit individual goals below.
+            </p>
+            <ul className="text-xs space-y-1 pl-1">
+              {suggestedGoals.map((g: any) => (
+                <li key={g.id} className="flex items-start gap-1.5">
+                  <span className="text-primary">•</span>
+                  <span><span className="font-medium">{g.title}</span>{g.description ? ` — ${g.description}` : ''}</span>
+                </li>
+              ))}
+            </ul>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Supporting Goals — open by default */}
       <CollapsibleSection
         id="goals-supporting"
