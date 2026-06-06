@@ -405,7 +405,7 @@ export default function WelcomeTestPage() {
             <div className="flex items-center gap-2 mb-3">
               <Sparkles className="h-5 w-5 text-primary" />
               <span className="text-lg font-semibold">Welcome Test</span>
-              <span className="text-xs text-muted-foreground ml-auto">Question 1 of 49</span>
+              <span className="text-xs text-muted-foreground ml-auto">Question 1 of 58</span>
             </div>
             {/* Fake progress bar */}
             <Progress value={3} className="h-1.5 mb-3" />

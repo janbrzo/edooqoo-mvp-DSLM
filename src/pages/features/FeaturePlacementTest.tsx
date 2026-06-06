@@ -58,7 +58,7 @@ const PlacementTestMockup = () => (
 );
 
 const benefits = [
-  { icon: ClipboardCheck, title: '49-question assessment', description: 'Multi-skill, CEFR-oriented diagnostic covering grammar, vocabulary, reading, listening, and speaking.' },
+  { icon: ClipboardCheck, title: '58-question assessment', description: 'Multi-skill, CEFR-oriented diagnostic covering grammar, vocabulary, reading, listening, and speaking.' },
   { icon: Brain, title: 'AI-generated profile input', description: 'Detailed learning profile with per-skill CEFR indicators, strengths, weaknesses, and pacing context for teacher review.' },
   { icon: Route, title: 'Roadmap starting point', description: 'Results can initialize profile context, skill scores, confidence signals, and a starting point for pacing and roadmap review.' },
   { icon: Mic, title: 'Speaking & listening', description: 'Not just grammar and vocabulary — the test includes audio comprehension and speaking tasks for a complete assessment.' },
@@ -66,29 +66,29 @@ const benefits = [
 
 const steps = [
   { number: 1, title: 'Send the test link', description: 'Generate a unique test link for your new student. They can take it on any device — phone, tablet, or computer.' },
-  { number: 2, title: 'Student completes 49 questions', description: '20-30 minutes. Questions cover grammar, vocabulary, reading, listening, and speaking sections across CEFR-oriented difficulty bands.' },
+  { number: 2, title: 'Student completes 58 questions', description: '20-30 minutes. Questions cover grammar, vocabulary, reading, listening, and speaking sections across CEFR-oriented difficulty bands.' },
   { number: 3, title: 'AI analyzes results', description: 'AI evaluates answers including open-ended speaking tasks and generates a detailed learning profile for teacher review.' },
   { number: 4, title: 'You review the profile', description: 'See the breakdown: strengths, weaknesses, confidence levels, and starting profile context. Test results become a starting input for DSLM.' },
 ];
 
 const faqItems = [
-  { question: 'How long does the test take?', answer: 'Most students complete it in 20-30 minutes. There are 49 questions across 5 skill areas using a CEFR-oriented diagnostic structure.' },
+  { question: 'How long does the test take?', answer: 'Most students complete it in 20-30 minutes. There are 58 questions across 5 skill areas using a CEFR-oriented diagnostic structure.' },
   { question: 'Does it include speaking and listening?', answer: 'Yes. The listening section uses audio clips. The speaking section includes recording tasks. AI evaluates pronunciation, fluency, and accuracy.' },
-  { question: 'Can I customize the test?', answer: 'The placement test uses a standardized 49-question format designed for maximum diagnostic accuracy. You cannot modify questions, but you can supplement results with your own observations through the Student Knowledge system.' },
+  { question: 'Can I customize the test?', answer: 'The placement test uses a standardized 58-question format designed for maximum diagnostic accuracy. You cannot modify questions, but you can supplement results with your own observations through the Student Knowledge system.' },
   { question: 'How does the test connect to DSLM?', answer: 'Test results initialize the student\'s DSLM profile with baseline skill context. This gives Edooqoo a stronger starting point for future worksheet suggestions, while teacher review remains part of the workflow.' },
   { question: 'Can students retake the test?', answer: 'Yes. You can generate a new test link at any time. Retakes update the DSLM profile with fresh data, which is useful for measuring long-term progress.' },
 ];
 
 const FeaturePlacementTest: React.FC = () => (
   <FeaturePageLayout
-    title="AI English Placement Test — 49 Questions, CEFR Assessment | Edooqoo"
-    metaDescription="Send a link, student completes 49 questions (grammar, vocabulary, reading, listening, speaking). AI generates a detailed CEFR profile with learning path recommendation."
+    title="AI English Placement Test — 58 Questions, CEFR Assessment | Edooqoo"
+    metaDescription="Send a link, student completes 58 questions (grammar, vocabulary, reading, listening, speaking). AI generates a detailed CEFR profile with learning path recommendation."
   >
     <FeatureHero
-      badge="49 Questions"
+      badge="58 Questions"
       badgeColor="bg-indigo-100 text-indigo-700 border-indigo-200"
       headline="Know your student's level before the first lesson."
-      subheadline="A 49-question AI assessment covering grammar, vocabulary, reading, listening, and speaking. Results become a detailed learning profile and DSLM baseline for teacher review."
+      subheadline="A 58-question AI assessment covering grammar, vocabulary, reading, listening, and speaking. Results become a detailed learning profile and DSLM baseline for teacher review."
     >
       <div className="grid gap-4 p-4 md:grid-cols-2">
         <FeatureScreenshotFrame
