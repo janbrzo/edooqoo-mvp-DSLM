@@ -168,6 +168,8 @@ export function TestDetailsView({ testId, teacherId, studentId, onBack }: TestDe
           await navigator.clipboard.writeText(url);
           toast.success('New Welcome Test created! Link copied to clipboard.');
         }
+        // v6.9.39 P2 — ensure StudentTestsTab list rebuilds with the new card.
+        window.dispatchEvent(new CustomEvent('student-tests:refresh', { detail: { studentId } }));
         onBack(); // Go back to test list
       }
     } catch (err) {

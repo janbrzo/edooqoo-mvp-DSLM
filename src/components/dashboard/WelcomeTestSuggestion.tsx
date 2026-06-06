@@ -16,6 +16,16 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '@/components/ui/tooltip';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { supabase } from '@/integrations/supabase/client';
 import { useStudentTests } from '@/hooks/useStudentTests';
 import { ALL_WELCOME_TEST_QUESTIONS } from '@/data/welcomeTestQuestions';
@@ -98,12 +108,16 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
       if (!data || data.length === 0) {
         setStatus('no_test');
       } else {
-        // WT-3 (v6.9.27): prefer completed/reviewed > in_progress > others.
-        // Avoids surfacing a stale empty duplicate over the real result.
-        const test =
-          data.find((t: any) => t.status === 'completed' || t.status === 'reviewed') ??
-          data.find((t: any) => t.status === 'in_progress') ??
-          data[0];
+        // v6.9.39 P2 — the LATEST attempt always wins. A freshly created
+        // retake (status pending/assigned/in_progress) must show as active
+        // even though older attempts may already be completed/reviewed.
+        // We only fall back to a completed attempt when the latest row is
+        // itself completed/reviewed (no newer attempt exists).
+        const latest = data[0] as any;
+        const pendingStatuses = ['pending', 'assigned', 'in_progress'];
+        const test = pendingStatuses.includes(latest.status)
+          ? latest
+          : (data.find((t: any) => t.status === 'completed' || t.status === 'reviewed') ?? latest);
         setTestId(test.id);
         setTotalQuestions(test.total_questions || 0);
         setAnsweredCount((test as any).answered_count || 0);
@@ -333,7 +347,17 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
    * teacher to the Tests tab so they can send/preview the new attempt.
    */
   const [retaking, setRetaking] = useState(false);
-  const handleRetake = async () => {
+  // v6.9.39 P2 — guard modal when the current attempt is not yet completed.
+  // Prevents teachers from accidentally stacking 5+ retake attempts.
+  const [confirmRetakeOpen, setConfirmRetakeOpen] = useState(false);
+  const handleRetake = () => {
+    if (status !== 'completed') {
+      setConfirmRetakeOpen(true);
+      return;
+    }
+    void runRetake();
+  };
+  const runRetake = async () => {
     if (!testId) return;
     setRetaking(true);
     try {
@@ -378,6 +402,9 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
       setAnsweredCount(0);
       setStatus('pending');
       toast.success(`Attempt #${nextAttempt} created. Send the new link to the student.`);
+      // v6.9.39 P2 — notify Tests tab list so the new attempt card appears
+      // immediately without waiting for re-poll.
+      window.dispatchEvent(new CustomEvent('student-tests:refresh', { detail: { studentId } }));
     } catch (err) {
       console.error('handleRetake failed', err);
       toast.error('Failed to create re-take');
@@ -626,6 +653,25 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
         </div>
         )}
       </CardContent>
+      <AlertDialog open={confirmRetakeOpen} onOpenChange={setConfirmRetakeOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Create another Welcome Test attempt?</AlertDialogTitle>
+            <AlertDialogDescription>
+              The current attempt is not completed yet. Re-take usually makes sense
+              about 30 days after the previous test is finished — that's enough time
+              for new learning signals to accumulate. Creating another attempt now
+              will leave the previous one open and may cause confusion.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => { setConfirmRetakeOpen(false); void runRetake(); }}>
+              Create new attempt anyway
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 }

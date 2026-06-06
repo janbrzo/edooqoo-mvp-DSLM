@@ -3,7 +3,7 @@
  * Round 8: Removed Create AI-Powered Test - only Welcome Test remains
  */
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { FileText, Loader2, Eye, Sparkles, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -22,6 +22,16 @@ import {
   WelcomeTestActionsPanel,
   type WelcomeTestActionsState,
 } from '@/components/welcome-test/WelcomeTestActionsPanel';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface StudentTestsTabProps {
   studentId: string;
@@ -161,7 +171,18 @@ export function StudentTestsTab({ studentId, teacherId, studentName }: StudentTe
 
   /** Plan v6.1 — Re-take: clones the welcome test as a new attempt linked to the previous one. */
   const [retaking, setRetaking] = useState(false);
-  const handleRetake = async () => {
+  // v6.9.39 P2 — confirmation modal when the current attempt isn't completed.
+  const [confirmRetakeOpen, setConfirmRetakeOpen] = useState(false);
+  const handleRetake = () => {
+    if (!welcomeTest) return;
+    const completed = welcomeTest.status === 'completed' || welcomeTest.status === 'reviewed';
+    if (!completed) {
+      setConfirmRetakeOpen(true);
+      return;
+    }
+    void runRetake();
+  };
+  const runRetake = async () => {
     if (!welcomeTest) return;
     setRetaking(true);
     try {
@@ -191,6 +212,7 @@ export function StudentTestsTab({ studentId, teacherId, studentName }: StudentTe
       await generateShareToken(newTest.id, 'welcome');
       refetch();
       toast.success(`Attempt #${nextAttempt} created. Use Send/Copy to share with the student.`);
+      window.dispatchEvent(new CustomEvent('student-tests:refresh', { detail: { studentId } }));
     } catch (err) {
       console.error('handleRetake failed', err);
       toast.error('Failed to create re-take');
@@ -198,6 +220,17 @@ export function StudentTestsTab({ studentId, teacherId, studentName }: StudentTe
       setRetaking(false);
     }
   };
+
+  // v6.9.39 P2 — refresh list whenever any retake path fires the event.
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail?.studentId && detail.studentId !== studentId) return;
+      refetch();
+    };
+    window.addEventListener('student-tests:refresh', handler as EventListener);
+    return () => window.removeEventListener('student-tests:refresh', handler as EventListener);
+  }, [studentId, refetch]);
 
   const welcomeShareUrl = welcomeTest?.share_token
     ? `${window.location.origin}/welcome-test/${welcomeTest.share_token}`
@@ -360,6 +393,26 @@ export function StudentTestsTab({ studentId, teacherId, studentName }: StudentTe
           <p>• <strong>AI Analysis</strong> - generates teaching recommendations from open-ended answers</p>
         </CardContent>
       </Card>
+
+      <AlertDialog open={confirmRetakeOpen} onOpenChange={setConfirmRetakeOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Create another Welcome Test attempt?</AlertDialogTitle>
+            <AlertDialogDescription>
+              The current attempt is not completed yet. Re-take usually makes sense
+              about 30 days after the previous test is finished — that's enough time
+              for new learning signals to accumulate. Creating another attempt now
+              will leave the previous one open and may cause confusion.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => { setConfirmRetakeOpen(false); void runRetake(); }}>
+              Create new attempt anyway
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

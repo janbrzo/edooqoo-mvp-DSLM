@@ -1,398 +1,216 @@
-## Kontekst i diagnoza
+# Plan v6.9.39 — Welcome Test, DSLM Pathway & Public Nav fixes
 
-Pięć niezależnych problemów. Każdy ma jasno zidentyfikowany root cause w obecnym kodzie — żaden nie wymaga ruszania Worksheet Generation Engine, RLS, migracji bazy ani edge functions oprócz wyraźnie wskazanego `audit-llm-models`.
-
----
-
-## P1 — Auto-generate worksheet z „1-Minute Prep" nadal nie startuje
-
-### Dependency scan
-- `src/components/dslm/PathwayView.tsx` — wywołuje `onUseWorksheetSuggestion(..., autoGenerate=true, suggestionId)`.
-- `src/pages/StudentPage.tsx` (1065–1102) — zapisuje `autoGenerateWorksheet`, `autoGenerateWorksheetRequest`, `preSelectedStudent`, `prefillWorksheet`, `prefillExercises`, `prefillExerciseFocusMap`, `prefillMediaTypes`, `forceNewWorksheet`, potem `navigate('/')`.
-- `src/components/WorksheetForm/index.tsx` — czyta wszystkie flagi w `useEffect([])` po mount, ustawia stan, czeka na readiness gate, watchdog 5 s.
-
-### Root cause
-Gate uruchomienia (`useEffect` z deps `[lessonTopic, selectedStudentId, selectedExercises, selectedMediaTypes, exerciseFocusMap]`) startuje dopiero **po** kolejnym renderze, w którym wszystkie pola dojechały. W praktyce zdarza się, że:
-1. `preSelectedStudent` prop (asynchroniczny) dociera po pierwszym mount i nadpisuje `selectedStudentId` ustawiony wcześniej z `autoGenerateWorksheetRequest`, generując dodatkowy cykl renderów.
-2. `selectedExercises` jest inicjalizowany domyślnym zestawem, potem normalizowany z prefilla — w jednym z mikro-cykli React batch'uje stany tak, że gate nie odpala, a kiedy wszystkie się ustabilizują, sessionStorage flag jest już skonsumowany przez wcześniejszy efekt.
-3. Watchdog 5 s teoretycznie powinien ratować, ale jeżeli flag został wcześniej `removeItem` w gate, watchdog wychodzi z `return` i nic się nie dzieje — co pasuje do raportu „przeszło, uzupełniło, ale nie wystartowało".
-
-### Solution options
-| # | Podejście | Tradeoff | Regresja |
-|---|---|---|---|
-| A | Lazy useState — odczyt sessionStorage podczas init stanów, gate skraca się do 1-2 warunków | Zero zmian w API; deterministyczne | Niska |
-| B | Bezpośrednie wywołanie `requestSubmit()` przez `setTimeout(100ms)` po sygnale ready bez gate'a | Proste, ale wraca race | Średnia |
-| C | Premove flagi dopiero po faktycznym dispatchu submit | Łatwe, ale gate i tak zostaje | Niska |
-
-### Selected: A + C łącznie
-Łączymy lazy init (eliminuje race renderów) z asercją, że flag w sessionStorage jest kasowany **dopiero po** `requestSubmit()` (nie przed). Watchdog skracamy do 1500 ms i robimy z niego ostatecznego strażnika tylko gdy lazy init zawiedzie (np. SSR snapshot, brak sessionStorage).
-
-### Impact analysis
-- Zmiana ograniczona do `src/components/WorksheetForm/index.tsx`.
-- `handleSubmit` (linia 378) już ma DOM-fallback na `lessonTopic` — bez zmian.
-- Worksheet Generation Engine: nietknięty.
-- Pozostałe call-sity `onUseWorksheetSuggestion` (Progress Tab) nie używają autoGenerate — nie dotyczy.
-
-### Pełna implementacja (gotowa do wklejenia)
-
-W `src/components/WorksheetForm/index.tsx`:
-
-1. Wprowadzamy helper na początku komponentu (przed `useState`):
-```ts
-// v6.9.38 — read autoGenerate intent synchronously to avoid render races.
-const readAutoGenerateIntent = () => {
-  if (typeof window === 'undefined') return null;
-  try {
-    if (sessionStorage.getItem('autoGenerateWorksheet') !== 'true') return null;
-    const raw = sessionStorage.getItem('autoGenerateWorksheetRequest');
-    return raw ? JSON.parse(raw) as { studentId?: string; suggestionId?: string | null } : {};
-  } catch { return null; }
-};
-const readPrefillTopic = () => {
-  if (typeof window === 'undefined') return '';
-  try {
-    const raw = sessionStorage.getItem('prefillWorksheet');
-    if (!raw) return '';
-    const p = JSON.parse(raw);
-    return typeof p?.topic === 'string' ? p.topic : '';
-  } catch { return ''; }
-};
-const initialAutoIntent = readAutoGenerateIntent();
-```
-
-2. Zamiana `useState` na lazy init dla 2 pól (linie 53 i 59):
-```ts
-const [lessonTopic, setLessonTopic] = useState(() => readPrefillTopic());
-const [selectedStudentId, setSelectedStudentId] = useState<string>(
-  () => (initialAutoIntent?.studentId as string) || preSelectedStudent?.id || "no-student"
-);
-```
-
-3. Usuwamy jednorazową ścieżkę „pin student z request" z efektu na mount (linie 276–290) — została zastąpiona lazy initem. W tym samym `useEffect` pozostawiamy: prefillExercises, prefillFocusMap, prefillMediaTypes, prefillWorksheet → **ale** sekcja `if (parsed.topic) setLessonTopic(parsed.topic)` jest już zbędna gdy lazy init zadziałał (zachowujemy idempotentnie z `if (parsed.topic && !lessonTopic)`).
-
-4. Readiness gate (296–321) upraszczamy do:
-```ts
-useEffect(() => {
-  if (autoSubmitFiredRef.current) return;
-  if (!initialAutoIntent) return;
-  if (!lessonTopic?.trim()) return;
-  if (!selectedExercises?.length) return;
-  if (!formRef.current) return;
-  autoSubmitFiredRef.current = true;
-  window.setTimeout(() => {
-    requestAnimationFrame(() => {
-      try {
-        devLog('🚀 [WorksheetForm v6.9.38] Auto-submit firing');
-        formRef.current?.requestSubmit();
-      } catch (e) { devWarn('[WorksheetForm v6.9.38] requestSubmit threw', e); }
-      // v6.9.38 — clear flags AFTER submit attempt, not before.
-      sessionStorage.removeItem('autoGenerateWorksheet');
-      sessionStorage.removeItem('autoGenerateWorksheetRequest');
-    });
-  }, 0);
-}, [lessonTopic, selectedExercises]);
-```
-
-5. Watchdog skracamy do 1500 ms i sprawdza tylko, czy `initialAutoIntent` był ustawiony, a `autoSubmitFiredRef.current` wciąż `false`. Wtedy force-submit.
-
-### Verification checklist P1
-- [ ] Klik „Generate worksheet ↗" w 1-Minute Prep → konsola pokazuje `[WorksheetForm v6.9.38] Auto-submit firing`.
-- [ ] Toast „Generating…" pojawia się <2 s od navigate.
-- [ ] Form po wygenerowaniu nie zostaje zablokowany przez ponowny watchdog.
-- [ ] Ręczne wejście na `/` (bez sessionStorage) → form pusty, brak autosubmit.
+Wszystkie zmiany operują na warstwie prezentacji + DSLM/Welcome Test bez dotykania Worksheet Generation Engine. Każdy fix ma określony root cause, wybrane rozwiązanie i pliki.
 
 ---
 
-## P2 — Modal „Add learning goals" nie otwiera się po autosend Welcome Test
+## P1 — Duplikat banera Welcome Test w Pathway (zakładka `?tab=dslm`)
 
-### Dependency scan
-- `src/components/dashboard/AddStudentDialog.tsx` (232) — `navigate('/student/{id}?tab=dslm&view=goals&focus=add-goal-modal&_=ts')`.
-- `src/components/dslm/DSLMTab.tsx` (193–216) — `focusParam` effect z `setTimeout(500)` → `setPendingAddGoal(true)` + scrollTo('goals') + strip params.
-- `src/components/dslm/DSLMTab.tsx` (284) — `<LazySection eager={pendingAddGoal || focus==='add-goal-modal'}>`.
-- `src/components/dslm/LazySection.tsx` — `useState(eager)` snapshotuje prop **tylko na pierwszym renderze**.
-- `src/components/dslm/GoalsView.tsx` (76–84) — `useEffect(pendingAddGoal)` → `setShowAddGoal(true)` + consume.
+**Root cause.** Na ekranie `1 MINUTE` baner pojawia się dwa razy: górny renderuje `DSLMTab` (`surface="oneMinute"`), a drugi wmontowany jest u góry `PathwayView` (`src/components/dslm/PathwayView.tsx:247-253`, `surface="oneMinute"` z `compact`). Dodano go w v6.9.33 jako kotwicę dla Onboarding Spotlight, ale teraz duplikuje informację.
 
-### Root cause
-`LazySection` używa `useState(eager)` i nigdy nie odsłuchuje zmian propa `eager`. Sekwencja w P2:
-1. Mount DSLMTab → focus param obecny → ale `setTimeout(500)` jeszcze nie odpalił → `pendingAddGoal=false`, focus==='add-goal-modal' jest true → `<LazySection eager={true}>` → `shouldRender=true`. Tu powinno działać.
-2. Jednak po 500 ms efekt `focusParam` robi `setSearchParams(next, {replace:true})` które **usuwa** `focus` z URL. W tym samym tick'u setPendingAddGoal(true) jeszcze nie został scommitowany w stanie nadrzędnym. W kolejnym renderze prop `eager` może chwilowo być `false` (focus już usunięty, pendingAddGoal jeszcze nie true z perspektywy zewnętrznej). `LazySection` ma już `shouldRender=true` — nie regresuje. Więc dlaczego nie działa?
-3. **Faktyczny root cause**: efekt `focusParam` zależy od `[focusParam, searchParams.get('_')]`. Pierwszy render: `focusParam = 'add-goal-modal'`, planuje timeout 500 ms. ALE: `setSearchParams(next, {replace:true})` w środku timeoutu zmienia `focusParam` na `null` → cleanup `clearTimeout(t)` w return effectu uruchamia się **dla starego efektu**, ale nowy efekt (`focusParam=null`) nie planuje nic. Problem pojawia się jeśli rerenderów jest więcej — `clearTimeout` może wyzerować timer **zanim odpali**. Typowy scenariusz: po nawigacji ze StudentPage następują 2–3 rerendery DSLMTab w pierwszych 500 ms (hydracja studenta, focus, pacing…) → każdy z nich uruchamia `return () => clearTimeout(t)` z poprzedniego efektu. Timer się nie wykonuje. PendingAddGoal nigdy nie staje się true.
+**Decyzja.** Usunąć drugą instancję wewnątrz `PathwayView`. Spotlight i tak celuje w górny baner (ten sam `data-spotlight="send-welcome-test"`).
 
-### Solution options
-| # | Podejście | Tradeoff | Regresja |
-|---|---|---|---|
-| A | Wykonać akcję synchronicznie bez setTimeout (jak najszybciej) | Najprostsze, ale tracimy „chwila na render" | Niska |
-| B | Użyć `useRef` zamiast `useState` jako latch jednorazowego wykonania | Pewne, ale dodaje ref-state | Niska |
-| C | Naprawić też `LazySection` żeby reagował na zmianę `eager` | Hardening warstwowy | Niska |
+**Implementacja.** W `src/components/dslm/PathwayView.tsx`:
+- usunąć blok `<WelcomeTestSuggestion ... compact />` (linie ok. 244-253),
+- usunąć import `WelcomeTestSuggestion` (linia 31).
 
-### Selected: A + C
-- A: zamieniamy `setTimeout(500)` na `requestAnimationFrame` + flagę `useRef(false)` która gwarantuje wykonanie raz, niezależnie od ile razy efekt się rerunuje.
-- C: dodatkowy `useEffect([eager])` w `LazySection`, żeby kolejna zmiana propa `eager→true` natychmiast unlockowała render. To zabezpieczy też przyszłe użycia.
+**Weryfikacja.** Na `/student/:id?tab=dslm` widoczny tylko 1 baner u góry. Spotlight dalej znajduje element po `data-spotlight`.
 
-### Impact analysis
-- `src/components/dslm/DSLMTab.tsx` — wymiana 1 efektu.
-- `src/components/dslm/LazySection.tsx` — dodanie 1 useEffect.
-- Nie dotyka GoalsView (jego logika `pendingAddGoal` już działa).
-- Pozostałe ścieżki używające `focus=`: `pick-idea` (PathwayView), `send-welcome-test`, `learning-roadmap`, `next-lesson-ideas` — wszystkie używają `window.dispatchEvent`. Po refaktorze nadal zostają obsłużone w nowym efekcie bez setTimeout.
+---
 
-### Pełna implementacja
+## P2 — Retake test: znika po refresh, brak nowej karty w Tests, brak guardu przy nieukończonym teście
 
-W `src/components/dslm/DSLMTab.tsx` zastąpienie efektu (193–216):
+**Root cause.** `handleRetake` w `WelcomeTestSuggestion.tsx` (linie 336-387) tworzy nowy `student_tests` row, ale lokalnie ustawia `setStatus('pending')` i `setTestId(newTest.id)` — po reloadzie `checkWelcomeTest` (linie 82-128) preferuje `completed/reviewed > in_progress > others`, więc cofa się do starego ukończonego attemptu zamiast pokazać nowy `assigned/pending`. Po drugie: `StudentTestsTab` używa własnego strumienia (`useStudentTests`), ale w niektórych przypadkach lista nie odświeża się natychmiast — guard. Po trzecie: brak modala potwierdzenia, gdy ostatni test nie jest ukończony, co prowadzi do mnożenia attemptów.
+
+**Decyzja.**
+1. Zmienić logikę priorytetu w `checkWelcomeTest`: gdy najnowszy attempt ma `attempt_number > 1` i status w (`assigned`, `pending`, `in_progress`), traktować go jako aktywny zamiast spadać do starego completed. Reguła: **najnowszy attempt zawsze wygrywa, jeżeli nie jest `cancelled`/`deleted`** — completed pokazujemy tylko gdy nie ma nowszego niewykonanego.
+2. W `WelcomeTestSuggestion` przed `handleRetake` sprawdzić, czy istnieje attempt o statusie nie-completed/nie-reviewed; jeżeli tak, pokazać `AlertDialog` z komunikatem: *"Last attempt is not completed yet. Re-take usually makes sense ~30 days after the previous test is completed. Create another one anyway?"* (próg 30 dni przyjęty na bazie standardów ESL re-assessment cycle — krótko uzasadnione w treści). CTA: `Cancel` / `Create new attempt`.
+3. Po `handleRetake` wywołać `window.dispatchEvent(new CustomEvent('student-tests:refresh', { detail: { studentId } }))` i nasłuchać tego w `StudentTestsTab` aby wymusić re-fetch listy (idempotentne, dodaje brakującą kartę bez czekania na poll).
+4. W `StudentTestsTab` po `handleRetake` (linie 162+) dodać ten sam event dispatch i ten sam guard modal — to zsynchronizuje obie ścieżki (z baneru i z `TestDetailsView`/`StudentTestsTab`).
+
+**Implementacja — pliki.**
+- `src/components/dashboard/WelcomeTestSuggestion.tsx`
+  - zmodyfikować `checkWelcomeTest`: liczyć najnowszy non-cancelled rekord; gdy `status in ('assigned','pending','in_progress')` traktować jako aktywny (nie spadać do completed).
+  - dodać stan `confirmRetakeOpen` + `AlertDialog` (re-używamy `@/components/ui/alert-dialog`).
+  - W `handleRetake` na początku: jeżeli `status === 'completed' || 'reviewed'` → kontynuuj normalnie; w przeciwnym razie → otwórz modal. Faktyczny insert wykonać dopiero po potwierdzeniu (split na `confirmAndRetake`).
+  - Po sukcesie: `window.dispatchEvent(new CustomEvent('student-tests:refresh'))`.
+- `src/components/student-tests/StudentTestsTab.tsx`
+  - dodać `useEffect` z listenerem `student-tests:refresh` → wywołać istniejący `fetchTests` (lub odpowiednik z `useStudentTests`).
+  - dodać ten sam AlertDialog dla retake (linie 162+).
+- `src/components/student-tests/TestDetailsView.tsx`
+  - w `handleRetake` dispatch tego samego eventu po sukcesie, by lista odświeżyła się po `onBack()`.
+
+**Weryfikacja.** Klik retake → modal jeśli stary niewykończony → po confirm: toast `Attempt #N created`, w Tests pojawia się nowa karta, po refresh strony nadal widać nowy attempt jako aktywny baner.
+
+---
+
+## P3 — Po retake fallback "Welcome Placement Test not completed" w `No curriculum plan yet`
+
+**Root cause.** `MacroTimeline.tsx:249-255` warunkuje komunikat na fladze `!wtCompleted`. Po retake mamy 1 ukończony + 1 pending, więc `wtCompleted` może być wyliczane na podstawie *najnowszego* attemptu (pending) zamiast *jakiegokolwiek* ukończonego.
+
+**Decyzja.** Zmienić semantykę `wtCompleted` na: *czy istnieje JAKIKOLWIEK welcome test ze statusem `completed` lub `reviewed` (deleted_at IS NULL)*. Jeżeli tak → ukryć całe `<li>` z "Send test" (linie 249-256), nawet jeśli istnieje nowszy pending retake.
+
+**Implementacja.** Znaleźć źródło `wtCompleted` (propaguje do `MacroTimeline` z `DSLMTab` / hooka). 
+- W `src/components/dslm/DSLMTab.tsx` (lub miejsce, gdzie liczymy `wtCompleted` przekazywane do `MacroTimeline`): zmienić zapytanie na `.eq('test_type','welcome').in('status', ['completed','reviewed']).is('deleted_at', null).limit(1)` — `wtCompleted = (count ?? 0) > 0`.
+- W `MacroTimeline.tsx` zachować obecny render warunkowy (już poprawny). Dodać `data-testid="welcome-test-suggestion-line"` dla łatwego QA.
+
+**Weryfikacja.** Po retake na widoku `No curriculum plan yet` linia "Welcome Placement Test not completed" nie pojawia się.
+
+---
+
+## P4 — Auto-apply nie zadziałał (baner "Apply to Progress" zamiast `reviewed`)
+
+**Root cause.** `supabase/functions/process-welcome-test/index.ts:634-661` próbuje wczytać `test_skill_results` z polem `applied_to_element_id`/`suggested_rating`, ale w nowym flow (po dodaniu pytań do 58) `calculate_test_results` / pipeline AI może NIE generować `applied_to_element_id` dla pytań speaking/listening/open. Jeśli `r.applied_to_element_id` jest `null` dla wszystkich rekordów, pętla nic nie zapisuje i `status` zostaje na `completed`. Brakuje też fallbacku: kiedy `applied_to_element_id` jest puste, należy zmapować po `element_type` ze `student_learning_elements` per student.
+
+**Decyzja.**
+1. W edge function dodać **fallback mapping**: dla każdego `test_skill_results` bez `applied_to_element_id` wyszukać `student_learning_elements` po `(student_id, element_type)` i użyć pierwszego trafionego. Jeśli nie ma elementu — utworzyć go (`upsert` z `current_rating = suggested_rating`).
+2. Po procesie zawsze ustawić `status = 'reviewed'`, jeżeli liczba zaaplikowanych skill_results > 0. Jeżeli faktycznie 0 wyników (brak skill_results w ogóle), zostawić `completed` i zapisać do `error_logs` z konkretnym powodem (`no_skill_results`, `no_matching_elements`), aby diagnostyka była jednoznaczna.
+3. Dodatkowo: na froncie w `TestDetailsView` przycisk `Apply to Progress` zostaje jako *manualny fallback* (idempotentny) — bez zmian.
+
+**Implementacja.**
+- `supabase/functions/process-welcome-test/index.ts` (sekcja v6.9.29 auto-apply, linie ~634-675):
 ```ts
-const focusParam = searchParams.get('focus');
-const focusHandledRef = useRef<string | null>(null);
-useEffect(() => {
-  if (!focusParam) return;
-  // v6.9.38 — guard against multiple rerenders cancelling the action via cleanup.
-  const cacheKey = `${focusParam}:${searchParams.get('_') || ''}`;
-  if (focusHandledRef.current === cacheKey) return;
-  focusHandledRef.current = cacheKey;
+const { data: skillResults } = await supabase
+  .from('test_skill_results')
+  .select('id, element_type, applied_to_element_id, suggested_rating')
+  .eq('student_test_id', test_id)
+  .is('applied_at', null);
 
-  const raf = requestAnimationFrame(() => {
-    if (focusParam === 'add-goal-modal') {
-      handleScrollTo('goals');
-      setPendingAddGoal(true);
-    } else if (focusParam === 'pick-idea') {
-      handleScrollTo('pathway');
-      window.dispatchEvent(new CustomEvent('pathway:pickIdea'));
+const applied: string[] = [];
+if (skillResults?.length) {
+  for (const r of skillResults) {
+    if (r.suggested_rating == null) continue;
+    let elementId = r.applied_to_element_id;
+    if (!elementId && r.element_type) {
+      const { data: existingEl } = await supabase
+        .from('student_learning_elements')
+        .select('id')
+        .eq('student_id', student_id)
+        .eq('element_type', r.element_type)
+        .maybeSingle();
+      if (existingEl) {
+        elementId = existingEl.id;
+      } else {
+        const { data: inserted } = await supabase
+          .from('student_learning_elements')
+          .insert({ student_id, element_type: r.element_type, current_rating: r.suggested_rating })
+          .select('id').single();
+        elementId = inserted?.id ?? null;
+      }
     }
-    const next = new URLSearchParams(searchParams);
-    next.delete('focus');
-    next.delete('_');
-    setSearchParams(next, { replace: true });
-  });
-  return () => cancelAnimationFrame(raf);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-}, [focusParam, searchParams.get('_')]);
+    if (!elementId) continue;
+    await supabase.from('student_learning_elements')
+      .update({ current_rating: r.suggested_rating, last_rated_at: new Date().toISOString() })
+      .eq('id', elementId);
+    await supabase.from('test_skill_results')
+      .update({ applied_at: new Date().toISOString(), applied_to_element_id: elementId })
+      .eq('id', r.id);
+    applied.push(r.id);
+  }
+}
+if (applied.length > 0) {
+  await supabase.from('student_tests')
+    .update({ status: 'reviewed', reviewed_at: new Date().toISOString() })
+    .eq('id', test_id);
+}
 ```
 
-W `src/components/dslm/LazySection.tsx` dodanie efektu pod istniejącym:
-```ts
-// v6.9.38 — honor late eager flips (e.g., add-goal-modal deep link).
-useEffect(() => {
-  if (eager && !shouldRender) setShouldRender(true);
-}, [eager, shouldRender]);
-```
-
-### Verification checklist P2
-- [ ] Add Student z opcją „Send welcome test now" → automatyczna nawigacja → modal „Add learning goals" otwiera się <1 s.
-- [ ] Ponowne kliknięcie tej samej akcji (re-nawigacja z `_=ts`) → modal otwiera się ponownie.
-- [ ] Ścieżki `focus=pick-idea` i `focus=send-welcome-test` nadal działają.
-- [ ] Console: brak warningu o cancelled rAF na zwykłej nawigacji.
+**Weryfikacja.** Po `process-welcome-test` dla nowego ucznia `status = 'reviewed'`, baner "Auto-apply did not complete" znika, `student_learning_elements` dostają ratingi.
 
 ---
 
-## P3 — Daily vs Monthly audit LLM: czy to to samo?
+## P5 — Brak auto-przypisania level/goals po teście (flow „I don't know my student yet")
 
-### Dependency scan
-- `supabase/functions/audit-llm-models/index.ts` — `TARGETS_DAILY` (4 modele) i `TARGETS_MONTHLY = [...DAILY, +3 dodatkowe]`.
-- `supabase/functions/send-model-audit-email/index.ts` — używa pola `mode` w temacie.
+**Root cause.** `process-welcome-test` tworzy `student_learning_profiles`, ale nie zapisuje wynikowego CEFR do `students.english_level` ani nie tworzy/sugeruje rekordów `student_goals`. UI nie pokazuje też propozycji.
 
-### Root cause
-To **nie są** te same audyty: Monthly = Daily + 3 extra (gpt-4o-mini-tts, gpt-4.1-2025-04-14, google/gemini-3-flash-preview). Daily pinguje hot path (4 modele × każdy dzień), Monthly raz/miesiąc pełną inwentaryzację (7 modeli). Treść maila różni się liczbą wierszy. Mimo to maile mogą wyglądać podobnie, bo brak rozróżnienia wizualnego.
+**Decyzja.** Dwie ścieżki:
+- **Auto-apply level** gdy `students.english_level` jest `NULL` lub puste → wpisać CEFR wyznaczony przez Learning Path Score (zmienna `learningPathResult` już istnieje w funkcji, linie ~1247-1255). Gdy poziom już istnieje i się różni → utworzyć rekord `pacing_proposals` typu `level_change` lub miękką notyfikację (NIE nadpisywać).
+- **Auto-create suggested goals**: jeżeli student ma 0 aktywnych `student_goals` (poza main goal), wziąć `recommended_focus_areas` z `student_learning_profiles` (już generowane przez AI summary, pole istnieje) i wstawić 1× `main` (jeśli brak), 2× `supporting`, 1× `additional`. Każdy goal w statusie `suggested` (nowa wartość enum, OR użyć `is_ai_suggested = true`), tak by UI pokazał je jako *do akceptacji*. Jeżeli enum nie wspiera — fallback: zwykłe `active` z flagą `source = 'welcome_test_auto'` w `metadata`.
+- **UI sugestii** w `GoalsView.tsx`: gdy istnieją goals z `metadata.source = 'welcome_test_auto'` i `accepted_at IS NULL`, renderować nad listą banner *"Suggested from Welcome Test"* z przyciskami `Accept all` / `Edit` / `Dismiss`.
 
-### Decyzja
-Skoro user pyta i jasno warunkuje: „jeżeli to są 2 osobne audyty to ma być osobno mail daily i monthly" — to **już są osobne**, ale potrzebują jasniejszego rozróżnienia. Trzymamy oba, dodajemy do maila wyraźny banner kadencji + listę modeli ekskluzywnych dla danego trybu, żeby user nie miał wątpliwości.
+**Implementacja.**
+- Migration: dodać kolumnę `student_goals.metadata jsonb default '{}'::jsonb` jeżeli nie istnieje, oraz `accepted_at timestamptz` (nullable). Zachowuje wstecz-kompatybilność. GRANTy bez zmian (tabela istniejąca).
+- Edge function `process-welcome-test/index.ts`: dodać sekcję `auto-apply level + suggest goals` PO sekcji auto-apply skill_results.
+  - Odczyt `students.english_level`; jeżeli puste → update.
+  - Odczyt aktywnych goals; jeżeli 0 → insert 4 sugerowane na bazie `recommended_focus_areas` + main goal z testu.
+- Front `src/components/dslm/GoalsView.tsx`: dodać sekcję `SuggestedGoalsBanner` z 3 akcjami.
+- Front `WelcomeTestSuggestion.tsx` (status `completed`): dodać krótki tekst *"Level + goal suggestions applied"* z linkiem do `?tab=dslm&focus=goals`.
 
-### Solution options
-| # | Podejście | Tradeoff | Regresja |
-|---|---|---|---|
-| A | Zostawić cron daily+monthly, ulepszyć subject + dodać banner w mailu | Minimalna zmiana | Niska |
-| B | Zlikwidować monthly (cały audyt daily) | Większy ruch do OpenAI każdego dnia, drożej | Średnia |
-| C | Zlikwidować daily, zostawić tylko monthly | Tracimy szybką detekcję regresji | Wysoka |
-
-### Selected: A
-Najtaniej, najbezpieczniej, respektuje istniejący kontrakt cron.
-
-### Pełna implementacja
-
-W `supabase/functions/audit-llm-models/index.ts` (przed `const rows = ...`):
-```ts
-const modeBannerHtml = mode === 'monthly'
-  ? `<div style="padding:10px 14px;border-radius:6px;background:#eef2ff;border:1px solid #c7d2fe;color:#3730a3;font-size:13px;margin:0 0 12px;">
-       <b>Monthly LLM Audit</b> — full inventory (${results.length} models, including TTS and legacy fallbacks). Runs on the 1st of each month.
-     </div>`
-  : `<div style="padding:10px 14px;border-radius:6px;background:#ecfeff;border:1px solid #a5f3fc;color:#155e75;font-size:13px;margin:0 0 12px;">
-       <b>Daily LLM Audit</b> — hot-path subset (${results.length} models powering live worksheet generation, classification, OpenAI fallback). Runs daily at 06:00 UTC.
-     </div>`;
-const reportHtml = `${modeBannerHtml}<table ...>...</table>`;
-```
-
-W `supabase/functions/send-model-audit-email/index.ts` upewniamy się, że subject ma prefix:
-```ts
-const subject = mode === 'monthly'
-  ? `📊 Monthly LLM Audit — ${summary.ok}/${summary.total} OK`
-  : `🔎 Daily LLM Audit — ${summary.ok}/${summary.total} OK`;
-```
-(jeśli już jest taki format po v6.9.37, tylko weryfikujemy).
-
-### Verification checklist P3
-- [ ] Ręczny POST `{"mode":"daily"}` → mail z bannerem „Daily LLM Audit — hot-path subset".
-- [ ] Ręczny POST `{"mode":"monthly"}` → mail z bannerem „Monthly LLM Audit — full inventory".
-- [ ] Subjecty maili wyraźnie różne.
+**Weryfikacja.** Nowy uczeń kończy test → na DSLM widoczne sugerowane goals + ustawiony poziom + (gdy poziom różny) badge propozycji zmiany.
 
 ---
 
-## P4 — Artykuł `teaching-english-one-to-one.html` ma mojibake (â€", Â·, â†)
+## P6 — Skąd "B1 → B2" na nagłówku ucznia?
 
-### Dependency scan
-- `public/blog/teaching-english-one-to-one.html` — 5774 bajtów, BOM + literalne sekwencje `â€"`, `Â·`, `â†'`, `â† `, `â€™`.
+**Root cause.** `src/components/dslm/StudentNavBadges.tsx:14-35` zawiera twardo zakodowaną mapę `LEVEL_PROGRESSION = {A1:'A2', ...}` i ZAWSZE pokazuje strzałkę do następnego CEFR, nawet bez jakichkolwiek sygnałów postępu. To wprowadza w błąd — wygląda jak rzeczywista predykcja modelu.
 
-### Root cause
-Plik został kiedyś zapisany z bajtów UTF-8 zinterpretowanych jako Windows-1252, a następnie ponownie zapisany jako UTF-8 (klasyczne podwójne kodowanie). Bajty `0xE2 0x80 0x94` (—) zostały zapisane jako trzy znaki `â`, `€`, `"`.
+**Decyzja.** Pokazywać `current → next` TYLKO wtedy, gdy istnieje realny sygnał: aktywny `pacing_proposal` typu `level_change` lub aktywna faza w `curriculum_phases` z `target_level` różnym od aktualnego. W każdym innym przypadku — sam `current`.
 
-### Solution options
-| # | Podejście | Tradeoff | Regresja |
-|---|---|---|---|
-| A | Find/replace ograniczonych sekwencji mojibake | Szybkie, deterministyczne | Niska |
-| B | Pełna konwersja `iconv -f UTF-8 -t WINDOWS-1252 \| iconv -f UTF-8 -t UTF-8` | Działa dla całych dokumentów, ale ryzyko utraty znaków jeśli pojawi się czysty UTF-8 | Średnia |
+**Implementacja.**
+- `src/components/dslm/StudentNavBadges.tsx`: przyjąć nowy prop `targetLevel?: string | null`. Render: `englishLevel === targetLevel || !targetLevel` → tylko `englishLevel`; inaczej `englishLevel → targetLevel`. Dodać `<Tooltip>` wyjaśniający źródło ("Inferred from current learning roadmap phase" / "Suggested by pacing proposal").
+- Wywołanie w `StudentPage.tsx` (lub gdziekolwiek mount): wyliczyć `targetLevel` z `useCurriculumPhases` (faza in_progress → `target_level`) lub `usePacingProposals` (typ `level_change` → `proposed_level`). Usunąć `LEVEL_PROGRESSION` jako *fallback* (nigdy nie używać auto-następnego CEFR bez evidence).
 
-### Selected: A
-Plik jest mały (5.7 KB), zestaw mojibake skończony — `â€"` → `—`, `â€™` → `'`, `â€œ` → `"`, `â€\u009d` → `"`, `â† ` → `←`, `â†'` → `→`, `Â·` → `·`, `Â ` → ` `, `Â©` → `©`, usuwamy BOM (`\uFEFF`) z początku pliku. Też zostawiamy nawigację taką samą wizualnie.
-
-### Pełna implementacja
-1. Wczytanie pliku przez `code--view`, identyfikacja wszystkich sekwencji mojibake (poniżej pełna lista do find/replace).
-2. Zapis nowej, czystej wersji UTF-8 bez BOM. Lista zamian (kolejność krytyczna — od najdłuższych do najkrótszych):
-```
-\uFEFF       → (usunąć BOM na początku pliku)
-â€"          → —    (em-dash)
-â€"          → –    (en-dash, jeśli występuje wariant)
-â€™          → '
-â€˜          → '
-â€œ          → "
-â€           → "
-â†'          → →
-â†           → ←
-Â·           → ·
-Â©           → ©
-Â®           → ®
-Â (samotne)  → (usunąć)
-```
-3. Po zapisie weryfikacja: `rg -n "â|Â|†|€" public/blog/teaching-english-one-to-one.html` powinno zwrócić 0 wyników.
-
-### Verification checklist P4
-- [ ] `rg "â|Â|€"` w pliku → brak.
-- [ ] Render w przeglądarce: `← Edooqoo Home · Blog`, `Teaching English One-to-One — Private Lesson Guide`, `Try Edooqoo Free →`.
-- [ ] Plik zaczyna się od `<!DOCTYPE html>` bez BOM.
+**Weryfikacja.** Johny Bravo (B1, brak fazy / propozycji) → widoczne tylko `B1`. Po wygenerowaniu roadmapy z `target_level=B2` → `B1 → B2` z tooltipem.
 
 ---
 
-## P5 — Artykuł `learning-pacing-scientific-vs-pragmatic-esl.html` ma być zgodny z logiką pacing
+## P7 — Brakuje "Where this feature fits in Edooqoo" na `/one-minute-prep` i `/`
 
-### Dependency scan
-- `public/blog/learning-pacing-scientific-vs-pragmatic-esl.html` — obecna treść jest faktyczna i poprawna, ale **nie odwołuje się** do konkretnych metod naukowych.
-- `supabase/functions/_shared/dslmPromptCore.ts` — faktyczna logika:
-  - Scientific (0–30): „Krashen", „Natural Order", „strict input-before-output", grammar explicitness HIGH.
-  - Pragmatic (70–100): „TBLT-first", „just-in-time micro-rules embedded in formulaic chunks".
-  - Balanced (31–69): respektuje Natural Order, ale anchoring w domenie ucznia od dnia 1.
-  - Adaptive rules: Pragmatic = ≥3 productive exercises; Scientific = ≥2 receptive przed produktywnymi; Balanced = 4V+4G interleaved.
+**Root cause.** Komponent `FeatureWorkflowMap` jest renderowany na podstronach feature (`/features/*`), ale nie na `/one-minute-prep` (`src/pages/OneMinutePrep.tsx`) ani na landingu (`src/pages/Index.tsx`).
 
-### Root cause
-Artykuł opisuje semantykę Scientific/Balanced/Pragmatic w sposób miękki („more input-first sequencing", „more output-first"), ale **nie wymienia** Krashena, Natural Order Hypothesis, Input Hypothesis ani Task-Based Language Teaching, które są **explicit** w naszym promptcie i w UI sliderze (`PacingModeSlider.tsx`). User słusznie odbiera to jako rozjazd z „logiką naukową".
+**Decyzja.** Wmontować `<FeatureWorkflowMap />` (bez `activeKey` — wersja "ogólna") na:
+1. `/one-minute-prep` — pomiędzy hero a `OneMinutePrepProofSection` (przed linią 239) z `activeKey="one-minute-prep"` (lub bez activeKey, jeżeli feature key nie istnieje w mapie — sprawdzić `PUBLIC_FEATURE_WORKFLOW` w `src/constants/publicFeatureWorkflow.ts`).
+2. `/` — w `src/pages/Index.tsx` wewnątrz dolnej sekcji marketingowej dla zalogowanych użytkowników anonimowych (po hero, przed sekcjami feature pills). Wersja bez `activeKey` — neutralna.
 
-### Solution options
-| # | Podejście | Tradeoff | Regresja |
-|---|---|---|---|
-| A | Rozszerzyć sekcje „Mode Definitions" + dodać nową sekcję „Scientific basis" z referencjami | Pełne uzasadnienie, lepsza SEO/AI citation | Niska |
-| B | Drobne dopisanie 2-3 nazw metod w istniejących bulletach | Szybsze, ale wciąż płytkie | Niska |
-| C | Pełne przepisanie | Niepotrzebnie szerokie | Średnia |
+**Implementacja.**
+- W `src/pages/OneMinutePrep.tsx` dodać import + `<FeatureWorkflowMap activeKey="one-minute-prep" />` (jeżeli klucz nie istnieje, dodać go do `publicFeatureWorkflow.ts` z poprawnym labelem i ścieżką).
+- W `src/pages/Index.tsx` dodać `<FeatureWorkflowMap />` w wybranym miejscu (między hero a Feature Pills) — sekcja widoczna tylko dla anon (warunek `!isRegisteredUser` jeśli komponent landingowy go ma; inaczej zawsze).
 
-### Selected: A
-Zachowujemy istniejący szkielet i metadane, dopisujemy konkrety, które są **rzeczywiście** w kodzie. Wszystkie nowe zdania muszą odpowiadać 1:1 mechanice w `dslmPromptCore.ts`, żeby spełnić Martha Test (zero marketingowych fikcji).
-
-### Pełna implementacja
-
-W `public/blog/learning-pacing-scientific-vs-pragmatic-esl.html`:
-
-1. Rozszerzenie sekcji „Mode Definitions" o explicit refs:
-
-```html
-<section>
-  <h2>Mode Definitions</h2>
-  <ul>
-    <li><b>Scientific pacing (0-30):</b> strict input-before-output sequencing inspired by Stephen Krashen's Natural Order Hypothesis and Input Hypothesis (i+1). Explicit grammar rules are introduced before exposure, with clear meta-language. Each generated step includes at least two receptive exercises (reading, multiple-choice, matching, true-false) before any productive task. Best for A1/A2 learners, exam preparation, and accuracy-sensitive learners.</li>
-    <li><b>Balanced pacing (31-69):</b> Natural Order is still respected, but every step is anchored in the learner's professional or personal domain from day one. Each step includes four vocabulary-focused and four grammar-focused exercises, interleaved, with at least two productive tasks. Default for most adult 1:1 learners.</li>
-    <li><b>Pragmatic pacing (70-100):</b> task-based methodology (TBLT) with just-in-time micro-rules embedded in formulaic chunks. Meta-language is avoided. Each generated step includes at least three productive exercises (dialogue, answer-questions, discussion, fill-in-blanks without options). Best for short deadlines, workplace English, travel goals, and learners with immediate communicative pressure.</li>
-  </ul>
-</section>
-```
-
-2. Dodanie nowej sekcji „Scientific basis" (po „Mode Definitions"):
-
-```html
-<section>
-  <h2>Scientific basis Edooqoo applies</h2>
-  <ul>
-    <li><b>Natural Order Hypothesis (Krashen):</b> drives the Scientific end of the slider. Lower values reduce grammar explicitness skips and enforce receptive-before-productive sequencing.</li>
-    <li><b>Input Hypothesis i+1 (Krashen):</b> informs how Scientific and Balanced phases keep new input one step above current competence, never several steps above.</li>
-    <li><b>Task-Based Language Teaching (Willis, Ellis):</b> drives the Pragmatic end. Higher values shift the generated step toward authentic real-world tasks and reduce explicit rule explanation.</li>
-    <li><b>Lexical Approach (Lewis):</b> informs the formulaic-chunk treatment Pragmatic pacing applies — collocations and prefabricated phrases over isolated grammar drills.</li>
-    <li><b>Spacing and re-targeting:</b> nano-skills introduced in any step are re-targeted 3-5 steps later regardless of pacing mode, to support retention.</li>
-  </ul>
-</section>
-```
-
-3. Zaktualizować sekcję „How This Connects To 1-Minute Prep":
-
-```html
-<li>Pacing is one of several DSLM signals: goals, roadmap phase, nano-skill mastery, teacher notes, homework evaluations, worksheet history, and flashcard retention.</li>
-<li>The pacing value adjusts INPUT/OUTPUT RATIO directly: a value of N translates to N% output-focused exercises and (100-N)% input-focused exercises in the planning prompt.</li>
-<li>Context immersion is also scaled by pacing: N% of vocabulary and scenarios are drawn from the student's professional or personal domain.</li>
-```
-
-4. Zaktualizować datę `dateModified` w JSON-LD na bieżącą.
-
-5. Zachować istniejące metadane, canonical, FAQ, BreadcrumbList — nie ruszać.
-
-### Verification checklist P5
-- [ ] Artykuł zawiera słowa kluczowe „Krashen", „Natural Order Hypothesis", „Input Hypothesis", „TBLT", „Lexical Approach".
-- [ ] Liczby (≥2 receptive, ≥3 productive, 4+4 V/G) zgodne z `getAdaptiveExerciseRules` w `dslmPromptCore.ts`.
-- [ ] Tooltip slidera w `PacingModeSlider.tsx` linkuje do tej strony — bez zmian.
-- [ ] `rg "Krashen|TBLT" public/blog/learning-pacing-scientific-vs-pragmatic-esl.html` → 5+ hits.
+**Weryfikacja.** Obie strony renderują sekcję; linki w mapie kierują do `/features/*`.
 
 ---
 
-## RAG injection (po wdrożeniu wszystkich 5 fixów)
+## P8 — Sticky nav ściśnięty na `/features/*` i `/one-minute-prep`; przenieść pills w lewo
 
-### `docs/llm-context.md` — dopisać sekcję v6.9.38
+**Root cause.** W `StickyNav.tsx` (linia 253 i sąsiednie) dla wariantu zalogowanego/anonimowego renderujemy `<FeatureNavPills />` w bloku po prawej. Pills mają `className="hidden items-center gap-1 lg:flex"` (FeatureNavPills.tsx:85) i są wpychane między logo a prawe akcje, co powoduje ścisk.
 
-```
-PROBLEM: 1-Minute Prep "Generate worksheet ↗" intermittently filled the form but did not auto-submit; Add-Goal modal failed to open after auto-sending the Welcome Test from AddStudentDialog.
-EDOOQOO SOLUTION: WorksheetForm now reads autoGenerate intent synchronously via lazy useState initializers, simplifying the readiness gate. DSLMTab focus-param effect uses requestAnimationFrame + dedupe ref so multiple rerenders cannot cancel the pending action; LazySection now honors late eager prop flips.
-TECHNICAL MECHANICS: src/components/WorksheetForm/index.tsx (lazy init for lessonTopic + selectedStudentId, removed pin-from-request useEffect, gate deps narrowed to [lessonTopic, selectedExercises], watchdog reduced to 1500ms). src/components/dslm/DSLMTab.tsx (focus-param effect rewritten with focusHandledRef dedupe + rAF). src/components/dslm/LazySection.tsx (added useEffect to react to eager flips). supabase/functions/audit-llm-models/index.ts (mode banner block added, subject prefix verified). public/blog/teaching-english-one-to-one.html (mojibake purge). public/blog/learning-pacing-scientific-vs-pragmatic-esl.html (Krashen/TBLT/Lexical basis sections added).
-RAG KEYWORDS: 1-Minute Prep auto generate worksheet, autoGenerateWorksheetRequest race fix, readiness gate lazy init, lessonTopic lazy useState, DSLMTab focus param rerender cancellation, requestAnimationFrame dedupe ref, LazySection eager late flip honored, Add Goal modal after Welcome Test autosend, daily versus monthly LLM audit subject prefix banner, hot-path subset full inventory model_health_checks purpose column, mojibake fix double encoded UTF-8 blog post, Krashen Natural Order Hypothesis pacing, Input Hypothesis i+1, Task-Based Language Teaching TBLT pragmatic mode, Lexical Approach formulaic chunks, dslmPromptCore pacing rules INPUT OUTPUT RATIO
-```
+**Decyzja.** Przenieść `FeatureNavPills` do lewego bloku (obok logo), tak samo jak na `/`. Konkretnie: w gałęzi anon desktop (linie 253+) struktura już ma `flex items-center justify-between` — wystarczy umieścić `<FeatureNavPills />` wewnątrz lewego `<div>` z logo, NIE prawego.
 
-### `public/llms.txt` i `llms.txt` — dopisać identyczny blok keywords w sekcji „Recent changes".
+**Implementacja.**
+- W `src/components/landing/StickyNav.tsx`:
+  - W każdym desktopowym renderze nav (anon i zalogowany) upewnić się, że `<FeatureNavPills />` znajduje się w lewym kontenerze obok `<Logo />`. Usunąć z prawego.
+  - Dla mobilnego (sheet) — bez zmian (już stacked w drawerze).
 
-### `mem/features/onboarding/v6938-auto-generate-and-modal-hardening.md` — nowy plik z opisem v6.9.38 (3 sekcje: WorksheetForm hardening, DSLMTab/LazySection hardening, content hygiene).
-
-### `mem/index.md` — dopisać link do nowej notatki w „Memories".
+**Weryfikacja.** Na `/`, `/features/*`, `/one-minute-prep` pills są wyrównane do lewej, prawa strona ma tylko CTA + login.
 
 ---
 
-## Final change report (po implementacji)
+## Po implementacji — RAG injection + change report
 
-Pliki modyfikowane:
-1. `src/components/WorksheetForm/index.tsx` — P1
-2. `src/components/dslm/DSLMTab.tsx` — P2
-3. `src/components/dslm/LazySection.tsx` — P2
-4. `supabase/functions/audit-llm-models/index.ts` — P3
-5. `supabase/functions/send-model-audit-email/index.ts` — P3 (subject weryfikacja)
-6. `public/blog/teaching-english-one-to-one.html` — P4
-7. `public/blog/learning-pacing-scientific-vs-pragmatic-esl.html` — P5
-8. `docs/llm-context.md`, `public/llms.txt`, `llms.txt` — RAG
-9. `mem/features/onboarding/v6938-auto-generate-and-modal-hardening.md` — nowy
-10. `mem/index.md` — link
+1. Aktualizacja `docs/llm-context.md` i `public/llms.txt` z sekcją v6.9.39:
+   - PROBLEM / EDOOQOO SOLUTION / TECHNICAL MECHANICS / RAG KEYWORDS (po 1 bloku na P1..P8 lub zbiorczo).
+2. Nowy plik memory `mem/features/onboarding/v6939-welcome-test-and-nav.md` (typ feature) + wpis w `mem/index.md` (Memories).
+3. Final change report: lista zmienionych plików, status weryfikacji per problem, lista *out of scope* (jeśli się pojawi cokolwiek), informacja że Worksheet Generation Engine nie został tknięty.
 
-Sanctity:
-- Worksheet Generation Engine: NIETKNIĘTY (zmiany tylko w warstwie auto-submit formularza, nie w prompcie/parametrach).
-- DB schema, RLS, migracje: bez zmian.
-- Edge functions z generacją: bez zmian.
+---
 
-Out of scope (zalogowane, nie naprawiane):
-- Brak — wszystkie 5 problemów obsłużone.
+## Pliki które zostaną zmienione (skrót)
 
-Verification: zsumowana lista checkboxów z P1–P5 (12 punktów) plus smoke test audit-llm-models w obu trybach.
+- `src/components/dslm/PathwayView.tsx` (P1)
+- `src/components/dashboard/WelcomeTestSuggestion.tsx` (P2, P5)
+- `src/components/student-tests/StudentTestsTab.tsx` (P2)
+- `src/components/student-tests/TestDetailsView.tsx` (P2)
+- `src/components/dslm/MacroTimeline.tsx` + `DSLMTab.tsx` (P3)
+- `supabase/functions/process-welcome-test/index.ts` (P4, P5)
+- `supabase/migrations/<timestamp>_welcome_test_suggested_goals.sql` (P5)
+- `src/components/dslm/GoalsView.tsx` (P5)
+- `src/components/dslm/StudentNavBadges.tsx` + `StudentPage.tsx` (P6)
+- `src/pages/OneMinutePrep.tsx`, `src/pages/Index.tsx`, `src/constants/publicFeatureWorkflow.ts` (P7)
+- `src/components/landing/StickyNav.tsx` (P8)
+- `docs/llm-context.md`, `public/llms.txt`, `mem/index.md`, `mem/features/onboarding/v6939-welcome-test-and-nav.md` (RAG + memory)
 
-Po zatwierdzeniu planu uruchamiam implementację w trybie build.
+Zero dotknięć: `generate-worksheet*`, prompty, `useWorksheetGenerationTracking`, kalkulatory, RLS poza dodaniem kolumn `metadata`/`accepted_at` w `student_goals`.
+
+## Wymagana decyzja
+
+Zatwierdzasz Plan v6.9.39 do wdrożenia? Po zatwierdzeniu wykonuję wszystkie 8 napraw w jednej iteracji, kończąc raportem zmian.

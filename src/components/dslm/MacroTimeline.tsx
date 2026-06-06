@@ -27,7 +27,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useStudent } from '@/hooks/useStudent';
 import { useStudentProgress } from '@/hooks/useStudentProgress';
-import { useWelcomeTestActions, type WelcomeTestSnapshot } from '@/hooks/useWelcomeTestActions';
+import { useWelcomeTestActions } from '@/hooks/useWelcomeTestActions';
 
 /**
  * v6.9.12 — Recommend 1 step per week of the phase length, clamped 1–6.
@@ -87,14 +87,26 @@ export const MacroTimeline: React.FC<MacroTimelineProps> = ({
   const studentName = studentRow?.name || 'Student';
   const studentEmail = studentRow?.student_email ?? null;
   const welcomeActions = useWelcomeTestActions({ studentId, teacherId, studentName, studentEmail });
-  const [wtStatus, setWtStatus] = useState<WelcomeTestSnapshot['status']>(null);
+  // v6.9.39 P3 — treat WT as completed if ANY attempt for this student is
+  // completed/reviewed (not only the latest). Prevents the "Send test" CTA
+  // from reappearing after a retake is created.
+  const [wtCompleted, setWtCompleted] = useState<boolean>(false);
   React.useEffect(() => {
     let cancelled = false;
-    welcomeActions.getStatus().then(s => { if (!cancelled) setWtStatus(s.status); }).catch(() => {});
+    import('@/integrations/supabase/client').then(({ supabase }) => {
+      supabase
+        .from('student_tests')
+        .select('id', { count: 'exact', head: true })
+        .eq('student_id', studentId)
+        .eq('teacher_id', teacherId)
+        .eq('test_type', 'welcome')
+        .in('status', ['completed', 'reviewed'])
+        .is('deleted_at', null)
+        .then(({ count }) => { if (!cancelled) setWtCompleted((count ?? 0) > 0); });
+    }).catch(() => {});
     return () => { cancelled = true; };
-  }, [studentId, teacherId, welcomeActions]);
+  }, [studentId, teacherId]);
   const hasGoals = (goals?.length ?? 0) > 0;
-  const wtCompleted = wtStatus === 'completed' || wtStatus === 'reviewed';
   // Pending generate-phases action — confirmed via AlertDialog when goals are missing.
   const [pendingGenerate, setPendingGenerate] = useState<null | { mode: 'replace' | 'add'; count?: number }>(null);
   const requestGeneratePhases = (mode: 'replace' | 'add', count?: number) => {

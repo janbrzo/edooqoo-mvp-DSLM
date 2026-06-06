@@ -17,6 +17,7 @@ import { PageSeo, buildFaqPageLd } from '@/components/seo/PageSeo';
 import LessonSignalCaptureSection from '@/components/landing/LessonSignalCaptureSection';
 import OneMinutePrepProofSection from '@/components/landing/OneMinutePrepProofSection';
 import PublicWorkflowNav from '@/components/public/PublicWorkflowNav';
+import FeatureWorkflowMap from '@/components/features/FeatureWorkflowMap';
 import {
   DEFAULT_ONE_MINUTE_PREP_CALCULATOR_INPUT,
   type OneMinutePrepCalculatorInput,
@@ -240,6 +241,8 @@ const OneMinutePrep: React.FC = () => {
           calculatorValue={oneMinutePrepCalculator}
           onCalculatorChange={setOneMinutePrepCalculator}
         />
+
+        <FeatureWorkflowMap activeKey="one-minute-prep" />
 
         <section className="border-y bg-secondary/20 py-16">
           <div className="mx-auto max-w-6xl px-4">

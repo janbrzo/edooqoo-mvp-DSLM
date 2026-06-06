@@ -28,6 +28,7 @@ import AnonPostWorksheetLandingPage from "@/components/anon/AnonPostWorksheetLan
 import WelcomeBackBanner from "@/components/anon/WelcomeBackBanner";
 import ParticlesBackground from "@/components/landing/ParticlesBackground";
 import StartOneMinutePrepDialog from "@/components/landing/StartOneMinutePrepDialog";
+import FeatureWorkflowMap from "@/components/features/FeatureWorkflowMap";
 import { markWorksheetForClaim } from "@/hooks/useWorksheetClaim";
 import { devLog, devWarn } from '@/utils/logger';
 import { AddStudentDialog } from "@/components/dashboard/AddStudentDialog";
@@ -410,6 +411,7 @@ const Index = () => {
           </div>
           <StatsBar />
           <TwoPhaseWorkflowSection compact className="bg-background/75 backdrop-blur-sm" />
+          <FeatureWorkflowMap />
           <section className="bg-secondary/20 py-14">
             <div className="mx-auto max-w-6xl px-4">
               <LessonSignalCaptureSection compact />
