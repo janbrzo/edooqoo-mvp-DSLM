@@ -2315,6 +2315,7 @@ export type Database = {
       }
       student_progress_goals: {
         Row: {
+          accepted_at: string | null
           achieved_at: string | null
           archived_at: string | null
           created_at: string | null
@@ -2325,6 +2326,8 @@ export type Database = {
           id: string
           is_achieved: boolean | null
           manual_progress_pct: number | null
+          metadata: Json
+          source: string | null
           student_id: string
           target_date: string | null
           teacher_id: string
@@ -2332,6 +2335,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          accepted_at?: string | null
           achieved_at?: string | null
           archived_at?: string | null
           created_at?: string | null
@@ -2342,6 +2346,8 @@ export type Database = {
           id?: string
           is_achieved?: boolean | null
           manual_progress_pct?: number | null
+          metadata?: Json
+          source?: string | null
           student_id: string
           target_date?: string | null
           teacher_id: string
@@ -2349,6 +2355,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          accepted_at?: string | null
           achieved_at?: string | null
           archived_at?: string | null
           created_at?: string | null
@@ -2359,6 +2366,8 @@ export type Database = {
           id?: string
           is_achieved?: boolean | null
           manual_progress_pct?: number | null
+          metadata?: Json
+          source?: string | null
           student_id?: string
           target_date?: string | null
           teacher_id?: string
