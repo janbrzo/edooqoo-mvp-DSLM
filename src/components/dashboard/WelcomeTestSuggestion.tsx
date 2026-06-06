@@ -108,12 +108,16 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
       if (!data || data.length === 0) {
         setStatus('no_test');
       } else {
-        // WT-3 (v6.9.27): prefer completed/reviewed > in_progress > others.
-        // Avoids surfacing a stale empty duplicate over the real result.
-        const test =
-          data.find((t: any) => t.status === 'completed' || t.status === 'reviewed') ??
-          data.find((t: any) => t.status === 'in_progress') ??
-          data[0];
+        // v6.9.39 P2 — the LATEST attempt always wins. A freshly created
+        // retake (status pending/assigned/in_progress) must show as active
+        // even though older attempts may already be completed/reviewed.
+        // We only fall back to a completed attempt when the latest row is
+        // itself completed/reviewed (no newer attempt exists).
+        const latest = data[0] as any;
+        const pendingStatuses = ['pending', 'assigned', 'in_progress'];
+        const test = pendingStatuses.includes(latest.status)
+          ? latest
+          : (data.find((t: any) => t.status === 'completed' || t.status === 'reviewed') ?? latest);
         setTestId(test.id);
         setTotalQuestions(test.total_questions || 0);
         setAnsweredCount((test as any).answered_count || 0);
