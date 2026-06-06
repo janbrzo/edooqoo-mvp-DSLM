@@ -69,6 +69,18 @@ export default function WorksheetForm({
       return typeof p?.topic === 'string' ? p.topic : '';
     } catch { return ''; }
   };
+  // v6.9.41 — synchronous reads of DSLM prefill so initial state already contains
+  // exercises/focus/media. Eliminates the race where the readiness gate fires
+  // before the prefill effect re-runs.
+  const readPrefillField = <T,>(key: string, fallback: T): T => {
+    if (typeof window === 'undefined') return fallback;
+    try {
+      const raw = sessionStorage.getItem(key);
+      if (!raw) return fallback;
+      const parsed = JSON.parse(raw);
+      return (parsed ?? fallback) as T;
+    } catch { return fallback; }
+  };
   const initialAutoIntentRef = useRef<{ studentId?: string; suggestionId?: string | null } | null>(readAutoGenerateIntent());
   const [lessonTopic, setLessonTopic] = useState<string>(() => readPrefillTopic());
   const [lessonGoal, setLessonGoal] = useState("");
@@ -86,10 +98,30 @@ export default function WorksheetForm({
     const MANUAL_EXERCISES_45MIN = ['reading', 'true-false', 'matching', 'fill-in-blanks', 'categorize', 'odd-one-out'];
     return lessonTime === '45min' ? MANUAL_EXERCISES_45MIN : MANUAL_EXERCISES_60MIN;
   };
-  const [selectedExercises, setSelectedExercises] = useState<string[]>(getInitialExercises());
+  const [selectedExercises, setSelectedExercises] = useState<string[]>(() => {
+    // v6.9.41 — when an auto-generate intent exists, prefer the DSLM exercises
+    // saved in sessionStorage so the readiness gate sees them on first render.
+    if (initialAutoIntentRef.current) {
+      const exFromStorage = readPrefillField<string[]>('prefillExercises', []);
+      if (Array.isArray(exFromStorage) && exFromStorage.length > 0) return exFromStorage;
+    }
+    return getInitialExercises();
+  });
   const [selectionMode, setSelectionMode] = useState<ExerciseSelectionMode>('manual');
-  const [selectedMediaTypes, setSelectedMediaTypes] = useState<MediaType[]>([]);
-  const [exerciseFocusMap, setExerciseFocusMap] = useState<Record<string, 'vocabulary' | 'grammar'>>({});
+  const [selectedMediaTypes, setSelectedMediaTypes] = useState<MediaType[]>(() => {
+    if (initialAutoIntentRef.current) {
+      const media = readPrefillField<MediaType[]>('prefillMediaTypes', []);
+      if (Array.isArray(media)) return media as MediaType[];
+    }
+    return [];
+  });
+  const [exerciseFocusMap, setExerciseFocusMap] = useState<Record<string, 'vocabulary' | 'grammar'>>(() => {
+    if (initialAutoIntentRef.current) {
+      const focus = readPrefillField<Record<string, 'vocabulary' | 'grammar'>>('prefillExerciseFocusMap', {});
+      if (focus && typeof focus === 'object') return focus;
+    }
+    return {};
+  });
   const [selectedImage, setSelectedImage] = useState<any>(null);
   const [currentPlaceholders, setCurrentPlaceholders] = useState<PlaceholderSet>(getRandomPlaceholderSet());
   const [currentSuggestions, setCurrentSuggestions] = useState<SuggestionSet[]>([]);
