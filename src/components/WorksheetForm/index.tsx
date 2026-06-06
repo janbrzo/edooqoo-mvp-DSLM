@@ -364,7 +364,20 @@ export default function WorksheetForm({
     const t = setTimeout(() => {
       if (autoSubmitFiredRef.current) return;
       if (!initialAutoIntentRef.current) return;
-      const ok = !!lessonTopic?.trim() && (selectedExercises?.length ?? 0) > 0 && !!formRef.current;
+      // v6.9.41 — last-chance re-hydration from sessionStorage before giving up.
+      let topicNow = lessonTopic;
+      let exercisesNow = selectedExercises;
+      if (!topicNow?.trim()) {
+        const recoveredTopic = readPrefillTopic();
+        if (recoveredTopic) { topicNow = recoveredTopic; setLessonTopic(recoveredTopic); }
+      }
+      if (!exercisesNow || exercisesNow.length === 0) {
+        const recoveredEx = readPrefillField<string[]>('prefillExercises', []);
+        if (Array.isArray(recoveredEx) && recoveredEx.length > 0) {
+          exercisesNow = recoveredEx; setSelectedExercises(recoveredEx);
+        }
+      }
+      const ok = !!topicNow?.trim() && (exercisesNow?.length ?? 0) > 0 && !!formRef.current;
       if (ok) {
         autoSubmitFiredRef.current = true;
         devWarn('[WorksheetForm v6.9.38] watchdog force-submit');
