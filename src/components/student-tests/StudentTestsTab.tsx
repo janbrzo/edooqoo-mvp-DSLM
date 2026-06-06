@@ -3,7 +3,7 @@
  * Round 8: Removed Create AI-Powered Test - only Welcome Test remains
  */
 
-import { useState, useMemo, useCallback } from 'react';
+import { useState, useMemo, useCallback, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { FileText, Loader2, Eye, Sparkles, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -22,6 +22,16 @@ import {
   WelcomeTestActionsPanel,
   type WelcomeTestActionsState,
 } from '@/components/welcome-test/WelcomeTestActionsPanel';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface StudentTestsTabProps {
   studentId: string;
