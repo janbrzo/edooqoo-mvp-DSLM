@@ -347,7 +347,17 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
    * teacher to the Tests tab so they can send/preview the new attempt.
    */
   const [retaking, setRetaking] = useState(false);
-  const handleRetake = async () => {
+  // v6.9.39 P2 — guard modal when the current attempt is not yet completed.
+  // Prevents teachers from accidentally stacking 5+ retake attempts.
+  const [confirmRetakeOpen, setConfirmRetakeOpen] = useState(false);
+  const handleRetake = () => {
+    if (status !== 'completed') {
+      setConfirmRetakeOpen(true);
+      return;
+    }
+    void runRetake();
+  };
+  const runRetake = async () => {
     if (!testId) return;
     setRetaking(true);
     try {
@@ -392,6 +402,9 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
       setAnsweredCount(0);
       setStatus('pending');
       toast.success(`Attempt #${nextAttempt} created. Send the new link to the student.`);
+      // v6.9.39 P2 — notify Tests tab list so the new attempt card appears
+      // immediately without waiting for re-poll.
+      window.dispatchEvent(new CustomEvent('student-tests:refresh', { detail: { studentId } }));
     } catch (err) {
       console.error('handleRetake failed', err);
       toast.error('Failed to create re-take');
