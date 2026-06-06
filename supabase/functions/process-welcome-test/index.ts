@@ -627,38 +627,75 @@ serve(async (req) => {
       console.error('[process-welcome-test] WT-4 status update failed', statusErr);
     }
 
-    // v6.9.29 — Auto-apply skill ratings to student_learning_elements.
-    // Mirrors the manual "Apply Results to Progress" path so DSLM has fresh
-    // mastery data without teacher intervention. Failure does NOT roll back
-    // 'completed' — UI fallback button lets teacher retry manually.
+    // v6.9.39 P4 — Auto-apply skill ratings.
+    // Improvements over v6.9.29:
+    //  - When `test_skill_results.applied_to_element_id` is NULL we look up
+    //    a matching `student_learning_elements` row by (student_id, element_type)
+    //    and use that. This covers students whose elements were created by
+    //    other surfaces (goals UI, prior tests) without a direct FK in the
+    //    test_skill_results row.
+    //  - We ALWAYS mark the test `reviewed` once the learning profile is in
+    //    place (it is — upsertError would have thrown above). The student
+    //    learning profile carries the per-skill scores even when no nano-skill
+    //    elements exist yet (typical for brand-new students with zero goals).
+    //    This eliminates the misleading "Auto-apply did not complete" banner.
     try {
       const { data: skillResults } = await supabase
         .from('test_skill_results')
-        .select('id, applied_to_element_id, suggested_rating')
+        .select('id, element_type, applied_to_element_id, suggested_rating')
         .eq('student_test_id', test_id)
         .is('applied_at', null);
 
+      const appliedIds: string[] = [];
       if (skillResults && skillResults.length > 0) {
-        for (const r of skillResults) {
-          if (r.applied_to_element_id && r.suggested_rating != null) {
+        for (const r of skillResults as any[]) {
+          if (r.suggested_rating == null) continue;
+          let elementId: string | null = r.applied_to_element_id ?? null;
+          if (!elementId && r.element_type) {
+            const { data: existingEl } = await supabase
+              .from('student_learning_elements')
+              .select('id')
+              .eq('student_id', student_id)
+              .eq('element_type', r.element_type)
+              .is('deleted_at', null)
+              .maybeSingle();
+            if (existingEl?.id) elementId = existingEl.id;
+          }
+          if (elementId) {
             await supabase
               .from('student_learning_elements')
               .update({
                 current_rating: r.suggested_rating,
                 last_rated_at: new Date().toISOString(),
               })
-              .eq('id', r.applied_to_element_id);
+              .eq('id', elementId);
+            await supabase
+              .from('test_skill_results')
+              .update({
+                applied_at: new Date().toISOString(),
+                applied_to_element_id: elementId,
+              })
+              .eq('id', r.id);
+          } else {
+            // No matching nano-skill element — still mark the skill_result as
+            // processed so the manual "Apply to Progress" fallback does not
+            // re-flag it. The per-skill score lives on the learning profile.
+            await supabase
+              .from('test_skill_results')
+              .update({ applied_at: new Date().toISOString() })
+              .eq('id', r.id);
           }
+          appliedIds.push(r.id);
         }
-        await supabase
-          .from('test_skill_results')
-          .update({ applied_at: new Date().toISOString() })
-          .in('id', skillResults.map((r: any) => r.id));
-        await supabase
-          .from('student_tests')
-          .update({ status: 'reviewed', reviewed_at: new Date().toISOString() })
-          .eq('id', test_id);
       }
+
+      // Always promote to 'reviewed' — the learning profile upsert succeeded
+      // and skill_results (if any) are processed. Skip if already reviewed.
+      await supabase
+        .from('student_tests')
+        .update({ status: 'reviewed', reviewed_at: new Date().toISOString() })
+        .eq('id', test_id)
+        .neq('status', 'reviewed');
     } catch (autoApplyErr) {
       console.error('[process-welcome-test] auto-apply failed', autoApplyErr);
       try {
@@ -672,6 +709,86 @@ serve(async (req) => {
           context: { testId: test_id, error: String((autoApplyErr as Error)?.message || autoApplyErr).slice(0, 500) },
         });
       } catch { /* swallow */ }
+    }
+
+    // v6.9.39 P5 — Auto-fill student level + suggest goals from Welcome Test.
+    // Only writes when the student record has no prior level / goals set, so
+    // teachers who configured the student themselves are never overwritten.
+    try {
+      const { data: studentRowForAutoFill } = await supabase
+        .from('students')
+        .select('english_level')
+        .eq('id', student_id)
+        .maybeSingle();
+      const currentLevel = (studentRowForAutoFill as any)?.english_level;
+      if (!currentLevel || String(currentLevel).trim() === '') {
+        await supabase
+          .from('students')
+          .update({ english_level: estimatedLevel })
+          .eq('id', student_id);
+      }
+
+      const { count: existingGoalCount } = await supabase
+        .from('student_progress_goals')
+        .select('id', { count: 'exact', head: true })
+        .eq('student_id', student_id)
+        .is('deleted_at', null)
+        .is('archived_at', null);
+
+      if ((existingGoalCount ?? 0) === 0) {
+        // Build 2-3 suggested goals from the just-computed profile signals.
+        const suggestions: Array<{ goal_type: string; title: string; description: string; meta: Record<string, unknown> }> = [];
+        const skillLabel = (s: string | null) => {
+          if (!s) return 'core skill';
+          const map: Record<string, string> = {
+            grammar: 'grammar accuracy', vocabulary: 'vocabulary range',
+            reading: 'reading comprehension', writing: 'writing fluency',
+            speaking: 'speaking fluency', listening: 'listening comprehension',
+          };
+          return map[s] || s;
+        };
+        if (weakest) {
+          suggestions.push({
+            goal_type: 'supporting',
+            title: `Improve ${skillLabel(weakest)}`,
+            description: `Welcome Test marked ${skillLabel(weakest)} as the weakest skill. Focused practice should lift overall CEFR confidence.`,
+            meta: { from: 'welcome_test', signal: 'weakest_skill', value: weakest },
+          });
+        }
+        if (strongest && strongest !== weakest) {
+          suggestions.push({
+            goal_type: 'supporting',
+            title: `Leverage ${skillLabel(strongest)}`,
+            description: `Welcome Test marked ${skillLabel(strongest)} as the strongest skill. Use it as a confidence anchor while building weaker areas.`,
+            meta: { from: 'welcome_test', signal: 'strongest_skill', value: strongest },
+          });
+        }
+        if (Array.isArray(interestTopics) && interestTopics.length > 0) {
+          const topic = String(interestTopics[0]);
+          suggestions.push({
+            goal_type: 'additional',
+            title: `Practice English around ${topic}`,
+            description: `Welcome Test surfaced "${topic}" as an interest area. Anchoring lessons here boosts motivation.`,
+            meta: { from: 'welcome_test', signal: 'interest_topic', value: topic },
+          });
+        }
+
+        if (suggestions.length > 0) {
+          const rows = suggestions.map((s, i) => ({
+            student_id,
+            teacher_id,
+            goal_type: s.goal_type,
+            title: s.title,
+            description: s.description,
+            display_order: i,
+            source: 'welcome_test_auto',
+            metadata: s.meta,
+          }));
+          await supabase.from('student_progress_goals').insert(rows);
+        }
+      }
+    } catch (autoLevelErr) {
+      console.error('[process-welcome-test] level/goal auto-suggest failed', autoLevelErr);
     }
 
     // v6.9.29 — Fire-and-forget thank-you email to the student. Idempotent server-side.
