@@ -11,10 +11,6 @@ interface StudentNavBadgesProps {
   daysSinceLastActivity: number | null;
 }
 
-const LEVEL_PROGRESSION: Record<string, string> = {
-  A1: 'A2', A2: 'B1', B1: 'B2', B2: 'C1', C1: 'C2', C2: 'C2',
-};
-
 const getActivityLabel = (days: number | null): string => {
   if (days === null) return 'no activity';
   if (days === 0) return 'active today';
@@ -31,8 +27,13 @@ const getActivityColorClass = (days: number | null): string => {
 };
 
 export const StudentNavBadges: React.FC<StudentNavBadgesProps> = ({ englishLevel, daysSinceLastActivity }) => {
-  const nextLevel = LEVEL_PROGRESSION[englishLevel] || englishLevel;
-  const levelLabel = englishLevel === nextLevel ? englishLevel : `${englishLevel} → ${nextLevel}`;
+  // v6.9.39 P6 — show ONLY the current CEFR level. Previous version always
+  // displayed `current → next` from a hard-coded progression map, which
+  // misled teachers into thinking it was an evidence-based prediction.
+  // Edooqoo has no current signal (no `target_level` on curriculum phases,
+  // no level_change pacing proposal type), so we render the current level
+  // alone until a real target signal exists.
+  const levelLabel = englishLevel;
   const activityClass = getActivityColorClass(daysSinceLastActivity);
 
   return (
