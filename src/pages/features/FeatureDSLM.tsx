@@ -6,6 +6,8 @@ import FeatureSteps from '@/components/features/FeatureSteps';
 import FeatureFAQ from '@/components/features/FeatureFAQ';
 import FeatureCTA from '@/components/features/FeatureCTA';
 import RelatedFeatures from '@/components/features/RelatedFeatures';
+import FeatureScreenshotFrame from '@/components/features/FeatureScreenshotFrame';
+import FeatureWorkflowMap from '@/components/features/FeatureWorkflowMap';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Brain, TrendingUp, Target, Layers, BookCheck, Layers3, CalendarDays, Radio, ClipboardCheck, GraduationCap, ArrowRight } from 'lucide-react';
@@ -115,19 +117,18 @@ const LayersDiagram = () => {
   );
 };
 
-const LearningPathCards = () => {
-  const paths = [
-    { name: 'Comfort', desc: 'Mostly review. Builds confidence with familiar material.', color: 'bg-green-50 border-green-200', emoji: '🟢' },
-    { name: 'Guided', desc: 'Balanced mix of review + new material at student\'s pace.', color: 'bg-blue-50 border-blue-200', emoji: '🔵' },
-    { name: 'Accelerated', desc: 'Pushes the student harder. More new material, less review.', color: 'bg-amber-50 border-amber-200', emoji: '🟠' },
-    { name: 'Target', desc: 'Laser-focused on specific weak areas detected by DSLM.', color: 'bg-red-50 border-red-200', emoji: '🔴' },
+const PacingModeCards = () => {
+  const modes = [
+    { name: 'Scientific', desc: 'More controlled sequencing when the learner needs safer input and accuracy work.', color: 'bg-blue-50 border-blue-200', marker: 'S' },
+    { name: 'Balanced', desc: 'Mixed input, output, review, and practical task work for many adult learners.', color: 'bg-violet-50 border-violet-200', marker: 'B' },
+    { name: 'Pragmatic', desc: 'More task-first planning when a real deadline or use case needs faster output.', color: 'bg-amber-50 border-amber-200', marker: 'P' },
   ];
 
   return (
-    <div className="grid grid-cols-2 gap-3">
-      {paths.map(p => (
+    <div className="grid gap-3 md:grid-cols-3">
+      {modes.map(p => (
         <div key={p.name} className={`p-4 rounded-xl border ${p.color}`}>
-          <div className="text-lg mb-1">{p.emoji}</div>
+          <div className="mb-2 flex h-8 w-8 items-center justify-center rounded-full bg-background text-xs font-bold text-primary">{p.marker}</div>
           <div className="font-semibold text-foreground text-sm">{p.name}</div>
           <div className="text-xs text-muted-foreground mt-1">{p.desc}</div>
         </div>
@@ -236,17 +237,27 @@ const FeatureDSLM: React.FC = () => (
       headline="Turn stored learner evidence into the next lesson focus."
       subheadline="The Dynamic Student Learning Model supports 1-Minute Prep by organizing profile, goals, nano-skill metrics, pacing, roadmap phases, notes, homework, flashcards, and teacher observations before worksheet output."
     >
-      <div className="p-6 md:p-8 grid md:grid-cols-2 gap-8">
-        <div>
-          <h3 className="text-sm font-semibold text-foreground mb-4">Julia Kowalski — B2 Business English</h3>
-          <RadarChartMockup />
-        </div>
-        <div>
-          <h3 className="text-sm font-semibold text-foreground mb-4">Nano-skill Mastery</h3>
-          <NanoSkillsMockup />
-        </div>
+      <div className="grid gap-4 p-4 md:grid-cols-2">
+        <FeatureScreenshotFrame
+          src="/features/skills-heat-map.png"
+          alt="DSLM skills heat map showing nano-skill mastery and category breakdown"
+          caption="Skills Heat Map: broad CEFR areas are broken into nano-skill evidence."
+          imageClassName="h-72"
+          objectPosition="center top"
+          loading="eager"
+        />
+        <FeatureScreenshotFrame
+          src="/features/one-minute-next-steps.png"
+          alt="1-Minute Prep next-step suggestion generated from DSLM context"
+          caption="Next Lesson Ideas: the teacher reviews the suggested focus before worksheet output."
+          imageClassName="h-72"
+          objectPosition="center top"
+          loading="eager"
+        />
       </div>
     </FeatureHero>
+
+    <FeatureWorkflowMap activeKey="dslm" />
 
     <section className="py-8 bg-background border-b border-border">
       <div className="max-w-4xl mx-auto px-4">
@@ -286,12 +297,31 @@ const FeatureDSLM: React.FC = () => (
       </div>
     </section>
 
-    {/* Learning Paths */}
+    {/* Pacing and roadmap */}
     <section className="py-16 bg-secondary/20">
-      <div className="max-w-3xl mx-auto px-4">
-        <h2 className="text-2xl font-bold text-foreground mb-2 text-center">4 Learning Paths</h2>
-        <p className="text-sm text-muted-foreground text-center mb-8">DSLM can suggest a difficulty direction for teacher review.</p>
-        <LearningPathCards />
+      <div className="max-w-5xl mx-auto px-4">
+        <div className="mx-auto mb-8 max-w-3xl text-center">
+          <h2 className="text-2xl font-bold text-foreground mb-2">Learning Pacing and Roadmap Context</h2>
+          <p className="text-sm text-muted-foreground">
+            DSLM uses pacing and roadmap context to decide whether the next step should be more input-first, balanced, or output-heavy. The teacher reviews every proposal before accepting it.
+          </p>
+        </div>
+        <div className="grid gap-4 md:grid-cols-2">
+          <FeatureScreenshotFrame
+            src="/features/pacing-proposal.png"
+            alt="Pacing recheck proposal with teacher approval controls"
+            caption="Pacing proposals are decision support. The teacher accepts or dismisses the change."
+            imageClassName="h-72"
+            objectPosition="center top"
+          />
+          <FeatureScreenshotFrame
+            src="/features/dslm-one-minute.png"
+            alt="DSLM 1-Minute Prep pathway with suggestion, roadmap, and pacing context"
+            caption="Roadmap and next-step suggestions keep worksheets from becoming isolated one-off tasks."
+            imageClassName="h-72"
+            objectPosition="center top"
+          />
+        </div>
       </div>
     </section>
 

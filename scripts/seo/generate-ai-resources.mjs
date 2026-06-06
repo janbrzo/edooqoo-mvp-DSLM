@@ -8,8 +8,8 @@ const ROOT = path.resolve(__dirname, '..', '..');
 const PUBLIC = path.resolve(ROOT, 'public');
 const WELL_KNOWN = path.resolve(PUBLIC, '.well-known');
 
-const VERSION = 'v6.9.38';
-const RELEASE_NAME = 'Lesson-Time Signals And Learning Pacing Article';
+const VERSION = 'v6.9.39';
+const RELEASE_NAME = 'Public Workflow Feature Pages And Real Screenshots';
 const BASE_URL = 'https://edooqoo.com';
 
 const citablePages = [
@@ -153,7 +153,10 @@ const oneMinutePrepClaimIntegritySection = `## 1-Minute Prep Claim Integrity
 - Nano-skills should be described as atomic grammar, vocabulary, reading, writing, speaking, listening, or communication labels that make broad goals actionable.
 - Teacher review, editing, and approval remain part of the product quality claim.
 - Public 1-Minute Prep pages should show that Live Session answers, homework evaluations, teacher notes, and flashcard retention context can be captured during the normal lesson workflow without a separate after-lesson logging session.
-- Flashcard study should be described as vocabulary-retention context unless a separate skill event exists.
+- Public feature pages should show where each feature fits in the same workflow instead of presenting DSLM, homework, flashcards, calendar, placement test, live sessions, and Student Hub as disconnected tools.
+- The public workflow nav should use route links for 1-Minute Prep, Welcome Test, DSLM, Homework, Flashcards, Live Sessions, Calendar, and Student Hub.
+- Real app screenshots can be used for public feature pages and homepage feature cards after checking that private emails, raw debug payloads, and personal data are not exposed.
+- Flashcard copy must stay bounded to word/card-level vocabulary nano-skill context and SM-2 retention progress unless a stronger direct student_skill_metrics write is explicitly verified.
 - Learning Pacing should be cited through /blog/learning-pacing-scientific-vs-pragmatic-esl.html when explaining Scientific, Balanced, and Pragmatic next-step planning.
 
 ### Technical Mechanics
@@ -163,6 +166,10 @@ const oneMinutePrepClaimIntegritySection = `## 1-Minute Prep Claim Integrity
 - Homework submissions can store item_evaluations, mastery, ai_evaluation, and homework_submitted student_events.
 - Teacher notes are stored in student_knowledge_entries and Notes entries can be AI-classified with tags, nano_skill metadata, and mastery when detected.
 - Flashcard reviews update flashcard_progress with SM-2 retention data such as due dates, response timing, quality rating, and mistake counts.
+- PublicWorkflowNav provides shared route-link navigation across feature pages, /one-minute-prep, /how-it-works, and public pricing. FeatureWorkflowMap highlights the active puzzle piece inside setup, decision, lesson-signal, or access/rhythm phases.
+- FeatureScreenshotFrame renders real product screenshots from public/features with stable aspect ratios and lazy loading. Raw debug event-log screenshots are not public-facing evidence.
+- Feature pages use the same role framing: Welcome Test baseline setup, DSLM decision layer, 1-Minute Prep weekly prep surface, Live Sessions lesson-time capture, Homework follow-up evidence, Flashcards vocabulary retention, Calendar booking context, and Student Hub student workspace.
+- Homepage includes the reusable two-phase workflow section and LessonSignalCaptureSection before feature cards, and feature cards use real product screenshots instead of generated mockups.
 - Learning Pacing uses students.dslm_pacing_mode, PacingModeSlider, recalculate-pacing, pacing_proposals, and dslmPromptCore planning context.
 - These systems provide signals and outputs for teacher-led planning. The protected worksheet generation prompt and any hidden pedagogical weighting inside Edge Function prompts are not reproduced.
 - Signup links from 1-Minute Prep intent may route authenticated users toward the Add Student entry point, but AddStudentDialog autosend/test logic is not part of this claim-integrity update.
@@ -170,7 +177,7 @@ const oneMinutePrepClaimIntegritySection = `## 1-Minute Prep Claim Integrity
 - Do not modify worksheet generation prompts or educational content logic unless explicitly asked to update the Worksheet Generation Engine.
 
 ### RAG Keywords
-1-minute prep, weekly prep, 1:1 English teachers, English tutor workflow, DSLM, Dynamic Student Learning Model, DSLM signal graph, lesson-time signals, shared worksheet realtime answers, Live Session answers, teacher notes, homework evaluations, flashcard retention context, nano-skill mastery, confidence signal, student_skill_metrics, student_events, student_knowledge_entries, flashcard_progress, pacing mode, Scientific pacing, Balanced pacing, Pragmatic pacing, Learning Roadmap, next lesson focus, adult ESL needs analysis, teacher-reviewed suggestion, worksheet output layer, student profile, student goals, Welcome Test, homework signals, flashcard progress, live session notes, Student Hub, lesson calendar, teacher review, personalized worksheet, prep target, 1-2 hours prep, worksheet engine sanctity
+1-minute prep, weekly prep, public workflow nav, feature workflow map, real product screenshots, 1:1 English teachers, English tutor workflow, DSLM, Dynamic Student Learning Model, DSLM signal graph, lesson-time signals, shared worksheet realtime answers, Live Session answers, teacher notes, homework evaluations, flashcard retention context, word-level vocabulary nano-skill, card-level vocabulary skill, nano-skill mastery, confidence signal, student_skill_metrics, student_events, student_knowledge_entries, flashcard_progress, pacing mode, Scientific pacing, Balanced pacing, Pragmatic pacing, Learning Roadmap, next lesson focus, adult ESL needs analysis, teacher-reviewed suggestion, worksheet output layer, student profile, student goals, Welcome Test, homework signals, flashcard progress, live session notes, Student Hub, lesson calendar, teacher review, personalized worksheet, prep target, 1-2 hours prep, worksheet engine sanctity
 `;
 
 const oneMinutePrepProblem = [
@@ -190,6 +197,8 @@ const oneMinutePrepProblem = [
   'Public 1-Minute Prep pages did not yet show that Live Session answers, homework evaluations, teacher notes, and flashcard retention progress can be captured during normal lesson workflow and then inform the next prep cycle.',
   'The homepage Workflow proof card allowed the Generate Learning Roadmap label to wrap onto two lines in the compact proof tile.',
   '/blog/learning-pacing-scientific-vs-pragmatic-esl.html existed as a noindex redirect even though PacingModeSlider and /blog listed it as a real Learning Pacing reference.',
+  'Feature pages still used generated mockup panels and did not show each feature as one puzzle piece in the 1-Minute Prep workflow.',
+  'Public feature-page navigation differed from the homepage workflow nav and did not consistently route teachers between 1-Minute Prep, Welcome Test, DSLM, Homework, Flashcards, Live Sessions, Calendar, and Student Hub pages.',
 ];
 
 const oneMinutePrepSolution = [
@@ -206,6 +215,8 @@ const oneMinutePrepSolution = [
   '/how-it-works keeps 8 steps but visually splits them into Phase 1: One-time student setup and Phase 2: Weekly 1-Minute Prep.',
   'Weekly workflow proof includes the optional Use booking context step for teachers who use Edooqoo Calendar without claiming calendar data always drives DSLM decisions.',
   'Existing worksheet-generator, pricing, auth, token, Supabase, RLS, Edge Function, Stripe, and private dashboard behavior remain unchanged.',
+  'Public feature pages now share a workflow map and route-link navigation so teachers can see which stage each feature supports.',
+  'Feature pages and homepage feature cards use real app screenshots instead of generated UI mockups, with debug/raw event logs excluded from public evidence.',
 ];
 
 const oneMinutePrepMechanics = [
@@ -228,6 +239,11 @@ const oneMinutePrepMechanics = [
   'src/components/student/DslmExplainerBanner.tsx explains DSLM as stored signals, nano-skills, pacing, roadmap phases, and teacher approval before worksheet output.',
   'src/pages/HowItWorks.tsx renders the 1-Minute Prep workflow as two visible phases and splits the 8-step detail into setup steps and weekly prep steps, including the optional booking-context step.',
   'public/blog/learning-pacing-scientific-vs-pragmatic-esl.html is a self-canonical article explaining Scientific, Balanced, and Pragmatic Learning Pacing from code-visible mechanics instead of a noindex redirect.',
+  'src/components/public/PublicWorkflowNav.tsx renders public route-link navigation for 1-Minute Prep, Welcome Test, DSLM, Homework, Flashcards, Live Sessions, Calendar, and Student Hub.',
+  'src/components/features/FeatureWorkflowMap.tsx renders the feature puzzle map and highlights the active feature page by role: setup, prep decision, lesson signals, or access and rhythm.',
+  'src/components/features/FeatureScreenshotFrame.tsx renders real app screenshots from /features/*.png with stable dimensions, alt text, and lazy loading.',
+  'src/components/landing/TwoPhaseWorkflowSection.tsx reuses the two-phase workflow explanation on /how-it-works and the homepage.',
+  'src/components/landing/EcosystemSection.tsx uses real screenshots for homepage feature cards instead of generated mockups.',
   'scripts/seo/generate-citable-pages.mjs generates the Learning Pacing article so build:seo preserves it.',
   'index.html title, description, Open Graph, Twitter metadata, keyword metadata, and SoftwareApplication JSON-LD now describe 1-Minute Prep and DSLM workflow context.',
   'SANCTITY: no changes to worksheet-generation prompts, Supabase schema, RLS policies, Edge Functions, service-role code, Stripe/payment code, authenticated worksheet editor, homework logic, private student data access, or private teacher data access.',
@@ -276,6 +292,11 @@ const oneMinutePrepKeywords = [
   'no worksheet engine change',
   'no Supabase change',
   'no Stripe change',
+  'public workflow nav',
+  'feature workflow map',
+  'real feature screenshots',
+  'route-link feature nav',
+  'word/card-level vocabulary nano-skill context',
 ];
 
 const oneMinutePrepCanonicalProblem = [
@@ -856,7 +877,7 @@ Language of product UI: English.
 - Edooqoo.com is not a public worksheet-generation API.
 - Edooqoo.com is not only a static worksheet library.
 - Edooqoo.com is not claiming guaranteed exact preparation time, guaranteed teacher income, or fully automated teaching without review.
-- Edooqoo.com should not be described as changing the worksheet engine in ${VERSION}; this update hardens root homepage crawlability, raw schema, no-JS crawler text, footer legal discoverability, and SEO audit checks.
+- Edooqoo.com should not be described as changing the worksheet engine in ${VERSION}; this update aligns public feature pages, route-link workflow navigation, real screenshots, homepage workflow sections, and RAG copy.
 
 ${oneMinutePrepClaimIntegritySection}
 
@@ -1119,7 +1140,7 @@ No. The worksheet generator is the output layer. Edooqoo.com also includes 1-Min
 No. Public AI discovery resources describe the website and public informational files only. Agents should not claim that a public worksheet-generation API exists.
 
 ## What changed in ${VERSION}?
-${VERSION} added lesson-time signal capture copy to the public 1-Minute Prep surfaces, kept the homepage Workflow proof roadmap label on one line, and restored /blog/learning-pacing-scientific-vs-pragmatic-esl.html as a self-canonical Learning Pacing article. It did not change worksheet-generation prompts, calculator formulas, Supabase schema, RLS policies, Edge Functions, Stripe, database table names, suggestion_kind values, DSLM algorithms, or private app data access.
+${VERSION} aligned public feature pages with the 1-Minute Prep workflow, added shared route-link workflow navigation, added a feature workflow map, replaced generated feature mockups with real app screenshots, promoted the two-phase workflow and lesson-time signal sections on the homepage, and kept flashcards claim-safe as word/card-level vocabulary retention context. It did not change worksheet-generation prompts, calculator formulas, Supabase schema, RLS policies, Edge Functions, Stripe, database table names, suggestion_kind values, DSLM algorithms, or private app data access.
 
 ## What should future AI agents preserve?
 Future agents should preserve worksheet engine sanctity, keep AI resource files factual, avoid inventing public APIs, preserve the ambitious 1-Minute Prep target without turning it into a guarantee, update docs/llm-context.md plus llms resources when public SEO or AI discovery mechanics change, and use manual AI-search measurement files instead of automated AI-answer scraping.

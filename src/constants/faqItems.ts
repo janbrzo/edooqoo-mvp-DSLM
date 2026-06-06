@@ -55,7 +55,7 @@ export const faqItems: FaqItem[] = [
   },
   {
     question: "How does student management work?",
-    answer: "You can add unlimited students to your account. Each worksheet gets assigned to a specific student, and you can view all worksheets created for each student. You can send each student a Welcome Test to assess their level, and the AI creates a detailed Learning Profile with strengths, weaknesses, and a recommended Learning Path. Student selection is required when generating worksheets."
+    answer: "You can add unlimited students to your account. Each worksheet gets assigned to a specific student, and you can view all worksheets created for each student. You can send each student a Welcome Test to assess their level, and the AI creates a detailed Learning Profile with strengths, weaknesses, confidence signals, and a DSLM baseline for teacher review. Student selection is required when generating worksheets."
   },
   {
     question: "What exercise types are available?",
@@ -99,7 +99,7 @@ export const faqItems: FaqItem[] = [
   },
   {
     question: "What is the Welcome Test & Learning Path?",
-    answer: "The Welcome Test is an AI-powered 49-question assessment covering grammar, vocabulary, reading, listening, and speaking. After the student completes it, AI analyzes the results to create a detailed Learning Profile with skill scores, strengths, and weaknesses. It also determines one of 4 Learning Paths (Comfort, Guided, Accelerated, or Target) based on 15 behavioral and performance signals. Teachers can preview all questions, review results, and use the profile to generate more personalized worksheets."
+    answer: "The Welcome Test is an AI-powered 49-question assessment covering grammar, vocabulary, reading, listening, and speaking. After the student completes it, AI analyzes the results to create a detailed Learning Profile with skill scores, strengths, weaknesses, confidence signals, and profile context for teacher review. Teachers can preview all questions, review results, and use the profile as a DSLM baseline for more targeted recurring prep."
   },
   {
     question: "How does Lesson Booking work?",

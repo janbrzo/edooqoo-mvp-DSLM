@@ -14,7 +14,7 @@ interface FeatureBenefitsProps {
 }
 
 const FeatureBenefits: React.FC<FeatureBenefitsProps> = ({
-  title = 'Why teachers love it',
+  title = 'What it does in the workflow',
   subtitle,
   benefits,
 }) => (

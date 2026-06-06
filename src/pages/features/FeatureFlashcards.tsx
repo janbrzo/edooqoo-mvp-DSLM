@@ -8,6 +8,8 @@ import FeatureCTA from '@/components/features/FeatureCTA';
 import DSLMBadge from '@/components/features/DSLMBadge';
 import RelatedFeatures from '@/components/features/RelatedFeatures';
 import FeatureComparisonTable from '@/components/features/FeatureComparisonTable';
+import FeatureScreenshotFrame from '@/components/features/FeatureScreenshotFrame';
+import FeatureWorkflowMap from '@/components/features/FeatureWorkflowMap';
 import { Brain, Repeat, Zap, Link2 } from 'lucide-react';
 
 const FlashcardHeroMockup = () => (
@@ -77,7 +79,7 @@ const ForgettingCurveDiagram = () => (
 const benefits = [
   { icon: Brain, title: 'SM-2 scheduling logic', description: 'Spaced-repetition scheduling based on SM-2 logic. Cards the student struggles with appear more often.' },
   { icon: Repeat, title: 'Auto-generated from worksheets', description: 'One click creates a flashcard set from any worksheet. Vocabulary, key phrases, grammar patterns — extracted automatically.' },
-  { icon: Link2, title: 'Ecosystem integration', description: 'Flashcard performance can become a vocabulary signal for DSLM and future prep decisions.' },
+  { icon: Link2, title: 'Word-level skill context', description: 'Each word/card can act as a vocabulary nano-skill context item while SM-2 progress records retention behavior.' },
   { icon: Zap, title: 'Student Hub access', description: 'Students study through their Hub — no app needed. Share via link. Track progress in real-time.' },
 ];
 
@@ -93,7 +95,7 @@ const faqItems = [
   { question: 'Can I create flashcards manually?', answer: 'Yes. While auto-generation from worksheets is the fastest method, you can also create cards manually. Set the front text, back text, example sentence, and CEFR level for each card.' },
   { question: 'Do students need an account?', answer: 'No. Students access flashcards through a shared link or their Student Hub. Access is email-based — no registration, no password, no app to install.' },
   { question: 'Can flashcards be bidirectional?', answer: 'Yes. You can enable bidirectional mode so students practice both directions: English → translation and translation → English. Each direction is tracked separately in the SM-2 algorithm.' },
-  { question: 'How do flashcards connect to DSLM?', answer: 'Flashcard reviews can generate vocabulary learning signals. If a student repeatedly struggles with business collocations, that signal can support more relevant future prep and worksheet suggestions.' },
+  { question: 'How do flashcards connect to DSLM?', answer: 'Each flashcard is a word/card-level vocabulary item. Student reviews store per-card SM-2 retention progress, which can support vocabulary continuity in future prep. Teacher review remains part of the lesson decision.' },
 ];
 
 const comparisonRows = [
@@ -115,19 +117,50 @@ const FeatureFlashcards: React.FC = () => (
       badge="SM-2"
       badgeColor="bg-violet-100 text-violet-700 border-violet-200"
       headline="Vocabulary review that feeds future prep."
-      subheadline="Auto-generate flashcard sets from any worksheet. Students study through their Hub with SM-2 scheduling logic, and review activity can become a vocabulary signal for DSLM."
+      subheadline="Auto-generate flashcard sets from any worksheet. Students study through their Hub with SM-2 scheduling logic, and each word/card can add vocabulary retention context for the next prep cycle."
     >
-      <FlashcardHeroMockup />
+      <div className="grid gap-4 p-4 md:grid-cols-2">
+        <FeatureScreenshotFrame
+          src="/features/flashcards-sets.png"
+          alt="Flashcard sets page with student-specific cards and study sessions"
+          caption="Teacher view: word/card sets, share actions, and sessions."
+          imageClassName="h-72"
+          objectPosition="center top"
+          loading="eager"
+        />
+        <FeatureScreenshotFrame
+          src="/features/flashcards-create.png"
+          alt="Create Flashcard Set modal with bidirectional card settings"
+          caption="Flashcards can be created manually or from teaching material, then shared with the student."
+          imageClassName="h-72"
+          objectPosition="center top"
+          loading="eager"
+        />
+      </div>
     </FeatureHero>
 
-    <DSLMBadge feature="Flashcards" description="Flashcard performance can add vocabulary signals to DSLM, helping future worksheet suggestions reflect what the student actually reviews." />
+    <FeatureWorkflowMap activeKey="flashcards" />
+    <DSLMBadge feature="Flashcards" description="Flashcard work supplies word/card-level vocabulary retention context. It supports future prep without replacing teacher review." />
 
-    {/* Forgetting curve */}
+    {/* Retention context */}
     <section className="py-16 bg-background">
       <div className="max-w-3xl mx-auto px-4">
-        <h2 className="text-2xl font-bold text-foreground mb-2 text-center">Why spaced repetition works</h2>
-        <p className="text-sm text-muted-foreground text-center mb-8">Spaced repetition helps students revisit difficult cards more often and keep vocabulary active between lessons.</p>
-        <ForgettingCurveDiagram />
+        <h2 className="text-2xl font-bold text-foreground mb-2 text-center">What flashcards add to the learning loop</h2>
+        <p className="text-sm text-muted-foreground text-center mb-8">
+          A broad vocabulary goal becomes concrete when each word or phrase is tracked as a card-level item. SM-2 progress then shows which vocabulary needs more exposure between lessons.
+        </p>
+        <div className="grid gap-4 sm:grid-cols-3">
+          {[
+            ['Word/card item', 'A card represents a concrete vocabulary item, phrase, or expression.'],
+            ['Retention progress', 'Reviews update due dates, quality rating, response time, and mistake counts.'],
+            ['Prep context', 'The next lesson can keep vocabulary continuity visible for teacher review.'],
+          ].map(([title, description]) => (
+            <div key={title} className="rounded-xl border border-border bg-card p-5">
+              <h3 className="font-semibold text-foreground">{title}</h3>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">{description}</p>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
 

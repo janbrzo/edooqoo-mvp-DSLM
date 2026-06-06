@@ -1,7 +1,5 @@
 import React, { useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { ArrowRight } from 'lucide-react';
+import PublicWorkflowNav from '@/components/public/PublicWorkflowNav';
 
 interface FeaturePageLayoutProps {
   title: string;
@@ -10,8 +8,6 @@ interface FeaturePageLayoutProps {
 }
 
 const FeaturePageLayout: React.FC<FeaturePageLayoutProps> = ({ title, metaDescription, children }) => {
-  const location = useLocation();
-  const fromState = { from: location.pathname + location.search };
   useEffect(() => {
     document.title = title;
     const meta = document.querySelector('meta[name="description"]');
@@ -27,19 +23,7 @@ const FeaturePageLayout: React.FC<FeaturePageLayoutProps> = ({ title, metaDescri
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Minimal header */}
-      <header className="sticky top-0 z-50 bg-background/95 backdrop-blur-sm border-b border-border">
-        <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
-          <Link to="/" className="text-xl font-bold text-primary">edooqoo</Link>
-          <div className="flex items-center gap-3">
-            <Link to="/pricing" className="text-sm text-muted-foreground hover:text-foreground transition-colors">Pricing</Link>
-            <Button size="sm" asChild>
-              <Link to="/signup" state={fromState}>Start Free <ArrowRight className="h-3 w-3" /></Link>
-            </Button>
-          </div>
-        </div>
-      </header>
-
+      <PublicWorkflowNav />
       <main>{children}</main>
     </div>
   );

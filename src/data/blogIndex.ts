@@ -1032,7 +1032,7 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "category": "Reading & Writing"
   },
   {
-    "title": "Teaching English One-to-One â€” Private Lesson Guide â€” Edooqoo",
+    "title": "Teaching English One-to-One \"” Private Lesson Guide \"” Edooqoo",
     "description": "Complete guide to teaching private English lessons. Needs analysis, lesson structure, pacing, rapport building, and tools for one-to-one ESL tutoring.",
     "url": "/blog/teaching-english-one-to-one.html",
     "date": "2025-08-11",

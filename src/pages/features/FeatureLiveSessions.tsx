@@ -6,6 +6,8 @@ import FeatureFAQ from '@/components/features/FeatureFAQ';
 import FeatureCTA from '@/components/features/FeatureCTA';
 import DSLMBadge from '@/components/features/DSLMBadge';
 import RelatedFeatures from '@/components/features/RelatedFeatures';
+import FeatureScreenshotFrame from '@/components/features/FeatureScreenshotFrame';
+import FeatureWorkflowMap from '@/components/features/FeatureWorkflowMap';
 import { Radio, PenTool, Zap, Plus } from 'lucide-react';
 
 const LiveSessionMockup = () => (
@@ -77,12 +79,30 @@ const FeatureLiveSessions: React.FC = () => (
     <FeatureHero
       badge="LIVE"
       badgeColor="bg-red-100 text-red-700 border-red-200"
-      headline="Teach live. See answers in real-time."
-      subheadline="Turn any worksheet into an interactive lesson. Monitor student answers live, annotate with drawing tools, review responses, and keep signals for future prep."
+      headline="Teach live. Capture lesson-time evidence."
+      subheadline="Turn any worksheet into an interactive lesson. Monitor student answers live, annotate with drawing tools, review responses, and keep shared worksheet signals visible for future prep."
     >
-      <LiveSessionMockup />
+      <div className="grid gap-4 p-4 md:grid-cols-2">
+        <FeatureScreenshotFrame
+          src="/features/live-session.png"
+          alt="Live Session teacher worksheet with answer evidence and nano-skill tooltip"
+          caption="Teacher view: student answers, nano-skill labels, notes, flashcards, and live lesson actions stay in one surface."
+          imageClassName="h-72"
+          objectPosition="center top"
+          loading="eager"
+        />
+        <FeatureScreenshotFrame
+          src="/features/shared-worksheet-2.png"
+          alt="Shared worksheet student view with progress and lesson content"
+          caption="Student view: shared worksheets can be completed online while progress is saved."
+          imageClassName="h-72"
+          objectPosition="center top"
+          loading="eager"
+        />
+      </div>
     </FeatureHero>
 
+    <FeatureWorkflowMap activeKey="live-sessions" />
     <DSLMBadge feature="Live Sessions" description="Live answers and teacher review signals can become context for future DSLM next-focus suggestions and the next prep cycle." />
     <FeatureBenefits benefits={benefits} />
     <FeatureFAQ items={faqItems} />

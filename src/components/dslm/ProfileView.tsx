@@ -197,7 +197,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
       </CollapsibleSection>
 
       {/* Event Log — collapsed debug */}
-      <CollapsibleSection id="profile-debug" title="Debug: Event Log" icon={Bug}>
+      <CollapsibleSection id="profile-debug" title="Event Log" icon={Bug}>
         <EventLogPanel studentId={studentId} teacherId={teacherId} />
       </CollapsibleSection>
     </div>

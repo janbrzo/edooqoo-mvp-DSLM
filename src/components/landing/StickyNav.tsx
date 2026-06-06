@@ -124,7 +124,7 @@ const StickyNav: React.FC<StickyNavProps> = ({ isRegisteredUser, tokenLeft, user
             <PacingProposalsBell />
             <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-10 w-10 focus-visible:ring-2 focus-visible:ring-offset-2" aria-label="Open menu">
+                <Button variant="ghost" size="icon" className="h-10 w-10 focus-visible:ring-2 focus-visible:ring-offset-2" aria-label="Open navigation">
                   <Menu className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
@@ -222,7 +222,7 @@ const StickyNav: React.FC<StickyNavProps> = ({ isRegisteredUser, tokenLeft, user
           </Button>
           <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-9 w-9" aria-label="Open menu">
+              <Button variant="ghost" size="icon" className="h-9 w-9" aria-label="Open navigation">
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>

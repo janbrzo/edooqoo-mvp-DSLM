@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { useScrollAnimation } from '@/hooks/useScrollAnimation';
+import FeatureScreenshotFrame from '@/components/features/FeatureScreenshotFrame';
 
 /* ─── Mini UI Mockups ─────────────────────────────── */
 
@@ -217,7 +218,7 @@ const features = [
     badgeColor: 'bg-violet-50 text-violet-600 border-violet-200',
     title: '1-Minute Prep',
     description: 'Use student context, choose a next lesson idea, then generate the ready-to-teach worksheet output.',
-    mockup: <OneMinutePrepMockup />,
+    image: { src: '/features/one-minute-next-steps.png', alt: '1-Minute Prep suggestion panel with next lesson ideas', objectPosition: 'center top' },
     link: '/one-minute-prep',
     anchorId: 'feature-one-minute-prep',
   },
@@ -226,7 +227,7 @@ const features = [
     badgeColor: 'bg-blue-50 text-blue-600 border-blue-200',
     title: 'Welcome Placement Test',
     description: 'New student? Send a placement test to initialize level, goals and starting context before lesson one.',
-    mockup: <WelcomeTestMockup />,
+    image: { src: '/features/welcome-test-profile-ai.png', alt: 'Welcome Test AI analysis and student profile summary', objectPosition: 'center top' },
     link: '/features/placement-test',
     anchorId: 'feature-placement-test',
   },
@@ -235,7 +236,7 @@ const features = [
     badgeColor: 'bg-blue-50 text-blue-600 border-blue-200',
     title: 'DSLM',
     description: 'Nano-skill signals and trends turn student activity into next-step suggestions for the next prep cycle.',
-    mockup: <DslmMockup />,
+    image: { src: '/features/skills-heat-map.png', alt: 'DSLM skills heat map with nano-skill mastery data', objectPosition: 'center top' },
     link: '/features/dslm',
     anchorId: 'feature-dslm',
   },
@@ -244,7 +245,7 @@ const features = [
     badgeColor: 'bg-amber-50 text-amber-600 border-amber-200',
     title: 'Homework Review',
     description: 'Assign exercises with deadlines. AI-assisted evaluation gives teacher-review data for the next student-specific worksheet.',
-    mockup: <HomeworkMockup />,
+    image: { src: '/features/homework-assignments.png', alt: 'Homework assignments list with completed student work', objectPosition: 'center top' },
     link: '/features/homework',
     anchorId: 'feature-homework',
   },
@@ -252,8 +253,8 @@ const features = [
     badge: 'SM-2',
     badgeColor: 'bg-violet-50 text-violet-600 border-violet-200',
     title: 'Smart Flashcards',
-    description: 'Auto-generated flashcards and spaced repetition activity add vocabulary signals to the student context.',
-    mockup: <FlashcardMockup />,
+    description: 'Word/card-level flashcard practice adds vocabulary retention context to the student profile.',
+    image: { src: '/features/flashcards-sets.png', alt: 'Flashcard sets with student-specific cards and sessions', objectPosition: 'center top' },
     link: '/features/flashcards',
     anchorId: 'feature-flashcards',
   },
@@ -262,7 +263,7 @@ const features = [
     badgeColor: 'bg-red-50 text-red-600 border-red-200',
     title: 'Live Sessions',
     description: 'Teach with the worksheet open. Live responses and review moments can feed the next lesson focus.',
-    mockup: <LiveSessionsMockup />,
+    image: { src: '/features/live-session.png', alt: 'Live Session worksheet with realtime nano-skill evidence', objectPosition: 'center top' },
     link: '/features/live-sessions',
     anchorId: 'feature-live-sessions',
   },
@@ -271,7 +272,7 @@ const features = [
     badgeColor: 'bg-green-50 text-green-600 border-green-200',
     title: 'Lesson Calendar',
     description: 'Lesson cadence and bookings keep weekly prep tied to the students you actually teach next.',
-    mockup: <CalendarMockup />,
+    image: { src: '/features/calendar-teacher.png', alt: 'Teacher calendar with available, booked, pending, and completed lessons', objectPosition: 'center top' },
     link: '/features/calendar',
     anchorId: 'feature-calendar',
   },
@@ -280,7 +281,7 @@ const features = [
     badgeColor: 'bg-indigo-50 text-indigo-600 border-indigo-200',
     title: 'Student Hub',
     description: 'Students work through shared materials online, giving you completion context for follow-up prep.',
-    mockup: <ShareMockup />,
+    image: { src: '/features/student-dashboard.png', alt: 'Student Hub dashboard with worksheets, homework, flashcards, and lessons', objectPosition: 'center top' },
     link: '/features/student-hub',
     anchorId: 'feature-student-hub',
   },
@@ -311,9 +312,14 @@ const EcosystemSection: React.FC = () => {
               id={feature.anchorId}
               className={`scroll-mt-20 bg-secondary/30 rounded-2xl border border-border overflow-hidden hover:shadow-lg hover:border-violet-200 transition-all duration-300 animate-fade-up stagger-${i + 1} ${isVisible ? 'visible' : ''} group`}
             >
-              {/* Mockup preview area */}
-              <div className="bg-muted/30 border-b border-border px-4 pt-4 pb-3">
-                {feature.mockup}
+              {/* Screenshot preview area */}
+              <div className="border-b border-border bg-muted/30 p-3">
+                <FeatureScreenshotFrame
+                  src={feature.image.src}
+                  alt={feature.image.alt}
+                  objectPosition={feature.image.objectPosition}
+                  imageClassName="h-36"
+                />
               </div>
 
               {/* Text area */}
