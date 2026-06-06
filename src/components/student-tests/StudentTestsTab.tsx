@@ -393,6 +393,26 @@ export function StudentTestsTab({ studentId, teacherId, studentName }: StudentTe
           <p>• <strong>AI Analysis</strong> - generates teaching recommendations from open-ended answers</p>
         </CardContent>
       </Card>
+
+      <AlertDialog open={confirmRetakeOpen} onOpenChange={setConfirmRetakeOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Create another Welcome Test attempt?</AlertDialogTitle>
+            <AlertDialogDescription>
+              The current attempt is not completed yet. Re-take usually makes sense
+              about 30 days after the previous test is finished — that's enough time
+              for new learning signals to accumulate. Creating another attempt now
+              will leave the previous one open and may cause confusion.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => { setConfirmRetakeOpen(false); void runRetake(); }}>
+              Create new attempt anyway
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
