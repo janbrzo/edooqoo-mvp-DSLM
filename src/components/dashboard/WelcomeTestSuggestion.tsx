@@ -35,6 +35,7 @@ import {
   WelcomeTestActionsPanel,
   type WelcomeTestActionsState,
 } from '@/components/welcome-test/WelcomeTestActionsPanel';
+import { sendWelcomeTestEmail } from '@/lib/welcomeTest/ensureWelcomeTest';
 
 interface WelcomeTestSuggestionProps {
   studentId: string;
@@ -405,7 +406,27 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
       setAnsweredCount(0);
       setStatus('pending');
       setAttemptNumber(nextAttempt);
-      toast.success(`Retake ${nextAttempt - 1} created. Send the new link to the student.`);
+      // v6.9.41 P3 — auto-email the new retake link to the student so the
+      // teacher doesn't need a second click. Falls back to clipboard when
+      // student email is missing.
+      if (studentEmail) {
+        try {
+          await sendWelcomeTestEmail({
+            token,
+            recipientEmail: studentEmail,
+            studentName,
+            teacherId,
+          });
+          toast.success(`Retake ${nextAttempt - 1} created and emailed to the student.`);
+        } catch (mailErr) {
+          console.error('retake email failed', mailErr);
+          try { await navigator.clipboard.writeText(`${window.location.origin}/welcome-test/${token}`); } catch {}
+          toast.success(`Retake ${nextAttempt - 1} created. Email failed — link copied to clipboard.`);
+        }
+      } else {
+        try { await navigator.clipboard.writeText(`${window.location.origin}/welcome-test/${token}`); } catch {}
+        toast.success(`Retake ${nextAttempt - 1} created. No student email on file — link copied to clipboard.`);
+      }
       // v6.9.39 P2 — notify Tests tab list so the new attempt card appears
       // immediately without waiting for re-poll.
       window.dispatchEvent(new CustomEvent('student-tests:refresh', { detail: { studentId } }));
