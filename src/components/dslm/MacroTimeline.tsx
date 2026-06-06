@@ -540,6 +540,9 @@ export const MacroTimeline: React.FC<MacroTimelineProps> = ({
         <Button variant="outline" size="sm" onClick={() => setAddDialog(true)}>
           <Plus className="h-4 w-4 mr-2" /> Add phase
         </Button>
+        <Button variant="outline" size="sm" disabled={generating} onClick={() => openGuidedDialog('replace')}>
+          <Sparkles className="h-4 w-4 mr-2" /> Regenerate roadmap…
+        </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm" disabled={generating}>
