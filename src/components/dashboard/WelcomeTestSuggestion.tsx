@@ -564,22 +564,22 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
             </p>
           </div>
         ) : (
-        <div className="flex items-center gap-4">
+        <div className="grid grid-cols-[auto_1fr] lg:grid-cols-[auto_1fr_auto] items-start lg:items-center gap-3 lg:gap-4">
           <div className="flex-shrink-0">
             <Sparkles className="h-8 w-8 text-primary" />
           </div>
-          <div className="flex-1 min-w-0">
+          <div className="min-w-0">
             {status === 'pending' && (
               <>
-                <div className="flex items-center gap-2">
-                  <p className="font-medium">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <p className="font-medium break-words">
                     {retakeLabel
                       ? `Welcome Test ${retakeLabel} sent`
                       : 'Welcome (placement) Test sent'}
                   </p>
-                  <Badge variant="secondary">Waiting for student</Badge>
+                  <Badge variant="secondary" className="shrink-0">Waiting for student</Badge>
                 </div>
-                <p className="text-sm text-muted-foreground truncate">{shareUrl}</p>
+                <p className="text-sm text-muted-foreground break-all line-clamp-1">{shareUrl}</p>
                 {sentAt && (() => {
                   const hours = (Date.now() - new Date(sentAt).getTime()) / 36e5;
                   const days = Math.floor(hours / 24);
@@ -656,13 +656,13 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
             )}
             {status === 'completed' && (
               <>
-                <div className="flex items-center gap-2">
-                  <p className="font-medium">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <p className="font-medium break-words">
                     {retakeLabel
                       ? `Welcome Test ${retakeLabel} completed!`
                       : 'Welcome (placement) Test completed!'}
                   </p>
-                  <Badge variant="default">Completed</Badge>
+                  <Badge variant="default" className="shrink-0">Completed</Badge>
                 </div>
                 <p className="text-sm text-muted-foreground">
                   View the learning profile and test results.
@@ -670,7 +670,7 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
               </>
             )}
           </div>
-          <div className="flex-shrink-0">
+          <div className="col-span-2 lg:col-span-1 lg:flex-shrink-0 lg:justify-self-end w-full lg:w-auto">
             <WelcomeTestActionsPanel
               state={panelState}
               shareUrl={shareUrl}
@@ -684,6 +684,7 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
               sending={creating}
               retaking={retaking}
               compact
+              className="justify-start lg:justify-end"
             />
           </div>
         </div>
