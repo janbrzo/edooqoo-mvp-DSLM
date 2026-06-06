@@ -35,6 +35,7 @@ import {
   WelcomeTestActionsPanel,
   type WelcomeTestActionsState,
 } from '@/components/welcome-test/WelcomeTestActionsPanel';
+import { sendWelcomeTestEmail } from '@/lib/welcomeTest/ensureWelcomeTest';
 
 interface WelcomeTestSuggestionProps {
   studentId: string;
@@ -405,7 +406,27 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
       setAnsweredCount(0);
       setStatus('pending');
       setAttemptNumber(nextAttempt);
-      toast.success(`Retake ${nextAttempt - 1} created. Send the new link to the student.`);
+      // v6.9.41 P3 — auto-email the new retake link to the student so the
+      // teacher doesn't need a second click. Falls back to clipboard when
+      // student email is missing.
+      if (studentEmail) {
+        try {
+          await sendWelcomeTestEmail({
+            token,
+            recipientEmail: studentEmail,
+            studentName,
+            teacherId,
+          });
+          toast.success(`Retake ${nextAttempt - 1} created and emailed to the student.`);
+        } catch (mailErr) {
+          console.error('retake email failed', mailErr);
+          try { await navigator.clipboard.writeText(`${window.location.origin}/welcome-test/${token}`); } catch {}
+          toast.success(`Retake ${nextAttempt - 1} created. Email failed — link copied to clipboard.`);
+        }
+      } else {
+        try { await navigator.clipboard.writeText(`${window.location.origin}/welcome-test/${token}`); } catch {}
+        toast.success(`Retake ${nextAttempt - 1} created. No student email on file — link copied to clipboard.`);
+      }
       // v6.9.39 P2 — notify Tests tab list so the new attempt card appears
       // immediately without waiting for re-poll.
       window.dispatchEvent(new CustomEvent('student-tests:refresh', { detail: { studentId } }));
@@ -543,22 +564,22 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
             </p>
           </div>
         ) : (
-        <div className="flex items-center gap-4">
+        <div className="grid grid-cols-[auto_1fr] lg:grid-cols-[auto_1fr_auto] items-start lg:items-center gap-3 lg:gap-4">
           <div className="flex-shrink-0">
             <Sparkles className="h-8 w-8 text-primary" />
           </div>
-          <div className="flex-1 min-w-0">
+          <div className="min-w-0">
             {status === 'pending' && (
               <>
-                <div className="flex items-center gap-2">
-                  <p className="font-medium">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <p className="font-medium break-words">
                     {retakeLabel
                       ? `Welcome Test ${retakeLabel} sent`
                       : 'Welcome (placement) Test sent'}
                   </p>
-                  <Badge variant="secondary">Waiting for student</Badge>
+                  <Badge variant="secondary" className="shrink-0">Waiting for student</Badge>
                 </div>
-                <p className="text-sm text-muted-foreground truncate">{shareUrl}</p>
+                <p className="text-sm text-muted-foreground break-all line-clamp-1">{shareUrl}</p>
                 {sentAt && (() => {
                   const hours = (Date.now() - new Date(sentAt).getTime()) / 36e5;
                   const days = Math.floor(hours / 24);
@@ -635,13 +656,13 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
             )}
             {status === 'completed' && (
               <>
-                <div className="flex items-center gap-2">
-                  <p className="font-medium">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <p className="font-medium break-words">
                     {retakeLabel
                       ? `Welcome Test ${retakeLabel} completed!`
                       : 'Welcome (placement) Test completed!'}
                   </p>
-                  <Badge variant="default">Completed</Badge>
+                  <Badge variant="default" className="shrink-0">Completed</Badge>
                 </div>
                 <p className="text-sm text-muted-foreground">
                   View the learning profile and test results.
@@ -649,7 +670,7 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
               </>
             )}
           </div>
-          <div className="flex-shrink-0">
+          <div className="col-span-2 lg:col-span-1 lg:flex-shrink-0 lg:justify-self-end w-full lg:w-auto">
             <WelcomeTestActionsPanel
               state={panelState}
               shareUrl={shareUrl}
@@ -663,6 +684,7 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
               sending={creating}
               retaking={retaking}
               compact
+              className="justify-start lg:justify-end"
             />
           </div>
         </div>

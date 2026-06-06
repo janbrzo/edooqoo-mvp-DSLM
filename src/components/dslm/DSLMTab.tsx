@@ -202,6 +202,12 @@ export const DSLMTab: React.FC<DSLMTabProps> = ({
       if (focusParam === 'add-goal-modal') {
         handleScrollTo('goals');
         setPendingAddGoal(true);
+        // v6.9.41 P2 — also dispatch event after the scroll/eager-mount so a late
+        // GoalsView mount still receives the open-modal signal even if the prop
+        // path was consumed before mount.
+        window.setTimeout(() => {
+          window.dispatchEvent(new CustomEvent('dslm:addGoal', { detail: { studentId, source: 'focus-param' } }));
+        }, 200);
       } else if (focusParam === 'pick-idea') {
         handleScrollTo('pathway');
         window.dispatchEvent(new CustomEvent('pathway:pickIdea'));

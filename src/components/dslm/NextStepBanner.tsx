@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Sparkles, Edit, Loader2, ArrowRight, ChevronDown, ClipboardCopy, MessageSquarePlus, CheckCircle2, Trash2 } from 'lucide-react';
+import { Sparkles, Edit, Loader2, ArrowRight, ChevronDown, ClipboardCopy, MessageSquarePlus, CheckCircle2, Trash2, AlertTriangle, Target, Send, Map } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { computeConfidence } from '@/lib/dslm/confidenceScore';
 import { ConfidenceBadge } from './ConfidenceBadge';
@@ -100,27 +100,34 @@ export const NextStepBanner: React.FC<NextStepBannerProps> = ({
             )}
           </div>
           {showReadiness && (
-            <div className="text-left max-w-md mx-auto rounded-md border border-amber-500/40 bg-amber-500/5 p-3 space-y-2">
-              <div className="text-xs font-semibold text-amber-700 dark:text-amber-400">
+            <div className="text-left max-w-2xl mx-auto rounded-md border border-amber-500/40 bg-amber-500/5 p-3 space-y-2">
+              <div className="flex items-center gap-2 text-xs font-semibold text-amber-700 dark:text-amber-400">
+                <AlertTriangle className="h-3.5 w-3.5" />
                 For sharper 1-Minute Prep suggestions, add this first
               </div>
               <ul className="text-xs text-muted-foreground space-y-1.5">
                 {!hasGoals && onAddGoal && (
-                  <li className="flex items-center justify-between gap-2">
+                  <li className="grid grid-cols-1 sm:grid-cols-[1fr_auto] items-center gap-2">
                     <span>No learning goals set — AI will infer from main goal only.</span>
-                    <button className="text-[11px] underline hover:no-underline" onClick={onAddGoal}>Add goal</button>
+                    <Button size="sm" variant="outline" className="h-7 text-[11px] justify-self-end" onClick={onAddGoal}>
+                      <Target className="h-3 w-3 mr-1" /> Add goal
+                    </Button>
                   </li>
                 )}
                 {!wtCompleted && onSendWelcomeTest && (
-                  <li className="flex items-center justify-between gap-2">
+                  <li className="grid grid-cols-1 sm:grid-cols-[1fr_auto] items-center gap-2">
                     <span>Welcome Placement Test not completed — level signals are weaker.</span>
-                    <button className="text-[11px] underline hover:no-underline" onClick={onSendWelcomeTest}>Send test</button>
+                    <Button size="sm" variant="outline" className="h-7 text-[11px] justify-self-end" onClick={onSendWelcomeTest}>
+                      <Send className="h-3 w-3 mr-1" /> Send test
+                    </Button>
                   </li>
                 )}
                 {!hasPhases && onGoToRoadmap && (
-                  <li className="flex items-center justify-between gap-2">
+                  <li className="grid grid-cols-1 sm:grid-cols-[1fr_auto] items-center gap-2">
                     <span>No curriculum plan yet — optional, but strongly recommended for recurring students.</span>
-                    <button className="text-[11px] underline hover:no-underline" onClick={onGoToRoadmap}>Go to roadmap</button>
+                    <Button size="sm" variant="outline" className="h-7 text-[11px] justify-self-end" onClick={onGoToRoadmap}>
+                      <Map className="h-3 w-3 mr-1" /> Go to roadmap
+                    </Button>
                   </li>
                 )}
               </ul>

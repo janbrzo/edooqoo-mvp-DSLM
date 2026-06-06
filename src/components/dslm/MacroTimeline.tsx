@@ -28,6 +28,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useStudent } from '@/hooks/useStudent';
 import { useStudentProgress } from '@/hooks/useStudentProgress';
 import { useWelcomeTestActions } from '@/hooks/useWelcomeTestActions';
+import { GenerateRoadmapDialog } from './GenerateRoadmapDialog';
 
 /**
  * v6.9.12 — Recommend 1 step per week of the phase length, clamped 1–6.
@@ -109,10 +110,23 @@ export const MacroTimeline: React.FC<MacroTimelineProps> = ({
   const hasGoals = (goals?.length ?? 0) > 0;
   // Pending generate-phases action — confirmed via AlertDialog when goals are missing.
   const [pendingGenerate, setPendingGenerate] = useState<null | { mode: 'replace' | 'add'; count?: number }>(null);
+  // v6.9.41 P6 — guided generation dialog state.
+  const [guidedDialog, setGuidedDialog] = useState<null | { mode: 'replace' | 'add' }>(null);
+  const openGuidedDialog = (mode: 'replace' | 'add') => setGuidedDialog({ mode });
   const requestGeneratePhases = (mode: 'replace' | 'add', count?: number) => {
     if (!hasGoals) { setPendingGenerate({ mode, count }); return; }
     void generatePhases(mode, count ? { count } : undefined);
   };
+  const guidedGoalOptions = useMemo(() =>
+    (goals || [])
+      .filter((g: any) => !g.is_achieved && !g.archived_at && !g.deleted_at)
+      .map((g: any) => ({
+        id: g.id,
+        title: g.title,
+        goal_type: g.goal_type ?? null,
+        target_date: g.target_date ?? null,
+      })),
+  [goals]);
   const dispatchAddGoal = () => {
     window.dispatchEvent(new CustomEvent('dslm:addGoal', { detail: { studentId } }));
   };
@@ -269,12 +283,20 @@ export const MacroTimeline: React.FC<MacroTimelineProps> = ({
                 </ul>
               </div>
             )}
-            <Button onClick={() => requestGeneratePhases('replace')} disabled={generating}>
+            <Button onClick={() => hasGoals ? openGuidedDialog('replace') : requestGeneratePhases('replace')} disabled={generating}>
               {generating ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Sparkles className="h-4 w-4 mr-2" />}
               Generate Learning Roadmap
             </Button>
           </CardContent>
         </Card>
+        <GenerateRoadmapDialog
+          open={guidedDialog?.mode === 'replace'}
+          onOpenChange={(o) => { if (!o) setGuidedDialog(null); }}
+          mode="replace"
+          goals={guidedGoalOptions}
+          generating={generating}
+          onConfirm={async (opts) => { await generatePhases('replace', opts); }}
+        />
         <AlertDialog open={!!pendingGenerate} onOpenChange={(o) => { if (!o) setPendingGenerate(null); }}>
           <AlertDialogContent>
             <AlertDialogHeader>
@@ -517,6 +539,9 @@ export const MacroTimeline: React.FC<MacroTimelineProps> = ({
         )}
         <Button variant="outline" size="sm" onClick={() => setAddDialog(true)}>
           <Plus className="h-4 w-4 mr-2" /> Add phase
+        </Button>
+        <Button variant="outline" size="sm" disabled={generating} onClick={() => openGuidedDialog('replace')}>
+          <Sparkles className="h-4 w-4 mr-2" /> Regenerate roadmap…
         </Button>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>

@@ -32,6 +32,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { sendWelcomeTestEmail } from '@/lib/welcomeTest/ensureWelcomeTest';
 
 interface StudentTestsTabProps {
   studentId: string;
@@ -80,7 +81,7 @@ export function StudentTestsTab({ studentId, teacherId, studentName }: StudentTe
     let testToUse = welcomeTest;
     if (!testToUse) {
       const { data: student } = await supabase
-        .from('students').select('name').eq('id', studentId).maybeSingle();
+        .from('students').select('name, student_email').eq('id', studentId).maybeSingle();
       testToUse = await createTest({
         student_id: studentId,
         test_type: 'welcome',
@@ -225,9 +226,32 @@ export function StudentTestsTab({ studentId, teacherId, studentName }: StudentTe
         skill_tags: q.nano_skill ? [q.nano_skill] : [],
       }));
       await addQuestions(newTest.id, questionsToAdd);
-      await generateShareToken(newTest.id, 'welcome');
+      const newToken = await generateShareToken(newTest.id, 'welcome');
       refetch();
-      toast.success(`Retake ${nextAttempt - 1} created. Send the new link to the student.`);
+      // v6.9.41 P3 — auto-email the new retake link.
+      const studentEmail = (student as any)?.student_email as string | null | undefined;
+      if (newToken && studentEmail) {
+        try {
+          await sendWelcomeTestEmail({
+            token: newToken,
+            recipientEmail: studentEmail,
+            studentName: student?.name || studentName || 'Student',
+            teacherId,
+          });
+          toast.success(`Retake ${nextAttempt - 1} created and emailed to the student.`);
+        } catch (mailErr) {
+          console.error('retake email failed', mailErr);
+          if (newToken) {
+            try { await navigator.clipboard.writeText(`${window.location.origin}/welcome-test/${newToken}`); } catch {}
+          }
+          toast.success(`Retake ${nextAttempt - 1} created. Email failed — link copied to clipboard.`);
+        }
+      } else {
+        if (newToken) {
+          try { await navigator.clipboard.writeText(`${window.location.origin}/welcome-test/${newToken}`); } catch {}
+        }
+        toast.success(`Retake ${nextAttempt - 1} created. No student email on file — link copied to clipboard.`);
+      }
       window.dispatchEvent(new CustomEvent('student-tests:refresh', { detail: { studentId } }));
     } catch (err) {
       console.error('handleRetake failed', err);
@@ -354,13 +378,13 @@ export function StudentTestsTab({ studentId, teacherId, studentName }: StudentTe
         return (
           <Card key={attempt.id} className={`border-primary/30 ${isLatest ? '' : 'opacity-90'}`}>
             <CardContent className="py-4">
-              <div className="flex items-center justify-between flex-wrap gap-3">
-                <div className="flex items-center gap-3 cursor-pointer" onClick={() => setSelectedTestId(attempt.id)}>
+              <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] items-start gap-3">
+                <div className="flex items-start gap-3 cursor-pointer min-w-0" onClick={() => setSelectedTestId(attempt.id)}>
                   <div className="p-2 rounded-lg bg-primary/10 text-primary">
                     <Sparkles className="h-5 w-5" />
                   </div>
-                  <div>
-                    <h3 className="font-semibold">
+                  <div className="min-w-0">
+                    <h3 className="font-semibold break-words">
                       {cardTitle}
                       {isLatest && welcomeAttempts.length > 1 && (
                         <Badge variant="outline" className="ml-2 text-[10px]">Latest</Badge>
@@ -380,7 +404,7 @@ export function StudentTestsTab({ studentId, teacherId, studentName }: StudentTe
                     />
                   </div>
                 </div>
-                <div className="flex items-center gap-2 flex-wrap">
+                <div className="flex items-center gap-2 flex-wrap lg:justify-end w-full lg:w-auto">
                   {attempt.score_percentage !== null && (
                     <div className="text-right mr-2">
                       <div className="text-lg font-bold">{answered}/{total}</div>
@@ -401,6 +425,7 @@ export function StudentTestsTab({ studentId, teacherId, studentName }: StudentTe
                       onRetake={handleRetake}
                       sending={creatingPreview}
                       retaking={retaking}
+                      className="justify-start lg:justify-end"
                     />
                   ) : (
                     <Button variant="outline" size="sm" onClick={() => setSelectedTestId(attempt.id)}>

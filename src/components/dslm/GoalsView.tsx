@@ -111,6 +111,31 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
     } finally { setDismissingAll(false); }
   };
 
+  // v6.9.41 P4 — per-suggestion Accept / Dismiss handlers.
+  const acceptSuggested = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('student_progress_goals')
+        .update({ accepted_at: new Date().toISOString() })
+        .eq('id', id);
+      if (error) throw error;
+      toast.success('Suggestion accepted.');
+      window.dispatchEvent(new CustomEvent('student-progress:refresh'));
+    } catch (err) {
+      console.error('acceptSuggested failed', err);
+      toast.error('Could not accept suggestion.');
+    }
+  };
+  const dismissSuggested = async (id: string) => {
+    try {
+      await deleteGoal(id);
+      toast.success('Suggestion dismissed.');
+    } catch (err) {
+      console.error('dismissSuggested failed', err);
+      toast.error('Could not dismiss suggestion.');
+    }
+  };
+
   const { map: progressMap, mainAggregate } = useGoalProgress(goals as any, studentId, teacherId);
   const editingGoal = editingGoalId ? (goals.find(g => g.id === editingGoalId) || null) : null;
 
@@ -124,6 +149,19 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
       onConsumePendingAddGoal?.();
     }
   }, [pendingAddGoal, onConsumePendingAddGoal]);
+
+  // v6.9.41 P2 — also open via window event so late mounts (LazySection) still
+  // catch the request after focus=add-goal-modal has already been consumed.
+  React.useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      if (detail?.studentId && detail.studentId !== studentId) return;
+      setNewGoal((prev) => ({ ...prev, type: 'supporting' }));
+      setShowAddGoal(true);
+    };
+    window.addEventListener('dslm:addGoal', handler as EventListener);
+    return () => window.removeEventListener('dslm:addGoal', handler as EventListener);
+  }, [studentId]);
 
   const renderGoalCard = (goal: any) => {
     const r = progressMap.get(goal.id);
@@ -262,11 +300,24 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
             <p className="text-xs text-muted-foreground">
               These goals were inferred from the student's Welcome Test results. Accept to keep them on the Pathway, dismiss to remove, or edit individual goals below.
             </p>
-            <ul className="text-xs space-y-1 pl-1">
+            <ul className="text-xs space-y-1.5 pl-1">
               {suggestedGoals.map((g: any) => (
-                <li key={g.id} className="flex items-start gap-1.5">
-                  <span className="text-primary">•</span>
-                  <span><span className="font-medium">{g.title}</span>{g.description ? ` — ${g.description}` : ''}</span>
+                <li
+                  key={g.id}
+                  className="grid grid-cols-1 sm:grid-cols-[1fr_auto] items-start gap-2 rounded-md bg-background/60 border border-border/40 px-2 py-1.5"
+                >
+                  <div className="flex items-start gap-1.5 min-w-0">
+                    <span className="text-primary mt-0.5">•</span>
+                    <span className="break-words"><span className="font-medium">{g.title}</span>{g.description ? ` — ${g.description}` : ''}</span>
+                  </div>
+                  <div className="flex gap-1 justify-end">
+                    <Button size="sm" variant="default" className="h-6 text-[11px] px-2" onClick={() => acceptSuggested(g.id)}>
+                      <Check className="h-3 w-3 mr-1" /> Accept
+                    </Button>
+                    <Button size="sm" variant="ghost" className="h-6 text-[11px] px-2" onClick={() => dismissSuggested(g.id)}>
+                      <X className="h-3 w-3 mr-1" /> Dismiss
+                    </Button>
+                  </div>
                 </li>
               ))}
             </ul>

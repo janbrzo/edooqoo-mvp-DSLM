@@ -37,6 +37,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { WelcomeTestResults } from './WelcomeTestResults';
 import { TestDates } from './TestDates';
 import { ALL_WELCOME_TEST_QUESTIONS } from '@/data/welcomeTestQuestions';
+import { sendWelcomeTestEmail } from '@/lib/welcomeTest/ensureWelcomeTest';
 import { 
   TEST_STATUS_CONFIG, 
   TEST_TYPES, 
@@ -139,20 +140,28 @@ export function TestDetailsView({ testId, teacherId, studentId, onBack }: TestDe
     if (!test || test.test_type !== 'welcome') return;
     setRetaking(true);
     try {
-      // Do NOT soft-delete old test - keep results visible
-      // Get student name
+      // v6.9.41 P3 — compute next attempt from existing welcome rows so the
+      // new attempt carries the right attempt_number + previous_attempt_id.
       const { data: student } = await supabase
         .from('students')
-        .select('name')
+        .select('name, student_email, teacher_id')
         .eq('id', studentId)
         .single();
-
-      // Create new test
+      const { data: existing } = await supabase
+        .from('student_tests')
+        .select('attempt_number')
+        .eq('student_id', studentId)
+        .eq('teacher_id', teacherId)
+        .eq('test_type', 'welcome')
+        .is('deleted_at', null);
+      const nextAttempt = (existing?.reduce((m, r: any) => Math.max(m, r.attempt_number ?? 1), 0) ?? 0) + 1;
       const newTest = await createTest({
         student_id: studentId,
         test_type: 'welcome',
-        title: `Welcome Test - ${student?.name || 'Student'} (Retake)`,
-        description: 'Comprehensive placement & learning profile assessment (retake)',
+        title: `Welcome Test - ${student?.name || 'Student'} (Retake ${nextAttempt - 1})`,
+        description: 'Re-take — comparing growth against the previous attempt',
+        attempt_number: nextAttempt,
+        previous_attempt_id: test.id,
       });
 
       if (newTest) {
@@ -168,11 +177,27 @@ export function TestDetailsView({ testId, teacherId, studentId, onBack }: TestDe
         }));
         await addQuestions(newTest.id, questionsToAdd);
 
-        const token = await generateShareToken(newTest.id);
+        const token = await generateShareToken(newTest.id, 'welcome');
         if (token) {
           const url = `${window.location.origin}/welcome-test/${token}`;
-          await navigator.clipboard.writeText(url);
-          toast.success('New Welcome Test created! Link copied to clipboard.');
+          if ((student as any)?.student_email) {
+            try {
+              await sendWelcomeTestEmail({
+                token,
+                recipientEmail: (student as any).student_email,
+                studentName: student?.name || 'Student',
+                teacherId,
+              });
+              toast.success(`Retake ${nextAttempt - 1} created and emailed to the student.`);
+            } catch (mailErr) {
+              console.error('retake email failed', mailErr);
+              try { await navigator.clipboard.writeText(url); } catch {}
+              toast.success(`Retake ${nextAttempt - 1} created. Email failed — link copied to clipboard.`);
+            }
+          } else {
+            try { await navigator.clipboard.writeText(url); } catch {}
+            toast.success(`Retake ${nextAttempt - 1} created. No student email on file — link copied.`);
+          }
         }
         // v6.9.39 P2 — ensure StudentTestsTab list rebuilds with the new card.
         window.dispatchEvent(new CustomEvent('student-tests:refresh', { detail: { studentId } }));
