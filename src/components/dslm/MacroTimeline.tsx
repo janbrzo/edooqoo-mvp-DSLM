@@ -27,7 +27,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useStudent } from '@/hooks/useStudent';
 import { useStudentProgress } from '@/hooks/useStudentProgress';
-import { useWelcomeTestActions, type WelcomeTestSnapshot } from '@/hooks/useWelcomeTestActions';
+import { useWelcomeTestActions } from '@/hooks/useWelcomeTestActions';
 
 /**
  * v6.9.12 — Recommend 1 step per week of the phase length, clamped 1–6.
