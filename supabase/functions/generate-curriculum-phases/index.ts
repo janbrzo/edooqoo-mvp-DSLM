@@ -254,10 +254,17 @@ serve(async (req) => {
     const worksheets = worksheetsRes.data || [];
     const existingPhases = existingPhasesRes.data || [];
 
-    // v6.9.44 — KEPT set: both done AND in_progress are preserved on regenerate.
-    // UI promises this and previous behaviour only kept done.
+    // v6.9.45 — hard preservation invariant: done AND in_progress phases are NEVER
+    // touched on `replace`. Their phase row IDs survive, so every
+    // `future_worksheet_suggestions.phase_id` pointing at them stays valid and
+    // the UI keeps showing their existing next steps.
     const KEPT_STATUSES = ['done', 'in_progress'];
-    const keptPhases = existingPhases.filter((p: any) => KEPT_STATUSES.includes(p.status));
+    const isKeptPhase = (status: string) => KEPT_STATUSES.includes(status);
+    const keptPhases = existingPhases.filter((p: any) => isKeptPhase(p.status));
+    const replaceablePhases = existingPhases.filter((p: any) => !isKeptPhase(p.status));
+    const keptPhaseIds: string[] = keptPhases.map((p: any) => p.id);
+    const replaceablePhaseIds: string[] = replaceablePhases.map((p: any) => p.id);
+    const hasKeptInProgress = keptPhases.some((p: any) => p.status === 'in_progress');
     const keptWeeksConsumed = keptPhases.reduce((acc: number, p: any) => {
       const s = Number.isInteger(p.estimated_weeks_start) ? p.estimated_weeks_start : 0;
       const e = Number.isInteger(p.estimated_weeks_end) ? p.estimated_weeks_end : 0;
@@ -501,17 +508,27 @@ Return ONLY a valid JSON array (no markdown), with this exact format:
     }
     phases = fit.phases;
 
-    // v6.9.44 — Soft-delete only NON-KEPT phases on replace (preserves in_progress).
-    if (mode === 'replace' && existingPhases.length > 0) {
-      const idsToDelete = existingPhases
-        .filter((p: any) => !KEPT_STATUSES.includes(p.status))
-        .map((p: any) => p.id);
-      if (idsToDelete.length > 0) {
-        await supabase
-          .from('dslm_curriculum_phases')
-          .update({ deleted_at: new Date().toISOString() })
-          .in('id', idsToDelete);
+    // v6.9.45 — Soft-delete ONLY planned/draft phases on `replace`. Scope the
+    // update by student_id + teacher_id as an extra safety belt so a runtime
+    // bug or stale id list can never affect another student's roadmap.
+    if (mode === 'replace' && replaceablePhaseIds.length > 0) {
+      const { error: softDeleteErr } = await supabase
+        .from('dslm_curriculum_phases')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('student_id', studentId)
+        .eq('teacher_id', teacherId)
+        .in('id', replaceablePhaseIds);
+      if (softDeleteErr) {
+        console.error('Failed to soft-delete replaceable phases', softDeleteErr);
+        throw softDeleteErr;
       }
+    }
+
+    // v6.9.45 — If we are preserving an in_progress phase, the freshly generated
+    // phases must NOT also be in_progress. Force them to `planned` so we never
+    // end up with two simultaneously-active phases.
+    if (mode === 'replace' && hasKeptInProgress) {
+      phases = phases.map((p: any) => ({ ...p, status: p.status === 'in_progress' ? 'planned' : p.status }));
     }
 
     // Compute starting sequence
@@ -538,6 +555,10 @@ Return ONLY a valid JSON array (no markdown), with this exact format:
         focused_goal_ids: focusedGoalIds.length > 0 ? focusedGoalIds : null,
         has_teacher_comment: Boolean(teacherComment && teacherComment.trim().length > 0),
       },
+      // v6.9.45 preservation audit
+      kept_phase_ids: keptPhaseIds,
+      replaceable_phase_ids: replaceablePhaseIds,
+      preserved_phase_count: keptPhases.length,
       generated_at: new Date().toISOString(),
     };
 
@@ -563,6 +584,36 @@ Return ONLY a valid JSON array (no markdown), with this exact format:
     if (insertError) {
       console.error('Insert error:', insertError);
       throw insertError;
+    }
+
+    // v6.9.45 — post-write preservation invariant. Verify every kept phase still
+    // exists and is NOT soft-deleted. If anything was touched, fail loudly so
+    // the regression cannot ship silently again.
+    if (mode === 'replace' && keptPhaseIds.length > 0) {
+      const { data: keptCheck, error: keptCheckErr } = await supabase
+        .from('dslm_curriculum_phases')
+        .select('id, status, deleted_at')
+        .in('id', keptPhaseIds);
+      if (keptCheckErr) {
+        console.error('Failed to verify kept phases', keptCheckErr);
+      } else {
+        const survived = (keptCheck || []).filter((r: any) => !r.deleted_at);
+        if (survived.length !== keptPhaseIds.length) {
+          console.error('Kept phase preservation invariant FAILED', {
+            expected: keptPhaseIds,
+            survived: survived.map((r: any) => r.id),
+          });
+          return new Response(
+            JSON.stringify({
+              error: 'Kept phase preservation failed',
+              preservationInvariantFailed: true,
+              expected_kept_ids: keptPhaseIds,
+              survived_kept_ids: survived.map((r: any) => r.id),
+            }),
+            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+      }
     }
 
     return new Response(

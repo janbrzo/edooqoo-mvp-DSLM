@@ -527,7 +527,11 @@ export default function WorksheetForm({
       selectedExercises: finalExercises,
       selectedMediaTypes,
       exerciseFocusMap: Object.keys(exerciseFocusMap).length > 0 ? exerciseFocusMap : undefined,
-      selectedImage: selectedImage
+      selectedImage: selectedImage,
+      // v6.9.45 — flag any submit that originated from the DSLM auto-generate intent
+      // so Index.tsx can queue the request until tokens/profile are ready instead of
+      // silently dropping it after 2 short retries.
+      __autoGenerateFromSuggestion: Boolean(initialAutoIntentRef.current),
     };
 
     // Refresh onboarding progress after successful worksheet generation

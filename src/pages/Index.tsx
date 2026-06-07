@@ -272,18 +272,22 @@ const Index = () => {
       return;
     }
 
-    // v4.7: never show paywall while the token/profile fetch is in-flight.
-    // useTokenSystem now keeps `loading` true until auth status AND profile are resolved.
-    // We retry up to 2× (250ms + 500ms) before surfacing a soft error so the
-    // user can re-click without losing their form data.
+    // v4.7 / v6.9.45: never show paywall while the token/profile fetch is in-flight.
+    // useTokenSystem keeps `loading` true until auth status AND profile are resolved.
+    // Manual submit: retry up to 2× (250ms + 500ms) so the user can re-click.
+    // Auto-submit from a 1-Minute Prep suggestion: queue silently up to ~12s, because
+    // there is no user to re-click and previous "2-retry-then-drop" caused the
+    // navigated-to-generator-but-nothing-happens regression.
     const retryCount = (data as any).__tokenRetry || 0;
+    const isAutoGenerateFromSuggestion = (data as any).__autoGenerateFromSuggestion === true;
     if (isRegisteredUser && tokensLoading) {
-      if (retryCount >= 2) {
-        devWarn('⏳ Token check still in progress after 2 retries — surfacing soft error');
+      const maxRetries = isAutoGenerateFromSuggestion ? 40 : 2;
+      if (retryCount >= maxRetries) {
+        devWarn(`⏳ Token check still in progress after ${maxRetries} retries — aborting (auto=${isAutoGenerateFromSuggestion})`);
         return;
       }
-      const delay = retryCount === 0 ? 250 : 500;
-      devLog(`⏳ Token entitlement still resolving — retry ${retryCount + 1}/2 in ${delay}ms`);
+      const delay = isAutoGenerateFromSuggestion ? 300 : (retryCount === 0 ? 250 : 500);
+      devLog(`⏳ Token entitlement still resolving — retry ${retryCount + 1}/${maxRetries} in ${delay}ms (auto=${isAutoGenerateFromSuggestion})`);
       setTimeout(() => handleGenerateWorksheet({ ...data, __tokenRetry: retryCount + 1 }), delay);
       return;
     }
