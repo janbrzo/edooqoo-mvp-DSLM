@@ -636,10 +636,11 @@ Return ONLY a valid JSON array (no markdown), with this exact format:
     // worksheet suggestions so they survive as free `next_step` rows instead of
     // pointing at a deleted phase row (which makes them invisible in the UI).
     let detachedReplaceableSuggestionIds: string[] = [];
+    const detachedSuggestionPriorPhase: Record<string, string> = {};
     if (mode === 'replace' && replaceablePhaseIds.length > 0) {
       const { data: detachable, error: detachReadErr } = await supabase
         .from('future_worksheet_suggestions')
-        .select('id')
+        .select('id, phase_id')
         .eq('student_id', studentId)
         .eq('teacher_id', teacherId)
         .is('deleted_at', null)
@@ -649,7 +650,10 @@ Return ONLY a valid JSON array (no markdown), with this exact format:
         console.error('Failed to read replaceable phase suggestions', detachReadErr);
         throw detachReadErr;
       }
-      detachedReplaceableSuggestionIds = (detachable || []).map((r: any) => String(r.id));
+      for (const r of detachable || []) {
+        detachedReplaceableSuggestionIds.push(String(r.id));
+        if (r.phase_id) detachedSuggestionPriorPhase[String(r.id)] = String(r.phase_id);
+      }
       if (detachedReplaceableSuggestionIds.length > 0) {
         const { error: detachErr } = await supabase
           .from('future_worksheet_suggestions')
