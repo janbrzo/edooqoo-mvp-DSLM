@@ -134,7 +134,7 @@ export const GenerateRoadmapDialog: React.FC<GenerateRoadmapDialogProps> = ({
           </DialogTitle>
           <DialogDescription>
             {isRegeneration
-              ? 'This produces a fresh phase structure. Previous planned phases will be archived; phases marked done or in progress are kept. Auto-fit gives full control to the AI — toggle anything off to steer the plan yourself.'
+              ? 'This regenerates ONLY planned and draft phases. Phases marked done or in progress keep their exact records, week ranges, and worksheet suggestions. Auto-fit gives full control to the AI — toggle anything off to steer the plan yourself.'
               : 'Auto-fit gives full control to the AI. Toggle anything off to steer the plan yourself.'}
           </DialogDescription>
         </DialogHeader>

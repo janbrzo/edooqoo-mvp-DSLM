@@ -724,9 +724,9 @@ export const MacroTimeline: React.FC<MacroTimelineProps> = ({
           <AlertDialogHeader>
             <AlertDialogTitle>Regenerate Learning Roadmap?</AlertDialogTitle>
             <AlertDialogDescription>
-              This replaces all <strong>planned</strong> phases with a freshly generated roadmap.
-              Phases marked <strong>done</strong> or <strong>in progress</strong> are kept.
-              Existing planned phases and their AI rationale will be archived (soft-deleted).
+              This regenerates only <strong>planned</strong> and <strong>draft</strong> phases.
+              Phases marked <strong>done</strong> or <strong>in progress</strong> keep their exact records, week ranges, and existing worksheet suggestions — because those phase rows are not replaced.
+              Existing planned and draft phases (and their AI rationale) will be archived (soft-deleted).
               On the next screen you can steer the new roadmap with phase count, weeks, focused goals, and a teacher comment.
             </AlertDialogDescription>
           </AlertDialogHeader>

@@ -106,13 +106,19 @@ export const useCurriculumPhases = ({ studentId, teacherId }: UseCurriculumPhase
       });
       if (response.error) throw response.error;
       const newPhases = response.data?.phases || [];
+      const ctx = response.data?.generationContext || {};
       if (newPhases.length === 0) {
         toast.info('No phases generated. Add more goals or notes first.');
         return false;
       }
       await fetchPhases();
       emitPhasesUpdated();
-      toast.success(`Generated ${newPhases.length} curriculum phases`);
+      const preserved = Number.isInteger(ctx.preserved_phase_count) ? ctx.preserved_phase_count : 0;
+      if (mode === 'replace' && preserved > 0) {
+        toast.success(`Regenerated ${newPhases.length} planned phase${newPhases.length === 1 ? '' : 's'}; kept ${preserved} active/completed phase${preserved === 1 ? '' : 's'}.`);
+      } else {
+        toast.success(`Generated ${newPhases.length} curriculum phase${newPhases.length === 1 ? '' : 's'}`);
+      }
       return true;
     } catch (e: any) {
       console.error('Error generating phases:', e);
