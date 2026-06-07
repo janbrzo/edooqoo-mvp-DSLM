@@ -89,6 +89,7 @@ const corsHeaders = {
 function fitPhasesToDeadline(
   phases: any[],
   targetWeeks: number | null,
+  startingWeek: number = 1,
 ): { phases: any[]; adjusted: boolean } {
   if (!targetWeeks || !Array.isArray(phases) || phases.length === 0) {
     return { phases, adjusted: false };
@@ -97,9 +98,10 @@ function fitPhasesToDeadline(
   const minWeeks = Math.max(1, Math.min(2, Math.floor(targetWeeks / n) || 1));
   if (minWeeks * n > targetWeeks) {
     // Cannot honor min — distribute as evenly as possible (every phase = 1 week up to budget)
-    let cursor = 1;
+    let cursor = Math.max(1, startingWeek);
+    const lastWeek = cursor + targetWeeks - 1;
     const out = phases.map((p, i) => {
-      const end = i === n - 1 ? targetWeeks : Math.min(targetWeeks, cursor);
+      const end = i === n - 1 ? lastWeek : Math.min(lastWeek, cursor);
       const fixed = { ...p, estimated_weeks_start: cursor, estimated_weeks_end: end };
       cursor = end + 1;
       return fixed;
@@ -127,7 +129,7 @@ function fitPhasesToDeadline(
       // Distribute leftover slack to last phase
       const leftover = targetWeeks - sum0;
       durations[durations.length - 1] += leftover;
-      return { phases: rebase(phases, durations), adjusted: aiSum !== targetWeeks };
+      return { phases: rebaseFromWeek(phases, durations, startingWeek), adjusted: aiSum !== targetWeeks };
     }
   }
 
@@ -152,7 +154,7 @@ function fitPhasesToDeadline(
     }
   }
 
-  return { phases: rebase(phases, durations), adjusted: true };
+  return { phases: rebaseFromWeek(phases, durations, startingWeek), adjusted: true };
 }
 
 function rebase(phases: any[], durations: number[]): any[] {
