@@ -790,6 +790,7 @@ Return ONLY a valid JSON array (no markdown), with this exact format:
     const preservationFailureResponse = async (reason: string, details: any, insertedIds: string[] = []) => {
       const cleanupErr = await cleanupInsertedPhases(insertedIds);
       const restoreErr = await restoreReplaceablePhases();
+      const detachRestoreErr = await restoreDetachedSuggestions();
       console.error('Roadmap preservation invariant FAILED', {
         reason,
         expected_kept_ids: keptPhaseIds,
@@ -797,6 +798,7 @@ Return ONLY a valid JSON array (no markdown), with this exact format:
         inserted_ids: insertedIds,
         cleanup_error: cleanupErr,
         restore_error: restoreErr,
+        detach_restore_error: detachRestoreErr,
         ...details,
       });
       return new Response(
@@ -809,6 +811,7 @@ Return ONLY a valid JSON array (no markdown), with this exact format:
           inserted_ids: insertedIds,
           cleanupFailed: Boolean(cleanupErr),
           restoreFailed: Boolean(restoreErr),
+          detachRestoreFailed: Boolean(detachRestoreErr),
           ...details,
         }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
