@@ -215,6 +215,14 @@ export function CreateHomeworkModal({
     setSelectedExercises(newSelected);
   };
 
+  // v6.9.44 — bulk helpers for the redesigned Exercises section.
+  const selectAllExercises = () => {
+    setSelectedExercises(new Set(exercises.map((_, i) => i)));
+  };
+  const clearExercisesSelection = () => {
+    setSelectedExercises(new Set());
+  };
+
   const handleCopyUrl = async () => {
     if (!shareUrl) return;
     
