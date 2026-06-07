@@ -563,8 +563,13 @@ export function CreateHomeworkModal({
           </div>
         ) : (
           // Creation form
-          <div className="space-y-6 py-4">
-            {/* Student Selection */}
+          <div className="space-y-3 py-4">
+            {/* v6.9.42 — Student Selection (open by default) */}
+            <HomeworkSection
+              title="Student"
+              defaultOpen
+              summary={students.find(s => s.id === selectedStudentId)?.name || (selectedStudentId ? undefined : 'Not selected')}
+            >
             <div className="space-y-2">
               <Label htmlFor="student">Select Student</Label>
               <select
@@ -581,8 +586,14 @@ export function CreateHomeworkModal({
                 ))}
               </select>
             </div>
+            </HomeworkSection>
 
-            {/* Exercise Selection */}
+            {/* v6.9.42 — Exercise Selection */}
+            <HomeworkSection
+              title="Exercises from Worksheet"
+              defaultOpen
+              summary={`${selectedExercises.size} of ${exercises.length} selected`}
+            >
             <div className="space-y-2">
               <Label>Select Exercises from Worksheet</Label>
               <p className="text-xs text-muted-foreground -mt-1">
@@ -609,6 +620,7 @@ export function CreateHomeworkModal({
                 {selectedExercises.size} exercise{selectedExercises.size !== 1 ? 's' : ''} selected
               </p>
             </div>
+            </HomeworkSection>
 
             {/* Generate More Exercises Section */}
             {worksheetFormData && (
