@@ -237,6 +237,7 @@ export function StudentTestsTab({ studentId, teacherId, studentName }: StudentTe
             recipientEmail: studentEmail,
             studentName: student?.name || studentName || 'Student',
             teacherId,
+            attemptNumber: nextAttempt,
           });
           toast.success(`Retake ${nextAttempt - 1} created and emailed to the student.`);
         } catch (mailErr) {
