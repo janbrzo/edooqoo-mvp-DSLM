@@ -27,6 +27,9 @@ export interface FormData {
   requiresAudio?: boolean;  // Whether audio is required by selected exercises
   requiresImage?: boolean;  // Whether image is required by selected exercises
   hasGrammar?: boolean;     // Whether grammar focus was provided
+  // v6.9.45 — internal transport flags, not part of the AI prompt.
+  __autoGenerateFromSuggestion?: boolean;
+  __tokenRetry?: number;
   selectedImage?: {
     id: string;
     url: string;
