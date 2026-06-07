@@ -310,7 +310,7 @@ export const useWorksheetGeneration = (
       }
       
       if (effectiveStudentId) {
-        devLog('🔄 FINAL STEP: Updating student activity for:', studentId);
+        devLog('🔄 FINAL STEP: Updating student activity for:', effectiveStudentId);
         
         setTimeout(() => {
           window.dispatchEvent(new CustomEvent('studentUpdated', { 
@@ -481,15 +481,19 @@ export const useWorksheetGeneration = (
         devWarn('[v4.8] suggestion-used update threw', e);
       }
       
-      if (studentId) {
-        devLog('🔄 FINAL STEP: Updating student activity for:', studentId);
-        
+      // v6.9.45 — use the studentId that came in with the FormData payload so
+      // DSLM auto-generate dispatches the event for the right student even when
+      // parent state had not yet hydrated.
+      const completionStudentId: string | null = (data?.studentId as string | undefined) || studentId || null;
+      if (completionStudentId) {
+        devLog('🔄 FINAL STEP: Updating student activity for:', completionStudentId);
+
         setTimeout(() => {
-          window.dispatchEvent(new CustomEvent('studentUpdated', { 
-            detail: { studentId } 
+          window.dispatchEvent(new CustomEvent('studentUpdated', {
+            detail: { studentId: completionStudentId }
           }));
-          
-          devLog('🔄 StudentUpdated event dispatched AFTER generation completed for:', studentId);
+
+          devLog('🔄 StudentUpdated event dispatched AFTER generation completed for:', completionStudentId);
         }, 500);
       }
     } else {
