@@ -714,8 +714,30 @@ export const MacroTimeline: React.FC<MacroTimelineProps> = ({
         mode="replace"
         goals={guidedGoalOptions}
         generating={generating}
+        isRegeneration={phases.length > 0}
         onConfirm={async (opts) => { await generatePhases('replace', opts); }}
       />
+      {/* v6.9.42 — regen confirm gate. Empty state still goes straight to the
+          guided dialog without this step (no destructive action). */}
+      <AlertDialog open={confirmRegenOpen} onOpenChange={setConfirmRegenOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Regenerate Learning Roadmap?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This replaces all <strong>planned</strong> phases with a freshly generated roadmap.
+              Phases marked <strong>done</strong> or <strong>in progress</strong> are kept.
+              Existing planned phases and their AI rationale will be archived (soft-deleted).
+              On the next screen you can steer the new roadmap with phase count, weeks, focused goals, and a teacher comment.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => { setConfirmRegenOpen(false); openGuidedDialog('replace'); }}>
+              Continue
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
