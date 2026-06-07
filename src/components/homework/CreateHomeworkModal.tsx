@@ -624,7 +624,11 @@ export function CreateHomeworkModal({
 
             {/* Generate More Exercises Section */}
             {worksheetFormData && (
-              <div className="space-y-3 border-t pt-4">
+              <HomeworkSection
+                title="Generate Additional Exercises"
+                summary={selectedGeneratedTypes.length > 0 ? `${selectedGeneratedTypes.length} types · ${generatedExercises.length} generated` : 'Optional AI add-on'}
+              >
+              <div className="space-y-3">
                 <Label>Generate Additional Exercises</Label>
                 
                 {/* Exercise Type Selection - SHOW ALL 21 TYPES */}
