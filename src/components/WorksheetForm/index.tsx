@@ -217,6 +217,70 @@ export default function WorksheetForm({
     toast({ title: 'Form cleared', description: 'All fields reset to defaults.' });
   };
 
+  // v6.9.46 — mounted-form auto intent hardening. The first-render lazy reads
+  // cover normal route navigation; this catches the rarer case where the form is
+  // already mounted and DSLM writes the auto-generate session flags afterward.
+  useEffect(() => {
+    let checks = 0;
+    const hydrateMountedAutoIntent = () => {
+      if (autoSubmitFiredRef.current) return true;
+      if (initialAutoIntentRef.current) return true;
+      const intent = readAutoGenerateIntent();
+      if (!intent) return false;
+
+      initialAutoIntentRef.current = intent;
+      if (intent.studentId) {
+        setSelectedStudentId(intent.studentId);
+      }
+
+      const topic = readPrefillTopic();
+      if (topic) {
+        setLessonTopic(topic);
+      }
+
+      const exercises = readPrefillField<string[]>('prefillExercises', []);
+      const focusMap = readPrefillField<Record<string, 'vocabulary' | 'grammar'>>('prefillExerciseFocusMap', {});
+      const mediaTypes = readPrefillField<MediaType[] | null>('prefillMediaTypes', null);
+      if (Array.isArray(exercises) && exercises.length > 0) {
+        const norm = normalizeSuggestionPrefill({
+          exercises,
+          focusMap,
+          mediaTypes,
+          lessonTime: lessonTime as '45min' | '60min',
+        });
+        setSelectedMediaTypes(norm.selectedMediaTypes as MediaType[]);
+        setSelectedExercises(norm.selectedExercises);
+        setExerciseFocusMap(norm.exerciseFocusMap);
+        setSelectionMode('manual');
+        setActiveTab('exercises');
+      }
+
+      devLog('🚀 [WorksheetForm v6.9.46] autoGenerate intent detected after mount');
+      return true;
+    };
+
+    hydrateMountedAutoIntent();
+    const onAutoIntentSignal = () => { hydrateMountedAutoIntent(); };
+    window.addEventListener('focus', onAutoIntentSignal);
+    window.addEventListener('pageshow', onAutoIntentSignal);
+    window.addEventListener('edooqoo:autoGenerateWorksheetReady', onAutoIntentSignal);
+    document.addEventListener('visibilitychange', onAutoIntentSignal);
+    const interval = window.setInterval(() => {
+      checks += 1;
+      if (hydrateMountedAutoIntent() || checks >= 20) {
+        window.clearInterval(interval);
+      }
+    }, 100);
+
+    return () => {
+      window.removeEventListener('focus', onAutoIntentSignal);
+      window.removeEventListener('pageshow', onAutoIntentSignal);
+      window.removeEventListener('edooqoo:autoGenerateWorksheetReady', onAutoIntentSignal);
+      document.removeEventListener('visibilitychange', onAutoIntentSignal);
+      window.clearInterval(interval);
+    };
+  }, [lessonTime]);
+
   // REMOVED: Backup initialization to avoid race condition with ExerciseSelector
   // ExerciseSelector is now solely responsible for initialization
 

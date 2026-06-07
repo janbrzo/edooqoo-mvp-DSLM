@@ -9,7 +9,6 @@ import { processExercises } from "@/utils/exerciseProcessor";
 import { getExpectedExerciseCount, validateWorksheet, createSampleVocabulary } from "@/utils/worksheetUtils";
 import { deepFixTextObjects } from "@/utils/textObjectFixer";
 import { useEventTracking } from "@/hooks/useEventTracking";
-import { useTokenSystem } from "@/hooks/useTokenSystem";
 import { supabase } from "@/integrations/supabase/client";
 import { generateAudioForWorksheet, generateImageForWorksheet } from '@/services/mediaService';
 import { streamWorksheetGeneration } from '@/services/worksheetStreamService';
@@ -17,10 +16,18 @@ import { markWorksheetForClaim } from '@/hooks/useWorksheetClaim';
 import { devLog, devWarn } from '@/utils/logger';
 import { useDemoContext } from '@/contexts/DemoContext';
 
+interface WorksheetGenerationEntitlement {
+  hasTokens: boolean;
+  canGenerateWorksheet: boolean;
+  isDemo: boolean;
+  consumeToken: (worksheetId: string) => Promise<boolean>;
+}
+
 export const useWorksheetGeneration = (
   userId: string | null,
   worksheetState: any,
-  studentId?: string | null
+  studentId?: string | null,
+  entitlement?: WorksheetGenerationEntitlement
 ) => {
   const [isGenerating, setIsGenerating] = useState(false);
   const [startGenerationTime, setStartGenerationTime] = useState<number>(0);
@@ -33,8 +40,11 @@ export const useWorksheetGeneration = (
   const abortControllerRef = useRef<AbortController | null>(null);
   const { toast } = useToast();
   const { trackEvent } = useEventTracking(userId);
-  const { tokenLeft, hasTokens, isDemo, consumeToken } = useTokenSystem(userId);
   const { isDemoMode, showDemoBlockedToast } = useDemoContext();
+  const hasTokens = entitlement?.hasTokens ?? !userId;
+  const canGenerateWorksheet = entitlement?.canGenerateWorksheet ?? hasTokens;
+  const isDemo = entitlement?.isDemo ?? !userId;
+  const consumeToken = entitlement?.consumeToken ?? (async () => false);
 
   const generateWorksheetHandler = async (data: FormData) => {
     // v6.9.7-patch — hard demo guard before any work or navigation
@@ -74,7 +84,7 @@ export const useWorksheetGeneration = (
     }
 
     // PROBLEM 4 FIX: Check token requirements ONLY for authenticated users
-    if (userId && !isDemo && !hasTokens) {
+    if (userId && !isDemo && !canGenerateWorksheet) {
       toast({
         title: "No tokens available",
         description: "You need tokens to generate worksheets. Please upgrade your plan or purchase tokens.",
@@ -511,8 +521,8 @@ export const useWorksheetGeneration = (
   return {
     isGenerating,
     generateWorksheetHandler,
-    tokenLeft,
     hasTokens,
+    canGenerateWorksheet,
     isDemo,
     streamProgress,
     mediaGenerating,

@@ -165,6 +165,94 @@ function rebase(phases: any[], durations: number[]): any[] {
   });
 }
 
+const normalizePhaseStatus = (status: any): string =>
+  String(status ?? '').trim().toLowerCase().replace(/[\s-]+/g, '_');
+
+const normalizeNullableInteger = (value: any): number | null => {
+  const n = Number(value);
+  return Number.isInteger(n) ? n : null;
+};
+
+const normalizeStringArray = (value: any): string[] =>
+  Array.isArray(value) ? value.map(String) : [];
+
+interface PhaseSnapshot {
+  id: string;
+  title: string | null;
+  description: string | null;
+  status: string;
+  sequence_number: number | null;
+  estimated_weeks_start: number | null;
+  estimated_weeks_end: number | null;
+  focus_areas: string[];
+  rationale: string | null;
+  deleted_at: string | null;
+}
+
+function phaseSnapshot(phase: any): PhaseSnapshot {
+  return {
+    id: String(phase.id),
+    title: phase.title ?? null,
+    description: phase.description ?? null,
+    status: normalizePhaseStatus(phase.status),
+    sequence_number: normalizeNullableInteger(phase.sequence_number),
+    estimated_weeks_start: normalizeNullableInteger(phase.estimated_weeks_start),
+    estimated_weeks_end: normalizeNullableInteger(phase.estimated_weeks_end),
+    focus_areas: normalizeStringArray(phase.focus_areas),
+    rationale: phase.rationale ?? null,
+    deleted_at: phase.deleted_at ?? null,
+  };
+}
+
+function phaseSnapshotMap(phases: any[]): Map<string, PhaseSnapshot> {
+  const out = new Map<string, PhaseSnapshot>();
+  for (const phase of phases || []) {
+    const snap = phaseSnapshot(phase);
+    out.set(snap.id, snap);
+  }
+  return out;
+}
+
+function diffPhaseSnapshots(expected: Map<string, PhaseSnapshot>, actual: Map<string, PhaseSnapshot>) {
+  const diffs: any[] = [];
+  for (const [id, before] of expected.entries()) {
+    const after = actual.get(id);
+    if (!after) {
+      diffs.push({ id, reason: 'missing' });
+      continue;
+    }
+    for (const field of Object.keys(before) as (keyof PhaseSnapshot)[]) {
+      if (JSON.stringify(before[field]) !== JSON.stringify(after[field])) {
+        diffs.push({ id, field, before: before[field], after: after[field] });
+      }
+    }
+  }
+  return diffs;
+}
+
+function suggestionBindingMap(rows: any[]): Map<string, string | null> {
+  const out = new Map<string, string | null>();
+  for (const row of rows || []) {
+    out.set(String(row.id), row.phase_id ? String(row.phase_id) : null);
+  }
+  return out;
+}
+
+function diffSuggestionBindings(expected: Map<string, string | null>, actual: Map<string, string | null>) {
+  const diffs: any[] = [];
+  for (const [id, beforePhaseId] of expected.entries()) {
+    if (!actual.has(id)) {
+      diffs.push({ id, reason: 'missing' });
+      continue;
+    }
+    const afterPhaseId = actual.get(id) ?? null;
+    if (beforePhaseId !== afterPhaseId) {
+      diffs.push({ id, before_phase_id: beforePhaseId, after_phase_id: afterPhaseId });
+    }
+  }
+  return diffs;
+}
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -233,7 +321,7 @@ serve(async (req) => {
         .limit(20),
       supabase
         .from('dslm_curriculum_phases')
-        .select('id, sequence_number, status, title, description, focus_areas, estimated_weeks_start, estimated_weeks_end')
+        .select('id, sequence_number, status, title, description, focus_areas, estimated_weeks_start, estimated_weeks_end, rationale, deleted_at')
         .eq('student_id', studentId)
         .eq('teacher_id', teacherId)
         .is('deleted_at', null)
@@ -254,22 +342,46 @@ serve(async (req) => {
     const worksheets = worksheetsRes.data || [];
     const existingPhases = existingPhasesRes.data || [];
 
-    // v6.9.45 — hard preservation invariant: done AND in_progress phases are NEVER
-    // touched on `replace`. Their phase row IDs survive, so every
-    // `future_worksheet_suggestions.phase_id` pointing at them stays valid and
-    // the UI keeps showing their existing next steps.
+    // v6.9.46 — hard preservation invariant: done AND in_progress phases are
+    // normalized and snapshotted before any write. Only planned/draft rows are
+    // replaceable; unknown legacy statuses are protected and logged.
     const KEPT_STATUSES = ['done', 'in_progress'];
-    const isKeptPhase = (status: string) => KEPT_STATUSES.includes(status);
+    const REPLACEABLE_STATUSES = ['planned', 'draft'];
+    const isKeptPhase = (status: any) => KEPT_STATUSES.includes(normalizePhaseStatus(status));
+    const isReplaceablePhase = (status: any) => REPLACEABLE_STATUSES.includes(normalizePhaseStatus(status));
     const keptPhases = existingPhases.filter((p: any) => isKeptPhase(p.status));
-    const replaceablePhases = existingPhases.filter((p: any) => !isKeptPhase(p.status));
+    const replaceablePhases = existingPhases.filter((p: any) => isReplaceablePhase(p.status));
+    const protectedPhases = existingPhases.filter((p: any) => !isReplaceablePhase(p.status));
+    const unknownStatusPhases = existingPhases
+      .filter((p: any) => !isKeptPhase(p.status) && !isReplaceablePhase(p.status))
+      .map((p: any) => ({ id: p.id, status: p.status }));
     const keptPhaseIds: string[] = keptPhases.map((p: any) => p.id);
     const replaceablePhaseIds: string[] = replaceablePhases.map((p: any) => p.id);
-    const hasKeptInProgress = keptPhases.some((p: any) => p.status === 'in_progress');
+    const protectedPhaseIds: string[] = protectedPhases.map((p: any) => p.id);
+    const keptPhaseSnapshotMap = phaseSnapshotMap(keptPhases);
+    const hasKeptInProgress = keptPhases.some((p: any) => normalizePhaseStatus(p.status) === 'in_progress');
     const keptWeeksConsumed = keptPhases.reduce((acc: number, p: any) => {
       const s = Number.isInteger(p.estimated_weeks_start) ? p.estimated_weeks_start : 0;
       const e = Number.isInteger(p.estimated_weeks_end) ? p.estimated_weeks_end : 0;
       return Math.max(acc, e || s || 0);
     }, 0);
+    let keptSuggestionRows: any[] = [];
+    if (keptPhaseIds.length > 0) {
+      const { data: keptSuggestionData, error: keptSuggestionErr } = await supabase
+        .from('future_worksheet_suggestions')
+        .select('id, phase_id')
+        .eq('student_id', studentId)
+        .eq('teacher_id', teacherId)
+        .is('deleted_at', null)
+        .in('phase_id', keptPhaseIds);
+      if (keptSuggestionErr) {
+        console.error('Failed to read kept phase suggestion bindings', keptSuggestionErr);
+        throw keptSuggestionErr;
+      }
+      keptSuggestionRows = keptSuggestionData || [];
+    }
+    const keptSuggestionIds: string[] = keptSuggestionRows.map((row: any) => row.id);
+    const keptSuggestionBindingMap = suggestionBindingMap(keptSuggestionRows);
 
     // Compute weeks until deadline
     let weeksUntilDeadline: number | null = null;
@@ -534,7 +646,7 @@ Return ONLY a valid JSON array (no markdown), with this exact format:
     // Compute starting sequence
     const remainingMaxSeq = mode === 'add'
       ? (existingPhases.reduce((acc: number, p: any) => Math.max(acc, p.sequence_number), 0))
-      : (keptPhases.reduce((acc: number, p: any) => Math.max(acc, p.sequence_number), 0));
+      : (protectedPhases.reduce((acc: number, p: any) => Math.max(acc, p.sequence_number), 0));
 
     const generationContext = {
       weeks_until_deadline: weeksUntilDeadline,
@@ -558,8 +670,63 @@ Return ONLY a valid JSON array (no markdown), with this exact format:
       // v6.9.45 preservation audit
       kept_phase_ids: keptPhaseIds,
       replaceable_phase_ids: replaceablePhaseIds,
+      protected_phase_ids: protectedPhaseIds,
+      kept_suggestion_ids: keptSuggestionIds,
+      unknown_status_phase_ids: unknownStatusPhases,
       preserved_phase_count: keptPhases.length,
       generated_at: new Date().toISOString(),
+    };
+
+    const restoreReplaceablePhases = async () => {
+      if (mode !== 'replace' || replaceablePhaseIds.length === 0) return null;
+      const { error } = await supabase
+        .from('dslm_curriculum_phases')
+        .update({ deleted_at: null })
+        .eq('student_id', studentId)
+        .eq('teacher_id', teacherId)
+        .in('id', replaceablePhaseIds);
+      if (error) console.error('Failed to restore replaceable phases after roadmap failure', error);
+      return error;
+    };
+
+    const cleanupInsertedPhases = async (insertedIds: string[]) => {
+      if (!insertedIds.length) return null;
+      const { error } = await supabase
+        .from('dslm_curriculum_phases')
+        .update({ deleted_at: new Date().toISOString() })
+        .eq('student_id', studentId)
+        .eq('teacher_id', teacherId)
+        .in('id', insertedIds);
+      if (error) console.error('Failed to clean up inserted phases after roadmap failure', error);
+      return error;
+    };
+
+    const preservationFailureResponse = async (reason: string, details: any, insertedIds: string[] = []) => {
+      const cleanupErr = await cleanupInsertedPhases(insertedIds);
+      const restoreErr = await restoreReplaceablePhases();
+      console.error('Roadmap preservation invariant FAILED', {
+        reason,
+        expected_kept_ids: keptPhaseIds,
+        kept_suggestion_ids: keptSuggestionIds,
+        inserted_ids: insertedIds,
+        cleanup_error: cleanupErr,
+        restore_error: restoreErr,
+        ...details,
+      });
+      return new Response(
+        JSON.stringify({
+          error: 'Kept phase preservation failed',
+          preservationInvariantFailed: true,
+          reason,
+          expected_kept_ids: keptPhaseIds,
+          kept_suggestion_ids: keptSuggestionIds,
+          inserted_ids: insertedIds,
+          cleanupFailed: Boolean(cleanupErr),
+          restoreFailed: Boolean(restoreErr),
+          ...details,
+        }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
     };
 
     const insertData = phases.map((p, idx) => ({
@@ -583,36 +750,45 @@ Return ONLY a valid JSON array (no markdown), with this exact format:
 
     if (insertError) {
       console.error('Insert error:', insertError);
+      await restoreReplaceablePhases();
       throw insertError;
     }
 
-    // v6.9.45 — post-write preservation invariant. Verify every kept phase still
-    // exists and is NOT soft-deleted. If anything was touched, fail loudly so
-    // the regression cannot ship silently again.
+    // v6.9.46 — post-write preservation invariant. Verify every kept phase field
+    // and every kept suggestion binding, not just row survival.
+    const insertedIds: string[] = (inserted || []).map((p: any) => p.id).filter(Boolean);
     if (mode === 'replace' && keptPhaseIds.length > 0) {
       const { data: keptCheck, error: keptCheckErr } = await supabase
         .from('dslm_curriculum_phases')
-        .select('id, status, deleted_at')
+        .select('id, sequence_number, status, title, description, focus_areas, estimated_weeks_start, estimated_weeks_end, rationale, deleted_at')
+        .eq('student_id', studentId)
+        .eq('teacher_id', teacherId)
         .in('id', keptPhaseIds);
       if (keptCheckErr) {
         console.error('Failed to verify kept phases', keptCheckErr);
-      } else {
-        const survived = (keptCheck || []).filter((r: any) => !r.deleted_at);
-        if (survived.length !== keptPhaseIds.length) {
-          console.error('Kept phase preservation invariant FAILED', {
-            expected: keptPhaseIds,
-            survived: survived.map((r: any) => r.id),
-          });
-          return new Response(
-            JSON.stringify({
-              error: 'Kept phase preservation failed',
-              preservationInvariantFailed: true,
-              expected_kept_ids: keptPhaseIds,
-              survived_kept_ids: survived.map((r: any) => r.id),
-            }),
-            { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          );
-        }
+        return await preservationFailureResponse('kept_phase_read_failed', { kept_phase_read_error: keptCheckErr }, insertedIds);
+      }
+      const phaseDiffs = diffPhaseSnapshots(keptPhaseSnapshotMap, phaseSnapshotMap(keptCheck || []));
+      if (phaseDiffs.length > 0) {
+        return await preservationFailureResponse('kept_phase_snapshot_changed', { phase_diffs: phaseDiffs }, insertedIds);
+      }
+    }
+
+    if (mode === 'replace' && keptSuggestionIds.length > 0) {
+      const { data: keptSuggestionCheck, error: keptSuggestionCheckErr } = await supabase
+        .from('future_worksheet_suggestions')
+        .select('id, phase_id')
+        .eq('student_id', studentId)
+        .eq('teacher_id', teacherId)
+        .is('deleted_at', null)
+        .in('id', keptSuggestionIds);
+      if (keptSuggestionCheckErr) {
+        console.error('Failed to verify kept suggestion bindings', keptSuggestionCheckErr);
+        return await preservationFailureResponse('kept_suggestion_read_failed', { kept_suggestion_read_error: keptSuggestionCheckErr }, insertedIds);
+      }
+      const suggestionDiffs = diffSuggestionBindings(keptSuggestionBindingMap, suggestionBindingMap(keptSuggestionCheck || []));
+      if (suggestionDiffs.length > 0) {
+        return await preservationFailureResponse('kept_suggestion_binding_changed', { suggestion_diffs: suggestionDiffs }, insertedIds);
       }
     }
 
