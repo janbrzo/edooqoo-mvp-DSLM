@@ -513,8 +513,8 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
   }
 
   return (
-    <Card data-spotlight="send-welcome-test" className={`border-primary/30 bg-primary/5 ${compact ? 'mb-3' : 'mb-6'} relative`}>
-      <CardContent className={compact ? 'py-2 px-3' : 'py-4'}>
+    <Card data-spotlight="send-welcome-test" className={`border-primary/30 bg-primary/5 ${compact ? 'mb-3' : 'mb-4'} relative`}>
+      <CardContent className={compact ? 'py-2 px-3' : 'py-3 px-4'}>
         {/* Always-on dismiss button — hides the banner from Overview only.
             The Welcome Test remains accessible in the Tests tab. */}
         <TooltipProvider delayDuration={200}>
