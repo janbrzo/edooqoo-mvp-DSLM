@@ -82,6 +82,14 @@ export default function WorksheetForm({
     } catch { return fallback; }
   };
   const initialAutoIntentRef = useRef<{ studentId?: string; suggestionId?: string | null } | null>(readAutoGenerateIntent());
+  const autoRequestIdRef = useRef<string | null>(null);
+  try {
+    const raw = typeof window !== 'undefined' ? sessionStorage.getItem('autoGenerateWorksheetRequest') : null;
+    if (raw && !autoRequestIdRef.current) {
+      const parsed = JSON.parse(raw);
+      if (parsed?.requestId) autoRequestIdRef.current = String(parsed.requestId);
+    }
+  } catch { /* ignore */ }
   const [lessonTopic, setLessonTopic] = useState<string>(() => readPrefillTopic());
   const [lessonGoal, setLessonGoal] = useState("");
   const [grammarFocus, setGrammarFocus] = useState("");
@@ -596,6 +604,7 @@ export default function WorksheetForm({
       // so Index.tsx can queue the request until tokens/profile are ready instead of
       // silently dropping it after 2 short retries.
       __autoGenerateFromSuggestion: Boolean(initialAutoIntentRef.current),
+      __autoGenerateRequestId: autoRequestIdRef.current || undefined,
     };
 
     // Refresh onboarding progress after successful worksheet generation

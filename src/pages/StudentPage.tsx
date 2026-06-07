@@ -1090,10 +1090,13 @@ const StudentPage = () => {
                   // request.studentId before firing requestSubmit(), avoiding
                   // the prior race where submit ran before student hydrated.
                   try {
+                    const requestId = (crypto?.randomUUID?.() || `req_${Date.now()}_${Math.random().toString(36).slice(2,8)}`);
                     sessionStorage.setItem('autoGenerateWorksheetRequest', JSON.stringify({
+                      requestId,
                       studentId: student.id,
                       suggestionId: suggestionId || null,
                       createdAt: Date.now(),
+                      status: 'pending',
                     }));
                   } catch { /* ignore quota */ }
                 }

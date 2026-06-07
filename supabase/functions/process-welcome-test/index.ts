@@ -1078,7 +1078,15 @@ serve(async (req) => {
           })
           .join('\n');
 
-        if (openAnswers) {
+        // v6.9.47 — when no open/speaking answers exist, generate AI Analysis
+        // from the deterministic profile + scenario answers so the teacher
+        // never sees an empty "AI Analysis" section after completion/review.
+        const profileAnswerSummary = `Profile snapshot (deterministic):\n- Estimated level: ${estimatedLevel}\n- Self-assessed level: ${selfAssessedLevel || 'unknown'} (${levelConfidence})\n- Skill scores: grammar=${grammarScore ?? '-'}%, vocabulary=${vocabularyScore ?? '-'}%, reading=${readingScore ?? '-'}%, writing=${writingScore ?? '-'}%\n- Strongest skill: ${strongest || 'n/a'}; weakest: ${weakest || 'n/a'}\n- Motivation type: ${traits.motivation_type || 'unknown'}; latent goal: ${traits.latent_goal || 'unknown'}\n- Anxiety: ${traits.anxiety_level || 'unknown'}; ambiguity tolerance: ${traits.ambiguity_tolerance || 'unknown'}; error attitude: ${traits.error_attitude || 'unknown'}\n- Feedback preference: ${traits.feedback_preference || 'unknown'}; correction preference: ${traits.correction_preference || 'unknown'}\n- Weekly study time: ${traits.weekly_study_time || 'unknown'}; homework commitment: ${traits.homework_commitment || 'unknown'}\n- Deadline response: ${traits.deadline_response || 'unknown'}; learning timeline: ${traits.learning_timeline || 'unknown'}; persistence: ${traits.persistence_level || 'unknown'}; plateau response: ${traits.plateau_response || 'unknown'}\n- Career importance: ${traits.career_english_importance || 'unknown'}; usage context: ${traits.usage_context || 'unknown'}\n- Interest topics: ${(interestTopics || []).join(', ') || 'none'}; preferred activities: ${(preferredActivities || []).join(', ') || 'none'}\n- Confidence matrix (1-5): speaking=${matrix['Speaking with strangers'] ?? '-'}, writing=${matrix['Writing formal emails'] ?? '-'}, listening=${matrix['Understanding movies without subtitles'] ?? '-'}, reading=${matrix['Reading news articles'] ?? '-'}, presenting=${matrix['Giving presentations'] ?? '-'}, small_talk=${matrix['Small talk at parties'] ?? '-'}`;
+        const userPromptBody = openAnswers
+          ? `Student profile data:\n- Estimated level: ${estimatedLevel}\n- Grammar score: ${grammarScore}%\n- Vocabulary score: ${vocabularyScore}%\n- Motivation: ${traits.motivation_type || 'unknown'}\n- Anxiety: ${traits.anxiety_level || 'unknown'}\n- Questions answered: ${questions.filter((q: any) => q.student_answer !== null).length}/${questions.length}\n\nOpen-ended answers:\n${openAnswers}`
+          : `${profileAnswerSummary}\n\nNo open-ended or speaking answers were submitted. Build the analysis strictly from the deterministic profile snapshot above.`;
+
+        if (openAnswers || profileAnswerSummary) {
           const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
             method: 'POST',
             headers: {
@@ -1131,19 +1139,7 @@ BE STRICT. Do NOT inflate scores. Most brief or off-topic answers should score b
 
 Format as JSON: {"summary": "...", "recommendations": ["...", "..."], "writing_quality": "basic|intermediate|advanced", "key_observations": ["...", "..."], "per_question_scores": {"wt_q16": 45, "wt_q36": 70, "wt_q16s": 15, ...}}`
                 },
-                {
-                  role: 'user',
-                  content: `Student profile data:
-- Estimated level: ${estimatedLevel}
-- Grammar score: ${grammarScore}%
-- Vocabulary score: ${vocabularyScore}%
-- Motivation: ${traits.motivation_type || 'unknown'}
-- Anxiety: ${traits.anxiety_level || 'unknown'}
-- Questions answered: ${questions.filter((q: any) => q.student_answer !== null).length}/${questions.length}
-
-Open-ended answers:
-${openAnswers}`
-                }
+                { role: 'user', content: userPromptBody },
               ],
             }),
           });
@@ -1171,6 +1167,22 @@ ${openAnswers}`
               endpoint: 'https://ai.gateway.lovable.dev/v1/chat/completions',
               error: errText.slice(0, 500),
               functionName: 'process-welcome-test',
+            });
+            // v6.9.47 — deterministic fallback so the UI never shows an empty
+            // AI Analysis card even when the model gateway is unavailable.
+            aiSummary = JSON.stringify({
+              summary: `Deterministic profile: estimated CEFR ${estimatedLevel} (self-assessed ${selfAssessedLevel || 'unknown'}, ${levelConfidence}). Strongest skill ${strongest || 'n/a'}, weakest ${weakest || 'n/a'}. Motivation ${traits.motivation_type || 'unknown'}, anxiety ${traits.anxiety_level || 'unknown'}, feedback preference ${traits.feedback_preference || 'unknown'}.`,
+              recommendations: [
+                weakest ? `Prioritise targeted practice on ${weakest} to lift overall CEFR confidence.` : 'Confirm weakest skill in the next lesson before locking the curriculum.',
+                'Anchor lessons in the surfaced interest topics to sustain motivation week over week.',
+                traits.feedback_preference ? `Match correction style to the student\u2019s preferred feedback mode: ${traits.feedback_preference}.` : 'Calibrate feedback style during the first live session.',
+              ],
+              writing_quality: 'unknown',
+              key_observations: [
+                `Estimated level ${estimatedLevel}; self-assessed ${selfAssessedLevel || 'unknown'} (${levelConfidence}).`,
+                `Weekly study time: ${traits.weekly_study_time || 'unknown'}; learning timeline: ${traits.learning_timeline || 'unknown'}.`,
+              ],
+              fallback: true,
             });
           }
         }

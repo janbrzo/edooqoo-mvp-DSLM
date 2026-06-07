@@ -89,6 +89,7 @@ const corsHeaders = {
 function fitPhasesToDeadline(
   phases: any[],
   targetWeeks: number | null,
+  startingWeek: number = 1,
 ): { phases: any[]; adjusted: boolean } {
   if (!targetWeeks || !Array.isArray(phases) || phases.length === 0) {
     return { phases, adjusted: false };
@@ -97,9 +98,10 @@ function fitPhasesToDeadline(
   const minWeeks = Math.max(1, Math.min(2, Math.floor(targetWeeks / n) || 1));
   if (minWeeks * n > targetWeeks) {
     // Cannot honor min — distribute as evenly as possible (every phase = 1 week up to budget)
-    let cursor = 1;
+    let cursor = Math.max(1, startingWeek);
+    const lastWeek = cursor + targetWeeks - 1;
     const out = phases.map((p, i) => {
-      const end = i === n - 1 ? targetWeeks : Math.min(targetWeeks, cursor);
+      const end = i === n - 1 ? lastWeek : Math.min(lastWeek, cursor);
       const fixed = { ...p, estimated_weeks_start: cursor, estimated_weeks_end: end };
       cursor = end + 1;
       return fixed;
@@ -127,7 +129,7 @@ function fitPhasesToDeadline(
       // Distribute leftover slack to last phase
       const leftover = targetWeeks - sum0;
       durations[durations.length - 1] += leftover;
-      return { phases: rebase(phases, durations), adjusted: aiSum !== targetWeeks };
+      return { phases: rebaseFromWeek(phases, durations, startingWeek), adjusted: aiSum !== targetWeeks };
     }
   }
 
@@ -152,11 +154,15 @@ function fitPhasesToDeadline(
     }
   }
 
-  return { phases: rebase(phases, durations), adjusted: true };
+  return { phases: rebaseFromWeek(phases, durations, startingWeek), adjusted: true };
 }
 
 function rebase(phases: any[], durations: number[]): any[] {
-  let cursor = 1;
+  return rebaseFromWeek(phases, durations, 1);
+}
+
+function rebaseFromWeek(phases: any[], durations: number[], startingWeek: number): any[] {
+  let cursor = Math.max(1, Number.isInteger(startingWeek) ? startingWeek : 1);
   return phases.map((p, i) => {
     const start = cursor;
     const end = cursor + durations[i] - 1;
@@ -610,15 +616,55 @@ Return ONLY a valid JSON array (no markdown), with this exact format:
       rationale: p.rationale ? String(p.rationale).slice(0, 600) : null,
     }));
 
+    // v6.9.47 — new phases must start AFTER the last kept (done/in_progress) week
+    // so they never overlap preserved active phases. `add` mode follows the same rule.
+    const roadmapStartWeek = (mode === 'add' || keptWeeksConsumed > 0)
+      ? (keptWeeksConsumed + 1)
+      : 1;
+
     // v6.9.41 P6 — when teacher set explicit per-phase week targets, honor them deterministically.
     let fit: { phases: any[]; adjusted: boolean };
     if (phaseWeekTargets && phases.length === phaseWeekTargets.length) {
-      fit = { phases: rebase(phases, phaseWeekTargets), adjusted: true };
+      fit = { phases: rebaseFromWeek(phases, phaseWeekTargets, roadmapStartWeek), adjusted: true };
     } else {
       // v6.9.13 — HARD DEADLINE FIT safety net (server-side scaling/clipping).
-      fit = fitPhasesToDeadline(phases, remainingBudget);
+      fit = fitPhasesToDeadline(phases, remainingBudget, roadmapStartWeek);
     }
     phases = fit.phases;
+
+    // v6.9.47 — before soft-deleting replaceable phases, detach their active
+    // worksheet suggestions so they survive as free `next_step` rows instead of
+    // pointing at a deleted phase row (which makes them invisible in the UI).
+    let detachedReplaceableSuggestionIds: string[] = [];
+    const detachedSuggestionPriorPhase: Record<string, string> = {};
+    if (mode === 'replace' && replaceablePhaseIds.length > 0) {
+      const { data: detachable, error: detachReadErr } = await supabase
+        .from('future_worksheet_suggestions')
+        .select('id, phase_id')
+        .eq('student_id', studentId)
+        .eq('teacher_id', teacherId)
+        .is('deleted_at', null)
+        .eq('is_used', false)
+        .in('phase_id', replaceablePhaseIds);
+      if (detachReadErr) {
+        console.error('Failed to read replaceable phase suggestions', detachReadErr);
+        throw detachReadErr;
+      }
+      for (const r of detachable || []) {
+        detachedReplaceableSuggestionIds.push(String(r.id));
+        if (r.phase_id) detachedSuggestionPriorPhase[String(r.id)] = String(r.phase_id);
+      }
+      if (detachedReplaceableSuggestionIds.length > 0) {
+        const { error: detachErr } = await supabase
+          .from('future_worksheet_suggestions')
+          .update({ phase_id: null, suggestion_kind: 'next_step' })
+          .in('id', detachedReplaceableSuggestionIds);
+        if (detachErr) {
+          console.error('Failed to detach replaceable phase suggestions', detachErr);
+          throw detachErr;
+        }
+      }
+    }
 
     // v6.9.45 — Soft-delete ONLY planned/draft phases on `replace`. Scope the
     // update by student_id + teacher_id as an extra safety belt so a runtime
@@ -674,6 +720,8 @@ Return ONLY a valid JSON array (no markdown), with this exact format:
       kept_suggestion_ids: keptSuggestionIds,
       unknown_status_phase_ids: unknownStatusPhases,
       preserved_phase_count: keptPhases.length,
+      roadmap_start_week: roadmapStartWeek,
+      detached_replaceable_suggestion_ids: detachedReplaceableSuggestionIds,
       generated_at: new Date().toISOString(),
     };
 
@@ -687,6 +735,44 @@ Return ONLY a valid JSON array (no markdown), with this exact format:
         .in('id', replaceablePhaseIds);
       if (error) console.error('Failed to restore replaceable phases after roadmap failure', error);
       return error;
+    };
+
+    // v6.9.47 — symmetric rollback for detached suggestions. We re-attach them
+    // to their original replaceable phase ids so the teacher does not lose
+    // existing worksheet plans when the regeneration is aborted post-detach.
+    const restoreDetachedSuggestions = async () => {
+      if (detachedReplaceableSuggestionIds.length === 0) return null;
+      // Re-read the original phase bindings from kept context; we rely on the
+      // fact that we filtered detachable by `in('phase_id', replaceablePhaseIds)`
+      // so any restoration must map id→its prior phase_id. We persisted that
+      // mapping via a second read here for safety.
+      const { data: priorBindings, error: bindingsErr } = await supabase
+        .from('future_worksheet_suggestions')
+        .select('id, phase_id, suggestion_kind')
+        .in('id', detachedReplaceableSuggestionIds);
+      if (bindingsErr) {
+        console.error('Failed to read detached suggestion bindings for rollback', bindingsErr);
+        return bindingsErr;
+      }
+      // For each detached row, try to re-attach to a still-existing replaceable
+      // phase. After phase restore (restoreReplaceablePhases) the previous
+      // phase rows are alive again, so we can re-bind by the original mapping
+      // captured in detachedSuggestionPriorPhase below.
+      const restoreErrors: any[] = [];
+      for (const row of priorBindings || []) {
+        const original = detachedSuggestionPriorPhase[String(row.id)];
+        if (!original) continue;
+        const { error: restoreErr } = await supabase
+          .from('future_worksheet_suggestions')
+          .update({ phase_id: original, suggestion_kind: 'phase_step' })
+          .eq('id', row.id);
+        if (restoreErr) restoreErrors.push(restoreErr);
+      }
+      if (restoreErrors.length > 0) {
+        console.error('Failed to restore some detached suggestions', restoreErrors);
+        return restoreErrors[0];
+      }
+      return null;
     };
 
     const cleanupInsertedPhases = async (insertedIds: string[]) => {
@@ -704,6 +790,7 @@ Return ONLY a valid JSON array (no markdown), with this exact format:
     const preservationFailureResponse = async (reason: string, details: any, insertedIds: string[] = []) => {
       const cleanupErr = await cleanupInsertedPhases(insertedIds);
       const restoreErr = await restoreReplaceablePhases();
+      const detachRestoreErr = await restoreDetachedSuggestions();
       console.error('Roadmap preservation invariant FAILED', {
         reason,
         expected_kept_ids: keptPhaseIds,
@@ -711,6 +798,7 @@ Return ONLY a valid JSON array (no markdown), with this exact format:
         inserted_ids: insertedIds,
         cleanup_error: cleanupErr,
         restore_error: restoreErr,
+        detach_restore_error: detachRestoreErr,
         ...details,
       });
       return new Response(
@@ -723,6 +811,7 @@ Return ONLY a valid JSON array (no markdown), with this exact format:
           inserted_ids: insertedIds,
           cleanupFailed: Boolean(cleanupErr),
           restoreFailed: Boolean(restoreErr),
+          detachRestoreFailed: Boolean(detachRestoreErr),
           ...details,
         }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
@@ -751,6 +840,7 @@ Return ONLY a valid JSON array (no markdown), with this exact format:
     if (insertError) {
       console.error('Insert error:', insertError);
       await restoreReplaceablePhases();
+      await restoreDetachedSuggestions();
       throw insertError;
     }
 

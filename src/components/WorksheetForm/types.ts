@@ -30,6 +30,9 @@ export interface FormData {
   // v6.9.45 — internal transport flags, not part of the AI prompt.
   __autoGenerateFromSuggestion?: boolean;
   __tokenRetry?: number;
+  // v6.9.47 — correlation id so Index.tsx can ack/refuse the auto-generate
+  // request before the form drops sessionStorage flags.
+  __autoGenerateRequestId?: string;
   selectedImage?: {
     id: string;
     url: string;
