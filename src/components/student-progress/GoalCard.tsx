@@ -27,6 +27,7 @@ interface GoalCardProps {
   progressPct?: number | null;
   isManualOverride?: boolean;
   signalsLabel?: string;
+  isSuggested?: boolean;
 }
 
 const formatDeadline = (targetDate?: string | null): string | null => {
@@ -44,7 +45,7 @@ const formatDeadline = (targetDate?: string | null): string | null => {
 export const GoalCard: React.FC<GoalCardProps> = ({
   goal, onDelete, onAddElement, onRateElement, onDeleteElement,
   onEdit, onArchive, onUnarchive, onMarkAchieved, onSetManualProgress,
-  progressPct, isManualOverride, signalsLabel,
+  progressPct, isManualOverride, signalsLabel, isSuggested,
 }) => {
   const deadline = formatDeadline(goal.target_date);
   const isArchived = !!goal.archived_at;
@@ -55,6 +56,7 @@ export const GoalCard: React.FC<GoalCardProps> = ({
       'border rounded-lg p-3 space-y-2',
       isAchieved && 'border-emerald-400/60 bg-emerald-50/40 dark:bg-emerald-950/20',
       isArchived && 'opacity-60',
+      isSuggested && 'opacity-70 grayscale-[0.3] bg-muted/30',
     )}>
       <div className="flex items-start justify-between">
         <div className="min-w-0 flex-1">

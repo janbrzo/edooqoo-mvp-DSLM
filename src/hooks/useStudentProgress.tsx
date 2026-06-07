@@ -64,6 +64,12 @@ export const useStudentProgress = ({ studentId, teacherId }: UseStudentProgressP
   }, [studentId, teacherId]);
 
   useEffect(() => {
+    const handler = () => fetchGoals();
+    window.addEventListener("student-progress:refresh", handler);
+    return () => window.removeEventListener("student-progress:refresh", handler);
+  }, [fetchGoals]);
+
+  useEffect(() => {
     fetchGoals();
   }, [fetchGoals]);
 
@@ -141,6 +147,7 @@ export const useStudentProgress = ({ studentId, teacherId }: UseStudentProgressP
     updates: Partial<Pick<ProgressGoal, 'title' | 'description' | 'target_date' | 'is_achieved'>> & {
       manual_progress_pct?: number | null;
       archived_at?: string | null;
+      accepted_at?: string | null;
     }
   ): Promise<boolean> => {
     try {
