@@ -54,12 +54,31 @@ export function WelcomeTestResults({ testId, studentId, teacherId, questions }: 
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const { data, error } = await supabase
-          .from('student_learning_profiles')
-          .select('*')
-          .eq('student_id', studentId)
-          .eq('teacher_id', teacherId)
-          .single();
+        // v6.9.47 — prefer the profile bound to THIS testId so retakes never
+        // show analysis from a previous attempt. Fallback to the latest profile
+        // for the student when no test-specific row exists yet.
+        let data: any = null;
+        if (testId) {
+          const { data: byTest } = await supabase
+            .from('student_learning_profiles')
+            .select('*')
+            .eq('student_id', studentId)
+            .eq('teacher_id', teacherId)
+            .eq('welcome_test_id', testId)
+            .maybeSingle();
+          if (byTest) data = byTest;
+        }
+        if (!data) {
+          const { data: latest } = await supabase
+            .from('student_learning_profiles')
+            .select('*')
+            .eq('student_id', studentId)
+            .eq('teacher_id', teacherId)
+            .order('updated_at', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          data = latest;
+        }
 
         if (data) {
           setProfile(data as unknown as LearningProfile);
@@ -73,22 +92,13 @@ export function WelcomeTestResults({ testId, studentId, teacherId, questions }: 
           }
         }
 
-        // FIX 2.1: Fetch skill results from test_skill_results to merge into Skill Scores
-        const { data: testData } = await supabase
-          .from('student_tests')
-          .select('id')
-          .eq('student_id', studentId)
-          .eq('teacher_id', teacherId)
-          .eq('test_type', 'welcome')
-          .order('created_at', { ascending: false })
-          .limit(1)
-          .single();
-
-        if (testData) {
+        // v6.9.47 — skill results should match the rendered test, not the
+        // student-wide newest welcome test (matters for retakes).
+        if (testId) {
           const { data: results } = await supabase
             .from('test_skill_results')
             .select('element_type, correct_answers, total_questions, score_percentage')
-            .eq('test_id', testData.id);
+            .eq('test_id', testId);
           setSkillResults((results as SkillResultData[]) || []);
         }
       } catch (err) {
@@ -99,7 +109,7 @@ export function WelcomeTestResults({ testId, studentId, teacherId, questions }: 
     };
 
     fetchProfile();
-  }, [studentId, teacherId]);
+  }, [studentId, teacherId, testId]);
 
   if (loading) {
     return <div className="py-8 text-center text-muted-foreground">Loading learning profile...</div>;
