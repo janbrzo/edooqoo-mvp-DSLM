@@ -47,12 +47,16 @@ export const useWorksheetGeneration = (
       devWarn('⚠️ Generation already in progress, ignoring duplicate click');
       return;
     }
+    // v6.9.45 — prefer the studentId carried by the form submission. Parent state
+    // may not have synced yet when an auto-generate request races with the
+    // navigation that just pre-selected the student.
+    const effectiveStudentId: string | null = (data?.studentId as string | undefined) || studentId || null;
     devLog('🚀 Starting worksheet generation for:', data.lessonTime);
     devLog('🔧 Form data received:', { 
       lessonTime: data.lessonTime, 
       grammarFocus: data.teachingPreferences,
       hasGrammar: !!(data.teachingPreferences && data.teachingPreferences.trim()),
-      studentId
+      studentId: effectiveStudentId
     });
 
     // FLAG: Track if streaming has started to prevent premature modal close
@@ -224,7 +228,7 @@ export const useWorksheetGeneration = (
             selectedAudio,
             selectedImage,
           },
-          studentId
+          studentId: effectiveStudentId
         },
         userId,
         {
@@ -305,15 +309,15 @@ export const useWorksheetGeneration = (
         devLog('🔄 Modal stays open - streaming in progress (will close in callbacks)');
       }
       
-      if (studentId) {
+      if (effectiveStudentId) {
         devLog('🔄 FINAL STEP: Updating student activity for:', studentId);
         
         setTimeout(() => {
           window.dispatchEvent(new CustomEvent('studentUpdated', { 
-            detail: { studentId } 
+            detail: { studentId: effectiveStudentId } 
           }));
           
-          devLog('🔄 StudentUpdated event dispatched AFTER generation completed for:', studentId);
+          devLog('🔄 StudentUpdated event dispatched AFTER generation completed for:', effectiveStudentId);
         }, 500);
       }
     }
