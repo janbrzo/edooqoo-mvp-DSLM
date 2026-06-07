@@ -132,10 +132,15 @@ export interface SendWelcomeTestEmailArgs {
   studentName: string;
   teacherId: string;
   reminder?: boolean;
+  /**
+   * v6.9.42 — attempt number for retake-aware subject/body. 1 = initial,
+   * 2+ = retake (retake index = attemptNumber - 1).
+   */
+  attemptNumber?: number;
 }
 
 export async function sendWelcomeTestEmail(
-  { token, recipientEmail, studentName, teacherId, reminder = false }: SendWelcomeTestEmailArgs,
+  { token, recipientEmail, studentName, teacherId, reminder = false, attemptNumber = 1 }: SendWelcomeTestEmailArgs,
 ): Promise<void> {
   // Use maybeSingle() so a missing profile does not bubble 406 console noise.
   const { data: teacher } = await supabase
@@ -147,14 +152,18 @@ export async function sendWelcomeTestEmail(
     ? [teacher.first_name, teacher.last_name].filter(Boolean).join(' ') || teacher.email || ''
     : '';
 
+  const retakeNumber = attemptNumber > 1 ? attemptNumber - 1 : 0;
+  const titleSuffix = retakeNumber > 0 ? ` (Retake ${retakeNumber})` : '';
+
   const { error } = await supabase.functions.invoke('send-test-email', {
     body: {
       shareToken: token,
       recipientEmail,
-      testTitle: `Welcome Test - ${studentName}`,
+      testTitle: `Welcome Test${titleSuffix} - ${studentName}`,
       teacherName,
       testType: 'welcome',
       reminder,
+      retakeNumber,
     },
   });
   if (error) throw error;

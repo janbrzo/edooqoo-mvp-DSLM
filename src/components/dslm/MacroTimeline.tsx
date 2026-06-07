@@ -113,6 +113,12 @@ export const MacroTimeline: React.FC<MacroTimelineProps> = ({
   // v6.9.41 P6 — guided generation dialog state.
   const [guidedDialog, setGuidedDialog] = useState<null | { mode: 'replace' | 'add' }>(null);
   const openGuidedDialog = (mode: 'replace' | 'add') => setGuidedDialog({ mode });
+  // v6.9.42 — confirm regen with existing phases before opening guided dialog.
+  const [confirmRegenOpen, setConfirmRegenOpen] = useState(false);
+  const openRegenFlow = () => {
+    if (phases.length > 0) setConfirmRegenOpen(true);
+    else openGuidedDialog('replace');
+  };
   const requestGeneratePhases = (mode: 'replace' | 'add', count?: number) => {
     if (!hasGoals) { setPendingGenerate({ mode, count }); return; }
     void generatePhases(mode, count ? { count } : undefined);
@@ -289,14 +295,6 @@ export const MacroTimeline: React.FC<MacroTimelineProps> = ({
             </Button>
           </CardContent>
         </Card>
-        <GenerateRoadmapDialog
-          open={guidedDialog?.mode === 'replace'}
-          onOpenChange={(o) => { if (!o) setGuidedDialog(null); }}
-          mode="replace"
-          goals={guidedGoalOptions}
-          generating={generating}
-          onConfirm={async (opts) => { await generatePhases('replace', opts); }}
-        />
         <AlertDialog open={!!pendingGenerate} onOpenChange={(o) => { if (!o) setPendingGenerate(null); }}>
           <AlertDialogContent>
             <AlertDialogHeader>
@@ -540,7 +538,7 @@ export const MacroTimeline: React.FC<MacroTimelineProps> = ({
         <Button variant="outline" size="sm" onClick={() => setAddDialog(true)}>
           <Plus className="h-4 w-4 mr-2" /> Add phase
         </Button>
-        <Button variant="outline" size="sm" disabled={generating} onClick={() => openGuidedDialog('replace')}>
+        <Button variant="outline" size="sm" disabled={generating} onClick={openRegenFlow}>
           <Sparkles className="h-4 w-4 mr-2" /> Regenerate roadmap…
         </Button>
         <DropdownMenu>
@@ -716,8 +714,30 @@ export const MacroTimeline: React.FC<MacroTimelineProps> = ({
         mode="replace"
         goals={guidedGoalOptions}
         generating={generating}
+        isRegeneration={phases.length > 0}
         onConfirm={async (opts) => { await generatePhases('replace', opts); }}
       />
+      {/* v6.9.42 — regen confirm gate. Empty state still goes straight to the
+          guided dialog without this step (no destructive action). */}
+      <AlertDialog open={confirmRegenOpen} onOpenChange={setConfirmRegenOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Regenerate Learning Roadmap?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This replaces all <strong>planned</strong> phases with a freshly generated roadmap.
+              Phases marked <strong>done</strong> or <strong>in progress</strong> are kept.
+              Existing planned phases and their AI rationale will be archived (soft-deleted).
+              On the next screen you can steer the new roadmap with phase count, weeks, focused goals, and a teacher comment.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => { setConfirmRegenOpen(false); openGuidedDialog('replace'); }}>
+              Continue
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

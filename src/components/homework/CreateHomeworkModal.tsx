@@ -18,6 +18,40 @@ import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
 import { useHomeworkExerciseGeneration } from "@/hooks/useHomeworkExerciseGeneration";
 import { devLog } from '@/utils/logger';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { ChevronDown } from "lucide-react";
+
+/**
+ * v6.9.42 — collapsible section so the Create Homework modal fits a 1080p
+ * viewport. The first section opens by default; the rest collapse on mount.
+ */
+function HomeworkSection({
+  title,
+  summary,
+  defaultOpen = false,
+  children,
+}: {
+  title: string;
+  summary?: string;
+  defaultOpen?: boolean;
+  children: React.ReactNode;
+}) {
+  const [open, setOpen] = useState(!!defaultOpen);
+  return (
+    <Collapsible open={open} onOpenChange={setOpen} className="border rounded-md">
+      <CollapsibleTrigger className="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-muted/40 transition-colors">
+        <span className="font-medium text-sm">
+          {title}
+          {summary && (
+            <span className="ml-2 text-xs text-muted-foreground font-normal">— {summary}</span>
+          )}
+        </span>
+        <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`} />
+      </CollapsibleTrigger>
+      <CollapsibleContent className="px-3 pb-3 pt-1">{children}</CollapsibleContent>
+    </Collapsible>
+  );
+}
 
 interface CreateHomeworkModalProps {
   open: boolean;
@@ -529,8 +563,13 @@ export function CreateHomeworkModal({
           </div>
         ) : (
           // Creation form
-          <div className="space-y-6 py-4">
-            {/* Student Selection */}
+          <div className="space-y-3 py-4">
+            {/* v6.9.42 — Student Selection (open by default) */}
+            <HomeworkSection
+              title="Student"
+              defaultOpen
+              summary={students.find(s => s.id === selectedStudentId)?.name || (selectedStudentId ? undefined : 'Not selected')}
+            >
             <div className="space-y-2">
               <Label htmlFor="student">Select Student</Label>
               <select
@@ -547,8 +586,14 @@ export function CreateHomeworkModal({
                 ))}
               </select>
             </div>
+            </HomeworkSection>
 
-            {/* Exercise Selection */}
+            {/* v6.9.42 — Exercise Selection */}
+            <HomeworkSection
+              title="Exercises from Worksheet"
+              defaultOpen
+              summary={`${selectedExercises.size} of ${exercises.length} selected`}
+            >
             <div className="space-y-2">
               <Label>Select Exercises from Worksheet</Label>
               <p className="text-xs text-muted-foreground -mt-1">
@@ -575,10 +620,15 @@ export function CreateHomeworkModal({
                 {selectedExercises.size} exercise{selectedExercises.size !== 1 ? 's' : ''} selected
               </p>
             </div>
+            </HomeworkSection>
 
             {/* Generate More Exercises Section */}
             {worksheetFormData && (
-              <div className="space-y-3 border-t pt-4">
+              <HomeworkSection
+                title="Generate Additional Exercises"
+                summary={selectedGeneratedTypes.length > 0 ? `${selectedGeneratedTypes.length} types · ${generatedExercises.length} generated` : 'Optional AI add-on'}
+              >
+              <div className="space-y-3">
                 <Label>Generate Additional Exercises</Label>
                 
                 {/* Exercise Type Selection - SHOW ALL 21 TYPES */}
@@ -776,9 +826,14 @@ export function CreateHomeworkModal({
                   </div>
                 )}
               </div>
+              </HomeworkSection>
             )}
 
-            {/* Deadline Selection */}
+            {/* v6.9.42 — Deadline */}
+            <HomeworkSection
+              title="Deadline"
+              summary={deadline ? `${format(deadline, 'PP')} at ${deadlineTime}` : 'No deadline'}
+            >
             <div className="space-y-2">
               <Label>Deadline (Optional)</Label>
               <div className="flex gap-2">
@@ -820,8 +875,13 @@ export function CreateHomeworkModal({
                 </div>
               </div>
             </div>
+            </HomeworkSection>
 
-            {/* Reminder Hours Dropdown */}
+            {/* v6.9.42 — Reminder */}
+            <HomeworkSection
+              title="Reminder"
+              summary={sendReminder ? `${reminderHours}h before deadline` : 'Off'}
+            >
               <div className="space-y-2">
                 <div className="flex items-center space-x-2">
                   <Switch 
@@ -893,6 +953,7 @@ export function CreateHomeworkModal({
                   </Select>
                 </div>
               )}
+            </HomeworkSection>
 
             {/* Action Buttons */}
             <div className="flex gap-3 pt-4">

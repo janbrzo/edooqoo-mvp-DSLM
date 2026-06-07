@@ -237,6 +237,7 @@ export function StudentTestsTab({ studentId, teacherId, studentName }: StudentTe
             recipientEmail: studentEmail,
             studentName: student?.name || studentName || 'Student',
             teacherId,
+            attemptNumber: nextAttempt,
           });
           toast.success(`Retake ${nextAttempt - 1} created and emailed to the student.`);
         } catch (mailErr) {
@@ -377,62 +378,64 @@ export function StudentTestsTab({ studentId, teacherId, studentName }: StudentTe
           : 'pending';
         return (
           <Card key={attempt.id} className={`border-primary/30 ${isLatest ? '' : 'opacity-90'}`}>
-            <CardContent className="py-4">
-              <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] items-start gap-3">
-                <div className="flex items-start gap-3 cursor-pointer min-w-0" onClick={() => setSelectedTestId(attempt.id)}>
-                  <div className="p-2 rounded-lg bg-primary/10 text-primary">
-                    <Sparkles className="h-5 w-5" />
-                  </div>
-                  <div className="min-w-0">
-                    <h3 className="font-semibold break-words">
-                      {cardTitle}
-                      {isLatest && welcomeAttempts.length > 1 && (
-                        <Badge variant="outline" className="ml-2 text-[10px]">Latest</Badge>
-                      )}
-                    </h3>
-                    <p className="text-sm text-muted-foreground">
-                      Welcome Test • {total} questions
-                      {attemptNumber > 1 && (
-                        <span className="ml-2 text-primary">· Attempt #{attemptNumber}</span>
-                      )}
-                    </p>
-                    <TestDates
-                      createdAt={attempt.created_at}
-                      completedAt={(attempt as any).completed_at}
-                      reviewedAt={(attempt as any).reviewed_at}
-                      className="mt-1"
-                    />
-                  </div>
+            <CardContent className="py-4 space-y-3">
+              {/* v6.9.42 — stack-first: title block full width, then actions row. */}
+              <div
+                className="flex items-start gap-3 min-w-0 cursor-pointer"
+                onClick={() => setSelectedTestId(attempt.id)}
+              >
+                <div className="p-2 rounded-lg bg-primary/10 text-primary flex-shrink-0">
+                  <Sparkles className="h-5 w-5" />
                 </div>
-                <div className="flex items-center gap-2 flex-wrap lg:justify-end w-full lg:w-auto">
-                  {attempt.score_percentage !== null && (
-                    <div className="text-right mr-2">
-                      <div className="text-lg font-bold">{answered}/{total}</div>
-                      <div className="text-xs text-muted-foreground">answered</div>
-                    </div>
-                  )}
-                  <Badge className={statusClass}>{statusLabel}</Badge>
-                  {isLatest ? (
-                    <WelcomeTestActionsPanel
-                      state={panelState}
-                      shareUrl={shareUrl}
-                      hasAnyAnswer={answered > 0}
-                      onCopy={handleCopyLink}
-                      onSend={handleSendEmail}
-                      onRefreshLink={handleRefreshWelcomeLink}
-                      onPreview={handlePreviewTest}
-                      onViewResults={() => setSelectedTestId(attempt.id)}
-                      onRetake={handleRetake}
-                      sending={creatingPreview}
-                      retaking={retaking}
-                      className="justify-start lg:justify-end"
-                    />
-                  ) : (
-                    <Button variant="outline" size="sm" onClick={() => setSelectedTestId(attempt.id)}>
-                      <Eye className="h-4 w-4 mr-1" /> View
-                    </Button>
-                  )}
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <h3 className="font-semibold break-words">{cardTitle}</h3>
+                    {isLatest && welcomeAttempts.length > 1 && (
+                      <Badge variant="outline" className="text-[10px] shrink-0">Latest</Badge>
+                    )}
+                    <Badge className={`${statusClass} shrink-0`}>{statusLabel}</Badge>
+                    {attempt.score_percentage !== null && (
+                      <span className="text-xs text-muted-foreground whitespace-nowrap">
+                        · {answered}/{total} answered
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-sm text-muted-foreground mt-0.5">
+                    Welcome Test • {total} questions
+                    {attemptNumber > 1 && (
+                      <span className="ml-2 text-primary">· Attempt #{attemptNumber}</span>
+                    )}
+                  </p>
+                  <TestDates
+                    createdAt={attempt.created_at}
+                    completedAt={(attempt as any).completed_at}
+                    reviewedAt={(attempt as any).reviewed_at}
+                    className="mt-1"
+                  />
                 </div>
+              </div>
+              <div className="flex justify-start lg:justify-end">
+                {isLatest ? (
+                  <WelcomeTestActionsPanel
+                    state={panelState}
+                    shareUrl={shareUrl}
+                    hasAnyAnswer={answered > 0}
+                    onCopy={handleCopyLink}
+                    onSend={handleSendEmail}
+                    onRefreshLink={handleRefreshWelcomeLink}
+                    onPreview={handlePreviewTest}
+                    onViewResults={() => setSelectedTestId(attempt.id)}
+                    onRetake={handleRetake}
+                    sending={creatingPreview}
+                    retaking={retaking}
+                    compact
+                    className="justify-start lg:justify-end"
+                  />
+                ) : (
+                  <Button variant="outline" size="sm" onClick={() => setSelectedTestId(attempt.id)}>
+                    <Eye className="h-4 w-4 mr-1" /> View
+                  </Button>
+                )}
               </div>
             </CardContent>
           </Card>

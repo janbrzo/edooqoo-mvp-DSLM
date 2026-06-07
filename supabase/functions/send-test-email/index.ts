@@ -18,7 +18,9 @@ serve(async (req) => {
   }
 
   try {
-    const { shareToken, recipientEmail, testTitle, teacherName, testType, reminder } = await req.json();
+    const { shareToken, recipientEmail, testTitle, teacherName, testType, reminder, retakeNumber } = await req.json();
+    const retakeN = Number.isFinite(retakeNumber) && retakeNumber > 0 ? Number(retakeNumber) : 0;
+    const isRetake = retakeN > 0;
 
     if (!shareToken || !recipientEmail) {
       return new Response(JSON.stringify({ error: "Missing shareToken or recipientEmail" }), {
@@ -47,10 +49,15 @@ serve(async (req) => {
         <p style="color:#6b7280;font-size:12px;margin-top:20px;">Or copy and paste this URL: ${shareUrl}</p>
       </div>`;
 
+    const retakeBanner = isRetake
+      ? `<p style="background:#f3e8ff;padding:10px 14px;border-radius:6px;margin:0 0 16px;color:#5b21b6;font-size:14px;"><strong>This is Retake ${retakeN}.</strong> Your teacher would like to re-measure your progress since the last attempt.</p>`
+      : "";
+
     const emailBody = isWelcomeTest
       ? `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-        <h2 style="color: #7c3aed;">🎯 Welcome Test</h2>
+        <h2 style="color: #7c3aed;">🎯 Welcome Test${isRetake ? ` — Retake ${retakeN}` : ""}</h2>
+        ${retakeBanner}
         <p>Hello,</p>
         <p><strong>${teacherName || "Your teacher"}</strong> has invited you to take a Welcome Test to help personalize your English learning experience.</p>
         <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin: 20px 0;">
@@ -97,7 +104,9 @@ serve(async (req) => {
     `;
 
     const subject = reminder && isWelcomeTest
-      ? `Reminder: please complete your Welcome Test from ${teacherName || "your teacher"}`
+      ? `Reminder: please complete your Welcome Test${isRetake ? ` (Retake ${retakeN})` : ""} from ${teacherName || "your teacher"}`
+      : isWelcomeTest && isRetake
+      ? `${teacherName || "Your teacher"} sent you a retake (Retake ${retakeN}) of the Welcome Test`
       : isWelcomeTest
       ? `${teacherName || "Your teacher"} invited you to take a Welcome Test`
       : `${teacherName || "Your teacher"} assigned you a test: ${testTitle}`;

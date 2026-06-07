@@ -187,6 +187,7 @@ export function TestDetailsView({ testId, teacherId, studentId, onBack }: TestDe
                 recipientEmail: (student as any).student_email,
                 studentName: student?.name || 'Student',
                 teacherId,
+                attemptNumber: nextAttempt,
               });
               toast.success(`Retake ${nextAttempt - 1} created and emailed to the student.`);
             } catch (mailErr) {

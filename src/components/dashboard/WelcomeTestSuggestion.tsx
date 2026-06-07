@@ -416,6 +416,7 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
             recipientEmail: studentEmail,
             studentName,
             teacherId,
+            attemptNumber: nextAttempt,
           });
           toast.success(`Retake ${nextAttempt - 1} created and emailed to the student.`);
         } catch (mailErr) {
@@ -564,11 +565,13 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
             </p>
           </div>
         ) : (
-        <div className="grid grid-cols-[auto_1fr] lg:grid-cols-[auto_1fr_auto] items-start lg:items-center gap-3 lg:gap-4">
-          <div className="flex-shrink-0">
-            <Sparkles className="h-8 w-8 text-primary" />
-          </div>
-          <div className="min-w-0">
+        // v6.9.42 — stack-first layout: title row, URL row (full width truncate),
+        // actions row (right-aligned on ≥sm). Fixes badge wrap + URL overflow
+        // observed on Welcome Test retake banners.
+        <div className="flex flex-col gap-3">
+          <div className="flex items-start gap-3 min-w-0">
+            <Sparkles className="h-8 w-8 text-primary flex-shrink-0" />
+            <div className="min-w-0 flex-1">
             {status === 'pending' && (
               <>
                 <div className="flex items-center gap-2 flex-wrap">
@@ -579,7 +582,14 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
                   </p>
                   <Badge variant="secondary" className="shrink-0">Waiting for student</Badge>
                 </div>
-                <p className="text-sm text-muted-foreground break-all line-clamp-1">{shareUrl}</p>
+                {shareUrl && (
+                  <p
+                    className="text-xs text-muted-foreground truncate mt-1"
+                    title={shareUrl}
+                  >
+                    {shareUrl}
+                  </p>
+                )}
                 {sentAt && (() => {
                   const hours = (Date.now() - new Date(sentAt).getTime()) / 36e5;
                   const days = Math.floor(hours / 24);
@@ -669,8 +679,9 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
                 </p>
               </>
             )}
+            </div>
           </div>
-          <div className="col-span-2 lg:col-span-1 lg:flex-shrink-0 lg:justify-self-end w-full lg:w-auto">
+          <div className="flex justify-start sm:justify-end">
             <WelcomeTestActionsPanel
               state={panelState}
               shareUrl={shareUrl}
@@ -684,7 +695,7 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
               sending={creating}
               retaking={retaking}
               compact
-              className="justify-start lg:justify-end"
+              className="justify-start sm:justify-end"
             />
           </div>
         </div>

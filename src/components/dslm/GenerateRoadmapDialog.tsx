@@ -35,6 +35,8 @@ export interface GenerateRoadmapDialogProps {
   mode: 'replace' | 'add';
   goals: RoadmapGoalOption[];
   generating: boolean;
+  /** v6.9.42 — adjusts title/description/CTA copy for regen vs first-time. */
+  isRegeneration?: boolean;
   onConfirm: (opts: {
     count?: number;
     weeksPerPhase?: number;
@@ -51,7 +53,7 @@ const clampInt = (v: any, min: number, max: number, fallback: number) => {
 };
 
 export const GenerateRoadmapDialog: React.FC<GenerateRoadmapDialogProps> = ({
-  open, onOpenChange, mode, goals, generating, onConfirm,
+  open, onOpenChange, mode, goals, generating, onConfirm, isRegeneration = false,
 }) => {
   const [autoCount, setAutoCount] = useState(true);
   const [count, setCount] = useState(4);
@@ -125,9 +127,15 @@ export const GenerateRoadmapDialog: React.FC<GenerateRoadmapDialogProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-lg max-h-[88vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>{mode === 'replace' ? 'Generate Learning Roadmap' : 'Add roadmap phases'}</DialogTitle>
+          <DialogTitle>
+            {isRegeneration
+              ? 'Regenerate Learning Roadmap'
+              : mode === 'replace' ? 'Generate Learning Roadmap' : 'Add roadmap phases'}
+          </DialogTitle>
           <DialogDescription>
-            Auto-fit gives full control to the AI. Toggle anything off to steer the plan yourself.
+            {isRegeneration
+              ? 'This produces a fresh phase structure. Previous planned phases will be archived; phases marked done or in progress are kept. Auto-fit gives full control to the AI — toggle anything off to steer the plan yourself.'
+              : 'Auto-fit gives full control to the AI. Toggle anything off to steer the plan yourself.'}
           </DialogDescription>
         </DialogHeader>
 
@@ -273,7 +281,9 @@ export const GenerateRoadmapDialog: React.FC<GenerateRoadmapDialogProps> = ({
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={generating}>Cancel</Button>
           <Button onClick={handleConfirm} disabled={generating}>
             {generating ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Sparkles className="h-4 w-4 mr-2" />}
-            {mode === 'replace' ? 'Generate roadmap' : 'Add phases'}
+            {isRegeneration
+              ? 'Regenerate roadmap'
+              : mode === 'replace' ? 'Generate roadmap' : 'Add phases'}
           </Button>
         </DialogFooter>
       </DialogContent>
