@@ -254,6 +254,16 @@ serve(async (req) => {
     const worksheets = worksheetsRes.data || [];
     const existingPhases = existingPhasesRes.data || [];
 
+    // v6.9.44 — KEPT set: both done AND in_progress are preserved on regenerate.
+    // UI promises this and previous behaviour only kept done.
+    const KEPT_STATUSES = ['done', 'in_progress'];
+    const keptPhases = existingPhases.filter((p: any) => KEPT_STATUSES.includes(p.status));
+    const keptWeeksConsumed = keptPhases.reduce((acc: number, p: any) => {
+      const s = Number.isInteger(p.estimated_weeks_start) ? p.estimated_weeks_start : 0;
+      const e = Number.isInteger(p.estimated_weeks_end) ? p.estimated_weeks_end : 0;
+      return Math.max(acc, e || s || 0);
+    }, 0);
+
     // Compute weeks until deadline
     let weeksUntilDeadline: number | null = null;
     let deadlineSource: 'student.main_goal_target_date' | 'goal.target_date' | 'fallback_no_deadline' = 'fallback_no_deadline';
@@ -320,8 +330,8 @@ serve(async (req) => {
     } else if (explicitWeeksPerPhase) {
       remainingBudget = explicitWeeksPerPhase * phaseCount;
     } else {
-        // 'replace' rebuilds from week 1 — use full deadline budget.
-        remainingBudget = weeksUntilDeadline;
+        // v6.9.44 — 'replace' preserves kept (done + in_progress); rebuild only the remainder.
+        remainingBudget = Math.max(phaseCount, weeksUntilDeadline - keptWeeksConsumed);
       }
     }
     const totalWeeks = remainingBudget ?? phaseCount * avgWeeksPerPhase;
