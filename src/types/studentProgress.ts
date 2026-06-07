@@ -32,6 +32,8 @@ export interface ProgressGoal {
   display_order: number;
   archived_at?: string | null;
   manual_progress_pct?: number | null;
+  accepted_at?: string | null;
+  source?: string | null;
   created_at: string | null;
   updated_at: string | null;
   deleted_at: string | null;
