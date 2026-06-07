@@ -401,20 +401,17 @@ export function StudentTestsTab({ studentId, teacherId, studentName }: StudentTe
                       </span>
                     )}
                   </div>
-                  <p className="text-xs text-muted-foreground mt-0.5">
+                  <div className="text-xs text-muted-foreground mt-0.5 flex flex-wrap items-center gap-x-2">
                     Welcome Test • {total} questions
                     {attemptNumber > 1 && (
-                      <span className="ml-2 text-primary">· Attempt #{attemptNumber}</span>
+                      <span className="text-primary">· Attempt #{attemptNumber}</span>
                     )}
-                    <span className="ml-2">
-                      · <TestDates
-                          createdAt={attempt.created_at}
-                          completedAt={(attempt as any).completed_at}
-                          reviewedAt={(attempt as any).reviewed_at}
-                          className="inline"
-                        />
-                    </span>
-                  </p>
+                    <TestDates
+                      createdAt={attempt.created_at}
+                      completedAt={(attempt as any).completed_at}
+                      reviewedAt={(attempt as any).reviewed_at}
+                    />
+                  </div>
                 </div>
                 </div>
                 <div className="lg:flex-shrink-0">
