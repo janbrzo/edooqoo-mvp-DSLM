@@ -8,8 +8,8 @@ const ROOT = path.resolve(__dirname, '..', '..');
 const PUBLIC = path.resolve(ROOT, 'public');
 const WELL_KNOWN = path.resolve(PUBLIC, '.well-known');
 
-const VERSION = 'v6.9.39';
-const RELEASE_NAME = 'Public Workflow Feature Pages And Real Screenshots';
+const VERSION = 'v6.9.42';
+const RELEASE_NAME = 'Homepage Post Generator Trust Narrative';
 const BASE_URL = 'https://edooqoo.com';
 
 const citablePages = [
@@ -169,7 +169,7 @@ const oneMinutePrepClaimIntegritySection = `## 1-Minute Prep Claim Integrity
 - PublicWorkflowNav provides shared route-link navigation across feature pages, /one-minute-prep, /how-it-works, and public pricing. FeatureWorkflowMap highlights the active puzzle piece inside setup, decision, lesson-signal, or access/rhythm phases.
 - FeatureScreenshotFrame renders real product screenshots from public/features with stable aspect ratios and lazy loading. Raw debug event-log screenshots are not public-facing evidence.
 - Feature pages use the same role framing: Welcome Test baseline setup, DSLM decision layer, 1-Minute Prep weekly prep surface, Live Sessions lesson-time capture, Homework follow-up evidence, Flashcards vocabulary retention, Calendar booking context, and Student Hub student workspace.
-- Homepage includes the reusable two-phase workflow section and LessonSignalCaptureSection before feature cards, and feature cards use real product screenshots instead of generated mockups.
+- Homepage keeps the hero and anonymous worksheet generator, then uses a homepage-only post-generator trust narrative: credibility bridge, workflow proof, honest setup limitation, real screenshot feature proof grid, explicit workload scenario, pricing, and a single final Add your first student CTA.
 - Learning Pacing uses students.dslm_pacing_mode, PacingModeSlider, recalculate-pacing, pacing_proposals, and dslmPromptCore planning context.
 - These systems provide signals and outputs for teacher-led planning. The protected worksheet generation prompt and any hidden pedagogical weighting inside Edge Function prompts are not reproduced.
 - Signup links from 1-Minute Prep intent may route authenticated users toward the Add Student entry point, but AddStudentDialog autosend/test logic is not part of this claim-integrity update.
@@ -199,6 +199,8 @@ const oneMinutePrepProblem = [
   '/blog/learning-pacing-scientific-vs-pragmatic-esl.html existed as a noindex redirect even though PacingModeSlider and /blog listed it as a real Learning Pacing reference.',
   'Feature pages still used generated mockup panels and did not show each feature as one puzzle piece in the 1-Minute Prep workflow.',
   'Public feature-page navigation differed from the homepage workflow nav and did not consistently route teachers between 1-Minute Prep, Welcome Test, DSLM, Homework, Flashcards, Live Sessions, Calendar, and Student Hub pages.',
+  'The homepage post-generator stack became chaotic after the rebrand because stats, workflow, feature map, lesson signals, value cards, pricing teaser, feature cards, testimonials, full pricing, and final CTA competed for one narrative.',
+  'Unverified testimonial-style cards with names, stars, and Real feedback language created trust risk for skeptical professional tutors.',
 ];
 
 const oneMinutePrepSolution = [
@@ -211,6 +213,9 @@ const oneMinutePrepSolution = [
   'The proof path is Signals -> Nano-skills -> Pacing/Roadmap -> Next focus -> Worksheet, with teacher review before use.',
   'The prep impact calculator estimates monthly preparation capacity currently tied up by prep work. It does not guarantee income or exact preparation time.',
   'Homepage hero proof tabs now separate Prep impact, Workflow proof, and Evidence stack so workflow order and DSLM evidence are not conflated.',
+  'The homepage post-generator narrative now follows a trust sequence: credibility bridge, weekly workflow proof, compounding-context limitation, real screenshot feature proof grid, explicit workload scenario, full pricing, and one final Add your first student CTA.',
+  'The homepage states the honest limitation that 1 minute is not realistic for a new student; recurring students are where prep time compounds down after real context exists.',
+  'Unverified testimonial cards are not rendered on the homepage; the workload section is explicitly labeled Example workload, not a testimonial.',
   '/one-minute-prep opens at the top on clean navigation and uses three proof tabs in this order: Workflow proof, Evidence stack, Prep impact calculator.',
   '/how-it-works keeps 8 steps but visually splits them into Phase 1: One-time student setup and Phase 2: Weekly 1-Minute Prep.',
   'Weekly workflow proof includes the optional Use booking context step for teachers who use Edooqoo Calendar without claiming calendar data always drives DSLM decisions.',
@@ -220,7 +225,7 @@ const oneMinutePrepSolution = [
 ];
 
 const oneMinutePrepMechanics = [
-  'Public landing files updated: src/components/landing/HeroHeadline.tsx, src/components/landing/StartOneMinutePrepDialog.tsx, src/components/PricingCalculator.tsx, src/components/PricingSection.tsx, src/components/landing/FinalCTA.tsx, src/components/landing/ParticlesBackground.tsx, src/pages/Index.tsx, and src/pages/HowItWorks.tsx.',
+  'Public landing files updated: src/components/landing/HeroHeadline.tsx, src/components/landing/StartOneMinutePrepDialog.tsx, src/components/PricingCalculator.tsx, src/components/PricingSection.tsx, src/components/landing/FinalCTA.tsx, src/components/landing/ParticlesBackground.tsx, src/pages/Index.tsx, src/pages/HowItWorks.tsx, and src/components/landing/HomePostGeneratorNarrative.tsx.',
   'src/pages/Index.tsx owns shared calculator state using DEFAULT_ONE_MINUTE_PREP_CALCULATOR_INPUT and passes value/onValueChange to the hero calculator and pricing calculator.',
   'Default homepage calculator values are prepMinutesPerStudent=25, studentsPerWeek=7, lessonPrice=25, lessonLengthMinutes=60.',
   'src/components/PricingCalculator.tsx supports controlled mode with value/onValueChange and retains an internal-state fallback for existing uses such as /pricing.',
@@ -242,8 +247,10 @@ const oneMinutePrepMechanics = [
   'src/components/public/PublicWorkflowNav.tsx renders public route-link navigation for 1-Minute Prep, Welcome Test, DSLM, Homework, Flashcards, Live Sessions, Calendar, and Student Hub.',
   'src/components/features/FeatureWorkflowMap.tsx renders the feature puzzle map and highlights the active feature page by role: setup, prep decision, lesson signals, or access and rhythm.',
   'src/components/features/FeatureScreenshotFrame.tsx renders real app screenshots from /features/*.png with stable dimensions, alt text, and lazy loading.',
-  'src/components/landing/TwoPhaseWorkflowSection.tsx reuses the two-phase workflow explanation on /how-it-works and the homepage.',
-  'src/components/landing/EcosystemSection.tsx uses real screenshots for homepage feature cards instead of generated mockups.',
+  'src/components/landing/TwoPhaseWorkflowSection.tsx reuses the two-phase workflow explanation on /how-it-works; the homepage now uses HomePostGeneratorNarrative instead of rendering the shared two-phase block.',
+  'src/components/landing/HomePostGeneratorNarrative.tsx exports HomeCredibilityBridge, HomeWeeklyWorkflowProof, HomeCompoundingContext, HomeFeatureProofGrid, HomeTutorRealityScenario, and HomeFinalCTA for homepage-only post-generator narrative.',
+  'src/pages/Index.tsx removes the anonymous homepage render of StatsBar, TwoPhaseWorkflowSection, FeatureWorkflowMap, LessonSignalCaptureSection, ValueCards, PricingTeaser, EcosystemSection, TestimonialsRow, and shared FinalCTA after the generator.',
+  'HomeFeatureProofGrid reuses FeatureScreenshotFrame and public/features screenshots while preserving legacy feature anchor IDs for feature-one-minute-prep, feature-placement-test, feature-dslm, feature-homework, feature-flashcards, feature-live-sessions, feature-calendar, and feature-student-hub.',
   'scripts/seo/generate-citable-pages.mjs generates the Learning Pacing article so build:seo preserves it.',
   'index.html title, description, Open Graph, Twitter metadata, keyword metadata, and SoftwareApplication JSON-LD now describe 1-Minute Prep and DSLM workflow context.',
   'SANCTITY: no changes to worksheet-generation prompts, Supabase schema, RLS policies, Edge Functions, service-role code, Stripe/payment code, authenticated worksheet editor, homework logic, private student data access, or private teacher data access.',
@@ -297,6 +304,13 @@ const oneMinutePrepKeywords = [
   'real feature screenshots',
   'route-link feature nav',
   'word/card-level vocabulary nano-skill context',
+  'homepage post-generator narrative',
+  'credibility bridge',
+  'honest limitation',
+  'recurring students compound context',
+  'Example workload not testimonial',
+  'no fake testimonials',
+  'Add your first student CTA',
 ];
 
 const oneMinutePrepCanonicalProblem = [
@@ -385,6 +399,7 @@ const homepageHeroProofProblem = [
   'The v6.9.32 homepage proof/storyboard section rendered below the anonymous worksheet form, but the intended proof surface belongs in the first-screen hero area next to the main positioning copy.',
   'The standalone proof section was too large for the homepage first screen and duplicated proof context that should remain fuller on /one-minute-prep.',
   'The right side of the homepage hero already contained the prep impact calculator; replacing that area with a compact calculator/workflow switcher preserves the conversion surface without increasing first-screen height.',
+  'After the anonymous worksheet generator, the homepage still rendered too many disconnected factual sections and an unverified testimonial-style row instead of one trust-building sales sequence.',
 ];
 
 const homepageHeroProofSolution = [
@@ -393,6 +408,8 @@ const homepageHeroProofSolution = [
   'The hero Workflow proof panel is a compact storyboard only: one-time setup (Student -> Welcome Test -> Goals -> Roadmap) and weekly prep (Next Lesson Ideas -> optional booking context -> Choose one -> Worksheet).',
   'The hero Evidence stack panel separately explains stored learner evidence, DSLM signals, nano-skills, pacing/roadmap, next focus, and worksheet output after teacher review.',
   'The full OneMinutePrepProofSection remains available on /one-minute-prep; it is no longer rendered as a separate homepage section below the worksheet form.',
+  'Below the generator, the homepage now uses a home-specific trust narrative: credibility bridge, weekly workflow proof, compounding-context limitation, real screenshot feature proof grid, explicit workload scenario, pricing, and one final Add your first student CTA.',
+  'The page no longer renders unverified testimonial cards; the workload scenario is explicitly labeled as an example, not a testimonial.',
 ];
 
 const homepageHeroProofMechanics = [
@@ -402,6 +419,9 @@ const homepageHeroProofMechanics = [
   'Mobile switching uses the same tab buttons by tap/click; no hover-only dependency is required.',
   'src/components/landing/HeroHeadline.tsx replaces the direct hero PricingCalculator with OneMinutePrepHeroProofSwitcher and keeps the two-column hero layout with a right column capped near 460px.',
   'src/pages/Index.tsx removes the standalone homepage OneMinutePrepProofSection render after #worksheet-form.',
+  'src/components/landing/HomePostGeneratorNarrative.tsx provides homepage-only post-generator sections and does not affect /one-minute-prep or /how-it-works shared sections.',
+  'src/pages/Index.tsx now renders HomeCredibilityBridge, HomeWeeklyWorkflowProof, HomeCompoundingContext, HomeFeatureProofGrid, HomeTutorRealityScenario, PricingSection, and HomeFinalCTA after the anonymous worksheet generator.',
+  'HomeFeatureProofGrid preserves feature anchor IDs so legacy scrollTo state can still find feature-one-minute-prep, feature-placement-test, feature-dslm, feature-homework, feature-flashcards, feature-live-sessions, feature-calendar, and feature-student-hub.',
   '/one-minute-prep continues using the full OneMinutePrepProofSection proof/storyboard section with Workflow proof, Evidence stack, and Prep impact calculator tabs.',
   'SANCTITY: no Worksheet Generation Engine prompt, parameter, or logic change; no Supabase schema, RLS, Edge Function, Stripe, auth, or service-role change.',
 ];
@@ -421,6 +441,13 @@ const homepageHeroProofKeywords = [
   '/one-minute-prep full proof section',
   'controlled PricingCalculator unchanged',
   'no worksheet engine change',
+  'homepage post-generator trust narrative',
+  'credibility bridge',
+  'honest setup limitation',
+  'real screenshot feature proof grid',
+  'no fake testimonials',
+  'Example workload not testimonial',
+  'Add your first student CTA',
 ];
 
 const rootCrawlabilityProblem = [
@@ -917,7 +944,7 @@ ${list(oneMinutePrepCanonicalMechanics)}
 ### RAG Keywords
 ${inlineList(oneMinutePrepCanonicalKeywords)}
 
-## Homepage Hero Proof Switcher Placement
+## Homepage Hero And Post-Generator Trust Layer
 
 ### Problem
 ${list(homepageHeroProofProblem)}
@@ -1140,7 +1167,7 @@ No. The worksheet generator is the output layer. Edooqoo.com also includes 1-Min
 No. Public AI discovery resources describe the website and public informational files only. Agents should not claim that a public worksheet-generation API exists.
 
 ## What changed in ${VERSION}?
-${VERSION} aligned public feature pages with the 1-Minute Prep workflow, added shared route-link workflow navigation, added a feature workflow map, replaced generated feature mockups with real app screenshots, promoted the two-phase workflow and lesson-time signal sections on the homepage, and kept flashcards claim-safe as word/card-level vocabulary retention context. It did not change worksheet-generation prompts, calculator formulas, Supabase schema, RLS policies, Edge Functions, Stripe, database table names, suggestion_kind values, DSLM algorithms, or private app data access.
+${VERSION} keeps the homepage hero and anonymous worksheet generator, then replaces the disconnected post-generator stack with a homepage-only trust narrative: credibility bridge, weekly workflow proof, honest setup limitation, real screenshot feature proof grid, explicit workload scenario, pricing, and one final Add your first student CTA. It removes unverified testimonial-style homepage cards and preserves feature anchor IDs, pricing calculator behavior, signup flow, worksheet-generator behavior, and public feature routes. It did not change worksheet-generation prompts, calculator formulas, Supabase schema, RLS policies, Edge Functions, Stripe, database table names, suggestion_kind values, DSLM algorithms, or private app data access.
 
 ## What should future AI agents preserve?
 Future agents should preserve worksheet engine sanctity, keep AI resource files factual, avoid inventing public APIs, preserve the ambitious 1-Minute Prep target without turning it into a guarantee, update docs/llm-context.md plus llms resources when public SEO or AI discovery mechanics change, and use manual AI-search measurement files instead of automated AI-answer scraping.

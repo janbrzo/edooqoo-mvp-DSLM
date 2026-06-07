@@ -15,20 +15,19 @@ import { FreeWeekBanner } from "@/components/FreeWeekBanner";
 import { deepFixTextObjects } from "@/utils/textObjectFixer";
 import StickyNav from "@/components/landing/StickyNav";
 import HeroHeadline from "@/components/landing/HeroHeadline";
-import StatsBar from "@/components/landing/StatsBar";
-import ValueCards from "@/components/landing/ValueCards";
-import EcosystemSection from "@/components/landing/EcosystemSection";
-import LessonSignalCaptureSection from "@/components/landing/LessonSignalCaptureSection";
-import TwoPhaseWorkflowSection from "@/components/landing/TwoPhaseWorkflowSection";
-import TestimonialsRow from "@/components/landing/TestimonialsRow";
-import FinalCTA from "@/components/landing/FinalCTA";
+import {
+  HomeCompoundingContext,
+  HomeCredibilityBridge,
+  HomeFeatureProofGrid,
+  HomeFinalCTA,
+  HomeTutorRealityScenario,
+  HomeWeeklyWorkflowProof,
+} from "@/components/landing/HomePostGeneratorNarrative";
 import { AuthenticatedPageShell } from "@/components/AuthenticatedPageShell";
-import PricingTeaser from "@/components/landing/PricingTeaser";
 import AnonPostWorksheetLandingPage from "@/components/anon/AnonPostWorksheetLandingPage";
 import WelcomeBackBanner from "@/components/anon/WelcomeBackBanner";
 import ParticlesBackground from "@/components/landing/ParticlesBackground";
 import StartOneMinutePrepDialog from "@/components/landing/StartOneMinutePrepDialog";
-import FeatureWorkflowMap from "@/components/features/FeatureWorkflowMap";
 import { markWorksheetForClaim } from "@/hooks/useWorksheetClaim";
 import { devLog, devWarn } from '@/utils/logger';
 import { AddStudentDialog } from "@/components/dashboard/AddStudentDialog";
@@ -57,7 +56,7 @@ const Index = () => {
   useEffect(() => {
     const target = (location.state as { scrollTo?: string } | null)?.scrollTo;
     if (!target) return;
-    // Wait one frame so EcosystemSection has mounted
+    // Wait one frame so the homepage feature proof anchors have mounted.
     const id = window.setTimeout(() => {
       const el = document.getElementById(target);
       if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -409,25 +408,18 @@ const Index = () => {
               variant="landing"
             />
           </div>
-          <StatsBar />
-          <TwoPhaseWorkflowSection compact className="bg-background/75 backdrop-blur-sm" />
-          <FeatureWorkflowMap />
-          <section className="bg-secondary/20 py-14">
-            <div className="mx-auto max-w-6xl px-4">
-              <LessonSignalCaptureSection compact />
-            </div>
-          </section>
-          <ValueCards />
-          <PricingTeaser />
-          <EcosystemSection />
-          <TestimonialsRow />
+          <HomeCredibilityBridge />
+          <HomeWeeklyWorkflowProof />
+          <HomeCompoundingContext />
+          <HomeFeatureProofGrid />
+          <HomeTutorRealityScenario />
           <div id="pricing-section">
             <PricingSection
               calculatorValue={oneMinutePrepCalculator}
               onCalculatorChange={setOneMinutePrepCalculator}
             />
           </div>
-          <FinalCTA onStartOneMinutePrep={() => setShowOneMinutePrepDialog(true)} />
+          <HomeFinalCTA onStartOneMinutePrep={() => setShowOneMinutePrepDialog(true)} />
         </>
       ) : (
         <>
