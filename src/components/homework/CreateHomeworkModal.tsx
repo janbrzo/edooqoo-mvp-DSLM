@@ -18,6 +18,40 @@ import { cn } from "@/lib/utils";
 import { Link } from "react-router-dom";
 import { useHomeworkExerciseGeneration } from "@/hooks/useHomeworkExerciseGeneration";
 import { devLog } from '@/utils/logger';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
+import { ChevronDown } from "lucide-react";
+
+/**
+ * v6.9.42 — collapsible section so the Create Homework modal fits a 1080p
+ * viewport. The first section opens by default; the rest collapse on mount.
+ */
+function HomeworkSection({
+  title,
+  summary,
+  defaultOpen = false,
+  children,
+}: {
+  title: string;
+  summary?: string;
+  defaultOpen?: boolean;
+  children: React.ReactNode;
+}) {
+  const [open, setOpen] = useState(!!defaultOpen);
+  return (
+    <Collapsible open={open} onOpenChange={setOpen} className="border rounded-md">
+      <CollapsibleTrigger className="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-muted/40 transition-colors">
+        <span className="font-medium text-sm">
+          {title}
+          {summary && (
+            <span className="ml-2 text-xs text-muted-foreground font-normal">— {summary}</span>
+          )}
+        </span>
+        <ChevronDown className={`h-4 w-4 text-muted-foreground transition-transform ${open ? "rotate-180" : ""}`} />
+      </CollapsibleTrigger>
+      <CollapsibleContent className="px-3 pb-3 pt-1">{children}</CollapsibleContent>
+    </Collapsible>
+  );
+}
 
 interface CreateHomeworkModalProps {
   open: boolean;
