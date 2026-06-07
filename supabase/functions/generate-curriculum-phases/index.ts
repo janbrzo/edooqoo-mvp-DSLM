@@ -358,7 +358,7 @@ serve(async (req) => {
 - Sum of (estimated_weeks_end - estimated_weeks_start + 1) across all returned phases MUST equal ${totalWeeks}.
 - Each phase MUST be at least 2 weeks (unless deadline forces shorter).
 - Phases MUST be contiguous: phase[i].estimated_weeks_start = phase[i-1].estimated_weeks_end + 1.
-- First phase starts at week ${mode === 'add' && weeksUntilDeadline ? (weeksUntilDeadline - totalWeeks + 1) : 1}.
+- First phase starts at week ${(mode === 'add' || keptWeeksConsumed > 0) ? (keptWeeksConsumed + 1) : 1}.
 - DO NOT exceed week ${weeksUntilDeadline} under any circumstance — the deadline is a wall, not a guideline.
 - A server-side validator WILL rescale your durations if they overflow; honoring the budget yourself produces better learning sequencing.
 
@@ -382,8 +382,9 @@ EXISTING ROADMAP PHASES (build COMPLEMENTARILY — never duplicate, never contra
 ${existingPlan}
 
 COMPLEMENTARITY RULES:
-- If mode='replace': only replace status='planned' phases. NEVER touch 'done' or 'in_progress'.
+- If mode='replace': only replace status='planned' or 'draft' phases. NEVER touch 'done' or 'in_progress' — they are KEPT.
 - If mode='add': extend the timeline AFTER the last existing phase.
+- NEVER overlap weeks with KEPT phases (done + in_progress). New phases MUST start at week ${(mode === 'add' || keptWeeksConsumed > 0) ? (keptWeeksConsumed + 1) : 1}.
 - NEVER overlap focus_areas with status='done'/'in_progress' phases unless explicitly reinforcing a still-weak skill (justify in rationale).
 
 WEAK AREAS (recency-weighted — RECENT SIGNALS CARRY MORE AUTHORITY than older ones):
