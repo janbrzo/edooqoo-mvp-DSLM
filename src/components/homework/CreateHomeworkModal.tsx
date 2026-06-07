@@ -570,46 +570,99 @@ export function CreateHomeworkModal({
             </Button>
           </div>
         ) : (
-          // Creation form
-          <div className="space-y-3 py-4">
-            {/* v6.9.42 — Student Selection (open by default) */}
-            <HomeworkSection
-              title="Student"
-              defaultOpen
-              summary={students.find(s => s.id === selectedStudentId)?.name || (selectedStudentId ? undefined : 'Not selected')}
-            >
-            <div className="space-y-2">
-              <Label htmlFor="student">Select Student</Label>
-              <select
-                id="student"
-                className="w-full rounded-md border border-input bg-background px-3 py-2"
-                value={selectedStudentId}
-                onChange={(e) => setSelectedStudentId(e.target.value)}
-              >
-                <option value="">Choose a student...</option>
-                {students.map((student) => (
-                  <option key={student.id} value={student.id}>
-                    {student.name} ({student.english_level})
-                  </option>
-                ))}
-              </select>
-            </div>
-            </HomeworkSection>
+          // v6.9.44 — redesigned creation form: grid sections, no duplicate labels,
+          // generator collapsed by default, sticky action bar.
+          <div className="space-y-3 py-2">
 
-            {/* v6.9.42 — Exercise Selection */}
-            <HomeworkSection
-              title="Exercises from Worksheet"
-              defaultOpen
-              summary={`${selectedExercises.size} of ${exercises.length} selected`}
-            >
-            <div className="space-y-2">
-              <Label>Select Exercises from Worksheet</Label>
-              <p className="text-xs text-muted-foreground -mt-1">
-                These are the exact exercises from the original worksheet
-              </p>
-              <div className="border rounded-md p-4 max-h-60 overflow-y-auto space-y-2">
+            {/* Row 1: Student + Deadline side-by-side on md+ */}
+            <div className="grid md:grid-cols-2 gap-3">
+              <section className="border rounded-lg p-3 space-y-2">
+                <div className="flex items-center justify-between gap-2">
+                  <h3 className="text-sm font-semibold">Student</h3>
+                  {selectedStudent && (
+                    <span className="text-xs text-muted-foreground truncate">
+                      {selectedStudent.name} ({selectedStudent.english_level})
+                    </span>
+                  )}
+                </div>
+                <select
+                  id="student"
+                  className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+                  value={selectedStudentId}
+                  onChange={(e) => setSelectedStudentId(e.target.value)}
+                >
+                  <option value="">Choose a student...</option>
+                  {students.map((student) => (
+                    <option key={student.id} value={student.id}>
+                      {student.name} ({student.english_level})
+                    </option>
+                  ))}
+                </select>
+              </section>
+
+              <section className="border rounded-lg p-3 space-y-2">
+                <div className="flex items-center justify-between gap-2">
+                  <h3 className="text-sm font-semibold">Deadline</h3>
+                  <span className="text-xs text-muted-foreground">
+                    {deadline ? `${format(deadline, 'PP')} · ${deadlineTime}` : 'None'}
+                  </span>
+                </div>
+                <div className="flex gap-2">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className={cn(
+                          "flex-1 justify-start text-left font-normal h-9",
+                          !deadline && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {deadline ? format(deadline, "PPP") : "Pick a date"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={deadline}
+                        onSelect={setDeadline}
+                        disabled={(date) => date < new Date(new Date().setHours(0, 0, 0, 0))}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <div className="flex items-center gap-1.5">
+                    <Clock className="h-4 w-4 text-muted-foreground" />
+                    <Input
+                      type="time"
+                      value={deadlineTime}
+                      onChange={(e) => setDeadlineTime(e.target.value)}
+                      className="w-28 h-9"
+                    />
+                  </div>
+                </div>
+              </section>
+            </div>
+
+            {/* Row 2: Exercises (full width) */}
+            <section className="border rounded-lg p-3 space-y-2">
+              <div className="flex items-center justify-between gap-2 flex-wrap">
+                <h3 className="text-sm font-semibold">
+                  Exercises <span className="text-muted-foreground font-normal">— {selectedExercises.size} of {exercises.length} selected</span>
+                </h3>
+                <div className="flex gap-1">
+                  <Button type="button" variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={selectAllExercises}>
+                    Select all
+                  </Button>
+                  <Button type="button" variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={clearExercisesSelection}>
+                    Clear
+                  </Button>
+                </div>
+              </div>
+              <div className="border rounded-md p-3 max-h-44 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-1.5">
                 {exercises.map((exercise, index) => (
-                  <div key={index} className="flex items-center space-x-2">
+                  <div key={index} className="flex items-center space-x-2 min-w-0">
                     <Checkbox
                       id={`exercise-${index}`}
                       checked={selectedExercises.has(index)}
@@ -617,354 +670,255 @@ export function CreateHomeworkModal({
                     />
                     <Label
                       htmlFor={`exercise-${index}`}
-                      className="text-sm font-normal cursor-pointer"
+                      className="text-sm font-normal cursor-pointer truncate"
                     >
-                      Exercise {index + 1}: {exercise.type || 'Unknown'}
+                      Ex {index + 1}: {exercise.type || 'Unknown'}
                     </Label>
                   </div>
                 ))}
               </div>
-              <p className="text-xs text-muted-foreground">
-                {selectedExercises.size} exercise{selectedExercises.size !== 1 ? 's' : ''} selected
-              </p>
-            </div>
-            </HomeworkSection>
+            </section>
 
-            {/* Generate More Exercises Section */}
-            {worksheetFormData && (
-              <HomeworkSection
-                title="Generate Additional Exercises"
-                summary={selectedGeneratedTypes.length > 0 ? `${selectedGeneratedTypes.length} types · ${generatedExercises.length} generated` : 'Optional AI add-on'}
-              >
-              <div className="space-y-3">
-                <Label>Generate Additional Exercises</Label>
-                
-                {/* Exercise Type Selection - SHOW ALL 21 TYPES */}
-                <div className="space-y-2">
-                  <Label className="text-sm">Select Exercise Types:</Label>
-                  <div className="border rounded-md p-3 max-h-32 overflow-y-auto space-y-1.5">
-                    {(() => {
-                      // PROBLEM 1.1: All exercise types with labels
-                      // PROBLEM 4.2: Removed 'describe' duplicate entry
-                      const EXERCISE_TYPES_MAP: Record<string, string> = {
-                        // General exercises (always available)
-                        'fill-in-blanks': 'Fill in the Blanks',
-                        'multiple-choice': 'Multiple Choice',
-                        'matching': 'Matching',
-                        'true-false': 'True/False',
-                        'word-order': 'Word Order',
-                        'gap-text': 'Gap Text',
-                        'answer-questions': 'Answer Questions',
-                        'paraphrasing': 'Paraphrasing',
-                        'sentence-transformation': 'Sentence Transformation',
-                        'odd-one-out': 'Odd One Out',
-                        'synonyms-antonyms': 'Synonyms & Antonyms',
-                        'matching-halves': 'Matching Halves',
-                        'complete-word': 'Complete Word',
-                        'categorize': 'Categorize',
-                        'negative-prefixes': 'Negative Prefixes',
-                        'dialogue': 'Dialogue Practice',
-                        'discussion': 'Discussion Questions',
-                        'error-correction': 'Error Correction',
-                        'reading': 'Reading Comprehension',
-                        // Picture exercises (only if worksheet has picture)
-                        'describe-picture': 'Describe Picture',
-                        'answer-questions-picture': 'Answer Questions (Picture)',
-                        'true-false-picture': 'True/False (Picture)',
-                        'multiple-choice-picture': 'Multiple Choice (Picture)',
-                        // Audio exercises (only if worksheet has audio)
-                        'listening-comprehension': 'Listening Comprehension',
-                        'answer-questions-audio': 'Answer Questions (Audio)',
-                        'true-false-audio': 'True/False (Audio)',
-                        'multiple-choice-audio': 'Multiple Choice (Audio)',
-                        'fill-in-blanks-audio': 'Fill in the Blanks (Audio)',
-                      };
-                      
-                      // PROBLEM 1.1: Filter available types based on worksheet media
-                      const getAvailableTypes = () => {
-                        let available = [...GENERAL_EXERCISES];
-                        if (worksheetHasPicture) {
-                          available = [...available, ...PICTURE_EXERCISES];
-                        }
-                        if (worksheetHasAudio) {
-                          available = [...available, ...AUDIO_EXERCISES];
-                        }
-                        return available;
-                      };
-                      
-                      const availableTypes = getAvailableTypes();
-                      
-                      return Object.entries(EXERCISE_TYPES_MAP)
-                        .filter(([exerciseId]) => availableTypes.includes(exerciseId))
-                        .map(([exerciseId, exerciseName]) => (
-                        <div key={exerciseId} className="flex items-center space-x-2">
-                          <Checkbox
-                            id={`gen-type-${exerciseId}`}
-                            checked={selectedGeneratedTypes.includes(exerciseId)}
-                            disabled={!selectedGeneratedTypes.includes(exerciseId) && selectedGeneratedTypes.length >= 6}
-                            onCheckedChange={(checked) => {
-                              if (checked) {
-                                // PROBLEM 4.4: Max 6 exercise types
-                                if (selectedGeneratedTypes.length >= 6) {
-                                  toast.error("Maximum 6 exercise types can be selected");
-                                  return;
-                                }
-                                setSelectedGeneratedTypes(prev => [...prev, exerciseId]);
-                              } else {
-                                setSelectedGeneratedTypes(prev => prev.filter(t => t !== exerciseId));
-                              }
-                            }}
-                          />
-                          <Label
-                            htmlFor={`gen-type-${exerciseId}`}
-                            className={`text-sm font-normal cursor-pointer ${!selectedGeneratedTypes.includes(exerciseId) && selectedGeneratedTypes.length >= 6 ? 'opacity-50' : ''}`}
-                          >
-                            {exerciseName}
-                          </Label>
-                        </div>
-                      ));
-                    })()}
-                  </div>
-                  <p className="text-xs text-muted-foreground">
-                    {selectedGeneratedTypes.length} type{selectedGeneratedTypes.length !== 1 ? 's' : ''} selected
-                  </p>
-                </div>
-                
-                {/* Additional Instructions Field */}
-                <div className="space-y-2">
-                  <Label htmlFor="additionalInstructions">
-                    Additional Instructions for AI (Optional)
-                  </Label>
-                  <Textarea
-                    id="additionalInstructions"
-                    placeholder="e.g., Focus more on business vocabulary, include idioms, make exercises more challenging..."
-                    value={additionalInstructions}
-                    onChange={(e) => setAdditionalInstructions(e.target.value)}
-                    rows={3}
-                    className="resize-none"
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Provide specific instructions to customize generated exercises
-                  </p>
-                </div>
-              
-              {/* Generate Button */}
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                className="w-full"
-                onClick={() => {
-                  if (selectedGeneratedTypes.length === 0) {
-                    toast.error("Please select at least one exercise type");
-                    return;
-                  }
-                  generateSimilarExercises(worksheetFormData, teacherId, {
-                    targetTypes: selectedGeneratedTypes,
-                    countPerType: 1,
-                    additionalInstructions: additionalInstructions.trim() || undefined
-                    });
-                  }}
-                  disabled={isGeneratingExercises || selectedGeneratedTypes.length === 0}
-                >
-                  {isGeneratingExercises ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Generating... ({generationSeconds}s)
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles className="mr-2 h-4 w-4" />
-                      Generate Selected
-                    </>
-                  )}
-                </Button>
-                {isGeneratingExercises && (
-                  <p className="text-xs text-muted-foreground text-center mt-2">
-                    {/* PROBLEM 4.6: Better time prediction - 25s base + 7s per type */}
-                    Expected time: ~{(() => {
-                      const expectedSeconds = 25 + selectedGeneratedTypes.length * 7;
-                      if (expectedSeconds >= 60) {
-                        const mins = Math.floor(expectedSeconds / 60);
-                        const secs = expectedSeconds % 60;
-                        return `${mins}:${secs.toString().padStart(2, '0')} min`;
-                      }
-                      return `${expectedSeconds}s`;
-                    })()}
-                  </p>
-                )}
-                
-                {/* Clear Button */}
-                {generatedExercises.length > 0 && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="w-full"
-                    onClick={clearGeneratedExercises}
-                  >
-                    Clear Generated
-                  </Button>
-                )}
-                
-                {/* Generated Exercises List */}
-                {generatedExercises.length > 0 && (
-                  <div className="border rounded-md p-4 max-h-48 overflow-y-auto space-y-2 bg-amber-50/30">
-                    <p className="text-xs text-muted-foreground mb-2">
-                      Generated exercises (select to include):
-                    </p>
-                    {generatedExercises.map((exercise) => (
-                      <div key={exercise.id} className="flex items-center space-x-2">
-                        <Checkbox
-                          id={exercise.id}
-                          checked={exercise.selected}
-                          onCheckedChange={() => toggleExerciseSelection(exercise.id)}
-                        />
-                        <Label
-                          htmlFor={exercise.id}
-                          className="text-sm font-normal cursor-pointer"
-                        >
-                          {exercise.title || `${exercise.type} exercise`}
-                        </Label>
-                      </div>
-                    ))}
-                    <p className="text-xs text-muted-foreground mt-2">
-                      {getSelectedGeneratedExercises().length} generated exercise{getSelectedGeneratedExercises().length !== 1 ? 's' : ''} selected
-                    </p>
-                  </div>
-                )}
-              </div>
-              </HomeworkSection>
-            )}
-
-            {/* v6.9.42 — Deadline */}
-            <HomeworkSection
-              title="Deadline"
-              summary={deadline ? `${format(deadline, 'PP')} at ${deadlineTime}` : 'No deadline'}
-            >
-            <div className="space-y-2">
-              <Label>Deadline (Optional)</Label>
-              <div className="flex gap-2">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "flex-1 justify-start text-left font-normal",
-                        !deadline && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {deadline ? format(deadline, "PPP") : "Pick a date"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={deadline}
-                      onSelect={setDeadline}
-                      disabled={(date) =>
-                        date < new Date(new Date().setHours(0, 0, 0, 0))
-                      }
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-                
-                {/* Time Picker */}
+            {/* Row 3: Reminder (inline) */}
+            <section className="border rounded-lg p-3">
+              <div className="flex items-center flex-wrap gap-3">
+                <h3 className="text-sm font-semibold mr-1">Reminder</h3>
                 <div className="flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-muted-foreground" />
-                  <Input
-                    type="time"
-                    value={deadlineTime}
-                    onChange={(e) => setDeadlineTime(e.target.value)}
-                    className="w-32"
-                  />
-                </div>
-              </div>
-            </div>
-            </HomeworkSection>
-
-            {/* v6.9.42 — Reminder */}
-            <HomeworkSection
-              title="Reminder"
-              summary={sendReminder ? `${reminderHours}h before deadline` : 'Off'}
-            >
-              <div className="space-y-2">
-                <div className="flex items-center space-x-2">
-                  <Switch 
-                    id="send-reminder" 
+                  <Switch
+                    id="send-reminder"
                     checked={sendReminder}
                     onCheckedChange={setSendReminder}
                   />
-                  <Label htmlFor="send-reminder" className="cursor-pointer">Send Reminder Before Deadline</Label>
-                </div>
-              </div>
-              
-              {sendReminder && (
-                <div className="space-y-2">
-                  <Label htmlFor="reminder-hours" className="flex items-center">
-                    <Clock className="h-4 w-4 mr-2" />
-                    Send Reminder Before Deadline
+                  <Label htmlFor="send-reminder" className="cursor-pointer text-sm font-normal">
+                    Send before deadline
                   </Label>
+                </div>
+                {sendReminder && (
                   <Select value={reminderHours} onValueChange={setReminderHours}>
-                    <SelectTrigger id="reminder-hours">
+                    <SelectTrigger id="reminder-hours" className="h-8 w-44 text-sm">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       {(() => {
-                        // Calculate hours until deadline using effective deadline (selected date + current time)
-                        const hoursUntilDeadline = deadline 
+                        const hoursUntilDeadline = deadline
                           ? (() => {
                               const now = new Date();
                               const effectiveDeadline = new Date(deadline);
-                              effectiveDeadline.setHours(
-                                now.getHours(),
-                                now.getMinutes(),
-                                now.getSeconds(),
-                                now.getMilliseconds()
-                              );
-                              return Math.floor((effectiveDeadline.getTime() - now.getTime()) / (1000 * 60 * 60));
+                              const [h, m] = deadlineTime.split(':').map(Number);
+                              effectiveDeadline.setHours(h || 0, m || 0, 0, 0);
+                              return Math.floor((effectiveDeadline.getTime() - now.getTime()) / 3600000);
                             })()
                           : null;
-                        
                         return (
                           <>
-                    <SelectItem value="6" disabled={hoursUntilDeadline !== null && hoursUntilDeadline < 6}>
-                      6 hours before
-                    </SelectItem>
-                    <SelectItem value="12" disabled={hoursUntilDeadline !== null && hoursUntilDeadline < 12}>
-                      12 hours before
-                    </SelectItem>
-                    <SelectItem value="23" disabled={hoursUntilDeadline !== null && hoursUntilDeadline < 23}>
-                      23 hours before
-                    </SelectItem>
-                    <SelectItem value="24" disabled={hoursUntilDeadline !== null && hoursUntilDeadline <= 24}>
-                      24 hours before (default)
-                    </SelectItem>
-                    <SelectItem value="48" disabled={hoursUntilDeadline !== null && hoursUntilDeadline <= 48}>
-                      2 days before
-                    </SelectItem>
-                    <SelectItem value="72" disabled={hoursUntilDeadline !== null && hoursUntilDeadline <= 72}>
-                      3 days before
-                    </SelectItem>
-                    <SelectItem value="96" disabled={hoursUntilDeadline !== null && hoursUntilDeadline <= 96}>
-                      4 days before
-                    </SelectItem>
-                    <SelectItem value="120" disabled={hoursUntilDeadline !== null && hoursUntilDeadline <= 120}>
-                      5 days before
-                    </SelectItem>
+                            <SelectItem value="6" disabled={hoursUntilDeadline !== null && hoursUntilDeadline < 6}>6 hours before</SelectItem>
+                            <SelectItem value="12" disabled={hoursUntilDeadline !== null && hoursUntilDeadline < 12}>12 hours before</SelectItem>
+                            <SelectItem value="23" disabled={hoursUntilDeadline !== null && hoursUntilDeadline < 23}>23 hours before</SelectItem>
+                            <SelectItem value="24" disabled={hoursUntilDeadline !== null && hoursUntilDeadline <= 24}>24 hours before (default)</SelectItem>
+                            <SelectItem value="48" disabled={hoursUntilDeadline !== null && hoursUntilDeadline <= 48}>2 days before</SelectItem>
+                            <SelectItem value="72" disabled={hoursUntilDeadline !== null && hoursUntilDeadline <= 72}>3 days before</SelectItem>
+                            <SelectItem value="96" disabled={hoursUntilDeadline !== null && hoursUntilDeadline <= 96}>4 days before</SelectItem>
+                            <SelectItem value="120" disabled={hoursUntilDeadline !== null && hoursUntilDeadline <= 120}>5 days before</SelectItem>
                           </>
                         );
                       })()}
                     </SelectContent>
                   </Select>
-                </div>
-              )}
-            </HomeworkSection>
+                )}
+              </div>
+            </section>
 
-            {/* Action Buttons */}
-            <div className="flex gap-3 pt-4">
+            {/* Row 4: Generate Additional Exercises (collapsed by default) */}
+            {worksheetFormData && (
+              <Collapsible className="border rounded-lg">
+                <CollapsibleTrigger className="w-full flex items-center justify-between px-3 py-2 text-left hover:bg-muted/40 transition-colors">
+                  <span className="flex items-center gap-2 text-sm font-semibold">
+                    <Sparkles className="h-4 w-4 text-primary" />
+                    Generate additional exercises
+                    <span className="text-xs text-muted-foreground font-normal">
+                      {selectedGeneratedTypes.length > 0
+                        ? `— ${selectedGeneratedTypes.length} types · ${generatedExercises.length} generated`
+                        : '— optional AI add-on'}
+                    </span>
+                  </span>
+                  <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform" />
+                </CollapsibleTrigger>
+                <CollapsibleContent className="px-3 pb-3 pt-1 space-y-3">
+                  <div className="space-y-1.5">
+                    <Label className="text-xs">Exercise types (max 6):</Label>
+                    <div className="border rounded-md p-3 max-h-32 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-x-3 gap-y-1">
+                      {(() => {
+                        const EXERCISE_TYPES_MAP: Record<string, string> = {
+                          'fill-in-blanks': 'Fill in the Blanks',
+                          'multiple-choice': 'Multiple Choice',
+                          'matching': 'Matching',
+                          'true-false': 'True/False',
+                          'word-order': 'Word Order',
+                          'gap-text': 'Gap Text',
+                          'answer-questions': 'Answer Questions',
+                          'paraphrasing': 'Paraphrasing',
+                          'sentence-transformation': 'Sentence Transformation',
+                          'odd-one-out': 'Odd One Out',
+                          'synonyms-antonyms': 'Synonyms & Antonyms',
+                          'matching-halves': 'Matching Halves',
+                          'complete-word': 'Complete Word',
+                          'categorize': 'Categorize',
+                          'negative-prefixes': 'Negative Prefixes',
+                          'dialogue': 'Dialogue Practice',
+                          'discussion': 'Discussion Questions',
+                          'error-correction': 'Error Correction',
+                          'reading': 'Reading Comprehension',
+                          'describe-picture': 'Describe Picture',
+                          'answer-questions-picture': 'Answer Questions (Picture)',
+                          'true-false-picture': 'True/False (Picture)',
+                          'multiple-choice-picture': 'Multiple Choice (Picture)',
+                          'listening-comprehension': 'Listening Comprehension',
+                          'answer-questions-audio': 'Answer Questions (Audio)',
+                          'true-false-audio': 'True/False (Audio)',
+                          'multiple-choice-audio': 'Multiple Choice (Audio)',
+                          'fill-in-blanks-audio': 'Fill in the Blanks (Audio)',
+                        };
+                        const getAvailableTypes = () => {
+                          let available = [...GENERAL_EXERCISES];
+                          if (worksheetHasPicture) available = [...available, ...PICTURE_EXERCISES];
+                          if (worksheetHasAudio) available = [...available, ...AUDIO_EXERCISES];
+                          return available;
+                        };
+                        const availableTypes = getAvailableTypes();
+                        return Object.entries(EXERCISE_TYPES_MAP)
+                          .filter(([exerciseId]) => availableTypes.includes(exerciseId))
+                          .map(([exerciseId, exerciseName]) => (
+                            <div key={exerciseId} className="flex items-center space-x-2 min-w-0">
+                              <Checkbox
+                                id={`gen-type-${exerciseId}`}
+                                checked={selectedGeneratedTypes.includes(exerciseId)}
+                                disabled={!selectedGeneratedTypes.includes(exerciseId) && selectedGeneratedTypes.length >= 6}
+                                onCheckedChange={(checked) => {
+                                  if (checked) {
+                                    if (selectedGeneratedTypes.length >= 6) {
+                                      toast.error("Maximum 6 exercise types can be selected");
+                                      return;
+                                    }
+                                    setSelectedGeneratedTypes(prev => [...prev, exerciseId]);
+                                  } else {
+                                    setSelectedGeneratedTypes(prev => prev.filter(t => t !== exerciseId));
+                                  }
+                                }}
+                              />
+                              <Label
+                                htmlFor={`gen-type-${exerciseId}`}
+                                className={`text-sm font-normal cursor-pointer truncate ${!selectedGeneratedTypes.includes(exerciseId) && selectedGeneratedTypes.length >= 6 ? 'opacity-50' : ''}`}
+                              >
+                                {exerciseName}
+                              </Label>
+                            </div>
+                          ));
+                      })()}
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label htmlFor="additionalInstructions" className="text-xs">
+                      Additional instructions (optional)
+                    </Label>
+                    <Textarea
+                      id="additionalInstructions"
+                      placeholder="e.g., focus on business vocabulary, include idioms, make exercises more challenging…"
+                      value={additionalInstructions}
+                      onChange={(e) => setAdditionalInstructions(e.target.value)}
+                      rows={2}
+                      className="resize-none text-sm"
+                    />
+                  </div>
+
+                  <div className="flex gap-2">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="flex-1"
+                      onClick={() => {
+                        if (selectedGeneratedTypes.length === 0) {
+                          toast.error("Please select at least one exercise type");
+                          return;
+                        }
+                        generateSimilarExercises(worksheetFormData, teacherId, {
+                          targetTypes: selectedGeneratedTypes,
+                          countPerType: 1,
+                          additionalInstructions: additionalInstructions.trim() || undefined
+                        });
+                      }}
+                      disabled={isGeneratingExercises || selectedGeneratedTypes.length === 0}
+                    >
+                      {isGeneratingExercises ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Generating… ({generationSeconds}s)
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="mr-2 h-4 w-4" />
+                          Generate Selected
+                        </>
+                      )}
+                    </Button>
+                    {generatedExercises.length > 0 && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={clearGeneratedExercises}
+                      >
+                        Clear Generated
+                      </Button>
+                    )}
+                  </div>
+
+                  {isGeneratingExercises && (
+                    <p className="text-xs text-muted-foreground text-center">
+                      Expected time: ~{(() => {
+                        const expectedSeconds = 25 + selectedGeneratedTypes.length * 7;
+                        if (expectedSeconds >= 60) {
+                          const mins = Math.floor(expectedSeconds / 60);
+                          const secs = expectedSeconds % 60;
+                          return `${mins}:${secs.toString().padStart(2, '0')} min`;
+                        }
+                        return `${expectedSeconds}s`;
+                      })()}
+                    </p>
+                  )}
+
+                  {generatedExercises.length > 0 && (
+                    <div className="border rounded-md p-3 max-h-32 overflow-y-auto space-y-1.5 bg-amber-50/30">
+                      <p className="text-xs text-muted-foreground mb-2">
+                        Generated exercises (select to include):
+                      </p>
+                      {generatedExercises.map((exercise) => (
+                        <div key={exercise.id} className="flex items-center space-x-2 min-w-0">
+                          <Checkbox
+                            id={exercise.id}
+                            checked={exercise.selected}
+                            onCheckedChange={() => toggleExerciseSelection(exercise.id)}
+                          />
+                          <Label
+                            htmlFor={exercise.id}
+                            className="text-sm font-normal cursor-pointer truncate"
+                          >
+                            {exercise.title || `${exercise.type} exercise`}
+                          </Label>
+                        </div>
+                      ))}
+                      <p className="text-xs text-muted-foreground mt-2">
+                        {getSelectedGeneratedExercises().length} generated exercise{getSelectedGeneratedExercises().length !== 1 ? 's' : ''} selected
+                      </p>
+                    </div>
+                  )}
+                </CollapsibleContent>
+              </Collapsible>
+            )}
+
+            {/* Sticky action bar */}
+            <div className="sticky bottom-0 -mx-5 px-5 pt-3 border-t bg-background flex gap-3">
               <Button
                 variant="outline"
                 onClick={handleClose}
