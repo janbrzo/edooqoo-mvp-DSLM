@@ -826,9 +826,14 @@ export function CreateHomeworkModal({
                   </div>
                 )}
               </div>
+              </HomeworkSection>
             )}
 
-            {/* Deadline Selection */}
+            {/* v6.9.42 — Deadline */}
+            <HomeworkSection
+              title="Deadline"
+              summary={deadline ? `${format(deadline, 'PP')} at ${deadlineTime}` : 'No deadline'}
+            >
             <div className="space-y-2">
               <Label>Deadline (Optional)</Label>
               <div className="flex gap-2">
@@ -870,8 +875,13 @@ export function CreateHomeworkModal({
                 </div>
               </div>
             </div>
+            </HomeworkSection>
 
-            {/* Reminder Hours Dropdown */}
+            {/* v6.9.42 — Reminder */}
+            <HomeworkSection
+              title="Reminder"
+              summary={sendReminder ? `${reminderHours}h before deadline` : 'Off'}
+            >
               <div className="space-y-2">
                 <div className="flex items-center space-x-2">
                   <Switch 
@@ -943,6 +953,7 @@ export function CreateHomeworkModal({
                   </Select>
                 </div>
               )}
+            </HomeworkSection>
 
             {/* Action Buttons */}
             <div className="flex gap-3 pt-4">
