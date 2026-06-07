@@ -156,7 +156,11 @@ function fitPhasesToDeadline(
 }
 
 function rebase(phases: any[], durations: number[]): any[] {
-  let cursor = 1;
+  return rebaseFromWeek(phases, durations, 1);
+}
+
+function rebaseFromWeek(phases: any[], durations: number[], startingWeek: number): any[] {
+  let cursor = Math.max(1, Number.isInteger(startingWeek) ? startingWeek : 1);
   return phases.map((p, i) => {
     const start = cursor;
     const end = cursor + durations[i] - 1;
