@@ -501,9 +501,11 @@ Return ONLY a valid JSON array (no markdown), with this exact format:
     }
     phases = fit.phases;
 
-    // Soft-delete existing un-done phases on replace
+    // v6.9.44 — Soft-delete only NON-KEPT phases on replace (preserves in_progress).
     if (mode === 'replace' && existingPhases.length > 0) {
-      const idsToDelete = existingPhases.filter((p: any) => p.status !== 'done').map((p: any) => p.id);
+      const idsToDelete = existingPhases
+        .filter((p: any) => !KEPT_STATUSES.includes(p.status))
+        .map((p: any) => p.id);
       if (idsToDelete.length > 0) {
         await supabase
           .from('dslm_curriculum_phases')
@@ -515,7 +517,7 @@ Return ONLY a valid JSON array (no markdown), with this exact format:
     // Compute starting sequence
     const remainingMaxSeq = mode === 'add'
       ? (existingPhases.reduce((acc: number, p: any) => Math.max(acc, p.sequence_number), 0))
-      : (existingPhases.filter((p: any) => p.status === 'done').reduce((acc: number, p: any) => Math.max(acc, p.sequence_number), 0));
+      : (keptPhases.reduce((acc: number, p: any) => Math.max(acc, p.sequence_number), 0));
 
     const generationContext = {
       weeks_until_deadline: weeksUntilDeadline,
