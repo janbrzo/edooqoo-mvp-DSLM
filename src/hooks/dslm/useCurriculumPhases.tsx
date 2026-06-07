@@ -69,6 +69,28 @@ export const useCurriculumPhases = ({ studentId, teacherId }: UseCurriculumPhase
     } catch { /* ignore */ }
   }, [studentId]);
 
+  const emitSuggestionsUpdated = useCallback(() => {
+    try {
+      window.dispatchEvent(new CustomEvent('dslm:suggestionsUpdated', { detail: { studentId } }));
+    } catch { /* ignore */ }
+  }, [studentId]);
+
+  const readFunctionErrorBody = async (error: any) => {
+    const context = error?.context;
+    if (!context) return null;
+    try {
+      if (typeof context.clone === 'function') {
+        return await context.clone().json();
+      }
+      if (typeof context.json === 'function') {
+        return await context.json();
+      }
+    } catch {
+      return null;
+    }
+    return null;
+  };
+
   // v6.9.14 — cross-instance sync: when one hook generates phases,
   // other instances (e.g. PathwayView vs MacroTimeline) refetch.
   useEffect(() => {
@@ -104,7 +126,15 @@ export const useCurriculumPhases = ({ studentId, teacherId }: UseCurriculumPhase
           focusedGoalIds: opts.focusedGoalIds,
         }
       });
-      if (response.error) throw response.error;
+      if (response.error) {
+        const body = await readFunctionErrorBody(response.error);
+        if (body?.preservationInvariantFailed) {
+          console.error('Roadmap preservation invariant failed:', body);
+          toast.error('Roadmap regeneration was stopped because active phases could not be preserved.');
+          return false;
+        }
+        throw response.error;
+      }
       const newPhases = response.data?.phases || [];
       const ctx = response.data?.generationContext || {};
       if (newPhases.length === 0) {
@@ -113,6 +143,7 @@ export const useCurriculumPhases = ({ studentId, teacherId }: UseCurriculumPhase
       }
       await fetchPhases();
       emitPhasesUpdated();
+      emitSuggestionsUpdated();
       const preserved = Number.isInteger(ctx.preserved_phase_count) ? ctx.preserved_phase_count : 0;
       if (mode === 'replace' && preserved > 0) {
         toast.success(`Regenerated ${newPhases.length} planned phase${newPhases.length === 1 ? '' : 's'}; kept ${preserved} active/completed phase${preserved === 1 ? '' : 's'}.`);

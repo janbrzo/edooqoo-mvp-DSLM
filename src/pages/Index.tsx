@@ -67,6 +67,7 @@ const Index = () => {
 
   const [selectedStudentId, setSelectedStudentId] = useState<string | null>(null);
   const [preSelectedStudent, setPreSelectedStudent] = useState<{id: string, name: string} | null>(null);
+  const { tokenLeft, hasTokens, canGenerateWorksheet, isDemo, profile, loading: tokensLoading, consumeToken } = useTokenSystem(user?.id || null);
   const { 
     isGenerating, 
     generateWorksheetHandler, 
@@ -75,8 +76,12 @@ const Index = () => {
     cancelGeneration,
     generationError,
     clearGenerationError,
-  } = useWorksheetGeneration(user?.id || null, worksheetState, selectedStudentId);
-  const { tokenLeft, hasTokens, canGenerateWorksheet, isDemo, profile, loading: tokensLoading } = useTokenSystem(user?.id || null);
+  } = useWorksheetGeneration(user?.id || null, worksheetState, selectedStudentId, {
+    hasTokens,
+    canGenerateWorksheet,
+    isDemo,
+    consumeToken,
+  });
   const [showTokenModal, setShowTokenModal] = useState(false);
   const [showWelcomeBackModal, setShowWelcomeBackModal] = useState(false);
   const [showOneMinutePrepDialog, setShowOneMinutePrepDialog] = useState(false);
