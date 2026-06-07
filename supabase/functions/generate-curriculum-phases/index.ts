@@ -840,6 +840,7 @@ Return ONLY a valid JSON array (no markdown), with this exact format:
     if (insertError) {
       console.error('Insert error:', insertError);
       await restoreReplaceablePhases();
+      await restoreDetachedSuggestions();
       throw insertError;
     }
 
