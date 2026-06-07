@@ -113,17 +113,9 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
 
   // v6.9.41 P4 — per-suggestion Accept / Dismiss handlers.
   const acceptSuggested = async (id: string) => {
-    try {
-      const { error } = await supabase
-        .from('student_progress_goals')
-        .update({ accepted_at: new Date().toISOString() })
-        .eq('id', id);
-      if (error) throw error;
-      toast.success('Suggestion accepted.');
-      window.dispatchEvent(new CustomEvent('student-progress:refresh'));
-    } catch (err) {
-      console.error('acceptSuggested failed', err);
-      toast.error('Could not accept suggestion.');
+    const success = await updateGoal(id, { accepted_at: new Date().toISOString() });
+    if (success) {
+      toast.success("Suggestion accepted.");
     }
   };
   const dismissSuggested = async (id: string) => {
@@ -180,6 +172,7 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
         onUnarchive={() => unarchiveGoal(goal.id)}
         onMarkAchieved={() => updateGoal(goal.id, { is_achieved: true })}
         onSetManualProgress={(pct) => updateGoal(goal.id, { manual_progress_pct: pct } as any)}
+        isSuggested={goal.source === 'welcome_test_auto' && !goal.accepted_at}
       />
     );
   };
