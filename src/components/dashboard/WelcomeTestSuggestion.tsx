@@ -416,6 +416,7 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
             recipientEmail: studentEmail,
             studentName,
             teacherId,
+            attemptNumber: nextAttempt,
           });
           toast.success(`Retake ${nextAttempt - 1} created and emailed to the student.`);
         } catch (mailErr) {
