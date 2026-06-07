@@ -254,6 +254,16 @@ serve(async (req) => {
     const worksheets = worksheetsRes.data || [];
     const existingPhases = existingPhasesRes.data || [];
 
+    // v6.9.44 — KEPT set: both done AND in_progress are preserved on regenerate.
+    // UI promises this and previous behaviour only kept done.
+    const KEPT_STATUSES = ['done', 'in_progress'];
+    const keptPhases = existingPhases.filter((p: any) => KEPT_STATUSES.includes(p.status));
+    const keptWeeksConsumed = keptPhases.reduce((acc: number, p: any) => {
+      const s = Number.isInteger(p.estimated_weeks_start) ? p.estimated_weeks_start : 0;
+      const e = Number.isInteger(p.estimated_weeks_end) ? p.estimated_weeks_end : 0;
+      return Math.max(acc, e || s || 0);
+    }, 0);
+
     // Compute weeks until deadline
     let weeksUntilDeadline: number | null = null;
     let deadlineSource: 'student.main_goal_target_date' | 'goal.target_date' | 'fallback_no_deadline' = 'fallback_no_deadline';
@@ -320,8 +330,8 @@ serve(async (req) => {
     } else if (explicitWeeksPerPhase) {
       remainingBudget = explicitWeeksPerPhase * phaseCount;
     } else {
-        // 'replace' rebuilds from week 1 — use full deadline budget.
-        remainingBudget = weeksUntilDeadline;
+        // v6.9.44 — 'replace' preserves kept (done + in_progress); rebuild only the remainder.
+        remainingBudget = Math.max(phaseCount, weeksUntilDeadline - keptWeeksConsumed);
       }
     }
     const totalWeeks = remainingBudget ?? phaseCount * avgWeeksPerPhase;
@@ -348,7 +358,7 @@ serve(async (req) => {
 - Sum of (estimated_weeks_end - estimated_weeks_start + 1) across all returned phases MUST equal ${totalWeeks}.
 - Each phase MUST be at least 2 weeks (unless deadline forces shorter).
 - Phases MUST be contiguous: phase[i].estimated_weeks_start = phase[i-1].estimated_weeks_end + 1.
-- First phase starts at week ${mode === 'add' && weeksUntilDeadline ? (weeksUntilDeadline - totalWeeks + 1) : 1}.
+- First phase starts at week ${(mode === 'add' || keptWeeksConsumed > 0) ? (keptWeeksConsumed + 1) : 1}.
 - DO NOT exceed week ${weeksUntilDeadline} under any circumstance — the deadline is a wall, not a guideline.
 - A server-side validator WILL rescale your durations if they overflow; honoring the budget yourself produces better learning sequencing.
 
@@ -372,8 +382,9 @@ EXISTING ROADMAP PHASES (build COMPLEMENTARILY — never duplicate, never contra
 ${existingPlan}
 
 COMPLEMENTARITY RULES:
-- If mode='replace': only replace status='planned' phases. NEVER touch 'done' or 'in_progress'.
+- If mode='replace': only replace status='planned' or 'draft' phases. NEVER touch 'done' or 'in_progress' — they are KEPT.
 - If mode='add': extend the timeline AFTER the last existing phase.
+- NEVER overlap weeks with KEPT phases (done + in_progress). New phases MUST start at week ${(mode === 'add' || keptWeeksConsumed > 0) ? (keptWeeksConsumed + 1) : 1}.
 - NEVER overlap focus_areas with status='done'/'in_progress' phases unless explicitly reinforcing a still-weak skill (justify in rationale).
 
 WEAK AREAS (recency-weighted — RECENT SIGNALS CARRY MORE AUTHORITY than older ones):
@@ -490,9 +501,11 @@ Return ONLY a valid JSON array (no markdown), with this exact format:
     }
     phases = fit.phases;
 
-    // Soft-delete existing un-done phases on replace
+    // v6.9.44 — Soft-delete only NON-KEPT phases on replace (preserves in_progress).
     if (mode === 'replace' && existingPhases.length > 0) {
-      const idsToDelete = existingPhases.filter((p: any) => p.status !== 'done').map((p: any) => p.id);
+      const idsToDelete = existingPhases
+        .filter((p: any) => !KEPT_STATUSES.includes(p.status))
+        .map((p: any) => p.id);
       if (idsToDelete.length > 0) {
         await supabase
           .from('dslm_curriculum_phases')
@@ -504,7 +517,7 @@ Return ONLY a valid JSON array (no markdown), with this exact format:
     // Compute starting sequence
     const remainingMaxSeq = mode === 'add'
       ? (existingPhases.reduce((acc: number, p: any) => Math.max(acc, p.sequence_number), 0))
-      : (existingPhases.filter((p: any) => p.status === 'done').reduce((acc: number, p: any) => Math.max(acc, p.sequence_number), 0));
+      : (keptPhases.reduce((acc: number, p: any) => Math.max(acc, p.sequence_number), 0));
 
     const generationContext = {
       weeks_until_deadline: weeksUntilDeadline,

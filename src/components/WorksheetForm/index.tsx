@@ -339,13 +339,13 @@ export default function WorksheetForm({
     if (autoSubmitFiredRef.current) return;
     if (!initialAutoIntentRef.current) return;
     if (!lessonTopic || !lessonTopic.trim()) { devLog('[autoSubmit] waiting: lessonTopic empty'); return; }
-    if (!selectedExercises || selectedExercises.length === 0) { devLog('[autoSubmit] waiting: no exercises'); return; }
     if (!formRef.current) { devLog('[autoSubmit] waiting: no formRef'); return; }
+    // v6.9.44 — exercises no longer block: submitForm() auto-completes to 6/8.
     autoSubmitFiredRef.current = true;
     window.setTimeout(() => {
       requestAnimationFrame(() => {
         try {
-          devLog('🚀 [WorksheetForm v6.9.42] Auto-submit firing (gate)');
+          devLog('🚀 [WorksheetForm v6.9.44] Auto-submit firing (gate, exercises optional)');
           // v6.9.42 — call submitForm() directly to bypass HTML5 form validation
           // that silently blocked requestSubmit() from 1-Minute Prep.
           submitForm(lessonTopic.trim());
@@ -379,10 +379,11 @@ export default function WorksheetForm({
           exercisesNow = recoveredEx; setSelectedExercises(recoveredEx);
         }
       }
-      const ok = !!topicNow?.trim() && (exercisesNow?.length ?? 0) > 0 && !!formRef.current;
+      // v6.9.44 — exercises optional in watchdog too; submitForm() auto-completes.
+      const ok = !!topicNow?.trim() && !!formRef.current;
       if (ok) {
         autoSubmitFiredRef.current = true;
-        devWarn('[WorksheetForm v6.9.42] watchdog force-submit (direct submitForm)');
+        devWarn('[WorksheetForm v6.9.44] watchdog force-submit (direct submitForm, exercises optional)');
         // v6.9.42 — direct submit, no native validation.
         submitForm(topicNow!.trim());
         sessionStorage.removeItem('autoGenerateWorksheet');

@@ -513,8 +513,8 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
   }
 
   return (
-    <Card data-spotlight="send-welcome-test" className={`border-primary/30 bg-primary/5 ${compact ? 'mb-3' : 'mb-6'} relative`}>
-      <CardContent className={compact ? 'py-2 px-3' : 'py-4'}>
+    <Card data-spotlight="send-welcome-test" className={`border-primary/30 bg-primary/5 ${compact ? 'mb-3' : 'mb-4'} relative`}>
+      <CardContent className={compact ? 'py-2 px-3' : 'py-3 px-4'}>
         {/* Always-on dismiss button — hides the banner from Overview only.
             The Welcome Test remains accessible in the Tests tab. */}
         <TooltipProvider delayDuration={200}>
@@ -554,6 +554,7 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
                   onPreview={handlePreview}
                   onViewResults={handleViewResults}
                   onRetake={handleRetake}
+                  canRetake={panelState === 'completed'}
                   sending={creating}
                   retaking={retaking}
                   compact
@@ -565,26 +566,31 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
             </p>
           </div>
         ) : (
-        // v6.9.42 — stack-first layout: title row, URL row (full width truncate),
-        // actions row (right-aligned on ≥sm). Fixes badge wrap + URL overflow
-        // observed on Welcome Test retake banners.
-        <div className="flex flex-col gap-3">
-          <div className="flex items-start gap-3 min-w-0">
-            <Sparkles className="h-8 w-8 text-primary flex-shrink-0" />
+        // v6.9.44 — single-row on lg: title block + actions inline, no wasted
+        // vertical space. Falls back to stack on smaller viewports.
+        <div className="flex flex-col lg:flex-row lg:items-center lg:gap-4 gap-2">
+          <div className="flex items-start gap-3 min-w-0 flex-1">
+            <Sparkles className="h-7 w-7 text-primary flex-shrink-0" />
             <div className="min-w-0 flex-1">
             {status === 'pending' && (
               <>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <p className="font-medium break-words">
+                  <p className="font-medium break-words text-sm">
                     {retakeLabel
                       ? `Welcome Test ${retakeLabel} sent`
                       : 'Welcome (placement) Test sent'}
                   </p>
                   <Badge variant="secondary" className="shrink-0">Waiting for student</Badge>
+                  {sentAt && (() => {
+                    const hours = (Date.now() - new Date(sentAt).getTime()) / 36e5;
+                    const days = Math.floor(hours / 24);
+                    const label = hours < 1 ? 'just now' : hours < 24 ? `${Math.floor(hours)}h ago` : `${days}d ago`;
+                    return <span className="text-xs text-muted-foreground">· Sent {label}</span>;
+                  })()}
                 </div>
                 {shareUrl && (
                   <p
-                    className="text-xs text-muted-foreground truncate mt-1"
+                    className="text-[11px] text-muted-foreground truncate mt-0.5"
                     title={shareUrl}
                   >
                     {shareUrl}
@@ -592,12 +598,8 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
                 )}
                 {sentAt && (() => {
                   const hours = (Date.now() - new Date(sentAt).getTime()) / 36e5;
-                  const days = Math.floor(hours / 24);
-                  const label = hours < 1 ? 'just now' : hours < 24 ? `${Math.floor(hours)}h ago` : `${days}d ago`;
-                  return (
-                    <div className="mt-2 flex items-center gap-2 text-xs">
-                      <span className="text-muted-foreground">Sent {label}</span>
-                      {hours >= 48 && (
+                  return hours >= 48 ? (
+                    <div className="mt-1">
                         <Button
                           size="sm"
                           variant="outline"
@@ -647,41 +649,40 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
                         >
                           {reminderSending ? 'Sending…' : 'Send reminder'}
                         </Button>
-                      )}
                     </div>
-                  );
+                  ) : null;
                 })()}
               </>
             )}
             {status === 'in_progress' && (
               <>
                 <div className="flex items-center gap-2">
-                  <p className="font-medium">
+                  <p className="font-medium text-sm">
                     {retakeLabel ? `Student is taking ${retakeLabel}` : 'Student is taking the test'}
                   </p>
                   <Badge variant="secondary">{answeredCount}/{totalQuestions} answered</Badge>
                 </div>
-                <Progress value={progressPercent} className="h-2 mt-2" />
+                <Progress value={progressPercent} className="h-1.5 mt-1.5" />
               </>
             )}
             {status === 'completed' && (
               <>
                 <div className="flex items-center gap-2 flex-wrap">
-                  <p className="font-medium break-words">
+                  <p className="font-medium break-words text-sm">
                     {retakeLabel
                       ? `Welcome Test ${retakeLabel} completed!`
                       : 'Welcome (placement) Test completed!'}
                   </p>
                   <Badge variant="default" className="shrink-0">Completed</Badge>
                 </div>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-xs text-muted-foreground mt-0.5">
                   View the learning profile and test results.
                 </p>
               </>
             )}
             </div>
           </div>
-          <div className="flex justify-start sm:justify-end">
+          <div className="lg:flex-shrink-0">
             <WelcomeTestActionsPanel
               state={panelState}
               shareUrl={shareUrl}
@@ -692,10 +693,11 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
               onPreview={handlePreview}
               onViewResults={handleViewResults}
               onRetake={handleRetake}
+              canRetake={panelState === 'completed'}
               sending={creating}
               retaking={retaking}
               compact
-              className="justify-start sm:justify-end"
+              className="justify-start lg:justify-end"
             />
           </div>
         </div>

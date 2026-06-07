@@ -60,6 +60,12 @@ interface WelcomeTestActionsPanelProps {
   onPreview?: () => void | Promise<void>;
   onViewResults?: () => void;
   onRetake?: () => void | Promise<void>;
+  /**
+   * v6.9.44 — gate "Create retake" / "Re-take Test" button independently of
+   * onRetake presence. Defaults to true only when the latest attempt is
+   * actually completed/reviewed.
+   */
+  canRetake?: boolean;
 
   // Async state passthrough (parent may control spinners externally).
   sending?: boolean;
@@ -82,6 +88,7 @@ export function WelcomeTestActionsPanel({
   onPreview,
   onViewResults,
   onRetake,
+  canRetake,
   sending = false,
   refreshing = false,
   retaking = false,
@@ -96,6 +103,8 @@ export function WelcomeTestActionsPanel({
   const [confirmRefreshOpen, setConfirmRefreshOpen] = useState(false);
 
   const isCompleted = state === "completed";
+  // v6.9.44 — fallback: when caller doesn't specify, only show retake on completed.
+  const retakeAllowed = canRetake ?? isCompleted;
   // View Results is meaningful once the student has ≥1 answer OR test is completed.
   const viewResultsEnabled = hasAnyAnswer || isCompleted;
 
@@ -279,7 +288,7 @@ export function WelcomeTestActionsPanel({
           </Tooltip>
         )}
 
-        {onRetake && (
+        {onRetake && retakeAllowed && (
           <Tooltip>
             <TooltipTrigger asChild>
               <Button size={size} onClick={() => onRetake()} disabled={retaking} className={compactCls}>
