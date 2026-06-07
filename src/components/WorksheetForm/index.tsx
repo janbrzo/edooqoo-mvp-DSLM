@@ -345,8 +345,10 @@ export default function WorksheetForm({
     window.setTimeout(() => {
       requestAnimationFrame(() => {
         try {
-          devLog('🚀 [WorksheetForm v6.9.38] Auto-submit firing');
-          formRef.current?.requestSubmit();
+          devLog('🚀 [WorksheetForm v6.9.42] Auto-submit firing (gate)');
+          // v6.9.42 — call submitForm() directly to bypass HTML5 form validation
+          // that silently blocked requestSubmit() from 1-Minute Prep.
+          submitForm(lessonTopic.trim());
         } catch (e) {
           devWarn('[WorksheetForm] requestSubmit threw', e);
         }
@@ -380,8 +382,9 @@ export default function WorksheetForm({
       const ok = !!topicNow?.trim() && (exercisesNow?.length ?? 0) > 0 && !!formRef.current;
       if (ok) {
         autoSubmitFiredRef.current = true;
-        devWarn('[WorksheetForm v6.9.38] watchdog force-submit');
-        formRef.current?.requestSubmit();
+        devWarn('[WorksheetForm v6.9.42] watchdog force-submit (direct submitForm)');
+        // v6.9.42 — direct submit, no native validation.
+        submitForm(topicNow!.trim());
         sessionStorage.removeItem('autoGenerateWorksheet');
         sessionStorage.removeItem('autoGenerateWorksheetRequest');
       } else {
@@ -660,7 +663,7 @@ export default function WorksheetForm({
   return <div className={`w-full ${isMobile ? 'py-2' : 'py-[24px]'}`}>
       <Card className="bg-card/88 backdrop-blur-sm border-border/60 shadow-lg">
         <CardContent className={`${isMobile ? 'p-3' : 'p-8'}`}>
-          <form ref={formRef} onSubmit={handleSubmit}>
+          <form ref={formRef} onSubmit={handleSubmit} noValidate>
             <div className="mb-6">
               <div className={`flex ${isMobile ? 'flex-col gap-3' : 'justify-between items-start'} mb-6`}>
                 <div className={`${isMobile ? 'text-center' : ''}`}>
