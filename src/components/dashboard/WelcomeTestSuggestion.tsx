@@ -554,6 +554,7 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
                   onPreview={handlePreview}
                   onViewResults={handleViewResults}
                   onRetake={handleRetake}
+                  canRetake={panelState === 'completed'}
                   sending={creating}
                   retaking={retaking}
                   compact
