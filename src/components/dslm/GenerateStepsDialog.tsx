@@ -91,10 +91,14 @@ export const GenerateStepsDialog: React.FC<GenerateStepsDialogProps> = ({
     }
     if (!selectedPhase) return null;
     if (selectedPhase.have >= selectedPhase.need) {
-      return `⚠ Already at recommended count (${selectedPhase.have}/${selectedPhase.need}). Adding more is OK but the rolling plan stays at ${selectedPhase.need} per week-block.`;
+      return `⚠ Already at target (${selectedPhase.have}/${selectedPhase.need}). Adding more is OK.`;
     }
     const gap = selectedPhase.need - selectedPhase.have;
-    return `Phase has ${selectedPhase.have}/${selectedPhase.need} steps. Recommended add: ${gap}.`;
+    const capped = Math.min(6, gap);
+    if (gap > 6) {
+      return `Phase has ${selectedPhase.have}/${selectedPhase.need} steps — adding ${capped} now (max 6 per batch, repeat to fill).`;
+    }
+    return `Phase has ${selectedPhase.have}/${selectedPhase.need} steps. Recommended add: ${capped}.`;
   })();
 
   // v6.9.15a — only treat as "recommended" if the phase still exists.
