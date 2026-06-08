@@ -122,6 +122,27 @@ export function TestDetailsView({ testId, teacherId, studentId, onBack }: TestDe
   };
 
   const handleApplyResults = async () => {
+    // v6.9.48 — Try re-running process-welcome-test with force=true first.
+    // This repairs Welcome Tests that completed before the v6.9.40 auto-apply
+    // fix (status stuck at 'completed'). Falls back to client-side rating
+    // application for non-welcome tests or when the function is unreachable.
+    const isWelcome = test?.test_type === 'welcome';
+    if (isWelcome) {
+      try {
+        const { error } = await supabase.functions.invoke('process-welcome-test', {
+          body: { test_id: testId, force: true },
+        });
+        if (!error) {
+          setManualApplyCompleted(true);
+          toast.success('Re-ran analysis and applied results.');
+          loadTest();
+          return;
+        }
+        console.warn('[TestDetailsView] force reprocess failed, falling back', error);
+      } catch (err) {
+        console.warn('[TestDetailsView] process-welcome-test invoke threw, falling back', err);
+      }
+    }
     if (!test?.skill_results) return;
     const success = await applyResultsToProgress(testId, test.skill_results);
     if (success) {
