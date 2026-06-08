@@ -73,11 +73,12 @@ export function buildAutoGeneratePayload(): (FormData & { __autoGenerateRequestI
   // Default lesson time / level mirror WorksheetForm initial state.
   const lessonTime: LessonTime = '60min';
   const englishLevel: EnglishLevel = 'B1/B2';
-  const maxExercises = lessonTime === '45min' ? 6 : 8;
+  const is45 = (lessonTime as LessonTime) === '45min';
+  const maxExercises = is45 ? 6 : 8;
 
   const seed = Array.isArray(exercises) && exercises.length > 0
     ? [...exercises]
-    : (lessonTime === '45min' ? [...MANUAL_45] : [...MANUAL_60]);
+    : (is45 ? [...MANUAL_45] : [...MANUAL_60]);
 
   const isPicture = mediaTypes.includes('picture');
   const isAudio = mediaTypes.includes('audio');
