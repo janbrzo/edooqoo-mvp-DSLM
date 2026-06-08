@@ -456,7 +456,7 @@ export const MacroTimeline: React.FC<MacroTimelineProps> = ({
                             <DropdownMenuContent align="start" className="w-56 p-2 space-y-2">
                               <DropdownMenuLabel className="text-xs">How many next steps to add?</DropdownMenuLabel>
                               <Input
-                                type="number" min="1" max="6" value={getPhaseQuickCount(phase.id)}
+                                type="number" min="1" max="6" value={getPhaseQuickCount(phase.id, phaseSuggestions.length)}
                                 onChange={(e) => setPhaseQuickCountFor(phase.id, parseInt(e.target.value) || 1)}
                                 className="h-8"
                               />
