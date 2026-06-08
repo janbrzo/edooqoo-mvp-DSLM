@@ -343,9 +343,11 @@ export function TestDetailsView({ testId, teacherId, studentId, onBack }: TestDe
               <CardTitle className="text-xl">
                 {/* v6.9.48 — render Welcome Test heading from live student.name
                     so renaming a student updates the test heading immediately. */}
-                {test.test_type === 'welcome' && studentName
-                  ? `Welcome Test - ${studentName}${test.attempt_number && test.attempt_number > 1 ? ` (Retake ${test.attempt_number - 1})` : ''}`
-                  : test.title}
+                {(() => {
+                  if (test.test_type !== 'welcome' || !studentName) return test.title;
+                  const attempt = ((test as any).attempt_number ?? 1) as number;
+                  return `Welcome Test - ${studentName}${attempt > 1 ? ` (Retake ${attempt - 1})` : ''}`;
+                })()}
               </CardTitle>
               <p className="text-muted-foreground">{test.description}</p>
               <TestDates
