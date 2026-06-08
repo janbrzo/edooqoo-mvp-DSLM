@@ -559,8 +559,8 @@ export default function WelcomeTestPage() {
   const isSkillQuestion = !!currentQuestion.correct_answer;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 px-3 sm:px-4 py-3">
-      <div className="max-w-2xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 px-2 sm:px-3 py-2">
+      <div className="max-w-lg mx-auto">
         {/* Teacher Preview Mode — sticky banner. Shown when ?preview=1 or after
             the teacher chose "Preview Test (Read-only)" from the access screen. */}
         {teacherPreviewMode && (
@@ -744,6 +744,7 @@ export default function WelcomeTestPage() {
               onAnswer={(val) => saveAnswer(currentQuestion.id, val)}
               translatedOptions={!isSkillQuestion ? currentTranslation?.options : undefined}
               disabled={teacherPreviewMode}
+              onNext={!isLastQuestion ? () => { void goToNext(); } : undefined}
             />
 
             {/* Answer status + I don't know */}
@@ -895,12 +896,14 @@ function QuestionInput({
   onAnswer,
   translatedOptions,
   disabled = false,
+  onNext,
 }: {
   question: WelcomeTestQuestionDef;
   answer: unknown;
   onAnswer: (val: unknown) => void;
   translatedOptions?: string[];
   disabled?: boolean;
+  onNext?: () => void;
 }) {
   const displayAnswer = answer === "__IDK__" ? "" : answer;
 
@@ -924,6 +927,7 @@ function QuestionInput({
       answer={displayAnswer}
       onAnswer={onAnswer}
       translatedOptions={translatedOptions}
+      onNext={onNext}
     />
   );
 }
@@ -933,11 +937,13 @@ function QuestionInputInner({
   answer,
   onAnswer,
   translatedOptions,
+  onNext,
 }: {
   question: WelcomeTestQuestionDef;
   answer: unknown;
   onAnswer: (val: unknown) => void;
   translatedOptions?: string[];
+  onNext?: () => void;
 }) {
   switch (question.question_type) {
     case "speaking_record":
@@ -962,7 +968,7 @@ function QuestionInputInner({
             <ListeningPlayer audioUrl={question.audio_url || ""} transcript={question.audio_transcript} />
           )}
           {question.options && (
-            <RadioGroup value={(answer as string) || ""} onValueChange={onAnswer}>
+            <RadioGroup value={(answer as string) || ""} onValueChange={(v) => { onAnswer(v); setTimeout(() => onNext?.(), 180); }}>
               {question.options.map((option, idx) => (
                 <div
                   key={idx}
@@ -986,7 +992,7 @@ function QuestionInputInner({
     case "scenario_reaction":
     case "multiple_choice":
       return (
-        <RadioGroup value={(answer as string) || ""} onValueChange={onAnswer}>
+        <RadioGroup value={(answer as string) || ""} onValueChange={(v) => { onAnswer(v); setTimeout(() => onNext?.(), 180); }}>
           {question.options?.map((option, idx) => (
             <div
               key={idx}
@@ -1047,7 +1053,7 @@ function QuestionInputInner({
         );
       }
       return (
-        <RadioGroup value={(answer as string) || ""} onValueChange={onAnswer}>
+        <RadioGroup value={(answer as string) || ""} onValueChange={(v) => { onAnswer(v); setTimeout(() => onNext?.(), 180); }}>
           {question.options?.map((option, idx) => (
             <div
               key={idx}
@@ -1070,6 +1076,7 @@ function QuestionInputInner({
         <Input
           value={(answer as string) || ""}
           onChange={(e) => onAnswer(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); onNext?.(); } }}
           placeholder="Type your answer..."
           className="text-sm"
         />
@@ -1081,6 +1088,7 @@ function QuestionInputInner({
         <Textarea
           value={(answer as string) || ""}
           onChange={(e) => onAnswer(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); onNext?.(); } }}
           placeholder={question.question_type === "open_reflection" ? "Share your thoughts..." : "Write your answer..."}
           className="min-h-[90px] text-sm"
         />
