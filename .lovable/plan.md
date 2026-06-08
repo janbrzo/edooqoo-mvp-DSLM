@@ -1,299 +1,210 @@
-# Plan v6.9.47 — Problem Resolution Cycle
 
-## Założenie wykonawcze
-Nie dotykam Worksheet Generation Engine. Zmiany będą ograniczone do warstwy transportu/prefill, DSLM roadmap, Welcome Test UX/results, Goals UI oraz RAG (`docs/llm-context.md`, `public/llms.txt`).
+# Plan v6.9.48 — Pełen plan wdrożenia
 
----
-
-## 1. `Generate worksheet ↗` z 1-Minute Prep nie startuje automatycznie
-
-### Dependency scan
-Affected surface:
-- `src/pages/StudentPage.tsx` — zapisuje `sessionStorage` i robi `navigate('/')` po kliknięciu sugestii.
-- `src/components/WorksheetForm/index.tsx` — hydratuje prefill i odpala autosubmit.
-- `src/pages/Index.tsx` — kolejkuje submit, czeka na token/profile readiness.
-- `src/hooks/useWorksheetGeneration.tsx` — startuje stream i używa `studentId` z payloadu.
-- `src/hooks/useWorksheetFormPersistence.ts` — może przywracać draft i konkurować z DSLM prefill.
-- `future_worksheet_suggestions` — tylko oznaczanie użytej sugestii po sukcesie; bez zmiany schematu.
-
-### Root cause
-Aktualny autosubmit zależy od jednorazowych flag `sessionStorage`, które są czyszczone po lokalnym `submitForm()`, zanim wiadomo, czy parent `Index.tsx` faktycznie przyjął i uruchomił generowanie; przy readiness/race z tokenami lub zamontowanym formularzem request może zostać „zużyty” bez widocznego startu streamu.
-
-### Solution options
-| Opcja | Podejście | Tradeoff | Regression risk |
-|---|---|---|---|
-| A | Dodać dłuższe timeouty w `WorksheetForm` | Szybkie, ale nadal losowe | Medium |
-| B | Zrobić trwały handshake: request ma ID/status, form nie usuwa flag zanim parent potwierdzi przyjęcie, parent emituje `accepted/started/failed` event | Najbardziej odporne na race, bez zmiany AI promptu | Low |
-| C | Przenieść generowanie całkowicie do `StudentPage` | Omija formularz, ale dubluje logikę generatora | High |
-
-### Selected solution + why
-Wybieram opcję B. To usuwa strukturalny błąd: autosubmit przestaje być „fire-and-forget” i staje się transakcją UI z potwierdzeniem przyjęcia przez `Index.tsx`. Zachowuje obecny formularz, token logic i worksheet runtime bez dotykania Worksheet Generation Engine.
-
-### Impact analysis
-Zero regressions confirmed:
-- manual submit nadal działa bez dodatkowych eventów,
-- `Use this` nadal tylko wypełnia formularz,
-- token paywall nadal działa dla manualnych requestów,
-- sugestia nadal oznacza się jako used dopiero po sukcesie generowania,
-- anonymous/demo guard pozostaje bez zmian.
-
-### Full implementation
-- W `StudentPage.tsx` przy `autoGenerate=true` zapisać `autoGenerateWorksheetRequest` z polami: `requestId`, `studentId`, `suggestionId`, `createdAt`, `status: 'pending'`.
-- W `WorksheetForm/index.tsx`:
-  - `readAutoGenerateIntent()` ma ignorować request starszy niż np. 60 sekund.
-  - `submitForm()` doda do payloadu `__autoGenerateRequestId` obok `__autoGenerateFromSuggestion`.
-  - Nie usuwać `autoGenerateWorksheet` i `autoGenerateWorksheetRequest` od razu po `submitForm()`.
-  - Nasłuchiwać eventu `worksheet:autoGenerateAccepted` / `worksheet:autoGenerateStarted` / `worksheet:autoGenerateFailed`; dopiero accepted/started czyści flagi.
-  - Watchdog po 1500 ms nie „dropuje” flag bez finalnego retry; jeżeli form jest gotowy, ponawia `submitForm()` raz z tym samym `requestId`.
-- W `src/components/WorksheetForm/types.ts` dodać `__autoGenerateRequestId?: string`.
-- W `Index.tsx`:
-  - przy wejściu `handleGenerateWorksheet(data)` dla auto requestu emitować `worksheet:autoGenerateAccepted` natychmiast po przejściu guardu pustego topicu.
-  - jeśli `tokensLoading`, retry pozostaje, ale nie czyści requestu.
-  - tuż przed `generateWorksheetHandler(data)` emitować `worksheet:autoGenerateStarted`.
-  - jeśli paywall/empty topic/timeout readiness blokuje request, emitować `worksheet:autoGenerateFailed` z reason.
-- W `useWorksheetGeneration.tsx` pozostawić `effectiveStudentId = data.studentId || studentId`, bez zmian promptu.
-
-### Verification checklist
-- DONE: Kliknięcie `Generate worksheet ↗` zapisuje request z ID.
-- DONE: Generator otwiera się i po readiness startuje stream/generating modal.
-- DONE: Request nie ginie, jeśli token/profile loading trwa kilka sekund.
-- DONE: Manual Generate nadal wymaga tylko kliknięcia użytkownika.
-- DONE: `future_worksheet_suggestions.is_used` zmienia się dopiero po `worksheetGenerationSuccess`.
+Cel: rozwiązać 4 powtarzające się błędy bez naruszania Worksheet Generation Engine. Każde rozwiązanie zostało wybrane tak, by zminimalizować ryzyko regresji i zostawić możliwie najmniej decyzji do podjęcia w trakcie implementacji.
 
 ---
 
-## 2. `Regenerate Learning Roadmap` zmienia `in_progress` i gubi Next Steps
+## P1 — Auto-generate worksheet z 1-Minute Prep nie startuje
 
-### Dependency scan
-Affected surface:
-- `supabase/functions/generate-curriculum-phases/index.ts` — replace/add, preservation invariant, phase insert.
-- `src/hooks/dslm/useCurriculumPhases.tsx` — refetch phases/suggestions po sukcesie.
-- `src/hooks/useFutureTimeline.tsx` — pobiera aktywne phase-bound suggestions.
-- `src/components/dslm/MacroTimeline.tsx` — renderuje fazy i suggestions by `phase_id`.
-- `src/components/dslm/GenerateRoadmapDialog.tsx` — copy potwierdzające zachowanie danych.
-- Tables: `dslm_curriculum_phases`, `future_worksheet_suggestions`.
+**Dependency scan:** `src/components/dslm/PathwayView.tsx` (callSuggestion), `src/pages/StudentPage.tsx` (onUseWorksheetSuggestion → sessionStorage + navigate('/')), `src/components/worksheet/FormView.tsx`, `src/components/WorksheetForm/index.tsx` (RAF gate + watchdog), `src/pages/Index.tsx` (handleGenerateWorksheet — token retry / paywall).
 
-### Root cause
-Backend snapshotuje zachowane fazy, ale server-side deadline rebase nadal startuje nowe fazy od tygodnia 1, a soft-delete planned/draft phases nie odpina ich `future_worksheet_suggestions`, więc część kroków staje się niewidoczna, a nowe fazy wizualnie nakładają się na preserved `in_progress`.
+**Root cause:** Po `navigate('/')` `Index.tsx` najpierw montuje `FormView`, ale gdy `tokensLoading=true` i jednocześnie auto-intent jest aktywny, ścieżka retry (`__tokenRetry`) potrafi się "zgubić", bo:
+- `handleGenerateWorksheet` rekursywnie woła samego siebie z nowym `data`, ale traci pole `__autoGenerateRequestId` przy każdej iteracji tylko jeśli ktoś go nie przekaże (przekazuje `...data`, OK);
+- jednak RAF gate w `WorksheetForm` po `submitForm()` od razu kasuje sessionStorage (`autoGenerateWorksheet`, `autoGenerateWorksheetRequest`), więc jeśli `handleGenerateWorksheet` aborduje (np. paywall albo wczesny `return` z tokenLoading-retry), nie ma żadnego trwałego śladu intencji i nic nie spróbuje ponownie wystartować.
+- Dodatkowo, gdy `WorksheetForm` jest już zamontowany i user klika "Generate ↗", efekt mounted-auto-intent działa, ale RAF gate ma deps `[lessonTopic, selectedExercises]` — jeśli `lessonTopic` był już ustawiony wcześniej (np. user wpisał coś ręcznie), efekt nie startuje ponownie po wpisaniu nowych flag do sessionStorage.
 
-### Solution options
-| Opcja | Podejście | Tradeoff | Regression risk |
-|---|---|---|---|
-| A | Tylko poprawić copy modala | Nie naprawia danych | High |
-| B | Poprawić `rebase(startingWeek)` i przed soft-delete odpiąć suggestions z usuwanych faz do `next_step` | Chroni active phases i nie gubi starych suggestions | Low |
-| C | W ogóle nie usuwać planned/draft; oznaczać jako archived | Więcej UI długu i potencjalny chaos planu | Medium |
+**Solution options:**
 
-### Selected solution + why
-Wybieram opcję B. Jest minimalna i zgodna z istniejącą architekturą: done/in_progress zostają fizycznie nietknięte, replace dotyczy tylko planned/draft, a kroki z usuwanych faz nie znikają — są detaczowane jako free `next_step`.
+| # | Approach | Tradeoff | Risk |
+|---|----------|----------|------|
+| A | Nie kasować flag sessionStorage przed potwierdzeniem że `handleGenerateWorksheet` faktycznie ruszył (event `worksheet:autoGenerateStarted`). | Wymaga handshake w `Index.tsx`. | Low |
+| B | Trzymać intent w refie w `WorksheetForm` i ponawiać `submitForm` co 500ms aż `isGenerating=true` z timeoutem 15s. | Łatwe, ale wymaga przekazania `isGenerating` propsem do formu (brak dziś). | Medium |
+| C | Przenieść auto-start do `Index.tsx`: jeżeli `Index` widzi sessionStorage `autoGenerateWorksheet`, sam wywoła `handleGenerateWorksheet` z danymi z sessionStorage gdy tokens/profile będą gotowe — `WorksheetForm` tylko hydratuje pola. | Najbardziej deterministyczne, omija race z mountem formu. | Low–Medium |
 
-### Impact analysis
-Zero regressions confirmed:
-- istniejące `done` i `in_progress` rows zachowują te same `id`, `title`, `description`, `week ranges`, `rationale`, `focus_areas`, `deleted_at=null`,
-- existing suggestions w kept phases zachowują `phase_id`,
-- suggestions z planned/draft nie są kasowane fizycznie; tylko tracą `phase_id`, więc pozostają widoczne,
-- add mode pozostaje append-only.
+**Selected:** **A + C** (komplementarne). Implementacja:
 
-### Full implementation
-- W `generate-curriculum-phases/index.ts`:
-  - zmienić `rebase(phases, durations)` na `rebase(phases, durations, startingWeek = 1)`.
-  - zmienić `fitPhasesToDeadline(phases, targetWeeks)` na przyjmowanie `startingWeek`.
-  - dla replace z `keptWeeksConsumed > 0` wywoływać fit/rebase ze startem `keptWeeksConsumed + 1`.
-  - przed soft-delete `replaceablePhaseIds` wykonać update `future_worksheet_suggestions`: `phase_id=null`, `suggestion_kind='next_step'` dla aktywnych/unused rows przypiętych do replaceable phases.
-  - dodać snapshot `replaceableSuggestionIds` i rollback: jeżeli insert/preservation fails, przywrócić `phase_id`/`suggestion_kind` dla odpiętych suggestions oraz `deleted_at=null` dla replaceable phases.
-  - rozszerzyć `generationContext` o `detached_replaceable_suggestion_ids` i `roadmap_start_week`.
-- W `useCurriculumPhases.tsx` po sukcesie emitować oba eventy już istniejące (`dslm:phasesUpdated`, `dslm:suggestionsUpdated`) po `await fetchPhases()`.
-- W `GenerateRoadmapDialog.tsx` zostawić copy w duchu: “Only planned/draft phases are regenerated. Active/completed phases and their worksheet suggestions are kept exactly.”
+1. `WorksheetForm` przestaje kasować `autoGenerateWorksheet` / `autoGenerateWorksheetRequest` z sessionStorage w RAF/watchdog. Kasuje je dopiero handler `worksheet:autoGenerateStarted` (event nadawany przez `Index.tsx` w pierwszej linii `handleGenerateWorksheet` gdy `data.__autoGenerateRequestId` jest obecny i nie został jeszcze potwierdzony).
+2. `Index.tsx` dostaje nowy `useEffect` (mount‐only) który:
+   - czyta `autoGenerateWorksheet` + `autoGenerateWorksheetRequest` + `prefillWorksheet` + `prefillExercises` + `prefillExerciseFocusMap` + `prefillMediaTypes` z sessionStorage,
+   - jeśli intent istnieje i `isRegisteredUser`, czeka w pętli `setInterval(200ms, max 60×)` aż `tokensLoading===false`, następnie buduje payload identyczny jak `WorksheetForm.submitForm` (wykorzystując pomocnik `buildAutoGeneratePayload` w nowym pliku `src/lib/worksheet/autoGenerateBootstrap.ts`) i jednorazowo wywołuje `handleGenerateWorksheet(payload)`.
+   - po wystartowaniu emituje `window.dispatchEvent(new CustomEvent('worksheet:autoGenerateStarted', { detail: { requestId }}))` → `WorksheetForm` (jeśli zamontowany) blokuje swój własny duplikat i kasuje sessionStorage.
+3. `WorksheetForm` RAF gate nadal działa jako fallback dla case gdy form już był zamontowany przed navigate (ten sam event chroni przed podwójnym submitem).
+4. Dodać `devLog('[Index v6.9.48] auto-bootstrap fired', payload)` do diagnostyki.
 
-### Verification checklist
-- DONE: Regenerate z 2 `in_progress` nie zmienia ich rekordów.
-- DONE: Next Steps w fazie `in_progress` zostają widoczne.
-- DONE: Kroki z usuwanych planned/draft nie znikają całkowicie.
-- DONE: Nowe fazy zaczynają się po ostatnim zachowanym tygodniu.
-- DONE: Invariant failure rollback nie zostawia częściowo nowej roadmapy.
+**Impact:** Zero zmian wizualnych, tylko warstwa orchestration. Manual submit niezmieniony (nie ma `__autoGenerateRequestId` → handshake skip). Zero regresji confirmed: handleGenerateWorksheet podpis bez zmian, FormData kształt bez zmian.
+
+**Pliki:**
+- `src/pages/Index.tsx` (+ mount effect, + handshake event dispatch)
+- `src/components/WorksheetForm/index.tsx` (usunąć kasowanie flag, dodać listener `worksheet:autoGenerateStarted` który kasuje flagi i ustawia `autoSubmitFiredRef.current=true`)
+- nowy: `src/lib/worksheet/autoGenerateBootstrap.ts` — czysta funkcja `readAutoGeneratePayload(): FormData | null`
+
+**Verification checklist:**
+- [ ] Klik "Generate worksheet ↗" w 1-Minute Prep → navigate('/') → po ≤2s generation modal startuje, bez ręcznego kliknięcia
+- [ ] Ręczny submit działa identycznie (brak intencji = brak bootstrap)
+- [ ] Po teardown intencji sessionStorage czyste
+- [ ] Brak podwójnego startu generacji (handshake)
 
 ---
 
-## 3. Welcome Test z tłumaczeniem jest za duży + szybka nawigacja odpowiedzi
+## P2 — Welcome Test nie mieści się pionowo z włączonym tłumaczeniem
 
-### Dependency scan
-Affected surface:
-- `src/pages/WelcomeTestPage.tsx` — cały student-facing test layout i `QuestionInput`.
-- `src/hooks/useWelcomeTest.tsx` — `saveAnswer`, `goToNext`, `flushPendingAnswer`, `completeTest`.
-- `src/data/welcomeTestTranslations.ts` — tylko odczyt; bez zmian treści.
-- Components: `SpeakingRecorder`, `ListeningPlayer` — bez zmian mechaniki.
+**Dependency scan:** `src/pages/WelcomeTestPage.tsx`, komponenty pytań w `src/components/welcome-test/` (`RadioGroup`, opcje), header testu.
 
-### Root cause
-Layout skaluje tłumaczenia jako dodatkowy blok pod pytaniem/opcjami bez trybu compact, a inputy wyboru zapisują odpowiedź, ale nie wywołują kontrolowanego `goToNext`; tekstowe pytania mają deferred commit i brak obsługi Enter.
+**Root cause:** Aktualny `max-w-lg` z v6.9.47 jest za wąski (treści owijają się na 3 linie zwiększając wysokość); dodatkowo padding pionowy opcji (`py-3` ~12px na każdą stronę) + duże gapy między sekcjami.
 
-### Solution options
-| Opcja | Podejście | Tradeoff | Regression risk |
-|---|---|---|---|
-| A | Zmniejszyć tylko fonty | Częściowo pomoże, ale nie rozwiązuje flow | Medium |
-| B | Dodać compact mode przy `translationLang`, ciaśniejsze spacingi i controlled auto-advance callbacks | Dokładnie rozwiązuje UX bez zmiany pytań | Low |
-| C | Usunąć część tłumaczeń z opcji | Szkodzi uczniowi, nieakceptowalne | High |
+**Selected:**
+- Container `max-w-2xl` (szerszy o ~33% niż `lg`, daje miejsce na tłumaczenie pod tekstem opcji).
+- Skala pionowa −20% przez nadpisanie spacingów: header `space-y-2` → `space-y-1.5`, options gap `space-y-3` → `space-y-2`, padding opcji `py-3` → `py-2.5`, font opcji `text-base` → `text-[15px]`, blok tłumaczenia `text-sm` → `text-[13px]`, footer padding `py-4` → `py-3`. Tytuł `text-xl` → `text-lg` na desktopie ≥md.
+- Dodatkowo: wartość kontenera `px-4 md:px-6` zamiast `px-6` aby zmniejszyć marginesy boczne na średnich szerokościach.
 
-### Selected solution + why
-Wybieram opcję B. Tłumaczenia zostają, ale ekran staje się ok. 20% bardziej zwarty; nawigacja jest szybsza, ale nadal bezpieczna dla multi-select, matrix, speaking i listening.
+**Impact:** Tylko CSS / Tailwind classes w `WelcomeTestPage.tsx`. Mobile nadal `max-w-full`. Brak zmian w logice testu.
 
-### Impact analysis
-Zero regressions confirmed:
-- multi-select nadal nie auto-przechodzi, bo wymaga wielu wyborów,
-- speaking/listening nie zmienią upload/playback,
-- teacher preview nie zapisuje i nie auto-przechodzi,
-- ostatnie pytanie nie próbuje przejść dalej — zostaje `Complete`.
+**Pliki:** `src/pages/WelcomeTestPage.tsx`
 
-### Full implementation
-- W `WelcomeTestPage.tsx` dodać `const compactTranslated = Boolean(translationLang)`.
-- Zmniejszyć layout przy compact:
-  - kontener `max-w-2xl` → `max-w-xl` przy tłumaczeniu,
-  - `py-3`, `mb-3/4`, `space-y-4`, `p-2.5`, `text-sm` zredukować warunkowo do ok. 80%,
-  - karta pytania `pt-4 pb-4 space-y-4` → `pt-3 pb-3 space-y-2.5`,
-  - opcje `p-2.5` → `p-2`, option label `text-sm` → `text-[13px]`, translation option `text-xs` → `text-[11px]`, textarea `min-h-[90px]` → `min-h-[72px]`.
-- Przekazać do `QuestionInput`:
-  - `onAutoAdvance`,
-  - `isLastQuestion`,
-  - `compact`.
-- Dodać wrapper `advanceAfterAnswer(value)`:
-  - `await saveAnswer(currentQuestion.id, value)`;
-  - po krótkim `requestAnimationFrame/setTimeout(80-120ms)` wywołać `goToNext()` jeśli nie last i nie preview.
-- Auto-advance tylko dla single-answer typów:
-  - `self_assessment`, `scenario_reaction`, `multiple_choice`, `preference_choice` bez `multi_select`, opcjonalnie `listening_comprehension` po wyborze opcji.
-- Enter handling:
-  - `fill_blank`: `onKeyDown Enter` zapisuje i idzie dalej.
-  - `open_ended/open_reflection`: `Enter` bez Shift zapisuje i idzie dalej; `Shift+Enter` robi nową linię.
-
-### Verification checklist
-- DONE: Z tłumaczeniem ekran jest ok. 20% bardziej zwarty.
-- DONE: Single choice klik zapisuje i przechodzi dalej.
-- DONE: Text input Enter zapisuje i przechodzi dalej.
-- DONE: Textarea Shift+Enter nadal dodaje newline.
-- DONE: Multi-select nie auto-przechodzi.
-- DONE: Teacher preview pozostaje read-only.
+**Verification:** screenshot Welcome Testu z tłumaczeniem niemieckim — pytanie + 5 opcji + footer mieszczą się w viewport 768×900 bez scrolla.
 
 ---
 
-## 4. Po Welcome Test nie pokazuje się `AI Analysis`
+## P3 — Welcome Test (3A, 3B, 3C)
 
-### Dependency scan
-Affected surface:
-- `supabase/functions/process-welcome-test/index.ts` — generuje `student_learning_profiles.ai_summary`.
-- `src/hooks/useWelcomeTest.tsx` — wywołuje funkcję po completion.
-- `src/components/student-tests/WelcomeTestResults.tsx` — pokazuje AI Analysis tylko gdy `ai_summary` istnieje.
-- `src/components/student-tests/TestDetailsView.tsx` — przekazuje `testId`, questions.
-- Tables: `student_tests`, `student_test_questions`, `student_learning_profiles`, `test_skill_results`, `student_events`.
+### 3A. Brak "Suggested level change"
 
-### Root cause
-`process-welcome-test` generuje AI Analysis tylko gdy istnieją odpowiedzi open/speaking w starych ID listach (`wt_q12`, `wt_q13`, etc.); jeżeli uczeń odpowiada głównie na choice/profile/skill questions albo część ID driftuje, `openAnswers` jest puste i `ai_summary` zostaje `null`, mimo że profil i skill results są gotowe.
+**Dependency scan:** `supabase/functions/process-welcome-test/index.ts` (auto-fill `english_level` only when missing), `src/components/student-tests/TestDetailsView.tsx`, `src/components/dslm/PathwayView.tsx`.
 
-### Solution options
-| Opcja | Podejście | Tradeoff | Regression risk |
-|---|---|---|---|
-| A | W UI pokazać placeholder, gdy brak `ai_summary` | Ukrywa brak analizy, nie naprawia pipeline | Medium |
-| B | Edge Function zawsze generuje AI summary: open/speaking jeśli są, a fallback z profilu, skills, traitów i ważnych choice/scenario answers jeśli openAnswers puste | Trwała naprawa, prawdziwa analiza także bez open answers | Low |
-| C | Dodać osobny przycisk “Generate AI Analysis” | Manualny workaround, nie rozwiązuje automatyki | Medium |
+**Root cause:** Edge function aktualizuje `students.english_level` tylko gdy puste. Student miał C1, test wyszedł A1 → różnica nigdy nie pokazywana w UI.
 
-### Selected solution + why
-Wybieram opcję B plus jednorazowy backfill dla wskazanego testu po wdrożeniu. To naprawia zarówno przyszłe testy, jak i konkretny rekord `003f71a3-41ce-4e3b-a033-5569d35a0c29`, gdzie `student_learning_profiles.ai_summary` jest obecnie `null`.
+**Selected:** Stworzyć **nieinwazyjny banner** w `TestDetailsView` (oraz w skrócie w `PathwayView` "Welcome Test completed"), bez automatycznej zmiany levelu. Logika:
+1. `process-welcome-test`: zawsze zapisywać `estimatedLevel` w `student_learning_profiles.estimated_level` (już robi); dodatkowo, jeśli `currentLevel !== estimatedLevel` ORAZ student level już ustawiony, zapisywać do `student_learning_profiles.raw_answers.level_change_suggestion = { current, estimated, created_at }`.
+2. `TestDetailsView`: jeśli profile zawiera `level_change_suggestion` (lub `estimated_level !== student.english_level`), pokazać kartę:
+   ```
+   Suggested level change: C1 → A1
+   Welcome Test results indicate a different CEFR level than the one set on the student profile.
+   [Apply A1] [Keep C1]
+   ```
+   Buttony: Apply wywołuje `updateStudent({ english_level: estimated })`; Keep ustawia flag `dismissed_level_change_test_id` w sessionStorage (per-test) by ukryć banner.
+3. Nie zmieniać auto-apply logiki dla brakującego levelu (zachowanie wstecz kompatybilne).
 
-### Impact analysis
-Zero regressions confirmed:
-- deterministic skill scores pozostają poza AI evaluation tam, gdzie są precyzyjne,
-- AI summary nie modyfikuje Worksheet Generation Engine,
-- `reviewed` status i auto-apply zostają zachowane,
-- wynik UI nadal sanitizuje AI text przez `sanitizeAiSummary`.
+**Impact:** Dodatkowy banner widoczny tylko gdy levele się różnią. Brak nadpisywania bez zgody nauczyciela.
 
-### Full implementation
-- W `process-welcome-test/index.ts`:
-  - zbudować `analysisContext` zawsze, nie tylko `openAnswers`.
-  - Dodać mapowanie `question_index -> ALL_WELCOME_TEST_QUESTIONS canonical id` lokalnie po stronie funkcji albo helper array z ID kolejności.
-  - Jeśli `openAnswers` puste, stworzyć `profileAnswerSummary` z: estimated level, self-assessed level, grammar/vocabulary/reading/writing scores, strongest/weakest, motivation, anxiety, ambiguity, feedback preference, interest topics, learning path, key scenario answers.
-  - Wywołać Lovable AI Gateway, gdy istnieje `openAnswers` lub `profileAnswerSummary`.
-  - Prompt AI summary ma analizować dorosłego ESL ucznia i nie cytować internal IDs w tekstach.
-  - Zapisać `ai_summary` do `student_learning_profiles` tak jak obecnie.
-  - Jeśli AI Gateway failuje, zapisać bezpieczny deterministic fallback JSON z `summary`, `recommendations`, `writing_quality: 'unknown'`, `key_observations`, żeby UI nie było puste; jednocześnie logować model failure.
-- W `WelcomeTestResults.tsx`:
-  - fetch profilu ma filtrować również `.eq('welcome_test_id', testId)` lub fallback do najnowszego profilu studenta; najpierw test-specific, żeby retake nie pokazywał analizy z poprzedniego testu.
-  - `useEffect` dependency doda `testId`.
-- Po wdrożeniu funkcji uruchomić bezpieczny backfill dla testu `003f71a3-41ce-4e3b-a033-5569d35a0c29` przez ponowne `process-welcome-test` z answers z `student_learning_profiles.raw_answers`/DB questions.
+**Pliki:**
+- `supabase/functions/process-welcome-test/index.ts` (zapis `level_change_suggestion`)
+- `src/components/student-tests/TestDetailsView.tsx` (banner + akcje)
+- `src/components/student-tests/WelcomeTestResults.tsx` (przekazanie estymowanego levelu jeżeli pobierane lokalnie)
 
-### Verification checklist
-- DONE: Nowe Welcome Test zawsze ma `ai_summary` po completion/review.
-- DONE: Wskazany test dostaje AI Analysis bez ręcznego odświeżania danych przez użytkownika.
-- DONE: Retake pokazuje analizę właściwego `testId`.
-- DONE: Brak open answers nie blokuje analizy.
-- DONE: AI failure nie zostawia pustej sekcji — jest fallback.
+### 3B. "Auto-apply did not complete" na starym teście
+
+**Root cause:** Test ukończony przed deployem v6.9.40 P3 (kolumna `test_id` zamiast `student_test_id`) — status nigdy nie poszedł do `reviewed`, ale ratings nie zostały zaaplikowane.
+
+**Selected:** Rozszerzyć przycisk "Apply to Progress" w `TestDetailsView.handleApplyResults` aby wywoływał **`process-welcome-test`** edge function ponownie (re-run analizy), zamiast tylko aplikować ratings z bieżącego state-u. Wariant: nowy parametr `forceReprocess: true` w funkcji, który omija dedupe i wymusza ponowny przebieg auto-apply + poziom + suggestions. Jeśli udane → przeładowanie i banner znika sam.
+
+Aktualnie `handleApplyResults` aplikuje ratings client-side. Zostawić client-side fallback ALE dodać wcześniejszą próbę re-run edge functionu. Pseudokod:
+```ts
+const { data, error } = await supabase.functions.invoke('process-welcome-test', { body: { test_id: testId, force: true } });
+if (!error) { /* refresh + return */ }
+// fallback to existing client-side path
+```
+
+**Pliki:**
+- `supabase/functions/process-welcome-test/index.ts` (akceptować `force: boolean`, omijać guard "already reviewed" gdy force=true)
+- `src/components/student-tests/TestDetailsView.tsx` (handleApplyResults nowa logika)
+
+### 3C. Zmiana imienia studenta nie odświeża tytułu testu
+
+**Dependency scan:** `useWelcomeTestActions.ts` (tworzenie title = `Welcome Test - ${studentName}` przy ensure()), `student_tests.title` (snapshot), `useWelcomeTest.tsx` (publiczna strona testu), `TestDetailsView` (heading), `WelcomeTestPage` (header).
+
+**Root cause:** `student_tests.title` to snapshot w momencie tworzenia. Przy renamingu studenta tytuł nie jest aktualizowany.
+
+**Selected:** Renderować tytuł dynamicznie z aktualnego student name we wszystkich widokach, nie z `test.title`. Schemat:
+- W komponentach (teacher side) zamiast `{test.title}` używać `Welcome Test - {student.name}{attemptSuffix}` (student name dostępne w props/contextcie). Trzymać `test.title` w DB dla legacy, ale wyświetlać computed.
+- Dla strony publicznej `/welcome-test/:token` (student side bez authy), `useWelcomeTest` fetch testu rozszerzyć o join `students(name)` (RLS już pozwala via share token na odczyt testu; dodać RPC `get_welcome_test_meta(token)` zwracającą `{ title_components: { studentName, attemptNumber } }`). Najmniej inwazyjna ścieżka: rozszerzyć istniejący `loadTestByShareToken`/equivalent o dołączenie `students!inner(name)` jeśli RLS pozwala — sprawdzić tabelę. Jeśli nie pozwala (anon), użyć security-definer funkcji `public.get_test_share_meta(p_token uuid)`.
+
+**Decision:** zrobić dedicated **security-definer RPC** `public.get_welcome_test_share_meta(p_token text)` returning `{ student_name text, attempt_number int }`. To zachowuje RLS i jest bezpieczne.
+
+**Pliki:**
+- nowa migration: funkcja RPC `get_welcome_test_share_meta` (security definer, `grant execute to anon, authenticated`)
+- `src/hooks/useWelcomeTest.tsx` — po loadzie testu wołać RPC, używać `studentName` do nagłówka zamiast `test.title`
+- `src/pages/WelcomeTestPage.tsx` — header czyta dynamiczne `studentName`
+- `src/components/student-tests/TestDetailsView.tsx` — heading komponowany z `student.name`
+- `src/components/student-tests/StudentTestsTab.tsx` — etykiety kart liczone z `student.name`
 
 ---
 
-## 5. `Suggested from Welcome Test` goals: szare przed Accept + Accept znika od razu
+## P4 — "Suggested: 6 (one per week of 10-week phase)" oraz zły defaultTargetPhaseId
 
-### Dependency scan
-Affected surface:
-- `src/components/dslm/GoalsView.tsx` — banner Suggested from Welcome Test i accept/dismiss.
-- `src/components/student-progress/GoalCard.tsx` — wizualne odróżnienie suggested goals.
-- `src/hooks/useStudentProgress.tsx` — local state po `accepted_at` update.
-- `src/types/studentProgress.ts` — `accepted_at`, `source`, ewentualnie `metadata`.
-- `student_progress_goals` — istniejące pola `source`, `accepted_at`, `deleted_at`.
+### 4A. Tekst „one per week of N-week phase" jest nielogiczny gdy clamp limit 6 < weeks
 
-### Root cause
-Suggested goals są celowo aktywne od razu, więc są używane przez roadmap/next steps, ale `Accept all` omija lokalny state hooka bezpośrednim Supabase update; przez to banner liczy stare `suggestedGoals` aż do refetch/refresh.
+**Dependency scan:** `src/components/dslm/MacroTimeline.tsx` (lines 446-457, helper `recommendedStepsForPhase`), `src/components/dslm/GenerateStepsDialog.tsx` (helperText), `src/components/dslm/PathwayView.tsx`.
 
-### Solution options
-| Opcja | Podejście | Tradeoff | Regression risk |
-|---|---|---|---|
-| A | Ukryć suggested goals z listy do Accept | Łamie wymaganie, że mają wpływać na roadmap | High |
-| B | Zachować je jako aktywne, dodać szary styl `isSuggested`, a Accept aktualizuje lokalny state natychmiast | Spełnia dokładnie wymaganie | Low |
-| C | Trzymać suggested tylko w banerze, a do roadmap dopisywać osobnym query | Więcej długu i możliwe rozjazdy | Medium |
+**Root cause:** `recommendedStepsForPhase` clampuje do max 6. Etykieta zakłada 1 step/week, więc dla fazy 10-tygodniowej mówi "6 (one per week of 10-week phase)" — niespójne.
 
-### Selected solution + why
-Wybieram opcję B. To zachowuje kierunek produktu: sugestie są realnymi celami dla DSLM, ale wizualnie mają status “awaiting teacher decision”.
+**Selected:** Zmodyfikować helper text aby był prawdziwy:
+- Gdy `weeks <= 6`: `Suggested: ${rec} (one per week of ${w}-week phase).`
+- Gdy `weeks > 6`: `Suggested: 6 per batch (phase is ${w} weeks, max 6 per generation — repeat to fill).`
+- Gdy brak weeks: `Suggested: 3 (set phase weeks for a smarter default).`
 
-### Impact analysis
-Zero regressions confirmed:
-- przed Accept cele nadal są w `goals`, więc `generate-curriculum-phases` i `generate-timeline` je widzą,
-- Dismiss nadal soft-delete usuwa wpływ z roadmap,
-- Accept nie zmienia treści celu — tylko `accepted_at`,
-- poza kolorem/stanem banera nie zmieniam układu Goals.
+Identyczna logika w `GenerateStepsDialog.helperText` (już ma "Already at recommended count" — wyciągnąć weeks/phase i dodać tę samą gałąź).
 
-### Full implementation
-- `GoalCard.tsx`: istniejący `isSuggested` zostaje, ale styl dopracować do lekkiego szarego, bez zmiany layoutu: np. `bg-muted/30 border-muted-foreground/20 opacity-80 grayscale-[0.2]`.
-- `GoalsView.tsx`:
-  - `acceptSuggested(id)` już używa `updateGoal`; zostawić, ale usunąć podwójne toasty lub unifikować.
-  - `acceptAllSuggested()` zmienić z bezpośredniego Supabase update na serię lokalnych `updateGoal(id, { accepted_at: now })` albo po batch update ręcznie wywołać lokalny refetch i natychmiastowy optimistic filter.
-  - Najprościej: po batch update ustawić lokalnie przez nowy helper w `useStudentProgress` albo wykonywać `Promise.all(suggestedGoals.map(g => updateGoal(g.id, { accepted_at: now })))`.
-- `useStudentProgress.tsx`: upewnić się, że `updateGoal` typowo obsługuje `accepted_at` i aktualizuje lokalny `goals` natychmiast.
-- `types/studentProgress.ts`: dodać brakujące `metadata?: any` jeśli potrzebne do rozpoznania source/test_id.
+**Pliki:** `src/components/dslm/MacroTimeline.tsx`, `src/components/dslm/GenerateStepsDialog.tsx`.
 
-### Verification checklist
-- DONE: Suggested goals przed Accept są lekko szare.
-- DONE: Są nadal widoczne w Supporting/Additional Goals.
-- DONE: Są nadal uwzględniane w roadmap/next steps.
-- DONE: Accept usuwa pozycję z banera natychmiast.
-- DONE: Dismiss nadal usuwa pozycję natychmiast.
-- DONE: Po refresh status jest spójny.
+### 4B. „Add more 1-Minute Prep suggestions" proponuje fazę 2 mimo niedopełnionej fazy 1
+
+**Dependency scan:** `PathwayView.recommendedTargetPhaseId` (lines 263-271). Pętla iteruje `[...inProgress, ...planned]` i bierze pierwszy z `have < need`.
+
+**Root cause:** `recommendedStepsForPhase` zwraca max 6 (clamp). Faza 1 ma 6/6 → warunek `have < need` falszywy → leci do fazy 2. Tymczasem rzeczywista długość fazy = 10 weeks, czyli docelowo powinno być 10 stepów, nie 6 (limit per-batch).
+
+**Selected:** Rozdzielić dwa pojęcia:
+- `recommendedStepsPerBatch(phase)` — clamp 1–6 (jak dziś, używane do default count w inputie).
+- nowy `targetStepsForPhase(phase)` — pełna liczba = `weeks` (bez clampu, min 1). Używane przez `recommendedTargetPhaseId` do porównania `have < target`.
+
+Zmiana:
+- `PathwayView.phaseOptions`: `need: targetStepsForPhase(p)` (pełny target), dodatkowe pole `perBatch: recommendedStepsPerBatch(p)` w `PhaseOption`.
+- `GenerateStepsDialog`: initial `count = min(6, max(1, target - have))` (już prawidłowe), helperText updated do dwóch wariantów (P4A).
+- `MacroTimeline` per-phase quick-add: input default = `min(6, max(1, target - have))` zamiast `recommendedStepsForPhase`. Helper text P4A.
+
+**Impact:** Faza nadal generuje max 6 na batch, ale rekomendacja kolejnej fazy nie przeskakuje przedwcześnie. Brak regresji w istniejących fazach z weeks ≤6 (target === recommendedStepsPerBatch).
+
+**Pliki:**
+- `src/components/dslm/MacroTimeline.tsx` (export `targetStepsForPhase`, `recommendedStepsPerBatch`; refaktor `recommendedStepsForPhase` jako alias `recommendedStepsPerBatch`)
+- `src/components/dslm/PathwayView.tsx` (użyć `targetStepsForPhase` w `phaseOptions.need`)
+- `src/components/dslm/GenerateStepsDialog.tsx` (helperText z nowymi gałęziami; clamp 6 nadal)
+- `src/components/dslm/NextStepsSection.tsx` (typ `PhaseOption` jeśli importowany — dodać `perBatch?: number` jako optional, brak breakage)
+
+**Verification:**
+- [ ] Faza 1 (10w, have=6) → "Add more" otwiera dialog z domyślną fazą = "Phase 1" (recommended), count = 4 (10-6 capped to 6 → 4); helper "Phase has 6/10 steps. Recommended add: 4."
+- [ ] Faza 1 (10w, have=10) → recommended phase = Phase 2 (planned).
+- [ ] Per-phase quick-add input dla fazy 10w: default = `min(6, 10-have)`; tekst "Suggested: 6 per batch (phase is 10 weeks, max 6 per generation — repeat to fill)." gdy weeks>6.
 
 ---
 
 ## RAG injection update
-Po implementacji zaktualizuję:
-- `docs/llm-context.md`
-- `public/llms.txt`
 
-Dopiszę dense factual Markdown:
-- PROBLEM: autosubmit DSLM suggestion handshake; roadmap preserved phases and suggestions; compact translated Welcome Test with auto-advance; AI Analysis fallback for Welcome Test; suggested goals visual/accept state.
-- EDOOQOO SOLUTION: konkretne zachowanie produkcyjne.
-- TECHNICAL MECHANICS: komponenty, hooki, edge functions, tabele.
-- RAG KEYWORDS: min. 15 semantycznych fraz dla każdej grupy.
+Po implementacji zaktualizować:
+- `docs/llm-context.md`: dodać sekcję "v6.9.48 — Auto-generate handshake bootstrap; Welcome Test compact width; level-change suggestion banner; force-reprocess auto-apply; dynamic student name in test headers; per-phase target vs per-batch steps."
+- `public/llms.txt`: skondensowany odpowiednik (PROBLEM / EDOOQOO SOLUTION / TECHNICAL MECHANICS / RAG KEYWORDS).
+- `mem/index.md` + nowy `mem/features/onboarding/v6948-auto-bootstrap-wt-compact-level-suggestion-phase-target.md`.
 
-## Final change report po wdrożeniu
-Raport końcowy będzie zawierał:
-- Summary implemented
-- Files modified
-- Documentation updated: YES
-- Out of scope issues flagged
-- Verification result: PASS/FAIL
+---
 
-## Out of scope issues noted
-- Nie zmieniam promptu ani logiki Worksheet Generation Engine.
-- Nie przebudowuję całego Welcome Test design systemu poza kompaktowaniem wskazanego ekranu.
-- Nie zmieniam scoringu deterministic skill questions poza fallbackiem AI summary.
+## Final change report (po implementacji)
+
+Files modified (przewidziane):
+- src/pages/Index.tsx
+- src/components/WorksheetForm/index.tsx
+- src/lib/worksheet/autoGenerateBootstrap.ts (new)
+- src/pages/WelcomeTestPage.tsx
+- src/hooks/useWelcomeTest.tsx
+- src/components/student-tests/TestDetailsView.tsx
+- src/components/student-tests/WelcomeTestResults.tsx
+- src/components/student-tests/StudentTestsTab.tsx
+- src/components/dslm/MacroTimeline.tsx
+- src/components/dslm/PathwayView.tsx
+- src/components/dslm/GenerateStepsDialog.tsx
+- src/components/dslm/NextStepsSection.tsx (typ)
+- supabase/functions/process-welcome-test/index.ts (+ `force`, + `level_change_suggestion`)
+- supabase/migrations/<ts>_get_welcome_test_share_meta.sql (new RPC, security definer + grants)
+- docs/llm-context.md, public/llms.txt, mem/index.md, mem/features/onboarding/v6948-*.md
+
+Zero zmian w Worksheet Generation Engine. Zero zmian w schemacie student_tests (tylko nowy RPC, nowa kolumna w JSON `raw_answers`).
+
+Verification: po implementacji uruchomię ręcznie scenariusze 1–4 + walidację per-file diff.

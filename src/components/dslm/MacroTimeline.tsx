@@ -31,16 +31,29 @@ import { useWelcomeTestActions } from '@/hooks/useWelcomeTestActions';
 import { GenerateRoadmapDialog } from './GenerateRoadmapDialog';
 
 /**
- * v6.9.12 — Recommend 1 step per week of the phase length, clamped 1–6.
+ * v6.9.12 — Per-batch suggestion (clamped 1–6, hard limit per generation).
  * Falls back to 3 (rolling 3-lesson plan) when weeks are not set.
  */
-export function recommendedStepsForPhase(phase: CurriculumPhase): number {
+export function recommendedStepsPerBatch(phase: CurriculumPhase): number {
   const start = phase.estimated_weeks_start;
   const end = phase.estimated_weeks_end;
   if (!start || !end || end < start) return 3;
   const weeks = end - start + 1;
   return Math.max(1, Math.min(6, weeks));
 }
+/**
+ * v6.9.48 — Full target number of steps for the phase = 1 step per week,
+ * NOT clamped to 6. Used by recommendedTargetPhaseId so the "next" phase is
+ * not surfaced before the current phase is actually full.
+ */
+export function targetStepsForPhase(phase: CurriculumPhase): number {
+  const start = phase.estimated_weeks_start;
+  const end = phase.estimated_weeks_end;
+  if (!start || !end || end < start) return 3;
+  return Math.max(1, end - start + 1);
+}
+/** Backwards-compatible alias (use `recommendedStepsPerBatch` in new code). */
+export const recommendedStepsForPhase = recommendedStepsPerBatch;
 export function phaseWeeks(phase: CurriculumPhase): number | null {
   const s = phase.estimated_weeks_start;
   const e = phase.estimated_weeks_end;
@@ -232,7 +245,13 @@ export const MacroTimeline: React.FC<MacroTimelineProps> = ({
   const openPhaseCommentDialog = (phaseId: string) => {
     setPhaseComment('');
     const phase = phases.find(p => p.id === phaseId);
-    setPhaseCommentCount(phase ? recommendedStepsForPhase(phase) : 3);
+    if (phase) {
+      const have = (suggestions || []).filter((s: any) => s?.phase_id === phaseId).length;
+      const gap = Math.max(1, targetStepsForPhase(phase) - have);
+      setPhaseCommentCount(Math.min(6, gap));
+    } else {
+      setPhaseCommentCount(3);
+    }
     setPhaseCommentDialog({ open: true, phaseId });
   };
   const submitPhaseComment = async () => {
@@ -245,10 +264,14 @@ export const MacroTimeline: React.FC<MacroTimelineProps> = ({
   };
 
 
-  const getPhaseQuickCount = (id: string) => {
+  const getPhaseQuickCount = (id: string, haveCount = 0) => {
     if (phaseQuickCount[id] !== undefined) return phaseQuickCount[id];
     const phase = phases.find(p => p.id === id);
-    return phase ? recommendedStepsForPhase(phase) : 3;
+    if (!phase) return 3;
+    // v6.9.48 — default = gap to target (1 step/week), clamped 1..6.
+    const target = targetStepsForPhase(phase);
+    const gap = Math.max(1, target - haveCount);
+    return Math.min(6, gap);
   };
   const setPhaseQuickCountFor = (id: string, n: number) =>
     setPhaseQuickCount(p => ({ ...p, [id]: Math.min(6, Math.max(1, n)) }));
@@ -439,29 +462,41 @@ export const MacroTimeline: React.FC<MacroTimelineProps> = ({
                             <DropdownMenuContent align="start" className="w-56 p-2 space-y-2">
                               <DropdownMenuLabel className="text-xs">How many next steps to add?</DropdownMenuLabel>
                               <Input
-                                type="number" min="1" max="6" value={getPhaseQuickCount(phase.id)}
+                                type="number" min="1" max="6" value={getPhaseQuickCount(phase.id, phaseSuggestions.length)}
                                 onChange={(e) => setPhaseQuickCountFor(phase.id, parseInt(e.target.value) || 1)}
                                 className="h-8"
                               />
                               {(() => {
                                 const w = phaseWeeks(phase);
-                                const rec = recommendedStepsForPhase(phase);
-                                return w ? (
+                                const target = targetStepsForPhase(phase);
+                                const have = phaseSuggestions.length;
+                                const gap = Math.max(0, target - have);
+                                if (!w) {
+                                  return (
+                                    <p className="text-[10px] text-muted-foreground leading-snug">
+                                      Suggested: 3 (set phase weeks for a smarter default).
+                                    </p>
+                                  );
+                                }
+                                if (w <= 6) {
+                                  return (
+                                    <p className="text-[10px] text-muted-foreground leading-snug">
+                                      Suggested: {Math.min(6, Math.max(1, gap || w))} (one per week of {w}-week phase, {have}/{target} added).
+                                    </p>
+                                  );
+                                }
+                                return (
                                   <p className="text-[10px] text-muted-foreground leading-snug">
-                                    Suggested: {rec} (one per week of {w}-week phase).
-                                  </p>
-                                ) : (
-                                  <p className="text-[10px] text-muted-foreground leading-snug">
-                                    Suggested: 3 (set phase weeks for a smarter default).
+                                    Suggested: {Math.min(6, Math.max(1, gap || 6))} per batch ({have}/{target} added — max 6 per generation, repeat to fill).
                                   </p>
                                 );
                               })()}
                               <Button
                                 size="sm" className="w-full"
-                                onClick={() => onGenerateForPhase(phase.id, getPhaseQuickCount(phase.id), '')}
+                                onClick={() => onGenerateForPhase(phase.id, getPhaseQuickCount(phase.id, phaseSuggestions.length), '')}
                                 disabled={generatingSteps}
                               >
-                                Add {getPhaseQuickCount(phase.id)} step{getPhaseQuickCount(phase.id) > 1 ? 's' : ''}
+                                Add {getPhaseQuickCount(phase.id, phaseSuggestions.length)} step{getPhaseQuickCount(phase.id, phaseSuggestions.length) > 1 ? 's' : ''}
                               </Button>
                             </DropdownMenuContent>
                           </DropdownMenu>

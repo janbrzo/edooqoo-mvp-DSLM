@@ -559,8 +559,8 @@ export default function WelcomeTestPage() {
   const isSkillQuestion = !!currentQuestion.correct_answer;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 px-2 sm:px-3 py-2">
-      <div className="max-w-lg mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 px-2 sm:px-3 py-1.5">
+      <div className="max-w-2xl mx-auto">
         {/* Teacher Preview Mode — sticky banner. Shown when ?preview=1 or after
             the teacher chose "Preview Test (Read-only)" from the access screen. */}
         {teacherPreviewMode && (
@@ -579,7 +579,7 @@ export default function WelcomeTestPage() {
         )}
 
         {/* Header - compact, mobile-friendly */}
-        <div className="mb-3 sm:mb-4">
+        <div className="mb-2 sm:mb-3">
           <div className="flex items-center justify-between mb-1 gap-2">
             <div className="flex items-center gap-1.5 min-w-0">
               <Sparkles className="h-4 w-4 text-primary flex-shrink-0" />
@@ -676,7 +676,7 @@ export default function WelcomeTestPage() {
         </div>
 
         {/* Section tabs - compact, touch-friendly */}
-        <div className="flex gap-1 mb-3 sm:mb-4 overflow-x-auto pb-1 -mx-1 px-1">
+        <div className="flex gap-1 mb-2 sm:mb-3 overflow-x-auto pb-1 -mx-1 px-1">
           {sections.map((section, idx) => {
             const sectionAnswered = section.questions.filter((q) => answers[q.id] !== undefined).length;
             const sectionTotal = section.questions.length;
@@ -706,8 +706,8 @@ export default function WelcomeTestPage() {
           })}
         </div>
 
-        {/* Section header - compact */}
-        <div className="mb-3">
+        {/* Section header - compact (v6.9.48 −20% vertical) */}
+        <div className="mb-2">
           <div className="flex items-center gap-1.5 mb-0.5">
             {SECTION_ICONS[currentSection.icon]}
             <h2 className="text-base font-semibold">{currentSection.title}</h2>
@@ -715,9 +715,9 @@ export default function WelcomeTestPage() {
           <p className="text-xs text-muted-foreground">{currentSection.subtitle}</p>
         </div>
 
-        {/* Question card - compact */}
-        <Card className="mb-4">
-          <CardContent className="pt-4 pb-4 space-y-4">
+        {/* Question card - compact (v6.9.48 −20% vertical) */}
+        <Card className="mb-3">
+          <CardContent className="pt-3 pb-3 space-y-3">
             <div>
               <p className="text-sm font-medium whitespace-pre-line leading-relaxed">{currentQuestion.question_text}</p>
               {currentQuestion.description && (
@@ -972,7 +972,7 @@ function QuestionInputInner({
               {question.options.map((option, idx) => (
                 <div
                   key={idx}
-                  className="flex items-center space-x-2.5 p-2.5 rounded-lg border hover:bg-muted/50 transition-colors"
+                  className="flex items-center space-x-2.5 px-2.5 py-2 rounded-lg border hover:bg-muted/50 transition-colors"
                 >
                   <RadioGroupItem value={option} id={`opt-${question.id}-${idx}`} />
                   <Label
@@ -996,7 +996,7 @@ function QuestionInputInner({
           {question.options?.map((option, idx) => (
             <div
               key={idx}
-              className="flex items-center space-x-2.5 p-2.5 rounded-lg border hover:bg-muted/50 transition-colors"
+              className="flex items-center space-x-2.5 px-2.5 py-2 rounded-lg border hover:bg-muted/50 transition-colors"
             >
               <RadioGroupItem value={option} id={`opt-${question.id}-${idx}`} />
               <Label htmlFor={`opt-${question.id}-${idx}`} className="flex-1 cursor-pointer text-sm leading-relaxed">
@@ -1021,7 +1021,7 @@ function QuestionInputInner({
               return (
                 <div
                   key={idx}
-                  className="flex items-center space-x-2.5 p-2.5 rounded-lg border hover:bg-muted/50 transition-colors"
+                  className="flex items-center space-x-2.5 px-2.5 py-2 rounded-lg border hover:bg-muted/50 transition-colors"
                 >
                   <Checkbox
                     id={`pref-${question.id}-${idx}`}
@@ -1057,7 +1057,7 @@ function QuestionInputInner({
           {question.options?.map((option, idx) => (
             <div
               key={idx}
-              className="flex items-center space-x-2.5 p-2.5 rounded-lg border hover:bg-muted/50 transition-colors"
+              className="flex items-center space-x-2.5 px-2.5 py-2 rounded-lg border hover:bg-muted/50 transition-colors"
             >
               <RadioGroupItem value={option} id={`pref-${question.id}-${idx}`} />
               <Label htmlFor={`pref-${question.id}-${idx}`} className="flex-1 cursor-pointer text-sm">

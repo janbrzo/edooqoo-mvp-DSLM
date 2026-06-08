@@ -237,7 +237,50 @@ serve(async (req) => {
   }
 
   try {
-    const { test_id, student_id, teacher_id, answers, detected_traits, answered_count } = await req.json();
+    const body = await req.json();
+    const { test_id, student_id: bodyStudentId, teacher_id: bodyTeacherId, detected_traits, answered_count, force } = body || {};
+    let answers = (body && body.answers) || null;
+    let student_id = bodyStudentId;
+    let teacher_id = bodyTeacherId;
+
+    // v6.9.48 — "force" re-run for retroactive auto-apply repair. Teacher-side
+    // "Apply to Progress" can call us with just { test_id, force: true } so we
+    // resolve student/teacher from the test row itself and bypass the
+    // already-reviewed/dedupe guards.
+    if (force && test_id && (!student_id || !teacher_id)) {
+      const supabaseTmp = createClient(
+        Deno.env.get('SUPABASE_URL')!,
+        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+      );
+      const { data: testRow } = await supabaseTmp
+        .from('student_tests')
+        .select('student_id, teacher_id')
+        .eq('id', test_id)
+        .maybeSingle();
+      if (testRow) {
+        student_id = student_id || (testRow as any).student_id;
+        teacher_id = teacher_id || (testRow as any).teacher_id;
+      }
+    }
+
+    // v6.9.48 — when caller did not provide answers (force re-run from teacher
+    // UI), reconstruct them from the persisted student_test_questions.
+    if (force && (!answers || Object.keys(answers).length === 0) && test_id) {
+      const supabaseTmp = createClient(
+        Deno.env.get('SUPABASE_URL')!,
+        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+      );
+      const { data: persistedQs } = await supabaseTmp
+        .from('student_test_questions')
+        .select('skill_tags, student_answer, question_index')
+        .eq('test_id', test_id);
+      const map: Record<string, unknown> = {};
+      for (const q of (persistedQs || []) as any[]) {
+        const qid = `wt_q${(q.question_index ?? 0) + 1}`;
+        map[qid] = q.student_answer;
+      }
+      if (Object.keys(map).length > 0) answers = map;
+    }
 
     if (!test_id || !student_id || !teacher_id) {
       return new Response(JSON.stringify({ error: 'Missing required fields' }), {
@@ -560,6 +603,24 @@ serve(async (req) => {
       .eq('teacher_id', teacher_id)
       .maybeSingle();
 
+    // v6.9.48 — fetch current student level early so we can attach a
+    // level_change_suggestion to raw_answers when it differs from estimate.
+    const { data: studentLevelRow } = await supabase
+      .from('students')
+      .select('english_level')
+      .eq('id', student_id)
+      .maybeSingle();
+    const currentStudentLevel = ((studentLevelRow as any)?.english_level || '').toString().trim();
+    const hasMeaningfulCurrent = currentStudentLevel && currentStudentLevel.toLowerCase() !== 'unknown';
+    const levelChangeSuggestion = hasMeaningfulCurrent && currentStudentLevel !== estimatedLevel
+      ? { current: currentStudentLevel, estimated: estimatedLevel, created_at: new Date().toISOString() }
+      : null;
+
+    const enrichedAnswers: Record<string, unknown> = { ...(answers || {}) };
+    if (levelChangeSuggestion) {
+      enrichedAnswers.level_change_suggestion = levelChangeSuggestion;
+    }
+
     // Upsert learning profile
     const profileData = {
       student_id,
@@ -590,7 +651,7 @@ serve(async (req) => {
       confidence_reading: matrix['Reading news articles'] || null,
       confidence_presenting: matrix['Giving presentations'] || null,
       confidence_small_talk: matrix['Small talk at parties'] || null,
-      raw_answers: answers || {},
+      raw_answers: enrichedAnswers,
       updated_at: new Date().toISOString(),
     };
 
@@ -776,6 +837,8 @@ serve(async (req) => {
         .eq('source', 'welcome_test_auto')
         .contains('metadata', { test_id });
 
+      // v6.9.48 — `force` lets the teacher repair stuck tests; suggestions are
+      // not regenerated to avoid duplicates, only auto-apply + status promotion.
       if ((existingForThisTest ?? 0) === 0) {
         // Build 2-3 suggested goals from the just-computed profile signals.
         const suggestions: Array<{ goal_type: string; title: string; description: string; meta: Record<string, unknown> }> = [];

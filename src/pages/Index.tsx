@@ -31,6 +31,7 @@ import StartOneMinutePrepDialog from "@/components/landing/StartOneMinutePrepDia
 import { markWorksheetForClaim } from "@/hooks/useWorksheetClaim";
 import { devLog, devWarn } from '@/utils/logger';
 import { AddStudentDialog } from "@/components/dashboard/AddStudentDialog";
+import { buildAutoGeneratePayload, clearAutoGenerateFlags, readAutoGenerateIntent } from "@/lib/worksheet/autoGenerateBootstrap";
 
 /**
  * Main Index page component that handles worksheet generation and display
@@ -238,6 +239,47 @@ const Index = () => {
     }
   }, [bothWorksheetsReady, isRegisteredUser, worksheetState.worksheetId]);
 
+  // v6.9.48 — Deterministic auto-generate bootstrap. When DSLM "Generate
+  // worksheet ↗" navigates to '/' with sessionStorage flags, Index waits for
+  // tokens to resolve and fires handleGenerateWorksheet itself. This avoids
+  // the WorksheetForm mount race that previously dropped the intent.
+  useEffect(() => {
+    if (!isRegisteredUser) return;
+    if (authLoading) return;
+    const intent = readAutoGenerateIntent();
+    if (!intent) return;
+    if (bothWorksheetsReady) return; // already showing a worksheet, don't re-fire
+
+    let fired = false;
+    let attempts = 0;
+    const interval = window.setInterval(() => {
+      if (fired) { window.clearInterval(interval); return; }
+      attempts += 1;
+      if (attempts > 60) { // ~12s max wait for tokensLoading to resolve
+        devWarn('[Index v6.9.48] auto-bootstrap timed out waiting for tokens');
+        window.clearInterval(interval);
+        return;
+      }
+      if (tokensLoading) return;
+      const payload = buildAutoGeneratePayload();
+      if (!payload) {
+        devWarn('[Index v6.9.48] auto-bootstrap: no payload (missing topic?)');
+        clearAutoGenerateFlags();
+        window.clearInterval(interval);
+        return;
+      }
+      fired = true;
+      devLog('[Index v6.9.48] auto-bootstrap fired', { requestId: payload.__autoGenerateRequestId, studentId: payload.studentId });
+      // Notify any mounted WorksheetForm so its RAF gate stands down and clears flags.
+      window.dispatchEvent(new CustomEvent('worksheet:autoGenerateStarted', { detail: { requestId: payload.__autoGenerateRequestId } }));
+      clearAutoGenerateFlags();
+      window.clearInterval(interval);
+      handleGenerateWorksheet(payload);
+    }, 200);
+    return () => window.clearInterval(interval);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isRegisteredUser, authLoading, tokensLoading]);
+
   if (authLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
@@ -247,6 +289,14 @@ const Index = () => {
   }
 
   const handleGenerateWorksheet = (data: any) => {
+    // v6.9.48 — acknowledge auto-generate intent so the form clears its
+    // sessionStorage flags exactly once, whichever path fired (Index bootstrap
+    // or WorksheetForm RAF gate).
+    if (data?.__autoGenerateRequestId) {
+      try {
+        window.dispatchEvent(new CustomEvent('worksheet:autoGenerateStarted', { detail: { requestId: data.__autoGenerateRequestId } }));
+      } catch { /* ignore */ }
+    }
     devLog('🔍 POPUP DECISION DEBUG:', {
       userId: user?.id,
       isAnonymous,

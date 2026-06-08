@@ -63,6 +63,15 @@ export function TestDetailsView({ testId, teacherId, studentId, onBack }: TestDe
   const [sharingLoading, setSharingLoading] = useState(false);
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [studentEmail, setStudentEmail] = useState<string>('');
+  // v6.9.48 — read live student name & english_level for dynamic test title
+  // (Welcome Test heading) and the suggested-level-change banner.
+  const [studentName, setStudentName] = useState<string>('');
+  const [studentLevel, setStudentLevel] = useState<string>('');
+  const [estimatedLevel, setEstimatedLevel] = useState<string | null>(null);
+  const [levelDismissed, setLevelDismissed] = useState<boolean>(() => {
+    try { return sessionStorage.getItem(`wt-level-change-dismissed:${testId}`) === '1'; } catch { return false; }
+  });
+  const [levelApplying, setLevelApplying] = useState(false);
   const [teacherName, setTeacherName] = useState<string>('');
   const [retaking, setRetaking] = useState(false);
   // v6.9.40 P3 — Track whether the teacher just clicked "Apply to Progress"
@@ -79,17 +88,28 @@ export function TestDetailsView({ testId, teacherId, studentId, onBack }: TestDe
     const data = await fetchTestWithQuestions(testId);
     setTest(data);
     setLoading(false);
+    // v6.9.48 — fetch estimated_level for the level-change banner (silently).
+    try {
+      const { data: prof } = await supabase
+        .from('student_learning_profiles')
+        .select('estimated_level')
+        .eq('welcome_test_id', testId)
+        .maybeSingle();
+      if (prof?.estimated_level) setEstimatedLevel(String(prof.estimated_level));
+    } catch { /* silent */ }
   };
 
   const loadStudentAndTeacherInfo = async () => {
     try {
       const { data: student } = await supabase
         .from('students')
-        .select('student_email, name')
+        .select('student_email, name, english_level')
         .eq('id', studentId)
         .single();
       
       if (student?.student_email) setStudentEmail(student.student_email);
+      if ((student as any)?.name) setStudentName(String((student as any).name));
+      if ((student as any)?.english_level) setStudentLevel(String((student as any).english_level));
       
       const { data: teacher } = await supabase
         .from('profiles')
@@ -122,6 +142,27 @@ export function TestDetailsView({ testId, teacherId, studentId, onBack }: TestDe
   };
 
   const handleApplyResults = async () => {
+    // v6.9.48 — Try re-running process-welcome-test with force=true first.
+    // This repairs Welcome Tests that completed before the v6.9.40 auto-apply
+    // fix (status stuck at 'completed'). Falls back to client-side rating
+    // application for non-welcome tests or when the function is unreachable.
+    const isWelcome = test?.test_type === 'welcome';
+    if (isWelcome) {
+      try {
+        const { error } = await supabase.functions.invoke('process-welcome-test', {
+          body: { test_id: testId, force: true },
+        });
+        if (!error) {
+          setManualApplyCompleted(true);
+          toast.success('Re-ran analysis and applied results.');
+          loadTest();
+          return;
+        }
+        console.warn('[TestDetailsView] force reprocess failed, falling back', error);
+      } catch (err) {
+        console.warn('[TestDetailsView] process-welcome-test invoke threw, falling back', err);
+      }
+    }
     if (!test?.skill_results) return;
     const success = await applyResultsToProgress(testId, test.skill_results);
     if (success) {
@@ -299,7 +340,15 @@ export function TestDetailsView({ testId, teacherId, studentId, onBack }: TestDe
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="text-xl">{test.title}</CardTitle>
+              <CardTitle className="text-xl">
+                {/* v6.9.48 — render Welcome Test heading from live student.name
+                    so renaming a student updates the test heading immediately. */}
+                {(() => {
+                  if (test.test_type !== 'welcome' || !studentName) return test.title;
+                  const attempt = ((test as any).attempt_number ?? 1) as number;
+                  return `Welcome Test - ${studentName}${attempt > 1 ? ` (Retake ${attempt - 1})` : ''}`;
+                })()}
+              </CardTitle>
               <p className="text-muted-foreground">{test.description}</p>
               <TestDates
                 createdAt={(test as any).created_at}
@@ -362,6 +411,60 @@ export function TestDetailsView({ testId, teacherId, studentId, onBack }: TestDe
       {/* Welcome Test Learning Profile - FIX 2.2: always show, even before completion */}
       {isWelcomeTest && (
         <WelcomeTestResults testId={testId} studentId={studentId} teacherId={teacherId} questions={questions} />
+      )}
+
+      {/* v6.9.48 — Suggested level change banner */}
+      {isWelcomeTest && estimatedLevel && studentLevel && estimatedLevel !== studentLevel && !levelDismissed && (
+        <Card className="border-primary/40 bg-primary/5">
+          <CardContent className="py-4">
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <div className="flex items-start gap-3">
+                <TrendingUp className="h-5 w-5 text-primary mt-0.5" />
+                <div>
+                  <p className="font-medium">Suggested level change: {studentLevel} → {estimatedLevel}</p>
+                  <p className="text-sm text-muted-foreground">Welcome Test results indicate a different CEFR level than the one set on the student profile.</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setLevelDismissed(true);
+                    try { sessionStorage.setItem(`wt-level-change-dismissed:${testId}`, '1'); } catch { /* ignore */ }
+                  }}
+                  disabled={levelApplying}
+                >
+                  Keep {studentLevel}
+                </Button>
+                <Button
+                  onClick={async () => {
+                    setLevelApplying(true);
+                    try {
+                      const { error } = await supabase
+                        .from('students')
+                        .update({ english_level: estimatedLevel })
+                        .eq('id', studentId);
+                      if (error) throw error;
+                      setStudentLevel(estimatedLevel);
+                      setLevelDismissed(true);
+                      try { sessionStorage.setItem(`wt-level-change-dismissed:${testId}`, '1'); } catch { /* ignore */ }
+                      toast.success(`Student level updated to ${estimatedLevel}.`);
+                    } catch (err) {
+                      console.error('[TestDetailsView] level update failed', err);
+                      toast.error('Failed to update student level.');
+                    } finally {
+                      setLevelApplying(false);
+                    }
+                  }}
+                  disabled={levelApplying}
+                >
+                  {levelApplying ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
+                  Apply {estimatedLevel}
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {/* v6.9.29 — Results are auto-applied by process-welcome-test (status=reviewed).

@@ -139,6 +139,20 @@ export default function WorksheetForm({
   const formRef = useRef<HTMLFormElement>(null);
   // v6.9.36 — auto-submit readiness refs (deterministic gate, not timeout).
   const autoSubmitFiredRef = useRef(false);
+  // v6.9.48 — Index.tsx now owns the auto-generate dispatch. When it fires,
+  // it emits `worksheet:autoGenerateStarted` so this form stands down (no
+  // double submit) and clears the sessionStorage flags exactly once.
+  useEffect(() => {
+    const onStarted = () => {
+      autoSubmitFiredRef.current = true;
+      try {
+        sessionStorage.removeItem('autoGenerateWorksheet');
+        sessionStorage.removeItem('autoGenerateWorksheetRequest');
+      } catch { /* ignore */ }
+    };
+    window.addEventListener('worksheet:autoGenerateStarted', onStarted);
+    return () => window.removeEventListener('worksheet:autoGenerateStarted', onStarted);
+  }, []);
   const {
     toast
   } = useToast();
@@ -425,8 +439,9 @@ export default function WorksheetForm({
         } catch (e) {
           devWarn('[WorksheetForm] submitForm threw', e);
         }
-        sessionStorage.removeItem('autoGenerateWorksheet');
-        sessionStorage.removeItem('autoGenerateWorksheetRequest');
+        // v6.9.48 — flag cleanup deferred to `worksheet:autoGenerateStarted`
+        // listener so an aborted handleGenerateWorksheet (paywall, token retry)
+        // does not lose the intent.
         return;
       }
       frames += 1;
@@ -464,8 +479,7 @@ export default function WorksheetForm({
         devWarn('[WorksheetForm v6.9.44] watchdog force-submit (direct submitForm, exercises optional)');
         // v6.9.42 — direct submit, no native validation.
         submitForm(topicNow!.trim());
-        sessionStorage.removeItem('autoGenerateWorksheet');
-        sessionStorage.removeItem('autoGenerateWorksheetRequest');
+        // v6.9.48 — see RAF gate note above.
       } else {
         devWarn('[WorksheetForm v6.9.38] watchdog dropping flag (form not ready)');
         sessionStorage.removeItem('autoGenerateWorksheet');
