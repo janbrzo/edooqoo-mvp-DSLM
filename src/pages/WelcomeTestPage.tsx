@@ -972,7 +972,7 @@ function QuestionInputInner({
               {question.options.map((option, idx) => (
                 <div
                   key={idx}
-                  className="flex items-center space-x-2.5 p-2.5 rounded-lg border hover:bg-muted/50 transition-colors"
+                  className="flex items-center space-x-2.5 px-2.5 py-2 rounded-lg border hover:bg-muted/50 transition-colors"
                 >
                   <RadioGroupItem value={option} id={`opt-${question.id}-${idx}`} />
                   <Label
@@ -996,7 +996,7 @@ function QuestionInputInner({
           {question.options?.map((option, idx) => (
             <div
               key={idx}
-              className="flex items-center space-x-2.5 p-2.5 rounded-lg border hover:bg-muted/50 transition-colors"
+              className="flex items-center space-x-2.5 px-2.5 py-2 rounded-lg border hover:bg-muted/50 transition-colors"
             >
               <RadioGroupItem value={option} id={`opt-${question.id}-${idx}`} />
               <Label htmlFor={`opt-${question.id}-${idx}`} className="flex-1 cursor-pointer text-sm leading-relaxed">
@@ -1021,7 +1021,7 @@ function QuestionInputInner({
               return (
                 <div
                   key={idx}
-                  className="flex items-center space-x-2.5 p-2.5 rounded-lg border hover:bg-muted/50 transition-colors"
+                  className="flex items-center space-x-2.5 px-2.5 py-2 rounded-lg border hover:bg-muted/50 transition-colors"
                 >
                   <Checkbox
                     id={`pref-${question.id}-${idx}`}
@@ -1057,7 +1057,7 @@ function QuestionInputInner({
           {question.options?.map((option, idx) => (
             <div
               key={idx}
-              className="flex items-center space-x-2.5 p-2.5 rounded-lg border hover:bg-muted/50 transition-colors"
+              className="flex items-center space-x-2.5 px-2.5 py-2 rounded-lg border hover:bg-muted/50 transition-colors"
             >
               <RadioGroupItem value={option} id={`pref-${question.id}-${idx}`} />
               <Label htmlFor={`pref-${question.id}-${idx}`} className="flex-1 cursor-pointer text-sm">
