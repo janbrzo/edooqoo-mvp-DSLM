@@ -837,6 +837,8 @@ serve(async (req) => {
         .eq('source', 'welcome_test_auto')
         .contains('metadata', { test_id });
 
+      // v6.9.48 — `force` lets the teacher repair stuck tests; suggestions are
+      // not regenerated to avoid duplicates, only auto-apply + status promotion.
       if ((existingForThisTest ?? 0) === 0) {
         // Build 2-3 suggested goals from the just-computed profile signals.
         const suggestions: Array<{ goal_type: string; title: string; description: string; meta: Record<string, unknown> }> = [];
