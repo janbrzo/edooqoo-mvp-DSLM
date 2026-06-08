@@ -404,31 +404,37 @@ export default function WorksheetForm({
     }
   }, []);
 
-  // v6.9.38 — simplified readiness gate. Lazy init guarantees topic +
-  // studentId snapshot on first render, so the gate only waits for the
-  // exercises array to be normalized and the form ref to mount.
+  // v6.9.47 — RAF-poll readiness gate. Eliminates the race where the prior
+  // useEffect ran once with formRef.current = null and never re-fired.
+  // Polls every animation frame (max ~3s) until topic + formRef are ready,
+  // then submits exactly once. Exercises remain optional (auto-completed).
   useEffect(() => {
     if (autoSubmitFiredRef.current) return;
     if (!initialAutoIntentRef.current) return;
-    if (!lessonTopic || !lessonTopic.trim()) { devLog('[autoSubmit] waiting: lessonTopic empty'); return; }
-    if (!formRef.current) { devLog('[autoSubmit] waiting: no formRef'); return; }
-    // v6.9.44 — exercises no longer block: submitForm() auto-completes to 6/8.
-    autoSubmitFiredRef.current = true;
-    window.setTimeout(() => {
-      requestAnimationFrame(() => {
+    let frames = 0;
+    let rafId = 0;
+    const attempt = () => {
+      if (autoSubmitFiredRef.current) return;
+      const topicNow = lessonTopic?.trim() || readPrefillTopic().trim();
+      if (topicNow && formRef.current) {
+        autoSubmitFiredRef.current = true;
+        if (!lessonTopic?.trim()) setLessonTopic(topicNow);
         try {
-          devLog('🚀 [WorksheetForm v6.9.44] Auto-submit firing (gate, exercises optional)');
-          // v6.9.42 — call submitForm() directly to bypass HTML5 form validation
-          // that silently blocked requestSubmit() from 1-Minute Prep.
-          submitForm(lessonTopic.trim());
+          devLog('🚀 [WorksheetForm v6.9.47] Auto-submit firing (RAF gate)');
+          submitForm(topicNow);
         } catch (e) {
-          devWarn('[WorksheetForm] requestSubmit threw', e);
+          devWarn('[WorksheetForm] submitForm threw', e);
         }
-        // v6.9.38 — clear flags AFTER dispatching submit, not before.
         sessionStorage.removeItem('autoGenerateWorksheet');
         sessionStorage.removeItem('autoGenerateWorksheetRequest');
-      });
-    }, 0);
+        return;
+      }
+      frames += 1;
+      if (frames > 180) { devWarn('[WorksheetForm v6.9.47] RAF gate timeout'); return; }
+      rafId = requestAnimationFrame(attempt);
+    };
+    rafId = requestAnimationFrame(attempt);
+    return () => cancelAnimationFrame(rafId);
   }, [lessonTopic, selectedExercises]);
 
   // v6.9.38 — last-resort watchdog (1500 ms). If lazy init detected an
