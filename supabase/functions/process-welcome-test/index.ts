@@ -238,7 +238,8 @@ serve(async (req) => {
 
   try {
     const body = await req.json();
-    const { test_id, student_id: bodyStudentId, teacher_id: bodyTeacherId, answers, detected_traits, answered_count, force } = body || {};
+    const { test_id, student_id: bodyStudentId, teacher_id: bodyTeacherId, detected_traits, answered_count, force } = body || {};
+    let answers = (body && body.answers) || null;
     let student_id = bodyStudentId;
     let teacher_id = bodyTeacherId;
 
@@ -260,6 +261,25 @@ serve(async (req) => {
         student_id = student_id || (testRow as any).student_id;
         teacher_id = teacher_id || (testRow as any).teacher_id;
       }
+    }
+
+    // v6.9.48 — when caller did not provide answers (force re-run from teacher
+    // UI), reconstruct them from the persisted student_test_questions.
+    if (force && (!answers || Object.keys(answers).length === 0) && test_id) {
+      const supabaseTmp = createClient(
+        Deno.env.get('SUPABASE_URL')!,
+        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+      );
+      const { data: persistedQs } = await supabaseTmp
+        .from('student_test_questions')
+        .select('skill_tags, student_answer, question_index')
+        .eq('test_id', test_id);
+      const map: Record<string, unknown> = {};
+      for (const q of (persistedQs || []) as any[]) {
+        const qid = `wt_q${(q.question_index ?? 0) + 1}`;
+        map[qid] = q.student_answer;
+      }
+      if (Object.keys(map).length > 0) answers = map;
     }
 
     if (!test_id || !student_id || !teacher_id) {
