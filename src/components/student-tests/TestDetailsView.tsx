@@ -340,7 +340,13 @@ export function TestDetailsView({ testId, teacherId, studentId, onBack }: TestDe
         <CardHeader>
           <div className="flex items-center justify-between">
             <div>
-              <CardTitle className="text-xl">{test.title}</CardTitle>
+              <CardTitle className="text-xl">
+                {/* v6.9.48 — render Welcome Test heading from live student.name
+                    so renaming a student updates the test heading immediately. */}
+                {test.test_type === 'welcome' && studentName
+                  ? `Welcome Test - ${studentName}${test.attempt_number && test.attempt_number > 1 ? ` (Retake ${test.attempt_number - 1})` : ''}`
+                  : test.title}
+              </CardTitle>
               <p className="text-muted-foreground">{test.description}</p>
               <TestDates
                 createdAt={(test as any).created_at}
