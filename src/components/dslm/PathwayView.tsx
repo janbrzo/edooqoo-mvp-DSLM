@@ -19,7 +19,7 @@ import { useFutureTimeline } from '@/hooks/useFutureTimeline';
 import { useStudentKnowledge } from '@/hooks/useStudentKnowledge';
 import { useCurriculumPhases } from '@/hooks/dslm/useCurriculumPhases';
 import { NextStepsSection } from './NextStepsSection';
-import { MacroTimeline, recommendedStepsForPhase, recommendedStepsPerBatch, targetStepsForPhase, phaseWeeks } from './MacroTimeline';
+import { MacroTimeline, recommendedStepsPerBatch, targetStepsForPhase, phaseWeeks } from './MacroTimeline';
 import type { PhaseOption } from './GenerateStepsDialog';
 import { SuggestionEditDialog, type SuggestionEditValue } from './SuggestionEditDialog';
 import { StudentKnowledgeEntryCard } from '@/components/student-knowledge/StudentKnowledgeEntryCard';
@@ -254,7 +254,11 @@ export const PathwayView: React.FC<PathwayViewProps> = ({
         sequence: p.sequence_number,
         status: p.status,
         have: counts[p.id] || 0,
-        need: recommendedStepsForPhase(p),
+        // v6.9.48 — `need` reflects the full per-phase target (1/week, no clamp)
+        // so recommendedTargetPhaseId only moves on to the next phase once the
+        // current one is genuinely full. `perBatch` keeps the 1–6 cap for inputs.
+        need: targetStepsForPhase(p),
+        perBatch: recommendedStepsPerBatch(p),
         weeks: phaseWeeks(p),
       }));
   }, [phases, phaseSteps]);
