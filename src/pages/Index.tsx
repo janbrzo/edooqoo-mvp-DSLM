@@ -289,6 +289,14 @@ const Index = () => {
   }
 
   const handleGenerateWorksheet = (data: any) => {
+    // v6.9.48 — acknowledge auto-generate intent so the form clears its
+    // sessionStorage flags exactly once, whichever path fired (Index bootstrap
+    // or WorksheetForm RAF gate).
+    if (data?.__autoGenerateRequestId) {
+      try {
+        window.dispatchEvent(new CustomEvent('worksheet:autoGenerateStarted', { detail: { requestId: data.__autoGenerateRequestId } }));
+      } catch { /* ignore */ }
+    }
     devLog('🔍 POPUP DECISION DEBUG:', {
       userId: user?.id,
       isAnonymous,
