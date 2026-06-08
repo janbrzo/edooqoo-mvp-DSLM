@@ -258,10 +258,14 @@ export const MacroTimeline: React.FC<MacroTimelineProps> = ({
   };
 
 
-  const getPhaseQuickCount = (id: string) => {
+  const getPhaseQuickCount = (id: string, haveCount = 0) => {
     if (phaseQuickCount[id] !== undefined) return phaseQuickCount[id];
     const phase = phases.find(p => p.id === id);
-    return phase ? recommendedStepsForPhase(phase) : 3;
+    if (!phase) return 3;
+    // v6.9.48 — default = gap to target (1 step/week), clamped 1..6.
+    const target = targetStepsForPhase(phase);
+    const gap = Math.max(1, target - haveCount);
+    return Math.min(6, gap);
   };
   const setPhaseQuickCountFor = (id: string, n: number) =>
     setPhaseQuickCount(p => ({ ...p, [id]: Math.min(6, Math.max(1, n)) }));
