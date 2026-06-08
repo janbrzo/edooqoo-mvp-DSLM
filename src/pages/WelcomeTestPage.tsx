@@ -559,8 +559,8 @@ export default function WelcomeTestPage() {
   const isSkillQuestion = !!currentQuestion.correct_answer;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 px-3 sm:px-4 py-3">
-      <div className="max-w-2xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 px-2 sm:px-3 py-2">
+      <div className="max-w-lg mx-auto">
         {/* Teacher Preview Mode — sticky banner. Shown when ?preview=1 or after
             the teacher chose "Preview Test (Read-only)" from the access screen. */}
         {teacherPreviewMode && (
@@ -744,6 +744,7 @@ export default function WelcomeTestPage() {
               onAnswer={(val) => saveAnswer(currentQuestion.id, val)}
               translatedOptions={!isSkillQuestion ? currentTranslation?.options : undefined}
               disabled={teacherPreviewMode}
+              onNext={!isLastQuestion ? () => { void goToNext(); } : undefined}
             />
 
             {/* Answer status + I don't know */}
