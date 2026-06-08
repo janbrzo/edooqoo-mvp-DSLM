@@ -968,7 +968,7 @@ function QuestionInputInner({
             <ListeningPlayer audioUrl={question.audio_url || ""} transcript={question.audio_transcript} />
           )}
           {question.options && (
-            <RadioGroup value={(answer as string) || ""} onValueChange={onAnswer}>
+            <RadioGroup value={(answer as string) || ""} onValueChange={(v) => { onAnswer(v); setTimeout(() => onNext?.(), 180); }}>
               {question.options.map((option, idx) => (
                 <div
                   key={idx}
@@ -992,7 +992,7 @@ function QuestionInputInner({
     case "scenario_reaction":
     case "multiple_choice":
       return (
-        <RadioGroup value={(answer as string) || ""} onValueChange={onAnswer}>
+        <RadioGroup value={(answer as string) || ""} onValueChange={(v) => { onAnswer(v); setTimeout(() => onNext?.(), 180); }}>
           {question.options?.map((option, idx) => (
             <div
               key={idx}
@@ -1053,7 +1053,7 @@ function QuestionInputInner({
         );
       }
       return (
-        <RadioGroup value={(answer as string) || ""} onValueChange={onAnswer}>
+        <RadioGroup value={(answer as string) || ""} onValueChange={(v) => { onAnswer(v); setTimeout(() => onNext?.(), 180); }}>
           {question.options?.map((option, idx) => (
             <div
               key={idx}
@@ -1076,6 +1076,7 @@ function QuestionInputInner({
         <Input
           value={(answer as string) || ""}
           onChange={(e) => onAnswer(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); onNext?.(); } }}
           placeholder="Type your answer..."
           className="text-sm"
         />
@@ -1087,6 +1088,7 @@ function QuestionInputInner({
         <Textarea
           value={(answer as string) || ""}
           onChange={(e) => onAnswer(e.target.value)}
+          onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); onNext?.(); } }}
           placeholder={question.question_type === "open_reflection" ? "Share your thoughts..." : "Write your answer..."}
           className="min-h-[90px] text-sm"
         />
