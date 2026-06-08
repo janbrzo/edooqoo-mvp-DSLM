@@ -896,12 +896,14 @@ function QuestionInput({
   onAnswer,
   translatedOptions,
   disabled = false,
+  onNext,
 }: {
   question: WelcomeTestQuestionDef;
   answer: unknown;
   onAnswer: (val: unknown) => void;
   translatedOptions?: string[];
   disabled?: boolean;
+  onNext?: () => void;
 }) {
   const displayAnswer = answer === "__IDK__" ? "" : answer;
 
@@ -925,6 +927,7 @@ function QuestionInput({
       answer={displayAnswer}
       onAnswer={onAnswer}
       translatedOptions={translatedOptions}
+      onNext={onNext}
     />
   );
 }
@@ -934,11 +937,13 @@ function QuestionInputInner({
   answer,
   onAnswer,
   translatedOptions,
+  onNext,
 }: {
   question: WelcomeTestQuestionDef;
   answer: unknown;
   onAnswer: (val: unknown) => void;
   translatedOptions?: string[];
+  onNext?: () => void;
 }) {
   switch (question.question_type) {
     case "speaking_record":
