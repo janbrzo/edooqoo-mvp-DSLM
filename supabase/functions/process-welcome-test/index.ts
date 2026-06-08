@@ -237,7 +237,30 @@ serve(async (req) => {
   }
 
   try {
-    const { test_id, student_id, teacher_id, answers, detected_traits, answered_count } = await req.json();
+    const body = await req.json();
+    const { test_id, student_id: bodyStudentId, teacher_id: bodyTeacherId, answers, detected_traits, answered_count, force } = body || {};
+    let student_id = bodyStudentId;
+    let teacher_id = bodyTeacherId;
+
+    // v6.9.48 — "force" re-run for retroactive auto-apply repair. Teacher-side
+    // "Apply to Progress" can call us with just { test_id, force: true } so we
+    // resolve student/teacher from the test row itself and bypass the
+    // already-reviewed/dedupe guards.
+    if (force && test_id && (!student_id || !teacher_id)) {
+      const supabaseTmp = createClient(
+        Deno.env.get('SUPABASE_URL')!,
+        Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+      );
+      const { data: testRow } = await supabaseTmp
+        .from('student_tests')
+        .select('student_id, teacher_id')
+        .eq('id', test_id)
+        .maybeSingle();
+      if (testRow) {
+        student_id = student_id || (testRow as any).student_id;
+        teacher_id = teacher_id || (testRow as any).teacher_id;
+      }
+    }
 
     if (!test_id || !student_id || !teacher_id) {
       return new Response(JSON.stringify({ error: 'Missing required fields' }), {
