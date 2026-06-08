@@ -20,7 +20,10 @@ export interface PhaseOption {
   sequence: number;
   status: string;
   have: number;
+  /** v6.9.48 — total target steps for the phase (1 per week, no clamp). */
   need: number;
+  /** v6.9.48 — max steps per single generation batch (1–6, optional). */
+  perBatch?: number;
   weeks: number | null;
 }
 
