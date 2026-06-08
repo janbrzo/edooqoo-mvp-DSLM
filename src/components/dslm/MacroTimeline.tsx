@@ -31,16 +31,29 @@ import { useWelcomeTestActions } from '@/hooks/useWelcomeTestActions';
 import { GenerateRoadmapDialog } from './GenerateRoadmapDialog';
 
 /**
- * v6.9.12 — Recommend 1 step per week of the phase length, clamped 1–6.
+ * v6.9.12 — Per-batch suggestion (clamped 1–6, hard limit per generation).
  * Falls back to 3 (rolling 3-lesson plan) when weeks are not set.
  */
-export function recommendedStepsForPhase(phase: CurriculumPhase): number {
+export function recommendedStepsPerBatch(phase: CurriculumPhase): number {
   const start = phase.estimated_weeks_start;
   const end = phase.estimated_weeks_end;
   if (!start || !end || end < start) return 3;
   const weeks = end - start + 1;
   return Math.max(1, Math.min(6, weeks));
 }
+/**
+ * v6.9.48 — Full target number of steps for the phase = 1 step per week,
+ * NOT clamped to 6. Used by recommendedTargetPhaseId so the "next" phase is
+ * not surfaced before the current phase is actually full.
+ */
+export function targetStepsForPhase(phase: CurriculumPhase): number {
+  const start = phase.estimated_weeks_start;
+  const end = phase.estimated_weeks_end;
+  if (!start || !end || end < start) return 3;
+  return Math.max(1, end - start + 1);
+}
+/** Backwards-compatible alias (use `recommendedStepsPerBatch` in new code). */
+export const recommendedStepsForPhase = recommendedStepsPerBatch;
 export function phaseWeeks(phase: CurriculumPhase): number | null {
   const s = phase.estimated_weeks_start;
   const e = phase.estimated_weeks_end;
