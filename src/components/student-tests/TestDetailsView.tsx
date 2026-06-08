@@ -94,7 +94,7 @@ export function TestDetailsView({ testId, teacherId, studentId, onBack }: TestDe
     try {
       const { data: student } = await supabase
         .from('students')
-        .select('student_email, name')
+        .select('student_email, name, english_level')
         .eq('id', studentId)
         .single();
       
