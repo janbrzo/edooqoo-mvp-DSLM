@@ -63,6 +63,15 @@ export function TestDetailsView({ testId, teacherId, studentId, onBack }: TestDe
   const [sharingLoading, setSharingLoading] = useState(false);
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [studentEmail, setStudentEmail] = useState<string>('');
+  // v6.9.48 — read live student name & english_level for dynamic test title
+  // (Welcome Test heading) and the suggested-level-change banner.
+  const [studentName, setStudentName] = useState<string>('');
+  const [studentLevel, setStudentLevel] = useState<string>('');
+  const [estimatedLevel, setEstimatedLevel] = useState<string | null>(null);
+  const [levelDismissed, setLevelDismissed] = useState<boolean>(() => {
+    try { return sessionStorage.getItem(`wt-level-change-dismissed:${testId}`) === '1'; } catch { return false; }
+  });
+  const [levelApplying, setLevelApplying] = useState(false);
   const [teacherName, setTeacherName] = useState<string>('');
   const [retaking, setRetaking] = useState(false);
   // v6.9.40 P3 — Track whether the teacher just clicked "Apply to Progress"
@@ -90,6 +99,8 @@ export function TestDetailsView({ testId, teacherId, studentId, onBack }: TestDe
         .single();
       
       if (student?.student_email) setStudentEmail(student.student_email);
+      if ((student as any)?.name) setStudentName(String((student as any).name));
+      if ((student as any)?.english_level) setStudentLevel(String((student as any).english_level));
       
       const { data: teacher } = await supabase
         .from('profiles')
