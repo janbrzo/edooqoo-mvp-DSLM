@@ -88,6 +88,15 @@ export function TestDetailsView({ testId, teacherId, studentId, onBack }: TestDe
     const data = await fetchTestWithQuestions(testId);
     setTest(data);
     setLoading(false);
+    // v6.9.48 — fetch estimated_level for the level-change banner (silently).
+    try {
+      const { data: prof } = await supabase
+        .from('student_learning_profiles')
+        .select('estimated_level')
+        .eq('welcome_test_id', testId)
+        .maybeSingle();
+      if (prof?.estimated_level) setEstimatedLevel(String(prof.estimated_level));
+    } catch { /* silent */ }
   };
 
   const loadStudentAndTeacherInfo = async () => {
