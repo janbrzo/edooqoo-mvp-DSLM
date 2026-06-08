@@ -583,6 +583,24 @@ serve(async (req) => {
       .eq('teacher_id', teacher_id)
       .maybeSingle();
 
+    // v6.9.48 — fetch current student level early so we can attach a
+    // level_change_suggestion to raw_answers when it differs from estimate.
+    const { data: studentLevelRow } = await supabase
+      .from('students')
+      .select('english_level')
+      .eq('id', student_id)
+      .maybeSingle();
+    const currentStudentLevel = ((studentLevelRow as any)?.english_level || '').toString().trim();
+    const hasMeaningfulCurrent = currentStudentLevel && currentStudentLevel.toLowerCase() !== 'unknown';
+    const levelChangeSuggestion = hasMeaningfulCurrent && currentStudentLevel !== estimatedLevel
+      ? { current: currentStudentLevel, estimated: estimatedLevel, created_at: new Date().toISOString() }
+      : null;
+
+    const enrichedAnswers: Record<string, unknown> = { ...(answers || {}) };
+    if (levelChangeSuggestion) {
+      enrichedAnswers.level_change_suggestion = levelChangeSuggestion;
+    }
+
     // Upsert learning profile
     const profileData = {
       student_id,
@@ -613,13 +631,7 @@ serve(async (req) => {
       confidence_reading: matrix['Reading news articles'] || null,
       confidence_presenting: matrix['Giving presentations'] || null,
       confidence_small_talk: matrix['Small talk at parties'] || null,
-      raw_answers: (() => {
-        // v6.9.48 — preserve level-change suggestion for teacher review when
-        // estimated CEFR differs from the level currently set on the student.
-        const base: Record<string, unknown> = { ...(answers || {}) };
-        // currentStudentLevel resolved later — placeholder mutation deferred.
-        return base;
-      })(),
+      raw_answers: enrichedAnswers,
       updated_at: new Date().toISOString(),
     };
 
