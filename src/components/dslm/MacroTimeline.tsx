@@ -245,7 +245,13 @@ export const MacroTimeline: React.FC<MacroTimelineProps> = ({
   const openPhaseCommentDialog = (phaseId: string) => {
     setPhaseComment('');
     const phase = phases.find(p => p.id === phaseId);
-    setPhaseCommentCount(phase ? recommendedStepsForPhase(phase) : 3);
+    if (phase) {
+      const have = (suggestions || []).filter((s: any) => s?.phase_id === phaseId).length;
+      const gap = Math.max(1, targetStepsForPhase(phase) - have);
+      setPhaseCommentCount(Math.min(6, gap));
+    } else {
+      setPhaseCommentCount(3);
+    }
     setPhaseCommentDialog({ open: true, phaseId });
   };
   const submitPhaseComment = async () => {
