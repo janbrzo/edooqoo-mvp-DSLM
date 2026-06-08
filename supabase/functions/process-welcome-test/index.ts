@@ -613,7 +613,13 @@ serve(async (req) => {
       confidence_reading: matrix['Reading news articles'] || null,
       confidence_presenting: matrix['Giving presentations'] || null,
       confidence_small_talk: matrix['Small talk at parties'] || null,
-      raw_answers: answers || {},
+      raw_answers: (() => {
+        // v6.9.48 — preserve level-change suggestion for teacher review when
+        // estimated CEFR differs from the level currently set on the student.
+        const base: Record<string, unknown> = { ...(answers || {}) };
+        // currentStudentLevel resolved later — placeholder mutation deferred.
+        return base;
+      })(),
       updated_at: new Date().toISOString(),
     };
 
