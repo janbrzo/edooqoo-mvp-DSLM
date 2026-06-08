@@ -19,7 +19,7 @@ import { useFutureTimeline } from '@/hooks/useFutureTimeline';
 import { useStudentKnowledge } from '@/hooks/useStudentKnowledge';
 import { useCurriculumPhases } from '@/hooks/dslm/useCurriculumPhases';
 import { NextStepsSection } from './NextStepsSection';
-import { MacroTimeline, recommendedStepsForPhase, phaseWeeks } from './MacroTimeline';
+import { MacroTimeline, recommendedStepsForPhase, recommendedStepsPerBatch, targetStepsForPhase, phaseWeeks } from './MacroTimeline';
 import type { PhaseOption } from './GenerateStepsDialog';
 import { SuggestionEditDialog, type SuggestionEditValue } from './SuggestionEditDialog';
 import { StudentKnowledgeEntryCard } from '@/components/student-knowledge/StudentKnowledgeEntryCard';
