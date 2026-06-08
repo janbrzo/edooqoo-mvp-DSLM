@@ -462,23 +462,35 @@ export const MacroTimeline: React.FC<MacroTimelineProps> = ({
                               />
                               {(() => {
                                 const w = phaseWeeks(phase);
-                                const rec = recommendedStepsForPhase(phase);
-                                return w ? (
+                                const target = targetStepsForPhase(phase);
+                                const have = phaseSuggestions.length;
+                                const gap = Math.max(0, target - have);
+                                if (!w) {
+                                  return (
+                                    <p className="text-[10px] text-muted-foreground leading-snug">
+                                      Suggested: 3 (set phase weeks for a smarter default).
+                                    </p>
+                                  );
+                                }
+                                if (w <= 6) {
+                                  return (
+                                    <p className="text-[10px] text-muted-foreground leading-snug">
+                                      Suggested: {Math.min(6, Math.max(1, gap || w))} (one per week of {w}-week phase, {have}/{target} added).
+                                    </p>
+                                  );
+                                }
+                                return (
                                   <p className="text-[10px] text-muted-foreground leading-snug">
-                                    Suggested: {rec} (one per week of {w}-week phase).
-                                  </p>
-                                ) : (
-                                  <p className="text-[10px] text-muted-foreground leading-snug">
-                                    Suggested: 3 (set phase weeks for a smarter default).
+                                    Suggested: {Math.min(6, Math.max(1, gap || 6))} per batch ({have}/{target} added — max 6 per generation, repeat to fill).
                                   </p>
                                 );
                               })()}
                               <Button
                                 size="sm" className="w-full"
-                                onClick={() => onGenerateForPhase(phase.id, getPhaseQuickCount(phase.id), '')}
+                                onClick={() => onGenerateForPhase(phase.id, getPhaseQuickCount(phase.id, phaseSuggestions.length), '')}
                                 disabled={generatingSteps}
                               >
-                                Add {getPhaseQuickCount(phase.id)} step{getPhaseQuickCount(phase.id) > 1 ? 's' : ''}
+                                Add {getPhaseQuickCount(phase.id, phaseSuggestions.length)} step{getPhaseQuickCount(phase.id, phaseSuggestions.length) > 1 ? 's' : ''}
                               </Button>
                             </DropdownMenuContent>
                           </DropdownMenu>
