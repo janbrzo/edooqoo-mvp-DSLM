@@ -68,11 +68,6 @@ export function TestDetailsView({ testId, teacherId, studentId, onBack }: TestDe
   // (Welcome Test heading) and the suggested-level-change banner.
   const [studentName, setStudentName] = useState<string>('');
   const [studentLevel, setStudentLevel] = useState<string>('');
-  const [estimatedLevel, setEstimatedLevel] = useState<string | null>(null);
-  const [levelDismissed, setLevelDismissed] = useState<boolean>(() => {
-    try { return sessionStorage.getItem(`wt-level-change-dismissed:${testId}`) === '1'; } catch { return false; }
-  });
-  const [levelApplying, setLevelApplying] = useState(false);
   const [teacherName, setTeacherName] = useState<string>('');
   const [retaking, setRetaking] = useState(false);
   // v6.9.40 P3 — Track whether the teacher just clicked "Apply to Progress"
@@ -89,15 +84,6 @@ export function TestDetailsView({ testId, teacherId, studentId, onBack }: TestDe
     const data = await fetchTestWithQuestions(testId);
     setTest(data);
     setLoading(false);
-    // v6.9.48 — fetch estimated_level for the level-change banner (silently).
-    try {
-      const { data: prof } = await supabase
-        .from('student_learning_profiles')
-        .select('estimated_level')
-        .eq('welcome_test_id', testId)
-        .maybeSingle();
-      if (prof?.estimated_level) setEstimatedLevel(String(prof.estimated_level));
-    } catch { /* silent */ }
   };
 
   const loadStudentAndTeacherInfo = async () => {
