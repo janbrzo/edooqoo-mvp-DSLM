@@ -257,10 +257,13 @@ const Index = () => {
   useEffect(() => {
     if (!isRegisteredUser) return;
     if (authLoading) return;
-    if (autoBootstrapFiredRef.current) return;
     if (!hasAutoGenerateIntent()) return;
     const intent = readAutoGenerateIntent();
     if (!intent) return;
+    // v6.9.50 — allow re-firing on a NEW requestId (different suggestion clicked
+    // without page reload). Skip only when this exact requestId already fired.
+    if (autoBootstrapFiredRef.current && lastBootstrappedRequestIdRef.current === intent.requestId) return;
+    autoBootstrapFiredRef.current = false;
     // v6.9.49 — if a previous worksheet is on-screen, hard-reset state so the
     // GenerationView unmounts and FormView shows the GeneratingModal again.
     if (bothWorksheetsReady) {
@@ -287,7 +290,8 @@ const Index = () => {
       }
       fired = true;
       autoBootstrapFiredRef.current = true;
-      devLog('[Index v6.9.49] auto-bootstrap fired', { requestId: payload.__autoGenerateRequestId, studentId: payload.studentId });
+      lastBootstrappedRequestIdRef.current = payload.__autoGenerateRequestId;
+      devLog('[Index v6.9.50] auto-bootstrap fired', { requestId: payload.__autoGenerateRequestId, studentId: payload.studentId });
       // Notify any mounted WorksheetForm so its RAF gate stands down and clears flags.
       window.dispatchEvent(new CustomEvent('worksheet:autoGenerateStarted', { detail: { requestId: payload.__autoGenerateRequestId } }));
       clearAutoGenerateFlags();
