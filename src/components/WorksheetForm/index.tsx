@@ -418,77 +418,11 @@ export default function WorksheetForm({
     }
   }, []);
 
-  // v6.9.47 — RAF-poll readiness gate. Eliminates the race where the prior
-  // useEffect ran once with formRef.current = null and never re-fired.
-  // Polls every animation frame (max ~3s) until topic + formRef are ready,
-  // then submits exactly once. Exercises remain optional (auto-completed).
-  useEffect(() => {
-    if (autoSubmitFiredRef.current) return;
-    if (!initialAutoIntentRef.current) return;
-    let frames = 0;
-    let rafId = 0;
-    const attempt = () => {
-      if (autoSubmitFiredRef.current) return;
-      const topicNow = lessonTopic?.trim() || readPrefillTopic().trim();
-      if (topicNow && formRef.current) {
-        autoSubmitFiredRef.current = true;
-        if (!lessonTopic?.trim()) setLessonTopic(topicNow);
-        try {
-          devLog('🚀 [WorksheetForm v6.9.47] Auto-submit firing (RAF gate)');
-          submitForm(topicNow);
-        } catch (e) {
-          devWarn('[WorksheetForm] submitForm threw', e);
-        }
-        // v6.9.48 — flag cleanup deferred to `worksheet:autoGenerateStarted`
-        // listener so an aborted handleGenerateWorksheet (paywall, token retry)
-        // does not lose the intent.
-        return;
-      }
-      frames += 1;
-      if (frames > 180) { devWarn('[WorksheetForm v6.9.47] RAF gate timeout'); return; }
-      rafId = requestAnimationFrame(attempt);
-    };
-    rafId = requestAnimationFrame(attempt);
-    return () => cancelAnimationFrame(rafId);
-  }, [lessonTopic, selectedExercises]);
-
-  // v6.9.38 — last-resort watchdog (1500 ms). If lazy init detected an
-  // intent but the gate never fired, force submit if minimally ready,
-  // otherwise drop the stale sessionStorage flags so manual edits work.
-  useEffect(() => {
-    const t = setTimeout(() => {
-      if (autoSubmitFiredRef.current) return;
-      if (!initialAutoIntentRef.current) return;
-      // v6.9.41 — last-chance re-hydration from sessionStorage before giving up.
-      let topicNow = lessonTopic;
-      let exercisesNow = selectedExercises;
-      if (!topicNow?.trim()) {
-        const recoveredTopic = readPrefillTopic();
-        if (recoveredTopic) { topicNow = recoveredTopic; setLessonTopic(recoveredTopic); }
-      }
-      if (!exercisesNow || exercisesNow.length === 0) {
-        const recoveredEx = readPrefillField<string[]>('prefillExercises', []);
-        if (Array.isArray(recoveredEx) && recoveredEx.length > 0) {
-          exercisesNow = recoveredEx; setSelectedExercises(recoveredEx);
-        }
-      }
-      // v6.9.44 — exercises optional in watchdog too; submitForm() auto-completes.
-      const ok = !!topicNow?.trim() && !!formRef.current;
-      if (ok) {
-        autoSubmitFiredRef.current = true;
-        devWarn('[WorksheetForm v6.9.44] watchdog force-submit (direct submitForm, exercises optional)');
-        // v6.9.42 — direct submit, no native validation.
-        submitForm(topicNow!.trim());
-        // v6.9.48 — see RAF gate note above.
-      } else {
-        devWarn('[WorksheetForm v6.9.38] watchdog dropping flag (form not ready)');
-        sessionStorage.removeItem('autoGenerateWorksheet');
-        sessionStorage.removeItem('autoGenerateWorksheetRequest');
-      }
-    }, 1500);
-    return () => clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  // v6.9.50 — RAF auto-submit and 1.5s watchdog REMOVED. Index.tsx is now the
+  // single source of truth for auto-generate dispatch (see autoGenerateBootstrap.ts).
+  // The form only listens for `worksheet:autoGenerateStarted` to stand down and
+  // clear sessionStorage flags. Eliminates race conditions where two competing
+  // submit paths fought for the same sessionStorage flag and silently dropped it.
   useEffect(() => {
     if (selectedStudentId && selectedStudentId !== "no-student") {
       const selectedStudent = students.find(s => s.id === selectedStudentId);
