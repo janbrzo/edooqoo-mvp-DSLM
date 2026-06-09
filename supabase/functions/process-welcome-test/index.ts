@@ -741,89 +741,11 @@ serve(async (req) => {
       console.error('[process-welcome-test] WT-4 status update failed', statusErr);
     }
 
-    // v6.9.39 P4 — Auto-apply skill ratings.
-    // Improvements over v6.9.29:
-    //  - When `test_skill_results.applied_to_element_id` is NULL we look up
-    //    a matching `student_learning_elements` row by (student_id, element_type)
-    //    and use that. This covers students whose elements were created by
-    //    other surfaces (goals UI, prior tests) without a direct FK in the
-    //    test_skill_results row.
-    //  - We ALWAYS mark the test `reviewed` once the learning profile is in
-    //    place (it is — upsertError would have thrown above). The student
-    //    learning profile carries the per-skill scores even when no nano-skill
-    //    elements exist yet (typical for brand-new students with zero goals).
-    //    This eliminates the misleading "Auto-apply did not complete" banner.
-    try {
-      const { data: skillResults } = await supabase
-        .from('test_skill_results')
-        .select('id, element_type, applied_to_element_id, suggested_rating')
-        .eq('test_id', test_id)
-        .is('applied_at', null);
-
-      const appliedIds: string[] = [];
-      if (skillResults && skillResults.length > 0) {
-        for (const r of skillResults as any[]) {
-          if (r.suggested_rating == null) continue;
-          let elementId: string | null = r.applied_to_element_id ?? null;
-          if (!elementId && r.element_type) {
-            const { data: existingEl } = await supabase
-              .from('student_learning_elements')
-              .select('id')
-              .eq('student_id', student_id)
-              .eq('element_type', r.element_type)
-              .is('deleted_at', null)
-              .maybeSingle();
-            if (existingEl?.id) elementId = existingEl.id;
-          }
-          if (elementId) {
-            await supabase
-              .from('student_learning_elements')
-              .update({
-                current_rating: r.suggested_rating,
-                last_rated_at: new Date().toISOString(),
-              })
-              .eq('id', elementId);
-            await supabase
-              .from('test_skill_results')
-              .update({
-                applied_at: new Date().toISOString(),
-                applied_to_element_id: elementId,
-              })
-              .eq('id', r.id);
-          } else {
-            // No matching nano-skill element — still mark the skill_result as
-            // processed so the manual "Apply to Progress" fallback does not
-            // re-flag it. The per-skill score lives on the learning profile.
-            await supabase
-              .from('test_skill_results')
-              .update({ applied_at: new Date().toISOString() })
-              .eq('id', r.id);
-          }
-          appliedIds.push(r.id);
-        }
-      }
-
-      // Always promote to 'reviewed' — the learning profile upsert succeeded
-      // and skill_results (if any) are processed. Skip if already reviewed.
-      await supabase
-        .from('student_tests')
-        .update({ status: 'reviewed', reviewed_at: new Date().toISOString() })
-        .eq('id', test_id)
-        .neq('status', 'reviewed');
-    } catch (autoApplyErr) {
-      console.error('[process-welcome-test] auto-apply failed', autoApplyErr);
-      try {
-        await supabase.from('error_logs').insert({
-          severity: 'warning',
-          source: 'edge-function',
-          source_name: 'process-welcome-test',
-          component: 'welcome-test-auto-apply',
-          error_code: 'welcome_auto_apply_failed',
-          message: `auto-apply failed for test ${test_id}`,
-          context: { testId: test_id, error: String((autoApplyErr as Error)?.message || autoApplyErr).slice(0, 500) },
-        });
-      } catch { /* swallow */ }
-    }
+    // v6.9.50 — initial auto-apply pass (idempotent, helper handles errors).
+    // A second pass runs at the very end of the function so that any later
+    // calls to `calculate_test_results` (AI rescoring path) cannot leave us
+    // with applied_at=NULL on the regenerated skill rows.
+    await applyAndPromote(supabase, test_id, student_id);
 
     // v6.9.39 P5 — Auto-fill student level + suggest goals from Welcome Test.
     // v6.9.40 P4 — Also auto-fill students.main_goal when missing/unknown,
