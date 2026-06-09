@@ -49,7 +49,7 @@ const evidenceSteps = [
 ];
 
 const setupSteps = [
-  { icon: UserPlus, label: 'Add 1 real student' },
+  { icon: UserPlus, label: 'Add student' },
   { icon: Send, label: 'Send Welcome Test' },
   { icon: Goal, label: 'Add goals' },
   { icon: Map, label: 'Generate Learning Roadmap' },
