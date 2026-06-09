@@ -986,8 +986,8 @@ export function SlotDetailModal({ open, onOpenChange, slot, studentName, student
               </Button>
             )}
             <Button size="sm" variant="outline" className="text-xs h-8" onClick={handleCancel}>Cancel</Button>
-            {hasChanges && (
-              <Button size="sm" onClick={handleSave} disabled={saving} className="text-xs h-8">{saving ? 'Saving...' : 'Save Changes'}</Button>
+            {hasChanges && !(isPending && editWorksheetId !== 'none') && (
+              <Button size="sm" onClick={() => handleSave()} disabled={saving} className="text-xs h-8">{saving ? 'Saving...' : 'Save Changes'}</Button>
             )}
           </div>
         </DraggableDialogFooter>
