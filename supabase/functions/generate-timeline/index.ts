@@ -80,8 +80,11 @@ serve(async (req) => {
       excludeIds.length > 0
         ? supabase.from('future_worksheet_suggestions').select('suggested_topic').in('id', excludeIds)
         : Promise.resolve({ data: [] }),
+      // v6.9.49 — join curriculum phases so prompt can label each pending step
+      // with `[Phase #N "title"]`. Helps the AI complement across phases
+      // rather than duplicating topics already planned elsewhere.
       supabase.from('future_worksheet_suggestions')
-        .select('suggested_topic, suggested_grammar_focus, sequence_number, phase_id')
+        .select('suggested_topic, suggested_grammar_focus, sequence_number, phase_id, dslm_curriculum_phases:phase_id(sequence_number, title)')
         .eq('student_id', studentId).eq('teacher_id', teacherId)
         .is('deleted_at', null).eq('is_used', false)
         .order('sequence_number', { ascending: true }).limit(20),

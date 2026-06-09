@@ -474,20 +474,20 @@ export const MacroTimeline: React.FC<MacroTimelineProps> = ({
                                 if (!w) {
                                   return (
                                     <p className="text-[10px] text-muted-foreground leading-snug">
-                                      Suggested: 3 (set phase weeks for a smarter default).
+                                      Suggested: 3 (set phase weeks for a smarter default). The AI sees all existing steps (this phase + others) and avoids duplicates.
                                     </p>
                                   );
                                 }
                                 if (w <= 6) {
                                   return (
                                     <p className="text-[10px] text-muted-foreground leading-snug">
-                                      Suggested: {Math.min(6, Math.max(1, gap || w))} (one per week of {w}-week phase, {have}/{target} added).
+                                      Suggested: {Math.min(6, Math.max(1, gap || w))} (one per week of {w}-week phase, {have}/{target} added). The AI sees your {have} existing step{have === 1 ? '' : 's'} in this phase AND steps from other phases — new ones won't duplicate, they complement and fill gaps.
                                     </p>
                                   );
                                 }
                                 return (
                                   <p className="text-[10px] text-muted-foreground leading-snug">
-                                    Suggested: {Math.min(6, Math.max(1, gap || 6))} per batch ({have}/{target} added — max 6 per generation, repeat to fill).
+                                    Suggested: {Math.min(6, Math.max(1, gap || 6))} per batch ({have}/{target} added — max 6 per generation, repeat to fill). The AI sees your {have} existing step{have === 1 ? '' : 's'} in this phase AND steps from other phases — new ones complement instead of duplicating.
                                   </p>
                                 );
                               })()}

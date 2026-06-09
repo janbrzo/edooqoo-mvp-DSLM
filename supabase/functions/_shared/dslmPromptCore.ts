@@ -250,7 +250,18 @@ export function buildExistingStepsBlock(steps: any[], limit = 20): string {
   if (!steps || steps.length === 0) return 'NONE — queue is empty.';
   return steps.slice(0, limit).map((s: any) => {
     const grammar = s.suggested_grammar_focus ? ` (grammar: ${s.suggested_grammar_focus})` : '';
-    const phase = s.phase_id ? ` [in phase ${s.phase_id.slice(0, 8)}]` : ' [free queue]';
+    // v6.9.49 — when caller joined `dslm_curriculum_phases(sequence_number,title)`
+    // we surface `[Phase #N "title"]` so the AI understands which macro block a
+    // step belongs to and can correctly complement *across* phases.
+    const joinedPhase = s.dslm_curriculum_phases || s.phase || null;
+    let phase = ' [free queue]';
+    if (joinedPhase && (joinedPhase.sequence_number != null || joinedPhase.title)) {
+      const seq = joinedPhase.sequence_number != null ? `#${joinedPhase.sequence_number}` : '';
+      const title = joinedPhase.title ? ` "${String(joinedPhase.title).slice(0, 40)}"` : '';
+      phase = ` [Phase ${seq}${title}]`;
+    } else if (s.phase_id) {
+      phase = ` [in phase ${String(s.phase_id).slice(0, 8)}]`;
+    }
     return `- "${s.suggested_topic}"${grammar}${phase}`;
   }).join('\n');
 }
