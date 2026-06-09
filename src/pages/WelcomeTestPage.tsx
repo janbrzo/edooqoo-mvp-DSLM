@@ -241,7 +241,13 @@ export default function WelcomeTestPage() {
       toast.error("Please enter your email");
       return;
     }
-    const email = emailInput.trim().toLowerCase();
+    const raw = emailInput.trim();
+    // v6.9.50 — basic RFC-5322-lite regex; rejects "asdf", "a@b", "@x.co", etc.
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(raw)) {
+      toast.error("Please enter a valid email address (e.g. name@example.com)");
+      return;
+    }
+    const email = raw.toLowerCase();
     
     // Verify against student's email in DB
     if (studentId) {
