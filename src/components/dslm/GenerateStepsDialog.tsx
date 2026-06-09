@@ -39,19 +39,31 @@ interface GenerateStepsDialogProps {
   showPhaseSelector: boolean;
   generating: boolean;
   onConfirm: (count: number, phaseId: string | null) => void | Promise<void>;
+  /**
+   * v6.9.50 — total active (unused, not-dismissed) next-step suggestions in the
+   * student's pipeline. When ≥ QUEUE_SOFT_LIMIT and mode='more', show a soft
+   * gate explaining DSLM learns from completed activity and offering a Wait /
+   * Generate anyway choice. Soft only — never blocks.
+   */
+  activeQueueSize?: number;
 }
 
 const FREE_VALUE = '__free__';
+const QUEUE_SOFT_LIMIT = 5;
 
 export const GenerateStepsDialog: React.FC<GenerateStepsDialogProps> = ({
   open, onOpenChange, mode, defaultCount,
   defaultTargetPhaseId, phaseOptions, showPhaseSelector, generating, onConfirm,
+  activeQueueSize = 0,
 }) => {
   const [count, setCount] = useState(defaultCount);
   const [phaseValue, setPhaseValue] = useState<string>(
     defaultTargetPhaseId ?? FREE_VALUE
   );
   const [countTouched, setCountTouched] = useState(false);
+  const [queueAcknowledged, setQueueAcknowledged] = useState(false);
+  useEffect(() => { if (open) setQueueAcknowledged(false); }, [open]);
+  const showQueueGate = mode === 'more' && activeQueueSize >= QUEUE_SOFT_LIMIT && !queueAcknowledged;
 
   // v6.9.14 — Reset every open. Initial count = (need - have) for recommended phase, else defaultCount.
   useEffect(() => {
@@ -171,6 +183,18 @@ export const GenerateStepsDialog: React.FC<GenerateStepsDialogProps> = ({
         </div>
 
         <DialogFooter>
+          {showQueueGate ? (
+            <div className="w-full rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900 space-y-2">
+              <p>
+                ⚠ You already have <b>{activeQueueSize}</b> active next-steps. DSLM gets sharper after each completed worksheet, homework, flashcard set, or note — generating more now risks stale suggestions.
+              </p>
+              <div className="flex gap-2 justify-end">
+                <Button variant="ghost" size="sm" onClick={() => onOpenChange(false)}>Wait</Button>
+                <Button size="sm" onClick={() => setQueueAcknowledged(true)}>Generate anyway</Button>
+              </div>
+            </div>
+          ) : (
+          <>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={generating}>
             Cancel
           </Button>
@@ -187,6 +211,8 @@ export const GenerateStepsDialog: React.FC<GenerateStepsDialogProps> = ({
               : <Plus className="h-4 w-4 mr-2" />}
             {mode === 'first' ? 'Generate' : 'Add'} {count} suggestion{count > 1 ? 's' : ''}
           </Button>
+          </>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
