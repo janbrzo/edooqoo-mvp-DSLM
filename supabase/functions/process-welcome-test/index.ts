@@ -236,6 +236,59 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  // v6.9.50 — extracted, idempotent. Applies skill ratings to learning
+  // elements and promotes status to 'reviewed'. Safe to call multiple times.
+  // Returns final status string for the response payload.
+  async function applyAndPromote(supabase: any, p_test_id: string, p_student_id: string): Promise<'reviewed' | 'completed'> {
+    try {
+      const { data: skillResults } = await supabase
+        .from('test_skill_results')
+        .select('id, element_type, applied_to_element_id, suggested_rating, applied_at')
+        .eq('test_id', p_test_id);
+      if (skillResults && skillResults.length > 0) {
+        for (const r of skillResults as any[]) {
+          if (r.applied_at) continue; // already applied
+          if (r.suggested_rating == null) continue;
+          let elementId: string | null = r.applied_to_element_id ?? null;
+          if (!elementId && r.element_type) {
+            const { data: existingEl } = await supabase
+              .from('student_learning_elements')
+              .select('id')
+              .eq('student_id', p_student_id)
+              .eq('element_type', r.element_type)
+              .is('deleted_at', null)
+              .maybeSingle();
+            if (existingEl?.id) elementId = existingEl.id;
+          }
+          if (elementId) {
+            await supabase
+              .from('student_learning_elements')
+              .update({ current_rating: r.suggested_rating, last_rated_at: new Date().toISOString() })
+              .eq('id', elementId);
+            await supabase
+              .from('test_skill_results')
+              .update({ applied_at: new Date().toISOString(), applied_to_element_id: elementId })
+              .eq('id', r.id);
+          } else {
+            await supabase
+              .from('test_skill_results')
+              .update({ applied_at: new Date().toISOString() })
+              .eq('id', r.id);
+          }
+        }
+      }
+      await supabase
+        .from('student_tests')
+        .update({ status: 'reviewed', reviewed_at: new Date().toISOString() })
+        .eq('id', p_test_id)
+        .neq('status', 'reviewed');
+      return 'reviewed';
+    } catch (err) {
+      console.error('[process-welcome-test v6.9.50] applyAndPromote failed', err);
+      return 'completed';
+    }
+  }
+
   try {
     const body = await req.json();
     const { test_id, student_id: bodyStudentId, teacher_id: bodyTeacherId, detected_traits, answered_count, force } = body || {};
