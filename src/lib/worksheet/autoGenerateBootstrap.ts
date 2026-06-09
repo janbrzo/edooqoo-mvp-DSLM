@@ -48,6 +48,20 @@ export function readAutoGenerateIntent(): AutoGenerateIntent | null {
 }
 
 /**
+ * v6.9.49 — Cheap synchronous check used by Index mount-effect to decide
+ * whether to wire the bootstrap interval at all (avoids polling cost when
+ * the page was opened normally).
+ */
+export function hasAutoGenerateIntent(): boolean {
+  if (typeof window === 'undefined') return false;
+  try {
+    return sessionStorage.getItem('autoGenerateWorksheet') === 'true';
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Build the FormData payload from sessionStorage prefill flags. Returns null
  * when there is no auto-generate intent or the prefilled lesson topic is empty
  * (we never start an empty AI generation).

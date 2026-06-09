@@ -1495,7 +1495,31 @@ Format as JSON: {"summary": "...", "recommendations": ["...", "..."], "writing_q
       console.error('[process-welcome-test] Error calculating Learning Path Score:', lpError);
     }
 
-    return new Response(JSON.stringify({ success: true, estimated_level: estimatedLevel, ai_summary: aiSummary, learning_path: learningPathResult }), {
+    // v6.9.49 — final defensive promotion. Earlier auto-apply try-block may
+    // have short-circuited on a non-fatal error before flipping the status.
+    // Force-mode callers (manual "Apply to Progress") rely on this to clear
+    // the "Auto-apply did not complete" banner. Idempotent: .neq('status','reviewed').
+    let finalStatus = 'reviewed';
+    let finalReviewedAt = new Date().toISOString();
+    try {
+      await supabase
+        .from('student_tests')
+        .update({ status: 'reviewed', reviewed_at: finalReviewedAt })
+        .eq('id', test_id)
+        .neq('status', 'reviewed');
+    } catch (finalStatusErr) {
+      console.warn('[process-welcome-test] final status promotion failed', finalStatusErr);
+      finalStatus = 'completed';
+    }
+
+    return new Response(JSON.stringify({
+      success: true,
+      estimated_level: estimatedLevel,
+      ai_summary: aiSummary,
+      learning_path: learningPathResult,
+      status: finalStatus,
+      reviewed_at: finalReviewedAt,
+    }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {

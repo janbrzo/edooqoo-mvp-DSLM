@@ -559,7 +559,7 @@ export default function WelcomeTestPage() {
   const isSkillQuestion = !!currentQuestion.correct_answer;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 px-2 sm:px-3 py-1.5">
+    <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 px-2 sm:px-3 py-1">
       <div className="max-w-2xl mx-auto">
         {/* Teacher Preview Mode — sticky banner. Shown when ?preview=1 or after
             the teacher chose "Preview Test (Read-only)" from the access screen. */}
@@ -578,9 +578,9 @@ export default function WelcomeTestPage() {
           </div>
         )}
 
-        {/* Header - compact, mobile-friendly */}
-        <div className="mb-2 sm:mb-3">
-          <div className="flex items-center justify-between mb-1 gap-2">
+        {/* Header - compact, mobile-friendly (v6.9.49 −10% vert) */}
+        <div className="mb-1.5">
+          <div className="flex items-center justify-between mb-0.5 gap-2">
             <div className="flex items-center gap-1.5 min-w-0">
               <Sparkles className="h-4 w-4 text-primary flex-shrink-0" />
               <span className="text-sm font-medium truncate">{title}</span>
@@ -664,7 +664,7 @@ export default function WelcomeTestPage() {
               </Button>
             </div>
           </div>
-          <div className="flex items-center justify-between mb-1.5">
+          <div className="flex items-center justify-between mb-1">
             <span className="text-xs text-muted-foreground">
               Question {globalQuestionIndex + 1} of {totalQuestions}
             </span>
@@ -672,11 +672,11 @@ export default function WelcomeTestPage() {
               {progress}%
             </Badge>
           </div>
-          <Progress value={progress} className="h-1.5" />
+          <Progress value={progress} className="h-1" />
         </div>
 
         {/* Section tabs - compact, touch-friendly */}
-        <div className="flex gap-1 mb-2 sm:mb-3 overflow-x-auto pb-1 -mx-1 px-1">
+        <div className="flex gap-1 mb-1.5 overflow-x-auto pb-0.5 -mx-1 px-1">
           {sections.map((section, idx) => {
             const sectionAnswered = section.questions.filter((q) => answers[q.id] !== undefined).length;
             const sectionTotal = section.questions.length;
@@ -687,7 +687,7 @@ export default function WelcomeTestPage() {
               <button
                 key={section.id}
                 onClick={() => goToSection(idx)}
-                className={`flex items-center gap-1 px-2.5 py-1.5 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors min-h-[32px] ${
+                className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-medium whitespace-nowrap transition-colors min-h-[26px] ${
                   isActive
                     ? "bg-primary text-primary-foreground"
                     : isDone
@@ -706,27 +706,27 @@ export default function WelcomeTestPage() {
           })}
         </div>
 
-        {/* Section header - compact (v6.9.48 −20% vertical) */}
-        <div className="mb-2">
-          <div className="flex items-center gap-1.5 mb-0.5">
+        {/* Section header - single line (v6.9.49 inline subtitle) */}
+        <div className="mb-1 flex items-baseline gap-2 flex-wrap">
+          <div className="flex items-center gap-1.5">
             {SECTION_ICONS[currentSection.icon]}
-            <h2 className="text-base font-semibold">{currentSection.title}</h2>
+            <h2 className="text-sm font-semibold">{currentSection.title}</h2>
           </div>
-          <p className="text-xs text-muted-foreground">{currentSection.subtitle}</p>
+          <p className="text-[11px] text-muted-foreground truncate">{currentSection.subtitle}</p>
         </div>
 
-        {/* Question card - compact (v6.9.48 −20% vertical) */}
-        <Card className="mb-3">
-          <CardContent className="pt-3 pb-3 space-y-3">
+        {/* Question card - ultra compact (v6.9.49) */}
+        <Card className="mb-2">
+          <CardContent className="pt-2 pb-2 space-y-2">
             <div>
-              <p className="text-sm font-medium whitespace-pre-line leading-relaxed">{currentQuestion.question_text}</p>
+              <p className="text-[13.5px] font-medium whitespace-pre-line leading-snug">{currentQuestion.question_text}</p>
               {currentQuestion.description && (
-                <p className="text-xs text-muted-foreground mt-1">{currentQuestion.description}</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">{currentQuestion.description}</p>
               )}
               {/* Translation */}
               {currentTranslation && !isSkillQuestion && (
-                <div className="mt-2 p-2 bg-muted/30 rounded border-l-2 border-primary/30">
-                  <p className="text-xs text-muted-foreground italic whitespace-pre-line">
+                <div className="mt-1 p-1.5 bg-muted/30 rounded border-l-2 border-primary/30">
+                  <p className="text-[11px] text-muted-foreground italic whitespace-pre-line leading-snug">
                     {currentTranslation.question}
                   </p>
                   {currentTranslation.description && (
@@ -777,14 +777,14 @@ export default function WelcomeTestPage() {
           </CardContent>
         </Card>
 
-        {/* Navigation - compact, mobile-friendly */}
-        <div className="flex items-center justify-between gap-2">
+        {/* Navigation - sticky bottom (v6.9.49) */}
+        <div className="sticky bottom-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/70 -mx-2 px-2 py-1 flex items-center justify-between gap-2">
           <Button
             variant="outline"
             size="sm"
             onClick={goToPrevious}
             disabled={globalQuestionIndex === 0}
-            className="min-h-[40px]"
+            className="min-h-[34px] text-xs"
           >
             <ChevronLeft className="h-3.5 w-3.5 mr-1" /> <span className="hidden sm:inline">Previous</span>
             <span className="sm:hidden">Prev</span>
@@ -794,7 +794,7 @@ export default function WelcomeTestPage() {
             variant="ghost"
             size="sm"
             onClick={skipQuestion}
-            className="text-xs text-muted-foreground min-h-[40px]"
+            className="text-xs text-muted-foreground min-h-[34px]"
             disabled={isLastQuestion}
           >
             <SkipForward className="h-3.5 w-3.5 sm:mr-1" /> <span className="hidden sm:inline">Skip</span>
@@ -806,7 +806,7 @@ export default function WelcomeTestPage() {
                 size="sm"
                 onClick={completeTest}
                 disabled={!canComplete || submitting || teacherPreviewMode}
-                className="bg-green-600 hover:bg-green-700 min-h-[40px]"
+                className="bg-green-600 hover:bg-green-700 min-h-[34px] text-xs"
               >
                 {submitting ? (
                   <Loader2 className="h-3.5 w-3.5 animate-spin mr-1" />
@@ -829,7 +829,7 @@ export default function WelcomeTestPage() {
                 try { await goToNext(); } finally { setSavingSpeaking(false); }
               }}
               disabled={savingSpeaking}
-              className="min-h-[40px]"
+              className="min-h-[34px] text-xs"
             >
               {savingSpeaking ? (
                 <><Loader2 className="h-3.5 w-3.5 animate-spin mr-1" /> Saving...</>
@@ -840,28 +840,9 @@ export default function WelcomeTestPage() {
           )}
         </div>
 
-        {/* Question progress - mobile: progress bar, desktop: dots */}
-        <div className="mt-4">
-          {/* Mobile: simple progress bar */}
-          <div className="sm:hidden">
-            <div className="flex items-center justify-between text-[10px] text-muted-foreground mb-1">
-              <span>Section progress</span>
-              <span>
-                {currentSection.questions.filter((q) => answers[q.id] !== undefined).length}/
-                {currentSection.questions.length}
-              </span>
-            </div>
-            <Progress
-              value={
-                (currentSection.questions.filter((q) => answers[q.id] !== undefined).length /
-                  currentSection.questions.length) *
-                100
-              }
-              className="h-1.5"
-            />
-          </div>
-          {/* Desktop: dots */}
-          <div className="hidden sm:flex flex-wrap gap-1.5 justify-center">
+        {/* Question progress - desktop dots only (mobile redundant with header X% badge) */}
+        <div className="mt-2 hidden sm:block">
+          <div className="flex flex-wrap gap-1.5 justify-center">
             {currentSection.questions.map((q, idx) => (
               <button
                 key={q.id}
@@ -963,21 +944,21 @@ function QuestionInputInner({
 
     case "listening_comprehension":
       return (
-        <div className="space-y-4">
+        <div className="space-y-2">
           {(question.audio_url !== undefined || question.audio_transcript) && (
             <ListeningPlayer audioUrl={question.audio_url || ""} transcript={question.audio_transcript} />
           )}
           {question.options && (
-            <RadioGroup value={(answer as string) || ""} onValueChange={(v) => { onAnswer(v); setTimeout(() => onNext?.(), 180); }}>
+            <RadioGroup value={(answer as string) || ""} onValueChange={(v) => { onAnswer(v); setTimeout(() => onNext?.(), 180); }} className="space-y-1">
               {question.options.map((option, idx) => (
                 <div
                   key={idx}
-                  className="flex items-center space-x-2.5 px-2.5 py-2 rounded-lg border hover:bg-muted/50 transition-colors"
+                  className="flex items-center space-x-2 px-2 py-1.5 rounded-lg border hover:bg-muted/50 transition-colors"
                 >
                   <RadioGroupItem value={option} id={`opt-${question.id}-${idx}`} />
                   <Label
                     htmlFor={`opt-${question.id}-${idx}`}
-                    className="flex-1 cursor-pointer text-sm leading-relaxed"
+                    className="flex-1 cursor-pointer text-[13.5px] leading-tight"
                   >
                     {option}
                   </Label>
@@ -991,37 +972,47 @@ function QuestionInputInner({
     case "self_assessment":
     case "scenario_reaction":
     case "multiple_choice":
-      return (
-        <RadioGroup value={(answer as string) || ""} onValueChange={(v) => { onAnswer(v); setTimeout(() => onNext?.(), 180); }}>
-          {question.options?.map((option, idx) => (
-            <div
-              key={idx}
-              className="flex items-center space-x-2.5 px-2.5 py-2 rounded-lg border hover:bg-muted/50 transition-colors"
-            >
-              <RadioGroupItem value={option} id={`opt-${question.id}-${idx}`} />
-              <Label htmlFor={`opt-${question.id}-${idx}`} className="flex-1 cursor-pointer text-sm leading-relaxed">
-                {option}
-                {translatedOptions?.[idx] && (
-                  <span className="block text-xs text-muted-foreground italic mt-0.5">{translatedOptions[idx]}</span>
-                )}
-              </Label>
-            </div>
-          ))}
-        </RadioGroup>
-      );
+      {
+        const opts = question.options || [];
+        const allShort = opts.every((o) => o.length <= 42);
+        const twoCol = opts.length >= 7 && allShort && !translatedOptions;
+        const wrap = twoCol ? 'grid grid-cols-1 sm:grid-cols-2 gap-1' : 'space-y-1';
+        return (
+          <RadioGroup value={(answer as string) || ""} onValueChange={(v) => { onAnswer(v); setTimeout(() => onNext?.(), 180); }} className={wrap}>
+            {opts.map((option, idx) => (
+              <div
+                key={idx}
+                className="flex items-center space-x-2 px-2 py-1.5 rounded-lg border hover:bg-muted/50 transition-colors"
+              >
+                <RadioGroupItem value={option} id={`opt-${question.id}-${idx}`} />
+                <Label htmlFor={`opt-${question.id}-${idx}`} className="flex-1 cursor-pointer text-[13.5px] leading-tight">
+                  {option}
+                  {translatedOptions?.[idx] && (
+                    <span className="block text-[11px] text-muted-foreground italic mt-0.5">{translatedOptions[idx]}</span>
+                  )}
+                </Label>
+              </div>
+            ))}
+          </RadioGroup>
+        );
+      }
 
     case "preference_choice":
       if (question.multi_select) {
         const selected = (answer as string[]) || [];
+        const opts = question.options || [];
+        const allShort = opts.every((o) => o.length <= 42);
+        const twoCol = opts.length >= 7 && allShort && !translatedOptions;
+        const wrap = twoCol ? 'grid grid-cols-1 sm:grid-cols-2 gap-1' : 'space-y-1';
         return (
-          <div className="space-y-1.5">
-            {question.options?.map((option, idx) => {
+          <div className={wrap}>
+            {opts.map((option, idx) => {
               const isChecked = selected.includes(option);
               const atMax = question.max_selections ? selected.length >= question.max_selections : false;
               return (
                 <div
                   key={idx}
-                  className="flex items-center space-x-2.5 px-2.5 py-2 rounded-lg border hover:bg-muted/50 transition-colors"
+                  className="flex items-center space-x-2 px-2 py-1.5 rounded-lg border hover:bg-muted/50 transition-colors"
                 >
                   <Checkbox
                     id={`pref-${question.id}-${idx}`}
@@ -1035,10 +1026,10 @@ function QuestionInputInner({
                       }
                     }}
                   />
-                  <Label htmlFor={`pref-${question.id}-${idx}`} className="flex-1 cursor-pointer text-sm">
+                  <Label htmlFor={`pref-${question.id}-${idx}`} className="flex-1 cursor-pointer text-[13.5px] leading-tight">
                     {option}
                     {translatedOptions?.[idx] && (
-                      <span className="block text-xs text-muted-foreground italic mt-0.5">
+                      <span className="block text-[11px] text-muted-foreground italic mt-0.5">
                         {translatedOptions[idx]}
                       </span>
                     )}
@@ -1047,29 +1038,35 @@ function QuestionInputInner({
               );
             })}
             {question.max_selections && (
-              <p className="text-[10px] text-muted-foreground">Select up to {question.max_selections}</p>
+              <p className="text-[10px] text-muted-foreground sm:col-span-2">Select up to {question.max_selections}</p>
             )}
           </div>
         );
       }
-      return (
-        <RadioGroup value={(answer as string) || ""} onValueChange={(v) => { onAnswer(v); setTimeout(() => onNext?.(), 180); }}>
-          {question.options?.map((option, idx) => (
-            <div
-              key={idx}
-              className="flex items-center space-x-2.5 px-2.5 py-2 rounded-lg border hover:bg-muted/50 transition-colors"
-            >
-              <RadioGroupItem value={option} id={`pref-${question.id}-${idx}`} />
-              <Label htmlFor={`pref-${question.id}-${idx}`} className="flex-1 cursor-pointer text-sm">
-                {option}
-                {translatedOptions?.[idx] && (
-                  <span className="block text-xs text-muted-foreground italic mt-0.5">{translatedOptions[idx]}</span>
-                )}
-              </Label>
-            </div>
-          ))}
-        </RadioGroup>
-      );
+      {
+        const opts = question.options || [];
+        const allShort = opts.every((o) => o.length <= 42);
+        const twoCol = opts.length >= 7 && allShort && !translatedOptions;
+        const wrap = twoCol ? 'grid grid-cols-1 sm:grid-cols-2 gap-1' : 'space-y-1';
+        return (
+          <RadioGroup value={(answer as string) || ""} onValueChange={(v) => { onAnswer(v); setTimeout(() => onNext?.(), 180); }} className={wrap}>
+            {opts.map((option, idx) => (
+              <div
+                key={idx}
+                className="flex items-center space-x-2 px-2 py-1.5 rounded-lg border hover:bg-muted/50 transition-colors"
+              >
+                <RadioGroupItem value={option} id={`pref-${question.id}-${idx}`} />
+                <Label htmlFor={`pref-${question.id}-${idx}`} className="flex-1 cursor-pointer text-[13.5px] leading-tight">
+                  {option}
+                  {translatedOptions?.[idx] && (
+                    <span className="block text-[11px] text-muted-foreground italic mt-0.5">{translatedOptions[idx]}</span>
+                  )}
+                </Label>
+              </div>
+            ))}
+          </RadioGroup>
+        );
+      }
 
     case "fill_blank":
       return (
