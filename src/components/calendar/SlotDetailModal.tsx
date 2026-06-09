@@ -814,27 +814,43 @@ export function SlotDetailModal({ open, onOpenChange, slot, studentName, student
 
           {!isBlock && (
             <div className="grid grid-cols-[1fr_80px] gap-2">
-              <div>
+              <div className={cn(isPending && 'rounded-md ring-2 ring-primary/40 ring-offset-1 p-1 -m-1')}>
                 <Label className="text-xs">Worksheet</Label>
                 {hasStudent ? (
-                  <div className="flex items-center gap-2">
-                    <Select value={editWorksheetId} onValueChange={setEditWorksheetId}>
-                      <SelectTrigger className="h-8 text-xs flex-1">
-                        <SelectValue placeholder="No worksheet" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">No worksheet</SelectItem>
-                        {studentWorksheets.map(w => (
-                          <SelectItem key={w.id} value={w.id}>{w.title || 'Untitled'}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {editWorksheetId !== 'none' && (
-                      <Button variant="ghost" size="sm" className="h-8 px-2" onClick={() => window.open(`/worksheet/${editWorksheetId}`, '_blank')}>
-                        <ExternalLink className="h-3 w-3" />
-                      </Button>
+                  <>
+                    <div className="flex items-center gap-2">
+                      <Select value={editWorksheetId} onValueChange={setEditWorksheetId}>
+                        <SelectTrigger className="h-8 text-xs flex-1">
+                          <SelectValue placeholder="No worksheet" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">No worksheet</SelectItem>
+                          {studentWorksheets.map(w => (
+                            <SelectItem key={w.id} value={w.id}>{w.title || 'Untitled'}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {editWorksheetId !== 'none' && (
+                        <Button variant="ghost" size="sm" className="h-8 px-2" onClick={() => window.open(`/worksheet/${editWorksheetId}`, '_blank')}>
+                          <ExternalLink className="h-3 w-3" />
+                        </Button>
+                      )}
+                    </div>
+                    {/* v6.9.50 — empty-state CTA: nudge teacher to 1-Minute Prep when no worksheet exists for this student */}
+                    {studentWorksheets.length === 0 && slot.student_id && (
+                      <p className="mt-1 text-[11px] text-muted-foreground flex items-center gap-1 flex-wrap">
+                        <Sparkles className="h-3 w-3 text-primary" />
+                        No worksheets yet —
+                        <button
+                          type="button"
+                          className="underline text-primary hover:text-primary/80"
+                          onClick={() => navigate(`/student/${slot.student_id}?tab=dslm`)}
+                        >
+                          generate one with 1-Minute Prep
+                        </button>
+                      </p>
                     )}
-                  </div>
+                  </>
                 ) : (
                   <p className="text-xs text-muted-foreground mt-1">Select a student first</p>
                 )}
