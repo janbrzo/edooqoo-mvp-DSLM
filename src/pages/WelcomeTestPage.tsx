@@ -944,21 +944,21 @@ function QuestionInputInner({
 
     case "listening_comprehension":
       return (
-        <div className="space-y-4">
+        <div className="space-y-2">
           {(question.audio_url !== undefined || question.audio_transcript) && (
             <ListeningPlayer audioUrl={question.audio_url || ""} transcript={question.audio_transcript} />
           )}
           {question.options && (
-            <RadioGroup value={(answer as string) || ""} onValueChange={(v) => { onAnswer(v); setTimeout(() => onNext?.(), 180); }}>
+            <RadioGroup value={(answer as string) || ""} onValueChange={(v) => { onAnswer(v); setTimeout(() => onNext?.(), 180); }} className="space-y-1">
               {question.options.map((option, idx) => (
                 <div
                   key={idx}
-                  className="flex items-center space-x-2.5 px-2.5 py-2 rounded-lg border hover:bg-muted/50 transition-colors"
+                  className="flex items-center space-x-2 px-2 py-1.5 rounded-lg border hover:bg-muted/50 transition-colors"
                 >
                   <RadioGroupItem value={option} id={`opt-${question.id}-${idx}`} />
                   <Label
                     htmlFor={`opt-${question.id}-${idx}`}
-                    className="flex-1 cursor-pointer text-sm leading-relaxed"
+                    className="flex-1 cursor-pointer text-[13.5px] leading-tight"
                   >
                     {option}
                   </Label>
@@ -972,37 +972,47 @@ function QuestionInputInner({
     case "self_assessment":
     case "scenario_reaction":
     case "multiple_choice":
-      return (
-        <RadioGroup value={(answer as string) || ""} onValueChange={(v) => { onAnswer(v); setTimeout(() => onNext?.(), 180); }}>
-          {question.options?.map((option, idx) => (
-            <div
-              key={idx}
-              className="flex items-center space-x-2.5 px-2.5 py-2 rounded-lg border hover:bg-muted/50 transition-colors"
-            >
-              <RadioGroupItem value={option} id={`opt-${question.id}-${idx}`} />
-              <Label htmlFor={`opt-${question.id}-${idx}`} className="flex-1 cursor-pointer text-sm leading-relaxed">
-                {option}
-                {translatedOptions?.[idx] && (
-                  <span className="block text-xs text-muted-foreground italic mt-0.5">{translatedOptions[idx]}</span>
-                )}
-              </Label>
-            </div>
-          ))}
-        </RadioGroup>
-      );
+      {
+        const opts = question.options || [];
+        const allShort = opts.every((o) => o.length <= 42);
+        const twoCol = opts.length >= 7 && allShort && !translatedOptions;
+        const wrap = twoCol ? 'grid grid-cols-1 sm:grid-cols-2 gap-1' : 'space-y-1';
+        return (
+          <RadioGroup value={(answer as string) || ""} onValueChange={(v) => { onAnswer(v); setTimeout(() => onNext?.(), 180); }} className={wrap}>
+            {opts.map((option, idx) => (
+              <div
+                key={idx}
+                className="flex items-center space-x-2 px-2 py-1.5 rounded-lg border hover:bg-muted/50 transition-colors"
+              >
+                <RadioGroupItem value={option} id={`opt-${question.id}-${idx}`} />
+                <Label htmlFor={`opt-${question.id}-${idx}`} className="flex-1 cursor-pointer text-[13.5px] leading-tight">
+                  {option}
+                  {translatedOptions?.[idx] && (
+                    <span className="block text-[11px] text-muted-foreground italic mt-0.5">{translatedOptions[idx]}</span>
+                  )}
+                </Label>
+              </div>
+            ))}
+          </RadioGroup>
+        );
+      }
 
     case "preference_choice":
       if (question.multi_select) {
         const selected = (answer as string[]) || [];
+        const opts = question.options || [];
+        const allShort = opts.every((o) => o.length <= 42);
+        const twoCol = opts.length >= 7 && allShort && !translatedOptions;
+        const wrap = twoCol ? 'grid grid-cols-1 sm:grid-cols-2 gap-1' : 'space-y-1';
         return (
-          <div className="space-y-1.5">
-            {question.options?.map((option, idx) => {
+          <div className={wrap}>
+            {opts.map((option, idx) => {
               const isChecked = selected.includes(option);
               const atMax = question.max_selections ? selected.length >= question.max_selections : false;
               return (
                 <div
                   key={idx}
-                  className="flex items-center space-x-2.5 px-2.5 py-2 rounded-lg border hover:bg-muted/50 transition-colors"
+                  className="flex items-center space-x-2 px-2 py-1.5 rounded-lg border hover:bg-muted/50 transition-colors"
                 >
                   <Checkbox
                     id={`pref-${question.id}-${idx}`}
@@ -1016,10 +1026,10 @@ function QuestionInputInner({
                       }
                     }}
                   />
-                  <Label htmlFor={`pref-${question.id}-${idx}`} className="flex-1 cursor-pointer text-sm">
+                  <Label htmlFor={`pref-${question.id}-${idx}`} className="flex-1 cursor-pointer text-[13.5px] leading-tight">
                     {option}
                     {translatedOptions?.[idx] && (
-                      <span className="block text-xs text-muted-foreground italic mt-0.5">
+                      <span className="block text-[11px] text-muted-foreground italic mt-0.5">
                         {translatedOptions[idx]}
                       </span>
                     )}
@@ -1028,29 +1038,35 @@ function QuestionInputInner({
               );
             })}
             {question.max_selections && (
-              <p className="text-[10px] text-muted-foreground">Select up to {question.max_selections}</p>
+              <p className="text-[10px] text-muted-foreground sm:col-span-2">Select up to {question.max_selections}</p>
             )}
           </div>
         );
       }
-      return (
-        <RadioGroup value={(answer as string) || ""} onValueChange={(v) => { onAnswer(v); setTimeout(() => onNext?.(), 180); }}>
-          {question.options?.map((option, idx) => (
-            <div
-              key={idx}
-              className="flex items-center space-x-2.5 px-2.5 py-2 rounded-lg border hover:bg-muted/50 transition-colors"
-            >
-              <RadioGroupItem value={option} id={`pref-${question.id}-${idx}`} />
-              <Label htmlFor={`pref-${question.id}-${idx}`} className="flex-1 cursor-pointer text-sm">
-                {option}
-                {translatedOptions?.[idx] && (
-                  <span className="block text-xs text-muted-foreground italic mt-0.5">{translatedOptions[idx]}</span>
-                )}
-              </Label>
-            </div>
-          ))}
-        </RadioGroup>
-      );
+      {
+        const opts = question.options || [];
+        const allShort = opts.every((o) => o.length <= 42);
+        const twoCol = opts.length >= 7 && allShort && !translatedOptions;
+        const wrap = twoCol ? 'grid grid-cols-1 sm:grid-cols-2 gap-1' : 'space-y-1';
+        return (
+          <RadioGroup value={(answer as string) || ""} onValueChange={(v) => { onAnswer(v); setTimeout(() => onNext?.(), 180); }} className={wrap}>
+            {opts.map((option, idx) => (
+              <div
+                key={idx}
+                className="flex items-center space-x-2 px-2 py-1.5 rounded-lg border hover:bg-muted/50 transition-colors"
+              >
+                <RadioGroupItem value={option} id={`pref-${question.id}-${idx}`} />
+                <Label htmlFor={`pref-${question.id}-${idx}`} className="flex-1 cursor-pointer text-[13.5px] leading-tight">
+                  {option}
+                  {translatedOptions?.[idx] && (
+                    <span className="block text-[11px] text-muted-foreground italic mt-0.5">{translatedOptions[idx]}</span>
+                  )}
+                </Label>
+              </div>
+            ))}
+          </RadioGroup>
+        );
+      }
 
     case "fill_blank":
       return (
