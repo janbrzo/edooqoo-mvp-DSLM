@@ -941,13 +941,44 @@ export function SlotDetailModal({ open, onOpenChange, slot, studentName, student
             )}
             {isPending && (
               <div className="w-full space-y-2">
-                <div className="flex gap-1">
-                  <Button size="sm" onClick={handleConfirm} disabled={actionInProgress} className="bg-green-600 hover:bg-green-700 text-white text-xs h-7">
-                    <Check className="h-3 w-3 mr-1" /> {actionInProgress ? 'Processing...' : 'Confirm'}
+                <div className="flex gap-1 flex-wrap">
+                  <Button
+                    size="sm"
+                    onClick={async () => {
+                      // v6.9.50 — when teacher already picked a worksheet, save it as part of confirm.
+                      if (editWorksheetId !== 'none' && hasChanges) {
+                        await handleSave({ skipClose: true });
+                      }
+                      await handleConfirm();
+                    }}
+                    disabled={actionInProgress || saving}
+                    className="bg-green-600 hover:bg-green-700 text-white text-xs h-7"
+                  >
+                    <Check className="h-3 w-3 mr-1" />
+                    {actionInProgress
+                      ? 'Processing...'
+                      : editWorksheetId !== 'none' && hasChanges
+                        ? 'Confirm & assign worksheet'
+                        : 'Confirm'}
                   </Button>
                   <Button size="sm" variant="outline" onClick={handleReject} disabled={actionInProgress} className="text-destructive text-xs h-7">
                     <Ban className="h-3 w-3 mr-1" /> Reject
                   </Button>
+                  {/* v6.9.50 — Confirm + jump to 1-Minute Prep, shown only when no worksheet picked yet */}
+                  {editWorksheetId === 'none' && slot.student_id && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={async () => {
+                        await handleConfirm();
+                        navigate(`/student/${slot.student_id}?tab=dslm`);
+                      }}
+                      disabled={actionInProgress}
+                      className="text-xs h-7 border-primary/40 text-primary hover:bg-primary/10"
+                    >
+                      <Sparkles className="h-3 w-3 mr-1" /> Confirm &amp; open 1-Minute Prep
+                    </Button>
+                  )}
                 </div>
                 <div className="flex items-center gap-2">
                   <input type="checkbox" id="inline-comment-check" checked={showInlineComment} onChange={e => setShowInlineComment(e.target.checked)} className="h-3.5 w-3.5 rounded border-border" />
