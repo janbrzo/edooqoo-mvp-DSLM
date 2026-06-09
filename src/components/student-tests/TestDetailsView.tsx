@@ -36,6 +36,7 @@ import { ShareTestModal } from './ShareTestModal';
 import { supabase } from '@/integrations/supabase/client';
 import { WelcomeTestResults } from './WelcomeTestResults';
 import { TestDates } from './TestDates';
+import { SuggestedLevelChangeBanner } from './SuggestedLevelChangeBanner';
 import { ALL_WELCOME_TEST_QUESTIONS } from '@/data/welcomeTestQuestions';
 import { sendWelcomeTestEmail } from '@/lib/welcomeTest/ensureWelcomeTest';
 import { 
@@ -413,58 +414,14 @@ export function TestDetailsView({ testId, teacherId, studentId, onBack }: TestDe
         <WelcomeTestResults testId={testId} studentId={studentId} teacherId={teacherId} questions={questions} />
       )}
 
-      {/* v6.9.48 — Suggested level change banner */}
-      {isWelcomeTest && estimatedLevel && studentLevel && estimatedLevel !== studentLevel && !levelDismissed && (
-        <Card className="border-primary/40 bg-primary/5">
-          <CardContent className="py-4">
-            <div className="flex items-center justify-between gap-3 flex-wrap">
-              <div className="flex items-start gap-3">
-                <TrendingUp className="h-5 w-5 text-primary mt-0.5" />
-                <div>
-                  <p className="font-medium">Suggested level change: {studentLevel} → {estimatedLevel}</p>
-                  <p className="text-sm text-muted-foreground">Welcome Test results indicate a different CEFR level than the one set on the student profile.</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    setLevelDismissed(true);
-                    try { sessionStorage.setItem(`wt-level-change-dismissed:${testId}`, '1'); } catch { /* ignore */ }
-                  }}
-                  disabled={levelApplying}
-                >
-                  Keep {studentLevel}
-                </Button>
-                <Button
-                  onClick={async () => {
-                    setLevelApplying(true);
-                    try {
-                      const { error } = await supabase
-                        .from('students')
-                        .update({ english_level: estimatedLevel })
-                        .eq('id', studentId);
-                      if (error) throw error;
-                      setStudentLevel(estimatedLevel);
-                      setLevelDismissed(true);
-                      try { sessionStorage.setItem(`wt-level-change-dismissed:${testId}`, '1'); } catch { /* ignore */ }
-                      toast.success(`Student level updated to ${estimatedLevel}.`);
-                    } catch (err) {
-                      console.error('[TestDetailsView] level update failed', err);
-                      toast.error('Failed to update student level.');
-                    } finally {
-                      setLevelApplying(false);
-                    }
-                  }}
-                  disabled={levelApplying}
-                >
-                  {levelApplying ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : null}
-                  Apply {estimatedLevel}
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+      {/* v6.9.49 — Reusable suggested-level-change banner (also rendered on DSLM tab). */}
+      {isWelcomeTest && studentLevel && (
+        <SuggestedLevelChangeBanner
+          studentId={studentId}
+          testId={testId}
+          currentLevel={studentLevel}
+          onApplied={(lvl) => setStudentLevel(lvl)}
+        />
       )}
 
       {/* v6.9.29 — Results are auto-applied by process-welcome-test (status=reviewed).

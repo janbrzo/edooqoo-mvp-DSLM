@@ -21,6 +21,7 @@ import { PacingModeSlider } from './PacingModeSlider';
 import { usePacingProposals } from '@/hooks/usePacingProposals';
 import { Badge } from '@/components/ui/badge';
 import { Bell } from 'lucide-react';
+import { SuggestedLevelChangeBanner } from '@/components/student-tests/SuggestedLevelChangeBanner';
 
 interface DSLMTabProps {
   studentId: string;
@@ -268,6 +269,10 @@ export const DSLMTab: React.FC<DSLMTabProps> = ({
     <>
       <div ref={sectionRefs.pathway} data-section="pathway" className="scroll-mt-4">
         {sectionHeader('Pathway', pathwayBadges)}
+        {/* v6.9.49 — surface Welcome Test level-change suggestion on DSLM tab. */}
+        <div className="mb-3">
+          <SuggestedLevelChangeBanner studentId={studentId} currentLevel={englishLevel} />
+        </div>
         <PathwayView
           studentId={studentId}
           teacherId={teacherId}
