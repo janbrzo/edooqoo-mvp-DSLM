@@ -1470,22 +1470,12 @@ Format as JSON: {"summary": "...", "recommendations": ["...", "..."], "writing_q
       console.error('[process-welcome-test] Error calculating Learning Path Score:', lpError);
     }
 
-    // v6.9.49 — final defensive promotion. Earlier auto-apply try-block may
-    // have short-circuited on a non-fatal error before flipping the status.
-    // Force-mode callers (manual "Apply to Progress") rely on this to clear
-    // the "Auto-apply did not complete" banner. Idempotent: .neq('status','reviewed').
-    let finalStatus = 'reviewed';
-    let finalReviewedAt = new Date().toISOString();
-    try {
-      await supabase
-        .from('student_tests')
-        .update({ status: 'reviewed', reviewed_at: finalReviewedAt })
-        .eq('id', test_id)
-        .neq('status', 'reviewed');
-    } catch (finalStatusErr) {
-      console.warn('[process-welcome-test] final status promotion failed', finalStatusErr);
-      finalStatus = 'completed';
-    }
+    // v6.9.50 — final auto-apply + promotion pass. Re-runs the helper after the
+    // AI rescoring block (which may have called calculate_test_results and
+    // regenerated test_skill_results rows). The DB migration also preserves
+    // applied_at on UPSERT now, but this is a second defense.
+    const finalStatus = await applyAndPromote(supabase, test_id, student_id);
+    const finalReviewedAt = new Date().toISOString();
 
     return new Response(JSON.stringify({
       success: true,
