@@ -32,6 +32,7 @@ import { markWorksheetForClaim } from "@/hooks/useWorksheetClaim";
 import { devLog, devWarn } from '@/utils/logger';
 import { AddStudentDialog } from "@/components/dashboard/AddStudentDialog";
 import { buildAutoGeneratePayload, clearAutoGenerateFlags, readAutoGenerateIntent } from "@/lib/worksheet/autoGenerateBootstrap";
+import { hasAutoGenerateIntent } from "@/lib/worksheet/autoGenerateBootstrap";
 
 /**
  * Main Index page component that handles worksheet generation and display
@@ -42,6 +43,13 @@ const Index = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const location = useLocation();
   const navigate = useNavigate();
+
+  // v6.9.49 — when DSLM "Generate worksheet ↗" navigated us here, StudentPage
+  // writes `sessionStorage.forceNewWorksheet='true'`. useWorksheetState consumes
+  // that flag on its own restore-effect; we additionally call resetWorksheetState
+  // to be defensive in case a previous worksheet was already hydrated in this
+  // component's state. Idempotent.
+  const autoBootstrapFiredRef = React.useRef(false);
 
   // v6.9.6 — force light theme on public landing (mobile dark mode was inheriting
   // prefers-color-scheme:dark and rendering the marketing page with poor contrast).
@@ -246,9 +254,15 @@ const Index = () => {
   useEffect(() => {
     if (!isRegisteredUser) return;
     if (authLoading) return;
+    if (autoBootstrapFiredRef.current) return;
+    if (!hasAutoGenerateIntent()) return;
     const intent = readAutoGenerateIntent();
     if (!intent) return;
-    if (bothWorksheetsReady) return; // already showing a worksheet, don't re-fire
+    // v6.9.49 — if a previous worksheet is on-screen, hard-reset state so the
+    // GenerationView unmounts and FormView shows the GeneratingModal again.
+    if (bothWorksheetsReady) {
+      try { worksheetState.resetWorksheetState(); } catch { /* ignore */ }
+    }
 
     let fired = false;
     let attempts = 0;
@@ -269,7 +283,8 @@ const Index = () => {
         return;
       }
       fired = true;
-      devLog('[Index v6.9.48] auto-bootstrap fired', { requestId: payload.__autoGenerateRequestId, studentId: payload.studentId });
+      autoBootstrapFiredRef.current = true;
+      devLog('[Index v6.9.49] auto-bootstrap fired', { requestId: payload.__autoGenerateRequestId, studentId: payload.studentId });
       // Notify any mounted WorksheetForm so its RAF gate stands down and clears flags.
       window.dispatchEvent(new CustomEvent('worksheet:autoGenerateStarted', { detail: { requestId: payload.__autoGenerateRequestId } }));
       clearAutoGenerateFlags();
@@ -278,7 +293,7 @@ const Index = () => {
     }, 200);
     return () => window.clearInterval(interval);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isRegisteredUser, authLoading, tokensLoading]);
+  }, [isRegisteredUser, authLoading, tokensLoading, bothWorksheetsReady]);
 
   if (authLoading) {
     return (
