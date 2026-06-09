@@ -12,10 +12,11 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CalendarSlot } from '@/hooks/useCalendarSlots';
 import { format, differenceInMinutes } from 'date-fns';
-import { Check, X, Trash2, FileText, ExternalLink, AlertTriangle, Link2, Undo2, UserMinus, Repeat, Ban, ChevronsUpDown, History, Lock } from 'lucide-react';
+import { Check, X, Trash2, FileText, ExternalLink, AlertTriangle, Link2, Undo2, UserMinus, Repeat, Ban, ChevronsUpDown, History, Lock, Sparkles } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { useNavigate } from 'react-router-dom';
 
 interface Student {
   id: string;
@@ -75,6 +76,7 @@ const EMPTY_SLOT = {
 export function SlotDetailModal({ open, onOpenChange, slot, studentName, students, onUpdate, onDelete, onLinkWorksheet, onNotificationsChanged }: SlotDetailModalProps) {
   // Use safeSlot for all hooks to ensure consistent hook order
   const safeSlot = slot || EMPTY_SLOT;
+  const navigate = useNavigate();
 
   const [editDate, setEditDate] = useState('');
   const [editStartTime, setEditStartTime] = useState('');
@@ -207,7 +209,7 @@ export function SlotDetailModal({ open, onOpenChange, slot, studentName, student
 
   const handleCancel = () => { resetChanges(); onOpenChange(false); };
 
-  const handleSave = async () => {
+  const handleSave = async (opts: { skipClose?: boolean } = {}) => {
     // v6.9.8 — demo guard (modal can open in demo, save is blocked)
     if (typeof window !== 'undefined' && localStorage.getItem('edooqoo_demo_mode') === 'true') {
       toast.info('Demo mode — Saving slot changes is disabled.');
@@ -350,7 +352,7 @@ export function SlotDetailModal({ open, onOpenChange, slot, studentName, student
       } as any);
     } catch (_) {}
     setSaving(false);
-    onOpenChange(false);
+    if (!opts.skipClose) onOpenChange(false);
   };
 
   const extractStudentEmail = (notes: string | null): string => {
@@ -812,27 +814,43 @@ export function SlotDetailModal({ open, onOpenChange, slot, studentName, student
 
           {!isBlock && (
             <div className="grid grid-cols-[1fr_80px] gap-2">
-              <div>
+              <div className={cn(isPending && 'rounded-md ring-2 ring-primary/40 ring-offset-1 p-1 -m-1')}>
                 <Label className="text-xs">Worksheet</Label>
                 {hasStudent ? (
-                  <div className="flex items-center gap-2">
-                    <Select value={editWorksheetId} onValueChange={setEditWorksheetId}>
-                      <SelectTrigger className="h-8 text-xs flex-1">
-                        <SelectValue placeholder="No worksheet" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="none">No worksheet</SelectItem>
-                        {studentWorksheets.map(w => (
-                          <SelectItem key={w.id} value={w.id}>{w.title || 'Untitled'}</SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    {editWorksheetId !== 'none' && (
-                      <Button variant="ghost" size="sm" className="h-8 px-2" onClick={() => window.open(`/worksheet/${editWorksheetId}`, '_blank')}>
-                        <ExternalLink className="h-3 w-3" />
-                      </Button>
+                  <>
+                    <div className="flex items-center gap-2">
+                      <Select value={editWorksheetId} onValueChange={setEditWorksheetId}>
+                        <SelectTrigger className="h-8 text-xs flex-1">
+                          <SelectValue placeholder="No worksheet" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">No worksheet</SelectItem>
+                          {studentWorksheets.map(w => (
+                            <SelectItem key={w.id} value={w.id}>{w.title || 'Untitled'}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {editWorksheetId !== 'none' && (
+                        <Button variant="ghost" size="sm" className="h-8 px-2" onClick={() => window.open(`/worksheet/${editWorksheetId}`, '_blank')}>
+                          <ExternalLink className="h-3 w-3" />
+                        </Button>
+                      )}
+                    </div>
+                    {/* v6.9.50 — empty-state CTA: nudge teacher to 1-Minute Prep when no worksheet exists for this student */}
+                    {studentWorksheets.length === 0 && slot.student_id && (
+                      <p className="mt-1 text-[11px] text-muted-foreground flex items-center gap-1 flex-wrap">
+                        <Sparkles className="h-3 w-3 text-primary" />
+                        No worksheets yet —
+                        <button
+                          type="button"
+                          className="underline text-primary hover:text-primary/80"
+                          onClick={() => navigate(`/student/${slot.student_id}?tab=dslm`)}
+                        >
+                          generate one with 1-Minute Prep
+                        </button>
+                      </p>
                     )}
-                  </div>
+                  </>
                 ) : (
                   <p className="text-xs text-muted-foreground mt-1">Select a student first</p>
                 )}
@@ -923,13 +941,44 @@ export function SlotDetailModal({ open, onOpenChange, slot, studentName, student
             )}
             {isPending && (
               <div className="w-full space-y-2">
-                <div className="flex gap-1">
-                  <Button size="sm" onClick={handleConfirm} disabled={actionInProgress} className="bg-green-600 hover:bg-green-700 text-white text-xs h-7">
-                    <Check className="h-3 w-3 mr-1" /> {actionInProgress ? 'Processing...' : 'Confirm'}
+                <div className="flex gap-1 flex-wrap">
+                  <Button
+                    size="sm"
+                    onClick={async () => {
+                      // v6.9.50 — when teacher already picked a worksheet, save it as part of confirm.
+                      if (editWorksheetId !== 'none' && hasChanges) {
+                        await handleSave({ skipClose: true });
+                      }
+                      await handleConfirm();
+                    }}
+                    disabled={actionInProgress || saving}
+                    className="bg-green-600 hover:bg-green-700 text-white text-xs h-7"
+                  >
+                    <Check className="h-3 w-3 mr-1" />
+                    {actionInProgress
+                      ? 'Processing...'
+                      : editWorksheetId !== 'none' && hasChanges
+                        ? 'Confirm & assign worksheet'
+                        : 'Confirm'}
                   </Button>
                   <Button size="sm" variant="outline" onClick={handleReject} disabled={actionInProgress} className="text-destructive text-xs h-7">
                     <Ban className="h-3 w-3 mr-1" /> Reject
                   </Button>
+                  {/* v6.9.50 — Confirm + jump to 1-Minute Prep, shown only when no worksheet picked yet */}
+                  {editWorksheetId === 'none' && slot.student_id && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={async () => {
+                        await handleConfirm();
+                        navigate(`/student/${slot.student_id}?tab=dslm`);
+                      }}
+                      disabled={actionInProgress}
+                      className="text-xs h-7 border-primary/40 text-primary hover:bg-primary/10"
+                    >
+                      <Sparkles className="h-3 w-3 mr-1" /> Confirm &amp; open 1-Minute Prep
+                    </Button>
+                  )}
                 </div>
                 <div className="flex items-center gap-2">
                   <input type="checkbox" id="inline-comment-check" checked={showInlineComment} onChange={e => setShowInlineComment(e.target.checked)} className="h-3.5 w-3.5 rounded border-border" />
@@ -984,8 +1033,8 @@ export function SlotDetailModal({ open, onOpenChange, slot, studentName, student
               </Button>
             )}
             <Button size="sm" variant="outline" className="text-xs h-8" onClick={handleCancel}>Cancel</Button>
-            {hasChanges && (
-              <Button size="sm" onClick={handleSave} disabled={saving} className="text-xs h-8">{saving ? 'Saving...' : 'Save Changes'}</Button>
+            {hasChanges && !(isPending && editWorksheetId !== 'none') && (
+              <Button size="sm" onClick={() => handleSave()} disabled={saving} className="text-xs h-8">{saving ? 'Saving...' : 'Save Changes'}</Button>
             )}
           </div>
         </DraggableDialogFooter>

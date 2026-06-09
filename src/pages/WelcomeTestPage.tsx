@@ -241,7 +241,13 @@ export default function WelcomeTestPage() {
       toast.error("Please enter your email");
       return;
     }
-    const email = emailInput.trim().toLowerCase();
+    const raw = emailInput.trim();
+    // v6.9.50 — basic RFC-5322-lite regex; rejects "asdf", "a@b", "@x.co", etc.
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(raw)) {
+      toast.error("Please enter a valid email address (e.g. name@example.com)");
+      return;
+    }
+    const email = raw.toLowerCase();
     
     // Verify against student's email in DB
     if (studentId) {
@@ -450,13 +456,25 @@ export default function WelcomeTestPage() {
               </p>
               <Input
                 type="email"
+                inputMode="email"
+                autoComplete="email"
                 placeholder="your.email@example.com"
                 value={emailInput}
                 onChange={(e) => setEmailInput(e.target.value)}
                 onKeyDown={(e) => e.key === "Enter" && handleVerifyEmail()}
+                aria-invalid={
+                  emailInput.trim().length > 0 &&
+                  !/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(emailInput.trim())
+                    ? true
+                    : undefined
+                }
                 className="text-base"
               />
-              <Button onClick={handleVerifyEmail} className="w-full" disabled={!emailInput.trim()}>
+              <Button
+                onClick={handleVerifyEmail}
+                className="w-full"
+                disabled={!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(emailInput.trim())}
+              >
                 Continue
               </Button>
             </CardContent>

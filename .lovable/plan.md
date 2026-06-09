@@ -1,288 +1,386 @@
 
-# Plan v6.9.49 — Problem Resolution Cycle
+# Plan v6.9.50 — naprawy 1-Minute Prep, Welcome Test auto-apply, kalendarza i bramki next-steps
 
-Skupiony fix 4 problemów. Zero zmian w Worksheet Generation Engine.
+Wersja zachowuje sanktuarium Worksheet Generation Engine (nie tykamy promptów ani logiki AI worksheet). Wszystkie zmiany w warstwie prezentacyjnej, w `process-welcome-test` (poza promptem AI) oraz w jednej funkcji DB.
 
 ---
 
-## P1. Auto-generate worksheet po kliknięciu „Generate worksheet ↗" znów nie startuje
+## P1 — „Generate worksheet ↗" nie startuje generowania po nawigacji na `/`
 
 ### Dependency scan
-`StudentPage.tsx` (1065–1104), `src/lib/worksheet/autoGenerateBootstrap.ts`,
-`src/pages/Index.tsx` (130–281), `src/hooks/useWorksheetState.tsx`,
-`src/components/WorksheetForm/index.tsx` (RAF gate 421–490).
+- `src/components/dslm/PathwayView.tsx` (callSuggestion → onUseWorksheetSuggestion)
+- `src/pages/StudentPage.tsx` linie 1065–1105 (zapis `prefillWorksheet`, `autoGenerateWorksheet`, `autoGenerateWorksheetRequest`, `forceNewWorksheet`, `navigate('/')`)
+- `src/pages/Index.tsx` linie 138–145 (gałąź `?forceNew=true`) ORAZ 250–296 (auto-bootstrap)
+- `src/hooks/useWorksheetState.tsx` (restoreWorksheetState — kasuje `forceNewWorksheet` i czyści state)
+- `src/lib/worksheet/autoGenerateBootstrap.ts` (`hasAutoGenerateIntent`, `buildAutoGeneratePayload`)
+- `src/components/WorksheetForm/index.tsx` (równoległa RAF-pętla, kasowanie flag)
 
 ### Root cause
-StudentPage zapisuje `sessionStorage.forceNewWorksheet = 'true'` (linia 1103),
-ale `Index.tsx` honoruje *wyłącznie* query-param `?forceNew=true` (linia 132) i nigdy
-nie czyta tej flagi z sessionStorage. Efekt: gdy user już wcześniej wygenerował
-worksheet w tej sesji, `worksheetState` ma niezerowy `generatedWorksheet` →
-`bothWorksheetsReady === true` → bootstrap z v6.9.48 wcześnie `return`-uje
-(`if (bothWorksheetsReady) return;`), a ekran pokazuje stary worksheet zamiast
-startu generowania. Drugi pochodny problem: gdy bootstrap fire-uje, **nie**
-resetuje stanu, więc nawet po jego naprawie nadal widać stary `GenerationView`.
+Bootstrap z `Index.tsx` (efekt z `[isRegisteredUser, authLoading, tokensLoading, bothWorksheetsReady]`) odpala się dopiero po hydrate'cie `useWorksheetState`. Po nawigacji na `/`:
+1. `useWorksheetState` widzi `forceNewWorksheet=true`, kasuje storage i wraca (nie odtwarza).
+2. `Index.tsx` montuje `<FormView>` → `<WorksheetForm>` natychmiast.
+3. **Bootstrap `Index.tsx` polluje `setInterval` co 200 ms, ale `WorksheetForm` ma swoją RAF-pętlę, która wcześniej odpala `submitForm()` z `selectedExercises=[]` (DOM jeszcze nie zhydratował exercises) lub z brakującym `studentId`, kończy się submitem, równolegle Index też wystrzeliwuje `handleGenerateWorksheet`. Pierwsza ścieżka, która wystartuje, kasuje flagę `autoGenerateWorksheet` przed tym, jak Index zdąży zbudować payload — `buildAutoGeneratePayload()` zwraca `null` i bootstrap kończy się ciszą.**
+4. Bywa też wariant: RAF-pętla `WorksheetForm` widzi pustą flagę bo Index ją zerował w 1. tiku, więc nikt nie strzela `submitForm`.
+
+Innymi słowy: dwie konkurujące ścieżki auto-submitu (`Index` i `WorksheetForm`) wyścigują się o tę samą flagę sessionStorage. To strukturalna kondycja race condition.
 
 ### Solution options
-| Opcja | Opis | Regresja |
-|---|---|---|
-| A | Zawsze honoruj `sessionStorage.forceNewWorksheet` w Index + przed bootstrap auto-generate wymuś `resetWorksheetState()` | low |
-| B | Przenieść `forceNewWorksheet` na URL param w StudentPage | medium (zmiana nawigacji, możliwe regresje QS) |
-| C | Wystawić event do WorksheetState | high (nowa magistrala) |
+| # | Podejście | Tradeoff | Regresja |
+|---|-----------|----------|----------|
+| A | Zostawić jedną ścieżkę: `Index.tsx`. W `WorksheetForm` usunąć/odciąć RAF-pętlę auto-submitu, gdy `Index` ogłosi przejęcie. | Czysto, ale wymaga drobnego refactoru w `WorksheetForm` | Niska |
+| B | Zostawić tylko `WorksheetForm` (usunąć bootstrap z `Index`). | Wraca race ze studentem/exercises (już raz to wystąpiło — v6.9.36) | Średnia |
+| C | Globalny lock w `sessionStorage` (`autoGenerateLock`) + sygnał event. | Dodatkowy stan = kolejne źródło bugów | Średnia |
 
-### Selected: A
-Najmniej inwazyjne, lokalne w Index.tsx i autoGenerateBootstrap.ts.
+### Selected solution — A
+Index pozostaje jedyną wyzwalaczką, bo on potrafi poczekać na `tokensLoading=false` i ma poprawnie zbudowany payload przez `buildAutoGeneratePayload()`. WorksheetForm całkowicie wyłącza swoją RAF-pętlę, ale nadal nasłuchuje eventu `worksheet:autoGenerateStarted`, żeby tylko schować autosuggest UI / pokazać GeneratingModal. Brak konkurencji o flagę = brak race conditiona.
 
 ### Impact analysis
-Zmiany dotyczą tylko Index.tsx mount-effects. Brak zmian w prompcie, RLS,
-DB. Manual submit nie tknięty.
+- Brak wpływu na ręczne klikanie „Generate worksheet" — `WorksheetForm.submitForm()` nadal działa normalnie z eventu `submit`.
+- Brak wpływu na zaplecze AI / Edge Function.
+- Auto-bootstrap będzie też działał, gdy użytkownik kliknie 2x ten sam suggestion (każdy klik generuje nowy `requestId`).
 
-### Implementation
-1. `src/pages/Index.tsx`, przy mount sprawdzamy **najpierw** `sessionStorage.forceNewWorksheet`:
-   ```tsx
-   useEffect(() => {
-     try {
-       if (sessionStorage.getItem('forceNewWorksheet') === 'true') {
-         sessionStorage.removeItem('forceNewWorksheet');
-         worksheetState.forceNewWorksheet();
-       }
-     } catch {}
-   }, []); // jednorazowo
-   ```
-2. W istniejącym bootstrap-effect (linie 246–281):
-   - Usuwamy `if (bothWorksheetsReady) return;`
-   - Tuż przed `handleGenerateWorksheet(payload)` wołamy `worksheetState.resetWorksheetState()` jeżeli `bothWorksheetsReady`.
-   - Dodajemy do deps `[isRegisteredUser, authLoading, tokensLoading, bothWorksheetsReady]`, ale z `fired` ref na poziomie komponentu (nie lokalnym), żeby effect mógł re-run bez podwójnego strzału:
-     ```tsx
-     const autoFiredRef = useRef(false);
-     // wewnątrz interval: if (autoFiredRef.current) return;
-     // przed `handleGenerateWorksheet`: autoFiredRef.current = true;
-     ```
-3. `src/lib/worksheet/autoGenerateBootstrap.ts` — dodać export `hasAutoGenerateIntent(): boolean` (tylko sprawdza flagę bez parsowania) i użyć w Index do early-out gdy ani intent ani forceNewWorksheet nie są ustawione.
+### Implementation (gotowe diffy)
 
-### Verification
-- Klik „Generate worksheet ↗" z 1-Minute Prep po wcześniejszym otwartym worksheecie → reset stanu + auto-submit działa.
-- Manual click w `/` bez flag → bez zmian.
-- Token-loading retry path nie traci intentu (event handshake z v6.9.48 nadal aktywny).
+**`src/components/WorksheetForm/index.tsx`** — usuwamy RAF-pętlę auto-submitu i zostawiamy tylko:
+- `useEffect` nasłuchujący `worksheet:autoGenerateStarted` → ustawia lokalny flag `autoSubmittedByIndex=true`, czyści `prefillWorksheet`/`prefillExercises`/`prefillExerciseFocusMap`/`prefillMediaTypes`/`prefillSuggestionId` z sessionStorage (Index już wystrzelił payload, nie musimy ich trzymać).
+- Usuwamy fragmenty zerujące `autoGenerateWorksheet*` w submit handlerach (linie ~149-150 i ~485-486). Te flagi już są kasowane jednorazowo przez `clearAutoGenerateFlags()` w `Index.tsx`.
+- Skip drugiego `dispatchEvent('worksheet:autoGenerateStarted')` w `Index.handleGenerateWorksheet` jest nieszkodliwy (idempotentny), zostawiamy.
+
+**`src/pages/Index.tsx`** — bez zmian funkcjonalnych poza:
+- Bootstrap effect: po `if (!hasAutoGenerateIntent()) return;` dodać `autoBootstrapFiredRef.current = false;` resetowane, gdy `requestId` w sessionStorage różni się od poprzedniego (klucz `lastBootstrappedRequestId` w `useRef`). To pozwala uruchomić bootstrap dwa razy z rzędu z różnych klików.
+
+**Weryfikacja**
+- [ ] Klik „Generate worksheet ↗" w NextStepBanner → przejście na `/` → po ≤4s widać GeneratingModal i finalny worksheet, BEZ kliknięcia.
+- [ ] Drugi klik (na innym suggestion) bez odświeżania strony → też startuje.
+- [ ] Ręczny submit formularza nadal działa.
+- [ ] `console.log` `[Index v6.9.49] auto-bootstrap fired` pojawia się dokładnie raz na klik.
 
 ---
 
-## P2. Welcome Test — jeszcze więcej pytań na jednym ekranie (desktop + mobile)
+## P2 — Welcome Test: „Auto-apply did not complete" zostaje na zawsze
 
 ### Dependency scan
-`src/pages/WelcomeTestPage.tsx` — header (582–676), section tabs (679–707),
-section header (710–716), question card (719–778), options renderer
-`QuestionInput`, nawigacja (781–841), section progress (843–880).
+- DB function `public.calculate_test_results(p_test_id uuid)` — masowo używana
+- `supabase/functions/process-welcome-test/index.ts` — wywołuje `calculate_test_results` w linii 1366 PO bloku auto-apply (755) i PO WT-4 (686)
+- `src/hooks/useWelcomeTest.tsx:549` — UI woła RPC PRZED `process-welcome-test`
+- `src/hooks/useStudentTests.tsx:307, 497` — inne ścieżki UI (też wywołują RPC)
+- `src/components/student-tests/TestDetailsView.tsx` — banner
 
-### Root cause
-Po v6.9.48 mamy `py-1.5`, `mb-2`, `pt-3 pb-3`, `space-y-3` — opcje
-`px-2.5 py-2`. Mimo to 7-10 opcji + header + tabs + nav nie mieści się na
-~754 px CSS w desktopie ani na mobile.
-
-### Selected solution (B — agresywna kompresja + dwukolumnowy układ dla krótkich opcji + sticky nav)
-| Element | Z | Na |
-|---|---|---|
-| Section tabs `min-h-[32px] px-2.5 py-1.5` | → | `min-h-[26px] px-2 py-0.5` + opcjonalnie ukryte na mobile (już `section progress` u dołu) |
-| Section header (h2 + subtitle) | dwa wiersze | jeden wiersz: `<h2 className="text-sm font-semibold inline">{title}</h2> <span className="text-xs text-muted-foreground ml-2">{subtitle}</span>`, `mb-1` |
-| Question card `pt-3 pb-3 space-y-3` | → | `pt-2 pb-2 space-y-2` |
-| Pytanie `text-sm font-medium leading-relaxed` | → | `text-[13.5px] leading-snug` |
-| Tłumaczenie italics `p-2 mt-2` | → | `p-1.5 mt-1 text-[11px]` |
-| Opcje row (RadioGroupItem/Checkbox) | `px-2.5 py-2 text-base` | `px-2 py-1.5 text-[13.5px] leading-tight` |
-| `space-y` między opcjami | `space-y-2` | `space-y-1` |
-| Header progress bar `h-1.5` | → | `h-1` |
-| „Question N of M" + „X%" linia | dedykowany wiersz | wciśnięte do prawej obok title (już prawie tak jest) — usuwamy osobny rząd na desktopie |
-| Nav buttons `min-h-[40px]` | → | `min-h-[34px] py-1.5 text-xs` + sticky bottom: `sticky bottom-0 bg-gradient-to-t from-background via-background/95 pt-1 pb-1 -mx-2 px-2` |
-| Section progress (mobile) | → | przenieść do paska header (już jest „X%" badge), całkowicie usunąć dolny duplikat na mobile |
-| Listy z >7 opcjami (skill q'ki — patrz P10 „learning activities") | jedna kolumna | `grid grid-cols-1 sm:grid-cols-2 gap-1` (auto-detekcja: `options.length >= 7 && wszystkie krótkie ≤32 znaki`) — to da redukcję pionową ~45 % dla pytań typu „pick all that apply" |
-
-### Implementation
-- `QuestionInput` (komponent w tym samym pliku, ~linia 900+): wprowadzić logikę:
-  ```tsx
-  const shortOpts = options.every((o:string)=>o.length<=42);
-  const wrapClass = options.length>=7 && shortOpts
-    ? 'grid grid-cols-1 sm:grid-cols-2 gap-1'
-    : 'space-y-1';
-  ```
-  Wykorzystać dla `multiple_choice`, `checkbox`, `radio` z odpowiednio dużymi listami.
-- Sticky bottom nav: `<div className="sticky bottom-0 z-10 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/70 -mx-2 px-2 py-1.5 flex items-center justify-between gap-2">`
-- Ukrycie dolnego paska „Section progress" na mobile (`hidden`).
-
-### Verification
-- Zmierzyć na 360×800 i 1280×754: pytanie z 8 opcjami mieści się bez scrollowania.
-- Tłumaczenie aktywne — nadal mieści się (sticky nav zostaje widoczna).
-- Long-form pytania (>20 słów) — wciąż czytelne (`text-[13.5px] leading-snug`).
-
-### Martha test
-13.5 px to wciąż czytelny rozmiar (>= WCAG min). Adult-tone nienaruszony.
-
----
-
-## P3. Welcome Test — banner zmiany levelu + repair auto-apply + nazwa testu
-
-### 3A. Banner „Suggested level change" w zakładce `?tab=dslm`
-
-#### Dependency scan
-`src/components/student-tests/TestDetailsView.tsx` (banner istnieje), `src/components/dslm/DSLMTab.tsx`, `src/components/dslm/PathwayView.tsx`.
-
-#### Root cause
-Banner żyje tylko w TestDetailsView, dostępny dopiero po wejściu w pojedynczy test. Nauczyciele na zakładce DSLM go nie widzą.
-
-#### Selected solution
-Wyekstrahować logikę do reużywalnego komponentu `src/components/student-tests/SuggestedLevelChangeBanner.tsx`:
-- Props: `studentId, teacherId, currentLevel, onApplied?: () => void`
-- Wnętrze: query `student_learning_profiles` po `student_id` + `welcome_test_id IS NOT NULL`, posortowane `updated_at desc limit 1`. Jeżeli `estimated_level && estimated_level !== currentLevel` → render banner z Apply/Keep.
-- Dismiss key: `sessionStorage.wt-level-change-dismissed:${studentId}` (per-student, nie per-test, bo na DSLM tabie nie ma kontekstu testu).
-- Apply: update `students.english_level = estimated_level` przez istniejący `updateStudent` (z `useStudent`); toast; `onApplied?.()`.
-
-Wstawić instancję na górze DSLMTab (zaraz pod `DslmExplainerBanner`).
-Refaktor TestDetailsView: użyć nowego komponentu zamiast inline (zachowuje identyczne API).
-
-#### Verification
-- Test z C1→A2 odchyleniem: banner widoczny na DSLM tab i w Test Details, niezależnie dismissowane.
-- Apply zmienia level → banner znika z obu miejsc po refetchu.
-
----
-
-### 3B. Auto-apply nadal nie kończy się dla starych testów
-
-#### Dependency scan
-`supabase/functions/process-welcome-test/index.ts` (680–773),
-`backfill-welcome-test-auto-apply/index.ts`, `TestDetailsView.handleApplyResults`.
-
-#### Root cause
-`process-welcome-test` zawsze próbuje promować status do `reviewed`, ale ten test
-(z 6 czerwca) ma `applied_at IS NOT NULL` w `test_skill_results` (poprzedni run
-wszystkie oznaczył jako „processed without element"), więc auto-apply nic nie
-robi, a status nie został wcześniej spromowany — wpadliśmy w lukę: kiedy w
-v6.9.39 nie było jeszcze gwarancji „always promote to reviewed", row pozostał
-w `completed`. Force-rerun z UI z v6.9.48 wysyła `force: true`, ale w
-edge-function status update na końcu używa `.neq('status','reviewed')` — to OK.
-**Realny powód braku skutku**: `handleApplyResults` w TestDetailsView wywołuje
-edge func i jeśli ta zwróci `{ ok: true }`, banner powinien zniknąć. Ale po
-sukcesie UI nie robi refetch testu i banner „Auto-apply did not complete" jest
-wyliczany lokalnie z props `test.status`. Trzeba **wymusić refetch** testu po
-udanym `process-welcome-test`.
-
-#### Selected solution
-1. `handleApplyResults` po `supabase.functions.invoke('process-welcome-test', { body: { test_id, force: true }})`:
-   - po sukcesie wywołać `onRefetch?.()` (nowy prop z parent) lub bezpośrednio re-fetch z DB i lokalny `setTestData`.
-2. Dodać w `process-welcome-test` defensywny fix: jeśli `force=true` i brak
-   `test_skill_results.applied_at IS NULL`, ale `status != 'reviewed'`, **i tak**
-   wykonać `status='reviewed'` (mamy już ten kod, ale upewnić się że jest *poza*
-   try który mógłby się wyrzucić wcześniej).
-3. Dodać w odpowiedzi edge-funct payload: `{ ok, applied_count, status, reviewed_at }` — UI używa do walidacji.
-4. UI w `TestDetailsView` warunkuje banner „Auto-apply did not complete" przez `test.status !== 'reviewed' && applied_count === 0` — po refetch banner sam zniknie.
-
-#### Verification
-- Klik „Apply to Progress" na teście z 6 czerwca: spinner → toast „Applied" → banner znika.
-- Edge function logs: `[process-welcome-test] auto-apply: applied=X, status=reviewed`.
-
----
-
-### 3C. (z poprzedniego planu — nadal aktualne, łapka bezpieczeństwa)
-Nazwa „Welcome Test - XD12" już używa dynamicznego studenta — bez zmian, ale dodać fallback gdy student został przemianowany: `useEffect` w `useWelcomeTest` re-fetchujący `students.name` po `studentId` na otwarciu, by tytuł w pasku był zawsze świeży.
-
----
-
-## P4. „How many next steps to add?" — wyjaśnienie + poprawka liczenia
-
-### Dependency scan
-`src/components/dslm/MacroTimeline.tsx` (37–62, 250–272, 471+),
-`src/components/dslm/PathwayView.tsx` (260–261, 312, 372–373),
-`src/hooks/useFutureTimeline.tsx` (128–262),
-`supabase/functions/generate-timeline/index.ts` (40–105, prompt 154–172).
-
-### Aktualna mechanika (odpowiedź dla Ciebie)
-
-**Per-batch math**:
-- `recommendedStepsPerBatch(phase)` = `min(6, max(1, weeks))` (linia 37) — *ile dodać teraz*.
-- `targetStepsForPhase(phase)` = `weeks` (bez clamp) — *docelowa suma w fazie*.
-- Tekst „Suggested: 4 per batch (6/10 added — max 6 per generation, repeat to fill)" → liczba „6" to ILE JUŻ JEST w fazie (`phaseSuggestions.length`), „10" to `targetStepsForPhase(phase)` (np. faza 10-tygodniowa), „4" to `target - have = 10-6 = 4` (clamp do 6).
-
-**Czy bierze istniejące pod uwagę przy generowaniu?**
-- TAK przez `existingStepsRes` w `generate-timeline/index.ts` (linie 83–88): pobiera do 20 ostatnich nieużytych sugestii **z CAŁEGO STUDENTA** (wszystkie fazy + free next steps), zlicza je do bloku `ACTIVE PENDING STEPS already queued for this student (do NOT duplicate, build COMPLEMENTARILY)`.
-- AI ma instrukcję `COMPLEMENTARITY RULE` (linia 157) — *nie powtarzaj, uzupełniaj luki, spaced retrieval ≥2 kroki temu*.
-- Dodatkowo `excludeIds` (do 25 sztuk, hard cap) — sugestie aktualnie pokazywane w UI są przekazywane jako „ADDITIONALLY AVOID".
-
-**Czy bierze pod uwagę next_steps z poprzednich faz przy generowaniu dla nowej fazy?**
-- TAK — `existingStepsRes` zwraca wiersze **bez filtru po `phase_id`**, więc poprzednie fazy też lądują w bloku. Ale informacja, że one należą do innej fazy, nie jest w prompcie — AI widzi tylko `suggested_topic`, `grammar_focus`, `sequence_number`, `phase_id`. **Tu jest luka** — możemy ulepszyć blok o pokazanie powiązania z fazami, by AI lepiej rozumiało, że one już są zaplanowane gdzie indziej.
+### Root cause (sprawdzone na rzeczywistych ID `92b9c16d…` i `fc81367a…`)
+RPC `calculate_test_results` w PL/pgSQL:
+```sql
+DELETE FROM public.test_skill_results WHERE test_id = p_test_id;
+INSERT INTO public.test_skill_results (...);
+UPDATE public.student_tests SET status='completed', completed_at=NOW(), ... WHERE id = p_test_id;
+```
+Nie ma żadnego guardu „nie nadpisuj jeśli reviewed", ani „nie kasuj applied_at". Sekwencja w `process-welcome-test`:
+1. WT-4 → status='completed'
+2. Auto-apply → status='reviewed', `test_skill_results.applied_at = NOW()`
+3. AI scoring + **`calculate_test_results` (linia 1366)** → **DELETE skill_results (gubi applied_at) + status='completed' (downgrade)**
+4. Final defensive promotion (linia 1505) → status='reviewed', ALE skill_results pozostają z `applied_at=NULL` → UI banner („Auto-apply did not complete") sterowany przez `test.status === 'completed'`. W kolejnych sesjach widać `status='completed'` (gdy linia 1505 nie zdąży się wykonać przy edge-function timeout). Potwierdzone w produkcji: oba testy mają `reviewed_at < completed_at` i status='completed', skill_results z `applied_at=NULL`.
 
 ### Solution options
-| Opcja | Opis |
-|---|---|
-| A | Tylko poprawić tooltip/copy żeby tłumaczył mechanikę (zero code) |
-| B | A + wzbogacić blok `existingSteps` w prompcie o adnotację „phase #N" gdy `phase_id` jest znane |
-| C | B + wprowadzić explicit `priorPhaseSteps` blok pokazujący kroki poprzednich faz oddzielnie |
+| # | Podejście | Tradeoff | Regresja |
+|---|-----------|----------|----------|
+| A | Migracja: `calculate_test_results` (a) skip `status='completed'` jeśli już 'reviewed'; (b) UPSERT skill_results z `ON CONFLICT(test_id,element_type) DO UPDATE SET ... ` zachowując `applied_at`. | Naprawa u źródła. Wymaga unique constraint lub MERGE. | Niska |
+| B | Refactor `process-welcome-test`: przenieść auto-apply na sam koniec (PO recalcu w linii 1366) + zostawić idempotentne ustawianie status. | Mniej inwazyjne, ale RPC nadal psuje rzeczy gdy uruchamia ją UI bez następującego `process-welcome-test`. | Niska |
+| C | Połączyć A+B — DB jako twardy guard, edge-function dodatkowo re-aplikuje po wewn. recalcu. | Najbardziej odporne. | Niska |
 
-### Selected: B
-Najlepszy stosunek wartości do ryzyka. **Nie zmienia** Worksheet Generation
-Engine (to inna funkcja `generate-timeline` dla DSLM, nie generator
-worksheetów). UI copy też wyjaśnia mechanikę.
+### Selected solution — C
+Naprawiamy strukturę na obu poziomach. Migracja DB chroni przed wszystkimi nieznanymi callerami (UI, future code). Refactor `process-welcome-test` gwarantuje, że nawet jeśli ktoś wywoła RPC w środku, wynik zawsze kończy się na `status='reviewed' + applied_at` ustawionym.
+
+### Impact analysis
+- Migracja zmienia kontrakt RPC, ale tylko w sposób bardziej zachowawczy: nie obniża statusu, nie czyści applied_at. UI sprawdzające `status === 'completed'` nadal przejdzie do `reviewed`, tylko już nie cofnie.
+- Wymagany unique index na `test_skill_results (test_id, element_type)` — sprawdzić, czy istnieje; jeśli nie — utworzyć w migracji (zachowując deduplikację: usunąć ew. duplikaty przed indexem).
+- Brak wpływu na not-welcome testy (other test types) — guardy są oparte o status.
 
 ### Implementation
-1. `supabase/functions/_shared/dslmPromptCore.ts` — `buildExistingStepsBlock(steps, limit)`:
-   - Dla każdego rekordu z `phase_id` dorzucić `[phase ${phase_id.slice(0,8)}]` lub mapować na `sequence_number` jeśli dostępne. Sygnatura zostaje, dodajemy fallback bez zmiany API.
-2. `generate-timeline/index.ts`: rozszerzyć `existingStepsRes` o join z fazami:
-   ```ts
-   supabase.from('future_worksheet_suggestions')
-     .select('suggested_topic, suggested_grammar_focus, sequence_number, phase_id, dslm_curriculum_phases(sequence_number, title)')
-     ...
-   ```
-   I w `buildExistingStepsBlock` pokazywać `[Phase #N "title"]`.
-3. UI copy w `MacroTimeline.tsx` (~linia 480, dropdown helper text):
-   - Z: `Suggested: 4 per batch (6/10 added — max 6 per generation, repeat to fill).`
-   - Na: `You have 6/10 steps in this phase. Adding 4 now (max 6 per click). The AI sees the 6 existing steps AND steps from other phases, so new ones won't duplicate — they complement and fill gaps.`
-4. W `GenerateStepsDialog.tsx` rozszerzyć opis:
-   ```
-   Adds up to 6 steps per generation. Existing steps in this AND other phases
-   are passed to the AI as 'queued steps — do not duplicate'. Repeat to reach
-   the phase target.
-   ```
 
-### Verification
-- Wygenerowanie 4 next steps w fazie z 6 istniejącymi i 3 w innej fazie → w edge logs widać `ACTIVE PENDING STEPS` z 9 wpisami z adnotacją `[Phase #N]`.
-- Brak duplikatów topiców.
+**Nowa migracja `supabase/migrations/<ts>_calculate_test_results_preserve_review.sql`**
+```sql
+-- 1) Unique key for upsert (deduplikuj jeśli istnieją duplikaty)
+WITH ranked AS (
+  SELECT id, ROW_NUMBER() OVER (PARTITION BY test_id, element_type ORDER BY created_at DESC, id) AS rn
+  FROM public.test_skill_results
+)
+DELETE FROM public.test_skill_results r USING ranked WHERE r.id = ranked.id AND ranked.rn > 1;
 
-### Sanctity
-Worksheet Generation Engine NIE jest dotykany. `generate-timeline` to osobny DSLM-pipeline.
+ALTER TABLE public.test_skill_results
+  ADD CONSTRAINT test_skill_results_test_element_unique
+  UNIQUE (test_id, element_type);
+
+-- 2) Re-create function preserving applied_at + status='reviewed'
+CREATE OR REPLACE FUNCTION public.calculate_test_results(p_test_id uuid)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path TO 'public'
+AS $function$
+DECLARE
+  v_total INTEGER; v_correct INTEGER; v_score NUMERIC(5,2);
+  v_time INTEGER; v_student_id UUID; v_current_status TEXT; v_result JSONB;
+BEGIN
+  SELECT st.student_id, st.status,
+         COUNT(*)::INTEGER,
+         COALESCE(SUM(CASE WHEN stq.is_correct THEN 1 ELSE 0 END),0)::INTEGER,
+         COALESCE(SUM(stq.time_spent_seconds),0)::INTEGER
+  INTO v_student_id, v_current_status, v_total, v_correct, v_time
+  FROM public.student_tests st
+  LEFT JOIN public.student_test_questions stq ON stq.test_id = st.id
+  WHERE st.id = p_test_id
+  GROUP BY st.student_id, st.status;
+
+  v_score := CASE WHEN v_total > 0 THEN (v_correct::NUMERIC / v_total * 100) ELSE 0 END;
+
+  UPDATE public.student_tests
+  SET total_questions = v_total,
+      correct_answers = v_correct,
+      score_percentage = v_score,
+      time_spent_seconds = v_time,
+      -- v6.9.50: do not downgrade a reviewed test
+      status = CASE WHEN v_current_status = 'reviewed' THEN status ELSE 'completed' END,
+      completed_at = COALESCE(completed_at, NOW()),
+      updated_at = NOW()
+  WHERE id = p_test_id;
+
+  -- v6.9.50: UPSERT skill rows, preserve applied_at + applied_to_element_id
+  INSERT INTO public.test_skill_results
+    (test_id, student_id, element_type, skill_tags, total_questions, correct_answers, score_percentage, suggested_rating)
+  SELECT p_test_id, v_student_id, element_type,
+         ARRAY_AGG(DISTINCT tag) FILTER (WHERE tag IS NOT NULL),
+         COUNT(*)::INTEGER,
+         SUM(CASE WHEN is_correct THEN 1 ELSE 0 END)::INTEGER,
+         (SUM(CASE WHEN is_correct THEN 1 ELSE 0 END)::NUMERIC / COUNT(*) * 100),
+         CASE
+           WHEN (SUM(CASE WHEN is_correct THEN 1 ELSE 0 END)::NUMERIC / COUNT(*) * 100) >= 80 THEN 5
+           WHEN (SUM(CASE WHEN is_correct THEN 1 ELSE 0 END)::NUMERIC / COUNT(*) * 100) >= 60 THEN 4
+           WHEN (SUM(CASE WHEN is_correct THEN 1 ELSE 0 END)::NUMERIC / COUNT(*) * 100) >= 40 THEN 3
+           WHEN (SUM(CASE WHEN is_correct THEN 1 ELSE 0 END)::NUMERIC / COUNT(*) * 100) >= 20 THEN 2
+           ELSE 1
+         END
+  FROM public.student_test_questions stq
+  LEFT JOIN LATERAL unnest(stq.skill_tags) AS tag ON true
+  WHERE stq.test_id = p_test_id AND stq.element_type IS NOT NULL
+  GROUP BY element_type
+  ON CONFLICT (test_id, element_type) DO UPDATE
+    SET skill_tags = EXCLUDED.skill_tags,
+        total_questions = EXCLUDED.total_questions,
+        correct_answers = EXCLUDED.correct_answers,
+        score_percentage = EXCLUDED.score_percentage,
+        suggested_rating = EXCLUDED.suggested_rating;
+        -- applied_at / applied_to_element_id intentionally untouched
+
+  RETURN jsonb_build_object('total_questions', v_total, 'correct_answers', v_correct,
+                            'score_percentage', v_score, 'time_spent_seconds', v_time);
+END;
+$function$;
+```
+
+**`supabase/functions/process-welcome-test/index.ts`** — wyodrębniamy auto-apply do `async function applyAndPromote(...)` i wołamy ją **na końcu** (po linii 1366), zastępując obecną „final defensive promotion" pełnym auto-apply (jak w bloku 703–759, ale jako jedna pomocnicza funkcja, idempotentna). Blok 703–773 redukujemy do prostego „wstępnego" wywołania `applyAndPromote(...)` (zachowanie kompatybilności gdy AI scoring jest pominięty/pusty), a po linii 1367 wstawiamy drugie wywołanie. Zwracane `status` w odpowiedzi reuse'uje wynik drugiego wywołania.
+
+**Backfill skryptowy** — nowa one-shot funkcja **nie jest potrzebna**, bo TestDetailsView już ma „Apply to Progress" które wywoła `process-welcome-test` z `force:true`. Po deployu DB-migracji nawet stare testy się naprawią przy następnym kliknięciu / kolejnym auto-procesie. Dla 2 ID z requestu wykonamy ręczny re-run przez `Apply to Progress` (zero kodu).
+
+**Weryfikacja**
+- [ ] Po deployu migracji: `SELECT status FROM student_tests WHERE id='fc81367a-…'` nadal 'completed' → klik „Apply to Progress" w UI → status='reviewed', `test_skill_results.applied_at IS NOT NULL` dla 6 wierszy.
+- [ ] Nowy student kończy Welcome Test → bez żadnej interakcji teacher widzi „Results applied to student's skill ratings." (zielony banner).
+- [ ] Re-run process-welcome-test wielokrotnie idempotentnie utrzymuje status='reviewed'.
 
 ---
 
-## RAG injection (po implementacji)
+## P3 — Walidacja e-maila w `WelcomeTestPage` blurred modal
 
-`docs/llm-context.md` + `public/llms.txt` — nowy bloczek:
+### Dependency scan
+- `src/pages/WelcomeTestPage.tsx` — funkcja `handleVerifyEmail` (linie 239–261)
 
+### Root cause
+Sprawdzamy tylko `email.trim()` przed wysłaniem do DB. Brak regexu HTML5 / JS — wkleić można cokolwiek.
+
+### Selected solution
+Dodać prostą walidację `/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/` z toastem „Please enter a valid email address" i `aria-invalid` na inpucie. Zachować dotychczasową ścieżkę porównania ze studentem.
+
+### Implementation
+```tsx
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+const handleVerifyEmail = async () => {
+  const raw = emailInput.trim();
+  if (!raw) { toast.error("Please enter your email"); return; }
+  if (!EMAIL_RE.test(raw)) {
+    toast.error("Please enter a valid email address (e.g. name@example.com)");
+    return;
+  }
+  const email = raw.toLowerCase();
+  // ...reszta bez zmian
+};
 ```
-PROBLEM: Auto-generate from 1-Minute Prep dropped intent when a worksheet was already visible; Welcome Test overflowed viewport; teachers missed level-change banner on DSLM tab; old completed tests stayed unreviewed; phase-batch math was opaque.
+Dodatkowo: `<Input type="email" inputMode="email" autoComplete="email" required aria-invalid={emailInput && !EMAIL_RE.test(emailInput.trim()) ? 'true' : undefined} ... />` i blokada `Continue` gdy regex nie przejdzie.
 
-EDOOQOO SOLUTION (v6.9.49): sessionStorage `forceNewWorksheet` honored in Index + `resetWorksheetState` before auto-bootstrap; ultra-compact WT layout (smaller paddings + 2-col options for ≥7 short choices + sticky nav); reusable `SuggestedLevelChangeBanner` on DSLMTab; `process-welcome-test` always promotes status to reviewed and UI refetches test after force-apply; generate-timeline existingSteps block annotates `[Phase #N]` and UI explains batch vs target.
-
-TECHNICAL MECHANICS: src/pages/Index.tsx, src/lib/worksheet/autoGenerateBootstrap.ts, src/pages/WelcomeTestPage.tsx, src/components/student-tests/SuggestedLevelChangeBanner.tsx, src/components/student-tests/TestDetailsView.tsx, src/components/dslm/DSLMTab.tsx, src/components/dslm/MacroTimeline.tsx, src/components/dslm/GenerateStepsDialog.tsx, supabase/functions/process-welcome-test/index.ts, supabase/functions/generate-timeline/index.ts, supabase/functions/_shared/dslmPromptCore.ts.
-
-RAG KEYWORDS: auto generate worksheet bootstrap, force new worksheet reset, dslm pathway phase batch target, welcome test compact layout, options two column grid, sticky bottom navigation, suggested level change banner, dslm tab repair banner, process welcome test force reprocess, refetch test after apply, generate timeline existing steps phase annotation, complementarity rule, max 6 per generation, target steps for phase, recommended steps per batch, student tests reviewed status.
-```
-
-`mem/index.md` — dodać wpis:
-`- [v6.9.49 fixes](mem://features/onboarding/v6949-force-new-bootstrap-wt-ultra-compact-banner-dslm-existing-steps-annot) — auto-generate reset, WT 2-col & sticky nav, DSLM level banner, force reprocess refetch, phase batch annotation`
+### Weryfikacja
+- [ ] `asdf` → toast „Please enter a valid email address", brak zapisu w localStorage.
+- [ ] `a@b.co` → przechodzi.
+- [ ] Test z email != studentowy nadal odrzuca z dotychczasowym komunikatem.
 
 ---
 
-## Final change report (po implementacji)
+## P4 — Bramka „za dużo zakolejkowanych next-steps"
 
-**Files modified (planowane):**
-- src/pages/Index.tsx
-- src/lib/worksheet/autoGenerateBootstrap.ts
-- src/pages/WelcomeTestPage.tsx
-- src/components/student-tests/SuggestedLevelChangeBanner.tsx (nowy)
-- src/components/student-tests/TestDetailsView.tsx
-- src/components/dslm/DSLMTab.tsx
-- src/components/dslm/MacroTimeline.tsx
-- src/components/dslm/GenerateStepsDialog.tsx
-- supabase/functions/process-welcome-test/index.ts
-- supabase/functions/generate-timeline/index.ts
-- supabase/functions/_shared/dslmPromptCore.ts
-- docs/llm-context.md, public/llms.txt, mem/index.md, mem/features/onboarding/v6949-*.md
+### Dependency scan
+- `src/components/dslm/GenerateStepsDialog.tsx` (props `phaseOptions` mają `have`, `need`)
+- `src/components/dslm/NextStepsSection.tsx` (otwiera dialog, zna listę aktywnych suggestions / next-steps)
+- `src/components/dslm/PathwayView.tsx` (źródło `phaseSteps`, `nextSteps`)
 
-**Out of scope (zalogowane na przyszłość):**
-- Pełny refaktor `useWorksheetState` na natywny persistence z `forceNew` flag.
-- Server-side enforcement liczby kroków per faza (obecnie tylko hint w UI).
-- Multilingual translation toggle dla pytań `open_ended` (poza scope tego cyklu).
+### Root cause
+Brak heurystyki gating: kliknięcie „Generate" generuje kolejne 1–6 sugestii niezależnie od istniejącej kolejki, mimo że DSLM uczy się dynamicznie po każdej wykonanej aktywności i lepiej generować w mniejszych dawkach.
+
+### Selected solution
+Próg = **5 aktywnych (nie wykonanych) next-steps** (sweet spot: 1 tydzień pracy ucznia przy 1 lekcji/tydzień; dolny próg poniżej 6 daje też nauczycielowi szybką pętlę).
+
+W `GenerateStepsDialog` dodajemy nowy prop `activeQueueSize: number`. Gdy `activeQueueSize >= 5` i `mode === 'more'` — przed kliknięciem `Confirm` pokazujemy żółty inline alert:
+
+> ⚠ You already have **{activeQueueSize}** active next-steps. DSLM learns from each completed worksheet/homework/note — fresh suggestions get smarter after the student finishes a few. Consider waiting before generating more.
+
+Pod alertem dwa przyciski: `Wait` (zamyka dialog) + `Generate anyway` (kontynuuje normalny `onConfirm`). Tekst NIE blokuje — to soft gate.
+
+W `NextStepsSection` policz `activeQueueSize`: liczba `nextSteps` (gdzie `is_used=false` i nie `dismissed_at`) + liczba `phaseSteps` w bieżącej fazie ze statusem != 'completed'/'archived'. Przekaż do dialogu.
+
+### Implementation (skrócone)
+```tsx
+// GenerateStepsDialog props
+activeQueueSize: number;
+const showQueueWarning = mode === 'more' && activeQueueSize >= 5;
+const [acknowledged, setAcknowledged] = useState(false);
+useEffect(() => { if (open) setAcknowledged(false); }, [open]);
+// W footer:
+{showQueueWarning && !acknowledged ? (
+  <div className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900 space-y-2">
+    <p>⚠ You already have <b>{activeQueueSize}</b> active next-steps. DSLM learns from each completed activity — new suggestions get sharper after the student finishes a few.</p>
+    <div className="flex gap-2 justify-end">
+      <Button variant="ghost" size="sm" onClick={() => onOpenChange(false)}>Wait</Button>
+      <Button size="sm" onClick={() => setAcknowledged(true)}>Generate anyway</Button>
+    </div>
+  </div>
+) : (
+  <Button onClick={() => onConfirm(count, phaseValue === FREE_VALUE ? null : phaseValue)} disabled={generating}>
+    {generating ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Plus className="h-4 w-4 mr-2" />}
+    Generate
+  </Button>
+)}
+```
+
+### Weryfikacja
+- [ ] 5 aktywnych suggestions + klik Generate more → widać alert + 2 przyciski.
+- [ ] „Generate anyway" → kontynuuje normalne `onConfirm`.
+- [ ] `mode='first'` (pusty stan) nigdy nie pokazuje alertu.
+- [ ] <5 — alert nie pojawia się.
+
+---
+
+## P5 — Modal Lesson Pending/Booked w `/calendar`
+
+### Dependency scan
+- `src/components/calendar/SlotDetailModal.tsx` (linie ~813–845 worksheet field; 920–959 confirm/reject; 985–989 save/cancel)
+- `useNavigate` z react-router (nowa zależność w pliku) — sprawdzić import; jest go już brak — dodać.
+
+### Root cause
+Modal traktuje „Confirm booking" i „Save changes (worksheet)" jako rozłączne akcje, mimo że dla statusu `Pending` zawsze są to części tej samej decyzji nauczyciela. Brak też CTA dla pustej listy worksheetów ani podpowiedzi przekierowania do 1-Minute Prep.
+
+### Selected solutions (po podproblemie)
+
+**5A — podświetlenie pola Worksheet w Pending + „Confirm & go to 1-Minute Prep"**
+- Owinąć blok worksheet (`<Label> + <Select>`) w `<div className={isPending ? 'ring-2 ring-primary/40 rounded-md p-2' : ''}>`.
+- W bloku `isPending` (linia 924) dodać 3. przycisk, widoczny tylko gdy `editWorksheetId === 'none'`:
+```tsx
+<Button size="sm" variant="outline" className="text-xs h-7"
+  onClick={async () => { await handleConfirm(); navigate(`/student/${slot.student_id}?tab=dslm`); }}>
+  <Sparkles className="h-3 w-3 mr-1" /> Confirm & open 1-Minute Prep
+</Button>
+```
+Tooltip: „Confirm the booking and jump to the student's DSLM to generate a tailored worksheet for this lesson."
+
+**5B — pusty stan listy worksheetów**
+Pod selectem (gdy `hasStudent && studentWorksheets.length === 0`):
+```tsx
+<div className="mt-1 text-[11px] text-muted-foreground flex items-center gap-1">
+  <Sparkles className="h-3 w-3 text-primary" />
+  No worksheets yet —
+  <button className="underline text-primary" onClick={() => navigate(`/student/${slot.student_id}?tab=dslm`)}>
+    generate one with 1-Minute Prep
+  </button>
+</div>
+```
+Pokazujemy zarówno w Pending, jak i Booked (warunek zawiera `hasStudent`, niezależny od statusu).
+
+**5C1 — Pending + wybrany worksheet → jeden „Confirm & assign"**
+Gdy `isPending && hasChanges && editWorksheetId !== 'none'`:
+- Ukrywamy dolny przycisk `Save Changes` (warunek staje się `hasChanges && !(isPending && editWorksheetId !== 'none')`)
+- Zamieniamy pending-bar Confirm na „Confirm & assign worksheet" wykonujący sekwencyjnie `await handleSave(); await handleConfirm();`. `Reject` pozostaje.
+```tsx
+const confirmLabel = (isPending && editWorksheetId !== 'none' && hasChanges)
+  ? 'Confirm & assign worksheet' : 'Confirm';
+onClick: async () => {
+  if (isPending && editWorksheetId !== 'none' && hasChanges) {
+    await handleSave({ skipClose: true }); // dodaj parametr w handleSave aby NIE zamykać modala
+  }
+  await handleConfirm();
+}
+```
+`handleSave` aktualnie zamyka modal po sukcesie — dodajemy opcjonalny argument `{ skipClose?: boolean }` i nie wywołujemy `onOpenChange(false)` gdy true.
+
+**5C2 — Booked: bez zmian (Cancel / Save Changes jak są).**
+
+**5D — dodatkowa propozycja**
+Sugestia (do potwierdzenia, niżej w pytaniu): dla statusu `Booked` bez worksheet i z datą lekcji ≤ 24h → pokazać amber pasek „Lesson starts in < 24h — assign or generate a worksheet" z dwoma przyciskami (`Pick worksheet`, `Generate with 1-Minute Prep`). Nie wdrażamy bez zielonego światła.
+
+### Implementation notes
+- Dodać `import { useNavigate } from 'react-router-dom'; import { Sparkles } from 'lucide-react';` na górze pliku.
+- `handleSave` zmiana sygnatury: `async (opts: { skipClose?: boolean } = {})`; `if (!opts.skipClose) onOpenChange(false)`.
+- Brak ingerencji w warstwę emaili / RLS.
+
+### Weryfikacja
+- [ ] Pending bez worksheet → 3 przyciski (Confirm / Reject / Confirm & open 1-Minute Prep). Worksheet field ma ramkę primary.
+- [ ] Pending z wybranym worksheet → 1 przycisk `Confirm & assign worksheet` (zamiast Confirm + Save Changes). `Reject` widoczny. W stopce brak `Save Changes` (jest `Cancel`).
+- [ ] Booked z istniejącym worksheet → bez zmian (Cancel + Save Changes).
+- [ ] Booked/Pending gdy student nie ma żadnego worksheet → linijka „No worksheets yet — generate one with 1-Minute Prep" (klikalna).
+- [ ] Nawigacja przenosi na `/student/{id}?tab=dslm`.
+
+---
+
+## Cross-cutting — RAG injection
+
+Dodajemy do `docs/llm-context.md` i `public/llms.txt` sekcję **v6.9.50** w formacie wymaganym przez Execution Engine ([10]):
+
+```
+PROBLEM: Auto-generate worksheet from 1-Minute Prep silently drops on navigation; Welcome Test auto-apply rolled back by calculate_test_results; WT email accepts any string; uncapped next-steps queue; calendar Pending modal duplicates confirm+save and lacks 1-Minute Prep shortcut.
+EDOOQOO SOLUTION: Single bootstrap path (Index only). DB function + edge-fn refactor preserving applied_at + status='reviewed'. Regex-validated WT email. Soft 5-queue gate in GenerateStepsDialog. Calendar Pending modal: highlighted worksheet field, "Confirm & open 1-Minute Prep", merged "Confirm & assign worksheet", empty-state CTA.
+TECHNICAL MECHANICS: WorksheetForm RAF loop removed; Index.tsx bootstrap effect tracked by lastBootstrappedRequestId. public.calculate_test_results upserts test_skill_results ON CONFLICT(test_id,element_type); never downgrades reviewed status. process-welcome-test exposes applyAndPromote() helper, called pre- and post- AI rescoring. WelcomeTestPage EMAIL_RE guard. GenerateStepsDialog activeQueueSize prop, NextStepsSection computes from nextSteps + phaseSteps. SlotDetailModal: handleSave accepts {skipClose}, conditional confirm label, isPending ring, navigate to /student/{id}?tab=dslm.
+RAG KEYWORDS: auto-generate worksheet, 1-Minute Prep handshake, sessionStorage forceNewWorksheet, autoGenerateWorksheetRequest, RAF auto-submit removal, Welcome Test auto-apply, calculate_test_results idempotent, test_skill_results applied_at, status reviewed guard, WT email regex validation, next-steps queue soft gate, GenerateStepsDialog activeQueueSize, calendar Pending modal, Confirm & assign worksheet, Confirm & open 1-Minute Prep
+```
+
+Aktualizujemy `mem/index.md` o nową pozycję:
+```
+- [v6.9.50 Auto-gen/WT/Calendar/Queue Gate](mem://features/onboarding/v6950-autogen-wt-applyfix-queue-calendar) — Single Index bootstrap, calculate_test_results idempotent, WT email regex, 5-queue gate, calendar Pending modal merged buttons
+```
+
+Tworzymy `mem/features/onboarding/v6950-autogen-wt-applyfix-queue-calendar.md` z opisem zmian (English).
+
+---
+
+## Final change report (preview)
+
+| Plik | Akcja |
+|------|-------|
+| `src/components/WorksheetForm/index.tsx` | Usuń RAF auto-submit (zachowaj listener eventu) |
+| `src/pages/Index.tsx` | `lastBootstrappedRequestId` ref + re-trigger po nowym requestId |
+| `supabase/migrations/<ts>_calculate_test_results_preserve_review.sql` | Nowa migracja |
+| `supabase/functions/process-welcome-test/index.ts` | Wyodrębnij `applyAndPromote`, wywołaj 2× |
+| `src/pages/WelcomeTestPage.tsx` | `EMAIL_RE` + walidacja |
+| `src/components/dslm/GenerateStepsDialog.tsx` | `activeQueueSize` prop + soft gate UI |
+| `src/components/dslm/NextStepsSection.tsx` | Policz `activeQueueSize`, przekaż do dialogu |
+| `src/components/dslm/PathwayView.tsx` | (Jeśli używa dialogu osobno) przekaż `activeQueueSize` |
+| `src/components/calendar/SlotDetailModal.tsx` | `useNavigate`, ring na worksheet, 3 przyciski Pending, empty-state CTA, merged confirm |
+| `docs/llm-context.md`, `public/llms.txt`, `mem/index.md`, `mem/features/onboarding/v6950-…md` | RAG + memory |
+
+**Decyzje do potwierdzenia (jedno pytanie):**
+1. Próg `activeQueueSize` = **5** (czy zostawiamy, czy wolisz 4 albo 6)?
+2. P5D: czy dodać amber pasek „Lesson < 24h, no worksheet" w Booked? (Tak/Nie)
+
+Po Twoim ok wdrażam wszystko jednym ciągiem.
