@@ -96,9 +96,9 @@ export const GenerateStepsDialog: React.FC<GenerateStepsDialogProps> = ({
     const gap = selectedPhase.need - selectedPhase.have;
     const capped = Math.min(6, gap);
     if (gap > 6) {
-      return `Phase has ${selectedPhase.have}/${selectedPhase.need} steps — adding ${capped} now (max 6 per batch, repeat to fill).`;
+      return `Phase has ${selectedPhase.have}/${selectedPhase.need} steps — adding ${capped} now (max 6 per batch, repeat to fill). AI receives all existing steps from this AND other phases to avoid duplicates and complement them.`;
     }
-    return `Phase has ${selectedPhase.have}/${selectedPhase.need} steps. Recommended add: ${capped}.`;
+    return `Phase has ${selectedPhase.have}/${selectedPhase.need} steps. Recommended add: ${capped}. AI receives all existing steps from this AND other phases to avoid duplicates and complement them.`;
   })();
 
   // v6.9.15a — only treat as "recommended" if the phase still exists.
