@@ -249,6 +249,7 @@ export const NextStepsSection: React.FC<NextStepsSectionProps> = ({
         phaseOptions={phaseOptions}
         showPhaseSelector={showPhaseSelector}
         generating={generating}
+        activeQueueSize={items.length}
         onConfirm={async (count, phaseId) => {
           if (genMode === 'first') {
             await onGenerateMore(count, [], phaseId);
