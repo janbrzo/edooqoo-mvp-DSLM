@@ -50,6 +50,9 @@ const Index = () => {
   // to be defensive in case a previous worksheet was already hydrated in this
   // component's state. Idempotent.
   const autoBootstrapFiredRef = React.useRef(false);
+  // v6.9.50 — track the last requestId we already auto-fired so a second click on
+  // a different "Generate worksheet ↗" suggestion (without page reload) re-triggers.
+  const lastBootstrappedRequestIdRef = React.useRef<string | null>(null);
 
   // v6.9.6 — force light theme on public landing (mobile dark mode was inheriting
   // prefers-color-scheme:dark and rendering the marketing page with poor contrast).
