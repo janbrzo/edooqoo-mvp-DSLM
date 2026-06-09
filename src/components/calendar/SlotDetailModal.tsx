@@ -12,10 +12,11 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CalendarSlot } from '@/hooks/useCalendarSlots';
 import { format, differenceInMinutes } from 'date-fns';
-import { Check, X, Trash2, FileText, ExternalLink, AlertTriangle, Link2, Undo2, UserMinus, Repeat, Ban, ChevronsUpDown, History, Lock } from 'lucide-react';
+import { Check, X, Trash2, FileText, ExternalLink, AlertTriangle, Link2, Undo2, UserMinus, Repeat, Ban, ChevronsUpDown, History, Lock, Sparkles } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { useNavigate } from 'react-router-dom';
 
 interface Student {
   id: string;
@@ -75,6 +76,7 @@ const EMPTY_SLOT = {
 export function SlotDetailModal({ open, onOpenChange, slot, studentName, students, onUpdate, onDelete, onLinkWorksheet, onNotificationsChanged }: SlotDetailModalProps) {
   // Use safeSlot for all hooks to ensure consistent hook order
   const safeSlot = slot || EMPTY_SLOT;
+  const navigate = useNavigate();
 
   const [editDate, setEditDate] = useState('');
   const [editStartTime, setEditStartTime] = useState('');
@@ -207,7 +209,7 @@ export function SlotDetailModal({ open, onOpenChange, slot, studentName, student
 
   const handleCancel = () => { resetChanges(); onOpenChange(false); };
 
-  const handleSave = async () => {
+  const handleSave = async (opts: { skipClose?: boolean } = {}) => {
     // v6.9.8 — demo guard (modal can open in demo, save is blocked)
     if (typeof window !== 'undefined' && localStorage.getItem('edooqoo_demo_mode') === 'true') {
       toast.info('Demo mode — Saving slot changes is disabled.');
@@ -350,7 +352,7 @@ export function SlotDetailModal({ open, onOpenChange, slot, studentName, student
       } as any);
     } catch (_) {}
     setSaving(false);
-    onOpenChange(false);
+    if (!opts.skipClose) onOpenChange(false);
   };
 
   const extractStudentEmail = (notes: string | null): string => {
