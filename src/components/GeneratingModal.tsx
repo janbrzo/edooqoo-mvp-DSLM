@@ -5,6 +5,7 @@ import { Circle, Loader2, CheckCircle2, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import GenerationContextPanel from "@/components/generation/GenerationContextPanel";
+import WorkflowSummaryCard from "@/components/generation/WorkflowSummaryCard";
 
 interface GeneratingModalProps {
   isOpen: boolean;
@@ -323,7 +324,7 @@ export default function GeneratingModal({
             'space-y-6 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.92fr)] lg:gap-6 lg:space-y-0 lg:p-6'
           )}
         >
-          <div className="space-y-4">
+          <div className="flex flex-col h-full space-y-4">
         <h2 className="text-2xl font-semibold text-center bg-gradient-to-r from-pink-500 via-violet-500 to-blue-500 bg-clip-text text-transparent">
           Generating Your Worksheet
         </h2>
@@ -390,6 +391,7 @@ export default function GeneratingModal({
             </span>
           )}
         </p>
+        <WorkflowSummaryCard className="mt-auto" />
           </div>
           <GenerationContextPanel variant={isAnonymous ? 'anonymous' : 'authenticated'} />
         </div>
