@@ -388,3 +388,6 @@ root crawlability, no-JS homepage summary, raw homepage canonical, FAQPage schem
 - `src/utils/promptFormatter.ts` now calls `format-worksheet-prompt` via raw `fetch` with `Authorization: Bearer <session token or VITE_SUPABASE_PUBLISHABLE_KEY>` + `apikey`, eliminating the 401 anonymous landing-page users saw when submitting the homepage worksheet form before a Supabase session existed.
 - New `src/components/generation/WorkflowSummaryCard.tsx` renders three compact equal-height columns (Phase 1 setup / Lesson-time signal capture / Phase 2 weekly prep). `src/components/GeneratingModal.tsx` flexes its left column with `mt-auto` so the card fills the previously empty area and balances both modal columns.
 - Sanctity: no Worksheet Generation Engine change.
+
+## v6.9.52 Update
+- format-worksheet-prompt now accepts both authenticated user JWT and Supabase anon key. Anonymous public worksheet generator no longer returns 401. Rate-limit key is anon:<ip> for unauthenticated callers and user:<uid> for authenticated teachers. No Worksheet Generation Engine change.
