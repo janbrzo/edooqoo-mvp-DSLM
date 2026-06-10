@@ -1,75 +1,113 @@
-## Plan v6.9.51 — Anon prompt 401 fix + GeneratingModal workflow card
+## Plan wdrożenia v6.9.52 — naprawa generowania worksheet dla niezalogowanych
 
-### P1. Anon users see 401 from `format-worksheet-prompt`
+### Affected surface
+- `supabase/functions/format-worksheet-prompt/index.ts` — główna przyczyna błędu; funkcja wymaga teraz prawdziwego user JWT nawet dla publicznego generatora.
+- `src/utils/promptFormatter.ts` — klient musi wysyłać stabilny publiczny klucz w `apikey` i nie może zakładać, że anon key jest poprawnym user session JWT.
+- `docs/llm-context.md` — RAG injection po naprawie.
+- `public/llms.txt` — skrót RAG/LLM index po naprawie.
+- `mem/index.md` + nowy memory file — trwała reguła dla przyszłych agentów, żeby nie przywrócić tego regresu.
+- Bez zmian w `supabase/functions/generateWorksheet/index.ts` — nie dotykam Worksheet Generation Engine ani protected prompt pipeline.
 
-**Root cause.** Funkcja w `supabase/config.toml` ma `verify_jwt = false`, ale wdrożona instancja nadal zwraca 401 dla niezalogowanego (brak sesji = brak `Authorization` Bearer). Oznacza to, że na produkcji JWT jest mimo wszystko wymagany. Dla zalogowanych działa, bo `supabase.functions.invoke` doczepia ich access token. Niezalogowany użytkownik ma anon session token (z `useAnonymousAuth`), ale w tym przepływie generowania worksheetu — z lądowania publicznego — sesja anon czasem jeszcze nie istnieje przy pierwszym wywołaniu, więc `invoke` leci bez `Authorization`.
+### Root cause
+`format-worksheet-prompt` ma `verify_jwt = false`, więc request dociera do funkcji, ale kod funkcji nadal robi `supabase.auth.getUser(token)`, co odrzuca anonimowy Supabase anon/publishable key jako niebędący sesją użytkownika; poprzednia poprawka zmieniła nagłówki klienta, ale nie zmieniła serwerowego warunku autoryzacji.
 
-**Fix (jedno miejsce, src/utils/promptFormatter.ts):** Zamiast `supabase.functions.invoke`, wywołać funkcję bezpośrednio przez `fetch` z **gwarantowanym** `Authorization: Bearer <publishable key>` + `apikey: <publishable key>`. Wzór z bazy wiedzy Lovable (dla niezalogowanych dozwolone, bo to publishable/anon key).
+### Do I know what the issue is?
+Tak. To nie jest problem `generateWorksheet`, nie jest problem tokenów i nie jest problem CORS. To wewnętrzna autoryzacja `format-worksheet-prompt`: anonimowy generator potrzebuje publicznego trybu dostępu, a funkcja ma obecnie wyłącznie tryb zalogowanego użytkownika.
 
-```ts
-// src/utils/promptFormatter.ts
-const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/format-worksheet-prompt`;
-const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY;
-const { data: sessionData } = await supabase.auth.getSession();
-const token = sessionData?.session?.access_token ?? anonKey;
+## Solution options
 
-const invoke = async () => {
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${token}`,
-      apikey: anonKey,
-    },
-    body: JSON.stringify({ formData: data }),
-  });
-  if (!res.ok) {
-    const txt = await res.text().catch(() => '');
-    return { data: null as null, error: new Error(`HTTP ${res.status}: ${txt.slice(0, 200)}`) };
-  }
-  return { data: (await res.json()) as { prompt: string }, error: null as null };
-};
-```
+| Opcja | Podejście | Tradeoff | Regression risk |
+|---|---|---|---|
+| A. Dodać dual-auth w `format-worksheet-prompt` | Funkcja akceptuje prawdziwy user JWT dla zalogowanych oraz anon/publishable key w `apikey` dla publicznego generatora. Rate limit: `user:<id>` albo `anon:<ip/fallback>`. | Najmniejsza zmiana, zachowuje obecny przepływ, naprawia dokładnie błąd 401. Prompt formatter nadal zwraca prompt do klienta, czyli utrzymujemy obecny kompromis IP z v6.9.7/v6.9.51. | Low |
+| B. Przenieść formatowanie promptu do `generateWorksheet` dla anonimowych | Klient dla anon nie wywołuje `format-worksheet-prompt`; wysyła `formData`, a serwer buduje prompt wewnętrznie. | Lepsze IP-hardening, ale dotyka runtime generowania i wymaga większego refaktoru wokół chronionego pipeline. Większe ryzyko naruszenia Sanctity Rule. | Medium/High |
+| C. Wyłączyć auth check w `format-worksheet-prompt` całkowicie | Funkcja publicznie buduje prompt bez sprawdzania nagłówków. | Najszybsze, ale zbyt szerokie; ułatwia scraping i usuwa sens poprzedniego IP-hardening. | Medium |
 
-Zachowujemy istniejący retry-once (250 ms) oraz finalny throw.
+## Selected solution + why
+Wybieram **Opcję A**. To jest najbezpieczniejszy punktowy fix: nie rusza Worksheet Generation Engine, nie zmienia semantyki promptu, nie ingeruje w `generateWorksheet`, a naprawia strukturalny błąd autoryzacji, który powoduje 401 dla niezalogowanych.
 
-**Secondary safeguard (config sanity):** zostawić `verify_jwt = false` w `supabase/config.toml` (już jest); zmiana w `promptFormatter.ts` rozwiązuje problem niezależnie od stanu deployu.
+## Impact analysis
+- Zalogowani nauczyciele: nadal użyją prawdziwego session JWT, więc ich flow zostaje bez zmian.
+- Niezalogowani użytkownicy z homepage/custom domain: publiczny generator dostanie 200 z `format-worksheet-prompt`, a potem przejdzie do istniejącego `generateWorksheet`.
+- Edge Function logs: po zmianie dodam neutralne `console.log` tylko dla trybu auth/anon/rate-limit, bez danych ucznia i bez promptu.
+- Security/IP: nie robię endpointu całkowicie otwartego; anonimowy tryb wymaga poprawnego Supabase anon/publishable key i ma osobny rate-limit key.
+- Zero regressions confirmed to check during implementation:
+  - `verify_jwt = false` pozostaje w `supabase/config.toml`.
+  - `OPTIONS` nadal zwraca CORS.
+  - Authenticated `Authorization: Bearer <user access token>` nadal działa.
+  - Anonymous `Authorization: Bearer <anon key>` + `apikey: <anon key>` zacznie działać.
+  - `generateWorksheet` streaming request zostaje nietknięty.
+  - No Worksheet Generation Engine prompt/logic change.
 
-**Edge log noise „cannot close or enqueue":** to log z `generateWorksheet/streaming.ts` (próba `close()` po `error`/abort). Out of scope tej iteracji — odnotowane.
+## Full implementation plan
 
-### P2. GeneratingModal — wypełnić puste miejsce w lewej kolumnie
+### 1. Edge Function: `format-worksheet-prompt`
+W `supabase/functions/format-worksheet-prompt/index.ts` przebuduję tylko blok autoryzacji.
 
-Dla **wszystkich** wariantów (anon + authenticated) dodać poniżej sekcji „Expected time" kompaktową kartę 3-fazową odwzorowującą screen 2 z uploadu:
+Docelowy mechanizm:
+1. Odczytaj:
+   - `Authorization`
+   - bearer token, jeśli istnieje
+   - `apikey`
+   - `SUPABASE_ANON_KEY`
+   - IP z `x-forwarded-for`, `cf-connecting-ip`, fallback `unknown`
+2. Spróbuj trybu zalogowanego:
+   - jeśli bearer token istnieje i nie jest anon key, wykonaj `supabase.auth.getUser(token)`.
+   - jeśli sukces: `rateLimitKey = user:<user.id>`.
+3. Jeśli tryb user nie przeszedł, spróbuj trybu publicznego generatora:
+   - zaakceptuj tylko request, w którym `apikey === SUPABASE_ANON_KEY` albo bearer token równa się `SUPABASE_ANON_KEY`.
+   - ustaw `rateLimitKey = anon:<ip>`.
+4. Jeśli oba tryby failują: zwróć `401 Unauthorized`.
+5. `checkRateLimit(rateLimitKey)` zostaje, ale zmienia nazwę parametru z `userId` na `key`, żeby nie mieszać anon z user.
+6. `buildPrompt` bez zmian — nie zmieniam prompt wording ani generator engine.
 
-- PHASE 1: ONE-TIME STUDENT SETUP — items: Add student, Send Welcome Test, Add goals, Generate Learning Roadmap.
-- LESSON-TIME SIGNAL CAPTURE — items: Welcome Test, Teacher notes, Homework, Flashcards, Live worksheet answers. (W tym wariancie krótszy nagłówek i krótszy opis, żeby kolumna była **równa wysokością** z pozostałymi — `flex-1` + `min-h-0` w siatce kolumn.)
-- PHASE 2: WEEKLY 1-MINUTE PREP FLOW — items: Generate Next Lesson Ideas, Use booking context (badge OPTIONAL), Choose one idea, Create a worksheet.
+### 2. Client wrapper: `src/utils/promptFormatter.ts`
+Ustabilizuję fallback publicznego klucza:
+- `const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY;`
+- Jeśli brakuje obu: rzucić czytelny błąd `Supabase public key is missing`.
+- Dla zalogowanych: `Authorization: Bearer <session access_token>` i `apikey: anonKey`.
+- Dla niezalogowanych: `Authorization: Bearer <anonKey>` i `apikey: anonKey`.
+- Zachować retry-once-after-250ms.
+- Nie logować promptu ani danych ucznia.
 
-**Plik:** nowy komponent `src/components/generation/WorkflowSummaryCard.tsx` (presentational, brak logiki) — 3 kolumny w `grid grid-cols-3 gap-2`, każda kolumna `bg-{tone}/40 rounded-lg p-2 text-[10px]`. Tony: phase-1 = `bg-violet-50`, signal = `bg-blue-50`, phase-2 = `bg-emerald-50`. Tekst tytułowy uppercase `text-[9px] font-semibold tracking-widest`; nagłówek H4 `text-[11px] font-semibold leading-tight`; opis `text-[10px] leading-snug text-muted-foreground`; itemy w `rounded-md border border-border/60 bg-background px-1.5 py-1 text-[10px] flex items-center gap-1` z ikoną `h-3 w-3`. Środkowa kolumna ma krótszy paragraph (1 zdanie) + 5 itemów; wymuszone wyrównanie wysokości przez `grid` + `items-stretch`.
+### 3. Verification
+Po implementacji wykonam:
+1. Deploy/test funkcji `format-worksheet-prompt` przez Supabase tool, żeby nie czekać biernie na automatyczny deploy.
+2. Test anonimowy przez `supabase.curl_edge_functions`:
+   - `POST /format-worksheet-prompt`
+   - headers: `Authorization: Bearer <anon key>`, `apikey: <anon key>`
+   - expected: `200` i JSON z `prompt`.
+3. Test złego tokenu:
+   - `Authorization: Bearer invalid`, `apikey: invalid`
+   - expected: `401`.
+4. Opcjonalny smoke z preview: wygenerowanie worksheet jako niezalogowany tylko do momentu potwierdzenia, że `format-worksheet-prompt` już nie zwraca 401.
 
-**Integracja w `src/components/GeneratingModal.tsx`:**
-- Importować `WorkflowSummaryCard`.
-- Dodać po `</p>` z „Expected time" (po linii 392):
-  ```tsx
-  <WorkflowSummaryCard className="mt-4" />
-  ```
-- Aby karta wypełniła pusty obszar (czerwony prostokąt), opakować lewą kolumnę w `flex flex-col h-full` i dać `WorkflowSummaryCard` `mt-auto` — wtedy karta dokleja się do dołu i wypełnia wolne miejsce niezależnie od wysokości listy ćwiczeń. Zmiana minimalna w klasie wrappera lewej kolumny: `space-y-4` → `flex flex-col h-full space-y-4`.
+### 4. RAG injection
+Zaktualizuję:
+- `docs/llm-context.md`
+- `public/llms.txt`
+- `mem/index.md`
+- nowy memory file: `mem/features/onboarding/v6952-anonymous-format-prompt-dual-auth.md`
 
-### P3. RAG / docs
-- `docs/llm-context.md` + `public/llms.txt`: krótka sekcja v6.9.51 (PROBLEM/EDOOQOO SOLUTION/TECHNICAL MECHANICS/RAG KEYWORDS).
-- `mem/index.md` + nowy memo `mem/features/onboarding/v6951-anon-prompt-auth-and-modal-workflow-card.md`.
+Treść RAG będzie w English i w wymaganym formacie:
+- `PROBLEM:` anonymous worksheet generation failed before generation because `format-worksheet-prompt` accepted only real user JWTs.
+- `EDOOQOO SOLUTION:` dual-auth Edge Function mode for authenticated teachers and public anonymous generator.
+- `TECHNICAL MECHANICS:` files/functions/headers/rate-limit behavior.
+- `RAG KEYWORDS:` minimum 15 semantic terms.
 
-### Files to change
-- `src/utils/promptFormatter.ts` — direct fetch z publishable key fallback.
-- `src/components/generation/WorkflowSummaryCard.tsx` — NEW.
-- `src/components/GeneratingModal.tsx` — wrapper lewej kolumny `flex flex-col h-full`; render `WorkflowSummaryCard` na dole.
-- `docs/llm-context.md`, `public/llms.txt`, `mem/index.md`, nowy memo.
+## Scope lock
+Out of scope issues noted:
+- Nie zmieniam modal UI ani WorkflowSummaryCard.
+- Nie zmieniam `generateWorksheet` promptu, parametrów ani pipeline.
+- Nie przenoszę całej architektury prompt formatting do `generateWorksheet` w tym kroku.
+- Nie naprawiam innych potencjalnych 401 w media generation, bo aktualny stack trace wskazuje wyłącznie `format-worksheet-prompt`.
 
-### Verification checklist
-- Niezalogowany user na `/` → submit form → `format-worksheet-prompt` zwraca 200, generowanie rusza.
-- Zalogowany user → bez regresji (token Bearer z sesji nadal użyty).
-- Modal: lewa kolumna i prawa kolumna mają tę samą wysokość, brak pustego prostokąta, środkowa kolumna w karcie 3-fazowej wyrównana wysokością do bocznych.
-- Sanctity rule: prompt generatora worksheetu nietknięty.
+## Verification checklist
+- Anonymous `format-worksheet-prompt` no longer returns 401: TODO in build mode.
+- Authenticated path remains supported: TODO in build mode.
+- Invalid credentials still rejected: TODO in build mode.
+- Worksheet Generation Engine untouched: TODO in build mode.
+- RAG docs updated: TODO in build mode.
 
-### Out of scope (logged)
-- „stream controller cannot close" w `generateWorksheet/streaming.ts` — osobny ticket.
+<presentation-actions>
+<presentation-link url="https://docs.lovable.dev/tips-tricks/troubleshooting">Troubleshooting docs</presentation-link>
+</presentation-actions>

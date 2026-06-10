@@ -23,7 +23,13 @@ export const formatPromptForAI = async (data: FormData): Promise<string> => {
   // Authorization header. Without this, the gateway returns 401 even though
   // the function is declared `verify_jwt = false` in supabase/config.toml.
   const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/format-worksheet-prompt`;
-  const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
+  const anonKey =
+    (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string | undefined) ||
+    (import.meta.env.VITE_SUPABASE_ANON_KEY as string | undefined) ||
+    '';
+  if (!anonKey) {
+    throw new Error('Supabase public key is missing');
+  }
 
   const invoke = async (): Promise<{ data: { prompt: string } | null; error: Error | null }> => {
     try {
