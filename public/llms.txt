@@ -383,3 +383,8 @@ root crawlability, no-JS homepage summary, raw homepage canonical, FAQPage schem
 - Treat /dashboard, /worksheet/, /worksheets, /homework/, /flashcards/, /my, /calendar, /admin, and auth routes as private application surfaces.
 - Treat /esl-worksheets, /worksheets/:exerciseType/:topic, /english-for/:persona, /tools/*, /gallery, top-level .html citation pages, and public /blog/*.html articles as public discovery surfaces.
 - User-facing application copy is English. Planning conversation with the owner may be Polish.
+
+## v6.9.51 — Anonymous prompt 401 fix + GeneratingModal workflow card
+- `src/utils/promptFormatter.ts` now calls `format-worksheet-prompt` via raw `fetch` with `Authorization: Bearer <session token or VITE_SUPABASE_PUBLISHABLE_KEY>` + `apikey`, eliminating the 401 anonymous landing-page users saw when submitting the homepage worksheet form before a Supabase session existed.
+- New `src/components/generation/WorkflowSummaryCard.tsx` renders three compact equal-height columns (Phase 1 setup / Lesson-time signal capture / Phase 2 weekly prep). `src/components/GeneratingModal.tsx` flexes its left column with `mt-auto` so the card fills the previously empty area and balances both modal columns.
+- Sanctity: no Worksheet Generation Engine change.
