@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
   Calculator,
-  CalendarDays,
   CheckCircle2,
   ClipboardList,
   FileText,
@@ -9,13 +8,18 @@ import {
   Lightbulb,
   Map,
   PlayCircle,
-  Send,
-  UserPlus,
 } from 'lucide-react';
 import {
   PricingCalculator,
   type OneMinutePrepCalculatorInput,
 } from '@/components/PricingCalculator';
+import {
+  lessonSignalWorkflowCopy,
+  lessonSignalWorkflowSteps,
+  setupWorkflowSteps,
+  weeklyWorkflowSteps,
+  type WorkflowProofStep,
+} from '@/constants/oneMinutePrepWorkflowProof';
 import { cn } from '@/lib/utils';
 
 type HeroProofPanel = 'calculator' | 'workflow' | 'evidence';
@@ -42,20 +46,6 @@ const evidenceSteps = [
   { icon: Map, label: 'Pacing/Roadmap' },
   { icon: Lightbulb, label: 'Next focus' },
   { icon: FileText, label: 'Worksheet' },
-];
-
-const setupSteps = [
-  { icon: UserPlus, label: 'Add student' },
-  { icon: Send, label: 'Send Welcome Test' },
-  { icon: Goal, label: 'Add goals' },
-  { icon: Map, label: 'Generate Learning Roadmap', nowrap: true },
-];
-
-const weeklyWorkflowSteps = [
-  { icon: Lightbulb, label: 'Generate Next Lesson Ideas' },
-  { icon: CalendarDays, label: 'Use booking context', badge: 'optional' },
-  { icon: CheckCircle2, label: 'Choose one idea' },
-  { icon: FileText, label: 'Create a worksheet' },
 ];
 
 const FlowStep = ({
@@ -85,7 +75,7 @@ const CompactWorkflowProofPanel = () => (
     id="one-minute-hero-workflow-panel"
     role="tabpanel"
     aria-labelledby="one-minute-hero-workflow-tab"
-    className="rounded-2xl border-2 border-violet-100 bg-white p-4 shadow-xl shadow-violet-500/10"
+    className="rounded-2xl border-2 border-violet-100 bg-white p-3 shadow-xl shadow-violet-500/10 sm:p-4"
   >
     <div className="flex items-center gap-2">
       <PlayCircle className="h-5 w-5 text-primary" />
@@ -95,34 +85,49 @@ const CompactWorkflowProofPanel = () => (
       </div>
     </div>
 
-    <div className="mt-4 space-y-3">
-      <div className="rounded-xl border border-violet-100 bg-violet-50/70 p-3">
+    <div className="mt-3 space-y-2.5">
+      <div className="rounded-xl border border-violet-100 bg-violet-50/70 p-2.5 sm:p-3">
         <p className="text-[11px] font-semibold uppercase tracking-wider text-violet-700">One-time student setup</p>
         <p className="mt-1 text-xs leading-5 text-muted-foreground">
           First create the learner context that the recurring prep flow can use.
         </p>
-        <div className="mt-3 grid gap-2 sm:grid-cols-2">
-          {setupSteps.map((step) => (
+        <div className="mt-2 grid gap-2 sm:grid-cols-2">
+          {setupWorkflowSteps.map((step) => (
             <FlowStep key={step.label} {...step} />
           ))}
         </div>
       </div>
 
-      <div className="rounded-xl border border-green-100 bg-green-50/70 p-3">
+      <div className="rounded-xl border border-blue-100 bg-blue-50/70 p-2.5 sm:p-3">
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-blue-700">{lessonSignalWorkflowCopy.eyebrow}</p>
+        <p className="mt-1 text-xs leading-5 text-muted-foreground">{lessonSignalWorkflowCopy.description}</p>
+        <p className="mt-1 text-xs leading-5 text-muted-foreground">{lessonSignalWorkflowCopy.supporting}</p>
+        <div className="mt-2 flex flex-wrap gap-1.5">
+          {lessonSignalWorkflowSteps.map(({ icon: Icon, label, nowrap }: WorkflowProofStep) => (
+            <span
+              key={label}
+              className={cn(
+                'inline-flex items-center gap-1.5 rounded-full border border-blue-100 bg-white px-2 py-1 text-[11px] font-medium text-blue-900',
+                nowrap && 'whitespace-nowrap'
+              )}
+            >
+              <Icon className="h-3 w-3 shrink-0 text-primary" />
+              {label}
+            </span>
+          ))}
+        </div>
+      </div>
+
+      <div className="rounded-xl border border-green-100 bg-green-50/70 p-2.5 sm:p-3">
         <p className="text-[11px] font-semibold uppercase tracking-wider text-green-700">Weekly 1-Minute Prep flow</p>
         <p className="mt-1 text-xs leading-5 text-muted-foreground">
           Then use stored context to choose the next focus before the worksheet is generated.
         </p>
-        <div className="mt-3 grid gap-2">
+        <div className="mt-2 grid gap-2 sm:grid-cols-2">
           {weeklyWorkflowSteps.map((step) => (
             <FlowStep key={step.label} {...step} />
           ))}
         </div>
-      </div>
-
-      <div className="flex items-start gap-2 rounded-xl border border-border bg-muted/30 p-3 text-xs leading-5 text-muted-foreground">
-        <CalendarDays className="mt-0.5 h-3.5 w-3.5 shrink-0 text-primary" />
-        <span>Booking context is optional when the teacher uses Edooqoo Calendar.</span>
       </div>
     </div>
   </div>

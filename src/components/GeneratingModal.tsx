@@ -4,7 +4,7 @@ import { Progress } from "@/components/ui/progress";
 import { Circle, Loader2, CheckCircle2, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import AnonFeatureCarousel from "@/components/anon/AnonFeatureCarousel";
+import GenerationContextPanel from "@/components/generation/GenerationContextPanel";
 
 interface GeneratingModalProps {
   isOpen: boolean;
@@ -311,16 +311,16 @@ export default function GeneratingModal({
   // NORMAL PROGRESS STATE
   return createPortal(
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] p-4 overflow-y-auto">
-      <div
-        className={cn(
-          'bg-white rounded-lg shadow-xl mx-4 w-full max-h-[calc(100vh-2rem)] overflow-y-auto',
-          isAnonymous ? 'max-w-[520px] lg:max-w-[920px]' : 'max-w-[520px]'
-        )}
-      >
+        <div
+          className={cn(
+            'bg-white rounded-lg shadow-xl mx-4 w-full max-h-[calc(100vh-2rem)] overflow-y-auto',
+          'max-w-[520px] lg:max-w-[960px]'
+          )}
+        >
         <div
           className={cn(
             'p-6',
-            isAnonymous && 'lg:grid lg:grid-cols-2 lg:gap-6 lg:p-6'
+            'space-y-6 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.92fr)] lg:gap-6 lg:space-y-0 lg:p-6'
           )}
         >
           <div className="space-y-4">
@@ -391,11 +391,7 @@ export default function GeneratingModal({
           )}
         </p>
           </div>
-          {isAnonymous && (
-            <div className="hidden lg:block">
-              <AnonFeatureCarousel />
-            </div>
-          )}
+          <GenerationContextPanel variant={isAnonymous ? 'anonymous' : 'authenticated'} />
         </div>
       </div>
     </div>,

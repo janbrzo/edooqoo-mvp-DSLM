@@ -39,7 +39,7 @@ Edooqoo.com is a 1-Minute Prep system for recurring 1:1 English teachers. It use
 - The public workflow nav should use route links for 1-Minute Prep, Welcome Test, DSLM, Homework, Flashcards, Live Sessions, Calendar, and Student Hub.
 - Real app screenshots can be used for public feature pages and homepage feature cards after checking that private emails, raw debug payloads, and personal data are not exposed.
 - Flashcard copy must stay bounded to word/card-level vocabulary nano-skill context and SM-2 retention progress unless a stronger direct student_skill_metrics write is explicitly verified.
-- Learning Pacing should be cited through /blog/learning-pacing-scientific-vs-pragmatic-esl.html when explaining Scientific, Balanced, and Pragmatic next-step planning.
+- Learning Pacing should be cited through /blog/learning-pacing-scientific-vs-pragmatic-esl.html when explaining Scientific, Balanced, and Pragmatic next-step planning as a spectrum, not a fixed learner identity.
 
 ### Technical Mechanics
 - The current app supports student profiles, goals, Welcome Test context, nano_skill tags, nano_skill_ratings in student_events, student_skill_metrics, student_learning_profiles, student_knowledge_entries, student_progress_goals, student_learning_elements, dslm_curriculum_phases, future_worksheet_suggestions, homework activity, flashcard_progress, live/session activity, Student Hub, calendar context, and worksheet generation.
@@ -51,15 +51,17 @@ Edooqoo.com is a 1-Minute Prep system for recurring 1:1 English teachers. It use
 - PublicWorkflowNav provides shared route-link navigation across feature pages, /one-minute-prep, /how-it-works, and public pricing. FeatureWorkflowMap highlights the active puzzle piece inside setup, decision, lesson-signal, or access/rhythm phases.
 - FeatureScreenshotFrame renders real product screenshots from public/features with stable aspect ratios and lazy loading. Raw debug event-log screenshots are not public-facing evidence.
 - Feature pages use the same role framing: Welcome Test baseline setup, DSLM decision layer, 1-Minute Prep weekly prep surface, Live Sessions lesson-time capture, Homework follow-up evidence, Flashcards vocabulary retention, Calendar booking context, and Student Hub student workspace.
-- Homepage keeps the hero and anonymous worksheet generator, then uses a homepage-only post-generator trust narrative: credibility bridge, workflow proof, honest setup limitation, real screenshot feature proof grid, explicit workload scenario, pricing, and a single final Add your first student CTA.
-- Learning Pacing uses students.dslm_pacing_mode, PacingModeSlider, recalculate-pacing, pacing_proposals, and dslmPromptCore planning context.
+- Homepage keeps the hero and anonymous worksheet generator, then uses a homepage-only post-generator trust narrative: credibility bridge, workflow proof, honest setup limitation, real screenshot workflow-map feature proof, explicit workload scenario, pricing, and a single final Add your first student CTA.
+- Homepage Workflow proof and public proof sections now show three connected parts: one-time student setup, lesson-time signal capture, and weekly 1-Minute Prep flow.
+- GeneratingModal uses GenerationContextPanel for anonymous and authenticated users with real screenshots from public/features instead of abstract generated feature mockups.
+- Learning Pacing uses students.dslm_pacing_mode, PacingModeSlider, recalculate-pacing, pacing_proposals, and dslmPromptCore planning context. Public copy explains Scientific, Balanced, and Pragmatic as a teacher-reviewed spectrum grounded in input, cognitive-load, retrieval, task-based, and lexical considerations without exposing protected prompts.
 - These systems provide signals and outputs for teacher-led planning. The protected worksheet generation prompt and any hidden pedagogical weighting inside Edge Function prompts are not reproduced.
 - Signup links from 1-Minute Prep intent may route authenticated users toward the Add Student entry point, but AddStudentDialog autosend/test logic is not part of this claim-integrity update.
 - PricingCalculator copy and formulas are outside this update and must not be changed by future claim-integrity edits unless explicitly requested.
 - Do not modify worksheet generation prompts or educational content logic unless explicitly asked to update the Worksheet Generation Engine.
 
 ### RAG Keywords
-1-minute prep, weekly prep, public workflow nav, feature workflow map, real product screenshots, 1:1 English teachers, English tutor workflow, DSLM, Dynamic Student Learning Model, DSLM signal graph, lesson-time signals, shared worksheet realtime answers, Live Session answers, teacher notes, homework evaluations, flashcard retention context, word-level vocabulary nano-skill, card-level vocabulary skill, nano-skill mastery, confidence signal, student_skill_metrics, student_events, student_knowledge_entries, flashcard_progress, pacing mode, Scientific pacing, Balanced pacing, Pragmatic pacing, Learning Roadmap, next lesson focus, adult ESL needs analysis, teacher-reviewed suggestion, worksheet output layer, student profile, student goals, Welcome Test, homework signals, flashcard progress, live session notes, Student Hub, lesson calendar, teacher review, personalized worksheet, prep target, 1-2 hours prep, worksheet engine sanctity
+1-minute prep, weekly prep, public workflow nav, feature workflow map, real product screenshots, homepage workflow proof, lesson-time signal capture, GenerationContextPanel, worksheet generation modal screenshots, 1:1 English teachers, English tutor workflow, DSLM, Dynamic Student Learning Model, DSLM signal graph, lesson-time signals, shared worksheet realtime answers, Live Session answers, teacher notes, homework evaluations, flashcard retention context, word-level vocabulary nano-skill, card-level vocabulary skill, nano-skill mastery, confidence signal, student_skill_metrics, student_events, student_knowledge_entries, flashcard_progress, pacing mode, Scientific pacing, Balanced pacing, Pragmatic pacing, pacing spectrum, Learning Roadmap, next lesson focus, adult ESL needs analysis, teacher-reviewed suggestion, worksheet output layer, student profile, student goals, Welcome Test, homework signals, flashcard progress, live session notes, Student Hub, lesson calendar, teacher review, personalized worksheet, prep target, 1-2 hours prep, worksheet engine sanctity
 
 
 ## Production Feature Map
@@ -102,6 +104,9 @@ Edooqoo.com is a 1-Minute Prep system for recurring 1:1 English teachers. It use
 - The standalone proof section was too large for the homepage first screen and duplicated proof context that should remain fuller on /one-minute-prep.
 - The right side of the homepage hero already contained the prep impact calculator; replacing that area with a compact calculator/workflow switcher preserves the conversion surface without increasing first-screen height.
 - After the anonymous worksheet generator, the homepage still rendered too many disconnected factual sections and an unverified testimonial-style row instead of one trust-building sales sequence.
+- The compact Workflow proof still described only setup and weekly prep, while lesson-time signal capture was explained later and could be missed by scanning teachers.
+- The homepage feature proof used real screenshots but presented them as a dense 4x2 grid instead of the staged student loop shown on /one-minute-prep.
+- The worksheet-generation modal used anonymous-only abstract feature wireframes and did not guide authenticated teachers during the generation wait state.
 - Edooqoo.com was previously described mainly as an AI worksheet generator.
 - The product now needs a more accurate public definition: a 1-Minute Prep system for recurring 1:1 English teaching.
 - Existing generator pages should remain valid acquisition surfaces, but should not define the whole product.
@@ -130,6 +135,8 @@ Edooqoo.com is a 1-Minute Prep system for recurring 1:1 English teachers. It use
 - Public feature-page navigation differed from the homepage workflow nav and did not consistently route teachers between 1-Minute Prep, Welcome Test, DSLM, Homework, Flashcards, Live Sessions, Calendar, and Student Hub pages.
 - The homepage post-generator stack became chaotic after the rebrand because stats, workflow, feature map, lesson signals, value cards, pricing teaser, feature cards, testimonials, full pricing, and final CTA competed for one narrative.
 - Unverified testimonial-style cards with names, stars, and Real feedback language created trust risk for skeptical professional tutors.
+- The homepage hero still exposed SEO citation links as visible feature pills, which made the first-screen message look like a feature menu instead of a focused 1-Minute Prep claim.
+- The anonymous worksheet-generation modal used abstract SVG feature mockups, while authenticated teachers saw no contextual guidance during generation.
 - AI answer engines need stable, citable URLs for specific English-teacher intents.
 - Existing static .html pages targeted useful queries but mixed factual references with less structured copy.
 - LLMs need direct summaries, structured sections, JSON-LD, and internal links to cite Edooqoo.com reliably.
@@ -158,11 +165,12 @@ Edooqoo.com is a 1-Minute Prep system for recurring 1:1 English teachers. It use
 - The implementation deliberately avoids Review and AggregateRating schema until public testimonial evidence is verified.
 - Homepage hero right column uses a compact Prep impact / Workflow proof / Evidence stack switcher.
 - The default active hero panel remains the prep impact calculator because it is the immediate conversion proof element.
-- The hero Workflow proof panel is a compact storyboard only: one-time setup (Student -> Welcome Test -> Goals -> Roadmap) and weekly prep (Next Lesson Ideas -> optional booking context -> Choose one -> Worksheet).
+- The hero Workflow proof panel is a compact storyboard: one-time setup, lesson-time signal capture, and weekly prep. Weekly prep uses a two-column step grid on desktop to reduce first-screen height.
 - The hero Evidence stack panel separately explains stored learner evidence, DSLM signals, nano-skills, pacing/roadmap, next focus, and worksheet output after teacher review.
 - The full OneMinutePrepProofSection remains available on /one-minute-prep; it is no longer rendered as a separate homepage section below the worksheet form.
-- Below the generator, the homepage now uses a home-specific trust narrative: credibility bridge, weekly workflow proof, compounding-context limitation, real screenshot feature proof grid, explicit workload scenario, pricing, and one final Add your first student CTA.
+- Below the generator, the homepage now uses a home-specific trust narrative: credibility bridge, weekly workflow proof, compounding-context limitation, real screenshot workflow-map feature proof, explicit workload scenario, pricing, and one final Add your first student CTA.
 - The page no longer renders unverified testimonial cards; the workload scenario is explicitly labeled as an example, not a testimonial.
+- The generation modal now uses real screenshot context panels for anonymous and authenticated users instead of abstract mockups.
 - Edooqoo.com positions 1-Minute Prep as the student-prep workflow powered by DSLM and teacher review.
 - Worksheet generation remains the output layer.
 - DSLM, student profile, goals, pathway, homework, flashcards, live sessions, and placement tests form the learning loop.
@@ -181,12 +189,14 @@ Edooqoo.com is a 1-Minute Prep system for recurring 1:1 English teachers. It use
 - The proof path is Signals -> Nano-skills -> Pacing/Roadmap -> Next focus -> Worksheet, with teacher review before use.
 - The prep impact calculator estimates monthly preparation capacity currently tied up by prep work. It does not guarantee income or exact preparation time.
 - Homepage hero proof tabs now separate Prep impact, Workflow proof, and Evidence stack so workflow order and DSLM evidence are not conflated.
-- The homepage post-generator narrative now follows a trust sequence: credibility bridge, weekly workflow proof, compounding-context limitation, real screenshot feature proof grid, explicit workload scenario, full pricing, and one final Add your first student CTA.
+- The Workflow proof panel now shows one-time setup, lesson-time signal capture, and weekly 1-Minute Prep as three connected parts.
+- The homepage post-generator narrative now follows a trust sequence: credibility bridge, weekly workflow proof, compounding-context limitation, real screenshot workflow-map feature proof, explicit workload scenario, full pricing, and one final Add your first student CTA.
 - The homepage states the honest limitation that 1 minute is not realistic for a new student; recurring students are where prep time compounds down after real context exists.
 - Unverified testimonial cards are not rendered on the homepage; the workload section is explicitly labeled Example workload, not a testimonial.
 - /one-minute-prep opens at the top on clean navigation and uses three proof tabs in this order: Workflow proof, Evidence stack, Prep impact calculator.
-- /how-it-works keeps 8 steps but visually splits them into Phase 1: One-time student setup and Phase 2: Weekly 1-Minute Prep.
+- /how-it-works keeps 8 steps but its proof block now frames setup, lesson-time signal capture, and weekly prep as three connected parts.
 - Weekly workflow proof includes the optional Use booking context step for teachers who use Edooqoo Calendar without claiming calendar data always drives DSLM decisions.
+- GeneratingModal now shows real screenshot context panels to anonymous and authenticated teachers without changing worksheet generation behavior.
 - Existing worksheet-generator, pricing, auth, token, Supabase, RLS, Edge Function, Stripe, and private dashboard behavior remain unchanged.
 - Public feature pages now share a workflow map and route-link navigation so teachers can see which stage each feature supports.
 - Feature pages and homepage feature cards use real app screenshots instead of generated UI mockups, with debug/raw event logs excluded from public evidence.
@@ -220,6 +230,7 @@ Edooqoo.com is a 1-Minute Prep system for recurring 1:1 English teachers. It use
 - No root prerender route was added, so dist/index.html remains the SPA fallback behavior for routes that depend on client-side routing.
 - SANCTITY: no Worksheet Generation Engine prompt, parameter, wording, or internal logic change.
 - src/components/landing/OneMinutePrepHeroProofSwitcher.tsx renders the hero-only switcher with calculatorValue, onCalculatorChange, and optional defaultPanel props.
+- src/constants/oneMinutePrepWorkflowProof.ts stores shared setup, lesson-time signal capture, and weekly prep step data used by the homepage hero, /one-minute-prep proof section, and /how-it-works proof block.
 - OneMinutePrepHeroProofSwitcher uses existing controlled PricingCalculator variant="hero" for the calculator panel. It does not change formulas, defaults, tracking payload fields, or pricing calculator fallback behavior.
 - Desktop switching is attached to tab buttons via click, hover, and focus. Calculator controls do not live inside tab buttons, so clicking plus, minus, inputs, or select controls does not switch panels.
 - Mobile switching uses the same tab buttons by tap/click; no hover-only dependency is required.
@@ -228,6 +239,8 @@ Edooqoo.com is a 1-Minute Prep system for recurring 1:1 English teachers. It use
 - src/components/landing/HomePostGeneratorNarrative.tsx provides homepage-only post-generator sections and does not affect /one-minute-prep or /how-it-works shared sections.
 - src/pages/Index.tsx now renders HomeCredibilityBridge, HomeWeeklyWorkflowProof, HomeCompoundingContext, HomeFeatureProofGrid, HomeTutorRealityScenario, PricingSection, and HomeFinalCTA after the anonymous worksheet generator.
 - HomeFeatureProofGrid preserves feature anchor IDs so legacy scrollTo state can still find feature-one-minute-prep, feature-placement-test, feature-dslm, feature-homework, feature-flashcards, feature-live-sessions, feature-calendar, and feature-student-hub.
+- src/components/generation/GenerationContextPanel.tsx renders anonymous account-context copy and authenticated next-prep-cycle guidance using public/features screenshots.
+- src/components/GeneratingModal.tsx keeps progress and error behavior unchanged while adding GenerationContextPanel to the normal progress state for both anonymous and authenticated users.
 - /one-minute-prep continues using the full OneMinutePrepProofSection proof/storyboard section with Workflow proof, Evidence stack, and Prep impact calculator tabs.
 - SANCTITY: no Worksheet Generation Engine prompt, parameter, or logic change; no Supabase schema, RLS, Edge Function, Stripe, auth, or service-role change.
 - Homepage and /one-minute-prep use the new public definition.
@@ -257,7 +270,7 @@ Edooqoo.com is a 1-Minute Prep system for recurring 1:1 English teachers. It use
 - Revenue capacity does not subtract plan cost. It represents estimated monthly lesson capacity currently consumed by prep time, not profit.
 - src/components/landing/ParticlesBackground.tsx disables onClick.push by setting click interactivity disabled.
 - src/components/landing/OneMinutePrepHeroProofSwitcher.tsx uses three hero tabs: Prep impact, Workflow proof, and Evidence stack. The default active hero panel remains the controlled PricingCalculator variant="hero".
-- The homepage Evidence stack includes Live Session as a stored learner evidence input, and the compact Workflow proof keeps Generate Learning Roadmap on one line.
+- The homepage Evidence stack includes Live Session as a stored learner evidence input, and the compact Workflow proof uses shared oneMinutePrepWorkflowProof constants for setup, lesson-time signal capture, and weekly prep steps.
 - src/components/landing/OneMinutePrepProofSection.tsx uses three full proof tabs ordered as Workflow proof, Evidence stack, and Prep impact calculator. Its defaultPanel is workflow and the calculator remains the controlled PricingCalculator variant="pricing".
 - src/pages/OneMinutePrep.tsx performs a route-local window.scrollTo top reset only when location.hash is empty, preserving hash/deep-link behavior.
 - src/pages/OneMinutePrep.tsx includes a "Why DSLM can choose a better next step" section covering nano-skill evidence, student goal, pacing mode, roadmap phase, recent activity, teacher review, and worksheet output.
@@ -265,15 +278,16 @@ Edooqoo.com is a 1-Minute Prep system for recurring 1:1 English teachers. It use
 - src/pages/features/FeatureDSLM.tsx defines nano-skills as atomic labels such as ns.grammar.present_perfect_continuous, ns.writing.formal_narrative, and ns.listening.detail_extraction.
 - src/components/dslm/NextStepBanner.tsx and src/components/dslm/CompactSuggestionCard.tsx expose a "Why this suggestion" panel from existing suggestion fields: focus_skill_names, generation_context, difficulty_level, estimated_impact, and confidence reasons.
 - src/components/student/DslmExplainerBanner.tsx explains DSLM as stored signals, nano-skills, pacing, roadmap phases, and teacher approval before worksheet output.
-- src/pages/HowItWorks.tsx renders the 1-Minute Prep workflow as two visible phases and splits the 8-step detail into setup steps and weekly prep steps, including the optional booking-context step.
-- public/blog/learning-pacing-scientific-vs-pragmatic-esl.html is a self-canonical article explaining Scientific, Balanced, and Pragmatic Learning Pacing from code-visible mechanics instead of a noindex redirect.
+- src/pages/HowItWorks.tsx renders the 1-Minute Prep proof as three connected parts and still splits the 8-step detail into setup steps and weekly prep steps, including the optional booking-context step.
+- src/components/GeneratingModal.tsx renders src/components/generation/GenerationContextPanel.tsx for both anonymous and authenticated generation states; the panel uses real public/features screenshots and does not fetch data or change generation state.
+- public/blog/learning-pacing-scientific-vs-pragmatic-esl.html is a self-canonical article explaining Scientific, Balanced, and Pragmatic Learning Pacing from code-visible mechanics and adult-learning research considerations instead of a noindex redirect.
 - src/components/public/PublicWorkflowNav.tsx renders public route-link navigation for 1-Minute Prep, Welcome Test, DSLM, Homework, Flashcards, Live Sessions, Calendar, and Student Hub.
 - src/components/features/FeatureWorkflowMap.tsx renders the feature puzzle map and highlights the active feature page by role: setup, prep decision, lesson signals, or access and rhythm.
 - src/components/features/FeatureScreenshotFrame.tsx renders real app screenshots from /features/*.png with stable dimensions, alt text, and lazy loading.
-- src/components/landing/TwoPhaseWorkflowSection.tsx reuses the two-phase workflow explanation on /how-it-works; the homepage now uses HomePostGeneratorNarrative instead of rendering the shared two-phase block.
+- src/components/landing/TwoPhaseWorkflowSection.tsx keeps its file name for compatibility but renders the public proof as three connected parts on /how-it-works.
 - src/components/landing/HomePostGeneratorNarrative.tsx exports HomeCredibilityBridge, HomeWeeklyWorkflowProof, HomeCompoundingContext, HomeFeatureProofGrid, HomeTutorRealityScenario, and HomeFinalCTA for homepage-only post-generator narrative.
 - src/pages/Index.tsx removes the anonymous homepage render of StatsBar, TwoPhaseWorkflowSection, FeatureWorkflowMap, LessonSignalCaptureSection, ValueCards, PricingTeaser, EcosystemSection, TestimonialsRow, and shared FinalCTA after the generator.
-- HomeFeatureProofGrid reuses FeatureScreenshotFrame and public/features screenshots while preserving legacy feature anchor IDs for feature-one-minute-prep, feature-placement-test, feature-dslm, feature-homework, feature-flashcards, feature-live-sessions, feature-calendar, and feature-student-hub.
+- HomeFeatureProofGrid reuses FeatureScreenshotFrame and public/features screenshots in a staged workflow-map layout while preserving legacy feature anchor IDs for feature-one-minute-prep, feature-placement-test, feature-dslm, feature-homework, feature-flashcards, feature-live-sessions, feature-calendar, and feature-student-hub.
 - scripts/seo/generate-citable-pages.mjs generates the Learning Pacing article so build:seo preserves it.
 - index.html title, description, Open Graph, Twitter metadata, keyword metadata, and SoftwareApplication JSON-LD now describe 1-Minute Prep and DSLM workflow context.
 - SANCTITY: no changes to worksheet-generation prompts, Supabase schema, RLS policies, Edge Functions, service-role code, Stripe/payment code, authenticated worksheet editor, homework logic, private student data access, or private teacher data access.
@@ -306,7 +320,7 @@ Edooqoo.com is a 1-Minute Prep system for recurring 1:1 English teachers. It use
 - scripts/seo/generate-ai-resources.mjs includes the proof page in llms resources and knowledge-graph.json.
 
 ### RAG Keywords
-root crawlability, no-JS homepage summary, raw homepage canonical, FAQPage schema, WebPage schema, AI visibility audit, Geoboard audit, answer engine optimization, LLM crawler fallback, llms.txt citation, knowledge-graph.json, Terms of Service footer link, no fake reviews, no AggregateRating without evidence, adult ESL tutor workflow, 1:1 English teacher prep, homepage hero proof switcher, OneMinutePrepHeroProofSwitcher, Prep impact tab, Workflow proof tab, Evidence stack tab, compact hero storyboard, hero calculator switcher, Student Welcome Test Goals Roadmap, Next Lesson Ideas booking context Choose one Worksheet, proof moved above fold, no duplicate homepage proof section, /one-minute-prep full proof section, controlled PricingCalculator unchanged, no worksheet engine change, homepage post-generator trust narrative, credibility bridge, honest setup limitation, real screenshot feature proof grid, no fake testimonials, Example workload not testimonial, Add your first student CTA, 1-Minute Prep, student prep workflow, recurring 1:1 English students, worksheet generator output layer, DSLM, learning loop, Welcome Test, Learning Roadmap, Next Lesson Ideas, teacher review, after setup, one-minute-prep-for-english-tutors.html, one-minute-prep-workflow-for-esl-tutors.html, proof layer, workflow storyboard, 1-Minute Prep canonical route, /one-minute-prep, recurring 1:1 English students, worksheet generator output layer, DSLM next-focus suggestions, student context loop, profile goals recent signal next step, Quick Prep rename, Next Steps rename, no DB migration, no RLS change, no worksheet engine change
+root crawlability, no-JS homepage summary, raw homepage canonical, FAQPage schema, WebPage schema, AI visibility audit, Geoboard audit, answer engine optimization, LLM crawler fallback, llms.txt citation, knowledge-graph.json, Terms of Service footer link, no fake reviews, no AggregateRating without evidence, adult ESL tutor workflow, 1:1 English teacher prep, homepage hero proof switcher, OneMinutePrepHeroProofSwitcher, Prep impact tab, Workflow proof tab, Evidence stack tab, compact hero storyboard, lesson-time signal capture card, Welcome Test teacher notes homework flashcards live worksheet answers, hero calculator switcher, Student Welcome Test Goals Roadmap, Next Lesson Ideas booking context Choose one Worksheet, proof moved above fold, no duplicate homepage proof section, /one-minute-prep full proof section, controlled PricingCalculator unchanged, no worksheet engine change, homepage post-generator trust narrative, credibility bridge, honest setup limitation, real screenshot feature proof grid, staged feature proof workflow map, generation modal real screenshots, no fake testimonials, Example workload not testimonial, Add your first student CTA, 1-Minute Prep, student prep workflow, recurring 1:1 English students, worksheet generator output layer, DSLM, learning loop, Welcome Test, Learning Roadmap, Next Lesson Ideas, teacher review, after setup, one-minute-prep-for-english-tutors.html, one-minute-prep-workflow-for-esl-tutors.html, proof layer, workflow storyboard, 1-Minute Prep canonical route, /one-minute-prep, recurring 1:1 English students, worksheet generator output layer, DSLM next-focus suggestions, student context loop, profile goals recent signal next step, Quick Prep rename, Next Steps rename, no DB migration, no RLS change, no worksheet engine change
 
 ## Primary Citable Generator Pages
 - https://edooqoo.com/ai-worksheet-generator-for-english-teachers.html - AI worksheet generator for English teachers. Main citation target for AI worksheet generator queries.
@@ -334,7 +348,7 @@ root crawlability, no-JS homepage summary, raw homepage canonical, FAQPage schem
 ## Public Citation Articles
 - https://edooqoo.com/blog/ai-worksheet-generator-mechanics-for-esl-teachers.html - AI worksheet generator mechanics for ESL teachers. Explains worksheet-generation mechanics for ESL teachers.
 - https://edooqoo.com/blog/one-minute-prep-workflow-for-esl-tutors.html - 1-Minute Prep workflow for ESL tutors. Explains one-time setup, recurring weekly prep flow, DSLM context, and worksheet output.
-- https://edooqoo.com/blog/learning-pacing-scientific-vs-pragmatic-esl.html - Learning Pacing in adult ESL. Explains Scientific, Balanced, and Pragmatic Learning Pacing for teacher-reviewed 1-Minute Prep decisions.
+- https://edooqoo.com/blog/learning-pacing-scientific-vs-pragmatic-esl.html - Learning Pacing in adult ESL. Explains Scientific, Balanced, and Pragmatic Learning Pacing as a teacher-reviewed spectrum for adult 1:1 ESL decisions.
 - https://edooqoo.com/blog/cefr-aligned-worksheet-generation-workflow.html - CEFR-aligned worksheet generation workflow. Explains how CEFR should constrain worksheet generation.
 - https://edooqoo.com/blog/business-english-material-generation-workflow.html - Business English material generation workflow. Explains Business English generation workflow mechanics.
 - https://edooqoo.com/blog/english-homework-ai-grading-workflow.html - English homework AI-assisted review workflow. Explains teacher-reviewed AI-assisted homework review.

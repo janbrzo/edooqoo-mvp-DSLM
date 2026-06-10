@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import FeatureScreenshotFrame from '@/components/features/FeatureScreenshotFrame';
+import { cn } from '@/lib/utils';
 
 const workflowSteps = [
   {
@@ -127,6 +128,29 @@ const featureProof = [
   },
 ];
 
+const featureProofColumns = [
+  {
+    label: 'Setup',
+    summary: 'Create the baseline Edooqoo can reuse.',
+    features: [featureProof[1]],
+  },
+  {
+    label: 'Prep decision',
+    summary: 'Choose the next focus before output.',
+    features: [featureProof[0], featureProof[2]],
+  },
+  {
+    label: 'Lesson signals',
+    summary: 'Capture evidence during normal teaching work.',
+    features: [featureProof[3], featureProof[4], featureProof[5]],
+  },
+  {
+    label: 'Access and rhythm',
+    summary: 'Keep the loop attached to upcoming work.',
+    features: [featureProof[6], featureProof[7]],
+  },
+];
+
 export const HomeCredibilityBridge = () => (
   <section className="border-y border-border bg-white py-16">
     <div className="mx-auto grid max-w-6xl gap-8 px-4 lg:grid-cols-[minmax(0,1.1fr)_minmax(320px,0.9fr)] lg:items-center">
@@ -234,33 +258,54 @@ export const HomeFeatureProofGrid = () => (
         </p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-        {featureProof.map((feature) => (
-          <Link
-            key={feature.id}
-            id={feature.id}
-            to={feature.link}
-            className="group scroll-mt-20 overflow-hidden rounded-lg border border-border bg-background transition hover:border-primary/30 hover:shadow-md"
-          >
-            <div className="border-b border-border bg-muted/30 p-2">
-              <FeatureScreenshotFrame
-                src={feature.image}
-                alt={feature.alt}
-                imageClassName="h-32"
-                objectPosition="center top"
-                className="rounded-lg border-0 shadow-none"
-              />
+      <div className="grid gap-5 lg:grid-cols-4">
+        {featureProofColumns.map((column, columnIndex) => (
+          <div key={column.label} className="relative">
+            <div className="mb-3 flex min-h-[3.25rem] items-start justify-between gap-3">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{column.label}</p>
+                <p className="mt-1 text-xs leading-5 text-muted-foreground">{column.summary}</p>
+              </div>
+              {columnIndex < featureProofColumns.length - 1 && (
+                <ArrowRight className="mt-1 hidden h-4 w-4 shrink-0 text-primary/50 lg:block" />
+              )}
             </div>
-            <div className="p-4">
-              <p className="text-[11px] font-semibold uppercase tracking-wider text-primary">{feature.phase}</p>
-              <h3 className="mt-1 text-sm font-semibold text-foreground group-hover:text-primary">{feature.title}</h3>
-              <p className="mt-2 text-xs leading-5 text-muted-foreground">{feature.description}</p>
-              <span className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-primary">
-                See details
-                <ArrowRight className="h-3 w-3" />
-              </span>
+            <div className="space-y-3">
+              {column.features.map((feature) => {
+                const isPrimary = feature.title === '1-Minute Prep';
+                return (
+                  <Link
+                    key={feature.id}
+                    id={feature.id}
+                    to={feature.link}
+                    className={cn(
+                      'group block scroll-mt-20 overflow-hidden rounded-lg border bg-background transition hover:border-primary/30 hover:shadow-md',
+                      isPrimary ? 'border-primary/30 shadow-sm' : 'border-border'
+                    )}
+                  >
+                    <div className="border-b border-border bg-muted/30 p-2">
+                      <FeatureScreenshotFrame
+                        src={feature.image}
+                        alt={feature.alt}
+                        imageClassName="h-28"
+                        objectPosition="center top"
+                        className="rounded-lg border-0 shadow-none"
+                      />
+                    </div>
+                    <div className="p-4">
+                      <p className="text-[11px] font-semibold uppercase tracking-wider text-primary">{feature.phase}</p>
+                      <h3 className="mt-1 text-sm font-semibold text-foreground group-hover:text-primary">{feature.title}</h3>
+                      <p className="mt-2 text-xs leading-5 text-muted-foreground">{feature.description}</p>
+                      <span className="mt-3 inline-flex items-center gap-1 text-xs font-medium text-primary">
+                        See details
+                        <ArrowRight className="h-3 w-3" />
+                      </span>
+                    </div>
+                  </Link>
+                );
+              })}
             </div>
-          </Link>
+          </div>
         ))}
       </div>
     </div>

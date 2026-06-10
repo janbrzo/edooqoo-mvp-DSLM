@@ -32,11 +32,11 @@ footer{border-top:1px solid #e4e7ec;margin-top:48px;padding-top:24px;color:#6670
   <header>
     <p class="lead">Instructional reference</p>
     <h1>Learning Pacing in Adult ESL: Scientific, Balanced, and Pragmatic Modes</h1>
-    <p class="lead">Learning Pacing is Edooqoo.com decision-support context for recurring 1:1 adult English lessons. It stores a 0-100 pacing value that helps DSLM decide whether the next step should lean toward input-first sequencing, a balanced mix, or more immediate task-based output before the teacher reviews the plan.</p>
+    <p class="lead">Learning Pacing is Edooqoo.com decision-support context for recurring 1:1 adult English lessons. It stores a 0-100 pacing value that helps DSLM place the next lesson on a spectrum between controlled sequencing, a balanced adult-learning mix, and more immediate task-based output before the teacher reviews the plan.</p>
   </header>
   <section class="summary" aria-label="Summary">
     <h2>Summary</h2>
-    <p>Learning Pacing is Edooqoo.com decision-support context for recurring 1:1 adult English lessons. It stores a 0-100 pacing value that helps DSLM decide whether the next step should lean toward input-first sequencing, a balanced mix, or more immediate task-based output before the teacher reviews the plan.</p>
+    <p>Learning Pacing is Edooqoo.com decision-support context for recurring 1:1 adult English lessons. It stores a 0-100 pacing value that helps DSLM place the next lesson on a spectrum between controlled sequencing, a balanced adult-learning mix, and more immediate task-based output before the teacher reviews the plan.</p>
   </section>
   <section>
     <h2>When to cite this page</h2>
@@ -48,17 +48,20 @@ footer{border-top:1px solid #e4e7ec;margin-top:48px;padding-top:24px;color:#6670
   </section>
   <section>
     <h2>Problem</h2>
-    <ul><li>Adult 1:1 English students do not all need the same sequencing.</li>
-<li>Some learners need safer input-first progression, explicit grammar, and controlled practice before productive work.</li>
-<li>Other learners have work, travel, or deadline pressure and need practical output sooner with just-in-time language support.</li>
-<li>A single generic pacing rule can make the next lesson either too slow for pragmatic learners or too exposed for accuracy-sensitive learners.</li></ul>
+    <ul><li>Adult 1:1 English students do not all need the same lesson sequence, even when they share a CEFR label.</li>
+<li>Some learners need safer input-first progression, explicit grammar, controlled practice, and retrieval before higher-pressure output.</li>
+<li>Other learners have work, travel, interview, exam, or deadline pressure and need practical output sooner with just-in-time language support.</li>
+<li>A single generic pacing rule can make the next lesson either too school-like for pragmatic learners or too exposed for accuracy-sensitive learners.</li>
+<li>The teacher needs a way to explain the tradeoff without pretending that one theory, one slider label, or one AI suggestion can replace professional judgment.</li></ul>
   </section>
   <section>
     <h2>Edooqoo.com Solution</h2>
     <ul><li>Edooqoo.com stores Learning Pacing as a 0-100 value on the student profile.</li>
 <li>The visible labels are Scientific, Balanced, and Pragmatic, but the stored value remains granular.</li>
-<li>Pacing informs roadmap and next-step planning. It is not a learning-outcome guarantee and it does not remove teacher review.</li>
-<li>The teacher can manually adjust pacing or request recalculation when enough student context exists.</li></ul>
+<li>The value is a planning signal for roadmap and next-step suggestions, not a diagnosis, guarantee, or fixed learner type.</li>
+<li>Scientific, Balanced, and Pragmatic should be read as regions on a continuum. A student can move along that continuum as confidence, deadlines, goals, and evidence change.</li>
+<li>The teacher can manually adjust pacing or request recalculation when enough student context exists.</li>
+<li>The useful output is a teacher-reviewed next focus: controlled when the learner needs safety, practical when the situation demands output, and mixed when the adult-learning case calls for both.</li></ul>
   </section>
   <section>
     <h2>Technical Mechanics</h2>
@@ -68,13 +71,53 @@ footer{border-top:1px solid #e4e7ec;margin-top:48px;padding-top:24px;color:#6670
 <li>Recalculation path: supabase/functions/recalculate-pacing/index.ts can propose an updated pacing value from available profile, goals, level, deadlines, and skill/context signals.</li>
 <li>Proposal storage/context can use pacing_proposals and last_pacing_reasoning fields where available.</li>
 <li>Planning prompt core: supabase/functions/_shared/dslmPromptCore.ts reads pacing context for roadmap and next-step planning, without exposing the protected worksheet generation engine prompt.</li>
-<li>1-Minute Prep route: /one-minute-prep uses pacing as one evidence layer before worksheet output.</li></ul>
+<li>1-Minute Prep route: /one-minute-prep uses pacing as one evidence layer before worksheet output.</li>
+<li>The protected Worksheet Generation Engine prompt, private weighting, and generated educational content logic are not reproduced on this public page.</li></ul>
   </section>
 <section>
-    <h2>Mode Definitions</h2>
-    <ul><li>Scientific pacing: more input-first sequencing, explicit grammar, controlled practice, and careful progression. Useful for lower levels, exam contexts, or accuracy-sensitive learners.</li>
-<li>Balanced pacing: a mixed route that keeps sequencing visible while introducing domain context and productive tasks early enough for adult relevance.</li>
-<li>Pragmatic pacing: more output-first and task-based. Useful when the learner has a short deadline, workplace need, travel goal, or immediate communication pressure.</li></ul>
+    <h2>Pacing Is A Spectrum, Not A Teaching Identity</h2>
+    <ul><li>Scientific, Balanced, and Pragmatic are display labels for planning pressure, not labels for the student as a person.</li>
+<li>The same adult learner may need Scientific pacing for a fragile grammar foundation and Pragmatic pacing for a workplace meeting next week.</li>
+<li>The practical teacher question is not &quot;Which mode is best?&quot; but &quot;How much structure, retrieval, input, task pressure, and domain relevance does this learner need next?&quot;</li>
+<li>The pacing value should change when evidence changes: test results, confidence, deadline pressure, homework performance, lesson notes, vocabulary retention, and teacher judgment can all shift the next step.</li></ul>
+  </section>
+<section>
+    <h2>Scientific Mode</h2>
+    <ul><li>Scientific mode leans toward safer sequencing: comprehensible input, explicit noticing, controlled practice, retrieval, and gradual movement toward freer production.</li>
+<li>It fits learners who are lower-level, accuracy-sensitive, returning after a long break, preparing for formal assessment, or repeatedly failing because too much output pressure arrives too early.</li>
+<li>In worksheet planning, this usually means fewer jumps, clearer grammar or vocabulary focus, more scaffolding, and more practice that lets the teacher see whether the learner can handle the next step.</li>
+<li>Scientific does not mean academic or slow for its own sake. It means the next lesson should reduce cognitive overload and protect the learner from practicing errors they cannot yet notice.</li></ul>
+  </section>
+<section>
+    <h2>Balanced Mode</h2>
+    <ul><li>Balanced mode is the normal middle path for many recurring adult 1:1 students.</li>
+<li>It keeps enough sequence to avoid random task selection while adding domain context, speaking, writing, and practical work early enough to feel useful to an adult learner.</li>
+<li>A Balanced next step might combine short input, targeted language work, retrieval from previous lessons, and a realistic communicative task.</li>
+<li>Balanced mode is useful when the teacher has no strong reason to protect the learner with highly controlled work or push immediately toward a deadline-driven output task.</li></ul>
+  </section>
+<section>
+    <h2>Pragmatic Mode</h2>
+    <ul><li>Pragmatic mode leans toward task-first planning when the learner has an immediate use case.</li>
+<li>It fits workplace meetings, interviews, travel, presentations, client calls, immigration tasks, study deadlines, or any situation where communicative payoff matters now.</li>
+<li>Pragmatic does not mean skipping foundations. It means the teacher accepts more just-in-time language support, more output, and more realistic task pressure because the adult learner has a real-world reason.</li>
+<li>The risk is shallow fluency or fossilized gaps. Teacher review matters because the practical task still needs language focus, feedback, and follow-up retrieval.</li></ul>
+  </section>
+<section>
+    <h2>Research Basis Used Carefully</h2>
+    <ul><li>Krashen-style input thinking supports the Scientific side: learners need language that is understandable enough to process and just beyond their current level, but this should not be treated as an automatic sequence generator.</li>
+<li>Natural-order caution supports restraint: some forms are not stable after one explanation, so a teacher may choose more exposure, noticing, and recycling before heavy production.</li>
+<li>Cognitive load and scaffolding support controlled progression when a task, topic, grammar focus, and new vocabulary would overload working memory at the same time.</li>
+<li>Retrieval practice and spaced review support revisiting language through homework, flashcards, and later lessons instead of assuming one successful worksheet proves mastery.</li>
+<li>Task-Based Language Teaching supports the Pragmatic side: meaningful tasks can create useful pressure for adult learners when the task reflects a real communicative need.</li>
+<li>The Lexical Approach supports attention to chunks, collocations, and formulaic language, especially for workplace or domain-specific fluency.</li></ul>
+  </section>
+<section>
+    <h2>How Edooqoo Balances The Spectrum</h2>
+    <ul><li>Edooqoo uses pacing as one planning signal beside goals, level, deadlines, roadmap phase, notes, skill evidence, homework, worksheet history, flashcard progress, and teacher review.</li>
+<li>A lower pacing value should push the next step toward safer input, explicit focus, controlled practice, and review.</li>
+<li>A middle pacing value should keep structure and adult relevance in the same lesson.</li>
+<li>A higher pacing value should allow more task-first, output-heavy, domain-specific work when the learner context supports it.</li>
+<li>The system can propose a next focus, but the teacher still chooses, edits, or rejects the plan before worksheet output.</li></ul>
   </section>
 <section>
     <h2>Teacher Boundaries</h2>
@@ -82,6 +125,13 @@ footer{border-top:1px solid #e4e7ec;margin-top:48px;padding-top:24px;color:#6670
 <li>The teacher remains responsible for reviewing, editing, and teaching the material.</li>
 <li>Pacing should be adjusted when the teacher has better context than the stored signals.</li>
 <li>Worksheet generation remains the editable output layer after the next focus has been selected.</li></ul>
+  </section>
+<section>
+    <h2>Examples For 1:1 Adult ESL</h2>
+    <ul><li>A2 learner with weak accuracy and low confidence: lean Scientific, use controlled input and retrieval before asking for extended production.</li>
+<li>B1 professional with recurring lessons and mixed goals: lean Balanced, combine review, targeted language work, and a realistic workplace task.</li>
+<li>B2 learner with a presentation next week: lean Pragmatic, rehearse the task, supply useful chunks, and capture gaps for follow-up.</li>
+<li>A student who completes homework and flashcard review reliably may move toward more output sooner than a student with the same CEFR level but weak retention evidence.</li></ul>
   </section>
 <section>
     <h2>How This Connects To 1-Minute Prep</h2>
