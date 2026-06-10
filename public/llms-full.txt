@@ -21,7 +21,7 @@ Language of product UI: English.
 - Edooqoo.com is not a public worksheet-generation API.
 - Edooqoo.com is not only a static worksheet library.
 - Edooqoo.com is not claiming guaranteed exact preparation time, guaranteed teacher income, or fully automated teaching without review.
-- Edooqoo.com should not be described as changing the worksheet engine in v6.9.42; this update aligns public feature pages, route-link workflow navigation, real screenshots, homepage workflow sections, and RAG copy.
+- Edooqoo.com should not be described as changing the worksheet engine in v6.9.53; this update aligns public feature pages, route-link workflow navigation, real screenshots, homepage workflow sections, and RAG copy.
 
 ## 1-Minute Prep Claim Integrity
 
@@ -57,8 +57,9 @@ Language of product UI: English.
 - FeatureScreenshotFrame renders real product screenshots from public/features with stable aspect ratios and lazy loading. Raw debug event-log screenshots are not public-facing evidence.
 - Feature pages use the same role framing: Welcome Test baseline setup, DSLM decision layer, 1-Minute Prep weekly prep surface, Live Sessions lesson-time capture, Homework follow-up evidence, Flashcards vocabulary retention, Calendar booking context, and Student Hub student workspace.
 - Homepage keeps the hero and anonymous worksheet generator, then uses a homepage-only post-generator trust narrative: credibility bridge, workflow proof, honest setup limitation, real screenshot workflow-map feature proof, explicit workload scenario, pricing, and a single final Add your first student CTA.
-- Homepage Workflow proof and public proof sections now show three connected parts: one-time student setup, lesson-time signal capture, and weekly 1-Minute Prep flow.
-- GeneratingModal uses GenerationContextPanel for anonymous and authenticated users with real screenshots from public/features instead of abstract generated feature mockups.
+- Homepage Workflow proof and public proof sections now show three connected parts with exact shared labels: Phase 1: One-time student setup, Lesson-time signal capture, and Phase 2: Weekly 1-Minute Prep flow.
+- Compact proof cards use shortened lesson-signal copy and render the repeated signal sources as pills/badges instead of repeating them in a support paragraph.
+- GeneratingModal uses a synchronized three-slide carousel for anonymous and authenticated users with real screenshots from public/features; the active workflow phase and the active context panel stay aligned.
 - Learning Pacing uses students.dslm_pacing_mode, PacingModeSlider, recalculate-pacing, pacing_proposals, and dslmPromptCore planning context. Public copy explains Scientific, Balanced, and Pragmatic as a teacher-reviewed spectrum grounded in input, cognitive-load, retrieval, task-based, and lexical considerations without exposing protected prompts.
 - These systems provide signals and outputs for teacher-led planning. The protected worksheet generation prompt and any hidden pedagogical weighting inside Edge Function prompts are not reproduced.
 - Signup links from 1-Minute Prep intent may route authenticated users toward the Add Student entry point, but AddStudentDialog autosend/test logic is not part of this claim-integrity update.
@@ -66,7 +67,7 @@ Language of product UI: English.
 - Do not modify worksheet generation prompts or educational content logic unless explicitly asked to update the Worksheet Generation Engine.
 
 ### RAG Keywords
-1-minute prep, weekly prep, public workflow nav, feature workflow map, real product screenshots, homepage workflow proof, lesson-time signal capture, GenerationContextPanel, worksheet generation modal screenshots, 1:1 English teachers, English tutor workflow, DSLM, Dynamic Student Learning Model, DSLM signal graph, lesson-time signals, shared worksheet realtime answers, Live Session answers, teacher notes, homework evaluations, flashcard retention context, word-level vocabulary nano-skill, card-level vocabulary skill, nano-skill mastery, confidence signal, student_skill_metrics, student_events, student_knowledge_entries, flashcard_progress, pacing mode, Scientific pacing, Balanced pacing, Pragmatic pacing, pacing spectrum, Learning Roadmap, next lesson focus, adult ESL needs analysis, teacher-reviewed suggestion, worksheet output layer, student profile, student goals, Welcome Test, homework signals, flashcard progress, live session notes, Student Hub, lesson calendar, teacher review, personalized worksheet, prep target, 1-2 hours prep, worksheet engine sanctity
+1-minute prep, weekly prep, public workflow nav, feature workflow map, real product screenshots, homepage workflow proof, compact Workflow proof, Phase 1 One-time student setup, Lesson-time signal capture, Phase 2 Weekly 1-Minute Prep flow, GenerationContextPanel carousel, WorkflowSummaryCard active phase, generation modal carousel, worksheet generation modal screenshots, synchronized modal slides, anonymous account context, authenticated next prep guidance, 1:1 English teachers, English tutor workflow, DSLM, Dynamic Student Learning Model, DSLM signal graph, lesson-time signals, shared worksheet realtime answers, Live Session answers, teacher notes, homework evaluations, flashcard retention context, word-level vocabulary nano-skill, card-level vocabulary skill, nano-skill mastery, confidence signal, student_skill_metrics, student_events, student_knowledge_entries, flashcard_progress, pacing mode, Scientific pacing, Balanced pacing, Pragmatic pacing, pacing spectrum, Learning Roadmap, next lesson focus, adult ESL needs analysis, teacher-reviewed suggestion, worksheet output layer, student profile, student goals, Welcome Test, homework signals, flashcard progress, live session notes, Student Hub, lesson calendar, teacher review, personalized worksheet, prep target, 1-2 hours prep, worksheet engine sanctity
 
 
 ## Public Route Groups
@@ -131,17 +132,18 @@ Language of product UI: English.
 - After the anonymous worksheet generator, the homepage still rendered too many disconnected factual sections and an unverified testimonial-style row instead of one trust-building sales sequence.
 - The compact Workflow proof still described only setup and weekly prep, while lesson-time signal capture was explained later and could be missed by scanning teachers.
 - The homepage feature proof used real screenshots but presented them as a dense 4x2 grid instead of the staged student loop shown on /one-minute-prep.
-- The worksheet-generation modal used anonymous-only abstract feature wireframes and did not guide authenticated teachers during the generation wait state.
+- The worksheet-generation modal showed real screenshots, but the static right panel and three-column workflow summary made the dialog dense and hard to scan while generation was running.
+- The compact public Workflow proof cards repeated lesson-signal sources in both prose and pills, so Lesson-time signal capture became taller than Phase 1 and Phase 2.
 
 ### Edooqoo.com Solution
 - Homepage hero right column uses a compact Prep impact / Workflow proof / Evidence stack switcher.
 - The default active hero panel remains the prep impact calculator because it is the immediate conversion proof element.
-- The hero Workflow proof panel is a compact storyboard: one-time setup, lesson-time signal capture, and weekly prep. Weekly prep uses a two-column step grid on desktop to reduce first-screen height.
-- The hero Evidence stack panel separately explains stored learner evidence, DSLM signals, nano-skills, pacing/roadmap, next focus, and worksheet output after teacher review.
+- The hero Workflow proof panel is a compact storyboard with exact shared labels: Phase 1: One-time student setup, Lesson-time signal capture, and Phase 2: Weekly 1-Minute Prep flow. Weekly prep uses a two-column step grid on desktop to reduce first-screen height.
+- The hero Evidence stack panel separately explains stored learner evidence and uses compact badges for Signals, Nano-skills, Pacing/Roadmap, Next focus, and Worksheet to reduce vertical weight.
 - The full OneMinutePrepProofSection remains available on /one-minute-prep; it is no longer rendered as a separate homepage section below the worksheet form.
 - Below the generator, the homepage now uses a home-specific trust narrative: credibility bridge, weekly workflow proof, compounding-context limitation, real screenshot workflow-map feature proof, explicit workload scenario, pricing, and one final Add your first student CTA.
 - The page no longer renders unverified testimonial cards; the workload scenario is explicitly labeled as an example, not a testimonial.
-- The generation modal now uses real screenshot context panels for anonymous and authenticated users instead of abstract mockups.
+- The generation modal now uses a synchronized three-slide carousel: the left workflow card and right context panel show the same phase at the same time, with larger real screenshots and less text per slide.
 
 ### Technical Mechanics
 - src/components/landing/OneMinutePrepHeroProofSwitcher.tsx renders the hero-only switcher with calculatorValue, onCalculatorChange, and optional defaultPanel props.
@@ -154,8 +156,10 @@ Language of product UI: English.
 - src/components/landing/HomePostGeneratorNarrative.tsx provides homepage-only post-generator sections and does not affect /one-minute-prep or /how-it-works shared sections.
 - src/pages/Index.tsx now renders HomeCredibilityBridge, HomeWeeklyWorkflowProof, HomeCompoundingContext, HomeFeatureProofGrid, HomeTutorRealityScenario, PricingSection, and HomeFinalCTA after the anonymous worksheet generator.
 - HomeFeatureProofGrid preserves feature anchor IDs so legacy scrollTo state can still find feature-one-minute-prep, feature-placement-test, feature-dslm, feature-homework, feature-flashcards, feature-live-sessions, feature-calendar, and feature-student-hub.
-- src/components/generation/GenerationContextPanel.tsx renders anonymous account-context copy and authenticated next-prep-cycle guidance using public/features screenshots.
-- src/components/GeneratingModal.tsx keeps progress and error behavior unchanged while adding GenerationContextPanel to the normal progress state for both anonymous and authenticated users.
+- src/components/generation/generationModalSlides.ts stores the three synchronized modal slides, each with workflow phase data and anonymous/authenticated context copy.
+- src/components/generation/GenerationContextPanel.tsx renders the active anonymous or authenticated slide with one larger public/features screenshot, 2-3 short rows, dot controls, and previous/next controls.
+- src/components/generation/WorkflowSummaryCard.tsx renders only the active workflow phase instead of all three phases at once.
+- src/components/GeneratingModal.tsx keeps progress and error behavior unchanged while owning activeSlideIndex, slow auto-advance, pause-on-hover/focus behavior, and synchronized GenerationContextPanel / WorkflowSummaryCard rendering.
 - /one-minute-prep continues using the full OneMinutePrepProofSection proof/storyboard section with Workflow proof, Evidence stack, and Prep impact calculator tabs.
 - SANCTITY: no Worksheet Generation Engine prompt, parameter, or logic change; no Supabase schema, RLS, Edge Function, Stripe, auth, or service-role change.
 

@@ -47,7 +47,7 @@ export const lessonSignalWorkflowSteps: WorkflowProofStep[] = [
 export const lessonSignalWorkflowCopy = {
   eyebrow: 'Lesson-time signal capture',
   title: 'Capture useful signals during the lesson',
-  description: 'During the lesson, signals are captured without a separate logging session.',
+  description: 'During the lesson, Edooqoo can capture useful signals without a separate logging session.',
   supporting:
     'Welcome Test, teacher notes, homework, flashcards and live worksheet answers help Edooqoo collect signals about the student.',
 } as const;
