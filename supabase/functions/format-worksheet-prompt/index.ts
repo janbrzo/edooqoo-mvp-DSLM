@@ -117,11 +117,11 @@ const rateLimitMap = new Map<string, { count: number; resetAt: number }>()
 const RATE_LIMIT_MAX = 60
 const RATE_LIMIT_WINDOW_MS = 60_000
 
-const checkRateLimit = (userId: string): boolean => {
+const checkRateLimit = (key: string): boolean => {
   const now = Date.now()
-  const entry = rateLimitMap.get(userId)
+  const entry = rateLimitMap.get(key)
   if (!entry || entry.resetAt < now) {
-    rateLimitMap.set(userId, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS })
+    rateLimitMap.set(key, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS })
     return true
   }
   if (entry.count >= RATE_LIMIT_MAX) return false
@@ -135,29 +135,60 @@ Deno.serve(async (req) => {
   }
 
   try {
-    // Verify JWT in code (verify_jwt = false in config to allow OPTIONS).
-    const authHeader = req.headers.get('Authorization')
-    if (!authHeader?.startsWith('Bearer ')) {
-      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      })
+    // v6.9.52 — Dual-auth: accept either a real Supabase user JWT
+    // (authenticated teacher) or the project's Supabase anon/publishable
+    // key (anonymous public worksheet generator on the marketing site).
+    // verify_jwt is disabled in supabase/config.toml so OPTIONS and anon
+    // requests can reach this handler.
+    const anonKey = Deno.env.get('SUPABASE_ANON_KEY') ?? ''
+    const authHeader = req.headers.get('Authorization') ?? ''
+    const bearer = authHeader.startsWith('Bearer ')
+      ? authHeader.slice('Bearer '.length).trim()
+      : ''
+    const apikeyHeader = (req.headers.get('apikey') ?? '').trim()
+    const ip =
+      req.headers.get('cf-connecting-ip') ||
+      req.headers.get('x-forwarded-for')?.split(',')[0]?.trim() ||
+      'unknown'
+
+    let rateLimitKey: string | null = null
+
+    // Authenticated mode: bearer is a real user JWT, not the anon key.
+    if (bearer && bearer !== anonKey) {
+      try {
+        const supabase = createClient(
+          Deno.env.get('SUPABASE_URL')!,
+          anonKey,
+          { global: { headers: { Authorization: `Bearer ${bearer}` } } },
+        )
+        const { data: userData, error: userError } =
+          await supabase.auth.getUser(bearer)
+        if (!userError && userData?.user) {
+          rateLimitKey = `user:${userData.user.id}`
+        }
+      } catch (_authErr) {
+        // fall through to anon attempt
+      }
     }
-    const token = authHeader.replace('Bearer ', '')
-    const supabase = createClient(
-      Deno.env.get('SUPABASE_URL')!,
-      Deno.env.get('SUPABASE_ANON_KEY')!,
-      { global: { headers: { Authorization: authHeader } } },
-    )
-    const { data: userData, error: userError } = await supabase.auth.getUser(token)
-    if (userError || !userData?.user) {
+
+    // Anonymous public generator: caller must present the project anon key
+    // on either Authorization: Bearer <anon> or apikey: <anon>.
+    if (!rateLimitKey) {
+      const presentedAnon =
+        (bearer && bearer === anonKey) || (apikeyHeader && apikeyHeader === anonKey)
+      if (presentedAnon) {
+        rateLimitKey = `anon:${ip}`
+      }
+    }
+
+    if (!rateLimitKey) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), {
         status: 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
 
-    if (!checkRateLimit(userData.user.id)) {
+    if (!checkRateLimit(rateLimitKey)) {
       return new Response(JSON.stringify({ error: 'Rate limit exceeded' }), {
         status: 429,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
