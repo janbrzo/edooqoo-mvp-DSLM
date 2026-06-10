@@ -190,6 +190,7 @@ const HowItWorks = () => {
 
         <LessonSignalCaptureSection
           compact
+          layout="four"
           className="mb-14 rounded-2xl border border-border bg-secondary/20 p-5 sm:p-6"
         />
 

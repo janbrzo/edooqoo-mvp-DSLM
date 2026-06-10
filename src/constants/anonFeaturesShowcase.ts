@@ -19,7 +19,7 @@ export interface AnonFeature {
 
 /**
  * Single source of truth for the 6 features showcased to anonymous teachers.
- * Consumed by AnonFeatureCarousel (in GeneratingModal) and MiniFeatureGrid
+ * Consumed by AnonFeatureCarousel and MiniFeatureGrid
  * (in AnonPostWorksheetLandingPage).
  */
 export const ANON_FEATURES: AnonFeature[] = [

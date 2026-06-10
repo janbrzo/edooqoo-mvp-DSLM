@@ -38,11 +38,13 @@ const lessonSignalItems = [
 interface LessonSignalCaptureSectionProps {
   className?: string;
   compact?: boolean;
+  layout?: 'default' | 'four';
 }
 
 const LessonSignalCaptureSection: React.FC<LessonSignalCaptureSectionProps> = ({
   className,
   compact = false,
+  layout = 'default',
 }) => (
   <section className={cn('space-y-6', className)} aria-labelledby="lesson-signal-capture-heading">
     <div className={compact ? 'max-w-3xl' : 'max-w-4xl'}>
@@ -58,7 +60,7 @@ const LessonSignalCaptureSection: React.FC<LessonSignalCaptureSectionProps> = ({
       </p>
     </div>
 
-    <div className={cn('grid gap-4', compact ? 'md:grid-cols-2' : 'sm:grid-cols-2 lg:grid-cols-4')}>
+    <div className={cn('grid gap-4', compact && layout !== 'four' ? 'md:grid-cols-2' : 'sm:grid-cols-2 lg:grid-cols-4')}>
       {lessonSignalItems.map(({ title, description, icon: Icon }) => (
         <article key={title} className="rounded-xl border border-border bg-background p-4 shadow-sm">
           <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">

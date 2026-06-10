@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import {
   Calculator,
-  CalendarDays,
   CheckCircle2,
   ClipboardList,
   FileText,
@@ -9,13 +8,17 @@ import {
   Lightbulb,
   Map,
   PlayCircle,
-  Send,
-  UserPlus,
 } from 'lucide-react';
 import {
   PricingCalculator,
   type OneMinutePrepCalculatorInput,
 } from '@/components/PricingCalculator';
+import {
+  lessonSignalWorkflowCopy,
+  lessonSignalWorkflowSteps,
+  setupWorkflowSteps,
+  weeklyWorkflowSteps,
+} from '@/constants/oneMinutePrepWorkflowProof';
 import { cn } from '@/lib/utils';
 
 type ProofPanel = 'workflow' | 'evidence' | 'calculator';
@@ -48,32 +51,20 @@ const evidenceSteps = [
   { icon: FileText, label: 'Worksheet is generated as output' },
 ];
 
-const setupSteps = [
-  { icon: UserPlus, label: 'Add student' },
-  { icon: Send, label: 'Send Welcome Test' },
-  { icon: Goal, label: 'Add goals' },
-  { icon: Map, label: 'Generate Learning Roadmap' },
-];
-
-const weeklyWorkflowSteps = [
-  { icon: Lightbulb, label: 'Generate Next Lesson Ideas' },
-  { icon: CalendarDays, label: 'Use booking context', badge: 'optional' },
-  { icon: CheckCircle2, label: 'Choose one idea' },
-  { icon: FileText, label: 'Create a worksheet' },
-];
-
 const StepPill = ({
   icon: Icon,
   label,
   badge,
+  nowrap,
 }: {
   icon: ProofIcon;
   label: string;
   badge?: string;
+  nowrap?: boolean;
 }) => (
   <div className="flex min-w-0 items-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground shadow-sm">
     <Icon className="h-4 w-4 shrink-0 text-primary" />
-    <span className="min-w-0 flex-1 leading-snug">{label}</span>
+    <span className={cn('min-w-0 flex-1 leading-snug', nowrap && 'whitespace-nowrap text-xs sm:text-sm')}>{label}</span>
     {badge ? (
       <span className="shrink-0 rounded-full bg-primary/10 px-2 py-0.5 text-[10px] font-semibold uppercase text-primary">
         {badge}
@@ -84,14 +75,26 @@ const StepPill = ({
 
 const WorkflowStoryboard = () => (
   <div className="space-y-5">
-    <div className="grid gap-4 lg:grid-cols-2">
+    <div className="grid gap-4 xl:grid-cols-3">
       <div className="rounded-xl border border-violet-100 bg-violet-50/70 p-4">
         <p className="text-xs font-semibold uppercase tracking-wider text-violet-700">Phase 1: One-time student setup</p>
         <p className="mt-2 text-sm leading-6 text-muted-foreground">
           First setup is not the one-minute claim. It creates the student context that recurring prep can use.
         </p>
         <div className="mt-4 grid gap-2">
-          {setupSteps.map((step) => (
+          {setupWorkflowSteps.map((step) => (
+            <StepPill key={step.label} {...step} />
+          ))}
+        </div>
+      </div>
+
+      <div className="rounded-xl border border-blue-100 bg-blue-50/70 p-4">
+        <p className="text-xs font-semibold uppercase tracking-wider text-blue-700">{lessonSignalWorkflowCopy.eyebrow}</p>
+        <h3 className="mt-2 text-lg font-semibold text-foreground">{lessonSignalWorkflowCopy.title}</h3>
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">{lessonSignalWorkflowCopy.description}</p>
+        <p className="mt-2 text-sm leading-6 text-muted-foreground">{lessonSignalWorkflowCopy.supporting}</p>
+        <div className="mt-4 grid gap-2">
+          {lessonSignalWorkflowSteps.map((step) => (
             <StepPill key={step.label} {...step} />
           ))}
         </div>
@@ -214,7 +217,7 @@ const OneMinutePrepProofSection: React.FC<OneMinutePrepProofSectionProps> = ({
             See the 1-Minute Prep proof before the video is ready
           </h2>
           <p className="mt-3 text-sm leading-6 text-muted-foreground sm:text-base">
-            First setup builds the student context. Weekly prep uses that context, optional calendar timing, and DSLM evidence before the worksheet output layer.
+            First setup builds the student context. Lesson activity adds evidence. Weekly prep uses that context, optional calendar timing, and DSLM evidence before the worksheet output layer.
           </p>
         </div>
 

@@ -1,19 +1,33 @@
 import React from 'react';
-import { ArrowDown, ArrowRight, BookOpen, Brain, Calendar, BarChart2, ClipboardCheck, Share2, Bell, CheckCircle2 } from 'lucide-react';
+import {
+  ArrowDown,
+  ArrowRight,
+  BookOpenCheck,
+  Calendar,
+  CheckCircle2,
+  ClipboardCheck,
+  Goal,
+  Layers,
+  Map,
+  Radio,
+  StickyNote,
+  Users,
+} from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useEventTracking } from '@/hooks/useEventTracking';
 import type { OneMinutePrepCalculatorInput } from '@/components/PricingCalculator';
 import OneMinutePrepHeroProofSwitcher from '@/components/landing/OneMinutePrepHeroProofSwitcher';
 
 const unlockFeatures = [
-  { icon: Brain, label: 'DSLM nano-skill signals' },
-  { icon: ClipboardCheck, label: 'Placement Tests' },
-  { icon: BookOpen, label: 'Homework Review' },
-  { icon: BarChart2, label: 'Student Progress Tracking' },
-  { icon: Brain, label: 'Smart Flashcards' },
-  { icon: Calendar, label: 'Smart Lesson Calendar' },
-  { icon: Bell, label: 'Auto Lesson Reminders' },
-  { icon: Share2, label: 'Interactive Sharing' },
+  { icon: BookOpenCheck, label: 'Welcome Test baseline' },
+  { icon: Goal, label: 'Student goals' },
+  { icon: StickyNote, label: 'Teacher notes' },
+  { icon: ClipboardCheck, label: 'Homework evidence' },
+  { icon: Layers, label: 'Flashcard retention' },
+  { icon: Radio, label: 'Live worksheet answers' },
+  { icon: Calendar, label: 'Calendar context' },
+  { icon: Users, label: 'Student Hub access' },
+  { icon: Map, label: 'Learning Roadmap' },
 ];
 
 const canonicalCitationLinks = [
@@ -116,7 +130,7 @@ const HeroHeadline: React.FC<HeroHeadlineProps> = ({
 
           <nav
             aria-label="Edooqoo canonical teacher workflows"
-            className="mb-8 flex max-w-full flex-wrap justify-center gap-2 text-xs sm:max-w-2xl lg:justify-start"
+            className="sr-only"
           >
             {canonicalCitationLinks.map((link) => (
               <a
@@ -130,9 +144,9 @@ const HeroHeadline: React.FC<HeroHeadlineProps> = ({
           </nav>
 
           {/* Unlock features ticker */}
-          <div className="w-full max-w-full sm:max-w-2xl mx-auto lg:mx-0 overflow-hidden border border-border rounded-2xl bg-secondary/60 py-3 mt-4">
+          <div className="w-full max-w-full sm:max-w-2xl mx-auto lg:mx-0 overflow-hidden border border-border rounded-2xl bg-white/80 py-3 mt-4 shadow-sm">
             <p className="text-xs font-semibold tracking-wide text-center mb-1 px-4 text-muted-foreground">
-              Create a free account to unlock 1-Minute Prep
+              Create a free account to save student context for 1-Minute Prep
             </p>
             <div className="flex overflow-hidden">
               <div className="flex animate-marquee whitespace-nowrap">
