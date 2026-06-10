@@ -70,6 +70,26 @@ const FlowStep = ({
   </div>
 );
 
+const CompactBadge = ({
+  icon: Icon,
+  label,
+  nowrap,
+}: {
+  icon: ProofIcon;
+  label: string;
+  nowrap?: boolean;
+}) => (
+  <span
+    className={cn(
+      'inline-flex min-w-0 items-center gap-1.5 rounded-full border border-border bg-white px-2 py-1 text-[11px] font-medium text-foreground shadow-sm',
+      nowrap && 'whitespace-nowrap'
+    )}
+  >
+    <Icon className="h-3 w-3 shrink-0 text-primary" />
+    <span className="min-w-0 leading-tight">{label}</span>
+  </span>
+);
+
 const CompactWorkflowProofPanel = () => (
   <div
     id="one-minute-hero-workflow-panel"
@@ -87,7 +107,7 @@ const CompactWorkflowProofPanel = () => (
 
     <div className="mt-3 space-y-2.5">
       <div className="rounded-xl border border-violet-100 bg-violet-50/70 p-2.5 sm:p-3">
-        <p className="text-[11px] font-semibold uppercase tracking-wider text-violet-700">One-time student setup</p>
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-violet-700">Phase 1: One-time student setup</p>
         <p className="mt-1 text-xs leading-5 text-muted-foreground">
           First create the learner context that the recurring prep flow can use.
         </p>
@@ -101,7 +121,6 @@ const CompactWorkflowProofPanel = () => (
       <div className="rounded-xl border border-blue-100 bg-blue-50/70 p-2.5 sm:p-3">
         <p className="text-[11px] font-semibold uppercase tracking-wider text-blue-700">{lessonSignalWorkflowCopy.eyebrow}</p>
         <p className="mt-1 text-xs leading-5 text-muted-foreground">{lessonSignalWorkflowCopy.description}</p>
-        <p className="mt-1 text-xs leading-5 text-muted-foreground">{lessonSignalWorkflowCopy.supporting}</p>
         <div className="mt-2 flex flex-wrap gap-1.5">
           {lessonSignalWorkflowSteps.map(({ icon: Icon, label, nowrap }: WorkflowProofStep) => (
             <span
@@ -119,7 +138,7 @@ const CompactWorkflowProofPanel = () => (
       </div>
 
       <div className="rounded-xl border border-green-100 bg-green-50/70 p-2.5 sm:p-3">
-        <p className="text-[11px] font-semibold uppercase tracking-wider text-green-700">Weekly 1-Minute Prep flow</p>
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-green-700">Phase 2: Weekly 1-Minute Prep flow</p>
         <p className="mt-1 text-xs leading-5 text-muted-foreground">
           Then use stored context to choose the next focus before the worksheet is generated.
         </p>
@@ -168,9 +187,9 @@ const CompactEvidenceStackPanel = () => (
         <p className="mt-1 text-xs leading-5 text-muted-foreground">
           Signals become nano-skill evidence, pacing context, and a teacher-reviewed next focus.
         </p>
-        <div className="mt-3 grid gap-2">
+        <div className="mt-3 flex flex-wrap gap-1.5">
           {evidenceSteps.map((step) => (
-            <FlowStep key={step.label} {...step} />
+            <CompactBadge key={step.label} {...step} />
           ))}
         </div>
       </div>

@@ -1,79 +1,72 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, CheckCircle2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, CheckCircle2 } from 'lucide-react';
 import FeatureScreenshotFrame from '@/components/features/FeatureScreenshotFrame';
 import { Button } from '@/components/ui/button';
-
-type GenerationContextVariant = 'anonymous' | 'authenticated';
+import { cn } from '@/lib/utils';
+import {
+  generationModalSlides,
+  type GenerationContextVariant,
+} from './generationModalSlides';
 
 interface GenerationContextPanelProps {
   variant: GenerationContextVariant;
+  activeSlideIndex: number;
+  onSlideChange: (index: number) => void;
 }
 
-const panelCopy: Record<GenerationContextVariant, {
-  eyebrow: string;
-  title: string;
-  description: string;
-  items: string[];
-}> = {
-  anonymous: {
-    eyebrow: 'Account context',
-    title: 'A free account turns this from one worksheet into student context.',
-    description:
-      'The generator can work instantly. 1-Minute Prep becomes useful when Edooqoo can save learner context and reuse it next week.',
-    items: [
-      'Save the student profile and goals',
-      'Send the Welcome Test when you need a stronger baseline',
-      'Use homework, flashcards and live worksheet answers as signals',
-      'Return next week with context already attached',
-    ],
-  },
-  authenticated: {
-    eyebrow: 'Next prep cycle',
-    title: 'Make the next worksheet easier to prepare.',
-    description:
-      'This worksheet can become useful context for the next student-specific prep decision after you teach, assign, or review it.',
-    items: [
-      'Attach this worksheet to the right student',
-      'Add notes after the lesson',
-      'Turn selected exercises into homework',
-      'Add useful vocabulary to flashcards',
-      'Use Next Lesson Ideas before the next worksheet',
-    ],
-  },
-};
+const GenerationContextPanel: React.FC<GenerationContextPanelProps> = ({
+  variant,
+  activeSlideIndex,
+  onSlideChange,
+}) => {
+  const slide = generationModalSlides[activeSlideIndex] ?? generationModalSlides[0];
+  const copy = slide.contexts[variant];
 
-const screenshots: Record<GenerationContextVariant, Array<{ src: string; alt: string }>> = {
-  anonymous: [
-    { src: '/features/welcome-test-profile-ai.png', alt: 'Welcome Test AI profile summary' },
-    { src: '/features/one-minute-next-steps.png', alt: '1-Minute Prep next lesson ideas panel' },
-    { src: '/features/student-dashboard.png', alt: 'Student Hub dashboard' },
-  ],
-  authenticated: [
-    { src: '/features/one-minute-next-steps.png', alt: '1-Minute Prep next lesson ideas panel' },
-    { src: '/features/homework-assignments.png', alt: 'Homework assignments list' },
-    { src: '/features/flashcards-sets.png', alt: 'Student flashcard sets' },
-  ],
-};
+  const goToPrevious = () => {
+    onSlideChange((activeSlideIndex - 1 + generationModalSlides.length) % generationModalSlides.length);
+  };
 
-const GenerationContextPanel: React.FC<GenerationContextPanelProps> = ({ variant }) => {
-  const copy = panelCopy[variant];
-  const [primaryScreenshot, ...secondaryScreenshots] = screenshots[variant];
+  const goToNext = () => {
+    onSlideChange((activeSlideIndex + 1) % generationModalSlides.length);
+  };
 
   return (
-    <aside className="flex h-full flex-col rounded-lg border border-border bg-secondary/25 p-4">
-      <div>
-        <p className="text-[11px] font-semibold uppercase tracking-widest text-primary">{copy.eyebrow}</p>
-        <h3 className="mt-2 text-lg font-semibold leading-tight text-foreground">{copy.title}</h3>
-        <p className="mt-2 text-sm leading-6 text-muted-foreground">{copy.description}</p>
+    <aside className="flex h-full flex-col rounded-xl border border-border bg-secondary/25 p-4">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-[11px] font-semibold uppercase tracking-widest text-primary">{copy.eyebrow}</p>
+          <h3 className="mt-2 text-lg font-semibold leading-tight text-foreground">{copy.title}</h3>
+          <p className="mt-2 text-sm leading-6 text-muted-foreground">{copy.description}</p>
+        </div>
+
+        <div className="flex shrink-0 items-center gap-1">
+          <button
+            type="button"
+            aria-label="Show previous generation context slide"
+            onClick={goToPrevious}
+            className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border bg-background text-muted-foreground transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+          >
+            <ArrowLeft className="h-3.5 w-3.5" />
+          </button>
+          <button
+            type="button"
+            aria-label="Show next generation context slide"
+            onClick={goToNext}
+            className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-border bg-background text-muted-foreground transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+          >
+            <ArrowRight className="h-3.5 w-3.5" />
+          </button>
+        </div>
       </div>
 
       <FeatureScreenshotFrame
-        src={primaryScreenshot.src}
-        alt={primaryScreenshot.alt}
-        imageClassName="h-32"
-        objectPosition="center top"
+        src={copy.screenshot.src}
+        alt={copy.screenshot.alt}
+        imageClassName="h-44 sm:h-48"
+        objectPosition={copy.screenshot.objectPosition ?? 'center top'}
         className="mt-4 rounded-lg shadow-none"
+        loading="eager"
       />
 
       <div className="mt-4 space-y-2">
@@ -85,15 +78,18 @@ const GenerationContextPanel: React.FC<GenerationContextPanelProps> = ({ variant
         ))}
       </div>
 
-      <div className="mt-4 grid grid-cols-2 gap-2">
-        {secondaryScreenshots.map((screenshot) => (
-          <FeatureScreenshotFrame
-            key={screenshot.src}
-            src={screenshot.src}
-            alt={screenshot.alt}
-            imageClassName="h-20"
-            objectPosition="center top"
-            className="rounded-lg shadow-none"
+      <div className="mt-4 flex items-center justify-center gap-1.5">
+        {generationModalSlides.map((dot, index) => (
+          <button
+            key={dot.id}
+            type="button"
+            aria-label={`Show ${dot.phaseLabel}`}
+            aria-current={index === activeSlideIndex ? 'true' : undefined}
+            onClick={() => onSlideChange(index)}
+            className={cn(
+              'h-2 rounded-full transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
+              index === activeSlideIndex ? 'w-7 bg-primary' : 'w-2 bg-primary/25 hover:bg-primary/40'
+            )}
           />
         ))}
       </div>
@@ -107,7 +103,7 @@ const GenerationContextPanel: React.FC<GenerationContextPanelProps> = ({ variant
         </Button>
       ) : (
         <p className="mt-4 rounded-lg border border-border bg-background px-3 py-2 text-xs leading-5 text-muted-foreground">
-          Teacher review remains part of the loop. Edooqoo uses saved context to support the next focus, not to replace your decision.
+          {copy.footer ?? 'Teacher review remains part of the loop. Edooqoo uses saved context to support the next focus, not to replace your decision.'}
         </p>
       )}
     </aside>

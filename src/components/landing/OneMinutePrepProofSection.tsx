@@ -76,8 +76,9 @@ const StepPill = ({
 const WorkflowStoryboard = () => (
   <div className="space-y-5">
     <div className="grid gap-4 xl:grid-cols-3">
-      <div className="rounded-xl border border-violet-100 bg-violet-50/70 p-4">
+      <div className="flex h-full flex-col rounded-xl border border-violet-100 bg-violet-50/70 p-4">
         <p className="text-xs font-semibold uppercase tracking-wider text-violet-700">Phase 1: One-time student setup</p>
+        <h3 className="mt-2 text-lg font-semibold text-foreground">Build the learner context once</h3>
         <p className="mt-2 text-sm leading-6 text-muted-foreground">
           First setup is not the one-minute claim. It creates the student context that recurring prep can use.
         </p>
@@ -88,20 +89,20 @@ const WorkflowStoryboard = () => (
         </div>
       </div>
 
-      <div className="rounded-xl border border-blue-100 bg-blue-50/70 p-4">
+      <div className="flex h-full flex-col rounded-xl border border-blue-100 bg-blue-50/70 p-4">
         <p className="text-xs font-semibold uppercase tracking-wider text-blue-700">{lessonSignalWorkflowCopy.eyebrow}</p>
         <h3 className="mt-2 text-lg font-semibold text-foreground">{lessonSignalWorkflowCopy.title}</h3>
         <p className="mt-2 text-sm leading-6 text-muted-foreground">{lessonSignalWorkflowCopy.description}</p>
-        <p className="mt-2 text-sm leading-6 text-muted-foreground">{lessonSignalWorkflowCopy.supporting}</p>
-        <div className="mt-4 grid gap-2">
+        <div className="mt-4 grid gap-2 sm:grid-cols-2">
           {lessonSignalWorkflowSteps.map((step) => (
             <StepPill key={step.label} {...step} />
           ))}
         </div>
       </div>
 
-      <div className="rounded-xl border border-green-100 bg-green-50/70 p-4">
+      <div className="flex h-full flex-col rounded-xl border border-green-100 bg-green-50/70 p-4">
         <p className="text-xs font-semibold uppercase tracking-wider text-green-700">Phase 2: Weekly 1-Minute Prep flow</p>
+        <h3 className="mt-2 text-lg font-semibold text-foreground">Run the recurring prep loop</h3>
         <p className="mt-2 text-sm leading-6 text-muted-foreground">
           Weekly prep uses stored context to decide the next focus before material generation.
         </p>

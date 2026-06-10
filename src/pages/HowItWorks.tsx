@@ -167,7 +167,7 @@ const HowItWorks = () => {
         <script type="application/ld+json">{JSON.stringify(faqJsonLd)}</script>
       </Helmet>
       <PublicWorkflowNav />
-      <div className="container mx-auto max-w-4xl px-4 py-12">
+      <div className="container mx-auto max-w-6xl px-4 py-12">
         <div className="mb-8">
           <button onClick={handleBack} className="text-sm text-primary hover:underline">
             ← Back to Edooqoo
@@ -186,7 +186,7 @@ const HowItWorks = () => {
           .
         </p>
 
-        <TwoPhaseWorkflowSection className="mb-14 -mx-4 sm:-mx-8" />
+        <TwoPhaseWorkflowSection className="mb-14" />
 
         <LessonSignalCaptureSection
           compact

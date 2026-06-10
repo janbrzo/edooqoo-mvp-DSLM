@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import GenerationContextPanel from "@/components/generation/GenerationContextPanel";
 import WorkflowSummaryCard from "@/components/generation/WorkflowSummaryCard";
+import { generationModalSlides } from "@/components/generation/generationModalSlides";
 
 interface GeneratingModalProps {
   isOpen: boolean;
@@ -137,6 +138,8 @@ export default function GeneratingModal({
   const [progress, setProgress] = useState(0);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [sections, setSections] = useState<SectionStatus[]>([]);
+  const [activeSlideIndex, setActiveSlideIndex] = useState(0);
+  const [isCarouselPaused, setIsCarouselPaused] = useState(false);
 
   // PROBLEM 3: Calculate expected time based on configuration
   const exerciseCount = selectedExercises?.length || 6;
@@ -147,6 +150,8 @@ export default function GeneratingModal({
       setProgress(0);
       setElapsedTime(0);
       setSections([]);
+      setActiveSlideIndex(0);
+      setIsCarouselPaused(false);
       return;
     }
 
@@ -174,6 +179,16 @@ export default function GeneratingModal({
       clearInterval(timerInterval);
     };
   }, [isOpen, requiresAudio, requiresImage, hasGrammar, selectedExercises, expectedSeconds]);
+
+  useEffect(() => {
+    if (!isOpen || errorMessage || isCarouselPaused) return;
+
+    const carouselInterval = setInterval(() => {
+      setActiveSlideIndex((current) => (current + 1) % generationModalSlides.length);
+    }, 8000);
+
+    return () => clearInterval(carouselInterval);
+  }, [isOpen, errorMessage, isCarouselPaused]);
 
   // Update sections based on progress - SEQUENTIAL ACTIVATION with exercise details
   useEffect(() => {
@@ -315,7 +330,7 @@ export default function GeneratingModal({
         <div
           className={cn(
             'bg-white rounded-lg shadow-xl mx-4 w-full max-h-[calc(100vh-2rem)] overflow-y-auto',
-          'max-w-[520px] lg:max-w-[960px]'
+          'max-w-[520px] lg:max-w-[1040px]'
           )}
         >
         <div
@@ -323,6 +338,10 @@ export default function GeneratingModal({
             'p-6',
             'space-y-6 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.92fr)] lg:gap-6 lg:space-y-0 lg:p-6'
           )}
+          onMouseEnter={() => setIsCarouselPaused(true)}
+          onMouseLeave={() => setIsCarouselPaused(false)}
+          onFocusCapture={() => setIsCarouselPaused(true)}
+          onBlurCapture={() => setIsCarouselPaused(false)}
         >
           <div className="flex flex-col h-full space-y-4">
         <h2 className="text-2xl font-semibold text-center bg-gradient-to-r from-pink-500 via-violet-500 to-blue-500 bg-clip-text text-transparent">
@@ -391,9 +410,17 @@ export default function GeneratingModal({
             </span>
           )}
         </p>
-        <WorkflowSummaryCard className="mt-auto" />
+        <WorkflowSummaryCard
+          activeSlideIndex={activeSlideIndex}
+          onSlideChange={setActiveSlideIndex}
+          className="mt-auto"
+        />
           </div>
-          <GenerationContextPanel variant={isAnonymous ? 'anonymous' : 'authenticated'} />
+          <GenerationContextPanel
+            variant={isAnonymous ? 'anonymous' : 'authenticated'}
+            activeSlideIndex={activeSlideIndex}
+            onSlideChange={setActiveSlideIndex}
+          />
         </div>
       </div>
     </div>,

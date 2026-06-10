@@ -145,7 +145,7 @@ const HeroHeadline: React.FC<HeroHeadlineProps> = ({
 
           {/* Unlock features ticker */}
           <div className="w-full max-w-full sm:max-w-2xl mx-auto lg:mx-0 overflow-hidden border border-border rounded-2xl bg-white/80 py-3 mt-4 shadow-sm">
-            <p className="text-xs font-semibold tracking-wide text-center mb-1 px-4 text-muted-foreground">
+            <p className="mx-auto mb-2 w-fit max-w-[calc(100%-2rem)] rounded-full border border-violet-100 bg-violet-50/80 px-3 py-1 text-center text-xs font-semibold tracking-wide text-violet-800">
               Create a free account to save student context for 1-Minute Prep
             </p>
             <div className="flex overflow-hidden">
