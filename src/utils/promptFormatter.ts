@@ -18,10 +18,36 @@ import { supabase } from "@/integrations/supabase/client";
 export const formatPromptForAI = async (data: FormData): Promise<string> => {
   devLog('📝 Requesting prompt format from edge fn');
 
-  const invoke = async () =>
-    supabase.functions.invoke<{ prompt: string }>('format-worksheet-prompt', {
-      body: { formData: data },
-    });
+  // v6.9.51 — Bypass `supabase.functions.invoke` and call the edge function
+  // directly so anonymous users (no Supabase session yet) still send a valid
+  // Authorization header. Without this, the gateway returns 401 even though
+  // the function is declared `verify_jwt = false` in supabase/config.toml.
+  const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/format-worksheet-prompt`;
+  const anonKey = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
+
+  const invoke = async (): Promise<{ data: { prompt: string } | null; error: Error | null }> => {
+    try {
+      const { data: sessionData } = await supabase.auth.getSession();
+      const token = sessionData?.session?.access_token ?? anonKey;
+      const res = await fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+          apikey: anonKey,
+        },
+        body: JSON.stringify({ formData: data }),
+      });
+      if (!res.ok) {
+        const txt = await res.text().catch(() => '');
+        return { data: null, error: new Error(`HTTP ${res.status}: ${txt.slice(0, 200)}`) };
+      }
+      const json = (await res.json()) as { prompt: string };
+      return { data: json, error: null };
+    } catch (err) {
+      return { data: null, error: err instanceof Error ? err : new Error(String(err)) };
+    }
+  };
 
   let { data: result, error } = await invoke();
   if (error || !result?.prompt) {
