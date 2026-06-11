@@ -52,6 +52,7 @@ import { TRANSLATION_LANGUAGES, getTranslation, hasTranslation } from "@/data/we
 import { BrainResetGames } from "@/components/welcome-test/BrainResetGames";
 import { WELCOME_TEST_SECTIONS_WITH_QUESTIONS } from "@/data/welcomeTestQuestions";
 import type { WelcomeTestQuestionDef } from "@/types/welcomeTest";
+import { useForceLightTheme } from "@/hooks/useForceLightTheme";
 
 const SECTION_ICONS: Record<string, React.ReactNode> = {
   User: <User className="h-4 w-4" />,
@@ -74,6 +75,7 @@ type Stage =
   | "section_celebration";
 
 export default function WelcomeTestPage() {
+  useForceLightTheme();
   const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
