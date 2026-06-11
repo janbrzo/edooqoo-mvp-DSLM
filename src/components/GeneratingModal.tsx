@@ -24,6 +24,7 @@ interface GeneratingModalProps {
   onRetry?: () => void;
   isAnonymous?: boolean;
   studentName?: string;
+  studentEmail?: string | null;
 }
 
 // Section completion status
@@ -136,6 +137,7 @@ export default function GeneratingModal({
   onRetry,
   isAnonymous = false,
   studentName,
+  studentEmail,
 }: GeneratingModalProps) {
   const [progress, setProgress] = useState(0);
   const [elapsedTime, setElapsedTime] = useState(0);
@@ -328,31 +330,42 @@ export default function GeneratingModal({
 
   // NORMAL PROGRESS STATE
   return createPortal(
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] p-4 overflow-y-auto">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] p-4 overflow-y-auto lg:overflow-hidden">
         <div
           className={cn(
-            'bg-white rounded-lg shadow-xl mx-4 w-full max-h-[calc(100vh-2rem)] overflow-y-auto',
-          'max-w-[520px] lg:max-w-[1040px]'
+            'bg-white rounded-lg shadow-xl mx-4 w-full',
+            // Mobile: allow internal scroll if needed.
+            'max-h-[calc(100vh-2rem)] overflow-y-auto',
+            // Desktop (lg+): cap height AND hide scrollbar — content is sized
+            // to fit a 720p viewport without a scrollbar.
+            'lg:max-h-[calc(100dvh-2rem)] lg:overflow-hidden',
+            'max-w-[520px] lg:max-w-[1040px]'
           )}
         >
         <div
           className={cn(
             'p-6',
-            'space-y-6 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.92fr)] lg:gap-4 lg:space-y-0 lg:p-6'
+            'space-y-6 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.92fr)] lg:gap-4 lg:space-y-0 lg:p-5 lg:min-h-0'
           )}
           onMouseEnter={() => setIsCarouselPaused(true)}
           onMouseLeave={() => setIsCarouselPaused(false)}
           onFocusCapture={() => setIsCarouselPaused(true)}
           onBlurCapture={() => setIsCarouselPaused(false)}
         >
-          <div className="flex flex-col h-full space-y-4">
+          <div className="flex flex-col h-full space-y-3 min-w-0 min-h-0">
         <div className="text-center space-y-0.5">
-          <h2 className="text-2xl font-semibold bg-gradient-to-r from-pink-500 via-violet-500 to-blue-500 bg-clip-text text-transparent">
+          <h2 className="text-xl lg:text-2xl font-semibold bg-gradient-to-r from-pink-500 via-violet-500 to-blue-500 bg-clip-text text-transparent">
             Generating Your Worksheet
           </h2>
           {studentName ? (
-            <p className="text-sm text-muted-foreground">
-              for <span className="font-medium text-foreground">{studentName}</span>
+            <p className="text-xs lg:text-sm text-muted-foreground">
+              For <span className="font-medium text-foreground">{studentName}</span>
+              <span className="mx-1.5 text-muted-foreground/60">·</span>
+              <span className="font-normal text-foreground/80 break-all">
+                {studentEmail && studentEmail.trim().length > 0
+                  ? studentEmail
+                  : 'no student email set'}
+              </span>
             </p>
           ) : null}
         </div>
@@ -368,7 +381,7 @@ export default function GeneratingModal({
           <span>{Math.round(progress)}%</span>
         </div>
 
-        <div className="space-y-1 bg-muted/30 p-3 rounded-lg max-h-[60vh] overflow-y-auto">
+        <div className="space-y-1 bg-muted/30 p-2.5 rounded-lg max-h-[44vh] lg:max-h-[34vh] overflow-y-auto">
           {sections.map((section, index) => (
             <div 
               key={index} 

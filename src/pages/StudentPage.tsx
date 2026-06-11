@@ -1078,6 +1078,9 @@ const StudentPage = () => {
                     grammarFocus: grammarFocus || '',
                     exercises: exercises || [],
                     exerciseFocusMap: (exerciseFocusMap || {}) as Record<string, 'vocabulary' | 'grammar'>,
+                    // v6.9.55 — surface in GeneratingModal header.
+                    studentName: student.name || null,
+                    studentEmail: (student as any).student_email || null,
                   });
                 } else {
                   // Manual "Use this" — only prefill, never auto-fire.

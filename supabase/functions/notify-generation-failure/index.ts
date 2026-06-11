@@ -33,6 +33,7 @@ serve(async (req) => {
       'audio': 'OpenAI audio model is unreachable. Verify OPENAI_API_KEY has access to gpt-4o-mini and gpt-4o-mini-tts. Check /v1/audio/speech endpoint status.',
       'network': 'Network error connecting to AI provider. Check API key validity and provider status page.',
       'database': 'Failed to save worksheet to database. Check Supabase connection, RLS policies, and table constraints.',
+      'client_stream_lost_no_saved_worksheet': 'Browser SSE stream ended without a terminal event AND no worksheet row matching this attempt was found after 30s of polling. This is a true delivery failure (network, edge cold-restart, or backend abort before DB insert). The user saw an error, tokens were NOT consumed, and the Next Step suggestion was NOT marked as used.',
       'default': 'Unknown error. Check edge function logs for full stack trace.',
     };
 

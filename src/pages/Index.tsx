@@ -435,7 +435,11 @@ const Index = () => {
           selectedExercises={worksheetState.inputParams?.selectedExercises}
           errorMessage={generationError}
           onRetry={clearGenerationError}
-          studentName={typeof window !== 'undefined' ? (sessionStorage.getItem('worksheetStudentName') || undefined) : undefined}
+          studentName={
+            worksheetState.inputParams?.studentName
+            || (typeof window !== 'undefined' ? (sessionStorage.getItem('worksheetStudentName') || undefined) : undefined)
+          }
+          studentEmail={worksheetState.inputParams?.studentEmail ?? null}
         />
         
         <TokenPaywallModal
@@ -554,7 +558,11 @@ const Index = () => {
         errorMessage={generationError}
         onRetry={clearGenerationError}
         isAnonymous={true}
-        studentName={typeof window !== 'undefined' ? (sessionStorage.getItem('worksheetStudentName') || undefined) : undefined}
+        studentName={
+          worksheetState.inputParams?.studentName
+          || (typeof window !== 'undefined' ? (sessionStorage.getItem('worksheetStudentName') || undefined) : undefined)
+        }
+        studentEmail={worksheetState.inputParams?.studentEmail ?? null}
       />
       
       <TokenPaywallModal

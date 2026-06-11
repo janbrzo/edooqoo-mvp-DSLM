@@ -78,6 +78,17 @@ export const useWorksheetGeneration = (
       studentId: effectiveStudentId
     });
 
+    // v6.9.55 — stable correlation id for THIS generation attempt.
+    // Used to (a) reconcile against `worksheets.form_data->>clientGenerationId`
+    // when the SSE stream drops without a terminal event, (b) drive the
+    // refresh-safe job registry, (c) gate Next Step `is_used` side effect on
+    // an actually-saved worksheet for this attempt.
+    const clientGenerationId: string =
+      (data as any).__autoGenerateRequestId
+      || (typeof crypto !== 'undefined' && 'randomUUID' in crypto
+        ? crypto.randomUUID()
+        : `gen_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`);
+
     // FLAG: Track if streaming has started to prevent premature modal close
     let streamingStarted = false;
 
@@ -157,7 +168,7 @@ export const useWorksheetGeneration = (
         suggestionId: autoSuggestionId,
         topic: String(data.lessonTopic || '').slice(0, 240),
         origin: !userId ? 'anonymous' : ((data as any).__autoGenerateFromSuggestion ? 'dslm-auto' : 'manual'),
-        requestId: (data as any).__autoGenerateRequestId || null,
+        requestId: clientGenerationId,
       });
     } catch (e) {
       devWarn('[useWorksheetGeneration] failed to start generation job', e);
@@ -177,6 +188,10 @@ export const useWorksheetGeneration = (
       
       const fullPrompt = await formatPromptForAI(data);
       const formDataForStorage = createFormDataForStorage(data);
+      // v6.9.55 — persist the correlation id into the row's `form_data` so a
+      // post-EOF reconciliation can locate THIS attempt's worksheet
+      // unambiguously. Prompt input itself is NOT modified.
+      (formDataForStorage as any).clientGenerationId = clientGenerationId;
       
       if (!userId) {
         devLog('📋 Anonymous user detected - proceeding in demo mode');
@@ -289,6 +304,52 @@ export const useWorksheetGeneration = (
             
             await handleWorksheetCompletion(worksheetResult, data, startTime);
           },
+          onStreamEndedWithoutTerminalEvent: async (lastProgress) => {
+            clearTimeout(generationTimeoutId);
+            devWarn(
+              '[useWorksheetGeneration] stream EOF without done/error — attempting DB reconciliation',
+              { lastProgress, clientGenerationId }
+            );
+            const recovered = await recoverWorksheetAfterStreamLoss({
+              clientGenerationId,
+              teacherId: userId,
+              studentId: effectiveStudentId,
+              startedAt: startTime,
+            });
+            if (recovered) {
+              devLog('✅ Recovered worksheet after stream EOF:', recovered.id);
+              setStreamProgress(null);
+              await handleWorksheetCompletion(recovered, data, startTime);
+              return;
+            }
+            // No saved worksheet for this attempt — surface a genuine failure
+            // and DO NOT mark the Next Step suggestion as used.
+            setStreamProgress(null);
+            const detail = `Stream ended after generating ${lastProgress.exercisesGenerated}/${lastProgress.expectedTotal || '?'} exercises and no worksheet was saved. Please retry — no tokens were consumed.`;
+            setGenerationError(detail);
+            try {
+              failGenerationJob(detail);
+              const reqId = (data as any).__autoGenerateRequestId;
+              if (reqId) markPersistentAutoGenerateIntentStatus(reqId, 'failed');
+            } catch { /* ignore */ }
+            // Notify ops (anonymous-friendly: minimal context, no prompt).
+            try {
+              await supabase.functions.invoke('notify-generation-failure', {
+                body: {
+                  errorType: 'client_stream_lost_no_saved_worksheet',
+                  errorMessage: detail,
+                  userId: userId || null,
+                  teacherEmail: null,
+                  model: 'unknown',
+                  promptPreview: String(data.lessonTopic || '').slice(0, 120),
+                  timestamp: new Date().toISOString(),
+                  clientGenerationId,
+                },
+              });
+            } catch (e) {
+              devWarn('[useWorksheetGeneration] notify-generation-failure invoke failed', e);
+            }
+          },
           onError: (error) => {
             clearTimeout(generationTimeoutId);
             console.error('❌ Stream error:', error);
@@ -366,6 +427,54 @@ export const useWorksheetGeneration = (
       }
     }
   };
+
+  /**
+   * v6.9.55 — Post-stream reconciliation. After an SSE EOF without a
+   * terminal event, look up the worksheet row that THIS attempt may have
+   * already saved. Returns a worksheet-shaped object compatible with
+   * `handleWorksheetCompletion`, or null if nothing matches.
+   */
+  async function recoverWorksheetAfterStreamLoss(params: {
+    clientGenerationId: string;
+    teacherId: string | null;
+    studentId: string | null;
+    startedAt: number;
+  }): Promise<any | null> {
+    const POLL_INTERVAL_MS = 2000;
+    const MAX_WAIT_MS = 30_000;
+    const deadline = Date.now() + MAX_WAIT_MS;
+    while (Date.now() < deadline) {
+      try {
+        let query = supabase
+          .from('worksheets')
+          .select('id, ai_response, html_content')
+          .filter('form_data->>clientGenerationId', 'eq', params.clientGenerationId)
+          .is('deleted_at', null)
+          .order('created_at', { ascending: false })
+          .limit(1);
+        if (params.teacherId) query = query.eq('teacher_id', params.teacherId);
+        const { data, error } = await query;
+        if (!error && data && data[0]?.id) {
+          const row: any = data[0];
+          let parsed: any = null;
+          if (row.ai_response) {
+            try { parsed = JSON.parse(row.ai_response); } catch { parsed = null; }
+          }
+          if (!parsed && row.html_content) {
+            try { parsed = JSON.parse(row.html_content); } catch { parsed = null; }
+          }
+          if (parsed && Array.isArray(parsed.exercises)) {
+            parsed.id = row.id;
+            return parsed;
+          }
+        }
+      } catch (e) {
+        devWarn('[recoverWorksheetAfterStreamLoss] poll error', e);
+      }
+      await new Promise((r) => setTimeout(r, POLL_INTERVAL_MS));
+    }
+    return null;
+  }
 
   const handleWorksheetCompletion = async (worksheetResult: any, data: FormData, startTime: number) => {
     devLog("✅ Generated worksheet result received:", {

@@ -29,6 +29,29 @@ const POLL_LOOKBACK_MS = 30_000;
 
 async function locateBackendWorksheet(job: WorksheetGenerationJob): Promise<string | null> {
   if (!job.teacherId) return null;
+
+  // v6.9.55 — prefer exact correlation via `form_data->>clientGenerationId`
+  // (set by `useWorksheetGeneration` for every attempt). Falls back to the
+  // wider teacher/student window for legacy jobs that were started before
+  // v6.9.55 and have no client correlation id.
+  if (job.requestId) {
+    try {
+      const { data: byCorr, error: corrErr } = await supabase
+        .from('worksheets')
+        .select('id, created_at')
+        .eq('teacher_id', job.teacherId)
+        .filter('form_data->>clientGenerationId', 'eq', job.requestId)
+        .is('deleted_at', null)
+        .order('created_at', { ascending: false })
+        .limit(1);
+      if (!corrErr && byCorr && byCorr[0]?.id) {
+        return byCorr[0].id as string;
+      }
+    } catch (e) {
+      devWarn('[useActiveWorksheetGenerationJob] correlation query failed', e);
+    }
+  }
+
   const since = new Date(Math.max(0, job.startedAt - POLL_LOOKBACK_MS)).toISOString();
   let query = supabase
     .from('worksheets')

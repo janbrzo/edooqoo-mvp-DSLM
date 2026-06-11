@@ -1,27 +1,11 @@
-import { useEffect } from 'react';
+import { useHardLightSurface } from './useHardLightSurface';
 
 /**
- * v6.9.54 — Force-disable dark mode for the lifetime of a page.
- * Used on worksheet/homework/welcome-test/public surfaces where the
- * teacher dark theme tokens would invert the high-contrast white
- * background and destroy readability for anonymous viewers.
- *
- * On unmount, restore dark only if the teacher has it explicitly stored.
+ * v6.9.55 — Now a thin wrapper around `useHardLightSurface` so every
+ * existing caller automatically gets the stronger lock (MutationObserver
+ * + color-scheme + ref count). Kept under the original name to avoid a
+ * sweeping rename across worksheet/homework/welcome-test pages.
  */
 export function useForceLightTheme() {
-  useEffect(() => {
-    const root = document.documentElement;
-    const hadDark = root.classList.contains('dark');
-    root.classList.remove('dark');
-    return () => {
-      try {
-        const stored = localStorage.getItem('edooqoo-theme');
-        if (stored === 'dark' && hadDark) {
-          root.classList.add('dark');
-        }
-      } catch (_) {
-        /* noop */
-      }
-    };
-  }, []);
+  useHardLightSurface('public-light');
 }

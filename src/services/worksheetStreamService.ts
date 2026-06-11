@@ -9,6 +9,19 @@ interface StreamCallbacks {
   onProgress?: (progress: { exercisesGenerated: number; expectedTotal: number }) => void;
   onDone?: (result: { worksheetId: string; worksheet: any }) => void;
   onError?: (error: Error) => void;
+  /**
+   * v6.9.55 — Fired when the underlying fetch/SSE stream closed cleanly but
+   * NO `done` and NO `error` event arrived AND the model had already
+   * streamed at least one exercise. The caller is expected to attempt a
+   * DB-based reconciliation (look up the worksheet row by
+   * `clientGenerationId`) before deciding whether to surface a real error.
+   * If this callback is not provided, the service falls back to `onError`
+   * with the legacy "Stream ended unexpectedly..." message.
+   */
+  onStreamEndedWithoutTerminalEvent?: (lastProgress: {
+    exercisesGenerated: number;
+    expectedTotal: number;
+  }) => void;
 }
 
 /**
@@ -156,10 +169,24 @@ export function streamWorksheetGeneration(
     
     if (!receivedDoneOrError) {
       console.error('⚠️ Stream ended without done/error event');
-      const detail = lastProgress.exercisesGenerated > 0
-        ? `Stream ended unexpectedly after generating ${lastProgress.exercisesGenerated}/${lastProgress.expectedTotal || '?'} exercises. Please retry.`
-        : 'Stream ended unexpectedly without completion. Please retry.';
-      callbacks.onError?.(new Error(detail));
+      // v6.9.55 — if at least one exercise streamed, the worksheet may be
+      // saved on the backend already. Hand the decision to the caller, who
+      // will reconcile against the `worksheets` table before showing a
+      // hard failure to the user.
+      if (
+        lastProgress.exercisesGenerated > 0 &&
+        callbacks.onStreamEndedWithoutTerminalEvent
+      ) {
+        callbacks.onStreamEndedWithoutTerminalEvent({
+          exercisesGenerated: lastProgress.exercisesGenerated,
+          expectedTotal: lastProgress.expectedTotal,
+        });
+      } else {
+        const detail = lastProgress.exercisesGenerated > 0
+          ? `Stream ended unexpectedly after generating ${lastProgress.exercisesGenerated}/${lastProgress.expectedTotal || '?'} exercises. Please retry.`
+          : 'Stream ended unexpectedly without completion. Please retry.';
+        callbacks.onError?.(new Error(detail));
+      }
     }
   }).catch(error => {
     cleanupHeartbeat();

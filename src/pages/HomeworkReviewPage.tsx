@@ -15,6 +15,7 @@ import {
 import { format } from "date-fns";
 import { deepFixTextObjects } from "@/utils/textObjectFixer";
 import { AiEvaluationBadge, type AiEvaluation } from "@/components/homework/AiEvaluationBadge";
+import { useHardLightSurface } from "@/hooks/useHardLightSurface";
 
 interface HomeworkData {
   id: string;
@@ -52,6 +53,9 @@ interface TeacherComment {
 }
 
 export default function HomeworkReviewPage() {
+  // v6.9.55 — Teacher homework review must stay light regardless of dark
+  // mode preference; worksheet/homework surfaces never invert.
+  useHardLightSurface('homework-review');
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [homework, setHomework] = useState<HomeworkData | null>(null);

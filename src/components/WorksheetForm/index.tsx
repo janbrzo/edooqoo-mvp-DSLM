@@ -564,7 +564,21 @@ export default function WorksheetForm({
       // silently dropping it after 2 short retries.
       __autoGenerateFromSuggestion: Boolean(initialAutoIntentRef.current),
       __autoGenerateRequestId: autoRequestIdRef.current || undefined,
-    };
+    } as any;
+
+    // v6.9.55 — attach UI/transport metadata (student name + email) for
+    // GeneratingModal. Not part of the AI prompt; the prompt formatter
+    // never reads these fields.
+    try {
+      const sid = selectedStudentId === 'no-student' ? null : selectedStudentId;
+      if (sid) {
+        const s: any = students.find((x: any) => x.id === sid);
+        if (s) {
+          formData.studentName = s.name || null;
+          formData.studentEmail = s.student_email || null;
+        }
+      }
+    } catch { /* ignore */ }
 
     // Refresh onboarding progress after successful worksheet generation
     devLog('[WorksheetForm] Triggering onboarding refresh after worksheet generation');
