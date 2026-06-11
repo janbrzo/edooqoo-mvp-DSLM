@@ -1,5 +1,4 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { ArrowLeft, ArrowRight, CheckCircle2 } from 'lucide-react';
 import FeatureScreenshotFrame from '@/components/features/FeatureScreenshotFrame';
 import { Button } from '@/components/ui/button';
@@ -32,12 +31,12 @@ const GenerationContextPanel: React.FC<GenerationContextPanelProps> = ({
   };
 
   return (
-    <aside className="flex h-full flex-col rounded-xl border border-border bg-secondary/25 p-4">
+    <aside className="flex h-full flex-col rounded-xl border border-border bg-secondary/25 p-3">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-[11px] font-semibold uppercase tracking-widest text-primary">{copy.eyebrow}</p>
-          <h3 className="mt-2 text-lg font-semibold leading-tight text-foreground">{copy.title}</h3>
-          <p className="mt-2 text-sm leading-6 text-muted-foreground">{copy.description}</p>
+          <h3 className="mt-1.5 text-base font-semibold leading-tight text-foreground">{copy.title}</h3>
+          <p className="mt-1.5 text-xs leading-5 text-muted-foreground">{copy.description}</p>
         </div>
 
         <div className="flex shrink-0 items-center gap-1">
@@ -63,22 +62,22 @@ const GenerationContextPanel: React.FC<GenerationContextPanelProps> = ({
       <FeatureScreenshotFrame
         src={copy.screenshot.src}
         alt={copy.screenshot.alt}
-        imageClassName="h-44 sm:h-48"
+        imageClassName="h-36 sm:h-40"
         objectPosition={copy.screenshot.objectPosition ?? 'center top'}
-        className="mt-4 rounded-lg shadow-none"
+        className="mt-3 rounded-lg shadow-none"
         loading="eager"
       />
 
-      <div className="mt-4 space-y-2">
+      <div className="mt-3 space-y-1.5">
         {copy.items.map((item) => (
-          <div key={item} className="flex gap-2 rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground">
+          <div key={item} className="flex gap-2 rounded-lg border border-border bg-background px-3 py-1.5 text-sm text-foreground">
             <CheckCircle2 className="mt-0.5 h-4 w-4 shrink-0 text-primary" />
             <span className="leading-5">{item}</span>
           </div>
         ))}
       </div>
 
-      <div className="mt-4 flex items-center justify-center gap-1.5">
+      <div className="mt-3 flex items-center justify-center gap-1.5">
         {generationModalSlides.map((dot, index) => (
           <button
             key={dot.id}
@@ -95,14 +94,16 @@ const GenerationContextPanel: React.FC<GenerationContextPanelProps> = ({
       </div>
 
       {variant === 'anonymous' ? (
-        <Button asChild className="mt-4 rounded-full">
-          <Link to="/signup">
+        // v6.9.54 — open signup in a new tab so worksheet generation in
+        // the current tab is not interrupted.
+        <Button asChild className="mt-3 rounded-full">
+          <a href="/signup" target="_blank" rel="noopener noreferrer">
             Create free account
             <ArrowRight className="ml-2 h-4 w-4" />
-          </Link>
+          </a>
         </Button>
       ) : (
-        <p className="mt-4 rounded-lg border border-border bg-background px-3 py-2 text-xs leading-5 text-muted-foreground">
+        <p className="mt-3 rounded-lg border border-border bg-background px-3 py-2 text-xs leading-5 text-muted-foreground">
           {copy.footer ?? 'Teacher review remains part of the loop. Edooqoo uses saved context to support the next focus, not to replace your decision.'}
         </p>
       )}
