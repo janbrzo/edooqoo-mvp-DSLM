@@ -63,7 +63,9 @@ function WorksheetHeader({
   const handleGenerateNewWorksheet = () => {
     if (isDemoMode) { showDemoBlockedToast('Generating worksheets'); return; }
     sessionStorage.setItem('forceNewWorksheet', 'true');
-    navigate('/?forceNew=' + Date.now());
+    // v6.9.53 — Index.tsx now accepts any truthy `forceNew` value, but we
+    // emit a stable token instead of a timestamp so the URL is predictable.
+    navigate('/?forceNew=1');
   };
 
   const handleStudentTransferSuccess = (newStudentName?: string) => {
