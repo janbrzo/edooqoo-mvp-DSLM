@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { PageSeo } from '@/components/seo/PageSeo';
 import GalleryExerciseRenderer from '@/components/gallery/GalleryExerciseRenderer';
 import PublicTopNav from '@/components/public/PublicTopNav';
+import { useForceLightTheme } from '@/hooks/useForceLightTheme';
 
 interface PublicWorksheetRow {
   id: string;
@@ -18,6 +19,7 @@ interface PublicWorksheetRow {
 }
 
 const PublicGalleryWorksheetPage: React.FC = () => {
+  useForceLightTheme();
   const { slug } = useParams<{ slug: string }>();
   const location = useLocation();
   const fromState = { from: location.pathname + location.search };

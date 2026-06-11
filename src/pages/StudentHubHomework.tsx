@@ -7,10 +7,12 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ClipboardList, ArrowRight, Loader2 } from 'lucide-react';
 import { format, parseISO, isPast } from 'date-fns';
+import { useForceLightTheme } from '@/hooks/useForceLightTheme';
 
 type Filter = 'all' | 'pending' | 'completed' | 'overdue';
 
 const StudentHubHomework = () => {
+  useForceLightTheme();
   const { teacherToken } = useParams<{ teacherToken: string }>();
   const navigate = useNavigate();
   const email = getSavedHubEmail();

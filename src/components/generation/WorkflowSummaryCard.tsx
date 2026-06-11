@@ -1,7 +1,7 @@
 import React from 'react';
 import { CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { generationModalSlides } from './generationModalSlides';
+import { generationModalSlides, MAX_LEFT_CARD_ITEMS } from './generationModalSlides';
 
 interface WorkflowSummaryCardProps {
   activeSlideIndex: number;
@@ -37,7 +37,7 @@ const WorkflowSummaryCard: React.FC<WorkflowSummaryCardProps> = ({
       </div>
 
       <div className="mt-3 grid gap-1.5 sm:grid-cols-2">
-        {slide.items.map(({ icon: Icon, label, badge, nowrap }) => (
+        {slide.items.slice(0, MAX_LEFT_CARD_ITEMS).map(({ icon: Icon, label, badge, nowrap }) => (
           <div
             key={label}
             className="flex min-w-0 items-center gap-1.5 rounded-md border border-border/70 bg-background px-2 py-1.5 text-xs text-foreground"

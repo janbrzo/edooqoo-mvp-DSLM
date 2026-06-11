@@ -18,8 +18,10 @@ import { devLog } from '@/utils/logger';
 import type { SharedWorksheetData } from '@/types/interactiveSharedWorksheet';
 import type { DrawingTool, DrawingColor, StrokeWidth, DrawingState } from '@/types/drawing';
 import { DRAWING_COLORS, STROKE_WIDTHS } from '@/types/drawing';
+import { useForceLightTheme } from '@/hooks/useForceLightTheme';
 
 const SharedWorksheet = () => {
+  useForceLightTheme();
   const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
   const [worksheet, setWorksheet] = useState<SharedWorksheetData | null>(null);

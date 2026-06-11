@@ -8,20 +8,16 @@ export function useTheme() {
     return (localStorage.getItem(STORAGE_KEY) as Theme) || 'system';
   });
 
+  // v6.9.54 — Dark mode is teacher-only and must be an explicit opt-in.
+  // 'system' resolves to light so anonymous worksheet/homework surfaces
+  // never inherit the OS dark preference and invert their tokens.
   const applyTheme = (t: Theme) => {
-    const isDark = t === 'dark' || (t === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+    const isDark = t === 'dark';
     document.documentElement.classList.toggle('dark', isDark);
   };
 
   useEffect(() => {
     applyTheme(theme);
-
-    if (theme === 'system') {
-      const mq = window.matchMedia('(prefers-color-scheme: dark)');
-      const handler = () => applyTheme('system');
-      mq.addEventListener('change', handler);
-      return () => mq.removeEventListener('change', handler);
-    }
   }, [theme]);
 
   const setTheme = (t: Theme) => {

@@ -211,11 +211,18 @@
 
   <body>
     <script>
+      // v6.9.54 — Dark mode is a teacher-only explicit opt-in. Never
+      // inherit prefers-color-scheme: doing so inverts the high-contrast
+      // white background on anonymous worksheet/homework/welcome-test pages.
       (function() {
-        var t = localStorage.getItem('edooqoo-theme');
-        if (t === 'dark' || (t !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-          document.documentElement.classList.add('dark');
-        }
+        try {
+          var t = localStorage.getItem('edooqoo-theme');
+          if (t === 'dark') {
+            document.documentElement.classList.add('dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+          }
+        } catch (_) {}
       })();
     </script>
     <noscript>

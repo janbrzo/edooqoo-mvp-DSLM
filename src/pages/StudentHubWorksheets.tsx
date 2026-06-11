@@ -6,8 +6,10 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { FileText, ArrowRight, Loader2 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
+import { useForceLightTheme } from '@/hooks/useForceLightTheme';
 
 const StudentHubWorksheets = () => {
+  useForceLightTheme();
   const { teacherToken } = useParams<{ teacherToken: string }>();
   const navigate = useNavigate();
   const email = getSavedHubEmail();

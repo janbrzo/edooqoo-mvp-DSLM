@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Calendar, Loader2 } from 'lucide-react';
 import { saveHubEmail, getSavedHubEmail } from '@/hooks/useStudentHubData';
+import { useForceLightTheme } from '@/hooks/useForceLightTheme';
 
 const EMAIL_STORAGE_KEY = 'book_student_email';
 
@@ -20,6 +21,7 @@ function getSavedValue(key: string): string | null {
 }
 
 const PublicBookingPage = () => {
+  useForceLightTheme();
   const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
   const [email, setEmail] = useState('');
