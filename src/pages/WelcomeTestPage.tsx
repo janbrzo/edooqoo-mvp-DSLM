@@ -253,16 +253,31 @@ export default function WelcomeTestPage() {
       return;
     }
     const email = raw.toLowerCase();
-    
-    // Verify against student's email in DB
-    if (studentId) {
-      const { data } = await supabase.from('students').select('student_email').eq('id', studentId).single();
-      if (data?.student_email && data.student_email.toLowerCase() !== email) {
-        toast.error("This email doesn't match the student assigned to this test.");
-        return;
-      }
+
+    // v6.9.54 — verify via SECURITY DEFINER RPC so RLS on `students`
+    // cannot silently let any email through for anonymous visitors.
+    if (!token) {
+      toast.error("Missing test token. Please use the link from your teacher.");
+      return;
     }
-    
+    const { data: verifyData, error: verifyError } = await supabase.rpc(
+      'verify_welcome_test_email',
+      { p_share_token: token, p_email: email }
+    );
+    if (verifyError) {
+      toast.error("Could not verify email. Please try again or contact your teacher.");
+      return;
+    }
+    const verifyRow = Array.isArray(verifyData) ? verifyData[0] : verifyData;
+    if (!verifyRow?.has_email) {
+      toast.error("This test requires the student email. Please ask your teacher to set it before starting.");
+      return;
+    }
+    if (!verifyRow?.matches) {
+      toast.error("This email doesn't match the student assigned to this test.");
+      return;
+    }
+
     if (token) {
       const expiresAt = new Date();
       expiresAt.setHours(expiresAt.getHours() + 24);
