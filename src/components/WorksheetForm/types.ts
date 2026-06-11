@@ -37,6 +37,18 @@ export interface FormData {
   // generation hook can flip `future_worksheet_suggestions.is_used` even when
   // sessionStorage was cleared between intent write and completion.
   __autoGenerateSuggestionId?: string | null;
+  // v6.9.55 — UI/transport metadata (NOT prompt input). Used by
+  // `GeneratingModal` to show "For Evelyn H · evelyn@example.com" without
+  // depending on fragile sessionStorage round-trips. Never injected into
+  // the AI prompt by `format-worksheet-prompt`.
+  studentName?: string | null;
+  studentEmail?: string | null;
+  // v6.9.55 — Stable id correlating a single client generation attempt
+  // with the saved `worksheets.form_data.clientGenerationId`. Used by
+  // post-stream reconciliation polling (problems 3 + 4) so we can mark
+  // suggestions used / consume tokens only when a real worksheet row
+  // for THIS attempt exists. Never part of the AI prompt input.
+  clientGenerationId?: string;
   selectedImage?: {
     id: string;
     url: string;

@@ -48,6 +48,10 @@ export interface PersistentAutoGenerateIntent {
   mediaTypes: MediaType[];
   createdAt: number;
   status: PersistentIntentStatus;
+  // v6.9.55 — UI metadata so the generation modal can render
+  // "For {name} · {email}" without re-fetching from Supabase.
+  studentName?: string | null;
+  studentEmail?: string | null;
 }
 
 function generateRequestId(): string {
@@ -75,6 +79,8 @@ export interface WriteAutoGenerateIntentInput {
   exercises?: string[];
   exerciseFocusMap?: Record<string, 'vocabulary' | 'grammar'>;
   mediaTypes?: MediaType[];
+  studentName?: string | null;
+  studentEmail?: string | null;
 }
 
 /**
@@ -99,6 +105,8 @@ export function writeAutoGenerateIntent(input: WriteAutoGenerateIntentInput): Pe
     mediaTypes,
     createdAt: Date.now(),
     status: 'pending',
+    studentName: input.studentName ?? null,
+    studentEmail: input.studentEmail ?? null,
   };
 
   if (typeof window !== 'undefined') {
@@ -321,6 +329,9 @@ export function buildAutoGeneratePayload(): (FormData & { __autoGenerateRequestI
     // v6.9.53 — carry suggestionId in the payload so generation hook can
     // mark `is_used` even when sessionStorage gets cleared mid-flight.
     __autoGenerateSuggestionId: suggestionId,
+    // v6.9.55 — UI/transport metadata for GeneratingModal.
+    studentName: persistent?.studentName ?? null,
+    studentEmail: persistent?.studentEmail ?? null,
   };
   return payload;
 }
