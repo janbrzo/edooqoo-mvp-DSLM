@@ -435,6 +435,7 @@ const Index = () => {
           selectedExercises={worksheetState.inputParams?.selectedExercises}
           errorMessage={generationError}
           onRetry={clearGenerationError}
+          studentName={typeof window !== 'undefined' ? (sessionStorage.getItem('worksheetStudentName') || undefined) : undefined}
         />
         
         <TokenPaywallModal
@@ -553,6 +554,7 @@ const Index = () => {
         errorMessage={generationError}
         onRetry={clearGenerationError}
         isAnonymous={true}
+        studentName={typeof window !== 'undefined' ? (sessionStorage.getItem('worksheetStudentName') || undefined) : undefined}
       />
       
       <TokenPaywallModal
