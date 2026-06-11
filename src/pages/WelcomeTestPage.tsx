@@ -53,6 +53,8 @@ import { BrainResetGames } from "@/components/welcome-test/BrainResetGames";
 import { WELCOME_TEST_SECTIONS_WITH_QUESTIONS } from "@/data/welcomeTestQuestions";
 import type { WelcomeTestQuestionDef } from "@/types/welcomeTest";
 import { useForceLightTheme } from "@/hooks/useForceLightTheme";
+import { useNoTranslatePage } from "@/hooks/useNoTranslatePage";
+import { Helmet } from "react-helmet-async";
 
 const SECTION_ICONS: Record<string, React.ReactNode> = {
   User: <User className="h-4 w-4" />,
@@ -76,6 +78,9 @@ type Stage =
 
 export default function WelcomeTestPage() {
   useForceLightTheme();
+  // v6.9.55 — Block Chrome / Google Translate auto-translation. A placement
+  // diagnostic translated to the student's native language defeats the test.
+  useNoTranslatePage('welcome-test');
   const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();

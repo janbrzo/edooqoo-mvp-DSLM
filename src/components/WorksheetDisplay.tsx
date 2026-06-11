@@ -43,6 +43,7 @@ import { supabase } from "@/integrations/supabase/client";
 // Live Session Quick Notes panels
 import { LiveSessionQuickNotes } from "./worksheet/LiveSessionQuickNotes";
 import { DraftTeacherNotes } from "./worksheet/DraftTeacherNotes";
+import { useHardLightSurface } from "@/hooks/useHardLightSurface";
 
 interface Exercise {
   type: string;
@@ -120,6 +121,11 @@ export default function WorksheetDisplay({
   tokenLeft,
   worksheetTitle
 }: WorksheetDisplayProps) {
+  // v6.9.55 — Worksheet UI must never invert to dark mode, regardless of
+  // teacher theme settings or OS preference. This covers the case where
+  // a freshly generated worksheet is rendered inline on `/` (Index.tsx),
+  // not only on `/worksheet/:id` (already locked at the page level).
+  useHardLightSurface('worksheet-display');
   // Problem #7: Default to Live Session for logged-in users, Teacher for anonymous
   const [viewMode, setViewMode] = useState<'student' | 'teacher' | 'live-session'>(
     userId ? 'live-session' : 'teacher'

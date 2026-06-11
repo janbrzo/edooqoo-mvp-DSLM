@@ -25,6 +25,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { devLog } from '@/utils/logger';
+import { useHardLightSurface } from "@/hooks/useHardLightSurface";
 
 interface HomeworkData {
   id: string;
@@ -47,6 +48,9 @@ interface HomeworkData {
 }
 
 export default function HomeworkPage() {
+  // v6.9.55 — Homework must NEVER invert to dark mode, regardless of any
+  // teacher theme preference or system setting.
+  useHardLightSurface('homework-page');
   const { token } = useParams<{ token: string }>();
   const navigate = useNavigate();
   const [homework, setHomework] = useState<HomeworkData | null>(null);
