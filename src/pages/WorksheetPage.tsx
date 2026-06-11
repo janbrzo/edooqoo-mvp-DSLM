@@ -16,6 +16,7 @@ import AnonPreWorksheetBanner from '@/components/anon/AnonPreWorksheetBanner';
 import StickyNav from '@/components/landing/StickyNav';
 import { markWorksheetForClaim } from '@/hooks/useWorksheetClaim';
 import { devLog } from '@/utils/logger';
+import { useForceLightTheme } from '@/hooks/useForceLightTheme';
 
 // PROBLEM 3 FIX: Calculate source count deterministically based on worksheet parameters
 const calculateSourceCount = (formData: any): number => {
@@ -44,6 +45,7 @@ const calculateSourceCount = (formData: any): number => {
 };
 
 export default function WorksheetPage() {
+  useForceLightTheme();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
