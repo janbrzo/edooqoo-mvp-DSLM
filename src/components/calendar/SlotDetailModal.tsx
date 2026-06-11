@@ -176,6 +176,23 @@ export function SlotDetailModal({ open, onOpenChange, slot, studentName, student
     editWorksheetId !== (safeSlot.worksheet_id || 'none') ||
     editDiscountPercent !== ((safeSlot as any).discount_percent != null ? String((safeSlot as any).discount_percent) : '');
 
+  // v6.9.53 — Booked confirmed lesson with no worksheet, starting in ≤24h.
+  const minutesUntilStart = (() => {
+    if (!safeSlot.slot_date || !safeSlot.start_time) return Number.POSITIVE_INFINITY;
+    const lessonStart = new Date(`${safeSlot.slot_date}T${safeSlot.start_time}`);
+    return differenceInMinutes(lessonStart, new Date());
+  })();
+  const showBookedWorksheetWarning =
+    safeSlot.status === 'booked'
+    && !!safeSlot.confirmed_at
+    && !!safeSlot.student_id
+    && editWorksheetId === 'none'
+    && minutesUntilStart >= 0
+    && minutesUntilStart <= 1440;
+  const lessonStartLabel = minutesUntilStart < 60
+    ? `${Math.max(0, Math.round(minutesUntilStart))} min`
+    : `${Math.ceil(minutesUntilStart / 60)}h`;
+
   // CRITICAL: early return AFTER all hooks
   if (!slot) return null;
 
@@ -816,6 +833,24 @@ export function SlotDetailModal({ open, onOpenChange, slot, studentName, student
             <div className="grid grid-cols-[1fr_80px] gap-2">
               <div className={cn(isPending && 'rounded-md ring-2 ring-primary/40 ring-offset-1 p-1 -m-1')}>
                 <Label className="text-xs">Worksheet</Label>
+                {showBookedWorksheetWarning && (
+                  <div className="mb-2 rounded-md border border-amber-300 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-700/50 px-2 py-1.5 text-[11px] text-amber-900 dark:text-amber-100 flex flex-wrap items-center gap-2">
+                    <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+                    <span className="flex-1 min-w-[160px]">
+                      Lesson starts in {lessonStartLabel} — assign or generate a worksheet.
+                    </span>
+                    {slot.student_id && (
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        className="h-6 text-[11px] px-2 border-amber-400 text-amber-900 hover:bg-amber-100"
+                        onClick={() => navigate(`/student/${slot.student_id}?tab=dslm`)}
+                      >
+                        <Sparkles className="h-3 w-3 mr-1" /> Generate with 1-Minute Prep
+                      </Button>
+                    )}
+                  </div>
+                )}
                 {hasStudent ? (
                   <>
                     <div className="flex items-center gap-2">

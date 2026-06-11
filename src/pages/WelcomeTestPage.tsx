@@ -157,21 +157,24 @@ export default function WelcomeTestPage() {
   // Translation language is OFF by default (null).
   // The Translate button will auto-detect language from profile when clicked.
 
-  // Check localStorage for email
+  // Check localStorage for email — v6.9.53 re-validates against the shared
+  // email regex so an older invalid value cannot bypass the new validation.
   useEffect(() => {
     if (!token) return;
     const stored = localStorage.getItem(`wt_email_${token}`);
-    if (stored) {
-      try {
-        const { email, expiresAt } = JSON.parse(stored);
-        if (new Date(expiresAt) > new Date()) {
-          setVerifiedEmail(email);
-        } else {
-          localStorage.removeItem(`wt_email_${token}`);
-        }
-      } catch {
+    if (!stored) return;
+    try {
+      const { email, expiresAt } = JSON.parse(stored);
+      const expired = !expiresAt || new Date(expiresAt) <= new Date();
+      const validShape = typeof email === 'string'
+        && /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim());
+      if (expired || !validShape) {
         localStorage.removeItem(`wt_email_${token}`);
+        return;
       }
+      setVerifiedEmail(email);
+    } catch {
+      localStorage.removeItem(`wt_email_${token}`);
     }
   }, [token]);
 

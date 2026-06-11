@@ -15,6 +15,15 @@ import { streamWorksheetGeneration } from '@/services/worksheetStreamService';
 import { markWorksheetForClaim } from '@/hooks/useWorksheetClaim';
 import { devLog, devWarn } from '@/utils/logger';
 import { useDemoContext } from '@/contexts/DemoContext';
+import {
+  clearGenerationJob,
+  completeGenerationJob,
+  failGenerationJob,
+  markSuggestionUsed,
+  markTokenConsumed,
+  startGenerationJob,
+} from '@/lib/worksheet/generationJobRegistry';
+import { markPersistentAutoGenerateIntentStatus } from '@/lib/worksheet/autoGenerateBootstrap';
 
 interface WorksheetGenerationEntitlement {
   hasTokens: boolean;
@@ -133,7 +142,27 @@ export const useWorksheetGeneration = (
     
     const startTime = Date.now();
     setStartGenerationTime(startTime);
-    
+
+    // v6.9.53 — persist the generation as an active job so the mini panel
+    // and refresh-safe polling can finish the side effects if the user
+    // refreshes or navigates away mid-generation.
+    try {
+      const autoSuggestionId =
+        (data as any).__autoGenerateSuggestionId
+        || (typeof window !== 'undefined' && sessionStorage.getItem('prefillSuggestionId'))
+        || null;
+      startGenerationJob({
+        teacherId: userId,
+        studentId: effectiveStudentId,
+        suggestionId: autoSuggestionId,
+        topic: String(data.lessonTopic || '').slice(0, 240),
+        origin: !userId ? 'anonymous' : ((data as any).__autoGenerateFromSuggestion ? 'dslm-auto' : 'manual'),
+        requestId: (data as any).__autoGenerateRequestId || null,
+      });
+    } catch (e) {
+      devWarn('[useWorksheetGeneration] failed to start generation job', e);
+    }
+
     // Track worksheet generation start
     trackEvent({
       eventType: 'worksheet_generation_start',
@@ -265,6 +294,11 @@ export const useWorksheetGeneration = (
             console.error('❌ Stream error:', error);
             setStreamProgress(null);
             setGenerationError(error.message || "Something went wrong during generation.");
+            try {
+              failGenerationJob(error.message || 'Generation failed');
+              const reqId = (data as any).__autoGenerateRequestId;
+              if (reqId) markPersistentAutoGenerateIntentStatus(reqId, 'failed');
+            } catch { /* ignore */ }
           }
         }
       );
@@ -366,6 +400,7 @@ export const useWorksheetGeneration = (
         devLog('⚠️ Failed to consume token, but worksheet was generated');
       } else {
         devLog('✅ Token consumed successfully');
+        try { markTokenConsumed(); } catch { /* ignore */ }
       }
     }
     
@@ -448,6 +483,13 @@ export const useWorksheetGeneration = (
       });
       
       devLog('🎉 Worksheet generation completed successfully with ID:', finalWorksheetId);
+      // v6.9.53 — flip the active generation job to `completed` so the global
+      // mini panel switches to its CTA and the persistent intent stops firing.
+      try {
+        completeGenerationJob(finalWorksheetId);
+        const reqId = (data as any).__autoGenerateRequestId;
+        if (reqId) markPersistentAutoGenerateIntentStatus(reqId, 'completed');
+      } catch { /* ignore */ }
       toast({
         title: "Worksheet generated successfully!",
         description: "Your custom worksheet is now ready to use.",
@@ -467,7 +509,9 @@ export const useWorksheetGeneration = (
 
       // v4.8: if this generation originated from a DSLM suggestion, flip is_used.
       try {
-        const sourceSuggestionId = sessionStorage.getItem('prefillSuggestionId');
+        const sourceSuggestionId =
+          (data as any).__autoGenerateSuggestionId
+          || sessionStorage.getItem('prefillSuggestionId');
         if (sourceSuggestionId && finalWorksheetId) {
           const { error: usedErr } = await supabase
             .from('future_worksheet_suggestions')
@@ -482,6 +526,7 @@ export const useWorksheetGeneration = (
           } else {
             devLog('[v4.8] Marked suggestion as used:', sourceSuggestionId);
             sessionStorage.removeItem('prefillSuggestionId');
+            try { markSuggestionUsed(); } catch { /* ignore */ }
             window.dispatchEvent(new CustomEvent('suggestionMarkedUsed', {
               detail: { suggestionId: sourceSuggestionId, worksheetId: finalWorksheetId },
             }));

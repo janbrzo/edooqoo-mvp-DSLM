@@ -33,6 +33,10 @@ export interface FormData {
   // v6.9.47 — correlation id so Index.tsx can ack/refuse the auto-generate
   // request before the form drops sessionStorage flags.
   __autoGenerateRequestId?: string;
+  // v6.9.53 — carry suggestionId through the FormData payload so the
+  // generation hook can flip `future_worksheet_suggestions.is_used` even when
+  // sessionStorage was cleared between intent write and completion.
+  __autoGenerateSuggestionId?: string | null;
   selectedImage?: {
     id: string;
     url: string;

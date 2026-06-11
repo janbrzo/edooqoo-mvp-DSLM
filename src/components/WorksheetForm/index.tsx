@@ -149,6 +149,11 @@ export default function WorksheetForm({
         sessionStorage.removeItem('autoGenerateWorksheet');
         sessionStorage.removeItem('autoGenerateWorksheetRequest');
       } catch { /* ignore */ }
+      // v6.9.53 — DO NOT clear `edooqoo.pendingWorksheetIntent` here.
+      // The Index dispatcher owns its lifecycle; clearing it from the form
+      // listener races with the dispatcher and reintroduces the original
+      // "navigates but never starts" bug. Index marks it `completed`/`failed`
+      // after the generation hook reports its terminal state.
     };
     window.addEventListener('worksheet:autoGenerateStarted', onStarted);
     return () => window.removeEventListener('worksheet:autoGenerateStarted', onStarted);
