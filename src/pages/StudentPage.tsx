@@ -1064,43 +1064,39 @@ const StudentPage = () => {
               }}
               onUseWorksheetSuggestion={(topic, goal, additionalInfo, grammarFocus, exercises, exerciseFocusMap, autoGenerate, suggestionId) => {
                 sessionStorage.setItem('preSelectedStudent', JSON.stringify({ id: student.id, name: student.name }));
-                sessionStorage.setItem('prefillWorksheet', JSON.stringify({ topic, goal, additionalInfo: additionalInfo || '', grammarFocus: grammarFocus || '' }));
-                // v4.8: persist source suggestion id so generation success can flip is_used.
-                if (suggestionId) sessionStorage.setItem('prefillSuggestionId', suggestionId);
-                else sessionStorage.removeItem('prefillSuggestionId');
-                // v4.6: write exercises + focus map + inferred media family together so
-                // the form can hydrate them coherently. Media family is inferred from
-                // exercise IDs (picture/audio/none — never mixed).
-                if (exercises && exercises.length > 0) {
-                  sessionStorage.setItem('prefillExercises', JSON.stringify(exercises));
-                  const PIC = ['describe-picture','answer-questions-picture','true-false-picture','multiple-choice-picture'];
-                  const AUD = ['listening-comprehension','answer-questions-audio','true-false-audio','multiple-choice-audio','fill-in-blanks-audio'];
-                  const hasPic = exercises.some(id => PIC.includes(id));
-                  const hasAud = exercises.some(id => AUD.includes(id));
-                  const media = hasPic && !hasAud ? ['picture'] : hasAud && !hasPic ? ['audio'] : hasPic && hasAud ? ['picture'] : [];
-                  sessionStorage.setItem('prefillMediaTypes', JSON.stringify(media));
-                }
-                if (exerciseFocusMap && Object.keys(exerciseFocusMap).length > 0) {
-                  sessionStorage.setItem('prefillExerciseFocusMap', JSON.stringify(exerciseFocusMap));
-                }
                 if (autoGenerate) {
-                  sessionStorage.setItem('autoGenerateWorksheet', 'true');
-                  // v6.9.36 — structured readiness gate for WorksheetForm
-                  // auto-submit. The form waits until selectedStudentId matches
-                  // request.studentId before firing requestSubmit(), avoiding
-                  // the prior race where submit ran before student hydrated.
-                  try {
-                    const requestId = (crypto?.randomUUID?.() || `req_${Date.now()}_${Math.random().toString(36).slice(2,8)}`);
-                    sessionStorage.setItem('autoGenerateWorksheetRequest', JSON.stringify({
-                      requestId,
-                      studentId: student.id,
-                      suggestionId: suggestionId || null,
-                      createdAt: Date.now(),
-                      status: 'pending',
-                    }));
-                  } catch { /* ignore quota */ }
+                  // v6.9.53 — single source of truth: persistent intent in
+                  // localStorage + legacy session flags mirrored inside the
+                  // helper. Survives refresh, mount-race and premature clears.
+                  writeAutoGenerateIntent({
+                    studentId: student.id,
+                    suggestionId: suggestionId || null,
+                    topic,
+                    goal: goal || '',
+                    additionalInfo: additionalInfo || '',
+                    grammarFocus: grammarFocus || '',
+                    exercises: exercises || [],
+                    exerciseFocusMap: (exerciseFocusMap || {}) as Record<string, 'vocabulary' | 'grammar'>,
+                  });
+                } else {
+                  // Manual "Use this" — only prefill, never auto-fire.
+                  sessionStorage.setItem('prefillWorksheet', JSON.stringify({ topic, goal, additionalInfo: additionalInfo || '', grammarFocus: grammarFocus || '' }));
+                  if (suggestionId) sessionStorage.setItem('prefillSuggestionId', suggestionId);
+                  else sessionStorage.removeItem('prefillSuggestionId');
+                  if (exercises && exercises.length > 0) {
+                    sessionStorage.setItem('prefillExercises', JSON.stringify(exercises));
+                    const PIC = ['describe-picture','answer-questions-picture','true-false-picture','multiple-choice-picture'];
+                    const AUD = ['listening-comprehension','answer-questions-audio','true-false-audio','multiple-choice-audio','fill-in-blanks-audio'];
+                    const hasPic = exercises.some(id => PIC.includes(id));
+                    const hasAud = exercises.some(id => AUD.includes(id));
+                    const media = hasPic ? ['picture'] : hasAud ? ['audio'] : [];
+                    sessionStorage.setItem('prefillMediaTypes', JSON.stringify(media));
+                  }
+                  if (exerciseFocusMap && Object.keys(exerciseFocusMap).length > 0) {
+                    sessionStorage.setItem('prefillExerciseFocusMap', JSON.stringify(exerciseFocusMap));
+                  }
+                  sessionStorage.setItem('forceNewWorksheet', 'true');
                 }
-                sessionStorage.setItem('forceNewWorksheet', 'true');
                 navigate('/');
               }}
             />
