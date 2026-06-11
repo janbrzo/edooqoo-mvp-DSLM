@@ -138,11 +138,15 @@ const Index = () => {
     localStorage.setItem('worksheetAppLastVisit', Date.now().toString());
   }, [authLoading, isRegisteredUser, user]);
 
-  // Handle ?forceNew=true query param from Profile page
+  // v6.9.53 — accept any `forceNew` value (Profile sends `true`, WorksheetHeader
+  // historically sent a timestamp). Previously only `=== 'true'` matched, so the
+  // anonymous "Generate New Worksheet" button silently no-oped.
   useEffect(() => {
-    if (searchParams.get('forceNew') === 'true') {
+    if (searchParams.has('forceNew')) {
       sessionStorage.setItem('forceNewWorksheet', 'true');
-      setSearchParams({}, { replace: true });
+      const next = new URLSearchParams(searchParams);
+      next.delete('forceNew');
+      setSearchParams(next, { replace: true });
       worksheetState.forceNewWorksheet();
     }
   }, [searchParams, setSearchParams, worksheetState]);
@@ -504,6 +508,24 @@ const Index = () => {
         </>
       ) : (
         <>
+          {!isRegisteredUser && (
+            <>
+              <StickyNav
+                isRegisteredUser={false}
+                tokenLeft={0}
+                user={null}
+                nonSticky
+                scrollToPricing={() => {
+                  const el = document.getElementById('post-worksheet-pricing');
+                  if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }}
+              />
+              {/* v6.9.53 — anon top banner mirrors /worksheet/:id render path so
+                  it appears immediately after in-memory generation, not only
+                  after refresh. */}
+              {React.createElement(require('@/components/anon/AnonPreWorksheetBanner').default)}
+            </>
+          )}
           <GenerationView 
             worksheetId={worksheetState.worksheetId}
             generatedWorksheet={worksheetState.generatedWorksheet}
