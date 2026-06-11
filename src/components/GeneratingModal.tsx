@@ -23,6 +23,7 @@ interface GeneratingModalProps {
   errorMessage?: string | null;
   onRetry?: () => void;
   isAnonymous?: boolean;
+  studentName?: string;
 }
 
 // Section completion status
@@ -134,6 +135,7 @@ export default function GeneratingModal({
   errorMessage,
   onRetry,
   isAnonymous = false,
+  studentName,
 }: GeneratingModalProps) {
   const [progress, setProgress] = useState(0);
   const [elapsedTime, setElapsedTime] = useState(0);
@@ -185,7 +187,7 @@ export default function GeneratingModal({
 
     const carouselInterval = setInterval(() => {
       setActiveSlideIndex((current) => (current + 1) % generationModalSlides.length);
-    }, 8000);
+    }, 15000);
 
     return () => clearInterval(carouselInterval);
   }, [isOpen, errorMessage, isCarouselPaused]);
@@ -336,7 +338,7 @@ export default function GeneratingModal({
         <div
           className={cn(
             'p-6',
-            'space-y-6 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.92fr)] lg:gap-6 lg:space-y-0 lg:p-6'
+            'space-y-6 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.92fr)] lg:gap-4 lg:space-y-0 lg:p-6'
           )}
           onMouseEnter={() => setIsCarouselPaused(true)}
           onMouseLeave={() => setIsCarouselPaused(false)}
@@ -344,9 +346,16 @@ export default function GeneratingModal({
           onBlurCapture={() => setIsCarouselPaused(false)}
         >
           <div className="flex flex-col h-full space-y-4">
-        <h2 className="text-2xl font-semibold text-center bg-gradient-to-r from-pink-500 via-violet-500 to-blue-500 bg-clip-text text-transparent">
-          Generating Your Worksheet
-        </h2>
+        <div className="text-center space-y-0.5">
+          <h2 className="text-2xl font-semibold bg-gradient-to-r from-pink-500 via-violet-500 to-blue-500 bg-clip-text text-transparent">
+            Generating Your Worksheet
+          </h2>
+          {studentName ? (
+            <p className="text-sm text-muted-foreground">
+              for <span className="font-medium text-foreground">{studentName}</span>
+            </p>
+          ) : null}
+        </div>
 
         <Progress
           value={progress}
