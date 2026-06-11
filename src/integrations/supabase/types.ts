@@ -3945,6 +3945,13 @@ export type Database = {
         Args: { p_email: string; p_homework_id: string }
         Returns: boolean
       }
+      verify_welcome_test_email: {
+        Args: { p_email: string; p_share_token: string }
+        Returns: {
+          has_email: boolean
+          matches: boolean
+        }[]
+      }
       verify_worksheet_student_email: {
         Args: { p_email: string; p_worksheet_id: string }
         Returns: boolean
