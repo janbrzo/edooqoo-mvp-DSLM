@@ -9,6 +9,11 @@ import {
 
 export type GenerationContextVariant = 'anonymous' | 'authenticated';
 
+// v6.9.54 — cap items shown in the left WorkflowSummaryCard so the
+// "Lesson-time signal capture" slide (5 items) never grows to 3 rows
+// and the modal does not require an inner scrollbar on 720p viewports.
+export const MAX_LEFT_CARD_ITEMS = 4;
+
 export interface GenerationModalContext {
   eyebrow: string;
   title: string;
