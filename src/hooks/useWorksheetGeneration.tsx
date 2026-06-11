@@ -447,7 +447,7 @@ export const useWorksheetGeneration = (
       try {
         let query = supabase
           .from('worksheets')
-          .select('id, ai_response, html_content, sourceCount')
+          .select('id, ai_response, html_content')
           .filter('form_data->>clientGenerationId', 'eq', params.clientGenerationId)
           .is('deleted_at', null)
           .order('created_at', { ascending: false })
