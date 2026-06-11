@@ -16,10 +16,10 @@ export const AnonPreWorksheetBanner: React.FC = () => {
       <div className="max-w-5xl mx-auto bg-gradient-to-r from-primary/10 via-primary/5 to-secondary/30 border border-primary/20 rounded-xl shadow-sm px-5 py-4 flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="text-center sm:text-left">
           <h2 className="text-lg md:text-xl font-bold text-foreground leading-tight">
-            🎉 You just generated a worksheet
+            🎉 Your worksheet is ready — now save the prep context
           </h2>
           <p className="text-sm text-muted-foreground">
-            Save it forever — free account in 30 seconds.
+            Create a free account to keep this worksheet and start building 1-Minute Prep context for your students.
           </p>
         </div>
         <Button asChild size="sm" className="h-10 px-5 text-sm font-semibold rounded-full shadow-md whitespace-nowrap">

@@ -26,6 +26,7 @@ import {
 import { AuthenticatedPageShell } from "@/components/AuthenticatedPageShell";
 import AnonPostWorksheetLandingPage from "@/components/anon/AnonPostWorksheetLandingPage";
 import WelcomeBackBanner from "@/components/anon/WelcomeBackBanner";
+import AnonPreWorksheetBanner from "@/components/anon/AnonPreWorksheetBanner";
 import ParticlesBackground from "@/components/landing/ParticlesBackground";
 import StartOneMinutePrepDialog from "@/components/landing/StartOneMinutePrepDialog";
 import { markWorksheetForClaim } from "@/hooks/useWorksheetClaim";
@@ -523,7 +524,7 @@ const Index = () => {
               {/* v6.9.53 — anon top banner mirrors /worksheet/:id render path so
                   it appears immediately after in-memory generation, not only
                   after refresh. */}
-              {React.createElement(require('@/components/anon/AnonPreWorksheetBanner').default)}
+              <AnonPreWorksheetBanner />
             </>
           )}
           <GenerationView 
