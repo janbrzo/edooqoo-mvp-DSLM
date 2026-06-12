@@ -15,7 +15,6 @@
  * the AI summary downstream.
  */
 import { useEffect, useRef } from 'react';
-import { supabase } from '@/integrations/supabase/client';
 
 interface UseWelcomeTestIntegrityArgs {
   enabled: boolean;
@@ -30,6 +29,42 @@ interface UseWelcomeTestIntegrityArgs {
 
 const OPEN_ENDED_SELECTOR = 'textarea, input[type="text"]';
 
+const blurStorageKey = (testId: string) => `wt_integrity_${testId}`;
+
+interface IntegrityState {
+  blur_count: number;
+  blur_events: Array<{ ts: number; reason: string; question_id: string | null }>;
+}
+
+const readIntegrity = (testId: string): IntegrityState => {
+  try {
+    const raw = localStorage.getItem(blurStorageKey(testId));
+    if (!raw) return { blur_count: 0, blur_events: [] };
+    const parsed = JSON.parse(raw);
+    return {
+      blur_count: typeof parsed.blur_count === 'number' ? parsed.blur_count : 0,
+      blur_events: Array.isArray(parsed.blur_events) ? parsed.blur_events.slice(-50) : [],
+    };
+  } catch { return { blur_count: 0, blur_events: [] }; }
+};
+
+const writeIntegrity = (testId: string, state: IntegrityState) => {
+  try { localStorage.setItem(blurStorageKey(testId), JSON.stringify(state)); } catch { /* ignore quota */ }
+};
+
+/**
+ * Read-and-clear helper used by `useWelcomeTest.completeTest` to attach the
+ * integrity snapshot to the final submission payload. Returns `null` when
+ * there is nothing to report so the field is omitted from the payload.
+ */
+export const consumeWelcomeTestIntegrity = (testId: string | null) => {
+  if (!testId) return null;
+  const snapshot = readIntegrity(testId);
+  if (snapshot.blur_count === 0 && snapshot.blur_events.length === 0) return null;
+  try { localStorage.removeItem(blurStorageKey(testId)); } catch { /* ignore */ }
+  return snapshot;
+};
+
 export function useWelcomeTestIntegrity({
   enabled,
   testId,
@@ -42,33 +77,29 @@ export function useWelcomeTestIntegrity({
 
   // 1) Tab-blur / visibility logging.
   useEffect(() => {
-    if (!enabled || !testId || !studentId || !teacherId) return;
+    if (!enabled || !testId || !studentId) return;
 
-    const log = async (reason: 'visibility_hidden' | 'window_blur') => {
+    const log = (reason: 'visibility_hidden' | 'window_blur') => {
       blurCountRef.current += 1;
-      try {
-        await supabase.from('student_events').insert({
-          student_id: studentId,
-          teacher_id: teacherId,
-          event_source: 'welcome_test',
-          event_type: 'welcome_test_tab_blur',
-          event_payload: {
-            test_id: testId,
-            question_id: currentQuestionId,
-            reason,
-            blur_count_session: blurCountRef.current,
-          },
-        });
-      } catch (err) {
-        // Integrity logging is best-effort — never block the test.
-        console.warn('[welcome-test-integrity] failed to log blur', err);
-      }
+      // Anon students can't insert into `student_events` directly (RLS), so we
+      // buffer in localStorage and the final `complete-welcome-test` submission
+      // forwards the snapshot to `process-welcome-test`, which persists it
+      // under `raw_answers.__integrity__` via the service role.
+      const current = readIntegrity(testId);
+      const next: IntegrityState = {
+        blur_count: current.blur_count + 1,
+        blur_events: [
+          ...current.blur_events,
+          { ts: Date.now(), reason, question_id: currentQuestionId },
+        ].slice(-50),
+      };
+      writeIntegrity(testId, next);
     };
 
     const onVisibility = () => {
-      if (document.visibilityState === 'hidden') void log('visibility_hidden');
+      if (document.visibilityState === 'hidden') log('visibility_hidden');
     };
-    const onBlur = () => { void log('window_blur'); };
+    const onBlur = () => log('window_blur');
 
     document.addEventListener('visibilitychange', onVisibility);
     window.addEventListener('blur', onBlur);
@@ -76,7 +107,7 @@ export function useWelcomeTestIntegrity({
       document.removeEventListener('visibilitychange', onVisibility);
       window.removeEventListener('blur', onBlur);
     };
-  }, [enabled, testId, studentId, teacherId, currentQuestionId]);
+  }, [enabled, testId, studentId, currentQuestionId]);
 
   // 2) Paste blocker for open-ended inputs.
   useEffect(() => {
