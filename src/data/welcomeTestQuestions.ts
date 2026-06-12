@@ -595,7 +595,7 @@ const grammarQuestions: WelcomeTestQuestionDef[] = [
     section: 'grammar',
     question_type: 'fill_blank',
     question_text: 'I ___ (study) English for three years.',
-    description: 'Write the correct form of the verb in brackets.',
+    description: 'Write the correct form of the verb in brackets. The action started in the past and continues now.',
     correct_answer: ['have been studying', 'have studied'],
     element_type: 'grammar',
     difficulty_level: 3,
@@ -607,6 +607,7 @@ const grammarQuestions: WelcomeTestQuestionDef[] = [
     section: 'grammar',
     question_type: 'multiple_choice',
     question_text: 'If I ___ earlier, I wouldn\'t have missed the train.',
+    description: 'Pick the correct form. This is an unreal situation about the past.',
     options: [
       'leave',
       'left',
