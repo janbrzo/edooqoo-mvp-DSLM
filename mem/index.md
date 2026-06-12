@@ -35,3 +35,4 @@
 - [v6.9.52 Format Prompt Dual-Auth](mem://features/onboarding/v6952-anonymous-format-prompt-dual-auth) — format-worksheet-prompt accepts user JWT or Supabase anon key (Authorization/apikey); anon rate-limit by IP; fixes anonymous public worksheet generator 401
 - [v6.9.54 Modal + Dark Mode + Welcome Email](mem://features/onboarding/v6954-modal-darkmode-welcome-email) — GeneratingModal studentName/15s carousel/new-tab CTA, useForceLightTheme on public pages, verify_welcome_test_email RPC
 - [v6.9.55 Modal & Light Lock & Stream Recovery](mem://features/onboarding/v6955-modal-light-lock-stream-recovery) — GeneratingModal student email from inputParams, useHardLightSurface for worksheet/homework, clientGenerationId reconciliation, Welcome Test notranslate
+- [Welcome Test v6.9.56 Martha audit](mem://features/welcome-test/v6956-martha-audit) — Wave 1: modal scroll fix + DB IDK columns + multi-wave plan locked. Worksheet engine deferred (Sanctity)

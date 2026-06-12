@@ -2203,6 +2203,8 @@ export type Database = {
           feedback_preference: string | null
           grammar_score: number | null
           id: string
+          idk_count_skill: number
+          idk_count_total: number
           interest_topics: string[] | null
           level_confidence: string | null
           motivation_type: string | null
@@ -2211,6 +2213,7 @@ export type Database = {
           raw_answers: Json | null
           reading_score: number | null
           self_assessed_level: string | null
+          self_awareness_score: number | null
           speaking_score: number | null
           strongest_skill: string | null
           student_id: string
@@ -2240,6 +2243,8 @@ export type Database = {
           feedback_preference?: string | null
           grammar_score?: number | null
           id?: string
+          idk_count_skill?: number
+          idk_count_total?: number
           interest_topics?: string[] | null
           level_confidence?: string | null
           motivation_type?: string | null
@@ -2248,6 +2253,7 @@ export type Database = {
           raw_answers?: Json | null
           reading_score?: number | null
           self_assessed_level?: string | null
+          self_awareness_score?: number | null
           speaking_score?: number | null
           strongest_skill?: string | null
           student_id: string
@@ -2277,6 +2283,8 @@ export type Database = {
           feedback_preference?: string | null
           grammar_score?: number | null
           id?: string
+          idk_count_skill?: number
+          idk_count_total?: number
           interest_topics?: string[] | null
           level_confidence?: string | null
           motivation_type?: string | null
@@ -2285,6 +2293,7 @@ export type Database = {
           raw_answers?: Json | null
           reading_score?: number | null
           self_assessed_level?: string | null
+          self_awareness_score?: number | null
           speaking_score?: number | null
           strongest_skill?: string | null
           student_id?: string
