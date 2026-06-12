@@ -54,6 +54,7 @@ import { WELCOME_TEST_SECTIONS_WITH_QUESTIONS } from "@/data/welcomeTestQuestion
 import type { WelcomeTestQuestionDef } from "@/types/welcomeTest";
 import { useForceLightTheme } from "@/hooks/useForceLightTheme";
 import { useNoTranslatePage } from "@/hooks/useNoTranslatePage";
+import { useWelcomeTestIntegrity } from "@/hooks/useWelcomeTestIntegrity";
 import { Helmet } from "react-helmet-async";
 
 const SECTION_ICONS: Record<string, React.ReactNode> = {
@@ -120,6 +121,7 @@ export default function WelcomeTestPage() {
     flushPendingAnswer,
     testId,
     studentId,
+    teacherId,
   } = useWelcomeTest({ shareToken: token || null });
 
   const [verifiedEmail, setVerifiedEmail] = useState<string | null>(null);
@@ -150,6 +152,21 @@ export default function WelcomeTestPage() {
       delete (window as any).__welcomeTestAutoSave;
     };
   }, [saveAnswer]);
+
+  // v6.9.56 — integrity layer (tab-blur logging + paste blocker on
+  // open-ended). Must run BEFORE any early returns to keep hook order
+  // stable. Skipped while in teacher preview mode.
+  const isOpenEndedQ =
+    currentQuestion?.question_type === 'open_ended' ||
+    currentQuestion?.question_type === 'open_reflection';
+  useWelcomeTestIntegrity({
+    enabled: !teacherPreviewMode,
+    testId: testId || null,
+    studentId: studentId || null,
+    teacherId: teacherId || null,
+    blockPasteOnOpenEnded: isOpenEndedQ,
+    currentQuestionId: currentQuestion?.id ?? null,
+  });
 
   // Track previous section for celebration
   const prevSectionRef = useState<number>(0);
@@ -806,12 +823,15 @@ export default function WelcomeTestPage() {
                   </div>
                 )}
               </div>
-              {isSkillQuestion && answers[currentQuestion.id] === undefined && !teacherPreviewMode && (
+              {answers[currentQuestion.id] === undefined && !teacherPreviewMode && (
                 <Button
                   variant="ghost"
                   size="sm"
                   className="text-xs h-7 text-muted-foreground"
                   onClick={() => saveIdontKnow(currentQuestion.id)}
+                  title={isSkillQuestion
+                    ? "Honest 'I don't know' helps your teacher calibrate the right level — far better than guessing."
+                    : "Skip this if you really have no preference — your teacher will fill it in together with you."}
                 >
                   <HelpCircle className="h-3 w-3 mr-1" />I don't know
                 </Button>
