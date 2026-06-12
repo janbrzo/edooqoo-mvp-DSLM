@@ -153,6 +153,21 @@ export default function WelcomeTestPage() {
     };
   }, [saveAnswer]);
 
+  // v6.9.56 — integrity layer (tab-blur logging + paste blocker on
+  // open-ended). Must run BEFORE any early returns to keep hook order
+  // stable. Skipped while in teacher preview mode.
+  const isOpenEndedQ =
+    currentQuestion?.question_type === 'open_ended' ||
+    currentQuestion?.question_type === 'open_reflection';
+  useWelcomeTestIntegrity({
+    enabled: !teacherPreviewMode,
+    testId: testId || null,
+    studentId: studentId || null,
+    teacherId: teacherId || null,
+    blockPasteOnOpenEnded: isOpenEndedQ,
+    currentQuestionId: currentQuestion?.id ?? null,
+  });
+
   // Track previous section for celebration
   const prevSectionRef = useState<number>(0);
 
