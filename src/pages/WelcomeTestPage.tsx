@@ -54,6 +54,7 @@ import { WELCOME_TEST_SECTIONS_WITH_QUESTIONS } from "@/data/welcomeTestQuestion
 import type { WelcomeTestQuestionDef } from "@/types/welcomeTest";
 import { useForceLightTheme } from "@/hooks/useForceLightTheme";
 import { useNoTranslatePage } from "@/hooks/useNoTranslatePage";
+import { useWelcomeTestIntegrity } from "@/hooks/useWelcomeTestIntegrity";
 import { Helmet } from "react-helmet-async";
 
 const SECTION_ICONS: Record<string, React.ReactNode> = {
@@ -120,6 +121,7 @@ export default function WelcomeTestPage() {
     flushPendingAnswer,
     testId,
     studentId,
+    teacherId,
   } = useWelcomeTest({ shareToken: token || null });
 
   const [verifiedEmail, setVerifiedEmail] = useState<string | null>(null);
