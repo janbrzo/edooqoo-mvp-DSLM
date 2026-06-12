@@ -560,7 +560,7 @@ const scenarioQuestions: WelcomeTestQuestionDef[] = [
     section: 'scenarios',
     question_type: 'listening_comprehension',
     question_text: 'Listen to the conversation and answer: when did the customer finally book a table?',
-    audio_url: 'https://pub-1b974ada9ae240948229c52d927980ee.r2.dev/audio/welcome-test-listening-1771235244954.mp3',
+    audio_url: 'https://pub-1b974ada9ae240948229c52d927980ee.r2.dev/audio/welcome-test-listening-1781265449193.mp3',
     audio_transcript: 'A: "Hi, I would like to book a table for Saturday evening, around eight."\nB: "Let me check… Saturday at eight is fully booked. The earliest we have is nine thirty."\nA: "Hmm, that is a bit late. Do you have anything earlier on Friday?"\nB: "Yes, we have a table for two at seven on Friday."\nA: "Perfect, let us go with that."',
     options: [
       'Saturday at eight',
