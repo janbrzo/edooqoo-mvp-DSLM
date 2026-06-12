@@ -21,6 +21,7 @@ interface UseWelcomeTestIntegrityArgs {
   enabled: boolean;
   testId: string | null;
   studentId: string | null;
+  teacherId: string | null;
   /** When true, paste events are blocked inside the active question. */
   blockPasteOnOpenEnded: boolean;
   /** Current question id for event payload context. */
@@ -33,6 +34,7 @@ export function useWelcomeTestIntegrity({
   enabled,
   testId,
   studentId,
+  teacherId,
   blockPasteOnOpenEnded,
   currentQuestionId,
 }: UseWelcomeTestIntegrityArgs) {
@@ -40,13 +42,15 @@ export function useWelcomeTestIntegrity({
 
   // 1) Tab-blur / visibility logging.
   useEffect(() => {
-    if (!enabled || !testId || !studentId) return;
+    if (!enabled || !testId || !studentId || !teacherId) return;
 
     const log = async (reason: 'visibility_hidden' | 'window_blur') => {
       blurCountRef.current += 1;
       try {
         await supabase.from('student_events').insert({
           student_id: studentId,
+          teacher_id: teacherId,
+          event_source: 'welcome_test',
           event_type: 'welcome_test_tab_blur',
           event_payload: {
             test_id: testId,
@@ -72,7 +76,7 @@ export function useWelcomeTestIntegrity({
       document.removeEventListener('visibilitychange', onVisibility);
       window.removeEventListener('blur', onBlur);
     };
-  }, [enabled, testId, studentId, currentQuestionId]);
+  }, [enabled, testId, studentId, teacherId, currentQuestionId]);
 
   // 2) Paste blocker for open-ended inputs.
   useEffect(() => {
