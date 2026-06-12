@@ -291,7 +291,7 @@ serve(async (req) => {
 
   try {
     const body = await req.json();
-    const { test_id, student_id: bodyStudentId, teacher_id: bodyTeacherId, detected_traits, answered_count, force } = body || {};
+    const { test_id, student_id: bodyStudentId, teacher_id: bodyTeacherId, detected_traits, answered_count, force, integrity } = body || {};
     let answers = (body && body.answers) || null;
     let student_id = bodyStudentId;
     let teacher_id = bodyTeacherId;
