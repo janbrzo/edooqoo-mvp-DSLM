@@ -801,8 +801,8 @@ const vocabularyQuestions: WelcomeTestQuestionDef[] = [
     options: [
       'an arm and a leg',
       'a hand and a foot',
-      'blood and sweat',
-      'a king\'s crown',
+      'an eye and a tooth',
+      'a finger and a toe',
     ],
     correct_answer: 'an arm and a leg',
     element_type: 'vocabulary',
