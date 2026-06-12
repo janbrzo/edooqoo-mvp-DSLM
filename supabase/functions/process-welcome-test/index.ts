@@ -389,6 +389,32 @@ serve(async (req) => {
     const strongest = scores.length > 0 ? scores.reduce((a, b) => (a.score! > b.score! ? a : b)).skill : null;
     const weakest = scores.length > 0 ? scores.reduce((a, b) => (a.score! < b.score! ? a : b)).skill : null;
 
+    // v6.9.56 — IDK signal aggregation. Promoted from "ignored sentinel" to
+    // a pedagogical metacognition metric. We measure on skill questions
+    // (grammar/vocabulary/reading/listening) where the student had a defined
+    // correct_answer. self_awareness_score = % of "should have admitted not
+    // knowing" cases (wrong-or-IDK on skill questions) where the student
+    // actually chose IDK instead of guessing. NULL when there is no signal
+    // (student answered every skill question correctly).
+    let idkCountTotal = 0;
+    let idkCountSkill = 0;
+    let skillWrongOrIdk = 0;
+    const SKILL_ELEMENT_TYPES = new Set(['grammar', 'vocabulary', 'reading', 'listening']);
+    if (answers && typeof answers === 'object') {
+      for (const v of Object.values(answers)) {
+        if (v === '__IDK__') idkCountTotal++;
+      }
+    }
+    for (const q of questions as any[]) {
+      if (!SKILL_ELEMENT_TYPES.has(q.element_type)) continue;
+      const sa = q.student_answer;
+      if (sa === '__IDK__') { idkCountSkill++; skillWrongOrIdk++; }
+      else if (q.is_correct === false) { skillWrongOrIdk++; }
+    }
+    const selfAwarenessScore = skillWrongOrIdk > 0
+      ? Math.round((idkCountSkill / skillWrongOrIdk) * 100)
+      : null;
+
     // Estimate level from grammar + vocabulary scores
     const avgScore = scores.length > 0 ? scores.reduce((sum, s) => sum + s.score!, 0) / scores.length : 0;
     let estimatedLevel = 'A2';
