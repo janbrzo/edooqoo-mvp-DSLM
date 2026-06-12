@@ -823,12 +823,15 @@ export default function WelcomeTestPage() {
                   </div>
                 )}
               </div>
-              {isSkillQuestion && answers[currentQuestion.id] === undefined && !teacherPreviewMode && (
+              {answers[currentQuestion.id] === undefined && !teacherPreviewMode && (
                 <Button
                   variant="ghost"
                   size="sm"
                   className="text-xs h-7 text-muted-foreground"
                   onClick={() => saveIdontKnow(currentQuestion.id)}
+                  title={isSkillQuestion
+                    ? "Honest 'I don't know' helps your teacher calibrate the right level — far better than guessing."
+                    : "Skip this if you really have no preference — your teacher will fill it in together with you."}
                 >
                   <HelpCircle className="h-3 w-3 mr-1" />I don't know
                 </Button>
