@@ -15,6 +15,7 @@ import type { WelcomeTestQuestionDef, WelcomeTestSectionDef } from '@/types/welc
 import type { Json } from '@/integrations/supabase/types';
 import { toCanonicalId } from '@/utils/welcomeTestNumbering';
 import { devLog, devWarn } from '@/utils/logger';
+import { consumeWelcomeTestIntegrity } from '@/hooks/useWelcomeTestIntegrity';
 
 interface UseWelcomeTestProps {
   shareToken: string | null;
