@@ -339,20 +339,20 @@ export default function GeneratingModal({
             // Desktop (lg+): cap height AND hide scrollbar — content is sized
             // to fit a 720p viewport without a scrollbar.
             'lg:max-h-[calc(100dvh-2rem)] lg:overflow-hidden',
-            'max-w-[520px] lg:max-w-[1040px]'
+            'max-w-[520px] lg:max-w-[1080px]'
           )}
         >
         <div
           className={cn(
             'p-6',
-            'space-y-6 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.92fr)] lg:gap-4 lg:space-y-0 lg:p-5 lg:min-h-0'
+            'space-y-6 lg:grid lg:grid-cols-[minmax(0,1fr)_minmax(320px,0.88fr)] lg:gap-4 lg:space-y-0 lg:p-5 lg:min-h-0'
           )}
           onMouseEnter={() => setIsCarouselPaused(true)}
           onMouseLeave={() => setIsCarouselPaused(false)}
           onFocusCapture={() => setIsCarouselPaused(true)}
           onBlurCapture={() => setIsCarouselPaused(false)}
         >
-          <div className="flex flex-col h-full space-y-3 min-w-0 min-h-0">
+          <div className="flex flex-col h-full space-y-2.5 min-w-0 min-h-0">
         <div className="text-center space-y-0.5">
           <h2 className="text-xl lg:text-2xl font-semibold bg-gradient-to-r from-pink-500 via-violet-500 to-blue-500 bg-clip-text text-transparent">
             Generating Your Worksheet
@@ -381,7 +381,7 @@ export default function GeneratingModal({
           <span>{Math.round(progress)}%</span>
         </div>
 
-        <div className="space-y-1 bg-muted/30 p-2.5 rounded-lg max-h-[44vh] lg:max-h-[34vh] overflow-y-auto">
+        <div className="space-y-1 bg-muted/30 p-2 rounded-lg max-h-[44vh] lg:max-h-[46vh] overflow-y-auto">
           {sections.map((section, index) => (
             <div 
               key={index} 

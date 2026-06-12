@@ -18,7 +18,7 @@ const WorkflowSummaryCard: React.FC<WorkflowSummaryCardProps> = ({
   const PhaseIcon = slide.phaseIcon;
 
   return (
-    <section className={cn('rounded-xl border p-3', slide.tone, className)} aria-label="1-Minute Prep workflow phase">
+    <section className={cn('rounded-xl border p-2.5', slide.tone, className)} aria-label="1-Minute Prep workflow phase">
       <div className="flex items-start gap-3">
         <div className="rounded-lg bg-background/80 p-2">
           <PhaseIcon className="h-4 w-4 text-primary" />
@@ -36,7 +36,7 @@ const WorkflowSummaryCard: React.FC<WorkflowSummaryCardProps> = ({
         </div>
       </div>
 
-      <div className="mt-3 grid gap-1.5 sm:grid-cols-2">
+      <div className="mt-2 grid gap-1.5 sm:grid-cols-2">
         {slide.items.slice(0, MAX_LEFT_CARD_ITEMS).map(({ icon: Icon, label, badge, nowrap }) => (
           <div
             key={label}
@@ -53,7 +53,7 @@ const WorkflowSummaryCard: React.FC<WorkflowSummaryCardProps> = ({
         ))}
       </div>
 
-      <div className="mt-3 flex items-center justify-between gap-3">
+      <div className="mt-2 flex items-center justify-between gap-3">
         <div className="flex items-center gap-1.5">
           {generationModalSlides.map((dot, index) => (
             <button
