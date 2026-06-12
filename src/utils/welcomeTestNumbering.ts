@@ -16,9 +16,14 @@ import { ALL_WELCOME_TEST_QUESTIONS } from '@/data/welcomeTestQuestions';
 export const QUESTION_CANONICAL_MAP: Record<string, string> = (() => {
   const map: Record<string, string> = {};
   ALL_WELCOME_TEST_QUESTIONS.forEach((q, i) => {
-    const canonical = `wt_q${i + 1}`;
+    // Zero-padded canonical IDs (wt_q01..wt_q58) — keeps lexicographic order
+    // aligned with display order and is human-friendly in analytics dashboards.
+    const canonical = `wt_q${String(i + 1).padStart(2, '0')}`;
     map[q.id] = canonical;        // legacy → canonical
     map[canonical] = canonical;   // identity (idempotent)
+    // Back-compat: also accept the previous non-padded canonical form so
+    // historical analytics records using `wt_q5` still resolve to `wt_q05`.
+    map[`wt_q${i + 1}`] = canonical;
   });
   return map;
 })();
