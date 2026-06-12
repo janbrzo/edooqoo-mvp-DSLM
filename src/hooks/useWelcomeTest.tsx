@@ -561,6 +561,10 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
           student_id: state.studentId,
           teacher_id: state.teacherId,
           answers: state.answers,
+          // v6.9.56 — attach integrity snapshot (tab-blur count + recent
+          // events) buffered by `useWelcomeTestIntegrity`. Stored on the
+          // backend under `raw_answers.__integrity__`.
+          integrity: consumeWelcomeTestIntegrity(state.testId),
           detected_traits: detectedTraits.current,
           answered_count: finalAnsweredCount,
         },
