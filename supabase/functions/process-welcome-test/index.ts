@@ -731,6 +731,9 @@ serve(async (req) => {
       confidence_presenting: matrix['Giving presentations'] || null,
       confidence_small_talk: matrix['Small talk at parties'] || null,
       raw_answers: enrichedAnswers,
+      idk_count_total: idkCountTotal,
+      idk_count_skill: idkCountSkill,
+      self_awareness_score: selfAwarenessScore,
       updated_at: new Date().toISOString(),
     };
 
