@@ -699,6 +699,12 @@ serve(async (req) => {
     if (levelChangeSuggestion) {
       enrichedAnswers.level_change_suggestion = levelChangeSuggestion;
     }
+    // v6.9.56 — integrity snapshot (tab-blur count + recent events) captured
+    // client-side. Surfaces as a teacher-only signal of potential outside
+    // help (translator/AI) during the placement test.
+    if (integrity && typeof integrity === 'object') {
+      enrichedAnswers.__integrity__ = integrity;
+    }
 
     // Upsert learning profile
     const profileData = {
