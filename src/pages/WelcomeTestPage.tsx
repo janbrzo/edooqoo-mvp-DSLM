@@ -602,6 +602,20 @@ export default function WelcomeTestPage() {
   if (!currentSection || !currentQuestion) return null;
 
   const isSkillQuestion = !!currentQuestion.correct_answer;
+  const isOpenEndedQ =
+    currentQuestion.question_type === 'open_ended' ||
+    currentQuestion.question_type === 'open_reflection';
+
+  // v6.9.56 — integrity layer: tab-blur logging + paste blocker on open-ended.
+  // Skipped entirely when the teacher is previewing the test.
+  useWelcomeTestIntegrity({
+    enabled: !teacherPreviewMode,
+    testId: testId || null,
+    studentId: studentId || null,
+    teacherId: teacherId || null,
+    blockPasteOnOpenEnded: isOpenEndedQ,
+    currentQuestionId: currentQuestion.id,
+  });
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 px-2 sm:px-3 py-1">
