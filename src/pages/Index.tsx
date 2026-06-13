@@ -34,6 +34,7 @@ import { devLog, devWarn } from '@/utils/logger';
 import { AddStudentDialog } from "@/components/dashboard/AddStudentDialog";
 import { buildAutoGeneratePayload, clearAutoGenerateFlags, readAutoGenerateIntent } from "@/lib/worksheet/autoGenerateBootstrap";
 import { hasAutoGenerateIntent } from "@/lib/worksheet/autoGenerateBootstrap";
+import { useActiveWorksheetGenerationJob } from "@/hooks/useActiveWorksheetGenerationJob";
 
 /**
  * Main Index page component that handles worksheet generation and display
@@ -95,6 +96,15 @@ const Index = () => {
     isDemo,
     consumeToken,
   });
+  // v6.9.57 — Refresh-safe modal rehydration. If a background generation job
+  // is still `running` (persisted in localStorage by generationJobRegistry),
+  // we resurrect the GeneratingModal on mount so the user sees the same UI
+  // they had before the refresh. The completion side effects (open worksheet,
+  // mark suggestion used, consume token) are handled by
+  // useActiveWorksheetGenerationJob via DB polling on form_data->>clientGenerationId.
+  const activeJob = useActiveWorksheetGenerationJob();
+  const isResumedGeneration =
+    !!activeJob && activeJob.status === 'running' && !isGenerating;
   const [showTokenModal, setShowTokenModal] = useState(false);
   const [showWelcomeBackModal, setShowWelcomeBackModal] = useState(false);
   const [showOneMinutePrepDialog, setShowOneMinutePrepDialog] = useState(false);
