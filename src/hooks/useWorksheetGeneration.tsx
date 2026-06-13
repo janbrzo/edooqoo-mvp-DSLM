@@ -340,6 +340,9 @@ export const useWorksheetGeneration = (
               failGenerationJob(detail);
               const reqId = (data as any).__autoGenerateRequestId;
               if (reqId) markPersistentAutoGenerateIntentStatus(reqId, 'failed');
+              // v6.9.57 — defensively drop legacy suggestion handle so a later
+              // retry cannot mark an unrelated suggestion as used.
+              try { sessionStorage.removeItem('prefillSuggestionId'); } catch { /* ignore */ }
             } catch { /* ignore */ }
             // Notify ops (anonymous-friendly: minimal context, no prompt).
             try {
@@ -368,6 +371,7 @@ export const useWorksheetGeneration = (
               failGenerationJob(error.message || 'Generation failed');
               const reqId = (data as any).__autoGenerateRequestId;
               if (reqId) markPersistentAutoGenerateIntentStatus(reqId, 'failed');
+              try { sessionStorage.removeItem('prefillSuggestionId'); } catch { /* ignore */ }
             } catch { /* ignore */ }
           }
         }
