@@ -27,6 +27,20 @@ export interface WorksheetGenerationJob {
   tokenConsumedAt: number | null;
   suggestionMarkedAt: number | null;
   errorMessage: string | null;
+  /**
+   * v6.9.57 — Form metadata snapshot used to rehydrate the GeneratingModal
+   * after a page refresh, so the modal can re-render with the same exercise
+   * list / media flags / student label as the original attempt.
+   * Worksheet generation prompt and engine are NOT derived from this.
+   */
+  formMeta?: {
+    requiresAudio?: boolean;
+    requiresImage?: boolean;
+    hasGrammar?: boolean;
+    selectedExercises?: string[];
+    studentName?: string | null;
+    studentEmail?: string | null;
+  } | null;
 }
 
 const STORAGE_KEY = 'edooqoo.activeWorksheetGeneration';
@@ -94,6 +108,7 @@ export interface StartJobInput {
   topic: string;
   origin: WorksheetGenerationOrigin;
   requestId?: string | null;
+  formMeta?: WorksheetGenerationJob['formMeta'];
 }
 
 export function startGenerationJob(input: StartJobInput): WorksheetGenerationJob {
@@ -116,6 +131,7 @@ export function startGenerationJob(input: StartJobInput): WorksheetGenerationJob
     tokenConsumedAt: null,
     suggestionMarkedAt: null,
     errorMessage: null,
+    formMeta: input.formMeta ?? null,
   };
   write(job);
   return job;

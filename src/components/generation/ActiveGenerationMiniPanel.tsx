@@ -10,7 +10,7 @@
  * on `/worksheet/:id` if that route already shows the generated worksheet,
  * and on `/` while the in-page `GeneratingModal` is on screen.
  */
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Loader2, Sparkles, X, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -33,10 +33,26 @@ export default function ActiveGenerationMiniPanel() {
     getActiveGenerationJob();
   }, [location.pathname]);
 
+  // v6.9.57 — Track whether the in-page GeneratingModal is currently mounted.
+  // The old gate hid this panel on `/` by path, which (a) duplicated UI when
+  // the modal was rehydrated after refresh and (b) hid the panel on `/` even
+  // when the modal was NOT on screen. Event-based gating fixes both.
+  const [modalMounted, setModalMounted] = useState(false);
+  useEffect(() => {
+    const onMount = () => setModalMounted(true);
+    const onUnmount = () => setModalMounted(false);
+    window.addEventListener('generation-modal:mount', onMount);
+    window.addEventListener('generation-modal:unmount', onUnmount);
+    return () => {
+      window.removeEventListener('generation-modal:mount', onMount);
+      window.removeEventListener('generation-modal:unmount', onUnmount);
+    };
+  }, []);
+
   const visible = useMemo(() => {
     if (!job) return false;
-    // While GeneratingModal is on screen at `/`, do not duplicate.
-    if (job.status === 'running' && location.pathname === '/') return false;
+    // While the actual GeneratingModal is mounted anywhere, do not duplicate.
+    if (job.status === 'running' && modalMounted) return false;
     // On the worksheet page for this exact worksheet, the page itself is the CTA.
     if (
       job.status === 'completed'
@@ -46,7 +62,7 @@ export default function ActiveGenerationMiniPanel() {
       return false;
     }
     return true;
-  }, [job, location.pathname]);
+  }, [job, location.pathname, modalMounted]);
 
   if (!job || !visible) return null;
 
