@@ -405,6 +405,19 @@ export default function GeneratingModal({
           <span>{Math.round(progress)}%</span>
         </div>
 
+        {isResumed ? (
+          <div className="rounded-md border border-amber-300/60 bg-amber-50/80 px-3 py-2 text-xs text-amber-900">
+            <strong>Generation resumed.</strong> The page was refreshed but
+            generation kept running in the background. Your worksheet will
+            open automatically when it's ready — no token is charged unless
+            it completes.
+          </div>
+        ) : (
+          <p className="text-center text-[11px] text-muted-foreground -mt-0.5">
+            Refreshing this page won't stop generation — you can come back any time.
+          </p>
+        )}
+
         <div className="space-y-1 bg-muted/30 p-2 rounded-lg max-h-[44vh] lg:max-h-[46vh] overflow-y-auto">
           {sections.map((section, index) => (
             <div 
