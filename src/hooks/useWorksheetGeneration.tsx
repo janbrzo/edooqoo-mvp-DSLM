@@ -631,9 +631,10 @@ export const useWorksheetGeneration = (
 
       // v4.8: if this generation originated from a DSLM suggestion, flip is_used.
       try {
-        const sourceSuggestionId =
-          (data as any).__autoGenerateSuggestionId
-          || sessionStorage.getItem('prefillSuggestionId');
+        // v6.9.57 — Only honor the suggestion id that came in WITH this exact
+        // form submission. Removing the sessionStorage fallback prevents a
+        // failed previous attempt from leaking a stale id into the next retry.
+        const sourceSuggestionId = (data as any).__autoGenerateSuggestionId || null;
         if (sourceSuggestionId && finalWorksheetId) {
           const { error: usedErr } = await supabase
             .from('future_worksheet_suggestions')
