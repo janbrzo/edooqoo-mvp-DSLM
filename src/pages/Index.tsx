@@ -436,20 +436,24 @@ const Index = () => {
         )}
         
         <GeneratingModal 
-          isOpen={isGenerating} 
-          requiresAudio={!!worksheetState.inputParams?.requiresAudio}
-          requiresImage={!!worksheetState.inputParams?.requiresImage}
-          hasGrammar={!!worksheetState.inputParams?.hasGrammar}
+          isOpen={isGenerating || isResumedGeneration} 
+          isResumed={isResumedGeneration}
+          requiresAudio={isResumedGeneration ? !!activeJob?.formMeta?.requiresAudio : !!worksheetState.inputParams?.requiresAudio}
+          requiresImage={isResumedGeneration ? !!activeJob?.formMeta?.requiresImage : !!worksheetState.inputParams?.requiresImage}
+          hasGrammar={isResumedGeneration ? !!activeJob?.formMeta?.hasGrammar : !!worksheetState.inputParams?.hasGrammar}
           streamProgress={streamProgress}
           mediaGenerating={mediaGenerating}
-          selectedExercises={worksheetState.inputParams?.selectedExercises}
-          errorMessage={generationError}
-          onRetry={clearGenerationError}
+          selectedExercises={isResumedGeneration ? activeJob?.formMeta?.selectedExercises : worksheetState.inputParams?.selectedExercises}
+          errorMessage={isResumedGeneration ? null : generationError}
+          onRetry={isResumedGeneration ? undefined : clearGenerationError}
           studentName={
+            isResumedGeneration
+              ? activeJob?.formMeta?.studentName ?? undefined
+              :
             worksheetState.inputParams?.studentName
             || (typeof window !== 'undefined' ? (sessionStorage.getItem('worksheetStudentName') || undefined) : undefined)
           }
-          studentEmail={worksheetState.inputParams?.studentEmail ?? null}
+          studentEmail={isResumedGeneration ? (activeJob?.formMeta?.studentEmail ?? null) : (worksheetState.inputParams?.studentEmail ?? null)}
         />
         
         <TokenPaywallModal
