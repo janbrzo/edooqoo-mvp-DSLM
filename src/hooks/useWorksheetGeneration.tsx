@@ -513,7 +513,14 @@ export const useWorksheetGeneration = (
       willConsumeToken: !isDemo && !!userId,
       finalWorksheetId
     });
-    
+
+    // v6.9.57 — Token consumption policy:
+    //   - Consumed ONLY after a worksheet row exists in DB AND was validated
+    //     client-side. Backend never consumes tokens itself.
+    //   - Idempotent via consume_token RPC keyed on worksheet_id, so the
+    //     refresh-safe polling path (useActiveWorksheetGenerationJob) and the
+    //     in-flight client cannot both deduct.
+    //   - Any failure before this point → ZERO tokens consumed.
     if (!isDemo && userId) {
       devLog('✅ Attempting to consume token for user:', userId);
       const tokenConsumed = await consumeToken(finalWorksheetId);
