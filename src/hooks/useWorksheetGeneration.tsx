@@ -169,6 +169,15 @@ export const useWorksheetGeneration = (
         topic: String(data.lessonTopic || '').slice(0, 240),
         origin: !userId ? 'anonymous' : ((data as any).__autoGenerateFromSuggestion ? 'dslm-auto' : 'manual'),
         requestId: clientGenerationId,
+        // v6.9.57 — snapshot UI metadata so the modal can rehydrate after refresh
+        formMeta: {
+          requiresAudio: !!requiresAudio,
+          requiresImage: !!requiresImage,
+          hasGrammar: !!hasGrammar,
+          selectedExercises: Array.isArray(data.selectedExercises) ? data.selectedExercises : [],
+          studentName: (data as any).studentName ?? null,
+          studentEmail: (data as any).studentEmail ?? null,
+        },
       });
     } catch (e) {
       devWarn('[useWorksheetGeneration] failed to start generation job', e);
