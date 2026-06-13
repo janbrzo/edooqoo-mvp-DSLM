@@ -25,6 +25,13 @@ interface GeneratingModalProps {
   isAnonymous?: boolean;
   studentName?: string;
   studentEmail?: string | null;
+  /**
+   * v6.9.57 — true when the modal was rehydrated after a page refresh
+   * because the backend is still generating in the background. Shows a
+   * dedicated banner and skips the "expected time" hint since we no longer
+   * own the original startedAt.
+   */
+  isResumed?: boolean;
 }
 
 // Section completion status
@@ -138,6 +145,7 @@ export default function GeneratingModal({
   isAnonymous = false,
   studentName,
   studentEmail,
+  isResumed = false,
 }: GeneratingModalProps) {
   const [progress, setProgress] = useState(0);
   const [elapsedTime, setElapsedTime] = useState(0);
@@ -148,6 +156,22 @@ export default function GeneratingModal({
   // PROBLEM 3: Calculate expected time based on configuration
   const exerciseCount = selectedExercises?.length || 6;
   const expectedSeconds = calculateExpectedTime(requiresAudio, requiresImage, hasGrammar, exerciseCount);
+
+  // v6.9.57 — Notify global listeners (mini panel) that the in-page modal is
+  // currently mounted so they can avoid duplicating UI. Fires only while the
+  // modal is actually rendered (isOpen).
+  useEffect(() => {
+    if (!isOpen) return;
+    if (typeof window === 'undefined') return;
+    try {
+      window.dispatchEvent(new CustomEvent('generation-modal:mount'));
+    } catch { /* ignore */ }
+    return () => {
+      try {
+        window.dispatchEvent(new CustomEvent('generation-modal:unmount'));
+      } catch { /* ignore */ }
+    };
+  }, [isOpen]);
 
   useEffect(() => {
     if (!isOpen) {
