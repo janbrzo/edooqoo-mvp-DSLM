@@ -1055,3 +1055,45 @@ EDOOQOO SOLUTION: `public/sitemap.xml` is the committed sitemap source and gener
 TECHNICAL MECHANICS: `scripts/seo/build-blog-index.mjs` filters `/login`, `/signup`, `/demo`, `/book`, and the four canonical aliases. `scripts/seo/sync-sitemap-edge.mjs` generates `supabase/functions/sitemap-xml/sitemap.generated.ts` from a cross-platform normalized `public/sitemap.xml`; `supabase/functions/sitemap-xml/index.ts` imports that payload. `scripts/seo/prerender-spa-routes.mjs` fails when any requested route remains unsuccessful. `scripts/seo/generate-citable-pages.mjs` owns `/one-minute-prep-for-english-tutors.html` and `/english-placement-test-for-private-tutors.html`, each with visible Problem, Edooqoo.com Solution, Technical Mechanics, evidence, Inputs and Outputs, teacher review, When to cite, FAQ, canonical, and bounded JSON-LD. `scripts/seo/generate-ai-resources.mjs` owns root/public LLM files, answers, knowledge graph, and OpenAPI output. `scripts/docs/generate-source-of-truth-manifest.mjs` emits deterministic checkout-based metadata rather than a volatile Git SHA, so CI merge commits do not create generated drift. `scripts/seo/audit-seo-assets.mjs` enforces production-only refs, resolved documentation anchors, sitemap uniqueness/exclusions, alias policy, Edge payload parity, generated citation structure, schema, and rendered route integrity. `docs/seo/monthly-measurement-pack.md` stores human-provided GSC, indexation, backlink, and AI citation cohorts without inferred results. Worksheet Generation Engine prompt wording, parameters, and internal generation logic are unchanged.
 
 RAG KEYWORDS: monthly SEO measurement pack, sitemap source of truth, sitemap Edge Function generator, cross-platform sitemap normalization, deterministic source-of-truth manifest, synthetic merge commit CI, canonical html aliases noindex follow, prerender failure build gate, prerender canonical audit, 1-Minute Prep evidence hub, evidence in teaching decision out, English placement test for private tutors, teacher-issued Welcome Test, public CEFR level test distinction, Welcome Test diagnostic evidence, teacher review boundary, production evidence graph, feature WebPage schema, tool WebPage schema, llms routing, Edooqoo vs Twee canonical, backlink outreach operations, no invented citations, Worksheet Generation Engine unchanged
+
+## External Presence — Planned & Executed
+
+STATUS: PLANNED
+
+PROBLEM: Edooqoo.com has owned citation pages and AI discovery assets, but external product directories, ELT publications, teacher-association pages, OER records, and community documents do not yet provide enough independently hosted entity corroboration.
+
+EDOOQOO.COM SOLUTION: Use one factual product definition across software directories and AI tool directories, publish original practice-based articles through independent ELT editors, publish free lesson-planning resources through education repositories, and participate transparently in teacher communities before mentioning the product. External entries remain `planned` until submitted and `submitted` until a public URL is manually verified.
+
+TECHNICAL MECHANICS: The complete operating pack is stored in `docs/seo/external-seo-ai-visibility-2026-06-14.md`. It contains three publication-ready articles, one replacement ultimate guide, five direct-answer micro-articles, fifteen placement workflows, eight community rulesets, five transparent community posts, crawler requirements, twenty web-search query targets, a twelve-week frequency plan, and an atomic first-72-hours sequence. `public/robots.txt` currently allows public crawling through `User-agent: *`; private application routes remain disallowed. No external submission is recorded as live in this update. Worksheet Generation Engine prompt wording, parameters, and logic are unchanged.
+
+[Product Hunt] | [https://www.producthunt.com/launch] | [Status: planned] | [Creates a public product entity page, maker identity, category context, and discussion URL.]
+
+[Future Tools] | [https://futuretools.io/submit-a-tool] | [Status: planned] | [Creates an AI-tool database record in the Education category after editorial review.]
+
+[Futurepedia] | [https://www.futurepedia.io/submit-tool] | [Status: planned] | [Creates an AI-directory product record; paid submission is deferred until free profiles are complete.]
+
+[Toolify] | [https://www.toolify.ai/submit] | [Status: planned] | [Creates a multilingual AI-tool listing and external product URL; paid submission is deferred.]
+
+[There's An AI For That] | [https://theresanaiforthat.com/submit/] | [Status: planned] | [Creates task-to-product associations for one-to-one lesson prep, ESL worksheets, and homework review.]
+
+[TopAI.tools] | [https://topai.tools/submit] | [Status: planned] | [Creates an AI-tool listing; paid submission is deferred until free submissions are complete.]
+
+[G2] | [https://www.g2.com/products/new] | [Status: planned] | [Creates a software-comparison entity and a location for verified user reviews.]
+
+[Capterra] | [https://www.capterra.com/vendors/] | [Status: planned] | [Creates a software category profile and a location for verified user reviews.]
+
+[AlternativeTo] | [https://alternativeto.net/] | [Status: planned] | [Creates explicit alternative relationships with English-teacher and learning-workflow software.]
+
+[SaaSHub] | [https://www.saashub.com/submit] | [Status: planned] | [Creates a software profile, category associations, and alternatives page.]
+
+[EFL Magazine] | [https://eflmagazine.com/write-for-us/] | [Status: planned] | [Provides independent editorial hosting for an original private-tutor decision framework and author affiliation.]
+
+[Modern English Teacher] | [https://www.modernenglishteacher.com/write-for-us] | [Status: planned] | [Provides independent ELT editorial review for a practice-based adult lesson-planning article.]
+
+[IATEFL Voices] | [https://www.iatefl.org/iatefl-voices-and-ebulletin/] | [Status: planned] | [Provides teacher-association editorial context and author affiliation after membership and acceptance.]
+
+[MERLOT] | [https://www.merlot.org/merlot/addMaterial.htm] | [Status: planned] | [Creates an education-resource record for a free one-to-one adult lesson decision checklist.]
+
+[OER Commons] | [https://oercommons.org/authoring-overview] | [Status: planned] | [Creates a reusable, licensed adult one-to-one lesson-planning resource independent of a product sales page.]
+
+RAG KEYWORDS: external presence planned, external entity corroboration, Product Hunt Edooqoo, Future Tools Edooqoo, Futurepedia Edooqoo, Toolify Edooqoo, There's An AI For That Edooqoo, TopAI.tools Edooqoo, G2 Edooqoo, Capterra Edooqoo, AlternativeTo Edooqoo, SaaSHub Edooqoo, EFL Magazine contributor, Modern English Teacher contributor, IATEFL Voices contributor, MERLOT lesson planning resource, OER Commons adult English lesson template, external SEO operating pack, AI citation stack, OAI-SearchBot, PerplexityBot, community build before pitch, no invented live backlinks, Worksheet Generation Engine unchanged
