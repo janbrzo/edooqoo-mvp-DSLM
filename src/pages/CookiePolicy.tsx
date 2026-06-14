@@ -1,13 +1,27 @@
 
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { Cookie } from 'lucide-react';
 import StickyNav from '@/components/landing/StickyNav';
+import { PageSeo } from '@/components/seo/PageSeo';
 
 const CookiePolicy = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20">
+      <PageSeo
+        title="Cookie Policy | Edooqoo"
+        description="How Edooqoo uses essential, functional, analytics, and third-party cookies, including retention, preferences, and user rights."
+        path="/cookie-policy"
+        jsonLd={{
+          '@context': 'https://schema.org',
+          '@type': 'WebPage',
+          '@id': 'https://edooqoo.com/cookie-policy#webpage',
+          url: 'https://edooqoo.com/cookie-policy',
+          name: 'Cookie Policy | Edooqoo',
+          inLanguage: 'en',
+        }}
+      />
       <StickyNav isRegisteredUser={false} tokenLeft={0} user={null} />
       <div className="max-w-4xl mx-auto p-4">
 
@@ -15,7 +29,7 @@ const CookiePolicy = () => {
           <CardHeader className="text-center border-b">
             <div className="flex items-center justify-center gap-3 mb-4">
               <Cookie className="h-8 w-8 text-primary" />
-              <CardTitle className="text-3xl">Cookie Policy</CardTitle>
+              <h1 className="text-3xl font-semibold tracking-tight">Cookie Policy</h1>
             </div>
             <p className="text-muted-foreground">
               Last updated: {new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' })}

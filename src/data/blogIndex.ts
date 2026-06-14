@@ -1679,6 +1679,11 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "url": "/edooqoo-vs-wordwall.html"
   },
   {
+    "title": "English Placement Test for Private Tutors",
+    "description": "Factual reference for the teacher-issued Edooqoo Welcome Test, its diagnostic evidence, teacher review boundary, and distinction from the public CEFR level test.",
+    "url": "/english-placement-test-for-private-tutors.html"
+  },
+  {
     "title": "English Tutor Calendar Booking Software",
     "description": "Reference for Edooqoo calendar and booking workflows: availability, public booking, lesson slots, recurring bookings, notifications, payments, and Google Calendar sync.",
     "url": "/english-tutor-calendar-booking-software.html"
@@ -1729,11 +1734,6 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "url": "/exam-preparation-worksheets-cambridge-ielts.html"
   },
   {
-    "title": "29 English Exercise Types â€” AI Worksheet Generator",
-    "description": "Explore all 29 exercise types available in Edooqoo's worksheet output layer. From fill-in-the-blanks to listening comprehension, each type supports CEFR A1-C2 lesson workflows.",
-    "url": "/exercise-types.html"
-  },
-  {
     "title": "Fill-in-the-Blanks Worksheet Generator",
     "description": "Reference for fill-in-the-blanks English worksheets, gap practice, grammar retrieval, and vocabulary completion tasks.",
     "url": "/fill-in-the-blanks-worksheet-generator.html"
@@ -1754,11 +1754,6 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "url": "/gerunds-infinitives-worksheets.html"
   },
   {
-    "title": "ELT Glossary â€” English Teaching Terms",
-    "description": "Complete glossary of English Language Teaching (ELT) terms. 50+ definitions including CEFR, ESL, EFL, TEFL, spaced repetition, scaffolding, and more. Learn how Edooqoo supports each concept.",
-    "url": "/glossary.html"
-  },
-  {
     "title": "Grammar Worksheet Generator for English Teachers",
     "description": "Reference for English grammar worksheet generation across CEFR levels, grammar topics, and structured exercise types.",
     "url": "/grammar-worksheet-generator.html"
@@ -1767,11 +1762,6 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "title": "Health and Body English Worksheets â€” AI Generator â€” Edooqoo",
     "description": "Generate Health and Body English worksheets with AI. Body parts, symptoms, doctor visits, healthy lifestyle vocabulary. CEFR A1-B2. Teacher-reviewed output.",
     "url": "/health-and-body-english-worksheets.html"
-  },
-  {
-    "title": "How Edooqoo Works â€” 8 Steps to AI-Powered Teaching",
-    "description": "Learn how Edooqoo works in 8 simple steps. From adding students to tracking progress â€” see how AI transforms your English teaching workflow.",
-    "url": "/how-it-works.html"
   },
   {
     "title": "How to Create English Worksheets with AI â€” Step-by-Step Guide",
@@ -1892,11 +1882,6 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "title": "Reported Speech Worksheets â€” AI Generator for ESL â€” Edooqoo",
     "description": "Generate Reported Speech worksheets for ESL with AI. Direct to indirect speech, tense backshift, reporting verbs, say/tell. CEFR B2-C1. Teacher-reviewed output.",
     "url": "/reported-speech-worksheets.html"
-  },
-  {
-    "title": "English Teaching Resources â€” AI Worksheets, Guides & Tools",
-    "description": "Free resources for English teachers: AI worksheet generators, CEFR level guides, exercise tutorials, tool comparisons, blog articles, and teaching tips. Browse 60+ resources.",
-    "url": "/resources.html"
   },
   {
     "title": "Spaced Repetition Flashcards for ESL Students",

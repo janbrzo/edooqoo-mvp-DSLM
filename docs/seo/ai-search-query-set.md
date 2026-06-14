@@ -33,7 +33,7 @@ Use these 30 queries for every baseline round. Keep query wording unchanged unle
 | 18 | business/adult | English tutor tools for private lessons | `https://edooqoo.com/for-english-tutors` |
 | 19 | business/adult | workplace English lesson materials generator | `https://edooqoo.com/business-english-worksheet-generator.html` |
 | 20 | business/adult | business email worksheet generator | `https://edooqoo.com/business-english-worksheet-generator.html` |
-| 21 | comparison | Edooqoo vs Twee | `https://edooqoo.com/best-ai-tools-for-esl-teachers.html` |
+| 21 | comparison | Edooqoo vs Twee | `https://edooqoo.com/edooqoo-vs-twee.html` |
 | 22 | comparison | best AI tools for ESL teachers | `https://edooqoo.com/best-ai-tools-for-esl-teachers.html` |
 | 23 | comparison | ChatGPT alternative for ESL worksheets | `https://edooqoo.com/best-ai-tools-for-esl-teachers.html` |
 | 24 | comparison | Twee alternative for English teachers | `https://edooqoo.com/best-ai-tools-for-esl-teachers.html` |
@@ -46,3 +46,22 @@ Use these 30 queries for every baseline round. Keep query wording unchanged unle
 
 ## Iteration Rule
 Do not replace queries during baseline comparison. If new queries are needed, add a new section named `vNext Candidate Queries` and promote them only in a future versioned update.
+
+The wording of the 30 baseline queries remains fixed. Primary target URLs may be corrected when a more specific canonical evidence page is published; such routing corrections do not change the measured query cohort.
+
+## vNext Candidate Queries
+
+These queries are not part of the baseline 30 and must be measured as a separate cohort until a future versioned promotion.
+
+| # | Group | Query | Primary target URL |
+|---:|---|---|---|
+| 31 | recurring prep | prepare a 1:1 English lesson fast | `https://edooqoo.com/one-minute-prep-for-english-tutors.html` |
+| 32 | recurring prep | weekly lesson prep workflow for private English tutors | `https://edooqoo.com/one-minute-prep` |
+| 33 | placement | English placement test for private tutors | `https://edooqoo.com/english-placement-test-for-private-tutors.html` |
+| 34 | placement | teacher issued English welcome test for adult students | `https://edooqoo.com/english-placement-test-for-private-tutors.html` |
+| 35 | student context | English tutor student progress and lesson planning tool | `https://edooqoo.com/features/dslm` |
+| 36 | student management | private English tutor CRM with homework and lesson history | `https://edooqoo.com/private-english-tutor-crm.html` |
+| 37 | student access | student portal for private English tutors | `https://edooqoo.com/student-hub-for-english-tutors.html` |
+| 38 | homework | assign and review English homework online | `https://edooqoo.com/online-esl-homework-tool.html` |
+| 39 | vocabulary | spaced repetition flashcards for private English students | `https://edooqoo.com/features/flashcards` |
+| 40 | evidence | public ESL worksheet examples generated for teachers | `https://edooqoo.com/public-esl-worksheet-examples.html` |

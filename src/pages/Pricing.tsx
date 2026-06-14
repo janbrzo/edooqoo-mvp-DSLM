@@ -340,6 +340,14 @@ const Pricing = () => {
         <PublicWorkflowNav />
       )}
       <div className="max-w-6xl mx-auto p-4">
+        <header className="mx-auto max-w-4xl py-8 text-center">
+          <h1 className="text-3xl font-bold tracking-tight text-foreground md:text-4xl">
+            Edooqoo Pricing for Private English Tutors
+          </h1>
+          <p className="mt-3 text-base text-muted-foreground">
+            Compare worksheet credits and workflow access for recurring 1:1 adult English teaching.
+          </p>
+        </header>
 
         <PricingCalculator onRecommendation={handleRecommendation} />
 

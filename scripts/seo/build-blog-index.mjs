@@ -3,6 +3,19 @@ import { basename, join } from 'path';
 
 const BLOG_DIR = 'public/blog';
 const TOP_DIR = 'public';
+const CANONICAL_ALIASES = new Set([
+  'exercise-types.html',
+  'glossary.html',
+  'how-it-works.html',
+  'resources.html',
+]);
+const EXCLUDED_SITEMAP_PATHS = new Set([
+  '/book',
+  '/demo',
+  '/login',
+  '/signup',
+  ...[...CANONICAL_ALIASES].map((slug) => `/${slug}`),
+]);
 
 function parseHtml(filepath, slugBase) {
   const html = readFileSync(filepath, 'utf8');
@@ -45,7 +58,12 @@ console.log(`Parsed ${posts.length} blog posts`);
 
 // Also top-level html
 const topFiles = readdirSync(TOP_DIR)
-  .filter(f => f.endsWith('.html') && f !== 'blog.html' && f !== 'about.html')
+  .filter(f =>
+    f.endsWith('.html') &&
+    f !== 'blog.html' &&
+    f !== 'about.html' &&
+    !CANONICAL_ALIASES.has(f)
+  )
   .map(f => join(TOP_DIR, f));
 
 const landings = topFiles.map(fp => {
@@ -92,6 +110,13 @@ let sitemap = readFileSync(sitemapPath, 'utf8');
 // Strip any prior html entries (idempotent). This catches both old single-line
 // entries and accidental Windows-path entries produced by older script runs.
 sitemap = sitemap.replace(/\s*<url>\s*<loc>https:\/\/edooqoo\.com\/[^<]*\.html<\/loc>[\s\S]*?<\/url>\s*/g, '\n');
+for (const route of EXCLUDED_SITEMAP_PATHS) {
+  const escaped = route.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  sitemap = sitemap.replace(
+    new RegExp(`\\s*<url>\\s*<loc>https:\\/\\/edooqoo\\.com${escaped}<\\/loc>[\\s\\S]*?<\\/url>\\s*`, 'g'),
+    '\n',
+  );
+}
 
 const htmlEntries = [
   ...posts.map(p => `  <url><loc>https://edooqoo.com${p.url}</loc>${p.date ? `<lastmod>${p.date}</lastmod>` : ''}<changefreq>monthly</changefreq><priority>0.7</priority></url>`),

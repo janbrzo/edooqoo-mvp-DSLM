@@ -31,7 +31,7 @@
  *
  * SAFETY:
  *   - Only prerenders informational/marketing routes (no auth, no dynamic data).
- *   - Skip if route returns non-200 (logged, build continues).
+ *   - Any route that still fails after retries fails the build.
  *   - Strips <script type="module" src="/src/main.tsx"> dev fragments if present.
  *
  * RAG KEYWORDS: prerender, static SPA snapshot, vite prerender, react snap,
@@ -46,11 +46,15 @@ import http from 'node:http';
 import fs from 'node:fs/promises';
 import fsSync from 'node:fs';
 import path from 'node:path';
+import { execFile } from 'node:child_process';
+import { promisify } from 'node:util';
 import { fileURLToPath } from 'node:url';
 import { getPrerenderRoutes } from './seo-route-manifest.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..', '..');
+const SITE_ORIGIN = 'https://edooqoo.com';
+const execFileAsync = promisify(execFile);
 
 const args = process.argv.slice(2);
 const distArg = args.find((a) => a.startsWith('--dist='));
@@ -69,10 +73,74 @@ const PORT = portArg ? parseInt(portArg.split('=')[1], 10) : 4173;
  */
 const OUT_MODE = outArg ? outArg.split('=')[1] : 'dist';
 const OUT_DIR = OUT_MODE === 'public' ? path.resolve(ROOT, 'public') : DIST;
+const PRERENDER_MARKER = path.join(OUT_DIR, '.seo-prerender-complete.json');
 const MAX_ROUTE_ATTEMPTS = 3;
+const BROWSER_RESTART_INTERVAL = 50;
 
 function delay(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function withTimeout(promise, ms, label) {
+  return Promise.race([
+    promise,
+    delay(ms).then(() => {
+      throw new Error(`${label} timeout after ${ms}ms`);
+    }),
+  ]);
+}
+
+function escapeHtmlAttribute(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+function normalizeSnapshotHtml(html, route) {
+  const canonical = route === '/' ? `${SITE_ORIGIN}/` : `${SITE_ORIGIN}${route}`;
+  const title = html.match(/<title[^>]*>([^<]*)<\/title>/i)?.[1]?.trim() || 'Edooqoo';
+  const descriptions = [...html.matchAll(/<meta[^>]+name=["']description["'][^>]+content=["']([^"']*)["'][^>]*>/gi)];
+  const description = descriptions.at(-1)?.[1]?.trim() || '';
+
+  let normalized = html
+    .replace(/<noscript\b[^>]*>[\s\S]*?<\/noscript>/gi, '')
+    .replace(/<link\b(?=[^>]*\brel=["']canonical["'])[^>]*>/gi, '')
+    .replace(
+      /<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi,
+      (full, jsonText) => {
+        try {
+          const json = JSON.parse(jsonText.trim());
+          const nodes = Array.isArray(json?.['@graph']) ? json['@graph'] : [json];
+          const isRootPageSchema = nodes.some((node) =>
+            ['WebPage', 'FAQPage', 'BreadcrumbList'].includes(node?.['@type'])
+          );
+          return isRootPageSchema ? '' : full;
+        } catch {
+          return full;
+        }
+      },
+    );
+
+  const webPageSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    '@id': `${canonical}#webpage`,
+    url: canonical,
+    name: title,
+    description,
+    isPartOf: { '@id': 'https://edooqoo.com/#website' },
+    about: { '@id': 'https://edooqoo.com/#software' },
+    inLanguage: 'en',
+  };
+  const headInjection = [
+    `<link rel="canonical" href="${escapeHtmlAttribute(canonical)}">`,
+    `<script type="application/ld+json">${JSON.stringify(webPageSchema).replace(/</g, '\\u003c')}</script>`,
+  ].join('');
+
+  normalized = normalized.replace('</head>', `${headInjection}</head>`);
+  return normalized;
 }
 
 function softExit(reason) {
@@ -102,6 +170,47 @@ const RENDER_ROUTES = ONLY_ROUTES.length > 0
   : START_AT_ROUTE && START_AT_INDEX >= 0
   ? SEO_ROUTES.slice(START_AT_INDEX)
   : SEO_ROUTES;
+
+async function validateCompletedSnapshotSet() {
+  const issues = [];
+
+  for (const route of SEO_ROUTES) {
+    const outputPath =
+      route === '/'
+        ? path.join(OUT_DIR, 'index.html')
+        : path.join(OUT_DIR, route.replace(/^\//, ''), 'index.html');
+
+    let html;
+    try {
+      html = await fs.readFile(outputPath, 'utf8');
+    } catch {
+      issues.push(`${route}: missing snapshot`);
+      continue;
+    }
+
+    const expectedCanonical = `${SITE_ORIGIN}${route === '/' ? '/' : route}`;
+    const canonicalCount = (
+      html.match(/<link\b[^>]*\brel=["']canonical["'][^>]*>/gi) || []
+    ).length;
+    const h1Count = (html.match(/<h1\b[^>]*>/gi) || []).length;
+    const compactHtml = html.replace(/\s+/g, '');
+
+    if (canonicalCount !== 1) {
+      issues.push(`${route}: expected one canonical, found ${canonicalCount}`);
+    }
+    if (!html.includes(`href="${expectedCanonical}"`)) {
+      issues.push(`${route}: canonical does not match ${expectedCanonical}`);
+    }
+    if (h1Count !== 1) {
+      issues.push(`${route}: expected one H1, found ${h1Count}`);
+    }
+    if (!compactHtml.includes(`"@id":"${expectedCanonical}#webpage"`)) {
+      issues.push(`${route}: route WebPage schema missing`);
+    }
+  }
+
+  return issues;
+}
 
 const MIME = {
   '.html': 'text/html; charset=utf-8',
@@ -183,9 +292,13 @@ function closeServer(server) {
 }
 
 async function main() {
+  await fs.rm(PRERENDER_MARKER, { force: true });
+
   // Validate dist exists
+  let shellTitle = '';
   try {
-    await fs.access(path.join(DIST, 'index.html'));
+    const shellHtml = await fs.readFile(path.join(DIST, 'index.html'), 'utf8');
+    shellTitle = shellHtml.match(/<title[^>]*>([^<]*)<\/title>/i)?.[1]?.trim() || '';
   } catch {
     return softExit(`dist/index.html not found at ${DIST}. Run \`vite build\` first.`);
   }
@@ -231,7 +344,17 @@ async function main() {
     } catch (err) {
       console.warn(`[prerender] WARN browser cleanup failed: ${err.message}`);
       try {
-        if (browserProcess && !browserProcess.killed) browserProcess.kill('SIGKILL');
+        if (browserProcess && !browserProcess.killed) {
+          if (process.platform === 'win32') {
+            await execFileAsync(
+              'taskkill',
+              ['/PID', String(browserProcess.pid), '/T', '/F'],
+              { timeout: 5000, windowsHide: true },
+            );
+          } else {
+            browserProcess.kill('SIGKILL');
+          }
+        }
       } catch {}
     }
   };
@@ -249,8 +372,9 @@ async function main() {
   const renderRoute = async (route, attempt) => {
     const url = `http://127.0.0.1:${PORT}${route}`;
     let page;
+    let restartBrowser = false;
     try {
-      page = await browser.newPage();
+      page = await withTimeout(browser.newPage(), 5000, 'new page');
     } catch (err) {
       console.warn(`[prerender] FAIL ${route} attempt ${attempt}/${MAX_ROUTE_ATTEMPTS} — cannot open new page: ${err.message}`);
       await closeBrowser(browser);
@@ -264,17 +388,55 @@ async function main() {
     }
 
     try {
-      await page.setUserAgent('Mozilla/5.0 (compatible; EdooqooPrerender/1.0)');
-      const resp = await page.goto(url, { waitUntil: 'networkidle0', timeout: 30000 });
+      await withTimeout(
+        page.setUserAgent('Mozilla/5.0 (compatible; EdooqooPrerender/1.0)'),
+        5000,
+        'set user agent',
+      );
+      await withTimeout(
+        page.setRequestInterception(true),
+        5000,
+        'enable request interception',
+      );
+      page.on('request', (request) => {
+        if (['image', 'media', 'font'].includes(request.resourceType())) request.abort();
+        else request.continue();
+      });
+      const resp = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 15000 });
       if (!resp || !resp.ok()) {
         console.warn(`[prerender] SKIP ${route} attempt ${attempt}/${MAX_ROUTE_ATTEMPTS} — status ${resp?.status() ?? 'no-response'}`);
         return false;
       }
-      // Extra wait for canonical hook + lazy components
-      await delay(1500);
+      const expectedCanonical = `${SITE_ORIGIN}${route === '/' ? '/' : route}`;
+      await page.waitForFunction(
+        (expected) =>
+          [...document.querySelectorAll('link[rel="canonical"]')].some(
+            (link) => link.href === expected,
+          ),
+        { timeout: 8000 },
+        expectedCanonical,
+      );
+      await page.waitForFunction(
+        () => (document.querySelector('#root')?.textContent?.trim().length || 0) > 100,
+        { timeout: 8000 },
+      );
+      await page.waitForFunction(
+        () => document.querySelectorAll('#root h1').length === 1,
+        { timeout: 8000 },
+      );
+      if (route !== '/') {
+        await page.waitForFunction(
+          (defaultTitle) =>
+            document.title.trim().length > 0 && document.title.trim() !== defaultTitle,
+          { timeout: 8000 },
+          shellTitle,
+        );
+      }
+      await delay(100);
 
       // Snapshot full HTML (includes hydrated DOM + updated canonical)
-      const html = await page.content();
+      const pageHtml = await withTimeout(page.content(), 5000, 'read page content');
+      const html = normalizeSnapshotHtml(pageHtml, route);
 
       // Write to <OUT_DIR>/<route>/index.html
       const outDir = path.join(OUT_DIR, route.replace(/^\//, ''));
@@ -299,26 +461,34 @@ async function main() {
     } catch (err) {
       console.warn(`[prerender] FAIL ${route} attempt ${attempt}/${MAX_ROUTE_ATTEMPTS} — ${err.message}`);
       if (/detached|connection|timeout/i.test(err.message)) {
-        await closeBrowser(browser);
-        try {
-          browser = await launchBrowser();
-          console.warn('[prerender] WARN relaunched Chromium after route failure');
-        } catch (launchErr) {
-          return softExit(`Failed to relaunch headless Chromium: ${launchErr.message}`);
-        }
+        restartBrowser = true;
       }
       return false;
     } finally {
       try {
-        if (page && !page.isClosed()) await page.close();
+        if (page && !page.isClosed()) {
+          await withTimeout(page.close(), 2000, 'page close');
+        }
       } catch (err) {
         console.warn(`[prerender] WARN ${route} page cleanup failed: ${err.message}`);
+        restartBrowser = true;
+      }
+      if (restartBrowser) {
+        await closeBrowser(browser);
+        browser = await launchBrowser();
+        console.warn('[prerender] WARN relaunched Chromium after route failure');
       }
     }
   };
 
   try {
-    for (const route of RENDER_ROUTES) {
+    for (let routeIndex = 0; routeIndex < RENDER_ROUTES.length; routeIndex++) {
+      const route = RENDER_ROUTES[routeIndex];
+      if (routeIndex > 0 && routeIndex % BROWSER_RESTART_INTERVAL === 0) {
+        await closeBrowser(browser);
+        browser = await launchBrowser();
+        console.log(`[prerender] Restarted Chromium after ${routeIndex} routes`);
+      }
       let rendered = false;
       for (let attempt = 1; attempt <= MAX_ROUTE_ATTEMPTS; attempt++) {
         rendered = await renderRoute(route, attempt);
@@ -343,8 +513,24 @@ async function main() {
   if (failCount > 0) {
     console.warn(`[prerender] Failed routes: ${failedRoutes.join(', ')}`);
   }
-  if (failCount > 0 && okCount === 0) {
-    return softExit(`All ${failCount} routes failed.`);
+  if (failCount > 0) {
+    return softExit(`${failCount} prerender route(s) failed.`);
+  }
+
+  if (ONLY_ROUTES.length === 0) {
+    const validationIssues = await validateCompletedSnapshotSet();
+    if (validationIssues.length > 0) {
+      const preview = validationIssues.slice(0, 20).join('\n- ');
+      return softExit(
+        `[prerender] Completed snapshot validation failed (${validationIssues.length} issues):\n- ${preview}`,
+      );
+    }
+
+    await fs.writeFile(
+      PRERENDER_MARKER,
+      `${JSON.stringify({ routeCount: SEO_ROUTES.length }, null, 2)}\n`,
+      'utf8',
+    );
   }
 }
 

@@ -7,6 +7,7 @@ import { getPrerenderRoutes, getPriorityExerciseTopicRoutes } from './seo-route-
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..', '..');
 const PUBLIC = path.resolve(ROOT, 'public');
+const DIST = path.resolve(ROOT, 'dist');
 const BASE_URL = 'https://edooqoo.com';
 
 const REQUIRED_AI_RESOURCES = [
@@ -61,6 +62,7 @@ const REQUIRED_PRERENDER_ROUTES = [
 const REQUIRED_CITABLE_PAGES = [
   '/ai-worksheet-generator-for-english-teachers.html',
   '/one-minute-prep-for-english-tutors.html',
+  '/english-placement-test-for-private-tutors.html',
   '/cefr-worksheet-generator.html',
   '/business-english-worksheet-generator.html',
   '/grammar-worksheet-generator.html',
@@ -82,6 +84,32 @@ const REQUIRED_CITABLE_PAGES = [
   '/student-hub-for-english-tutors.html',
 ];
 
+const EVIDENCE_ONLY_CITABLE_PAGES = new Set([
+  '/one-minute-prep-for-english-tutors.html',
+  '/english-placement-test-for-private-tutors.html',
+]);
+
+const FEATURE_AND_TOOL_PAGES = [
+  '/features/dslm',
+  '/features/homework',
+  '/features/flashcards',
+  '/features/calendar',
+  '/features/live-sessions',
+  '/features/placement-test',
+  '/features/student-hub',
+  '/tools',
+  '/tools/cefr-level-test',
+  '/tools/lesson-plan-generator',
+  '/tools/vocab-cefr-checker',
+];
+
+const CANONICAL_ALIASES = [
+  ['/resources.html', '/resources'],
+  ['/glossary.html', '/glossary'],
+  ['/how-it-works.html', '/how-it-works'],
+  ['/exercise-types.html', '/exercise-types'],
+];
+
 const REQUIRED_HOMEPAGE_CANONICAL_LINKS = [
   '/one-minute-prep',
   '/ai-worksheet-generator-for-english-teachers.html',
@@ -93,6 +121,7 @@ const REQUIRED_HOMEPAGE_CANONICAL_LINKS = [
 const REQUIRED_CITATION_ARTICLES = [
   '/blog/ai-worksheet-generator-mechanics-for-esl-teachers.html',
   '/blog/one-minute-prep-workflow-for-esl-tutors.html',
+  '/blog/learning-pacing-scientific-vs-pragmatic-esl.html',
   '/blog/cefr-aligned-worksheet-generation-workflow.html',
   '/blog/business-english-material-generation-workflow.html',
   '/blog/english-homework-ai-grading-workflow.html',
@@ -183,6 +212,7 @@ const HIGH_RISK_PUBLIC_CLAIM_PAGES = [
 ];
 
 const PRIVATE_SITEMAP_PATTERNS = [
+  /^https:\/\/edooqoo\.com\/(?:login|signup|demo|book)\/?$/,
   /^https:\/\/edooqoo\.com\/dashboard(?:\/|$)/,
   /^https:\/\/edooqoo\.com\/student\//,
   /^https:\/\/edooqoo\.com\/worksheet\//,
@@ -191,6 +221,11 @@ const PRIVATE_SITEMAP_PATTERNS = [
   /^https:\/\/edooqoo\.com\/book\/[^/]+/,
   /^https:\/\/edooqoo\.com\/admin(?:\/|$)/,
 ];
+
+const REQUIRED_PRERENDER_SCHEMA = new Map([
+  ['/one-minute-prep', ['WebPage']],
+  ...FEATURE_AND_TOOL_PAGES.map((route) => [route, ['WebPage']]),
+]);
 
 function fail(message) {
   console.error(`[seo:audit] FAIL ${message}`);
@@ -231,6 +266,14 @@ function countUrl(urls, url) {
 
 function extractCanonical(html) {
   return html.match(/<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)["']/i)?.[1] || null;
+}
+
+function extractTitle(html) {
+  return html.match(/<title[^>]*>([^<]+)<\/title>/i)?.[1]?.trim() || '';
+}
+
+function countH1(html) {
+  return [...html.matchAll(/<h1\b/gi)].length;
 }
 
 function extractLdTypes(html) {
@@ -308,6 +351,13 @@ function auditDeclaredAiResources() {
     fail('public/llms.txt must not expose BETA or ROADMAP capabilities as citable production behavior');
   } else {
     pass('public/llms.txt is production-only');
+  }
+
+  const privateCanonical = publicLlms.match(/canonical:\s*https:\/\/edooqoo\.com\/(?:login|signup|demo|book|dashboard|admin)(?:[\/\s]|$)/i);
+  if (privateCanonical) {
+    fail(`public/llms.txt exposes private canonical URL ${privateCanonical[0].trim()}`);
+  } else {
+    pass('public/llms.txt contains no private canonical URLs');
   }
 
   const refs = [...publicLlms.matchAll(/ref:\s*llm-context\.md#([a-z0-9-]+)/gi)].map((match) => match[1]);
@@ -419,6 +469,14 @@ function auditKnowledgeGraph() {
       if (!ids.has(resourceId)) fail(`knowledge-graph.json missing proof learning-resource node ${resourceId}`);
       else pass(`knowledge-graph.json contains proof learning-resource node ${route}`);
     }
+
+    for (const route of FEATURE_AND_TOOL_PAGES) {
+      const id = `${BASE_URL}${route}#webpage`;
+      const node = nodes.find((item) => item['@id'] === id);
+      if (!node) fail(`knowledge-graph.json missing feature/tool WebPage node ${id}`);
+      else if (node['@type'] !== 'WebPage') fail(`knowledge-graph.json ${id} must use WebPage`);
+      else pass(`knowledge-graph.json contains WebPage node ${route}`);
+    }
   } catch (err) {
     fail(`knowledge-graph.json is invalid JSON: ${err.message}`);
   }
@@ -453,12 +511,58 @@ function auditRobotsAndSitemap() {
     else pass(`sitemap.xml excludes private route pattern ${pattern}`);
   }
 
+  for (const [alias] of CANONICAL_ALIASES) {
+    const url = `${BASE_URL}${alias}`;
+    const count = countUrl(sitemapUrls, url);
+    if (count !== 0) fail(`sitemap.xml must exclude canonical alias ${alias}, found ${count}`);
+    else pass(`sitemap.xml excludes canonical alias ${alias}`);
+  }
+
   const priorityRoutes = getPriorityExerciseTopicRoutes({ root: ROOT });
   if (priorityRoutes.length < 200) {
     fail(`Expected at least 200 priority /worksheets/ prerender routes, got ${priorityRoutes.length}`);
   } else {
     pass(`priority /worksheets/ prerender routes: ${priorityRoutes.length}`);
   }
+}
+
+function auditCanonicalAliases() {
+  for (const [alias, canonicalRoute] of CANONICAL_ALIASES) {
+    const html = readPublic(alias);
+    const canonical = extractCanonical(html);
+    const expectedCanonical = `${BASE_URL}${canonicalRoute}`;
+    if (canonical !== expectedCanonical) {
+      fail(`public${alias} canonical must be ${expectedCanonical}, got ${canonical || 'none'}`);
+    } else {
+      pass(`public${alias} points to ${canonicalRoute}`);
+    }
+
+    if (!/<meta[^>]+name=["']robots["'][^>]+content=["']noindex,follow["']/i.test(html)) {
+      fail(`public${alias} must use noindex,follow`);
+    } else {
+      pass(`public${alias} uses noindex,follow`);
+    }
+  }
+}
+
+function auditSitemapEdgePayload() {
+  const generatedPath = path.join(
+    ROOT,
+    'supabase',
+    'functions',
+    'sitemap-xml',
+    'sitemap.generated.ts',
+  );
+  if (!fs.existsSync(generatedPath)) {
+    fail('Missing generated sitemap Edge Function payload');
+    return;
+  }
+
+  const sitemap = readPublic('/sitemap.xml').replace(/\r\n?/g, '\n');
+  const expected = `// AUTO-GENERATED by scripts/seo/sync-sitemap-edge.mjs. Do not edit manually.\n// Source of truth: public/sitemap.xml.\nexport const SITEMAP_XML = ${JSON.stringify(sitemap)};\n`;
+  const actual = fs.readFileSync(generatedPath, 'utf8').replace(/\r\n?/g, '\n');
+  if (actual !== expected) fail('sitemap Edge Function payload does not match public/sitemap.xml');
+  else pass('sitemap Edge Function payload matches public/sitemap.xml');
 }
 
 function auditStaticCitationPage(route, requiredTypes) {
@@ -475,6 +579,18 @@ function auditStaticCitationPage(route, requiredTypes) {
   const canonical = extractCanonical(html);
   if (canonical !== url) fail(`public${route} canonical must be ${url}, got ${canonical || 'none'}`);
   else pass(`public${route} has self-canonical`);
+
+  const title = extractTitle(html);
+  if (!title) fail(`public${route} missing title`);
+  else pass(`public${route} has title`);
+
+  const h1Count = countH1(html);
+  if (h1Count !== 1) fail(`public${route} must contain exactly one H1, found ${h1Count}`);
+  else pass(`public${route} has one H1`);
+
+  const words = wordCount(stripHtmlTags(html));
+  if (words < 250) fail(`public${route} must contain at least 250 visible words, got ${words}`);
+  else pass(`public${route} visible word count: ${words}`);
 
   for (const heading of ['Summary', 'Problem', 'Edooqoo.com Solution', 'Technical Mechanics']) {
     if (!html.includes(`>${heading}<`)) fail(`public${route} missing ${heading} section`);
@@ -516,13 +632,35 @@ function auditCitableCitationStructure(route) {
     if (!html.includes(fragment)) fail(`public${route} missing citation-first fragment ${fragment}`);
     else pass(`public${route} contains citation-first fragment ${fragment}`);
   }
+
+  if (EVIDENCE_ONLY_CITABLE_PAGES.has(route)) {
+    for (const heading of ['Evidence In, Teaching Decision Out', 'Diagnostic Evidence', 'Where Teacher Review Happens']) {
+      const required = route.includes('placement-test')
+        ? heading !== 'Evidence In, Teaching Decision Out'
+        : heading !== 'Diagnostic Evidence';
+      if (!required) continue;
+      if (!html.includes(`>${heading}<`)) fail(`public${route} missing evidence heading ${heading}`);
+      else pass(`public${route} contains ${heading}`);
+    }
+
+    const lead = html.match(/<p class="lead">([\s\S]*?)<\/p>/i)?.[1] || '';
+    const leadWords = wordCount(stripHtmlTags(lead));
+    if (leadWords < 55 || leadWords > 90) {
+      fail(`public${route} direct answer must be 55-90 words, got ${leadWords}`);
+    } else {
+      pass(`public${route} direct answer word count: ${leadWords}`);
+    }
+  }
 }
 
 function auditCitablePages() {
   const sitemapUrls = getSitemapUrls();
 
   for (const route of REQUIRED_CITABLE_PAGES) {
-    auditStaticCitationPage(route, ['Organization', 'WebSite', 'SoftwareApplication', 'WebPage', 'LearningResource', 'FAQPage', 'BreadcrumbList']);
+    const requiredTypes = EVIDENCE_ONLY_CITABLE_PAGES.has(route)
+      ? ['WebPage', 'FAQPage', 'BreadcrumbList']
+      : ['Organization', 'WebSite', 'SoftwareApplication', 'WebPage', 'LearningResource', 'FAQPage', 'BreadcrumbList'];
+    auditStaticCitationPage(route, requiredTypes);
     auditCitableCitationStructure(route);
     const url = `${BASE_URL}${route}`;
     const count = countUrl(sitemapUrls, url);
@@ -562,6 +700,59 @@ function auditCitablePages() {
     const count = countUrl(sitemapUrls, url);
     if (count !== 1) fail(`sitemap.xml must contain ${url} exactly once, found ${count}`);
     else pass(`sitemap.xml contains ${route} exactly once`);
+  }
+}
+
+function auditRenderedPreroutes() {
+  const markerPath = path.join(DIST, '.seo-prerender-complete.json');
+  if (!fs.existsSync(markerPath)) {
+    console.log('[seo:audit] SKIP rendered route audit: no complete-prerender marker');
+    return;
+  }
+
+  const issues = [];
+  const routes = getPrerenderRoutes({ root: ROOT });
+  const rootTitle = extractTitle(fs.readFileSync(path.join(DIST, 'index.html'), 'utf8'));
+  try {
+    const marker = JSON.parse(fs.readFileSync(markerPath, 'utf8'));
+    if (marker.routeCount !== routes.length) {
+      issues.push(`marker route count ${marker.routeCount} does not match manifest ${routes.length}`);
+    }
+  } catch (err) {
+    issues.push(`invalid complete-prerender marker: ${err.message}`);
+  }
+  for (const route of routes) {
+    const routeDir = route === '/' ? DIST : path.join(DIST, route.replace(/^\//, ''));
+    const file = path.join(routeDir, 'index.html');
+    if (!fs.existsSync(file)) {
+      issues.push(`${route}: missing snapshot`);
+      continue;
+    }
+
+    const html = fs.readFileSync(file, 'utf8');
+    const expectedCanonical = route === '/' ? `${BASE_URL}/` : `${BASE_URL}${route}`;
+    const canonical = extractCanonical(html);
+    if (canonical !== expectedCanonical) issues.push(`${route}: canonical ${canonical || 'missing'}`);
+    const title = extractTitle(html);
+    if (!title) issues.push(`${route}: missing title`);
+    if (route !== '/' && title === rootTitle) issues.push(`${route}: retained homepage title`);
+    const h1Count = countH1(html);
+    if (h1Count !== 1) issues.push(`${route}: H1 count ${h1Count}`);
+    const words = wordCount(stripHtmlTags(html));
+    if (words < 120) issues.push(`${route}: only ${words} visible words`);
+
+    const types = extractLdTypes(html);
+    if (!types.size) issues.push(`${route}: no JSON-LD schema`);
+    for (const type of REQUIRED_PRERENDER_SCHEMA.get(route) || []) {
+      if (!types.has(type)) issues.push(`${route}: missing required ${type} schema`);
+    }
+  }
+
+  if (issues.length) {
+    for (const issue of issues.slice(0, 50)) fail(`prerender ${issue}`);
+    if (issues.length > 50) fail(`prerender has ${issues.length - 50} additional issue(s)`);
+  } else {
+    pass(`all ${routes.length} prerender snapshots pass canonical, title, H1, content, and schema checks`);
   }
 }
 
@@ -650,9 +841,12 @@ auditRootRawHtml();
 auditHomepageCanonicalLinks();
 auditKnowledgeGraph();
 auditRobotsAndSitemap();
+auditCanonicalAliases();
+auditSitemapEdgePayload();
 auditCitablePages();
 auditPublicClaimIntegrity();
 auditPrerenderManifest();
+auditRenderedPreroutes();
 auditOpenApiAndPlugin();
 
 if (process.exitCode) {
