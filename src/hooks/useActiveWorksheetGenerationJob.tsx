@@ -16,9 +16,11 @@ import {
   WorksheetGenerationJob,
   completeGenerationJob,
   getActiveGenerationJob,
+  getActiveGenerationJobs,
   markSuggestionUsed,
   markTokenConsumed,
   subscribeToGenerationJob,
+  subscribeToGenerationJobs,
 } from '@/lib/worksheet/generationJobRegistry';
 import { clearAutoGenerateFlags, markPersistentAutoGenerateIntentStatus } from '@/lib/worksheet/autoGenerateBootstrap';
 import { devLog, devWarn } from '@/utils/logger';
@@ -83,7 +85,7 @@ async function applyCompletionSideEffects(job: WorksheetGenerationJob, worksheet
       if (error) {
         devWarn('[useActiveWorksheetGenerationJob] failed to mark suggestion used', error);
       } else {
-        markSuggestionUsed();
+        markSuggestionUsed(job.jobId);
         window.dispatchEvent(new CustomEvent('suggestionMarkedUsed', {
           detail: { suggestionId: job.suggestionId, worksheetId },
         }));
@@ -103,7 +105,7 @@ async function applyCompletionSideEffects(job: WorksheetGenerationJob, worksheet
       if (error) {
         devWarn('[useActiveWorksheetGenerationJob] consume_token error', error);
       } else if (data === true) {
-        markTokenConsumed();
+        markTokenConsumed(job.jobId);
       }
     } catch (e) {
       devWarn('[useActiveWorksheetGenerationJob] consume_token threw', e);
@@ -143,7 +145,7 @@ export function useActiveWorksheetGenerationJob() {
       const wsId = await locateBackendWorksheet(job);
       if (cancelled || !wsId) return;
       devLog('[useActiveWorksheetGenerationJob] detected worksheet for active job', { wsId, jobId: job.jobId });
-      const next = completeGenerationJob(wsId);
+      const next = completeGenerationJob(job.jobId, wsId);
       if (next) {
         await applyCompletionSideEffects(next, wsId, user?.id ?? null);
       }
@@ -158,4 +160,52 @@ export function useActiveWorksheetGenerationJob() {
   }, [job?.jobId, job?.status, user?.id]);
 
   return job;
+}
+
+/**
+ * v6.9.58 — Multi-job variant. Returns ALL active generation jobs (running +
+ * recently completed/failed) and runs per-job polling so each can finish its
+ * own side effects independently. Used by ActiveGenerationMiniPanel.
+ */
+export function useActiveWorksheetGenerationJobs(): WorksheetGenerationJob[] {
+  const [jobs, setJobs] = useState<WorksheetGenerationJob[]>(() => getActiveGenerationJobs());
+  const { user } = useAuthFlow();
+
+  useEffect(() => {
+    setJobs(getActiveGenerationJobs());
+    const unsub = subscribeToGenerationJobs(setJobs);
+    return () => unsub();
+  }, []);
+
+  // Per-job polling for any running jobs.
+  const runningIds = jobs.filter((j) => j.status === 'running').map((j) => j.jobId).join(',');
+  useEffect(() => {
+    if (!runningIds) return;
+    const ids = runningIds.split(',').filter(Boolean);
+    let cancelled = false;
+    const handles: number[] = [];
+    for (const id of ids) {
+      const job = jobs.find((j) => j.jobId === id);
+      if (!job) continue;
+      const tick = async () => {
+        if (cancelled) return;
+        const wsId = await locateBackendWorksheet(job);
+        if (cancelled || !wsId) return;
+        devLog('[useActiveWorksheetGenerationJobs] detected worksheet', { wsId, jobId: job.jobId });
+        const next = completeGenerationJob(job.jobId, wsId);
+        if (next) {
+          await applyCompletionSideEffects(next, wsId, user?.id ?? null);
+        }
+      };
+      void tick();
+      handles.push(window.setInterval(tick, POLL_INTERVAL_MS));
+    }
+    return () => {
+      cancelled = true;
+      for (const h of handles) window.clearInterval(h);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [runningIds, user?.id]);
+
+  return jobs;
 }

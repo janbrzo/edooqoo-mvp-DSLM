@@ -1,46 +1,52 @@
 /**
  * v6.9.53 — Global mini panel that keeps the worksheet generation visible
- * after the user navigates away from `/` or refreshes the page mid-generation.
- *
- *  - `running`:   non-closable status pill ("generation still in progress")
- *  - `completed`: CTA to open the generated worksheet + closable X
- *  - `failed`:    error message + retry/close
- *
- * Mounted once in `App.tsx` so it is visible across every route. Hides itself
- * on `/worksheet/:id` if that route already shows the generated worksheet,
- * and on `/` while the in-page `GeneratingModal` is on screen.
+ *            after navigation/refresh mid-generation.
+ * v6.9.58 — Multi-job stack. One floating card per concurrent generation,
+ *            stacked bottom-right. A given job is hidden only while the
+ *            in-page GeneratingModal is mounted for THAT exact jobId.
  */
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Loader2, Sparkles, X, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import {
+  WorksheetGenerationJob,
   clearGenerationJob,
-  getActiveGenerationJob,
 } from '@/lib/worksheet/generationJobRegistry';
-import { useActiveWorksheetGenerationJob } from '@/hooks/useActiveWorksheetGenerationJob';
+import { useActiveWorksheetGenerationJobs } from '@/hooks/useActiveWorksheetGenerationJob';
+
+const PANEL_HEIGHT_PX = 96; // approximate; stack offset between items
+const PANEL_GAP_PX = 8;
 
 export default function ActiveGenerationMiniPanel() {
-  const job = useActiveWorksheetGenerationJob();
+  const jobs = useActiveWorksheetGenerationJobs();
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Re-evaluate from storage on every route change so a navigation right after
-  // completion still picks up the latest status.
+  // Track which jobIds are currently shown by an in-page modal.
+  const [mountedJobIds, setMountedJobIds] = useState<Set<string>>(new Set());
   useEffect(() => {
-    // touch storage; the hook's subscribe handler updates state.
-    getActiveGenerationJob();
-  }, [location.pathname]);
-
-  // v6.9.57 — Track whether the in-page GeneratingModal is currently mounted.
-  // The old gate hid this panel on `/` by path, which (a) duplicated UI when
-  // the modal was rehydrated after refresh and (b) hid the panel on `/` even
-  // when the modal was NOT on screen. Event-based gating fixes both.
-  const [modalMounted, setModalMounted] = useState(false);
-  useEffect(() => {
-    const onMount = () => setModalMounted(true);
-    const onUnmount = () => setModalMounted(false);
+    const onMount = (e: Event) => {
+      const id = (e as CustomEvent<{ jobId?: string }>).detail?.jobId;
+      if (!id) return;
+      setMountedJobIds((prev) => {
+        if (prev.has(id)) return prev;
+        const next = new Set(prev);
+        next.add(id);
+        return next;
+      });
+    };
+    const onUnmount = (e: Event) => {
+      const id = (e as CustomEvent<{ jobId?: string }>).detail?.jobId;
+      if (!id) return;
+      setMountedJobIds((prev) => {
+        if (!prev.has(id)) return prev;
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
+    };
     window.addEventListener('generation-modal:mount', onMount);
     window.addEventListener('generation-modal:unmount', onUnmount);
     return () => {
@@ -49,47 +55,67 @@ export default function ActiveGenerationMiniPanel() {
     };
   }, []);
 
-  const visible = useMemo(() => {
-    if (!job) return false;
-    // While the actual GeneratingModal is mounted anywhere, do not duplicate.
-    if (job.status === 'running' && modalMounted) return false;
-    // On the worksheet page for this exact worksheet, the page itself is the CTA.
-    if (
-      job.status === 'completed'
-      && job.worksheetId
-      && location.pathname === `/worksheet/${job.worksheetId}`
-    ) {
-      return false;
-    }
-    return true;
-  }, [job, location.pathname, modalMounted]);
+  const visibleJobs = jobs
+    .filter((job) => {
+      if (job.status === 'running' && mountedJobIds.has(job.jobId)) return false;
+      if (
+        job.status === 'completed'
+        && job.worksheetId
+        && location.pathname === `/worksheet/${job.worksheetId}`
+      ) return false;
+      return true;
+    })
+    .sort((a, b) => a.startedAt - b.startedAt);
 
-  if (!job || !visible) return null;
+  if (visibleJobs.length === 0) return null;
 
+  return (
+    <>
+      {visibleJobs.map((job, idx) => (
+        <MiniPanelCard
+          key={job.jobId}
+          job={job}
+          stackIndex={idx}
+          onOpen={() => {
+            if (job.worksheetId) {
+              navigate(`/worksheet/${job.worksheetId}`);
+              clearGenerationJob(job.jobId);
+            }
+          }}
+          onDismiss={() => clearGenerationJob(job.jobId)}
+        />
+      ))}
+    </>
+  );
+}
+
+function MiniPanelCard({
+  job,
+  stackIndex,
+  onOpen,
+  onDismiss,
+}: {
+  job: WorksheetGenerationJob;
+  stackIndex: number;
+  onOpen: () => void;
+  onDismiss: () => void;
+}) {
   const isRunning = job.status === 'running';
   const isCompleted = job.status === 'completed';
   const isFailed = job.status === 'failed';
-
-  const handleOpen = () => {
-    if (job.worksheetId) {
-      navigate(`/worksheet/${job.worksheetId}`);
-      clearGenerationJob();
-    }
-  };
-
-  const handleDismiss = () => {
-    clearGenerationJob();
-  };
+  const bottom = 16 + stackIndex * (PANEL_HEIGHT_PX + PANEL_GAP_PX);
+  const studentName = job.formMeta?.studentName;
 
   return (
     <div
       className={cn(
-        'fixed bottom-4 right-4 z-[80] w-[300px] sm:w-[340px] rounded-xl border shadow-lg p-3',
+        'fixed right-4 z-[80] w-[300px] sm:w-[340px] rounded-xl border shadow-lg p-3',
         'bg-background/95 backdrop-blur-md',
         isRunning && 'border-primary/40',
         isCompleted && 'border-emerald-400/60',
         isFailed && 'border-destructive/50',
       )}
+      style={{ bottom }}
       role="status"
       aria-live="polite"
     >
@@ -106,7 +132,8 @@ export default function ActiveGenerationMiniPanel() {
                 Worksheet generation in progress
               </p>
               <p className="text-xs text-muted-foreground mt-0.5 leading-snug">
-                {job.topic ? `“${job.topic}” — ` : ''}You can refresh or move around, generation keeps running in the background.
+                {studentName ? <>For <span className="font-medium text-foreground">{studentName}</span> · </> : null}
+                {job.topic ? `“${job.topic}” — ` : ''}keeps running in the background.
               </p>
             </>
           )}
@@ -116,10 +143,11 @@ export default function ActiveGenerationMiniPanel() {
                 Your worksheet is ready
               </p>
               <p className="text-xs text-muted-foreground mt-0.5 leading-snug">
+                {studentName ? <>For <span className="font-medium text-foreground">{studentName}</span>. </> : ''}
                 {job.topic ? `“${job.topic}”` : 'Worksheet generated successfully.'}
               </p>
               <div className="mt-2 flex gap-2">
-                <Button size="sm" className="h-8 text-xs" onClick={handleOpen}>
+                <Button size="sm" className="h-8 text-xs" onClick={onOpen}>
                   Open generated worksheet
                 </Button>
               </div>
@@ -139,7 +167,7 @@ export default function ActiveGenerationMiniPanel() {
         {(isCompleted || isFailed) && (
           <button
             type="button"
-            onClick={handleDismiss}
+            onClick={onDismiss}
             aria-label="Dismiss"
             className="text-muted-foreground hover:text-foreground transition-colors"
           >

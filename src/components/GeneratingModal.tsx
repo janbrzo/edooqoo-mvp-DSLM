@@ -32,6 +32,23 @@ interface GeneratingModalProps {
    * own the original startedAt.
    */
   isResumed?: boolean;
+  /**
+   * v6.9.58 — epoch ms when generation actually started. Used to seed
+   * elapsed time + progress bar after a refresh so the user sees live
+   * values instead of 0.
+   */
+  startedAt?: number;
+  /**
+   * v6.9.58 — student id used to deep-link the student name in the
+   * "For {student}" header to their profile in a new tab.
+   */
+  studentId?: string | null;
+  /**
+   * v6.9.58 — jobId of the underlying generation job. Dispatched in the
+   * `generation-modal:mount` / `:unmount` events so the global mini panel
+   * can hide ONLY the job represented by this modal (not all jobs).
+   */
+  jobId?: string | null;
 }
 
 // Section completion status
@@ -146,9 +163,15 @@ export default function GeneratingModal({
   studentName,
   studentEmail,
   isResumed = false,
+  startedAt,
+  studentId,
+  jobId,
 }: GeneratingModalProps) {
+  // v6.9.58 — seed live values from startedAt so a refresh resumes the bar
+  // and timer instead of restarting them from zero.
+  const initialElapsed = startedAt ? Math.max(0, Math.floor((Date.now() - startedAt) / 1000)) : 0;
   const [progress, setProgress] = useState(0);
-  const [elapsedTime, setElapsedTime] = useState(0);
+  const [elapsedTime, setElapsedTime] = useState(initialElapsed);
   const [sections, setSections] = useState<SectionStatus[]>([]);
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
   const [isCarouselPaused, setIsCarouselPaused] = useState(false);
@@ -158,20 +181,20 @@ export default function GeneratingModal({
   const expectedSeconds = calculateExpectedTime(requiresAudio, requiresImage, hasGrammar, exerciseCount);
 
   // v6.9.57 — Notify global listeners (mini panel) that the in-page modal is
-  // currently mounted so they can avoid duplicating UI. Fires only while the
-  // modal is actually rendered (isOpen).
+  // currently mounted so they can avoid duplicating UI. v6.9.58: include
+  // jobId in the event detail so the panel hides ONLY the matching job.
   useEffect(() => {
     if (!isOpen) return;
     if (typeof window === 'undefined') return;
     try {
-      window.dispatchEvent(new CustomEvent('generation-modal:mount'));
+      window.dispatchEvent(new CustomEvent('generation-modal:mount', { detail: { jobId: jobId ?? null } }));
     } catch { /* ignore */ }
     return () => {
       try {
-        window.dispatchEvent(new CustomEvent('generation-modal:unmount'));
+        window.dispatchEvent(new CustomEvent('generation-modal:unmount', { detail: { jobId: jobId ?? null } }));
       } catch { /* ignore */ }
     };
-  }, [isOpen]);
+  }, [isOpen, jobId]);
 
   useEffect(() => {
     if (!isOpen) {
@@ -186,18 +209,16 @@ export default function GeneratingModal({
     // Initialize sections with grammar condition and selected exercises
     setSections(getGenerationSections(requiresAudio, requiresImage, hasGrammar, selectedExercises));
 
-    // PROBLEM 3: Use calculated expected time for progress bar
-    const totalDuration = expectedSeconds;
-    const progressIncrement = 100 / totalDuration;
+    // v6.9.58 — seed both timer and progress from startedAt (if known) so a
+    // refresh-resumed modal continues from realistic values.
+    const seedElapsed = startedAt ? Math.max(0, Math.floor((Date.now() - startedAt) / 1000)) : 0;
+    setElapsedTime(seedElapsed);
+    setProgress(Math.min(99, (seedElapsed / Math.max(1, expectedSeconds)) * 100));
 
+    const progressIncrement = 100 / Math.max(1, expectedSeconds);
     const progressInterval = setInterval(() => {
-      setProgress((prev) => {
-        const newProgress = prev + progressIncrement;
-        return Math.min(newProgress, 99);
-      });
+      setProgress((prev) => Math.min(prev + progressIncrement, 99));
     }, 1000);
-
-    // Timer - counts real time
     const timerInterval = setInterval(() => {
       setElapsedTime((prev) => prev + 1);
     }, 1000);
@@ -206,7 +227,7 @@ export default function GeneratingModal({
       clearInterval(progressInterval);
       clearInterval(timerInterval);
     };
-  }, [isOpen, requiresAudio, requiresImage, hasGrammar, selectedExercises, expectedSeconds]);
+  }, [isOpen, requiresAudio, requiresImage, hasGrammar, selectedExercises, expectedSeconds, startedAt]);
 
   useEffect(() => {
     if (!isOpen || errorMessage || isCarouselPaused) return;
@@ -383,7 +404,19 @@ export default function GeneratingModal({
           </h2>
           {studentName ? (
             <p className="text-xs lg:text-sm text-muted-foreground">
-              For <span className="font-medium text-foreground">{studentName}</span>
+              For{' '}
+              {studentId ? (
+                <a
+                  href={`/student/${studentId}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-medium text-foreground underline-offset-2 hover:underline"
+                >
+                  {studentName}
+                </a>
+              ) : (
+                <span className="font-medium text-foreground">{studentName}</span>
+              )}
               <span className="mx-1.5 text-muted-foreground/60">·</span>
               <span className="font-normal text-foreground/80 break-all">
                 {studentEmail && studentEmail.trim().length > 0
@@ -405,18 +438,33 @@ export default function GeneratingModal({
           <span>{Math.round(progress)}%</span>
         </div>
 
-        {isResumed ? (
-          <div className="rounded-md border border-amber-300/60 bg-amber-50/80 px-3 py-2 text-xs text-amber-900">
-            <strong>Generation resumed.</strong> The page was refreshed but
-            generation kept running in the background. Your worksheet will
-            open automatically when it's ready — no token is charged unless
-            it completes.
-          </div>
-        ) : (
-          <p className="text-center text-[11px] text-muted-foreground -mt-0.5">
-            Refreshing this page won't stop generation — you can come back any time.
-          </p>
-        )}
+        <div
+          className={cn(
+            'rounded-md border px-3 py-2 text-xs flex items-center justify-between gap-3',
+            isResumed
+              ? 'border-amber-300/60 bg-amber-50/80 text-amber-900'
+              : 'border-muted bg-muted/40 text-muted-foreground',
+          )}
+        >
+          <span className="leading-snug">
+            {isResumed && <strong className="mr-1">Generation resumed.</strong>}
+            Generation runs in the background — keep prepping for
+            {studentName ? (
+              <>
+                {' '}
+                <span className="font-medium text-foreground">{studentName}</span>
+              </>
+            ) : (
+              ' your students'
+            )}
+            {' '}or another student while you wait.
+          </span>
+          <Button asChild size="sm" variant="outline" className="h-7 text-[11px] shrink-0">
+            <a href="/dashboard" target="_blank" rel="noopener noreferrer">
+              Open dashboard ↗
+            </a>
+          </Button>
+        </div>
 
         <div className="space-y-1 bg-muted/30 p-2 rounded-lg max-h-[44vh] lg:max-h-[46vh] overflow-y-auto">
           {sections.map((section, index) => (
