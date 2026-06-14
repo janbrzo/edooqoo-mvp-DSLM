@@ -438,6 +438,9 @@ const Index = () => {
         <GeneratingModal 
           isOpen={isGenerating || isResumedGeneration} 
           isResumed={isResumedGeneration}
+          startedAt={activeJob?.startedAt}
+          jobId={activeJob?.jobId ?? null}
+          studentId={isResumedGeneration ? (activeJob?.studentId ?? null) : (worksheetState.inputParams?.studentId ?? selectedStudentId ?? null)}
           requiresAudio={isResumedGeneration ? !!activeJob?.formMeta?.requiresAudio : !!worksheetState.inputParams?.requiresAudio}
           requiresImage={isResumedGeneration ? !!activeJob?.formMeta?.requiresImage : !!worksheetState.inputParams?.requiresImage}
           hasGrammar={isResumedGeneration ? !!activeJob?.formMeta?.hasGrammar : !!worksheetState.inputParams?.hasGrammar}
@@ -564,6 +567,9 @@ const Index = () => {
       <GeneratingModal 
         isOpen={isGenerating || isResumedGeneration} 
         isResumed={isResumedGeneration}
+        startedAt={activeJob?.startedAt}
+        jobId={activeJob?.jobId ?? null}
+        studentId={isResumedGeneration ? (activeJob?.studentId ?? null) : (worksheetState.inputParams?.studentId ?? selectedStudentId ?? null)}
         requiresAudio={isResumedGeneration ? !!activeJob?.formMeta?.requiresAudio : !!worksheetState.inputParams?.requiresAudio}
         requiresImage={isResumedGeneration ? !!activeJob?.formMeta?.requiresImage : !!worksheetState.inputParams?.requiresImage}
         hasGrammar={isResumedGeneration ? !!activeJob?.formMeta?.hasGrammar : !!worksheetState.inputParams?.hasGrammar}
