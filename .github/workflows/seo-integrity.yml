@@ -22,11 +22,17 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Generate source-of-truth manifest
+        run: npm run docs:audit-source
+
       - name: Generate citable pages
         run: node scripts/seo/generate-citable-pages.mjs
 
       - name: Build blog index and sitemap
         run: node scripts/seo/build-blog-index.mjs
+
+      - name: Sync sitemap Edge Function payload
+        run: npm run seo:sync-sitemap-edge
 
       - name: Generate AI discovery resources
         run: node scripts/seo/generate-ai-resources.mjs
@@ -40,6 +46,6 @@ jobs:
       - name: TypeScript check
         run: npx tsc --noEmit -p tsconfig.app.json
 
-      - name: Production build
-        run: npm run build
+      - name: Full SEO production build
+        run: npm run build:seo
 

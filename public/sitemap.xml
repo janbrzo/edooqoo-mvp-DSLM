@@ -10,11 +10,8 @@
   <url><loc>https://edooqoo.com/blog</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edooqoo.com/glossary</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
   <url><loc>https://edooqoo.com/prompts</loc><changefreq>weekly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/demo</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/gallery</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
-  <url><loc>https://edooqoo.com/signup</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://edooqoo.com/login</loc><changefreq>monthly</changefreq><priority>0.5</priority></url>
-  <url><loc>https://edooqoo.com/privacy-policy</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
+<url><loc>https://edooqoo.com/gallery</loc><changefreq>daily</changefreq><priority>0.8</priority></url>
+<url><loc>https://edooqoo.com/privacy-policy</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
   <url><loc>https://edooqoo.com/terms</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
   <url><loc>https://edooqoo.com/cookie-policy</loc><changefreq>yearly</changefreq><priority>0.3</priority></url>
   <url><loc>https://edooqoo.com/features/dslm</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
@@ -24,8 +21,7 @@
   <url><loc>https://edooqoo.com/features/live-sessions</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://edooqoo.com/features/placement-test</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://edooqoo.com/features/student-hub</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://edooqoo.com/book</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://edooqoo.com/esl-worksheets</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
+<url><loc>https://edooqoo.com/esl-worksheets</loc><changefreq>weekly</changefreq><priority>0.9</priority></url>
   <url><loc>https://edooqoo.com/for-english-tutors</loc><changefreq>monthly</changefreq><priority>0.8</priority></url>
   <url><loc>https://edooqoo.com/resources/esl-class-toolkit</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edooqoo.com/blog/english-games-for-learners</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
@@ -1753,9 +1749,6 @@
 
 
 
-
-
-
   <url><loc>https://edooqoo.com/blog/ai-worksheet-generator-mechanics-for-esl-teachers.html</loc><lastmod>2026-05-24</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edooqoo.com/blog/business-english-material-generation-workflow.html</loc><lastmod>2026-05-24</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edooqoo.com/blog/cefr-aligned-worksheet-generation-workflow.html</loc><lastmod>2026-05-24</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
@@ -2001,6 +1994,7 @@
   <url><loc>https://edooqoo.com/edooqoo-vs-quizlet.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edooqoo.com/edooqoo-vs-twee.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edooqoo.com/edooqoo-vs-wordwall.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/english-placement-test-for-private-tutors.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edooqoo.com/english-tutor-calendar-booking-software.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edooqoo.com/english-worksheets-for-adults.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edooqoo.com/english-worksheets-for-corporate-training.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
@@ -2011,15 +2005,12 @@
   <url><loc>https://edooqoo.com/esl-homework-grading-tool.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edooqoo.com/esl-student-progress-tracking-tool.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edooqoo.com/exam-preparation-worksheets-cambridge-ielts.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/exercise-types.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edooqoo.com/fill-in-the-blanks-worksheet-generator.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edooqoo.com/food-and-cooking-english-worksheets.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edooqoo.com/future-tenses-worksheets-english.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edooqoo.com/gerunds-infinitives-worksheets.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/glossary.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edooqoo.com/grammar-worksheet-generator.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edooqoo.com/health-and-body-english-worksheets.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/how-it-works.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edooqoo.com/how-to-create-english-worksheets-with-ai.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edooqoo.com/how-to-save-time-as-english-teacher.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edooqoo.com/job-interview-english-worksheets.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
@@ -2044,7 +2035,6 @@
   <url><loc>https://edooqoo.com/reading-comprehension-worksheet-maker.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edooqoo.com/relative-clauses-worksheets.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edooqoo.com/reported-speech-worksheets.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/resources.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edooqoo.com/spaced-repetition-flashcards-esl.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edooqoo.com/speaking-activities-esl-worksheets.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edooqoo.com/student-hub-for-english-tutors.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>

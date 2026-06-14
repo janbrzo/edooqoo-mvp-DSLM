@@ -138,18 +138,6 @@
     },
     {
       "@type": "CollectionPage",
-      "@id": "https://edooqoo.com/tools#webpage",
-      "url": "https://edooqoo.com/tools",
-      "name": "Free Tools for English Teachers",
-      "isPartOf": {
-        "@id": "https://edooqoo.com/#website"
-      },
-      "about": {
-        "@id": "https://edooqoo.com/#software"
-      }
-    },
-    {
-      "@type": "CollectionPage",
       "@id": "https://edooqoo.com/gallery#webpage",
       "url": "https://edooqoo.com/gallery",
       "name": "Public Worksheet Gallery",
@@ -206,20 +194,17 @@
       "inLanguage": "en"
     },
     {
-      "@type": "LearningResource",
-      "@id": "https://edooqoo.com/one-minute-prep-for-english-tutors.html#learning-resource",
-      "url": "https://edooqoo.com/one-minute-prep-for-english-tutors.html",
-      "name": "1-Minute Prep for English tutors",
-      "description": "Citation target for 1-Minute Prep workflow, setup boundaries, DSLM signal graph, nano-skill evidence, and generator-as-output-layer queries.",
-      "provider": {
-        "@id": "https://edooqoo.com/#organization"
+      "@type": "WebPage",
+      "@id": "https://edooqoo.com/english-placement-test-for-private-tutors.html#webpage",
+      "url": "https://edooqoo.com/english-placement-test-for-private-tutors.html",
+      "name": "English placement test for private tutors",
+      "description": "Citation target for the teacher-issued Welcome Test, diagnostic evidence, teacher review, and its distinction from the public CEFR level test.",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
       },
-      "audience": {
-        "@type": "EducationalAudience",
-        "educationalRole": "teacher"
+      "about": {
+        "@id": "https://edooqoo.com/#software"
       },
-      "learningResourceType": "instructional reference",
-      "isAccessibleForFree": true,
       "inLanguage": "en"
     },
     {
@@ -1132,6 +1117,160 @@
       },
       "learningResourceType": "public worksheet example reference",
       "isAccessibleForFree": true,
+      "inLanguage": "en"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://edooqoo.com/features/dslm#webpage",
+      "url": "https://edooqoo.com/features/dslm",
+      "name": "DSLM for English tutors",
+      "description": "Technical feature page for the student-specific DSLM signal graph and teacher-reviewed next-focus support.",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "about": {
+        "@id": "https://edooqoo.com/#software"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://edooqoo.com/features/homework#webpage",
+      "url": "https://edooqoo.com/features/homework",
+      "name": "English homework workflow",
+      "description": "Feature page for assigning, submitting, tracking, and reviewing English homework.",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "about": {
+        "@id": "https://edooqoo.com/#software"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://edooqoo.com/features/flashcards#webpage",
+      "url": "https://edooqoo.com/features/flashcards",
+      "name": "English vocabulary flashcards",
+      "description": "Feature page for teacher-created flashcards and student spaced-repetition practice.",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "about": {
+        "@id": "https://edooqoo.com/#software"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://edooqoo.com/features/calendar#webpage",
+      "url": "https://edooqoo.com/features/calendar",
+      "name": "English tutor calendar",
+      "description": "Feature page for lesson scheduling, public booking, recurring lessons, and calendar context.",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "about": {
+        "@id": "https://edooqoo.com/#software"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://edooqoo.com/features/live-sessions#webpage",
+      "url": "https://edooqoo.com/features/live-sessions",
+      "name": "Live Sessions",
+      "description": "Feature page for shared worksheet answers, teacher interaction, and lesson-time evidence.",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "about": {
+        "@id": "https://edooqoo.com/#software"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://edooqoo.com/features/placement-test#webpage",
+      "url": "https://edooqoo.com/features/placement-test",
+      "name": "Welcome Test",
+      "description": "Feature page for the teacher-issued student diagnostic workflow.",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "about": {
+        "@id": "https://edooqoo.com/#software"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://edooqoo.com/features/student-hub#webpage",
+      "url": "https://edooqoo.com/features/student-hub",
+      "name": "Student Hub",
+      "description": "Feature page for student access to shared worksheets, homework, flashcards, and lesson materials.",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "about": {
+        "@id": "https://edooqoo.com/#software"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://edooqoo.com/tools#webpage",
+      "url": "https://edooqoo.com/tools",
+      "name": "Free tools for English teachers",
+      "description": "Public hub for browser-based English-teacher utilities.",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "about": {
+        "@id": "https://edooqoo.com/#software"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://edooqoo.com/tools/cefr-level-test#webpage",
+      "url": "https://edooqoo.com/tools/cefr-level-test",
+      "name": "CEFR level test",
+      "description": "Public browser-only CEFR-oriented level estimation utility.",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "about": {
+        "@id": "https://edooqoo.com/#software"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://edooqoo.com/tools/lesson-plan-generator#webpage",
+      "url": "https://edooqoo.com/tools/lesson-plan-generator",
+      "name": "ESL lesson plan generator",
+      "description": "Public browser-only lesson plan utility for English teachers.",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "about": {
+        "@id": "https://edooqoo.com/#software"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://edooqoo.com/tools/vocab-cefr-checker#webpage",
+      "url": "https://edooqoo.com/tools/vocab-cefr-checker",
+      "name": "Vocabulary CEFR checker",
+      "description": "Public browser-only vocabulary CEFR checking utility.",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "about": {
+        "@id": "https://edooqoo.com/#software"
+      },
       "inLanguage": "en"
     }
   ]

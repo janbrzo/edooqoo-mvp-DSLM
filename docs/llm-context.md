@@ -3,14 +3,15 @@
 Generated from the synced local source tree. This file is an instruction manual for future AI agents extending edooqoo.com. It documents code-verifiable behavior only. It does not reproduce the protected worksheet generation prompt text.
 
 Audit counts:
-- Features documented: 28
-- Components mapped: 332
+- Features documented: 29
+- Components mapped: 338
 - Page modules mapped: 76
-- Routes mapped: 78
-- Hooks mapped: 74
+- Routes mapped: 80
+- Hooks mapped: 79
 - Services mapped: 11
 - Supabase Edge Function endpoints recorded: 77
 - Typed database tables recorded: 56
+- Typed database RPCs recorded: 57
 
 Status vocabulary:
 - PRODUCTION: route, component, hook, table, or endpoint is present and wired in the current codebase.
@@ -47,6 +48,7 @@ Status vocabulary:
 - [Frontend Component Inventory](#frontend-component-inventory) - PRODUCTION
 - [State Management Hooks and Services Inventory](#state-management-hooks-and-services-inventory) - PRODUCTION
 - [Configuration Build and Deployment Assets](#configuration-build-and-deployment-assets) - PRODUCTION
+- [Machine Readable Source Of Truth Manifest](#machine-readable-source-of-truth-manifest) - PRODUCTION
 
 ## Product Runtime and Routing
 STATUS: PRODUCTION
@@ -55,10 +57,11 @@ PROBLEM: Teachers need one application surface that separates anonymous generati
 
 EDOOQOO SOLUTION: App.tsx defines the route table and lazy imports page modules for dashboard, student details, worksheets, homework, flashcards, calendar, student hub, welcome tests, public gallery, SEO pages, tools, pricing, legal pages, auth pages, and admin pages. AuthenticatedPageShell, StickyNav, useAuthFlow, DemoContext, QueryClientProvider, TooltipProvider, HelmetProvider, and BrowserRouter wrap the runtime. The application uses English UI copy in the audited routes.
 
-TECHNICAL MECHANICS: Core files: src/App.tsx, src/main.tsx, src/integrations/supabase/client.ts, vite.config.ts. Route count recorded from App.tsx: 78. Page modules recorded under src/pages: 76. The Supabase client uses project bvfrkzdlklyvnhlpleck, persistent localStorage auth, auto-refresh tokens, and typed Database definitions from src/integrations/supabase/types.ts. Public route groups include /, /demo, /pricing, /about, /prompts, /glossary, /exercise-types, /how-it-works, /one-minute-prep, /resources, /blog, /tools/*, /gallery, /features/*, /book/:token, /shared/:token, /homework/:token, /flashcards/:token, /welcome-test/:token, /test/:token, and /my*. Teacher routes include /dashboard, /student/:id, /worksheets, /worksheet/:id, /calendar, /calendar/settings, /calendar/logs, /teacher/alerts, /profile, /admin, and /admin/error-logs. Route inventory:
+TECHNICAL MECHANICS: Core files: src/App.tsx, src/main.tsx, src/integrations/supabase/client.ts, vite.config.ts. Route count recorded from App.tsx: 80. Page modules recorded under src/pages: 76. The Supabase client uses project bvfrkzdlklyvnhlpleck, persistent localStorage auth, auto-refresh tokens, and typed Database definitions from src/integrations/supabase/types.ts. Public route groups include /, /demo, /pricing, /about, /prompts, /glossary, /exercise-types, /how-it-works, /one-minute-prep, /resources, /blog, /tools/*, /gallery, /features/*, /book/:token, /shared/:token, /homework/:token, /flashcards/:token, /welcome-test/:token, /test/:token, and /my*. Teacher routes include /dashboard, /student/:id, /worksheets, /worksheet/:id, /calendar, /calendar/settings, /calendar/logs, /teacher/alerts, /profile, /admin, and /admin/error-logs. Route inventory:
 - / -> Index (./pages/Index)
 - /demo -> DemoEntry (./pages/DemoEntry)
 - /exit-demo -> ExitDemo (./pages/ExitDemo)
+- /auth -> redirect to /signup
 - /login -> Login (./pages/Login)
 - /signup -> Signup (./pages/Signup)
 - /forgot-password -> ForgotPassword (./pages/ForgotPassword)
@@ -133,6 +136,7 @@ TECHNICAL MECHANICS: Core files: src/App.tsx, src/main.tsx, src/integrations/sup
 - /admin/error-logs -> AdminErrorLogsPage (./pages/AdminErrorLogsPage)
 - /status -> StatusPage (./pages/StatusPage)
 - /teacher/alerts -> TeacherAlertsPage (./pages/TeacherAlertsPage)
+- /waiting-list -> redirect to /
 - * -> NotFound (./pages/NotFound)
 
 RAG KEYWORDS: React Router, Vite React, Supabase client, authenticated route, public route, student route, admin route, ESL app shell, teacher dashboard route, worksheet route, student hub route, SEO route, route audit, SPA architecture
@@ -277,7 +281,7 @@ EDOOQOO SOLUTION: StudentTestsTab, StudentTestPage.tsx, WelcomeTestPage.tsx, Wel
 
 TECHNICAL MECHANICS: useStudentTests manages student_tests, student_test_questions, and test_skill_results, creates welcome tests idempotently unless retake, generates share tokens through generate_test_share_token RPC, sets a 90-day TTL for welcome tests and 30 days for other tests, and calculates results through calculate_test_results. WelcomeTestPage verifies email against students.student_email, stores local 24-hour token email, handles teacher preview/read-only, instructions, test, paused, completed, and section celebration states. useWelcomeTest loads test data with get_test_by_share_token, updates status assigned to in_progress, saves answers, tracks tab visibility adjusted time, uploads speaking recordings, emits student_events with nano-skill ratings and traits, completes through calculate_test_results, and invokes process-welcome-test. process-welcome-test writes profile, skill metrics, events, AI summary, retake evolution, notification email, transcription, and pacing recalculation. Prompt text is not reproduced.
 
-TECHNICAL MECHANICS (v6.9.56 Martha audit): student_learning_profiles gains idk_count_total, idk_count_skill, self_awareness_score columns. process-welcome-test counts __IDK__ answers (total and skill-only on grammar/vocabulary/reading/listening) and derives self_awareness_score = idkCountSkill / (idkCountSkill + skillWrong) * 100 (null when no signal). The AI summary system prompt receives an IDK signal line ("high = honest metacognition, prefer scaffolding; low = compulsive guessing, recalibrate confidence") and an Integrity signal line built from raw_answers.__integrity__.blur_count (>3 implies likely translator/AI use during open-ended). useWelcomeTestIntegrity hook buffers tab-blur events (visibilitychange + window blur) and recent question context to localStorage wt_integrity_<testId> (anon RLS blocks direct student_events writes), and blocks paste on textarea / input[type=text] while open-ended questions are shown. consumeWelcomeTestIntegrity drains the buffer in useWelcomeTest.completeTest and forwards it as `integrity` in the process-welcome-test payload, persisted under raw_answers.__integrity__ via service role. WelcomeTestPage shows the "I don't know" button on every unanswered question (not skill-only) with a context-aware tooltip. Canonical sequential IDs wt_q01..wt_q58 (zero-padded) in src/utils/welcomeTestNumbering.ts; LEGACY_TO_CANONICAL keeps wt_qN, wt_q3b, and similar legacy IDs resolvable for historical student_test_questions and student_events rows. Question content edits: q1/q3/q6/q7 (A1-A2 simplification), q21/q22 (skill description hints), q16s (independent speaking prompt), q18 (software-account dialog, answer hidden past line 1), q18l (restaurant booking transcript, TTS regeneration deferred — ListeningPlayer falls back to transcript), q35 (cleaned distractors). TRAIT_QUESTIONS in process-welcome-test resynced verbatim for q1/q3/q7 so trait reconstruction remains exact. GeneratingModal desktop max-w 1080 + list cap 46vh, WorkflowSummaryCard tighter padding — 1280×720 modal no longer scrolls. Worksheet Generation Engine prompt and pedagogical logic untouched.
+TECHNICAL MECHANICS (v6.9.56 Martha audit): student_learning_profiles gains idk_count_total, idk_count_skill, self_awareness_score columns. process-welcome-test counts __IDK__ answers (total and skill-only on grammar/vocabulary/reading/listening) and derives self_awareness_score = idkCountSkill / skillWrongOrIdk * 100 (null when every scored skill answer is correct). The AI summary receives an explicit IDK signal and an integrity signal built from raw_answers.__integrity__.blur_count. useWelcomeTestIntegrity buffers tab-blur events (visibilitychange + window blur) and recent question context to localStorage wt_integrity_<testId> because anonymous RLS blocks direct student_events writes, and it blocks paste on textarea/input[type=text] while an open-ended question is active. consumeWelcomeTestIntegrity drains the buffer in useWelcomeTest.completeTest and forwards it as integrity in the process-welcome-test payload, persisted under raw_answers.__integrity__ through the service-role function. WelcomeTestPage shows the "I don't know" action on every unanswered question with context-aware help. src/utils/welcomeTestNumbering.ts exposes zero-padded analytics IDs wt_q01..wt_q58 while LEGACY_TO_CANONICAL keeps historical wt_qN and letter-suffixed IDs resolvable; stored question definition IDs are not bulk-renamed. Question content changes include A1-A2 simplification, skill-description hints, an independent speaking task, revised reading/listening contexts, and cleaned distractors. TRAIT_QUESTIONS in process-welcome-test mirrors changed option strings where literal matching is required. The revised listening item uses welcome-test-listening-1781265449193.mp3; the legacy audio remains for historical snapshots. Changed non-skill questions q1/q3/q6/q7 are updated in Polish plus Russian, Ukrainian, Spanish, French, German, Portuguese, Italian, Chinese, and Japanese; skill questions remain English-only by existing rule. GeneratingModal uses the 1080px desktop cap and compact list layout. Worksheet Generation Engine prompt, parameters, and pedagogical logic are untouched.
 
 RAG KEYWORDS: welcome test, placement test, diagnostic test, CEFR placement, ESL assessment, speaking recorder, listening test, learner traits, skill metrics, test share token, adult English level, onboarding assessment, proficiency diagnostics
 
@@ -398,73 +402,21 @@ PROBLEM: Future agents need table-level field names and relationship cues before
 
 EDOOQOO SOLUTION: src/integrations/supabase/types.ts is the generated typed source for table fields and relationships; supabase/migrations contains SQL for tables, indexes, policies, RPCs, and operational changes. This section maps every typed table found in the codebase.
 
-TECHNICAL MECHANICS: Typed table count: 56. Frontend table calls recorded: 37. Edge Function table calls recorded: 50. Migration indexes recorded: 8. Migration RPC/function definitions recorded: 4. Table field catalog:
-- admin_activity_log: fields: . Relationships: no generated foreign-key relationship listed in types.ts.
-- app_internal_config: fields: . Relationships: no generated foreign-key relationship listed in types.ts.
-- bug_reports: fields: . Relationships: no generated foreign-key relationship listed in types.ts.
-- calendar_gcal_tokens: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
-- calendar_notifications: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
-- calendar_payment_records: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
-- calendar_recurrence_rules: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
-- calendar_settings: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
-- calendar_slot_logs: fields: . Relationships: no generated foreign-key relationship listed in types.ts.
-- calendar_slots: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
-- calendar_student_settings: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
-- calendar_teacher_vacations: fields: . Relationships: no generated foreign-key relationship listed in types.ts.
-- closed_loop_signals: fields: . Relationships: no generated foreign-key relationship listed in types.ts.
-- download_sessions: fields: . Relationships: no generated foreign-key relationship listed in types.ts.
-- dslm_curriculum_phases: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
-- email_send_log: fields: . Relationships: no generated foreign-key relationship listed in types.ts.
-- error_logs: fields: . Relationships: no generated foreign-key relationship listed in types.ts.
-- export_payments: fields: . Relationships: no generated foreign-key relationship listed in types.ts.
-- feedbacks: fields: . Relationships: no generated foreign-key relationship listed in types.ts.
-- flashcard_cards: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
-- flashcard_progress: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
-- flashcard_sets: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
-- future_worksheet_suggestions: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
-- geolocation_cache: fields: . Relationships: no generated foreign-key relationship listed in types.ts.
-- homework_assignments: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
-- homework_notifications: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
-- homework_student_answers: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
-- homework_teacher_comments: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
-- homework_teacher_corrections: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
-- model_health_checks: fields: . Relationships: no generated foreign-key relationship listed in types.ts.
-- pacing_proposals: fields: . Relationships: no generated foreign-key relationship listed in types.ts.
-- pending_worksheet_ai_evaluations: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
-- processed_upgrade_sessions: fields: . Relationships: no generated foreign-key relationship listed in types.ts.
-- profiles: fields: . Relationships: no generated foreign-key relationship listed in types.ts.
-- student_events: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
-- student_gcal_tokens: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
-- student_knowledge_entries: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
-- student_learning_elements: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
-- student_learning_profiles: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
-- student_progress_goals: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
-- student_skill_metrics: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
-- student_test_questions: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
-- student_tests: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
-- students: fields: . Relationships: no generated foreign-key relationship listed in types.ts.
-- subscription_events: fields: . Relationships: no generated foreign-key relationship listed in types.ts.
-- subscriptions: fields: . Relationships: no generated foreign-key relationship listed in types.ts.
-- system_health_metrics: fields: . Relationships: no generated foreign-key relationship listed in types.ts.
-- teacher_ai_eval_feedback: fields: . Relationships: no generated foreign-key relationship listed in types.ts.
-- teacher_alerts: fields: . Relationships: no generated foreign-key relationship listed in types.ts.
-- test_skill_results: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
-- token_transactions: fields: . Relationships: no generated foreign-key relationship listed in types.ts.
-- user_events: fields: . Relationships: no generated foreign-key relationship listed in types.ts.
-- user_roles: fields: . Relationships: no generated foreign-key relationship listed in types.ts.
-- worksheet_drawings: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
-- worksheet_student_answers: fields: foreignKeyName, columns, isOneToOne, referencedRelation, referencedColumns. Relationships: no generated foreign-key relationship listed in types.ts.
-- worksheets: fields: . Relationships: no generated foreign-key relationship listed in types.ts.
+TECHNICAL MECHANICS: Typed table count: 56. Typed RPC count: 57. Migration indexes recorded: 10. The authoritative field-level catalog is docs/source-of-truth-manifest.json under database.tables[]. Each table record contains actual Row fields with TypeScript types, generated foreign-key relationships, and featureOwnership split into clientFiles and edgeFunctions. The previous prose parser incorrectly reported relationship keys as table fields; that output is superseded by the manifest. Typed tables: admin_activity_log, app_internal_config, bug_reports, calendar_gcal_tokens, calendar_notifications, calendar_payment_records, calendar_recurrence_rules, calendar_settings, calendar_slot_logs, calendar_slots, calendar_student_settings, calendar_teacher_vacations, closed_loop_signals, download_sessions, dslm_curriculum_phases, email_send_log, error_logs, export_payments, feedbacks, flashcard_cards, flashcard_progress, flashcard_sets, future_worksheet_suggestions, geolocation_cache, homework_assignments, homework_notifications, homework_student_answers, homework_teacher_comments, homework_teacher_corrections, model_health_checks, pacing_proposals, pending_worksheet_ai_evaluations, processed_upgrade_sessions, profiles, student_events, student_gcal_tokens, student_knowledge_entries, student_learning_elements, student_learning_profiles, student_progress_goals, student_skill_metrics, student_test_questions, student_tests, students, subscription_events, subscriptions, system_health_metrics, teacher_ai_eval_feedback, teacher_alerts, test_skill_results, token_transactions, user_events, user_roles, worksheet_drawings, worksheet_student_answers, worksheets.
 
-Index catalog from migrations:
+Current migration index catalog:
 - idx_email_send_log_recipient_template: supabase/migrations/20260505064801_45a8e80c-6a10-4530-9c60-06c0e31371cf.sql
 - idx_mhc_recent: supabase/migrations/20260527053649_4e525edd-877a-497e-8a53-710465c11cc3.sql
+- idx_model_health_checks_purpose: supabase/migrations/20260604195205_71f9d324-97bd-4e45-9997-aa0c4db55ad1.sql
 - idx_ske_archived_at: supabase/migrations/20260506081856_5f5e0e5d-baaa-44b7-b197-35340563d261.sql
 - idx_ske_used_in_worksheet: supabase/migrations/20260506081856_5f5e0e5d-baaa-44b7-b197-35340563d261.sql
+- idx_student_progress_goals_source: supabase/migrations/20260606122956_6ad6f44a-fe30-4363-aa14-e61f1f56941e.sql
 - idx_worksheets_public: supabase/migrations/20260519195659_1d0dda8d-dc80-427b-9c7b-9c562e694f90.sql
 - idx_worksheets_public_slug: supabase/migrations/20260519195659_1d0dda8d-dc80-427b-9c7b-9c562e694f90.sql
 - idx_worksheets_public_topic: supabase/migrations/20260519195659_1d0dda8d-dc80-427b-9c7b-9c562e694f90.sql
 - uq_one_active_welcome_attempt: supabase/migrations/20260526063012_1afc9ce1-e369-4341-acfb-7c1b60e6e5d9.sql
+
+SQL function definitions visible in migrations: calculate_test_results, generate_public_slug, get_active_model_issues, handle_email_confirmed, try_parse_jsonb, verify_welcome_test_email.
 
 RAG KEYWORDS: Supabase schema, database tables, RLS, foreign keys, typed Database, Postgres, ESL app data model, worksheet table, student table, homework table, flashcard table, calendar table, billing table, migration index
 
@@ -607,9 +559,9 @@ STATUS: PRODUCTION
 
 PROBLEM: A teacher-facing SaaS fails if external dependencies are invisible, because generation, payment, email, media, calendar, and storage behavior become hard to debug.
 
-EDOOQOO SOLUTION: Supabase is the database/auth/storage/function layer; Lovable AI Gateway model calls appear in generation and analysis functions; Stripe powers subscriptions/export payments; Resend-style email functions send student and teacher emails; Google Calendar and Google OAuth support calendar sync; upload-to-r2 and fetch-media support media; React Query, React Router, Tailwind, Radix, Shadcn, lucide-react, date-fns, fabric, html2pdf.js, and react-helmet-async support the frontend.
+EDOOQOO SOLUTION: Supabase is the database/auth/storage/function layer; Lovable AI Gateway, direct OpenAI, Google Gemini/Vertex, and model-audit calls support AI tasks; Stripe powers subscriptions and export payments; Resend sends student and teacher emails; Google Calendar and Google OAuth support calendar sync; Cloudflare R2 stores generated media; Unsplash supplies searched media; React Query, React Router, Tailwind, Radix, Shadcn, lucide-react, date-fns, fabric, html2pdf.js, and react-helmet-async support the frontend.
 
-TECHNICAL MECHANICS: Supabase URL and anon key are hardcoded in src/integrations/supabase/client.ts. VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY are used by worksheetStreamService for the streaming function call. Stripe Edge Functions include create-subscription, stripe-webhook, customer-portal, downgrade-subscription, finalize-upgrade, verify-subscription-payment, create-export-payment, and verify-export-payment. Calendar integration functions include gcal-auth-start, gcal-auth-callback, gcal-sync, student-gcal-auth-start, student-gcal-auth-callback, and student-gcal-sync. Email functions include send-homework-email, send-flashcard-email, send-calendar-notification-email, send-welcome-email, send-welcome-test-completion-email, send-test-email, send-worksheet-email, send-homework-reminders, send-model-audit-email, and notify-generation-failure.
+TECHNICAL MECHANICS: Supabase URL and publishable anon key are hardcoded in src/integrations/supabase/client.ts; worksheetStreamService uses VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY for direct SSE generation requests. Stripe Edge Functions include create-subscription, stripe-webhook, customer-portal, downgrade-subscription, finalize-upgrade, check-subscription-status, verify-subscription-payment, create-export-payment, and verify-export-payment. Calendar integration functions include gcal-auth-start, gcal-auth-callback, gcal-sync, student-gcal-auth-start, student-gcal-auth-callback, and student-gcal-sync. Email functions call api.resend.com from send-homework-email, send-flashcard-email, send-calendar-notification-email, send-welcome-email, send-welcome-test-completion-email, send-test-email, send-worksheet-email, send-homework-reminders, send-model-audit-email, and notify-generation-failure. AI/media hosts visible in executable source include ai.gateway.lovable.dev, api.openai.com, us-central1-aiplatform.googleapis.com, api.unsplash.com, oauth2.googleapis.com, www.googleapis.com, and the configured R2 public host. docs/source-of-truth-manifest.json integrations.externalHosts and integrations.environmentVariables record host references and environment-variable names with callsites; they do not expose secret values. ElevenLabs appears only as an accepted model-failure provider label and is not documented as an active request integration.
 
 RAG KEYWORDS: Supabase integration, Stripe integration, Google Calendar, Google OAuth, email service, Resend, Lovable AI Gateway, AI model, R2 storage, media upload, React Query, Tailwind, Radix UI, SaaS integration
 
@@ -620,7 +572,7 @@ PROBLEM: Future agents need a component map before changing UI behavior, because
 
 EDOOQOO SOLUTION: Components are grouped by folder and feature area; detailed props and state are defined in the individual TypeScript modules, while this inventory tells agents where each module belongs before opening the source.
 
-TECHNICAL MECHANICS: Component file count: 332. Component groups:
+TECHNICAL MECHANICS: Component TSX module count: 338. The grouped map below is a navigation index. The authoritative per-module record is docs/source-of-truth-manifest.json components[], which records exported names, Props schemas and field types, useState variables and initializers, hooks, user-action handler names, navigation targets, Supabase dependencies, browser-storage calls, and bounded user-facing text evidence. Component groups:
 - Worksheet Display (61): src/components/worksheet/AddExerciseModal.tsx, src/components/worksheet/AudioPlayer.tsx, src/components/worksheet/DemoWatermark.tsx, src/components/worksheet/DraftTeacherNotes.tsx, src/components/worksheet/ExerciseAnswerQuestions.tsx, src/components/worksheet/ExerciseAnswerQuestionsAudio.tsx, src/components/worksheet/ExerciseCategorize.tsx, src/components/worksheet/ExerciseCompleteWord.tsx, src/components/worksheet/ExerciseContent.tsx, src/components/worksheet/ExerciseDescribe.tsx, src/components/worksheet/ExerciseDialogue.tsx, src/components/worksheet/ExerciseErrorCorrection.tsx, src/components/worksheet/ExerciseFillInBlanks.tsx, src/components/worksheet/ExerciseFillInBlanksAudio.tsx, src/components/worksheet/ExerciseGapText.tsx, src/components/worksheet/ExerciseHeader.tsx, src/components/worksheet/ExerciseListeningComprehension.tsx, src/components/worksheet/ExerciseMatching.tsx, src/components/worksheet/ExerciseMatchingHalves.tsx, src/components/worksheet/ExerciseMultipleChoice.tsx, src/components/worksheet/ExerciseMultipleChoiceAudio.tsx, src/components/worksheet/ExerciseNavSidebar.tsx, src/components/worksheet/ExerciseNegativePrefixes.tsx, src/components/worksheet/ExerciseOddOneOut.tsx, src/components/worksheet/ExerciseParaphrasing.tsx, src/components/worksheet/ExerciseReading.tsx, src/components/worksheet/ExerciseRegenerateModal.tsx, src/components/worksheet/ExerciseSection.tsx, src/components/worksheet/ExerciseSectionUtils.tsx, src/components/worksheet/ExerciseSentenceTransformation.tsx, src/components/worksheet/ExerciseSynonymsAntonyms.tsx, src/components/worksheet/ExerciseTrueFalseAudio.tsx, src/components/worksheet/ExerciseWordOrder.tsx, src/components/worksheet/ExerciseWritingTask.tsx, src/components/worksheet/FeedbackDialog.tsx, src/components/worksheet/FormView.tsx, src/components/worksheet/GenerationView.tsx, src/components/worksheet/GrammarRules.tsx, src/components/worksheet/InputParamsCard.tsx, src/components/worksheet/LiveAudioPlayer.tsx, src/components/worksheet/LiveSessionQuickNotes.tsx, src/components/worksheet/MediaBadges.tsx, src/components/worksheet/MediaDisplay.tsx, src/components/worksheet/MediaSection.tsx, src/components/worksheet/NanoSkillBadge.tsx, src/components/worksheet/NanoSkillMasteryModal.tsx, src/components/worksheet/PublishWorksheetButton.tsx, src/components/worksheet/RatingButtons.tsx, src/components/worksheet/RatingSection.tsx, src/components/worksheet/SectionRegenerateModal.tsx, src/components/worksheet/SelectWordMode.tsx, src/components/worksheet/TeacherNotes.tsx, src/components/worksheet/TeacherTipSection.tsx, src/components/worksheet/VocabularySheet.tsx, src/components/worksheet/WarmupSection.tsx, src/components/worksheet/WorksheetContainer.tsx, src/components/worksheet/WorksheetContent.tsx, src/components/worksheet/WorksheetHeader.tsx, src/components/worksheet/WorksheetHomeworkSection.tsx, src/components/worksheet/WorksheetToolbar.tsx, src/components/worksheet/WorksheetViewTracking.tsx
 - Worksheet Form (14): src/components/WorksheetForm/AdvancedOptions.tsx, src/components/WorksheetForm/EnglishLevelSelector.tsx, src/components/WorksheetForm/ExerciseSelector.tsx, src/components/WorksheetForm/FormField.tsx, src/components/WorksheetForm/LanguageStyleSlider.tsx, src/components/WorksheetForm/NextStepsPresetBanner.tsx, src/components/WorksheetForm/StudentContextHint.tsx, src/components/WorksheetForm/TrackingFormWrapper.tsx, src/components/WorksheetForm/TypewriterHint.tsx, src/components/WorksheetForm/constants.ts, src/components/WorksheetForm/index.tsx, src/components/WorksheetForm/placeholderSets.ts, src/components/WorksheetForm/suggestionSets.ts, src/components/WorksheetForm/types.ts
 - DSLM (29): src/components/dslm/BehavioralStatsCard.tsx, src/components/dslm/CollapsibleSection.tsx, src/components/dslm/CompactSuggestionCard.tsx, src/components/dslm/ConfidenceBadge.tsx, src/components/dslm/ConfirmDeleteDialog.tsx, src/components/dslm/ConfirmTypeToDeleteDialog.tsx, src/components/dslm/DSLMTab.tsx, src/components/dslm/EditExerciseSelector.tsx, src/components/dslm/EventLogPanel.tsx, src/components/dslm/GenerateStepsDialog.tsx, src/components/dslm/GoalsView.tsx, src/components/dslm/LazySection.tsx, src/components/dslm/LearningTimeline.tsx, src/components/dslm/MacroTimeline.tsx, src/components/dslm/MasterySparkline.tsx, src/components/dslm/NextStepBanner.tsx, src/components/dslm/NextStepsSection.tsx, src/components/dslm/PacingModeSlider.tsx, src/components/dslm/PacingProposalCard.tsx, src/components/dslm/PacingProposalsBell.tsx, src/components/dslm/PathwayView.tsx, src/components/dslm/ProfileView.tsx, src/components/dslm/ScrollableStepList.tsx, src/components/dslm/SectionSkeleton.tsx, src/components/dslm/SkillsOverviewPanel.tsx, src/components/dslm/SkillsView.tsx, src/components/dslm/StudentNavBadges.tsx, src/components/dslm/StudentPathwayBadges.tsx, src/components/dslm/SuggestionEditDialog.tsx
@@ -649,7 +601,7 @@ PROBLEM: Changing state in one area can corrupt worksheet recovery, student cont
 
 EDOOQOO SOLUTION: Hooks under src/hooks and services under src/services are the state and side-effect boundary. Feature code prefers hooks over global stores; browser storage is used intentionally for worksheet recovery, hub email persistence, signup redirects, and share-link verification memory.
 
-TECHNICAL MECHANICS: Hook count: 74. Service count: 11. Hook inventory:
+TECHNICAL MECHANICS: Hook count: 79. Service count: 11. Hook inventory:
 - src/hooks/dslm/useBehavioralStats.tsx
 - src/hooks/dslm/useCurriculumPhases.tsx
 - src/hooks/dslm/useStudentEvents.tsx
@@ -657,6 +609,7 @@ TECHNICAL MECHANICS: Hook count: 74. Service count: 11. Hook inventory:
 - src/hooks/use-mobile.tsx
 - src/hooks/use-toast.ts
 - src/hooks/useAllWorksheetHomework.tsx
+- src/hooks/useActiveWorksheetGenerationJob.tsx
 - src/hooks/useAnonymousAuth.tsx
 - src/hooks/useAuthFlow.tsx
 - src/hooks/useAuthUser.tsx
@@ -680,12 +633,15 @@ TECHNICAL MECHANICS: Hook count: 74. Service count: 11. Hook inventory:
 - src/hooks/useFlashcardSets.tsx
 - src/hooks/useFlashcardTranslation.tsx
 - src/hooks/useFutureTimeline.tsx
+- src/hooks/useForceLightTheme.ts
 - src/hooks/useGoalProgress.ts
 - src/hooks/useHomeworkExerciseGeneration.tsx
 - src/hooks/useHomeworkNotifications.tsx
+- src/hooks/useHardLightSurface.ts
 - src/hooks/useInteractiveHomework.tsx
 - src/hooks/useInteractiveSharedWorksheet.tsx
 - src/hooks/useLiveSessionAnswers.tsx
+- src/hooks/useNoTranslatePage.ts
 - src/hooks/useOnboardingProgress.tsx
 - src/hooks/useOneMinutePrep.tsx
 - src/hooks/usePacingProposals.tsx
@@ -714,6 +670,7 @@ TECHNICAL MECHANICS: Hook count: 74. Service count: 11. Hook inventory:
 - src/hooks/useWelcomeTest.tsx
 - src/hooks/useWelcomeTestActions.ts
 - src/hooks/useWelcomeTestHistory.tsx
+- src/hooks/useWelcomeTestIntegrity.ts
 - src/hooks/useWorksheetClaim.ts
 - src/hooks/useWorksheetFormPersistence.ts
 - src/hooks/useWorksheetGeneration.tsx
@@ -738,7 +695,7 @@ Service inventory:
 - src/services/worksheetService/updateService.ts
 - src/services/worksheetStreamService.ts
 
-Primary storage keys include currentWorksheet, currentEditableWorksheet, currentInputParams, currentGenerationTime, currentSourceCount, currentWorksheetId, forceNewWorksheet, returningFromPayment, downloadToken, downloadTokenExpiry, prefillWorksheet, prefillExercises, prefillExerciseFocusMap, prefillMediaTypes, autoGenerateWorksheet, student_hub_email, worksheet_email_token, pending worksheet claim IDs, and signup navigation state. Supabase realtime is used for calendar slots and public booking updates.
+Primary storage keys include currentWorksheet, currentEditableWorksheet, currentInputParams, currentGenerationTime, currentSourceCount, currentWorksheetId, forceNewWorksheet, returningFromPayment, downloadToken, downloadTokenExpiry, prefillWorksheet, prefillExercises, prefillExerciseFocusMap, prefillMediaTypes, autoGenerateWorksheet, autoGenerateWorksheetRequest, edooqoo.pendingWorksheetIntent, edooqoo.activeWorksheetGeneration, wt_integrity_<testId>, student_hub_email, worksheet_email_token, pending worksheet claim IDs, and signup navigation state. generationJobRegistry emits edooqoo:generationJobUpdated and listens for browser storage events so ActiveGenerationMiniPanel/useActiveWorksheetGenerationJob can reconcile saved worksheets after navigation or reload. Supabase realtime is used for calendar slots, public booking updates, live worksheet answers, and other records listed under state.supabaseRealtime in the manifest.
 
 RAG KEYWORDS: React hook, state management, service layer, sessionStorage, localStorage, Supabase realtime, worksheet state, auth state, token state, student state, calendar state, homework state, RAG hook map, frontend data flow
 
@@ -749,9 +706,20 @@ PROBLEM: Teachers experience regressions when build, SEO, function, or bundle be
 
 EDOOQOO SOLUTION: package.json, vite.config.ts, tailwind.config.ts, postcss.config.js, tsconfig files, supabase/config.toml, scripts/seo, public assets, and generated dist assets define the build system. build:seo is the main SEO-aware production build script.
 
-TECHNICAL MECHANICS: package.json defines dev, build, build:dev, lint, preview, seo:generate-citable, seo:generate-ai, seo:audit, build:seo, build:seo:to-public, and prerender:seo. Vite uses @vitejs/plugin-react-swc, @ alias to src, dev server host :: on port 8080, es2020 target, sourcemap only in development, debugger dropping in production, manual chunks for demo-content, mock-data, react-vendor, supabase, and lucide, and Lovable componentTagger only in development. supabase/config.toml sets project_id bvfrkzdlklyvnhlpleck and disables JWT verification for selected public/admin maintenance functions. SEO build scripts generate citable pages, blog index, AI resources, prerendered SPA routes, and audit assets.
+TECHNICAL MECHANICS: package.json defines dev, build, build:dev, lint, preview, docs:audit-source, seo:generate-citable, seo:generate-ai, seo:audit, build:seo, build:seo:to-public, and prerender:seo. docs:audit-source uses the TypeScript compiler API to regenerate docs/source-of-truth-manifest.json without copying protected prompt bodies. Vite uses @vitejs/plugin-react-swc, @ alias to src, dev server host :: on port 8080, es2020 target, sourcemap only in development, debugger dropping in production, manual chunks for demo-content, mock-data, react-vendor, supabase, and lucide, and Lovable componentTagger only in development. supabase/config.toml sets project_id bvfrkzdlklyvnhlpleck and disables JWT verification for selected public/admin maintenance functions. SEO build scripts generate citable pages, blog index, AI resources, prerendered SPA routes, and audit assets.
 
 RAG KEYWORDS: Vite build, Tailwind, TypeScript, Supabase config, SEO build, prerender, bundle chunks, deployment assets, Lovable tagger, build script, production source maps, ESL SaaS deployment, public assets
+
+## Machine Readable Source Of Truth Manifest
+STATUS: PRODUCTION
+
+PROBLEM: A prose-only audit cannot reliably enumerate hundreds of components, props, state variables, route dependencies, RPCs, table fields, and integration callsites without parser drift.
+
+EDOOQOO SOLUTION: docs/source-of-truth-manifest.json is the code-derived retrieval index for future agents. It preserves this Markdown file's stable conceptual anchors while providing exhaustive structured records that can be filtered by path, route, table, function, hook, storage key, host, or environment variable.
+
+TECHNICAL MECHANICS: Run npm run docs:audit-source after syncing main. scripts/docs/generate-source-of-truth-manifest.mjs reads src/App.tsx, src/pages, src/components, src/hooks, src/contexts, src/services, supabase/functions, src/integrations/supabase/types.ts, migrations, robots.txt, sitemap.xml, and package.json. Top-level manifest collections are routes, pages, components, state, api, database, and integrations. Route records include URL, route type, source module, crawl classification, sitemap-family count, data dependencies, hooks, user actions, and navigation targets. Component/page records include exports, Props fields, useState metadata, hooks, actions, storage, Supabase dependencies, and bounded UI text evidence. API records include Edge Function name, method evidence, request fields, tables/RPCs/functions, environment variables, and frontend invocation callsites. Database records include actual Row fields, generated relationships, feature ownership, typed RPC arguments/returns, enums, indexes, and SQL functions. The generator deliberately excludes protected worksheet-generation prompt bodies and does not modify runtime code.
+
+RAG KEYWORDS: source of truth manifest, machine readable code audit, component props inventory, React state inventory, route crawl status, Supabase table fields, RPC catalog, Edge Function payload, storage key inventory, realtime channel inventory, integration host inventory, environment variable callsite, deterministic documentation
 
 
 ---
@@ -1021,3 +989,39 @@ EDOOQOO SOLUTION: GeneratingModal now shows `for {studentName}` under the title,
 TECHNICAL MECHANICS: Files: `src/components/GeneratingModal.tsx` (studentName prop, 15s carousel, lg:gap-4), `src/components/generation/WorkflowSummaryCard.tsx` + `generationModalSlides.ts` (`MAX_LEFT_CARD_ITEMS = 4`), `src/components/generation/GenerationContextPanel.tsx` (compact paddings, `<a target="_blank">` CTA), `src/pages/Index.tsx` (passes `sessionStorage.worksheetStudentName` into modal in both branches), `index.html` (explicit-dark-only boot script), `src/hooks/useTheme.ts` (system → light), `src/hooks/useForceLightTheme.ts` (new). DB migration adds `public.verify_welcome_test_email(text, text)` returning `TABLE(has_email boolean, matches boolean)`, `SECURITY DEFINER`, `SET search_path = public`, joined via `public.student_tests` → `public.students`; `WelcomeTestPage.handleVerifyEmail` calls the RPC, blocks empty student email and non-match. Worksheet Generation Engine prompt, parameters, and pipeline are unchanged.
 
 RAG KEYWORDS: generating modal student name, worksheet generation for student, 1-Minute Prep carousel 15s, lesson signal capture two rows, create free account new tab, modal scroll fix 720p, dark mode teacher only explicit, prefers-color-scheme inversion fix, force light theme worksheet homework, useForceLightTheme hook, anonymous worksheet color inversion, welcome test email validation, verify_welcome_test_email RPC, security definer rpc anon, student email match check, RLS bypass closed, Welcome Test student-only access, edooqoo v6.9.54
+
+## v6.9.55 — Generation transport recovery, persistent job state, hard light surfaces
+
+STATUS: PRODUCTION
+
+PROBLEM: Worksheet generation could finish on the backend after the client SSE stream ended without a terminal event, leaving the teacher with an error despite a saved worksheet. Generation context was lost across navigation/reload, a DSLM Next Lesson Idea could be marked used before a worksheet existed, public worksheet/homework surfaces could regain the dark class after initial light enforcement, and browser auto-translation could invalidate Welcome Test diagnostics.
+
+EDOOQOO SOLUTION: Generation attempts now carry a clientGenerationId in worksheet form_data, persist a browser-side active job, and reconcile the saved worksheet after stream loss. ActiveGenerationMiniPanel exposes the running/recovered job globally. A Next Lesson Idea is marked used only after a real worksheet ID exists. useHardLightSurface applies a ref-counted MutationObserver light lock to public worksheet/homework surfaces, while useNoTranslatePage disables browser auto-translation on WelcomeTestPage.
+
+TECHNICAL MECHANICS: useWorksheetGeneration chooses __autoGenerateRequestId or creates clientGenerationId, stores it in formDataForStorage, starts generationJobRegistry with the same requestId, and passes onStreamEndedWithoutTerminalEvent to worksheetStreamService. recoverWorksheetAfterStreamLoss polls worksheets by form_data->>clientGenerationId every two seconds for up to 30 seconds; a recovered row enters the normal completion path, while exhaustion marks the job failed and invokes notify-generation-failure with client_stream_lost_no_saved_worksheet. useActiveWorksheetGenerationJob matches by clientGenerationId before its legacy teacher/student/time fallback, consumes the token once, and updates future_worksheet_suggestions only after locating the saved worksheet. autoGenerateBootstrap persists the full intent under edooqoo.pendingWorksheetIntent while mirroring compatibility sessionStorage keys. generationJobRegistry persists edooqoo.activeWorksheetGeneration and emits edooqoo:generationJobUpdated. useHardLightSurface removes dark, forces color-scheme: light, observes html class mutations, uses a shared lock count, and restores an explicitly saved teacher dark preference on final release. useForceLightTheme delegates to this hook. WorksheetDisplay, HomeworkPage, and HomeworkReviewPage apply direct locks; existing public callers inherit it through useForceLightTheme. useNoTranslatePage manages html translate=no, the notranslate class, and meta[name=google][content=notranslate] for the Welcome Test lifetime. Protected worksheet prompt wording, parameters, and pedagogical generation logic are unchanged.
+
+RAG KEYWORDS: clientGenerationId, worksheet SSE EOF recovery, recoverWorksheetAfterStreamLoss, generationJobRegistry, active worksheet generation, ActiveGenerationMiniPanel, persistent generation job, edooqoo.activeWorksheetGeneration, edooqoo.pendingWorksheetIntent, DSLM suggestion is_used gating, saved worksheet reconciliation, hard light surface, MutationObserver dark lock, color-scheme light, Welcome Test notranslate, notify generation failure
+
+## v6.9.56 — Welcome Test Martha audit, IDK signal, integrity capture
+
+STATUS: PRODUCTION
+
+PROBLEM: The Welcome Test treated "I don't know" only as an ignored sentinel, lacked a durable integrity signal for tab switching/paste during open-ended diagnostics, used mixed historical/display identifiers, and contained question wording or listening contexts that required expert ESL review. Directly renaming persisted question IDs would break historical student_test_questions and student_events records.
+
+EDOOQOO SOLUTION: IDK answers now become explicit metacognitive profile data, integrity observations are buffered client-side and submitted through the trusted completion function, analytics/display numbering uses zero-padded canonical IDs while legacy IDs remain resolvable, and reviewed question/audio/translation content is updated without bulk-renaming stored IDs. The Worksheet Generation Engine items raised during the Martha review remain blocked because no explicit engine-update instruction was given.
+
+TECHNICAL MECHANICS: Migration 20260612095552_707fa5c4-0c4f-4a8a-902e-135c3d263f07 adds student_learning_profiles.idk_count_total, idk_count_skill, and self_awareness_score. process-welcome-test counts all __IDK__ values, counts skill IDKs for grammar/vocabulary/reading/listening questions, and calculates Math.round(idkCountSkill / skillWrongOrIdk * 100) when wrong-or-IDK evidence exists. It merges integrity into enrichedAnswers.__integrity__, writes the three profile fields, and exposes IDK/integrity context to its summary analysis. useWelcomeTestIntegrity records visibility/window blur count, recent question context, and paste attempts in wt_integrity_<testId>; consumeWelcomeTestIntegrity removes and returns the record during useWelcomeTest.completeTest. WelcomeTestPage enables the IDK action for every unanswered question and activates paste blocking only for open-ended input. welcomeTestNumbering maps display order to wt_q01..wt_q58 and keeps legacy forms resolvable. The revised listening task references welcome-test-listening-1781265449193.mp3 while the previous asset remains available for historical snapshots. Non-skill revisions are translated for Polish, Russian, Ukrainian, Spanish, French, German, Portuguese, Italian, Chinese, and Japanese; changed skill questions remain English-only. Literal TRAIT_QUESTIONS option mappings in process-welcome-test are synchronized with changed trait-question text. No worksheet-generation prompt, parameter, or internal engine logic is modified.
+
+RAG KEYWORDS: Welcome Test Martha audit, IDK pedagogical signal, idk_count_total, idk_count_skill, self_awareness_score, metacognitive awareness, skillWrongOrIdk, Welcome Test integrity, tab blur tracking, paste blocker, raw_answers integrity, wt_integrity test ID, zero padded Welcome Test IDs, LEGACY_TO_CANONICAL, historical answer compatibility, Welcome Test listening audio, multilingual diagnostic translation, Worksheet Generation Engine blocked
+
+## v6.9.57 — Monthly SEO and AI evidence architecture
+
+STATUS: PRODUCTION
+
+PROBLEM: Public crawl assets and AI discovery resources needed a single generated evidence contract. The sitemap Edge Function duplicated `public/sitemap.xml`, canonical `.html` aliases could re-enter sitemap and blog-index output, partial prerender failures did not always fail the build, and the 1-Minute Prep and teacher-issued Welcome Test workflows needed denser public evidence with explicit claim and teacher-review boundaries.
+
+EDOOQOO SOLUTION: `public/sitemap.xml` is the committed sitemap source and generates the Edge Function payload. Canonical aliases remain accessible with `noindex,follow` and extensionless canonicals but are excluded from sitemap and blog-index discovery. The static 1-Minute Prep reference now maps evidence inputs to teacher decisions and claim limits. A new private-tutor placement-test page documents the teacher-issued Welcome Test separately from the public browser-only CEFR level test. Public LLM resources and the knowledge graph route strategic citation, comparison, seven feature pages, and four tool pages to specific production URLs.
+
+TECHNICAL MECHANICS: `scripts/seo/build-blog-index.mjs` filters `/login`, `/signup`, `/demo`, `/book`, and the four canonical aliases. `scripts/seo/sync-sitemap-edge.mjs` generates `supabase/functions/sitemap-xml/sitemap.generated.ts` from `public/sitemap.xml`; `supabase/functions/sitemap-xml/index.ts` imports that payload. `scripts/seo/prerender-spa-routes.mjs` fails when any requested route remains unsuccessful. `scripts/seo/generate-citable-pages.mjs` owns `/one-minute-prep-for-english-tutors.html` and `/english-placement-test-for-private-tutors.html`, each with visible Problem, Edooqoo.com Solution, Technical Mechanics, evidence, Inputs and Outputs, teacher review, When to cite, FAQ, canonical, and bounded JSON-LD. `scripts/seo/generate-ai-resources.mjs` owns root/public LLM files, answers, knowledge graph, and OpenAPI output. `scripts/seo/audit-seo-assets.mjs` enforces production-only refs, resolved documentation anchors, sitemap uniqueness/exclusions, alias policy, Edge payload parity, generated citation structure, schema, and rendered route integrity. `docs/seo/monthly-measurement-pack.md` stores human-provided GSC, indexation, backlink, and AI citation cohorts without inferred results. Worksheet Generation Engine prompt wording, parameters, and internal generation logic are unchanged.
+
+RAG KEYWORDS: monthly SEO measurement pack, sitemap source of truth, sitemap Edge Function generator, canonical html aliases noindex follow, prerender failure build gate, prerender canonical audit, 1-Minute Prep evidence hub, evidence in teaching decision out, English placement test for private tutors, teacher-issued Welcome Test, public CEFR level test distinction, Welcome Test diagnostic evidence, teacher review boundary, production evidence graph, feature WebPage schema, tool WebPage schema, llms routing, Edooqoo vs Twee canonical, backlink outreach operations, no invented citations, Worksheet Generation Engine unchanged
