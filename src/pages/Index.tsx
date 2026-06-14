@@ -34,6 +34,7 @@ import { devLog, devWarn } from '@/utils/logger';
 import { AddStudentDialog } from "@/components/dashboard/AddStudentDialog";
 import { buildAutoGeneratePayload, clearAutoGenerateFlags, readAutoGenerateIntent } from "@/lib/worksheet/autoGenerateBootstrap";
 import { hasAutoGenerateIntent } from "@/lib/worksheet/autoGenerateBootstrap";
+import { useActiveWorksheetGenerationJob } from "@/hooks/useActiveWorksheetGenerationJob";
 
 /**
  * Main Index page component that handles worksheet generation and display
@@ -95,6 +96,15 @@ const Index = () => {
     isDemo,
     consumeToken,
   });
+  // v6.9.57 — Refresh-safe modal rehydration. If a background generation job
+  // is still `running` (persisted in localStorage by generationJobRegistry),
+  // we resurrect the GeneratingModal on mount so the user sees the same UI
+  // they had before the refresh. The completion side effects (open worksheet,
+  // mark suggestion used, consume token) are handled by
+  // useActiveWorksheetGenerationJob via DB polling on form_data->>clientGenerationId.
+  const activeJob = useActiveWorksheetGenerationJob();
+  const isResumedGeneration =
+    !!activeJob && activeJob.status === 'running' && !isGenerating;
   const [showTokenModal, setShowTokenModal] = useState(false);
   const [showWelcomeBackModal, setShowWelcomeBackModal] = useState(false);
   const [showOneMinutePrepDialog, setShowOneMinutePrepDialog] = useState(false);
@@ -426,20 +436,24 @@ const Index = () => {
         )}
         
         <GeneratingModal 
-          isOpen={isGenerating} 
-          requiresAudio={!!worksheetState.inputParams?.requiresAudio}
-          requiresImage={!!worksheetState.inputParams?.requiresImage}
-          hasGrammar={!!worksheetState.inputParams?.hasGrammar}
+          isOpen={isGenerating || isResumedGeneration} 
+          isResumed={isResumedGeneration}
+          requiresAudio={isResumedGeneration ? !!activeJob?.formMeta?.requiresAudio : !!worksheetState.inputParams?.requiresAudio}
+          requiresImage={isResumedGeneration ? !!activeJob?.formMeta?.requiresImage : !!worksheetState.inputParams?.requiresImage}
+          hasGrammar={isResumedGeneration ? !!activeJob?.formMeta?.hasGrammar : !!worksheetState.inputParams?.hasGrammar}
           streamProgress={streamProgress}
           mediaGenerating={mediaGenerating}
-          selectedExercises={worksheetState.inputParams?.selectedExercises}
-          errorMessage={generationError}
-          onRetry={clearGenerationError}
+          selectedExercises={isResumedGeneration ? activeJob?.formMeta?.selectedExercises : worksheetState.inputParams?.selectedExercises}
+          errorMessage={isResumedGeneration ? null : generationError}
+          onRetry={isResumedGeneration ? undefined : clearGenerationError}
           studentName={
+            isResumedGeneration
+              ? activeJob?.formMeta?.studentName ?? undefined
+              :
             worksheetState.inputParams?.studentName
             || (typeof window !== 'undefined' ? (sessionStorage.getItem('worksheetStudentName') || undefined) : undefined)
           }
-          studentEmail={worksheetState.inputParams?.studentEmail ?? null}
+          studentEmail={isResumedGeneration ? (activeJob?.formMeta?.studentEmail ?? null) : (worksheetState.inputParams?.studentEmail ?? null)}
         />
         
         <TokenPaywallModal
@@ -548,21 +562,25 @@ const Index = () => {
       )}
       
       <GeneratingModal 
-        isOpen={isGenerating} 
-        requiresAudio={!!worksheetState.inputParams?.requiresAudio}
-        requiresImage={!!worksheetState.inputParams?.requiresImage}
-        hasGrammar={!!worksheetState.inputParams?.hasGrammar}
+        isOpen={isGenerating || isResumedGeneration} 
+        isResumed={isResumedGeneration}
+        requiresAudio={isResumedGeneration ? !!activeJob?.formMeta?.requiresAudio : !!worksheetState.inputParams?.requiresAudio}
+        requiresImage={isResumedGeneration ? !!activeJob?.formMeta?.requiresImage : !!worksheetState.inputParams?.requiresImage}
+        hasGrammar={isResumedGeneration ? !!activeJob?.formMeta?.hasGrammar : !!worksheetState.inputParams?.hasGrammar}
         streamProgress={streamProgress}
         mediaGenerating={mediaGenerating}
-        selectedExercises={worksheetState.inputParams?.selectedExercises}
-        errorMessage={generationError}
-        onRetry={clearGenerationError}
+        selectedExercises={isResumedGeneration ? activeJob?.formMeta?.selectedExercises : worksheetState.inputParams?.selectedExercises}
+        errorMessage={isResumedGeneration ? null : generationError}
+        onRetry={isResumedGeneration ? undefined : clearGenerationError}
         isAnonymous={true}
         studentName={
+          isResumedGeneration
+            ? activeJob?.formMeta?.studentName ?? undefined
+            :
           worksheetState.inputParams?.studentName
           || (typeof window !== 'undefined' ? (sessionStorage.getItem('worksheetStudentName') || undefined) : undefined)
         }
-        studentEmail={worksheetState.inputParams?.studentEmail ?? null}
+        studentEmail={isResumedGeneration ? (activeJob?.formMeta?.studentEmail ?? null) : (worksheetState.inputParams?.studentEmail ?? null)}
       />
       
       <TokenPaywallModal

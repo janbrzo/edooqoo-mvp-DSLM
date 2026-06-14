@@ -529,15 +529,44 @@ serve(async (req) => {
         },
       });
 
-      // Background: Generate with streaming
-      (async () => {
+      // v6.9.57 — Refresh-safe streaming.
+      // The previous IIFE was not registered with EdgeRuntime.waitUntil, so
+      // when the client disconnected (e.g. page refresh) Deno Deploy killed
+      // the worker BEFORE the worksheets INSERT ran. We now:
+      //   1) wrap every SSE write in safeSend that tolerates a closed stream
+      //      and flips into headless "background-only" mode,
+      //   2) keep the worker alive via EdgeRuntime.waitUntil so the DB save
+      //      always completes — refresh-safe polling on the client then picks
+      //      up the saved row via form_data->>clientGenerationId.
+      // The worksheet generation prompt and model pipeline are NOT touched.
+      let clientConnected = true;
+      const safeSend = (event: string, payload: unknown) => {
+        if (!clientConnected) return;
+        try {
+          send(event, payload);
+        } catch (e) {
+          clientConnected = false;
+          console.log(
+            "📴 SSE client disconnected, continuing in background-only mode",
+            {
+              event,
+              reason: e instanceof Error ? e.message : String(e),
+            },
+          );
+        }
+      };
+      const safeClose = () => {
+        try { close(); } catch { /* ignore */ }
+      };
+
+      const backgroundWork = (async () => {
         let fullContent = "";
         let lastExerciseCount = 0;
         let streamUsedModel = "";
         const expectedTotal = getExpectedCount(formData?.lessonTime);
 
         try {
-          send("start", { message: "Starting generation..." });
+          safeSend("start", { message: "Starting generation..." });
 
           try {
             console.log("🔵 Trying Gemini 2.5 Flash streaming...");
@@ -551,7 +580,7 @@ serve(async (req) => {
                 const newCount = countExercisesInPartialJSON(fullContent);
                 if (newCount > lastExerciseCount) {
                   lastExerciseCount = newCount;
-                  send("progress", {
+                  safeSend("progress", {
                     exercisesGenerated: newCount,
                     expectedTotal,
                   });
@@ -585,7 +614,7 @@ serve(async (req) => {
               const newCount = countExercisesInPartialJSON(fullContent);
               if (newCount > lastExerciseCount) {
                 lastExerciseCount = newCount;
-                send("progress", { exercisesGenerated: newCount, expectedTotal });
+                safeSend("progress", { exercisesGenerated: newCount, expectedTotal });
               }
             }
             console.log(`✅ OpenAI fallback streaming completed`);
@@ -597,11 +626,9 @@ serve(async (req) => {
           // Parse final JSON with full recovery pipeline.
           // AI-REPAIR can take 10-30s of silent Gemini work → emit keepalive
           // progress events every 15s so the client heartbeat (40s) does not trip.
-          send("progress", { exercisesGenerated: expectedTotal, expectedTotal, phase: "repairing" });
+          safeSend("progress", { exercisesGenerated: expectedTotal, expectedTotal, phase: "repairing" });
           const repairKeepalive = setInterval(() => {
-            try {
-              send("progress", { exercisesGenerated: expectedTotal, expectedTotal, phase: "repairing" });
-            } catch (_) { /* stream closed */ }
+            safeSend("progress", { exercisesGenerated: expectedTotal, expectedTotal, phase: "repairing" });
           }, 15000);
 
           let worksheetData: any;
@@ -746,7 +773,7 @@ serve(async (req) => {
           worksheetData.share_token = worksheet?.[0]?.share_token;
 
           console.log("✅ Streaming generation complete, sending done event");
-          send("done", {
+          safeSend("done", {
             worksheetId,
             worksheet: worksheetData,
           });
@@ -778,11 +805,21 @@ serve(async (req) => {
               await notifyPromise;
             }
           } catch (_) { /* ignore */ }
-          send("error", { message: error instanceof Error ? error.message : "Unknown error" });
+          safeSend("error", { message: error instanceof Error ? error.message : "Unknown error" });
         } finally {
-          close();
+          safeClose();
         }
       })();
+
+      // Keep the worker alive even after the client disconnects so the DB
+      // insert at the end of the pipeline always completes.
+      try {
+        // @ts-ignore - EdgeRuntime is a Deno Deploy global
+        if (typeof EdgeRuntime !== "undefined" && (EdgeRuntime as any).waitUntil) {
+          // @ts-ignore
+          EdgeRuntime.waitUntil(backgroundWork);
+        }
+      } catch (_) { /* ignore */ }
 
       return responsePromise;
     }

@@ -169,6 +169,15 @@ export const useWorksheetGeneration = (
         topic: String(data.lessonTopic || '').slice(0, 240),
         origin: !userId ? 'anonymous' : ((data as any).__autoGenerateFromSuggestion ? 'dslm-auto' : 'manual'),
         requestId: clientGenerationId,
+        // v6.9.57 — snapshot UI metadata so the modal can rehydrate after refresh
+        formMeta: {
+          requiresAudio: !!requiresAudio,
+          requiresImage: !!requiresImage,
+          hasGrammar: !!hasGrammar,
+          selectedExercises: Array.isArray(data.selectedExercises) ? data.selectedExercises : [],
+          studentName: (data as any).studentName ?? null,
+          studentEmail: (data as any).studentEmail ?? null,
+        },
       });
     } catch (e) {
       devWarn('[useWorksheetGeneration] failed to start generation job', e);
@@ -331,6 +340,9 @@ export const useWorksheetGeneration = (
               failGenerationJob(detail);
               const reqId = (data as any).__autoGenerateRequestId;
               if (reqId) markPersistentAutoGenerateIntentStatus(reqId, 'failed');
+              // v6.9.57 — defensively drop legacy suggestion handle so a later
+              // retry cannot mark an unrelated suggestion as used.
+              try { sessionStorage.removeItem('prefillSuggestionId'); } catch { /* ignore */ }
             } catch { /* ignore */ }
             // Notify ops (anonymous-friendly: minimal context, no prompt).
             try {
@@ -359,6 +371,7 @@ export const useWorksheetGeneration = (
               failGenerationJob(error.message || 'Generation failed');
               const reqId = (data as any).__autoGenerateRequestId;
               if (reqId) markPersistentAutoGenerateIntentStatus(reqId, 'failed');
+              try { sessionStorage.removeItem('prefillSuggestionId'); } catch { /* ignore */ }
             } catch { /* ignore */ }
           }
         }
@@ -500,7 +513,14 @@ export const useWorksheetGeneration = (
       willConsumeToken: !isDemo && !!userId,
       finalWorksheetId
     });
-    
+
+    // v6.9.57 — Token consumption policy:
+    //   - Consumed ONLY after a worksheet row exists in DB AND was validated
+    //     client-side. Backend never consumes tokens itself.
+    //   - Idempotent via consume_token RPC keyed on worksheet_id, so the
+    //     refresh-safe polling path (useActiveWorksheetGenerationJob) and the
+    //     in-flight client cannot both deduct.
+    //   - Any failure before this point → ZERO tokens consumed.
     if (!isDemo && userId) {
       devLog('✅ Attempting to consume token for user:', userId);
       const tokenConsumed = await consumeToken(finalWorksheetId);
@@ -618,9 +638,10 @@ export const useWorksheetGeneration = (
 
       // v4.8: if this generation originated from a DSLM suggestion, flip is_used.
       try {
-        const sourceSuggestionId =
-          (data as any).__autoGenerateSuggestionId
-          || sessionStorage.getItem('prefillSuggestionId');
+        // v6.9.57 — Only honor the suggestion id that came in WITH this exact
+        // form submission. Removing the sessionStorage fallback prevents a
+        // failed previous attempt from leaking a stale id into the next retry.
+        const sourceSuggestionId = (data as any).__autoGenerateSuggestionId || null;
         if (sourceSuggestionId && finalWorksheetId) {
           const { error: usedErr } = await supabase
             .from('future_worksheet_suggestions')
