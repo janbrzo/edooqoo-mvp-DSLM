@@ -8,15 +8,24 @@ export interface PageSeoProps {
   path: string;
   ogType?: "website" | "article";
   jsonLd?: Record<string, unknown> | Record<string, unknown>[];
+  robots?: string;
 }
 
-export const PageSeo = ({ title, description, path, ogType = "website", jsonLd }: PageSeoProps) => {
+export const PageSeo = ({
+  title,
+  description,
+  path,
+  ogType = "website",
+  jsonLd,
+  robots = "index,follow",
+}: PageSeoProps) => {
   const url = `${BASE}${path}`;
   const ldArr = jsonLd ? (Array.isArray(jsonLd) ? jsonLd : [jsonLd]) : [];
   return (
     <Helmet>
       <title>{title}</title>
       <meta name="description" content={description} />
+      <meta name="robots" content={robots} />
       <link rel="canonical" href={url} />
       <link rel="alternate" hrefLang="x-default" href={url} />
       <meta property="og:title" content={title} />

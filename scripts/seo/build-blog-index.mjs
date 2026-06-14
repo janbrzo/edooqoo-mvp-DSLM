@@ -1,8 +1,13 @@
 import { readdirSync, readFileSync, writeFileSync } from 'fs';
 import { basename, join } from 'path';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { getContentRegistry, inferCluster } from './content-registry.mjs';
 
 const BLOG_DIR = 'public/blog';
 const TOP_DIR = 'public';
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const ROOT = path.resolve(__dirname, '..', '..');
 const CANONICAL_ALIASES = new Set([
   'exercise-types.html',
   'glossary.html',
@@ -26,23 +31,8 @@ function parseHtml(filepath, slugBase) {
   return { title, description: desc, url: slugBase + '/' + slug, date };
 }
 
-function categorize(title) {
-  const t = title.toLowerCase();
-  if (/\b(ai|chatgpt|gpt|llm|tts|automation)/.test(t)) return 'AI in Education';
-  if (/\b(cefr|a1|a2|b1|b2|c1|c2|level)/.test(t)) return 'CEFR & Levels';
-  if (/\b(business|corporate|workplace|professional english)/.test(t)) return 'Business English';
-  if (/\b(grammar|tense|conditional|passive|modal|articles|phrasal|preposition)/.test(t)) return 'Grammar';
-  if (/\b(vocabulary|word|collocation|idiom|phrasal)/.test(t)) return 'Vocabulary';
-  if (/\b(listening|speaking|pronunciation|accent)/.test(t)) return 'Listening & Speaking';
-  if (/\b(reading|writing|comprehension)/.test(t)) return 'Reading & Writing';
-  if (/\b(exam|ielts|toefl|cambridge|fce|cae|cpe|ket|pet)/.test(t)) return 'Exam Prep';
-  if (/\b(young|kids|teen|children|song|story|game)/.test(t)) return 'Young Learners';
-  if (/\b(assess|rubric|feedback|test|portfolio|grading)/.test(t)) return 'Assessment';
-  if (/\b(method|approach|task-based|communicative|flipped|gamif|scaffold|differentiat)/.test(t)) return 'Methodology';
-  if (/\b(how to|guide|tips|strategies|planning|management)/.test(t)) return 'How to Teach';
-  if (/\b(tool|resource|software|app|platform|portfolio)/.test(t)) return 'Tools';
-  return 'General';
-}
+const registry = getContentRegistry({ root: ROOT });
+const registryByRoute = new Map(registry.map((entry) => [entry.route, entry]));
 
 const blogFiles = readdirSync(BLOG_DIR)
   .filter(f => f.endsWith('.html') && f !== 'index.html')
@@ -50,8 +40,13 @@ const blogFiles = readdirSync(BLOG_DIR)
 
 const posts = blogFiles.map(fp => {
   const p = parseHtml(fp, '/blog');
-  return { ...p, category: categorize(p.title) };
-}).filter(p => p.title && p.description)
+  const entry = registryByRoute.get(p.url);
+  return {
+    ...p,
+    category: entry?.cluster || inferCluster(`${p.url} ${p.title}`),
+    state: entry?.state || 'hold',
+  };
+}).filter(p => p.title && p.description && registryByRoute.get(p.url)?.indexable !== false)
   .sort((a, b) => (b.date || '').localeCompare(a.date || ''));
 
 console.log(`Parsed ${posts.length} blog posts`);
@@ -71,8 +66,9 @@ const landings = topFiles.map(fp => {
   const title = (html.match(/<title>([^<]+)<\/title>/i)?.[1] || '').replace(/\s+\|\s+Edooqoo.*$/i, '').replace(/\s+—\s+Edooqoo.*$/i, '').trim();
   const desc = (html.match(/<meta\s+name="description"\s+content="([^"]+)"/i)?.[1] || '').trim();
   const slug = basename(fp);
-  return { title, description: desc, url: '/' + slug };
-}).filter(p => p.title);
+  const url = '/' + slug;
+  return { title, description: desc, url, state: registryByRoute.get(url)?.state || 'hold' };
+}).filter(p => p.title && registryByRoute.get(p.url)?.indexable !== false);
 
 console.log(`Parsed ${landings.length} top-level landings`);
 
@@ -85,19 +81,21 @@ export interface BlogPostMeta {
   url: string;
   date: string;
   category: string;
+  state: 'keep' | 'improve' | 'hold';
 }
 
 export interface LandingPageMeta {
   title: string;
   description: string;
   url: string;
+  state: 'keep' | 'improve' | 'hold';
 }
 
 export const BLOG_POSTS: BlogPostMeta[] = ${JSON.stringify(posts, null, 2)};
 
 export const LANDING_PAGES: LandingPageMeta[] = ${JSON.stringify(landings, null, 2)};
 
-export const BLOG_CATEGORIES = Array.from(new Set(BLOG_POSTS.map(p => p.category))).sort();
+export const BLOG_CATEGORIES = Array.from(new Set(BLOG_POSTS.map(p => p.category)));
 `;
 
 writeFileSync('src/data/blogIndex.ts', tsOut);

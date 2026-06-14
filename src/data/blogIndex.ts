@@ -7,12 +7,14 @@ export interface BlogPostMeta {
   url: string;
   date: string;
   category: string;
+  state: 'keep' | 'improve' | 'hold';
 }
 
 export interface LandingPageMeta {
   title: string;
   description: string;
   url: string;
+  state: 'keep' | 'improve' | 'hold';
 }
 
 export const BLOG_POSTS: BlogPostMeta[] = [
@@ -21,1519 +23,1736 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "description": "Instructional explanation of how an ESL worksheet generator should connect topic, CEFR level, exercise type, answer keys, and teacher workflow.",
     "url": "/blog/ai-worksheet-generator-mechanics-for-esl-teachers.html",
     "date": "2026-05-24",
-    "category": "AI in Education"
+    "category": "Tutor Business and Tools",
+    "state": "keep"
   },
   {
     "title": "Business English Material Generation Workflow | Edooqoo",
     "description": "Instructional workflow for generating Business English materials for meetings, emails, interviews, presentations, and workplace vocabulary.",
     "url": "/blog/business-english-material-generation-workflow.html",
     "date": "2026-05-24",
-    "category": "Business English"
+    "category": "Adult and Business English",
+    "state": "keep"
   },
   {
     "title": "CEFR-Aligned Worksheet Generation Workflow | Edooqoo",
     "description": "Instructional workflow for generating English worksheets aligned with CEFR A1-C2 levels.",
     "url": "/blog/cefr-aligned-worksheet-generation-workflow.html",
     "date": "2026-05-24",
-    "category": "CEFR & Levels"
+    "category": "Student Evidence and Progress",
+    "state": "keep"
   },
   {
     "title": "English Homework AI-Assisted Review Workflow | Edooqoo",
     "description": "Instructional description of AI-assisted English homework review with teacher oversight.",
     "url": "/blog/english-homework-ai-grading-workflow.html",
     "date": "2026-05-24",
-    "category": "AI in Education"
+    "category": "Homework and Retention",
+    "state": "keep"
   },
   {
     "title": "English Tutor Material Organization Workflow | Edooqoo",
     "description": "Instructional workflow for organizing English tutoring materials, student context, worksheets, homework, flashcards, and follow-up tasks.",
     "url": "/blog/english-tutor-material-organization-workflow.html",
     "date": "2026-05-24",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "keep"
   },
   {
     "title": "ESL Exercise Type Selection Guide | Edooqoo",
     "description": "Instructional guide for selecting ESL exercise types by teaching goal, CEFR level, skill, and classroom use.",
     "url": "/blog/esl-exercise-type-selection-guide.html",
     "date": "2026-05-24",
-    "category": "How to Teach"
+    "category": "Tutor Business and Tools",
+    "state": "keep"
   },
   {
     "title": "Learning Pacing in Adult ESL: Scientific, Balanced, and Pragmatic Modes | Edooqoo",
     "description": "Instructional reference for Edooqoo Learning Pacing: Scientific, Balanced, and Pragmatic modes for recurring 1:1 adult English lessons.",
     "url": "/blog/learning-pacing-scientific-vs-pragmatic-esl.html",
     "date": "2026-05-24",
-    "category": "General"
+    "category": "What Should I Teach Next?",
+    "state": "keep"
   },
   {
     "title": "1-Minute Prep Workflow for ESL Tutors | Edooqoo",
     "description": "Instructional reference for testing the Edooqoo.com 1-Minute Prep workflow with one real student, DSLM signal evidence, setup boundaries, and worksheet output.",
     "url": "/blog/one-minute-prep-workflow-for-esl-tutors.html",
     "date": "2026-05-24",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "keep"
   },
   {
     "title": "Public ESL Worksheet Gallery Quality Standards | Edooqoo",
     "description": "Instructional explanation of public worksheet gallery quality standards, public examples, and LearningResource citation context.",
     "url": "/blog/public-esl-worksheet-gallery-quality-standards.html",
     "date": "2026-05-24",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "keep"
   },
   {
     "title": "Student Progress to Worksheet Feedback Loop | Edooqoo",
     "description": "Instructional explanation of how student progress context can inform future worksheet and homework decisions.",
     "url": "/blog/student-progress-to-worksheet-feedback-loop.html",
     "date": "2026-05-24",
-    "category": "Assessment"
+    "category": "What Should I Teach Next?",
+    "state": "keep"
   },
   {
     "title": "Choosing a Learning Management System for ESL Teaching | Edooqoo Blog",
     "description": "Google Classroom, Moodle, Canvas comparison with ESL-specific requirements, features analysis, and implementation guide.",
     "url": "/blog/learning-management-systems-esl.html",
     "date": "2025-12-24",
-    "category": "How to Teach"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Materials Design Principles for ELT",
     "description": "Tomlinson's principles, task design, sequencing, and piloting new materials for English language teaching.",
     "url": "/blog/materials-design-principles-elt.html",
     "date": "2025-12-24",
-    "category": "General"
+    "category": "One-to-One Lesson Planning",
+    "state": "hold"
   },
   {
     "title": "Data-Driven Learning with Corpora in ESL Teaching | Edooqoo Blog",
     "description": "Concordance lines, COCA/BNC corpus tools, student corpus investigation activities, and data-driven vocabulary teaching.",
     "url": "/blog/data-driven-learning-esl-corpora.html",
     "date": "2025-12-23",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Digital Resource Curation for ESL Teachers",
     "description": "Organizing bookmarks, evaluating online resources, and building a personal teaching library.",
     "url": "/blog/digital-resource-curation-esl.html",
     "date": "2025-12-23",
-    "category": "Tools"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Screen-Free Technology Activities for ESL Classes | Edooqoo Blog",
     "description": "QR code hunts, audio journals, tech-enhanced activities without screen dependency, and balanced technology integration.",
     "url": "/blog/screen-free-tech-activities-esl.html",
     "date": "2025-12-22",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Supplementing Coursebooks — Activities and Resources",
     "description": "When and how to go beyond the textbook with complementary materials and activities.",
     "url": "/blog/supplementing-coursebooks-activities.html",
     "date": "2025-12-22",
-    "category": "Tools"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Creating Authentic Materials for ESL Teaching",
     "description": "Realia, news articles, menus, and real-world texts with grading techniques for ESL classrooms.",
     "url": "/blog/creating-authentic-materials-esl.html",
     "date": "2025-12-21",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Using Chatbots for Language Practice — Teacher's Guide | Edooqoo Blog",
     "description": "ChatGPT, character.ai, and custom bots for speaking and writing practice — practical guide for ESL teachers.",
     "url": "/blog/using-chatbots-language-practice.html",
     "date": "2025-12-21",
-    "category": "How to Teach"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Adapting Textbooks for the ESL Classroom",
     "description": "Adding, deleting, modifying, and extending textbook activities for your specific teaching context.",
     "url": "/blog/adapting-textbooks-esl-classroom.html",
     "date": "2025-12-20",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "AI-Powered Differentiation in the ESL Classroom | Edooqoo Blog",
     "description": "Adaptive worksheets, automatic leveling, personalized learning paths with AI, and differentiation strategies for ESL teaching.",
     "url": "/blog/ai-powered-differentiation-esl.html",
     "date": "2025-12-20",
-    "category": "AI in Education"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "CPD Planning for ESL Teachers — Building Your Development Path",
     "description": "SMART goals, conference selection, online courses, and portfolio documentation for teacher CPD.",
     "url": "/blog/cpd-planning-esl-teachers.html",
     "date": "2025-12-19",
-    "category": "How to Teach"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Teaching Literacy to Young ESL Learners — Phonics and Beyond | Edooqoo Blog",
     "description": "Synthetic phonics, sight words, guided reading, emergent literacy stages, and reading readiness activities for young ESL.",
     "url": "/blog/teaching-literacy-young-esl-learners.html",
     "date": "2025-12-19",
-    "category": "Young Learners"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Content-Based Instruction for Young ESL Learners | Edooqoo Blog",
     "description": "Theme-based units, language through content, cross-curricular planning, and integrated skills development for young learners.",
     "url": "/blog/content-based-instruction-young-learners.html",
     "date": "2025-12-18",
-    "category": "Young Learners"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Mentoring New ESL Teachers — A Guide for Experienced Educators",
     "description": "Mentoring models, scaffolded autonomy, feedback frameworks, and mentor professional development.",
     "url": "/blog/mentoring-new-esl-teachers.html",
     "date": "2025-12-18",
-    "category": "How to Teach"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Peer Observation for ESL Teachers — Protocols and Feedback",
     "description": "Pre-observation meetings, focus areas, observation tools, and post-observation feedback dialogue.",
     "url": "/blog/peer-observation-esl-teachers.html",
     "date": "2025-12-17",
-    "category": "Assessment"
+    "category": "Student Evidence and Progress",
+    "state": "hold"
   },
   {
     "title": "Teen Engagement Strategies for ESL Classes | Edooqoo Blog",
     "description": "Relevance, autonomy, social media integration, project-based learning, and motivation techniques for teenage ESL students.",
     "url": "/blog/teen-engagement-strategies-esl.html",
     "date": "2025-12-17",
-    "category": "Young Learners"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Reflective Practice in Language Teaching",
     "description": "Reflective journals, critical incidents, Kolb's cycle, and peer reflection groups for ESL teachers.",
     "url": "/blog/reflective-practice-language-teaching.html",
     "date": "2025-12-16",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Total Physical Response (TPR) Activities for Young Learners | Edooqoo Blog",
     "description": "Action commands, TPR storytelling, extended TPR for vocabulary building, and movement-based language activities.",
     "url": "/blog/tpr-total-physical-response-activities.html",
     "date": "2025-12-16",
-    "category": "Young Learners"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Action Research for ESL Teachers — A Practical Guide",
     "description": "Research questions, data collection, analysis cycles, and classroom implementation for teacher research.",
     "url": "/blog/action-research-esl-teachers.html",
     "date": "2025-12-15",
-    "category": "How to Teach"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Teaching English to Preschoolers — Complete Guide | Edooqoo Blog",
     "description": "Routine-based learning, songs, stories, play-based language exposure, and age-appropriate activities for preschool ESL.",
     "url": "/blog/teaching-english-preschoolers-guide.html",
     "date": "2025-12-15",
-    "category": "How to Teach"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Motivation Theories in Language Learning — From Gardner to Dörnyei",
     "description": "Integrative and instrumental motivation, L2 Motivational Self System, and classroom strategies.",
     "url": "/blog/motivation-theories-language-learning.html",
     "date": "2025-12-14",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Teaching Listening for Gist and Detail — Practical Activities | Edooqoo Blog",
     "description": "Gist questions, detail scanning tasks, graded listening sequences, and practical activity design for ESL classes.",
     "url": "/blog/teaching-listening-for-gist-detail.html",
     "date": "2025-12-14",
-    "category": "Listening & Speaking"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "The Critical Period Hypothesis — Implications for Teaching",
     "description": "Age effects on language acquisition, neuroplasticity, ultimate attainment, and teaching adaptations.",
     "url": "/blog/critical-period-hypothesis-language.html",
     "date": "2025-12-13",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "The Dictogloss Technique in ESL Teaching | Edooqoo Blog",
     "description": "Dictogloss procedure, variations, grammar focus integration, and collaborative text reconstruction activities.",
     "url": "/blog/dictogloss-technique-esl-teaching.html",
     "date": "2025-12-13",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Input and Output Hypotheses in the ESL Classroom",
     "description": "Comprehensible input, pushed output, noticing hypothesis, and interaction hypothesis in practice.",
     "url": "/blog/input-output-hypotheses-classroom.html",
     "date": "2025-12-12",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Podcast-Based Listening Lessons for ESL Classes | Edooqoo Blog",
     "description": "Podcast selection criteria, pre/while/post listening activities, graded tasks, and lesson planning with podcasts.",
     "url": "/blog/podcast-based-listening-lessons-esl.html",
     "date": "2025-12-12",
-    "category": "Listening & Speaking"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Interlanguage and Fossilization — What Teachers Need to Know",
     "description": "Developmental stages, error analysis, and strategies for preventing fossilization in ESL learners.",
     "url": "/blog/interlanguage-fossilization-esl.html",
     "date": "2025-12-11",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Teaching Note-Taking from Lectures — ESL Academic Skills | Edooqoo Blog",
     "description": "Cornell method, abbreviation systems, lecture comprehension scaffolding, and academic listening skills development.",
     "url": "/blog/teaching-note-taking-from-lectures.html",
     "date": "2025-12-11",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Bottom-Up vs Top-Down Listening Strategies in ESL | Edooqoo Blog",
     "description": "Decoding skills, schema activation, integrated listening lesson design, and balanced strategy training for ESL learners.",
     "url": "/blog/bottom-up-top-down-listening-esl.html",
     "date": "2025-12-10",
-    "category": "Listening & Speaking"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Krashen's Hypotheses Applied to ESL Teaching",
     "description": "Acquisition-learning distinction, input hypothesis, monitor model, and affective filter in ESL practice.",
     "url": "/blog/krashen-hypotheses-esl-teaching.html",
     "date": "2025-12-10",
-    "category": "Tools"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Collaborative Writing Activities for ESL Students",
     "description": "Round-robin stories, wiki writing, peer drafting, and collaborative essays for language learners.",
     "url": "/blog/collaborative-writing-activities-esl.html",
     "date": "2025-12-09",
-    "category": "Reading & Writing"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Teaching Determiners and Quantifiers in ESL | Edooqoo Blog",
     "description": "Articles, demonstratives, quantifiers — common errors, practice activities, and systematic teaching approaches for ESL students.",
     "url": "/blog/teaching-determiners-quantifiers-esl.html",
     "date": "2025-12-09",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Consciousness-Raising Grammar Tasks for ESL | Edooqoo Blog",
     "description": "Discovery-based grammar teaching, noticing activities, guided induction approaches, and task design for grammar awareness.",
     "url": "/blog/consciousness-raising-grammar-tasks.html",
     "date": "2025-12-08",
-    "category": "Grammar"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Managing Group Dynamics in the ESL Classroom",
     "description": "Role assignment, participation balancing, and conflict resolution in ESL group work activities.",
     "url": "/blog/group-dynamics-esl-classroom.html",
     "date": "2025-12-08",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Teaching Relative Clauses to ESL Students | Edooqoo Blog",
     "description": "Defining vs non-defining clauses, reduced relatives, common errors by L1, and practical activities for teaching relative clauses.",
     "url": "/blog/teaching-relative-clauses-esl.html",
     "date": "2025-12-07",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Think-Pair-Share and Variations for ESL",
     "description": "Write-pair-share, think-pair-square, and rally robin adaptations for ESL discussion activities.",
     "url": "/blog/think-pair-share-esl-variations.html",
     "date": "2025-12-07",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Jigsaw Activities for the ESL Classroom",
     "description": "Expert groups, information sharing, and accountability in jigsaw reading and listening activities.",
     "url": "/blog/jigsaw-activities-esl-classroom.html",
     "date": "2025-12-06",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Teaching Modality in English — Must, Might, Could, Should | Edooqoo Blog",
     "description": "Epistemic vs deontic modality, probability scale activities, and modal verb teaching strategies for ESL classrooms.",
     "url": "/blog/teaching-modality-english-esl.html",
     "date": "2025-12-06",
-    "category": "Grammar"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Cooperative Learning Structures for ESL Classes",
     "description": "Kagan structures, numbered heads, round robin, and rally coach adapted for ESL classrooms.",
     "url": "/blog/cooperative-learning-structures-esl.html",
     "date": "2025-12-05",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Teaching Aspect in English Grammar — Perfect and Progressive | Edooqoo Blog",
     "description": "Aspect vs tense distinction, timeline visuals, common L1 interference patterns, and effective teaching strategies for English aspect.",
     "url": "/blog/teaching-aspect-english-grammar.html",
     "date": "2025-12-05",
-    "category": "Grammar"
+    "category": "Student Evidence and Progress",
+    "state": "hold"
   },
   {
     "title": "Teaching Abstract Vocabulary to ESL Students | Edooqoo Blog",
     "description": "Concept mapping, context clues, metaphor use, graded definition techniques, and strategies for teaching abstract words in ESL.",
     "url": "/blog/teaching-abstract-vocabulary-esl.html",
     "date": "2025-12-04",
-    "category": "Vocabulary"
+    "category": "Homework and Retention",
+    "state": "hold"
   },
   {
     "title": "Using Comics and Graphic Novels in ESL Teaching",
     "description": "Panel analysis, speech bubble writing, story creation, and visual literacy for ESL students.",
     "url": "/blog/using-comics-graphic-novels-esl.html",
     "date": "2025-12-04",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Art-Based Language Activities for ESL Classes",
     "description": "Drawing dictation, gallery walks, visual storytelling, and art response writing for language classes.",
     "url": "/blog/art-based-language-activities-esl.html",
     "date": "2025-12-03",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Vocabulary Notebook Strategies for ESL Students | Edooqoo Blog",
     "description": "Organization systems, example sentence writing, visual associations, review cycles, and effective vocabulary notebook management for ESL learners.",
     "url": "/blog/vocabulary-notebook-strategies-esl.html",
     "date": "2025-12-03",
-    "category": "Vocabulary"
+    "category": "Homework and Retention",
+    "state": "hold"
   },
   {
     "title": "The Lexical Approach in Language Teaching — Chunks and Collocations | Edooqoo Blog",
     "description": "Lewis's lexical approach framework, teaching chunks and collocations, and practical classroom implementation strategies for ESL.",
     "url": "/blog/lexical-approach-language-teaching.html",
     "date": "2025-12-02",
-    "category": "Vocabulary"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Reader's Theatre in ESL — Scripts and Activities",
     "description": "Script selection, fluency practice, intonation work, and performance preparation for ESL reader's theatre.",
     "url": "/blog/readers-theatre-esl-activities.html",
     "date": "2025-12-02",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Improvisation Activities for ESL Students",
     "description": "Yes-and, status games, character switches, and spontaneous dialogue building for language learners.",
     "url": "/blog/improvisation-activities-esl.html",
     "date": "2025-12-01",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Phrasal Verbs Teaching Strategies — From Avoidance to Mastery | Edooqoo Blog",
     "description": "Particle meaning analysis, context-based teaching approaches, and systematic phrasal verb coverage strategies for ESL students.",
     "url": "/blog/phrasal-verbs-teaching-strategies.html",
     "date": "2025-12-01",
-    "category": "Grammar"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Drama Techniques for the ESL Classroom",
     "description": "Hot-seating, freeze-frame, conscience alley, and forum theatre for language practice in ESL classes.",
     "url": "/blog/drama-techniques-esl-classroom.html",
     "date": "2025-11-30",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Teaching Word Families and Morphology in ESL | Edooqoo Blog",
     "description": "Comprehensive guide to teaching prefixes, suffixes, roots, and productive word-building strategies for vocabulary expansion in ESL classes.",
     "url": "/blog/teaching-word-families-morphology-esl.html",
     "date": "2025-11-30",
-    "category": "Vocabulary"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Accent Coaching Techniques for ESL Teachers | Edooqoo Blog",
     "description": "Individual accent coaching methods, modification goals, intelligibility-focused approaches, and practical techniques for ESL pronunciation teaching.",
     "url": "/blog/accent-coaching-techniques-esl.html",
     "date": "2025-11-29",
-    "category": "Listening & Speaking"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Lesson Sequencing and Scaffolding in Curriculum Design",
     "description": "Spiral curriculum, task complexity grading, and coherent lesson chains for ESL course planning.",
     "url": "/blog/lesson-sequencing-scaffolding-curriculum.html",
     "date": "2025-11-29",
-    "category": "Methodology"
+    "category": "One-to-One Lesson Planning",
+    "state": "hold"
   },
   {
     "title": "Evaluating ESL Course Effectiveness — Methods and Tools",
     "description": "Pre/post testing, student feedback, observation, and outcome analysis for ESL program evaluation.",
     "url": "/blog/course-evaluation-esl-programs.html",
     "date": "2025-11-28",
-    "category": "Methodology"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Phonemic Awareness Activities for ESL Learners | Edooqoo Blog",
     "description": "Sound discrimination exercises, phoneme segmentation tasks, minimal pair activities, and phonological awareness development strategies for ESL teaching.",
     "url": "/blog/phonemic-awareness-activities-esl.html",
     "date": "2025-11-28",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "How to Select and Evaluate ESL Textbooks",
     "description": "Evaluation criteria, piloting strategies, and textbook adaptation frameworks for ESL teachers.",
     "url": "/blog/selecting-esl-textbooks-guide.html",
     "date": "2025-11-27",
-    "category": "How to Teach"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Teaching Weak Forms in English — Schwa and Reduced Vowels | Edooqoo Blog",
     "description": "Guide to teaching common weak forms, schwa identification, reduced vowel patterns, and natural speech listening practice for ESL students.",
     "url": "/blog/teaching-weak-forms-english.html",
     "date": "2025-11-27",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Conducting Needs Analysis for ESL Students",
     "description": "Questionnaires, interviews, placement data, and learning objectives mapping for ESL needs analysis.",
     "url": "/blog/needs-analysis-esl-students.html",
     "date": "2025-11-26",
-    "category": "General"
+    "category": "One-to-One Lesson Planning",
+    "state": "hold"
   },
   {
     "title": "Teaching Rhythm in English Speech — Stress-Timed Language | Edooqoo Blog",
     "description": "Master stress-timed rhythm teaching with content vs function words identification, rhythm-based practice activities, and natural speech flow exercises for ESL classes.",
     "url": "/blog/teaching-rhythm-english-speech.html",
     "date": "2025-11-26",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Syllabus Design for ESL Courses — A Complete Guide",
     "description": "Structural, notional-functional, and task-based syllabi with planning templates for ESL course designers.",
     "url": "/blog/syllabus-design-esl-courses.html",
     "date": "2025-11-25",
-    "category": "How to Teach"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Teaching Word Stress Patterns to ESL Students | Edooqoo Blog",
     "description": "Learn effective techniques for teaching English word stress patterns including primary/secondary stress, compound nouns, stress shift rules, and drilling activities for ESL students.",
     "url": "/blog/teaching-word-stress-patterns-esl.html",
     "date": "2025-11-25",
-    "category": "Vocabulary"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Heritage Speakers in the ESL Classroom — Challenges and Strategies",
     "description": "Bidialectal literacy, academic register development, and identity affirmation activities.",
     "url": "/blog/heritage-speakers-esl-classroom.html",
     "date": "2025-11-24",
-    "category": "How to Teach"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Teaching Gender-Inclusive Language in ESL",
     "description": "Pronouns, titles, occupational nouns, and navigating evolving language norms.",
     "url": "/blog/gender-inclusive-language-esl.html",
     "date": "2025-11-23",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Culturally Responsive Teaching in ESL — Practical Strategies",
     "description": "Funds of knowledge, identity texts, and culturally sustaining pedagogy in language classes.",
     "url": "/blog/culturally-responsive-teaching-esl.html",
     "date": "2025-11-22",
-    "category": "How to Teach"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Trauma-Informed Teaching in ESL Classes",
     "description": "Safety, predictability, choice, and relationship-building for refugee and trauma-affected students.",
     "url": "/blog/trauma-informed-teaching-esl.html",
     "date": "2025-11-21",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Neurodiversity in the ESL Classroom — ADHD, Autism, and Dyslexia",
     "description": "Accommodations, multisensory techniques, and differentiated materials for neurodiverse learners.",
     "url": "/blog/neurodiversity-esl-classroom.html",
     "date": "2025-11-20",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Alternative Assessment in the ESL Classroom",
     "description": "Presentations, podcasts, vlogs, infographics, and performance-based assessment rubrics.",
     "url": "/blog/alternative-assessment-esl-classroom.html",
     "date": "2025-11-19",
-    "category": "Assessment"
+    "category": "Student Evidence and Progress",
+    "state": "hold"
   },
   {
     "title": "The Washback Effect in Language Testing — Teaching to the Test Done Right",
     "description": "Positive vs negative washback, test design for learning, and alignment strategies.",
     "url": "/blog/washback-effect-language-testing.html",
     "date": "2025-11-18",
-    "category": "Assessment"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Item Analysis for English Tests — Improving Your Exams",
     "description": "Facility value, discrimination index, distractor analysis, and test reliability.",
     "url": "/blog/item-analysis-english-tests.html",
     "date": "2025-11-17",
-    "category": "Exam Prep"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Designing Cloze Tests for ESL — Types and Best Practices",
     "description": "Fixed-ratio, rational, C-test, and banked cloze with scoring approaches.",
     "url": "/blog/cloze-test-design-esl.html",
     "date": "2025-11-16",
-    "category": "Assessment"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Designing English Midterm and Final Exams",
     "description": "Item types, specification tables, timing, difficulty calibration, and answer key design.",
     "url": "/blog/designing-english-midterm-final-exams.html",
     "date": "2025-11-15",
-    "category": "Exam Prep"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Teaching Academic Language Functions in CLIL",
     "description": "Classifying, hypothesizing, comparing, evaluating — language frames by subject area.",
     "url": "/blog/academic-language-functions-clil.html",
     "date": "2025-11-14",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Bilingual Education Models — Comparison and Implementation",
     "description": "Transitional, maintenance, dual-language, and immersion models with pros/cons.",
     "url": "/blog/bilingual-education-models-comparison.html",
     "date": "2025-11-13",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "English as Medium of Instruction (EMI) — Teacher's Guide",
     "description": "Lecture scaffolding, academic language support, and student comprehension strategies.",
     "url": "/blog/emi-english-medium-instruction-guide.html",
     "date": "2025-11-12",
-    "category": "How to Teach"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Teaching Science Through English — CLIL Activities",
     "description": "Lab reports, experiment descriptions, and scientific vocabulary scaffolding.",
     "url": "/blog/teaching-science-through-english.html",
     "date": "2025-11-11",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "CLIL Methodology — A Complete Guide for Language Teachers",
     "description": "Content and Language Integrated Learning: the 4Cs framework, lesson planning, and assessment.",
     "url": "/blog/clil-methodology-complete-guide.html",
     "date": "2025-11-10",
-    "category": "Methodology"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Teaching Aviation English — ICAO Standards and Radiotelephony",
     "description": "ICAO Level 4+ requirements, radiotelephony phrases, and emergency communication drills.",
     "url": "/blog/teaching-aviation-english.html",
     "date": "2025-11-09",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Teaching English for IT Professionals",
     "description": "Technical documentation, Agile vocabulary, code review language, and presentation skills.",
     "url": "/blog/teaching-english-it-professionals.html",
     "date": "2025-11-08",
-    "category": "General"
+    "category": "Adult and Business English",
+    "state": "hold"
   },
   {
     "title": "Teaching English for Hospitality and Tourism",
     "description": "Hotel, restaurant, and travel agency scenarios with functional language worksheets.",
     "url": "/blog/teaching-english-hospitality-tourism.html",
     "date": "2025-11-07",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Teaching Legal English — Contracts, Court Language, and Case Studies",
     "description": "Legal vocabulary, contract analysis, moot court activities, and plain English drafting.",
     "url": "/blog/teaching-legal-english.html",
     "date": "2025-11-06",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Teaching Medical English — Vocabulary, Scenarios, and Resources",
     "description": "Medical terminology, patient communication, case studies, and role-plays for healthcare professionals.",
     "url": "/blog/teaching-medical-english.html",
     "date": "2025-11-05",
-    "category": "Vocabulary"
+    "category": "Homework and Retention",
+    "state": "hold"
   },
   {
     "title": "Portfolio Assessment for ESL Writing — Complete Guide",
     "description": "Selection criteria, reflection tasks, showcase vs working portfolios, and grading.",
     "url": "/blog/portfolio-assessment-esl-writing.html",
     "date": "2025-11-04",
-    "category": "Reading & Writing"
+    "category": "Student Evidence and Progress",
+    "state": "hold"
   },
   {
     "title": "Journal Writing for ESL Students — Ideas and Implementation",
     "description": "Dialogue journals, reflective journals, and creative journal prompts by level.",
     "url": "/blog/journal-writing-esl-students.html",
     "date": "2025-11-03",
-    "category": "Reading & Writing"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Running Peer Editing Workshops in ESL Classes",
     "description": "Training students in peer review, feedback forms, and structured editing protocols.",
     "url": "/blog/peer-editing-workshops-esl.html",
     "date": "2025-11-02",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "The Process Writing Approach in ESL Teaching",
     "description": "Brainstorming, drafting, revising, editing, and publishing stages with classroom activities.",
     "url": "/blog/process-writing-approach-esl.html",
     "date": "2025-11-01",
-    "category": "Reading & Writing"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Teaching Essay Structure to ESL Students",
     "description": "Introduction-body-conclusion, thesis statements, topic sentences, and paragraph unity.",
     "url": "/blog/teaching-essay-structure-esl.html",
     "date": "2025-10-31",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Managing Large ESL Classes — Strategies for 30+ Students",
     "description": "Monitoring techniques, choral work, group roles, and efficient feedback in large groups.",
     "url": "/blog/managing-large-esl-classes.html",
     "date": "2025-10-30",
-    "category": "How to Teach"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Energy Management in ESL Lessons — Pacing and Flow",
     "description": "Stirrers vs settlers, lesson arc, and balancing high-energy with focused work.",
     "url": "/blog/energy-management-esl-lessons.html",
     "date": "2025-10-29",
-    "category": "How to Teach"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Smooth Transitions Between Activities in ESL Classes",
     "description": "Transition signals, timer techniques, and maintaining momentum between tasks.",
     "url": "/blog/transitions-activities-esl-classroom.html",
     "date": "2025-10-28",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Seating Arrangements for the ESL Classroom — What Works",
     "description": "U-shape, clusters, rows, and flexible seating with activity-type matching.",
     "url": "/blog/seating-arrangements-esl-classroom.html",
     "date": "2025-10-27",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Managing Behavior in the ESL Classroom",
     "description": "Positive discipline, behavior contracts, and de-escalation strategies for language classes.",
     "url": "/blog/managing-behavior-esl-classroom.html",
     "date": "2025-10-26",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Collaborating with Mainstream Teachers as an ESL Specialist",
     "description": "Co-teaching models, content-language integration, and shared planning strategies for ESL specialists working with mainstream teachers.",
     "url": "/blog/collaborating-with-mainstream-teachers-esl.html",
     "date": "2025-09-25",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Advocating for ELL Students in Your School",
     "description": "Policy awareness, accommodation requests, and data-driven advocacy for English Language Learners. Be an effective advocate for your students.",
     "url": "/blog/advocating-for-ell-students.html",
     "date": "2025-09-24",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Parent-Teacher Conferences for ESL — Preparation Guide",
     "description": "Conference structure, visual aids, and navigating language barriers during parent-teacher meetings for ESL programs.",
     "url": "/blog/parent-teacher-conferences-esl.html",
     "date": "2025-09-23",
-    "category": "How to Teach"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Writing Student Progress Reports for ESL Classes",
     "description": "CEFR-aligned descriptors, strengths/areas format, and report templates for ESL teachers. Write effective progress reports efficiently.",
     "url": "/blog/writing-student-progress-reports-esl.html",
     "date": "2025-09-22",
-    "category": "Reading & Writing"
+    "category": "Student Evidence and Progress",
+    "state": "hold"
   },
   {
     "title": "Communicating with ESL Parents — Tips and Templates",
     "description": "Multilingual communication, progress updates, and building home-school partnerships for ESL teachers. Templates and strategies that work.",
     "url": "/blog/communicating-with-esl-parents.html",
     "date": "2025-09-21",
-    "category": "How to Teach"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Using Authentic Listening Materials in ESL — Tips and Sources",
     "description": "TED Talks, news broadcasts, interviews, and how to grade authentic input for ESL students. Make real English accessible at every level.",
     "url": "/blog/authentic-listening-materials-esl.html",
     "date": "2025-09-20",
-    "category": "Listening & Speaking"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Teaching Note-Taking Skills in English Classes",
     "description": "Cornell method, mind maps, abbreviations, and academic listening practice for ESL students. Build essential academic and professional skills.",
     "url": "/blog/teaching-note-taking-skills-english.html",
     "date": "2025-09-19",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Using Podcasts in ESL Teaching — Activities and Lesson Plans",
     "description": "Podcast selection, pre-listening tasks, and follow-up activities organized by CEFR level. Turn podcasts into complete ESL lessons.",
     "url": "/blog/using-podcasts-esl-teaching.html",
     "date": "2025-09-18",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Dictation Activities for the ESL Classroom",
     "description": "Running dictation, dictogloss, partial dictation, and communicative dictation activities for ESL. Make dictation engaging and effective.",
     "url": "/blog/dictation-activities-esl-classroom.html",
     "date": "2025-09-17",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Teaching Listening Strategies to ESL Students",
     "description": "Top-down, bottom-up, and metacognitive strategies for listening comprehension in ESL. Help students understand real English, not just classroom English.",
     "url": "/blog/teaching-listening-strategies-esl.html",
     "date": "2025-09-16",
-    "category": "Listening & Speaking"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Teaching Mixed Conditionals — Activities and Worksheets",
     "description": "Past-present and present-past mixed conditionals with contextualized practice activities and worksheets for B2-C2 ESL learners.",
     "url": "/blog/teaching-mixed-conditionals-esl.html",
     "date": "2025-09-15",
-    "category": "Grammar"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Teaching Ellipsis and Substitution in English",
     "description": "Textual cohesion, so/do substitution, and discourse-level grammar for advanced ESL learners. Make student writing more natural and cohesive.",
     "url": "/blog/teaching-ellipsis-substitution-english.html",
     "date": "2025-09-14",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Teaching Cleft Sentences — It-Clefts and What-Clefts",
     "description": "Focus and emphasis structures with transformation and production activities for advanced ESL. It-clefts, what-clefts, and all-clefts explained.",
     "url": "/blog/teaching-cleft-sentences-english.html",
     "date": "2025-09-13",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Teaching Inversion in English — Advanced Grammar Activities",
     "description": "Negative adverbials, conditional inversion, and formal register practice for advanced ESL learners. Activities and worksheets for B2-C2.",
     "url": "/blog/teaching-inversion-english.html",
     "date": "2025-09-12",
-    "category": "Grammar"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Teaching the Subjunctive in English — When and How",
     "description": "Mandative subjunctive, were-subjunctive, and practice contexts for advanced ESL. Clear explanations with activities for B2-C2 learners.",
     "url": "/blog/teaching-subjunctive-english.html",
     "date": "2025-09-11",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Growth Mindset in Language Learning — Activities and Strategies",
     "description": "Fixed vs growth mindset in ESL, error positivity, effort-based feedback, and practical activities to build resilient language learners.",
     "url": "/blog/growth-mindset-language-learning.html",
     "date": "2025-09-10",
-    "category": "How to Teach"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Using Rewards in the ESL Classroom — Dos and Don'ts",
     "description": "Token economies, praise strategies, and avoiding reward dependency in ESL. Research-based guide to effective use of rewards in language teaching.",
     "url": "/blog/using-rewards-esl-classroom.html",
     "date": "2025-09-09",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Fostering Student Autonomy in the ESL Classroom",
     "description": "Choice boards, learning contracts, and self-directed projects for ESL students. Build independent learners who take ownership of their progress.",
     "url": "/blog/student-autonomy-esl-classroom.html",
     "date": "2025-09-08",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Building Intrinsic Motivation in Language Learning",
     "description": "Self-determination theory, autonomy, competence, and relatedness applied to ESL teaching. Build lasting motivation in language learners.",
     "url": "/blog/intrinsic-motivation-language-learning.html",
     "date": "2025-09-07",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Motivating Reluctant ESL Learners — Practical Strategies",
     "description": "Identify barriers, build rapport, and create meaningful learning experiences for unmotivated ESL students. Research-backed strategies that work.",
     "url": "/blog/motivating-reluctant-esl-learners.html",
     "date": "2025-09-06",
-    "category": "How to Teach"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
-    "title": "Best Digital Homework Tools for ESL Teachers in 2026 â€” Edooqoo",
+    "title": "Best Digital Homework Tools for ESL Teachers in 2026",
     "description": "Platform comparison for assigning, tracking, and grading ESL homework online. Find the best digital tools for your teaching workflow.",
     "url": "/blog/digital-homework-tools-esl-teachers.html",
     "date": "2025-09-05",
-    "category": "Tools"
+    "category": "Homework and Retention",
+    "state": "hold"
   },
   {
     "title": "Flipped Homework — Reversing In-Class and At-Home Tasks",
     "description": "Video-based pre-learning, in-class practice, and blended learning models for ESL. How to flip homework for better language learning outcomes.",
     "url": "/blog/flipped-homework-esl-classroom.html",
     "date": "2025-09-04",
-    "category": "Methodology"
+    "category": "Homework and Retention",
+    "state": "hold"
   },
   {
     "title": "Encouraging Self-Directed Learning in ESL Students",
     "description": "Learner training, goal setting, and autonomy-building strategies for ESL students. Help students take ownership of their English learning journey.",
     "url": "/blog/self-directed-learning-esl.html",
     "date": "2025-09-03",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Teaching Study Skills to English Learners",
     "description": "Note-taking, time management, vocabulary notebooks, and revision techniques for ESL students. Help learners study English more effectively.",
     "url": "/blog/teaching-study-skills-english-learners.html",
     "date": "2025-09-02",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
-    "title": "Effective ESL Homework Strategies That Students Actually Do â€” Edooqoo",
+    "title": "Effective ESL Homework Strategies That Students Actually Do",
     "description": "Design meaningful ESL homework with accountability systems and feedback loops. Practical strategies for homework that students complete and learn from.",
     "url": "/blog/effective-esl-homework-strategies.html",
     "date": "2025-09-01",
-    "category": "How to Teach"
+    "category": "Homework and Retention",
+    "state": "hold"
   },
   {
     "title": "Accent Reduction Activities for ESL Students",
     "description": "Intelligibility-focused accent work with diagnostic tools and targeted practice activities. Help ESL students communicate clearly without losing identity.",
     "url": "/blog/accent-reduction-activities-esl.html",
     "date": "2025-08-31",
-    "category": "Listening & Speaking"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Using the IPA Phonetic Alphabet in ESL Teaching",
     "description": "When and how to introduce IPA symbols in ESL classes. Practical activities for teaching phonemic transcription to English learners.",
     "url": "/blog/ipa-phonetic-alphabet-esl-teaching.html",
     "date": "2025-08-30",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Teaching Connected Speech — Activities and Exercises",
     "description": "Linking, elision, assimilation, and weak forms explained with practical ESL activities. Help students understand natural spoken English.",
     "url": "/blog/connected-speech-teaching-activities.html",
     "date": "2025-08-29",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Teaching English Intonation and Stress Patterns",
     "description": "Sentence stress, word stress, rising and falling intonation patterns with practice activities for ESL students at every level.",
     "url": "/blog/teaching-english-intonation-stress.html",
     "date": "2025-08-28",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Teaching Minimal Pairs — Pronunciation Activities for ESL",
     "description": "Minimal pair drills, card games, and listening discrimination exercises for ESL pronunciation practice. Complete guide with activities by CEFR level.",
     "url": "/blog/teaching-minimal-pairs-esl.html",
     "date": "2025-08-27",
-    "category": "Listening & Speaking"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Setting Up Extensive Reading Programs for ESL",
     "description": "How to set up and manage extensive reading programs in ESL. Graded readers, reading logs, assessment methods, and strategies for motivating reluctant readers.",
     "url": "/blog/extensive-reading-programs-esl.html",
     "date": "2025-08-26",
-    "category": "Reading & Writing"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Teaching Pragmatics in ESL — Politeness and Context",
     "description": "How to teach pragmatics in ESL classes. Speech acts, politeness strategies, indirect language, and context-appropriate communication activities.",
     "url": "/blog/teaching-pragmatics-esl.html",
     "date": "2025-08-25",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Contrastive Analysis in Language Teaching",
     "description": "How contrastive analysis helps predict and address L1 interference in ESL. Common error patterns by L1 background and targeted practice strategies.",
     "url": "/blog/contrastive-analysis-language-teaching.html",
     "date": "2025-08-24",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Using Corpus Linguistics in ESL Teaching",
     "description": "How to use corpus linguistics in ESL teaching. Concordancers, frequency lists, data-driven learning, and practical corpus activities for English teachers.",
     "url": "/blog/corpus-linguistics-esl-teaching.html",
     "date": "2025-08-23",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Teaching Linking Words and Connectors",
     "description": "How to teach linking words and connectors in ESL. Conjunctions, discourse markers, cohesion activities, and connector exercises organized by CEFR level.",
     "url": "/blog/teaching-linking-words-connectors.html",
     "date": "2025-08-22",
-    "category": "Vocabulary"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "20 Five-Minute Filler Activities for ESL",
     "description": "Quick 5-minute filler activities for ESL classes. Perfect for transitions, early finishers, unexpected free time, and energy changes in English lessons.",
     "url": "/blog/five-minute-filler-activities-esl.html",
     "date": "2025-08-21",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Substitute Teacher ESL Lesson Plans — Ready to Go",
     "description": "No-prep emergency lesson plans for substitute ESL teachers. Ready-to-use activities that work at any level, any topic, and require no prior knowledge of the class.",
     "url": "/blog/substitute-teacher-esl-lesson-plans.html",
     "date": "2025-08-20",
-    "category": "General"
+    "category": "One-to-One Lesson Planning",
+    "state": "hold"
   },
   {
     "title": "Holiday-Themed ESL Activities and Worksheets",
     "description": "Holiday-themed ESL activities for Christmas, Halloween, Easter, and cultural celebrations. Lesson ideas, worksheets, and vocabulary for seasonal English classes.",
     "url": "/blog/holiday-themed-esl-activities.html",
     "date": "2025-08-19",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "End-of-Term Activities for ESL Classes",
     "description": "Engaging end-of-term activities for ESL classes. Review games, portfolio presentations, reflection activities, celebrations, and course wrap-up strategies.",
     "url": "/blog/end-of-term-activities-esl.html",
     "date": "2025-08-18",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "First Day of ESL Class — Activities and Icebreakers",
     "description": "Make the first ESL class memorable. Icebreaker activities, needs analysis techniques, classroom rules, and first-lesson routines for English teachers.",
     "url": "/blog/first-day-esl-class-activities.html",
     "date": "2025-08-17",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Teaching Formal vs Informal English — Register Guide",
     "description": "How to teach English register and style shifting. Formal vs informal vocabulary, grammar differences, and activities for register awareness in ESL classes.",
     "url": "/blog/teaching-formal-informal-english.html",
     "date": "2025-08-16",
-    "category": "How to Teach"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "100 Discussion Questions for ESL Classes — By Topic",
     "description": "100 curated discussion questions for ESL classes organized by topic and CEFR level. Ready-to-use conversation starters for speaking practice.",
     "url": "/blog/discussion-questions-esl-topics.html",
     "date": "2025-08-15",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Teaching Presentation Skills in English",
     "description": "How to teach presentation skills in English. Structure, signposting language, visual aids, delivery techniques, and practice activities for ESL students.",
     "url": "/blog/teaching-presentation-skills-english.html",
     "date": "2025-08-14",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Creative Writing Activities for ESL Classes",
     "description": "Engaging creative writing activities for ESL students. Story starters, poetry templates, flash fiction, collaborative writing, and assessment strategies.",
     "url": "/blog/creative-writing-activities-esl.html",
     "date": "2025-08-13",
-    "category": "Reading & Writing"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Teaching Email Writing to ESL Students",
     "description": "How to teach email writing in ESL classes. Formal and informal templates, register, common mistakes, and practice activities for professional email communication.",
     "url": "/blog/teaching-email-writing-esl.html",
     "date": "2025-08-12",
-    "category": "Reading & Writing"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
-    "title": "Teaching English One-to-One \"” Private Lesson Guide \"” Edooqoo",
+    "title": "Teaching English One-to-One — Private Lesson Guide",
     "description": "Complete guide to teaching private English lessons. Needs analysis, lesson structure, pacing, rapport building, and tools for one-to-one ESL tutoring.",
     "url": "/blog/teaching-english-one-to-one.html",
     "date": "2025-08-11",
-    "category": "How to Teach"
+    "category": "One-to-One Lesson Planning",
+    "state": "hold"
   },
   {
     "title": "Managing a Multilevel ESL Classroom",
     "description": "Practical strategies for teaching multilevel ESL classes. Differentiation, tiered tasks, flexible grouping, and materials management for mixed-ability groups.",
     "url": "/blog/multilevel-esl-classroom-strategies.html",
     "date": "2025-08-10",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Teaching English to Students with Learning Disabilities",
     "description": "Strategies for teaching English to students with dyslexia, ADHD, and other learning disabilities. Inclusive classroom design, adapted materials, and assistive technology.",
     "url": "/blog/teaching-english-learning-disabilities.html",
     "date": "2025-08-09",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "English for Specific Purposes (ESP) — Teacher's Guide",
     "description": "Complete guide to teaching English for Specific Purposes. Medical, legal, aviation, IT, and business English course design with needs analysis and materials.",
     "url": "/blog/english-for-specific-purposes-guide.html",
     "date": "2025-08-08",
-    "category": "How to Teach"
+    "category": "Adult and Business English",
+    "state": "hold"
   },
   {
     "title": "Teaching English to Immigrants and Refugees",
     "description": "Guide to teaching English to immigrants and refugees. Trauma-informed approaches, survival English, literacy development, and community integration strategies.",
     "url": "/blog/teaching-english-immigrants-refugees.html",
     "date": "2025-08-07",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
-    "title": "AI Lesson Planning Strategies for English Teachers â€” Edooqoo",
+    "title": "AI Lesson Planning Strategies for English Teachers",
     "description": "How to use AI for lesson planning in English teaching. Strategies for generating content, differentiating materials, and saving time with AI-powered tools.",
     "url": "/blog/ai-lesson-planning-strategies.html",
     "date": "2025-08-06",
-    "category": "AI in Education"
+    "category": "One-to-One Lesson Planning",
+    "state": "hold"
   },
   {
     "title": "Video Conferencing Tips for Online ESL Teachers",
     "description": "Optimize Zoom, Google Meet, and Teams for online ESL lessons. Camera setup, screen sharing, engagement techniques, and technical troubleshooting guide.",
     "url": "/blog/video-conferencing-tips-online-esl.html",
     "date": "2025-08-05",
-    "category": "How to Teach"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
-    "title": "Creating Interactive Worksheets Online â€” Tools and Tips â€” Edooqoo",
+    "title": "Creating Interactive Worksheets Online — Tools and Tips",
     "description": "How to create engaging interactive worksheets online. Compare tools, platforms, and techniques for making digital worksheets that students love.",
     "url": "/blog/creating-interactive-worksheets-online.html",
     "date": "2025-08-04",
-    "category": "How to Teach"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
-    "title": "Using Google Workspace for ESL Teachers â€” Edooqoo",
+    "title": "Using Google Workspace for ESL Teachers",
     "description": "How ESL teachers can use Google Docs, Slides, Forms, and Classroom. Practical workflows for lesson planning, worksheet sharing, and student management.",
     "url": "/blog/using-google-workspace-esl-teachers.html",
     "date": "2025-08-03",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
-    "title": "Best Apps for Learning English in 2026 â€” Edooqoo",
-    "description": "Complete comparison of the best English learning apps in 2026. Duolingo, Babbel, Edooqoo, Anki, and more â€” features, pricing, and teacher recommendations.",
+    "title": "Best Apps for Learning English in 2026",
+    "description": "Complete comparison of the best English learning apps in 2026. Duolingo, Babbel, Edooqoo, Anki, and more — features, pricing, and teacher recommendations.",
     "url": "/blog/best-apps-learning-english-2026.html",
     "date": "2025-08-02",
-    "category": "Tools"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Using Current Events in ESL Lessons",
     "description": "How to use news articles and current events in ESL classes. News-based lesson plans, media literacy activities, and critical thinking exercises for English learners.",
     "url": "/blog/current-events-esl-lessons.html",
     "date": "2025-08-01",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Teaching English Through Literature — Practical Guide",
     "description": "How to use graded readers, poetry, short stories, and literature circles in ESL classes. Practical activities for integrating literature into English teaching.",
     "url": "/blog/teaching-english-through-literature.html",
     "date": "2025-07-31",
-    "category": "How to Teach"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Using Films and Videos in English Teaching",
     "description": "How to use films, movie clips, and videos in ESL lessons. Film-based activities, clip selection guide, viewing tasks, and discussion strategies for all levels.",
     "url": "/blog/using-films-english-teaching.html",
     "date": "2025-07-30",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Cross-Cultural Communication Activities for ESL",
     "description": "Practical activities for teaching cross-cultural communication in ESL classes. Body language, politeness strategies, and intercultural awareness exercises.",
     "url": "/blog/cross-cultural-communication-activities.html",
     "date": "2025-07-29",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Teaching Culture in the ESL Classroom",
     "description": "How to integrate cultural awareness into ESL lessons. Activities for intercultural competence, cultural comparison tasks, and global citizenship education.",
     "url": "/blog/teaching-culture-esl-classroom.html",
     "date": "2025-07-28",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Setting Up a Freelance ESL Business — Complete Guide",
     "description": "Complete guide to setting up a freelance ESL business: pricing strategies, marketing, student acquisition, essential tools, and scaling your teaching practice.",
     "url": "/blog/setting-up-freelance-esl-business.html",
     "date": "2025-07-27",
-    "category": "Business English"
+    "category": "Adult and Business English",
+    "state": "hold"
   },
   {
-    "title": "Using AI to Boost Teacher Productivity in 2026 â€” Edooqoo",
+    "title": "Using AI to Boost Teacher Productivity in 2026",
     "description": "How ESL teachers can use AI tools in 2026: worksheet generation, teacher-reviewed homework support, lesson planning, student tracking, and administrative automation.",
     "url": "/blog/using-ai-teacher-productivity.html",
     "date": "2025-07-26",
-    "category": "AI in Education"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Building Your ESL Teaching Portfolio — What to Include",
     "description": "How to build an ESL teaching portfolio: structure, sample materials, student testimonials, digital tools, and what employers and clients want to see.",
     "url": "/blog/building-esl-teaching-portfolio.html",
     "date": "2025-07-25",
-    "category": "Assessment"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
-    "title": "Preventing Teacher Burnout â€” Strategies for ESL Teachers â€” Edooqoo",
+    "title": "Preventing Teacher Burnout — Strategies for ESL Teachers",
     "description": "Practical strategies to prevent ESL teacher burnout: workload management, boundaries, self-care routines, and sustainable teaching practices.",
     "url": "/blog/teacher-burnout-prevention-esl.html",
     "date": "2025-07-24",
-    "category": "How to Teach"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "TEFL Certification — Complete Guide for New Teachers",
     "description": "TEFL certification guide: TEFL vs TESOL vs CELTA, online vs in-person courses, costs, career paths, and what to look for in a TEFL program.",
     "url": "/blog/tefl-certification-guide.html",
     "date": "2025-07-23",
-    "category": "How to Teach"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Project-Based Learning in the English Classroom",
     "description": "How to implement project-based learning in ESL: project ideas, planning frameworks, assessment criteria, and integrating all four language skills.",
     "url": "/blog/project-based-learning-english.html",
     "date": "2025-07-22",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Pair Work Activities for ESL — 15 Ready-to-Use Ideas",
     "description": "15 pair work activities for ESL: information gap, interview activities, collaborative tasks, and pair speaking exercises for all levels.",
     "url": "/blog/pair-work-activities-esl.html",
     "date": "2025-07-21",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Debate Activities for English Classes — Topics and Rules",
     "description": "Structured debate activities for ESL classes: debate formats, topic lists by CEFR level, language of argumentation, and assessment criteria.",
     "url": "/blog/debate-activities-english-class.html",
     "date": "2025-07-20",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Role-Play Activities for ESL — Ideas and Templates",
     "description": "Role-play activities for ESL classes: scenario cards, role assignments, language support frames, and templates for speaking practice at every CEFR level.",
     "url": "/blog/role-play-activities-esl.html",
     "date": "2025-07-19",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "20 Warm-Up Activities for ESL Classes",
     "description": "20 quick warm-up activities for ESL classes: vocabulary review, speaking starters, grammar games, and energy boosters to begin every lesson effectively.",
     "url": "/blog/warm-up-activities-esl.html",
     "date": "2025-07-18",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Diagnostic Testing for English Learners — How and When",
     "description": "How to use diagnostic testing in ESL: placement tests, needs analysis, skills audits, and identifying specific learning gaps for targeted instruction.",
     "url": "/blog/diagnostic-testing-english-learners.html",
     "date": "2025-07-17",
-    "category": "Assessment"
+    "category": "Student Evidence and Progress",
+    "state": "hold"
   },
   {
     "title": "Peer Feedback Activities for English Classes",
     "description": "Structured peer feedback activities for ESL: peer review frameworks, feedback sentence starters, writing workshops, and collaborative assessment.",
     "url": "/blog/peer-feedback-activities-english.html",
     "date": "2025-07-16",
-    "category": "Assessment"
+    "category": "Student Evidence and Progress",
+    "state": "hold"
   },
   {
     "title": "Self-Assessment Strategies for ESL Students",
     "description": "Practical self-assessment strategies for ESL students: can-do checklists, learning journals, portfolio assessment, and goal-setting techniques.",
     "url": "/blog/self-assessment-strategies-esl.html",
     "date": "2025-07-15",
-    "category": "Assessment"
+    "category": "Student Evidence and Progress",
+    "state": "hold"
   },
   {
     "title": "Creating Rubrics for English Language Assessment",
     "description": "How to create effective rubrics for ESL assessment: analytic vs holistic rubrics, writing rubrics, speaking rubrics, and ready-to-use templates.",
     "url": "/blog/rubrics-for-english-teachers.html",
     "date": "2025-07-14",
-    "category": "Assessment"
+    "category": "Student Evidence and Progress",
+    "state": "hold"
   },
   {
-    "title": "How to Create Effective English Tests â€” Teacher's Guide â€” Edooqoo",
+    "title": "How to Create Effective English Tests — Teacher's Guide",
     "description": "Guide to creating effective English tests: test design principles, item types, scoring methods, validity, reliability, and AI-assisted test creation.",
     "url": "/blog/creating-english-tests-guide.html",
     "date": "2025-07-13",
-    "category": "Assessment"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
-    "title": "Error Correction Techniques for ESL Teachers â€” Edooqoo",
+    "title": "Error Correction Techniques for ESL Teachers",
     "description": "Effective error correction strategies for ESL: self-correction, peer correction, delayed correction, reformulation, and when to correct vs. ignore errors.",
     "url": "/blog/error-correction-techniques-esl.html",
     "date": "2025-07-12",
-    "category": "General"
+    "category": "Student Evidence and Progress",
+    "state": "hold"
   },
   {
     "title": "Teaching Articles (A, An, The) — ESL Guide",
     "description": "How to teach English articles a, an, the: rules, exceptions, practice activities, and exercises for ESL students from A1 to C1 level.",
     "url": "/blog/teaching-articles-esl-guide.html",
     "date": "2025-07-11",
-    "category": "Grammar"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Teaching Reported Speech — Step-by-Step Guide",
     "description": "Step-by-step guide to teaching reported speech in ESL: tense backshift rules, reporting verbs, practice activities, and common errors with solutions.",
     "url": "/blog/teaching-reported-speech-esl.html",
     "date": "2025-07-10",
-    "category": "How to Teach"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Teaching Passive Voice — Activities and Worksheets",
     "description": "How to teach passive voice in ESL: when to introduce it, transformation activities, contextualized practice, and common student errors with solutions.",
     "url": "/blog/teaching-passive-voice-activities.html",
     "date": "2025-07-09",
-    "category": "Grammar"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Teaching Conditionals — Complete ESL Guide",
     "description": "Complete guide to teaching conditionals in ESL: zero to third conditional with timelines, practice activities, common errors, and worksheet ideas.",
     "url": "/blog/teaching-conditionals-esl-guide.html",
     "date": "2025-07-08",
-    "category": "Grammar"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Word Formation Exercises — Prefixes, Suffixes, and Roots",
     "description": "Complete guide to word formation in English: prefixes, suffixes, roots, and morphology-based exercises for vocabulary building in ESL classes.",
     "url": "/blog/word-formation-exercises-english.html",
     "date": "2025-07-07",
-    "category": "Vocabulary"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Teaching Academic Vocabulary — Strategies for ESL",
     "description": "Strategies for teaching academic vocabulary in ESL: AWL-based instruction, Tier 2-3 words, academic register practice, and vocabulary worksheets.",
     "url": "/blog/academic-vocabulary-teaching-strategies.html",
     "date": "2025-07-06",
-    "category": "Vocabulary"
+    "category": "Homework and Retention",
+    "state": "hold"
   },
   {
     "title": "15 Vocabulary Games for the ESL Classroom",
     "description": "15 engaging vocabulary games for ESL classrooms: competitive, collaborative, and digital games for vocabulary review, acquisition, and long-term retention.",
     "url": "/blog/vocabulary-games-esl-classroom.html",
     "date": "2025-07-05",
-    "category": "Vocabulary"
+    "category": "Homework and Retention",
+    "state": "hold"
   },
   {
     "title": "Teaching Idioms — Activities and Worksheets for ESL",
     "description": "How to teach English idioms effectively: categorized idiom lists, context-based activities, matching worksheets, and idiom teaching strategies by CEFR level.",
     "url": "/blog/teaching-idioms-esl-activities.html",
     "date": "2025-07-04",
-    "category": "Vocabulary"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "How to Teach Collocations in ESL Classes",
     "description": "Complete guide to teaching collocations in ESL: types of collocations, teaching strategies, practice activities, and worksheets for natural English.",
     "url": "/blog/teaching-collocations-esl.html",
     "date": "2025-07-03",
-    "category": "Vocabulary"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Storytelling Activities for ESL Classes",
     "description": "15 storytelling activities for ESL classes: story chains, picture stories, digital storytelling, and narrative writing activities for all CEFR levels.",
     "url": "/blog/storytelling-activities-esl.html",
     "date": "2025-07-02",
-    "category": "Young Learners"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Using Songs and Music in the ESL Classroom",
     "description": "How to use songs and music for ESL teaching: gap-fill lyrics, pronunciation practice, grammar through songs, and song-based lesson plans by CEFR level.",
     "url": "/blog/english-songs-activities-esl.html",
     "date": "2025-07-01",
-    "category": "Young Learners"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Teaching English to Teenagers — Strategies That Work",
     "description": "Proven strategies for teaching English to teenagers: motivation techniques, relevant topics, technology integration, and managing classroom dynamics.",
     "url": "/blog/teaching-english-to-teenagers.html",
     "date": "2025-06-30",
-    "category": "Young Learners"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "20 ESL Games for Kids That Actually Work",
     "description": "20 tested ESL games for kids: vocabulary games, grammar games, speaking activities, and movement games that keep young learners engaged and learning.",
     "url": "/blog/esl-games-for-kids.html",
     "date": "2025-06-29",
-    "category": "Young Learners"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Teaching English to Young Learners — Complete Guide",
     "description": "Complete guide to teaching English to young learners: TPR, songs, games, storytelling, and classroom management strategies for kids aged 3-12.",
     "url": "/blog/teaching-english-to-young-learners.html",
     "date": "2025-06-28",
-    "category": "Young Learners"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
-    "title": "Classroom Management Tips for ESL Teachers â€” Edooqoo",
+    "title": "Classroom Management Tips for ESL Teachers",
     "description": "Practical classroom management strategies for ESL/EFL teachers. Engagement techniques, behavior management, routines, energy management, and maintaining motivation in language classes.",
     "url": "/blog/classroom-management-esl-tips.html",
     "date": "2025-06-27",
-    "category": "How to Teach"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "How to Plan English Lessons Effectively",
     "description": "Step-by-step guide to planning English lessons. PPP, ESA, TBL frameworks, lesson plan templates, timing strategies, and AI tools for faster preparation.",
     "url": "/blog/how-to-plan-english-lessons-effectively.html",
     "date": "2025-06-26",
-    "category": "How to Teach"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "How to Teach English Pronunciation",
     "description": "Practical pronunciation teaching techniques for ESL/EFL teachers. Minimal pairs, connected speech, stress and intonation, phonics activities, and AI-supported listening exercises.",
     "url": "/blog/how-to-teach-english-pronunciation.html",
     "date": "2025-06-25",
-    "category": "Listening & Speaking"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "How to Teach Writing to ESL Students",
     "description": "Practical writing instruction strategies for ESL/EFL teachers. Process writing, genre-based approach, error correction, and AI-generated writing exercises for all CEFR levels.",
     "url": "/blog/how-to-teach-writing-esl-students.html",
     "date": "2025-06-24",
-    "category": "Reading & Writing"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "How to Teach Speaking in ESL Classes",
     "description": "Practical speaking activities for ESL/EFL classes. Fluency vs accuracy, discussion frameworks, role-play techniques, and AI-supported oral practice for all CEFR levels.",
     "url": "/blog/how-to-teach-speaking-esl.html",
     "date": "2025-06-23",
-    "category": "Listening & Speaking"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
-    "title": "How to Teach English Grammar Effectively â€” Edooqoo",
+    "title": "How to Teach English Grammar Effectively",
     "description": "Proven grammar teaching strategies for ESL/EFL teachers. Inductive vs deductive approaches, PPP framework, error correction techniques, and AI worksheet examples for all CEFR levels.",
     "url": "/blog/how-to-teach-english-grammar-effectively.html",
     "date": "2025-06-22",
-    "category": "Grammar"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
-    "title": "Formative Assessment in English Teaching â€” Strategies & Tools | Edooqoo",
+    "title": "Formative Assessment in English Teaching — Strategies & Tools | Edooqoo",
     "description": "How to use formative assessment in ESL/EFL teaching. Exit tickets, self-assessment, peer feedback, AI-assisted homework, and progress tracking strategies for English teachers.",
     "url": "/blog/formative-assessment-english-teaching.html",
     "date": "2025-06-21",
-    "category": "Assessment"
+    "category": "Student Evidence and Progress",
+    "state": "hold"
   },
   {
     "title": "Scaffolding Strategies for English Learners — Practical Guide | Edooqoo",
     "description": "10 scaffolding strategies for ESL/EFL teachers. Visual supports, sentence frames, graphic organizers, and AI-differentiated worksheets for CEFR A1-C2 English learners.",
     "url": "/blog/scaffolding-strategies-english-learners.html",
     "date": "2025-06-20",
-    "category": "Methodology"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Gamification in the English Classroom — Strategies & Activities | Edooqoo",
     "description": "How to use gamification in ESL/EFL teaching. Points, badges, leaderboards, quests, and game-based activities for English classes with AI worksheet support for all CEFR levels.",
     "url": "/blog/gamification-english-classroom.html",
     "date": "2025-06-19",
-    "category": "Methodology"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
-    "title": "Flipped Classroom for English Teaching â€” Complete Guide | Edooqoo",
+    "title": "Flipped Classroom for English Teaching — Complete Guide | Edooqoo",
     "description": "How to implement the flipped classroom model in ESL/EFL teaching. Pre-class worksheets, in-class activities, and AI tools for creating flipped learning materials.",
     "url": "/blog/flipped-classroom-english-teaching.html",
     "date": "2025-06-18",
-    "category": "Methodology"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Task-Based Language Teaching Worksheets for ESL",
     "description": "How to design TBLT worksheets for ESL classes. Pre-task, task cycle, and language focus phases with practical examples for CEFR A1-C2 and AI worksheet generation tips.",
     "url": "/blog/task-based-language-teaching-worksheets.html",
     "date": "2025-06-17",
-    "category": "Methodology"
+    "category": "One-to-One Lesson Planning",
+    "state": "hold"
   },
   {
     "title": "Communicative Language Teaching Activities for ESL",
     "description": "Practical CLT activities for ESL/EFL classrooms. Information gap, role-play, opinion exchange, and task-based activities with AI worksheet examples for all CEFR levels.",
     "url": "/blog/communicative-language-teaching-activities.html",
     "date": "2025-06-16",
-    "category": "Methodology"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "IELTS Preparation Worksheets — A Teacher's Guide",
     "description": "Teacher's guide to creating effective IELTS preparation worksheets. All 4 sections covered with AI-generated practice materials, scoring tips, and 4-week prep plan.",
     "url": "/blog/ielts-preparation-worksheets-guide.html",
     "date": "2025-06-15",
-    "category": "Exam Prep"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Teaching Business English — Complete Guide",
     "description": "Complete guide to teaching Business English for ESL tutors and language schools. Key topics, industry vocabulary, role-play activities, assessment, and AI materials.",
     "url": "/blog/teaching-business-english-guide.html",
     "date": "2025-06-14",
-    "category": "Business English"
+    "category": "Adult and Business English",
+    "state": "hold"
   },
   {
-    "title": "Cambridge Exam Preparation Tips for Teachers â€” Edooqoo Blog",
+    "title": "Cambridge Exam Preparation Tips for Teachers",
     "description": "Cambridge exam preparation tips and worksheet strategies for teachers. KET, PET, FCE, CAE, CPE exercise types, AI practice materials, study schedules, and mock tests.",
     "url": "/blog/cambridge-exam-preparation-tips-teachers.html",
     "date": "2025-06-13",
-    "category": "Exam Prep"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
-    "title": "Personalized Learning in English Teaching â€” Edooqoo Blog",
+    "title": "Personalized Learning in English Teaching",
     "description": "From theory to AI-powered practice. How personalized learning works in English teaching with student profiles, nano-skill tracking, and AI-driven worksheet generation.",
     "url": "/blog/personalized-learning-english-teaching.html",
     "date": "2025-06-12",
-    "category": "General"
+    "category": "One-to-One Lesson Planning",
+    "state": "hold"
   },
   {
-    "title": "AI-Generated Listening Exercises for ESL â€” Edooqoo Blog",
+    "title": "AI-Generated Listening Exercises for ESL",
     "description": "How AI text-to-speech changes ESL listening instruction. 5 types of listening exercises, scaffolding by level, and comparing AI TTS vs native recordings.",
     "url": "/blog/ai-generated-listening-exercises-esl.html",
     "date": "2025-06-11",
-    "category": "AI in Education"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "AI Homework Review for English Teachers - Edooqoo Blog",
     "description": "How AI-assisted homework review works for English teachers: online submission, answer evaluation signals, teacher confirmation, feedback, and progress tracking.",
     "url": "/blog/ai-homework-grading-for-english-teachers.html",
     "date": "2025-06-10",
-    "category": "AI in Education"
+    "category": "Homework and Retention",
+    "state": "hold"
   },
   {
-    "title": "Best AI Tools for English Teachers in 2026 â€” Edooqoo Blog",
+    "title": "Best AI Tools for English Teachers in 2026",
     "description": "Complete guide to the best AI tools for English teachers in 2026. Compare Edooqoo, ChatGPT, Twee, MagicSchool, Quizlet across 8 criteria for ESL/EFL teaching.",
     "url": "/blog/ai-tools-for-english-teachers-2026.html",
     "date": "2025-06-09",
-    "category": "AI in Education"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "Spaced Repetition for Vocabulary Learning",
     "description": "How spaced repetition works for vocabulary learning. SM-2 algorithm explained, Ebbinghaus forgetting curve, practical implementation for ESL teachers, and digital flashcard best practices.",
     "url": "/blog/spaced-repetition-vocabulary-learning.html",
     "date": "2025-06-08",
-    "category": "Vocabulary"
+    "category": "Homework and Retention",
+    "state": "hold"
   },
   {
-    "title": "Teaching English Online in 2026 â€” Complete Guide â€” Edooqoo Blog",
+    "title": "Teaching English Online in 2026 — Complete Guide",
     "description": "Complete guide to teaching English online in 2026. Setup, tools, engagement techniques, scheduling, assessment, and growing your online tutoring business.",
     "url": "/blog/teaching-english-online-complete-guide.html",
     "date": "2025-06-07",
-    "category": "How to Teach"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "How to Assess English Level Using CEFR",
     "description": "Complete teacher's guide to assessing English level using CEFR. All 6 levels explained with can-do statements, formal vs informal assessment, and AI placement testing.",
     "url": "/blog/how-to-assess-english-level-cefr.html",
     "date": "2025-06-06",
-    "category": "CEFR & Levels"
+    "category": "Student Evidence and Progress",
+    "state": "hold"
   },
   {
-    "title": "Differentiated Instruction in the English Classroom â€” Edooqoo Blog",
+    "title": "Differentiated Instruction in the English Classroom",
     "description": "Practical guide to differentiated instruction in the English classroom. 6 strategies for ESL/EFL teachers with AI personalization examples and assessment approaches.",
     "url": "/blog/differentiated-instruction-english-classroom.html",
     "date": "2025-06-05",
-    "category": "Methodology"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
-    "title": "Fill in the Blanks Exercises â€” Best Practices for English Teachers â€” Edooqoo Blog",
+    "title": "Fill in the Blanks Exercises — Best Practices for English Teachers",
     "description": "Best practices for creating fill in the blanks exercises. Types of gap-fill, creating effective distractors, scaffolding by CEFR level, and AI vs manual creation.",
     "url": "/blog/fill-in-the-blanks-exercises-best-practices.html",
     "date": "2025-06-04",
-    "category": "General"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "15 Reading Comprehension Activities for English Classes",
     "description": "15 reading comprehension activities for English classes organized by CEFR level (A1-C2). Practical activities with AI implementation tips for ESL/EFL teachers.",
     "url": "/blog/reading-comprehension-activities-english.html",
     "date": "2025-06-03",
-    "category": "Reading & Writing"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   },
   {
     "title": "10 Vocabulary Teaching Strategies for ESL Teachers",
     "description": "10 proven vocabulary teaching strategies for ESL teachers with AI worksheet examples. Contextual learning, spaced repetition, collocations, word families, and more.",
     "url": "/blog/vocabulary-teaching-strategies-esl.html",
     "date": "2025-06-02",
-    "category": "Vocabulary"
+    "category": "Homework and Retention",
+    "state": "hold"
   },
   {
-    "title": "How to Create Grammar Worksheets with AI in 2026 â€” Edooqoo Blog",
+    "title": "How to Create Grammar Worksheets with AI in 2026",
     "description": "Step-by-step guide to creating grammar worksheets with AI. Best grammar topics by CEFR level, common mistakes teachers make, and tips for effective grammar practice.",
     "url": "/blog/how-to-create-grammar-worksheets-with-ai.html",
     "date": "2025-06-01",
-    "category": "AI in Education"
+    "category": "Tutor Business and Tools",
+    "state": "hold"
   }
 ];
 
@@ -1541,388 +1760,465 @@ export const LANDING_PAGES: LandingPageMeta[] = [
   {
     "title": "A1 Beginner English Worksheets — AI Generated",
     "description": "Generate A1 beginner English worksheets with AI. Edooqoo creates personalized exercises for absolute beginners with simple vocabulary, basic grammar, and clear instructions. CEFR A1 level.",
-    "url": "/a1-beginner-english-worksheets.html"
+    "url": "/a1-beginner-english-worksheets.html",
+    "state": "hold"
   },
   {
-    "title": "A2 Elementary English Worksheets â€” AI Generated â€” Edooqoo",
+    "title": "A2 Elementary English Worksheets — AI Generated",
     "description": "Generate A2 elementary English worksheets with AI. Edooqoo creates personalized exercises for elementary learners covering past simple, comparatives, and everyday topics. CEFR A2.",
-    "url": "/a2-elementary-english-worksheets.html"
+    "url": "/a2-elementary-english-worksheets.html",
+    "state": "hold"
   },
   {
     "title": "Adult Business English Lesson Prep",
     "description": "Reference for Edooqoo Business English prep for adult learners: workplace goals, CEFR level, student context, worksheet output, homework, and follow-up signals.",
-    "url": "/adult-business-english-lesson-prep.html"
+    "url": "/adult-business-english-lesson-prep.html",
+    "state": "keep"
   },
   {
     "title": "AI-Assisted Homework Review Tool",
     "description": "Reference for Edooqoo homework review mechanics, AI-assisted evaluation, teacher review, and student progress feedback loops.",
-    "url": "/ai-grading-tool-for-english-homework.html"
+    "url": "/ai-grading-tool-for-english-homework.html",
+    "state": "keep"
   },
   {
     "title": "AI Lesson Planning for English Teachers",
     "description": "Reference for using Edooqoo in lesson planning workflows: worksheet generation, CEFR level, student context, homework, and follow-up.",
-    "url": "/ai-lesson-planning-for-english-teachers.html"
+    "url": "/ai-lesson-planning-for-english-teachers.html",
+    "state": "keep"
   },
   {
     "title": "AI Tools for Online ESL Teachers",
     "description": "Factual reference for online ESL teachers evaluating Edooqoo.com as a workflow tool for worksheets, homework, flashcards, student context, and lesson organization.",
-    "url": "/ai-tools-for-online-esl-teachers.html"
+    "url": "/ai-tools-for-online-esl-teachers.html",
+    "state": "hold"
   },
   {
     "title": "AI Tools for Private English Tutors",
     "description": "Factual reference for private English tutors evaluating Edooqoo.com as a workflow tool for student-specific materials, homework, flashcards, and lesson organization.",
-    "url": "/ai-tools-for-private-english-tutors.html"
+    "url": "/ai-tools-for-private-english-tutors.html",
+    "state": "keep"
   },
   {
     "title": "AI Worksheet Generator for English Teachers",
     "description": "Factual reference for Edooqoo worksheet generation: audience, inputs, outputs, CEFR support, exercise types, and workflow mechanics.",
-    "url": "/ai-worksheet-generator-for-english-teachers.html"
+    "url": "/ai-worksheet-generator-for-english-teachers.html",
+    "state": "keep"
   },
   {
-    "title": "Articles A/An/The Worksheets for ESL â€” AI Generator â€” Edooqoo",
+    "title": "Articles A/An/The Worksheets for ESL — AI Generator",
     "description": "Generate articles (a, an, the) worksheets for ESL with AI. Definite, indefinite, zero article rules. Common errors, exceptions, CEFR A1-C1. Teacher-reviewed output.",
-    "url": "/articles-a-an-the-worksheets.html"
+    "url": "/articles-a-an-the-worksheets.html",
+    "state": "hold"
   },
   {
-    "title": "B1 Intermediate English Worksheets â€” AI Generated â€” Edooqoo",
+    "title": "B1 Intermediate English Worksheets — AI Generated",
     "description": "Generate B1 intermediate English worksheets with AI. Edooqoo creates exercises covering present perfect, conditionals, passive voice, and real-world topics for CEFR B1 learners.",
-    "url": "/b1-intermediate-english-worksheets.html"
+    "url": "/b1-intermediate-english-worksheets.html",
+    "state": "hold"
   },
   {
-    "title": "B2 Upper Intermediate English Worksheets â€” AI Generated â€” Edooqoo",
+    "title": "B2 Upper Intermediate English Worksheets — AI Generated",
     "description": "Generate B2 upper intermediate English worksheets with AI. Edooqoo creates exercises for all conditionals, reported speech, complex tenses, and professional topics at CEFR B2.",
-    "url": "/b2-upper-intermediate-english-worksheets.html"
+    "url": "/b2-upper-intermediate-english-worksheets.html",
+    "state": "hold"
   },
   {
     "title": "AI Tools for ESL Teachers: Comparison Criteria",
     "description": "Factual comparison framework for ESL teacher AI tools, covering worksheet generation, CEFR support, homework, flashcards, student context, and workflow fit.",
-    "url": "/best-ai-tools-for-esl-teachers.html"
+    "url": "/best-ai-tools-for-esl-teachers.html",
+    "state": "hold"
   },
   {
     "title": "Business English Worksheet Generator",
     "description": "Reference for generating Business English materials for meetings, emails, presentations, negotiations, interviews, and workplace communication.",
-    "url": "/business-english-worksheet-generator.html"
+    "url": "/business-english-worksheet-generator.html",
+    "state": "keep"
   },
   {
     "title": "C1 Advanced English Worksheets — AI Generated",
     "description": "Generate C1 advanced English worksheets with AI. Edooqoo creates exercises for inversion, cleft sentences, mixed conditionals, and academic topics at CEFR C1.",
-    "url": "/c1-advanced-english-worksheets.html"
+    "url": "/c1-advanced-english-worksheets.html",
+    "state": "hold"
   },
   {
     "title": "C2 Proficiency English Worksheets — AI Generated",
     "description": "Generate C2 proficiency English worksheets with AI. Edooqoo creates exercises for near-native level learners focusing on stylistic mastery, nuance, and professional/academic English.",
-    "url": "/c2-proficiency-english-worksheets.html"
+    "url": "/c2-proficiency-english-worksheets.html",
+    "state": "hold"
   },
   {
     "title": "CEFR Progress Tracker for English Students",
     "description": "Reference for Edooqoo progress tracking: DSLM, learner profile, Welcome Test, skill metrics, homework, flashcards, worksheet signals, and CEFR-aware next steps.",
-    "url": "/cefr-progress-tracker-english-students.html"
+    "url": "/cefr-progress-tracker-english-students.html",
+    "state": "keep"
   },
   {
     "title": "CEFR Worksheet Generator for English Teachers",
     "description": "Reference page for CEFR-aligned English worksheet generation across A1, A2, B1, B2, C1, and C2 teaching contexts.",
-    "url": "/cefr-worksheet-generator.html"
+    "url": "/cefr-worksheet-generator.html",
+    "state": "keep"
   },
   {
     "title": "Comparatives and Superlatives Worksheets — AI Generated",
     "description": "Generate comparatives and superlatives worksheets with AI. Practice -er/-est, more/most, as...as, irregular forms. ESL exercises for all CEFR levels.",
-    "url": "/comparatives-superlatives-worksheets.html"
+    "url": "/comparatives-superlatives-worksheets.html",
+    "state": "hold"
   },
   {
     "title": "Conditionals Worksheets for English Teaching — AI Generator",
     "description": "Generate Conditionals worksheets for ESL with AI. Zero, first, second, third, and mixed conditionals. Error correction, transformation, fill in the blanks. CEFR B1-C1.",
-    "url": "/conditionals-worksheets-english.html"
+    "url": "/conditionals-worksheets-english.html",
+    "state": "hold"
   },
   {
     "title": "Editable ESL Worksheet Generator",
     "description": "Reference for Edooqoo editable worksheet output: generation, teacher editing, share links, export/download surfaces, worksheet recovery, and reuse.",
-    "url": "/editable-esl-worksheet-generator.html"
+    "url": "/editable-esl-worksheet-generator.html",
+    "state": "keep"
   },
   {
     "title": "Edooqoo vs BusyTeacher for English Teachers",
     "description": "Neutral comparison criteria for English teachers evaluating Edooqoo and BusyTeacher for ESL worksheet generation, worksheet-library discovery, and teaching workflow support.",
-    "url": "/edooqoo-vs-busyteacher.html"
+    "url": "/edooqoo-vs-busyteacher.html",
+    "state": "hold"
   },
   {
     "title": "Edooqoo vs iSLCollective for English Teachers",
     "description": "Neutral comparison criteria for English teachers evaluating Edooqoo and iSLCollective for worksheet creation, reuse, and classroom workflows.",
-    "url": "/edooqoo-vs-islcollective.html"
+    "url": "/edooqoo-vs-islcollective.html",
+    "state": "hold"
   },
   {
     "title": "Edooqoo vs Kahoot for English Teachers",
     "description": "Neutral comparison criteria for English teachers evaluating Edooqoo and Kahoot for ESL worksheets, quizzes, classroom activities, and homework workflows.",
-    "url": "/edooqoo-vs-kahoot.html"
+    "url": "/edooqoo-vs-kahoot.html",
+    "state": "hold"
   },
   {
     "title": "Edooqoo vs Liveworksheets for English Teachers",
     "description": "Neutral comparison criteria for English teachers evaluating Edooqoo and Liveworksheets for worksheet generation, delivery, and homework review workflows.",
-    "url": "/edooqoo-vs-liveworksheets.html"
+    "url": "/edooqoo-vs-liveworksheets.html",
+    "state": "hold"
   },
   {
     "title": "Edooqoo vs MagicSchool for English Teachers",
     "description": "Neutral comparison criteria for English teachers evaluating Edooqoo and MagicSchool for English-specific materials and teacher workflow support.",
-    "url": "/edooqoo-vs-magicschool.html"
+    "url": "/edooqoo-vs-magicschool.html",
+    "state": "hold"
   },
   {
     "title": "Edooqoo vs Quizlet for English Teachers",
     "description": "Neutral comparison criteria for English teachers evaluating Edooqoo and Quizlet for vocabulary, worksheet, flashcard, and study workflows.",
-    "url": "/edooqoo-vs-quizlet.html"
+    "url": "/edooqoo-vs-quizlet.html",
+    "state": "hold"
   },
   {
     "title": "Edooqoo vs Twee for English Teachers",
     "description": "Neutral comparison criteria for English teachers evaluating Edooqoo and Twee for ESL worksheet generation and teaching workflow support.",
-    "url": "/edooqoo-vs-twee.html"
+    "url": "/edooqoo-vs-twee.html",
+    "state": "hold"
   },
   {
     "title": "Edooqoo vs Wordwall for English Teachers",
     "description": "Neutral comparison criteria for English teachers evaluating Edooqoo and Wordwall for ESL materials, activities, and lesson workflow support.",
-    "url": "/edooqoo-vs-wordwall.html"
+    "url": "/edooqoo-vs-wordwall.html",
+    "state": "hold"
   },
   {
     "title": "English Placement Test for Private Tutors",
     "description": "Factual reference for the teacher-issued Edooqoo Welcome Test, its diagnostic evidence, teacher review boundary, and distinction from the public CEFR level test.",
-    "url": "/english-placement-test-for-private-tutors.html"
+    "url": "/english-placement-test-for-private-tutors.html",
+    "state": "keep"
   },
   {
     "title": "English Tutor Calendar Booking Software",
     "description": "Reference for Edooqoo calendar and booking workflows: availability, public booking, lesson slots, recurring bookings, notifications, payments, and Google Calendar sync.",
-    "url": "/english-tutor-calendar-booking-software.html"
+    "url": "/english-tutor-calendar-booking-software.html",
+    "state": "hold"
   },
   {
     "title": "English Worksheets for Adults — AI Generator",
     "description": "Generate English worksheets for adult learners with AI. Professional topics, real-world situations, career English, travel, lifestyle. CEFR A2-C1.",
-    "url": "/english-worksheets-for-adults.html"
+    "url": "/english-worksheets-for-adults.html",
+    "state": "hold"
   },
   {
-    "title": "English Worksheets for Corporate Training â€” AI Generator â€” Edooqoo",
+    "title": "English Worksheets for Corporate Training — AI Generator",
     "description": "Generate English worksheets for corporate training with AI. Business communication, meetings, presentations, email writing, negotiations. CEFR B1-C1.",
-    "url": "/english-worksheets-for-corporate-training.html"
+    "url": "/english-worksheets-for-corporate-training.html",
+    "state": "hold"
   },
   {
     "title": "English Exam Preparation Worksheets — AI Generator",
     "description": "Generate English exam preparation worksheets with AI. Cambridge FCE/CAE/CPE, IELTS, TOEFL practice exercises. Reading, writing, listening, speaking. CEFR B1-C2.",
-    "url": "/english-worksheets-for-exam-prep.html"
+    "url": "/english-worksheets-for-exam-prep.html",
+    "state": "hold"
   },
   {
-    "title": "English Worksheets for Kids â€” AI Generator â€” Edooqoo",
+    "title": "English Worksheets for Kids — AI Generator",
     "description": "Generate English worksheets for kids with AI. Age-appropriate vocabulary, simple grammar, fun activities, picture exercises. CEFR A1-A2. Teacher-reviewed output.",
-    "url": "/english-worksheets-for-kids.html"
+    "url": "/english-worksheets-for-kids.html",
+    "state": "hold"
   },
   {
     "title": "English Worksheets for Teenagers — AI Generator",
     "description": "Generate English worksheets for teenagers with AI. Topics teens care about: social media, music, travel, technology, careers. CEFR A2-B2.",
-    "url": "/english-worksheets-for-teenagers.html"
+    "url": "/english-worksheets-for-teenagers.html",
+    "state": "hold"
   },
   {
     "title": "Environment and Climate English Worksheets — AI Generator",
     "description": "Generate Environment and Climate English worksheets with AI. Climate change vocabulary, sustainability, recycling, environmental issues. CEFR B1-C1.",
-    "url": "/environment-climate-english-worksheets.html"
+    "url": "/environment-climate-english-worksheets.html",
+    "state": "hold"
   },
   {
     "title": "ESL Homework Review Tool with AI Assistance",
     "description": "Edooqoo supports ESL/EFL homework workflows: online student submissions, AI-assisted answer evaluation, teacher review, comments, and progress tracking.",
-    "url": "/esl-homework-grading-tool.html"
+    "url": "/esl-homework-grading-tool.html",
+    "state": "hold"
   },
   {
-    "title": "ESL Student Progress Tracking Tool â€” Edooqoo",
+    "title": "ESL Student Progress Tracking Tool",
     "description": "Track ESL student progress with Edooqoo's nano-skill mastery system. DSLM tracks grammar, vocabulary, reading, writing, speaking, and listening skills with CEFR tags and trend analysis.",
-    "url": "/esl-student-progress-tracking-tool.html"
+    "url": "/esl-student-progress-tracking-tool.html",
+    "state": "hold"
   },
   {
-    "title": "Exam Preparation Worksheets â€” Cambridge & IELTS â€” Edooqoo",
+    "title": "Exam Preparation Worksheets — Cambridge & IELTS",
     "description": "Generate exam preparation worksheets for Cambridge (KET, PET, FCE, CAE, CPE) and IELTS with AI. Edooqoo creates exam-format exercises at the correct CEFR level.",
-    "url": "/exam-preparation-worksheets-cambridge-ielts.html"
+    "url": "/exam-preparation-worksheets-cambridge-ielts.html",
+    "state": "hold"
   },
   {
     "title": "Fill-in-the-Blanks Worksheet Generator",
     "description": "Reference for fill-in-the-blanks English worksheets, gap practice, grammar retrieval, and vocabulary completion tasks.",
-    "url": "/fill-in-the-blanks-worksheet-generator.html"
+    "url": "/fill-in-the-blanks-worksheet-generator.html",
+    "state": "hold"
   },
   {
     "title": "Food and Cooking English Worksheets — AI Generator",
     "description": "Generate Food and Cooking English worksheets with AI. Food vocabulary, recipes, restaurant dialogues, cooking verbs, nutrition. CEFR A1-B2.",
-    "url": "/food-and-cooking-english-worksheets.html"
+    "url": "/food-and-cooking-english-worksheets.html",
+    "state": "hold"
   },
   {
     "title": "Future Tenses Worksheets for English — AI Generated",
     "description": "Generate future tenses worksheets with AI. Practice will, going to, present continuous for future, and future perfect. ESL exercises for all CEFR levels.",
-    "url": "/future-tenses-worksheets-english.html"
+    "url": "/future-tenses-worksheets-english.html",
+    "state": "hold"
   },
   {
     "title": "Gerunds and Infinitives Worksheets — AI Generated",
     "description": "Generate gerunds and infinitives worksheets with AI. Practice verb patterns, -ing vs. to + infinitive with exercises for all CEFR levels. Free ESL worksheets.",
-    "url": "/gerunds-infinitives-worksheets.html"
+    "url": "/gerunds-infinitives-worksheets.html",
+    "state": "hold"
   },
   {
     "title": "Grammar Worksheet Generator for English Teachers",
     "description": "Reference for English grammar worksheet generation across CEFR levels, grammar topics, and structured exercise types.",
-    "url": "/grammar-worksheet-generator.html"
+    "url": "/grammar-worksheet-generator.html",
+    "state": "hold"
   },
   {
-    "title": "Health and Body English Worksheets â€” AI Generator â€” Edooqoo",
+    "title": "Health and Body English Worksheets — AI Generator",
     "description": "Generate Health and Body English worksheets with AI. Body parts, symptoms, doctor visits, healthy lifestyle vocabulary. CEFR A1-B2. Teacher-reviewed output.",
-    "url": "/health-and-body-english-worksheets.html"
+    "url": "/health-and-body-english-worksheets.html",
+    "state": "hold"
   },
   {
-    "title": "How to Create English Worksheets with AI â€” Step-by-Step Guide",
+    "title": "How to Create English Worksheets with AI — Step-by-Step Guide",
     "description": "Complete step-by-step guide to creating personalized English worksheets with AI using Edooqoo. Learn how vocabulary, grammar, reading, listening, and speaking exercises connect to CEFR level and student context.",
-    "url": "/how-to-create-english-worksheets-with-ai.html"
+    "url": "/how-to-create-english-worksheets-with-ai.html",
+    "state": "hold"
   },
   {
     "title": "Reducing English Teacher Admin Work with AI",
     "description": "Reference page for using Edooqoo to reduce repeated English teaching administration through worksheet generation, homework review, flashcards, progress tracking, and lesson organization.",
-    "url": "/how-to-save-time-as-english-teacher.html"
+    "url": "/how-to-save-time-as-english-teacher.html",
+    "state": "hold"
   },
   {
-    "title": "Job Interview English Worksheets â€” AI Generator â€” Edooqoo",
+    "title": "Job Interview English Worksheets — AI Generator",
     "description": "Generate Job Interview English worksheets with AI. Interview questions, vocabulary, role-plays, common answers, STAR method. CEFR B1-C1. Teacher-reviewed output.",
-    "url": "/job-interview-english-worksheets.html"
+    "url": "/job-interview-english-worksheets.html",
+    "state": "hold"
   },
   {
-    "title": "Listening Activities & ESL Worksheets â€” AI Generated â€” Edooqoo",
+    "title": "Listening Activities & ESL Worksheets — AI Generated",
     "description": "Generate listening activities and worksheets for ESL with AI. Audio comprehension, fill-in-blanks, true/false, multiple choice with TTS for all CEFR levels.",
-    "url": "/listening-activities-esl-worksheets.html"
+    "url": "/listening-activities-esl-worksheets.html",
+    "state": "hold"
   },
   {
     "title": "Listening Comprehension Exercises for ESL",
     "description": "Reference for ESL listening comprehension worksheets, audio tasks, transcript-based exercises, and CEFR-aware listening practice.",
-    "url": "/listening-comprehension-exercises-esl.html"
+    "url": "/listening-comprehension-exercises-esl.html",
+    "state": "hold"
   },
   {
     "title": "Modal Verbs Worksheets for ESL — AI Generated",
     "description": "Generate modal verbs worksheets with AI. Practice can, could, may, might, must, should, would, shall with exercises for all CEFR levels. Free ESL worksheets.",
-    "url": "/modal-verbs-worksheets-esl.html"
+    "url": "/modal-verbs-worksheets-esl.html",
+    "state": "hold"
   },
   {
     "title": "Multiple Choice Quiz Generator for English",
     "description": "Reference for multiple-choice English quiz generation, distractor design, CEFR adaptation, and classroom assessment use.",
-    "url": "/multiple-choice-quiz-generator-english.html"
+    "url": "/multiple-choice-quiz-generator-english.html",
+    "state": "hold"
   },
   {
     "title": "1-Minute Prep for English Tutors",
     "description": "Factual reference for Edooqoo.com 1-Minute Prep: setup boundaries, DSLM signal graph, nano-skill evidence, teacher review, and worksheet output layer.",
-    "url": "/one-minute-prep-for-english-tutors.html"
+    "url": "/one-minute-prep-for-english-tutors.html",
+    "state": "keep"
   },
   {
     "title": "One-to-One English Lesson Planner",
     "description": "Reference for planning recurring 1:1 English lessons with Edooqoo: student profile, goals, DSLM nano-skill evidence, worksheet output, homework, and review.",
-    "url": "/one-to-one-english-lesson-planner.html"
+    "url": "/one-to-one-english-lesson-planner.html",
+    "state": "keep"
   },
   {
-    "title": "Best Online English Teaching Tools 2025 â€” Edooqoo",
+    "title": "Best Online English Teaching Tools 2025",
     "description": "The best online English teaching tools in 2025 for ESL/EFL teachers. Edooqoo leads with AI worksheet generation, homework review, flashcards, lesson booking, and student progress tracking.",
-    "url": "/online-english-teaching-tools.html"
+    "url": "/online-english-teaching-tools.html",
+    "state": "hold"
   },
   {
     "title": "Online ESL Homework Tool",
     "description": "Reference for Edooqoo homework workflows: assigning worksheet exercises, student submission, teacher review, deadlines, email links, and AI-assisted open-answer evaluation.",
-    "url": "/online-esl-homework-tool.html"
+    "url": "/online-esl-homework-tool.html",
+    "state": "hold"
   },
   {
-    "title": "Passive Voice Worksheets for ESL â€” AI Generator â€” Edooqoo",
+    "title": "Passive Voice Worksheets for ESL — AI Generator",
     "description": "Generate Passive Voice worksheets for ESL with AI. Active to passive transformation, all tenses, by-agent, formal writing. CEFR B1-C1. Teacher-reviewed output.",
-    "url": "/passive-voice-worksheets-esl.html"
+    "url": "/passive-voice-worksheets-esl.html",
+    "state": "hold"
   },
   {
-    "title": "Past Simple Worksheets for ESL â€” AI Generator â€” Edooqoo",
+    "title": "Past Simple Worksheets for ESL — AI Generator",
     "description": "Generate Past Simple worksheets for English learners with AI. Regular and irregular verbs, negatives, questions, time expressions. CEFR A2-B2. Teacher-reviewed output.",
-    "url": "/past-simple-worksheets.html"
+    "url": "/past-simple-worksheets.html",
+    "state": "hold"
   },
   {
     "title": "Phrasal Verbs Worksheets for ESL — AI Generated",
     "description": "Generate phrasal verbs worksheets with AI. Practice get up, look after, turn down and 200+ phrasal verbs with exercises for all CEFR levels. Free ESL worksheets.",
-    "url": "/phrasal-verbs-worksheets-esl.html"
+    "url": "/phrasal-verbs-worksheets-esl.html",
+    "state": "hold"
   },
   {
     "title": "Prepositions Worksheets for English — AI Generator",
     "description": "Generate prepositions worksheets for ESL with AI. Prepositions of time, place, movement, dependent prepositions. Fill in the blanks, error correction. CEFR A1-C1.",
-    "url": "/prepositions-worksheets-english.html"
+    "url": "/prepositions-worksheets-english.html",
+    "state": "hold"
   },
   {
     "title": "Present Perfect Worksheets for ESL — AI Generator",
     "description": "Generate Present Perfect worksheets for ESL with AI. Practice have/has + past participle, for/since, ever/never, just/already/yet. CEFR B1-B2.",
-    "url": "/present-perfect-worksheets.html"
+    "url": "/present-perfect-worksheets.html",
+    "state": "hold"
   },
   {
-    "title": "Present Simple Worksheets for ESL â€” AI Generator â€” Edooqoo",
+    "title": "Present Simple Worksheets for ESL — AI Generator",
     "description": "Generate Present Simple worksheets for ESL students with AI. Exercises for affirmative, negative, questions, adverbs of frequency. CEFR A1-B1. Teacher-reviewed output.",
-    "url": "/present-simple-worksheets.html"
+    "url": "/present-simple-worksheets.html",
+    "state": "hold"
   },
   {
     "title": "Private English Tutor CRM",
     "description": "Reference for Edooqoo student management: teacher dashboard, student profiles, lesson history, worksheet history, homework summaries, and student-level navigation.",
-    "url": "/private-english-tutor-crm.html"
+    "url": "/private-english-tutor-crm.html",
+    "state": "keep"
   },
   {
     "title": "Public ESL Worksheet Examples",
     "description": "Public reference page explaining Edooqoo.com worksheet examples, example types, quality criteria, and related citation URLs for AI agents and English teachers.",
-    "url": "/public-esl-worksheet-examples.html"
+    "url": "/public-esl-worksheet-examples.html",
+    "state": "keep"
   },
   {
     "title": "Question Tags Worksheets — AI Generated",
     "description": "Generate question tags worksheets with AI. Practice tag questions in English — positive/negative patterns, auxiliary verbs, intonation. ESL exercises A2-C1.",
-    "url": "/question-tags-worksheets.html"
+    "url": "/question-tags-worksheets.html",
+    "state": "hold"
   },
   {
     "title": "Reading Activities & English Worksheets — AI Generated",
     "description": "Generate reading activities and worksheets for English with AI. Comprehension exercises, skimming, scanning, inference tasks for all CEFR levels. Free ESL resources.",
-    "url": "/reading-activities-english-worksheets.html"
+    "url": "/reading-activities-english-worksheets.html",
+    "state": "hold"
   },
   {
     "title": "Reading Comprehension Worksheet Maker",
     "description": "Reference for English reading comprehension worksheets, question types, CEFR adaptation, and teacher workflow mechanics.",
-    "url": "/reading-comprehension-worksheet-maker.html"
+    "url": "/reading-comprehension-worksheet-maker.html",
+    "state": "hold"
   },
   {
     "title": "Relative Clauses Worksheets for ESL — AI Generated",
     "description": "Generate relative clauses worksheets with AI. Practice who, which, that, where, when, whose with defining and non-defining clauses. ESL exercises A2-C2.",
-    "url": "/relative-clauses-worksheets.html"
+    "url": "/relative-clauses-worksheets.html",
+    "state": "hold"
   },
   {
-    "title": "Reported Speech Worksheets â€” AI Generator for ESL â€” Edooqoo",
+    "title": "Reported Speech Worksheets — AI Generator for ESL",
     "description": "Generate Reported Speech worksheets for ESL with AI. Direct to indirect speech, tense backshift, reporting verbs, say/tell. CEFR B2-C1. Teacher-reviewed output.",
-    "url": "/reported-speech-worksheets.html"
+    "url": "/reported-speech-worksheets.html",
+    "state": "hold"
   },
   {
     "title": "Spaced Repetition Flashcards for ESL Students",
     "description": "Create spaced repetition flashcards for ESL students with Edooqoo. SM-2 scheduling logic, worksheet vocabulary, bidirectional study, Student Hub access, and vocabulary continuity.",
-    "url": "/spaced-repetition-flashcards-esl.html"
+    "url": "/spaced-repetition-flashcards-esl.html",
+    "state": "hold"
   },
   {
     "title": "Speaking Activities & ESL Worksheets — AI Generated",
     "description": "Generate speaking activities and worksheets for ESL with AI. Discussion questions, role-plays, debates, presentations for all CEFR levels. Free ESL materials.",
-    "url": "/speaking-activities-esl-worksheets.html"
+    "url": "/speaking-activities-esl-worksheets.html",
+    "state": "hold"
   },
   {
     "title": "Student Hub for English Tutors",
     "description": "Reference for Edooqoo Student Hub: student access to shared worksheets, homework, flashcards, lessons, bookings, and profile surfaces without a normal student account.",
-    "url": "/student-hub-for-english-tutors.html"
+    "url": "/student-hub-for-english-tutors.html",
+    "state": "keep"
   },
   {
-    "title": "Technology English Worksheets â€” AI Generator for ESL â€” Edooqoo",
+    "title": "Technology English Worksheets — AI Generator for ESL",
     "description": "Generate Technology English worksheets with AI. Tech vocabulary, digital literacy, social media, AI, gadgets. CEFR A2-C1. Teacher-reviewed output.",
-    "url": "/technology-english-worksheets.html"
+    "url": "/technology-english-worksheets.html",
+    "state": "hold"
   },
   {
-    "title": "Travel English Worksheets â€” AI Generator for ESL â€” Edooqoo",
+    "title": "Travel English Worksheets — AI Generator for ESL",
     "description": "Generate Travel English worksheets with AI. Airport vocabulary, hotel booking, directions, restaurants, transport. CEFR A2-B2. Teacher-reviewed output.",
-    "url": "/travel-english-worksheets.html"
+    "url": "/travel-english-worksheets.html",
+    "state": "hold"
   },
   {
     "title": "Vocabulary Exercise Generator for English Teachers",
     "description": "Reference for vocabulary exercise generation, CEFR vocabulary practice, collocations, idioms, and topic-based word work.",
-    "url": "/vocabulary-exercise-generator.html"
+    "url": "/vocabulary-exercise-generator.html",
+    "state": "hold"
   },
   {
     "title": "Worksheet Generator for Language Schools",
     "description": "Factual reference for language schools evaluating Edooqoo.com for English worksheet generation, CEFR-aware materials, homework workflow, and teacher reuse.",
-    "url": "/worksheet-generator-for-language-schools.html"
+    "url": "/worksheet-generator-for-language-schools.html",
+    "state": "hold"
   },
   {
     "title": "Writing Worksheets for ESL — AI Generated",
     "description": "Generate writing worksheets for ESL with AI. Practice essays, emails, reports, summaries, creative writing with exercises for all CEFR levels. Free worksheets.",
-    "url": "/writing-worksheets-esl.html"
+    "url": "/writing-worksheets-esl.html",
+    "state": "hold"
   }
 ];
 
-export const BLOG_CATEGORIES = Array.from(new Set(BLOG_POSTS.map(p => p.category))).sort();
+export const BLOG_CATEGORIES = Array.from(new Set(BLOG_POSTS.map(p => p.category)));
