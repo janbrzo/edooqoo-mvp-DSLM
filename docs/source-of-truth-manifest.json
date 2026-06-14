@@ -9034,6 +9034,21 @@
               "name": "isResumed",
               "type": "boolean",
               "optional": true
+            },
+            {
+              "name": "startedAt",
+              "type": "number",
+              "optional": true
+            },
+            {
+              "name": "studentId",
+              "type": "string | null",
+              "optional": true
+            },
+            {
+              "name": "jobId",
+              "type": "string | null",
+              "optional": true
             }
           ]
         }
@@ -9047,7 +9062,7 @@
         {
           "value": "elapsedTime",
           "setter": "setElapsedTime",
-          "initial": "0"
+          "initial": "initialElapsed"
         },
         {
           "value": "sections",
@@ -9088,11 +9103,12 @@
         "Generating Your Worksheet",
         "Generating...",
         "Generation resumed.",
+        "Generation runs in the background — keep prepping for",
         "No token was consumed. Your form data is preserved.",
-        "Refreshing this page won't stop generation — you can come back any time.",
-        "The page was refreshed but generation kept running in the background. Your worksheet will open automatically when it's ready — no token is charged unless it completes.",
+        "Open dashboard ↗",
         "Time:",
-        "Try Again"
+        "Try Again",
+        "or another student while you wait."
       ],
       "userFacingBehavior": {
         "actionHandlers": [],
@@ -20198,22 +20214,19 @@
       "props": [],
       "state": [
         {
-          "value": "modalMounted",
-          "setter": "setModalMounted",
-          "initial": "false"
+          "value": "mountedJobIds",
+          "setter": "setMountedJobIds",
+          "initial": "new Set()"
         }
       ],
       "hooks": [
-        "useActiveWorksheetGenerationJob",
+        "useActiveWorksheetGenerationJobs",
         "useEffect",
         "useLocation",
-        "useMemo",
         "useNavigate",
         "useState"
       ],
       "actions": [
-        "handleDismiss",
-        "handleOpen",
         "onMount",
         "onUnmount"
       ],
@@ -20227,16 +20240,15 @@
       "storage": [],
       "userFacingText": [
         "Dismiss",
+        "For",
         "Generation failed",
         "Open generated worksheet",
         "Worksheet generation in progress",
-        "You can refresh or move around, generation keeps running in the background.",
-        "Your worksheet is ready"
+        "Your worksheet is ready",
+        "keeps running in the background."
       ],
       "userFacingBehavior": {
         "actionHandlers": [
-          "handleDismiss",
-          "handleOpen",
           "onMount",
           "onUnmount"
         ],
@@ -34420,7 +34432,8 @@
         "domain": "state",
         "purpose": "Implements use Active Worksheet Generation Job behavior in the state domain.",
         "exports": [
-          "useActiveWorksheetGenerationJob"
+          "useActiveWorksheetGenerationJob",
+          "useActiveWorksheetGenerationJobs"
         ],
         "props": [],
         "state": [
@@ -34428,6 +34441,11 @@
             "value": "job",
             "setter": "setJob",
             "initial": "() => getActiveGenerationJob()"
+          },
+          {
+            "value": "jobs",
+            "setter": "setJobs",
+            "initial": "() => getActiveGenerationJobs()"
           }
         ],
         "hooks": [

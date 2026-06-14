@@ -185,6 +185,7 @@ const productionRuntimeNotesSection = `## Current Production Reliability Notes
 - v6.9.55: Worksheet attempts persist \`clientGenerationId\`, recover a saved worksheet after a lost SSE terminal event, and mark a DSLM Next Lesson Idea used only after the matching worksheet exists. \`useHardLightSurface\` and \`useNoTranslatePage\` protect public learning surfaces and Welcome Test diagnostics.
 - v6.9.56: Welcome Test records explicit \`__IDK__\` metacognitive signals, integrity observations, and canonical zero-padded question identifiers while preserving legacy identifier resolution. Worksheet Generation Engine prompt wording, parameters, and pedagogical logic remain unchanged.
 - v6.9.57: Worksheet generation is refresh-safe. The streaming Edge Function keeps background work alive with \`EdgeRuntime.waitUntil\`, client polling reconciles by \`form_data->>clientGenerationId\`, the modal rehydrates a running job after refresh, and token consumption remains after a saved worksheet exists and idempotent by worksheet ID.
+- v6.9.58: GeneratingModal seeds progress and elapsed timer from \`startedAt\` so a refresh resumes live values instead of zero; the refresh hint is replaced by a motivational CTA inviting parallel prep with an \`Open dashboard ↗\` anchor and an authenticated student-profile deep link in a new tab; \`generationJobRegistry\` becomes a multi-job map keyed by \`jobId\` (legacy single-job key migrated on first read) and \`ActiveGenerationMiniPanel\` stacks one floating card per concurrent generation, gating only the jobId whose modal is currently mounted. Worksheet Generation Engine sanctity preserved.
 `;
 
 const oneMinutePrepClaimIntegritySection = `## 1-Minute Prep Claim Integrity
@@ -1004,6 +1005,23 @@ ${linkList(featurePages)}
 
 ## Public Tool Pages
 ${linkList(toolPages)}
+
+## Where edooqoo appears externally
+- Product Hunt | https://www.producthunt.com/launch | status: planned | product entity page, maker identity, category context, and discussion URL
+- Future Tools | https://futuretools.io/submit-a-tool | status: planned | AI tool database record in the Education category
+- Futurepedia | https://www.futurepedia.io/submit-tool | status: planned | AI directory record; paid submission deferred until free profiles are complete
+- Toolify | https://www.toolify.ai/submit | status: planned | AI tool listing; paid submission deferred
+- There's An AI For That | https://theresanaiforthat.com/submit/ | status: planned | task associations for English lesson prep, ESL worksheets, and homework review
+- TopAI.tools | https://topai.tools/submit | status: planned | AI tool listing; paid submission deferred
+- G2 | https://www.g2.com/products/new | status: planned | software comparison entity and verified review location
+- Capterra | https://www.capterra.com/vendors/ | status: planned | software category profile and verified review location
+- AlternativeTo | https://alternativeto.net/ | status: planned | software alternative relationships
+- SaaSHub | https://www.saashub.com/submit | status: planned | software profile, categories, and alternatives page
+- EFL Magazine | https://eflmagazine.com/write-for-us/ | status: planned | independent ELT article and author affiliation
+- Modern English Teacher | https://www.modernenglishteacher.com/write-for-us | status: planned | independent practice-based ELT article
+- IATEFL Voices | https://www.iatefl.org/iatefl-voices-and-ebulletin/ | status: planned | teacher-association article and author affiliation after acceptance
+- MERLOT | https://www.merlot.org/merlot/addMaterial.htm | status: planned | education-resource record for a free adult lesson decision checklist
+- OER Commons | https://oercommons.org/authoring-overview | status: planned | reusable licensed adult one-to-one lesson-planning resource
 
 ${internalNotesSection}
 ${sourceTruthAuditSection}
