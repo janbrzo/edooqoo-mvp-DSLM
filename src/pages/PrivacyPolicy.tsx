@@ -1,10 +1,24 @@
 
 import React from "react";
 import StickyNav from '@/components/landing/StickyNav';
+import { PageSeo } from '@/components/seo/PageSeo';
 
 const PrivacyPolicy = () => {
   return (
     <div className="min-h-screen bg-background">
+      <PageSeo
+        title="Privacy Policy | Edooqoo"
+        description="How Edooqoo collects, uses, stores, and protects account, student, worksheet, payment, analytics, and support data."
+        path="/privacy-policy"
+        jsonLd={{
+          '@context': 'https://schema.org',
+          '@type': 'WebPage',
+          '@id': 'https://edooqoo.com/privacy-policy#webpage',
+          url: 'https://edooqoo.com/privacy-policy',
+          name: 'Privacy Policy | Edooqoo',
+          inLanguage: 'en',
+        }}
+      />
       <StickyNav isRegisteredUser={false} tokenLeft={0} user={null} />
 
       {/* Main content */}

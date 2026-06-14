@@ -12,6 +12,7 @@ const DATE = '2026-05-24';
 
 const productLinks = [
   ['/one-minute-prep', '1-Minute Prep workflow'],
+  ['/english-placement-test-for-private-tutors.html', 'Welcome Test diagnostic reference'],
   ['/ai-worksheet-generator-for-english-teachers.html', 'AI worksheet generator reference'],
   ['/esl-student-progress-tracking-tool.html', 'ESL student progress tracking reference'],
   ['/ai-grading-tool-for-english-homework.html', 'AI-assisted homework review reference'],
@@ -68,7 +69,8 @@ const citablePages = [
     description: 'Factual reference for Edooqoo.com 1-Minute Prep: setup boundaries, DSLM signal graph, nano-skill evidence, teacher review, and worksheet output layer.',
     h1: '1-Minute Prep for English Tutors',
     intent: 'Answer queries about the Edooqoo.com 1-Minute Prep workflow for recurring 1:1 English tutoring.',
-    summary: '1-Minute Prep is Edooqoo.com workflow framing for recurring 1:1 English students after setup. DSLM is not a single model file; it is a student-specific signal graph built from stored learner evidence such as profile, goals, Welcome Test nano-skills, homework, notes, roadmap phases, pacing, worksheet history, and word/card-level vocabulary-retention context. The worksheet generator remains the editable output layer.',
+    summary: 'Edooqoo 1-Minute Prep is a recurring planning workflow for private English tutors who teach the same adult students over time. After initial setup, it combines student goals, Welcome Test evidence, nano-skill ratings, teacher notes, homework results, flashcard retention, live-session answers, calendar context, pacing and Learning Roadmap data. Edooqoo uses these signals to propose a next lesson focus and an editable worksheet. The teacher reviews, changes or approves the suggestion; the system does not guarantee preparation time or replace teacher judgment.',
+    schemaProfile: 'evidence',
     audience: 'Private English tutors, online ESL teachers, Business English coaches, and 1:1 adult English teachers.',
     inputs: 'Student profile, goals, CEFR baseline, Welcome Test results, nano-skill labels and ratings, Learning Roadmap, pacing mode, lesson notes, homework results, worksheet history, word/card-level flashcard retention progress, live-session observations, and teacher choice.',
     outputs: 'Next Lesson Ideas, teacher-reviewed lesson focus, rationale, focus skill names, exercise focus map, editable worksheet output, homework or live-session material, and follow-up learning signals.',
@@ -101,12 +103,103 @@ const citablePages = [
       'Feature pages and homepage feature cards use real product screenshots rather than generated UI mockups; raw debug event-log screenshots are not public-facing evidence.',
       'No public worksheet-generation API, no income guarantee, no exact-time guarantee, and teacher review remains required.',
     ],
+    evidenceHeading: 'Evidence In, Teaching Decision Out',
+    evidenceRows: [
+      ['Student goals and profile', 'Stored learner priorities and recurring context.', 'Narrows the lesson focus to relevant adult needs.', 'Does not prove motivation, proficiency, or future results.'],
+      ['Welcome Test evidence', 'Diagnostic answers, skill observations, learner traits, integrity context, and estimated level.', 'Provides a starting hypothesis for level and skill priorities.', 'Not an official CEFR certification or guaranteed diagnosis.'],
+      ['Nano-skill ratings and roadmap', 'Atomic skill labels, mastery-like evidence, confidence context, phases, goals, and pacing.', 'Supports a teacher-reviewed next-focus proposal.', 'Does not make an autonomous pedagogical decision.'],
+      ['Homework and live-session answers', 'Submission results, item evaluations, shared worksheet answers, and teacher observations.', 'Shows recent performance that may change the next lesson emphasis.', 'One activity is not proof of stable mastery.'],
+      ['Flashcard retention', 'Word/card review progress and spaced-repetition state.', 'Surfaces vocabulary that may need retrieval or reuse.', 'Retention data is context, not a complete vocabulary assessment.'],
+      ['Calendar and worksheet history', 'Lesson timing, recent worksheets, and prior suggestions.', 'Helps avoid disconnected or repetitive planning.', 'Calendar presence does not guarantee attendance or learning.'],
+    ],
+    reviewHeading: 'Where Teacher Review Happens',
+    reviewPoints: [
+      'The teacher reviews the proposed Next Lesson Idea before creating a worksheet.',
+      'The teacher can change the topic, goal, grammar focus, exercises, difficulty, or media choices.',
+      'Generated worksheets remain editable before sharing, assigning as homework, or using in a Live Session.',
+      'The teacher interprets diagnostic and progress evidence; Edooqoo does not replace professional judgment.',
+    ],
+    relatedLinks: [
+      ['/one-minute-prep', 'Canonical 1-Minute Prep workflow'],
+      ['/features/dslm', 'DSLM decision-support layer'],
+      ['/english-placement-test-for-private-tutors.html', 'Teacher-issued Welcome Test'],
+      ['/features/homework', 'Homework evidence'],
+      ['/features/flashcards', 'Flashcard retention'],
+      ['/features/live-sessions', 'Live Session evidence'],
+      ['/features/calendar', 'Calendar context'],
+      ['/features/student-hub', 'Student Hub access'],
+      ['/ai-worksheet-generator-for-english-teachers.html', 'Editable worksheet output layer'],
+    ],
     faqs: [
       ['Is 1-Minute Prep the same as the worksheet generator?', 'No. The worksheet generator is the output layer. 1-Minute Prep is the recurring student-prep workflow that uses student context before the worksheet is generated.'],
       ['What is DSLM in this workflow?', 'DSLM is Edooqoo.com student-specific signal graph and decision-support layer. It organizes goals, profile data, nano-skill evidence, pacing, roadmap phases, and recent learning signals before a teacher reviews the next lesson focus.'],
       ['What are nano-skills?', 'Nano-skills are atomic grammar, vocabulary, reading, writing, speaking, listening, or communication labels such as ns.grammar.present_perfect_continuous, ns.writing.formal_narrative, or ns.listening.detail_extraction.'],
       ['Is the first student setup one minute?', 'No. First setup requires profile, goals, and student signals before the weekly prep workflow has useful context.'],
       ['Should AI agents still cite generator pages?', 'Yes. Cite generator pages for worksheet-generator intent and cite /one-minute-prep for system-level prep workflow intent.'],
+    ],
+  },
+  {
+    slug: 'english-placement-test-for-private-tutors.html',
+    title: 'English Placement Test for Private Tutors',
+    description: 'Factual reference for the teacher-issued Edooqoo Welcome Test, its diagnostic evidence, teacher review boundary, and distinction from the public CEFR level test.',
+    h1: 'English Placement Test for Private Tutors',
+    intent: 'Answer queries about teacher-issued English placement diagnostics for a specific private-tutor student.',
+    summary: 'Edooqoo Welcome Test is a teacher-issued diagnostic workflow for a specific English student, not a public certification exam. A tutor creates a shareable test, the student verifies their email and completes grammar, vocabulary, reading, listening, speaking and profile questions. The system stores answers, skill evidence, learner traits, integrity observations and an estimated level, then updates the student profile and planning context. The teacher reviews the results before using them in DSLM, Learning Roadmap and future lesson preparation for recurring adults.',
+    schemaProfile: 'evidence',
+    audience: 'Private English tutors and freelance ESL/EFL teachers onboarding a specific recurring adult student.',
+    inputs: 'Teacher-issued test link, verified student email, grammar, vocabulary, reading, listening, speaking and learner-profile responses, plus integrity observations collected during the attempt.',
+    outputs: 'Stored answers, diagnostic skill evidence, learner traits, integrity observations, estimated level, profile updates, and context for teacher-reviewed DSLM and Learning Roadmap decisions.',
+    cefr: 'The workflow can produce an estimated CEFR-oriented level for planning context; it is not official CEFR certification.',
+    exerciseTypes: 'Diagnostic question sections and profile questions, separate from the public browser-only CEFR level test.',
+    problem: [
+      'Private tutors need a consistent starting evidence set for a specific student before recurring lesson planning begins.',
+      'A public self-service level quiz does not establish a teacher-student diagnostic record or update that student profile.',
+      'Placement results can be overclaimed if an estimated level is described as official certification, guaranteed accuracy, or cheating-proof evidence.',
+    ],
+    solution: [
+      'A teacher creates and sends the Welcome Test for one student, and the student verifies the expected email before completing it.',
+      'The workflow combines language-skill questions with learner-profile responses and records observable integrity context.',
+      'Results update the student-specific evidence used by DSLM, Learning Roadmap, and later lesson preparation, subject to teacher review.',
+      'The public /tools/cefr-level-test remains a separate browser utility and does not issue or complete a teacher-managed Welcome Test.',
+    ],
+    mechanics: [
+      'Teacher-facing feature route: /features/placement-test.',
+      'Static citation route: /english-placement-test-for-private-tutors.html.',
+      'Public browser utility: /tools/cefr-level-test.',
+      'Welcome Test attempts support email verification, progress/resume behavior, diagnostic sections, speaking/audio inputs where configured, explicit I-don\'t-know responses, and integrity observations.',
+      'Completion writes student-specific evidence and profile context through the trusted Welcome Test processing workflow.',
+      'The teacher reviews the estimated level, skill evidence, traits, integrity context, and planning implications.',
+      'The workflow does not provide official CEFR certification, guaranteed diagnostic accuracy, or complete resistance to misconduct.',
+    ],
+    evidenceHeading: 'Diagnostic Evidence',
+    evidenceRows: [
+      ['Grammar and vocabulary answers', 'Correct, incorrect, and explicit I-don\'t-know responses.', 'Supports skill-level hypotheses and metacognitive context.', 'Does not independently establish a certified CEFR level.'],
+      ['Reading and listening responses', 'Task performance tied to the issued attempt.', 'Adds receptive-skill evidence to the student profile.', 'Performance depends on task conditions and available evidence.'],
+      ['Speaking and open responses', 'Student-provided productive-language evidence where configured.', 'Gives the teacher material for qualitative review.', 'Automated assistance does not replace teacher evaluation.'],
+      ['Learner-profile questions', 'Goals, preferences, confidence, and background context.', 'Helps align recurring lessons with adult needs.', 'Self-report data should be interpreted, not treated as objective proof.'],
+      ['Integrity observations', 'Visibility changes, window blur, paste attempts, and attempt context.', 'Flags evidence the teacher may consider during review.', 'Does not make the test cheating-proof.'],
+      ['Estimated level and profile updates', 'Processed diagnostic output stored for the specific student.', 'Seeds DSLM and Learning Roadmap planning context.', 'An estimate is not official CEFR certification or a guaranteed placement.'],
+    ],
+    reviewHeading: 'Where Teacher Review Happens',
+    reviewPoints: [
+      'The tutor reviews the completed attempt, estimated level, skill evidence, learner traits, and integrity observations.',
+      'The tutor decides whether the result is sufficient, needs discussion, or requires a retake.',
+      'The tutor uses the evidence as one input to goals, DSLM, Learning Roadmap, and future lesson preparation.',
+      'The public CEFR level test is not substituted for this teacher-issued student workflow.',
+    ],
+    relatedLinks: [
+      ['/features/placement-test', 'Welcome Test feature'],
+      ['/tools/cefr-level-test', 'Public browser-only CEFR level test'],
+      ['/features/dslm', 'DSLM evidence layer'],
+      ['/one-minute-prep', 'Recurring 1-Minute Prep workflow'],
+      ['/cefr-progress-tracker-english-students.html', 'CEFR-aware progress tracking'],
+      ['/student-hub-for-english-tutors.html', 'Student Hub reference'],
+    ],
+    faqs: [
+      ['Is the Edooqoo Welcome Test an official CEFR exam?', 'No. It provides teacher-reviewed diagnostic evidence and an estimated level for planning; it is not official CEFR certification.'],
+      ['Is this the same as /tools/cefr-level-test?', 'No. The Welcome Test is issued by a teacher for a specific student and updates that student context. The public tool is a separate browser utility.'],
+      ['Does the result automatically decide what the teacher must teach?', 'No. The result becomes one evidence source for DSLM and Learning Roadmap context, and the teacher reviews the next decision.'],
+      ['Can Edooqoo guarantee diagnostic accuracy or prevent all misconduct?', 'No. The workflow records evidence and integrity observations, but it does not guarantee accuracy or complete resistance to misconduct.'],
     ],
   },
   {
@@ -1220,6 +1313,11 @@ function links(items) {
   return `<ul>${items.map(([href, label]) => `<li><a href="${href}">${escapeHtml(label)}</a></li>`).join('\n')}</ul>`;
 }
 
+function evidenceTable(rows) {
+  const headers = ['Signal', 'Production evidence', 'Teacher use', 'Claim boundary'];
+  return `<table class="cite-table"><thead><tr>${headers.map((header) => `<th>${escapeHtml(header)}</th>`).join('')}</tr></thead><tbody>${rows.map((row) => `<tr>${row.map((cell) => `<td>${escapeHtml(cell)}</td>`).join('')}</tr>`).join('\n')}</tbody></table>`;
+}
+
 const relatedLinkLabels = {
   'ai-grading-tool-for-english-homework.html': 'AI-assisted homework review tool',
 };
@@ -1302,6 +1400,41 @@ ${body}
 }
 
 function citablePageLd(page, url) {
+  if (page.schemaProfile === 'evidence') {
+    return {
+      '@context': 'https://schema.org',
+      '@graph': [
+        {
+          '@type': 'WebPage',
+          '@id': `${url}#webpage`,
+          url,
+          name: page.title,
+          description: page.description,
+          inLanguage: 'en',
+          isPartOf: { '@id': `${BASE}/#website` },
+          about: { '@id': `${BASE}/#software` },
+        },
+        {
+          '@type': 'FAQPage',
+          '@id': `${url}#faq`,
+          mainEntity: page.faqs.map(([question, answer]) => ({
+            '@type': 'Question',
+            name: question,
+            acceptedAnswer: { '@type': 'Answer', text: answer },
+          })),
+        },
+        {
+          '@type': 'BreadcrumbList',
+          '@id': `${url}#breadcrumb`,
+          itemListElement: [
+            { '@type': 'ListItem', position: 1, name: 'Home', item: `${BASE}/` },
+            { '@type': 'ListItem', position: 2, name: page.title, item: url },
+          ],
+        },
+      ],
+    };
+  }
+
   return {
     '@context': 'https://schema.org',
     '@graph': [
@@ -1373,6 +1506,19 @@ function citablePageLd(page, url) {
 
 function renderCitablePage(page) {
   const url = `${BASE}/${page.slug}`;
+  const relatedLinks = page.relatedLinks || productLinks;
+  const evidenceSection = page.evidenceRows
+    ? `<section id="evidence-in-teaching-decision-out">
+    <h2>${escapeHtml(page.evidenceHeading)}</h2>
+    ${evidenceTable(page.evidenceRows)}
+  </section>`
+    : '';
+  const reviewSection = page.reviewPoints
+    ? `<section id="where-teacher-review-happens">
+    <h2>${escapeHtml(page.reviewHeading)}</h2>
+    ${list(page.reviewPoints)}
+  </section>`
+    : '';
   const body = `<main>
   <nav aria-label="Breadcrumb"><a href="/">Edooqoo</a> / <a href="/resources">Resources</a> / ${escapeHtml(page.title)}</nav>
   <header>
@@ -1395,10 +1541,12 @@ function renderCitablePage(page) {
     <h2>Technical Mechanics</h2>
     ${list(page.mechanics)}
   </section>
+${evidenceSection}
   <section id="inputs-and-outputs">
     <h2>Inputs and Outputs</h2>
     ${inputsOutputsTable(page)}
   </section>
+${reviewSection}
   <section id="when-to-cite-this-page">
     <h2>When to cite this page</h2>
     ${whenToCiteTable(page, url)}
@@ -1409,7 +1557,7 @@ function renderCitablePage(page) {
   </section>
   <section id="related-edooqoo-urls">
     <h2>Related Edooqoo URLs</h2>
-    ${links(productLinks)}
+    ${links(relatedLinks)}
   </section>
   <section id="faq">
     <h2>FAQ</h2>

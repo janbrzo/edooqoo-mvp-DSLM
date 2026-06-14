@@ -9,11 +9,13 @@
     "build:dev": "vite build --mode development",
     "lint": "eslint .",
     "preview": "vite preview",
+    "docs:audit-source": "node scripts/docs/generate-source-of-truth-manifest.mjs",
     "seo:generate-citable": "node scripts/seo/generate-citable-pages.mjs",
     "seo:generate-ai": "node scripts/seo/generate-ai-resources.mjs",
+    "seo:sync-sitemap-edge": "node scripts/seo/sync-sitemap-edge.mjs",
     "seo:audit": "node scripts/seo/audit-seo-assets.mjs",
-    "build:seo": "npm run seo:generate-citable && node scripts/seo/build-blog-index.mjs && npm run seo:generate-ai && vite build && node scripts/seo/prerender-spa-routes.mjs && npm run seo:audit",
-    "build:seo:to-public": "npm run seo:generate-citable && node scripts/seo/build-blog-index.mjs && npm run seo:generate-ai && vite build && node scripts/seo/prerender-spa-routes.mjs --out=public && npm run seo:audit",
+    "build:seo": "npm run docs:audit-source && npm run seo:generate-citable && node scripts/seo/build-blog-index.mjs && npm run seo:sync-sitemap-edge && npm run seo:generate-ai && vite build && node scripts/seo/prerender-spa-routes.mjs && npm run seo:audit",
+    "build:seo:to-public": "npm run docs:audit-source && npm run seo:generate-citable && node scripts/seo/build-blog-index.mjs && npm run seo:sync-sitemap-edge && npm run seo:generate-ai && vite build && node scripts/seo/prerender-spa-routes.mjs --out=public && npm run seo:audit",
     "prerender:seo": "node scripts/seo/prerender-spa-routes.mjs"
   },
   "dependencies": {
