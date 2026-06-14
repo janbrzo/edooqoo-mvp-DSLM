@@ -93,6 +93,12 @@ Language of product UI: English.
 - Programmatic exercise-topic pages: /worksheets/:exerciseType/:topic.
 - Programmatic persona pages: /english-for/:persona.
 
+## Content Registry
+- Machine-readable repository inventory: docs/seo/content-registry.generated.json.
+- Current states: keep=48, improve=0, merge=0, retire=0, hold=1702, noindex=4.
+- Indexable states: keep, improve, hold.
+- Destructive decisions: merge and retire require measured GSC or verified backlink evidence.
+
 ## Private or Application Route Groups
 - /dashboard and nested dashboard screens.
 - /worksheet/ and single worksheet editor surfaces.

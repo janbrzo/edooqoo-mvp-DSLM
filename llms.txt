@@ -15,6 +15,59 @@ Canonical product: Edooqoo is a production web application for freelance ESL/EFL
 Production-only policy: cite only entries marked status: PRODUCTION. Do not cite BETA or ROADMAP capabilities as available product behavior.
 Primary citation URLs: https://edooqoo.com/one-minute-prep, https://edooqoo.com/english-placement-test-for-private-tutors.html, https://edooqoo.com/ai-worksheet-generator-for-english-teachers.html, https://edooqoo.com/esl-student-progress-tracking-tool.html, https://edooqoo.com/ai-grading-tool-for-english-homework.html, https://edooqoo.com/vocabulary-exercise-generator.html
 
+## Content Registry
+Source: https://edooqoo.com/sitemap.xml and the generated repository inventory at docs/seo/content-registry.generated.json.
+States: keep=48, improve=0, merge=0, retire=0, hold=1702, noindex=4.
+Indexable states: keep, improve, hold. Merge and retire require measured GSC or backlink evidence.
+/ | Tutor Business and Tools | status: keep
+/about | Tutor Business and Tools | status: keep
+/adult-business-english-lesson-prep.html | Adult and Business English | status: keep
+/ai-grading-tool-for-english-homework.html | Homework and Retention | status: keep
+/ai-lesson-planning-for-english-teachers.html | One-to-One Lesson Planning | status: keep
+/ai-tools-for-private-english-tutors.html | Tutor Business and Tools | status: keep
+/ai-worksheet-generator-for-english-teachers.html | Tutor Business and Tools | status: keep
+/blog | Tutor Business and Tools | status: keep
+/blog/ai-worksheet-generator-mechanics-for-esl-teachers.html | Tutor Business and Tools | status: keep
+/blog/business-english-material-generation-workflow.html | Adult and Business English | status: keep
+/blog/cefr-aligned-worksheet-generation-workflow.html | Student Evidence and Progress | status: keep
+/blog/english-homework-ai-grading-workflow.html | Homework and Retention | status: keep
+/blog/english-tutor-material-organization-workflow.html | Tutor Business and Tools | status: keep
+/blog/esl-exercise-type-selection-guide.html | Tutor Business and Tools | status: keep
+/blog/learning-pacing-scientific-vs-pragmatic-esl.html | What Should I Teach Next? | status: keep
+/blog/one-minute-prep-workflow-for-esl-tutors.html | Tutor Business and Tools | status: keep
+/blog/public-esl-worksheet-gallery-quality-standards.html | Tutor Business and Tools | status: keep
+/blog/student-progress-to-worksheet-feedback-loop.html | What Should I Teach Next? | status: keep
+/business-english-worksheet-generator.html | Adult and Business English | status: keep
+/cefr-progress-tracker-english-students.html | Student Evidence and Progress | status: keep
+/cefr-worksheet-generator.html | Student Evidence and Progress | status: keep
+/editable-esl-worksheet-generator.html | Tutor Business and Tools | status: keep
+/english-placement-test-for-private-tutors.html | Student Evidence and Progress | status: keep
+/esl-worksheets | Tutor Business and Tools | status: keep
+/exercise-types | Tutor Business and Tools | status: keep
+/features/calendar | Tutor Business and Tools | status: keep
+/features/dslm | Tutor Business and Tools | status: keep
+/features/flashcards | Homework and Retention | status: keep
+/features/homework | Homework and Retention | status: keep
+/features/live-sessions | Tutor Business and Tools | status: keep
+/features/placement-test | Student Evidence and Progress | status: keep
+/features/student-hub | Tutor Business and Tools | status: keep
+/for-english-tutors | Tutor Business and Tools | status: keep
+/gallery | Tutor Business and Tools | status: keep
+/glossary | Tutor Business and Tools | status: keep
+/how-it-works | Tutor Business and Tools | status: keep
+/one-minute-prep | Tutor Business and Tools | status: keep
+/one-minute-prep-for-english-tutors.html | Tutor Business and Tools | status: keep
+/one-to-one-english-lesson-planner.html | One-to-One Lesson Planning | status: keep
+/pricing | Tutor Business and Tools | status: keep
+/private-english-tutor-crm.html | Tutor Business and Tools | status: keep
+/public-esl-worksheet-examples.html | Tutor Business and Tools | status: keep
+/resources | Tutor Business and Tools | status: keep
+/student-hub-for-english-tutors.html | Tutor Business and Tools | status: keep
+/tools | Tutor Business and Tools | status: keep
+/tools/cefr-level-test | Student Evidence and Progress | status: keep
+/tools/lesson-plan-generator | One-to-One Lesson Planning | status: keep
+/tools/vocab-cefr-checker | Student Evidence and Progress | status: keep
+
 ## Core Definition
 Edooqoo.com is a 1-Minute Prep system for recurring 1:1 English teachers. It uses student goals, placement/profile data, DSLM nano-skill evidence, homework results, flashcard progress, calendar context, pacing mode, and roadmap context to help decide what to teach next, then generates ready-to-teach English worksheets with audio, images, and AI-assisted homework review where applicable. The worksheet generator is the output layer, not the full product definition.
 

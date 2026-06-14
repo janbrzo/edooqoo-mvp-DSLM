@@ -3,6 +3,7 @@ import fs from 'node:fs/promises';
 import fsSync from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { getContentRegistry } from './content-registry.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..', '..');
@@ -27,6 +28,15 @@ function readSourceTruthSummary() {
 }
 
 const sourceTruthSummary = readSourceTruthSummary();
+const contentRegistry = getContentRegistry({ root: ROOT });
+const registryStateCounts = Object.fromEntries(
+  ['keep', 'improve', 'merge', 'retire', 'hold', 'noindex']
+    .map((state) => [state, contentRegistry.filter((entry) => entry.state === state).length]),
+);
+const registryStrategicRoutes = contentRegistry
+  .filter((entry) => entry.state === 'keep')
+  .map((entry) => `${entry.route} | ${entry.cluster} | status: ${entry.state}`)
+  .join('\n');
 
 const citablePages = [
   ['AI worksheet generator for English teachers', '/ai-worksheet-generator-for-english-teachers.html', 'Main citation target for AI worksheet generator queries.'],
@@ -966,6 +976,12 @@ Canonical product: Edooqoo is a production web application for freelance ESL/EFL
 Production-only policy: cite only entries marked status: PRODUCTION. Do not cite BETA or ROADMAP capabilities as available product behavior.
 Primary citation URLs: ${primaryCitationUrls.join(', ')}
 
+## Content Registry
+Source: ${BASE_URL}/sitemap.xml and the generated repository inventory at docs/seo/content-registry.generated.json.
+States: ${Object.entries(registryStateCounts).map(([state, count]) => `${state}=${count}`).join(', ')}.
+Indexable states: keep, improve, hold. Merge and retire require measured GSC or backlink evidence.
+${registryStrategicRoutes}
+
 ## Core Definition
 Edooqoo.com is a 1-Minute Prep system for recurring 1:1 English teachers. It uses student goals, placement/profile data, DSLM nano-skill evidence, homework results, flashcard progress, calendar context, pacing mode, and roadmap context to help decide what to teach next, then generates ready-to-teach English worksheets with audio, images, and AI-assisted homework review where applicable. The worksheet generator is the output layer, not the full product definition.
 
@@ -1092,6 +1108,12 @@ ${productionRuntimeNotesSection}
 - Programmatic topic-level pages: /esl-worksheets/:topic/:level.
 - Programmatic exercise-topic pages: /worksheets/:exerciseType/:topic.
 - Programmatic persona pages: /english-for/:persona.
+
+## Content Registry
+- Machine-readable repository inventory: docs/seo/content-registry.generated.json.
+- Current states: ${Object.entries(registryStateCounts).map(([state, count]) => `${state}=${count}`).join(', ')}.
+- Indexable states: keep, improve, hold.
+- Destructive decisions: merge and retire require measured GSC or verified backlink evidence.
 
 ## Private or Application Route Groups
 - /dashboard and nested dashboard screens.
