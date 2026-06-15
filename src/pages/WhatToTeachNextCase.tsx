@@ -5,6 +5,7 @@ import { PageSeo } from '@/components/seo/PageSeo';
 import { CONTENT_AUTHORS } from '@/data/contentAuthors';
 import { getWhatToTeachNextCase } from '@/data/whatToTeachNextCases';
 import { useEventTracking } from '@/hooks/useEventTracking';
+import NewsletterSignup from '@/components/newsletter/NewsletterSignup';
 
 const WhatToTeachNextCase: React.FC = () => {
   const { slug } = useParams();
@@ -174,6 +175,10 @@ const WhatToTeachNextCase: React.FC = () => {
             Decide your next lesson
             <ExternalLink className="h-4 w-4" aria-hidden="true" />
           </Link>
+        </div>
+
+        <div className="mt-12">
+          <NewsletterSignup source={`worked-example:${example.slug}`} />
         </div>
       </article>
     </div>

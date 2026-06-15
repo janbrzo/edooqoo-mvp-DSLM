@@ -26,3 +26,9 @@ verify_jwt = false
 
 [functions.bulk-publish-worksheets]
 verify_jwt = false
+
+[functions.newsletter-subscription]
+verify_jwt = false
+
+[functions.send-next-lesson-newsletter]
+verify_jwt = false

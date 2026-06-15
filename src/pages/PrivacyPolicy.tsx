@@ -92,6 +92,13 @@ const PrivacyPolicy = () => {
               <li>Usage analytics and performance metrics</li>
               <li>Session data and authentication tokens</li>
             </ul>
+
+            <h3 className="text-xl font-medium text-foreground mb-3">3.6 Newsletter Information</h3>
+            <ul className="list-disc pl-6 mb-4 text-foreground">
+              <li>Email address submitted through a newsletter form</li>
+              <li>Consent version, form source, and confirmation status</li>
+              <li>Confirmation, subscription, and unsubscribe timestamps</li>
+            </ul>
           </section>
 
           {/* How We Use Information */}
@@ -113,6 +120,11 @@ const PrivacyPolicy = () => {
               <li><strong>Consent:</strong> Marketing communications (where applicable)</li>
               <li><strong>Legal Obligation:</strong> Compliance with tax and financial regulations</li>
             </ul>
+
+            <h3 className="text-xl font-medium text-foreground mb-3">4.3 Newsletter</h3>
+            <p className="text-foreground mb-4">
+              We send the What Should I Teach Next? newsletter only after double opt-in confirmation. Product accounts are not added automatically. Every newsletter contains an unsubscribe link.
+            </p>
           </section>
 
           {/* Information Sharing */}
@@ -124,8 +136,9 @@ const PrivacyPolicy = () => {
               <ul className="list-disc pl-6 text-foreground">
                 <li><strong>Supabase:</strong> Database hosting and authentication (EU/US)</li>
                 <li><strong>Stripe:</strong> Payment processing (global, GDPR compliant)</li>
-                <li><strong>Google:</strong> OAuth authentication (global, GDPR compliant)</li>
-                <li><strong>OpenAI:</strong> AI worksheet generation (US, privacy-focused)</li>
+              <li><strong>Google:</strong> OAuth authentication (global, GDPR compliant)</li>
+              <li><strong>OpenAI:</strong> AI worksheet generation (US, privacy-focused)</li>
+              <li><strong>Resend:</strong> Newsletter confirmation and delivery</li>
               </ul>
             </div>
 
@@ -191,6 +204,7 @@ const PrivacyPolicy = () => {
               <li><strong>Payment Records:</strong> 7 years for tax compliance</li>
               <li><strong>Analytics Data:</strong> Anonymized after 24 months</li>
               <li><strong>Backup Data:</strong> Automatically deleted after 30 days</li>
+              <li><strong>Newsletter Data:</strong> Retained while the subscription is active and as needed to record consent or unsubscribe status</li>
             </ul>
           </section>
 

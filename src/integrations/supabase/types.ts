@@ -1714,6 +1714,72 @@ export type Database = {
         }
         Relationships: []
       }
+      newsletter_rate_limits: {
+        Row: {
+          action: string
+          key_hash: string
+          request_count: number
+          window_started_at: string
+        }
+        Insert: {
+          action: string
+          key_hash: string
+          request_count?: number
+          window_started_at?: string
+        }
+        Update: {
+          action?: string
+          key_hash?: string
+          request_count?: number
+          window_started_at?: string
+        }
+        Relationships: []
+      }
+      newsletter_subscribers: {
+        Row: {
+          confirmation_expires_at: string | null
+          confirmation_sent_at: string | null
+          confirmation_token_hash: string | null
+          confirmed_at: string | null
+          consent_version: string
+          created_at: string
+          email: string
+          id: string
+          source: string
+          status: string
+          unsubscribed_at: string | null
+          updated_at: string
+        }
+        Insert: {
+          confirmation_expires_at?: string | null
+          confirmation_sent_at?: string | null
+          confirmation_token_hash?: string | null
+          confirmed_at?: string | null
+          consent_version?: string
+          created_at?: string
+          email: string
+          id?: string
+          source?: string
+          status?: string
+          unsubscribed_at?: string | null
+          updated_at?: string
+        }
+        Update: {
+          confirmation_expires_at?: string | null
+          confirmation_sent_at?: string | null
+          confirmation_token_hash?: string | null
+          confirmed_at?: string | null
+          consent_version?: string
+          created_at?: string
+          email?: string
+          id?: string
+          source?: string
+          status?: string
+          unsubscribed_at?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       pacing_proposals: {
         Row: {
           created_at: string
@@ -3454,6 +3520,15 @@ export type Database = {
           p_teacher_id: string
         }
         Returns: undefined
+      }
+      consume_newsletter_rate_limit: {
+        Args: {
+          p_action: string
+          p_key_hash: string
+          p_limit: number
+          p_window_seconds: number
+        }
+        Returns: boolean
       }
       consume_token: {
         Args: { p_teacher_id: string; p_worksheet_id: string }

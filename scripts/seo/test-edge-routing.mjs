@@ -5,7 +5,11 @@ import { handleRequest } from '../../cloudflare/worker.mjs';
 const routing = {
   redirects: { '/old-article': '/blog' },
   gone: new Set(['/retired-article']),
-  noindex: new Set(['/worksheets/matching/reported-speech']),
+  noindex: new Set([
+    '/newsletter/confirmed',
+    '/newsletter/unsubscribed',
+    '/worksheets/matching/reported-speech',
+  ]),
   publicRoutes: new Set(['/', '/blog', '/worksheets/fill-in-the-blanks/present-perfect']),
 };
 const env = {
@@ -41,6 +45,12 @@ const publicNoindex = await handleRequest(
 assert.equal(publicNoindex.status, 200);
 assert.equal(publicNoindex.headers.get('x-robots-tag'), 'noindex, follow');
 
+for (const path of ['/newsletter/confirmed', '/newsletter/unsubscribed']) {
+  const lifecyclePage = await handleRequest(new Request(`https://edooqoo.com${path}`), env, routing);
+  assert.equal(lifecyclePage.status, 200);
+  assert.equal(lifecyclePage.headers.get('x-robots-tag'), 'noindex, follow');
+}
+
 const publicProgrammatic = await handleRequest(
   new Request('https://edooqoo.com/worksheets/fill-in-the-blanks/present-perfect'),
   env,
@@ -49,4 +59,4 @@ const publicProgrammatic = await handleRequest(
 assert.equal(publicProgrammatic.status, 200);
 assert.equal(publicProgrammatic.headers.get('x-robots-tag'), null);
 
-console.log('[edge-routing-test] PASS 404, 301, 410, private noindex, public noindex, public programmatic route');
+console.log('[edge-routing-test] PASS 404, 301, 410, private noindex, newsletter noindex, public noindex, public programmatic route');

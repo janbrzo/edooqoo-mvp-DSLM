@@ -15,16 +15,16 @@
     "databaseTypeSource": "src/integrations/supabase/types.ts"
   },
   "counts": {
-    "routes": 84,
-    "pageModules": 80,
-    "componentModules": 338,
+    "routes": 86,
+    "pageModules": 81,
+    "componentModules": 339,
     "hookModules": 79,
     "contextModules": 1,
     "serviceModules": 11,
-    "edgeFunctions": 77,
-    "typedTables": 56,
-    "typedRpcs": 57,
-    "migrationIndexes": 10
+    "edgeFunctions": 79,
+    "typedTables": 58,
+    "typedRpcs": 58,
+    "migrationIndexes": 12
   },
   "routes": [
     {
@@ -45,13 +45,15 @@
         "fetchTargets": []
       },
       "hooks": [
-        "useActiveWorksheetGenerationJob",
+        "useActiveWorksheetGenerationJobs",
         "useAuthFlow",
         "useEffect",
         "useLocation",
+        "useMemo",
         "useNavigate",
         "useSearchParams",
         "useState",
+        "useTabId",
         "useTokenSystem",
         "useWorksheetGeneration",
         "useWorksheetState"
@@ -1731,6 +1733,58 @@
         "useLocation",
         "useRef",
         "useState"
+      ],
+      "userActions": [],
+      "navigateTargets": []
+    },
+    {
+      "path": "/newsletter/confirmed",
+      "element": "NewsletterStatus",
+      "source": "src/pages/NewsletterStatus.tsx",
+      "type": "public-functional-or-auth",
+      "redirectTo": null,
+      "crawl": {
+        "robotsBlocked": false,
+        "sitemapMatches": 0,
+        "status": "not-in-sitemap"
+      },
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "hooks": [
+        "useEffect",
+        "useEventTracking",
+        "useRef",
+        "useSearchParams"
+      ],
+      "userActions": [],
+      "navigateTargets": []
+    },
+    {
+      "path": "/newsletter/unsubscribed",
+      "element": "NewsletterStatus",
+      "source": "src/pages/NewsletterStatus.tsx",
+      "type": "public-functional-or-auth",
+      "redirectTo": null,
+      "crawl": {
+        "robotsBlocked": false,
+        "sitemapMatches": 0,
+        "status": "not-in-sitemap"
+      },
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "hooks": [
+        "useEffect",
+        "useEventTracking",
+        "useRef",
+        "useSearchParams"
       ],
       "userActions": [],
       "navigateTargets": []
@@ -4341,6 +4395,11 @@
           "initial": "null"
         },
         {
+          "value": "activeJobIdx",
+          "setter": "setActiveJobIdx",
+          "initial": "0"
+        },
+        {
           "value": "showTokenModal",
           "setter": "setShowTokenModal",
           "initial": "false"
@@ -4367,13 +4426,15 @@
         }
       ],
       "hooks": [
-        "useActiveWorksheetGenerationJob",
+        "useActiveWorksheetGenerationJobs",
         "useAuthFlow",
         "useEffect",
         "useLocation",
+        "useMemo",
         "useNavigate",
         "useSearchParams",
         "useState",
+        "useTabId",
         "useTokenSystem",
         "useWorksheetGeneration",
         "useWorksheetState"
@@ -4569,6 +4630,54 @@
       },
       "routes": [
         "/login"
+      ]
+    },
+    {
+      "path": "src/pages/NewsletterStatus.tsx",
+      "domain": "page",
+      "purpose": "Implements Newsletter Status behavior in the page domain.",
+      "exports": [
+        "NewsletterStatus"
+      ],
+      "props": [
+        {
+          "name": "NewsletterStatusProps",
+          "fields": [
+            {
+              "name": "mode",
+              "type": "'confirmed' | 'unsubscribed'",
+              "optional": false
+            }
+          ]
+        }
+      ],
+      "state": [],
+      "hooks": [
+        "useEffect",
+        "useEventTracking",
+        "useRef",
+        "useSearchParams"
+      ],
+      "actions": [],
+      "navigateTargets": [],
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "storage": [],
+      "userFacingText": [
+        "Open the decision library",
+        "Use the decision tool"
+      ],
+      "userFacingBehavior": {
+        "actionHandlers": [],
+        "navigationTargets": []
+      },
+      "routes": [
+        "/newsletter/confirmed",
+        "/newsletter/unsubscribed"
       ]
     },
     {
@@ -4920,14 +5029,14 @@
         "3.3 Worksheet Data",
         "3.4 Payment Information",
         "3.5 Technical Information",
+        "3.6 Newsletter Information",
         "4. How We Use Your Information",
         "4.1 Service Provision",
         "4.2 Legal Bases (GDPR)",
+        "4.3 Newsletter",
         "5. Information Sharing",
         "5.1 Third-Party Service Providers",
-        "5.2 We Do NOT Share",
-        "6. Data Security",
-        "7 years for tax compliance"
+        "5.2 We Do NOT Share"
       ],
       "userFacingBehavior": {
         "actionHandlers": [],
@@ -9369,6 +9478,21 @@
               "name": "jobId",
               "type": "string | null",
               "optional": true
+            },
+            {
+              "name": "jobsCount",
+              "type": "number",
+              "optional": true
+            },
+            {
+              "name": "currentIndex",
+              "type": "number",
+              "optional": true
+            },
+            {
+              "name": "onSelectIndex",
+              "type": "(index: number) => void",
+              "optional": true
             }
           ]
         }
@@ -9422,10 +9546,13 @@
         "For",
         "Generating Your Worksheet",
         "Generating...",
+        "Generation",
         "Generation resumed.",
         "Generation runs in the background — keep prepping for",
+        "Next generation",
         "No token was consumed. Your form data is preserved.",
         "Open dashboard ↗",
+        "Previous generation",
         "Time:",
         "Try Again",
         "or another student while you wait."
@@ -20544,7 +20671,8 @@
         "useEffect",
         "useLocation",
         "useNavigate",
-        "useState"
+        "useState",
+        "useTabId"
       ],
       "actions": [
         "onMount",
@@ -22757,6 +22885,81 @@
       "userFacingText": [
         "1-Minute Prep starts before the worksheet",
         "Edooqoo connects student context, learning signals and material generation into one weekly prep loop for 1-on-1 English lessons."
+      ],
+      "userFacingBehavior": {
+        "actionHandlers": [],
+        "navigationTargets": []
+      }
+    },
+    {
+      "path": "src/components/newsletter/NewsletterSignup.tsx",
+      "domain": "newsletter",
+      "purpose": "Implements Newsletter Signup behavior in the newsletter domain.",
+      "exports": [
+        "NewsletterSignup"
+      ],
+      "props": [
+        {
+          "name": "NewsletterSignupProps",
+          "fields": [
+            {
+              "name": "source",
+              "type": "string",
+              "optional": false
+            }
+          ]
+        }
+      ],
+      "state": [
+        {
+          "value": "email",
+          "setter": "setEmail",
+          "initial": "''"
+        },
+        {
+          "value": "company",
+          "setter": "setCompany",
+          "initial": "''"
+        },
+        {
+          "value": "consent",
+          "setter": "setConsent",
+          "initial": "false"
+        },
+        {
+          "value": "submitState",
+          "setter": "setSubmitState",
+          "initial": "'idle'"
+        },
+        {
+          "value": "message",
+          "setter": "setMessage",
+          "initial": "''"
+        }
+      ],
+      "hooks": [
+        "useEventTracking",
+        "useState"
+      ],
+      "actions": [],
+      "navigateTargets": [],
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [
+          "newsletter-subscription"
+        ],
+        "fetchTargets": []
+      },
+      "storage": [],
+      "userFacingText": [
+        "Company",
+        "Email address",
+        "I want to receive the weekly Edooqoo newsletter. I can unsubscribe in every email. See the",
+        "One weekly adult 1:1 teaching decision, with the full article or worked example as the canonical source.",
+        "Privacy Policy",
+        "What Should I Teach Next?",
+        "tutor@example.com"
       ],
       "userFacingBehavior": {
         "actionHandlers": [],
@@ -39285,6 +39488,17 @@
       },
       {
         "storage": "sessionStorage",
+        "key": "KEY",
+        "operations": [
+          "getItem",
+          "setItem"
+        ],
+        "files": [
+          "src/lib/worksheet/tabId.ts"
+        ]
+      },
+      {
+        "storage": "sessionStorage",
         "key": "onboarding-temp-dismissed",
         "operations": [
           "getItem",
@@ -41043,6 +41257,50 @@
         ]
       },
       {
+        "name": "newsletter-subscription",
+        "path": "supabase/functions/newsletter-subscription/index.ts",
+        "invocation": "POST via supabase.functions.invoke or direct /functions/v1 request unless method list says otherwise",
+        "methods": [
+          "GET",
+          "OPTIONS",
+          "POST"
+        ],
+        "requestFields": [
+          "company"
+        ],
+        "visibleResponseFields": [
+          "error",
+          "from",
+          "html",
+          "ok",
+          "reply_to",
+          "status",
+          "subject",
+          "to"
+        ],
+        "dataDependencies": {
+          "tables": [
+            "email_send_log",
+            "newsletter_subscribers"
+          ],
+          "rpcs": [
+            "consume_newsletter_rate_limit"
+          ],
+          "edgeFunctions": [],
+          "fetchTargets": [
+            "https://api.resend.com/emails"
+          ]
+        },
+        "environmentVariables": [
+          "APP_BASE_URL",
+          "NEWSLETTER_RATE_LIMIT_SALT",
+          "NEWSLETTER_UNSUBSCRIBE_SECRET",
+          "RESEND_API_KEY",
+          "SUPABASE_SERVICE_ROLE_KEY",
+          "SUPABASE_URL"
+        ]
+      },
+      {
         "name": "notify-generation-failure",
         "path": "supabase/functions/notify-generation-failure/index.ts",
         "invocation": "POST via supabase.functions.invoke or direct /functions/v1 request unless method list says otherwise",
@@ -41551,6 +41809,50 @@
         "environmentVariables": [
           "CRON_SECRET",
           "RESEND_API_KEY"
+        ]
+      },
+      {
+        "name": "send-next-lesson-newsletter",
+        "path": "supabase/functions/send-next-lesson-newsletter/index.ts",
+        "invocation": "POST via supabase.functions.invoke or direct /functions/v1 request unless method list says otherwise",
+        "methods": [
+          "OPTIONS",
+          "POST"
+        ],
+        "requestFields": [
+          "campaignKey",
+          "canonicalUrl",
+          "summary",
+          "title"
+        ],
+        "visibleResponseFields": [
+          "activeSubscribers",
+          "appBaseUrl",
+          "canonicalUrl",
+          "error",
+          "failures",
+          "ok",
+          "sent",
+          "skipped"
+        ],
+        "dataDependencies": {
+          "tables": [
+            "email_send_log",
+            "newsletter_subscribers"
+          ],
+          "rpcs": [],
+          "edgeFunctions": [],
+          "fetchTargets": [
+            "https://api.resend.com/emails/batch"
+          ]
+        },
+        "environmentVariables": [
+          "APP_BASE_URL",
+          "CRON_SECRET",
+          "NEWSLETTER_UNSUBSCRIBE_SECRET",
+          "RESEND_API_KEY",
+          "SUPABASE_SERVICE_ROLE_KEY",
+          "SUPABASE_URL"
         ]
       },
       {
@@ -42763,6 +43065,19 @@
         "payloadFields": [
           "studentEmail",
           "teacherToken"
+        ],
+        "payloadExpressions": []
+      },
+      {
+        "name": "newsletter-subscription",
+        "callsites": [
+          "src/components/newsletter/NewsletterSignup.tsx"
+        ],
+        "payloadFields": [
+          "company",
+          "consent",
+          "email",
+          "source"
         ],
         "payloadExpressions": []
       },
@@ -45075,6 +45390,8 @@
         "featureOwnership": {
           "clientFiles": [],
           "edgeFunctions": [
+            "newsletter-subscription",
+            "send-next-lesson-newsletter",
             "send-welcome-email"
           ]
         }
@@ -46366,6 +46683,109 @@
           "clientFiles": [],
           "edgeFunctions": [
             "audit-llm-models"
+          ]
+        }
+      },
+      {
+        "name": "newsletter_rate_limits",
+        "fields": [
+          {
+            "name": "action",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "key_hash",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "request_count",
+            "type": "number",
+            "optional": false
+          },
+          {
+            "name": "window_started_at",
+            "type": "string",
+            "optional": false
+          }
+        ],
+        "relationships": [],
+        "featureOwnership": {
+          "clientFiles": [],
+          "edgeFunctions": []
+        }
+      },
+      {
+        "name": "newsletter_subscribers",
+        "fields": [
+          {
+            "name": "confirmation_expires_at",
+            "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "confirmation_sent_at",
+            "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "confirmation_token_hash",
+            "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "confirmed_at",
+            "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "consent_version",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "created_at",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "email",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "id",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "source",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "status",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "unsubscribed_at",
+            "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "updated_at",
+            "type": "string",
+            "optional": false
+          }
+        ],
+        "relationships": [],
+        "featureOwnership": {
+          "clientFiles": [],
+          "edgeFunctions": [
+            "newsletter-subscription",
+            "send-next-lesson-newsletter"
           ]
         }
       },
@@ -49295,6 +49715,32 @@
         "returns": "undefined"
       },
       {
+        "name": "consume_newsletter_rate_limit",
+        "args": [
+          {
+            "name": "p_action",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_key_hash",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_limit",
+            "type": "number",
+            "optional": false
+          },
+          {
+            "name": "p_window_seconds",
+            "type": "number",
+            "optional": false
+          }
+        ],
+        "returns": "boolean"
+      },
+      {
         "name": "consume_token",
         "args": [
           {
@@ -50201,12 +50647,32 @@
         "table": "student_progress_goals",
         "unique": false,
         "migration": "supabase/migrations/20260606122956_6ad6f44a-fe30-4363-aa14-e61f1f56941e.sql"
+      },
+      {
+        "name": "newsletter_subscribers_status_idx",
+        "table": "newsletter_subscribers",
+        "unique": false,
+        "migration": "supabase/migrations/20260615143000_newsletter_double_opt_in.sql"
+      },
+      {
+        "name": "newsletter_subscribers_confirmation_token_idx",
+        "table": "newsletter_subscribers",
+        "unique": false,
+        "migration": "supabase/migrations/20260615143000_newsletter_double_opt_in.sql"
       }
     ],
     "migrationFunctions": [
       {
         "name": "calculate_test_results",
         "migration": "supabase/migrations/20260609191429_f1209887-288d-49d1-98f8-e3de2a43be52.sql"
+      },
+      {
+        "name": "consume_newsletter_rate_limit",
+        "migration": "supabase/migrations/20260615143000_newsletter_double_opt_in.sql"
+      },
+      {
+        "name": "consume_token",
+        "migration": "supabase/migrations/20260615164911_f17d6d20-5a34-4783-b8e7-403175d8c56f.sql"
       },
       {
         "name": "generate_public_slug",
@@ -50278,11 +50744,13 @@
       {
         "host": "api.resend.com",
         "callsites": [
+          "supabase/functions/newsletter-subscription/index.ts",
           "supabase/functions/notify-generation-failure/index.ts",
           "supabase/functions/process-welcome-test/index.ts",
           "supabase/functions/send-calendar-notification-email/index.ts",
           "supabase/functions/send-flashcard-email/index.ts",
           "supabase/functions/send-model-audit-email/index.ts",
+          "supabase/functions/send-next-lesson-newsletter/index.ts",
           "supabase/functions/send-test-email/index.ts",
           "supabase/functions/send-welcome-email/index.ts",
           "supabase/functions/send-welcome-test-completion-email/index.ts",
@@ -50422,6 +50890,7 @@
           "supabase/functions/loop-student-engagement/index.ts",
           "supabase/functions/loop-token-economy/index.ts",
           "supabase/functions/loop-worksheet-quality/index.ts",
+          "supabase/functions/newsletter-subscription/index.ts",
           "supabase/functions/pacing-periodic-check/index.ts",
           "supabase/functions/process-pending-ai-evaluations/index.ts",
           "supabase/functions/process-welcome-test/index.ts",
@@ -50433,6 +50902,7 @@
           "supabase/functions/send-flashcard-email/index.ts",
           "supabase/functions/send-homework-email/index.ts",
           "supabase/functions/send-homework-reminders/index.ts",
+          "supabase/functions/send-next-lesson-newsletter/index.ts",
           "supabase/functions/send-welcome-email/index.ts",
           "supabase/functions/send-welcome-test-completion-email/index.ts",
           "supabase/functions/send-worksheet-email/index.ts",
@@ -50588,11 +51058,13 @@
           "supabase/functions/admin-impersonate/index.ts",
           "supabase/functions/calendar-handle-reschedule-decision/index.ts",
           "supabase/functions/get-student-bookings/index.ts",
+          "supabase/functions/newsletter-subscription/index.ts",
           "supabase/functions/notify-generation-failure/index.ts",
           "supabase/functions/process-welcome-test/index.ts",
           "supabase/functions/publish-worksheet/index.ts",
           "supabase/functions/regenerate-gallery-sitemap/index.ts",
           "supabase/functions/send-homework-reminders/index.ts",
+          "supabase/functions/send-next-lesson-newsletter/index.ts",
           "supabase/functions/send-test-email/index.ts",
           "supabase/functions/send-welcome-email/index.ts",
           "supabase/functions/submit-bug-report/index.ts"
@@ -50617,6 +51089,7 @@
           "supabase/functions/backfill-welcome-test-auto-apply/index.ts",
           "supabase/functions/bulk-publish-worksheets/index.ts",
           "supabase/functions/send-model-audit-email/index.ts",
+          "supabase/functions/send-next-lesson-newsletter/index.ts",
           "supabase/functions/test-model-failure-logger/index.ts"
         ]
       },
@@ -50670,6 +51143,19 @@
           "supabase/functions/suggest-exercises/index.ts",
           "supabase/functions/translate-flashcard/index.ts",
           "supabase/functions/verify-open-answers/index.ts"
+        ]
+      },
+      {
+        "name": "NEWSLETTER_RATE_LIMIT_SALT",
+        "callsites": [
+          "supabase/functions/newsletter-subscription/index.ts"
+        ]
+      },
+      {
+        "name": "NEWSLETTER_UNSUBSCRIBE_SECRET",
+        "callsites": [
+          "supabase/functions/newsletter-subscription/index.ts",
+          "supabase/functions/send-next-lesson-newsletter/index.ts"
         ]
       },
       {
@@ -50730,6 +51216,7 @@
       {
         "name": "RESEND_API_KEY",
         "callsites": [
+          "supabase/functions/newsletter-subscription/index.ts",
           "supabase/functions/notify-generation-failure/index.ts",
           "supabase/functions/process-welcome-test/index.ts",
           "supabase/functions/send-calendar-notification-email/index.ts",
@@ -50737,6 +51224,7 @@
           "supabase/functions/send-homework-email/index.ts",
           "supabase/functions/send-homework-reminders/index.ts",
           "supabase/functions/send-model-audit-email/index.ts",
+          "supabase/functions/send-next-lesson-newsletter/index.ts",
           "supabase/functions/send-test-email/index.ts",
           "supabase/functions/send-welcome-email/index.ts",
           "supabase/functions/send-welcome-test-completion-email/index.ts",
@@ -50826,6 +51314,7 @@
           "supabase/functions/loop-student-engagement/index.ts",
           "supabase/functions/loop-token-economy/index.ts",
           "supabase/functions/loop-worksheet-quality/index.ts",
+          "supabase/functions/newsletter-subscription/index.ts",
           "supabase/functions/pacing-periodic-check/index.ts",
           "supabase/functions/process-pending-ai-evaluations/index.ts",
           "supabase/functions/process-welcome-test/index.ts",
@@ -50836,6 +51325,7 @@
           "supabase/functions/send-flashcard-email/index.ts",
           "supabase/functions/send-homework-email/index.ts",
           "supabase/functions/send-homework-reminders/index.ts",
+          "supabase/functions/send-next-lesson-newsletter/index.ts",
           "supabase/functions/send-welcome-email/index.ts",
           "supabase/functions/send-welcome-test-completion-email/index.ts",
           "supabase/functions/send-worksheet-email/index.ts",
@@ -50893,6 +51383,7 @@
           "supabase/functions/loop-student-engagement/index.ts",
           "supabase/functions/loop-token-economy/index.ts",
           "supabase/functions/loop-worksheet-quality/index.ts",
+          "supabase/functions/newsletter-subscription/index.ts",
           "supabase/functions/pacing-periodic-check/index.ts",
           "supabase/functions/process-pending-ai-evaluations/index.ts",
           "supabase/functions/process-welcome-test/index.ts",
@@ -50903,6 +51394,7 @@
           "supabase/functions/send-flashcard-email/index.ts",
           "supabase/functions/send-homework-email/index.ts",
           "supabase/functions/send-homework-reminders/index.ts",
+          "supabase/functions/send-next-lesson-newsletter/index.ts",
           "supabase/functions/send-welcome-email/index.ts",
           "supabase/functions/send-welcome-test-completion-email/index.ts",
           "supabase/functions/send-worksheet-email/index.ts",

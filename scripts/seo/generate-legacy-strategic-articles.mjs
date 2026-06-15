@@ -2,6 +2,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { NEWSLETTER_EMBED_CSS, renderNewsletterEmbed } from './newsletter-embed.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..', '..');
@@ -322,6 +323,7 @@ function renderDocument(article, published, body, words) {
     dl{display:grid;gap:14px}dl div{padding-bottom:12px;border-bottom:1px solid #e5e7eb}dt{font-weight:700}dd{margin:4px 0 0;color:#4b5563}
     details{border:1px solid #e5e7eb;border-radius:12px;padding:14px 16px;margin:10px 0}summary{cursor:pointer;font-weight:700}
     .next-step{margin:48px 0;padding:28px;border-radius:18px;background:#111827;color:#fff}.next-step a{color:#ddd6fe;font-weight:700}
+${NEWSLETTER_EMBED_CSS}
     footer{margin-top:64px;padding:32px 0 48px;border-top:1px solid #e5e7eb;color:#6b7280;font-size:.9rem}
     @media(max-width:640px){nav,main{padding-left:18px;padding-right:18px}header{padding-top:32px}h1{font-size:2.35rem}}
   </style>
@@ -350,6 +352,7 @@ function renderDocument(article, published, body, words) {
       <h2>Related resources</h2>
       <ul>${related}</ul>
     </section>
+${renderNewsletterEmbed(`article:${article.slug.replace(/\.html$/, '')}`)}
     <section class="next-step">
       <h2>Next step</h2>
       <p>Use the <a href="/what-to-teach-next">What Should I Teach Next?</a> framework to convert the evidence into one bounded decision for the next adult one-to-one lesson.</p>
