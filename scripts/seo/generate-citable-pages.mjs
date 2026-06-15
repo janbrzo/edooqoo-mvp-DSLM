@@ -9,6 +9,9 @@ const PUBLIC = path.join(ROOT, 'public');
 const BLOG = path.join(PUBLIC, 'blog');
 const BASE = 'https://edooqoo.com';
 const DATE = '2026-05-24';
+const UPDATED_DATE = '2026-06-14';
+const AUTHOR_URL = `${BASE}/authors/jan-brzostowski`;
+const REVIEWER_URL = `${BASE}/authors/martha`;
 
 const productLinks = [
   ['/one-minute-prep', '1-Minute Prep workflow'],
@@ -1586,8 +1589,16 @@ function articleLd(article, url) {
         headline: article.title,
         description: article.description,
         datePublished: DATE,
-        dateModified: DATE,
-        author: { '@type': 'Organization', name: 'Edooqoo' },
+        dateModified: UPDATED_DATE,
+        author: { '@type': 'Person', '@id': `${AUTHOR_URL}#person`, name: 'Jan Brzostowski', url: AUTHOR_URL },
+        reviewedBy: {
+          '@type': 'Person',
+          '@id': `${REVIEWER_URL}#person`,
+          name: 'Martha',
+          jobTitle: 'ESL Methodology Reviewer',
+          description: '10 years of ESL experience',
+          url: REVIEWER_URL,
+        },
         publisher: { '@type': 'Organization', '@id': `${BASE}/#organization`, name: 'Edooqoo' },
         mainEntityOfPage: { '@id': `${url}#webpage` },
         inLanguage: 'en',
@@ -1599,6 +1610,21 @@ function articleLd(article, url) {
         name: article.title,
         description: article.description,
         inLanguage: 'en',
+      },
+      {
+        '@type': 'Person',
+        '@id': `${AUTHOR_URL}#person`,
+        name: 'Jan Brzostowski',
+        url: AUTHOR_URL,
+        description: 'Founder of Edooqoo and author of product workflow documentation.',
+      },
+      {
+        '@type': 'Person',
+        '@id': `${REVIEWER_URL}#person`,
+        name: 'Martha',
+        url: REVIEWER_URL,
+        jobTitle: 'ESL Methodology Reviewer',
+        description: '10 years of ESL experience',
       },
       {
         '@type': 'FAQPage',
@@ -1635,6 +1661,7 @@ function renderArticle(article) {
     <p class="lead">Instructional reference</p>
     <h1>${escapeHtml(article.h1)}</h1>
     <p class="lead">${escapeHtml(article.summary)}</p>
+    <p>By <a href="/authors/jan-brzostowski">Jan Brzostowski</a>. Reviewed by <a href="/authors/martha">Martha, ESL Methodology Reviewer</a>. Published ${DATE}. Updated ${UPDATED_DATE}.</p>
   </header>
   <section class="summary" aria-label="Summary">
     <h2>Summary</h2>
@@ -1674,7 +1701,7 @@ ${extraSectionHtml}
     ])}
   </section>
   <footer>
-    Published ${DATE}. This page is an instructional resource for public AI/search citation.
+    Published ${DATE}. Updated ${UPDATED_DATE}. Authored by Jan Brzostowski and reviewed by Martha, ESL Methodology Reviewer.
   </footer>
 </main>`;
 

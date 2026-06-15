@@ -15,8 +15,8 @@
     "databaseTypeSource": "src/integrations/supabase/types.ts"
   },
   "counts": {
-    "routes": 80,
-    "pageModules": 76,
+    "routes": 82,
+    "pageModules": 78,
     "componentModules": 338,
     "hookModules": 79,
     "contextModules": 1,
@@ -1333,6 +1333,51 @@
       "hooks": [
         "useLocation",
         "useMemo"
+      ],
+      "userActions": [],
+      "navigateTargets": []
+    },
+    {
+      "path": "/what-to-teach-next",
+      "element": "WhatToTeachNext",
+      "source": "src/pages/WhatToTeachNext.tsx",
+      "type": "public-functional-or-auth",
+      "redirectTo": null,
+      "crawl": {
+        "robotsBlocked": false,
+        "sitemapMatches": 1,
+        "status": "indexable-sitemap"
+      },
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "hooks": [],
+      "userActions": [],
+      "navigateTargets": []
+    },
+    {
+      "path": "/authors/:slug",
+      "element": "AuthorProfile",
+      "source": "src/pages/authors/AuthorProfile.tsx",
+      "type": "public-functional-or-auth",
+      "redirectTo": null,
+      "crawl": {
+        "robotsBlocked": false,
+        "sitemapMatches": 2,
+        "status": "indexable-generated-family"
+      },
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "hooks": [
+        "useLocation",
+        "useParams"
       ],
       "userActions": [],
       "navigateTargets": []
@@ -7163,6 +7208,51 @@
       ]
     },
     {
+      "path": "src/pages/WhatToTeachNext.tsx",
+      "domain": "page",
+      "purpose": "Implements What To Teach Next behavior in the page domain.",
+      "exports": [
+        "WhatToTeachNext"
+      ],
+      "props": [],
+      "state": [],
+      "hooks": [],
+      "actions": [],
+      "navigateTargets": [],
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "storage": [],
+      "userFacingText": [
+        ", ESL Methodology Reviewer",
+        "Blog",
+        "Choose the next lesson by connecting one real learner goal with the strongest current evidence, then make a clear continue, repair, or advance decision.",
+        "Decision system for adult 1:1 tutors",
+        "Edooqoo",
+        "Generate or select material only after the teaching decision is bounded. A polished worksheet built around the wrong objective is still the wrong lesson.",
+        "One rule to keep",
+        "Read resource",
+        "Reviewed by",
+        "See the recurring Edooqoo workflow",
+        "Start with these resources",
+        "The decision sequence",
+        "The framework narrows weekly preparation to the evidence that can change the next adult learner performance.",
+        "Updated June 14, 2026",
+        "What Should I Teach Next?",
+        "What Should I Teach Next? — Adult 1:1 English Lessons"
+      ],
+      "userFacingBehavior": {
+        "actionHandlers": [],
+        "navigationTargets": []
+      },
+      "routes": [
+        "/what-to-teach-next"
+      ]
+    },
+    {
       "path": "src/pages/WorksheetExpiredPage.tsx",
       "domain": "page",
       "purpose": "Implements Worksheet Expired Page behavior in the page domain.",
@@ -7285,6 +7375,48 @@
       },
       "routes": [
         "/worksheet/:id"
+      ]
+    },
+    {
+      "path": "src/pages/authors/AuthorProfile.tsx",
+      "domain": "authors",
+      "purpose": "Implements Author Profile behavior in the authors domain.",
+      "exports": [
+        "AuthorProfile"
+      ],
+      "props": [],
+      "state": [],
+      "hooks": [
+        "useLocation",
+        "useParams"
+      ],
+      "actions": [],
+      "navigateTargets": [],
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "storage": [],
+      "userFacingText": [
+        "Authorship boundary",
+        "Blog",
+        "Editorial profile",
+        "Editorial responsibility",
+        "Edooqoo",
+        "Jan authors product, workflow, and operating-system explanations. ESL methodology claims in strategic teaching content are reviewed separately by Martha.",
+        "Profile",
+        "Read the What Should I Teach Next? resource hub",
+        "Review checks whether advice leads to a specific adult learner performance, uses current evidence, preserves teacher judgment, and avoids generic classroom or school-like tasks.",
+        "Review standard"
+      ],
+      "userFacingBehavior": {
+        "actionHandlers": [],
+        "navigationTargets": []
+      },
+      "routes": [
+        "/authors/:slug"
       ]
     },
     {
@@ -50187,6 +50319,8 @@
           "src/pages/OneMinutePrep.tsx",
           "src/pages/PrivacyPolicy.tsx",
           "src/pages/Resources.tsx",
+          "src/pages/WhatToTeachNext.tsx",
+          "src/pages/authors/AuthorProfile.tsx",
           "src/pages/gallery/PublicGalleryIndex.tsx",
           "src/pages/gallery/PublicGalleryWorksheetPage.tsx",
           "src/pages/seo/EnglishGamesForLearners.tsx",

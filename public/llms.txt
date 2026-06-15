@@ -17,7 +17,7 @@ Primary citation URLs: https://edooqoo.com/one-minute-prep, https://edooqoo.com/
 
 ## Content Registry
 Source: https://edooqoo.com/sitemap.xml and the generated repository inventory at docs/seo/content-registry.generated.json.
-States: keep=48, improve=0, merge=0, retire=0, hold=1702, noindex=4.
+States: keep=60, improve=0, merge=0, retire=0, hold=1701, noindex=4.
 Indexable states: keep, improve, hold. Merge and retire require measured GSC or backlink evidence.
 / | Tutor Business and Tools | status: keep
 /about | Tutor Business and Tools | status: keep
@@ -26,17 +26,28 @@ Indexable states: keep, improve, hold. Merge and retire require measured GSC or 
 /ai-lesson-planning-for-english-teachers.html | One-to-One Lesson Planning | status: keep
 /ai-tools-for-private-english-tutors.html | Tutor Business and Tools | status: keep
 /ai-worksheet-generator-for-english-teachers.html | Tutor Business and Tools | status: keep
+/authors/jan-brzostowski | Tutor Business and Tools | status: keep
+/authors/martha | Tutor Business and Tools | status: keep
 /blog | Tutor Business and Tools | status: keep
+/blog/adult-esl-student-profile-lesson-planning.html | Student Evidence and Progress | status: keep
 /blog/ai-worksheet-generator-mechanics-for-esl-teachers.html | Tutor Business and Tools | status: keep
+/blog/best-lesson-prep-tool-for-english-tutors.html | Tutor Business and Tools | status: keep
 /blog/business-english-material-generation-workflow.html | Adult and Business English | status: keep
+/blog/can-ai-plan-one-to-one-english-lesson.html | One-to-One Lesson Planning | status: keep
 /blog/cefr-aligned-worksheet-generation-workflow.html | Student Evidence and Progress | status: keep
 /blog/english-homework-ai-grading-workflow.html | Homework and Retention | status: keep
 /blog/english-tutor-material-organization-workflow.html | Tutor Business and Tools | status: keep
 /blog/esl-exercise-type-selection-guide.html | Tutor Business and Tools | status: keep
+/blog/homework-mistakes-next-english-lesson.html | Homework and Retention | status: keep
+/blog/how-english-tutors-track-what-to-teach-next.html | Student Evidence and Progress | status: keep
+/blog/how-long-should-private-english-tutors-spend-on-lesson-prep.html | Tutor Business and Tools | status: keep
 /blog/learning-pacing-scientific-vs-pragmatic-esl.html | What Should I Teach Next? | status: keep
 /blog/one-minute-prep-workflow-for-esl-tutors.html | Tutor Business and Tools | status: keep
 /blog/public-esl-worksheet-gallery-quality-standards.html | Tutor Business and Tools | status: keep
 /blog/student-progress-to-worksheet-feedback-loop.html | What Should I Teach Next? | status: keep
+/blog/teaching-english-one-to-one.html | One-to-One Lesson Planning | status: keep
+/blog/what-should-adult-english-placement-test-include.html | Student Evidence and Progress | status: keep
+/blog/what-to-teach-next-private-english-student.html | What Should I Teach Next? | status: keep
 /business-english-worksheet-generator.html | Adult and Business English | status: keep
 /cefr-progress-tracker-english-students.html | Student Evidence and Progress | status: keep
 /cefr-worksheet-generator.html | Student Evidence and Progress | status: keep
@@ -67,6 +78,7 @@ Indexable states: keep, improve, hold. Merge and retire require measured GSC or 
 /tools/cefr-level-test | Student Evidence and Progress | status: keep
 /tools/lesson-plan-generator | One-to-One Lesson Planning | status: keep
 /tools/vocab-cefr-checker | Student Evidence and Progress | status: keep
+/what-to-teach-next | What Should I Teach Next? | status: keep
 
 ## Core Definition
 Edooqoo.com is a 1-Minute Prep system for recurring 1:1 English teachers. It uses student goals, placement/profile data, DSLM nano-skill evidence, homework results, flashcard progress, calendar context, pacing mode, and roadmap context to help decide what to teach next, then generates ready-to-teach English worksheets with audio, images, and AI-assisted homework review where applicable. The worksheet generator is the output layer, not the full product definition.

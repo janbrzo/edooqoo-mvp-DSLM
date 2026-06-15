@@ -60,6 +60,8 @@ const HowItWorks = lazy(() => import("./pages/HowItWorks"));
 const OneMinutePrep = lazy(() => import("./pages/OneMinutePrep"));
 const Resources = lazy(() => import("./pages/Resources"));
 const Blog = lazy(() => import("./pages/Blog"));
+const WhatToTeachNext = lazy(() => import("./pages/WhatToTeachNext"));
+const AuthorProfile = lazy(() => import("./pages/authors/AuthorProfile"));
 const EslWorksheets = lazy(() => import("./pages/seo/EslWorksheets"));
 const EnglishGamesForLearners = lazy(() => import("./pages/seo/EnglishGamesForLearners"));
 const EslGamesForTeachers = lazy(() => import("./pages/seo/EslGamesForTeachers"));
@@ -169,6 +171,8 @@ const App = () => (
               <Route path="/one-minute-prep" element={<OneMinutePrep />} />
               <Route path="/resources" element={<Resources />} />
               <Route path="/blog" element={<Blog />} />
+              <Route path="/what-to-teach-next" element={<WhatToTeachNext />} />
+              <Route path="/authors/:slug" element={<AuthorProfile />} />
               <Route path="/esl-worksheets" element={<EslWorksheets />} />
               <Route path="/blog/english-games-for-learners" element={<EnglishGamesForLearners />} />
               <Route path="/blog/esl-games-for-teachers" element={<EslGamesForTeachers />} />
