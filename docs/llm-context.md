@@ -1145,3 +1145,54 @@ EDOOQOO SOLUTION: `/tools/what-should-i-teach-next` applies transparent local ru
 TECHNICAL MECHANICS: `src/lib/decisionTool/decisionRules.mjs` is the single decision source. Repair applies when the prior objective was not mastered or a recurring error blocks the goal. Advance requires secure mastery, independent use, and no established recurring target error. All other states return Continue. `src/data/whatToTeachNextCases.json` owns the 12 cases. `WhatShouldITeachNextTool.tsx`, `WhatToTeachNext.tsx`, and `WhatToTeachNextCase.tsx` render the tool, library, and case pages. Share URLs serialize only controlled pedagogical categories and cannot include learner identity or free text. `scripts/seo/generate-decision-content.mjs` adds 13 routes to sitemap and generates newsletter, LinkedIn, video, community, and editorial distribution packages. Route manifest, content registry, prerender, knowledge graph, analytics, and audits consume the same sources. Analytics events contain route, slug, decision, level, and controlled option values only. Worksheet Generation Engine prompt wording, parameters, and internal logic are unchanged.
 
 RAG KEYWORDS: what should I teach next tool, next lesson decision tool, continue repair advance, adult one-to-one English lesson decision, evidence-led ESL planning, student evidence next lesson, repair blocking error, continue partial mastery, advance independent transfer, worked example English tutor, project manager English lesson, software engineer English lesson, accountant English lesson, lawyer English lesson, sales discovery call English, HR performance conversation English, marketing presentation English, consultant executive summary English, entrepreneur customer interview English, travel disruption lesson, job interview achievement answer, IELTS Task 2 paragraph development, no AI local teaching tool, no student data decision link, Worksheet Generation Engine unchanged
+
+## v6.9.59 — Multi-generation per-tab UX & idempotent token consumption
+
+PROBLEM: Opening edooqoo.com in a second browser tab auto-opened the
+GeneratingModal because `activeJob.status === 'running'` was read from
+shared localStorage. Two parallel generations rendered only the newest
+modal; the older was invisible. Mini-panel cards overlapped. And
+`consume_token` could be called 2–3× for the same worksheet by racing
+pollers (in-flight client + single-job hook + multi-job hook + extra
+tabs), each inserting a `token_transactions` row.
+
+EDOOQOO SOLUTION:
+1. `src/lib/worksheet/tabId.ts` — sessionStorage tab id; `getTabId()`
+   and `useTabId()`. `WorksheetGenerationJob.originTabId` set by
+   `startGenerationJob`. Index renders the full-screen modal only for
+   jobs whose `originTabId` matches the current tab.
+2. `GeneratingModal` accepts `jobsCount`, `currentIndex`,
+   `onSelectIndex` and renders `‹ Generation N/M ›` + dot pills when
+   more than one running job exists in this tab. Each rendered job
+   keeps its own `startedAt` so timer/progress continue independently
+   when switching cards.
+3. `ActiveGenerationMiniPanel` — `PANEL_HEIGHT_PX=144`,
+   `PANEL_GAP_PX=12`, `MAX_VISIBLE_PANELS=4`. Hide-on-modal-mount
+   filter now requires `originTabId === tabId`.
+4. `useActiveWorksheetGenerationJob.locateBackendWorksheet` drops the
+   legacy teacher/time-window fallback; without `job.requestId` it
+   returns `null`. Prevents false completion of job B from a worksheet
+   actually saved by job A.
+5. SQL: `public.consume_token(p_teacher_id, p_worksheet_id)`
+   redefined to take a transactional advisory lock keyed on the
+   (teacher, worksheet) pair and short-circuit to `RETURN TRUE` when a
+   `usage` row already exists for that worksheet. Client also marks
+   `tokenConsumedAt` optimistically before the RPC.
+
+TECHNICAL MECHANICS:
+- Files: `src/lib/worksheet/tabId.ts` (new),
+  `src/lib/worksheet/generationJobRegistry.ts` (+`originTabId`),
+  `src/hooks/useWorksheetGeneration.tsx` (passes `originTabId`),
+  `src/hooks/useActiveWorksheetGenerationJob.tsx` (drop window
+  fallback, optimistic token claim), `src/components/GeneratingModal.tsx`
+  (switcher), `src/components/generation/ActiveGenerationMiniPanel.tsx`
+  (height/per-tab filter), `src/pages/Index.tsx` (multi-job, activeIdx).
+- Migration: redefinition of `public.consume_token` (no schema/RLS
+  change).
+- Sanctity: Worksheet Generation Engine untouched.
+
+RAG KEYWORDS: idempotent token consumption, advisory lock,
+sessionStorage tab id, originTabId, generation registry, mini panel
+stacking, modal switcher, multi-generation UX, refresh-safe generation,
+worksheet generation jobs, race condition fix, token transactions
+dedupe, per-tab UI scoping, lovable cloud, generation modal arrows.
