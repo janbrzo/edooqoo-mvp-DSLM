@@ -315,3 +315,10 @@ monthly SEO measurement pack, sitemap source of truth, sitemap Edge Function pay
 - v6.9.57: Worksheet generation is refresh-safe. The streaming Edge Function keeps background work alive with `EdgeRuntime.waitUntil`, client polling reconciles by `form_data->>clientGenerationId`, the modal rehydrates a running job after refresh, and token consumption remains after a saved worksheet exists and idempotent by worksheet ID.
 - v6.9.58: GeneratingModal seeds progress and elapsed timer from `startedAt` so a refresh resumes live values instead of zero; the refresh hint is replaced by a motivational CTA inviting parallel prep with an `Open dashboard ↗` anchor and an authenticated student-profile deep link in a new tab; `generationJobRegistry` becomes a multi-job map keyed by `jobId` (legacy single-job key migrated on first read) and `ActiveGenerationMiniPanel` stacks one floating card per concurrent generation, gating only the jobId whose modal is currently mounted. Worksheet Generation Engine sanctity preserved.
 
+
+## v6.9.59 — Multi-generation per-tab UX & idempotent token consumption
+- Tab id (sessionStorage) attached to each generation job as `originTabId`; full-screen modal only resumes on the tab that started the job.
+- GeneratingModal renders `‹ Generation N/M ›` switcher with arrows and dot pills when multiple jobs are running in the same tab.
+- ActiveGenerationMiniPanel: card height 144px, gap 12px, max 4 stacked; running jobs from other tabs always remain visible as mini panels.
+- `locateBackendWorksheet` dropped the teacher/time-window fallback; requires exact `form_data->>clientGenerationId` match to avoid false completions.
+- `public.consume_token` RPC made idempotent on `(teacher_id, worksheet_id)` via `pg_advisory_xact_lock` + existence check on `token_transactions`.
