@@ -31,6 +31,9 @@ jobs:
       - name: Build blog index and sitemap
         run: node scripts/seo/build-blog-index.mjs
 
+      - name: Apply programmatic SEO index policy
+        run: npm run seo:apply-pseo-policy
+
       - name: Sync sitemap Edge Function payload
         run: npm run seo:sync-sitemap-edge
 
