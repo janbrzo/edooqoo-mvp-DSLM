@@ -19,6 +19,78 @@ export interface LandingPageMeta {
 
 export const BLOG_POSTS: BlogPostMeta[] = [
   {
+    "title": "Adult ESL Student Profiles for Better Lesson Planning",
+    "description": "Build a concise adult learner profile that improves one-to-one English lesson decisions without collecting irrelevant personal data.",
+    "url": "/blog/adult-esl-student-profile-lesson-planning.html",
+    "date": "2026-06-14",
+    "category": "Student Evidence and Progress",
+    "state": "keep"
+  },
+  {
+    "title": "What Is the Best Lesson Prep Tool for English Tutors?",
+    "description": "The criteria private English tutors should use to choose a lesson-prep tool for recurring adult one-to-one teaching.",
+    "url": "/blog/best-lesson-prep-tool-for-english-tutors.html",
+    "date": "2026-06-14",
+    "category": "Tutor Business and Tools",
+    "state": "keep"
+  },
+  {
+    "title": "Can AI Plan a One-to-One English Lesson?",
+    "description": "What AI can automate in private English lesson planning and which decisions must remain under teacher review.",
+    "url": "/blog/can-ai-plan-one-to-one-english-lesson.html",
+    "date": "2026-06-14",
+    "category": "One-to-One Lesson Planning",
+    "state": "keep"
+  },
+  {
+    "title": "Turn ESL Homework Mistakes Into the Next Lesson",
+    "description": "A private-tutor workflow for converting adult ESL homework evidence into focused, useful, teacher-reviewed lesson decisions.",
+    "url": "/blog/homework-mistakes-next-english-lesson.html",
+    "date": "2026-06-14",
+    "category": "Homework and Retention",
+    "state": "keep"
+  },
+  {
+    "title": "How Do English Tutors Track What to Teach Next?",
+    "description": "A compact evidence system for choosing the next lesson in recurring private English tutoring.",
+    "url": "/blog/how-english-tutors-track-what-to-teach-next.html",
+    "date": "2026-06-14",
+    "category": "Student Evidence and Progress",
+    "state": "keep"
+  },
+  {
+    "title": "How Long Should Private English Tutors Spend on Lesson Prep?",
+    "description": "A direct benchmark and workflow for reducing recurring one-to-one English lesson preparation without lowering instructional quality.",
+    "url": "/blog/how-long-should-private-english-tutors-spend-on-lesson-prep.html",
+    "date": "2026-06-14",
+    "category": "Tutor Business and Tools",
+    "state": "keep"
+  },
+  {
+    "title": "One-to-One English Lesson Planning for Adults: Complete Guide",
+    "description": "A complete system for planning one-to-one adult English lessons using goals, evidence, CEFR, retrieval, realistic tasks, homework, and review.",
+    "url": "/blog/teaching-english-one-to-one.html",
+    "date": "2026-06-14",
+    "category": "One-to-One Lesson Planning",
+    "state": "keep"
+  },
+  {
+    "title": "What Should an Adult English Placement Test Include?",
+    "description": "The essential components of an adult English placement test for private tutors and how to use the evidence afterward.",
+    "url": "/blog/what-should-adult-english-placement-test-include.html",
+    "date": "2026-06-14",
+    "category": "Student Evidence and Progress",
+    "state": "keep"
+  },
+  {
+    "title": "What to Teach Next in a One-to-One English Lesson",
+    "description": "A practical decision framework for private English tutors using goals, recent performance, recurring errors, retention, and lesson context.",
+    "url": "/blog/what-to-teach-next-private-english-student.html",
+    "date": "2026-06-14",
+    "category": "What Should I Teach Next?",
+    "state": "keep"
+  },
+  {
     "title": "AI Worksheet Generator Mechanics for ESL Teachers | Edooqoo",
     "description": "Instructional explanation of how an ESL worksheet generator should connect topic, CEFR level, exercise type, answer keys, and teacher workflow.",
     "url": "/blog/ai-worksheet-generator-mechanics-for-esl-teachers.html",
@@ -1176,14 +1248,6 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "url": "/blog/teaching-email-writing-esl.html",
     "date": "2025-08-12",
     "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "Teaching English One-to-One — Private Lesson Guide",
-    "description": "Complete guide to teaching private English lessons. Needs analysis, lesson structure, pacing, rapport building, and tools for one-to-one ESL tutoring.",
-    "url": "/blog/teaching-english-one-to-one.html",
-    "date": "2025-08-11",
-    "category": "One-to-One Lesson Planning",
     "state": "hold"
   },
   {

@@ -14,16 +14,25 @@ export const CONTENT_CLUSTERS = [
 ];
 
 const STRATEGIC_BLOG_SLUGS = new Set([
+  'adult-esl-student-profile-lesson-planning.html',
   'ai-worksheet-generator-mechanics-for-esl-teachers.html',
+  'best-lesson-prep-tool-for-english-tutors.html',
   'business-english-material-generation-workflow.html',
+  'can-ai-plan-one-to-one-english-lesson.html',
   'cefr-aligned-worksheet-generation-workflow.html',
   'english-homework-ai-grading-workflow.html',
   'english-tutor-material-organization-workflow.html',
   'esl-exercise-type-selection-guide.html',
+  'homework-mistakes-next-english-lesson.html',
+  'how-english-tutors-track-what-to-teach-next.html',
+  'how-long-should-private-english-tutors-spend-on-lesson-prep.html',
   'learning-pacing-scientific-vs-pragmatic-esl.html',
   'one-minute-prep-workflow-for-esl-tutors.html',
   'public-esl-worksheet-gallery-quality-standards.html',
   'student-progress-to-worksheet-feedback-loop.html',
+  'teaching-english-one-to-one.html',
+  'what-should-adult-english-placement-test-include.html',
+  'what-to-teach-next-private-english-student.html',
 ]);
 
 const STRATEGIC_ROOT_HTML = new Set([
@@ -48,11 +57,58 @@ export const CONTENT_OVERRIDES = {
   // Add measured keep/improve/merge/retire decisions here after GSC and backlink
   // evidence is recorded. Unknown content remains hold to prevent destructive
   // redirects based only on code inspection.
+  '/blog/adult-esl-student-profile-lesson-planning.html': {
+    state: 'keep',
+    cluster: 'Student Evidence and Progress',
+    reason: 'Strategic adult 1:1 student-evidence resource.',
+  },
+  '/blog/best-lesson-prep-tool-for-english-tutors.html': {
+    state: 'keep',
+    cluster: 'Tutor Business and Tools',
+    reason: 'Strategic English tutor tool-selection resource.',
+  },
+  '/blog/can-ai-plan-one-to-one-english-lesson.html': {
+    state: 'keep',
+    cluster: 'One-to-One Lesson Planning',
+    reason: 'Strategic teacher-reviewed AI lesson-planning resource.',
+  },
+  '/blog/homework-mistakes-next-english-lesson.html': {
+    state: 'keep',
+    cluster: 'Homework and Retention',
+    reason: 'Strategic homework-to-next-lesson evidence resource.',
+  },
+  '/blog/how-english-tutors-track-what-to-teach-next.html': {
+    state: 'keep',
+    cluster: 'Student Evidence and Progress',
+    reason: 'Strategic compact progress-evidence resource.',
+  },
+  '/blog/how-long-should-private-english-tutors-spend-on-lesson-prep.html': {
+    state: 'keep',
+    cluster: 'Tutor Business and Tools',
+    reason: 'Strategic recurring lesson-preparation benchmark resource.',
+  },
+  '/blog/teaching-english-one-to-one.html': {
+    state: 'keep',
+    cluster: 'One-to-One Lesson Planning',
+    reason: 'Strategic complete guide for adult 1:1 lesson planning.',
+  },
+  '/blog/what-should-adult-english-placement-test-include.html': {
+    state: 'keep',
+    cluster: 'Student Evidence and Progress',
+    reason: 'Strategic adult placement-test evidence resource.',
+  },
+  '/blog/what-to-teach-next-private-english-student.html': {
+    state: 'keep',
+    cluster: 'What Should I Teach Next?',
+    reason: 'Strategic next-lesson decision framework.',
+  },
 };
 
 const CORE_KEEP_ROUTES = new Set([
   '/',
   '/about',
+  '/authors/jan-brzostowski',
+  '/authors/martha',
   '/blog',
   '/esl-worksheets',
   '/exercise-types',
@@ -74,6 +130,7 @@ const CORE_KEEP_ROUTES = new Set([
   '/tools/cefr-level-test',
   '/tools/lesson-plan-generator',
   '/tools/vocab-cefr-checker',
+  '/what-to-teach-next',
 ]);
 
 const PRIVATE_ROUTE_PATTERNS = [

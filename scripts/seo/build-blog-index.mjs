@@ -116,6 +116,14 @@ for (const route of EXCLUDED_SITEMAP_PATHS) {
   );
 }
 
+// Repeated regeneration must not accumulate empty lines where old generated
+// blocks were removed.
+sitemap = sitemap
+  .replace(/\r\n/g, '\n')
+  .replace(/[ \t]+\n/g, '\n')
+  .replace(/\n{3,}/g, '\n\n')
+  .replace(/\n*<\/urlset>\s*$/, '\n</urlset>\n');
+
 const htmlEntries = [
   ...posts.map(p => `  <url><loc>https://edooqoo.com${p.url}</loc>${p.date ? `<lastmod>${p.date}</lastmod>` : ''}<changefreq>monthly</changefreq><priority>0.7</priority></url>`),
   ...landings.map(l => `  <url><loc>https://edooqoo.com${l.url}</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>`),
