@@ -15,8 +15,8 @@
     "databaseTypeSource": "src/integrations/supabase/types.ts"
   },
   "counts": {
-    "routes": 82,
-    "pageModules": 78,
+    "routes": 84,
+    "pageModules": 80,
     "componentModules": 338,
     "hookModules": 79,
     "contextModules": 1,
@@ -1354,7 +1354,36 @@
         "edgeFunctions": [],
         "fetchTargets": []
       },
-      "hooks": [],
+      "hooks": [
+        "useEffect",
+        "useEventTracking"
+      ],
+      "userActions": [],
+      "navigateTargets": []
+    },
+    {
+      "path": "/what-to-teach-next/:slug",
+      "element": "WhatToTeachNextCase",
+      "source": "src/pages/WhatToTeachNextCase.tsx",
+      "type": "public-functional-or-auth",
+      "redirectTo": null,
+      "crawl": {
+        "robotsBlocked": false,
+        "sitemapMatches": 12,
+        "status": "indexable-generated-family"
+      },
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "hooks": [
+        "useEffect",
+        "useEventTracking",
+        "useParams",
+        "useState"
+      ],
       "userActions": [],
       "navigateTargets": []
     },
@@ -1674,6 +1703,33 @@
       "hooks": [
         "useLocation",
         "useMemo",
+        "useState"
+      ],
+      "userActions": [],
+      "navigateTargets": []
+    },
+    {
+      "path": "/tools/what-should-i-teach-next",
+      "element": "WhatShouldITeachNextTool",
+      "source": "src/pages/tools/WhatShouldITeachNextTool.tsx",
+      "type": "public-seo-or-product",
+      "redirectTo": null,
+      "crawl": {
+        "robotsBlocked": false,
+        "sitemapMatches": 1,
+        "status": "indexable-sitemap"
+      },
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "hooks": [
+        "useEffect",
+        "useEventTracking",
+        "useLocation",
+        "useRef",
         "useState"
       ],
       "userActions": [],
@@ -7216,7 +7272,10 @@
       ],
       "props": [],
       "state": [],
-      "hooks": [],
+      "hooks": [
+        "useEffect",
+        "useEventTracking"
+      ],
       "actions": [],
       "navigateTargets": [],
       "dataDependencies": {
@@ -7227,22 +7286,26 @@
       },
       "storage": [],
       "userFacingText": [
-        ", ESL Methodology Reviewer",
+        ", ESL Methodology Reviewer, 10 years of experience",
+        "12 constructed cases",
         "Blog",
-        "Choose the next lesson by connecting one real learner goal with the strongest current evidence, then make a clear continue, repair, or advance decision.",
+        "Browse worked examples",
+        "Choose the next lesson by connecting one real learner goal with the strongest current evidence, then make a clear Continue, Repair, or Advance decision.",
+        "Decide the next lesson",
+        "Decision resources",
         "Decision system for adult 1:1 tutors",
+        "Decision tool",
+        "Each case follows the same sequence: Student context, Evidence, Continue/Repair/Advance, Lesson objective, Activity sequence, and Evidence to collect next. These are teaching models, not reports of real student outcomes.",
         "Edooqoo",
-        "Generate or select material only after the teaching decision is bounded. A polished worksheet built around the wrong objective is still the wrong lesson.",
-        "One rule to keep",
-        "Read resource",
+        "Open the decision tool",
+        "Read the full decision",
+        "Repair when a missing prerequisite or recurring error blocks the goal. Continue when the learner has partial control, needs prompts, or the evidence is not strong enough. Advance only after accurate independent use without an established recurring target error.",
         "Reviewed by",
-        "See the recurring Edooqoo workflow",
-        "Start with these resources",
-        "The decision sequence",
-        "The framework narrows weekly preparation to the evidence that can change the next adult learner performance.",
-        "Updated June 14, 2026",
-        "What Should I Teach Next?",
-        "What Should I Teach Next? — Adult 1:1 English Lessons"
+        "The decision rule",
+        "The local tool converts seven teaching signals into a transparent recommendation, objective, activity structure, worksheet brief, and next evidence criteria.",
+        "Updated June 15, 2026",
+        "Use evidence, then make one bounded decision",
+        "What Should I Teach Next?"
       ],
       "userFacingBehavior": {
         "actionHandlers": [],
@@ -7250,6 +7313,60 @@
       },
       "routes": [
         "/what-to-teach-next"
+      ]
+    },
+    {
+      "path": "src/pages/WhatToTeachNextCase.tsx",
+      "domain": "page",
+      "purpose": "Implements What To Teach Next Case behavior in the page domain.",
+      "exports": [
+        "WhatToTeachNextCase"
+      ],
+      "props": [],
+      "state": [
+        {
+          "value": "copied",
+          "setter": "setCopied",
+          "initial": "false"
+        }
+      ],
+      "hooks": [
+        "useEffect",
+        "useEventTracking",
+        "useParams",
+        "useState"
+      ],
+      "actions": [],
+      "navigateTargets": [],
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "storage": [],
+      "userFacingText": [
+        ", ESL Methodology Reviewer, 10 years of experience",
+        "Activity sequence",
+        "All worked examples",
+        "Breadcrumb",
+        "Decide your next lesson",
+        "Decision",
+        "Evidence",
+        "Evidence to collect next",
+        "Lesson objective",
+        "Published and updated June 15, 2026",
+        "Reviewed by",
+        "Student context",
+        "This is a constructed teaching example, not a report of a real student or a claimed learning outcome.",
+        "Worked example"
+      ],
+      "userFacingBehavior": {
+        "actionHandlers": [],
+        "navigationTargets": []
+      },
+      "routes": [
+        "/what-to-teach-next/:slug"
       ]
     },
     {
@@ -8335,9 +8452,9 @@
       },
       "storage": [],
       "userFacingText": [
+        "Four browser-based tools built with Martha (10 yrs ESL). No login, no installs, no data leaves your device.",
         "Free Tools for English Teachers",
-        "Free Tools for English Teachers — Edooqoo",
-        "Three browser-based tools built with Martha (10 yrs ESL). No login, no installs, no data leaves your device."
+        "Free Tools for English Teachers — Edooqoo"
       ],
       "userFacingBehavior": {
         "actionHandlers": [],
@@ -8404,6 +8521,77 @@
       },
       "routes": [
         "/tools/vocab-cefr-checker"
+      ]
+    },
+    {
+      "path": "src/pages/tools/WhatShouldITeachNextTool.tsx",
+      "domain": "tools",
+      "purpose": "Implements What Should ITeach Next Tool behavior in the tools domain.",
+      "exports": [
+        "WhatShouldITeachNextTool"
+      ],
+      "props": [],
+      "state": [
+        {
+          "value": "input",
+          "setter": "setInput",
+          "initial": "() => { try { return location.search ? parseDecisionInput(location.search) : DEFAULT_DECISION_INPUT; } catch { return DEFAULT_DECISION_INPUT; } }"
+        },
+        {
+          "value": "result",
+          "setter": "setResult",
+          "initial": "() => ( location.search ? decideNextLesson(parseDecisionInput(location.search)) : null )"
+        },
+        {
+          "value": "copyStatus",
+          "setter": "setCopyStatus",
+          "initial": "null"
+        }
+      ],
+      "hooks": [
+        "useEffect",
+        "useEventTracking",
+        "useLocation",
+        "useRef",
+        "useState"
+      ],
+      "actions": [],
+      "navigateTargets": [],
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "storage": [],
+      "userFacingText": [
+        "Advance",
+        "Breadcrumb",
+        "Continue",
+        "Decide the next lesson",
+        "Decision",
+        "Decision rules",
+        "Enter bounded teaching evidence. The tool applies transparent rules and returns Repair, Continue, or Advance with a usable next-lesson brief.",
+        "Evidence to collect next",
+        "Frequently asked questions",
+        "Local decision tool for adult 1:1 tutors",
+        "Next Lesson Decision Tool",
+        "Next lesson objective",
+        "Repair",
+        "Runs locally. No AI, account, student name, email, notes, or worksheet-generation call.",
+        "The link contains only the seven selected teaching categories. It cannot contain student notes or identity data.",
+        "Tools",
+        "Use after accurate independent performance with no established recurring target error.",
+        "Use when evidence is incomplete, control is partial, or success still depends on prompts.",
+        "Use when the previous objective was not mastered or a recurring error blocks the communication goal.",
+        "What Should I Teach Next?"
+      ],
+      "userFacingBehavior": {
+        "actionHandlers": [],
+        "navigationTargets": []
+      },
+      "routes": [
+        "/tools/what-should-i-teach-next"
       ]
     }
   ],
@@ -50326,6 +50514,7 @@
           "src/pages/PrivacyPolicy.tsx",
           "src/pages/Resources.tsx",
           "src/pages/WhatToTeachNext.tsx",
+          "src/pages/WhatToTeachNextCase.tsx",
           "src/pages/authors/AuthorProfile.tsx",
           "src/pages/gallery/PublicGalleryIndex.tsx",
           "src/pages/gallery/PublicGalleryWorksheetPage.tsx",
@@ -50339,7 +50528,8 @@
           "src/pages/tools/CefrLevelTest.tsx",
           "src/pages/tools/LessonPlanGenerator.tsx",
           "src/pages/tools/ToolsIndex.tsx",
-          "src/pages/tools/VocabCefrChecker.tsx"
+          "src/pages/tools/VocabCefrChecker.tsx",
+          "src/pages/tools/WhatShouldITeachNextTool.tsx"
         ]
       },
       {

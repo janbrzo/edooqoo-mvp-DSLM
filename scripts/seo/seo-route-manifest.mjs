@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { getPseoRouteInventory } from './pseo-index-policy.mjs';
+import { getDecisionContentRoutes } from './decision-content.mjs';
 
 export const CORE_SEO_ROUTES = [
   '/about',
@@ -33,6 +34,7 @@ export const CORE_SEO_ROUTES = [
   '/tools',
   '/tools/cefr-level-test',
   '/tools/lesson-plan-generator',
+  '/tools/what-should-i-teach-next',
   '/tools/vocab-cefr-checker',
   '/gallery',
 ];
@@ -69,6 +71,7 @@ export function getPrerenderRoutes({ root }) {
     ...getTopicLevelRoutes({ root }),
     ...getPersonaRoutes({ root }),
     ...getPriorityExerciseTopicRoutes({ root }),
+    ...getDecisionContentRoutes({ root }),
   ];
 
   return [...new Set(routes)].sort();

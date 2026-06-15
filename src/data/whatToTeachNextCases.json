@@ -1,0 +1,302 @@
+[
+  {
+    "slug": "project-manager-status-update",
+    "title": "Project Manager: Make a Status Update Clearer",
+    "summary": "A B2 project manager can report completed work but loses control when explaining delays and dependencies.",
+    "studentContext": "A B2 project manager leads a weekly remote status meeting with an international product team. The immediate goal is to explain progress, dependencies, and risk without reading a script.",
+    "evidence": [
+      "The learner reports completed tasks accurately in a prepared update.",
+      "When a dependency causes a delay, the learner switches to vague phrases such as \"there is a problem\".",
+      "Homework used because and so correctly, but did not distinguish cause, consequence, and mitigation."
+    ],
+    "decision": "Continue",
+    "decisionReason": "The core reporting skill is present, but the learner still needs support to explain cause, impact, and next action as one coherent update.",
+    "lessonObjective": "By the end of the lesson, the learner will deliver a 60-second status update that states a dependency, its impact, and one mitigation action without a written script.",
+    "activitySequence": [
+      "Compare two short status updates and identify which one makes the dependency and impact explicit.",
+      "Rebuild three vague updates using the frame: dependency, impact, mitigation.",
+      "Rehearse one authentic project update with a keyword-only prompt.",
+      "Repeat the update after one follow-up question from the tutor."
+    ],
+    "evidenceToCollect": [
+      "Whether the learner separates dependency, impact, and mitigation.",
+      "Whether the learner can respond to a follow-up question without returning to a full script.",
+      "Which linking phrases remain accurate under time pressure."
+    ]
+  },
+  {
+    "slug": "software-engineer-incident-explanation",
+    "title": "Software Engineer: Repair an Incident Explanation",
+    "summary": "A B2 software engineer knows the technical content but uses an unclear timeline and ambiguous pronouns.",
+    "studentContext": "A B2 software engineer needs to explain a production incident to a non-technical product manager. The learner understands the incident but must make the sequence and ownership clear.",
+    "evidence": [
+      "The learner names the technical cause accurately.",
+      "The explanation jumps between detection, diagnosis, and recovery.",
+      "Repeated use of it and they makes the responsible system or team unclear."
+    ],
+    "decision": "Repair",
+    "decisionReason": "The recurring timeline and reference errors block the listener from understanding the incident, so advancing to broader incident vocabulary would add complexity without fixing the communication failure.",
+    "lessonObjective": "By the end of the lesson, the learner will explain a four-stage incident timeline using explicit subjects and time markers that a non-technical listener can follow.",
+    "activitySequence": [
+      "Order four incident events from detection to recovery.",
+      "Replace ambiguous pronouns with the system, service, or team responsible.",
+      "Explain the timeline once with a visual sequence and once without it.",
+      "Answer two non-technical clarification questions."
+    ],
+    "evidenceToCollect": [
+      "Whether every event has an explicit actor or system.",
+      "Whether timeline markers remain accurate in the second explanation.",
+      "Whether clarification answers simplify rather than add technical detail."
+    ]
+  },
+  {
+    "slug": "accountant-variance-call",
+    "title": "Accountant: Advance From Variance Description to Recommendation",
+    "summary": "A C1 accountant independently explains financial variances and is ready to add concise recommendations.",
+    "studentContext": "A C1 accountant joins monthly calls with regional finance leaders. The learner can explain actual-versus-budget variance accurately and now needs to recommend a next action.",
+    "evidence": [
+      "Two consecutive role-plays contained accurate variance language.",
+      "The learner used figures and comparison structures without tutor prompts.",
+      "No recurring language error changed the meaning of the explanation."
+    ],
+    "decision": "Advance",
+    "decisionReason": "The previous objective is secure and independently transferable, so the next useful challenge is moving from explanation to recommendation.",
+    "lessonObjective": "By the end of the lesson, the learner will present one variance and recommend a proportionate follow-up action with a clear rationale.",
+    "activitySequence": [
+      "Review a concise variance explanation and identify the missing decision.",
+      "Match three variance patterns with proportionate follow-up actions.",
+      "Prepare a 90-second recommendation from a short finance scenario.",
+      "Defend the recommendation against one challenge from a regional lead."
+    ],
+    "evidenceToCollect": [
+      "Whether the recommendation follows logically from the stated variance.",
+      "Whether the rationale is concise enough for a finance call.",
+      "Whether the learner can adjust the recommendation after a challenge."
+    ]
+  },
+  {
+    "slug": "lawyer-client-explanation",
+    "title": "Lawyer: Continue Simplifying a Contract Risk",
+    "summary": "A C1 lawyer identifies contract risk accurately but still relies on legal phrasing with clients.",
+    "studentContext": "A C1 commercial lawyer advises startup clients in English. The immediate goal is to explain a limitation-of-liability risk without losing legal accuracy.",
+    "evidence": [
+      "The learner identifies the relevant clause and consequence correctly.",
+      "The first explanation contains dense nominal phrases and long qualifications.",
+      "With tutor prompts, the learner can restate the point in shorter client-facing language."
+    ],
+    "decision": "Continue",
+    "decisionReason": "The legal analysis is secure, but independent client-facing simplification is not yet stable.",
+    "lessonObjective": "By the end of the lesson, the learner will explain one contract risk in plain English, preserve the legal consequence, and check the client's understanding.",
+    "activitySequence": [
+      "Separate the legal rule, practical consequence, and client decision.",
+      "Replace five dense legal phrases with precise plain-English alternatives.",
+      "Deliver a two-minute client explanation using a three-part structure.",
+      "Respond to a client who incorrectly paraphrases the risk."
+    ],
+    "evidenceToCollect": [
+      "Whether the practical consequence remains legally accurate.",
+      "Whether the learner avoids unexplained legal nominalizations.",
+      "Whether the understanding check reveals and repairs a misunderstanding."
+    ]
+  },
+  {
+    "slug": "sales-discovery-call",
+    "title": "Sales Representative: Repair Follow-up Questions",
+    "summary": "A B2 sales representative asks prepared discovery questions but misses information in the answer.",
+    "studentContext": "A B2 sales representative runs software discovery calls. The learner has a reliable question list but needs to respond to the prospect's actual answer.",
+    "evidence": [
+      "Prepared opening questions are accurate and natural.",
+      "The learner asks the next scripted question even when the prospect reveals a constraint.",
+      "Follow-up questions repeatedly use broad prompts that do not test the stated business impact."
+    ],
+    "decision": "Repair",
+    "decisionReason": "Failure to build a relevant follow-up question blocks the purpose of a discovery call, so the next lesson should repair listening-to-question conversion.",
+    "lessonObjective": "By the end of the lesson, the learner will turn three prospect statements into specific follow-up questions about impact, urgency, or decision criteria.",
+    "activitySequence": [
+      "Underline the decision-relevant detail in six short prospect answers.",
+      "Choose whether each detail requires an impact, urgency, or criteria question.",
+      "Run a branching discovery call in which the next prompt depends on the previous answer.",
+      "Review one missed opportunity and immediately replay that exchange."
+    ],
+    "evidenceToCollect": [
+      "Whether the follow-up question reuses the prospect's meaning rather than a memorized script.",
+      "Whether the question type matches the information gap.",
+      "Whether the learner notices and repairs an irrelevant follow-up."
+    ]
+  },
+  {
+    "slug": "hr-performance-conversation",
+    "title": "HR Professional: Continue a Performance Conversation",
+    "summary": "A B2 HR professional can state a concern but needs more control when separating observation from interpretation.",
+    "studentContext": "A B2 HR business partner supports managers during performance conversations. The learner must describe a behavior, its impact, and the expected change without sounding accusatory.",
+    "evidence": [
+      "The learner can open the conversation and state the topic directly.",
+      "Examples sometimes mix observable behavior with assumptions about motivation.",
+      "The learner uses a neutral structure correctly after a model is provided."
+    ],
+    "decision": "Continue",
+    "decisionReason": "The learner has partial control of the conversation structure but still needs scaffolding to keep evidence and interpretation separate.",
+    "lessonObjective": "By the end of the lesson, the learner will state one performance concern using observable evidence, impact, and a specific expected change.",
+    "activitySequence": [
+      "Sort statements into observation, interpretation, impact, and expectation.",
+      "Rewrite three accusatory statements as evidence-based descriptions.",
+      "Conduct a short performance conversation with a resistant employee.",
+      "Repeat the difficult section using fewer tutor prompts."
+    ],
+    "evidenceToCollect": [
+      "Whether the learner uses observable behavior rather than assumed intent.",
+      "Whether the expected change is specific and actionable.",
+      "Whether neutral language remains stable when the employee disagrees."
+    ]
+  },
+  {
+    "slug": "marketing-campaign-recommendation",
+    "title": "Marketing Manager: Advance to Defending a Campaign Recommendation",
+    "summary": "A C1 marketing manager independently presents campaign evidence and is ready to defend a trade-off.",
+    "studentContext": "A C1 marketing manager presents campaign performance to an executive team. The learner can describe results and recommend a channel allocation.",
+    "evidence": [
+      "The learner independently summarized campaign results in two different data sets.",
+      "Recommendations used appropriate hedging and linked evidence to action.",
+      "No recurring accuracy problem remained in the target language."
+    ],
+    "decision": "Advance",
+    "decisionReason": "The reporting and recommendation objective is secure, so the next lesson should add executive challenge and trade-off defense.",
+    "lessonObjective": "By the end of the lesson, the learner will defend a channel-allocation recommendation against two executive objections and state one condition that would change the decision.",
+    "activitySequence": [
+      "Identify the strongest evidence and the weakest assumption in a campaign recommendation.",
+      "Prepare concise responses to cost, risk, and timing objections.",
+      "Present the recommendation to a skeptical executive role-play.",
+      "State a measurable condition for revising the allocation."
+    ],
+    "evidenceToCollect": [
+      "Whether responses address the objection rather than repeat the original case.",
+      "Whether concessions preserve the central recommendation.",
+      "Whether the revision condition is measurable."
+    ]
+  },
+  {
+    "slug": "consultant-executive-summary",
+    "title": "Consultant: Repair an Executive Summary",
+    "summary": "A C1 consultant includes all analysis but does not prioritize the decision the client must make.",
+    "studentContext": "A C1 management consultant gives five-minute project updates to a client steering committee. The immediate goal is to lead with the decision and support it selectively.",
+    "evidence": [
+      "The learner's analysis is accurate and detailed.",
+      "The update starts with background and reaches the recommendation after several minutes.",
+      "This sequencing problem recurred in live practice and homework."
+    ],
+    "decision": "Repair",
+    "decisionReason": "The repeated failure to foreground the decision blocks executive usefulness, even though the underlying English and analysis are strong.",
+    "lessonObjective": "By the end of the lesson, the learner will deliver a 90-second executive summary that starts with the required decision, gives two supporting facts, and names one risk.",
+    "activitySequence": [
+      "Reduce a long update to decision, evidence, risk, and next action.",
+      "Compare background-first and decision-first openings.",
+      "Deliver three 30-second openings from different consulting scenarios.",
+      "Expand the strongest opening into a 90-second summary."
+    ],
+    "evidenceToCollect": [
+      "Whether the required decision appears in the first two sentences.",
+      "Whether supporting facts are selected rather than listed.",
+      "Whether the named risk changes or qualifies the recommendation."
+    ]
+  },
+  {
+    "slug": "entrepreneur-customer-interview",
+    "title": "Entrepreneur: Continue a Customer Interview",
+    "summary": "A B1 entrepreneur can ask about customer problems but still asks leading questions.",
+    "studentContext": "A B1 founder interviews potential customers in English before building a product feature. The learner needs neutral questions that elicit past behavior.",
+    "evidence": [
+      "The learner can explain the interview purpose and ask basic open questions.",
+      "Several questions suggest the desired answer or ask whether a proposed feature is useful.",
+      "After feedback, the learner can reformulate a leading question as a past-behavior question."
+    ],
+    "decision": "Continue",
+    "decisionReason": "The interview structure is partially established, but neutral questioning is not yet independent enough to advance to complex probing.",
+    "lessonObjective": "By the end of the lesson, the learner will ask five neutral questions about a customer's last relevant experience and use one answer to ask a specific follow-up.",
+    "activitySequence": [
+      "Identify leading language in eight customer-interview questions.",
+      "Convert feature-opinion questions into questions about the last real event.",
+      "Run a short interview using a one-page evidence grid.",
+      "Review whether each note records behavior, opinion, or assumption."
+    ],
+    "evidenceToCollect": [
+      "Whether questions avoid suggesting a product or preferred answer.",
+      "Whether follow-ups refer to a concrete past event.",
+      "Whether notes separate observed evidence from the founder's interpretation."
+    ]
+  },
+  {
+    "slug": "travel-disruption",
+    "title": "Traveller: Advance From Routine Requests to Disruption Handling",
+    "summary": "A B1 traveller independently handles routine hotel and transport requests and is ready for an unexpected disruption.",
+    "studentContext": "A B1 adult learner is preparing for independent business travel. Routine check-in, directions, and simple requests are already secure.",
+    "evidence": [
+      "The learner completed two routine travel role-plays without prompts.",
+      "Requests were polite, intelligible, and adapted to different contexts.",
+      "No recurring target error interfered with the outcome."
+    ],
+    "decision": "Advance",
+    "decisionReason": "Routine travel communication is independently usable, so the next lesson should introduce a realistic disruption with negotiation and clarification.",
+    "lessonObjective": "By the end of the lesson, the learner will explain a missed connection, ask for two alternatives, and confirm the final arrangement.",
+    "activitySequence": [
+      "Extract the essential facts from a missed-connection scenario.",
+      "Practice asking for alternatives and checking conditions.",
+      "Handle a role-play in which the first proposed solution is unsuitable.",
+      "Confirm the final route, time, and cost in the learner's own words."
+    ],
+    "evidenceToCollect": [
+      "Whether the learner explains the problem concisely.",
+      "Whether at least two alternatives are requested or compared.",
+      "Whether the final confirmation catches a deliberately introduced misunderstanding."
+    ]
+  },
+  {
+    "slug": "job-interview-achievement",
+    "title": "Job Candidate: Repair an Achievement Answer",
+    "summary": "A B2 job candidate describes responsibilities but does not show an individual result.",
+    "studentContext": "A B2 operations specialist is preparing for an English job interview. The target question asks for an example of improving a process.",
+    "evidence": [
+      "The learner describes the team and project context clearly.",
+      "The answer lists routine responsibilities but does not identify a specific action or measurable result.",
+      "The same gap appears in written preparation and spoken rehearsal."
+    ],
+    "decision": "Repair",
+    "decisionReason": "The repeated absence of a specific action and result prevents the answer from demonstrating competence, so adding more interview questions would avoid the core problem.",
+    "lessonObjective": "By the end of the lesson, the learner will give a 90-second achievement answer that distinguishes the situation, personal action, and measurable result.",
+    "activitySequence": [
+      "Mark team context, personal action, and result in two sample answers.",
+      "Select one authentic achievement and quantify the result conservatively.",
+      "Build a keyword outline with one sentence per function.",
+      "Answer the interview question twice, with a follow-up after the second version."
+    ],
+    "evidenceToCollect": [
+      "Whether the learner uses I accurately for personal contribution.",
+      "Whether the result is specific without being exaggerated.",
+      "Whether the answer remains coherent after a follow-up question."
+    ]
+  },
+  {
+    "slug": "ielts-task-2-paragraph",
+    "title": "IELTS Candidate: Continue Developing One Task 2 Paragraph",
+    "summary": "A B2 IELTS candidate has a relevant idea but needs support to develop it with explanation and evidence.",
+    "studentContext": "A B2 adult learner is preparing for IELTS Writing Task 2. The current objective is paragraph development, not full-essay speed.",
+    "evidence": [
+      "The topic sentence answers the prompt and states a clear position.",
+      "Supporting sentences repeat the main idea instead of explaining how or why it is true.",
+      "With a planning question, the learner can add a relevant example."
+    ],
+    "decision": "Continue",
+    "decisionReason": "The paragraph has a valid controlling idea, but development still depends on prompts and does not yet justify advancing to full timed essays.",
+    "lessonObjective": "By the end of the lesson, the learner will produce one Task 2 body paragraph with a claim, explanation, specific example, and explicit link back to the argument.",
+    "activitySequence": [
+      "Diagnose repetition in two underdeveloped paragraphs.",
+      "Use how, why, and example prompts to expand one claim.",
+      "Write a paragraph from a four-part plan under a short time limit.",
+      "Revise one sentence that does not contribute to the argument."
+    ],
+    "evidenceToCollect": [
+      "Whether each sentence has a distinct argumentative function.",
+      "Whether the example supports rather than merely illustrates the topic.",
+      "Whether the learner can plan the four parts without tutor prompts."
+    ]
+  }
+]

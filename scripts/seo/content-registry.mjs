@@ -1,6 +1,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { getPseoRouteInventory } from './pseo-index-policy.mjs';
+import { getDecisionContentRoutes } from './decision-content.mjs';
 
 export const CONTENT_STATES = ['keep', 'improve', 'merge', 'retire', 'hold', 'noindex'];
 export const INDEXABLE_STATES = new Set(['keep', 'improve', 'hold']);
@@ -220,6 +221,7 @@ const CORE_KEEP_ROUTES = new Set([
   '/tools',
   '/tools/cefr-level-test',
   '/tools/lesson-plan-generator',
+  '/tools/what-should-i-teach-next',
   '/tools/vocab-cefr-checker',
   '/what-to-teach-next',
 ]);
@@ -343,6 +345,7 @@ function inferType(route) {
 function defaultState(route, sourceName = '') {
   if (CANONICAL_ALIAS_ROUTES.has(route)) return 'noindex';
   if (PRIVATE_ROUTE_PATTERNS.some((pattern) => pattern.test(route))) return 'noindex';
+  if (route.startsWith('/what-to-teach-next/')) return 'keep';
   if (route.startsWith('/blog/') && STRATEGIC_BLOG_SLUGS.has(sourceName)) return 'keep';
   if (route.endsWith('.html') && STRATEGIC_ROOT_HTML.has(sourceName)) return 'keep';
   if (CORE_KEEP_ROUTES.has(route)) return 'keep';
@@ -377,6 +380,10 @@ function sitemapRoutes(root) {
 
 export function getContentRegistry({ root }) {
   const entries = new Map();
+  const strategicRoutes = new Set([
+    ...CORE_KEEP_ROUTES,
+    ...getDecisionContentRoutes({ root }),
+  ]);
 
   for (const route of sitemapRoutes(root)) {
     entries.set(route, entryForRoute(route));
@@ -413,7 +420,7 @@ export function getContentRegistry({ root }) {
     }));
   }
 
-  for (const route of CORE_KEEP_ROUTES) {
+  for (const route of strategicRoutes) {
     if (!entries.has(route)) entries.set(route, entryForRoute(route));
   }
 

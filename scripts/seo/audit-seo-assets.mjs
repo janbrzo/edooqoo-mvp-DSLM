@@ -8,6 +8,7 @@ import {
   getPriorityExerciseTopicRoutes,
 } from './seo-route-manifest.mjs';
 import { getPseoRouteInventory } from './pseo-index-policy.mjs';
+import { getDecisionContentRoutes } from './decision-content.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..', '..');
@@ -60,6 +61,7 @@ const REQUIRED_PRERENDER_ROUTES = [
   '/tools',
   '/tools/cefr-level-test',
   '/tools/lesson-plan-generator',
+  '/tools/what-should-i-teach-next',
   '/tools/vocab-cefr-checker',
   '/gallery',
 ];
@@ -105,6 +107,7 @@ const FEATURE_AND_TOOL_PAGES = [
   '/tools',
   '/tools/cefr-level-test',
   '/tools/lesson-plan-generator',
+  '/tools/what-should-i-teach-next',
   '/tools/vocab-cefr-checker',
 ];
 
@@ -230,6 +233,7 @@ const PRIVATE_SITEMAP_PATTERNS = [
 const REQUIRED_PRERENDER_SCHEMA = new Map([
   ['/one-minute-prep', ['WebPage']],
   ...FEATURE_AND_TOOL_PAGES.map((route) => [route, ['WebPage']]),
+  ['/tools/what-should-i-teach-next', ['SoftwareApplication', 'FAQPage', 'BreadcrumbList']],
 ]);
 
 function fail(message) {
@@ -830,6 +834,7 @@ function auditPrerenderManifest() {
   const expectedCount = new Set([
     ...CORE_SEO_ROUTES,
     ...getPseoRouteInventory({ root: ROOT }).indexable,
+    ...getDecisionContentRoutes({ root: ROOT }),
   ]).size;
   if (routes.length !== expectedCount) {
     fail(`Expected ${expectedCount} policy-approved prerender routes, got ${routes.length}`);

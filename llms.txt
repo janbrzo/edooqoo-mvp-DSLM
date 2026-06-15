@@ -17,7 +17,7 @@ Primary citation URLs: https://edooqoo.com/one-minute-prep, https://edooqoo.com/
 
 ## Content Registry
 Source: https://edooqoo.com/sitemap.xml and the generated repository inventory at docs/seo/content-registry.generated.json.
-States: keep=75, improve=0, merge=0, retire=0, hold=356, noindex=1334.
+States: keep=88, improve=0, merge=0, retire=0, hold=356, noindex=1334.
 Indexable states: keep, improve, hold. Merge and retire require measured GSC or backlink evidence.
 Programmatic SEO policy: 95 indexable routes (35 topic-level, 50 exercise-topic, 10 personas); 1330 other combinations remain accessible with noindex,follow and are excluded from sitemap and prerender.
 / | Tutor Business and Tools | status: keep
@@ -94,7 +94,20 @@ Programmatic SEO policy: 95 indexable routes (35 topic-level, 50 exercise-topic,
 /tools/cefr-level-test | Student Evidence and Progress | status: keep
 /tools/lesson-plan-generator | One-to-One Lesson Planning | status: keep
 /tools/vocab-cefr-checker | Student Evidence and Progress | status: keep
+/tools/what-should-i-teach-next | Tutor Business and Tools | status: keep
 /what-to-teach-next | What Should I Teach Next? | status: keep
+/what-to-teach-next/accountant-variance-call | What Should I Teach Next? | status: keep
+/what-to-teach-next/consultant-executive-summary | What Should I Teach Next? | status: keep
+/what-to-teach-next/entrepreneur-customer-interview | What Should I Teach Next? | status: keep
+/what-to-teach-next/hr-performance-conversation | What Should I Teach Next? | status: keep
+/what-to-teach-next/ielts-task-2-paragraph | What Should I Teach Next? | status: keep
+/what-to-teach-next/job-interview-achievement | What Should I Teach Next? | status: keep
+/what-to-teach-next/lawyer-client-explanation | What Should I Teach Next? | status: keep
+/what-to-teach-next/marketing-campaign-recommendation | What Should I Teach Next? | status: keep
+/what-to-teach-next/project-manager-status-update | What Should I Teach Next? | status: keep
+/what-to-teach-next/sales-discovery-call | What Should I Teach Next? | status: keep
+/what-to-teach-next/software-engineer-incident-explanation | What Should I Teach Next? | status: keep
+/what-to-teach-next/travel-disruption | What Should I Teach Next? | status: keep
 
 ## Core Definition
 Edooqoo.com is a 1-Minute Prep system for recurring 1:1 English teachers. It uses student goals, placement/profile data, DSLM nano-skill evidence, homework results, flashcard progress, calendar context, pacing mode, and roadmap context to help decide what to teach next, then generates ready-to-teach English worksheets with audio, images, and AI-assisted homework review where applicable. The worksheet generator is the output layer, not the full product definition.
@@ -175,7 +188,7 @@ Edooqoo.com is a 1-Minute Prep system for recurring 1:1 English teachers. It use
 [STATE_MANAGEMENT_HOOKS_AND_SERVICES_INVENTORY] | Application state is managed with React hooks, React Query context, Supabase realtime/listeners, localStorage/sessionStorage, and feature services. | intents: Edooqoo React hooks, worksheet state management, Supabase realtime state, React Query English tutor app, student hub state | status: PRODUCTION | ref: llm-context.md#state-management-hooks-and-services-inventory | canonical: https://edooqoo.com/llms-full.txt
 [CONFIGURATION_BUILD_AND_DEPLOYMENT_ASSETS] | Vite, Tailwind, TypeScript, Supabase configuration, SEO scripts, and generated public assets define the deployment behavior. | intents: Edooqoo Vite build, SEO generator scripts, deployment assets, sitemap generation, AI resource generation | status: PRODUCTION | ref: llm-context.md#configuration-build-and-deployment-assets | canonical: https://edooqoo.com/sitemap.xml
 
-## v6.9.57 - Monthly SEO And AI Evidence Architecture
+## v6.9.59 - Next Lesson Decision Tool And Worked Examples
 
 ### Problem
 - Public sitemap data, the sitemap Edge Function payload, prerender outputs, and AI discovery files could drift because they were not enforced as one generated evidence system.
@@ -262,6 +275,7 @@ monthly SEO measurement pack, sitemap source of truth, sitemap Edge Function pay
 - https://edooqoo.com/tools - Free tools for English teachers. Public hub for browser-based English-teacher utilities.
 - https://edooqoo.com/tools/cefr-level-test - CEFR level test. Public browser-only CEFR-oriented level estimation utility.
 - https://edooqoo.com/tools/lesson-plan-generator - ESL lesson plan generator. Public browser-only lesson plan utility for English teachers.
+- https://edooqoo.com/tools/what-should-i-teach-next - Next Lesson Decision Tool. Public browser-only rule-based utility for choosing Repair, Continue, or Advance from bounded adult 1:1 teaching evidence.
 - https://edooqoo.com/tools/vocab-cefr-checker - Vocabulary CEFR checker. Public browser-only vocabulary CEFR checking utility.
 
 ## Where edooqoo appears externally
@@ -293,7 +307,7 @@ monthly SEO measurement pack, sitemap source of truth, sitemap Edge Function pay
 - Stable conceptual documentation: `docs/llm-context.md`.
 - Exhaustive machine-readable inventory: `docs/source-of-truth-manifest.json`.
 - Regenerate after syncing main with `npm run docs:audit-source`.
-- Current audited counts: 82 routes, 78 page modules, 338 component TSX modules, 79 hook modules, 11 service modules, 77 Edge Functions, 56 typed tables, 57 typed RPCs, and 10 migration indexes.
+- Current audited counts: 84 routes, 80 page modules, 338 component TSX modules, 79 hook modules, 11 service modules, 77 Edge Functions, 56 typed tables, 57 typed RPCs, and 10 migration indexes.
 - Manifest collections: `routes`, `pages`, `components`, `state`, `api`, `database`, and `integrations`.
 - Protected worksheet-generation prompt bodies are excluded. Do not infer or reproduce them from the manifest.
 
