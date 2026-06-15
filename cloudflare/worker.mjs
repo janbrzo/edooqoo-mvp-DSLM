@@ -56,8 +56,7 @@ const PUBLIC_FILES = new Set([
 ]);
 
 function isPrivate(pathname) {
-  return NOINDEX_ROUTES.has(pathname)
-    || PRIVATE_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`))
+  return PRIVATE_PREFIXES.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`))
     || DYNAMIC_PRIVATE_PATTERNS.some((pattern) => pattern.test(pathname));
 }
 
@@ -98,8 +97,9 @@ export async function handleRequest(
       });
     }
 
-    const privateRoute = routing.noindex.has(pathname) || isPrivate(pathname);
-    const knownPublic = routing.publicRoutes.has(pathname) || isKnownPublic(pathname);
+    const publicNoindexRoute = routing.noindex.has(pathname);
+    const privateRoute = isPrivate(pathname);
+    const knownPublic = publicNoindexRoute || routing.publicRoutes.has(pathname) || isKnownPublic(pathname);
     if (!privateRoute && !knownPublic) return notFound();
 
     if (!env.ASSETS?.fetch) {
@@ -111,6 +111,7 @@ export async function handleRequest(
     const response = await env.ASSETS.fetch(request);
     const headers = new Headers(response.headers);
     if (privateRoute) headers.set('x-robots-tag', 'noindex, nofollow');
+    else if (publicNoindexRoute) headers.set('x-robots-tag', 'noindex, follow');
     return new Response(response.body, {
       status: response.status,
       statusText: response.statusText,

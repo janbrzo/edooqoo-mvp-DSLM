@@ -5,7 +5,7 @@ import { handleRequest } from '../../cloudflare/worker.mjs';
 const routing = {
   redirects: { '/old-article': '/blog' },
   gone: new Set(['/retired-article']),
-  noindex: new Set(['/private-preview']),
+  noindex: new Set(['/worksheets/matching/reported-speech']),
   publicRoutes: new Set(['/', '/blog', '/worksheets/fill-in-the-blanks/present-perfect']),
 };
 const env = {
@@ -29,9 +29,17 @@ const gone = await handleRequest(new Request('https://edooqoo.com/retired-articl
 assert.equal(gone.status, 410);
 assert.match(gone.headers.get('x-robots-tag') || '', /noindex/);
 
-const privatePage = await handleRequest(new Request('https://edooqoo.com/private-preview'), env, routing);
+const privatePage = await handleRequest(new Request('https://edooqoo.com/dashboard'), env, routing);
 assert.equal(privatePage.status, 200);
 assert.equal(privatePage.headers.get('x-robots-tag'), 'noindex, nofollow');
+
+const publicNoindex = await handleRequest(
+  new Request('https://edooqoo.com/worksheets/matching/reported-speech'),
+  env,
+  routing,
+);
+assert.equal(publicNoindex.status, 200);
+assert.equal(publicNoindex.headers.get('x-robots-tag'), 'noindex, follow');
 
 const publicProgrammatic = await handleRequest(
   new Request('https://edooqoo.com/worksheets/fill-in-the-blanks/present-perfect'),
@@ -41,4 +49,4 @@ const publicProgrammatic = await handleRequest(
 assert.equal(publicProgrammatic.status, 200);
 assert.equal(publicProgrammatic.headers.get('x-robots-tag'), null);
 
-console.log('[edge-routing-test] PASS 404, 301, 410, private noindex, public programmatic route');
+console.log('[edge-routing-test] PASS 404, 301, 410, private noindex, public noindex, public programmatic route');

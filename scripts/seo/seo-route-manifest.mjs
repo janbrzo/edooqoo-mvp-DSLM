@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { getPseoRouteInventory } from './pseo-index-policy.mjs';
 
 export const CORE_SEO_ROUTES = [
   '/about',
@@ -36,19 +37,6 @@ export const CORE_SEO_ROUTES = [
   '/gallery',
 ];
 
-export const PRIORITY_EXERCISE_TOPICS = [
-  'present-perfect',
-  'past-simple',
-  'conditionals',
-  'modal-verbs',
-  'phrasal-verbs',
-  'business-email',
-  'job-interview',
-  'meetings',
-  'travel-vocabulary',
-  'ielts-writing-task-2',
-];
-
 export function getSitemapRoutes({ root }) {
   const sitemapPath = path.resolve(root, 'public', 'sitemap.xml');
   const xml = fs.readFileSync(sitemapPath, 'utf8');
@@ -64,22 +52,15 @@ export function getSitemapRoutes({ root }) {
 }
 
 export function getTopicLevelRoutes({ root }) {
-  return getSitemapRoutes({ root }).filter((route) =>
-    /^\/esl-worksheets\/[^/]+\/[^/]+$/.test(route)
-  );
+  return getPseoRouteInventory({ root }).indexableTopicLevelRoutes;
 }
 
 export function getPersonaRoutes({ root }) {
-  return getSitemapRoutes({ root }).filter((route) =>
-    /^\/english-for\/[^/]+$/.test(route)
-  );
+  return getPseoRouteInventory({ root }).indexablePersonaRoutes;
 }
 
 export function getPriorityExerciseTopicRoutes({ root }) {
-  return getSitemapRoutes({ root }).filter((route) => {
-    const match = route.match(/^\/worksheets\/[^/]+\/([^/]+)$/);
-    return match ? PRIORITY_EXERCISE_TOPICS.includes(match[1]) : false;
-  });
+  return getPseoRouteInventory({ root }).indexableExerciseTopicRoutes;
 }
 
 export function getPrerenderRoutes({ root }) {

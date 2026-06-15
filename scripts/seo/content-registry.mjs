@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { getPseoRouteInventory } from './pseo-index-policy.mjs';
 
 export const CONTENT_STATES = ['keep', 'improve', 'merge', 'retire', 'hold', 'noindex'];
 export const INDEXABLE_STATES = new Set(['keep', 'improve', 'hold']);
@@ -27,12 +28,27 @@ const STRATEGIC_BLOG_SLUGS = new Set([
   'how-english-tutors-track-what-to-teach-next.html',
   'how-long-should-private-english-tutors-spend-on-lesson-prep.html',
   'learning-pacing-scientific-vs-pragmatic-esl.html',
+  'lesson-sequencing-scaffolding-curriculum.html',
+  'materials-design-principles-elt.html',
+  'needs-analysis-esl-students.html',
   'one-minute-prep-workflow-for-esl-tutors.html',
+  'personalized-learning-english-teaching.html',
   'public-esl-worksheet-gallery-quality-standards.html',
+  'setting-up-freelance-esl-business.html',
+  'spaced-repetition-vocabulary-learning.html',
   'student-progress-to-worksheet-feedback-loop.html',
+  'task-based-language-teaching-worksheets.html',
+  'teacher-burnout-prevention-esl.html',
+  'teaching-business-english-guide.html',
+  'teaching-english-online-complete-guide.html',
   'teaching-english-one-to-one.html',
   'what-should-adult-english-placement-test-include.html',
   'what-to-teach-next-private-english-student.html',
+  'effective-esl-homework-strategies.html',
+  'error-correction-techniques-esl.html',
+  'formative-assessment-english-teaching.html',
+  'how-to-plan-english-lessons-effectively.html',
+  'writing-student-progress-reports-esl.html',
 ]);
 
 const STRATEGIC_ROOT_HTML = new Set([
@@ -101,6 +117,81 @@ export const CONTENT_OVERRIDES = {
     state: 'keep',
     cluster: 'What Should I Teach Next?',
     reason: 'Strategic next-lesson decision framework.',
+  },
+  '/blog/how-to-plan-english-lessons-effectively.html': {
+    state: 'keep',
+    cluster: 'One-to-One Lesson Planning',
+    reason: 'Strategic adult one-to-one lesson-planning workflow.',
+  },
+  '/blog/needs-analysis-esl-students.html': {
+    state: 'keep',
+    cluster: 'Student Evidence and Progress',
+    reason: 'Strategic adult needs-analysis workflow.',
+  },
+  '/blog/lesson-sequencing-scaffolding-curriculum.html': {
+    state: 'keep',
+    cluster: 'One-to-One Lesson Planning',
+    reason: 'Strategic lesson-sequencing and scaffolding resource.',
+  },
+  '/blog/formative-assessment-english-teaching.html': {
+    state: 'keep',
+    cluster: 'Student Evidence and Progress',
+    reason: 'Strategic formative-assessment evidence cycle.',
+  },
+  '/blog/error-correction-techniques-esl.html': {
+    state: 'keep',
+    cluster: 'Student Evidence and Progress',
+    reason: 'Strategic adult error-correction decision framework.',
+  },
+  '/blog/effective-esl-homework-strategies.html': {
+    state: 'keep',
+    cluster: 'Homework and Retention',
+    reason: 'Strategic adult homework design workflow.',
+  },
+  '/blog/writing-student-progress-reports-esl.html': {
+    state: 'keep',
+    cluster: 'Student Evidence and Progress',
+    reason: 'Strategic evidence-based progress-report workflow.',
+  },
+  '/blog/spaced-repetition-vocabulary-learning.html': {
+    state: 'keep',
+    cluster: 'Homework and Retention',
+    reason: 'Strategic spaced-retrieval vocabulary resource.',
+  },
+  '/blog/teaching-business-english-guide.html': {
+    state: 'keep',
+    cluster: 'Adult and Business English',
+    reason: 'Strategic adult one-to-one Business English guide.',
+  },
+  '/blog/teaching-english-online-complete-guide.html': {
+    state: 'keep',
+    cluster: 'Tutor Business and Tools',
+    reason: 'Strategic adult online tutoring workflow.',
+  },
+  '/blog/setting-up-freelance-esl-business.html': {
+    state: 'keep',
+    cluster: 'Tutor Business and Tools',
+    reason: 'Strategic freelance tutoring operations resource.',
+  },
+  '/blog/teacher-burnout-prevention-esl.html': {
+    state: 'keep',
+    cluster: 'Tutor Business and Tools',
+    reason: 'Strategic tutor workload and burnout-prevention resource.',
+  },
+  '/blog/materials-design-principles-elt.html': {
+    state: 'keep',
+    cluster: 'One-to-One Lesson Planning',
+    reason: 'Strategic adult materials-design framework.',
+  },
+  '/blog/task-based-language-teaching-worksheets.html': {
+    state: 'keep',
+    cluster: 'One-to-One Lesson Planning',
+    reason: 'Strategic adult task-based worksheet framework.',
+  },
+  '/blog/personalized-learning-english-teaching.html': {
+    state: 'keep',
+    cluster: 'One-to-One Lesson Planning',
+    reason: 'Strategic evidence-led personalization framework.',
   },
 };
 
@@ -259,8 +350,9 @@ function defaultState(route, sourceName = '') {
 }
 
 function entryForRoute(route, base = {}) {
+  const { forcedState, ...entryBase } = base;
   const override = CONTENT_OVERRIDES[route] || {};
-  const state = override.state || defaultState(route, base.sourceName);
+  const state = override.state || forcedState || defaultState(route, entryBase.sourceName);
   return {
     route,
     canonical: `https://edooqoo.com${route === '/' ? '/' : route}`,
@@ -272,7 +364,7 @@ function entryForRoute(route, base = {}) {
     reason: override.reason || (state === 'hold'
       ? 'Awaiting GSC and backlink evidence; preserve current URL without destructive action.'
       : 'Strategic product, workflow, evidence, or public resource URL.'),
-    ...base,
+    ...entryBase,
     ...override,
   };
 }
@@ -288,6 +380,13 @@ export function getContentRegistry({ root }) {
 
   for (const route of sitemapRoutes(root)) {
     entries.set(route, entryForRoute(route));
+  }
+
+  for (const route of getPseoRouteInventory({ root }).noindex) {
+    entries.set(route, entryForRoute(route, {
+      forcedState: 'noindex',
+      reason: 'Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy.',
+    }));
   }
 
   const blogDir = path.join(root, 'public', 'blog');

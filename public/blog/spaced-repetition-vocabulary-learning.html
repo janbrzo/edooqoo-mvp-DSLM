@@ -1,1 +1,176 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Spaced Repetition for Vocabulary Learning — Edooqoo Blog</title><meta name="description" content="How spaced repetition works for vocabulary learning. SM-2 algorithm explained, Ebbinghaus forgetting curve, practical implementation for ESL teachers, and digital flashcard best practices."><link rel="canonical" href="https://edooqoo.com/blog/spaced-repetition-vocabulary-learning.html"><script type="application/ld+json">{"@context":"https://schema.org","@type":"BlogPosting","headline":"Spaced Repetition for Vocabulary Learning — How It Works and Why Teachers Should Use It","url":"https://edooqoo.com/blog/spaced-repetition-vocabulary-learning.html","datePublished":"2025-06-08","dateModified":"2025-06-08","author":{"@type":"Organization","name":"Edooqoo","url":"https://edooqoo.com"},"publisher":{"@type":"Organization","name":"Edooqoo","logo":{"@type":"ImageObject","url":"https://edooqoo.com/lovable-uploads/2d55c1e0-547e-45aa-a55c-e71479adb602.png"}},"inLanguage":"en"}</script><style>body{font-family:system-ui,-apple-system,sans-serif;max-width:800px;margin:0 auto;padding:20px;line-height:1.7;color:#1a1a2e}h1{font-size:2em;margin-bottom:0.5em}h2{font-size:1.4em;margin-top:2em;border-bottom:2px solid #e0e0e0;padding-bottom:0.3em}ul,ol{padding-left:1.5em}a{color:#6d28d9}details{margin:1em 0;padding:0.5em;border:1px solid #e0e0e0;border-radius:4px}summary{cursor:pointer;font-weight:600;padding:0.5em}table{width:100%;border-collapse:collapse;margin:1em 0}th,td{border:1px solid #e0e0e0;padding:8px;text-align:left}th{background:#f5f5f5}.cta{display:inline-block;background:#6d28d9;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;margin:1em 0}</style></head><body><nav><a href="https://edooqoo.com">← Edooqoo Home</a> · <a href="https://edooqoo.com/blog">Blog</a></nav><h1>Spaced Repetition for Vocabulary Learning — How It Works and Why Teachers Should Use It</h1><p><em>Published March 11, 2026 · Teaching Methods</em></p><p><strong>Spaced repetition is the most scientifically validated method for long-term vocabulary retention.</strong> Research spanning over 130 years — from Ebbinghaus's pioneering memory experiments in 1885 to modern cognitive science studies — consistently shows that distributing review sessions over increasing intervals dramatically improves long-term retention compared to massed practice (cramming).</p><p>Yet most ESL/EFL teachers still rely on word lists, translation drills, or hope that students will "pick up" vocabulary through exposure alone. This guide explains the science behind spaced repetition, how the SM-2 algorithm works, and how you can implement it in your teaching practice using digital flashcard systems.</p><h2>The Science Behind Spaced Repetition</h2><p>In 1885, German psychologist Hermann Ebbinghaus conducted the first systematic study of memory. He discovered the "forgetting curve" — a mathematical model showing that newly learned information fades rapidly from memory unless actively reviewed. Within 24 hours, approximately 70% of new information is forgotten. Within a week, over 90% is lost.</p><p>However, Ebbinghaus also discovered that each time you successfully retrieve information from memory, the forgetting curve flattens — the memory becomes more durable. The key insight: the best time to review is just before you would have forgotten. Reviewing too early wastes time (the memory is still strong). Reviewing too late means you've forgotten and must relearn from scratch.</p><p>This "sweet spot" of optimal review timing is what spaced repetition systems exploit.</p><h2>The Ebbinghaus Forgetting Curve</h2><p>The forgetting curve follows an exponential decay pattern. Without review, memory strength drops rapidly at first, then more slowly:</p><ul><li>After 20 minutes: 58% retained</li><li>After 1 hour: 44% retained</li><li>After 1 day: 33% retained</li><li>After 1 week: 25% retained</li><li>After 1 month: 21% retained</li></ul><p>With spaced repetition, each review "resets" the curve at a higher level. After 5-6 well-timed reviews, the memory becomes essentially permanent, with review intervals stretching to months or years.</p><h2>SM-2 Algorithm Explained Simply</h2><p>SM-2 (SuperMemo 2) is the algorithm used by Edooqoo's flashcard system. Developed by Piotr Woźniak in 1987, it's the same algorithm used by Anki, the world's most popular flashcard application. Here's how it works in simple terms:</p><ol><li>When you first learn a word, the review interval starts at 1 day.</li><li>After a successful review, the interval increases (1 day → 3 days → 7 days → 14 days → 30 days → etc.).</li><li>The "easiness factor" (EF) determines how quickly intervals grow. Words that are easy get longer intervals; difficult words get shorter ones.</li><li>When you fail a review (can't recall the word), the interval resets to 1 day and the EF decreases.</li><li>The quality of each review (how easily you recalled the word) adjusts the EF for future calculations.</li></ol><p>The result: easy words quickly move to long intervals (reviewed rarely), while difficult words stay at short intervals (reviewed frequently). Each student's review schedule is uniquely personalized to their actual learning patterns.</p><h2>How to Implement in ESL Classes</h2><p>Here's a practical workflow for using spaced repetition with your English students:</p><ol><li><strong>After each lesson</strong> — Add 8-12 key vocabulary items from the worksheet to the student's flashcard set in Edooqoo. Include definitions, example sentences, and translations if appropriate.</li><li><strong>Student reviews daily</strong> — Students access their flashcards through the Student Hub portal. The SM-2 algorithm presents cards due for review. Daily sessions typically take 5-15 minutes.</li><li><strong>Bidirectional practice</strong> — Edooqoo supports bidirectional flashcards: English→Definition and Definition→English. This builds both recognition and production vocabulary.</li><li><strong>Monitor progress</strong> — Check flashcard statistics to see which words students are struggling with. Address persistent problem words in lessons.</li><li><strong>Integrate with lessons</strong> — When generating new worksheets, include vocabulary from the student's flashcard "difficult" list for additional contextual practice.</li></ol><h2>Digital vs Paper Flashcards</h2><table><tr><th>Aspect</th><th>Digital (Edooqoo/Anki)</th><th>Paper</th></tr><tr><td>Scheduling</td><td>Automatic SM-2 algorithm</td><td>Manual — students forget to review</td></tr><tr><td>Tracking</td><td>Detailed statistics per word</td><td>No tracking</td></tr><tr><td>Accessibility</td><td>Phone, tablet, computer — anywhere</td><td>Physical cards needed</td></tr><tr><td>Content</td><td>Example sentences, audio, images</td><td>Limited space</td></tr><tr><td>Teacher insight</td><td>See student progress remotely</td><td>Only if student brings cards</td></tr><tr><td>Kinesthetic learners</td><td>Less tactile engagement</td><td>Writing and handling aids memory</td></tr></table><h2>Tracking Student Retention</h2><p>Edooqoo's flashcard system tracks multiple metrics per word and per student:</p><ul><li><strong>Easiness factor</strong> — How difficult each word is for the student.</li><li><strong>Review history</strong> — When each word was reviewed and the quality of recall.</li><li><strong>Retention rate</strong> — Percentage of successful reviews over time.</li><li><strong>Cards due</strong> — How many words need review today.</li><li><strong>Response time</strong> — How quickly the student recalls each word (faster = stronger memory).</li></ul><h2>Best Practices</h2><ol><li><strong>Add vocabulary from worksheets</strong> — Don't create flashcards in isolation. Add words from actual lesson materials so students have contextual memory anchors.</li><li><strong>Include example sentences</strong> — A word without context is harder to remember. Edooqoo auto-generates example sentences for each flashcard.</li><li><strong>Keep sets manageable</strong> — 8-12 new words per lesson. Too many overwhelms the review queue.</li><li><strong>Encourage daily review</strong> — Even 5 minutes daily is more effective than 30 minutes once a week.</li><li><strong>Use bidirectional mode</strong> — Students who practice both directions (English→meaning and meaning→English) develop both receptive and productive vocabulary.</li><li><strong>Review data before lessons</strong> — Check which words students are struggling with and incorporate them into your lesson plan.</li></ol><h2>Frequently Asked Questions</h2><details><summary>How long should daily review sessions be?</summary><p>5-15 minutes is optimal. Short, frequent sessions are more effective than long, infrequent ones. Edooqoo's Student Hub makes it easy for students to do quick review sessions on their phone.</p></details><details><summary>At what age can students start using flashcards?</summary><p>Digital flashcards work well for students aged 12+. Younger students benefit more from physical flashcard activities with a teacher present. Edooqoo is designed for adult learners.</p></details><details><summary>Can spaced repetition work for grammar, not just vocabulary?</summary><p>Yes. Create flashcards with grammar rules, example sentences, and common errors. However, grammar is better practiced through exercises (sentence transformation, error correction) with vocabulary reinforcement through flashcards.</p></details><p><a href="https://edooqoo.com/signup" class="cta">Try Edooqoo Free — Smart Flashcards</a></p><hr><h3>Related Articles</h3><ul><li><a href="https://edooqoo.com/blog/vocabulary-teaching-strategies-esl.html">10 Vocabulary Teaching Strategies</a></li><li><a href="https://edooqoo.com/blog/personalized-learning-english-teaching.html">Personalized Learning in English</a></li></ul><h3>Related Resources</h3><ul><li><a href="https://edooqoo.com/spaced-repetition-flashcards-esl.html">Spaced Repetition Flashcards</a></li><li><a href="https://edooqoo.com/vocabulary-exercise-generator.html">Vocabulary Exercise Generator</a></li><li><a href="https://edooqoo.com/glossary">ELT Glossary</a></li></ul><p><a href="https://edooqoo.com/about">About</a> · <a href="https://edooqoo.com/pricing">Pricing</a> · <a href="https://edooqoo.com/exercise-types">Exercise Types</a> · <a href="https://edooqoo.com/prompts">Prompts</a> · <a href="https://edooqoo.com/glossary">Glossary</a> · <a href="https://edooqoo.com/how-it-works">How It Works</a> · <a href="https://edooqoo.com/blog">Blog</a> · <a href="https://edooqoo.com/resources">Resources</a></p></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Spaced Retrieval for Adult English Vocabulary</title>
+  <meta name="description" content="Use spaced retrieval to make adult English vocabulary available in real speaking and writing, not only recognizable in flashcards.">
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="https://edooqoo.com/blog/spaced-repetition-vocabulary-learning.html">
+  <meta property="og:type" content="article">
+  <meta property="og:title" content="Spaced Retrieval for Adult English Vocabulary">
+  <meta property="og:description" content="Use spaced retrieval to make adult English vocabulary available in real speaking and writing, not only recognizable in flashcards.">
+  <meta property="og:url" content="https://edooqoo.com/blog/spaced-repetition-vocabulary-learning.html">
+  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"Article","@id":"https://edooqoo.com/blog/spaced-repetition-vocabulary-learning.html#article","headline":"Spaced Retrieval for Vocabulary in Adult One-to-One English","description":"Use spaced retrieval to make adult English vocabulary available in real speaking and writing, not only recognizable in flashcards.","datePublished":"2025-06-08","dateModified":"2026-06-15","author":{"@type":"Person","@id":"https://edooqoo.com/authors/jan-brzostowski#person","name":"Jan Brzostowski","url":"https://edooqoo.com/authors/jan-brzostowski"},"reviewedBy":{"@type":"Person","@id":"https://edooqoo.com/authors/martha#person","name":"Martha","jobTitle":"ESL Methodology Reviewer","description":"10 years of experience","url":"https://edooqoo.com/authors/martha"},"publisher":{"@type":"Organization","@id":"https://edooqoo.com/#organization","name":"Edooqoo"},"mainEntityOfPage":{"@id":"https://edooqoo.com/blog/spaced-repetition-vocabulary-learning.html#webpage"},"inLanguage":"en","wordCount":1185,"articleSection":"Homework and Retention"},{"@type":"WebPage","@id":"https://edooqoo.com/blog/spaced-repetition-vocabulary-learning.html#webpage","url":"https://edooqoo.com/blog/spaced-repetition-vocabulary-learning.html","name":"Spaced Retrieval for Adult English Vocabulary","description":"Use spaced retrieval to make adult English vocabulary available in real speaking and writing, not only recognizable in flashcards.","inLanguage":"en"},{"@type":"Person","@id":"https://edooqoo.com/authors/jan-brzostowski#person","name":"Jan Brzostowski","url":"https://edooqoo.com/authors/jan-brzostowski","description":"Founder of Edooqoo and author of product workflow documentation."},{"@type":"Person","@id":"https://edooqoo.com/authors/martha#person","name":"Martha","url":"https://edooqoo.com/authors/martha","jobTitle":"ESL Methodology Reviewer","description":"10 years of experience"},{"@type":"FAQPage","@id":"https://edooqoo.com/blog/spaced-repetition-vocabulary-learning.html#faq","mainEntity":[{"@type":"Question","name":"What is the difference between spaced repetition and spaced retrieval?","acceptedAnswer":{"@type":"Answer","text":"Spacing concerns timing; retrieval requires recall. Effective vocabulary practice uses both and checks contextual use."}},{"@type":"Question","name":"How many vocabulary items should an adult learn at once?","acceptedAnswer":{"@type":"Answer","text":"Use a small set the learner can retrieve and apply, often five to ten items tied to one goal."}},{"@type":"Question","name":"What should happen after a failed review?","acceptedAnswer":{"@type":"Answer","text":"Clarify the failure, repair form or meaning if needed, provide a successful retrieval, and shorten the next interval."}},{"@type":"Question","name":"Are flashcards enough?","acceptedAnswer":{"@type":"Answer","text":"They support retrieval, but productive goals require later speaking or writing where the item is not explicitly cued."}},{"@type":"Question","name":"When is a word learned?","acceptedAnswer":{"@type":"Answer","text":"For a productive goal, when the learner can retrieve and use it accurately after a delay in an appropriate changed context."}}]},{"@type":"BreadcrumbList","@id":"https://edooqoo.com/blog/spaced-repetition-vocabulary-learning.html#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://edooqoo.com/"},{"@type":"ListItem","position":2,"name":"Blog","item":"https://edooqoo.com/blog"},{"@type":"ListItem","position":3,"name":"Spaced Retrieval for Vocabulary in Adult One-to-One English","item":"https://edooqoo.com/blog/spaced-repetition-vocabulary-learning.html"}]}]}</script>
+  <style>
+    :root{color-scheme:light;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color:#1f2937;background:#fff}
+    *{box-sizing:border-box}body{margin:0;line-height:1.72}a{color:#6d28d9}a:hover{text-decoration-thickness:2px}
+    nav,main{max-width:820px;margin:0 auto;padding:0 24px}nav{padding-top:24px;font-size:.92rem;color:#6b7280}
+    header{padding:48px 0 24px}h1{font-size:clamp(2.25rem,6vw,4rem);line-height:1.08;letter-spacing:-.035em;margin:.25em 0}
+    h2{font-size:1.65rem;line-height:1.25;margin:2.2em 0 .65em}h3{font-size:1.15rem;line-height:1.35;margin:1.35em 0 .35em}
+    p,li,dd{font-size:1.05rem}.eyebrow{font-size:.78rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:#6d28d9}
+    .answer{margin:24px 0 36px;padding:22px 24px;border-left:4px solid #7c3aed;background:#f5f3ff;font-size:1.16rem}
+    .byline{display:flex;flex-wrap:wrap;gap:8px 18px;color:#4b5563;font-size:.93rem}.byline a{font-weight:650}
+    li{margin:.45em 0}.decision,.case,.sources,.related{margin:40px 0;padding:24px;border:1px solid #e5e7eb;border-radius:16px;background:#fafafa}
+    .workflow{padding-left:24px}.workflow h3{margin-bottom:0}.workflow p{margin-top:.25em}
+    dl{display:grid;gap:14px}dl div{padding-bottom:12px;border-bottom:1px solid #e5e7eb}dt{font-weight:700}dd{margin:4px 0 0;color:#4b5563}
+    details{border:1px solid #e5e7eb;border-radius:12px;padding:14px 16px;margin:10px 0}summary{cursor:pointer;font-weight:700}
+    .next-step{margin:48px 0;padding:28px;border-radius:18px;background:#111827;color:#fff}.next-step a{color:#ddd6fe;font-weight:700}
+    footer{margin-top:64px;padding:32px 0 48px;border-top:1px solid #e5e7eb;color:#6b7280;font-size:.9rem}
+    @media(max-width:640px){nav,main{padding-left:18px;padding-right:18px}header{padding-top:32px}h1{font-size:2.35rem}}
+  </style>
+</head>
+<body>
+  <nav><a href="/">Edooqoo</a> / <a href="/blog">Blog</a> / Homework and Retention</nav>
+  <main>
+    <header>
+      <p class="eyebrow">Homework and Retention</p>
+      <h1>Spaced Retrieval for Vocabulary in Adult One-to-One English</h1>
+      <div class="byline">
+        <span>By <a href="/authors/jan-brzostowski">Jan Brzostowski</a></span>
+        <span>Reviewed by <a href="/authors/martha">Martha, ESL Methodology Reviewer</a></span>
+        <span>Published 2025-06-08</span>
+        <span>Updated 2026-06-15</span>
+      </div>
+      <p class="answer"><strong>Direct answer:</strong> Use spaced retrieval for adult English vocabulary by selecting a small goal-relevant set, requiring active recall across increasing intervals, varying the cue and context, and testing whether the learner can use each item accurately in a real task.</p>
+    </header>
+    <article>
+    <section>
+      <h2>Start with the adult performance, not the topic list</h2>
+      <p>Spacing controls when practice occurs; retrieval controls what the learner must produce. Neither guarantees useful vocabulary unless the item is relevant, its form and meaning are precise, and it transfers into communication.</p>
+      <p>In adult one-to-one teaching, the useful unit of planning is a performance in context. The tutor defines what the learner must do, the audience or reader, the pressure or constraint, the support currently available, and the evidence that will count as independent success. This prevents a broad topic from becoming a sequence of school-like exercises with no clear transfer.</p>
+      <p>The learner's profession or interest can make examples relevant, but relevance alone is not personalization. The material must respond to current evidence and make the next teaching decision easier. A lesson should therefore leave the tutor with a defensible answer to three questions: what changed, what still requires support, and what should happen next.</p>
+    </section>
+    <section>
+      <h2>Evidence to collect before planning</h2>
+      <p>Use a small evidence set. The aim is not to document everything about the learner; it is to retrieve only the information that changes the objective, task, support, feedback, or sequence.</p>
+      <ul>
+        <li>
+          <strong>Goal relevance.</strong>
+          Select words and phrases the learner is likely to need in upcoming or recurring communication.
+        </li>
+        <li>
+          <strong>Retrieval direction.</strong>
+          Decide whether the learner needs meaning from form, form from meaning, pronunciation, spelling, collocation, or full-sentence use.
+        </li>
+        <li>
+          <strong>Error pattern.</strong>
+          Record whether failure concerns memory, form, particle, preposition, register, pronunciation, or context.
+        </li>
+        <li>
+          <strong>Transfer sample.</strong>
+          Check whether the item appears when the learner completes the real task without being told which vocabulary to use.
+        </li></ul>
+      <p>When the evidence is weak or contradictory, use a short diagnostic attempt before adding new content. A direct sample is usually more useful than asking whether the learner understands a rule or feels confident. Confidence can affect participation, but it does not replace observable performance.</p>
+    </section>
+    <section class="decision">
+      <h2>Teaching decision</h2>
+      <p>Continue spacing when recall is effortful but successful, shorten the interval after failure, repair form or meaning when the same error repeats, and retire an item from intensive review only after delayed contextual use.</p>
+      <p>For this topic, make the next lesson decision from the stated criterion and current evidence rather than from content coverage.</p>
+      <p>The decision should be narrow enough to test in the next task. Avoid labels such as 'work on fluency' or 'improve grammar.' Name the communication function, the relevant language or strategy, the conditions, and the quality criterion. This makes the plan editable when the learner's first attempt produces different evidence.</p>
+    </section>
+    <section>
+      <h2>A practical one-to-one workflow</h2>
+      <p>The following sequence protects teacher judgment while making preparation repeatable. Each stage has a specific evidence function, so an activity is not included merely because it is familiar or visually attractive.</p>
+      <ol class="workflow">
+        <li>
+          <h3>1. Select a bounded set</h3>
+          <p>Choose five to ten high-value items instead of importing every unfamiliar word from a text.</p>
+        </li>
+        <li>
+          <h3>2. Create productive cues</h3>
+          <p>Use definitions, situations, images, sentence gaps, or questions that require the target response.</p>
+        </li>
+        <li>
+          <h3>3. Schedule increasing intervals</h3>
+          <p>Review soon after learning, then after longer delays, adjusting when retrieval repeatedly fails.</p>
+        </li>
+        <li>
+          <h3>4. Vary context and cue</h3>
+          <p>Move from card recall to sentence completion, explanation, dialogue, and unsignaled task use.</p>
+        </li>
+        <li>
+          <h3>5. Retest in communication</h3>
+          <p>Use a realistic speaking or writing task before considering the item available for the learner&#039;s goal.</p>
+        </li></ol>
+      <p>Do not force every lesson through the same number of stages. If the opening retrieval shows independent control, shorten repair and move to transfer. If a prerequisite is missing, reduce the target rather than disguising the gap with permanent prompts.</p>
+    </section>
+    <section class="case">
+      <h2>Adult one-to-one worked example</h2>
+      <dl>
+        <div><dt>Student context</dt><dd>A B1 software engineer needs six phrases for raising and tracking blockers in daily stand-ups.</dd></div>
+        <div><dt>Evidence</dt><dd>The learner recognizes all six but retrieves only two during a timed update and confuses &#039;follow up on&#039; with &#039;follow up with.&#039;</dd></div>
+        <div><dt>Continue, repair, or advance</dt><dd>Repair the two patterns and continue spaced productive retrieval across changed stand-up scenarios.</dd></div>
+        <div><dt>Lesson objective</dt><dd>Use all six phrases accurately in a concise update without a visible list.</dd></div>
+        <div><dt>Activity sequence</dt><dd>Meaning-to-form recall, collocation contrast, a thirty-second update, two-day flashcard review, then an unsignaled stand-up simulation.</dd></div>
+        <div><dt>Evidence to collect next</dt><dd>Check retrieval speed, particle accuracy, and spontaneous selection when a new blocker is introduced.</dd></div>
+      </dl>
+      <p>This is a worked example, not a claim about a real student's outcome. Its purpose is to show how context and evidence become a bounded teaching decision without inventing results.</p>
+    </section>
+    <section>
+      <h2>Material and worksheet design</h2>
+      <p>Cards and exercises should include the minimum information needed for retrieval: a cue, target response, pronunciation or form detail when relevant, one natural pattern, and a context the learner recognizes.</p>
+      <p>A useful worksheet creates a path from retrieval or diagnosis to supported rehearsal and independent transfer. Instructions should be clear on the learner's actual device, examples should be credible for an adult, and answer keys or model responses should be reviewed before use. When an exercise can be completed correctly without engaging the target decision, it is not valid evidence for that objective.</p>
+      <p>Teacher control remains necessary. Generated or reusable material can reduce mechanical preparation, but the tutor still owns factual accuracy, appropriacy, level, sequencing, correction priorities, and the response to live learner evidence. The material should be easy to edit when the first attempt changes the plan.</p>
+    </section>
+    <section>
+      <h2>What to avoid</h2>
+      <ul><li>Adding every new word to one undifferentiated deck.</li><li>Counting recognition as productive vocabulary control.</li><li>Keeping fixed intervals when repeated failures show the schedule is too long.</li><li>Practicing an item without its common pattern, register, or communication use.</li></ul>
+      <p>These failures have the same root cause: the visible activity replaces the teaching decision. A professional adult lesson should make the reason for each stage clear to the tutor and, where useful, to the learner.</p>
+    </section>
+    <section>
+      <h2>Evidence for the next lesson</h2>
+      <p>Track delayed recall, speed, form accuracy, collocation, register, and spontaneous use. Recognition or a correct multiple-choice answer is insufficient evidence for productive goals.</p>
+      <p>Write evidence in comparable terms: task, conditions, support, observed performance, consequence, and next decision. A short statement such as 'completed the request independently but omitted the deadline in both attempts' is more actionable than a page of undifferentiated notes. Revisit the target after a delay before treating immediate success as stable learning.</p>
+    </section>
+    <section>
+      <h2>Frequently asked questions</h2>
+      <div class="faq">
+        <details>
+          <summary>What is the difference between spaced repetition and spaced retrieval?</summary>
+          <p>Spacing concerns timing; retrieval requires recall. Effective vocabulary practice uses both and checks contextual use.</p>
+        </details>
+        <details>
+          <summary>How many vocabulary items should an adult learn at once?</summary>
+          <p>Use a small set the learner can retrieve and apply, often five to ten items tied to one goal.</p>
+        </details>
+        <details>
+          <summary>What should happen after a failed review?</summary>
+          <p>Clarify the failure, repair form or meaning if needed, provide a successful retrieval, and shorten the next interval.</p>
+        </details>
+        <details>
+          <summary>Are flashcards enough?</summary>
+          <p>They support retrieval, but productive goals require later speaking or writing where the item is not explicitly cued.</p>
+        </details>
+        <details>
+          <summary>When is a word learned?</summary>
+          <p>For a productive goal, when the learner can retrieve and use it accurately after a delay in an appropriate changed context.</p>
+        </details></div>
+    </section></article>
+    <section class="sources">
+      <h2>Sources and methodology references</h2>
+      <ul><li><a href="https://doi.org/10.1111/j.1467-9280.2006.01764.x" rel="noreferrer">Cepeda et al. (2006): Distributed Practice in Verbal Recall Tasks</a></li><li><a href="https://doi.org/10.1111/j.1467-9280.2006.01693.x" rel="noreferrer">Roediger and Karpicke (2006): Test-Enhanced Learning</a></li><li><a href="https://doi.org/10.1017/S0261444806004050" rel="noreferrer">Nation (2007): The Four Strands</a></li></ul>
+      <p>Product workflow statements are checked against public Edooqoo source-of-truth documentation. Methodology decisions are reviewed for adult one-to-one ESL relevance.</p>
+    </section>
+    <section class="related">
+      <h2>Related resources</h2>
+      <ul><li><a href="/features/flashcards">Edooqoo flashcard workflow</a></li><li><a href="/blog/effective-esl-homework-strategies.html">Effective adult homework</a></li><li><a href="/tools/vocab-cefr-checker">Vocabulary difficulty checker</a></li></ul>
+    </section>
+    <section class="next-step">
+      <h2>Next step</h2>
+      <p>Use the <a href="/what-to-teach-next">What Should I Teach Next?</a> framework to convert the evidence into one bounded decision for the next adult one-to-one lesson.</p>
+    </section>
+    <footer>Authored by Jan Brzostowski. Methodology review by Martha, ESL Methodology Reviewer, 10 years of experience.</footer>
+  </main>
+</body>
+</html>

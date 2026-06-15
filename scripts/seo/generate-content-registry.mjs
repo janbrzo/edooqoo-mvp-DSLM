@@ -17,6 +17,8 @@ const payload = {
   schemaVersion: 1,
   generatedFrom: [
     'scripts/seo/content-registry.mjs',
+    'src/data/pseoIndexPolicy.json',
+    'docs/seo/pseo-index-policy.generated.json',
     'public/sitemap.xml',
     'public/blog/*.html',
     'public/*.html',
@@ -36,4 +38,3 @@ const payload = {
 
 await fs.writeFile(OUTPUT, `${JSON.stringify(payload, null, 2)}\n`, 'utf8');
 console.log(`[content-registry] Wrote ${entries.length} entries to ${path.relative(ROOT, OUTPUT)}`);
-

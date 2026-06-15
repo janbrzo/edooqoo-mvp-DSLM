@@ -179,12 +179,12 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "hold"
   },
   {
-    "title": "Materials Design Principles for ELT",
-    "description": "Tomlinson's principles, task design, sequencing, and piloting new materials for English language teaching.",
+    "title": "Materials Design for Adult One-to-One English",
+    "description": "Design adult one-to-one English materials from a real performance, current evidence, useful constraints, teacher editability, and transfer.",
     "url": "/blog/materials-design-principles-elt.html",
     "date": "2025-12-24",
     "category": "One-to-One Lesson Planning",
-    "state": "hold"
+    "state": "keep"
   },
   {
     "title": "Data-Driven Learning with Corpora in ESL Teaching | Edooqoo Blog",
@@ -579,12 +579,12 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "hold"
   },
   {
-    "title": "Lesson Sequencing and Scaffolding in Curriculum Design",
-    "description": "Spiral curriculum, task complexity grading, and coherent lesson chains for ESL course planning.",
+    "title": "Lesson Sequencing and Scaffolding for Adult ESL",
+    "description": "Sequence adult one-to-one English lessons from retrieval to supported rehearsal, independent transfer, and the next evidence decision.",
     "url": "/blog/lesson-sequencing-scaffolding-curriculum.html",
     "date": "2025-11-29",
     "category": "One-to-One Lesson Planning",
-    "state": "hold"
+    "state": "keep"
   },
   {
     "title": "Evaluating ESL Course Effectiveness — Methods and Tools",
@@ -619,12 +619,12 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "hold"
   },
   {
-    "title": "Conducting Needs Analysis for ESL Students",
-    "description": "Questionnaires, interviews, placement data, and learning objectives mapping for ESL needs analysis.",
+    "title": "Adult ESL Needs Analysis for One-to-One Tutors",
+    "description": "Run an adult ESL needs analysis that separates goals, real tasks, present evidence, constraints, and priorities for the first lessons.",
     "url": "/blog/needs-analysis-esl-students.html",
     "date": "2025-11-26",
-    "category": "One-to-One Lesson Planning",
-    "state": "hold"
+    "category": "Student Evidence and Progress",
+    "state": "keep"
   },
   {
     "title": "Teaching Rhythm in English Speech — Stress-Timed Language | Edooqoo Blog",
@@ -915,12 +915,12 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "hold"
   },
   {
-    "title": "Writing Student Progress Reports for ESL Classes",
-    "description": "CEFR-aligned descriptors, strengths/areas format, and report templates for ESL teachers. Write effective progress reports efficiently.",
+    "title": "How to Write ESL Progress Reports for Adult Students",
+    "description": "Write adult ESL progress reports from comparable evidence, independent performance, remaining gaps, and the next learning decision.",
     "url": "/blog/writing-student-progress-reports-esl.html",
     "date": "2025-09-22",
     "category": "Student Evidence and Progress",
-    "state": "hold"
+    "state": "keep"
   },
   {
     "title": "Communicating with ESL Parents — Tips and Templates",
@@ -1083,12 +1083,12 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "hold"
   },
   {
-    "title": "Effective ESL Homework Strategies That Students Actually Do",
-    "description": "Design meaningful ESL homework with accountability systems and feedback loops. Practical strategies for homework that students complete and learn from.",
+    "title": "Effective ESL Homework for Adult One-to-One Students",
+    "description": "Design adult ESL homework that is brief, retrievable, connected to a real goal, and useful as evidence for the next lesson.",
     "url": "/blog/effective-esl-homework-strategies.html",
     "date": "2025-09-01",
     "category": "Homework and Retention",
-    "state": "hold"
+    "state": "keep"
   },
   {
     "title": "Accent Reduction Activities for ESL Students",
@@ -1363,12 +1363,12 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "hold"
   },
   {
-    "title": "Setting Up a Freelance ESL Business — Complete Guide",
-    "description": "Complete guide to setting up a freelance ESL business: pricing strategies, marketing, student acquisition, essential tools, and scaling your teaching practice.",
+    "title": "Set Up a Freelance One-to-One English Tutoring Business",
+    "description": "Build a freelance adult English tutoring business around a defined learner, repeatable delivery, clear boundaries, evidence, and retention.",
     "url": "/blog/setting-up-freelance-esl-business.html",
     "date": "2025-07-27",
-    "category": "Adult and Business English",
-    "state": "hold"
+    "category": "Tutor Business and Tools",
+    "state": "keep"
   },
   {
     "title": "Using AI to Boost Teacher Productivity in 2026",
@@ -1387,12 +1387,12 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "hold"
   },
   {
-    "title": "Preventing Teacher Burnout — Strategies for ESL Teachers",
-    "description": "Practical strategies to prevent ESL teacher burnout: workload management, boundaries, self-care routines, and sustainable teaching practices.",
+    "title": "Prevent Burnout in One-to-One English Tutoring",
+    "description": "Reduce burnout risk in one-to-one English tutoring through workload evidence, boundaries, repeatable preparation, recovery, and offer design.",
     "url": "/blog/teacher-burnout-prevention-esl.html",
     "date": "2025-07-24",
     "category": "Tutor Business and Tools",
-    "state": "hold"
+    "state": "keep"
   },
   {
     "title": "TEFL Certification — Complete Guide for New Teachers",
@@ -1483,12 +1483,12 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "hold"
   },
   {
-    "title": "Error Correction Techniques for ESL Teachers",
-    "description": "Effective error correction strategies for ESL: self-correction, peer correction, delayed correction, reformulation, and when to correct vs. ignore errors.",
+    "title": "Error Correction for Adult One-to-One English",
+    "description": "Choose when and how to correct adult one-to-one English errors based on task purpose, consequence, recurrence, and learner independence.",
     "url": "/blog/error-correction-techniques-esl.html",
     "date": "2025-07-12",
     "category": "Student Evidence and Progress",
-    "state": "hold"
+    "state": "keep"
   },
   {
     "title": "Teaching Articles (A, An, The) — ESL Guide",
@@ -1611,12 +1611,12 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "hold"
   },
   {
-    "title": "How to Plan English Lessons Effectively",
-    "description": "Step-by-step guide to planning English lessons. PPP, ESA, TBL frameworks, lesson plan templates, timing strategies, and AI tools for faster preparation.",
+    "title": "How to Plan Effective One-to-One English Lessons",
+    "description": "Plan adult one-to-one English lessons from a real performance goal, current evidence, a bounded sequence, and evidence for the next lesson.",
     "url": "/blog/how-to-plan-english-lessons-effectively.html",
     "date": "2025-06-26",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
+    "category": "One-to-One Lesson Planning",
+    "state": "keep"
   },
   {
     "title": "How to Teach English Pronunciation",
@@ -1651,12 +1651,12 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "hold"
   },
   {
-    "title": "Formative Assessment in English Teaching — Strategies & Tools | Edooqoo",
-    "description": "How to use formative assessment in ESL/EFL teaching. Exit tickets, self-assessment, peer feedback, AI-assisted homework, and progress tracking strategies for English teachers.",
+    "title": "Formative Assessment for Adult One-to-One English",
+    "description": "Use formative assessment in adult one-to-one English to collect actionable evidence and decide whether to continue, repair, or advance.",
     "url": "/blog/formative-assessment-english-teaching.html",
     "date": "2025-06-21",
     "category": "Student Evidence and Progress",
-    "state": "hold"
+    "state": "keep"
   },
   {
     "title": "Scaffolding Strategies for English Learners — Practical Guide | Edooqoo",
@@ -1683,12 +1683,12 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "hold"
   },
   {
-    "title": "Task-Based Language Teaching Worksheets for ESL",
-    "description": "How to design TBLT worksheets for ESL classes. Pre-task, task cycle, and language focus phases with practical examples for CEFR A1-C2 and AI worksheet generation tips.",
+    "title": "Task-Based Worksheets for Adult One-to-One English",
+    "description": "Build task-based adult English worksheets around a real outcome, pre-task readiness, independent task performance, and evidence-led follow-up.",
     "url": "/blog/task-based-language-teaching-worksheets.html",
     "date": "2025-06-17",
     "category": "One-to-One Lesson Planning",
-    "state": "hold"
+    "state": "keep"
   },
   {
     "title": "Communicative Language Teaching Activities for ESL",
@@ -1707,12 +1707,12 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "hold"
   },
   {
-    "title": "Teaching Business English — Complete Guide",
-    "description": "Complete guide to teaching Business English for ESL tutors and language schools. Key topics, industry vocabulary, role-play activities, assessment, and AI materials.",
+    "title": "Teaching Business English One-to-One to Adults",
+    "description": "Teach one-to-one Business English from real professional tasks, role-specific evidence, communication consequences, and independent transfer.",
     "url": "/blog/teaching-business-english-guide.html",
     "date": "2025-06-14",
     "category": "Adult and Business English",
-    "state": "hold"
+    "state": "keep"
   },
   {
     "title": "Cambridge Exam Preparation Tips for Teachers",
@@ -1723,12 +1723,12 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "hold"
   },
   {
-    "title": "Personalized Learning in English Teaching",
-    "description": "From theory to AI-powered practice. How personalized learning works in English teaching with student profiles, nano-skill tracking, and AI-driven worksheet generation.",
+    "title": "Personalized Adult One-to-One English Teaching",
+    "description": "Personalize adult one-to-one English through goals, evidence, constraints, support, task choice, and changing next-lesson decisions.",
     "url": "/blog/personalized-learning-english-teaching.html",
     "date": "2025-06-12",
     "category": "One-to-One Lesson Planning",
-    "state": "hold"
+    "state": "keep"
   },
   {
     "title": "AI-Generated Listening Exercises for ESL",
@@ -1755,20 +1755,20 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "hold"
   },
   {
-    "title": "Spaced Repetition for Vocabulary Learning",
-    "description": "How spaced repetition works for vocabulary learning. SM-2 algorithm explained, Ebbinghaus forgetting curve, practical implementation for ESL teachers, and digital flashcard best practices.",
+    "title": "Spaced Retrieval for Adult English Vocabulary",
+    "description": "Use spaced retrieval to make adult English vocabulary available in real speaking and writing, not only recognizable in flashcards.",
     "url": "/blog/spaced-repetition-vocabulary-learning.html",
     "date": "2025-06-08",
     "category": "Homework and Retention",
-    "state": "hold"
+    "state": "keep"
   },
   {
-    "title": "Teaching English Online in 2026 — Complete Guide",
-    "description": "Complete guide to teaching English online in 2026. Setup, tools, engagement techniques, scheduling, assessment, and growing your online tutoring business.",
+    "title": "Teaching Adult English One-to-One Online",
+    "description": "Run effective adult one-to-one English lessons online with explicit interaction, low-friction materials, evidence capture, and backup paths.",
     "url": "/blog/teaching-english-online-complete-guide.html",
     "date": "2025-06-07",
     "category": "Tutor Business and Tools",
-    "state": "hold"
+    "state": "keep"
   },
   {
     "title": "How to Assess English Level Using CEFR",

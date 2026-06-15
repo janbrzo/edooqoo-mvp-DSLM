@@ -89,15 +89,17 @@ Language of product UI: English.
 - Neutral comparison pages: the comparison .html URLs listed below.
 - Public proof dataset page: /public-esl-worksheet-examples.html.
 - Public citation articles: the 8 /blog/*.html URLs listed below.
-- Programmatic topic-level pages: /esl-worksheets/:topic/:level.
-- Programmatic exercise-topic pages: /worksheets/:exerciseType/:topic.
-- Programmatic persona pages: /english-for/:persona.
+- Programmatic topic-level pages: 35 policy-approved /esl-worksheets/:topic/:level routes.
+- Programmatic exercise-topic pages: 50 policy-approved /worksheets/:exerciseType/:topic routes.
+- Programmatic persona pages: 10 policy-approved /english-for/:persona routes.
+- Non-priority programmatic combinations: 1330 public routes with noindex,follow, excluded from sitemap and prerender.
 
 ## Content Registry
 - Machine-readable repository inventory: docs/seo/content-registry.generated.json.
-- Current states: keep=60, improve=0, merge=0, retire=0, hold=1701, noindex=4.
+- Current states: keep=75, improve=0, merge=0, retire=0, hold=356, noindex=1334.
 - Indexable states: keep, improve, hold.
 - Destructive decisions: merge and retire require measured GSC or verified backlink evidence.
+- Programmatic index policy source: src/data/pseoIndexPolicy.json; generated inventory: docs/seo/pseo-index-policy.generated.json.
 
 ## Private or Application Route Groups
 - /dashboard and nested dashboard screens.

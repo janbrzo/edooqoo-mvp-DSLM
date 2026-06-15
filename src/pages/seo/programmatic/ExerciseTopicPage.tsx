@@ -6,8 +6,12 @@ import {
   findTopic,
   PSEO_LEVELS,
   PSEO_TOPICS,
-  PSEO_EXERCISE_TYPES,
 } from '@/constants/pseoMatrix';
+import {
+  getTopicIndexPolicy,
+  isIndexableExerciseTopic,
+  isIndexableTopicLevel,
+} from '@/lib/seo/pseoIndexPolicy';
 
 const ExerciseTopicPage: React.FC = () => {
   const { exerciseType: exSlug = '', topic: topicSlug = '' } = useParams();
@@ -16,23 +20,36 @@ const ExerciseTopicPage: React.FC = () => {
 
   if (!exercise || !topic) return <Navigate to="/exercise-types" replace />;
 
+  const policy = getTopicIndexPolicy(topic.slug);
+  const isIndexable = isIndexableExerciseTopic(exercise.slug, topic.slug);
   const title = `${exercise.label} Worksheet: ${topic.label} — Edooqoo`;
   const description = `Create a ${exercise.label} worksheet on ${topic.label} for adult English learners through a structured worksheet-generation workflow. CEFR A1-C2 labels, editable output, free to start.`;
   const h1 = `${exercise.label} Worksheet: ${topic.label}`;
-  const lead = `Build a ${exercise.label.toLowerCase()} worksheet on ${topic.label} for a selected CEFR level. Edooqoo uses teacher inputs such as topic, learner goal, level, and context to draft editable worksheet material.`;
+  const lead = policy
+    ? `${policy.useCase} This ${exercise.label.toLowerCase()} page narrows that objective to one teacher-editable practice mechanic and one observable quality criterion.`
+    : `Build a ${exercise.label.toLowerCase()} worksheet on ${topic.label} for a selected CEFR level. This combination remains available but is not indexed without a distinct teaching rationale.`;
   const path = `/worksheets/${exercise.slug}/${topic.slug}`;
 
-  const levelLinks = PSEO_LEVELS.slice(0, 4).map((l) => ({
+  const levelLinks = PSEO_LEVELS.filter((level) =>
+    isIndexableTopicLevel(topic.slug, level.slug)
+  ).slice(0, 4).map((l) => ({
     label: `${topic.label} for ${l.label}`,
     to: `/esl-worksheets/${topic.slug}/${l.slug}`,
   }));
-  const otherExercises = PSEO_EXERCISE_TYPES.filter((e) => e.slug !== exercise.slug)
+  const otherExercises = (policy?.exerciseTypes || [])
+    .filter((slug) => slug !== exercise.slug)
+    .map((slug) => findExerciseType(slug))
+    .filter(Boolean)
     .slice(0, 4)
-    .map((e) => ({
-      label: `${e.label}: ${topic.label}`,
-      to: `/worksheets/${e.slug}/${topic.slug}`,
+    .map((candidateExercise) => ({
+      label: `${candidateExercise!.label}: ${topic.label}`,
+      to: `/worksheets/${candidateExercise!.slug}/${topic.slug}`,
     }));
-  const otherTopics = PSEO_TOPICS.filter((t) => t.slug !== topic.slug)
+  const otherTopics = PSEO_TOPICS.filter(
+    (candidateTopic) =>
+      candidateTopic.slug !== topic.slug &&
+      isIndexableExerciseTopic(exercise.slug, candidateTopic.slug)
+  )
     .slice(0, 4)
     .map((t) => ({
       label: `${exercise.label}: ${t.label}`,
@@ -41,7 +58,7 @@ const ExerciseTopicPage: React.FC = () => {
 
   return (
     <ProgrammaticSeoLayout
-      seo={{ title, description, path }}
+      seo={{ title, description, path, robots: isIndexable ? 'index,follow' : 'noindex,follow' }}
       breadcrumbs={[
         { label: 'Home', to: '/' },
         { label: 'Worksheets', to: '/esl-worksheets' },
@@ -72,10 +89,11 @@ const ExerciseTopicPage: React.FC = () => {
       ]}
       trustNumbers={[
         { value: 'Workflow', label: 'Teacher-controlled generation' },
-        { value: '29', label: 'Exercise types' },
-        { value: 'A1–C2', label: 'CEFR levels' },
+        { value: policy ? '5' : '29', label: policy ? 'Selected exercise types' : 'Available exercise types' },
+        { value: policy ? String(policy.validLevels.length) : 'A1-C2', label: policy ? 'Indexed level fits' : 'Available CEFR levels' },
         { value: 'Public', label: 'Citable workflow pages' },
       ]}
+      decisionCriteria={policy}
       related={{
         heading: 'Related worksheet templates',
         items: [...levelLinks, ...otherExercises, ...otherTopics],
@@ -83,7 +101,7 @@ const ExerciseTopicPage: React.FC = () => {
       faqs={[
         {
           question: `What is a ${exercise.label} worksheet?`,
-          answer: `${exercise.label} is one of 29 exercise types Edooqoo can generate. It tests ${topic.label} via the ${exercise.label.toLowerCase()} pattern that adult learners complete in 3-10 minutes.`,
+          answer: `${exercise.label} is one of the exercise mechanics available in Edooqoo. It gives the tutor a bounded way to elicit or check ${topic.label}, with the final task reviewed before use.`,
         },
         {
           question: `Can I print the ${exercise.label} worksheet?`,
