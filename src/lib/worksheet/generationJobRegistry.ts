@@ -24,6 +24,13 @@ export interface WorksheetGenerationJob {
   suggestionMarkedAt: number | null;
   errorMessage: string | null;
   /**
+   * v6.9.59 — sessionStorage-backed id of the tab that started this job.
+   * The Index page only shows a full-screen modal for jobs whose
+   * `originTabId` matches the current tab, so opening edooqoo.com in
+   * another tab does not auto-open the modal there.
+   */
+  originTabId?: string | null;
+  /**
    * v6.9.57 — Form metadata snapshot used to rehydrate the GeneratingModal
    * after a page refresh, so the modal can re-render with the same exercise
    * list / media flags / student label as the original attempt.
@@ -136,6 +143,7 @@ export interface StartJobInput {
   topic: string;
   origin: WorksheetGenerationOrigin;
   requestId?: string | null;
+  originTabId?: string | null;
   formMeta?: WorksheetGenerationJob['formMeta'];
 }
 
@@ -159,6 +167,7 @@ export function startGenerationJob(input: StartJobInput): WorksheetGenerationJob
     tokenConsumedAt: null,
     suggestionMarkedAt: null,
     errorMessage: null,
+    originTabId: input.originTabId ?? null,
     formMeta: input.formMeta ?? null,
   };
   const map = readMap();
