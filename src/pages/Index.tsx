@@ -34,7 +34,11 @@ import { devLog, devWarn } from '@/utils/logger';
 import { AddStudentDialog } from "@/components/dashboard/AddStudentDialog";
 import { buildAutoGeneratePayload, clearAutoGenerateFlags, readAutoGenerateIntent } from "@/lib/worksheet/autoGenerateBootstrap";
 import { hasAutoGenerateIntent } from "@/lib/worksheet/autoGenerateBootstrap";
-import { useActiveWorksheetGenerationJob } from "@/hooks/useActiveWorksheetGenerationJob";
+import {
+  useActiveWorksheetGenerationJob,
+  useActiveWorksheetGenerationJobs,
+} from "@/hooks/useActiveWorksheetGenerationJob";
+import { useTabId } from "@/lib/worksheet/tabId";
 
 /**
  * Main Index page component that handles worksheet generation and display
@@ -96,15 +100,28 @@ const Index = () => {
     isDemo,
     consumeToken,
   });
-  // v6.9.57 — Refresh-safe modal rehydration. If a background generation job
-  // is still `running` (persisted in localStorage by generationJobRegistry),
-  // we resurrect the GeneratingModal on mount so the user sees the same UI
-  // they had before the refresh. The completion side effects (open worksheet,
-  // mark suggestion used, consume token) are handled by
-  // useActiveWorksheetGenerationJob via DB polling on form_data->>clientGenerationId.
-  const activeJob = useActiveWorksheetGenerationJob();
-  const isResumedGeneration =
-    !!activeJob && activeJob.status === 'running' && !isGenerating;
+  // v6.9.57 / v6.9.59 — Refresh-safe modal rehydration scoped to this tab.
+  // We list ALL active jobs, then filter to those started in THIS tab
+  // (sessionStorage-based tabId). Opening edooqoo.com in another tab no
+  // longer auto-opens a resumed modal there.
+  const allJobs = useActiveWorksheetGenerationJobs();
+  const tabId = useTabId();
+  const myRunningJobs = useMemo(
+    () => allJobs
+      .filter((j) => j.status === 'running' && (j.originTabId ?? null) === tabId)
+      .sort((a, b) => a.startedAt - b.startedAt),
+    [allJobs, tabId],
+  );
+  const [activeJobIdx, setActiveJobIdx] = useState(0);
+  useEffect(() => {
+    // Auto-focus the newest running job whenever the running set grows.
+    if (myRunningJobs.length > 0) setActiveJobIdx(myRunningJobs.length - 1);
+    else setActiveJobIdx(0);
+  }, [myRunningJobs.length]);
+  const safeIdx = Math.min(activeJobIdx, Math.max(0, myRunningJobs.length - 1));
+  const activeJob = myRunningJobs[safeIdx] ?? null;
+  const isResumedGeneration = !!activeJob && !isGenerating;
+  const jobsCount = myRunningJobs.length;
   const [showTokenModal, setShowTokenModal] = useState(false);
   const [showWelcomeBackModal, setShowWelcomeBackModal] = useState(false);
   const [showOneMinutePrepDialog, setShowOneMinutePrepDialog] = useState(false);
