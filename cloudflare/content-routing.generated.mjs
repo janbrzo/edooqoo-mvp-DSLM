@@ -671,6 +671,8 @@ export const NOINDEX_ROUTES = new Set([
   "/exercise-types.html",
   "/glossary.html",
   "/how-it-works.html",
+  "/newsletter/confirmed",
+  "/newsletter/unsubscribed",
   "/resources.html",
   "/worksheets/audio-fill-blanks/articles",
   "/worksheets/audio-fill-blanks/business-email",

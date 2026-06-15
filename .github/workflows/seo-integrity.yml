@@ -28,6 +28,12 @@ jobs:
       - name: Generate citable pages
         run: node scripts/seo/generate-citable-pages.mjs
 
+      - name: Generate strategic articles
+        run: npm run seo:generate-strategic-content
+
+      - name: Generate rewritten strategic articles
+        run: npm run seo:generate-legacy-strategic-content
+
       - name: Build blog index and sitemap
         run: node scripts/seo/build-blog-index.mjs
 
@@ -37,8 +43,14 @@ jobs:
       - name: Generate next-lesson decision routes
         run: npm run seo:generate-decision-content
 
+      - name: Test newsletter lifecycle
+        run: npm run seo:test-newsletter
+
       - name: Generate content registry
         run: npm run content:generate
+
+      - name: Generate Cloudflare content routing
+        run: npm run seo:generate-edge-routing
 
       - name: Sync sitemap Edge Function payload
         run: npm run seo:sync-sitemap-edge

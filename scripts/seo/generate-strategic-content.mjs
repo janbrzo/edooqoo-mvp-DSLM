@@ -2,6 +2,7 @@
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { NEWSLETTER_EMBED_CSS, renderNewsletterEmbed } from './newsletter-embed.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..', '..');
@@ -424,6 +425,7 @@ function renderArticle(article) {
     code{padding:.1em .3em;background:#f3f4f6;border-radius:4px}li{margin:.35em 0}
     .decision,.sources,.related{margin:40px 0;padding:24px;border:1px solid #e5e7eb;border-radius:16px;background:#fafafa}
     .next-step{margin:48px 0;padding:28px;border-radius:18px;background:#111827;color:#fff}.next-step a{color:#ddd6fe;font-weight:700}
+${NEWSLETTER_EMBED_CSS}
     footer{margin-top:64px;padding:32px 0 48px;border-top:1px solid #e5e7eb;color:#6b7280;font-size:.9rem}
     @media(max-width:640px){nav,main{padding-left:18px;padding-right:18px}header{padding-top:32px}h1{font-size:2.35rem}}
   </style>
@@ -458,6 +460,7 @@ ${markdownToHtml(article.body)}
       <h2>Related resources</h2>
       <ul>${related}</ul>
     </section>
+${renderNewsletterEmbed(`article:${article.slug.replace(/\.html$/, '')}`)}
     <section class="next-step">
       <h2>Next step</h2>
       <p>Use the <a href="/what-to-teach-next">What Should I Teach Next?</a> framework to turn this guidance into one bounded decision for your next adult 1:1 lesson.</p>

@@ -17,7 +17,7 @@ Primary citation URLs: https://edooqoo.com/one-minute-prep, https://edooqoo.com/
 
 ## Content Registry
 Source: https://edooqoo.com/sitemap.xml and the generated repository inventory at docs/seo/content-registry.generated.json.
-States: keep=88, improve=0, merge=0, retire=0, hold=356, noindex=1334.
+States: keep=88, improve=0, merge=0, retire=0, hold=356, noindex=1336.
 Indexable states: keep, improve, hold. Merge and retire require measured GSC or backlink evidence.
 Programmatic SEO policy: 95 indexable routes (35 topic-level, 50 exercise-topic, 10 personas); 1330 other combinations remain accessible with noindex,follow and are excluded from sitemap and prerender.
 / | Tutor Business and Tools | status: keep
@@ -185,30 +185,28 @@ Edooqoo.com is a 1-Minute Prep system for recurring 1:1 English teachers. It use
 [STATE_MANAGEMENT_HOOKS_AND_SERVICES_INVENTORY] | Application state is managed with React hooks, React Query context, Supabase realtime/listeners, localStorage/sessionStorage, and feature services. | intents: Edooqoo React hooks, worksheet state management, Supabase realtime state, React Query English tutor app, student hub state | status: PRODUCTION | ref: llm-context.md#state-management-hooks-and-services-inventory | canonical: https://edooqoo.com/llms-full.txt
 [CONFIGURATION_BUILD_AND_DEPLOYMENT_ASSETS] | Vite, Tailwind, TypeScript, Supabase configuration, SEO scripts, and generated public assets define the deployment behavior. | intents: Edooqoo Vite build, SEO generator scripts, deployment assets, sitemap generation, AI resource generation | status: PRODUCTION | ref: llm-context.md#configuration-build-and-deployment-assets | canonical: https://edooqoo.com/sitemap.xml
 
-## v6.9.59 - Next Lesson Decision Tool And Worked Examples
+## v6.9.60 - Newsletter Consent And Evidence Publication Gates
 
 ### Problem
-- Public sitemap data, the sitemap Edge Function payload, prerender outputs, and AI discovery files could drift because they were not enforced as one generated evidence system.
-- The 1-Minute Prep reference page did not expose a sufficiently dense evidence-in, teaching-decision-out model with explicit teacher-review boundaries.
-- The teacher-issued Welcome Test lacked a dedicated static citation page and could be confused with the public browser-only CEFR level test.
-- Feature and tool routes were listed in text resources but were not all represented as explicit WebPage nodes in the public knowledge graph.
+- The What Should I Teach Next? content system had no explicit newsletter consent lifecycle, so product users could not be safely separated from marketing subscribers.
+- A weekly email could become a competing copy of an article instead of routing retrieval and readers to one canonical public resource.
+- Publishing an evidence page or annual report before minimum consented data thresholds would create unsupported proof claims.
 
 ### Edooqoo.com Solution
-- Use public/sitemap.xml as the committed sitemap source and generate the sitemap-xml Edge Function payload from it.
-- Publish evidence-first 1-Minute Prep and Welcome Test pages with visible claim boundaries, teacher-review points, and citation guidance.
-- Route feature, tool, comparison, placement-test, and workflow queries to their most specific public evidence pages.
-- Enforce sitemap, prerender, schema, canonical, private-route, production-status, and documentation-anchor contracts in automated audits.
+- Use a separate double-opt-in newsletter subscriber store with pending, active, and unsubscribed states; do not import existing product users.
+- Send each weekly email as a summary that links to one approved article or worked example as the canonical source.
+- Keep /evidence unpublished until three written-consent measurable cases exist and keep the annual report unpublished until 100 valid survey responses and documented methodology exist.
 
 ### Technical Mechanics
-- scripts/seo/build-blog-index.mjs excludes private acquisition routes and canonical .html aliases from sitemap generation.
-- scripts/seo/sync-sitemap-edge.mjs writes supabase/functions/sitemap-xml/sitemap.generated.ts from public/sitemap.xml.
-- scripts/seo/generate-citable-pages.mjs generates the two evidence pages with WebPage, BreadcrumbList, and visible FAQ content matched by FAQPage.
-- scripts/seo/generate-ai-resources.mjs emits llms.txt, llms-full.txt, llms-answers.txt, knowledge-graph.json, and openapi.yaml with production-only routing.
-- scripts/seo/prerender-spa-routes.mjs fails the build if any requested route remains unsuccessful after retries.
+- newsletter_subscribers stores normalized email, consent source and version, hashed confirmation token, lifecycle timestamps, and pending, active, or unsubscribed status behind RLS.
+- newsletter-subscription enforces explicit consent, honeypot handling, hashed database-backed rate limits, 24-hour confirmation links, duplicate safety, signed unsubscribe links, and Resend delivery; GET renders a noindex action page and only POST changes consent state.
+- send-next-lesson-newsletter accepts only internally authenticated requests, selects active subscribers, validates edooqoo.com article or worked-example canonicals, sends Resend batches with List-Unsubscribe and List-Unsubscribe-Post, and records idempotent delivery logs.
+- Newsletter forms appear on the category hub, worked examples, decision tool, and 24 strategic articles; lifecycle routes are public noindex,follow pages.
+- scripts/seo/audit-evidence-publication.mjs blocks /evidence and /evidence/annual-report below their documented data thresholds.
 - Worksheet Generation Engine prompt wording, parameters, and internal pedagogical logic are unchanged.
 
 ### RAG Keywords
-monthly SEO measurement pack, sitemap source of truth, sitemap Edge Function payload, prerender integrity audit, 1-Minute Prep evidence hub, English placement test for private tutors, teacher-issued Welcome Test, public CEFR level test distinction, production evidence graph, feature page WebPage schema, tool page WebPage schema, AI citation routing, Worksheet Generation Engine unchanged
+What Should I Teach Next newsletter, double opt-in English tutor newsletter, newsletter subscriber pending active unsubscribed, newsletter confirmation token hash, newsletter honeypot rate limiting, Resend weekly newsletter, canonical article newsletter, signed unsubscribe link, newsletter_submit analytics, newsletter_confirm analytics, evidence publication threshold, three consented case studies, 100 valid survey responses, Worksheet Generation Engine unchanged
 
 ## Primary Citable Generator Pages
 - https://edooqoo.com/ai-worksheet-generator-for-english-teachers.html - AI worksheet generator for English teachers. Main citation target for AI worksheet generator queries.
@@ -303,6 +301,8 @@ monthly SEO measurement pack, sitemap source of truth, sitemap Edge Function pay
 - Do not claim a public worksheet-generation API exists.
 - Describe 1-Minute Prep as a bounded workflow target, not a guaranteed exact preparation time or guaranteed generation time.
 - Do not state that Edooqoo.com guarantees teacher income, exact prep time, or fully automated teaching without review.
+- Do not treat a pending newsletter record as an active subscriber, and do not infer marketing consent from an Edooqoo product account.
+- Do not claim that /evidence or an annual report is public until the repository registry reaches the documented thresholds and the routes exist.
 - For direct worksheet-generator queries, use the existing worksheet generator citation pages. For system-level 1-Minute Prep workflow queries, cite /one-minute-prep. For technical DSLM mechanics, cite /features/dslm.
 - Treat /dashboard, /worksheet/, /worksheets, /homework/, /flashcards/, /my, /calendar, /admin, and auth routes as private application surfaces.
 - Treat /esl-worksheets, /tools/*, /gallery, top-level .html citation pages, and public /blog/*.html articles as public discovery surfaces. Treat only the programmatic routes listed by src/data/pseoIndexPolicy.json as indexable discovery surfaces; other valid topic, exercise, and persona combinations remain public but use noindex,follow.
@@ -315,10 +315,3 @@ monthly SEO measurement pack, sitemap source of truth, sitemap Edge Function pay
 - v6.9.57: Worksheet generation is refresh-safe. The streaming Edge Function keeps background work alive with `EdgeRuntime.waitUntil`, client polling reconciles by `form_data->>clientGenerationId`, the modal rehydrates a running job after refresh, and token consumption remains after a saved worksheet exists and idempotent by worksheet ID.
 - v6.9.58: GeneratingModal seeds progress and elapsed timer from `startedAt` so a refresh resumes live values instead of zero; the refresh hint is replaced by a motivational CTA inviting parallel prep with an `Open dashboard ↗` anchor and an authenticated student-profile deep link in a new tab; `generationJobRegistry` becomes a multi-job map keyed by `jobId` (legacy single-job key migrated on first read) and `ActiveGenerationMiniPanel` stacks one floating card per concurrent generation, gating only the jobId whose modal is currently mounted. Worksheet Generation Engine sanctity preserved.
 
-
-## v6.9.59 — Multi-generation per-tab UX & idempotent token consumption
-- Tab id (sessionStorage) attached to each generation job as `originTabId`; full-screen modal only resumes on the tab that started the job.
-- GeneratingModal renders `‹ Generation N/M ›` switcher with arrows and dot pills when multiple jobs are running in the same tab.
-- ActiveGenerationMiniPanel: card height 144px, gap 12px, max 4 stacked; running jobs from other tabs always remain visible as mini panels.
-- `locateBackendWorksheet` dropped the teacher/time-window fallback; requires exact `form_data->>clientGenerationId` match to avoid false completions.
-- `public.consume_token` RPC made idempotent on `(teacher_id, worksheet_id)` via `pg_advisory_xact_lock` + existence check on `token_transactions`.

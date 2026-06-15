@@ -257,6 +257,10 @@ const CANONICAL_ALIAS_ROUTES = new Set([
   '/how-it-works.html',
   '/resources.html',
 ]);
+const PUBLIC_NOINDEX_ROUTES = new Set([
+  '/newsletter/confirmed',
+  '/newsletter/unsubscribed',
+]);
 
 const MOJIBAKE_PATTERN = /â€”|Â·|â†[’]|âťŚ|âś…|â­|←[’]|�/;
 
@@ -393,6 +397,13 @@ export function getContentRegistry({ root }) {
     entries.set(route, entryForRoute(route, {
       forcedState: 'noindex',
       reason: 'Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy.',
+    }));
+  }
+
+  for (const route of PUBLIC_NOINDEX_ROUTES) {
+    entries.set(route, entryForRoute(route, {
+      forcedState: 'noindex',
+      reason: 'Public newsletter lifecycle status route; accessible to confirmation links but excluded from indexing.',
     }));
   }
 

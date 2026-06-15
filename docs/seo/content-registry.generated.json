@@ -25,7 +25,7 @@
     ]
   },
   "counts": {
-    "total": 1778,
+    "total": 1780,
     "indexable": 444,
     "byState": {
       "keep": 88,
@@ -33,7 +33,7 @@
       "merge": 0,
       "retire": 0,
       "hold": 356,
-      "noindex": 1334
+      "noindex": 1336
     }
   },
   "entries": [
@@ -464,7 +464,7 @@
       "dateModified": "2026-06-14",
       "author": "Jan Brzostowski",
       "reviewer": "Martha",
-      "wordCount": 1707,
+      "wordCount": 1774,
       "hasEncodingIssue": false
     },
     {
@@ -704,7 +704,7 @@
       "dateModified": "2026-06-14",
       "author": "Jan Brzostowski",
       "reviewer": "Martha",
-      "wordCount": 634,
+      "wordCount": 701,
       "hasEncodingIssue": false
     },
     {
@@ -824,7 +824,7 @@
       "dateModified": "2026-06-14",
       "author": "Jan Brzostowski",
       "reviewer": "Martha",
-      "wordCount": 585,
+      "wordCount": 652,
       "hasEncodingIssue": false
     },
     {
@@ -1544,7 +1544,7 @@
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
       "reviewer": "Martha",
-      "wordCount": 1337,
+      "wordCount": 1404,
       "hasEncodingIssue": false
     },
     {
@@ -1714,7 +1714,7 @@
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
       "reviewer": "Martha",
-      "wordCount": 1313,
+      "wordCount": 1380,
       "hasEncodingIssue": false
     },
     {
@@ -1904,7 +1904,7 @@
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
       "reviewer": "Martha",
-      "wordCount": 1299,
+      "wordCount": 1366,
       "hasEncodingIssue": false
     },
     {
@@ -2044,7 +2044,7 @@
       "dateModified": "2026-06-14",
       "author": "Jan Brzostowski",
       "reviewer": "Martha",
-      "wordCount": 1675,
+      "wordCount": 1742,
       "hasEncodingIssue": false
     },
     {
@@ -2064,7 +2064,7 @@
       "dateModified": "2026-06-14",
       "author": "Jan Brzostowski",
       "reviewer": "Martha",
-      "wordCount": 578,
+      "wordCount": 645,
       "hasEncodingIssue": false
     },
     {
@@ -2084,7 +2084,7 @@
       "dateModified": "2026-06-14",
       "author": "Jan Brzostowski",
       "reviewer": "Martha",
-      "wordCount": 633,
+      "wordCount": 700,
       "hasEncodingIssue": false
     },
     {
@@ -2144,7 +2144,7 @@
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
       "reviewer": "Martha",
-      "wordCount": 1387,
+      "wordCount": 1454,
       "hasEncodingIssue": false
     },
     {
@@ -2484,7 +2484,7 @@
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
       "reviewer": "Martha",
-      "wordCount": 1340,
+      "wordCount": 1407,
       "hasEncodingIssue": false
     },
     {
@@ -2564,7 +2564,7 @@
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
       "reviewer": "Martha",
-      "wordCount": 1310,
+      "wordCount": 1377,
       "hasEncodingIssue": false
     },
     {
@@ -2664,7 +2664,7 @@
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
       "reviewer": "Martha",
-      "wordCount": 1345,
+      "wordCount": 1412,
       "hasEncodingIssue": false
     },
     {
@@ -2824,7 +2824,7 @@
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
       "reviewer": "Martha",
-      "wordCount": 1284,
+      "wordCount": 1351,
       "hasEncodingIssue": false
     },
     {
@@ -3204,7 +3204,7 @@
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
       "reviewer": "Martha",
-      "wordCount": 1303,
+      "wordCount": 1370,
       "hasEncodingIssue": false
     },
     {
@@ -3224,7 +3224,7 @@
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
       "reviewer": "Martha",
-      "wordCount": 1318,
+      "wordCount": 1385,
       "hasEncodingIssue": false
     },
     {
@@ -3364,7 +3364,7 @@
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
       "reviewer": "Martha",
-      "wordCount": 1303,
+      "wordCount": 1370,
       "hasEncodingIssue": false
     },
     {
@@ -3394,7 +3394,7 @@
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
       "reviewer": "Martha",
-      "wordCount": 1276,
+      "wordCount": 1343,
       "hasEncodingIssue": false
     },
     {
@@ -3494,7 +3494,7 @@
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
       "reviewer": "Martha",
-      "wordCount": 1291,
+      "wordCount": 1358,
       "hasEncodingIssue": false
     },
     {
@@ -3754,7 +3754,7 @@
       "dateModified": "2026-06-14",
       "author": "Jan Brzostowski",
       "reviewer": "Martha",
-      "wordCount": 3130,
+      "wordCount": 3197,
       "hasEncodingIssue": false
     },
     {
@@ -3774,7 +3774,7 @@
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
       "reviewer": "Martha",
-      "wordCount": 1317,
+      "wordCount": 1384,
       "hasEncodingIssue": false
     },
     {
@@ -4794,7 +4794,7 @@
       "dateModified": "2026-06-14",
       "author": "Jan Brzostowski",
       "reviewer": "Martha",
-      "wordCount": 583,
+      "wordCount": 650,
       "hasEncodingIssue": false
     },
     {
@@ -4814,7 +4814,7 @@
       "dateModified": "2026-06-14",
       "author": "Jan Brzostowski",
       "reviewer": "Martha",
-      "wordCount": 1865,
+      "wordCount": 1932,
       "hasEncodingIssue": false
     },
     {
@@ -4854,7 +4854,7 @@
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
       "reviewer": "Martha",
-      "wordCount": 1298,
+      "wordCount": 1365,
       "hasEncodingIssue": false
     },
     {
@@ -8506,6 +8506,26 @@
       "reviewer": "",
       "wordCount": 456,
       "hasEncodingIssue": false
+    },
+    {
+      "route": "/newsletter/confirmed",
+      "canonical": "https://edooqoo.com/newsletter/confirmed",
+      "type": "spa-route",
+      "state": "noindex",
+      "indexable": false,
+      "cluster": "Tutor Business and Tools",
+      "redirectTo": null,
+      "reason": "Public newsletter lifecycle status route; accessible to confirmation links but excluded from indexing."
+    },
+    {
+      "route": "/newsletter/unsubscribed",
+      "canonical": "https://edooqoo.com/newsletter/unsubscribed",
+      "type": "spa-route",
+      "state": "noindex",
+      "indexable": false,
+      "cluster": "Tutor Business and Tools",
+      "redirectTo": null,
+      "reason": "Public newsletter lifecycle status route; accessible to confirmation links but excluded from indexing."
     },
     {
       "route": "/one-minute-prep",

@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { CheckCircle2, ClipboardCopy, Link2 } from 'lucide-react';
 import { PageSeo, buildFaqPageLd } from '@/components/seo/PageSeo';
 import { useEventTracking } from '@/hooks/useEventTracking';
+import NewsletterSignup from '@/components/newsletter/NewsletterSignup';
 import {
   CEFR_LEVELS,
   DEFAULT_DECISION_INPUT,
@@ -289,6 +290,9 @@ const WhatShouldITeachNextTool: React.FC = () => {
           </div>
         </section>
       </article>
+      <div className="container mx-auto max-w-4xl px-4 pb-16">
+        <NewsletterSignup source="next-lesson-decision-tool" />
+      </div>
     </div>
   );
 };

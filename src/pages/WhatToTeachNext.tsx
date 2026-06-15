@@ -5,6 +5,7 @@ import { PageSeo } from '@/components/seo/PageSeo';
 import { CONTENT_AUTHORS } from '@/data/contentAuthors';
 import { WHAT_TO_TEACH_NEXT_CASES } from '@/data/whatToTeachNextCases';
 import { useEventTracking } from '@/hooks/useEventTracking';
+import NewsletterSignup from '@/components/newsletter/NewsletterSignup';
 
 const featuredResources = [
   {
@@ -228,6 +229,10 @@ const WhatToTeachNext: React.FC = () => {
             <ArrowRight className="h-4 w-4" aria-hidden="true" />
           </Link>
         </section>
+
+        <div className="container mx-auto max-w-5xl px-4 pb-16">
+          <NewsletterSignup source="what-to-teach-next-hub" />
+        </div>
       </main>
     </div>
   );

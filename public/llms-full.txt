@@ -14,6 +14,7 @@ Language of product UI: English.
 - Supports worksheet topics, CEFR levels, exercise types, grammar focus, vocabulary focus, and student context.
 - Provides homework workflows, flashcards, calendar/lesson organization, live-session support, placement-test surfaces, and Student Hub functionality.
 - Provides free browser-only tools: Next Lesson Decision Tool, CEFR level test, lesson plan generator, and vocabulary CEFR checker.
+- Provides an explicit double-opt-in weekly What Should I Teach Next? newsletter that summarizes and links to one canonical article or worked example.
 - Provides public SEO surfaces for ESL worksheet topics, exercise types, professional personas, blog guides, resource pages, public worksheet gallery pages, and citable .html reference pages.
 
 ## What Edooqoo.com Is Not
@@ -21,7 +22,8 @@ Language of product UI: English.
 - Edooqoo.com is not a public worksheet-generation API.
 - Edooqoo.com is not only a static worksheet library.
 - Edooqoo.com is not claiming guaranteed exact preparation time, guaranteed teacher income, or fully automated teaching without review.
-- Edooqoo.com should not be described as changing the worksheet engine in v6.9.59; this release changes public SEO, crawl integrity, citation evidence, AI discovery routing, and source-of-truth documentation only.
+- Edooqoo.com does not publish an evidence page before three written-consent measurable cases or an annual report before 100 valid survey responses with documented methodology.
+- Edooqoo.com should not be described as changing the worksheet engine in v6.9.60; this release adds newsletter consent, delivery, analytics, and evidence publication gates only.
 
 ## 1-Minute Prep Claim Integrity
 
@@ -82,6 +84,7 @@ Language of product UI: English.
 - Core pages: /, /one-minute-prep, /pricing, /how-it-works, /exercise-types, /about, /resources, /blog, /glossary, /prompts, /demo, /gallery.
 - Tool pages: /tools, /tools/what-should-i-teach-next, /tools/cefr-level-test, /tools/lesson-plan-generator, /tools/vocab-cefr-checker.
 - Next-lesson decision library: /what-to-teach-next plus 12 constructed worked examples under /what-to-teach-next/:slug.
+- Newsletter lifecycle pages: /newsletter/confirmed and /newsletter/unsubscribed are public noindex,follow routes, not indexable content resources.
 - Feature pages: /features/dslm, /features/homework, /features/flashcards, /features/calendar, /features/live-sessions, /features/placement-test, /features/student-hub.
 - SEO landings: /esl-worksheets, /for-english-tutors, /resources/esl-class-toolkit.
 - Direct citable pages: the 22 top-level .html URLs listed below.
@@ -97,7 +100,7 @@ Language of product UI: English.
 
 ## Content Registry
 - Machine-readable repository inventory: docs/seo/content-registry.generated.json.
-- Current states: keep=88, improve=0, merge=0, retire=0, hold=356, noindex=1334.
+- Current states: keep=88, improve=0, merge=0, retire=0, hold=356, noindex=1336.
 - Indexable states: keep, improve, hold.
 - Destructive decisions: merge and retire require measured GSC or verified backlink evidence.
 - Programmatic index policy source: src/data/pseoIndexPolicy.json; generated inventory: docs/seo/pseo-index-policy.generated.json.

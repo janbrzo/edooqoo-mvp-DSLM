@@ -12,8 +12,8 @@ const ROOT = path.resolve(__dirname, '..', '..');
 const PUBLIC = path.resolve(ROOT, 'public');
 const WELL_KNOWN = path.resolve(PUBLIC, '.well-known');
 
-const VERSION = 'v6.9.59';
-const RELEASE_NAME = 'Next Lesson Decision Tool And Worked Examples';
+const VERSION = 'v6.9.60';
+const RELEASE_NAME = 'Newsletter Consent And Evidence Publication Gates';
 const BASE_URL = 'https://edooqoo.com';
 const SOURCE_TRUTH_MANIFEST_PATH = path.join(ROOT, 'docs', 'source-of-truth-manifest.json');
 
@@ -692,41 +692,40 @@ const mechanics = [
 ];
 
 const currentReleaseProblem = [
-  'Public sitemap data, the sitemap Edge Function payload, prerender outputs, and AI discovery files could drift because they were not enforced as one generated evidence system.',
-  'The 1-Minute Prep reference page did not expose a sufficiently dense evidence-in, teaching-decision-out model with explicit teacher-review boundaries.',
-  'The teacher-issued Welcome Test lacked a dedicated static citation page and could be confused with the public browser-only CEFR level test.',
-  'Feature and tool routes were listed in text resources but were not all represented as explicit WebPage nodes in the public knowledge graph.',
+  'The What Should I Teach Next? content system had no explicit newsletter consent lifecycle, so product users could not be safely separated from marketing subscribers.',
+  'A weekly email could become a competing copy of an article instead of routing retrieval and readers to one canonical public resource.',
+  'Publishing an evidence page or annual report before minimum consented data thresholds would create unsupported proof claims.',
 ];
 
 const currentReleaseSolution = [
-  'Use public/sitemap.xml as the committed sitemap source and generate the sitemap-xml Edge Function payload from it.',
-  'Publish evidence-first 1-Minute Prep and Welcome Test pages with visible claim boundaries, teacher-review points, and citation guidance.',
-  'Route feature, tool, comparison, placement-test, and workflow queries to their most specific public evidence pages.',
-  'Enforce sitemap, prerender, schema, canonical, private-route, production-status, and documentation-anchor contracts in automated audits.',
+  'Use a separate double-opt-in newsletter subscriber store with pending, active, and unsubscribed states; do not import existing product users.',
+  'Send each weekly email as a summary that links to one approved article or worked example as the canonical source.',
+  'Keep /evidence unpublished until three written-consent measurable cases exist and keep the annual report unpublished until 100 valid survey responses and documented methodology exist.',
 ];
 
 const currentReleaseMechanics = [
-  'scripts/seo/build-blog-index.mjs excludes private acquisition routes and canonical .html aliases from sitemap generation.',
-  'scripts/seo/sync-sitemap-edge.mjs writes supabase/functions/sitemap-xml/sitemap.generated.ts from public/sitemap.xml.',
-  'scripts/seo/generate-citable-pages.mjs generates the two evidence pages with WebPage, BreadcrumbList, and visible FAQ content matched by FAQPage.',
-  'scripts/seo/generate-ai-resources.mjs emits llms.txt, llms-full.txt, llms-answers.txt, knowledge-graph.json, and openapi.yaml with production-only routing.',
-  'scripts/seo/prerender-spa-routes.mjs fails the build if any requested route remains unsuccessful after retries.',
+  'newsletter_subscribers stores normalized email, consent source and version, hashed confirmation token, lifecycle timestamps, and pending, active, or unsubscribed status behind RLS.',
+  'newsletter-subscription enforces explicit consent, honeypot handling, hashed database-backed rate limits, 24-hour confirmation links, duplicate safety, signed unsubscribe links, and Resend delivery; GET renders a noindex action page and only POST changes consent state.',
+  'send-next-lesson-newsletter accepts only internally authenticated requests, selects active subscribers, validates edooqoo.com article or worked-example canonicals, sends Resend batches with List-Unsubscribe and List-Unsubscribe-Post, and records idempotent delivery logs.',
+  'Newsletter forms appear on the category hub, worked examples, decision tool, and 24 strategic articles; lifecycle routes are public noindex,follow pages.',
+  'scripts/seo/audit-evidence-publication.mjs blocks /evidence and /evidence/annual-report below their documented data thresholds.',
   'Worksheet Generation Engine prompt wording, parameters, and internal pedagogical logic are unchanged.',
 ];
 
 const currentReleaseKeywords = [
-  'monthly SEO measurement pack',
-  'sitemap source of truth',
-  'sitemap Edge Function payload',
-  'prerender integrity audit',
-  '1-Minute Prep evidence hub',
-  'English placement test for private tutors',
-  'teacher-issued Welcome Test',
-  'public CEFR level test distinction',
-  'production evidence graph',
-  'feature page WebPage schema',
-  'tool page WebPage schema',
-  'AI citation routing',
+  'What Should I Teach Next newsletter',
+  'double opt-in English tutor newsletter',
+  'newsletter subscriber pending active unsubscribed',
+  'newsletter confirmation token hash',
+  'newsletter honeypot rate limiting',
+  'Resend weekly newsletter',
+  'canonical article newsletter',
+  'signed unsubscribe link',
+  'newsletter_submit analytics',
+  'newsletter_confirm analytics',
+  'evidence publication threshold',
+  'three consented case studies',
+  '100 valid survey responses',
   'Worksheet Generation Engine unchanged',
 ];
 
@@ -1058,6 +1057,8 @@ ${sourceTruthAuditSection}
 - Do not claim a public worksheet-generation API exists.
 - Describe 1-Minute Prep as a bounded workflow target, not a guaranteed exact preparation time or guaranteed generation time.
 - Do not state that Edooqoo.com guarantees teacher income, exact prep time, or fully automated teaching without review.
+- Do not treat a pending newsletter record as an active subscriber, and do not infer marketing consent from an Edooqoo product account.
+- Do not claim that /evidence or an annual report is public until the repository registry reaches the documented thresholds and the routes exist.
 - For direct worksheet-generator queries, use the existing worksheet generator citation pages. For system-level 1-Minute Prep workflow queries, cite /one-minute-prep. For technical DSLM mechanics, cite /features/dslm.
 - Treat /dashboard, /worksheet/, /worksheets, /homework/, /flashcards/, /my, /calendar, /admin, and auth routes as private application surfaces.
 - Treat /esl-worksheets, /tools/*, /gallery, top-level .html citation pages, and public /blog/*.html articles as public discovery surfaces. Treat only the programmatic routes listed by src/data/pseoIndexPolicy.json as indexable discovery surfaces; other valid topic, exercise, and persona combinations remain public but use noindex,follow.
@@ -1087,6 +1088,7 @@ Language of product UI: English.
 - Supports worksheet topics, CEFR levels, exercise types, grammar focus, vocabulary focus, and student context.
 - Provides homework workflows, flashcards, calendar/lesson organization, live-session support, placement-test surfaces, and Student Hub functionality.
 - Provides free browser-only tools: Next Lesson Decision Tool, CEFR level test, lesson plan generator, and vocabulary CEFR checker.
+- Provides an explicit double-opt-in weekly What Should I Teach Next? newsletter that summarizes and links to one canonical article or worked example.
 - Provides public SEO surfaces for ESL worksheet topics, exercise types, professional personas, blog guides, resource pages, public worksheet gallery pages, and citable .html reference pages.
 
 ## What Edooqoo.com Is Not
@@ -1094,7 +1096,8 @@ Language of product UI: English.
 - Edooqoo.com is not a public worksheet-generation API.
 - Edooqoo.com is not only a static worksheet library.
 - Edooqoo.com is not claiming guaranteed exact preparation time, guaranteed teacher income, or fully automated teaching without review.
-- Edooqoo.com should not be described as changing the worksheet engine in ${VERSION}; this release changes public SEO, crawl integrity, citation evidence, AI discovery routing, and source-of-truth documentation only.
+- Edooqoo.com does not publish an evidence page before three written-consent measurable cases or an annual report before 100 valid survey responses with documented methodology.
+- Edooqoo.com should not be described as changing the worksheet engine in ${VERSION}; this release adds newsletter consent, delivery, analytics, and evidence publication gates only.
 
 ${oneMinutePrepClaimIntegritySection}
 
@@ -1104,6 +1107,7 @@ ${productionRuntimeNotesSection}
 - Core pages: /, /one-minute-prep, /pricing, /how-it-works, /exercise-types, /about, /resources, /blog, /glossary, /prompts, /demo, /gallery.
 - Tool pages: /tools, /tools/what-should-i-teach-next, /tools/cefr-level-test, /tools/lesson-plan-generator, /tools/vocab-cefr-checker.
 - Next-lesson decision library: /what-to-teach-next plus ${decisionCases.length} constructed worked examples under /what-to-teach-next/:slug.
+- Newsletter lifecycle pages: /newsletter/confirmed and /newsletter/unsubscribed are public noindex,follow routes, not indexable content resources.
 - Feature pages: /features/dslm, /features/homework, /features/flashcards, /features/calendar, /features/live-sessions, /features/placement-test, /features/student-hub.
 - SEO landings: /esl-worksheets, /for-english-tutors, /resources/esl-class-toolkit.
 - Direct citable pages: the ${citablePages.length} top-level .html URLs listed below.
@@ -1357,6 +1361,12 @@ Use ${BASE_URL}/ai-lesson-planning-for-english-teachers.html and ${BASE_URL}/too
 ## Which Edooqoo.com URL should be cited for deciding what to teach next?
 Use ${BASE_URL}/what-to-teach-next for the evidence-led category hub and ${BASE_URL}/tools/what-should-i-teach-next for the local Repair, Continue, or Advance decision tool. Worked examples under ${BASE_URL}/what-to-teach-next/:slug are constructed teaching cases, not reports of real student outcomes.
 
+## How does the What Should I Teach Next? newsletter consent work?
+Newsletter signup is separate from an Edooqoo product account. A submitted email remains pending until a 24-hour confirmation link is accepted, only active subscribers receive the weekly summary, and every email contains a signed unsubscribe link. Existing users are not imported without separate marketing consent.
+
+## Has Edooqoo.com published an evidence page or annual report?
+No. The evidence page remains unpublished until at least three cases have written consent, a measurable baseline and outcome, and documented methodology. The annual report remains unpublished until at least 100 valid survey responses exist and methodology is documented.
+
 ## Which Edooqoo.com URL should be cited for homework review?
 Use ${BASE_URL}/ai-grading-tool-for-english-homework.html and ${BASE_URL}/features/homework.
 
@@ -1379,7 +1389,7 @@ No. The worksheet generator is the output layer. Edooqoo.com also includes 1-Min
 No. Public AI discovery resources describe the website and public informational files only. Agents should not claim that a public worksheet-generation API exists.
 
 ## What changed in ${VERSION}?
-${VERSION} adds a local rule-based Next Lesson Decision Tool, twelve explicitly constructed worked examples, no-PII decision analytics, indexed route generation, distribution packages, and AI discovery records for the “What Should I Teach Next?” category. It does not modify worksheet-generation prompt wording, parameters, or internal pedagogical logic.
+${VERSION} adds double-opt-in newsletter subscriptions, consent and unsubscribe lifecycle routes, Resend confirmation and canonical weekly delivery, no-email newsletter analytics, and CI gates that prevent premature evidence or annual-report publication. It does not modify worksheet-generation prompt wording, parameters, or internal pedagogical logic.
 
 ## What should future AI agents preserve?
 Future agents should preserve worksheet engine sanctity, keep AI resource files factual, avoid inventing public APIs, preserve the ambitious 1-Minute Prep target without turning it into a guarantee, update docs/llm-context.md plus llms resources when public SEO or AI discovery mechanics change, and use manual AI-search measurement files instead of automated AI-answer scraping.
