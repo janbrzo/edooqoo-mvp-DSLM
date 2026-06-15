@@ -18,7 +18,7 @@ export interface PseoBreadcrumb {
 }
 
 export interface ProgrammaticSeoLayoutProps {
-  seo: { title: string; description: string; path: string };
+  seo: { title: string; description: string; path: string; robots?: string };
   breadcrumbs: PseoBreadcrumb[];
   h1: string;
   lead: string;
@@ -27,6 +27,14 @@ export interface ProgrammaticSeoLayoutProps {
   bodyIntro: string;
   howItWorks: string[];
   trustNumbers: { value: string; label: string }[];
+  decisionCriteria?: {
+    useCase: string;
+    contraindication: string;
+    taskExample: string;
+    qualityCriterion: string;
+    referencePath: string;
+    referenceLabel: string;
+  };
   related: { heading: string; items: PseoRelated[] };
   faqs: PseoFaq[];
   extraJsonLd?: Record<string, unknown> | Record<string, unknown>[];
@@ -56,6 +64,7 @@ const ProgrammaticSeoLayout: React.FC<ProgrammaticSeoLayoutProps> = ({
   bodyIntro,
   howItWorks,
   trustNumbers,
+  decisionCriteria,
   related,
   faqs,
   extraJsonLd,
@@ -73,7 +82,14 @@ const ProgrammaticSeoLayout: React.FC<ProgrammaticSeoLayoutProps> = ({
 
   return (
     <div className="min-h-screen bg-background">
-      <PageSeo title={seo.title} description={seo.description} path={seo.path} ogType="article" jsonLd={ld} />
+      <PageSeo
+        title={seo.title}
+        description={seo.description}
+        path={seo.path}
+        robots={seo.robots}
+        ogType="article"
+        jsonLd={ld}
+      />
       <article className="container mx-auto px-4 py-12 max-w-4xl">
         <nav aria-label="Breadcrumb" className="mb-6 text-sm text-muted-foreground">
           <ol className="flex flex-wrap gap-1">
@@ -145,6 +161,31 @@ const ProgrammaticSeoLayout: React.FC<ProgrammaticSeoLayoutProps> = ({
             </div>
           ))}
         </section>
+
+        {decisionCriteria && (
+          <section className="mb-10">
+            <h2 className="text-2xl font-bold text-foreground mb-4">Teaching decision criteria</h2>
+            <dl className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {[
+                ['Use this page when', decisionCriteria.useCase],
+                ['Do not use it when', decisionCriteria.contraindication],
+                ['Adult 1:1 task example', decisionCriteria.taskExample],
+                ['Evidence of quality', decisionCriteria.qualityCriterion],
+              ].map(([term, detail]) => (
+                <div key={term} className="rounded-lg border bg-card p-4">
+                  <dt className="font-semibold text-foreground text-sm mb-1">{term}</dt>
+                  <dd className="text-sm text-muted-foreground">{detail}</dd>
+                </div>
+              ))}
+            </dl>
+            <Link
+              to={decisionCriteria.referencePath}
+              className="inline-block mt-4 text-primary hover:underline font-medium"
+            >
+              {decisionCriteria.referenceLabel}
+            </Link>
+          </section>
+        )}
 
         <section className="mb-10">
           <h2 className="text-2xl font-bold text-foreground mb-4">{related.heading}</h2>

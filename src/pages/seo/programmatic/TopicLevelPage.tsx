@@ -4,11 +4,16 @@ import ProgrammaticSeoLayout from '@/components/seo/ProgrammaticSeoLayout';
 import {
   findTopic,
   findLevel,
+  findExerciseType,
   PSEO_TOPICS,
   PSEO_LEVELS,
-  PSEO_EXERCISE_TYPES,
   PSEO_PERSONAS,
 } from '@/constants/pseoMatrix';
+import {
+  getTopicIndexPolicy,
+  INDEXABLE_PERSONA_SLUGS,
+  isIndexableTopicLevel,
+} from '@/lib/seo/pseoIndexPolicy';
 
 const TopicLevelPage: React.FC = () => {
   const { topic: topicSlug = '', level: levelSlug = '' } = useParams();
@@ -17,32 +22,49 @@ const TopicLevelPage: React.FC = () => {
 
   if (!topic || !level) return <Navigate to="/esl-worksheets" replace />;
 
+  const policy = getTopicIndexPolicy(topic.slug);
+  const isIndexable = isIndexableTopicLevel(topic.slug, level.slug);
   const title = `${topic.label} worksheets for ${level.label} English learners | Edooqoo`;
   const description = `Create ${topic.label} worksheets for ${level.label} (${level.cefr}) adult learners through a structured worksheet-generation workflow. Editable, printable, and free to start.`;
   const h1 = `${topic.label} worksheets for ${level.label} English learners`;
-  const lead = `Edooqoo creates ${topic.label} worksheets for ${level.cefr} English learners from teacher-selected topic, level, goal, exercise type, and student context. This page is a public reference for teachers who need level-aware material rather than a generic worksheet list. The production workflow lets a teacher choose the focus, generate structured exercises, review and edit the output, share it with a student, assign selected exercises as homework, and use teacher-reviewed results as follow-up context. For 1:1 adult lessons, this means ${topic.label} practice can connect to the student's profile, goals, recent work, CEFR baseline, and next lesson focus instead of existing as an isolated printable.`;
+  const lead = policy
+    ? `${policy.useCase} Edooqoo lets the tutor set ${level.cefr}, add the adult learner's context, select a suitable exercise type, edit the draft, and collect follow-up evidence.`
+    : `Edooqoo can draft ${topic.label} practice for ${level.cefr} adult learners, but this combination is not part of the current public indexing set because it does not yet have a distinct teaching rationale.`;
 
   const path = `/esl-worksheets/${topic.slug}/${level.slug}`;
 
-  const otherLevels = PSEO_LEVELS.filter((l) => l.slug !== level.slug)
+  const otherLevels = PSEO_LEVELS.filter(
+    (candidateLevel) =>
+      candidateLevel.slug !== level.slug &&
+      isIndexableTopicLevel(topic.slug, candidateLevel.slug)
+  )
     .slice(0, 5)
     .map((l) => ({
       label: `${topic.label} — ${l.label}`,
       to: `/esl-worksheets/${topic.slug}/${l.slug}`,
     }));
   const sameCategoryTopics = PSEO_TOPICS.filter(
-    (t) => t.category === topic.category && t.slug !== topic.slug
+    (candidateTopic) =>
+      candidateTopic.category === topic.category &&
+      candidateTopic.slug !== topic.slug &&
+      isIndexableTopicLevel(candidateTopic.slug, level.slug)
   )
     .slice(0, 4)
     .map((t) => ({
       label: `${t.label} — ${level.label}`,
       to: `/esl-worksheets/${t.slug}/${level.slug}`,
     }));
-  const exerciseLinks = PSEO_EXERCISE_TYPES.slice(0, 2).map((e) => ({
-    label: `${e.label}: ${topic.label}`,
-    to: `/worksheets/${e.slug}/${topic.slug}`,
-  }));
-  const personaLinks = PSEO_PERSONAS.slice(0, 2).map((p) => ({
+  const exerciseLinks = (policy?.exerciseTypes || [])
+    .map((slug) => findExerciseType(slug))
+    .filter(Boolean)
+    .slice(0, 5)
+    .map((exerciseType) => ({
+      label: `${exerciseType!.label}: ${topic.label}`,
+      to: `/worksheets/${exerciseType!.slug}/${topic.slug}`,
+    }));
+  const personaLinks = PSEO_PERSONAS.filter((persona) =>
+    INDEXABLE_PERSONA_SLUGS.includes(persona.slug)
+  ).slice(0, 2).map((p) => ({
     label: `English for ${p.label}`,
     to: `/english-for/${p.slug}`,
   }));
@@ -66,11 +88,16 @@ const TopicLevelPage: React.FC = () => {
 
   return (
     <ProgrammaticSeoLayout
-      seo={{ title, description, path }}
+      seo={{ title, description, path, robots: isIndexable ? 'index,follow' : 'noindex,follow' }}
       breadcrumbs={[
         { label: 'Home', to: '/' },
         { label: 'ESL Worksheets', to: '/esl-worksheets' },
-        { label: topic.label, to: `/esl-worksheets/${topic.slug}/b1-intermediate` },
+        {
+          label: topic.label,
+          to: policy?.validLevels[0]
+            ? `/esl-worksheets/${topic.slug}/${policy.validLevels[0]}`
+            : '/esl-worksheets',
+        },
         { label: level.label },
       ]}
       h1={h1}
@@ -81,7 +108,12 @@ const TopicLevelPage: React.FC = () => {
       }}
       whatsInside={[
         { title: 'CEFR-oriented tasks', body: `Exercises use ${level.cefr} as the selected difficulty label and can be reviewed by the teacher before use.` },
-        { title: '29 exercise types', body: 'Mix fill-in-the-blanks, matching, error correction, dictation, picture description.' },
+        {
+          title: policy ? 'Five selected exercise types' : 'Teacher-selected exercise type',
+          body: policy
+            ? 'The indexed combinations are limited to exercise mechanics that fit this language objective.'
+            : 'The full worksheet workflow remains available even when this public page is not indexed.',
+        },
         { title: 'Homework review workflow', body: 'Assign to your student, review submitted answers, and use results as input for follow-up planning.' },
         { title: 'Printable + interactive', body: 'Download PDF or share an interactive link. Works on phone and laptop.' },
         { title: 'Personalized to goal', body: 'Specify business email, IELTS, travel — examples adapt to the student\'s profession.' },
@@ -97,10 +129,11 @@ const TopicLevelPage: React.FC = () => {
       ]}
       trustNumbers={[
         { value: 'Workflow', label: 'Teacher-controlled generation' },
-        { value: '29', label: 'Exercise types' },
-        { value: 'A1–C2', label: 'Full CEFR coverage' },
+        { value: policy ? '5' : '29', label: policy ? 'Selected exercise types' : 'Available exercise types' },
+        { value: policy ? String(policy.validLevels.length) : 'A1-C2', label: policy ? 'Indexed level fits' : 'Available CEFR levels' },
         { value: '2', label: 'Free worksheets / month' },
       ]}
+      decisionCriteria={policy}
       related={{
         heading: `More ${topic.label} and ${level.cefr} resources`,
         items: [...generatorLinks, ...otherLevels, ...sameCategoryTopics, ...exerciseLinks, ...personaLinks],

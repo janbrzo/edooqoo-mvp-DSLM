@@ -1,0 +1,187 @@
+{
+  "schemaVersion": 1,
+  "topics": {
+    "present-perfect": {
+      "validLevels": ["a2-elementary", "b1-intermediate", "b2-upper-intermediate", "c1-advanced"],
+      "exerciseTypes": ["gap-fill", "error-correction", "short-answer", "dialogue-completion", "open-question"],
+      "useCase": "Use this focus when an adult learner must connect a past event to a present result, report experience, or discuss unfinished time in a real conversation.",
+      "contraindication": "Do not lead with the tense label when the learner cannot yet distinguish a finished past time from a present-relevant result; establish that contrast first.",
+      "taskExample": "The learner gives a project update using three present results, then answers follow-up questions without switching to a finished-time marker.",
+      "qualityCriterion": "The learner selects present perfect independently when the time frame remains open or the present result matters, and switches to past simple when a finished time is stated.",
+      "referencePath": "/gallery",
+      "referenceLabel": "Review public worksheet examples"
+    },
+    "past-simple": {
+      "validLevels": ["a1-beginner", "a2-elementary", "b1-intermediate", "b2-upper-intermediate"],
+      "exerciseTypes": ["fill-in-the-blanks", "ordering", "error-correction", "dialogue-completion", "short-answer"],
+      "useCase": "Use past simple when an adult learner needs to recount a completed event, explain a sequence, or report what happened at a known finished time.",
+      "contraindication": "Do not expand into irregular-verb lists when the communication problem is sequencing or intelligibility; teach only the forms required by the target account.",
+      "taskExample": "The learner explains a completed client incident from first event to resolution while the tutor checks time markers, verb forms, and listener clarity.",
+      "qualityCriterion": "A successful response keeps the event in a finished time frame, uses comprehensible verb forms, and makes the sequence clear without tutor reconstruction.",
+      "referencePath": "/tools/lesson-plan-generator",
+      "referenceLabel": "Open the lesson plan tool"
+    },
+    "conditionals": {
+      "validLevels": ["b1-intermediate", "b2-upper-intermediate", "c1-advanced"],
+      "exerciseTypes": ["matching", "transformation", "error-correction", "open-question", "paragraph-writing"],
+      "useCase": "Use conditionals when the learner must discuss consequences, options, risks, policies, or hypothetical decisions in work or personal contexts.",
+      "contraindication": "Do not teach all numbered conditional patterns together when the learner needs one decision function; contrast only the meanings needed for the target situation.",
+      "taskExample": "The learner advises a manager on three project risks, distinguishing likely consequences from hypothetical alternatives and past counterfactuals.",
+      "qualityCriterion": "The learner's verb choices preserve the intended degree of likelihood and time reference, and the listener can identify the proposed consequence without clarification.",
+      "referencePath": "/one-minute-prep",
+      "referenceLabel": "Use the recurring prep workflow"
+    },
+    "modal-verbs": {
+      "validLevels": ["a2-elementary", "b1-intermediate", "b2-upper-intermediate", "c1-advanced"],
+      "exerciseTypes": ["multiple-choice", "error-correction", "dialogue-completion", "rewriting", "open-question"],
+      "useCase": "Use modal verbs when an adult learner needs to express obligation, permission, advice, probability, or diplomatic distance in a specific interaction.",
+      "contraindication": "Do not organize the lesson as a list of modal forms when the learner's problem is tone; select one communicative scale such as direct to diplomatic.",
+      "taskExample": "The learner rewrites a set of workplace requests for a colleague, a client, and a senior manager, then explains how the force changes.",
+      "qualityCriterion": "The learner chooses a modal that matches both the intended function and relationship, without making a request accidentally sound optional or aggressive.",
+      "referencePath": "/gallery",
+      "referenceLabel": "Review public worksheet examples"
+    },
+    "phrasal-verbs": {
+      "validLevels": ["b1-intermediate", "b2-upper-intermediate", "c1-advanced"],
+      "exerciseTypes": ["definition-match", "collocations-match", "gap-fill", "dialogue-completion", "open-question"],
+      "useCase": "Use phrasal verbs when a learner repeatedly encounters a small set in meetings, messages, media, or informal professional conversation.",
+      "contraindication": "Do not teach unrelated alphabetical lists; exclude items the learner is unlikely to retrieve in the next month.",
+      "taskExample": "The learner uses six selected phrasal verbs to hand over a project, clarify ownership, and describe what must be followed up.",
+      "qualityCriterion": "The learner retrieves the item with the correct particle, object pattern, register, and meaning in a relevant sentence rather than only matching a definition.",
+      "referencePath": "/tools/vocab-cefr-checker",
+      "referenceLabel": "Check vocabulary difficulty"
+    },
+    "business-email": {
+      "validLevels": ["b1-intermediate", "b2-upper-intermediate", "c1-advanced"],
+      "exerciseTypes": ["ordering", "error-correction", "rewriting", "paragraph-writing", "short-answer"],
+      "useCase": "Use business email work when the learner must complete a real message function such as requesting action, following up, declining, escalating, or summarizing a decision.",
+      "contraindication": "Do not teach generic formal phrases without a recipient, relationship, deadline, and desired response; correctness alone does not make an email effective.",
+      "taskExample": "The learner turns disorganized meeting notes into a concise follow-up email with ownership, deadlines, and one unambiguous request.",
+      "qualityCriterion": "The recipient can identify the purpose, required action, owner, and deadline on the first read, while tone remains appropriate to the relationship.",
+      "referencePath": "/one-minute-prep",
+      "referenceLabel": "Use the recurring prep workflow"
+    },
+    "job-interview": {
+      "validLevels": ["a2-elementary", "b1-intermediate", "b2-upper-intermediate", "c1-advanced"],
+      "exerciseTypes": ["matching", "dialogue-completion", "short-answer", "open-question", "pronunciation-drill"],
+      "useCase": "Use job interview English when an adult learner has a defined role, hiring stage, and evidence they need to communicate under time pressure.",
+      "contraindication": "Do not memorize complete model answers; scripted fluency breaks when the interviewer changes the wording or asks for evidence.",
+      "taskExample": "The learner gives a ninety-second example of solving a role-relevant problem, then handles two unscripted follow-up questions.",
+      "qualityCriterion": "The answer is specific, relevant to the role, understandable on first hearing, and adaptable when the follow-up question changes.",
+      "referencePath": "/tools/lesson-plan-generator",
+      "referenceLabel": "Open the lesson plan tool"
+    },
+    "meetings": {
+      "validLevels": ["b1-intermediate", "b2-upper-intermediate", "c1-advanced"],
+      "exerciseTypes": ["collocations-match", "dialogue-completion", "error-correction", "open-question", "short-answer"],
+      "useCase": "Use meetings English when a learner needs to enter discussion, clarify, disagree, summarize, or assign action in a recurring meeting type.",
+      "contraindication": "Do not teach meeting phrases without turn-taking pressure; recognition practice alone will not make the language available during interruption or disagreement.",
+      "taskExample": "The learner chairs a five-minute decision segment, invites one view, challenges an assumption, summarizes agreement, and assigns the next action.",
+      "qualityCriterion": "The learner completes the meeting function at the right moment, maintains professional tone, and leaves participants with a clear decision or action.",
+      "referencePath": "/gallery",
+      "referenceLabel": "Review public worksheet examples"
+    },
+    "travel-vocabulary": {
+      "validLevels": ["a1-beginner", "a2-elementary", "b1-intermediate", "b2-upper-intermediate"],
+      "exerciseTypes": ["picture-vocabulary", "matching", "dialogue-completion", "short-answer", "open-question"],
+      "useCase": "Use travel vocabulary when the learner has an upcoming journey and needs language for a bounded situation such as check-in, disruption, directions, or accommodation.",
+      "contraindication": "Do not cover a full travel word list when the learner faces one predictable interaction; prioritize phrases that change the outcome of that interaction.",
+      "taskExample": "The learner reports a cancelled connection, asks for two alternatives, checks the new arrival time, and confirms baggage arrangements.",
+      "qualityCriterion": "The learner can obtain the required information or action despite one unexpected follow-up, using intelligible core vocabulary and repair strategies.",
+      "referencePath": "/tools/vocab-cefr-checker",
+      "referenceLabel": "Check vocabulary difficulty"
+    },
+    "ielts-writing-task-2": {
+      "validLevels": ["b2-upper-intermediate", "c1-advanced", "c2-proficiency"],
+      "exerciseTypes": ["paragraph-writing", "ordering", "error-correction", "rewriting", "word-formation"],
+      "useCase": "Use IELTS Writing Task 2 practice when the learner needs evidence-based work on task response, paragraph control, cohesion, lexical precision, or grammatical range.",
+      "contraindication": "Do not assign another full essay when the evidence points to one repeated bottleneck; isolate the weakest scoring behavior before returning to timed writing.",
+      "taskExample": "The learner plans a response, writes one body paragraph with a claim and developed example, then revises it against a single scoring criterion.",
+      "qualityCriterion": "The paragraph advances a clear position, develops rather than lists an idea, and uses language the learner can reproduce under timed conditions.",
+      "referencePath": "/tools/lesson-plan-generator",
+      "referenceLabel": "Open the lesson plan tool"
+    }
+  },
+  "personas": {
+    "software-engineers": {
+      "useCase": "Prioritize English for requirements clarification, technical trade-offs, incident explanations, code reviews, and concise asynchronous updates.",
+      "contraindication": "Do not build lessons around isolated technology vocabulary when the learner's real difficulty is explaining reasoning or negotiating uncertainty.",
+      "taskExample": "The learner explains a production incident to a non-technical stakeholder, separates confirmed facts from hypotheses, and proposes the next check.",
+      "qualityCriterion": "A non-specialist listener can identify the issue, impact, uncertainty, and next action without asking the tutor to translate the explanation.",
+      "referencePath": "/gallery",
+      "referenceLabel": "Review public worksheet examples"
+    },
+    "project-managers": {
+      "useCase": "Prioritize English for scope, dependencies, risk, stakeholder alignment, meeting control, and action ownership.",
+      "contraindication": "Do not teach generic business fluency when the learner cannot make responsibility, deadline, or escalation explicit.",
+      "taskExample": "The learner leads a short status meeting, surfaces one dependency, negotiates a revised deadline, and confirms owners.",
+      "qualityCriterion": "Participants can state the decision, owner, deadline, and unresolved risk after the learner's summary.",
+      "referencePath": "/one-minute-prep",
+      "referenceLabel": "Use the recurring prep workflow"
+    },
+    "accountants": {
+      "useCase": "Prioritize English for explaining variances, requesting missing documentation, presenting controls, and translating financial findings for non-finance colleagues.",
+      "contraindication": "Do not spend lesson time on finance terms the learner already recognizes if the gap is diplomatic questioning or plain-English explanation.",
+      "taskExample": "The learner explains a budget variance to an operations manager and asks for the evidence needed to close the month.",
+      "qualityCriterion": "The listener understands the amount, cause, confidence level, required evidence, and deadline without losing the financial meaning.",
+      "referencePath": "/tools/lesson-plan-generator",
+      "referenceLabel": "Open the lesson plan tool"
+    },
+    "lawyers": {
+      "useCase": "Prioritize English for issue framing, qualification, client explanation, negotiation, and precise distinction between obligation, option, and risk.",
+      "contraindication": "Do not imitate dense legal drafting when the learner's target is a client call; precision must remain understandable.",
+      "taskExample": "The learner explains two contract risks to a client, distinguishes legal certainty from commercial judgment, and checks the client's priority.",
+      "qualityCriterion": "The client can distinguish the confirmed position, remaining uncertainty, available options, and requested decision.",
+      "referencePath": "/gallery",
+      "referenceLabel": "Review public worksheet examples"
+    },
+    "sales-reps": {
+      "useCase": "Prioritize English for discovery questions, value explanation, objection handling, next-step control, and accurate follow-up.",
+      "contraindication": "Do not teach persuasive scripts before the learner can listen for the buyer's constraint and adapt the next question.",
+      "taskExample": "The learner runs a discovery segment, confirms one business cost, handles a timing objection, and secures a specific next action.",
+      "qualityCriterion": "The buyer's need is accurately restated and the conversation ends with a mutually understood next step rather than a vague promise.",
+      "referencePath": "/one-minute-prep",
+      "referenceLabel": "Use the recurring prep workflow"
+    },
+    "hr-professionals": {
+      "useCase": "Prioritize English for interviews, policy explanation, sensitive feedback, conflict clarification, and neutral documentation.",
+      "contraindication": "Do not use casual role-play prompts for high-stakes employee conversations; define policy boundaries and tone before language practice.",
+      "taskExample": "The learner explains a performance process, separates observation from judgment, and invites the employee's account.",
+      "qualityCriterion": "The message is procedurally clear, neutral in wording, and leaves no ambiguity about the next step or opportunity to respond.",
+      "referencePath": "/gallery",
+      "referenceLabel": "Review public worksheet examples"
+    },
+    "marketing-managers": {
+      "useCase": "Prioritize English for campaign rationale, audience insight, creative feedback, performance interpretation, and stakeholder recommendations.",
+      "contraindication": "Do not overteach promotional adjectives when the learner needs to defend evidence and make a decision under challenge.",
+      "taskExample": "The learner presents a campaign result, separates signal from noise, and recommends one budget change with a stated assumption.",
+      "qualityCriterion": "The audience can identify the evidence, interpretation, assumption, recommendation, and expected consequence.",
+      "referencePath": "/tools/lesson-plan-generator",
+      "referenceLabel": "Open the lesson plan tool"
+    },
+    "consultants": {
+      "useCase": "Prioritize English for hypothesis framing, structured questioning, synthesis, executive recommendations, and handling challenge.",
+      "contraindication": "Do not reward polished jargon when the learner cannot connect evidence to a recommendation in plain language.",
+      "taskExample": "The learner summarizes an ambiguous client problem, tests one hypothesis, and gives a recommendation with risks and next evidence.",
+      "qualityCriterion": "The client can follow the reasoning from evidence to implication to action and can identify what remains uncertain.",
+      "referencePath": "/one-minute-prep",
+      "referenceLabel": "Use the recurring prep workflow"
+    },
+    "executives": {
+      "useCase": "Prioritize English for concise decisions, strategic narrative, board questions, high-stakes negotiation, and organizational alignment.",
+      "contraindication": "Do not fill sessions with broad conversation practice when the learner has a known decision audience and limited speaking time.",
+      "taskExample": "The learner gives a two-minute strategic update, names the decision required, and answers one skeptical question without losing the core message.",
+      "qualityCriterion": "The audience can repeat the decision, rationale, principal risk, and requested action after a concise delivery.",
+      "referencePath": "/gallery",
+      "referenceLabel": "Review public worksheet examples"
+    },
+    "entrepreneurs": {
+      "useCase": "Prioritize English for customer discovery, pitching, hiring, partnership negotiation, product explanation, and investor updates.",
+      "contraindication": "Do not rehearse one universal pitch; the language must change with the listener's knowledge, incentive, and decision.",
+      "taskExample": "The learner explains the product to a prospective customer, asks two discovery questions, and adapts the value statement to the answers.",
+      "qualityCriterion": "The listener understands the problem, relevant outcome, evidence boundary, and next action without relying on unexplained startup terminology.",
+      "referencePath": "/tools/lesson-plan-generator",
+      "referenceLabel": "Open the lesson plan tool"
+    }
+  }
+}

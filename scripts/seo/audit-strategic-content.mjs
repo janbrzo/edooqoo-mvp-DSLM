@@ -17,6 +17,21 @@ const strategicArticles = [
   ['can-ai-plan-one-to-one-english-lesson.html', 400, 2],
   ['how-english-tutors-track-what-to-teach-next.html', 400, 2],
   ['what-should-adult-english-placement-test-include.html', 400, 2],
+  ['how-to-plan-english-lessons-effectively.html', 900, 5],
+  ['needs-analysis-esl-students.html', 900, 5],
+  ['lesson-sequencing-scaffolding-curriculum.html', 900, 5],
+  ['formative-assessment-english-teaching.html', 900, 5],
+  ['error-correction-techniques-esl.html', 900, 5],
+  ['effective-esl-homework-strategies.html', 900, 5],
+  ['writing-student-progress-reports-esl.html', 900, 5],
+  ['spaced-repetition-vocabulary-learning.html', 900, 5],
+  ['teaching-business-english-guide.html', 900, 5],
+  ['teaching-english-online-complete-guide.html', 900, 5],
+  ['setting-up-freelance-esl-business.html', 900, 5],
+  ['teacher-burnout-prevention-esl.html', 900, 5],
+  ['materials-design-principles-elt.html', 900, 5],
+  ['task-based-language-teaching-worksheets.html', 900, 5],
+  ['personalized-learning-english-teaching.html', 900, 5],
 ];
 
 function extractJsonLd(html) {
@@ -57,6 +72,9 @@ async function main() {
     if (!html.includes('href="/authors/martha"')) failures.push(`${slug}: visible reviewer link missing`);
     if (!html.includes(`<link rel="canonical" href="https://edooqoo.com/blog/${slug}">`)) {
       failures.push(`${slug}: canonical mismatch`);
+    }
+    if (minimumWords === 900 && article?.dateModified !== '2026-06-15') {
+      failures.push(`${slug}: dateModified must be 2026-06-15`);
     }
   }
 

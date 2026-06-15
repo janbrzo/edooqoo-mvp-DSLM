@@ -2,37 +2,54 @@ import React from 'react';
 import { useParams, Navigate } from 'react-router-dom';
 import ProgrammaticSeoLayout from '@/components/seo/ProgrammaticSeoLayout';
 import { findPersona, PSEO_PERSONAS, PSEO_TOPICS, PSEO_LEVELS } from '@/constants/pseoMatrix';
+import {
+  getPersonaIndexPolicy,
+  getTopicIndexPolicy,
+  isIndexablePersona,
+  isIndexableTopicLevel,
+} from '@/lib/seo/pseoIndexPolicy';
 
 const PersonaPage: React.FC = () => {
   const { persona: slug = '' } = useParams();
   const persona = findPersona(slug);
   if (!persona) return <Navigate to="/for-english-tutors" replace />;
 
+  const policy = getPersonaIndexPolicy(persona.slug);
+  const isIndexable = isIndexablePersona(persona.slug);
   const title = `English for ${persona.label} — Worksheets, Lessons, Vocabulary | Edooqoo`;
   const description = `Teach English for ${persona.professionPlural} with AI-generated worksheets calibrated to their daily tasks. CEFR A1-C2. Free to start.`;
   const h1 = `English for ${persona.label}`;
-  const lead = `Edooqoo helps English tutors prepare ${persona.professionPlural} for real workplace communication. Generate vocabulary lists, dialogues, and CEFR-aligned worksheets that match their actual job.`;
+  const lead = policy
+    ? `${policy.useCase} Edooqoo lets the tutor connect that communication target to the learner's CEFR level, real context, editable practice, and evidence for the next lesson.`
+    : `Edooqoo can personalize adult 1:1 worksheet drafts for ${persona.professionPlural}, but this page is not indexed until it has a distinct evidence-based teaching rationale.`;
   const path = `/english-for/${persona.slug}`;
 
   const sameDomainPersonas = PSEO_PERSONAS.filter(
-    (p) => p.domain === persona.domain && p.slug !== persona.slug
+    (p) => p.domain === persona.domain && p.slug !== persona.slug && isIndexablePersona(p.slug)
   )
     .slice(0, 4)
     .map((p) => ({ label: `English for ${p.label}`, to: `/english-for/${p.slug}` }));
-  const topicLinks = PSEO_TOPICS.filter((t) => t.category === 'business' || t.category === 'skills')
+  const topicLinks = PSEO_TOPICS.filter(
+    (topic) =>
+      (topic.category === 'business' || topic.category === 'skills') &&
+      Boolean(getTopicIndexPolicy(topic.slug)) &&
+      isIndexableTopicLevel(topic.slug, 'b1-intermediate')
+  )
     .slice(0, 6)
     .map((t) => ({
       label: `${t.label} for ${persona.label}`,
       to: `/esl-worksheets/${t.slug}/b1-intermediate`,
     }));
-  const levelLinks = PSEO_LEVELS.slice(0, 3).map((l) => ({
+  const levelLinks = PSEO_LEVELS.filter((level) =>
+    isIndexableTopicLevel('business-email', level.slug)
+  ).slice(0, 3).map((l) => ({
     label: `Business English ${l.label}`,
     to: `/esl-worksheets/business-email/${l.slug}`,
   }));
 
   return (
     <ProgrammaticSeoLayout
-      seo={{ title, description, path }}
+      seo={{ title, description, path, robots: isIndexable ? 'index,follow' : 'noindex,follow' }}
       breadcrumbs={[
         { label: 'Home', to: '/' },
         { label: 'For English Tutors', to: '/for-english-tutors' },
@@ -62,10 +79,11 @@ const PersonaPage: React.FC = () => {
       ]}
       trustNumbers={[
         { value: 'Workflow', label: 'Teacher-controlled generation' },
-        { value: '25', label: 'Profession personas' },
-        { value: 'A1–C2', label: 'CEFR coverage' },
+        { value: '10', label: 'Indexed profession contexts' },
+        { value: 'A1-C2', label: 'Available CEFR levels' },
         { value: '1-on-1', label: 'Adult tutoring focus' },
       ]}
+      decisionCriteria={policy}
       related={{
         heading: 'Related English-for-profession pages',
         items: [...sameDomainPersonas, ...topicLinks, ...levelLinks],

@@ -4,6 +4,7 @@ import fsSync from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { getContentRegistry } from './content-registry.mjs';
+import { getPseoRouteInventory } from './pseo-index-policy.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..', '..');
@@ -29,6 +30,7 @@ function readSourceTruthSummary() {
 
 const sourceTruthSummary = readSourceTruthSummary();
 const contentRegistry = getContentRegistry({ root: ROOT });
+const pseoInventory = getPseoRouteInventory({ root: ROOT });
 const registryStateCounts = Object.fromEntries(
   ['keep', 'improve', 'merge', 'retire', 'hold', 'noindex']
     .map((state) => [state, contentRegistry.filter((entry) => entry.state === state).length]),
@@ -980,6 +982,7 @@ Primary citation URLs: ${primaryCitationUrls.join(', ')}
 Source: ${BASE_URL}/sitemap.xml and the generated repository inventory at docs/seo/content-registry.generated.json.
 States: ${Object.entries(registryStateCounts).map(([state, count]) => `${state}=${count}`).join(', ')}.
 Indexable states: keep, improve, hold. Merge and retire require measured GSC or backlink evidence.
+Programmatic SEO policy: ${pseoInventory.indexable.length} indexable routes (${pseoInventory.indexableTopicLevelRoutes.length} topic-level, ${pseoInventory.indexableExerciseTopicRoutes.length} exercise-topic, ${pseoInventory.indexablePersonaRoutes.length} personas); ${pseoInventory.noindex.length} other combinations remain accessible with noindex,follow and are excluded from sitemap and prerender.
 ${registryStrategicRoutes}
 
 ## Core Definition
@@ -1054,7 +1057,7 @@ ${sourceTruthAuditSection}
 - Do not state that Edooqoo.com guarantees teacher income, exact prep time, or fully automated teaching without review.
 - For direct worksheet-generator queries, use the existing worksheet generator citation pages. For system-level 1-Minute Prep workflow queries, cite /one-minute-prep. For technical DSLM mechanics, cite /features/dslm.
 - Treat /dashboard, /worksheet/, /worksheets, /homework/, /flashcards/, /my, /calendar, /admin, and auth routes as private application surfaces.
-- Treat /esl-worksheets, /worksheets/:exerciseType/:topic, /english-for/:persona, /tools/*, /gallery, top-level .html citation pages, and public /blog/*.html articles as public discovery surfaces.
+- Treat /esl-worksheets, /tools/*, /gallery, top-level .html citation pages, and public /blog/*.html articles as public discovery surfaces. Treat only the programmatic routes listed by src/data/pseoIndexPolicy.json as indexable discovery surfaces; other valid topic, exercise, and persona combinations remain public but use noindex,follow.
 - User-facing application copy is English. Planning conversation with the owner may be Polish.
 
 ${productionRuntimeNotesSection}
@@ -1105,15 +1108,17 @@ ${productionRuntimeNotesSection}
 - Neutral comparison pages: the comparison .html URLs listed below.
 - Public proof dataset page: /public-esl-worksheet-examples.html.
 - Public citation articles: the 8 /blog/*.html URLs listed below.
-- Programmatic topic-level pages: /esl-worksheets/:topic/:level.
-- Programmatic exercise-topic pages: /worksheets/:exerciseType/:topic.
-- Programmatic persona pages: /english-for/:persona.
+- Programmatic topic-level pages: ${pseoInventory.indexableTopicLevelRoutes.length} policy-approved /esl-worksheets/:topic/:level routes.
+- Programmatic exercise-topic pages: ${pseoInventory.indexableExerciseTopicRoutes.length} policy-approved /worksheets/:exerciseType/:topic routes.
+- Programmatic persona pages: ${pseoInventory.indexablePersonaRoutes.length} policy-approved /english-for/:persona routes.
+- Non-priority programmatic combinations: ${pseoInventory.noindex.length} public routes with noindex,follow, excluded from sitemap and prerender.
 
 ## Content Registry
 - Machine-readable repository inventory: docs/seo/content-registry.generated.json.
 - Current states: ${Object.entries(registryStateCounts).map(([state, count]) => `${state}=${count}`).join(', ')}.
 - Indexable states: keep, improve, hold.
 - Destructive decisions: merge and retire require measured GSC or verified backlink evidence.
+- Programmatic index policy source: src/data/pseoIndexPolicy.json; generated inventory: docs/seo/pseo-index-policy.generated.json.
 
 ## Private or Application Route Groups
 - /dashboard and nested dashboard screens.

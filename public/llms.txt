@@ -17,8 +17,9 @@ Primary citation URLs: https://edooqoo.com/one-minute-prep, https://edooqoo.com/
 
 ## Content Registry
 Source: https://edooqoo.com/sitemap.xml and the generated repository inventory at docs/seo/content-registry.generated.json.
-States: keep=60, improve=0, merge=0, retire=0, hold=1701, noindex=4.
+States: keep=75, improve=0, merge=0, retire=0, hold=356, noindex=1334.
 Indexable states: keep, improve, hold. Merge and retire require measured GSC or backlink evidence.
+Programmatic SEO policy: 95 indexable routes (35 topic-level, 50 exercise-topic, 10 personas); 1330 other combinations remain accessible with noindex,follow and are excluded from sitemap and prerender.
 / | Tutor Business and Tools | status: keep
 /about | Tutor Business and Tools | status: keep
 /adult-business-english-lesson-prep.html | Adult and Business English | status: keep
@@ -35,19 +36,34 @@ Indexable states: keep, improve, hold. Merge and retire require measured GSC or 
 /blog/business-english-material-generation-workflow.html | Adult and Business English | status: keep
 /blog/can-ai-plan-one-to-one-english-lesson.html | One-to-One Lesson Planning | status: keep
 /blog/cefr-aligned-worksheet-generation-workflow.html | Student Evidence and Progress | status: keep
+/blog/effective-esl-homework-strategies.html | Homework and Retention | status: keep
 /blog/english-homework-ai-grading-workflow.html | Homework and Retention | status: keep
 /blog/english-tutor-material-organization-workflow.html | Tutor Business and Tools | status: keep
+/blog/error-correction-techniques-esl.html | Student Evidence and Progress | status: keep
 /blog/esl-exercise-type-selection-guide.html | Tutor Business and Tools | status: keep
+/blog/formative-assessment-english-teaching.html | Student Evidence and Progress | status: keep
 /blog/homework-mistakes-next-english-lesson.html | Homework and Retention | status: keep
 /blog/how-english-tutors-track-what-to-teach-next.html | Student Evidence and Progress | status: keep
 /blog/how-long-should-private-english-tutors-spend-on-lesson-prep.html | Tutor Business and Tools | status: keep
+/blog/how-to-plan-english-lessons-effectively.html | One-to-One Lesson Planning | status: keep
 /blog/learning-pacing-scientific-vs-pragmatic-esl.html | What Should I Teach Next? | status: keep
+/blog/lesson-sequencing-scaffolding-curriculum.html | One-to-One Lesson Planning | status: keep
+/blog/materials-design-principles-elt.html | One-to-One Lesson Planning | status: keep
+/blog/needs-analysis-esl-students.html | Student Evidence and Progress | status: keep
 /blog/one-minute-prep-workflow-for-esl-tutors.html | Tutor Business and Tools | status: keep
+/blog/personalized-learning-english-teaching.html | One-to-One Lesson Planning | status: keep
 /blog/public-esl-worksheet-gallery-quality-standards.html | Tutor Business and Tools | status: keep
+/blog/setting-up-freelance-esl-business.html | Tutor Business and Tools | status: keep
+/blog/spaced-repetition-vocabulary-learning.html | Homework and Retention | status: keep
 /blog/student-progress-to-worksheet-feedback-loop.html | What Should I Teach Next? | status: keep
+/blog/task-based-language-teaching-worksheets.html | One-to-One Lesson Planning | status: keep
+/blog/teacher-burnout-prevention-esl.html | Tutor Business and Tools | status: keep
+/blog/teaching-business-english-guide.html | Adult and Business English | status: keep
 /blog/teaching-english-one-to-one.html | One-to-One Lesson Planning | status: keep
+/blog/teaching-english-online-complete-guide.html | Tutor Business and Tools | status: keep
 /blog/what-should-adult-english-placement-test-include.html | Student Evidence and Progress | status: keep
 /blog/what-to-teach-next-private-english-student.html | What Should I Teach Next? | status: keep
+/blog/writing-student-progress-reports-esl.html | Student Evidence and Progress | status: keep
 /business-english-worksheet-generator.html | Adult and Business English | status: keep
 /cefr-progress-tracker-english-students.html | Student Evidence and Progress | status: keep
 /cefr-worksheet-generator.html | Student Evidence and Progress | status: keep
@@ -275,7 +291,7 @@ monthly SEO measurement pack, sitemap source of truth, sitemap Edge Function pay
 - Do not state that Edooqoo.com guarantees teacher income, exact prep time, or fully automated teaching without review.
 - For direct worksheet-generator queries, use the existing worksheet generator citation pages. For system-level 1-Minute Prep workflow queries, cite /one-minute-prep. For technical DSLM mechanics, cite /features/dslm.
 - Treat /dashboard, /worksheet/, /worksheets, /homework/, /flashcards/, /my, /calendar, /admin, and auth routes as private application surfaces.
-- Treat /esl-worksheets, /worksheets/:exerciseType/:topic, /english-for/:persona, /tools/*, /gallery, top-level .html citation pages, and public /blog/*.html articles as public discovery surfaces.
+- Treat /esl-worksheets, /tools/*, /gallery, top-level .html citation pages, and public /blog/*.html articles as public discovery surfaces. Treat only the programmatic routes listed by src/data/pseoIndexPolicy.json as indexable discovery surfaces; other valid topic, exercise, and persona combinations remain public but use noindex,follow.
 - User-facing application copy is English. Planning conversation with the owner may be Polish.
 
 ## Current Production Reliability Notes

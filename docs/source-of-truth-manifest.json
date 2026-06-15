@@ -1516,7 +1516,7 @@
       "redirectTo": null,
       "crawl": {
         "robotsBlocked": false,
-        "sitemapMatches": 240,
+        "sitemapMatches": 35,
         "status": "indexable-generated-family"
       },
       "dataDependencies": {
@@ -1539,7 +1539,7 @@
       "redirectTo": null,
       "crawl": {
         "robotsBlocked": false,
-        "sitemapMatches": 1160,
+        "sitemapMatches": 50,
         "status": "indexable-generated-family"
       },
       "dataDependencies": {
@@ -1562,7 +1562,7 @@
       "redirectTo": null,
       "crawl": {
         "robotsBlocked": false,
-        "sitemapMatches": 25,
+        "sitemapMatches": 10,
         "status": "indexable-generated-family"
       },
       "dataDependencies": {
@@ -22993,7 +22993,7 @@
           "fields": [
             {
               "name": "seo",
-              "type": "{ title: string; description: string; path: string }",
+              "type": "{ title: string; description: string; path: string; robots?: string }",
               "optional": false
             },
             {
@@ -23037,6 +23037,11 @@
               "optional": false
             },
             {
+              "name": "decisionCriteria",
+              "type": "{ useCase: string; contraindication: string; taskExample: string; qualityCriterion: string; referencePath: string; referenceLabel: string; }",
+              "optional": true
+            },
+            {
               "name": "related",
               "type": "{ heading: string; items: PseoRelated[] }",
               "optional": false
@@ -23075,6 +23080,7 @@
         "See pricing",
         "Summary",
         "TL;DR",
+        "Teaching decision criteria",
         "Two worksheets included on the free plan. No credit card. Built with Martha (10 yrs ESL).",
         "What&apos;s inside every worksheet"
       ],

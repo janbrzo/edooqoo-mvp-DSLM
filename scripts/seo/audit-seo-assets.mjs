@@ -2,7 +2,12 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { getPrerenderRoutes, getPriorityExerciseTopicRoutes } from './seo-route-manifest.mjs';
+import {
+  CORE_SEO_ROUTES,
+  getPrerenderRoutes,
+  getPriorityExerciseTopicRoutes,
+} from './seo-route-manifest.mjs';
+import { getPseoRouteInventory } from './pseo-index-policy.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..', '..');
@@ -518,9 +523,22 @@ function auditRobotsAndSitemap() {
     else pass(`sitemap.xml excludes canonical alias ${alias}`);
   }
 
+  const inventory = getPseoRouteInventory({ root: ROOT });
+  const sitemapPseoRoutes = sitemapUrls
+    .map((url) => url.replace(BASE_URL, ''))
+    .filter((route) =>
+      /^\/(?:esl-worksheets\/[^/]+\/[^/]+|worksheets\/[^/]+\/[^/]+|english-for\/[^/]+)$/.test(route)
+    )
+    .sort();
+  if (JSON.stringify(sitemapPseoRoutes) !== JSON.stringify(inventory.indexable)) {
+    fail(`sitemap.xml pSEO set must match policy exactly (${sitemapPseoRoutes.length}/${inventory.indexable.length})`);
+  } else {
+    pass(`sitemap.xml contains exactly ${inventory.indexable.length} policy-approved pSEO routes`);
+  }
+
   const priorityRoutes = getPriorityExerciseTopicRoutes({ root: ROOT });
-  if (priorityRoutes.length < 200) {
-    fail(`Expected at least 200 priority /worksheets/ prerender routes, got ${priorityRoutes.length}`);
+  if (priorityRoutes.length !== inventory.indexableExerciseTopicRoutes.length) {
+    fail(`Expected ${inventory.indexableExerciseTopicRoutes.length} priority /worksheets/ routes, got ${priorityRoutes.length}`);
   } else {
     pass(`priority /worksheets/ prerender routes: ${priorityRoutes.length}`);
   }
@@ -809,8 +827,15 @@ function auditPrerenderManifest() {
     else pass(`Prerender manifest includes ${route}`);
   }
 
-  if (routes.length < 500) fail(`Expected at least 500 prerender routes, got ${routes.length}`);
-  else pass(`Prerender manifest route count: ${routes.length}`);
+  const expectedCount = new Set([
+    ...CORE_SEO_ROUTES,
+    ...getPseoRouteInventory({ root: ROOT }).indexable,
+  ]).size;
+  if (routes.length !== expectedCount) {
+    fail(`Expected ${expectedCount} policy-approved prerender routes, got ${routes.length}`);
+  } else {
+    pass(`Prerender manifest route count: ${routes.length}`);
+  }
 }
 
 function auditOpenApiAndPlugin() {
