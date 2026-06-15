@@ -27,7 +27,6 @@ import { devLog, devWarn } from '@/utils/logger';
 import { useAuthFlow } from '@/hooks/useAuthFlow';
 
 const POLL_INTERVAL_MS = 5000;
-const POLL_LOOKBACK_MS = 30_000;
 
 async function locateBackendWorksheet(job: WorksheetGenerationJob): Promise<string | null> {
   if (!job.teacherId) return null;
