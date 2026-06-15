@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Progress } from "@/components/ui/progress";
-import { Circle, Loader2, CheckCircle2, XCircle } from "lucide-react";
+import { Circle, Loader2, CheckCircle2, XCircle, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import GenerationContextPanel from "@/components/generation/GenerationContextPanel";
@@ -49,6 +49,14 @@ interface GeneratingModalProps {
    * can hide ONLY the job represented by this modal (not all jobs).
    */
   jobId?: string | null;
+  /**
+   * v6.9.59 — Multi-generation switcher. When more than one generation is
+   * running on this tab, Index passes the full count and the currently
+   * shown index so the modal can render arrow + dot navigation.
+   */
+  jobsCount?: number;
+  currentIndex?: number;
+  onSelectIndex?: (index: number) => void;
 }
 
 // Section completion status
@@ -166,6 +174,9 @@ export default function GeneratingModal({
   startedAt,
   studentId,
   jobId,
+  jobsCount = 1,
+  currentIndex = 0,
+  onSelectIndex,
 }: GeneratingModalProps) {
   // v6.9.58 — seed live values from startedAt so a refresh resumes the bar
   // and timer instead of restarting them from zero.
@@ -402,6 +413,45 @@ export default function GeneratingModal({
           <h2 className="text-xl lg:text-2xl font-semibold bg-gradient-to-r from-pink-500 via-violet-500 to-blue-500 bg-clip-text text-transparent">
             Generating Your Worksheet
           </h2>
+          {jobsCount > 1 ? (
+            <div className="flex items-center justify-center gap-2 pt-1">
+              <button
+                type="button"
+                aria-label="Previous generation"
+                className="rounded-md border border-muted-foreground/20 p-1 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition"
+                onClick={() => onSelectIndex?.((currentIndex - 1 + jobsCount) % jobsCount)}
+              >
+                <ChevronLeft className="h-3.5 w-3.5" />
+              </button>
+              <span className="text-[11px] font-medium text-muted-foreground">
+                Generation {currentIndex + 1} / {jobsCount}
+              </span>
+              <button
+                type="button"
+                aria-label="Next generation"
+                className="rounded-md border border-muted-foreground/20 p-1 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition"
+                onClick={() => onSelectIndex?.((currentIndex + 1) % jobsCount)}
+              >
+                <ChevronRight className="h-3.5 w-3.5" />
+              </button>
+              <div className="flex items-center gap-1 ml-1">
+                {Array.from({ length: jobsCount }).map((_, i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    aria-label={`Go to generation ${i + 1}`}
+                    onClick={() => onSelectIndex?.(i)}
+                    className={cn(
+                      'h-1.5 w-1.5 rounded-full transition',
+                      i === currentIndex
+                        ? 'bg-violet-500'
+                        : 'bg-muted-foreground/30 hover:bg-muted-foreground/60'
+                    )}
+                  />
+                ))}
+              </div>
+            </div>
+          ) : null}
           {studentName ? (
             <p className="text-xs lg:text-sm text-muted-foreground">
               For{' '}

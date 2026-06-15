@@ -24,6 +24,7 @@ import {
   startGenerationJob,
 } from '@/lib/worksheet/generationJobRegistry';
 import { markPersistentAutoGenerateIntentStatus } from '@/lib/worksheet/autoGenerateBootstrap';
+import { getTabId } from '@/lib/worksheet/tabId';
 
 interface WorksheetGenerationEntitlement {
   hasTokens: boolean;
@@ -169,6 +170,7 @@ export const useWorksheetGeneration = (
         topic: String(data.lessonTopic || '').slice(0, 240),
         origin: !userId ? 'anonymous' : ((data as any).__autoGenerateFromSuggestion ? 'dslm-auto' : 'manual'),
         requestId: clientGenerationId,
+        originTabId: getTabId(),
         // v6.9.57 — snapshot UI metadata so the modal can rehydrate after refresh
         formMeta: {
           requiresAudio: !!requiresAudio,

@@ -15,14 +15,19 @@ import {
   clearGenerationJob,
 } from '@/lib/worksheet/generationJobRegistry';
 import { useActiveWorksheetGenerationJobs } from '@/hooks/useActiveWorksheetGenerationJob';
+import { useTabId } from '@/lib/worksheet/tabId';
 
-const PANEL_HEIGHT_PX = 96; // approximate; stack offset between items
-const PANEL_GAP_PX = 8;
+// v6.9.59 — realistic card height (2-line copy + button) and a slightly
+// larger gap so concurrent panels never visually overlap.
+const PANEL_HEIGHT_PX = 144;
+const PANEL_GAP_PX = 12;
+const MAX_VISIBLE_PANELS = 4;
 
 export default function ActiveGenerationMiniPanel() {
   const jobs = useActiveWorksheetGenerationJobs();
   const location = useLocation();
   const navigate = useNavigate();
+  const tabId = useTabId();
 
   // Track which jobIds are currently shown by an in-page modal.
   const [mountedJobIds, setMountedJobIds] = useState<Set<string>>(new Set());
@@ -57,7 +62,15 @@ export default function ActiveGenerationMiniPanel() {
 
   const visibleJobs = jobs
     .filter((job) => {
-      if (job.status === 'running' && mountedJobIds.has(job.jobId)) return false;
+      // v6.9.59 — only hide a running job from the mini panel when its
+      // foreground modal lives in THIS tab. Jobs started in another tab
+      // must remain visible as mini panels here even if their modal is
+      // mounted somewhere else.
+      if (
+        job.status === 'running'
+        && mountedJobIds.has(job.jobId)
+        && (job.originTabId ?? null) === tabId
+      ) return false;
       if (
         job.status === 'completed'
         && job.worksheetId
@@ -65,7 +78,8 @@ export default function ActiveGenerationMiniPanel() {
       ) return false;
       return true;
     })
-    .sort((a, b) => a.startedAt - b.startedAt);
+    .sort((a, b) => a.startedAt - b.startedAt)
+    .slice(-MAX_VISIBLE_PANELS);
 
   if (visibleJobs.length === 0) return null;
 
