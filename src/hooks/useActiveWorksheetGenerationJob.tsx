@@ -32,11 +32,15 @@ const POLL_LOOKBACK_MS = 30_000;
 async function locateBackendWorksheet(job: WorksheetGenerationJob): Promise<string | null> {
   if (!job.teacherId) return null;
 
-  // v6.9.55 — prefer exact correlation via `form_data->>clientGenerationId`
-  // (set by `useWorksheetGeneration` for every attempt). Falls back to the
-  // wider teacher/student window for legacy jobs that were started before
-  // v6.9.55 and have no client correlation id.
-  if (job.requestId) {
+  // v6.9.55 — exact correlation via `form_data->>clientGenerationId`
+  // (set by `useWorksheetGeneration` for every attempt).
+  // v6.9.59 — fallback window query removed. If a job has no requestId
+  // (legacy job started before v6.9.55) we refuse to guess, because the
+  // wider teacher/student window query was causing job B to be falsely
+  // marked completed using a worksheet actually saved by job A when two
+  // generations ran in parallel for the same student.
+  if (!job.requestId) return null;
+
     try {
       const { data: byCorr, error: corrErr } = await supabase
         .from('worksheets')
@@ -52,26 +56,7 @@ async function locateBackendWorksheet(job: WorksheetGenerationJob): Promise<stri
     } catch (e) {
       devWarn('[useActiveWorksheetGenerationJob] correlation query failed', e);
     }
-  }
-
-  const since = new Date(Math.max(0, job.startedAt - POLL_LOOKBACK_MS)).toISOString();
-  let query = supabase
-    .from('worksheets')
-    .select('id, created_at, student_id')
-    .eq('teacher_id', job.teacherId)
-    .gte('created_at', since)
-    .is('deleted_at', null)
-    .order('created_at', { ascending: false })
-    .limit(5);
-  if (job.studentId) {
-    query = query.eq('student_id', job.studentId);
-  }
-  const { data, error } = await query;
-  if (error) {
-    devWarn('[useActiveWorksheetGenerationJob] poll error', error);
-    return null;
-  }
-  return data?.[0]?.id ?? null;
+  return null;
 }
 
 async function applyCompletionSideEffects(job: WorksheetGenerationJob, worksheetId: string, userId: string | null) {
@@ -95,20 +80,26 @@ async function applyCompletionSideEffects(job: WorksheetGenerationJob, worksheet
     }
   }
 
-  // 2. Consume token once for authenticated, non-demo users
+  // 2. Consume token once for authenticated, non-demo users.
+  // v6.9.59 — optimistic local claim BEFORE the network call: prevents the
+  // single-job and multi-job pollers (or two pollers across two browser
+  // tabs) from issuing the RPC concurrently for the same worksheet. The
+  // DB function `public.consume_token` is also idempotent on
+  // (teacher_id, worksheet_id) as defense-in-depth.
   if (userId && job.teacherId === userId && !job.tokenConsumedAt && job.origin !== 'anonymous') {
-    try {
-      const { data, error } = await supabase.rpc('consume_token', {
-        p_teacher_id: userId,
-        p_worksheet_id: worksheetId,
-      });
-      if (error) {
-        devWarn('[useActiveWorksheetGenerationJob] consume_token error', error);
-      } else if (data === true) {
-        markTokenConsumed(job.jobId);
+    const claim = markTokenConsumed(job.jobId);
+    const wonClaim = !!claim && (claim.tokenConsumedAt ?? 0) > 0
+      && Math.abs(Date.now() - (claim.tokenConsumedAt ?? 0)) < 2000;
+    if (wonClaim) {
+      try {
+        const { error } = await supabase.rpc('consume_token', {
+          p_teacher_id: userId,
+          p_worksheet_id: worksheetId,
+        });
+        if (error) devWarn('[useActiveWorksheetGenerationJob] consume_token error', error);
+      } catch (e) {
+        devWarn('[useActiveWorksheetGenerationJob] consume_token threw', e);
       }
-    } catch (e) {
-      devWarn('[useActiveWorksheetGenerationJob] consume_token threw', e);
     }
   }
 
