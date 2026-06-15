@@ -457,6 +457,9 @@ const Index = () => {
           isResumed={isResumedGeneration}
           startedAt={activeJob?.startedAt}
           jobId={activeJob?.jobId ?? null}
+          jobsCount={jobsCount}
+          currentIndex={safeIdx}
+          onSelectIndex={setActiveJobIdx}
           studentId={isResumedGeneration ? (activeJob?.studentId ?? null) : (worksheetState.inputParams?.studentId ?? selectedStudentId ?? null)}
           requiresAudio={isResumedGeneration ? !!activeJob?.formMeta?.requiresAudio : !!worksheetState.inputParams?.requiresAudio}
           requiresImage={isResumedGeneration ? !!activeJob?.formMeta?.requiresImage : !!worksheetState.inputParams?.requiresImage}
@@ -586,6 +589,9 @@ const Index = () => {
         isResumed={isResumedGeneration}
         startedAt={activeJob?.startedAt}
         jobId={activeJob?.jobId ?? null}
+        jobsCount={jobsCount}
+        currentIndex={safeIdx}
+        onSelectIndex={setActiveJobIdx}
         studentId={isResumedGeneration ? (activeJob?.studentId ?? null) : (worksheetState.inputParams?.studentId ?? selectedStudentId ?? null)}
         requiresAudio={isResumedGeneration ? !!activeJob?.formMeta?.requiresAudio : !!worksheetState.inputParams?.requiresAudio}
         requiresImage={isResumedGeneration ? !!activeJob?.formMeta?.requiresImage : !!worksheetState.inputParams?.requiresImage}
