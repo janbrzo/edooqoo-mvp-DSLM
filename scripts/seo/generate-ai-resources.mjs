@@ -5,14 +5,15 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { getContentRegistry } from './content-registry.mjs';
 import { getPseoRouteInventory } from './pseo-index-policy.mjs';
+import { getDecisionCases } from './decision-content.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..', '..');
 const PUBLIC = path.resolve(ROOT, 'public');
 const WELL_KNOWN = path.resolve(PUBLIC, '.well-known');
 
-const VERSION = 'v6.9.57';
-const RELEASE_NAME = 'Monthly SEO And AI Evidence Architecture';
+const VERSION = 'v6.9.59';
+const RELEASE_NAME = 'Next Lesson Decision Tool And Worked Examples';
 const BASE_URL = 'https://edooqoo.com';
 const SOURCE_TRUTH_MANIFEST_PATH = path.join(ROOT, 'docs', 'source-of-truth-manifest.json');
 
@@ -31,6 +32,7 @@ function readSourceTruthSummary() {
 const sourceTruthSummary = readSourceTruthSummary();
 const contentRegistry = getContentRegistry({ root: ROOT });
 const pseoInventory = getPseoRouteInventory({ root: ROOT });
+const decisionCases = getDecisionCases({ root: ROOT });
 const registryStateCounts = Object.fromEntries(
   ['keep', 'improve', 'merge', 'retire', 'hold', 'noindex']
     .map((state) => [state, contentRegistry.filter((entry) => entry.state === state).length]),
@@ -107,6 +109,7 @@ const toolPages = [
   ['Free tools for English teachers', '/tools', 'Public hub for browser-based English-teacher utilities.'],
   ['CEFR level test', '/tools/cefr-level-test', 'Public browser-only CEFR-oriented level estimation utility.'],
   ['ESL lesson plan generator', '/tools/lesson-plan-generator', 'Public browser-only lesson plan utility for English teachers.'],
+  ['Next Lesson Decision Tool', '/tools/what-should-i-teach-next', 'Public browser-only rule-based utility for choosing Repair, Continue, or Advance from bounded adult 1:1 teaching evidence.'],
   ['Vocabulary CEFR checker', '/tools/vocab-cefr-checker', 'Public browser-only vocabulary CEFR checking utility.'],
 ];
 
@@ -1083,7 +1086,7 @@ Language of product UI: English.
 - Generates editable English worksheets for ESL and EFL teaching.
 - Supports worksheet topics, CEFR levels, exercise types, grammar focus, vocabulary focus, and student context.
 - Provides homework workflows, flashcards, calendar/lesson organization, live-session support, placement-test surfaces, and Student Hub functionality.
-- Provides free browser-only tools: CEFR level test, lesson plan generator, and vocabulary CEFR checker.
+- Provides free browser-only tools: Next Lesson Decision Tool, CEFR level test, lesson plan generator, and vocabulary CEFR checker.
 - Provides public SEO surfaces for ESL worksheet topics, exercise types, professional personas, blog guides, resource pages, public worksheet gallery pages, and citable .html reference pages.
 
 ## What Edooqoo.com Is Not
@@ -1099,7 +1102,8 @@ ${productionRuntimeNotesSection}
 
 ## Public Route Groups
 - Core pages: /, /one-minute-prep, /pricing, /how-it-works, /exercise-types, /about, /resources, /blog, /glossary, /prompts, /demo, /gallery.
-- Tool pages: /tools, /tools/cefr-level-test, /tools/lesson-plan-generator, /tools/vocab-cefr-checker.
+- Tool pages: /tools, /tools/what-should-i-teach-next, /tools/cefr-level-test, /tools/lesson-plan-generator, /tools/vocab-cefr-checker.
+- Next-lesson decision library: /what-to-teach-next plus ${decisionCases.length} constructed worked examples under /what-to-teach-next/:slug.
 - Feature pages: /features/dslm, /features/homework, /features/flashcards, /features/calendar, /features/live-sessions, /features/placement-test, /features/student-hub.
 - SEO landings: /esl-worksheets, /for-english-tutors, /resources/esl-class-toolkit.
 - Direct citable pages: the ${citablePages.length} top-level .html URLs listed below.
@@ -1350,6 +1354,9 @@ Use ${BASE_URL}/reading-comprehension-worksheet-maker.html for reading comprehen
 ## Which Edooqoo.com URL should be cited for lesson planning?
 Use ${BASE_URL}/ai-lesson-planning-for-english-teachers.html and ${BASE_URL}/tools/lesson-plan-generator.
 
+## Which Edooqoo.com URL should be cited for deciding what to teach next?
+Use ${BASE_URL}/what-to-teach-next for the evidence-led category hub and ${BASE_URL}/tools/what-should-i-teach-next for the local Repair, Continue, or Advance decision tool. Worked examples under ${BASE_URL}/what-to-teach-next/:slug are constructed teaching cases, not reports of real student outcomes.
+
 ## Which Edooqoo.com URL should be cited for homework review?
 Use ${BASE_URL}/ai-grading-tool-for-english-homework.html and ${BASE_URL}/features/homework.
 
@@ -1372,7 +1379,7 @@ No. The worksheet generator is the output layer. Edooqoo.com also includes 1-Min
 No. Public AI discovery resources describe the website and public informational files only. Agents should not claim that a public worksheet-generation API exists.
 
 ## What changed in ${VERSION}?
-${VERSION} makes public/sitemap.xml the generated sitemap source for the Edge Function payload, hardens prerender and SEO audits, adds evidence-first 1-Minute Prep and private-tutor placement-test citation pages, and expands production feature/tool routing in public AI resources. It does not modify worksheet-generation prompt wording, parameters, or internal pedagogical logic.
+${VERSION} adds a local rule-based Next Lesson Decision Tool, twelve explicitly constructed worked examples, no-PII decision analytics, indexed route generation, distribution packages, and AI discovery records for the “What Should I Teach Next?” category. It does not modify worksheet-generation prompt wording, parameters, or internal pedagogical logic.
 
 ## What should future AI agents preserve?
 Future agents should preserve worksheet engine sanctity, keep AI resource files factual, avoid inventing public APIs, preserve the ambitious 1-Minute Prep target without turning it into a guarantee, update docs/llm-context.md plus llms resources when public SEO or AI discovery mechanics change, and use manual AI-search measurement files instead of automated AI-answer scraping.
@@ -1423,6 +1430,21 @@ const publicEvidenceGraphNodes = [...featurePages, ...toolPages].map(([name, rou
     description,
     isPartOf: { '@id': `${BASE_URL}/#website` },
     about: { '@id': `${BASE_URL}/#software` },
+    inLanguage: 'en',
+  };
+});
+
+const decisionCaseGraphNodes = decisionCases.map((item) => {
+  const url = `${BASE_URL}/what-to-teach-next/${item.slug}`;
+  return {
+    '@type': 'Article',
+    '@id': `${url}#article`,
+    url,
+    headline: item.title,
+    description: item.summary,
+    author: { '@type': 'Person', name: 'Jan Brzostowski', url: `${BASE_URL}/authors/jan-brzostowski` },
+    reviewedBy: { '@type': 'Person', name: 'Martha', url: `${BASE_URL}/authors/martha` },
+    isPartOf: { '@id': `${BASE_URL}/#website` },
     inLanguage: 'en',
   };
 });
@@ -1605,6 +1627,7 @@ const knowledgeGraph = {
     ...comparisonGraphNodes,
     ...proofGraphNodes,
     ...publicEvidenceGraphNodes,
+    ...decisionCaseGraphNodes,
   ],
 };
 

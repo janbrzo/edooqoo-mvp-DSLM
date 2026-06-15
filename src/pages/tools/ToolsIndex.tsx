@@ -4,6 +4,12 @@ import { PageSeo } from '@/components/seo/PageSeo';
 
 const TOOLS = [
   {
+    to: '/tools/what-should-i-teach-next',
+    title: 'Next Lesson Decision Tool',
+    blurb: 'Choose Repair, Continue, or Advance from bounded learner evidence. No student data required.',
+    keyword: 'what should I teach next English student',
+  },
+  {
     to: '/tools/cefr-level-test',
     title: 'CEFR Level Test',
     blurb: '25 questions, ~5 minutes. Instant A1–C2 result. No sign-up.',
@@ -44,7 +50,7 @@ const ToolsIndex: React.FC = () => (
       <header className="mb-10">
         <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">Free Tools for English Teachers</h1>
         <p className="text-lg text-muted-foreground">
-          Three browser-based tools built with Martha (10 yrs ESL). No login, no installs, no data leaves your device.
+          Four browser-based tools built with Martha (10 yrs ESL). No login, no installs, no data leaves your device.
         </p>
       </header>
       <ul className="grid grid-cols-1 md:grid-cols-2 gap-4">

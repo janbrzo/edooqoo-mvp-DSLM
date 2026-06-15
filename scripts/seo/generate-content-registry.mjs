@@ -18,6 +18,7 @@ const payload = {
   generatedFrom: [
     'scripts/seo/content-registry.mjs',
     'src/data/pseoIndexPolicy.json',
+    'src/data/whatToTeachNextCases.json',
     'docs/seo/pseo-index-policy.generated.json',
     'public/sitemap.xml',
     'public/blog/*.html',

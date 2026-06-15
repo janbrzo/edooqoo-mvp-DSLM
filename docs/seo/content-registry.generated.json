@@ -3,6 +3,7 @@
   "generatedFrom": [
     "scripts/seo/content-registry.mjs",
     "src/data/pseoIndexPolicy.json",
+    "src/data/whatToTeachNextCases.json",
     "docs/seo/pseo-index-policy.generated.json",
     "public/sitemap.xml",
     "public/blog/*.html",
@@ -24,10 +25,10 @@
     ]
   },
   "counts": {
-    "total": 1765,
-    "indexable": 431,
+    "total": 1778,
+    "indexable": 444,
     "byState": {
-      "keep": 75,
+      "keep": 88,
       "improve": 0,
       "merge": 0,
       "retire": 0,
@@ -9057,6 +9058,16 @@
       "reason": "Strategic product, workflow, evidence, or public resource URL."
     },
     {
+      "route": "/tools/what-should-i-teach-next",
+      "canonical": "https://edooqoo.com/tools/what-should-i-teach-next",
+      "type": "spa-route",
+      "state": "keep",
+      "indexable": true,
+      "cluster": "Tutor Business and Tools",
+      "redirectTo": null,
+      "reason": "Strategic product, workflow, evidence, or public resource URL."
+    },
+    {
       "route": "/travel-english-worksheets.html",
       "canonical": "https://edooqoo.com/travel-english-worksheets.html",
       "type": "static-landing",
@@ -9099,6 +9110,126 @@
     {
       "route": "/what-to-teach-next",
       "canonical": "https://edooqoo.com/what-to-teach-next",
+      "type": "spa-route",
+      "state": "keep",
+      "indexable": true,
+      "cluster": "What Should I Teach Next?",
+      "redirectTo": null,
+      "reason": "Strategic product, workflow, evidence, or public resource URL."
+    },
+    {
+      "route": "/what-to-teach-next/accountant-variance-call",
+      "canonical": "https://edooqoo.com/what-to-teach-next/accountant-variance-call",
+      "type": "spa-route",
+      "state": "keep",
+      "indexable": true,
+      "cluster": "What Should I Teach Next?",
+      "redirectTo": null,
+      "reason": "Strategic product, workflow, evidence, or public resource URL."
+    },
+    {
+      "route": "/what-to-teach-next/consultant-executive-summary",
+      "canonical": "https://edooqoo.com/what-to-teach-next/consultant-executive-summary",
+      "type": "spa-route",
+      "state": "keep",
+      "indexable": true,
+      "cluster": "What Should I Teach Next?",
+      "redirectTo": null,
+      "reason": "Strategic product, workflow, evidence, or public resource URL."
+    },
+    {
+      "route": "/what-to-teach-next/entrepreneur-customer-interview",
+      "canonical": "https://edooqoo.com/what-to-teach-next/entrepreneur-customer-interview",
+      "type": "spa-route",
+      "state": "keep",
+      "indexable": true,
+      "cluster": "What Should I Teach Next?",
+      "redirectTo": null,
+      "reason": "Strategic product, workflow, evidence, or public resource URL."
+    },
+    {
+      "route": "/what-to-teach-next/hr-performance-conversation",
+      "canonical": "https://edooqoo.com/what-to-teach-next/hr-performance-conversation",
+      "type": "spa-route",
+      "state": "keep",
+      "indexable": true,
+      "cluster": "What Should I Teach Next?",
+      "redirectTo": null,
+      "reason": "Strategic product, workflow, evidence, or public resource URL."
+    },
+    {
+      "route": "/what-to-teach-next/ielts-task-2-paragraph",
+      "canonical": "https://edooqoo.com/what-to-teach-next/ielts-task-2-paragraph",
+      "type": "spa-route",
+      "state": "keep",
+      "indexable": true,
+      "cluster": "What Should I Teach Next?",
+      "redirectTo": null,
+      "reason": "Strategic product, workflow, evidence, or public resource URL."
+    },
+    {
+      "route": "/what-to-teach-next/job-interview-achievement",
+      "canonical": "https://edooqoo.com/what-to-teach-next/job-interview-achievement",
+      "type": "spa-route",
+      "state": "keep",
+      "indexable": true,
+      "cluster": "What Should I Teach Next?",
+      "redirectTo": null,
+      "reason": "Strategic product, workflow, evidence, or public resource URL."
+    },
+    {
+      "route": "/what-to-teach-next/lawyer-client-explanation",
+      "canonical": "https://edooqoo.com/what-to-teach-next/lawyer-client-explanation",
+      "type": "spa-route",
+      "state": "keep",
+      "indexable": true,
+      "cluster": "What Should I Teach Next?",
+      "redirectTo": null,
+      "reason": "Strategic product, workflow, evidence, or public resource URL."
+    },
+    {
+      "route": "/what-to-teach-next/marketing-campaign-recommendation",
+      "canonical": "https://edooqoo.com/what-to-teach-next/marketing-campaign-recommendation",
+      "type": "spa-route",
+      "state": "keep",
+      "indexable": true,
+      "cluster": "What Should I Teach Next?",
+      "redirectTo": null,
+      "reason": "Strategic product, workflow, evidence, or public resource URL."
+    },
+    {
+      "route": "/what-to-teach-next/project-manager-status-update",
+      "canonical": "https://edooqoo.com/what-to-teach-next/project-manager-status-update",
+      "type": "spa-route",
+      "state": "keep",
+      "indexable": true,
+      "cluster": "What Should I Teach Next?",
+      "redirectTo": null,
+      "reason": "Strategic product, workflow, evidence, or public resource URL."
+    },
+    {
+      "route": "/what-to-teach-next/sales-discovery-call",
+      "canonical": "https://edooqoo.com/what-to-teach-next/sales-discovery-call",
+      "type": "spa-route",
+      "state": "keep",
+      "indexable": true,
+      "cluster": "What Should I Teach Next?",
+      "redirectTo": null,
+      "reason": "Strategic product, workflow, evidence, or public resource URL."
+    },
+    {
+      "route": "/what-to-teach-next/software-engineer-incident-explanation",
+      "canonical": "https://edooqoo.com/what-to-teach-next/software-engineer-incident-explanation",
+      "type": "spa-route",
+      "state": "keep",
+      "indexable": true,
+      "cluster": "What Should I Teach Next?",
+      "redirectTo": null,
+      "reason": "Strategic product, workflow, evidence, or public resource URL."
+    },
+    {
+      "route": "/what-to-teach-next/travel-disruption",
+      "canonical": "https://edooqoo.com/what-to-teach-next/travel-disruption",
       "type": "spa-route",
       "state": "keep",
       "indexable": true,

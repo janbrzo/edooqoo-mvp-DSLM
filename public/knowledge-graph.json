@@ -1261,6 +1261,20 @@
     },
     {
       "@type": "WebPage",
+      "@id": "https://edooqoo.com/tools/what-should-i-teach-next#webpage",
+      "url": "https://edooqoo.com/tools/what-should-i-teach-next",
+      "name": "Next Lesson Decision Tool",
+      "description": "Public browser-only rule-based utility for choosing Repair, Continue, or Advance from bounded adult 1:1 teaching evidence.",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "about": {
+        "@id": "https://edooqoo.com/#software"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "WebPage",
       "@id": "https://edooqoo.com/tools/vocab-cefr-checker#webpage",
       "url": "https://edooqoo.com/tools/vocab-cefr-checker",
       "name": "Vocabulary CEFR checker",
@@ -1270,6 +1284,258 @@
       },
       "about": {
         "@id": "https://edooqoo.com/#software"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "Article",
+      "@id": "https://edooqoo.com/what-to-teach-next/project-manager-status-update#article",
+      "url": "https://edooqoo.com/what-to-teach-next/project-manager-status-update",
+      "headline": "Project Manager: Make a Status Update Clearer",
+      "description": "A B2 project manager can report completed work but loses control when explaining delays and dependencies.",
+      "author": {
+        "@type": "Person",
+        "name": "Jan Brzostowski",
+        "url": "https://edooqoo.com/authors/jan-brzostowski"
+      },
+      "reviewedBy": {
+        "@type": "Person",
+        "name": "Martha",
+        "url": "https://edooqoo.com/authors/martha"
+      },
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "Article",
+      "@id": "https://edooqoo.com/what-to-teach-next/software-engineer-incident-explanation#article",
+      "url": "https://edooqoo.com/what-to-teach-next/software-engineer-incident-explanation",
+      "headline": "Software Engineer: Repair an Incident Explanation",
+      "description": "A B2 software engineer knows the technical content but uses an unclear timeline and ambiguous pronouns.",
+      "author": {
+        "@type": "Person",
+        "name": "Jan Brzostowski",
+        "url": "https://edooqoo.com/authors/jan-brzostowski"
+      },
+      "reviewedBy": {
+        "@type": "Person",
+        "name": "Martha",
+        "url": "https://edooqoo.com/authors/martha"
+      },
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "Article",
+      "@id": "https://edooqoo.com/what-to-teach-next/accountant-variance-call#article",
+      "url": "https://edooqoo.com/what-to-teach-next/accountant-variance-call",
+      "headline": "Accountant: Advance From Variance Description to Recommendation",
+      "description": "A C1 accountant independently explains financial variances and is ready to add concise recommendations.",
+      "author": {
+        "@type": "Person",
+        "name": "Jan Brzostowski",
+        "url": "https://edooqoo.com/authors/jan-brzostowski"
+      },
+      "reviewedBy": {
+        "@type": "Person",
+        "name": "Martha",
+        "url": "https://edooqoo.com/authors/martha"
+      },
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "Article",
+      "@id": "https://edooqoo.com/what-to-teach-next/lawyer-client-explanation#article",
+      "url": "https://edooqoo.com/what-to-teach-next/lawyer-client-explanation",
+      "headline": "Lawyer: Continue Simplifying a Contract Risk",
+      "description": "A C1 lawyer identifies contract risk accurately but still relies on legal phrasing with clients.",
+      "author": {
+        "@type": "Person",
+        "name": "Jan Brzostowski",
+        "url": "https://edooqoo.com/authors/jan-brzostowski"
+      },
+      "reviewedBy": {
+        "@type": "Person",
+        "name": "Martha",
+        "url": "https://edooqoo.com/authors/martha"
+      },
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "Article",
+      "@id": "https://edooqoo.com/what-to-teach-next/sales-discovery-call#article",
+      "url": "https://edooqoo.com/what-to-teach-next/sales-discovery-call",
+      "headline": "Sales Representative: Repair Follow-up Questions",
+      "description": "A B2 sales representative asks prepared discovery questions but misses information in the answer.",
+      "author": {
+        "@type": "Person",
+        "name": "Jan Brzostowski",
+        "url": "https://edooqoo.com/authors/jan-brzostowski"
+      },
+      "reviewedBy": {
+        "@type": "Person",
+        "name": "Martha",
+        "url": "https://edooqoo.com/authors/martha"
+      },
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "Article",
+      "@id": "https://edooqoo.com/what-to-teach-next/hr-performance-conversation#article",
+      "url": "https://edooqoo.com/what-to-teach-next/hr-performance-conversation",
+      "headline": "HR Professional: Continue a Performance Conversation",
+      "description": "A B2 HR professional can state a concern but needs more control when separating observation from interpretation.",
+      "author": {
+        "@type": "Person",
+        "name": "Jan Brzostowski",
+        "url": "https://edooqoo.com/authors/jan-brzostowski"
+      },
+      "reviewedBy": {
+        "@type": "Person",
+        "name": "Martha",
+        "url": "https://edooqoo.com/authors/martha"
+      },
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "Article",
+      "@id": "https://edooqoo.com/what-to-teach-next/marketing-campaign-recommendation#article",
+      "url": "https://edooqoo.com/what-to-teach-next/marketing-campaign-recommendation",
+      "headline": "Marketing Manager: Advance to Defending a Campaign Recommendation",
+      "description": "A C1 marketing manager independently presents campaign evidence and is ready to defend a trade-off.",
+      "author": {
+        "@type": "Person",
+        "name": "Jan Brzostowski",
+        "url": "https://edooqoo.com/authors/jan-brzostowski"
+      },
+      "reviewedBy": {
+        "@type": "Person",
+        "name": "Martha",
+        "url": "https://edooqoo.com/authors/martha"
+      },
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "Article",
+      "@id": "https://edooqoo.com/what-to-teach-next/consultant-executive-summary#article",
+      "url": "https://edooqoo.com/what-to-teach-next/consultant-executive-summary",
+      "headline": "Consultant: Repair an Executive Summary",
+      "description": "A C1 consultant includes all analysis but does not prioritize the decision the client must make.",
+      "author": {
+        "@type": "Person",
+        "name": "Jan Brzostowski",
+        "url": "https://edooqoo.com/authors/jan-brzostowski"
+      },
+      "reviewedBy": {
+        "@type": "Person",
+        "name": "Martha",
+        "url": "https://edooqoo.com/authors/martha"
+      },
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "Article",
+      "@id": "https://edooqoo.com/what-to-teach-next/entrepreneur-customer-interview#article",
+      "url": "https://edooqoo.com/what-to-teach-next/entrepreneur-customer-interview",
+      "headline": "Entrepreneur: Continue a Customer Interview",
+      "description": "A B1 entrepreneur can ask about customer problems but still asks leading questions.",
+      "author": {
+        "@type": "Person",
+        "name": "Jan Brzostowski",
+        "url": "https://edooqoo.com/authors/jan-brzostowski"
+      },
+      "reviewedBy": {
+        "@type": "Person",
+        "name": "Martha",
+        "url": "https://edooqoo.com/authors/martha"
+      },
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "Article",
+      "@id": "https://edooqoo.com/what-to-teach-next/travel-disruption#article",
+      "url": "https://edooqoo.com/what-to-teach-next/travel-disruption",
+      "headline": "Traveller: Advance From Routine Requests to Disruption Handling",
+      "description": "A B1 traveller independently handles routine hotel and transport requests and is ready for an unexpected disruption.",
+      "author": {
+        "@type": "Person",
+        "name": "Jan Brzostowski",
+        "url": "https://edooqoo.com/authors/jan-brzostowski"
+      },
+      "reviewedBy": {
+        "@type": "Person",
+        "name": "Martha",
+        "url": "https://edooqoo.com/authors/martha"
+      },
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "Article",
+      "@id": "https://edooqoo.com/what-to-teach-next/job-interview-achievement#article",
+      "url": "https://edooqoo.com/what-to-teach-next/job-interview-achievement",
+      "headline": "Job Candidate: Repair an Achievement Answer",
+      "description": "A B2 job candidate describes responsibilities but does not show an individual result.",
+      "author": {
+        "@type": "Person",
+        "name": "Jan Brzostowski",
+        "url": "https://edooqoo.com/authors/jan-brzostowski"
+      },
+      "reviewedBy": {
+        "@type": "Person",
+        "name": "Martha",
+        "url": "https://edooqoo.com/authors/martha"
+      },
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "Article",
+      "@id": "https://edooqoo.com/what-to-teach-next/ielts-task-2-paragraph#article",
+      "url": "https://edooqoo.com/what-to-teach-next/ielts-task-2-paragraph",
+      "headline": "IELTS Candidate: Continue Developing One Task 2 Paragraph",
+      "description": "A B2 IELTS candidate has a relevant idea but needs support to develop it with explanation and evidence.",
+      "author": {
+        "@type": "Person",
+        "name": "Jan Brzostowski",
+        "url": "https://edooqoo.com/authors/jan-brzostowski"
+      },
+      "reviewedBy": {
+        "@type": "Person",
+        "name": "Martha",
+        "url": "https://edooqoo.com/authors/martha"
+      },
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
       },
       "inLanguage": "en"
     }

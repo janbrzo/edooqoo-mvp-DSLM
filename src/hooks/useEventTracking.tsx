@@ -47,7 +47,15 @@ export interface TrackingEvent {
     | 'one_minute_dslm_card_click'
     | 'one_minute_calculator_input_change'
     | 'one_minute_calculator_cta_click'
-    | 'one_minute_calculator_pricing_click';
+    | 'one_minute_calculator_pricing_click'
+    | 'content_view'
+    | 'content_cta_click'
+    | 'decision_tool_start'
+    | 'decision_tool_complete'
+    | 'decision_tool_copy'
+    | 'newsletter_submit'
+    | 'newsletter_confirm'
+    | 'case_share';
   eventData?: any;
   userIdentifier?: string;
 }

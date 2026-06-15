@@ -110,6 +110,9 @@ function normalizeSnapshotHtml(html, route) {
     .replace(
       /<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi,
       (full, jsonText) => {
+        if (/\bdata-rh=["']true["']/i.test(full)) {
+          return full;
+        }
         try {
           const json = JSON.parse(jsonText.trim());
           const nodes = Array.isArray(json?.['@graph']) ? json['@graph'] : [json];

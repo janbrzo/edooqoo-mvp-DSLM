@@ -61,6 +61,7 @@ const OneMinutePrep = lazy(() => import("./pages/OneMinutePrep"));
 const Resources = lazy(() => import("./pages/Resources"));
 const Blog = lazy(() => import("./pages/Blog"));
 const WhatToTeachNext = lazy(() => import("./pages/WhatToTeachNext"));
+const WhatToTeachNextCase = lazy(() => import("./pages/WhatToTeachNextCase"));
 const AuthorProfile = lazy(() => import("./pages/authors/AuthorProfile"));
 const EslWorksheets = lazy(() => import("./pages/seo/EslWorksheets"));
 const EnglishGamesForLearners = lazy(() => import("./pages/seo/EnglishGamesForLearners"));
@@ -93,6 +94,7 @@ const ToolsIndex = lazy(() => import("./pages/tools/ToolsIndex"));
 const CefrLevelTest = lazy(() => import("./pages/tools/CefrLevelTest"));
 const LessonPlanGenerator = lazy(() => import("./pages/tools/LessonPlanGenerator"));
 const VocabCefrChecker = lazy(() => import("./pages/tools/VocabCefrChecker"));
+const WhatShouldITeachNextTool = lazy(() => import("./pages/tools/WhatShouldITeachNextTool"));
 const PublicGalleryIndex = lazy(() => import("./pages/gallery/PublicGalleryIndex"));
 const PublicGalleryWorksheetPage = lazy(() => import("./pages/gallery/PublicGalleryWorksheetPage"));
 
@@ -172,6 +174,7 @@ const App = () => (
               <Route path="/resources" element={<Resources />} />
               <Route path="/blog" element={<Blog />} />
               <Route path="/what-to-teach-next" element={<WhatToTeachNext />} />
+              <Route path="/what-to-teach-next/:slug" element={<WhatToTeachNextCase />} />
               <Route path="/authors/:slug" element={<AuthorProfile />} />
               <Route path="/esl-worksheets" element={<EslWorksheets />} />
               <Route path="/blog/english-games-for-learners" element={<EnglishGamesForLearners />} />
@@ -186,6 +189,7 @@ const App = () => (
               <Route path="/tools/cefr-level-test" element={<CefrLevelTest />} />
               <Route path="/tools/lesson-plan-generator" element={<LessonPlanGenerator />} />
               <Route path="/tools/vocab-cefr-checker" element={<VocabCefrChecker />} />
+              <Route path="/tools/what-should-i-teach-next" element={<WhatShouldITeachNextTool />} />
               <Route path="/gallery" element={<PublicGalleryIndex />} />
               <Route path="/gallery/:slug" element={<PublicGalleryWorksheetPage />} />
               <Route path="/features/dslm" element={<FeatureDSLM />} />
