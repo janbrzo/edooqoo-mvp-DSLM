@@ -34,10 +34,7 @@ import { devLog, devWarn } from '@/utils/logger';
 import { AddStudentDialog } from "@/components/dashboard/AddStudentDialog";
 import { buildAutoGeneratePayload, clearAutoGenerateFlags, readAutoGenerateIntent } from "@/lib/worksheet/autoGenerateBootstrap";
 import { hasAutoGenerateIntent } from "@/lib/worksheet/autoGenerateBootstrap";
-import {
-  useActiveWorksheetGenerationJob,
-  useActiveWorksheetGenerationJobs,
-} from "@/hooks/useActiveWorksheetGenerationJob";
+import { useActiveWorksheetGenerationJobs } from "@/hooks/useActiveWorksheetGenerationJob";
 import { useTabId } from "@/lib/worksheet/tabId";
 
 /**
