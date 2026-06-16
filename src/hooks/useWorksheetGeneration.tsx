@@ -159,12 +159,16 @@ export const useWorksheetGeneration = (
     // v6.9.53 — persist the generation as an active job so the mini panel
     // and refresh-safe polling can finish the side effects if the user
     // refreshes or navigates away mid-generation.
+    // v6.9.60 — capture the returned jobId so every later mutation
+    // (progress, complete, fail, token, suggestion) is scoped to THIS job
+    // and cannot accidentally affect another concurrent generation.
+    let activeJobId: string | null = null;
     try {
       const autoSuggestionId =
         (data as any).__autoGenerateSuggestionId
         || (typeof window !== 'undefined' && sessionStorage.getItem('prefillSuggestionId'))
         || null;
-      startGenerationJob({
+      const startedJob = startGenerationJob({
         teacherId: userId,
         studentId: effectiveStudentId,
         suggestionId: autoSuggestionId,
@@ -182,6 +186,7 @@ export const useWorksheetGeneration = (
           studentEmail: (data as any).studentEmail ?? null,
         },
       });
+      activeJobId = startedJob?.jobId ?? null;
     } catch (e) {
       devWarn('[useWorksheetGeneration] failed to start generation job', e);
     }
