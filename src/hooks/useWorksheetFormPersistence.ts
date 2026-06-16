@@ -22,6 +22,13 @@ export interface WorksheetDraft {
   selectedMediaTypes?: string[];
   exerciseFocusMap?: Record<string, string>;
   selectionMode?: string;
+  /**
+   * v6.9.60 — Persist the selected student so a failed generation does not
+   * silently drop the student context on re-hydration. Stored as a plain id;
+   * a hydration step in WorksheetForm restores it (and the parent Index
+   * state via the existing `onStudentChange` effect).
+   */
+  selectedStudentId?: string;
 }
 
 interface StoredDraft {
