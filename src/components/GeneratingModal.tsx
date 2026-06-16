@@ -188,6 +188,7 @@ export default function GeneratingModal({
   jobsCount = 1,
   currentIndex = 0,
   onSelectIndex,
+  jobs,
 }: GeneratingModalProps) {
   // v6.9.58 — seed live values from startedAt so a refresh resumes the bar
   // and timer instead of restarting them from zero.
