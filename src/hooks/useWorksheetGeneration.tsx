@@ -653,7 +653,11 @@ export const useWorksheetGeneration = (
       // v6.9.53 — flip the active generation job to `completed` so the global
       // mini panel switches to its CTA and the persistent intent stops firing.
       try {
-        completeGenerationJob(finalWorksheetId);
+        // v6.9.60 — scope to THIS job so a sibling running generation is not
+        // flipped to completed by accident.
+        const jid = activeJobIdRef.current;
+        if (jid) completeGenerationJob(jid, finalWorksheetId);
+        else completeGenerationJob(finalWorksheetId);
         const reqId = (data as any).__autoGenerateRequestId;
         if (reqId) markPersistentAutoGenerateIntentStatus(reqId, 'completed');
       } catch { /* ignore */ }
