@@ -307,10 +307,28 @@ export const useWorksheetGeneration = (
             devLog('🚀 Streaming started');
             const expectedTotal = getExpectedExerciseCount(data.lessonTime);
             setStreamProgress({ exercisesGenerated: 0, expectedTotal });
+            if (activeJobId) {
+              try {
+                patchGenerationJob(activeJobId, {
+                  progress: { exercisesGenerated: 0, expectedTotal },
+                });
+              } catch { /* ignore */ }
+            }
           },
           onProgress: (progress) => {
             devLog(`📝 Progress: ${progress.exercisesGenerated}/${progress.expectedTotal}`);
             setStreamProgress(progress);
+            if (activeJobId) {
+              try {
+                patchGenerationJob(activeJobId, {
+                  progress: {
+                    exercisesGenerated: progress.exercisesGenerated,
+                    expectedTotal: progress.expectedTotal,
+                    phase: (progress as any)?.phase,
+                  },
+                });
+              } catch { /* ignore */ }
+            }
           },
           onDone: async (result) => {
             clearTimeout(generationTimeoutId);
