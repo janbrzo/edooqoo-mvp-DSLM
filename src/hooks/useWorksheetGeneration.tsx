@@ -49,6 +49,10 @@ export const useWorksheetGeneration = (
     expectedTotal: number;
   } | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
+  // v6.9.60 — jobId of the in-flight generation. Shared between
+  // generateWorksheetHandler and handleWorksheetCompletion so the
+  // completion/token/suggestion mutations are scoped to the exact job.
+  const activeJobIdRef = useRef<string | null>(null);
   const { toast } = useToast();
   const { trackEvent } = useEventTracking(userId);
   const { isDemoMode, showDemoBlockedToast } = useDemoContext();
