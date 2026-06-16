@@ -44,6 +44,17 @@ export interface WorksheetGenerationJob {
     studentName?: string | null;
     studentEmail?: string | null;
   } | null;
+  /**
+   * v6.9.60 — Live per-job progress. Set from `useWorksheetGeneration` on
+   * every SSE `progress` event so the modal switcher and mini-panel can
+   * render correct values even when the active card is not the one
+   * receiving live callbacks in this render.
+   */
+  progress?: {
+    exercisesGenerated: number;
+    expectedTotal: number;
+    phase?: string;
+  } | null;
 }
 
 const STORAGE_KEY_V2 = 'edooqoo.activeWorksheetGenerations'; // v6.9.58 multi-job map
