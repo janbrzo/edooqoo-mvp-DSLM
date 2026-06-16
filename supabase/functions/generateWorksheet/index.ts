@@ -542,21 +542,22 @@ serve(async (req) => {
       let clientConnected = true;
       const safeSend = (event: string, payload: unknown) => {
         if (!clientConnected) return;
-        try {
-          send(event, payload);
-        } catch (e) {
+        // `send` now returns `false` when the controller is already closed.
+        // Trust it instead of catching exceptions one-by-one, and flip to
+        // background-only mode so we never log per-write failures again.
+        const ok = send(event, payload);
+        if (!ok) {
           clientConnected = false;
           console.log(
             "📴 SSE client disconnected, continuing in background-only mode",
-            {
-              event,
-              reason: e instanceof Error ? e.message : String(e),
-            },
+            { event },
           );
         }
       };
       const safeClose = () => {
-        try { close(); } catch { /* ignore */ }
+        if (!clientConnected) return;
+        clientConnected = false;
+        close();
       };
 
       const backgroundWork = (async () => {
@@ -594,8 +595,13 @@ serve(async (req) => {
           } catch (geminiError) {
             console.warn("⚠️ Gemini streaming failed, falling back to OpenAI:", (geminiError as Error).message);
             streamUsedModel = "gpt-5-mini-2025-08-07";
+            // v6.9.60 — keep progress monotonic across the fallback so the
+            // client UI does not visually regress from e.g. 3/8 back to 1/8.
+            // We only restart the content buffer (because Gemini output was
+            // not valid JSON) but preserve `lastExerciseCount` so we only
+            // emit progress events when OpenAI actually surpasses it.
             fullContent = "";
-            lastExerciseCount = 0;
+            const fallbackProgressFloor = lastExerciseCount;
 
             const stream = await (openai.chat.completions.create as any)({
               model: "gpt-5-mini-2025-08-07",
@@ -612,7 +618,7 @@ serve(async (req) => {
               const delta = chunk.choices[0]?.delta?.content || "";
               fullContent += delta;
               const newCount = countExercisesInPartialJSON(fullContent);
-              if (newCount > lastExerciseCount) {
+              if (newCount > lastExerciseCount && newCount > fallbackProgressFloor) {
                 lastExerciseCount = newCount;
                 safeSend("progress", { exercisesGenerated: newCount, expectedTotal });
               }
