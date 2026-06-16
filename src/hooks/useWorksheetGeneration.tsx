@@ -698,7 +698,11 @@ export const useWorksheetGeneration = (
           } else {
             devLog('[v4.8] Marked suggestion as used:', sourceSuggestionId);
             sessionStorage.removeItem('prefillSuggestionId');
-            try { markSuggestionUsed(); } catch { /* ignore */ }
+            try {
+              const jid = activeJobIdRef.current;
+              if (jid) markSuggestionUsed(jid);
+              else markSuggestionUsed();
+            } catch { /* ignore */ }
             window.dispatchEvent(new CustomEvent('suggestionMarkedUsed', {
               detail: { suggestionId: sourceSuggestionId, worksheetId: finalWorksheetId },
             }));
