@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import { Progress } from "@/components/ui/progress";
-import { Circle, Loader2, CheckCircle2, XCircle, ChevronLeft, ChevronRight } from "lucide-react";
+import { Circle, Loader2, CheckCircle2, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import GenerationContextPanel from "@/components/generation/GenerationContextPanel";
@@ -57,6 +57,17 @@ interface GeneratingModalProps {
   jobsCount?: number;
   currentIndex?: number;
   onSelectIndex?: (index: number) => void;
+  /**
+   * v6.9.60 — Per-job metadata so the multi-generation switcher renders as a
+   * row of selectable cards (one card per concurrent generation) instead of
+   * arrow + dot navigation. Order matches the index used by `onSelectIndex`.
+   */
+  jobs?: Array<{
+    jobId: string;
+    studentName?: string | null;
+    topic?: string | null;
+    progress?: { exercisesGenerated: number; expectedTotal: number } | null;
+  }>;
 }
 
 // Section completion status
