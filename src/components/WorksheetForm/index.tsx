@@ -189,6 +189,9 @@ export default function WorksheetForm({
     lessonTime, lessonTopic, lessonGoal, grammarFocus, additionalInformation,
     englishLevel, languageStyle, selectedExercises, selectedMediaTypes,
     exerciseFocusMap, selectionMode,
+    // v6.9.60 — persist selected student id so a failed generation does
+    // not clear it on re-hydration.
+    selectedStudentId: selectedStudentId && selectedStudentId !== 'no-student' ? selectedStudentId : undefined,
   };
   const persistenceKey = userId || 'anon';
   const { clear: clearPersistedDraft } = useWorksheetFormPersistence(
