@@ -21,6 +21,7 @@ import {
   failGenerationJob,
   markSuggestionUsed,
   markTokenConsumed,
+  patchGenerationJob,
   startGenerationJob,
 } from '@/lib/worksheet/generationJobRegistry';
 import { markPersistentAutoGenerateIntentStatus } from '@/lib/worksheet/autoGenerateBootstrap';
