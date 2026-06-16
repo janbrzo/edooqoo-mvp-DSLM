@@ -469,11 +469,14 @@ const Index = () => {
           jobsCount={jobsCount}
           currentIndex={safeIdx}
           onSelectIndex={setActiveJobIdx}
+          jobs={modalJobsMeta}
           studentId={isResumedGeneration ? (activeJob?.studentId ?? null) : (worksheetState.inputParams?.studentId ?? selectedStudentId ?? null)}
           requiresAudio={isResumedGeneration ? !!activeJob?.formMeta?.requiresAudio : !!worksheetState.inputParams?.requiresAudio}
           requiresImage={isResumedGeneration ? !!activeJob?.formMeta?.requiresImage : !!worksheetState.inputParams?.requiresImage}
           hasGrammar={isResumedGeneration ? !!activeJob?.formMeta?.hasGrammar : !!worksheetState.inputParams?.hasGrammar}
-          streamProgress={streamProgress}
+          streamProgress={activeJob?.progress
+            ? { exercisesGenerated: activeJob.progress.exercisesGenerated, expectedTotal: activeJob.progress.expectedTotal }
+            : streamProgress}
           mediaGenerating={mediaGenerating}
           selectedExercises={isResumedGeneration ? activeJob?.formMeta?.selectedExercises : worksheetState.inputParams?.selectedExercises}
           errorMessage={isResumedGeneration ? null : generationError}
@@ -601,11 +604,14 @@ const Index = () => {
         jobsCount={jobsCount}
         currentIndex={safeIdx}
         onSelectIndex={setActiveJobIdx}
+        jobs={modalJobsMeta}
         studentId={isResumedGeneration ? (activeJob?.studentId ?? null) : (worksheetState.inputParams?.studentId ?? selectedStudentId ?? null)}
         requiresAudio={isResumedGeneration ? !!activeJob?.formMeta?.requiresAudio : !!worksheetState.inputParams?.requiresAudio}
         requiresImage={isResumedGeneration ? !!activeJob?.formMeta?.requiresImage : !!worksheetState.inputParams?.requiresImage}
         hasGrammar={isResumedGeneration ? !!activeJob?.formMeta?.hasGrammar : !!worksheetState.inputParams?.hasGrammar}
-        streamProgress={streamProgress}
+        streamProgress={activeJob?.progress
+          ? { exercisesGenerated: activeJob.progress.exercisesGenerated, expectedTotal: activeJob.progress.expectedTotal }
+          : streamProgress}
         mediaGenerating={mediaGenerating}
         selectedExercises={isResumedGeneration ? activeJob?.formMeta?.selectedExercises : worksheetState.inputParams?.selectedExercises}
         errorMessage={isResumedGeneration ? null : generationError}
