@@ -196,6 +196,30 @@ export function streamWorksheetGeneration(
     }
 
     console.error('❌ Stream error:', error);
+    // v6.9.60 — Treat network-class transport errors as RECOVERABLE when any
+    // progress has streamed and the caller wired the reconciliation callback.
+    // The backend `EdgeRuntime.waitUntil(backgroundWork)` keeps the worker
+    // alive after a client disconnect, so the worksheet row is very likely
+    // saved or about to be saved. Hand off to the DB reconciliation path
+    // instead of immediately surfacing a hard failure to the user.
+    const msg = (error?.message ?? String(error)) as string;
+    const isTransport =
+      error?.name === 'TypeError'
+      || msg.includes('Failed to fetch')
+      || msg.includes('NetworkError')
+      || msg.includes('network error')
+      || msg.includes('net::ERR');
+    if (
+      isTransport
+      && lastProgress.exercisesGenerated > 0
+      && callbacks.onStreamEndedWithoutTerminalEvent
+    ) {
+      callbacks.onStreamEndedWithoutTerminalEvent({
+        exercisesGenerated: lastProgress.exercisesGenerated,
+        expectedTotal: lastProgress.expectedTotal,
+      });
+      return;
+    }
     callbacks.onError?.(error);
   }).finally(() => {
     cleanupHeartbeat();
