@@ -563,7 +563,11 @@ export const useWorksheetGeneration = (
         devLog('⚠️ Failed to consume token, but worksheet was generated');
       } else {
         devLog('✅ Token consumed successfully');
-        try { markTokenConsumed(); } catch { /* ignore */ }
+        try {
+          const jid = activeJobIdRef.current;
+          if (jid) markTokenConsumed(jid);
+          else markTokenConsumed();
+        } catch { /* ignore */ }
       }
     }
     
