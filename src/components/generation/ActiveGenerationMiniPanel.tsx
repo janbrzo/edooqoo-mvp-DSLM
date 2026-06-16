@@ -15,21 +15,22 @@ import {
   clearGenerationJob,
 } from '@/lib/worksheet/generationJobRegistry';
 import { useActiveWorksheetGenerationJobs } from '@/hooks/useActiveWorksheetGenerationJob';
-import { useTabId } from '@/lib/worksheet/tabId';
 
-// v6.9.59 — realistic card height (2-line copy + button) and a slightly
-// larger gap so concurrent panels never visually overlap.
-const PANEL_HEIGHT_PX = 144;
-const PANEL_GAP_PX = 12;
+// v6.9.60 — cards now live inside a single flex stack so each card's
+// natural height drives layout; concurrent cards always sit adjacent
+// with a small fixed gap and never overlap. Cap visible to 4.
 const MAX_VISIBLE_PANELS = 4;
 
 export default function ActiveGenerationMiniPanel() {
   const jobs = useActiveWorksheetGenerationJobs();
   const location = useLocation();
   const navigate = useNavigate();
-  const tabId = useTabId();
 
-  // Track which jobIds are currently shown by an in-page modal.
+  // v6.9.60 — Track which jobIds have an in-page modal currently mounted on
+  // ANY tab. We use this to suppress the mini-card ONLY when the foreground
+  // modal of that exact job is showing in this window — so the user does
+  // not see a duplicate. Other concurrent jobs remain visible as mini-cards
+  // even if one of them is currently the active modal card.
   const [mountedJobIds, setMountedJobIds] = useState<Set<string>>(new Set());
   useEffect(() => {
     const onMount = (e: Event) => {
@@ -62,15 +63,9 @@ export default function ActiveGenerationMiniPanel() {
 
   const visibleJobs = jobs
     .filter((job) => {
-      // v6.9.59 — only hide a running job from the mini panel when its
-      // foreground modal lives in THIS tab. Jobs started in another tab
-      // must remain visible as mini panels here even if their modal is
-      // mounted somewhere else.
-      if (
-        job.status === 'running'
-        && mountedJobIds.has(job.jobId)
-        && (job.originTabId ?? null) === tabId
-      ) return false;
+      // v6.9.60 — Show running jobs as mini-cards even on the generation
+      // page; only hide a completed job's CTA when the user is already
+      // viewing that exact worksheet.
       if (
         job.status === 'completed'
         && job.worksheetId
@@ -84,12 +79,15 @@ export default function ActiveGenerationMiniPanel() {
   if (visibleJobs.length === 0) return null;
 
   return (
-    <>
-      {visibleJobs.map((job, idx) => (
+    <div
+      className="fixed right-4 bottom-4 z-[110] flex flex-col-reverse gap-2 pointer-events-none"
+      role="status"
+      aria-live="polite"
+    >
+      {visibleJobs.map((job) => (
         <MiniPanelCard
           key={job.jobId}
           job={job}
-          stackIndex={idx}
           onOpen={() => {
             if (job.worksheetId) {
               navigate(`/worksheet/${job.worksheetId}`);
@@ -99,39 +97,34 @@ export default function ActiveGenerationMiniPanel() {
           onDismiss={() => clearGenerationJob(job.jobId)}
         />
       ))}
-    </>
+    </div>
   );
 }
 
 function MiniPanelCard({
   job,
-  stackIndex,
   onOpen,
   onDismiss,
 }: {
   job: WorksheetGenerationJob;
-  stackIndex: number;
   onOpen: () => void;
   onDismiss: () => void;
 }) {
   const isRunning = job.status === 'running';
   const isCompleted = job.status === 'completed';
   const isFailed = job.status === 'failed';
-  const bottom = 16 + stackIndex * (PANEL_HEIGHT_PX + PANEL_GAP_PX);
   const studentName = job.formMeta?.studentName;
+  const progress = job.progress ?? null;
 
   return (
     <div
       className={cn(
-        'fixed right-4 z-[80] w-[300px] sm:w-[340px] rounded-xl border shadow-lg p-3',
+        'pointer-events-auto w-[300px] sm:w-[340px] rounded-xl border shadow-lg p-3',
         'bg-background/95 backdrop-blur-md',
         isRunning && 'border-primary/40',
         isCompleted && 'border-emerald-400/60',
         isFailed && 'border-destructive/50',
       )}
-      style={{ bottom }}
-      role="status"
-      aria-live="polite"
     >
       <div className="flex items-start gap-3">
         <div className="mt-0.5 shrink-0">
@@ -149,6 +142,11 @@ function MiniPanelCard({
                 {studentName ? <>For <span className="font-medium text-foreground">{studentName}</span> · </> : null}
                 {job.topic ? `“${job.topic}” — ` : ''}keeps running in the background.
               </p>
+              {progress && progress.expectedTotal > 0 ? (
+                <p className="text-[11px] text-muted-foreground/80 mt-1">
+                  Exercises: {progress.exercisesGenerated}/{progress.expectedTotal}
+                </p>
+              ) : null}
             </>
           )}
           {isCompleted && (

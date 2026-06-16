@@ -21,6 +21,7 @@ import {
   failGenerationJob,
   markSuggestionUsed,
   markTokenConsumed,
+  patchGenerationJob,
   startGenerationJob,
 } from '@/lib/worksheet/generationJobRegistry';
 import { markPersistentAutoGenerateIntentStatus } from '@/lib/worksheet/autoGenerateBootstrap';
@@ -48,6 +49,10 @@ export const useWorksheetGeneration = (
     expectedTotal: number;
   } | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
+  // v6.9.60 — jobId of the in-flight generation. Shared between
+  // generateWorksheetHandler and handleWorksheetCompletion so the
+  // completion/token/suggestion mutations are scoped to the exact job.
+  const activeJobIdRef = useRef<string | null>(null);
   const { toast } = useToast();
   const { trackEvent } = useEventTracking(userId);
   const { isDemoMode, showDemoBlockedToast } = useDemoContext();
@@ -158,12 +163,17 @@ export const useWorksheetGeneration = (
     // v6.9.53 — persist the generation as an active job so the mini panel
     // and refresh-safe polling can finish the side effects if the user
     // refreshes or navigates away mid-generation.
+    // v6.9.60 — capture the returned jobId so every later mutation
+    // (progress, complete, fail, token, suggestion) is scoped to THIS job
+    // and cannot accidentally affect another concurrent generation.
+    let activeJobId: string | null = null;
+    activeJobIdRef.current = null;
     try {
       const autoSuggestionId =
         (data as any).__autoGenerateSuggestionId
         || (typeof window !== 'undefined' && sessionStorage.getItem('prefillSuggestionId'))
         || null;
-      startGenerationJob({
+      const startedJob = startGenerationJob({
         teacherId: userId,
         studentId: effectiveStudentId,
         suggestionId: autoSuggestionId,
@@ -181,6 +191,8 @@ export const useWorksheetGeneration = (
           studentEmail: (data as any).studentEmail ?? null,
         },
       });
+      activeJobId = startedJob?.jobId ?? null;
+      activeJobIdRef.current = activeJobId;
     } catch (e) {
       devWarn('[useWorksheetGeneration] failed to start generation job', e);
     }
@@ -301,10 +313,28 @@ export const useWorksheetGeneration = (
             devLog('🚀 Streaming started');
             const expectedTotal = getExpectedExerciseCount(data.lessonTime);
             setStreamProgress({ exercisesGenerated: 0, expectedTotal });
+            if (activeJobId) {
+              try {
+                patchGenerationJob(activeJobId, {
+                  progress: { exercisesGenerated: 0, expectedTotal },
+                });
+              } catch { /* ignore */ }
+            }
           },
           onProgress: (progress) => {
             devLog(`📝 Progress: ${progress.exercisesGenerated}/${progress.expectedTotal}`);
             setStreamProgress(progress);
+            if (activeJobId) {
+              try {
+                patchGenerationJob(activeJobId, {
+                  progress: {
+                    exercisesGenerated: progress.exercisesGenerated,
+                    expectedTotal: progress.expectedTotal,
+                    phase: (progress as any)?.phase,
+                  },
+                });
+              } catch { /* ignore */ }
+            }
           },
           onDone: async (result) => {
             clearTimeout(generationTimeoutId);
@@ -333,25 +363,23 @@ export const useWorksheetGeneration = (
               await handleWorksheetCompletion(recovered, data, startTime);
               return;
             }
-            // No saved worksheet for this attempt — surface a genuine failure
-            // and DO NOT mark the Next Step suggestion as used.
+            // v6.9.60 — Do NOT immediately mark this job as failed. The
+            // backend keeps generating via `EdgeRuntime.waitUntil` and the
+            // global hook `useActiveWorksheetGenerationJobs` keeps polling
+            // for the saved worksheet by clientGenerationId. Close the
+            // in-page modal for this submit, leave the persistent job in
+            // `running` state so the mini-panel keeps showing it.
             setStreamProgress(null);
-            const detail = `Stream ended after generating ${lastProgress.exercisesGenerated}/${lastProgress.expectedTotal || '?'} exercises and no worksheet was saved. Please retry — no tokens were consumed.`;
-            setGenerationError(detail);
-            try {
-              failGenerationJob(detail);
-              const reqId = (data as any).__autoGenerateRequestId;
-              if (reqId) markPersistentAutoGenerateIntentStatus(reqId, 'failed');
-              // v6.9.57 — defensively drop legacy suggestion handle so a later
-              // retry cannot mark an unrelated suggestion as used.
-              try { sessionStorage.removeItem('prefillSuggestionId'); } catch { /* ignore */ }
-            } catch { /* ignore */ }
-            // Notify ops (anonymous-friendly: minimal context, no prompt).
+            setIsGenerating(false);
+            devLog('🛟 Transport loss — keeping job running for DB polling', {
+              clientGenerationId,
+              activeJobId,
+            });
             try {
               await supabase.functions.invoke('notify-generation-failure', {
                 body: {
-                  errorType: 'client_stream_lost_no_saved_worksheet',
-                  errorMessage: detail,
+                  errorType: 'client_stream_lost_pending_db_reconciliation',
+                  errorMessage: `Stream EOF after ${lastProgress.exercisesGenerated}/${lastProgress.expectedTotal || '?'} — handed off to DB polling`,
                   userId: userId || null,
                   teacherEmail: null,
                   model: 'unknown',
@@ -370,7 +398,11 @@ export const useWorksheetGeneration = (
             setStreamProgress(null);
             setGenerationError(error.message || "Something went wrong during generation.");
             try {
-              failGenerationJob(error.message || 'Generation failed');
+              if (activeJobId) {
+                failGenerationJob(activeJobId, error.message || 'Generation failed');
+              } else {
+                failGenerationJob(error.message || 'Generation failed');
+              }
               const reqId = (data as any).__autoGenerateRequestId;
               if (reqId) markPersistentAutoGenerateIntentStatus(reqId, 'failed');
               try { sessionStorage.removeItem('prefillSuggestionId'); } catch { /* ignore */ }
@@ -531,7 +563,11 @@ export const useWorksheetGeneration = (
         devLog('⚠️ Failed to consume token, but worksheet was generated');
       } else {
         devLog('✅ Token consumed successfully');
-        try { markTokenConsumed(); } catch { /* ignore */ }
+        try {
+          const jid = activeJobIdRef.current;
+          if (jid) markTokenConsumed(jid);
+          else markTokenConsumed();
+        } catch { /* ignore */ }
       }
     }
     
@@ -617,7 +653,11 @@ export const useWorksheetGeneration = (
       // v6.9.53 — flip the active generation job to `completed` so the global
       // mini panel switches to its CTA and the persistent intent stops firing.
       try {
-        completeGenerationJob(finalWorksheetId);
+        // v6.9.60 — scope to THIS job so a sibling running generation is not
+        // flipped to completed by accident.
+        const jid = activeJobIdRef.current;
+        if (jid) completeGenerationJob(jid, finalWorksheetId);
+        else completeGenerationJob(finalWorksheetId);
         const reqId = (data as any).__autoGenerateRequestId;
         if (reqId) markPersistentAutoGenerateIntentStatus(reqId, 'completed');
       } catch { /* ignore */ }
@@ -658,7 +698,11 @@ export const useWorksheetGeneration = (
           } else {
             devLog('[v4.8] Marked suggestion as used:', sourceSuggestionId);
             sessionStorage.removeItem('prefillSuggestionId');
-            try { markSuggestionUsed(); } catch { /* ignore */ }
+            try {
+              const jid = activeJobIdRef.current;
+              if (jid) markSuggestionUsed(jid);
+              else markSuggestionUsed();
+            } catch { /* ignore */ }
             window.dispatchEvent(new CustomEvent('suggestionMarkedUsed', {
               detail: { suggestionId: sourceSuggestionId, worksheetId: finalWorksheetId },
             }));

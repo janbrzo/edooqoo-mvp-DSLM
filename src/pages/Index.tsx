@@ -119,6 +119,18 @@ const Index = () => {
   const activeJob = myRunningJobs[safeIdx] ?? null;
   const isResumedGeneration = !!activeJob && !isGenerating;
   const jobsCount = myRunningJobs.length;
+  // v6.9.60 — Build a compact per-job descriptor for the modal card switcher.
+  const modalJobsMeta = useMemo(
+    () => myRunningJobs.map((j) => ({
+      jobId: j.jobId,
+      studentName: j.formMeta?.studentName ?? null,
+      topic: j.topic ?? null,
+      progress: j.progress
+        ? { exercisesGenerated: j.progress.exercisesGenerated, expectedTotal: j.progress.expectedTotal }
+        : null,
+    })),
+    [myRunningJobs],
+  );
   const [showTokenModal, setShowTokenModal] = useState(false);
   const [showWelcomeBackModal, setShowWelcomeBackModal] = useState(false);
   const [showOneMinutePrepDialog, setShowOneMinutePrepDialog] = useState(false);
@@ -457,11 +469,14 @@ const Index = () => {
           jobsCount={jobsCount}
           currentIndex={safeIdx}
           onSelectIndex={setActiveJobIdx}
+          jobs={modalJobsMeta}
           studentId={isResumedGeneration ? (activeJob?.studentId ?? null) : (worksheetState.inputParams?.studentId ?? selectedStudentId ?? null)}
           requiresAudio={isResumedGeneration ? !!activeJob?.formMeta?.requiresAudio : !!worksheetState.inputParams?.requiresAudio}
           requiresImage={isResumedGeneration ? !!activeJob?.formMeta?.requiresImage : !!worksheetState.inputParams?.requiresImage}
           hasGrammar={isResumedGeneration ? !!activeJob?.formMeta?.hasGrammar : !!worksheetState.inputParams?.hasGrammar}
-          streamProgress={streamProgress}
+          streamProgress={activeJob?.progress
+            ? { exercisesGenerated: activeJob.progress.exercisesGenerated, expectedTotal: activeJob.progress.expectedTotal }
+            : streamProgress}
           mediaGenerating={mediaGenerating}
           selectedExercises={isResumedGeneration ? activeJob?.formMeta?.selectedExercises : worksheetState.inputParams?.selectedExercises}
           errorMessage={isResumedGeneration ? null : generationError}
@@ -589,11 +604,14 @@ const Index = () => {
         jobsCount={jobsCount}
         currentIndex={safeIdx}
         onSelectIndex={setActiveJobIdx}
+        jobs={modalJobsMeta}
         studentId={isResumedGeneration ? (activeJob?.studentId ?? null) : (worksheetState.inputParams?.studentId ?? selectedStudentId ?? null)}
         requiresAudio={isResumedGeneration ? !!activeJob?.formMeta?.requiresAudio : !!worksheetState.inputParams?.requiresAudio}
         requiresImage={isResumedGeneration ? !!activeJob?.formMeta?.requiresImage : !!worksheetState.inputParams?.requiresImage}
         hasGrammar={isResumedGeneration ? !!activeJob?.formMeta?.hasGrammar : !!worksheetState.inputParams?.hasGrammar}
-        streamProgress={streamProgress}
+        streamProgress={activeJob?.progress
+          ? { exercisesGenerated: activeJob.progress.exercisesGenerated, expectedTotal: activeJob.progress.expectedTotal }
+          : streamProgress}
         mediaGenerating={mediaGenerating}
         selectedExercises={isResumedGeneration ? activeJob?.formMeta?.selectedExercises : worksheetState.inputParams?.selectedExercises}
         errorMessage={isResumedGeneration ? null : generationError}
