@@ -167,6 +167,7 @@ export const useWorksheetGeneration = (
     // (progress, complete, fail, token, suggestion) is scoped to THIS job
     // and cannot accidentally affect another concurrent generation.
     let activeJobId: string | null = null;
+    activeJobIdRef.current = null;
     try {
       const autoSuggestionId =
         (data as any).__autoGenerateSuggestionId
