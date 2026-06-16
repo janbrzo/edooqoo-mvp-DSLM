@@ -426,41 +426,53 @@ export default function GeneratingModal({
             Generating Your Worksheet
           </h2>
           {jobsCount > 1 ? (
-            <div className="flex items-center justify-center gap-2 pt-1">
-              <button
-                type="button"
-                aria-label="Previous generation"
-                className="rounded-md border border-muted-foreground/20 p-1 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition"
-                onClick={() => onSelectIndex?.((currentIndex - 1 + jobsCount) % jobsCount)}
-              >
-                <ChevronLeft className="h-3.5 w-3.5" />
-              </button>
-              <span className="text-[11px] font-medium text-muted-foreground">
-                Generation {currentIndex + 1} / {jobsCount}
-              </span>
-              <button
-                type="button"
-                aria-label="Next generation"
-                className="rounded-md border border-muted-foreground/20 p-1 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition"
-                onClick={() => onSelectIndex?.((currentIndex + 1) % jobsCount)}
-              >
-                <ChevronRight className="h-3.5 w-3.5" />
-              </button>
-              <div className="flex items-center gap-1 ml-1">
-                {Array.from({ length: jobsCount }).map((_, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    aria-label={`Go to generation ${i + 1}`}
-                    onClick={() => onSelectIndex?.(i)}
-                    className={cn(
-                      'h-1.5 w-1.5 rounded-full transition',
-                      i === currentIndex
-                        ? 'bg-violet-500'
-                        : 'bg-muted-foreground/30 hover:bg-muted-foreground/60'
-                    )}
-                  />
-                ))}
+            <div className="pt-2">
+              <div className="flex items-center gap-2 overflow-x-auto pb-1 -mx-1 px-1">
+                {Array.from({ length: jobsCount }).map((_, i) => {
+                  const meta = jobs?.[i];
+                  const isActive = i === currentIndex;
+                  const topicLabel = meta?.topic
+                    ? (meta.topic.length > 28 ? `${meta.topic.slice(0, 27)}…` : meta.topic)
+                    : null;
+                  const progressLabel = meta?.progress && meta.progress.expectedTotal > 0
+                    ? `${meta.progress.exercisesGenerated}/${meta.progress.expectedTotal}`
+                    : null;
+                  return (
+                    <button
+                      key={meta?.jobId ?? i}
+                      type="button"
+                      onClick={() => onSelectIndex?.(i)}
+                      aria-pressed={isActive}
+                      className={cn(
+                        'shrink-0 text-left rounded-lg border px-2.5 py-1.5 transition min-w-[140px]',
+                        isActive
+                          ? 'border-violet-500 bg-violet-50 text-foreground shadow-sm'
+                          : 'border-muted-foreground/20 bg-background hover:border-muted-foreground/40 text-muted-foreground hover:text-foreground'
+                      )}
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="text-[11px] font-semibold uppercase tracking-wide">
+                          Generation {i + 1}
+                        </span>
+                        {progressLabel ? (
+                          <span className="text-[10px] font-medium text-muted-foreground">
+                            {progressLabel}
+                          </span>
+                        ) : null}
+                      </div>
+                      {meta?.studentName ? (
+                        <div className="text-[11px] font-medium text-foreground truncate">
+                          For {meta.studentName}
+                        </div>
+                      ) : null}
+                      {topicLabel ? (
+                        <div className="text-[10px] text-muted-foreground/80 truncate">
+                          “{topicLabel}”
+                        </div>
+                      ) : null}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           ) : null}
