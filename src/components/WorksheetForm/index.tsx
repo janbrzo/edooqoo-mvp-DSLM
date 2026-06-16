@@ -224,6 +224,12 @@ export default function WorksheetForm({
         if (draft.selectionMode === 'manual' || draft.selectionMode === 'random' || draft.selectionMode === 'smart') {
           setSelectionMode(draft.selectionMode as ExerciseSelectionMode);
         }
+        // v6.9.60 — Restore previously selected student so a retry after a
+        // generation error keeps the same learner context (and the CEFR
+        // band / exercise defaults that follow from it).
+        if (typeof draft.selectedStudentId === 'string' && draft.selectedStudentId.length > 0) {
+          setSelectedStudentId(draft.selectedStudentId);
+        }
         if ((draft.lessonGoal?.length ?? 0) > 0 || (draft.grammarFocus?.length ?? 0) > 0 || (draft.additionalInformation?.length ?? 0) > 0) {
           setShowMoreFields(true);
         }
