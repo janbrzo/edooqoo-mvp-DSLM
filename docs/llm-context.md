@@ -1197,6 +1197,29 @@ stacking, modal switcher, multi-generation UX, refresh-safe generation,
 worksheet generation jobs, race condition fix, token transactions
 dedupe, per-tab UI scoping, lovable cloud, generation modal arrows.
 
+## v6.9.60 — Generation transport recovery, multi-job UI, mini-panel layout, form draft restore
+
+PROBLEM: A browser refresh during one or two concurrent worksheet generations surfaced a spurious "network error" toast and back-end logs spammed `Failed to send SSE message` / `Failed to close SSE stream` even though `EdgeRuntime.waitUntil` was still saving the worksheet. When two generations ran concurrently the modal only showed the newer one as a small arrow strip, the mini-panel was hidden on the generation page itself, two mini-panel cards sat far apart with a large vertical gap, and a single completed job flipped both mini-cards to "ready" because completion/failure mutated the latest job instead of the exact `jobId`. After a generation error the form draft restored topic/CEFR/exercises but silently dropped the selected student, which in turn changed CEFR defaults.
+
+EDOOQOO SOLUTION:
+1. `supabase/functions/generateWorksheet/streaming.ts` — `send()` returns a boolean and stops on first failure; `close()` is idempotent; keepalive aborts cleanly on close. `index.ts` `safeSend`/`safeClose` trust the boolean and switch to background-only mode silently. Gemini→OpenAI fallback preserves `lastExerciseCount` (monotonic progress).
+2. `src/services/worksheetStreamService.ts` — `TypeError` / `Failed to fetch` / `NetworkError` / `net::ERR` after any progress route to `onStreamEndedWithoutTerminalEvent` instead of `onError`.
+3. `src/hooks/useWorksheetGeneration.tsx` — captures `activeJobId` from `startGenerationJob` into `activeJobIdRef`; transport loss closes the in-page modal but leaves the persistent job `running` so `useActiveWorksheetGenerationJobs` polling can finish via DB reconciliation by `clientGenerationId`; every `completeGenerationJob` / `failGenerationJob` / `markTokenConsumed` / `markSuggestionUsed` call is scoped to the captured jobId; new `patchGenerationJob` calls write live `progress` per job from `onStart` / `onProgress`.
+4. `src/lib/worksheet/generationJobRegistry.ts` — `WorksheetGenerationJob.progress` (`exercisesGenerated`, `expectedTotal`, optional `phase`).
+5. `src/components/GeneratingModal.tsx` — new optional `jobs` prop; when `jobsCount > 1` renders a horizontal row of selectable cards (generation N, student name, truncated topic, X/Y) instead of the previous arrow + dot strip.
+6. `src/pages/Index.tsx` — builds `modalJobsMeta` from running jobs; passes it to both modal instances; prefers `activeJob.progress` over local `streamProgress` so the visible card always reflects the selected job.
+7. `src/components/generation/ActiveGenerationMiniPanel.tsx` — single `fixed right-4 bottom-4 z-[110] flex flex-col-reverse gap-2` container; cards have natural height and never overlap; same-tab mounted-modal no longer hides the mini-card; running cards render live `X/Y` progress.
+8. `src/hooks/useWorksheetFormPersistence.ts` and `src/components/WorksheetForm/index.tsx` — `WorksheetDraft.selectedStudentId` is included in the 24h localStorage draft and hydrated on mount, so a failed generation re-mount keeps the chosen learner, CEFR band, and exercise defaults.
+
+TECHNICAL MECHANICS:
+- No prompt wording, model parameters, or pedagogical pipeline changes.
+- Token consumption remains idempotent at the DB level (`consume_token` advisory lock + `reference_id` existence check from v6.9.59) and is now also job-scoped on the client.
+- SSE events (`start`, `progress`, `done`, `error`) remain wire-compatible.
+- Modal portal pattern (`createPortal` + `z-[100]`) preserved.
+- Mini-panel uses `z-[110]` so it sits above the footer's `backdrop-blur` stacking context.
+
+RAG KEYWORDS: SSE disconnect recovery, idempotent SSE controller, stream controller cannot close or enqueue, refresh-safe worksheet generation, clientGenerationId reconciliation, transport-loss handoff, EdgeRuntime waitUntil, multi-generation modal cards, generation card switcher, mini-panel flex stack, mini-panel generation page visibility, job-scoped completion, job-scoped failure, per-job live progress, patchGenerationJob, Gemini OpenAI fallback monotonic progress, selectedStudentId draft persistence, form draft after error, Worksheet Generation Engine sanctity.
+
 ## Content Operating System — Newsletter Consent and Evidence Gates
 
 STATUS: PRODUCTION CODE; SUPABASE MIGRATION AND EDGE FUNCTION DEPLOYMENT REQUIRED
