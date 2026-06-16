@@ -5,8 +5,18 @@
 
 export interface SSEStream {
   readable: ReadableStream;
-  send: (event: string, data: any) => void;
-  close: () => void;
+  /**
+   * Returns true when the message was actually enqueued. Returns false when
+   * the underlying controller is already closed (client disconnect or earlier
+   * enqueue failure). Callers MUST treat `false` as a signal that the stream
+   * is no longer connected and stop further writes.
+   */
+  send: (event: string, data: any) => boolean;
+  /**
+   * Idempotent close. Returns true if it actually closed the controller,
+   * false if the stream was already closed.
+   */
+  close: () => boolean;
 }
 
 /**
@@ -40,6 +50,7 @@ export function createSSEStream(): SSEStream {
         try {
           controller.enqueue(encoder.encode(`: keepalive ${Date.now()}\n\n`));
         } catch {
+          closed = true;
           stopKeepalive();
         }
       }, 15000) as unknown as number;
@@ -54,22 +65,34 @@ export function createSSEStream(): SSEStream {
   return {
     readable,
     send: (event: string, data: any) => {
+      if (closed) return false;
       try {
         const sseMessage = `event: ${event}\ndata: ${JSON.stringify(data)}\n\n`;
         controller.enqueue(encoder.encode(sseMessage));
         console.log(`📡 SSE sent: ${event}`, data);
+        return true;
       } catch (error) {
-        console.error('❌ Failed to send SSE message:', error);
+        // Most common cause: client disconnected (refresh/navigate) and the
+        // controller is already closed. Flip our flag and stop the keepalive
+        // timer so we don't spam logs or attempt further writes.
+        closed = true;
+        stopKeepalive();
+        console.log('📴 SSE send aborted — stream already closed:', (error as Error)?.message ?? String(error));
+        return false;
       }
     },
     close: () => {
+      if (closed) return false;
       try {
         closed = true;
         stopKeepalive();
         controller.close();
         console.log('✅ SSE stream closed');
+        return true;
       } catch (error) {
-        console.error('❌ Failed to close SSE stream:', error);
+        // Already closed by the runtime — treat as a no-op.
+        console.log('📴 SSE close skipped — stream already closed:', (error as Error)?.message ?? String(error));
+        return false;
       }
     }
   };
