@@ -192,6 +192,7 @@ export const useWorksheetGeneration = (
         },
       });
       activeJobId = startedJob?.jobId ?? null;
+      activeJobIdRef.current = activeJobId;
     } catch (e) {
       devWarn('[useWorksheetGeneration] failed to start generation job', e);
     }
