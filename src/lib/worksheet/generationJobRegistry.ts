@@ -55,12 +55,23 @@ export interface WorksheetGenerationJob {
     expectedTotal: number;
     phase?: string;
   } | null;
+  /**
+   * v6.9.61 — Epoch ms after which a `failed` job is no longer pollable for
+   * background recovery. Set when `failGenerationJob` flips a job to failed
+   * (default: now + 60 s). Cancellations explicitly clear this (null) so the
+   * poller does not try to "recover" a user-aborted run.
+   */
+  recoveryDeadlineAt?: number | null;
 }
 
 const STORAGE_KEY_V2 = 'edooqoo.activeWorksheetGenerations'; // v6.9.58 multi-job map
 const LEGACY_STORAGE_KEY = 'edooqoo.activeWorksheetGeneration'; // v6.9.53 single-job
-const JOB_TTL_MS = 15 * 60 * 1000; // 15 minutes upper bound for any job
+// v6.9.61 — Hard backend timeout for `running` jobs. After this window, the
+// global poller flips them to `failed` with a clear timeout message so the
+// modal/mini-panel doesn't spin forever when the backend actually crashed.
+const RUNNING_TTL_MS = 4 * 60 * 1000; // 4 minutes
 const COMPLETED_TTL_MS = 24 * 60 * 60 * 1000; // keep completed CTA for 24h
+const RECOVERY_WINDOW_MS = 60 * 1000; // failed → DB-poll recovery grace
 
 const EVENT_NAME = 'edooqoo:generationJobUpdated';
 
@@ -77,7 +88,7 @@ type JobMap = Record<string, WorksheetGenerationJob>;
 
 function isExpired(job: WorksheetGenerationJob): boolean {
   const age = Date.now() - (job.startedAt ?? 0);
-  if (job.status === 'running') return age > JOB_TTL_MS;
+  if (job.status === 'running') return age > RUNNING_TTL_MS;
   return age > COMPLETED_TTL_MS;
 }
 
@@ -267,10 +278,76 @@ export function failGenerationJob(
     status: 'failed',
     errorMessage: message,
     updatedAt: Date.now(),
+    // v6.9.61 — open a recovery window so the global DB poller can still
+    // promote this job back to `completed` if the backend (running via
+    // EdgeRuntime.waitUntil) saves the worksheet within RECOVERY_WINDOW_MS.
+    recoveryDeadlineAt: Date.now() + RECOVERY_WINDOW_MS,
   };
   map[jobId] = next;
   writeMap(map);
   return next;
+}
+
+/**
+ * v6.9.61 — Promote a `failed` job back to `completed` after the DB poller
+ * located the worksheet that was saved in the background. Idempotent —
+ * returns null if jobId is unknown.
+ */
+export function recoverJobToCompleted(
+  jobId: string,
+  worksheetId: string,
+): WorksheetGenerationJob | null {
+  const map = readMap();
+  if (!map[jobId]) return null;
+  const next: WorksheetGenerationJob = {
+    ...map[jobId],
+    status: 'completed',
+    worksheetId,
+    errorMessage: null,
+    recoveryDeadlineAt: null,
+    updatedAt: Date.now(),
+  };
+  map[jobId] = next;
+  writeMap(map);
+  return next;
+}
+
+/**
+ * v6.9.61 — Joblist eligible for DB polling: still running, OR recently
+ * failed but inside the recovery window (backend may still save).
+ */
+export function getPollableJobs(): WorksheetGenerationJob[] {
+  const now = Date.now();
+  return Object.values(readMap()).filter((j) => {
+    if (j.status === 'running') return true;
+    if (j.status === 'failed' && j.recoveryDeadlineAt && now < j.recoveryDeadlineAt) return true;
+    return false;
+  });
+}
+
+/**
+ * v6.9.61 — Flip `running` jobs older than RUNNING_TTL_MS to `failed` with a
+ * timeout message. Called periodically from the global poller so a dead
+ * backend does not leave a spinner forever. Returns the jobs that flipped.
+ */
+export function expireStaleRunningJobs(): WorksheetGenerationJob[] {
+  const map = readMap();
+  const flipped: WorksheetGenerationJob[] = [];
+  const now = Date.now();
+  for (const [id, job] of Object.entries(map)) {
+    if (job.status === 'running' && now - (job.startedAt ?? now) > RUNNING_TTL_MS) {
+      map[id] = {
+        ...job,
+        status: 'failed',
+        errorMessage: 'Backend did not respond within 4 minutes. No tokens were consumed.',
+        recoveryDeadlineAt: null, // hard timeout — no recovery
+        updatedAt: now,
+      };
+      flipped.push(map[id]);
+    }
+  }
+  if (flipped.length > 0) writeMap(map);
+  return flipped;
 }
 
 export function markTokenConsumed(jobId?: string): WorksheetGenerationJob | null {

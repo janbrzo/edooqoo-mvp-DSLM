@@ -15,10 +15,12 @@ import { supabase } from '@/integrations/supabase/client';
 import {
   WorksheetGenerationJob,
   completeGenerationJob,
+  expireStaleRunningJobs,
   getActiveGenerationJob,
   getActiveGenerationJobs,
   markSuggestionUsed,
   markTokenConsumed,
+  recoverJobToCompleted,
   subscribeToGenerationJob,
   subscribeToGenerationJobs,
 } from '@/lib/worksheet/generationJobRegistry';
@@ -127,15 +129,29 @@ export function useActiveWorksheetGenerationJob() {
     return () => unsub();
   }, []);
 
+  // v6.9.61 — periodic stale-running expiry so a dead backend cannot leave
+  // a spinner forever in the mini-panel / modal.
   useEffect(() => {
-    if (!job || job.status !== 'running') return;
+    const handle = window.setInterval(() => {
+      try { expireStaleRunningJobs(); } catch { /* ignore */ }
+    }, 30_000);
+    return () => window.clearInterval(handle);
+  }, []);
+
+  useEffect(() => {
+    if (!job) return;
+    const isPollable = job.status === 'running'
+      || (job.status === 'failed' && !!job.recoveryDeadlineAt && Date.now() < job.recoveryDeadlineAt);
+    if (!isPollable) return;
     let cancelled = false;
     const tick = async () => {
       if (cancelled) return;
       const wsId = await locateBackendWorksheet(job);
       if (cancelled || !wsId) return;
-      devLog('[useActiveWorksheetGenerationJob] detected worksheet for active job', { wsId, jobId: job.jobId });
-      const next = completeGenerationJob(job.jobId, wsId);
+      devLog('[useActiveWorksheetGenerationJob] detected worksheet for active job', { wsId, jobId: job.jobId, status: job.status });
+      const next = job.status === 'failed'
+        ? recoverJobToCompleted(job.jobId, wsId)
+        : completeGenerationJob(job.jobId, wsId);
       if (next) {
         await applyCompletionSideEffects(next, wsId, user?.id ?? null);
       }
@@ -147,7 +163,7 @@ export function useActiveWorksheetGenerationJob() {
       cancelled = true;
       window.clearInterval(handle);
     };
-  }, [job?.jobId, job?.status, user?.id]);
+  }, [job?.jobId, job?.status, job?.recoveryDeadlineAt, user?.id]);
 
   return job;
 }
@@ -167,11 +183,27 @@ export function useActiveWorksheetGenerationJobs(): WorksheetGenerationJob[] {
     return () => unsub();
   }, []);
 
-  // Per-job polling for any running jobs.
-  const runningIds = jobs.filter((j) => j.status === 'running').map((j) => j.jobId).join(',');
+  // v6.9.61 — periodic stale-running expiry (4 min hard timeout).
   useEffect(() => {
-    if (!runningIds) return;
-    const ids = runningIds.split(',').filter(Boolean);
+    const handle = window.setInterval(() => {
+      try { expireStaleRunningJobs(); } catch { /* ignore */ }
+    }, 30_000);
+    return () => window.clearInterval(handle);
+  }, []);
+
+  // v6.9.61 — Per-job polling covers running jobs AND recently-failed jobs
+  // still inside their recovery window. This lets a network-error fail
+  // promote back to completed once the backend (EdgeRuntime.waitUntil)
+  // saves the worksheet, so tokens/next-step side effects still run.
+  const now = Date.now();
+  const pollableIds = jobs
+    .filter((j) => j.status === 'running'
+      || (j.status === 'failed' && !!j.recoveryDeadlineAt && now < j.recoveryDeadlineAt))
+    .map((j) => j.jobId)
+    .join(',');
+  useEffect(() => {
+    if (!pollableIds) return;
+    const ids = pollableIds.split(',').filter(Boolean);
     let cancelled = false;
     const handles: number[] = [];
     for (const id of ids) {
@@ -181,8 +213,10 @@ export function useActiveWorksheetGenerationJobs(): WorksheetGenerationJob[] {
         if (cancelled) return;
         const wsId = await locateBackendWorksheet(job);
         if (cancelled || !wsId) return;
-        devLog('[useActiveWorksheetGenerationJobs] detected worksheet', { wsId, jobId: job.jobId });
-        const next = completeGenerationJob(job.jobId, wsId);
+        devLog('[useActiveWorksheetGenerationJobs] detected worksheet', { wsId, jobId: job.jobId, status: job.status });
+        const next = job.status === 'failed'
+          ? recoverJobToCompleted(job.jobId, wsId)
+          : completeGenerationJob(job.jobId, wsId);
         if (next) {
           await applyCompletionSideEffects(next, wsId, user?.id ?? null);
         }
@@ -195,7 +229,7 @@ export function useActiveWorksheetGenerationJobs(): WorksheetGenerationJob[] {
       for (const h of handles) window.clearInterval(h);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [runningIds, user?.id]);
+  }, [pollableIds, user?.id]);
 
   return jobs;
 }
