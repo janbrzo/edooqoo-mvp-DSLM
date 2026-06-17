@@ -531,6 +531,12 @@ export default function GeneratingModal({
               </span>
             </p>
           ) : null}
+          {/* v6.9.62 P5 — topic preview under student row (single-job header). */}
+          {jobsCount <= 1 && jobs && jobs[0]?.topic ? (
+            <p className="text-[11px] lg:text-xs text-muted-foreground/80 truncate">
+              “{jobs[0].topic.length > 80 ? `${jobs[0].topic.slice(0, 79)}…` : jobs[0].topic}”
+            </p>
+          ) : null}
         </div>
 
         <Progress
