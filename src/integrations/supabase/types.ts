@@ -1059,6 +1059,7 @@ export type Database = {
           card_position: number
           cefr_level: string | null
           created_at: string | null
+          created_by_student: boolean
           deleted_at: string | null
           front_example: string | null
           front_text: string
@@ -1072,6 +1073,7 @@ export type Database = {
           card_position?: number
           cefr_level?: string | null
           created_at?: string | null
+          created_by_student?: boolean
           deleted_at?: string | null
           front_example?: string | null
           front_text: string
@@ -1085,6 +1087,7 @@ export type Database = {
           card_position?: number
           cefr_level?: string | null
           created_at?: string | null
+          created_by_student?: boolean
           deleted_at?: string | null
           front_example?: string | null
           front_text?: string
@@ -1187,6 +1190,7 @@ export type Database = {
       }
       flashcard_sets: {
         Row: {
+          allow_student_contributions: boolean
           back_type: string | null
           created_at: string | null
           deleted_at: string | null
@@ -1201,6 +1205,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          allow_student_contributions?: boolean
           back_type?: string | null
           created_at?: string | null
           deleted_at?: string | null
@@ -1215,6 +1220,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          allow_student_contributions?: boolean
           back_type?: string | null
           created_at?: string | null
           deleted_at?: string | null
@@ -4078,6 +4084,16 @@ export type Database = {
       soft_delete_worksheet: {
         Args: { p_teacher_id: string; p_worksheet_id: string }
         Returns: boolean
+      }
+      student_add_flashcard: {
+        Args: {
+          p_back: string
+          p_front: string
+          p_native?: string
+          p_set_id: string
+          p_student_email: string
+        }
+        Returns: string
       }
       submit_homework_answers: {
         Args: { p_homework_id: string; p_student_email: string }
