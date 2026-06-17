@@ -316,12 +316,12 @@ export default function MediaSection({
           <div className="flex items-center justify-center gap-2 text-sm text-gray-500">
             <span>Photo by: </span>
             <a
-              href="https://deepmind.google/models/imagen/"
+              href="https://deepmind.google/models/gemini/"
               target="_blank"
               rel="noopener noreferrer"
               className="font-medium text-worksheet-purple hover:underline inline-flex items-center gap-1"
             >
-              Google Imagen 4.0 Fast
+              Google Gemini 3.1 Flash Image
               <ExternalLink className="h-3 w-3" />
             </a>
           </div>
