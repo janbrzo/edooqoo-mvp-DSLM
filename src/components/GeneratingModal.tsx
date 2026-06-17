@@ -558,7 +558,18 @@ export default function GeneratingModal({
             {studentName ? (
               <>
                 {' '}
-                <span className="font-medium text-foreground">{studentName}</span>
+                {studentId ? (
+                  <a
+                    href={`/student/${studentId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-medium text-foreground underline-offset-2 hover:underline"
+                  >
+                    {studentName}
+                  </a>
+                ) : (
+                  <span className="font-medium text-foreground">{studentName}</span>
+                )}
               </>
             ) : (
               ' your students'

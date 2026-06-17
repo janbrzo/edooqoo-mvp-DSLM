@@ -22,7 +22,9 @@ export default function GlobalGeneratingModal() {
   const myPollableJobs = useMemo(() => {
     const now = Date.now();
     return allJobs
-      .filter((j) => (j.originTabId ?? null) === tabId)
+      // v6.9.62 P1 — accept legacy jobs without an originTabId so multi-job
+      // switcher reappears after a refresh on tabs that started >1 job.
+      .filter((j) => j.originTabId == null || j.originTabId === tabId)
       .filter((j) =>
         j.status === 'running'
         || (j.status === 'failed' && !!j.recoveryDeadlineAt && now < j.recoveryDeadlineAt),
