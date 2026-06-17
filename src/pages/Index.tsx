@@ -424,36 +424,6 @@ const Index = () => {
           />
         )}
         
-        <GeneratingModal 
-          isOpen={isGenerating || isResumedGeneration} 
-          isResumed={isResumedGeneration}
-          startedAt={activeJob?.startedAt}
-          jobId={activeJob?.jobId ?? null}
-          jobsCount={jobsCount}
-          currentIndex={safeIdx}
-          onSelectIndex={setActiveJobIdx}
-          jobs={modalJobsMeta}
-          studentId={isResumedGeneration ? (activeJob?.studentId ?? null) : (worksheetState.inputParams?.studentId ?? selectedStudentId ?? null)}
-          requiresAudio={isResumedGeneration ? !!activeJob?.formMeta?.requiresAudio : !!worksheetState.inputParams?.requiresAudio}
-          requiresImage={isResumedGeneration ? !!activeJob?.formMeta?.requiresImage : !!worksheetState.inputParams?.requiresImage}
-          hasGrammar={isResumedGeneration ? !!activeJob?.formMeta?.hasGrammar : !!worksheetState.inputParams?.hasGrammar}
-          streamProgress={activeJob?.progress
-            ? { exercisesGenerated: activeJob.progress.exercisesGenerated, expectedTotal: activeJob.progress.expectedTotal }
-            : streamProgress}
-          mediaGenerating={mediaGenerating}
-          selectedExercises={isResumedGeneration ? activeJob?.formMeta?.selectedExercises : worksheetState.inputParams?.selectedExercises}
-          errorMessage={isResumedGeneration ? null : generationError}
-          onRetry={isResumedGeneration ? undefined : clearGenerationError}
-          studentName={
-            isResumedGeneration
-              ? activeJob?.formMeta?.studentName ?? undefined
-              :
-            worksheetState.inputParams?.studentName
-            || (typeof window !== 'undefined' ? (sessionStorage.getItem('worksheetStudentName') || undefined) : undefined)
-          }
-          studentEmail={isResumedGeneration ? (activeJob?.formMeta?.studentEmail ?? null) : (worksheetState.inputParams?.studentEmail ?? null)}
-        />
-        
         <TokenPaywallModal
           isOpen={showTokenModal}
           onClose={() => setShowTokenModal(false)}
@@ -558,37 +528,6 @@ const Index = () => {
           {!isRegisteredUser && <AnonPostWorksheetLandingPage />}
         </>
       )}
-      
-      <GeneratingModal 
-        isOpen={isGenerating || isResumedGeneration} 
-        isResumed={isResumedGeneration}
-        startedAt={activeJob?.startedAt}
-        jobId={activeJob?.jobId ?? null}
-        jobsCount={jobsCount}
-        currentIndex={safeIdx}
-        onSelectIndex={setActiveJobIdx}
-        jobs={modalJobsMeta}
-        studentId={isResumedGeneration ? (activeJob?.studentId ?? null) : (worksheetState.inputParams?.studentId ?? selectedStudentId ?? null)}
-        requiresAudio={isResumedGeneration ? !!activeJob?.formMeta?.requiresAudio : !!worksheetState.inputParams?.requiresAudio}
-        requiresImage={isResumedGeneration ? !!activeJob?.formMeta?.requiresImage : !!worksheetState.inputParams?.requiresImage}
-        hasGrammar={isResumedGeneration ? !!activeJob?.formMeta?.hasGrammar : !!worksheetState.inputParams?.hasGrammar}
-        streamProgress={activeJob?.progress
-          ? { exercisesGenerated: activeJob.progress.exercisesGenerated, expectedTotal: activeJob.progress.expectedTotal }
-          : streamProgress}
-        mediaGenerating={mediaGenerating}
-        selectedExercises={isResumedGeneration ? activeJob?.formMeta?.selectedExercises : worksheetState.inputParams?.selectedExercises}
-        errorMessage={isResumedGeneration ? null : generationError}
-        onRetry={isResumedGeneration ? undefined : clearGenerationError}
-        isAnonymous={true}
-        studentName={
-          isResumedGeneration
-            ? activeJob?.formMeta?.studentName ?? undefined
-            :
-          worksheetState.inputParams?.studentName
-          || (typeof window !== 'undefined' ? (sessionStorage.getItem('worksheetStudentName') || undefined) : undefined)
-        }
-        studentEmail={isResumedGeneration ? (activeJob?.formMeta?.studentEmail ?? null) : (worksheetState.inputParams?.studentEmail ?? null)}
-      />
       
       <TokenPaywallModal
         isOpen={showTokenModal}
