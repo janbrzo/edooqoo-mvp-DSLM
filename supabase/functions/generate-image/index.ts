@@ -63,10 +63,10 @@ serve(async (req) => {
 
     console.log(`[GENERATE-IMAGE] Starting image generation for topic: "${topic}", level: ${englishLevel}, user: ${userId}`);
 
-    // STEP 1 (v6.9.61): Generate image using Vertex AI Gemini 3.1 Flash Image
-    // (Nano Banana 2). Replaces deprecated imagen-4.0-fast-generate-001.
-    // Same service-account auth and same GCP project — only the endpoint,
-    // request body and response parser changed.
+    // STEP 1 (v6.9.62 P2): Generate image via Vertex AI Gemini Image models.
+    // Use PRIMARY then FALLBACK on 404 / NOT_FOUND so a region/preview rename
+    // does not block media generation. PRIMARY can be overridden via env var
+    // GEMINI_IMAGE_MODEL. Default chain: gemini-2.5-flash-image → gemini-3.1-flash-image-preview.
     const imagePrompt = createImagePrompt(topic, englishLevel);
     console.log(`[GENERATE-IMAGE] Image prompt: ${imagePrompt.substring(0, 150)}...`);
 
@@ -81,48 +81,70 @@ serve(async (req) => {
       throw new Error("GEMINI_VERTEX_API_KEY must be a valid service account JSON");
     }
 
-    const MODEL_ID = "gemini-3.1-flash-image-preview";
-    const vertexEndpoint = `https://us-central1-aiplatform.googleapis.com/v1/projects/${projectId}/locations/us-central1/publishers/google/models/${MODEL_ID}:generateContent`;
+    const PRIMARY_MODEL = Deno.env.get("GEMINI_IMAGE_MODEL") || "gemini-2.5-flash-image";
+    const FALLBACK_MODELS = ["gemini-3.1-flash-image-preview", "gemini-2.5-flash-image"]
+      .filter((m) => m !== PRIMARY_MODEL);
+    const MODEL_CHAIN = [PRIMARY_MODEL, ...FALLBACK_MODELS];
 
-    const imageResponse = await fetch(vertexEndpoint, {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        contents: [
-          {
-            role: "user",
-            parts: [{ text: imagePrompt }],
-          },
-        ],
-        generationConfig: {
-          responseModalities: ["IMAGE"],
-          imageConfig: { aspectRatio: "16:9" },
+    const callVertex = async (modelId: string) => {
+      const endpoint = `https://us-central1-aiplatform.googleapis.com/v1/projects/${projectId}/locations/us-central1/publishers/google/models/${modelId}:generateContent`;
+      const resp = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json",
         },
-        safetySettings: [
-          { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_ONLY_HIGH" },
-          { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_ONLY_HIGH" },
-          { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_ONLY_HIGH" },
-          { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_ONLY_HIGH" },
-        ],
-      }),
-    });
+        body: JSON.stringify({
+          contents: [{ role: "user", parts: [{ text: imagePrompt }] }],
+          generationConfig: {
+            responseModalities: ["IMAGE"],
+            imageConfig: { aspectRatio: "16:9" },
+          },
+          safetySettings: [
+            { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_ONLY_HIGH" },
+            { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_ONLY_HIGH" },
+            { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_ONLY_HIGH" },
+            { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_ONLY_HIGH" },
+          ],
+        }),
+      });
+      return { resp, endpoint };
+    };
 
-    if (!imageResponse.ok) {
-      const errorText = await imageResponse.text();
-      console.error(`[GENERATE-IMAGE] Vertex AI error: ${imageResponse.status} - ${errorText}`);
+    let imageResponse: Response | null = null;
+    let activeEndpoint = "";
+    let MODEL_ID = PRIMARY_MODEL;
+    let lastErrorText = "";
+    for (const modelId of MODEL_CHAIN) {
+      console.log(`[GENERATE-IMAGE] Attempt model: ${modelId}`);
+      const { resp, endpoint } = await callVertex(modelId);
+      if (resp.ok) {
+        imageResponse = resp;
+        activeEndpoint = endpoint;
+        MODEL_ID = modelId;
+        break;
+      }
+      lastErrorText = await resp.text();
+      console.warn(`[GENERATE-IMAGE] Model ${modelId} failed: ${resp.status} - ${lastErrorText.slice(0, 200)}`);
       await logModelFailure({
-        model: MODEL_ID,
+        model: modelId,
         provider: 'google-vertex',
-        status: imageResponse.status,
-        endpoint: vertexEndpoint,
-        error: errorText.slice(0, 500),
+        status: resp.status,
+        endpoint,
+        error: lastErrorText.slice(0, 500),
         functionName: 'generate-image',
       });
-      throw new Error(`Image generation failed: ${imageResponse.status} - ${errorText}`);
+      // Only fall back on 404 / NOT_FOUND / model-not-available signals.
+      const isMissing = resp.status === 404
+        || /NOT_FOUND|was not found|is not found|does not exist|unsupported/i.test(lastErrorText);
+      if (!isMissing) {
+        throw new Error(`Image generation failed: ${resp.status} - ${lastErrorText}`);
+      }
     }
+    if (!imageResponse) {
+      throw new Error(`Image generation failed for all models. Last error: ${lastErrorText}`);
+    }
+    console.log(`[GENERATE-IMAGE] Using model: ${MODEL_ID} @ ${activeEndpoint}`);
 
     const imageData = await imageResponse.json();
     // Gemini Image response: candidates[0].content.parts → first part with inlineData.
