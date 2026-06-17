@@ -68,6 +68,12 @@ interface GeneratingModalProps {
     topic?: string | null;
     progress?: { exercisesGenerated: number; expectedTotal: number } | null;
   }>;
+  /**
+   * v6.9.61 — When true the job is in a transient `failed` state inside the
+   * recovery window: backend may still save the worksheet. We show a
+   * "checking server" banner instead of the destructive error UI.
+   */
+  recovering?: boolean;
 }
 
 // Section completion status
@@ -189,6 +195,7 @@ export default function GeneratingModal({
   currentIndex = 0,
   onSelectIndex,
   jobs,
+  recovering = false,
 }: GeneratingModalProps) {
   // v6.9.58 — seed live values from startedAt so a refresh resumes the bar
   // and timer instead of restarting them from zero.
@@ -352,6 +359,31 @@ export default function GeneratingModal({
     const secs = seconds % 60;
     return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
   };
+
+  // RECOVERY STATE (v6.9.61) — backend may still save the worksheet.
+  if (recovering) {
+    return createPortal(
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] p-4 overflow-y-auto">
+        <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-[520px] mx-4 space-y-6 max-h-[calc(100vh-2rem)] overflow-y-auto">
+          <div className="flex flex-col items-center gap-3">
+            <Loader2 className="h-12 w-12 text-primary animate-spin" />
+            <h2 className="text-2xl font-semibold text-center text-foreground">
+              Checking server…
+            </h2>
+          </div>
+          <div className="text-center space-y-2">
+            <p className="text-muted-foreground">
+              The connection dropped, but your worksheet might still be saving in the background.
+            </p>
+            <p className="text-sm font-medium text-foreground">
+              No tokens were consumed yet.
+            </p>
+          </div>
+        </div>
+      </div>,
+      document.body,
+    );
+  }
 
   // ERROR STATE
   if (errorMessage) {
