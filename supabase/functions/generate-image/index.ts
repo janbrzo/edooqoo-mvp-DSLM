@@ -63,14 +63,15 @@ serve(async (req) => {
 
     console.log(`[GENERATE-IMAGE] Starting image generation for topic: "${topic}", level: ${englishLevel}, user: ${userId}`);
 
-    // STEP 1: Generate image using Vertex AI Imagen 4.0 Fast
+    // STEP 1 (v6.9.61): Generate image using Vertex AI Gemini 3.1 Flash Image
+    // (Nano Banana 2). Replaces deprecated imagen-4.0-fast-generate-001.
+    // Same service-account auth and same GCP project — only the endpoint,
+    // request body and response parser changed.
     const imagePrompt = createImagePrompt(topic, englishLevel);
     console.log(`[GENERATE-IMAGE] Image prompt: ${imagePrompt.substring(0, 150)}...`);
 
-    // Get access token from service account
     const accessToken = await getVertexAccessToken(GEMINI_VERTEX_API_KEY);
 
-    // Parse project ID from service account JSON
     let projectId = "your-gcp-project";
     try {
       const serviceAccount = JSON.parse(GEMINI_VERTEX_API_KEY);
@@ -80,7 +81,8 @@ serve(async (req) => {
       throw new Error("GEMINI_VERTEX_API_KEY must be a valid service account JSON");
     }
 
-    const vertexEndpoint = `https://us-central1-aiplatform.googleapis.com/v1/projects/${projectId}/locations/us-central1/publishers/google/models/imagen-4.0-fast-generate-001:predict`;
+    const MODEL_ID = "gemini-3.1-flash-image-preview";
+    const vertexEndpoint = `https://us-central1-aiplatform.googleapis.com/v1/projects/${projectId}/locations/us-central1/publishers/google/models/${MODEL_ID}:generateContent`;
 
     const imageResponse = await fetch(vertexEndpoint, {
       method: "POST",
@@ -89,17 +91,22 @@ serve(async (req) => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        instances: [
+        contents: [
           {
-            prompt: imagePrompt,
+            role: "user",
+            parts: [{ text: imagePrompt }],
           },
         ],
-        parameters: {
-          sampleCount: 1,
-          aspectRatio: "16:9",
-          safetyFilterLevel: "block_few",
-          personGeneration: "allow_all",
+        generationConfig: {
+          responseModalities: ["IMAGE"],
+          imageConfig: { aspectRatio: "16:9" },
         },
+        safetySettings: [
+          { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_ONLY_HIGH" },
+          { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_ONLY_HIGH" },
+          { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_ONLY_HIGH" },
+          { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_ONLY_HIGH" },
+        ],
       }),
     });
 
@@ -107,8 +114,8 @@ serve(async (req) => {
       const errorText = await imageResponse.text();
       console.error(`[GENERATE-IMAGE] Vertex AI error: ${imageResponse.status} - ${errorText}`);
       await logModelFailure({
-        model: 'imagen-4.0-fast-generate-001',
-        provider: 'google',
+        model: MODEL_ID,
+        provider: 'google-vertex',
         status: imageResponse.status,
         endpoint: vertexEndpoint,
         error: errorText.slice(0, 500),
@@ -118,17 +125,26 @@ serve(async (req) => {
     }
 
     const imageData = await imageResponse.json();
-    const base64Image = imageData.predictions?.[0]?.bytesBase64Encoded;
+    // Gemini Image response: candidates[0].content.parts → first part with inlineData.
+    const inlinePart = imageData?.candidates?.[0]?.content?.parts?.find(
+      (p: any) => p?.inlineData?.data,
+    );
+    const base64Image: string | undefined = inlinePart?.inlineData?.data;
+    const mimeType: string = inlinePart?.inlineData?.mimeType || "image/png";
 
     if (!base64Image) {
-      console.error("[GENERATE-IMAGE] No image in Vertex AI response:", JSON.stringify(imageData));
-      throw new Error("No valid image data received from Vertex AI");
+      console.error(
+        "[GENERATE-IMAGE] No image in Vertex AI response:",
+        JSON.stringify(imageData).slice(0, 1000),
+      );
+      throw new Error("No valid image data received from Vertex AI (gemini-3.1-flash-image-preview)");
     }
 
-    // Convert to data URL
-    const imageUrl = `data:image/png;base64,${base64Image}`;
+    const imageUrl = `data:${mimeType};base64,${base64Image}`;
 
-    console.log(`[GENERATE-IMAGE] Image generated successfully (${Math.round(base64Image.length / 1024)}KB)`);
+    console.log(
+      `[GENERATE-IMAGE] Image generated successfully (${Math.round(base64Image.length / 1024)}KB, ${mimeType})`,
+    );
 
     // STEP 2: Generate detailed description using Gemini Pro WITH VISION
     const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
@@ -138,7 +154,7 @@ serve(async (req) => {
     const imagePart = {
       inlineData: {
         data: base64Image,
-        mimeType: "image/png",
+        mimeType: mimeType,
       },
     };
 
