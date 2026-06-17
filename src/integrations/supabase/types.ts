@@ -2086,6 +2086,62 @@ export type Database = {
           },
         ]
       }
+      student_intake_extractions: {
+        Row: {
+          applied_student_updates: Json
+          created_at: string
+          created_entry_ids: string[]
+          created_goal_ids: string[]
+          created_pacing_proposal_id: string | null
+          extracted_json: Json
+          id: string
+          model: string
+          pre_update_snapshot: Json
+          raw_text: string
+          status: string
+          student_id: string
+          teacher_id: string
+        }
+        Insert: {
+          applied_student_updates?: Json
+          created_at?: string
+          created_entry_ids?: string[]
+          created_goal_ids?: string[]
+          created_pacing_proposal_id?: string | null
+          extracted_json: Json
+          id?: string
+          model: string
+          pre_update_snapshot?: Json
+          raw_text: string
+          status?: string
+          student_id: string
+          teacher_id: string
+        }
+        Update: {
+          applied_student_updates?: Json
+          created_at?: string
+          created_entry_ids?: string[]
+          created_goal_ids?: string[]
+          created_pacing_proposal_id?: string | null
+          extracted_json?: Json
+          id?: string
+          model?: string
+          pre_update_snapshot?: Json
+          raw_text?: string
+          status?: string
+          student_id?: string
+          teacher_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_intake_extractions_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       student_knowledge_entries: {
         Row: {
           ai_classified: boolean | null
@@ -3498,6 +3554,16 @@ export type Database = {
         }
         Returns: undefined
       }
+      apply_intake_extraction: {
+        Args: {
+          p_includes: Json
+          p_model: string
+          p_payload: Json
+          p_raw_text: string
+          p_student_id: string
+        }
+        Returns: Json
+      }
       backfill_skill_metrics: {
         Args: { p_student_id?: string }
         Returns: number
@@ -3858,6 +3924,10 @@ export type Database = {
       reactivate_user_account: {
         Args: { user_email: string }
         Returns: boolean
+      }
+      rollback_intake_extraction: {
+        Args: { p_extraction_id: string }
+        Returns: undefined
       }
       save_homework_answer:
         | {
