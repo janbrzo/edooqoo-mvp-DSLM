@@ -81,7 +81,6 @@ const Index = () => {
   const [preSelectedStudent, setPreSelectedStudent] = useState<{id: string, name: string} | null>(null);
   const { tokenLeft, hasTokens, canGenerateWorksheet, isDemo, profile, loading: tokensLoading, consumeToken } = useTokenSystem(user?.id || null);
   const { 
-    isGenerating, 
     generateWorksheetHandler, 
   } = useWorksheetGeneration(user?.id || null, worksheetState, selectedStudentId, {
     hasTokens,
