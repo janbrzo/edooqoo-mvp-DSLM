@@ -231,6 +231,17 @@ export const useWorksheetGeneration = (
       if (requiresAudio && !selectedAudio) {
         devLog('🎵 Pre-generating audio...');
         setMediaGenerating(true);
+        if (activeJobId) {
+          try {
+            patchGenerationJob(activeJobId, {
+              progress: {
+                exercisesGenerated: 0,
+                expectedTotal: getExpectedExerciseCount(data.lessonTime),
+                phase: 'media',
+              },
+            });
+          } catch { /* ignore */ }
+        }
         
         try {
           selectedAudio = await generateAudioForWorksheet(data);
@@ -252,6 +263,17 @@ export const useWorksheetGeneration = (
       if (requiresImage && !selectedImage) {
         devLog('🎨 Pre-generating image...');
         setMediaGenerating(true);
+        if (activeJobId) {
+          try {
+            patchGenerationJob(activeJobId, {
+              progress: {
+                exercisesGenerated: 0,
+                expectedTotal: getExpectedExerciseCount(data.lessonTime),
+                phase: 'media',
+              },
+            });
+          } catch { /* ignore */ }
+        }
         
         try {
           selectedImage = await generateImageForWorksheet(data);
@@ -392,12 +414,33 @@ export const useWorksheetGeneration = (
               devWarn('[useWorksheetGeneration] notify-generation-failure invoke failed', e);
             }
           },
-          onError: (error) => {
+          onError: async (error) => {
             clearTimeout(generationTimeoutId);
             console.error('❌ Stream error:', error);
             setStreamProgress(null);
+            // v6.9.61 — Before declaring failure, attempt a single DB recovery
+            // pass (covers the case where the SSE socket died but the backend
+            // already saved the worksheet via EdgeRuntime.waitUntil).
+            try {
+              const recovered = await recoverWorksheetAfterStreamLoss({
+                clientGenerationId,
+                teacherId: userId,
+                studentId: effectiveStudentId,
+                startedAt: startTime,
+              });
+              if (recovered) {
+                devLog('✅ [v6.9.61] Recovered worksheet after stream onError:', recovered.id);
+                await handleWorksheetCompletion(recovered, data, startTime);
+                return;
+              }
+            } catch (e) {
+              devWarn('[useWorksheetGeneration] onError recovery attempt threw', e);
+            }
             setGenerationError(error.message || "Something went wrong during generation.");
             try {
+              // v6.9.61 — failGenerationJob now sets a 60s recoveryDeadlineAt
+              // so the global DB poller can still promote the job back to
+              // completed if the backend persists the worksheet later.
               if (activeJobId) {
                 failGenerationJob(activeJobId, error.message || 'Generation failed');
               } else {
@@ -756,6 +799,18 @@ export const useWorksheetGeneration = (
       setStreamProgress(null);
       setMediaGenerating(false);
       setGenerationError(null);
+      // v6.9.61 — explicit user cancellation: flip job to failed AND clear the
+      // recovery window so the DB poller does not "recover" a cancelled run.
+      try {
+        const jid = activeJobIdRef.current;
+        if (jid) {
+          patchGenerationJob(jid, {
+            status: 'failed',
+            errorMessage: 'Cancelled by user',
+            recoveryDeadlineAt: null,
+          });
+        }
+      } catch { /* ignore */ }
       toast({
         title: "Generation cancelled",
         description: "Worksheet generation was stopped",
