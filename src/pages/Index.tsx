@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect } from "react";
 import { useSearchParams, useLocation, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { useAuthFlow } from "@/hooks/useAuthFlow";
@@ -83,11 +83,6 @@ const Index = () => {
   const { 
     isGenerating, 
     generateWorksheetHandler, 
-    streamProgress,
-    mediaGenerating,
-    cancelGeneration,
-    generationError,
-    clearGenerationError,
   } = useWorksheetGeneration(user?.id || null, worksheetState, selectedStudentId, {
     hasTokens,
     canGenerateWorksheet,
