@@ -11,10 +11,9 @@ import {
 } from '../_shared/newsletter-core.mjs'
 
 const APP_BASE_URL = Deno.env.get('APP_BASE_URL') || 'https://edooqoo.com'
-const FUNCTION_BASE_URL = `${Deno.env.get('SUPABASE_URL')}/functions/v1/newsletter-subscription`
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
 const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -23,12 +22,6 @@ const corsHeaders = {
 }
 
 const jsonHeaders = { ...corsHeaders, 'Content-Type': 'application/json' }
-const htmlHeaders = {
-  ...corsHeaders,
-  'Content-Type': 'text/html; charset=utf-8',
-  'Content-Security-Policy': "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'",
-  'X-Robots-Tag': 'noindex, nofollow',
-}
 
 function escapeHtml(value: string): string {
   return value.replace(/[&<>"']/g, (character) => ({
@@ -46,34 +39,13 @@ function redirect(path: string, status: string): Response {
   return Response.redirect(url.toString(), 303)
 }
 
-function renderActionPage(
-  actionUrl: URL,
-  title: string,
-  description: string,
-  buttonLabel: string,
-): Response {
-  const safeAction = escapeHtml(actionUrl.toString())
-  return new Response(`<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="robots" content="noindex,nofollow">
-  <title>${escapeHtml(title)} | Edooqoo</title>
-</head>
-<body style="margin:0;background:#f8fafc;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#111827">
-  <main style="max-width:560px;margin:0 auto;padding:48px 20px">
-    <section style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:32px">
-      <p style="margin:0 0 10px;color:#6d28d9;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em">What Should I Teach Next?</p>
-      <h1 style="margin:0 0 16px;font-size:28px;line-height:1.25">${escapeHtml(title)}</h1>
-      <p style="font-size:16px;line-height:1.65;color:#4b5563">${escapeHtml(description)}</p>
-      <form method="post" action="${safeAction}" style="margin-top:28px">
-        <button type="submit" style="border:0;border-radius:8px;background:#6d28d9;color:#fff;font:inherit;font-weight:700;padding:12px 20px;cursor:pointer">${escapeHtml(buttonLabel)}</button>
-      </form>
-    </section>
-  </main>
-</body>
-</html>`, { status: 200, headers: htmlHeaders })
+function appActionUrl(path: string, sourceUrl: URL, keys: string[]): URL {
+  const actionUrl = new URL(path, APP_BASE_URL)
+  for (const key of keys) {
+    const value = sourceUrl.searchParams.get(key)
+    if (value) actionUrl.searchParams.set(key, value)
+  }
+  return actionUrl
 }
 
 function randomToken(): string {
@@ -152,8 +124,9 @@ async function consumeRateLimit(
 async function sendConfirmation(email: string, token: string): Promise<{ ok: boolean; id?: string; error?: string }> {
   if (!RESEND_API_KEY) return { ok: false, error: 'resend_not_configured' }
 
-  const confirmationUrl = `${FUNCTION_BASE_URL}?action=confirm&token=${encodeURIComponent(token)}`
-  const safeUrl = escapeHtml(confirmationUrl)
+  const confirmationUrl = new URL('/newsletter/confirm', APP_BASE_URL)
+  confirmationUrl.searchParams.set('token', token)
+  const safeUrl = escapeHtml(confirmationUrl.toString())
   const response = await fetch('https://api.resend.com/emails', {
     method: 'POST',
     headers: {
@@ -172,7 +145,7 @@ async function sendConfirmation(email: string, token: string): Promise<{ ok: boo
     <div style="background:#fff;border:1px solid #e5e7eb;border-radius:14px;padding:32px">
       <p style="margin:0 0 10px;color:#6d28d9;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em">What Should I Teach Next?</p>
       <h1 style="margin:0 0 16px;font-size:26px;line-height:1.25">Confirm your subscription</h1>
-      <p style="font-size:16px;line-height:1.65;color:#4b5563">Open the confirmation page below, then confirm that you want the weekly Edooqoo newsletter for adult one-to-one English tutors.</p>
+      <p style="font-size:16px;line-height:1.65;color:#4b5563">Open the confirmation page below, then confirm that you want Edooqoo email updates about adult one-to-one English teaching.</p>
       <p style="margin:28px 0"><a href="${safeUrl}" style="display:inline-block;background:#6d28d9;color:#fff;text-decoration:none;font-weight:700;padding:12px 20px;border-radius:8px">Open confirmation page</a></p>
       <p style="font-size:13px;line-height:1.6;color:#6b7280">This link expires in 24 hours. If you did not request this email, ignore it and no subscription will be activated.</p>
     </div>
@@ -364,12 +337,7 @@ Deno.serve(async (req) => {
   if (req.method === 'GET' && action === 'confirm') {
     const token = url.searchParams.get('token') || ''
     if (token.length < 32) return redirect('/newsletter/confirmed', 'invalid')
-    return renderActionPage(
-      url,
-      'Confirm your subscription',
-      'Confirm that you want to receive the weekly What Should I Teach Next? newsletter.',
-      'Confirm subscription',
-    )
+    return Response.redirect(appActionUrl('/newsletter/confirm', url, ['token']).toString(), 303)
   }
   if (req.method === 'POST' && action === 'confirm') return handleConfirm(url)
   if (req.method === 'GET' && action === 'unsubscribe') {
@@ -382,12 +350,7 @@ Deno.serve(async (req) => {
     if (!secureEqualHex(signature, expectedSignature)) {
       return redirect('/newsletter/unsubscribed', 'invalid')
     }
-    return renderActionPage(
-      url,
-      'Unsubscribe from the newsletter',
-      'Confirm that you no longer want to receive the weekly What Should I Teach Next? newsletter.',
-      'Unsubscribe',
-    )
+    return Response.redirect(appActionUrl('/newsletter/unsubscribe', url, ['id', 'signature']).toString(), 303)
   }
   if (req.method === 'POST' && action === 'unsubscribe') return handleUnsubscribe(url)
   if (req.method === 'POST') return handleSubscribe(req)

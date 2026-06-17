@@ -15,8 +15,8 @@
     "databaseTypeSource": "src/integrations/supabase/types.ts"
   },
   "counts": {
-    "routes": 86,
-    "pageModules": 81,
+    "routes": 88,
+    "pageModules": 82,
     "componentModules": 339,
     "hookModules": 79,
     "contextModules": 1,
@@ -1733,6 +1733,52 @@
         "useLocation",
         "useRef",
         "useState"
+      ],
+      "userActions": [],
+      "navigateTargets": []
+    },
+    {
+      "path": "/newsletter/confirm",
+      "element": "NewsletterAction",
+      "source": "src/pages/NewsletterAction.tsx",
+      "type": "public-functional-or-auth",
+      "redirectTo": null,
+      "crawl": {
+        "robotsBlocked": false,
+        "sitemapMatches": 0,
+        "status": "not-in-sitemap"
+      },
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "hooks": [
+        "useSearchParams"
+      ],
+      "userActions": [],
+      "navigateTargets": []
+    },
+    {
+      "path": "/newsletter/unsubscribe",
+      "element": "NewsletterAction",
+      "source": "src/pages/NewsletterAction.tsx",
+      "type": "public-functional-or-auth",
+      "redirectTo": null,
+      "crawl": {
+        "robotsBlocked": false,
+        "sitemapMatches": 0,
+        "status": "not-in-sitemap"
+      },
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "hooks": [
+        "useSearchParams"
       ],
       "userActions": [],
       "navigateTargets": []
@@ -4630,6 +4676,51 @@
       },
       "routes": [
         "/login"
+      ]
+    },
+    {
+      "path": "src/pages/NewsletterAction.tsx",
+      "domain": "page",
+      "purpose": "Implements Newsletter Action behavior in the page domain.",
+      "exports": [
+        "NewsletterAction"
+      ],
+      "props": [
+        {
+          "name": "NewsletterActionProps",
+          "fields": [
+            {
+              "name": "mode",
+              "type": "'confirm' | 'unsubscribe'",
+              "optional": false
+            }
+          ]
+        }
+      ],
+      "state": [],
+      "hooks": [
+        "useSearchParams"
+      ],
+      "actions": [],
+      "navigateTargets": [],
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "storage": [],
+      "userFacingText": [
+        "Open the decision library",
+        "What Should I Teach Next?"
+      ],
+      "userFacingBehavior": {
+        "actionHandlers": [],
+        "navigationTargets": []
+      },
+      "routes": [
+        "/newsletter/confirm",
+        "/newsletter/unsubscribe"
       ]
     },
     {
@@ -9493,6 +9584,11 @@
               "name": "onSelectIndex",
               "type": "(index: number) => void",
               "optional": true
+            },
+            {
+              "name": "jobs",
+              "type": "Array<{ jobId: string; studentName?: string | null; topic?: string | null; progress?: { exercisesGenerated: number; expectedTotal: number } | null; }>",
+              "optional": true
             }
           ]
         }
@@ -9549,10 +9645,8 @@
         "Generation",
         "Generation resumed.",
         "Generation runs in the background — keep prepping for",
-        "Next generation",
         "No token was consumed. Your form data is preserved.",
         "Open dashboard ↗",
-        "Previous generation",
         "Time:",
         "Try Again",
         "or another student while you wait."
@@ -20671,8 +20765,7 @@
         "useEffect",
         "useLocation",
         "useNavigate",
-        "useState",
-        "useTabId"
+        "useState"
       ],
       "actions": [
         "onMount",
@@ -20688,6 +20781,7 @@
       "storage": [],
       "userFacingText": [
         "Dismiss",
+        "Exercises:",
         "For",
         "Generation failed",
         "Open generated worksheet",
@@ -22955,8 +23049,8 @@
       "userFacingText": [
         "Company",
         "Email address",
-        "I want to receive the weekly Edooqoo newsletter. I can unsubscribe in every email. See the",
-        "One weekly adult 1:1 teaching decision, with the full article or worked example as the canonical source.",
+        "Get Edooqoo updates about adult 1:1 teaching decisions. Each email links to the full article or worked example as the canonical source.",
+        "I want to receive Edooqoo email updates about adult 1:1 English teaching. I can unsubscribe in every email. See the",
         "Privacy Policy",
         "What Should I Teach Next?",
         "tutor@example.com"
@@ -38408,12 +38502,6 @@
             "operation": "removeItem",
             "key": "prefillSuggestionId",
             "file": "src/hooks/useWorksheetGeneration.tsx"
-          },
-          {
-            "storage": "sessionStorage",
-            "operation": "removeItem",
-            "key": "prefillSuggestionId",
-            "file": "src/hooks/useWorksheetGeneration.tsx"
           }
         ],
         "userFacingText": [],
@@ -50769,6 +50857,7 @@
           "src/hooks/useHomeworkExerciseGeneration.tsx",
           "src/hooks/useInteractiveSharedWorksheet.tsx",
           "src/integrations/supabase/client.ts",
+          "src/pages/NewsletterAction.tsx",
           "src/services/exerciseRegenerationService.ts",
           "src/services/worksheetService/apiService.ts",
           "src/services/worksheetService/feedbackService.ts",

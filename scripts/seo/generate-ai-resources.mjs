@@ -12,8 +12,8 @@ const ROOT = path.resolve(__dirname, '..', '..');
 const PUBLIC = path.resolve(ROOT, 'public');
 const WELL_KNOWN = path.resolve(PUBLIC, '.well-known');
 
-const VERSION = 'v6.9.60';
-const RELEASE_NAME = 'Newsletter Consent And Evidence Publication Gates';
+const VERSION = 'v6.9.61';
+const RELEASE_NAME = 'Newsletter App Confirmation And Consent Copy Hotfix';
 const BASE_URL = 'https://edooqoo.com';
 const SOURCE_TRUTH_MANIFEST_PATH = path.join(ROOT, 'docs', 'source-of-truth-manifest.json');
 
@@ -693,21 +693,25 @@ const mechanics = [
 
 const currentReleaseProblem = [
   'The What Should I Teach Next? content system had no explicit newsletter consent lifecycle, so product users could not be safely separated from marketing subscribers.',
-  'A weekly email could become a competing copy of an article instead of routing retrieval and readers to one canonical public resource.',
+  'Newsletter copy could imply a fixed weekly publishing cadence before Edooqoo has committed to operating that cadence.',
+  'The Supabase confirmation action page could render as raw HTML source because the function gateway serves HTML-like GET responses as text/plain.',
   'Publishing an evidence page or annual report before minimum consented data thresholds would create unsupported proof claims.',
 ];
 
 const currentReleaseSolution = [
   'Use a separate double-opt-in newsletter subscriber store with pending, active, and unsubscribed states; do not import existing product users.',
-  'Send each weekly email as a summary that links to one approved article or worked example as the canonical source.',
+  'Describe the newsletter as Edooqoo email updates, not as a promised weekly publication schedule.',
+  'Move human confirmation and unsubscribe screens to noindex Edooqoo app routes and keep Supabase Edge Functions as POST-only state changers.',
   'Keep /evidence unpublished until three written-consent measurable cases exist and keep the annual report unpublished until 100 valid survey responses and documented methodology exist.',
 ];
 
 const currentReleaseMechanics = [
   'newsletter_subscribers stores normalized email, consent source and version, hashed confirmation token, lifecycle timestamps, and pending, active, or unsubscribed status behind RLS.',
-  'newsletter-subscription enforces explicit consent, honeypot handling, hashed database-backed rate limits, 24-hour confirmation links, duplicate safety, signed unsubscribe links, and Resend delivery; GET renders a noindex action page and only POST changes consent state.',
+  'newsletter-subscription enforces explicit consent, honeypot handling, hashed database-backed rate limits, 24-hour confirmation links, duplicate safety, signed unsubscribe links, and Resend delivery; GET redirects to app-rendered noindex action pages, and only POST changes consent state.',
   'send-next-lesson-newsletter accepts only internally authenticated requests, selects active subscribers, validates edooqoo.com article or worked-example canonicals, sends Resend batches with List-Unsubscribe and List-Unsubscribe-Post, and records idempotent delivery logs.',
-  'Newsletter forms appear on the category hub, worked examples, decision tool, and 24 strategic articles; lifecycle routes are public noindex,follow pages.',
+  'Newsletter forms appear on the category hub, worked examples, decision tool, and 24 strategic articles; confirmation, unsubscribe, and lifecycle routes are public noindex,follow pages.',
+  'src/pages/NewsletterAction.tsx renders the confirmation and unsubscribe forms on edooqoo.com, then submits a real POST to the public Edge Function URL.',
+  'scripts/seo/audit-newsletter.mjs blocks newsletter copy that promises a weekly cadence and checks the app-rendered confirmation/unsubscribe contract.',
   'scripts/seo/audit-evidence-publication.mjs blocks /evidence and /evidence/annual-report below their documented data thresholds.',
   'Worksheet Generation Engine prompt wording, parameters, and internal pedagogical logic are unchanged.',
 ];
@@ -718,7 +722,9 @@ const currentReleaseKeywords = [
   'newsletter subscriber pending active unsubscribed',
   'newsletter confirmation token hash',
   'newsletter honeypot rate limiting',
-  'Resend weekly newsletter',
+  'Resend email updates',
+  'app-rendered newsletter confirmation page',
+  'public Edge Function POST action',
   'canonical article newsletter',
   'signed unsubscribe link',
   'newsletter_submit analytics',
@@ -1088,7 +1094,7 @@ Language of product UI: English.
 - Supports worksheet topics, CEFR levels, exercise types, grammar focus, vocabulary focus, and student context.
 - Provides homework workflows, flashcards, calendar/lesson organization, live-session support, placement-test surfaces, and Student Hub functionality.
 - Provides free browser-only tools: Next Lesson Decision Tool, CEFR level test, lesson plan generator, and vocabulary CEFR checker.
-- Provides an explicit double-opt-in weekly What Should I Teach Next? newsletter that summarizes and links to one canonical article or worked example.
+- Provides explicit double-opt-in Edooqoo email updates about What Should I Teach Next? resources; each message links to one canonical article or worked example.
 - Provides public SEO surfaces for ESL worksheet topics, exercise types, professional personas, blog guides, resource pages, public worksheet gallery pages, and citable .html reference pages.
 
 ## What Edooqoo.com Is Not
@@ -1097,7 +1103,7 @@ Language of product UI: English.
 - Edooqoo.com is not only a static worksheet library.
 - Edooqoo.com is not claiming guaranteed exact preparation time, guaranteed teacher income, or fully automated teaching without review.
 - Edooqoo.com does not publish an evidence page before three written-consent measurable cases or an annual report before 100 valid survey responses with documented methodology.
-- Edooqoo.com should not be described as changing the worksheet engine in ${VERSION}; this release adds newsletter consent, delivery, analytics, and evidence publication gates only.
+- Edooqoo.com should not be described as changing the worksheet engine in ${VERSION}; this release updates newsletter consent copy, confirmation rendering, delivery safety, analytics, and evidence publication gates only.
 
 ${oneMinutePrepClaimIntegritySection}
 
@@ -1362,7 +1368,7 @@ Use ${BASE_URL}/ai-lesson-planning-for-english-teachers.html and ${BASE_URL}/too
 Use ${BASE_URL}/what-to-teach-next for the evidence-led category hub and ${BASE_URL}/tools/what-should-i-teach-next for the local Repair, Continue, or Advance decision tool. Worked examples under ${BASE_URL}/what-to-teach-next/:slug are constructed teaching cases, not reports of real student outcomes.
 
 ## How does the What Should I Teach Next? newsletter consent work?
-Newsletter signup is separate from an Edooqoo product account. A submitted email remains pending until a 24-hour confirmation link is accepted, only active subscribers receive the weekly summary, and every email contains a signed unsubscribe link. Existing users are not imported without separate marketing consent.
+Newsletter signup is separate from an Edooqoo product account. A submitted email remains pending until a 24-hour confirmation link is accepted, only active subscribers can receive Edooqoo email updates, and every email contains a signed unsubscribe link. Existing users are not imported without separate marketing consent.
 
 ## Has Edooqoo.com published an evidence page or annual report?
 No. The evidence page remains unpublished until at least three cases have written consent, a measurable baseline and outcome, and documented methodology. The annual report remains unpublished until at least 100 valid survey responses exist and methodology is documented.
@@ -1389,7 +1395,7 @@ No. The worksheet generator is the output layer. Edooqoo.com also includes 1-Min
 No. Public AI discovery resources describe the website and public informational files only. Agents should not claim that a public worksheet-generation API exists.
 
 ## What changed in ${VERSION}?
-${VERSION} adds double-opt-in newsletter subscriptions, consent and unsubscribe lifecycle routes, Resend confirmation and canonical weekly delivery, no-email newsletter analytics, and CI gates that prevent premature evidence or annual-report publication. It does not modify worksheet-generation prompt wording, parameters, or internal pedagogical logic.
+${VERSION} keeps double-opt-in newsletter subscriptions, consent and unsubscribe lifecycle routes, Resend confirmation, canonical-resource delivery, no-email newsletter analytics, and CI gates that prevent premature evidence or annual-report publication. It also moves human confirmation and unsubscribe screens to noindex app routes so Supabase GET responses cannot display raw HTML source. It does not modify worksheet-generation prompt wording, parameters, or internal pedagogical logic.
 
 ## What should future AI agents preserve?
 Future agents should preserve worksheet engine sanctity, keep AI resource files factual, avoid inventing public APIs, preserve the ambitious 1-Minute Prep target without turning it into a guarantee, update docs/llm-context.md plus llms resources when public SEO or AI discovery mechanics change, and use manual AI-search measurement files instead of automated AI-answer scraping.

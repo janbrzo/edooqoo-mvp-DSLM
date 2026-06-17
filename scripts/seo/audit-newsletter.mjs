@@ -20,6 +20,8 @@ const subscriptionFunction = read('supabase/functions/newsletter-subscription/in
 const campaignFunction = read('supabase/functions/send-next-lesson-newsletter/index.ts');
 const app = read('src/App.tsx');
 const component = read('src/components/newsletter/NewsletterSignup.tsx');
+const actionPage = read('src/pages/NewsletterAction.tsx');
+const statusPage = read('src/pages/NewsletterStatus.tsx');
 const eventTracking = read('src/hooks/useEventTracking.tsx');
 const strategicGenerator = read('scripts/seo/generate-strategic-content.mjs');
 const legacyGenerator = read('scripts/seo/generate-legacy-strategic-articles.mjs');
@@ -48,14 +50,27 @@ expect(subscriptionFunction.includes("req.method === 'POST' && action === 'confi
   'confirmation must change state only on POST');
 expect(subscriptionFunction.includes("req.method === 'POST' && action === 'unsubscribe'"),
   'unsubscribe must change state only on POST');
+expect(subscriptionFunction.includes("Response.redirect(appActionUrl('/newsletter/confirm'"),
+  'confirmation GET must redirect to the app-rendered action page');
+expect(subscriptionFunction.includes("Response.redirect(appActionUrl('/newsletter/unsubscribe'"),
+  'unsubscribe GET must redirect to the app-rendered action page');
+expect(subscriptionFunction.includes("new URL('/newsletter/confirm', APP_BASE_URL)"),
+  'confirmation email must link to the app-rendered action page');
 expect(campaignFunction.includes("req.headers.get('x-internal-call')"), 'campaign sender lacks internal authentication');
 expect(campaignFunction.includes('isAllowedNewsletterCanonical'), 'campaign sender does not enforce article/case canonical URLs');
 expect(campaignFunction.includes('List-Unsubscribe'), 'campaign email lacks unsubscribe header');
 expect(campaignFunction.includes('List-Unsubscribe-Post'), 'campaign email lacks one-click unsubscribe contract');
+expect(campaignFunction.includes("new URL('/newsletter/unsubscribe', APP_BASE_URL)"),
+  'campaign email body must link to the app-rendered unsubscribe page');
 expect(campaignFunction.includes('/emails/batch'), 'campaign sender does not use the Resend batch endpoint');
 
-expect(app.includes('/newsletter/confirmed') && app.includes('/newsletter/unsubscribed'),
+expect(app.includes('/newsletter/confirm') && app.includes('/newsletter/unsubscribe')
+  && app.includes('/newsletter/confirmed') && app.includes('/newsletter/unsubscribed'),
   'newsletter lifecycle routes missing');
+expect(actionPage.includes('method="post"') && actionPage.includes('NEWSLETTER_ENDPOINT'),
+  'newsletter action page must submit with a real form POST to the Edge Function');
+expect(actionPage.includes('robots="noindex,follow"') && statusPage.includes('robots="noindex,follow"'),
+  'newsletter action and status pages must remain noindex');
 expect(component.includes('consent: true'), 'React form does not send explicit consent');
 expect(component.includes('company'), 'React form lacks honeypot');
 expect(component.includes("eventType: 'newsletter_submit'"), 'React form lacks newsletter_submit analytics');
@@ -67,6 +82,18 @@ expect(newsletterEmbed.includes("eventType: 'newsletter_submit'"),
   'static article form lacks newsletter_submit analytics');
 expect(!newsletterEmbed.includes("eventData: {\n                  email"),
   'static article analytics must not contain email');
+
+for (const [name, source] of [
+  ['newsletter-subscription', subscriptionFunction],
+  ['send-next-lesson-newsletter', campaignFunction],
+  ['NewsletterSignup', component],
+  ['NewsletterAction', actionPage],
+  ['NewsletterStatus', statusPage],
+  ['newsletter-embed', newsletterEmbed],
+]) {
+  expect(!/weekly[^.\n]{0,90}(newsletter|email|summary|decision support)/i.test(source),
+    `${name} must not promise a weekly newsletter cadence`);
+}
 
 for (const directory of ['public/blog']) {
   const generatedArticles = fs.readdirSync(path.join(ROOT, directory))

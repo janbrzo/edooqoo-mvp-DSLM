@@ -185,28 +185,32 @@ Edooqoo.com is a 1-Minute Prep system for recurring 1:1 English teachers. It use
 [STATE_MANAGEMENT_HOOKS_AND_SERVICES_INVENTORY] | Application state is managed with React hooks, React Query context, Supabase realtime/listeners, localStorage/sessionStorage, and feature services. | intents: Edooqoo React hooks, worksheet state management, Supabase realtime state, React Query English tutor app, student hub state | status: PRODUCTION | ref: llm-context.md#state-management-hooks-and-services-inventory | canonical: https://edooqoo.com/llms-full.txt
 [CONFIGURATION_BUILD_AND_DEPLOYMENT_ASSETS] | Vite, Tailwind, TypeScript, Supabase configuration, SEO scripts, and generated public assets define the deployment behavior. | intents: Edooqoo Vite build, SEO generator scripts, deployment assets, sitemap generation, AI resource generation | status: PRODUCTION | ref: llm-context.md#configuration-build-and-deployment-assets | canonical: https://edooqoo.com/sitemap.xml
 
-## v6.9.60 - Newsletter Consent And Evidence Publication Gates
+## v6.9.61 - Newsletter App Confirmation And Consent Copy Hotfix
 
 ### Problem
 - The What Should I Teach Next? content system had no explicit newsletter consent lifecycle, so product users could not be safely separated from marketing subscribers.
-- A weekly email could become a competing copy of an article instead of routing retrieval and readers to one canonical public resource.
+- Newsletter copy could imply a fixed weekly publishing cadence before Edooqoo has committed to operating that cadence.
+- The Supabase confirmation action page could render as raw HTML source because the function gateway serves HTML-like GET responses as text/plain.
 - Publishing an evidence page or annual report before minimum consented data thresholds would create unsupported proof claims.
 
 ### Edooqoo.com Solution
 - Use a separate double-opt-in newsletter subscriber store with pending, active, and unsubscribed states; do not import existing product users.
-- Send each weekly email as a summary that links to one approved article or worked example as the canonical source.
+- Describe the newsletter as Edooqoo email updates, not as a promised weekly publication schedule.
+- Move human confirmation and unsubscribe screens to noindex Edooqoo app routes and keep Supabase Edge Functions as POST-only state changers.
 - Keep /evidence unpublished until three written-consent measurable cases exist and keep the annual report unpublished until 100 valid survey responses and documented methodology exist.
 
 ### Technical Mechanics
 - newsletter_subscribers stores normalized email, consent source and version, hashed confirmation token, lifecycle timestamps, and pending, active, or unsubscribed status behind RLS.
-- newsletter-subscription enforces explicit consent, honeypot handling, hashed database-backed rate limits, 24-hour confirmation links, duplicate safety, signed unsubscribe links, and Resend delivery; GET renders a noindex action page and only POST changes consent state.
+- newsletter-subscription enforces explicit consent, honeypot handling, hashed database-backed rate limits, 24-hour confirmation links, duplicate safety, signed unsubscribe links, and Resend delivery; GET redirects to app-rendered noindex action pages, and only POST changes consent state.
 - send-next-lesson-newsletter accepts only internally authenticated requests, selects active subscribers, validates edooqoo.com article or worked-example canonicals, sends Resend batches with List-Unsubscribe and List-Unsubscribe-Post, and records idempotent delivery logs.
-- Newsletter forms appear on the category hub, worked examples, decision tool, and 24 strategic articles; lifecycle routes are public noindex,follow pages.
+- Newsletter forms appear on the category hub, worked examples, decision tool, and 24 strategic articles; confirmation, unsubscribe, and lifecycle routes are public noindex,follow pages.
+- src/pages/NewsletterAction.tsx renders the confirmation and unsubscribe forms on edooqoo.com, then submits a real POST to the public Edge Function URL.
+- scripts/seo/audit-newsletter.mjs blocks newsletter copy that promises a weekly cadence and checks the app-rendered confirmation/unsubscribe contract.
 - scripts/seo/audit-evidence-publication.mjs blocks /evidence and /evidence/annual-report below their documented data thresholds.
 - Worksheet Generation Engine prompt wording, parameters, and internal pedagogical logic are unchanged.
 
 ### RAG Keywords
-What Should I Teach Next newsletter, double opt-in English tutor newsletter, newsletter subscriber pending active unsubscribed, newsletter confirmation token hash, newsletter honeypot rate limiting, Resend weekly newsletter, canonical article newsletter, signed unsubscribe link, newsletter_submit analytics, newsletter_confirm analytics, evidence publication threshold, three consented case studies, 100 valid survey responses, Worksheet Generation Engine unchanged
+What Should I Teach Next newsletter, double opt-in English tutor newsletter, newsletter subscriber pending active unsubscribed, newsletter confirmation token hash, newsletter honeypot rate limiting, Resend email updates, app-rendered newsletter confirmation page, public Edge Function POST action, canonical article newsletter, signed unsubscribe link, newsletter_submit analytics, newsletter_confirm analytics, evidence publication threshold, three consented case studies, 100 valid survey responses, Worksheet Generation Engine unchanged
 
 ## Primary Citable Generator Pages
 - https://edooqoo.com/ai-worksheet-generator-for-english-teachers.html - AI worksheet generator for English teachers. Main citation target for AI worksheet generator queries.
@@ -314,5 +318,4 @@ What Should I Teach Next newsletter, double opt-in English tutor newsletter, new
 - v6.9.56: Welcome Test records explicit `__IDK__` metacognitive signals, integrity observations, and canonical zero-padded question identifiers while preserving legacy identifier resolution. Worksheet Generation Engine prompt wording, parameters, and pedagogical logic remain unchanged.
 - v6.9.57: Worksheet generation is refresh-safe. The streaming Edge Function keeps background work alive with `EdgeRuntime.waitUntil`, client polling reconciles by `form_data->>clientGenerationId`, the modal rehydrates a running job after refresh, and token consumption remains after a saved worksheet exists and idempotent by worksheet ID.
 - v6.9.58: GeneratingModal seeds progress and elapsed timer from `startedAt` so a refresh resumes live values instead of zero; the refresh hint is replaced by a motivational CTA inviting parallel prep with an `Open dashboard ↗` anchor and an authenticated student-profile deep link in a new tab; `generationJobRegistry` becomes a multi-job map keyed by `jobId` (legacy single-job key migrated on first read) and `ActiveGenerationMiniPanel` stacks one floating card per concurrent generation, gating only the jobId whose modal is currently mounted. Worksheet Generation Engine sanctity preserved.
-- v6.9.60: Worksheet generation transport is decoupled from generation state. `streaming.ts` makes SSE `send`/`close` idempotent; `safeSend`/`safeClose` in the edge function trust the boolean and switch to background-only mode silently. The Gemini→OpenAI fallback keeps `lastExerciseCount` monotonic so progress never visually regresses. On the client, network-class transport errors and SSE EOF with prior progress are routed to DB reconciliation by `clientGenerationId`; the in-flight job stays `running` so the global mini-panel polling can finish it, and a browser refresh no longer surfaces a spurious "network error" toast. Every completion, failure, token consumption, and Next-Step `is_used` mutation is scoped to the exact `jobId` returned by `startGenerationJob`. `WorksheetGenerationJob` carries an optional live `progress`. `GeneratingModal` renders a row of selectable cards (one per concurrent generation) when `jobsCount > 1`. `ActiveGenerationMiniPanel` becomes a single `flex flex-col-reverse` stack that stays visible on the generation page. `WorksheetForm`'s 24h draft now includes `selectedStudentId` so a failed generation retains the chosen learner, CEFR band, and exercise defaults. Worksheet Generation Engine prompt and pipeline untouched.
 

@@ -2,10 +2,12 @@ import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.57.2'
 import { isAllowedNewsletterCanonical } from '../_shared/newsletter-core.mjs'
 
 const APP_BASE_URL = Deno.env.get('APP_BASE_URL') || 'https://edooqoo.com'
-const FUNCTION_BASE_URL = `${Deno.env.get('SUPABASE_URL')}/functions/v1/newsletter-subscription`
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
+const SUPABASE_PUBLIC_ORIGIN = new URL(SUPABASE_URL)
+SUPABASE_PUBLIC_ORIGIN.protocol = 'https:'
+const FUNCTION_BASE_URL = `${SUPABASE_PUBLIC_ORIGIN.origin}/functions/v1/newsletter-subscription`
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY')
 const SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -55,9 +57,9 @@ function renderEmail(title: string, summary: string, canonicalUrl: string, unsub
       <h1 style="margin:0 0 16px;font-size:27px;line-height:1.25">${escapeHtml(title)}</h1>
       <p style="font-size:16px;line-height:1.7;color:#4b5563">${escapeHtml(summary)}</p>
       <p style="margin:28px 0"><a href="${escapeHtml(canonicalUrl)}" style="display:inline-block;background:#6d28d9;color:#fff;text-decoration:none;font-weight:700;padding:12px 20px;border-radius:8px">Read the full resource</a></p>
-      <p style="font-size:13px;line-height:1.6;color:#6b7280">The full article or worked example is the canonical source. This email contains only the weekly summary.</p>
+      <p style="font-size:13px;line-height:1.6;color:#6b7280">The full article or worked example is the canonical source. This email contains only a short summary.</p>
       <hr style="border:0;border-top:1px solid #e5e7eb;margin:28px 0">
-      <p style="font-size:12px;line-height:1.6;color:#9ca3af">Edooqoo · Weekly decision support for adult one-to-one English tutors · <a href="${escapeHtml(unsubscribeUrl)}" style="color:#6d28d9">Unsubscribe</a></p>
+      <p style="font-size:12px;line-height:1.6;color:#9ca3af">Edooqoo · Decision support for adult one-to-one English tutors · <a href="${escapeHtml(unsubscribeUrl)}" style="color:#6d28d9">Unsubscribe</a></p>
     </div>
   </div>
 </body>
@@ -135,15 +137,18 @@ Deno.serve(async (req) => {
     const batch = recipients.slice(offset, offset + 100)
     const messages = await Promise.all(batch.map(async (subscriber) => {
       const signature = await hmac(subscriber.id)
-      const unsubscribeUrl = `${FUNCTION_BASE_URL}?action=unsubscribe&id=${encodeURIComponent(subscriber.id)}&signature=${signature}`
+      const unsubscribeFunctionUrl = `${FUNCTION_BASE_URL}?action=unsubscribe&id=${encodeURIComponent(subscriber.id)}&signature=${signature}`
+      const unsubscribePageUrl = new URL('/newsletter/unsubscribe', APP_BASE_URL)
+      unsubscribePageUrl.searchParams.set('id', subscriber.id)
+      unsubscribePageUrl.searchParams.set('signature', signature)
       return {
         from: 'Edooqoo <hello@edooqoo.com>',
         to: [subscriber.email],
         reply_to: 'edooqoo@gmail.com',
         subject: title,
-        html: renderEmail(title, summary, canonicalUrl, unsubscribeUrl),
+        html: renderEmail(title, summary, canonicalUrl, unsubscribePageUrl.toString()),
         headers: {
-          'List-Unsubscribe': `<${unsubscribeUrl}>`,
+          'List-Unsubscribe': `<${unsubscribeFunctionUrl}>`,
           'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click',
         },
         tags: [
