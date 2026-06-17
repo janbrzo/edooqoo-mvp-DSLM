@@ -97,5 +97,18 @@ export function useWorksheetFormPersistence(
     try { localStorage.removeItem(storageKey); } catch { /* ignore */ }
   }, [storageKey]);
 
-  return { clear };
+  /**
+   * v6.9.61 — Synchronous draft write, bypassing the 600 ms debounce. Used
+   * by the form right before submitting, so a generation error that
+   * remounts the form rehydrates with the EXACT submitted state (including
+   * the auto-completed `selectedExercises` list).
+   */
+  const saveDraftNow = useCallback((draft: WorksheetDraft) => {
+    try {
+      const payload: StoredDraft = { savedAt: Date.now(), data: draft };
+      localStorage.setItem(storageKey, JSON.stringify(payload));
+    } catch { /* ignore quota */ }
+  }, [storageKey]);
+
+  return { clear, saveDraftNow };
 }

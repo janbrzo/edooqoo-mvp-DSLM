@@ -194,7 +194,7 @@ export default function WorksheetForm({
     selectedStudentId: selectedStudentId && selectedStudentId !== 'no-student' ? selectedStudentId : undefined,
   };
   const persistenceKey = userId || 'anon';
-  const { clear: clearPersistedDraft } = useWorksheetFormPersistence(
+  const { clear: clearPersistedDraft, saveDraftNow } = useWorksheetFormPersistence(
     persistenceKey,
     draftSnapshot,
     (draft) => {
