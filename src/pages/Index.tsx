@@ -5,7 +5,6 @@ import { useAuthFlow } from "@/hooks/useAuthFlow";
 import { useWorksheetState } from "@/hooks/useWorksheetState";
 import { useWorksheetGeneration } from "@/hooks/useWorksheetGeneration";
 import { useTokenSystem } from "@/hooks/useTokenSystem";
-import GeneratingModal from "@/components/GeneratingModal";
 import FormView from "@/components/worksheet/FormView";
 import GenerationView from "@/components/worksheet/GenerationView";
 import { TokenPaywallModal } from "@/components/TokenPaywallModal";
@@ -34,8 +33,6 @@ import { devLog, devWarn } from '@/utils/logger';
 import { AddStudentDialog } from "@/components/dashboard/AddStudentDialog";
 import { buildAutoGeneratePayload, clearAutoGenerateFlags, readAutoGenerateIntent } from "@/lib/worksheet/autoGenerateBootstrap";
 import { hasAutoGenerateIntent } from "@/lib/worksheet/autoGenerateBootstrap";
-import { useActiveWorksheetGenerationJobs } from "@/hooks/useActiveWorksheetGenerationJob";
-import { useTabId } from "@/lib/worksheet/tabId";
 
 /**
  * Main Index page component that handles worksheet generation and display
@@ -97,40 +94,6 @@ const Index = () => {
     isDemo,
     consumeToken,
   });
-  // v6.9.57 / v6.9.59 — Refresh-safe modal rehydration scoped to this tab.
-  // We list ALL active jobs, then filter to those started in THIS tab
-  // (sessionStorage-based tabId). Opening edooqoo.com in another tab no
-  // longer auto-opens a resumed modal there.
-  const allJobs = useActiveWorksheetGenerationJobs();
-  const tabId = useTabId();
-  const myRunningJobs = useMemo(
-    () => allJobs
-      .filter((j) => j.status === 'running' && (j.originTabId ?? null) === tabId)
-      .sort((a, b) => a.startedAt - b.startedAt),
-    [allJobs, tabId],
-  );
-  const [activeJobIdx, setActiveJobIdx] = useState(0);
-  useEffect(() => {
-    // Auto-focus the newest running job whenever the running set grows.
-    if (myRunningJobs.length > 0) setActiveJobIdx(myRunningJobs.length - 1);
-    else setActiveJobIdx(0);
-  }, [myRunningJobs.length]);
-  const safeIdx = Math.min(activeJobIdx, Math.max(0, myRunningJobs.length - 1));
-  const activeJob = myRunningJobs[safeIdx] ?? null;
-  const isResumedGeneration = !!activeJob && !isGenerating;
-  const jobsCount = myRunningJobs.length;
-  // v6.9.60 — Build a compact per-job descriptor for the modal card switcher.
-  const modalJobsMeta = useMemo(
-    () => myRunningJobs.map((j) => ({
-      jobId: j.jobId,
-      studentName: j.formMeta?.studentName ?? null,
-      topic: j.topic ?? null,
-      progress: j.progress
-        ? { exercisesGenerated: j.progress.exercisesGenerated, expectedTotal: j.progress.expectedTotal }
-        : null,
-    })),
-    [myRunningJobs],
-  );
   const [showTokenModal, setShowTokenModal] = useState(false);
   const [showWelcomeBackModal, setShowWelcomeBackModal] = useState(false);
   const [showOneMinutePrepDialog, setShowOneMinutePrepDialog] = useState(false);
