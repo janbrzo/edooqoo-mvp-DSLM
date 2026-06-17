@@ -594,6 +594,32 @@ export default function WorksheetForm({
     refreshProgress();
     setTimeout(refreshProgress, 1000);
     setTimeout(refreshProgress, 2000);
+    // v6.9.61 — Snapshot the EXACT submitted form state synchronously, so a
+    // generation error that remounts the form rehydrates with the same
+    // exercise list, focus map, student, etc. (avoids the "word-order [G]
+    // becomes Gap Text (Cloze) [V] after retry" bug caused by the debounced
+    // auto-save not flushing the auto-completed exercises in time).
+    try {
+      saveDraftNow({
+        lessonTime,
+        lessonTopic: effectiveTopic,
+        lessonGoal,
+        grammarFocus,
+        additionalInformation,
+        englishLevel,
+        languageStyle,
+        selectedExercises: finalExercises,
+        selectedMediaTypes,
+        exerciseFocusMap,
+        selectionMode,
+        selectedStudentId:
+          selectedStudentId && selectedStudentId !== 'no-student'
+            ? selectedStudentId
+            : undefined,
+      });
+    } catch (e) {
+      devWarn('[WorksheetForm] saveDraftNow before submit failed', e);
+    }
     onSubmit(formData);
   };
   const refreshSuggestions = () => {
@@ -717,6 +743,29 @@ export default function WorksheetForm({
     setSelectionMode('manual');
     setActiveTab('exercises');
     sessionStorage.setItem('appliedPresetSuggestionId', p.sourceSuggestionId);
+    // v6.9.61 — persist the preset deterministically so an immediate
+    // auto-submit + failure path still recovers the EXACT preset on retry.
+    try {
+      saveDraftNow({
+        lessonTime,
+        lessonTopic: p.topic || '',
+        lessonGoal: p.goal || '',
+        grammarFocus: p.grammarFocus || '',
+        additionalInformation: p.additionalInfo || '',
+        englishLevel,
+        languageStyle,
+        selectedExercises: norm.selectedExercises,
+        selectedMediaTypes: norm.selectedMediaTypes as MediaType[],
+        exerciseFocusMap: norm.exerciseFocusMap,
+        selectionMode: 'manual',
+        selectedStudentId:
+          selectedStudentId && selectedStudentId !== 'no-student'
+            ? selectedStudentId
+            : undefined,
+      });
+    } catch (e) {
+      devWarn('[WorksheetForm] saveDraftNow in applyPreset failed', e);
+    }
     toast({ title: 'Preset applied', description: 'Review fields and generate.' });
   };
 
