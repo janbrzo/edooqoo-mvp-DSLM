@@ -21,6 +21,12 @@ import { devLog } from '@/utils/logger';
 import { toast as sonnerToast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import { ensureWelcomeTest, sendWelcomeTestEmail } from '@/lib/welcomeTest/ensureWelcomeTest';
+import { PasteIntakeSection } from './PasteIntakeSection';
+import {
+  applyIntakeExtraction,
+  type IntakeExtractionPayload,
+  type IntakeIncludes,
+} from '@/lib/intake/applyIntakeExtraction';
 
 const ADD_STUDENT_DRAFT_KEY = 'add-student-dialog-draft';
 
@@ -73,6 +79,21 @@ export const AddStudentDialog = ({
   const [loading, setLoading] = useState(false);
   const { addStudent, refetch } = useStudents();
   const { refreshProgress } = useOnboardingProgress();
+
+  // v6.9.62 P6 — paste intake state
+  const [pasteEnabled, setPasteEnabled] = useState(false);
+  const [pasteRaw, setPasteRaw] = useState('');
+  const [extraction, setExtraction] = useState<IntakeExtractionPayload | null>(null);
+  const [extractionModel, setExtractionModel] = useState<string | null>(null);
+  const [intakeIncludes, setIntakeIncludes] = useState<IntakeIncludes>({
+    notes: true,
+    signals: {},
+    goals: {},
+    english_level: true,
+    main_goal: true,
+    native_language: true,
+    pacing: true,
+  });
 
   // Prefill from props (e.g. from calendar notification)
   useEffect(() => {
@@ -161,7 +182,27 @@ export const AddStudentDialog = ({
         nativeLanguage,
         deferProfile ? null : (mainGoalDeadline || null)
       );
-      
+
+      // v6.9.62 P6 — Apply paste intake extraction (atomic RPC). Best-effort:
+      // if it fails, the student row already exists; surface a retry toast.
+      let intakeExtractionId: string | null = null;
+      if (pasteEnabled && extraction && newStudent?.id) {
+        try {
+          const res = await applyIntakeExtraction({
+            studentId: newStudent.id,
+            payload: extraction,
+            includes: intakeIncludes,
+            rawText: pasteRaw,
+            model: extractionModel ?? 'google/gemini-2.5-flash',
+          });
+          intakeExtractionId = res.extraction_id;
+          sonnerToast.success(`Profile seeded — ${res.auto_count} item${res.auto_count === 1 ? '' : 's'} applied.`);
+        } catch (err: any) {
+          console.error('[AddStudentDialog] applyIntakeExtraction failed', err);
+          sonnerToast.error('Student created, but intake suggestions failed to apply. Open the profile to retry.');
+        }
+      }
+
       // Reset form and close dialog
       setName('');
       setEnglishLevel('');
@@ -173,6 +214,14 @@ export const AddStudentDialog = ({
       setMode('defer');
       setSendTestWhenKnown(true);
       setMainGoalDeadline('');
+      setPasteEnabled(false);
+      setPasteRaw('');
+      setExtraction(null);
+      setExtractionModel(null);
+      setIntakeIncludes({
+        notes: true, signals: {}, goals: {},
+        english_level: true, main_goal: true, native_language: true, pacing: true,
+      });
       sessionStorage.removeItem(ADD_STUDENT_DRAFT_KEY);
       setOpen(false);
       
@@ -228,10 +277,11 @@ export const AddStudentDialog = ({
         //  • autosend ON  → focus Add Goal modal (test runs in background)
         //  • autosend OFF → focus Send Welcome Test banner
         const ts = Date.now();
+        const intakeQs = intakeExtractionId ? `&intake=${intakeExtractionId}` : '';
         if (autoSendWelcomeTest) {
-          navigate(`/student/${newStudent.id}?tab=dslm&view=goals&focus=add-goal-modal&_=${ts}`);
+          navigate(`/student/${newStudent.id}?tab=dslm&view=goals&focus=add-goal-modal&_=${ts}${intakeQs}`);
         } else {
-          navigate(`/student/${newStudent.id}?tab=dslm&view=pathway&focus=send-welcome-test&_=${ts}`);
+          navigate(`/student/${newStudent.id}?tab=dslm&view=pathway&focus=send-welcome-test&_=${ts}${intakeQs}`);
         }
       }
     } catch (error) {
@@ -407,6 +457,29 @@ export const AddStudentDialog = ({
               onCheckedChange={setSendOverdueEmails}
             />
           </div>
+
+          {/* v6.9.62 P6 — Paste intake (AI). Opt-in, independent of know/defer. */}
+          <PasteIntakeSection
+            enabled={pasteEnabled}
+            onEnabledChange={setPasteEnabled}
+            rawText={pasteRaw}
+            onRawTextChange={setPasteRaw}
+            extraction={extraction}
+            onExtractionChange={setExtraction}
+            includes={intakeIncludes}
+            setIncludes={setIntakeIncludes}
+            existing={{
+              english_level: mode === 'know' ? englishLevel || null : null,
+              main_goal: mode === 'know'
+                ? (mainGoal === 'custom' ? customGoal : mainGoal) || null
+                : null,
+              main_goal_target_date: mode === 'know' ? mainGoalDeadline || null : null,
+              native_language: nativeLanguage || null,
+              mainGoalSet: mode === 'know',
+            }}
+            model={extractionModel}
+            onModelResolved={setExtractionModel}
+          />
 
           <div className="flex justify-end gap-2 pt-2">
             <Button type="button" variant="outline" onClick={() => setOpen(false)} size="sm">

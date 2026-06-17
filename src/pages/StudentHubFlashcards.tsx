@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { StudentHubLayout } from '@/components/student-hub/StudentHubLayout';
 import { useStudentHubData, getSavedHubEmail } from '@/hooks/useStudentHubData';
+import { AddStudentFlashcardDialog } from '@/components/student-hub/AddStudentFlashcardDialog';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -14,7 +15,7 @@ const StudentHubFlashcards = () => {
 
   useEffect(() => { if (!email) navigate('/my'); }, [email, navigate]);
 
-  const { data, loading } = useStudentHubData(teacherToken, email || undefined);
+  const { data, loading, refetch } = useStudentHubData(teacherToken, email || undefined) as any;
 
   if (!email) return null;
 
@@ -62,6 +63,15 @@ const StudentHubFlashcards = () => {
                       onClick={() => navigate(`/flashcards/${set.share_token}?email=${encodeURIComponent(email)}&returnTo=${encodeURIComponent(returnToPath)}`)}>
                       <Brain className="w-3 h-3 mr-1" /> Study
                     </Button>
+                  </div>
+                  <div className="flex pt-1">
+                    <AddStudentFlashcardDialog
+                      setId={set.id}
+                      setTitle={set.title}
+                      studentEmail={email}
+                      hasNative={set.back_type === 'translation'}
+                      onAdded={() => refetch?.()}
+                    />
                   </div>
                 </CardContent>
               </Card>

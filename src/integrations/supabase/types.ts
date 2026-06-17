@@ -1059,6 +1059,7 @@ export type Database = {
           card_position: number
           cefr_level: string | null
           created_at: string | null
+          created_by_student: boolean
           deleted_at: string | null
           front_example: string | null
           front_text: string
@@ -1072,6 +1073,7 @@ export type Database = {
           card_position?: number
           cefr_level?: string | null
           created_at?: string | null
+          created_by_student?: boolean
           deleted_at?: string | null
           front_example?: string | null
           front_text: string
@@ -1085,6 +1087,7 @@ export type Database = {
           card_position?: number
           cefr_level?: string | null
           created_at?: string | null
+          created_by_student?: boolean
           deleted_at?: string | null
           front_example?: string | null
           front_text?: string
@@ -1187,6 +1190,7 @@ export type Database = {
       }
       flashcard_sets: {
         Row: {
+          allow_student_contributions: boolean
           back_type: string | null
           created_at: string | null
           deleted_at: string | null
@@ -1201,6 +1205,7 @@ export type Database = {
           updated_at: string | null
         }
         Insert: {
+          allow_student_contributions?: boolean
           back_type?: string | null
           created_at?: string | null
           deleted_at?: string | null
@@ -1215,6 +1220,7 @@ export type Database = {
           updated_at?: string | null
         }
         Update: {
+          allow_student_contributions?: boolean
           back_type?: string | null
           created_at?: string | null
           deleted_at?: string | null
@@ -2082,6 +2088,62 @@ export type Database = {
             columns: ["teacher_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      student_intake_extractions: {
+        Row: {
+          applied_student_updates: Json
+          created_at: string
+          created_entry_ids: string[]
+          created_goal_ids: string[]
+          created_pacing_proposal_id: string | null
+          extracted_json: Json
+          id: string
+          model: string
+          pre_update_snapshot: Json
+          raw_text: string
+          status: string
+          student_id: string
+          teacher_id: string
+        }
+        Insert: {
+          applied_student_updates?: Json
+          created_at?: string
+          created_entry_ids?: string[]
+          created_goal_ids?: string[]
+          created_pacing_proposal_id?: string | null
+          extracted_json: Json
+          id?: string
+          model: string
+          pre_update_snapshot?: Json
+          raw_text: string
+          status?: string
+          student_id: string
+          teacher_id: string
+        }
+        Update: {
+          applied_student_updates?: Json
+          created_at?: string
+          created_entry_ids?: string[]
+          created_goal_ids?: string[]
+          created_pacing_proposal_id?: string | null
+          extracted_json?: Json
+          id?: string
+          model?: string
+          pre_update_snapshot?: Json
+          raw_text?: string
+          status?: string
+          student_id?: string
+          teacher_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "student_intake_extractions_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
             referencedColumns: ["id"]
           },
         ]
@@ -3498,6 +3560,16 @@ export type Database = {
         }
         Returns: undefined
       }
+      apply_intake_extraction: {
+        Args: {
+          p_includes: Json
+          p_model: string
+          p_payload: Json
+          p_raw_text: string
+          p_student_id: string
+        }
+        Returns: Json
+      }
       backfill_skill_metrics: {
         Args: { p_student_id?: string }
         Returns: number
@@ -3859,6 +3931,10 @@ export type Database = {
         Args: { user_email: string }
         Returns: boolean
       }
+      rollback_intake_extraction: {
+        Args: { p_extraction_id: string }
+        Returns: undefined
+      }
       save_homework_answer:
         | {
             Args: {
@@ -4008,6 +4084,16 @@ export type Database = {
       soft_delete_worksheet: {
         Args: { p_teacher_id: string; p_worksheet_id: string }
         Returns: boolean
+      }
+      student_add_flashcard: {
+        Args: {
+          p_back: string
+          p_front: string
+          p_native?: string
+          p_set_id: string
+          p_student_email: string
+        }
+        Returns: string
       }
       submit_homework_answers: {
         Args: { p_homework_id: string; p_student_email: string }

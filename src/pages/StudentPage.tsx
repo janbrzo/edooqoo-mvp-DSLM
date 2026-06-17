@@ -15,6 +15,7 @@ import { useStudent } from '@/hooks/useStudent';
 import { useWorksheetHistory } from '@/hooks/useWorksheetHistory';
 import { useDeletedWorksheets } from '@/hooks/useDeletedWorksheets';
 import { StudentEditDialog } from '@/components/StudentEditDialog';
+import { IntakeExtractionBanner } from '@/components/student/IntakeExtractionBanner';
 import { DeleteWorksheetButton } from "@/components/DeleteWorksheetButton";
 import { DuplicateWorksheetButton } from "@/components/DuplicateWorksheetButton";
 import { StudentSelector } from '@/components/StudentSelector';
@@ -437,6 +438,19 @@ const StudentPage = () => {
         }
       />
       <div className="max-w-6xl mx-auto p-4">
+
+        {/* v6.9.62 P6 — intake extraction banner: shown when ?intake=<id> is present. */}
+        {searchParams.get('intake') && id ? (
+          <IntakeExtractionBanner
+            extractionId={searchParams.get('intake') as string}
+            studentId={id}
+            onDismiss={() => {
+              const next = new URLSearchParams(searchParams);
+              next.delete('intake');
+              setSearchParams(next, { replace: true });
+            }}
+          />
+        ) : null}
 
         {/* Tabs Navigation */}
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">

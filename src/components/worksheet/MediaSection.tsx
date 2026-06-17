@@ -321,7 +321,7 @@ export default function MediaSection({
               rel="noopener noreferrer"
               className="font-medium text-worksheet-purple hover:underline inline-flex items-center gap-1"
             >
-              Google Gemini 3.1 Flash Image
+              Google Gemini Image (Vertex AI)
               <ExternalLink className="h-3 w-3" />
             </a>
           </div>

@@ -531,6 +531,12 @@ export default function GeneratingModal({
               </span>
             </p>
           ) : null}
+          {/* v6.9.62 P5 — topic preview under student row (single-job header). */}
+          {jobsCount <= 1 && jobs && jobs[0]?.topic ? (
+            <p className="text-[11px] lg:text-xs text-muted-foreground/80 truncate">
+              “{jobs[0].topic.length > 80 ? `${jobs[0].topic.slice(0, 79)}…` : jobs[0].topic}”
+            </p>
+          ) : null}
         </div>
 
         <Progress
@@ -558,7 +564,18 @@ export default function GeneratingModal({
             {studentName ? (
               <>
                 {' '}
-                <span className="font-medium text-foreground">{studentName}</span>
+                {studentId ? (
+                  <a
+                    href={`/student/${studentId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-medium text-foreground underline-offset-2 hover:underline"
+                  >
+                    {studentName}
+                  </a>
+                ) : (
+                  <span className="font-medium text-foreground">{studentName}</span>
+                )}
               </>
             ) : (
               ' your students'

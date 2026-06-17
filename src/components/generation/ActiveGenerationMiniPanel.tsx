@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Loader2, Sparkles, X, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Progress } from '@/components/ui/progress';
 import { cn } from '@/lib/utils';
 import {
   WorksheetGenerationJob,
@@ -116,6 +117,32 @@ function MiniPanelCard({
   const studentName = job.formMeta?.studentName;
   const progress = job.progress ?? null;
 
+  // v6.9.62 P5 — live elapsed counter + % for running mini-cards.
+  const [elapsedSec, setElapsedSec] = useState<number>(() =>
+    Math.max(0, Math.floor((Date.now() - (job.startedAt ?? Date.now())) / 1000)),
+  );
+  useEffect(() => {
+    if (!isRunning) return;
+    const id = window.setInterval(() => {
+      setElapsedSec(Math.max(0, Math.floor((Date.now() - (job.startedAt ?? Date.now())) / 1000)));
+    }, 1000);
+    return () => window.clearInterval(id);
+  }, [isRunning, job.startedAt]);
+
+  const pct = (() => {
+    if (progress && progress.expectedTotal > 0) {
+      return Math.min(100, Math.round((progress.exercisesGenerated / progress.expectedTotal) * 100));
+    }
+    // Soft time-based fallback so the bar still moves before stream metadata arrives.
+    return Math.min(95, Math.round(elapsedSec * 1.2));
+  })();
+
+  const formatElapsed = (s: number) => {
+    const m = Math.floor(s / 60);
+    const r = s % 60;
+    return `${m}:${r.toString().padStart(2, '0')}`;
+  };
+
   return (
     <div
       className={cn(
@@ -142,11 +169,13 @@ function MiniPanelCard({
                 {studentName ? <>For <span className="font-medium text-foreground">{studentName}</span> · </> : null}
                 {job.topic ? `“${job.topic}” — ` : ''}keeps running in the background.
               </p>
-              {progress && progress.expectedTotal > 0 ? (
-                <p className="text-[11px] text-muted-foreground/80 mt-1">
-                  Exercises: {progress.exercisesGenerated}/{progress.expectedTotal}
-                </p>
-              ) : null}
+              <div className="mt-1.5 flex items-center justify-between text-[11px] tabular-nums text-muted-foreground/90">
+                <span>{formatElapsed(elapsedSec)} · {pct}%</span>
+                {progress && progress.expectedTotal > 0 ? (
+                  <span>{progress.exercisesGenerated}/{progress.expectedTotal}</span>
+                ) : null}
+              </div>
+              <Progress value={pct} className="h-1 mt-1" />
             </>
           )}
           {isCompleted && (
