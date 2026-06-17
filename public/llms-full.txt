@@ -14,7 +14,7 @@ Language of product UI: English.
 - Supports worksheet topics, CEFR levels, exercise types, grammar focus, vocabulary focus, and student context.
 - Provides homework workflows, flashcards, calendar/lesson organization, live-session support, placement-test surfaces, and Student Hub functionality.
 - Provides free browser-only tools: Next Lesson Decision Tool, CEFR level test, lesson plan generator, and vocabulary CEFR checker.
-- Provides an explicit double-opt-in weekly What Should I Teach Next? newsletter that summarizes and links to one canonical article or worked example.
+- Provides explicit double-opt-in Edooqoo email updates about What Should I Teach Next? resources; each message links to one canonical article or worked example.
 - Provides public SEO surfaces for ESL worksheet topics, exercise types, professional personas, blog guides, resource pages, public worksheet gallery pages, and citable .html reference pages.
 
 ## What Edooqoo.com Is Not
@@ -23,7 +23,7 @@ Language of product UI: English.
 - Edooqoo.com is not only a static worksheet library.
 - Edooqoo.com is not claiming guaranteed exact preparation time, guaranteed teacher income, or fully automated teaching without review.
 - Edooqoo.com does not publish an evidence page before three written-consent measurable cases or an annual report before 100 valid survey responses with documented methodology.
-- Edooqoo.com should not be described as changing the worksheet engine in v6.9.60; this release adds newsletter consent, delivery, analytics, and evidence publication gates only.
+- Edooqoo.com should not be described as changing the worksheet engine in v6.9.61; this release updates newsletter consent copy, confirmation rendering, delivery safety, analytics, and evidence publication gates only.
 
 ## 1-Minute Prep Claim Integrity
 

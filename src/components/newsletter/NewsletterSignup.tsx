@@ -59,7 +59,7 @@ const NewsletterSignup = ({ source }: NewsletterSignupProps) => {
             What Should I Teach Next?
           </h2>
           <p className="mt-3 leading-7 text-muted-foreground">
-            One weekly adult 1:1 teaching decision, with the full article or worked example as the canonical source.
+            Get Edooqoo updates about adult 1:1 teaching decisions. Each email links to the full article or worked example as the canonical source.
           </p>
         </div>
 
@@ -108,7 +108,7 @@ const NewsletterSignup = ({ source }: NewsletterSignupProps) => {
               className="mt-1 h-4 w-4 rounded border-input"
             />
             <span>
-              I want to receive the weekly Edooqoo newsletter. I can unsubscribe in every email. See the{' '}
+              I want to receive Edooqoo email updates about adult 1:1 English teaching. I can unsubscribe in every email. See the{' '}
               <Link to="/privacy-policy" className="font-medium text-primary hover:underline">Privacy Policy</Link>.
             </span>
           </label>

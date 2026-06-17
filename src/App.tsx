@@ -95,6 +95,7 @@ const CefrLevelTest = lazy(() => import("./pages/tools/CefrLevelTest"));
 const LessonPlanGenerator = lazy(() => import("./pages/tools/LessonPlanGenerator"));
 const VocabCefrChecker = lazy(() => import("./pages/tools/VocabCefrChecker"));
 const WhatShouldITeachNextTool = lazy(() => import("./pages/tools/WhatShouldITeachNextTool"));
+const NewsletterAction = lazy(() => import("./pages/NewsletterAction"));
 const NewsletterStatus = lazy(() => import("./pages/NewsletterStatus"));
 const PublicGalleryIndex = lazy(() => import("./pages/gallery/PublicGalleryIndex"));
 const PublicGalleryWorksheetPage = lazy(() => import("./pages/gallery/PublicGalleryWorksheetPage"));
@@ -191,6 +192,8 @@ const App = () => (
               <Route path="/tools/lesson-plan-generator" element={<LessonPlanGenerator />} />
               <Route path="/tools/vocab-cefr-checker" element={<VocabCefrChecker />} />
               <Route path="/tools/what-should-i-teach-next" element={<WhatShouldITeachNextTool />} />
+              <Route path="/newsletter/confirm" element={<NewsletterAction mode="confirm" />} />
+              <Route path="/newsletter/unsubscribe" element={<NewsletterAction mode="unsubscribe" />} />
               <Route path="/newsletter/confirmed" element={<NewsletterStatus mode="confirmed" />} />
               <Route path="/newsletter/unsubscribed" element={<NewsletterStatus mode="unsubscribed" />} />
               <Route path="/gallery" element={<PublicGalleryIndex />} />

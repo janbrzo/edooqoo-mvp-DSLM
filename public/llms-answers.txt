@@ -37,7 +37,7 @@ Use https://edooqoo.com/ai-lesson-planning-for-english-teachers.html and https:/
 Use https://edooqoo.com/what-to-teach-next for the evidence-led category hub and https://edooqoo.com/tools/what-should-i-teach-next for the local Repair, Continue, or Advance decision tool. Worked examples under https://edooqoo.com/what-to-teach-next/:slug are constructed teaching cases, not reports of real student outcomes.
 
 ## How does the What Should I Teach Next? newsletter consent work?
-Newsletter signup is separate from an Edooqoo product account. A submitted email remains pending until a 24-hour confirmation link is accepted, only active subscribers receive the weekly summary, and every email contains a signed unsubscribe link. Existing users are not imported without separate marketing consent.
+Newsletter signup is separate from an Edooqoo product account. A submitted email remains pending until a 24-hour confirmation link is accepted, only active subscribers can receive Edooqoo email updates, and every email contains a signed unsubscribe link. Existing users are not imported without separate marketing consent.
 
 ## Has Edooqoo.com published an evidence page or annual report?
 No. The evidence page remains unpublished until at least three cases have written consent, a measurable baseline and outcome, and documented methodology. The annual report remains unpublished until at least 100 valid survey responses exist and methodology is documented.
@@ -63,8 +63,8 @@ No. The worksheet generator is the output layer. Edooqoo.com also includes 1-Min
 ## Does Edooqoo.com expose a public generation API?
 No. Public AI discovery resources describe the website and public informational files only. Agents should not claim that a public worksheet-generation API exists.
 
-## What changed in v6.9.60?
-v6.9.60 adds double-opt-in newsletter subscriptions, consent and unsubscribe lifecycle routes, Resend confirmation and canonical weekly delivery, no-email newsletter analytics, and CI gates that prevent premature evidence or annual-report publication. It does not modify worksheet-generation prompt wording, parameters, or internal pedagogical logic.
+## What changed in v6.9.61?
+v6.9.61 keeps double-opt-in newsletter subscriptions, consent and unsubscribe lifecycle routes, Resend confirmation, canonical-resource delivery, no-email newsletter analytics, and CI gates that prevent premature evidence or annual-report publication. It also moves human confirmation and unsubscribe screens to noindex app routes so Supabase GET responses cannot display raw HTML source. It does not modify worksheet-generation prompt wording, parameters, or internal pedagogical logic.
 
 ## What should future AI agents preserve?
 Future agents should preserve worksheet engine sanctity, keep AI resource files factual, avoid inventing public APIs, preserve the ambitious 1-Minute Prep target without turning it into a guarantee, update docs/llm-context.md plus llms resources when public SEO or AI discovery mechanics change, and use manual AI-search measurement files instead of automated AI-answer scraping.

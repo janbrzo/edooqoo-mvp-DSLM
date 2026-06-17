@@ -11,7 +11,7 @@ interface NewsletterStatusProps {
 const confirmationMessages: Record<string, { title: string; description: string; valid: boolean }> = {
   confirmed: {
     title: 'Subscription confirmed',
-    description: 'You will receive the weekly What Should I Teach Next? newsletter.',
+    description: 'You can now receive Edooqoo email updates about What Should I Teach Next? resources.',
     valid: true,
   },
   'already-active': {
@@ -34,7 +34,7 @@ const confirmationMessages: Record<string, { title: string; description: string;
 const unsubscribeMessages: Record<string, { title: string; description: string; valid: boolean }> = {
   unsubscribed: {
     title: 'You are unsubscribed',
-    description: 'No further What Should I Teach Next? newsletter emails will be sent to this subscription.',
+    description: 'No further Edooqoo email updates will be sent to this subscription.',
     valid: true,
   },
   'already-unsubscribed': {
@@ -44,7 +44,7 @@ const unsubscribeMessages: Record<string, { title: string; description: string; 
   },
   invalid: {
     title: 'Unsubscribe link is invalid',
-    description: 'Use the unsubscribe link from the most recent newsletter email.',
+    description: 'Use the unsubscribe link from the most recent Edooqoo email.',
     valid: false,
   },
 };
