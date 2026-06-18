@@ -178,9 +178,10 @@ serve(async (req) => {
       `[GENERATE-IMAGE] Image generated successfully (${Math.round(base64Image.length / 1024)}KB, ${mimeType})`,
     );
 
-    // STEP 2: Generate detailed description using Gemini Pro WITH VISION
+    // STEP 2: Generate detailed description using Gemini WITH VISION.
+    // v6.9.63: gemini-2.0-flash can return 404 on the Generative Language API,
+    // so use the current 2.5 vision-capable model with a lite fallback.
     const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-    const descriptionModel = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     // Pass the actual image to Gemini for VISUAL analysis
     const imagePart = {
@@ -207,11 +208,40 @@ FORMAT:
 - Spatial prepositions (in front of, behind, next to)
 `;
 
-    const descriptionResult = await descriptionModel.generateContent([
-      descriptionPrompt,
-      imagePart,
-    ]);
-    let detailedDescription = descriptionResult.response.text();
+    const DESCRIPTION_MODEL_CHAIN = Array.from(new Set([
+      Deno.env.get("GEMINI_DESCRIPTION_MODEL")?.trim() || "gemini-2.5-flash",
+      "gemini-2.5-flash-lite",
+    ].filter(Boolean)));
+
+    let detailedDescription = "";
+    let activeDescriptionModel = DESCRIPTION_MODEL_CHAIN[0];
+    let lastDescriptionError = "";
+    for (const descriptionModelId of DESCRIPTION_MODEL_CHAIN) {
+      try {
+        const descriptionModel = genAI.getGenerativeModel({ model: descriptionModelId });
+        const descriptionResult = await descriptionModel.generateContent([
+          descriptionPrompt,
+          imagePart,
+        ]);
+        detailedDescription = descriptionResult.response.text();
+        activeDescriptionModel = descriptionModelId;
+        break;
+      } catch (descriptionError) {
+        lastDescriptionError = (descriptionError as Error)?.message ?? String(descriptionError);
+        console.warn(`[GENERATE-IMAGE] Description model ${descriptionModelId} failed: ${lastDescriptionError.slice(0, 240)}`);
+        await logModelFailure({
+          model: descriptionModelId,
+          provider: "google",
+          status: /404|not found|no longer available/i.test(lastDescriptionError) ? 404 : 500,
+          endpoint: "https://generativelanguage.googleapis.com/v1beta/models/:generateContent",
+          error: lastDescriptionError.slice(0, 500),
+          functionName: "generate-image",
+        });
+        if (!/404|not found|no longer available|does not exist|unsupported/i.test(lastDescriptionError)) {
+          throw descriptionError;
+        }
+      }
+    }
 
     if (!detailedDescription || detailedDescription.length < 100) {
       throw new Error("Generated description is too short or empty");
@@ -222,7 +252,7 @@ FORMAT:
       console.log(`[GENERATE-IMAGE] Description truncated to 2000 chars`);
     }
 
-    console.log(`[GENERATE-IMAGE] Description generated with vision analysis (${detailedDescription.length} chars)`);
+    console.log(`[GENERATE-IMAGE] Description generated with ${activeDescriptionModel} vision analysis (${detailedDescription.length} chars)`);
     console.log(`[GENERATE-IMAGE] Description preview: ${detailedDescription.substring(0, 200)}...`);
 
     const finalImageUrl = imageUrl;
