@@ -63,10 +63,10 @@ serve(async (req) => {
 
     console.log(`[GENERATE-IMAGE] Starting image generation for topic: "${topic}", level: ${englishLevel}, user: ${userId}`);
 
-    // STEP 1 (v6.9.62 P2): Generate image via Vertex AI Gemini Image models.
-    // Use PRIMARY then FALLBACK on 404 / NOT_FOUND so a region/preview rename
-    // does not block media generation. PRIMARY can be overridden via env var
-    // GEMINI_IMAGE_MODEL. Default chain: gemini-2.5-flash-image → gemini-3.1-flash-image-preview.
+    // STEP 1 (v6.9.63 P1): Generate image via Vertex AI Gemini Image models.
+    // The preview/stable 3.1 names can return NOT_FOUND for this GCP project
+    // until access is granted in Vertex. Default to the accessible production
+    // model and allow 3.1 only through an explicit working env override.
     const imagePrompt = createImagePrompt(topic, englishLevel);
     console.log(`[GENERATE-IMAGE] Image prompt: ${imagePrompt.substring(0, 150)}...`);
 
@@ -81,10 +81,20 @@ serve(async (req) => {
       throw new Error("GEMINI_VERTEX_API_KEY must be a valid service account JSON");
     }
 
-    const PRIMARY_MODEL = Deno.env.get("GEMINI_IMAGE_MODEL") || "gemini-2.5-flash-image";
-    const FALLBACK_MODELS = ["gemini-3.1-flash-image-preview", "gemini-2.5-flash-image"]
-      .filter((m) => m !== PRIMARY_MODEL);
-    const MODEL_CHAIN = [PRIMARY_MODEL, ...FALLBACK_MODELS];
+    const normalizeImageModel = (model: string | null | undefined) => {
+      const trimmed = model?.trim();
+      if (!trimmed || trimmed === "gemini-3.1-flash-image-preview") {
+        return "gemini-2.5-flash-image";
+      }
+      return trimmed;
+    };
+
+    const PRIMARY_MODEL = normalizeImageModel(Deno.env.get("GEMINI_IMAGE_MODEL"));
+    const MODEL_CHAIN = Array.from(new Set([
+      PRIMARY_MODEL,
+      "gemini-2.5-flash-image",
+      "gemini-3.1-flash-image",
+    ]));
 
     const callVertex = async (modelId: string) => {
       const endpoint = `https://us-central1-aiplatform.googleapis.com/v1/projects/${projectId}/locations/us-central1/publishers/google/models/${modelId}:generateContent`;
@@ -159,7 +169,7 @@ serve(async (req) => {
         "[GENERATE-IMAGE] No image in Vertex AI response:",
         JSON.stringify(imageData).slice(0, 1000),
       );
-      throw new Error("No valid image data received from Vertex AI (gemini-3.1-flash-image-preview)");
+      throw new Error(`No valid image data received from Vertex AI (${MODEL_ID})`);
     }
 
     const imageUrl = `data:${mimeType};base64,${base64Image}`;
@@ -168,9 +178,10 @@ serve(async (req) => {
       `[GENERATE-IMAGE] Image generated successfully (${Math.round(base64Image.length / 1024)}KB, ${mimeType})`,
     );
 
-    // STEP 2: Generate detailed description using Gemini Pro WITH VISION
+    // STEP 2: Generate detailed description using Gemini WITH VISION.
+    // v6.9.63: gemini-2.0-flash can return 404 on the Generative Language API,
+    // so use the current 2.5 vision-capable model with a lite fallback.
     const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
-    const descriptionModel = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
 
     // Pass the actual image to Gemini for VISUAL analysis
     const imagePart = {
@@ -197,11 +208,40 @@ FORMAT:
 - Spatial prepositions (in front of, behind, next to)
 `;
 
-    const descriptionResult = await descriptionModel.generateContent([
-      descriptionPrompt,
-      imagePart,
-    ]);
-    let detailedDescription = descriptionResult.response.text();
+    const DESCRIPTION_MODEL_CHAIN = Array.from(new Set([
+      Deno.env.get("GEMINI_DESCRIPTION_MODEL")?.trim() || "gemini-2.5-flash",
+      "gemini-2.5-flash-lite",
+    ].filter(Boolean)));
+
+    let detailedDescription = "";
+    let activeDescriptionModel = DESCRIPTION_MODEL_CHAIN[0];
+    let lastDescriptionError = "";
+    for (const descriptionModelId of DESCRIPTION_MODEL_CHAIN) {
+      try {
+        const descriptionModel = genAI.getGenerativeModel({ model: descriptionModelId });
+        const descriptionResult = await descriptionModel.generateContent([
+          descriptionPrompt,
+          imagePart,
+        ]);
+        detailedDescription = descriptionResult.response.text();
+        activeDescriptionModel = descriptionModelId;
+        break;
+      } catch (descriptionError) {
+        lastDescriptionError = (descriptionError as Error)?.message ?? String(descriptionError);
+        console.warn(`[GENERATE-IMAGE] Description model ${descriptionModelId} failed: ${lastDescriptionError.slice(0, 240)}`);
+        await logModelFailure({
+          model: descriptionModelId,
+          provider: "google",
+          status: /404|not found|no longer available/i.test(lastDescriptionError) ? 404 : 500,
+          endpoint: "https://generativelanguage.googleapis.com/v1beta/models/:generateContent",
+          error: lastDescriptionError.slice(0, 500),
+          functionName: "generate-image",
+        });
+        if (!/404|not found|no longer available|does not exist|unsupported/i.test(lastDescriptionError)) {
+          throw descriptionError;
+        }
+      }
+    }
 
     if (!detailedDescription || detailedDescription.length < 100) {
       throw new Error("Generated description is too short or empty");
@@ -212,7 +252,7 @@ FORMAT:
       console.log(`[GENERATE-IMAGE] Description truncated to 2000 chars`);
     }
 
-    console.log(`[GENERATE-IMAGE] Description generated with vision analysis (${detailedDescription.length} chars)`);
+    console.log(`[GENERATE-IMAGE] Description generated with ${activeDescriptionModel} vision analysis (${detailedDescription.length} chars)`);
     console.log(`[GENERATE-IMAGE] Description preview: ${detailedDescription.substring(0, 200)}...`);
 
     const finalImageUrl = imageUrl;
