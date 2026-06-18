@@ -64,9 +64,9 @@ serve(async (req) => {
     console.log(`[GENERATE-IMAGE] Starting image generation for topic: "${topic}", level: ${englishLevel}, user: ${userId}`);
 
     // STEP 1 (v6.9.63 P1): Generate image via Vertex AI Gemini Image models.
-    // The preview model name used in v6.9.61 can return NOT_FOUND for this
-    // project/region. Normalize that legacy alias to the stable Nano Banana 2
-    // model and keep Gemini 2.5 Flash Image as the safe production fallback.
+    // The preview/stable 3.1 names can return NOT_FOUND for this GCP project
+    // until access is granted in Vertex. Default to the accessible production
+    // model and allow 3.1 only through an explicit working env override.
     const imagePrompt = createImagePrompt(topic, englishLevel);
     console.log(`[GENERATE-IMAGE] Image prompt: ${imagePrompt.substring(0, 150)}...`);
 
@@ -84,7 +84,7 @@ serve(async (req) => {
     const normalizeImageModel = (model: string | null | undefined) => {
       const trimmed = model?.trim();
       if (!trimmed || trimmed === "gemini-3.1-flash-image-preview") {
-        return "gemini-3.1-flash-image";
+        return "gemini-2.5-flash-image";
       }
       return trimmed;
     };
@@ -92,8 +92,8 @@ serve(async (req) => {
     const PRIMARY_MODEL = normalizeImageModel(Deno.env.get("GEMINI_IMAGE_MODEL"));
     const MODEL_CHAIN = Array.from(new Set([
       PRIMARY_MODEL,
-      "gemini-3.1-flash-image",
       "gemini-2.5-flash-image",
+      "gemini-3.1-flash-image",
     ]));
 
     const callVertex = async (modelId: string) => {
