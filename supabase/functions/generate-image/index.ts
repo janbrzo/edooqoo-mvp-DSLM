@@ -63,10 +63,10 @@ serve(async (req) => {
 
     console.log(`[GENERATE-IMAGE] Starting image generation for topic: "${topic}", level: ${englishLevel}, user: ${userId}`);
 
-    // STEP 1 (v6.9.62 P2): Generate image via Vertex AI Gemini Image models.
-    // Use PRIMARY then FALLBACK on 404 / NOT_FOUND so a region/preview rename
-    // does not block media generation. PRIMARY can be overridden via env var
-    // GEMINI_IMAGE_MODEL. Default chain: gemini-2.5-flash-image → gemini-3.1-flash-image-preview.
+    // STEP 1 (v6.9.63 P1): Generate image via Vertex AI Gemini Image models.
+    // The preview model name used in v6.9.61 can return NOT_FOUND for this
+    // project/region. Normalize that legacy alias to the stable Nano Banana 2
+    // model and keep Gemini 2.5 Flash Image as the safe production fallback.
     const imagePrompt = createImagePrompt(topic, englishLevel);
     console.log(`[GENERATE-IMAGE] Image prompt: ${imagePrompt.substring(0, 150)}...`);
 
@@ -81,10 +81,20 @@ serve(async (req) => {
       throw new Error("GEMINI_VERTEX_API_KEY must be a valid service account JSON");
     }
 
-    const PRIMARY_MODEL = Deno.env.get("GEMINI_IMAGE_MODEL") || "gemini-2.5-flash-image";
-    const FALLBACK_MODELS = ["gemini-3.1-flash-image-preview", "gemini-2.5-flash-image"]
-      .filter((m) => m !== PRIMARY_MODEL);
-    const MODEL_CHAIN = [PRIMARY_MODEL, ...FALLBACK_MODELS];
+    const normalizeImageModel = (model: string | null | undefined) => {
+      const trimmed = model?.trim();
+      if (!trimmed || trimmed === "gemini-3.1-flash-image-preview") {
+        return "gemini-3.1-flash-image";
+      }
+      return trimmed;
+    };
+
+    const PRIMARY_MODEL = normalizeImageModel(Deno.env.get("GEMINI_IMAGE_MODEL"));
+    const MODEL_CHAIN = Array.from(new Set([
+      PRIMARY_MODEL,
+      "gemini-3.1-flash-image",
+      "gemini-2.5-flash-image",
+    ]));
 
     const callVertex = async (modelId: string) => {
       const endpoint = `https://us-central1-aiplatform.googleapis.com/v1/projects/${projectId}/locations/us-central1/publishers/google/models/${modelId}:generateContent`;
@@ -159,7 +169,7 @@ serve(async (req) => {
         "[GENERATE-IMAGE] No image in Vertex AI response:",
         JSON.stringify(imageData).slice(0, 1000),
       );
-      throw new Error("No valid image data received from Vertex AI (gemini-3.1-flash-image-preview)");
+      throw new Error(`No valid image data received from Vertex AI (${MODEL_ID})`);
     }
 
     const imageUrl = `data:${mimeType};base64,${base64Image}`;
