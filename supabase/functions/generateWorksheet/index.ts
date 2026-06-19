@@ -994,8 +994,17 @@ serve(async (req) => {
       if (!jsonContent) {
         throw new Error("No JSON content received from AI");
       }
-      const { data: parsedData, repairMethod } = await parseWithRecovery(jsonContent, exerciseCount);
-      worksheetData = parsedData;
+      const recovery = await parseOrRegenerateWithFallback({
+        rawContent: jsonContent,
+        expectedExerciseCount: exerciseCount,
+        systemMessage,
+        sanitizedPrompt,
+        allowRegenerateFallback: hasPictureMedia,
+      });
+      worksheetData = recovery.data;
+      jsonContent = recovery.content;
+      const repairMethod = recovery.repairMethod;
+      if (recovery.modelOverride) usedModel = recovery.modelOverride;
       if (repairMethod !== 'none') {
         console.log(`🔧 [REGULAR] JSON was repaired using: ${repairMethod}`);
       }
