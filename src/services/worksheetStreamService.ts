@@ -6,7 +6,12 @@ import { devLog } from '@/utils/logger';
 
 interface StreamCallbacks {
   onStart?: () => void;
-  onProgress?: (progress: { exercisesGenerated: number; expectedTotal: number }) => void;
+  onProgress?: (progress: {
+    exercisesGenerated: number;
+    expectedTotal: number;
+    phase?: string;
+    percent?: number;
+  }) => void;
   onDone?: (result: { worksheetId: string; worksheet: any }) => void;
   onError?: (error: Error) => void;
   /**
@@ -48,7 +53,10 @@ export function streamWorksheetGeneration(
   // keepalive comment frame every 15s. Before tearing the stream down we try
   // a single silent retry if no exercise has streamed yet.
   const HEARTBEAT_MS = 45000;
-  let lastProgress = { exercisesGenerated: 0, expectedTotal: 0 };
+  let lastProgress: { exercisesGenerated: number; expectedTotal: number; phase?: string; percent?: number } = {
+    exercisesGenerated: 0,
+    expectedTotal: 0,
+  };
   let heartbeatTimer: ReturnType<typeof setTimeout> | null = null;
 
   const cleanupHeartbeat = () => {
@@ -149,8 +157,13 @@ export function streamWorksheetGeneration(
               callbacks.onStart?.();
               break;
             case 'progress':
-              lastProgress = { exercisesGenerated: data?.exercisesGenerated ?? lastProgress.exercisesGenerated, expectedTotal: data?.expectedTotal ?? lastProgress.expectedTotal };
-              callbacks.onProgress?.(data);
+              lastProgress = {
+                exercisesGenerated: data?.exercisesGenerated ?? lastProgress.exercisesGenerated,
+                expectedTotal: data?.expectedTotal ?? lastProgress.expectedTotal,
+                phase: typeof data?.phase === 'string' ? data.phase : lastProgress.phase,
+                percent: typeof data?.percent === 'number' ? data.percent : lastProgress.percent,
+              };
+              callbacks.onProgress?.(lastProgress);
               break;
             case 'done':
               receivedDoneOrError = true;

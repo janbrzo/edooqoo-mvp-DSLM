@@ -145,6 +145,19 @@ const Index = () => {
     }
   }, [searchParams, setSearchParams, worksheetState]);
 
+  // v6.9.64 — react to completion event dispatched by useWorksheetGeneration
+  // and navigate via React Router. Replaces the previous raw history.pushState
+  // path which silently changed the URL without re-rendering the route.
+  useEffect(() => {
+    const onNavigateToGenerated = (event: Event) => {
+      const worksheetId = (event as CustomEvent<{ worksheetId?: string }>).detail?.worksheetId;
+      if (!worksheetId) return;
+      navigate(`/worksheet/${worksheetId}`, { replace: false });
+    };
+    window.addEventListener('worksheet:navigateToGenerated', onNavigateToGenerated);
+    return () => window.removeEventListener('worksheet:navigateToGenerated', onNavigateToGenerated);
+  }, [navigate]);
+
   // Function to scroll to pricing section
   const scrollToPricing = () => {
     const pricingSection = document.getElementById('pricing-section');

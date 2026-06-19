@@ -30,6 +30,89 @@ const corsHeaders = {
 const rateLimiter = new RateLimiter();
 
 // ============================================================
+// v6.9.64 — Worksheet-local image description sanitizer.
+// Keeps DB row/image metadata intact; only the prompt-context copy
+// of `selectedImage.detailedDescription` is bounded so very long
+// vision outputs do not destabilize JSON-only worksheet generation.
+// ============================================================
+function truncateAtSentenceBoundary(value: string, maxChars: number): string {
+  const clean = String(value || '').replace(/\s+/g, ' ').trim();
+  if (clean.length <= maxChars) return clean;
+  const slice = clean.slice(0, maxChars);
+  const lastBoundary = Math.max(
+    slice.lastIndexOf('. '),
+    slice.lastIndexOf('; '),
+    slice.lastIndexOf(': '),
+  );
+  if (lastBoundary > Math.floor(maxChars * 0.55)) {
+    return slice.slice(0, lastBoundary + 1).trim();
+  }
+  return `${slice.trim()}...`;
+}
+
+function buildWorksheetMediaContextImage(selectedImage: any): any {
+  if (!selectedImage) return null;
+  const rawDescription = selectedImage?.detailedDescription || selectedImage?.description || '';
+  return {
+    ...selectedImage,
+    detailedDescription: truncateAtSentenceBoundary(rawDescription, 1200),
+  };
+}
+
+// ============================================================
+// v6.9.64 — Parse-safe model fallback for picture worksheets.
+// When the streamed Gemini JSON cannot be parsed even after the
+// deterministic + AI repair passes, regenerate the worksheet JSON
+// once via GPT-5-mini in strict JSON-object mode. This protects the
+// large picture-worksheet payload without altering the protected
+// worksheet generation prompt.
+// ============================================================
+async function generateFallbackJsonWithOpenAI(
+  systemMessage: string,
+  userMessage: string,
+): Promise<{ content: string; model: string }> {
+  console.log('🟠 [JSON-FALLBACK] Regenerating worksheet JSON with GPT-5-mini after malformed Gemini JSON');
+  const response = await (openai.chat.completions.create as any)({
+    model: 'gpt-5-mini-2025-08-07',
+    temperature: 1,
+    messages: [
+      { role: 'system', content: systemMessage },
+      { role: 'user', content: userMessage },
+    ],
+    max_completion_tokens: 30000,
+    response_format: { type: 'json_object' },
+  });
+  return {
+    content: response.choices?.[0]?.message?.content || '',
+    model: 'gpt-5-mini-2025-08-07-json-fallback',
+  };
+}
+
+async function parseOrRegenerateWithFallback(params: {
+  rawContent: string;
+  expectedExerciseCount: number;
+  systemMessage: string;
+  sanitizedPrompt: string;
+  allowRegenerateFallback: boolean;
+}): Promise<{ data: any; content: string; repairMethod: string; modelOverride?: string }> {
+  try {
+    const parsed = await parseWithRecovery(params.rawContent, params.expectedExerciseCount);
+    return { data: parsed.data, content: params.rawContent, repairMethod: parsed.repairMethod };
+  } catch (firstError) {
+    if (!params.allowRegenerateFallback) throw firstError;
+    console.warn('⚠️ [JSON-FALLBACK] Parse/repair failed; trying full JSON regeneration fallback');
+    const fallback = await generateFallbackJsonWithOpenAI(params.systemMessage, params.sanitizedPrompt);
+    const parsed = await parseWithRecovery(fallback.content, params.expectedExerciseCount);
+    return {
+      data: parsed.data,
+      content: fallback.content,
+      repairMethod: parsed.repairMethod === 'none' ? 'model-fallback' : `model-fallback+${parsed.repairMethod}`,
+      modelOverride: fallback.model,
+    };
+  }
+}
+
+// ============================================================
 // FAILURE NOTIFICATION HELPER
 // Sends email alert on any failed worksheet generation
 // ============================================================
@@ -453,10 +536,13 @@ serve(async (req) => {
 
     const selectedImage = formData?.selectedImage || null;
     const selectedAudio = formData?.selectedAudio || null;
+    // v6.9.64 — sanitized copy for prompt only; DB row keeps full image.
+    const worksheetPromptImage = buildWorksheetMediaContextImage(selectedImage);
 
     console.log("📸🎵 [MEDIA-CHECK] Received pre-generated media:", {
       hasImage: !!selectedImage,
       hasAudio: !!selectedAudio,
+      worksheetPromptImageDescChars: worksheetPromptImage?.detailedDescription?.length || 0,
     });
 
     const hasAudioMedia = selectedAudio !== null;
@@ -492,7 +578,7 @@ serve(async (req) => {
       formData,
       exerciseCount,
       effectiveExercises,
-      selectedImage,
+      worksheetPromptImage,
       selectedAudio,
       exerciseFocusMap,
     );
@@ -632,17 +718,37 @@ serve(async (req) => {
           // Parse final JSON with full recovery pipeline.
           // AI-REPAIR can take 10-30s of silent Gemini work → emit keepalive
           // progress events every 15s so the client heartbeat (40s) does not trip.
-          safeSend("progress", { exercisesGenerated: expectedTotal, expectedTotal, phase: "repairing" });
+          // v6.9.64 — also emit smooth `percent` so the mini-panel/main modal
+          // progress bar continues moving during repair instead of snapping.
+          safeSend("progress", { exercisesGenerated: expectedTotal, expectedTotal, phase: "repairing", percent: 92 });
+          let repairTick = 0;
           const repairKeepalive = setInterval(() => {
-            safeSend("progress", { exercisesGenerated: expectedTotal, expectedTotal, phase: "repairing" });
-          }, 15000);
+            repairTick += 1;
+            safeSend("progress", {
+              exercisesGenerated: expectedTotal,
+              expectedTotal,
+              phase: "repairing",
+              percent: Math.min(98, 92 + repairTick),
+            });
+          }, 5000);
 
           let worksheetData: any;
           let repairMethod: string;
           try {
-            const result = await parseWithRecovery(fullContent, expectedTotal);
+            // v6.9.64 — allow a parse-safe model fallback for picture worksheets
+            // (the long visual description is the dominant cause of malformed
+            // JSON). Non-picture worksheets keep the old behavior.
+            const result = await parseOrRegenerateWithFallback({
+              rawContent: fullContent,
+              expectedExerciseCount: expectedTotal,
+              systemMessage,
+              sanitizedPrompt,
+              allowRegenerateFallback: hasPictureMedia,
+            });
             worksheetData = result.data;
+            fullContent = result.content;
             repairMethod = result.repairMethod;
+            if (result.modelOverride) streamUsedModel = result.modelOverride;
           } finally {
             clearInterval(repairKeepalive);
           }
@@ -701,6 +807,7 @@ serve(async (req) => {
           const generationTimeSeconds = Math.round((Date.now() - generationStartTime) / 1000);
 
           // Save to database
+          safeSend("progress", { exercisesGenerated: expectedTotal, expectedTotal, phase: "saving", percent: 99 });
           console.log("💾 Saving worksheet to database...");
           const fullPrompt = `SYSTEM MESSAGE:\n${systemMessage}\n\nUSER MESSAGE:\n${sanitizedPrompt}`;
           const sanitizedFormData = formData ? JSON.parse(JSON.stringify(formData)) : {};
@@ -887,8 +994,17 @@ serve(async (req) => {
       if (!jsonContent) {
         throw new Error("No JSON content received from AI");
       }
-      const { data: parsedData, repairMethod } = await parseWithRecovery(jsonContent, exerciseCount);
-      worksheetData = parsedData;
+      const recovery = await parseOrRegenerateWithFallback({
+        rawContent: jsonContent,
+        expectedExerciseCount: exerciseCount,
+        systemMessage,
+        sanitizedPrompt,
+        allowRegenerateFallback: hasPictureMedia,
+      });
+      worksheetData = recovery.data;
+      jsonContent = recovery.content;
+      const repairMethod = recovery.repairMethod;
+      if (recovery.modelOverride) usedModel = recovery.modelOverride;
       if (repairMethod !== 'none') {
         console.log(`🔧 [REGULAR] JSON was repaired using: ${repairMethod}`);
       }

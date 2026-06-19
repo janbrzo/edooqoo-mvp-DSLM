@@ -234,12 +234,15 @@ export function repairJSONStringDeterministic(content: string): string {
   // 3. Fix missing commas between arrays: ][ -> ],[
   repaired = repaired.replace(/](\s*)\[/g, '],[');
   
-  // 4. Fix missing colon between key and value: "key" "value" -> "key": "value"
-  // This is the exact pattern causing "Expected ':' after property name" errors
-  repaired = repaired.replace(/"(\s*)\n\s*"/g, (match, space) => {
-    // Only apply if this looks like a key-value split (not inside an array of strings)
-    return '": "';
-  });
+  // 4. Fix missing colon between a property-like key and value on the next line.
+  // v6.9.64: previous broad rule `"(\s*)\n\s*"` turned any two adjacent
+  // quoted strings into a key:value pair, which silently corrupted valid
+  // string arrays. Restrict to identifier-like keys followed by a JSON
+  // value start.
+  repaired = repaired.replace(
+    /"([A-Za-z_][A-Za-z0-9_]{0,60})"\s*\n\s*("|\{|\[|true|false|null|-?\d)/g,
+    '"$1":\n$2'
+  );
   // More targeted: "key" followed by "value" on same line without colon
   repaired = repaired.replace(/"([^"]+)"\s+"([^"]*)"(?=\s*[,}\]])/g, (match, key, val) => {
     // Heuristic: if key looks like a JSON property name (no spaces or short), add colon

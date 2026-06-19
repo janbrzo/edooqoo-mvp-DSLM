@@ -353,6 +353,7 @@ export const useWorksheetGeneration = (
                     exercisesGenerated: progress.exercisesGenerated,
                     expectedTotal: progress.expectedTotal,
                     phase: (progress as any)?.phase,
+                    percent: typeof (progress as any)?.percent === 'number' ? (progress as any).percent : undefined,
                   },
                 });
               } catch { /* ignore */ }
@@ -676,7 +677,19 @@ export const useWorksheetGeneration = (
         worksheetState.setEditableWorksheet(deepFixedWorksheet);
         
         devLog('🔗 Updating URL to /worksheet/' + finalWorksheetId);
-        window.history.pushState({}, '', `/worksheet/${finalWorksheetId}`);
+        // v6.9.64 — raw pushState does not notify React Router, so the SPA
+        // could keep showing the form while the URL silently changed. Emit a
+        // typed navigation event; Index.tsx listens and calls `navigate()`.
+        // Fallback to a hard assign only if dispatch throws (e.g. headless).
+        try {
+          window.dispatchEvent(
+            new CustomEvent('worksheet:navigateToGenerated', {
+              detail: { worksheetId: finalWorksheetId },
+            }),
+          );
+        } catch {
+          window.location.assign(`/worksheet/${finalWorksheetId}`);
+        }
         
         // Mark generation as complete
         setIsGenerating(false);
