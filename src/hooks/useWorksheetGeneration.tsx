@@ -353,6 +353,7 @@ export const useWorksheetGeneration = (
                     exercisesGenerated: progress.exercisesGenerated,
                     expectedTotal: progress.expectedTotal,
                     phase: (progress as any)?.phase,
+                    percent: typeof (progress as any)?.percent === 'number' ? (progress as any).percent : undefined,
                   },
                 });
               } catch { /* ignore */ }
