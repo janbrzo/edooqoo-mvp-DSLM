@@ -536,10 +536,13 @@ serve(async (req) => {
 
     const selectedImage = formData?.selectedImage || null;
     const selectedAudio = formData?.selectedAudio || null;
+    // v6.9.64 — sanitized copy for prompt only; DB row keeps full image.
+    const worksheetPromptImage = buildWorksheetMediaContextImage(selectedImage);
 
     console.log("📸🎵 [MEDIA-CHECK] Received pre-generated media:", {
       hasImage: !!selectedImage,
       hasAudio: !!selectedAudio,
+      worksheetPromptImageDescChars: worksheetPromptImage?.detailedDescription?.length || 0,
     });
 
     const hasAudioMedia = selectedAudio !== null;
@@ -575,7 +578,7 @@ serve(async (req) => {
       formData,
       exerciseCount,
       effectiveExercises,
-      selectedImage,
+      worksheetPromptImage,
       selectedAudio,
       exerciseFocusMap,
     );
