@@ -30,6 +30,89 @@ const corsHeaders = {
 const rateLimiter = new RateLimiter();
 
 // ============================================================
+// v6.9.64 — Worksheet-local image description sanitizer.
+// Keeps DB row/image metadata intact; only the prompt-context copy
+// of `selectedImage.detailedDescription` is bounded so very long
+// vision outputs do not destabilize JSON-only worksheet generation.
+// ============================================================
+function truncateAtSentenceBoundary(value: string, maxChars: number): string {
+  const clean = String(value || '').replace(/\s+/g, ' ').trim();
+  if (clean.length <= maxChars) return clean;
+  const slice = clean.slice(0, maxChars);
+  const lastBoundary = Math.max(
+    slice.lastIndexOf('. '),
+    slice.lastIndexOf('; '),
+    slice.lastIndexOf(': '),
+  );
+  if (lastBoundary > Math.floor(maxChars * 0.55)) {
+    return slice.slice(0, lastBoundary + 1).trim();
+  }
+  return `${slice.trim()}...`;
+}
+
+function buildWorksheetMediaContextImage(selectedImage: any): any {
+  if (!selectedImage) return null;
+  const rawDescription = selectedImage?.detailedDescription || selectedImage?.description || '';
+  return {
+    ...selectedImage,
+    detailedDescription: truncateAtSentenceBoundary(rawDescription, 1200),
+  };
+}
+
+// ============================================================
+// v6.9.64 — Parse-safe model fallback for picture worksheets.
+// When the streamed Gemini JSON cannot be parsed even after the
+// deterministic + AI repair passes, regenerate the worksheet JSON
+// once via GPT-5-mini in strict JSON-object mode. This protects the
+// large picture-worksheet payload without altering the protected
+// worksheet generation prompt.
+// ============================================================
+async function generateFallbackJsonWithOpenAI(
+  systemMessage: string,
+  userMessage: string,
+): Promise<{ content: string; model: string }> {
+  console.log('🟠 [JSON-FALLBACK] Regenerating worksheet JSON with GPT-5-mini after malformed Gemini JSON');
+  const response = await (openai.chat.completions.create as any)({
+    model: 'gpt-5-mini-2025-08-07',
+    temperature: 1,
+    messages: [
+      { role: 'system', content: systemMessage },
+      { role: 'user', content: userMessage },
+    ],
+    max_completion_tokens: 30000,
+    response_format: { type: 'json_object' },
+  });
+  return {
+    content: response.choices?.[0]?.message?.content || '',
+    model: 'gpt-5-mini-2025-08-07-json-fallback',
+  };
+}
+
+async function parseOrRegenerateWithFallback(params: {
+  rawContent: string;
+  expectedExerciseCount: number;
+  systemMessage: string;
+  sanitizedPrompt: string;
+  allowRegenerateFallback: boolean;
+}): Promise<{ data: any; content: string; repairMethod: string; modelOverride?: string }> {
+  try {
+    const parsed = await parseWithRecovery(params.rawContent, params.expectedExerciseCount);
+    return { data: parsed.data, content: params.rawContent, repairMethod: parsed.repairMethod };
+  } catch (firstError) {
+    if (!params.allowRegenerateFallback) throw firstError;
+    console.warn('⚠️ [JSON-FALLBACK] Parse/repair failed; trying full JSON regeneration fallback');
+    const fallback = await generateFallbackJsonWithOpenAI(params.systemMessage, params.sanitizedPrompt);
+    const parsed = await parseWithRecovery(fallback.content, params.expectedExerciseCount);
+    return {
+      data: parsed.data,
+      content: fallback.content,
+      repairMethod: parsed.repairMethod === 'none' ? 'model-fallback' : `model-fallback+${parsed.repairMethod}`,
+      modelOverride: fallback.model,
+    };
+  }
+}
+
+// ============================================================
 // FAILURE NOTIFICATION HELPER
 // Sends email alert on any failed worksheet generation
 // ============================================================
