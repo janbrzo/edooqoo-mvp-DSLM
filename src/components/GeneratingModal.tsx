@@ -453,10 +453,30 @@ export default function GeneratingModal({
           onBlurCapture={() => setIsCarouselPaused(false)}
         >
           <div className="flex flex-col h-full space-y-2.5 min-w-0 min-h-0">
-        <div className="text-center space-y-0.5">
-          <h2 className="text-xl lg:text-2xl font-semibold bg-gradient-to-r from-pink-500 via-violet-500 to-blue-500 bg-clip-text text-transparent">
-            Generating Your Worksheet
-          </h2>
+        <div className="space-y-1 min-w-0">
+          {/* v6.9.64 — two-row responsive header: title+student, then email+topic. */}
+          <div className="flex flex-col items-center justify-center gap-1 lg:flex-row lg:gap-2 min-w-0">
+            <h2 className="shrink-0 text-xl lg:text-2xl font-semibold bg-gradient-to-r from-pink-500 via-violet-500 to-blue-500 bg-clip-text text-transparent">
+              Generating Your Worksheet
+            </h2>
+            {studentName ? (
+              <div className="min-w-0 text-xs lg:text-sm text-muted-foreground">
+                <span className="text-muted-foreground/70">For </span>
+                {studentId ? (
+                  <a
+                    href={`/student/${studentId}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-medium text-foreground underline-offset-2 hover:underline"
+                  >
+                    {studentName}
+                  </a>
+                ) : (
+                  <span className="font-medium text-foreground">{studentName}</span>
+                )}
+              </div>
+            ) : null}
+          </div>
           {jobsCount > 1 ? (
             <div className="pt-2">
               <div className="flex items-center gap-2 overflow-x-auto pb-1 -mx-1 px-1">
@@ -508,34 +528,22 @@ export default function GeneratingModal({
               </div>
             </div>
           ) : null}
-          {studentName ? (
-            <p className="text-xs lg:text-sm text-muted-foreground">
-              For{' '}
-              {studentId ? (
-                <a
-                  href={`/student/${studentId}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-medium text-foreground underline-offset-2 hover:underline"
-                >
-                  {studentName}
-                </a>
-              ) : (
-                <span className="font-medium text-foreground">{studentName}</span>
-              )}
-              <span className="mx-1.5 text-muted-foreground/60">·</span>
-              <span className="font-normal text-foreground/80 break-all">
-                {studentEmail && studentEmail.trim().length > 0
-                  ? studentEmail
-                  : 'no student email set'}
-              </span>
-            </p>
-          ) : null}
-          {/* v6.9.62 P5 — topic preview under student row (single-job header). */}
-          {jobsCount <= 1 && jobs && jobs[0]?.topic ? (
-            <p className="text-[11px] lg:text-xs text-muted-foreground/80 truncate">
-              “{jobs[0].topic.length > 80 ? `${jobs[0].topic.slice(0, 79)}…` : jobs[0].topic}”
-            </p>
+          {(studentName || (jobsCount <= 1 && jobs && jobs[0]?.topic)) ? (
+            <div className="mx-auto flex max-w-full items-center justify-center gap-1.5 text-[11px] lg:text-xs text-muted-foreground/80 min-w-0">
+              {studentName ? (
+                <span className="min-w-0 max-w-[42%] truncate text-foreground/80">
+                  {studentEmail && studentEmail.trim().length > 0
+                    ? studentEmail
+                    : 'no student email set'}
+                </span>
+              ) : null}
+              {studentName && jobsCount <= 1 && jobs && jobs[0]?.topic ? (
+                <span className="shrink-0 text-muted-foreground/50">·</span>
+              ) : null}
+              {jobsCount <= 1 && jobs && jobs[0]?.topic ? (
+                <span className="min-w-0 truncate">“{jobs[0].topic}”</span>
+              ) : null}
+            </div>
           ) : null}
         </div>
 
