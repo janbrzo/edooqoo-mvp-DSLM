@@ -129,12 +129,37 @@ function MiniPanelCard({
     return () => window.clearInterval(id);
   }, [isRunning, job.startedAt]);
 
+  // v6.9.64 — hybrid monotonic progress. Prefer SSE-supplied `percent` if
+  // present; otherwise interpolate smoothly between phase floors and the
+  // exercise count so the mini-panel bar updates every second instead of
+  // snapping in 12% steps.
+  const estimatedDuration = (() => {
+    let seconds = 50;
+    if (job.formMeta?.requiresImage) seconds += 25;
+    if (job.formMeta?.requiresAudio) seconds += 25;
+    if (job.formMeta?.hasGrammar) seconds += 8;
+    seconds += Math.max(0, (job.formMeta?.selectedExercises?.length || 6) - 6) * 4;
+    return seconds;
+  })();
+
   const pct = (() => {
-    if (progress && progress.expectedTotal > 0) {
-      return Math.min(100, Math.round((progress.exercisesGenerated / progress.expectedTotal) * 100));
+    if (typeof progress?.percent === 'number') {
+      return Math.max(0, Math.min(99, Math.round(progress.percent)));
     }
-    // Soft time-based fallback so the bar still moves before stream metadata arrives.
-    return Math.min(95, Math.round(elapsedSec * 1.2));
+    if (progress?.phase === 'media') {
+      return Math.min(
+        18,
+        Math.max(3, Math.round((elapsedSec / Math.max(20, estimatedDuration * 0.25)) * 18)),
+      );
+    }
+    if (progress && progress.expectedTotal > 0) {
+      const completed = Math.max(0, progress.exercisesGenerated);
+      const perExercise = 74 / progress.expectedTotal;
+      const floor = 18 + completed * perExercise;
+      const liveDrift = Math.min(perExercise * 0.85, Math.max(0, elapsedSec - 20) * 0.35);
+      return Math.min(91, Math.round(floor + liveDrift));
+    }
+    return Math.min(18, Math.max(2, Math.round(elapsedSec * 0.8)));
   })();
 
   const formatElapsed = (s: number) => {
