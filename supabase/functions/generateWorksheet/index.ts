@@ -718,17 +718,37 @@ serve(async (req) => {
           // Parse final JSON with full recovery pipeline.
           // AI-REPAIR can take 10-30s of silent Gemini work → emit keepalive
           // progress events every 15s so the client heartbeat (40s) does not trip.
-          safeSend("progress", { exercisesGenerated: expectedTotal, expectedTotal, phase: "repairing" });
+          // v6.9.64 — also emit smooth `percent` so the mini-panel/main modal
+          // progress bar continues moving during repair instead of snapping.
+          safeSend("progress", { exercisesGenerated: expectedTotal, expectedTotal, phase: "repairing", percent: 92 });
+          let repairTick = 0;
           const repairKeepalive = setInterval(() => {
-            safeSend("progress", { exercisesGenerated: expectedTotal, expectedTotal, phase: "repairing" });
-          }, 15000);
+            repairTick += 1;
+            safeSend("progress", {
+              exercisesGenerated: expectedTotal,
+              expectedTotal,
+              phase: "repairing",
+              percent: Math.min(98, 92 + repairTick),
+            });
+          }, 5000);
 
           let worksheetData: any;
           let repairMethod: string;
           try {
-            const result = await parseWithRecovery(fullContent, expectedTotal);
+            // v6.9.64 — allow a parse-safe model fallback for picture worksheets
+            // (the long visual description is the dominant cause of malformed
+            // JSON). Non-picture worksheets keep the old behavior.
+            const result = await parseOrRegenerateWithFallback({
+              rawContent: fullContent,
+              expectedExerciseCount: expectedTotal,
+              systemMessage,
+              sanitizedPrompt,
+              allowRegenerateFallback: hasPictureMedia,
+            });
             worksheetData = result.data;
+            fullContent = result.content;
             repairMethod = result.repairMethod;
+            if (result.modelOverride) streamUsedModel = result.modelOverride;
           } finally {
             clearInterval(repairKeepalive);
           }
@@ -787,6 +807,7 @@ serve(async (req) => {
           const generationTimeSeconds = Math.round((Date.now() - generationStartTime) / 1000);
 
           // Save to database
+          safeSend("progress", { exercisesGenerated: expectedTotal, expectedTotal, phase: "saving", percent: 99 });
           console.log("💾 Saving worksheet to database...");
           const fullPrompt = `SYSTEM MESSAGE:\n${systemMessage}\n\nUSER MESSAGE:\n${sanitizedPrompt}`;
           const sanitizedFormData = formData ? JSON.parse(JSON.stringify(formData)) : {};
