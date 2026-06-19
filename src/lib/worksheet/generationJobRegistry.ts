@@ -54,6 +54,8 @@ export interface WorksheetGenerationJob {
     exercisesGenerated: number;
     expectedTotal: number;
     phase?: string;
+    /** v6.9.64 — optional smooth percent emitted by SSE or computed by UI. */
+    percent?: number;
   } | null;
   /**
    * v6.9.61 — Epoch ms after which a `failed` job is no longer pollable for
