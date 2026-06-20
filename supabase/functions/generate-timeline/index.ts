@@ -20,7 +20,7 @@ import {
   buildExistingStepsBlock,
   getAdaptiveExerciseRules,
 } from "../_shared/dslmPromptCore.ts";
-import { logModelFailure } from "../_shared/modelFailureLogger.ts";
+import { chatCompletion } from "../_shared/aiChat.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
