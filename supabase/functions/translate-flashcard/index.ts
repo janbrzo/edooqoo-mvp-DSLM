@@ -1,12 +1,10 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { logModelFailure } from "../_shared/modelFailureLogger.ts";
+import { chatCompletion } from "../_shared/aiChat.ts";
 
 // v6.6 (2026-04-27): migrated from OpenAI gpt-4o-mini → Lovable AI gemini-2.5-flash-lite.
-// Rationale: ~3x cost reduction, latency parity, task scope (translate/define + CEFR) matches Tier 4.
-// Previous engine kept as fallback if LOVABLE_API_KEY is missing.
-const lovableApiKey = Deno.env.get('LOVABLE_API_KEY');
-const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
+// v6.9.65: unified through chatCompletion helper which auto-falls back to
+// OpenAI gpt-4o-mini on Lovable 402/429/5xx.
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -63,91 +61,23 @@ CEFR guidelines for word difficulty:
 Consider: frequency of use, abstractness, morphological complexity, collocational range.`;
     }
 
-    // Primary path: Lovable AI Gateway (gemini-2.5-flash-lite). Fallback: OpenAI gpt-4o-mini.
-    let content = '';
-    const useLovable = !!lovableApiKey;
+    const response = await chatCompletion({
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: text },
+      ],
+      max_tokens: 200,
+      temperature: 0.3,
+      response_format: { type: 'json_object' },
+    }, { primaryModel: 'google/gemini-2.5-flash-lite', functionName: 'translate-flashcard' });
 
-    if (useLovable) {
-      const response = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${lovableApiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'google/gemini-2.5-flash-lite',
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: text },
-          ],
-          max_tokens: 200,
-          temperature: 0.3,
-          response_format: { type: 'json_object' },
-        }),
-      });
-
-      if (!response.ok) {
-        if (response.status === 429) {
-          return new Response(
-            JSON.stringify({ error: 'Rate limit exceeded, try again shortly.' }),
-            { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          );
-        }
-        if (response.status === 402) {
-          return new Response(
-            JSON.stringify({ error: 'AI credits depleted. Add credits in Workspace Usage.' }),
-            { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-          );
-        }
-        const errText = await response.text();
-        console.error('[translate-flashcard] Lovable AI error:', response.status, errText);
-        await logModelFailure({
-          model: 'google/gemini-2.5-flash-lite',
-          provider: 'lovable-gateway',
-          status: response.status,
-          endpoint: '/v1/chat/completions',
-          error: errText,
-          functionName: 'translate-flashcard',
-        });
-        throw new Error(`Lovable AI error ${response.status}`);
-      }
-
-      const data = await response.json();
-      content = (data.choices?.[0]?.message?.content || '').trim();
-    } else {
-      // Legacy fallback (kept for safety while LOVABLE_API_KEY rolls out)
-      const response = await fetch('https://api.openai.com/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${openAIApiKey}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'gpt-4o-mini',
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: text },
-          ],
-          max_tokens: 150,
-          temperature: 0.3,
-          response_format: { type: 'json_object' },
-        }),
-      });
-      const data = await response.json();
-      if (!response.ok) {
-        console.error('[translate-flashcard] OpenAI error:', data);
-        await logModelFailure({
-          model: 'gpt-4o-mini',
-          provider: 'openai',
-          status: response.status,
-          endpoint: '/v1/chat/completions',
-          error: JSON.stringify(data).slice(0, 500),
-          functionName: 'translate-flashcard',
-        });
-        throw new Error(data.error?.message || 'OpenAI request failed');
-      }
-      content = data.choices[0]?.message?.content?.trim() || '';
+    if (!response.ok) {
+      const errText = await response.text();
+      console.error('[translate-flashcard] AI error:', response.status, errText);
+      throw new Error(`AI error ${response.status}`);
     }
+    const data = await response.json();
+    const content = (data.choices?.[0]?.message?.content || '').trim();
     
     let translation = '';
     let cefr_level = 'A2';
