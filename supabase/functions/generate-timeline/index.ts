@@ -215,23 +215,17 @@ Return ONLY a valid JSON array of EXACTLY ${count} objects (no markdown, no comm
     // reliably for batches). Tool calling with `additionalProperties` on nested object
     // schemas was triggering Gemini "too many states" / INVALID_ARGUMENT for count>1.
     const buildAiBody = (temp: number, extraInstruction?: string) => ({
-      model: 'google/gemini-2.5-flash',
       messages: [
         { role: 'system', content: 'You are an expert ESL curriculum planner. Return only a valid JSON array. No markdown, no commentary.' },
         { role: 'user', content: extraInstruction ? `${prompt}\n\n${extraInstruction}` : prompt }
       ],
       temperature: temp,
-      reasoning: { effort: 'low' },
       max_tokens: Math.min(8192, 2200 + 1500 * count)
     });
 
-    const callGateway = (body: any) => fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${Deno.env.get('LOVABLE_API_KEY')}`
-      },
-      body: JSON.stringify(body)
+    const callGateway = (body: any) => chatCompletion(body, {
+      primaryModel: 'google/gemini-2.5-flash',
+      functionName: 'generate-timeline',
     });
 
     const parseSuggestionsFromContent = (content: string): any[] => {
@@ -267,15 +261,7 @@ Return ONLY a valid JSON array of EXACTLY ${count} objects (no markdown, no comm
       suggestions = parseSuggestionsFromContent(content);
     } else {
       lastErrorText = await aiResponse.text();
-      console.error('AI Gateway error (attempt 1):', aiResponse.status, lastErrorText.slice(0, 500));
-      await logModelFailure({
-        model: 'google/gemini-2.5-flash',
-        provider: 'lovable-gateway',
-        status: aiResponse.status,
-        endpoint: 'https://ai.gateway.lovable.dev/v1/chat/completions',
-        error: lastErrorText.slice(0, 500),
-        functionName: 'generate-timeline',
-      });
+      console.error('AI error (attempt 1):', aiResponse.status, lastErrorText.slice(0, 500));
     }
 
     // v6.9.15c — single retry with stricter temperature + explicit final reminder.
@@ -290,15 +276,7 @@ Return ONLY a valid JSON array of EXACTLY ${count} objects (no markdown, no comm
         suggestions = parseSuggestionsFromContent(content);
       } else {
         lastErrorText = await aiResponse.text();
-        console.error('AI Gateway error (attempt 2):', aiResponse.status, lastErrorText.slice(0, 500));
-        await logModelFailure({
-          model: 'google/gemini-2.5-flash',
-          provider: 'lovable-gateway',
-          status: aiResponse.status,
-          endpoint: 'https://ai.gateway.lovable.dev/v1/chat/completions',
-          error: lastErrorText.slice(0, 500),
-          functionName: 'generate-timeline',
-        });
+        console.error('AI error (attempt 2):', aiResponse.status, lastErrorText.slice(0, 500));
       }
     }
 
