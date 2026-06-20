@@ -1167,15 +1167,8 @@ serve(async (req) => {
           : `${profileAnswerSummary}\n\nNo open-ended or speaking answers were submitted. Build the analysis strictly from the deterministic profile snapshot above.`;
 
         if (openAnswers || profileAnswerSummary) {
-          const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              model: 'google/gemini-2.5-flash',
-              messages: [
+          const aiResponse = await chatCompletion({
+            messages: [
                 {
                   role: 'system',
                   content: `You are an expert ESL teacher analyzing a student's Welcome Test answers. Based on their open-ended responses, provide:
@@ -1221,8 +1214,7 @@ Format as JSON: {"summary": "...", "recommendations": ["...", "..."], "writing_q
                 },
                 { role: 'user', content: userPromptBody },
               ],
-            }),
-          });
+          }, { primaryModel: 'google/gemini-2.5-flash', functionName: 'process-welcome-test' });
 
           if (aiResponse.ok) {
             const aiData = await aiResponse.json();
@@ -1239,15 +1231,7 @@ Format as JSON: {"summary": "...", "recommendations": ["...", "..."], "writing_q
               aiSummary = JSON.stringify({ summary: content, recommendations: [], writing_quality: 'unknown', key_observations: [] });
             }
           } else {
-            const errText = await aiResponse.text().catch(() => '');
-            await logModelFailure({
-              model: 'google/gemini-2.5-flash',
-              provider: 'lovable-gateway',
-              status: aiResponse.status,
-              endpoint: 'https://ai.gateway.lovable.dev/v1/chat/completions',
-              error: errText.slice(0, 500),
-              functionName: 'process-welcome-test',
-            });
+            await aiResponse.text().catch(() => '');
             // v6.9.47 — deterministic fallback so the UI never shows an empty
             // AI Analysis card even when the model gateway is unavailable.
             aiSummary = JSON.stringify({
