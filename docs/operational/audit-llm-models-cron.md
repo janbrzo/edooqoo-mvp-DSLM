@@ -64,9 +64,36 @@ Expected: JSON `{ ok: true, checked: 4, results: [...] }`. New rows appear in `p
 
 ## What the function checks
 
+Daily (hot-path, runs at 06:00 UTC):
 - `google/gemini-2.5-flash` (Lovable Gateway)
 - `google/gemini-2.5-flash-lite` (Lovable Gateway)
-- `openai/gpt-5-mini` (Lovable Gateway)
 - `gpt-4o-mini` (OpenAI direct, via `/v1/models/<id>`)
+- `gpt-5-mini-2025-08-07` (OpenAI direct)
+- `gpt-4o-mini-tts` (OpenAI direct) — primary TTS
+- `gemini-2.5-flash-image` (Google Vertex AI publisher-model metadata) — worksheet images
+
+Monthly (full breadth, runs on the 1st at 06:15 UTC):
+- Daily set, plus
+- `gpt-4.1-2025-04-14` (OpenAI direct) — legacy reasoning fallback
+- `google/gemini-3-flash-preview` (Lovable Gateway) — default chat catalog
+- `tts-1` (OpenAI direct) — legacy TTS fallback
+- `gemini-3.1-flash-image` (Google Vertex AI) — Nano Banana 2 access
 
 A non-OK response that returns 404/410/5xx is additionally written to `error_logs` so the StatusPage banner picks it up within the next page load.
+
+## Monthly schedule (operator-only)
+
+```sql
+select cron.schedule(
+  'audit-llm-models-monthly',
+  '15 6 1 * *',
+  $$select net.http_post(
+      url := 'https://bvfrkzdlklyvnhlpleck.supabase.co/functions/v1/audit-llm-models',
+      headers := jsonb_build_object(
+        'Content-Type','application/json',
+        'x-cron-secret', current_setting('app.cron_secret', true)
+      ),
+      body := jsonb_build_object('mode','monthly')
+    )$$
+);
+```

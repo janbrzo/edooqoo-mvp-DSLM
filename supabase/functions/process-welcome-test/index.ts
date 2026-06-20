@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { logModelFailure } from "../_shared/modelFailureLogger.ts";
+import { chatCompletion } from "../_shared/aiChat.ts";
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
 const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
@@ -1167,15 +1167,8 @@ serve(async (req) => {
           : `${profileAnswerSummary}\n\nNo open-ended or speaking answers were submitted. Build the analysis strictly from the deterministic profile snapshot above.`;
 
         if (openAnswers || profileAnswerSummary) {
-          const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${LOVABLE_API_KEY}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              model: 'google/gemini-2.5-flash',
-              messages: [
+          const aiResponse = await chatCompletion({
+            messages: [
                 {
                   role: 'system',
                   content: `You are an expert ESL teacher analyzing a student's Welcome Test answers. Based on their open-ended responses, provide:
@@ -1221,8 +1214,7 @@ Format as JSON: {"summary": "...", "recommendations": ["...", "..."], "writing_q
                 },
                 { role: 'user', content: userPromptBody },
               ],
-            }),
-          });
+          }, { primaryModel: 'google/gemini-2.5-flash', functionName: 'process-welcome-test' });
 
           if (aiResponse.ok) {
             const aiData = await aiResponse.json();
@@ -1239,15 +1231,7 @@ Format as JSON: {"summary": "...", "recommendations": ["...", "..."], "writing_q
               aiSummary = JSON.stringify({ summary: content, recommendations: [], writing_quality: 'unknown', key_observations: [] });
             }
           } else {
-            const errText = await aiResponse.text().catch(() => '');
-            await logModelFailure({
-              model: 'google/gemini-2.5-flash',
-              provider: 'lovable-gateway',
-              status: aiResponse.status,
-              endpoint: 'https://ai.gateway.lovable.dev/v1/chat/completions',
-              error: errText.slice(0, 500),
-              functionName: 'process-welcome-test',
-            });
+            await aiResponse.text().catch(() => '');
             // v6.9.47 — deterministic fallback so the UI never shows an empty
             // AI Analysis card even when the model gateway is unavailable.
             aiSummary = JSON.stringify({
@@ -1445,15 +1429,8 @@ Format as JSON: {"summary": "...", "recommendations": ["...", "..."], "writing_q
           },
         };
 
-        const evoResp = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            Authorization: `Bearer ${LOVABLE_API_KEY}`,
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            model: 'google/gemini-2.5-flash',
-            messages: [
+        const evoResp = await chatCompletion({
+          messages: [
               {
                 role: 'system',
                 content: `You are an ESL diagnostic analyst. Compare two Welcome Test attempts of the same adult learner and produce a concise evolution report (3-6 sentences) covering: (1) measurable score deltas (grammar, vocabulary, writing, speaking, reading) with direction and magnitude, (2) CEFR level shift (if any), (3) psychological/behavioral trait transitions (motivation, anxiety, error attitude), (4) one concrete teaching recommendation based on the change. Be factual, no praise, no marketing language.`,
@@ -1463,8 +1440,7 @@ Format as JSON: {"summary": "...", "recommendations": ["...", "..."], "writing_q
                 content: `Attempt comparison data:\n${JSON.stringify(evoPayload, null, 2)}`,
               },
             ],
-          }),
-        });
+        }, { primaryModel: 'google/gemini-2.5-flash', functionName: 'process-welcome-test' });
 
         if (evoResp.ok) {
           const evoData = await evoResp.json();
@@ -1479,15 +1455,7 @@ Format as JSON: {"summary": "...", "recommendations": ["...", "..."], "writing_q
           }
         } else {
           console.warn('[process-welcome-test] evolution_summary generation failed:', evoResp.status);
-          const errText = await evoResp.text().catch(() => '');
-          await logModelFailure({
-            model: 'google/gemini-2.5-flash',
-            provider: 'lovable-gateway',
-            status: evoResp.status,
-            endpoint: 'https://ai.gateway.lovable.dev/v1/chat/completions',
-            error: errText.slice(0, 500),
-            functionName: 'process-welcome-test',
-          });
+          await evoResp.text().catch(() => '');
         }
       }
     } catch (evoErr) {

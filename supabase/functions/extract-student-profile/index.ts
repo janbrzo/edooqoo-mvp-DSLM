@@ -5,7 +5,7 @@
 // Pattern mirrors classify-knowledge-entry (Lovable AI Gateway, tool-call,
 // 429/402 surfacing, logModelFailure on errors).
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
-import { logModelFailure } from "../_shared/modelFailureLogger.ts";
+import { chatCompletion } from "../_shared/aiChat.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -188,45 +188,17 @@ Deno.serve(async (req) => {
     `Extract the profile. Return the tool-call ONLY.`;
 
   try {
-    const aiResp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: MODEL,
-        messages: [
-          { role: "system", content: SYSTEM_PROMPT },
-          { role: "user", content: userMsg },
-        ],
-        tools: [TOOL],
-        tool_choice: { type: "function", function: { name: "extract_student_profile" } },
-      }),
-    });
+    const aiResp = await chatCompletion({
+      messages: [
+        { role: "system", content: SYSTEM_PROMPT },
+        { role: "user", content: userMsg },
+      ],
+      tools: [TOOL],
+      tool_choice: { type: "function", function: { name: "extract_student_profile" } },
+    }, { primaryModel: MODEL, functionName: "extract-student-profile" });
 
-    if (aiResp.status === 429) {
-      return new Response(JSON.stringify({ error: "rate_limited" }), {
-        status: 429,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
-    if (aiResp.status === 402) {
-      return new Response(JSON.stringify({ error: "payment_required" }), {
-        status: 402,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
     if (!aiResp.ok) {
       const t = await aiResp.text();
-      await logModelFailure({
-        model: MODEL,
-        provider: "lovable-gateway",
-        status: aiResp.status,
-        endpoint: "/v1/chat/completions",
-        error: t.slice(0, 500),
-        functionName: "extract-student-profile",
-      });
       return new Response(JSON.stringify({ error: "ai_error", detail: t.slice(0, 300) }), {
         status: 502,
         headers: { ...corsHeaders, "Content-Type": "application/json" },

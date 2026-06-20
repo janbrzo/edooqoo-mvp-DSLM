@@ -1,8 +1,8 @@
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { GoogleGenerativeAI } from "https://esm.sh/@google/generative-ai@0.21.0";
-import { create, getNumericDate } from "https://deno.land/x/djwt@v3.0.2/mod.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { logModelFailure } from "../_shared/modelFailureLogger.ts";
+import { getVertexAccessToken } from "../_shared/vertexAuth.ts";
 
 const GEMINI_API_KEY = Deno.env.get("GEMINI_API_KEY");
 const GEMINI_VERTEX_API_KEY = Deno.env.get("GEMINI_VERTEX_API_KEY");
@@ -327,83 +327,6 @@ FORMAT:
 /**
  * Convert PEM private key to ArrayBuffer
  */
-function pemToArrayBuffer(pem: string): ArrayBuffer {
-  const pemContents = pem
-    .replace(/-----BEGIN PRIVATE KEY-----/, "")
-    .replace(/-----END PRIVATE KEY-----/, "")
-    .replace(/\s/g, "");
-
-  const binaryString = atob(pemContents);
-
-  const bytes = new Uint8Array(binaryString.length);
-  for (let i = 0; i < binaryString.length; i++) {
-    bytes[i] = binaryString.charCodeAt(i);
-  }
-
-  return bytes.buffer;
-}
-
-/**
- * Import private key as CryptoKey for JWT signing
- */
-async function importPrivateKey(pemKey: string): Promise<CryptoKey> {
-  try {
-    const keyData = pemToArrayBuffer(pemKey);
-
-    return await crypto.subtle.importKey(
-      "pkcs8",
-      keyData,
-      {
-        name: "RSASSA-PKCS1-v1_5",
-        hash: "SHA-256",
-      },
-      false,
-      ["sign"],
-    );
-  } catch (error) {
-    console.error("[GENERATE-IMAGE] Failed to import private key:", error);
-    throw new Error(`Invalid private key format: ${(error as Error)?.message ?? String(error)}`);
-  }
-}
-
-/**
- * Get OAuth2 access token from service account JSON
- */
-async function getVertexAccessToken(serviceAccountJson: string): Promise<string> {
-  const serviceAccount = JSON.parse(serviceAccountJson);
-
-  const privateKey = await importPrivateKey(serviceAccount.private_key);
-
-  const jwt = await create(
-    { alg: "RS256", typ: "JWT" },
-    {
-      iss: serviceAccount.client_email,
-      scope: "https://www.googleapis.com/auth/cloud-platform",
-      aud: "https://oauth2.googleapis.com/token",
-      exp: getNumericDate(60 * 60),
-      iat: getNumericDate(0),
-    },
-    privateKey,
-  );
-
-  const tokenResponse = await fetch("https://oauth2.googleapis.com/token", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({
-      grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
-      assertion: jwt,
-    }),
-  });
-
-  if (!tokenResponse.ok) {
-    const error = await tokenResponse.text();
-    throw new Error(`Failed to get access token: ${error}`);
-  }
-
-  const tokenData = await tokenResponse.json();
-  return tokenData.access_token;
-}
-
 /**
  * Creates a detailed prompt for Gemini Imagen 3.0
  */

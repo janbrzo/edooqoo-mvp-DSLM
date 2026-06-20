@@ -7,13 +7,14 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { logModelFailure } from "../_shared/modelFailureLogger.ts";
+import { getVertexAccessToken, getVertexProjectId } from "../_shared/vertexAuth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-cron-secret",
 };
 
-type Provider = "lovable-gateway" | "openai" | "google";
+type Provider = "lovable-gateway" | "openai" | "google" | "google-vertex";
 interface Target { provider: Provider; model: string; endpoint: string; purpose: string; }
 
 // Daily set — cheap, fast, covers the hottest paths.
@@ -28,18 +29,26 @@ const TARGETS_DAILY: Target[] = [
     purpose: "OpenAI fallback for verify-open-answers, generate-curriculum-phases" },
   { provider: "openai",          model: "gpt-5-mini-2025-08-07",        endpoint: "https://api.openai.com/v1/models/gpt-5-mini-2025-08-07",
     purpose: "Direct OpenAI premium fallback (welcome-test scoring)" },
+  // v6.9.65 — TTS + image are part of the hot worksheet path; ping daily.
+  { provider: "openai",          model: "gpt-4o-mini-tts",              endpoint: "https://api.openai.com/v1/models/gpt-4o-mini-tts",
+    purpose: "TTS for generate-audio (primary)" },
+  { provider: "google-vertex",   model: "gemini-2.5-flash-image",       endpoint: "https://us-central1-aiplatform.googleapis.com/v1/projects/{PROJECT_ID}/locations/us-central1/publishers/google/models/gemini-2.5-flash-image",
+    purpose: "Worksheet image generation (Vertex AI primary)" },
 ];
 
 // Monthly set — full breadth. When adding a new model anywhere in the app,
 // append it here. See docs/closed-loops/LLM_MODEL_INVENTORY.md (when present).
 const TARGETS_MONTHLY: Target[] = [
   ...TARGETS_DAILY,
-  { provider: "openai",          model: "gpt-4o-mini-tts",              endpoint: "https://api.openai.com/v1/models/gpt-4o-mini-tts",
-    purpose: "TTS for generate-audio and welcome-test audio prompts" },
   { provider: "openai",          model: "gpt-4.1-2025-04-14",           endpoint: "https://api.openai.com/v1/models/gpt-4.1-2025-04-14",
     purpose: "Legacy reasoning fallback (kept for audit only)" },
   { provider: "lovable-gateway", model: "google/gemini-3-flash-preview", endpoint: "https://ai.gateway.lovable.dev/v1/chat/completions",
     purpose: "Default chat/text model (per Lovable AI catalog)" },
+  // v6.9.65 — Vertex AI Image fallback model + legacy TTS fallback model.
+  { provider: "openai",          model: "tts-1",                        endpoint: "https://api.openai.com/v1/models/tts-1",
+    purpose: "TTS legacy fallback (generate-audio, welcome-test audio)" },
+  { provider: "google-vertex",   model: "gemini-3.1-flash-image",       endpoint: "https://us-central1-aiplatform.googleapis.com/v1/projects/{PROJECT_ID}/locations/us-central1/publishers/google/models/gemini-3.1-flash-image",
+    purpose: "Worksheet image generation (Vertex AI preview/next-gen)" },
 ];
 
 async function ping(target: Target): Promise<{ status: number; latency_ms: number; error: string | null }> {
@@ -51,6 +60,24 @@ async function ping(target: Target): Promise<{ status: number; latency_ms: numbe
       const r = await fetch(target.endpoint, { headers: { Authorization: `Bearer ${key}` } });
       const err = r.ok ? null : (await r.text()).slice(0, 500);
       return { status: r.status, latency_ms: Date.now() - t0, error: err };
+    }
+    if (target.provider === "google-vertex") {
+      const sa = Deno.env.get("GEMINI_VERTEX_API_KEY");
+      if (!sa) return { status: -1, latency_ms: 0, error: "missing GEMINI_VERTEX_API_KEY" };
+      try {
+        const accessToken = await getVertexAccessToken(sa);
+        const projectId = getVertexProjectId(sa);
+        const endpoint = target.endpoint.replace("{PROJECT_ID}", projectId);
+        // models.get returns metadata if the publisher model is reachable
+        // by this project — cheap, no inference cost.
+        const r = await fetch(endpoint, {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        const err = r.ok ? null : (await r.text()).slice(0, 500);
+        return { status: r.status, latency_ms: Date.now() - t0, error: err };
+      } catch (e) {
+        return { status: 0, latency_ms: Date.now() - t0, error: String((e as Error).message || e).slice(0, 500) };
+      }
     }
     // Lovable gateway: minimal chat completion.
     // GPT-5 family rejects `max_tokens`; requires `max_completion_tokens` instead.

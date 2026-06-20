@@ -1,6 +1,6 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { logModelFailure } from "../_shared/modelFailureLogger.ts";
+import { chatCompletion } from "../_shared/aiChat.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -139,34 +139,18 @@ Return exactly ${answers.length} evaluation objects in a JSON array:
       });
     }
 
-    const aiResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${lovableApiKey}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          { role: "system", content: systemPrompt },
-          { role: "user", content: userPrompt },
-        ],
-        temperature: 0.3,
-        max_tokens: 4000,
-      }),
-    });
+    const aiResponse = await chatCompletion({
+      messages: [
+        { role: "system", content: systemPrompt },
+        { role: "user", content: userPrompt },
+      ],
+      temperature: 0.3,
+      max_tokens: 4000,
+    }, { primaryModel: "google/gemini-2.5-flash", functionName: "verify-open-answers" });
 
     if (!aiResponse.ok) {
       const errorText = await aiResponse.text();
       console.error("[verify-open-answers] AI API error:", errorText);
-      await logModelFailure({
-        model: "google/gemini-2.5-flash",
-        provider: "lovable-gateway",
-        status: aiResponse.status,
-        endpoint: "/v1/chat/completions",
-        error: errorText,
-        functionName: "verify-open-answers",
-      });
       return new Response(JSON.stringify({ error: "AI evaluation failed", details: errorText }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },

@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import GenerationContextPanel from "@/components/generation/GenerationContextPanel";
 import WorkflowSummaryCard from "@/components/generation/WorkflowSummaryCard";
 import { generationModalSlides } from "@/components/generation/generationModalSlides";
+import { computeGenerationProgress } from "@/lib/worksheet/computeProgress";
 
 interface GeneratingModalProps {
   isOpen: boolean;
@@ -16,6 +17,8 @@ interface GeneratingModalProps {
   streamProgress?: {
     exercisesGenerated: number;
     expectedTotal: number;
+    phase?: string;
+    percent?: number;
   } | null;
   mediaGenerating?: boolean;
   onCancel?: () => void;
@@ -200,7 +203,6 @@ export default function GeneratingModal({
   // v6.9.58 — seed live values from startedAt so a refresh resumes the bar
   // and timer instead of restarting them from zero.
   const initialElapsed = startedAt ? Math.max(0, Math.floor((Date.now() - startedAt) / 1000)) : 0;
-  const [progress, setProgress] = useState(0);
   const [elapsedTime, setElapsedTime] = useState(initialElapsed);
   const [sections, setSections] = useState<SectionStatus[]>([]);
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
@@ -228,7 +230,6 @@ export default function GeneratingModal({
 
   useEffect(() => {
     if (!isOpen) {
-      setProgress(0);
       setElapsedTime(0);
       setSections([]);
       setActiveSlideIndex(0);
@@ -239,25 +240,41 @@ export default function GeneratingModal({
     // Initialize sections with grammar condition and selected exercises
     setSections(getGenerationSections(requiresAudio, requiresImage, hasGrammar, selectedExercises));
 
-    // v6.9.58 — seed both timer and progress from startedAt (if known) so a
-    // refresh-resumed modal continues from realistic values.
+    // v6.9.58 — seed timer from startedAt (if known) so a refresh-resumed
+    // modal continues from realistic values.
     const seedElapsed = startedAt ? Math.max(0, Math.floor((Date.now() - startedAt) / 1000)) : 0;
     setElapsedTime(seedElapsed);
-    setProgress(Math.min(99, (seedElapsed / Math.max(1, expectedSeconds)) * 100));
 
-    const progressIncrement = 100 / Math.max(1, expectedSeconds);
-    const progressInterval = setInterval(() => {
-      setProgress((prev) => Math.min(prev + progressIncrement, 99));
-    }, 1000);
     const timerInterval = setInterval(() => {
       setElapsedTime((prev) => prev + 1);
     }, 1000);
 
     return () => {
-      clearInterval(progressInterval);
       clearInterval(timerInterval);
     };
-  }, [isOpen, requiresAudio, requiresImage, hasGrammar, selectedExercises, expectedSeconds, startedAt]);
+  }, [isOpen, requiresAudio, requiresImage, hasGrammar, selectedExercises, startedAt]);
+
+  // v6.9.65 — Progress computed from the same shared helper as the mini panel,
+  // so the two surfaces never disagree.
+  const progress = computeGenerationProgress(
+    {
+      progress: streamProgress
+        ? {
+            exercisesGenerated: streamProgress.exercisesGenerated,
+            expectedTotal: streamProgress.expectedTotal,
+            phase: streamProgress.phase,
+            percent: streamProgress.percent,
+          } as any
+        : null,
+      formMeta: {
+        requiresImage: !!requiresImage,
+        requiresAudio: !!requiresAudio,
+        hasGrammar: !!hasGrammar,
+        selectedExercises: selectedExercises ?? [],
+      } as any,
+    },
+    elapsedTime,
+  );
 
   useEffect(() => {
     if (!isOpen || errorMessage || isCarouselPaused) return;

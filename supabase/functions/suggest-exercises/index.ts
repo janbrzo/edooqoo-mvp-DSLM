@@ -1,7 +1,7 @@
 // Smart exercise selection via Lovable AI Gateway
 // Returns { exercises: string[], focusMap: Record<string,'vocabulary'|'grammar'> }
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { logModelFailure } from "../_shared/modelFailureLogger.ts";
+import { chatCompletion } from "../_shared/aiChat.ts";
 import {
   NO_MEDIA_EXERCISE_IDS,
   PICTURE_EXERCISE_IDS,
@@ -91,16 +91,12 @@ ALLOWED EXERCISES (pick exactly ${exerciseCount}, no duplicates): ${allowed.join
 ${hasPicture ? 'Include 2 picture exercises.' : ''}
 ${hasAudio ? 'Include 2 audio exercises.' : ''}${autoMediaBlock}`;
 
-    const aiResp = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
-      body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
-        messages: [
+    const aiResp = await chatCompletion({
+      messages: [
           { role: 'system', content: systemMsg },
           { role: 'user', content: userMsg },
         ],
-        tools: [{
+      tools: [{
           type: 'function',
           function: {
             name: 'select_exercises',
@@ -128,10 +124,9 @@ ${hasAudio ? 'Include 2 audio exercises.' : ''}${autoMediaBlock}`;
             },
           },
         }],
-        tool_choice: { type: 'function', function: { name: 'select_exercises' } },
-        temperature: 0.85,
-      }),
-    });
+      tool_choice: { type: 'function', function: { name: 'select_exercises' } },
+      temperature: 0.85,
+    }, { primaryModel: 'google/gemini-2.5-flash', functionName: 'suggest-exercises' });
 
     if (!aiResp.ok) {
       if (aiResp.status === 429) {
@@ -146,14 +141,6 @@ ${hasAudio ? 'Include 2 audio exercises.' : ''}${autoMediaBlock}`;
       }
       const t = await aiResp.text();
       console.error('AI gateway error', aiResp.status, t);
-      await logModelFailure({
-        model: 'google/gemini-2.5-flash',
-        provider: 'lovable-gateway',
-        status: aiResp.status,
-        endpoint: '/v1/chat/completions',
-        error: t,
-        functionName: 'suggest-exercises',
-      });
       throw new Error(`AI gateway ${aiResp.status}`);
     }
 

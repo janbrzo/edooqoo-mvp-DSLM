@@ -16,6 +16,7 @@ import {
   clearGenerationJob,
 } from '@/lib/worksheet/generationJobRegistry';
 import { useActiveWorksheetGenerationJobs } from '@/hooks/useActiveWorksheetGenerationJob';
+import { computeGenerationProgress } from '@/lib/worksheet/computeProgress';
 
 // v6.9.60 — cards now live inside a single flex stack so each card's
 // natural height drives layout; concurrent cards always sit adjacent
@@ -129,38 +130,12 @@ function MiniPanelCard({
     return () => window.clearInterval(id);
   }, [isRunning, job.startedAt]);
 
-  // v6.9.64 — hybrid monotonic progress. Prefer SSE-supplied `percent` if
-  // present; otherwise interpolate smoothly between phase floors and the
-  // exercise count so the mini-panel bar updates every second instead of
-  // snapping in 12% steps.
-  const estimatedDuration = (() => {
-    let seconds = 50;
-    if (job.formMeta?.requiresImage) seconds += 25;
-    if (job.formMeta?.requiresAudio) seconds += 25;
-    if (job.formMeta?.hasGrammar) seconds += 8;
-    seconds += Math.max(0, (job.formMeta?.selectedExercises?.length || 6) - 6) * 4;
-    return seconds;
-  })();
-
-  const pct = (() => {
-    if (typeof progress?.percent === 'number') {
-      return Math.max(0, Math.min(99, Math.round(progress.percent)));
-    }
-    if (progress?.phase === 'media') {
-      return Math.min(
-        18,
-        Math.max(3, Math.round((elapsedSec / Math.max(20, estimatedDuration * 0.25)) * 18)),
-      );
-    }
-    if (progress && progress.expectedTotal > 0) {
-      const completed = Math.max(0, progress.exercisesGenerated);
-      const perExercise = 74 / progress.expectedTotal;
-      const floor = 18 + completed * perExercise;
-      const liveDrift = Math.min(perExercise * 0.85, Math.max(0, elapsedSec - 20) * 0.35);
-      return Math.min(91, Math.round(floor + liveDrift));
-    }
-    return Math.min(18, Math.max(2, Math.round(elapsedSec * 0.8)));
-  })();
+  // v6.9.65 — Use shared computeGenerationProgress so this mini-panel and
+  // the foreground GeneratingModal always show the same %.
+  const pct = computeGenerationProgress(
+    { progress: job.progress ?? null, formMeta: job.formMeta ?? null },
+    elapsedSec,
+  );
 
   const formatElapsed = (s: number) => {
     const m = Math.floor(s / 60);
