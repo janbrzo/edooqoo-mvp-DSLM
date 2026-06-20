@@ -554,35 +554,18 @@ Return ONLY a valid JSON array (no markdown), with this exact format:
   }
 ]`;
 
-    const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${Deno.env.get('LOVABLE_API_KEY')}`
-      },
-      body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
-        messages: [
-          { role: 'system', content: 'You are an expert ESL curriculum architect. Return only valid JSON arrays. No markdown.' },
-          { role: 'user', content: prompt }
-        ],
-        temperature: 0.6,
-        max_tokens: 2500,
-        reasoning: { effort: 'low' }
-      })
-    });
+    const aiResponse = await chatCompletion({
+      messages: [
+        { role: 'system', content: 'You are an expert ESL curriculum architect. Return only valid JSON arrays. No markdown.' },
+        { role: 'user', content: prompt }
+      ],
+      temperature: 0.6,
+      max_tokens: 2500,
+    }, { primaryModel: 'google/gemini-2.5-flash', functionName: 'generate-curriculum-phases' });
 
     if (!aiResponse.ok) {
       const errorText = await aiResponse.text();
       console.error('AI Gateway error:', errorText);
-      await logModelFailure({
-        model: 'google/gemini-2.5-flash',
-        provider: 'lovable-gateway',
-        status: aiResponse.status,
-        endpoint: '/v1/chat/completions',
-        error: errorText,
-        functionName: 'generate-curriculum-phases',
-      });
       throw new Error(`AI Gateway error: ${aiResponse.status}`);
     }
 
