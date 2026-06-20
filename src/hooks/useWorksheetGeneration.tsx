@@ -47,6 +47,8 @@ export const useWorksheetGeneration = (
   const [streamProgress, setStreamProgress] = useState<{
     exercisesGenerated: number;
     expectedTotal: number;
+    phase?: string;
+    percent?: number;
   } | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
   // v6.9.60 — jobId of the in-flight generation. Shared between
