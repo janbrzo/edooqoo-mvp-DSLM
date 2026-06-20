@@ -1,7 +1,9 @@
 // v6.9.8 — Auto-classify a Student Knowledge entry via Lovable AI Gateway.
+// v6.9.65 — Use chatCompletion helper for automatic OpenAI fallback
+// when Lovable Gateway returns 402/429/5xx.
 // Fire-and-forget: called from useStudentKnowledge after a Quick Add.
 // Returns a category + structured metadata + confidence; client patches the row.
-import { logModelFailure } from "../_shared/modelFailureLogger.ts";
+import { chatCompletion } from "../_shared/aiChat.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -73,19 +75,14 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const aiResp = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
-      method: 'POST',
-      headers: { 'Authorization': `Bearer ${LOVABLE_API_KEY}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'google/gemini-2.5-flash',
-        messages: [
-          { role: 'system', content: SYSTEM_PROMPT },
-          { role: 'user', content: userMsg }
-        ],
-        tools: [tool],
-        tool_choice: { type: 'function', function: { name: 'classify_note' } }
-      })
-    })
+    const aiResp = await chatCompletion({
+      messages: [
+        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'user', content: userMsg }
+      ],
+      tools: [tool],
+      tool_choice: { type: 'function', function: { name: 'classify_note' } }
+    }, { primaryModel: 'google/gemini-2.5-flash', functionName: 'classify-knowledge-entry' })
 
     if (aiResp.status === 429) {
       return new Response(JSON.stringify({ error: 'rate_limited' }), { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
@@ -95,14 +92,6 @@ Deno.serve(async (req) => {
     }
     if (!aiResp.ok) {
       const t = await aiResp.text()
-      await logModelFailure({
-        model: 'google/gemini-2.5-flash',
-        provider: 'lovable-gateway',
-        status: aiResp.status,
-        endpoint: '/v1/chat/completions',
-        error: t,
-        functionName: 'classify-knowledge-entry',
-      })
       return new Response(JSON.stringify({ error: 'ai_error', detail: t.slice(0, 300) }), { status: 502, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     }
     const data = await aiResp.json()
