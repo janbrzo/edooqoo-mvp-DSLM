@@ -16,7 +16,7 @@ import {
   clearGenerationJob,
 } from '@/lib/worksheet/generationJobRegistry';
 import { useActiveWorksheetGenerationJobs } from '@/hooks/useActiveWorksheetGenerationJob';
-import { computeGenerationProgress, estimateDurationSec } from '@/lib/worksheet/computeProgress';
+import { computeGenerationProgress } from '@/lib/worksheet/computeProgress';
 
 // v6.9.60 — cards now live inside a single flex stack so each card's
 // natural height drives layout; concurrent cards always sit adjacent
@@ -132,7 +132,6 @@ function MiniPanelCard({
 
   // v6.9.65 — Use shared computeGenerationProgress so this mini-panel and
   // the foreground GeneratingModal always show the same %.
-  void estimateDurationSec; // keep import side-effect-free
   const pct = computeGenerationProgress(
     { progress: job.progress ?? null, formMeta: job.formMeta ?? null },
     elapsedSec,
