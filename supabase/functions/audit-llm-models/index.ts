@@ -40,8 +40,6 @@ const TARGETS_DAILY: Target[] = [
 // append it here. See docs/closed-loops/LLM_MODEL_INVENTORY.md (when present).
 const TARGETS_MONTHLY: Target[] = [
   ...TARGETS_DAILY,
-  { provider: "openai",          model: "gpt-4o-mini-tts",              endpoint: "https://api.openai.com/v1/models/gpt-4o-mini-tts",
-    purpose: "TTS for generate-audio and welcome-test audio prompts" },
   { provider: "openai",          model: "gpt-4.1-2025-04-14",           endpoint: "https://api.openai.com/v1/models/gpt-4.1-2025-04-14",
     purpose: "Legacy reasoning fallback (kept for audit only)" },
   { provider: "lovable-gateway", model: "google/gemini-3-flash-preview", endpoint: "https://ai.gateway.lovable.dev/v1/chat/completions",
