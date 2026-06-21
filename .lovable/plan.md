@@ -1,396 +1,477 @@
 
-# Plan v6.9.65 — Resilience + Audit Coverage + Progress Parity
+# Plan v6.9.66 — Naprawa audytu LLM + migracja z Lovable Gateway
 
-Trzy niezależne problemy, jeden plan. Worksheet Generation Engine NIE jest dotykany (worksheet już ma własny fallback Gemini→OpenAI direct i nie używa Lovable Gateway — verified).
+Plan rozwiązuje 5 problemów z dziennego audytu i testów manualnych. Każdy ma kompletne rozwiązanie gotowe do implementacji.
 
 ---
 
-## PROBLEM 1 — Lovable Gateway 402 „Not enough credits"
+## P1 — Lovable Gateway zwraca 402 (brak kredytów)
 
 ### Dependency scan
-Funkcje wołające `https://ai.gateway.lovable.dev/v1/chat/completions`:
-`classify-knowledge-entry`, `extract-student-profile`, `generate-curriculum-phases`, `generate-timeline`, `process-welcome-test`, `suggest-exercises`, `translate-flashcard`, `verify-open-answers`.
-(`generateWorksheet` NIE używa Lovable Gateway — używa bezpośrednio Google Generative Language API + OpenAI direct. Pozostaje nietknięte.)
+`supabase/functions/_shared/aiChat.ts` (główny helper), 8 funkcji wywołujących `chatCompletion`: `classify-knowledge-entry`, `suggest-exercises`, `verify-open-answers`, `translate-flashcard`, `extract-student-profile`, `generate-curriculum-phases`, `generate-timeline`, `process-welcome-test`. `generateWorksheet` jest off-limits (sanctity rule).
 
 ### Root cause
-Workspace wyczerpał miesięczny budżet kredytów Lovable AI Gateway → bramka odpowiada `HTTP 402 {type:"payment_required"}`. Każda funkcja ma własny fetch bez ujednoliconej obsługi tego błędu — niektóre wracają błąd 500, inne degradują do pustej analizy.
+`aiChat.ts` używa Lovable Gateway jako primary. Workspace nie ma kredytów, więc każde wywołanie najpierw "marnuje" round-trip na 402, potem fallback na OpenAI. To powoduje:
+- niepotrzebne 100–300 ms latencji,
+- spam w `error_logs` + StatusPage banner,
+- daily audit raportuje FAIL.
 
 ### Solution options
-| Opcja | Opis | Tradeoff |
+| Opcja | Opis | Trade-off |
 |---|---|---|
-| A | Doładować kredyty Lovable AI | natychmiast działa, ale nie chroni przed kolejnym wyczerpaniem |
-| B | Pojedynczy współdzielony helper `callChatJSON(...)` z chainem: **Lovable Gateway → OpenAI direct (`gpt-4o-mini`)**, automatyczny fallback na 402/429/5xx | jeden refactor, ~8 funkcji, zero zmian w logice biznesowej, OPENAI_API_KEY już skonfigurowany |
-| C | Helper z chainem Lovable → Gemini direct → OpenAI | wymaga dodania `GEMINI_API_KEY` (sekret nie istnieje) |
+| A. Zostawić Lovable jako primary, wyłączyć go w audycie | minimalna zmiana | nadal +200ms na każde wywołanie, spam logów |
+| B. **Przełączyć primary na Google Generative Language API direct (GEMINI_API_KEY)**, OpenAI jako fallback | zerowa zależność od Lovable, te same modele Gemini | trzeba zmapować body z OpenAI-shape → Gemini-shape |
+| C. Przełączyć primary na OpenAI gpt-4o-mini | najprostsze | tracimy darmowe Gemini, rosną koszty OpenAI |
 
-### Selected: **B**
-OPENAI_API_KEY już skonfigurowany i działa (audit OK 200). Jeden punkt zmiany prowadzi do regresji na ścieżkach AI niezależnie od stanu kredytów. Bez nowych sekretów.
+### Selected: **B** — Direct Google + OpenAI fallback
+Powód: `GEMINI_API_KEY` już istnieje i działa (używany w `generate-image` przez `@google/generative-ai` SDK). Modele `gemini-2.5-flash` i `gemini-2.5-flash-lite` są dostępne na endpointcie `generativelanguage.googleapis.com/v1beta`. Zerowy koszt dla użytkownika, pełna kontrola.
 
 ### Impact analysis
-- Zero zmian w UX, zero zmian w schematach DB, zero zmian w promptach.
-- Worksheet Engine nietknięty.
-- Latencja: identyczna gdy Lovable działa; +1 RTT tylko podczas faktycznego 402/429/5xx.
+Wszystkie 8 funkcji edge nadal otrzymuje response w OpenAI Chat Completions shape (helper konwertuje). `generateWorksheet` nieruszony. Zero regresji w UI.
 
-### Implementation
+### Pełna implementacja
 
-**1) Nowy plik `supabase/functions/_shared/aiChat.ts`** (helper, pełny kod):
+**Krok 1.1** — przepisać `supabase/functions/_shared/aiChat.ts`:
+
 ```ts
+// v6.9.66 — Direct Google Generative Language as primary, OpenAI as fallback.
+// Lovable Gateway removed (workspace credits exhausted).
 import { logModelFailure } from "./modelFailureLogger.ts";
 
-export type ChatMessage = { role: "system" | "user" | "assistant"; content: string };
+const GOOGLE_ENDPOINT_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
+const OPENAI_ENDPOINT      = "https://api.openai.com/v1/chat/completions";
 
-export interface CallChatOptions {
-  messages: ChatMessage[];
-  /** Lovable Gateway model, default google/gemini-2.5-flash */
-  primaryModel?: string;
-  /** OpenAI fallback model, default gpt-4o-mini (cheap, JSON-capable) */
+export interface ChatCompletionOpts {
+  /** Gemini model id, e.g. "gemini-2.5-flash" or legacy "google/gemini-2.5-flash". */
+  primaryModel: string;
+  /** OpenAI fallback model id, defaults to "gpt-4o-mini". */
   fallbackModel?: string;
-  /** When true, request JSON object response */
-  jsonMode?: boolean;
-  temperature?: number;
-  maxTokens?: number;
-  /** Identifier of the caller function, used in error_logs */
+  /** Caller function name for logModelFailure. */
   functionName: string;
 }
 
-export interface CallChatResult {
-  content: string;
-  model: string;
-  provider: "lovable-gateway" | "openai";
-}
-
-const LOVABLE_ENDPOINT = "https://ai.gateway.lovable.dev/v1/chat/completions";
-const OPENAI_ENDPOINT  = "https://api.openai.com/v1/chat/completions";
-
 function shouldFallback(status: number): boolean {
-  return status === 402 || status === 429 || status >= 500;
+  return status === 402 || status === 429 || status === 503 || status >= 500;
 }
 
-export async function callChatJSON(opts: CallChatOptions): Promise<CallChatResult> {
-  const primaryModel  = opts.primaryModel  ?? "google/gemini-2.5-flash";
+function normalizeGeminiModel(m: string): string {
+  // Accept legacy "google/gemini-2.5-flash" → "gemini-2.5-flash"
+  return m.startsWith("google/") ? m.slice("google/".length) : m;
+}
+
+/**
+ * Maps OpenAI chat-completions body → Gemini generateContent body.
+ * Forwards: messages, temperature, max_tokens, response_format(json_object), tools(function-calling).
+ */
+function toGeminiBody(openaiBody: Record<string, unknown>) {
+  const messages = (openaiBody.messages as Array<{ role: string; content: string }>) || [];
+  const systemMsgs = messages.filter((m) => m.role === "system").map((m) => m.content).join("\n\n");
+  const contents = messages
+    .filter((m) => m.role !== "system")
+    .map((m) => ({
+      role: m.role === "assistant" ? "model" : "user",
+      parts: [{ text: m.content }],
+    }));
+
+  const generationConfig: Record<string, unknown> = {};
+  if (typeof openaiBody.temperature === "number") generationConfig.temperature = openaiBody.temperature;
+  if (typeof openaiBody.max_tokens === "number") generationConfig.maxOutputTokens = openaiBody.max_tokens;
+  const rf = openaiBody.response_format as { type?: string } | undefined;
+  if (rf?.type === "json_object") generationConfig.responseMimeType = "application/json";
+
+  const out: Record<string, unknown> = { contents, generationConfig };
+  if (systemMsgs) out.systemInstruction = { parts: [{ text: systemMsgs }] };
+
+  // Function calling: OpenAI tools[] → Gemini tools[{ functionDeclarations: [...] }]
+  const tools = openaiBody.tools as Array<{ type: string; function: any }> | undefined;
+  if (tools?.length) {
+    out.tools = [{ functionDeclarations: tools.map((t) => t.function) }];
+  }
+  return out;
+}
+
+/**
+ * Converts a Gemini generateContent response → OpenAI chat-completions shape,
+ * so existing callers keep parsing data.choices[0].message.content / tool_calls unchanged.
+ */
+function geminiToOpenAIResponse(gemini: any, model: string): any {
+  const candidate = gemini?.candidates?.[0];
+  const parts = candidate?.content?.parts || [];
+  const textParts = parts.filter((p: any) => typeof p?.text === "string").map((p: any) => p.text);
+  const fnCalls = parts
+    .filter((p: any) => p?.functionCall)
+    .map((p: any, i: number) => ({
+      id: `call_${i}`,
+      type: "function",
+      function: { name: p.functionCall.name, arguments: JSON.stringify(p.functionCall.args || {}) },
+    }));
+  return {
+    id: `gemini-${Date.now()}`,
+    object: "chat.completion",
+    model,
+    choices: [{
+      index: 0,
+      message: {
+        role: "assistant",
+        content: textParts.join("") || null,
+        ...(fnCalls.length ? { tool_calls: fnCalls } : {}),
+      },
+      finish_reason: candidate?.finishReason?.toLowerCase() || "stop",
+    }],
+    usage: {
+      prompt_tokens: gemini?.usageMetadata?.promptTokenCount ?? 0,
+      completion_tokens: gemini?.usageMetadata?.candidatesTokenCount ?? 0,
+      total_tokens: gemini?.usageMetadata?.totalTokenCount ?? 0,
+    },
+  };
+}
+
+export async function chatCompletion(
+  body: Record<string, unknown>,
+  opts: ChatCompletionOpts,
+): Promise<Response> {
   const fallbackModel = opts.fallbackModel ?? "gpt-4o-mini";
-  const temperature   = opts.temperature ?? 0.3;
-  const maxTokens     = opts.maxTokens   ?? 2048;
-  const responseFormat = opts.jsonMode ? { type: "json_object" } : undefined;
+  const googleKey = Deno.env.get("GEMINI_API_KEY");
+  const oaKey     = Deno.env.get("OPENAI_API_KEY");
 
-  const lovKey = Deno.env.get("LOVABLE_API_KEY");
-  const oaKey  = Deno.env.get("OPENAI_API_KEY");
+  let primaryResp: Response | null = null;
+  const geminiModel = normalizeGeminiModel(opts.primaryModel);
 
-  // 1) Try Lovable Gateway
-  if (lovKey) {
+  if (googleKey) {
     try {
-      const r = await fetch(LOVABLE_ENDPOINT, {
+      const url = `${GOOGLE_ENDPOINT_BASE}/${geminiModel}:generateContent?key=${googleKey}`;
+      primaryResp = await fetch(url, {
         method: "POST",
-        headers: { Authorization: `Bearer ${lovKey}`, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          model: primaryModel,
-          messages: opts.messages,
-          temperature,
-          max_tokens: maxTokens,
-          ...(responseFormat ? { response_format: responseFormat } : {}),
-        }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(toGeminiBody(body)),
       });
-      if (r.ok) {
-        const j = await r.json();
-        const content = j?.choices?.[0]?.message?.content ?? "";
-        return { content, model: primaryModel, provider: "lovable-gateway" };
+      if (primaryResp.ok) {
+        const geminiJson = await primaryResp.json();
+        const openaiShape = geminiToOpenAIResponse(geminiJson, geminiModel);
+        return new Response(JSON.stringify(openaiShape), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
       }
-      const errText = (await r.text()).slice(0, 500);
+      const errText = await primaryResp.clone().text().catch(() => "");
       await logModelFailure({
-        model: primaryModel, provider: "lovable-gateway", status: r.status,
-        endpoint: LOVABLE_ENDPOINT, error: errText, functionName: opts.functionName,
+        model: geminiModel, provider: "google",
+        status: primaryResp.status, endpoint: GOOGLE_ENDPOINT_BASE,
+        error: errText.slice(0, 500), functionName: opts.functionName,
       });
-      if (!shouldFallback(r.status)) {
-        throw new Error(`Lovable Gateway ${r.status}: ${errText}`);
-      }
-      console.warn(`[aiChat] Lovable ${r.status} → falling back to OpenAI ${fallbackModel}`);
+      if (!shouldFallback(primaryResp.status)) return primaryResp;
+      console.warn(`[aiChat] Google ${primaryResp.status} for ${geminiModel} → fallback OpenAI ${fallbackModel}`);
     } catch (e) {
-      console.warn(`[aiChat] Lovable threw, falling back:`, (e as Error).message);
+      console.warn(`[aiChat] Google fetch threw, falling back:`, (e as Error).message);
     }
   }
 
-  // 2) OpenAI fallback
-  if (!oaKey) throw new Error("Both Lovable Gateway and OpenAI unavailable");
+  if (!oaKey) {
+    if (primaryResp) return primaryResp;
+    return new Response(JSON.stringify({ error: "no_ai_provider_configured" }), {
+      status: 503, headers: { "Content-Type": "application/json" },
+    });
+  }
+
   const r2 = await fetch(OPENAI_ENDPOINT, {
     method: "POST",
     headers: { Authorization: `Bearer ${oaKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({
-      model: fallbackModel,
-      messages: opts.messages,
-      temperature,
-      max_tokens: maxTokens,
-      ...(responseFormat ? { response_format: responseFormat } : {}),
-    }),
+    body: JSON.stringify({ ...body, model: fallbackModel }),
   });
   if (!r2.ok) {
-    const errText = (await r2.text()).slice(0, 500);
+    const errText = await r2.clone().text().catch(() => "");
     await logModelFailure({
-      model: fallbackModel, provider: "openai", status: r2.status,
-      endpoint: OPENAI_ENDPOINT, error: errText, functionName: opts.functionName,
+      model: fallbackModel, provider: "openai",
+      status: r2.status, endpoint: OPENAI_ENDPOINT,
+      error: errText.slice(0, 500), functionName: opts.functionName,
     });
-    throw new Error(`OpenAI fallback ${r2.status}: ${errText}`);
+  } else {
+    console.log(`[aiChat] OpenAI fallback succeeded with ${fallbackModel}`);
   }
-  const j2 = await r2.json();
-  const content = j2?.choices?.[0]?.message?.content ?? "";
-  return { content, model: fallbackModel, provider: "openai" };
+  return r2;
 }
 ```
 
-**2) Refactor 8 funkcji** — w każdej zastąpić bezpośredni `fetch(LOVABLE_ENDPOINT, …)` wywołaniem `callChatJSON({ messages, jsonMode: <jak dotąd>, functionName: "<nazwa>" })`. Zachować dokładnie: model primary (`google/gemini-2.5-flash` lub `google/gemini-2.5-flash-lite` dla `translate-flashcard`), temperature, max_tokens, response_format. Zmiany czysto mechaniczne, bez modyfikacji promptów ani parsowania odpowiedzi.
+**Krok 1.2** — żadne callsite nie wymaga zmiany (interfejs `chatCompletion(body, opts)` bez zmian). Modele `google/gemini-2.5-flash` zostają w callsite'ach — helper sam zdejmuje prefiks `google/`.
 
-Lista plików:
-- `supabase/functions/classify-knowledge-entry/index.ts`
-- `supabase/functions/extract-student-profile/index.ts`
-- `supabase/functions/generate-curriculum-phases/index.ts`
-- `supabase/functions/generate-timeline/index.ts` (2 wywołania)
-- `supabase/functions/process-welcome-test/index.ts` (2 wywołania: scoring + evolution)
-- `supabase/functions/suggest-exercises/index.ts`
-- `supabase/functions/translate-flashcard/index.ts` — usuwa istniejący manualny fallback, używa helpera z `primaryModel:"google/gemini-2.5-flash-lite"`, `fallbackModel:"gpt-4o-mini"`
-- `supabase/functions/verify-open-answers/index.ts`
-
-### Verification (P1)
-- [ ] Każda z 8 funkcji buduje się i deployuje.
-- [ ] `curl` do `classify-knowledge-entry` z prostym input → 200 (z OpenAI fallback gdy Lovable zwróci 402).
-- [ ] Brak zmian w polach JSON zwracanych do klienta.
-- [ ] `error_logs` zapisuje `lovable-gateway 402` ale request kończy się sukcesem.
+### Verification checklist P1
+- [ ] Wszystkie 8 funkcji edge nadal zwracają poprawny JSON.
+- [ ] Brak wpisów `lovable-gateway 402` w `error_logs` po wdrożeniu.
+- [ ] `translate-flashcard` test: tłumaczenie zwraca `{translation, cefr_level}`.
+- [ ] `classify-knowledge-entry` test: zwraca poprawne kategorie.
+- [ ] `extract-student-profile` test (problem 4) działa end-to-end.
 
 ---
 
-## PROBLEM 2 — Audyt LLM nie pokrywa wszystkich modeli
+## P2 — Vertex AI audit zwraca 404 mimo że generowanie obrazów działa
 
 ### Dependency scan
-`supabase/functions/audit-llm-models/index.ts`. Brakuje pingowania:
-- TTS: `gpt-4o-mini-tts`, `tts-1` (są w `TARGETS_MONTHLY`, **ale nigdy nie pingowane bo cron uruchamia tylko daily**).
-- Image: Vertex AI `gemini-2.5-flash-image`, `gemini-3.1-flash-image` — w ogóle nie audytowane.
-- Lovable Gateway `google/gemini-3-flash-preview` — tylko monthly.
+`supabase/functions/audit-llm-models/index.ts` linia 73 — `fetch(endpoint, { headers })` GET na URL `https://us-central1-aiplatform.googleapis.com/v1/projects/.../publishers/google/models/gemini-2.5-flash-image`.
 
 ### Root cause
-1. Cron nigdy nie wywołuje trybu `monthly`, więc rozszerzona lista nie była realnie sprawdzana.
-2. Brak target dla Vertex AI (image generation) — wymaga `Authorization: Bearer <access_token>` z service-account JSON (`GEMINI_VERTEX_API_KEY`), inny niż wszystkie pozostałe ping-e.
+GET na endpoint pod ścieżką `projects/<id>/...publishers/google/models/<id>` **NIE jest publicznym endpointem metadanych** dla modeli publisher w Vertex AI. Vertex zwraca 404 dla GET. Real flow (`generate-image`) używa POST `:generateContent`, który działa. Audit jest błędny — testuje endpoint który nigdy nie istniał.
 
 ### Solution options
-| Opcja | Opis | Tradeoff |
+| Opcja | Opis | Trade-off |
 |---|---|---|
-| A | Dodać scheduler dla monthly (1. dnia miesiąca) + dodać Vertex pingery | pełne pokrycie, lekki refactor |
-| B | Wszystko codziennie | wzrost kosztu audytu, dłuższy run |
-| C | Tylko rozszerzyć daily o image+tts | proste, ale traci sens „daily=hot path" |
+| A. Switch na metadata endpoint `v1beta1/publishers/google/models/<id>` (bez projects/) | tani GET, oficjalny | wymaga `aiplatform.publisherModels.get` scope (mamy `cloud-platform`) |
+| B. Mini POST `:generateContent` z `responseModalities:["TEXT"]` i `maxOutputTokens:1` | testuje realny flow | model image-only może nie wspierać TEXT modality |
+| C. POST `:countTokens` | tani | image generation models nie wspierają countTokens |
 
-### Selected: **A**
-Hot-path daily zostaje cienki. Pełne pokrycie raz w miesiącu + image i TTS jednak również w daily (są krytyczne dla worksheet generation z obrazem). Cron pg_cron dla monthly raz w miesiącu.
+### Selected: **A** — publisher metadata endpoint
+Powód: oficjalne, darmowe, zerowy koszt inference, faktycznie waliduje że konto ma access do modelu publisher.
 
-### Implementation
+### Pełna implementacja
 
-**1) Edycja `supabase/functions/audit-llm-models/index.ts`:**
+**Krok 2.1** — w `audit-llm-models/index.ts` zmienić `TARGETS_DAILY` i `TARGETS_MONTHLY` endpoint dla Vertex z:
+```
+https://us-central1-aiplatform.googleapis.com/v1/projects/{PROJECT_ID}/locations/us-central1/publishers/google/models/<model>
+```
+na:
+```
+https://us-central1-aiplatform.googleapis.com/v1beta1/publishers/google/models/<model>
+```
 
-- Dodać `TARGETS_DAILY`:
-  ```ts
-  { provider: "openai", model: "gpt-4o-mini-tts",
-    endpoint: "https://api.openai.com/v1/models/gpt-4o-mini-tts",
-    purpose: "TTS for generate-audio (primary)" },
-  { provider: "google-vertex", model: "gemini-2.5-flash-image",
-    endpoint: "https://us-central1-aiplatform.googleapis.com/v1/projects/{PROJECT_ID}/locations/us-central1/publishers/google/models/gemini-2.5-flash-image",
-    purpose: "Worksheet image generation (Vertex AI)" },
-  ```
-
-- Dodać `TARGETS_MONTHLY` (extra):
-  ```ts
-  { provider: "openai", model: "tts-1",
-    endpoint: "https://api.openai.com/v1/models/tts-1",
-    purpose: "TTS legacy fallback (generate-audio, welcome-test audio)" },
-  { provider: "google-vertex", model: "gemini-3.1-flash-image",
-    endpoint: "...publishers/google/models/gemini-3.1-flash-image",
-    purpose: "Worksheet image generation (Vertex AI preview/next-gen)" },
-  ```
-
-- Rozszerzyć `Provider` o `"google-vertex"`. Dodać gałąź w `ping()`:
-  ```ts
-  if (target.provider === "google-vertex") {
-    const sa = Deno.env.get("GEMINI_VERTEX_API_KEY");
-    if (!sa) return { status: -1, latency_ms: 0, error: "missing GEMINI_VERTEX_API_KEY" };
-    // Reuse the same access-token helper as generate-image:
+**Krok 2.2** — w funkcji `ping()` dla `google-vertex` usunąć `endpoint.replace("{PROJECT_ID}", projectId)` (już niepotrzebne) i zostawić sam GET z Bearer tokenem:
+```ts
+if (target.provider === "google-vertex") {
+  const sa = Deno.env.get("GEMINI_VERTEX_API_KEY");
+  if (!sa) return { status: -1, latency_ms: 0, error: "missing GEMINI_VERTEX_API_KEY" };
+  try {
     const accessToken = await getVertexAccessToken(sa);
-    const projectId = JSON.parse(sa).project_id;
-    const endpoint = target.endpoint.replace("{PROJECT_ID}", projectId);
-    // Use models.get (cheaper than generateContent) for liveness:
-    const metaEndpoint = endpoint.replace(":generateContent", "")
-      .replace("https://us-central1-aiplatform.googleapis.com/v1/",
-               "https://us-central1-aiplatform.googleapis.com/v1/");
-    const r = await fetch(metaEndpoint, {
-      headers: { Authorization: `Bearer ${accessToken}` },
-    });
+    const r = await fetch(target.endpoint, { headers: { Authorization: `Bearer ${accessToken}` } });
     const err = r.ok ? null : (await r.text()).slice(0, 500);
     return { status: r.status, latency_ms: Date.now() - t0, error: err };
-  }
-  ```
-  Skopiować helper `getVertexAccessToken` z `generate-image/index.ts` do nowego `supabase/functions/_shared/vertexAuth.ts` (jeden plik, importowany z obu miejsc). `generate-image` przełącza import (mechaniczne, bez zmian logiki).
-
-- TTS audit: użyć tego samego pinga co dla zwykłego OpenAI (`/v1/models/<id>`) — już działa.
-
-**2) Operator-only SQL** (do `docs/operational/audit-llm-models-cron.md`, nie do migracji):
-```sql
--- Monthly full audit, 1. dnia miesiąca o 06:15 UTC
-select cron.schedule(
-  'audit-llm-models-monthly',
-  '15 6 1 * *',
-  $$select net.http_post(
-      url := 'https://bvfrkzdlklyvnhlpleck.supabase.co/functions/v1/audit-llm-models',
-      headers := jsonb_build_object('Content-Type','application/json',
-                                    'x-cron-secret', current_setting('app.cron_secret', true)),
-      body := jsonb_build_object('mode','monthly')
-    )$$
-);
+  } catch (e) { … unchanged }
+}
 ```
 
-### Verification (P2)
-- [ ] Manual call `POST {mode:"daily"}` zwraca 6 wpisów (3 dotychczasowe + tts-mini + vertex 2.5-image; nie mylić: 4 + 2 = 6).
-- [ ] Manual call `{mode:"monthly"}` zwraca pełną listę (≥ 8).
-- [ ] Vertex ping zwraca 200 (model dostępny w GCP).
-- [ ] Mail audytu pokazuje nowe wiersze i właściwy banner cadence.
+### Verification checklist P2
+- [ ] Manual smoke: `curl -X POST -H "x-cron-secret: …" https://…/audit-llm-models` → Vertex 200.
+- [ ] Email audit pokazuje OK dla `gemini-2.5-flash-image`.
+- [ ] Generowanie obrazu w worksheet nadal działa (nie zmieniliśmy `generate-image`).
 
 ---
 
-## PROBLEM 3 — Mini-panel % ≠ duży modal %
+## P3 — Audyt nie obejmuje wszystkich modeli używanych w aplikacji
 
 ### Dependency scan
-- `src/components/GeneratingModal.tsx` — postęp liczony **wyłącznie z elapsed time** (`progressIncrement = 100/expectedSeconds`, tick 1s, cap 99%).
-- `src/components/generation/ActiveGenerationMiniPanel.tsx` — postęp hybrydowy: preferuje `progress.percent` z SSE, fallback do phase floors + exercise count + drift.
+Pełny skan wykrył dodatkowe modele:
 
-### Root cause
-Dwa niezależne algorytmy postępu. Duży modal ignoruje SSE i polega tylko na zegarze; mini-panel używa rzeczywistego SSE percent. Stąd rozjazd (na screenie: modal 33% vs mini 18%).
-
-### Solution options
-| Opcja | Opis | Tradeoff |
+| Funkcja | Model | Pokrycie obecnie |
 |---|---|---|
-| A | Wyekstrahować jedną funkcję `computeGenerationProgress(job, elapsedSec, estimatedDuration)` i użyć w obu komponentach | jedno źródło prawdy, zero rozjazdu |
-| B | Modal czyta tylko `progress.percent` z SSE | szybkie, ale traci płynność gdy brak eventu |
-| C | Mini-panel używa zegara jak modal | regresja P3 z v6.9.64 |
+| `transcribe-audio` | `whisper-1` (OpenAI) | **brak** |
+| `generate-media-exercises` | `gpt-4.1-2025-04-14` (OpenAI) | tylko monthly |
+| `generate-welcome-test-audio` | `tts-1` (OpenAI primary) | tylko monthly |
+| `generate-audio` chat step | `gpt-4o-mini` (OpenAI) | daily ✓ |
+| `generate-image` description | `gemini-2.5-flash` + `gemini-2.5-flash-lite` (Google direct) | brak (był pod lovable) |
+| `generateWorksheet` primary | `gemini-2.5-flash` (Google direct) | brak |
+| `generateWorksheet` fallback | `gpt-5-mini-2025-08-07` (OpenAI) | daily ✓ |
+| `aiChat.ts` po P1 | `gemini-2.5-flash`, `gemini-2.5-flash-lite` (Google direct) | brak |
 
-### Selected: **A**
-Eliminuje rozjazd na dobre. Mini-panel zachowuje swój obecny (zweryfikowany) algorytm — staje się on kanonicznym źródłem.
+### Selected solution
+Zastąpić w daily 2× Lovable Gateway → 2× Google Generative Language direct (`gemini-2.5-flash`, `gemini-2.5-flash-lite`). Dodać `whisper-1` do daily (whisper jest krytyczny dla live session). Przesunąć `tts-1` z monthly → daily (primary welcome-test audio). Dodać Lovable Gateway entries do monthly tylko (na wypadek powrotu kredytów). Dodać `gpt-4.1-2025-04-14` do daily (używany w `generate-media-exercises`).
 
-### Implementation
+### Pełna implementacja
 
-**1) Nowy plik `src/lib/worksheet/computeProgress.ts`:**
+**Krok 3.1** — nowy helper w `ping()` dla Google Generative Language direct (sprawdzenie metadanych modelu):
+
 ```ts
-import type { WorksheetGenerationJob } from './generationJobRegistry';
+type Provider = "lovable-gateway" | "openai" | "google" | "google-vertex" | "openai-whisper";
 
-export function estimateDurationSec(meta?: WorksheetGenerationJob['formMeta']): number {
-  let s = 50;
-  if (meta?.requiresImage) s += 25;
-  if (meta?.requiresAudio) s += 25;
-  if (meta?.hasGrammar)    s += 8;
-  s += Math.max(0, (meta?.selectedExercises?.length || 6) - 6) * 4;
-  return s;
+// ...inside ping():
+if (target.provider === "google") {
+  const key = Deno.env.get("GEMINI_API_KEY");
+  if (!key) return { status: -1, latency_ms: 0, error: "missing GEMINI_API_KEY" };
+  // models.get returns metadata if key has access — no inference cost.
+  const r = await fetch(`${target.endpoint}?key=${key}`);
+  const err = r.ok ? null : (await r.text()).slice(0, 500);
+  return { status: r.status, latency_ms: Date.now() - t0, error: err };
 }
-
-export function computeGenerationProgress(
-  job: Pick<WorksheetGenerationJob, 'progress' | 'formMeta' | 'startedAt' | 'status'>,
-  elapsedSec: number,
-): number {
-  const p = job.progress ?? null;
-  if (typeof p?.percent === 'number') {
-    return Math.max(0, Math.min(99, Math.round(p.percent)));
-  }
-  const dur = estimateDurationSec(job.formMeta);
-  if (p?.phase === 'media') {
-    return Math.min(18, Math.max(3, Math.round((elapsedSec / Math.max(20, dur * 0.25)) * 18)));
-  }
-  if (p && p.expectedTotal > 0) {
-    const completed = Math.max(0, p.exercisesGenerated);
-    const perExercise = 74 / p.expectedTotal;
-    const floor = 18 + completed * perExercise;
-    const liveDrift = Math.min(perExercise * 0.85, Math.max(0, elapsedSec - 20) * 0.35);
-    return Math.min(91, Math.round(floor + liveDrift));
-  }
-  return Math.min(18, Math.max(2, Math.round(elapsedSec * 0.8)));
+if (target.provider === "openai-whisper") {
+  // Whisper-1 is on the same /v1/models endpoint; just probe metadata.
+  const key = Deno.env.get("OPENAI_API_KEY");
+  if (!key) return { status: -1, latency_ms: 0, error: "missing OPENAI_API_KEY" };
+  const r = await fetch(target.endpoint, { headers: { Authorization: `Bearer ${key}` } });
+  const err = r.ok ? null : (await r.text()).slice(0, 500);
+  return { status: r.status, latency_ms: Date.now() - t0, error: err };
 }
 ```
 
-**2) `ActiveGenerationMiniPanel.tsx`** — zastąpić inline'owy `const pct = (() => { … })()` wywołaniem `computeGenerationProgress(job, elapsedSec)`. Funkcja `estimateDuration` znika lokalnie (już niepotrzebna do progress, ale zachowujemy jeśli używana gdzieś indziej — w obecnym pliku tylko do pct).
+(W praktyce `openai-whisper` można pominąć i użyć typu `openai` — endpoint jest taki sam. Zostawiamy jeden case `openai`).
 
-**3) `GeneratingModal.tsx`** — usunąć `const [progress, setProgress] = useState(0)` i całą logikę inkrementu z `progressInterval`. Zamiast tego:
-```tsx
-const job = useActiveWorksheetGenerationJob(jobId); // lub przez prop meta
-const [elapsedSec, setElapsedSec] = useState(initialElapsedSec);
-useEffect(() => { const id = setInterval(() => setElapsedSec(s => s+1), 1000); return () => clearInterval(id); }, []);
-const progress = computeGenerationProgress({
-  progress: meta?.progress ?? null,
-  formMeta: meta?.formMeta,
-  startedAt: startedAt ?? Date.now(),
-  status: 'running',
-}, elapsedSec);
+**Krok 3.2** — nowy `TARGETS_DAILY` (8 modeli):
+
+```ts
+const TARGETS_DAILY: Target[] = [
+  // Google direct (primary chat — replaces Lovable Gateway after v6.9.66 P1)
+  { provider: "google", model: "gemini-2.5-flash",
+    endpoint: "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash",
+    purpose: "Primary chat (aiChat helper: classify, suggest-exercises, verify-open-answers, curriculum, timeline, welcome-test, extract-profile)" },
+  { provider: "google", model: "gemini-2.5-flash-lite",
+    endpoint: "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite",
+    purpose: "Lightweight chat (translate-flashcard, image description fallback)" },
+  // OpenAI direct
+  { provider: "openai", model: "gpt-4o-mini",
+    endpoint: "https://api.openai.com/v1/models/gpt-4o-mini",
+    purpose: "OpenAI fallback for aiChat helper + generate-audio chat step" },
+  { provider: "openai", model: "gpt-5-mini-2025-08-07",
+    endpoint: "https://api.openai.com/v1/models/gpt-5-mini-2025-08-07",
+    purpose: "generateWorksheet JSON fallback + welcome-test scoring" },
+  { provider: "openai", model: "gpt-4.1-2025-04-14",
+    endpoint: "https://api.openai.com/v1/models/gpt-4.1-2025-04-14",
+    purpose: "generate-media-exercises (reading/listening passages)" },
+  { provider: "openai", model: "whisper-1",
+    endpoint: "https://api.openai.com/v1/models/whisper-1",
+    purpose: "transcribe-audio (live session STT)" },
+  { provider: "openai", model: "gpt-4o-mini-tts",
+    endpoint: "https://api.openai.com/v1/models/gpt-4o-mini-tts",
+    purpose: "TTS primary (generate-audio)" },
+  { provider: "openai", model: "tts-1",
+    endpoint: "https://api.openai.com/v1/models/tts-1",
+    purpose: "TTS for welcome-test-audio + generate-audio fallback" },
+  // Google Vertex (image)
+  { provider: "google-vertex", model: "gemini-2.5-flash-image",
+    endpoint: "https://us-central1-aiplatform.googleapis.com/v1beta1/publishers/google/models/gemini-2.5-flash-image",
+    purpose: "Worksheet image generation (Vertex AI primary)" },
+];
 ```
-Reszta JSX (`<Progress value={progress}/>`, `{Math.round(progress)}%`) bez zmian. Sekcyjna animacja exercises (linie 272+) pozostaje — opiera się na `progress` jako %, więc działa identycznie.
 
-### Verification (P3)
-- [ ] Modal i mini-panel pokazują dokładnie tę samą wartość % co sekundę podczas streamingu (test ręczny: porównanie po refreshu strony).
-- [ ] Brak migotania/cofania paska.
-- [ ] Po `phase: 'media'` → 'exercises' → 'repairing' (92-98) → 'saving' (99) modal i mini-panel poruszają się synchronicznie.
+**Krok 3.3** — nowy `TARGETS_MONTHLY`:
+
+```ts
+const TARGETS_MONTHLY: Target[] = [
+  ...TARGETS_DAILY,
+  { provider: "openai", model: "gpt-4.1-2025-04-14",
+    endpoint: "https://api.openai.com/v1/models/gpt-4.1-2025-04-14",
+    purpose: "Legacy reasoning fallback (audit only)" },
+  { provider: "google-vertex", model: "gemini-3.1-flash-image",
+    endpoint: "https://us-central1-aiplatform.googleapis.com/v1beta1/publishers/google/models/gemini-3.1-flash-image",
+    purpose: "Vertex AI image fallback (Nano Banana 2)" },
+  // Optional Lovable Gateway probe — re-enable if/when credits are topped up.
+  { provider: "lovable-gateway", model: "google/gemini-2.5-flash",
+    endpoint: "https://ai.gateway.lovable.dev/v1/chat/completions",
+    purpose: "Lovable Gateway probe (currently unused, kept for re-activation)" },
+];
+```
+
+Usunąć duplikat `gpt-4.1` w monthly (jeden raz wystarczy).
+
+### Verification checklist P3
+- [ ] Email audit pokazuje 8 modeli daily, wszystkie OK.
+- [ ] `model_health_checks` ma świeże wpisy dla `whisper-1`, `gpt-4.1`, `tts-1`, `gemini-2.5-flash`, `gemini-2.5-flash-lite`.
+- [ ] Brak entries `lovable-gateway` w daily.
 
 ---
 
-## RAG injection — `docs/llm-context.md` + `public/llms.txt`
+## P4 — Smoke test: "Paste notes about student to set up profile (AI, optional)"
 
-Dodać sekcję **v6.9.65 — Resilience & Audit Coverage**:
-```
-PROBLEM: Lovable AI Gateway 402 (credits exhausted) wywalał klasyfikację notatek,
-sugestie ćwiczeń, generowanie faz, welcome-test scoring, translate-flashcard,
-extract-student-profile, generate-timeline, verify-open-answers.
-EDOOQOO SOLUTION: Współdzielony helper supabase/functions/_shared/aiChat.ts
-(callChatJSON) z chainem Lovable Gateway → OpenAI direct (gpt-4o-mini) na
-402/429/5xx. Worksheet Engine NIETKNIĘTY (ma własny Gemini direct + OpenAI direct).
-TECHNICAL MECHANICS: 8 funkcji zrefaktorowanych, error_logs nadal loguje 402 dla
-StatusPage, response_format/temperature/max_tokens zachowane 1:1.
-RAG KEYWORDS: lovable gateway, payment_required, 402, openai fallback,
-gpt-4o-mini, ai resilience, edge function fallback, gemini quota,
-classification fallback, translate flashcard fallback, suggest exercises fallback,
-welcome test scoring fallback, curriculum phases fallback, verify open answers,
-extract student profile.
+### Dependency scan
+- `src/components/dashboard/PasteIntakeSection.tsx` — UI textarea + przycisk Analyze.
+- `src/components/dashboard/AddStudentDialog.tsx` (linia 462) — osadzenie sekcji.
+- `src/components/dashboard/ExtractionPreviewCard.tsx` — preview wykryta danych.
+- `supabase/functions/extract-student-profile/index.ts` — backend (używa aiChat → po P1 będzie Gemini direct).
+- `src/lib/intake/applyIntakeExtraction.ts` — apply/rollback.
+- `src/components/student/IntakeExtractionBanner.tsx` — banner z opcją rollback.
 
-PROBLEM: Daily LLM Audit nie pokrywał image (Vertex AI) ani TTS; monthly nigdy
-nie był uruchamiany przez crona.
-EDOOQOO SOLUTION: audit-llm-models v6.9.65: daily +tts-mini +vertex 2.5-image,
-monthly +tts-1 +vertex 3.1-image. Vertex pinger przez models.get z reused
-getVertexAccessToken (vyextrahowany do _shared/vertexAuth.ts). Operator dodaje
-pg_cron monthly schedule.
-TECHNICAL MECHANICS: Provider type rozszerzony o google-vertex; nowy plik
-_shared/vertexAuth.ts; generate-image przełączony na import.
-RAG KEYWORDS: model audit, vertex ai ping, image generation health,
-tts health check, monthly audit, daily audit, google-vertex provider,
-service account token, audit-llm-models, model_health_checks.
+### Test plan (ręczny, do wykonania po wdrożeniu P1)
+**Scenariusze:**
+1. **Happy path:** wkleić tekst (PL+EN) z imieniem, emailem, celami, deadline → `Analyze` → preview pokazuje wykryte pola → checkbox per pole → `Apply` → student powstaje z prefilled fieldsami → banner "Undo" w StudentPage.
+2. **Edge — tekst pusty:** przycisk `Analyze` disabled gdy < 20 znaków.
+3. **Edge — tylko email:** wykrywa tylko email, reszta pól pusta, brak crash.
+4. **Edge — duplicate email:** intake nie nadpisuje istniejącego studenta (extract-student-profile waliduje).
+5. **Edge — Gemini fail → OpenAI fallback:** wymuszony przez P1, sprawdzić logi `aiChat` "fallback succeeded".
+6. **Rollback:** kliknąć Undo w bannerze → pola wracają do stanu pre-extract.
+7. **Marta test:** preview używa profesjonalnego języka, brak "school textbook" nazewnictwa.
 
-PROBLEM: Mini-panel postępu pokazywał inny % niż duży GeneratingModal.
-EDOOQOO SOLUTION: src/lib/worksheet/computeProgress.ts jako single source
-of truth. Modal i mini-panel używają tej samej funkcji
-computeGenerationProgress(job, elapsedSec).
-TECHNICAL MECHANICS: GeneratingModal usuwa lokalny progressInterval;
-ActiveGenerationMiniPanel usuwa inline pct(); oba czytają identyczny algorytm
-hybrydowy (SSE percent → exercise count + drift → media floor → bootstrap).
-RAG KEYWORDS: progress parity, generation progress, mini panel sync,
-sse percent, exercise count progress, hybrid progress, computeGenerationProgress.
-```
+### Potencjalne usprawnienia do dyskusji
+- Po `Apply` automatyczne przewinięcie do pierwszego puste required field.
+- `Analyze` powinno wyświetlać licznik tokenów / szacowany czas (~3s).
+- Trim długich notatek do 8000 znaków po stronie klienta z toastem "Truncated for AI processing".
 
-Analogiczna sekcja w `public/llms.txt` (skrócona, faktualna, bez nazw promptów).
+**Implementacja zmian (jeśli testy wykryją bug):** placeholder — zaproponuję patch po testach. Plan v6.9.66 nie zakłada zmian kodu w P4 dopóki nie znajdziemy konkretnej regresji.
+
+### Verification checklist P4
+- [ ] 7 scenariuszy przechodzi.
+- [ ] Brak entries `model_failure` w `error_logs` z `source_name=extract-student-profile`.
+- [ ] Latency < 5s na typowej notatce 500 słów.
 
 ---
 
-## Final change report (po wdrożeniu)
+## P5 — Smoke test: "Możliwość dodawania flashcards do swoich zestawów przez /my"
 
-Pliki nowe:
-- `supabase/functions/_shared/aiChat.ts`
-- `supabase/functions/_shared/vertexAuth.ts`
-- `src/lib/worksheet/computeProgress.ts`
+### Dependency scan
+- `src/pages/StudentHubFlashcards.tsx` (linia 68) — renderuje `AddStudentFlashcardDialog`.
+- `src/components/student-hub/AddStudentFlashcardDialog.tsx` — modal z front/back/native.
+- RPC `public.student_add_flashcard(uuid, text, text, text, text)` w migracji `20260617163003_…`.
+- Kolumna `flashcard_sets.allow_student_contributions boolean DEFAULT true`.
 
-Pliki edytowane:
-- 8× edge functions (P1 refactor)
-- `supabase/functions/audit-llm-models/index.ts` (+ targets + vertex)
-- `supabase/functions/generate-image/index.ts` (import vertexAuth)
-- `src/components/GeneratingModal.tsx`
-- `src/components/generation/ActiveGenerationMiniPanel.tsx`
-- `docs/llm-context.md`, `public/llms.txt`
-- `docs/operational/audit-llm-models-cron.md` (operator SQL)
-- `mem/index.md` + nowy `mem/infrastructure/lovable-gateway-fallback.md`
+### Test plan (ręczny)
+1. **Happy path:** student na `/my` otwiera zestaw → klika "Add card" → wpisuje front+back → Save → toast "Card added!" → lista flashcards się refreshuje.
+2. **Edge — contributions disabled:** nauczyciel ustawia `allow_student_contributions=false` na zestawie → student widzi "Add card" ale po Save toast "Your teacher has disabled student additions".
+3. **Edge — pusty front/back:** Save disabled lub toast walidacji.
+4. **Edge — bardzo długi text:** Input ma `maxLength=200`, textarea `1000`, native `200`.
+5. **Edge — student z innym emailem (nie należy do zestawu):** RPC zwraca `student_not_authorized` → toast.
+6. **Native field visibility:** pokazuje się tylko jeśli `hasNative=true` (zestaw ma native_language).
+7. **Realtime sync:** nauczyciel widzi nową kartę w swoim panelu po refresh.
+8. **Marta test:** karta dodana przez studenta wygląda identycznie jak ta od nauczyciela, brak stigma'y.
 
-Out of scope (zalogowane do przyszłych zadań):
-- Worksheet Engine sanctity — nietknięty.
-- `extract-student-profile` ma własny prompt — refactor tylko warstwy HTTP.
-- Brak `GEMINI_API_KEY` — nie dodajemy nowego sekretu; OpenAI fallback wystarcza.
+### Potencjalne usprawnienia (do dyskusji, nie wdrażam bez decyzji)
+- Toggle "Show only my added cards" w nauczycielskim widoku zestawu.
+- Email notification dla nauczyciela gdy student doda > 3 karty/dzień (anti-spam).
+- Możliwość moderacji: nauczyciel akceptuje/odrzuca student-added cards (`status: pending/approved`).
+
+**Implementacja zmian:** zero zmian kodu w P5 — to są smoke testy + zgłoszenie potencjalnych usprawnień. Czekam na decyzje przed budową.
+
+### Verification checklist P5
+- [ ] 8 scenariuszy przechodzi.
+- [ ] RPC `student_add_flashcard` w `pg_stat_statements` ma niskie p95.
+- [ ] Brak race condition przy podwójnym kliknięciu Save (button ma `disabled={busy}`).
+
+---
+
+## RAG injection — `docs/llm-context.md` i `public/llms.txt`
+
+Dodać sekcję:
+
+```
+PROBLEM: Lovable AI Gateway credits exhausted; daily audit reports false-positive 404 for Vertex; coverage gaps for whisper/tts/gpt-4.1.
+EDOOQOO SOLUTION (v6.9.66):
+  • _shared/aiChat.ts now calls Google Generative Language direct (GEMINI_API_KEY) as primary, OpenAI as fallback. Lovable Gateway no longer in hot path.
+  • audit-llm-models switched Vertex probe to v1beta1 publisher metadata endpoint (no project prefix), eliminating 404.
+  • Daily audit expanded from 6 → 9 models: gemini-2.5-flash, gemini-2.5-flash-lite (Google direct), gpt-4o-mini, gpt-5-mini, gpt-4.1, whisper-1, gpt-4o-mini-tts, tts-1, gemini-2.5-flash-image.
+TECHNICAL MECHANICS:
+  • aiChat.ts maps OpenAI chat-completions body → Gemini generateContent body and back; tools/function-calling preserved.
+  • Existing 8 callsites unchanged (interface stable).
+  • model_health_checks table receives 9 rows per daily run.
+RAG KEYWORDS: lovable gateway fallback, gemini direct api, generative language api, vertex publisher metadata, whisper-1 audit, tts-1 audit, daily llm audit, model health monitoring, openai chat completions to gemini, function calling gemini mapping, payment_required 402, vertex 404 false positive, audit-llm-models v6.9.66, gpt-4o-mini fallback, gemini-2.5-flash primary.
+```
+
+Zaktualizować `mem/infrastructure/lovable-gateway-fallback.md` → nowa nazwa `gemini-direct-with-openai-fallback.md` + zmienić Core w `mem/index.md`.
+
+---
+
+## Final change report (po implementacji)
+
+**Pliki zmodyfikowane:**
+- `supabase/functions/_shared/aiChat.ts` — pełna rewrite (P1)
+- `supabase/functions/audit-llm-models/index.ts` — Vertex endpoint + TARGETS expand (P2, P3)
+- `docs/llm-context.md` — RAG injection
+- `public/llms.txt` — RAG injection
+- `docs/operational/audit-llm-models-cron.md` — update listy modeli
+- `mem/infrastructure/lovable-gateway-fallback.md` → rename + przepisać
+- `mem/index.md` — update referencji
+
+**Pliki bez zmian (potwierdzone scope lock):**
+- `generateWorksheet/*` — sanctity rule
+- 8 funkcji edge wywołujących `chatCompletion` — interfejs helpera stabilny
+- `generate-image/index.ts` — działa poprawnie, bez zmian
+
+**Out of scope flagged (z testów P4/P5):**
+- Lista potencjalnych usprawnień UX dla paste-intake i student flashcards — czekają na decyzje, nie implementuję w tym cyklu.
+
+**Decyzje pozostawione człowiekowi:**
+1. Czy zostawić Lovable Gateway w `TARGETS_MONTHLY` (probe na wypadek powrotu kredytów)? **Sugeruję: TAK** (1 zapytanie/miesiąc to zerowy koszt).
+2. Czy implementować usprawnienia UX z P4/P5 w v6.9.67? **Decyzja po testach.**
+
+Proszę o zatwierdzenie — wtedy implementuję P1, P2, P3 w kodzie i poproszę Cię o ręczne wykonanie smoke testów P4/P5.

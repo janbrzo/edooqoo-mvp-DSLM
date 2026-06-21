@@ -1,73 +1,164 @@
-// v6.9.65 — Shared chat-completion helper with automatic fallback.
-// Tries Lovable AI Gateway first; on HTTP 402 (credits exhausted),
-// 429 (rate limit) or 5xx (transient), falls back to OpenAI direct.
-// Body is forwarded verbatim except `model`, so callers keep their
-// existing `tools`, `tool_choice`, `response_format`, `temperature`,
-// `max_tokens` etc. unchanged.
+// v6.9.66 — Shared chat-completion helper.
+// Primary: Google Generative Language direct (GEMINI_API_KEY).
+// Fallback: OpenAI Chat Completions (gpt-4o-mini by default).
+// Lovable AI Gateway removed from hot path (workspace credits exhausted).
+// Callers keep using OpenAI-style chat-completions bodies; this helper
+// maps to Gemini generateContent and converts the response back to the
+// OpenAI Chat Completions shape so existing parsing keeps working.
 import { logModelFailure } from "./modelFailureLogger.ts";
 
-const LOVABLE_ENDPOINT = "https://ai.gateway.lovable.dev/v1/chat/completions";
-const OPENAI_ENDPOINT  = "https://api.openai.com/v1/chat/completions";
+const GOOGLE_ENDPOINT_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
+const OPENAI_ENDPOINT      = "https://api.openai.com/v1/chat/completions";
 
 export interface ChatCompletionOpts {
-  /** Lovable Gateway model id, e.g. "google/gemini-2.5-flash". */
+  /** Gemini model id, e.g. "gemini-2.5-flash". Legacy "google/<id>" is accepted. */
   primaryModel: string;
-  /** OpenAI direct model id, defaults to "gpt-4o-mini". */
+  /** OpenAI fallback model id, defaults to "gpt-4o-mini". */
   fallbackModel?: string;
   /** Caller function name for logModelFailure. */
   functionName: string;
 }
 
 function shouldFallback(status: number): boolean {
-  return status === 402 || status === 429 || status >= 500;
+  return status === 402 || status === 429 || status === 503 || status >= 500;
+}
+
+function normalizeGeminiModel(m: string): string {
+  return m.startsWith("google/") ? m.slice("google/".length) : m;
 }
 
 /**
- * POST a Chat-Completions request with Lovable → OpenAI fallback.
- * Returns the final Response (same shape from both providers), so
- * existing callers can keep their .ok / .status / .json() handling.
+ * OpenAI chat-completions body → Gemini generateContent body.
+ * Forwards messages, temperature, max_tokens, response_format(json_object)
+ * and OpenAI tools[] (mapped to Gemini functionDeclarations).
+ */
+function toGeminiBody(openaiBody: Record<string, unknown>) {
+  const messages = (openaiBody.messages as Array<{ role: string; content: string }>) || [];
+  const systemMsgs = messages
+    .filter((m) => m.role === "system")
+    .map((m) => m.content)
+    .join("\n\n");
+  const contents = messages
+    .filter((m) => m.role !== "system")
+    .map((m) => ({
+      role: m.role === "assistant" ? "model" : "user",
+      parts: [{ text: typeof m.content === "string" ? m.content : JSON.stringify(m.content) }],
+    }));
+
+  const generationConfig: Record<string, unknown> = {};
+  if (typeof openaiBody.temperature === "number") {
+    generationConfig.temperature = openaiBody.temperature;
+  }
+  if (typeof openaiBody.max_tokens === "number") {
+    generationConfig.maxOutputTokens = openaiBody.max_tokens;
+  }
+  if (typeof (openaiBody as any).max_completion_tokens === "number") {
+    generationConfig.maxOutputTokens = (openaiBody as any).max_completion_tokens;
+  }
+  const rf = openaiBody.response_format as { type?: string } | undefined;
+  if (rf?.type === "json_object") generationConfig.responseMimeType = "application/json";
+
+  const out: Record<string, unknown> = { contents, generationConfig };
+  if (systemMsgs) out.systemInstruction = { parts: [{ text: systemMsgs }] };
+
+  const tools = openaiBody.tools as Array<{ type: string; function: any }> | undefined;
+  if (tools?.length) {
+    out.tools = [{ functionDeclarations: tools.map((t) => t.function) }];
+  }
+  return out;
+}
+
+/**
+ * Gemini generateContent response → OpenAI chat-completions shape.
+ */
+function geminiToOpenAIResponse(gemini: any, model: string): any {
+  const candidate = gemini?.candidates?.[0];
+  const parts: any[] = candidate?.content?.parts || [];
+  const textParts = parts
+    .filter((p) => typeof p?.text === "string")
+    .map((p) => p.text as string);
+  const fnCalls = parts
+    .filter((p) => p?.functionCall)
+    .map((p, i: number) => ({
+      id: `call_${i}`,
+      type: "function",
+      function: {
+        name: p.functionCall.name,
+        arguments: JSON.stringify(p.functionCall.args ?? {}),
+      },
+    }));
+  return {
+    id: `gemini-${Date.now()}`,
+    object: "chat.completion",
+    created: Math.floor(Date.now() / 1000),
+    model,
+    choices: [
+      {
+        index: 0,
+        message: {
+          role: "assistant",
+          content: textParts.join("") || null,
+          ...(fnCalls.length ? { tool_calls: fnCalls } : {}),
+        },
+        finish_reason: (candidate?.finishReason ?? "stop").toString().toLowerCase(),
+      },
+    ],
+    usage: {
+      prompt_tokens: gemini?.usageMetadata?.promptTokenCount ?? 0,
+      completion_tokens: gemini?.usageMetadata?.candidatesTokenCount ?? 0,
+      total_tokens: gemini?.usageMetadata?.totalTokenCount ?? 0,
+    },
+  };
+}
+
+/**
+ * POST a Chat-Completions style request with Google Gemini → OpenAI fallback.
+ * Always returns a Response with OpenAI Chat Completions JSON body so existing
+ * callsites parse `data.choices[0].message.content` without modification.
  */
 export async function chatCompletion(
   body: Record<string, unknown>,
   opts: ChatCompletionOpts,
 ): Promise<Response> {
   const fallbackModel = opts.fallbackModel ?? "gpt-4o-mini";
-  const lovKey = Deno.env.get("LOVABLE_API_KEY");
-  const oaKey  = Deno.env.get("OPENAI_API_KEY");
+  const googleKey = Deno.env.get("GEMINI_API_KEY");
+  const oaKey     = Deno.env.get("OPENAI_API_KEY");
 
   let primaryResp: Response | null = null;
+  const geminiModel = normalizeGeminiModel(opts.primaryModel);
 
-  if (lovKey) {
+  if (googleKey) {
     try {
-      primaryResp = await fetch(LOVABLE_ENDPOINT, {
+      const url = `${GOOGLE_ENDPOINT_BASE}/${geminiModel}:generateContent?key=${googleKey}`;
+      primaryResp = await fetch(url, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${lovKey}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ ...body, model: opts.primaryModel }),
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(toGeminiBody(body)),
       });
-      if (primaryResp.ok) return primaryResp;
+      if (primaryResp.ok) {
+        const geminiJson = await primaryResp.json();
+        const openaiShape = geminiToOpenAIResponse(geminiJson, geminiModel);
+        return new Response(JSON.stringify(openaiShape), {
+          status: 200,
+          headers: { "Content-Type": "application/json" },
+        });
+      }
 
       const errText = await primaryResp.clone().text().catch(() => "");
       await logModelFailure({
-        model: opts.primaryModel,
-        provider: "lovable-gateway",
+        model: geminiModel,
+        provider: "google",
         status: primaryResp.status,
-        endpoint: LOVABLE_ENDPOINT,
+        endpoint: GOOGLE_ENDPOINT_BASE,
         error: errText.slice(0, 500),
         functionName: opts.functionName,
       });
-
-      if (!shouldFallback(primaryResp.status)) {
-        // Non-recoverable (400/401/403/404) — return as-is.
-        return primaryResp;
-      }
+      if (!shouldFallback(primaryResp.status)) return primaryResp;
       console.warn(
-        `[aiChat] Lovable ${primaryResp.status} for ${opts.primaryModel} → falling back to OpenAI ${fallbackModel}`,
+        `[aiChat] Google ${primaryResp.status} for ${geminiModel} → fallback OpenAI ${fallbackModel}`,
       );
     } catch (e) {
-      console.warn(`[aiChat] Lovable fetch threw, falling back:`, (e as Error).message);
+      console.warn(`[aiChat] Google fetch threw, falling back:`, (e as Error).message);
     }
   }
 
