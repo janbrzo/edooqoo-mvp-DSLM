@@ -64,20 +64,22 @@ Expected: JSON `{ ok: true, checked: 4, results: [...] }`. New rows appear in `p
 
 ## What the function checks
 
-Daily (hot-path, runs at 06:00 UTC):
-- `google/gemini-2.5-flash` (Lovable Gateway)
-- `google/gemini-2.5-flash-lite` (Lovable Gateway)
-- `gpt-4o-mini` (OpenAI direct, via `/v1/models/<id>`)
-- `gpt-5-mini-2025-08-07` (OpenAI direct)
-- `gpt-4o-mini-tts` (OpenAI direct) — primary TTS
-- `gemini-2.5-flash-image` (Google Vertex AI publisher-model metadata) — worksheet images
+Daily (hot-path, runs at 06:00 UTC) — v6.9.66:
+- `gemini-2.5-flash` (Google Generative Language direct) — aiChat primary
+- `gemini-2.5-flash-lite` (Google Generative Language direct) — lightweight chat
+- `gpt-4o-mini` (OpenAI direct) — aiChat OpenAI fallback + generate-audio chat step
+- `gpt-5-mini-2025-08-07` (OpenAI direct) — generateWorksheet JSON fallback + welcome-test
+- `gpt-4.1-2025-04-14` (OpenAI direct) — generate-media-exercises
+- `whisper-1` (OpenAI direct) — transcribe-audio (live session STT)
+- `gpt-4o-mini-tts` (OpenAI direct) — TTS primary
+- `tts-1` (OpenAI direct) — TTS for welcome-test-audio + generate-audio fallback
+- `gemini-2.5-flash-image` (Google Vertex AI, v1beta1 publisher metadata) — worksheet images
 
 Monthly (full breadth, runs on the 1st at 06:15 UTC):
 - Daily set, plus
-- `gpt-4.1-2025-04-14` (OpenAI direct) — legacy reasoning fallback
-- `google/gemini-3-flash-preview` (Lovable Gateway) — default chat catalog
-- `tts-1` (OpenAI direct) — legacy TTS fallback
-- `gemini-3.1-flash-image` (Google Vertex AI) — Nano Banana 2 access
+- `gemini-3.1-flash-image` (Vertex AI) — Nano Banana 2 fallback
+- `google/gemini-2.5-flash` (Lovable Gateway) — probe in case workspace credits return
+- `google/gemini-3-flash-preview` (Lovable Gateway) — default Lovable AI catalog probe
 
 A non-OK response that returns 404/410/5xx is additionally written to `error_logs` so the StatusPage banner picks it up within the next page load.
 
