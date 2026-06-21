@@ -7,7 +7,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { logModelFailure } from "../_shared/modelFailureLogger.ts";
-import { getVertexAccessToken, getVertexProjectId } from "../_shared/vertexAuth.ts";
+import { getVertexAccessToken } from "../_shared/vertexAuth.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
