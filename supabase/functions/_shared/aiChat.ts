@@ -10,6 +10,28 @@ import { logModelFailure } from "./modelFailureLogger.ts";
 const GOOGLE_ENDPOINT_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
 const OPENAI_ENDPOINT      = "https://api.openai.com/v1/chat/completions";
 
+// v6.9.67 — Gemini rejects many JSON-Schema keywords accepted by OpenAI tools.
+// Strip them recursively before sending functionDeclarations.
+const GEMINI_DISALLOWED_SCHEMA_KEYS = new Set([
+  "additionalProperties","maxLength","minLength","minimum","maximum",
+  "maxItems","minItems","exclusiveMinimum","exclusiveMaximum","pattern",
+  "patternProperties","default","examples","$schema","$id","title",
+  "const","contentEncoding","contentMediaType",
+]);
+
+function sanitizeForGemini(node: any): any {
+  if (Array.isArray(node)) return node.map(sanitizeForGemini);
+  if (node && typeof node === "object") {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(node)) {
+      if (GEMINI_DISALLOWED_SCHEMA_KEYS.has(k)) continue;
+      out[k] = sanitizeForGemini(v);
+    }
+    return out;
+  }
+  return node;
+}
+
 export interface ChatCompletionOpts {
   /** Gemini model id, e.g. "gemini-2.5-flash". Legacy "google/<id>" is accepted. */
   primaryModel: string;
@@ -63,7 +85,22 @@ function toGeminiBody(openaiBody: Record<string, unknown>) {
 
   const tools = openaiBody.tools as Array<{ type: string; function: any }> | undefined;
   if (tools?.length) {
-    out.tools = [{ functionDeclarations: tools.map((t) => t.function) }];
+    out.tools = [{
+      functionDeclarations: tools.map((t) => sanitizeForGemini(t.function)),
+    }];
+    const choice = (openaiBody as any).tool_choice;
+    if (choice && typeof choice === "object" && choice.function?.name) {
+      out.toolConfig = {
+        functionCallingConfig: {
+          mode: "ANY",
+          allowedFunctionNames: [choice.function.name],
+        },
+      };
+    } else if (choice === "required") {
+      out.toolConfig = { functionCallingConfig: { mode: "ANY" } };
+    } else {
+      out.toolConfig = { functionCallingConfig: { mode: "AUTO" } };
+    }
   }
   return out;
 }

@@ -69,7 +69,8 @@ const StudentHubFlashcards = () => {
                       setId={set.id}
                       setTitle={set.title}
                       studentEmail={email}
-                      hasNative={set.back_type === 'translation'}
+                      backType={set.back_type === 'translation' ? 'translation' : 'definition'}
+                      studentNativeLanguage={data?.nativeLanguage || 'English'}
                       onAdded={() => refetch?.()}
                     />
                   </div>

@@ -13,7 +13,6 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 const MODEL = "google/gemini-2.5-flash";
 
 const SYSTEM_PROMPT = `You receive raw teacher notes about a 1:1 adult English language student.
@@ -155,13 +154,6 @@ Deno.serve(async (req) => {
     });
   }
 
-  if (!LOVABLE_API_KEY) {
-    return new Response(JSON.stringify({ error: "ai_key_missing" }), {
-      status: 500,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  }
-
   let body: any = null;
   try { body = await req.json(); } catch { body = null; }
   const rawText: string = typeof body?.raw_text === "string" ? body.raw_text.trim() : "";
@@ -206,17 +198,20 @@ Deno.serve(async (req) => {
     }
 
     const data = await aiResp.json();
-    const call = data?.choices?.[0]?.message?.tool_calls?.[0];
-    if (!call?.function?.arguments) {
-      return new Response(JSON.stringify({ error: "no_tool_call" }), {
-        status: 502,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+    const msg = data?.choices?.[0]?.message;
+    const call = msg?.tool_calls?.[0];
+    let extraction: any = null;
+    if (call?.function?.arguments) {
+      try { extraction = JSON.parse(call.function.arguments); } catch { extraction = null; }
     }
-    let extraction: any;
-    try { extraction = JSON.parse(call.function.arguments); }
-    catch {
-      return new Response(JSON.stringify({ error: "parse_failed" }), {
+    // Fallback: Gemini sometimes returns the structured JSON as plain text
+    // when toolConfig is AUTO or the schema collapses.
+    if (!extraction && typeof msg?.content === "string") {
+      const raw = msg.content.trim().replace(/^```json\s*/i, "").replace(/```$/, "").trim();
+      try { extraction = JSON.parse(raw); } catch { extraction = null; }
+    }
+    if (!extraction || typeof extraction !== "object") {
+      return new Response(JSON.stringify({ error: "no_tool_call" }), {
         status: 502,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });

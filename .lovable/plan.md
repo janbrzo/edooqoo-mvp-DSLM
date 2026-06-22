@@ -1,477 +1,311 @@
+## Plan v6.9.67 — Naprawy: Paste-Intake 502, Student-Hub flashcard modal, audyt tłumaczeń, semantyka Skip / IDK
 
-# Plan v6.9.66 — Naprawa audytu LLM + migracja z Lovable Gateway
-
-Plan rozwiązuje 5 problemów z dziennego audytu i testów manualnych. Każdy ma kompletne rozwiązanie gotowe do implementacji.
+> Wszystkie zmiany mieszczą się w 4 izolowanych obszarach. Worksheet Generation Engine NIE jest dotykany.
 
 ---
 
-## P1 — Lovable Gateway zwraca 402 (brak kredytów)
+### PROBLEM 1 — `extract-student-profile` zwraca 502
 
-### Dependency scan
-`supabase/functions/_shared/aiChat.ts` (główny helper), 8 funkcji wywołujących `chatCompletion`: `classify-knowledge-entry`, `suggest-exercises`, `verify-open-answers`, `translate-flashcard`, `extract-student-profile`, `generate-curriculum-phases`, `generate-timeline`, `process-welcome-test`. `generateWorksheet` jest off-limits (sanctity rule).
+**Dependency scan:** `supabase/functions/extract-student-profile/index.ts`, `supabase/functions/_shared/aiChat.ts`, `src/components/dashboard/PasteIntakeSection.tsx` (klient).
 
-### Root cause
-`aiChat.ts` używa Lovable Gateway jako primary. Workspace nie ma kredytów, więc każde wywołanie najpierw "marnuje" round-trip na 402, potem fallback na OpenAI. To powoduje:
-- niepotrzebne 100–300 ms latencji,
-- spam w `error_logs` + StatusPage banner,
-- daily audit raportuje FAIL.
+**Root cause:** Funkcja deklaruje narzędzie OpenAI-style (`tools[].function.parameters`) z polami JSON-Schema, których Gemini **odrzuca** (`additionalProperties`, `maxLength`, `maxItems`, `minimum`, `maximum`). Dodatkowo `chatCompletion` w `_shared/aiChat.ts` mapuje `tools` na `functionDeclarations`, ale **nie przekazuje `tool_choice`** → Gemini nie wymusza function-callu i odpowiada zwykłym tekstem albo `400 Invalid Schema`. Skutek: `aiResp.ok=false` → funkcja zwraca 502 `ai_error`. Stary check `LOVABLE_API_KEY` jest martwy (Gateway już nieużywany) i myli debugging.
 
-### Solution options
-| Opcja | Opis | Trade-off |
-|---|---|---|
-| A. Zostawić Lovable jako primary, wyłączyć go w audycie | minimalna zmiana | nadal +200ms na każde wywołanie, spam logów |
-| B. **Przełączyć primary na Google Generative Language API direct (GEMINI_API_KEY)**, OpenAI jako fallback | zerowa zależność od Lovable, te same modele Gemini | trzeba zmapować body z OpenAI-shape → Gemini-shape |
-| C. Przełączyć primary na OpenAI gpt-4o-mini | najprostsze | tracimy darmowe Gemini, rosną koszty OpenAI |
+**Selected solution:** Rozszerzyć `_shared/aiChat.ts` o (a) sanitizację schematu `functionDeclarations` (usuwanie nieobsługiwanych przez Gemini kluczy) i (b) mapowanie `tool_choice` → `toolConfig.functionCallingConfig` (mode `ANY` + `allowedFunctionNames`). Usunąć martwą bramkę `LOVABLE_API_KEY` z `extract-student-profile/index.ts` (zostaje walidacja `GEMINI_API_KEY || OPENAI_API_KEY` po stronie helpera — helper zwraca 503 jeśli żadnego nie ma). Zachować pełną kompatybilność z innymi callerami (`translate-flashcard`, `classify-knowledge-entry`, …) bo `sanitizeForGemini` jest idempotentna dla schematów bez ww. kluczy.
 
-### Selected: **B** — Direct Google + OpenAI fallback
-Powód: `GEMINI_API_KEY` już istnieje i działa (używany w `generate-image` przez `@google/generative-ai` SDK). Modele `gemini-2.5-flash` i `gemini-2.5-flash-lite` są dostępne na endpointcie `generativelanguage.googleapis.com/v1beta`. Zerowy koszt dla użytkownika, pełna kontrola.
-
-### Impact analysis
-Wszystkie 8 funkcji edge nadal otrzymuje response w OpenAI Chat Completions shape (helper konwertuje). `generateWorksheet` nieruszony. Zero regresji w UI.
-
-### Pełna implementacja
-
-**Krok 1.1** — przepisać `supabase/functions/_shared/aiChat.ts`:
+**Implementation:**
 
 ```ts
-// v6.9.66 — Direct Google Generative Language as primary, OpenAI as fallback.
-// Lovable Gateway removed (workspace credits exhausted).
-import { logModelFailure } from "./modelFailureLogger.ts";
-
-const GOOGLE_ENDPOINT_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
-const OPENAI_ENDPOINT      = "https://api.openai.com/v1/chat/completions";
-
-export interface ChatCompletionOpts {
-  /** Gemini model id, e.g. "gemini-2.5-flash" or legacy "google/gemini-2.5-flash". */
-  primaryModel: string;
-  /** OpenAI fallback model id, defaults to "gpt-4o-mini". */
-  fallbackModel?: string;
-  /** Caller function name for logModelFailure. */
-  functionName: string;
-}
-
-function shouldFallback(status: number): boolean {
-  return status === 402 || status === 429 || status === 503 || status >= 500;
-}
-
-function normalizeGeminiModel(m: string): string {
-  // Accept legacy "google/gemini-2.5-flash" → "gemini-2.5-flash"
-  return m.startsWith("google/") ? m.slice("google/".length) : m;
-}
-
-/**
- * Maps OpenAI chat-completions body → Gemini generateContent body.
- * Forwards: messages, temperature, max_tokens, response_format(json_object), tools(function-calling).
- */
-function toGeminiBody(openaiBody: Record<string, unknown>) {
-  const messages = (openaiBody.messages as Array<{ role: string; content: string }>) || [];
-  const systemMsgs = messages.filter((m) => m.role === "system").map((m) => m.content).join("\n\n");
-  const contents = messages
-    .filter((m) => m.role !== "system")
-    .map((m) => ({
-      role: m.role === "assistant" ? "model" : "user",
-      parts: [{ text: m.content }],
-    }));
-
-  const generationConfig: Record<string, unknown> = {};
-  if (typeof openaiBody.temperature === "number") generationConfig.temperature = openaiBody.temperature;
-  if (typeof openaiBody.max_tokens === "number") generationConfig.maxOutputTokens = openaiBody.max_tokens;
-  const rf = openaiBody.response_format as { type?: string } | undefined;
-  if (rf?.type === "json_object") generationConfig.responseMimeType = "application/json";
-
-  const out: Record<string, unknown> = { contents, generationConfig };
-  if (systemMsgs) out.systemInstruction = { parts: [{ text: systemMsgs }] };
-
-  // Function calling: OpenAI tools[] → Gemini tools[{ functionDeclarations: [...] }]
-  const tools = openaiBody.tools as Array<{ type: string; function: any }> | undefined;
-  if (tools?.length) {
-    out.tools = [{ functionDeclarations: tools.map((t) => t.function) }];
-  }
-  return out;
-}
-
-/**
- * Converts a Gemini generateContent response → OpenAI chat-completions shape,
- * so existing callers keep parsing data.choices[0].message.content / tool_calls unchanged.
- */
-function geminiToOpenAIResponse(gemini: any, model: string): any {
-  const candidate = gemini?.candidates?.[0];
-  const parts = candidate?.content?.parts || [];
-  const textParts = parts.filter((p: any) => typeof p?.text === "string").map((p: any) => p.text);
-  const fnCalls = parts
-    .filter((p: any) => p?.functionCall)
-    .map((p: any, i: number) => ({
-      id: `call_${i}`,
-      type: "function",
-      function: { name: p.functionCall.name, arguments: JSON.stringify(p.functionCall.args || {}) },
-    }));
-  return {
-    id: `gemini-${Date.now()}`,
-    object: "chat.completion",
-    model,
-    choices: [{
-      index: 0,
-      message: {
-        role: "assistant",
-        content: textParts.join("") || null,
-        ...(fnCalls.length ? { tool_calls: fnCalls } : {}),
-      },
-      finish_reason: candidate?.finishReason?.toLowerCase() || "stop",
-    }],
-    usage: {
-      prompt_tokens: gemini?.usageMetadata?.promptTokenCount ?? 0,
-      completion_tokens: gemini?.usageMetadata?.candidatesTokenCount ?? 0,
-      total_tokens: gemini?.usageMetadata?.totalTokenCount ?? 0,
-    },
-  };
-}
-
-export async function chatCompletion(
-  body: Record<string, unknown>,
-  opts: ChatCompletionOpts,
-): Promise<Response> {
-  const fallbackModel = opts.fallbackModel ?? "gpt-4o-mini";
-  const googleKey = Deno.env.get("GEMINI_API_KEY");
-  const oaKey     = Deno.env.get("OPENAI_API_KEY");
-
-  let primaryResp: Response | null = null;
-  const geminiModel = normalizeGeminiModel(opts.primaryModel);
-
-  if (googleKey) {
-    try {
-      const url = `${GOOGLE_ENDPOINT_BASE}/${geminiModel}:generateContent?key=${googleKey}`;
-      primaryResp = await fetch(url, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(toGeminiBody(body)),
-      });
-      if (primaryResp.ok) {
-        const geminiJson = await primaryResp.json();
-        const openaiShape = geminiToOpenAIResponse(geminiJson, geminiModel);
-        return new Response(JSON.stringify(openaiShape), {
-          status: 200,
-          headers: { "Content-Type": "application/json" },
-        });
-      }
-      const errText = await primaryResp.clone().text().catch(() => "");
-      await logModelFailure({
-        model: geminiModel, provider: "google",
-        status: primaryResp.status, endpoint: GOOGLE_ENDPOINT_BASE,
-        error: errText.slice(0, 500), functionName: opts.functionName,
-      });
-      if (!shouldFallback(primaryResp.status)) return primaryResp;
-      console.warn(`[aiChat] Google ${primaryResp.status} for ${geminiModel} → fallback OpenAI ${fallbackModel}`);
-    } catch (e) {
-      console.warn(`[aiChat] Google fetch threw, falling back:`, (e as Error).message);
+// supabase/functions/_shared/aiChat.ts  (dodać helper + użyć w toGeminiBody)
+const GEMINI_DISALLOWED = new Set([
+  "additionalProperties","maxLength","minLength","minimum","maximum",
+  "maxItems","minItems","exclusiveMinimum","exclusiveMaximum","pattern",
+  "patternProperties","default","examples","$schema","$id","title",
+]);
+function sanitizeForGemini(node: any): any {
+  if (Array.isArray(node)) return node.map(sanitizeForGemini);
+  if (node && typeof node === "object") {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(node)) {
+      if (GEMINI_DISALLOWED.has(k)) continue;
+      out[k] = sanitizeForGemini(v);
     }
+    return out;
   }
+  return node;
+}
 
-  if (!oaKey) {
-    if (primaryResp) return primaryResp;
-    return new Response(JSON.stringify({ error: "no_ai_provider_configured" }), {
-      status: 503, headers: { "Content-Type": "application/json" },
+// w toGeminiBody — zamiast `tools: tools.map(t => t.function)` użyć
+if (tools?.length) {
+  out.tools = [{ functionDeclarations: tools.map((t) => sanitizeForGemini(t.function)) }];
+  const choice = (openaiBody as any).tool_choice;
+  if (choice && typeof choice === "object" && choice.function?.name) {
+    out.toolConfig = {
+      functionCallingConfig: { mode: "ANY", allowedFunctionNames: [choice.function.name] },
+    };
+  } else if (choice === "required") {
+    out.toolConfig = { functionCallingConfig: { mode: "ANY" } };
+  } else if (choice === "auto" || choice === undefined) {
+    out.toolConfig = { functionCallingConfig: { mode: "AUTO" } };
+  }
+}
+```
+
+```ts
+// supabase/functions/extract-student-profile/index.ts
+// 1) usunąć linie z LOVABLE_API_KEY (deklarację i if(!LOVABLE_API_KEY)).
+// 2) dodać czytelniejszy fallback gdy brak tool_calls — spróbować
+//    sparsować data.choices[0].message.content jako JSON i zbudować
+//    extraction (Gemini bez wymuszonego function-call wraca tekstem JSON).
+```
+
+**Patch w `extract-student-profile`** (fragment parsowania):
+```ts
+const msg = data?.choices?.[0]?.message;
+let extraction: any = null;
+const call = msg?.tool_calls?.[0];
+if (call?.function?.arguments) {
+  try { extraction = JSON.parse(call.function.arguments); } catch {}
+}
+if (!extraction && typeof msg?.content === "string") {
+  try { extraction = JSON.parse(msg.content); } catch {}
+}
+if (!extraction) {
+  return new Response(JSON.stringify({ error: "no_tool_call" }), { status: 502, ... });
+}
+```
+
+**Impact analysis:** Sanitizacja zwraca identyczny obiekt dla schematów bez zakazanych kluczy → callerzy `translate-flashcard`, `verify-open-answers`, `classify-knowledge-entry`, `extract-student-profile`, `suggest-exercises`, `generate-curriculum-phases`, `translate-flashcard`, `process-welcome-test`, `generate-timeline` zachowują obecne zachowanie. `tool_choice` mapowanie jest opcjonalne; brak zmian w gałęzi OpenAI fallback.
+
+**Verification checklist:**
+- [ ] `supabase/functions/_shared/aiChat.ts` zawiera `sanitizeForGemini` i mapowanie `tool_choice` → `toolConfig`.
+- [ ] `extract-student-profile`: brak referencji do `LOVABLE_API_KEY`; dodany fallback content-parse.
+- [ ] Ręczny test w UI (Add Student → toggle Paste notes → Analyze) zwraca `extraction` zamiast toast „AI extraction failed”.
+- [ ] Edge logs `extract-student-profile` → status 200, model `gemini-2.5-flash`.
+
+---
+
+### PROBLEM 2 — Modal „Add a flashcard” na `/my` ma złe pola i brak auto-AI
+
+**Dependency scan:** `src/components/student-hub/AddStudentFlashcardDialog.tsx`, `src/pages/StudentHubFlashcards.tsx`, `src/hooks/useStudentHubData.tsx`, `src/components/flashcards/AddFlashcardModal.tsx` (referencja UX), `supabase/functions/get-student-hub-data/index.ts`, RPC `student_add_flashcard`.
+
+**Root cause:** `AddStudentFlashcardDialog` to osobna, uproszczona implementacja z generycznymi etykietami „Front / Back / Native translation (optional)” — nie odróżnia setów `translation` od `definition`, nie zna `native_language` studenta, nie wywołuje `translate-flashcard`. Hub data nie wystawia `nativeLanguage`.
+
+**Selected solution:** Doprowadzić student-side modal do parytetu z `AddFlashcardModal` nauczyciela poprzez (a) wzbogacenie endpointu `get-student-hub-data` o `nativeLanguage` (+ `studentNativeLanguage` w `StudentHubData` / props) i (b) przepisanie `AddStudentFlashcardDialog` aby używał hooków `useFlashcardTranslation` / `useFlashcardDefinition` oraz dokładnie tych samych etykiet/pól co modal nauczyciela. RPC `student_add_flashcard` zachowujemy bez zmian — przekażemy `p_native = null` (back zawiera już native lub definition; pole „native_text” to redundancja, którą eliminujemy zgodnie z konwencją nauczycielską).
+
+**Implementation:**
+
+1. `supabase/functions/get-student-hub-data/index.ts`
+   - Wiersz 255: `.select('id, name, english_level, student_email, native_language')`
+   - Wiersz 516–517 (response): dodać `nativeLanguage: studentData.native_language ?? null`
+
+2. `src/hooks/useStudentHubData.tsx` — w `StudentHubData` dodać `nativeLanguage: string | null`.
+
+3. `src/pages/StudentHubFlashcards.tsx` — przekazać do dialogu:
+```tsx
+<AddStudentFlashcardDialog
+  setId={set.id}
+  setTitle={set.title}
+  studentEmail={email}
+  backType={set.back_type === 'translation' ? 'translation' : 'definition'}
+  studentNativeLanguage={data?.nativeLanguage || 'English'}
+  onAdded={() => refetch?.()}
+/>
+```
+
+4. `src/components/student-hub/AddStudentFlashcardDialog.tsx` — pełen rewrite (zero placeholderów). Logika 1:1 z `AddFlashcardModal`:
+   - Pola: `English Term *`, `Example Sentence (optional)`, dynamicznie `{nativeLanguage} Translation *` LUB `English Definition *`.
+   - Hooki `useFlashcardTranslation({ targetLanguage: nativeLanguage, enabled: backType==='translation' })` i `useFlashcardDefinition({ enabled: backType==='definition' })` — debounce 800 ms.
+   - Auto-fill `backText` jeśli user nie edytował (`userEditedBackText` flag).
+   - Loader (`Loader2`) wewnątrz inputa podczas `isTranslating`/`isLoadingDefinition`.
+   - Sekcja `Preview` z `Front / Back / cefr_level badge` (identyczna jak nauczyciel).
+   - Submit nadal woła `supabase.rpc('student_add_flashcard', { p_set_id, p_student_email, p_front, p_back, p_native: null })`. Obsługa błędów `contributions_disabled`, `student_not_authorized`, `empty_card` jak teraz.
+
+**Impact analysis:** Endpoint `get-student-hub-data` dodaje tylko jedno pole — istniejący klient ignoruje. Zmiany w `StudentHubFlashcards.tsx` są przekazywaniem nowych propsów. Brak nowych RPC, brak migracji. Wpływ na inne miejsca: zero (`AddFlashcardModal` nauczyciela nietknięty, hooki `useFlashcardTranslation`/`useFlashcardDefinition` używane już w produkcji).
+
+**Verification checklist:**
+- [ ] Student z natywnym hiszpańskim na secie `translation` widzi etykietę „Spanish Translation *”, po wpisaniu terminu pojawia się auto-tłumaczenie (loader → wynik) + badge CEFR w preview.
+- [ ] Student na secie `definition` widzi „English Definition *”, auto-definicja działa.
+- [ ] Po zapisie karta pojawia się w secie (`created_by_student=true`), brak błędu `student_not_authorized`.
+- [ ] Pole „Native translation (optional)” całkowicie usunięte z modala.
+
+---
+
+### PROBLEM 3 — Audyt kompletności tłumaczeń welcome-testu
+
+**Dependency scan:** `src/data/welcomeTestTranslations.ts`, `src/data/welcomeTestQuestions.ts`, `src/pages/WelcomeTestPage.tsx`.
+
+**Status faktyczny po audycie:**
+- 25 języków, każdy ma identyczne 34 ID profilingowe → 100% pokrycia istniejącej listy.
+- **5 ID profilingowych dodanych po ostatnim sync’u nie ma tłumaczeń w żadnym z 25 języków:** `wt_q39` (scenario_reaction, communication), `wt_q16s` (speaking, scenarios), `wt_q18l` (listening_comprehension, scenarios), `wt_q36s` (speaking, communication), `wt_q41s` (speaking, goals). Są to instrukcje/opisy (nie testy gramatyki), więc kwalifikują się do tłumaczenia.
+- UI welcome-testu (przyciski `Skip`, `I don't know`, `InstructionScreen`) NIE jest tłumaczone — to świadoma decyzja produktu (brak globalnego i18n w aplikacji). Pozostawiamy bez zmian.
+
+**Root cause:** Brak procesu synchronizacji `welcomeTestQuestions.ts` ↔ `welcomeTestTranslations.ts` przy dodaniu nowego pytania profilingowego.
+
+**Selected solution:** (a) Uzupełnić brakujące 5 ID we wszystkich 25 językach. (b) Dodać samosprawdzający się skrypt walidacyjny `scripts/audit-welcome-test-translations.mjs`, który listuje ID profilingowe z `welcomeTestQuestions.ts` (typy `preference_choice`, `scenario_reaction`, `open_reflection`, `self_assessment`, `self_assessment_matrix`, `speaking_record`, `listening_comprehension` z sekcji innych niż `vocab_grammar`) i porównuje z każdym z 25 setów translacji; exit 1 gdy luka. Skrypt uruchamiamy ręcznie (nie blokujemy build’a w tym sprincie).
+
+**Implementation (pełne treści tłumaczeń — 5 ID × 25 języków = 125 wpisów):**
+Wzór jednego wpisu (Polish, q16s):
+```ts
+'wt_q16s': {
+  question: 'Opisz problem z pokojem hotelowym — zadanie głosowe.',
+  description: 'Wyobraź sobie, że jesteś w recepcji. Wybierz jeden problem (zepsuta klimatyzacja, brudna łazienka, hałaśliwi sąsiedzi, brakujące ręczniki) i nagraj się, jak go wyjaśniasz i prosisz o pomoc. Nagraj do 60 sekund. Mów naturalnie — płynność i wymowa są ważniejsze niż perfekcyjna gramatyka.',
+},
+```
+Treści dla pozostałych 4 ID (q18l, q36s, q39, q41s) w identycznej strukturze. Implementacja w build mode wygeneruje pełne 125 wpisów (po jednym bloku `'wt_qXX': {...}` doklejonym na końcu każdego z 25 obiektów `*: TranslationSet`).
+
+**Impact analysis:** Tylko dane stałe. Funkcja `getTranslation` już obsługuje fallback `null` → angielski oryginał, więc nic się nie psuje przy ewentualnej literówce. Skrypt audytowy jest opt-in (poza pipeline).
+
+**Verification checklist:**
+- [ ] `node scripts/audit-welcome-test-translations.mjs` kończy się exit 0.
+- [ ] W teście welcome ze studentem-PL pytania q16s / q18l / q36s / q39 / q41s pokazują polskie tłumaczenie pod oryginalnym tekstem.
+
+---
+
+### PROBLEM 4 — Semantyka „Skip” i „I don't know” w welcome teście
+
+**Dependency scan:** `src/hooks/useWelcomeTest.tsx` (`saveIdontKnow`, `skipQuestion`, `commitAnswer`), `src/pages/WelcomeTestPage.tsx` (przyciski), `supabase/functions/process-welcome-test/index.ts` (interpretacja `__IDK__`), tabela `student_events`.
+
+**Stan obecny:**
+- **I don't know:** zapisuje wartość `'__IDK__'` w `state.answers`, woła `commitAnswer` → wpis do `student_test_questions` + event `test_answer_submitted` z `is_correct=false` (lub `null` gdy brak `nano_skill`), `nano_skill_ratings.mastery=0`, brak `detected_traits`. `process-welcome-test` traktuje to jako pomyłkę umiejętności (`idkCountSkill` osobno zliczany), ale w `student_events` nie ma flagi odróżniającej „uczciwe nie wiem” od „błędna odpowiedź”.
+- **Skip:** tylko nawigacja w przód — **żaden ślad w DB**. Nauczyciel nie widzi, że pytanie zostało pominięte (a w sekcjach profilujących to ważny sygnał, np. „nie chcę odpowiadać”).
+
+**Root cause:** Brak rozróżnienia trzech intencji ucznia: (1) udzielił odpowiedzi, (2) świadomie zaznaczył „nie wiem”, (3) pominął. Wszystko trafia albo do `is_correct=false`, albo donikąd.
+
+**Selected solution:** Zachować obecny model danych (single source of truth = `student_test_questions` + `student_events`), dorzucić dwie flagi do `event_payload`:
+- `is_idk: true` przy commit po `saveIdontKnow`.
+- `is_skipped: true` z dedykowanym `event_type='test_answer_skipped'` przy każdym kliknięciu Skip (przy pominięciu zapisuje też `student_test_questions.answered_at = now` z `answer = null` — żeby panel postępu UI mógł odróżnić „odwiedzone i pominięte” od „w ogóle nie widziane”).
+Brak migracji — `event_payload` jest jsonb; `event_type='test_answer_skipped'` jest dozwolone (kolumna jest swobodnym text). Process-welcome-test pozostaje bez zmian (ignoruje nowy event_type, nie obniża skill score).
+
+**Implementation:**
+
+1. `src/hooks/useWelcomeTest.tsx`:
+
+```ts
+// commitAnswer: rozszerz parametry o opcjonalne meta
+const commitAnswer = useCallback(async (
+  questionId: string,
+  answer: unknown,
+  opts: { isIdk?: boolean } = {},
+) => {
+  // ... istniejący kod ...
+  p_event_payload: {
+    answer_id: canonicalId,
+    legacy_answer_id: questionId,
+    exercise_type: questionDef.question_type,
+    exercise_index: questionIndex,
+    is_correct: isCorrect,
+    is_idk: opts.isIdk === true ? true : undefined,
+    nano_skill_ratings: nanoSkillRatings,
+    detected_traits: detectedTraitData,
+    time_spent_seconds: timeSpent,
+  },
+  // ...
+}, [...]);
+
+// saveIdontKnow: przekaż flagę
+const saveIdontKnow = useCallback((questionId: string) => {
+  setState(prev => ({ ...prev, answers: { ...prev.answers, [questionId]: '__IDK__' } }));
+  commitAnswer(questionId, '__IDK__', { isIdk: true });
+}, [commitAnswer]);
+
+// skipQuestion: zaloguj event_type='test_answer_skipped' + answer=null w student_test_questions
+const skipQuestion = useCallback(async () => {
+  await flushSpeakingIfNeeded();
+  await flushPendingAnswer();
+  const section = sections[state.currentSectionIndex];
+  const questionDef = section?.questions[state.currentQuestionIndex];
+  if (state.testId && questionDef && state.studentId && state.teacherId) {
+    const questionIndex = computeFlatQuestionIndex(sections, state.currentSectionIndex, state.currentQuestionIndex);
+    await supabase
+      .from('student_test_questions')
+      .update({ answered_at: new Date().toISOString(), answer_data: null })
+      .eq('test_id', state.testId)
+      .eq('question_index', questionIndex);
+    await supabase.rpc('add_student_event', {
+      p_student_id: state.studentId,
+      p_teacher_id: state.teacherId,
+      p_event_type: 'test_answer_skipped',
+      p_event_source: 'welcome_test',
+      p_source_id: state.testId,
+      p_element_type: questionDef.element_type || questionDef.question_type || null,
+      p_event_payload: {
+        answer_id: toCanonicalId(questionDef.id),
+        legacy_answer_id: questionDef.id,
+        exercise_type: questionDef.question_type,
+        exercise_index: questionIndex,
+        is_skipped: true,
+      } as unknown as Json,
+      p_skill_ids: questionDef.nano_skill ? [questionDef.nano_skill] : [],
     });
   }
-
-  const r2 = await fetch(OPENAI_ENDPOINT, {
-    method: "POST",
-    headers: { Authorization: `Bearer ${oaKey}`, "Content-Type": "application/json" },
-    body: JSON.stringify({ ...body, model: fallbackModel }),
-  });
-  if (!r2.ok) {
-    const errText = await r2.clone().text().catch(() => "");
-    await logModelFailure({
-      model: fallbackModel, provider: "openai",
-      status: r2.status, endpoint: OPENAI_ENDPOINT,
-      error: errText.slice(0, 500), functionName: opts.functionName,
-    });
-  } else {
-    console.log(`[aiChat] OpenAI fallback succeeded with ${fallbackModel}`);
-  }
-  return r2;
-}
+  await goToNext();
+}, [...]);
 ```
 
-**Krok 1.2** — żadne callsite nie wymaga zmiany (interfejs `chatCompletion(body, opts)` bez zmian). Modele `google/gemini-2.5-flash` zostają w callsite'ach — helper sam zdejmuje prefiks `google/`.
+2. `supabase/functions/process-welcome-test/index.ts` — bez zmian (już ignoruje nieznane event_type w pętli skill aggregation).
 
-### Verification checklist P1
-- [ ] Wszystkie 8 funkcji edge nadal zwracają poprawny JSON.
-- [ ] Brak wpisów `lovable-gateway 402` w `error_logs` po wdrożeniu.
-- [ ] `translate-flashcard` test: tłumaczenie zwraca `{translation, cefr_level}`.
-- [ ] `classify-knowledge-entry` test: zwraca poprawne kategorie.
-- [ ] `extract-student-profile` test (problem 4) działa end-to-end.
+**Impact analysis:** Zero zmian schematu DB. `student_events.event_type` jest tekstowe, więc nowa wartość `test_answer_skipped` zostanie zapisana bez błędu. Istniejące zapytania filtrują po konkretnych typach, więc nowy typ nie zaśmieci agregatów (np. `idkCountSkill` w process-welcome-test). RAG dla nauczyciela zyskuje sygnał „student avoids X”.
+
+**Verification checklist:**
+- [ ] Klik „I don't know” → w `student_events` event `test_answer_submitted` z `event_payload->>is_idk = 'true'`.
+- [ ] Klik „Skip” → event `test_answer_skipped`, `student_test_questions.answered_at` ustawione, `answer_data IS NULL`.
+- [ ] `process-welcome-test` nadal zwraca poprawny `estimatedLevel` (skipped questions nie wpływają na skill score — bo nie ma `is_correct`).
+- [ ] UI welcome-testu działa identycznie (przyciski w tym samym miejscu, zachowanie nawigacji bez zmian).
 
 ---
 
-## P2 — Vertex AI audit zwraca 404 mimo że generowanie obrazów działa
+## RAG INJECTION
 
-### Dependency scan
-`supabase/functions/audit-llm-models/index.ts` linia 73 — `fetch(endpoint, { headers })` GET na URL `https://us-central1-aiplatform.googleapis.com/v1/projects/.../publishers/google/models/gemini-2.5-flash-image`.
+Aktualizacje do `docs/llm-context.md` i `public/llms.txt`:
 
-### Root cause
-GET na endpoint pod ścieżką `projects/<id>/...publishers/google/models/<id>` **NIE jest publicznym endpointem metadanych** dla modeli publisher w Vertex AI. Vertex zwraca 404 dla GET. Real flow (`generate-image`) używa POST `:generateContent`, który działa. Audit jest błędny — testuje endpoint który nigdy nie istniał.
-
-### Solution options
-| Opcja | Opis | Trade-off |
-|---|---|---|
-| A. Switch na metadata endpoint `v1beta1/publishers/google/models/<id>` (bez projects/) | tani GET, oficjalny | wymaga `aiplatform.publisherModels.get` scope (mamy `cloud-platform`) |
-| B. Mini POST `:generateContent` z `responseModalities:["TEXT"]` i `maxOutputTokens:1` | testuje realny flow | model image-only może nie wspierać TEXT modality |
-| C. POST `:countTokens` | tani | image generation models nie wspierają countTokens |
-
-### Selected: **A** — publisher metadata endpoint
-Powód: oficjalne, darmowe, zerowy koszt inference, faktycznie waliduje że konto ma access do modelu publisher.
-
-### Pełna implementacja
-
-**Krok 2.1** — w `audit-llm-models/index.ts` zmienić `TARGETS_DAILY` i `TARGETS_MONTHLY` endpoint dla Vertex z:
 ```
-https://us-central1-aiplatform.googleapis.com/v1/projects/{PROJECT_ID}/locations/us-central1/publishers/google/models/<model>
-```
-na:
-```
-https://us-central1-aiplatform.googleapis.com/v1beta1/publishers/google/models/<model>
+PROBLEM: extract-student-profile zwracało 502 po migracji na bezpośredni endpoint Gemini.
+EDOOQOO SOLUTION: chatCompletion helper sanitizuje schematy narzędzi pod ograniczenia Gemini i mapuje tool_choice → toolConfig.
+TECHNICAL MECHANICS: supabase/functions/_shared/aiChat.ts (sanitizeForGemini + toolConfig.functionCallingConfig); usunięto martwy LOVABLE_API_KEY guard w extract-student-profile; fallback parser content-as-JSON dodany.
+RAG KEYWORDS: gemini function calling, tool_choice, function declarations, additionalProperties, JSON schema sanitization, paste intake, student profile extraction, 502 bad gateway, edge function debugging, Lovable Gateway migration, OpenAI fallback, AI hot path, aiChat helper, structured output, generateContent
 ```
 
-**Krok 2.2** — w funkcji `ping()` dla `google-vertex` usunąć `endpoint.replace("{PROJECT_ID}", projectId)` (już niepotrzebne) i zostawić sam GET z Bearer tokenem:
-```ts
-if (target.provider === "google-vertex") {
-  const sa = Deno.env.get("GEMINI_VERTEX_API_KEY");
-  if (!sa) return { status: -1, latency_ms: 0, error: "missing GEMINI_VERTEX_API_KEY" };
-  try {
-    const accessToken = await getVertexAccessToken(sa);
-    const r = await fetch(target.endpoint, { headers: { Authorization: `Bearer ${accessToken}` } });
-    const err = r.ok ? null : (await r.text()).slice(0, 500);
-    return { status: r.status, latency_ms: Date.now() - t0, error: err };
-  } catch (e) { … unchanged }
-}
+```
+PROBLEM: Studenci nie mogli dodać dobrze sformatowanej fiszki ze swojej strony /my (złe etykiety, brak AI autosuggest).
+EDOOQOO SOLUTION: AddStudentFlashcardDialog osiąga parytet UX z teacher AddFlashcardModal; get-student-hub-data wystawia native_language.
+TECHNICAL MECHANICS: useFlashcardTranslation + useFlashcardDefinition w student dialogu; backType prop z back_type setu; RPC student_add_flashcard bez zmian (p_native=null); StudentHubData.nativeLanguage; get-student-hub-data SELECT native_language.
+RAG KEYWORDS: student hub flashcards, student-add-flashcard RPC, native_language, translation auto-suggest, definition auto-suggest, CEFR badge, AddFlashcardModal parity, back_type translation definition, allow_student_contributions, student authorization, hub_token, flashcard set, learner contributions
 ```
 
-### Verification checklist P2
-- [ ] Manual smoke: `curl -X POST -H "x-cron-secret: …" https://…/audit-llm-models` → Vertex 200.
-- [ ] Email audit pokazuje OK dla `gemini-2.5-flash-image`.
-- [ ] Generowanie obrazu w worksheet nadal działa (nie zmieniliśmy `generate-image`).
+```
+PROBLEM: Audyt tłumaczeń welcome-testu wskazał 5 nowo dodanych pytań profilingowych bez tłumaczeń w 25 językach.
+EDOOQOO SOLUTION: Uzupełnione pełne tłumaczenia dla wt_q16s, wt_q18l, wt_q36s, wt_q39, wt_q41s; dodany skrypt walidacyjny.
+TECHNICAL MECHANICS: src/data/welcomeTestTranslations.ts (+125 wpisów); scripts/audit-welcome-test-translations.mjs (diff IDs vs translations); fallback getTranslation→null pozostaje bezpieczny.
+RAG KEYWORDS: welcome test translations, profiling questions, scenario_reaction, speaking_record, listening_comprehension, translation parity, 25 languages, getTranslation fallback, audit script, completeness check
+```
+
+```
+PROBLEM: Skip i I-don't-know w welcome-teście traktowane były nierozróżnialnie od błędnej odpowiedzi lub w ogóle nie były zapisywane.
+EDOOQOO SOLUTION: event_payload.is_idk + dedykowany event_type test_answer_skipped + answered_at na student_test_questions.
+TECHNICAL MECHANICS: useWelcomeTest.commitAnswer akceptuje opts.isIdk; skipQuestion loguje add_student_event(test_answer_skipped) + UPDATE student_test_questions answer_data=null; process-welcome-test bez zmian.
+RAG KEYWORDS: welcome test skip, I don't know, IDK, student_events, test_answer_submitted, test_answer_skipped, calibration honesty, skill score aggregation, profiling avoidance signal, andragogy
+```
 
 ---
 
-## P3 — Audyt nie obejmuje wszystkich modeli używanych w aplikacji
+## CHANGE REPORT (po implementacji)
 
-### Dependency scan
-Pełny skan wykrył dodatkowe modele:
+- Files to modify:
+  - `supabase/functions/_shared/aiChat.ts`
+  - `supabase/functions/extract-student-profile/index.ts`
+  - `supabase/functions/get-student-hub-data/index.ts`
+  - `src/components/student-hub/AddStudentFlashcardDialog.tsx` (rewrite)
+  - `src/pages/StudentHubFlashcards.tsx`
+  - `src/hooks/useStudentHubData.tsx`
+  - `src/hooks/useWelcomeTest.tsx`
+  - `src/data/welcomeTestTranslations.ts` (+125 wpisów)
+- Files to create:
+  - `scripts/audit-welcome-test-translations.mjs`
+  - `mem/features/welcome-test/skip-idk-semantics.md`
+- Docs:
+  - `docs/llm-context.md` + `public/llms.txt` (cztery bloki PROBLEM/SOLUTION/MECHANICS/KEYWORDS)
+  - aktualizacja `mem/index.md`
+- Sanctity: Worksheet Generation Engine nietknięty.
+- Out-of-scope flags: brak globalnego i18n dla UI welcome-testu (świadomie pominięte — wymaga osobnego planu).
 
-| Funkcja | Model | Pokrycie obecnie |
-|---|---|---|
-| `transcribe-audio` | `whisper-1` (OpenAI) | **brak** |
-| `generate-media-exercises` | `gpt-4.1-2025-04-14` (OpenAI) | tylko monthly |
-| `generate-welcome-test-audio` | `tts-1` (OpenAI primary) | tylko monthly |
-| `generate-audio` chat step | `gpt-4o-mini` (OpenAI) | daily ✓ |
-| `generate-image` description | `gemini-2.5-flash` + `gemini-2.5-flash-lite` (Google direct) | brak (był pod lovable) |
-| `generateWorksheet` primary | `gemini-2.5-flash` (Google direct) | brak |
-| `generateWorksheet` fallback | `gpt-5-mini-2025-08-07` (OpenAI) | daily ✓ |
-| `aiChat.ts` po P1 | `gemini-2.5-flash`, `gemini-2.5-flash-lite` (Google direct) | brak |
-
-### Selected solution
-Zastąpić w daily 2× Lovable Gateway → 2× Google Generative Language direct (`gemini-2.5-flash`, `gemini-2.5-flash-lite`). Dodać `whisper-1` do daily (whisper jest krytyczny dla live session). Przesunąć `tts-1` z monthly → daily (primary welcome-test audio). Dodać Lovable Gateway entries do monthly tylko (na wypadek powrotu kredytów). Dodać `gpt-4.1-2025-04-14` do daily (używany w `generate-media-exercises`).
-
-### Pełna implementacja
-
-**Krok 3.1** — nowy helper w `ping()` dla Google Generative Language direct (sprawdzenie metadanych modelu):
-
-```ts
-type Provider = "lovable-gateway" | "openai" | "google" | "google-vertex" | "openai-whisper";
-
-// ...inside ping():
-if (target.provider === "google") {
-  const key = Deno.env.get("GEMINI_API_KEY");
-  if (!key) return { status: -1, latency_ms: 0, error: "missing GEMINI_API_KEY" };
-  // models.get returns metadata if key has access — no inference cost.
-  const r = await fetch(`${target.endpoint}?key=${key}`);
-  const err = r.ok ? null : (await r.text()).slice(0, 500);
-  return { status: r.status, latency_ms: Date.now() - t0, error: err };
-}
-if (target.provider === "openai-whisper") {
-  // Whisper-1 is on the same /v1/models endpoint; just probe metadata.
-  const key = Deno.env.get("OPENAI_API_KEY");
-  if (!key) return { status: -1, latency_ms: 0, error: "missing OPENAI_API_KEY" };
-  const r = await fetch(target.endpoint, { headers: { Authorization: `Bearer ${key}` } });
-  const err = r.ok ? null : (await r.text()).slice(0, 500);
-  return { status: r.status, latency_ms: Date.now() - t0, error: err };
-}
-```
-
-(W praktyce `openai-whisper` można pominąć i użyć typu `openai` — endpoint jest taki sam. Zostawiamy jeden case `openai`).
-
-**Krok 3.2** — nowy `TARGETS_DAILY` (8 modeli):
-
-```ts
-const TARGETS_DAILY: Target[] = [
-  // Google direct (primary chat — replaces Lovable Gateway after v6.9.66 P1)
-  { provider: "google", model: "gemini-2.5-flash",
-    endpoint: "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash",
-    purpose: "Primary chat (aiChat helper: classify, suggest-exercises, verify-open-answers, curriculum, timeline, welcome-test, extract-profile)" },
-  { provider: "google", model: "gemini-2.5-flash-lite",
-    endpoint: "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite",
-    purpose: "Lightweight chat (translate-flashcard, image description fallback)" },
-  // OpenAI direct
-  { provider: "openai", model: "gpt-4o-mini",
-    endpoint: "https://api.openai.com/v1/models/gpt-4o-mini",
-    purpose: "OpenAI fallback for aiChat helper + generate-audio chat step" },
-  { provider: "openai", model: "gpt-5-mini-2025-08-07",
-    endpoint: "https://api.openai.com/v1/models/gpt-5-mini-2025-08-07",
-    purpose: "generateWorksheet JSON fallback + welcome-test scoring" },
-  { provider: "openai", model: "gpt-4.1-2025-04-14",
-    endpoint: "https://api.openai.com/v1/models/gpt-4.1-2025-04-14",
-    purpose: "generate-media-exercises (reading/listening passages)" },
-  { provider: "openai", model: "whisper-1",
-    endpoint: "https://api.openai.com/v1/models/whisper-1",
-    purpose: "transcribe-audio (live session STT)" },
-  { provider: "openai", model: "gpt-4o-mini-tts",
-    endpoint: "https://api.openai.com/v1/models/gpt-4o-mini-tts",
-    purpose: "TTS primary (generate-audio)" },
-  { provider: "openai", model: "tts-1",
-    endpoint: "https://api.openai.com/v1/models/tts-1",
-    purpose: "TTS for welcome-test-audio + generate-audio fallback" },
-  // Google Vertex (image)
-  { provider: "google-vertex", model: "gemini-2.5-flash-image",
-    endpoint: "https://us-central1-aiplatform.googleapis.com/v1beta1/publishers/google/models/gemini-2.5-flash-image",
-    purpose: "Worksheet image generation (Vertex AI primary)" },
-];
-```
-
-**Krok 3.3** — nowy `TARGETS_MONTHLY`:
-
-```ts
-const TARGETS_MONTHLY: Target[] = [
-  ...TARGETS_DAILY,
-  { provider: "openai", model: "gpt-4.1-2025-04-14",
-    endpoint: "https://api.openai.com/v1/models/gpt-4.1-2025-04-14",
-    purpose: "Legacy reasoning fallback (audit only)" },
-  { provider: "google-vertex", model: "gemini-3.1-flash-image",
-    endpoint: "https://us-central1-aiplatform.googleapis.com/v1beta1/publishers/google/models/gemini-3.1-flash-image",
-    purpose: "Vertex AI image fallback (Nano Banana 2)" },
-  // Optional Lovable Gateway probe — re-enable if/when credits are topped up.
-  { provider: "lovable-gateway", model: "google/gemini-2.5-flash",
-    endpoint: "https://ai.gateway.lovable.dev/v1/chat/completions",
-    purpose: "Lovable Gateway probe (currently unused, kept for re-activation)" },
-];
-```
-
-Usunąć duplikat `gpt-4.1` w monthly (jeden raz wystarczy).
-
-### Verification checklist P3
-- [ ] Email audit pokazuje 8 modeli daily, wszystkie OK.
-- [ ] `model_health_checks` ma świeże wpisy dla `whisper-1`, `gpt-4.1`, `tts-1`, `gemini-2.5-flash`, `gemini-2.5-flash-lite`.
-- [ ] Brak entries `lovable-gateway` w daily.
-
----
-
-## P4 — Smoke test: "Paste notes about student to set up profile (AI, optional)"
-
-### Dependency scan
-- `src/components/dashboard/PasteIntakeSection.tsx` — UI textarea + przycisk Analyze.
-- `src/components/dashboard/AddStudentDialog.tsx` (linia 462) — osadzenie sekcji.
-- `src/components/dashboard/ExtractionPreviewCard.tsx` — preview wykryta danych.
-- `supabase/functions/extract-student-profile/index.ts` — backend (używa aiChat → po P1 będzie Gemini direct).
-- `src/lib/intake/applyIntakeExtraction.ts` — apply/rollback.
-- `src/components/student/IntakeExtractionBanner.tsx` — banner z opcją rollback.
-
-### Test plan (ręczny, do wykonania po wdrożeniu P1)
-**Scenariusze:**
-1. **Happy path:** wkleić tekst (PL+EN) z imieniem, emailem, celami, deadline → `Analyze` → preview pokazuje wykryte pola → checkbox per pole → `Apply` → student powstaje z prefilled fieldsami → banner "Undo" w StudentPage.
-2. **Edge — tekst pusty:** przycisk `Analyze` disabled gdy < 20 znaków.
-3. **Edge — tylko email:** wykrywa tylko email, reszta pól pusta, brak crash.
-4. **Edge — duplicate email:** intake nie nadpisuje istniejącego studenta (extract-student-profile waliduje).
-5. **Edge — Gemini fail → OpenAI fallback:** wymuszony przez P1, sprawdzić logi `aiChat` "fallback succeeded".
-6. **Rollback:** kliknąć Undo w bannerze → pola wracają do stanu pre-extract.
-7. **Marta test:** preview używa profesjonalnego języka, brak "school textbook" nazewnictwa.
-
-### Potencjalne usprawnienia do dyskusji
-- Po `Apply` automatyczne przewinięcie do pierwszego puste required field.
-- `Analyze` powinno wyświetlać licznik tokenów / szacowany czas (~3s).
-- Trim długich notatek do 8000 znaków po stronie klienta z toastem "Truncated for AI processing".
-
-**Implementacja zmian (jeśli testy wykryją bug):** placeholder — zaproponuję patch po testach. Plan v6.9.66 nie zakłada zmian kodu w P4 dopóki nie znajdziemy konkretnej regresji.
-
-### Verification checklist P4
-- [ ] 7 scenariuszy przechodzi.
-- [ ] Brak entries `model_failure` w `error_logs` z `source_name=extract-student-profile`.
-- [ ] Latency < 5s na typowej notatce 500 słów.
-
----
-
-## P5 — Smoke test: "Możliwość dodawania flashcards do swoich zestawów przez /my"
-
-### Dependency scan
-- `src/pages/StudentHubFlashcards.tsx` (linia 68) — renderuje `AddStudentFlashcardDialog`.
-- `src/components/student-hub/AddStudentFlashcardDialog.tsx` — modal z front/back/native.
-- RPC `public.student_add_flashcard(uuid, text, text, text, text)` w migracji `20260617163003_…`.
-- Kolumna `flashcard_sets.allow_student_contributions boolean DEFAULT true`.
-
-### Test plan (ręczny)
-1. **Happy path:** student na `/my` otwiera zestaw → klika "Add card" → wpisuje front+back → Save → toast "Card added!" → lista flashcards się refreshuje.
-2. **Edge — contributions disabled:** nauczyciel ustawia `allow_student_contributions=false` na zestawie → student widzi "Add card" ale po Save toast "Your teacher has disabled student additions".
-3. **Edge — pusty front/back:** Save disabled lub toast walidacji.
-4. **Edge — bardzo długi text:** Input ma `maxLength=200`, textarea `1000`, native `200`.
-5. **Edge — student z innym emailem (nie należy do zestawu):** RPC zwraca `student_not_authorized` → toast.
-6. **Native field visibility:** pokazuje się tylko jeśli `hasNative=true` (zestaw ma native_language).
-7. **Realtime sync:** nauczyciel widzi nową kartę w swoim panelu po refresh.
-8. **Marta test:** karta dodana przez studenta wygląda identycznie jak ta od nauczyciela, brak stigma'y.
-
-### Potencjalne usprawnienia (do dyskusji, nie wdrażam bez decyzji)
-- Toggle "Show only my added cards" w nauczycielskim widoku zestawu.
-- Email notification dla nauczyciela gdy student doda > 3 karty/dzień (anti-spam).
-- Możliwość moderacji: nauczyciel akceptuje/odrzuca student-added cards (`status: pending/approved`).
-
-**Implementacja zmian:** zero zmian kodu w P5 — to są smoke testy + zgłoszenie potencjalnych usprawnień. Czekam na decyzje przed budową.
-
-### Verification checklist P5
-- [ ] 8 scenariuszy przechodzi.
-- [ ] RPC `student_add_flashcard` w `pg_stat_statements` ma niskie p95.
-- [ ] Brak race condition przy podwójnym kliknięciu Save (button ma `disabled={busy}`).
-
----
-
-## RAG injection — `docs/llm-context.md` i `public/llms.txt`
-
-Dodać sekcję:
-
-```
-PROBLEM: Lovable AI Gateway credits exhausted; daily audit reports false-positive 404 for Vertex; coverage gaps for whisper/tts/gpt-4.1.
-EDOOQOO SOLUTION (v6.9.66):
-  • _shared/aiChat.ts now calls Google Generative Language direct (GEMINI_API_KEY) as primary, OpenAI as fallback. Lovable Gateway no longer in hot path.
-  • audit-llm-models switched Vertex probe to v1beta1 publisher metadata endpoint (no project prefix), eliminating 404.
-  • Daily audit expanded from 6 → 9 models: gemini-2.5-flash, gemini-2.5-flash-lite (Google direct), gpt-4o-mini, gpt-5-mini, gpt-4.1, whisper-1, gpt-4o-mini-tts, tts-1, gemini-2.5-flash-image.
-TECHNICAL MECHANICS:
-  • aiChat.ts maps OpenAI chat-completions body → Gemini generateContent body and back; tools/function-calling preserved.
-  • Existing 8 callsites unchanged (interface stable).
-  • model_health_checks table receives 9 rows per daily run.
-RAG KEYWORDS: lovable gateway fallback, gemini direct api, generative language api, vertex publisher metadata, whisper-1 audit, tts-1 audit, daily llm audit, model health monitoring, openai chat completions to gemini, function calling gemini mapping, payment_required 402, vertex 404 false positive, audit-llm-models v6.9.66, gpt-4o-mini fallback, gemini-2.5-flash primary.
-```
-
-Zaktualizować `mem/infrastructure/lovable-gateway-fallback.md` → nowa nazwa `gemini-direct-with-openai-fallback.md` + zmienić Core w `mem/index.md`.
-
----
-
-## Final change report (po implementacji)
-
-**Pliki zmodyfikowane:**
-- `supabase/functions/_shared/aiChat.ts` — pełna rewrite (P1)
-- `supabase/functions/audit-llm-models/index.ts` — Vertex endpoint + TARGETS expand (P2, P3)
-- `docs/llm-context.md` — RAG injection
-- `public/llms.txt` — RAG injection
-- `docs/operational/audit-llm-models-cron.md` — update listy modeli
-- `mem/infrastructure/lovable-gateway-fallback.md` → rename + przepisać
-- `mem/index.md` — update referencji
-
-**Pliki bez zmian (potwierdzone scope lock):**
-- `generateWorksheet/*` — sanctity rule
-- 8 funkcji edge wywołujących `chatCompletion` — interfejs helpera stabilny
-- `generate-image/index.ts` — działa poprawnie, bez zmian
-
-**Out of scope flagged (z testów P4/P5):**
-- Lista potencjalnych usprawnień UX dla paste-intake i student flashcards — czekają na decyzje, nie implementuję w tym cyklu.
-
-**Decyzje pozostawione człowiekowi:**
-1. Czy zostawić Lovable Gateway w `TARGETS_MONTHLY` (probe na wypadek powrotu kredytów)? **Sugeruję: TAK** (1 zapytanie/miesiąc to zerowy koszt).
-2. Czy implementować usprawnienia UX z P4/P5 w v6.9.67? **Decyzja po testach.**
-
-Proszę o zatwierdzenie — wtedy implementuję P1, P2, P3 w kodzie i poproszę Cię o ręczne wykonanie smoke testów P4/P5.
+Zatwierdź plan, a w kolejnym kroku wdrożę całość w jednej iteracji.

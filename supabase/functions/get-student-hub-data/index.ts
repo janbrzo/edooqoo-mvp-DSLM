@@ -252,7 +252,7 @@ Deno.serve(async (req) => {
 
     const { data: studentData, error: studentError } = await supabase
       .from('students')
-      .select('id, name, english_level, student_email')
+      .select('id, name, english_level, student_email, native_language')
       .eq('teacher_id', teacherId)
       .ilike('student_email', normalizedEmail)
       .is('deleted_at', null)
@@ -515,6 +515,7 @@ Deno.serve(async (req) => {
       studentId,
       studentEmail: studentData.student_email,
       englishLevel: studentData.english_level,
+      nativeLanguage: (studentData as any).native_language ?? null,
       flashcardSets: enrichedFlashcardSets,
       homeworks: enrichedHomeworks,
       sharedWorksheets: enrichedWorksheets,
