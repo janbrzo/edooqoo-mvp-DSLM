@@ -255,6 +255,9 @@ export const PUBLIC_ROUTES = new Set([
   "/cookie-policy",
   "/editable-esl-worksheet-generator.html",
   "/edooqoo-vs-busyteacher.html",
+  "/edooqoo-vs-chatgpt.html",
+  "/edooqoo-vs-claude.html",
+  "/edooqoo-vs-general-purpose-ai.html",
   "/edooqoo-vs-islcollective.html",
   "/edooqoo-vs-kahoot.html",
   "/edooqoo-vs-liveworksheets.html",
@@ -445,7 +448,32 @@ export const PUBLIC_ROUTES = new Set([
   "/worksheets/word-formation/ielts-writing-task-2",
   "/writing-worksheets-esl.html"
 ]);
-export const REDIRECTS = {};
+export const REDIRECTS = {
+  "/blog/asynchronous-learning-esl.html": "/blog/effective-esl-homework-strategies.html",
+  "/blog/classroom-language-esl-teachers.html": "/blog/teaching-english-one-to-one.html",
+  "/blog/concept-checking-questions-esl.html": "/blog/how-to-teach-english-grammar-effectively.html",
+  "/blog/conferencing-with-esl-students.html": "/blog/process-writing-approach-esl.html",
+  "/blog/conversation-classes-esl-structure.html": "/blog/how-to-teach-speaking-esl.html",
+  "/blog/duolingo-english-test-preparation.html": "/english-worksheets-for-exam-prep.html",
+  "/blog/eliciting-techniques-esl-teaching.html": "/blog/how-to-plan-english-lessons-effectively.html",
+  "/blog/fluency-activities-esl-classroom.html": "/blog/how-to-teach-speaking-esl.html",
+  "/blog/giving-instructions-esl-classroom.html": "/blog/how-to-plan-english-lessons-effectively.html",
+  "/blog/graded-readers-guide-esl-teachers.html": "/blog/extensive-reading-programs-esl.html",
+  "/blog/marking-codes-esl-writing.html": "/blog/error-correction-techniques-esl.html",
+  "/blog/newspaper-articles-esl-lessons.html": "/blog/current-events-esl-lessons.html",
+  "/blog/oral-correction-timing-techniques.html": "/blog/error-correction-techniques-esl.html",
+  "/blog/positive-error-culture-esl.html": "/blog/error-correction-techniques-esl.html",
+  "/blog/shadowing-technique-esl.html": "/blog/how-to-teach-english-pronunciation.html",
+  "/blog/standardized-test-comparison-esl.html": "/english-worksheets-for-exam-prep.html",
+  "/blog/teacher-talking-time-reducing.html": "/blog/teaching-english-one-to-one.html",
+  "/blog/teaching-critical-reading-esl.html": "/blog/reading-comprehension-activities-english.html",
+  "/blog/teaching-functional-language-esl.html": "/blog/teaching-pragmatics-esl.html",
+  "/blog/teaching-reading-fluency-esl.html": "/blog/reading-comprehension-activities-english.html",
+  "/blog/teaching-skimming-scanning-esl.html": "/blog/reading-comprehension-activities-english.html",
+  "/blog/teaching-test-taking-strategies-esl.html": "/english-worksheets-for-exam-prep.html",
+  "/blog/toefl-preparation-strategies-teachers.html": "/english-worksheets-for-exam-prep.html",
+  "/blog/toeic-preparation-worksheets-guide.html": "/english-worksheets-for-exam-prep.html"
+};
 export const GONE_ROUTES = new Set([]);
 export const NOINDEX_ROUTES = new Set([
   "/english-for/cabin-crew",

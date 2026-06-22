@@ -13,12 +13,22 @@ import { DashboardPreviewBackground } from '@/components/DashboardPreviewBackgro
 import { claimPendingWorksheets, getPendingClaimIds } from '@/hooks/useWorksheetClaim';
 import { toast as sonnerToast } from 'sonner';
 import { devLog } from '@/utils/logger';
+import { setRobotsMeta } from '@/hooks/useCanonical';
+
+const rememberPostSignupAddStudent = () => {
+  try {
+    localStorage.setItem('post-signup-add-student', '1');
+  } catch {
+    /* localStorage may be unavailable in privacy-restricted browsers. */
+  }
+};
 
 const Signup = () => {
   useEffect(() => {
     document.title = "Start 1-Minute Prep Free — Edooqoo | 2 Free Worksheets";
     const meta = document.querySelector('meta[name="description"]');
     if (meta) meta.setAttribute('content', 'Create your free Edooqoo account, add your first student, and start building the context for 1-Minute Prep. Includes 2 free worksheets. No credit card required.');
+    return setRobotsMeta('noindex,nofollow');
   }, []);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -115,13 +125,13 @@ const Signup = () => {
 
       if (data?.user && !data.session) {
         // Email confirmation required
-        try { localStorage.setItem('post-signup-add-student', '1'); } catch {}
+        rememberPostSignupAddStudent();
         setRegisteredEmail(email);
         setShowEmailModal(true);
         devLog('Account created, email confirmation required');
       } else if (data?.session) {
         // Immediate login (shouldn't happen with email confirmation enabled)
-        try { localStorage.setItem('post-signup-add-student', '1'); } catch {}
+        rememberPostSignupAddStudent();
         toast({
           title: "Success",
           description: "Account created and signed in successfully!",
@@ -129,11 +139,12 @@ const Signup = () => {
         navigate(postSignupPath);
       }
 
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to create account";
       console.error('Signup error:', error);
       toast({
         title: "Error",
-        description: error.message || "Failed to create account",
+        description: errorMessage,
         variant: "destructive"
       });
     } finally {

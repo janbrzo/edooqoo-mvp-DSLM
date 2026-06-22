@@ -140,6 +140,9 @@ const REQUIRED_CITATION_ARTICLES = [
 ];
 
 const REQUIRED_COMPARISON_PAGES = [
+  '/edooqoo-vs-chatgpt.html',
+  '/edooqoo-vs-claude.html',
+  '/edooqoo-vs-general-purpose-ai.html',
   '/edooqoo-vs-twee.html',
   '/edooqoo-vs-islcollective.html',
   '/edooqoo-vs-liveworksheets.html',
@@ -502,10 +505,16 @@ function auditRobotsAndSitemap() {
     pass('robots.txt allows /worksheets/*/*');
   }
 
-  if (!robots.includes('Disallow: /worksheets')) {
-    fail('robots.txt must keep /worksheets private list blocked');
+  if (!/^Disallow:\s*\/worksheets\$/m.test(robots)) {
+    fail('robots.txt must keep only exact /worksheets private list blocked');
   } else {
-    pass('robots.txt keeps /worksheets private list blocked');
+    pass('robots.txt keeps exact /worksheets private list blocked');
+  }
+
+  if (/^Disallow:\s*\/worksheets\s*$/m.test(robots)) {
+    fail('robots.txt must not broadly block public /worksheets/:exerciseType/:topic routes');
+  } else {
+    pass('robots.txt does not broadly block public worksheet pSEO routes');
   }
 
   if (!sitemap.includes('https://edooqoo.com/worksheets/')) {

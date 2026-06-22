@@ -20,6 +20,7 @@ export interface WorkflowProofStep {
   label: string;
   badge?: string;
   nowrap?: boolean;
+  span?: 'full';
 }
 
 export const setupWorkflowSteps: WorkflowProofStep[] = [
@@ -41,7 +42,7 @@ export const lessonSignalWorkflowSteps: WorkflowProofStep[] = [
   { icon: StickyNote, label: 'Teacher notes' },
   { icon: ClipboardCheck, label: 'Homework' },
   { icon: Layers, label: 'Flashcards' },
-  { icon: Radio, label: 'Live worksheet answers', nowrap: true },
+  { icon: Radio, label: 'Live worksheet answers', span: 'full' },
 ];
 
 export const lessonSignalWorkflowCopy = {

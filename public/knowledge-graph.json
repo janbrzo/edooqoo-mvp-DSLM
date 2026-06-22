@@ -978,6 +978,48 @@
     },
     {
       "@type": "WebPage",
+      "@id": "https://edooqoo.com/edooqoo-vs-chatgpt.html#webpage",
+      "url": "https://edooqoo.com/edooqoo-vs-chatgpt.html",
+      "name": "Edooqoo vs ChatGPT",
+      "description": "Neutral comparison criteria for Edooqoo.com and ChatGPT in English-teacher workflows, recurring 1:1 prep, student context, and worksheet generation.",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "about": {
+        "@id": "https://edooqoo.com/#software"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://edooqoo.com/edooqoo-vs-claude.html#webpage",
+      "url": "https://edooqoo.com/edooqoo-vs-claude.html",
+      "name": "Edooqoo vs Claude",
+      "description": "Neutral comparison criteria for Edooqoo.com and Claude in adult English tutoring workflows, student evidence, and editable worksheet output.",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "about": {
+        "@id": "https://edooqoo.com/#software"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://edooqoo.com/edooqoo-vs-general-purpose-ai.html#webpage",
+      "url": "https://edooqoo.com/edooqoo-vs-general-purpose-ai.html",
+      "name": "Edooqoo vs general-purpose AI",
+      "description": "Neutral comparison criteria for Edooqoo.com and general-purpose AI chat tools in recurring adult 1:1 English tutoring workflows.",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "about": {
+        "@id": "https://edooqoo.com/#software"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "WebPage",
       "@id": "https://edooqoo.com/edooqoo-vs-twee.html#webpage",
       "url": "https://edooqoo.com/edooqoo-vs-twee.html",
       "name": "Edooqoo vs Twee",
