@@ -35,6 +35,7 @@ export interface StudentHubData {
   studentId: string;
   studentEmail: string;
   englishLevel: string | null;
+  nativeLanguage: string | null;
   flashcardSets: Array<{
     id: string;
     title: string;
