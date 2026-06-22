@@ -1,0 +1,8 @@
+---
+name: Welcome Test Skip and I-don't-know semantics
+description: v6.9.67 — Skip emits test_answer_skipped event + writes answered_at; IDK clicks tag event_payload.is_idk=true so analytics distinguish honest gaps from wrong guesses.
+type: feature
+---
+- `useWelcomeTest.saveIdontKnow` stores `'__IDK__'` in `state.answers` and calls `commitAnswer(qid, '__IDK__', { isIdk: true })`. The committed `student_events` row is `event_type='test_answer_submitted'` with `event_payload.is_idk=true`. `is_correct` is still `false` for skill questions (mastery 0) — IDK does NOT bypass skill scoring; it only adds an analytics flag.
+- `useWelcomeTest.skipQuestion` writes `student_test_questions.answered_at=now(), student_answer=null` and emits `add_student_event` with `event_type='test_answer_skipped'`, `event_payload={ answer_id, legacy_answer_id, exercise_type, exercise_index, is_skipped: true }`. The new event type is intentionally not consumed by `process-welcome-test` (so skill aggregation is unaffected) but is visible in teacher analytics for profiling-section avoidance signals.
+- HOW TO APPLY: never repurpose `__IDK__` for "skipped"; never emit `test_answer_skipped` for questions the student actually answered. Keep skip writes idempotent — re-skipping the same index updates `answered_at` and emits a duplicate event (acceptable; analytics can dedupe by `(student_id, source_id, exercise_index)`).
