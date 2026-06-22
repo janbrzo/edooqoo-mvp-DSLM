@@ -13,7 +13,6 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
 const MODEL = "google/gemini-2.5-flash";
 
 const SYSTEM_PROMPT = `You receive raw teacher notes about a 1:1 adult English language student.
@@ -151,13 +150,6 @@ Deno.serve(async (req) => {
   if (!teacherId) {
     return new Response(JSON.stringify({ error: "unauthorized" }), {
       status: 401,
-      headers: { ...corsHeaders, "Content-Type": "application/json" },
-    });
-  }
-
-  if (!LOVABLE_API_KEY) {
-    return new Response(JSON.stringify({ error: "ai_key_missing" }), {
-      status: 500,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
