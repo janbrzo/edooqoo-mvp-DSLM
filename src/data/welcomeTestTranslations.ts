@@ -90,7 +90,6 @@ const POLISH: TranslationSet = {
   'wt_q16s': { question: "Opisz problem z pokojem hotelowym — zadanie głosowe.", description: "Wyobraź sobie, że jesteś w recepcji. Wybierz jeden problem (zepsuta klimatyzacja, brudna łazienka, hałaśliwi sąsiedzi, brakujące ręczniki) i nagraj się, jak go wyjaśniasz i prosisz o pomoc. Mów do 60 sekund — płynność i wymowa są ważniejsze niż perfekcyjna gramatyka." },
   'wt_q18l': { question: "Posłuchaj rozmowy i odpowiedz: kiedy klient ostatecznie zarezerwował stolik?", description: "Posłuchaj nagrania w języku angielskim i wybierz właściwą odpowiedź." },
   'wt_q36s': { question: "Teraz nagraj się, jak odmawiasz zaproszenia na głos.", description: "Wyobraź sobie, że kolega właśnie Cię zaprosił. Mów naturalnie, jakbyś rzeczywiście z nim rozmawiał/a. Nagraj do 45 sekund — bądź uprzejmy, ale konkretny." },
-  'wt_q39':  { question: "Musisz wyjaśnić, dlaczego spóźniłeś/aś się na spotkanie. Wybierz najlepszą odpowiedź:",  description: "Wybierz wersję, która brzmi naturalnie — ani zbyt nieformalnie, ani zbyt formalnie." },
   'wt_q41s': { question: "Nagraj 30-sekundowe przedstawienie siebie po angielsku.", description: "Powiedz, jak masz na imię, czym się zajmujesz i dlaczego uczysz się angielskiego. Mów swobodnie do 30 sekund — nie ma złej odpowiedzi." },
 };
 
@@ -134,7 +133,6 @@ const SPANISH: TranslationSet = {
   'wt_q16s': { question: "Describe un problema con tu habitación de hotel — tarea oral.", description: "Imagina que estás en recepción. Elige un problema (aire acondicionado roto, baño sucio, vecinos ruidosos, toallas ausentes) y grábate explicándolo y pidiendo ayuda. Habla hasta 60 segundos — la fluidez y la pronunciación importan más que la gramática perfecta." },
   'wt_q18l': { question: "Escucha la conversación y responde: ¿cuándo reservó finalmente el cliente la mesa?", description: "Escucha la grabación en inglés y elige la respuesta correcta." },
   'wt_q36s': { question: "Ahora grábate rechazando la invitación verbalmente.", description: "Imagina que tu colega te acaba de invitar. Habla con naturalidad, como si realmente le estuvieras hablando. Graba hasta 45 segundos — sé educado pero claro." },
-  'wt_q39':  { question: "Tienes que explicar por qué llegaste tarde a una reunión. Elige la mejor respuesta:",  description: "Elige la versión que suena natural — ni demasiado informal ni demasiado formal." },
   'wt_q41s': { question: "Graba una presentación de 30 segundos sobre ti en inglés.", description: "Di tu nombre, a qué te dedicas y por qué estás aprendiendo inglés. Habla libremente hasta 30 segundos — no hay respuesta incorrecta." },
 };
 
@@ -178,7 +176,6 @@ const GERMAN: TranslationSet = {
   'wt_q16s': { question: "Beschreibe ein Problem mit deinem Hotelzimmer — Sprechaufgabe.", description: "Stell dir vor, du bist an der Rezeption. Wähle ein Problem (defekte Klimaanlage, schmutziges Bad, laute Nachbarn, fehlende Handtücher) und nimm dich auf, wie du es erklärst und um Hilfe bittest. Sprich bis zu 60 Sekunden — Flüssigkeit und Aussprache zählen mehr als perfekte Grammatik." },
   'wt_q18l': { question: "Höre das Gespräch und beantworte: Wann hat der Kunde schließlich einen Tisch reserviert?", description: "Höre die englische Aufnahme und wähle die richtige Antwort." },
   'wt_q36s': { question: "Nimm dich jetzt auf, wie du die Einladung mündlich ablehnst.", description: "Stell dir vor, dein Kollege hat dich gerade eingeladen. Sprich natürlich, als würdest du tatsächlich mit ihm reden. Nimm bis zu 45 Sekunden auf — höflich, aber klar." },
-  'wt_q39':  { question: "Du musst erklären, warum du zu spät zu einem Meeting kamst. Wähle die beste Antwort:",  description: "Wähle die Version, die natürlich klingt — weder zu informell noch zu formell." },
   'wt_q41s': { question: "Nimm eine 30-sekündige Vorstellung von dir auf Englisch auf.", description: "Sag deinen Namen, was du machst und warum du Englisch lernst. Sprich frei bis zu 30 Sekunden — es gibt keine falsche Antwort." },
 };
 
@@ -222,7 +219,6 @@ const FRENCH: TranslationSet = {
   'wt_q16s': { question: "Décris un problème avec ta chambre d'hôtel — tâche orale.", description: "Imagine que tu es à la réception. Choisis un problème (clim cassée, salle de bain sale, voisins bruyants, serviettes manquantes) et enregistre-toi en expliquant et en demandant de l'aide. Parle jusqu'à 60 secondes — la fluidité et la prononciation comptent plus que la grammaire parfaite." },
   'wt_q18l': { question: "Écoute la conversation et réponds : quand le client a-t-il finalement réservé une table ?", description: "Écoute l'enregistrement en anglais et choisis la bonne réponse." },
   'wt_q36s': { question: "Maintenant, enregistre-toi en déclinant l'invitation à l'oral.", description: "Imagine que ton collègue vient de t'inviter. Parle naturellement, comme si tu lui parlais vraiment. Enregistre jusqu'à 45 secondes — sois poli mais clair." },
-  'wt_q39':  { question: "Tu dois expliquer pourquoi tu étais en retard à une réunion. Choisis la meilleure réponse :",  description: "Choisis la version qui sonne naturel — ni trop informelle, ni trop formelle." },
   'wt_q41s': { question: "Enregistre une présentation de 30 secondes de toi-même en anglais.", description: "Dis ton nom, ce que tu fais et pourquoi tu apprends l'anglais. Parle librement jusqu'à 30 secondes — il n'y a pas de mauvaise réponse." },
 };
 
@@ -266,7 +262,6 @@ const PORTUGUESE: TranslationSet = {
   'wt_q16s': { question: "Descreva um problema com seu quarto de hotel — tarefa oral.", description: "Imagine que está na recepção. Escolha um problema (ar condicionado quebrado, banheiro sujo, vizinhos barulhentos, toalhas em falta) e grave-se explicando e pedindo ajuda. Fale até 60 segundos — fluência e pronúncia importam mais que gramática perfeita." },
   'wt_q18l': { question: "Ouça a conversa e responda: quando o cliente finalmente reservou uma mesa?", description: "Ouça a gravação em inglês e escolha a resposta correta." },
   'wt_q36s': { question: "Agora grave-se recusando o convite verbalmente.", description: "Imagine que seu colega acabou de convidá-lo. Fale naturalmente, como se realmente estivesse falando com ele. Grave até 45 segundos — seja educado mas claro." },
-  'wt_q39':  { question: "Você precisa explicar por que se atrasou para uma reunião. Escolha a melhor resposta:",  description: "Escolha a versão que soa natural — nem muito informal, nem muito formal." },
   'wt_q41s': { question: "Grave uma apresentação de 30 segundos sobre você em inglês.", description: "Diga seu nome, o que faz e por que está aprendendo inglês. Fale livremente por até 30 segundos — não há resposta errada." },
 };
 
@@ -310,7 +305,6 @@ const ITALIAN: TranslationSet = {
   'wt_q16s': { question: "Descrivi un problema con la tua camera d'albergo — compito orale.", description: "Immagina di essere alla reception. Scegli un problema (aria condizionata rotta, bagno sporco, vicini rumorosi, asciugamani mancanti) e registrati mentre lo spieghi e chiedi aiuto. Parla fino a 60 secondi — fluidità e pronuncia contano più della grammatica perfetta." },
   'wt_q18l': { question: "Ascolta la conversazione e rispondi: quando il cliente ha finalmente prenotato un tavolo?", description: "Ascolta la registrazione in inglese e scegli la risposta corretta." },
   'wt_q36s': { question: "Ora registrati mentre rifiuti l'invito a voce.", description: "Immagina che il tuo collega ti abbia appena invitato. Parla naturalmente, come se gli stessi parlando davvero. Registra fino a 45 secondi — sii cortese ma chiaro." },
-  'wt_q39':  { question: "Devi spiegare perché sei arrivato in ritardo a una riunione. Scegli la risposta migliore:",  description: "Scegli la versione che suona naturale — né troppo informale, né troppo formale." },
   'wt_q41s': { question: "Registra una presentazione di 30 secondi su di te in inglese.", description: "Di' il tuo nome, cosa fai e perché stai imparando l'inglese. Parla liberamente fino a 30 secondi — non c'è risposta sbagliata." },
 };
 
@@ -354,7 +348,6 @@ const TURKISH: TranslationSet = {
   'wt_q16s': { question: "Otel odanızla ilgili bir sorunu anlatın — konuşma görevi.", description: "Resepsiyonda olduğunuzu hayal edin. Bir sorun seçin (bozuk klima, kirli banyo, gürültülü komşular, eksik havlu) ve açıklayıp yardım isterken kendinizi kaydedin. 60 saniyeye kadar konuşun — akıcılık ve telaffuz mükemmel gramerden daha önemli." },
   'wt_q18l': { question: "Konuşmayı dinleyin ve cevaplayın: müşteri sonunda ne zaman masa rezervasyonu yaptı?", description: "İngilizce kaydı dinleyin ve doğru cevabı seçin." },
   'wt_q36s': { question: "Şimdi daveti sözlü olarak reddederken kendinizi kaydedin.", description: "İş arkadaşınızın sizi yeni davet ettiğini hayal edin. Gerçekten onunla konuşuyormuş gibi doğal konuşun. 45 saniyeye kadar kaydedin — kibar ama net olun." },
-  'wt_q39':  { question: "Bir toplantıya neden geç kaldığınızı açıklamanız gerekiyor. En iyi yanıtı seçin:",  description: "Doğal görünen versiyonu seçin — ne çok resmi olmayan ne de çok resmi." },
   'wt_q41s': { question: "İngilizce 30 saniyelik bir tanıtım kaydedin.", description: "Adınızı, ne yaptığınızı ve neden İngilizce öğrendiğinizi söyleyin. 30 saniyeye kadar serbestçe konuşun — yanlış cevap yok." },
 };
 
@@ -398,7 +391,6 @@ const RUSSIAN: TranslationSet = {
   'wt_q16s': { question: "Опишите проблему с вашим номером в отеле — устное задание.", description: "Представьте, что вы на ресепшене. Выберите одну проблему (сломанный кондиционер, грязная ванная, шумные соседи, отсутствие полотенец) и запишите, как объясняете и просите помощи. Говорите до 60 секунд — беглость и произношение важнее идеальной грамматики." },
   'wt_q18l': { question: "Послушайте разговор и ответьте: когда клиент в итоге забронировал столик?", description: "Послушайте запись на английском и выберите правильный ответ." },
   'wt_q36s': { question: "Теперь запишите, как вы отказываетесь от приглашения устно.", description: "Представьте, что коллега только что вас пригласил. Говорите естественно, как будто действительно разговариваете с ним. Запишите до 45 секунд — будьте вежливы, но ясны." },
-  'wt_q39':  { question: "Вам нужно объяснить, почему вы опоздали на встречу. Выберите лучший ответ:",  description: "Выберите версию, которая звучит естественно — ни слишком неформально, ни слишком формально." },
   'wt_q41s': { question: "Запишите 30-секундное представление о себе на английском.", description: "Назовите своё имя, чем занимаетесь и почему изучаете английский. Говорите свободно до 30 секунд — нет неправильного ответа." },
 };
 
@@ -442,7 +434,6 @@ const CZECH: TranslationSet = {
   'wt_q16s': { question: "Popiš problém se svým hotelovým pokojem — mluvený úkol.", description: "Představ si, že jsi na recepci. Vyber si jeden problém (rozbitá klimatizace, špinavá koupelna, hluční sousedé, chybějící ručníky) a nahraj se, jak ho vysvětluješ a žádáš o pomoc. Mluv až 60 sekund — plynulost a výslovnost jsou důležitější než dokonalá gramatika." },
   'wt_q18l': { question: "Poslechni si rozhovor a odpověz: kdy si zákazník nakonec rezervoval stůl?", description: "Poslechni si anglickou nahrávku a vyber správnou odpověď." },
   'wt_q36s': { question: "Teď se nahraj, jak pozvání odmítáš ústně.", description: "Představ si, že tě kolega právě pozval. Mluv přirozeně, jako bys s ním opravdu mluvil/a. Nahraj až 45 sekund — buď zdvořilý ale jasný." },
-  'wt_q39':  { question: "Musíš vysvětlit, proč jsi přišel/a pozdě na schůzku. Vyber nejlepší odpověď:",  description: "Vyber verzi, která zní přirozeně — ani příliš neformální, ani příliš formální." },
   'wt_q41s': { question: "Nahraj 30sekundové představení sebe v angličtině.", description: "Řekni své jméno, čím se zabýváš a proč se učíš anglicky. Mluv volně až 30 sekund — neexistuje špatná odpověď." },
 };
 
@@ -486,7 +477,6 @@ const UKRAINIAN: TranslationSet = {
   'wt_q16s': { question: "Опиши проблему зі своїм готельним номером — усне завдання.", description: "Уяви, що ти на рецепції. Обери одну проблему (зламаний кондиціонер, брудна ванна, гучні сусіди, відсутні рушники) і запиши, як її пояснюєш і просиш допомоги. Говори до 60 секунд — плавність і вимова важливіші за ідеальну граматику." },
   'wt_q18l': { question: "Послухай розмову і дай відповідь: коли клієнт зрештою забронював столик?", description: "Послухай запис англійською і обери правильну відповідь." },
   'wt_q36s': { question: "Тепер запиши, як ти відмовляєшся від запрошення усно.", description: "Уяви, що колега щойно тебе запросив. Говори природно, ніби справді з ним розмовляєш. Запиши до 45 секунд — будь ввічливим, але чітким." },
-  'wt_q39':  { question: "Тобі потрібно пояснити, чому ти запізнився/лася на зустріч. Обери найкращу відповідь:",  description: "Обери версію, яка звучить природно — ні занадто неформально, ні занадто формально." },
   'wt_q41s': { question: "Запиши 30-секундне представлення себе англійською.", description: "Скажи своє ім'я, чим займаєшся і чому вчиш англійську. Говори вільно до 30 секунд — немає неправильної відповіді." },
 };
 
@@ -532,7 +522,6 @@ const DUTCH: TranslationSet = {
   'wt_q16s': { question: "Beschrijf een probleem met je hotelkamer — spreektaak.", description: "Stel je voor dat je bij de receptie staat. Kies een probleem (kapotte airco, vieze badkamer, luidruchtige buren, ontbrekende handdoeken) en neem jezelf op terwijl je het uitlegt en om hulp vraagt. Spreek tot 60 seconden — vloeiendheid en uitspraak zijn belangrijker dan perfecte grammatica." },
   'wt_q18l': { question: "Luister naar het gesprek en beantwoord: wanneer reserveerde de klant uiteindelijk een tafel?", description: "Luister naar de Engelse opname en kies het juiste antwoord." },
   'wt_q36s': { question: "Neem jezelf nu op terwijl je de uitnodiging mondeling afslaat.", description: "Stel je voor dat je collega je net uitnodigde. Spreek natuurlijk, alsof je echt tegen hem praat. Neem tot 45 seconden op — wees beleefd maar duidelijk." },
-  'wt_q39':  { question: "Je moet uitleggen waarom je te laat was voor een vergadering. Kies het beste antwoord:",  description: "Kies de versie die natuurlijk klinkt — niet te informeel, niet te formeel." },
   'wt_q41s': { question: "Neem een introductie van 30 seconden over jezelf op in het Engels.", description: "Zeg je naam, wat je doet en waarom je Engels leert. Spreek vrij tot 30 seconden — er is geen fout antwoord." },
 };
 
@@ -576,7 +565,6 @@ const JAPANESE: TranslationSet = {
   'wt_q16s': { question: "ホテルの部屋の問題を説明してください — スピーキング課題。", description: "フロントにいると想像してください。一つの問題（エアコンの故障、汚れた浴室、騒がしい隣人、足りないタオル）を選び、それを説明して助けを求める自分を録音してください。最大60秒間話してください — 完璧な文法よりも流暢さと発音が重要です。" },
   'wt_q18l': { question: "会話を聞いて答えてください：お客様は最終的にいつテーブルを予約しましたか？", description: "英語の録音を聞いて正しい答えを選んでください。" },
   'wt_q36s': { question: "では、招待を口頭で断る自分を録音してください。", description: "同僚があなたを招待したと想像してください。実際に話しているように自然に話してください。最大45秒間録音してください — 礼儀正しく、しかし明確に。" },
-  'wt_q39':  { question: "会議に遅れた理由を説明する必要があります。最適な答えを選んでください：",  description: "自然に聞こえるバージョンを選んでください — カジュアルすぎず、フォーマルすぎず。" },
   'wt_q41s': { question: "英語で30秒の自己紹介を録音してください。", description: "名前、職業、英語を学ぶ理由を言ってください。30秒間自由に話してください — 間違った答えはありません。" },
 };
 
@@ -620,7 +608,6 @@ const KOREAN: TranslationSet = {
   'wt_q16s': { question: "호텔 방의 문제를 설명하세요 — 말하기 과제.", description: "프런트에 있다고 상상하세요. 문제 하나를 선택하고 (고장 난 에어컨, 더러운 욕실, 시끄러운 이웃, 없는 수건) 설명하고 도움을 요청하는 자신을 녹음하세요. 최대 60초 동안 말하세요 — 완벽한 문법보다 유창함과 발음이 더 중요합니다." },
   'wt_q18l': { question: "대화를 듣고 답하세요: 고객은 결국 언제 테이블을 예약했나요?", description: "영어 녹음을 듣고 올바른 답을 선택하세요." },
   'wt_q36s': { question: "이제 초대를 말로 거절하는 자신을 녹음하세요.", description: "동료가 방금 당신을 초대했다고 상상하세요. 실제로 그에게 말하는 것처럼 자연스럽게 말하세요. 최대 45초까지 녹음하세요 — 정중하지만 명확하게." },
-  'wt_q39':  { question: "회의에 늦은 이유를 설명해야 합니다. 최선의 답을 선택하세요:",  description: "자연스럽게 들리는 버전을 선택하세요 — 너무 캐주얼하지도, 너무 격식적이지도 않게." },
   'wt_q41s': { question: "영어로 30초 자기소개를 녹음하세요.", description: "이름, 직업, 영어를 배우는 이유를 말하세요. 30초 동안 자유롭게 말하세요 — 틀린 답은 없습니다." },
 };
 
@@ -664,7 +651,6 @@ const CHINESE: TranslationSet = {
   'wt_q16s': { question: "描述你酒店房间的问题 — 口语任务。", description: "想象你在前台。选择一个问题（空调坏了、浴室脏、邻居吵闹、缺毛巾），录下自己解释问题并请求帮助的过程。说话最多60秒 — 流利度和发音比完美的语法更重要。" },
   'wt_q18l': { question: "听对话并回答：客户最后什么时候预订了桌位？", description: "听英语录音并选择正确答案。" },
   'wt_q36s': { question: "现在录下自己口头拒绝邀请的过程。", description: "想象同事刚邀请了你。像真的在跟他说话一样自然地说话。录音最多45秒 — 要礼貌但清楚。" },
-  'wt_q39':  { question: "你需要解释为什么开会迟到了。选择最佳回答：",  description: "选择听起来自然的版本 — 既不太随意，也不太正式。" },
   'wt_q41s': { question: "用英语录制30秒的自我介绍。", description: "说出你的名字、职业以及学英语的原因。自由地说话最多30秒 — 没有错误答案。" },
 };
 
@@ -708,7 +694,6 @@ const ARABIC: TranslationSet = {
   'wt_q16s': { question: "صف مشكلة في غرفة فندقك — مهمة شفهية.", description: "تخيل أنك في الاستقبال. اختر مشكلة واحدة (مكيف مكسور، حمام متسخ، جيران مزعجون، مناشف مفقودة) وسجل نفسك وأنت تشرحها وتطلب المساعدة. تحدث حتى 60 ثانية — الطلاقة والنطق أهم من القواعد المثالية." },
   'wt_q18l': { question: "استمع إلى المحادثة وأجب: متى حجز العميل طاولة في النهاية؟", description: "استمع إلى التسجيل الإنجليزي واختر الإجابة الصحيحة." },
   'wt_q36s': { question: "الآن سجل نفسك وأنت ترفض الدعوة شفهياً.", description: "تخيل أن زميلك دعاك للتو. تحدث بشكل طبيعي كما لو كنت تتحدث إليه فعلاً. سجل حتى 45 ثانية — كن مهذباً لكن واضحاً." },
-  'wt_q39':  { question: "عليك أن تشرح لماذا تأخرت عن الاجتماع. اختر أفضل إجابة:",  description: "اختر النسخة التي تبدو طبيعية — ليست رسمية جداً ولا غير رسمية جداً." },
   'wt_q41s': { question: "سجل تقديماً لنفسك مدته 30 ثانية بالإنجليزية.", description: "قل اسمك وماذا تفعل ولماذا تتعلم الإنجليزية. تحدث بحرية حتى 30 ثانية — لا توجد إجابة خاطئة." },
 };
 
@@ -752,7 +737,6 @@ const HUNGARIAN: TranslationSet = {
   'wt_q16s': { question: "Írd le a hotelszobád problémáját — beszédfeladat.", description: "Képzeld el, hogy a recepción vagy. Válassz egy problémát (rossz légkondi, piszkos fürdő, hangos szomszédok, hiányzó törölközők), és vedd fel magad, ahogy elmagyarázod és segítséget kérsz. Beszélj legfeljebb 60 másodpercig — a folyékonyság és a kiejtés fontosabb, mint a tökéletes nyelvtan." },
   'wt_q18l': { question: "Hallgasd meg a beszélgetést és válaszolj: mikor foglalt asztalt végül az ügyfél?", description: "Hallgasd meg az angol felvételt és válaszd ki a helyes választ." },
   'wt_q36s': { question: "Most vedd fel magad, ahogy szóban visszautasítod a meghívást.", description: "Képzeld el, hogy a kollégád épp meghívott. Beszélj természetesen, mintha tényleg vele beszélnél. Vegyél fel legfeljebb 45 másodpercet — udvarias, de világos legyen." },
-  'wt_q39':  { question: "El kell magyaráznod, miért késtél el egy értekezletről. Válaszd a legjobb választ:",  description: "Válaszd azt a változatot, ami természetesen hangzik — sem túl informális, sem túl hivatalos." },
   'wt_q41s': { question: "Vegyél fel egy 30 másodperces bemutatkozást magadról angolul.", description: "Mondd el a neved, hogy mit csinálsz és miért tanulsz angolul. Beszélj szabadon legfeljebb 30 másodpercig — nincs rossz válasz." },
 };
 
@@ -796,7 +780,6 @@ const ROMANIAN: TranslationSet = {
   'wt_q16s': { question: "Descrie o problemă cu camera ta de hotel — sarcină orală.", description: "Imaginează-ți că ești la recepție. Alege o problemă (aer condiționat stricat, baie murdară, vecini gălăgioși, prosoape lipsă) și înregistrează-te explicând-o și cerând ajutor. Vorbește până la 60 de secunde — fluența și pronunția contează mai mult decât gramatica perfectă." },
   'wt_q18l': { question: "Ascultă conversația și răspunde: când a rezervat în final clientul o masă?", description: "Ascultă înregistrarea în engleză și alege răspunsul corect." },
   'wt_q36s': { question: "Acum înregistrează-te refuzând invitația verbal.", description: "Imaginează-ți că un coleg tocmai te-a invitat. Vorbește natural, ca și cum chiar i-ai vorbi. Înregistrează până la 45 de secunde — fii politicos dar clar." },
-  'wt_q39':  { question: "Trebuie să explici de ce ai întârziat la o întâlnire. Alege cel mai bun răspuns:",  description: "Alege versiunea care sună natural — nici prea informală, nici prea formală." },
   'wt_q41s': { question: "Înregistrează o prezentare de 30 de secunde despre tine în engleză.", description: "Spune-ți numele, ce faci și de ce înveți engleza. Vorbește liber până la 30 de secunde — nu există răspuns greșit." },
 };
 
@@ -840,7 +823,6 @@ const GREEK: TranslationSet = {
   'wt_q16s': { question: "Περίγραψε ένα πρόβλημα με το δωμάτιο του ξενοδοχείου σου — προφορική άσκηση.", description: "Φαντάσου ότι είσαι στη ρεσεψιόν. Διάλεξε ένα πρόβλημα (χαλασμένο κλιματιστικό, βρόμικο μπάνιο, θορυβώδεις γείτονες, λείπουν πετσέτες) και ηχογράφησε τον εαυτό σου να το εξηγείς και να ζητάς βοήθεια. Μίλα μέχρι 60 δευτερόλεπτα — η ροή και η προφορά μετράνε περισσότερο από την τέλεια γραμματική." },
   'wt_q18l': { question: "Άκουσε τη συζήτηση και απάντησε: πότε τελικά έκλεισε τραπέζι ο πελάτης;", description: "Άκουσε την αγγλική ηχογράφηση και διάλεξε τη σωστή απάντηση." },
   'wt_q36s': { question: "Τώρα ηχογράφησε τον εαυτό σου να αρνείσαι την πρόσκληση προφορικά.", description: "Φαντάσου ότι ο συνάδελφός σου μόλις σε προσκάλεσε. Μίλα φυσικά, σαν να του μιλάς πραγματικά. Ηχογράφησε μέχρι 45 δευτερόλεπτα — να είσαι ευγενικός αλλά σαφής." },
-  'wt_q39':  { question: "Πρέπει να εξηγήσεις γιατί άργησες σε μια συνάντηση. Διάλεξε την καλύτερη απάντηση:",  description: "Διάλεξε την εκδοχή που ακούγεται φυσική — ούτε πολύ ανεπίσημη, ούτε πολύ επίσημη." },
   'wt_q41s': { question: "Ηχογράφησε μια παρουσίαση 30 δευτερολέπτων για τον εαυτό σου στα Αγγλικά.", description: "Πες το όνομά σου, τι κάνεις και γιατί μαθαίνεις Αγγλικά. Μίλα ελεύθερα μέχρι 30 δευτερόλεπτα — δεν υπάρχει λάθος απάντηση." },
 };
 
@@ -884,7 +866,6 @@ const CROATIAN: TranslationSet = {
   'wt_q16s': { question: "Opiši problem sa svojom hotelskom sobom — govorni zadatak.", description: "Zamisli da si na recepciji. Odaberi jedan problem (pokvaren klima, prljava kupaonica, glasni susjedi, nedostaju ručnici) i snimi se kako ga objašnjavaš i tražiš pomoć. Govori do 60 sekundi — tečnost i izgovor su važniji od savršene gramatike." },
   'wt_q18l': { question: "Poslušaj razgovor i odgovori: kada je klijent na kraju rezervirao stol?", description: "Poslušaj englesku snimku i odaberi točan odgovor." },
   'wt_q36s': { question: "Sada se snimi kako usmeno odbijaš poziv.", description: "Zamisli da te kolega upravo pozvao. Govori prirodno, kao da mu stvarno govoriš. Snimi do 45 sekundi — budi pristojan ali jasan." },
-  'wt_q39':  { question: "Trebaš objasniti zašto si zakasnio/la na sastanak. Odaberi najbolji odgovor:",  description: "Odaberi verziju koja zvuči prirodno — ni previše neformalno, ni previše formalno." },
   'wt_q41s': { question: "Snimi 30-sekundnu predstavu sebe na engleskom.", description: "Reci svoje ime, čime se baviš i zašto učiš engleski. Govori slobodno do 30 sekundi — nema pogrešnog odgovora." },
 };
 
@@ -928,7 +909,6 @@ const SWEDISH: TranslationSet = {
   'wt_q16s': { question: "Beskriv ett problem med ditt hotellrum — talövning.", description: "Föreställ dig att du står i receptionen. Välj ett problem (trasig AC, smutsigt badrum, högljudda grannar, saknade handdukar) och spela in dig själv när du förklarar och ber om hjälp. Tala upp till 60 sekunder — flyt och uttal är viktigare än perfekt grammatik." },
   'wt_q18l': { question: "Lyssna på samtalet och svara: när bokade kunden slutligen ett bord?", description: "Lyssna på den engelska inspelningen och välj rätt svar." },
   'wt_q36s': { question: "Spela nu in dig själv när du tackar nej till inbjudan muntligt.", description: "Föreställ dig att din kollega just bjudit in dig. Tala naturligt, som om du verkligen pratade med honom. Spela in upp till 45 sekunder — var artig men tydlig." },
-  'wt_q39':  { question: "Du måste förklara varför du var sen till ett möte. Välj bästa svaret:",  description: "Välj den version som låter naturlig — varken för informell eller för formell." },
   'wt_q41s': { question: "Spela in en 30-sekunders presentation av dig själv på engelska.", description: "Säg ditt namn, vad du gör och varför du lär dig engelska. Tala fritt upp till 30 sekunder — det finns inget fel svar." },
 };
 
@@ -972,7 +952,6 @@ const HINDI: TranslationSet = {
   'wt_q16s': { question: "अपने होटल के कमरे की समस्या का वर्णन करें — बोलने का कार्य।", description: "कल्पना करें कि आप रिसेप्शन पर हैं। एक समस्या चुनें (टूटा एसी, गंदा बाथरूम, शोर वाले पड़ोसी, गायब तौलिये) और खुद को रिकॉर्ड करें जब आप इसे समझाते हैं और मदद मांगते हैं। 60 सेकंड तक बोलें — प्रवाह और उच्चारण सही व्याकरण से ज्यादा महत्वपूर्ण हैं।" },
   'wt_q18l': { question: "बातचीत सुनें और उत्तर दें: ग्राहक ने आखिरकार कब टेबल बुक की?", description: "अंग्रेजी रिकॉर्डिंग सुनें और सही उत्तर चुनें।" },
   'wt_q36s': { question: "अब निमंत्रण को मौखिक रूप से अस्वीकार करते हुए खुद को रिकॉर्ड करें।", description: "कल्पना करें कि आपके सहकर्मी ने अभी आपको आमंत्रित किया। स्वाभाविक रूप से बोलें, जैसे आप वास्तव में उससे बात कर रहे हैं। 45 सेकंड तक रिकॉर्ड करें — विनम्र लेकिन स्पष्ट रहें।" },
-  'wt_q39':  { question: "आपको समझाना है कि आप मीटिंग में देरी से क्यों पहुंचे। सबसे अच्छा उत्तर चुनें:",  description: "वह संस्करण चुनें जो स्वाभाविक लगे — न तो बहुत अनौपचारिक, न ही बहुत औपचारिक।" },
   'wt_q41s': { question: "अंग्रेजी में अपना 30 सेकंड का परिचय रिकॉर्ड करें।", description: "अपना नाम, आप क्या करते हैं और अंग्रेजी क्यों सीख रहे हैं बताएं। 30 सेकंड तक स्वतंत्र रूप से बोलें — कोई गलत उत्तर नहीं है।" },
 };
 
@@ -1016,7 +995,6 @@ const VIETNAMESE: TranslationSet = {
   'wt_q16s': { question: "Mô tả một vấn đề với phòng khách sạn của bạn — bài tập nói.", description: "Hãy tưởng tượng bạn đang ở quầy lễ tân. Chọn một vấn đề (điều hòa hỏng, phòng tắm bẩn, hàng xóm ồn, thiếu khăn) và ghi âm chính mình khi giải thích và yêu cầu giúp đỡ. Nói tối đa 60 giây — sự lưu loát và phát âm quan trọng hơn ngữ pháp hoàn hảo." },
   'wt_q18l': { question: "Nghe cuộc trò chuyện và trả lời: khi nào khách hàng cuối cùng đặt bàn?", description: "Nghe bản ghi âm tiếng Anh và chọn câu trả lời đúng." },
   'wt_q36s': { question: "Bây giờ ghi âm chính mình khi từ chối lời mời bằng lời nói.", description: "Hãy tưởng tượng đồng nghiệp vừa mời bạn. Nói tự nhiên như đang thực sự nói với anh ấy. Ghi âm tối đa 45 giây — lịch sự nhưng rõ ràng." },
-  'wt_q39':  { question: "Bạn cần giải thích tại sao đi họp muộn. Chọn câu trả lời tốt nhất:",  description: "Chọn phiên bản nghe tự nhiên — không quá thân mật, không quá trang trọng." },
   'wt_q41s': { question: "Ghi âm phần giới thiệu bản thân 30 giây bằng tiếng Anh.", description: "Nói tên, công việc và lý do bạn học tiếng Anh. Nói tự do tối đa 30 giây — không có câu trả lời sai." },
 };
 
@@ -1060,7 +1038,6 @@ const THAI: TranslationSet = {
   'wt_q16s': { question: "อธิบายปัญหาเกี่ยวกับห้องโรงแรมของคุณ — งานพูด", description: "จินตนาการว่าคุณอยู่ที่แผนกต้อนรับ เลือกปัญหาหนึ่ง (แอร์เสีย ห้องน้ำสกปรก เพื่อนบ้านเสียงดัง ผ้าเช็ดตัวขาด) แล้วบันทึกตัวเองอธิบายและขอความช่วยเหลือ พูดได้สูงสุด 60 วินาที — ความคล่องและการออกเสียงสำคัญกว่าไวยากรณ์ที่สมบูรณ์แบบ" },
   'wt_q18l': { question: "ฟังบทสนทนาและตอบ: ในที่สุดลูกค้าจองโต๊ะเมื่อใด?", description: "ฟังการบันทึกภาษาอังกฤษและเลือกคำตอบที่ถูกต้อง" },
   'wt_q36s': { question: "ตอนนี้บันทึกตัวเองปฏิเสธคำเชิญด้วยวาจา", description: "จินตนาการว่าเพื่อนร่วมงานเพิ่งเชิญคุณ พูดอย่างเป็นธรรมชาติเหมือนกำลังคุยกับเขาจริงๆ บันทึกได้สูงสุด 45 วินาที — สุภาพแต่ชัดเจน" },
-  'wt_q39':  { question: "คุณต้องอธิบายว่าทำไมถึงมาประชุมสาย เลือกคำตอบที่ดีที่สุด:",  description: "เลือกเวอร์ชันที่ฟังดูเป็นธรรมชาติ — ไม่กันเองเกินไป ไม่ทางการเกินไป" },
   'wt_q41s': { question: "บันทึกการแนะนำตัว 30 วินาทีเป็นภาษาอังกฤษ", description: "บอกชื่อ อาชีพ และเหตุผลที่เรียนภาษาอังกฤษ พูดได้อย่างอิสระสูงสุด 30 วินาที — ไม่มีคำตอบผิด" },
 };
 
@@ -1104,7 +1081,6 @@ const NORWEGIAN: TranslationSet = {
   'wt_q16s': { question: "Beskriv et problem med hotellrommet ditt — taleoppgave.", description: "Tenk deg at du står i resepsjonen. Velg ett problem (ødelagt AC, skittent bad, høylytte naboer, manglende håndklær) og ta opp deg selv mens du forklarer og ber om hjelp. Snakk i opptil 60 sekunder — flyt og uttale er viktigere enn perfekt grammatikk." },
   'wt_q18l': { question: "Hør samtalen og svar: når reserverte kunden til slutt et bord?", description: "Hør på det engelske opptaket og velg riktig svar." },
   'wt_q36s': { question: "Ta opp deg selv mens du takker nei til invitasjonen muntlig.", description: "Tenk deg at kollegaen din nettopp inviterte deg. Snakk naturlig, som om du faktisk snakker til ham. Ta opp inntil 45 sekunder — vær høflig, men tydelig." },
-  'wt_q39':  { question: "Du må forklare hvorfor du var sen til et møte. Velg det beste svaret:",  description: "Velg versjonen som høres naturlig ut — verken for uformell eller for formell." },
   'wt_q41s': { question: "Ta opp en 30-sekunders presentasjon av deg selv på engelsk.", description: "Si navnet ditt, hva du gjør og hvorfor du lærer engelsk. Snakk fritt inntil 30 sekunder — det finnes ingen feil svar." },
 };
 
@@ -1148,7 +1124,6 @@ const DANISH: TranslationSet = {
   'wt_q16s': { question: "Beskriv et problem med dit hotelværelse — taleopgave.", description: "Forestil dig, at du står i receptionen. Vælg et problem (ødelagt AC, beskidt badeværelse, larmende naboer, manglende håndklæder) og optag dig selv, mens du forklarer og beder om hjælp. Tal i op til 60 sekunder — flydende tale og udtale er vigtigere end perfekt grammatik." },
   'wt_q18l': { question: "Lyt til samtalen og svar: hvornår reserverede kunden i sidste ende et bord?", description: "Lyt til den engelske optagelse og vælg det rigtige svar." },
   'wt_q36s': { question: "Optag nu dig selv, mens du afviser invitationen mundtligt.", description: "Forestil dig, at din kollega lige har inviteret dig. Tal naturligt, som om du virkelig talte med ham. Optag i op til 45 sekunder — vær høflig, men tydelig." },
-  'wt_q39':  { question: "Du skal forklare, hvorfor du kom for sent til et møde. Vælg det bedste svar:",  description: "Vælg den version, der lyder naturlig — hverken for uformel eller for formel." },
   'wt_q41s': { question: "Optag en 30-sekunders præsentation af dig selv på engelsk.", description: "Sig dit navn, hvad du laver, og hvorfor du lærer engelsk. Tal frit i op til 30 sekunder — der er intet forkert svar." },
 };
 
