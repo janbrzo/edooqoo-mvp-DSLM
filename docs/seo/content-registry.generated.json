@@ -25,14 +25,14 @@
     ]
   },
   "counts": {
-    "total": 1780,
-    "indexable": 444,
+    "total": 1807,
+    "indexable": 447,
     "byState": {
       "keep": 88,
       "improve": 0,
-      "merge": 0,
+      "merge": 24,
       "retire": 0,
-      "hold": 356,
+      "hold": 359,
       "noindex": 1336
     }
   },
@@ -648,6 +648,16 @@
       "hasEncodingIssue": false
     },
     {
+      "route": "/blog/asynchronous-learning-esl.html",
+      "canonical": "https://edooqoo.com/blog/asynchronous-learning-esl.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "Homework and Retention",
+      "redirectTo": "/blog/effective-esl-homework-strategies.html",
+      "reason": "GSC 404 repair: redirect retired asynchronous-learning slug to the live homework-strategy guide."
+    },
+    {
       "route": "/blog/authentic-listening-materials-esl.html",
       "canonical": "https://edooqoo.com/blog/authentic-listening-materials-esl.html",
       "type": "blog",
@@ -848,6 +858,16 @@
       "hasEncodingIssue": false
     },
     {
+      "route": "/blog/classroom-language-esl-teachers.html",
+      "canonical": "https://edooqoo.com/blog/classroom-language-esl-teachers.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "One-to-One Lesson Planning",
+      "redirectTo": "/blog/teaching-english-one-to-one.html",
+      "reason": "GSC 404 repair: redirect retired classroom-language slug to the strategic adult 1:1 guide."
+    },
+    {
       "route": "/blog/classroom-management-esl-tips.html",
       "canonical": "https://edooqoo.com/blog/classroom-management-esl-tips.html",
       "type": "blog",
@@ -988,6 +1008,26 @@
       "hasEncodingIssue": false
     },
     {
+      "route": "/blog/concept-checking-questions-esl.html",
+      "canonical": "https://edooqoo.com/blog/concept-checking-questions-esl.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "One-to-One Lesson Planning",
+      "redirectTo": "/blog/how-to-teach-english-grammar-effectively.html",
+      "reason": "GSC 404 repair: redirect retired CCQ slug to the closest live grammar-teaching guide."
+    },
+    {
+      "route": "/blog/conferencing-with-esl-students.html",
+      "canonical": "https://edooqoo.com/blog/conferencing-with-esl-students.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "Student Evidence and Progress",
+      "redirectTo": "/blog/process-writing-approach-esl.html",
+      "reason": "GSC 404 repair: redirect retired writing-conference slug to the live process-writing guide."
+    },
+    {
       "route": "/blog/connected-speech-teaching-activities.html",
       "canonical": "https://edooqoo.com/blog/connected-speech-teaching-activities.html",
       "type": "blog",
@@ -1066,6 +1106,16 @@
       "reviewer": "",
       "wordCount": 262,
       "hasEncodingIssue": false
+    },
+    {
+      "route": "/blog/conversation-classes-esl-structure.html",
+      "canonical": "https://edooqoo.com/blog/conversation-classes-esl-structure.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "One-to-One Lesson Planning",
+      "redirectTo": "/blog/how-to-teach-speaking-esl.html",
+      "reason": "GSC 404 repair: redirect retired conversation-class slug to the live speaking guide."
     },
     {
       "route": "/blog/cooperative-learning-structures-esl.html",
@@ -1528,6 +1578,16 @@
       "hasEncodingIssue": false
     },
     {
+      "route": "/blog/duolingo-english-test-preparation.html",
+      "canonical": "https://edooqoo.com/blog/duolingo-english-test-preparation.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "Adult and Business English",
+      "redirectTo": "/english-worksheets-for-exam-prep.html",
+      "reason": "GSC 404 repair: redirect retired Duolingo-test slug to the live exam-prep worksheet page."
+    },
+    {
       "route": "/blog/effective-esl-homework-strategies.html",
       "canonical": "https://edooqoo.com/blog/effective-esl-homework-strategies.html",
       "type": "blog",
@@ -1546,6 +1606,16 @@
       "reviewer": "Martha",
       "wordCount": 1405,
       "hasEncodingIssue": false
+    },
+    {
+      "route": "/blog/eliciting-techniques-esl-teaching.html",
+      "canonical": "https://edooqoo.com/blog/eliciting-techniques-esl-teaching.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "One-to-One Lesson Planning",
+      "redirectTo": "/blog/how-to-plan-english-lessons-effectively.html",
+      "reason": "GSC 404 repair: redirect retired eliciting slug to the live adult lesson-planning guide."
     },
     {
       "route": "/blog/emi-english-medium-instruction-guide.html",
@@ -1888,6 +1958,16 @@
       "hasEncodingIssue": false
     },
     {
+      "route": "/blog/fluency-activities-esl-classroom.html",
+      "canonical": "https://edooqoo.com/blog/fluency-activities-esl-classroom.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "One-to-One Lesson Planning",
+      "redirectTo": "/blog/how-to-teach-speaking-esl.html",
+      "reason": "GSC 404 repair: redirect retired fluency activities slug to the live speaking guide."
+    },
+    {
       "route": "/blog/formative-assessment-english-teaching.html",
       "canonical": "https://edooqoo.com/blog/formative-assessment-english-teaching.html",
       "type": "blog",
@@ -1946,6 +2026,26 @@
       "reviewer": "",
       "wordCount": 478,
       "hasEncodingIssue": false
+    },
+    {
+      "route": "/blog/giving-instructions-esl-classroom.html",
+      "canonical": "https://edooqoo.com/blog/giving-instructions-esl-classroom.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "One-to-One Lesson Planning",
+      "redirectTo": "/blog/how-to-plan-english-lessons-effectively.html",
+      "reason": "GSC 404 repair: redirect retired instructions slug to the live adult lesson-planning guide."
+    },
+    {
+      "route": "/blog/graded-readers-guide-esl-teachers.html",
+      "canonical": "https://edooqoo.com/blog/graded-readers-guide-esl-teachers.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "One-to-One Lesson Planning",
+      "redirectTo": "/blog/extensive-reading-programs-esl.html",
+      "reason": "GSC 404 repair: redirect retired graded-readers slug to the live extensive-reading guide."
     },
     {
       "route": "/blog/group-dynamics-esl-classroom.html",
@@ -2548,6 +2648,16 @@
       "hasEncodingIssue": false
     },
     {
+      "route": "/blog/marking-codes-esl-writing.html",
+      "canonical": "https://edooqoo.com/blog/marking-codes-esl-writing.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "Student Evidence and Progress",
+      "redirectTo": "/blog/error-correction-techniques-esl.html",
+      "reason": "GSC 404 repair: redirect retired marking-codes slug to the live error-correction guide."
+    },
+    {
       "route": "/blog/materials-design-principles-elt.html",
       "canonical": "https://edooqoo.com/blog/materials-design-principles-elt.html",
       "type": "blog",
@@ -2688,6 +2798,16 @@
       "hasEncodingIssue": false
     },
     {
+      "route": "/blog/newspaper-articles-esl-lessons.html",
+      "canonical": "https://edooqoo.com/blog/newspaper-articles-esl-lessons.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "One-to-One Lesson Planning",
+      "redirectTo": "/blog/current-events-esl-lessons.html",
+      "reason": "GSC 404 repair: redirect retired newspaper-articles slug to the live current-events guide."
+    },
+    {
       "route": "/blog/one-minute-prep-workflow-for-esl-tutors.html",
       "canonical": "https://edooqoo.com/blog/one-minute-prep-workflow-for-esl-tutors.html",
       "type": "blog",
@@ -2706,6 +2826,16 @@
       "reviewer": "Martha",
       "wordCount": 476,
       "hasEncodingIssue": false
+    },
+    {
+      "route": "/blog/oral-correction-timing-techniques.html",
+      "canonical": "https://edooqoo.com/blog/oral-correction-timing-techniques.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "Student Evidence and Progress",
+      "redirectTo": "/blog/error-correction-techniques-esl.html",
+      "reason": "GSC 404 repair: redirect retired oral-correction slug to the live error-correction guide."
     },
     {
       "route": "/blog/pair-work-activities-esl.html",
@@ -2906,6 +3036,16 @@
       "reviewer": "",
       "wordCount": 509,
       "hasEncodingIssue": false
+    },
+    {
+      "route": "/blog/positive-error-culture-esl.html",
+      "canonical": "https://edooqoo.com/blog/positive-error-culture-esl.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "Student Evidence and Progress",
+      "redirectTo": "/blog/error-correction-techniques-esl.html",
+      "reason": "GSC 404 repair: redirect retired error-culture slug to the live error-correction guide."
     },
     {
       "route": "/blog/process-writing-approach-esl.html",
@@ -3208,6 +3348,16 @@
       "hasEncodingIssue": false
     },
     {
+      "route": "/blog/shadowing-technique-esl.html",
+      "canonical": "https://edooqoo.com/blog/shadowing-technique-esl.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "One-to-One Lesson Planning",
+      "redirectTo": "/blog/how-to-teach-english-pronunciation.html",
+      "reason": "GSC 404 repair: redirect retired pronunciation technique slug to the closest live adult ESL pronunciation guide."
+    },
+    {
       "route": "/blog/spaced-repetition-vocabulary-learning.html",
       "canonical": "https://edooqoo.com/blog/spaced-repetition-vocabulary-learning.html",
       "type": "blog",
@@ -3226,6 +3376,16 @@
       "reviewer": "Martha",
       "wordCount": 1386,
       "hasEncodingIssue": false
+    },
+    {
+      "route": "/blog/standardized-test-comparison-esl.html",
+      "canonical": "https://edooqoo.com/blog/standardized-test-comparison-esl.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "Adult and Business English",
+      "redirectTo": "/english-worksheets-for-exam-prep.html",
+      "reason": "GSC 404 repair: redirect retired standardized-test slug to the live exam-prep worksheet page."
     },
     {
       "route": "/blog/storytelling-activities-esl.html",
@@ -3398,6 +3558,16 @@
       "hasEncodingIssue": false
     },
     {
+      "route": "/blog/teacher-talking-time-reducing.html",
+      "canonical": "https://edooqoo.com/blog/teacher-talking-time-reducing.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "One-to-One Lesson Planning",
+      "redirectTo": "/blog/teaching-english-one-to-one.html",
+      "reason": "GSC 404 repair: redirect retired TTT slug to the strategic adult 1:1 lesson-planning guide."
+    },
+    {
       "route": "/blog/teaching-abstract-vocabulary-esl.html",
       "canonical": "https://edooqoo.com/blog/teaching-abstract-vocabulary-esl.html",
       "type": "blog",
@@ -3556,6 +3726,16 @@
       "reviewer": "",
       "wordCount": 815,
       "hasEncodingIssue": false
+    },
+    {
+      "route": "/blog/teaching-critical-reading-esl.html",
+      "canonical": "https://edooqoo.com/blog/teaching-critical-reading-esl.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "One-to-One Lesson Planning",
+      "redirectTo": "/blog/reading-comprehension-activities-english.html",
+      "reason": "GSC 404 repair: redirect retired critical-reading slug to the closest live reading guide."
     },
     {
       "route": "/blog/teaching-culture-esl-classroom.html",
@@ -3898,6 +4078,16 @@
       "hasEncodingIssue": false
     },
     {
+      "route": "/blog/teaching-functional-language-esl.html",
+      "canonical": "https://edooqoo.com/blog/teaching-functional-language-esl.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "One-to-One Lesson Planning",
+      "redirectTo": "/blog/teaching-pragmatics-esl.html",
+      "reason": "GSC 404 repair: redirect retired functional-language slug to the closest live pragmatics guide."
+    },
+    {
       "route": "/blog/teaching-idioms-esl-activities.html",
       "canonical": "https://edooqoo.com/blog/teaching-idioms-esl-activities.html",
       "type": "blog",
@@ -4218,6 +4408,16 @@
       "hasEncodingIssue": false
     },
     {
+      "route": "/blog/teaching-reading-fluency-esl.html",
+      "canonical": "https://edooqoo.com/blog/teaching-reading-fluency-esl.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "One-to-One Lesson Planning",
+      "redirectTo": "/blog/reading-comprehension-activities-english.html",
+      "reason": "GSC 404 repair: redirect retired reading-fluency slug to the closest live reading guide."
+    },
+    {
       "route": "/blog/teaching-relative-clauses-esl.html",
       "canonical": "https://edooqoo.com/blog/teaching-relative-clauses-esl.html",
       "type": "blog",
@@ -4298,6 +4498,16 @@
       "hasEncodingIssue": false
     },
     {
+      "route": "/blog/teaching-skimming-scanning-esl.html",
+      "canonical": "https://edooqoo.com/blog/teaching-skimming-scanning-esl.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "One-to-One Lesson Planning",
+      "redirectTo": "/blog/reading-comprehension-activities-english.html",
+      "reason": "GSC 404 repair: redirect retired skimming/scanning slug to the closest live reading guide."
+    },
+    {
       "route": "/blog/teaching-study-skills-english-learners.html",
       "canonical": "https://edooqoo.com/blog/teaching-study-skills-english-learners.html",
       "type": "blog",
@@ -4336,6 +4546,16 @@
       "reviewer": "",
       "wordCount": 312,
       "hasEncodingIssue": false
+    },
+    {
+      "route": "/blog/teaching-test-taking-strategies-esl.html",
+      "canonical": "https://edooqoo.com/blog/teaching-test-taking-strategies-esl.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "Adult and Business English",
+      "redirectTo": "/english-worksheets-for-exam-prep.html",
+      "reason": "GSC 404 repair: redirect retired test-taking slug to the live exam-prep worksheet page."
     },
     {
       "route": "/blog/teaching-weak-forms-english.html",
@@ -4456,6 +4676,26 @@
       "reviewer": "",
       "wordCount": 408,
       "hasEncodingIssue": false
+    },
+    {
+      "route": "/blog/toefl-preparation-strategies-teachers.html",
+      "canonical": "https://edooqoo.com/blog/toefl-preparation-strategies-teachers.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "Adult and Business English",
+      "redirectTo": "/english-worksheets-for-exam-prep.html",
+      "reason": "GSC 404 repair: redirect retired TOEFL slug to the live exam-prep worksheet page."
+    },
+    {
+      "route": "/blog/toeic-preparation-worksheets-guide.html",
+      "canonical": "https://edooqoo.com/blog/toeic-preparation-worksheets-guide.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "Adult and Business English",
+      "redirectTo": "/english-worksheets-for-exam-prep.html",
+      "reason": "GSC 404 repair: redirect retired TOEIC worksheet slug to the live exam-prep worksheet page."
     },
     {
       "route": "/blog/tpr-total-physical-response-activities.html",
@@ -5044,7 +5284,67 @@
       "dateModified": "",
       "author": "",
       "reviewer": "",
-      "wordCount": 437,
+      "wordCount": 501,
+      "hasEncodingIssue": false
+    },
+    {
+      "route": "/edooqoo-vs-chatgpt.html",
+      "canonical": "https://edooqoo.com/edooqoo-vs-chatgpt.html",
+      "type": "static-landing",
+      "state": "hold",
+      "indexable": true,
+      "cluster": "Tutor Business and Tools",
+      "redirectTo": null,
+      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action.",
+      "source": "public/edooqoo-vs-chatgpt.html",
+      "sourceName": "edooqoo-vs-chatgpt.html",
+      "title": "Edooqoo vs ChatGPT for English Teachers",
+      "description": "Neutral comparison criteria for English teachers evaluating Edooqoo and ChatGPT for ESL worksheet generation, recurring 1:1 prep, student context, and homework workflows.",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
+      "reviewer": "",
+      "wordCount": 631,
+      "hasEncodingIssue": false
+    },
+    {
+      "route": "/edooqoo-vs-claude.html",
+      "canonical": "https://edooqoo.com/edooqoo-vs-claude.html",
+      "type": "static-landing",
+      "state": "hold",
+      "indexable": true,
+      "cluster": "Tutor Business and Tools",
+      "redirectTo": null,
+      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action.",
+      "source": "public/edooqoo-vs-claude.html",
+      "sourceName": "edooqoo-vs-claude.html",
+      "title": "Edooqoo vs Claude for English Teachers",
+      "description": "Neutral comparison criteria for English teachers evaluating Edooqoo and Claude for ESL materials, adult 1:1 lesson prep, student evidence, and worksheet workflows.",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
+      "reviewer": "",
+      "wordCount": 632,
+      "hasEncodingIssue": false
+    },
+    {
+      "route": "/edooqoo-vs-general-purpose-ai.html",
+      "canonical": "https://edooqoo.com/edooqoo-vs-general-purpose-ai.html",
+      "type": "static-landing",
+      "state": "hold",
+      "indexable": true,
+      "cluster": "Tutor Business and Tools",
+      "redirectTo": null,
+      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action.",
+      "source": "public/edooqoo-vs-general-purpose-ai.html",
+      "sourceName": "edooqoo-vs-general-purpose-ai.html",
+      "title": "Edooqoo vs General-Purpose AI for English Tutors",
+      "description": "Neutral comparison criteria for English tutors evaluating Edooqoo against general-purpose AI chat tools for recurring adult 1:1 lesson prep and worksheet workflows.",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
+      "reviewer": "",
+      "wordCount": 650,
       "hasEncodingIssue": false
     },
     {
@@ -5064,7 +5364,7 @@
       "dateModified": "",
       "author": "",
       "reviewer": "",
-      "wordCount": 437,
+      "wordCount": 501,
       "hasEncodingIssue": false
     },
     {
@@ -5084,7 +5384,7 @@
       "dateModified": "",
       "author": "",
       "reviewer": "",
-      "wordCount": 432,
+      "wordCount": 496,
       "hasEncodingIssue": false
     },
     {
@@ -5104,7 +5404,7 @@
       "dateModified": "",
       "author": "",
       "reviewer": "",
-      "wordCount": 434,
+      "wordCount": 498,
       "hasEncodingIssue": false
     },
     {
@@ -5124,7 +5424,7 @@
       "dateModified": "",
       "author": "",
       "reviewer": "",
-      "wordCount": 437,
+      "wordCount": 501,
       "hasEncodingIssue": false
     },
     {
@@ -5144,7 +5444,7 @@
       "dateModified": "",
       "author": "",
       "reviewer": "",
-      "wordCount": 436,
+      "wordCount": 500,
       "hasEncodingIssue": false
     },
     {
@@ -5164,7 +5464,7 @@
       "dateModified": "",
       "author": "",
       "reviewer": "",
-      "wordCount": 442,
+      "wordCount": 506,
       "hasEncodingIssue": false
     },
     {
@@ -5184,7 +5484,7 @@
       "dateModified": "",
       "author": "",
       "reviewer": "",
-      "wordCount": 436,
+      "wordCount": 500,
       "hasEncodingIssue": false
     },
     {
@@ -8934,7 +9234,7 @@
       "dateModified": "",
       "author": "",
       "reviewer": "",
-      "wordCount": 1635,
+      "wordCount": 1669,
       "hasEncodingIssue": false
     },
     {

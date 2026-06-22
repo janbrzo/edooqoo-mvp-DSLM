@@ -17,14 +17,14 @@
   "counts": {
     "routes": 88,
     "pageModules": 82,
-    "componentModules": 339,
+    "componentModules": 344,
     "hookModules": 79,
     "contextModules": 1,
     "serviceModules": 11,
-    "edgeFunctions": 79,
-    "typedTables": 58,
-    "typedRpcs": 58,
-    "migrationIndexes": 12
+    "edgeFunctions": 80,
+    "typedTables": 59,
+    "typedRpcs": 61,
+    "migrationIndexes": 14
   },
   "routes": [
     {
@@ -45,21 +45,19 @@
         "fetchTargets": []
       },
       "hooks": [
-        "useActiveWorksheetGenerationJobs",
         "useAuthFlow",
         "useEffect",
         "useLocation",
-        "useMemo",
         "useNavigate",
         "useSearchParams",
         "useState",
-        "useTabId",
         "useTokenSystem",
         "useWorksheetGeneration",
         "useWorksheetState"
       ],
       "userActions": [
-        "handleGenerateWorksheet"
+        "handleGenerateWorksheet",
+        "onNavigateToGenerated"
       ],
       "navigateTargets": []
     },
@@ -545,9 +543,9 @@
       "type": "authenticated-teacher",
       "redirectTo": null,
       "crawl": {
-        "robotsBlocked": true,
+        "robotsBlocked": false,
         "sitemapMatches": 0,
-        "status": "blocked-by-robots"
+        "status": "not-in-sitemap"
       },
       "dataDependencies": {
         "tables": [],
@@ -4441,11 +4439,6 @@
           "initial": "null"
         },
         {
-          "value": "activeJobIdx",
-          "setter": "setActiveJobIdx",
-          "initial": "0"
-        },
-        {
           "value": "showTokenModal",
           "setter": "setShowTokenModal",
           "initial": "false"
@@ -4472,21 +4465,19 @@
         }
       ],
       "hooks": [
-        "useActiveWorksheetGenerationJobs",
         "useAuthFlow",
         "useEffect",
         "useLocation",
-        "useMemo",
         "useNavigate",
         "useSearchParams",
         "useState",
-        "useTabId",
         "useTokenSystem",
         "useWorksheetGeneration",
         "useWorksheetState"
       ],
       "actions": [
-        "handleGenerateWorksheet"
+        "handleGenerateWorksheet",
+        "onNavigateToGenerated"
       ],
       "navigateTargets": [],
       "dataDependencies": {
@@ -4585,24 +4576,13 @@
           "operation": "setItem",
           "key": "worksheetAppHasGenerated",
           "file": "src/pages/Index.tsx"
-        },
-        {
-          "storage": "sessionStorage",
-          "operation": "getItem",
-          "key": "worksheetStudentName",
-          "file": "src/pages/Index.tsx"
-        },
-        {
-          "storage": "sessionStorage",
-          "operation": "getItem",
-          "key": "worksheetStudentName",
-          "file": "src/pages/Index.tsx"
         }
       ],
       "userFacingText": [],
       "userFacingBehavior": {
         "actionHandlers": [
-          "handleGenerateWorksheet"
+          "handleGenerateWorksheet",
+          "onNavigateToGenerated"
         ],
         "navigationTargets": []
       },
@@ -5853,12 +5833,6 @@
         "fetchTargets": []
       },
       "storage": [
-        {
-          "storage": "localStorage",
-          "operation": "setItem",
-          "key": "post-signup-add-student",
-          "file": "src/pages/Signup.tsx"
-        },
         {
           "storage": "localStorage",
           "operation": "setItem",
@@ -9507,7 +9481,7 @@
             },
             {
               "name": "streamProgress",
-              "type": "{ exercisesGenerated: number; expectedTotal: number; } | null",
+              "type": "{ exercisesGenerated: number; expectedTotal: number; phase?: string; percent?: number; } | null",
               "optional": true
             },
             {
@@ -9589,16 +9563,16 @@
               "name": "jobs",
               "type": "Array<{ jobId: string; studentName?: string | null; topic?: string | null; progress?: { exercisesGenerated: number; expectedTotal: number } | null; }>",
               "optional": true
+            },
+            {
+              "name": "recovering",
+              "type": "boolean",
+              "optional": true
             }
           ]
         }
       ],
       "state": [
-        {
-          "value": "progress",
-          "setter": "setProgress",
-          "initial": "0"
-        },
         {
           "value": "elapsedTime",
           "setter": "setElapsedTime",
@@ -9635,6 +9609,7 @@
       "storage": [],
       "userFacingText": [
         "(with",
+        "Checking server…",
         "Close",
         "Done",
         "Error:",
@@ -9646,7 +9621,9 @@
         "Generation resumed.",
         "Generation runs in the background — keep prepping for",
         "No token was consumed. Your form data is preserved.",
+        "No tokens were consumed yet.",
         "Open dashboard ↗",
+        "The connection dropped, but your worksheet might still be saving in the background.",
         "Time:",
         "Try Again",
         "or another student while you wait."
@@ -14843,6 +14820,31 @@
           "value": "loading",
           "setter": "setLoading",
           "initial": "false"
+        },
+        {
+          "value": "pasteEnabled",
+          "setter": "setPasteEnabled",
+          "initial": "false"
+        },
+        {
+          "value": "pasteRaw",
+          "setter": "setPasteRaw",
+          "initial": "''"
+        },
+        {
+          "value": "extraction",
+          "setter": "setExtraction",
+          "initial": "null"
+        },
+        {
+          "value": "extractionModel",
+          "setter": "setExtractionModel",
+          "initial": "null"
+        },
+        {
+          "value": "intakeIncludes",
+          "setter": "setIntakeIncludes",
+          "initial": "{ notes: true, signals: {}, goals: {}, english_level: true, main_goal: true, native_language: true, pacing: true, }"
         }
       ],
       "hooks": [
@@ -14987,6 +14989,80 @@
       }
     },
     {
+      "path": "src/components/dashboard/ExtractionPreviewCard.tsx",
+      "domain": "dashboard",
+      "purpose": "Implements Extraction Preview Card behavior in the dashboard domain.",
+      "exports": [
+        "ExtractionPreviewCard"
+      ],
+      "props": [
+        {
+          "name": "Props",
+          "fields": [
+            {
+              "name": "extraction",
+              "type": "IntakeExtractionPayload",
+              "optional": false
+            },
+            {
+              "name": "includes",
+              "type": "IntakeIncludes",
+              "optional": false
+            },
+            {
+              "name": "setIncludes",
+              "type": "React.Dispatch<React.SetStateAction<IntakeIncludes>>",
+              "optional": false
+            },
+            {
+              "name": "existing",
+              "type": "{ english_level?: string | null; main_goal?: string | null; native_language?: string | null; }",
+              "optional": false
+            }
+          ]
+        }
+      ],
+      "state": [],
+      "hooks": [
+        "useMemo"
+      ],
+      "actions": [],
+      "navigateTargets": [],
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "storage": [],
+      "userFacingText": [
+        ". AI value will be saved as a suggestion.",
+        "/week",
+        "AI extracted profile",
+        "Always saved as a pending pacing proposal — accept it from the Pacing bell.",
+        "English level",
+        "Goals (",
+        "Include goal",
+        "Include level",
+        "Include main goal",
+        "Include native language",
+        "Include notes",
+        "Include pacing",
+        "Include signal",
+        "Main goal",
+        "Native language",
+        "Notes summary",
+        "Pacing suggestion",
+        "Signals (",
+        "We couldn't extract anything actionable. Try adding more context.",
+        "You already set a main goal. AI value will be saved as a suggestion."
+      ],
+      "userFacingBehavior": {
+        "actionHandlers": [],
+        "navigationTargets": []
+      }
+    },
+    {
       "path": "src/components/dashboard/HomeworkOverviewWidget.tsx",
       "domain": "dashboard",
       "purpose": "Implements Homework Overview Widget behavior in the dashboard domain.",
@@ -15029,6 +15105,119 @@
       ],
       "userFacingBehavior": {
         "actionHandlers": [],
+        "navigationTargets": []
+      }
+    },
+    {
+      "path": "src/components/dashboard/PasteIntakeSection.tsx",
+      "domain": "dashboard",
+      "purpose": "Implements Paste Intake Section behavior in the dashboard domain.",
+      "exports": [
+        "PasteIntakeSection"
+      ],
+      "props": [
+        {
+          "name": "Props",
+          "fields": [
+            {
+              "name": "enabled",
+              "type": "boolean",
+              "optional": false
+            },
+            {
+              "name": "onEnabledChange",
+              "type": "(v: boolean) => void",
+              "optional": false
+            },
+            {
+              "name": "rawText",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "onRawTextChange",
+              "type": "(v: string) => void",
+              "optional": false
+            },
+            {
+              "name": "extraction",
+              "type": "IntakeExtractionPayload | null",
+              "optional": false
+            },
+            {
+              "name": "onExtractionChange",
+              "type": "(v: IntakeExtractionPayload | null) => void",
+              "optional": false
+            },
+            {
+              "name": "includes",
+              "type": "IntakeIncludes",
+              "optional": false
+            },
+            {
+              "name": "setIncludes",
+              "type": "React.Dispatch<React.SetStateAction<IntakeIncludes>>",
+              "optional": false
+            },
+            {
+              "name": "existing",
+              "type": "{ english_level?: string | null; main_goal?: string | null; main_goal_target_date?: string | null; native_language?: string | null; mainGoalSet?: boolean; }",
+              "optional": false
+            },
+            {
+              "name": "model",
+              "type": "string | null",
+              "optional": false
+            },
+            {
+              "name": "onModelResolved",
+              "type": "(model: string) => void",
+              "optional": false
+            }
+          ]
+        }
+      ],
+      "state": [
+        {
+          "value": "analyzing",
+          "setter": "setAnalyzing",
+          "initial": "false"
+        },
+        {
+          "value": "lastAnalyzedAt",
+          "setter": "setLastAnalyzedAt",
+          "initial": "null"
+        }
+      ],
+      "hooks": [
+        "useDemoContext",
+        "useState"
+      ],
+      "actions": [
+        "handleAnalyze"
+      ],
+      "navigateTargets": [],
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [
+          "extract-student-profile"
+        ],
+        "fetchTargets": []
+      },
+      "storage": [],
+      "userFacingText": [
+        "Analyzing…",
+        "Drop an email, intake form, or your meeting notes — AI will extract goals, signals and level.",
+        "Paste anything you know about the student here…",
+        "Paste notes about student to set up profile (AI, optional)",
+        "Paste notes toggle",
+        "chars · stored only on your account"
+      ],
+      "userFacingBehavior": {
+        "actionHandlers": [
+          "handleAnalyze"
+        ],
         "navigationTargets": []
       }
     },
@@ -20758,6 +20947,11 @@
           "value": "mountedJobIds",
           "setter": "setMountedJobIds",
           "initial": "new Set()"
+        },
+        {
+          "value": "elapsedSec",
+          "setter": "setElapsedSec",
+          "initial": "() => Math.max(0, Math.floor((Date.now() - (job.startedAt ?? Date.now())) / 1000))"
         }
       ],
       "hooks": [
@@ -20781,7 +20975,6 @@
       "storage": [],
       "userFacingText": [
         "Dismiss",
-        "Exercises:",
         "For",
         "Generation failed",
         "Open generated worksheet",
@@ -20842,6 +21035,44 @@
         "Show next generation context slide",
         "Show previous generation context slide"
       ],
+      "userFacingBehavior": {
+        "actionHandlers": [],
+        "navigationTargets": []
+      }
+    },
+    {
+      "path": "src/components/generation/GlobalGeneratingModal.tsx",
+      "domain": "generation",
+      "purpose": "Implements Global Generating Modal behavior in the generation domain.",
+      "exports": [
+        "GlobalGeneratingModal"
+      ],
+      "props": [],
+      "state": [
+        {
+          "value": "activeJobIdx",
+          "setter": "setActiveJobIdx",
+          "initial": "0"
+        }
+      ],
+      "hooks": [
+        "useActiveWorksheetGenerationJobs",
+        "useAuthFlow",
+        "useEffect",
+        "useMemo",
+        "useState",
+        "useTabId"
+      ],
+      "actions": [],
+      "navigateTargets": [],
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "storage": [],
+      "userFacingText": [],
       "userFacingBehavior": {
         "actionHandlers": [],
         "navigationTargets": []
@@ -22501,22 +22732,19 @@
         "Build the learner context once",
         "DSLM is not a single model file. It is a student-specific signal graph built from profile, goals, activity, and teacher-reviewed evidence.",
         "Decision path",
-        "Evidence stack",
         "First setup builds the student context. Lesson activity adds evidence. Weekly prep uses that context, optional calendar timing, and DSLM evidence before the worksheet output layer.",
         "First setup is not the one-minute claim. It creates the student context that recurring prep can use.",
         "Nano-skill evidence, pacing mode, roadmap phase, and recent activity narrow the next lesson focus before material generation.",
         "Optional when you use Edooqoo Calendar: confirmed booking time, lesson timing, and schedule context can inform the prep decision.",
         "Phase 1: One-time student setup",
         "Phase 2: Weekly 1-Minute Prep flow",
-        "Prep impact calculator",
         "Run the recurring prep loop",
         "See the 1-Minute Prep proof before the video is ready",
         "Stored learner evidence",
         "The teacher still chooses or edits the next focus before generating the worksheet output.",
         "The teacher still reviews and edits the recommendation.",
         "The worksheet generator is the editable output layer after the next focus has been selected.",
-        "Weekly prep uses stored context to decide the next focus before material generation.",
-        "Workflow proof"
+        "Weekly prep uses stored context to decide the next focus before material generation."
       ],
       "userFacingBehavior": {
         "actionHandlers": [],
@@ -24225,6 +24453,106 @@
           "handleOpenHomework",
           "handleRenameHomework",
           "handleUpdateDeadline"
+        ],
+        "navigationTargets": []
+      }
+    },
+    {
+      "path": "src/components/student-hub/AddStudentFlashcardDialog.tsx",
+      "domain": "student-hub",
+      "purpose": "Implements Add Student Flashcard Dialog behavior in the student hub domain.",
+      "exports": [
+        "AddStudentFlashcardDialog"
+      ],
+      "props": [
+        {
+          "name": "Props",
+          "fields": [
+            {
+              "name": "setId",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "setTitle",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "studentEmail",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "hasNative",
+              "type": "boolean",
+              "optional": false
+            },
+            {
+              "name": "onAdded",
+              "type": "() => void",
+              "optional": true
+            }
+          ]
+        }
+      ],
+      "state": [
+        {
+          "value": "open",
+          "setter": "setOpen",
+          "initial": "false"
+        },
+        {
+          "value": "front",
+          "setter": "setFront",
+          "initial": "''"
+        },
+        {
+          "value": "back",
+          "setter": "setBack",
+          "initial": "''"
+        },
+        {
+          "value": "native",
+          "setter": "setNative",
+          "initial": "''"
+        },
+        {
+          "value": "busy",
+          "setter": "setBusy",
+          "initial": "false"
+        }
+      ],
+      "hooks": [
+        "useState"
+      ],
+      "actions": [
+        "handleSubmit"
+      ],
+      "navigateTargets": [],
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [
+          "student_add_flashcard"
+        ],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "storage": [],
+      "userFacingText": [
+        "\". Your teacher will see new cards.",
+        "Add a flashcard",
+        "Add card",
+        "Back (definition or translation)",
+        "Cancel",
+        "Front (word or phrase)",
+        "Native translation (optional)",
+        "Saving…",
+        "To \""
+      ],
+      "userFacingBehavior": {
+        "actionHandlers": [
+          "handleSubmit"
         ],
         "navigationTargets": []
       }
@@ -26701,6 +27029,66 @@
       }
     },
     {
+      "path": "src/components/student/IntakeExtractionBanner.tsx",
+      "domain": "student",
+      "purpose": "Implements Intake Extraction Banner behavior in the student domain.",
+      "exports": [
+        "IntakeExtractionBanner"
+      ],
+      "props": [],
+      "state": [
+        {
+          "value": "row",
+          "setter": "setRow",
+          "initial": "null"
+        },
+        {
+          "value": "confirm",
+          "setter": "setConfirm",
+          "initial": "false"
+        },
+        {
+          "value": "busy",
+          "setter": "setBusy",
+          "initial": "false"
+        }
+      ],
+      "hooks": [
+        "useEffect",
+        "useState"
+      ],
+      "actions": [
+        "handleUndo"
+      ],
+      "navigateTargets": [],
+      "dataDependencies": {
+        "tables": [
+          "student_intake_extractions"
+        ],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "storage": [],
+      "userFacingText": [
+        "Cancel",
+        "Dismiss",
+        "Intake extraction has been rolled back. Nothing from that paste remains active.",
+        "Profile seeded from your notes —",
+        "This archives every entry, goal and rejects the pending pacing proposal created from this paste. Profile fields the AI set are restored to their previous values. This action is reversible only via support.",
+        "Undo all",
+        "Undo all intake suggestions?",
+        "auto-applied",
+        "pending pacing proposal"
+      ],
+      "userFacingBehavior": {
+        "actionHandlers": [
+          "handleUndo"
+        ],
+        "navigationTargets": []
+      }
+    },
+    {
       "path": "src/components/teacher/TeacherAlertsBell.tsx",
       "domain": "teacher",
       "purpose": "Implements Teacher Alerts Bell behavior in the teacher domain.",
@@ -26789,7 +27177,7 @@
         {
           "storage": "localStorage",
           "operation": "getItem",
-          "key": "MIGRATION_KEY",
+          "key": "MIGRATION_KEY_V1",
           "file": "src/components/ui/AppBackground.tsx"
         },
         {
@@ -26801,7 +27189,7 @@
         {
           "storage": "localStorage",
           "operation": "setItem",
-          "key": "MIGRATION_KEY",
+          "key": "MIGRATION_KEY_V1",
           "file": "src/components/ui/AppBackground.tsx"
         },
         {
@@ -26814,6 +27202,24 @@
           "storage": "localStorage",
           "operation": "getItem",
           "key": "OPACITY_KEY",
+          "file": "src/components/ui/AppBackground.tsx"
+        },
+        {
+          "storage": "localStorage",
+          "operation": "getItem",
+          "key": "MIGRATION_KEY_V2",
+          "file": "src/components/ui/AppBackground.tsx"
+        },
+        {
+          "storage": "localStorage",
+          "operation": "setItem",
+          "key": "PATTERN_KEY",
+          "file": "src/components/ui/AppBackground.tsx"
+        },
+        {
+          "storage": "localStorage",
+          "operation": "setItem",
+          "key": "MIGRATION_KEY_V2",
           "file": "src/components/ui/AppBackground.tsx"
         }
       ],
@@ -26898,7 +27304,7 @@
         {
           "storage": "localStorage",
           "operation": "getItem",
-          "key": "MIGRATION_KEY",
+          "key": "MIGRATION_KEY_V1",
           "file": "src/components/ui/BackgroundPatternSwitcher.tsx"
         },
         {
@@ -26910,7 +27316,7 @@
         {
           "storage": "localStorage",
           "operation": "setItem",
-          "key": "MIGRATION_KEY",
+          "key": "MIGRATION_KEY_V1",
           "file": "src/components/ui/BackgroundPatternSwitcher.tsx"
         },
         {
@@ -33079,7 +33485,7 @@
         "Collapse",
         "Expand",
         "Expand image",
-        "Google Imagen 4.0 Fast",
+        "Google Gemini Image (Vertex AI)",
         "Lesson Media",
         "Loading image...",
         "Photo by",
@@ -38418,6 +38824,12 @@
             "operation": "removeItem",
             "key": "storageKey",
             "file": "src/hooks/useWorksheetFormPersistence.ts"
+          },
+          {
+            "storage": "localStorage",
+            "operation": "setItem",
+            "key": "storageKey",
+            "file": "src/hooks/useWorksheetFormPersistence.ts"
           }
         ],
         "userFacingText": [],
@@ -39173,7 +39585,7 @@
       },
       {
         "storage": "localStorage",
-        "key": "MIGRATION_KEY",
+        "key": "MIGRATION_KEY_V1",
         "operations": [
           "getItem",
           "setItem"
@@ -39181,6 +39593,17 @@
         "files": [
           "src/components/ui/AppBackground.tsx",
           "src/components/ui/BackgroundPatternSwitcher.tsx"
+        ]
+      },
+      {
+        "storage": "localStorage",
+        "key": "MIGRATION_KEY_V2",
+        "operations": [
+          "getItem",
+          "setItem"
+        ],
+        "files": [
+          "src/components/ui/AppBackground.tsx"
         ]
       },
       {
@@ -39990,11 +40413,14 @@
           "rpcs": [],
           "edgeFunctions": [],
           "fetchTargets": [
+            "${target.endpoint}?key=${key}",
             "${url}/functions/v1/send-model-audit-email"
           ]
         },
         "environmentVariables": [
           "CRON_SECRET",
+          "GEMINI_API_KEY",
+          "GEMINI_VERTEX_API_KEY",
           "LOVABLE_API_KEY",
           "OPENAI_API_KEY",
           "SUPABASE_SERVICE_ROLE_KEY",
@@ -40249,19 +40675,13 @@
           "classification",
           "detail",
           "error",
-          "messages",
-          "model",
-          "ok",
-          "tool_choice",
-          "tools"
+          "ok"
         ],
         "dataDependencies": {
           "tables": [],
           "rpcs": [],
           "edgeFunctions": [],
-          "fetchTargets": [
-            "https://ai.gateway.lovable.dev/v1/chat/completions"
-          ]
+          "fetchTargets": []
         },
         "environmentVariables": [
           "LOVABLE_API_KEY"
@@ -40464,6 +40884,39 @@
           "SUPABASE_SERVICE_ROLE_KEY",
           "SUPABASE_URL",
           "Stripe_Secret_Key"
+        ]
+      },
+      {
+        "name": "extract-student-profile",
+        "path": "supabase/functions/extract-student-profile/index.ts",
+        "invocation": "POST via supabase.functions.invoke or direct /functions/v1 request unless method list says otherwise",
+        "methods": [
+          "OPTIONS",
+          "POST"
+        ],
+        "requestFields": [
+          "existing_profile",
+          "raw_text"
+        ],
+        "visibleResponseFields": [
+          "detail",
+          "error",
+          "extraction",
+          "max",
+          "min",
+          "model",
+          "ok"
+        ],
+        "dataDependencies": {
+          "tables": [],
+          "rpcs": [],
+          "edgeFunctions": [],
+          "fetchTargets": []
+        },
+        "environmentVariables": [
+          "LOVABLE_API_KEY",
+          "SUPABASE_ANON_KEY",
+          "SUPABASE_URL"
         ]
       },
       {
@@ -40792,15 +41245,10 @@
           "generationContext",
           "inserted_ids",
           "kept_suggestion_ids",
-          "max_tokens",
-          "messages",
-          "model",
           "phases",
           "preservationInvariantFailed",
           "reason",
-          "reasoning",
-          "restoreFailed",
-          "temperature"
+          "restoreFailed"
         ],
         "dataDependencies": {
           "tables": [
@@ -40814,12 +41262,9 @@
           ],
           "rpcs": [],
           "edgeFunctions": [],
-          "fetchTargets": [
-            "https://ai.gateway.lovable.dev/v1/chat/completions"
-          ]
+          "fetchTargets": []
         },
         "environmentVariables": [
-          "LOVABLE_API_KEY",
           "SUPABASE_SERVICE_ROLE_KEY",
           "SUPABASE_URL"
         ]
@@ -40839,24 +41284,25 @@
         "visibleResponseFields": [
           "base64Image",
           "contentType",
+          "contents",
           "details",
           "error",
           "filename",
+          "generationConfig",
           "image",
-          "instances",
-          "parameters",
+          "safetySettings",
           "success"
         ],
         "dataDependencies": {
           "tables": [],
           "rpcs": [],
           "edgeFunctions": [],
-          "fetchTargets": [
-            "https://oauth2.googleapis.com/token"
-          ]
+          "fetchTargets": []
         },
         "environmentVariables": [
           "GEMINI_API_KEY",
+          "GEMINI_DESCRIPTION_MODEL",
+          "GEMINI_IMAGE_MODEL",
           "GEMINI_VERTEX_API_KEY",
           "SUPABASE_ANON_KEY",
           "SUPABASE_SERVICE_ROLE_KEY",
@@ -40938,12 +41384,9 @@
           ],
           "rpcs": [],
           "edgeFunctions": [],
-          "fetchTargets": [
-            "https://ai.gateway.lovable.dev/v1/chat/completions"
-          ]
+          "fetchTargets": []
         },
         "environmentVariables": [
-          "LOVABLE_API_KEY",
           "SUPABASE_SERVICE_ROLE_KEY",
           "SUPABASE_URL"
         ]
@@ -41532,8 +41975,6 @@
           "html",
           "key_observations",
           "learning_path",
-          "messages",
-          "model",
           "recommendations",
           "reviewed_at",
           "status",
@@ -41570,7 +42011,6 @@
           "fetchTargets": [
             "${supabaseUrl}/functions/v1/send-welcome-test-completion-email",
             "${supabaseUrl}/functions/v1/transcribe-audio",
-            "https://ai.gateway.lovable.dev/v1/chat/completions",
             "https://api.resend.com/emails"
           ]
         },
@@ -42370,20 +42810,13 @@
           "error",
           "exercises",
           "focusMap",
-          "messages",
-          "model",
-          "recommendedMediaType",
-          "temperature",
-          "tool_choice",
-          "tools"
+          "recommendedMediaType"
         ],
         "dataDependencies": {
           "tables": [],
           "rpcs": [],
           "edgeFunctions": [],
-          "fetchTargets": [
-            "https://ai.gateway.lovable.dev/v1/chat/completions"
-          ]
+          "fetchTargets": []
         },
         "environmentVariables": [
           "LOVABLE_API_KEY"
@@ -42589,7 +43022,6 @@
         ],
         "requestFields": [
           "choices",
-          "error",
           "mode",
           "target_language",
           "text"
@@ -42597,26 +43029,15 @@
         "visibleResponseFields": [
           "cefr_level",
           "error",
-          "max_tokens",
-          "messages",
-          "model",
-          "response_format",
-          "temperature",
           "translation"
         ],
         "dataDependencies": {
           "tables": [],
           "rpcs": [],
           "edgeFunctions": [],
-          "fetchTargets": [
-            "https://ai.gateway.lovable.dev/v1/chat/completions",
-            "https://api.openai.com/v1/chat/completions"
-          ]
+          "fetchTargets": []
         },
-        "environmentVariables": [
-          "LOVABLE_API_KEY",
-          "OPENAI_API_KEY"
-        ]
+        "environmentVariables": []
       },
       {
         "name": "unpublish-worksheet",
@@ -42762,19 +43183,13 @@
         "requestFields": [],
         "visibleResponseFields": [
           "details",
-          "error",
-          "max_tokens",
-          "messages",
-          "model",
-          "temperature"
+          "error"
         ],
         "dataDependencies": {
           "tables": [],
           "rpcs": [],
           "edgeFunctions": [],
-          "fetchTargets": [
-            "https://ai.gateway.lovable.dev/v1/chat/completions"
-          ]
+          "fetchTargets": []
         },
         "environmentVariables": [
           "LOVABLE_API_KEY"
@@ -42961,6 +43376,17 @@
           "planName",
           "planType",
           "price"
+        ],
+        "payloadExpressions": []
+      },
+      {
+        "name": "extract-student-profile",
+        "callsites": [
+          "src/components/dashboard/PasteIntakeSection.tsx"
+        ],
+        "payloadFields": [
+          "existing_profile",
+          "raw_text"
         ],
         "payloadExpressions": []
       },
@@ -43499,6 +43925,20 @@
         "payloadExpressions": []
       },
       {
+        "name": "apply_intake_extraction",
+        "callsites": [
+          "src/lib/intake/applyIntakeExtraction.ts"
+        ],
+        "payloadFields": [
+          "p_includes",
+          "p_model",
+          "p_payload",
+          "p_raw_text",
+          "p_student_id"
+        ],
+        "payloadExpressions": []
+      },
+      {
         "name": "calculate_test_results",
         "callsites": [
           "src/hooks/useStudentTests.tsx",
@@ -43807,6 +44247,16 @@
         "payloadExpressions": []
       },
       {
+        "name": "rollback_intake_extraction",
+        "callsites": [
+          "src/lib/intake/applyIntakeExtraction.ts"
+        ],
+        "payloadFields": [
+          "p_extraction_id"
+        ],
+        "payloadExpressions": []
+      },
+      {
         "name": "save_homework_answer",
         "callsites": [
           "src/hooks/useInteractiveHomework.tsx"
@@ -43895,6 +44345,20 @@
           "src/hooks/useWorksheetHistory.tsx"
         ],
         "payloadFields": [],
+        "payloadExpressions": []
+      },
+      {
+        "name": "student_add_flashcard",
+        "callsites": [
+          "src/components/student-hub/AddStudentFlashcardDialog.tsx"
+        ],
+        "payloadFields": [
+          "p_back",
+          "p_front",
+          "p_native",
+          "p_set_id",
+          "p_student_email"
+        ],
         "payloadExpressions": []
       },
       {
@@ -45713,6 +46177,11 @@
             "optional": false
           },
           {
+            "name": "created_by_student",
+            "type": "boolean",
+            "optional": false
+          },
+          {
             "name": "deleted_at",
             "type": "string | null",
             "optional": false
@@ -45908,6 +46377,11 @@
       {
         "name": "flashcard_sets",
         "fields": [
+          {
+            "name": "allow_student_contributions",
+            "type": "boolean",
+            "optional": false
+          },
           {
             "name": "back_type",
             "type": "string | null",
@@ -47409,6 +47883,95 @@
             "student-gcal-auth-callback",
             "student-gcal-sync"
           ]
+        }
+      },
+      {
+        "name": "student_intake_extractions",
+        "fields": [
+          {
+            "name": "applied_student_updates",
+            "type": "Json",
+            "optional": false
+          },
+          {
+            "name": "created_at",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "created_entry_ids",
+            "type": "string[]",
+            "optional": false
+          },
+          {
+            "name": "created_goal_ids",
+            "type": "string[]",
+            "optional": false
+          },
+          {
+            "name": "created_pacing_proposal_id",
+            "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "extracted_json",
+            "type": "Json",
+            "optional": false
+          },
+          {
+            "name": "id",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "model",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "pre_update_snapshot",
+            "type": "Json",
+            "optional": false
+          },
+          {
+            "name": "raw_text",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "status",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "student_id",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "teacher_id",
+            "type": "string",
+            "optional": false
+          }
+        ],
+        "relationships": [
+          {
+            "foreignKeyName": "student_intake_extractions_student_id_fkey",
+            "columns": [
+              "student_id"
+            ],
+            "isOneToOne": false,
+            "referencedRelation": "students",
+            "referencedColumns": [
+              "id"
+            ]
+          }
+        ],
+        "featureOwnership": {
+          "clientFiles": [
+            "src/components/student/IntakeExtractionBanner.tsx"
+          ],
+          "edgeFunctions": []
         }
       },
       {
@@ -49745,6 +50308,37 @@
         "returns": "undefined"
       },
       {
+        "name": "apply_intake_extraction",
+        "args": [
+          {
+            "name": "p_includes",
+            "type": "Json",
+            "optional": false
+          },
+          {
+            "name": "p_model",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_payload",
+            "type": "Json",
+            "optional": false
+          },
+          {
+            "name": "p_raw_text",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_student_id",
+            "type": "string",
+            "optional": false
+          }
+        ],
+        "returns": "Json"
+      },
+      {
         "name": "backfill_skill_metrics",
         "args": [
           {
@@ -50378,6 +50972,17 @@
         "returns": "boolean"
       },
       {
+        "name": "rollback_intake_extraction",
+        "args": [
+          {
+            "name": "p_extraction_id",
+            "type": "string",
+            "optional": false
+          }
+        ],
+        "returns": "undefined"
+      },
+      {
         "name": "save_teacher_comment",
         "args": [
           {
@@ -50493,6 +51098,37 @@
           }
         ],
         "returns": "boolean"
+      },
+      {
+        "name": "student_add_flashcard",
+        "args": [
+          {
+            "name": "p_back",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_front",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_native",
+            "type": "string",
+            "optional": true
+          },
+          {
+            "name": "p_set_id",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_student_email",
+            "type": "string",
+            "optional": false
+          }
+        ],
+        "returns": "string"
       },
       {
         "name": "submit_homework_answers",
@@ -50747,9 +51383,25 @@
         "table": "newsletter_subscribers",
         "unique": false,
         "migration": "supabase/migrations/20260615143000_newsletter_double_opt_in.sql"
+      },
+      {
+        "name": "idx_student_intake_extractions_student",
+        "table": "student_intake_extractions",
+        "unique": false,
+        "migration": "supabase/migrations/20260617162941_66b70675-3140-44e5-b81e-6b034065a814.sql"
+      },
+      {
+        "name": "idx_student_intake_extractions_teacher",
+        "table": "student_intake_extractions",
+        "unique": false,
+        "migration": "supabase/migrations/20260617162941_66b70675-3140-44e5-b81e-6b034065a814.sql"
       }
     ],
     "migrationFunctions": [
+      {
+        "name": "apply_intake_extraction",
+        "migration": "supabase/migrations/20260617162941_66b70675-3140-44e5-b81e-6b034065a814.sql"
+      },
       {
         "name": "calculate_test_results",
         "migration": "supabase/migrations/20260609191429_f1209887-288d-49d1-98f8-e3de2a43be52.sql"
@@ -50775,6 +51427,14 @@
         "migration": "supabase/migrations/20260505064801_45a8e80c-6a10-4530-9c60-06c0e31371cf.sql"
       },
       {
+        "name": "rollback_intake_extraction",
+        "migration": "supabase/migrations/20260617162941_66b70675-3140-44e5-b81e-6b034065a814.sql"
+      },
+      {
+        "name": "student_add_flashcard",
+        "migration": "supabase/migrations/20260617163003_320073b7-18a6-428d-8dd0-20784f7f45d7.sql"
+      },
+      {
         "name": "try_parse_jsonb",
         "migration": "supabase/migrations/20260601082424_08261ec2-f683-4520-94d9-4c1bef3bab9b.sql"
       },
@@ -50797,14 +51457,7 @@
       {
         "host": "ai.gateway.lovable.dev",
         "callsites": [
-          "supabase/functions/audit-llm-models/index.ts",
-          "supabase/functions/classify-knowledge-entry/index.ts",
-          "supabase/functions/generate-curriculum-phases/index.ts",
-          "supabase/functions/generate-timeline/index.ts",
-          "supabase/functions/process-welcome-test/index.ts",
-          "supabase/functions/suggest-exercises/index.ts",
-          "supabase/functions/translate-flashcard/index.ts",
-          "supabase/functions/verify-open-answers/index.ts"
+          "supabase/functions/audit-llm-models/index.ts"
         ]
       },
       {
@@ -50825,8 +51478,7 @@
           "supabase/functions/audit-llm-models/index.ts",
           "supabase/functions/generate-audio/index.ts",
           "supabase/functions/generate-welcome-test-audio/index.ts",
-          "supabase/functions/transcribe-audio/index.ts",
-          "supabase/functions/translate-flashcard/index.ts"
+          "supabase/functions/transcribe-audio/index.ts"
         ]
       },
       {
@@ -50961,6 +51613,7 @@
           "supabase/functions/customer-portal/index.ts",
           "supabase/functions/delete-account/index.ts",
           "supabase/functions/downgrade-subscription/index.ts",
+          "supabase/functions/extract-student-profile/index.ts",
           "supabase/functions/finalize-upgrade/index.ts",
           "supabase/functions/find-teachers-by-student-email/index.ts",
           "supabase/functions/format-worksheet-prompt/index.ts",
@@ -51017,6 +51670,13 @@
         ]
       },
       {
+        "host": "generativelanguage.googleapis.com",
+        "callsites": [
+          "supabase/functions/audit-llm-models/index.ts",
+          "supabase/functions/generate-image/index.ts"
+        ]
+      },
+      {
         "host": "ipapi.co",
         "callsites": [
           "supabase/functions/get-demo-locale/index.ts"
@@ -51041,7 +51701,6 @@
         "callsites": [
           "supabase/functions/gcal-auth-callback/index.ts",
           "supabase/functions/gcal-sync/index.ts",
-          "supabase/functions/generate-image/index.ts",
           "supabase/functions/student-gcal-auth-callback/index.ts",
           "supabase/functions/student-gcal-sync/index.ts"
         ]
@@ -51108,6 +51767,7 @@
       {
         "host": "us-central1-aiplatform.googleapis.com",
         "callsites": [
+          "supabase/functions/audit-llm-models/index.ts",
           "supabase/functions/generate-image/index.ts"
         ]
       },
@@ -51122,7 +51782,6 @@
         "callsites": [
           "supabase/functions/gcal-auth-start/index.ts",
           "supabase/functions/gcal-sync/index.ts",
-          "supabase/functions/generate-image/index.ts",
           "supabase/functions/student-gcal-auth-start/index.ts",
           "supabase/functions/student-gcal-sync/index.ts"
         ]
@@ -51191,13 +51850,27 @@
       {
         "name": "GEMINI_API_KEY",
         "callsites": [
+          "supabase/functions/audit-llm-models/index.ts",
           "supabase/functions/generate-image/index.ts",
           "supabase/functions/generateWorksheet/index.ts"
         ]
       },
       {
+        "name": "GEMINI_DESCRIPTION_MODEL",
+        "callsites": [
+          "supabase/functions/generate-image/index.ts"
+        ]
+      },
+      {
+        "name": "GEMINI_IMAGE_MODEL",
+        "callsites": [
+          "supabase/functions/generate-image/index.ts"
+        ]
+      },
+      {
         "name": "GEMINI_VERTEX_API_KEY",
         "callsites": [
+          "supabase/functions/audit-llm-models/index.ts",
           "supabase/functions/generate-image/index.ts"
         ]
       },
@@ -51226,11 +51899,9 @@
         "callsites": [
           "supabase/functions/audit-llm-models/index.ts",
           "supabase/functions/classify-knowledge-entry/index.ts",
-          "supabase/functions/generate-curriculum-phases/index.ts",
-          "supabase/functions/generate-timeline/index.ts",
+          "supabase/functions/extract-student-profile/index.ts",
           "supabase/functions/process-welcome-test/index.ts",
           "supabase/functions/suggest-exercises/index.ts",
-          "supabase/functions/translate-flashcard/index.ts",
           "supabase/functions/verify-open-answers/index.ts"
         ]
       },
@@ -51256,8 +51927,7 @@
           "supabase/functions/generate-welcome-test-audio/index.ts",
           "supabase/functions/generateWorksheet/index.ts",
           "supabase/functions/process-welcome-test/index.ts",
-          "supabase/functions/transcribe-audio/index.ts",
-          "supabase/functions/translate-flashcard/index.ts"
+          "supabase/functions/transcribe-audio/index.ts"
         ]
       },
       {
@@ -51356,6 +52026,7 @@
           "supabase/functions/customer-portal/index.ts",
           "supabase/functions/delete-account/index.ts",
           "supabase/functions/downgrade-subscription/index.ts",
+          "supabase/functions/extract-student-profile/index.ts",
           "supabase/functions/finalize-upgrade/index.ts",
           "supabase/functions/format-worksheet-prompt/index.ts",
           "supabase/functions/generate-image/index.ts",
@@ -51452,6 +52123,7 @@
           "supabase/functions/customer-portal/index.ts",
           "supabase/functions/delete-account/index.ts",
           "supabase/functions/downgrade-subscription/index.ts",
+          "supabase/functions/extract-student-profile/index.ts",
           "supabase/functions/finalize-upgrade/index.ts",
           "supabase/functions/find-teachers-by-student-email/index.ts",
           "supabase/functions/format-worksheet-prompt/index.ts",

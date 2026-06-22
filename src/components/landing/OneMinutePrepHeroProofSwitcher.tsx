@@ -53,13 +53,20 @@ const FlowStep = ({
   label,
   badge,
   nowrap,
+  span,
 }: {
   icon: ProofIcon;
   label: string;
   badge?: string;
   nowrap?: boolean;
+  span?: 'full';
 }) => (
-  <div className="flex min-w-0 items-center gap-2 rounded-lg border border-border bg-white px-3 py-2 text-xs font-medium text-foreground shadow-sm">
+  <div
+    className={cn(
+      'flex min-w-0 items-center gap-2 rounded-lg border border-border bg-white px-3 py-2 text-xs font-medium text-foreground shadow-sm',
+      span === 'full' && 'sm:col-span-2'
+    )}
+  >
     <Icon className="h-3.5 w-3.5 shrink-0 text-primary" />
     <span className={cn('min-w-0 flex-1 leading-snug', nowrap && 'whitespace-nowrap text-[11px] sm:text-xs')}>{label}</span>
     {badge ? (
@@ -122,12 +129,13 @@ const CompactWorkflowProofPanel = () => (
         <p className="text-[11px] font-semibold uppercase tracking-wider text-blue-700">{lessonSignalWorkflowCopy.eyebrow}</p>
         <p className="mt-1 text-xs leading-5 text-muted-foreground">{lessonSignalWorkflowCopy.description}</p>
         <div className="mt-2 flex flex-wrap gap-1.5">
-          {lessonSignalWorkflowSteps.map(({ icon: Icon, label, nowrap }: WorkflowProofStep) => (
+          {lessonSignalWorkflowSteps.map(({ icon: Icon, label, nowrap, span }: WorkflowProofStep) => (
             <span
               key={label}
               className={cn(
                 'inline-flex items-center gap-1.5 rounded-full border border-blue-100 bg-white px-2 py-1 text-[11px] font-medium text-blue-900',
-                nowrap && 'whitespace-nowrap'
+                nowrap && 'whitespace-nowrap',
+                span === 'full' && 'basis-full sm:basis-auto'
               )}
             >
               <Icon className="h-3 w-3 shrink-0 text-primary" />

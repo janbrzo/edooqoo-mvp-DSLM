@@ -84,8 +84,14 @@ const TwoPhaseWorkflowSection: React.FC<TwoPhaseWorkflowSectionProps> = ({ compa
               <p className="text-sm leading-6 text-muted-foreground">{description}</p>
               {support ? <p className="mt-2 text-sm leading-6 text-muted-foreground">{support}</p> : null}
               <div className={cn('mt-4 grid gap-2', tone === 'signal' && 'sm:grid-cols-2')}>
-                {steps.map(({ icon: StepIcon, label, badge, nowrap }) => (
-                  <div key={label} className="flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground">
+                {steps.map(({ icon: StepIcon, label, badge, nowrap, span }) => (
+                  <div
+                    key={label}
+                    className={cn(
+                      'flex items-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground',
+                      span === 'full' && 'sm:col-span-2'
+                    )}
+                  >
                     <StepIcon className="h-4 w-4 shrink-0 text-primary" />
                     <span className={cn('min-w-0 flex-1', nowrap && 'whitespace-nowrap text-xs sm:text-sm')}>{label}</span>
                     {badge ? (

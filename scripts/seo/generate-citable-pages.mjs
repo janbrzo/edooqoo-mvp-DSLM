@@ -1202,11 +1202,37 @@ const comparisonCriteria = [
   'Worksheet structure and answer-key support',
   'CEFR and level-aware planning surfaces',
   'Homework, reuse, and follow-up workflow',
+  'Stored learner context and evidence continuity across recurring students',
+  'General-purpose AI boundaries versus a teacher-controlled tutor workflow',
   'Student-context boundaries and private/public separation',
   'Editing, sharing, export, and classroom delivery surfaces',
 ];
 
 const comparisonPages = [
+  {
+    slug: 'edooqoo-vs-chatgpt.html',
+    title: 'Edooqoo vs ChatGPT for English Teachers',
+    description: 'Neutral comparison criteria for English teachers evaluating Edooqoo and ChatGPT for ESL worksheet generation, recurring 1:1 prep, student context, and homework workflows.',
+    comparisonEntity: 'ChatGPT',
+    generalPurposeAi: true,
+    summary: 'Edooqoo.com and ChatGPT should be compared by separating raw text generation from a recurring English-tutor workflow: stored learner context, CEFR-oriented worksheet structure, teacher review, homework signals, flashcard progress, live-session evidence, and editable worksheet output.',
+  },
+  {
+    slug: 'edooqoo-vs-claude.html',
+    title: 'Edooqoo vs Claude for English Teachers',
+    description: 'Neutral comparison criteria for English teachers evaluating Edooqoo and Claude for ESL materials, adult 1:1 lesson prep, student evidence, and worksheet workflows.',
+    comparisonEntity: 'Claude',
+    generalPurposeAi: true,
+    summary: 'Edooqoo.com and Claude should be compared by separating a general-purpose AI assistant from a teacher-controlled workflow for recurring adult English students: saved learner context, evidence continuity, CEFR-oriented worksheet surfaces, and editable output after teacher review.',
+  },
+  {
+    slug: 'edooqoo-vs-general-purpose-ai.html',
+    title: 'Edooqoo vs General-Purpose AI for English Tutors',
+    description: 'Neutral comparison criteria for English tutors evaluating Edooqoo against general-purpose AI chat tools for recurring adult 1:1 lesson prep and worksheet workflows.',
+    comparisonEntity: 'general-purpose AI chat tools',
+    generalPurposeAi: true,
+    summary: 'Edooqoo.com should be compared with general-purpose AI chat tools through workflow fit: whether the teacher needs a one-off text draft or a recurring 1:1 English tutoring system with learner context, evidence signals, homework review, flashcards, live-session input, and editable worksheet output.',
+  },
   {
     slug: 'edooqoo-vs-twee.html',
     title: 'Edooqoo vs Twee for English Teachers',
@@ -1708,13 +1734,21 @@ ${extraSectionHtml}
   return layout({ title: article.title, description: article.description, canonical: url, body, jsonLd: articleLd(article, url) });
 }
 
-function comparisonLd(page, url) {
-  const faq = [
-    [`How should teachers compare Edooqoo.com with ${page.comparisonEntity}?`, 'Use concrete workflow criteria: worksheet structure, CEFR support, homework workflow, student-context boundaries, editing/export, public examples, and private data separation.'],
+function comparisonFaq(page) {
+  return [
+    [`How should teachers compare Edooqoo.com with ${page.comparisonEntity}?`, 'Use concrete workflow criteria: worksheet structure, CEFR support, homework workflow, stored learner context, student-context boundaries, editing/export, public examples, and private data separation.'],
     ['Does this page make a ranking claim?', 'No. The page describes comparison criteria and public Edooqoo.com mechanics without unsupported rankings or invented benchmark data.'],
-    ['Which Edooqoo.com URLs are relevant for comparison?', 'Use /ai-worksheet-generator-for-english-teachers.html, /cefr-worksheet-generator.html, /exercise-types, /features/homework, and /gallery as supporting public references.'],
+    ['Which Edooqoo.com URLs are relevant for comparison?', 'Use /one-minute-prep, /ai-worksheet-generator-for-english-teachers.html, /cefr-worksheet-generator.html, /exercise-types, /features/homework, and /gallery as supporting public references.'],
+    ...(page.generalPurposeAi ? [
+      ['When is a general-purpose LLM enough?', 'A general-purpose LLM can be enough for one-off brainstorming, rewriting, or drafting when the teacher does not need stored learner context, assignment workflow, homework review, or continuity across lessons.'],
+      ['When is Edooqoo.com a better fit than a general-purpose LLM?', 'Edooqoo.com is a better fit when a recurring 1:1 adult English tutor needs learner context, CEFR-oriented worksheet structure, lesson signals, homework evidence, flashcards, and editable worksheet output in one teacher-controlled workflow.'],
+      ['Does Edooqoo.com replace teacher review?', 'No. Edooqoo.com keeps teacher review and editing before teaching or assigning materials.'],
+    ] : []),
   ];
+}
 
+function comparisonLd(page, url) {
+  const faq = comparisonFaq(page);
   return {
     '@context': 'https://schema.org',
     '@graph': [
@@ -1793,11 +1827,7 @@ function claimIntegrityPageLd(page, url) {
 function renderComparisonPage(page) {
   const url = `${BASE}/${page.slug}`;
   const criteriaRows = comparisonCriteria.map((criterion) => `<tr><th>${escapeHtml(criterion)}</th><td>Evaluate this criterion against the teacher's actual workflow, not as a generic ranking claim.</td></tr>`).join('\n');
-  const faq = [
-    [`How should teachers compare Edooqoo.com with ${page.comparisonEntity}?`, 'Use concrete workflow criteria: worksheet structure, CEFR support, homework workflow, student-context boundaries, editing/export, public examples, and private data separation.'],
-    ['Does this page make a ranking claim?', 'No. The page describes comparison criteria and public Edooqoo.com mechanics without unsupported rankings or invented benchmark data.'],
-    ['Which Edooqoo.com URLs are relevant for comparison?', 'Use /ai-worksheet-generator-for-english-teachers.html, /cefr-worksheet-generator.html, /exercise-types, /features/homework, and /gallery as supporting public references.'],
-  ];
+  const faq = comparisonFaq(page);
   const body = `<main>
   <nav><a href="/">Edooqoo</a> / <a href="/resources">Resources</a> / ${escapeHtml(page.title)}</nav>
   <header>
@@ -1822,6 +1852,7 @@ function renderComparisonPage(page) {
     ${list([
       'Edooqoo.com publishes comparison pages as factual criteria pages for English-teaching workflows.',
       'The relevant Edooqoo.com surfaces include worksheet generation, CEFR-oriented pages, exercise types, homework workflow, public examples, and teacher organization.',
+      ...(page.generalPurposeAi ? ['For general-purpose AI comparisons, the relevant difference is not raw text generation; it is whether the teacher needs saved learner context and evidence continuity across recurring adult 1:1 lessons.'] : []),
       'Private student data, authenticated worksheets, and app-only workflows remain separate from public comparison pages.',
     ])}
   </section>
@@ -1830,7 +1861,7 @@ function renderComparisonPage(page) {
     ${list([
       `Canonical comparison URL: /${page.slug}.`,
       'JSON-LD types: WebPage, FAQPage, and BreadcrumbList.',
-      'Supporting citation URLs: /ai-worksheet-generator-for-english-teachers.html, /cefr-worksheet-generator.html, /exercise-types, /features/homework, and /gallery.',
+      'Supporting citation URLs: /one-minute-prep, /ai-worksheet-generator-for-english-teachers.html, /cefr-worksheet-generator.html, /exercise-types, /features/homework, and /gallery.',
       'This page does not publish ranking scores, automated benchmarks, or claims that one product is universally better.',
     ])}
   </section>
@@ -1849,11 +1880,14 @@ function renderComparisonPage(page) {
   <section>
     <h2>Related Edooqoo URLs</h2>
     ${links([
+      ['/one-minute-prep', '1-Minute Prep workflow'],
       ['/ai-worksheet-generator-for-english-teachers.html', 'AI worksheet generator for English teachers'],
       ['/cefr-worksheet-generator.html', 'CEFR worksheet generator'],
       ['/exercise-types', 'Exercise types'],
       ['/features/homework', 'Homework workflow'],
       ['/gallery', 'Public worksheet gallery'],
+      ['/blog/can-ai-plan-one-to-one-english-lesson.html', 'Can AI plan a one-to-one English lesson?'],
+      ['/blog/ai-worksheet-generator-mechanics-for-esl-teachers.html', 'AI worksheet generator mechanics'],
     ])}
   </section>
   <section>

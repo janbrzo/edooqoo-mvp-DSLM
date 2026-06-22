@@ -1948,6 +1948,24 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "state": "hold"
   },
   {
+    "title": "Edooqoo vs ChatGPT for English Teachers",
+    "description": "Neutral comparison criteria for English teachers evaluating Edooqoo and ChatGPT for ESL worksheet generation, recurring 1:1 prep, student context, and homework workflows.",
+    "url": "/edooqoo-vs-chatgpt.html",
+    "state": "hold"
+  },
+  {
+    "title": "Edooqoo vs Claude for English Teachers",
+    "description": "Neutral comparison criteria for English teachers evaluating Edooqoo and Claude for ESL materials, adult 1:1 lesson prep, student evidence, and worksheet workflows.",
+    "url": "/edooqoo-vs-claude.html",
+    "state": "hold"
+  },
+  {
+    "title": "Edooqoo vs General-Purpose AI for English Tutors",
+    "description": "Neutral comparison criteria for English tutors evaluating Edooqoo against general-purpose AI chat tools for recurring adult 1:1 lesson prep and worksheet workflows.",
+    "url": "/edooqoo-vs-general-purpose-ai.html",
+    "state": "hold"
+  },
+  {
     "title": "Edooqoo vs iSLCollective for English Teachers",
     "description": "Neutral comparison criteria for English teachers evaluating Edooqoo and iSLCollective for worksheet creation, reuse, and classroom workflows.",
     "url": "/edooqoo-vs-islcollective.html",

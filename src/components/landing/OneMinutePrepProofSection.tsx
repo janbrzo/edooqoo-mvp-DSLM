@@ -51,18 +51,31 @@ const evidenceSteps = [
   { icon: FileText, label: 'Worksheet is generated as output' },
 ];
 
+const proofTabs: Array<{ panel: ProofPanel; label: string; icon: ProofIcon }> = [
+  { panel: 'workflow', label: 'Workflow proof', icon: PlayCircle },
+  { panel: 'evidence', label: 'Evidence stack', icon: ClipboardList },
+  { panel: 'calculator', label: 'Prep impact calculator', icon: Calculator },
+];
+
 const StepPill = ({
   icon: Icon,
   label,
   badge,
   nowrap,
+  span,
 }: {
   icon: ProofIcon;
   label: string;
   badge?: string;
   nowrap?: boolean;
+  span?: 'full';
 }) => (
-  <div className="flex min-w-0 items-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground shadow-sm">
+  <div
+    className={cn(
+      'flex min-w-0 items-center gap-2 rounded-lg border border-border bg-background px-3 py-2 text-sm text-foreground shadow-sm',
+      span === 'full' && 'sm:col-span-2'
+    )}
+  >
     <Icon className="h-4 w-4 shrink-0 text-primary" />
     <span className={cn('min-w-0 flex-1 leading-snug', nowrap && 'whitespace-nowrap text-xs sm:text-sm')}>{label}</span>
     {badge ? (
@@ -193,6 +206,8 @@ const OneMinutePrepProofSection: React.FC<OneMinutePrepProofSectionProps> = ({
   defaultPanel = 'workflow',
 }) => {
   const [activePanel, setActivePanel] = useState<ProofPanel>(defaultPanel);
+  const activePanelMeta = proofTabs.find((tab) => tab.panel === activePanel) ?? proofTabs[0];
+  const ActivePanelIcon = activePanelMeta.icon;
 
   const activatePanel = (panel: ProofPanel) => {
     setActivePanel(panel);
@@ -211,8 +226,8 @@ const OneMinutePrepProofSection: React.FC<OneMinutePrepProofSectionProps> = ({
       <div className="mx-auto max-w-6xl px-4">
         <div className="mx-auto mb-8 max-w-3xl text-center">
           <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-violet-200 bg-violet-50 px-3 py-1 text-xs font-semibold text-violet-700">
-            <PlayCircle className="h-3.5 w-3.5" />
-            Workflow proof
+            <ActivePanelIcon className="h-3.5 w-3.5" />
+            {activePanelMeta.label}
           </div>
           <h2 id="one-minute-prep-proof-heading" className="text-2xl font-bold text-foreground sm:text-3xl">
             See the 1-Minute Prep proof before the video is ready
@@ -228,48 +243,23 @@ const OneMinutePrepProofSection: React.FC<OneMinutePrepProofSectionProps> = ({
             role="tablist"
             aria-label="1-Minute Prep proof panels"
           >
-            <button
-              id="one-minute-prep-workflow-tab"
-              type="button"
-              role="tab"
-              aria-selected={activePanel === 'workflow'}
-              aria-controls="one-minute-prep-workflow-panel"
-              className={tabClassName('workflow')}
-              onClick={() => activatePanel('workflow')}
-              onMouseEnter={() => activatePanel('workflow')}
-              onFocus={() => activatePanel('workflow')}
-            >
-              <PlayCircle className="h-4 w-4 shrink-0" />
-              <span className="min-w-0">Workflow proof</span>
-            </button>
-            <button
-              id="one-minute-prep-evidence-tab"
-              type="button"
-              role="tab"
-              aria-selected={activePanel === 'evidence'}
-              aria-controls="one-minute-prep-evidence-panel"
-              className={tabClassName('evidence')}
-              onClick={() => activatePanel('evidence')}
-              onMouseEnter={() => activatePanel('evidence')}
-              onFocus={() => activatePanel('evidence')}
-            >
-              <ClipboardList className="h-4 w-4 shrink-0" />
-              <span className="min-w-0">Evidence stack</span>
-            </button>
-            <button
-              id="one-minute-prep-calculator-tab"
-              type="button"
-              role="tab"
-              aria-selected={activePanel === 'calculator'}
-              aria-controls="one-minute-prep-calculator-panel"
-              className={tabClassName('calculator')}
-              onClick={() => activatePanel('calculator')}
-              onMouseEnter={() => activatePanel('calculator')}
-              onFocus={() => activatePanel('calculator')}
-            >
-              <Calculator className="h-4 w-4 shrink-0" />
-              <span className="min-w-0">Prep impact calculator</span>
-            </button>
+            {proofTabs.map(({ panel, label, icon: TabIcon }) => (
+              <button
+                key={panel}
+                id={`one-minute-prep-${panel}-tab`}
+                type="button"
+                role="tab"
+                aria-selected={activePanel === panel}
+                aria-controls={`one-minute-prep-${panel}-panel`}
+                className={tabClassName(panel)}
+                onClick={() => activatePanel(panel)}
+                onPointerEnter={() => activatePanel(panel)}
+                onFocus={() => activatePanel(panel)}
+              >
+                <TabIcon className="h-4 w-4 shrink-0" />
+                <span className="min-w-0">{label}</span>
+              </button>
+            ))}
           </div>
 
           <div className="p-4 sm:p-5">

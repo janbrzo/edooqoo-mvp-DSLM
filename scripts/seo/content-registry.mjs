@@ -74,6 +74,150 @@ export const CONTENT_OVERRIDES = {
   // Add measured keep/improve/merge/retire decisions here after GSC and backlink
   // evidence is recorded. Unknown content remains hold to prevent destructive
   // redirects based only on code inspection.
+  '/blog/shadowing-technique-esl.html': {
+    state: 'merge',
+    redirectTo: '/blog/how-to-teach-english-pronunciation.html',
+    cluster: 'One-to-One Lesson Planning',
+    reason: 'GSC 404 repair: redirect retired pronunciation technique slug to the closest live adult ESL pronunciation guide.',
+  },
+  '/blog/teacher-talking-time-reducing.html': {
+    state: 'merge',
+    redirectTo: '/blog/teaching-english-one-to-one.html',
+    cluster: 'One-to-One Lesson Planning',
+    reason: 'GSC 404 repair: redirect retired TTT slug to the strategic adult 1:1 lesson-planning guide.',
+  },
+  '/blog/teaching-functional-language-esl.html': {
+    state: 'merge',
+    redirectTo: '/blog/teaching-pragmatics-esl.html',
+    cluster: 'One-to-One Lesson Planning',
+    reason: 'GSC 404 repair: redirect retired functional-language slug to the closest live pragmatics guide.',
+  },
+  '/blog/teaching-critical-reading-esl.html': {
+    state: 'merge',
+    redirectTo: '/blog/reading-comprehension-activities-english.html',
+    cluster: 'One-to-One Lesson Planning',
+    reason: 'GSC 404 repair: redirect retired critical-reading slug to the closest live reading guide.',
+  },
+  '/blog/conferencing-with-esl-students.html': {
+    state: 'merge',
+    redirectTo: '/blog/process-writing-approach-esl.html',
+    cluster: 'Student Evidence and Progress',
+    reason: 'GSC 404 repair: redirect retired writing-conference slug to the live process-writing guide.',
+  },
+  '/blog/concept-checking-questions-esl.html': {
+    state: 'merge',
+    redirectTo: '/blog/how-to-teach-english-grammar-effectively.html',
+    cluster: 'One-to-One Lesson Planning',
+    reason: 'GSC 404 repair: redirect retired CCQ slug to the closest live grammar-teaching guide.',
+  },
+  '/blog/fluency-activities-esl-classroom.html': {
+    state: 'merge',
+    redirectTo: '/blog/how-to-teach-speaking-esl.html',
+    cluster: 'One-to-One Lesson Planning',
+    reason: 'GSC 404 repair: redirect retired fluency activities slug to the live speaking guide.',
+  },
+  '/blog/teaching-skimming-scanning-esl.html': {
+    state: 'merge',
+    redirectTo: '/blog/reading-comprehension-activities-english.html',
+    cluster: 'One-to-One Lesson Planning',
+    reason: 'GSC 404 repair: redirect retired skimming/scanning slug to the closest live reading guide.',
+  },
+  '/blog/conversation-classes-esl-structure.html': {
+    state: 'merge',
+    redirectTo: '/blog/how-to-teach-speaking-esl.html',
+    cluster: 'One-to-One Lesson Planning',
+    reason: 'GSC 404 repair: redirect retired conversation-class slug to the live speaking guide.',
+  },
+  '/blog/classroom-language-esl-teachers.html': {
+    state: 'merge',
+    redirectTo: '/blog/teaching-english-one-to-one.html',
+    cluster: 'One-to-One Lesson Planning',
+    reason: 'GSC 404 repair: redirect retired classroom-language slug to the strategic adult 1:1 guide.',
+  },
+  '/blog/toeic-preparation-worksheets-guide.html': {
+    state: 'merge',
+    redirectTo: '/english-worksheets-for-exam-prep.html',
+    cluster: 'Adult and Business English',
+    reason: 'GSC 404 repair: redirect retired TOEIC worksheet slug to the live exam-prep worksheet page.',
+  },
+  '/blog/eliciting-techniques-esl-teaching.html': {
+    state: 'merge',
+    redirectTo: '/blog/how-to-plan-english-lessons-effectively.html',
+    cluster: 'One-to-One Lesson Planning',
+    reason: 'GSC 404 repair: redirect retired eliciting slug to the live adult lesson-planning guide.',
+  },
+  '/blog/positive-error-culture-esl.html': {
+    state: 'merge',
+    redirectTo: '/blog/error-correction-techniques-esl.html',
+    cluster: 'Student Evidence and Progress',
+    reason: 'GSC 404 repair: redirect retired error-culture slug to the live error-correction guide.',
+  },
+  '/blog/standardized-test-comparison-esl.html': {
+    state: 'merge',
+    redirectTo: '/english-worksheets-for-exam-prep.html',
+    cluster: 'Adult and Business English',
+    reason: 'GSC 404 repair: redirect retired standardized-test slug to the live exam-prep worksheet page.',
+  },
+  '/blog/toefl-preparation-strategies-teachers.html': {
+    state: 'merge',
+    redirectTo: '/english-worksheets-for-exam-prep.html',
+    cluster: 'Adult and Business English',
+    reason: 'GSC 404 repair: redirect retired TOEFL slug to the live exam-prep worksheet page.',
+  },
+  '/blog/teaching-test-taking-strategies-esl.html': {
+    state: 'merge',
+    redirectTo: '/english-worksheets-for-exam-prep.html',
+    cluster: 'Adult and Business English',
+    reason: 'GSC 404 repair: redirect retired test-taking slug to the live exam-prep worksheet page.',
+  },
+  '/blog/duolingo-english-test-preparation.html': {
+    state: 'merge',
+    redirectTo: '/english-worksheets-for-exam-prep.html',
+    cluster: 'Adult and Business English',
+    reason: 'GSC 404 repair: redirect retired Duolingo-test slug to the live exam-prep worksheet page.',
+  },
+  '/blog/teaching-reading-fluency-esl.html': {
+    state: 'merge',
+    redirectTo: '/blog/reading-comprehension-activities-english.html',
+    cluster: 'One-to-One Lesson Planning',
+    reason: 'GSC 404 repair: redirect retired reading-fluency slug to the closest live reading guide.',
+  },
+  '/blog/graded-readers-guide-esl-teachers.html': {
+    state: 'merge',
+    redirectTo: '/blog/extensive-reading-programs-esl.html',
+    cluster: 'One-to-One Lesson Planning',
+    reason: 'GSC 404 repair: redirect retired graded-readers slug to the live extensive-reading guide.',
+  },
+  '/blog/newspaper-articles-esl-lessons.html': {
+    state: 'merge',
+    redirectTo: '/blog/current-events-esl-lessons.html',
+    cluster: 'One-to-One Lesson Planning',
+    reason: 'GSC 404 repair: redirect retired newspaper-articles slug to the live current-events guide.',
+  },
+  '/blog/oral-correction-timing-techniques.html': {
+    state: 'merge',
+    redirectTo: '/blog/error-correction-techniques-esl.html',
+    cluster: 'Student Evidence and Progress',
+    reason: 'GSC 404 repair: redirect retired oral-correction slug to the live error-correction guide.',
+  },
+  '/blog/giving-instructions-esl-classroom.html': {
+    state: 'merge',
+    redirectTo: '/blog/how-to-plan-english-lessons-effectively.html',
+    cluster: 'One-to-One Lesson Planning',
+    reason: 'GSC 404 repair: redirect retired instructions slug to the live adult lesson-planning guide.',
+  },
+  '/blog/asynchronous-learning-esl.html': {
+    state: 'merge',
+    redirectTo: '/blog/effective-esl-homework-strategies.html',
+    cluster: 'Homework and Retention',
+    reason: 'GSC 404 repair: redirect retired asynchronous-learning slug to the live homework-strategy guide.',
+  },
+  '/blog/marking-codes-esl-writing.html': {
+    state: 'merge',
+    redirectTo: '/blog/error-correction-techniques-esl.html',
+    cluster: 'Student Evidence and Progress',
+    reason: 'GSC 404 repair: redirect retired marking-codes slug to the live error-correction guide.',
+  },
   '/blog/adult-esl-student-profile-lesson-planning.html': {
     state: 'keep',
     cluster: 'Student Evidence and Progress',
@@ -429,6 +573,10 @@ export function getContentRegistry({ root }) {
       sourceName,
       ...metadata,
     }));
+  }
+
+  for (const route of Object.keys(CONTENT_OVERRIDES)) {
+    if (!entries.has(route)) entries.set(route, entryForRoute(route));
   }
 
   for (const route of strategicRoutes) {

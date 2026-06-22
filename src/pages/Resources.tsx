@@ -106,6 +106,9 @@ const Resources = () => {
   ];
 
   const comparisons: ResourceCard[] = [
+    { title: "Edooqoo vs ChatGPT", description: "Tutor workflow vs general-purpose AI drafting.", href: "/edooqoo-vs-chatgpt.html", badge: "Compare" },
+    { title: "Edooqoo vs Claude", description: "Stored learner context vs one-off AI assistance.", href: "/edooqoo-vs-claude.html", badge: "Compare" },
+    { title: "Edooqoo vs General AI", description: "Recurring 1:1 prep workflow vs generic chat tools.", href: "/edooqoo-vs-general-purpose-ai.html", badge: "Compare" },
     { title: "Edooqoo vs ISLCollective", description: "AI-generated vs user-uploaded worksheets.", href: "/edooqoo-vs-islcollective.html", badge: "Compare" },
     { title: "Edooqoo vs Liveworksheets", description: "AI generation vs manual interactive conversion.", href: "/edooqoo-vs-liveworksheets.html", badge: "Compare" },
     { title: "Edooqoo vs Twee", description: "Complete ecosystem vs quick text generation.", href: "/edooqoo-vs-twee.html", badge: "Compare" },

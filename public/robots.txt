@@ -13,7 +13,7 @@ Disallow: /admin/
 Disallow: /dashboard
 Disallow: /profile
 Disallow: /worksheet/
-Disallow: /worksheets
+Disallow: /worksheets$
 Disallow: /homework/
 Disallow: /flashcards/
 Disallow: /shared/

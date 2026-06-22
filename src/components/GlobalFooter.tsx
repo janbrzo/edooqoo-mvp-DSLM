@@ -110,6 +110,9 @@ const GlobalFooter = () => {
           <div>
             <h3 className="font-semibold text-foreground mb-3 text-sm">Compare</h3>
             <ul className="space-y-2 text-sm">
+              <li><FooterLink href="/edooqoo-vs-chatgpt.html">vs ChatGPT</FooterLink></li>
+              <li><FooterLink href="/edooqoo-vs-claude.html">vs Claude</FooterLink></li>
+              <li><FooterLink href="/edooqoo-vs-general-purpose-ai.html">vs General AI</FooterLink></li>
               <li><FooterLink href="/edooqoo-vs-islcollective.html">vs ISLCollective</FooterLink></li>
               <li><FooterLink href="/edooqoo-vs-liveworksheets.html">vs Liveworksheets</FooterLink></li>
               <li><FooterLink href="/edooqoo-vs-twee.html">vs Twee</FooterLink></li>

@@ -35,7 +35,7 @@ Use these 30 queries for every baseline round. Keep query wording unchanged unle
 | 20 | business/adult | business email worksheet generator | `https://edooqoo.com/business-english-worksheet-generator.html` |
 | 21 | comparison | Edooqoo vs Twee | `https://edooqoo.com/edooqoo-vs-twee.html` |
 | 22 | comparison | best AI tools for ESL teachers | `https://edooqoo.com/best-ai-tools-for-esl-teachers.html` |
-| 23 | comparison | ChatGPT alternative for ESL worksheets | `https://edooqoo.com/best-ai-tools-for-esl-teachers.html` |
+| 23 | comparison | ChatGPT alternative for ESL worksheets | `https://edooqoo.com/edooqoo-vs-chatgpt.html` |
 | 24 | comparison | Twee alternative for English teachers | `https://edooqoo.com/best-ai-tools-for-esl-teachers.html` |
 | 25 | comparison | AI worksheet generator comparison ESL teachers | `https://edooqoo.com/best-ai-tools-for-esl-teachers.html` |
 | 26 | long-tail exercise/topic | present perfect worksheet generator | `https://edooqoo.com/grammar-worksheet-generator.html` |
@@ -62,6 +62,8 @@ These queries are not part of the baseline 30 and must be measured as a separate
 | 35 | student context | English tutor student progress and lesson planning tool | `https://edooqoo.com/features/dslm` |
 | 36 | student management | private English tutor CRM with homework and lesson history | `https://edooqoo.com/private-english-tutor-crm.html` |
 | 37 | student access | student portal for private English tutors | `https://edooqoo.com/student-hub-for-english-tutors.html` |
+| 38 | comparison | Claude alternative for English tutors | `https://edooqoo.com/edooqoo-vs-claude.html` |
+| 39 | comparison | general-purpose AI vs ESL worksheet generator | `https://edooqoo.com/edooqoo-vs-general-purpose-ai.html` |
 | 38 | homework | assign and review English homework online | `https://edooqoo.com/online-esl-homework-tool.html` |
 | 39 | vocabulary | spaced repetition flashcards for private English students | `https://edooqoo.com/features/flashcards` |
 | 40 | evidence | public ESL worksheet examples generated for teachers | `https://edooqoo.com/public-esl-worksheet-examples.html` |
