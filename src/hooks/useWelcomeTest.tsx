@@ -238,7 +238,13 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
   // commitAnswer with fixed element_type, enriched payload, and fixed dedup
 
   // Commit answer to DB + log event (called on blur/navigate for text, immediately for radio/checkbox)
-  const commitAnswer = useCallback(async (questionId: string, answer: unknown) => {
+  // v6.9.67 — opts.isIdk flags the event_payload so analytics can distinguish
+  // an honest "I don't know" from a wrong guess.
+  const commitAnswer = useCallback(async (
+    questionId: string,
+    answer: unknown,
+    opts: { isIdk?: boolean } = {},
+  ) => {
     if (!state.testId || state.isTeacherMode) return;
 
     const questionDef = ALL_WELCOME_TEST_QUESTIONS.find(q => q.id === questionId);
@@ -402,6 +408,7 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
             exercise_type: questionDef.question_type,
             exercise_index: questionIndex,
             is_correct: isCorrect,
+            is_idk: opts.isIdk === true ? true : undefined,
             nano_skill_ratings: nanoSkillRatings,
             detected_traits: detectedTraitData,
             time_spent_seconds: timeSpent,
@@ -448,7 +455,7 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
       ...prev,
       answers: { ...prev.answers, [questionId]: '__IDK__' },
     }));
-    commitAnswer(questionId, '__IDK__');
+    commitAnswer(questionId, '__IDK__', { isIdk: true });
   }, [commitAnswer]);
 
   // Flush pending speaking recording before navigation (synchronous approach)
@@ -497,12 +504,51 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
     });
   }, [sections, flushPendingAnswer, flushSpeakingIfNeeded]);
 
-  // Skip question (just move forward without saving)
+  // Skip question (v6.9.67: log a lightweight test_answer_skipped event so
+  // teachers can see which questions the student avoided, without polluting
+  // skill scoring — process-welcome-test ignores unknown event types).
   const skipQuestion = useCallback(async () => {
     await flushSpeakingIfNeeded();
     await flushPendingAnswer();
+
+    const section = sections[state.currentSectionIndex];
+    const questionDef = section?.questions[state.currentQuestionIndex];
+    if (state.testId && questionDef && state.studentId && state.teacherId && !state.isTeacherMode) {
+      const questionIndex = ALL_WELCOME_TEST_QUESTIONS.indexOf(questionDef);
+      try {
+        await supabase
+          .from('student_test_questions')
+          .update({
+            student_answer: null,
+            answered_at: new Date().toISOString(),
+          })
+          .eq('test_id', state.testId)
+          .eq('question_index', questionIndex);
+
+        const canonicalId = toCanonicalId(questionDef.id);
+        await supabase.rpc('add_student_event', {
+          p_student_id: state.studentId,
+          p_teacher_id: state.teacherId,
+          p_event_type: 'test_answer_skipped',
+          p_event_source: 'welcome_test',
+          p_source_id: state.testId,
+          p_element_type: questionDef.element_type || questionDef.question_type || null,
+          p_event_payload: {
+            answer_id: canonicalId,
+            legacy_answer_id: questionDef.id,
+            exercise_type: questionDef.question_type,
+            exercise_index: questionIndex,
+            is_skipped: true,
+          } as unknown as Json,
+          p_skill_ids: questionDef.nano_skill ? [questionDef.nano_skill] : [],
+        });
+      } catch (err) {
+        console.error('Error logging skip event:', err);
+      }
+    }
+
     await goToNext();
-  }, [flushPendingAnswer, flushSpeakingIfNeeded, goToNext]);
+  }, [flushPendingAnswer, flushSpeakingIfNeeded, goToNext, sections, state.currentSectionIndex, state.currentQuestionIndex, state.testId, state.studentId, state.teacherId, state.isTeacherMode]);
 
   const goToPrevious = useCallback(async () => {
     await flushSpeakingIfNeeded();
