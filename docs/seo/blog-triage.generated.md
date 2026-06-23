@@ -1,6 +1,6 @@
 # Blog Triage
 
-Generated: 2026-06-23T07:10:04.691Z
+Generated: deterministic from committed source files
 
 This file classifies every public blog article against Edooqoo's strategic audience: recurring 1:1 adult ESL/EFL tutors. It is intentionally strict. School-like, classroom-first, or generic ELT topics should not receive index priority unless rewritten into a concrete adult tutor decision page.
 

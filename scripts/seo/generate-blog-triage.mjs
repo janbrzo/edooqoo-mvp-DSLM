@@ -9,6 +9,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..', '..');
 const OUT_JSON = path.join(ROOT, 'docs', 'seo', 'blog-triage.generated.json');
 const OUT_MD = path.join(ROOT, 'docs', 'seo', 'blog-triage.generated.md');
+const GENERATED_FROM = 'deterministic from committed source files';
 
 const PRIORITY_REWRITE_SLUGS = new Set([
   'one-minute-prep-workflow-for-esl-tutors.html',
@@ -150,7 +151,7 @@ const counts = blogEntries.reduce((acc, entry) => {
 }, {});
 
 const report = {
-  generatedAt: new Date().toISOString(),
+  generatedAt: GENERATED_FROM,
   totalArticles: blogEntries.length,
   counts,
   priorityRewriteSlugs: [...PRIORITY_REWRITE_SLUGS].sort(),
