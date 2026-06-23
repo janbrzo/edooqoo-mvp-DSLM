@@ -38,14 +38,18 @@ export const AddStudentFlashcardDialog: React.FC<Props> = ({
   const [userEditedBackText, setUserEditedBackText] = useState(false);
   const [busy, setBusy] = useState(false);
 
-  const nativeLang = studentNativeLanguage || 'English';
+  // v6.9.68 — do NOT silently fall back to English; that hides a missing
+  // native_language on the student record and shows "English Translation"
+  // for translation sets, which is confusing for Spanish/Polish/etc. learners.
+  const nativeLang = (studentNativeLanguage || '').trim();
+  const hasNativeLang = nativeLang.length > 0;
 
   const {
     translation, cefrLevel: translationCefr, isTranslating,
     translateText, clearTranslation,
   } = useFlashcardTranslation({
-    targetLanguage: nativeLang,
-    enabled: backType === 'translation' && !!nativeLang,
+    targetLanguage: hasNativeLang ? nativeLang : 'Spanish',
+    enabled: backType === 'translation' && hasNativeLang,
   });
 
   const {
@@ -63,10 +67,10 @@ export const AddStudentFlashcardDialog: React.FC<Props> = ({
 
   // Auto-translate / auto-define on front change (debounced inside hooks).
   useEffect(() => {
-    if (backType === 'translation' && nativeLang && frontText.trim().length > 2 && !userEditedBackText) {
+    if (backType === 'translation' && hasNativeLang && frontText.trim().length > 2 && !userEditedBackText) {
       translateText(frontText);
     }
-  }, [frontText, backType, nativeLang, translateText, userEditedBackText]);
+  }, [frontText, backType, hasNativeLang, translateText, userEditedBackText]);
 
   useEffect(() => {
     if (backType === 'definition' && frontText.trim().length > 2 && !userEditedBackText) {
@@ -94,18 +98,24 @@ export const AddStudentFlashcardDialog: React.FC<Props> = ({
     }
     setBusy(true);
     try {
-      const { error } = await (supabase as any).rpc('student_add_flashcard', {
+      // v6.9.68 — use v2 RPC which matches the actual flashcard_cards schema
+      // (front_example, cefr_level, card_position) and avoids the 400 from
+      // the legacy column names.
+      const { error } = await (supabase as any).rpc('student_add_flashcard_v2', {
         p_set_id: setId,
         p_student_email: studentEmail,
         p_front: frontText.trim(),
         p_back: backText.trim(),
-        p_native: null,
+        p_front_example: frontExample.trim() || null,
+        p_cefr_level: currentCefr || null,
       });
       if (error) {
         const msg = String(error.message || '');
+        console.warn('[AddStudentFlashcardDialog] RPC error:', msg);
         if (msg.includes('contributions_disabled')) toast.error('Your teacher has disabled student additions for this set.');
         else if (msg.includes('student_not_authorized')) toast.error("Couldn't verify your email for this set.");
         else if (msg.includes('empty_card')) toast.error('Front and back are required.');
+        else if (msg.includes('set_not_found')) toast.error('This flashcard set no longer exists.');
         else toast.error('Could not save the card. Try again.');
         return;
       }
@@ -121,10 +131,10 @@ export const AddStudentFlashcardDialog: React.FC<Props> = ({
   };
 
   const backLabel = backType === 'translation'
-    ? `${nativeLang} Translation *`
+    ? (hasNativeLang ? `${nativeLang} Translation *` : 'Native-language Translation *')
     : 'English Definition *';
   const backPlaceholder = backType === 'translation'
-    ? `Translation in ${nativeLang}...`
+    ? (hasNativeLang ? `Translation in ${nativeLang}...` : 'Type the translation in your native language...')
     : 'Definition in English...';
 
   return (
@@ -182,6 +192,11 @@ export const AddStudentFlashcardDialog: React.FC<Props> = ({
             </div>
             {backType === 'translation' && translation && !userEditedBackText && (
               <p className="text-xs text-muted-foreground mt-1">💡 Auto-suggested translation</p>
+            )}
+            {backType === 'translation' && !hasNativeLang && (
+              <p className="text-xs text-muted-foreground mt-1">
+                Ask your teacher to set your native language for auto-suggestions.
+              </p>
             )}
             {backType === 'definition' && definition && !userEditedBackText && (
               <p className="text-xs text-muted-foreground mt-1">💡 Auto-suggested definition</p>

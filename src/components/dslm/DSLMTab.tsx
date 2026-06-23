@@ -22,6 +22,8 @@ import { usePacingProposals } from '@/hooks/usePacingProposals';
 import { Badge } from '@/components/ui/badge';
 import { Bell } from 'lucide-react';
 import { SuggestedLevelChangeBanner } from '@/components/student-tests/SuggestedLevelChangeBanner';
+import { useStudentAttentionDots } from '@/hooks/useStudentAttentionDots';
+import { AttentionDot } from '@/components/ui/AttentionDot';
 
 interface DSLMTabProps {
   studentId: string;
@@ -114,6 +116,7 @@ export const DSLMTab: React.FC<DSLMTabProps> = ({
   const { data: stats } = useBehavioralStats({ studentId, teacherId });
   const { proposals: pacingProposals } = usePacingProposals(studentId);
   const { goals: progressGoals } = useStudentProgress({ studentId, teacherId });
+  const attention = useStudentAttentionDots(studentId, teacherId, englishLevel);
 
   // v5.2: nearest non-main active goal deadline (separate from main_goal_target_date)
   const nearestGoalDeadline = React.useMemo(() => {
@@ -396,6 +399,8 @@ export const DSLMTab: React.FC<DSLMTabProps> = ({
                     >
                       <Icon className="h-4 w-4" />
                       {view.label}
+                      {view.id === 'goals' && <AttentionDot show={attention.goalsAny} />}
+                      {view.id === 'pathway' && <AttentionDot show={attention.pathway} />}
                     </button>
                     {subs.length > 0 && (
                       <div className={cn(
@@ -414,6 +419,12 @@ export const DSLMTab: React.FC<DSLMTabProps> = ({
                             className="block w-full text-left px-2 py-1 rounded text-xs text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
                           >
                             {s.label}
+                            {view.id === 'goals' && s.id === 'goals-supporting' && (
+                              <AttentionDot show={attention.supporting} />
+                            )}
+                            {view.id === 'goals' && s.id === 'goals-additional' && (
+                              <AttentionDot show={attention.additional} />
+                            )}
                           </button>
                         ))}
                       </div>
