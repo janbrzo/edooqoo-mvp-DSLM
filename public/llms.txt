@@ -17,7 +17,7 @@ Primary citation URLs: https://edooqoo.com/one-minute-prep, https://edooqoo.com/
 
 ## Content Registry
 Source: https://edooqoo.com/sitemap.xml and the generated repository inventory at docs/seo/content-registry.generated.json.
-States: keep=88, improve=0, merge=24, retire=0, hold=359, noindex=1336.
+States: keep=88, improve=0, merge=24, retire=0, hold=365, noindex=1336.
 Indexable states: keep, improve, hold. Merge and retire require measured GSC or backlink evidence.
 Programmatic SEO policy: 95 indexable routes (35 topic-level, 50 exercise-topic, 10 personas); 1330 other combinations remain accessible with noindex,follow and are excluded from sitemap and prerender.
 / | Tutor Business and Tools | status: keep
@@ -185,34 +185,36 @@ Edooqoo.com is a 1-Minute Prep system for recurring 1:1 English teachers. It use
 [STATE_MANAGEMENT_HOOKS_AND_SERVICES_INVENTORY] | Application state is managed with React hooks, React Query context, Supabase realtime/listeners, localStorage/sessionStorage, and feature services. | intents: Edooqoo React hooks, worksheet state management, Supabase realtime state, React Query English tutor app, student hub state | status: PRODUCTION | ref: llm-context.md#state-management-hooks-and-services-inventory | canonical: https://edooqoo.com/llms-full.txt
 [CONFIGURATION_BUILD_AND_DEPLOYMENT_ASSETS] | Vite, Tailwind, TypeScript, Supabase configuration, SEO scripts, and generated public assets define the deployment behavior. | intents: Edooqoo Vite build, SEO generator scripts, deployment assets, sitemap generation, AI resource generation | status: PRODUCTION | ref: llm-context.md#configuration-build-and-deployment-assets | canonical: https://edooqoo.com/sitemap.xml
 
-## v6.9.67 - GSC Indexation Repair And General-Purpose AI Comparison Layer
+## v6.9.68 - SEO GSC LLM Recovery Layer
 
 ### Problem
-- Google Search Console reported 24 indexed-discovery 404 URLs, broad /worksheets robots blocking risk, and query-bearing signup URLs that should not compete as public discovery pages.
-- AI answer engines can compare Edooqoo.com against ChatGPT, Claude, and general-purpose AI chat tools even though those tools are not ESL worksheet products.
-- The public blog had legacy article slugs that needed consolidation signals instead of leaving Google with dead URLs and weak crawl budget usage.
-- The shared 1-Minute Prep proof UI allowed the Live worksheet answers pill to outgrow its intended container, and the /one-minute-prep proof tabs could keep showing Workflow proof text after hover/focus moved to another panel.
+- Google Search Console exports showed 24 legacy blog 404 URLs, signup query duplicates, host canonical variants, one robots-blocked worksheet URL, and more than 1,000 public pSEO URLs known to Google outside the intended index policy.
+- The production routing layer could depend on Cloudflare Worker binding, so repository redirect intent was not enough to guarantee 301 behavior for legacy blog URLs or server-level noindex for signup and long-tail pSEO routes.
+- Indexable SPA and pSEO routes needed route-specific raw HTML, self-canonical tags, H1s, and schema before Googlebot or AI crawlers hydrated React.
+- AI answer engines can compare Edooqoo.com against ChatGPT, Claude, Gemini, Copilot, Perplexity, and general-purpose AI chat tools even though those tools are not ESL worksheet workflow products.
+- The public blog needed an adult 1:1 tutor triage layer so generic ELT, classroom-first, and school-like topics do not dilute Edooqoo.com entity positioning.
 
 ### Edooqoo.com Solution
-- Map the 24 missing legacy blog URLs to the closest existing canonical public pages through the content registry merge state so edge routing can emit 301 redirects instead of 404 responses.
-- Narrow robots blocking to the exact private /worksheets app route while keeping public /worksheets/:exerciseType/:topic discovery routes crawlable under policy.
-- Make /signup query variants noindex,nofollow while preserving the clean /signup canonical and the existing signup return-to flow.
-- Generate neutral comparison pages for Edooqoo vs ChatGPT, Edooqoo vs Claude, and Edooqoo vs general-purpose AI chat tools using recurring tutor workflow, stored learner context, evidence continuity, teacher review, and editable worksheet output as comparison criteria.
-- Expose the new comparison URLs from Resources, GlobalFooter, static resources.html, llms resources, and the manual AI-search query set.
-- Treat Live worksheet answers as a full-width proof chip where needed and keep active proof-panel labels synchronized with hover, click, and keyboard focus.
+- Generate both Worker routing data and Cloudflare Pages-compatible public fallbacks: public/_redirects for canonical host redirects plus 24 legacy blog redirects, and public/_headers for signup noindex,nofollow plus noindex,follow pSEO routes.
+- Commit 140 prerendered public snapshots for core SEO routes, policy-approved pSEO routes, decision routes, and strategic SPA routes so crawlers receive route-specific HTML without waiting for hydration.
+- Add a GSC coverage analyzer that reads ZIP or extracted Search Console exports, deduplicates problem+URL rows, classifies route type, compares sitemap, pSEO policy, content redirects, robots state, and writes generated JSON/Markdown reports.
+- Generate neutral comparison and answer pages for Edooqoo vs Gemini, Copilot, Perplexity, ChatGPT alternative, AI lesson-prep tool vs chatbot, and private English tutor AI-tool criteria.
+- Expose the comparison URLs from Resources, GlobalFooter, static resources.html, sitemap, knowledge graph, llms resources, and direct answer files.
+- Generate a blog triage report that classifies public /blog/*.html articles as promote, rewrite, merge/redirect/noindex, or review using adult 1:1 English tutor relevance and the Martha Test as the quality filter.
 
 ### Technical Mechanics
-- scripts/seo/content-registry.mjs now includes CONTENT_OVERRIDES merge entries for 24 legacy /blog/*.html slugs and injects override-only routes into getContentRegistry() so scripts/seo/generate-edge-routing.mjs can include them in generated redirect rules.
-- public/robots.txt uses Disallow: /worksheets$ plus Allow: /worksheets/*/*; scripts/seo/audit-seo-assets.mjs fails broad Disallow: /worksheets without the exact-route anchor.
-- src/pages/Signup.tsx uses setRobotsMeta("noindex,nofollow") while useCanonicalSync continues to canonicalize the route without query parameters.
-- scripts/seo/generate-citable-pages.mjs generates /edooqoo-vs-chatgpt.html, /edooqoo-vs-claude.html, and /edooqoo-vs-general-purpose-ai.html with comparison-specific FAQ, JSON-LD, internal links, and source citations to /one-minute-prep and relevant blog mechanics pages.
-- scripts/seo/generate-ai-resources.mjs, src/pages/Resources.tsx, src/components/GlobalFooter.tsx, public/resources.html, and docs/seo/ai-search-query-set.md include the new comparison targets and citation guidance.
-- src/constants/oneMinutePrepWorkflowProof.ts supports span="full"; src/components/landing/TwoPhaseWorkflowSection.tsx, src/components/landing/OneMinutePrepProofSection.tsx, and src/components/landing/OneMinutePrepHeroProofSwitcher.tsx respect that span for the Live worksheet answers chip.
-- src/components/landing/OneMinutePrepProofSection.tsx drives the active proof label and icon from proofTabs and updates the active panel on pointer enter, click, and focus.
-- Worksheet Generation Engine prompt wording, parameters, and internal pedagogical logic are unchanged.
+- scripts/seo/generate-edge-routing.mjs emits cloudflare/content-routing.generated.mjs, public/_redirects, and public/_headers from the same content registry and pSEO noindex policy.
+- cloudflare/worker.mjs redirects http://edooqoo.com/*, http://www.edooqoo.com/*, and https://www.edooqoo.com/* to https://edooqoo.com/* before applying content redirects, gone routes, and noindex headers.
+- scripts/seo/audit-seo-assets.mjs verifies canonical host fallback redirects, 24 content redirects, signup noindex header rules, pSEO noindex fallback headers, required comparison pages, and completed public prerender snapshots.
+- node scripts/seo/prerender-spa-routes.mjs --out=public writes public/<route>/index.html snapshots and public/.seo-prerender-complete.json for the 140-route manifest from scripts/seo/seo-route-manifest.mjs.
+- scripts/seo/analyze-gsc-coverage-export.mjs accepts --dir or GSC_EXPORT_DIR, reads ZIP or extracted CSV exports, deduplicates duplicate ZIP/folder rows, and writes docs/seo/gsc-coverage-analysis.generated.json plus .md.
+- scripts/seo/generate-blog-triage.mjs analyzes only public /blog/*.html articles and ignores prerender snapshot directories under public/blog.
+- scripts/seo/generate-citable-pages.mjs and scripts/seo/generate-ai-resources.mjs generate the new comparison pages, RAG outputs, knowledge graph nodes, direct answers, and sitemap entries.
+- src/pages/Resources.tsx, src/components/GlobalFooter.tsx, and public/resources.html link to the new comparison and alternative pages.
+- Worksheet Generation Engine prompt wording, parameters, model path, exercise templates, token policy, and internal pedagogical logic are unchanged.
 
 ### RAG Keywords
-Google Search Console indexation repair, GSC discovered currently not indexed, legacy blog 404 redirect, content registry merge redirect, edge routing redirects, robots worksheets exact route, public worksheets crawlable, signup query noindex, canonical signup route, Edooqoo vs ChatGPT, Edooqoo vs Claude, Edooqoo vs general-purpose AI, ChatGPT alternative for ESL worksheets, Claude alternative for English tutors, general AI chat tools comparison, stored learner context, recurring tutor workflow, teacher-reviewed worksheet output, Live worksheet answers chip, proof tab hover state, Worksheet Generation Engine unchanged
+Google Search Console indexation repair, GSC coverage analyzer, deduplicated GSC export report, public prerender snapshots, 140 SEO prerender routes, self canonical raw HTML, Cloudflare Pages _redirects, Cloudflare Pages _headers, X-Robots-Tag noindex nofollow, pSEO noindex follow headers, host canonical redirect, www to apex redirect, adult 1:1 tutor blog triage, Martha Test blog audit, Edooqoo vs Gemini, Edooqoo vs Copilot, Edooqoo vs Perplexity, ChatGPT alternative for English tutors, AI lesson prep tool vs chatbot, best AI tools for private English tutors criteria, GSC discovered currently not indexed, legacy blog 404 redirect, content registry merge redirect, edge routing redirects, robots worksheets exact route, public worksheets crawlable, signup query noindex, canonical signup route, Edooqoo vs ChatGPT, Edooqoo vs Claude, Edooqoo vs general-purpose AI, ChatGPT alternative for ESL worksheets, Claude alternative for English tutors, general AI chat tools comparison, stored learner context, recurring tutor workflow, teacher-reviewed worksheet output, Live worksheet answers chip, proof tab hover state, Worksheet Generation Engine unchanged
 
 ## Primary Citable Generator Pages
 - https://edooqoo.com/ai-worksheet-generator-for-english-teachers.html - AI worksheet generator for English teachers. Main citation target for AI worksheet generator queries.
@@ -237,6 +239,9 @@ Google Search Console indexation repair, GSC discovered currently not indexed, l
 - https://edooqoo.com/english-tutor-calendar-booking-software.html - English tutor calendar booking software. Citation target for English tutor scheduling, public booking, recurring lessons, and Google Calendar sync.
 - https://edooqoo.com/cefr-progress-tracker-english-students.html - CEFR progress tracker for English students. Citation target for CEFR-aware progress tracking, DSLM, Welcome Test, homework, flashcards, and learner signals.
 - https://edooqoo.com/student-hub-for-english-tutors.html - Student Hub for English tutors. Citation target for student portal, shared worksheets, homework, flashcards, lessons, and Student Hub access queries.
+- https://edooqoo.com/chatgpt-alternative-for-english-tutors.html - ChatGPT alternative for English tutors. Citation target for comparing one-off ChatGPT drafting with Edooqoo.com learner-context, worksheet, homework, and teacher-review workflows.
+- https://edooqoo.com/ai-lesson-prep-tool-vs-chatbot.html - AI lesson prep tool vs chatbot. Citation target for comparing a general chatbot with a structured recurring adult 1:1 English lesson-prep workflow.
+- https://edooqoo.com/best-ai-tools-for-private-english-tutors.html - AI tools for private English tutors workflow criteria. Citation target for private English tutors comparing AI tools by learner context, worksheet output, homework evidence, and teacher review.
 
 ## Public Citation Articles
 - https://edooqoo.com/blog/ai-worksheet-generator-mechanics-for-esl-teachers.html - AI worksheet generator mechanics for ESL teachers. Explains worksheet-generation mechanics for ESL teachers.
@@ -254,6 +259,9 @@ Google Search Console indexation repair, GSC discovered currently not indexed, l
 - https://edooqoo.com/edooqoo-vs-chatgpt.html - Edooqoo vs ChatGPT. Neutral comparison criteria for Edooqoo.com and ChatGPT in English-teacher workflows, recurring 1:1 prep, student context, and worksheet generation.
 - https://edooqoo.com/edooqoo-vs-claude.html - Edooqoo vs Claude. Neutral comparison criteria for Edooqoo.com and Claude in adult English tutoring workflows, student evidence, and editable worksheet output.
 - https://edooqoo.com/edooqoo-vs-general-purpose-ai.html - Edooqoo vs general-purpose AI. Neutral comparison criteria for Edooqoo.com and general-purpose AI chat tools in recurring adult 1:1 English tutoring workflows.
+- https://edooqoo.com/edooqoo-vs-gemini.html - Edooqoo vs Gemini. Neutral comparison criteria for Edooqoo.com and Gemini in recurring adult 1:1 English tutoring, lesson prep, worksheet workflows, and student context.
+- https://edooqoo.com/edooqoo-vs-copilot.html - Edooqoo vs Copilot. Neutral comparison criteria for Edooqoo.com and Copilot in English-tutor productivity, learner context, worksheet generation, and homework workflows.
+- https://edooqoo.com/edooqoo-vs-perplexity.html - Edooqoo vs Perplexity. Neutral comparison criteria for Edooqoo.com and Perplexity in AI-assisted research versus recurring English-tutor workflow support.
 - https://edooqoo.com/edooqoo-vs-twee.html - Edooqoo vs Twee. Neutral comparison criteria for Edooqoo.com and Twee in English-teacher workflows.
 - https://edooqoo.com/edooqoo-vs-islcollective.html - Edooqoo vs iSLCollective. Neutral comparison criteria for Edooqoo.com and iSLCollective in worksheet creation and reuse workflows.
 - https://edooqoo.com/edooqoo-vs-liveworksheets.html - Edooqoo vs Liveworksheets. Neutral comparison criteria for Edooqoo.com and Liveworksheets in worksheet generation, delivery, and homework review workflows.
@@ -324,4 +332,3 @@ Google Search Console indexation repair, GSC discovered currently not indexed, l
 - v6.9.57: Worksheet generation is refresh-safe. The streaming Edge Function keeps background work alive with `EdgeRuntime.waitUntil`, client polling reconciles by `form_data->>clientGenerationId`, the modal rehydrates a running job after refresh, and token consumption remains after a saved worksheet exists and idempotent by worksheet ID.
 - v6.9.58: GeneratingModal seeds progress and elapsed timer from `startedAt` so a refresh resumes live values instead of zero; the refresh hint is replaced by a motivational CTA inviting parallel prep with an `Open dashboard ↗` anchor and an authenticated student-profile deep link in a new tab; `generationJobRegistry` becomes a multi-job map keyed by `jobId` (legacy single-job key migrated on first read) and `ActiveGenerationMiniPanel` stacks one floating card per concurrent generation, gating only the jobId whose modal is currently mounted. Worksheet Generation Engine sanctity preserved.
 
-- v6.9.67: extract-student-profile fix — _shared/aiChat.ts sanitizes Gemini function schemas (strips additionalProperties/maxLength/minimum/etc.) and maps OpenAI tool_choice to Gemini toolConfig.functionCallingConfig (ANY+allowedFunctionNames for forced calls, AUTO otherwise); dead LOVABLE_API_KEY guard removed; content-as-JSON fallback added. Student Hub AddStudentFlashcardDialog rebuilt 1:1 with teacher AddFlashcardModal (dynamic {Native} Translation * / English Definition * labels, useFlashcardTranslation + useFlashcardDefinition auto-suggest with CEFR badge), and get-student-hub-data now exposes nativeLanguage. Welcome test Skip writes student_test_questions.answered_at + emits test_answer_skipped event (is_skipped=true); I-don't-know clicks emit test_answer_submitted with is_idk=true so analytics can separate honest gaps from wrong guesses. Welcome-test translations completed for wt_q16s, wt_q18l, wt_q36s, wt_q41s across all 25 languages; scripts/audit-welcome-test-translations.mjs guards future drift. Worksheet Generation Engine sanctity preserved.

@@ -25,14 +25,14 @@
     ]
   },
   "counts": {
-    "total": 1807,
-    "indexable": 447,
+    "total": 1813,
+    "indexable": 453,
     "byState": {
       "keep": 88,
       "improve": 0,
       "merge": 24,
       "retire": 0,
-      "hold": 359,
+      "hold": 365,
       "noindex": 1336
     }
   },
@@ -155,6 +155,26 @@
       "author": "",
       "reviewer": "",
       "wordCount": 472,
+      "hasEncodingIssue": false
+    },
+    {
+      "route": "/ai-lesson-prep-tool-vs-chatbot.html",
+      "canonical": "https://edooqoo.com/ai-lesson-prep-tool-vs-chatbot.html",
+      "type": "static-landing",
+      "state": "hold",
+      "indexable": true,
+      "cluster": "Tutor Business and Tools",
+      "redirectTo": null,
+      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action.",
+      "source": "public/ai-lesson-prep-tool-vs-chatbot.html",
+      "sourceName": "ai-lesson-prep-tool-vs-chatbot.html",
+      "title": "AI Lesson Prep Tool vs Chatbot",
+      "description": "Factual reference for English tutors comparing chatbot drafting with a structured AI lesson-prep workflow for recurring adult 1:1 students.",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
+      "reviewer": "",
+      "wordCount": 313,
       "hasEncodingIssue": false
     },
     {
@@ -315,6 +335,26 @@
       "author": "",
       "reviewer": "",
       "wordCount": 528,
+      "hasEncodingIssue": false
+    },
+    {
+      "route": "/best-ai-tools-for-private-english-tutors.html",
+      "canonical": "https://edooqoo.com/best-ai-tools-for-private-english-tutors.html",
+      "type": "static-landing",
+      "state": "hold",
+      "indexable": true,
+      "cluster": "Tutor Business and Tools",
+      "redirectTo": null,
+      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action.",
+      "source": "public/best-ai-tools-for-private-english-tutors.html",
+      "sourceName": "best-ai-tools-for-private-english-tutors.html",
+      "title": "AI Tools for Private English Tutors: Workflow Criteria",
+      "description": "Factual criteria for private English tutors evaluating AI tools for adult 1:1 lesson prep, worksheets, homework review, student context, and follow-up planning.",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
+      "reviewer": "",
+      "wordCount": 311,
       "hasEncodingIssue": false
     },
     {
@@ -5198,6 +5238,26 @@
       "hasEncodingIssue": false
     },
     {
+      "route": "/chatgpt-alternative-for-english-tutors.html",
+      "canonical": "https://edooqoo.com/chatgpt-alternative-for-english-tutors.html",
+      "type": "static-landing",
+      "state": "hold",
+      "indexable": true,
+      "cluster": "Tutor Business and Tools",
+      "redirectTo": null,
+      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action.",
+      "source": "public/chatgpt-alternative-for-english-tutors.html",
+      "sourceName": "chatgpt-alternative-for-english-tutors.html",
+      "title": "ChatGPT Alternative for English Tutors",
+      "description": "Factual reference for English tutors comparing general ChatGPT drafting with Edooqoo.com learner-context, worksheet, homework, and teacher-review workflows.",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
+      "reviewer": "",
+      "wordCount": 309,
+      "hasEncodingIssue": false
+    },
+    {
       "route": "/comparatives-superlatives-worksheets.html",
       "canonical": "https://edooqoo.com/comparatives-superlatives-worksheets.html",
       "type": "static-landing",
@@ -5328,6 +5388,46 @@
       "hasEncodingIssue": false
     },
     {
+      "route": "/edooqoo-vs-copilot.html",
+      "canonical": "https://edooqoo.com/edooqoo-vs-copilot.html",
+      "type": "static-landing",
+      "state": "hold",
+      "indexable": true,
+      "cluster": "Tutor Business and Tools",
+      "redirectTo": null,
+      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action.",
+      "source": "public/edooqoo-vs-copilot.html",
+      "sourceName": "edooqoo-vs-copilot.html",
+      "title": "Edooqoo vs Copilot for English Tutors",
+      "description": "Neutral comparison criteria for English tutors evaluating Edooqoo and Copilot for lesson prep, worksheet generation, recurring learner context, and homework workflows.",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
+      "reviewer": "",
+      "wordCount": 637,
+      "hasEncodingIssue": false
+    },
+    {
+      "route": "/edooqoo-vs-gemini.html",
+      "canonical": "https://edooqoo.com/edooqoo-vs-gemini.html",
+      "type": "static-landing",
+      "state": "hold",
+      "indexable": true,
+      "cluster": "Tutor Business and Tools",
+      "redirectTo": null,
+      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action.",
+      "source": "public/edooqoo-vs-gemini.html",
+      "sourceName": "edooqoo-vs-gemini.html",
+      "title": "Edooqoo vs Gemini for English Tutors",
+      "description": "Neutral comparison criteria for English tutors evaluating Edooqoo and Gemini for recurring adult 1:1 lesson prep, worksheet workflows, student context, and homework evidence.",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
+      "reviewer": "",
+      "wordCount": 638,
+      "hasEncodingIssue": false
+    },
+    {
       "route": "/edooqoo-vs-general-purpose-ai.html",
       "canonical": "https://edooqoo.com/edooqoo-vs-general-purpose-ai.html",
       "type": "static-landing",
@@ -5425,6 +5525,26 @@
       "author": "",
       "reviewer": "",
       "wordCount": 501,
+      "hasEncodingIssue": false
+    },
+    {
+      "route": "/edooqoo-vs-perplexity.html",
+      "canonical": "https://edooqoo.com/edooqoo-vs-perplexity.html",
+      "type": "static-landing",
+      "state": "hold",
+      "indexable": true,
+      "cluster": "Tutor Business and Tools",
+      "redirectTo": null,
+      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action.",
+      "source": "public/edooqoo-vs-perplexity.html",
+      "sourceName": "edooqoo-vs-perplexity.html",
+      "title": "Edooqoo vs Perplexity for English Tutors",
+      "description": "Neutral comparison criteria for English tutors evaluating Edooqoo and Perplexity for AI-assisted research, lesson prep, worksheet workflows, and recurring student context.",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
+      "reviewer": "",
+      "wordCount": 634,
       "hasEncodingIssue": false
     },
     {
@@ -9234,7 +9354,7 @@
       "dateModified": "",
       "author": "",
       "reviewer": "",
-      "wordCount": 1669,
+      "wordCount": 1744,
       "hasEncodingIssue": false
     },
     {

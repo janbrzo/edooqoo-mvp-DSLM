@@ -37,6 +37,9 @@ jobs:
       - name: Build blog index and sitemap
         run: node scripts/seo/build-blog-index.mjs
 
+      - name: Generate blog triage
+        run: npm run seo:generate-blog-triage
+
       - name: Apply programmatic SEO index policy
         run: npm run seo:apply-pseo-policy
 
