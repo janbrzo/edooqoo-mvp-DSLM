@@ -45,7 +45,11 @@ function countStringLiterals(body) {
 
 // Walk question objects naively. Capture id, question_type, optional
 // `options` literal count and whether `description:` is present in the body.
-const profiling = new Map(); // id -> { hasOptions, optionCount, hasDescription }
+// Listening-comprehension answers must remain in English because the audio
+// they refer to is in English; we do not require translated options.
+const OPTIONS_OPTIONAL_TYPES = new Set(['listening_comprehension']);
+
+const profiling = new Map(); // id -> { type, hasOptions, optionCount, hasDescription }
 const re = /\{\s*id:\s*['"](wt_q[a-z0-9]+)['"]([\s\S]*?)\n\s{2}\},/g;
 let m;
 while ((m = re.exec(qFile)) !== null) {
@@ -53,6 +57,7 @@ while ((m = re.exec(qFile)) !== null) {
   const body = m[2];
   const typeMatch = body.match(/question_type:\s*['"]([a-z_]+)['"]/);
   if (!typeMatch || !PROFILING_TYPES.has(typeMatch[1])) continue;
+  const type = typeMatch[1];
   const hasDescription = /\n\s*description:\s*['"]/.test(body);
   const optionsBlock = body.match(/\n\s*options:\s*\[([\s\S]*?)\][,\n]/);
   let optionCount = 0;
@@ -61,7 +66,7 @@ while ((m = re.exec(qFile)) !== null) {
     hasOptions = true;
     optionCount = countStringLiterals(optionsBlock[1]);
   }
-  profiling.set(id, { hasOptions, optionCount, hasDescription });
+  profiling.set(id, { type, hasOptions, optionCount, hasDescription });
 }
 const profilingIds = new Set(profiling.keys());
 
@@ -101,8 +106,9 @@ for (const [lang, entries] of Object.entries(langs)) {
     const tr = entries.get(id);
     if (!tr) { problems.push(`missing ${id}`); continue; }
     if (!tr.hasQuestion) problems.push(`${id}: no 'question'`);
-    if (src.hasOptions && !tr.hasOptions) problems.push(`${id}: missing options`);
-    if (src.hasOptions && tr.hasOptions && src.optionCount !== tr.optionCount) {
+    const optionsRequired = src.hasOptions && !OPTIONS_OPTIONAL_TYPES.has(src.type);
+    if (optionsRequired && !tr.hasOptions) problems.push(`${id}: missing options`);
+    if (optionsRequired && tr.hasOptions && src.optionCount !== tr.optionCount) {
       problems.push(`${id}: options ${tr.optionCount}≠${src.optionCount}`);
     }
     if (src.hasDescription && !tr.hasDescription) problems.push(`${id}: missing description`);
