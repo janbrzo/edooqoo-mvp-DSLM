@@ -117,6 +117,10 @@ const GlobalFooter = () => {
               <li><FooterLink href="/edooqoo-vs-copilot.html">vs Copilot</FooterLink></li>
               <li><FooterLink href="/edooqoo-vs-perplexity.html">vs Perplexity</FooterLink></li>
               <li><FooterLink href="/chatgpt-alternative-for-english-tutors.html">ChatGPT Alternative</FooterLink></li>
+              <li><FooterLink href="/chatgpt-for-esl-teachers-limitations.html">ChatGPT Limitations</FooterLink></li>
+              <li><FooterLink href="/ai-chatbot-vs-student-context-system.html">AI Chatbot vs Context</FooterLink></li>
+              <li><FooterLink href="/teacher-controlled-ai-for-english-tutors.html">Teacher-Controlled AI</FooterLink></li>
+              <li><FooterLink href="/best-ai-worksheet-tools-for-english-tutors.html">Worksheet Tool Criteria</FooterLink></li>
               <li><FooterLink href="/best-ai-tools-for-private-english-tutors.html">Private Tutor AI Tools</FooterLink></li>
               <li><FooterLink href="/edooqoo-vs-islcollective.html">vs ISLCollective</FooterLink></li>
               <li><FooterLink href="/edooqoo-vs-liveworksheets.html">vs Liveworksheets</FooterLink></li>

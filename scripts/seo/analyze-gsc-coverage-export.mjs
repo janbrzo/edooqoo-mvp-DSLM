@@ -70,6 +70,7 @@ const argValue = (name) => {
 const GSC_DIR = path.resolve(
   argValue('--dir') || process.env.GSC_EXPORT_DIR || ''
 );
+const PREVIOUS_REPORT_PATH = argValue('--previous') || argValue('--baseline') || process.env.GSC_PREVIOUS_REPORT || '';
 const LIVE_CHECK = argv.includes('--live');
 const WRITE_OUTPUT = !argv.includes('--no-write');
 
@@ -415,8 +416,120 @@ const sets = problemNames.map((problem) => {
   };
 });
 
+function loadPreviousReport() {
+  if (!PREVIOUS_REPORT_PATH) return null;
+  const resolved = path.resolve(PREVIOUS_REPORT_PATH);
+  if (!fsSync.existsSync(resolved)) {
+    console.warn(`[gsc-analyze] Previous report not found: ${resolved}`);
+    return null;
+  }
+  try {
+    return JSON.parse(fsSync.readFileSync(resolved, 'utf8'));
+  } catch (error) {
+    console.warn(`[gsc-analyze] Could not parse previous report ${resolved}: ${error.message}`);
+    return null;
+  }
+}
+
+function urlsForProblem(rows, problem) {
+  return new Set(rows
+    .filter((row) => normalizeProblemLabel(row.problem) === normalizeProblemLabel(problem))
+    .map((row) => row.url)
+    .filter(Boolean));
+}
+
+function intersection(a, b) {
+  return [...a].filter((value) => b.has(value)).sort();
+}
+
+function difference(a, b) {
+  return [...a].filter((value) => !b.has(value)).sort();
+}
+
+function sample(values, count = 20) {
+  return values.slice(0, count);
+}
+
+function daysBetween(startIso, endIso) {
+  if (!startIso || !endIso) return null;
+  const start = Date.parse(startIso);
+  const end = Date.parse(endIso);
+  if (!Number.isFinite(start) || !Number.isFinite(end)) return null;
+  return Math.floor((end - start) / 86400000);
+}
+
+function compareReports(currentRows, previousReport, generatedAt) {
+  const previousRows = previousReport?.rows || [];
+  const previousIndexed = urlsForProblem(previousRows, 'Zindeksowano');
+  const currentIndexed = urlsForProblem(currentRows, 'Zindeksowano');
+  const ageDays = daysBetween(previousReport?.generatedAt, generatedAt);
+  const currentSitemapUrls = [...sitemapSet].sort();
+  const sitemapNotIndexed = currentSitemapUrls.filter((url) => !currentIndexed.has(url));
+  const noindexAccidentallyIndexed = currentRows
+    .filter((row) =>
+      normalizeProblemLabel(row.problem) === 'Zindeksowano' &&
+      (row.noindex || ['keep-noindex', 'keep-noindex-follow', 'keep-out-of-index-policy'].includes(row.expectedAction))
+    )
+    .map((row) => row.url)
+    .sort();
+
+  return {
+    previousReportPath: PREVIOUS_REPORT_PATH ? path.resolve(PREVIOUS_REPORT_PATH) : '',
+    previousGeneratedAt: previousReport?.generatedAt || '',
+    ageDays,
+    newIndexed: {
+      count: previousReport ? difference(currentIndexed, previousIndexed).length : 0,
+      samples: previousReport ? sample(difference(currentIndexed, previousIndexed)) : [],
+    },
+    stillDiscoveredNotIndexed: {
+      count: previousReport ? intersection(
+        urlsForProblem(currentRows, PROBLEM_LABELS.DISCOVERED_NOT_INDEXED),
+        urlsForProblem(previousRows, PROBLEM_LABELS.DISCOVERED_NOT_INDEXED)
+      ).length : 0,
+      samples: previousReport ? sample(intersection(
+        urlsForProblem(currentRows, PROBLEM_LABELS.DISCOVERED_NOT_INDEXED),
+        urlsForProblem(previousRows, PROBLEM_LABELS.DISCOVERED_NOT_INDEXED)
+      )) : [],
+    },
+    stillCrawledNotIndexed: {
+      count: previousReport ? intersection(
+        urlsForProblem(currentRows, PROBLEM_LABELS.CRAWLED_NOT_INDEXED),
+        urlsForProblem(previousRows, PROBLEM_LABELS.CRAWLED_NOT_INDEXED)
+      ).length : 0,
+      samples: previousReport ? sample(intersection(
+        urlsForProblem(currentRows, PROBLEM_LABELS.CRAWLED_NOT_INDEXED),
+        urlsForProblem(previousRows, PROBLEM_LABELS.CRAWLED_NOT_INDEXED)
+      )) : [],
+    },
+    still404: {
+      count: previousReport ? intersection(
+        urlsForProblem(currentRows, PROBLEM_LABELS.NOT_FOUND),
+        urlsForProblem(previousRows, PROBLEM_LABELS.NOT_FOUND)
+      ).length : 0,
+      samples: previousReport ? sample(intersection(
+        urlsForProblem(currentRows, PROBLEM_LABELS.NOT_FOUND),
+        urlsForProblem(previousRows, PROBLEM_LABELS.NOT_FOUND)
+      )) : [],
+    },
+    noindexAccidentallyIndexed: {
+      count: noindexAccidentallyIndexed.length,
+      samples: sample(noindexAccidentallyIndexed),
+    },
+    sitemapUrlsNotIndexed: {
+      count: sitemapNotIndexed.length,
+      samples: sample(sitemapNotIndexed),
+      requires14DayReview: Boolean(previousReport && ageDays !== null && ageDays >= 14),
+      requires28DayReview: Boolean(previousReport && ageDays !== null && ageDays >= 28),
+    },
+  };
+}
+
+const previousReport = loadPreviousReport();
+const generatedAt = new Date().toISOString();
+const comparison = compareReports(allRows, previousReport, generatedAt);
+
 const report = {
-  generatedAt: new Date().toISOString(),
+  generatedAt,
   gscDirectory: GSC_DIR,
   liveCheck: LIVE_CHECK,
   totals: {
@@ -428,6 +541,7 @@ const report = {
     byType: countBy(allRows, (row) => row.type),
     byAction: countBy(allRows, (row) => row.expectedAction),
   },
+  comparison,
   sets,
   rows: allRows,
 };
@@ -455,6 +569,24 @@ const markdown = [
   ...sets.map((set) =>
     `| ${set.problem} | ${set.rows} | ${set.rawRows} | ${set.inSitemap} | ${set.noindex} | ${set.redirect} | ${formatCounts(set.byType)} | ${formatCounts(set.byAction)} |`
   ),
+  '',
+  '## Week-Over-Week Comparison',
+  '',
+  `- Previous report: ${report.comparison.previousReportPath ? `\`${report.comparison.previousReportPath}\`` : 'not provided'}`,
+  `- Previous generated at: ${report.comparison.previousGeneratedAt || 'n/a'}`,
+  `- Age in days: ${report.comparison.ageDays ?? 'n/a'}`,
+  '',
+  '| Metric | Count | Samples |',
+  '|---|---:|---|',
+  `| New indexed | ${report.comparison.newIndexed.count} | ${report.comparison.newIndexed.samples.join('<br>')} |`,
+  `| Still discovered not indexed | ${report.comparison.stillDiscoveredNotIndexed.count} | ${report.comparison.stillDiscoveredNotIndexed.samples.join('<br>')} |`,
+  `| Still crawled not indexed | ${report.comparison.stillCrawledNotIndexed.count} | ${report.comparison.stillCrawledNotIndexed.samples.join('<br>')} |`,
+  `| Still 404 | ${report.comparison.still404.count} | ${report.comparison.still404.samples.join('<br>')} |`,
+  `| Noindex URLs accidentally indexed | ${report.comparison.noindexAccidentallyIndexed.count} | ${report.comparison.noindexAccidentallyIndexed.samples.join('<br>')} |`,
+  `| Sitemap URLs not indexed | ${report.comparison.sitemapUrlsNotIndexed.count} | ${report.comparison.sitemapUrlsNotIndexed.samples.join('<br>')} |`,
+  '',
+  `- 14-day sitemap review required: ${report.comparison.sitemapUrlsNotIndexed.requires14DayReview ? 'yes' : 'no'}`,
+  `- 28-day sitemap review required: ${report.comparison.sitemapUrlsNotIndexed.requires28DayReview ? 'yes' : 'no'}`,
   '',
   '## Priority Samples',
   '',

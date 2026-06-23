@@ -17,14 +17,14 @@
   "counts": {
     "routes": 88,
     "pageModules": 82,
-    "componentModules": 344,
-    "hookModules": 79,
+    "componentModules": 345,
+    "hookModules": 80,
     "contextModules": 1,
     "serviceModules": 11,
     "edgeFunctions": 80,
-    "typedTables": 59,
-    "typedRpcs": 61,
-    "migrationIndexes": 14
+    "typedTables": 60,
+    "typedRpcs": 63,
+    "migrationIndexes": 16
   },
   "routes": [
     {
@@ -5511,7 +5511,7 @@
         "Comparisons",
         "Edooqoo",
         "English Teaching Resources",
-        "Free resources for English teachers: AI worksheet generators, CEFR level guides, exercise tutorials, tool comparisons, blog articles, and practical teaching tips. Browse 60+ resources.",
+        "Free resources for English teachers: AI worksheet generators, CEFR level guides, exercise tutorials, tool comparisons, blog articles, and practical teaching tips. Browse 100+ resources.",
         "Guides & References",
         "Pricing",
         "Sign Up Free",
@@ -9657,6 +9657,7 @@
       "userFacingText": [
         "1-Minute Prep",
         "1-Minute Prep for 1:1 English teachers",
+        "AI Chatbot vs Context",
         "About",
         "All Grammar",
         "All Resources",
@@ -9665,6 +9666,7 @@
         "CEFR Guide",
         "CEFR Level Test",
         "ChatGPT Alternative",
+        "ChatGPT Limitations",
         "Compare",
         "Conditionals",
         "Cookie Policy",
@@ -9672,9 +9674,7 @@
         "DSLM Progress Tracking",
         "ELT Glossary",
         "ESL Worksheets",
-        "Edooqoo",
-        "Edooqoo. All rights reserved.",
-        "Exercise Types"
+        "Edooqoo"
       ],
       "userFacingBehavior": {
         "actionHandlers": [],
@@ -16567,6 +16567,7 @@
         "useRef",
         "useSearchParams",
         "useState",
+        "useStudentAttentionDots",
         "useStudentProgress"
       ],
       "actions": [],
@@ -24546,7 +24547,7 @@
       "dataDependencies": {
         "tables": [],
         "rpcs": [
-          "student_add_flashcard"
+          "student_add_flashcard_v2"
         ],
         "edgeFunctions": [],
         "fetchTargets": []
@@ -24556,6 +24557,7 @@
         "\". Your teacher will see new cards.",
         "Add a flashcard",
         "Add card",
+        "Ask your teacher to set your native language for auto-suggestions.",
         "Back:",
         "Cancel",
         "English Term *",
@@ -27248,6 +27250,52 @@
           "onOpacity",
           "onPattern"
         ],
+        "navigationTargets": []
+      }
+    },
+    {
+      "path": "src/components/ui/AttentionDot.tsx",
+      "domain": "ui",
+      "purpose": "Implements Attention Dot behavior in the ui domain.",
+      "exports": [
+        "AttentionDot"
+      ],
+      "props": [
+        {
+          "name": "AttentionDotProps",
+          "fields": [
+            {
+              "name": "show",
+              "type": "boolean",
+              "optional": false
+            },
+            {
+              "name": "className",
+              "type": "string",
+              "optional": true
+            },
+            {
+              "name": "label",
+              "type": "string",
+              "optional": true
+            }
+          ]
+        }
+      ],
+      "state": [],
+      "hooks": [],
+      "actions": [],
+      "navigateTargets": [],
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "storage": [],
+      "userFacingText": [],
+      "userFacingBehavior": {
+        "actionHandlers": [],
         "navigationTargets": []
       }
     },
@@ -37847,6 +37895,55 @@
         }
       },
       {
+        "path": "src/hooks/useStudentAttentionDots.tsx",
+        "domain": "state",
+        "purpose": "Implements use Student Attention Dots behavior in the state domain.",
+        "exports": [
+          "useStudentAttentionDots"
+        ],
+        "props": [],
+        "state": [
+          {
+            "value": "dots",
+            "setter": "setDots",
+            "initial": "EMPTY"
+          }
+        ],
+        "hooks": [
+          "useEffect",
+          "useMemo",
+          "useState"
+        ],
+        "actions": [],
+        "navigateTargets": [],
+        "dataDependencies": {
+          "tables": [
+            "flashcard_cards",
+            "flashcard_sets",
+            "homework_assignments",
+            "pacing_proposals",
+            "student_learning_profiles",
+            "student_progress_goals"
+          ],
+          "rpcs": [],
+          "edgeFunctions": [],
+          "fetchTargets": []
+        },
+        "storage": [
+          {
+            "storage": "sessionStorage",
+            "operation": "getItem",
+            "key": "wt-level-change-dismissed:student:${studentId}",
+            "file": "src/hooks/useStudentAttentionDots.tsx"
+          }
+        ],
+        "userFacingText": [],
+        "userFacingBehavior": {
+          "actionHandlers": [],
+          "navigationTargets": []
+        }
+      },
+      {
         "path": "src/hooks/useStudentHubData.tsx",
         "domain": "state",
         "purpose": "Implements use Student Hub Data behavior in the state domain.",
@@ -40202,6 +40299,16 @@
           "src/components/worksheet/WorksheetHeader.tsx",
           "src/pages/Index.tsx"
         ]
+      },
+      {
+        "storage": "sessionStorage",
+        "key": "wt-level-change-dismissed:student:${studentId}",
+        "operations": [
+          "getItem"
+        ],
+        "files": [
+          "src/hooks/useStudentAttentionDots.tsx"
+        ]
       }
     ],
     "supabaseRealtime": [
@@ -40924,7 +41031,8 @@
           "max",
           "min",
           "model",
-          "ok"
+          "ok",
+          "status"
         ],
         "dataDependencies": {
           "tables": [],
@@ -44367,14 +44475,15 @@
         "payloadExpressions": []
       },
       {
-        "name": "student_add_flashcard",
+        "name": "student_add_flashcard_v2",
         "callsites": [
           "src/components/student-hub/AddStudentFlashcardDialog.tsx"
         ],
         "payloadFields": [
           "p_back",
+          "p_cefr_level",
           "p_front",
-          "p_native",
+          "p_front_example",
           "p_set_id",
           "p_student_email"
         ],
@@ -44496,6 +44605,66 @@
           "edgeFunctions": [
             "send-welcome-email"
           ]
+        }
+      },
+      {
+        "name": "attention_reads",
+        "fields": [
+          {
+            "name": "actor_key",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "actor_type",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "created_at",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "id",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "last_seen_at",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "student_id",
+            "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "subject_id",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "surface",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "teacher_id",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "updated_at",
+            "type": "string",
+            "optional": false
+          }
+        ],
+        "relationships": [],
+        "featureOwnership": {
+          "clientFiles": [],
+          "edgeFunctions": []
         }
       },
       {
@@ -46263,6 +46432,7 @@
         "featureOwnership": {
           "clientFiles": [
             "src/hooks/useFlashcardCards.tsx",
+            "src/hooks/useStudentAttentionDots.tsx",
             "src/pages/FlashcardsLearning.tsx"
           ],
           "edgeFunctions": [
@@ -46491,6 +46661,7 @@
             "src/hooks/dslm/useBehavioralStats.tsx",
             "src/hooks/useFlashcardLearning.tsx",
             "src/hooks/useFlashcardSets.tsx",
+            "src/hooks/useStudentAttentionDots.tsx",
             "src/pages/StudentPortal.tsx"
           ],
           "edgeFunctions": [
@@ -46874,6 +47045,7 @@
             "src/hooks/useAllWorksheetHomework.tsx",
             "src/hooks/useHomeworkNotifications.tsx",
             "src/hooks/useInteractiveHomework.tsx",
+            "src/hooks/useStudentAttentionDots.tsx",
             "src/pages/HomeworkPage.tsx",
             "src/pages/HomeworkReviewPage.tsx"
           ],
@@ -47437,7 +47609,8 @@
         "relationships": [],
         "featureOwnership": {
           "clientFiles": [
-            "src/hooks/usePacingProposals.tsx"
+            "src/hooks/usePacingProposals.tsx",
+            "src/hooks/useStudentAttentionDots.tsx"
           ],
           "edgeFunctions": [
             "loop-pacing-aggregator",
@@ -48490,6 +48663,7 @@
             "src/components/student-tests/SuggestedLevelChangeBanner.tsx",
             "src/components/student-tests/WelcomeTestResults.tsx",
             "src/hooks/dslm/useStudentProfile.tsx",
+            "src/hooks/useStudentAttentionDots.tsx",
             "src/hooks/useWelcomeTestHistory.tsx"
           ],
           "edgeFunctions": [
@@ -48619,6 +48793,7 @@
           "clientFiles": [
             "src/components/dslm/GoalsView.tsx",
             "src/hooks/useOnboardingProgress.tsx",
+            "src/hooks/useStudentAttentionDots.tsx",
             "src/hooks/useStudentProgress.tsx"
           ],
           "edgeFunctions": [
@@ -50849,6 +51024,37 @@
         "returns": "undefined"
       },
       {
+        "name": "mark_attention_seen",
+        "args": [
+          {
+            "name": "p_actor_key",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_actor_type",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_student_id",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_subject_id",
+            "type": "string",
+            "optional": true
+          },
+          {
+            "name": "p_surface",
+            "type": "string",
+            "optional": false
+          }
+        ],
+        "returns": "undefined"
+      },
+      {
         "name": "mark_homework_completed",
         "args": [
           {
@@ -51150,6 +51356,42 @@
         "returns": "string"
       },
       {
+        "name": "student_add_flashcard_v2",
+        "args": [
+          {
+            "name": "p_back",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_cefr_level",
+            "type": "string",
+            "optional": true
+          },
+          {
+            "name": "p_front",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_front_example",
+            "type": "string",
+            "optional": true
+          },
+          {
+            "name": "p_set_id",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_student_email",
+            "type": "string",
+            "optional": false
+          }
+        ],
+        "returns": "string"
+      },
+      {
         "name": "submit_homework_answers",
         "args": [
           {
@@ -51414,6 +51656,18 @@
         "table": "student_intake_extractions",
         "unique": false,
         "migration": "supabase/migrations/20260617162941_66b70675-3140-44e5-b81e-6b034065a814.sql"
+      },
+      {
+        "name": "idx_attention_reads_teacher",
+        "table": "attention_reads",
+        "unique": false,
+        "migration": "supabase/migrations/20260623202114_6dc3ae03-5d7e-4e9d-b3a7-56a0763ba472.sql"
+      },
+      {
+        "name": "idx_attention_reads_student",
+        "table": "attention_reads",
+        "unique": false,
+        "migration": "supabase/migrations/20260623202114_6dc3ae03-5d7e-4e9d-b3a7-56a0763ba472.sql"
       }
     ],
     "migrationFunctions": [
@@ -51446,12 +51700,24 @@
         "migration": "supabase/migrations/20260505064801_45a8e80c-6a10-4530-9c60-06c0e31371cf.sql"
       },
       {
+        "name": "mark_attention_seen",
+        "migration": "supabase/migrations/20260623202114_6dc3ae03-5d7e-4e9d-b3a7-56a0763ba472.sql"
+      },
+      {
         "name": "rollback_intake_extraction",
         "migration": "supabase/migrations/20260617162941_66b70675-3140-44e5-b81e-6b034065a814.sql"
       },
       {
+        "name": "student_add_flashcard_v2",
+        "migration": "supabase/migrations/20260623202114_6dc3ae03-5d7e-4e9d-b3a7-56a0763ba472.sql"
+      },
+      {
         "name": "student_add_flashcard",
         "migration": "supabase/migrations/20260617163003_320073b7-18a6-428d-8dd0-20784f7f45d7.sql"
+      },
+      {
+        "name": "student_add_flashcard",
+        "migration": "supabase/migrations/20260623202114_6dc3ae03-5d7e-4e9d-b3a7-56a0763ba472.sql"
       },
       {
         "name": "try_parse_jsonb",

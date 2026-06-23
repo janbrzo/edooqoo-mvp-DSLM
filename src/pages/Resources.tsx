@@ -48,7 +48,7 @@ const Resources = () => {
     document.title = 'English Teaching Resources — AI Worksheets, Guides & Tools | Edooqoo';
     const meta = document.querySelector('meta[name="description"]');
     if (meta) {
-      meta.setAttribute('content', 'Free resources for English teachers: AI worksheet generators, CEFR level guides, exercise tutorials, tool comparisons, blog articles, and teaching tips. Browse 60+ resources.');
+      meta.setAttribute('content', 'Free resources for English teachers: AI worksheet generators, CEFR level guides, exercise tutorials, tool comparisons, blog articles, and teaching tips. Browse 100+ resources.');
     }
 
     const script = document.createElement('script');
@@ -113,7 +113,11 @@ const Resources = () => {
     { title: "Edooqoo vs Copilot", description: "English-tutor workflow vs general productivity AI.", href: "/edooqoo-vs-copilot.html", badge: "Compare" },
     { title: "Edooqoo vs Perplexity", description: "Recurring lesson workflow vs answer research.", href: "/edooqoo-vs-perplexity.html", badge: "Compare" },
     { title: "ChatGPT Alternative for English Tutors", description: "When a tutor needs context, homework evidence, and review.", href: "/chatgpt-alternative-for-english-tutors.html", badge: "Guide" },
+    { title: "ChatGPT for ESL Teachers: Limitations", description: "Where prompts help and where tutor workflow context matters.", href: "/chatgpt-for-esl-teachers-limitations.html", badge: "LLM" },
     { title: "AI Lesson Prep Tool vs Chatbot", description: "Structured prep workflow vs one-off prompt drafting.", href: "/ai-lesson-prep-tool-vs-chatbot.html", badge: "Guide" },
+    { title: "AI Chatbot vs Student Context System", description: "One-off drafting vs stored learner evidence.", href: "/ai-chatbot-vs-student-context-system.html", badge: "LLM" },
+    { title: "Teacher-Controlled AI", description: "How English tutors keep objectives, evidence, and review under teacher control.", href: "/teacher-controlled-ai-for-english-tutors.html", badge: "Guide" },
+    { title: "AI Worksheet Tools Criteria", description: "Evaluate worksheet tools by editability, task fit, evidence, and review.", href: "/best-ai-worksheet-tools-for-english-tutors.html", badge: "Criteria" },
     { title: "AI Tools for Private Tutors", description: "Workflow criteria for adult 1:1 English tutors.", href: "/best-ai-tools-for-private-english-tutors.html", badge: "Criteria" },
     { title: "Edooqoo vs ISLCollective", description: "AI-generated vs user-uploaded worksheets.", href: "/edooqoo-vs-islcollective.html", badge: "Compare" },
     { title: "Edooqoo vs Liveworksheets", description: "AI generation vs manual interactive conversion.", href: "/edooqoo-vs-liveworksheets.html", badge: "Compare" },
@@ -161,7 +165,7 @@ const Resources = () => {
       <main className="container mx-auto px-4 py-12 max-w-6xl">
         <h1 className="text-4xl font-bold text-foreground mb-4">English Teaching Resources</h1>
         <p className="text-lg text-muted-foreground mb-12 max-w-3xl">
-          Free resources for English teachers: AI worksheet generators, CEFR level guides, exercise tutorials, tool comparisons, blog articles, and practical teaching tips. Browse 60+ resources.
+          Free resources for English teachers: AI worksheet generators, CEFR level guides, exercise tutorials, tool comparisons, blog articles, and practical teaching tips. Browse 100+ resources.
         </p>
 
         <ResourceSection title="Worksheet Generators" cards={worksheetGenerators} />
