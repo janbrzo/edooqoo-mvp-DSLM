@@ -193,6 +193,11 @@ export const AddStudentFlashcardDialog: React.FC<Props> = ({
             {backType === 'translation' && translation && !userEditedBackText && (
               <p className="text-xs text-muted-foreground mt-1">💡 Auto-suggested translation</p>
             )}
+            {backType === 'translation' && !hasNativeLang && (
+              <p className="text-xs text-muted-foreground mt-1">
+                Ask your teacher to set your native language for auto-suggestions.
+              </p>
+            )}
             {backType === 'definition' && definition && !userEditedBackText && (
               <p className="text-xs text-muted-foreground mt-1">💡 Auto-suggested definition</p>
             )}
