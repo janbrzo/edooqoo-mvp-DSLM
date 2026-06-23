@@ -33,7 +33,7 @@ while ((m = re.exec(qFile)) !== null) {
   let hasOptions = false;
   if (optionsBlock) {
     hasOptions = true;
-    optionCount = (optionsBlock[1].match(/['"]/g) || []).length / 2;
+    optionCount = countStringLiterals(optionsBlock[1]);
   }
   profiling.set(id, { hasOptions, optionCount, hasDescription });
 }
@@ -59,7 +59,7 @@ while ((lm = langRe.exec(tFile)) !== null) {
     let hasOptions = false;
     if (optMatch) {
       hasOptions = true;
-      optionCount = (optMatch[1].match(/['"]/g) || []).length / 2;
+      optionCount = countStringLiterals(optMatch[1]);
     }
     entries.set(id, { hasQuestion, hasDescription, hasOptions, optionCount });
   }
