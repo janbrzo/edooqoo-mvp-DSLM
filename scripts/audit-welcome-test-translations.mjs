@@ -17,6 +17,32 @@ const PROFILING_TYPES = new Set([
   'scenario_reaction','open_reflection','speaking_record','listening_comprehension',
 ]);
 
+/**
+ * Count the number of top-level string literals inside a `[ ... ]` body,
+ * tolerating escaped apostrophes inside strings (e.g. "don\\'t").
+ * Walks character-by-character to find string start/end pairs.
+ */
+function countStringLiterals(body) {
+  let count = 0;
+  let i = 0;
+  while (i < body.length) {
+    const ch = body[i];
+    if (ch === '"' || ch === "'") {
+      const quote = ch;
+      count++;
+      i++;
+      while (i < body.length) {
+        if (body[i] === '\\') { i += 2; continue; }
+        if (body[i] === quote) { i++; break; }
+        i++;
+      }
+      continue;
+    }
+    i++;
+  }
+  return count;
+}
+
 // Walk question objects naively. Capture id, question_type, optional
 // `options` literal count and whether `description:` is present in the body.
 const profiling = new Map(); // id -> { hasOptions, optionCount, hasDescription }
