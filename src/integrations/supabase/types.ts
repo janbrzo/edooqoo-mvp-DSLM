@@ -59,6 +59,45 @@ export type Database = {
         }
         Relationships: []
       }
+      attention_reads: {
+        Row: {
+          actor_key: string
+          actor_type: string
+          created_at: string
+          id: string
+          last_seen_at: string
+          student_id: string | null
+          subject_id: string
+          surface: string
+          teacher_id: string
+          updated_at: string
+        }
+        Insert: {
+          actor_key: string
+          actor_type: string
+          created_at?: string
+          id?: string
+          last_seen_at?: string
+          student_id?: string | null
+          subject_id?: string
+          surface: string
+          teacher_id: string
+          updated_at?: string
+        }
+        Update: {
+          actor_key?: string
+          actor_type?: string
+          created_at?: string
+          id?: string
+          last_seen_at?: string
+          student_id?: string | null
+          subject_id?: string
+          surface?: string
+          teacher_id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       bug_reports: {
         Row: {
           admin_note: string | null
@@ -3890,6 +3929,16 @@ export type Database = {
         }
         Returns: undefined
       }
+      mark_attention_seen: {
+        Args: {
+          p_actor_key: string
+          p_actor_type: string
+          p_student_id: string
+          p_subject_id?: string
+          p_surface: string
+        }
+        Returns: undefined
+      }
       mark_homework_completed: {
         Args: {
           p_homework_id: string
@@ -4090,6 +4139,17 @@ export type Database = {
           p_back: string
           p_front: string
           p_native?: string
+          p_set_id: string
+          p_student_email: string
+        }
+        Returns: string
+      }
+      student_add_flashcard_v2: {
+        Args: {
+          p_back: string
+          p_cefr_level?: string
+          p_front: string
+          p_front_example?: string
           p_set_id: string
           p_student_email: string
         }
