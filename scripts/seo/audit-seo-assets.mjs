@@ -9,6 +9,7 @@ import {
 } from './seo-route-manifest.mjs';
 import { getPseoRouteInventory } from './pseo-index-policy.mjs';
 import { getDecisionContentRoutes } from './decision-content.mjs';
+import { getRoutingDecisions } from './content-registry.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..', '..');
@@ -143,6 +144,9 @@ const REQUIRED_COMPARISON_PAGES = [
   '/edooqoo-vs-chatgpt.html',
   '/edooqoo-vs-claude.html',
   '/edooqoo-vs-general-purpose-ai.html',
+  '/edooqoo-vs-gemini.html',
+  '/edooqoo-vs-copilot.html',
+  '/edooqoo-vs-perplexity.html',
   '/edooqoo-vs-twee.html',
   '/edooqoo-vs-islcollective.html',
   '/edooqoo-vs-liveworksheets.html',
@@ -160,6 +164,9 @@ const REQUIRED_PROOF_PAGES = [
 const CLAIM_INTEGRITY_PAGES = [
   '/ai-tools-for-online-esl-teachers.html',
   '/ai-tools-for-private-english-tutors.html',
+  '/chatgpt-alternative-for-english-tutors.html',
+  '/ai-lesson-prep-tool-vs-chatbot.html',
+  '/best-ai-tools-for-private-english-tutors.html',
   '/worksheet-generator-for-language-schools.html',
   ...REQUIRED_COMPARISON_PAGES,
   '/best-ai-tools-for-esl-teachers.html',
@@ -557,6 +564,59 @@ function auditRobotsAndSitemap() {
   }
 }
 
+function auditPagesFallbackRouting() {
+  const redirectsPath = path.join(PUBLIC, '_redirects');
+  const headersPath = path.join(PUBLIC, '_headers');
+  const decisions = getRoutingDecisions({ root: ROOT });
+
+  if (!fs.existsSync(redirectsPath)) {
+    fail('public/_redirects is missing');
+    return;
+  }
+  if (!fs.existsSync(headersPath)) {
+    fail('public/_headers is missing');
+    return;
+  }
+
+  const redirects = fs.readFileSync(redirectsPath, 'utf8');
+  const headers = fs.readFileSync(headersPath, 'utf8');
+
+  for (const line of [
+    'http://edooqoo.com/* https://edooqoo.com/:splat 301',
+    'http://www.edooqoo.com/* https://edooqoo.com/:splat 301',
+    'https://www.edooqoo.com/* https://edooqoo.com/:splat 301',
+  ]) {
+    if (!redirects.includes(line)) fail(`public/_redirects missing canonical host rule: ${line}`);
+    else pass(`public/_redirects contains canonical host rule ${line}`);
+  }
+
+  for (const [from, to] of Object.entries(decisions.redirects)) {
+    const line = `${from} ${to} 301`;
+    if (!redirects.includes(line)) fail(`public/_redirects missing legacy redirect ${line}`);
+  }
+  if (Object.keys(decisions.redirects).length) {
+    pass(`public/_redirects contains ${Object.keys(decisions.redirects).length} content redirects`);
+  }
+
+  for (const fragment of [
+    '/signup\n  X-Robots-Tag: noindex, nofollow',
+    '/signup/*\n  X-Robots-Tag: noindex, nofollow',
+  ]) {
+    if (!headers.includes(fragment)) fail(`public/_headers missing signup noindex rule ${fragment.split('\n')[0]}`);
+    else pass(`public/_headers contains signup noindex rule ${fragment.split('\n')[0]}`);
+  }
+
+  const pseoNoindexRoutes = decisions.noindex.filter((route) =>
+    /^\/(?:esl-worksheets\/[^/]+\/[^/]+|worksheets\/[^/]+\/[^/]+|english-for\/[^/]+)$/.test(route)
+  );
+  for (const route of pseoNoindexRoutes) {
+    if (!headers.includes(`${route}\n  X-Robots-Tag: noindex, follow`)) {
+      fail(`public/_headers missing noindex fallback for ${route}`);
+    }
+  }
+  pass(`public/_headers contains ${pseoNoindexRoutes.length} pSEO noindex fallback rules`);
+}
+
 function auditCanonicalAliases() {
   for (const [alias, canonicalRoute] of CANONICAL_ALIASES) {
     const html = readPublic(alias);
@@ -735,15 +795,23 @@ function auditCitablePages() {
 }
 
 function auditRenderedPreroutes() {
-  const markerPath = path.join(DIST, '.seo-prerender-complete.json');
-  if (!fs.existsSync(markerPath)) {
+  const markerCandidates = [DIST, PUBLIC].map((snapshotRoot) => ({
+    snapshotRoot,
+    markerPath: path.join(snapshotRoot, '.seo-prerender-complete.json'),
+  }));
+  const markerCandidate = markerCandidates.find(({ markerPath }) => fs.existsSync(markerPath));
+  if (!markerCandidate) {
     console.log('[seo:audit] SKIP rendered route audit: no complete-prerender marker');
     return;
   }
+  const { snapshotRoot, markerPath } = markerCandidate;
 
   const issues = [];
   const routes = getPrerenderRoutes({ root: ROOT });
-  const rootTitle = extractTitle(fs.readFileSync(path.join(DIST, 'index.html'), 'utf8'));
+  const shellIndexPath = snapshotRoot === PUBLIC
+    ? path.join(ROOT, 'index.html')
+    : path.join(snapshotRoot, 'index.html');
+  const rootTitle = extractTitle(fs.readFileSync(shellIndexPath, 'utf8'));
   try {
     const marker = JSON.parse(fs.readFileSync(markerPath, 'utf8'));
     if (marker.routeCount !== routes.length) {
@@ -753,8 +821,9 @@ function auditRenderedPreroutes() {
     issues.push(`invalid complete-prerender marker: ${err.message}`);
   }
   for (const route of routes) {
-    const routeDir = route === '/' ? DIST : path.join(DIST, route.replace(/^\//, ''));
-    const file = path.join(routeDir, 'index.html');
+    const file = route === '/'
+      ? shellIndexPath
+      : path.join(snapshotRoot, route.replace(/^\//, ''), 'index.html');
     if (!fs.existsSync(file)) {
       issues.push(`${route}: missing snapshot`);
       continue;
@@ -783,7 +852,7 @@ function auditRenderedPreroutes() {
     for (const issue of issues.slice(0, 50)) fail(`prerender ${issue}`);
     if (issues.length > 50) fail(`prerender has ${issues.length - 50} additional issue(s)`);
   } else {
-    pass(`all ${routes.length} prerender snapshots pass canonical, title, H1, content, and schema checks`);
+    pass(`all ${routes.length} prerender snapshots in ${path.relative(ROOT, snapshotRoot)} pass canonical, title, H1, content, and schema checks`);
   }
 }
 
@@ -880,6 +949,7 @@ auditRootRawHtml();
 auditHomepageCanonicalLinks();
 auditKnowledgeGraph();
 auditRobotsAndSitemap();
+auditPagesFallbackRouting();
 auditCanonicalAliases();
 auditSitemapEdgePayload();
 auditCitablePages();

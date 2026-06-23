@@ -29,6 +29,14 @@ const redirect = await handleRequest(new Request('https://edooqoo.com/old-articl
 assert.equal(redirect.status, 301);
 assert.equal(redirect.headers.get('location'), 'https://edooqoo.com/blog');
 
+const wwwRedirect = await handleRequest(new Request('https://www.edooqoo.com/blog'), env, routing);
+assert.equal(wwwRedirect.status, 301);
+assert.equal(wwwRedirect.headers.get('location'), 'https://edooqoo.com/blog');
+
+const httpRedirect = await handleRequest(new Request('http://edooqoo.com/blog'), env, routing);
+assert.equal(httpRedirect.status, 301);
+assert.equal(httpRedirect.headers.get('location'), 'https://edooqoo.com/blog');
+
 const gone = await handleRequest(new Request('https://edooqoo.com/retired-article'), env, routing);
 assert.equal(gone.status, 410);
 assert.match(gone.headers.get('x-robots-tag') || '', /noindex/);
@@ -59,4 +67,4 @@ const publicProgrammatic = await handleRequest(
 assert.equal(publicProgrammatic.status, 200);
 assert.equal(publicProgrammatic.headers.get('x-robots-tag'), null);
 
-console.log('[edge-routing-test] PASS 404, 301, 410, private noindex, newsletter noindex, public noindex, public programmatic route');
+console.log('[edge-routing-test] PASS 404, 301, host canonical, 410, private noindex, newsletter noindex, public noindex, public programmatic route');

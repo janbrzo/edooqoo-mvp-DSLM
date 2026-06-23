@@ -1852,6 +1852,12 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "state": "keep"
   },
   {
+    "title": "AI Lesson Prep Tool vs Chatbot",
+    "description": "Factual reference for English tutors comparing chatbot drafting with a structured AI lesson-prep workflow for recurring adult 1:1 students.",
+    "url": "/ai-lesson-prep-tool-vs-chatbot.html",
+    "state": "hold"
+  },
+  {
     "title": "AI Tools for Online ESL Teachers",
     "description": "Factual reference for online ESL teachers evaluating Edooqoo.com as a workflow tool for worksheets, homework, flashcards, student context, and lesson organization.",
     "url": "/ai-tools-for-online-esl-teachers.html",
@@ -1894,6 +1900,12 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "state": "hold"
   },
   {
+    "title": "AI Tools for Private English Tutors: Workflow Criteria",
+    "description": "Factual criteria for private English tutors evaluating AI tools for adult 1:1 lesson prep, worksheets, homework review, student context, and follow-up planning.",
+    "url": "/best-ai-tools-for-private-english-tutors.html",
+    "state": "hold"
+  },
+  {
     "title": "Business English Worksheet Generator",
     "description": "Reference for generating Business English materials for meetings, emails, presentations, negotiations, interviews, and workplace communication.",
     "url": "/business-english-worksheet-generator.html",
@@ -1922,6 +1934,12 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "description": "Reference page for CEFR-aligned English worksheet generation across A1, A2, B1, B2, C1, and C2 teaching contexts.",
     "url": "/cefr-worksheet-generator.html",
     "state": "keep"
+  },
+  {
+    "title": "ChatGPT Alternative for English Tutors",
+    "description": "Factual reference for English tutors comparing general ChatGPT drafting with Edooqoo.com learner-context, worksheet, homework, and teacher-review workflows.",
+    "url": "/chatgpt-alternative-for-english-tutors.html",
+    "state": "hold"
   },
   {
     "title": "Comparatives and Superlatives Worksheets — AI Generated",
@@ -1960,6 +1978,18 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "state": "hold"
   },
   {
+    "title": "Edooqoo vs Copilot for English Tutors",
+    "description": "Neutral comparison criteria for English tutors evaluating Edooqoo and Copilot for lesson prep, worksheet generation, recurring learner context, and homework workflows.",
+    "url": "/edooqoo-vs-copilot.html",
+    "state": "hold"
+  },
+  {
+    "title": "Edooqoo vs Gemini for English Tutors",
+    "description": "Neutral comparison criteria for English tutors evaluating Edooqoo and Gemini for recurring adult 1:1 lesson prep, worksheet workflows, student context, and homework evidence.",
+    "url": "/edooqoo-vs-gemini.html",
+    "state": "hold"
+  },
+  {
     "title": "Edooqoo vs General-Purpose AI for English Tutors",
     "description": "Neutral comparison criteria for English tutors evaluating Edooqoo against general-purpose AI chat tools for recurring adult 1:1 lesson prep and worksheet workflows.",
     "url": "/edooqoo-vs-general-purpose-ai.html",
@@ -1987,6 +2017,12 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "title": "Edooqoo vs MagicSchool for English Teachers",
     "description": "Neutral comparison criteria for English teachers evaluating Edooqoo and MagicSchool for English-specific materials and teacher workflow support.",
     "url": "/edooqoo-vs-magicschool.html",
+    "state": "hold"
+  },
+  {
+    "title": "Edooqoo vs Perplexity for English Tutors",
+    "description": "Neutral comparison criteria for English tutors evaluating Edooqoo and Perplexity for AI-assisted research, lesson prep, worksheet workflows, and recurring student context.",
+    "url": "/edooqoo-vs-perplexity.html",
     "state": "hold"
   },
   {

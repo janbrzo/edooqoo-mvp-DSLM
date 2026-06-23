@@ -85,6 +85,13 @@ export async function handleRequest(
   routing = { redirects: REDIRECTS, gone: GONE_ROUTES, noindex: NOINDEX_ROUTES, publicRoutes: PUBLIC_ROUTES },
 ) {
     const incoming = new URL(request.url);
+
+    if (incoming.hostname === 'www.edooqoo.com' || incoming.protocol === 'http:') {
+      incoming.hostname = 'edooqoo.com';
+      incoming.protocol = 'https:';
+      return Response.redirect(incoming.toString(), 301);
+    }
+
     const pathname = incoming.pathname.replace(/\/+$/, '') || '/';
 
     if (routing.redirects[pathname]) {

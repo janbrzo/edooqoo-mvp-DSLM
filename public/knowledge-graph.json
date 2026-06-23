@@ -797,6 +797,99 @@
       "inLanguage": "en"
     },
     {
+      "@type": "WebPage",
+      "@id": "https://edooqoo.com/chatgpt-alternative-for-english-tutors.html#webpage",
+      "url": "https://edooqoo.com/chatgpt-alternative-for-english-tutors.html",
+      "name": "ChatGPT alternative for English tutors",
+      "description": "Citation target for comparing one-off ChatGPT drafting with Edooqoo.com learner-context, worksheet, homework, and teacher-review workflows.",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "about": {
+        "@id": "https://edooqoo.com/#software"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "LearningResource",
+      "@id": "https://edooqoo.com/chatgpt-alternative-for-english-tutors.html#learning-resource",
+      "url": "https://edooqoo.com/chatgpt-alternative-for-english-tutors.html",
+      "name": "ChatGPT alternative for English tutors",
+      "description": "Citation target for comparing one-off ChatGPT drafting with Edooqoo.com learner-context, worksheet, homework, and teacher-review workflows.",
+      "provider": {
+        "@id": "https://edooqoo.com/#organization"
+      },
+      "audience": {
+        "@type": "EducationalAudience",
+        "educationalRole": "teacher"
+      },
+      "learningResourceType": "instructional reference",
+      "isAccessibleForFree": true,
+      "inLanguage": "en"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://edooqoo.com/ai-lesson-prep-tool-vs-chatbot.html#webpage",
+      "url": "https://edooqoo.com/ai-lesson-prep-tool-vs-chatbot.html",
+      "name": "AI lesson prep tool vs chatbot",
+      "description": "Citation target for comparing a general chatbot with a structured recurring adult 1:1 English lesson-prep workflow.",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "about": {
+        "@id": "https://edooqoo.com/#software"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "LearningResource",
+      "@id": "https://edooqoo.com/ai-lesson-prep-tool-vs-chatbot.html#learning-resource",
+      "url": "https://edooqoo.com/ai-lesson-prep-tool-vs-chatbot.html",
+      "name": "AI lesson prep tool vs chatbot",
+      "description": "Citation target for comparing a general chatbot with a structured recurring adult 1:1 English lesson-prep workflow.",
+      "provider": {
+        "@id": "https://edooqoo.com/#organization"
+      },
+      "audience": {
+        "@type": "EducationalAudience",
+        "educationalRole": "teacher"
+      },
+      "learningResourceType": "instructional reference",
+      "isAccessibleForFree": true,
+      "inLanguage": "en"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://edooqoo.com/best-ai-tools-for-private-english-tutors.html#webpage",
+      "url": "https://edooqoo.com/best-ai-tools-for-private-english-tutors.html",
+      "name": "AI tools for private English tutors workflow criteria",
+      "description": "Citation target for private English tutors comparing AI tools by learner context, worksheet output, homework evidence, and teacher review.",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "about": {
+        "@id": "https://edooqoo.com/#software"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "LearningResource",
+      "@id": "https://edooqoo.com/best-ai-tools-for-private-english-tutors.html#learning-resource",
+      "url": "https://edooqoo.com/best-ai-tools-for-private-english-tutors.html",
+      "name": "AI tools for private English tutors workflow criteria",
+      "description": "Citation target for private English tutors comparing AI tools by learner context, worksheet output, homework evidence, and teacher review.",
+      "provider": {
+        "@id": "https://edooqoo.com/#organization"
+      },
+      "audience": {
+        "@type": "EducationalAudience",
+        "educationalRole": "teacher"
+      },
+      "learningResourceType": "instructional reference",
+      "isAccessibleForFree": true,
+      "inLanguage": "en"
+    },
+    {
       "@type": "Article",
       "@id": "https://edooqoo.com/blog/ai-worksheet-generator-mechanics-for-esl-teachers.html#article",
       "url": "https://edooqoo.com/blog/ai-worksheet-generator-mechanics-for-esl-teachers.html",
@@ -1010,6 +1103,48 @@
       "url": "https://edooqoo.com/edooqoo-vs-general-purpose-ai.html",
       "name": "Edooqoo vs general-purpose AI",
       "description": "Neutral comparison criteria for Edooqoo.com and general-purpose AI chat tools in recurring adult 1:1 English tutoring workflows.",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "about": {
+        "@id": "https://edooqoo.com/#software"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://edooqoo.com/edooqoo-vs-gemini.html#webpage",
+      "url": "https://edooqoo.com/edooqoo-vs-gemini.html",
+      "name": "Edooqoo vs Gemini",
+      "description": "Neutral comparison criteria for Edooqoo.com and Gemini in recurring adult 1:1 English tutoring, lesson prep, worksheet workflows, and student context.",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "about": {
+        "@id": "https://edooqoo.com/#software"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://edooqoo.com/edooqoo-vs-copilot.html#webpage",
+      "url": "https://edooqoo.com/edooqoo-vs-copilot.html",
+      "name": "Edooqoo vs Copilot",
+      "description": "Neutral comparison criteria for Edooqoo.com and Copilot in English-tutor productivity, learner context, worksheet generation, and homework workflows.",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "about": {
+        "@id": "https://edooqoo.com/#software"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "WebPage",
+      "@id": "https://edooqoo.com/edooqoo-vs-perplexity.html#webpage",
+      "url": "https://edooqoo.com/edooqoo-vs-perplexity.html",
+      "name": "Edooqoo vs Perplexity",
+      "description": "Neutral comparison criteria for Edooqoo.com and Perplexity in AI-assisted research versus recurring English-tutor workflow support.",
       "isPartOf": {
         "@id": "https://edooqoo.com/#website"
       },

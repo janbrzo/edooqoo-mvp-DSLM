@@ -9664,6 +9664,7 @@
         "Business English",
         "CEFR Guide",
         "CEFR Level Test",
+        "ChatGPT Alternative",
         "Compare",
         "Conditionals",
         "Cookie Policy",
@@ -9673,8 +9674,7 @@
         "ESL Worksheets",
         "Edooqoo",
         "Edooqoo. All rights reserved.",
-        "Exercise Types",
-        "Features"
+        "Exercise Types"
       ],
       "userFacingBehavior": {
         "actionHandlers": [],
@@ -24484,8 +24484,13 @@
               "optional": false
             },
             {
-              "name": "hasNative",
-              "type": "boolean",
+              "name": "backType",
+              "type": "'translation' | 'definition'",
+              "optional": false
+            },
+            {
+              "name": "studentNativeLanguage",
+              "type": "string",
               "optional": false
             },
             {
@@ -24503,19 +24508,24 @@
           "initial": "false"
         },
         {
-          "value": "front",
-          "setter": "setFront",
+          "value": "frontText",
+          "setter": "setFrontText",
           "initial": "''"
         },
         {
-          "value": "back",
-          "setter": "setBack",
+          "value": "frontExample",
+          "setter": "setFrontExample",
           "initial": "''"
         },
         {
-          "value": "native",
-          "setter": "setNative",
+          "value": "backText",
+          "setter": "setBackText",
           "initial": "''"
+        },
+        {
+          "value": "userEditedBackText",
+          "setter": "setUserEditedBackText",
+          "initial": "false"
         },
         {
           "value": "busy",
@@ -24524,6 +24534,9 @@
         }
       ],
       "hooks": [
+        "useEffect",
+        "useFlashcardDefinition",
+        "useFlashcardTranslation",
         "useState"
       ],
       "actions": [
@@ -24543,12 +24556,18 @@
         "\". Your teacher will see new cards.",
         "Add a flashcard",
         "Add card",
-        "Back (definition or translation)",
+        "Back:",
         "Cancel",
-        "Front (word or phrase)",
-        "Native translation (optional)",
+        "English Term *",
+        "Example Sentence (optional)",
+        "Front:",
+        "Preview:",
         "Saving…",
-        "To \""
+        "To \"",
+        "e.g., She accomplished her goal of learning English.",
+        "e.g., accomplish",
+        "💡 Auto-suggested definition",
+        "💡 Auto-suggested translation"
       ],
       "userFacingBehavior": {
         "actionHandlers": [
@@ -40914,7 +40933,6 @@
           "fetchTargets": []
         },
         "environmentVariables": [
-          "LOVABLE_API_KEY",
           "SUPABASE_ANON_KEY",
           "SUPABASE_URL"
         ]
@@ -41589,6 +41607,7 @@
           "gcal_settings",
           "hasPassword",
           "homeworks",
+          "nativeLanguage",
           "reason",
           "requiresPassword",
           "sharedWorksheets",
@@ -51899,7 +51918,6 @@
         "callsites": [
           "supabase/functions/audit-llm-models/index.ts",
           "supabase/functions/classify-knowledge-entry/index.ts",
-          "supabase/functions/extract-student-profile/index.ts",
           "supabase/functions/process-welcome-test/index.ts",
           "supabase/functions/suggest-exercises/index.ts",
           "supabase/functions/verify-open-answers/index.ts"
