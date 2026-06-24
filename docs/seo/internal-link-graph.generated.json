@@ -3,17 +3,22 @@
   "totals": {
     "pages": 612,
     "strategic": 416,
-    "orphanStrategic": 23,
-    "weakTop40": 14,
-    "noindexPriorityLinks": 1
+    "orphanStrategic": 0,
+    "weakTop40": 0,
+    "weakTop120": 0,
+    "noindexPriorityLinks": 0
+  },
+  "thresholds": {
+    "minTop40Incoming": 10,
+    "minTop120Incoming": 5
   },
   "topStrategic": [
     {
       "route": "/chatgpt-alternative-for-english-tutors.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 369,
-      "outgoing": 9
+      "incoming": 374,
+      "outgoing": 21
     },
     {
       "route": "/edooqoo-vs-chatgpt.html",
@@ -75,85 +80,85 @@
       "route": "/best-chatgpt-alternatives-for-esl-teachers.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 0,
-      "outgoing": 10
+      "incoming": 227,
+      "outgoing": 43
     },
     {
       "route": "/best-chatgpt-prompts-for-esl-teachers-vs-workflow.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 0,
-      "outgoing": 10
+      "incoming": 229,
+      "outgoing": 45
     },
     {
       "route": "/blog/how-to-keep-chatgpt-output-from-sounding-generic-in-esl-lessons.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 1,
-      "outgoing": 16
+      "incoming": 13,
+      "outgoing": 55
     },
     {
       "route": "/blog/how-to-use-chatgpt-for-esl-lesson-prep-without-losing-context.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 1,
-      "outgoing": 16
+      "incoming": 13,
+      "outgoing": 55
     },
     {
       "route": "/blog/why-chatgpt-is-not-enough-for-recurring-english-tutoring.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 1,
-      "outgoing": 16
+      "incoming": 13,
+      "outgoing": 55
     },
     {
       "route": "/chatgpt-alternative-for-business-english-tutors.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 0,
-      "outgoing": 10
+      "incoming": 227,
+      "outgoing": 42
     },
     {
       "route": "/chatgpt-alternative-for-homework-review.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 0,
-      "outgoing": 10
+      "incoming": 227,
+      "outgoing": 40
     },
     {
       "route": "/chatgpt-alternative-for-private-esl-tutors.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 0,
-      "outgoing": 10
+      "incoming": 227,
+      "outgoing": 41
     },
     {
       "route": "/chatgpt-for-esl-teachers-limitations.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 141,
-      "outgoing": 10
+      "incoming": 153,
+      "outgoing": 46
     },
     {
       "route": "/chatgpt-vs-ai-worksheet-generator.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 0,
-      "outgoing": 10
+      "incoming": 227,
+      "outgoing": 42
     },
     {
       "route": "/chatgpt-vs-homework-evidence-workflow.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 0,
-      "outgoing": 10
+      "incoming": 227,
+      "outgoing": 41
     },
     {
       "route": "/claude-alternative-for-english-tutors.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 0,
-      "outgoing": 10
+      "incoming": 227,
+      "outgoing": 39
     },
     {
       "route": "/edooqoo-vs-busyteacher.html",
@@ -250,281 +255,281 @@
       "route": "/gemini-alternative-for-english-tutors.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 0,
-      "outgoing": 10
+      "incoming": 227,
+      "outgoing": 39
     },
     {
       "route": "/perplexity-alternative-for-esl-teachers.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 0,
-      "outgoing": 10
+      "incoming": 227,
+      "outgoing": 39
     },
     {
       "route": "/blog/adult-business-english-homework-feedback-loop.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 1,
-      "outgoing": 16
+      "incoming": 13,
+      "outgoing": 55
     },
     {
       "route": "/blog/ai-generated-listening-exercises-esl.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 8,
-      "outgoing": 16
+      "incoming": 20,
+      "outgoing": 55
     },
     {
       "route": "/blog/ai-homework-grading-for-english-teachers.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 4,
-      "outgoing": 16
+      "incoming": 16,
+      "outgoing": 55
     },
     {
       "route": "/blog/ai-lesson-planning-strategies.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 4,
-      "outgoing": 16
+      "incoming": 16,
+      "outgoing": 55
     },
     {
       "route": "/blog/ai-powered-differentiation-esl.html",
       "type": "blog",
       "state": "keep",
-      "incoming": 2,
-      "outgoing": 16
+      "incoming": 14,
+      "outgoing": 55
     },
     {
       "route": "/blog/ai-tools-for-english-teachers-2026.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 5,
-      "outgoing": 16
+      "incoming": 17,
+      "outgoing": 55
     },
     {
       "route": "/blog/ai-worksheet-generator-mechanics-for-esl-teachers.html",
       "type": "blog",
       "state": "keep",
-      "incoming": 15,
-      "outgoing": 16
+      "incoming": 27,
+      "outgoing": 55
     },
     {
       "route": "/blog/ai-worksheet-generator-vs-lesson-planning-chatbot.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 1,
-      "outgoing": 16
+      "incoming": 13,
+      "outgoing": 55
     },
     {
       "route": "/blog/best-workflow-for-private-english-tutors.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 1,
-      "outgoing": 16
+      "incoming": 13,
+      "outgoing": 55
     },
     {
       "route": "/blog/between-session-homework-evidence-for-private-english-tutors.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 2,
-      "outgoing": 16
+      "incoming": 14,
+      "outgoing": 55
     },
     {
       "route": "/blog/business-english-material-generation-workflow.html",
       "type": "blog",
       "state": "keep",
-      "incoming": 2,
-      "outgoing": 16
+      "incoming": 14,
+      "outgoing": 55
     },
     {
       "route": "/blog/can-ai-plan-one-to-one-english-lesson.html",
       "type": "blog",
       "state": "keep",
-      "incoming": 15,
-      "outgoing": 16
+      "incoming": 27,
+      "outgoing": 55
     },
     {
       "route": "/blog/cefr-aligned-worksheet-generation-workflow.html",
       "type": "blog",
       "state": "keep",
-      "incoming": 1,
-      "outgoing": 16
+      "incoming": 13,
+      "outgoing": 55
     },
     {
       "route": "/blog/creating-interactive-worksheets-online.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 4,
-      "outgoing": 16
+      "incoming": 16,
+      "outgoing": 55
     },
     {
       "route": "/blog/digital-homework-tools-esl-teachers.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 2,
-      "outgoing": 16
+      "incoming": 14,
+      "outgoing": 55
     },
     {
       "route": "/blog/editable-ai-worksheets-for-adult-english-learners.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 1,
-      "outgoing": 16
+      "incoming": 13,
+      "outgoing": 55
     },
     {
       "route": "/blog/effective-esl-homework-strategies.html",
       "type": "blog",
       "state": "keep",
-      "incoming": 6,
-      "outgoing": 16
+      "incoming": 18,
+      "outgoing": 55
     },
     {
       "route": "/blog/english-homework-ai-grading-workflow.html",
       "type": "blog",
       "state": "keep",
-      "incoming": 1,
-      "outgoing": 16
+      "incoming": 13,
+      "outgoing": 55
     },
     {
       "route": "/blog/english-tutor-material-organization-workflow.html",
       "type": "blog",
       "state": "keep",
-      "incoming": 1,
-      "outgoing": 16
+      "incoming": 13,
+      "outgoing": 55
     },
     {
       "route": "/blog/english-tutor-workflow-after-a-live-lesson.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 1,
-      "outgoing": 16
+      "incoming": 13,
+      "outgoing": 55
     },
     {
       "route": "/blog/from-student-goals-to-worksheet.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 1,
-      "outgoing": 16
+      "incoming": 13,
+      "outgoing": 55
     },
     {
       "route": "/blog/homework-before-lesson-workflow-for-adult-english-tutors.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 2,
-      "outgoing": 16
+      "incoming": 14,
+      "outgoing": 55
     },
     {
       "route": "/blog/homework-mistakes-next-english-lesson.html",
       "type": "blog",
       "state": "keep",
-      "incoming": 2,
-      "outgoing": 16
+      "incoming": 14,
+      "outgoing": 55
     },
     {
       "route": "/blog/how-english-tutors-track-what-to-teach-next.html",
       "type": "blog",
       "state": "keep",
-      "incoming": 3,
-      "outgoing": 16
+      "incoming": 15,
+      "outgoing": 55
     },
     {
       "route": "/blog/how-private-english-tutors-use-ai-safely.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 1,
-      "outgoing": 16
+      "incoming": 13,
+      "outgoing": 55
     },
     {
       "route": "/blog/how-to-avoid-generic-ai-lesson-plans-for-adults.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 1,
-      "outgoing": 16
+      "incoming": 13,
+      "outgoing": 55
     },
     {
       "route": "/blog/how-to-build-student-context-for-english-tutoring.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 1,
-      "outgoing": 16
+      "incoming": 13,
+      "outgoing": 55
     },
     {
       "route": "/blog/how-to-choose-an-ai-tool-for-private-english-tutoring.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 1,
-      "outgoing": 16
+      "incoming": 13,
+      "outgoing": 55
     },
     {
       "route": "/blog/how-to-create-business-english-homework-that-gets-completed.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 1,
-      "outgoing": 16
+      "incoming": 13,
+      "outgoing": 55
     },
     {
       "route": "/blog/how-to-create-grammar-worksheets-with-ai.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 9,
-      "outgoing": 16
+      "incoming": 21,
+      "outgoing": 55
     },
     {
       "route": "/blog/how-to-plan-next-lesson-from-homework-mistakes.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 1,
-      "outgoing": 16
+      "incoming": 13,
+      "outgoing": 55
     },
     {
       "route": "/blog/how-to-prepare-business-english-lesson-in-one-minute.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 1,
-      "outgoing": 16
+      "incoming": 13,
+      "outgoing": 55
     },
     {
       "route": "/blog/how-to-review-ai-generated-esl-worksheets-before-teaching.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 1,
-      "outgoing": 16
+      "incoming": 13,
+      "outgoing": 55
     },
     {
       "route": "/blog/how-to-review-homework-before-next-english-lesson.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 1,
-      "outgoing": 16
+      "incoming": 13,
+      "outgoing": 55
     },
     {
       "route": "/blog/how-to-turn-homework-errors-into-next-lesson-focus.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 1,
-      "outgoing": 16
+      "incoming": 13,
+      "outgoing": 55
     },
     {
       "route": "/blog/how-to-turn-student-notes-into-esl-worksheets.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 1,
-      "outgoing": 16
+      "incoming": 13,
+      "outgoing": 55
     },
     {
       "route": "/blog/how-to-use-ai-without-losing-teacher-control.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 1,
-      "outgoing": 16
+      "incoming": 13,
+      "outgoing": 55
     },
     {
       "route": "/blog/how-to-use-student-context-in-ai-worksheet-generation.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 1,
-      "outgoing": 16
+      "incoming": 13,
+      "outgoing": 55
     },
     {
       "route": "/blog/ielts-preparation-worksheets-guide.html",
@@ -537,29 +542,29 @@
       "route": "/blog/one-minute-prep-workflow-for-esl-tutors.html",
       "type": "blog",
       "state": "keep",
-      "incoming": 1,
-      "outgoing": 16
+      "incoming": 13,
+      "outgoing": 55
     },
     {
       "route": "/blog/private-english-tutor-homework-workflow.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 1,
-      "outgoing": 16
+      "incoming": 13,
+      "outgoing": 55
     },
     {
       "route": "/blog/public-esl-worksheet-gallery-quality-standards.html",
       "type": "blog",
       "state": "keep",
-      "incoming": 2,
-      "outgoing": 16
+      "incoming": 14,
+      "outgoing": 28
     },
     {
       "route": "/blog/student-progress-to-worksheet-feedback-loop.html",
       "type": "blog",
       "state": "keep",
-      "incoming": 1,
-      "outgoing": 16
+      "incoming": 13,
+      "outgoing": 55
     },
     {
       "route": "/blog/task-based-language-teaching-worksheets.html",
@@ -572,50 +577,50 @@
       "route": "/blog/teacher-controlled-ai-lesson-prep.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 1,
-      "outgoing": 16
+      "incoming": 13,
+      "outgoing": 55
     },
     {
       "route": "/blog/tutor-workflow-system-vs-lms-for-private-english-lessons.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 2,
-      "outgoing": 16
+      "incoming": 14,
+      "outgoing": 55
     },
     {
       "route": "/blog/using-ai-teacher-productivity.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 3,
-      "outgoing": 16
+      "incoming": 15,
+      "outgoing": 55
     },
     {
       "route": "/blog/what-to-teach-after-a-speaking-lesson.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 1,
-      "outgoing": 16
+      "incoming": 13,
+      "outgoing": 55
     },
     {
       "route": "/blog/what-to-teach-after-a-writing-homework.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 1,
-      "outgoing": 16
+      "incoming": 13,
+      "outgoing": 55
     },
     {
       "route": "/blog/what-to-teach-next-private-english-student.html",
       "type": "blog",
       "state": "keep",
-      "incoming": 6,
-      "outgoing": 16
+      "incoming": 18,
+      "outgoing": 55
     },
     {
       "route": "/blog/why-generic-esl-worksheets-fail-adult-learners.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 1,
-      "outgoing": 16
+      "incoming": 13,
+      "outgoing": 55
     },
     {
       "route": "/a1-beginner-english-worksheets.html",
@@ -635,36 +640,36 @@
       "route": "/accountant-variance-explanation-lesson-prep.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 0,
-      "outgoing": 10
+      "incoming": 227,
+      "outgoing": 46
     },
     {
       "route": "/accountant-variance-explanation-what-to-teach-next.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 0,
-      "outgoing": 10
+      "incoming": 227,
+      "outgoing": 46
     },
     {
       "route": "/accountant-variance-explanation-worksheet.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 0,
-      "outgoing": 10
+      "incoming": 227,
+      "outgoing": 46
     },
     {
       "route": "/adult-business-english-lesson-prep.html",
       "type": "static-landing",
       "state": "keep",
-      "incoming": 1,
+      "incoming": 229,
       "outgoing": 14
     },
     {
       "route": "/ai-chatbot-vs-student-context-system.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 141,
-      "outgoing": 10
+      "incoming": 153,
+      "outgoing": 44
     },
     {
       "route": "/ai-grading-tool-for-english-homework.html",
@@ -677,78 +682,78 @@
       "route": "/ai-lesson-planner-vs-worksheet-workflow.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 0,
-      "outgoing": 10
+      "incoming": 227,
+      "outgoing": 43
     },
     {
       "route": "/ai-lesson-planning-for-english-teachers.html",
       "type": "static-landing",
       "state": "keep",
-      "incoming": 4,
+      "incoming": 232,
       "outgoing": 14
     },
     {
       "route": "/ai-lesson-prep-software-for-private-tutors.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 0,
-      "outgoing": 10
+      "incoming": 227,
+      "outgoing": 42
     },
     {
       "route": "/ai-lesson-prep-tool-vs-chatbot.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 2,
-      "outgoing": 9
+      "incoming": 14,
+      "outgoing": 21
     },
     {
       "route": "/ai-tools-for-adult-esl-homework.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 0,
-      "outgoing": 10
+      "incoming": 227,
+      "outgoing": 41
     },
     {
       "route": "/ai-tools-for-business-english-tutors.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 0,
-      "outgoing": 10
+      "incoming": 227,
+      "outgoing": 40
     },
     {
       "route": "/ai-tools-for-esl-progress-tracking.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 0,
-      "outgoing": 10
+      "incoming": 227,
+      "outgoing": 42
     },
     {
       "route": "/ai-tools-for-one-to-one-english-lessons.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 0,
-      "outgoing": 10
+      "incoming": 227,
+      "outgoing": 40
     },
     {
       "route": "/ai-tools-for-online-esl-teachers.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 142,
-      "outgoing": 9
+      "incoming": 154,
+      "outgoing": 21
     },
     {
       "route": "/ai-tools-for-private-english-tutors.html",
       "type": "static-landing",
       "state": "keep",
-      "incoming": 141,
-      "outgoing": 9
+      "incoming": 153,
+      "outgoing": 21
     },
     {
       "route": "/ai-tools-for-private-tutor-student-context.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 0,
-      "outgoing": 10
+      "incoming": 227,
+      "outgoing": 43
     },
     {
       "route": "/ai-worksheet-generator-for-english-teachers.html",
@@ -761,7 +766,7 @@
       "route": "/articles-a-an-the-worksheets.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 4,
+      "incoming": 232,
       "outgoing": 10
     },
     {
@@ -782,162 +787,75 @@
       "route": "/best-ai-homework-tools-for-private-english-tutors.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 0,
-      "outgoing": 10
+      "incoming": 227,
+      "outgoing": 40
     },
     {
       "route": "/best-ai-tools-for-english-tutors-with-student-context.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 0,
-      "outgoing": 10
+      "incoming": 227,
+      "outgoing": 39
     },
     {
       "route": "/best-ai-tools-for-esl-teachers.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 3,
+      "incoming": 231,
       "outgoing": 14
     },
     {
       "route": "/best-ai-tools-for-private-english-tutors.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 141,
-      "outgoing": 9
+      "incoming": 153,
+      "outgoing": 21
     },
     {
       "route": "/best-ai-worksheet-generator-for-adult-esl.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 0,
-      "outgoing": 10
+      "incoming": 227,
+      "outgoing": 41
     },
     {
       "route": "/best-ai-worksheet-tools-for-english-tutors.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 141,
-      "outgoing": 10
+      "incoming": 153,
+      "outgoing": 43
     },
     {
       "route": "/blog/academic-language-functions-clil.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 3,
-      "outgoing": 16
+      "incoming": 15,
+      "outgoing": 55
     },
     {
       "route": "/blog/academic-vocabulary-teaching-strategies.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 10,
-      "outgoing": 16
+      "incoming": 22,
+      "outgoing": 55
     },
     {
       "route": "/blog/accent-coaching-techniques-esl.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 2,
-      "outgoing": 16
+      "incoming": 14,
+      "outgoing": 55
     },
     {
       "route": "/blog/accent-reduction-activities-esl.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 7,
-      "outgoing": 16
+      "incoming": 19,
+      "outgoing": 55
     }
   ],
-  "orphanStrategic": [
-    "/best-chatgpt-alternatives-for-esl-teachers.html",
-    "/best-chatgpt-prompts-for-esl-teachers-vs-workflow.html",
-    "/chatgpt-alternative-for-business-english-tutors.html",
-    "/chatgpt-alternative-for-homework-review.html",
-    "/chatgpt-alternative-for-private-esl-tutors.html",
-    "/chatgpt-vs-ai-worksheet-generator.html",
-    "/chatgpt-vs-homework-evidence-workflow.html",
-    "/claude-alternative-for-english-tutors.html",
-    "/gemini-alternative-for-english-tutors.html",
-    "/perplexity-alternative-for-esl-teachers.html",
-    "/accountant-variance-explanation-lesson-prep.html",
-    "/accountant-variance-explanation-what-to-teach-next.html",
-    "/accountant-variance-explanation-worksheet.html",
-    "/ai-lesson-planner-vs-worksheet-workflow.html",
-    "/ai-lesson-prep-software-for-private-tutors.html",
-    "/ai-tools-for-adult-esl-homework.html",
-    "/ai-tools-for-business-english-tutors.html",
-    "/ai-tools-for-esl-progress-tracking.html",
-    "/ai-tools-for-one-to-one-english-lessons.html",
-    "/ai-tools-for-private-tutor-student-context.html",
-    "/best-ai-homework-tools-for-private-english-tutors.html",
-    "/best-ai-tools-for-english-tutors-with-student-context.html",
-    "/best-ai-worksheet-generator-for-adult-esl.html"
-  ],
-  "weakTop40": [
-    {
-      "route": "/best-chatgpt-alternatives-for-esl-teachers.html",
-      "incoming": 0
-    },
-    {
-      "route": "/best-chatgpt-prompts-for-esl-teachers-vs-workflow.html",
-      "incoming": 0
-    },
-    {
-      "route": "/blog/how-to-keep-chatgpt-output-from-sounding-generic-in-esl-lessons.html",
-      "incoming": 1
-    },
-    {
-      "route": "/blog/how-to-use-chatgpt-for-esl-lesson-prep-without-losing-context.html",
-      "incoming": 1
-    },
-    {
-      "route": "/blog/why-chatgpt-is-not-enough-for-recurring-english-tutoring.html",
-      "incoming": 1
-    },
-    {
-      "route": "/chatgpt-alternative-for-business-english-tutors.html",
-      "incoming": 0
-    },
-    {
-      "route": "/chatgpt-alternative-for-homework-review.html",
-      "incoming": 0
-    },
-    {
-      "route": "/chatgpt-alternative-for-private-esl-tutors.html",
-      "incoming": 0
-    },
-    {
-      "route": "/chatgpt-vs-ai-worksheet-generator.html",
-      "incoming": 0
-    },
-    {
-      "route": "/chatgpt-vs-homework-evidence-workflow.html",
-      "incoming": 0
-    },
-    {
-      "route": "/claude-alternative-for-english-tutors.html",
-      "incoming": 0
-    },
-    {
-      "route": "/gemini-alternative-for-english-tutors.html",
-      "incoming": 0
-    },
-    {
-      "route": "/perplexity-alternative-for-esl-teachers.html",
-      "incoming": 0
-    },
-    {
-      "route": "/blog/adult-business-english-homework-feedback-loop.html",
-      "incoming": 1
-    }
-  ],
-  "noindexPriorityLinks": [
-    {
-      "route": "/blog/differentiated-instruction-english-classroom.html",
-      "incoming": [
-        "/resources"
-      ]
-    }
-  ]
+  "orphanStrategic": [],
+  "weakTop40": [],
+  "weakTop120": [],
+  "noindexPriorityLinks": []
 }

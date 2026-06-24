@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-24T07:17:16.341Z",
+  "generatedAt": "2026-06-24T10:52:44.929Z",
   "status": "manual-template",
   "reason": "Fill the CSV manually from ChatGPT, Claude, Perplexity, and Gemini UI answers, then rerun with --answers <csv>.",
   "summary": {

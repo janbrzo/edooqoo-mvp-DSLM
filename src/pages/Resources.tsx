@@ -137,7 +137,7 @@ const Resources = () => {
     { title: "10 Vocabulary Teaching Strategies", description: "ESL vocabulary strategies with AI examples.", href: "/blog/vocabulary-teaching-strategies-esl.html", badge: "Blog" },
     { title: "15 Reading Comprehension Activities", description: "Activities from A1 to C2 for English classes.", href: "/blog/reading-comprehension-activities-english.html", badge: "Blog" },
     { title: "Fill in the Blanks Best Practices", description: "How to create effective gap-fill exercises.", href: "/blog/fill-in-the-blanks-exercises-best-practices.html", badge: "Blog" },
-    { title: "Differentiated Instruction Guide", description: "Practical guide for the English classroom.", href: "/blog/differentiated-instruction-english-classroom.html", badge: "Blog" },
+  { title: "Adapting Task Difficulty for One Adult Learner", description: "Evidence-led task difficulty decisions for private adult English tutoring.", href: "/blog/adapting-task-difficulty-for-one-adult-english-learner.html", badge: "Blog" },
     { title: "How to Assess English Level (CEFR)", description: "Complete teacher's guide to CEFR assessment.", href: "/blog/how-to-assess-english-level-cefr.html", badge: "Blog" },
     { title: "Teaching English Online Guide", description: "Complete guide for online ESL teachers.", href: "/blog/teaching-english-online-complete-guide.html", badge: "Blog" },
     { title: "Spaced Repetition for Vocabulary", description: "The science and practice of spaced repetition.", href: "/blog/spaced-repetition-vocabulary-learning.html", badge: "Blog" },

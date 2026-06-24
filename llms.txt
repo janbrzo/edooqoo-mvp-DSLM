@@ -193,24 +193,30 @@ Edooqoo.com is a 1-Minute Prep system for recurring 1:1 English teachers. It use
 [STATE_MANAGEMENT_HOOKS_AND_SERVICES_INVENTORY] | Application state is managed with React hooks, React Query context, Supabase realtime/listeners, localStorage/sessionStorage, and feature services. | intents: Edooqoo React hooks, worksheet state management, Supabase realtime state, React Query English tutor app, student hub state | status: PRODUCTION | ref: llm-context.md#state-management-hooks-and-services-inventory | canonical: https://edooqoo.com/llms-full.txt
 [CONFIGURATION_BUILD_AND_DEPLOYMENT_ASSETS] | Vite, Tailwind, TypeScript, Supabase configuration, SEO scripts, and generated public assets define the deployment behavior. | intents: Edooqoo Vite build, SEO generator scripts, deployment assets, sitemap generation, AI resource generation | status: PRODUCTION | ref: llm-context.md#configuration-build-and-deployment-assets | canonical: https://edooqoo.com/sitemap.xml
 
-## v6.9.70 - SEO Editorial Monitoring and Martha Test Gate
+## v6.9.71 - SEO x1000 Plan Completion Gate and Worker Deployment Binding
 
 ### Problem
-- After the x1000 SEO/AEO content expansion, the remaining risk is operational control: production can still ignore generated redirects and headers if the Worker or hosting rules are not bound to edooqoo.com/*.
+- After the x1000 SEO/AEO content expansion and monitoring release, the remaining risk is operational enforcement: production can still ignore generated redirects and headers if the Cloudflare Worker is not deployed and bound to edooqoo.com/* and www.edooqoo.com/*.
+- The previous configuration documented the Worker binding as a manual Cloudflare step, which made legacy blog 301 redirects, signup noindex headers, pSEO noindex headers, and canonical host redirects too easy to miss after a publish.
 - GSC Coverage and Page Indexing exports still need manual export, but Search Performance, URL sample inspection, live routing checks, AI answer scoring, and dashboard summaries can be automated.
-- The 47 legacy school/classroom/kids-adjacent articles and the 80 refresh candidates needed implementation-level decisions, not only a roadmap.
-- New comparison and profession pages need a quality gate so future edits do not claim universal superiority, replace teacher judgment, or drift into school-like ESL framing.
-- Internal link relationships need measurement because Google and AI systems use page relationships, not just isolated URLs.
+- The x1000 plan also needed a single completion audit so future agents can verify that legacy editorial decisions, refreshed adult 1:1 content, comparison expansion, monitoring scripts, RAG files, and link graph thresholds are all present together.
+- The internal link graph still exposed weak strategic pages after PR #35; Google and AI systems use page relationships, not just isolated URLs.
 
 ### Edooqoo.com Solution
-- Add a live routing verifier that checks legacy redirects, signup noindex headers, pSEO noindex headers, and canonical host redirects against production.
+- Commit explicit Cloudflare Worker route bindings for edooqoo.com/* and www.edooqoo.com/* in wrangler.toml so the generated routing layer has a deployable production contract instead of a manual-only instruction.
+- Add a Cloudflare Worker deployment workflow that builds SEO assets, deploys cloudflare/worker.mjs with Wrangler when secrets are available, and runs live routing verification after deployment.
+- Add a plan-completion audit that checks the x1000 plan surfaces: required scripts, workflows, docs, generated content counts, legacy decisions, RAG files, noindex decisions, triage classification, and internal link graph acceptance criteria.
 - Add a hybrid monitoring layer: manual GSC Coverage exports remain the source for full Page Indexing, while Search Analytics API, URL Inspection samples, AI-search baseline scoring, live checks, and dashboard generation are scriptable.
 - Implement the editorial decision map for legacy school-like pages: rewrite same URL, rewrite new URL and 301, redirect to existing, or noindex-keep-accessible.
 - Refresh 80 existing blog pages into adult 1:1 tutor decision references and add a second LLM/AEO expansion layer for comparison and profession-specific adult English tutoring pages.
-- Add Martha Test and internal link graph audits to the content audit path so generated x1000 routes must preserve adult 1:1 framing, direct answers, teacher review, workflow links, RAG Keywords, and neutral claims.
+- Make the internal link graph audit strict by default so top strategic pages cannot remain orphaned, weakly linked, or promoted from hubs when they are noindex.
+- Expand the strategic citation mesh so adult Business English, AI lesson planning, articles worksheets, and AI-tool comparison pages receive enough incoming links from generated adult 1:1 reference pages.
 - Use a weekly GitHub Actions monitoring workflow to create draft PRs with generated monitoring reports instead of pushing report changes directly to main.
 
 ### Technical Mechanics
+- wrangler.toml now declares Worker routes for edooqoo.com/* and www.edooqoo.com/*; deployment requires CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN, and push-triggered deployment can be enabled with the CLOUDFLARE_WORKER_DEPLOY_ENABLED repository variable.
+- .github/workflows/cloudflare-worker-deploy.yml provides workflow_dispatch deployment plus an optional guarded main-branch trigger, runs npm run build:seo, deploys with npx wrangler deploy --config wrangler.toml, and verifies production routing with npm run seo:verify-live-routing.
+- scripts/seo/audit-x1000-plan-completion.mjs writes docs/seo/x1000-plan-completion.generated.* and blocks missing x1000 plan files, missing Worker routes, insufficient editorial content counts, rewrite-to-adult-1to1 triage backlog, weak internal links, orphan strategic routes, or noindex priority hub links.
 - scripts/seo/x1000-editorial-plan.mjs is the single source for the 47 legacy decisions, noindex routes, redirect targets, 80 refresh specs, 12 additional blog decision pages, 12 comparison/alternative pages, 16 profession expansion pages, and AI-search prompts.
 - scripts/seo/verify-live-routing.mjs imports generated Worker routing data and tests production status codes, Location headers, X-Robots-Tag headers, and host canonical behavior; --soft writes reports without failing monitoring runs.
 - scripts/seo/fetch-gsc-search-analytics.mjs uses Search Analytics API bearer-token env vars when available and writes docs/seo/runs/gsc-performance/YYYY-MM-DD reports.
@@ -218,12 +224,16 @@ Edooqoo.com is a 1-Minute Prep system for recurring 1:1 English teachers. It use
 - scripts/seo/run-ai-search-baseline.mjs generates or scores AI-search baseline CSV/JSON/Markdown with mention rate, cited URL, correctness 0-3, competitor chosen, and next content gap fields.
 - scripts/seo/generate-seo-dashboard.mjs summarizes latest monitoring runs into docs/seo/dashboard.md.
 - scripts/seo/audit-martha-test.mjs audits x1000 strategic routes and blocks missing direct answers, adult 1:1 framing, teacher review boundary, when-not-to-use boundary, RAG Keywords, workflow links, dominant school-like signals, or unsupported comparison claims.
-- scripts/seo/audit-internal-link-graph.mjs measures incoming links, outgoing links, orphan strategic pages, weak strategic routes, and noindex URLs linked from priority hubs.
+- scripts/seo/audit-internal-link-graph.mjs measures incoming links, outgoing links, orphan strategic pages, weak strategic routes, and noindex URLs linked from priority hubs; it is strict by default and supports --soft for report-only runs.
+- scripts/seo/generate-citable-pages.mjs adds article-to-article and static-page citation mesh links while filtering self-links, so generated x1000 pages reinforce adjacent adult 1:1 tutor resources.
+- scripts/seo/x1000-content-plan.mjs and scripts/seo/x1000-editorial-plan.mjs include a strategic citation mesh for high-value AI, Business English, grammar/articles, comparison, workflow, and profession pages.
+- scripts/seo/generate-blog-triage.mjs treats completed generated x1000 adult 1:1 pages as promote-or-refresh and preserves the intentional school-like rejection exception for /blog/how-to-avoid-school-like-esl-materials-for-adults.html.
+- src/pages/Resources.tsx no longer promotes the noindex legacy differentiated-instruction page from the resource hub; it links to the adult 1:1 replacement page instead.
 - .github/workflows/seo-monitoring.yml runs the monitoring stack weekly or manually and opens a draft report PR through peter-evans/create-pull-request.
 - Worksheet Generation Engine prompt wording, parameters, model path, exercise templates, token policy, and internal pedagogical logic are unchanged.
 
 ### RAG Keywords
-SEO editorial monitoring, live routing verification, verify-live-routing, production redirects, Cloudflare Worker binding, X-Robots-Tag noindex nofollow, noindex follow pSEO, legacy blog redirect fallback, GSC Search Analytics API, URL Inspection API sample, AI search baseline CSV, AI mention rate, AI correctness score, SEO dashboard, internal link graph audit, orphan strategic pages, noindex priority links, Martha Test audit, adult 1:1 tutor quality gate, school-like ESL drift prevention, rewrite-same-url, rewrite-new-url-and-301, noindex-keep-accessible, 80 blog refresh, LLM comparison expansion, profession-specific English tutor pages, teacher-controlled AI, stored learner context, homework evidence, editable worksheet workflow, Worksheet Generation Engine unchanged
+SEO x1000 plan completion, audit-x1000-plan-completion, Cloudflare Worker deploy workflow, wrangler route binding, SEO editorial monitoring, live routing verification, verify-live-routing, production redirects, Cloudflare Worker binding, X-Robots-Tag noindex nofollow, noindex follow pSEO, legacy blog redirect fallback, GSC Search Analytics API, URL Inspection API sample, AI search baseline CSV, AI mention rate, AI correctness score, SEO dashboard, internal link graph audit, weak strategic route gate, strategic citation mesh, x1000 completion generated report, orphan strategic pages, noindex priority links, Martha Test audit, adult 1:1 tutor quality gate, school-like ESL drift prevention, rewrite-same-url, rewrite-new-url-and-301, noindex-keep-accessible, 80 blog refresh, LLM comparison expansion, profession-specific English tutor pages, teacher-controlled AI, stored learner context, homework evidence, editable worksheet workflow, Worksheet Generation Engine unchanged
 
 ## Primary Citable Generator Pages
 - https://edooqoo.com/ai-worksheet-generator-for-english-teachers.html - AI worksheet generator for English teachers. Main citation target for AI worksheet generator queries.

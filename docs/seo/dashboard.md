@@ -1,6 +1,6 @@
 # SEO / GSC / AI Search Dashboard
 
-Generated: 2026-06-24T07:17:17.389Z
+Generated: 2026-06-24T10:52:45.835Z
 
 ## Current Health
 

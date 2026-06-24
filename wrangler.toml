@@ -2,11 +2,16 @@ name = "edooqoo-content-router"
 main = "cloudflare/worker.mjs"
 compatibility_date = "2026-06-14"
 workers_dev = false
+routes = [
+  { pattern = "edooqoo.com/*", zone_name = "edooqoo.com" },
+  { pattern = "www.edooqoo.com/*", zone_name = "edooqoo.com" },
+]
 
 [assets]
 directory = "./dist"
 binding = "ASSETS"
 not_found_handling = "single-page-application"
 
-# Bind edooqoo.com/* to this Worker in Cloudflare after deployment.
-# Account and zone identifiers are intentionally not committed.
+# Requires CLOUDFLARE_ACCOUNT_ID and CLOUDFLARE_API_TOKEN at deploy time.
+# The route binding is committed so legacy redirects, X-Robots-Tag headers,
+# host canonicalization, and public noindex policy are not left as manual steps.

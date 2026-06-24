@@ -1,0 +1,51 @@
+name: Cloudflare Worker Deploy
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - 'wrangler.toml'
+      - 'cloudflare/**'
+      - 'public/_headers'
+      - 'public/_redirects'
+      - 'scripts/seo/generate-edge-routing.mjs'
+      - 'scripts/seo/content-registry.mjs'
+      - 'scripts/seo/x1000-editorial-plan.mjs'
+      - 'package.json'
+      - 'package-lock.json'
+
+permissions:
+  contents: read
+
+jobs:
+  deploy-worker:
+    name: Deploy Cloudflare Worker edge routing
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch' || vars.CLOUDFLARE_WORKER_DEPLOY_ENABLED == 'true'
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build SEO assets for Worker deployment
+        run: npm run build:seo
+
+      - name: Deploy Worker and route bindings
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: npx wrangler deploy --config wrangler.toml
+
+      - name: Verify live routing after Worker deploy
+        run: npm run seo:verify-live-routing
