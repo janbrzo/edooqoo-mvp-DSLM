@@ -47,6 +47,8 @@ export interface StudentHubData {
     back_type: string;
     created_at: string;
     updated_at: string;
+    /** v6.9.72 — propagated from students.native_language for the Add Card dialog. */
+    student_native_language?: string | null;
   }>;
   homeworks: Array<{
     id: string;
