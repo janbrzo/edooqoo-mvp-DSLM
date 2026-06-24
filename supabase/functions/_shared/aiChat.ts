@@ -42,7 +42,7 @@ export interface ChatCompletionOpts {
 }
 
 function shouldFallback(status: number): boolean {
-  return status === 402 || status === 429 || status === 503 || status >= 500;
+  return status === 402 || status === 404 || status === 429 || status === 503 || status >= 500;
 }
 
 function normalizeGeminiModel(m: string): string {
@@ -67,21 +67,21 @@ function toGeminiBody(openaiBody: Record<string, unknown>) {
       parts: [{ text: typeof m.content === "string" ? m.content : JSON.stringify(m.content) }],
     }));
 
-  const generationConfig: Record<string, unknown> = {};
+  const generation_config: Record<string, unknown> = {};
   if (typeof openaiBody.temperature === "number") {
-    generationConfig.temperature = openaiBody.temperature;
+    generation_config.temperature = openaiBody.temperature;
   }
   if (typeof openaiBody.max_tokens === "number") {
-    generationConfig.maxOutputTokens = openaiBody.max_tokens;
+    generation_config.max_output_tokens = openaiBody.max_tokens;
   }
   if (typeof (openaiBody as any).max_completion_tokens === "number") {
-    generationConfig.maxOutputTokens = (openaiBody as any).max_completion_tokens;
+    generation_config.max_output_tokens = (openaiBody as any).max_completion_tokens;
   }
   const rf = openaiBody.response_format as { type?: string } | undefined;
-  if (rf?.type === "json_object") generationConfig.responseMimeType = "application/json";
+  if (rf?.type === "json_object") generation_config.response_mime_type = "application/json";
 
-  const out: Record<string, unknown> = { contents, generationConfig };
-  if (systemMsgs) out.systemInstruction = { parts: [{ text: systemMsgs }] };
+  const out: Record<string, unknown> = { contents, generation_config };
+  if (systemMsgs) out.system_instruction = { parts: [{ text: systemMsgs }] };
 
   const tools = openaiBody.tools as Array<{ type: string; function: any }> | undefined;
   if (tools?.length) {
@@ -90,16 +90,16 @@ function toGeminiBody(openaiBody: Record<string, unknown>) {
     }];
     const choice = (openaiBody as any).tool_choice;
     if (choice && typeof choice === "object" && choice.function?.name) {
-      out.toolConfig = {
-        functionCallingConfig: {
+      out.tool_config = {
+        function_calling_config: {
           mode: "ANY",
-          allowedFunctionNames: [choice.function.name],
+          allowed_function_names: [choice.function.name],
         },
       };
     } else if (choice === "required") {
-      out.toolConfig = { functionCallingConfig: { mode: "ANY" } };
+      out.tool_config = { function_calling_config: { mode: "ANY" } };
     } else {
-      out.toolConfig = { functionCallingConfig: { mode: "AUTO" } };
+      out.tool_config = { function_calling_config: { mode: "AUTO" } };
     }
   }
   return out;
