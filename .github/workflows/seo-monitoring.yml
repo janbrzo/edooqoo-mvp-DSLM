@@ -1,0 +1,62 @@
+name: SEO Monitoring
+
+on:
+  schedule:
+    - cron: '15 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  seo-monitoring:
+    name: Live routing, GSC, URL inspection, AI search baseline
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run SEO monitoring
+        env:
+          GSC_ACCESS_TOKEN: ${{ secrets.GSC_ACCESS_TOKEN }}
+          GOOGLE_SEARCH_CONSOLE_ACCESS_TOKEN: ${{ secrets.GOOGLE_SEARCH_CONSOLE_ACCESS_TOKEN }}
+          GOOGLE_ACCESS_TOKEN: ${{ secrets.GOOGLE_ACCESS_TOKEN }}
+          GSC_SITE_URL: sc-domain:edooqoo.com
+        run: npm run seo:monitor
+
+      - name: Create monitoring report PR
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: Add weekly SEO monitoring report
+          title: '[codex] Weekly SEO monitoring report'
+          body: |
+            Automated SEO monitoring report.
+
+            This PR contains generated monitoring summaries only:
+            - live routing/header checks
+            - Search Console performance fetch, when API credentials are available
+            - URL Inspection sample, when API credentials are available
+            - AI search baseline template or scored manual results
+            - SEO dashboard update
+
+            It does not change product behavior or worksheet-generation logic.
+          branch: codex/seo-monitoring-report
+          delete-branch: true
+          draft: true
+          add-paths: |
+            docs/seo/live-routing.generated.json
+            docs/seo/live-routing.generated.md
+            docs/seo/runs/**
+            docs/seo/dashboard.md

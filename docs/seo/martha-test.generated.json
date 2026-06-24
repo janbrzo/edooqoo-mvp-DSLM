@@ -1,0 +1,1189 @@
+{
+  "auditedRoutes": 147,
+  "passedRoutes": 147,
+  "failedRoutes": 0,
+  "warningCount": 3,
+  "routes": [
+    {
+      "route": "/blog/action-research-esl-teachers.html",
+      "file": "public/blog/action-research-esl-teachers.html",
+      "state": "keep",
+      "cluster": "Adult and Business English",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/ai-powered-differentiation-esl.html",
+      "file": "public/blog/ai-powered-differentiation-esl.html",
+      "state": "keep",
+      "cluster": "Adult and Business English",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/esl-exercise-type-selection-guide.html",
+      "file": "public/blog/esl-exercise-type-selection-guide.html",
+      "state": "keep",
+      "cluster": "Adult and Business English",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/motivation-theories-language-learning.html",
+      "file": "public/blog/motivation-theories-language-learning.html",
+      "state": "keep",
+      "cluster": "Adult and Business English",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/process-writing-approach-esl.html",
+      "file": "public/blog/process-writing-approach-esl.html",
+      "state": "keep",
+      "cluster": "Adult and Business English",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/teaching-listening-strategies-esl.html",
+      "file": "public/blog/teaching-listening-strategies-esl.html",
+      "state": "keep",
+      "cluster": "Adult and Business English",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/adapting-textbook-tasks-for-adult-one-to-one-english-lessons.html",
+      "file": "public/blog/adapting-textbook-tasks-for-adult-one-to-one-english-lessons.html",
+      "state": "hold",
+      "cluster": "One-to-One Lesson Planning",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/adult-learner-performance-evidence-beyond-tests.html",
+      "file": "public/blog/adult-learner-performance-evidence-beyond-tests.html",
+      "state": "hold",
+      "cluster": "Adult and Business English",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/managing-lesson-focus-in-one-to-one-adult-english-lessons.html",
+      "file": "public/blog/managing-lesson-focus-in-one-to-one-adult-english-lessons.html",
+      "state": "hold",
+      "cluster": "One-to-One Lesson Planning",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/dictation-for-adult-listening-accuracy-evidence.html",
+      "file": "public/blog/dictation-for-adult-listening-accuracy-evidence.html",
+      "state": "hold",
+      "cluster": "Adult and Business English",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/adapting-task-difficulty-for-one-adult-english-learner.html",
+      "file": "public/blog/adapting-task-difficulty-for-one-adult-english-learner.html",
+      "state": "hold",
+      "cluster": "Adult and Business English",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/role-play-for-adult-workplace-english-practice.html",
+      "file": "public/blog/role-play-for-adult-workplace-english-practice.html",
+      "state": "hold",
+      "cluster": "Adult and Business English",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/first-adult-one-to-one-english-lesson-evidence-capture.html",
+      "file": "public/blog/first-adult-one-to-one-english-lesson-evidence-capture.html",
+      "state": "hold",
+      "cluster": "One-to-One Lesson Planning",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/between-session-homework-evidence-for-private-english-tutors.html",
+      "file": "public/blog/between-session-homework-evidence-for-private-english-tutors.html",
+      "state": "hold",
+      "cluster": "Homework and Retention",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/homework-before-lesson-workflow-for-adult-english-tutors.html",
+      "file": "public/blog/homework-before-lesson-workflow-for-adult-english-tutors.html",
+      "state": "hold",
+      "cluster": "Homework and Retention",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/low-friction-review-loops-for-adult-english-learners.html",
+      "file": "public/blog/low-friction-review-loops-for-adult-english-learners.html",
+      "state": "hold",
+      "cluster": "Adult and Business English",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/input-output-evidence-in-adult-one-to-one-english-lessons.html",
+      "file": "public/blog/input-output-evidence-in-adult-one-to-one-english-lessons.html",
+      "state": "hold",
+      "cluster": "One-to-One Lesson Planning",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/information-gap-tasks-for-adult-workplace-communication.html",
+      "file": "public/blog/information-gap-tasks-for-adult-workplace-communication.html",
+      "state": "hold",
+      "cluster": "Adult and Business English",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/tutor-workflow-system-vs-lms-for-private-english-lessons.html",
+      "file": "public/blog/tutor-workflow-system-vs-lms-for-private-english-lessons.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/adult-one-to-one-neurodivergent-english-lesson-adaptations.html",
+      "file": "public/blog/adult-one-to-one-neurodivergent-english-lesson-adaptations.html",
+      "state": "hold",
+      "cluster": "One-to-One Lesson Planning",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/adult-professional-task-projects-in-english-coaching.html",
+      "file": "public/blog/adult-professional-task-projects-in-english-coaching.html",
+      "state": "hold",
+      "cluster": "Adult and Business English",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/adult-learner-autonomy-in-private-english-lessons.html",
+      "file": "public/blog/adult-learner-autonomy-in-private-english-lessons.html",
+      "state": "hold",
+      "cluster": "Adult and Business English",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/intercultural-communication-for-adult-professional-english.html",
+      "file": "public/blog/intercultural-communication-for-adult-professional-english.html",
+      "state": "hold",
+      "cluster": "Adult and Business English",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/adult-one-to-one-accessibility-adaptations-for-english-lessons.html",
+      "file": "public/blog/adult-one-to-one-accessibility-adaptations-for-english-lessons.html",
+      "state": "hold",
+      "cluster": "One-to-One Lesson Planning",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/transitioning-between-tasks-in-adult-one-to-one-english-lessons.html",
+      "file": "public/blog/transitioning-between-tasks-in-adult-one-to-one-english-lessons.html",
+      "state": "hold",
+      "cluster": "One-to-One Lesson Planning",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/private-english-tutor-tool-stack.html",
+      "file": "public/blog/private-english-tutor-tool-stack.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/adult-vocabulary-retrieval-practice-not-games.html",
+      "file": "public/blog/adult-vocabulary-retrieval-practice-not-games.html",
+      "state": "hold",
+      "cluster": "Homework and Retention",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/adult-business-english-homework-feedback-loop.html",
+      "file": "public/blog/adult-business-english-homework-feedback-loop.html",
+      "state": "hold",
+      "cluster": "Student Evidence and Progress",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/adult-esl-student-profile-lesson-planning.html",
+      "file": "public/blog/adult-esl-student-profile-lesson-planning.html",
+      "state": "keep",
+      "cluster": "Student Evidence and Progress",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/ai-generated-listening-exercises-esl.html",
+      "file": "public/blog/ai-generated-listening-exercises-esl.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/ai-homework-grading-for-english-teachers.html",
+      "file": "public/blog/ai-homework-grading-for-english-teachers.html",
+      "state": "hold",
+      "cluster": "Homework and Retention",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/ai-tools-for-english-teachers-2026.html",
+      "file": "public/blog/ai-tools-for-english-teachers-2026.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/ai-worksheet-generator-vs-lesson-planning-chatbot.html",
+      "file": "public/blog/ai-worksheet-generator-vs-lesson-planning-chatbot.html",
+      "state": "hold",
+      "cluster": "One-to-One Lesson Planning",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/best-lesson-prep-tool-for-english-tutors.html",
+      "file": "public/blog/best-lesson-prep-tool-for-english-tutors.html",
+      "state": "keep",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/best-workflow-for-private-english-tutors.html",
+      "file": "public/blog/best-workflow-for-private-english-tutors.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/business-english-material-generation-workflow.html",
+      "file": "public/blog/business-english-material-generation-workflow.html",
+      "state": "keep",
+      "cluster": "Adult and Business English",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/can-ai-plan-one-to-one-english-lesson.html",
+      "file": "public/blog/can-ai-plan-one-to-one-english-lesson.html",
+      "state": "keep",
+      "cluster": "One-to-One Lesson Planning",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/cefr-aligned-worksheet-generation-workflow.html",
+      "file": "public/blog/cefr-aligned-worksheet-generation-workflow.html",
+      "state": "keep",
+      "cluster": "Student Evidence and Progress",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/cefr-evidence-for-private-english-lessons.html",
+      "file": "public/blog/cefr-evidence-for-private-english-lessons.html",
+      "state": "hold",
+      "cluster": "Student Evidence and Progress",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/creating-interactive-worksheets-online.html",
+      "file": "public/blog/creating-interactive-worksheets-online.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/digital-homework-tools-esl-teachers.html",
+      "file": "public/blog/digital-homework-tools-esl-teachers.html",
+      "state": "hold",
+      "cluster": "Homework and Retention",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/editable-ai-worksheets-for-adult-english-learners.html",
+      "file": "public/blog/editable-ai-worksheets-for-adult-english-learners.html",
+      "state": "hold",
+      "cluster": "Adult and Business English",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/english-homework-ai-grading-workflow.html",
+      "file": "public/blog/english-homework-ai-grading-workflow.html",
+      "state": "keep",
+      "cluster": "Homework and Retention",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/english-tutor-material-organization-workflow.html",
+      "file": "public/blog/english-tutor-material-organization-workflow.html",
+      "state": "keep",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/english-tutor-workflow-after-a-live-lesson.html",
+      "file": "public/blog/english-tutor-workflow-after-a-live-lesson.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/from-lesson-evidence-to-next-lesson-plan.html",
+      "file": "public/blog/from-lesson-evidence-to-next-lesson-plan.html",
+      "state": "hold",
+      "cluster": "What Should I Teach Next?",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/from-student-goals-to-worksheet.html",
+      "file": "public/blog/from-student-goals-to-worksheet.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/homework-mistakes-next-english-lesson.html",
+      "file": "public/blog/homework-mistakes-next-english-lesson.html",
+      "state": "keep",
+      "cluster": "Homework and Retention",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/how-english-tutors-track-what-to-teach-next.html",
+      "file": "public/blog/how-english-tutors-track-what-to-teach-next.html",
+      "state": "keep",
+      "cluster": "Student Evidence and Progress",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/how-long-should-private-english-tutors-spend-on-lesson-prep.html",
+      "file": "public/blog/how-long-should-private-english-tutors-spend-on-lesson-prep.html",
+      "state": "keep",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/how-private-english-tutors-use-ai-safely.html",
+      "file": "public/blog/how-private-english-tutors-use-ai-safely.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/how-to-assess-english-level-cefr.html",
+      "file": "public/blog/how-to-assess-english-level-cefr.html",
+      "state": "hold",
+      "cluster": "Student Evidence and Progress",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/how-to-build-student-context-for-english-tutoring.html",
+      "file": "public/blog/how-to-build-student-context-for-english-tutoring.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/how-to-create-grammar-worksheets-with-ai.html",
+      "file": "public/blog/how-to-create-grammar-worksheets-with-ai.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/how-to-plan-english-lessons-effectively.html",
+      "file": "public/blog/how-to-plan-english-lessons-effectively.html",
+      "state": "keep",
+      "cluster": "One-to-One Lesson Planning",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/how-to-plan-next-lesson-from-homework-mistakes.html",
+      "file": "public/blog/how-to-plan-next-lesson-from-homework-mistakes.html",
+      "state": "hold",
+      "cluster": "What Should I Teach Next?",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/how-to-prepare-business-english-lesson-in-one-minute.html",
+      "file": "public/blog/how-to-prepare-business-english-lesson-in-one-minute.html",
+      "state": "hold",
+      "cluster": "Adult and Business English",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/how-to-reduce-lesson-prep-time-for-private-english-tutors.html",
+      "file": "public/blog/how-to-reduce-lesson-prep-time-for-private-english-tutors.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/how-to-review-homework-before-next-english-lesson.html",
+      "file": "public/blog/how-to-review-homework-before-next-english-lesson.html",
+      "state": "hold",
+      "cluster": "Homework and Retention",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/fill-in-the-blanks-exercises-best-practices.html",
+      "file": "public/blog/fill-in-the-blanks-exercises-best-practices.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/formative-assessment-english-teaching.html",
+      "file": "public/blog/formative-assessment-english-teaching.html",
+      "state": "keep",
+      "cluster": "Student Evidence and Progress",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/error-correction-techniques-esl.html",
+      "file": "public/blog/error-correction-techniques-esl.html",
+      "state": "keep",
+      "cluster": "Student Evidence and Progress",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/discussion-questions-esl-topics.html",
+      "file": "public/blog/discussion-questions-esl-topics.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/current-events-esl-lessons.html",
+      "file": "public/blog/current-events-esl-lessons.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/diagnostic-testing-english-learners.html",
+      "file": "public/blog/diagnostic-testing-english-learners.html",
+      "state": "hold",
+      "cluster": "Student Evidence and Progress",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/creating-english-tests-guide.html",
+      "file": "public/blog/creating-english-tests-guide.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/cross-cultural-communication-activities.html",
+      "file": "public/blog/cross-cultural-communication-activities.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/academic-language-functions-clil.html",
+      "file": "public/blog/academic-language-functions-clil.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/academic-vocabulary-teaching-strategies.html",
+      "file": "public/blog/academic-vocabulary-teaching-strategies.html",
+      "state": "hold",
+      "cluster": "Homework and Retention",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/accent-coaching-techniques-esl.html",
+      "file": "public/blog/accent-coaching-techniques-esl.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/accent-reduction-activities-esl.html",
+      "file": "public/blog/accent-reduction-activities-esl.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/authentic-listening-materials-esl.html",
+      "file": "public/blog/authentic-listening-materials-esl.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/bottom-up-top-down-listening-esl.html",
+      "file": "public/blog/bottom-up-top-down-listening-esl.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/cambridge-exam-preparation-tips-teachers.html",
+      "file": "public/blog/cambridge-exam-preparation-tips-teachers.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/cloze-test-design-esl.html",
+      "file": "public/blog/cloze-test-design-esl.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/connected-speech-teaching-activities.html",
+      "file": "public/blog/connected-speech-teaching-activities.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/consciousness-raising-grammar-tasks.html",
+      "file": "public/blog/consciousness-raising-grammar-tasks.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/corpus-linguistics-esl-teaching.html",
+      "file": "public/blog/corpus-linguistics-esl-teaching.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/creating-authentic-materials-esl.html",
+      "file": "public/blog/creating-authentic-materials-esl.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/data-driven-learning-esl-corpora.html",
+      "file": "public/blog/data-driven-learning-esl-corpora.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/dictogloss-technique-esl-teaching.html",
+      "file": "public/blog/dictogloss-technique-esl-teaching.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/english-for-specific-purposes-guide.html",
+      "file": "public/blog/english-for-specific-purposes-guide.html",
+      "state": "hold",
+      "cluster": "Adult and Business English",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/extensive-reading-programs-esl.html",
+      "file": "public/blog/extensive-reading-programs-esl.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/gender-inclusive-language-esl.html",
+      "file": "public/blog/gender-inclusive-language-esl.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/growth-mindset-language-learning.html",
+      "file": "public/blog/growth-mindset-language-learning.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/learning-pacing-scientific-vs-pragmatic-esl.html",
+      "file": "public/blog/learning-pacing-scientific-vs-pragmatic-esl.html",
+      "state": "keep",
+      "cluster": "What Should I Teach Next?",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/student-progress-to-worksheet-feedback-loop.html",
+      "file": "public/blog/student-progress-to-worksheet-feedback-loop.html",
+      "state": "keep",
+      "cluster": "What Should I Teach Next?",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/art-based-language-activities-esl.html",
+      "file": "public/blog/art-based-language-activities-esl.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/best-apps-learning-english-2026.html",
+      "file": "public/blog/best-apps-learning-english-2026.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/bilingual-education-models-comparison.html",
+      "file": "public/blog/bilingual-education-models-comparison.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/building-esl-teaching-portfolio.html",
+      "file": "public/blog/building-esl-teaching-portfolio.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/clil-methodology-complete-guide.html",
+      "file": "public/blog/clil-methodology-complete-guide.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/collaborative-writing-activities-esl.html",
+      "file": "public/blog/collaborative-writing-activities-esl.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/communicative-language-teaching-activities.html",
+      "file": "public/blog/communicative-language-teaching-activities.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/contrastive-analysis-language-teaching.html",
+      "file": "public/blog/contrastive-analysis-language-teaching.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/cooperative-learning-structures-esl.html",
+      "file": "public/blog/cooperative-learning-structures-esl.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/course-evaluation-esl-programs.html",
+      "file": "public/blog/course-evaluation-esl-programs.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/cpd-planning-esl-teachers.html",
+      "file": "public/blog/cpd-planning-esl-teachers.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/creative-writing-activities-esl.html",
+      "file": "public/blog/creative-writing-activities-esl.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/critical-period-hypothesis-language.html",
+      "file": "public/blog/critical-period-hypothesis-language.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/culturally-responsive-teaching-esl.html",
+      "file": "public/blog/culturally-responsive-teaching-esl.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/debate-activities-english-class.html",
+      "file": "public/blog/debate-activities-english-class.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/designing-english-midterm-final-exams.html",
+      "file": "public/blog/designing-english-midterm-final-exams.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/digital-resource-curation-esl.html",
+      "file": "public/blog/digital-resource-curation-esl.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/emi-english-medium-instruction-guide.html",
+      "file": "public/blog/emi-english-medium-instruction-guide.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/end-of-term-activities-esl.html",
+      "file": "public/blog/end-of-term-activities-esl.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/energy-management-esl-lessons.html",
+      "file": "public/blog/energy-management-esl-lessons.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/how-to-choose-an-ai-tool-for-private-english-tutoring.html",
+      "file": "public/blog/how-to-choose-an-ai-tool-for-private-english-tutoring.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/how-to-keep-chatgpt-output-from-sounding-generic-in-esl-lessons.html",
+      "file": "public/blog/how-to-keep-chatgpt-output-from-sounding-generic-in-esl-lessons.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/how-to-turn-homework-errors-into-next-lesson-focus.html",
+      "file": "public/blog/how-to-turn-homework-errors-into-next-lesson-focus.html",
+      "state": "hold",
+      "cluster": "What Should I Teach Next?",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/how-to-use-ai-without-losing-teacher-control.html",
+      "file": "public/blog/how-to-use-ai-without-losing-teacher-control.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/how-to-build-an-adult-esl-lesson-from-real-work-tasks.html",
+      "file": "public/blog/how-to-build-an-adult-esl-lesson-from-real-work-tasks.html",
+      "state": "hold",
+      "cluster": "Adult and Business English",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/how-to-create-business-english-homework-that-gets-completed.html",
+      "file": "public/blog/how-to-create-business-english-homework-that-gets-completed.html",
+      "state": "hold",
+      "cluster": "Homework and Retention",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/how-to-use-student-context-in-ai-worksheet-generation.html",
+      "file": "public/blog/how-to-use-student-context-in-ai-worksheet-generation.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/how-to-plan-a-recurring-english-student-learning-loop.html",
+      "file": "public/blog/how-to-plan-a-recurring-english-student-learning-loop.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/how-to-review-ai-generated-esl-worksheets-before-teaching.html",
+      "file": "public/blog/how-to-review-ai-generated-esl-worksheets-before-teaching.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/how-to-avoid-generic-ai-lesson-plans-for-adults.html",
+      "file": "public/blog/how-to-avoid-generic-ai-lesson-plans-for-adults.html",
+      "state": "hold",
+      "cluster": "One-to-One Lesson Planning",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/how-to-track-progress-without-school-like-tests.html",
+      "file": "public/blog/how-to-track-progress-without-school-like-tests.html",
+      "state": "hold",
+      "cluster": "Student Evidence and Progress",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/how-to-design-one-to-one-english-lessons-for-professionals.html",
+      "file": "public/blog/how-to-design-one-to-one-english-lessons-for-professionals.html",
+      "state": "hold",
+      "cluster": "One-to-One Lesson Planning",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/chatgpt-alternative-for-business-english-tutors.html",
+      "file": "public/chatgpt-alternative-for-business-english-tutors.html",
+      "state": "hold",
+      "cluster": "Adult and Business English",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/chatgpt-alternative-for-private-esl-tutors.html",
+      "file": "public/chatgpt-alternative-for-private-esl-tutors.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/chatgpt-alternative-for-homework-review.html",
+      "file": "public/chatgpt-alternative-for-homework-review.html",
+      "state": "hold",
+      "cluster": "Homework and Retention",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/claude-alternative-for-english-tutors.html",
+      "file": "public/claude-alternative-for-english-tutors.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/gemini-alternative-for-english-tutors.html",
+      "file": "public/gemini-alternative-for-english-tutors.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/perplexity-alternative-for-esl-teachers.html",
+      "file": "public/perplexity-alternative-for-esl-teachers.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/best-ai-tools-for-english-tutors-with-student-context.html",
+      "file": "public/best-ai-tools-for-english-tutors-with-student-context.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/best-ai-homework-tools-for-private-english-tutors.html",
+      "file": "public/best-ai-homework-tools-for-private-english-tutors.html",
+      "state": "hold",
+      "cluster": "Homework and Retention",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/best-ai-worksheet-generator-for-adult-esl.html",
+      "file": "public/best-ai-worksheet-generator-for-adult-esl.html",
+      "state": "hold",
+      "cluster": "Adult and Business English",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/ai-lesson-prep-software-for-private-tutors.html",
+      "file": "public/ai-lesson-prep-software-for-private-tutors.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/teacher-controlled-ai-vs-ai-autopilot.html",
+      "file": "public/teacher-controlled-ai-vs-ai-autopilot.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/student-context-system-vs-chatbot-for-english-tutors.html",
+      "file": "public/student-context-system-vs-chatbot-for-english-tutors.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/doctor-patient-explanation-lesson-prep.html",
+      "file": "public/doctor-patient-explanation-lesson-prep.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/doctor-patient-explanation-worksheet.html",
+      "file": "public/doctor-patient-explanation-worksheet.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/nurse-handover-lesson-prep.html",
+      "file": "public/nurse-handover-lesson-prep.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/nurse-handover-worksheet.html",
+      "file": "public/nurse-handover-worksheet.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/ux-designer-research-interview-lesson-prep.html",
+      "file": "public/ux-designer-research-interview-lesson-prep.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/ux-designer-research-interview-worksheet.html",
+      "file": "public/ux-designer-research-interview-worksheet.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/data-analyst-insight-presentation-lesson-prep.html",
+      "file": "public/data-analyst-insight-presentation-lesson-prep.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/data-analyst-insight-presentation-worksheet.html",
+      "file": "public/data-analyst-insight-presentation-worksheet.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/customer-success-renewal-call-lesson-prep.html",
+      "file": "public/customer-success-renewal-call-lesson-prep.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/customer-success-renewal-call-worksheet.html",
+      "file": "public/customer-success-renewal-call-worksheet.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/operations-manager-process-update-lesson-prep.html",
+      "file": "public/operations-manager-process-update-lesson-prep.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/operations-manager-process-update-worksheet.html",
+      "file": "public/operations-manager-process-update-worksheet.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/finance-manager-budget-explanation-lesson-prep.html",
+      "file": "public/finance-manager-budget-explanation-lesson-prep.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/finance-manager-budget-explanation-worksheet.html",
+      "file": "public/finance-manager-budget-explanation-worksheet.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/product-manager-roadmap-tradeoff-lesson-prep.html",
+      "file": "public/product-manager-roadmap-tradeoff-lesson-prep.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/product-manager-roadmap-tradeoff-worksheet.html",
+      "file": "public/product-manager-roadmap-tradeoff-worksheet.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
+      "pass": true,
+      "errors": []
+    }
+  ],
+  "warnings": [
+    "/blog/parent-teacher-conferences-esl.html: indexable page has school-like title/H1/meta signal outside x1000 target set",
+    "/english-worksheets-for-kids.html: indexable page has school-like title/H1/meta signal outside x1000 target set",
+    "/english-worksheets-for-teenagers.html: indexable page has school-like title/H1/meta signal outside x1000 target set"
+  ]
+}

@@ -1,0 +1,939 @@
+{
+  "generatedAt": "2026-06-24T07:17:11.581Z",
+  "base": "https://edooqoo.com",
+  "totals": {
+    "checks": 58,
+    "passed": 1,
+    "failed": 57
+  },
+  "checks": [
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/adapting-textbooks-esl-classroom.html",
+      "expected": "https://edooqoo.com/blog/adapting-textbook-tasks-for-adult-one-to-one-english-lessons.html",
+      "pass": false,
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/alternative-assessment-esl-classroom.html",
+      "expected": "https://edooqoo.com/blog/adult-learner-performance-evidence-beyond-tests.html",
+      "pass": false,
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/asynchronous-learning-esl.html",
+      "expected": "https://edooqoo.com/blog/effective-esl-homework-strategies.html",
+      "pass": false,
+      "ok": true,
+      "status": 404,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/plain; charset=UTF-8",
+        "cacheControl": "",
+        "deploymentId": "",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/classroom-language-esl-teachers.html",
+      "expected": "https://edooqoo.com/blog/teaching-english-one-to-one.html",
+      "pass": false,
+      "ok": true,
+      "status": 404,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/plain; charset=UTF-8",
+        "cacheControl": "",
+        "deploymentId": "",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/classroom-management-esl-tips.html",
+      "expected": "https://edooqoo.com/blog/managing-lesson-focus-in-one-to-one-adult-english-lessons.html",
+      "pass": false,
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/concept-checking-questions-esl.html",
+      "expected": "https://edooqoo.com/blog/how-to-teach-english-grammar-effectively.html",
+      "pass": false,
+      "ok": true,
+      "status": 404,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/plain; charset=UTF-8",
+        "cacheControl": "",
+        "deploymentId": "",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/conferencing-with-esl-students.html",
+      "expected": "https://edooqoo.com/blog/process-writing-approach-esl.html",
+      "pass": false,
+      "ok": true,
+      "status": 404,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/plain; charset=UTF-8",
+        "cacheControl": "",
+        "deploymentId": "",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/conversation-classes-esl-structure.html",
+      "expected": "https://edooqoo.com/blog/how-to-teach-speaking-esl.html",
+      "pass": false,
+      "ok": true,
+      "status": 404,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/plain; charset=UTF-8",
+        "cacheControl": "",
+        "deploymentId": "",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/dictation-activities-esl-classroom.html",
+      "expected": "https://edooqoo.com/blog/dictation-for-adult-listening-accuracy-evidence.html",
+      "pass": false,
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/differentiated-instruction-english-classroom.html",
+      "expected": "https://edooqoo.com/blog/adapting-task-difficulty-for-one-adult-english-learner.html",
+      "pass": false,
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/drama-techniques-esl-classroom.html",
+      "expected": "https://edooqoo.com/blog/role-play-for-adult-workplace-english-practice.html",
+      "pass": false,
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/duolingo-english-test-preparation.html",
+      "expected": "https://edooqoo.com/english-worksheets-for-exam-prep.html",
+      "pass": false,
+      "ok": true,
+      "status": 404,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/plain; charset=UTF-8",
+        "cacheControl": "",
+        "deploymentId": "",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/eliciting-techniques-esl-teaching.html",
+      "expected": "https://edooqoo.com/blog/how-to-plan-english-lessons-effectively.html",
+      "pass": false,
+      "ok": true,
+      "status": 404,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/plain; charset=UTF-8",
+        "cacheControl": "",
+        "deploymentId": "",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/first-day-esl-class-activities.html",
+      "expected": "https://edooqoo.com/blog/first-adult-one-to-one-english-lesson-evidence-capture.html",
+      "pass": false,
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/flipped-classroom-english-teaching.html",
+      "expected": "https://edooqoo.com/blog/between-session-homework-evidence-for-private-english-tutors.html",
+      "pass": false,
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/flipped-homework-esl-classroom.html",
+      "expected": "https://edooqoo.com/blog/homework-before-lesson-workflow-for-adult-english-tutors.html",
+      "pass": false,
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/fluency-activities-esl-classroom.html",
+      "expected": "https://edooqoo.com/blog/how-to-teach-speaking-esl.html",
+      "pass": false,
+      "ok": true,
+      "status": 404,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/plain; charset=UTF-8",
+        "cacheControl": "",
+        "deploymentId": "",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/gamification-english-classroom.html",
+      "expected": "https://edooqoo.com/blog/low-friction-review-loops-for-adult-english-learners.html",
+      "pass": false,
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/giving-instructions-esl-classroom.html",
+      "expected": "https://edooqoo.com/blog/how-to-plan-english-lessons-effectively.html",
+      "pass": false,
+      "ok": true,
+      "status": 404,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/plain; charset=UTF-8",
+        "cacheControl": "",
+        "deploymentId": "",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/graded-readers-guide-esl-teachers.html",
+      "expected": "https://edooqoo.com/blog/extensive-reading-programs-esl.html",
+      "pass": false,
+      "ok": true,
+      "status": 404,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/plain; charset=UTF-8",
+        "cacheControl": "",
+        "deploymentId": "",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/input-output-hypotheses-classroom.html",
+      "expected": "https://edooqoo.com/blog/input-output-evidence-in-adult-one-to-one-english-lessons.html",
+      "pass": false,
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/jigsaw-activities-esl-classroom.html",
+      "expected": "https://edooqoo.com/blog/information-gap-tasks-for-adult-workplace-communication.html",
+      "pass": false,
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/learning-management-systems-esl.html",
+      "expected": "https://edooqoo.com/blog/tutor-workflow-system-vs-lms-for-private-english-lessons.html",
+      "pass": false,
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/marking-codes-esl-writing.html",
+      "expected": "https://edooqoo.com/blog/error-correction-techniques-esl.html",
+      "pass": false,
+      "ok": true,
+      "status": 404,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/plain; charset=UTF-8",
+        "cacheControl": "",
+        "deploymentId": "",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/neurodiversity-esl-classroom.html",
+      "expected": "https://edooqoo.com/blog/adult-one-to-one-neurodivergent-english-lesson-adaptations.html",
+      "pass": false,
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/newspaper-articles-esl-lessons.html",
+      "expected": "https://edooqoo.com/blog/current-events-esl-lessons.html",
+      "pass": false,
+      "ok": true,
+      "status": 404,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/plain; charset=UTF-8",
+        "cacheControl": "",
+        "deploymentId": "",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/oral-correction-timing-techniques.html",
+      "expected": "https://edooqoo.com/blog/error-correction-techniques-esl.html",
+      "pass": false,
+      "ok": true,
+      "status": 404,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/plain; charset=UTF-8",
+        "cacheControl": "",
+        "deploymentId": "",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/positive-error-culture-esl.html",
+      "expected": "https://edooqoo.com/blog/error-correction-techniques-esl.html",
+      "pass": false,
+      "ok": true,
+      "status": 404,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/plain; charset=UTF-8",
+        "cacheControl": "",
+        "deploymentId": "",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/project-based-learning-english.html",
+      "expected": "https://edooqoo.com/blog/adult-professional-task-projects-in-english-coaching.html",
+      "pass": false,
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/shadowing-technique-esl.html",
+      "expected": "https://edooqoo.com/blog/how-to-teach-english-pronunciation.html",
+      "pass": false,
+      "ok": true,
+      "status": 404,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/plain; charset=UTF-8",
+        "cacheControl": "",
+        "deploymentId": "",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/standardized-test-comparison-esl.html",
+      "expected": "https://edooqoo.com/english-worksheets-for-exam-prep.html",
+      "pass": false,
+      "ok": true,
+      "status": 404,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/plain; charset=UTF-8",
+        "cacheControl": "",
+        "deploymentId": "",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/student-autonomy-esl-classroom.html",
+      "expected": "https://edooqoo.com/blog/adult-learner-autonomy-in-private-english-lessons.html",
+      "pass": false,
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/teacher-talking-time-reducing.html",
+      "expected": "https://edooqoo.com/blog/teaching-english-one-to-one.html",
+      "pass": false,
+      "ok": true,
+      "status": 404,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/plain; charset=UTF-8",
+        "cacheControl": "",
+        "deploymentId": "",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/teaching-critical-reading-esl.html",
+      "expected": "https://edooqoo.com/blog/reading-comprehension-activities-english.html",
+      "pass": false,
+      "ok": true,
+      "status": 404,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/plain; charset=UTF-8",
+        "cacheControl": "",
+        "deploymentId": "",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/teaching-culture-esl-classroom.html",
+      "expected": "https://edooqoo.com/blog/intercultural-communication-for-adult-professional-english.html",
+      "pass": false,
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/teaching-english-learning-disabilities.html",
+      "expected": "https://edooqoo.com/blog/adult-one-to-one-accessibility-adaptations-for-english-lessons.html",
+      "pass": false,
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/teaching-functional-language-esl.html",
+      "expected": "https://edooqoo.com/blog/teaching-pragmatics-esl.html",
+      "pass": false,
+      "ok": true,
+      "status": 404,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/plain; charset=UTF-8",
+        "cacheControl": "",
+        "deploymentId": "",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/teaching-reading-fluency-esl.html",
+      "expected": "https://edooqoo.com/blog/reading-comprehension-activities-english.html",
+      "pass": false,
+      "ok": true,
+      "status": 404,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/plain; charset=UTF-8",
+        "cacheControl": "",
+        "deploymentId": "",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/teaching-skimming-scanning-esl.html",
+      "expected": "https://edooqoo.com/blog/reading-comprehension-activities-english.html",
+      "pass": false,
+      "ok": true,
+      "status": 404,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/plain; charset=UTF-8",
+        "cacheControl": "",
+        "deploymentId": "",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/teaching-test-taking-strategies-esl.html",
+      "expected": "https://edooqoo.com/english-worksheets-for-exam-prep.html",
+      "pass": false,
+      "ok": true,
+      "status": 404,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/plain; charset=UTF-8",
+        "cacheControl": "",
+        "deploymentId": "",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/toefl-preparation-strategies-teachers.html",
+      "expected": "https://edooqoo.com/english-worksheets-for-exam-prep.html",
+      "pass": false,
+      "ok": true,
+      "status": 404,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/plain; charset=UTF-8",
+        "cacheControl": "",
+        "deploymentId": "",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/toeic-preparation-worksheets-guide.html",
+      "expected": "https://edooqoo.com/english-worksheets-for-exam-prep.html",
+      "pass": false,
+      "ok": true,
+      "status": 404,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/plain; charset=UTF-8",
+        "cacheControl": "",
+        "deploymentId": "",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/transitions-activities-esl-classroom.html",
+      "expected": "https://edooqoo.com/blog/transitioning-between-tasks-in-adult-one-to-one-english-lessons.html",
+      "pass": false,
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/using-google-workspace-esl-teachers.html",
+      "expected": "https://edooqoo.com/blog/private-english-tutor-tool-stack.html",
+      "pass": false,
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "legacy-redirect",
+      "url": "https://edooqoo.com/blog/vocabulary-games-esl-classroom.html",
+      "expected": "https://edooqoo.com/blog/adult-vocabulary-retrieval-practice-not-games.html",
+      "pass": false,
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "signup-noindex",
+      "url": "https://edooqoo.com/signup?exerciseType=definition-match&topic=weather",
+      "expected": "X-Robots-Tag: noindex, nofollow",
+      "pass": false,
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "no-cache, must-revalidate, max-age=0",
+        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "public-noindex-follow",
+      "url": "https://edooqoo.com/english-for/cabin-crew",
+      "expected": "X-Robots-Tag: noindex, follow",
+      "pass": false,
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "no-cache, must-revalidate, max-age=0",
+        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "public-noindex-follow",
+      "url": "https://edooqoo.com/english-for/call-center-agents",
+      "expected": "X-Robots-Tag: noindex, follow",
+      "pass": false,
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "no-cache, must-revalidate, max-age=0",
+        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "public-noindex-follow",
+      "url": "https://edooqoo.com/english-for/chefs",
+      "expected": "X-Robots-Tag: noindex, follow",
+      "pass": false,
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "no-cache, must-revalidate, max-age=0",
+        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "public-noindex-follow",
+      "url": "https://edooqoo.com/english-for/customer-service",
+      "expected": "X-Robots-Tag: noindex, follow",
+      "pass": false,
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "no-cache, must-revalidate, max-age=0",
+        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "public-noindex-follow",
+      "url": "https://edooqoo.com/english-for/doctors",
+      "expected": "X-Robots-Tag: noindex, follow",
+      "pass": false,
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "no-cache, must-revalidate, max-age=0",
+        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "public-noindex-follow",
+      "url": "https://edooqoo.com/english-for/financial-advisors",
+      "expected": "X-Robots-Tag: noindex, follow",
+      "pass": false,
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "no-cache, must-revalidate, max-age=0",
+        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "public-noindex-follow",
+      "url": "https://edooqoo.com/english-for/hotel-staff",
+      "expected": "X-Robots-Tag: noindex, follow",
+      "pass": false,
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "no-cache, must-revalidate, max-age=0",
+        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "public-noindex-follow",
+      "url": "https://edooqoo.com/english-for/nurses",
+      "expected": "X-Robots-Tag: noindex, follow",
+      "pass": false,
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "no-cache, must-revalidate, max-age=0",
+        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "public-noindex-follow",
+      "url": "https://edooqoo.com/english-for/real-estate-agents",
+      "expected": "X-Robots-Tag: noindex, follow",
+      "pass": false,
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "no-cache, must-revalidate, max-age=0",
+        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "public-noindex-follow",
+      "url": "https://edooqoo.com/english-for/retail-staff",
+      "expected": "X-Robots-Tag: noindex, follow",
+      "pass": false,
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "no-cache, must-revalidate, max-age=0",
+        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "host-canonical",
+      "url": "https://www.edooqoo.com/llms.txt",
+      "expected": "https://edooqoo.com/llms.txt",
+      "pass": false,
+      "ok": true,
+      "status": 200,
+      "headers": {
+        "location": "",
+        "xRobotsTag": "",
+        "contentType": "text/plain; charset=utf-8",
+        "cacheControl": "",
+        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "server": "cloudflare"
+      }
+    },
+    {
+      "type": "http-to-https",
+      "url": "http://edooqoo.com/llms.txt",
+      "expected": "https://edooqoo.com/llms.txt",
+      "pass": true,
+      "ok": true,
+      "status": 301,
+      "headers": {
+        "location": "https://edooqoo.com/llms.txt",
+        "xRobotsTag": "",
+        "contentType": "",
+        "cacheControl": "",
+        "deploymentId": "",
+        "server": "cloudflare"
+      }
+    }
+  ]
+}

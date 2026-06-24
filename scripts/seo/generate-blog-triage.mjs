@@ -4,6 +4,7 @@ import fsSync from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { getBlogRegistry } from './content-registry.mjs';
+import { intentionalSchoolLikeRejectionSlugs } from './x1000-editorial-plan.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..', '..');
@@ -48,11 +49,35 @@ function decide(entry) {
   const schoolLike = SIGNALS.schoolLike.test(haystack);
   const theoryGeneric = SIGNALS.theoryGeneric.test(haystack);
 
+  if (intentionalSchoolLikeRejectionSlugs.has(slug)) {
+    return {
+      action: 'promote-or-refresh',
+      priority: 2,
+      reason: 'Intentional adult 1:1 page that rejects school-like materials; school-like language is the object of critique, not the framing.',
+    };
+  }
+
   if (PRIORITY_REWRITE_SLUGS.has(slug)) {
     return {
       action: 'promote-rewrite-now',
       priority: 1,
       reason: 'Top strategic cluster for recurring adult 1:1 English tutor workflow and LLM citation.',
+    };
+  }
+
+  if (entry.state === 'noindex') {
+    return {
+      action: 'noindex-keep-accessible',
+      priority: 4,
+      reason: 'Legacy school-like page kept accessible but excluded from indexing by x1000 editorial policy.',
+    };
+  }
+
+  if (entry.state === 'merge') {
+    return {
+      action: 'merge-redirect-or-noindex',
+      priority: 4,
+      reason: 'Legacy page is merged into a stronger adult 1:1 target by x1000 editorial policy.',
     };
   }
 
@@ -132,6 +157,7 @@ function rewriteStage(decision) {
   if (decision.action === 'promote-rewrite-now') return 'stage-1-pillar-rewrite';
   if (decision.action === 'rewrite-to-adult-1to1') return 'stage-3-school-like-rewrite';
   if (decision.action === 'promote-or-refresh') return 'stage-4-refresh-candidate';
+  if (decision.action === 'noindex-keep-accessible') return 'stage-3-noindex-legacy';
   if (decision.action === 'merge-redirect-or-noindex') return 'stage-3-merge-redirect-or-noindex';
   if (decision.action === 'rewrite-with-adult-performance-decision') return 'stage-3-theory-to-decision-rewrite';
   return 'manual-review';
@@ -139,6 +165,7 @@ function rewriteStage(decision) {
 
 function canonicalDecision(entry, decision) {
   if (decision.action === 'merge-redirect-or-noindex') return 'merge, redirect, or noindex unless rewritten for adult 1:1 tutoring';
+  if (decision.action === 'noindex-keep-accessible') return 'keep accessible with noindex,follow and exclude from sitemap';
   if (decision.action === 'rewrite-to-adult-1to1') return 'keep self-canonical only after adult 1:1 rewrite';
   if (decision.action === 'rewrite-with-adult-performance-decision') return 'keep self-canonical only after decision-page rewrite';
   if (decision.action === 'review-for-merge') return 'hold self-canonical until measured evidence or manual decision';

@@ -2,3 +2,5 @@ node_modules
 .npm-cache/
 .git-tmp-*
 .ssh_known_hosts
+data/seo/gsc-exports/
+data/seo/ai-raw/

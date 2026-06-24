@@ -1519,7 +1519,8 @@ ${NEWSLETTER_EMBED_CSS}
 </style>`;
 }
 
-function layout({ title, description, canonical, body, jsonLd }) {
+function layout({ title, description, canonical, body, jsonLd, robots = '' }) {
+  const robotsMeta = robots ? `  <meta name="robots" content="${escapeHtml(robots)}">\n` : '';
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -1527,6 +1528,7 @@ function layout({ title, description, canonical, body, jsonLd }) {
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>${escapeHtml(title)} | Edooqoo</title>
   <meta name="description" content="${escapeHtml(description)}">
+${robotsMeta}  <meta name="llm-intent" content="adult 1:1 English tutoring reference">
   <link rel="canonical" href="${canonical}">
   <meta property="og:title" content="${escapeHtml(title)}">
   <meta property="og:description" content="${escapeHtml(description)}">
@@ -1857,7 +1859,14 @@ ${renderNewsletterEmbed(`article:${article.slug.replace(/\.html$/, '')}`).trimSt
   </footer>
 </main>`;
 
-  return layout({ title: article.title, description: article.description, canonical: url, body, jsonLd: articleLd(article, url) });
+  return layout({
+    title: article.title,
+    description: article.description,
+    canonical: url,
+    body,
+    jsonLd: articleLd(article, url),
+    robots: article.noindex ? 'noindex,follow' : '',
+  });
 }
 
 function comparisonFaq(page) {

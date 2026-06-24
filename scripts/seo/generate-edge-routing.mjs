@@ -9,6 +9,8 @@ const ROOT = path.resolve(__dirname, '..', '..');
 const OUTPUT = path.join(ROOT, 'cloudflare', 'content-routing.generated.mjs');
 const PUBLIC_REDIRECTS_OUTPUT = path.join(ROOT, 'public', '_redirects');
 const PUBLIC_HEADERS_OUTPUT = path.join(ROOT, 'public', '_headers');
+const PUBLIC = path.join(ROOT, 'public');
+const BASE = 'https://edooqoo.com';
 const entries = getContentRegistry({ root: ROOT });
 const decisions = getRoutingDecisions({ root: ROOT });
 const publicRoutes = entries.filter((entry) => entry.indexable).map((entry) => entry.route);
@@ -57,11 +59,55 @@ export const GONE_ROUTES = new Set(${JSON.stringify(decisions.gone, null, 2)});
 export const NOINDEX_ROUTES = new Set(${JSON.stringify(decisions.noindex, null, 2)});
 `;
 
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+function redirectFallbackHtml(from, to) {
+  const target = new URL(to, BASE).toString();
+  return `<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex,follow">
+  <meta http-equiv="refresh" content="0; url=${escapeHtml(target)}">
+  <link rel="canonical" href="${escapeHtml(target)}">
+  <title>Moved | Edooqoo</title>
+</head>
+<body>
+  <main>
+    <h1>This Edooqoo page has moved</h1>
+    <p>The adult 1:1 English tutoring reference now lives at <a href="${escapeHtml(target)}">${escapeHtml(target)}</a>.</p>
+    <p>This HTML file is a fallback for hosts that do not execute the generated edge redirect rules. The preferred production response is HTTP 301.</p>
+  </main>
+</body>
+</html>
+`;
+}
+
+async function writeStaticRedirectFallbacks() {
+  for (const [from, to] of Object.entries(decisions.redirects)) {
+    const normalized = from.replace(/^\/+/, '');
+    if (!normalized || normalized.includes('..')) continue;
+    const filePath = path.join(PUBLIC, normalized);
+    if (!filePath.startsWith(PUBLIC)) continue;
+    await fs.mkdir(path.dirname(filePath), { recursive: true });
+    await fs.writeFile(filePath, redirectFallbackHtml(from, to), 'utf8');
+  }
+}
+
 await fs.mkdir(path.dirname(OUTPUT), { recursive: true });
 await fs.writeFile(OUTPUT, output, 'utf8');
 await fs.writeFile(PUBLIC_REDIRECTS_OUTPUT, publicRedirects, 'utf8');
 await fs.writeFile(PUBLIC_HEADERS_OUTPUT, publicHeaders, 'utf8');
+await writeStaticRedirectFallbacks();
 console.log(`[edge-routing] Wrote ${publicRoutes.length} public routes to ${path.relative(ROOT, OUTPUT)}`);
 console.log(`[edge-routing] Wrote ${routeRedirects.length + hostCanonicalRedirects.length} fallback redirects to ${path.relative(ROOT, PUBLIC_REDIRECTS_OUTPUT)}`);
 console.log(`[edge-routing] Wrote ${decisions.noindex.length + 2} fallback noindex header rules to ${path.relative(ROOT, PUBLIC_HEADERS_OUTPUT)}`);
+console.log(`[edge-routing] Wrote ${Object.keys(decisions.redirects).length} static redirect fallback HTML files for hosts without edge redirect support`);
 
