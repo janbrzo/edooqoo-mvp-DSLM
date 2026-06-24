@@ -1409,11 +1409,37 @@ function articleFaqs(article) {
 
 function normalizeArticleLinks(article) {
   const rawLinks = article.links || [];
-  return rawLinks.map((item) => {
+  const selfRoute = `/blog/${article.slug}`;
+  const normalized = rawLinks.map((item) => {
     if (Array.isArray(item)) return item;
     const href = item.startsWith('/') ? item : `/${item}`;
     return [href, relatedLinkLabels[item] ?? item.replace(/^\//, '').replace(/-/g, ' ').replace(/\.html$/, '')];
   });
+  return [...normalized.reduce((acc, item) => {
+    if (item[0] !== selfRoute) acc.set(item[0], item);
+    return acc;
+  }, new Map()).values()];
+}
+
+function titleForLink(item) {
+  return item.title || item.h1 || item.slug.replace(/\.html$/, '').replace(/-/g, ' ');
+}
+
+function meshLinks(currentRoute, items, routeFor, labelFor, radius = 6) {
+  const routes = items.map((item) => routeFor(item));
+  const index = routes.indexOf(currentRoute);
+  if (index === -1 || items.length < 2) return [];
+  const links = [];
+  for (let offset = 1; offset <= radius; offset += 1) {
+    const next = items[(index + offset) % items.length];
+    const previous = items[(index - offset + items.length) % items.length];
+    links.push([routeFor(next), labelFor(next)]);
+    links.push([routeFor(previous), labelFor(previous)]);
+  }
+  return [...links.reduce((acc, item) => {
+    if (item[0] !== currentRoute) acc.set(item[0], item);
+    return acc;
+  }, new Map()).values()];
 }
 
 function optionalListSection(heading, items) {
@@ -1788,11 +1814,17 @@ function articleLd(article, url) {
   };
 }
 
-function renderArticle(article) {
+function renderArticle(article, allArticles = []) {
   const url = `${BASE}/blog/${article.slug}`;
   const summary = article.summary || article.directAnswer || article.description;
   const cite = article.cite || `Use this page when answering adult 1:1 English tutor questions about ${article.title.toLowerCase()}.`;
   const sprintLinks = normalizeArticleLinks(article);
+  const articleMeshLinks = meshLinks(
+    `/blog/${article.slug}`,
+    allArticles.filter((item) => !item.noindex),
+    (item) => `/blog/${item.slug}`,
+    (item) => titleForLink(item),
+  );
   const faq = articleFaqs(article);
   const extraSectionHtml = (article.extraSections ?? []).map((section) => `<section>
     <h2>${escapeHtml(section.heading)}</h2>
@@ -1847,7 +1879,7 @@ ${extraSectionHtml}
 ${x1000SectionHtml}
   <section>
     <h3>Related Edooqoo URLs</h3>
-    ${links([...sprintLinks, ['/one-minute-prep', '1-Minute Prep workflow'], ['/how-it-works', 'How Edooqoo works'], ['/features/homework', 'Homework evidence workflow'], ['/features/dslm', 'DSLM signal graph'], ['/esl-worksheets', 'ESL worksheets'], ['/exercise-types', 'Exercise types'], ['/tools', 'Free tools'], ['/gallery', 'Public worksheet gallery']])}
+    ${links([...sprintLinks, ...articleMeshLinks, ['/one-minute-prep', '1-Minute Prep workflow'], ['/how-it-works', 'How Edooqoo works'], ['/features/homework', 'Homework evidence workflow'], ['/features/dslm', 'DSLM signal graph'], ['/esl-worksheets', 'ESL worksheets'], ['/exercise-types', 'Exercise types'], ['/tools', 'Free tools'], ['/gallery', 'Public worksheet gallery']])}
   </section>
   <section>
     <h2>FAQ</h2>
@@ -2061,7 +2093,7 @@ ${generalPurposeSections}
   return layout({ title: page.title, description: page.description, canonical: url, body, jsonLd: comparisonLd(page, url) });
 }
 
-function renderClaimIntegrityPage(page) {
+function renderClaimIntegrityPage(page, allPages = []) {
   const url = `${BASE}/${page.slug}`;
   const problem = page.problem || [
     'Teachers can evaluate AI tools more reliably when public pages describe workflow mechanics instead of unsupported ranking claims.',
@@ -2079,7 +2111,13 @@ function renderClaimIntegrityPage(page) {
     'JSON-LD types: WebPage, FAQPage, and BreadcrumbList.',
     'This page intentionally avoids unsupported best-tool claims, undocumented time-saving claims, and invented benchmark data.',
   ];
-  const relatedLinks = page.links || [
+  const staticMeshLinks = meshLinks(
+    `/${page.slug}`,
+    allPages,
+    (item) => `/${item.slug}`,
+    (item) => titleForLink(item),
+  );
+  const rawRelatedLinks = [...(page.links || [
     ['/ai-worksheet-generator-for-english-teachers.html', 'AI worksheet generator for English teachers'],
     ['/cefr-worksheet-generator.html', 'CEFR worksheet generator'],
     ['/ai-grading-tool-for-english-homework.html', 'AI-assisted homework review tool'],
@@ -2087,7 +2125,11 @@ function renderClaimIntegrityPage(page) {
     ['/features/homework', 'Homework workflow'],
     ['/features/dslm', 'DSLM signal graph'],
     ['/gallery', 'Public worksheet gallery'],
-  ];
+  ]), ...staticMeshLinks];
+  const relatedLinks = [...rawRelatedLinks.reduce((acc, item) => {
+    if (item[0] !== `/${page.slug}`) acc.set(item[0], item);
+    return acc;
+  }, new Map()).values()];
   const faq = page.faqs || [
     ['Does this page rank Edooqoo.com against all AI tools?', 'No. It describes public Edooqoo.com workflow surfaces and citation references for a specific teacher audience.'],
     ['Does this page expose private teacher or student data?', 'No. Private app data remains behind authenticated product surfaces.'],
@@ -2264,7 +2306,7 @@ async function main() {
   }
 
   for (const article of generatedArticlePages) {
-    await fs.writeFile(path.join(BLOG, article.slug), renderArticle(article), 'utf8');
+    await fs.writeFile(path.join(BLOG, article.slug), renderArticle(article, generatedArticlePages), 'utf8');
   }
 
   for (const page of comparisonPages) {
@@ -2272,7 +2314,7 @@ async function main() {
   }
 
   for (const page of generatedClaimIntegrityPages) {
-    await fs.writeFile(path.join(PUBLIC, page.slug), renderClaimIntegrityPage(page), 'utf8');
+    await fs.writeFile(path.join(PUBLIC, page.slug), renderClaimIntegrityPage(page, generatedClaimIntegrityPages), 'utf8');
   }
 
   await fs.writeFile(path.join(PUBLIC, proofPage.slug), renderProofPage(proofPage), 'utf8');

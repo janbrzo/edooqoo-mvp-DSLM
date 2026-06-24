@@ -1,0 +1,199 @@
+#!/usr/bin/env node
+import fs from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+import {
+  x1000BlogArticles,
+  x1000StaticPages,
+} from './x1000-content-plan.mjs';
+import {
+  legacyEditorialDecisions,
+  legacyNoindexRoutes,
+  x1000AdditionalBlogArticles,
+  x1000AdditionalStaticPages,
+  x1000RefreshArticles,
+} from './x1000-editorial-plan.mjs';
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const ROOT = path.resolve(__dirname, '..', '..');
+const fail = [];
+const warn = [];
+const pass = [];
+
+function read(rel) {
+  return fs.readFileSync(path.join(ROOT, rel), 'utf8');
+}
+
+function exists(rel) {
+  return fs.existsSync(path.join(ROOT, rel));
+}
+
+function json(rel) {
+  return JSON.parse(read(rel));
+}
+
+function expect(condition, ok, bad) {
+  if (condition) pass.push(ok);
+  else fail.push(bad || ok);
+}
+
+function warnIf(condition, message) {
+  if (condition) warn.push(message);
+}
+
+const requiredFiles = [
+  '.github/workflows/cloudflare-worker-deploy.yml',
+  '.github/workflows/seo-monitoring.yml',
+  'docs/seo/dashboard.md',
+  'docs/seo/gsc-monitoring.md',
+  'docs/seo/ai-search-baseline.md',
+  'docs/seo/content-roadmap.md',
+  'scripts/seo/verify-live-routing.mjs',
+  'scripts/seo/fetch-gsc-search-analytics.mjs',
+  'scripts/seo/inspect-gsc-url-sample.mjs',
+  'scripts/seo/run-ai-search-baseline.mjs',
+  'scripts/seo/generate-seo-dashboard.mjs',
+  'scripts/seo/audit-internal-link-graph.mjs',
+  'scripts/seo/audit-martha-test.mjs',
+  'scripts/seo/x1000-editorial-plan.mjs',
+];
+
+for (const rel of requiredFiles) {
+  expect(exists(rel), `required x1000 file exists: ${rel}`);
+}
+
+const pkg = json('package.json');
+const scripts = pkg.scripts || {};
+for (const script of [
+  'seo:verify-live-routing',
+  'seo:fetch-gsc-performance',
+  'seo:inspect-gsc-sample',
+  'seo:ai-search-baseline',
+  'seo:dashboard',
+  'seo:audit-internal-links',
+  'seo:audit-martha-test',
+  'seo:audit-x1000-plan',
+  'seo:monitor',
+  'deploy:cloudflare-worker',
+]) {
+  expect(Boolean(scripts[script]), `npm script exists: ${script}`);
+}
+
+const wrangler = read('wrangler.toml');
+expect(
+  /pattern\s*=\s*"edooqoo\.com\/\*"/.test(wrangler) &&
+  /pattern\s*=\s*"www\.edooqoo\.com\/\*"/.test(wrangler),
+  'wrangler.toml declares edooqoo.com and www.edooqoo.com Worker routes',
+);
+
+expect(
+  legacyEditorialDecisions.length >= 47,
+  `legacy editorial decisions present: ${legacyEditorialDecisions.length}`,
+);
+expect(
+  legacyNoindexRoutes.length >= 17,
+  `legacy noindex routes present: ${legacyNoindexRoutes.length}`,
+);
+expect(
+  x1000RefreshArticles.length >= 80,
+  `x1000 refresh articles present: ${x1000RefreshArticles.length}`,
+);
+expect(
+  x1000AdditionalBlogArticles.length >= 12,
+  `x1000 additional blog decision pages present: ${x1000AdditionalBlogArticles.length}`,
+);
+expect(
+  x1000AdditionalStaticPages.length >= 28,
+  `x1000 additional static AEO/profession pages present: ${x1000AdditionalStaticPages.length}`,
+);
+expect(
+  x1000BlogArticles.length >= 145,
+  `x1000 generated blog articles present: ${x1000BlogArticles.length}`,
+);
+expect(
+  x1000StaticPages.length >= 76,
+  `x1000 generated static pages present: ${x1000StaticPages.length}`,
+);
+
+const triage = json('docs/seo/blog-triage.generated.json');
+expect(
+  (triage.counts?.['rewrite-to-adult-1to1'] || 0) === 0,
+  'blog triage has zero unresolved rewrite-to-adult-1to1 items',
+  `blog triage still has ${triage.counts?.['rewrite-to-adult-1to1'] || 0} rewrite-to-adult-1to1 items`,
+);
+expect(
+  (triage.entries || []).some((entry) =>
+    entry.slug === 'how-to-avoid-school-like-esl-materials-for-adults.html' &&
+    entry.action === 'promote-or-refresh'
+  ),
+  'school-like rejection page is classified as intentional adult 1:1 content',
+);
+
+const linkGraph = json('docs/seo/internal-link-graph.generated.json');
+expect(
+  linkGraph.totals?.orphanStrategic === 0,
+  'internal link graph has zero orphan strategic top-120 routes',
+  `internal link graph has ${linkGraph.totals?.orphanStrategic} orphan strategic routes`,
+);
+expect(
+  linkGraph.totals?.weakTop40 === 0,
+  'internal link graph has zero weak top-40 strategic routes',
+  `internal link graph has ${linkGraph.totals?.weakTop40} weak top-40 strategic routes`,
+);
+expect(
+  linkGraph.totals?.weakTop120 === 0,
+  'internal link graph has zero weak top-120 strategic routes',
+  `internal link graph has ${linkGraph.totals?.weakTop120} weak top-120 strategic routes`,
+);
+expect(
+  linkGraph.totals?.noindexPriorityLinks === 0,
+  'internal link graph has zero noindex priority hub links',
+  `internal link graph has ${linkGraph.totals?.noindexPriorityLinks} noindex priority hub links`,
+);
+
+const liveRouting = json('docs/seo/live-routing.generated.json');
+warnIf(
+  (liveRouting.totals?.failed || 0) > 0,
+  `live routing still reports ${liveRouting.totals.failed} failures; this requires Cloudflare Worker deployment/binding, not more content edits`,
+);
+
+const summary = [
+  '# x1000 Plan Completion Audit',
+  '',
+  'Generated by `scripts/seo/audit-x1000-plan-completion.mjs`.',
+  '',
+  '## Summary',
+  '',
+  `- Passed checks: ${pass.length}`,
+  `- Warnings: ${warn.length}`,
+  `- Failures: ${fail.length}`,
+  '',
+  '## Passed',
+  '',
+  ...pass.map((item) => `- ${item}`),
+  '',
+  '## Warnings',
+  '',
+  ...(warn.length ? warn.map((item) => `- ${item}`) : ['- none']),
+  '',
+  '## Failures',
+  '',
+  ...(fail.length ? fail.map((item) => `- ${item}`) : ['- none']),
+  '',
+  '## RAG Keywords',
+  '',
+  'x1000 SEO plan completion, adult 1:1 English tutor SEO, internal link graph, Cloudflare Worker route binding, GSC monitoring, AI search baseline, Edooqoo Martha Test.',
+  '',
+].join('\n');
+
+fs.mkdirSync(path.join(ROOT, 'docs', 'seo'), { recursive: true });
+fs.writeFileSync(path.join(ROOT, 'docs', 'seo', 'x1000-plan-completion.generated.md'), summary, 'utf8');
+fs.writeFileSync(path.join(ROOT, 'docs', 'seo', 'x1000-plan-completion.generated.json'), `${JSON.stringify({ pass, warn, fail }, null, 2)}\n`, 'utf8');
+
+if (fail.length) {
+  console.error(`[x1000-plan-audit] FAIL ${fail.length} failures`);
+  for (const item of fail) console.error(`- ${item}`);
+  process.exit(1);
+}
+
+console.log(`[x1000-plan-audit] PASS ${pass.length} checks, ${warn.length} warnings`);

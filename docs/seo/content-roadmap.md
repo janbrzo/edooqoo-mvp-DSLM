@@ -25,8 +25,7 @@ Generated: deterministic from scripts/seo/x1000-content-plan.mjs and docs/seo/bl
 ## Current Triage Counts
 
 - Total articles: 306
-- promote-or-refresh: 119
-- rewrite-to-adult-1to1: 119
+- promote-or-refresh: 238
 - merge-redirect-or-noindex: 45
 - noindex-keep-accessible: 17
 - promote-rewrite-now: 6
@@ -48,125 +47,6 @@ Decision rule: rewrite if the topic can honestly become an adult 1:1 tutor decis
 
 | Route | Decision | Words | Reason |
 | --- | --- | --- | --- |
-| /blog/academic-language-functions-clil.html | rewrite-to-adult-1to1 | 884 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/academic-vocabulary-teaching-strategies.html | rewrite-to-adult-1to1 | 884 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/accent-coaching-techniques-esl.html | rewrite-to-adult-1to1 | 884 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/accent-reduction-activities-esl.html | rewrite-to-adult-1to1 | 884 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/action-research-esl-teachers.html | rewrite-to-adult-1to1 | 899 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/adapting-task-difficulty-for-one-adult-english-learner.html | rewrite-to-adult-1to1 | 859 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/adapting-textbook-tasks-for-adult-one-to-one-english-lessons.html | rewrite-to-adult-1to1 | 880 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/adult-business-english-homework-feedback-loop.html | rewrite-to-adult-1to1 | 900 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/adult-esl-student-profile-lesson-planning.html | rewrite-to-adult-1to1 | 900 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/adult-learner-autonomy-in-private-english-lessons.html | rewrite-to-adult-1to1 | 850 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/adult-learner-performance-evidence-beyond-tests.html | rewrite-to-adult-1to1 | 856 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/adult-one-to-one-accessibility-adaptations-for-english-lessons.html | rewrite-to-adult-1to1 | 847 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/adult-one-to-one-neurodivergent-english-lesson-adaptations.html | rewrite-to-adult-1to1 | 859 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/adult-professional-task-projects-in-english-coaching.html | rewrite-to-adult-1to1 | 852 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/adult-vocabulary-retrieval-practice-not-games.html | rewrite-to-adult-1to1 | 833 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/ai-generated-listening-exercises-esl.html | rewrite-to-adult-1to1 | 892 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/ai-homework-grading-for-english-teachers.html | rewrite-to-adult-1to1 | 900 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/ai-powered-differentiation-esl.html | rewrite-to-adult-1to1 | 887 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/ai-tools-for-english-teachers-2026.html | rewrite-to-adult-1to1 | 900 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/ai-worksheet-generator-vs-lesson-planning-chatbot.html | rewrite-to-adult-1to1 | 908 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/art-based-language-activities-esl.html | rewrite-to-adult-1to1 | 892 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/authentic-listening-materials-esl.html | rewrite-to-adult-1to1 | 884 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/best-apps-learning-english-2026.html | rewrite-to-adult-1to1 | 892 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/best-lesson-prep-tool-for-english-tutors.html | rewrite-to-adult-1to1 | 908 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/best-workflow-for-private-english-tutors.html | rewrite-to-adult-1to1 | 900 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/between-session-homework-evidence-for-private-english-tutors.html | rewrite-to-adult-1to1 | 846 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/bilingual-education-models-comparison.html | rewrite-to-adult-1to1 | 884 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/bottom-up-top-down-listening-esl.html | rewrite-to-adult-1to1 | 900 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/building-esl-teaching-portfolio.html | rewrite-to-adult-1to1 | 884 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/business-english-material-generation-workflow.html | rewrite-to-adult-1to1 | 892 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/cambridge-exam-preparation-tips-teachers.html | rewrite-to-adult-1to1 | 892 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/can-ai-plan-one-to-one-english-lesson.html | rewrite-to-adult-1to1 | 916 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/cefr-aligned-worksheet-generation-workflow.html | rewrite-to-adult-1to1 | 892 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/cefr-evidence-for-private-english-lessons.html | rewrite-to-adult-1to1 | 900 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/clil-methodology-complete-guide.html | rewrite-to-adult-1to1 | 884 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/cloze-test-design-esl.html | rewrite-to-adult-1to1 | 884 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/collaborative-writing-activities-esl.html | rewrite-to-adult-1to1 | 884 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/communicative-language-teaching-activities.html | rewrite-to-adult-1to1 | 884 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/connected-speech-teaching-activities.html | rewrite-to-adult-1to1 | 884 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/consciousness-raising-grammar-tasks.html | rewrite-to-adult-1to1 | 884 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/contrastive-analysis-language-teaching.html | rewrite-to-adult-1to1 | 884 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/cooperative-learning-structures-esl.html | rewrite-to-adult-1to1 | 884 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/corpus-linguistics-esl-teaching.html | rewrite-to-adult-1to1 | 884 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/course-evaluation-esl-programs.html | rewrite-to-adult-1to1 | 884 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/cpd-planning-esl-teachers.html | rewrite-to-adult-1to1 | 884 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/creating-authentic-materials-esl.html | rewrite-to-adult-1to1 | 884 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/creating-english-tests-guide.html | rewrite-to-adult-1to1 | 884 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/creating-interactive-worksheets-online.html | rewrite-to-adult-1to1 | 884 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/creative-writing-activities-esl.html | rewrite-to-adult-1to1 | 884 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/critical-period-hypothesis-language.html | rewrite-to-adult-1to1 | 884 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/cross-cultural-communication-activities.html | rewrite-to-adult-1to1 | 884 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/culturally-responsive-teaching-esl.html | rewrite-to-adult-1to1 | 884 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/current-events-esl-lessons.html | rewrite-to-adult-1to1 | 884 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/data-driven-learning-esl-corpora.html | rewrite-to-adult-1to1 | 892 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/debate-activities-english-class.html | rewrite-to-adult-1to1 | 884 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/designing-english-midterm-final-exams.html | rewrite-to-adult-1to1 | 892 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/diagnostic-testing-english-learners.html | rewrite-to-adult-1to1 | 884 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/dictation-for-adult-listening-accuracy-evidence.html | rewrite-to-adult-1to1 | 868 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/dictogloss-technique-esl-teaching.html | rewrite-to-adult-1to1 | 884 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/digital-homework-tools-esl-teachers.html | rewrite-to-adult-1to1 | 892 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/digital-resource-curation-esl.html | rewrite-to-adult-1to1 | 884 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/discussion-questions-esl-topics.html | rewrite-to-adult-1to1 | 884 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/editable-ai-worksheets-for-adult-english-learners.html | rewrite-to-adult-1to1 | 908 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/emi-english-medium-instruction-guide.html | rewrite-to-adult-1to1 | 892 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/end-of-term-activities-esl.html | rewrite-to-adult-1to1 | 892 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/energy-management-esl-lessons.html | rewrite-to-adult-1to1 | 884 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/english-for-specific-purposes-guide.html | rewrite-to-adult-1to1 | 892 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/english-homework-ai-grading-workflow.html | rewrite-to-adult-1to1 | 892 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/english-tutor-material-organization-workflow.html | rewrite-to-adult-1to1 | 892 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/english-tutor-workflow-after-a-live-lesson.html | rewrite-to-adult-1to1 | 908 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/error-correction-techniques-esl.html | rewrite-to-adult-1to1 | 884 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/esl-exercise-type-selection-guide.html | rewrite-to-adult-1to1 | 889 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/extensive-reading-programs-esl.html | rewrite-to-adult-1to1 | 884 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/fill-in-the-blanks-exercises-best-practices.html | rewrite-to-adult-1to1 | 908 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/first-adult-one-to-one-english-lesson-evidence-capture.html | rewrite-to-adult-1to1 | 861 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/formative-assessment-english-teaching.html | rewrite-to-adult-1to1 | 884 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/from-lesson-evidence-to-next-lesson-plan.html | rewrite-to-adult-1to1 | 908 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/from-student-goals-to-worksheet.html | rewrite-to-adult-1to1 | 892 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/gender-inclusive-language-esl.html | rewrite-to-adult-1to1 | 884 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/growth-mindset-language-learning.html | rewrite-to-adult-1to1 | 884 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/homework-before-lesson-workflow-for-adult-english-tutors.html | rewrite-to-adult-1to1 | 843 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/homework-mistakes-next-english-lesson.html | rewrite-to-adult-1to1 | 892 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/how-english-tutors-track-what-to-teach-next.html | rewrite-to-adult-1to1 | 916 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/how-long-should-private-english-tutors-spend-on-lesson-prep.html | rewrite-to-adult-1to1 | 932 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/how-private-english-tutors-use-ai-safely.html | rewrite-to-adult-1to1 | 908 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/how-to-assess-english-level-cefr.html | rewrite-to-adult-1to1 | 900 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/how-to-avoid-generic-ai-lesson-plans-for-adults.html | rewrite-to-adult-1to1 | 905 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/how-to-build-an-adult-esl-lesson-from-real-work-tasks.html | rewrite-to-adult-1to1 | 921 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/how-to-build-student-context-for-english-tutoring.html | rewrite-to-adult-1to1 | 916 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/how-to-choose-an-ai-tool-for-private-english-tutoring.html | rewrite-to-adult-1to1 | 913 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/how-to-create-business-english-homework-that-gets-completed.html | rewrite-to-adult-1to1 | 905 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/how-to-create-grammar-worksheets-with-ai.html | rewrite-to-adult-1to1 | 908 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/how-to-design-one-to-one-english-lessons-for-professionals.html | rewrite-to-adult-1to1 | 913 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/how-to-keep-chatgpt-output-from-sounding-generic-in-esl-lessons.html | rewrite-to-adult-1to1 | 921 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/how-to-plan-a-recurring-english-student-learning-loop.html | rewrite-to-adult-1to1 | 905 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/how-to-plan-english-lessons-effectively.html | rewrite-to-adult-1to1 | 900 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/how-to-plan-next-lesson-from-homework-mistakes.html | rewrite-to-adult-1to1 | 916 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/how-to-prepare-business-english-lesson-in-one-minute.html | rewrite-to-adult-1to1 | 924 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/how-to-reduce-lesson-prep-time-for-private-english-tutors.html | rewrite-to-adult-1to1 | 932 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/how-to-review-ai-generated-esl-worksheets-before-teaching.html | rewrite-to-adult-1to1 | 905 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/how-to-review-homework-before-next-english-lesson.html | rewrite-to-adult-1to1 | 916 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/how-to-track-progress-without-school-like-tests.html | rewrite-to-adult-1to1 | 897 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/how-to-turn-homework-errors-into-next-lesson-focus.html | rewrite-to-adult-1to1 | 905 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/how-to-use-ai-without-losing-teacher-control.html | rewrite-to-adult-1to1 | 897 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/how-to-use-student-context-in-ai-worksheet-generation.html | rewrite-to-adult-1to1 | 905 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/information-gap-tasks-for-adult-workplace-communication.html | rewrite-to-adult-1to1 | 858 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/input-output-evidence-in-adult-one-to-one-english-lessons.html | rewrite-to-adult-1to1 | 861 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/intercultural-communication-for-adult-professional-english.html | rewrite-to-adult-1to1 | 841 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/learning-pacing-scientific-vs-pragmatic-esl.html | rewrite-to-adult-1to1 | 900 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/low-friction-review-loops-for-adult-english-learners.html | rewrite-to-adult-1to1 | 847 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/managing-lesson-focus-in-one-to-one-adult-english-lessons.html | rewrite-to-adult-1to1 | 871 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/motivation-theories-language-learning.html | rewrite-to-adult-1to1 | 854 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/private-english-tutor-tool-stack.html | rewrite-to-adult-1to1 | 855 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/process-writing-approach-esl.html | rewrite-to-adult-1to1 | 877 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/role-play-for-adult-workplace-english-practice.html | rewrite-to-adult-1to1 | 853 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/student-progress-to-worksheet-feedback-loop.html | rewrite-to-adult-1to1 | 900 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/teaching-listening-strategies-esl.html | rewrite-to-adult-1to1 | 858 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/transitioning-between-tasks-in-adult-one-to-one-english-lessons.html | rewrite-to-adult-1to1 | 873 | Useful intent, but current framing risks classroom/school-like positioning. |
-| /blog/tutor-workflow-system-vs-lms-for-private-english-lessons.html | rewrite-to-adult-1to1 | 863 | Useful intent, but current framing risks classroom/school-like positioning. |
 
 ## Sprint 4: Refresh 80 Existing Blog Posts
 
@@ -176,101 +56,101 @@ Priority rule: choose indexed or near-product URLs first, especially adult/busin
 
 | Route | Words | Reason |
 | --- | --- | --- |
-| /blog/five-minute-filler-activities-esl.html | 427 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/holiday-themed-esl-activities.html | 215 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/how-to-avoid-school-like-esl-materials-for-adults.html | 868 | Intentional adult 1:1 page that rejects school-like materials; school-like language is the object of critique, not the framing. |
-| /blog/how-to-teach-english-grammar-effectively.html | 1361 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/how-to-teach-english-pronunciation.html | 966 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/how-to-teach-speaking-esl.html | 1119 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/how-to-teach-writing-esl-students.html | 982 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/how-to-track-adult-english-student-progress.html | 870 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/how-to-turn-student-notes-into-esl-worksheets.html | 893 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/how-to-use-chatgpt-for-esl-lesson-prep-without-losing-context.html | 947 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/ielts-preparation-worksheets-guide.html | 854 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/improvisation-activities-esl.html | 413 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/interlanguage-fossilization-esl.html | 414 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/intrinsic-motivation-language-learning.html | 302 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/ipa-phonetic-alphabet-esl-teaching.html | 609 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/item-analysis-english-tests.html | 511 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/journal-writing-esl-students.html | 528 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/krashen-hypotheses-esl-teaching.html | 413 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/lesson-sequencing-scaffolding-curriculum.html | 1408 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/lexical-approach-language-teaching.html | 579 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
+| /blog/academic-language-functions-clil.html | 1082 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/academic-vocabulary-teaching-strategies.html | 1082 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/accent-coaching-techniques-esl.html | 1082 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/accent-reduction-activities-esl.html | 1082 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/action-research-esl-teachers.html | 1126 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/adapting-task-difficulty-for-one-adult-english-learner.html | 1091 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/adapting-textbook-tasks-for-adult-one-to-one-english-lessons.html | 1112 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/adult-business-english-homework-feedback-loop.html | 1135 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/adult-esl-student-profile-lesson-planning.html | 1122 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/adult-learner-autonomy-in-private-english-lessons.html | 1081 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/adult-learner-performance-evidence-beyond-tests.html | 1089 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/adult-one-to-one-accessibility-adaptations-for-english-lessons.html | 1073 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/adult-one-to-one-neurodivergent-english-lesson-adaptations.html | 1090 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/adult-professional-task-projects-in-english-coaching.html | 1083 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/adult-vocabulary-retrieval-practice-not-games.html | 1058 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/ai-generated-listening-exercises-esl.html | 1113 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/ai-homework-grading-for-english-teachers.html | 1119 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/ai-powered-differentiation-esl.html | 1119 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/ai-tools-for-english-teachers-2026.html | 1120 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/ai-worksheet-generator-vs-lesson-planning-chatbot.html | 1143 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
 
 ### Batch 2
 
 | Route | Words | Reason |
 | --- | --- | --- |
-| /blog/managing-large-esl-classes.html | 509 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/materials-design-principles-elt.html | 1377 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/mentoring-new-esl-teachers.html | 415 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/motivating-reluctant-esl-learners.html | 368 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/needs-analysis-esl-students.html | 1408 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/pair-work-activities-esl.html | 684 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/parent-teacher-conferences-esl.html | 199 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/peer-editing-workshops-esl.html | 533 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/peer-feedback-activities-english.html | 635 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/peer-observation-esl-teachers.html | 415 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/personalized-learning-english-teaching.html | 1351 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/phonemic-awareness-activities-esl.html | 584 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/phrasal-verbs-teaching-strategies.html | 577 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/podcast-based-listening-lessons-esl.html | 570 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/portfolio-assessment-esl-writing.html | 509 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/private-english-tutor-homework-workflow.html | 856 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/public-esl-worksheet-gallery-quality-standards.html | 452 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/readers-theatre-esl-activities.html | 419 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/reading-comprehension-activities-english.html | 1130 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/reflective-practice-language-teaching.html | 410 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
+| /blog/art-based-language-activities-esl.html | 1090 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/authentic-listening-materials-esl.html | 1082 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/best-apps-learning-english-2026.html | 1089 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/best-lesson-prep-tool-for-english-tutors.html | 1129 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/best-workflow-for-private-english-tutors.html | 1146 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/between-session-homework-evidence-for-private-english-tutors.html | 1079 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/bilingual-education-models-comparison.html | 1082 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/bottom-up-top-down-listening-esl.html | 1096 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/building-esl-teaching-portfolio.html | 1081 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/business-english-material-generation-workflow.html | 1121 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/cambridge-exam-preparation-tips-teachers.html | 1090 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/can-ai-plan-one-to-one-english-lesson.html | 1137 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/cefr-aligned-worksheet-generation-workflow.html | 1121 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/cefr-evidence-for-private-english-lessons.html | 1136 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/clil-methodology-complete-guide.html | 1081 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/cloze-test-design-esl.html | 1083 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/collaborative-writing-activities-esl.html | 1081 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/communicative-language-teaching-activities.html | 1081 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/connected-speech-teaching-activities.html | 1084 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/consciousness-raising-grammar-tasks.html | 1084 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
 
 ### Batch 3
 
 | Route | Words | Reason |
 | --- | --- | --- |
-| /blog/role-play-activities-esl.html | 602 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/rubrics-for-english-teachers.html | 601 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/scaffolding-strategies-english-learners.html | 1089 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/screen-free-tech-activities-esl.html | 575 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/selecting-esl-textbooks-guide.html | 413 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/self-assessment-strategies-esl.html | 570 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/self-directed-learning-esl.html | 359 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/setting-up-freelance-esl-business.html | 1371 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/spaced-repetition-vocabulary-learning.html | 1385 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/storytelling-activities-esl.html | 763 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/substitute-teacher-esl-lesson-plans.html | 334 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/supplementing-coursebooks-activities.html | 409 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/syllabus-design-esl-courses.html | 507 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/task-based-language-teaching-worksheets.html | 1371 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/teacher-burnout-prevention-esl.html | 1344 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/teacher-controlled-ai-lesson-prep.html | 852 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/teaching-abstract-vocabulary-esl.html | 573 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/teaching-articles-esl-guide.html | 592 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/teaching-aspect-english-grammar.html | 582 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/teaching-aviation-english.html | 471 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
+| /blog/contrastive-analysis-language-teaching.html | 1080 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/cooperative-learning-structures-esl.html | 1079 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/corpus-linguistics-esl-teaching.html | 1084 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/course-evaluation-esl-programs.html | 1080 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/cpd-planning-esl-teachers.html | 1080 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/creating-authentic-materials-esl.html | 1084 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/creating-english-tests-guide.html | 1082 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/creating-interactive-worksheets-online.html | 1110 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/creative-writing-activities-esl.html | 1081 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/critical-period-hypothesis-language.html | 1082 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/cross-cultural-communication-activities.html | 1081 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/culturally-responsive-teaching-esl.html | 1082 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/current-events-esl-lessons.html | 1087 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/data-driven-learning-esl-corpora.html | 1090 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/debate-activities-english-class.html | 1088 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/designing-english-midterm-final-exams.html | 1102 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/diagnostic-testing-english-learners.html | 1084 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/dictation-for-adult-listening-accuracy-evidence.html | 1099 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/dictogloss-technique-esl-teaching.html | 1083 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/digital-homework-tools-esl-teachers.html | 1117 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
 
 ### Batch 4
 
 | Route | Words | Reason |
 | --- | --- | --- |
-| /blog/teaching-business-english-guide.html | 1356 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/teaching-cleft-sentences-english.html | 222 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/teaching-collocations-esl.html | 761 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/teaching-conditionals-esl-guide.html | 815 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/teaching-determiners-quantifiers-esl.html | 574 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/teaching-ellipsis-substitution-english.html | 242 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/teaching-email-writing-esl.html | 286 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/teaching-english-hospitality-tourism.html | 367 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/teaching-english-immigrants-refugees.html | 525 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/teaching-english-intonation-stress.html | 697 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/teaching-english-it-professionals.html | 386 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/teaching-english-one-to-one.html | 3188 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/teaching-english-online-complete-guide.html | 1382 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/teaching-english-through-literature.html | 567 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/teaching-essay-structure-esl.html | 558 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/teaching-formal-informal-english.html | 247 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/teaching-idioms-esl-activities.html | 819 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/teaching-inversion-english.html | 256 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/teaching-legal-english.html | 448 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/teaching-linking-words-connectors.html | 215 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
+| /blog/digital-resource-curation-esl.html | 1100 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/discussion-questions-esl-topics.html | 1089 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/editable-ai-worksheets-for-adult-english-learners.html | 1139 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/emi-english-medium-instruction-guide.html | 1111 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/end-of-term-activities-esl.html | 1118 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/energy-management-esl-lessons.html | 1116 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/english-for-specific-purposes-guide.html | 1090 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/english-homework-ai-grading-workflow.html | 1121 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/english-tutor-material-organization-workflow.html | 1119 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/english-tutor-workflow-after-a-live-lesson.html | 1139 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/error-correction-techniques-esl.html | 1095 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/esl-exercise-type-selection-guide.html | 1114 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/extensive-reading-programs-esl.html | 1083 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/fill-in-the-blanks-exercises-best-practices.html | 1121 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/first-adult-one-to-one-english-lesson-evidence-capture.html | 1094 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/five-minute-filler-activities-esl.html | 427 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
+| /blog/formative-assessment-english-teaching.html | 1099 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/from-lesson-evidence-to-next-lesson-plan.html | 1139 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/from-student-goals-to-worksheet.html | 1123 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
+| /blog/gender-inclusive-language-esl.html | 1083 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
 
 ## Sprint 5A: 24 New Blog Decision Pages
 

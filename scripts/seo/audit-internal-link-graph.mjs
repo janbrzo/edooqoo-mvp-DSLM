@@ -10,7 +10,9 @@ const ROOT = path.resolve(__dirname, '..', '..');
 const PUBLIC = path.join(ROOT, 'public');
 const OUTPUT_JSON = path.join(ROOT, 'docs', 'seo', 'internal-link-graph.generated.json');
 const OUTPUT_MD = path.join(ROOT, 'docs', 'seo', 'internal-link-graph.generated.md');
-const STRICT = process.argv.includes('--strict');
+const SOFT = process.argv.includes('--soft');
+const MIN_TOP_40_INCOMING = 10;
+const MIN_TOP_120_INCOMING = 5;
 
 const priorityRoutes = new Set([
   '/one-minute-prep',
@@ -98,7 +100,8 @@ async function main() {
   const top40 = strategic.slice(0, 40);
   const top120 = strategic.slice(0, 120);
   const orphanStrategic = top120.filter((entry) => !(incoming[entry.route] || []).length);
-  const weakTop40 = top40.filter((entry) => (incoming[entry.route] || []).length < 3);
+  const weakTop40 = top40.filter((entry) => (incoming[entry.route] || []).length < MIN_TOP_40_INCOMING);
+  const weakTop120 = top120.filter((entry) => (incoming[entry.route] || []).length < MIN_TOP_120_INCOMING);
   const noindexPriorityLinks = registry
     .filter((entry) => !entry.indexable)
     .map((entry) => ({
@@ -114,7 +117,12 @@ async function main() {
       strategic: strategic.length,
       orphanStrategic: orphanStrategic.length,
       weakTop40: weakTop40.length,
+      weakTop120: weakTop120.length,
       noindexPriorityLinks: noindexPriorityLinks.length,
+    },
+    thresholds: {
+      minTop40Incoming: MIN_TOP_40_INCOMING,
+      minTop120Incoming: MIN_TOP_120_INCOMING,
     },
     topStrategic: strategic.slice(0, 120).map((entry) => ({
       route: entry.route,
@@ -125,6 +133,10 @@ async function main() {
     })),
     orphanStrategic: orphanStrategic.map((entry) => entry.route),
     weakTop40: weakTop40.map((entry) => ({
+      route: entry.route,
+      incoming: (incoming[entry.route] || []).length,
+    })),
+    weakTop120: weakTop120.map((entry) => ({
       route: entry.route,
       incoming: (incoming[entry.route] || []).length,
     })),
@@ -141,7 +153,8 @@ async function main() {
     `- HTML pages scanned: ${report.totals.pages}`,
     `- Strategic indexable routes: ${report.totals.strategic}`,
     `- Orphan strategic routes in top 120: ${report.totals.orphanStrategic}`,
-    `- Weak top 40 strategic routes: ${report.totals.weakTop40}`,
+    `- Weak top 40 strategic routes below ${MIN_TOP_40_INCOMING} incoming links: ${report.totals.weakTop40}`,
+    `- Weak top 120 strategic routes below ${MIN_TOP_120_INCOMING} incoming links: ${report.totals.weakTop120}`,
     `- Noindex routes linked from priority hubs: ${report.totals.noindexPriorityLinks}`,
     '',
     '## Top Strategic Routes',
@@ -158,6 +171,14 @@ async function main() {
     '',
     ...(report.noindexPriorityLinks.length ? report.noindexPriorityLinks.map((row) => `- ${row.route} from ${row.incoming.join(', ')}`) : ['- none']),
     '',
+    '## Weak Top 40 Strategic Routes',
+    '',
+    ...(report.weakTop40.length ? report.weakTop40.map((row) => `- ${row.route}: ${row.incoming} incoming links`) : ['- none']),
+    '',
+    '## Weak Top 120 Strategic Routes',
+    '',
+    ...(report.weakTop120.length ? report.weakTop120.map((row) => `- ${row.route}: ${row.incoming} incoming links`) : ['- none']),
+    '',
     '## RAG Keywords',
     '',
     'internal link graph, strategic URLs, orphan pages, noindex link audit, adult 1:1 English tutor SEO, Edooqoo topic authority.',
@@ -167,9 +188,14 @@ async function main() {
   await fs.mkdir(path.dirname(OUTPUT_JSON), { recursive: true });
   await fs.writeFile(OUTPUT_JSON, `${JSON.stringify(report, null, 2)}\n`, 'utf8');
   await fs.writeFile(OUTPUT_MD, markdown, 'utf8');
-  console.log(`[internal-links] strategic=${report.totals.strategic} orphan=${report.totals.orphanStrategic} noindexPriority=${report.totals.noindexPriorityLinks}`);
+  console.log(`[internal-links] strategic=${report.totals.strategic} orphan=${report.totals.orphanStrategic} weakTop40=${report.totals.weakTop40} weakTop120=${report.totals.weakTop120} noindexPriority=${report.totals.noindexPriorityLinks}`);
 
-  if (STRICT && (report.totals.orphanStrategic > 0 || report.totals.noindexPriorityLinks > 0)) {
+  if (!SOFT && (
+    report.totals.orphanStrategic > 0 ||
+    report.totals.weakTop40 > 0 ||
+    report.totals.weakTop120 > 0 ||
+    report.totals.noindexPriorityLinks > 0
+  )) {
     process.exit(1);
   }
 }

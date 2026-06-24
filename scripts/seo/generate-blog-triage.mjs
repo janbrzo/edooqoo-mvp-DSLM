@@ -4,6 +4,7 @@ import fsSync from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { getBlogRegistry } from './content-registry.mjs';
+import { x1000BlogArticles } from './x1000-content-plan.mjs';
 import { intentionalSchoolLikeRejectionSlugs } from './x1000-editorial-plan.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -20,6 +21,11 @@ const PRIORITY_REWRITE_SLUGS = new Set([
   'ai-worksheet-generator-mechanics-for-esl-teachers.html',
   'what-to-teach-next-private-english-student.html',
 ]);
+const COMPLETED_X1000_BLOG_SLUGS = new Set(
+  x1000BlogArticles
+    .filter((article) => !article.noindex)
+    .map((article) => article.slug)
+);
 
 const SIGNALS = {
   adultTutor: /\b(adult|one-to-one|1:1|private|tutor|freelance|business english|professional|online esl|student profile|what-to-teach|lesson prep|homework|worksheet|flashcard|cefr|progress|roadmap)\b/i,
@@ -62,6 +68,14 @@ function decide(entry) {
       action: 'promote-rewrite-now',
       priority: 1,
       reason: 'Top strategic cluster for recurring adult 1:1 English tutor workflow and LLM citation.',
+    };
+  }
+
+  if (COMPLETED_X1000_BLOG_SLUGS.has(slug)) {
+    return {
+      action: 'promote-or-refresh',
+      priority: 2,
+      reason: 'Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format.',
     };
   }
 

@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-06-24T07:17:11.581Z",
+  "generatedAt": "2026-06-24T10:52:40.475Z",
   "base": "https://edooqoo.com",
   "totals": {
     "checks": 58,
@@ -19,7 +19,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "deploymentId": "58475e8f-90ea-45ce-89b8-df56df2a4928",
         "server": "cloudflare"
       }
     },
@@ -35,7 +35,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "deploymentId": "58475e8f-90ea-45ce-89b8-df56df2a4928",
         "server": "cloudflare"
       }
     },
@@ -45,13 +45,13 @@
       "expected": "https://edooqoo.com/blog/effective-esl-homework-strategies.html",
       "pass": false,
       "ok": true,
-      "status": 404,
+      "status": 200,
       "headers": {
         "location": "",
         "xRobotsTag": "",
-        "contentType": "text/plain; charset=UTF-8",
+        "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "",
+        "deploymentId": "58475e8f-90ea-45ce-89b8-df56df2a4928",
         "server": "cloudflare"
       }
     },
@@ -61,13 +61,13 @@
       "expected": "https://edooqoo.com/blog/teaching-english-one-to-one.html",
       "pass": false,
       "ok": true,
-      "status": 404,
+      "status": 200,
       "headers": {
         "location": "",
         "xRobotsTag": "",
-        "contentType": "text/plain; charset=UTF-8",
+        "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "",
+        "deploymentId": "58475e8f-90ea-45ce-89b8-df56df2a4928",
         "server": "cloudflare"
       }
     },
@@ -83,7 +83,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "deploymentId": "58475e8f-90ea-45ce-89b8-df56df2a4928",
         "server": "cloudflare"
       }
     },
@@ -93,13 +93,13 @@
       "expected": "https://edooqoo.com/blog/how-to-teach-english-grammar-effectively.html",
       "pass": false,
       "ok": true,
-      "status": 404,
+      "status": 200,
       "headers": {
         "location": "",
         "xRobotsTag": "",
-        "contentType": "text/plain; charset=UTF-8",
+        "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "",
+        "deploymentId": "58475e8f-90ea-45ce-89b8-df56df2a4928",
         "server": "cloudflare"
       }
     },
@@ -109,13 +109,13 @@
       "expected": "https://edooqoo.com/blog/process-writing-approach-esl.html",
       "pass": false,
       "ok": true,
-      "status": 404,
+      "status": 200,
       "headers": {
         "location": "",
         "xRobotsTag": "",
-        "contentType": "text/plain; charset=UTF-8",
+        "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "",
+        "deploymentId": "58475e8f-90ea-45ce-89b8-df56df2a4928",
         "server": "cloudflare"
       }
     },
@@ -125,13 +125,13 @@
       "expected": "https://edooqoo.com/blog/how-to-teach-speaking-esl.html",
       "pass": false,
       "ok": true,
-      "status": 404,
+      "status": 200,
       "headers": {
         "location": "",
         "xRobotsTag": "",
-        "contentType": "text/plain; charset=UTF-8",
+        "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "",
+        "deploymentId": "58475e8f-90ea-45ce-89b8-df56df2a4928",
         "server": "cloudflare"
       }
     },
@@ -147,7 +147,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "deploymentId": "58475e8f-90ea-45ce-89b8-df56df2a4928",
         "server": "cloudflare"
       }
     },
@@ -163,7 +163,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "deploymentId": "58475e8f-90ea-45ce-89b8-df56df2a4928",
         "server": "cloudflare"
       }
     },
@@ -179,7 +179,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "deploymentId": "58475e8f-90ea-45ce-89b8-df56df2a4928",
         "server": "cloudflare"
       }
     },
@@ -189,13 +189,13 @@
       "expected": "https://edooqoo.com/english-worksheets-for-exam-prep.html",
       "pass": false,
       "ok": true,
-      "status": 404,
+      "status": 200,
       "headers": {
         "location": "",
         "xRobotsTag": "",
-        "contentType": "text/plain; charset=UTF-8",
+        "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "",
+        "deploymentId": "58475e8f-90ea-45ce-89b8-df56df2a4928",
         "server": "cloudflare"
       }
     },
@@ -205,13 +205,13 @@
       "expected": "https://edooqoo.com/blog/how-to-plan-english-lessons-effectively.html",
       "pass": false,
       "ok": true,
-      "status": 404,
+      "status": 200,
       "headers": {
         "location": "",
         "xRobotsTag": "",
-        "contentType": "text/plain; charset=UTF-8",
+        "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "",
+        "deploymentId": "58475e8f-90ea-45ce-89b8-df56df2a4928",
         "server": "cloudflare"
       }
     },
@@ -227,7 +227,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "deploymentId": "58475e8f-90ea-45ce-89b8-df56df2a4928",
         "server": "cloudflare"
       }
     },
@@ -243,7 +243,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "deploymentId": "58475e8f-90ea-45ce-89b8-df56df2a4928",
         "server": "cloudflare"
       }
     },
@@ -259,7 +259,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "deploymentId": "58475e8f-90ea-45ce-89b8-df56df2a4928",
         "server": "cloudflare"
       }
     },
@@ -269,13 +269,13 @@
       "expected": "https://edooqoo.com/blog/how-to-teach-speaking-esl.html",
       "pass": false,
       "ok": true,
-      "status": 404,
+      "status": 200,
       "headers": {
         "location": "",
         "xRobotsTag": "",
-        "contentType": "text/plain; charset=UTF-8",
+        "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "",
+        "deploymentId": "58475e8f-90ea-45ce-89b8-df56df2a4928",
         "server": "cloudflare"
       }
     },
@@ -291,7 +291,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "deploymentId": "58475e8f-90ea-45ce-89b8-df56df2a4928",
         "server": "cloudflare"
       }
     },
@@ -301,13 +301,13 @@
       "expected": "https://edooqoo.com/blog/how-to-plan-english-lessons-effectively.html",
       "pass": false,
       "ok": true,
-      "status": 404,
+      "status": 200,
       "headers": {
         "location": "",
         "xRobotsTag": "",
-        "contentType": "text/plain; charset=UTF-8",
+        "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "",
+        "deploymentId": "58475e8f-90ea-45ce-89b8-df56df2a4928",
         "server": "cloudflare"
       }
     },
@@ -317,13 +317,13 @@
       "expected": "https://edooqoo.com/blog/extensive-reading-programs-esl.html",
       "pass": false,
       "ok": true,
-      "status": 404,
+      "status": 200,
       "headers": {
         "location": "",
         "xRobotsTag": "",
-        "contentType": "text/plain; charset=UTF-8",
+        "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "",
+        "deploymentId": "58475e8f-90ea-45ce-89b8-df56df2a4928",
         "server": "cloudflare"
       }
     },
@@ -339,7 +339,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "deploymentId": "58475e8f-90ea-45ce-89b8-df56df2a4928",
         "server": "cloudflare"
       }
     },
@@ -355,7 +355,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "deploymentId": "58475e8f-90ea-45ce-89b8-df56df2a4928",
         "server": "cloudflare"
       }
     },
@@ -371,7 +371,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "deploymentId": "58475e8f-90ea-45ce-89b8-df56df2a4928",
         "server": "cloudflare"
       }
     },
@@ -381,13 +381,13 @@
       "expected": "https://edooqoo.com/blog/error-correction-techniques-esl.html",
       "pass": false,
       "ok": true,
-      "status": 404,
+      "status": 200,
       "headers": {
         "location": "",
         "xRobotsTag": "",
-        "contentType": "text/plain; charset=UTF-8",
+        "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "",
+        "deploymentId": "58475e8f-90ea-45ce-89b8-df56df2a4928",
         "server": "cloudflare"
       }
     },
@@ -403,7 +403,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "deploymentId": "58475e8f-90ea-45ce-89b8-df56df2a4928",
         "server": "cloudflare"
       }
     },
@@ -413,13 +413,13 @@
       "expected": "https://edooqoo.com/blog/current-events-esl-lessons.html",
       "pass": false,
       "ok": true,
-      "status": 404,
+      "status": 200,
       "headers": {
         "location": "",
         "xRobotsTag": "",
-        "contentType": "text/plain; charset=UTF-8",
+        "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "",
+        "deploymentId": "58475e8f-90ea-45ce-89b8-df56df2a4928",
         "server": "cloudflare"
       }
     },
@@ -429,13 +429,13 @@
       "expected": "https://edooqoo.com/blog/error-correction-techniques-esl.html",
       "pass": false,
       "ok": true,
-      "status": 404,
+      "status": 200,
       "headers": {
         "location": "",
         "xRobotsTag": "",
-        "contentType": "text/plain; charset=UTF-8",
+        "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "",
+        "deploymentId": "58475e8f-90ea-45ce-89b8-df56df2a4928",
         "server": "cloudflare"
       }
     },
@@ -445,13 +445,13 @@
       "expected": "https://edooqoo.com/blog/error-correction-techniques-esl.html",
       "pass": false,
       "ok": true,
-      "status": 404,
+      "status": 200,
       "headers": {
         "location": "",
         "xRobotsTag": "",
-        "contentType": "text/plain; charset=UTF-8",
+        "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "",
+        "deploymentId": "58475e8f-90ea-45ce-89b8-df56df2a4928",
         "server": "cloudflare"
       }
     },
@@ -467,7 +467,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "deploymentId": "58475e8f-90ea-45ce-89b8-df56df2a4928",
         "server": "cloudflare"
       }
     },
@@ -477,13 +477,13 @@
       "expected": "https://edooqoo.com/blog/how-to-teach-english-pronunciation.html",
       "pass": false,
       "ok": true,
-      "status": 404,
+      "status": 200,
       "headers": {
         "location": "",
         "xRobotsTag": "",
-        "contentType": "text/plain; charset=UTF-8",
+        "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "",
+        "deploymentId": "58475e8f-90ea-45ce-89b8-df56df2a4928",
         "server": "cloudflare"
       }
     },
@@ -493,13 +493,13 @@
       "expected": "https://edooqoo.com/english-worksheets-for-exam-prep.html",
       "pass": false,
       "ok": true,
-      "status": 404,
+      "status": 200,
       "headers": {
         "location": "",
         "xRobotsTag": "",
-        "contentType": "text/plain; charset=UTF-8",
+        "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "",
+        "deploymentId": "58475e8f-90ea-45ce-89b8-df56df2a4928",
         "server": "cloudflare"
       }
     },
@@ -515,7 +515,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "deploymentId": "58475e8f-90ea-45ce-89b8-df56df2a4928",
         "server": "cloudflare"
       }
     },
@@ -525,13 +525,13 @@
       "expected": "https://edooqoo.com/blog/teaching-english-one-to-one.html",
       "pass": false,
       "ok": true,
-      "status": 404,
+      "status": 200,
       "headers": {
         "location": "",
         "xRobotsTag": "",
-        "contentType": "text/plain; charset=UTF-8",
+        "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "",
+        "deploymentId": "58475e8f-90ea-45ce-89b8-df56df2a4928",
         "server": "cloudflare"
       }
     },
@@ -541,13 +541,13 @@
       "expected": "https://edooqoo.com/blog/reading-comprehension-activities-english.html",
       "pass": false,
       "ok": true,
-      "status": 404,
+      "status": 200,
       "headers": {
         "location": "",
         "xRobotsTag": "",
-        "contentType": "text/plain; charset=UTF-8",
+        "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "",
+        "deploymentId": "58475e8f-90ea-45ce-89b8-df56df2a4928",
         "server": "cloudflare"
       }
     },
@@ -563,7 +563,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "deploymentId": "58475e8f-90ea-45ce-89b8-df56df2a4928",
         "server": "cloudflare"
       }
     },
@@ -579,7 +579,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "deploymentId": "58475e8f-90ea-45ce-89b8-df56df2a4928",
         "server": "cloudflare"
       }
     },
@@ -589,13 +589,13 @@
       "expected": "https://edooqoo.com/blog/teaching-pragmatics-esl.html",
       "pass": false,
       "ok": true,
-      "status": 404,
+      "status": 200,
       "headers": {
         "location": "",
         "xRobotsTag": "",
-        "contentType": "text/plain; charset=UTF-8",
+        "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "",
+        "deploymentId": "58475e8f-90ea-45ce-89b8-df56df2a4928",
         "server": "cloudflare"
       }
     },
@@ -605,13 +605,13 @@
       "expected": "https://edooqoo.com/blog/reading-comprehension-activities-english.html",
       "pass": false,
       "ok": true,
-      "status": 404,
+      "status": 200,
       "headers": {
         "location": "",
         "xRobotsTag": "",
-        "contentType": "text/plain; charset=UTF-8",
+        "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "",
+        "deploymentId": "58475e8f-90ea-45ce-89b8-df56df2a4928",
         "server": "cloudflare"
       }
     },
@@ -621,13 +621,13 @@
       "expected": "https://edooqoo.com/blog/reading-comprehension-activities-english.html",
       "pass": false,
       "ok": true,
-      "status": 404,
+      "status": 200,
       "headers": {
         "location": "",
         "xRobotsTag": "",
-        "contentType": "text/plain; charset=UTF-8",
+        "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "",
+        "deploymentId": "58475e8f-90ea-45ce-89b8-df56df2a4928",
         "server": "cloudflare"
       }
     },
@@ -637,13 +637,13 @@
       "expected": "https://edooqoo.com/english-worksheets-for-exam-prep.html",
       "pass": false,
       "ok": true,
-      "status": 404,
+      "status": 200,
       "headers": {
         "location": "",
         "xRobotsTag": "",
-        "contentType": "text/plain; charset=UTF-8",
+        "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "",
+        "deploymentId": "58475e8f-90ea-45ce-89b8-df56df2a4928",
         "server": "cloudflare"
       }
     },
@@ -653,13 +653,13 @@
       "expected": "https://edooqoo.com/english-worksheets-for-exam-prep.html",
       "pass": false,
       "ok": true,
-      "status": 404,
+      "status": 200,
       "headers": {
         "location": "",
         "xRobotsTag": "",
-        "contentType": "text/plain; charset=UTF-8",
+        "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "",
+        "deploymentId": "58475e8f-90ea-45ce-89b8-df56df2a4928",
         "server": "cloudflare"
       }
     },
@@ -669,13 +669,13 @@
       "expected": "https://edooqoo.com/english-worksheets-for-exam-prep.html",
       "pass": false,
       "ok": true,
-      "status": 404,
+      "status": 200,
       "headers": {
         "location": "",
         "xRobotsTag": "",
-        "contentType": "text/plain; charset=UTF-8",
+        "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "",
+        "deploymentId": "58475e8f-90ea-45ce-89b8-df56df2a4928",
         "server": "cloudflare"
       }
     },
@@ -691,7 +691,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "deploymentId": "58475e8f-90ea-45ce-89b8-df56df2a4928",
         "server": "cloudflare"
       }
     },
@@ -707,7 +707,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "deploymentId": "58475e8f-90ea-45ce-89b8-df56df2a4928",
         "server": "cloudflare"
       }
     },
@@ -723,7 +723,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "deploymentId": "58475e8f-90ea-45ce-89b8-df56df2a4928",
         "server": "cloudflare"
       }
     },
@@ -739,7 +739,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "no-cache, must-revalidate, max-age=0",
-        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "deploymentId": "58475e8f-90ea-45ce-89b8-df56df2a4928",
         "server": "cloudflare"
       }
     },
@@ -755,7 +755,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "no-cache, must-revalidate, max-age=0",
-        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "deploymentId": "58475e8f-90ea-45ce-89b8-df56df2a4928",
         "server": "cloudflare"
       }
     },
@@ -771,7 +771,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "no-cache, must-revalidate, max-age=0",
-        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "deploymentId": "58475e8f-90ea-45ce-89b8-df56df2a4928",
         "server": "cloudflare"
       }
     },
@@ -787,7 +787,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "no-cache, must-revalidate, max-age=0",
-        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "deploymentId": "58475e8f-90ea-45ce-89b8-df56df2a4928",
         "server": "cloudflare"
       }
     },
@@ -803,7 +803,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "no-cache, must-revalidate, max-age=0",
-        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "deploymentId": "58475e8f-90ea-45ce-89b8-df56df2a4928",
         "server": "cloudflare"
       }
     },
@@ -819,7 +819,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "no-cache, must-revalidate, max-age=0",
-        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "deploymentId": "58475e8f-90ea-45ce-89b8-df56df2a4928",
         "server": "cloudflare"
       }
     },
@@ -835,7 +835,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "no-cache, must-revalidate, max-age=0",
-        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "deploymentId": "58475e8f-90ea-45ce-89b8-df56df2a4928",
         "server": "cloudflare"
       }
     },
@@ -851,7 +851,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "no-cache, must-revalidate, max-age=0",
-        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "deploymentId": "58475e8f-90ea-45ce-89b8-df56df2a4928",
         "server": "cloudflare"
       }
     },
@@ -867,7 +867,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "no-cache, must-revalidate, max-age=0",
-        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "deploymentId": "58475e8f-90ea-45ce-89b8-df56df2a4928",
         "server": "cloudflare"
       }
     },
@@ -883,7 +883,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "no-cache, must-revalidate, max-age=0",
-        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "deploymentId": "58475e8f-90ea-45ce-89b8-df56df2a4928",
         "server": "cloudflare"
       }
     },
@@ -899,7 +899,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "no-cache, must-revalidate, max-age=0",
-        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "deploymentId": "58475e8f-90ea-45ce-89b8-df56df2a4928",
         "server": "cloudflare"
       }
     },
@@ -915,7 +915,7 @@
         "xRobotsTag": "",
         "contentType": "text/plain; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "12d24019-f6bf-483f-a3e0-a50a90454b15",
+        "deploymentId": "58475e8f-90ea-45ce-89b8-df56df2a4928",
         "server": "cloudflare"
       }
     },
