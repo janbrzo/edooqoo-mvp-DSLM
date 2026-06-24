@@ -1,11 +1,13 @@
-// v6.9.68 — Extract a structured student profile from a teacher's free-form
+// v6.9.72 — Extract a structured student profile from a teacher's free-form
 // paste of notes. Pure extraction: returns JSON for the client to apply via
 // the apply_intake_extraction RPC (so the teacher can preview before commit).
 //
-// History: previously relied on Gemini tool-calling with a JSON schema. Gemini
-// rejects many JSON-Schema keywords and our heavy `extract_student_profile`
-// tool definition reliably triggered 502s. v6.9.68 drops tools entirely and
-// uses a plain JSON-object response with defensive parsing.
+// History
+//  - v6.9.67/68: dropped Gemini tool-calling; switched to JSON-object response.
+//  - v6.9.72: hardened error handling — robust JSON parser, explicit OpenAI
+//    fallback when Gemini errors or returns unparsable content, and a
+//    deterministic preview fallback so the UI never shows 502 for valid
+//    teacher input. Worksheet Generation Engine NOT touched.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { chatCompletion } from "../_shared/aiChat.ts";
 
@@ -15,7 +17,8 @@ const corsHeaders = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
 };
 
-const MODEL = "google/gemini-2.5-flash";
+const PRIMARY_MODEL = "google/gemini-2.5-flash";
+const FALLBACK_MODEL = "gpt-4o-mini";
 
 const SYSTEM_PROMPT = `You receive raw teacher notes about a 1:1 adult English language student.
 Your job is to extract a structured profile so the platform can seed the student record.
@@ -125,86 +128,188 @@ Deno.serve(async (req) => {
     `Raw teacher notes:\n"""\n${rawText}\n"""\n\n` +
     `Extract the profile. Return ONLY the JSON object described in the system message.`;
 
+  const messages = [
+    { role: "system", content: SYSTEM_PROMPT },
+    { role: "user", content: userMsg },
+  ];
+
+  const stageOne = await tryAiStage(messages, PRIMARY_MODEL, false);
+  if (stageOne.kind === "rate_limited") {
+    return jsonResponse(429, { error: "ai_rate_limited", status: 429 });
+  }
+  if (stageOne.kind === "credits_exhausted") {
+    return jsonResponse(402, { error: "ai_credits_exhausted", status: 402 });
+  }
+  if (stageOne.kind === "ok") {
+    return jsonResponse(200, { ok: true, extraction: stageOne.extraction, model: stageOne.model });
+  }
+
+  const stageTwo = await tryAiStage(messages, FALLBACK_MODEL, true);
+  if (stageTwo.kind === "ok") {
+    return jsonResponse(200, { ok: true, extraction: stageTwo.extraction, model: stageTwo.model });
+  }
+
+  console.warn(
+    `[extract-student-profile] AI stages failed (${stageOne.kind}/${stageTwo.kind}); returning deterministic preview.`,
+  );
+  const deterministic = buildDeterministicExtraction(rawText, existingProfile);
+  return jsonResponse(200, {
+    ok: true,
+    extraction: deterministic,
+    model: "fallback:deterministic-intake",
+    degraded: true,
+  });
+});
+
+function jsonResponse(status: number, body: unknown): Response {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, "Content-Type": "application/json" },
+  });
+}
+
+type AiStageResult =
+  | { kind: "ok"; extraction: any; model: string }
+  | { kind: "rate_limited" }
+  | { kind: "credits_exhausted" }
+  | { kind: "provider_error"; status: number }
+  | { kind: "invalid_json" }
+  | { kind: "exception"; message: string };
+
+async function tryAiStage(
+  messages: Array<{ role: string; content: string }>,
+  model: string,
+  skipPrimary: boolean,
+): Promise<AiStageResult> {
   try {
+    const opts: any = { primaryModel: model, functionName: "extract-student-profile" };
+    if (skipPrimary) opts.skipPrimary = true;
     const aiResp = await chatCompletion({
-      messages: [
-        { role: "system", content: SYSTEM_PROMPT },
-        { role: "user", content: userMsg },
-      ],
+      messages,
       temperature: 0.2,
       max_tokens: 2048,
       response_format: { type: "json_object" },
-    }, { primaryModel: MODEL, functionName: "extract-student-profile" });
+    }, opts);
 
     if (!aiResp.ok) {
       const t = await aiResp.text().catch(() => "");
       const status = aiResp.status;
-      const code = status === 429 ? "ai_rate_limited"
-                 : status === 402 ? "ai_credits_exhausted"
-                 : "ai_provider_error";
+      if (status === 429) return { kind: "rate_limited" };
+      if (status === 402) return { kind: "credits_exhausted" };
       console.warn(`[extract-student-profile] provider ${status}: ${t.slice(0, 200)}`);
-      return new Response(JSON.stringify({ error: code, status, detail: t.slice(0, 300) }), {
-        status: status === 429 ? 429 : status === 402 ? 402 : 502,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return { kind: "provider_error", status };
     }
 
     const data = await aiResp.json();
     const msg = data?.choices?.[0]?.message;
-    let extraction: any = null;
-    // Primary path: plain JSON content.
     const rawContent = typeof msg?.content === "string" ? msg.content : "";
-    if (rawContent) {
-      const cleaned = rawContent
-        .trim()
-        .replace(/^```(?:json)?\s*/i, "")
-        .replace(/```\s*$/i, "")
-        .trim();
-      try { extraction = JSON.parse(cleaned); } catch { /* fall through */ }
-      if (!extraction) {
-        // Last-resort: pull the first {...} block.
-        const start = cleaned.indexOf("{");
-        const end = cleaned.lastIndexOf("}");
-        if (start >= 0 && end > start) {
-          try { extraction = JSON.parse(cleaned.slice(start, end + 1)); } catch { /* ignore */ }
-        }
-      }
-    }
-    // Legacy fallback: if a tool-call sneaks back in someday.
+    let extraction = parseJsonObjectFromText(rawContent);
     if (!extraction) {
       const call = msg?.tool_calls?.[0];
       if (call?.function?.arguments) {
-        try { extraction = JSON.parse(call.function.arguments); } catch { /* ignore */ }
+        extraction = parseJsonObjectFromText(call.function.arguments);
       }
     }
     if (!extraction || typeof extraction !== "object") {
       console.warn("[extract-student-profile] invalid_ai_json", rawContent.slice(0, 200));
-      return new Response(JSON.stringify({ error: "invalid_ai_json" }), {
-        status: 502,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
+      return { kind: "invalid_json" };
     }
-
-    // Post-filter: drop low-confidence signals/goals (<0.55) and clean shape.
-    if (Array.isArray(extraction.signals)) {
-      extraction.signals = extraction.signals
-        .filter((s: any) => typeof s?.confidence === "number" && s.confidence >= 0.55)
-        .slice(0, 12);
-    } else extraction.signals = [];
-    if (Array.isArray(extraction.goals)) {
-      extraction.goals = extraction.goals
-        .filter((g: any) => typeof g?.confidence === "number" && g.confidence >= 0.55)
-        .slice(0, 5);
-    } else extraction.goals = [];
-
-    return new Response(
-      JSON.stringify({ ok: true, extraction, model: MODEL }),
-      { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-    );
+    normalizeExtraction(extraction);
+    return { kind: "ok", extraction, model };
   } catch (e) {
-    return new Response(
-      JSON.stringify({ error: "exception", detail: e instanceof Error ? e.message : "unknown" }),
-      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } },
-    );
+    const message = e instanceof Error ? e.message : "unknown";
+    console.warn(`[extract-student-profile] stage exception:`, message);
+    return { kind: "exception", message };
   }
-});
+}
+
+function parseJsonObjectFromText(input: string): any | null {
+  if (!input) return null;
+  const cleaned = input
+    .replace(/^\uFEFF/, "")
+    .replace(/^```(?:json)?\s*/i, "")
+    .replace(/```\s*$/i, "")
+    .trim();
+  const candidates: string[] = [cleaned];
+  const start = cleaned.indexOf("{");
+  const end = cleaned.lastIndexOf("}");
+  if (start >= 0 && end > start) candidates.push(cleaned.slice(start, end + 1));
+  for (const c of candidates) {
+    const tries = [c, stripTrailingCommas(c), stripControlChars(stripTrailingCommas(c))];
+    for (const t of tries) {
+      try {
+        const v = JSON.parse(t);
+        if (v && typeof v === "object") return v;
+      } catch { /* try next */ }
+    }
+  }
+  return null;
+}
+
+function stripTrailingCommas(s: string): string {
+  return s.replace(/,(\s*[}\]])/g, "$1");
+}
+function stripControlChars(s: string): string {
+  return s.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, "");
+}
+
+function normalizeExtraction(extraction: any): void {
+  if (Array.isArray(extraction.signals)) {
+    extraction.signals = extraction.signals
+      .filter((s: any) => typeof s?.confidence === "number" && s.confidence >= 0.55)
+      .slice(0, 12);
+  } else extraction.signals = [];
+  if (Array.isArray(extraction.goals)) {
+    extraction.goals = extraction.goals
+      .filter((g: any) => typeof g?.confidence === "number" && g.confidence >= 0.55)
+      .slice(0, 5);
+  } else extraction.goals = [];
+}
+
+function buildDeterministicExtraction(rawText: string, existing: any): any {
+  const text = rawText.slice(0, 2000);
+  const lower = text.toLowerCase();
+
+  let cefr: string | null = null;
+  const cefrMatch = text.match(/\b(A1|A2|B1|B2|C1|C2)\b/);
+  if (cefrMatch) cefr = cefrMatch[1].toUpperCase();
+
+  let nativeLang: string | null = existing?.native_language || null;
+  if (!nativeLang) {
+    const langMatch = text.match(/native (?:language|speaker)[:\s]+([A-Za-z]+)/i);
+    if (langMatch) nativeLang = langMatch[1];
+  }
+
+  const goalSignals: Array<[RegExp, string]> = [
+    [/\b(ielts|toefl|cambridge|cae|fce|cpe|exam)\b/i, "Exam preparation"],
+    [/\b(job interview|interview)\b/i, "Job interview preparation"],
+    [/\b(presentation|meeting|client call|conference call)\b/i, "Business meetings and presentations"],
+    [/\b(promotion|career)\b/i, "Career advancement"],
+    [/\b(travel|trip|holiday|vacation)\b/i, "Travel English"],
+    [/\b(business|work|professional)\b/i, "Business English"],
+    [/\b(conversation|fluency|speaking)\b/i, "Conversational fluency"],
+  ];
+  let mainGoal: any = null;
+  if (!existing?.main_goal) {
+    for (const [re, label] of goalSignals) {
+      if (re.test(lower)) {
+        mainGoal = { value: label, target_date: "", confidence: 0.6, evidence_quote: text.match(re)?.[0] || label };
+        break;
+      }
+    }
+  }
+
+  const language = /^[\x00-\x7F]*$/.test(text) ? "en" : "und";
+  const summary = text.split(/\s+/).slice(0, 180).join(" ").slice(0, 1200);
+
+  return {
+    language,
+    summary_notes: summary,
+    signals: [],
+    goals: [],
+    english_level: cefr ? { value: cefr, confidence: 0.6, evidence_quote: cefr } : null,
+    main_goal: mainGoal,
+    native_language: nativeLang ? { value: nativeLang, confidence: 0.6, evidence_quote: nativeLang } : null,
+    pacing: null,
+  };
+}
