@@ -1,6 +1,6 @@
 # GSC Coverage Analysis
 
-Generated: 2026-06-23T07:23:09.824Z
+Generated: 2026-06-23T21:58:35.081Z
 Source directory: `G:\Mój dysk\FIRMA JB\13. edooqoo\6. GSC`
 Live HTTP checks: `disabled`
 
@@ -9,7 +9,7 @@ Live HTTP checks: `disabled`
 - Unique problem URLs analyzed: 1526
 - Raw export rows read: 3052
 - Export sources read: 16
-- Sitemap URLs: 453
+- Sitemap URLs: 525
 
 | Problem | Unique URLs | Raw rows | In sitemap | Noindex routes | Redirect routes | Type breakdown | Action breakdown |
 |---|---:|---:|---:|---:|---:|---|---|
@@ -21,6 +21,24 @@ Live HTTP checks: `disabled`
 | Strona zawiera przekierowanie | 2 | 4 | 0 | 0 | 0 | home: 2 | accept-host-redirect: 2 |
 | Strona zeskanowana, ale jeszcze nie zindeksowana | 27 | 54 | 12 | 13 | 0 | worksheets-pseo: 13<br>blog: 9<br>static-html: 3<br>esl-worksheets-pseo: 1<br>private: 1 | keep-noindex-follow: 13<br>strengthen-prerender-internal-links: 12<br>decide-promote-or-noindex: 2 |
 | Zindeksowano | 452 | 904 | 224 | 187 | 0 | blog: 198<br>worksheets-pseo: 155<br>esl-worksheets-pseo: 42<br>static-html: 32<br>english-for-pseo: 8<br>other-spa: 8<br>signup-query: 6<br>core-spa: 1<br>home: 1<br>private: 1 | review: 259<br>keep-noindex-follow: 187<br>keep-noindex: 6 |
+
+## Week-Over-Week Comparison
+
+- Previous report: `C:\Users\JanBrzostowski\Documents\EDOOQOO\docs\seo\gsc-coverage-analysis.generated.json`
+- Previous generated at: 2026-06-23T18:23:39.108Z
+- Age in days: 0
+
+| Metric | Count | Samples |
+|---|---:|---|
+| New indexed | 0 |  |
+| Still discovered not indexed | 1000 | https://edooqoo.com/a2-elementary-english-worksheets.html<br>https://edooqoo.com/about<br>https://edooqoo.com/ai-grading-tool-for-english-homework.html<br>https://edooqoo.com/ai-tools-for-online-esl-teachers.html<br>https://edooqoo.com/ai-worksheet-generator-for-english-teachers.html<br>https://edooqoo.com/blog<br>https://edooqoo.com/blog/academic-vocabulary-teaching-strategies.html<br>https://edooqoo.com/blog/advocating-for-ell-students.html<br>https://edooqoo.com/blog/ai-powered-differentiation-esl.html<br>https://edooqoo.com/blog/art-based-language-activities-esl.html<br>https://edooqoo.com/blog/classroom-management-esl-tips.html<br>https://edooqoo.com/blog/contrastive-analysis-language-teaching.html<br>https://edooqoo.com/blog/creative-writing-activities-esl.html<br>https://edooqoo.com/blog/data-driven-learning-esl-corpora.html<br>https://edooqoo.com/blog/digital-resource-curation-esl.html<br>https://edooqoo.com/blog/drama-techniques-esl-classroom.html<br>https://edooqoo.com/blog/effective-esl-homework-strategies.html<br>https://edooqoo.com/blog/emi-english-medium-instruction-guide.html<br>https://edooqoo.com/blog/end-of-term-activities-esl.html<br>https://edooqoo.com/blog/energy-management-esl-lessons.html |
+| Still crawled not indexed | 27 | https://edooqoo.com/blog/bottom-up-top-down-listening-esl.html<br>https://edooqoo.com/blog/content-based-instruction-young-learners.html<br>https://edooqoo.com/blog/how-goal-progress-is-calculated-esl.html<br>https://edooqoo.com/blog/item-analysis-english-tests.html<br>https://edooqoo.com/blog/phrasal-verbs-teaching-strategies.html<br>https://edooqoo.com/blog/teaching-collocations-esl.html<br>https://edooqoo.com/blog/teaching-essay-structure-esl.html<br>https://edooqoo.com/blog/teaching-word-families-morphology-esl.html<br>https://edooqoo.com/blog/vocabulary-notebook-strategies-esl.html<br>https://edooqoo.com/english-tutor-calendar-booking-software.html<br>https://edooqoo.com/esl-worksheets/gerunds-infinitives/c2-proficiency<br>https://edooqoo.com/login<br>https://edooqoo.com/public-esl-worksheet-examples.html<br>https://edooqoo.com/reported-speech-worksheets.html<br>https://edooqoo.com/worksheets/crossword/news-media<br>https://edooqoo.com/worksheets/crossword/presentations<br>https://edooqoo.com/worksheets/definition-match/small-talk<br>https://edooqoo.com/worksheets/error-correction/idioms<br>https://edooqoo.com/worksheets/fill-in-the-blanks/food-restaurant<br>https://edooqoo.com/worksheets/fill-in-the-blanks/gerunds-infinitives |
+| Still 404 | 24 | https://edooqoo.com/blog/asynchronous-learning-esl.html<br>https://edooqoo.com/blog/classroom-language-esl-teachers.html<br>https://edooqoo.com/blog/concept-checking-questions-esl.html<br>https://edooqoo.com/blog/conferencing-with-esl-students.html<br>https://edooqoo.com/blog/conversation-classes-esl-structure.html<br>https://edooqoo.com/blog/duolingo-english-test-preparation.html<br>https://edooqoo.com/blog/eliciting-techniques-esl-teaching.html<br>https://edooqoo.com/blog/fluency-activities-esl-classroom.html<br>https://edooqoo.com/blog/giving-instructions-esl-classroom.html<br>https://edooqoo.com/blog/graded-readers-guide-esl-teachers.html<br>https://edooqoo.com/blog/marking-codes-esl-writing.html<br>https://edooqoo.com/blog/newspaper-articles-esl-lessons.html<br>https://edooqoo.com/blog/oral-correction-timing-techniques.html<br>https://edooqoo.com/blog/positive-error-culture-esl.html<br>https://edooqoo.com/blog/shadowing-technique-esl.html<br>https://edooqoo.com/blog/standardized-test-comparison-esl.html<br>https://edooqoo.com/blog/teacher-talking-time-reducing.html<br>https://edooqoo.com/blog/teaching-critical-reading-esl.html<br>https://edooqoo.com/blog/teaching-functional-language-esl.html<br>https://edooqoo.com/blog/teaching-reading-fluency-esl.html |
+| Noindex URLs accidentally indexed | 193 | https://edooqoo.com/english-for/hotel-staff<br>https://edooqoo.com/english-for/retail-staff<br>https://edooqoo.com/english-for/teachers<br>https://edooqoo.com/english-for/waiters<br>https://edooqoo.com/esl-worksheets/collocations/a2-elementary<br>https://edooqoo.com/esl-worksheets/collocations/c1-advanced<br>https://edooqoo.com/esl-worksheets/comparatives/a2-elementary<br>https://edooqoo.com/esl-worksheets/conditionals/c2-proficiency<br>https://edooqoo.com/esl-worksheets/conflict-resolution/b2-upper-intermediate<br>https://edooqoo.com/esl-worksheets/conflict-resolution/c1-advanced<br>https://edooqoo.com/esl-worksheets/cross-cultural/a1-beginner<br>https://edooqoo.com/esl-worksheets/cross-cultural/a2-elementary<br>https://edooqoo.com/esl-worksheets/cv-resume/c1-advanced<br>https://edooqoo.com/esl-worksheets/daily-routines/a2-elementary<br>https://edooqoo.com/esl-worksheets/daily-routines/b2-upper-intermediate<br>https://edooqoo.com/esl-worksheets/environment/b2-upper-intermediate<br>https://edooqoo.com/esl-worksheets/family/a1-beginner<br>https://edooqoo.com/esl-worksheets/family/c2-proficiency<br>https://edooqoo.com/esl-worksheets/food-restaurant/b1-intermediate<br>https://edooqoo.com/esl-worksheets/food-restaurant/c2-proficiency |
+| Sitemap URLs not indexed | 301 | https://edooqoo.com/a2-elementary-english-worksheets.html<br>https://edooqoo.com/about<br>https://edooqoo.com/accountant-variance-explanation-lesson-prep.html<br>https://edooqoo.com/accountant-variance-explanation-what-to-teach-next.html<br>https://edooqoo.com/accountant-variance-explanation-worksheet.html<br>https://edooqoo.com/ai-chatbot-vs-student-context-system.html<br>https://edooqoo.com/ai-grading-tool-for-english-homework.html<br>https://edooqoo.com/ai-lesson-planner-vs-worksheet-workflow.html<br>https://edooqoo.com/ai-lesson-prep-tool-vs-chatbot.html<br>https://edooqoo.com/ai-tools-for-adult-esl-homework.html<br>https://edooqoo.com/ai-tools-for-business-english-tutors.html<br>https://edooqoo.com/ai-tools-for-esl-progress-tracking.html<br>https://edooqoo.com/ai-tools-for-one-to-one-english-lessons.html<br>https://edooqoo.com/ai-tools-for-online-esl-teachers.html<br>https://edooqoo.com/ai-tools-for-private-english-tutors.html<br>https://edooqoo.com/ai-tools-for-private-tutor-student-context.html<br>https://edooqoo.com/ai-worksheet-generator-for-english-teachers.html<br>https://edooqoo.com/articles-a-an-the-worksheets.html<br>https://edooqoo.com/authors/jan-brzostowski<br>https://edooqoo.com/authors/martha |
+
+- 14-day sitemap review required: no
+- 28-day sitemap review required: no
 
 ## Priority Samples
 

@@ -117,6 +117,49 @@ function ragKeywords(entry, decision) {
   return [...new Set(base)].sort();
 }
 
+function strategicCluster(entry, decision) {
+  const text = `${entry.route} ${entry.title || ''} ${entry.description || ''} ${entry.cluster || ''}`.toLowerCase();
+  if (/chatgpt|claude|gemini|copilot|perplexity|ai|workflow|generator/.test(text)) return 'LLM vs tutor workflow';
+  if (/homework|grading|review|retention|flashcard/.test(text)) return 'Homework evidence and retention';
+  if (/what-to-teach|next-lesson|next focus|roadmap|progress/.test(text)) return 'What to teach next';
+  if (/business|adult|professional|workplace|corporate/.test(text)) return 'Adult and professional English';
+  if (/cefr|assessment|placement|diagnostic|level/.test(text)) return 'CEFR and learner evidence';
+  if (decision.action.includes('rewrite')) return 'Adult 1:1 rewrite queue';
+  return entry.cluster || 'Tutor business and tools';
+}
+
+function rewriteStage(decision) {
+  if (decision.action === 'promote-rewrite-now') return 'stage-1-pillar-rewrite';
+  if (decision.action === 'rewrite-to-adult-1to1') return 'stage-3-school-like-rewrite';
+  if (decision.action === 'promote-or-refresh') return 'stage-4-refresh-candidate';
+  if (decision.action === 'merge-redirect-or-noindex') return 'stage-3-merge-redirect-or-noindex';
+  if (decision.action === 'rewrite-with-adult-performance-decision') return 'stage-3-theory-to-decision-rewrite';
+  return 'manual-review';
+}
+
+function canonicalDecision(entry, decision) {
+  if (decision.action === 'merge-redirect-or-noindex') return 'merge, redirect, or noindex unless rewritten for adult 1:1 tutoring';
+  if (decision.action === 'rewrite-to-adult-1to1') return 'keep self-canonical only after adult 1:1 rewrite';
+  if (decision.action === 'rewrite-with-adult-performance-decision') return 'keep self-canonical only after decision-page rewrite';
+  if (decision.action === 'review-for-merge') return 'hold self-canonical until measured evidence or manual decision';
+  if (entry.indexable === false) return 'keep excluded from sitemap';
+  return 'keep self-canonical and strengthen internal links';
+}
+
+function marthaTestScore(entry, decision, words) {
+  const haystack = `${entry.route} ${entry.title || ''} ${entry.description || ''} ${entry.cluster || ''}`;
+  let score = 70;
+  if (SIGNALS.adultTutor.test(haystack)) score += 12;
+  if (SIGNALS.aiWorkflow.test(haystack)) score += 8;
+  if (decision.action === 'promote-rewrite-now') score += 10;
+  if (decision.action === 'promote-or-refresh') score += 6;
+  if (SIGNALS.schoolLike.test(haystack)) score -= 35;
+  if (SIGNALS.theoryGeneric.test(haystack)) score -= 12;
+  if (words < 600) score -= 12;
+  if (words > 1200) score += 4;
+  return Math.max(0, Math.min(100, score));
+}
+
 const blogEntries = getBlogRegistry({ root: ROOT })
   .filter((entry) =>
     entry.route.startsWith('/blog/') &&
@@ -130,6 +173,7 @@ const blogEntries = getBlogRegistry({ root: ROOT })
       ? fsSync.readFileSync(file, 'utf8')
       : '';
     const decision = decide(entry);
+    const words = wordCount(visibleText(html));
     return {
       route: entry.route,
       slug,
@@ -138,8 +182,12 @@ const blogEntries = getBlogRegistry({ root: ROOT })
       cluster: entry.cluster,
       state: entry.state,
       indexable: entry.indexable,
-      words: wordCount(visibleText(html)),
+      words,
       ...decision,
+      strategicCluster: strategicCluster(entry, decision),
+      rewriteStage: rewriteStage(decision),
+      canonicalDecision: canonicalDecision(entry, decision),
+      marthaTestScore: marthaTestScore(entry, decision, words),
       ragKeywords: ragKeywords(entry, decision),
     };
   })
@@ -166,7 +214,7 @@ const actionRows = Object.entries(counts)
 const priorityRows = blogEntries
   .filter((entry) => entry.priority <= 2)
   .map((entry) =>
-    `| ${entry.route} | ${entry.action} | ${entry.words} | ${entry.ragKeywords.join(', ')} | ${entry.reason} |`
+    `| ${entry.route} | ${entry.action} | ${entry.strategicCluster} | ${entry.rewriteStage} | ${entry.marthaTestScore} | ${entry.words} | ${entry.ragKeywords.join(', ')} | ${entry.reason} |`
   )
   .join('\n');
 
@@ -174,7 +222,7 @@ const driftRows = blogEntries
   .filter((entry) => ['merge-redirect-or-noindex', 'rewrite-to-adult-1to1', 'rewrite-with-adult-performance-decision'].includes(entry.action))
   .slice(0, 80)
   .map((entry) =>
-    `| ${entry.route} | ${entry.action} | ${entry.words} | ${entry.reason} |`
+    `| ${entry.route} | ${entry.action} | ${entry.strategicCluster} | ${entry.canonicalDecision} | ${entry.marthaTestScore} | ${entry.words} | ${entry.reason} |`
   )
   .join('\n');
 
@@ -192,14 +240,14 @@ ${actionRows}
 
 ## Priority Rewrite / Promote Queue
 
-| Route | Action | Words | RAG Keywords | Reason |
-|---|---|---:|---|---|
+| Route | Action | Strategic cluster | Rewrite stage | Martha Test score | Words | RAG Keywords | Reason |
+|---|---|---|---|---:|---:|---|---|
 ${priorityRows}
 
 ## Adult 1:1 Rewrite Or Deprioritize Queue
 
-| Route | Action | Words | Reason |
-|---|---|---:|---|
+| Route | Action | Strategic cluster | Canonical decision | Martha Test score | Words | Reason |
+|---|---|---|---|---:|---:|---|
 ${driftRows}
 
 ## Rules

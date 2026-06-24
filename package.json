@@ -17,6 +17,7 @@
     "seo:generate-strategic-content": "node scripts/seo/generate-strategic-content.mjs",
     "seo:generate-legacy-strategic-content": "node scripts/seo/generate-legacy-strategic-articles.mjs",
     "seo:generate-blog-triage": "node scripts/seo/generate-blog-triage.mjs",
+    "seo:generate-x1000-docs": "node scripts/seo/generate-x1000-docs.mjs",
     "seo:apply-pseo-policy": "node scripts/seo/apply-pseo-index-policy.mjs",
     "seo:generate-decision-content": "node scripts/seo/generate-decision-content.mjs",
     "seo:test-decision-tool": "node scripts/seo/test-decision-tool.mjs",
@@ -32,8 +33,8 @@
     "seo:sync-sitemap-edge": "node scripts/seo/sync-sitemap-edge.mjs",
     "seo:gsc-analyze": "node scripts/seo/analyze-gsc-coverage-export.mjs",
     "seo:audit": "node scripts/seo/audit-seo-assets.mjs",
-    "build:seo": "npm run docs:audit-source && npm run seo:generate-citable && npm run seo:generate-strategic-content && npm run seo:generate-legacy-strategic-content && npm run content:repair-encoding && node scripts/seo/build-blog-index.mjs && npm run seo:generate-blog-triage && npm run seo:apply-pseo-policy && npm run seo:generate-decision-content && npm run seo:test-decision-tool && npm run seo:test-newsletter && npm run content:generate && npm run seo:generate-edge-routing && npm run seo:sync-sitemap-edge && npm run seo:generate-ai && vite build && node scripts/seo/prerender-spa-routes.mjs && npm run seo:audit && npm run content:audit",
-    "build:seo:to-public": "npm run docs:audit-source && npm run seo:generate-citable && npm run seo:generate-strategic-content && npm run seo:generate-legacy-strategic-content && npm run content:repair-encoding && node scripts/seo/build-blog-index.mjs && npm run seo:generate-blog-triage && npm run seo:apply-pseo-policy && npm run seo:generate-decision-content && npm run seo:test-decision-tool && npm run seo:test-newsletter && npm run content:generate && npm run seo:generate-edge-routing && npm run seo:sync-sitemap-edge && npm run seo:generate-ai && vite build && node scripts/seo/prerender-spa-routes.mjs --out=public && npm run seo:audit && npm run content:audit",
+    "build:seo": "npm run docs:audit-source && npm run seo:generate-citable && npm run seo:generate-strategic-content && npm run seo:generate-legacy-strategic-content && npm run seo:generate-citable && npm run content:repair-encoding && node scripts/seo/build-blog-index.mjs && npm run seo:generate-blog-triage && npm run seo:generate-x1000-docs && npm run seo:apply-pseo-policy && npm run seo:generate-decision-content && npm run seo:test-decision-tool && npm run seo:test-newsletter && npm run content:generate && npm run seo:generate-edge-routing && npm run seo:sync-sitemap-edge && npm run seo:generate-ai && vite build && node scripts/seo/prerender-spa-routes.mjs && npm run seo:audit && npm run content:audit",
+    "build:seo:to-public": "npm run docs:audit-source && npm run seo:generate-citable && npm run seo:generate-strategic-content && npm run seo:generate-legacy-strategic-content && npm run seo:generate-citable && npm run content:repair-encoding && node scripts/seo/build-blog-index.mjs && npm run seo:generate-blog-triage && npm run seo:generate-x1000-docs && npm run seo:apply-pseo-policy && npm run seo:generate-decision-content && npm run seo:test-decision-tool && npm run seo:test-newsletter && npm run content:generate && npm run seo:generate-edge-routing && npm run seo:sync-sitemap-edge && npm run seo:generate-ai && vite build && node scripts/seo/prerender-spa-routes.mjs --out=public && npm run seo:audit && npm run content:audit",
     "prerender:seo": "node scripts/seo/prerender-spa-routes.mjs"
   },
   "dependencies": {

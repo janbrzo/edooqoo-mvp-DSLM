@@ -1,12 +1,12 @@
 {
-  "generatedAt": "2026-06-23T07:23:09.824Z",
+  "generatedAt": "2026-06-23T21:58:35.081Z",
   "gscDirectory": "G:\\Mój dysk\\FIRMA JB\\13. edooqoo\\6. GSC",
   "liveCheck": false,
   "totals": {
     "rows": 1526,
     "rawRows": 3052,
     "sources": 16,
-    "sitemapUrls": 453,
+    "sitemapUrls": 525,
     "byProblem": {
       "Strona wykryta – obecnie niezindeksowana": 1000,
       "Zindeksowano": 452,
@@ -39,6 +39,142 @@
       "decide-promote-or-noindex": 3,
       "accept-host-redirect": 2,
       "accept-or-force-host-canonical": 1
+    }
+  },
+  "comparison": {
+    "previousReportPath": "C:\\Users\\JanBrzostowski\\Documents\\EDOOQOO\\docs\\seo\\gsc-coverage-analysis.generated.json",
+    "previousGeneratedAt": "2026-06-23T18:23:39.108Z",
+    "ageDays": 0,
+    "newIndexed": {
+      "count": 0,
+      "samples": []
+    },
+    "stillDiscoveredNotIndexed": {
+      "count": 1000,
+      "samples": [
+        "https://edooqoo.com/a2-elementary-english-worksheets.html",
+        "https://edooqoo.com/about",
+        "https://edooqoo.com/ai-grading-tool-for-english-homework.html",
+        "https://edooqoo.com/ai-tools-for-online-esl-teachers.html",
+        "https://edooqoo.com/ai-worksheet-generator-for-english-teachers.html",
+        "https://edooqoo.com/blog",
+        "https://edooqoo.com/blog/academic-vocabulary-teaching-strategies.html",
+        "https://edooqoo.com/blog/advocating-for-ell-students.html",
+        "https://edooqoo.com/blog/ai-powered-differentiation-esl.html",
+        "https://edooqoo.com/blog/art-based-language-activities-esl.html",
+        "https://edooqoo.com/blog/classroom-management-esl-tips.html",
+        "https://edooqoo.com/blog/contrastive-analysis-language-teaching.html",
+        "https://edooqoo.com/blog/creative-writing-activities-esl.html",
+        "https://edooqoo.com/blog/data-driven-learning-esl-corpora.html",
+        "https://edooqoo.com/blog/digital-resource-curation-esl.html",
+        "https://edooqoo.com/blog/drama-techniques-esl-classroom.html",
+        "https://edooqoo.com/blog/effective-esl-homework-strategies.html",
+        "https://edooqoo.com/blog/emi-english-medium-instruction-guide.html",
+        "https://edooqoo.com/blog/end-of-term-activities-esl.html",
+        "https://edooqoo.com/blog/energy-management-esl-lessons.html"
+      ]
+    },
+    "stillCrawledNotIndexed": {
+      "count": 27,
+      "samples": [
+        "https://edooqoo.com/blog/bottom-up-top-down-listening-esl.html",
+        "https://edooqoo.com/blog/content-based-instruction-young-learners.html",
+        "https://edooqoo.com/blog/how-goal-progress-is-calculated-esl.html",
+        "https://edooqoo.com/blog/item-analysis-english-tests.html",
+        "https://edooqoo.com/blog/phrasal-verbs-teaching-strategies.html",
+        "https://edooqoo.com/blog/teaching-collocations-esl.html",
+        "https://edooqoo.com/blog/teaching-essay-structure-esl.html",
+        "https://edooqoo.com/blog/teaching-word-families-morphology-esl.html",
+        "https://edooqoo.com/blog/vocabulary-notebook-strategies-esl.html",
+        "https://edooqoo.com/english-tutor-calendar-booking-software.html",
+        "https://edooqoo.com/esl-worksheets/gerunds-infinitives/c2-proficiency",
+        "https://edooqoo.com/login",
+        "https://edooqoo.com/public-esl-worksheet-examples.html",
+        "https://edooqoo.com/reported-speech-worksheets.html",
+        "https://edooqoo.com/worksheets/crossword/news-media",
+        "https://edooqoo.com/worksheets/crossword/presentations",
+        "https://edooqoo.com/worksheets/definition-match/small-talk",
+        "https://edooqoo.com/worksheets/error-correction/idioms",
+        "https://edooqoo.com/worksheets/fill-in-the-blanks/food-restaurant",
+        "https://edooqoo.com/worksheets/fill-in-the-blanks/gerunds-infinitives"
+      ]
+    },
+    "still404": {
+      "count": 24,
+      "samples": [
+        "https://edooqoo.com/blog/asynchronous-learning-esl.html",
+        "https://edooqoo.com/blog/classroom-language-esl-teachers.html",
+        "https://edooqoo.com/blog/concept-checking-questions-esl.html",
+        "https://edooqoo.com/blog/conferencing-with-esl-students.html",
+        "https://edooqoo.com/blog/conversation-classes-esl-structure.html",
+        "https://edooqoo.com/blog/duolingo-english-test-preparation.html",
+        "https://edooqoo.com/blog/eliciting-techniques-esl-teaching.html",
+        "https://edooqoo.com/blog/fluency-activities-esl-classroom.html",
+        "https://edooqoo.com/blog/giving-instructions-esl-classroom.html",
+        "https://edooqoo.com/blog/graded-readers-guide-esl-teachers.html",
+        "https://edooqoo.com/blog/marking-codes-esl-writing.html",
+        "https://edooqoo.com/blog/newspaper-articles-esl-lessons.html",
+        "https://edooqoo.com/blog/oral-correction-timing-techniques.html",
+        "https://edooqoo.com/blog/positive-error-culture-esl.html",
+        "https://edooqoo.com/blog/shadowing-technique-esl.html",
+        "https://edooqoo.com/blog/standardized-test-comparison-esl.html",
+        "https://edooqoo.com/blog/teacher-talking-time-reducing.html",
+        "https://edooqoo.com/blog/teaching-critical-reading-esl.html",
+        "https://edooqoo.com/blog/teaching-functional-language-esl.html",
+        "https://edooqoo.com/blog/teaching-reading-fluency-esl.html"
+      ]
+    },
+    "noindexAccidentallyIndexed": {
+      "count": 193,
+      "samples": [
+        "https://edooqoo.com/english-for/hotel-staff",
+        "https://edooqoo.com/english-for/retail-staff",
+        "https://edooqoo.com/english-for/teachers",
+        "https://edooqoo.com/english-for/waiters",
+        "https://edooqoo.com/esl-worksheets/collocations/a2-elementary",
+        "https://edooqoo.com/esl-worksheets/collocations/c1-advanced",
+        "https://edooqoo.com/esl-worksheets/comparatives/a2-elementary",
+        "https://edooqoo.com/esl-worksheets/conditionals/c2-proficiency",
+        "https://edooqoo.com/esl-worksheets/conflict-resolution/b2-upper-intermediate",
+        "https://edooqoo.com/esl-worksheets/conflict-resolution/c1-advanced",
+        "https://edooqoo.com/esl-worksheets/cross-cultural/a1-beginner",
+        "https://edooqoo.com/esl-worksheets/cross-cultural/a2-elementary",
+        "https://edooqoo.com/esl-worksheets/cv-resume/c1-advanced",
+        "https://edooqoo.com/esl-worksheets/daily-routines/a2-elementary",
+        "https://edooqoo.com/esl-worksheets/daily-routines/b2-upper-intermediate",
+        "https://edooqoo.com/esl-worksheets/environment/b2-upper-intermediate",
+        "https://edooqoo.com/esl-worksheets/family/a1-beginner",
+        "https://edooqoo.com/esl-worksheets/family/c2-proficiency",
+        "https://edooqoo.com/esl-worksheets/food-restaurant/b1-intermediate",
+        "https://edooqoo.com/esl-worksheets/food-restaurant/c2-proficiency"
+      ]
+    },
+    "sitemapUrlsNotIndexed": {
+      "count": 301,
+      "samples": [
+        "https://edooqoo.com/a2-elementary-english-worksheets.html",
+        "https://edooqoo.com/about",
+        "https://edooqoo.com/accountant-variance-explanation-lesson-prep.html",
+        "https://edooqoo.com/accountant-variance-explanation-what-to-teach-next.html",
+        "https://edooqoo.com/accountant-variance-explanation-worksheet.html",
+        "https://edooqoo.com/ai-chatbot-vs-student-context-system.html",
+        "https://edooqoo.com/ai-grading-tool-for-english-homework.html",
+        "https://edooqoo.com/ai-lesson-planner-vs-worksheet-workflow.html",
+        "https://edooqoo.com/ai-lesson-prep-tool-vs-chatbot.html",
+        "https://edooqoo.com/ai-tools-for-adult-esl-homework.html",
+        "https://edooqoo.com/ai-tools-for-business-english-tutors.html",
+        "https://edooqoo.com/ai-tools-for-esl-progress-tracking.html",
+        "https://edooqoo.com/ai-tools-for-one-to-one-english-lessons.html",
+        "https://edooqoo.com/ai-tools-for-online-esl-teachers.html",
+        "https://edooqoo.com/ai-tools-for-private-english-tutors.html",
+        "https://edooqoo.com/ai-tools-for-private-tutor-student-context.html",
+        "https://edooqoo.com/ai-worksheet-generator-for-english-teachers.html",
+        "https://edooqoo.com/articles-a-an-the-worksheets.html",
+        "https://edooqoo.com/authors/jan-brzostowski",
+        "https://edooqoo.com/authors/martha"
+      ],
+      "requires14DayReview": false,
+      "requires28DayReview": false
     }
   },
   "sets": [
