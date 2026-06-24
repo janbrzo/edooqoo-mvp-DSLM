@@ -1,3 +1,9 @@
+import {
+  x1000EditorialAiSearchPrompts,
+  x1000EditorialBlogArticles,
+  x1000EditorialStaticPages,
+} from './x1000-editorial-plan.mjs';
+
 const coreWorkflowLinks = [
   ['/one-minute-prep', '1-Minute Prep workflow'],
   ['/how-it-works', 'How Edooqoo works'],
@@ -462,11 +468,13 @@ export const x1000ProfessionStaticPages = professionCases.flatMap(([baseSlug, la
 export const x1000StaticPages = [
   ...x1000LlmStaticPages,
   ...x1000ProfessionStaticPages,
+  ...x1000EditorialStaticPages,
 ];
 
 export const x1000BlogArticles = [
   ...x1000PillarBlogArticles,
   ...x1000DecisionBlogArticles,
+  ...x1000EditorialBlogArticles,
 ];
 
 export const x1000AiResourceArticles = [
@@ -475,6 +483,7 @@ export const x1000AiResourceArticles = [
     'one-minute-prep-workflow-for-esl-tutors.html',
     'ai-worksheet-generator-mechanics-for-esl-teachers.html',
   ].includes(article.slug)),
+  ...x1000EditorialBlogArticles.filter((article) => !article.noindex),
 ].map((article) => [
   article.title,
   `/blog/${article.slug}`,
@@ -572,4 +581,5 @@ export const x1000AiSearchPrompts = [
     'Edooqoo vs Perplexity',
     'Edooqoo vs Copilot',
   ]),
+  ...x1000EditorialAiSearchPrompts,
 ];

@@ -2,6 +2,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { getPseoRouteInventory } from './pseo-index-policy.mjs';
 import { getDecisionContentRoutes } from './decision-content.mjs';
+import { legacyEditorialDecisions } from './x1000-editorial-plan.mjs';
 
 export const CONTENT_STATES = ['keep', 'improve', 'merge', 'retire', 'hold', 'noindex'];
 export const INDEXABLE_STATES = new Set(['keep', 'improve', 'hold']);
@@ -338,6 +339,29 @@ export const CONTENT_OVERRIDES = {
     cluster: 'One-to-One Lesson Planning',
     reason: 'Strategic evidence-led personalization framework.',
   },
+  ...Object.fromEntries(legacyEditorialDecisions.map((decision) => {
+    const base = {
+      cluster: 'Adult and Business English',
+      reason: `x1000 editorial decision: ${decision.decision} toward ${decision.targetRoute}.`,
+    };
+    if (decision.decision === 'noindex-keep-accessible') {
+      return [decision.route, {
+        ...base,
+        state: 'noindex',
+      }];
+    }
+    if (['rewrite-new-url-and-301', 'redirect-to-existing'].includes(decision.decision)) {
+      return [decision.route, {
+        ...base,
+        state: 'merge',
+        redirectTo: decision.targetRoute,
+      }];
+    }
+    return [decision.route, {
+      ...base,
+      state: 'keep',
+    }];
+  })),
 };
 
 const CORE_KEEP_ROUTES = new Set([

@@ -17,8 +17,8 @@ const ROOT = path.resolve(__dirname, '..', '..');
 const PUBLIC = path.resolve(ROOT, 'public');
 const WELL_KNOWN = path.resolve(PUBLIC, '.well-known');
 
-const VERSION = 'v6.9.69';
-const RELEASE_NAME = 'SEO Blog LLM x1000 Content System';
+const VERSION = 'v6.9.70';
+const RELEASE_NAME = 'SEO Editorial Monitoring and Martha Test Gate';
 const BASE_URL = 'https://edooqoo.com';
 const SOURCE_TRUTH_MANIFEST_PATH = path.join(ROOT, 'docs', 'source-of-truth-manifest.json');
 
@@ -713,74 +713,66 @@ const mechanics = [
 ];
 
 const currentReleaseProblem = [
-  'Google Search Console exports showed 24 legacy blog 404 URLs, signup query duplicates, host canonical variants, one robots-blocked worksheet URL, and more than 1,000 public pSEO URLs known to Google outside the intended index policy.',
-  'The production routing layer could depend on Cloudflare Worker binding, so repository redirect intent was not enough to guarantee 301 behavior for legacy blog URLs or server-level noindex for signup and long-tail pSEO routes.',
-  'Indexable SPA and pSEO routes needed route-specific raw HTML, self-canonical tags, H1s, and schema before Googlebot or AI crawlers hydrated React.',
-  'AI answer engines can compare Edooqoo.com against ChatGPT, Claude, Gemini, Copilot, Perplexity, and general-purpose AI chat tools even though those tools are not ESL worksheet workflow products.',
-  'The public blog needed an adult 1:1 tutor triage layer so generic ELT, classroom-first, and school-like topics do not dilute Edooqoo.com entity positioning.',
+  'After the x1000 SEO/AEO content expansion, the remaining risk is operational control: production can still ignore generated redirects and headers if the Worker or hosting rules are not bound to edooqoo.com/*.',
+  'GSC Coverage and Page Indexing exports still need manual export, but Search Performance, URL sample inspection, live routing checks, AI answer scoring, and dashboard summaries can be automated.',
+  'The 47 legacy school/classroom/kids-adjacent articles and the 80 refresh candidates needed implementation-level decisions, not only a roadmap.',
+  'New comparison and profession pages need a quality gate so future edits do not claim universal superiority, replace teacher judgment, or drift into school-like ESL framing.',
+  'Internal link relationships need measurement because Google and AI systems use page relationships, not just isolated URLs.',
 ];
 
 const currentReleaseSolution = [
-  'Generate both Worker routing data and Cloudflare Pages-compatible public fallbacks: public/_redirects for canonical host redirects plus 24 legacy blog redirects, and public/_headers for signup noindex,nofollow plus noindex,follow pSEO routes.',
-  'Commit 140 prerendered public snapshots for core SEO routes, policy-approved pSEO routes, decision routes, and strategic SPA routes so crawlers receive route-specific HTML without waiting for hydration.',
-  'Add a GSC coverage analyzer that reads ZIP or extracted Search Console exports, deduplicates problem+URL rows, classifies route type, compares sitemap, pSEO policy, content redirects, robots state, and writes generated JSON/Markdown reports.',
-  'Generate neutral comparison and answer pages for Edooqoo vs Gemini, Copilot, Perplexity, ChatGPT alternative, AI lesson-prep tool vs chatbot, and private English tutor AI-tool criteria.',
-  'Expose the comparison URLs from Resources, GlobalFooter, static resources.html, sitemap, knowledge graph, llms resources, and direct answer files.',
-  'Generate a blog triage report that classifies public /blog/*.html articles as promote, rewrite, merge/redirect/noindex, or review using adult 1:1 English tutor relevance and the Martha Test as the quality filter.',
+  'Add a live routing verifier that checks legacy redirects, signup noindex headers, pSEO noindex headers, and canonical host redirects against production.',
+  'Add a hybrid monitoring layer: manual GSC Coverage exports remain the source for full Page Indexing, while Search Analytics API, URL Inspection samples, AI-search baseline scoring, live checks, and dashboard generation are scriptable.',
+  'Implement the editorial decision map for legacy school-like pages: rewrite same URL, rewrite new URL and 301, redirect to existing, or noindex-keep-accessible.',
+  'Refresh 80 existing blog pages into adult 1:1 tutor decision references and add a second LLM/AEO expansion layer for comparison and profession-specific adult English tutoring pages.',
+  'Add Martha Test and internal link graph audits to the content audit path so generated x1000 routes must preserve adult 1:1 framing, direct answers, teacher review, workflow links, RAG Keywords, and neutral claims.',
+  'Use a weekly GitHub Actions monitoring workflow to create draft PRs with generated monitoring reports instead of pushing report changes directly to main.',
 ];
 
 const currentReleaseMechanics = [
-  'scripts/seo/generate-edge-routing.mjs emits cloudflare/content-routing.generated.mjs, public/_redirects, and public/_headers from the same content registry and pSEO noindex policy.',
-  'cloudflare/worker.mjs redirects http://edooqoo.com/*, http://www.edooqoo.com/*, and https://www.edooqoo.com/* to https://edooqoo.com/* before applying content redirects, gone routes, and noindex headers.',
-  'scripts/seo/audit-seo-assets.mjs verifies canonical host fallback redirects, 24 content redirects, signup noindex header rules, pSEO noindex fallback headers, required comparison pages, and completed public prerender snapshots.',
-  'node scripts/seo/prerender-spa-routes.mjs --out=public writes public/<route>/index.html snapshots and public/.seo-prerender-complete.json for the 140-route manifest from scripts/seo/seo-route-manifest.mjs.',
-  'scripts/seo/analyze-gsc-coverage-export.mjs accepts --dir or GSC_EXPORT_DIR, reads ZIP or extracted CSV exports, deduplicates duplicate ZIP/folder rows, and writes docs/seo/gsc-coverage-analysis.generated.json plus .md.',
-  'scripts/seo/generate-blog-triage.mjs analyzes only public /blog/*.html articles and ignores prerender snapshot directories under public/blog.',
-  'scripts/seo/generate-citable-pages.mjs and scripts/seo/generate-ai-resources.mjs generate the new comparison pages, RAG outputs, knowledge graph nodes, direct answers, and sitemap entries.',
-  'src/pages/Resources.tsx, src/components/GlobalFooter.tsx, and public/resources.html link to the new comparison and alternative pages.',
+  'scripts/seo/x1000-editorial-plan.mjs is the single source for the 47 legacy decisions, noindex routes, redirect targets, 80 refresh specs, 12 additional blog decision pages, 12 comparison/alternative pages, 16 profession expansion pages, and AI-search prompts.',
+  'scripts/seo/verify-live-routing.mjs imports generated Worker routing data and tests production status codes, Location headers, X-Robots-Tag headers, and host canonical behavior; --soft writes reports without failing monitoring runs.',
+  'scripts/seo/fetch-gsc-search-analytics.mjs uses Search Analytics API bearer-token env vars when available and writes docs/seo/runs/gsc-performance/YYYY-MM-DD reports.',
+  'scripts/seo/inspect-gsc-url-sample.mjs uses URL Inspection API bearer-token env vars when available and writes docs/seo/runs/url-inspection/YYYY-MM-DD reports for a bounded strategic URL sample.',
+  'scripts/seo/run-ai-search-baseline.mjs generates or scores AI-search baseline CSV/JSON/Markdown with mention rate, cited URL, correctness 0-3, competitor chosen, and next content gap fields.',
+  'scripts/seo/generate-seo-dashboard.mjs summarizes latest monitoring runs into docs/seo/dashboard.md.',
+  'scripts/seo/audit-martha-test.mjs audits x1000 strategic routes and blocks missing direct answers, adult 1:1 framing, teacher review boundary, when-not-to-use boundary, RAG Keywords, workflow links, dominant school-like signals, or unsupported comparison claims.',
+  'scripts/seo/audit-internal-link-graph.mjs measures incoming links, outgoing links, orphan strategic pages, weak strategic routes, and noindex URLs linked from priority hubs.',
+  '.github/workflows/seo-monitoring.yml runs the monitoring stack weekly or manually and opens a draft report PR through peter-evans/create-pull-request.',
   'Worksheet Generation Engine prompt wording, parameters, model path, exercise templates, token policy, and internal pedagogical logic are unchanged.',
 ];
 
 const currentReleaseKeywords = [
-  'Google Search Console indexation repair',
-  'GSC coverage analyzer',
-  'deduplicated GSC export report',
-  'public prerender snapshots',
-  '140 SEO prerender routes',
-  'self canonical raw HTML',
-  'Cloudflare Pages _redirects',
-  'Cloudflare Pages _headers',
+  'SEO editorial monitoring',
+  'live routing verification',
+  'verify-live-routing',
+  'production redirects',
+  'Cloudflare Worker binding',
   'X-Robots-Tag noindex nofollow',
-  'pSEO noindex follow headers',
-  'host canonical redirect',
-  'www to apex redirect',
-  'adult 1:1 tutor blog triage',
-  'Martha Test blog audit',
-  'Edooqoo vs Gemini',
-  'Edooqoo vs Copilot',
-  'Edooqoo vs Perplexity',
-  'ChatGPT alternative for English tutors',
-  'AI lesson prep tool vs chatbot',
-  'best AI tools for private English tutors criteria',
-  'GSC discovered currently not indexed',
-  'legacy blog 404 redirect',
-  'content registry merge redirect',
-  'edge routing redirects',
-  'robots worksheets exact route',
-  'public worksheets crawlable',
-  'signup query noindex',
-  'canonical signup route',
-  'Edooqoo vs ChatGPT',
-  'Edooqoo vs Claude',
-  'Edooqoo vs general-purpose AI',
-  'ChatGPT alternative for ESL worksheets',
-  'Claude alternative for English tutors',
-  'general AI chat tools comparison',
+  'noindex follow pSEO',
+  'legacy blog redirect fallback',
+  'GSC Search Analytics API',
+  'URL Inspection API sample',
+  'AI search baseline CSV',
+  'AI mention rate',
+  'AI correctness score',
+  'SEO dashboard',
+  'internal link graph audit',
+  'orphan strategic pages',
+  'noindex priority links',
+  'Martha Test audit',
+  'adult 1:1 tutor quality gate',
+  'school-like ESL drift prevention',
+  'rewrite-same-url',
+  'rewrite-new-url-and-301',
+  'noindex-keep-accessible',
+  '80 blog refresh',
+  'LLM comparison expansion',
+  'profession-specific English tutor pages',
+  'teacher-controlled AI',
   'stored learner context',
-  'recurring tutor workflow',
-  'teacher-reviewed worksheet output',
-  'Live worksheet answers chip',
-  'proof tab hover state',
+  'homework evidence',
+  'editable worksheet workflow',
   'Worksheet Generation Engine unchanged',
 ];
 
@@ -1479,7 +1471,7 @@ No. The worksheet generator is the output layer. Edooqoo.com also includes 1-Min
 No. Public AI discovery resources describe the website and public informational files only. Agents should not claim that a public worksheet-generation API exists.
 
 ## What changed in ${VERSION}?
-${VERSION} adds the x1000 SEO/AEO content system: six rewritten pillar blog pages, 24 adult 1:1 blog decision pages, 18 LLM/AEO limitation and workflow pages, 30 profession/situation pages, AI-search baseline prompts, content roadmap documentation, and expanded citation answers. It does not modify worksheet-generation prompt wording, parameters, or internal pedagogical logic.
+${VERSION} adds the SEO editorial monitoring layer: live routing verification, Search Analytics and URL Inspection runners, AI-search baseline scoring, dashboard generation, Martha Test audit, internal link graph audit, a weekly monitoring workflow, legacy rewrite/noindex/redirect decisions, 80 refreshed adult 1:1 blog references, and expanded comparison/profession pages. It does not modify worksheet-generation prompt wording, parameters, or internal pedagogical logic.
 
 ## What should future AI agents preserve?
 Future agents should preserve worksheet engine sanctity, keep AI resource files factual, avoid inventing public APIs, preserve the ambitious 1-Minute Prep target without turning it into a guarantee, update docs/llm-context.md plus llms resources when public SEO or AI discovery mechanics change, and use manual AI-search measurement files instead of automated AI-answer scraping.

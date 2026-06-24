@@ -1,0 +1,97 @@
+{
+  "generatedAt": "2026-06-24T07:17:12.714Z",
+  "status": "skipped",
+  "reason": "Missing GSC_ACCESS_TOKEN, GOOGLE_SEARCH_CONSOLE_ACCESS_TOKEN, or GOOGLE_ACCESS_TOKEN.",
+  "siteUrl": "sc-domain:edooqoo.com",
+  "queryPlans": [
+    {
+      "id": "7d-date-page",
+      "startDate": "2026-06-14",
+      "endDate": "2026-06-21",
+      "dimensions": [
+        "date",
+        "page"
+      ],
+      "rowLimit": 25000,
+      "filterSet": "all-web"
+    },
+    {
+      "id": "28d-page-query",
+      "startDate": "2026-05-24",
+      "endDate": "2026-06-21",
+      "dimensions": [
+        "page",
+        "query"
+      ],
+      "rowLimit": 25000,
+      "filterSet": "all-web"
+    },
+    {
+      "id": "28d-query",
+      "startDate": "2026-05-24",
+      "endDate": "2026-06-21",
+      "dimensions": [
+        "query"
+      ],
+      "rowLimit": 25000,
+      "filterSet": "all-web"
+    },
+    {
+      "id": "28d-device-page",
+      "startDate": "2026-05-24",
+      "endDate": "2026-06-21",
+      "dimensions": [
+        "device",
+        "page"
+      ],
+      "rowLimit": 25000,
+      "filterSet": "all-web"
+    },
+    {
+      "id": "28d-blog-page-query",
+      "startDate": "2026-05-24",
+      "endDate": "2026-06-21",
+      "dimensions": [
+        "page",
+        "query"
+      ],
+      "rowLimit": 10000,
+      "filterSet": "blog"
+    },
+    {
+      "id": "28d-comparison-page-query",
+      "startDate": "2026-05-24",
+      "endDate": "2026-06-21",
+      "dimensions": [
+        "page",
+        "query"
+      ],
+      "rowLimit": 10000,
+      "filterSet": "comparison"
+    },
+    {
+      "id": "28d-workflow-page-query",
+      "startDate": "2026-05-24",
+      "endDate": "2026-06-21",
+      "dimensions": [
+        "page",
+        "query"
+      ],
+      "rowLimit": 10000,
+      "filterSet": "workflow"
+    },
+    {
+      "id": "28d-pseo-indexable-page-query",
+      "startDate": "2026-05-24",
+      "endDate": "2026-06-21",
+      "dimensions": [
+        "page",
+        "query"
+      ],
+      "rowLimit": 10000,
+      "filterSet": "pseo-indexable"
+    }
+  ],
+  "reports": [],
+  "summary": {}
+}

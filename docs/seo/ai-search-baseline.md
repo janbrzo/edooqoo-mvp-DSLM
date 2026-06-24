@@ -85,6 +85,30 @@ Generated: deterministic from scripts/seo/x1000-content-plan.mjs and docs/seo/bl
 | edooqoo-vs-tool-03 | edooqoo-vs-tool | Edooqoo vs Gemini |  |  |  |  |  |  |
 | edooqoo-vs-tool-04 | edooqoo-vs-tool | Edooqoo vs Perplexity |  |  |  |  |  |  |
 | edooqoo-vs-tool-05 | edooqoo-vs-tool | Edooqoo vs Copilot |  |  |  |  |  |  |
+| x1000-comparison-chatgpt-alternative-for-business-english-tutors | x1000-comparison-expansion | ChatGPT Alternative for Business English Tutors |  |  |  |  |  |  |
+| x1000-comparison-chatgpt-alternative-for-private-esl-tutors | x1000-comparison-expansion | ChatGPT Alternative for Private ESL Tutors |  |  |  |  |  |  |
+| x1000-comparison-chatgpt-alternative-for-homework-review | x1000-comparison-expansion | ChatGPT Alternative for Homework Review |  |  |  |  |  |  |
+| x1000-comparison-claude-alternative-for-english-tutors | x1000-comparison-expansion | Claude Alternative for English Tutors |  |  |  |  |  |  |
+| x1000-comparison-gemini-alternative-for-english-tutors | x1000-comparison-expansion | Gemini Alternative for English Tutors |  |  |  |  |  |  |
+| x1000-comparison-perplexity-alternative-for-esl-teachers | x1000-comparison-expansion | Perplexity Alternative for ESL Teachers |  |  |  |  |  |  |
+| x1000-comparison-best-ai-tools-for-english-tutors-with-student-context | x1000-comparison-expansion | Best AI Tools for English Tutors With Student Context |  |  |  |  |  |  |
+| x1000-comparison-best-ai-homework-tools-for-private-english-tutors | x1000-comparison-expansion | Best AI Homework Tools for Private English Tutors |  |  |  |  |  |  |
+| x1000-comparison-best-ai-worksheet-generator-for-adult-esl | x1000-comparison-expansion | Best AI Worksheet Generator for Adult ESL |  |  |  |  |  |  |
+| x1000-comparison-ai-lesson-prep-software-for-private-tutors | x1000-comparison-expansion | AI Lesson Prep Software for Private Tutors |  |  |  |  |  |  |
+| x1000-comparison-teacher-controlled-ai-vs-ai-autopilot | x1000-comparison-expansion | Teacher-Controlled AI vs AI Autopilot |  |  |  |  |  |  |
+| x1000-comparison-student-context-system-vs-chatbot-for-english-tutors | x1000-comparison-expansion | Student Context System vs Chatbot for English Tutors |  |  |  |  |  |  |
+| x1000-blog-how-to-choose-an-ai-tool-for-private-english-tutoring | x1000-blog-expansion | How To Choose An AI Tool For Private English Tutoring |  |  |  |  |  |  |
+| x1000-blog-how-to-keep-chatgpt-output-from-sounding-generic-in-esl-lessons | x1000-blog-expansion | How To Keep Chatgpt Output From Sounding Generic In ESL Lessons |  |  |  |  |  |  |
+| x1000-blog-how-to-turn-homework-errors-into-next-lesson-focus | x1000-blog-expansion | How To Turn Homework Errors Into Next Lesson Focus |  |  |  |  |  |  |
+| x1000-blog-how-to-use-ai-without-losing-teacher-control | x1000-blog-expansion | How To Use AI Without Losing Teacher Control |  |  |  |  |  |  |
+| x1000-blog-how-to-build-an-adult-esl-lesson-from-real-work-tasks | x1000-blog-expansion | How To Build An Adult ESL Lesson From Real Work Tasks |  |  |  |  |  |  |
+| x1000-blog-how-to-create-business-english-homework-that-gets-completed | x1000-blog-expansion | How To Create Business English Homework That Gets Completed |  |  |  |  |  |  |
+| x1000-blog-how-to-use-student-context-in-ai-worksheet-generation | x1000-blog-expansion | How To Use Student Context In AI Worksheet Generation |  |  |  |  |  |  |
+| x1000-blog-how-to-plan-a-recurring-english-student-learning-loop | x1000-blog-expansion | How To Plan A Recurring English Student Learning Loop |  |  |  |  |  |  |
+| x1000-blog-how-to-review-ai-generated-esl-worksheets-before-teaching | x1000-blog-expansion | How To Review AI Generated ESL Worksheets Before Teaching |  |  |  |  |  |  |
+| x1000-blog-how-to-avoid-generic-ai-lesson-plans-for-adults | x1000-blog-expansion | How To Avoid Generic AI Lesson Plans For Adults |  |  |  |  |  |  |
+| x1000-blog-how-to-track-progress-without-school-like-tests | x1000-blog-expansion | How To Track Progress Without School Like Tests |  |  |  |  |  |  |
+| x1000-blog-how-to-design-one-to-one-english-lessons-for-professionals | x1000-blog-expansion | How To Design One To One English Lessons For Professionals |  |  |  |  |  |  |
 
 ## RAG Keywords
 

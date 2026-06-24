@@ -4,6 +4,40 @@
   X-Robots-Tag: noindex, nofollow
 /signup/*
   X-Robots-Tag: noindex, nofollow
+/blog/advocating-for-ell-students.html
+  X-Robots-Tag: noindex, follow
+/blog/collaborating-with-mainstream-teachers-esl.html
+  X-Robots-Tag: noindex, follow
+/blog/communicating-with-esl-parents.html
+  X-Robots-Tag: noindex, follow
+/blog/content-based-instruction-young-learners.html
+  X-Robots-Tag: noindex, follow
+/blog/english-songs-activities-esl.html
+  X-Robots-Tag: noindex, follow
+/blog/esl-games-for-kids.html
+  X-Robots-Tag: noindex, follow
+/blog/group-dynamics-esl-classroom.html
+  X-Robots-Tag: noindex, follow
+/blog/heritage-speakers-esl-classroom.html
+  X-Robots-Tag: noindex, follow
+/blog/managing-behavior-esl-classroom.html
+  X-Robots-Tag: noindex, follow
+/blog/multilevel-esl-classroom-strategies.html
+  X-Robots-Tag: noindex, follow
+/blog/seating-arrangements-esl-classroom.html
+  X-Robots-Tag: noindex, follow
+/blog/teaching-english-preschoolers-guide.html
+  X-Robots-Tag: noindex, follow
+/blog/teaching-english-to-teenagers.html
+  X-Robots-Tag: noindex, follow
+/blog/teaching-english-to-young-learners.html
+  X-Robots-Tag: noindex, follow
+/blog/teen-engagement-strategies-esl.html
+  X-Robots-Tag: noindex, follow
+/blog/tpr-total-physical-response-activities.html
+  X-Robots-Tag: noindex, follow
+/blog/using-rewards-esl-classroom.html
+  X-Robots-Tag: noindex, follow
 /english-for/cabin-crew
   X-Robots-Tag: noindex, follow
 /english-for/call-center-agents

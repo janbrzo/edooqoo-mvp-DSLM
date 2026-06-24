@@ -19,54 +19,6 @@ export interface LandingPageMeta {
 
 export const BLOG_POSTS: BlogPostMeta[] = [
   {
-    "title": "Adult ESL Student Profiles for Better Lesson Planning",
-    "description": "Build a concise adult learner profile that improves one-to-one English lesson decisions without collecting irrelevant personal data.",
-    "url": "/blog/adult-esl-student-profile-lesson-planning.html",
-    "date": "2026-06-14",
-    "category": "Student Evidence and Progress",
-    "state": "keep"
-  },
-  {
-    "title": "What Is the Best Lesson Prep Tool for English Tutors?",
-    "description": "The criteria private English tutors should use to choose a lesson-prep tool for recurring adult one-to-one teaching.",
-    "url": "/blog/best-lesson-prep-tool-for-english-tutors.html",
-    "date": "2026-06-14",
-    "category": "Tutor Business and Tools",
-    "state": "keep"
-  },
-  {
-    "title": "Can AI Plan a One-to-One English Lesson?",
-    "description": "What AI can automate in private English lesson planning and which decisions must remain under teacher review.",
-    "url": "/blog/can-ai-plan-one-to-one-english-lesson.html",
-    "date": "2026-06-14",
-    "category": "One-to-One Lesson Planning",
-    "state": "keep"
-  },
-  {
-    "title": "Turn ESL Homework Mistakes Into the Next Lesson",
-    "description": "A private-tutor workflow for converting adult ESL homework evidence into focused, useful, teacher-reviewed lesson decisions.",
-    "url": "/blog/homework-mistakes-next-english-lesson.html",
-    "date": "2026-06-14",
-    "category": "Homework and Retention",
-    "state": "keep"
-  },
-  {
-    "title": "How Do English Tutors Track What to Teach Next?",
-    "description": "A compact evidence system for choosing the next lesson in recurring private English tutoring.",
-    "url": "/blog/how-english-tutors-track-what-to-teach-next.html",
-    "date": "2026-06-14",
-    "category": "Student Evidence and Progress",
-    "state": "keep"
-  },
-  {
-    "title": "How Long Should Private English Tutors Spend on Lesson Prep?",
-    "description": "A direct benchmark and workflow for reducing recurring one-to-one English lesson preparation without lowering instructional quality.",
-    "url": "/blog/how-long-should-private-english-tutors-spend-on-lesson-prep.html",
-    "date": "2026-06-14",
-    "category": "Tutor Business and Tools",
-    "state": "keep"
-  },
-  {
     "title": "One-to-One English Lesson Planning for Adults: Complete Guide",
     "description": "A complete system for planning one-to-one adult English lessons using goals, evidence, CEFR, retrieval, realistic tasks, homework, and review.",
     "url": "/blog/teaching-english-one-to-one.html",
@@ -83,11 +35,139 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "keep"
   },
   {
+    "title": "Academic Language Functions Clil | Edooqoo",
+    "description": "Academic Language Functions Clil: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/academic-language-functions-clil.html",
+    "date": "2026-05-24",
+    "category": "Tutor Business and Tools",
+    "state": "hold"
+  },
+  {
+    "title": "Academic Vocabulary Teaching Strategies | Edooqoo",
+    "description": "Academic Vocabulary Teaching Strategies: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/academic-vocabulary-teaching-strategies.html",
+    "date": "2026-05-24",
+    "category": "Homework and Retention",
+    "state": "hold"
+  },
+  {
+    "title": "Accent Coaching Techniques ESL | Edooqoo",
+    "description": "Accent Coaching Techniques ESL: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/accent-coaching-techniques-esl.html",
+    "date": "2026-05-24",
+    "category": "Tutor Business and Tools",
+    "state": "hold"
+  },
+  {
+    "title": "Accent Reduction Activities ESL | Edooqoo",
+    "description": "Accent Reduction Activities ESL: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/accent-reduction-activities-esl.html",
+    "date": "2026-05-24",
+    "category": "Tutor Business and Tools",
+    "state": "hold"
+  },
+  {
+    "title": "Evidence Review Loop for Private Adult English Tutors | Edooqoo",
+    "description": "Evidence Review Loop for Private Adult English Tutors: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/action-research-esl-teachers.html",
+    "date": "2026-05-24",
+    "category": "Adult and Business English",
+    "state": "keep"
+  },
+  {
+    "title": "Adapting Task Difficulty for One Adult English Learner | Edooqoo",
+    "description": "Adapting Task Difficulty for One Adult English Learner: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/adapting-task-difficulty-for-one-adult-english-learner.html",
+    "date": "2026-05-24",
+    "category": "Adult and Business English",
+    "state": "hold"
+  },
+  {
+    "title": "Adapting Textbook Tasks for Adult 1:1 English Lessons | Edooqoo",
+    "description": "Adapting Textbook Tasks for Adult 1:1 English Lessons: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/adapting-textbook-tasks-for-adult-one-to-one-english-lessons.html",
+    "date": "2026-05-24",
+    "category": "One-to-One Lesson Planning",
+    "state": "hold"
+  },
+  {
     "title": "Adult Business English Homework Feedback Loop | Edooqoo",
-    "description": "Adult Business English Homework Feedback Loop: adult 1:1 English tutor decision page with Edooqoo workflow links, teacher review, and evidence-led next-step framing.",
+    "description": "Adult Business English Homework Feedback Loop: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
     "url": "/blog/adult-business-english-homework-feedback-loop.html",
     "date": "2026-05-24",
     "category": "Student Evidence and Progress",
+    "state": "hold"
+  },
+  {
+    "title": "Adult ESL Student Profile Lesson Planning | Edooqoo",
+    "description": "Adult ESL Student Profile Lesson Planning: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/adult-esl-student-profile-lesson-planning.html",
+    "date": "2026-05-24",
+    "category": "Student Evidence and Progress",
+    "state": "keep"
+  },
+  {
+    "title": "Adult Learner Autonomy in Private English Lessons | Edooqoo",
+    "description": "Adult Learner Autonomy in Private English Lessons: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/adult-learner-autonomy-in-private-english-lessons.html",
+    "date": "2026-05-24",
+    "category": "Adult and Business English",
+    "state": "hold"
+  },
+  {
+    "title": "Adult Learner Performance Evidence Beyond Tests | Edooqoo",
+    "description": "Adult Learner Performance Evidence Beyond Tests: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/adult-learner-performance-evidence-beyond-tests.html",
+    "date": "2026-05-24",
+    "category": "Adult and Business English",
+    "state": "hold"
+  },
+  {
+    "title": "Adult 1:1 Accessibility Adaptations for English Lessons | Edooqoo",
+    "description": "Adult 1:1 Accessibility Adaptations for English Lessons: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/adult-one-to-one-accessibility-adaptations-for-english-lessons.html",
+    "date": "2026-05-24",
+    "category": "One-to-One Lesson Planning",
+    "state": "hold"
+  },
+  {
+    "title": "Adult 1:1 English Lesson Adaptations for Neurodivergent Learners | Edooqoo",
+    "description": "Adult 1:1 English Lesson Adaptations for Neurodivergent Learners: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/adult-one-to-one-neurodivergent-english-lesson-adaptations.html",
+    "date": "2026-05-24",
+    "category": "One-to-One Lesson Planning",
+    "state": "hold"
+  },
+  {
+    "title": "Adult Professional Task Projects in English Coaching | Edooqoo",
+    "description": "Adult Professional Task Projects in English Coaching: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/adult-professional-task-projects-in-english-coaching.html",
+    "date": "2026-05-24",
+    "category": "Adult and Business English",
+    "state": "hold"
+  },
+  {
+    "title": "Adult Vocabulary Retrieval Practice, Not Games | Edooqoo",
+    "description": "Adult Vocabulary Retrieval Practice, Not Games: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/adult-vocabulary-retrieval-practice-not-games.html",
+    "date": "2026-05-24",
+    "category": "Homework and Retention",
+    "state": "hold"
+  },
+  {
+    "title": "AI Generated Listening Exercises ESL | Edooqoo",
+    "description": "AI Generated Listening Exercises ESL: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/ai-generated-listening-exercises-esl.html",
+    "date": "2026-05-24",
+    "category": "Tutor Business and Tools",
+    "state": "hold"
+  },
+  {
+    "title": "AI Homework Grading For English Teachers | Edooqoo",
+    "description": "AI Homework Grading For English Teachers: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/ai-homework-grading-for-english-teachers.html",
+    "date": "2026-05-24",
+    "category": "Homework and Retention",
     "state": "hold"
   },
   {
@@ -99,6 +179,22 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "hold"
   },
   {
+    "title": "Personalizing Adult 1:1 English Tasks From Evidence | Edooqoo",
+    "description": "Personalizing Adult 1:1 English Tasks From Evidence: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/ai-powered-differentiation-esl.html",
+    "date": "2026-05-24",
+    "category": "Adult and Business English",
+    "state": "keep"
+  },
+  {
+    "title": "AI Tools For English Teachers 2026 | Edooqoo",
+    "description": "AI Tools For English Teachers 2026: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/ai-tools-for-english-teachers-2026.html",
+    "date": "2026-05-24",
+    "category": "Tutor Business and Tools",
+    "state": "hold"
+  },
+  {
     "title": "AI Worksheet Generator Mechanics for ESL Teachers | Edooqoo",
     "description": "Technical and pedagogical guide to AI worksheet generator mechanics for adult 1:1 ESL tutors, including inputs, editable output, answer keys, and review.",
     "url": "/blog/ai-worksheet-generator-mechanics-for-esl-teachers.html",
@@ -107,48 +203,352 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "keep"
   },
   {
-    "title": "AI Worksheet Generator vs Lesson Planning Chatbot | Edooqoo",
-    "description": "AI Worksheet Generator vs Lesson Planning Chatbot: adult 1:1 English tutor decision page with Edooqoo workflow links, teacher review, and evidence-led next-step framing.",
+    "title": "AI Worksheet Generator Vs Lesson Planning Chatbot | Edooqoo",
+    "description": "AI Worksheet Generator Vs Lesson Planning Chatbot: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
     "url": "/blog/ai-worksheet-generator-vs-lesson-planning-chatbot.html",
     "date": "2026-05-24",
     "category": "One-to-One Lesson Planning",
     "state": "hold"
   },
   {
-    "title": "Best Workflow for Private English Tutors | Edooqoo",
-    "description": "Best Workflow for Private English Tutors: adult 1:1 English tutor decision page with Edooqoo workflow links, teacher review, and evidence-led next-step framing.",
+    "title": "Art Based Language Activities ESL | Edooqoo",
+    "description": "Art Based Language Activities ESL: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/art-based-language-activities-esl.html",
+    "date": "2026-05-24",
+    "category": "Tutor Business and Tools",
+    "state": "hold"
+  },
+  {
+    "title": "Authentic Listening Materials ESL | Edooqoo",
+    "description": "Authentic Listening Materials ESL: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/authentic-listening-materials-esl.html",
+    "date": "2026-05-24",
+    "category": "Tutor Business and Tools",
+    "state": "hold"
+  },
+  {
+    "title": "Best Apps Learning English 2026 | Edooqoo",
+    "description": "Best Apps Learning English 2026: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/best-apps-learning-english-2026.html",
+    "date": "2026-05-24",
+    "category": "Tutor Business and Tools",
+    "state": "hold"
+  },
+  {
+    "title": "Best Lesson Prep Tool For English Tutors | Edooqoo",
+    "description": "Best Lesson Prep Tool For English Tutors: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/best-lesson-prep-tool-for-english-tutors.html",
+    "date": "2026-05-24",
+    "category": "Tutor Business and Tools",
+    "state": "keep"
+  },
+  {
+    "title": "Best Workflow For Private English Tutors | Edooqoo",
+    "description": "Best Workflow For Private English Tutors: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
     "url": "/blog/best-workflow-for-private-english-tutors.html",
     "date": "2026-05-24",
     "category": "Tutor Business and Tools",
     "state": "hold"
   },
   {
+    "title": "Between-Session Homework Evidence for Private English Tutors | Edooqoo",
+    "description": "Between-Session Homework Evidence for Private English Tutors: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/between-session-homework-evidence-for-private-english-tutors.html",
+    "date": "2026-05-24",
+    "category": "Homework and Retention",
+    "state": "hold"
+  },
+  {
+    "title": "Bilingual Education Models Comparison | Edooqoo",
+    "description": "Bilingual Education Models Comparison: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/bilingual-education-models-comparison.html",
+    "date": "2026-05-24",
+    "category": "Tutor Business and Tools",
+    "state": "hold"
+  },
+  {
+    "title": "Bottom Up Top Down Listening ESL | Edooqoo",
+    "description": "Bottom Up Top Down Listening ESL: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/bottom-up-top-down-listening-esl.html",
+    "date": "2026-05-24",
+    "category": "Tutor Business and Tools",
+    "state": "hold"
+  },
+  {
+    "title": "Building ESL Teaching Portfolio | Edooqoo",
+    "description": "Building ESL Teaching Portfolio: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/building-esl-teaching-portfolio.html",
+    "date": "2026-05-24",
+    "category": "Tutor Business and Tools",
+    "state": "hold"
+  },
+  {
     "title": "Business English Material Generation Workflow | Edooqoo",
-    "description": "Instructional workflow for generating Business English materials for meetings, emails, interviews, presentations, and workplace vocabulary.",
+    "description": "Business English Material Generation Workflow: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
     "url": "/blog/business-english-material-generation-workflow.html",
     "date": "2026-05-24",
     "category": "Adult and Business English",
     "state": "keep"
   },
   {
-    "title": "CEFR-Aligned Worksheet Generation Workflow | Edooqoo",
-    "description": "Instructional workflow for generating English worksheets aligned with CEFR A1-C2 levels.",
+    "title": "Cambridge Exam Preparation Tips Teachers | Edooqoo",
+    "description": "Cambridge Exam Preparation Tips Teachers: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/cambridge-exam-preparation-tips-teachers.html",
+    "date": "2026-05-24",
+    "category": "Tutor Business and Tools",
+    "state": "hold"
+  },
+  {
+    "title": "Can AI Plan One To One English Lesson | Edooqoo",
+    "description": "Can AI Plan One To One English Lesson: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/can-ai-plan-one-to-one-english-lesson.html",
+    "date": "2026-05-24",
+    "category": "One-to-One Lesson Planning",
+    "state": "keep"
+  },
+  {
+    "title": "CEFR Aligned Worksheet Generation Workflow | Edooqoo",
+    "description": "CEFR Aligned Worksheet Generation Workflow: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
     "url": "/blog/cefr-aligned-worksheet-generation-workflow.html",
     "date": "2026-05-24",
     "category": "Student Evidence and Progress",
     "state": "keep"
   },
   {
-    "title": "CEFR Evidence for Private English Lessons | Edooqoo",
-    "description": "CEFR Evidence for Private English Lessons: adult 1:1 English tutor decision page with Edooqoo workflow links, teacher review, and evidence-led next-step framing.",
+    "title": "CEFR Evidence For Private English Lessons | Edooqoo",
+    "description": "CEFR Evidence For Private English Lessons: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
     "url": "/blog/cefr-evidence-for-private-english-lessons.html",
     "date": "2026-05-24",
     "category": "Student Evidence and Progress",
     "state": "hold"
   },
   {
-    "title": "Editable AI Worksheets for Adult English Learners | Edooqoo",
-    "description": "Editable AI Worksheets for Adult English Learners: adult 1:1 English tutor decision page with Edooqoo workflow links, teacher review, and evidence-led next-step framing.",
+    "title": "Clil Methodology Complete Guide | Edooqoo",
+    "description": "Clil Methodology Complete Guide: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/clil-methodology-complete-guide.html",
+    "date": "2026-05-24",
+    "category": "Tutor Business and Tools",
+    "state": "hold"
+  },
+  {
+    "title": "Cloze Test Design ESL | Edooqoo",
+    "description": "Cloze Test Design ESL: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/cloze-test-design-esl.html",
+    "date": "2026-05-24",
+    "category": "Tutor Business and Tools",
+    "state": "hold"
+  },
+  {
+    "title": "Collaborative Writing Activities ESL | Edooqoo",
+    "description": "Collaborative Writing Activities ESL: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/collaborative-writing-activities-esl.html",
+    "date": "2026-05-24",
+    "category": "Tutor Business and Tools",
+    "state": "hold"
+  },
+  {
+    "title": "Communicative Language Teaching Activities | Edooqoo",
+    "description": "Communicative Language Teaching Activities: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/communicative-language-teaching-activities.html",
+    "date": "2026-05-24",
+    "category": "Tutor Business and Tools",
+    "state": "hold"
+  },
+  {
+    "title": "Connected Speech Teaching Activities | Edooqoo",
+    "description": "Connected Speech Teaching Activities: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/connected-speech-teaching-activities.html",
+    "date": "2026-05-24",
+    "category": "Tutor Business and Tools",
+    "state": "hold"
+  },
+  {
+    "title": "Consciousness Raising Grammar Tasks | Edooqoo",
+    "description": "Consciousness Raising Grammar Tasks: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/consciousness-raising-grammar-tasks.html",
+    "date": "2026-05-24",
+    "category": "Tutor Business and Tools",
+    "state": "hold"
+  },
+  {
+    "title": "Contrastive Analysis Language Teaching | Edooqoo",
+    "description": "Contrastive Analysis Language Teaching: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/contrastive-analysis-language-teaching.html",
+    "date": "2026-05-24",
+    "category": "Tutor Business and Tools",
+    "state": "hold"
+  },
+  {
+    "title": "Cooperative Learning Structures ESL | Edooqoo",
+    "description": "Cooperative Learning Structures ESL: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/cooperative-learning-structures-esl.html",
+    "date": "2026-05-24",
+    "category": "Tutor Business and Tools",
+    "state": "hold"
+  },
+  {
+    "title": "Corpus Linguistics ESL Teaching | Edooqoo",
+    "description": "Corpus Linguistics ESL Teaching: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/corpus-linguistics-esl-teaching.html",
+    "date": "2026-05-24",
+    "category": "Tutor Business and Tools",
+    "state": "hold"
+  },
+  {
+    "title": "Course Evaluation ESL Programs | Edooqoo",
+    "description": "Course Evaluation ESL Programs: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/course-evaluation-esl-programs.html",
+    "date": "2026-05-24",
+    "category": "Tutor Business and Tools",
+    "state": "hold"
+  },
+  {
+    "title": "Cpd Planning ESL Teachers | Edooqoo",
+    "description": "Cpd Planning ESL Teachers: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/cpd-planning-esl-teachers.html",
+    "date": "2026-05-24",
+    "category": "Tutor Business and Tools",
+    "state": "hold"
+  },
+  {
+    "title": "Creating Authentic Materials ESL | Edooqoo",
+    "description": "Creating Authentic Materials ESL: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/creating-authentic-materials-esl.html",
+    "date": "2026-05-24",
+    "category": "Tutor Business and Tools",
+    "state": "hold"
+  },
+  {
+    "title": "Creating English Tests Guide | Edooqoo",
+    "description": "Creating English Tests Guide: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/creating-english-tests-guide.html",
+    "date": "2026-05-24",
+    "category": "Tutor Business and Tools",
+    "state": "hold"
+  },
+  {
+    "title": "Creating Interactive Worksheets Online | Edooqoo",
+    "description": "Creating Interactive Worksheets Online: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/creating-interactive-worksheets-online.html",
+    "date": "2026-05-24",
+    "category": "Tutor Business and Tools",
+    "state": "hold"
+  },
+  {
+    "title": "Creative Writing Activities ESL | Edooqoo",
+    "description": "Creative Writing Activities ESL: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/creative-writing-activities-esl.html",
+    "date": "2026-05-24",
+    "category": "Tutor Business and Tools",
+    "state": "hold"
+  },
+  {
+    "title": "Critical Period Hypothesis Language | Edooqoo",
+    "description": "Critical Period Hypothesis Language: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/critical-period-hypothesis-language.html",
+    "date": "2026-05-24",
+    "category": "Tutor Business and Tools",
+    "state": "hold"
+  },
+  {
+    "title": "Cross Cultural Communication Activities | Edooqoo",
+    "description": "Cross Cultural Communication Activities: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/cross-cultural-communication-activities.html",
+    "date": "2026-05-24",
+    "category": "Tutor Business and Tools",
+    "state": "hold"
+  },
+  {
+    "title": "Culturally Responsive Teaching ESL | Edooqoo",
+    "description": "Culturally Responsive Teaching ESL: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/culturally-responsive-teaching-esl.html",
+    "date": "2026-05-24",
+    "category": "Tutor Business and Tools",
+    "state": "hold"
+  },
+  {
+    "title": "Current Events ESL Lessons | Edooqoo",
+    "description": "Current Events ESL Lessons: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/current-events-esl-lessons.html",
+    "date": "2026-05-24",
+    "category": "Tutor Business and Tools",
+    "state": "hold"
+  },
+  {
+    "title": "Data Driven Learning ESL Corpora | Edooqoo",
+    "description": "Data Driven Learning ESL Corpora: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/data-driven-learning-esl-corpora.html",
+    "date": "2026-05-24",
+    "category": "Tutor Business and Tools",
+    "state": "hold"
+  },
+  {
+    "title": "Debate Activities English Class | Edooqoo",
+    "description": "Debate Activities English Class: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/debate-activities-english-class.html",
+    "date": "2026-05-24",
+    "category": "Tutor Business and Tools",
+    "state": "hold"
+  },
+  {
+    "title": "Designing English Midterm Final Exams | Edooqoo",
+    "description": "Designing English Midterm Final Exams: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/designing-english-midterm-final-exams.html",
+    "date": "2026-05-24",
+    "category": "Tutor Business and Tools",
+    "state": "hold"
+  },
+  {
+    "title": "Diagnostic Testing English Learners | Edooqoo",
+    "description": "Diagnostic Testing English Learners: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/diagnostic-testing-english-learners.html",
+    "date": "2026-05-24",
+    "category": "Student Evidence and Progress",
+    "state": "hold"
+  },
+  {
+    "title": "Dictation for Adult Listening Accuracy Evidence | Edooqoo",
+    "description": "Dictation for Adult Listening Accuracy Evidence: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/dictation-for-adult-listening-accuracy-evidence.html",
+    "date": "2026-05-24",
+    "category": "Adult and Business English",
+    "state": "hold"
+  },
+  {
+    "title": "Dictogloss Technique ESL Teaching | Edooqoo",
+    "description": "Dictogloss Technique ESL Teaching: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/dictogloss-technique-esl-teaching.html",
+    "date": "2026-05-24",
+    "category": "Tutor Business and Tools",
+    "state": "hold"
+  },
+  {
+    "title": "Digital Homework Tools ESL Teachers | Edooqoo",
+    "description": "Digital Homework Tools ESL Teachers: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/digital-homework-tools-esl-teachers.html",
+    "date": "2026-05-24",
+    "category": "Homework and Retention",
+    "state": "hold"
+  },
+  {
+    "title": "Digital Resource Curation ESL | Edooqoo",
+    "description": "Digital Resource Curation ESL: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/digital-resource-curation-esl.html",
+    "date": "2026-05-24",
+    "category": "Tutor Business and Tools",
+    "state": "hold"
+  },
+  {
+    "title": "Discussion Questions ESL Topics | Edooqoo",
+    "description": "Discussion Questions ESL Topics: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/discussion-questions-esl-topics.html",
+    "date": "2026-05-24",
+    "category": "Tutor Business and Tools",
+    "state": "hold"
+  },
+  {
+    "title": "Editable AI Worksheets For Adult English Learners | Edooqoo",
+    "description": "Editable AI Worksheets For Adult English Learners: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
     "url": "/blog/editable-ai-worksheets-for-adult-english-learners.html",
     "date": "2026-05-24",
     "category": "Adult and Business English",
@@ -163,8 +563,40 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "keep"
   },
   {
-    "title": "English Homework AI-Assisted Review Workflow | Edooqoo",
-    "description": "Instructional description of AI-assisted English homework review with teacher oversight.",
+    "title": "Emi English Medium Instruction Guide | Edooqoo",
+    "description": "Emi English Medium Instruction Guide: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/emi-english-medium-instruction-guide.html",
+    "date": "2026-05-24",
+    "category": "Tutor Business and Tools",
+    "state": "hold"
+  },
+  {
+    "title": "End Of Term Activities ESL | Edooqoo",
+    "description": "End Of Term Activities ESL: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/end-of-term-activities-esl.html",
+    "date": "2026-05-24",
+    "category": "Tutor Business and Tools",
+    "state": "hold"
+  },
+  {
+    "title": "Energy Management ESL Lessons | Edooqoo",
+    "description": "Energy Management ESL Lessons: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/energy-management-esl-lessons.html",
+    "date": "2026-05-24",
+    "category": "Tutor Business and Tools",
+    "state": "hold"
+  },
+  {
+    "title": "English For Specific Purposes Guide | Edooqoo",
+    "description": "English For Specific Purposes Guide: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/english-for-specific-purposes-guide.html",
+    "date": "2026-05-24",
+    "category": "Adult and Business English",
+    "state": "hold"
+  },
+  {
+    "title": "English Homework AI Grading Workflow | Edooqoo",
+    "description": "English Homework AI Grading Workflow: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
     "url": "/blog/english-homework-ai-grading-workflow.html",
     "date": "2026-05-24",
     "category": "Homework and Retention",
@@ -172,50 +604,154 @@ export const BLOG_POSTS: BlogPostMeta[] = [
   },
   {
     "title": "English Tutor Material Organization Workflow | Edooqoo",
-    "description": "Instructional workflow for organizing English tutoring materials, student context, worksheets, homework, flashcards, and follow-up tasks.",
+    "description": "English Tutor Material Organization Workflow: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
     "url": "/blog/english-tutor-material-organization-workflow.html",
     "date": "2026-05-24",
     "category": "Tutor Business and Tools",
     "state": "keep"
   },
   {
-    "title": "English Tutor Workflow After a Live Lesson | Edooqoo",
-    "description": "English Tutor Workflow After a Live Lesson: adult 1:1 English tutor decision page with Edooqoo workflow links, teacher review, and evidence-led next-step framing.",
+    "title": "English Tutor Workflow After A Live Lesson | Edooqoo",
+    "description": "English Tutor Workflow After A Live Lesson: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
     "url": "/blog/english-tutor-workflow-after-a-live-lesson.html",
     "date": "2026-05-24",
     "category": "Tutor Business and Tools",
     "state": "hold"
   },
   {
-    "title": "ESL Exercise Type Selection Guide | Edooqoo",
-    "description": "Instructional guide for selecting ESL exercise types by teaching goal, CEFR level, skill, and classroom use.",
-    "url": "/blog/esl-exercise-type-selection-guide.html",
+    "title": "Error Correction Techniques ESL | Edooqoo",
+    "description": "Error Correction Techniques ESL: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/error-correction-techniques-esl.html",
     "date": "2026-05-24",
-    "category": "Tutor Business and Tools",
+    "category": "Student Evidence and Progress",
     "state": "keep"
   },
   {
-    "title": "From Lesson Evidence to Next Lesson Plan | Edooqoo",
-    "description": "From Lesson Evidence to Next Lesson Plan: adult 1:1 English tutor decision page with Edooqoo workflow links, teacher review, and evidence-led next-step framing.",
+    "title": "Choosing ESL Exercise Types for Adult 1:1 Worksheet Decisions | Edooqoo",
+    "description": "Choosing ESL Exercise Types for Adult 1:1 Worksheet Decisions: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/esl-exercise-type-selection-guide.html",
+    "date": "2026-05-24",
+    "category": "Adult and Business English",
+    "state": "keep"
+  },
+  {
+    "title": "Extensive Reading Programs ESL | Edooqoo",
+    "description": "Extensive Reading Programs ESL: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/extensive-reading-programs-esl.html",
+    "date": "2026-05-24",
+    "category": "Tutor Business and Tools",
+    "state": "hold"
+  },
+  {
+    "title": "Fill In The Blanks Exercises Best Practices | Edooqoo",
+    "description": "Fill In The Blanks Exercises Best Practices: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/fill-in-the-blanks-exercises-best-practices.html",
+    "date": "2026-05-24",
+    "category": "Tutor Business and Tools",
+    "state": "hold"
+  },
+  {
+    "title": "First Adult 1:1 English Lesson Evidence Capture | Edooqoo",
+    "description": "First Adult 1:1 English Lesson Evidence Capture: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/first-adult-one-to-one-english-lesson-evidence-capture.html",
+    "date": "2026-05-24",
+    "category": "One-to-One Lesson Planning",
+    "state": "hold"
+  },
+  {
+    "title": "Formative Assessment English Teaching | Edooqoo",
+    "description": "Formative Assessment English Teaching: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/formative-assessment-english-teaching.html",
+    "date": "2026-05-24",
+    "category": "Student Evidence and Progress",
+    "state": "keep"
+  },
+  {
+    "title": "From Lesson Evidence To Next Lesson Plan | Edooqoo",
+    "description": "From Lesson Evidence To Next Lesson Plan: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
     "url": "/blog/from-lesson-evidence-to-next-lesson-plan.html",
     "date": "2026-05-24",
     "category": "What Should I Teach Next?",
     "state": "hold"
   },
   {
-    "title": "From Student Goals to Worksheet | Edooqoo",
-    "description": "From Student Goals to Worksheet: adult 1:1 English tutor decision page with Edooqoo workflow links, teacher review, and evidence-led next-step framing.",
+    "title": "From Student Goals To Worksheet | Edooqoo",
+    "description": "From Student Goals To Worksheet: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
     "url": "/blog/from-student-goals-to-worksheet.html",
     "date": "2026-05-24",
     "category": "Tutor Business and Tools",
     "state": "hold"
   },
   {
+    "title": "Gender Inclusive Language ESL | Edooqoo",
+    "description": "Gender Inclusive Language ESL: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/gender-inclusive-language-esl.html",
+    "date": "2026-05-24",
+    "category": "Tutor Business and Tools",
+    "state": "hold"
+  },
+  {
+    "title": "Growth Mindset Language Learning | Edooqoo",
+    "description": "Growth Mindset Language Learning: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/growth-mindset-language-learning.html",
+    "date": "2026-05-24",
+    "category": "Tutor Business and Tools",
+    "state": "hold"
+  },
+  {
+    "title": "Homework-Before-Lesson Workflow for Adult English Tutors | Edooqoo",
+    "description": "Homework-Before-Lesson Workflow for Adult English Tutors: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/homework-before-lesson-workflow-for-adult-english-tutors.html",
+    "date": "2026-05-24",
+    "category": "Homework and Retention",
+    "state": "hold"
+  },
+  {
+    "title": "Homework Mistakes Next English Lesson | Edooqoo",
+    "description": "Homework Mistakes Next English Lesson: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/homework-mistakes-next-english-lesson.html",
+    "date": "2026-05-24",
+    "category": "Homework and Retention",
+    "state": "keep"
+  },
+  {
+    "title": "How English Tutors Track What To Teach Next | Edooqoo",
+    "description": "How English Tutors Track What To Teach Next: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/how-english-tutors-track-what-to-teach-next.html",
+    "date": "2026-05-24",
+    "category": "Student Evidence and Progress",
+    "state": "keep"
+  },
+  {
+    "title": "How Long Should Private English Tutors Spend On Lesson Prep | Edooqoo",
+    "description": "How Long Should Private English Tutors Spend On Lesson Prep: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/how-long-should-private-english-tutors-spend-on-lesson-prep.html",
+    "date": "2026-05-24",
+    "category": "Tutor Business and Tools",
+    "state": "keep"
+  },
+  {
     "title": "How Private English Tutors Use AI Safely | Edooqoo",
-    "description": "How Private English Tutors Use AI Safely: adult 1:1 English tutor decision page with Edooqoo workflow links, teacher review, and evidence-led next-step framing.",
+    "description": "How Private English Tutors Use AI Safely: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
     "url": "/blog/how-private-english-tutors-use-ai-safely.html",
     "date": "2026-05-24",
     "category": "Tutor Business and Tools",
+    "state": "hold"
+  },
+  {
+    "title": "How To Assess English Level CEFR | Edooqoo",
+    "description": "How To Assess English Level CEFR: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/how-to-assess-english-level-cefr.html",
+    "date": "2026-05-24",
+    "category": "Student Evidence and Progress",
+    "state": "hold"
+  },
+  {
+    "title": "How To Avoid Generic AI Lesson Plans For Adults | Edooqoo",
+    "description": "How To Avoid Generic AI Lesson Plans For Adults: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/how-to-avoid-generic-ai-lesson-plans-for-adults.html",
+    "date": "2026-05-24",
+    "category": "One-to-One Lesson Planning",
     "state": "hold"
   },
   {
@@ -227,40 +763,112 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "hold"
   },
   {
-    "title": "How to Build Student Context for English Tutoring | Edooqoo",
-    "description": "How to Build Student Context for English Tutoring: adult 1:1 English tutor decision page with Edooqoo workflow links, teacher review, and evidence-led next-step framing.",
+    "title": "How To Build An Adult ESL Lesson From Real Work Tasks | Edooqoo",
+    "description": "How To Build An Adult ESL Lesson From Real Work Tasks: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/how-to-build-an-adult-esl-lesson-from-real-work-tasks.html",
+    "date": "2026-05-24",
+    "category": "Adult and Business English",
+    "state": "hold"
+  },
+  {
+    "title": "How To Build Student Context For English Tutoring | Edooqoo",
+    "description": "How To Build Student Context For English Tutoring: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
     "url": "/blog/how-to-build-student-context-for-english-tutoring.html",
     "date": "2026-05-24",
     "category": "Tutor Business and Tools",
     "state": "hold"
   },
   {
-    "title": "How to Plan the Next Lesson From Homework Mistakes | Edooqoo",
-    "description": "How to Plan the Next Lesson From Homework Mistakes: adult 1:1 English tutor decision page with Edooqoo workflow links, teacher review, and evidence-led next-step framing.",
+    "title": "How To Choose An AI Tool For Private English Tutoring | Edooqoo",
+    "description": "How To Choose An AI Tool For Private English Tutoring: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/how-to-choose-an-ai-tool-for-private-english-tutoring.html",
+    "date": "2026-05-24",
+    "category": "Tutor Business and Tools",
+    "state": "hold"
+  },
+  {
+    "title": "How To Create Business English Homework That Gets Completed | Edooqoo",
+    "description": "How To Create Business English Homework That Gets Completed: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/how-to-create-business-english-homework-that-gets-completed.html",
+    "date": "2026-05-24",
+    "category": "Homework and Retention",
+    "state": "hold"
+  },
+  {
+    "title": "How To Create Grammar Worksheets With AI | Edooqoo",
+    "description": "How To Create Grammar Worksheets With AI: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/how-to-create-grammar-worksheets-with-ai.html",
+    "date": "2026-05-24",
+    "category": "Tutor Business and Tools",
+    "state": "hold"
+  },
+  {
+    "title": "How To Design One To One English Lessons For Professionals | Edooqoo",
+    "description": "How To Design One To One English Lessons For Professionals: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/how-to-design-one-to-one-english-lessons-for-professionals.html",
+    "date": "2026-05-24",
+    "category": "One-to-One Lesson Planning",
+    "state": "hold"
+  },
+  {
+    "title": "How To Keep Chatgpt Output From Sounding Generic In ESL Lessons | Edooqoo",
+    "description": "How To Keep Chatgpt Output From Sounding Generic In ESL Lessons: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/how-to-keep-chatgpt-output-from-sounding-generic-in-esl-lessons.html",
+    "date": "2026-05-24",
+    "category": "Tutor Business and Tools",
+    "state": "hold"
+  },
+  {
+    "title": "How To Plan A Recurring English Student Learning Loop | Edooqoo",
+    "description": "How To Plan A Recurring English Student Learning Loop: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/how-to-plan-a-recurring-english-student-learning-loop.html",
+    "date": "2026-05-24",
+    "category": "Tutor Business and Tools",
+    "state": "hold"
+  },
+  {
+    "title": "How To Plan English Lessons Effectively | Edooqoo",
+    "description": "How To Plan English Lessons Effectively: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/how-to-plan-english-lessons-effectively.html",
+    "date": "2026-05-24",
+    "category": "One-to-One Lesson Planning",
+    "state": "keep"
+  },
+  {
+    "title": "How To Plan Next Lesson From Homework Mistakes | Edooqoo",
+    "description": "How To Plan Next Lesson From Homework Mistakes: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
     "url": "/blog/how-to-plan-next-lesson-from-homework-mistakes.html",
     "date": "2026-05-24",
     "category": "What Should I Teach Next?",
     "state": "hold"
   },
   {
-    "title": "How to Prepare a Business English Lesson in One Minute | Edooqoo",
-    "description": "How to Prepare a Business English Lesson in One Minute: adult 1:1 English tutor decision page with Edooqoo workflow links, teacher review, and evidence-led next-step framing.",
+    "title": "How To Prepare Business English Lesson In One Minute | Edooqoo",
+    "description": "How To Prepare Business English Lesson In One Minute: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
     "url": "/blog/how-to-prepare-business-english-lesson-in-one-minute.html",
     "date": "2026-05-24",
     "category": "Adult and Business English",
     "state": "hold"
   },
   {
-    "title": "How to Reduce Lesson Prep Time for Private English Tutors | Edooqoo",
-    "description": "How to Reduce Lesson Prep Time for Private English Tutors: adult 1:1 English tutor decision page with Edooqoo workflow links, teacher review, and evidence-led next-step framing.",
+    "title": "How To Reduce Lesson Prep Time For Private English Tutors | Edooqoo",
+    "description": "How To Reduce Lesson Prep Time For Private English Tutors: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
     "url": "/blog/how-to-reduce-lesson-prep-time-for-private-english-tutors.html",
     "date": "2026-05-24",
     "category": "Tutor Business and Tools",
     "state": "hold"
   },
   {
-    "title": "How to Review Homework Before the Next English Lesson | Edooqoo",
-    "description": "How to Review Homework Before the Next English Lesson: adult 1:1 English tutor decision page with Edooqoo workflow links, teacher review, and evidence-led next-step framing.",
+    "title": "How To Review AI Generated ESL Worksheets Before Teaching | Edooqoo",
+    "description": "How To Review AI Generated ESL Worksheets Before Teaching: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/how-to-review-ai-generated-esl-worksheets-before-teaching.html",
+    "date": "2026-05-24",
+    "category": "Tutor Business and Tools",
+    "state": "hold"
+  },
+  {
+    "title": "How To Review Homework Before Next English Lesson | Edooqoo",
+    "description": "How To Review Homework Before Next English Lesson: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
     "url": "/blog/how-to-review-homework-before-next-english-lesson.html",
     "date": "2026-05-24",
     "category": "Homework and Retention",
@@ -275,9 +883,33 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "hold"
   },
   {
+    "title": "How To Track Progress Without School Like Tests | Edooqoo",
+    "description": "How To Track Progress Without School Like Tests: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/how-to-track-progress-without-school-like-tests.html",
+    "date": "2026-05-24",
+    "category": "Student Evidence and Progress",
+    "state": "hold"
+  },
+  {
+    "title": "How To Turn Homework Errors Into Next Lesson Focus | Edooqoo",
+    "description": "How To Turn Homework Errors Into Next Lesson Focus: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/how-to-turn-homework-errors-into-next-lesson-focus.html",
+    "date": "2026-05-24",
+    "category": "What Should I Teach Next?",
+    "state": "hold"
+  },
+  {
     "title": "How to Turn Student Notes Into ESL Worksheets | Edooqoo",
     "description": "How to Turn Student Notes Into ESL Worksheets: adult 1:1 English tutor decision page with Edooqoo workflow links, teacher review, and evidence-led next-step framing.",
     "url": "/blog/how-to-turn-student-notes-into-esl-worksheets.html",
+    "date": "2026-05-24",
+    "category": "Tutor Business and Tools",
+    "state": "hold"
+  },
+  {
+    "title": "How To Use AI Without Losing Teacher Control | Edooqoo",
+    "description": "How To Use AI Without Losing Teacher Control: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/how-to-use-ai-without-losing-teacher-control.html",
     "date": "2026-05-24",
     "category": "Tutor Business and Tools",
     "state": "hold"
@@ -291,11 +923,67 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "hold"
   },
   {
-    "title": "Learning Pacing in Adult ESL: Scientific, Balanced, and Pragmatic Modes | Edooqoo",
-    "description": "Instructional reference for Edooqoo Learning Pacing: Scientific, Balanced, and Pragmatic modes for recurring 1:1 adult English lessons.",
+    "title": "How To Use Student Context In AI Worksheet Generation | Edooqoo",
+    "description": "How To Use Student Context In AI Worksheet Generation: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/how-to-use-student-context-in-ai-worksheet-generation.html",
+    "date": "2026-05-24",
+    "category": "Tutor Business and Tools",
+    "state": "hold"
+  },
+  {
+    "title": "Information-Gap Tasks for Adult Workplace Communication | Edooqoo",
+    "description": "Information-Gap Tasks for Adult Workplace Communication: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/information-gap-tasks-for-adult-workplace-communication.html",
+    "date": "2026-05-24",
+    "category": "Adult and Business English",
+    "state": "hold"
+  },
+  {
+    "title": "Input and Output Evidence in Adult 1:1 English Lessons | Edooqoo",
+    "description": "Input and Output Evidence in Adult 1:1 English Lessons: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/input-output-evidence-in-adult-one-to-one-english-lessons.html",
+    "date": "2026-05-24",
+    "category": "One-to-One Lesson Planning",
+    "state": "hold"
+  },
+  {
+    "title": "Intercultural Communication for Adult Professional English | Edooqoo",
+    "description": "Intercultural Communication for Adult Professional English: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/intercultural-communication-for-adult-professional-english.html",
+    "date": "2026-05-24",
+    "category": "Adult and Business English",
+    "state": "hold"
+  },
+  {
+    "title": "Learning Pacing Scientific Vs Pragmatic ESL | Edooqoo",
+    "description": "Learning Pacing Scientific Vs Pragmatic ESL: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
     "url": "/blog/learning-pacing-scientific-vs-pragmatic-esl.html",
     "date": "2026-05-24",
     "category": "What Should I Teach Next?",
+    "state": "keep"
+  },
+  {
+    "title": "Low-Friction Review Loops for Adult English Learners | Edooqoo",
+    "description": "Low-Friction Review Loops for Adult English Learners: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/low-friction-review-loops-for-adult-english-learners.html",
+    "date": "2026-05-24",
+    "category": "Adult and Business English",
+    "state": "hold"
+  },
+  {
+    "title": "Managing Lesson Focus in 1:1 Adult English Lessons | Edooqoo",
+    "description": "Managing Lesson Focus in 1:1 Adult English Lessons: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/managing-lesson-focus-in-one-to-one-adult-english-lessons.html",
+    "date": "2026-05-24",
+    "category": "One-to-One Lesson Planning",
+    "state": "hold"
+  },
+  {
+    "title": "Adult Motivation in Private English Lessons | Edooqoo",
+    "description": "Adult Motivation in Private English Lessons: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/motivation-theories-language-learning.html",
+    "date": "2026-05-24",
+    "category": "Adult and Business English",
     "state": "keep"
   },
   {
@@ -315,6 +1003,22 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "hold"
   },
   {
+    "title": "Private English Tutor Tool Stack | Edooqoo",
+    "description": "Private English Tutor Tool Stack: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/private-english-tutor-tool-stack.html",
+    "date": "2026-05-24",
+    "category": "Tutor Business and Tools",
+    "state": "hold"
+  },
+  {
+    "title": "Adult Writing Improvement From Draft Evidence to Next Worksheet | Edooqoo",
+    "description": "Adult Writing Improvement From Draft Evidence to Next Worksheet: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/process-writing-approach-esl.html",
+    "date": "2026-05-24",
+    "category": "Adult and Business English",
+    "state": "keep"
+  },
+  {
     "title": "Public ESL Worksheet Gallery Quality Standards | Edooqoo",
     "description": "Instructional explanation of public worksheet gallery quality standards, public examples, and LearningResource citation context.",
     "url": "/blog/public-esl-worksheet-gallery-quality-standards.html",
@@ -323,8 +1027,16 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "keep"
   },
   {
-    "title": "Student Progress to Worksheet Feedback Loop | Edooqoo",
-    "description": "Instructional explanation of how student progress context can inform future worksheet and homework decisions.",
+    "title": "Role-Play for Adult Workplace English Practice | Edooqoo",
+    "description": "Role-Play for Adult Workplace English Practice: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/role-play-for-adult-workplace-english-practice.html",
+    "date": "2026-05-24",
+    "category": "Adult and Business English",
+    "state": "hold"
+  },
+  {
+    "title": "Student Progress To Worksheet Feedback Loop | Edooqoo",
+    "description": "Student Progress To Worksheet Feedback Loop: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
     "url": "/blog/student-progress-to-worksheet-feedback-loop.html",
     "date": "2026-05-24",
     "category": "What Should I Teach Next?",
@@ -334,6 +1046,30 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "title": "Teacher-Controlled AI Lesson Prep | Edooqoo",
     "description": "Teacher-Controlled AI Lesson Prep: adult 1:1 English tutor decision page with Edooqoo workflow links, teacher review, and evidence-led next-step framing.",
     "url": "/blog/teacher-controlled-ai-lesson-prep.html",
+    "date": "2026-05-24",
+    "category": "Tutor Business and Tools",
+    "state": "hold"
+  },
+  {
+    "title": "Listening Evidence for Adult Professional Communication | Edooqoo",
+    "description": "Listening Evidence for Adult Professional Communication: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/teaching-listening-strategies-esl.html",
+    "date": "2026-05-24",
+    "category": "Adult and Business English",
+    "state": "keep"
+  },
+  {
+    "title": "Transitioning Between Tasks in Adult 1:1 English Lessons | Edooqoo",
+    "description": "Transitioning Between Tasks in Adult 1:1 English Lessons: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/transitioning-between-tasks-in-adult-one-to-one-english-lessons.html",
+    "date": "2026-05-24",
+    "category": "One-to-One Lesson Planning",
+    "state": "hold"
+  },
+  {
+    "title": "Tutor Workflow System vs LMS for Private English Lessons | Edooqoo",
+    "description": "Tutor Workflow System vs LMS for Private English Lessons: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
+    "url": "/blog/tutor-workflow-system-vs-lms-for-private-english-lessons.html",
     "date": "2026-05-24",
     "category": "Tutor Business and Tools",
     "state": "hold"
@@ -387,36 +1123,12 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "hold"
   },
   {
-    "title": "Choosing a Learning Management System for ESL Teaching | Edooqoo Blog",
-    "description": "Google Classroom, Moodle, Canvas comparison with ESL-specific requirements, features analysis, and implementation guide.",
-    "url": "/blog/learning-management-systems-esl.html",
-    "date": "2025-12-24",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
     "title": "Materials Design for Adult One-to-One English",
     "description": "Design adult one-to-one English materials from a real performance, current evidence, useful constraints, teacher editability, and transfer.",
     "url": "/blog/materials-design-principles-elt.html",
     "date": "2025-12-24",
     "category": "One-to-One Lesson Planning",
     "state": "keep"
-  },
-  {
-    "title": "Data-Driven Learning with Corpora in ESL Teaching | Edooqoo Blog",
-    "description": "Concordance lines, COCA/BNC corpus tools, student corpus investigation activities, and data-driven vocabulary teaching.",
-    "url": "/blog/data-driven-learning-esl-corpora.html",
-    "date": "2025-12-23",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "Digital Resource Curation for ESL Teachers",
-    "description": "Organizing bookmarks, evaluating online resources, and building a personal teaching library.",
-    "url": "/blog/digital-resource-curation-esl.html",
-    "date": "2025-12-23",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
   },
   {
     "title": "Screen-Free Technology Activities for ESL Classes | Edooqoo Blog",
@@ -435,14 +1147,6 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "hold"
   },
   {
-    "title": "Creating Authentic Materials for ESL Teaching",
-    "description": "Realia, news articles, menus, and real-world texts with grading techniques for ESL classrooms.",
-    "url": "/blog/creating-authentic-materials-esl.html",
-    "date": "2025-12-21",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
     "title": "Using Chatbots for Language Practice — Teacher's Guide | Edooqoo Blog",
     "description": "ChatGPT, character.ai, and custom bots for speaking and writing practice — practical guide for ESL teachers.",
     "url": "/blog/using-chatbots-language-practice.html",
@@ -451,42 +1155,10 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "hold"
   },
   {
-    "title": "Adapting Textbooks for the ESL Classroom",
-    "description": "Adding, deleting, modifying, and extending textbook activities for your specific teaching context.",
-    "url": "/blog/adapting-textbooks-esl-classroom.html",
-    "date": "2025-12-20",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "AI-Powered Differentiation in the ESL Classroom | Edooqoo Blog",
-    "description": "Adaptive worksheets, automatic leveling, personalized learning paths with AI, and differentiation strategies for ESL teaching.",
-    "url": "/blog/ai-powered-differentiation-esl.html",
-    "date": "2025-12-20",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "CPD Planning for ESL Teachers — Building Your Development Path",
-    "description": "SMART goals, conference selection, online courses, and portfolio documentation for teacher CPD.",
-    "url": "/blog/cpd-planning-esl-teachers.html",
-    "date": "2025-12-19",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
     "title": "Teaching Literacy to Young ESL Learners — Phonics and Beyond | Edooqoo Blog",
     "description": "Synthetic phonics, sight words, guided reading, emergent literacy stages, and reading readiness activities for young ESL.",
     "url": "/blog/teaching-literacy-young-esl-learners.html",
     "date": "2025-12-19",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "Content-Based Instruction for Young ESL Learners | Edooqoo Blog",
-    "description": "Theme-based units, language through content, cross-curricular planning, and integrated skills development for young learners.",
-    "url": "/blog/content-based-instruction-young-learners.html",
-    "date": "2025-12-18",
     "category": "Tutor Business and Tools",
     "state": "hold"
   },
@@ -507,14 +1179,6 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "hold"
   },
   {
-    "title": "Teen Engagement Strategies for ESL Classes | Edooqoo Blog",
-    "description": "Relevance, autonomy, social media integration, project-based learning, and motivation techniques for teenage ESL students.",
-    "url": "/blog/teen-engagement-strategies-esl.html",
-    "date": "2025-12-17",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
     "title": "Reflective Practice in Language Teaching",
     "description": "Reflective journals, critical incidents, Kolb's cycle, and peer reflection groups for ESL teachers.",
     "url": "/blog/reflective-practice-language-teaching.html",
@@ -523,66 +1187,10 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "hold"
   },
   {
-    "title": "Total Physical Response (TPR) Activities for Young Learners | Edooqoo Blog",
-    "description": "Action commands, TPR storytelling, extended TPR for vocabulary building, and movement-based language activities.",
-    "url": "/blog/tpr-total-physical-response-activities.html",
-    "date": "2025-12-16",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "Action Research for ESL Teachers — A Practical Guide",
-    "description": "Research questions, data collection, analysis cycles, and classroom implementation for teacher research.",
-    "url": "/blog/action-research-esl-teachers.html",
-    "date": "2025-12-15",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "Teaching English to Preschoolers — Complete Guide | Edooqoo Blog",
-    "description": "Routine-based learning, songs, stories, play-based language exposure, and age-appropriate activities for preschool ESL.",
-    "url": "/blog/teaching-english-preschoolers-guide.html",
-    "date": "2025-12-15",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "Motivation Theories in Language Learning — From Gardner to Dörnyei",
-    "description": "Integrative and instrumental motivation, L2 Motivational Self System, and classroom strategies.",
-    "url": "/blog/motivation-theories-language-learning.html",
-    "date": "2025-12-14",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
     "title": "Teaching Listening for Gist and Detail — Practical Activities | Edooqoo Blog",
     "description": "Gist questions, detail scanning tasks, graded listening sequences, and practical activity design for ESL classes.",
     "url": "/blog/teaching-listening-for-gist-detail.html",
     "date": "2025-12-14",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "The Critical Period Hypothesis — Implications for Teaching",
-    "description": "Age effects on language acquisition, neuroplasticity, ultimate attainment, and teaching adaptations.",
-    "url": "/blog/critical-period-hypothesis-language.html",
-    "date": "2025-12-13",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "The Dictogloss Technique in ESL Teaching | Edooqoo Blog",
-    "description": "Dictogloss procedure, variations, grammar focus integration, and collaborative text reconstruction activities.",
-    "url": "/blog/dictogloss-technique-esl-teaching.html",
-    "date": "2025-12-13",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "Input and Output Hypotheses in the ESL Classroom",
-    "description": "Comprehensible input, pushed output, noticing hypothesis, and interaction hypothesis in practice.",
-    "url": "/blog/input-output-hypotheses-classroom.html",
-    "date": "2025-12-12",
     "category": "Tutor Business and Tools",
     "state": "hold"
   },
@@ -611,14 +1219,6 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "hold"
   },
   {
-    "title": "Bottom-Up vs Top-Down Listening Strategies in ESL | Edooqoo Blog",
-    "description": "Decoding skills, schema activation, integrated listening lesson design, and balanced strategy training for ESL learners.",
-    "url": "/blog/bottom-up-top-down-listening-esl.html",
-    "date": "2025-12-10",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
     "title": "Krashen's Hypotheses Applied to ESL Teaching",
     "description": "Acquisition-learning distinction, input hypothesis, monitor model, and affective filter in ESL practice.",
     "url": "/blog/krashen-hypotheses-esl-teaching.html",
@@ -627,34 +1227,10 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "hold"
   },
   {
-    "title": "Collaborative Writing Activities for ESL Students",
-    "description": "Round-robin stories, wiki writing, peer drafting, and collaborative essays for language learners.",
-    "url": "/blog/collaborative-writing-activities-esl.html",
-    "date": "2025-12-09",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
     "title": "Teaching Determiners and Quantifiers in ESL | Edooqoo Blog",
     "description": "Articles, demonstratives, quantifiers — common errors, practice activities, and systematic teaching approaches for ESL students.",
     "url": "/blog/teaching-determiners-quantifiers-esl.html",
     "date": "2025-12-09",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "Consciousness-Raising Grammar Tasks for ESL | Edooqoo Blog",
-    "description": "Discovery-based grammar teaching, noticing activities, guided induction approaches, and task design for grammar awareness.",
-    "url": "/blog/consciousness-raising-grammar-tasks.html",
-    "date": "2025-12-08",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "Managing Group Dynamics in the ESL Classroom",
-    "description": "Role assignment, participation balancing, and conflict resolution in ESL group work activities.",
-    "url": "/blog/group-dynamics-esl-classroom.html",
-    "date": "2025-12-08",
     "category": "Tutor Business and Tools",
     "state": "hold"
   },
@@ -675,26 +1251,10 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "hold"
   },
   {
-    "title": "Jigsaw Activities for the ESL Classroom",
-    "description": "Expert groups, information sharing, and accountability in jigsaw reading and listening activities.",
-    "url": "/blog/jigsaw-activities-esl-classroom.html",
-    "date": "2025-12-06",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
     "title": "Teaching Modality in English — Must, Might, Could, Should | Edooqoo Blog",
     "description": "Epistemic vs deontic modality, probability scale activities, and modal verb teaching strategies for ESL classrooms.",
     "url": "/blog/teaching-modality-english-esl.html",
     "date": "2025-12-06",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "Cooperative Learning Structures for ESL Classes",
-    "description": "Kagan structures, numbered heads, round robin, and rally coach adapted for ESL classrooms.",
-    "url": "/blog/cooperative-learning-structures-esl.html",
-    "date": "2025-12-05",
     "category": "Tutor Business and Tools",
     "state": "hold"
   },
@@ -719,14 +1279,6 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "description": "Panel analysis, speech bubble writing, story creation, and visual literacy for ESL students.",
     "url": "/blog/using-comics-graphic-novels-esl.html",
     "date": "2025-12-04",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "Art-Based Language Activities for ESL Classes",
-    "description": "Drawing dictation, gallery walks, visual storytelling, and art response writing for language classes.",
-    "url": "/blog/art-based-language-activities-esl.html",
-    "date": "2025-12-03",
     "category": "Tutor Business and Tools",
     "state": "hold"
   },
@@ -771,26 +1323,10 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "hold"
   },
   {
-    "title": "Drama Techniques for the ESL Classroom",
-    "description": "Hot-seating, freeze-frame, conscience alley, and forum theatre for language practice in ESL classes.",
-    "url": "/blog/drama-techniques-esl-classroom.html",
-    "date": "2025-11-30",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
     "title": "Teaching Word Families and Morphology in ESL | Edooqoo Blog",
     "description": "Comprehensive guide to teaching prefixes, suffixes, roots, and productive word-building strategies for vocabulary expansion in ESL classes.",
     "url": "/blog/teaching-word-families-morphology-esl.html",
     "date": "2025-11-30",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "Accent Coaching Techniques for ESL Teachers | Edooqoo Blog",
-    "description": "Individual accent coaching methods, modification goals, intelligibility-focused approaches, and practical techniques for ESL pronunciation teaching.",
-    "url": "/blog/accent-coaching-techniques-esl.html",
-    "date": "2025-11-29",
     "category": "Tutor Business and Tools",
     "state": "hold"
   },
@@ -801,14 +1337,6 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "date": "2025-11-29",
     "category": "One-to-One Lesson Planning",
     "state": "keep"
-  },
-  {
-    "title": "Evaluating ESL Course Effectiveness — Methods and Tools",
-    "description": "Pre/post testing, student feedback, observation, and outcome analysis for ESL program evaluation.",
-    "url": "/blog/course-evaluation-esl-programs.html",
-    "date": "2025-11-28",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
   },
   {
     "title": "Phonemic Awareness Activities for ESL Learners | Edooqoo Blog",
@@ -867,51 +1395,11 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "hold"
   },
   {
-    "title": "Heritage Speakers in the ESL Classroom — Challenges and Strategies",
-    "description": "Bidialectal literacy, academic register development, and identity affirmation activities.",
-    "url": "/blog/heritage-speakers-esl-classroom.html",
-    "date": "2025-11-24",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "Teaching Gender-Inclusive Language in ESL",
-    "description": "Pronouns, titles, occupational nouns, and navigating evolving language norms.",
-    "url": "/blog/gender-inclusive-language-esl.html",
-    "date": "2025-11-23",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "Culturally Responsive Teaching in ESL — Practical Strategies",
-    "description": "Funds of knowledge, identity texts, and culturally sustaining pedagogy in language classes.",
-    "url": "/blog/culturally-responsive-teaching-esl.html",
-    "date": "2025-11-22",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
     "title": "Trauma-Informed Teaching in ESL Classes",
     "description": "Safety, predictability, choice, and relationship-building for refugee and trauma-affected students.",
     "url": "/blog/trauma-informed-teaching-esl.html",
     "date": "2025-11-21",
     "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "Neurodiversity in the ESL Classroom — ADHD, Autism, and Dyslexia",
-    "description": "Accommodations, multisensory techniques, and differentiated materials for neurodiverse learners.",
-    "url": "/blog/neurodiversity-esl-classroom.html",
-    "date": "2025-11-20",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "Alternative Assessment in the ESL Classroom",
-    "description": "Presentations, podcasts, vlogs, infographics, and performance-based assessment rubrics.",
-    "url": "/blog/alternative-assessment-esl-classroom.html",
-    "date": "2025-11-19",
-    "category": "Student Evidence and Progress",
     "state": "hold"
   },
   {
@@ -931,58 +1419,10 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "hold"
   },
   {
-    "title": "Designing Cloze Tests for ESL — Types and Best Practices",
-    "description": "Fixed-ratio, rational, C-test, and banked cloze with scoring approaches.",
-    "url": "/blog/cloze-test-design-esl.html",
-    "date": "2025-11-16",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "Designing English Midterm and Final Exams",
-    "description": "Item types, specification tables, timing, difficulty calibration, and answer key design.",
-    "url": "/blog/designing-english-midterm-final-exams.html",
-    "date": "2025-11-15",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "Teaching Academic Language Functions in CLIL",
-    "description": "Classifying, hypothesizing, comparing, evaluating — language frames by subject area.",
-    "url": "/blog/academic-language-functions-clil.html",
-    "date": "2025-11-14",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "Bilingual Education Models — Comparison and Implementation",
-    "description": "Transitional, maintenance, dual-language, and immersion models with pros/cons.",
-    "url": "/blog/bilingual-education-models-comparison.html",
-    "date": "2025-11-13",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "English as Medium of Instruction (EMI) — Teacher's Guide",
-    "description": "Lecture scaffolding, academic language support, and student comprehension strategies.",
-    "url": "/blog/emi-english-medium-instruction-guide.html",
-    "date": "2025-11-12",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
     "title": "Teaching Science Through English — CLIL Activities",
     "description": "Lab reports, experiment descriptions, and scientific vocabulary scaffolding.",
     "url": "/blog/teaching-science-through-english.html",
     "date": "2025-11-11",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "CLIL Methodology — A Complete Guide for Language Teachers",
-    "description": "Content and Language Integrated Learning: the 4Cs framework, lesson planning, and assessment.",
-    "url": "/blog/clil-methodology-complete-guide.html",
-    "date": "2025-11-10",
     "category": "Tutor Business and Tools",
     "state": "hold"
   },
@@ -1051,14 +1491,6 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "hold"
   },
   {
-    "title": "The Process Writing Approach in ESL Teaching",
-    "description": "Brainstorming, drafting, revising, editing, and publishing stages with classroom activities.",
-    "url": "/blog/process-writing-approach-esl.html",
-    "date": "2025-11-01",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
     "title": "Teaching Essay Structure to ESL Students",
     "description": "Introduction-body-conclusion, thesis statements, topic sentences, and paragraph unity.",
     "url": "/blog/teaching-essay-structure-esl.html",
@@ -1071,54 +1503,6 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "description": "Monitoring techniques, choral work, group roles, and efficient feedback in large groups.",
     "url": "/blog/managing-large-esl-classes.html",
     "date": "2025-10-30",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "Energy Management in ESL Lessons — Pacing and Flow",
-    "description": "Stirrers vs settlers, lesson arc, and balancing high-energy with focused work.",
-    "url": "/blog/energy-management-esl-lessons.html",
-    "date": "2025-10-29",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "Smooth Transitions Between Activities in ESL Classes",
-    "description": "Transition signals, timer techniques, and maintaining momentum between tasks.",
-    "url": "/blog/transitions-activities-esl-classroom.html",
-    "date": "2025-10-28",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "Seating Arrangements for the ESL Classroom — What Works",
-    "description": "U-shape, clusters, rows, and flexible seating with activity-type matching.",
-    "url": "/blog/seating-arrangements-esl-classroom.html",
-    "date": "2025-10-27",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "Managing Behavior in the ESL Classroom",
-    "description": "Positive discipline, behavior contracts, and de-escalation strategies for language classes.",
-    "url": "/blog/managing-behavior-esl-classroom.html",
-    "date": "2025-10-26",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "Collaborating with Mainstream Teachers as an ESL Specialist",
-    "description": "Co-teaching models, content-language integration, and shared planning strategies for ESL specialists working with mainstream teachers.",
-    "url": "/blog/collaborating-with-mainstream-teachers-esl.html",
-    "date": "2025-09-25",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "Advocating for ELL Students in Your School",
-    "description": "Policy awareness, accommodation requests, and data-driven advocacy for English Language Learners. Be an effective advocate for your students.",
-    "url": "/blog/advocating-for-ell-students.html",
-    "date": "2025-09-24",
     "category": "Tutor Business and Tools",
     "state": "hold"
   },
@@ -1139,22 +1523,6 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "keep"
   },
   {
-    "title": "Communicating with ESL Parents — Tips and Templates",
-    "description": "Multilingual communication, progress updates, and building home-school partnerships for ESL teachers. Templates and strategies that work.",
-    "url": "/blog/communicating-with-esl-parents.html",
-    "date": "2025-09-21",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "Using Authentic Listening Materials in ESL — Tips and Sources",
-    "description": "TED Talks, news broadcasts, interviews, and how to grade authentic input for ESL students. Make real English accessible at every level.",
-    "url": "/blog/authentic-listening-materials-esl.html",
-    "date": "2025-09-20",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
     "title": "Teaching Note-Taking Skills in English Classes",
     "description": "Cornell method, mind maps, abbreviations, and academic listening practice for ESL students. Build essential academic and professional skills.",
     "url": "/blog/teaching-note-taking-skills-english.html",
@@ -1167,22 +1535,6 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "description": "Podcast selection, pre-listening tasks, and follow-up activities organized by CEFR level. Turn podcasts into complete ESL lessons.",
     "url": "/blog/using-podcasts-esl-teaching.html",
     "date": "2025-09-18",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "Dictation Activities for the ESL Classroom",
-    "description": "Running dictation, dictogloss, partial dictation, and communicative dictation activities for ESL. Make dictation engaging and effective.",
-    "url": "/blog/dictation-activities-esl-classroom.html",
-    "date": "2025-09-17",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "Teaching Listening Strategies to ESL Students",
-    "description": "Top-down, bottom-up, and metacognitive strategies for listening comprehension in ESL. Help students understand real English, not just classroom English.",
-    "url": "/blog/teaching-listening-strategies-esl.html",
-    "date": "2025-09-16",
     "category": "Tutor Business and Tools",
     "state": "hold"
   },
@@ -1227,30 +1579,6 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "hold"
   },
   {
-    "title": "Growth Mindset in Language Learning — Activities and Strategies",
-    "description": "Fixed vs growth mindset in ESL, error positivity, effort-based feedback, and practical activities to build resilient language learners.",
-    "url": "/blog/growth-mindset-language-learning.html",
-    "date": "2025-09-10",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "Using Rewards in the ESL Classroom — Dos and Don'ts",
-    "description": "Token economies, praise strategies, and avoiding reward dependency in ESL. Research-based guide to effective use of rewards in language teaching.",
-    "url": "/blog/using-rewards-esl-classroom.html",
-    "date": "2025-09-09",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "Fostering Student Autonomy in the ESL Classroom",
-    "description": "Choice boards, learning contracts, and self-directed projects for ESL students. Build independent learners who take ownership of their progress.",
-    "url": "/blog/student-autonomy-esl-classroom.html",
-    "date": "2025-09-08",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
     "title": "Building Intrinsic Motivation in Language Learning",
     "description": "Self-determination theory, autonomy, competence, and relatedness applied to ESL teaching. Build lasting motivation in language learners.",
     "url": "/blog/intrinsic-motivation-language-learning.html",
@@ -1264,22 +1592,6 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "url": "/blog/motivating-reluctant-esl-learners.html",
     "date": "2025-09-06",
     "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "Best Digital Homework Tools for ESL Teachers in 2026",
-    "description": "Platform comparison for assigning, tracking, and grading ESL homework online. Find the best digital tools for your teaching workflow.",
-    "url": "/blog/digital-homework-tools-esl-teachers.html",
-    "date": "2025-09-05",
-    "category": "Homework and Retention",
-    "state": "hold"
-  },
-  {
-    "title": "Flipped Homework — Reversing In-Class and At-Home Tasks",
-    "description": "Video-based pre-learning, in-class practice, and blended learning models for ESL. How to flip homework for better language learning outcomes.",
-    "url": "/blog/flipped-homework-esl-classroom.html",
-    "date": "2025-09-04",
-    "category": "Homework and Retention",
     "state": "hold"
   },
   {
@@ -1299,26 +1611,10 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "hold"
   },
   {
-    "title": "Accent Reduction Activities for ESL Students",
-    "description": "Intelligibility-focused accent work with diagnostic tools and targeted practice activities. Help ESL students communicate clearly without losing identity.",
-    "url": "/blog/accent-reduction-activities-esl.html",
-    "date": "2025-08-31",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
     "title": "Using the IPA Phonetic Alphabet in ESL Teaching",
     "description": "When and how to introduce IPA symbols in ESL classes. Practical activities for teaching phonemic transcription to English learners.",
     "url": "/blog/ipa-phonetic-alphabet-esl-teaching.html",
     "date": "2025-08-30",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "Teaching Connected Speech — Activities and Exercises",
-    "description": "Linking, elision, assimilation, and weak forms explained with practical ESL activities. Help students understand natural spoken English.",
-    "url": "/blog/connected-speech-teaching-activities.html",
-    "date": "2025-08-29",
     "category": "Tutor Business and Tools",
     "state": "hold"
   },
@@ -1339,34 +1635,10 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "hold"
   },
   {
-    "title": "Setting Up Extensive Reading Programs for ESL",
-    "description": "How to set up and manage extensive reading programs in ESL. Graded readers, reading logs, assessment methods, and strategies for motivating reluctant readers.",
-    "url": "/blog/extensive-reading-programs-esl.html",
-    "date": "2025-08-26",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
     "title": "Teaching Pragmatics in ESL — Politeness and Context",
     "description": "How to teach pragmatics in ESL classes. Speech acts, politeness strategies, indirect language, and context-appropriate communication activities.",
     "url": "/blog/teaching-pragmatics-esl.html",
     "date": "2025-08-25",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "Contrastive Analysis in Language Teaching",
-    "description": "How contrastive analysis helps predict and address L1 interference in ESL. Common error patterns by L1 background and targeted practice strategies.",
-    "url": "/blog/contrastive-analysis-language-teaching.html",
-    "date": "2025-08-24",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "Using Corpus Linguistics in ESL Teaching",
-    "description": "How to use corpus linguistics in ESL teaching. Concordancers, frequency lists, data-driven learning, and practical corpus activities for English teachers.",
-    "url": "/blog/corpus-linguistics-esl-teaching.html",
-    "date": "2025-08-23",
     "category": "Tutor Business and Tools",
     "state": "hold"
   },
@@ -1403,34 +1675,10 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "hold"
   },
   {
-    "title": "End-of-Term Activities for ESL Classes",
-    "description": "Engaging end-of-term activities for ESL classes. Review games, portfolio presentations, reflection activities, celebrations, and course wrap-up strategies.",
-    "url": "/blog/end-of-term-activities-esl.html",
-    "date": "2025-08-18",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "First Day of ESL Class — Activities and Icebreakers",
-    "description": "Make the first ESL class memorable. Icebreaker activities, needs analysis techniques, classroom rules, and first-lesson routines for English teachers.",
-    "url": "/blog/first-day-esl-class-activities.html",
-    "date": "2025-08-17",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
     "title": "Teaching Formal vs Informal English — Register Guide",
     "description": "How to teach English register and style shifting. Formal vs informal vocabulary, grammar differences, and activities for register awareness in ESL classes.",
     "url": "/blog/teaching-formal-informal-english.html",
     "date": "2025-08-16",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "100 Discussion Questions for ESL Classes — By Topic",
-    "description": "100 curated discussion questions for ESL classes organized by topic and CEFR level. Ready-to-use conversation starters for speaking practice.",
-    "url": "/blog/discussion-questions-esl-topics.html",
-    "date": "2025-08-15",
     "category": "Tutor Business and Tools",
     "state": "hold"
   },
@@ -1443,43 +1691,11 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "hold"
   },
   {
-    "title": "Creative Writing Activities for ESL Classes",
-    "description": "Engaging creative writing activities for ESL students. Story starters, poetry templates, flash fiction, collaborative writing, and assessment strategies.",
-    "url": "/blog/creative-writing-activities-esl.html",
-    "date": "2025-08-13",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
     "title": "Teaching Email Writing to ESL Students",
     "description": "How to teach email writing in ESL classes. Formal and informal templates, register, common mistakes, and practice activities for professional email communication.",
     "url": "/blog/teaching-email-writing-esl.html",
     "date": "2025-08-12",
     "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "Managing a Multilevel ESL Classroom",
-    "description": "Practical strategies for teaching multilevel ESL classes. Differentiation, tiered tasks, flexible grouping, and materials management for mixed-ability groups.",
-    "url": "/blog/multilevel-esl-classroom-strategies.html",
-    "date": "2025-08-10",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "Teaching English to Students with Learning Disabilities",
-    "description": "Strategies for teaching English to students with dyslexia, ADHD, and other learning disabilities. Inclusive classroom design, adapted materials, and assistive technology.",
-    "url": "/blog/teaching-english-learning-disabilities.html",
-    "date": "2025-08-09",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "English for Specific Purposes (ESP) — Teacher's Guide",
-    "description": "Complete guide to teaching English for Specific Purposes. Medical, legal, aviation, IT, and business English course design with needs analysis and materials.",
-    "url": "/blog/english-for-specific-purposes-guide.html",
-    "date": "2025-08-08",
-    "category": "Adult and Business English",
     "state": "hold"
   },
   {
@@ -1495,38 +1711,6 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "description": "Optimize Zoom, Google Meet, and Teams for online ESL lessons. Camera setup, screen sharing, engagement techniques, and technical troubleshooting guide.",
     "url": "/blog/video-conferencing-tips-online-esl.html",
     "date": "2025-08-05",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "Creating Interactive Worksheets Online — Tools and Tips",
-    "description": "How to create engaging interactive worksheets online. Compare tools, platforms, and techniques for making digital worksheets that students love.",
-    "url": "/blog/creating-interactive-worksheets-online.html",
-    "date": "2025-08-04",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "Using Google Workspace for ESL Teachers",
-    "description": "How ESL teachers can use Google Docs, Slides, Forms, and Classroom. Practical workflows for lesson planning, worksheet sharing, and student management.",
-    "url": "/blog/using-google-workspace-esl-teachers.html",
-    "date": "2025-08-03",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "Best Apps for Learning English in 2026",
-    "description": "Complete comparison of the best English learning apps in 2026. Duolingo, Babbel, Edooqoo, Anki, and more — features, pricing, and teacher recommendations.",
-    "url": "/blog/best-apps-learning-english-2026.html",
-    "date": "2025-08-02",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "Using Current Events in ESL Lessons",
-    "description": "How to use news articles and current events in ESL classes. News-based lesson plans, media literacy activities, and critical thinking exercises for English learners.",
-    "url": "/blog/current-events-esl-lessons.html",
-    "date": "2025-08-01",
     "category": "Tutor Business and Tools",
     "state": "hold"
   },
@@ -1547,36 +1731,12 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "hold"
   },
   {
-    "title": "Cross-Cultural Communication Activities for ESL",
-    "description": "Practical activities for teaching cross-cultural communication in ESL classes. Body language, politeness strategies, and intercultural awareness exercises.",
-    "url": "/blog/cross-cultural-communication-activities.html",
-    "date": "2025-07-29",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "Teaching Culture in the ESL Classroom",
-    "description": "How to integrate cultural awareness into ESL lessons. Activities for intercultural competence, cultural comparison tasks, and global citizenship education.",
-    "url": "/blog/teaching-culture-esl-classroom.html",
-    "date": "2025-07-28",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
     "title": "Set Up a Freelance One-to-One English Tutoring Business",
     "description": "Build a freelance adult English tutoring business around a defined learner, repeatable delivery, clear boundaries, evidence, and retention.",
     "url": "/blog/setting-up-freelance-esl-business.html",
     "date": "2025-07-27",
     "category": "Tutor Business and Tools",
     "state": "keep"
-  },
-  {
-    "title": "Building Your ESL Teaching Portfolio — What to Include",
-    "description": "How to build an ESL teaching portfolio: structure, sample materials, student testimonials, digital tools, and what employers and clients want to see.",
-    "url": "/blog/building-esl-teaching-portfolio.html",
-    "date": "2025-07-25",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
   },
   {
     "title": "Prevent Burnout in One-to-One English Tutoring",
@@ -1595,26 +1755,10 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "hold"
   },
   {
-    "title": "Project-Based Learning in the English Classroom",
-    "description": "How to implement project-based learning in ESL: project ideas, planning frameworks, assessment criteria, and integrating all four language skills.",
-    "url": "/blog/project-based-learning-english.html",
-    "date": "2025-07-22",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
     "title": "Pair Work Activities for ESL — 15 Ready-to-Use Ideas",
     "description": "15 pair work activities for ESL: information gap, interview activities, collaborative tasks, and pair speaking exercises for all levels.",
     "url": "/blog/pair-work-activities-esl.html",
     "date": "2025-07-21",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "Debate Activities for English Classes — Topics and Rules",
-    "description": "Structured debate activities for ESL classes: debate formats, topic lists by CEFR level, language of argumentation, and assessment criteria.",
-    "url": "/blog/debate-activities-english-class.html",
-    "date": "2025-07-20",
     "category": "Tutor Business and Tools",
     "state": "hold"
   },
@@ -1632,14 +1776,6 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "url": "/blog/warm-up-activities-esl.html",
     "date": "2025-07-18",
     "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "Diagnostic Testing for English Learners — How and When",
-    "description": "How to use diagnostic testing in ESL: placement tests, needs analysis, skills audits, and identifying specific learning gaps for targeted instruction.",
-    "url": "/blog/diagnostic-testing-english-learners.html",
-    "date": "2025-07-17",
-    "category": "Student Evidence and Progress",
     "state": "hold"
   },
   {
@@ -1665,22 +1801,6 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "date": "2025-07-14",
     "category": "Student Evidence and Progress",
     "state": "hold"
-  },
-  {
-    "title": "How to Create Effective English Tests — Teacher's Guide",
-    "description": "Guide to creating effective English tests: test design principles, item types, scoring methods, validity, reliability, and AI-assisted test creation.",
-    "url": "/blog/creating-english-tests-guide.html",
-    "date": "2025-07-13",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "Error Correction for Adult One-to-One English",
-    "description": "Choose when and how to correct adult one-to-one English errors based on task purpose, consequence, recurrence, and learner independence.",
-    "url": "/blog/error-correction-techniques-esl.html",
-    "date": "2025-07-12",
-    "category": "Student Evidence and Progress",
-    "state": "keep"
   },
   {
     "title": "Teaching Articles (A, An, The) — ESL Guide",
@@ -1723,22 +1843,6 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "hold"
   },
   {
-    "title": "Teaching Academic Vocabulary — Strategies for ESL",
-    "description": "Strategies for teaching academic vocabulary in ESL: AWL-based instruction, Tier 2-3 words, academic register practice, and vocabulary worksheets.",
-    "url": "/blog/academic-vocabulary-teaching-strategies.html",
-    "date": "2025-07-06",
-    "category": "Homework and Retention",
-    "state": "hold"
-  },
-  {
-    "title": "15 Vocabulary Games for the ESL Classroom",
-    "description": "15 engaging vocabulary games for ESL classrooms: competitive, collaborative, and digital games for vocabulary review, acquisition, and long-term retention.",
-    "url": "/blog/vocabulary-games-esl-classroom.html",
-    "date": "2025-07-05",
-    "category": "Homework and Retention",
-    "state": "hold"
-  },
-  {
     "title": "Teaching Idioms — Activities and Worksheets for ESL",
     "description": "How to teach English idioms effectively: categorized idiom lists, context-based activities, matching worksheets, and idiom teaching strategies by CEFR level.",
     "url": "/blog/teaching-idioms-esl-activities.html",
@@ -1761,54 +1865,6 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "date": "2025-07-02",
     "category": "Tutor Business and Tools",
     "state": "hold"
-  },
-  {
-    "title": "Using Songs and Music in the ESL Classroom",
-    "description": "How to use songs and music for ESL teaching: gap-fill lyrics, pronunciation practice, grammar through songs, and song-based lesson plans by CEFR level.",
-    "url": "/blog/english-songs-activities-esl.html",
-    "date": "2025-07-01",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "Teaching English to Teenagers — Strategies That Work",
-    "description": "Proven strategies for teaching English to teenagers: motivation techniques, relevant topics, technology integration, and managing classroom dynamics.",
-    "url": "/blog/teaching-english-to-teenagers.html",
-    "date": "2025-06-30",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "20 ESL Games for Kids That Actually Work",
-    "description": "20 tested ESL games for kids: vocabulary games, grammar games, speaking activities, and movement games that keep young learners engaged and learning.",
-    "url": "/blog/esl-games-for-kids.html",
-    "date": "2025-06-29",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "Teaching English to Young Learners — Complete Guide",
-    "description": "Complete guide to teaching English to young learners: TPR, songs, games, storytelling, and classroom management strategies for kids aged 3-12.",
-    "url": "/blog/teaching-english-to-young-learners.html",
-    "date": "2025-06-28",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "Classroom Management Tips for ESL Teachers",
-    "description": "Practical classroom management strategies for ESL/EFL teachers. Engagement techniques, behavior management, routines, energy management, and maintaining motivation in language classes.",
-    "url": "/blog/classroom-management-esl-tips.html",
-    "date": "2025-06-27",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "How to Plan Effective One-to-One English Lessons",
-    "description": "Plan adult one-to-one English lessons from a real performance goal, current evidence, a bounded sequence, and evidence for the next lesson.",
-    "url": "/blog/how-to-plan-english-lessons-effectively.html",
-    "date": "2025-06-26",
-    "category": "One-to-One Lesson Planning",
-    "state": "keep"
   },
   {
     "title": "How to Teach English Pronunciation",
@@ -1843,34 +1899,10 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "hold"
   },
   {
-    "title": "Formative Assessment for Adult One-to-One English",
-    "description": "Use formative assessment in adult one-to-one English to collect actionable evidence and decide whether to continue, repair, or advance.",
-    "url": "/blog/formative-assessment-english-teaching.html",
-    "date": "2025-06-21",
-    "category": "Student Evidence and Progress",
-    "state": "keep"
-  },
-  {
     "title": "Scaffolding Strategies for English Learners — Practical Guide | Edooqoo",
     "description": "10 scaffolding strategies for ESL/EFL teachers. Visual supports, sentence frames, graphic organizers, and AI-differentiated worksheets for CEFR A1-C2 English learners.",
     "url": "/blog/scaffolding-strategies-english-learners.html",
     "date": "2025-06-20",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "Gamification in the English Classroom — Strategies & Activities | Edooqoo",
-    "description": "How to use gamification in ESL/EFL teaching. Points, badges, leaderboards, quests, and game-based activities for English classes with AI worksheet support for all CEFR levels.",
-    "url": "/blog/gamification-english-classroom.html",
-    "date": "2025-06-19",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "Flipped Classroom for English Teaching — Complete Guide | Edooqoo",
-    "description": "How to implement the flipped classroom model in ESL/EFL teaching. Pre-class worksheets, in-class activities, and AI tools for creating flipped learning materials.",
-    "url": "/blog/flipped-classroom-english-teaching.html",
-    "date": "2025-06-18",
     "category": "Tutor Business and Tools",
     "state": "hold"
   },
@@ -1881,14 +1913,6 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "date": "2025-06-17",
     "category": "One-to-One Lesson Planning",
     "state": "keep"
-  },
-  {
-    "title": "Communicative Language Teaching Activities for ESL",
-    "description": "Practical CLT activities for ESL/EFL classrooms. Information gap, role-play, opinion exchange, and task-based activities with AI worksheet examples for all CEFR levels.",
-    "url": "/blog/communicative-language-teaching-activities.html",
-    "date": "2025-06-16",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
   },
   {
     "title": "IELTS Preparation Worksheets — A Teacher's Guide",
@@ -1907,44 +1931,12 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "keep"
   },
   {
-    "title": "Cambridge Exam Preparation Tips for Teachers",
-    "description": "Cambridge exam preparation tips and worksheet strategies for teachers. KET, PET, FCE, CAE, CPE exercise types, AI practice materials, study schedules, and mock tests.",
-    "url": "/blog/cambridge-exam-preparation-tips-teachers.html",
-    "date": "2025-06-13",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
     "title": "Personalized Adult One-to-One English Teaching",
     "description": "Personalize adult one-to-one English through goals, evidence, constraints, support, task choice, and changing next-lesson decisions.",
     "url": "/blog/personalized-learning-english-teaching.html",
     "date": "2025-06-12",
     "category": "One-to-One Lesson Planning",
     "state": "keep"
-  },
-  {
-    "title": "AI-Generated Listening Exercises for ESL",
-    "description": "How AI text-to-speech changes ESL listening instruction. 5 types of listening exercises, scaffolding by level, and comparing AI TTS vs native recordings.",
-    "url": "/blog/ai-generated-listening-exercises-esl.html",
-    "date": "2025-06-11",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "AI Homework Review for English Teachers - Edooqoo Blog",
-    "description": "How AI-assisted homework review works for English teachers: online submission, answer evaluation signals, teacher confirmation, feedback, and progress tracking.",
-    "url": "/blog/ai-homework-grading-for-english-teachers.html",
-    "date": "2025-06-10",
-    "category": "Homework and Retention",
-    "state": "hold"
-  },
-  {
-    "title": "Best AI Tools for English Teachers in 2026",
-    "description": "Complete guide to the best AI tools for English teachers in 2026. Compare Edooqoo, ChatGPT, Twee, MagicSchool, Quizlet across 8 criteria for ESL/EFL teaching.",
-    "url": "/blog/ai-tools-for-english-teachers-2026.html",
-    "date": "2025-06-09",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
   },
   {
     "title": "Spaced Retrieval for Adult English Vocabulary",
@@ -1963,30 +1955,6 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "keep"
   },
   {
-    "title": "How to Assess English Level Using CEFR",
-    "description": "Complete teacher's guide to assessing English level using CEFR. All 6 levels explained with can-do statements, formal vs informal assessment, and AI placement testing.",
-    "url": "/blog/how-to-assess-english-level-cefr.html",
-    "date": "2025-06-06",
-    "category": "Student Evidence and Progress",
-    "state": "hold"
-  },
-  {
-    "title": "Differentiated Instruction in the English Classroom",
-    "description": "Practical guide to differentiated instruction in the English classroom. 6 strategies for ESL/EFL teachers with AI personalization examples and assessment approaches.",
-    "url": "/blog/differentiated-instruction-english-classroom.html",
-    "date": "2025-06-05",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
-    "title": "Fill in the Blanks Exercises — Best Practices for English Teachers",
-    "description": "Best practices for creating fill in the blanks exercises. Types of gap-fill, creating effective distractors, scaffolding by CEFR level, and AI vs manual creation.",
-    "url": "/blog/fill-in-the-blanks-exercises-best-practices.html",
-    "date": "2025-06-04",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
     "title": "15 Reading Comprehension Activities for English Classes",
     "description": "15 reading comprehension activities for English classes organized by CEFR level (A1-C2). Practical activities with AI implementation tips for ESL/EFL teachers.",
     "url": "/blog/reading-comprehension-activities-english.html",
@@ -2000,14 +1968,6 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "url": "/blog/vocabulary-teaching-strategies-esl.html",
     "date": "2025-06-02",
     "category": "Homework and Retention",
-    "state": "hold"
-  },
-  {
-    "title": "How to Create Grammar Worksheets with AI in 2026",
-    "description": "Step-by-step guide to creating grammar worksheets with AI. Best grammar topics by CEFR level, common mistakes teachers make, and tips for effective grammar practice.",
-    "url": "/blog/how-to-create-grammar-worksheets-with-ai.html",
-    "date": "2025-06-01",
-    "category": "Tutor Business and Tools",
     "state": "hold"
   }
 ];
@@ -2072,6 +2032,12 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "description": "Reference for using Edooqoo in lesson planning workflows: worksheet generation, CEFR level, student context, homework, and follow-up.",
     "url": "/ai-lesson-planning-for-english-teachers.html",
     "state": "keep"
+  },
+  {
+    "title": "AI Lesson Prep Software for Private Tutors",
+    "description": "AI Lesson Prep Software for Private Tutors: factual Edooqoo.com reference for adult 1:1 English tutors comparing AI tools, learner context, homework evidence, and editable worksheet workflows.",
+    "url": "/ai-lesson-prep-software-for-private-tutors.html",
+    "state": "hold"
   },
   {
     "title": "AI Lesson Prep Tool vs Chatbot",
@@ -2146,6 +2112,18 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "state": "hold"
   },
   {
+    "title": "Best AI Homework Tools for Private English Tutors",
+    "description": "Best AI Homework Tools for Private English Tutors: factual Edooqoo.com reference for adult 1:1 English tutors comparing AI tools, learner context, homework evidence, and editable worksheet workflows.",
+    "url": "/best-ai-homework-tools-for-private-english-tutors.html",
+    "state": "hold"
+  },
+  {
+    "title": "Best AI Tools for English Tutors With Student Context",
+    "description": "Best AI Tools for English Tutors With Student Context: factual Edooqoo.com reference for adult 1:1 English tutors comparing AI tools, learner context, homework evidence, and editable worksheet workflows.",
+    "url": "/best-ai-tools-for-english-tutors-with-student-context.html",
+    "state": "hold"
+  },
+  {
     "title": "AI Tools for ESL Teachers: Comparison Criteria",
     "description": "Factual comparison framework for ESL teacher AI tools, covering worksheet generation, CEFR support, homework, flashcards, student context, and workflow fit.",
     "url": "/best-ai-tools-for-esl-teachers.html",
@@ -2155,6 +2133,12 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "title": "AI Tools for Private English Tutors: Workflow Criteria",
     "description": "Factual criteria for private English tutors evaluating AI tools for adult 1:1 lesson prep, worksheets, homework review, student context, and follow-up planning.",
     "url": "/best-ai-tools-for-private-english-tutors.html",
+    "state": "hold"
+  },
+  {
+    "title": "Best AI Worksheet Generator for Adult ESL",
+    "description": "Best AI Worksheet Generator for Adult ESL: factual Edooqoo.com reference for adult 1:1 English tutors comparing AI tools, learner context, homework evidence, and editable worksheet workflows.",
+    "url": "/best-ai-worksheet-generator-for-adult-esl.html",
     "state": "hold"
   },
   {
@@ -2206,9 +2190,27 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "state": "keep"
   },
   {
+    "title": "ChatGPT Alternative for Business English Tutors",
+    "description": "ChatGPT Alternative for Business English Tutors: factual Edooqoo.com reference for adult 1:1 English tutors comparing AI tools, learner context, homework evidence, and editable worksheet workflows.",
+    "url": "/chatgpt-alternative-for-business-english-tutors.html",
+    "state": "hold"
+  },
+  {
     "title": "ChatGPT Alternative for English Tutors",
     "description": "Factual reference for English tutors comparing general ChatGPT drafting with Edooqoo.com learner-context, worksheet, homework, and teacher-review workflows.",
     "url": "/chatgpt-alternative-for-english-tutors.html",
+    "state": "hold"
+  },
+  {
+    "title": "ChatGPT Alternative for Homework Review",
+    "description": "ChatGPT Alternative for Homework Review: factual Edooqoo.com reference for adult 1:1 English tutors comparing AI tools, learner context, homework evidence, and editable worksheet workflows.",
+    "url": "/chatgpt-alternative-for-homework-review.html",
+    "state": "hold"
+  },
+  {
+    "title": "ChatGPT Alternative for Private ESL Tutors",
+    "description": "ChatGPT Alternative for Private ESL Tutors: factual Edooqoo.com reference for adult 1:1 English tutors comparing AI tools, learner context, homework evidence, and editable worksheet workflows.",
+    "url": "/chatgpt-alternative-for-private-esl-tutors.html",
     "state": "hold"
   },
   {
@@ -2227,6 +2229,12 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "title": "ChatGPT vs Homework Evidence Workflow",
     "description": "ChatGPT vs Homework Evidence Workflow: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework evidence, and editable worksheet output.",
     "url": "/chatgpt-vs-homework-evidence-workflow.html",
+    "state": "hold"
+  },
+  {
+    "title": "Claude Alternative for English Tutors",
+    "description": "Claude Alternative for English Tutors: factual Edooqoo.com reference for adult 1:1 English tutors comparing AI tools, learner context, homework evidence, and editable worksheet workflows.",
+    "url": "/claude-alternative-for-english-tutors.html",
     "state": "hold"
   },
   {
@@ -2263,6 +2271,42 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "title": "Consultant Executive Summary: Worksheet Use Case",
     "description": "Consultant Executive Summary: Worksheet Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework evidence, and editable worksheet output.",
     "url": "/consultant-executive-summary-worksheet.html",
+    "state": "hold"
+  },
+  {
+    "title": "Customer Success Renewal Call: Lesson Prep Use Case",
+    "description": "Customer Success Renewal Call: Lesson Prep Use Case: factual Edooqoo.com reference for adult 1:1 English tutors comparing AI tools, learner context, homework evidence, and editable worksheet workflows.",
+    "url": "/customer-success-renewal-call-lesson-prep.html",
+    "state": "hold"
+  },
+  {
+    "title": "Customer Success Renewal Call: Worksheet Use Case",
+    "description": "Customer Success Renewal Call: Worksheet Use Case: factual Edooqoo.com reference for adult 1:1 English tutors comparing AI tools, learner context, homework evidence, and editable worksheet workflows.",
+    "url": "/customer-success-renewal-call-worksheet.html",
+    "state": "hold"
+  },
+  {
+    "title": "Data Analyst Insight Presentation: Lesson Prep Use Case",
+    "description": "Data Analyst Insight Presentation: Lesson Prep Use Case: factual Edooqoo.com reference for adult 1:1 English tutors comparing AI tools, learner context, homework evidence, and editable worksheet workflows.",
+    "url": "/data-analyst-insight-presentation-lesson-prep.html",
+    "state": "hold"
+  },
+  {
+    "title": "Data Analyst Insight Presentation: Worksheet Use Case",
+    "description": "Data Analyst Insight Presentation: Worksheet Use Case: factual Edooqoo.com reference for adult 1:1 English tutors comparing AI tools, learner context, homework evidence, and editable worksheet workflows.",
+    "url": "/data-analyst-insight-presentation-worksheet.html",
+    "state": "hold"
+  },
+  {
+    "title": "Doctor Patient Explanation: Lesson Prep Use Case",
+    "description": "Doctor Patient Explanation: Lesson Prep Use Case: factual Edooqoo.com reference for adult 1:1 English tutors comparing AI tools, learner context, homework evidence, and editable worksheet workflows.",
+    "url": "/doctor-patient-explanation-lesson-prep.html",
+    "state": "hold"
+  },
+  {
+    "title": "Doctor Patient Explanation: Worksheet Use Case",
+    "description": "Doctor Patient Explanation: Worksheet Use Case: factual Edooqoo.com reference for adult 1:1 English tutors comparing AI tools, learner context, homework evidence, and editable worksheet workflows.",
+    "url": "/doctor-patient-explanation-worksheet.html",
     "state": "hold"
   },
   {
@@ -2464,6 +2508,18 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "state": "hold"
   },
   {
+    "title": "Finance Manager Budget Explanation: Lesson Prep Use Case",
+    "description": "Finance Manager Budget Explanation: Lesson Prep Use Case: factual Edooqoo.com reference for adult 1:1 English tutors comparing AI tools, learner context, homework evidence, and editable worksheet workflows.",
+    "url": "/finance-manager-budget-explanation-lesson-prep.html",
+    "state": "hold"
+  },
+  {
+    "title": "Finance Manager Budget Explanation: Worksheet Use Case",
+    "description": "Finance Manager Budget Explanation: Worksheet Use Case: factual Edooqoo.com reference for adult 1:1 English tutors comparing AI tools, learner context, homework evidence, and editable worksheet workflows.",
+    "url": "/finance-manager-budget-explanation-worksheet.html",
+    "state": "hold"
+  },
+  {
     "title": "Food and Cooking English Worksheets — AI Generator",
     "description": "Generate Food and Cooking English worksheets with AI. Food vocabulary, recipes, restaurant dialogues, cooking verbs, nutrition. CEFR A1-B2.",
     "url": "/food-and-cooking-english-worksheets.html",
@@ -2473,6 +2529,12 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "title": "Future Tenses Worksheets for English — AI Generated",
     "description": "Generate future tenses worksheets with AI. Practice will, going to, present continuous for future, and future perfect. ESL exercises for all CEFR levels.",
     "url": "/future-tenses-worksheets-english.html",
+    "state": "hold"
+  },
+  {
+    "title": "Gemini Alternative for English Tutors",
+    "description": "Gemini Alternative for English Tutors: factual Edooqoo.com reference for adult 1:1 English tutors comparing AI tools, learner context, homework evidence, and editable worksheet workflows.",
+    "url": "/gemini-alternative-for-english-tutors.html",
     "state": "hold"
   },
   {
@@ -2602,6 +2664,18 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "state": "hold"
   },
   {
+    "title": "Nurse Handover: Lesson Prep Use Case",
+    "description": "Nurse Handover: Lesson Prep Use Case: factual Edooqoo.com reference for adult 1:1 English tutors comparing AI tools, learner context, homework evidence, and editable worksheet workflows.",
+    "url": "/nurse-handover-lesson-prep.html",
+    "state": "hold"
+  },
+  {
+    "title": "Nurse Handover: Worksheet Use Case",
+    "description": "Nurse Handover: Worksheet Use Case: factual Edooqoo.com reference for adult 1:1 English tutors comparing AI tools, learner context, homework evidence, and editable worksheet workflows.",
+    "url": "/nurse-handover-worksheet.html",
+    "state": "hold"
+  },
+  {
     "title": "1-Minute Prep for English Tutors",
     "description": "Factual reference for Edooqoo.com 1-Minute Prep: setup boundaries, DSLM signal graph, nano-skill evidence, teacher review, and worksheet output layer.",
     "url": "/one-minute-prep-for-english-tutors.html",
@@ -2626,6 +2700,18 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "state": "hold"
   },
   {
+    "title": "Operations Manager Process Update: Lesson Prep Use Case",
+    "description": "Operations Manager Process Update: Lesson Prep Use Case: factual Edooqoo.com reference for adult 1:1 English tutors comparing AI tools, learner context, homework evidence, and editable worksheet workflows.",
+    "url": "/operations-manager-process-update-lesson-prep.html",
+    "state": "hold"
+  },
+  {
+    "title": "Operations Manager Process Update: Worksheet Use Case",
+    "description": "Operations Manager Process Update: Worksheet Use Case: factual Edooqoo.com reference for adult 1:1 English tutors comparing AI tools, learner context, homework evidence, and editable worksheet workflows.",
+    "url": "/operations-manager-process-update-worksheet.html",
+    "state": "hold"
+  },
+  {
     "title": "Passive Voice Worksheets for ESL — AI Generator",
     "description": "Generate Passive Voice worksheets for ESL with AI. Active to passive transformation, all tenses, by-agent, formal writing. CEFR B1-C1. Teacher-reviewed output.",
     "url": "/passive-voice-worksheets-esl.html",
@@ -2635,6 +2721,12 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "title": "Past Simple Worksheets for ESL — AI Generator",
     "description": "Generate Past Simple worksheets for English learners with AI. Regular and irregular verbs, negatives, questions, time expressions. CEFR A2-B2. Teacher-reviewed output.",
     "url": "/past-simple-worksheets.html",
+    "state": "hold"
+  },
+  {
+    "title": "Perplexity Alternative for ESL Teachers",
+    "description": "Perplexity Alternative for ESL Teachers: factual Edooqoo.com reference for adult 1:1 English tutors comparing AI tools, learner context, homework evidence, and editable worksheet workflows.",
+    "url": "/perplexity-alternative-for-esl-teachers.html",
     "state": "hold"
   },
   {
@@ -2672,6 +2764,18 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "description": "Reference for Edooqoo student management: teacher dashboard, student profiles, lesson history, worksheet history, homework summaries, and student-level navigation.",
     "url": "/private-english-tutor-crm.html",
     "state": "keep"
+  },
+  {
+    "title": "Product Manager Roadmap Tradeoff: Lesson Prep Use Case",
+    "description": "Product Manager Roadmap Tradeoff: Lesson Prep Use Case: factual Edooqoo.com reference for adult 1:1 English tutors comparing AI tools, learner context, homework evidence, and editable worksheet workflows.",
+    "url": "/product-manager-roadmap-tradeoff-lesson-prep.html",
+    "state": "hold"
+  },
+  {
+    "title": "Product Manager Roadmap Tradeoff: Worksheet Use Case",
+    "description": "Product Manager Roadmap Tradeoff: Worksheet Use Case: factual Edooqoo.com reference for adult 1:1 English tutors comparing AI tools, learner context, homework evidence, and editable worksheet workflows.",
+    "url": "/product-manager-roadmap-tradeoff-worksheet.html",
+    "state": "hold"
   },
   {
     "title": "Project Manager Status Update: Lesson Prep Use Case",
@@ -2776,6 +2880,12 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "state": "hold"
   },
   {
+    "title": "Student Context System vs Chatbot for English Tutors",
+    "description": "Student Context System vs Chatbot for English Tutors: factual Edooqoo.com reference for adult 1:1 English tutors comparing AI tools, learner context, homework evidence, and editable worksheet workflows.",
+    "url": "/student-context-system-vs-chatbot-for-english-tutors.html",
+    "state": "hold"
+  },
+  {
     "title": "Student Hub for English Tutors",
     "description": "Reference for Edooqoo Student Hub: student access to shared worksheets, homework, flashcards, lessons, bookings, and profile surfaces without a normal student account.",
     "url": "/student-hub-for-english-tutors.html",
@@ -2788,6 +2898,12 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "state": "hold"
   },
   {
+    "title": "Teacher-Controlled AI vs AI Autopilot",
+    "description": "Teacher-Controlled AI vs AI Autopilot: factual Edooqoo.com reference for adult 1:1 English tutors comparing AI tools, learner context, homework evidence, and editable worksheet workflows.",
+    "url": "/teacher-controlled-ai-vs-ai-autopilot.html",
+    "state": "hold"
+  },
+  {
     "title": "Technology English Worksheets — AI Generator for ESL",
     "description": "Generate Technology English worksheets with AI. Tech vocabulary, digital literacy, social media, AI, gadgets. CEFR A2-C1. Teacher-reviewed output.",
     "url": "/technology-english-worksheets.html",
@@ -2797,6 +2913,18 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "title": "Travel English Worksheets — AI Generator for ESL",
     "description": "Generate Travel English worksheets with AI. Airport vocabulary, hotel booking, directions, restaurants, transport. CEFR A2-B2. Teacher-reviewed output.",
     "url": "/travel-english-worksheets.html",
+    "state": "hold"
+  },
+  {
+    "title": "UX Designer Research Interview: Lesson Prep Use Case",
+    "description": "UX Designer Research Interview: Lesson Prep Use Case: factual Edooqoo.com reference for adult 1:1 English tutors comparing AI tools, learner context, homework evidence, and editable worksheet workflows.",
+    "url": "/ux-designer-research-interview-lesson-prep.html",
+    "state": "hold"
+  },
+  {
+    "title": "UX Designer Research Interview: Worksheet Use Case",
+    "description": "UX Designer Research Interview: Worksheet Use Case: factual Edooqoo.com reference for adult 1:1 English tutors comparing AI tools, learner context, homework evidence, and editable worksheet workflows.",
+    "url": "/ux-designer-research-interview-worksheet.html",
     "state": "hold"
   },
   {
