@@ -321,10 +321,13 @@ Deno.serve(async (req) => {
       });
     }
 
+    // v6.9.72 — embed student's native_language on each set so the Add Card
+    // dialog can auto-translate even if the top-level field is stale.
     const enrichedFlashcardSets = (flashcardSets || []).map(s => ({
       ...s,
       cards_count: cardsCountMap[s.id] || 0,
       mastered_count: masteredCountMap[s.id] || 0,
+      student_native_language: (studentData as any).native_language ?? null,
     }));
 
     // 5. Homework assignments
