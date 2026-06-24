@@ -39,6 +39,13 @@ export interface ChatCompletionOpts {
   fallbackModel?: string;
   /** Caller function name for logModelFailure. */
   functionName: string;
+  /**
+   * v6.9.72 — when true, skip the Google primary call entirely and go straight
+   * to OpenAI. The `primaryModel` is then ignored and `fallbackModel` (or the
+   * default "gpt-4o-mini") is used. Lets callers force a second-stage retry on
+   * a different provider without duplicating helper logic.
+   */
+  skipPrimary?: boolean;
 }
 
 function shouldFallback(status: number): boolean {
@@ -164,7 +171,7 @@ export async function chatCompletion(
   let primaryResp: Response | null = null;
   const geminiModel = normalizeGeminiModel(opts.primaryModel);
 
-  if (googleKey) {
+  if (googleKey && !opts.skipPrimary) {
     try {
       const url = `${GOOGLE_ENDPOINT_BASE}/${geminiModel}:generateContent?key=${googleKey}`;
       primaryResp = await fetch(url, {
