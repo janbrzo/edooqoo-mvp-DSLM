@@ -10,6 +10,7 @@ import { useStudents } from '@/hooks/useStudents';
 import { useOnboardingProgress } from '@/hooks/useOnboardingProgress';
 import { useNavigate } from 'react-router-dom';
 import { Plus } from 'lucide-react';
+import { Plus as PlusIcon, Eraser } from 'lucide-react';
 import { NATIVE_LANGUAGES } from '@/types/flashcards';
 import { MAIN_GOALS, ENGLISH_LEVELS } from '@/constants/studentGoals';
 import { DeadlinePicker } from '@/components/shared/DeadlinePicker';
@@ -94,6 +95,59 @@ export const AddStudentDialog = ({
     native_language: true,
     pacing: true,
   });
+
+  // Reset all form state + drop the persisted draft so the dialog is pristine.
+  const handleClearForm = () => {
+    setName('');
+    setEnglishLevel('');
+    setMainGoal('custom');
+    setCustomGoal('');
+    setStudentEmail('');
+    setSendOverdueEmails(true);
+    setNativeLanguage('Spanish');
+    setMode('defer');
+    setSendTestWhenKnown(true);
+    setMainGoalDeadline('');
+    setPasteEnabled(false);
+    setPasteRaw('');
+    setExtraction(null);
+    setExtractionModel(null);
+    setIntakeIncludes({
+      notes: true, signals: {}, goals: {},
+      english_level: true, main_goal: true, native_language: true, pacing: true,
+    });
+    try { sessionStorage.removeItem(ADD_STUDENT_DRAFT_KEY); } catch { /* noop */ }
+    sonnerToast.success('Form cleared.');
+  };
+
+  // v6.9.73 — After AI extraction lands, auto-fill the standard fields the
+  // teacher would otherwise re-type by hand. Only fill when the field is empty
+  // so we never overwrite something the teacher just typed.
+  useEffect(() => {
+    if (!extraction) return;
+    const sn = (extraction as any)?.student_name?.value as string | undefined;
+    const se = (extraction as any)?.student_email?.value as string | undefined;
+    if (sn && !name.trim()) setName(sn.trim().slice(0, 120));
+    if (se && !studentEmail.trim() && /.+@.+\..+/.test(se)) setStudentEmail(se.trim());
+    const lvl = extraction.english_level?.value;
+    if (lvl && !englishLevel && ['A1','A2','B1','B2','C1','C2'].includes(lvl)) {
+      setEnglishLevel(lvl);
+    }
+    const mg = extraction.main_goal?.value;
+    if (mg && (mainGoal === 'custom' && !customGoal.trim())) {
+      setCustomGoal(mg.trim().slice(0, 200));
+    }
+    const nl = extraction.native_language?.value;
+    if (nl && (!nativeLanguage || nativeLanguage === 'Spanish')) {
+      setNativeLanguage(nl);
+    }
+    if (extraction.main_goal?.target_date && !mainGoalDeadline) {
+      setMainGoalDeadline(extraction.main_goal.target_date);
+    }
+    // Surface to teacher so they know the form was updated.
+    if (sn || se || lvl || mg) sonnerToast.success('AI filled the form — review and adjust.');
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [extraction]);
 
   // Prefill from props (e.g. from calendar notification)
   useEffect(() => {
