@@ -356,10 +356,24 @@ export const AddStudentDialog = ({
       )}
       <DialogContent className="sm:max-w-[480px] max-h-[88vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Add Student</DialogTitle>
-          <DialogDescription>
-            Only name + email are required. Defer level &amp; goal until after the Welcome Test if you prefer.
-          </DialogDescription>
+          <div className="flex items-start justify-between gap-2">
+            <div>
+              <DialogTitle>Add Student</DialogTitle>
+              <DialogDescription>
+                Only name + email are required. Defer level &amp; goal until after the Welcome Test if you prefer.
+              </DialogDescription>
+            </div>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={handleClearForm}
+              className="h-7 text-[11px] text-muted-foreground hover:text-destructive"
+              title="Reset all fields and the saved draft"
+            >
+              <Eraser className="h-3 w-3 mr-1" /> Clear
+            </Button>
+          </div>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-3">
           {/* Row 1: name + email */}
