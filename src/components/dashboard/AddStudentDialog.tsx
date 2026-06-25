@@ -432,6 +432,70 @@ export const AddStudentDialog = ({
                 </span>
               </Label>
             </div>
+            {mode === 'know' && (
+              <div className="space-y-3 border-l-2 border-primary/30 pl-3 ml-2">
+                <div className="space-y-1">
+                  <Label htmlFor="level" className="text-xs">English Level (CEFR) <span className="text-destructive">*</span></Label>
+                  <Select value={englishLevel} onValueChange={setEnglishLevel} required>
+                    <SelectTrigger className="h-9"><SelectValue placeholder="Select level" /></SelectTrigger>
+                    <SelectContent>
+                      {ENGLISH_LEVELS.map((level) => (
+                        <SelectItem key={level.value} value={level.value}>{level.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="goal" className="text-xs flex items-center gap-1.5">
+                    Main Goal <span className="text-destructive">*</span>
+                    <TooltipProvider delayDuration={150}>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button type="button" className="text-muted-foreground hover:text-foreground" aria-label="What is Main Goal?">
+                            <Info className="h-3 w-3" />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent side="right" className="max-w-xs">
+                          Main Goal is the student's primary outcome (e.g. job interview in English, B2 exam). You'll be able to add Supporting Goals (sub-skills) and Additional Goals (side topics) later from the student's Goals tab.
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </Label>
+                  <Select value={mainGoal} onValueChange={setMainGoal} required>
+                    <SelectTrigger className="h-9"><SelectValue placeholder="Select main goal" /></SelectTrigger>
+                    <SelectContent>
+                      {MAIN_GOALS.map((goal) => (
+                        <SelectItem key={goal.value} value={goal.value}>{goal.label}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {mainGoal === 'custom' && (
+                    <Input
+                      placeholder="Describe the custom goal"
+                      value={customGoal}
+                      onChange={(e) => setCustomGoal(e.target.value)}
+                      required
+                      className="h-9 mt-1"
+                    />
+                  )}
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Goal Deadline (optional)</Label>
+                  <DeadlinePicker value={mainGoalDeadline} onChange={setMainGoalDeadline} compact />
+                </div>
+                <div className="flex items-start gap-2 rounded-md border bg-muted/30 p-2 mt-2">
+                  <Checkbox
+                    id="send-test-known"
+                    checked={sendTestWhenKnown}
+                    onCheckedChange={(v) => setSendTestWhenKnown(!!v)}
+                    className="mt-0.5"
+                  />
+                  <Label htmlFor="send-test-known" className="text-[11px] cursor-pointer">
+                    Also send the Welcome Test (refines learning profile)
+                  </Label>
+                </div>
+              </div>
+            )}
             <div className="flex items-start gap-2 rounded-md border border-primary/30 bg-primary/5 p-2.5">
               <RadioGroupItem id="mode-defer" value="defer" className="mt-0.5" />
               <Label htmlFor="mode-defer" className="flex-1 cursor-pointer">
@@ -442,76 +506,6 @@ export const AddStudentDialog = ({
               </Label>
             </div>
           </RadioGroup>
-
-          {/* Level + Goal + Deadline — collapsed when deferred */}
-          {mode === 'know' && (
-            <div className="space-y-3 border-l-2 border-primary/30 pl-3">
-              <div className="space-y-1">
-                <Label htmlFor="level" className="text-xs">English Level (CEFR) <span className="text-destructive">*</span></Label>
-                <Select value={englishLevel} onValueChange={setEnglishLevel} required>
-                  <SelectTrigger className="h-9">
-                    <SelectValue placeholder="Select level" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ENGLISH_LEVELS.map((level) => (
-                      <SelectItem key={level.value} value={level.value}>{level.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-1">
-                <Label htmlFor="goal" className="text-xs flex items-center gap-1.5">
-                  Main Goal <span className="text-destructive">*</span>
-                  <TooltipProvider delayDuration={150}>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <button type="button" className="text-muted-foreground hover:text-foreground" aria-label="What is Main Goal?">
-                          <Info className="h-3 w-3" />
-                        </button>
-                      </TooltipTrigger>
-                      <TooltipContent side="right" className="max-w-xs">
-                        Main Goal is the student's primary outcome (e.g. job interview in English, B2 exam). You'll be able to add Supporting Goals (sub-skills) and Additional Goals (side topics) later from the student's Goals tab.
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </Label>
-                <Select value={mainGoal} onValueChange={setMainGoal} required>
-                  <SelectTrigger className="h-9">
-                    <SelectValue placeholder="Select main goal" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {MAIN_GOALS.map((goal) => (
-                      <SelectItem key={goal.value} value={goal.value}>{goal.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {mainGoal === 'custom' && (
-                  <Input
-                    placeholder="Describe the custom goal"
-                    value={customGoal}
-                    onChange={(e) => setCustomGoal(e.target.value)}
-                    required
-                    className="h-9 mt-1"
-                  />
-                )}
-              </div>
-              <div className="space-y-1">
-                <Label className="text-xs">Goal Deadline (optional)</Label>
-                <DeadlinePicker value={mainGoalDeadline} onChange={setMainGoalDeadline} compact />
-              </div>
-              <div className="flex items-start gap-2 rounded-md border bg-muted/30 p-2 mt-2">
-                <Checkbox
-                  id="send-test-known"
-                  checked={sendTestWhenKnown}
-                  onCheckedChange={(v) => setSendTestWhenKnown(!!v)}
-                  className="mt-0.5"
-                />
-                <Label htmlFor="send-test-known" className="text-[11px] cursor-pointer">
-                  Also send the Welcome Test (refines learning profile)
-                </Label>
-              </div>
-            </div>
-          )}
 
           {/* Overdue email toggle — compact row */}
           <div className="flex items-center justify-between gap-2 pt-1">
