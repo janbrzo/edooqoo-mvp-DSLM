@@ -44,6 +44,8 @@ no markdown fences):
 {
   "language": "<BCP-47 like 'en' or 'pl'>",
   "summary_notes": "<<=1200 chars, English summary of the paste>",
+  "student_name":  { "value": "<<=120 chars>", "confidence": <0..1>, "evidence_quote": "<verbatim>" } | null,
+  "student_email": { "value": "<email address>", "confidence": <0..1>, "evidence_quote": "<verbatim>" } | null,
   "signals": [
     { "category": "Personal" | "Skill Assessment",
       "subtype": "<short label, optional>",
