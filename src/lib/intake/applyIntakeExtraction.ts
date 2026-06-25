@@ -6,6 +6,8 @@ import { supabase } from '@/integrations/supabase/client';
 export interface IntakeExtractionPayload {
   language?: string;
   summary_notes?: string;
+  student_name?:  { value?: string; confidence?: number; evidence_quote?: string };
+  student_email?: { value?: string; confidence?: number; evidence_quote?: string };
   signals?: Array<{
     category?: 'Personal' | 'Skill Assessment';
     subtype?: string;
