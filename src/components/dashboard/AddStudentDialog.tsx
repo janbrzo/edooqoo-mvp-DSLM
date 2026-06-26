@@ -144,7 +144,8 @@ export const AddStudentDialog = ({
   // `manual` opt-out was removed — teachers can still skip the test from
   // the student page after creation.
   const [mode, setMode] = useState<'know' | 'defer'>('defer');
-  const deferProfile = mode !== 'know';
+  const knowsStudent = mode === 'know';
+  const deferProfile = !knowsStudent;
   const [mainGoalDeadline, setMainGoalDeadline] = useState<string>('');
   // v6.9.34 — default ON in both modes.
   const [sendTestWhenKnown, setSendTestWhenKnown] = useState(true);
@@ -192,34 +193,67 @@ export const AddStudentDialog = ({
     sonnerToast.success('Form cleared.');
   };
 
-  // v6.9.73 — After AI extraction lands, auto-fill the standard fields the
-  // teacher would otherwise re-type by hand. Only fill when the field is empty
-  // so we never overwrite something the teacher just typed.
+  // v6.9.74 — After AI extraction lands, convert the preview into the editable
+  // draft fields. This deliberately ignores default UI values as evidence and
+  // only applies native language when the quoted evidence exists in the paste.
   useEffect(() => {
     if (!extraction) return;
-    const sn = (extraction as any)?.student_name?.value as string | undefined;
-    const se = (extraction as any)?.student_email?.value as string | undefined;
-    if (sn && !name.trim()) setName(sn.trim().slice(0, 120));
-    if (se && !studentEmail.trim() && /.+@.+\..+/.test(se)) setStudentEmail(se.trim());
-    const lvl = extraction.english_level?.value;
-    if (lvl && !englishLevel && ['A1','A2','B1','B2','C1','C2'].includes(lvl)) {
-      setEnglishLevel(lvl);
+    let changed = false;
+
+    const sn = extraction.student_name;
+    const se = extraction.student_email;
+    const nameValue = hasMeaningfulValue(sn?.value) ? sn!.value!.trim().slice(0, 120) : '';
+    const emailValue = hasMeaningfulValue(se?.value) ? se!.value!.trim().toLowerCase() : '';
+    if (nameValue && !name.trim() && confidenceOf(sn) >= 0.55) {
+      setName(nameValue);
+      changed = true;
     }
-    const mg = extraction.main_goal?.value;
-    if (mg && (mainGoal === 'custom' && !customGoal.trim())) {
-      setCustomGoal(mg.trim().slice(0, 200));
+    if (emailValue && !studentEmail.trim() && /.+@.+\..+/.test(emailValue) && confidenceOf(se) >= 0.55) {
+      setStudentEmail(emailValue);
+      changed = true;
     }
-    const nl = extraction.native_language?.value;
-    if (nl && (!nativeLanguage || nativeLanguage === 'Spanish')) {
-      setNativeLanguage(nl);
+
+    const levelValue = mapEnglishLevel(extraction.english_level?.value);
+    if (levelValue && (!englishLevel || englishLevel === 'unknown') && confidenceOf(extraction.english_level) >= 0.55) {
+      setEnglishLevel(levelValue);
+      changed = true;
     }
-    if (extraction.main_goal?.target_date && !mainGoalDeadline) {
-      setMainGoalDeadline(extraction.main_goal.target_date);
+
+    const goalText = getMainGoalSuggestionText(extraction);
+    const goalValue = mapGoalToSelectValue(goalText);
+    if (goalText && goalValue && (mainGoal === 'custom' && !customGoal.trim())) {
+      setMainGoal(goalValue);
+      setCustomGoal(goalValue === 'custom' ? goalText.slice(0, 200) : '');
+      changed = true;
     }
-    // Surface to teacher so they know the form was updated.
-    if (sn || se || lvl || mg) sonnerToast.success('AI filled the form — review and adjust.');
+
+    const goalDate = getMainGoalTargetDate(extraction);
+    if (goalDate && !mainGoalDeadline && /^\d{4}-\d{2}-\d{2}$/.test(goalDate)) {
+      setMainGoalDeadline(goalDate);
+      changed = true;
+    }
+
+    const nativeCandidate = extraction.native_language;
+    const mappedNative = mapNativeLanguage(nativeCandidate?.value);
+    const nativeHasEvidence = quoteAppearsInText(nativeCandidate?.evidence_quote, pasteRaw);
+    if (mappedNative && nativeHasEvidence && (!nativeLanguage || nativeLanguage === 'Spanish') && confidenceOf(nativeCandidate) >= 0.75) {
+      setNativeLanguage(mappedNative);
+      changed = true;
+    }
+
+    if (changed) sonnerToast.success('AI filled the form — review and adjust before adding.');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [extraction]);
+
+  const intakeExistingForAnalysis = useMemo(() => ({
+    english_level: knowsStudent && englishLevel ? englishLevel : null,
+    main_goal: knowsStudent && (mainGoal !== 'custom' || customGoal.trim())
+      ? (mainGoal === 'custom' ? customGoal.trim() : mainGoal)
+      : null,
+    main_goal_target_date: knowsStudent && mainGoalDeadline ? mainGoalDeadline : null,
+    native_language: null,
+    mainGoalSet: knowsStudent && Boolean(mainGoal !== 'custom' || customGoal.trim()),
+  }), [knowsStudent, englishLevel, mainGoal, customGoal, mainGoalDeadline]);
 
   // Prefill from props (e.g. from calendar notification)
   useEffect(() => {
