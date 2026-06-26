@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useMemo, useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,7 +14,6 @@ import { NATIVE_LANGUAGES } from '@/types/flashcards';
 import { MAIN_GOALS, ENGLISH_LEVELS } from '@/constants/studentGoals';
 import { DeadlinePicker } from '@/components/shared/DeadlinePicker';
 import { Checkbox } from '@/components/ui/checkbox';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Info } from 'lucide-react';
 import { devLog } from '@/utils/logger';
@@ -29,6 +28,80 @@ import {
 } from '@/lib/intake/applyIntakeExtraction';
 
 const ADD_STUDENT_DRAFT_KEY = 'add-student-dialog-draft';
+
+const normalizeText = (value: string) => value.trim().toLowerCase();
+const hasMeaningfulValue = (value: unknown) => typeof value === 'string' && value.trim().length > 0;
+
+const confidenceOf = (item?: { confidence?: number | string | null } | null): number => {
+  const raw = typeof item?.confidence === 'number' ? item.confidence : Number(item?.confidence);
+  return Number.isFinite(raw) ? Math.max(0, Math.min(1, raw)) : 0;
+};
+
+const quoteAppearsInText = (quote: unknown, rawText: string): boolean => {
+  if (!hasMeaningfulValue(quote) || !hasMeaningfulValue(rawText)) return false;
+  const q = normalizeText(String(quote));
+  if (q.length < 2) return false;
+  return normalizeText(rawText).includes(q);
+};
+
+const mapEnglishLevel = (level?: string | null): string => {
+  const match = String(level || '').toUpperCase().match(/\b(A1|A2|B1|B2|C1|C2)\b/);
+  return match?.[1] || '';
+};
+
+const mapNativeLanguage = (language?: string | null): string => {
+  if (!hasMeaningfulValue(language)) return '';
+  const normalized = normalizeText(language!);
+  return NATIVE_LANGUAGES.find((lang) => normalizeText(lang.value) === normalized || normalizeText(lang.label) === normalized)?.value || '';
+};
+
+const mapGoalToSelectValue = (goalText?: string | null): string => {
+  if (!hasMeaningfulValue(goalText)) return '';
+  const text = normalizeText(goalText!);
+  const exact = MAIN_GOALS.find((goal) => normalizeText(goal.value) === text || normalizeText(goal.label) === text);
+  if (exact) return exact.value;
+
+  const synonymRules: Array<[string[], string]> = [
+    [['work', 'business', 'job', 'career', 'meeting', 'presentation', 'client', 'professional', 'interview'], 'work'],
+    [['ielts', 'toefl', 'cambridge', 'exam', 'certificate', 'cae', 'fce', 'cpe'], 'exam'],
+    [['general', 'overall', 'fluency', 'speaking', 'conversation', 'grammar', 'vocabulary'], 'general'],
+    [['travel', 'trip', 'holiday', 'vacation'], 'travel'],
+    [['academic', 'university', 'study', 'research', 'paper'], 'academic'],
+    [['social', 'people', 'small talk', 'networking', 'friends'], 'social-conversation'],
+    [['confidence', 'self', 'personal development', 'improve myself'], 'personal-development'],
+    [['fun', 'movie', 'music', 'game', 'entertainment', 'hobby'], 'fun-entertainment'],
+  ];
+
+  for (const [keywords, value] of synonymRules) {
+    if (keywords.some((keyword) => text.includes(keyword))) return value;
+  }
+  return 'custom';
+};
+
+const getMainGoalSuggestionText = (extraction: IntakeExtractionPayload | null): string => {
+  const direct = extraction?.main_goal?.value;
+  if (hasMeaningfulValue(direct)) return direct!.trim();
+
+  const goal = extraction?.goals?.find((item) => normalizeText(item.goal_type || '') === 'main') || extraction?.goals?.[0];
+  if (!goal) return '';
+  const title = hasMeaningfulValue(goal.title) ? goal.title!.trim() : '';
+  const description = hasMeaningfulValue(goal.description) ? goal.description!.trim() : '';
+  if (title && !['main', 'goal', 'primary goal'].includes(normalizeText(title))) return title;
+  return description;
+};
+
+const getMainGoalTargetDate = (extraction: IntakeExtractionPayload | null): string => {
+  const direct = extraction?.main_goal?.target_date;
+  if (hasMeaningfulValue(direct)) return direct!.trim();
+  const goal = extraction?.goals?.find((item) => normalizeText(item.goal_type || '') === 'main') || extraction?.goals?.[0];
+  return hasMeaningfulValue(goal?.target_date) ? goal!.target_date!.trim() : '';
+};
+
+const getMainGoalConfidence = (extraction: IntakeExtractionPayload | null): number => {
+  if (extraction?.main_goal) return confidenceOf(extraction.main_goal);
+  const goal = extraction?.goals?.find((item) => normalizeText(item.goal_type || '') === 'main') || extraction?.goals?.[0];
+  return confidenceOf(goal);
+};
 
 interface AddStudentDialogProps {
   /** If provided, the dialog will NOT navigate to /student/:id on success —
