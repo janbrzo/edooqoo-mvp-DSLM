@@ -461,7 +461,7 @@ export const AddStudentDialog = ({
           </Button>
         </DialogTrigger>
       )}
-      <DialogContent className="sm:max-w-[480px] max-h-[88vh] overflow-y-auto">
+      <DialogContent className={`${pasteEnabled ? 'sm:max-w-[980px]' : 'sm:max-w-[480px]'} max-h-[88vh] overflow-y-auto transition-[max-width] duration-200`}>
         <DialogHeader>
           <div className="flex items-start justify-between gap-2">
             <div>
@@ -482,174 +482,181 @@ export const AddStudentDialog = ({
             </Button>
           </div>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-3">
-          {/* Row 1: name + email */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="space-y-1">
-              <Label htmlFor="name" className="text-xs">Name <span className="text-destructive">*</span></Label>
-              <Input
-                id="name"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="Student's name"
-                required
-                autoFocus
-                className="h-9"
-              />
-            </div>
-            <div className="space-y-1">
-              <Label htmlFor="email" className="text-xs">Email <span className="text-destructive">*</span></Label>
-              <Input
-                id="email"
-                type="email"
-                value={studentEmail}
-                onChange={(e) => setStudentEmail(e.target.value)}
-                placeholder="student@example.com"
-                required
-                className="h-9"
-              />
-            </div>
-          </div>
-
-          {/* Row 2: native language (always shown — short) */}
-          <div className="space-y-1">
-            <Label htmlFor="native-language" className="text-xs">Native Language</Label>
-            <Select value={nativeLanguage} onValueChange={setNativeLanguage}>
-              <SelectTrigger id="native-language" className="h-9">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {NATIVE_LANGUAGES.map((lang) => (
-                  <SelectItem key={lang.value} value={lang.value}>
-                    {lang.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* v6.9.33 — 3-mode setup */}
-          <RadioGroup value={mode} onValueChange={(v: any) => setMode(v)} className="space-y-1.5">
-            <div className="flex items-start gap-2 rounded-md border bg-muted/30 p-2.5">
-              <RadioGroupItem id="mode-know" value="know" className="mt-0.5" />
-              <Label htmlFor="mode-know" className="flex-1 cursor-pointer">
-                <span className="text-xs font-medium block">I already know my student</span>
-                <span className="text-[11px] text-muted-foreground">
-                  Set CEFR level and main goal now. Roadmap and Next Steps unlock immediately.
-                </span>
-              </Label>
-            </div>
-            {mode === 'know' && (
-              <div className="space-y-3 border-l-2 border-primary/30 pl-3 ml-2">
-                <div className="space-y-1">
-                  <Label htmlFor="level" className="text-xs">English Level (CEFR) <span className="text-destructive">*</span></Label>
-                  <Select value={englishLevel} onValueChange={setEnglishLevel} required>
-                    <SelectTrigger className="h-9"><SelectValue placeholder="Select level" /></SelectTrigger>
-                    <SelectContent>
-                      {ENGLISH_LEVELS.map((level) => (
-                        <SelectItem key={level.value} value={level.value}>{level.label}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-1">
-                  <Label htmlFor="goal" className="text-xs flex items-center gap-1.5">
-                    Main Goal <span className="text-destructive">*</span>
-                    <TooltipProvider delayDuration={150}>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <button type="button" className="text-muted-foreground hover:text-foreground" aria-label="What is Main Goal?">
-                            <Info className="h-3 w-3" />
-                          </button>
-                        </TooltipTrigger>
-                        <TooltipContent side="right" className="max-w-xs">
-                          Main Goal is the student's primary outcome (e.g. job interview in English, B2 exam). You'll be able to add Supporting Goals (sub-skills) and Additional Goals (side topics) later from the student's Goals tab.
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </Label>
-                  <Select value={mainGoal} onValueChange={setMainGoal} required>
-                    <SelectTrigger className="h-9"><SelectValue placeholder="Select main goal" /></SelectTrigger>
-                    <SelectContent>
-                      {MAIN_GOALS.map((goal) => (
-                        <SelectItem key={goal.value} value={goal.value}>{goal.label}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  {mainGoal === 'custom' && (
-                    <Input
-                      placeholder="Describe the custom goal"
-                      value={customGoal}
-                      onChange={(e) => setCustomGoal(e.target.value)}
-                      required
-                      className="h-9 mt-1"
-                    />
-                  )}
-                </div>
-                <div className="space-y-1">
-                  <Label className="text-xs">Goal Deadline (optional)</Label>
-                  <DeadlinePicker value={mainGoalDeadline} onChange={setMainGoalDeadline} compact />
-                </div>
-                <div className="flex items-start gap-2 rounded-md border bg-muted/30 p-2 mt-2">
-                  <Checkbox
-                    id="send-test-known"
-                    checked={sendTestWhenKnown}
-                    onCheckedChange={(v) => setSendTestWhenKnown(!!v)}
-                    className="mt-0.5"
-                  />
-                  <Label htmlFor="send-test-known" className="text-[11px] cursor-pointer">
-                    Also send the Welcome Test (refines learning profile)
-                  </Label>
-                </div>
+        <form onSubmit={handleSubmit} className={pasteEnabled ? 'space-y-3 lg:grid lg:grid-cols-[430px_minmax(0,1fr)] lg:gap-5 lg:space-y-0 lg:items-start' : 'space-y-3'}>
+          <div className="space-y-3">
+            {/* Row 1: name + email */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1">
+                <Label htmlFor="name" className="text-xs">Name <span className="text-destructive">*</span></Label>
+                <Input
+                  id="name"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  placeholder="Student's name"
+                  required
+                  autoFocus
+                  className="h-9"
+                />
               </div>
-            )}
-            <div className="flex items-start gap-2 rounded-md border border-primary/30 bg-primary/5 p-2.5">
-              <RadioGroupItem id="mode-defer" value="defer" className="mt-0.5" />
-              <Label htmlFor="mode-defer" className="flex-1 cursor-pointer">
-                <span className="text-xs font-medium block">I don't know my student yet — fill from Welcome Test</span>
-                <span className="text-[11px] text-muted-foreground">
-                  Recommended. The test is sent right after creating. Roadmap + Next Steps unlock once the student completes it (usually 1–3 days). Use generic worksheets in the meantime.
-                </span>
-              </Label>
+              <div className="space-y-1">
+                <Label htmlFor="email" className="text-xs">Email <span className="text-destructive">*</span></Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={studentEmail}
+                  onChange={(e) => setStudentEmail(e.target.value)}
+                  placeholder="student@example.com"
+                  required
+                  className="h-9"
+                />
+              </div>
             </div>
-          </RadioGroup>
 
-          {/* Overdue email toggle — compact row */}
-          <div className="flex items-center justify-between gap-2 pt-1">
-            <Label htmlFor="send-overdue-new" className="text-xs text-muted-foreground cursor-pointer">
-              Send overdue homework reminders
-            </Label>
-            <Switch
-              id="send-overdue-new"
-              checked={sendOverdueEmails}
-              onCheckedChange={setSendOverdueEmails}
+            {/* Row 2: native language (always shown — short) */}
+            <div className="space-y-1">
+              <Label htmlFor="native-language" className="text-xs">Native Language</Label>
+              <Select value={nativeLanguage} onValueChange={setNativeLanguage}>
+                <SelectTrigger id="native-language" className="h-9">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {NATIVE_LANGUAGES.map((lang) => (
+                    <SelectItem key={lang.value} value={lang.value}>
+                      {lang.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-[10px] text-muted-foreground">
+                AI will only change this if the notes explicitly mention the student's native language.
+              </p>
+            </div>
+
+            <div className="rounded-md border bg-muted/20 p-3 space-y-3">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <Label htmlFor="know-student-toggle" className="text-xs font-medium cursor-pointer">
+                    {knowsStudent ? 'I already know my student' : "I don't know my student yet"}
+                  </Label>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">
+                    {knowsStudent
+                      ? 'Set CEFR level and main goal now. AI suggestions fill these fields, then you can edit them.'
+                      : 'Recommended. Fill level and goal from the Welcome Test after the student completes it.'}
+                  </p>
+                </div>
+                <Switch
+                  id="know-student-toggle"
+                  checked={knowsStudent}
+                  onCheckedChange={(checked) => setMode(checked ? 'know' : 'defer')}
+                />
+              </div>
+
+              {knowsStudent && (
+                <div className="space-y-3 border-t pt-3">
+                  <div className="space-y-1">
+                    <Label htmlFor="level" className="text-xs">English Level (CEFR) <span className="text-destructive">*</span></Label>
+                    <Select value={englishLevel} onValueChange={setEnglishLevel} required>
+                      <SelectTrigger className="h-9"><SelectValue placeholder="Select level" /></SelectTrigger>
+                      <SelectContent>
+                        {ENGLISH_LEVELS.filter((level) => level.value !== 'unknown').map((level) => (
+                          <SelectItem key={level.value} value={level.value}>{level.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="space-y-1">
+                    <Label htmlFor="goal" className="text-xs flex items-center gap-1.5">
+                      Main Goal <span className="text-destructive">*</span>
+                      <TooltipProvider delayDuration={150}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <button type="button" className="text-muted-foreground hover:text-foreground" aria-label="What is Main Goal?">
+                              <Info className="h-3 w-3" />
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent side="right" className="max-w-xs">
+                            Main Goal is the student's primary outcome (e.g. job interview in English, B2 exam). You'll be able to add Supporting Goals and Additional Goals later from the student's Goals tab.
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                    </Label>
+                    <Select value={mainGoal} onValueChange={setMainGoal} required>
+                      <SelectTrigger className="h-9"><SelectValue placeholder="Select main goal" /></SelectTrigger>
+                      <SelectContent>
+                        {MAIN_GOALS.map((goal) => (
+                          <SelectItem key={goal.value} value={goal.value}>{goal.label}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {mainGoal === 'custom' && (
+                      <Input
+                        placeholder="Describe the custom goal"
+                        value={customGoal}
+                        onChange={(e) => setCustomGoal(e.target.value)}
+                        required
+                        className="h-9 mt-1"
+                      />
+                    )}
+                  </div>
+                  <div className="space-y-1">
+                    <Label className="text-xs">Goal Deadline (optional)</Label>
+                    <DeadlinePicker value={mainGoalDeadline} onChange={setMainGoalDeadline} compact />
+                  </div>
+                  <div className="flex items-start gap-2 rounded-md border bg-background p-2 mt-2">
+                    <Checkbox
+                      id="send-test-known"
+                      checked={sendTestWhenKnown}
+                      onCheckedChange={(v) => setSendTestWhenKnown(!!v)}
+                      className="mt-0.5"
+                    />
+                    <Label htmlFor="send-test-known" className="text-[11px] cursor-pointer">
+                      Also send the Welcome Test (refines learning profile)
+                    </Label>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Overdue email toggle — compact row */}
+            <div className="flex items-center justify-between gap-2 pt-1">
+              <Label htmlFor="send-overdue-new" className="text-xs text-muted-foreground cursor-pointer">
+                Send overdue homework reminders
+              </Label>
+              <Switch
+                id="send-overdue-new"
+                checked={sendOverdueEmails}
+                onCheckedChange={setSendOverdueEmails}
+              />
+            </div>
+          </div>
+
+          <div className={pasteEnabled ? 'lg:border-l lg:pl-5 lg:min-w-0' : ''}>
+            {/* v6.9.62 P6 — Paste intake (AI). Opt-in, independent of know/defer. */}
+            <PasteIntakeSection
+              enabled={pasteEnabled}
+              onEnabledChange={setPasteEnabled}
+              rawText={pasteRaw}
+              onRawTextChange={setPasteRaw}
+              extraction={extraction}
+              onExtractionChange={setExtraction}
+              includes={intakeIncludes}
+              setIncludes={setIntakeIncludes}
+              existing={{
+                english_level: knowsStudent ? englishLevel || null : null,
+                main_goal: knowsStudent
+                  ? (mainGoal === 'custom' ? customGoal : mainGoal) || null
+                  : null,
+                main_goal_target_date: knowsStudent ? mainGoalDeadline || null : null,
+                native_language: nativeLanguage || null,
+                mainGoalSet: knowsStudent,
+              }}
+              analysisExisting={intakeExistingForAnalysis}
+              model={extractionModel}
+              onModelResolved={setExtractionModel}
             />
           </div>
 
-          {/* v6.9.62 P6 — Paste intake (AI). Opt-in, independent of know/defer. */}
-          <PasteIntakeSection
-            enabled={pasteEnabled}
-            onEnabledChange={setPasteEnabled}
-            rawText={pasteRaw}
-            onRawTextChange={setPasteRaw}
-            extraction={extraction}
-            onExtractionChange={setExtraction}
-            includes={intakeIncludes}
-            setIncludes={setIntakeIncludes}
-            existing={{
-              english_level: mode === 'know' ? englishLevel || null : null,
-              main_goal: mode === 'know'
-                ? (mainGoal === 'custom' ? customGoal : mainGoal) || null
-                : null,
-              main_goal_target_date: mode === 'know' ? mainGoalDeadline || null : null,
-              native_language: nativeLanguage || null,
-              mainGoalSet: mode === 'know',
-            }}
-            model={extractionModel}
-            onModelResolved={setExtractionModel}
-          />
-
-          <div className="flex justify-end gap-2 pt-2">
+          <div className={pasteEnabled ? 'flex justify-end gap-2 pt-2 lg:col-span-2' : 'flex justify-end gap-2 pt-2'}>
             <Button type="button" variant="outline" onClick={() => setOpen(false)} size="sm">
               Cancel
             </Button>
