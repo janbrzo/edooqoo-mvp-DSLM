@@ -35,9 +35,10 @@ RULES:
 - Andragogy: describe professional adult contexts (work, goals, life), avoid classroom labels.
 - Signals belong either to "Personal" (life/work/interests/personality) or "Skill Assessment"
   (language strengths/weaknesses/mistakes/practice).
-- The teacher already filled some profile fields ("existing_profile" in the user message).
-  When existing_profile.english_level is already set, your english_level extraction is treated
-  as a SUGGESTION, never auto-applied. Same for main_goal and native_language.
+- The teacher may already have default UI values in "existing_profile". Treat existing_profile
+  only as conflict context. NEVER use it as evidence and NEVER copy native_language from it.
+- Native language may be returned only when the raw notes explicitly mention it or clearly state
+  nationality/mother tongue. A dropdown default such as Spanish is not evidence.
 
 OUTPUT FORMAT — return a SINGLE JSON object with EXACTLY these top-level keys (no prose,
 no markdown fences):
@@ -125,8 +126,17 @@ Deno.serve(async (req) => {
     });
   }
 
+  const safeExistingProfile = {
+    english_level: typeof existingProfile?.english_level === "string" ? existingProfile.english_level : null,
+    main_goal: typeof existingProfile?.main_goal === "string" ? existingProfile.main_goal : null,
+    main_goal_target_date: typeof existingProfile?.main_goal_target_date === "string" ? existingProfile.main_goal_target_date : null,
+    native_language: null,
+    mainGoalSet: Boolean(existingProfile?.mainGoalSet),
+  };
+
   const userMsg =
-    `existing_profile: ${JSON.stringify(existingProfile)}\n\n` +
+    `existing_profile: ${JSON.stringify(safeExistingProfile)}\n` +
+    `Important: existing_profile is NOT evidence. Extract only from Raw teacher notes.\n\n` +
     `Raw teacher notes:\n"""\n${rawText}\n"""\n\n` +
     `Extract the profile. Return ONLY the JSON object described in the system message.`;
 
@@ -135,7 +145,7 @@ Deno.serve(async (req) => {
     { role: "user", content: userMsg },
   ];
 
-  const stageOne = await tryAiStage(messages, PRIMARY_MODEL, false);
+  const stageOne = await tryAiStage(messages, PRIMARY_MODEL, false, rawText);
   if (stageOne.kind === "rate_limited") {
     return jsonResponse(429, { error: "ai_rate_limited", status: 429 });
   }
@@ -146,7 +156,7 @@ Deno.serve(async (req) => {
     return jsonResponse(200, { ok: true, extraction: stageOne.extraction, model: stageOne.model });
   }
 
-  const stageTwo = await tryAiStage(messages, FALLBACK_MODEL, true);
+  const stageTwo = await tryAiStage(messages, FALLBACK_MODEL, true, rawText);
   if (stageTwo.kind === "ok") {
     return jsonResponse(200, { ok: true, extraction: stageTwo.extraction, model: stageTwo.model });
   }
@@ -182,6 +192,7 @@ async function tryAiStage(
   messages: Array<{ role: string; content: string }>,
   model: string,
   skipPrimary: boolean,
+  rawText: string,
 ): Promise<AiStageResult> {
   try {
     const opts: any = { primaryModel: model, functionName: "extract-student-profile" };
@@ -217,6 +228,8 @@ async function tryAiStage(
       return { kind: "invalid_json" };
     }
     normalizeExtraction(extraction);
+    enforceEvidenceQuotes(extraction, rawText);
+    enrichDeterministicIdentity(extraction, rawText);
     return { kind: "ok", extraction, model };
   } catch (e) {
     const message = e instanceof Error ? e.message : "unknown";
@@ -256,16 +269,79 @@ function stripControlChars(s: string): string {
 }
 
 function normalizeExtraction(extraction: any): void {
+  const toConfidence = (value: unknown): number => {
+    const parsed = typeof value === "number" ? value : Number(value);
+    return Number.isFinite(parsed) ? Math.max(0, Math.min(1, parsed)) : 0;
+  };
+  for (const key of ["student_name", "student_email", "english_level", "main_goal", "native_language", "pacing"]) {
+    if (extraction?.[key] && typeof extraction[key] === "object") {
+      extraction[key].confidence = toConfidence(extraction[key].confidence);
+    }
+  }
   if (Array.isArray(extraction.signals)) {
     extraction.signals = extraction.signals
-      .filter((s: any) => typeof s?.confidence === "number" && s.confidence >= 0.55)
+      .map((s: any) => ({ ...s, confidence: toConfidence(s?.confidence) }))
+      .filter((s: any) => s.confidence >= 0.55)
       .slice(0, 12);
   } else extraction.signals = [];
   if (Array.isArray(extraction.goals)) {
     extraction.goals = extraction.goals
-      .filter((g: any) => typeof g?.confidence === "number" && g.confidence >= 0.55)
+      .map((g: any) => ({ ...g, confidence: toConfidence(g?.confidence) }))
+      .filter((g: any) => g.confidence >= 0.55)
       .slice(0, 5);
   } else extraction.goals = [];
+}
+
+function quoteAppearsInRaw(quote: unknown, rawText: string): boolean {
+  if (typeof quote !== "string" || !quote.trim()) return false;
+  const q = quote.trim().toLowerCase();
+  if (q.length < 2) return false;
+  return rawText.toLowerCase().includes(q);
+}
+
+function clearIfNoEvidence(extraction: any, key: string): void {
+  const value = extraction?.[key];
+  if (!value || typeof value !== "object") return;
+  if (!quoteAppearsInRaw(value.evidence_quote, extraction.__rawTextForEvidence)) extraction[key] = null;
+}
+
+function enforceEvidenceQuotes(extraction: any, rawText: string): void {
+  extraction.__rawTextForEvidence = rawText;
+  clearIfNoEvidence(extraction, "student_name");
+  clearIfNoEvidence(extraction, "student_email");
+  clearIfNoEvidence(extraction, "english_level");
+  clearIfNoEvidence(extraction, "main_goal");
+  clearIfNoEvidence(extraction, "native_language");
+  delete extraction.__rawTextForEvidence;
+
+  if (Array.isArray(extraction.signals)) {
+    extraction.signals = extraction.signals.filter((item: any) => quoteAppearsInRaw(item?.evidence_quote, rawText));
+  }
+  if (Array.isArray(extraction.goals)) {
+    extraction.goals = extraction.goals.filter((item: any) => quoteAppearsInRaw(item?.evidence_quote, rawText));
+  }
+}
+
+function enrichDeterministicIdentity(extraction: any, rawText: string): void {
+  const email = rawText.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i)?.[0];
+  if (email && !extraction.student_email) {
+    extraction.student_email = { value: email.toLowerCase(), confidence: 0.95, evidence_quote: email };
+  }
+
+  if (!extraction.student_name) {
+    const namePatterns = [
+      /(?:student name|name|imi[eę](?: i nazwisko)?|ucze[nń]|uczennica|studentka|student|kursant|kursantka)\s*[:\-–]\s*([^\n,;<>@]{2,120})/i,
+      /(?:nazywa si[eę]|to jest)\s+([^\n,;<>@]{2,120})/i,
+    ];
+    for (const pattern of namePatterns) {
+      const match = rawText.match(pattern);
+      const candidate = match?.[1]?.trim().replace(/\s+/g, " ").replace(/[.。]+$/, "");
+      if (candidate && /[\p{L}]/u.test(candidate) && !/email|mail|@/i.test(candidate)) {
+        extraction.student_name = { value: candidate.slice(0, 120), confidence: 0.9, evidence_quote: match![0].trim() };
+        break;
+      }
+    }
+  }
 }
 
 function buildDeterministicExtraction(rawText: string, existing: any): any {
@@ -276,10 +352,12 @@ function buildDeterministicExtraction(rawText: string, existing: any): any {
   const cefrMatch = text.match(/\b(A1|A2|B1|B2|C1|C2)\b/);
   if (cefrMatch) cefr = cefrMatch[1].toUpperCase();
 
-  let nativeLang: string | null = existing?.native_language || null;
-  if (!nativeLang) {
-    const langMatch = text.match(/native (?:language|speaker)[:\s]+([A-Za-z]+)/i);
-    if (langMatch) nativeLang = langMatch[1];
+  let nativeLang: string | null = null;
+  let nativeQuote = "";
+  const langMatch = text.match(/(?:native language|mother tongue|native speaker|język ojczysty|ojczysty)[:\s\-–]+([A-Za-zÀ-ž]+)/i);
+  if (langMatch) {
+    nativeLang = langMatch[1];
+    nativeQuote = langMatch[0];
   }
 
   const goalSignals: Array<[RegExp, string]> = [
@@ -304,14 +382,18 @@ function buildDeterministicExtraction(rawText: string, existing: any): any {
   const language = /^[\x00-\x7F]*$/.test(text) ? "en" : "und";
   const summary = text.split(/\s+/).slice(0, 180).join(" ").slice(0, 1200);
 
-  return {
+  const deterministic = {
     language,
     summary_notes: summary,
+    student_name: null,
+    student_email: null,
     signals: [],
     goals: [],
     english_level: cefr ? { value: cefr, confidence: 0.6, evidence_quote: cefr } : null,
     main_goal: mainGoal,
-    native_language: nativeLang ? { value: nativeLang, confidence: 0.6, evidence_quote: nativeLang } : null,
+    native_language: nativeLang ? { value: nativeLang, confidence: 0.8, evidence_quote: nativeQuote || nativeLang } : null,
     pacing: null,
   };
+  enrichDeterministicIdentity(deterministic, rawText);
+  return deterministic;
 }
