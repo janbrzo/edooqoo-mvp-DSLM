@@ -87,7 +87,8 @@ const getMainGoalSuggestionText = (extraction: IntakeExtractionPayload | null): 
   const title = hasMeaningfulValue(goal.title) ? goal.title!.trim() : '';
   const description = hasMeaningfulValue(goal.description) ? goal.description!.trim() : '';
   if (title && !['main', 'goal', 'primary goal'].includes(normalizeText(title))) return title;
-  return description;
+  if (description) return description;
+  return hasMeaningfulValue(goal.evidence_quote) ? goal.evidence_quote!.trim() : '';
 };
 
 const getMainGoalTargetDate = (extraction: IntakeExtractionPayload | null): string => {
