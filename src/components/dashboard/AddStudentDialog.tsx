@@ -97,12 +97,6 @@ const getMainGoalTargetDate = (extraction: IntakeExtractionPayload | null): stri
   return hasMeaningfulValue(goal?.target_date) ? goal!.target_date!.trim() : '';
 };
 
-const getMainGoalConfidence = (extraction: IntakeExtractionPayload | null): number => {
-  if (extraction?.main_goal) return confidenceOf(extraction.main_goal);
-  const goal = extraction?.goals?.find((item) => normalizeText(item.goal_type || '') === 'main') || extraction?.goals?.[0];
-  return confidenceOf(goal);
-};
-
 interface AddStudentDialogProps {
   /** If provided, the dialog will NOT navigate to /student/:id on success —
    *  the caller takes over (e.g. WorksheetForm auto-selects the new student). */
