@@ -269,14 +269,25 @@ function stripControlChars(s: string): string {
 }
 
 function normalizeExtraction(extraction: any): void {
+  const toConfidence = (value: unknown): number => {
+    const parsed = typeof value === "number" ? value : Number(value);
+    return Number.isFinite(parsed) ? Math.max(0, Math.min(1, parsed)) : 0;
+  };
+  for (const key of ["student_name", "student_email", "english_level", "main_goal", "native_language", "pacing"]) {
+    if (extraction?.[key] && typeof extraction[key] === "object") {
+      extraction[key].confidence = toConfidence(extraction[key].confidence);
+    }
+  }
   if (Array.isArray(extraction.signals)) {
     extraction.signals = extraction.signals
-      .filter((s: any) => typeof s?.confidence === "number" && s.confidence >= 0.55)
+      .map((s: any) => ({ ...s, confidence: toConfidence(s?.confidence) }))
+      .filter((s: any) => s.confidence >= 0.55)
       .slice(0, 12);
   } else extraction.signals = [];
   if (Array.isArray(extraction.goals)) {
     extraction.goals = extraction.goals
-      .filter((g: any) => typeof g?.confidence === "number" && g.confidence >= 0.55)
+      .map((g: any) => ({ ...g, confidence: toConfidence(g?.confidence) }))
+      .filter((g: any) => g.confidence >= 0.55)
       .slice(0, 5);
   } else extraction.goals = [];
 }
