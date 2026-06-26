@@ -32,6 +32,13 @@ interface Props {
     native_language?: string | null;
     mainGoalSet?: boolean;
   };
+  analysisExisting?: {
+    english_level?: string | null;
+    main_goal?: string | null;
+    main_goal_target_date?: string | null;
+    native_language?: string | null;
+    mainGoalSet?: boolean;
+  };
   model: string | null;
   onModelResolved: (model: string) => void;
 }
@@ -46,6 +53,7 @@ export const PasteIntakeSection: React.FC<Props> = ({
   includes,
   setIncludes,
   existing,
+  analysisExisting,
   onModelResolved,
 }) => {
   const [analyzing, setAnalyzing] = useState(false);
@@ -71,7 +79,7 @@ export const PasteIntakeSection: React.FC<Props> = ({
       const { data, error } = await supabase.functions.invoke('extract-student-profile', {
         body: {
           raw_text: rawText,
-          existing_profile: existing,
+          existing_profile: analysisExisting ?? existing,
         },
       });
       if (error) {
