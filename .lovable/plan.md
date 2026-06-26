@@ -1,394 +1,306 @@
-## Plan v6.9.72 — Problem Resolution Cycle
+# Plan wdrożenia v6.9.74 — Add Student AI Intake stabilizacja
 
-Przeczytałem wymagane źródła RAG: `docs/llm-context.md` i `public/llms.txt`. To jest plan wykonawczy do zatwierdzenia przed zmianami w kodzie.
+Zakres jest celowo wąski: naprawiam tylko problemy z modalem `Add Student`, `Paste notes about student`, RPC `apply_intake_extraction`, layoutem modala oraz opisem planu P4/P5 na następną iterację. Worksheet Generation Engine pozostaje nietknięty.
 
-**Do I know what the issue is?** Tak — w dwóch miejscach poprzednia naprawa była za płytka: AI intake nadal może zwracać 502, bo Edge Function traktuje każdy błąd dostawcy/parsing JSON jako twardą awarię, a auto-tłumaczenie fiszek zależy od jednego pola `nativeLanguage`, które w realnym Student Hub potrafi nie dotrzeć do dialogu mimo że rekord studenta ma `native_language`.
-
----
-
-## Problem 1 — Add Student: `Analyze with AI` nadal zwraca 502
+## Problem 1 — Paste notes AI nadal nie wypełnia pól i kończy się 400 przy apply
 
 ### Dependency scan
 Affected surface:
-- `src/components/dashboard/PasteIntakeSection.tsx`
-- `supabase/functions/extract-student-profile/index.ts`
-- `supabase/functions/_shared/aiChat.ts`
-- `supabase/functions/_shared/modelFailureLogger.ts`
-- `supabase/config.toml`
-- `public/llms.txt`
-- `docs/llm-context.md`
+- `src/components/dashboard/AddStudentDialog.tsx` — główny stan formularza, tryb `know/defer`, autofill, submit, przekaz `existing_profile`, layout modala.
+- `src/components/dashboard/PasteIntakeSection.tsx` — wywołanie `extract-student-profile`, reset includes po analizie, przekaz preview.
+- `src/components/dashboard/ExtractionPreviewCard.tsx` — pokazuje `Goals`, `English level`, `Main goal`, `Native language`; obecnie preview może mówić `Auto-apply`, mimo że UI formularza zostaje puste.
+- `src/lib/intake/applyIntakeExtraction.ts` — typ payloadu; `student_name` i `student_email` już są, ale trzeba dopiąć normalizację po stronie edge/client.
+- `supabase/functions/extract-student-profile/index.ts` — prompt, fallback deterministyczny, normalizacja ekstrakcji.
+- `public.apply_intake_extraction(uuid,jsonb,jsonb,text,text)` — aktywna funkcja SQL w Supabase; sprawdzona przez `pg_get_functiondef`.
+- Tabele: `students`, `student_knowledge_entries`, `student_progress_goals`, `pacing_proposals`, `student_intake_extractions`.
+- Constraints sprawdzone: `student_progress_goals.goal_type` dopuszcza tylko `supporting/additional`; `student_knowledge_entries.category` ma zamknięty katalog; daty i confidence mogą wywołać runtime cast error.
 
 ### Root cause
-`extract-student-profile` nadal ma pojedynczy punkt awarii: jeśli Gemini/OpenAI zwróci błąd albo odpowiedź nieparsowalną jako JSON, funkcja zwraca 502 zamiast przejść przez drugi model, naprawę JSON albo bezpieczny fallback ekstrakcji.
+Root cause: system miesza dwa różne źródła prawdy — `existing_profile` z aktualnego formularza jest wysyłany do LLM jako fakt, a wynik AI jest zapisywany głównie jako preview/RPC, ale nie jako deterministyczny draft formularza, więc UI i backend rozjeżdżają się przed submit.
 
 ### Solution options
 | Opcja | Podejście | Tradeoff | Regression risk |
 |---|---|---|---|
-| A | Tylko zmienić model / prompt | Szybkie, ale dalej kruche przy 400/502/invalid JSON | Medium |
-| B | Dodać retry + fallback provider + robust JSON parser + deterministic fallback | Więcej kodu, ale usuwa blokadę testowania | Low |
-| C | Przepisać na AI SDK structured output | Czystsze docelowo, ale większa migracja i ryzyko w istniejącej architekturze | Medium/High |
+| A | Tylko poprawić prompt LLM, żeby częściej zwracał name/email/goal/level | Szybkie, ale dalej zależne od modelu; nie naprawia `native_language` ani UI wymaganych pól | Medium |
+| B | Deterministyczny client-side mapping AI → formularz + odfiltrowanie domyślnego native language z promptu + hardening RPC | Najbezpieczniejsze; UI i DB dostają tę samą decyzję; mniej zależne od LLM | Low |
+| C | Usunąć required level/goal przy `know` i zostawić wszystko w preview/RPC | Mniej friction, ale semantycznie błędne: teacher wybrał, że zna studenta, więc powinien widzieć i edytować wartości przed zapisem | Medium |
 
 ### Selected solution + why
-Wybieram **B**. To najmniejsza zmiana, która usuwa strukturalną przyczynę 502 bez zmiany Worksheet Generation Engine i bez przebudowy całego AI stacku. Priorytet: użytkownik ma móc kontynuować testy nawet gdy provider zwróci błędną odpowiedź.
+Wybieram opcję B. To zamyka przyczynę strukturalną: po analizie AI standardowe pola formularza staną się edytowalnym draftem, a RPC dostanie odporny payload bez wartości sztucznie wziętych z dropdownu. Jest to najbardziej odporne na regresje, bo nie zmienia modelu danych ani workflow Welcome Test — tylko synchronizuje istniejące pola.
 
 ### Impact analysis
 Zero regressions confirmed:
-- Nie dotykam `generateWorksheet` ani żadnego promptu worksheet engine.
-- Nie zmieniam zapisu studenta; AI intake dalej tylko zwraca preview.
-- Zachowuję statusy 429 i 402 jako czytelne błędy UI.
-- Zmieniam tylko ścieżkę `extract-student-profile` i wspólny helper AI w sposób backward-compatible.
+- `defer` nadal tworzy studenta bez wymaganego level/goal i wysyła Welcome Test.
+- `know` nadal wymaga level/goal, ale po AI pola będą uzupełnione, więc nie będzie blokady mimo widocznej propozycji na dole.
+- Nauczyciel może zmienić/usunąć AI wartości przed zapisem.
+- `students.main_goal` pozostaje jedynym miejscem na main goal; `student_progress_goals` nadal tylko `supporting/additional`.
+- `native_language` nie będzie „zgadywany” z obecnego dropdownu.
+- Content-script warnings z konsoli nie będą traktowane jako błąd aplikacji; realny błąd to `400` RPC.
 
 ### Full implementation
-1. W `supabase/functions/_shared/aiChat.ts` dodam kontrolowane opcje:
-   - `fallbackOnStatuses?: number[]` — dla funkcji, które mają fallbackować także na 400/401/403 provider validation/auth errors.
-   - `forceProvider?: 'primary' | 'fallback'` albo równoważny `skipPrimary` — żeby `extract-student-profile` mogło jawnie zrobić drugą próbę na fallbacku, bez hacków.
-   - logowanie błędów bez wycieku danych wejściowych.
-2. W `supabase/functions/extract-student-profile/index.ts` dodam:
-   - `parseJsonObjectFromText()` z obsługą markdown fences, brace scanning, trailing commas i whitespace/control chars.
-   - `normalizeExtraction()` walidujące top-level shape, CEFR, confidence, array limits, `summary_notes`, `signals`, `goals`, `english_level`, `main_goal`, `native_language`, `pacing`.
-   - `callAiExtraction()` z kolejnością:
-     1. Gemini JSON mode,
-     2. fallback OpenAI JSON mode na provider error albo invalid JSON,
-     3. deterministic fallback extraction, która zwraca minimalny preview zamiast 502.
-   - Deterministic fallback będzie oznaczony `model: "fallback:deterministic-intake"` i zwróci minimum:
-     - `language` heuristic,
-     - `summary_notes` z bezpiecznie skróconego inputu,
-     - wykryty CEFR jeśli występuje `A1-C2`,
-     - `native_language` jeśli w tekście lub existing profile,
-     - prosty `main_goal` tylko jeśli występują silne frazy typu `exam`, `meeting`, `presentation`, `job interview`, `travel`, `business`.
-3. W `src/components/dashboard/PasteIntakeSection.tsx` doprecyzuję UI obsługi:
-   - 502/provider parse nie powinien kasować możliwości testowania, jeśli backend zwróci fallback extraction.
-   - 429 i 402 zostają jako wyraźne komunikaty.
-4. Deploy po implementacji:
-   - `extract-student-profile`
-   - funkcje zależne od `_shared/aiChat.ts` tylko jeśli zmiana helpera wymaga redeployu używających go hot paths; minimum `extract-student-profile` i `translate-flashcard`.
+1. `AddStudentDialog.tsx`
+   - Dodać helpery:
+     - `isValidEmail(value)`
+     - `normalizeCefr(value)`
+     - `findStandardGoal(value)` — mapuje oczywiste AI cele na `MAIN_GOALS` (`work`, `exam`, `general`, `travel`, `academic`, `social-conversation`, itd.), a gdy brak pewnego dopasowania ustawia `mainGoal='custom'` i `customGoal=<AI value>`.
+     - `deriveMainGoalFromExtraction(extraction)` — preferuje `extraction.main_goal.value`, fallback do pierwszego `goals[]` z `goal_type='main'`.
+   - Zastąpić obecny `useEffect([extraction])` bardziej deterministyczną funkcją `applyExtractionToDraft(extraction)`:
+     - name: wypełnij z `student_name.value`, jeśli pole puste.
+     - email: wypełnij z `student_email.value`, jeśli wygląda jak email i pole puste.
+     - level: wypełnij z `english_level.value`, jeśli `A1-C2` i pole puste.
+     - goal: wypełnij Main Goal z `main_goal` albo `goals[goal_type=main]`; jeśli nie pasuje do standardowego selecta, ustaw `custom` + tekst.
+     - deadline: wypełnij tylko datą `YYYY-MM-DD`; błędne formaty ignoruj.
+     - native language: ustaw tylko gdy `extraction.native_language.evidence_quote` realnie występuje w notatkach i confidence >= 0.8; nie używaj dropdownu jako dowodu.
+   - Po skutecznej analizie wymusić `mode='know'` tylko wtedy, gdy AI znalazło level lub main goal i użytkownik już wybrał `know`; nie przełączać automatycznie z `defer` bez intencji użytkownika. Jeżeli user już jest w `know`, pola obowiązkowe zostają uzupełnione.
+   - `existing` przekazywane do `PasteIntakeSection` zmienić:
+     - dla `english_level/main_goal`: przekazywać tylko realne wartości, jeśli user je wpisał.
+     - dla `native_language`: nie przekazywać domyślnego `Spanish` jako fakt do LLM; wysyłać `null` dopóki user nie zmienił native language ręcznie albo dopóki nie pochodzi z AI.
+   - Dodać stan `nativeLanguageTouched` ustawiany przy ręcznej zmianie dropdownu.
+   - Submit: przed `applyIntakeExtraction` zbudować `payloadForApply`, który:
+     - usuwa `native_language`, jeśli evidence nie jest z notatek,
+     - sanitizuje daty i confidence,
+     - zamienia puste `target_date` na `''`, a błędne daty na `''`, żeby RPC nie castowało śmieci do `date`.
+
+2. `extract-student-profile/index.ts`
+   - Zaostrzyć prompt:
+     - `existing_profile` jest kontekstem UI, nie źródłem dowodu.
+     - `native_language` wolno zwrócić tylko gdy język ojczysty jest jawnie w notatkach, nie z `existing_profile`.
+     - `student_name` i `student_email` są polami wysokiego priorytetu; jeśli w notatkach występuje imię/nazwisko/email, muszą zostać zwrócone.
+   - `normalizeExtraction(extraction)`:
+     - normalizować email do lowercase.
+     - odrzucać `student_email`, jeśli nie przechodzi prostego email regex.
+     - odrzucać `student_name`, jeśli confidence < 0.55 albo jest pusty.
+     - odrzucać `native_language`, jeśli `evidence_quote` puste lub nie występuje w raw text.
+   - `buildDeterministicExtraction(rawText, existing)`:
+     - dodać regex na email.
+     - dodać ostrożny regex na imię/nazwisko dla wzorców typu `Name:`, `Student:`, `Uczeń:`, `Imię:`.
+     - usunąć fallback `let nativeLang = existing?.native_language`; to obecnie powoduje fałszywe `Spanish 100%` albo dowolny dropdown.
+
+3. SQL migration przez `supabase--migration`
+   - Zastąpić `public.apply_intake_extraction` wersją hardeningową:
+     - Przed castem confidence używać helpera inline/CASE z regexem numeric, żeby tekst modelu nie wywalił funkcji.
+     - Przed castem `target_date::date` sprawdzać regex `^\d{4}-\d{2}-\d{2}$`.
+     - `goals[]` z `goal_type='main'` nadal promować do `students.main_goal`, nigdy do `student_progress_goals`.
+     - Jeśli `students.main_goal` już ustawione przez formularz, main goal z AI zapisać jako `student_knowledge_entries` z tagiem `suggested_main_goal`, a nie próbować nadpisywać.
+     - `auto_count` ma liczyć też `student_updates`, żeby toast nie mówił fałszywie `0 items applied`, gdy zaktualizowano tylko profil.
+   - Nie tworzyć nowych tabel, więc GRANT dla nowych tabel nie dotyczy; zachować `GRANT EXECUTE` na funkcję dla `authenticated`.
 
 ### Verification checklist
-- `extract-student-profile` z poprawnym JWT zwraca 200 dla realistycznych notatek: DONE expected.
-- Brak `AI extraction failed. You can still create the student.` dla normalnego inputu: DONE expected.
-- 429/402 nadal mapują się na właściwe komunikaty: DONE expected.
-- Edge logs pokazują model albo fallback, bez raw prywatnych notatek: DONE expected.
-- Worksheet Generation Engine nietknięty: DONE.
+- DONE po implementacji: AI notatki z imieniem i emailem wypełniają `Name` i `Email`.
+- DONE po implementacji: w trybie `I already know my student` AI level `B2` wypełnia górny select.
+- DONE po implementacji: AI main goal wypełnia górne pole Main Goal lub custom goal.
+- DONE po implementacji: nauczyciel może ręcznie zmienić AI wartości przed submit.
+- DONE po implementacji: domyślny `Spanish` nie pojawia się jako AI native language bez dowodu w notatkach.
+- DONE po implementacji: ręcznie wybrany dziwny native language nie jest zwracany przez AI jako 100% certainty.
+- DONE po implementacji: `apply_intake_extraction` nie zwraca 400 dla `main` goal, pustych dat ani nieliczbowego confidence.
+- DONE po implementacji: student tworzy się z wartościami widocznymi w formularzu.
 
----
-
-## Problem 2 — Student Hub `/my`: `Native-language Translation` nie auto-tłumaczy
+## Problem 2 — modal po analizie robi się za długi
 
 ### Dependency scan
 Affected surface:
-- `src/pages/StudentHubFlashcards.tsx`
-- `src/components/student-hub/AddStudentFlashcardDialog.tsx`
-- `src/hooks/useStudentHubData.tsx`
-- `src/hooks/useFlashcardTranslation.tsx`
-- `src/hooks/useFlashcardDefinition.tsx`
-- `supabase/functions/get-student-hub-data/index.ts`
-- `supabase/functions/translate-flashcard/index.ts`
-- `public/llms.txt`
-- `docs/llm-context.md`
+- `AddStudentDialog.tsx` — `DialogContent`, formularz, układ sekcji.
+- `PasteIntakeSection.tsx` — textarea, button Analyze, `ExtractionPreviewCard`.
+- `ExtractionPreviewCard.tsx` — accordion preview.
+- `src/components/ui/dialog.tsx` — nie planuję zmieniać; użyję istniejących klas.
 
 ### Root cause
-Dialog fiszki bierze język tylko z `data.nativeLanguage`; jeśli to pole jest puste/stare/niedostarczone w payloadzie, auto-suggest jest wyłączony mimo że `students.native_language` istnieje w bazie.
+Root cause: formularz i AI preview są renderowane w jednej wąskiej kolumnie `sm:max-w-[480px]`, więc po analizie preview naturalnie wypycha modal w pionie.
 
 ### Solution options
 | Opcja | Podejście | Tradeoff | Regression risk |
 |---|---|---|---|
-| A | Dodać fallback `Spanish` w kliencie | Ukrywa błąd danych i tłumaczy na zły język | Medium |
-| B | Zwracać `native_language` także per flashcard set i używać set-level fallback | Precyzyjne, odporne na payload mismatch | Low |
-| C | Każde otwarcie dialogu robi osobne zapytanie o studenta | Dodatkowy latency i zapytania | Medium |
+| A | Tylko zwiększyć `max-width` modala | Mniej pionowego scrolla, ale dalej chaotyczny układ | Low |
+| B | Po włączeniu Paste Intake przełączyć modal na 2 kolumny desktop / 1 kolumnę mobile | Najbardziej ergonomiczne i zgodne z prośbą | Low |
+| C | Preview przenieść do osobnego nested modal/drawer | Czytelne, ale więcej interakcji i większe ryzyko regresji | Medium |
 
 ### Selected solution + why
-Wybieram **B**. Set należy do konkretnego studenta, więc set-level `student_native_language` jest najbezpieczniejszym kontraktem dla dialogu i nie wymaga dodatkowego requestu.
+Wybieram opcję B. Na desktopie lewa kolumna będzie zawierała podstawowy formularz, a prawa kolumna Paste Notes + AI preview; na mobile zostanie jedna kolumna i dotychczasowy scroll. To rozwiązuje długość bez zmiany flow ani danych.
 
 ### Impact analysis
 Zero regressions confirmed:
-- Nie zmieniam modelu zapisu fiszki poza istniejącym RPC v2.
-- Nie wymuszam błędnego fallbacku na English/Spanish.
-- Translation sets dostają tłumaczenie w języku studenta; definition sets nadal dostają English definition.
+- Modal bez Paste Intake zostaje kompaktowy.
+- Mobile nie dostaje ciasnego 2-column layoutu.
+- Preview nadal używa accordion i include switches.
+- Submit buttons pozostają zawsze na dole, poza prawą kolumną preview.
 
 ### Full implementation
-1. W `supabase/functions/get-student-hub-data/index.ts` rozszerzę `enrichedFlashcardSets` o:
-   - `student_native_language: studentData.native_language ?? null`
-   - opcjonalnie `student_id` tylko jeśli potrzebne klientowi; preferuję nie eksponować więcej niż trzeba.
-2. W `src/hooks/useStudentHubData.tsx` rozszerzę typ `flashcardSets[]` o `student_native_language: string | null`.
-3. W `src/pages/StudentHubFlashcards.tsx` przekażę do dialogu:
-   - `studentNativeLanguage={set.student_native_language || data?.nativeLanguage || ''}`.
-4. W `src/components/student-hub/AddStudentFlashcardDialog.tsx` poprawię UX:
-   - label ma pokazać `Spanish Translation *`, `Korean Translation *`, `Polish Translation *` itd.
-   - spinner ma się pojawiać podczas auto-translate.
-   - komunikat “Ask your teacher…” tylko gdy realnie nie ma języka.
-   - `Save card` pozostaje disabled dopóki back field pusty.
-5. W `src/hooks/useFlashcardTranslation.tsx` dodam bezpieczne logowanie przez `src/utils/logger.ts` albo ograniczę console noise zgodnie z pamięcią projektu.
-6. Deploy po implementacji:
-   - `get-student-hub-data`
-   - `translate-flashcard`, jeśli shared helper AI zostanie zmieniony.
+- `DialogContent`:
+  - gdy `pasteEnabled`: `sm:max-w-[960px] lg:max-w-[1040px] max-h-[88vh] overflow-hidden`.
+  - gdy nie: obecne `sm:max-w-[480px] max-h-[88vh] overflow-y-auto`.
+- Wewnątrz formularza:
+  - `form` jako `flex flex-col`.
+  - body jako `grid grid-cols-1 lg:grid-cols-[minmax(0,420px)_minmax(0,1fr)] gap-4 overflow-y-auto`.
+  - lewa kolumna: name/email/native/mode/level/goal/reminders.
+  - prawa kolumna: `PasteIntakeSection`, sticky-ish top tylko na desktopie bez agresywnych fixed pozycji.
+- Footer buttons: pełna szerokość, bez overlapu, pod gridem.
 
 ### Verification checklist
-- Dla setu `NATIV WORK` student ma `native_language = Spanish`, więc label pokazuje `Spanish Translation *`: DONE expected.
-- Wpisanie `mother` automatycznie wypełnia `madre`: DONE expected.
-- Dla definition setu wpisanie `mom` nadal daje English definition: DONE expected.
-- Brak fallbacku do złego języka: DONE expected.
+- DONE po implementacji: bez paste toggle modal wygląda jak wcześniej.
+- DONE po implementacji: po włączeniu paste toggle modal rozszerza się na desktopie.
+- DONE po implementacji: textarea + Analyze + preview są po prawej stronie na desktopie.
+- DONE po implementacji: mobile pozostaje jedną kolumną bez poziomego scrolla.
 
----
-
-## Problem 3 — Welcome Test translations: kompletność i aktualność
+## Problem 3 — sprzeczne radio UI: widać `I already know...` i `I don't know...` naraz
 
 ### Dependency scan
 Affected surface:
-- `src/data/welcomeTestQuestions.ts`
-- `src/data/welcomeTestTranslations.ts`
-- `scripts/audit-welcome-test-translations.mjs`
-- `src/hooks/useWelcomeTest.tsx`
-- `docs/llm-context.md`
-- `public/llms.txt`
+- `AddStudentDialog.tsx` — `RadioGroup`, `RadioGroupItem`, opis trybu, conditional fields.
+- `src/components/ui/switch.tsx` — wykorzystanie istniejącego Switcha; brak zmian w komponencie UI.
+- `src/components/ui/radio-group.tsx` — import stanie się zbędny; pliku nie zmieniam.
 
 ### Root cause
-Obecny audyt sprawdza strukturę 35 profiling IDs i 25 języków, ale nie ma jeszcze pełnego “stale coverage guard” dla wszystkich przyszłych typów pytań i nie raportuje, które pytania są celowo nietłumaczone jako skill items.
+Root cause: wybór trybu jest zakodowany jako dwie karty radio renderowane zawsze w jednym pionowym bloku, więc po wyborze `know` użytkownik nadal widzi komunikat `I don't know...`, który semantycznie przeczy wybranemu trybowi.
 
 ### Solution options
 | Opcja | Podejście | Tradeoff | Regression risk |
 |---|---|---|---|
-| A | Zostawić jak jest, bo obecny audyt przechodzi 25/25 | Brak dodatkowej ochrony przed przyszłym stale data | Low teraz, Medium później |
-| B | Rozszerzyć audyt o manifest expected/ignored + empty/duplicate sanity checks | Najlepsza ochrona bez zmiany treści | Low |
-| C | Przepuścić wszystkie tłumaczenia przez AI semantic QA | Kosztowne, ryzyko false positives, wymaga review lingwistycznego | Medium |
+| A | Ukrywać niewybraną kartę radio | Mniej zmian, ale radio z jedną opcją jest dziwne | Low |
+| B | Zastąpić dwie karty jednym Switchem `I already know this student's level and goal` | Najczytelniejsze; jeden stan, jeden opis | Low |
+| C | Zrobić segmented control | Dobre UX, ale wymaga nowego wzorca | Medium |
 
 ### Selected solution + why
-Wybieram **B**. Obecny wynik audytu jest dobry: `35 profiling IDs`, `25/25 languages OK`. Dodatkowa warstwa zabezpieczy przyszłe pytania bez automatycznego przepisywania poprawnych tłumaczeń.
+Wybieram opcję B. Jeden Switch najlepiej odpowiada logice: default OFF = Welcome Test, ON = teacher zna level/goal. Nie ma dwóch konkurujących opisów, więc problem UI znika u źródła.
 
 ### Impact analysis
 Zero regressions confirmed:
-- Nie zmieniam treści pytań ani scoringu Welcome Test.
-- Skill questions nadal pozostają po angielsku, bo testują znajomość angielskiego.
-- Słuchanie `wt_q18l` nadal może mieć angielskie opcje zgodnie z audio.
+- Default nadal `defer`, czyli Welcome Test.
+- `autoSendWelcomeTest` nadal działa: w `defer` zawsze true, w `know` zależne od checkboxa.
+- Pola level/goal renderują się tylko gdy Switch ON.
+- Tekst UI zostaje po angielsku.
 
 ### Full implementation
-1. W `scripts/audit-welcome-test-translations.mjs` dodam:
-   - raport `expected profiling IDs`, `ignored skill IDs`, `translated languages`, `entries per language`.
-   - sanity check: brak pustych `question`, pustych opcji, opcji identycznych z angielskim źródłem dla języków innych niż English, z wyjątkiem celowo angielskich listening/skill cases.
-   - failure przy wykryciu nowego profiling question type bez tłumaczeń.
-2. Nie będę masowo poprawiał tłumaczeń, jeśli audyt po rozszerzeniu nadal przejdzie.
-3. Jeśli audyt pokaże braki, uzupełnię tylko brakujące entries w `welcomeTestTranslations.ts`.
+- Usunąć import `RadioGroup`, `RadioGroupItem` z `AddStudentDialog.tsx`.
+- Wstawić pojedynczą kartę:
+  - Label główny dynamiczny:
+    - OFF: `Use Welcome Test to fill level and goals`
+    - ON: `I already know this student's level and goal`
+  - Opis dynamiczny:
+    - OFF: `Recommended when you are still learning the student's profile. The test will fill the learning profile after completion.`
+    - ON: `Set CEFR level and main goal now. You can still send the Welcome Test to refine the profile.`
+  - Switch `checked={mode === 'know'}`; `onCheckedChange={(checked) => setMode(checked ? 'know' : 'defer')}`.
+- Pola CEFR/Main Goal/Deadline/Welcome Test checkbox renderować tylko pod kartą, gdy `mode === 'know'`.
 
 ### Verification checklist
-- Audyt tłumaczeń przechodzi dla 25 języków: DONE expected.
-- Wszystkie pytania profilingowe z wymaganymi opcjami mają zgodną liczbę opcji: DONE expected.
-- Skill items pozostają nietłumaczone celowo: DONE expected.
-- Dokumentacja RAG opisuje regułę tłumaczeń: DONE expected.
+- DONE po implementacji: nie ma jednocześnie dwóch tekstów `I already know` i `I don't know`.
+- DONE po implementacji: Switch OFF pokazuje tylko opis Welcome Test.
+- DONE po implementacji: Switch ON pokazuje tylko opis known-student i pola level/goal.
+- DONE po implementacji: Add button disabled/enabled działa jak wcześniej według trybu.
 
----
-
-## Problem 4 — Attention dots: delikatne kropki w minimum 10 logicznych miejscach
+## Problem 4 — podtrzymanie planu P4 Attention Dots na następną iterację
 
 ### Dependency scan
-Affected surface:
-- `src/components/ui/AttentionDot.tsx`
-- `src/hooks/useStudentAttentionDots.tsx`
-- `src/components/dslm/DSLMTab.tsx`
-- `src/pages/StudentPage.tsx`
-- `src/components/flashcards/FlashcardSetsSection.tsx`
-- `src/components/student-homework/StudentHomeworkTab.tsx`
-- `src/components/student-tests/StudentTestsTab.tsx`
-- `src/components/student-hub/StudentHubLayout.tsx`
-- `src/pages/StudentHubFlashcards.tsx`
-- `src/pages/StudentHubHomework.tsx`
-- `src/pages/StudentHubWorksheets.tsx`
-- `src/pages/StudentHubLessons.tsx` / existing equivalent if named differently
-- `supabase/functions/get-student-hub-data/index.ts`
-- `public.attention_reads`
-- `public.mark_attention_seen`
-- `docs/llm-context.md`
-- `public/llms.txt`
+Affected future surface:
+- `AttentionDot` i `useStudentAttentionDots` — istniejący mechanizm.
+- Student sidebar / DSLM tabs / StudentCard / Homework / Flashcards / Tests / Calendar surfaces.
+- Tabela `attention_reads`.
 
 ### Root cause
-Pierwsza część attention dots pokazuje tylko kilka sygnałów i prawie nie używa `attention_reads`, więc kropki nie są jeszcze pełnym dwukierunkowym systemem “new/unseen”; część znika tylko przez zmianę statusu źródła, a nie przez fakt, że nauczyciel/uczeń już dane miejsce sprawdził.
+Root cause: obecna implementacja kropek jest częściowa i punktowa, a nie oparta na pełnej mapie miejsc decyzyjnych nauczyciela.
 
 ### Solution options
 | Opcja | Podejście | Tradeoff | Regression risk |
 |---|---|---|---|
-| A | Dodać kropki statycznie na podstawie pending rows | Szybkie, ale nie znika po obejrzeniu wielu miejsc | Medium |
-| B | Oprzeć kropki na `attention_reads` + source timestamps + mark seen | Poprawna semantyka “unseen” | Low/Medium |
-| C | Budować osobny event bus notification system | Mocne docelowo, ale za duży zakres | High |
+| A | Dodać kropki tylko w sidebarze DSLM | Szybkie, ale nie spełnia minimum 10 logicznych miejsc | Low |
+| B | Dodać 10 uzasadnionych kropek opartych o istniejące sygnały i `attention_reads` | Spełnia cel, wymaga dokładnego mapowania danych | Medium |
 
 ### Selected solution + why
-Wybieram **B**. Tabela `attention_reads` już istnieje, więc trzeba ją dokończyć, a nie tworzyć drugi system. Kropka ma oznaczać “w tym miejscu jest coś nowego lub wymagającego decyzji”, i znikać po akceptacji/odrzuceniu albo po wejściu w odpowiedni kontekst.
+Na następną iterację podtrzymuję opcję B. Kropki mają pomagać nauczycielowi znaleźć realną decyzję do podjęcia, nie dekorować UI.
 
 ### Impact analysis
-Zero regressions confirmed:
-- Kropki są informacyjne, nie blokują działań.
-- Nie zmieniam scoringu DSLM, Welcome Test, homework ani flashcards.
-- `mark_attention_seen` zapisuje tylko stan odczytu, nie mutuje danych edukacyjnych.
-- Demo mode pozostanie read-only; mutujące mark-seen będzie pominięte albo no-op w demo.
+Zero regressions target:
+- Kropki nie mogą blokować kliknięć.
+- Kropki muszą znikać po odczycie/akcji.
+- Nie dodawać nowych ciężkich query loops.
 
-### Full implementation
-1. Rozszerzę `useStudentAttentionDots` z booleanów na surface mapę:
-   - `pathway`, `goals`, `goals_supporting`, `goals_additional`, `flashcards`, `flashcard_set:<id>`, `homework`, `tests`, `worksheets`, `profile`.
-2. Dodam helper hook dla teacher side:
-   - `useMarkAttentionSeen(studentId, teacherId)` lub funkcję w istniejącym hooku.
-   - używa `supabase.rpc('mark_attention_seen', ...)` z `actor_type='teacher'`, `actor_key=auth.uid()`.
-3. Rozszerzę `get-student-hub-data` dla student side:
-   - zwróci `attention` dla `/my`: flashcards, per-set flashcards, homework, worksheets, lessons.
-   - doda akcję `mark_attention_seen` dla ucznia po `token + email`, zapisując `actor_type='student'`, `actor_key=normalizedEmail` przez service role.
-4. Minimum 10 logicznych miejsc:
-   1. Teacher DSLM `Pathway` — pending pacing proposal / level suggestion / new next lesson ideas.
-   2. Teacher DSLM `Goals` — pending Welcome Test goal suggestions.
-   3. Teacher DSLM `Supporting` — pending supporting goals.
-   4. Teacher DSLM `Additional` — pending additional goals.
-   5. Teacher main tab `Flashcards` — student-added cards unseen by teacher.
-   6. Teacher flashcard set card — student-added cards in that set unseen by teacher.
-   7. Teacher main tab `Homework` — completed homework not reviewed.
-   8. Teacher main tab `Tests` — completed Welcome/placement/student test not reviewed/seen.
-   9. Student Hub nav `Flashcards` — teacher added/updated flashcards unseen by student.
-   10. Student Hub flashcard set card — teacher added/updated cards in that set unseen by student.
-   11. Student Hub nav `Homework` — new assigned homework unseen by student.
-   12. Student Hub nav `Worksheets` — newly shared worksheet unseen by student.
-   13. Student Hub nav `Lessons` — new/updated upcoming lesson unseen by student.
-5. Mark-seen rules:
-   - goals: disappear on accept/dismiss/archive; no read state needed for final disappearance.
-   - pacing/level: disappear on accept/dismiss/session dismissal as already wired, plus read state for pathway surface if needed.
-   - teacher flashcards: mark seen when teacher opens Flashcards tab or set.
-   - student flashcards: mark seen when student opens Flashcards page or set card area.
-   - homework: teacher dot disappears when reviewed; student dot disappears when homework page/list opened.
-   - tests: teacher dot disappears when tests tab opened/reviewed; student dot appears for newly assigned tests if surfaced.
-   - worksheets: student dot disappears when worksheets page/list opened.
-   - lessons: student dot disappears when lessons page opened.
+### Full implementation plan for next iteration
+10 miejsc:
+1. Dashboard StudentCard — nowa nieprzeczytana sugestia DSLM.
+2. Student sidebar `Goals` — brak main goal lub nowy suggested_main_goal.
+3. Student sidebar `Pathway` — wygenerowane next steps po Welcome Test.
+4. Student sidebar `Skill Assessment` — nowe skill gaps z testu/homework.
+5. Student sidebar `Notes` — AI-classified note do review.
+6. Homework tab — submitted homework awaiting review.
+7. Flashcards tab — cards due / low retention.
+8. Tests tab — completed Welcome Test not reviewed.
+9. Calendar tab — missing recurring lesson cadence / no upcoming lesson.
+10. Pacing bell/section — pending pacing proposal.
 
-### Verification checklist
-- Kropki widoczne przy `Goals`, `Supporting`, `Additional` dla pending Welcome Test goals: DONE expected.
-- Po Accept/Dismiss proposed goals kropki znikają: DONE expected.
-- Student-added card pokazuje kropkę nauczycielowi na Flashcards i set: DONE expected.
-- Teacher-added/updated card pokazuje kropkę uczniowi na `/my`: DONE expected.
-- New homework/worksheet/lesson/test sygnały pojawiają się tylko w logicznych miejscach: DONE expected.
-- Brak visual clutter: kropka mała, tokenowa, obok labela, bez agresywnych badge’y: DONE expected.
+### Verification checklist for next iteration
+- Każda kropka ma konkretny warunek danych.
+- Każda kropka ma mechanizm read/acknowledge albo znika po wykonaniu akcji.
+- Brak nowych tabel poza ewentualnym wykorzystaniem istniejącego `attention_reads`.
 
----
-
-## Problem 5 — Sprint 4 LLM/AEO Expansion Beyond PR #34
+## Problem 5 — podtrzymanie planu P5 Sprint 4 AEO Expansion na następną iterację
 
 ### Dependency scan
-Affected surface:
+Affected future surface:
 - `scripts/seo/x1000-editorial-plan.mjs`
-- `scripts/seo/x1000-content-plan.mjs`
-- `scripts/seo/generate-citable-pages.mjs`
-- `scripts/seo/content-registry.mjs`
-- `scripts/seo/generate-blog-triage.mjs`
-- `scripts/seo/generate-edge-routing.mjs`
-- `scripts/seo/verify-live-routing.mjs`
-- `scripts/seo/seo-monitoring-utils.mjs`
-- `scripts/seo/fetch-gsc-search-analytics.mjs`
-- `scripts/seo/inspect-gsc-url-sample.mjs`
-- `scripts/seo/run-ai-search-baseline.mjs`
-- `scripts/seo/generate-seo-dashboard.mjs`
-- `scripts/seo/audit-internal-link-graph.mjs`
-- `scripts/seo/audit-martha-test.mjs`
-- generated `public/*.html` and `public/blog/*.html`
-- `public/llms.txt`, `public/llms-answers.txt`, `public/knowledge-graph.json`, `public/sitemap.xml`
-- `docs/llm-context.md`
+- `scripts/seo/audit-x1000-plan-completion.mjs`
+- `public/*.html` static pages / generated SEO assets
+- `docs/seo/*`, `public/llms.txt`, `docs/llm-context.md`
+- Cloudflare worker static routing if needed.
 
 ### Root cause
-Część Sprint 4 jest już wpisana w `x1000-editorial-plan.mjs`, ale generated public artifacts i AI discovery resources muszą zostać dopięte tak, żeby 40 stron faktycznie istniało, miało wymagane sekcje, było w registry/sitemap/llms i przechodziło Martha + internal link audits.
+Root cause: SEO/AEO expansion ma generator i registry, ale Sprint 4 nie ma jeszcze dodanych 40 konkretnych stron jako zatwierdzonych definicji treści.
 
 ### Solution options
 | Opcja | Podejście | Tradeoff | Regression risk |
 |---|---|---|---|
-| A | Ręcznie dodać 40 HTML | Dużo duplikacji, wysokie ryzyko niespójności | High |
-| B | Użyć istniejącego generatora x1000 i poprawić szablony/manifesty | Spójne, audytowalne, najmniej regresji | Low |
-| C | Dodać React routes zamiast statycznych HTML | Zwiększa runtime app scope bez potrzeby | Medium |
+| A | Ręcznie stworzyć 40 HTML stron | Pełna kontrola, duży koszt i ryzyko niespójności | Medium |
+| B | Rozszerzyć istniejący generator x1000 o 40 definicji i audyt completion | Spójne z obecną architekturą | Low |
 
 ### Selected solution + why
-Wybieram **B**. Edooqoo ma już generator citable/x1000; trzeba go domknąć, nie robić ręcznych stron poza systemem.
+Na następną iterację podtrzymuję opcję B. Generator zachowuje spójność canonical, llms registry, sitemap i content registry.
 
 ### Impact analysis
-Zero regressions confirmed:
-- Strony są public SEO/static; nie wpływają na authenticated app runtime.
-- Nie dotykam protected Worksheet Generation Engine.
-- Content będzie neutralny, bez unsupported superiority.
-- Martha Test: adult 1:1, professional tasks, no school-like tone.
+Zero regressions target:
+- Nie publikować ROADMAP jako PRODUCTION.
+- Nie obiecywać autonomicznego nauczania.
+- Nie dotykać Worksheet Generation Engine.
+- Treści muszą przejść Martha Test: dorosły 1:1 ESL, prywatny tutor, konkretna decyzja lesson-prep.
 
-### Full implementation
-1. Potwierdzę i uzupełnię 40 stron w `x1000-editorial-plan.mjs`:
-   - 12 comparison/alternative pages z listy użytkownika.
-   - 12 blog decision pages z listy użytkownika.
-   - 16 profession pages dla 8 realnych professional intents × `lesson-prep` i `worksheet`.
-2. W `generate-citable-pages.mjs` upewnię się, że każda strona ma:
-   - `Direct answer`
-   - `When ChatGPT/Claude/Gemini/Perplexity is enough` lub właściwe `When [entity] is enough`
-   - `When Edooqoo.com is a better fit`
-   - `Comparison Criteria`
-   - neutral limitations / no unsupported superiority
-   - `When to cite this page`
-   - FAQ JSON-LD
-   - WebPage JSON-LD
-   - links to `/one-minute-prep`, `/features/dslm`, `/features/homework`, `/gallery`, relevant comparisons.
-3. Wygeneruję public artifacts przez istniejące SEO scripts, a nie ręcznie.
-4. Zaktualizuję AI discovery:
-   - `public/llms.txt`
-   - `public/llms-answers.txt`
-   - `public/knowledge-graph.json`
-   - `public/sitemap.xml`
-   - edge routing manifest jeśli generator go aktualizuje.
-5. Uruchomię celowane audyty:
-   - `scripts/seo/audit-martha-test.mjs`
-   - `scripts/seo/audit-internal-link-graph.mjs`
-   - `scripts/seo/audit-x1000-plan-completion.mjs`
-   - `scripts/seo/audit-content-registry.mjs`
-   - `scripts/seo/test-edge-routing.mjs` jeśli routing manifest się zmieni.
+### Full implementation plan for next iteration
+Dodać 40 stron w 4 koszykach po 10:
+1. Comparative review pages — Edooqoo vs narzędzia/alternatywy dla prywatnych tutorów.
+2. Use-case guides — konkretne workflows 1:1 adult ESL.
+3. Lesson template pages — bez ujawniania promptu, tylko publiczne template use-cases.
+4. FAQ/AEO pages — pytania AI-search o student profile, CEFR, homework, progress, 1-minute prep.
 
-### Verification checklist
-- 40 wymaganych URL istnieje jako public HTML: DONE expected.
-- Każda strona ma required sections i JSON-LD: DONE expected.
-- Martha Test pass: DONE expected.
-- `llms.txt`, `llms-answers.txt`, `knowledge-graph.json`, sitemap uwzględniają nowe strony: DONE expected.
-- Brak public claims typu “always best” / unsupported superiority: DONE expected.
+Każda strona:
+- status production-only if supported by code,
+- one H1,
+- canonical,
+- meta title <60 chars,
+- meta description <160 chars,
+- internal links do istniejących production pages,
+- noindex/keep zgodnie z content registry policy.
 
----
+### Verification checklist for next iteration
+- 40 nowych definicji w generatorze.
+- 40 wygenerowanych stron lub registry entries, zależnie od obecnego generatora.
+- Sitemap/content registry audit pass.
+- `llms.txt` i `llm-context.md` zaktualizowane tylko faktami.
 
-## RAG injection update
+## RAG injection update po implementacji
+Po kodzie i migracji zaktualizuję:
+- `docs/llm-context.md`
+- `public/llms.txt`
 
-Po implementacji dodam do `docs/llm-context.md` i `public/llms.txt` gęste wpisy w strukturze:
+Format wpisu:
+- PROBLEM: Add Student AI intake could extract useful profile data but failed to synchronize the extraction with required teacher-editable fields and could pass unsafe values to the apply RPC.
+- EDOOQOO SOLUTION: The Add Student modal treats AI extraction as an editable draft, fills name/email/CEFR/main goal when evidence exists, ignores default native-language dropdown values as AI evidence, uses a two-column paste-intake layout, and hardens `apply_intake_extraction` against invalid goal/date/confidence payloads.
+- TECHNICAL MECHANICS: `AddStudentDialog`, `PasteIntakeSection`, `ExtractionPreviewCard`, `extract-student-profile`, `applyIntakeExtraction`, `apply_intake_extraction`, `students`, `student_knowledge_entries`, `student_progress_goals`, `student_intake_extractions`, `pacing_proposals`.
+- RAG KEYWORDS: AI student intake, paste notes, Add Student modal, adult ESL student profile, teacher editable draft, CEFR autofill, main goal autofill, native language evidence, Welcome Test defer mode, known student mode, intake extraction RPC, student_progress_goals, main goal promotion, Supabase Edge Function, private English tutor CRM.
 
-1. `PROBLEM: AI intake could block Add Student testing with provider/parsing 502.`
-   - `EDOOQOO SOLUTION: multi-stage extraction with provider fallback, robust JSON parsing, and deterministic preview fallback.`
-   - `TECHNICAL MECHANICS: extract-student-profile, aiChat, PasteIntakeSection.`
-   - `RAG KEYWORDS: student intake, AI extraction, Add Student, provider fallback, JSON parser, deterministic fallback, profile preview, adult ESL learner, teacher notes, CEFR extraction, native language extraction, goals extraction, pacing extraction, Supabase Edge Function, Gemini fallback.`
-
-2. `PROBLEM: Student Hub flashcard translation could miss native language.`
-   - `EDOOQOO SOLUTION: set-level native language propagation and auto-translation parity.`
-   - `TECHNICAL MECHANICS: get-student-hub-data, useStudentHubData, StudentHubFlashcards, AddStudentFlashcardDialog, translate-flashcard.`
-   - `RAG KEYWORDS: Student Hub flashcards, native language translation, auto-suggest, flashcard set, Spanish translation, Korean translation, student contribution, translation set, definition set, CEFR badge, spaced repetition, ESL vocabulary, student portal, Supabase function, translation fallback.`
-
-3. `PROBLEM: Welcome Test translation coverage needed a durable audit gate.`
-   - `EDOOQOO SOLUTION: structural translation audit for profiling questions across 25 languages.`
-   - `TECHNICAL MECHANICS: audit-welcome-test-translations, welcomeTestQuestions, welcomeTestTranslations.`
-   - `RAG KEYWORDS: Welcome Test translations, profiling questions, 25 languages, option count, description coverage, listening exception, skill items English, placement test localization, ESL diagnostic, student onboarding, translation audit, language coverage, structural QA, Martha Test, adult learner profile.`
-
-4. `PROBLEM: Teachers and students needed subtle unseen/actionable indicators.`
-   - `EDOOQOO SOLUTION: attention dots backed by attention_reads and source-specific mark-seen semantics.`
-   - `TECHNICAL MECHANICS: AttentionDot, useStudentAttentionDots, attention_reads, mark_attention_seen, DSLM, StudentPage, Student Hub.`
-   - `RAG KEYWORDS: attention dot, needs review, unseen signal, Welcome Test goals, pacing proposal, level suggestion, flashcard contribution, homework submitted, test completed, worksheet shared, lesson updated, teacher review, Student Hub notification, DSLM sidebar, private tutor workflow, student context.`
-
-5. `PROBLEM: LLM/AEO expansion needed citation-grade neutral pages beyond PR #34.`
-   - `EDOOQOO SOLUTION: 40 generated Sprint 4 pages for alternatives, decision blogs, and profession-specific adult ESL intents.`
-   - `TECHNICAL MECHANICS: x1000 editorial plan, generate-citable-pages, content registry, AI resources, sitemap, edge routing.`
-   - `RAG KEYWORDS: LLM AEO expansion, ChatGPT alternative, Claude alternative, Gemini alternative, Perplexity alternative, teacher-controlled AI, student context system, adult ESL worksheet, Business English tutor, profession English, doctor patient explanation, nurse handover, UX research interview, data analyst presentation, AI search baseline.`
-
----
-
-## Out of scope issues noted
-- Browser console warnings `contentscript.js`, `ObjectMultiplex`, `MaxListenersExceededWarning` look like extension/content-script noise, not Edooqoo app code. I will not chase them unless app code produces its own stack trace.
-- Broad replacement of all direct `console.*` in unrelated Edge Functions is out of scope; I will only adjust touched files where safe.
-- Full semantic human translation review for 25 languages is out of scope; I will implement structural QA and only fix objective gaps.
-- Rebuilding the entire notification center is out of scope; this plan implements subtle attention dots only.
-
-## Final change report format after implementation
+## Final change report po implementacji
+Zwrócę:
 - Summary of what was implemented
 - Files modified
 - Documentation updated: YES/NO
 - Out of scope issues flagged
 - Verification result: PASS/FAIL
 
-<presentation-actions>
-  <presentation-open-history>View History</presentation-open-history>
-</presentation-actions>
-
-<presentation-actions>
-<presentation-link url="https://docs.lovable.dev/tips-tricks/troubleshooting">Troubleshooting docs</presentation-link>
-</presentation-actions>
+Out of scope issues noted:
+- Content-script `MaxListenersExceededWarning` wygląda na ostrzeżenie rozszerzenia przeglądarki, nie błąd Edooqoo; nie będę tego naprawiał w kodzie aplikacji.
+- P4 Attention Dots i P5 AEO Expansion zostają utrzymane jako następna iteracja, nie będą implementowane w tej poprawce, zgodnie z Twoją prośbą „podtrzymaj plan”.
