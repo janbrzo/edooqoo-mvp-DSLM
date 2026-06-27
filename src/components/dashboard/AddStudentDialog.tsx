@@ -26,6 +26,7 @@ import {
   type IntakeExtractionPayload,
   type IntakeIncludes,
 } from '@/lib/intake/applyIntakeExtraction';
+import { cn } from '@/lib/utils';
 
 const ADD_STUDENT_DRAFT_KEY = 'add-student-dialog-draft';
 
@@ -96,6 +97,53 @@ const getMainGoalTargetDate = (extraction: IntakeExtractionPayload | null): stri
   if (hasMeaningfulValue(direct)) return direct!.trim();
   const goal = extraction?.goals?.find((item) => normalizeText(item.goal_type || '') === 'main') || extraction?.goals?.[0];
   return hasMeaningfulValue(goal?.target_date) ? goal!.target_date!.trim() : '';
+};
+
+// v6.9.76 — UI-side safety net used when AI extraction returns no identity
+// fields but the raw paste clearly contains them. Mirrors the server-side
+// detector but stays intentionally simple.
+const extractIdentityFallbackFromNotes = (raw: string): { name?: string; email?: string } => {
+  const out: { name?: string; email?: string } = {};
+  if (!raw || !raw.trim()) return out;
+  const email = raw.match(/[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/i)?.[0];
+  if (email) out.email = email.toLowerCase();
+
+  const labelMatch = raw.match(
+    /(?:student name|name|imi[eę](?: i nazwisko)?|nazwisko|ucze[nń]|uczennica|studentka|student|kursant|kursantka)\s*[:\-–]\s*([^\n,;<>@]{2,120})/i,
+  );
+  if (labelMatch?.[1]) {
+    const v = labelMatch[1].trim().replace(/\s+/g, ' ').replace(/[.。]+$/, '');
+    if (v && /[\p{L}]/u.test(v)) out.name = v.slice(0, 120);
+  }
+
+  if (!out.name) {
+    const inline = raw.match(
+      /([\p{Lu}][\p{L}'-]+(?:\s+[\p{Lu}][\p{L}'-]+){1,3})\s*[<,\-–]\s*[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/iu,
+    );
+    if (inline?.[1]) out.name = inline[1].trim();
+  }
+
+  if (!out.name && email) {
+    const lines = raw.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+    const idx = lines.findIndex((l) => l.toLowerCase().includes(email.toLowerCase()));
+    if (idx >= 0) {
+      for (const line of [lines[idx], lines[idx - 1], lines[idx + 1]].filter(Boolean) as string[]) {
+        const m = line.match(/[\p{Lu}][\p{L}'-]+(?:\s+[\p{Lu}][\p{L}'-]+){1,3}/u);
+        if (m) { out.name = m[0]; break; }
+      }
+    }
+  }
+
+  if (!out.name) {
+    const lines = raw.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+    for (const line of lines.slice(0, 3)) {
+      if (line.length > 80 || /[.!?]/.test(line)) continue;
+      const m = line.match(/^[\p{Lu}][\p{L}'-]+(?:\s+[\p{Lu}][\p{L}'-]+){1,3}$/u);
+      if (m) { out.name = m[0]; break; }
+    }
+  }
+
+  return out;
 };
 
 interface AddStudentDialogProps {
