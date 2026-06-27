@@ -389,7 +389,11 @@ export const DSLMTab: React.FC<DSLMTabProps> = ({
                 return (
                   <div key={view.id}>
                     <button
-                      onClick={() => handleScrollTo(view.id)}
+                      onClick={() => {
+                        handleScrollTo(view.id);
+                        if (view.id === 'goals') attention.dismiss('goalsAny');
+                        if (view.id === 'pathway') attention.dismiss('pathway');
+                      }}
                       className={cn(
                         'w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-left',
                         activeSection === view.id
@@ -412,6 +416,8 @@ export const DSLMTab: React.FC<DSLMTabProps> = ({
                             key={s.id}
                             onClick={() => {
                               handleScrollTo(view.id);
+                              if (s.id === 'goals-supporting') attention.dismiss('supporting');
+                              if (s.id === 'goals-additional') attention.dismiss('additional');
                               setTimeout(() => {
                                 window.dispatchEvent(new CustomEvent('dslm:openSubsection', { detail: { id: s.id } }));
                               }, 250);

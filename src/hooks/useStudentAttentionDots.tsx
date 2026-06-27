@@ -5,7 +5,7 @@
 //
 // This hook stays read-only and reuses existing tables; it does NOT mutate
 // curriculum, worksheet generation, or any other educational data path.
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 export interface StudentAttentionDots {
@@ -29,11 +29,9 @@ const EMPTY: StudentAttentionDots = {
 export function useStudentAttentionDots(studentId?: string, teacherId?: string, currentLevel?: string | null) {
   const [dots, setDots] = useState<StudentAttentionDots>(EMPTY);
 
-  useEffect(() => {
+  const fetchDots = useCallback(async () => {
     if (!studentId || !teacherId) { setDots(EMPTY); return; }
-    let cancelled = false;
-    (async () => {
-      try {
+    try {
         const [goals, pacing, lp, hw, flashSets] = await Promise.all([
           supabase.from('student_progress_goals')
             .select('id, goal_type, source, accepted_at, archived_at, is_achieved, deleted_at')
@@ -48,8 +46,6 @@ export function useStudentAttentionDots(studentId?: string, teacherId?: string, 
           supabase.from('flashcard_sets')
             .select('id').eq('student_id', studentId).eq('teacher_id', teacherId).is('deleted_at', null),
         ]);
-
-        if (cancelled) return;
 
         const goalsRows = (goals.data || []).filter((g: any) =>
           g.source === 'welcome_test_auto' && !g.accepted_at && !g.archived_at && !g.is_achieved
@@ -89,9 +85,32 @@ export function useStudentAttentionDots(studentId?: string, teacherId?: string, 
         console.warn('[useStudentAttentionDots] failed', err);
         setDots(EMPTY);
       }
-    })();
-    return () => { cancelled = true; };
   }, [studentId, teacherId, currentLevel]);
 
-  return useMemo(() => dots, [dots]);
+  useEffect(() => { fetchDots(); }, [fetchDots]);
+
+  // v6.9.76 — react to cross-component mutations so dots clear after an action
+  // anywhere in the app (accept/reject pacing, goal mutations, etc.).
+  useEffect(() => {
+    const handler = () => { fetchDots(); };
+    window.addEventListener('pacingProposalChanged', handler);
+    window.addEventListener('studentGoalsChanged', handler);
+    window.addEventListener('attentionDirty', handler);
+    return () => {
+      window.removeEventListener('pacingProposalChanged', handler);
+      window.removeEventListener('studentGoalsChanged', handler);
+      window.removeEventListener('attentionDirty', handler);
+    };
+  }, [fetchDots]);
+
+  // v6.9.76 — optimistic local dismiss for instant UI feedback. The next
+  // fetchDots() will reconcile with reality.
+  const dismiss = useCallback((key: keyof StudentAttentionDots) => {
+    setDots((prev) => ({ ...prev, [key]: false }));
+    if (key === 'pathway' && studentId) {
+      try { sessionStorage.setItem(`wt-level-change-dismissed:student:${studentId}`, '1'); } catch { /* noop */ }
+    }
+  }, [studentId]);
+
+  return useMemo(() => ({ ...dots, dismiss, refetch: fetchDots }), [dots, dismiss, fetchDots]);
 }

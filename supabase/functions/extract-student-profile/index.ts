@@ -292,11 +292,47 @@ function normalizeExtraction(extraction: any): void {
   } else extraction.goals = [];
 }
 
+function normalizeForEvidence(s: string): string {
+  return s
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
 function quoteAppearsInRaw(quote: unknown, rawText: string): boolean {
   if (typeof quote !== "string" || !quote.trim()) return false;
-  const q = quote.trim().toLowerCase();
+  const q = normalizeForEvidence(quote);
   if (q.length < 2) return false;
-  return rawText.toLowerCase().includes(q);
+  return normalizeForEvidence(rawText).includes(q);
+}
+
+// v6.9.76 — name/email use lenient evidence (literal value present, or all
+// >2-char tokens within 40 normalized chars). Avoids dropping correct AI
+// extractions when the cited quote is paraphrased or translated.
+function valueAppearsInRaw(value: unknown, rawText: string): boolean {
+  if (typeof value !== "string" || !value.trim()) return false;
+  return rawText.toLowerCase().includes(value.trim().toLowerCase());
+}
+
+function nameTokensAppearInRaw(value: unknown, rawText: string): boolean {
+  if (typeof value !== "string" || !value.trim()) return false;
+  const tokens = value
+    .split(/\s+/)
+    .map((t) => t.replace(/[^\p{L}'-]/gu, ""))
+    .filter((t) => t.length > 2);
+  if (!tokens.length) return false;
+  const haystack = normalizeForEvidence(rawText);
+  if (tokens.length === 1) return haystack.includes(normalizeForEvidence(tokens[0]));
+  // require any two consecutive tokens within 40 chars
+  for (let i = 0; i < tokens.length - 1; i++) {
+    const a = normalizeForEvidence(tokens[i]);
+    const b = normalizeForEvidence(tokens[i + 1]);
+    const re = new RegExp(`${a.replace(/[.*+?^${}()|[\\\]\\\\]/g, "\\\\$&")}[\\s\\S]{0,40}${b.replace(/[.*+?^${}()|[\\\]\\\\]/g, "\\\\$&")}`);
+    if (re.test(haystack)) return true;
+  }
+  return false;
 }
 
 function clearIfNoEvidence(extraction: any, key: string): void {
@@ -307,8 +343,22 @@ function clearIfNoEvidence(extraction: any, key: string): void {
 
 function enforceEvidenceQuotes(extraction: any, rawText: string): void {
   extraction.__rawTextForEvidence = rawText;
-  clearIfNoEvidence(extraction, "student_name");
-  clearIfNoEvidence(extraction, "student_email");
+
+  // student_name: lenient — keep if quote OR tokens appear in raw.
+  const sn = extraction.student_name;
+  if (sn && typeof sn === "object") {
+    const ok = quoteAppearsInRaw(sn.evidence_quote, rawText) || nameTokensAppearInRaw(sn.value, rawText);
+    if (!ok) extraction.student_name = null;
+  }
+
+  // student_email: lenient — keep if the literal email value is present.
+  const se = extraction.student_email;
+  if (se && typeof se === "object") {
+    const ok = quoteAppearsInRaw(se.evidence_quote, rawText) || valueAppearsInRaw(se.value, rawText);
+    if (!ok) extraction.student_email = null;
+    else if (typeof se.value === "string") se.evidence_quote = se.evidence_quote || se.value;
+  }
+
   clearIfNoEvidence(extraction, "english_level");
   clearIfNoEvidence(extraction, "main_goal");
   clearIfNoEvidence(extraction, "native_language");
@@ -328,20 +378,77 @@ function enrichDeterministicIdentity(extraction: any, rawText: string): void {
     extraction.student_email = { value: email.toLowerCase(), confidence: 0.95, evidence_quote: email };
   }
 
-  if (!extraction.student_name) {
-    const namePatterns = [
-      /(?:student name|name|imi[eę](?: i nazwisko)?|ucze[nń]|uczennica|studentka|student|kursant|kursantka)\s*[:\-–]\s*([^\n,;<>@]{2,120})/i,
-      /(?:nazywa si[eę]|to jest)\s+([^\n,;<>@]{2,120})/i,
-    ];
-    for (const pattern of namePatterns) {
-      const match = rawText.match(pattern);
-      const candidate = match?.[1]?.trim().replace(/\s+/g, " ").replace(/[.。]+$/, "");
-      if (candidate && /[\p{L}]/u.test(candidate) && !/email|mail|@/i.test(candidate)) {
-        extraction.student_name = { value: candidate.slice(0, 120), confidence: 0.9, evidence_quote: match![0].trim() };
-        break;
+  if (extraction.student_name) return;
+
+  const candidate = detectNameFromRaw(rawText, email);
+  if (candidate) {
+    extraction.student_name = {
+      value: candidate.value.slice(0, 120),
+      confidence: 0.9,
+      evidence_quote: candidate.evidence,
+    };
+  }
+}
+
+// v6.9.76 — multi-pass name detector:
+//  (1) explicit label "Name:" / "Imię:" etc.
+//  (2) "First Last <email>" / "First Last - email" / "First Last, email"
+//  (3) line adjacent to the email line, picking the first 2–4 capitalised
+//      Unicode words.
+//  (4) first non-empty line if it looks like a name (2–4 capitalised words,
+//      no sentence punctuation, no verbs).
+export function detectNameFromRaw(
+  rawText: string,
+  email?: string,
+): { value: string; evidence: string } | null {
+  const labelPatterns = [
+    /(?:student name|name|imi[eę](?: i nazwisko)?|nazwisko|ucze[nń]|uczennica|studentka|student|kursant|kursantka)\s*[:\-–]\s*([^\n,;<>@]{2,120})/i,
+    /(?:nazywa si[eę]|to jest|this is|meet)\s+([^\n,;<>@]{2,120})/i,
+  ];
+  for (const pattern of labelPatterns) {
+    const match = rawText.match(pattern);
+    const candidate = match?.[1]?.trim().replace(/\s+/g, " ").replace(/[.。]+$/, "");
+    if (candidate && looksLikeName(candidate)) {
+      return { value: candidate, evidence: match![0].trim() };
+    }
+  }
+
+  const inlineEmail = rawText.match(/([\p{Lu}][\p{L}'-]+(?:\s+[\p{Lu}][\p{L}'-]+){1,3})\s*[<,\-–]\s*[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}/iu);
+  if (inlineEmail) {
+    return { value: inlineEmail[1].trim(), evidence: inlineEmail[0].trim() };
+  }
+
+  const lines = rawText.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+
+  if (email) {
+    const emailIdx = lines.findIndex((l) => l.toLowerCase().includes(email.toLowerCase()));
+    if (emailIdx >= 0) {
+      const neighbours = [lines[emailIdx], lines[emailIdx - 1], lines[emailIdx + 1]].filter(Boolean) as string[];
+      for (const line of neighbours) {
+        const m = line.match(/[\p{Lu}][\p{L}'-]+(?:\s+[\p{Lu}][\p{L}'-]+){1,3}/u);
+        if (m && looksLikeName(m[0])) return { value: m[0], evidence: line };
       }
     }
   }
+
+  // First line that looks like a name
+  for (const line of lines.slice(0, 3)) {
+    if (line.length > 80) continue;
+    if (/[.!?]/.test(line)) continue;
+    const m = line.match(/^[\p{Lu}][\p{L}'-]+(?:\s+[\p{Lu}][\p{L}'-]+){1,3}$/u);
+    if (m && looksLikeName(m[0])) return { value: m[0], evidence: line };
+  }
+
+  return null;
+}
+
+function looksLikeName(value: string): boolean {
+  if (!/[\p{L}]/u.test(value)) return false;
+  if (/@/.test(value)) return false;
+  if (/(email|mail|phone|tel|address)/i.test(value)) return false;
+  const words = value.split(/\s+/);
+  if (words.length < 1 || words.length > 4) return false;
+  return true;
 }
 
 function buildDeterministicExtraction(rawText: string, existing: any): any {
