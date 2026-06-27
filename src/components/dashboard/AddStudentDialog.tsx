@@ -284,6 +284,16 @@ export const AddStudentDialog = ({
       changed = true;
     }
 
+    // v6.9.76 safety net — if AI dropped identity but the raw paste has it, fill from regex.
+    if ((!name.trim() || !studentEmail.trim()) && pasteRaw.trim()) {
+      const fb = extractIdentityFallbackFromNotes(pasteRaw);
+      if (fb.name && !name.trim()) { setName(fb.name); changed = true; }
+      if (fb.email && !studentEmail.trim() && /.+@.+\..+/.test(fb.email)) {
+        setStudentEmail(fb.email);
+        changed = true;
+      }
+    }
+
     if (changed) sonnerToast.success('AI filled the form — review and adjust before adding.');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [extraction]);
