@@ -514,7 +514,7 @@ export const AddStudentDialog = ({
           </Button>
         </DialogTrigger>
       )}
-      <DialogContent className={`${pasteEnabled ? 'sm:max-w-[980px]' : 'sm:max-w-[480px]'} max-h-[88vh] overflow-y-auto transition-[max-width] duration-200`}>
+      <DialogContent className={`${pasteEnabled ? 'sm:max-w-[980px]' : 'sm:max-w-[520px]'} max-h-[92vh] overflow-y-auto transition-[max-width] duration-200`}>
         <DialogHeader>
           <div className="flex items-start justify-between gap-2">
             <div>
@@ -585,31 +585,42 @@ export const AddStudentDialog = ({
               </p>
             </div>
 
-            <div className="rounded-md border bg-muted/20 p-3 space-y-3">
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <Label htmlFor="know-student-toggle" className="text-xs font-medium cursor-pointer">
-                    {knowsStudent ? 'I already know my student' : "I don't know my student yet"}
-                  </Label>
-                  <p className="text-[11px] text-muted-foreground mt-0.5">
-                    {knowsStudent
-                      ? 'Set CEFR level and main goal now. AI suggestions fill these fields, then you can edit them.'
-                      : 'Recommended. Fill level and goal from the Welcome Test after the student completes it.'}
-                  </p>
-                </div>
-                <Switch
-                  id="know-student-toggle"
-                  checked={knowsStudent}
-                  onCheckedChange={(checked) => setMode(checked ? 'know' : 'defer')}
-                />
-              </div>
+            {/* v6.9.76 — Segmented control: both modes visually active */}
+            <div
+              role="radiogroup"
+              aria-label="Student knowledge mode"
+              className="grid grid-cols-2 gap-1 rounded-md border bg-background p-0.5"
+            >
+              {[
+                { value: 'defer' as const, title: "I don't know my student yet", hint: 'Recommended — fill from Welcome Test' },
+                { value: 'know' as const,  title: 'I already know my student',   hint: 'Set CEFR + goal now' },
+              ].map((opt) => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  role="radio"
+                  aria-checked={mode === opt.value}
+                  onClick={() => setMode(opt.value)}
+                  className={cn(
+                    'rounded px-3 py-2 text-left transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-ring',
+                    mode === opt.value
+                      ? 'bg-primary text-primary-foreground shadow-sm'
+                      : 'text-muted-foreground hover:bg-muted',
+                  )}
+                >
+                  <div className="text-xs font-medium leading-tight">{opt.title}</div>
+                  <div className="text-[10px] opacity-80 mt-0.5 leading-tight">{opt.hint}</div>
+                </button>
+              ))}
+            </div>
 
-              {knowsStudent && (
-                <div className="space-y-3 border-t pt-3">
+            {knowsStudent && (
+              <div className="space-y-2 rounded-md border bg-muted/20 p-3">
+                <div className="grid grid-cols-2 gap-3">
                   <div className="space-y-1">
-                    <Label htmlFor="level" className="text-xs">English Level (CEFR) <span className="text-destructive">*</span></Label>
+                    <Label htmlFor="level" className="text-xs">CEFR <span className="text-destructive">*</span></Label>
                     <Select value={englishLevel} onValueChange={setEnglishLevel} required>
-                      <SelectTrigger className="h-9"><SelectValue placeholder="Select level" /></SelectTrigger>
+                      <SelectTrigger className="h-9"><SelectValue placeholder="Level" /></SelectTrigger>
                       <SelectContent>
                         {ENGLISH_LEVELS.filter((level) => level.value !== 'unknown').map((level) => (
                           <SelectItem key={level.value} value={level.value}>{level.label}</SelectItem>
@@ -618,7 +629,7 @@ export const AddStudentDialog = ({
                     </Select>
                   </div>
                   <div className="space-y-1">
-                    <Label htmlFor="goal" className="text-xs flex items-center gap-1.5">
+                    <Label htmlFor="goal" className="text-xs flex items-center gap-1">
                       Main Goal <span className="text-destructive">*</span>
                       <TooltipProvider delayDuration={150}>
                         <Tooltip>
@@ -628,59 +639,77 @@ export const AddStudentDialog = ({
                             </button>
                           </TooltipTrigger>
                           <TooltipContent side="right" className="max-w-xs">
-                            Main Goal is the student's primary outcome (e.g. job interview in English, B2 exam). You'll be able to add Supporting Goals and Additional Goals later from the student's Goals tab.
+                            Main Goal is the student's primary outcome (e.g. job interview in English, B2 exam). Add Supporting/Additional goals later from the Goals tab.
                           </TooltipContent>
                         </Tooltip>
                       </TooltipProvider>
                     </Label>
                     <Select value={mainGoal} onValueChange={setMainGoal} required>
-                      <SelectTrigger className="h-9"><SelectValue placeholder="Select main goal" /></SelectTrigger>
+                      <SelectTrigger className="h-9"><SelectValue placeholder="Main goal" /></SelectTrigger>
                       <SelectContent>
                         {MAIN_GOALS.map((goal) => (
                           <SelectItem key={goal.value} value={goal.value}>{goal.label}</SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
-                    {mainGoal === 'custom' && (
-                      <Input
-                        placeholder="Describe the custom goal"
-                        value={customGoal}
-                        onChange={(e) => setCustomGoal(e.target.value)}
-                        required
-                        className="h-9 mt-1"
-                      />
-                    )}
                   </div>
+                </div>
+                {mainGoal === 'custom' && (
+                  <Input
+                    placeholder="Describe the custom goal"
+                    value={customGoal}
+                    onChange={(e) => setCustomGoal(e.target.value)}
+                    required
+                    className="h-9"
+                  />
+                )}
+                <div className="grid grid-cols-[1fr_auto] gap-3 items-end">
                   <div className="space-y-1">
                     <Label className="text-xs">Goal Deadline (optional)</Label>
                     <DeadlinePicker value={mainGoalDeadline} onChange={setMainGoalDeadline} compact />
                   </div>
-                  <div className="flex items-start gap-2 rounded-md border bg-background p-2 mt-2">
+                  <label
+                    htmlFor="send-test-known"
+                    className="flex items-center gap-2 rounded-md border bg-background px-2 h-9 cursor-pointer"
+                  >
                     <Checkbox
                       id="send-test-known"
                       checked={sendTestWhenKnown}
                       onCheckedChange={(v) => setSendTestWhenKnown(!!v)}
-                      className="mt-0.5"
                     />
-                    <Label htmlFor="send-test-known" className="text-[11px] cursor-pointer">
-                      Also send the Welcome Test (refines learning profile)
-                    </Label>
-                  </div>
+                    <span className="text-[11px] whitespace-nowrap">Send Welcome Test</span>
+                  </label>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
 
-            {/* Overdue email toggle — compact row */}
-            <div className="flex items-center justify-between gap-2 pt-1">
-              <Label htmlFor="send-overdue-new" className="text-xs text-muted-foreground cursor-pointer">
-                Send overdue homework reminders
-              </Label>
-              <Switch
-                id="send-overdue-new"
-                checked={sendOverdueEmails}
-                onCheckedChange={setSendOverdueEmails}
-              />
-            </div>
+            {/* Overdue email toggle — collapsed under details in know mode to save vertical space */}
+            {knowsStudent ? (
+              <details className="rounded-md border bg-background px-2 py-1.5">
+                <summary className="text-[11px] text-muted-foreground cursor-pointer select-none">More options</summary>
+                <div className="flex items-center justify-between gap-2 pt-2">
+                  <Label htmlFor="send-overdue-new" className="text-xs text-muted-foreground cursor-pointer">
+                    Send overdue homework reminders
+                  </Label>
+                  <Switch
+                    id="send-overdue-new"
+                    checked={sendOverdueEmails}
+                    onCheckedChange={setSendOverdueEmails}
+                  />
+                </div>
+              </details>
+            ) : (
+              <div className="flex items-center justify-between gap-2 pt-1">
+                <Label htmlFor="send-overdue-new" className="text-xs text-muted-foreground cursor-pointer">
+                  Send overdue homework reminders
+                </Label>
+                <Switch
+                  id="send-overdue-new"
+                  checked={sendOverdueEmails}
+                  onCheckedChange={setSendOverdueEmails}
+                />
+              </div>
+            )}
           </div>
 
           <div className={pasteEnabled ? 'lg:border-l lg:pl-5 lg:min-w-0' : ''}>
