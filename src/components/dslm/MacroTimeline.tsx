@@ -338,6 +338,16 @@ export const MacroTimeline: React.FC<MacroTimelineProps> = ({
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
+        {/* v6.9.77 — guided roadmap dialog must be mounted in empty-state too. */}
+        <GenerateRoadmapDialog
+          open={guidedDialog?.mode === 'replace'}
+          onOpenChange={(o) => { if (!o) setGuidedDialog(null); }}
+          mode="replace"
+          goals={guidedGoalOptions}
+          generating={generating}
+          isRegeneration={false}
+          onConfirm={async (opts) => { await generatePhases('replace', opts); }}
+        />
       </>
     );
   }
