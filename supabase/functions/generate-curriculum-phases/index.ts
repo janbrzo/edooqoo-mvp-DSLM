@@ -560,7 +560,7 @@ Return ONLY a valid JSON array (no markdown), with this exact format:
         { role: 'user', content: prompt }
       ],
       temperature: 0.6,
-      max_tokens: 2500,
+      max_tokens: 6000,
     }, { primaryModel: 'google/gemini-2.5-flash', functionName: 'generate-curriculum-phases' });
 
     if (!aiResponse.ok) {
@@ -573,12 +573,37 @@ Return ONLY a valid JSON array (no markdown), with this exact format:
     const content = aiData.choices?.[0]?.message?.content || '[]';
 
     let phases: any[] = [];
-    try {
+    {
       const cleaned = content.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-      phases = JSON.parse(cleaned);
-    } catch (e) {
-      console.error('Failed to parse AI response:', content);
-      phases = [];
+      const tryParse = (s: string): any[] | null => {
+        try {
+          const parsed = JSON.parse(s);
+          return Array.isArray(parsed) ? parsed : null;
+        } catch { return null; }
+      };
+      const direct = tryParse(cleaned);
+      if (direct) {
+        phases = direct;
+      } else {
+        // v6.9.78 — repair truncated JSON array: trim to the last complete '}'
+        // and close with ']'. Fixes model output cut off by max_tokens.
+        const startIdx = cleaned.indexOf('[');
+        if (startIdx >= 0) {
+          const body = cleaned.slice(startIdx);
+          const lastClose = body.lastIndexOf('}');
+          if (lastClose > 0) {
+            const repaired = body.slice(0, lastClose + 1).replace(/,\s*$/, '') + ']';
+            const repairedParsed = tryParse(repaired);
+            if (repairedParsed && repairedParsed.length > 0) {
+              console.warn('AI JSON truncated — repaired to', repairedParsed.length, 'phase(s)');
+              phases = repairedParsed;
+            }
+          }
+        }
+        if (phases.length === 0) {
+          console.error('Failed to parse AI response:', content);
+        }
+      }
     }
 
     if (!Array.isArray(phases) || phases.length === 0) {
