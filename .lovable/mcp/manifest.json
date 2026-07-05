@@ -1,0 +1,104 @@
+{
+  "version": 1,
+  "sdk_version": "0.20.0",
+  "path": "/mcp",
+  "auth": {
+    "type": "none"
+  },
+  "mcp": {
+    "server": {
+      "name": "edooqoo-mcp",
+      "version": "0.1.0",
+      "title": "Edooqoo — 1-Minute Prep for English Tutors"
+    },
+    "tools": [
+      {
+        "name": "echo",
+        "title": "Echo",
+        "description": "Echo the input text back to the caller. Use this to verify the Edooqoo MCP server is reachable.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "text": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Text to echo back."
+            }
+          },
+          "required": [
+            "text"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_exercise_types",
+        "title": "List Edooqoo exercise types",
+        "description": "Return the catalog of ESL exercise types Edooqoo can generate, grouped by media requirement (no-media, picture-based, audio-based). Useful for lesson-plan assistants that need to know which exercise formats Edooqoo supports.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "media": {
+              "type": "string",
+              "enum": [
+                "all",
+                "no_media",
+                "picture",
+                "audio"
+              ],
+              "default": "all",
+              "description": "Filter by media requirement. Defaults to all."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_topics",
+        "title": "List Edooqoo ESL topics",
+        "description": "Return the Edooqoo ESL topic catalog (grammar, vocabulary, skills). Optionally filter by category or search substring. Useful for suggesting adult 1:1 lesson focus areas.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "category": {
+              "type": "string",
+              "description": "Filter by category (e.g. grammar, vocabulary, skills)."
+            },
+            "query": {
+              "type": "string",
+              "description": "Case-insensitive substring match on slug or label."
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 60,
+              "default": 40
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      }
+    ]
+  }
+}
