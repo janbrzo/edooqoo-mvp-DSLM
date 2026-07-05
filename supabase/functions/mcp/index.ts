@@ -20,11 +20,49 @@ var echo_default = defineTool({
 // src/lib/mcp/tools/list_exercise_types.ts
 import { defineTool as defineTool2 } from "npm:@lovable.dev/mcp-js@0.20.0";
 import { z as z2 } from "npm:zod@^3.23.8";
-import {
-  NO_MEDIA_EXERCISE_IDS,
-  PICTURE_EXERCISE_IDS,
-  AUDIO_EXERCISE_IDS
-} from "npm:@/lib/exerciseTaxonomy";
+
+// src/lib/exerciseTaxonomy.ts
+var NO_MEDIA_EXERCISE_IDS = [
+  "reading",
+  "fill-in-blanks",
+  "multiple-choice",
+  "true-false",
+  "matching",
+  "dialogue",
+  "answer-questions",
+  "discussion",
+  "error-correction",
+  "odd-one-out",
+  "matching-halves",
+  "word-order",
+  "gap-text",
+  "negative-prefixes",
+  "categorize",
+  "paraphrasing",
+  "complete-word",
+  "synonyms",
+  "antonyms"
+];
+var PICTURE_EXERCISE_IDS = [
+  "describe-picture",
+  "answer-questions-picture",
+  "true-false-picture",
+  "multiple-choice-picture"
+];
+var AUDIO_EXERCISE_IDS = [
+  "listening-comprehension",
+  "answer-questions-audio",
+  "true-false-audio",
+  "multiple-choice-audio",
+  "fill-in-blanks-audio"
+];
+var ALL_EXERCISE_IDS = [
+  ...NO_MEDIA_EXERCISE_IDS,
+  ...PICTURE_EXERCISE_IDS,
+  ...AUDIO_EXERCISE_IDS
+];
+
+// src/lib/mcp/tools/list_exercise_types.ts
 var list_exercise_types_default = defineTool2({
   name: "list_exercise_types",
   title: "List Edooqoo exercise types",

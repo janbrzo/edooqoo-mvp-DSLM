@@ -6,7 +6,7 @@ import {
   NO_MEDIA_EXERCISE_IDS,
   PICTURE_EXERCISE_IDS,
   AUDIO_EXERCISE_IDS,
-} from "@/lib/exerciseTaxonomy";
+} from "../../exerciseTaxonomy";
 
 export default defineTool({
   name: "list_exercise_types",
