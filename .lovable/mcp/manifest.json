@@ -98,6 +98,85 @@
           "$schema": "http://json-schema.org/draft-07/schema#"
         },
         "outputSchema": null
+      },
+      {
+        "name": "list_students",
+        "title": "List my students",
+        "description": "List the calling teacher's students (id, name, CEFR level, main goal, last updated). Read-only. Requires a Personal MCP Token generated in Edooqoo → Settings → Agent integrations (MCP).",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 200,
+              "default": 50,
+              "description": "Max number of students to return."
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "get_student_summary",
+        "title": "Get student summary",
+        "description": "Return a full read-only summary for one student the calling teacher owns: profile fields, top skill metrics (by mastery), and the 5 most recent worksheets. Requires a Personal MCP Token.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "student_id": {
+              "type": "string",
+              "format": "uuid",
+              "description": "UUID of the student. Get one from list_students."
+            }
+          },
+          "required": [
+            "student_id"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
+      },
+      {
+        "name": "list_recent_worksheets",
+        "title": "List recent worksheets",
+        "description": "Return the calling teacher's most recent worksheets (optionally scoped to a student). Read-only.",
+        "annotations": {
+          "readOnlyHint": true,
+          "idempotentHint": true,
+          "openWorldHint": false
+        },
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20
+            },
+            "student_id": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "outputSchema": null
       }
     ]
   }
