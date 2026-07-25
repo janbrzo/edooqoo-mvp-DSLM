@@ -49,6 +49,7 @@ const StatusPage = lazy(() => import("./pages/StatusPage"));
 const TeacherAlertsPage = lazy(() => import("./pages/TeacherAlertsPage"));
 const CalendarPage = lazy(() => import("./pages/CalendarPage"));
 const CalendarSettingsPage = lazy(() => import("./pages/CalendarSettingsPage"));
+const McpTokensPage = lazy(() => import("./pages/settings/McpTokensPage"));
 const PublicBookingPage = lazy(() => import("./pages/PublicBookingPage"));
 const StudentLessonsPage = lazy(() => import("./pages/StudentLessonsPage"));
 const CalendarLogHistoryPage = lazy(() => import("./components/calendar/CalendarLogHistoryPage"));
@@ -167,6 +168,7 @@ const App = () => (
               <Route path="/test-exercises" element={<TestExercises />} />
               <Route path="/calendar" element={<CalendarPage />} />
               <Route path="/calendar/settings" element={<CalendarSettingsPage />} />
+              <Route path="/settings/mcp" element={<McpTokensPage />} />
               <Route path="/calendar/logs" element={<CalendarLogHistoryPage />} />
               <Route path="/about" element={<About />} />
               <Route path="/prompts" element={<Prompts />} />
