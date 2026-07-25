@@ -2,9 +2,13 @@
 // at module top-level. Called only from tool handlers.
 import { createClient, type SupabaseClient } from "@supabase/supabase-js";
 
-export type McpAuthResult =
-  | { ok: true; teacherId: string; tokenHash: string; supabase: SupabaseClient }
-  | { ok: false; reason: string };
+export interface McpAuthResult {
+  ok: boolean;
+  teacherId?: string;
+  tokenHash?: string;
+  supabase?: SupabaseClient;
+  reason?: string;
+}
 
 async function sha256Hex(input: string): Promise<string> {
   const buf = new TextEncoder().encode(input);
