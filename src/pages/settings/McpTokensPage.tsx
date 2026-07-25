@@ -3,6 +3,7 @@ import { AuthenticatedPageShell } from '@/components/AuthenticatedPageShell';
 import StickyNav from '@/components/landing/StickyNav';
 import { useNavigate } from 'react-router-dom';
 import { useAuthFlow } from '@/hooks/useAuthFlow';
+import { useTokenSystem } from '@/hooks/useTokenSystem';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -35,6 +36,7 @@ const MCP_ENDPOINT = `https://bvfrkzdlklyvnhlpleck.supabase.co/functions/v1/mcp`
 const McpTokensPage: React.FC = () => {
   const navigate = useNavigate();
   const { user, loading: authLoading, isRegisteredUser } = useAuthFlow();
+  const { tokenLeft } = useTokenSystem(user?.id);
   const [tokens, setTokens] = useState<McpTokenRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
@@ -88,7 +90,7 @@ const McpTokensPage: React.FC = () => {
 
   return (
     <AuthenticatedPageShell>
-      <StickyNav />
+      <StickyNav user={user} isRegisteredUser={isRegisteredUser} tokenLeft={tokenLeft} />
       <div className="container mx-auto max-w-4xl px-4 pt-24 pb-16">
         <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="mb-4">
           <ArrowLeft className="mr-2 h-4 w-4" /> Back
