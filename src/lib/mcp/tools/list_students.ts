@@ -13,7 +13,7 @@ export default defineTool({
   annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
   handler: async ({ limit }, ctx) => {
     const auth = await resolveTeacherFromRequest(ctx);
-    if (!auth.ok) return unauthorized(auth.reason);
+    if (!auth.ok || !auth.supabase || !auth.teacherId) return unauthorized(auth.reason ?? "Unauthorized");
     const { data, error } = await auth.supabase
       .from("students")
       .select("id, name, english_level, main_goal, native_language, updated_at")
