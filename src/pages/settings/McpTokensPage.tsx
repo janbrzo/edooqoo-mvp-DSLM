@@ -90,7 +90,7 @@ const McpTokensPage: React.FC = () => {
 
   return (
     <AuthenticatedPageShell>
-      <StickyNav user={user} isRegisteredUser={isRegisteredUser} tokenLeft={tokenLeft} />
+      <StickyNav user={user} isRegisteredUser={!!isRegisteredUser} tokenLeft={tokenLeft} />
       <div className="container mx-auto max-w-4xl px-4 pt-24 pb-16">
         <Button variant="ghost" size="sm" onClick={() => navigate(-1)} className="mb-4">
           <ArrowLeft className="mr-2 h-4 w-4" /> Back
