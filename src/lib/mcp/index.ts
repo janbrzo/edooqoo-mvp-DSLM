@@ -11,6 +11,9 @@ import { defineMcp } from "@lovable.dev/mcp-js";
 import echoTool from "./tools/echo";
 import listExerciseTypesTool from "./tools/list_exercise_types";
 import listTopicsTool from "./tools/list_topics";
+import listStudentsTool from "./tools/list_students";
+import getStudentSummaryTool from "./tools/get_student_summary";
+import listRecentWorksheetsTool from "./tools/list_recent_worksheets";
 
 export default defineMcp({
   name: "edooqoo-mcp",
@@ -18,5 +21,12 @@ export default defineMcp({
   version: "0.1.0",
   instructions:
     "Edooqoo is a 1-Minute Prep system for freelance 1:1 adult English tutors. Use `list_exercise_types` to see which worksheet formats Edooqoo can generate, `list_topics` to browse the ESL topic catalog, and `echo` to verify connectivity. This MCP server only exposes public catalog data; teacher- and student-scoped tools are intentionally not exposed until authenticated MCP is wired up.",
-  tools: [echoTool, listExerciseTypesTool, listTopicsTool],
+  tools: [
+    echoTool,
+    listExerciseTypesTool,
+    listTopicsTool,
+    listStudentsTool,
+    getStudentSummaryTool,
+    listRecentWorksheetsTool,
+  ],
 });

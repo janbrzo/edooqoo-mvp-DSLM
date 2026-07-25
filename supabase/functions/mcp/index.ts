@@ -109,13 +109,143 @@ var list_topics_default = defineTool3({
   }
 });
 
+// src/lib/mcp/tools/list_students.ts
+import { defineTool as defineTool4 } from "npm:@lovable.dev/mcp-js@0.20.0";
+import { z as z4 } from "npm:zod@^3.23.8";
+
+// src/lib/mcp/auth.ts
+import { createClient } from "npm:@supabase/supabase-js@^2.57.2";
+async function sha256Hex(input) {
+  const buf = new TextEncoder().encode(input);
+  const digest = await crypto.subtle.digest("SHA-256", buf);
+  return Array.from(new Uint8Array(digest)).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+function readAuthHeader(ctx) {
+  const anyCtx = ctx;
+  const req = anyCtx?.request ?? anyCtx?.req;
+  const headers = req?.headers ?? anyCtx?.headers;
+  if (!headers) return "";
+  return headers.get("authorization") ?? headers.get("Authorization") ?? "";
+}
+async function resolveTeacherFromRequest(ctx) {
+  const authHeader = readAuthHeader(ctx);
+  const match = authHeader.match(/^Bearer\s+(edq_mcp_[A-Za-z0-9]+)$/);
+  if (!match) {
+    return { ok: false, reason: "Missing or malformed Bearer token (expected `Authorization: Bearer edq_mcp_...`)." };
+  }
+  const token = match[1];
+  const tokenHash = await sha256Hex(token);
+  const denoEnv = globalThis.Deno?.env;
+  const supabaseUrl = denoEnv?.get("SUPABASE_URL");
+  const serviceKey = denoEnv?.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!supabaseUrl || !serviceKey) {
+    return { ok: false, reason: "MCP server misconfigured (missing Supabase service credentials)." };
+  }
+  const supabase = createClient(supabaseUrl, serviceKey, {
+    auth: { persistSession: false, autoRefreshToken: false }
+  });
+  const { data, error } = await supabase.from("mcp_tokens").select("teacher_id, expires_at, revoked_at").eq("token_hash", tokenHash).is("revoked_at", null).maybeSingle();
+  if (error || !data) return { ok: false, reason: "Invalid or revoked MCP token." };
+  if (data.expires_at && new Date(data.expires_at) < /* @__PURE__ */ new Date()) {
+    return { ok: false, reason: "MCP token expired." };
+  }
+  void supabase.from("mcp_tokens").update({ last_used_at: (/* @__PURE__ */ new Date()).toISOString() }).eq("token_hash", tokenHash);
+  return { ok: true, teacherId: data.teacher_id, tokenHash, supabase };
+}
+function unauthorized(reason) {
+  return {
+    content: [{ type: "text", text: `Unauthorized: ${reason}` }],
+    isError: true
+  };
+}
+
+// src/lib/mcp/tools/list_students.ts
+var list_students_default = defineTool4({
+  name: "list_students",
+  title: "List my students",
+  description: "List the calling teacher's students (id, name, CEFR level, main goal, last updated). Read-only. Requires a Personal MCP Token generated in Edooqoo \u2192 Settings \u2192 Agent integrations (MCP).",
+  inputSchema: {
+    limit: z4.number().int().min(1).max(200).default(50).describe("Max number of students to return.")
+  },
+  annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+  handler: async ({ limit }, ctx) => {
+    const auth = await resolveTeacherFromRequest(ctx);
+    if (!auth.ok || !auth.supabase || !auth.teacherId) return unauthorized(auth.reason ?? "Unauthorized");
+    const { data, error } = await auth.supabase.from("students").select("id, name, english_level, main_goal, native_language, updated_at").eq("teacher_id", auth.teacherId).is("deleted_at", null).order("updated_at", { ascending: false }).limit(limit ?? 50);
+    if (error) {
+      return { content: [{ type: "text", text: `DB error: ${error.message}` }], isError: true };
+    }
+    return {
+      content: [{ type: "text", text: JSON.stringify(data ?? [], null, 2) }],
+      structuredContent: { students: data ?? [] }
+    };
+  }
+});
+
+// src/lib/mcp/tools/get_student_summary.ts
+import { defineTool as defineTool5 } from "npm:@lovable.dev/mcp-js@0.20.0";
+import { z as z5 } from "npm:zod@^3.23.8";
+var get_student_summary_default = defineTool5({
+  name: "get_student_summary",
+  title: "Get student summary",
+  description: "Return a full read-only summary for one student the calling teacher owns: profile fields, top skill metrics (by mastery), and the 5 most recent worksheets. Requires a Personal MCP Token.",
+  inputSchema: {
+    student_id: z5.string().uuid().describe("UUID of the student. Get one from list_students.")
+  },
+  annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+  handler: async ({ student_id }, ctx) => {
+    const auth = await resolveTeacherFromRequest(ctx);
+    if (!auth.ok || !auth.supabase || !auth.teacherId) return unauthorized(auth.reason ?? "Unauthorized");
+    const { data: student, error: sErr } = await auth.supabase.from("students").select("id, name, english_level, main_goal, main_goal_target_date, native_language, created_at, updated_at").eq("id", student_id).eq("teacher_id", auth.teacherId).is("deleted_at", null).maybeSingle();
+    if (sErr) return { content: [{ type: "text", text: `DB error: ${sErr.message}` }], isError: true };
+    if (!student) return { content: [{ type: "text", text: "Student not found or not owned by you." }], isError: true };
+    const { data: skills } = await auth.supabase.from("student_skill_metrics").select("skill_name, skill_category, current_mastery, trend, total_events").eq("student_id", student_id).eq("teacher_id", auth.teacherId).order("current_mastery", { ascending: false }).limit(10);
+    const { data: worksheets } = await auth.supabase.from("worksheets").select("id, title, created_at").eq("student_id", student_id).eq("user_id", auth.teacherId).order("created_at", { ascending: false }).limit(5);
+    const summary = { student, top_skills: skills ?? [], recent_worksheets: worksheets ?? [] };
+    return {
+      content: [{ type: "text", text: JSON.stringify(summary, null, 2) }],
+      structuredContent: summary
+    };
+  }
+});
+
+// src/lib/mcp/tools/list_recent_worksheets.ts
+import { defineTool as defineTool6 } from "npm:@lovable.dev/mcp-js@0.20.0";
+import { z as z6 } from "npm:zod@^3.23.8";
+var list_recent_worksheets_default = defineTool6({
+  name: "list_recent_worksheets",
+  title: "List recent worksheets",
+  description: "Return the calling teacher's most recent worksheets (optionally scoped to a student). Read-only.",
+  inputSchema: {
+    limit: z6.number().int().min(1).max(100).default(20),
+    student_id: z6.string().uuid().optional()
+  },
+  annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
+  handler: async ({ limit, student_id }, ctx) => {
+    const auth = await resolveTeacherFromRequest(ctx);
+    if (!auth.ok || !auth.supabase || !auth.teacherId) return unauthorized(auth.reason ?? "Unauthorized");
+    let q = auth.supabase.from("worksheets").select("id, title, student_id, created_at").eq("user_id", auth.teacherId).order("created_at", { ascending: false }).limit(limit ?? 20);
+    if (student_id) q = q.eq("student_id", student_id);
+    const { data, error } = await q;
+    if (error) return { content: [{ type: "text", text: `DB error: ${error.message}` }], isError: true };
+    return { content: [{ type: "text", text: JSON.stringify(data ?? [], null, 2) }], structuredContent: { worksheets: data ?? [] } };
+  }
+});
+
 // src/lib/mcp/index.ts
 var mcp_default = defineMcp({
   name: "edooqoo-mcp",
   title: "Edooqoo \u2014 1-Minute Prep for English Tutors",
   version: "0.1.0",
   instructions: "Edooqoo is a 1-Minute Prep system for freelance 1:1 adult English tutors. Use `list_exercise_types` to see which worksheet formats Edooqoo can generate, `list_topics` to browse the ESL topic catalog, and `echo` to verify connectivity. This MCP server only exposes public catalog data; teacher- and student-scoped tools are intentionally not exposed until authenticated MCP is wired up.",
-  tools: [echo_default, list_exercise_types_default, list_topics_default]
+  tools: [
+    echo_default,
+    list_exercise_types_default,
+    list_topics_default,
+    list_students_default,
+    get_student_summary_default,
+    list_recent_worksheets_default
+  ]
 });
 
 // lovable-mcp-supabase-entry.ts
