@@ -1723,6 +1723,45 @@ export type Database = {
           },
         ]
       }
+      mcp_tokens: {
+        Row: {
+          created_at: string
+          expires_at: string | null
+          id: string
+          last_used_at: string | null
+          name: string
+          revoked_at: string | null
+          scopes: string[]
+          teacher_id: string
+          token_hash: string
+          token_prefix: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          last_used_at?: string | null
+          name: string
+          revoked_at?: string | null
+          scopes?: string[]
+          teacher_id: string
+          token_hash: string
+          token_prefix: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          last_used_at?: string | null
+          name?: string
+          revoked_at?: string | null
+          scopes?: string[]
+          teacher_id?: string
+          token_hash?: string
+          token_prefix?: string
+        }
+        Relationships: []
+      }
       model_health_checks: {
         Row: {
           checked_at: string
@@ -3645,6 +3684,14 @@ export type Database = {
         Args: { p_teacher_id: string; p_worksheet_id: string }
         Returns: boolean
       }
+      create_mcp_token: {
+        Args: { _expires_at?: string; _name: string }
+        Returns: {
+          id: string
+          token: string
+          token_prefix: string
+        }[]
+      }
       extract_micro_skill: { Args: { skill_name: string }; Returns: string }
       extract_skill_category: { Args: { skill_name: string }; Returns: string }
       find_student_by_email: {
@@ -3980,6 +4027,7 @@ export type Database = {
         Args: { user_email: string }
         Returns: boolean
       }
+      revoke_mcp_token: { Args: { _id: string }; Returns: undefined }
       rollback_intake_extraction: {
         Args: { p_extraction_id: string }
         Returns: undefined
