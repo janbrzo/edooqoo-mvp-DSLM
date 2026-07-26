@@ -1766,6 +1766,7 @@ export type Database = {
         Row: {
           checked_at: string
           error: string | null
+          expected: boolean
           id: string
           latency_ms: number | null
           model: string
@@ -1777,6 +1778,7 @@ export type Database = {
         Insert: {
           checked_at?: string
           error?: string | null
+          expected?: boolean
           id?: string
           latency_ms?: number | null
           model: string
@@ -1788,6 +1790,7 @@ export type Database = {
         Update: {
           checked_at?: string
           error?: string | null
+          expected?: boolean
           id?: string
           latency_ms?: number | null
           model?: string
