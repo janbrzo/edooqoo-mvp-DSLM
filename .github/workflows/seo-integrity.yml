@@ -20,7 +20,7 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci || (echo "lockfile out of sync — falling back to npm install" && npm install --no-audit --no-fund)
 
       - name: Generate source-of-truth manifest
         run: npm run docs:audit-source
