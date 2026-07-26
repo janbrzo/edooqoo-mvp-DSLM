@@ -15,7 +15,16 @@ const corsHeaders = {
 };
 
 type Provider = "lovable-gateway" | "openai" | "google" | "google-vertex";
-interface Target { provider: Provider; model: string; endpoint: string; purpose: string; }
+interface Target {
+  provider: Provider;
+  model: string;
+  endpoint: string;
+  purpose: string;
+  /** Probe kept for observability only — a non-2xx here is not an incident. */
+  optional?: boolean;
+  /** Non-2xx statuses that are the documented, expected state for an optional probe. */
+  expectedFailureStatuses?: number[];
+}
 
 // v6.9.66 — Daily set covers every model in the live hot path.
 // Lovable Gateway removed from daily after aiChat helper migrated to
@@ -54,9 +63,11 @@ const TARGETS_MONTHLY: Target[] = [
   { provider: "google-vertex",   model: "gemini-3.1-flash-image",       endpoint: "https://us-central1-aiplatform.googleapis.com/v1beta1/publishers/google/models/gemini-3.1-flash-image",
     purpose: "Vertex AI image fallback (Nano Banana 2)" },
   { provider: "lovable-gateway", model: "google/gemini-2.5-flash",       endpoint: "https://ai.gateway.lovable.dev/v1/chat/completions",
-    purpose: "Lovable Gateway probe — currently unused, kept for re-activation when credits return" },
+    purpose: "Lovable Gateway probe — currently unused, kept for re-activation when credits return",
+    optional: true, expectedFailureStatuses: [401, 402, 403] },
   { provider: "lovable-gateway", model: "google/gemini-3-flash-preview", endpoint: "https://ai.gateway.lovable.dev/v1/chat/completions",
-    purpose: "Lovable AI default catalog model (audit probe only)" },
+    purpose: "Lovable AI default catalog model (audit probe only)",
+    optional: true, expectedFailureStatuses: [401, 402, 403] },
 ];
 
 async function ping(target: Target): Promise<{ status: number; latency_ms: number; error: string | null }> {
@@ -143,23 +154,30 @@ serve(async (req) => {
   const sb = createClient(url, srk);
 
   const targets = mode === "monthly" ? TARGETS_MONTHLY : TARGETS_DAILY;
-  const results: Array<Target & { status: number; latency_ms: number; error: string | null; ok: boolean }> = [];
+  const results: Array<Target & { status: number; latency_ms: number; error: string | null; ok: boolean; expected: boolean }> = [];
   for (const target of targets) {
     const r = await ping(target);
     const ok = r.status >= 200 && r.status < 300;
-    results.push({ ...target, ...r, ok });
+    // v6.9.81 — three-state classification. An `optional` probe returning one of
+    // its documented statuses (e.g. Lovable Gateway 402 while the workspace has
+    // no credits) is EXPECTED, not a failure: it must not inflate the failed
+    // count, must not colour the email red, and must never hit logModelFailure.
+    const expected = !ok && target.optional === true &&
+      (target.expectedFailureStatuses ?? []).includes(r.status);
+    results.push({ ...target, ...r, ok, expected });
     await sb.from("model_health_checks").insert({
       provider: target.provider,
       model: target.model,
       status: r.status,
       latency_ms: r.latency_ms,
       ok,
+      expected,
       error: r.error,
       purpose: target.purpose,
     });
     // Critical (deprecation 404/410) or 5xx → also log to error_logs so the
     // StatusPage banner picks it up immediately.
-    if (!ok && (r.status === 404 || r.status === 410 || r.status >= 500)) {
+    if (!ok && !expected && (r.status === 404 || r.status === 410 || r.status >= 500)) {
       await logModelFailure({
         model: target.model,
         provider: target.provider,
@@ -176,17 +194,25 @@ serve(async (req) => {
   {
     try {
       const okCount = results.filter(r => r.ok).length;
-      const failedCount = results.length - okCount;
-      const rows = results.map(r => `
+      const expectedCount = results.filter(r => r.expected).length;
+      const failedCount = results.length - okCount - expectedCount;
+      const rows = results.map(r => {
+        const label = r.ok ? 'OK' : r.expected ? 'EXPECTED' : 'FAIL';
+        const colour = r.ok ? '#16a34a' : r.expected ? '#b45309' : '#dc2626';
+        const errorText = r.expected
+          ? `probe only — intentionally unused, ${(r.error || '').slice(0, 80)}`
+          : (r.error || '').slice(0, 120);
+        return `
         <tr>
           <td style="padding:6px 10px;border-bottom:1px solid #e5e7eb;">${r.provider}</td>
           <td style="padding:6px 10px;border-bottom:1px solid #e5e7eb;"><code>${r.model}</code></td>
           <td style="padding:6px 10px;border-bottom:1px solid #e5e7eb;">${(r as any).purpose || ''}</td>
           <td style="padding:6px 10px;border-bottom:1px solid #e5e7eb;text-align:right;">${r.status}</td>
           <td style="padding:6px 10px;border-bottom:1px solid #e5e7eb;text-align:right;">${r.latency_ms} ms</td>
-          <td style="padding:6px 10px;border-bottom:1px solid #e5e7eb;color:${r.ok ? '#16a34a' : '#dc2626'};">${r.ok ? 'OK' : 'FAIL'}</td>
-          <td style="padding:6px 10px;border-bottom:1px solid #e5e7eb;font-size:11px;color:#6b7280;">${(r.error || '').slice(0, 120)}</td>
-        </tr>`).join("");
+          <td style="padding:6px 10px;border-bottom:1px solid #e5e7eb;color:${colour};">${label}</td>
+          <td style="padding:6px 10px;border-bottom:1px solid #e5e7eb;font-size:11px;color:#6b7280;">${errorText}</td>
+        </tr>`;
+      }).join("");
       // v6.9.38 — explicit cadence banner so daily and monthly reports are
       // visually distinguishable in the inbox even when the model counts
       // happen to overlap.
@@ -218,7 +244,7 @@ serve(async (req) => {
         },
         body: JSON.stringify({
           reportHtml,
-          summary: { total: results.length, ok: okCount, failed: failedCount },
+          summary: { total: results.length, ok: okCount, expected: expectedCount, failed: failedCount },
           generatedAt: new Date().toISOString(),
           mode,
         }),

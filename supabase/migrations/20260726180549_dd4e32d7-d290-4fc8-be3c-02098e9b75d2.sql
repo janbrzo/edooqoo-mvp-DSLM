@@ -1,0 +1,1 @@
+ALTER TABLE public.model_health_checks ADD COLUMN IF NOT EXISTS expected boolean NOT NULL DEFAULT false;

@@ -13,3 +13,12 @@ type: feature
 - `logModelFailure` wired into: `generate-audio`, `verify-open-answers`, `suggest-exercises`, `classify-knowledge-entry`, `generate-curriculum-phases`, `translate-flashcard` (Lovable + OpenAI fallback). Pattern: log BEFORE throw / error response.
 
 **Why:** v6.9.21 logger existed but only 1 function used it; deprecations elsewhere went silent.
+
+## v6.9.81 — Three-state classification
+
+- `Target` supports `optional: true` + `expectedFailureStatuses: number[]`. Both `lovable-gateway` monthly probes use `[401, 402, 403]`.
+- Results are `ok` (2xx) / `expected` (optional probe hitting a documented status) / `failed`. Only `failed` counts in the email subject; `expected` never calls `logModelFailure`.
+- `model_health_checks.expected boolean not null default false` persists the state.
+- Manual re-run: `POST /functions/v1/audit-llm-models`, header `x-cron-secret: <CRON_SECRET>`, body `{"mode":"monthly"}`.
+
+**Why:** Lovable Gateway is intentionally unused (no credits) — a permanent red FAIL trains the operator to ignore the audit.
