@@ -194,17 +194,25 @@ serve(async (req) => {
   {
     try {
       const okCount = results.filter(r => r.ok).length;
-      const failedCount = results.length - okCount;
-      const rows = results.map(r => `
+      const expectedCount = results.filter(r => r.expected).length;
+      const failedCount = results.length - okCount - expectedCount;
+      const rows = results.map(r => {
+        const label = r.ok ? 'OK' : r.expected ? 'EXPECTED' : 'FAIL';
+        const colour = r.ok ? '#16a34a' : r.expected ? '#b45309' : '#dc2626';
+        const errorText = r.expected
+          ? `probe only — intentionally unused, ${(r.error || '').slice(0, 80)}`
+          : (r.error || '').slice(0, 120);
+        return `
         <tr>
           <td style="padding:6px 10px;border-bottom:1px solid #e5e7eb;">${r.provider}</td>
           <td style="padding:6px 10px;border-bottom:1px solid #e5e7eb;"><code>${r.model}</code></td>
           <td style="padding:6px 10px;border-bottom:1px solid #e5e7eb;">${(r as any).purpose || ''}</td>
           <td style="padding:6px 10px;border-bottom:1px solid #e5e7eb;text-align:right;">${r.status}</td>
           <td style="padding:6px 10px;border-bottom:1px solid #e5e7eb;text-align:right;">${r.latency_ms} ms</td>
-          <td style="padding:6px 10px;border-bottom:1px solid #e5e7eb;color:${r.ok ? '#16a34a' : '#dc2626'};">${r.ok ? 'OK' : 'FAIL'}</td>
-          <td style="padding:6px 10px;border-bottom:1px solid #e5e7eb;font-size:11px;color:#6b7280;">${(r.error || '').slice(0, 120)}</td>
-        </tr>`).join("");
+          <td style="padding:6px 10px;border-bottom:1px solid #e5e7eb;color:${colour};">${label}</td>
+          <td style="padding:6px 10px;border-bottom:1px solid #e5e7eb;font-size:11px;color:#6b7280;">${errorText}</td>
+        </tr>`;
+      }).join("");
       // v6.9.38 — explicit cadence banner so daily and monthly reports are
       // visually distinguishable in the inbox even when the model counts
       // happen to overlap.
@@ -236,7 +244,7 @@ serve(async (req) => {
         },
         body: JSON.stringify({
           reportHtml,
-          summary: { total: results.length, ok: okCount, failed: failedCount },
+          summary: { total: results.length, ok: okCount, expected: expectedCount, failed: failedCount },
           generatedAt: new Date().toISOString(),
           mode,
         }),
