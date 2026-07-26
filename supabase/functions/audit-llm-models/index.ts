@@ -15,7 +15,16 @@ const corsHeaders = {
 };
 
 type Provider = "lovable-gateway" | "openai" | "google" | "google-vertex";
-interface Target { provider: Provider; model: string; endpoint: string; purpose: string; }
+interface Target {
+  provider: Provider;
+  model: string;
+  endpoint: string;
+  purpose: string;
+  /** Probe kept for observability only — a non-2xx here is not an incident. */
+  optional?: boolean;
+  /** Non-2xx statuses that are the documented, expected state for an optional probe. */
+  expectedFailureStatuses?: number[];
+}
 
 // v6.9.66 — Daily set covers every model in the live hot path.
 // Lovable Gateway removed from daily after aiChat helper migrated to
@@ -54,9 +63,11 @@ const TARGETS_MONTHLY: Target[] = [
   { provider: "google-vertex",   model: "gemini-3.1-flash-image",       endpoint: "https://us-central1-aiplatform.googleapis.com/v1beta1/publishers/google/models/gemini-3.1-flash-image",
     purpose: "Vertex AI image fallback (Nano Banana 2)" },
   { provider: "lovable-gateway", model: "google/gemini-2.5-flash",       endpoint: "https://ai.gateway.lovable.dev/v1/chat/completions",
-    purpose: "Lovable Gateway probe — currently unused, kept for re-activation when credits return" },
+    purpose: "Lovable Gateway probe — currently unused, kept for re-activation when credits return",
+    optional: true, expectedFailureStatuses: [401, 402, 403] },
   { provider: "lovable-gateway", model: "google/gemini-3-flash-preview", endpoint: "https://ai.gateway.lovable.dev/v1/chat/completions",
-    purpose: "Lovable AI default catalog model (audit probe only)" },
+    purpose: "Lovable AI default catalog model (audit probe only)",
+    optional: true, expectedFailureStatuses: [401, 402, 403] },
 ];
 
 async function ping(target: Target): Promise<{ status: number; latency_ms: number; error: string | null }> {
