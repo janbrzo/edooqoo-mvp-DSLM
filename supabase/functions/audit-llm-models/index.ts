@@ -154,23 +154,30 @@ serve(async (req) => {
   const sb = createClient(url, srk);
 
   const targets = mode === "monthly" ? TARGETS_MONTHLY : TARGETS_DAILY;
-  const results: Array<Target & { status: number; latency_ms: number; error: string | null; ok: boolean }> = [];
+  const results: Array<Target & { status: number; latency_ms: number; error: string | null; ok: boolean; expected: boolean }> = [];
   for (const target of targets) {
     const r = await ping(target);
     const ok = r.status >= 200 && r.status < 300;
-    results.push({ ...target, ...r, ok });
+    // v6.9.81 — three-state classification. An `optional` probe returning one of
+    // its documented statuses (e.g. Lovable Gateway 402 while the workspace has
+    // no credits) is EXPECTED, not a failure: it must not inflate the failed
+    // count, must not colour the email red, and must never hit logModelFailure.
+    const expected = !ok && target.optional === true &&
+      (target.expectedFailureStatuses ?? []).includes(r.status);
+    results.push({ ...target, ...r, ok, expected });
     await sb.from("model_health_checks").insert({
       provider: target.provider,
       model: target.model,
       status: r.status,
       latency_ms: r.latency_ms,
       ok,
+      expected,
       error: r.error,
       purpose: target.purpose,
     });
     // Critical (deprecation 404/410) or 5xx → also log to error_logs so the
     // StatusPage banner picks it up immediately.
-    if (!ok && (r.status === 404 || r.status === 410 || r.status >= 500)) {
+    if (!ok && !expected && (r.status === 404 || r.status === 410 || r.status >= 500)) {
       await logModelFailure({
         model: target.model,
         provider: target.provider,
