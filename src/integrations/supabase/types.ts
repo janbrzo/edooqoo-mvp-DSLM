@@ -3745,6 +3745,18 @@ export type Database = {
           provider: string
         }[]
       }
+      get_download_session_by_token: {
+        Args: { p_session_token: string }
+        Returns: {
+          created_at: string
+          downloads_count: number
+          expires_at: string
+          id: string
+          payment_id: string
+          session_token: string
+          worksheet_id: string
+        }[]
+      }
       get_flashcard_cards_for_learning: {
         Args: { p_learner_identifier: string; p_set_id: string }
         Returns: {
@@ -3919,6 +3931,13 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      increment_download_session_by_token: {
+        Args: { p_session_token: string }
+        Returns: {
+          downloads_count: number
+          expires_at: string
+        }[]
       }
       increment_worksheet_download_count: {
         Args: { p_worksheet_id: string }
