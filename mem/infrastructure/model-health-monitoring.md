@@ -14,14 +14,11 @@ type: feature
 
 **Why:** v6.9.21 logger existed but only 1 function used it; deprecations elsewhere went silent.
 
-## v6.9.81 — Three-state classification
+## v6.9.81 — Deprecated three-state classification
 
-- `Target` supports `optional: true` + `expectedFailureStatuses: number[]`. Both `lovable-gateway` monthly probes use `[401, 402, 403]`.
-- Results are `ok` (2xx) / `expected` (optional probe hitting a documented status) / `failed`. Only `failed` counts in the email subject; `expected` never calls `logModelFailure`.
-- `model_health_checks.expected boolean not null default false` persists the state.
+- Historical note: v6.9.81 temporarily marked old Lovable Gateway failures as `EXPECTED` instead of `FAIL`.
+- This was superseded by v6.9.82 because the correct monitoring target is the direct provider path, not an intentionally unused gateway.
 - Manual re-run: `POST /functions/v1/audit-llm-models`, header `x-cron-secret: <CRON_SECRET>`, body `{"mode":"monthly"}`.
-
-**Why:** Lovable Gateway is intentionally unused (no credits) — a permanent red FAIL trains the operator to ignore the audit.
 
 ## v6.9.82 — Lovable Gateway removed from active health checks
 
@@ -29,5 +26,6 @@ type: feature
 - Monthly audit replaces the two old Lovable Gateway probes with direct inference smoke tests: Gemini `gemini-2.5-flash` and OpenAI `gpt-4o-mini`.
 - Hot-path functions using `_shared/aiChat.ts` must gate on `GEMINI_API_KEY || OPENAI_API_KEY`, not `LOVABLE_API_KEY`.
 - `scripts/audit-llm-models.ts` no longer live-pings Lovable Gateway.
+- `model_health_checks.expected` remains for backward compatibility with old rows, but current audits should report `Expected: 0`.
 
 **Why:** Edooqoo intentionally does not use Lovable AI credits for model runtime; monitoring must test the direct providers that can actually break teacher workflows.

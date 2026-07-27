@@ -23,10 +23,6 @@ interface Target {
   purpose: string;
   /** Metadata is a cheap availability check; smoke sends a minimal inference request. */
   check?: CheckKind;
-  /** Probe kept for observability only — a non-2xx here is not an incident. */
-  optional?: boolean;
-  /** Non-2xx statuses that are the documented, expected state for an optional probe. */
-  expectedFailureStatuses?: number[];
 }
 
 // v6.9.66 — Daily set covers every model in the live hot path.
@@ -162,12 +158,10 @@ serve(async (req) => {
   for (const target of targets) {
     const r = await ping(target);
     const ok = r.status >= 200 && r.status < 300;
-    // v6.9.81 — three-state classification. An `optional` probe returning one of
-    // its documented statuses (e.g. Lovable Gateway 402 while the workspace has
-    // no credits) is EXPECTED, not a failure: it must not inflate the failed
-    // count, must not colour the email red, and must never hit logModelFailure.
-    const expected = !ok && target.optional === true &&
-      (target.expectedFailureStatuses ?? []).includes(r.status);
+    // v6.9.82 — active probes now target only direct providers actually used by
+    // Edooqoo. `expected` remains in storage for historical rows but current
+    // checks should fail loudly when a direct provider is unavailable.
+    const expected = false;
     results.push({ ...target, ...r, ok, expected });
     await sb.from("model_health_checks").insert({
       provider: target.provider,
@@ -203,9 +197,7 @@ serve(async (req) => {
       const rows = results.map(r => {
         const label = r.ok ? 'OK' : r.expected ? 'EXPECTED' : 'FAIL';
         const colour = r.ok ? '#16a34a' : r.expected ? '#b45309' : '#dc2626';
-        const errorText = r.expected
-          ? `probe only — intentionally unused, ${(r.error || '').slice(0, 80)}`
-          : (r.error || '').slice(0, 120);
+        const errorText = (r.error || '').slice(0, 120);
         return `
         <tr>
           <td style="padding:6px 10px;border-bottom:1px solid #e5e7eb;">${r.provider}</td>

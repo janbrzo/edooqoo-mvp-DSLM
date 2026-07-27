@@ -33,9 +33,8 @@ serve(async (req) => {
     const dateStr = (generatedAt || new Date().toISOString()).slice(0, 10);
     const total = summary?.total ?? 0;
     const failed = summary?.failed ?? 0;
-    // v6.9.81 — `expected` counts optional probes whose non-2xx status is the
-    // documented steady state (e.g. Lovable Gateway 402 with no credits).
-    // They are reported separately and never inflate the subject's failed count.
+    // Backward-compatible with v6.9.81 reports; active v6.9.82 targets should
+    // normally have expected=0 because Lovable Gateway probes were removed.
     const expectedCount = summary?.expected ?? 0;
     const label = mode === 'monthly' ? 'Monthly LLM Audit' : 'Daily LLM Audit';
     const subject = `[Edooqoo] ${label} — ${dateStr} — ${failed}/${total} failed`;
