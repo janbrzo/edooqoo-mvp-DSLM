@@ -1,6 +1,6 @@
-// v6.9.8 — Auto-classify a Student Knowledge entry via Lovable AI Gateway.
+// v6.9.8 — Auto-classify a Student Knowledge entry.
 // v6.9.65 — Use chatCompletion helper for automatic OpenAI fallback
-// when Lovable Gateway returns 402/429/5xx.
+// when the direct Gemini primary path returns 402/429/5xx.
 // Fire-and-forget: called from useStudentKnowledge after a Quick Add.
 // Returns a category + structured metadata + confidence; client patches the row.
 import { chatCompletion } from "../_shared/aiChat.ts";
@@ -10,8 +10,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
-
-const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY')
 
 const SYSTEM_PROMPT = `You classify short teacher notes about an English language student.
 Return STRICT JSON matching the schema. Pick the single best category.
@@ -35,8 +33,9 @@ Deno.serve(async (req) => {
   if (req.method !== 'POST') {
     return new Response(JSON.stringify({ error: 'method_not_allowed' }), { status: 405, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
   }
-  if (!LOVABLE_API_KEY) {
-    return new Response(JSON.stringify({ error: 'ai_key_missing' }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+  const hasDirectAiProvider = Boolean(Deno.env.get('GEMINI_API_KEY') || Deno.env.get('OPENAI_API_KEY'))
+  if (!hasDirectAiProvider) {
+    return new Response(JSON.stringify({ error: 'ai_key_missing', detail: 'GEMINI_API_KEY or OPENAI_API_KEY required' }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
   }
 
   let body: any

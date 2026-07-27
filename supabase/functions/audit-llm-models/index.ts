@@ -1,5 +1,5 @@
 // v6.9.27 — Daily LLM provider health audit.
-// Pings a minimal set of models across Lovable Gateway, OpenAI and Google,
+// Pings a minimal set of models across direct OpenAI, Google and Vertex APIs,
 // persists results in `model_health_checks` and surfaces deprecations via
 // the StatusPage banner (which reads from error_logs / get_active_model_issues).
 // Triggered by pg_cron at 06:00 UTC. Header `x-cron-secret` must match the
@@ -14,12 +14,15 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-cron-secret",
 };
 
-type Provider = "lovable-gateway" | "openai" | "google" | "google-vertex";
+type Provider = "openai" | "google" | "google-vertex";
+type CheckKind = "metadata" | "smoke";
 interface Target {
   provider: Provider;
   model: string;
   endpoint: string;
   purpose: string;
+  /** Metadata is a cheap availability check; smoke sends a minimal inference request. */
+  check?: CheckKind;
   /** Probe kept for observability only — a non-2xx here is not an incident. */
   optional?: boolean;
   /** Non-2xx statuses that are the documented, expected state for an optional probe. */
@@ -56,18 +59,16 @@ const TARGETS_DAILY: Target[] = [
     purpose: "Worksheet image generation (Vertex AI primary)" },
 ];
 
-// Monthly set — full breadth, includes fallbacks and the now-cold Lovable
-// Gateway probe (kept for re-activation if/when workspace credits return).
+// Monthly set — full breadth for direct providers only. Lovable Gateway is not
+// probed because Edooqoo intentionally runs on direct Google/OpenAI/Vertex APIs.
 const TARGETS_MONTHLY: Target[] = [
   ...TARGETS_DAILY,
   { provider: "google-vertex",   model: "gemini-3.1-flash-image",       endpoint: "https://us-central1-aiplatform.googleapis.com/v1beta1/publishers/google/models/gemini-3.1-flash-image",
     purpose: "Vertex AI image fallback (Nano Banana 2)" },
-  { provider: "lovable-gateway", model: "google/gemini-2.5-flash",       endpoint: "https://ai.gateway.lovable.dev/v1/chat/completions",
-    purpose: "Lovable Gateway probe — currently unused, kept for re-activation when credits return",
-    optional: true, expectedFailureStatuses: [401, 402, 403] },
-  { provider: "lovable-gateway", model: "google/gemini-3-flash-preview", endpoint: "https://ai.gateway.lovable.dev/v1/chat/completions",
-    purpose: "Lovable AI default catalog model (audit probe only)",
-    optional: true, expectedFailureStatuses: [401, 402, 403] },
+  { provider: "google",          model: "gemini-2.5-flash",             endpoint: "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
+    purpose: "Direct Gemini inference smoke test for aiChat primary path", check: "smoke" },
+  { provider: "openai",          model: "gpt-4o-mini",                  endpoint: "https://api.openai.com/v1/chat/completions",
+    purpose: "Direct OpenAI inference smoke test for aiChat fallback path", check: "smoke" },
 ];
 
 async function ping(target: Target): Promise<{ status: number; latency_ms: number; error: string | null }> {
@@ -76,6 +77,15 @@ async function ping(target: Target): Promise<{ status: number; latency_ms: numbe
     if (target.provider === "openai") {
       const key = Deno.env.get("OPENAI_API_KEY");
       if (!key) return { status: -1, latency_ms: 0, error: "missing OPENAI_API_KEY" };
+      if (target.check === "smoke") {
+        const r = await fetch(target.endpoint, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
+          body: JSON.stringify({ model: target.model, messages: [{ role: "user", content: "Return OK." }], max_tokens: 3 }),
+        });
+        const err = r.ok ? null : (await r.text()).slice(0, 500);
+        return { status: r.status, latency_ms: Date.now() - t0, error: err };
+      }
       const r = await fetch(target.endpoint, { headers: { Authorization: `Bearer ${key}` } });
       const err = r.ok ? null : (await r.text()).slice(0, 500);
       return { status: r.status, latency_ms: Date.now() - t0, error: err };
@@ -83,6 +93,18 @@ async function ping(target: Target): Promise<{ status: number; latency_ms: numbe
     if (target.provider === "google") {
       const key = Deno.env.get("GEMINI_API_KEY");
       if (!key) return { status: -1, latency_ms: 0, error: "missing GEMINI_API_KEY" };
+      if (target.check === "smoke") {
+        const r = await fetch(`${target.endpoint}?key=${key}`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            contents: [{ role: "user", parts: [{ text: "Return OK." }] }],
+            generationConfig: { maxOutputTokens: 3, temperature: 0 },
+          }),
+        });
+        const err = r.ok ? null : (await r.text()).slice(0, 500);
+        return { status: r.status, latency_ms: Date.now() - t0, error: err };
+      }
       // Generative Language models.get returns metadata if the key has access
       // — no inference cost, no token spend.
       const r = await fetch(`${target.endpoint}?key=${key}`);
@@ -105,25 +127,7 @@ async function ping(target: Target): Promise<{ status: number; latency_ms: numbe
         return { status: 0, latency_ms: Date.now() - t0, error: String((e as Error).message || e).slice(0, 500) };
       }
     }
-    // Lovable gateway: minimal chat completion.
-    // GPT-5 family rejects `max_tokens`; requires `max_completion_tokens` instead.
-    const key = Deno.env.get("LOVABLE_API_KEY");
-    if (!key) return { status: -1, latency_ms: 0, error: "missing LOVABLE_API_KEY" };
-    const isGpt5Family = target.model.startsWith("openai/gpt-5");
-    const tokenField = isGpt5Family ? "max_completion_tokens" : "max_tokens";
-    const r = await fetch(target.endpoint, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        model: target.model,
-        messages: [{ role: "user", content: "ping" }],
-        // v6.9.35 — GPT-5 family burns reasoning tokens before any output.
-        // 16 was still tripping the cap; 128 leaves room for a short ping.
-        [tokenField]: isGpt5Family ? 128 : 1,
-      }),
-    });
-    const err = r.ok ? null : (await r.text()).slice(0, 500);
-    return { status: r.status, latency_ms: Date.now() - t0, error: err };
+    return { status: 0, latency_ms: Date.now() - t0, error: `unsupported provider ${target.provider}` };
   } catch (e) {
     return { status: 0, latency_ms: Date.now() - t0, error: String((e as Error).message || e).slice(0, 500) };
   }

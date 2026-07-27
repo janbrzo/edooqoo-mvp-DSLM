@@ -9,13 +9,13 @@
  *
  * Usage:
  *   OPENAI_API_KEY=... GEMINI_API_KEY=... ANTHROPIC_API_KEY=... \
- *   ELEVENLABS_API_KEY=... LOVABLE_API_KEY=... \
+ *   ELEVENLABS_API_KEY=... \
  *   deno run --allow-net --allow-env --allow-read --allow-write scripts/audit-llm-models.ts
  */
 
 import { walk } from "https://deno.land/std@0.224.0/fs/walk.ts";
 
-type Provider = "openai" | "google" | "anthropic" | "elevenlabs" | "lovable-gateway";
+type Provider = "openai" | "google" | "anthropic" | "elevenlabs";
 interface Hit { model: string; provider: Provider; files: Set<string>; }
 
 const PATTERNS: { provider: Provider; re: RegExp }[] = [
@@ -23,7 +23,6 @@ const PATTERNS: { provider: Provider; re: RegExp }[] = [
   { provider: "google",          re: /["'`](gemini-[\w.\-]+|google\/[\w.\-]+)["'`]/g },
   { provider: "anthropic",       re: /["'`](claude-[\w.\-]+|anthropic\/[\w.\-]+)["'`]/g },
   { provider: "elevenlabs",      re: /["'`](eleven[\w._\-]*|elevenlabs[\/_\-][\w.\-]+)["'`]/gi },
-  { provider: "lovable-gateway", re: /["'`](lovable\/[\w.\-]+)["'`]/g },
 ];
 
 const inventory = new Map<string, Hit>();
@@ -84,17 +83,6 @@ async function checkElevenLabs(_model: string): Promise<number> {
   await r.body?.cancel();
   return r.status;
 }
-async function checkLovable(model: string): Promise<number> {
-  const k = Deno.env.get("LOVABLE_API_KEY"); if (!k) return -1;
-  const r = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-    method: "POST",
-    headers: { Authorization: `Bearer ${k}`, "content-type": "application/json" },
-    body: JSON.stringify({ model, messages: [{ role: "user", content: "ping" }], max_tokens: 1 }),
-  });
-  await r.body?.cancel();
-  return r.status;
-}
-
 const liveLines = ["# LLM Model Live Status", "", `_Checked: ${new Date().toISOString()}_`, "", "| Model | Provider | HTTP | Severity | Files |", "|---|---|---|---|---|"];
 for (const h of [...inventory.values()]) {
   let status = -1;
@@ -103,7 +91,6 @@ for (const h of [...inventory.values()]) {
     else if (h.provider === "google") status = await checkGoogle(h.model);
     else if (h.provider === "anthropic") status = await checkAnthropic(h.model);
     else if (h.provider === "elevenlabs") status = await checkElevenLabs(h.model);
-    else if (h.provider === "lovable-gateway") status = await checkLovable(h.model);
   } catch (e) {
     console.error(`[${h.provider}/${h.model}] check failed:`, (e as Error).message);
   }

@@ -22,3 +22,12 @@ type: feature
 - Manual re-run: `POST /functions/v1/audit-llm-models`, header `x-cron-secret: <CRON_SECRET>`, body `{"mode":"monthly"}`.
 
 **Why:** Lovable Gateway is intentionally unused (no credits) — a permanent red FAIL trains the operator to ignore the audit.
+
+## v6.9.82 — Lovable Gateway removed from active health checks
+
+- `audit-llm-models` active targets now cover only direct providers used by Edooqoo: Google Generative Language, OpenAI, and Google Vertex.
+- Monthly audit replaces the two old Lovable Gateway probes with direct inference smoke tests: Gemini `gemini-2.5-flash` and OpenAI `gpt-4o-mini`.
+- Hot-path functions using `_shared/aiChat.ts` must gate on `GEMINI_API_KEY || OPENAI_API_KEY`, not `LOVABLE_API_KEY`.
+- `scripts/audit-llm-models.ts` no longer live-pings Lovable Gateway.
+
+**Why:** Edooqoo intentionally does not use Lovable AI credits for model runtime; monitoring must test the direct providers that can actually break teacher workflows.
