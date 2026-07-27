@@ -12,28 +12,24 @@ export interface DownloadSession {
   payment_id: string | null;
 }
 
+async function fetchSessionByToken(sessionToken: string): Promise<DownloadSession | null> {
+  const { data, error } = await (supabase as any).rpc('get_download_session_by_token', {
+    p_session_token: sessionToken,
+  });
+
+  if (error) throw error;
+  return Array.isArray(data) ? (data[0] || null) : (data || null);
+}
+
 export const downloadSessionService = {
   // Create a new download session
   async createSession(sessionToken: string, worksheetId?: string, paymentId?: string): Promise<DownloadSession | null> {
     try {
-      const { data, error } = await supabase
-        .from('download_sessions')
-        .insert({
-          session_token: sessionToken,
-          worksheet_id: worksheetId || null,
-          payment_id: paymentId || null,
-          downloads_count: 0
-        })
-        .select()
-        .single();
+      const existing = await fetchSessionByToken(sessionToken);
+      if (!existing) return null;
 
-      if (error) {
-        console.error('Error creating download session:', error);
-        return null;
-      }
-
-      devLog('Download session created successfully:', data);
-      return data;
+      devLog('Download session exists for token:', sessionToken);
+      return existing;
     } catch (error) {
       console.error('Error creating download session:', error);
       return null;
@@ -43,18 +39,7 @@ export const downloadSessionService = {
   // Get session by token
   async getSessionByToken(sessionToken: string): Promise<DownloadSession | null> {
     try {
-      const { data, error } = await supabase
-        .from('download_sessions')
-        .select('*')
-        .eq('session_token', sessionToken)
-        .maybeSingle();
-
-      if (error) {
-        console.error('Error fetching download session:', error);
-        return null;
-      }
-
-      return data;
+      return await fetchSessionByToken(sessionToken);
     } catch (error) {
       console.error('Error fetching download session:', error);
       return null;
@@ -66,43 +51,22 @@ export const downloadSessionService = {
     try {
       devLog('Attempting to increment download count for token:', sessionToken);
       
-      // First get current session data
-      const { data: session, error: fetchError } = await supabase
-        .from('download_sessions')
-        .select('downloads_count, id')
-        .eq('session_token', sessionToken)
-        .single();
-
-      if (fetchError) {
-        console.error('Error fetching current download count:', fetchError);
-        return false;
-      }
-
-      if (!session) {
-        console.error('No session found for token:', sessionToken);
-        return false;
-      }
-
-      devLog('Current downloads_count:', session.downloads_count);
-      const newCount = (session.downloads_count || 0) + 1;
-      devLog('New downloads_count will be:', newCount);
-
-      // Then update with incremented value
-      const { data: updateData, error: updateError } = await supabase
-        .from('download_sessions')
-        .update({ 
-          downloads_count: newCount
-        })
-        .eq('session_token', sessionToken)
-        .select('downloads_count')
-        .single();
+      const { data: updateData, error: updateError } = await (supabase as any).rpc('increment_download_session_by_token', {
+        p_session_token: sessionToken,
+      });
 
       if (updateError) {
         console.error('Error updating download count:', updateError);
         return false;
       }
 
-      devLog('Download count updated successfully to:', updateData?.downloads_count);
+      const updated = Array.isArray(updateData) ? updateData[0] : updateData;
+      if (!updated) {
+        console.error('No valid session found for token:', sessionToken);
+        return false;
+      }
+
+      devLog('Download count updated successfully to:', updated.downloads_count);
       return true;
     } catch (error) {
       console.error('Error incrementing download count:', error);
@@ -113,17 +77,7 @@ export const downloadSessionService = {
   // Check if session is valid (not expired)
   async isSessionValid(sessionToken: string): Promise<boolean> {
     try {
-      const { data, error } = await supabase
-        .from('download_sessions')
-        .select('expires_at')
-        .eq('session_token', sessionToken)
-        .maybeSingle();
-
-      if (error) {
-        console.error('Error checking session validity:', error);
-        return false;
-      }
-
+      const data = await fetchSessionByToken(sessionToken);
       if (!data) return false;
 
       const expiresAt = new Date(data.expires_at);
@@ -139,19 +93,10 @@ export const downloadSessionService = {
   // Get download statistics for a session
   async getSessionStats(sessionToken: string): Promise<{ downloads_count: number; expires_at: string } | null> {
     try {
-      const { data, error } = await supabase
-        .from('download_sessions')
-        .select('downloads_count, expires_at')
-        .eq('session_token', sessionToken)
-        .maybeSingle();
-
-      if (error) {
-        console.error('Error fetching session stats:', error);
-        return null;
-      }
+      const data = await fetchSessionByToken(sessionToken);
 
       devLog('Session stats fetched:', data);
-      return data;
+      return data ? { downloads_count: data.downloads_count, expires_at: data.expires_at } : null;
     } catch (error) {
       console.error('Error fetching session stats:', error);
       return null;

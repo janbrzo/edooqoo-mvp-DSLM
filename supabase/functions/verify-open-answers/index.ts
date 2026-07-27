@@ -129,10 +129,9 @@ Return exactly ${answers.length} evaluation objects in a JSON array:
     console.log("[verify-open-answers] System prompt length:", systemPrompt.length);
     console.log("[verify-open-answers] User prompt length:", userPrompt.length);
 
-    const lovableApiKey = Deno.env.get("LOVABLE_API_KEY");
-
-    if (!lovableApiKey) {
-      console.error("[verify-open-answers] ERROR: LOVABLE_API_KEY not configured");
+    const hasDirectAiProvider = Boolean(Deno.env.get("GEMINI_API_KEY") || Deno.env.get("OPENAI_API_KEY"));
+    if (!hasDirectAiProvider) {
+      console.error("[verify-open-answers] ERROR: no direct AI provider configured");
       return new Response(JSON.stringify({ error: "AI service not configured" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },

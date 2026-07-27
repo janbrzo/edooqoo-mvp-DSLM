@@ -3,7 +3,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { chatCompletion } from "../_shared/aiChat.ts";
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
-const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
+const HAS_DIRECT_AI_PROVIDER = Boolean(Deno.env.get('GEMINI_API_KEY') || Deno.env.get('OPENAI_API_KEY'));
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -1059,7 +1059,7 @@ serve(async (req) => {
 
     // --- Point 15: AI Analysis of open answers (including speaking transcriptions) ---
     let aiSummary: string | null = null;
-    if (LOVABLE_API_KEY) {
+    if (HAS_DIRECT_AI_PROVIDER) {
       try {
         const openQuestionIds = ['wt_q12', 'wt_q13', 'wt_q16', 'wt_q17', 'wt_q36', 'wt_q37', 'wt_q40', 'wt_q41', 'wt_q45'];
         const speakingQuestionIds = ['wt_q16s', 'wt_q36s', 'wt_q41s'];
@@ -1386,7 +1386,7 @@ Format as JSON: {"summary": "...", "recommendations": ["...", "..."], "writing_q
 
       const attemptNumber = testRow?.attempt_number ?? 1;
 
-      if (attemptNumber > 1 && previousProfile && LOVABLE_API_KEY) {
+      if (attemptNumber > 1 && previousProfile && HAS_DIRECT_AI_PROVIDER) {
         // Build a compact diff payload for the model
         const prevAi = (() => {
           try { return previousProfile.ai_summary ? JSON.parse(previousProfile.ai_summary) : null; }

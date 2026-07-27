@@ -39,7 +39,7 @@ jobs:
         run: npm run seo:generate-edge-routing
 
       - name: Build static assets
-        run: vite build
+        run: npm run build
         env:
           # vite build wymaga tych env żeby wygenerować SPA — bierzemy je z Secrets
           VITE_SUPABASE_URL: https://bvfrkzdlklyvnhlpleck.supabase.co

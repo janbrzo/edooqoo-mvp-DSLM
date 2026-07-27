@@ -1,4 +1,4 @@
-// Smart exercise selection via Lovable AI Gateway
+// Smart exercise selection via direct Gemini/OpenAI provider helper.
 // Returns { exercises: string[], focusMap: Record<string,'vocabulary'|'grammar'> }
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { chatCompletion } from "../_shared/aiChat.ts";
@@ -44,8 +44,8 @@ serve(async (req) => {
           ...(hasAudio ? AUDIO_EXERCISE_IDS : []),
         ];
 
-    const apiKey = Deno.env.get('LOVABLE_API_KEY');
-    if (!apiKey) throw new Error('LOVABLE_API_KEY not configured');
+    const hasDirectAiProvider = Boolean(Deno.env.get('GEMINI_API_KEY') || Deno.env.get('OPENAI_API_KEY'));
+    if (!hasDirectAiProvider) throw new Error('AI provider not configured: GEMINI_API_KEY or OPENAI_API_KEY required');
 
     // v6.6 (2026-04-27) A/B: explicit DSLM context block prepended to recover Pro-level targeting at Flash cost.
     // Frontend currently does not pass per-student weak-skill metrics (would require studentId plumbing); we instead
@@ -140,8 +140,8 @@ ${hasAudio ? 'Include 2 audio exercises.' : ''}${autoMediaBlock}`;
         });
       }
       const t = await aiResp.text();
-      console.error('AI gateway error', aiResp.status, t);
-      throw new Error(`AI gateway ${aiResp.status}`);
+      console.error('AI provider error', aiResp.status, t);
+      throw new Error(`AI provider ${aiResp.status}`);
     }
 
     const data = await aiResp.json();
