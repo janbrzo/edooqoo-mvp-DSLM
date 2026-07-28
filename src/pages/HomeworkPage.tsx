@@ -330,12 +330,11 @@ export default function HomeworkPage() {
 
       setHomework(fixedData as HomeworkData);
       
-      // Fetch reviewed_at status and source_worksheet_id separately (not in RPC)
+      // Fetch reviewed_at status and source_worksheet_id separately (not in main RPC)
+      // v6.9.83 — share-token scoped RPC (public table policy removed for security)
       const { data: homeworkStatus } = await supabase
-        .from('homework_assignments')
-        .select('reviewed_at, completed_at, source_worksheet_id')
-        .eq('id', fixedData.id)
-        .single();
+        .rpc('get_homework_status_by_share_token', { p_share_token: token })
+        .maybeSingle();
       
       if (homeworkStatus) {
         setHomework(prev => prev ? {

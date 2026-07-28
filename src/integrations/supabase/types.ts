@@ -3757,6 +3757,21 @@ export type Database = {
           worksheet_id: string
         }[]
       }
+      get_flashcard_cards_by_share_token: {
+        Args: { p_share_token: string }
+        Returns: {
+          back_text: string
+          card_position: number
+          cefr_level: string
+          created_at: string
+          created_by_student: boolean
+          front_example: string
+          front_text: string
+          id: string
+          set_id: string
+          source_type: string
+        }[]
+      }
       get_flashcard_cards_for_learning: {
         Args: { p_learner_identifier: string; p_set_id: string }
         Returns: {
@@ -3791,6 +3806,10 @@ export type Database = {
           title: string
         }[]
       }
+      get_flashcard_set_is_bidirectional: {
+        Args: { p_set_id: string }
+        Returns: boolean
+      }
       get_homework_by_share_token: {
         Args: { p_share_token: string }
         Returns: {
@@ -3818,6 +3837,22 @@ export type Database = {
           exercise_index: number
           id: string
           updated_at: string
+        }[]
+      }
+      get_homework_owner_ids: {
+        Args: { p_homework_id: string }
+        Returns: {
+          student_id: string
+          teacher_id: string
+        }[]
+      }
+      get_homework_status_by_share_token: {
+        Args: { p_share_token: string }
+        Returns: {
+          completed_at: string
+          id: string
+          reviewed_at: string
+          source_worksheet_id: string
         }[]
       }
       get_public_status: {

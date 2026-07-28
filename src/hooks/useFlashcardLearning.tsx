@@ -102,15 +102,13 @@ export const useFlashcardLearning = (setId: string, learnerEmail: string) => {
       }
       // else: includeAll = true means load all cards
 
-      // Fetch set data to check if bidirectional
-      const { data: setData } = await supabase
-        .from('flashcard_sets')
-        .select('is_bidirectional')
-        .eq('id', setId)
-        .single();
+      // Fetch set direction flag via SECURITY DEFINER RPC (works for anon share links too)
+      const { data: isBidirectional } = await supabase.rpc('get_flashcard_set_is_bidirectional', {
+        p_set_id: setId,
+      });
 
       // Duplicate cards for bidirectional (direction 1 and 2)
-      if (setData?.is_bidirectional) {
+      if (isBidirectional) {
         const reversedCards = learningCards.map(card => ({
           ...card,
           direction: 2 as const, // Mark as reversed
