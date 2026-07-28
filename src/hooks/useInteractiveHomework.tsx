@@ -286,11 +286,10 @@ export const useInteractiveHomework = ({
 
       // Emit homework_submitted event for DSLM Layer A
       try {
+        // v6.9.83 — SECURITY DEFINER RPC (public table policy removed for security)
         const { data: hwData } = await supabase
-          .from('homework_assignments')
-          .select('teacher_id, student_id')
-          .eq('id', homeworkId)
-          .single();
+          .rpc('get_homework_owner_ids', { p_homework_id: homeworkId })
+          .maybeSingle();
         
         if (hwData?.student_id && hwData?.teacher_id) {
           await supabase.rpc('add_student_event', {
