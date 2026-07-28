@@ -1438,3 +1438,17 @@ EDOOQOO SOLUTION (v6.9.81): The lockfile was regenerated with `npm install --pac
 TECHNICAL MECHANICS: Files modified — `package-lock.json` (resync), `.github/workflows/cloudflare-worker-deploy.yml`, `.github/workflows/seo-integrity.yml`, `.github/workflows/seo-monitoring.yml` (resilient install step), `supabase/functions/audit-llm-models/index.ts` (`Target.optional`, `Target.expectedFailureStatuses`, three-state loop, `expected` column write, `logModelFailure` guard, amber email row), `supabase/functions/send-model-audit-email/index.ts` (`summary.expected` in the header line). Migration — `ALTER TABLE public.model_health_checks ADD COLUMN IF NOT EXISTS expected boolean NOT NULL DEFAULT false`. Both edge functions redeployed. Manual re-run contract: `POST /functions/v1/audit-llm-models` with header `x-cron-secret: <CRON_SECRET>` and body `{"mode":"monthly"}`. Worksheet Generation Engine untouched.
 
 RAG KEYWORDS: npm ci EUSAGE, package-lock out of sync, Cloudflare Worker Deploy exit code 1, @lovable.dev/mcp-js lockfile, npm install --package-lock-only, GitHub Actions install fallback, seo-monitoring workflow failure, audit-llm-models three-state, expected failure status, lovable-gateway 402 payment_required, model_health_checks.expected column, logModelFailure guard, monthly LLM audit email, summary.expected, amber EXPECTED row, optional probe target, x-cron-secret manual run, mode monthly audit, StatusPage banner noise, false positive model failure
+
+## v6.9.83 — Share-token RLS hardening (PRODUCTION)
+
+PROBLEM: RLS policies on `flashcard_sets`, `flashcard_cards` and `homework_assignments` only checked `share_token IS NOT NULL`, so any anonymous client could enumerate every shared set, card and homework row without knowing a token. `export_payments` additionally allowed the `public` role to INSERT/UPDATE payment rows.
+
+EDOOQOO SOLUTION: All enumeration-prone policies were dropped. Anonymous share-link access now flows exclusively through SECURITY DEFINER RPCs that require the exact token value. Payment writes are restricted to `service_role`.
+
+TECHNICAL MECHANICS:
+- Dropped policies: `Public can view sets by share_token` (flashcard_sets), `Public can view cards in shared sets` (flashcard_cards), `Public can view homework by share token` (homework_assignments), `Allow insert/update for edge functions` (export_payments).
+- `Service role full access homework_assignments` re-scoped from `public` to `service_role`.
+- New RPCs: `get_flashcard_cards_by_share_token(p_share_token text)`, `get_flashcard_set_is_bidirectional(p_set_id uuid)`, `get_homework_status_by_share_token(p_share_token text)`, `get_homework_owner_ids(p_homework_id uuid)`.
+- Client updates: `src/pages/FlashcardsLearning.tsx` (browse-mode card list), `src/hooks/useFlashcardLearning.tsx` (bidirectional flag), `src/pages/HomeworkPage.tsx` (reviewed/completed status), `src/hooks/useInteractiveHomework.tsx` (teacher/student ids for DSLM event).
+
+RAG KEYWORDS: RLS hardening, share token enumeration, SECURITY DEFINER RPC, anonymous access, flashcard share link, homework share link, export payments policy, service_role, PostgREST permission, Supabase policy audit, token scoped lookup, data leak prevention, public role policy, row level security, Edooqoo security v6.9.83
