@@ -78,8 +78,9 @@ Daily (hot-path, runs at 06:00 UTC) — v6.9.66:
 Monthly (full breadth, runs on the 1st at 06:15 UTC):
 - Daily set, plus
 - `gemini-3.1-flash-image` (Vertex AI) — Nano Banana 2 fallback
-- `google/gemini-2.5-flash` (Lovable Gateway) — probe in case workspace credits return
-- `google/gemini-3-flash-preview` (Lovable Gateway) — default Lovable AI catalog probe
+- `check: "smoke"` real inference calls for the Gemini and OpenAI text models
+
+Lovable Gateway probes were removed in v6.9.82 — the platform no longer uses that provider.
 
 A non-OK response that returns 404/410/5xx is additionally written to `error_logs` so the StatusPage banner picks it up within the next page load.
 
@@ -99,3 +100,54 @@ select cron.schedule(
     )$$
 );
 ```
+
+## Manual invocation
+
+The Supabase SQL Editor executes SQL only. Pasting a `curl` command there fails with
+`42601: syntax error at or near "curl"`. Use one of the three options below.
+
+### Option A — from the SQL Editor via pg_net
+
+```sql
+select net.http_post(
+  url     := 'https://bvfrkzdlklyvnhlpleck.supabase.co/functions/v1/audit-llm-models',
+  headers := jsonb_build_object(
+    'Content-Type', 'application/json',
+    'x-cron-secret', '<CRON_SECRET>'
+  ),
+  body    := jsonb_build_object('mode', 'monthly')
+) as request_id;
+```
+
+Read the response a few seconds later:
+
+```sql
+select id, status_code, content
+from net._http_response
+order by created desc
+limit 5;
+```
+
+### Option B — from a local terminal
+
+```bash
+curl -X POST \
+  "https://bvfrkzdlklyvnhlpleck.supabase.co/functions/v1/audit-llm-models" \
+  -H "x-cron-secret: <CRON_SECRET>" \
+  -H "Content-Type: application/json" \
+  -d '{"mode":"monthly"}'
+```
+
+### Option C — inspect results without invoking
+
+```sql
+select provider, model, status, ok, expected, latency_ms, error, checked_at
+from public.model_health_checks
+order by checked_at desc
+limit 30;
+```
+
+### Secret hygiene
+
+Never paste the raw `CRON_SECRET` into a shared SQL Editor tab or screenshot. If it leaks,
+rotate the secret and update both pg_cron jobs (`audit-llm-models-daily`, `audit-llm-models-monthly`).
