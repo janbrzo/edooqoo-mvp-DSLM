@@ -59,16 +59,14 @@ export default function FlashcardsLearning() {
     }
   };
 
-  const fetchAllCards = async (setId: string) => {
+  const fetchAllCards = async (_setId: string) => {
     try {
-      const { data, error } = await supabase
-        .from('flashcard_cards')
-        .select('*')
-        .eq('set_id', setId)
-        .is('deleted_at', null)
-        .order('card_position', { ascending: true });
+      // v6.9.83 — share-token scoped RPC (public table policy removed for security)
+      const { data, error } = await supabase.rpc('get_flashcard_cards_by_share_token', {
+        p_share_token: token,
+      });
       if (error) throw error;
-      setAllCards(data || []);
+      setAllCards((data as any) || []);
     } catch (error) {
       console.error('Error fetching cards:', error);
     }
