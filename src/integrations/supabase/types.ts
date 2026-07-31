@@ -4276,6 +4276,20 @@ export type Database = {
         Returns: string
       }
       try_parse_jsonb: { Args: { input: string }; Returns: Json }
+      update_homework_answer_by_share_token: {
+        Args: {
+          p_ai_evaluation?: Json
+          p_answers?: Json
+          p_eval_trigger?: string
+          p_exercise_index: number
+          p_homework_id: string
+          p_item_evaluations?: Json
+          p_mastery?: number
+          p_share_token: string
+          p_student_email: string
+        }
+        Returns: boolean
+      }
       verify_homework_student_email: {
         Args: { p_email: string; p_homework_id: string }
         Returns: boolean
