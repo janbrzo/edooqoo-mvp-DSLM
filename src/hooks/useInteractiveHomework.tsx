@@ -24,6 +24,9 @@ interface UseInteractiveHomeworkProps {
   totalExercises: number;
   exerciseQuestionCounts?: Record<number, number>;
   exercises?: any[];
+  /** v6.9.84 — required for anonymous students: direct table writes were
+   *  replaced by the token-scoped RPC `update_homework_answer_by_share_token`. */
+  shareToken?: string;
 }
 
 export const useInteractiveHomework = ({
@@ -32,7 +35,8 @@ export const useInteractiveHomework = ({
   studentEmail,
   totalExercises,
   exerciseQuestionCounts = {},
-  exercises = []
+  exercises = [],
+  shareToken
 }: UseInteractiveHomeworkProps) => {
   const [answers, setAnswers] = useState<Record<number, ExerciseAnswers>>({});
   const [audioAnswers, setAudioAnswers] = useState<Record<number, Record<number, string>>>({});
