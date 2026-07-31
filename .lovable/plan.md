@@ -1,132 +1,44 @@
-# Plan v6.9.83 — Cloudflare deploy + ręczny audyt LLM
+## Odpowiedź krótko
 
-## Problem 1 — Cloudflare Worker Deploy #8: brak CLOUDFLARE_API_TOKEN
+Tak, to była **realna, nieudana generacja** (nie fałszywy alarm). Sprawdziłem bazę: w oknie 08:50–09:20 UTC 29.07 **nie zapisał się żaden worksheet**. Dopiero o 11:11 ten sam nauczyciel (`38a9fae8…`) ma zapisany worksheet „Presenting Luxury Spa Products at a Trade Fair” — czyli ponowił próbę i wtedy się udało.
 
-### Diagnoza
-Workflow `.github/workflows/cloudflare-worker-deploy.yml` w kroku „Deploy Worker and route bindings" ustawia:
+Powaga: **średnia**. Nie jest to awaria systemu — to pojedynczy przypadek uszkodzonego JSON-a od modelu. Ale użytkownik stracił ~2 minuty i musiał powtórzyć generację, a alert mailowy podał mylącą przyczynę.
 
-```yaml
-env:
-  CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-  CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-```
+## Root cause (łańcuch zdarzeń)
 
-Build przeszedł (26s), więc `npm run build` jest już naprawione. Wrangler zgłasza brak `CLOUDFLARE_API_TOKEN` — to oznacza, że sekret **rozwinął się do pustego stringa**. Najczęstsze przyczyny (do sprawdzenia po Twojej stronie, bo agent nie ma dostępu do GitHub Settings):
-1. Sekret dodany jako **Environment secret** (np. w środowisku `production`), a job nie deklaruje `environment:` — wtedy `secrets.X` jest puste.
-2. Sekret dodany na poziomie **organizacji** bez udostępnienia temu repo.
-3. Literówka w nazwie (np. `CLOUDFLARE_TOKEN`, spacja na końcu).
-4. Sekret dodany w zakładce Dependabot secrets zamiast Actions secrets.
+1. `gemini-2.5-flash` zwrócił 61 269 znaków JSON z **błędem składni na pozycji 28356** (`Expected ',' or '}' after property value`) — typowo niezescape'owany cudzysłów w środku wartości tekstowej albo brak przecinka między polami.
+2. `parseAIResponse` → `repairJSONStringDeterministic` (`supabase/functions/generateWorksheet/helpers.ts`) **nie ma reguły na ten przypadek**. Obecne reguły naprawiają: trailing commas, brakujące przecinki między obiektami/tablicami, brakujące dwukropki, niezbilansowane nawiasy. Nie naprawiają niezescape'owanego `"` wewnątrz stringa ani brakującego przecinka między `"a": "x"` a `"b": "y"`.
+3. Odpalił się AI-REPAIR pass (10–30 s ciszy przy 61 KB wejścia). W tym czasie klientowi urwał się strumień SSE (EOF przy 8/8, phase `repairing`, 93–96%).
+4. Frontend (`useWorksheetGeneration.tsx`, `onStreamEndedWithoutTerminalEvent`) poprawnie przekazał sprawę do pollingu DB i wysłał alert `client_stream_lost_pending_db_reconciliation`. Backend jednak nigdy nic nie zapisał, bo AI-REPAIR też nie dowiózł poprawnego JSON-a.
 
-### Zmiany w kodzie
-Do `.github/workflows/cloudflare-worker-deploy.yml` dodać **krok preflight** przed deployem, który jednoznacznie powie, czy sekrety są widoczne (bez ujawniania wartości):
+**Zdanie kluczowe:** alert jest o objawie transportowym, a prawdziwą przyczyną jest luka w deterministycznej naprawie JSON + zbyt długi, ryzykowny AI-repair na dużym wejściu.
 
-```yaml
-      - name: Preflight — verify Cloudflare secrets are visible to this job
-        env:
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        run: |
-          missing=0
-          if [ -z "${CLOUDFLARE_ACCOUNT_ID}" ]; then
-            echo "::error::CLOUDFLARE_ACCOUNT_ID is empty in this job context."
-            missing=1
-          else
-            echo "CLOUDFLARE_ACCOUNT_ID present (length ${#CLOUDFLARE_ACCOUNT_ID})"
-          fi
-          if [ -z "${CLOUDFLARE_API_TOKEN}" ]; then
-            echo "::error::CLOUDFLARE_API_TOKEN is empty in this job context."
-            missing=1
-          else
-            echo "CLOUDFLARE_API_TOKEN present (length ${#CLOUDFLARE_API_TOKEN})"
-          fi
-          if [ "$missing" = "1" ]; then
-            echo "Add both as Repository secrets: Settings > Secrets and variables > Actions > Repository secrets."
-            exit 1
-          fi
-```
+## Zakres naprawy (proponowany)
 
-Dodatkowo dodać `--var`-free, jawne przekazanie tokenu do wranglera oraz `id-token`-free `permissions` bez zmian. Krok deployu zostaje bez zmian merytorycznych, ale dostaje czytelniejszą diagnostykę:
+### 1. `supabase/functions/generateWorksheet/helpers.ts` — mocniejszy repair
+- Dodać **Layer 2.5: character-level JSON scanner** (bez regexów): przejście znak po znaku ze śledzeniem stanu `inString` / `escaped`; kiedy wewnątrz stringa napotka `"` po którym **nie** następuje `,`, `}`, `]`, `:` ani whitespace+jeden z nich → zescape'uje go jako `\"`. To dokładnie klasa błędu z pozycji 28356.
+- Dodać regułę: brakujący przecinek między dwiema właściwościami (`"…"\s*\n\s*"key"\s*:` → wstaw `,`).
+- Dodać **Layer 2.6: truncate-to-last-valid-exercise** — jeśli mimo wszystko nie da się sparsować, odciąć JSON do ostatniego kompletnego elementu tablicy `exercises` i domknąć strukturę. Lepiej oddać 7/8 ćwiczeń niż zero.
+- Logować, która warstwa naprawiła (`json_repair_layer: "escape-scan" | "comma-fix" | "truncate"`) — do audytu skuteczności.
 
-```yaml
-      - name: Deploy Worker and route bindings
-        env:
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        run: npx wrangler@4 deploy --config wrangler.toml
-```
+### 2. `supabase/functions/generateWorksheet/index.ts` — AI-REPAIR bez utraty klienta
+- Przed AI-repair wysłać SSE `progress` z `phase: "repairing"` i **keepalive co 3 s** (dziś jest komentarz o keepalive przy linii ~719 — zweryfikować, że faktycznie tyka w całym oknie repair).
+- Ograniczyć wejście AI-repair: zamiast wysyłać 61 KB, wysyłać **tylko uszkodzony fragment** (±3000 znaków wokół pozycji błędu zgłoszonej przez `JSON.parse`) z prośbą o zwrot samego naprawionego fragmentu. Skraca to repair z ~25 s do ~3 s i drastycznie zmniejsza szansę na EOF.
 
-(przypięcie majora `wrangler@4` eliminuje niespodziankę z auto-instalacją losowej wersji).
+### 3. `supabase/functions/notify-generation-failure` — czytelniejszy alert
+- Dla `errorType: client_stream_lost_pending_db_reconciliation` dodać **opóźnioną weryfikację**: sprawdzić po fakcie, czy dla `clientGenerationId` istnieje wiersz w `worksheets`. Jeśli tak → nie wysyłać maila (odzyskane). Jeśli nie → wysłać z typem `generation_lost_confirmed` i sensowną sekcją „Proposed Solution” (dziś: „Unknown error”).
 
-### Co musisz zrobić ręcznie
-1. GitHub → repo `edooqoo-mvp-DSLM` → **Settings** → **Secrets and variables** → **Actions**.
-2. Zakładka **Secrets**, sekcja **Repository secrets** (nie „Environment secrets", nie „Dependabot").
-3. Upewnij się, że istnieją dokładnie: `CLOUDFLARE_ACCOUNT_ID` oraz `CLOUDFLARE_API_TOKEN`.
-4. Jeśli są w „Environment secrets" — przenieś je do Repository secrets (albo powiedz mi, w jakim środowisku są, to dodam `environment:` do joba).
-5. Token musi mieć uprawnienia: **Account → Workers Scripts → Edit** oraz **Zone → Workers Routes → Edit** dla strefy `edooqoo.com`.
-6. Uruchom ponownie: Actions → Cloudflare Worker Deploy → Run workflow → `main`.
+### 4. RAG
+- `docs/llm-context.md` + `public/llms.txt`: wpis PROBLEM / EDOOQOO SOLUTION / TECHNICAL MECHANICS / RAG KEYWORDS dla warstwy odporności JSON.
 
-Po zmianie workflow, jeśli sekrety nadal będą puste, run zakończy się na kroku preflight z jasnym komunikatem zamiast mylącego błędu wranglera.
+## Uwaga o zakresie (Sanctity Rule)
 
----
+Wszystkie zmiany dotyczą **parsowania i transportu odpowiedzi**, nie promptu generującego worksheety. Prompt Worksheet Generation Engine pozostaje nietknięty.
 
-## Problem 2 — `curl` wklejony do Supabase SQL Editor
+## Ryzyko regresji
 
-### Diagnoza
-Supabase SQL Editor wykonuje wyłącznie SQL. Wklejenie polecenia `curl` daje `42601: syntax error at or near "curl"` — to nie jest błąd naszego kodu, tylko zły kanał wywołania.
+Niskie. Nowy scanner escape'ujący działa wyłącznie na ścieżce, która dziś i tak rzuca wyjątkiem (po nieudanym `JSON.parse` + nieudanym repair deterministycznym). Poprawne odpowiedzi parsują się w Attempt 1 i nie dotykają nowego kodu.
 
-### Trzy poprawne sposoby wywołania audytu
+## Czy trzeba naprawiać teraz?
 
-**Opcja A — z SQL Editor przez `pg_net` (to, co chciałeś zrobić):**
-
-```sql
-select net.http_post(
-  url     := 'https://bvfrkzdlklyvnhlpleck.supabase.co/functions/v1/audit-llm-models',
-  headers := jsonb_build_object(
-    'Content-Type', 'application/json',
-    'x-cron-secret', '<TWÓJ_CRON_SECRET>'
-  ),
-  body    := jsonb_build_object('mode', 'monthly')
-) as request_id;
-```
-
-Zwróci `request_id`. Odpowiedź odczytasz po kilku sekundach:
-
-```sql
-select id, status_code, content
-from net._http_response
-order by created desc
-limit 5;
-```
-
-**Opcja B — z terminala na Twoim komputerze** (PowerShell / bash), tam `curl` działa:
-
-```bash
-curl -X POST \
-  "https://bvfrkzdlklyvnhlpleck.supabase.co/functions/v1/audit-llm-models" \
-  -H "x-cron-secret: <TWÓJ_CRON_SECRET>" \
-  -H "Content-Type: application/json" \
-  -d '{"mode":"monthly"}'
-```
-
-**Opcja C — sprawdzenie wyników bez wywoływania funkcji** (jeśli cron już przeszedł):
-
-```sql
-select provider, model, status, ok, expected, latency_ms, error, checked_at
-from public.model_health_checks
-order by checked_at desc
-limit 30;
-```
-
-### Uwaga bezpieczeństwa
-Na zrzucie ekranu widać pełną wartość `CRON_SECRET` w edytorze SQL. **Zalecam rotację tego sekretu** — mogę to zrobić w kolejnej turze (wygenerowanie nowego `CRON_SECRET` + aktualizacja obu zadań pg_cron, które go używają).
-
----
-
-## Zmiany plików w tej iteracji
-- `.github/workflows/cloudflare-worker-deploy.yml` — dodanie kroku preflight na sekrety + przypięcie `wrangler@4`.
-- `docs/operational/audit-llm-models-cron.md` — dodanie sekcji „Manual invocation" z trzema opcjami (pg_net / lokalny curl / odczyt tabeli), żeby nie było więcej prób wklejania curl do SQL Editora.
-- `docs/llm-context.md` i `public/llms.txt` — wpis RAG (PROBLEM / EDOOQOO SOLUTION / TECHNICAL MECHANICS / RAG KEYWORDS).
-
-## Kryterium sukcesu
-- Ponowny run „Cloudflare Worker Deploy" albo przechodzi na zielono, albo zatrzymuje się na preflight z jednoznacznym komunikatem, który sekret brakuje.
-- Audyt LLM da się wywołać ręcznie z SQL Editora przez `net.http_post` i zwraca `status_code = 200`.
+Nie jest to pożar — retry działa. Ale ta klasa błędu będzie wracać przy długich worksheetach (8 ćwiczeń, >60 KB), więc rekomenduję zrobić punkty 1 i 2 w tym sprincie, a 3 jako drobny follow-up (przestanie Ci przychodzić mail o „awarii”, która się sama naprawiła).
