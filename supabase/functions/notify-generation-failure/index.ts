@@ -34,6 +34,7 @@ serve(async (req) => {
       'network': 'Network error connecting to AI provider. Check API key validity and provider status page.',
       'database': 'Failed to save worksheet to database. Check Supabase connection, RLS policies, and table constraints.',
       'client_stream_lost_no_saved_worksheet': 'Browser SSE stream ended without a terminal event AND no worksheet row matching this attempt was found after 30s of polling. This is a true delivery failure (network, edge cold-restart, or backend abort before DB insert). The user saw an error, tokens were NOT consumed, and the Next Step suggestion was NOT marked as used.',
+      'client_stream_lost_pending_db_reconciliation': 'Browser SSE stream ended without a terminal event while DB reconciliation was still pending. The backend may still have saved the worksheet. Usual root cause: a long JSON repair / regeneration pass on the edge function. Check generateWorksheet logs for json_repair_* entries around the timestamp; if a worksheet row exists for this teacher at that time, the user only lost the live stream, not the content.',
       'default': 'Unknown error. Check edge function logs for full stack trace.',
     };
 

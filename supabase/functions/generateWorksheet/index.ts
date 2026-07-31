@@ -187,6 +187,49 @@ ${brokenJson}`;
  * 1. parseAIResponse (extract + deterministic repair)
  * 2. AI repair pass if #1 fails
  */
+/**
+ * v6.9.84 — Repairs only the broken window around the reported syntax error
+ * instead of shipping the whole (often 60KB+) document to the repair model.
+ * Keeps the repair call in the ~2-4s range so the client SSE socket survives.
+ */
+async function repairJsonWindowWithAI(
+  brokenJson: string,
+  errorPosition: number,
+  radius = 3000,
+): Promise<string | null> {
+  if (!Number.isFinite(errorPosition) || errorPosition < 0) return null;
+  const start = Math.max(0, errorPosition - radius);
+  const end = Math.min(brokenJson.length, errorPosition + radius);
+  const windowText = brokenJson.slice(start, end);
+  console.log(`🔧 [AI-REPAIR-WINDOW] pos=${errorPosition} window=[${start}, ${end}) len=${windowText.length}`);
+
+  try {
+    const res = await (openai.chat.completions.create as any)({
+      model: "gpt-4o-mini",
+      temperature: 0,
+      messages: [
+        {
+          role: "system",
+          content:
+            "You repair JSON fragments. You receive a FRAGMENT cut out of a larger JSON document. " +
+            "Fix only syntax errors (unescaped quotes, missing commas/colons). " +
+            "Do NOT add or remove content. Do NOT close unopened brackets. " +
+            "Return ONLY the corrected fragment as raw text, no markdown, no explanation.",
+        },
+        { role: "user", content: windowText },
+      ],
+      max_completion_tokens: 8000,
+    });
+    const fixed = (res.choices[0]?.message?.content || "").replace(/^```[a-z]*\s*/i, '').replace(/```\s*$/i, '');
+    if (!fixed) return null;
+    console.log(`🔧 [AI-REPAIR-WINDOW] fragment repaired (${windowText.length} → ${fixed.length})`);
+    return brokenJson.slice(0, start) + fixed + brokenJson.slice(end);
+  } catch (e) {
+    console.error('❌ [AI-REPAIR-WINDOW] failed:', (e as Error).message);
+    return null;
+  }
+}
+
 async function parseWithRecovery(rawContent: string, expectedExerciseCount: number): Promise<{ data: any; repairMethod: string }> {
   // Attempt 1: Local parsing (extract + deterministic repair)
   try {
@@ -197,6 +240,20 @@ async function parseWithRecovery(rawContent: string, expectedExerciseCount: numb
     
     // Attempt 2: AI repair pass
     const rawForRepair = (localError as any).rawContent || extractJSONString(rawContent);
+
+    // Attempt 2a: cheap, fast windowed repair around the reported position.
+    const errorPosition = (localError as any).errorPosition ?? -1;
+    const windowed = await repairJsonWindowWithAI(rawForRepair, errorPosition);
+    if (windowed) {
+      try {
+        const data = parseAIResponse(windowed);
+        console.log('✅ json_repair_ai_window_succeeded');
+        return { data, repairMethod: 'ai-window' };
+      } catch (windowErr) {
+        console.warn('⚠️ json_repair_ai_window_failed:', (windowErr as Error).message);
+      }
+    }
+
     try {
       const repairedJson = await repairWorksheetJsonWithAI(rawForRepair, expectedExerciseCount);
       const data = parseAIResponse(repairedJson);

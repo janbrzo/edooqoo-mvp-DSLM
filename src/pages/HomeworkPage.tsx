@@ -150,7 +150,8 @@ export default function HomeworkPage() {
     studentEmail: emailForAnswers,
     totalExercises,
     exerciseQuestionCounts,
-    exercises: Array.isArray(homework?.selected_exercises) ? homework.selected_exercises : []
+    exercises: Array.isArray(homework?.selected_exercises) ? homework.selected_exercises : [],
+    shareToken: token
   });
 
   useEffect(() => {

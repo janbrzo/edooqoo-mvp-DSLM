@@ -218,7 +218,12 @@ export function usePublicBooking(token?: string) {
       if (slot && settings.notify_email_on_booking) {
         const slotDate = slot.slot_date;
         const slotTime = slot.start_time.slice(0, 5);
-        const { data: teacherProfile } = await supabase.from('profiles').select('email, first_name, last_name').eq('id', settings.teacher_id).maybeSingle();
+        // v6.9.84 — anonymous visitors can no longer read `profiles` directly.
+        // Token-scoped RPC exposes only teachers with a public booking page.
+        const { data: contactRows } = await supabase.rpc('get_public_teacher_contact', {
+          p_teacher_id: settings.teacher_id,
+        });
+        const teacherProfile = Array.isArray(contactRows) ? contactRows[0] : (contactRows as any);
         const teacherName = [teacherProfile?.first_name, teacherProfile?.last_name].filter(Boolean).join(' ') || 'Your Teacher';
         const teacherEmail = teacherProfile?.email || '';
         const { data: hubSettings } = await supabase.from('calendar_settings').select('hub_token').eq('teacher_id', settings.teacher_id).maybeSingle();

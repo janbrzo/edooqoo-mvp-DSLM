@@ -24,6 +24,9 @@ interface UseInteractiveHomeworkProps {
   totalExercises: number;
   exerciseQuestionCounts?: Record<number, number>;
   exercises?: any[];
+  /** v6.9.84 — required for anonymous students: direct table writes were
+   *  replaced by the token-scoped RPC `update_homework_answer_by_share_token`. */
+  shareToken?: string;
 }
 
 export const useInteractiveHomework = ({
@@ -32,7 +35,8 @@ export const useInteractiveHomework = ({
   studentEmail,
   totalExercises,
   exerciseQuestionCounts = {},
-  exercises = []
+  exercises = [],
+  shareToken
 }: UseInteractiveHomeworkProps) => {
   const [answers, setAnswers] = useState<Record<number, ExerciseAnswers>>({});
   const [audioAnswers, setAudioAnswers] = useState<Record<number, Record<number, string>>>({});
@@ -451,18 +455,17 @@ export const useInteractiveHomework = ({
                 const ansForEx = savedAnswers.find((a: any) => a.exercise_index === exIdx);
                 const mergedAnswers = (typeof ansForEx?.answers === 'object' && ansForEx?.answers !== null) ? { ...ansForEx.answers } : {};
                 
-                await supabase
-                  .from('homework_student_answers')
-                  .update({ 
-                    answers: mergedAnswers,
-                    ai_evaluation: evalData,
-                    item_evaluations: JSON.parse(JSON.stringify(itemEvals)),
-                    mastery: overallMastery,
-                    eval_trigger: 'submit_homework'
-                  })
-                  .eq('homework_id', homeworkId)
-                  .eq('student_email', studentEmail)
-                  .eq('exercise_index', exIdx);
+                await supabase.rpc('update_homework_answer_by_share_token', {
+                  p_share_token: shareToken || '',
+                  p_homework_id: homeworkId,
+                  p_student_email: studentEmail,
+                  p_exercise_index: exIdx,
+                  p_answers: mergedAnswers as any,
+                  p_ai_evaluation: evalData as any,
+                  p_item_evaluations: JSON.parse(JSON.stringify(itemEvals)),
+                  p_mastery: overallMastery,
+                  p_eval_trigger: 'submit_homework',
+                });
               }
               
               setAiEvaluations(prev => {
@@ -513,12 +516,13 @@ export const useInteractiveHomework = ({
               const existingAnswers = (typeof ans.answers === 'object' && ans.answers !== null) ? { ...ans.answers } : {};
               existingAnswers[`_transcription_${qIdxStr}`] = transcription.text;
               
-              await supabase
-                .from('homework_student_answers')
-                .update({ answers: existingAnswers })
-                .eq('homework_id', homeworkId)
-                .eq('student_email', studentEmail)
-                .eq('exercise_index', exIdx);
+              await supabase.rpc('update_homework_answer_by_share_token', {
+                p_share_token: shareToken || '',
+                p_homework_id: homeworkId,
+                p_student_email: studentEmail,
+                p_exercise_index: exIdx,
+                p_answers: existingAnswers as any,
+              });
             }
             devLog('[submitHomework] Transcriptions persisted for non-AI-eval exercises');
           }
