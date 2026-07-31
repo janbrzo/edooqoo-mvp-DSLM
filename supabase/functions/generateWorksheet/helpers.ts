@@ -285,6 +285,7 @@ export function repairJSONStringDeterministic(content: string): string {
 export function parseAIResponse(jsonContent: string): any {
   // Layer 1: Extract clean JSON
   const extracted = extractJSONString(jsonContent);
+  let firstErrorPosition = -1;
   
   // Attempt 1: Parse extracted content directly
   try {
@@ -293,6 +294,8 @@ export function parseAIResponse(jsonContent: string): any {
     return result;
   } catch (firstError) {
     console.warn('⚠️ json_parse_initial_failed:', (firstError as Error).message);
+    const m = /position (\d+)/.exec((firstError as Error).message || '');
+    if (m) firstErrorPosition = Number(m[1]);
   }
   
   // Attempt 2: Deterministic repair
@@ -341,6 +344,7 @@ export function parseAIResponse(jsonContent: string): any {
   const error = new Error(`Invalid JSON from AI: unable to parse after deterministic repair`);
   (error as any).rawContent = extracted;
   (error as any).rawLength = extracted.length;
+  (error as any).errorPosition = firstErrorPosition;
   throw error;
 }
 
