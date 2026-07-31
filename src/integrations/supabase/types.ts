@@ -3864,6 +3864,14 @@ export type Database = {
           status: string
         }[]
       }
+      get_public_teacher_contact: {
+        Args: { p_teacher_id: string }
+        Returns: {
+          email: string
+          first_name: string
+          last_name: string
+        }[]
+      }
       get_student_homework_answers: {
         Args: { p_homework_id: string; p_student_email: string }
         Returns: {
