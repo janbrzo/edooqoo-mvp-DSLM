@@ -305,6 +305,33 @@ export function parseAIResponse(jsonContent: string): any {
     console.warn('⚠️ json_repair_deterministic_failed:', (secondError as Error).message);
   }
   
+  // Attempt 3 (v6.9.84 — Layer 2.5): character-level scanner that escapes
+  // stray double quotes inside string values. This is the exact failure class
+  // seen in production ("Expected ',' or '}' after property value").
+  const escaped = repairUnescapedQuotes(repaired);
+  if (escaped !== repaired) {
+    try {
+      const result = JSON.parse(escaped);
+      console.log('✅ json_repair_layer: escape-scan');
+      return result;
+    } catch (thirdError) {
+      console.warn('⚠️ json_repair_escape_scan_failed:', (thirdError as Error).message);
+    }
+  }
+
+  // Attempt 4 (v6.9.84 — Layer 2.6): salvage by truncating the `exercises`
+  // array to its last complete element. Better to ship 7/8 exercises than 0.
+  for (const candidate of [escaped, repaired, extracted]) {
+    const salvaged = truncateToLastCompleteExercise(candidate);
+    if (!salvaged) continue;
+    try {
+      const result = JSON.parse(salvaged);
+      const count = Array.isArray(result?.exercises) ? result.exercises.length : 0;
+      console.log(`✅ json_repair_layer: truncate (${count} exercises salvaged)`);
+      return result;
+    } catch { /* try next candidate */ }
+  }
+
   // Both attempts failed — throw with rich context for AI repair pass
   console.error('❌ All local JSON repair attempts failed');
   console.error('❌ Content length:', extracted.length);
@@ -315,4 +342,103 @@ export function parseAIResponse(jsonContent: string): any {
   (error as any).rawContent = extracted;
   (error as any).rawLength = extracted.length;
   throw error;
+}
+
+/**
+ * Layer 2.5 — escape stray `"` characters that appear inside JSON string
+ * values. Walks the document character by character tracking string state.
+ * A closing quote is only accepted when the next non-whitespace character is
+ * a structural JSON character (`,` `}` `]` `:`); otherwise the quote is
+ * treated as literal content and escaped.
+ */
+export function repairUnescapedQuotes(content: string): string {
+  let out = '';
+  let inString = false;
+  let escapedChar = false;
+
+  for (let i = 0; i < content.length; i++) {
+    const ch = content[i];
+
+    if (!inString) {
+      out += ch;
+      if (ch === '"') inString = true;
+      continue;
+    }
+
+    if (escapedChar) {
+      out += ch;
+      escapedChar = false;
+      continue;
+    }
+
+    if (ch === '\\') {
+      out += ch;
+      escapedChar = true;
+      continue;
+    }
+
+    if (ch === '"') {
+      // Look ahead for the next non-whitespace character.
+      let j = i + 1;
+      while (j < content.length && /\s/.test(content[j])) j++;
+      const next = j < content.length ? content[j] : '';
+      if (next === ',' || next === '}' || next === ']' || next === ':' || next === '') {
+        out += ch;
+        inString = false;
+      } else {
+        out += '\\"';
+      }
+      continue;
+    }
+
+    // Raw newlines inside a string are also invalid JSON.
+    if (ch === '\n') { out += '\\n'; continue; }
+    if (ch === '\r') { continue; }
+    if (ch === '\t') { out += '\\t'; continue; }
+
+    out += ch;
+  }
+
+  return out;
+}
+
+/**
+ * Layer 2.6 — salvage pass. Finds the `"exercises": [` array, walks it with a
+ * brace/bracket depth counter, and cuts the document after the last element
+ * that closed cleanly, then re-closes the array and root object.
+ * Returns null when no salvageable prefix exists.
+ */
+export function truncateToLastCompleteExercise(content: string): string | null {
+  const keyIdx = content.search(/"exercises"\s*:\s*\[/);
+  if (keyIdx < 0) return null;
+  const arrayStart = content.indexOf('[', keyIdx);
+  if (arrayStart < 0) return null;
+
+  let depth = 0;
+  let inString = false;
+  let escapedChar = false;
+  let lastCompleteEnd = -1;
+
+  for (let i = arrayStart + 1; i < content.length; i++) {
+    const ch = content[i];
+
+    if (inString) {
+      if (escapedChar) { escapedChar = false; continue; }
+      if (ch === '\\') { escapedChar = true; continue; }
+      if (ch === '"') inString = false;
+      continue;
+    }
+
+    if (ch === '"') { inString = true; continue; }
+    if (ch === '{' || ch === '[') { depth++; continue; }
+    if (ch === '}' || ch === ']') {
+      if (depth === 0) break; // end of the exercises array
+      depth--;
+      if (depth === 0 && ch === '}') lastCompleteEnd = i;
+      continue;
+    }
+  }
+
+  if (lastCompleteEnd < 0) return null;
+  return content.slice(0, lastCompleteEnd + 1) + ']}';
 }
