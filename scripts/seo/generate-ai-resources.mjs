@@ -805,6 +805,12 @@ function linkList(items) {
   return items.map(([label, route, description]) => `- ${BASE_URL}${route} - ${label}. ${description}`).join('\n');
 }
 
+function mdLinkList(items) {
+  return items
+    .map(([label, route, description]) => `- [${label}](${BASE_URL}${route}): ${description}`)
+    .join('\n');
+}
+
 const primaryCitationUrls = [
   `${BASE_URL}/one-minute-prep`,
   `${BASE_URL}/english-placement-test-for-private-tutors.html`,
