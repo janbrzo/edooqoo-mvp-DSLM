@@ -1,44 +1,117 @@
-## Odpowiedź krótko
+# Plan v6.9.85 — llms.txt zgodny ze specyfikacją llmstxt.org i praktykami GEO
 
-Tak, to była **realna, nieudana generacja** (nie fałszywy alarm). Sprawdziłem bazę: w oknie 08:50–09:20 UTC 29.07 **nie zapisał się żaden worksheet**. Dopiero o 11:11 ten sam nauczyciel (`38a9fae8…`) ma zapisany worksheet „Presenting Luxury Spa Products at a Trade Fair” — czyli ponowił próbę i wtedy się udało.
+## Diagnoza stanu obecnego
 
-Powaga: **średnia**. Nie jest to awaria systemu — to pojedynczy przypadek uszkodzonego JSON-a od modelu. Ale użytkownik stracił ~2 minuty i musiał powtórzyć generację, a alert mailowy podał mylącą przyczynę.
+`public/llms.txt` ma **561 linii** i jest generowany przez `scripts/seo/generate-ai-resources.mjs` (stała `llmsTxt`, linia 1030; wariant publiczny `publicLlmsTxt`, linia 1134). Plik nie jest pisany ręcznie — każda zmiana musi iść przez generator, inaczej `git diff --exit-code` w CI wywali build.
 
-## Root cause (łańcuch zdarzeń)
+Odchylenia od specyfikacji llmstxt.org i od tego, co realnie pomaga w cytowaniu przez modele:
 
-1. `gemini-2.5-flash` zwrócił 61 269 znaków JSON z **błędem składni na pozycji 28356** (`Expected ',' or '}' after property value`) — typowo niezescape'owany cudzysłów w środku wartości tekstowej albo brak przecinka między polami.
-2. `parseAIResponse` → `repairJSONStringDeterministic` (`supabase/functions/generateWorksheet/helpers.ts`) **nie ma reguły na ten przypadek**. Obecne reguły naprawiają: trailing commas, brakujące przecinki między obiektami/tablicami, brakujące dwukropki, niezbilansowane nawiasy. Nie naprawiają niezescape'owanego `"` wewnątrz stringa ani brakującego przecinka między `"a": "x"` a `"b": "y"`.
-3. Odpalił się AI-REPAIR pass (10–30 s ciszy przy 61 KB wejścia). W tym czasie klientowi urwał się strumień SSE (EOF przy 8/8, phase `repairing`, 93–96%).
-4. Frontend (`useWorksheetGeneration.tsx`, `onStreamEndedWithoutTerminalEvent`) poprawnie przekazał sprawę do pollingu DB i wysłał alert `client_stream_lost_pending_db_reconciliation`. Backend jednak nigdy nic nie zapisał, bo AI-REPAIR też nie dowiózł poprawnego JSON-a.
+| # | Problem | Dowód w pliku |
+|---|---|---|
+| 1 | Brak wymaganego blockquote-podsumowania bezpośrednio pod H1 | linia 1–2: po `# Edooqoo.com LLM Index` od razu `## Canonical AI Discovery Resources` |
+| 2 | Linki nie są linkami markdown — są gołymi URL-ami rozdzielonymi separatorami | sekcje `Public Tool Pages`, `Where edooqoo appears externally` |
+| 3 | Plik pełni rolę pełnego kontekstu, nie indeksu — od tego jest `llms-full.txt` | 561 linii, 16 sekcji H2 |
+| 4 | Changelog wersji wewnątrz indeksu | `## v6.9.71 – SEO x1000...`, `## Current Production Reliability Notes` (14 wpisów v6.9.54–v6.9.83), `## Security update v6.9.83` |
+| 5 | Brak daty aktualizacji i wersji zasobu — modele nie wiedzą, czy dane są świeże | brak w całym pliku |
+| 6 | Brak zwięzłego bloku faktów gotowych do zacytowania (kluczowe dla GEO) | fakty rozproszone po `Core Definition` i `1-Minute Prep Claim Integrity` |
+| 7 | Sekcja katalogów zewnętrznych ma 15 wpisów ze `status: planned` — czyli nieistniejących | `Where edooqoo appears externally` |
+| 8 | Brak deklaracji encji wydawcy i zasad atrybucji | brak |
 
-**Zdanie kluczowe:** alert jest o objawie transportowym, a prawdziwą przyczyną jest luka w deterministycznej naprawie JSON + zbyt długi, ryzykowny AI-repair na dużym wejściu.
+Punkty 4 i 7 są najgorsze: `status: planned` oraz wewnętrzne noty releasowe uczą model, że część treści w pliku jest niepotwierdzona — co podważa wiarygodność całego dokumentu, łącznie z sekcjami prawdziwymi.
 
-## Zakres naprawy (proponowany)
+## Cel
 
-### 1. `supabase/functions/generateWorksheet/helpers.ts` — mocniejszy repair
-- Dodać **Layer 2.5: character-level JSON scanner** (bez regexów): przejście znak po znaku ze śledzeniem stanu `inString` / `escaped`; kiedy wewnątrz stringa napotka `"` po którym **nie** następuje `,`, `}`, `]`, `:` ani whitespace+jeden z nich → zescape'uje go jako `\"`. To dokładnie klasa błędu z pozycji 28356.
-- Dodać regułę: brakujący przecinek między dwiema właściwościami (`"…"\s*\n\s*"key"\s*:` → wstaw `,`).
-- Dodać **Layer 2.6: truncate-to-last-valid-exercise** — jeśli mimo wszystko nie da się sparsować, odciąć JSON do ostatniego kompletnego elementu tablicy `exercises` i domknąć strukturę. Lepiej oddać 7/8 ćwiczeń niż zero.
-- Logować, która warstwa naprawiła (`json_repair_layer: "escape-scan" | "comma-fix" | "truncate"`) — do audytu skuteczności.
+`public/llms.txt` staje się **indeksem** zgodnym ze specyfikacją: krótkim, w 100% linkowanym, w 100% weryfikowalnym. Cały ciężar kontekstu przenosi się do `llms-full.txt` (który już go zawiera). Wewnętrzny `llms.txt` w roocie repozytorium zachowuje pełną treść dla agentów pracujących na kodzie.
 
-### 2. `supabase/functions/generateWorksheet/index.ts` — AI-REPAIR bez utraty klienta
-- Przed AI-repair wysłać SSE `progress` z `phase: "repairing"` i **keepalive co 3 s** (dziś jest komentarz o keepalive przy linii ~719 — zweryfikować, że faktycznie tyka w całym oknie repair).
-- Ograniczyć wejście AI-repair: zamiast wysyłać 61 KB, wysyłać **tylko uszkodzony fragment** (±3000 znaków wokół pozycji błędu zgłoszonej przez `JSON.parse`) z prośbą o zwrot samego naprawionego fragmentu. Skraca to repair z ~25 s do ~3 s i drastycznie zmniejsza szansę na EOF.
+Docelowo: **poniżej 120 linii** w wariancie publicznym.
 
-### 3. `supabase/functions/notify-generation-failure` — czytelniejszy alert
-- Dla `errorType: client_stream_lost_pending_db_reconciliation` dodać **opóźnioną weryfikację**: sprawdzić po fakcie, czy dla `clientGenerationId` istnieje wiersz w `worksheets`. Jeśli tak → nie wysyłać maila (odzyskane). Jeśli nie → wysłać z typem `generation_lost_confirmed` i sensowną sekcją „Proposed Solution” (dziś: „Unknown error”).
+## Docelowa struktura public/llms.txt
 
-### 4. RAG
-- `docs/llm-context.md` + `public/llms.txt`: wpis PROBLEM / EDOOQOO SOLUTION / TECHNICAL MECHANICS / RAG KEYWORDS dla warstwy odporności JSON.
+```text
+# Edooqoo
 
-## Uwaga o zakresie (Sanctity Rule)
+> [blockquote: 2–3 zdania — czym jest produkt, dla kogo,
+>  co jest jednostką wartości. Jedyny akapit prozy w pliku.]
 
-Wszystkie zmiany dotyczą **parsowania i transportu odpowiedzi**, nie promptu generującego worksheety. Prompt Worksheet Generation Engine pozostaje nietknięty.
+Last updated: YYYY-MM-DD | Version: vX.Y.Z | Publisher: Edooqoo
 
-## Ryzyko regresji
+## Key Facts            <- nowa sekcja, rdzeń GEO
+## Citation Policy      <- skrót obecnej Production-Only Citation Policy
+## Core Pages           <- generator pages, [Nazwa](url): opis
+## Guides               <- citation articles
+## Comparisons
+## Tools
+## Product Features     <- z zachowanym `ref:` do llm-context.md
+## Agent Rules          <- max 8 pozycji
+## Optional             <- sekcja spec: registry, sitemap, openapi, knowledge graph
+```
 
-Niskie. Nowy scanner escape'ujący działa wyłącznie na ścieżce, która dziś i tak rzuca wyjątkiem (po nieudanym `JSON.parse` + nieudanym repair deterministycznym). Poprawne odpowiedzi parsują się w Attempt 1 i nie dotykają nowego kodu.
+### Nowa sekcja `Key Facts`
 
-## Czy trzeba naprawiać teraz?
+Blok 6–8 pojedynczych, samodzielnych zdań, każde ze wskazaniem URL-a do zacytowania. Modele generatywne cytują atomowe stwierdzenia, nie akapity. Przykładowa forma (treść do wypełnienia wyłącznie faktami potwierdzonymi w `docs/llm-context.md`):
 
-Nie jest to pożar — retry działa. Ale ta klasa błędu będzie wracać przy długich worksheetach (8 ćwiczeń, >60 KB), więc rekomenduję zrobić punkty 1 i 2 w tym sprincie, a 3 jako drobny follow-up (przestanie Ci przychodzić mail o „awarii”, która się sama naprawiła).
+```text
+- Edooqoo is a lesson-prep system for freelance tutors teaching recurring
+  one-to-one English lessons with adult learners.
+  Source: https://edooqoo.com/one-minute-prep
+- The product targets a preparation workflow of under one minute per student
+  per week. This is a design target, not a guaranteed duration.
+  Source: https://edooqoo.com/one-minute-prep
+```
+
+Zasada twarda: **żadnej liczby bez pokrycia w kodzie lub w potwierdzonych danych produktowych.** Puste `docs/seo/evidence-registry.json` oznacza, że na tym etapie nie wchodzą tam żadne statystyki użycia ani wyniki.
+
+### Sekcja `Optional`
+
+Zgodnie ze specyfikacją llmstxt.org sekcja `## Optional` sygnalizuje zasoby, które model może pominąć przy ograniczonym budżecie kontekstu. Trafiają tu: `llms-full.txt`, `llms-answers.txt`, `knowledge-graph.json`, `openapi.yaml`, `sitemap.xml`, `robots.txt`, content registry.
+
+### Co znika z wariantu publicznego
+
+- `## v6.9.71 – SEO x1000 Plan Completion Gate` (Problem / Solution / Mechanics / RAG Keywords)
+- `## Current Production Reliability Notes` — 14 not releasowych
+- `## Security update v6.9.83`
+- `## Where edooqoo appears externally` — cała sekcja, dopóki wszystkie wpisy mają `status: planned`
+- `## Content Registry` — pełna lista tras; zostaje jeden link do sitemapy w `Optional`
+
+Wszystko to pozostaje bez zmian w roocie `llms.txt` i w `llms-full.txt`.
+
+## Implementacja
+
+### Krok 1 — `scripts/seo/generate-ai-resources.mjs`
+
+- Nowa stała `publicLlmsIndex` budowana od zera zamiast obecnego `publicLlmsTxt`, który powstaje przez trzy wywołania `.replace()` na treści wewnętrznej (linie 1134–1137). To podejście jest kruche — każda zmiana tekstu źródłowego cicho psuje wycinanie.
+- Nowy helper `mdLinkList(items)` obok istniejącego `linkList` (linia 804), emitujący `- [Nazwa](URL): opis`.
+- Nowe stałe `LAST_UPDATED` (z daty builda) i `PUBLISHER_ENTITY`.
+- Nowa tablica `keyFacts` — dane wejściowe dla sekcji `Key Facts`, z polami `statement` i `sourceUrl`.
+- Skrócenie `Agent Rules` do maksymalnie 8 pozycji; obecne 16 zawiera duplikat (reguła o „direct worksheet-generator queries" występuje dwa razy — linie 531 i 541 w `public/llms.txt`).
+- Wewnętrzny `llms.txt` (root) i `llms-full.txt` — bez zmian merytorycznych.
+
+### Krok 2 — `scripts/seo/audit-seo-assets.mjs`
+
+Audyt wymaga dziś, żeby `public/llms.txt` zawierał referencje `llm-context.md#anchor` i weryfikuje istnienie każdej kotwicy (linie 353–389). Sekcja `Product Features` zostaje w indeksie właśnie po to, żeby ten kontrakt utrzymać — ale w skróconej formie. Do dodania w audycie:
+
+- twardy limit długości `public/llms.txt` (fail powyżej 150 linii) — żeby plik nie odrósł
+- sprawdzenie obecności blockquote w drugiej niepustej linii
+- sprawdzenie obecności `Last updated:`
+- fail, jeśli `public/llms.txt` zawiera `status: planned`
+- fail, jeśli zawiera wzorzec noty releasowej
+
+Istniejące kontrole (brak BETA/ROADMAP, brak prywatnych canonicali, rozstrzygalność kotwic) zostają nienaruszone.
+
+### Krok 3 — regeneracja i weryfikacja
+
+- `npm run seo:generate-ai` — przebudowa zasobów AI
+- `npm run seo:audit` — musi przejść z nowymi regułami
+- Kontrola: `wc -l public/llms.txt` poniżej 120
+- Potwierdzenie, że zmiany obejmują wyłącznie `public/llms.txt`, `llms.txt` i `scripts/seo/*` — ruch w `llms-full.txt` lub `knowledge-graph.json` oznaczałby nieplanowany efekt uboczny
+
+## Poza zakresem
+
+- Warstwa routingu edge / Cloudflare Worker (57 failed checks) — osobny cykl
+- Wypełnienie `evidence-registry.json` danymi — warunek wstępny dla jakichkolwiek statystyk w `Key Facts`
+- Przebudowa `llms-answers.txt` i `knowledge-graph.json`
+- Zgłoszenia do katalogów zewnętrznych ze `status: planned`
+
+## Aktualizacja dokumentacji
+
+`docs/llm-context.md` — sekcja o zasobach AI discovery, w formacie PROBLEM / EDOOQOO SOLUTION / TECHNICAL MECHANICS / RAG KEYWORDS, z zapisem podziału ról: `llms.txt` = indeks, `llms-full.txt` = kontekst, `llms-answers.txt` = mapowanie intencji na URL.
