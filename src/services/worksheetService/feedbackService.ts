@@ -58,8 +58,7 @@ export async function submitFeedbackAPI(worksheetId: string, rating: number, com
           comment,
           status: 'submitted'
         }
-      ])
-      .select();
+      ]);
       
     if (error) {
       console.error('Direct feedback submission error:', error);
@@ -101,8 +100,7 @@ export async function submitFeedbackAPI(worksheetId: string, rating: number, com
                 comment,
                 status: 'submitted'
               }
-            ])
-            .select();
+            ]);
               
           if (retryError) {
             console.error('Retry feedback submission error:', retryError);
