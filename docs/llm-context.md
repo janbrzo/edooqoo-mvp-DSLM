@@ -1452,3 +1452,13 @@ TECHNICAL MECHANICS:
 - Client updates: `src/pages/FlashcardsLearning.tsx` (browse-mode card list), `src/hooks/useFlashcardLearning.tsx` (bidirectional flag), `src/pages/HomeworkPage.tsx` (reviewed/completed status), `src/hooks/useInteractiveHomework.tsx` (teacher/student ids for DSLM event).
 
 RAG KEYWORDS: RLS hardening, share token enumeration, SECURITY DEFINER RPC, anonymous access, flashcard share link, homework share link, export payments policy, service_role, PostgREST permission, Supabase policy audit, token scoped lookup, data leak prevention, public role policy, row level security, Edooqoo security v6.9.83
+
+## v6.9.85 — AI discovery resource split (llms.txt as index)
+
+PROBLEM: `public/llms.txt` had grown to 561 lines and duplicated full RAG context, internal release notes, security notes and 15 `status: planned` external directory entries. It violated the llmstxt.org shape (no blockquote summary, no markdown link lists), carried no freshness signal, and mixed unverifiable planned items with production facts, which lowers model trust in the whole document.
+
+EDOOQOO SOLUTION: The public `llms.txt` is now a strict index (<120 lines): H1 + blockquote summary, `Last updated` / version / publisher line, a `Key Facts` section of atomic citable statements each with a source URL, a short citation policy, markdown link lists (Core Pages, Guides, Comparisons, Tools), the production feature map with `ref: llm-context.md#anchor` pointers, 8 agent rules, and an `## Optional` section pointing to the heavy resources. Role split: `llms.txt` = index, `llms-full.txt` = full retrieval context, `llms-answers.txt` = intent-to-URL mapping, root `llms.txt` = internal agent context (unchanged).
+
+TECHNICAL MECHANICS: `scripts/seo/generate-ai-resources.mjs` builds `publicLlmsTxt` from scratch (new `mdLinkList` helper, `LAST_UPDATED`, `PUBLISHER_ENTITY`, `keyFacts`, `publicAgentRules`, `publicFeatureIndexLines()`), replacing the previous fragile `.replace()` derivation from the internal variant. `scripts/seo/audit-seo-assets.mjs` adds five gates in `auditDeclaredAiResources()`: max 150 lines, H1 + blockquote shape, `Last updated:` line, no `status: planned`, no internal release notes. Existing gates (no BETA/ROADMAP, no private canonicals, resolvable `llm-context.md` anchors) remain. Worksheet Generation Engine untouched.
+
+RAG KEYWORDS: llms.txt, llmstxt.org specification, GEO, generative engine optimization, AI discovery resources, LLM index, atomic facts, citation policy, RAG context file, llms-full.txt, llms-answers.txt, knowledge graph, AEO, agent rules, SEO asset audit

@@ -58,8 +58,7 @@ export async function submitFeedbackAPI(worksheetId: string, rating: number, com
           comment,
           status: 'submitted'
         }
-      ])
-      .select();
+      ]);
       
     if (error) {
       console.error('Direct feedback submission error:', error);
@@ -101,8 +100,7 @@ export async function submitFeedbackAPI(worksheetId: string, rating: number, com
                 comment,
                 status: 'submitted'
               }
-            ])
-            .select();
+            ]);
               
           if (retryError) {
             console.error('Retry feedback submission error:', retryError);
@@ -133,20 +131,19 @@ export async function updateFeedbackAPI(id: string, comment: string, userId: str
   try {
     devLog('Updating feedback with comment:', { id, comment });
 
-    const { data, error } = await supabase
-      .from('feedbacks')
-      .update({ comment })
-      .eq('id', id)
-      .eq('user_id', userId)
-      .select();
+    // RLS: authenticated users may update only their own rows; anonymous feedback
+    // (user_id IS NULL) is updatable only by whoever holds the exact record id.
+    let query = supabase.from('feedbacks').update({ comment }).eq('id', id);
+    query = userId ? query.eq('user_id', userId) : query.is('user_id', null);
+    const { error } = await query;
       
     if (error) {
       console.error('Error updating feedback:', error);
       throw new Error(`Failed to update feedback: ${error.message}`);
     }
     
-    devLog('Feedback updated successfully:', data);
-    return data;
+    devLog('Feedback updated successfully:', { id });
+    return { id, comment };
   } catch (error) {
     console.error('Error updating feedback:', error);
     throw error;
