@@ -384,6 +384,40 @@ function auditDeclaredAiResources() {
     fail('public/llms.txt contains no llm-context.md refs');
   }
 
+  const llmsLines = publicLlms.split('\n');
+  if (llmsLines.length > 150) {
+    fail(`public/llms.txt must stay an index under 150 lines, got ${llmsLines.length}`);
+  } else {
+    pass(`public/llms.txt is index-sized (${llmsLines.length} lines)`);
+  }
+
+  const firstContentLines = llmsLines.filter((line) => line.trim().length > 0);
+  if (!/^#\s+/.test(firstContentLines[0] || '')) {
+    fail('public/llms.txt must start with an H1 site-name heading');
+  } else if (!/^>\s+/.test(firstContentLines[1] || '')) {
+    fail('public/llms.txt must have a blockquote summary directly after the H1');
+  } else {
+    pass('public/llms.txt follows the llmstxt.org H1 + blockquote shape');
+  }
+
+  if (!/^Last updated:\s*\d{4}-\d{2}-\d{2}/m.test(publicLlms)) {
+    fail('public/llms.txt must declare a "Last updated: YYYY-MM-DD" line');
+  } else {
+    pass('public/llms.txt declares a last-updated date');
+  }
+
+  if (/status:\s*planned/i.test(publicLlms)) {
+    fail('public/llms.txt must not list planned (non-existent) resources');
+  } else {
+    pass('public/llms.txt lists no planned resources');
+  }
+
+  if (/^##\s+.*\bv\d+\.\d+\.\d+/m.test(publicLlms) || /Reliability Notes/i.test(publicLlms)) {
+    fail('public/llms.txt must not contain internal release notes');
+  } else {
+    pass('public/llms.txt contains no internal release notes');
+  }
+
   for (const anchor of refs) {
     if (!docsAnchors.has(anchor)) fail(`public/llms.txt ref missing docs/llm-context.md anchor #${anchor}`);
     else pass(`public/llms.txt ref resolves #${anchor}`);
