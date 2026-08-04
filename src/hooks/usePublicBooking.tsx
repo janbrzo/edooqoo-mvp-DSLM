@@ -20,48 +20,18 @@ export function usePublicBooking(token?: string) {
   const fetchSettings = useCallback(async () => {
     if (!token) return;
     try {
-      // 1. Try hub_token first (Student Hub context — /my/:hubToken/lessons)
-      let { data, error: err } = await supabase
-        .from('calendar_settings')
-        .select('*')
-        .eq('hub_token', token)
-        .maybeSingle();
-
-      if (data && !err) {
-        if (!data.public_calendar_enabled) {
-          setError('Your teacher has not enabled their public calendar yet. Please ask them to turn it on in Calendar Settings.');
-          setLoading(false);
-          return;
-        }
-        setSettings(data as unknown as CalendarSettings);
-        return;
-      }
-
-      // 2. Try public_calendar_token (Public booking context — /book/:token)
-      if (!data && !err) {
-        const result = await supabase
-          .from('calendar_settings')
-          .select('*')
-          .eq('public_calendar_token', token)
-          .eq('public_calendar_enabled', true)
-          .maybeSingle();
-        data = result.data;
-        err = result.error;
-      }
-
-      // 3. Try slug
-      if (!data && !err) {
-        const slugResult = await supabase
-          .from('calendar_settings')
-          .select('*')
-          .eq('public_calendar_slug', token)
-          .eq('public_calendar_enabled', true)
-          .maybeSingle();
-        data = slugResult.data;
-        err = slugResult.error;
-      }
+      // Token-scoped lookup (hub_token, public_calendar_token or public slug).
+      // RLS-safe: the RPC only returns a row for an exact token match.
+      const { data: rows, error: err } = await supabase
+        .rpc('get_public_calendar_settings', { p_token: token });
+      const data = rows?.[0] ?? null;
 
       if (err) throw err;
+      if (data && !data.public_calendar_enabled && data.hub_token === token) {
+        setError('Your teacher has not enabled their public calendar yet. Please ask them to turn it on in Calendar Settings.');
+        setLoading(false);
+        return;
+      }
       if (!data) { setError('Calendar not found or not public.'); setLoading(false); return; }
       setSettings(data as unknown as CalendarSettings);
     } catch (err) { setError('Failed to load calendar.'); console.error(err); }
@@ -226,8 +196,8 @@ export function usePublicBooking(token?: string) {
         const teacherProfile = Array.isArray(contactRows) ? contactRows[0] : (contactRows as any);
         const teacherName = [teacherProfile?.first_name, teacherProfile?.last_name].filter(Boolean).join(' ') || 'Your Teacher';
         const teacherEmail = teacherProfile?.email || '';
-        const { data: hubSettings } = await supabase.from('calendar_settings').select('hub_token').eq('teacher_id', settings.teacher_id).maybeSingle();
-        const hubToken = hubSettings?.hub_token || settings.public_calendar_token;
+        // Settings already came from the token-scoped RPC — no extra read needed.
+        const hubToken = (settings as any).hub_token || settings.public_calendar_token;
         const bookUrl = `${window.location.origin}/my/${hubToken}/lessons`;
         const calendarUrl = `${window.location.origin}/calendar`;
 
@@ -285,9 +255,7 @@ export function usePublicBooking(token?: string) {
 
       // GCal sync for student booking (teacher's calendar)
       try {
-        const { data: syncSettings } = await supabase.from('calendar_settings')
-          .select('gcal_sync_booked, gcal_sync_pending, gcal_integration_enabled')
-          .eq('teacher_id', settings.teacher_id).maybeSingle();
+        const syncSettings = settings as any;
         if (syncSettings?.gcal_integration_enabled) {
           const isPending = !autoConfirm;
           const shouldSync = isPending

@@ -3855,6 +3855,65 @@ export type Database = {
           source_worksheet_id: string
         }[]
       }
+      get_public_calendar_settings: {
+        Args: { p_token: string }
+        Returns: {
+          allow_student_reschedule: boolean
+          auto_create_meet_link: boolean | null
+          auto_create_student_meeting_link: boolean
+          buffer_minutes: number
+          created_at: string
+          currency: string | null
+          default_booking_mode: string
+          default_lesson_duration_minutes: number
+          default_lesson_price: number | null
+          default_meeting_link: string | null
+          display_end_hour: number
+          display_start_hour: number
+          enforce_slot_limit: boolean
+          gcal_color_available: string | null
+          gcal_color_booked: string | null
+          gcal_color_completed: string | null
+          gcal_color_no_show: string | null
+          gcal_color_pending: string | null
+          gcal_default_color: string | null
+          gcal_default_reminder_minutes: number | null
+          gcal_integration_enabled: boolean
+          gcal_on_cancel_action: string | null
+          gcal_sync_available_new: boolean | null
+          gcal_sync_available_on_cancel: boolean | null
+          gcal_sync_booked: boolean | null
+          gcal_sync_mode: string | null
+          gcal_sync_pending: boolean | null
+          hub_token: string | null
+          id: string
+          max_slots_per_student_per_week: number | null
+          min_cancellation_hours: number | null
+          notify_email_on_booking: boolean
+          notify_email_on_cancellation: boolean
+          notify_email_on_confirmation: boolean
+          notify_email_on_lesson_created: boolean
+          notify_email_on_rejection: boolean
+          notify_email_on_reschedule: boolean
+          notify_on_booking: boolean
+          notify_on_cancellation: boolean
+          notify_payment_reminder: boolean
+          notify_student_reminder_hours: number | null
+          payment_tracking_enabled: boolean
+          public_calendar_enabled: boolean
+          public_calendar_slug: string | null
+          public_calendar_token: string | null
+          teacher_id: string
+          timezone: string
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "calendar_settings"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       get_public_status: {
         Args: never
         Returns: {
@@ -3912,6 +3971,44 @@ export type Database = {
           title: string
           total_questions: number
         }[]
+      }
+      get_test_context_by_share_token: {
+        Args: { p_share_token: string }
+        Returns: {
+          generation_params: Json
+          id: string
+          student_id: string
+          student_native_language: string
+          teacher_id: string
+        }[]
+      }
+      get_test_questions_by_share_token: {
+        Args: { p_share_token: string }
+        Returns: {
+          ai_feedback: string | null
+          answered_at: string | null
+          correct_answer: Json
+          created_at: string | null
+          difficulty_level: number | null
+          element_type: string | null
+          explanation: string | null
+          id: string
+          is_correct: boolean | null
+          question_data: Json | null
+          question_index: number
+          question_text: string
+          question_type: string
+          skill_tags: string[] | null
+          student_answer: Json | null
+          test_id: string
+          time_spent_seconds: number | null
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "student_test_questions"
+          isOneToOne: false
+          isSetofReturn: true
+        }
       }
       get_test_status_by_share_token: {
         Args: { p_share_token: string }
@@ -4168,6 +4265,16 @@ export type Database = {
         }
         Returns: string
       }
+      save_test_answer_by_share_token: {
+        Args: {
+          p_answer: Json
+          p_is_correct?: boolean
+          p_question_index: number
+          p_share_token: string
+          p_time_spent_seconds?: number
+        }
+        Returns: boolean
+      }
       save_worksheet_answer:
         | {
             Args: {
@@ -4229,6 +4336,10 @@ export type Database = {
             }
             Returns: string
           }
+      set_test_answered_count_by_share_token: {
+        Args: { p_answered_count: number; p_share_token: string }
+        Returns: boolean
+      }
       should_show_onboarding: { Args: { user_id: string }; Returns: boolean }
       soft_delete_flashcard_set: {
         Args: { p_set_id: string; p_teacher_id: string }
@@ -4245,6 +4356,10 @@ export type Database = {
       soft_delete_user_account: { Args: { user_id: string }; Returns: boolean }
       soft_delete_worksheet: {
         Args: { p_teacher_id: string; p_worksheet_id: string }
+        Returns: boolean
+      }
+      start_test_by_share_token: {
+        Args: { p_share_token: string }
         Returns: boolean
       }
       student_add_flashcard: {
