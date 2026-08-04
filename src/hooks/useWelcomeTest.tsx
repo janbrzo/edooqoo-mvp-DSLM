@@ -107,32 +107,18 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
 
         const testInfo = data[0];
 
-        const { data: fullTest } = await supabase
-          .from('student_tests')
-          .select('student_id, teacher_id, generation_params')
-          .eq('id', testInfo.id)
-          .single();
+        // Token-scoped context (RLS-safe: requires the exact share token)
+        const { data: contextRows } = await supabase
+          .rpc('get_test_context_by_share_token', { p_share_token: shareToken });
+        const fullTest = contextRows?.[0] ?? null;
 
         const studentId = fullTest?.student_id || null;
         const teacherId = fullTest?.teacher_id || null;
+        const nativeLang: string | null = fullTest?.student_native_language || null;
 
-        // Fetch student's native language for auto-translation
-        let nativeLang: string | null = null;
-        if (studentId) {
-          const { data: studentData } = await supabase
-            .from('students')
-            .select('native_language')
-            .eq('id', studentId)
-            .single();
-          nativeLang = studentData?.native_language || null;
-        }
-
-        // Load existing answers
+        // Load existing answers (token-scoped)
         const { data: questionsData } = await supabase
-          .from('student_test_questions')
-          .select('*')
-          .eq('test_id', testInfo.id)
-          .order('question_index', { ascending: true });
+          .rpc('get_test_questions_by_share_token', { p_share_token: shareToken });
 
         const existingAnswers: Record<string, unknown> = {};
         let dbAnsweredCount = 0;
@@ -154,10 +140,7 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
 
         // Update status to in_progress if assigned (only if not teacher)
         if (testInfo.status === 'assigned' && !isTeacher) {
-          await supabase
-            .from('student_tests')
-            .update({ status: 'in_progress', started_at: new Date().toISOString() })
-            .eq('id', testInfo.id);
+          await supabase.rpc('start_test_by_share_token', { p_share_token: shareToken });
         }
 
         // For cross-device resume: find first unanswered question
@@ -298,16 +281,13 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
     }
 
     try {
-      await supabase
-        .from('student_test_questions')
-        .update({
-          student_answer: answer as Json,
-          is_correct: isCorrect,
-          answered_at: new Date().toISOString(),
-          time_spent_seconds: timeSpent,
-        })
-        .eq('test_id', state.testId)
-        .eq('question_index', questionIndex);
+      await supabase.rpc('save_test_answer_by_share_token', {
+        p_share_token: shareToken as string,
+        p_question_index: questionIndex,
+        p_answer: answer as Json,
+        p_is_correct: isCorrect,
+        p_time_spent_seconds: timeSpent,
+      });
 
       // Log test_answer_submitted event with nano_skill_ratings
       if (state.studentId && state.teacherId) {
@@ -516,14 +496,13 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
     if (state.testId && questionDef && state.studentId && state.teacherId && !state.isTeacherMode) {
       const questionIndex = ALL_WELCOME_TEST_QUESTIONS.indexOf(questionDef);
       try {
-        await supabase
-          .from('student_test_questions')
-          .update({
-            student_answer: null,
-            answered_at: new Date().toISOString(),
-          })
-          .eq('test_id', state.testId)
-          .eq('question_index', questionIndex);
+        await supabase.rpc('save_test_answer_by_share_token', {
+          p_share_token: shareToken as string,
+          p_question_index: questionIndex,
+          p_answer: null,
+          p_is_correct: null,
+          p_time_spent_seconds: null,
+        });
 
         const canonicalId = toCanonicalId(questionDef.id);
         await supabase.rpc('add_student_event', {
@@ -597,10 +576,10 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
 
       const finalAnsweredCount = allVisibleQuestions.filter(q => state.answers[q.id] !== undefined).length;
       
-      await supabase
-        .from('student_tests')
-        .update({ answered_count: finalAnsweredCount })
-        .eq('id', state.testId);
+      await supabase.rpc('set_test_answered_count_by_share_token', {
+        p_share_token: shareToken as string,
+        p_answered_count: finalAnsweredCount,
+      });
 
       await supabase.functions.invoke('process-welcome-test', {
         body: {

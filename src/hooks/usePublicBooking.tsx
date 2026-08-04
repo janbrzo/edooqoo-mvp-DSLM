@@ -20,48 +20,18 @@ export function usePublicBooking(token?: string) {
   const fetchSettings = useCallback(async () => {
     if (!token) return;
     try {
-      // 1. Try hub_token first (Student Hub context — /my/:hubToken/lessons)
-      let { data, error: err } = await supabase
-        .from('calendar_settings')
-        .select('*')
-        .eq('hub_token', token)
-        .maybeSingle();
-
-      if (data && !err) {
-        if (!data.public_calendar_enabled) {
-          setError('Your teacher has not enabled their public calendar yet. Please ask them to turn it on in Calendar Settings.');
-          setLoading(false);
-          return;
-        }
-        setSettings(data as unknown as CalendarSettings);
-        return;
-      }
-
-      // 2. Try public_calendar_token (Public booking context — /book/:token)
-      if (!data && !err) {
-        const result = await supabase
-          .from('calendar_settings')
-          .select('*')
-          .eq('public_calendar_token', token)
-          .eq('public_calendar_enabled', true)
-          .maybeSingle();
-        data = result.data;
-        err = result.error;
-      }
-
-      // 3. Try slug
-      if (!data && !err) {
-        const slugResult = await supabase
-          .from('calendar_settings')
-          .select('*')
-          .eq('public_calendar_slug', token)
-          .eq('public_calendar_enabled', true)
-          .maybeSingle();
-        data = slugResult.data;
-        err = slugResult.error;
-      }
+      // Token-scoped lookup (hub_token, public_calendar_token or public slug).
+      // RLS-safe: the RPC only returns a row for an exact token match.
+      const { data: rows, error: err } = await supabase
+        .rpc('get_public_calendar_settings', { p_token: token });
+      const data = rows?.[0] ?? null;
 
       if (err) throw err;
+      if (data && !data.public_calendar_enabled && data.hub_token === token) {
+        setError('Your teacher has not enabled their public calendar yet. Please ask them to turn it on in Calendar Settings.');
+        setLoading(false);
+        return;
+      }
       if (!data) { setError('Calendar not found or not public.'); setLoading(false); return; }
       setSettings(data as unknown as CalendarSettings);
     } catch (err) { setError('Failed to load calendar.'); console.error(err); }
