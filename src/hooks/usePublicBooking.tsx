@@ -196,8 +196,8 @@ export function usePublicBooking(token?: string) {
         const teacherProfile = Array.isArray(contactRows) ? contactRows[0] : (contactRows as any);
         const teacherName = [teacherProfile?.first_name, teacherProfile?.last_name].filter(Boolean).join(' ') || 'Your Teacher';
         const teacherEmail = teacherProfile?.email || '';
-        const { data: hubSettings } = await supabase.from('calendar_settings').select('hub_token').eq('teacher_id', settings.teacher_id).maybeSingle();
-        const hubToken = hubSettings?.hub_token || settings.public_calendar_token;
+        // Settings already came from the token-scoped RPC — no extra read needed.
+        const hubToken = (settings as any).hub_token || settings.public_calendar_token;
         const bookUrl = `${window.location.origin}/my/${hubToken}/lessons`;
         const calendarUrl = `${window.location.origin}/calendar`;
 
@@ -255,9 +255,7 @@ export function usePublicBooking(token?: string) {
 
       // GCal sync for student booking (teacher's calendar)
       try {
-        const { data: syncSettings } = await supabase.from('calendar_settings')
-          .select('gcal_sync_booked, gcal_sync_pending, gcal_integration_enabled')
-          .eq('teacher_id', settings.teacher_id).maybeSingle();
+        const syncSettings = settings as any;
         if (syncSettings?.gcal_integration_enabled) {
           const isPending = !autoConfirm;
           const shouldSync = isPending
