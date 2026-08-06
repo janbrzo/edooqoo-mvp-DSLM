@@ -4087,6 +4087,17 @@ export type Database = {
         Args: { p_homework_id: string; p_message?: string }
         Returns: undefined
       }
+      insert_public_booking_notification: {
+        Args: {
+          p_message: string
+          p_metadata?: Json
+          p_notification_type: string
+          p_slot_id?: string
+          p_student_name?: string
+          p_teacher_id: string
+        }
+        Returns: string
+      }
       insert_worksheet_bypass_limit:
         | {
             Args: {
@@ -4399,6 +4410,10 @@ export type Database = {
         Returns: string
       }
       try_parse_jsonb: { Args: { input: string }; Returns: Json }
+      update_anonymous_feedback_comment: {
+        Args: { p_comment: string; p_id: string }
+        Returns: boolean
+      }
       update_homework_answer_by_share_token: {
         Args: {
           p_ai_evaluation?: Json
