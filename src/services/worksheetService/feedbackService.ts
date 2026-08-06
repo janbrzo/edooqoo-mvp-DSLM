@@ -131,11 +131,20 @@ export async function updateFeedbackAPI(id: string, comment: string, userId: str
   try {
     devLog('Updating feedback with comment:', { id, comment });
 
-    // RLS: authenticated users may update only their own rows; anonymous feedback
-    // (user_id IS NULL) is updatable only by whoever holds the exact record id.
-    let query = supabase.from('feedbacks').update({ comment }).eq('id', id);
-    query = userId ? query.eq('user_id', userId) : query.is('user_id', null);
-    const { error } = await query;
+    // v6.9.86 — RLS: authenticated users may update only their own rows.
+    // Anonymous feedback goes through a time-boxed SECURITY DEFINER RPC
+    // (comment allowed within 1 hour of submission) instead of a blanket policy.
+    let error: { message: string } | null = null;
+    if (userId) {
+      const res = await supabase.from('feedbacks').update({ comment }).eq('id', id).eq('user_id', userId);
+      error = res.error;
+    } else {
+      const res = await supabase.rpc('update_anonymous_feedback_comment', {
+        p_id: id,
+        p_comment: comment,
+      } as any);
+      error = res.error;
+    }
       
     if (error) {
       console.error('Error updating feedback:', error);

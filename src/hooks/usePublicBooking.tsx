@@ -147,13 +147,15 @@ export function usePublicBooking(token?: string) {
       // Notification for teacher — new vs existing student
       if (!existingStudent) {
         try {
-          await supabase.from('calendar_notifications').insert({
-            teacher_id: settings.teacher_id,
-            notification_type: 'new_student',
-            message: `New student signed up: ${studentName} (${normalizedEmail})`,
-            student_name: studentName,
-            slot_id: slotId,
-            metadata: {
+          // v6.9.86 — anonymous visitors insert notifications only through a
+          // validated SECURITY DEFINER RPC (teacher must have public booking on).
+          await supabase.rpc('insert_public_booking_notification', {
+            p_teacher_id: settings.teacher_id,
+            p_notification_type: 'new_student',
+            p_message: `New student signed up: ${studentName} (${normalizedEmail})`,
+            p_student_name: studentName,
+            p_slot_id: slotId,
+            p_metadata: {
               student_email: normalizedEmail,
               student_name_raw: studentName,
               slot_date: slot?.slot_date,
@@ -169,13 +171,13 @@ export function usePublicBooking(token?: string) {
         const messageText = autoConfirm
           ? `${resolvedName} booked a lesson ${slot?.slot_date} at ${slot?.start_time?.slice(0,5)}–${slot?.end_time?.slice(0,5)} (auto-confirmed)`
           : `${resolvedName} requested a lesson ${slot?.slot_date} at ${slot?.start_time?.slice(0,5)}–${slot?.end_time?.slice(0,5)} — awaiting confirmation`;
-        await supabase.from('calendar_notifications').insert({
-          teacher_id: settings.teacher_id,
-          notification_type: autoConfirm ? 'booking_confirmed' : 'booking_pending',
-          message: messageText,
-          student_name: resolvedName,
-          slot_id: slotId,
-          metadata: {
+        await supabase.rpc('insert_public_booking_notification', {
+          p_teacher_id: settings.teacher_id,
+          p_notification_type: autoConfirm ? 'booking_confirmed' : 'booking_pending',
+          p_message: messageText,
+          p_student_name: resolvedName,
+          p_slot_id: slotId,
+          p_metadata: {
             student_email: normalizedEmail,
             slot_date: slot?.slot_date,
             start_time: slot?.start_time?.slice(0, 5),
