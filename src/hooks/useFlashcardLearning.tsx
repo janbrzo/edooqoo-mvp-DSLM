@@ -161,27 +161,23 @@ export const useFlashcardLearning = (setId: string, learnerEmail: string) => {
       const nextReviewDate = new Date();
       nextReviewDate.setDate(nextReviewDate.getDate() + newInterval);
 
-      // PROBLEM 5 FIX: Save response_time_ms to database (via last_response_time_ms column)
-      const { error } = await supabase
-        .from('flashcard_progress')
-        .upsert({
-          card_id: cardId,
-          set_id: setId,
-          learner_identifier: learnerEmail,
-          direction: card.direction,
-          easiness_factor: newEF,
-          repetition: newRepetition,
-          interval_days: newInterval,
-          next_review_date: nextReviewDate.toISOString(),
-          last_reviewed_at: new Date().toISOString(),
-          total_reviews: card.total_reviews + 1,
-          correct_count: quality >= 2 ? card.correct_count + 1 : card.correct_count,
-          incorrect_count: quality < 2 ? card.incorrect_count + 1 : card.incorrect_count,
-          last_response_time_ms: responseTimeMs,
-          last_quality_rating: quality, // 0=Again, 2=I Know This
-        }, {
-          onConflict: 'card_id,learner_identifier,direction'
-        });
+      // v6.9.87 — learners no longer write to flashcard_progress directly.
+      // The SECURITY DEFINER RPC scopes the row to the learner's own identifier.
+      const { error } = await supabase.rpc('save_flashcard_progress', {
+        p_card_id: cardId,
+        p_set_id: setId,
+        p_learner_identifier: learnerEmail,
+        p_direction: card.direction,
+        p_easiness_factor: newEF,
+        p_repetition: newRepetition,
+        p_interval_days: newInterval,
+        p_next_review_date: nextReviewDate.toISOString(),
+        p_total_reviews: card.total_reviews + 1,
+        p_correct_count: quality >= 2 ? card.correct_count + 1 : card.correct_count,
+        p_incorrect_count: quality < 2 ? card.incorrect_count + 1 : card.incorrect_count,
+        p_last_response_time_ms: responseTimeMs,
+        p_last_quality_rating: quality, // 0=Again, 2=I Know This
+      } as any);
 
       if (error) throw error;
 
