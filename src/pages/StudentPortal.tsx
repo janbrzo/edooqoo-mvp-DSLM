@@ -55,17 +55,15 @@ export default function StudentPortal() {
 
       if (setsError) throw setsError;
 
-      // Fetch progress for mastered count
-      const { data: progressData } = await supabase
-        .from('flashcard_progress')
-        .select('set_id, repetition')
-        .eq('learner_identifier', studentEmail || '')
-        .gte('repetition', 4);  // Mastered = repetition >= 4
+      // v6.9.87 — learner progress is read through a SECURITY DEFINER RPC
+      // scoped to the learner's own identifier (mastered = repetition >= 4).
+      const { data: progressData } = await supabase.rpc('get_learner_mastered_counts', {
+        p_learner_identifier: studentEmail || '',
+      } as any);
 
-      // Calculate mastered count per set
       const masteredBySet: Record<string, number> = {};
-      progressData?.forEach((p) => {
-        masteredBySet[p.set_id] = (masteredBySet[p.set_id] || 0) + 1;
+      (progressData as Array<{ set_id: string; mastered_count: number }> | null)?.forEach((p) => {
+        masteredBySet[p.set_id] = Number(p.mastered_count) || 0;
       });
 
       const formattedSets = setsData?.map((set: any) => ({
