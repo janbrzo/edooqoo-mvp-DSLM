@@ -1,0 +1,14 @@
+ALTER FUNCTION public.add_student_event(uuid, uuid, text, text, uuid, jsonb, text[], text, text) SET search_path = public;
+ALTER FUNCTION public.add_tokens(uuid, integer, text, uuid) SET search_path = public;
+ALTER FUNCTION public.clean_old_geolocation_cache() SET search_path = public;
+ALTER FUNCTION public.get_homework_by_share_token(text) SET search_path = public;
+ALTER FUNCTION public.get_worksheet_live_answers(uuid) SET search_path = public;
+ALTER FUNCTION public.insert_worksheet_bypass_limit(text, jsonb, text, text, uuid, text, text, text, integer, text, text) SET search_path = public;
+ALTER FUNCTION public.normalize_tag(text) SET search_path = public;
+ALTER FUNCTION public.normalize_tags_trigger() SET search_path = public;
+ALTER FUNCTION public.set_reminder_scheduled_at() SET search_path = public;
+ALTER FUNCTION public.sync_subscription_to_subscriptions() SET search_path = public;
+ALTER FUNCTION public.update_homework_updated_at() SET search_path = public;
+ALTER FUNCTION public.update_student_tests_updated_at() SET search_path = public;
+ALTER FUNCTION public.update_worksheet_drawings_updated_at() SET search_path = public;
+ALTER FUNCTION public.welcome_test_canonical_id(text) SET search_path = public;
