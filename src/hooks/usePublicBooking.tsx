@@ -104,45 +104,39 @@ export function usePublicBooking(token?: string) {
 
       const normalizedEmail = studentEmail.toLowerCase().trim();
 
-      // Use SECURITY DEFINER function to bypass RLS on students table
-      const { data: existingStudentRows } = await supabase
-        .rpc('find_student_by_email', {
-          p_teacher_id: settings.teacher_id,
-          p_email: normalizedEmail,
-        });
-      const existingStudent = existingStudentRows?.[0] || null;
-
-      const studentId = existingStudent?.id || null;
-      const resolvedName = existingStudent?.name || studentName;
-      const autoConfirm = settings.default_booking_mode === 'auto_confirm';
-
-      let slot = slots.find(s => s.id === slotId);
-      // Slot might be from a different week (recurring booking) — fetch directly from DB
-      if (!slot) {
-        const { data: dbSlot } = await supabase
-          .from('calendar_slots')
-          .select('id, slot_date, start_time, end_time, worksheet_id, meeting_link')
-          .eq('id', slotId)
-          .single();
-        if (dbSlot) slot = dbSlot as any;
-      }
-
-      const { error: err } = await supabase
-        .from('calendar_slots')
-        .update({
-          student_id: studentId,
-          status: 'booked',
-          booking_type: 'student_booked',
-          booked_at: new Date().toISOString(),
-          booked_by: 'student',
-          confirmed_at: autoConfirm ? new Date().toISOString() : null,
-          student_notes: `Booked by: ${resolvedName} (${normalizedEmail})`,
-          title: `${resolvedName} — English lesson`,
-        } as any)
-        .eq('id', slotId)
-        .eq('status', 'available');
+      // v6.9.87 — anonymous visitors can no longer update calendar_slots directly.
+      // A single SECURITY DEFINER RPC validates the public calendar, locks the slot,
+      // resolves an existing student by email and performs the booking atomically.
+      const { data: bookingResult, error: err } = await supabase
+        .rpc('book_public_slot', {
+          p_slot_id: slotId,
+          p_student_name: studentName,
+          p_student_email: normalizedEmail,
+        } as any);
 
       if (err) throw err;
+
+      const booking = (bookingResult || {}) as Record<string, any>;
+      if (!booking.success) {
+        toast({ title: 'Slot no longer available', description: 'Please select another time.', variant: 'destructive', duration: 6000 });
+        await fetchSlots();
+        return false;
+      }
+
+      const existingStudent = booking.student_existed
+        ? { id: booking.student_id as string, name: booking.student_name as string }
+        : null;
+      const resolvedName: string = booking.student_name || studentName;
+      const autoConfirm: boolean = booking.auto_confirm === true;
+
+      const slot = (slots.find(s => s.id === slotId) || {
+        id: slotId,
+        slot_date: booking.slot_date,
+        start_time: booking.start_time,
+        end_time: booking.end_time,
+        worksheet_id: booking.worksheet_id,
+        meeting_link: booking.meeting_link,
+      }) as any;
 
       // Notification for teacher — new vs existing student
       if (!existingStudent) {
