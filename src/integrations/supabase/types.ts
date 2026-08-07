@@ -3655,6 +3655,14 @@ export type Database = {
         Args: { p_student_id?: string }
         Returns: number
       }
+      book_public_slot: {
+        Args: {
+          p_slot_id: string
+          p_student_email: string
+          p_student_name: string
+        }
+        Returns: Json
+      }
       calculate_test_results: { Args: { p_test_id: string }; Returns: Json }
       clean_old_geolocation_cache: { Args: never; Returns: undefined }
       cleanup_worksheet_base64: {
@@ -3853,6 +3861,13 @@ export type Database = {
           id: string
           reviewed_at: string
           source_worksheet_id: string
+        }[]
+      }
+      get_learner_mastered_counts: {
+        Args: { p_learner_identifier: string }
+        Returns: {
+          mastered_count: number
+          set_id: string
         }[]
       }
       get_public_calendar_settings: {
@@ -4203,6 +4218,24 @@ export type Database = {
       revoke_mcp_token: { Args: { _id: string }; Returns: undefined }
       rollback_intake_extraction: {
         Args: { p_extraction_id: string }
+        Returns: undefined
+      }
+      save_flashcard_progress: {
+        Args: {
+          p_card_id: string
+          p_correct_count: number
+          p_direction: number
+          p_easiness_factor: number
+          p_incorrect_count: number
+          p_interval_days: number
+          p_last_quality_rating: number
+          p_last_response_time_ms: number
+          p_learner_identifier: string
+          p_next_review_date: string
+          p_repetition: number
+          p_set_id: string
+          p_total_reviews: number
+        }
         Returns: undefined
       }
       save_homework_answer:
