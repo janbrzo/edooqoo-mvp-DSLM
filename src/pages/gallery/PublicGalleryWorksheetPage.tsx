@@ -31,11 +31,9 @@ const PublicGalleryWorksheetPage: React.FC = () => {
     if (!slug) return;
     let cancelled = false;
     (async () => {
-      const { data } = await supabase
-        .from('worksheets')
-        .select('id, title, ai_response, html_content, public_topic, public_level, published_at, is_public, public_slug')
-        .eq('public_slug', slug)
-        .maybeSingle();
+      // v6.9.88 — safe-column RPC (no teacher PII / tracking metadata).
+      const { data: rows } = await supabase.rpc('get_public_worksheet_by_slug', { p_slug: slug });
+      const data = Array.isArray(rows) ? rows[0] ?? null : rows ?? null;
       if (cancelled) return;
       if (!data) {
         setNotFound(true);
