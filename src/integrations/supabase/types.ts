@@ -3946,6 +3946,20 @@ export type Database = {
           last_name: string
         }[]
       }
+      get_public_worksheet_by_slug: {
+        Args: { p_slug: string }
+        Returns: {
+          ai_response: string
+          html_content: string
+          id: string
+          is_public: boolean
+          public_level: string
+          public_slug: string
+          public_topic: string
+          published_at: string
+          title: string
+        }[]
+      }
       get_student_homework_answers: {
         Args: { p_homework_id: string; p_student_email: string }
         Returns: {
@@ -4156,6 +4170,24 @@ export type Database = {
             }[]
           }
       is_user_anonymous: { Args: { user_id: string }; Returns: boolean }
+      list_public_worksheets: {
+        Args: {
+          p_level?: string
+          p_limit?: number
+          p_offset?: number
+          p_topic?: string
+        }
+        Returns: {
+          id: string
+          public_exercise_types: string[]
+          public_level: string
+          public_slug: string
+          public_topic: string
+          public_view_count: number
+          published_at: string
+          title: string
+        }[]
+      }
       mark_ai_evaluation_done: {
         Args: {
           p_exercise_index: number
