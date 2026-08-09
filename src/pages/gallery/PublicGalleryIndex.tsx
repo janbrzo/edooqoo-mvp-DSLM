@@ -31,17 +31,14 @@ const PublicGalleryIndex: React.FC = () => {
     let cancelled = false;
     setLoading(true);
     (async () => {
-      let q = supabase
-        .from('worksheets')
-        .select('id, public_slug, title, public_topic, public_level, public_exercise_types, published_at, public_view_count')
-        .eq('is_public', true)
-        .order('published_at', { ascending: false })
-        .range(page * PAGE_SIZE, page * PAGE_SIZE + PAGE_SIZE);
-      // v6.9.34 — use ilike so a single CEFR (e.g. "A1") matches stored
-      // composite values like "A1/A2".
-      if (levelFilter) q = q.ilike('public_level', `%${levelFilter}%`);
-      if (topicFilter) q = q.ilike('public_topic', `%${topicFilter}%`);
-      const { data } = await q;
+      // v6.9.88 — read through a security-definer RPC that exposes only safe
+      // display columns; the worksheets table no longer has a public policy.
+      const { data } = await supabase.rpc('list_public_worksheets', {
+        p_level: levelFilter || null,
+        p_topic: topicFilter || null,
+        p_limit: PAGE_SIZE + 1,
+        p_offset: page * PAGE_SIZE,
+      });
       if (cancelled) return;
       const rows = (data || []) as PublicWorksheet[];
       setHasMore(rows.length > PAGE_SIZE);
