@@ -2,33 +2,12 @@ import React from 'react';
 import {
   ArrowDown,
   ArrowRight,
-  BookOpenCheck,
-  Calendar,
   CheckCircle2,
-  ClipboardCheck,
-  Goal,
-  Layers,
-  Map,
-  Radio,
-  StickyNote,
-  Users,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useEventTracking } from '@/hooks/useEventTracking';
 import type { OneMinutePrepCalculatorInput } from '@/components/PricingCalculator';
 import OneMinutePrepHeroProofSwitcher from '@/components/landing/OneMinutePrepHeroProofSwitcher';
-
-const unlockFeatures = [
-  { icon: BookOpenCheck, label: 'Welcome Test baseline' },
-  { icon: Goal, label: 'Student goals' },
-  { icon: StickyNote, label: 'Teacher notes' },
-  { icon: ClipboardCheck, label: 'Homework evidence' },
-  { icon: Layers, label: 'Flashcard retention' },
-  { icon: Radio, label: 'Live worksheet answers' },
-  { icon: Calendar, label: 'Calendar context' },
-  { icon: Users, label: 'Student Hub access' },
-  { icon: Map, label: 'Learning Roadmap' },
-];
 
 const canonicalCitationLinks = [
   { href: '/one-minute-prep', label: '1-Minute Prep' },
