@@ -49,7 +49,7 @@ const HeroHeadline: React.FC<HeroHeadlineProps> = ({
   };
 
   return (
-    <section className="relative px-4 pt-16 pb-16 sm:pt-20 lg:pt-24 lg:pb-24 overflow-hidden">
+    <section className="relative px-4 pt-10 pb-10 sm:pt-14 lg:pt-16 lg:pb-16 overflow-hidden">
       {/* Background decoration */}
       <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-violet-100/30 via-transparent to-transparent pointer-events-none"></div>
 
@@ -58,28 +58,24 @@ const HeroHeadline: React.FC<HeroHeadlineProps> = ({
           {/* Headline */}
           {/* v6.9.36 — leading + span padding so gradient-clipped descenders
               (lowercase "g" in "teachers") are not cut on Safari/Chrome. */}
-          <h1 className="max-w-full break-words text-[2rem] sm:text-5xl md:text-5xl lg:text-[3.25rem] xl:text-6xl font-extrabold tracking-tight text-foreground mb-6 leading-[1.18]">
+          <h1 className="max-w-full break-words text-[2rem] sm:text-5xl md:text-5xl lg:text-5xl xl:text-[3.5rem] font-extrabold tracking-tight text-foreground mb-6 leading-[1.18]">
             <span className="block">1-Minute Prep</span>
             <span className="block max-w-full whitespace-normal text-transparent bg-clip-text bg-gradient-to-r from-violet-600 to-indigo-600 pb-1 leading-[1.2]">
-              for 1:1 English teachers.
+              for 1:1 English teachers
             </span>
           </h1>
 
           {/* Subheadline — LCP element, hint browser to prioritize */}
           <p
-            className="max-w-full text-base sm:text-lg text-muted-foreground mb-6 sm:max-w-2xl mx-auto lg:mx-0 leading-relaxed"
+            className="max-w-full text-base sm:text-lg text-muted-foreground mb-5 sm:max-w-2xl mx-auto lg:mx-0 leading-relaxed"
             // @ts-expect-error fetchpriority is valid HTML but not yet typed in React
             fetchpriority="high"
           >
-            Edooqoo uses student goals, lesson notes, homework, flashcard progress and DSLM nano-skill evidence to help you decide what to teach next, then generate a ready-to-teach worksheet with audio, images and AI-assisted review.
-          </p>
-
-          <p className="max-w-full text-sm text-foreground/80 mb-8 sm:max-w-2xl mx-auto lg:mx-0 font-medium">
-            The worksheet generator is still available instantly. 1-Minute Prep starts when you create a student profile.
+            Edooqoo turns student goals, lesson notes, homework and flashcard progress into a clear next focus — and a ready-to-teach worksheet with audio, images and AI-assisted review.
           </p>
 
           {/* CTA Area */}
-          <div className="flex max-w-full flex-col items-center lg:items-start gap-4 mb-8">
+          <div className="flex max-w-full flex-col items-center lg:items-start gap-3 mb-6">
             <div className="flex w-full max-w-full flex-col sm:w-auto sm:flex-row gap-3">
               <Button
                 onClick={handlePrimaryCta}
@@ -105,6 +101,9 @@ const HeroHeadline: React.FC<HeroHeadlineProps> = ({
               <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4 text-violet-500" />2 worksheets free</span>
               <span className="inline-flex items-center gap-1.5"><CheckCircle2 className="h-4 w-4 text-violet-500" />Best with profile + goals</span>
             </div>
+            <p className="max-w-full text-xs text-muted-foreground sm:max-w-2xl">
+              Worksheet generator works instantly. 1-Minute Prep starts when you create a student profile.
+            </p>
           </div>
 
           <nav
@@ -121,24 +120,6 @@ const HeroHeadline: React.FC<HeroHeadlineProps> = ({
               </a>
             ))}
           </nav>
-
-          {/* Unlock features ticker */}
-          <div className="w-full max-w-full sm:max-w-2xl mx-auto lg:mx-0 overflow-hidden border border-border rounded-2xl bg-white/80 py-3 mt-4 shadow-sm">
-            <p className="mx-auto mb-2 w-fit max-w-[calc(100%-2rem)] rounded-full border border-violet-100 bg-violet-50/80 px-3 py-1 text-center text-xs font-semibold tracking-wide text-violet-800">
-              Create a free account to save student context for 1-Minute Prep
-            </p>
-            <div className="flex overflow-hidden">
-              <div className="flex animate-marquee whitespace-nowrap">
-                {[...unlockFeatures, ...unlockFeatures].map(({ icon: Icon, label }, i) =>
-                <div key={i} className="flex items-center gap-1.5 text-sm text-foreground/80 mx-4 shrink-0">
-                    <Icon className="h-3.5 w-3.5 text-violet-500 flex-shrink-0" />
-                    <span>{label}</span>
-                    <span className="mx-3 text-muted-foreground/40">·</span>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
         </div>
 
         <div className="w-full max-w-full sm:max-w-[460px] mx-auto lg:mx-0 lg:justify-self-end">
