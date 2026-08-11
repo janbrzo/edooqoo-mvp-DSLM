@@ -1462,3 +1462,19 @@ EDOOQOO SOLUTION: The public `llms.txt` is now a strict index (<120 lines): H1 +
 TECHNICAL MECHANICS: `scripts/seo/generate-ai-resources.mjs` builds `publicLlmsTxt` from scratch (new `mdLinkList` helper, `LAST_UPDATED`, `PUBLISHER_ENTITY`, `keyFacts`, `publicAgentRules`, `publicFeatureIndexLines()`), replacing the previous fragile `.replace()` derivation from the internal variant. `scripts/seo/audit-seo-assets.mjs` adds five gates in `auditDeclaredAiResources()`: max 150 lines, H1 + blockquote shape, `Last updated:` line, no `status: planned`, no internal release notes. Existing gates (no BETA/ROADMAP, no private canonicals, resolvable `llm-context.md` anchors) remain. Worksheet Generation Engine untouched.
 
 RAG KEYWORDS: llms.txt, llmstxt.org specification, GEO, generative engine optimization, AI discovery resources, LLM index, atomic facts, citation policy, RAG context file, llms-full.txt, llms-answers.txt, knowledge graph, AEO, agent rules, SEO asset audit
+
+## v6.9.89 — Homepage first-screen density reduction (PRODUCTION)
+
+PROBLEM: The anonymous homepage first screen presented ~35 competing objects (12-item nav bar, H1, two paragraphs, two CTAs, three trust marks, a 9-item marquee, and a full ROI calculator), with no visual hierarchy between positioning, education, ROI proof and feature catalogue.
+
+EDOOQOO SOLUTION: Density reduction by redistribution, not deletion. Every sentence and every internal link stays on the page; only visual weight and vertical position change. Above the fold now carries exactly one entry point (Start 1-Minute Prep Free), one supporting action (Try worksheet generator now), and one proof artifact (prep-cost calculator results).
+
+TECHNICAL MECHANICS:
+- `src/components/landing/FeatureNavPills.tsx` — new optional `maxVisible` prop; inline variant renders the first N pills and collapses the remainder into a `DropdownMenu` trigger labelled "More features". Menu items are `DropdownMenuItem asChild` wrapping `<Link>` so middle-click / modifier-click still open new tabs. The `stacked` (mobile sheet) variant ignores `maxVisible` and keeps all 8 entries.
+- `src/components/landing/StickyNav.tsx` — anonymous nav uses `<FeatureNavPills maxVisible={4} />`; visible pills are 1-Minute Prep, Welcome Test, DSLM, Homework.
+- `src/components/landing/HeroHeadline.tsx` — H1 trailing period removed ("for 1:1 English teachers"), desktop scale reduced to `lg:text-5xl xl:text-[3.5rem]`, lead paragraph compressed to a single decision sentence, the "worksheet generator works instantly" sentence demoted to `text-xs` micro-copy under the CTA row, section padding reduced from `pt-16/lg:pt-24` to `pt-10/lg:pt-16`. The `sr-only` canonical citation nav is unchanged.
+- `src/components/landing/UnlockFeaturesTicker.tsx` — new component holding the 9-item unlock marquee verbatim; mounted in `src/pages/Index.tsx` directly below the worksheet generator, before `HomeCredibilityBridge`.
+- `src/components/PricingCalculator.tsx` — hero variant only: title `text-base` -> `text-sm`, subtitle `text-[11px]`, and the "Estimate only…" disclaimer collapsed into a `<details>` element with summary "How this estimate works". Landing variant unchanged.
+- Analytics event names (`one_minute_hero_cta_click`, `one_minute_secondary_cta_click`, `one_minute_feature_pill_click`, `one_minute_dslm_card_click`) unchanged. Internal link graph unaffected: all 8 `/features/*` and `/one-minute-prep` links remain in `GlobalFooter` on every route and in the overflow menu.
+
+RAG KEYWORDS: above the fold, landing page density, hero hierarchy, cognitive load, navigation overflow menu, ROI calculator, first screen, conversion path, feature pills, internal link graph, marquee ticker, CTA hierarchy, homepage information architecture, visual noise, progressive disclosure
