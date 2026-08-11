@@ -363,9 +363,9 @@ export const PricingCalculator: React.FC<PricingCalculatorProps> = ({
         <div className="flex flex-col items-center gap-1 mb-2">
           <div className="flex items-center gap-2">
             <Calculator className="h-5 w-5 text-primary" />
-            <CardTitle className={cn("text-gray-900", isHero ? "text-base" : "text-lg")}>See how much prep is silently costing you</CardTitle>
+            <CardTitle className={cn("text-gray-900", isHero ? "text-sm" : "text-lg")}>See how much prep is silently costing you</CardTitle>
           </div>
-          <p className={cn("text-gray-600", isHero ? "text-xs max-w-sm" : "text-sm max-w-2xl")}>
+          <p className={cn("text-gray-600", isHero ? "text-[11px] leading-snug max-w-sm" : "text-sm max-w-2xl")}>
             See how many hours, lessons and dollars you currently lose to prep every month. Benchmark: about 1 focused minute per student.
           </p>
         </div>
@@ -414,9 +414,18 @@ export const PricingCalculator: React.FC<PricingCalculatorProps> = ({
               </div>
             </div>
 
-            <p className={cn("leading-relaxed text-green-800/80", isHero ? "text-[10px] mt-2" : "text-[11px] mt-3")}>
-              Estimate only. Edooqoo does not guarantee income or exact prep time. Results depend on student setup quality, lesson format, teacher review and plan usage.
-            </p>
+            {isHero ? (
+              <details className="mt-2 text-[10px] leading-relaxed text-green-800/80">
+                <summary className="cursor-pointer font-medium">How this estimate works</summary>
+                <p className="mt-1">
+                  Estimate only. Edooqoo does not guarantee income or exact prep time. Results depend on student setup quality, lesson format, teacher review and plan usage.
+                </p>
+              </details>
+            ) : (
+              <p className="leading-relaxed text-green-800/80 text-[11px] mt-3">
+                Estimate only. Edooqoo does not guarantee income or exact prep time. Results depend on student setup quality, lesson format, teacher review and plan usage.
+              </p>
+            )}
 
             {variant === "landing" && (
               <div className="flex flex-col sm:flex-row gap-2 mt-4">
