@@ -1,8 +1,14 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { Brain, BrainCircuit, GraduationCap, ClipboardCheck, Calendar, Radio, Layers, Users } from 'lucide-react';
+import { Brain, BrainCircuit, GraduationCap, ClipboardCheck, Calendar, Radio, Layers, Users, ChevronDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useEventTracking } from '@/hooks/useEventTracking';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 /**
  * Feature pills for anonymous public nav.
@@ -37,6 +43,12 @@ interface FeatureNavPillsProps {
    * pills are route links now, so there is no delayed signup prompt to suppress.
    */
   suppressSignupPrompt?: boolean;
+  /**
+   * v6.9.89 — first-screen density reduction. When set, the inline variant shows
+   * only the first N pills and collapses the rest into a "More features" menu.
+   * Ignored by the stacked (mobile sheet) variant.
+   */
+  maxVisible?: number;
 }
 
 const FeatureNavPills: React.FC<FeatureNavPillsProps> = ({
@@ -44,6 +56,7 @@ const FeatureNavPills: React.FC<FeatureNavPillsProps> = ({
   onItemClick,
   className,
   suppressSignupPrompt: _suppressSignupPrompt = false,
+  maxVisible,
 }) => {
   const location = useLocation();
   const { trackEvent } = useEventTracking();
@@ -81,9 +94,13 @@ const FeatureNavPills: React.FC<FeatureNavPillsProps> = ({
     );
   }
 
+  const visibleCount = typeof maxVisible === 'number' ? maxVisible : FEATURE_PILLS.length;
+  const visiblePills = FEATURE_PILLS.slice(0, visibleCount);
+  const overflowPills = FEATURE_PILLS.slice(visibleCount);
+
   return (
     <div className={cn('hidden items-center gap-1 lg:flex', className)}>
-      {FEATURE_PILLS.map((item) => {
+      {visiblePills.map((item) => {
         const Icon = item.icon;
         const active = location.pathname === item.path;
         return (
@@ -102,6 +119,30 @@ const FeatureNavPills: React.FC<FeatureNavPillsProps> = ({
           </Link>
         );
       })}
+      {overflowPills.length > 0 && (
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            className="flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-xs font-medium text-muted-foreground transition-colors hover:bg-accent hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+            aria-label="More Edooqoo features"
+          >
+            <span>More features</span>
+            <ChevronDown className="h-3.5 w-3.5" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-56 bg-popover">
+            {overflowPills.map((item) => {
+              const Icon = item.icon;
+              return (
+                <DropdownMenuItem key={item.anchorId} asChild>
+                  <Link to={item.path} onClick={() => handleClick(item)} className="flex items-center gap-2">
+                    <Icon className="h-4 w-4 text-violet-600" />
+                    <span>{item.label}</span>
+                  </Link>
+                </DropdownMenuItem>
+              );
+            })}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
     </div>
   );
 };

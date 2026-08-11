@@ -14,6 +14,7 @@ import { FreeWeekBanner } from "@/components/FreeWeekBanner";
 import { deepFixTextObjects } from "@/utils/textObjectFixer";
 import StickyNav from "@/components/landing/StickyNav";
 import HeroHeadline from "@/components/landing/HeroHeadline";
+import UnlockFeaturesTicker from "@/components/landing/UnlockFeaturesTicker";
 import {
   HomeCompoundingContext,
   HomeCredibilityBridge,
@@ -488,6 +489,7 @@ const Index = () => {
               variant="landing"
             />
           </div>
+          <UnlockFeaturesTicker />
           <HomeCredibilityBridge />
           <HomeWeeklyWorkflowProof />
           <HomeCompoundingContext />
