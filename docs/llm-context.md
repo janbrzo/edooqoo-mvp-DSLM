@@ -1478,3 +1478,17 @@ TECHNICAL MECHANICS:
 - Analytics event names (`one_minute_hero_cta_click`, `one_minute_secondary_cta_click`, `one_minute_feature_pill_click`, `one_minute_dslm_card_click`) unchanged. Internal link graph unaffected: all 8 `/features/*` and `/one-minute-prep` links remain in `GlobalFooter` on every route and in the overflow menu.
 
 RAG KEYWORDS: above the fold, landing page density, hero hierarchy, cognitive load, navigation overflow menu, ROI calculator, first screen, conversion path, feature pills, internal link graph, marquee ticker, CTA hierarchy, homepage information architecture, visual noise, progressive disclosure
+
+## v6.9.90 — Hero typography upscale and fold repositioning (PRODUCTION)
+
+PROBLEM: After first-screen density reduction the hero typography scale was still tuned for the dense layout, leaving the left column visually weak while the worksheet generator competed for attention above the fold.
+EDOOQOO SOLUTION: Hero typography upscaling that strengthens the positioning message and pushes the worksheet generator to the bottom edge of the fold as a scroll affordance (generator top at ~758px on a 1338x889 viewport).
+TECHNICAL MECHANICS: `src/components/landing/HeroHeadline.tsx` Tailwind scale changes only — H1 `xl:text-[4.25rem]`, lead paragraph `lg:text-[1.375rem]` with `lg:max-w-[34rem]` measure cap, CTA heights `h-[3.25rem] sm:h-16`, checkmark row `sm:text-base` with `sm:h-5 sm:w-5` icons, micro-copy `text-sm`, section padding `lg:pt-20 lg:pb-24`. No copy, routing, analytics or SEO markup changes.
+RAG KEYWORDS: hero typography, above the fold, type scale, visual hierarchy, landing page conversion, CTA sizing, reading measure, scroll affordance, fold line, responsive typography, Tailwind scale, first screen, headline weight, lead paragraph, progressive disclosure
+
+## v6.9.90 — Security: student_events and student_skill_metrics policy scoping
+
+PROBLEM: `Service role full access` policies on `public.student_events` and `public.student_skill_metrics` targeted the `public` role with USING(true)/WITH CHECK(true), exposing every student's event payloads and mastery metrics to anonymous and authenticated clients.
+EDOOQOO SOLUTION: Both policies re-scoped to `service_role`; `anon` privileges revoked; `service_role` granted ALL.
+TECHNICAL MECHANICS: SQL migration `ALTER POLICY ... TO service_role` + `REVOKE ALL ... FROM anon` on both tables. All application access to these tables already runs through Edge Functions using the service role, so no client behaviour changes.
+RAG KEYWORDS: RLS, row level security, service_role, anon role, student_events, student_skill_metrics, DSLM telemetry, mastery scores, policy scoping, data exposure, Supabase linter, privilege revocation, edge function access, PII protection, security hardening
