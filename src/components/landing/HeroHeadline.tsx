@@ -49,7 +49,7 @@ const HeroHeadline: React.FC<HeroHeadlineProps> = ({
   };
 
   return (
-    <section className="relative px-4 pt-12 pb-14 sm:pt-16 lg:pt-24 lg:pb-28 overflow-hidden">
+    <section className="relative px-4 pt-12 pb-14 sm:pt-16 lg:pt-20 lg:pb-16 overflow-hidden">
       {/* Background decoration */}
       <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-violet-100/30 via-transparent to-transparent pointer-events-none"></div>
 
