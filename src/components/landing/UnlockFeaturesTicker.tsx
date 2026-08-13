@@ -29,12 +29,12 @@ const unlockFeatures = [
  * where the "create an account to keep student context" message is relevant.
  */
 const UnlockFeaturesTicker: React.FC = () => (
-  <div className="px-4">
+  <div className="px-4 pt-10 pb-12">
     <div className="w-full max-w-full sm:max-w-3xl mx-auto overflow-hidden border border-border rounded-2xl bg-white/80 py-3 shadow-sm">
-      <p className="mx-auto mb-2 w-fit max-w-[calc(100%-2rem)] rounded-full border border-violet-100 bg-violet-50/80 px-3 py-1 text-center text-xs font-semibold tracking-wide text-violet-800">
+      <p className="mx-auto mb-3 w-fit max-w-[calc(100%-2rem)] rounded-full border border-violet-100 bg-violet-50/80 px-3 py-1 text-center text-xs font-semibold tracking-wide text-violet-800">
         Create a free account to save student context for 1-Minute Prep
       </p>
-      <div className="flex overflow-hidden">
+      <div className="flex overflow-hidden border-t border-border/60 pt-3">
         <div className="flex animate-marquee whitespace-nowrap">
           {[...unlockFeatures, ...unlockFeatures].map(({ icon: Icon, label }, i) => (
             <div key={i} className="flex items-center gap-1.5 text-sm text-foreground/80 mx-4 shrink-0">

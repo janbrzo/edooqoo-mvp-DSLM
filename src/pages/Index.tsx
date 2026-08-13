@@ -479,7 +479,7 @@ const Index = () => {
             onStartOneMinutePrep={() => setShowOneMinutePrepDialog(true)}
             onTryWorksheetGenerator={scrollToWorksheetForm}
           />
-          <div id="worksheet-form" className="scroll-mt-16 pb-16">
+          <div id="worksheet-form" className="scroll-mt-16 pb-10">
             <FormView 
               onSubmit={handleGenerateWorksheet} 
               userId={user?.id || null} 
