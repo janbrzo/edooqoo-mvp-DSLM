@@ -28,7 +28,8 @@ type ProofIcon = React.ComponentType<{ className?: string }>;
 interface OneMinutePrepHeroProofSwitcherProps {
   calculatorValue: OneMinutePrepCalculatorInput;
   onCalculatorChange: (value: OneMinutePrepCalculatorInput) => void;
-  defaultPanel?: HeroProofPanel;
+  /** v6.9.91 — no panel is active until hover/tap/focus, to reduce first-screen noise. */
+  initialPanel?: HeroProofPanel | null;
 }
 
 const signalInputs = [
