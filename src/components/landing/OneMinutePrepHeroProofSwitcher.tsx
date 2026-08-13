@@ -214,9 +214,9 @@ const CompactEvidenceStackPanel = () => (
 const OneMinutePrepHeroProofSwitcher: React.FC<OneMinutePrepHeroProofSwitcherProps> = ({
   calculatorValue,
   onCalculatorChange,
-  defaultPanel = 'calculator',
+  initialPanel = null,
 }) => {
-  const [activePanel, setActivePanel] = useState<HeroProofPanel>(defaultPanel);
+  const [activePanel, setActivePanel] = useState<HeroProofPanel | null>(initialPanel);
 
   const activatePanel = (panel: HeroProofPanel) => {
     setActivePanel(panel);
@@ -295,8 +295,15 @@ const OneMinutePrepHeroProofSwitcher: React.FC<OneMinutePrepHeroProofSwitcherPro
         </div>
       ) : activePanel === 'workflow' ? (
         <CompactWorkflowProofPanel />
-      ) : (
+      ) : activePanel === 'evidence' ? (
         <CompactEvidenceStackPanel />
+      ) : (
+        <div className="rounded-2xl border border-dashed border-violet-200 bg-white/70 px-4 py-6 text-center">
+          <p className="text-sm font-medium text-foreground">Hover or tap a tab to see the proof</p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Prep impact, workflow proof, and the evidence stack behind the next focus.
+          </p>
+        </div>
       )}
     </div>
   );
