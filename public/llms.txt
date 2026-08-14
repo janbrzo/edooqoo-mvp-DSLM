@@ -2,7 +2,7 @@
 
 > Edooqoo is a lesson-preparation system for freelance English teachers and private tutors who run recurring one-to-one lessons with adult learners. It stores student context — goals, diagnostic results, nano-skill evidence, homework and flashcard signals — and turns that context into ready-to-teach, teacher-reviewable worksheets and follow-up materials. Worksheet generation is the output layer of the workflow, not the whole product.
 
-Last updated: 2026-08-03 | Version: v6.9.71 | Publisher: Edooqoo | Canonical: https://edooqoo.com/
+Last updated: 2026-08-14 | Version: v6.9.92 | Publisher: Edooqoo | Canonical: https://edooqoo.com/
 
 ## Key Facts
 
