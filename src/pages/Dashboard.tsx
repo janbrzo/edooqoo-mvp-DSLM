@@ -322,16 +322,17 @@ const Dashboard = () => {
           {/* Recent Worksheets */}
           <Card>
             <CardHeader>
-              <div className="flex items-center justify-between">
-                <CardTitle className="flex items-center gap-2">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <CardTitle className="flex min-w-0 items-center gap-2">
                   <FileText className="h-5 w-5" />
                   Recent Worksheets
                 </CardTitle>
-                <div className="flex items-center gap-2">
+                <div className="flex min-w-0 flex-wrap items-center gap-2">
                   <Button 
                     size="sm" 
                     variant="outline"
                     asChild
+                    className="px-2 sm:px-3"
                   >
                     <Link to="/worksheets">
                       View All
@@ -340,7 +341,7 @@ const Dashboard = () => {
                   <Button 
                     size="sm" 
                     onClick={handleGenerateWorksheet}
-                    className="gap-1"
+                    className="gap-1 px-2 sm:px-3"
                   >
                     <Plus className="h-4 w-4" />
                     Generate
