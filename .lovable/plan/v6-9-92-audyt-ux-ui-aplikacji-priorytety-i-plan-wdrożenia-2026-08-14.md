@@ -35,6 +35,7 @@ Audyt przeprowadzony na żywej aplikacji (tryb `/demo`, viewport 1280 i 390 px) 
 **Dlaczego ważne:** bariera dostępności (czytnik czyta „button") i realny problem UX — nauczyciel klika obok kosza.
 
 **Rozwiązanie (zakres: 4 najważniejsze powierzchnie nauczyciela):**
+
 1. Rząd ikon karty worksheetu w `Dashboard.tsx` — `aria-label` + shadcn `Tooltip` z tą samą treścią.
 2. `WorksheetDisplay.tsx` — 11 przycisków: `aria-label` + tooltip.
 3. `student-progress/GoalCard.tsx` i `dslm/LearningTimeline.tsx` — `aria-label` + tooltip.
@@ -94,7 +95,7 @@ Gotowe etykiety: „Rename worksheet", „Assign to student", „Play audio vers
 
 ## Kolejność wdrożenia
 
-- **Faza 1 (krytyczna, niskie ryzyko):** P1, P2, P7.
+- w pierwszysm strincie zrób **Faza 1 (krytyczna, niskie ryzyko):** P1, P2, P7. 
 - **Faza 2 (jakość interakcji):** P3, P4, P6.
 - **Faza 3 (wartość produktowa):** P5.
 
