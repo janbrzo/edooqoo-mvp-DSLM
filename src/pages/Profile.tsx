@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { AuthenticatedPageShell } from '@/components/AuthenticatedPageShell';
+import { PageLoadingState } from '@/components/ui/PageLoadingState';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
