@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { AuthenticatedPageShell } from '@/components/AuthenticatedPageShell';
+import { PageLoadingState } from '@/components/ui/PageLoadingState';
 import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useDemoContext } from '@/contexts/DemoContext';
@@ -349,7 +350,7 @@ const StudentPage = () => {
   }, []);
 
   if (loading || (studentsLoading && studentLoading) || !authChecked) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+    return <PageLoadingState label="Loading student profile" />;
   }
 
   if (!student) {

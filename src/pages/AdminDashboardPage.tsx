@@ -5,6 +5,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { PageLoadingState } from '@/components/ui/PageLoadingState';
 import { useAuthFlow } from '@/hooks/useAuthFlow';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -215,7 +216,7 @@ export default function AdminDashboardPage() {
       {/* Teachers list */}
       <div className="space-y-2">
         {isLoading ? (
-          <div className="text-center py-8 text-muted-foreground">Loading...</div>
+          <PageLoadingState label="Loading teachers" cards={3} inline />
         ) : filteredTeachers.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">No teachers found</div>
         ) : (

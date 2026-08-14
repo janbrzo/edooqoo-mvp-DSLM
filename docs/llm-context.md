@@ -1492,3 +1492,19 @@ PROBLEM: `Service role full access` policies on `public.student_events` and `pub
 EDOOQOO SOLUTION: Both policies re-scoped to `service_role`; `anon` privileges revoked; `service_role` granted ALL.
 TECHNICAL MECHANICS: SQL migration `ALTER POLICY ... TO service_role` + `REVOKE ALL ... FROM anon` on both tables. All application access to these tables already runs through Edge Functions using the service role, so no client behaviour changes.
 RAG KEYWORDS: RLS, row level security, service_role, anon role, student_events, student_skill_metrics, DSLM telemetry, mastery scores, policy scoping, data exposure, Supabase linter, privilege revocation, edge function access, PII protection, security hardening
+
+## v6.9.92 Phase 1 — Dashboard mobile overflow, page loading skeletons, console noise (PRODUCTION)
+
+PROBLEM: On a 390px viewport the teacher dashboard produced horizontal page scroll (document scrollWidth 402px), the student profile route rendered a bare full-screen "Loading..." string with no layout affordance, and every dashboard render logged a React.Fragment invalid-prop warning that masked real errors.
+
+EDOOQOO SOLUTION: Layout-only fixes on the two most-visited teacher surfaces plus one shared skeleton primitive. No data fetching, RLS, DSLM or worksheet-engine logic touched.
+
+TECHNICAL MECHANICS:
+- `src/components/ui/PageLoadingState.tsx` (new) — shared skeleton placeholder built on shadcn `Skeleton`. Props: `label` (sr-only announcement), `cards` (skeleton card count, default 3), `inline` (render inside an existing shell instead of `min-h-screen`), `className`. Carries `role="status"`, `aria-live="polite"`, `aria-busy="true"`.
+- Replaced bare loading strings with `PageLoadingState`: `src/pages/StudentPage.tsx` (label "Loading student profile"), `src/pages/Profile.tsx` ("Loading your profile"), `src/pages/FlashcardsLearning.tsx` ("Loading flashcards", 2 cards), `src/pages/AdminDashboardPage.tsx` ("Loading teachers", inline).
+- `src/components/dashboard/StudentCard.tsx` — action row `flex flex-wrap items-center justify-between gap-2`, button group `flex min-w-0 flex-wrap gap-2`, buttons `px-2 sm:px-3`, `CardContent` gains `min-w-0`. Hardcoded green utility classes removed from the "View Profile" button (now plain `variant="outline"`). `React.Fragment` list wrapper replaced with `<div className="contents">` to clear the `data-lov-id` warning.
+- `src/pages/Dashboard.tsx` — Recent Worksheets card header wraps (`flex flex-wrap ... gap-2`) and its "View All" / "Generate" buttons use `px-2 sm:px-3`; this pair was the remaining 3px overflow source.
+
+VERIFICATION: Playwright at 390x900 on `/demo` — `document.documentElement.scrollWidth === window.innerWidth === 390`; zero React.Fragment console warnings; throttled `/rest/v1/**` run on `/student/demo-student-1` shows `[role="status"][aria-busy="true"]` skeleton before content. Project typecheck clean.
+
+RAG KEYWORDS: horizontal overflow, mobile dashboard, responsive layout, flex-wrap, tap target, loading skeleton, perceived performance, layout shift, aria-live, role status, shadcn Skeleton, design tokens, console warning, React.Fragment, teacher dashboard UX

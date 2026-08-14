@@ -78,22 +78,22 @@ export const StudentCard = ({ student, onViewHistory, onOpenWorksheet, onDeleteS
           <Badge variant="secondary">{student.english_level}</Badge>
         </div>
       </CardHeader>
-      <CardContent className="space-y-1 pt-1 pb-3">
+      <CardContent className="min-w-0 space-y-1 pt-1 pb-3">
         <div className="text-sm text-muted-foreground">
           <strong>Goal:</strong> {formatGoal(student.main_goal)}
         </div>
         
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-2">
           <div className="flex items-center space-x-1 text-sm text-muted-foreground">
             <BookOpen className="h-4 w-4" />
             <span>{totalCount} worksheets</span>
           </div>
-          <div className="flex space-x-2">
+          <div className="flex min-w-0 flex-wrap gap-2">
             <Button 
               variant="outline" 
               size="sm" 
               asChild
-              className="border-green-500 text-green-600 hover:bg-green-50 hover:text-green-700"
+              className="px-2 sm:px-3"
             >
               <Link to={`/student/${student.id}`}>
                 <ExternalLink className="h-4 w-4 mr-1" />
@@ -102,7 +102,7 @@ export const StudentCard = ({ student, onViewHistory, onOpenWorksheet, onDeleteS
             </Button>
             <Collapsible open={isOpen} onOpenChange={setIsOpen}>
               <CollapsibleTrigger asChild>
-                <Button variant="outline" size="sm">
+                <Button variant="outline" size="sm" className="px-2 sm:px-3">
                   {isOpen ? <ChevronDown className="h-4 w-4 mr-1" /> : <ChevronRight className="h-4 w-4 mr-1" />}
                   Recent
                 </Button>
@@ -120,7 +120,7 @@ export const StudentCard = ({ student, onViewHistory, onOpenWorksheet, onDeleteS
             ) : recentWorksheets.length > 0 ? (
               <div className="space-y-2 mt-2">
                 {recentWorksheets.map((worksheet) => (
-                  <React.Fragment key={worksheet.id}>
+                  <div key={worksheet.id} className="contents">
                     <div className="flex items-center justify-between p-2 bg-muted/50 rounded cursor-pointer hover:bg-muted transition-colors">
                       <div
                         className="flex items-center space-x-2 flex-1 min-w-0"
@@ -158,7 +158,7 @@ export const StudentCard = ({ student, onViewHistory, onOpenWorksheet, onDeleteS
                       homework={homeworkByWorksheet[worksheet.id]}
                       compact={true}
                     />
-                  </React.Fragment>
+                  </div>
                 ))}
                 <Button
                   variant="link"
