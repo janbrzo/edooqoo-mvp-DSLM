@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
+import { PageLoadingState } from '@/components/ui/PageLoadingState';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -97,11 +98,7 @@ export default function FlashcardsLearning() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">Loading...</div>
-      </div>
-    );
+    return <PageLoadingState label="Loading flashcards" cards={2} />;
   }
 
   if (!setData) {
