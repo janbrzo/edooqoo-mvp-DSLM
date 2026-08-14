@@ -349,7 +349,7 @@ const StudentPage = () => {
   }, []);
 
   if (loading || (studentsLoading && studentLoading) || !authChecked) {
-    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+    return <PageLoadingState label="Loading student profile" />;
   }
 
   if (!student) {
