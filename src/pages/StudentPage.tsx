@@ -973,15 +973,15 @@ const StudentPage = () => {
                           {deletedWorksheets.map((worksheet) => (
                             <div
                               key={worksheet.id}
-                              className="flex items-center justify-between p-4 bg-white rounded-lg border border-red-200"
+                              className="flex items-center justify-between p-4 bg-card rounded-lg border border-destructive/30"
                             >
                               <div className="flex items-center space-x-3 flex-1">
-                                <FileText className="h-5 w-5 text-red-400" />
+                                <FileText className="h-5 w-5 text-destructive/70" />
                                 <div>
-                                  <h3 className="font-medium text-gray-700">
+                                  <h3 className="font-medium text-foreground">
                                     {worksheet.title || 'Untitled Worksheet'}
                                   </h3>
-                                  <p className="text-sm text-red-600">
+                                  <p className="text-sm text-destructive">
                                     Deleted: {format(new Date(worksheet.deleted_at), 'MMM dd, yyyy HH:mm')}
                                   </p>
                                 </div>
@@ -995,7 +995,6 @@ const StudentPage = () => {
                                     refetchWorksheets();
                                   }
                                 }}
-                                className="border-green-500 text-green-700 hover:bg-green-50"
                               >
                                 Restore
                               </Button>
