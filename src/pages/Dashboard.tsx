@@ -385,7 +385,8 @@ const Dashboard = () => {
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                className="h-6 w-6 shrink-0"
+                                aria-label="Rename worksheet"
+                                className="h-6 w-6 min-h-11 min-w-11 sm:min-h-9 sm:min-w-9 shrink-0"
                                 onClick={(e) => {
                                   e.preventDefault();
                                   e.stopPropagation();
@@ -420,14 +421,15 @@ const Dashboard = () => {
                                 onDuplicate={refetchWorksheets}
                                 variant="ghost"
                                 size="icon"
-                                className="h-7 w-7"
+                                className="h-7 w-7 min-h-11 min-w-11 sm:min-h-9 sm:min-w-9"
                               />
                               <Tooltip>
                                 <TooltipTrigger asChild>
                                   <Button
                                     variant="ghost"
                                     size="icon"
-                                    className="h-7 w-7"
+                                    aria-label="Copy share link"
+                                    className="h-7 w-7 min-h-11 min-w-11 sm:min-h-9 sm:min-w-9"
                                     onClick={(e) => {
                                       e.preventDefault();
                                       e.stopPropagation();
