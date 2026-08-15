@@ -1508,3 +1508,19 @@ TECHNICAL MECHANICS:
 VERIFICATION: Playwright at 390x900 on `/demo` — `document.documentElement.scrollWidth === window.innerWidth === 390`; zero React.Fragment console warnings; throttled `/rest/v1/**` run on `/student/demo-student-1` shows `[role="status"][aria-busy="true"]` skeleton before content. Project typecheck clean.
 
 RAG KEYWORDS: horizontal overflow, mobile dashboard, responsive layout, flex-wrap, tap target, loading skeleton, perceived performance, layout shift, aria-live, role status, shadcn Skeleton, design tokens, console warning, React.Fragment, teacher dashboard UX
+
+## v6.9.92 Phase 2 — Icon button accessibility, unified toasts, token colors
+
+PROBLEM: Icon-only teacher controls had no accessible name and tap targets below 44px; two toast systems (shadcn Toaster bottom-right, Sonner top-right) rendered the same class of feedback in different corners with different lifetimes; StudentPage deleted-worksheet rows used hardcoded white/gray/green colors that break teacher dark mode.
+
+EDOOQOO SOLUTION: All `size="icon"` buttons on the four highest-traffic teacher surfaces now carry `aria-label` plus mobile-first 44px minimum hit area. Both toast systems now render top-right with a 4s lifetime and identical shadcn token styling. Hardcoded colors on StudentPage were replaced with semantic tokens.
+
+TECHNICAL MECHANICS:
+- `src/pages/Dashboard.tsx`, `src/components/WorksheetDisplay.tsx`, `src/components/student-progress/GoalCard.tsx`, `src/components/dslm/LearningTimeline.tsx` — `aria-label` on every icon button; touched buttons gained `min-h-11 min-w-11 sm:min-h-9 sm:min-w-9`.
+- `src/components/ui/toast.tsx` — viewport pinned to `fixed top-0 right-0`, open animation `slide-in-from-right-full`.
+- `src/components/ui/toaster.tsx` — `<ToastProvider duration={4000}>`, toast surface on `bg-background text-foreground border-border`, title/description on tokens.
+- `src/hooks/use-toast.ts` — `TOAST_REMOVE_DELAY` 1000000 → 4000.
+- `src/pages/StudentPage.tsx` — deleted worksheet rows: `bg-card`, `border-destructive/30`, `text-foreground`, `text-destructive`; Restore button back to plain `variant="outline"`.
+- CONVENTION: new components use `useToast()` from `@/hooks/use-toast`; Sonner remains only for existing call sites.
+
+RAG KEYWORDS: aria-label, icon button, accessible name, tap target 44px, WCAG, toast position, sonner, shadcn toaster, toast duration, design tokens, dark mode, semantic color, teacher dashboard, worksheet actions, goal card

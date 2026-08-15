@@ -784,6 +784,7 @@ export default function WorksheetDisplay({
                   <Button
                     onClick={() => setShowViewSetsModal(true)}
                     size="icon"
+                    aria-label="View flashcard sets"
                     className="p-3 rounded-full shadow-lg bg-green-500 hover:bg-green-600 text-white"
                   >
                     <Layers className="h-5 w-5" />
@@ -825,6 +826,7 @@ export default function WorksheetDisplay({
                 <Button
                   onClick={() => handleLockedFeature('Flashcard Sets')}
                   size="icon"
+                  aria-label="View flashcard sets (locked)"
                   className="p-3 rounded-full shadow-lg bg-gray-300 text-gray-500 cursor-not-allowed"
                 >
                   <Layers className="h-5 w-5" />
@@ -843,6 +845,7 @@ export default function WorksheetDisplay({
                 <Button
                   onClick={() => handleLockedFeature('Select Word for Flashcards')}
                   size="icon"
+                  aria-label="Select word for flashcards (locked)"
                   className="p-3 rounded-full shadow-lg bg-gray-300 text-gray-500 cursor-not-allowed"
                 >
                   <TextSelect className="h-5 w-5" />
@@ -861,6 +864,7 @@ export default function WorksheetDisplay({
                 <Button
                   onClick={() => handleLockedFeature('Quick Add Flashcard')}
                   size="icon"
+                  aria-label="Quick add flashcard (locked)"
                   className="p-3 rounded-full shadow-lg bg-gray-300 text-gray-500 cursor-not-allowed"
                 >
                   <Plus className="h-5 w-5" />
@@ -879,6 +883,7 @@ export default function WorksheetDisplay({
                 <Button
                   onClick={() => handleLockedFeature('Student Notes')}
                   size="icon"
+                  aria-label="Add student note (locked)"
                   className="p-3 rounded-full shadow-lg bg-gray-300 text-gray-500 cursor-not-allowed"
                 >
                   <Plus className="h-5 w-5" />
@@ -897,6 +902,7 @@ export default function WorksheetDisplay({
                 <Button
                   onClick={() => handleLockedFeature('Lesson Ideas')}
                   size="icon"
+                  aria-label="Add lesson idea (locked)"
                   className="p-3 rounded-full shadow-lg bg-gray-300 text-gray-500 cursor-not-allowed"
                 >
                   <Lightbulb className="h-5 w-5" />
@@ -1185,10 +1191,10 @@ export default function WorksheetDisplay({
             onClick={() => handleLockedFeature('Quick Notes')}
           >
             <div className="flex items-center gap-1 px-3 py-2 border-b border-muted/30">
-              <Button variant="ghost" size="icon" disabled className="h-7 w-7"><User className="h-3.5 w-3.5" /></Button>
-              <Button variant="ghost" size="icon" disabled className="h-7 w-7"><Target className="h-3.5 w-3.5" /></Button>
-              <Button variant="ghost" size="icon" disabled className="h-7 w-7"><StickyNote className="h-3.5 w-3.5" /></Button>
-              <Button variant="ghost" size="icon" disabled className="h-7 w-7"><MoreHorizontal className="h-3.5 w-3.5" /></Button>
+              <Button variant="ghost" size="icon" disabled aria-label="Student notes (locked)" className="h-7 w-7"><User className="h-3.5 w-3.5" /></Button>
+              <Button variant="ghost" size="icon" disabled aria-label="Goals (locked)" className="h-7 w-7"><Target className="h-3.5 w-3.5" /></Button>
+              <Button variant="ghost" size="icon" disabled aria-label="Quick notes (locked)" className="h-7 w-7"><StickyNote className="h-3.5 w-3.5" /></Button>
+              <Button variant="ghost" size="icon" disabled aria-label="More options (locked)" className="h-7 w-7"><MoreHorizontal className="h-3.5 w-3.5" /></Button>
             </div>
             <div className="flex items-center gap-2 px-3 py-2">
               <div className="flex-1 h-8 rounded-md border bg-muted/30 px-3 flex items-center">
@@ -1196,7 +1202,7 @@ export default function WorksheetDisplay({
                   {userId ? 'Assign a student to add notes...' : 'Login to add notes...'}
                 </span>
               </div>
-              <Button variant="ghost" size="icon" disabled className="h-8 w-8">
+              <Button variant="ghost" size="icon" disabled aria-label="Send note (locked)" className="h-8 w-8">
                 <Send className="h-4 w-4" />
               </Button>
             </div>

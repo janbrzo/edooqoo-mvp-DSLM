@@ -52,17 +52,17 @@ const CompactCard: React.FC<{
               </div>
             </div>
             <div className="flex items-center gap-0.5 shrink-0">
-              <Button size="icon" variant="ghost" className="h-7 w-7" title="Generate worksheet" onClick={() => onUse(s)}>
+              <Button size="icon" variant="ghost" aria-label="Generate worksheet from this step" className="h-7 w-7 min-h-11 min-w-11 sm:min-h-9 sm:min-w-9" title="Generate worksheet" onClick={() => onUse(s)}>
                 <Play className="h-3.5 w-3.5" />
               </Button>
-              <Button size="icon" variant="ghost" className="h-7 w-7" title="Edit" onClick={() => onEdit(s)}>
+              <Button size="icon" variant="ghost" aria-label="Edit timeline entry" className="h-7 w-7 min-h-11 min-w-11 sm:min-h-9 sm:min-w-9" title="Edit" onClick={() => onEdit(s)}>
                 <Edit className="h-3 w-3" />
               </Button>
-              <Button size="icon" variant="ghost" className="h-7 w-7" title="Remove" onClick={() => onDelete(s.id)}>
+              <Button size="icon" variant="ghost" aria-label="Remove timeline entry" className="h-7 w-7 min-h-11 min-w-11 sm:min-h-9 sm:min-w-9" title="Remove" onClick={() => onDelete(s.id)}>
                 <Trash2 className="h-3 w-3" />
               </Button>
               <CollapsibleTrigger asChild>
-                <Button size="icon" variant="ghost" className="h-7 w-7" title="Toggle details">
+                <Button size="icon" variant="ghost" aria-label="Expand timeline entry" className="h-7 w-7 min-h-11 min-w-11 sm:min-h-9 sm:min-w-9" title="Toggle details">
                   <ChevronDown className={cn('h-3.5 w-3.5 transition-transform', open && 'rotate-180')} />
                 </Button>
               </CollapsibleTrigger>
@@ -181,8 +181,8 @@ export const LearningTimeline: React.FC<LearningTimelineProps> = ({
                     <div className="flex items-start justify-between gap-2">
                       <h4 className="font-medium text-sm">{s.suggested_topic}</h4>
                       <div className="flex gap-1 shrink-0">
-                        <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => onEdit(s)}><Edit className="h-3 w-3" /></Button>
-                        <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => onDelete(s.id)}><Trash2 className="h-3 w-3" /></Button>
+                        <Button size="icon" variant="ghost" aria-label="Edit timeline entry" className="h-6 w-6 min-h-11 min-w-11 sm:min-h-9 sm:min-w-9" onClick={() => onEdit(s)}><Edit className="h-3 w-3" /></Button>
+                        <Button size="icon" variant="ghost" aria-label="Remove timeline entry" className="h-6 w-6 min-h-11 min-w-11 sm:min-h-9 sm:min-w-9" onClick={() => onDelete(s.id)}><Trash2 className="h-3 w-3" /></Button>
                       </div>
                     </div>
                     {s.suggested_goal && <p className="text-xs text-muted-foreground">{s.suggested_goal}</p>}

@@ -81,7 +81,7 @@ export const GoalCard: React.FC<GoalCardProps> = ({
           {!isArchived && (
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button size="icon" variant="ghost" className="h-7 w-7" onClick={onAddElement}><Plus className="h-4 w-4" /></Button>
+                <Button size="icon" variant="ghost" aria-label="Add learning element" className="h-7 w-7 min-h-11 min-w-11 sm:min-h-9 sm:min-w-9" onClick={onAddElement}><Plus className="h-4 w-4" /></Button>
               </TooltipTrigger>
               <TooltipContent>Add learning element</TooltipContent>
             </Tooltip>
@@ -89,7 +89,7 @@ export const GoalCard: React.FC<GoalCardProps> = ({
           {onEdit && !isArchived && (
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button size="icon" variant="ghost" className="h-7 w-7" onClick={onEdit}><Pencil className="h-3.5 w-3.5" /></Button>
+                <Button size="icon" variant="ghost" aria-label="Edit goal" className="h-7 w-7 min-h-11 min-w-11 sm:min-h-9 sm:min-w-9" onClick={onEdit}><Pencil className="h-3.5 w-3.5" /></Button>
               </TooltipTrigger>
               <TooltipContent>Edit goal</TooltipContent>
             </Tooltip>
@@ -97,7 +97,7 @@ export const GoalCard: React.FC<GoalCardProps> = ({
           {onSetManualProgress && !isArchived && !isAchieved && (
             <Popover>
               <PopoverTrigger asChild>
-                <Button size="icon" variant="ghost" className="h-7 w-7" title="Set manual progress">
+                <Button size="icon" variant="ghost" aria-label="Set manual progress" className="h-7 w-7 min-h-11 min-w-11 sm:min-h-9 sm:min-w-9" title="Set manual progress">
                   <TargetIcon className="h-3.5 w-3.5" />
                 </Button>
               </PopoverTrigger>
@@ -121,7 +121,7 @@ export const GoalCard: React.FC<GoalCardProps> = ({
           {onMarkAchieved && !isArchived && !isAchieved && (
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button size="icon" variant="ghost" className="h-7 w-7 text-emerald-600 hover:text-emerald-700" onClick={onMarkAchieved}>
+                <Button size="icon" variant="ghost" aria-label="Mark goal as achieved" className="h-7 w-7 min-h-11 min-w-11 sm:min-h-9 sm:min-w-9 text-emerald-600 hover:text-emerald-700" onClick={onMarkAchieved}>
                   <CheckCircle2 className="h-3.5 w-3.5" />
                 </Button>
               </TooltipTrigger>
@@ -131,7 +131,7 @@ export const GoalCard: React.FC<GoalCardProps> = ({
           {onArchive && !isArchived && (
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button size="icon" variant="ghost" className="h-7 w-7" onClick={onArchive}>
+                <Button size="icon" variant="ghost" aria-label="Archive goal" className="h-7 w-7 min-h-11 min-w-11 sm:min-h-9 sm:min-w-9" onClick={onArchive}>
                   <Archive className="h-3.5 w-3.5" />
                 </Button>
               </TooltipTrigger>
@@ -141,7 +141,7 @@ export const GoalCard: React.FC<GoalCardProps> = ({
           {onUnarchive && isArchived && (
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button size="icon" variant="ghost" className="h-7 w-7" onClick={onUnarchive}>
+                <Button size="icon" variant="ghost" aria-label="Restore goal from archive" className="h-7 w-7 min-h-11 min-w-11 sm:min-h-9 sm:min-w-9" onClick={onUnarchive}>
                   <ArchiveRestore className="h-3.5 w-3.5" />
                 </Button>
               </TooltipTrigger>
@@ -150,7 +150,7 @@ export const GoalCard: React.FC<GoalCardProps> = ({
           )}
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button size="icon" variant="ghost" className="h-7 w-7 text-destructive" onClick={onDelete}><Trash2 className="h-4 w-4" /></Button>
+              <Button size="icon" variant="ghost" aria-label="Delete goal" className="h-7 w-7 min-h-11 min-w-11 sm:min-h-9 sm:min-w-9 text-destructive" onClick={onDelete}><Trash2 className="h-4 w-4" /></Button>
             </TooltipTrigger>
             <TooltipContent>Delete goal</TooltipContent>
           </Tooltip>
@@ -171,7 +171,7 @@ export const GoalCard: React.FC<GoalCardProps> = ({
                     <Star className={`h-4 w-4 ${el.current_rating >= r ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground/40'}`} />
                   </button>
                 ))}
-                <Button size="icon" variant="ghost" className="h-6 w-6 ml-1" onClick={() => onDeleteElement(el.id)}>
+                <Button size="icon" variant="ghost" aria-label="Delete learning element" className="h-6 w-6 min-h-11 min-w-11 sm:min-h-9 sm:min-w-9 ml-1" onClick={() => onDeleteElement(el.id)}>
                   <Trash2 className="h-3 w-3" />
                 </Button>
               </div>

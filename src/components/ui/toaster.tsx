@@ -20,7 +20,7 @@ export function Toaster() {
   };
 
   return (
-    <ToastProvider>
+    <ToastProvider duration={4000}>
       {toasts.map(function ({
         id,
         title,
@@ -30,14 +30,14 @@ export function Toaster() {
         ...props
       }) {
         return (
-          <Toast key={id} className="bg-white shadow-lg rounded-lg group max-h-36 min-h-[36px] h-[68px] px-[16px] py-[12px]">
+          <Toast key={id} className="bg-background text-foreground border-border shadow-lg rounded-xl group max-h-36 min-h-[36px] h-[68px] px-[16px] py-[12px]">
             <div className="flex items-center gap-2 h-full">
               <div className="flex-shrink-0 pt-0.5">
                 {getIcon(variant)}
               </div>
               <div className="grid gap-1">
-                {title && <ToastTitle className="font-semibold text-sm text-gray-900 py-0">{title}</ToastTitle>}
-                {description && <ToastDescription className="text-xs text-gray-600">{description}</ToastDescription>}
+                {title && <ToastTitle className="font-semibold text-sm text-foreground py-0">{title}</ToastTitle>}
+                {description && <ToastDescription className="text-xs text-muted-foreground">{description}</ToastDescription>}
               </div>
             </div>
             {action}
