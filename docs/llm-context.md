@@ -1524,3 +1524,10 @@ TECHNICAL MECHANICS:
 - CONVENTION: new components use `useToast()` from `@/hooks/use-toast`; Sonner remains only for existing call sites.
 
 RAG KEYWORDS: aria-label, icon button, accessible name, tap target 44px, WCAG, toast position, sonner, shadcn toaster, toast duration, design tokens, dark mode, semantic color, teacher dashboard, worksheet actions, goal card
+
+## v6.9.92 Phase 3 — Dashboard Next Prep Strip
+
+PROBLEM: The teacher dashboard opened with duplicated stats and two long lists, offering no explicit "what now" entry point; reaching the core 1-Minute Prep action took 3 clicks.
+EDOOQOO SOLUTION: `NextPrepStrip` renders above the two dashboard columns and surfaces the 3 most recently updated students (level badge + main goal) with a direct "Start 1-Minute Prep" action. With zero students it degrades to the existing "Add your first student" CTA.
+TECHNICAL MECHANICS: `src/components/dashboard/NextPrepStrip.tsx` (presentation only), mounted in `src/pages/Dashboard.tsx` between `CompactStatsBar` and the two-column grid. Data reuses the already fetched `useStudents()` list (ordered `updated_at DESC`) — no new query, no RLS or schema change. Navigation via `useNavigate()` to `/student/:id`. Worksheet generation engine untouched.
+RAG KEYWORDS: dashboard next prep, 1-minute prep entry point, teacher dashboard UX, student quick access, recently updated students, dashboard call to action, ESL tutor workflow, prep shortcut, student card strip, useStudents reuse, empty state CTA, add first student, lesson prep speed, teacher home screen, v6.9.92
