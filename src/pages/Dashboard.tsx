@@ -49,6 +49,7 @@ import RenameDialog from "@/components/RenameDialog";
 import { toast } from "sonner";
 import StickyNav from '@/components/landing/StickyNav';
 import CompactStatsBar from '@/components/dashboard/CompactStatsBar';
+import NextPrepStrip from '@/components/dashboard/NextPrepStrip';
 import { useUpcomingLessonsCount } from '@/hooks/useUpcomingLessonsCount';
 
 const Dashboard = () => {
@@ -210,6 +211,11 @@ const Dashboard = () => {
           studentsCount={students.length}
           activeHomeworkCount={Object.values(homeworkByWorksheet).flat().filter((h: any) => !h.completed_at).length}
           upcomingLessonsCount={upcomingLessonsCount}
+        />
+
+        <NextPrepStrip
+          students={students}
+          onAddStudent={() => setAddStudentModalOpen(true)}
         />
 
         {/* Two Column Layout */}
