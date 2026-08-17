@@ -86,9 +86,50 @@ function titleFromSlug(slug) {
     .join(' ');
 }
 
+/**
+ * Curated SEO snippets (Sprint 1 — CTR recovery).
+ * Single source of truth for generated blog pages. Keys are slugs without ".html".
+ * Rules: title <= 60 chars, description <= 155 chars, unique per page,
+ * keyword-first, no "| Edooqoo" suffix, description ends in a tutor action.
+ * NEVER hand-edit the produced files in public/blog — edit these maps instead.
+ */
+export const SEO_TITLE_OVERRIDES = {
+  'fill-in-the-blanks-exercises-best-practices': 'Fill-in-the-Blank Tasks: 7 Rules That Make Them Work',
+  'word-formation-exercises-english': 'Word Formation Exercises: 60 Prefix & Suffix Prompts',
+  'diagnostic-testing-english-learners': 'Diagnostic Testing Adult English Learners in 15 Min',
+  'how-to-create-grammar-worksheets-with-ai': 'Create Grammar Worksheets With AI in Under a Minute',
+  'error-correction-techniques-esl': 'ESL Error Correction: 6 Techniques for 1:1 Lessons',
+  'cloze-test-design-esl': 'Cloze Tests: Every-Nth-Word vs Rational Deletion',
+  'cambridge-exam-preparation-tips-teachers': 'Cambridge B2 First & C1 Advanced: Tutor Prep Plan',
+  'digital-homework-tools-esl-teachers': 'Digital Homework Tools for ESL Tutors, 2026 Compared',
+  'accent-reduction-activities-esl': 'Accent Reduction: 9 Activities for Adult Professionals',
+};
+
+export const SEO_DESCRIPTION_OVERRIDES = {
+  'fill-in-the-blanks-exercises-best-practices':
+    'Seven design rules that stop gap-fill turning into guesswork: single defensible answer, context length, distractors, scoring. Build one for your next lesson.',
+  'word-formation-exercises-english':
+    'Prefix, suffix and part-of-speech drills for B1-C1 adults, with 60 prompts and a marking key. Generate a word-formation worksheet for your student.',
+  'diagnostic-testing-english-learners':
+    'Run a 15-minute diagnostic on a new adult student: what to test, what to skip, and how to turn the result into lesson one. Start with a free placement test.',
+  'how-to-create-grammar-worksheets-with-ai':
+    'Prompt structure, level control and the checks to run before you send it. Turn one grammar gap into an editable worksheet in under a minute.',
+  'error-correction-techniques-esl':
+    'Recast, elicitation, delayed correction and three more, with when each one helps an adult 1:1 student. Turn recurring errors into a targeted worksheet.',
+  'cloze-test-design-esl':
+    'Every-nth-word versus rational deletion: which one measures what, deletion rate, and scoring. Design a cloze that matches your student CEFR level.',
+  'cambridge-exam-preparation-tips-teachers':
+    'A tutor prep plan for B2 First and C1 Advanced: paper-by-paper priorities, timing drills and marking criteria. Generate exam-style practice tasks.',
+  'digital-homework-tools-esl-teachers':
+    'Compared for 1:1 tutors: assignment, submission, correction and evidence tracking, with the trade-offs of each. See how homework review works in Edooqoo.',
+  'accent-reduction-activities-esl':
+    'Nine intelligibility-first activities for working professionals: stress, weak forms, problem sounds by L1. Pair each one with an audio worksheet.',
+};
+
 function articleSpec({
   slug,
-  title = titleFromSlug(slug),
+  title: explicitTitle,
+  description: explicitDescription,
   directAnswer,
   tutorDecision,
   example,
@@ -103,12 +144,18 @@ function articleSpec({
   works = commonWorks,
   notEnough = commonNotEnough,
 }) {
+  const slugKey = slug.replace(/\.html$/, '');
+  const title = SEO_TITLE_OVERRIDES[slugKey] || explicitTitle || titleFromSlug(slug);
+  const description =
+    SEO_DESCRIPTION_OVERRIDES[slugKey] ||
+    explicitDescription ||
+    `${title}: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.`;
   const answer = directAnswer || `${title} should be handled as an adult 1:1 tutor decision: identify the learner evidence, choose the next performance target, and create or adapt one editable task the teacher can review.`;
   return {
     slug,
     title,
     h1: title,
-    description: `${title}: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.`,
+    description,
     directAnswer: answer,
     problem,
     solution,
