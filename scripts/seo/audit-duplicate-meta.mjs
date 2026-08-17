@@ -33,12 +33,12 @@ const BANNED_PHRASES = [
 
 /** Baseline lock — lower these as pages get rewritten. Never raise them. */
 const BASELINE = {
-  duplicateGroups: 20,
-  duplicatePages: 400,
-  slugTitles: 381,
-  longTitles: 700,
-  longDescriptions: 700,
-  bannedPhrases: 400,
+  duplicateGroups: 1,
+  duplicatePages: 131,
+  slugTitles: 92,
+  longTitles: 193,
+  longDescriptions: 408,
+  bannedPhrases: 122,
 };
 
 const WRITE_MODE = process.argv.includes('--write-baseline');
