@@ -107,11 +107,11 @@ export const SEO_TITLE_OVERRIDES = {
 
 export const SEO_DESCRIPTION_OVERRIDES = {
   'fill-in-the-blanks-exercises-best-practices':
-    'Seven design rules that stop gap-fill turning into guesswork: single defensible answer, context length, distractors, scoring. Build one for your next lesson.',
+    'Seven rules that stop gap-fill turning into guesswork: one defensible answer, context length, distractors, scoring. Build one for your next lesson.',
   'word-formation-exercises-english':
     'Prefix, suffix and part-of-speech drills for B1-C1 adults, with 60 prompts and a marking key. Generate a word-formation worksheet for your student.',
   'diagnostic-testing-english-learners':
-    'Run a 15-minute diagnostic on a new adult student: what to test, what to skip, and how to turn the result into lesson one. Start with a free placement test.',
+    'Run a 15-minute diagnostic on a new adult student: what to test, what to skip, how to turn the result into lesson one. Start with a free placement test.',
   'how-to-create-grammar-worksheets-with-ai':
     'Prompt structure, level control and the checks to run before you send it. Turn one grammar gap into an editable worksheet in under a minute.',
   'error-correction-techniques-esl':
