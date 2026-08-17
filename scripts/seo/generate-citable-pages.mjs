@@ -1547,12 +1547,15 @@ ${NEWSLETTER_EMBED_CSS}
 
 function layout({ title, description, canonical, body, jsonLd, robots = '' }) {
   const robotsMeta = robots ? `  <meta name="robots" content="${escapeHtml(robots)}">\n` : '';
+  // Keep the SERP title under ~60 chars: drop the brand suffix on long, curated titles.
+  const BRAND_SUFFIX = ' | Edooqoo';
+  const headTitle = title.length + BRAND_SUFFIX.length > 60 ? title : `${title}${BRAND_SUFFIX}`;
   return `<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>${escapeHtml(title)} | Edooqoo</title>
+  <title>${escapeHtml(headTitle)}</title>
   <meta name="description" content="${escapeHtml(description)}">
 ${robotsMeta}  <meta name="llm-intent" content="adult 1:1 English tutoring reference">
   <link rel="canonical" href="${canonical}">
