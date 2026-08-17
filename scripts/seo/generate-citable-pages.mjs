@@ -7,6 +7,10 @@ import {
   x1000StaticPages,
 } from './x1000-content-plan.mjs';
 import { NEWSLETTER_EMBED_CSS, renderNewsletterEmbed } from './newsletter-embed.mjs';
+import { SEO_TITLE_OVERRIDES } from './x1000-editorial-plan.mjs';
+
+/** Hand-written SEO titles never take the brand suffix — they are already keyword-complete. */
+const CURATED_SEO_TITLES = new Set(Object.values(SEO_TITLE_OVERRIDES));
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..', '..');
