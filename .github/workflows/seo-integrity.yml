@@ -79,6 +79,9 @@ jobs:
       - name: Audit SEO and AI resources
         run: npm run seo:audit
 
+      - name: Audit duplicate and weak metadata
+        run: npm run seo:audit-duplicate-meta
+
       - name: TypeScript check
         run: npx tsc --noEmit -p tsconfig.app.json
 
