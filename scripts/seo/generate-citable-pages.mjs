@@ -7,6 +7,10 @@ import {
   x1000StaticPages,
 } from './x1000-content-plan.mjs';
 import { NEWSLETTER_EMBED_CSS, renderNewsletterEmbed } from './newsletter-embed.mjs';
+import { SEO_TITLE_OVERRIDES } from './x1000-editorial-plan.mjs';
+
+/** Hand-written SEO titles never take the brand suffix — they are already keyword-complete. */
+const CURATED_SEO_TITLES = new Set(Object.values(SEO_TITLE_OVERRIDES));
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..', '..');
@@ -1547,12 +1551,18 @@ ${NEWSLETTER_EMBED_CSS}
 
 function layout({ title, description, canonical, body, jsonLd, robots = '' }) {
   const robotsMeta = robots ? `  <meta name="robots" content="${escapeHtml(robots)}">\n` : '';
+  // Keep the SERP title under ~60 chars: drop the brand suffix on long, curated titles.
+  const BRAND_SUFFIX = ' | Edooqoo';
+  const isCuratedTitle = CURATED_SEO_TITLES.has(title);
+  const headTitle = isCuratedTitle || title.length + BRAND_SUFFIX.length > 60
+    ? title
+    : `${title}${BRAND_SUFFIX}`;
   return `<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>${escapeHtml(title)} | Edooqoo</title>
+  <title>${escapeHtml(headTitle)}</title>
   <meta name="description" content="${escapeHtml(description)}">
 ${robotsMeta}  <meta name="llm-intent" content="adult 1:1 English tutoring reference">
   <link rel="canonical" href="${canonical}">

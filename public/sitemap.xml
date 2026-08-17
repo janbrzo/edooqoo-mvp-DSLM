@@ -50,8 +50,124 @@
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
-<url><loc>https://edooqoo.com/blog/teaching-english-one-to-one.html</loc><lastmod>2026-06-14</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+
+<url><loc>https://edooqoo.com/english-for/accountants</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/english-for/consultants</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/english-for/entrepreneurs</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/english-for/executives</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/english-for/hr-professionals</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/english-for/lawyers</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/english-for/marketing-managers</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/english-for/project-managers</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/english-for/sales-reps</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/english-for/software-engineers</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/esl-worksheets/business-email/b1-intermediate</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/esl-worksheets/business-email/b2-upper-intermediate</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/esl-worksheets/business-email/c1-advanced</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/esl-worksheets/conditionals/b1-intermediate</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/esl-worksheets/conditionals/b2-upper-intermediate</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/esl-worksheets/conditionals/c1-advanced</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/esl-worksheets/ielts-writing-task-2/b2-upper-intermediate</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/esl-worksheets/ielts-writing-task-2/c1-advanced</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/esl-worksheets/ielts-writing-task-2/c2-proficiency</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/esl-worksheets/job-interview/a2-elementary</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/esl-worksheets/job-interview/b1-intermediate</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/esl-worksheets/job-interview/b2-upper-intermediate</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/esl-worksheets/job-interview/c1-advanced</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/esl-worksheets/meetings/b1-intermediate</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/esl-worksheets/meetings/b2-upper-intermediate</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/esl-worksheets/meetings/c1-advanced</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/esl-worksheets/modal-verbs/a2-elementary</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/esl-worksheets/modal-verbs/b1-intermediate</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/esl-worksheets/modal-verbs/b2-upper-intermediate</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/esl-worksheets/modal-verbs/c1-advanced</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/esl-worksheets/past-simple/a1-beginner</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/esl-worksheets/past-simple/a2-elementary</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/esl-worksheets/past-simple/b1-intermediate</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/esl-worksheets/past-simple/b2-upper-intermediate</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/esl-worksheets/phrasal-verbs/b1-intermediate</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/esl-worksheets/phrasal-verbs/b2-upper-intermediate</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/esl-worksheets/phrasal-verbs/c1-advanced</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/esl-worksheets/present-perfect/a2-elementary</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/esl-worksheets/present-perfect/b1-intermediate</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/esl-worksheets/present-perfect/b2-upper-intermediate</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/esl-worksheets/present-perfect/c1-advanced</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/esl-worksheets/travel-vocabulary/a1-beginner</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/esl-worksheets/travel-vocabulary/a2-elementary</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/esl-worksheets/travel-vocabulary/b1-intermediate</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/esl-worksheets/travel-vocabulary/b2-upper-intermediate</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/worksheets/collocations-match/meetings</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/worksheets/collocations-match/phrasal-verbs</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/worksheets/definition-match/phrasal-verbs</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/worksheets/dialogue-completion/job-interview</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/worksheets/dialogue-completion/meetings</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/worksheets/dialogue-completion/modal-verbs</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/worksheets/dialogue-completion/past-simple</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/worksheets/dialogue-completion/phrasal-verbs</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/worksheets/dialogue-completion/present-perfect</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/worksheets/dialogue-completion/travel-vocabulary</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/worksheets/error-correction/business-email</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/worksheets/error-correction/conditionals</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/worksheets/error-correction/ielts-writing-task-2</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/worksheets/error-correction/meetings</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/worksheets/error-correction/modal-verbs</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/worksheets/error-correction/past-simple</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/worksheets/error-correction/present-perfect</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/worksheets/fill-in-the-blanks/past-simple</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/worksheets/gap-fill/phrasal-verbs</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/worksheets/gap-fill/present-perfect</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/worksheets/matching/conditionals</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/worksheets/matching/job-interview</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/worksheets/matching/travel-vocabulary</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/worksheets/multiple-choice/modal-verbs</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/worksheets/open-question/conditionals</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/worksheets/open-question/job-interview</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/worksheets/open-question/meetings</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/worksheets/open-question/modal-verbs</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/worksheets/open-question/phrasal-verbs</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/worksheets/open-question/present-perfect</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/worksheets/open-question/travel-vocabulary</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/worksheets/ordering/business-email</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/worksheets/ordering/ielts-writing-task-2</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/worksheets/ordering/past-simple</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/worksheets/paragraph-writing/business-email</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/worksheets/paragraph-writing/conditionals</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/worksheets/paragraph-writing/ielts-writing-task-2</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/worksheets/picture-vocabulary/travel-vocabulary</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/worksheets/pronunciation-drill/job-interview</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/worksheets/rewriting/business-email</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/worksheets/rewriting/ielts-writing-task-2</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/worksheets/rewriting/modal-verbs</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/worksheets/short-answer/business-email</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/worksheets/short-answer/job-interview</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/worksheets/short-answer/meetings</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/worksheets/short-answer/past-simple</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/worksheets/short-answer/present-perfect</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/worksheets/short-answer/travel-vocabulary</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/worksheets/transformation/conditionals</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/worksheets/word-formation/ielts-writing-task-2</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/tools/what-should-i-teach-next</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://edooqoo.com/what-to-teach-next/project-manager-status-update</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/what-to-teach-next/software-engineer-incident-explanation</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/what-to-teach-next/accountant-variance-call</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/what-to-teach-next/lawyer-client-explanation</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/what-to-teach-next/sales-discovery-call</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/what-to-teach-next/hr-performance-conversation</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/what-to-teach-next/marketing-campaign-recommendation</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/what-to-teach-next/consultant-executive-summary</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/what-to-teach-next/entrepreneur-customer-interview</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/what-to-teach-next/travel-disruption</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/what-to-teach-next/job-interview-achievement</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/what-to-teach-next/ielts-task-2-paragraph</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/blog/adult-esl-student-profile-lesson-planning.html</loc><lastmod>2026-06-14</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/blog/best-lesson-prep-tool-for-english-tutors.html</loc><lastmod>2026-06-14</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/blog/can-ai-plan-one-to-one-english-lesson.html</loc><lastmod>2026-06-14</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/blog/homework-mistakes-next-english-lesson.html</loc><lastmod>2026-06-14</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/blog/how-english-tutors-track-what-to-teach-next.html</loc><lastmod>2026-06-14</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/blog/how-long-should-private-english-tutors-spend-on-lesson-prep.html</loc><lastmod>2026-06-14</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/blog/teaching-english-one-to-one.html</loc><lastmod>2026-06-14</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edooqoo.com/blog/what-should-adult-english-placement-test-include.html</loc><lastmod>2026-06-14</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://edooqoo.com/blog/what-to-teach-next-private-english-student.html</loc><lastmod>2026-06-14</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edooqoo.com/blog/academic-language-functions-clil.html</loc><lastmod>2026-05-24</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edooqoo.com/blog/academic-vocabulary-teaching-strategies.html</loc><lastmod>2026-05-24</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edooqoo.com/blog/accent-coaching-techniques-esl.html</loc><lastmod>2026-05-24</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
@@ -60,7 +176,6 @@
   <url><loc>https://edooqoo.com/blog/adapting-task-difficulty-for-one-adult-english-learner.html</loc><lastmod>2026-05-24</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edooqoo.com/blog/adapting-textbook-tasks-for-adult-one-to-one-english-lessons.html</loc><lastmod>2026-05-24</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edooqoo.com/blog/adult-business-english-homework-feedback-loop.html</loc><lastmod>2026-05-24</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/blog/adult-esl-student-profile-lesson-planning.html</loc><lastmod>2026-05-24</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edooqoo.com/blog/adult-learner-autonomy-in-private-english-lessons.html</loc><lastmod>2026-05-24</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edooqoo.com/blog/adult-learner-performance-evidence-beyond-tests.html</loc><lastmod>2026-05-24</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edooqoo.com/blog/adult-one-to-one-accessibility-adaptations-for-english-lessons.html</loc><lastmod>2026-05-24</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
@@ -77,7 +192,6 @@
   <url><loc>https://edooqoo.com/blog/art-based-language-activities-esl.html</loc><lastmod>2026-05-24</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edooqoo.com/blog/authentic-listening-materials-esl.html</loc><lastmod>2026-05-24</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edooqoo.com/blog/best-apps-learning-english-2026.html</loc><lastmod>2026-05-24</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/blog/best-lesson-prep-tool-for-english-tutors.html</loc><lastmod>2026-05-24</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edooqoo.com/blog/best-workflow-for-private-english-tutors.html</loc><lastmod>2026-05-24</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edooqoo.com/blog/between-session-homework-evidence-for-private-english-tutors.html</loc><lastmod>2026-05-24</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edooqoo.com/blog/bilingual-education-models-comparison.html</loc><lastmod>2026-05-24</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
@@ -85,7 +199,6 @@
   <url><loc>https://edooqoo.com/blog/building-esl-teaching-portfolio.html</loc><lastmod>2026-05-24</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edooqoo.com/blog/business-english-material-generation-workflow.html</loc><lastmod>2026-05-24</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edooqoo.com/blog/cambridge-exam-preparation-tips-teachers.html</loc><lastmod>2026-05-24</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/blog/can-ai-plan-one-to-one-english-lesson.html</loc><lastmod>2026-05-24</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edooqoo.com/blog/cefr-aligned-worksheet-generation-workflow.html</loc><lastmod>2026-05-24</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edooqoo.com/blog/cefr-evidence-for-private-english-lessons.html</loc><lastmod>2026-05-24</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edooqoo.com/blog/clil-methodology-complete-guide.html</loc><lastmod>2026-05-24</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
@@ -136,9 +249,6 @@
   <url><loc>https://edooqoo.com/blog/gender-inclusive-language-esl.html</loc><lastmod>2026-05-24</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edooqoo.com/blog/growth-mindset-language-learning.html</loc><lastmod>2026-05-24</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edooqoo.com/blog/homework-before-lesson-workflow-for-adult-english-tutors.html</loc><lastmod>2026-05-24</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/blog/homework-mistakes-next-english-lesson.html</loc><lastmod>2026-05-24</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/blog/how-english-tutors-track-what-to-teach-next.html</loc><lastmod>2026-05-24</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/blog/how-long-should-private-english-tutors-spend-on-lesson-prep.html</loc><lastmod>2026-05-24</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edooqoo.com/blog/how-private-english-tutors-use-ai-safely.html</loc><lastmod>2026-05-24</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edooqoo.com/blog/how-to-assess-english-level-cefr.html</loc><lastmod>2026-05-24</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edooqoo.com/blog/how-to-avoid-generic-ai-lesson-plans-for-adults.html</loc><lastmod>2026-05-24</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
@@ -185,7 +295,6 @@
   <url><loc>https://edooqoo.com/blog/using-ai-teacher-productivity.html</loc><lastmod>2026-05-24</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edooqoo.com/blog/what-to-teach-after-a-speaking-lesson.html</loc><lastmod>2026-05-24</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edooqoo.com/blog/what-to-teach-after-a-writing-homework.html</loc><lastmod>2026-05-24</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/blog/what-to-teach-next-private-english-student.html</loc><lastmod>2026-05-24</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edooqoo.com/blog/why-chatgpt-is-not-enough-for-recurring-english-tutoring.html</loc><lastmod>2026-05-24</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edooqoo.com/blog/why-generic-esl-worksheets-fail-adult-learners.html</loc><lastmod>2026-05-24</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edooqoo.com/blog/materials-design-principles-elt.html</loc><lastmod>2025-12-24</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
@@ -456,112 +565,4 @@
   <url><loc>https://edooqoo.com/vocabulary-exercise-generator.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edooqoo.com/worksheet-generator-for-language-schools.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
   <url><loc>https://edooqoo.com/writing-worksheets-esl.html</loc><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/english-for/accountants</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/english-for/consultants</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/english-for/entrepreneurs</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/english-for/executives</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/english-for/hr-professionals</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/english-for/lawyers</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/english-for/marketing-managers</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/english-for/project-managers</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/english-for/sales-reps</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/english-for/software-engineers</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/esl-worksheets/business-email/b1-intermediate</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/esl-worksheets/business-email/b2-upper-intermediate</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/esl-worksheets/business-email/c1-advanced</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/esl-worksheets/conditionals/b1-intermediate</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/esl-worksheets/conditionals/b2-upper-intermediate</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/esl-worksheets/conditionals/c1-advanced</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/esl-worksheets/ielts-writing-task-2/b2-upper-intermediate</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/esl-worksheets/ielts-writing-task-2/c1-advanced</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/esl-worksheets/ielts-writing-task-2/c2-proficiency</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/esl-worksheets/job-interview/a2-elementary</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/esl-worksheets/job-interview/b1-intermediate</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/esl-worksheets/job-interview/b2-upper-intermediate</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/esl-worksheets/job-interview/c1-advanced</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/esl-worksheets/meetings/b1-intermediate</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/esl-worksheets/meetings/b2-upper-intermediate</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/esl-worksheets/meetings/c1-advanced</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/esl-worksheets/modal-verbs/a2-elementary</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/esl-worksheets/modal-verbs/b1-intermediate</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/esl-worksheets/modal-verbs/b2-upper-intermediate</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/esl-worksheets/modal-verbs/c1-advanced</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/esl-worksheets/past-simple/a1-beginner</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/esl-worksheets/past-simple/a2-elementary</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/esl-worksheets/past-simple/b1-intermediate</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/esl-worksheets/past-simple/b2-upper-intermediate</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/esl-worksheets/phrasal-verbs/b1-intermediate</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/esl-worksheets/phrasal-verbs/b2-upper-intermediate</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/esl-worksheets/phrasal-verbs/c1-advanced</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/esl-worksheets/present-perfect/a2-elementary</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/esl-worksheets/present-perfect/b1-intermediate</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/esl-worksheets/present-perfect/b2-upper-intermediate</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/esl-worksheets/present-perfect/c1-advanced</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/esl-worksheets/travel-vocabulary/a1-beginner</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/esl-worksheets/travel-vocabulary/a2-elementary</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/esl-worksheets/travel-vocabulary/b1-intermediate</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/esl-worksheets/travel-vocabulary/b2-upper-intermediate</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/worksheets/collocations-match/meetings</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/worksheets/collocations-match/phrasal-verbs</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/worksheets/definition-match/phrasal-verbs</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/worksheets/dialogue-completion/job-interview</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/worksheets/dialogue-completion/meetings</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/worksheets/dialogue-completion/modal-verbs</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/worksheets/dialogue-completion/past-simple</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/worksheets/dialogue-completion/phrasal-verbs</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/worksheets/dialogue-completion/present-perfect</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/worksheets/dialogue-completion/travel-vocabulary</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/worksheets/error-correction/business-email</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/worksheets/error-correction/conditionals</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/worksheets/error-correction/ielts-writing-task-2</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/worksheets/error-correction/meetings</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/worksheets/error-correction/modal-verbs</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/worksheets/error-correction/past-simple</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/worksheets/error-correction/present-perfect</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/worksheets/fill-in-the-blanks/past-simple</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/worksheets/gap-fill/phrasal-verbs</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/worksheets/gap-fill/present-perfect</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/worksheets/matching/conditionals</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/worksheets/matching/job-interview</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/worksheets/matching/travel-vocabulary</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/worksheets/multiple-choice/modal-verbs</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/worksheets/open-question/conditionals</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/worksheets/open-question/job-interview</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/worksheets/open-question/meetings</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/worksheets/open-question/modal-verbs</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/worksheets/open-question/phrasal-verbs</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/worksheets/open-question/present-perfect</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/worksheets/open-question/travel-vocabulary</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/worksheets/ordering/business-email</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/worksheets/ordering/ielts-writing-task-2</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/worksheets/ordering/past-simple</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/worksheets/paragraph-writing/business-email</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/worksheets/paragraph-writing/conditionals</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/worksheets/paragraph-writing/ielts-writing-task-2</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/worksheets/picture-vocabulary/travel-vocabulary</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/worksheets/pronunciation-drill/job-interview</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/worksheets/rewriting/business-email</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/worksheets/rewriting/ielts-writing-task-2</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/worksheets/rewriting/modal-verbs</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/worksheets/short-answer/business-email</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/worksheets/short-answer/job-interview</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/worksheets/short-answer/meetings</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/worksheets/short-answer/past-simple</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/worksheets/short-answer/present-perfect</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/worksheets/short-answer/travel-vocabulary</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/worksheets/transformation/conditionals</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/worksheets/word-formation/ielts-writing-task-2</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/tools/what-should-i-teach-next</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://edooqoo.com/what-to-teach-next/project-manager-status-update</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/what-to-teach-next/software-engineer-incident-explanation</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/what-to-teach-next/accountant-variance-call</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/what-to-teach-next/lawyer-client-explanation</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/what-to-teach-next/sales-discovery-call</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/what-to-teach-next/hr-performance-conversation</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/what-to-teach-next/marketing-campaign-recommendation</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/what-to-teach-next/consultant-executive-summary</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/what-to-teach-next/entrepreneur-customer-interview</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/what-to-teach-next/travel-disruption</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/what-to-teach-next/job-interview-achievement</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
-  <url><loc>https://edooqoo.com/what-to-teach-next/ielts-task-2-paragraph</loc><lastmod>2026-06-15</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
 </urlset>
