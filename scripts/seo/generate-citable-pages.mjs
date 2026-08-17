@@ -1549,7 +1549,10 @@ function layout({ title, description, canonical, body, jsonLd, robots = '' }) {
   const robotsMeta = robots ? `  <meta name="robots" content="${escapeHtml(robots)}">\n` : '';
   // Keep the SERP title under ~60 chars: drop the brand suffix on long, curated titles.
   const BRAND_SUFFIX = ' | Edooqoo';
-  const headTitle = title.length + BRAND_SUFFIX.length > 60 ? title : `${title}${BRAND_SUFFIX}`;
+  const isCuratedTitle = CURATED_SEO_TITLES.has(title);
+  const headTitle = isCuratedTitle || title.length + BRAND_SUFFIX.length > 60
+    ? title
+    : `${title}${BRAND_SUFFIX}`;
   return `<!doctype html>
 <html lang="en">
 <head>
