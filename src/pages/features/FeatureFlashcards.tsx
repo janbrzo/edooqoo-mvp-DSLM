@@ -110,8 +110,8 @@ const comparisonRows = [
 
 const FeatureFlashcards: React.FC = () => (
   <FeaturePageLayout
-    title="SM-2 Spaced Repetition Flashcards for ESL — Edooqoo"
-    metaDescription="Auto-generate flashcards from any worksheet. SM-2 spaced repetition algorithm. Integrated with student progress tracking. No student app needed."
+    title="Flashcards for Adult Learners — Spaced Repetition"
+    metaDescription="Auto-generate flashcard sets from any worksheet, with SM-2 spaced repetition and no student app to install. Share a set with your student in one click."
   >
     <FeatureHero
       badge="SM-2"
