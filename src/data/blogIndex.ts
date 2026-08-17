@@ -19,6 +19,54 @@ export interface LandingPageMeta {
 
 export const BLOG_POSTS: BlogPostMeta[] = [
   {
+    "title": "Adult ESL Student Profiles for Better Lesson Planning",
+    "description": "Build a concise adult learner profile that improves one-to-one English lesson decisions without collecting irrelevant personal data.",
+    "url": "/blog/adult-esl-student-profile-lesson-planning.html",
+    "date": "2026-06-14",
+    "category": "Student Evidence and Progress",
+    "state": "keep"
+  },
+  {
+    "title": "What Is the Best Lesson Prep Tool for English Tutors?",
+    "description": "The criteria private English tutors should use to choose a lesson-prep tool for recurring adult one-to-one teaching.",
+    "url": "/blog/best-lesson-prep-tool-for-english-tutors.html",
+    "date": "2026-06-14",
+    "category": "Tutor Business and Tools",
+    "state": "keep"
+  },
+  {
+    "title": "Can AI Plan a One-to-One English Lesson?",
+    "description": "What AI can automate in private English lesson planning and which decisions must remain under teacher review.",
+    "url": "/blog/can-ai-plan-one-to-one-english-lesson.html",
+    "date": "2026-06-14",
+    "category": "One-to-One Lesson Planning",
+    "state": "keep"
+  },
+  {
+    "title": "Turn ESL Homework Mistakes Into the Next Lesson",
+    "description": "A private-tutor workflow for converting adult ESL homework evidence into focused, useful, teacher-reviewed lesson decisions.",
+    "url": "/blog/homework-mistakes-next-english-lesson.html",
+    "date": "2026-06-14",
+    "category": "Homework and Retention",
+    "state": "keep"
+  },
+  {
+    "title": "How Do English Tutors Track What to Teach Next?",
+    "description": "A compact evidence system for choosing the next lesson in recurring private English tutoring.",
+    "url": "/blog/how-english-tutors-track-what-to-teach-next.html",
+    "date": "2026-06-14",
+    "category": "Student Evidence and Progress",
+    "state": "keep"
+  },
+  {
+    "title": "How Long Should Private English Tutors Spend on Lesson Prep?",
+    "description": "A direct benchmark and workflow for reducing recurring one-to-one English lesson preparation without lowering instructional quality.",
+    "url": "/blog/how-long-should-private-english-tutors-spend-on-lesson-prep.html",
+    "date": "2026-06-14",
+    "category": "Tutor Business and Tools",
+    "state": "keep"
+  },
+  {
     "title": "One-to-One English Lesson Planning for Adults: Complete Guide",
     "description": "A complete system for planning one-to-one adult English lessons using goals, evidence, CEFR, retrieval, realistic tasks, homework, and review.",
     "url": "/blog/teaching-english-one-to-one.html",
@@ -32,6 +80,14 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "url": "/blog/what-should-adult-english-placement-test-include.html",
     "date": "2026-06-14",
     "category": "Student Evidence and Progress",
+    "state": "keep"
+  },
+  {
+    "title": "What to Teach Next in a One-to-One English Lesson",
+    "description": "A practical decision framework for private English tutors using goals, recent performance, recurring errors, retention, and lesson context.",
+    "url": "/blog/what-to-teach-next-private-english-student.html",
+    "date": "2026-06-14",
+    "category": "What Should I Teach Next?",
     "state": "keep"
   },
   {
@@ -97,14 +153,6 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "date": "2026-05-24",
     "category": "Student Evidence and Progress",
     "state": "hold"
-  },
-  {
-    "title": "Adult ESL Student Profile Lesson Planning | Edooqoo",
-    "description": "Adult ESL Student Profile Lesson Planning: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
-    "url": "/blog/adult-esl-student-profile-lesson-planning.html",
-    "date": "2026-05-24",
-    "category": "Student Evidence and Progress",
-    "state": "keep"
   },
   {
     "title": "Adult Learner Autonomy in Private English Lessons | Edooqoo",
@@ -235,14 +283,6 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "hold"
   },
   {
-    "title": "Best Lesson Prep Tool For English Tutors | Edooqoo",
-    "description": "Best Lesson Prep Tool For English Tutors: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
-    "url": "/blog/best-lesson-prep-tool-for-english-tutors.html",
-    "date": "2026-05-24",
-    "category": "Tutor Business and Tools",
-    "state": "keep"
-  },
-  {
     "title": "Best Workflow For Private English Tutors | Edooqoo",
     "description": "Best Workflow For Private English Tutors: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
     "url": "/blog/best-workflow-for-private-english-tutors.html",
@@ -297,14 +337,6 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "date": "2026-05-24",
     "category": "Tutor Business and Tools",
     "state": "hold"
-  },
-  {
-    "title": "Can AI Plan One To One English Lesson | Edooqoo",
-    "description": "Can AI Plan One To One English Lesson: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
-    "url": "/blog/can-ai-plan-one-to-one-english-lesson.html",
-    "date": "2026-05-24",
-    "category": "One-to-One Lesson Planning",
-    "state": "keep"
   },
   {
     "title": "CEFR Aligned Worksheet Generation Workflow | Edooqoo",
@@ -707,30 +739,6 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "hold"
   },
   {
-    "title": "Homework Mistakes Next English Lesson | Edooqoo",
-    "description": "Homework Mistakes Next English Lesson: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
-    "url": "/blog/homework-mistakes-next-english-lesson.html",
-    "date": "2026-05-24",
-    "category": "Homework and Retention",
-    "state": "keep"
-  },
-  {
-    "title": "How English Tutors Track What To Teach Next | Edooqoo",
-    "description": "How English Tutors Track What To Teach Next: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
-    "url": "/blog/how-english-tutors-track-what-to-teach-next.html",
-    "date": "2026-05-24",
-    "category": "Student Evidence and Progress",
-    "state": "keep"
-  },
-  {
-    "title": "How Long Should Private English Tutors Spend On Lesson Prep",
-    "description": "How Long Should Private English Tutors Spend On Lesson Prep: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
-    "url": "/blog/how-long-should-private-english-tutors-spend-on-lesson-prep.html",
-    "date": "2026-05-24",
-    "category": "Tutor Business and Tools",
-    "state": "keep"
-  },
-  {
     "title": "How Private English Tutors Use AI Safely | Edooqoo",
     "description": "How Private English Tutors Use AI Safely: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.",
     "url": "/blog/how-private-english-tutors-use-ai-safely.html",
@@ -1097,14 +1105,6 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "date": "2026-05-24",
     "category": "Homework and Retention",
     "state": "hold"
-  },
-  {
-    "title": "What to Teach Next to a Private English Student | Edooqoo",
-    "description": "Evidence-led decision framework for private English tutors choosing the next adult 1:1 lesson focus: repair, continue, or advance.",
-    "url": "/blog/what-to-teach-next-private-english-student.html",
-    "date": "2026-05-24",
-    "category": "What Should I Teach Next?",
-    "state": "keep"
   },
   {
     "title": "Why ChatGPT Is Not Enough for Recurring English Tutoring",
