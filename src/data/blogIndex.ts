@@ -331,7 +331,7 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "keep"
   },
   {
-    "title": "Cambridge B2 First &amp; C1 Advanced: Tutor Prep Plan | Edooqoo",
+    "title": "Cambridge B2 First &amp; C1 Advanced: Tutor Prep Plan",
     "description": "A tutor prep plan for B2 First and C1 Advanced: paper-by-paper priorities, timing drills and marking criteria. Generate exam-style practice tasks.",
     "url": "/blog/cambridge-exam-preparation-tips-teachers.html",
     "date": "2026-05-24",
@@ -363,7 +363,7 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "hold"
   },
   {
-    "title": "Cloze Tests: Every-Nth-Word vs Rational Deletion | Edooqoo",
+    "title": "Cloze Tests: Every-Nth-Word vs Rational Deletion",
     "description": "Every-nth-word versus rational deletion: which one measures what, deletion rate, and scoring. Design a cloze that matches your student CEFR level.",
     "url": "/blog/cloze-test-design-esl.html",
     "date": "2026-05-24",
@@ -651,7 +651,7 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "hold"
   },
   {
-    "title": "ESL Error Correction: 6 Techniques for 1:1 Lessons | Edooqoo",
+    "title": "ESL Error Correction: 6 Techniques for 1:1 Lessons",
     "description": "Recast, elicitation, delayed correction and three more, with when each one helps an adult 1:1 student. Turn recurring errors into a targeted worksheet.",
     "url": "/blog/error-correction-techniques-esl.html",
     "date": "2026-05-24",
@@ -1835,8 +1835,8 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "hold"
   },
   {
-    "title": "Word Formation Exercises — Prefixes, Suffixes, and Roots",
-    "description": "Complete guide to word formation in English: prefixes, suffixes, roots, and morphology-based exercises for vocabulary building in ESL classes.",
+    "title": "Word Formation Exercises: 60 Prefix &amp; Suffix Prompts",
+    "description": "Prefix, suffix and part-of-speech drills for B1-C1 adults, with 60 prompts and a marking key. Generate a word-formation worksheet for your student.",
     "url": "/blog/word-formation-exercises-english.html",
     "date": "2025-07-07",
     "category": "Tutor Business and Tools",
