@@ -1,123 +1,113 @@
-# Plan v6.9.93 — GSC-Driven SEO/GEO Recovery (90 dni: 184 → 1500+ klików/mies.)
+# Sprint 1 — CTR Recovery (Plan v6.9.93, Faza 1)
 
-## Diagnoza — potwierdzona w kodzie, nie zgadywana
+Cel: podnieść CTR z 2,0% do 4,5–5% bez zmiany pozycji i bez pisania nowych treści.
+Szacunek: +200–250 klików/mies. przy obecnych 9 020 wyświetleniach.
+Zero zmian w logice biznesowej, bazie i silniku worksheetów.
 
-Dane GSC (2026-05-15 → 2026-08-14): 184 kliki / 9 020 wyświetleń / CTR 2,0% / poz. 14,2.
-441 URL-i rankuje, klik zdobywa ~40. To **nie jest problem rankingów — to problem snippetów**.
+## Ustalenie krytyczne przed startem
 
-Weryfikacja w plikach projektu (przeczytana przed napisaniem planu):
+Sprawdziłem, skąd biorą się metadane. Większość stron blogowych jest generowana skryptami,
+a workflow `.github/workflows/seo-integrity.yml` regeneruje je przy każdym PR:
 
-- **137 stron w `public/` ma IDENTYCZNY meta description**: „…: adult 1:1 English tutor
-  reference with Edooqoo workflow links, teacher review, evidence-led planning, and
-  non-school-like framing." Google widzi 137 klonów.
-- **381 tytułów ma wzorzec `Slug Title Case | Edooqoo`** — tytuł = slug. Zero korzyści,
-  zero liczby, zero persony. Przykład najdroższy: `/blog/digital-homework-tools-esl-teachers.html`
-  stoi na **pozycji 4,35 i ma 0 klików** (Strony.csv, 51 wyśw.) — na poz. 4 zero klików jest
-  możliwe wyłącznie przy złym tytule/opisie.
-- `public/llms.txt` = 17 KB, `docs/llm-context.md` = 341 KB (za duży do retrievalu),
-  sitemap = 548 URL-i.
-- `src/data/pseoIndexPolicy.json` = 10 topics × 10 personas (polityka już zawężona).
+- `scripts/seo/x1000-editorial-plan.mjs`, funkcja `articleSpec()` (ok. linii 111), ma zaszyty
+  szablon opisu "TITLE: adult 1:1 English tutor reference with Edooqoo workflow links…"
+  oraz `title = titleFromSlug(slug)`.
+- To jest źródło 137 identycznych meta description i 381 tytułów typu "Slug | Edooqoo".
+- HTML zapisują `scripts/seo/generate-citable-pages.mjs` i `generate-strategic-content.mjs`.
 
-**Root cause #1 (CTR 2% na poz. 14):** treść generowana szablonowo dostała też szablonowe
-metadane — snippet nie zawiera żadnego powodu do kliknięcia dla nauczyciela.
+Wniosek: ręczna edycja `public/blog/*.html` dla stron generowanych zostanie nadpisana przy
+pierwszym PR. Naprawę robimy na poziomie generatora. Strony pisane ręcznie
+(m.in. `teaching-english-intonation-stress.html`, `teaching-minimal-pairs-esl.html`)
+edytujemy bezpośrednio.
 
-**Root cause #2 (US: 3 965 wyśw., CTR 0,4% vs PL 10,9%):** w US rankujemy głównie klastrem
-„best apps … 2026" (intencja **ucznia**, 1 422 wyśw. / 1 klik na
-`/blog/best-apps-learning-english-2026.html`) — pokazujemy tutorską stronę osobie szukającej
-aplikacji dla siebie. Intent mismatch, nie problem jakości.
+## Krok 1 — Odblokowanie generatora
 
-## Zakres — 5 faz
+W `scripts/seo/x1000-editorial-plan.mjs`:
 
-### Faza 1 — CTR Recovery Sprint (bez nowych treści, największe ROI)
+1. `articleSpec()` przyjmuje opcjonalne `description`; szablon zostaje wyłącznie jako fallback.
+2. Nowy eksport `SEO_TITLE_OVERRIDES` i `SEO_DESCRIPTION_OVERRIDES` — mapy `slug -> string`,
+   jedno miejsce prawdy dla ręcznie napisanych snippetów.
+3. `articleSpec()` czyta override przed fallbackiem; brak override = zachowanie bez zmian.
 
-1. Przepisać title + meta dla **15 stron striking-distance** (poz. 4–13, ≥30 wyśw., CTR <2%):
-   intonation-stress (309 wyśw., poz. 10,8), modal-verbs-worksheets-esl (187 / 7,7),
-   fill-in-the-blanks (112 / 12,8), diagnostic-testing (110 / 10,4), minimal-pairs (86 / 10,0),
-   how-to-create-grammar-worksheets-with-ai (81 / 13,7), error-correction (63 / 12,4),
-   cloze-test-design (60 / 8,7), `/features/flashcards` (59 / 9,6), cambridge-exam-prep (54 / 17,1),
-   digital-homework-tools (51 / **4,35**), esl-speaking-assessment-rubric (42 / 8,9),
-   accent-reduction (41 / 9,6), using-films (41 / 12,8), teaching-future-tenses (35 / 9,5).
-   Reguła: ≤60 znaków, keyword na początku, liczba lub konkret („7 minimal-pair drills…"),
-   meta ≤155 znaków kończący się akcją tutora. Zero słowa „reference".
-2. Zabić szablon: nowy `scripts/seo/audit-duplicate-meta.mjs` failuje CI, gdy >3 strony
-   dzielą ten sam meta description lub gdy title jest dosłownym slugiem w Title Case.
-3. Strony statyczne edytujemy w `public/**/*.html`; strony React (`/features/flashcards`,
-   `/tools/vocab-cefr-checker`, `/esl-worksheets`) przez `src/constants/seoMeta.ts` + `PageSeo`.
+Dzięki temu kolejne sprinty dopisują tylko wpisy do mapy, bez dotykania generatora.
 
-Oczekiwany efekt: CTR 2,0% → 4,5–5% przy tych samych pozycjach ≈ +200–250 klików/mies.
+## Krok 2 — 15 stron do przepisania (title ≤60 znaków, meta ≤155)
 
-### Faza 2 — Intent realignment (naprawa przecieku US)
+Wybór: pozycja 4–19, ≥35 wyświetleń, CTR poniżej 2,5% (Strony.csv). Typ: G = generowana
+(override w mapie), R = ręczna (edycja HTML), SPA = `src/constants/seoMeta.ts`.
 
-- **Klaster „best apps … 2026"** (≈900 wyśw., 0 klików): nie kasujemy. Re-angle na
-  „Best English Learning Apps 2026 — What to Recommend to Adult 1:1 Students (and What to
-  Do in the Lesson Instead)". Nad foldem tabela porównawcza aplikacji + sekcja „what the app
-  can't do: assess, personalise, review homework" → CTA do `/esl-worksheets`.
-- **Kids cluster** (`esl-games-for-kids.html`, poz. 31–55 na `esl games for kids`, `esl kids`):
-  łamie pozycjonowanie „adults only" → `noindex,follow` + przekierowanie linkowania
-  wewnętrznego na `/blog/esl-games-for-teachers`. Z pozycji 46 i tak nie ma ruchu.
-- Każda utrzymana strona learner-intent dostaje jeden tutorski CTA path
-  (`/esl-worksheets` lub `/signup`).
+| # | Strona | Dane GSC | Typ | Nowy title (propozycja) |
+|---|---|---|---|---|
+| 1 | blog/teaching-english-intonation-stress | 309 wyśw., poz. 10,8 | R | English Stress & Intonation: 10 Drills for Adults |
+| 2 | blog/teaching-collocations-esl | 192 wyśw., poz. 18,9 | R | Teaching Collocations: 10 Activities That Stick |
+| 3 | modal-verbs-worksheets-esl | 187 wyśw., poz. 7,7 | R | Modal Verbs Worksheets — 8 Ready ESL Exercise Types |
+| 4 | blog/fill-in-the-blanks-exercises-best-practices | 112 wyśw., poz. 12,8 | G | Fill-in-the-Blank Tasks: 7 Rules That Make Them Work |
+| 5 | blog/word-formation-exercises-english | 112 wyśw., poz. 11,6 | G | Word Formation Exercises: 60 Prefix & Suffix Prompts |
+| 6 | blog/diagnostic-testing-english-learners | 110 wyśw., poz. 10,4 | G | Diagnostic Testing Adult English Learners in 15 Min |
+| 7 | blog/teaching-minimal-pairs-esl | 86 wyśw., poz. 10,0 | R | Minimal Pairs: 12 Drills Sorted by Learner's L1 |
+| 8 | blog/how-to-create-grammar-worksheets-with-ai | 81 wyśw., poz. 13,7 | G | Create Grammar Worksheets With AI in Under a Minute |
+| 9 | blog/error-correction-techniques-esl | 63 wyśw., poz. 12,4 | G | ESL Error Correction: 6 Techniques for 1:1 Lessons |
+| 10 | blog/cloze-test-design-esl | 60 wyśw., poz. 8,7 | G | Cloze Tests: Every-Nth-Word vs Rational Deletion |
+| 11 | /features/flashcards | 59 wyśw., poz. 9,6 | SPA | Flashcards for Adult Learners — Spaced Repetition |
+| 12 | blog/cambridge-exam-preparation-tips-teachers | 54 wyśw., poz. 17,1 | G | Cambridge B2 First & C1 Advanced: Tutor Prep Plan |
+| 13 | blog/digital-homework-tools-esl-teachers | 51 wyśw., poz. 4,35, 0 klików | G | Digital Homework Tools for ESL Tutors — 2026 Compared |
+| 14 | blog/accent-reduction-activities-esl | 41 wyśw., poz. 9,6 | G | Accent Reduction: 9 Activities for Adult Professionals |
+| 15 | blog/using-films-english-teaching | 41 wyśw., poz. 12,8 | R | Using Films in English Lessons: 8 Clip-Based Tasks |
 
-### Faza 3 — 4 klastry topical authority (tylko popyt widoczny w CSV)
+Pozycja 13 to najostrzejszy dowód diagnozy: poz. 4,35 i zero klików jest możliwe wyłącznie
+przy snippetcie, który nikogo nie przekonuje.
 
-| Hub | Spokes istniejące | Lejek do narzędzia |
-|---|---|---|
-| CEFR assessment | diagnostic-testing, how-to-assess-english-level-cefr, how-to-give-english-level-test | `/tools/vocab-cefr-checker` (12 klików, 276 wyśw.), `/features/placement-test` (10 klików, 308 wyśw.) |
-| Pronunciation & phonology | intonation-stress, minimal-pairs, connected-speech (7 klików), IPA, accent-reduction | `/esl-worksheets` (audio exercise types) |
-| Exercise design | cloze, fill-in-the-blanks, sentence-transformation, word-formation | worksheet generator |
-| Tutor operations | digital-homework-tools, progress-reports, substitute-plans, one-to-one lesson plans | `/features/homework` |
+### Reguły copy (egzekwowane w review)
 
-Dla każdego huba: nowa strona w `src/pages/seo/` (wzorzec `SeoLandingLayout`), mapa
-linkowania wewnętrznego z konkretnym anchor textem, wpis w `seoMeta.ts` + `sitemap.xml`.
+- Keyword na początku tytułu; liczba lub konkretne rozróżnienie, jeśli jest prawdziwe.
+- Bez sufiksu "| Edooqoo" na stronach blogowych — marnuje znaki, Google i tak dokleja brand.
+- Meta kończy się akcją tutora, np. "Generate a matching worksheet in one minute."
+- Zakazane w meta: "reference", "evidence-led planning", "non-school-like framing".
+- Każdy meta unikalny, zero wspólnych zdań między stronami.
+- Martha Test: żadnego szkolnego tonu, żadnych dzieci, tylko dorosły uczeń 1:1.
 
-### Faza 4 — Warstwa GEO/AEO (efekt złożony)
+## Krok 3 — Audit script blokujący regresję
 
-- **Citation-shaped queries już są w danych**: `"stressed syllables occur at roughly regular
-  intervals"` (111+21+5 wyśw., poz. ~9), `"good girl" /gʊg gɜːl/ assimilation` (20 wyśw., poz. 6,6).
-  To LLM-y i ludzie weryfikujący konkretne zdanie. Każdy hub dostaje **citation block**:
-  definicja 40–60 słów, tabela porównawcza, 3 pary Q&A sformułowane jak prompt do chatbota.
-- `public/llms.txt` — przepisany na gęsty indeks faktów (produkt, 29 typów ćwiczeń, DSLM,
-  ceny, dla kogo NIE jest). `docs/llm-context.md` (341 KB) rozbić na katalog
-  `docs/llm-context/` + slim `index.md` ≤ 20 KB — obecny rozmiar jest nieretrievalny.
-- Schema: FAQPage (huby), HowTo (workflow), SoftwareApplication (`/`, `/pricing`),
-  LearningResource (pSEO), BreadcrumbList. **AggregateRating zakazany** — brak realnych recenzji.
-- Pętla pomiaru: 25 seed promptów (ChatGPT/Gemini/Perplexity), cykl miesięczny, wyniki do
-  `docs/seo/runs/ai-search/`.
+Nowy `scripts/seo/audit-duplicate-meta.mjs`, uruchamiany w `seo-integrity.yml` po krokach
+generujących. Failuje build, gdy:
 
-### Faza 5 — Mobile, geo, conquest, higiena
+1. ten sam meta description występuje na więcej niż 3 stronach w `public/**/*.html`,
+2. `<title>` jest dosłownym slugiem przekonwertowanym na Title Case,
+3. title przekracza 60 znaków lub meta przekracza 155 znaków,
+4. meta zawiera którekolwiek z zakazanych sformułowań.
 
-- **Mobile**: CTR 5,21% @ poz. 8,84 vs desktop 1,67% @ 14,91. Nad foldem na hubach blok
-  odpowiedzi (40–60 słów) + sticky CTA; budżet LCP <2,5 s, CLS <0,1.
-- **Geo**: PL/BR/IT/FR/EG mają CTR 7–11% przy małym wolumenie — zostajemy przy angielskim,
-  **bez hreflang** (za wcześnie); decyzję o lokalizacji odkładamy do progu 500 wyśw./kraj.
-- **Conquest**: `/edooqoo-vs-islcollective.html` = 447 wyśw., poz. 5,8, 1 klik. Nowy szablon
-  porównania z sekcją „When NOT to choose Edooqoo" (to cytują LLM-y), zastosowany do
-  wszystkich 8 stron `edooqoo-vs-*`.
-- **Higiena pSEO**: sitemap 548 URL-i vs 441 rankujących — zaostrzenie `pseoIndexPolicy.json`
-  (`noindex,follow` dla kombinacji bez unikalnych kryteriów decyzyjnych) i egzekwowanie przez
-  `scripts/seo/audit-pseo-index-policy.mjs`.
+Raport: `docs/seo/duplicate-meta.generated.md` (lista offenderów + liczby), żeby kolejne
+sprinty widziały pozostały dług (dziś: 137 duplikatów, 381 slug-titles).
 
-## Szczegóły techniczne
+Próg startowy ustawiamy jako baseline lock — CI ma przejść po Sprintcie 1, a kolejne sprinty
+tylko obniżają próg. Inaczej pipeline padnie na 122 stronach, których jeszcze nie tkniemy.
 
-Pliki dotykane: `public/**/*.html` (title/meta/schema), `src/constants/seoMeta.ts`,
-`src/pages/seo/*` (4 nowe huby), `src/App.tsx` (lazy routes), `public/sitemap.xml`,
-`public/llms.txt`, `docs/llm-context*`, `src/data/pseoIndexPolicy.json`,
-`scripts/seo/audit-duplicate-meta.mjs` (nowy), `docs/seo/keyword-strategy.md`.
+## Krok 4 — Regeneracja i weryfikacja
 
-Nie dotykamy: silnika generowania worksheetów (protected IP), Supabase, edge functions,
-schematu bazy. Zero nowych tabel, zero zmian w logice biznesowej.
+1. `node scripts/seo/generate-citable-pages.mjs` oraz `npm run seo:generate-strategic-content`
+   — sprawdzić, że 11 stron generowanych ma nowe title/meta w wyjściowym HTML.
+2. `node scripts/seo/build-blog-index.mjs` — `src/data/blogIndex.ts` i sitemap spójne.
+3. `node scripts/seo/audit-duplicate-meta.mjs` — zielone.
+4. `tsgo --noEmit` po zmianie w `seoMeta.ts`.
+5. Spot-check w przeglądarce: `/features/flashcards` renderuje nowy title przez `PageSeo`.
 
-## Guardrails — czego świadomie NIE robimy
+## Definition of Done
 
-- Nie gonimy head terma `esl` (110k/mies., zero różnicowania komercyjnego).
-- Nie tworzymy treści dla dzieci ani dla uczniów-samouków (łamie Martha Test).
-- Nie rozdmuchujemy pSEO — zawężamy indeksowanie zamiast dodawać URL-e.
-- Nie dodajemy zmyślonych recenzji ani AggregateRating.
-- Nie ruszamy worksheet engine.
+- 15 stron ma unikalny, ręcznie napisany title i meta.
+- Żadna zmiana nie ginie po regeneracji: uruchomić generatory dwa razy, `git diff` pusty.
+- `audit-duplicate-meta.mjs` wpięty w CI i przechodzi.
+- `docs/llm-context.md` i `public/llms.txt` zaktualizowane o zasadę własności metadanych.
+- Wpis do pamięci projektu: nie edytować metadanych stron generowanych bezpośrednio w `public/`.
 
-## Kolejność wdrożenia
+## Pomiar
 
-- **Sprint 1** = Faza 1 (CTR recovery: 15 stron + audit script) — najszybszy zwrot.
-- **Sprint 2** = Faza 2 + 5 (intent realignment, conquest, higiena pSEO).
-- **Sprint 3** = Faza 3 (4 huby klastrowe).
-- **Sprint 4** = Faza 4 (GEO/AEO + pętla pomiaru).
+Baseline z dzisiejszego eksportu zapisujemy do
+`docs/seo/runs/gsc-performance/baseline-2026-08-16.json` (CTR i pozycja dla 15 stron).
+Odczyt kontrolny po 14 i 28 dniach, porównanie CTR przy pozycji ±1. Jeśli CTR nie drgnie
+przy niezmienionej pozycji, przyczyną jest intencja zapytania, nie snippet — strona trafia
+do Sprintu 2 (intent realignment).
+
+## Poza zakresem Sprintu 1
+
+Nowe treści, huby klastrowe, przepisanie `llms.txt` na GEO, polityka pSEO, strony
+`edooqoo-vs-*`, klaster "best apps 2026", kids content. To Sprinty 2–4.
