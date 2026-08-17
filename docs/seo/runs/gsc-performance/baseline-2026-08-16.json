@@ -1,0 +1,24 @@
+{
+  "source": "Google Search Console export, last 3 months (site-wide: 184 clicks, 9020 impressions, 2.0% CTR, avg position 14.2)",
+  "capturedAt": "2026-08-16",
+  "sprint": "v6.9.93 Faza 1 — CTR recovery",
+  "readAgainAt": ["2026-08-30", "2026-09-13"],
+  "successCriterion": "CTR up at position +/-1; pages with flat CTR at flat position move to Sprint 2 (intent realignment).",
+  "pages": [
+    { "url": "/blog/teaching-english-intonation-stress", "impressions": 309, "position": 10.8, "type": "manual" },
+    { "url": "/blog/teaching-collocations-esl", "impressions": 192, "position": 18.9, "type": "manual" },
+    { "url": "/modal-verbs-worksheets-esl", "impressions": 187, "position": 7.7, "type": "manual" },
+    { "url": "/blog/fill-in-the-blanks-exercises-best-practices", "impressions": 112, "position": 12.8, "type": "generated" },
+    { "url": "/blog/word-formation-exercises-english", "impressions": 112, "position": 11.6, "type": "generated" },
+    { "url": "/blog/diagnostic-testing-english-learners", "impressions": 110, "position": 10.4, "type": "generated" },
+    { "url": "/blog/teaching-minimal-pairs-esl", "impressions": 86, "position": 10.0, "type": "manual" },
+    { "url": "/blog/how-to-create-grammar-worksheets-with-ai", "impressions": 81, "position": 13.7, "type": "generated" },
+    { "url": "/blog/error-correction-techniques-esl", "impressions": 63, "position": 12.4, "type": "generated" },
+    { "url": "/blog/cloze-test-design-esl", "impressions": 60, "position": 8.7, "type": "generated" },
+    { "url": "/features/flashcards", "impressions": 59, "position": 9.6, "type": "spa" },
+    { "url": "/blog/cambridge-exam-preparation-tips-teachers", "impressions": 54, "position": 17.1, "type": "generated" },
+    { "url": "/blog/digital-homework-tools-esl-teachers", "impressions": 51, "position": 4.35, "clicks": 0, "type": "generated" },
+    { "url": "/blog/accent-reduction-activities-esl", "impressions": 41, "position": 9.6, "type": "generated" },
+    { "url": "/blog/using-films-english-teaching", "impressions": 41, "position": 12.8, "type": "manual" }
+  ]
+}
