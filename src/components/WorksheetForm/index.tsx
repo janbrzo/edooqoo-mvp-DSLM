@@ -494,6 +494,24 @@ export default function WorksheetForm({
       });
       return;
     }
+    // v6.9.94 — client-side prompt budget guard. The backend rejects any
+    // assembled prompt over PROMPT_HARD_LIMIT chars with an opaque 400; catch
+    // it here with an actionable message instead of burning a request and
+    // firing a false "generation failed" alert email.
+    const estimatedPromptLength =
+      PROMPT_SCAFFOLD_RESERVE
+      + effectiveTopic.length
+      + lessonGoal.length
+      + grammarFocus.length
+      + additionalInformation.length;
+    if (estimatedPromptLength > PROMPT_HARD_LIMIT) {
+      toast({
+        title: 'Lesson details are too long',
+        description: `Your lesson details add up to about ${estimatedPromptLength} characters (limit ${PROMPT_HARD_LIMIT}). Please shorten the lesson focus or additional information.`,
+        variant: 'destructive',
+      });
+      return;
+    }
     submitForm(effectiveTopic);
   };
   const submitForm = (topicOverride?: string) => {
@@ -824,10 +842,10 @@ export default function WorksheetForm({
 
               {/* Lesson Topic - Always Visible, with Lesson Focus appearing next to it */}
               <div className={`grid grid-cols-1 ${isMobile ? 'gap-4' : showMoreFields ? 'md:grid-cols-2 gap-6' : ''} mb-6`}>
-                <FormField name="lessonTopic" label="Lesson topic: General theme or real‑life scenario" placeholder={currentPlaceholders.lessonTopic} value={lessonTopic} onChange={setLessonTopic} suggestions={createSuggestionTiles('lessonTopic')} isRequired={true} />
+                <FormField name="lessonTopic" label="Lesson topic: General theme or real‑life scenario" placeholder={currentPlaceholders.lessonTopic} value={lessonTopic} onChange={setLessonTopic} suggestions={createSuggestionTiles('lessonTopic')} isRequired={true} maxLength={FIELD_LIMITS.lessonTopic} />
                 
                 {/* Lesson Focus appears next to Lesson Topic when expanded */}
-                {showMoreFields && <FormField label="Lesson focus: What should your student achieve by the end of the lesson?" placeholder={currentPlaceholders.lessonFocus} value={lessonGoal} onChange={setLessonGoal} suggestions={createSuggestionTiles('lessonFocus')} isOptional={true} />}
+                {showMoreFields && <FormField label="Lesson focus: What should your student achieve by the end of the lesson?" placeholder={currentPlaceholders.lessonFocus} value={lessonGoal} onChange={setLessonGoal} suggestions={createSuggestionTiles('lessonFocus')} isOptional={true} maxLength={FIELD_LIMITS.lessonGoal} />}
               </div>
 
               {/* Show More Link with Preview - button UNDER the blurred preview */}
@@ -861,9 +879,9 @@ export default function WorksheetForm({
 
               {/* Additional Fields - Second Row when expanded */}
               {showMoreFields && <div className={`grid grid-cols-1 ${isMobile ? 'gap-4' : 'md:grid-cols-2 gap-6'} mb-6`}>
-                  <FormField label="Additional Information: Extra context & personal or situational details" placeholder={currentPlaceholders.additionalInformation} value={additionalInformation} onChange={setAdditionalInformation} suggestions={createSuggestionTiles('additionalInformation')} isOptional={true} />
+                  <FormField label="Additional Information: Extra context & personal or situational details" placeholder={currentPlaceholders.additionalInformation} value={additionalInformation} onChange={setAdditionalInformation} suggestions={createSuggestionTiles('additionalInformation')} isOptional={true} maxLength={FIELD_LIMITS.additionalInformation} />
 
-                  <FormField label="Grammar focus" placeholder={currentPlaceholders.grammarFocus} value={grammarFocus} onChange={setGrammarFocus} suggestions={createSuggestionTiles('grammarFocus')} isOptional={true} />
+                  <FormField label="Grammar focus" placeholder={currentPlaceholders.grammarFocus} value={grammarFocus} onChange={setGrammarFocus} suggestions={createSuggestionTiles('grammarFocus')} isOptional={true} maxLength={FIELD_LIMITS.grammarFocus} />
                 </div>}
 
               {/* v6.9.10 — Next-Step preset banner (per selected student) */}

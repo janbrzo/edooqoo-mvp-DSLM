@@ -109,7 +109,20 @@ export function streamWorksheetGeneration(
     signal: innerController.signal
   }).then(async response => {
     if (!response.ok) {
-      throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      // v6.9.94 — surface the backend's own error message (e.g. prompt too
+      // long) instead of an opaque "HTTP 400", which used to send teachers
+      // into a blind retry loop.
+      let serverMessage: string | null = null;
+      try {
+        const body = await response.clone().json();
+        serverMessage = typeof body?.error === 'string' ? body.error : null;
+      } catch {
+        try {
+          const text = (await response.text()).trim();
+          serverMessage = text ? text.slice(0, 300) : null;
+        } catch { /* ignore */ }
+      }
+      throw new Error(serverMessage || `HTTP ${response.status}: ${response.statusText}`);
     }
     
     const reader = response.body?.getReader();

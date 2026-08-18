@@ -30,7 +30,12 @@ export function validatePrompt(prompt: string): { isValid: boolean; error?: stri
   }
   
   if (prompt.length > 5000) {
-    return { isValid: false, error: 'Prompt must be less than 5000 characters' };
+    // v6.9.94 — user-facing wording; the client now surfaces this string
+    // directly in the generation modal.
+    return {
+      isValid: false,
+      error: 'Your lesson details are too long. Please shorten the lesson focus or additional information and try again.',
+    };
   }
   
   return { isValid: true };
