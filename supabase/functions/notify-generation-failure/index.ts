@@ -132,8 +132,8 @@ serve(async (req) => {
 <body style="margin:0; padding:0; background:#f9fafb;">
   <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; max-width: 700px; margin: 0 auto; padding: 24px;">
     <div style="background:white; border-radius:12px; border:1px solid #e5e7eb; overflow:hidden;">
-      <div style="background:#dc2626; padding:16px 24px;">
-        <h2 style="color:white; margin:0; font-size:18px;">⚠️ Worksheet Generation Failed</h2>
+      <div style="background:${headerColor}; padding:16px 24px;">
+        <h2 style="color:white; margin:0; font-size:18px;">${headerTitle}</h2>
       </div>
       <div style="padding:24px;">
         <table style="width:100%; border-collapse:collapse; margin:0 0 20px 0;">
