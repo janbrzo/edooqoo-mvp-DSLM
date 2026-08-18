@@ -400,22 +400,39 @@ export const useWorksheetGeneration = (
               clientGenerationId,
               activeJobId,
             });
-            try {
-              await supabase.functions.invoke('notify-generation-failure', {
-                body: {
-                  errorType: 'client_stream_lost_pending_db_reconciliation',
-                  errorMessage: `Stream EOF after ${lastProgress.exercisesGenerated}/${lastProgress.expectedTotal || '?'} — handed off to DB polling`,
-                  userId: userId || null,
-                  teacherEmail: null,
-                  model: 'unknown',
-                  promptPreview: String(data.lessonTopic || '').slice(0, 120),
-                  timestamp: new Date().toISOString(),
+            // v6.9.94 — Do NOT alert yet. A stream EOF is only an incident if
+            // the backend never persisted the worksheet. Wait out the DB
+            // reconciliation window (the global poller runs every 5s) and
+            // alert only when the row is genuinely missing. This removes the
+            // single largest source of false-positive failure emails.
+            window.setTimeout(async () => {
+              try {
+                const late = await recoverWorksheetAfterStreamLoss({
                   clientGenerationId,
-                },
-              });
-            } catch (e) {
-              devWarn('[useWorksheetGeneration] notify-generation-failure invoke failed', e);
-            }
+                  teacherId: userId,
+                  studentId: effectiveStudentId,
+                  startedAt: startTime,
+                });
+                if (late) {
+                  devLog('✅ Stream EOF reconciled by DB — no alert sent', { clientGenerationId });
+                  return;
+                }
+                await supabase.functions.invoke('notify-generation-failure', {
+                  body: {
+                    errorType: 'client_stream_lost_no_saved_worksheet',
+                    errorMessage: `Stream EOF after ${lastProgress.exercisesGenerated}/${lastProgress.expectedTotal || '?'} — no worksheet row after 90s of DB reconciliation`,
+                    userId: userId || null,
+                    teacherEmail: null,
+                    model: 'unknown',
+                    promptPreview: String(data.lessonTopic || '').slice(0, 120),
+                    timestamp: new Date().toISOString(),
+                    clientGenerationId,
+                  },
+                });
+              } catch (e) {
+                devWarn('[useWorksheetGeneration] deferred stream-loss alert failed', e);
+              }
+            }, 90_000);
           },
           onError: async (error) => {
             clearTimeout(generationTimeoutId);
