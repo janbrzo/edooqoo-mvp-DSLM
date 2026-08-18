@@ -411,6 +411,7 @@ export const useWorksheetGeneration = (
                   clientGenerationId,
                   teacherId: userId,
                   studentId: effectiveStudentId,
+                  startedAt: startTime,
                 });
                 if (late) {
                   devLog('✅ Stream EOF reconciled by DB — no alert sent', { clientGenerationId });
