@@ -156,7 +156,7 @@ serve(async (req) => {
           <tr style="border-bottom:1px solid #f3f4f6;">
             <td style="padding:10px 12px; font-weight:600; color:#6b7280; vertical-align:top;">Error Type</td>
             <td style="padding:10px 12px;">
-              <span style="background:#fef2f2; color:#dc2626; padding:4px 10px; border-radius:6px; font-weight:700; font-size:13px;">${errorType}</span>
+              <span style="background:${badgeBg}; color:${badgeColor}; padding:4px 10px; border-radius:6px; font-weight:700; font-size:13px;">${errorType}</span>
             </td>
           </tr>
           <tr>
@@ -207,7 +207,7 @@ serve(async (req) => {
       body: JSON.stringify({
         from: 'EDOQOO Alerts <notifications@edooqoo.com>',
         to: ALERT_EMAILS,
-        subject: `⚠️ Worksheet generation failed: ${errorType} — ${teacherEmail || 'anonymous'}`,
+        subject: emailSubject,
         html,
       }),
     });
