@@ -1,6 +1,30 @@
 
 import { Tile } from './types';
 
+/**
+ * v6.9.94 — Field character budgets.
+ *
+ * Mirrors the server-side sanitizer limits in `src/utils/securityUtils.ts`
+ * (`sanitizeWorksheetForm`) and keeps the assembled prompt under the 5000-char
+ * cap enforced by `supabase/functions/generateWorksheet/security.ts`.
+ */
+export const FIELD_LIMITS = {
+  lessonTopic: 200,
+  lessonGoal: 500,
+  grammarFocus: 1000,
+  additionalInformation: 1000,
+} as const;
+
+/**
+ * Characters reserved for the server-side prompt scaffolding built by
+ * `format-worksheet-prompt` (language-style ladder + CEFR ladder + exercise
+ * list). Measured at ~2.4k for the longest ladder combination.
+ */
+export const PROMPT_SCAFFOLD_RESERVE = 2600;
+
+/** Hard limit enforced by the generateWorksheet edge function. */
+export const PROMPT_HARD_LIMIT = 5000;
+
 export const LESSON_TOPICS: Tile[] = [{
   id: "restaurant",
   title: "Ordering food at a restaurant"
