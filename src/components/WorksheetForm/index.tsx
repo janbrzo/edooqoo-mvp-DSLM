@@ -7,6 +7,7 @@ import { LessonTime, EnglishLevel, FormData, WorksheetFormProps, ExerciseSelecti
 import { getRandomPlaceholderSet, PlaceholderSet } from './placeholderSets';
 import { getRandomSuggestionSets, getSuggestionSetMatchingPlaceholder, SuggestionSet } from './suggestionSets';
 import FormField from './FormField';
+import { FIELD_LIMITS, PROMPT_SCAFFOLD_RESERVE, PROMPT_HARD_LIMIT } from './constants';
 import AdvancedOptions from './AdvancedOptions';
 import ExerciseSelector from './ExerciseSelector';
 import TypewriterHint from './TypewriterHint';
