@@ -1571,3 +1571,35 @@ RAG KEYWORDS: meta description duplication, SERP CTR recovery, striking distance
 title tag length, programmatic SEO metadata, snippet rewriting, Google Search Console,
 click-through rate optimization, ESL tutor SEO, generated page overrides, CI SEO guard,
 baseline lock, blog metadata ownership, AEO snippet, organic clicks.
+
+## Worksheet generation failure taxonomy (v6.9.95)
+
+PROBLEM: alert emails and `error_logs` mixed real outages with teacher form mistakes and
+successful AI repairs, so genuine incidents drowned in noise.
+
+EDOOQOO SOLUTION: three classes, enforced in code.
+- `validation` — CLIENT INPUT ERROR, not an incident. The assembled prompt exceeded the
+  5000-char cap (`generateWorksheet/security.ts`). No email, no `error_logs` row. Blocked
+  client-side before the request is sent.
+- `parse_recovered` — QUALITY SIGNAL. Worksheet was saved after AI JSON repair. Amber email,
+  `error_logs` severity `warning`.
+- everything else (`quota`, `timeout`, `parse`, `network`, `database`,
+  `client_stream_lost_no_saved_worksheet`) — REAL FAILURE. Red email, severity `error`.
+
+TECHNICAL MECHANICS:
+- `src/components/WorksheetForm/constants.ts`: `FIELD_LIMITS`, `PROMPT_SCAFFOLD_RESERVE` (2600),
+  `PROMPT_HARD_LIMIT` (5000). `FormField` enforces `maxLength` + counter.
+- `src/hooks/useWorksheetGeneration.tsx`: exact pre-flight on `fullPrompt.length` returned by
+  `format-worksheet-prompt`; over budget => inline error, generation never starts.
+- `supabase/functions/generateWorksheet/index.ts`: validation failure returns 400 only, no
+  `notifyGenerationFailure` call.
+- `supabase/functions/notify-generation-failure/index.ts`: `CLIENT_INPUT_TYPES = {validation}`
+  short-circuits before logging/email; 10-minute per (type,user) email dedup; every other event
+  is persisted via `_shared/logError.ts`.
+- `src/pages/AdminErrorLogsPage.tsx`: `error_code` filter + last-7-days rollup (error/fatal vs
+  warning, top 3 codes clickable as filters).
+
+RAG KEYWORDS: worksheet generation failure, error taxonomy, prompt character limit, form
+validation error, parse_recovered, client_stream_lost, error_logs, alert deduplication,
+severity classification, edge function alerting, admin error dashboard, false positive alerts,
+SSE stream loss, AI JSON repair, prompt budget.

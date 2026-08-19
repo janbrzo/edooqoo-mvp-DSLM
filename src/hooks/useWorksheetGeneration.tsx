@@ -26,6 +26,7 @@ import {
 } from '@/lib/worksheet/generationJobRegistry';
 import { markPersistentAutoGenerateIntentStatus } from '@/lib/worksheet/autoGenerateBootstrap';
 import { getTabId } from '@/lib/worksheet/tabId';
+import { PROMPT_HARD_LIMIT } from '@/components/WorksheetForm/constants';
 
 interface WorksheetGenerationEntitlement {
   hasTokens: boolean;
@@ -310,6 +311,24 @@ export const useWorksheetGeneration = (
       
       let worksheetResult: any = null;
       
+      // v6.9.95 — exact prompt budget pre-flight. `fullPrompt` is the very
+      // string the edge function validates, so check it here and never start
+      // a generation that is guaranteed to 400. Form input errors must not
+      // reach the failure alert pipeline.
+      if (typeof fullPrompt === 'string' && fullPrompt.length > PROMPT_HARD_LIMIT) {
+        devWarn('[useWorksheetGeneration] Prompt over budget — generation not started', {
+          length: fullPrompt.length,
+          limit: PROMPT_HARD_LIMIT,
+        });
+        setStreamProgress(null);
+        setIsGenerating(false);
+        setGenerationError(
+          `Your lesson details are too long (${fullPrompt.length} characters, limit ${PROMPT_HARD_LIMIT}). ` +
+          'Please shorten the lesson focus or additional information and try again.'
+        );
+        return;
+      }
+
       streamingStarted = true;
       devLog('🚦 Streaming flag set to TRUE - modal will stay open');
       

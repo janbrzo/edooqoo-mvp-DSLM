@@ -72,6 +72,7 @@ export default function AdminErrorLogsPage() {
   const [refreshing, setRefreshing] = useState(false);
   const [severity, setSeverity] = useState<string>('all');
   const [component, setComponent] = useState<string>('all');
+  const [errorCode, setErrorCode] = useState<string>('all');
   const [showResolved, setShowResolved] = useState(false);
   const [search, setSearch] = useState('');
   const [expanded, setExpanded] = useState<string | null>(null);
@@ -165,15 +166,40 @@ export default function AdminErrorLogsPage() {
       if (!showResolved && l.resolved_at) return false;
       if (severity !== 'all' && l.severity !== severity) return false;
       if (component !== 'all' && l.component !== component) return false;
+      if (errorCode !== 'all' && l.error_code !== errorCode) return false;
       if (search && !`${l.message} ${l.source_name} ${l.error_code ?? ''}`.toLowerCase().includes(search.toLowerCase())) return false;
       return true;
     });
-  }, [logs, severity, component, showResolved, search]);
+  }, [logs, severity, component, errorCode, showResolved, search]);
 
   const components = useMemo(() => {
     const s = new Set<string>();
     logs.forEach((l) => l.component && s.add(l.component));
     return Array.from(s).sort();
+  }, [logs]);
+
+  /** v6.9.95 — Phase E: error_code filter options, sourced from loaded logs. */
+  const errorCodes = useMemo(() => {
+    const s = new Set<string>();
+    logs.forEach((l) => l.error_code && s.add(l.error_code));
+    return Array.from(s).sort();
+  }, [logs]);
+
+  /** v6.9.95 — Phase E: last-7-days rollup shown above the list. */
+  const last7Days = useMemo(() => {
+    const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
+    const recent = logs.filter((l) => new Date(l.created_at).getTime() >= cutoff);
+    const counts = new Map<string, number>();
+    recent.forEach((l) => {
+      const code = l.error_code ?? '(no code)';
+      counts.set(code, (counts.get(code) ?? 0) + 1);
+    });
+    return {
+      total: recent.length,
+      errors: recent.filter((l) => l.severity === 'error' || l.severity === 'fatal').length,
+      warnings: recent.filter((l) => l.severity === 'warning').length,
+      topCodes: Array.from(counts.entries()).sort((a, b) => b[1] - a[1]).slice(0, 3),
+    };
   }, [logs]);
 
   const markResolved = async (id: string) => {
@@ -305,6 +331,31 @@ export default function AdminErrorLogsPage() {
                   <Button variant={showResolved ? 'default' : 'outline'} size="sm" onClick={() => setShowResolved((s) => !s)}>
                     {showResolved ? 'Hide resolved' : 'Show resolved'}
                   </Button>
+                </div>
+                <div className="flex flex-wrap gap-3 items-center mt-3">
+                  <Select value={errorCode} onValueChange={setErrorCode}>
+                    <SelectTrigger className="w-64"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All error codes</SelectItem>
+                      {errorCodes.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                  <div className="flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                    <span className="font-medium text-foreground">Last 7 days:</span>
+                    <span>{last7Days.total} logs</span>
+                    <Badge variant="destructive" className="bg-orange-600">{last7Days.errors} error/fatal</Badge>
+                    <Badge variant="secondary">{last7Days.warnings} warning</Badge>
+                    {last7Days.topCodes.map(([code, count]) => (
+                      <button
+                        key={code}
+                        type="button"
+                        onClick={() => setErrorCode(code === '(no code)' ? 'all' : code)}
+                        aria-label={`Filter by error code ${code}`}
+                      >
+                        <Badge variant="outline" className="font-mono">{code} · {count}</Badge>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               </CardHeader>
               <CardContent className="p-0">
