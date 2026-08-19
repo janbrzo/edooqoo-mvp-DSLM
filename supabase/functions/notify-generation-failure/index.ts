@@ -18,6 +18,12 @@ const APP_BASE_URL = Deno.env.get('APP_BASE_URL') || 'https://edooqoo.com';
  * Failed", otherwise every real outage drowns in noise.
  */
 const INFO_TYPES = new Set(['parse_recovered']);
+/**
+ * v6.9.95 — client input errors. The teacher filled the form incorrectly
+ * (e.g. lesson details over the prompt budget). Never an incident: no email,
+ * no error_logs row, no admin noise.
+ */
+const CLIENT_INPUT_TYPES = new Set(['validation']);
 const WARNING_TYPES = new Set([
   'parse_recovered',
   'client_stream_lost_pending_db_reconciliation',
@@ -54,6 +60,12 @@ serve(async (req) => {
     } = await req.json();
 
     const isInfo = INFO_TYPES.has(errorType);
+    if (CLIENT_INPUT_TYPES.has(errorType)) {
+      console.log(`🙈 Client input error ignored (not an incident): ${errorType}`);
+      return new Response(JSON.stringify({ skipped: true, reason: 'client_input_error' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
     const severity: 'warning' | 'error' = WARNING_TYPES.has(errorType) ? 'warning' : 'error';
 
     // Persist FIRST and ALWAYS — the alert email is best-effort, the audit

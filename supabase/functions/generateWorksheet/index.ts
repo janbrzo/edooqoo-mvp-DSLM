@@ -381,9 +381,9 @@ serve(async (req) => {
         hasFormData: !!formData,
         formDataKeys: formData ? Object.keys(formData) : [],
       });
-      notifyGenerationFailure('validation', promptValidation.error || 'Unknown validation error', {
-        userId, promptPreview: typeof prompt === 'string' ? prompt?.substring(0, 300) : String(prompt),
-      });
+      // v6.9.95 — `validation` is a FORM INPUT error, not an application
+      // incident: no alert email, no error_logs row. The client surfaces the
+      // message directly and blocks the request before it is even sent.
       return new Response(JSON.stringify({ error: promptValidation.error }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
