@@ -50,6 +50,7 @@ import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { fileURLToPath } from 'node:url';
 import { getPrerenderRoutes } from './seo-route-manifest.mjs';
+import { dedupeHeadMeta } from './head-meta-dedupe.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..', '..');
