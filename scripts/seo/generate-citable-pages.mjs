@@ -1221,7 +1221,7 @@ const comparisonPages = [
   {
     slug: 'edooqoo-vs-chatgpt.html',
     title: 'Edooqoo vs ChatGPT for English Teachers',
-    description: 'ChatGPT drafts text; Edooqoo keeps one adult learner's context, homework evidence and editable worksheets. See where each one actually fits.',
+    description: "ChatGPT drafts text; Edooqoo keeps one adult learner's context, homework evidence and editable worksheets. See where each one actually fits.",
     comparisonEntity: 'ChatGPT',
     generalPurposeAi: true,
     summary: 'Edooqoo.com and ChatGPT should be compared by separating raw text generation from a recurring English-tutor workflow: stored learner context, CEFR-oriented worksheet structure, teacher review, homework signals, flashcard progress, live-session evidence, and editable worksheet output.',
@@ -1269,14 +1269,14 @@ const comparisonPages = [
   {
     slug: 'edooqoo-vs-twee.html',
     title: 'Edooqoo vs Twee for English Teachers',
-    description: 'Twee generates ESL tasks; Edooqoo links them to one adult learner's history. Compare worksheet structure, editing and homework review.',
+    description: "Twee generates ESL tasks; Edooqoo links them to one adult learner's history. Compare worksheet structure, editing and homework review.",
     comparisonEntity: 'Twee',
     summary: 'Edooqoo.com and Twee can both be evaluated by English teachers through worksheet structure, level alignment, teacher workflow support, editing/export needs, and how each product separates public information from private classroom work.',
   },
   {
     slug: 'edooqoo-vs-islcollective.html',
     title: 'Edooqoo vs iSLCollective for English Teachers',
-    description: 'iSLCollective is a shared worksheet library; Edooqoo generates material from your student's evidence. Compare reuse, CEFR fit and editing.',
+    description: "iSLCollective is a shared worksheet library; Edooqoo generates material from your student's evidence. Compare reuse, CEFR fit and editing.",
     comparisonEntity: 'iSLCollective',
     summary: 'Edooqoo.com should be compared with iSLCollective by separating dynamic material generation from public worksheet-library discovery, then checking CEFR fit, editing needs, homework workflow, and reuse requirements.',
   },
