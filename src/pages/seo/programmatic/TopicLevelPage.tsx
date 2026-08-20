@@ -10,6 +10,7 @@ import {
   PSEO_PERSONAS,
 } from '@/constants/pseoMatrix';
 import {
+import { clampSeoDescription, clampSeoTitle } from '@/utils/seoSnippet';
   getTopicIndexPolicy,
   INDEXABLE_PERSONA_SLUGS,
   isIndexableTopicLevel,
@@ -24,8 +25,10 @@ const TopicLevelPage: React.FC = () => {
 
   const policy = getTopicIndexPolicy(topic.slug);
   const isIndexable = isIndexableTopicLevel(topic.slug, level.slug);
-  const title = `${topic.label} worksheets for ${level.label} English learners | Edooqoo`;
-  const description = `Create ${topic.label} worksheets for ${level.label} (${level.cefr}) adult learners through a structured worksheet-generation workflow. Editable, printable, and free to start.`;
+  const title = clampSeoTitle(`${topic.label} worksheets for ${level.label} learners | Edooqoo`);
+  const description = clampSeoDescription(
+    `Create ${topic.label} worksheets for ${level.label} (${level.cefr}) adult learners. Editable, printable, free to start.`
+  );
   const h1 = `${topic.label} worksheets for ${level.label} English learners`;
   const lead = policy
     ? `${policy.useCase} Edooqoo lets the tutor set ${level.cefr}, add the adult learner's context, select a suitable exercise type, edit the draft, and collect follow-up evidence.`

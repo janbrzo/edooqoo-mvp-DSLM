@@ -3,6 +3,7 @@ import { useParams, Navigate } from 'react-router-dom';
 import ProgrammaticSeoLayout from '@/components/seo/ProgrammaticSeoLayout';
 import { findPersona, PSEO_PERSONAS, PSEO_TOPICS, PSEO_LEVELS } from '@/constants/pseoMatrix';
 import {
+import { clampSeoDescription, clampSeoTitle } from '@/utils/seoSnippet';
   getPersonaIndexPolicy,
   getTopicIndexPolicy,
   isIndexablePersona,
@@ -16,8 +17,10 @@ const PersonaPage: React.FC = () => {
 
   const policy = getPersonaIndexPolicy(persona.slug);
   const isIndexable = isIndexablePersona(persona.slug);
-  const title = `English for ${persona.label} — Worksheets, Lessons, Vocabulary | Edooqoo`;
-  const description = `Teach English for ${persona.professionPlural} with AI-generated worksheets calibrated to their daily tasks. CEFR A1-C2. Free to start.`;
+  const title = clampSeoTitle(`English for ${persona.label} — Worksheets and Lessons | Edooqoo`);
+  const description = clampSeoDescription(
+    `Teach English for ${persona.professionPlural} with worksheets calibrated to their daily tasks. CEFR A1-C2. Free to start.`
+  );
   const h1 = `English for ${persona.label}`;
   const lead = policy
     ? `${policy.useCase} Edooqoo lets the tutor connect that communication target to the learner's CEFR level, real context, editable practice, and evidence for the next lesson.`
