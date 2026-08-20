@@ -8,11 +8,11 @@ import {
   PSEO_TOPICS,
 } from '@/constants/pseoMatrix';
 import {
-import { clampSeoDescription, clampSeoTitle } from '@/utils/seoSnippet';
   getTopicIndexPolicy,
   isIndexableExerciseTopic,
   isIndexableTopicLevel,
 } from '@/lib/seo/pseoIndexPolicy';
+import { clampSeoDescription, clampSeoTitle } from '@/utils/seoSnippet';
 
 const ExerciseTopicPage: React.FC = () => {
   const { exerciseType: exSlug = '', topic: topicSlug = '' } = useParams();

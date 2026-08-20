@@ -10,11 +10,11 @@ import {
   PSEO_PERSONAS,
 } from '@/constants/pseoMatrix';
 import {
-import { clampSeoDescription, clampSeoTitle } from '@/utils/seoSnippet';
   getTopicIndexPolicy,
   INDEXABLE_PERSONA_SLUGS,
   isIndexableTopicLevel,
 } from '@/lib/seo/pseoIndexPolicy';
+import { clampSeoDescription, clampSeoTitle } from '@/utils/seoSnippet';
 
 const TopicLevelPage: React.FC = () => {
   const { topic: topicSlug = '', level: levelSlug = '' } = useParams();

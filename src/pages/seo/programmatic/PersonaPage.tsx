@@ -3,12 +3,12 @@ import { useParams, Navigate } from 'react-router-dom';
 import ProgrammaticSeoLayout from '@/components/seo/ProgrammaticSeoLayout';
 import { findPersona, PSEO_PERSONAS, PSEO_TOPICS, PSEO_LEVELS } from '@/constants/pseoMatrix';
 import {
-import { clampSeoDescription, clampSeoTitle } from '@/utils/seoSnippet';
   getPersonaIndexPolicy,
   getTopicIndexPolicy,
   isIndexablePersona,
   isIndexableTopicLevel,
 } from '@/lib/seo/pseoIndexPolicy';
+import { clampSeoDescription, clampSeoTitle } from '@/utils/seoSnippet';
 
 const PersonaPage: React.FC = () => {
   const { persona: slug = '' } = useParams();
