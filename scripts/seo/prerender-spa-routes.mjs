@@ -50,6 +50,7 @@ import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 import { fileURLToPath } from 'node:url';
 import { getPrerenderRoutes } from './seo-route-manifest.mjs';
+import { dedupeHeadMeta } from './head-meta-dedupe.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..', '..');
@@ -98,7 +99,11 @@ function escapeHtmlAttribute(value) {
     .replace(/>/g, '&gt;');
 }
 
+// Sprint 2 (S2-A) — head metadata deduplication lives in ./head-meta-dedupe.mjs
+// so the one-off repair script can apply the exact same transformation.
+
 function normalizeSnapshotHtml(html, route) {
+  html = dedupeHeadMeta(html);
   const canonical = route === '/' ? `${SITE_ORIGIN}/` : `${SITE_ORIGIN}${route}`;
   const title = html.match(/<title[^>]*>([^<]*)<\/title>/i)?.[1]?.trim() || 'Edooqoo';
   const descriptions = [...html.matchAll(/<meta[^>]+name=["']description["'][^>]+content=["']([^"']*)["'][^>]*>/gi)];
@@ -196,6 +201,12 @@ async function validateCompletedSnapshotSet() {
       html.match(/<link\b[^>]*\brel=["']canonical["'][^>]*>/gi) || []
     ).length;
     const h1Count = (html.match(/<h1\b[^>]*>/gi) || []).length;
+    const descriptionCount = (
+      html.match(/<meta\b(?=[^>]*\bname=["']description["'])[^>]*>/gi) || []
+    ).length;
+    const ogDescriptionCount = (
+      html.match(/<meta\b(?=[^>]*\bproperty=["']og:description["'])[^>]*>/gi) || []
+    ).length;
     const compactHtml = html.replace(/\s+/g, '');
 
     if (canonicalCount !== 1) {
@@ -206,6 +217,13 @@ async function validateCompletedSnapshotSet() {
     }
     if (h1Count !== 1) {
       issues.push(`${route}: expected one H1, found ${h1Count}`);
+    }
+    // Sprint 2 (S2-A) — duplicated description tags must never ship again.
+    if (descriptionCount !== 1) {
+      issues.push(`${route}: expected one meta description, found ${descriptionCount}`);
+    }
+    if (ogDescriptionCount > 1) {
+      issues.push(`${route}: expected at most one og:description, found ${ogDescriptionCount}`);
     }
     if (!compactHtml.includes(`"@id":"${expectedCanonical}#webpage"`)) {
       issues.push(`${route}: route WebPage schema missing`);

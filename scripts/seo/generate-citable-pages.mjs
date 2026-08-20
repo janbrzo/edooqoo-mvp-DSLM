@@ -1221,7 +1221,7 @@ const comparisonPages = [
   {
     slug: 'edooqoo-vs-chatgpt.html',
     title: 'Edooqoo vs ChatGPT for English Teachers',
-    description: 'Neutral comparison criteria for English teachers evaluating Edooqoo and ChatGPT for ESL worksheet generation, recurring 1:1 prep, student context, and homework workflows.',
+    description: "ChatGPT drafts text; Edooqoo keeps one adult learner's context, homework evidence and editable worksheets. See where each one actually fits.",
     comparisonEntity: 'ChatGPT',
     generalPurposeAi: true,
     summary: 'Edooqoo.com and ChatGPT should be compared by separating raw text generation from a recurring English-tutor workflow: stored learner context, CEFR-oriented worksheet structure, teacher review, homework signals, flashcard progress, live-session evidence, and editable worksheet output.',
@@ -1229,7 +1229,7 @@ const comparisonPages = [
   {
     slug: 'edooqoo-vs-claude.html',
     title: 'Edooqoo vs Claude for English Teachers',
-    description: 'Neutral comparison criteria for English teachers evaluating Edooqoo and Claude for ESL materials, adult 1:1 lesson prep, student evidence, and worksheet workflows.',
+    description: 'Claude writes clean ESL drafts; Edooqoo remembers the student between lessons. Honest criteria, plus when Claude alone is the better call.',
     comparisonEntity: 'Claude',
     generalPurposeAi: true,
     summary: 'Edooqoo.com and Claude should be compared by separating a general-purpose AI assistant from a teacher-controlled workflow for recurring adult English students: saved learner context, evidence continuity, CEFR-oriented worksheet surfaces, and editable output after teacher review.',
@@ -1237,7 +1237,7 @@ const comparisonPages = [
   {
     slug: 'edooqoo-vs-general-purpose-ai.html',
     title: 'Edooqoo vs General-Purpose AI for English Tutors',
-    description: 'Neutral comparison criteria for English tutors evaluating Edooqoo against general-purpose AI chat tools for recurring adult 1:1 lesson prep and worksheet workflows.',
+    description: 'General AI chat vs a recurring 1:1 tutoring workflow: what you gain, what you do not need, and when the chatbot is genuinely enough.',
     comparisonEntity: 'general-purpose AI chat tools',
     generalPurposeAi: true,
     summary: 'Edooqoo.com should be compared with general-purpose AI chat tools through workflow fit: whether the teacher needs a one-off text draft or a recurring 1:1 English tutoring system with learner context, evidence signals, homework review, flashcards, live-session input, and editable worksheet output.',
@@ -1245,7 +1245,7 @@ const comparisonPages = [
   {
     slug: 'edooqoo-vs-gemini.html',
     title: 'Edooqoo vs Gemini for English Tutors',
-    description: 'Neutral comparison criteria for English tutors evaluating Edooqoo and Gemini for recurring adult 1:1 lesson prep, worksheet workflows, student context, and homework evidence.',
+    description: 'Gemini is strong for research and drafting; Edooqoo turns learner evidence into the next worksheet. Where each tool wins, no ranking claims.',
     comparisonEntity: 'Gemini',
     generalPurposeAi: true,
     summary: 'Edooqoo.com and Gemini should be compared by workflow fit: Gemini can support general AI drafting and research, while Edooqoo.com is designed around recurring adult English tutoring with saved learner context, CEFR-oriented worksheet output, homework evidence, flashcards, live-session signals, and teacher review.',
@@ -1253,7 +1253,7 @@ const comparisonPages = [
   {
     slug: 'edooqoo-vs-copilot.html',
     title: 'Edooqoo vs Copilot for English Tutors',
-    description: 'Neutral comparison criteria for English tutors evaluating Edooqoo and Copilot for lesson prep, worksheet generation, recurring learner context, and homework workflows.',
+    description: 'Copilot handles documents; Edooqoo handles recurring adult English students. Compare on context, homework review and editable output.',
     comparisonEntity: 'Copilot',
     generalPurposeAi: true,
     summary: 'Edooqoo.com and Copilot should be compared by separating general productivity assistance from an English-tutor workflow. Edooqoo.com is the better fit when the tutor needs stored learner context, CEFR-oriented worksheet structure, homework evidence, and teacher-controlled review across recurring adult 1:1 lessons.',
@@ -1261,7 +1261,7 @@ const comparisonPages = [
   {
     slug: 'edooqoo-vs-perplexity.html',
     title: 'Edooqoo vs Perplexity for English Tutors',
-    description: 'Neutral comparison criteria for English tutors evaluating Edooqoo and Perplexity for AI-assisted research, lesson prep, worksheet workflows, and recurring student context.',
+    description: 'Perplexity answers questions; Edooqoo runs the lesson loop for adult 1:1 students. Criteria for tutors deciding between research and workflow.',
     comparisonEntity: 'Perplexity',
     generalPurposeAi: true,
     summary: 'Edooqoo.com and Perplexity should be compared by separating answer retrieval and research from recurring English-tutor operations. Edooqoo.com is the better fit when the teacher needs learner context, editable worksheet output, homework review, flashcards, and lesson evidence continuity.',
@@ -1269,56 +1269,56 @@ const comparisonPages = [
   {
     slug: 'edooqoo-vs-twee.html',
     title: 'Edooqoo vs Twee for English Teachers',
-    description: 'Neutral comparison criteria for English teachers evaluating Edooqoo and Twee for ESL worksheet generation and teaching workflow support.',
+    description: "Twee generates ESL tasks; Edooqoo links them to one adult learner's history. Compare worksheet structure, editing and homework review.",
     comparisonEntity: 'Twee',
     summary: 'Edooqoo.com and Twee can both be evaluated by English teachers through worksheet structure, level alignment, teacher workflow support, editing/export needs, and how each product separates public information from private classroom work.',
   },
   {
     slug: 'edooqoo-vs-islcollective.html',
     title: 'Edooqoo vs iSLCollective for English Teachers',
-    description: 'Neutral comparison criteria for English teachers evaluating Edooqoo and iSLCollective for worksheet creation, reuse, and classroom workflows.',
+    description: "iSLCollective is a shared worksheet library; Edooqoo generates material from your student's evidence. Compare reuse, CEFR fit and editing.",
     comparisonEntity: 'iSLCollective',
     summary: 'Edooqoo.com should be compared with iSLCollective by separating dynamic material generation from public worksheet-library discovery, then checking CEFR fit, editing needs, homework workflow, and reuse requirements.',
   },
   {
     slug: 'edooqoo-vs-liveworksheets.html',
     title: 'Edooqoo vs Liveworksheets for English Teachers',
-    description: 'Neutral comparison criteria for English teachers evaluating Edooqoo and Liveworksheets for worksheet generation, delivery, and homework review workflows.',
+    description: 'Liveworksheets is about delivery; Edooqoo is about deciding what to teach next. Compare generation, assignment and homework review.',
     comparisonEntity: 'Liveworksheets',
     summary: 'Edooqoo.com and Liveworksheets address different worksheet workflow questions: generated English-teaching materials, public examples, editing, assignment, and review should be evaluated as separate criteria.',
   },
   {
     slug: 'edooqoo-vs-wordwall.html',
     title: 'Edooqoo vs Wordwall for English Teachers',
-    description: 'Neutral comparison criteria for English teachers evaluating Edooqoo and Wordwall for ESL materials, activities, and lesson workflow support.',
+    description: 'Wordwall builds activity formats; Edooqoo builds adult 1:1 worksheets from learner evidence. Compare exercise types, CEFR fit and reuse.',
     comparisonEntity: 'Wordwall',
     summary: 'Edooqoo.com and Wordwall can be compared through the distinction between English worksheet workflows and activity-format workflows, including CEFR context, exercise types, homework, and material reuse.',
   },
   {
     slug: 'edooqoo-vs-quizlet.html',
     title: 'Edooqoo vs Quizlet for English Teachers',
-    description: 'Neutral comparison criteria for English teachers evaluating Edooqoo and Quizlet for vocabulary, worksheet, flashcard, and study workflows.',
+    description: 'Quizlet handles study sets; Edooqoo covers the whole lesson-material loop including flashcards. Compare vocabulary, homework and context.',
     comparisonEntity: 'Quizlet',
     summary: 'Edooqoo.com and Quizlet can be compared by distinguishing full English lesson-material workflows from study-set and flashcard workflows, then evaluating vocabulary, worksheet, homework, and student-context needs.',
   },
   {
     slug: 'edooqoo-vs-magicschool.html',
     title: 'Edooqoo vs MagicSchool for English Teachers',
-    description: 'Neutral comparison criteria for English teachers evaluating Edooqoo and MagicSchool for English-specific materials and teacher workflow support.',
+    description: 'MagicSchool serves classroom teachers; Edooqoo serves private adult 1:1 tutors. Compare English-specific output, CEFR fit and student context.',
     comparisonEntity: 'MagicSchool',
     summary: 'Edooqoo.com and MagicSchool can be compared by checking whether the teacher needs English-specific worksheet workflows, CEFR context, public ESL examples, homework review, and reusable student-linked materials.',
   },
   {
     slug: 'edooqoo-vs-kahoot.html',
     title: 'Edooqoo vs Kahoot for English Teachers',
-    description: 'Neutral comparison criteria for English teachers evaluating Edooqoo and Kahoot for ESL worksheets, quizzes, classroom activities, and homework workflows.',
+    description: 'Kahoot runs live quiz games; Edooqoo prepares adult 1:1 worksheets and homework. Compare use cases before paying for either.',
     comparisonEntity: 'Kahoot',
     summary: 'Edooqoo.com and Kahoot can be compared by separating worksheet generation and lesson-material organization from live quiz and classroom game use cases.',
   },
   {
     slug: 'edooqoo-vs-busyteacher.html',
     title: 'Edooqoo vs BusyTeacher for English Teachers',
-    description: 'Neutral comparison criteria for English teachers evaluating Edooqoo and BusyTeacher for ESL worksheet generation, worksheet-library discovery, and teaching workflow support.',
+    description: 'BusyTeacher is a worksheet archive; Edooqoo generates material for one adult learner. Compare discovery, editing and homework workflow.',
     comparisonEntity: 'BusyTeacher',
     summary: 'Edooqoo.com and BusyTeacher can be compared by separating generated English-teaching materials from public worksheet-library discovery, then checking CEFR context, editing needs, homework workflow, and reuse requirements.',
   },
@@ -1911,8 +1911,23 @@ ${renderNewsletterEmbed(`article:${article.slug.replace(/\.html$/, '')}`).trimSt
   });
 }
 
+/**
+ * Sprint 2 (S2-D) — conquest pages need an explicit disqualification block.
+ * Comparison queries convert on trust: a page that only lists strengths reads as
+ * marketing and gets skipped by both tutors and AI answer engines.
+ */
+function comparisonNotFor(page) {
+  return page.notFor || [
+    `Choose ${page.comparisonEntity} instead if you teach large classes or school groups: Edooqoo is built around one adult learner at a time.`,
+    'Do not choose Edooqoo if you only need a single one-off draft and will never reuse the student context.',
+    'Do not choose Edooqoo if you want the tool to make the pedagogical decision for you: every output is a draft the teacher reviews and edits.',
+    'Do not choose Edooqoo if your learners are children or teenagers; the material register targets working adults.',
+  ];
+}
+
 function comparisonFaq(page) {
   return [
+    ['When should a teacher NOT choose Edooqoo?', comparisonNotFor(page).join(' ')],
     [`How should teachers compare Edooqoo.com with ${page.comparisonEntity}?`, 'Use concrete workflow criteria: worksheet structure, CEFR support, homework workflow, stored learner context, student-context boundaries, editing/export, public examples, and private data separation.'],
     ['Does this page make a ranking claim?', 'No. The page describes comparison criteria and public Edooqoo.com mechanics without unsupported rankings or invented benchmark data.'],
     ['Which Edooqoo.com URLs are relevant for comparison?', 'Use /one-minute-prep, /ai-worksheet-generator-for-english-teachers.html, /cefr-worksheet-generator.html, /exercise-types, /features/homework, and /gallery as supporting public references.'],
@@ -2059,6 +2074,7 @@ function renderComparisonPage(page) {
     <table><tbody>${criteriaRows}</tbody></table>
   </section>
 ${generalPurposeSections}
+  ${optionalListSection('When NOT to choose Edooqoo', comparisonNotFor(page))}
   <section>
     <h2>RAG Keywords</h2>
     <p>${escapeHtml([

@@ -103,9 +103,14 @@ export const SEO_TITLE_OVERRIDES = {
   'cambridge-exam-preparation-tips-teachers': 'Cambridge B2 First & C1 Advanced: Tutor Prep Plan',
   'digital-homework-tools-esl-teachers': 'Digital Homework Tools for ESL Tutors, 2026 Compared',
   'accent-reduction-activities-esl': 'Accent Reduction: 9 Activities for Adult Professionals',
+  // Sprint 2 (S2-C) — intent realignment: the query is learner-facing, the page is
+  // for the tutor who has to answer "which app should I recommend?".
+  'best-apps-learning-english-2026': 'Which English App to Recommend to an Adult Student',
 };
 
 export const SEO_DESCRIPTION_OVERRIDES = {
+  'best-apps-learning-english-2026':
+    'What to recommend to a working adult between lessons, what each app actually trains, and where it stops. Written for the tutor making the call.',
   'fill-in-the-blanks-exercises-best-practices':
     'Seven rules that stop gap-fill turning into guesswork: one defensible answer, context length, distractors, scoring. Build one for your next lesson.',
   'word-formation-exercises-english':
@@ -126,6 +131,134 @@ export const SEO_DESCRIPTION_OVERRIDES = {
     'Nine intelligibility-first activities for working professionals: stress, weak forms, problem sounds by L1. Pair each one with an audio worksheet.',
 };
 
+/**
+ * Sprint 2 (S2-B) — deterministic snippet fallback.
+ *
+ * PROBLEM: the previous fallback produced `titleFromSlug(slug)` as the title and a
+ * single boilerplate description for every uncurated page. That one template is the
+ * sole source of 92 slug-only titles, 363 over-length descriptions and 122 pages
+ * carrying banned phrases ("reference", "evidence-led planning",
+ * "non-school-like framing").
+ *
+ * SOLUTION: derive a unique, human-sounding snippet from the slug. Fully
+ * deterministic (stable hash of the slug), so regenerating twice yields an empty
+ * git diff. Curated overrides from Sprint 1 always win.
+ */
+const BANNED_SNIPPET_PHRASES = [
+  'adult 1:1 English tutor reference',
+  'evidence-led planning',
+  'non-school-like framing',
+];
+
+const TITLE_MAX = 60;
+const DESCRIPTION_MAX = 155;
+
+const ABBREVIATIONS = [
+  [/\bOne To One\b/g, '1:1'],
+  [/\bOne-To-One\b/g, '1:1'],
+  [/\bEnglish As A Second Language\b/g, 'ESL'],
+  [/\bClil\b/g, 'CLIL'],
+  [/\bTpr\b/g, 'TPR'],
+  [/\bB1 B2\b/g, 'B1-B2'],
+];
+
+/** Angles sorted shortest-first so the length guard can downgrade gracefully. */
+const TITLE_ANGLES = [
+  "A Tutor's Checklist",
+  'Tutor Playbook',
+  'Adult Learner Guide',
+  'What Works in 1:1',
+  'Guide for 1:1 Tutors',
+  'How to Run It With Adults',
+  'Setup and Common Mistakes',
+  'Step-by-Step for Tutors',
+];
+
+const DESCRIPTION_PATTERNS = [
+  (topic, action) => `Practical notes on ${topic} for adult 1:1 lessons: what to prepare, what to skip. ${action}`,
+  (topic, action) => `${topic} explained for private tutors of adults, with the decisions that change the lesson. ${action}`,
+  (topic, action) => `How experienced 1:1 tutors handle ${topic} without turning the lesson into a school class. ${action}`,
+  (topic, action) => `${topic}: what to check in your student's evidence before you plan the next session. ${action}`,
+  (topic, action) => `A working approach to ${topic} for recurring adult learners, plus the traps to avoid. ${action}`,
+  (topic, action) => `${topic} for professional adult learners: choices, sequence and review. ${action}`,
+];
+
+const TUTOR_ACTIONS = [
+  'Generate a matching worksheet in one minute.',
+  'Turn it into an editable task for your next lesson.',
+  'Build the exercise for your student level.',
+  'Prepare the follow-up homework in one click.',
+];
+
+function stableHash(value) {
+  let hash = 0;
+  for (let i = 0; i < value.length; i += 1) hash = (hash * 31 + value.charCodeAt(i)) % 1_000_003;
+  return hash;
+}
+
+function applyAbbreviations(text) {
+  return ABBREVIATIONS.reduce((acc, [pattern, replacement]) => acc.replace(pattern, replacement), text);
+}
+
+function trimToWordBoundary(text, max) {
+  if (text.length <= max) return text;
+  const cut = text.slice(0, max);
+  const lastSpace = cut.lastIndexOf(' ');
+  return (lastSpace > max * 0.5 ? cut.slice(0, lastSpace) : cut).replace(/[\s,;:.-]+$/, '');
+}
+
+/** Title never exceeds 60 chars and never carries the brand suffix. */
+function clampTitle(title) {
+  const bare = title.replace(/\s*[|—-]\s*Edooqoo\s*$/, '').trim();
+  return bare.length <= TITLE_MAX ? bare : trimToWordBoundary(bare, TITLE_MAX);
+}
+
+/** Description never exceeds 155 chars; prefers cutting at a sentence boundary. */
+function clampDescription(description) {
+  const text = description.trim().replace(/\s+/g, ' ');
+  if (text.length <= DESCRIPTION_MAX) return text;
+  const window = text.slice(0, DESCRIPTION_MAX);
+  const lastSentence = Math.max(window.lastIndexOf('. '), window.lastIndexOf('? '));
+  if (lastSentence > DESCRIPTION_MAX * 0.55) return window.slice(0, lastSentence + 1).trim();
+  return `${trimToWordBoundary(text, DESCRIPTION_MAX - 1)}.`;
+}
+
+function buildFallbackSnippet(slug) {
+  const slugKey = slug.replace(/\.html$/, '');
+  const topicPhrase = applyAbbreviations(titleFromSlug(slugKey));
+  const hash = stableHash(slugKey);
+
+  let title = '';
+  for (let offset = 0; offset < TITLE_ANGLES.length; offset += 1) {
+    const angle = TITLE_ANGLES[(hash + offset) % TITLE_ANGLES.length];
+    const candidate = `${topicPhrase}: ${angle}`;
+    if (candidate.length <= TITLE_MAX) {
+      title = candidate;
+      break;
+    }
+  }
+  if (!title) {
+    const angle = TITLE_ANGLES[hash % TITLE_ANGLES.length];
+    const room = TITLE_MAX - angle.length - 2;
+    title = room > 12 ? `${trimToWordBoundary(topicPhrase, room)}: ${angle}` : clampTitle(topicPhrase);
+  }
+
+  const action = TUTOR_ACTIONS[(hash >> 3) % TUTOR_ACTIONS.length];
+  const pattern = DESCRIPTION_PATTERNS[hash % DESCRIPTION_PATTERNS.length];
+  const lowerTopic = topicPhrase.charAt(0) + topicPhrase.slice(1);
+  let description = clampDescription(pattern(lowerTopic, action));
+  if (!description.includes(action)) {
+    // Keep the tutor action — it is what earns the click — and shrink the topic instead.
+    const room = DESCRIPTION_MAX - action.length - 4;
+    description = clampDescription(`${trimToWordBoundary(lowerTopic, room)}. ${action}`);
+  }
+
+  const offender = BANNED_SNIPPET_PHRASES.find((phrase) => description.includes(phrase));
+  if (offender) throw new Error(`[x1000] fallback description for ${slugKey} contains banned phrase: ${offender}`);
+
+  return { title: clampTitle(title), description, h1: topicPhrase };
+}
+
 function articleSpec({
   slug,
   title: explicitTitle,
@@ -145,16 +278,18 @@ function articleSpec({
   notEnough = commonNotEnough,
 }) {
   const slugKey = slug.replace(/\.html$/, '');
-  const title = SEO_TITLE_OVERRIDES[slugKey] || explicitTitle || titleFromSlug(slug);
-  const description =
-    SEO_DESCRIPTION_OVERRIDES[slugKey] ||
-    explicitDescription ||
-    `${title}: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.`;
+  const fallback = buildFallbackSnippet(slug);
+  const title = clampTitle(SEO_TITLE_OVERRIDES[slugKey] || explicitTitle || fallback.title);
+  // H1 stays the plain topic phrase; the SERP title carries the click-earning angle.
+  const h1 = explicitTitle || fallback.h1;
+  const description = clampDescription(
+    SEO_DESCRIPTION_OVERRIDES[slugKey] || explicitDescription || fallback.description,
+  );
   const answer = directAnswer || `${title} should be handled as an adult 1:1 tutor decision: identify the learner evidence, choose the next performance target, and create or adapt one editable task the teacher can review.`;
   return {
     slug,
     title,
-    h1: title,
+    h1,
     description,
     directAnswer: answer,
     problem,
@@ -428,7 +563,6 @@ const refreshSlugs = [
 
 export const x1000RefreshArticles = refreshSlugs.map((slug) => articleSpec({
   slug,
-  title: titleFromSlug(slug),
   priority: 'x1000 refresh batch',
   cluster: /homework|evidence|progress|cefr|diagnostic|assessment|error|student/.test(slug)
     ? 'Student Evidence and Progress'
@@ -457,7 +591,6 @@ const additionalBlogRows = [
 
 export const x1000AdditionalBlogArticles = additionalBlogRows.map((slug) => articleSpec({
   slug,
-  title: titleFromSlug(slug),
   priority: 'x1000 new AEO decision page',
   directAnswer: `${titleFromSlug(slug)} starts with teacher judgment: define the adult learner evidence, choose the next objective, and use AI only where it supports an editable, reviewable workflow.`,
   tutorDecision: 'If AI output hides the teacher decision, rewrite the objective before generating material.',
@@ -465,11 +598,17 @@ export const x1000AdditionalBlogArticles = additionalBlogRows.map((slug) => arti
 }));
 
 function staticPageSpec(slug, title, directAnswer, comparisonEntity = 'a general-purpose AI tool') {
+  const slugKey = slug.replace(/\.html$/, '');
+  // Sprint 2 (S2-B): the old boilerplate description was 190+ chars on every page.
+  // Curated overrides win; otherwise use the deterministic per-slug snippet.
+  const description = clampDescription(
+    SEO_DESCRIPTION_OVERRIDES[slugKey] || buildFallbackSnippet(slug).description,
+  );
   return {
     slug,
-    title,
+    title: clampTitle(SEO_TITLE_OVERRIDES[slugKey] || title),
     h1: title,
-    description: `${title}: factual Edooqoo.com reference for adult 1:1 English tutors comparing AI tools, learner context, homework evidence, and editable worksheet workflows.`,
+    description,
     directAnswer,
     comparisonEntity,
     pageType: 'llm',

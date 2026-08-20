@@ -12,6 +12,7 @@ import {
   isIndexableExerciseTopic,
   isIndexableTopicLevel,
 } from '@/lib/seo/pseoIndexPolicy';
+import { clampSeoDescription, clampSeoTitle } from '@/utils/seoSnippet';
 
 const ExerciseTopicPage: React.FC = () => {
   const { exerciseType: exSlug = '', topic: topicSlug = '' } = useParams();
@@ -22,8 +23,10 @@ const ExerciseTopicPage: React.FC = () => {
 
   const policy = getTopicIndexPolicy(topic.slug);
   const isIndexable = isIndexableExerciseTopic(exercise.slug, topic.slug);
-  const title = `${exercise.label} Worksheet: ${topic.label} — Edooqoo`;
-  const description = `Create a ${exercise.label} worksheet on ${topic.label} for adult English learners through a structured worksheet-generation workflow. CEFR A1-C2 labels, editable output, free to start.`;
+  const title = clampSeoTitle(`${exercise.label} Worksheet: ${topic.label} — Edooqoo`);
+  const description = clampSeoDescription(
+    `Create a ${exercise.label} worksheet on ${topic.label} for adult learners. CEFR A1-C2 labels, editable output, free to start.`
+  );
   const h1 = `${exercise.label} Worksheet: ${topic.label}`;
   const lead = policy
     ? `${policy.useCase} This ${exercise.label.toLowerCase()} page narrows that objective to one teacher-editable practice mechanic and one observable quality criterion.`
