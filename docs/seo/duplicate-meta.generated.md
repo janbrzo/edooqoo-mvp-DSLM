@@ -4,17 +4,15 @@ Scanned 612 HTML files under `public/`.
 
 | Metric | Current | Baseline lock |
 | --- | --- | --- |
-| duplicateGroups | 1 | 2 |
-| duplicatePages | 131 | 135 |
+| duplicateGroups | 0 | 2 |
+| duplicatePages | 0 | 135 |
 | slugTitles | 92 | 100 |
 | longTitles | 128 | 135 |
-| longDescriptions | 406 | 415 |
+| longDescriptions | 363 | 415 |
 | bannedPhrases | 122 | 130 |
 
 ## Largest duplicate-description groups
 
-- **131 pages** — "1-Minute Prep for 1:1 English teachers. Use student goals, DSLM nano-skill evidence, pacing, homework, flashca…"
-  - e.g. public/about/index.html, public/authors/jan-brzostowski/index.html, public/authors/martha/index.html
 
 ## Sample slug-only titles
 
