@@ -1572,6 +1572,42 @@ title tag length, programmatic SEO metadata, snippet rewriting, Google Search Co
 click-through rate optimization, ESL tutor SEO, generated page overrides, CI SEO guard,
 baseline lock, blog metadata ownership, AEO snippet, organic clicks.
 
+## Sprint 2 — intent realignment, conquest pages, pSEO hygiene (v6.9.96)
+
+PROBLEM: 131 prerendered SPA snapshots shipped two `<meta name="description">` tags (static
+index.html + Helmet), generated blog fallbacks reused boilerplate, comparison ("conquest")
+pages listed only Edooqoo strengths, and `/blog/best-apps-learning-english-2026` targeted a
+learner query with tutor-agnostic copy.
+
+EDOOQOO SOLUTION: head dedupe at prerender time, deterministic unique fallback snippets,
+clamped programmatic metadata, an explicit disqualification block on every conquest page, and
+a tutor-intent rewrite of the "best apps" page.
+
+TECHNICAL MECHANICS:
+- `scripts/seo/head-meta-dedupe.mjs` — removes static meta/canonical when a `data-rh="true"`
+  variant exists; called by `prerender-spa-routes.mjs` (`normalizeSnapshotHtml`) and by the
+  one-shot repair script `scripts/seo/repair-snapshot-head.mjs`
+  (`npm run seo:repair-snapshot-head`, verified by `seo:check-snapshot-head`).
+  Prerender validation now fails when a route has !=1 description or >1 og:description.
+- `scripts/seo/x1000-editorial-plan.mjs` — `buildFallbackSnippet(slug)` derives a
+  deterministic angle from a slug hash, so every generated title/description is unique and
+  clamped (60/155) without touching the worksheet engine.
+- `src/utils/seoSnippet.ts` — `clampSeoTitle` / `clampSeoDescription` used by
+  `ExerciseTopicPage.tsx`, `TopicLevelPage.tsx`, `PersonaPage.tsx`.
+- `scripts/seo/generate-citable-pages.mjs` — `comparisonNotFor(page)` renders a
+  "When NOT to choose Edooqoo" section on all 14 `edooqoo-vs-*` pages and injects the same
+  answer as the first FAQPage entry. Per-page `notFor: [...]` overrides the default set.
+  All 14 comparison descriptions rewritten to <=155 chars, unique, contrast-first.
+- Intent realignment: `best-apps-learning-english-2026` title/description overrides now speak
+  to the tutor deciding what to recommend, not to the learner.
+- Audit state after Sprint 2: duplicateGroups 0, duplicatePages 0, slugTitles 17 (was 92),
+  longDescriptions 208 (was 415), bannedPhrases 0. Baseline re-locked at these values.
+
+RAG KEYWORDS: duplicate meta description, prerender head dedupe, Helmet data-rh, conquest
+pages, competitor comparison SEO, disqualification section, FAQPage schema, deterministic
+snippet generation, programmatic SEO hygiene, meta description length, title clamping,
+search intent realignment, ESL tutor SERP, baseline lock, AEO trust signals.
+
 ## Worksheet generation failure taxonomy (v6.9.95)
 
 PROBLEM: alert emails and `error_logs` mixed real outages with teacher form mistakes and
