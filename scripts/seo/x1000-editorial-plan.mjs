@@ -593,11 +593,17 @@ export const x1000AdditionalBlogArticles = additionalBlogRows.map((slug) => arti
 }));
 
 function staticPageSpec(slug, title, directAnswer, comparisonEntity = 'a general-purpose AI tool') {
+  const slugKey = slug.replace(/\.html$/, '');
+  // Sprint 2 (S2-B): the old boilerplate description was 190+ chars on every page.
+  // Curated overrides win; otherwise use the deterministic per-slug snippet.
+  const description = clampDescription(
+    SEO_DESCRIPTION_OVERRIDES[slugKey] || buildFallbackSnippet(slug).description,
+  );
   return {
     slug,
-    title,
+    title: clampTitle(SEO_TITLE_OVERRIDES[slugKey] || title),
     h1: title,
-    description: `${title}: factual Edooqoo.com reference for adult 1:1 English tutors comparing AI tools, learner context, homework evidence, and editable worksheet workflows.`,
+    description,
     directAnswer,
     comparisonEntity,
     pageType: 'llm',
