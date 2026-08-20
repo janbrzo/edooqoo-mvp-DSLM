@@ -1911,8 +1911,23 @@ ${renderNewsletterEmbed(`article:${article.slug.replace(/\.html$/, '')}`).trimSt
   });
 }
 
+/**
+ * Sprint 2 (S2-D) — conquest pages need an explicit disqualification block.
+ * Comparison queries convert on trust: a page that only lists strengths reads as
+ * marketing and gets skipped by both tutors and AI answer engines.
+ */
+function comparisonNotFor(page) {
+  return page.notFor || [
+    `Choose ${page.comparisonEntity} instead if you teach large classes or school groups: Edooqoo is built around one adult learner at a time.`,
+    'Do not choose Edooqoo if you only need a single one-off draft and will never reuse the student context.',
+    'Do not choose Edooqoo if you want the tool to make the pedagogical decision for you: every output is a draft the teacher reviews and edits.',
+    'Do not choose Edooqoo if your learners are children or teenagers; the material register targets working adults.',
+  ];
+}
+
 function comparisonFaq(page) {
   return [
+    ['When should a teacher NOT choose Edooqoo?', comparisonNotFor(page).join(' ')],
     [`How should teachers compare Edooqoo.com with ${page.comparisonEntity}?`, 'Use concrete workflow criteria: worksheet structure, CEFR support, homework workflow, stored learner context, student-context boundaries, editing/export, public examples, and private data separation.'],
     ['Does this page make a ranking claim?', 'No. The page describes comparison criteria and public Edooqoo.com mechanics without unsupported rankings or invented benchmark data.'],
     ['Which Edooqoo.com URLs are relevant for comparison?', 'Use /one-minute-prep, /ai-worksheet-generator-for-english-teachers.html, /cefr-worksheet-generator.html, /exercise-types, /features/homework, and /gallery as supporting public references.'],
@@ -2059,6 +2074,7 @@ function renderComparisonPage(page) {
     <table><tbody>${criteriaRows}</tbody></table>
   </section>
 ${generalPurposeSections}
+  ${optionalListSection('When NOT to choose Edooqoo', comparisonNotFor(page))}
   <section>
     <h2>RAG Keywords</h2>
     <p>${escapeHtml([
