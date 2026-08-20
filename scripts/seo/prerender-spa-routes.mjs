@@ -236,6 +236,12 @@ async function validateCompletedSnapshotSet() {
       html.match(/<link\b[^>]*\brel=["']canonical["'][^>]*>/gi) || []
     ).length;
     const h1Count = (html.match(/<h1\b[^>]*>/gi) || []).length;
+    const descriptionCount = (
+      html.match(/<meta\b(?=[^>]*\bname=["']description["'])[^>]*>/gi) || []
+    ).length;
+    const ogDescriptionCount = (
+      html.match(/<meta\b(?=[^>]*\bproperty=["']og:description["'])[^>]*>/gi) || []
+    ).length;
     const compactHtml = html.replace(/\s+/g, '');
 
     if (canonicalCount !== 1) {
@@ -246,6 +252,13 @@ async function validateCompletedSnapshotSet() {
     }
     if (h1Count !== 1) {
       issues.push(`${route}: expected one H1, found ${h1Count}`);
+    }
+    // Sprint 2 (S2-A) — duplicated description tags must never ship again.
+    if (descriptionCount !== 1) {
+      issues.push(`${route}: expected one meta description, found ${descriptionCount}`);
+    }
+    if (ogDescriptionCount > 1) {
+      issues.push(`${route}: expected at most one og:description, found ${ogDescriptionCount}`);
     }
     if (!compactHtml.includes(`"@id":"${expectedCanonical}#webpage"`)) {
       issues.push(`${route}: route WebPage schema missing`);
