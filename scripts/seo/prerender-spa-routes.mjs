@@ -98,44 +98,8 @@ function escapeHtmlAttribute(value) {
     .replace(/>/g, '&gt;');
 }
 
-/**
- * Sprint 2 (S2-A) — head metadata deduplication.
- *
- * A snapshot inherits the static <head> from index.html and react-helmet
- * APPENDS its route-specific tags (data-rh="true") instead of replacing them.
- * Result: 131 snapshots shipped two <meta name="description"> tags, the first
- * one being the homepage boilerplate — and the first tag is the one Google reads.
- *
- * Rule: when a data-rh variant of a managed tag exists, every non-data-rh
- * variant of that tag is removed (Helmet is the single source of head truth
- * per route). When Helmet did not manage the tag, the static fallback stays.
- */
-const DEDUPED_META_TAGS = [
-  { attr: 'name', key: 'description' },
-  { attr: 'name', key: 'twitter:description' },
-  { attr: 'name', key: 'twitter:title' },
-  { attr: 'name', key: 'robots' },
-  { attr: 'property', key: 'og:description' },
-  { attr: 'property', key: 'og:title' },
-  { attr: 'property', key: 'og:url' },
-];
-
-function metaTagPattern({ attr, key }) {
-  return new RegExp(`<meta\\b(?=[^>]*\\b${attr}=["']${key}["'])[^>]*>`, 'gi');
-}
-
-export function dedupeHeadMeta(html) {
-  let output = html;
-  for (const tag of DEDUPED_META_TAGS) {
-    const matches = output.match(metaTagPattern(tag)) || [];
-    if (matches.length < 2) continue;
-    if (!matches.some((match) => /\bdata-rh=["']true["']/i.test(match))) continue;
-    output = output.replace(metaTagPattern(tag), (match) =>
-      /\bdata-rh=["']true["']/i.test(match) ? match : '',
-    );
-  }
-  return output;
-}
+// Sprint 2 (S2-A) — head metadata deduplication lives in ./head-meta-dedupe.mjs
+// so the one-off repair script can apply the exact same transformation.
 
 function normalizeSnapshotHtml(html, route) {
   html = dedupeHeadMeta(html);
