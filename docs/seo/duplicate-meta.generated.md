@@ -6,10 +6,10 @@ Scanned 612 HTML files under `public/`.
 | --- | --- | --- |
 | duplicateGroups | 0 | 2 |
 | duplicatePages | 0 | 135 |
-| slugTitles | 92 | 100 |
-| longTitles | 128 | 135 |
-| longDescriptions | 363 | 415 |
-| bannedPhrases | 122 | 130 |
+| slugTitles | 97 | 100 |
+| longTitles | 124 | 135 |
+| longDescriptions | 243 | 415 |
+| bannedPhrases | 0 | 130 |
 
 ## Largest duplicate-description groups
 
@@ -21,6 +21,7 @@ Scanned 612 HTML files under `public/`.
 - public/blog/academic-vocabulary-teaching-strategies.html
 - public/blog/accent-coaching-techniques-esl.html
 - public/blog/adult-business-english-homework-feedback-loop.html
+- public/blog/adult-esl-student-profile-lesson-planning.html
 - public/blog/adult-learner-performance-evidence-beyond-tests.html
 - public/blog/ai-generated-listening-exercises-esl.html
 - public/blog/ai-homework-grading-for-english-teachers.html
@@ -29,11 +30,10 @@ Scanned 612 HTML files under `public/`.
 - public/blog/art-based-language-activities-esl.html
 - public/blog/authentic-listening-materials-esl.html
 - public/blog/best-apps-learning-english-2026.html
+- public/blog/best-lesson-prep-tool-for-english-tutors.html
 - public/blog/best-workflow-for-private-english-tutors.html
 - public/blog/bilingual-education-models-comparison.html
 - public/blog/bottom-up-top-down-listening-esl.html
 - public/blog/building-esl-teaching-portfolio.html
 - public/blog/business-english-material-generation-workflow.html
-- public/blog/clil-methodology-complete-guide.html
-- public/blog/collaborative-writing-activities-esl.html
 
