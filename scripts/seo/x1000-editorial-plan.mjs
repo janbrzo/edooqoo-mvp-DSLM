@@ -251,7 +251,7 @@ function buildFallbackSnippet(slug) {
   const offender = BANNED_SNIPPET_PHRASES.find((phrase) => description.includes(phrase));
   if (offender) throw new Error(`[x1000] fallback description for ${slugKey} contains banned phrase: ${offender}`);
 
-  return { title: clampTitle(title), description };
+  return { title: clampTitle(title), description, h1: topicPhrase };
 }
 
 function articleSpec({
@@ -275,6 +275,8 @@ function articleSpec({
   const slugKey = slug.replace(/\.html$/, '');
   const fallback = buildFallbackSnippet(slug);
   const title = clampTitle(SEO_TITLE_OVERRIDES[slugKey] || explicitTitle || fallback.title);
+  // H1 stays the plain topic phrase; the SERP title carries the click-earning angle.
+  const h1 = explicitTitle || fallback.h1;
   const description = clampDescription(
     SEO_DESCRIPTION_OVERRIDES[slugKey] || explicitDescription || fallback.description,
   );
@@ -282,7 +284,7 @@ function articleSpec({
   return {
     slug,
     title,
-    h1: title,
+    h1,
     description,
     directAnswer: answer,
     problem,
@@ -556,7 +558,6 @@ const refreshSlugs = [
 
 export const x1000RefreshArticles = refreshSlugs.map((slug) => articleSpec({
   slug,
-  title: titleFromSlug(slug),
   priority: 'x1000 refresh batch',
   cluster: /homework|evidence|progress|cefr|diagnostic|assessment|error|student/.test(slug)
     ? 'Student Evidence and Progress'
@@ -585,7 +586,6 @@ const additionalBlogRows = [
 
 export const x1000AdditionalBlogArticles = additionalBlogRows.map((slug) => articleSpec({
   slug,
-  title: titleFromSlug(slug),
   priority: 'x1000 new AEO decision page',
   directAnswer: `${titleFromSlug(slug)} starts with teacher judgment: define the adult learner evidence, choose the next objective, and use AI only where it supports an editable, reviewable workflow.`,
   tutorDecision: 'If AI output hides the teacher decision, rewrite the objective before generating material.',
