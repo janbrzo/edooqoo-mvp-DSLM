@@ -103,9 +103,14 @@ export const SEO_TITLE_OVERRIDES = {
   'cambridge-exam-preparation-tips-teachers': 'Cambridge B2 First & C1 Advanced: Tutor Prep Plan',
   'digital-homework-tools-esl-teachers': 'Digital Homework Tools for ESL Tutors, 2026 Compared',
   'accent-reduction-activities-esl': 'Accent Reduction: 9 Activities for Adult Professionals',
+  // Sprint 2 (S2-C) — intent realignment: the query is learner-facing, the page is
+  // for the tutor who has to answer "which app should I recommend?".
+  'best-apps-learning-english-2026': 'Which English App to Recommend to an Adult Student',
 };
 
 export const SEO_DESCRIPTION_OVERRIDES = {
+  'best-apps-learning-english-2026':
+    'What to recommend to a working adult between lessons, what each app actually trains, and where it stops. Written for the tutor making the call.',
   'fill-in-the-blanks-exercises-best-practices':
     'Seven rules that stop gap-fill turning into guesswork: one defensible answer, context length, distractors, scoring. Build one for your next lesson.',
   'word-formation-exercises-english':
