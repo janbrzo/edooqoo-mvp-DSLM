@@ -36,8 +36,8 @@ const BASELINE = {
   duplicateGroups: 0,
   duplicatePages: 0,
   slugTitles: 17,
-  longTitles: 84,
-  longDescriptions: 123,
+  longTitles: 39,
+  longDescriptions: 99,
   bannedPhrases: 0,
 };
 

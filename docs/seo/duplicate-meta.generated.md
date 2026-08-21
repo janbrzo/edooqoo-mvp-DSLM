@@ -7,8 +7,8 @@ Scanned 612 HTML files under `public/`.
 | duplicateGroups | 0 | 0 |
 | duplicatePages | 0 | 0 |
 | slugTitles | 17 | 17 |
-| longTitles | 84 | 84 |
-| longDescriptions | 123 | 123 |
+| longTitles | 39 | 39 |
+| longDescriptions | 99 | 99 |
 | bannedPhrases | 0 | 0 |
 
 ## Largest duplicate-description groups
