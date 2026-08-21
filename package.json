@@ -43,6 +43,8 @@
     "seo:sync-sitemap-edge": "node scripts/seo/sync-sitemap-edge.mjs",
     "seo:gsc-analyze": "node scripts/seo/analyze-gsc-coverage-export.mjs",
     "seo:audit-duplicate-meta": "node scripts/seo/audit-duplicate-meta.mjs",
+    "seo:repair-snapshot-snippets": "node scripts/seo/repair-snapshot-snippets.mjs",
+    "seo:check-snapshot-snippets": "node scripts/seo/repair-snapshot-snippets.mjs --check",
     "seo:repair-snapshot-head": "node scripts/seo/repair-snapshot-head.mjs",
     "seo:check-snapshot-head": "node scripts/seo/repair-snapshot-head.mjs --check",
     "seo:audit": "node scripts/seo/audit-seo-assets.mjs",

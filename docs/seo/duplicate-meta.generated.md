@@ -4,12 +4,12 @@ Scanned 612 HTML files under `public/`.
 
 | Metric | Current | Baseline lock |
 | --- | --- | --- |
-| duplicateGroups | 0 | 2 |
-| duplicatePages | 0 | 135 |
-| slugTitles | 17 | 100 |
-| longTitles | 124 | 135 |
-| longDescriptions | 208 | 415 |
-| bannedPhrases | 0 | 130 |
+| duplicateGroups | 0 | 0 |
+| duplicatePages | 0 | 0 |
+| slugTitles | 17 | 17 |
+| longTitles | 84 | 84 |
+| longDescriptions | 123 | 123 |
+| bannedPhrases | 0 | 0 |
 
 ## Largest duplicate-description groups
 
