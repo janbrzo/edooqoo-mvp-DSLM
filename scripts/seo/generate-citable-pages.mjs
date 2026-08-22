@@ -23,6 +23,11 @@ const AUTHOR_URL = `${BASE}/authors/jan-brzostowski`;
 const REVIEWER_URL = `${BASE}/authors/martha`;
 
 const productLinks = [
+  // Sprint 3 (Faza 3) topical cluster hubs — see scripts/seo/cluster-hubs.mjs
+  ['/cefr-assessment', 'CEFR assessment hub'],
+  ['/teaching-english-pronunciation', 'Pronunciation teaching hub'],
+  ['/esl-exercise-design', 'ESL exercise design hub'],
+  ['/tutor-operations', 'Tutor operations hub'],
   ['/one-minute-prep', '1-Minute Prep workflow'],
   ['/english-placement-test-for-private-tutors.html', 'Welcome Test diagnostic reference'],
   ['/ai-worksheet-generator-for-english-teachers.html', 'AI worksheet generator reference'],

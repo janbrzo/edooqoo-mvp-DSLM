@@ -1,4 +1,9 @@
 const workflowLinks = [
+  // Sprint 3 (Faza 3) topical cluster hubs — see scripts/seo/cluster-hubs.mjs
+  ['/cefr-assessment', 'CEFR assessment hub'],
+  ['/teaching-english-pronunciation', 'Pronunciation teaching hub'],
+  ['/esl-exercise-design', 'ESL exercise design hub'],
+  ['/tutor-operations', 'Tutor operations hub'],
   ['/one-minute-prep', '1-Minute Prep workflow'],
   ['/how-it-works', 'How Edooqoo works'],
   ['/features/homework', 'Homework evidence workflow'],
