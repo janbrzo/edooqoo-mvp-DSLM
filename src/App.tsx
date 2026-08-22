@@ -70,6 +70,10 @@ const EnglishGamesForLearners = lazy(() => import("./pages/seo/EnglishGamesForLe
 const EslGamesForTeachers = lazy(() => import("./pages/seo/EslGamesForTeachers"));
 const TeachEnglishOnlineGuide = lazy(() => import("./pages/seo/TeachEnglishOnlineGuide"));
 const ForEnglishTutors = lazy(() => import("./pages/seo/ForEnglishTutors"));
+const CefrAssessmentHub = lazy(() => import("./pages/seo/CefrAssessmentHub"));
+const PronunciationHub = lazy(() => import("./pages/seo/PronunciationHub"));
+const ExerciseDesignHub = lazy(() => import("./pages/seo/ExerciseDesignHub"));
+const TutorOperationsHub = lazy(() => import("./pages/seo/TutorOperationsHub"));
 const EslClassToolkit = lazy(() => import("./pages/seo/EslClassToolkit"));
 const TopicLevelPage = lazy(() => import("./pages/seo/programmatic/TopicLevelPage"));
 const ExerciseTopicPage = lazy(() => import("./pages/seo/programmatic/ExerciseTopicPage"));
@@ -186,6 +190,10 @@ const App = () => (
               <Route path="/blog/esl-games-for-teachers" element={<EslGamesForTeachers />} />
               <Route path="/blog/teach-english-online-guide" element={<TeachEnglishOnlineGuide />} />
               <Route path="/for-english-tutors" element={<ForEnglishTutors />} />
+              <Route path="/cefr-assessment" element={<CefrAssessmentHub />} />
+              <Route path="/teaching-english-pronunciation" element={<PronunciationHub />} />
+              <Route path="/esl-exercise-design" element={<ExerciseDesignHub />} />
+              <Route path="/tutor-operations" element={<TutorOperationsHub />} />
               <Route path="/resources/esl-class-toolkit" element={<EslClassToolkit />} />
               <Route path="/esl-worksheets/:topic/:level" element={<TopicLevelPage />} />
               <Route path="/worksheets/:exerciseType/:topic" element={<ExerciseTopicPage />} />

@@ -27,6 +27,11 @@ export const CORE_SEO_ROUTES = [
   '/features/student-hub',
   '/esl-worksheets',
   '/for-english-tutors',
+  // Sprint 3 (Faza 3) cluster hubs — keep in sync with scripts/seo/cluster-hubs.mjs
+  '/cefr-assessment',
+  '/teaching-english-pronunciation',
+  '/esl-exercise-design',
+  '/tutor-operations',
   '/resources/esl-class-toolkit',
   '/blog/english-games-for-learners',
   '/blog/esl-games-for-teachers',
