@@ -45,3 +45,4 @@
 - [aiChat helper v6.9.66](mem://infrastructure/lovable-gateway-fallback) — Google Generative Language direct primary + OpenAI gpt-4o-mini fallback; Lovable Gateway dropped from hot path (credits exhausted)
 - [Welcome Test Skip/IDK](mem://features/welcome-test/skip-idk-semantics) — v6.9.67 Skip emits test_answer_skipped + answered_at; IDK tags event_payload.is_idk for analytics
 - [Worksheet Failure Taxonomy](mem://features/worksheet-generation/failure-alert-taxonomy) — validation = client input error (no email/log), parse_recovered = quality signal, rest = real failure
+- [Cluster Hubs](mem://seo/cluster-hubs) — 4 topical hub-and-spoke SEO/GEO hubs, backlink injector, cluster audit

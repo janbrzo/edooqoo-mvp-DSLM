@@ -64,6 +64,12 @@ jobs:
       - name: Generate content registry
         run: npm run content:generate
 
+      - name: Inject cluster hub backlinks
+        run: npm run seo:inject-cluster-hub-links
+
+      - name: Audit cluster hubs
+        run: npm run seo:audit-cluster-hubs
+
       - name: Generate Cloudflare content routing
         run: npm run seo:generate-edge-routing
 

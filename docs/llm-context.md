@@ -1639,3 +1639,40 @@ RAG KEYWORDS: worksheet generation failure, error taxonomy, prompt character lim
 validation error, parse_recovered, client_stream_lost, error_logs, alert deduplication,
 severity classification, edge function alerting, admin error dashboard, false positive alerts,
 SSE stream loss, AI JSON repair, prompt budget.
+
+## Sprint 3 — Topical cluster hubs (Faza 3, v6.9.97)
+
+PROBLEM: 441 URLs rank but only ~40 earn clicks; articles sit at position 12-18 because internal
+link equity is spread flat across the site and no single URL owns a topic. LLM answer engines have
+no extractable per-topic definition to cite, so Edooqoo mention rate in AI answers stays at 0%.
+
+EDOOQOO SOLUTION: four hub-and-spoke clusters built only on demand already measured in GSC:
+- `/cefr-assessment` — placement, level testing, formative assessment (tool funnel: `/tools/vocab-cefr-checker`).
+- `/teaching-english-pronunciation` — stress, intonation, minimal pairs, connected speech (funnel: `/esl-worksheets`).
+- `/esl-exercise-design` — cloze, gap-fill, word formation, task-based design (funnel: `/exercise-types`).
+- `/tutor-operations` — homework, progress reports, lesson records, next-objective decisions (funnel: `/tools/what-should-i-teach-next`).
+Every hub renders a fixed GEO surface: a 40-60 word citation block (`data-citation-block`), a
+decision table, the spoke list, and 3 FAQs with FAQPage + CollectionPage + BreadcrumbList JSON-LD.
+
+TECHNICAL MECHANICS:
+- Content source of truth: `src/constants/clusterHubs.ts` (React) mirrored by `scripts/seo/cluster-hubs.mjs` (build scripts).
+- Renderer: `src/components/seo/ClusterHubPage.tsx` on top of `SeoLandingLayout`; static `.html` spokes use `<a>`, SPA spokes use `<Link>`.
+- Pages: `src/pages/seo/{CefrAssessmentHub,PronunciationHub,ExerciseDesignHub,TutorOperationsHub}.tsx`; routes in `src/App.tsx`.
+- Prerender + sitemap: routes added to `CORE_SEO_ROUTES` in `scripts/seo/seo-route-manifest.mjs` and to `public/sitemap.xml`.
+- Spoke backlinks: `scripts/seo/inject-cluster-hub-links.mjs` writes an idempotent
+  `<p data-cluster-hub="...">` block into 20 static spoke HTML files; it runs inside `build:seo` after
+  content generation so regenerated pages never lose the link.
+- Site-wide equity: hub links added to `workflowLinks` (`scripts/seo/x1000-editorial-plan.mjs`) and
+  `productLinks` (`scripts/seo/generate-citable-pages.mjs`), raising incoming links per hub above the
+  top-40 threshold (internal link audit: weakTop40=0, weakTop120=0, orphan=0).
+- AI discovery: `## Topic Hubs` section emitted into `public/llms.txt` by `scripts/seo/generate-ai-resources.mjs`.
+- CI guard: `scripts/seo/audit-cluster-hubs.mjs` (`npm run seo:audit-cluster-hubs`) validates routes,
+  manifest registration, citation block, spoke existence, backlink presence, and title/description limits.
+  Wired into `.github/workflows/seo-integrity.yml` and both `build:seo` scripts.
+- Metadata rules unchanged: hub titles <= 60 chars, descriptions <= 155 chars, enforced by the audit and
+  by `audit-duplicate-meta.mjs` baseline (longTitles 3, longDescriptions 0).
+
+RAG KEYWORDS: cluster hub, hub and spoke SEO, topical authority, CEFR assessment hub, pronunciation
+teaching hub, ESL exercise design hub, tutor operations hub, GEO citation block, internal link equity,
+adult 1:1 English tutoring, placement test, cloze design, homework review workflow, answer engine
+optimization, Edooqoo content architecture.
