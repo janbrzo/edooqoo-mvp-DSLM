@@ -17,7 +17,7 @@
       "route": "/cefr-assessment",
       "type": "spa-route",
       "state": "hold",
-      "incoming": 177,
+      "incoming": 178,
       "outgoing": 67
     },
     {
@@ -38,7 +38,7 @@
       "route": "/esl-exercise-design",
       "type": "spa-route",
       "state": "hold",
-      "incoming": 178,
+      "incoming": 179,
       "outgoing": 68
     },
     {
@@ -60,7 +60,7 @@
       "type": "spa-route",
       "state": "keep",
       "incoming": 290,
-      "outgoing": 89
+      "outgoing": 65
     },
     {
       "route": "/how-it-works",
@@ -81,20 +81,20 @@
       "type": "spa-route",
       "state": "keep",
       "incoming": 292,
-      "outgoing": 101
+      "outgoing": 105
     },
     {
       "route": "/teaching-english-pronunciation",
       "type": "spa-route",
       "state": "hold",
-      "incoming": 179,
+      "incoming": 180,
       "outgoing": 69
     },
     {
       "route": "/tutor-operations",
       "type": "spa-route",
       "state": "hold",
-      "incoming": 177,
+      "incoming": 178,
       "outgoing": 69
     },
     {
