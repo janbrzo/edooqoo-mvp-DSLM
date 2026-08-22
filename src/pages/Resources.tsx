@@ -126,6 +126,11 @@ const Resources = () => {
   ];
 
   const guides: ResourceCard[] = [
+    // Sprint 3 (Faza 3) cluster hubs
+    { title: "CEFR Assessment Hub", description: "Place an adult student on the CEFR scale in one lesson.", href: "/cefr-assessment", badge: "Hub" },
+    { title: "Teaching Pronunciation Hub", description: "Stress, intonation, minimal pairs, and connected speech for adults.", href: "/teaching-english-pronunciation", badge: "Hub" },
+    { title: "ESL Exercise Design Hub", description: "Cloze, gap-fill, word formation, and transformation task design.", href: "/esl-exercise-design", badge: "Hub" },
+    { title: "Tutor Operations Hub", description: "Homework, progress reports, and what-to-teach-next decisions.", href: "/tutor-operations", badge: "Hub" },
     { title: "All 29 Exercise Types", description: "Descriptions, CEFR levels, and use cases.", href: "/exercise-types", badge: "Guide" },
     { title: "Prompt Library", description: "50+ ready-to-use prompts for worksheet creation.", href: "/prompts", badge: "Prompts" },
     { title: "ELT Glossary", description: "50+ English teaching terms with definitions.", href: "/glossary", badge: "Reference" },
