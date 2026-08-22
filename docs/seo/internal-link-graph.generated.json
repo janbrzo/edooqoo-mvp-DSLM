@@ -1,11 +1,11 @@
 {
   "generatedBy": "scripts/seo/audit-internal-link-graph.mjs",
   "totals": {
-    "pages": 612,
-    "strategic": 416,
+    "pages": 616,
+    "strategic": 420,
     "orphanStrategic": 0,
-    "weakTop40": 0,
-    "weakTop120": 0,
+    "weakTop40": 4,
+    "weakTop120": 2,
     "noindexPriorityLinks": 0
   },
   "thresholds": {
@@ -14,31 +14,45 @@
   },
   "topStrategic": [
     {
+      "route": "/cefr-assessment",
+      "type": "spa-route",
+      "state": "hold",
+      "incoming": 4,
+      "outgoing": 67
+    },
+    {
       "route": "/chatgpt-alternative-for-english-tutors.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 374,
+      "incoming": 378,
       "outgoing": 21
     },
     {
       "route": "/edooqoo-vs-chatgpt.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 369,
+      "incoming": 373,
       "outgoing": 10
+    },
+    {
+      "route": "/esl-exercise-design",
+      "type": "spa-route",
+      "state": "hold",
+      "incoming": 6,
+      "outgoing": 68
     },
     {
       "route": "/features/dslm",
       "type": "spa-route",
       "state": "keep",
-      "incoming": 377,
+      "incoming": 381,
       "outgoing": 64
     },
     {
       "route": "/features/homework",
       "type": "spa-route",
       "state": "keep",
-      "incoming": 410,
+      "incoming": 414,
       "outgoing": 64
     },
     {
@@ -52,28 +66,42 @@
       "route": "/how-it-works",
       "type": "spa-route",
       "state": "keep",
-      "incoming": 390,
+      "incoming": 394,
       "outgoing": 64
     },
     {
       "route": "/one-minute-prep",
       "type": "spa-route",
       "state": "keep",
-      "incoming": 413,
+      "incoming": 417,
       "outgoing": 64
     },
     {
       "route": "/resources",
       "type": "spa-route",
       "state": "keep",
-      "incoming": 288,
+      "incoming": 292,
       "outgoing": 101
+    },
+    {
+      "route": "/teaching-english-pronunciation",
+      "type": "spa-route",
+      "state": "hold",
+      "incoming": 6,
+      "outgoing": 69
+    },
+    {
+      "route": "/tutor-operations",
+      "type": "spa-route",
+      "state": "hold",
+      "incoming": 4,
+      "outgoing": 69
     },
     {
       "route": "/what-to-teach-next",
       "type": "spa-route",
       "state": "keep",
-      "incoming": 255,
+      "incoming": 256,
       "outgoing": 82
     },
     {
@@ -136,7 +164,7 @@
       "route": "/chatgpt-for-esl-teachers-limitations.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 153,
+      "incoming": 157,
       "outgoing": 46
     },
     {
@@ -164,91 +192,91 @@
       "route": "/edooqoo-vs-busyteacher.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 141,
+      "incoming": 145,
       "outgoing": 10
     },
     {
       "route": "/edooqoo-vs-claude.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 141,
+      "incoming": 145,
       "outgoing": 10
     },
     {
       "route": "/edooqoo-vs-copilot.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 141,
+      "incoming": 145,
       "outgoing": 10
     },
     {
       "route": "/edooqoo-vs-gemini.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 141,
+      "incoming": 145,
       "outgoing": 10
     },
     {
       "route": "/edooqoo-vs-general-purpose-ai.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 141,
+      "incoming": 145,
       "outgoing": 10
     },
     {
       "route": "/edooqoo-vs-islcollective.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 141,
+      "incoming": 145,
       "outgoing": 10
     },
     {
       "route": "/edooqoo-vs-kahoot.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 141,
+      "incoming": 145,
       "outgoing": 10
     },
     {
       "route": "/edooqoo-vs-liveworksheets.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 141,
+      "incoming": 145,
       "outgoing": 10
     },
     {
       "route": "/edooqoo-vs-magicschool.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 141,
+      "incoming": 145,
       "outgoing": 10
     },
     {
       "route": "/edooqoo-vs-perplexity.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 141,
+      "incoming": 145,
       "outgoing": 10
     },
     {
       "route": "/edooqoo-vs-quizlet.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 141,
+      "incoming": 145,
       "outgoing": 10
     },
     {
       "route": "/edooqoo-vs-twee.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 141,
+      "incoming": 145,
       "outgoing": 10
     },
     {
       "route": "/edooqoo-vs-wordwall.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 141,
+      "incoming": 145,
       "outgoing": 10
     },
     {
@@ -353,8 +381,8 @@
       "route": "/blog/cefr-aligned-worksheet-generation-workflow.html",
       "type": "blog",
       "state": "keep",
-      "incoming": 13,
-      "outgoing": 55
+      "incoming": 14,
+      "outgoing": 56
     },
     {
       "route": "/blog/creating-interactive-worksheets-online.html",
@@ -367,8 +395,8 @@
       "route": "/blog/digital-homework-tools-esl-teachers.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 14,
-      "outgoing": 55
+      "incoming": 15,
+      "outgoing": 56
     },
     {
       "route": "/blog/editable-ai-worksheets-for-adult-english-learners.html",
@@ -388,8 +416,8 @@
       "route": "/blog/english-homework-ai-grading-workflow.html",
       "type": "blog",
       "state": "keep",
-      "incoming": 13,
-      "outgoing": 55
+      "incoming": 14,
+      "outgoing": 56
     },
     {
       "route": "/blog/english-tutor-material-organization-workflow.html",
@@ -570,8 +598,8 @@
       "route": "/blog/task-based-language-teaching-worksheets.html",
       "type": "blog",
       "state": "keep",
-      "incoming": 5,
-      "outgoing": 9
+      "incoming": 6,
+      "outgoing": 10
     },
     {
       "route": "/blog/teacher-controlled-ai-lesson-prep.html",
@@ -668,7 +696,7 @@
       "route": "/ai-chatbot-vs-student-context-system.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 153,
+      "incoming": 157,
       "outgoing": 44
     },
     {
@@ -738,14 +766,14 @@
       "route": "/ai-tools-for-online-esl-teachers.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 154,
+      "incoming": 158,
       "outgoing": 21
     },
     {
       "route": "/ai-tools-for-private-english-tutors.html",
       "type": "static-landing",
       "state": "keep",
-      "incoming": 153,
+      "incoming": 157,
       "outgoing": 21
     },
     {
@@ -808,7 +836,7 @@
       "route": "/best-ai-tools-for-private-english-tutors.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 153,
+      "incoming": 157,
       "outgoing": 21
     },
     {
@@ -822,40 +850,38 @@
       "route": "/best-ai-worksheet-tools-for-english-tutors.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 153,
+      "incoming": 157,
       "outgoing": 43
-    },
-    {
-      "route": "/blog/academic-language-functions-clil.html",
-      "type": "blog",
-      "state": "hold",
-      "incoming": 15,
-      "outgoing": 55
-    },
-    {
-      "route": "/blog/academic-vocabulary-teaching-strategies.html",
-      "type": "blog",
-      "state": "hold",
-      "incoming": 22,
-      "outgoing": 55
-    },
-    {
-      "route": "/blog/accent-coaching-techniques-esl.html",
-      "type": "blog",
-      "state": "hold",
-      "incoming": 14,
-      "outgoing": 55
-    },
-    {
-      "route": "/blog/accent-reduction-activities-esl.html",
-      "type": "blog",
-      "state": "hold",
-      "incoming": 19,
-      "outgoing": 55
     }
   ],
   "orphanStrategic": [],
-  "weakTop40": [],
-  "weakTop120": [],
+  "weakTop40": [
+    {
+      "route": "/cefr-assessment",
+      "incoming": 4
+    },
+    {
+      "route": "/esl-exercise-design",
+      "incoming": 6
+    },
+    {
+      "route": "/teaching-english-pronunciation",
+      "incoming": 6
+    },
+    {
+      "route": "/tutor-operations",
+      "incoming": 4
+    }
+  ],
+  "weakTop120": [
+    {
+      "route": "/cefr-assessment",
+      "incoming": 4
+    },
+    {
+      "route": "/tutor-operations",
+      "incoming": 4
+    }
+  ],
   "noindexPriorityLinks": []
 }
