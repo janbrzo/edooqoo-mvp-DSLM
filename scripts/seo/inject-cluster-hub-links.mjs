@@ -48,6 +48,9 @@ async function main() {
         console.error(`[cluster-hub-links] MISSING spoke file: public/${spoke}`);
         continue;
       }
+      // Idempotency check: the exact block already present means nothing to do,
+      // regardless of surrounding indentation produced by upstream generators.
+      if (html.includes(block)) continue;
       const next = insert(html, block);
       if (next === html) continue;
       changed += 1;
