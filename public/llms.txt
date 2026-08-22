@@ -34,6 +34,13 @@ Last updated: 2026-08-22 | Version: v6.9.71 | Publisher: Edooqoo | Canonical: ht
 - [Reading comprehension worksheet maker](https://edooqoo.com/reading-comprehension-worksheet-maker.html): Citation target for reading comprehension worksheets.
 - [Listening comprehension exercises for ESL](https://edooqoo.com/listening-comprehension-exercises-esl.html): Citation target for listening comprehension and audio task workflows.
 
+## Topic Hubs
+
+- [CEFR assessment hub](https://edooqoo.com/cefr-assessment): Topical hub for placing an adult 1:1 student on the CEFR scale and turning the result into lesson objectives.
+- [Pronunciation teaching hub](https://edooqoo.com/teaching-english-pronunciation): Topical hub for stress, intonation, minimal pairs, and connected speech with adult learners.
+- [ESL exercise design hub](https://edooqoo.com/esl-exercise-design): Topical hub for cloze, gap-fill, word formation, and task-based exercise design.
+- [Tutor operations hub](https://edooqoo.com/tutor-operations): Topical hub for homework review, progress reports, lesson records, and next-objective decisions.
+
 ## Guides
 
 - [AI worksheet generator mechanics for ESL teachers](https://edooqoo.com/blog/ai-worksheet-generator-mechanics-for-esl-teachers.html): Explains worksheet-generation mechanics for ESL teachers.

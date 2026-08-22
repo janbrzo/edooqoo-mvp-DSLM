@@ -125,6 +125,13 @@ const featurePages = [
   ['Student Hub', '/features/student-hub', 'Feature page for student access to shared worksheets, homework, flashcards, and lesson materials.'],
 ];
 
+const clusterHubPages = [
+  ['CEFR assessment hub', '/cefr-assessment', 'Topical hub for placing an adult 1:1 student on the CEFR scale and turning the result into lesson objectives.'],
+  ['Pronunciation teaching hub', '/teaching-english-pronunciation', 'Topical hub for stress, intonation, minimal pairs, and connected speech with adult learners.'],
+  ['ESL exercise design hub', '/esl-exercise-design', 'Topical hub for cloze, gap-fill, word formation, and task-based exercise design.'],
+  ['Tutor operations hub', '/tutor-operations', 'Topical hub for homework review, progress reports, lesson records, and next-objective decisions.'],
+];
+
 const toolPages = [
   ['Free tools for English teachers', '/tools', 'Public hub for browser-based English-teacher utilities.'],
   ['CEFR level test', '/tools/cefr-level-test', 'Public browser-only CEFR-oriented level estimation utility.'],
@@ -1189,6 +1196,10 @@ ${keyFacts.map(([statement, source]) => `- ${statement} Source: ${source}`).join
 ## Core Pages
 
 ${mdLinkList(citablePages.slice(0, 10))}
+
+## Topic Hubs
+
+${mdLinkList(clusterHubPages)}
 
 ## Guides
 
