@@ -2,7 +2,7 @@
 
 > Edooqoo is a lesson-preparation system for freelance English teachers and private tutors who run recurring one-to-one lessons with adult learners. It stores student context — goals, diagnostic results, nano-skill evidence, homework and flashcard signals — and turns that context into ready-to-teach, teacher-reviewable worksheets and follow-up materials. Worksheet generation is the output layer of the workflow, not the whole product.
 
-Last updated: 2026-08-14 | Version: v6.9.92 | Publisher: Edooqoo | Canonical: https://edooqoo.com/
+Last updated: 2026-08-22 | Version: v6.9.71 | Publisher: Edooqoo | Canonical: https://edooqoo.com/
 
 ## Key Facts
 
@@ -38,10 +38,10 @@ Last updated: 2026-08-14 | Version: v6.9.92 | Publisher: Edooqoo | Canonical: ht
 
 - [AI worksheet generator mechanics for ESL teachers](https://edooqoo.com/blog/ai-worksheet-generator-mechanics-for-esl-teachers.html): Explains worksheet-generation mechanics for ESL teachers.
 - [1-Minute Prep workflow for ESL tutors](https://edooqoo.com/blog/one-minute-prep-workflow-for-esl-tutors.html): Explains one-time setup, recurring weekly prep flow, DSLM context, and worksheet output.
-- [Learning Pacing Scientific Vs Pragmatic ESL](https://edooqoo.com/blog/learning-pacing-scientific-vs-pragmatic-esl.html): Learning Pacing Scientific Vs Pragmatic ESL: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.
-- [CEFR Aligned Worksheet Generation Workflow](https://edooqoo.com/blog/cefr-aligned-worksheet-generation-workflow.html): CEFR Aligned Worksheet Generation Workflow: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.
-- [Business English Material Generation Workflow](https://edooqoo.com/blog/business-english-material-generation-workflow.html): Business English Material Generation Workflow: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.
-- [English Homework AI Grading Workflow](https://edooqoo.com/blog/english-homework-ai-grading-workflow.html): English Homework AI Grading Workflow: adult 1:1 English tutor reference with Edooqoo workflow links, teacher review, evidence-led planning, and non-school-like framing.
+- [Learning Pacing Scientific Vs Pragmatic ESL: Tutor Playbook](https://edooqoo.com/blog/learning-pacing-scientific-vs-pragmatic-esl.html): Learning Pacing Scientific Vs Pragmatic ESL. Generate a matching worksheet in one minute.
+- [CEFR Aligned Worksheet Generation Workflow: Tutor Playbook](https://edooqoo.com/blog/cefr-aligned-worksheet-generation-workflow.html): CEFR Aligned Worksheet Generation Workflow for professional adult learners: choices, sequence and review. Build the exercise for your student level.
+- [Business English Material Generation: Adult Learner Guide](https://edooqoo.com/blog/business-english-material-generation-workflow.html): Business English Material Generation Workflow. Turn it into an editable task for your next lesson.
+- [English Homework AI Grading Workflow: A Tutor's Checklist](https://edooqoo.com/blog/english-homework-ai-grading-workflow.html): English Homework AI Grading Workflow: what to check in your student's evidence before you plan the next session. Build the exercise for your student level.
 
 ## Comparisons
 
