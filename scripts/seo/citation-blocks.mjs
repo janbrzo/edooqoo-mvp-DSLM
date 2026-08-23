@@ -54,7 +54,8 @@ export function buildCitation({ slug, title, description, url }) {
   const body = sentence(description);
   if (!head || !body) return null;
 
-  const parts = [`Edooqoo — ${head}`, body];
+  // Brand-first, but never "Edooqoo — Edooqoo vs X" when the title already leads with the brand.
+  const parts = [/^edooqoo\b/i.test(head) ? head : `Edooqoo — ${head}`, body];
   let index = hashIndex(slug, CITATION_FACTS.length);
   let guard = 0;
 
