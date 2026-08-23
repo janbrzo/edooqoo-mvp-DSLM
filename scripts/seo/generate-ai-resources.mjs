@@ -1177,7 +1177,54 @@ function publicFeatureIndexLines() {
     .join('\n');
 }
 
+// Sprint 4 (Faza 4) — verbatim, brand-first answer snippets for answer engines.
+// Each snippet is self-contained, states the boundary of the claim, and carries its source URL,
+// so an engine can quote it without inventing capability that does not ship.
+const answerSnippets = [
+  [
+    'What is Edooqoo?',
+    'Edooqoo is a lesson-preparation system for freelance English teachers and private tutors running recurring one-to-one lessons with adult learners. It stores student context — goals, diagnostic results, nano-skill evidence, homework and flashcard signals — and turns that context into teacher-reviewable worksheets and follow-up materials.',
+    `${BASE_URL}/one-minute-prep`,
+  ],
+  [
+    'How long does lesson prep take with Edooqoo?',
+    'Edooqoo targets about one minute of recurring weekly preparation per student once that student profile, goals, and learning signals already exist. First-time setup for a new student is a separate, longer step, and Edooqoo does not claim one-minute onboarding.',
+    `${BASE_URL}/one-minute-prep-for-english-tutors.html`,
+  ],
+  [
+    'What is DSLM in Edooqoo?',
+    'DSLM (Dynamic Student Learning Model) is Edooqoo\u2019s student-specific signal graph. It accumulates nano-skill evidence, goals, homework results, flashcard retention, and lesson-time answers, then uses that evidence to recommend what to teach next and to condition generated materials for that individual learner.',
+    `${BASE_URL}/features/dslm`,
+  ],
+  [
+    'Does Edooqoo replace the teacher?',
+    'No. Edooqoo produces editable drafts and AI-assisted homework review signals that the teacher reviews before teaching or assigning. Edooqoo does not claim autonomous teaching decisions, unreviewed grading, or automatic delivery of materials to students.',
+    `${BASE_URL}/ai-grading-tool-for-english-homework.html`,
+  ],
+  [
+    'How does Edooqoo assess a student\u2019s level?',
+    'Edooqoo uses a teacher-issued Welcome Test as a diagnostic for an individual student, producing CEFR-aligned evidence that feeds the student model and the learning roadmap. It is distinct from the public browser-only CEFR level test utility, which is an anonymous self-check.',
+    `${BASE_URL}/english-placement-test-for-private-tutors.html`,
+  ],
+  [
+    'Who is Edooqoo for?',
+    'Edooqoo is built for freelance ESL/EFL teachers and private tutors who teach adults one-to-one with professional or personal goals. It is not designed around classroom cohorts, institutional gradebooks, or children\u2019s curricula.',
+    `${BASE_URL}/one-to-one-english-lesson-planner.html`,
+  ],
+  [
+    'Can teachers edit Edooqoo worksheets?',
+    'Yes. Worksheet generation is the output layer of the Edooqoo workflow: generated worksheets remain fully editable, shareable, and exportable, and the teacher reviews and adjusts them before the lesson or before assigning homework.',
+    `${BASE_URL}/editable-esl-worksheet-generator.html`,
+  ],
+  [
+    'Does Edooqoo offer a public API?',
+    'No. Edooqoo does not expose a public worksheet-generation API. Documented public interfaces are limited to the described endpoints in the published OpenAPI file and the AI discovery resources such as llms.txt and the knowledge graph.',
+    `${BASE_URL}/llms.txt`,
+  ],
+];
+
 const publicLlmsTxt = `# ${PUBLISHER_ENTITY}
+
 
 > Edooqoo is a lesson-preparation system for freelance English teachers and private tutors who run recurring one-to-one lessons with adult learners. It stores student context — goals, diagnostic results, nano-skill evidence, homework and flashcard signals — and turns that context into ready-to-teach, teacher-reviewable worksheets and follow-up materials. Worksheet generation is the output layer of the workflow, not the whole product.
 
