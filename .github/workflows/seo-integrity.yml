@@ -88,6 +88,13 @@ jobs:
       - name: Audit duplicate and weak metadata
         run: npm run seo:audit-duplicate-meta
 
+      - name: Check for conflicting JSON-LD @id nodes
+        run: npm run seo:check-jsonld
+
+      - name: Audit structured data and citation coverage
+        run: npm run seo:audit-structured-data
+
+
       - name: TypeScript check
         run: npx tsc --noEmit -p tsconfig.app.json
 

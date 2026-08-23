@@ -1,0 +1,19 @@
+{
+  "rounds": [
+    {
+      "date": "2026-06-24",
+      "status": "manual-template",
+      "prompts": 84,
+      "rows": 336,
+      "answered": 0,
+      "mentions": 0,
+      "mentionRate": 0,
+      "avgCorrectness": null,
+      "byModel": {},
+      "contentGaps": []
+    }
+  ],
+  "pendingRounds": [
+    "2026-06-24"
+  ]
+}
