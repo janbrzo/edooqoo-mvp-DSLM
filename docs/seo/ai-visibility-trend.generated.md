@@ -1,11 +1,22 @@
 # AI Visibility Trend (generated)
 
-Source: manual rounds recorded with `npm run seo:record-ai-search-run`.
-Engines: ChatGPT Search, Perplexity, Google AI results, Bing/Copilot.
+Source: rounds in `docs/seo/runs/ai-search/` produced by `npm run seo:ai-search-baseline`.
+A round with `answered: 0` is a template awaiting manual answers from the engine UIs.
 
 ## Rounds
 
-| Date | Queries | Mentioned | Mention rate | Cited | Citation rate | Citation delta |
-|---|---:|---:|---:|---:|---:|---:|
+| Date | Status | Prompts | Answered | Mentions | Mention rate | Delta | Avg correctness |
+|---|---|---:|---:|---:|---:|---:|---:|
+| 2026-06-24 | manual-template | 84 | 0 | 0 | 0% | — | — |
 
-No rounds recorded yet. Run one measurement round and record it.
+## Latest round — per model
+
+- no answers recorded yet
+
+## Latest round — content gaps to close
+
+- none recorded
+
+## Unfinished rounds
+
+- 2026-06-24: fill the CSV twin and rerun the baseline with --answers
