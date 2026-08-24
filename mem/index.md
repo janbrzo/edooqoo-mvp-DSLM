@@ -46,3 +46,4 @@
 - [Welcome Test Skip/IDK](mem://features/welcome-test/skip-idk-semantics) — v6.9.67 Skip emits test_answer_skipped + answered_at; IDK tags event_payload.is_idk for analytics
 - [Worksheet Failure Taxonomy](mem://features/worksheet-generation/failure-alert-taxonomy) — validation = client input error (no email/log), parse_recovered = quality signal, rest = real failure
 - [Cluster Hubs](mem://seo/cluster-hubs) — 4 topical hub-and-spoke SEO/GEO hubs, backlink injector, cluster audit
+- [Indexation Truth Layer](mem://seo/indexation-truth-layer) — No Cloudflare worker in prod; HTML/robots.txt crawl signals, 3-layer pSEO policy cross-check, sitemap integrity guard
