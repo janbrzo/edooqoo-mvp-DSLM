@@ -1676,3 +1676,47 @@ RAG KEYWORDS: cluster hub, hub and spoke SEO, topical authority, CEFR assessment
 teaching hub, ESL exercise design hub, tutor operations hub, GEO citation block, internal link equity,
 adult 1:1 English tutoring, placement test, cloze design, homework review workflow, answer engine
 optimization, Edooqoo content architecture.
+
+
+## Indexation Truth Layer (Sprint 5, Faza 6, v6.9.99) — PRODUCTION
+
+PROBLEM: production routing signals and the SEO measurement layer disagreed. `verify-live-routing`
+reported 57 failed checks against edooqoo.com because it required HTTP-level 301s and
+`X-Robots-Tag` headers. Those headers are emitted by `cloudflare/worker.mjs`, which is NOT bound to
+edooqoo.com (the apex is served by Lovable hosting). Meanwhile 15 persona routes had no prerendered
+HTML at all, so crawlers received the SPA shell with a canonical pointing at `/`.
+
+EDOOQOO SOLUTION: audits now measure the signal that actually reaches Google, and every crawl-control
+decision must agree across three layers (policy, prerendered HTML, sitemap).
+
+TECHNICAL MECHANICS:
+- `scripts/seo/verify-live-routing.mjs` classifies each check as `pass-header-301`,
+  `pass-header-noindex`, `pass-html-stub`, `pass-html-meta`, `pass-html-canonical`,
+  `pass-robots-disallow` or `fail-no-signal`. HTML fallback requires an exact match of
+  `meta robots` + `link canonical` + `meta refresh` against the expected target.
+  `--strict-headers` restores header-only expectations once the Cloudflare worker serves traffic.
+  Result on production: 57 failures -> 0 real defects (45 `pass-html-stub`, 1 `pass-header-301`).
+- `scripts/seo/pseo-index-policy.mjs` exposes `allPersonaRoutes`; `scripts/seo/seo-route-manifest.mjs`
+  prerenders every persona route, including the 15 `noindex` ones, so each URL owns its robots meta
+  and canonical instead of inheriting the SPA shell.
+- `scripts/seo/audit-pseo-index-policy.mjs` cross-checks `src/data/pseoIndexPolicy.json`, the
+  prerendered `meta robots`, and sitemap membership for all 1,425 pSEO routes (110 have static HTML).
+  Any disagreement fails the build with the offending route and layer.
+- `scripts/seo/audit-sitemap-integrity.mjs` (`npm run seo:audit-sitemap-integrity`) fails on redirect
+  stubs, noindex pages, duplicate `<loc>`, off-domain URLs, and sitemap URLs with no file on disk.
+  Report: `docs/seo/sitemap-integrity.generated.json`.
+- `scripts/seo/build-blog-index.mjs` filters any HTML containing `http-equiv="refresh"` or
+  `robots: noindex` before the sitemap is written (45 legacy stubs can never re-enter).
+- `public/robots.txt` adds `Disallow: /signup`; it is the only crawl-control signal available for
+  app routes without prerendered HTML.
+- `scripts/seo/generate-seo-dashboard.mjs` reports "Live routing: no crawl signal" plus a
+  Routing Truth outcome table and sitemap integrity, replacing the misleading raw failure count.
+- CI: `seo:audit-sitemap-integrity` and `seo:audit-pseo-policy` run in
+  `.github/workflows/seo-integrity.yml`; `npm run seo:routing-truth` runs all three locally.
+- Cloudflare worker status: NOT ACTIVE ON edooqoo.com. It stays generated and deployable, but no
+  audit expects its headers until DNS is proxied through Cloudflare.
+
+RAG KEYWORDS: indexation truth, live routing verification, meta refresh stub, canonical consolidation,
+X-Robots-Tag fallback, noindex follow, pSEO index policy, sitemap integrity, discovered not indexed,
+crawl budget, prerendered persona pages, Cloudflare worker binding, robots.txt disallow signup,
+Search Console recovery, Edooqoo SEO audits.
