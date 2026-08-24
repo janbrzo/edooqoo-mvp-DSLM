@@ -1,14 +1,15 @@
 {
-  "generatedAt": "2026-08-24T06:41:49.634Z",
+  "generatedAt": "2026-08-24T06:48:57.667Z",
   "base": "https://edooqoo.com",
   "strictHeaders": false,
   "totals": {
     "checks": 58,
-    "passed": 46,
-    "failed": 12,
+    "passed": 47,
+    "failed": 11,
     "byOutcome": {
       "pass-html-stub": 45,
-      "fail-no-signal": 12,
+      "fail-no-signal": 11,
+      "pass-html-canonical": 1,
       "pass-header-301": 1
     }
   },
@@ -1247,17 +1248,22 @@
     },
     {
       "type": "host-canonical",
-      "url": "https://www.edooqoo.com/llms.txt",
-      "expected": "https://edooqoo.com/llms.txt",
-      "outcome": "fail-no-signal",
-      "pass": false,
+      "url": "https://www.edooqoo.com/",
+      "expected": "https://edooqoo.com/",
+      "outcome": "pass-html-canonical",
+      "pass": true,
+      "signals": {
+        "robots": "",
+        "canonical": "https://edooqoo.com/",
+        "refresh": ""
+      },
       "ok": true,
       "status": 200,
       "headers": {
         "location": "",
         "xRobotsTag": "",
-        "contentType": "text/plain; charset=utf-8",
-        "cacheControl": "",
+        "contentType": "text/html; charset=utf-8",
+        "cacheControl": "no-cache, must-revalidate, max-age=0",
         "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
         "server": "cloudflare"
       }

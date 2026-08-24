@@ -1,19 +1,20 @@
 # Live Routing Verification
 
-Generated: 2026-08-24T06:41:49.634Z
+Generated: 2026-08-24T06:48:57.667Z
 Base: https://edooqoo.com
 
 ## Summary
 
 - Checks: 58
-- Passed: 46
-- Failed (fail-no-signal): 12
+- Passed: 47
+- Failed (fail-no-signal): 11
 - Strict header mode: off (HTML signal layer accepted)
 
 ### Outcomes
 
-- fail-no-signal: 12
+- fail-no-signal: 11
 - pass-header-301: 1
+- pass-html-canonical: 1
 - pass-html-stub: 45
 
 | Type | URL | Expected | Status | Outcome | Location | Robots signal |
@@ -74,7 +75,7 @@ Base: https://edooqoo.com
 | public-noindex-follow | https://edooqoo.com/english-for/nurses | noindex, follow (header or meta) | 200 | fail-no-signal | https://edooqoo.com/ |  |
 | public-noindex-follow | https://edooqoo.com/english-for/real-estate-agents | noindex, follow (header or meta) | 200 | fail-no-signal | https://edooqoo.com/ |  |
 | public-noindex-follow | https://edooqoo.com/english-for/retail-staff | noindex, follow (header or meta) | 200 | fail-no-signal | https://edooqoo.com/ |  |
-| host-canonical | https://www.edooqoo.com/llms.txt | https://edooqoo.com/llms.txt | 200 | fail-no-signal |  |  |
+| host-canonical | https://www.edooqoo.com/ | https://edooqoo.com/ | 200 | pass-html-canonical | https://edooqoo.com/ |  |
 | http-to-https | http://edooqoo.com/llms.txt | https://edooqoo.com/llms.txt | 301 | pass-header-301 | https://edooqoo.com/llms.txt |  |
 
 ## Operating Rule

@@ -1,12 +1,12 @@
 # SEO / GSC / AI Search Dashboard
 
-Generated: 2026-08-24T06:47:45.643Z
+Generated: 2026-08-24T06:48:58.161Z
 
 ## Current Health
 
 | Signal | Current | Target | Notes |
 |---|---:|---:|---|
-| Live routing: no crawl signal | 12 | 0 | docs/seo/live-routing.generated.md |
+| Live routing: no crawl signal | 11 | 0 | docs/seo/live-routing.generated.md |
 | Sitemap integrity issues | 0 | 0 | 552 URLs checked |
 | GSC indexed rows | 452 | rising for strategic URLs | docs/seo/gsc-coverage-analysis.generated.md |
 | GSC discovered not indexed | 1000 | falling or intentional noindex |  |
@@ -22,8 +22,9 @@ to edooqoo.com. `pass-html-*` is a valid crawl-control signal; only `fail-no-sig
 
 | Outcome | Checks |
 |---|---:|
-| fail-no-signal | 12 |
+| fail-no-signal | 11 |
 | pass-header-301 | 1 |
+| pass-html-canonical | 1 |
 | pass-html-stub | 45 |
 
 ## Latest Run Files
