@@ -187,14 +187,25 @@ async function run() {
     });
   }
 
-  const wwwUrl = 'https://www.edooqoo.com/llms.txt';
+  // Checked on an HTML route: without the Cloudflare worker the www host cannot 301, but the
+  // rendered canonical still consolidates the apex host for Google.
+  const wwwUrl = 'https://www.edooqoo.com/';
   const www = await request(wwwUrl);
+  let wwwOutcome = 'fail-no-signal';
+  let wwwSignals = null;
+  if (www.status === 301 && sameTarget(www.headers.location, `${BASE}/`)) {
+    wwwOutcome = 'pass-header-301';
+  } else if (!STRICT_HEADERS && www.status === 200) {
+    wwwSignals = htmlSignals(await fetchHtml(wwwUrl));
+    if (sameTarget(wwwSignals.canonical, `${BASE}/`)) wwwOutcome = 'pass-html-canonical';
+  }
   checks.push({
     type: 'host-canonical',
     url: wwwUrl,
-    expected: `${BASE}/llms.txt`,
-    outcome: www.status === 301 && sameTarget(www.headers.location, `${BASE}/llms.txt`) ? 'pass-header-301' : 'fail-no-signal',
-    pass: www.status === 301 && sameTarget(www.headers.location, `${BASE}/llms.txt`),
+    expected: `${BASE}/`,
+    outcome: wwwOutcome,
+    pass: wwwOutcome.startsWith('pass'),
+    signals: wwwSignals,
     ...www,
   });
 
