@@ -70,7 +70,8 @@ const topFiles = readdirSync(TOP_DIR)
     f !== 'about.html' &&
     !CANONICAL_ALIASES.has(f)
   )
-  .map(f => join(TOP_DIR, f));
+  .map(f => join(TOP_DIR, f))
+  .filter(fp => !isNonIndexableFile(fp));
 
 const landings = topFiles.map(fp => {
   const html = readFileSync(fp, 'utf8');
