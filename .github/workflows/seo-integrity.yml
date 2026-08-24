@@ -94,6 +94,12 @@ jobs:
       - name: Audit structured data and citation coverage
         run: npm run seo:audit-structured-data
 
+      - name: Audit sitemap integrity (no stubs, no noindex, no missing files)
+        run: npm run seo:audit-sitemap-integrity
+
+      - name: Audit pSEO index policy across policy, prerender and sitemap
+        run: npm run seo:audit-pseo-policy
+
 
       - name: TypeScript check
         run: npx tsc --noEmit -p tsconfig.app.json

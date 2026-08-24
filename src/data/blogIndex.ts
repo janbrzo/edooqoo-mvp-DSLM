@@ -67,7 +67,7 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "keep"
   },
   {
-    "title": "One-to-One English Lesson Planning for Adults: Complete Guide",
+    "title": "One-to-One English Lesson Planning for Adults: Complete",
     "description": "A complete system for planning one-to-one adult English lessons using goals, evidence, CEFR, retrieval, realistic tasks, homework, and review.",
     "url": "/blog/teaching-english-one-to-one.html",
     "date": "2026-06-14",
@@ -764,7 +764,7 @@ export const BLOG_POSTS: BlogPostMeta[] = [
   },
   {
     "title": "How to Avoid School-Like ESL Materials for Adults | Edooqoo",
-    "description": "How to Avoid School-Like ESL Materials for Adults: adult 1:1 English tutor decision page with Edooqoo workflow links, teacher review, and evidence-led next-step framing.",
+    "description": "How to Avoid School-Like ESL Materials for Adults: adult 1:1 English tutor decision page with Edooqoo workflow links, teacher review, and evidence-led.",
     "url": "/blog/how-to-avoid-school-like-esl-materials-for-adults.html",
     "date": "2026-05-24",
     "category": "Adult and Business English",
@@ -884,7 +884,7 @@ export const BLOG_POSTS: BlogPostMeta[] = [
   },
   {
     "title": "How to Track Adult English Student Progress | Edooqoo",
-    "description": "How to Track Adult English Student Progress: adult 1:1 English tutor decision page with Edooqoo workflow links, teacher review, and evidence-led next-step framing.",
+    "description": "How to Track Adult English Student Progress: adult 1:1 English tutor decision page with Edooqoo workflow links, teacher review, and evidence-led.",
     "url": "/blog/how-to-track-adult-english-student-progress.html",
     "date": "2026-05-24",
     "category": "Student Evidence and Progress",
@@ -908,7 +908,7 @@ export const BLOG_POSTS: BlogPostMeta[] = [
   },
   {
     "title": "How to Turn Student Notes Into ESL Worksheets | Edooqoo",
-    "description": "How to Turn Student Notes Into ESL Worksheets: adult 1:1 English tutor decision page with Edooqoo workflow links, teacher review, and evidence-led next-step framing.",
+    "description": "How to Turn Student Notes Into ESL Worksheets: adult 1:1 English tutor decision page with Edooqoo workflow links, teacher review, and evidence-led.",
     "url": "/blog/how-to-turn-student-notes-into-esl-worksheets.html",
     "date": "2026-05-24",
     "category": "Tutor Business and Tools",
@@ -923,8 +923,8 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "hold"
   },
   {
-    "title": "How to Use ChatGPT for ESL Lesson Prep Without Losing Context",
-    "description": "How to Use ChatGPT for ESL Lesson Prep Without Losing Context: adult 1:1 English tutor decision page with Edooqoo workflow links, teacher review, and evidence-led next-step framing.",
+    "title": "How to Use ChatGPT for ESL Lesson Prep Without Losing",
+    "description": "How to Use ChatGPT for ESL Lesson Prep Without Losing Context: adult 1:1 English tutor decision page with Edooqoo workflow links, teacher review, and.",
     "url": "/blog/how-to-use-chatgpt-for-esl-lesson-prep-without-losing-context.html",
     "date": "2026-05-24",
     "category": "Tutor Business and Tools",
@@ -1004,7 +1004,7 @@ export const BLOG_POSTS: BlogPostMeta[] = [
   },
   {
     "title": "Private English Tutor Homework Workflow | Edooqoo",
-    "description": "Private English Tutor Homework Workflow: adult 1:1 English tutor decision page with Edooqoo workflow links, teacher review, and evidence-led next-step framing.",
+    "description": "Private English Tutor Homework Workflow: adult 1:1 English tutor decision page with Edooqoo workflow links, teacher review, and evidence-led next-step.",
     "url": "/blog/private-english-tutor-homework-workflow.html",
     "date": "2026-05-24",
     "category": "Homework and Retention",
@@ -1083,7 +1083,7 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "hold"
   },
   {
-    "title": "Using AI for Teacher Productivity Without Losing Lesson Quality",
+    "title": "Using AI for Teacher Productivity Without Losing Lesson",
     "description": "Adult 1:1 English tutor guide to using AI for productivity while preserving teacher control, learner evidence, and editable lesson materials.",
     "url": "/blog/using-ai-teacher-productivity.html",
     "date": "2026-05-24",
@@ -1092,7 +1092,7 @@ export const BLOG_POSTS: BlogPostMeta[] = [
   },
   {
     "title": "What to Teach After a Speaking Lesson | Edooqoo",
-    "description": "What to Teach After a Speaking Lesson: adult 1:1 English tutor decision page with Edooqoo workflow links, teacher review, and evidence-led next-step framing.",
+    "description": "What to Teach After a Speaking Lesson: adult 1:1 English tutor decision page with Edooqoo workflow links, teacher review, and evidence-led next-step.",
     "url": "/blog/what-to-teach-after-a-speaking-lesson.html",
     "date": "2026-05-24",
     "category": "Tutor Business and Tools",
@@ -1100,7 +1100,7 @@ export const BLOG_POSTS: BlogPostMeta[] = [
   },
   {
     "title": "What to Teach After a Writing Homework | Edooqoo",
-    "description": "What to Teach After a Writing Homework: adult 1:1 English tutor decision page with Edooqoo workflow links, teacher review, and evidence-led next-step framing.",
+    "description": "What to Teach After a Writing Homework: adult 1:1 English tutor decision page with Edooqoo workflow links, teacher review, and evidence-led next-step.",
     "url": "/blog/what-to-teach-after-a-writing-homework.html",
     "date": "2026-05-24",
     "category": "Homework and Retention",
@@ -1108,7 +1108,7 @@ export const BLOG_POSTS: BlogPostMeta[] = [
   },
   {
     "title": "Why ChatGPT Is Not Enough for Recurring English Tutoring",
-    "description": "Why ChatGPT Is Not Enough for Recurring English Tutoring: adult 1:1 English tutor decision page with Edooqoo workflow links, teacher review, and evidence-led next-step framing.",
+    "description": "Why ChatGPT Is Not Enough for Recurring English Tutoring: adult 1:1 English tutor decision page with Edooqoo workflow links, teacher review, and.",
     "url": "/blog/why-chatgpt-is-not-enough-for-recurring-english-tutoring.html",
     "date": "2026-05-24",
     "category": "Tutor Business and Tools",
@@ -1116,7 +1116,7 @@ export const BLOG_POSTS: BlogPostMeta[] = [
   },
   {
     "title": "Why Generic ESL Worksheets Fail Adult Learners | Edooqoo",
-    "description": "Why Generic ESL Worksheets Fail Adult Learners: adult 1:1 English tutor decision page with Edooqoo workflow links, teacher review, and evidence-led next-step framing.",
+    "description": "Why Generic ESL Worksheets Fail Adult Learners: adult 1:1 English tutor decision page with Edooqoo workflow links, teacher review, and evidence-led.",
     "url": "/blog/why-generic-esl-worksheets-fail-adult-learners.html",
     "date": "2026-05-24",
     "category": "Adult and Business English",
@@ -1987,31 +1987,31 @@ export const LANDING_PAGES: LandingPageMeta[] = [
   },
   {
     "title": "Accountant Variance Explanation: Lesson Prep Use Case",
-    "description": "Accountant Variance Explanation: Lesson Prep Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework evidence, and editable worksheet output.",
+    "description": "Accountant Variance Explanation: Lesson Prep Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner.",
     "url": "/accountant-variance-explanation-lesson-prep.html",
     "state": "hold"
   },
   {
     "title": "Accountant Variance Explanation: What-to-Teach-Next Use Case",
-    "description": "Accountant Variance Explanation: What-to-Teach-Next Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework evidence, and editable worksheet output.",
+    "description": "Accountant Variance Explanation: What-to-Teach-Next Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit.",
     "url": "/accountant-variance-explanation-what-to-teach-next.html",
     "state": "hold"
   },
   {
     "title": "Accountant Variance Explanation: Worksheet Use Case",
-    "description": "Accountant Variance Explanation: Worksheet Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework evidence, and editable worksheet output.",
+    "description": "Accountant Variance Explanation: Worksheet Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner.",
     "url": "/accountant-variance-explanation-worksheet.html",
     "state": "hold"
   },
   {
     "title": "Adult Business English Lesson Prep",
-    "description": "Reference for Edooqoo Business English prep for adult learners: workplace goals, CEFR level, student context, worksheet output, homework, and follow-up signals.",
+    "description": "Reference for Edooqoo Business English prep for adult learners: workplace goals, CEFR level, student context, worksheet output, homework, and follow-up.",
     "url": "/adult-business-english-lesson-prep.html",
     "state": "keep"
   },
   {
     "title": "AI Chatbot vs Student Context System",
-    "description": "AI Chatbot vs Student Context System: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework evidence, and editable worksheet output.",
+    "description": "AI Chatbot vs Student Context System: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework.",
     "url": "/ai-chatbot-vs-student-context-system.html",
     "state": "hold"
   },
@@ -2023,7 +2023,7 @@ export const LANDING_PAGES: LandingPageMeta[] = [
   },
   {
     "title": "AI Lesson Planner vs Worksheet Workflow",
-    "description": "AI Lesson Planner vs Worksheet Workflow: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework evidence, and editable worksheet output.",
+    "description": "AI Lesson Planner vs Worksheet Workflow: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework.",
     "url": "/ai-lesson-planner-vs-worksheet-workflow.html",
     "state": "hold"
   },
@@ -2047,43 +2047,43 @@ export const LANDING_PAGES: LandingPageMeta[] = [
   },
   {
     "title": "AI Tools for Adult ESL Homework",
-    "description": "AI Tools for Adult ESL Homework: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework evidence, and editable worksheet output.",
+    "description": "AI Tools for Adult ESL Homework: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework.",
     "url": "/ai-tools-for-adult-esl-homework.html",
     "state": "hold"
   },
   {
     "title": "AI Tools for Business English Tutors",
-    "description": "AI Tools for Business English Tutors: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework evidence, and editable worksheet output.",
+    "description": "AI Tools for Business English Tutors: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework.",
     "url": "/ai-tools-for-business-english-tutors.html",
     "state": "hold"
   },
   {
     "title": "AI Tools for ESL Progress Tracking",
-    "description": "AI Tools for ESL Progress Tracking: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework evidence, and editable worksheet output.",
+    "description": "AI Tools for ESL Progress Tracking: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework.",
     "url": "/ai-tools-for-esl-progress-tracking.html",
     "state": "hold"
   },
   {
     "title": "AI Tools for One-to-One English Lessons",
-    "description": "AI Tools for One-to-One English Lessons: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework evidence, and editable worksheet output.",
+    "description": "AI Tools for One-to-One English Lessons: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework.",
     "url": "/ai-tools-for-one-to-one-english-lessons.html",
     "state": "hold"
   },
   {
     "title": "AI Tools for Online ESL Teachers",
-    "description": "Factual reference for online ESL teachers evaluating Edooqoo.com as a workflow tool for worksheets, homework, flashcards, student context, and lesson organization.",
+    "description": "Factual reference for online ESL teachers evaluating Edooqoo.com as a workflow tool for worksheets, homework, flashcards, student context, and lesson.",
     "url": "/ai-tools-for-online-esl-teachers.html",
     "state": "hold"
   },
   {
     "title": "AI Tools for Private English Tutors",
-    "description": "Factual reference for private English tutors evaluating Edooqoo.com as a workflow tool for student-specific materials, homework, flashcards, and lesson organization.",
+    "description": "Factual reference for private English tutors evaluating Edooqoo.com as a workflow tool for student-specific materials, homework, flashcards, and lesson.",
     "url": "/ai-tools-for-private-english-tutors.html",
     "state": "keep"
   },
   {
     "title": "AI Tools for Private Tutor Student Context",
-    "description": "AI Tools for Private Tutor Student Context: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework evidence, and editable worksheet output.",
+    "description": "AI Tools for Private Tutor Student Context: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context.",
     "url": "/ai-tools-for-private-tutor-student-context.html",
     "state": "hold"
   },
@@ -2125,13 +2125,13 @@ export const LANDING_PAGES: LandingPageMeta[] = [
   },
   {
     "title": "AI Tools for ESL Teachers: Comparison Criteria",
-    "description": "Factual comparison framework for ESL teacher AI tools, covering worksheet generation, CEFR support, homework, flashcards, student context, and workflow fit.",
+    "description": "Factual comparison framework for ESL teacher AI tools, covering worksheet generation, CEFR support, homework, flashcards, student context, and workflow.",
     "url": "/best-ai-tools-for-esl-teachers.html",
     "state": "hold"
   },
   {
     "title": "AI Tools for Private English Tutors: Workflow Criteria",
-    "description": "Factual criteria for private English tutors evaluating AI tools for adult 1:1 lesson prep, worksheets, homework review, student context, and follow-up planning.",
+    "description": "Factual criteria for private English tutors evaluating AI tools for adult 1:1 lesson prep, worksheets, homework review, student context, and follow-up.",
     "url": "/best-ai-tools-for-private-english-tutors.html",
     "state": "hold"
   },
@@ -2143,19 +2143,19 @@ export const LANDING_PAGES: LandingPageMeta[] = [
   },
   {
     "title": "AI Worksheet Tools for English Tutors: Criteria",
-    "description": "AI Worksheet Tools for English Tutors: Criteria: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework evidence, and editable worksheet output.",
+    "description": "AI Worksheet Tools for English Tutors: Criteria: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context.",
     "url": "/best-ai-worksheet-tools-for-english-tutors.html",
     "state": "hold"
   },
   {
     "title": "ChatGPT Alternatives for ESL Teachers: Workflow Criteria",
-    "description": "ChatGPT Alternatives for ESL Teachers: Workflow Criteria: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework evidence, and editable worksheet output.",
+    "description": "ChatGPT Alternatives for ESL Teachers: Workflow Criteria: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner.",
     "url": "/best-chatgpt-alternatives-for-esl-teachers.html",
     "state": "hold"
   },
   {
     "title": "Best ChatGPT Prompts for ESL Teachers vs Workflow",
-    "description": "Best ChatGPT Prompts for ESL Teachers vs Workflow: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework evidence, and editable worksheet output.",
+    "description": "Best ChatGPT Prompts for ESL Teachers vs Workflow: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner.",
     "url": "/best-chatgpt-prompts-for-esl-teachers-vs-workflow.html",
     "state": "hold"
   },
@@ -2179,7 +2179,7 @@ export const LANDING_PAGES: LandingPageMeta[] = [
   },
   {
     "title": "CEFR Progress Tracker for English Students",
-    "description": "Reference for Edooqoo progress tracking: DSLM, learner profile, Welcome Test, skill metrics, homework, flashcards, worksheet signals, and CEFR-aware next steps.",
+    "description": "Reference for Edooqoo progress tracking: DSLM, learner profile, Welcome Test, skill metrics, homework, flashcards, worksheet signals, and CEFR-aware next.",
     "url": "/cefr-progress-tracker-english-students.html",
     "state": "keep"
   },
@@ -2197,7 +2197,7 @@ export const LANDING_PAGES: LandingPageMeta[] = [
   },
   {
     "title": "ChatGPT Alternative for English Tutors",
-    "description": "Factual reference for English tutors comparing general ChatGPT drafting with Edooqoo.com learner-context, worksheet, homework, and teacher-review workflows.",
+    "description": "Factual reference for English tutors comparing general ChatGPT drafting with Edooqoo.com learner-context, worksheet, homework, and teacher-review.",
     "url": "/chatgpt-alternative-for-english-tutors.html",
     "state": "hold"
   },
@@ -2215,19 +2215,19 @@ export const LANDING_PAGES: LandingPageMeta[] = [
   },
   {
     "title": "ChatGPT for ESL Teachers: Limitations",
-    "description": "ChatGPT for ESL Teachers: Limitations: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework evidence, and editable worksheet output.",
+    "description": "ChatGPT for ESL Teachers: Limitations: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework.",
     "url": "/chatgpt-for-esl-teachers-limitations.html",
     "state": "hold"
   },
   {
     "title": "ChatGPT vs AI Worksheet Generator",
-    "description": "ChatGPT vs AI Worksheet Generator: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework evidence, and editable worksheet output.",
+    "description": "ChatGPT vs AI Worksheet Generator: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework.",
     "url": "/chatgpt-vs-ai-worksheet-generator.html",
     "state": "hold"
   },
   {
     "title": "ChatGPT vs Homework Evidence Workflow",
-    "description": "ChatGPT vs Homework Evidence Workflow: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework evidence, and editable worksheet output.",
+    "description": "ChatGPT vs Homework Evidence Workflow: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework.",
     "url": "/chatgpt-vs-homework-evidence-workflow.html",
     "state": "hold"
   },
@@ -2239,7 +2239,7 @@ export const LANDING_PAGES: LandingPageMeta[] = [
   },
   {
     "title": "Claude for English Tutors: Limitations",
-    "description": "Claude for English Tutors: Limitations: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework evidence, and editable worksheet output.",
+    "description": "Claude for English Tutors: Limitations: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework.",
     "url": "/claude-for-english-tutors-limitations.html",
     "state": "hold"
   },
@@ -2257,19 +2257,19 @@ export const LANDING_PAGES: LandingPageMeta[] = [
   },
   {
     "title": "Consultant Executive Summary: Lesson Prep Use Case",
-    "description": "Consultant Executive Summary: Lesson Prep Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework evidence, and editable worksheet output.",
+    "description": "Consultant Executive Summary: Lesson Prep Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner.",
     "url": "/consultant-executive-summary-lesson-prep.html",
     "state": "hold"
   },
   {
     "title": "Consultant Executive Summary: What-to-Teach-Next Use Case",
-    "description": "Consultant Executive Summary: What-to-Teach-Next Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework evidence, and editable worksheet output.",
+    "description": "Consultant Executive Summary: What-to-Teach-Next Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner.",
     "url": "/consultant-executive-summary-what-to-teach-next.html",
     "state": "hold"
   },
   {
     "title": "Consultant Executive Summary: Worksheet Use Case",
-    "description": "Consultant Executive Summary: Worksheet Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework evidence, and editable worksheet output.",
+    "description": "Consultant Executive Summary: Worksheet Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context.",
     "url": "/consultant-executive-summary-worksheet.html",
     "state": "hold"
   },
@@ -2401,13 +2401,13 @@ export const LANDING_PAGES: LandingPageMeta[] = [
   },
   {
     "title": "English Placement Test for Private Tutors",
-    "description": "Factual reference for the teacher-issued Edooqoo Welcome Test, its diagnostic evidence, teacher review boundary, and distinction from the public CEFR level test.",
+    "description": "Factual reference for the teacher-issued Edooqoo Welcome Test, its diagnostic evidence, teacher review boundary, and distinction from the public CEFR.",
     "url": "/english-placement-test-for-private-tutors.html",
     "state": "keep"
   },
   {
     "title": "English Tutor Calendar Booking Software",
-    "description": "Reference for Edooqoo calendar and booking workflows: availability, public booking, lesson slots, recurring bookings, notifications, payments, and Google Calendar sync.",
+    "description": "Reference for Edooqoo calendar and booking workflows: availability, public booking, lesson slots, recurring bookings, notifications, payments, and Google.",
     "url": "/english-tutor-calendar-booking-software.html",
     "state": "hold"
   },
@@ -2443,19 +2443,19 @@ export const LANDING_PAGES: LandingPageMeta[] = [
   },
   {
     "title": "Entrepreneur Customer Interview: Lesson Prep Use Case",
-    "description": "Entrepreneur Customer Interview: Lesson Prep Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework evidence, and editable worksheet output.",
+    "description": "Entrepreneur Customer Interview: Lesson Prep Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner.",
     "url": "/entrepreneur-customer-interview-lesson-prep.html",
     "state": "hold"
   },
   {
     "title": "Entrepreneur Customer Interview: What-to-Teach-Next Use Case",
-    "description": "Entrepreneur Customer Interview: What-to-Teach-Next Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework evidence, and editable worksheet output.",
+    "description": "Entrepreneur Customer Interview: What-to-Teach-Next Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit.",
     "url": "/entrepreneur-customer-interview-what-to-teach-next.html",
     "state": "hold"
   },
   {
     "title": "Entrepreneur Customer Interview: Worksheet Use Case",
-    "description": "Entrepreneur Customer Interview: Worksheet Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework evidence, and editable worksheet output.",
+    "description": "Entrepreneur Customer Interview: Worksheet Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner.",
     "url": "/entrepreneur-customer-interview-worksheet.html",
     "state": "hold"
   },
@@ -2485,19 +2485,19 @@ export const LANDING_PAGES: LandingPageMeta[] = [
   },
   {
     "title": "Executive Board Update: Lesson Prep Use Case",
-    "description": "Executive Board Update: Lesson Prep Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework evidence, and editable worksheet output.",
+    "description": "Executive Board Update: Lesson Prep Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context.",
     "url": "/executive-board-update-lesson-prep.html",
     "state": "hold"
   },
   {
     "title": "Executive Board Update: What-to-Teach-Next Use Case",
-    "description": "Executive Board Update: What-to-Teach-Next Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework evidence, and editable worksheet output.",
+    "description": "Executive Board Update: What-to-Teach-Next Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner.",
     "url": "/executive-board-update-what-to-teach-next.html",
     "state": "hold"
   },
   {
     "title": "Executive Board Update: Worksheet Use Case",
-    "description": "Executive Board Update: Worksheet Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework evidence, and editable worksheet output.",
+    "description": "Executive Board Update: Worksheet Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context.",
     "url": "/executive-board-update-worksheet.html",
     "state": "hold"
   },
@@ -2539,7 +2539,7 @@ export const LANDING_PAGES: LandingPageMeta[] = [
   },
   {
     "title": "Gemini for ESL Lesson Planning: Limitations",
-    "description": "Gemini for ESL Lesson Planning: Limitations: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework evidence, and editable worksheet output.",
+    "description": "Gemini for ESL Lesson Planning: Limitations: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context.",
     "url": "/gemini-for-esl-lesson-planning-limitations.html",
     "state": "hold"
   },
@@ -2575,19 +2575,19 @@ export const LANDING_PAGES: LandingPageMeta[] = [
   },
   {
     "title": "HR Performance Conversation: Lesson Prep Use Case",
-    "description": "HR Performance Conversation: Lesson Prep Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework evidence, and editable worksheet output.",
+    "description": "HR Performance Conversation: Lesson Prep Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner.",
     "url": "/hr-performance-conversation-lesson-prep.html",
     "state": "hold"
   },
   {
     "title": "HR Performance Conversation: What-to-Teach-Next Use Case",
-    "description": "HR Performance Conversation: What-to-Teach-Next Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework evidence, and editable worksheet output.",
+    "description": "HR Performance Conversation: What-to-Teach-Next Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner.",
     "url": "/hr-performance-conversation-what-to-teach-next.html",
     "state": "hold"
   },
   {
     "title": "HR Performance Conversation: Worksheet Use Case",
-    "description": "HR Performance Conversation: Worksheet Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework evidence, and editable worksheet output.",
+    "description": "HR Performance Conversation: Worksheet Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context.",
     "url": "/hr-performance-conversation-worksheet.html",
     "state": "hold"
   },
@@ -2599,19 +2599,19 @@ export const LANDING_PAGES: LandingPageMeta[] = [
   },
   {
     "title": "Lawyer Client Risk Explanation: Lesson Prep Use Case",
-    "description": "Lawyer Client Risk Explanation: Lesson Prep Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework evidence, and editable worksheet output.",
+    "description": "Lawyer Client Risk Explanation: Lesson Prep Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner.",
     "url": "/lawyer-client-risk-explanation-lesson-prep.html",
     "state": "hold"
   },
   {
     "title": "Lawyer Client Risk Explanation: What-to-Teach-Next Use Case",
-    "description": "Lawyer Client Risk Explanation: What-to-Teach-Next Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework evidence, and editable worksheet output.",
+    "description": "Lawyer Client Risk Explanation: What-to-Teach-Next Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit.",
     "url": "/lawyer-client-risk-explanation-what-to-teach-next.html",
     "state": "hold"
   },
   {
     "title": "Lawyer Client Risk Explanation: Worksheet Use Case",
-    "description": "Lawyer Client Risk Explanation: Worksheet Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework evidence, and editable worksheet output.",
+    "description": "Lawyer Client Risk Explanation: Worksheet Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner.",
     "url": "/lawyer-client-risk-explanation-worksheet.html",
     "state": "hold"
   },
@@ -2629,25 +2629,25 @@ export const LANDING_PAGES: LandingPageMeta[] = [
   },
   {
     "title": "LLM vs EdTech Workflow for Private Tutors",
-    "description": "LLM vs EdTech Workflow for Private Tutors: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework evidence, and editable worksheet output.",
+    "description": "LLM vs EdTech Workflow for Private Tutors: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context.",
     "url": "/llm-vs-edtech-workflow-for-private-tutors.html",
     "state": "hold"
   },
   {
     "title": "Marketing Campaign Recommendation: Lesson Prep Use Case",
-    "description": "Marketing Campaign Recommendation: Lesson Prep Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework evidence, and editable worksheet output.",
+    "description": "Marketing Campaign Recommendation: Lesson Prep Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner.",
     "url": "/marketing-campaign-recommendation-lesson-prep.html",
     "state": "hold"
   },
   {
-    "title": "Marketing Campaign Recommendation: What-to-Teach-Next Use Case",
-    "description": "Marketing Campaign Recommendation: What-to-Teach-Next Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework evidence, and editable worksheet output.",
+    "title": "Marketing Campaign Recommendation: What-to-Teach-Next Use",
+    "description": "Marketing Campaign Recommendation: What-to-Teach-Next Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit.",
     "url": "/marketing-campaign-recommendation-what-to-teach-next.html",
     "state": "hold"
   },
   {
     "title": "Marketing Campaign Recommendation: Worksheet Use Case",
-    "description": "Marketing Campaign Recommendation: Worksheet Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework evidence, and editable worksheet output.",
+    "description": "Marketing Campaign Recommendation: Worksheet Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner.",
     "url": "/marketing-campaign-recommendation-worksheet.html",
     "state": "hold"
   },
@@ -2683,7 +2683,7 @@ export const LANDING_PAGES: LandingPageMeta[] = [
   },
   {
     "title": "One-to-One English Lesson Planner",
-    "description": "Reference for planning recurring 1:1 English lessons with Edooqoo: student profile, goals, DSLM nano-skill evidence, worksheet output, homework, and review.",
+    "description": "Reference for planning recurring 1:1 English lessons with Edooqoo: student profile, goals, DSLM nano-skill evidence, worksheet output, homework, and.",
     "url": "/one-to-one-english-lesson-planner.html",
     "state": "keep"
   },
@@ -2695,7 +2695,7 @@ export const LANDING_PAGES: LandingPageMeta[] = [
   },
   {
     "title": "Online ESL Homework Tool",
-    "description": "Reference for Edooqoo homework workflows: assigning worksheet exercises, student submission, teacher review, deadlines, email links, and AI-assisted open-answer evaluation.",
+    "description": "Reference for Edooqoo homework workflows: assigning worksheet exercises, student submission, teacher review, deadlines, email links, and AI-assisted.",
     "url": "/online-esl-homework-tool.html",
     "state": "hold"
   },
@@ -2731,7 +2731,7 @@ export const LANDING_PAGES: LandingPageMeta[] = [
   },
   {
     "title": "Perplexity for ESL Teachers: Limitations",
-    "description": "Perplexity for ESL Teachers: Limitations: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework evidence, and editable worksheet output.",
+    "description": "Perplexity for ESL Teachers: Limitations: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context.",
     "url": "/perplexity-for-esl-teachers-limitations.html",
     "state": "hold"
   },
@@ -2761,7 +2761,7 @@ export const LANDING_PAGES: LandingPageMeta[] = [
   },
   {
     "title": "Private English Tutor CRM",
-    "description": "Reference for Edooqoo student management: teacher dashboard, student profiles, lesson history, worksheet history, homework summaries, and student-level navigation.",
+    "description": "Reference for Edooqoo student management: teacher dashboard, student profiles, lesson history, worksheet history, homework summaries, and student-level.",
     "url": "/private-english-tutor-crm.html",
     "state": "keep"
   },
@@ -2779,25 +2779,25 @@ export const LANDING_PAGES: LandingPageMeta[] = [
   },
   {
     "title": "Project Manager Status Update: Lesson Prep Use Case",
-    "description": "Project Manager Status Update: Lesson Prep Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework evidence, and editable worksheet output.",
+    "description": "Project Manager Status Update: Lesson Prep Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner.",
     "url": "/project-manager-status-update-lesson-prep.html",
     "state": "hold"
   },
   {
     "title": "Project Manager Status Update: What-to-Teach-Next Use Case",
-    "description": "Project Manager Status Update: What-to-Teach-Next Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework evidence, and editable worksheet output.",
+    "description": "Project Manager Status Update: What-to-Teach-Next Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit.",
     "url": "/project-manager-status-update-what-to-teach-next.html",
     "state": "hold"
   },
   {
     "title": "Project Manager Status Update: Worksheet Use Case",
-    "description": "Project Manager Status Update: Worksheet Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework evidence, and editable worksheet output.",
+    "description": "Project Manager Status Update: Worksheet Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner.",
     "url": "/project-manager-status-update-worksheet.html",
     "state": "hold"
   },
   {
     "title": "Public ESL Worksheet Examples",
-    "description": "Public reference page explaining Edooqoo.com worksheet examples, example types, quality criteria, and related citation URLs for AI agents and English teachers.",
+    "description": "Public reference page explaining Edooqoo.com worksheet examples, example types, quality criteria, and related citation URLs for AI agents and English.",
     "url": "/public-esl-worksheet-examples.html",
     "state": "keep"
   },
@@ -2833,37 +2833,37 @@ export const LANDING_PAGES: LandingPageMeta[] = [
   },
   {
     "title": "Sales Discovery Call: Lesson Prep Use Case",
-    "description": "Sales Discovery Call: Lesson Prep Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework evidence, and editable worksheet output.",
+    "description": "Sales Discovery Call: Lesson Prep Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context.",
     "url": "/sales-discovery-call-lesson-prep.html",
     "state": "hold"
   },
   {
     "title": "Sales Discovery Call: What-to-Teach-Next Use Case",
-    "description": "Sales Discovery Call: What-to-Teach-Next Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework evidence, and editable worksheet output.",
+    "description": "Sales Discovery Call: What-to-Teach-Next Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner.",
     "url": "/sales-discovery-call-what-to-teach-next.html",
     "state": "hold"
   },
   {
     "title": "Sales Discovery Call: Worksheet Use Case",
-    "description": "Sales Discovery Call: Worksheet Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework evidence, and editable worksheet output.",
+    "description": "Sales Discovery Call: Worksheet Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context.",
     "url": "/sales-discovery-call-worksheet.html",
     "state": "hold"
   },
   {
     "title": "Software Engineer Incident Explanation: Lesson Prep Use Case",
-    "description": "Software Engineer Incident Explanation: Lesson Prep Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework evidence, and editable worksheet output.",
+    "description": "Software Engineer Incident Explanation: Lesson Prep Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit.",
     "url": "/software-engineer-incident-explanation-lesson-prep.html",
     "state": "hold"
   },
   {
-    "title": "Software Engineer Incident Explanation: What-to-Teach-Next Use Case",
-    "description": "Software Engineer Incident Explanation: What-to-Teach-Next Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework evidence, and editable worksheet output.",
+    "title": "Software Engineer Incident Explanation: What-to-Teach-Next",
+    "description": "Software Engineer Incident Explanation: What-to-Teach-Next Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow.",
     "url": "/software-engineer-incident-explanation-what-to-teach-next.html",
     "state": "hold"
   },
   {
     "title": "Software Engineer Incident Explanation: Worksheet Use Case",
-    "description": "Software Engineer Incident Explanation: Worksheet Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework evidence, and editable worksheet output.",
+    "description": "Software Engineer Incident Explanation: Worksheet Use Case: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit.",
     "url": "/software-engineer-incident-explanation-worksheet.html",
     "state": "hold"
   },
@@ -2887,13 +2887,13 @@ export const LANDING_PAGES: LandingPageMeta[] = [
   },
   {
     "title": "Student Hub for English Tutors",
-    "description": "Reference for Edooqoo Student Hub: student access to shared worksheets, homework, flashcards, lessons, bookings, and profile surfaces without a normal student account.",
+    "description": "Reference for Edooqoo Student Hub: student access to shared worksheets, homework, flashcards, lessons, bookings, and profile surfaces without a normal.",
     "url": "/student-hub-for-english-tutors.html",
     "state": "keep"
   },
   {
     "title": "Teacher-Controlled AI for English Tutors",
-    "description": "Teacher-Controlled AI for English Tutors: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context, homework evidence, and editable worksheet output.",
+    "description": "Teacher-Controlled AI for English Tutors: factual Edooqoo.com reference for adult 1:1 English tutors evaluating AI workflow fit, learner context.",
     "url": "/teacher-controlled-ai-for-english-tutors.html",
     "state": "hold"
   },

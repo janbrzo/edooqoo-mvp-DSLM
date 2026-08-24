@@ -22,6 +22,16 @@ const EXCLUDED_SITEMAP_PATHS = new Set([
   ...[...CANONICAL_ALIASES].map((slug) => `/${slug}`),
 ]);
 
+/**
+ * Redirect stubs and noindex pages must never enter the sitemap: submitting them produces
+ * "discovered - not indexed" / "page with redirect" noise in Search Console.
+ */
+function isNonIndexableFile(filepath) {
+  const head = readFileSync(filepath, 'utf8').slice(0, 4000);
+  return /http-equiv=["']refresh["']/i.test(head)
+    || /<meta[^>]+name=["']robots["'][^>]*content=["'][^"']*noindex/i.test(head);
+}
+
 function parseHtml(filepath, slugBase) {
   const html = readFileSync(filepath, 'utf8');
   const title = (html.match(/<title>([^<]+)<\/title>/i)?.[1] || '').replace(/\s+—\s+Edooqoo.*$/i, '').trim();
@@ -36,7 +46,8 @@ const registryByRoute = new Map(registry.map((entry) => [entry.route, entry]));
 
 const blogFiles = readdirSync(BLOG_DIR)
   .filter(f => f.endsWith('.html') && f !== 'index.html')
-  .map(f => join(BLOG_DIR, f));
+  .map(f => join(BLOG_DIR, f))
+  .filter(fp => !isNonIndexableFile(fp));
 
 const posts = blogFiles.map(fp => {
   const p = parseHtml(fp, '/blog');
@@ -59,7 +70,8 @@ const topFiles = readdirSync(TOP_DIR)
     f !== 'about.html' &&
     !CANONICAL_ALIASES.has(f)
   )
-  .map(f => join(TOP_DIR, f));
+  .map(f => join(TOP_DIR, f))
+  .filter(fp => !isNonIndexableFile(fp));
 
 const landings = topFiles.map(fp => {
   const html = readFileSync(fp, 'utf8');

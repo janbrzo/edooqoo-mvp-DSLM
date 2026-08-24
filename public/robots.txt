@@ -9,6 +9,8 @@ Allow: /.well-known/ai-plugin.json
 Allow: /worksheets/*/*
 
 Disallow: /admin
+Disallow: /signup
+
 Disallow: /admin/
 Disallow: /dashboard
 Disallow: /profile

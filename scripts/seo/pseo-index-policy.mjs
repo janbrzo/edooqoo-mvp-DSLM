@@ -106,5 +106,9 @@ export function getPseoRouteInventory({ root }) {
     indexableTopicLevelRoutes: [...new Set(indexableTopicLevelRoutes)].sort(),
     indexableExerciseTopicRoutes: [...new Set(indexableExerciseTopicRoutes)].sort(),
     indexablePersonaRoutes: [...new Set(indexablePersonaRoutes)].sort(),
+    // Every persona route is prerendered, including noindex ones: without static HTML a crawler
+    // receives the SPA shell, whose canonical points at "/" and whose robots meta is missing.
+    allPersonaRoutes: [...new Set(allPersonaRoutes)].sort(),
   };
+
 }

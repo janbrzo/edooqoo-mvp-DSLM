@@ -1,3 +1,10 @@
+/**
+ * STATUS: NOT ACTIVE ON edooqoo.com (verified 2026-08-24).
+ * The apex domain is served by Lovable hosting, so this worker emits no headers in production.
+ * Crawl-control signals are delivered in HTML (meta robots, canonical, meta refresh stubs) and in
+ * robots.txt. Do not add header-only expectations to audits until DNS is proxied through Cloudflare;
+ * once it is, run `npm run seo:verify-live-routing -- --strict-headers`.
+ */
 import { GONE_ROUTES, NOINDEX_ROUTES, PUBLIC_ROUTES, REDIRECTS } from './content-routing.generated.mjs';
 
 const PRIVATE_PREFIXES = [

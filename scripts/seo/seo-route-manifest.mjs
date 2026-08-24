@@ -63,8 +63,11 @@ export function getTopicLevelRoutes({ root }) {
 }
 
 export function getPersonaRoutes({ root }) {
-  return getPseoRouteInventory({ root }).indexablePersonaRoutes;
+  // All personas, indexable or not: a noindex page still needs static HTML carrying
+  // `robots: noindex,follow` and its own canonical, otherwise crawlers see the SPA shell.
+  return getPseoRouteInventory({ root }).allPersonaRoutes;
 }
+
 
 export function getPriorityExerciseTopicRoutes({ root }) {
   return getPseoRouteInventory({ root }).indexableExerciseTopicRoutes;
