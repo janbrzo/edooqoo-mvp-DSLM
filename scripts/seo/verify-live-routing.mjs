@@ -161,7 +161,14 @@ async function run() {
 
   const signupUrl = `${BASE}/signup?exerciseType=definition-match&topic=weather`;
   const signup = await request(signupUrl);
+  // /signup is an app route with no prerendered HTML, so the only crawl-control signal that can
+  // exist without the edge worker is the robots.txt Disallow rule.
+  const robotsTxt = await fetchHtml(`${BASE}/robots.txt`);
+  const signupDisallowed = /^\s*Disallow:\s*\/signup\s*$/mi.test(robotsTxt);
   const signupOutcome = await classifyNoindex(signupUrl, signup, /nofollow/i);
+  if (!signupOutcome.outcome.startsWith('pass') && signupDisallowed && !STRICT_HEADERS) {
+    signupOutcome.outcome = 'pass-robots-disallow';
+  }
   checks.push({
     type: 'signup-noindex',
     url: signupUrl,
