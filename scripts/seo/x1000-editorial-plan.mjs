@@ -111,9 +111,13 @@ export const SEO_TITLE_OVERRIDES = {
   // Sprint 2 (S2-C) — intent realignment: the query is learner-facing, the page is
   // for the tutor who has to answer "which app should I recommend?".
   'best-apps-learning-english-2026': 'Which English App to Recommend to an Adult Student',
+  // Growth opportunity (position ~13.8, 266 impressions): keyword-first title with a 1:1 angle.
+  'communicative-language-teaching-activities': 'Communicative Activities for 1:1 Adult English Lessons',
 };
 
 export const SEO_DESCRIPTION_OVERRIDES = {
+  'communicative-language-teaching-activities':
+    'Information-gap, role play, opinion-gap and task-repetition activities rebuilt for one adult learner, with tutor scripts. Prep the next lesson in a minute.',
   'best-apps-learning-english-2026':
     'What to recommend to a working adult between lessons, what each app actually trains, and where it stops. Written for the tutor making the call.',
   'fill-in-the-blanks-exercises-best-practices':
@@ -264,6 +268,43 @@ function buildFallbackSnippet(slug) {
   return { title: clampTitle(title), description, h1: topicPhrase };
 }
 
+/**
+ * Per-slug editorial depth overrides. Use for pages where the generic refresh body
+ * is too thin to earn a page-1 click (Martha Standard: adult, 1:1, decision-driven).
+ */
+export const ARTICLE_DETAIL_OVERRIDES = {
+  'communicative-language-teaching-activities': {
+    directAnswer:
+      'In 1:1 adult lessons, communicative activities work when the information gap is real: the tutor holds data the learner does not, the learner has to negotiate meaning to get it, and the task mirrors a workplace exchange the learner will actually have.',
+    problem: [
+      'Most communicative language teaching activities assume a group: pairwork, mingles, find-someone-who, team debates. None of them survive contact with a single adult learner and one tutor.',
+      'Tutors then default to question-and-answer conversation, which produces fluency practice without a measurable target and no evidence for the next lesson.',
+      'Adult learners with a professional goal disengage from role plays set in cafes, airports, and shops that have nothing to do with their working week.',
+    ],
+    solution: [
+      'Information gap for two: the tutor holds a schedule, price list, incident report, or dataset; the learner must ask precise questions to reconstruct it, then summarise it back.',
+      'Role play from the learner real calendar: run the meeting, escalation, or client call that is actually in their diary, then swap roles so the tutor models the target language.',
+      'Opinion gap with a stake: the learner argues a position they must defend at work, and the tutor pushes back with counter-arguments at one CEFR level above their comfort.',
+      'Task repetition: the same speaking task run three times with shrinking support, which is where adult accuracy and fluency gains actually show up.',
+      'Reconstruction: the learner retells a short authentic input (voicemail, email thread, meeting extract) and the tutor records which target forms survived.',
+    ],
+    works: [
+      'The learner has a concrete communicative task in the next two to four weeks: an interview, a review, a demo, a negotiation, a standup.',
+      'The tutor can record what broke during the activity (form, lexis, pragmatics, hesitation) instead of only judging that it went well.',
+      'There is a follow-up lesson where the same task can be repeated with less scaffolding.',
+    ],
+    notEnough: [
+      'The learner needs controlled accuracy work first: with no usable form to deploy, a communicative task only rehearses the error.',
+      'The session is a one-off with no next lesson, so task repetition and evidence tracking have nowhere to land.',
+      'The goal is exam speaking with a fixed rubric, which needs format-specific practice before free communicative work.',
+    ],
+    tutorDecision:
+      'After each communicative activity, name one breakdown that blocked the message and turn it into the next worksheet objective; if nothing broke, raise the task difficulty rather than repeating it.',
+    example:
+      'A B1+ logistics coordinator has a weekly carrier call. The tutor holds a delivery schedule with three conflicts; the learner phones in and has to identify them, propose a fix, and confirm the agreement. Run one: message fails on past conditionals and hedging. The tutor logs both, sends a targeted worksheet as homework, and reruns the same call the following week with only a prompt card, then a third time with nothing.',
+  },
+};
+
 function articleSpec({
   slug,
   title: explicitTitle,
@@ -283,6 +324,15 @@ function articleSpec({
   notEnough = commonNotEnough,
 }) {
   const slugKey = slug.replace(/\.html$/, '');
+  const detail = ARTICLE_DETAIL_OVERRIDES[slugKey] || {};
+  problem = detail.problem || problem;
+  solution = detail.solution || solution;
+  mechanics = detail.mechanics || mechanics;
+  works = detail.works || works;
+  notEnough = detail.notEnough || notEnough;
+  directAnswer = detail.directAnswer || directAnswer;
+  tutorDecision = detail.tutorDecision || tutorDecision;
+  example = detail.example || example;
   const fallback = buildFallbackSnippet(slug);
   const title = clampTitle(SEO_TITLE_OVERRIDES[slugKey] || explicitTitle || fallback.title);
   // H1 stays the plain topic phrase; the SERP title carries the click-earning angle.
