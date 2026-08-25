@@ -14,17 +14,62 @@ import { useLocation } from 'react-router-dom';
 const SITE_ORIGIN = 'https://edooqoo.com';
 const CANONICAL_ID = 'dynamic-canonical';
 
+const isHelmetManaged = (el: Element) => el.hasAttribute('data-rh');
+
+/**
+ * Root-only head tags (homepage canonical, BreadcrumbList / WebPage / FAQPage JSON-LD)
+ * live in index.html, which is also the SPA fallback shell for every client route.
+ * On any non-root route we drop them so subpages never report the homepage canonical
+ * or homepage structured data.
+ */
+const pruneRootOnlyTags = (isRoot: boolean) => {
+  if (isRoot) return;
+  document.querySelectorAll('[data-root-only]').forEach((el) => el.remove());
+};
+
+/** Guarantees exactly one <link rel="canonical"> in the document head. */
+const dedupeCanonicals = () => {
+  const links = Array.from(
+    document.querySelectorAll('link[rel="canonical"]'),
+  ) as HTMLLinkElement[];
+  if (links.length < 2) return;
+  const keep = links.find(isHelmetManaged) ?? links[0];
+  links.forEach((link) => {
+    if (link !== keep) link.remove();
+  });
+};
+
 export const setCanonicalForPath = (pathname: string) => {
   const cleanPath = pathname.replace(/\/+$/, '') || '/';
-  const href = `${SITE_ORIGIN}${cleanPath === '/' ? '/' : cleanPath}`;
-  let link = document.getElementById(CANONICAL_ID) as HTMLLinkElement | null;
+  const isRoot = cleanPath === '/';
+  const href = `${SITE_ORIGIN}${isRoot ? '/' : cleanPath}`;
+
+  pruneRootOnlyTags(isRoot);
+
+  const existing = Array.from(
+    document.querySelectorAll('link[rel="canonical"]'),
+  ) as HTMLLinkElement[];
+
+  // A route rendering <PageSeo> owns its canonical through react-helmet-async.
+  const helmetCanonical = existing.find(isHelmetManaged);
+  if (helmetCanonical) {
+    document.getElementById(CANONICAL_ID)?.remove();
+    dedupeCanonicals();
+    return;
+  }
+
+  let link = (document.getElementById(CANONICAL_ID) as HTMLLinkElement | null)
+    ?? existing[0]
+    ?? null;
   if (!link) {
     link = document.createElement('link');
     link.rel = 'canonical';
-    link.id = CANONICAL_ID;
     document.head.appendChild(link);
   }
+  link.id = CANONICAL_ID;
+  link.removeAttribute('data-root-only');
   link.href = href;
+  dedupeCanonicals();
 };
 
 export const removeCanonical = () => {
@@ -48,5 +93,13 @@ export const useCanonicalSync = () => {
   const { pathname } = useLocation();
   useEffect(() => {
     setCanonicalForPath(pathname);
+    // Helmet commits its own tags after this effect; re-run so the winner is
+    // the route-owned canonical and never a leftover duplicate.
+    const t1 = window.setTimeout(() => setCanonicalForPath(pathname), 0);
+    const t2 = window.setTimeout(() => setCanonicalForPath(pathname), 400);
+    return () => {
+      window.clearTimeout(t1);
+      window.clearTimeout(t2);
+    };
   }, [pathname]);
 };
