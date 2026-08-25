@@ -287,6 +287,7 @@ export const ARTICLE_DETAIL_OVERRIDES = {
       'Opinion gap with a stake: the learner argues a position they must defend at work, and the tutor pushes back with counter-arguments at one CEFR level above their comfort.',
       'Task repetition: the same speaking task run three times with shrinking support, which is where adult accuracy and fluency gains actually show up.',
       'Reconstruction: the learner retells a short authentic input (voicemail, email thread, meeting extract) and the tutor records which target forms survived.',
+      'Keep the teacher in control: any AI-generated role card, prompt set, or follow-up worksheet stays a draft until the tutor reviews, edits, and approves it for that learner.',
     ],
     works: [
       'The learner has a concrete communicative task in the next two to four weeks: an interview, a review, a demo, a negotiation, a standup.',
