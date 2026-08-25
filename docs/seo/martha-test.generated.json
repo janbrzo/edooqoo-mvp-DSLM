@@ -1,7 +1,7 @@
 {
   "auditedRoutes": 147,
-  "passedRoutes": 147,
-  "failedRoutes": 0,
+  "passedRoutes": 146,
+  "failedRoutes": 1,
   "warningCount": 3,
   "routes": [
     {
@@ -752,9 +752,11 @@
       "route": "/blog/communicative-language-teaching-activities.html",
       "file": "public/blog/communicative-language-teaching-activities.html",
       "state": "hold",
-      "cluster": "Tutor Business and Tools",
-      "pass": true,
-      "errors": []
+      "cluster": "Adult and Business English",
+      "pass": false,
+      "errors": [
+        "teacher review/control boundary missing"
+      ]
     },
     {
       "route": "/blog/contrastive-analysis-language-teaching.html",
