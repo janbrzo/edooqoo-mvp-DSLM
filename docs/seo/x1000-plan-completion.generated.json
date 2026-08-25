@@ -40,7 +40,7 @@
     "internal link graph has zero noindex priority hub links"
   ],
   "warn": [
-    "live routing still reports 57 failures; this requires Cloudflare Worker deployment/binding, not more content edits"
+    "live routing still reports 11 failures; this requires Cloudflare Worker deployment/binding, not more content edits"
   ],
   "fail": []
 }
