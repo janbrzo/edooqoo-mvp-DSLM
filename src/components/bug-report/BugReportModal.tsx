@@ -311,7 +311,7 @@ export const BugReportModal: React.FC<Props> = ({ open, onOpenChange }) => {
               <div className="grid grid-cols-3 gap-2 mt-2">
                 {files.map((f) => (
                   <div key={f.id} className="relative group border rounded-md overflow-hidden bg-muted/30">
-                    <img src={f.preview} alt={f.file.name} className="w-full h-24 object-cover" />
+                    <img src={f.preview} alt="" className="w-full h-24 object-cover" />
                     <button
                       type="button"
                       onClick={(e) => { e.stopPropagation(); removeFile(f.id); }}

@@ -103,7 +103,15 @@ const ExerciseAnswerQuestions: React.FC<ExerciseAnswerQuestionsProps> = ({
               {media_url ? (
                 <div className="max-w-full">
                   {media_type === "image" && (
-                    <img src={media_url} alt="Exercise media" className="max-w-full max-h-64 mx-auto rounded" />
+                    <img
+                      src={media_url}
+                      alt={
+                        safeGetText(questions?.[0]?.question ?? questions?.[0]?.text ?? "")
+                          ? `Picture to look at while answering: ${safeGetText(questions[0].question ?? questions[0].text ?? "")}`
+                          : "Picture prompt for this exercise"
+                      }
+                      className="max-w-full max-h-64 mx-auto rounded"
+                    />
                   )}
                   {media_type === "video" && (
                     <video controls className="max-w-full max-h-64 mx-auto rounded">

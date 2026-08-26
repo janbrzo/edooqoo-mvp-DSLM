@@ -165,6 +165,9 @@ const Prompts = () => {
         </div>
 
         {/* Prompts Grid */}
+        <h2 className="text-2xl font-bold text-foreground mb-4">
+          {activeCategory === "All" ? "All prompts" : `${activeCategory} prompts`}
+        </h2>
         <div className="grid gap-4 md:grid-cols-2">
           {filtered.map((prompt, i) => (
             <article
