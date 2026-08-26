@@ -795,9 +795,9 @@ export default function WorksheetForm({
             <div className="mb-6">
               <div className={`flex ${isMobile ? 'flex-col gap-3' : 'justify-between items-start'} mb-6`}>
                 <div className={`${isMobile ? 'text-center' : ''}`}>
-                  <h1 className={`font-bold bg-clip-text text-transparent bg-gradient-to-r from-pink-500 via-violet-500 to-blue-500 ${isMobile ? 'text-xl' : 'text-3xl'} mb-2`}>
+                  <h2 className={`font-bold bg-clip-text text-transparent bg-gradient-to-r from-pink-500 via-violet-500 to-blue-500 ${isMobile ? 'text-xl' : 'text-3xl'} mb-2`}>
                     Create A Worksheet
-                  </h1>
+                  </h2>
                    <p className={`text-gray-600 ${isMobile ? 'text-sm' : 'text-base'}`}>
                      Tailored to your students. In seconds.
                    </p>
@@ -1002,6 +1002,8 @@ export default function WorksheetForm({
                                   : 'border-gray-200 hover:border-gray-300'
                               }`}
                               title="Include picture-based exercises"
+                              aria-label="Include picture-based exercises"
+                              aria-pressed={selectedMediaTypes.includes('picture')}
                             >
                               <input 
                                 type="checkbox" 
@@ -1042,6 +1044,8 @@ export default function WorksheetForm({
                                   : 'border-gray-200 hover:border-gray-300'
                               }`}
                               title="Include audio-based exercises"
+                              aria-label="Include audio-based exercises"
+                              aria-pressed={selectedMediaTypes.includes('audio')}
                             >
                               <input 
                                 type="checkbox" 

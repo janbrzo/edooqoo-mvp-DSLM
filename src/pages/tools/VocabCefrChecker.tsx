@@ -7,6 +7,7 @@ const FAQS = [
   { question: 'How does the checker decide each word\'s CEFR level?', answer: 'Known words are matched against a built-in English Vocabulary Profile lookup (~480 high-frequency lemmas across A1–C1). Unknown words fall back to a length-and-suffix heuristic.' },
   { question: 'Is my text uploaded anywhere?', answer: 'No. Analysis runs entirely in your browser. Nothing leaves your device.' },
   { question: 'How long can the input be?', answer: 'Up to about 5,000 characters comfortably. Longer texts still work but may pause your tab briefly while tokenizing.' },
+  { question: 'Can I use it as a CEFR writing checker?', answer: 'Yes. Paste a student writing sample and read the level histogram: the range of vocabulary the learner actually produced indicates their productive level. It measures vocabulary range only, not grammar accuracy or task achievement.' },
   { question: 'Can I export the result?', answer: 'Yes — copy the highlighted text or the per-level breakdown into a Google Doc or share it with the student.' },
 ];
 
@@ -30,8 +31,8 @@ const VocabCefrChecker: React.FC = () => {
   return (
     <div className="min-h-screen bg-background">
       <PageSeo
-        title="Free CEFR Vocabulary Checker — Estimate A1–C2 Text Level"
-        description="Paste any English text and see each word's CEFR level (A1–C2) plus the overall difficulty. Free, browser-only, no sign-up."
+        title="Free CEFR Vocabulary & Writing Checker — Estimate A1–C2 Level"
+        description="Paste a text or a student writing sample and see each word's CEFR level (A1–C2) plus the overall level. Free, browser-only, no sign-up."
         path="/tools/vocab-cefr-checker"
         ogType="article"
         jsonLd={[
@@ -59,16 +60,16 @@ const VocabCefrChecker: React.FC = () => {
         </nav>
 
         <header className="mb-8">
-          <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">CEFR Vocabulary Checker</h1>
+          <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">CEFR Vocabulary &amp; Writing Checker</h1>
           <p className="text-lg text-muted-foreground">
-            Paste any English text. Get a per-word CEFR level (A1–C2) and the overall difficulty of the passage. Useful before assigning a reading task.
+            Paste any English text — a reading passage or a student's writing sample. Get a per-word CEFR level (A1–C2) and the overall level of the passage, before you assign a task or grade a draft.
           </p>
         </header>
 
         <aside aria-label="Summary" className="mb-8 rounded-lg border bg-card p-5 text-sm">
           <strong className="block text-foreground mb-1">TL;DR</strong>
           <span className="text-muted-foreground">
-            Paste English text → see per-word CEFR colours and a level histogram. Runs locally; no sign-up.
+            Paste English text or student writing → see per-word CEFR colours and a level histogram. Runs locally; no sign-up.
           </span>
         </aside>
 
@@ -135,6 +136,22 @@ const VocabCefrChecker: React.FC = () => {
             </div>
           </section>
         )}
+
+        <section className="my-12">
+          <h2 className="text-2xl font-bold text-foreground mb-4">How to check a student's writing against CEFR</h2>
+          <p className="text-muted-foreground mb-4">
+            In 1:1 adult lessons, the fastest way to justify a level claim is the learner's own output. Paste the writing sample above and read the histogram instead of the score:
+          </p>
+          <ol className="list-decimal pl-5 space-y-2 text-muted-foreground">
+            <li><strong className="text-foreground">Check the ceiling.</strong> If almost every word lands in A1–A2, the draft is functionally A2 even when the task was set at B1 — the learner avoided the target range.</li>
+            <li><strong className="text-foreground">Check the spread.</strong> A healthy B2 sample shows a B1 core with a visible B2/C1 tail. A flat profile usually means memorised phrases, not productive range.</li>
+            <li><strong className="text-foreground">Compare with the input text.</strong> Run the reading or email the learner replied to, then run the reply. A large gap between input level and output level tells you exactly where to place the next task.</li>
+            <li><strong className="text-foreground">Record what you found.</strong> Note the two or three higher-level words the learner actually produced — that is the evidence you reuse when you set the next worksheet.</li>
+          </ol>
+          <p className="text-muted-foreground mt-4">
+            The checker measures vocabulary range only. Grammar accuracy, cohesion and task achievement still need your reading — treat the output as one evidence source, not a grade.
+          </p>
+        </section>
 
         <section className="my-12">
           <h2 className="text-2xl font-bold text-foreground mb-4">Frequently asked questions</h2>
