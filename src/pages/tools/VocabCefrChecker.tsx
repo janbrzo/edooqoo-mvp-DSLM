@@ -7,6 +7,7 @@ const FAQS = [
   { question: 'How does the checker decide each word\'s CEFR level?', answer: 'Known words are matched against a built-in English Vocabulary Profile lookup (~480 high-frequency lemmas across A1–C1). Unknown words fall back to a length-and-suffix heuristic.' },
   { question: 'Is my text uploaded anywhere?', answer: 'No. Analysis runs entirely in your browser. Nothing leaves your device.' },
   { question: 'How long can the input be?', answer: 'Up to about 5,000 characters comfortably. Longer texts still work but may pause your tab briefly while tokenizing.' },
+  { question: 'Can I use it as a CEFR writing checker?', answer: 'Yes. Paste a student writing sample and read the level histogram: the range of vocabulary the learner actually produced indicates their productive level. It measures vocabulary range only, not grammar accuracy or task achievement.' },
   { question: 'Can I export the result?', answer: 'Yes — copy the highlighted text or the per-level breakdown into a Google Doc or share it with the student.' },
 ];
 
