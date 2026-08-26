@@ -1044,6 +1044,8 @@ export default function WorksheetForm({
                                   : 'border-gray-200 hover:border-gray-300'
                               }`}
                               title="Include audio-based exercises"
+                              aria-label="Include audio-based exercises"
+                              aria-pressed={selectedMediaTypes.includes('audio')}
                             >
                               <input 
                                 type="checkbox" 
