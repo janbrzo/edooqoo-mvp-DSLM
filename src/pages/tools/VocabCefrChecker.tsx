@@ -31,8 +31,8 @@ const VocabCefrChecker: React.FC = () => {
   return (
     <div className="min-h-screen bg-background">
       <PageSeo
-        title="Free CEFR Vocabulary & Writing Checker — Estimate A1–C2 Level"
-        description="Paste a text or a student writing sample and see each word's CEFR level (A1–C2) plus the overall level. Free, browser-only, no sign-up."
+        title="CEFR Vocabulary Checker — Free A1–C2 Text Level Analyser"
+        description="Free CEFR vocabulary checker: paste a text or student writing sample, get every word's A1–C2 level and the overall level in seconds. No sign-up, runs in your browser."
         path="/tools/vocab-cefr-checker"
         ogType="article"
         jsonLd={[
