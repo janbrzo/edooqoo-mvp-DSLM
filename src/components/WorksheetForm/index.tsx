@@ -1002,6 +1002,8 @@ export default function WorksheetForm({
                                   : 'border-gray-200 hover:border-gray-300'
                               }`}
                               title="Include picture-based exercises"
+                              aria-label="Include picture-based exercises"
+                              aria-pressed={selectedMediaTypes.includes('picture')}
                             >
                               <input 
                                 type="checkbox" 
