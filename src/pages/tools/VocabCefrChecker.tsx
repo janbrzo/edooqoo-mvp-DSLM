@@ -60,11 +60,15 @@ const VocabCefrChecker: React.FC = () => {
         </nav>
 
         <header className="mb-8">
-          <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">CEFR Vocabulary &amp; Writing Checker</h1>
-          <p className="text-lg text-muted-foreground">
-            Paste any English text — a reading passage or a student's writing sample. Get a per-word CEFR level (A1–C2) and the overall level of the passage, before you assign a task or grade a draft.
+          <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">CEFR Vocabulary Checker</h1>
+          <p className="text-lg text-muted-foreground mb-4">
+            Paste any English text — a reading passage or a student's writing sample. This CEFR vocabulary checker gives you a per-word level (A1–C2) and the overall level of the passage, before you assign a task or grade a draft.
+          </p>
+          <p className="text-muted-foreground">
+            Why it matters for lesson planning: an article that reads "about B1" often hides a C1 tail that stalls the lesson, and a task set at B2 is wasted if the source text never leaves A2. Checking the vocabulary profile first tells you whether to use the text as-is, pre-teach five words, or drop it — a 20-second decision instead of a mid-lesson rescue. Do the same with the learner's output and you get evidence for the level you claim, not a hunch.
           </p>
         </header>
+
 
         <aside aria-label="Summary" className="mb-8 rounded-lg border bg-card p-5 text-sm">
           <strong className="block text-foreground mb-1">TL;DR</strong>
