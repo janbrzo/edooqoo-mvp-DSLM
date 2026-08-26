@@ -59,16 +59,16 @@ const VocabCefrChecker: React.FC = () => {
         </nav>
 
         <header className="mb-8">
-          <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">CEFR Vocabulary Checker</h1>
+          <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">CEFR Vocabulary &amp; Writing Checker</h1>
           <p className="text-lg text-muted-foreground">
-            Paste any English text. Get a per-word CEFR level (A1–C2) and the overall difficulty of the passage. Useful before assigning a reading task.
+            Paste any English text — a reading passage or a student's writing sample. Get a per-word CEFR level (A1–C2) and the overall level of the passage, before you assign a task or grade a draft.
           </p>
         </header>
 
         <aside aria-label="Summary" className="mb-8 rounded-lg border bg-card p-5 text-sm">
           <strong className="block text-foreground mb-1">TL;DR</strong>
           <span className="text-muted-foreground">
-            Paste English text → see per-word CEFR colours and a level histogram. Runs locally; no sign-up.
+            Paste English text or student writing → see per-word CEFR colours and a level histogram. Runs locally; no sign-up.
           </span>
         </aside>
 
