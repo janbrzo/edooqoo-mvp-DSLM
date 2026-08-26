@@ -137,6 +137,22 @@ const VocabCefrChecker: React.FC = () => {
         )}
 
         <section className="my-12">
+          <h2 className="text-2xl font-bold text-foreground mb-4">How to check a student's writing against CEFR</h2>
+          <p className="text-muted-foreground mb-4">
+            In 1:1 adult lessons, the fastest way to justify a level claim is the learner's own output. Paste the writing sample above and read the histogram instead of the score:
+          </p>
+          <ol className="list-decimal pl-5 space-y-2 text-muted-foreground">
+            <li><strong className="text-foreground">Check the ceiling.</strong> If almost every word lands in A1–A2, the draft is functionally A2 even when the task was set at B1 — the learner avoided the target range.</li>
+            <li><strong className="text-foreground">Check the spread.</strong> A healthy B2 sample shows a B1 core with a visible B2/C1 tail. A flat profile usually means memorised phrases, not productive range.</li>
+            <li><strong className="text-foreground">Compare with the input text.</strong> Run the reading or email the learner replied to, then run the reply. A large gap between input level and output level tells you exactly where to place the next task.</li>
+            <li><strong className="text-foreground">Record what you found.</strong> Note the two or three higher-level words the learner actually produced — that is the evidence you reuse when you set the next worksheet.</li>
+          </ol>
+          <p className="text-muted-foreground mt-4">
+            The checker measures vocabulary range only. Grammar accuracy, cohesion and task achievement still need your reading — treat the output as one evidence source, not a grade.
+          </p>
+        </section>
+
+        <section className="my-12">
           <h2 className="text-2xl font-bold text-foreground mb-4">Frequently asked questions</h2>
           <div className="space-y-3">
             {FAQS.map((f) => (
