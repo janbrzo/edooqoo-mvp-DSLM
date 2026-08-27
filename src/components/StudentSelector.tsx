@@ -112,6 +112,7 @@ export const StudentSelector: React.FC<StudentSelectorProps> = ({
             className={`${buttonSize} p-0 hover:bg-muted ${className}`}
             disabled={isLoading}
             title="Transfer to another student"
+            aria-label="Transfer to another student"
             onClick={handlePopoverTrigger}
           >
             {isLoading ? (

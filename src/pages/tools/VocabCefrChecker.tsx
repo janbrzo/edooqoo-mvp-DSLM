@@ -31,8 +31,8 @@ const VocabCefrChecker: React.FC = () => {
   return (
     <div className="min-h-screen bg-background">
       <PageSeo
-        title="CEFR Vocabulary Checker — Free A1–C2 Text Level Analyser"
-        description="Free CEFR vocabulary checker: paste a text or student writing sample, get every word's A1–C2 level and the overall level in seconds. No sign-up, runs in your browser."
+        title="Vocabulary Checker — Free CEFR A1–C2 Word Level Test"
+        description="Free vocabulary checker for teachers: paste any text or student writing and see each word's CEFR level (A1–C2) plus the overall level. Instant, no sign-up."
         path="/tools/vocab-cefr-checker"
         ogType="article"
         jsonLd={[
@@ -140,6 +140,45 @@ const VocabCefrChecker: React.FC = () => {
             </div>
           </section>
         )}
+
+        <section className="my-12">
+          <h2 className="text-2xl font-bold text-foreground mb-4">What each CEFR vocabulary level means</h2>
+          <p className="text-muted-foreground mb-4">
+            The checker labels words, not people. Use this table to read the histogram above and decide what the level actually implies for your next 1:1 lesson.
+          </p>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm border-collapse">
+              <thead>
+                <tr className="text-left border-b">
+                  <th className="py-2 pr-4 font-semibold text-foreground">Level</th>
+                  <th className="py-2 pr-4 font-semibold text-foreground">Vocabulary range</th>
+                  <th className="py-2 font-semibold text-foreground">Typical words</th>
+                </tr>
+              </thead>
+              <tbody className="text-muted-foreground">
+                <tr className="border-b"><td className="py-2 pr-4 font-semibold text-foreground">A1</td><td className="py-2 pr-4">~500 high-frequency words: personal details, immediate needs.</td><td className="py-2">work, family, buy, good</td></tr>
+                <tr className="border-b"><td className="py-2 pr-4 font-semibold text-foreground">A2</td><td className="py-2 pr-4">~1,000 words: routine tasks, simple descriptions of the past.</td><td className="py-2">meeting, arrive, busy, cheap</td></tr>
+                <tr className="border-b"><td className="py-2 pr-4 font-semibold text-foreground">B1</td><td className="py-2 pr-4">~2,000 words: familiar work and travel topics, simple opinions.</td><td className="py-2">deadline, suggest, reliable, avoid</td></tr>
+                <tr className="border-b"><td className="py-2 pr-4 font-semibold text-foreground">B2</td><td className="py-2 pr-4">~4,000 words: abstract topics, argument and nuance.</td><td className="py-2">stakeholder, assess, ambiguous, milestone</td></tr>
+                <tr className="border-b"><td className="py-2 pr-4 font-semibold text-foreground">C1</td><td className="py-2 pr-4">~8,000 words: implicit meaning, idiomatic and professional register.</td><td className="py-2">endorse, mitigate, contingent, discrepancy</td></tr>
+                <tr><td className="py-2 pr-4 font-semibold text-foreground">C2</td><td className="py-2 pr-4">Near-native breadth: low-frequency, technical and figurative usage.</td><td className="py-2">ostensibly, coalesce, ineluctable</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p className="text-muted-foreground mt-4">
+            Rule of thumb for adult 1:1: a text is usable when 90–95% of its tokens sit at or below the learner's level. Above that, you are teaching vocabulary instead of running the task you planned.
+          </p>
+        </section>
+
+        <section className="my-12">
+          <h2 className="text-2xl font-bold text-foreground mb-4">How teachers use this vocabulary checker</h2>
+          <ol className="list-decimal pl-5 space-y-2 text-muted-foreground">
+            <li><strong className="text-foreground">Vet a source text before the lesson.</strong> Paste the article or email you plan to use; if the C1 column is above ~5% of tokens, pre-teach or swap the text.</li>
+            <li><strong className="text-foreground">Build a pre-teach list.</strong> Copy the words highlighted above the learner's level — that is your five-word warm-up, not a guess.</li>
+            <li><strong className="text-foreground">Level a worksheet you wrote yourself.</strong> Run your own instructions through it; instructions written above task level are the usual reason an exercise "did not work".</li>
+            <li><strong className="text-foreground">Evidence a level claim.</strong> Save the histogram of a writing sample at intake and again after ten lessons; the shift in the B2/C1 tail is the progress evidence learners actually believe.</li>
+          </ol>
+        </section>
 
         <section className="my-12">
           <h2 className="text-2xl font-bold text-foreground mb-4">How to check a student's writing against CEFR</h2>
