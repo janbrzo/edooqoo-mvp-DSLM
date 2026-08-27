@@ -204,7 +204,7 @@ const ShareWorksheetModal = ({
                     readOnly
                     className="flex-1 bg-transparent text-sm outline-none"
                   />
-                  <Button size="sm" variant="outline" onClick={copyToClipboard}>
+                  <Button size="sm" variant="outline" onClick={copyToClipboard} aria-label="Copy share link">
                     <Copy className="h-4 w-4" />
                   </Button>
                 </div>

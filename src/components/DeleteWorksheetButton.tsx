@@ -70,6 +70,8 @@ export const DeleteWorksheetButton = ({
           variant={variant}
           size={size}
           disabled={isDeleting}
+          aria-label="Delete worksheet"
+          title="Delete worksheet"
         >
           <Trash2 className="h-4 w-4" />
         </Button>
