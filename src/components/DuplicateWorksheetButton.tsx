@@ -37,6 +37,7 @@ export const DuplicateWorksheetButton = ({
         size={size}
         onClick={handleClick}
         title="Duplicate worksheet"
+        aria-label="Duplicate worksheet"
         className={className}
       >
         <Copy className="h-4 w-4" />
