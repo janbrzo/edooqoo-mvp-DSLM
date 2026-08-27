@@ -1,70 +1,119 @@
-# Analiza feedbacku dwóch nauczycielek — triage i plan naprawczy
+# P0.1 — Silnik walidacji odpowiedzi (matchAnswer)
 
-Dwa raporty pilotażowe (`My_feedback.pdf`, `Eqoodoo.pdf`). Poniżej: co jest realnym defektem (potwierdzonym w kodzie), co jest problemem UX/discovery, a co świadomie odrzucamy jako sprzeczne ze strategią produktu.
+## Co ustaliłem w kodzie (fakty, nie domysły)
 
-## Wynik weryfikacji w kodzie (fakty, nie domysły)
+Walidacja odpowiedzi tekstowych jest dziś **rozsypana po komponentach** i istnieje w **dwóch niezależnych implementacjach**, które potrafią dać różny wynik dla tej samej odpowiedzi:
 
-| Zarzut | Weryfikacja w kodzie | Werdykt |
-|---|---|---|
-| Poprawne odpowiedzi oznaczane jako błędne | `ExerciseErrorCorrection.tsx` porównuje `studentAnswer.toLowerCase().trim() === correctAnswer.toLowerCase().trim()`. Brak obsługi wariantów „A OR B", brak obsługi „This sentence is correct". `answersMatch()` z `src/utils/textNormalization.ts` jest użyty tylko w 2 z ~12 ćwiczeń tekstowych | POTWIERDZONY BUG (krytyczny) |
-| Oba głosy w dialogu brzmią tak samo | `supabase/functions/generate-audio/index.ts`: jeden losowy głos (`randomVoice`) dla całego skryptu, jedno wywołanie TTS | POTWIERDZONY BUG |
-| Procenty (rd 93% / wr 88% / sp 38%) w PDF nauczyciela | `NanoSkillBadge.tsx` renderuje `confidencePercent` bez `data-no-pdf`; `pdfUtils.ts` usuwa tylko elementy z `data-no-pdf="true"` | POTWIERDZONY BUG |
-| Timing i przycisk „Regenerate" w PDF ucznia | `ExerciseHeader.tsx` renderuje Regenerate/Clock/Move/Delete bez `data-no-pdf` | POTWIERDZONY BUG |
-| „Nie da się zobaczyć wyników testu" | `TestDetailsView.tsx` + `QuestionCard` mają pełny widok per-pytanie z `student_answer`/`is_correct`. Funkcja ISTNIEJE, ale nauczycielka jej nie znalazła | PROBLEM DISCOVERY, nie brak funkcji |
-| Test wstępny mierzy profil psychologiczny zamiast poziomu | `welcomeTest.ts`: sekcje z `trait_name` (anxiety, motivation) obok `element_type` (grammar/vocab/...). Miks jest zamierzony, ale poziom liczony jest na podmiotowej próbce | CZĘŚCIOWO ZASADNY |
-| Zmiany w ćwiczeniach nie zapisują się / nie ma ich w PDF | Wymaga dodatkowego audytu ścieżki zapisu (nie potwierdzone jednoznacznie w tej turze) | DO ZDIAGNOZOWANIA |
+**Ścieżka A — warstwa wizualna (co widzi uczeń/nauczyciel).** Każde ćwiczenie liczy poprawność u siebie:
 
-## Triage — co robimy
+| Plik | Obecna logika |
+|---|---|
+| `ExerciseFillInBlanks.tsx:107` | jedyny używa `answersMatch()` z `src/utils/textNormalization.ts` |
+| `ExerciseFillInBlanksAudio.tsx:106` | `toLowerCase().trim()` |
+| `ExerciseGapText.tsx:74,110` | `toLowerCase().trim()`, warianty rozbijane tylko po `/` |
+| `ExerciseCompleteWord.tsx:46` | `toLowerCase().trim()` |
+| `ExerciseNegativePrefixes.tsx:43` | `toLowerCase().trim()` |
+| `ExerciseSentenceTransformation.tsx:40` | `toLowerCase().trim()` |
+| `ExerciseErrorCorrection.tsx:75` | `toLowerCase().trim()` |
+| `ExerciseAnswerQuestions.tsx:141` | brak walidacji — pokazuje „Suggested answer” (poprawnie, zostaje) |
+| `ExerciseParaphrasing.tsx` | brak walidacji (otwarte) — zostaje |
 
-### P0 — Naprawiamy natychmiast (podważają zaufanie do produktu)
+**Ścieżka B — `src/utils/masteryCalculator.ts` (co trafia do DSLM).** To druga, całkowicie odrębna implementacja tych samych porównań (linie 259, 265, 297, 306, 315, 337, 345, 366, 376, 385) — również `toLowerCase().trim()`. Jej wynik to `100` albo `0` i zasila `calculateItemMastery` → `calculateOverallMastery` → oceny mastery ucznia.
 
-1. **Silnik walidacji odpowiedzi.** Jeden współdzielony moduł `src/lib/answers/matchAnswer.ts`: normalizacja (case, interpunkcja, białe znaki, apostrofy typograficzne, kolapsy spacji), rozbicie wariantów po `" OR "` / `"/"` / `";"`, obsługa sentinela „This sentence is correct" (odpowiedź poprawna = zdanie źródłowe), tolerancja skróceń (`don't`/`do not`). Podpięcie do WSZYSTKICH ćwiczeń tekstowych (error correction, sentence transformation, gap text, complete word, word order, fill-in-blanks, paraphrasing, answer questions). Fallback: gdy odpowiedź nie pasuje dosłownie, oznaczamy jako „needs teacher review" (żółty), a nie „wrong" (czerwony) — nigdy nie mówimy uczniowi, że ma źle, gdy nie jesteśmy pewni.
-2. **Higiena eksportów PDF/HTML.** Dodanie `data-no-pdf="true"` na: `NanoSkillBadge`, blok czasu i Regenerate w `ExerciseHeader`, przyciski Move/Delete/Mark Done. Osobno: wersja ucznia nie może zawierać żadnych `Suggested answer` — audyt 5 komponentów, które je renderują.
-3. **Różne głosy w dialogach.** Parsowanie skryptu na tury mówców, przypisanie stałego głosu per speaker (A: `onyx`, B: `nova`), scalanie segmentów audio. Zero zmian w prompcie generacji worksheetów (zasada świętości) — zmiana dotyczy wyłącznie `generate-audio`.
+**Root cause:** brak jednego kontraktu poprawności. Poprawność jest liczona ad hoc w miejscu renderowania, przez ścisłe równość stringów, a drugi raz — innym kodem i **innymi kluczami danych** — w kalkulatorze mastery.
 
-### P1 — Naprawiamy w drugiej kolejności (blokują realne użycie)
+**Trzy konkretne konsekwencje, które zgłosili nauczyciele:**
 
-4. **Trwałość edycji + PDF odzwierciedlający zmiany.** Audyt ścieżki `isEditing → onChange → persist → reload → export`. Cel: jawny stan „Saved/Unsaved" i eksport zawsze z aktualnej wersji z bazy.
-5. **Generowanie z obrazkami i z zadanym słownictwem.** Diagnoza z `error_logs`: czy to timeout, czy limit 5000 znaków, czy błąd modelu obrazów. Naprawa + czytelny komunikat zamiast cichego faila.
-6. **Dostęp ucznia do `/my`.** Uczeń trafił na ekran „Welcome Test Completed" zamiast Student Hub. Weryfikacja routingu `/my` → `/my/:teacherToken` i stanu po ukończeniu testu.
-7. **Share otwierający wersję live z odpowiedziami.** Domyślny share MUSI dawać wersję ucznia; wersja live/z odpowiedziami tylko jako świadomy, oznaczony wybór.
-8. **Nagrywanie nie działa.** Odtworzenie na uczniowskiej ścieżce (uprawnienia mikrofonu, upload, MIME).
+1. **Fałszywe „źle”.** `don't` vs `do not`, kropka na końcu, typograficzny apostrof `’`, podwójna spacja, `A OR B` w kluczu odpowiedzi, sentinel „This sentence is correct” — wszystko to dziś wypada na czerwono.
+2. **Rozjazd UI ↔ DSLM.** `ExerciseErrorCorrection` czyta klucz `sentence.answer`, a `masteryCalculator:342` czyta `sentence.correct || sentence.corrected || sentence.correct_sentence || sentence.correction` — czyli ten sam item może być zielony w UI i `0` w mastery (albo `null`).
+3. **Brak stanu pośredniego.** System zna tylko `true`/`false`. Nie ma sposobu, by powiedzieć „nie jestem pewien — do decyzji nauczyciela”.
 
-### P2 — Robimy, bo tanie i realnie zmniejszają tarcie
+## Zasada bezpieczeństwa tej zmiany
 
-9. **Auto-email przy przypisaniu zadania** (dziś wymaga osobnego kliknięcia) — z możliwością wyłączenia.
-10. **Rozwinięte domyślnie „extra lesson information"** zamiast chowania pod przyciskiem.
-11. **Podpowiedzi w polu tematu lekcji jako ikona z tooltipem**, nie ściana przykładów.
-12. **Widoczny link „See every answer" z wyników testu** do `TestDetailsView` — funkcja istnieje, brakuje jej wejścia.
-13. **Ukrycie nano-skill/confidence za trybem „Advanced"** — domyślnie nauczyciel widzi materiał, nie telemetrię.
+Nowy matcher jest **wyłącznie łagodniejszy** od obecnego: każda odpowiedź uznana dziś za poprawną pozostaje poprawna. Zmiana może przenieść item tylko z `wrong` → `correct` lub `wrong` → `review`. Nigdy odwrotnie. Dzięki temu żaden istniejący wynik mastery nie spadnie.
 
-### P3 — Wymaga osobnej decyzji strategicznej (nie robimy teraz)
+## Rozwiązanie
 
-14. **Zgodność z zamówionymi typami ćwiczeń i zadanym słownictwem.** To dotyka Worksheet Generation Engine — objęty zasadą świętości. Propozycja bez ruszania promptu: warstwa post-walidacji, która porównuje wygenerowany zestaw z zamówieniem i pokazuje nauczycielowi ostrzeżenie „you asked for 4 grammar exercises, got 7" z opcją usunięcia nadmiarowych jednym kliknięciem.
-15. **Test wstępny: rozdzielenie diagnozy językowej od profilu.** Duży temat — oddzielny sprint. Kierunek: krótszy blok językowy z adaptacyjną trudnością + jawny raport „gdzie popełnił błąd", profil psychologiczny jako opcjonalny drugi krok.
+### 1. Nowy moduł `src/lib/answers/matchAnswer.ts`
 
-### ODRZUCAMY (świadomie, ze strategii)
+Jedno publiczne API:
 
-16. **„Dodajcie gry dla nastolatków."** Edooqoo to system dla dorosłych uczniów 1:1. Gry dla nastolatków to inny produkt i inny rynek. Nie budujemy.
-17. **„Worksheety powinny zastąpić całą lekcję."** Pozycjonowanie jest jawne: 1-Minute Prep = materiał do przeglądu przez nauczyciela, nie autopilot. Zamiast budować „lekcję pod klucz", poprawiamy jakość i przewidywalność tego, co generujemy.
-18. **„Za dużo funkcji" jako całość.** Nie usuwamy funkcji; obniżamy gęstość interfejsu (punkty 10–13). Sam zarzut jest jednak sygnałem — jeśli powtórzy się u kolejnych 3 nauczycieli, wracamy do niego jako do osobnego sprintu redukcji.
+```ts
+export type MatchVerdict = 'correct' | 'review' | 'wrong' | 'empty';
 
-## Kolejność wdrożenia
+export interface MatchResult {
+  verdict: MatchVerdict;
+  matchedVariant?: string;   // wariant klucza, który zadziałał
+  reason?: string;           // 'exact' | 'normalized' | 'contraction' | 'variant' | 'sentinel' | 'near'
+  acceptedAnswers: string[]; // wszystkie warianty do wyświetlenia
+}
 
-```text
-Sprint A (P0)  → walidacja odpowiedzi + higiena PDF + głosy w dialogach
-Sprint B (P1)  → trwałość edycji, generowanie z obrazami/słownictwem, dostęp ucznia, share, nagrywanie
-Sprint C (P2)  → auto-email, odchudzenie UI, wejście do szczegółów testu
-Sprint D (P3)  → warstwa zgodności zamówienia + redesign testu wstępnego (osobna decyzja)
+export function matchAnswer(
+  studentAnswer: unknown,
+  correctAnswer: unknown,
+  options?: {
+    sourceSentence?: string;      // dla sentinela „This sentence is correct”
+    mode?: 'word' | 'sentence';   // word = pojedyncze słowo/prefix, sentence = pełne zdanie
+    caseSensitive?: boolean;      // domyślnie false
+  }
+): MatchResult;
+
+export function isAnswerCorrect(...): boolean;      // adapter zgodności wstecznej
+export function splitAnswerVariants(raw: string): string[];
 ```
 
-## Uwagi techniczne
+Warstwy porównania, w kolejności:
 
-- Nie dotykamy `supabase/functions/generateWorksheet/prompts/**` — zasada świętości silnika. Wszystkie naprawy P0/P1 są poza tą warstwą.
-- Walidacja odpowiedzi trafia do jednego modułu z testami jednostkowymi (vitest), aby regresja nie wróciła przy kolejnym ćwiczeniu.
-- Higiena eksportu wymaga jednego przejścia audytowego po `src/components/worksheet/*` — atrybut `data-no-pdf` jest jedynym kontraktem, jaki rozumieją `pdfUtils.ts` i `htmlExport.ts`.
-- Zmiana w `generate-audio` zwiększy liczbę wywołań TTS (jedno na turę mówcy) — trzeba oszacować wpływ na koszt przy dialogach 90-sekundowych.
+1. **Pusto** → `empty` (żadnego koloru, tak jak dziś).
+2. **Normalizacja:** lowercase, trim, kolaps białych znaków, apostrofy typograficzne `’‘` → `'`, cudzysłowy `“”` → `"`, myślniki `–—` → `-`, usunięcie końcowej interpunkcji `.?!,;:` (tylko na końcu, nie w środku).
+3. **Warianty klucza:** rozbicie po ` OR `, ` / `, `;`, `|` oraz nawiasach opcjonalnych `he (has) gone` → `he has gone` + `he gone`. Każdy wariant testowany osobno.
+4. **Skrócenia:** dwustronna ekspansja/kontrakcja na słowniku (`don't↔do not`, `isn't↔is not`, `I'm↔I am`, `won't↔will not`, `it's↔it is`, `'ll/'ve/'re/'d`). Porównanie po sprowadzeniu obu stron do formy rozwiniętej.
+5. **Sentinel:** jeśli klucz to jedna z fraz `this sentence is correct` / `no error` / `correct as is` / `no mistake`, to za poprawne uznajemy również powtórzenie `sourceSentence` (po normalizacji) oraz `ok`/`correct`/`no error`.
+6. **Near-match → `review`:** jeżeli nic nie pasuje, liczymy dystans Levenshteina do najbliższego wariantu. Dla `mode: 'word'` próg to `<= 1` znak przy słowie ≥ 4 znaków; dla `mode: 'sentence'` próg to znormalizowany dystans `<= 15%` długości **lub** identyczny zbiór słów w innej kolejności. Trafienie → `review`.
+7. W pozostałych przypadkach → `wrong`.
 
-## Następny krok
+Moduł jest czysty (bez importów Reacta), w pełni testowalny.
 
-Wskaż, który sprint planujemy szczegółowo jako pierwszy. Rekomendacja: Sprint A — trzy defekty, które w raportach obu nauczycielek pojawiają się jako powód braku zaufania do narzędzia.
+`src/utils/textNormalization.ts` zostaje na miejscu; jego `answersMatch` staje się cienkim wrapperem na `matchAnswer(...).verdict === 'correct'`, żeby nie łamać innych importów.
+
+### 2. Jeden wspólny komponent statusu
+
+`src/components/worksheet/AnswerStatusBadge.tsx` — renderuje trzy stany zamiast dwóch:
+
+- `correct` → zielony `✓ Correct` (bez zmian względem dziś)
+- `review` → **żółty** `● Needs teacher review` + w nawiasie oczekiwana odpowiedź
+- `wrong` → czerwony `✗ (klucz)`
+
+Kolory z tokenów semantycznych (`text-success`, `text-warning`, `text-destructive`), bez hardkodowanych klas. Pola input dostają odpowiadające obramowanie żółte dla `review`.
+
+### 3. Podpięcie do ćwiczeń
+
+Podmiana lokalnego porównania na `matchAnswer` + `AnswerStatusBadge` w:
+`ExerciseErrorCorrection` (`mode: 'sentence'` + `sourceSentence`), `ExerciseSentenceTransformation` (`sentence`), `ExerciseGapText` (`word`, per-blank), `ExerciseCompleteWord` (`word`), `ExerciseFillInBlanks` (`word`), `ExerciseFillInBlanksAudio` (`word`), `ExerciseNegativePrefixes` (`word`), `ExerciseWordOrder` (`sentence`).
+
+`ExerciseAnswerQuestions` i `ExerciseParaphrasing` pozostają otwarte (ocena AI/nauczyciela) — zmieniamy w nich tylko opis na „Suggested answer”, żeby uczeń nie czytał tego jako jedynej poprawnej wersji.
+
+### 4. Uspójnienie z DSLM (`masteryCalculator.ts`)
+
+- Wszystkie porównania tekstowe w `calculateItemMastery` przechodzą na `matchAnswer`.
+- Ujednolicenie kluczy danych: dla `error-correction` czytamy **ten sam** łańcuch fallbacków co UI (`sentence.answer || sentence.correct || sentence.corrected || sentence.correct_sentence || sentence.correction`). To likwiduje rozjazd UI↔DSLM.
+- **Mapowanie werdyktu na mastery:** `correct` → `100`, `wrong` → `0`, **`review` → `null`** (item nie wchodzi do średniej, dokładnie tak jak dziś „nie da się ustalić”). Zgodne z regułą, że niepewne dane nie psują precyzyjnych wyników mastery.
+
+### 5. Testy
+
+`src/lib/answers/__tests__/matchAnswer.test.ts` — tabela ~60 przypadków: kontrakcje w obie strony, apostrof typograficzny, końcowa kropka, `A OR B`, `a/b`, nawiasy opcjonalne, sentinel z powtórzeniem zdania, literówka 1-znakowa (→ review), zamieniona kolejność słów (→ review), realnie zła odpowiedź (→ wrong), pusta (→ empty). Plus test regresyjny: dla zestawu par, które dziś zwracają `true`, nowy matcher też zwraca `correct`.
+
+## Pliki
+
+**Nowe:** `src/lib/answers/matchAnswer.ts`, `src/lib/answers/contractions.ts`, `src/lib/answers/__tests__/matchAnswer.test.ts`, `src/components/worksheet/AnswerStatusBadge.tsx`
+
+**Modyfikowane:** `src/utils/textNormalization.ts`, `src/utils/masteryCalculator.ts`, oraz 8 komponentów ćwiczeń wymienionych w pkt. 3
+
+**Nietykane:** silnik generowania worksheetów (prompty, pipeline), ścieżka ocen AI dla ćwiczeń otwartych, RLS/schema bazy
+
+## Weryfikacja przed zamknięciem
+
+1. `bunx vitest run src/lib/answers` — wszystkie przypadki zielone.
+2. Test regresyjny „nigdy surowiej niż dziś”.
+3. Smoke w przeglądarce na worksheecie z error-correction + gap-text: wpisanie `don't` przy kluczu `do not` → zielone; literówka → żółte „Needs teacher review”; bzdura → czerwone.
+4. Sprawdzenie, że dla itemu `review` mastery nie zapisuje `0`.
