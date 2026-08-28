@@ -67,19 +67,24 @@ const ExerciseErrorCorrection: React.FC<ExerciseErrorCorrectionProps> = ({
                 onChange={(e) => onAnswerChange?.(sIndex, e.target.value)}
                 placeholder="Write the correct sentence..."
                 className={`w-full h-10 border rounded px-3
-                  ${isCorrect ? 'bg-green-200 border-2 border-green-600' : ''}
-                  ${isIncorrect ? 'bg-red-200 border-2 border-red-600' : ''}
+                  ${isCorrect ? answerFieldClasses('correct') : ''}
+                  ${isReview ? answerFieldClasses('review') : ''}
+                  ${isIncorrect ? answerFieldClasses('wrong') : ''}
                   ${isEmpty ? 'bg-red-100 border-2 border-red-400' : ''}
                   ${disabled ? 'bg-muted cursor-not-allowed opacity-70' : ''}
                 `}
                 disabled={disabled}
               />
             )}
-            {showCorrectAnswers && correctAnswer && (
-              <div className={`text-sm mt-1 ${isCorrect ? 'text-green-600' : 'text-red-600'}`}>
-                {isCorrect ? '✓ Correct!' : `✗ Correct answer: ${correctAnswer}`}
+            {showCorrectAnswers && correctAnswer && studentAnswer && (
+              <div className="text-sm mt-1">
+                <AnswerStatusBadge
+                  verdict={match.verdict}
+                  expected={isCorrect ? undefined : correctAnswer}
+                />
               </div>
             )}
+
             {(viewMode === 'teacher' || showCorrectAnswers) && isEditing && (
               <div className="text-green-600 italic text-sm mt-1">
                 <input
