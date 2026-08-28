@@ -3,6 +3,9 @@ import { InteractiveExerciseProps } from "@/types/interactiveHomework";
 import { Input } from "@/components/ui/input";
 import { safeGetNanoSkill, safeGetAllNanoSkills } from "@/utils/textObjectFixer";
 import NanoSkillBadge, { NanoSkill } from "./NanoSkillBadge";
+import { matchAnswer } from "@/lib/answers/matchAnswer";
+import { AnswerStatusBadge, answerFieldClasses } from "./AnswerStatusBadge";
+
 
 interface ExerciseCompleteWordProps extends Partial<InteractiveExerciseProps> {
   words: any[];
@@ -43,9 +46,12 @@ const ExerciseCompleteWord: React.FC<ExerciseCompleteWordProps> = ({
         {words.map((wordItem, wIndex) => {
           const studentAnswer = studentAnswers[wIndex] || '';
           const correctAnswer = wordItem?.complete || wordItem?.complete_word || '';
-          const isCorrect = showCorrectAnswers && studentAnswer.toLowerCase().trim() === correctAnswer.toLowerCase().trim();
-          const isIncorrect = showCorrectAnswers && studentAnswer && !isCorrect;
+          const match = matchAnswer(studentAnswer, correctAnswer, { mode: 'word' });
+          const isCorrect = showCorrectAnswers && match.verdict === 'correct';
+          const isReview = showCorrectAnswers && match.verdict === 'review';
+          const isIncorrect = showCorrectAnswers && match.verdict === 'wrong';
           const isEmpty = showCorrectAnswers && !studentAnswer;
+
           const nanoSkill = safeGetNanoSkill(wordItem);
           const showNanoSkill = viewMode === 'teacher' && nanoSkill;
 
