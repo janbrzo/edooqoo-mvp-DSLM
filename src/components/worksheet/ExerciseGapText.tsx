@@ -1,3 +1,5 @@
+import { matchAnswer } from "@/lib/answers/matchAnswer";
+import { AnswerStatusBadge, answerFieldClasses } from "./AnswerStatusBadge";
 import React from "react";
 import { InteractiveExerciseProps } from "@/types/interactiveHomework";
 import { Input } from "@/components/ui/input";
@@ -67,12 +69,20 @@ const ExerciseGapText: React.FC<ExerciseGapTextProps> = ({
         })();
         
         // Overall correctness for the sentence (all blanks correct)
-        const allBlanksCorrect = blanksCount > 0 && Array.from({ length: blanksCount }).every((_, i) => {
+        const blankVerdicts = Array.from({ length: Math.max(blanksCount, 0) }).map((_, i) => {
           const key = getBlankKey(i);
           const answer = studentAnswers[key] || '';
           const correct = correctAnswers[i] || correctAnswers[0] || '';
-          return answer.toLowerCase().trim() === correct.toLowerCase().trim();
+          return matchAnswer(answer, correct, { mode: 'word' }).verdict;
         });
+        const allBlanksCorrect = blanksCount > 0 && blankVerdicts.every((v) => v === 'correct');
+        const sentenceVerdict: 'correct' | 'review' | 'wrong' | 'empty' = allBlanksCorrect
+          ? 'correct'
+          : blankVerdicts.every((v) => v === 'empty')
+            ? 'empty'
+            : blankVerdicts.some((v) => v === 'wrong')
+              ? 'wrong'
+              : 'review';
 
         return (
           <div key={sIndex} className="border rounded-lg p-3 bg-white">
@@ -96,9 +106,11 @@ const ExerciseGapText: React.FC<ExerciseGapTextProps> = ({
                               <React.Fragment key={pIndex}>
                                 {part}
                                 {showCorrectAnswers && (
-                                  <span className={`ml-2 text-sm font-medium ${allBlanksCorrect ? 'text-green-600' : 'text-red-600'}`}>
-                                    {allBlanksCorrect ? '✓ Correct' : `✗ (${correctAnswers.join(', ')})`}
-                                  </span>
+                                  <AnswerStatusBadge
+                                    className="ml-2"
+                                    verdict={sentenceVerdict}
+                                    expected={allBlanksCorrect ? undefined : correctAnswers.join(', ')}
+                                  />
                                 )}
                               </React.Fragment>
                             );
@@ -107,8 +119,10 @@ const ExerciseGapText: React.FC<ExerciseGapTextProps> = ({
                           const blankKey = getBlankKey(pIndex);
                           const blankAnswer = studentAnswers[blankKey] || '';
                           const blankCorrectAnswer = correctAnswers[pIndex] || correctAnswers[0] || '';
-                          const blankIsCorrect = showCorrectAnswers && blankAnswer.toLowerCase().trim() === blankCorrectAnswer.toLowerCase().trim();
-                          const blankIsIncorrect = showCorrectAnswers && blankAnswer && !blankIsCorrect;
+                          const blankVerdict = blankVerdicts[pIndex] ?? 'empty';
+                          const blankIsCorrect = showCorrectAnswers && blankVerdict === 'correct';
+                          const blankIsReview = showCorrectAnswers && blankVerdict === 'review';
+                          const blankIsIncorrect = showCorrectAnswers && blankVerdict === 'wrong';
                           const blankIsEmpty = showCorrectAnswers && !blankAnswer;
                           
                           return (
@@ -119,8 +133,9 @@ const ExerciseGapText: React.FC<ExerciseGapTextProps> = ({
                                 onChange={(e) => onAnswerChange?.(blankKey as any, e.target.value)}
                                 disabled={disabled}
                                 className={`inline-block w-32 mx-1 h-7 
-                                  ${blankIsCorrect ? 'bg-green-200 border-2 border-green-600' : ''}
-                                  ${blankIsIncorrect ? 'bg-red-200 border-2 border-red-600' : ''}
+                                  ${blankIsCorrect ? answerFieldClasses('correct') : ''}
+                                  ${blankIsReview ? answerFieldClasses('review') : ''}
+                                  ${blankIsIncorrect ? answerFieldClasses('wrong') : ''}
                                   ${blankIsEmpty ? 'bg-red-100 border-2 border-red-400' : ''}
                                   ${disabled ? 'bg-muted cursor-not-allowed opacity-70' : ''}
                                 `}
