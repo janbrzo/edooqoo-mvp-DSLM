@@ -1,7 +1,8 @@
 import React, { useMemo } from "react";
 import { InteractiveExerciseProps } from "@/types/interactiveHomework";
 import { Input } from "@/components/ui/input";
-import { answersMatch } from "@/utils/textNormalization";
+import { matchAnswer } from "@/lib/answers/matchAnswer";
+import { AnswerStatusBadge, answerFieldClasses } from "./AnswerStatusBadge";
 import NanoSkillBadge, { NanoSkill } from "./NanoSkillBadge";
 import { safeGetText, safeGetNanoSkill, safeGetAllNanoSkills } from "@/utils/textObjectFixer";
 
@@ -104,8 +105,10 @@ const ExerciseFillInBlanks: React.FC<ExerciseFillInBlanksProps> = ({
           const studentAnswer = studentAnswers[sIndex] || '';
           const correctAnswer = sentence.answer;
           // Use normalized comparison to ignore punctuation and case
-          const isCorrect = showCorrectAnswers && answersMatch(studentAnswer, correctAnswer);
-          const isIncorrect = showCorrectAnswers && studentAnswer && !isCorrect;
+          const match = matchAnswer(studentAnswer, correctAnswer, { mode: 'word' });
+          const isCorrect = showCorrectAnswers && match.verdict === 'correct';
+          const isReview = showCorrectAnswers && match.verdict === 'review';
+          const isIncorrect = showCorrectAnswers && match.verdict === 'wrong';
           const isEmpty = showCorrectAnswers && !studentAnswer;
           const liveAnswer = liveSessionAnswer?.[sIndex];
           const showNanoSkill = viewMode === 'teacher' && nanoSkill;
@@ -134,8 +137,9 @@ const ExerciseFillInBlanks: React.FC<ExerciseFillInBlanksProps> = ({
                                   onChange={(e) => onAnswerChange?.(sIndex, e.target.value)}
                                   disabled={disabled}
                                   className={`inline-block w-32 mx-1 h-7 
-                                    ${isCorrect ? 'bg-green-200 border-2 border-green-600' : ''}
-                                    ${isIncorrect ? 'bg-red-200 border-2 border-red-600' : ''}
+                                    ${isCorrect ? answerFieldClasses('correct') : ''}
+                                    ${isReview ? answerFieldClasses('review') : ''}
+                                    ${isIncorrect ? answerFieldClasses('wrong') : ''}
                                     ${isEmpty ? 'bg-red-100 border-2 border-red-400' : ''}
                                     ${disabled ? 'opacity-70' : ''}
                                   `}
@@ -145,9 +149,11 @@ const ExerciseFillInBlanks: React.FC<ExerciseFillInBlanksProps> = ({
                             </React.Fragment>
                           ))}
                           {showCorrectAnswers && (
-                            <span className={`ml-2 text-sm font-medium ${isCorrect ? 'text-green-600' : 'text-red-600'}`}>
-                              {isCorrect ? '✓ Correct' : <>✗ ({correctAnswer})</>}
-                            </span>
+                            <AnswerStatusBadge
+                              className="ml-2"
+                              verdict={match.verdict}
+                              expected={isCorrect ? undefined : correctAnswer}
+                            />
                           )}
                         </span>
                       ) : (

@@ -4,6 +4,8 @@ import { Input } from "@/components/ui/input";
 import { answersMatch } from "@/utils/textNormalization";
 import { safeGetNanoSkill, safeGetAllNanoSkills } from "@/utils/textObjectFixer";
 import NanoSkillBadge, { NanoSkill } from "./NanoSkillBadge";
+import { matchAnswer } from "@/lib/answers/matchAnswer";
+import { AnswerStatusBadge, answerFieldClasses } from "./AnswerStatusBadge";
 
 interface ExerciseWordOrderProps extends Partial<InteractiveExerciseProps> {
   sentences: any[];
@@ -44,8 +46,10 @@ const ExerciseWordOrder: React.FC<ExerciseWordOrderProps> = ({
           const studentAnswer = studentAnswers[sIndex] || '';
           const correctAnswer = sentence?.correct_order || '';
           // Use normalized comparison to ignore punctuation and case
-          const isCorrect = showCorrectAnswers && answersMatch(studentAnswer, correctAnswer);
-          const isIncorrect = showCorrectAnswers && studentAnswer && !isCorrect;
+          const match = matchAnswer(studentAnswer, correctAnswer, { mode: 'sentence' });
+          const isCorrect = showCorrectAnswers && match.verdict === 'correct';
+          const isReview = showCorrectAnswers && match.verdict === 'review';
+          const isIncorrect = showCorrectAnswers && match.verdict === 'wrong';
           const isEmpty = showCorrectAnswers && !studentAnswer;
           const nanoSkill = safeGetNanoSkill(sentence);
           const showNanoSkill = viewMode === 'teacher' && nanoSkill;
@@ -94,8 +98,9 @@ const ExerciseWordOrder: React.FC<ExerciseWordOrderProps> = ({
                     placeholder="Write the sentence in correct order..."
                     disabled={disabled}
                     className={`h-10
-                      ${isCorrect ? 'bg-green-200 border-2 border-green-600' : ''}
-                      ${isIncorrect ? 'bg-red-200 border-2 border-red-600' : ''}
+                      ${isCorrect ? answerFieldClasses('correct') : ''}
+                      ${isReview ? answerFieldClasses('review') : ''}
+                      ${isIncorrect ? answerFieldClasses('wrong') : ''}
                       ${isEmpty ? 'bg-red-100 border-2 border-red-400' : ''}
                       ${disabled ? 'bg-muted cursor-not-allowed opacity-70' : ''}
                     `}
@@ -103,9 +108,11 @@ const ExerciseWordOrder: React.FC<ExerciseWordOrderProps> = ({
                 )}
                 
                 {isInteractive && showCorrectAnswers && (
-                  <span className={`text-sm font-medium ${isCorrect ? 'text-green-600' : 'text-red-600'}`}>
-                    {isCorrect ? '✓' : `✗ (${correctAnswer})`}
-                  </span>
+                  <AnswerStatusBadge
+                    verdict={match.verdict}
+                    compact={match.verdict === 'correct'}
+                    expected={isCorrect ? undefined : correctAnswer}
+                  />
                 )}
                 
                 {viewMode === 'teacher' && (
