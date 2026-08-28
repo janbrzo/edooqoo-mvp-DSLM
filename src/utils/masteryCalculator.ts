@@ -10,6 +10,25 @@
  * - NanoSkillMasteryModal
  */
 
+import { matchAnswer } from '@/lib/answers/matchAnswer';
+
+/**
+ * Text correctness for DSLM.
+ * Uses the shared matcher; an uncertain ("review") verdict yields `null`
+ * so the item is excluded from mastery instead of scoring 0.
+ */
+const textVerdict = (
+  studentAnswer: unknown,
+  correctAnswer: unknown,
+  mode: 'word' | 'sentence',
+  sourceSentence?: string
+): boolean | null => {
+  const { verdict } = matchAnswer(studentAnswer, correctAnswer, { mode, sourceSentence });
+  if (verdict === 'correct') return true;
+  if (verdict === 'wrong') return false;
+  return null; // 'review' / 'empty' => not scored
+};
+
 // Seeded random for deterministic shuffle (same algorithm as UI components)
 function seededRandom(seed: string) {
   let hash = 0;
@@ -210,7 +229,7 @@ export const calculateItemMastery = (
         // Fallback: direct text comparison
         const correctMatch = item.correct_match || item.match || item.definition;
         if (correctMatch !== undefined) {
-          isCorrect = String(studentAnswer).toLowerCase().trim() === String(correctMatch).toLowerCase().trim();
+          isCorrect = textVerdict(studentAnswer, correctMatch, 'word');
         }
       }
     }
@@ -256,13 +275,13 @@ export const calculateItemMastery = (
       if (exerciseType === 'fill-in-blanks-audio' && exerciseData?.answers?.[itemIndex]) {
         const correctAnswer = exerciseData.answers[itemIndex];
         if (correctAnswer && typeof studentAnswer === 'string') {
-          isCorrect = studentAnswer.toLowerCase().trim() === String(correctAnswer).toLowerCase().trim();
+          isCorrect = textVerdict(studentAnswer, correctAnswer, 'word');
         }
       } else if (exerciseData?.sentences?.[itemIndex]) {
         const sentence = exerciseData.sentences[itemIndex];
         const correctAnswer = typeof sentence === 'string' ? null : (sentence.answer || sentence.correct || sentence.missing_word);
         if (correctAnswer && typeof studentAnswer === 'string') {
-          isCorrect = studentAnswer.toLowerCase().trim() === correctAnswer.toLowerCase().trim();
+          isCorrect = textVerdict(studentAnswer, correctAnswer, 'word');
         }
       }
     }
@@ -294,7 +313,7 @@ export const calculateItemMastery = (
       const word = exerciseData.words[itemIndex];
       const correctWord = typeof word === 'string' ? word : (word.word || word.complete || word.complete_word);
       if (correctWord && typeof studentAnswer === 'string') {
-        isCorrect = studentAnswer.toLowerCase().trim() === correctWord.toLowerCase().trim();
+        isCorrect = textVerdict(studentAnswer, correctWord, 'word');
       }
     }
 
@@ -303,7 +322,7 @@ export const calculateItemMastery = (
       const word = exerciseData.words[itemIndex];
       const correctPrefix = typeof word === 'string' ? null : (word.prefix || word.answer);
       if (correctPrefix && typeof studentAnswer === 'string') {
-        isCorrect = studentAnswer.toLowerCase().trim() === correctPrefix.toLowerCase().trim();
+        isCorrect = textVerdict(studentAnswer, correctPrefix, 'word');
       }
     }
 
@@ -312,7 +331,7 @@ export const calculateItemMastery = (
       const question = exerciseData.questions[itemIndex];
       const correctAnswer = question.odd_word || question.correct || question.correct_answer;
       if (correctAnswer) {
-        isCorrect = String(studentAnswer).toLowerCase().trim() === String(correctAnswer).toLowerCase().trim();
+        isCorrect = textVerdict(studentAnswer, correctAnswer, 'word');
       }
     }
 
@@ -333,7 +352,7 @@ export const calculateItemMastery = (
         // Direct text answer
         const correctAnswer = item.answer || item.synonym || item.antonym;
         if (correctAnswer && typeof studentAnswer === 'string') {
-          isCorrect = studentAnswer.toLowerCase().trim() === correctAnswer.toLowerCase().trim();
+          isCorrect = textVerdict(studentAnswer, correctAnswer, 'word');
         }
       }
     }
@@ -341,9 +360,11 @@ export const calculateItemMastery = (
     // Error correction
     if (exerciseType === 'error-correction' && exerciseData?.sentences?.[itemIndex]) {
       const sentence = exerciseData.sentences[itemIndex];
-      const correctAnswer = sentence.correct || sentence.corrected || sentence.correct_sentence || sentence.correction;
+      // Key fallbacks MUST mirror ExerciseErrorCorrection.tsx or UI and DSLM disagree.
+      const correctAnswer = sentence.answer || sentence.correction || sentence.correct || sentence.corrected || sentence.correct_sentence;
+      const sourceSentence = typeof sentence === 'string' ? '' : (sentence.incorrect || sentence.text || '');
       if (correctAnswer && typeof studentAnswer === 'string') {
-        isCorrect = studentAnswer.toLowerCase().trim() === String(correctAnswer).toLowerCase().trim();
+        isCorrect = textVerdict(studentAnswer, correctAnswer, 'sentence', sourceSentence);
       }
     }
 
@@ -362,7 +383,7 @@ export const calculateItemMastery = (
           const blankKey = `${itemIndex}_${b}`;
           const blankAnswer = allAnswers[blankKey];
           const expected = correctParts[b] || correctParts[0] || '';
-          if (!blankAnswer || String(blankAnswer).toLowerCase().trim() !== expected.toLowerCase().trim()) {
+          if (!blankAnswer || textVerdict(blankAnswer, expected, 'word') !== true) {
             allCorrectFlag = false;
             break;
           }
@@ -372,7 +393,7 @@ export const calculateItemMastery = (
         // Single blank (backward compatible)
         const correctAnswer = sentence.answer || sentence.correct || sentence.missing_word;
         if (correctAnswer && typeof studentAnswer === 'string') {
-          isCorrect = studentAnswer.toLowerCase().trim() === String(correctAnswer).toLowerCase().trim();
+          isCorrect = textVerdict(studentAnswer, correctAnswer, 'word');
         }
       }
     }
@@ -380,9 +401,9 @@ export const calculateItemMastery = (
     // Word order
     if (exerciseType === 'word-order' && exerciseData?.sentences?.[itemIndex]) {
       const sentence = exerciseData.sentences[itemIndex];
-      const correctAnswer = sentence.correct || sentence.correct_order || sentence.answer;
+      const correctAnswer = sentence.correct_order || sentence.correct || sentence.answer;
       if (correctAnswer && typeof studentAnswer === 'string') {
-        isCorrect = studentAnswer.toLowerCase().trim() === String(correctAnswer).toLowerCase().trim();
+        isCorrect = textVerdict(studentAnswer, correctAnswer, 'sentence');
       }
     }
 

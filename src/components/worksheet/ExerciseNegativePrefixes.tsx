@@ -3,6 +3,8 @@ import { InteractiveExerciseProps } from "@/types/interactiveHomework";
 import { Input } from "@/components/ui/input";
 import { safeGetNanoSkill, safeGetAllNanoSkills } from "@/utils/textObjectFixer";
 import NanoSkillBadge, { NanoSkill } from "./NanoSkillBadge";
+import { matchAnswer } from "@/lib/answers/matchAnswer";
+import { AnswerStatusBadge, answerFieldClasses } from "./AnswerStatusBadge";
 
 interface ExerciseNegativePrefixesProps extends Partial<InteractiveExerciseProps> {
   words: any[];
@@ -40,8 +42,10 @@ const ExerciseNegativePrefixes: React.FC<ExerciseNegativePrefixesProps> = ({
         {words.map((wordItem, wIndex) => {
           const studentAnswer = studentAnswers[wIndex] || '';
           const correctAnswer = wordItem?.answer || '';
-          const isCorrect = showCorrectAnswers && studentAnswer.toLowerCase().trim() === correctAnswer.toLowerCase().trim();
-          const isIncorrect = showCorrectAnswers && studentAnswer && !isCorrect;
+          const match = matchAnswer(studentAnswer, correctAnswer, { mode: 'word' });
+          const isCorrect = showCorrectAnswers && match.verdict === 'correct';
+          const isReview = showCorrectAnswers && match.verdict === 'review';
+          const isIncorrect = showCorrectAnswers && match.verdict === 'wrong';
           const isEmpty = showCorrectAnswers && !studentAnswer;
           const nanoSkill = safeGetNanoSkill(wordItem);
           const showNanoSkill = viewMode === 'teacher' && nanoSkill;
@@ -70,17 +74,20 @@ const ExerciseNegativePrefixes: React.FC<ExerciseNegativePrefixesProps> = ({
                             onChange={(e) => onAnswerChange?.(wIndex, e.target.value)}
                             placeholder="negative form..."
                             className={`inline-block w-40 mx-1 h-7
-                              ${isCorrect ? 'bg-green-200 border-2 border-green-600' : ''}
-                              ${isIncorrect ? 'bg-red-200 border-2 border-red-600' : ''}
+                              ${isCorrect ? answerFieldClasses('correct') : ''}
+                              ${isReview ? answerFieldClasses('review') : ''}
+                              ${isIncorrect ? answerFieldClasses('wrong') : ''}
                               ${isEmpty ? 'bg-red-100 border-2 border-red-400' : ''}
                               ${disabled ? 'opacity-60 cursor-not-allowed' : ''}
                             `}
                             disabled={disabled}
                           />
-                          {showCorrectAnswers && (
-                            <span className={`text-sm font-medium ${isCorrect ? 'text-green-600' : 'text-red-600'}`}>
-                              {isCorrect ? '✓' : <>✗ ({correctAnswer})</>}
-                            </span>
+                          {showCorrectAnswers && studentAnswer && (
+                            <AnswerStatusBadge
+                              verdict={match.verdict}
+                              compact={match.verdict === 'correct'}
+                              expected={isCorrect ? undefined : correctAnswer}
+                            />
                           )}
                         </>
                       ) : '______'}

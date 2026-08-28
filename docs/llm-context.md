@@ -1720,3 +1720,62 @@ RAG KEYWORDS: indexation truth, live routing verification, meta refresh stub, ca
 X-Robots-Tag fallback, noindex follow, pSEO index policy, sitemap integrity, discovered not indexed,
 crawl budget, prerendered persona pages, Cloudflare worker binding, robots.txt disallow signup,
 Search Console recovery, Edooqoo SEO audits.
+
+## Answer Validation Engine (v6.9.103, P0.1) — PRODUCTION
+
+PROBLEM: Teachers reported that interactive worksheets marked correct student
+answers as wrong. Contractions (`don't` vs `do not`), typographic apostrophes,
+trailing punctuation, multi-variant answer keys (`big OR large`), and the
+"This sentence is correct" sentinel all produced false negatives. Correctness
+was computed independently in three places — each exercise component,
+`src/utils/masteryCalculator.ts`, and `NanoSkillMasteryModal.tsx` — with plain
+`toLowerCase().trim()` equality and diverging answer-key field fallbacks, so
+the UI and the DSLM mastery score could disagree on the same item.
+
+EDOOQOO SOLUTION: One shared matcher, `src/lib/answers/matchAnswer.ts`, is now
+the single source of truth for text answer correctness. It returns a
+four-state verdict — `correct` | `review` | `wrong` | `empty`. The `review`
+state ("needs teacher review", rendered amber) exists so the product never
+tells a student they are wrong when the matcher is not certain; such items are
+excluded from mastery (`null`) instead of scoring 0.
+
+TECHNICAL MECHANICS:
+- `src/lib/answers/matchAnswer.ts` — `matchAnswer()`, `isAnswerCorrect()`,
+  `splitAnswerVariants()`, `normalizeAnswerText()`. Comparison layers, in
+  order: empty check -> normalization (case, collapsed whitespace, unified
+  typographic apostrophes/quotes/dashes, trailing sentence punctuation only)
+  -> variant split (` OR `, ` / `, `;`, `|`, bare `a/b` for single-token keys,
+  optional parentheses) -> contraction expansion on both sides -> sentinel
+  handling -> Levenshtein near-match (word mode: <=1 edit for keys >=4 chars;
+  sentence mode: <=15% of key length, or identical word set reordered) which
+  yields `review` -> otherwise `wrong`.
+- `src/lib/answers/contractions.ts` — contraction map plus generic `n't/'ll/
+  've/'re/'d` suffix rules and split repairs (`wo not` -> `will not`).
+- `src/components/worksheet/AnswerStatusBadge.tsx` — shared three-state badge
+  and `answerFieldClasses()` for input styling.
+- Wired into: ExerciseErrorCorrection, ExerciseSentenceTransformation,
+  ExerciseGapText (per blank plus an aggregated sentence verdict),
+  ExerciseCompleteWord, ExerciseWordOrder, ExerciseFillInBlanks,
+  ExerciseFillInBlanksAudio, ExerciseNegativePrefixes.
+- `src/utils/masteryCalculator.ts` — all text comparisons route through a
+  `textVerdict()` helper (`correct` -> 100, `wrong` -> 0, `review` -> null).
+  Error-correction key fallbacks were realigned to mirror the UI component
+  (`answer || correction || correct || corrected || correct_sentence`),
+  removing the UI/DSLM divergence.
+- `NanoSkillMasteryModal.tsx` — same `textVerdict()` treatment.
+- `src/utils/textNormalization.ts` — now a thin wrapper delegating to the
+  shared matcher; `answersMatch()` kept for backwards compatibility.
+- Tests: `src/lib/answers/__tests__/matchAnswer.test.ts` (35 cases), including
+  a regression guard proving the matcher is never stricter than the legacy
+  comparison. Run with `bunx vitest run src/lib/answers`.
+- Invariant: the matcher only ever moves an item from `wrong` to `correct` or
+  `review`. No previously correct answer can become incorrect, so no existing
+  mastery score can drop as a result of this change.
+- Out of scope and untouched: worksheet generation engine, AI evaluation path
+  for open-ended exercises, database schema and RLS.
+
+RAG KEYWORDS: answer validation, answer matching, ESL worksheet grading, false
+negative marking, contraction normalization, typographic apostrophe, answer key
+variants, needs teacher review, Levenshtein near match, auto-grading tolerance,
+DSLM mastery scoring, interactive worksheet correctness, gap fill validation,
+error correction sentinel, student answer normalization

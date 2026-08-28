@@ -4,6 +4,9 @@ import { Input } from "@/components/ui/input";
 import { safeGetNanoSkill, safeGetAllNanoSkills } from "@/utils/textObjectFixer";
 import NanoSkillBadge, { NanoSkill } from "./NanoSkillBadge";
 import { AiEvaluationBadge, AiEvaluation } from "@/components/homework/AiEvaluationBadge";
+import { matchAnswer } from "@/lib/answers/matchAnswer";
+import { AnswerStatusBadge, answerFieldClasses } from "./AnswerStatusBadge";
+
 
 interface ExerciseSentenceTransformationProps extends Partial<InteractiveExerciseProps> {
   sentences: any[];
@@ -37,9 +40,12 @@ const ExerciseSentenceTransformation: React.FC<ExerciseSentenceTransformationPro
         {sentences.map((sentence, sIndex) => {
           const studentAnswer = studentAnswers[sIndex] || '';
           const correctAnswer = sentence?.transformed || '';
-          const isCorrect = showCorrectAnswers && studentAnswer.toLowerCase().trim() === correctAnswer.toLowerCase().trim();
-          const isIncorrect = showCorrectAnswers && studentAnswer && !isCorrect;
+          const match = matchAnswer(studentAnswer, correctAnswer, { mode: 'sentence' });
+          const isCorrect = showCorrectAnswers && match.verdict === 'correct';
+          const isReview = showCorrectAnswers && match.verdict === 'review';
+          const isIncorrect = showCorrectAnswers && match.verdict === 'wrong';
           const isEmpty = showCorrectAnswers && !studentAnswer;
+
           const nanoSkill = safeGetNanoSkill(sentence);
           const showNanoSkill = viewMode === 'teacher' && nanoSkill;
 
@@ -87,9 +93,11 @@ const ExerciseSentenceTransformation: React.FC<ExerciseSentenceTransformationPro
                     onChange={(e) => onAnswerChange?.(sIndex, e.target.value)}
                     placeholder="Transform the sentence..."
                     className={`h-10
-                      ${isCorrect ? 'bg-green-200 border-2 border-green-600' : ''}
-                      ${isIncorrect ? 'bg-red-200 border-2 border-red-600' : ''}
+                      ${isCorrect ? answerFieldClasses('correct') : ''}
+                      ${isReview ? answerFieldClasses('review') : ''}
+                      ${isIncorrect ? answerFieldClasses('wrong') : ''}
                       ${isEmpty ? 'bg-red-100 border-2 border-red-400' : ''}
+
                       ${disabled ? 'opacity-60 cursor-not-allowed' : ''}
                     `}
                     disabled={disabled}
