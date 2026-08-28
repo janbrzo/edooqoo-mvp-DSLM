@@ -229,7 +229,7 @@ export const calculateItemMastery = (
         // Fallback: direct text comparison
         const correctMatch = item.correct_match || item.match || item.definition;
         if (correctMatch !== undefined) {
-          isCorrect = String(studentAnswer).toLowerCase().trim() === String(correctMatch).toLowerCase().trim();
+          isCorrect = textVerdict(studentAnswer, correctMatch, 'word');
         }
       }
     }
