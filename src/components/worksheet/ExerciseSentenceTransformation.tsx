@@ -93,9 +93,11 @@ const ExerciseSentenceTransformation: React.FC<ExerciseSentenceTransformationPro
                     onChange={(e) => onAnswerChange?.(sIndex, e.target.value)}
                     placeholder="Transform the sentence..."
                     className={`h-10
-                      ${isCorrect ? 'bg-green-200 border-2 border-green-600' : ''}
-                      ${isIncorrect ? 'bg-red-200 border-2 border-red-600' : ''}
+                      ${isCorrect ? answerFieldClasses('correct') : ''}
+                      ${isReview ? answerFieldClasses('review') : ''}
+                      ${isIncorrect ? answerFieldClasses('wrong') : ''}
                       ${isEmpty ? 'bg-red-100 border-2 border-red-400' : ''}
+
                       ${disabled ? 'opacity-60 cursor-not-allowed' : ''}
                     `}
                     disabled={disabled}

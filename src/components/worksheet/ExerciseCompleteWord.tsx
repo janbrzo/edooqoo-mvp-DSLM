@@ -103,8 +103,9 @@ const ExerciseCompleteWord: React.FC<ExerciseCompleteWordProps> = ({
                     onChange={(e) => onAnswerChange?.(wIndex, e.target.value)}
                     placeholder="Complete the word..."
                     className={`h-10 
-                      ${isCorrect ? 'bg-green-200 border-2 border-green-600' : ''}
-                      ${isIncorrect ? 'bg-red-200 border-2 border-red-600' : ''}
+                      ${isCorrect ? answerFieldClasses('correct') : ''}
+                      ${isReview ? answerFieldClasses('review') : ''}
+                      ${isIncorrect ? answerFieldClasses('wrong') : ''}
                       ${isEmpty ? 'bg-red-100 border-2 border-red-400' : ''}
                       ${disabled ? 'opacity-60 cursor-not-allowed' : ''}
                     `}
@@ -112,11 +113,14 @@ const ExerciseCompleteWord: React.FC<ExerciseCompleteWordProps> = ({
                   />
                 )}
                 
-                {isInteractive && showCorrectAnswers && (
-                  <span className={`text-sm font-medium ${isCorrect ? 'text-green-600' : 'text-red-600'}`}>
-                    {isCorrect ? '✓' : `✗ (${correctAnswer})`}
-                  </span>
+                {isInteractive && showCorrectAnswers && studentAnswer && (
+                  <AnswerStatusBadge
+                    verdict={match.verdict}
+                    compact={match.verdict === 'correct'}
+                    expected={isCorrect ? undefined : correctAnswer}
+                  />
                 )}
+
                 
                 {viewMode === 'teacher' && (
                   <div className="flex items-center gap-2 flex-wrap">
