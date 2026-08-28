@@ -7,6 +7,7 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { devLog } from '@/utils/logger';
+import { matchAnswer } from '@/lib/answers/matchAnswer';
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
 import { Badge } from "@/components/ui/badge";
@@ -132,6 +133,19 @@ const calculateInitialMasteryForItem = (
   
   // Try to determine correctness for this specific item
   let isCorrect: boolean | null = null;
+
+  // Shared matcher: 'review' stays null so an uncertain answer is not scored 0.
+  const textVerdict = (
+    answer: unknown,
+    key: unknown,
+    mode: 'word' | 'sentence',
+    sourceSentence?: string
+  ): boolean | null => {
+    const { verdict } = matchAnswer(answer, key, { mode, sourceSentence });
+    if (verdict === 'correct') return true;
+    if (verdict === 'wrong') return false;
+    return null;
+  };
   
   // Check questions array
   if (exerciseData?.questions && exerciseData.questions[itemIndex]) {
@@ -149,8 +163,7 @@ const calculateInitialMasteryForItem = (
     
     // Odd One Out - compare with correct_answer (case-insensitive)
     if (question.correct_answer) {
-      isCorrect = String(studentAnswer).toLowerCase().trim() === 
-                  String(question.correct_answer).toLowerCase().trim();
+      isCorrect = textVerdict(studentAnswer, question.correct_answer, 'word');
       devLog(`[Mastery] Odd One Out item ${itemIndex}: student="${studentAnswer}", correct="${question.correct_answer}", isCorrect=${isCorrect}`);
     }
     
@@ -158,7 +171,7 @@ const calculateInitialMasteryForItem = (
     if (question.answer || question.correct || question.expected) {
       const expected = question.answer || question.correct || question.expected;
       if (typeof studentAnswer === 'string' && typeof expected === 'string') {
-        isCorrect = studentAnswer.toLowerCase().trim() === expected.toLowerCase().trim();
+        isCorrect = textVerdict(studentAnswer, expected, 'sentence');
       }
     }
   }
@@ -197,7 +210,7 @@ const calculateInitialMasteryForItem = (
     const errorCorrectionAnswer = sentence.correction || sentence.correct;
     if (errorCorrectionAnswer && !sentence.answer && !sentence.missing_word) {
       if (typeof studentAnswer === 'string') {
-        isCorrect = studentAnswer.toLowerCase().trim() === errorCorrectionAnswer.toLowerCase().trim();
+        isCorrect = textVerdict(studentAnswer, errorCorrectionAnswer, 'sentence', sentence.incorrect || sentence.text);
         devLog(`[Mastery] Error Correction item ${itemIndex}: student="${studentAnswer}", correct="${errorCorrectionAnswer}", isCorrect=${isCorrect}`);
       }
     }
@@ -205,7 +218,7 @@ const calculateInitialMasteryForItem = (
     // PROBLEM 1.1 FIX: Word Order - compare with correct_order
     if (sentence.correct_order) {
       if (typeof studentAnswer === 'string') {
-        isCorrect = studentAnswer.toLowerCase().trim() === sentence.correct_order.toLowerCase().trim();
+        isCorrect = textVerdict(studentAnswer, sentence.correct_order, 'sentence');
         devLog(`[Mastery] Word Order item ${itemIndex}: student="${studentAnswer}", correct="${sentence.correct_order}", isCorrect=${isCorrect}`);
       }
     }
@@ -213,7 +226,7 @@ const calculateInitialMasteryForItem = (
     // Standard fill in blanks
     const correctAnswer = sentence.answer || sentence.missing_word;
     if (correctAnswer && typeof studentAnswer === 'string') {
-      isCorrect = studentAnswer.toLowerCase().trim() === correctAnswer.toLowerCase().trim();
+      isCorrect = textVerdict(studentAnswer, correctAnswer, 'word');
     }
   }
   
@@ -223,7 +236,7 @@ const calculateInitialMasteryForItem = (
     // Negative Prefixes uses 'answer', Complete Word uses 'complete' or 'complete_word'
     const correctAnswer = word.answer || word.complete || word.complete_word;
     if (correctAnswer && typeof studentAnswer === 'string') {
-      isCorrect = studentAnswer.toLowerCase().trim() === correctAnswer.toLowerCase().trim();
+      isCorrect = textVerdict(studentAnswer, correctAnswer, 'word');
       devLog(`[Mastery] Words item ${itemIndex}: student="${studentAnswer}", correct="${correctAnswer}", isCorrect=${isCorrect}`);
     }
   }
