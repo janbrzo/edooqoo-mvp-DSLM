@@ -1,35 +1,29 @@
 /**
  * Text Normalization Utilities for Answer Comparison
- * 
- * Used to compare student answers with correct answers while ignoring:
- * - Punctuation (periods, commas, question marks, etc.)
- * - Case differences
- * - Extra whitespace
+ *
+ * DEPRECATED as a matching engine — kept as a thin backwards-compatible
+ * wrapper. The single source of truth for answer correctness is
+ * `src/lib/answers/matchAnswer.ts`.
  */
 
+import { matchAnswer, normalizeAnswerText } from '@/lib/answers/matchAnswer';
+
 /**
- * Normalizes text for comparison by:
- * - Converting to lowercase
- * - Removing punctuation
- * - Trimming whitespace
- * - Collapsing multiple spaces into single space
+ * Normalizes text for comparison (lowercase, collapse whitespace, unify
+ * typographic characters, drop punctuation).
  */
 export const normalizeForComparison = (text: string): string => {
   if (!text) return '';
-  
-  return text
-    .toLowerCase()
-    .trim()
-    // Remove common punctuation marks
+
+  return normalizeAnswerText(text)
     .replace(/[.,!?;:'"()[\]{}\-–—]/g, '')
-    // Replace multiple spaces with single space
     .replace(/\s+/g, ' ')
     .trim();
 };
 
 /**
- * Compares two strings for answer validation, ignoring punctuation and case
+ * Compares two strings for answer validation.
+ * Delegates to the shared matcher so every surface agrees on correctness.
  */
-export const answersMatch = (studentAnswer: string, correctAnswer: string): boolean => {
-  return normalizeForComparison(studentAnswer) === normalizeForComparison(correctAnswer);
-};
+export const answersMatch = (studentAnswer: string, correctAnswer: string): boolean =>
+  matchAnswer(studentAnswer, correctAnswer).verdict === 'correct';
