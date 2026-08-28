@@ -1,6 +1,9 @@
 import React from "react";
 import { InteractiveExerciseProps } from "@/types/interactiveHomework";
 import { safeGetText } from "@/utils/textObjectFixer";
+import { matchAnswer } from "@/lib/answers/matchAnswer";
+import { AnswerStatusBadge, answerFieldClasses } from "./AnswerStatusBadge";
+
 
 interface ExerciseErrorCorrectionProps extends Partial<InteractiveExerciseProps> {
   sentences: any[];
