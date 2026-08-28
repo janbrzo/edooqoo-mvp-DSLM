@@ -32,10 +32,15 @@ const ExerciseErrorCorrection: React.FC<ExerciseErrorCorrectionProps> = ({
           sentence.correct ||
           sentence.corrected ||
           sentence.correct_sentence || '';
-        const isCorrect = showCorrectAnswers && studentAnswer &&
-          studentAnswer.toLowerCase().trim() === correctAnswer.toLowerCase().trim();
-        const isIncorrect = showCorrectAnswers && studentAnswer && !isCorrect;
+        const match = matchAnswer(studentAnswer, correctAnswer, {
+          mode: 'sentence',
+          sourceSentence: safeGetText(sentence.incorrect) || safeGetText(sentence.text),
+        });
+        const isCorrect = showCorrectAnswers && match.verdict === 'correct';
+        const isReview = showCorrectAnswers && match.verdict === 'review';
+        const isIncorrect = showCorrectAnswers && match.verdict === 'wrong';
         const isEmpty = showCorrectAnswers && !studentAnswer;
+
 
         return (
           <div key={sIndex} className="border rounded-lg p-3 bg-white">
