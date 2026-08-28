@@ -3,6 +3,8 @@ import { InteractiveExerciseProps } from "@/types/interactiveHomework";
 import { Input } from "@/components/ui/input";
 import { safeGetText, safeGetNanoSkill, safeGetAllNanoSkills } from "@/utils/textObjectFixer";
 import NanoSkillBadge from "./NanoSkillBadge";
+import { matchAnswer } from "@/lib/answers/matchAnswer";
+import { AnswerStatusBadge, answerFieldClasses } from "./AnswerStatusBadge";
 
 interface ExerciseFillInBlanksAudioProps extends Partial<InteractiveExerciseProps> {
   word_bank?: string[];
@@ -103,8 +105,10 @@ const ExerciseFillInBlanksAudio: React.FC<ExerciseFillInBlanksAudioProps> = ({
           {sentences!.map((sentence, sIndex) => {
             const studentAnswer = studentAnswers[sIndex];
             const correctAnswer = sentence.answer;
-            const isCorrect = showCorrectAnswers && studentAnswer?.toLowerCase().trim() === correctAnswer?.toLowerCase().trim();
-            const isIncorrect = showCorrectAnswers && studentAnswer && !isCorrect;
+            const match = matchAnswer(studentAnswer, correctAnswer, { mode: 'word' });
+            const isCorrect = showCorrectAnswers && match.verdict === 'correct';
+            const isReview = showCorrectAnswers && match.verdict === 'review';
+            const isIncorrect = showCorrectAnswers && match.verdict === 'wrong';
             const isEmpty = showCorrectAnswers && !studentAnswer;
             // CRITICAL FIX: Use safeGetText to prevent "Cannot read properties of undefined (reading 'replace')"
             const sentenceText = safeGetText(sentence?.text ?? sentence);
@@ -135,8 +139,9 @@ const ExerciseFillInBlanksAudio: React.FC<ExerciseFillInBlanksAudioProps> = ({
                                   onChange={(e) => onAnswerChange?.(sIndex, e.target.value)}
                                   disabled={disabled}
                                   className={`inline-block w-32 mx-1 h-7 
-                                    ${isCorrect ? 'bg-green-200 border-2 border-green-600' : ''}
-                                    ${isIncorrect ? 'bg-red-200 border-2 border-red-600' : ''}
+                                    ${isCorrect ? answerFieldClasses('correct') : ''}
+                                    ${isReview ? answerFieldClasses('review') : ''}
+                                    ${isIncorrect ? answerFieldClasses('wrong') : ''}
                                     ${isEmpty ? 'bg-red-100 border-2 border-red-400' : ''}
                                     ${disabled ? 'opacity-70' : ''}
                                   `}
@@ -179,8 +184,11 @@ const ExerciseFillInBlanksAudio: React.FC<ExerciseFillInBlanksAudioProps> = ({
                     </div>
                   )}
                   {showCorrectAnswers && isInteractive && (
-                    <div className={`text-sm font-medium ${isCorrect ? 'text-green-600' : 'text-red-600'}`}>
-                      {isCorrect ? '✓ Correct' : <>✗ ({correctAnswer})</>}
+                    <div className="text-sm font-medium">
+                      <AnswerStatusBadge
+                        verdict={match.verdict}
+                        expected={isCorrect ? undefined : correctAnswer}
+                      />
                     </div>
                   )}
                   {/* Live Session: show student answer in blue */}
