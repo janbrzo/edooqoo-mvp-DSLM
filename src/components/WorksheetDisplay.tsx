@@ -132,6 +132,13 @@ export default function WorksheetDisplay({
   );
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  // P1.4 — autosave keeps the database (what the student sees) in sync with edits.
+  const autosave = useWorksheetAutosave({
+    worksheetId,
+    userId,
+    worksheet: editableWorksheet,
+  });
+
   const [expandAllRef, setExpandAllRef] = useState<(() => void) | null>(null);
   // ✅ NEW: Ref for scrollToExercise function from WorksheetContent
   const [scrollToExerciseRef, setScrollToExerciseRef] = useState<((index: number) => void) | null>(null);
