@@ -80,6 +80,9 @@ const WorksheetToolbar = ({
   onCreateHomework,
   onAddExercise,
   onDuplicateSuccess,
+  autosaveStatus = 'disabled',
+  autosaveLastSavedAt = null,
+  onFlushSave,
   isDrawingEnabled = false,
   isDrawingLayerVisible = false,
   onDrawingToggle,
@@ -87,9 +90,11 @@ const WorksheetToolbar = ({
 }: WorksheetToolbarProps) => {
   const [showPaymentPopup, setShowPaymentPopup] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [isPreparingShare, setIsPreparingShare] = useState(false);
   const [pendingAction, setPendingAction] = useState<'html-student' | 'html-teacher' | 'pdf' | null>(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [loginFeatureName, setLoginFeatureName] = useState("");
+
   const isMobile = useIsMobile();
   const { trackDownloadAttempt } = useDownloadTracking(userId);
   const { user, isRegisteredUser } = useAuthFlow();
