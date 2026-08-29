@@ -261,11 +261,13 @@ export function SpeakingRecorder({ maxSeconds = 60, answer, onAnswer, questionId
   const uploadAndSave = useCallback(async () => {
     if (!blobRef.current) return;
     setStatus('uploading');
+    setErrorMsg(null);
 
     try {
-      const url = await uploadBlobToR2(blobRef.current);
-
-      if (!url) throw new Error('No URL returned from upload');
+      const url = await uploadRecording(blobRef.current, {
+        filenamePrefix: 'welcome-test-speaking',
+        onRetry: (attempt) => devLog('[SpeakingRecorder] Upload retry', attempt),
+      });
 
       setAudioUrl(url);
       setStatus('done');
@@ -273,12 +275,14 @@ export function SpeakingRecorder({ maxSeconds = 60, answer, onAnswer, questionId
       delete (window as any).__pendingSpeakingRecording;
       toast.success('Recording saved!');
     } catch (err) {
+      // Honest failure: keep the blob so the student can retry.
       console.error('Upload error:', err);
-      setStatus('done');
-      onAnswer(`recording_${Date.now()}_${seconds}s`);
-      toast.info('Recording saved locally');
+      setStatus('recorded');
+      setErrorMsg("We couldn't upload your recording. Check your connection and tap Save again.");
+      toast.error('Recording not saved — please try again.');
     }
-  }, [onAnswer, seconds]);
+  }, [onAnswer]);
+
 
   const formatTime = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 
