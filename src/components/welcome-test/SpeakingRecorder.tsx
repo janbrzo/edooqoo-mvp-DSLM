@@ -343,10 +343,12 @@ export function SpeakingRecorder({ maxSeconds = 60, answer, onAnswer, questionId
               <RotateCcw className="h-4 w-4" />
               Re-record
             </Button>
-            <Button onClick={uploadAndSave} size="sm" className="gap-1.5 min-h-[44px]">
+            <Button onClick={uploadAndSave} size="sm" className="gap-1.5 min-h-[44px]"
+              variant={errorMsg ? 'destructive' : 'default'}>
               <Upload className="h-4 w-4" />
-              Save
+              {errorMsg ? 'Retry save' : 'Save'}
             </Button>
+
           </>
         )}
 
