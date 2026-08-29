@@ -219,6 +219,17 @@ serve(async (req) => {
     );
   } catch (error) {
     console.error("[UPLOAD-TO-R2] Error:", error);
+    const admin = adminClient();
+    if (admin) {
+      const e = formatErr(error);
+      await logError(admin, {
+        source_name: "upload-to-r2",
+        component: "storage",
+        message: e.message,
+        error_code: e.code ?? "R2_UPLOAD_FAILED",
+        stack: e.stack,
+      });
+    }
     return new Response(
       JSON.stringify({
         error: (error as Error)?.message || "Upload failed",
@@ -227,4 +238,5 @@ serve(async (req) => {
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
+
 });
