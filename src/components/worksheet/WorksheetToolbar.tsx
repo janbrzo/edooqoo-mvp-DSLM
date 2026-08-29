@@ -45,12 +45,18 @@ interface WorksheetToolbarProps {
   onCreateHomework?: () => void;
   onAddExercise?: () => void;
   onDuplicateSuccess?: () => void;
+  // P1.4 — autosave state surfaced to the teacher
+  autosaveStatus?: 'disabled' | 'idle' | 'dirty' | 'saving' | 'saved' | 'error';
+  autosaveLastSavedAt?: Date | null;
+  /** Forces a save (used before sharing) and resolves when the DB is up to date. */
+  onFlushSave?: () => Promise<boolean | void>;
   // Drawing overlay props (for Live Session mode)
   isDrawingEnabled?: boolean;
   isDrawingLayerVisible?: boolean;
   onDrawingToggle?: () => void;
   onDrawingLayerToggle?: () => void;
 }
+
 
 const WorksheetToolbar = ({
   viewMode,
@@ -74,6 +80,9 @@ const WorksheetToolbar = ({
   onCreateHomework,
   onAddExercise,
   onDuplicateSuccess,
+  autosaveStatus = 'disabled',
+  autosaveLastSavedAt = null,
+  onFlushSave,
   isDrawingEnabled = false,
   isDrawingLayerVisible = false,
   onDrawingToggle,
@@ -81,9 +90,11 @@ const WorksheetToolbar = ({
 }: WorksheetToolbarProps) => {
   const [showPaymentPopup, setShowPaymentPopup] = useState(false);
   const [showShareModal, setShowShareModal] = useState(false);
+  const [isPreparingShare, setIsPreparingShare] = useState(false);
   const [pendingAction, setPendingAction] = useState<'html-student' | 'html-teacher' | 'pdf' | null>(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [loginFeatureName, setLoginFeatureName] = useState("");
+
   const isMobile = useIsMobile();
   const { trackDownloadAttempt } = useDownloadTracking(userId);
   const { user, isRegisteredUser } = useAuthFlow();
@@ -242,13 +253,21 @@ const WorksheetToolbar = ({
     setPendingAction(null);
   };
 
-  const handleShareClick = () => {
+  const handleShareClick = async () => {
     devLog('Share button clicked');
-    devLog('User:', user);
-    devLog('Is registered user:', isRegisteredUser);
-    devLog('Worksheet ID:', worksheetId);
-    
+
+    // P1.4 — never hand a student a link to a stale version.
+    if (onFlushSave) {
+      setIsPreparingShare(true);
+      try {
+        await onFlushSave();
+      } finally {
+        setIsPreparingShare(false);
+      }
+    }
+
     setShowShareModal(true);
+
   };
 
   // Check if user can share worksheets (registered user with valid worksheetId)
@@ -304,6 +323,25 @@ const WorksheetToolbar = ({
             </Tooltip>
           </div>
           <div className={`flex ${isMobile ? 'flex-col gap-2' : 'items-center'}`}>
+            {/* P1.4 — autosave indicator */}
+            {autosaveStatus !== 'disabled' && (
+              <span
+                className={`text-xs mr-3 whitespace-nowrap ${
+                  autosaveStatus === 'error' ? 'text-destructive' : 'text-muted-foreground'
+                }`}
+                aria-live="polite"
+              >
+                {autosaveStatus === 'saving' && 'Saving…'}
+                {autosaveStatus === 'dirty' && 'Unsaved changes'}
+                {autosaveStatus === 'error' && 'Not saved — click Save Changes'}
+                {autosaveStatus === 'saved' && (
+                  autosaveLastSavedAt
+                    ? `Saved • ${autosaveLastSavedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+                    : 'Saved'
+                )}
+              </span>
+            )}
+
             {!isEditing && (
               <>
                 <Button
@@ -357,11 +395,17 @@ const WorksheetToolbar = ({
                   <Button
                     variant="outline"
                     onClick={handleShareClick}
+                    disabled={isPreparingShare}
                     className={`${hasActiveShareToken ? 'border-2 border-green-500' : 'border-worksheet-purple'} text-worksheet-purple ${isMobile ? '' : 'mr-2'}`}
                     size="sm"
                   >
-                    <Share2 className="mr-2 h-4 w-4" /> Share
+                    {isPreparingShare ? (
+                      <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving…</>
+                    ) : (
+                      <><Share2 className="mr-2 h-4 w-4" /> Share</>
+                    )}
                   </Button>
+
                 ) : !isRegisteredUser && worksheetId && (
                   <Tooltip>
                     <TooltipTrigger asChild>

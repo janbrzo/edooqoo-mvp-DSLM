@@ -2,6 +2,8 @@
 import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { updateWorksheetAPI } from '@/services/worksheetService/updateService';
+
 import { Loader2, AlertCircle, FileText, ArrowUp, Image, X, Maximize2, Headphones, Home, User, ArrowLeft, Unlock, Save, RotateCcw, LayoutDashboard } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -282,18 +284,23 @@ const SharedWorksheet = () => {
   // PROBLEM 3: Teacher edit mode handlers
   const handleSaveTeacherChanges = async () => {
     if (!worksheet?.id || !editableWorksheet) return;
-    
+
     setIsSavingTeacherEdits(true);
     try {
-      const { error } = await supabase
-        .from('worksheets')
-        .update({ ai_response: JSON.stringify(editableWorksheet) })
-        .eq('id', worksheet.id);
-      
-      if (error) throw error;
-      
+      // P1.4 — single write path: keeps ai_response, title and html_content in sync.
+      if (currentTeacherId) {
+        await updateWorksheetAPI(worksheet.id, editableWorksheet, currentTeacherId);
+      } else {
+        const { error } = await supabase
+          .from('worksheets')
+          .update({ ai_response: JSON.stringify(editableWorksheet) })
+          .eq('id', worksheet.id);
+        if (error) throw error;
+      }
+
       setOriginalWorksheet(editableWorksheet);
       setTeacherEditMode(false);
+
       
       toast({
         title: "Changes saved",

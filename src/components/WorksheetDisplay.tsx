@@ -3,6 +3,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useDownloadTracking } from "@/hooks/useDownloadTracking";
 import { usePaymentTracking } from "@/hooks/usePaymentTracking";
 import { updateWorksheet } from "@/services/worksheetService";
+import { useWorksheetAutosave } from "@/hooks/useWorksheetAutosave";
+
 import WorksheetHeader from "./worksheet/WorksheetHeader";
 import InputParamsCard from "./worksheet/InputParamsCard";
 import WorksheetToolbar from "./worksheet/WorksheetToolbar";
@@ -132,6 +134,13 @@ export default function WorksheetDisplay({
   );
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+  // P1.4 — autosave keeps the database (what the student sees) in sync with edits.
+  const autosave = useWorksheetAutosave({
+    worksheetId,
+    userId,
+    worksheet: editableWorksheet,
+  });
+
   const [expandAllRef, setExpandAllRef] = useState<(() => void) | null>(null);
   // ✅ NEW: Ref for scrollToExercise function from WorksheetContent
   const [scrollToExerciseRef, setScrollToExerciseRef] = useState<((index: number) => void) | null>(null);
@@ -581,15 +590,15 @@ export default function WorksheetDisplay({
       return;
     }
 
-    // Handle anonymous users - save locally only
+    // Anonymous users have no database row of their own — be honest about it.
     if (!userId) {
       setIsEditing(false);
       toast({
-        title: "Changes saved locally",
-        description: "Your changes have been saved in this browser. Log in to save them to your account.",
-        className: "bg-green-50 border-green-200"
+        title: "Not saved to your account",
+        description: "These changes only live in this browser. Sign in to keep this worksheet and share it with students.",
+        variant: "destructive"
       });
-      devLog('📝 Anonymous user changes saved locally');
+      devLog('📝 Anonymous user changes kept in browser only');
       return;
     }
 
@@ -599,6 +608,7 @@ export default function WorksheetDisplay({
     try {
       devLog('💾 Saving worksheet changes to database...');
       await updateWorksheet(worksheetId, editableWorksheet, userId);
+      autosave.markSaved();
       
       setIsEditing(false);
       toast({
@@ -608,6 +618,7 @@ export default function WorksheetDisplay({
       });
       
       devLog('✅ Worksheet changes saved successfully');
+
     } catch (error) {
       console.error('❌ Error saving worksheet changes:', error);
       toast({
@@ -1054,6 +1065,10 @@ export default function WorksheetDisplay({
             handleEdit={handleEdit}
             handleSave={handleSave}
             onDiscardChanges={handleDiscardChanges}
+            autosaveStatus={autosave.status}
+            autosaveLastSavedAt={autosave.lastSavedAt}
+            onFlushSave={autosave.flush}
+
             worksheetId={worksheetId}
             userIp={userIp}
             isDownloadUnlocked={isDownloadUnlocked}
