@@ -1065,6 +1065,10 @@ export default function WorksheetDisplay({
             handleEdit={handleEdit}
             handleSave={handleSave}
             onDiscardChanges={handleDiscardChanges}
+            autosaveStatus={autosave.status}
+            autosaveLastSavedAt={autosave.lastSavedAt}
+            onFlushSave={autosave.flush}
+
             worksheetId={worksheetId}
             userIp={userIp}
             isDownloadUnlocked={isDownloadUnlocked}
