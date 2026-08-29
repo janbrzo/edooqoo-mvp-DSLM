@@ -181,10 +181,12 @@ export function HomeworkSpeakingRecorder({
     } catch (err) {
       // Keep the recorded blob so the student can retry — never fake a success.
       console.error('[HomeworkSpeakingRecorder] Upload failed:', err);
+      uploadFailedRef.current = true;
       setStatus('recorded');
       setErrorMsg('Upload failed. Check your connection and tap Save again.');
       toast.error('Recording not saved — please try again.');
     }
+
   }, []); // STABLE - no dependency on onAudioSaved
 
 
