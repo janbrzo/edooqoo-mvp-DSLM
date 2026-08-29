@@ -1,5 +1,15 @@
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { logError, formatErr } from "../_shared/logError.ts";
+
+/** Service-role client used only for error telemetry. */
+function adminClient() {
+  const url = Deno.env.get("SUPABASE_URL");
+  const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!url || !key) return null;
+  return createClient(url, key);
+}
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
