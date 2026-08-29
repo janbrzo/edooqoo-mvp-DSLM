@@ -268,13 +268,21 @@ export function HomeworkSpeakingRecorder({
           <Button onClick={resetRecording} variant="ghost" size="sm" className="h-7 px-2 text-xs">
             <RotateCcw className="h-3 w-3" />
           </Button>
-          <Button onClick={uploadAndSave} variant="ghost" size="sm" className="gap-1 h-7 px-2 text-xs text-green-600">
+          <Button onClick={uploadAndSave} variant="ghost" size="sm"
+            className={`gap-1 h-7 px-2 text-xs ${errorMsg ? 'text-destructive' : 'text-green-600'}`}>
             <Upload className="h-3 w-3" />
-            Save
+            {errorMsg ? 'Retry save' : 'Save'}
           </Button>
+          {errorMsg && (
+            <span className="text-xs text-destructive flex items-center gap-1">
+              <AlertTriangle className="h-3 w-3" />
+              {errorMsg}
+            </span>
+          )}
           {displayCountdown !== null && displayCountdown > 0 && (
             <span className="text-xs text-muted-foreground">Auto-save {displayCountdown}s</span>
           )}
+
         </>
       )}
 
