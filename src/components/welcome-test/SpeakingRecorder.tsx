@@ -81,15 +81,18 @@ export function SpeakingRecorder({ maxSeconds = 60, answer, onAnswer, questionId
               onAutoSave(capturedPrevId, url);
             } else if (url) {
               onAnswer(url);
-            } else if (onAutoSave) {
-              onAutoSave(capturedPrevId, `recording_autosaved_${Date.now()}`);
+            } else {
+              // Never fabricate a placeholder answer — an unsaved recording
+              // must stay unsaved so the student can retry.
+              console.error('[SpeakingRecorder] Auto-save upload failed for:', capturedPrevId);
+              toast.error('We could not save your recording. Please record it again.');
             }
           })
-          .catch(() => {
-            if (onAutoSave) {
-              onAutoSave(capturedPrevId, `recording_autosaved_${Date.now()}`);
-            }
+          .catch((err) => {
+            console.error('[SpeakingRecorder] Auto-save failed:', err);
+            toast.error('We could not save your recording. Please record it again.');
           });
+
       } else if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
         mediaRecorderRef.current.stop();
         if (timerRef.current) clearInterval(timerRef.current);
