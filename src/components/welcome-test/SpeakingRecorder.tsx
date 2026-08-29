@@ -310,12 +310,13 @@ export function SpeakingRecorder({ maxSeconds = 60, answer, onAnswer, questionId
         </div>
       )}
 
-      {status === 'error' && (
+      {(status === 'error' || (status === 'recorded' && errorMsg)) && (
         <div className="flex items-center gap-2 p-3 bg-destructive/10 rounded-lg text-sm text-destructive">
           <AlertTriangle className="h-4 w-4 flex-shrink-0" />
           <span>{errorMsg || 'Recording failed. Please try again.'}</span>
         </div>
       )}
+
 
       <div className="flex items-center justify-center gap-2 flex-wrap">
         {(status === 'idle' || status === 'error') && (
