@@ -2,15 +2,21 @@
  * SpeakingRecorder - Microphone recording component for Welcome Test speaking questions
  * Records up to 60s of audio, uploads to R2 via base64 JSON, saves URL as answer
  * Cross-browser: tries audio/webm, audio/mp4, then no mimeType
- * Round 8: Fixed upload - converts blob to base64 JSON (upload-to-r2 expects JSON, not FormData)
+ * P1.8: capability guards + honest upload failures (no fabricated placeholder answers)
  */
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { Mic, Square, Play, Pause, RotateCcw, Upload, CheckCircle, Loader2, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { devLog } from '@/utils/logger';
+import {
+  checkRecordingSupport,
+  describeMicrophoneError,
+  getSupportedMimeType,
+  tryUploadRecording,
+  uploadRecording,
+} from '@/lib/audio/recorder';
 
 interface SpeakingRecorderProps {
   maxSeconds?: number;
@@ -20,56 +26,14 @@ interface SpeakingRecorderProps {
   onAutoSave?: (questionId: string, audioUrl: string) => void;
 }
 
-function getSupportedMimeType(): string | undefined {
-  if (typeof MediaRecorder === 'undefined') return undefined;
-  const types = ['audio/webm', 'audio/mp4', 'audio/ogg', 'audio/wav'];
-  for (const type of types) {
-    if (MediaRecorder.isTypeSupported(type)) return type;
-  }
-  return undefined;
-}
-
 /**
- * Convert blob to base64 and upload to R2 via JSON endpoint.
- * Returns the public URL or null on failure.
+ * Backwards-compatible wrapper kept for existing callers.
+ * Returns null on failure (never a placeholder string).
  */
 export async function uploadBlobToR2(blob: Blob): Promise<string | null> {
-  if (!blob || blob.size === 0) return null;
-
-  try {
-    const base64Full = await new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result as string);
-      reader.onerror = () => reject(reader.error);
-      reader.readAsDataURL(blob);
-    });
-
-    const base64Data = base64Full.split(',')[1];
-    if (!base64Data) return null;
-
-    const mimeType = blob.type || 'audio/webm';
-    const ext = mimeType.includes('mp4') ? 'mp4' : mimeType.includes('ogg') ? 'ogg' : 'webm';
-    const fileName = `welcome-test-speaking-${Date.now()}.${ext}`;
-
-    const { data, error } = await supabase.functions.invoke('upload-to-r2', {
-      body: {
-        base64Data,
-        filename: fileName,
-        contentType: mimeType,
-      },
-    });
-
-    if (error) {
-      console.error('[uploadBlobToR2] Edge function error:', error);
-      return null;
-    }
-
-    return data?.url || data?.publicUrl || null;
-  } catch (err) {
-    console.error('[uploadBlobToR2] Failed:', err);
-    return null;
-  }
+  return tryUploadRecording(blob, { filenamePrefix: 'welcome-test-speaking' });
 }
+
 
 export function SpeakingRecorder({ maxSeconds = 60, answer, onAnswer, questionId, onAutoSave }: SpeakingRecorderProps) {
   const [status, setStatus] = useState<'idle' | 'recording' | 'recorded' | 'uploading' | 'done' | 'error'>(
@@ -117,15 +81,18 @@ export function SpeakingRecorder({ maxSeconds = 60, answer, onAnswer, questionId
               onAutoSave(capturedPrevId, url);
             } else if (url) {
               onAnswer(url);
-            } else if (onAutoSave) {
-              onAutoSave(capturedPrevId, `recording_autosaved_${Date.now()}`);
+            } else {
+              // Never fabricate a placeholder answer — an unsaved recording
+              // must stay unsaved so the student can retry.
+              console.error('[SpeakingRecorder] Auto-save upload failed for:', capturedPrevId);
+              toast.error('We could not save your recording. Please record it again.');
             }
           })
-          .catch(() => {
-            if (onAutoSave) {
-              onAutoSave(capturedPrevId, `recording_autosaved_${Date.now()}`);
-            }
+          .catch((err) => {
+            console.error('[SpeakingRecorder] Auto-save failed:', err);
+            toast.error('We could not save your recording. Please record it again.');
           });
+
       } else if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
         mediaRecorderRef.current.stop();
         if (timerRef.current) clearInterval(timerRef.current);
@@ -180,8 +147,17 @@ export function SpeakingRecorder({ maxSeconds = 60, answer, onAnswer, questionId
 
   const startRecording = useCallback(async () => {
     setErrorMsg(null);
+
+    const support = checkRecordingSupport();
+    if (!support.supported) {
+      setErrorMsg(support.reason ?? 'Recording is not available in this browser.');
+      setStatus('error');
+      return;
+    }
+
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
       
       const mimeType = getSupportedMimeType();
       let mediaRecorder: MediaRecorder;
@@ -243,14 +219,11 @@ export function SpeakingRecorder({ maxSeconds = 60, answer, onAnswer, questionId
       }, 1000);
     } catch (err: any) {
       console.error('Microphone error:', err);
-      if (err.name === 'NotAllowedError') {
-        setErrorMsg('Microphone access denied. Please allow microphone permission in your browser settings.');
-      } else {
-        setErrorMsg('Could not access microphone. Please check your device settings.');
-      }
+      setErrorMsg(describeMicrophoneError(err));
       setStatus('error');
     }
   }, [maxSeconds, questionId]);
+
 
   const stopRecording = useCallback(() => {
     if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
@@ -288,11 +261,13 @@ export function SpeakingRecorder({ maxSeconds = 60, answer, onAnswer, questionId
   const uploadAndSave = useCallback(async () => {
     if (!blobRef.current) return;
     setStatus('uploading');
+    setErrorMsg(null);
 
     try {
-      const url = await uploadBlobToR2(blobRef.current);
-
-      if (!url) throw new Error('No URL returned from upload');
+      const url = await uploadRecording(blobRef.current, {
+        filenamePrefix: 'welcome-test-speaking',
+        onRetry: (attempt) => devLog('[SpeakingRecorder] Upload retry', attempt),
+      });
 
       setAudioUrl(url);
       setStatus('done');
@@ -300,12 +275,14 @@ export function SpeakingRecorder({ maxSeconds = 60, answer, onAnswer, questionId
       delete (window as any).__pendingSpeakingRecording;
       toast.success('Recording saved!');
     } catch (err) {
+      // Honest failure: keep the blob so the student can retry.
       console.error('Upload error:', err);
-      setStatus('done');
-      onAnswer(`recording_${Date.now()}_${seconds}s`);
-      toast.info('Recording saved locally');
+      setStatus('recorded');
+      setErrorMsg("We couldn't upload your recording. Check your connection and tap Save again.");
+      toast.error('Recording not saved — please try again.');
     }
-  }, [onAnswer, seconds]);
+  }, [onAnswer]);
+
 
   const formatTime = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 
@@ -333,12 +310,13 @@ export function SpeakingRecorder({ maxSeconds = 60, answer, onAnswer, questionId
         </div>
       )}
 
-      {status === 'error' && (
+      {(status === 'error' || (status === 'recorded' && errorMsg)) && (
         <div className="flex items-center gap-2 p-3 bg-destructive/10 rounded-lg text-sm text-destructive">
           <AlertTriangle className="h-4 w-4 flex-shrink-0" />
           <span>{errorMsg || 'Recording failed. Please try again.'}</span>
         </div>
       )}
+
 
       <div className="flex items-center justify-center gap-2 flex-wrap">
         {(status === 'idle' || status === 'error') && (
@@ -365,10 +343,12 @@ export function SpeakingRecorder({ maxSeconds = 60, answer, onAnswer, questionId
               <RotateCcw className="h-4 w-4" />
               Re-record
             </Button>
-            <Button onClick={uploadAndSave} size="sm" className="gap-1.5 min-h-[44px]">
+            <Button onClick={uploadAndSave} size="sm" className="gap-1.5 min-h-[44px]"
+              variant={errorMsg ? 'destructive' : 'default'}>
               <Upload className="h-4 w-4" />
-              Save
+              {errorMsg ? 'Retry save' : 'Save'}
             </Button>
+
           </>
         )}
 

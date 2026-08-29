@@ -438,35 +438,30 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
     commitAnswer(questionId, '__IDK__', { isIdk: true });
   }, [commitAnswer]);
 
-  // Flush pending speaking recording before navigation (synchronous approach)
-  // Round 8: Uses uploadBlobToR2 (base64 JSON) instead of FormData
+  // Flush pending speaking recording before navigation.
+  // P1.8: never fabricate a "recording_pending_*" placeholder — a failed upload
+  // must stay unanswered so the student (and teacher) see the truth.
   const flushSpeakingIfNeeded = useCallback(async () => {
     const pending = (window as any).__pendingSpeakingRecording;
     if (!pending?.blob || !pending?.questionId) return;
-    
+
     delete (window as any).__pendingSpeakingRecording;
-    
+
     try {
-      const { uploadBlobToR2 } = await import('@/components/welcome-test/SpeakingRecorder');
-      
+      const { uploadRecording } = await import('@/lib/audio/recorder');
+
       devLog('[flushSpeaking] Uploading pending recording for:', pending.questionId);
-      const url = await uploadBlobToR2(pending.blob);
-      if (url) {
-        devLog('[flushSpeaking] Upload success, saving answer:', url);
-        await saveAnswer(pending.questionId, url);
-        await commitAnswer(pending.questionId, url);
-      } else {
-        devWarn('[flushSpeaking] Upload returned no URL, saving placeholder');
-        await saveAnswer(pending.questionId, `recording_pending_${Date.now()}`);
-        await commitAnswer(pending.questionId, `recording_pending_${Date.now()}`);
-      }
+      const url = await uploadRecording(pending.blob, { filenamePrefix: 'welcome-test-speaking' });
+      devLog('[flushSpeaking] Upload success, saving answer:', url);
+      await saveAnswer(pending.questionId, url);
+      await commitAnswer(pending.questionId, url);
     } catch (err) {
       console.error('[flushSpeaking] Upload failed:', err);
-      const placeholder = `recording_pending_${Date.now()}`;
-      await saveAnswer(pending.questionId, placeholder);
-      await commitAnswer(pending.questionId, placeholder);
+      devWarn('[flushSpeaking] Leaving question unanswered instead of saving a placeholder');
+      toast.error('Your recording could not be uploaded. You can record it again.');
     }
   }, [saveAnswer, commitAnswer]);
+
 
   // Navigation
   const goToNext = useCallback(async () => {

@@ -2,13 +2,19 @@
  * HomeworkSpeakingRecorder - Minimalist inline audio recorder for homework/shared worksheet exercises
  * Records audio, uploads to R2, returns audio_url
  * FIX 1.1: Ref-based countdown timer to prevent resets from parent re-renders
+ * P1.8: shared capability guards + retrying upload with honest failure state
  */
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { Mic, Square, Play, Pause, RotateCcw, Upload, CheckCircle, Loader2, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { uploadBlobToR2 } from '@/components/welcome-test/SpeakingRecorder';
 import { toast } from 'sonner';
+import {
+  checkRecordingSupport,
+  describeMicrophoneError,
+  getSupportedMimeType,
+  uploadRecording,
+} from '@/lib/audio/recorder';
 
 interface HomeworkSpeakingRecorderProps {
   maxSeconds?: number;
@@ -23,14 +29,6 @@ if (typeof window !== 'undefined' && !(window as any).__pendingSpeakingRecording
   (window as any).__pendingSpeakingRecordings = new Map();
 }
 
-function getSupportedMimeType(): string | undefined {
-  if (typeof MediaRecorder === 'undefined') return undefined;
-  const types = ['audio/webm', 'audio/mp4', 'audio/ogg', 'audio/wav'];
-  for (const type of types) {
-    if (MediaRecorder.isTypeSupported(type)) return type;
-  }
-  return undefined;
-}
 
 export function HomeworkSpeakingRecorder({ 
   maxSeconds = 120, 
@@ -57,6 +55,9 @@ export function HomeworkSpeakingRecorder({
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const blobRef = useRef<Blob | null>(null);
+  // Prevents the 30s auto-save timer from retrying in a loop after a failed upload.
+  const uploadFailedRef = useRef(false);
+
   
   // FIX 1.1: Stabilize onAudioSaved ref to prevent timer resets on parent re-renders
   const onAudioSavedRef = useRef(onAudioSaved);
@@ -81,8 +82,18 @@ export function HomeworkSpeakingRecorder({
 
   const startRecording = useCallback(async () => {
     setErrorMsg(null);
+    uploadFailedRef.current = false;
+
+    const support = checkRecordingSupport();
+    if (!support.supported) {
+      setErrorMsg(support.reason ?? 'Recording is not available in this browser.');
+      setStatus('error');
+      return;
+    }
+
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
       const mimeType = getSupportedMimeType();
       let mediaRecorder: MediaRecorder;
       try {
@@ -120,9 +131,10 @@ export function HomeworkSpeakingRecorder({
         });
       }, 1000);
     } catch (err: any) {
-      setErrorMsg(err.name === 'NotAllowedError' ? 'Microphone access denied.' : 'Could not access microphone.');
+      setErrorMsg(describeMicrophoneError(err));
       setStatus('error');
     }
+
   }, [maxSeconds]);
 
   const stopRecording = useCallback(() => {
@@ -147,27 +159,36 @@ export function HomeworkSpeakingRecorder({
   const resetRecording = useCallback(() => {
     if (audioUrl?.startsWith('blob:')) URL.revokeObjectURL(audioUrl);
     setAudioUrl(null); blobRef.current = null; setSeconds(0); setStatus('idle'); setIsPlaying(false); setErrorMsg(null);
+    uploadFailedRef.current = false;
     setDisplayCountdown(null);
     if (autoSaveTimerRef.current) { clearTimeout(autoSaveTimerRef.current); autoSaveTimerRef.current = null; }
     if (countdownIntervalRef.current) { clearInterval(countdownIntervalRef.current); countdownIntervalRef.current = null; }
   }, [audioUrl]);
 
+
   const uploadAndSave = useCallback(async () => {
     if (!blobRef.current) return;
     setStatus('uploading');
+    setErrorMsg(null);
     // Clear countdown on manual save
     setDisplayCountdown(null);
     if (autoSaveTimerRef.current) { clearTimeout(autoSaveTimerRef.current); autoSaveTimerRef.current = null; }
     if (countdownIntervalRef.current) { clearInterval(countdownIntervalRef.current); countdownIntervalRef.current = null; }
     try {
-      const url = await uploadBlobToR2(blobRef.current);
-      if (!url) throw new Error('No URL returned');
+      const url = await uploadRecording(blobRef.current, { filenamePrefix: 'homework-speaking' });
       setAudioUrl(url); setStatus('done'); onAudioSavedRef.current(url);
       toast.success('Recording saved!');
-    } catch {
-      setStatus('error'); setErrorMsg('Upload failed. Please try again.');
+    } catch (err) {
+      // Keep the recorded blob so the student can retry — never fake a success.
+      console.error('[HomeworkSpeakingRecorder] Upload failed:', err);
+      uploadFailedRef.current = true;
+      setStatus('recorded');
+      setErrorMsg('Upload failed. Check your connection and tap Save again.');
+      toast.error('Recording not saved — please try again.');
     }
+
   }, []); // STABLE - no dependency on onAudioSaved
+
 
   // FIX 1.1: Single ref-based effect for auto-save timer + countdown
   // Only depends on [status, registryKey] — uploadAndSave is stable (deps=[])
@@ -180,6 +201,10 @@ export function HomeworkSpeakingRecorder({
       if (registryKey) {
         (window as any).__pendingSpeakingRecordings?.set(registryKey, { blob: blobRef.current, save: uploadAndSave });
       }
+
+      // After a failed upload the student retries manually — do not loop the timer.
+      if (uploadFailedRef.current) return;
+
       
       // Start 30s countdown using closure variable (not state)
       let remaining = 30;
@@ -243,13 +268,21 @@ export function HomeworkSpeakingRecorder({
           <Button onClick={resetRecording} variant="ghost" size="sm" className="h-7 px-2 text-xs">
             <RotateCcw className="h-3 w-3" />
           </Button>
-          <Button onClick={uploadAndSave} variant="ghost" size="sm" className="gap-1 h-7 px-2 text-xs text-green-600">
+          <Button onClick={uploadAndSave} variant="ghost" size="sm"
+            className={`gap-1 h-7 px-2 text-xs ${errorMsg ? 'text-destructive' : 'text-green-600'}`}>
             <Upload className="h-3 w-3" />
-            Save
+            {errorMsg ? 'Retry save' : 'Save'}
           </Button>
+          {errorMsg && (
+            <span className="text-xs text-destructive flex items-center gap-1">
+              <AlertTriangle className="h-3 w-3" />
+              {errorMsg}
+            </span>
+          )}
           {displayCountdown !== null && displayCountdown > 0 && (
             <span className="text-xs text-muted-foreground">Auto-save {displayCountdown}s</span>
           )}
+
         </>
       )}
 

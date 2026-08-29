@@ -1,5 +1,15 @@
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { logError, formatErr } from "../_shared/logError.ts";
+
+/** Service-role client used only for error telemetry. */
+function adminClient() {
+  const url = Deno.env.get("SUPABASE_URL");
+  const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  if (!url || !key) return null;
+  return createClient(url, key);
+}
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -142,11 +152,21 @@ serve(async (req) => {
 
     if (!R2_ACCESS_KEY_ID || !R2_SECRET_ACCESS_KEY || !R2_ENDPOINT || !R2_BUCKET_NAME) {
       console.error("[UPLOAD-TO-R2] Missing R2 credentials");
+      const admin = adminClient();
+      if (admin) {
+        await logError(admin, {
+          source_name: "upload-to-r2",
+          component: "storage",
+          message: "R2 credentials not configured",
+          error_code: "R2_CONFIG_MISSING",
+        });
+      }
       return new Response(
         JSON.stringify({ error: "R2 credentials not configured" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
 
     console.log(`[UPLOAD-TO-R2] Starting upload: ${filename} to bucket: ${R2_BUCKET_NAME}`);
 
@@ -209,6 +229,17 @@ serve(async (req) => {
     );
   } catch (error) {
     console.error("[UPLOAD-TO-R2] Error:", error);
+    const admin = adminClient();
+    if (admin) {
+      const e = formatErr(error);
+      await logError(admin, {
+        source_name: "upload-to-r2",
+        component: "storage",
+        message: e.message,
+        error_code: e.code ?? "R2_UPLOAD_FAILED",
+        stack: e.stack,
+      });
+    }
     return new Response(
       JSON.stringify({
         error: (error as Error)?.message || "Upload failed",
@@ -217,4 +248,5 @@ serve(async (req) => {
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
+
 });
