@@ -201,6 +201,10 @@ export function HomeworkSpeakingRecorder({
       if (registryKey) {
         (window as any).__pendingSpeakingRecordings?.set(registryKey, { blob: blobRef.current, save: uploadAndSave });
       }
+
+      // After a failed upload the student retries manually — do not loop the timer.
+      if (uploadFailedRef.current) return;
+
       
       // Start 30s countdown using closure variable (not state)
       let remaining = 30;
