@@ -590,15 +590,15 @@ export default function WorksheetDisplay({
       return;
     }
 
-    // Handle anonymous users - save locally only
+    // Anonymous users have no database row of their own — be honest about it.
     if (!userId) {
       setIsEditing(false);
       toast({
-        title: "Changes saved locally",
-        description: "Your changes have been saved in this browser. Log in to save them to your account.",
-        className: "bg-green-50 border-green-200"
+        title: "Not saved to your account",
+        description: "These changes only live in this browser. Sign in to keep this worksheet and share it with students.",
+        variant: "destructive"
       });
-      devLog('📝 Anonymous user changes saved locally');
+      devLog('📝 Anonymous user changes kept in browser only');
       return;
     }
 
@@ -608,6 +608,7 @@ export default function WorksheetDisplay({
     try {
       devLog('💾 Saving worksheet changes to database...');
       await updateWorksheet(worksheetId, editableWorksheet, userId);
+      autosave.markSaved();
       
       setIsEditing(false);
       toast({
@@ -617,6 +618,7 @@ export default function WorksheetDisplay({
       });
       
       devLog('✅ Worksheet changes saved successfully');
+
     } catch (error) {
       console.error('❌ Error saving worksheet changes:', error);
       toast({
