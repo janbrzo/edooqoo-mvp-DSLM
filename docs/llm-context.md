@@ -1779,3 +1779,32 @@ negative marking, contraction normalization, typographic apostrophe, answer key
 variants, needs teacher review, Levenshtein near match, auto-grading tolerance,
 DSLM mastery scoring, interactive worksheet correctness, gap fill validation,
 error correction sentinel, student answer normalization
+
+## Worksheet Autosave & Single Write Path (v6.9.104, P1.4) — PRODUCTION
+
+PROBLEM: Teacher edits lived only in React state + sessionStorage. The database (what the
+student reads via the share link, and what powers `html_content`) updated only when the teacher
+clicked "Save Changes". Reordering/deleting exercises saved instantly while text edits did not,
+producing "some changes stay, some vanish" and students receiving stale worksheets.
+
+EDOOQOO SOLUTION:
+- `src/hooks/useWorksheetAutosave.ts` — debounced (2.5s) autosave through `updateWorksheetAPI`.
+  Early returns when there is no `worksheetId`, no `userId` (anonymous), or demo mode is active.
+  In-flight guard with last-write-wins queueing, `flush()` for forced saves, `markSaved()` for
+  external save paths, and a `beforeunload` warning while changes are unsaved.
+- `WorksheetToolbar` shows `Saving… / Unsaved changes / Saved • HH:MM / Not saved` and awaits
+  `onFlushSave()` before opening the share modal, so a share link never points at a stale version.
+- `WorksheetDisplay` manual Save now calls `autosave.markSaved()`; anonymous users get an honest
+  "Not saved to your account" message instead of a green "saved locally" toast.
+- `SharedWorksheet.handleSaveTeacherChanges` routes through `updateWorksheetAPI` when the teacher
+  is identified, so `ai_response`, `title` and `html_content` can no longer drift apart.
+
+TECHNICAL MECHANICS: `src/hooks/useWorksheetAutosave.ts`, `src/components/WorksheetDisplay.tsx`,
+`src/components/worksheet/WorksheetToolbar.tsx`, `src/pages/SharedWorksheet.tsx`,
+`src/services/worksheetService/updateService.ts`, table `public.worksheets`
+(`ai_response`, `html_content`, `title`, `last_modified_at`).
+
+RAG KEYWORDS: worksheet autosave, debounce save, single write path, stale share link,
+unsaved changes indicator, beforeunload guard, updateWorksheetAPI, html_content drift,
+teacher edit persistence, last write wins, demo mode guard, anonymous worksheet, flush before share,
+worksheet last_modified_at, shared worksheet teacher edit
