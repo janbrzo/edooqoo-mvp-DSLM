@@ -147,8 +147,17 @@ export function SpeakingRecorder({ maxSeconds = 60, answer, onAnswer, questionId
 
   const startRecording = useCallback(async () => {
     setErrorMsg(null);
+
+    const support = checkRecordingSupport();
+    if (!support.supported) {
+      setErrorMsg(support.reason ?? 'Recording is not available in this browser.');
+      setStatus('error');
+      return;
+    }
+
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
       
       const mimeType = getSupportedMimeType();
       let mediaRecorder: MediaRecorder;
