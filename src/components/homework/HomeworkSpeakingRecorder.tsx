@@ -2,13 +2,19 @@
  * HomeworkSpeakingRecorder - Minimalist inline audio recorder for homework/shared worksheet exercises
  * Records audio, uploads to R2, returns audio_url
  * FIX 1.1: Ref-based countdown timer to prevent resets from parent re-renders
+ * P1.8: shared capability guards + retrying upload with honest failure state
  */
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { Mic, Square, Play, Pause, RotateCcw, Upload, CheckCircle, Loader2, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { uploadBlobToR2 } from '@/components/welcome-test/SpeakingRecorder';
 import { toast } from 'sonner';
+import {
+  checkRecordingSupport,
+  describeMicrophoneError,
+  getSupportedMimeType,
+  uploadRecording,
+} from '@/lib/audio/recorder';
 
 interface HomeworkSpeakingRecorderProps {
   maxSeconds?: number;
@@ -23,14 +29,6 @@ if (typeof window !== 'undefined' && !(window as any).__pendingSpeakingRecording
   (window as any).__pendingSpeakingRecordings = new Map();
 }
 
-function getSupportedMimeType(): string | undefined {
-  if (typeof MediaRecorder === 'undefined') return undefined;
-  const types = ['audio/webm', 'audio/mp4', 'audio/ogg', 'audio/wav'];
-  for (const type of types) {
-    if (MediaRecorder.isTypeSupported(type)) return type;
-  }
-  return undefined;
-}
 
 export function HomeworkSpeakingRecorder({ 
   maxSeconds = 120, 
