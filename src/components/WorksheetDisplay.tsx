@@ -3,6 +3,8 @@ import { useToast } from "@/hooks/use-toast";
 import { useDownloadTracking } from "@/hooks/useDownloadTracking";
 import { usePaymentTracking } from "@/hooks/usePaymentTracking";
 import { updateWorksheet } from "@/services/worksheetService";
+import { useWorksheetAutosave } from "@/hooks/useWorksheetAutosave";
+
 import WorksheetHeader from "./worksheet/WorksheetHeader";
 import InputParamsCard from "./worksheet/InputParamsCard";
 import WorksheetToolbar from "./worksheet/WorksheetToolbar";
