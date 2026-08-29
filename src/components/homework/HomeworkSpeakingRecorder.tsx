@@ -55,6 +55,9 @@ export function HomeworkSpeakingRecorder({
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const blobRef = useRef<Blob | null>(null);
+  // Prevents the 30s auto-save timer from retrying in a loop after a failed upload.
+  const uploadFailedRef = useRef(false);
+
   
   // FIX 1.1: Stabilize onAudioSaved ref to prevent timer resets on parent re-renders
   const onAudioSavedRef = useRef(onAudioSaved);
