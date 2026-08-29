@@ -253,13 +253,21 @@ const WorksheetToolbar = ({
     setPendingAction(null);
   };
 
-  const handleShareClick = () => {
+  const handleShareClick = async () => {
     devLog('Share button clicked');
-    devLog('User:', user);
-    devLog('Is registered user:', isRegisteredUser);
-    devLog('Worksheet ID:', worksheetId);
-    
+
+    // P1.4 — never hand a student a link to a stale version.
+    if (onFlushSave) {
+      setIsPreparingShare(true);
+      try {
+        await onFlushSave();
+      } finally {
+        setIsPreparingShare(false);
+      }
+    }
+
     setShowShareModal(true);
+
   };
 
   // Check if user can share worksheets (registered user with valid worksheetId)
