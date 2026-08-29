@@ -2,15 +2,21 @@
  * SpeakingRecorder - Microphone recording component for Welcome Test speaking questions
  * Records up to 60s of audio, uploads to R2 via base64 JSON, saves URL as answer
  * Cross-browser: tries audio/webm, audio/mp4, then no mimeType
- * Round 8: Fixed upload - converts blob to base64 JSON (upload-to-r2 expects JSON, not FormData)
+ * P1.8: capability guards + honest upload failures (no fabricated placeholder answers)
  */
 
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { Mic, Square, Play, Pause, RotateCcw, Upload, CheckCircle, Loader2, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { devLog } from '@/utils/logger';
+import {
+  checkRecordingSupport,
+  describeMicrophoneError,
+  getSupportedMimeType,
+  tryUploadRecording,
+  uploadRecording,
+} from '@/lib/audio/recorder';
 
 interface SpeakingRecorderProps {
   maxSeconds?: number;
@@ -20,56 +26,14 @@ interface SpeakingRecorderProps {
   onAutoSave?: (questionId: string, audioUrl: string) => void;
 }
 
-function getSupportedMimeType(): string | undefined {
-  if (typeof MediaRecorder === 'undefined') return undefined;
-  const types = ['audio/webm', 'audio/mp4', 'audio/ogg', 'audio/wav'];
-  for (const type of types) {
-    if (MediaRecorder.isTypeSupported(type)) return type;
-  }
-  return undefined;
-}
-
 /**
- * Convert blob to base64 and upload to R2 via JSON endpoint.
- * Returns the public URL or null on failure.
+ * Backwards-compatible wrapper kept for existing callers.
+ * Returns null on failure (never a placeholder string).
  */
 export async function uploadBlobToR2(blob: Blob): Promise<string | null> {
-  if (!blob || blob.size === 0) return null;
-
-  try {
-    const base64Full = await new Promise<string>((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => resolve(reader.result as string);
-      reader.onerror = () => reject(reader.error);
-      reader.readAsDataURL(blob);
-    });
-
-    const base64Data = base64Full.split(',')[1];
-    if (!base64Data) return null;
-
-    const mimeType = blob.type || 'audio/webm';
-    const ext = mimeType.includes('mp4') ? 'mp4' : mimeType.includes('ogg') ? 'ogg' : 'webm';
-    const fileName = `welcome-test-speaking-${Date.now()}.${ext}`;
-
-    const { data, error } = await supabase.functions.invoke('upload-to-r2', {
-      body: {
-        base64Data,
-        filename: fileName,
-        contentType: mimeType,
-      },
-    });
-
-    if (error) {
-      console.error('[uploadBlobToR2] Edge function error:', error);
-      return null;
-    }
-
-    return data?.url || data?.publicUrl || null;
-  } catch (err) {
-    console.error('[uploadBlobToR2] Failed:', err);
-    return null;
-  }
+  return tryUploadRecording(blob, { filenamePrefix: 'welcome-test-speaking' });
 }
+
 
 export function SpeakingRecorder({ maxSeconds = 60, answer, onAnswer, questionId, onAutoSave }: SpeakingRecorderProps) {
   const [status, setStatus] = useState<'idle' | 'recording' | 'recorded' | 'uploading' | 'done' | 'error'>(
