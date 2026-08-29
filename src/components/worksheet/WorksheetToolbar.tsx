@@ -323,6 +323,25 @@ const WorksheetToolbar = ({
             </Tooltip>
           </div>
           <div className={`flex ${isMobile ? 'flex-col gap-2' : 'items-center'}`}>
+            {/* P1.4 — autosave indicator */}
+            {autosaveStatus !== 'disabled' && (
+              <span
+                className={`text-xs mr-3 whitespace-nowrap ${
+                  autosaveStatus === 'error' ? 'text-destructive' : 'text-muted-foreground'
+                }`}
+                aria-live="polite"
+              >
+                {autosaveStatus === 'saving' && 'Saving…'}
+                {autosaveStatus === 'dirty' && 'Unsaved changes'}
+                {autosaveStatus === 'error' && 'Not saved — click Save Changes'}
+                {autosaveStatus === 'saved' && (
+                  autosaveLastSavedAt
+                    ? `Saved • ${autosaveLastSavedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
+                    : 'Saved'
+                )}
+              </span>
+            )}
+
             {!isEditing && (
               <>
                 <Button
