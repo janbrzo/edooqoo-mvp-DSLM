@@ -219,14 +219,11 @@ export function SpeakingRecorder({ maxSeconds = 60, answer, onAnswer, questionId
       }, 1000);
     } catch (err: any) {
       console.error('Microphone error:', err);
-      if (err.name === 'NotAllowedError') {
-        setErrorMsg('Microphone access denied. Please allow microphone permission in your browser settings.');
-      } else {
-        setErrorMsg('Could not access microphone. Please check your device settings.');
-      }
+      setErrorMsg(describeMicrophoneError(err));
       setStatus('error');
     }
   }, [maxSeconds, questionId]);
+
 
   const stopRecording = useCallback(() => {
     if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
