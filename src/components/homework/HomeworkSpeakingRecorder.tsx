@@ -131,9 +131,10 @@ export function HomeworkSpeakingRecorder({
         });
       }, 1000);
     } catch (err: any) {
-      setErrorMsg(err.name === 'NotAllowedError' ? 'Microphone access denied.' : 'Could not access microphone.');
+      setErrorMsg(describeMicrophoneError(err));
       setStatus('error');
     }
+
   }, [maxSeconds]);
 
   const stopRecording = useCallback(() => {
