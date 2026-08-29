@@ -159,10 +159,12 @@ export function HomeworkSpeakingRecorder({
   const resetRecording = useCallback(() => {
     if (audioUrl?.startsWith('blob:')) URL.revokeObjectURL(audioUrl);
     setAudioUrl(null); blobRef.current = null; setSeconds(0); setStatus('idle'); setIsPlaying(false); setErrorMsg(null);
+    uploadFailedRef.current = false;
     setDisplayCountdown(null);
     if (autoSaveTimerRef.current) { clearTimeout(autoSaveTimerRef.current); autoSaveTimerRef.current = null; }
     if (countdownIntervalRef.current) { clearInterval(countdownIntervalRef.current); countdownIntervalRef.current = null; }
   }, [audioUrl]);
+
 
   const uploadAndSave = useCallback(async () => {
     if (!blobRef.current) return;
