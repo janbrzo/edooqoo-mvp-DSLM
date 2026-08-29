@@ -45,12 +45,18 @@ interface WorksheetToolbarProps {
   onCreateHomework?: () => void;
   onAddExercise?: () => void;
   onDuplicateSuccess?: () => void;
+  // P1.4 — autosave state surfaced to the teacher
+  autosaveStatus?: 'disabled' | 'idle' | 'dirty' | 'saving' | 'saved' | 'error';
+  autosaveLastSavedAt?: Date | null;
+  /** Forces a save (used before sharing) and resolves when the DB is up to date. */
+  onFlushSave?: () => Promise<boolean | void>;
   // Drawing overlay props (for Live Session mode)
   isDrawingEnabled?: boolean;
   isDrawingLayerVisible?: boolean;
   onDrawingToggle?: () => void;
   onDrawingLayerToggle?: () => void;
 }
+
 
 const WorksheetToolbar = ({
   viewMode,
