@@ -282,18 +282,23 @@ const SharedWorksheet = () => {
   // PROBLEM 3: Teacher edit mode handlers
   const handleSaveTeacherChanges = async () => {
     if (!worksheet?.id || !editableWorksheet) return;
-    
+
     setIsSavingTeacherEdits(true);
     try {
-      const { error } = await supabase
-        .from('worksheets')
-        .update({ ai_response: JSON.stringify(editableWorksheet) })
-        .eq('id', worksheet.id);
-      
-      if (error) throw error;
-      
+      // P1.4 — single write path: keeps ai_response, title and html_content in sync.
+      if (currentTeacherId) {
+        await updateWorksheetAPI(worksheet.id, editableWorksheet, currentTeacherId);
+      } else {
+        const { error } = await supabase
+          .from('worksheets')
+          .update({ ai_response: JSON.stringify(editableWorksheet) })
+          .eq('id', worksheet.id);
+        if (error) throw error;
+      }
+
       setOriginalWorksheet(editableWorksheet);
       setTeacherEditMode(false);
+
       
       toast({
         title: "Changes saved",
