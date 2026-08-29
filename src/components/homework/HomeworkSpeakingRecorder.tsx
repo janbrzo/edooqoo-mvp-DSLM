@@ -79,8 +79,18 @@ export function HomeworkSpeakingRecorder({
 
   const startRecording = useCallback(async () => {
     setErrorMsg(null);
+    uploadFailedRef.current = false;
+
+    const support = checkRecordingSupport();
+    if (!support.supported) {
+      setErrorMsg(support.reason ?? 'Recording is not available in this browser.');
+      setStatus('error');
+      return;
+    }
+
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
       const mimeType = getSupportedMimeType();
       let mediaRecorder: MediaRecorder;
       try {
