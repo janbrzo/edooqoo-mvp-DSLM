@@ -376,11 +376,17 @@ const WorksheetToolbar = ({
                   <Button
                     variant="outline"
                     onClick={handleShareClick}
+                    disabled={isPreparingShare}
                     className={`${hasActiveShareToken ? 'border-2 border-green-500' : 'border-worksheet-purple'} text-worksheet-purple ${isMobile ? '' : 'mr-2'}`}
                     size="sm"
                   >
-                    <Share2 className="mr-2 h-4 w-4" /> Share
+                    {isPreparingShare ? (
+                      <><Loader2 className="mr-2 h-4 w-4 animate-spin" /> Saving…</>
+                    ) : (
+                      <><Share2 className="mr-2 h-4 w-4" /> Share</>
+                    )}
                   </Button>
+
                 ) : !isRegisteredUser && worksheetId && (
                   <Tooltip>
                     <TooltipTrigger asChild>
