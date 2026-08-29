@@ -152,11 +152,21 @@ serve(async (req) => {
 
     if (!R2_ACCESS_KEY_ID || !R2_SECRET_ACCESS_KEY || !R2_ENDPOINT || !R2_BUCKET_NAME) {
       console.error("[UPLOAD-TO-R2] Missing R2 credentials");
+      const admin = adminClient();
+      if (admin) {
+        await logError(admin, {
+          source_name: "upload-to-r2",
+          component: "storage",
+          message: "R2 credentials not configured",
+          error_code: "R2_CONFIG_MISSING",
+        });
+      }
       return new Response(
         JSON.stringify({ error: "R2 credentials not configured" }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
+
 
     console.log(`[UPLOAD-TO-R2] Starting upload: ${filename} to bucket: ${R2_BUCKET_NAME}`);
 
