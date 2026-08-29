@@ -153,19 +153,24 @@ export function HomeworkSpeakingRecorder({
   const uploadAndSave = useCallback(async () => {
     if (!blobRef.current) return;
     setStatus('uploading');
+    setErrorMsg(null);
     // Clear countdown on manual save
     setDisplayCountdown(null);
     if (autoSaveTimerRef.current) { clearTimeout(autoSaveTimerRef.current); autoSaveTimerRef.current = null; }
     if (countdownIntervalRef.current) { clearInterval(countdownIntervalRef.current); countdownIntervalRef.current = null; }
     try {
-      const url = await uploadBlobToR2(blobRef.current);
-      if (!url) throw new Error('No URL returned');
+      const url = await uploadRecording(blobRef.current, { filenamePrefix: 'homework-speaking' });
       setAudioUrl(url); setStatus('done'); onAudioSavedRef.current(url);
       toast.success('Recording saved!');
-    } catch {
-      setStatus('error'); setErrorMsg('Upload failed. Please try again.');
+    } catch (err) {
+      // Keep the recorded blob so the student can retry — never fake a success.
+      console.error('[HomeworkSpeakingRecorder] Upload failed:', err);
+      setStatus('recorded');
+      setErrorMsg('Upload failed. Check your connection and tap Save again.');
+      toast.error('Recording not saved — please try again.');
     }
   }, []); // STABLE - no dependency on onAudioSaved
+
 
   // FIX 1.1: Single ref-based effect for auto-save timer + countdown
   // Only depends on [status, registryKey] — uploadAndSave is stable (deps=[])
