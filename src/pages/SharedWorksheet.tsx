@@ -2,6 +2,8 @@
 import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { updateWorksheetAPI } from '@/services/worksheetService/updateService';
+
 import { Loader2, AlertCircle, FileText, ArrowUp, Image, X, Maximize2, Headphones, Home, User, ArrowLeft, Unlock, Save, RotateCcw, LayoutDashboard } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
