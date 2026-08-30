@@ -241,7 +241,7 @@ const updateExerciseNumber = (title: string, newNumber: number): string => {
 };
 
 const ExerciseSection = forwardRef<HTMLDivElement, ExerciseSectionProps>(({
-  exercise,
+  exercise: rawExercise,
   index,
   originalIndex,
   isEditing,
