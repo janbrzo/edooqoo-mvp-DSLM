@@ -28,6 +28,7 @@ import ExerciseSentenceTransformation from '@/components/worksheet/ExerciseSente
 import ExerciseErrorCorrection from '@/components/worksheet/ExerciseErrorCorrection';
 import ExerciseMatchingHalves from '@/components/worksheet/ExerciseMatchingHalves';
 import ExerciseSynonymsAntonyms from '@/components/worksheet/ExerciseSynonymsAntonyms';
+import { normalizeExerciseShape } from '@/lib/worksheet/normalizeExercise';
 import ExerciseListeningComprehension from '@/components/worksheet/ExerciseListeningComprehension';
 import ExerciseAnswerQuestionsAudio from '@/components/worksheet/ExerciseAnswerQuestionsAudio';
 import ExerciseTrueFalseAudio from '@/components/worksheet/ExerciseTrueFalseAudio';
