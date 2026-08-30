@@ -1808,3 +1808,17 @@ RAG KEYWORDS: worksheet autosave, debounce save, single write path, stale share 
 unsaved changes indicator, beforeunload guard, updateWorksheetAPI, html_content drift,
 teacher edit persistence, last write wins, demo mode guard, anonymous worksheet, flush before share,
 worksheet last_modified_at, shared worksheet teacher edit
+
+## v6.9.105 — P1.5 Media rendering + exercise shape normalization
+
+PROBLEM: Worksheets with both image and audio lost the image (MediaSection returned early on the audio branch); vocabulary-style exercises rendered as empty blocks when the generator emitted `pairs`/`words` instead of `items`; batch regeneration of `-picture`/`-audio` exercises ran without the worksheet media.
+
+EDOOQOO SOLUTION:
+- `src/components/worksheet/MediaSection.tsx` renders image and audio blocks independently (no early return); hooks moved above all conditional returns.
+- `src/lib/worksheet/normalizeExercise.ts` (new): pure `normalizeExerciseShape()` / `normalizeWorksheetExercises()` mapping legacy shapes (`pairs`, `words`, `halves`, `word`/`match`, `left`/`right`, `transformations`, `questions`-as-statements) onto the canonical renderer shape.
+- Normalizer applied at render in `ExerciseSection.tsx`, `HomeworkExerciseRenderer.tsx`, `SharedWorksheetContent.tsx`.
+- `supabase/functions/generateWorksheet/index.ts` batch mode now forwards `selectedImage`/`selectedAudio` when the requested target types depend on them.
+
+TECHNICAL MECHANICS: components MediaSection, ExerciseSection, HomeworkExerciseRenderer, SharedWorksheetContent; lib normalizeExercise; edge function generateWorksheet (batch branch only — generation prompt untouched).
+
+RAG KEYWORDS: worksheet media, mixed media worksheet, image and audio, exercise shape drift, pairs vs items, matching exercise empty, synonyms antonyms rendering, categorize words, batch regeneration media, picture exercise, listening exercise, normalizer, canonical exercise schema, homework renderer, shared worksheet.
