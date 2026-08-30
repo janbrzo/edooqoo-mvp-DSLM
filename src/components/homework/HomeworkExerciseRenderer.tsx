@@ -67,7 +67,7 @@ const OPEN_ENDED_TYPES = [
 ];
 
 const HomeworkExerciseRenderer: React.FC<HomeworkExerciseRendererProps> = ({
-  exercise,
+  exercise: rawExercise,
   index,
   homeworkId,
   isInteractive,
