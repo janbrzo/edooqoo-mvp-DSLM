@@ -400,7 +400,9 @@ const SharedWorksheetContent: React.FC<SharedWorksheetContentProps> = ({
       )}
 
       {/* Exercises - using proper React components with FIXED ICONS */}
-      {worksheetData.exercises && worksheetData.exercises.map((exercise: any, index: number) => {
+      {worksheetData.exercises && worksheetData.exercises.map((rawExercise: any, index: number) => {
+        // P1.5 — canonicalize drifted exercise shapes before rendering.
+        const exercise = normalizeExerciseShape(rawExercise);
         devLog(`🔧 Rendering exercise ${index + 1}: ${exercise.type}`, exercise);
         
         // Normalize type to handle -picture and -audio suffixes
