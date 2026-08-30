@@ -4,6 +4,7 @@ import { AlertCircle, MessageCircle, BookOpen, Clock, FileText } from 'lucide-re
 import { AiEvaluation, AiEvaluationBadge } from '@/components/homework/AiEvaluationBadge';
 import { isClosedExerciseType } from '@/utils/masteryCalculator';
 import ExerciseMatching from '../worksheet/ExerciseMatching';
+import { normalizeExerciseShape } from '@/lib/worksheet/normalizeExercise';
 import ExerciseFillInBlanks from '../worksheet/ExerciseFillInBlanks';
 import ExerciseMultipleChoice from '../worksheet/ExerciseMultipleChoice';
 import ExerciseReading from '../worksheet/ExerciseReading';
