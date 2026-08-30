@@ -81,6 +81,8 @@ const HomeworkExerciseRenderer: React.FC<HomeworkExerciseRendererProps> = ({
   audioAnswers,
   onAudioAnswerChange
 }) => {
+  // P1.5 — canonicalize drifted exercise shapes before rendering.
+  const exercise = React.useMemo(() => normalizeExerciseShape(rawExercise), [rawExercise]);
   const normalizedType = normalizeExerciseType(exercise.type);
   const isOpenEnded = OPEN_ENDED_TYPES.includes(exercise.type) || OPEN_ENDED_TYPES.includes(normalizedType);
   
