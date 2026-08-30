@@ -8,6 +8,7 @@ import ExerciseRegenerateModal from "./ExerciseRegenerateModal";
 import ExerciseHeader from "./ExerciseHeader";
 import ExerciseContent from "./ExerciseContent";
 import MediaDisplay from "./MediaDisplay";
+import { normalizeExerciseShape } from "@/lib/worksheet/normalizeExercise";
 import ExerciseReading from "./ExerciseReading";
 import ExerciseMatching from "./ExerciseMatching";
 import ExerciseFillInBlanks from "./ExerciseFillInBlanks";
