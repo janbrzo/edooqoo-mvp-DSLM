@@ -280,6 +280,9 @@ const ExerciseSection = forwardRef<HTMLDivElement, ExerciseSectionProps>(({
   studentId: studentIdProp,
   teacherId: teacherIdProp,
 }, ref) => {
+  // P1.5 — canonicalize drifted exercise shapes (pairs/items, word/match, ...)
+  // so renderers never receive a payload they silently drop.
+  const exercise = React.useMemo(() => normalizeExerciseShape(rawExercise), [rawExercise]);
   // PROBLEM 4: Persist Mark Done state to localStorage for Live Session
   // Use worksheetId prop as fallback, ensure we have a valid ID before creating storage key
   const worksheetIdForStorage = (editableWorksheet as any)?.id || worksheetId;
