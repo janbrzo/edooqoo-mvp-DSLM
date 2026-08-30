@@ -453,6 +453,17 @@ serve(async (req) => {
       const exerciseCountPerType = formData.exerciseCountPerType || 1;
       const totalExerciseCount = formData.targetExerciseTypes.length * exerciseCountPerType;
 
+      // P1.5 — keep the existing worksheet media when the requested batch types
+      // depend on it, otherwise picture/audio exercises are generated blind.
+      const batchNeedsImage = formData.targetExerciseTypes.some((t: string) =>
+        String(t).includes("-picture") || String(t) === "describe-picture"
+      );
+      const batchNeedsAudio = formData.targetExerciseTypes.some((t: string) =>
+        String(t).includes("-audio") || String(t) === "listening-comprehension"
+      );
+      const batchImage = batchNeedsImage ? (formData.selectedImage || null) : null;
+      const batchAudio = batchNeedsAudio ? (formData.selectedAudio || null) : null;
+
       // Build ONE system message for ALL exercise types
       const batchSystemMessage = composeSystemMessage(
         hasGrammarFocus,
@@ -460,13 +471,13 @@ serve(async (req) => {
         {
           ...formData,
           selectedExercises: formData.targetExerciseTypes, // Pass ALL types
-          selectedImage: null, // ❌ No image in batch mode
-          selectedAudio: null, // ❌ No audio in batch mode
+          selectedImage: batchImage,
+          selectedAudio: batchAudio,
         },
         totalExerciseCount, // Total count of ALL exercises
         formData.targetExerciseTypes, // ALL types at once
-        null, // ❌ No image in batch mode
-        null, // ❌ No audio in batch mode
+        batchImage,
+        batchAudio,
       );
 
       console.log(

@@ -28,6 +28,7 @@ import ExerciseSentenceTransformation from '@/components/worksheet/ExerciseSente
 import ExerciseErrorCorrection from '@/components/worksheet/ExerciseErrorCorrection';
 import ExerciseMatchingHalves from '@/components/worksheet/ExerciseMatchingHalves';
 import ExerciseSynonymsAntonyms from '@/components/worksheet/ExerciseSynonymsAntonyms';
+import { normalizeExerciseShape } from '@/lib/worksheet/normalizeExercise';
 import ExerciseListeningComprehension from '@/components/worksheet/ExerciseListeningComprehension';
 import ExerciseAnswerQuestionsAudio from '@/components/worksheet/ExerciseAnswerQuestionsAudio';
 import ExerciseTrueFalseAudio from '@/components/worksheet/ExerciseTrueFalseAudio';
@@ -67,7 +68,7 @@ const OPEN_ENDED_TYPES = [
 ];
 
 const HomeworkExerciseRenderer: React.FC<HomeworkExerciseRendererProps> = ({
-  exercise,
+  exercise: rawExercise,
   index,
   homeworkId,
   isInteractive,
@@ -81,6 +82,8 @@ const HomeworkExerciseRenderer: React.FC<HomeworkExerciseRendererProps> = ({
   audioAnswers,
   onAudioAnswerChange
 }) => {
+  // P1.5 — canonicalize drifted exercise shapes before rendering.
+  const exercise = React.useMemo(() => normalizeExerciseShape(rawExercise), [rawExercise]);
   const normalizedType = normalizeExerciseType(exercise.type);
   const isOpenEnded = OPEN_ENDED_TYPES.includes(exercise.type) || OPEN_ENDED_TYPES.includes(normalizedType);
   
