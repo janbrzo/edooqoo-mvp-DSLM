@@ -661,6 +661,17 @@ export function CreateHomeworkModal({
                     Send before deadline
                   </Label>
                 </div>
+                {/* P1.6 — notify the student right after creation (was fully manual) */}
+                <div className="flex items-center gap-2">
+                  <Switch
+                    id="notify-student"
+                    checked={notifyStudent}
+                    onCheckedChange={setNotifyStudent}
+                  />
+                  <Label htmlFor="notify-student" className="cursor-pointer text-sm font-normal">
+                    Notify student by email
+                  </Label>
+                </div>
                 {sendReminder && (
                   <Select value={reminderHours} onValueChange={setReminderHours}>
                     <SelectTrigger id="reminder-hours" className="h-8 w-44 text-sm">
