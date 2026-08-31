@@ -21,6 +21,7 @@ import type { SharedWorksheetData } from '@/types/interactiveSharedWorksheet';
 import type { DrawingTool, DrawingColor, StrokeWidth, DrawingState } from '@/types/drawing';
 import { DRAWING_COLORS, STROKE_WIDTHS } from '@/types/drawing';
 import { useForceLightTheme } from '@/hooks/useForceLightTheme';
+import { saveHubEmail } from '@/hooks/useStudentHubData';
 
 const SharedWorksheet = () => {
   useForceLightTheme();
