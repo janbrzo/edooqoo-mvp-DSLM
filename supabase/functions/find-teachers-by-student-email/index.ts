@@ -30,7 +30,8 @@ Deno.serve(async (req) => {
 
     if (studentsError) throw studentsError;
     if (!students || students.length === 0) {
-      return new Response(JSON.stringify({ teachers: [] }), {
+      // P1.6 — diagnostic reason instead of a blind empty list
+      return new Response(JSON.stringify({ teachers: [], reason: 'email_not_found' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
@@ -46,21 +47,53 @@ Deno.serve(async (req) => {
     const { data: settings } = await supabase
       .from('calendar_settings')
       .select('teacher_id, hub_token')
-      .in('teacher_id', teacherIds)
-      .not('hub_token', 'is', null);
+      .in('teacher_id', teacherIds);
 
-    const teachers = (settings || [])
-      .filter(s => s.hub_token)
-      .map(s => {
-        const profile = profiles?.find(p => p.id === s.teacher_id);
+    const tokenByTeacher = new Map<string, string>();
+    for (const s of settings || []) {
+      if (s.hub_token) tokenByTeacher.set(s.teacher_id, s.hub_token);
+    }
+
+    // P1.6 — auto-provision a hub_token for teachers that don't have one yet,
+    // instead of silently hiding them from the student ("No teachers found").
+    const provisionFailures: string[] = [];
+    for (const teacherId of teacherIds) {
+      if (tokenByTeacher.has(teacherId)) continue;
+      const newToken = crypto.randomUUID().replace(/-/g, '');
+      const hasRow = (settings || []).some(s => s.teacher_id === teacherId);
+      const { error: provisionError } = hasRow
+        ? await supabase
+            .from('calendar_settings')
+            .update({ hub_token: newToken })
+            .eq('teacher_id', teacherId)
+            .is('hub_token', null)
+        : await supabase
+            .from('calendar_settings')
+            .insert({ teacher_id: teacherId, hub_token: newToken });
+
+      if (provisionError) {
+        console.error('[find-teachers] hub_token provisioning failed:', teacherId, provisionError.message);
+        provisionFailures.push(teacherId);
+        continue;
+      }
+      tokenByTeacher.set(teacherId, newToken);
+    }
+
+    const teachers = teacherIds
+      .filter(id => tokenByTeacher.has(id))
+      .map(id => {
+        const profile = profiles?.find(p => p.id === id);
         const name = [profile?.first_name, profile?.last_name].filter(Boolean).join(' ') || 'Teacher';
-        return {
-          name,
-          token: s.hub_token,
-        };
+        return { name, token: tokenByTeacher.get(id)! };
       });
 
-    return new Response(JSON.stringify({ teachers }), {
+    const reason = teachers.length > 0
+      ? undefined
+      : provisionFailures.length > 0
+        ? 'hub_not_enabled'
+        : 'email_not_found';
+
+    return new Response(JSON.stringify({ teachers, reason }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (err) {
