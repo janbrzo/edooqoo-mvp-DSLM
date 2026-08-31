@@ -79,6 +79,8 @@ export function CreateHomeworkModal({
     return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
   });
   const [sendReminder, setSendReminder] = useState<boolean>(true);
+  // P1.6 — notify the student by email right after the homework is created
+  const [notifyStudent, setNotifyStudent] = useState<boolean>(true);
   const [reminderHours, setReminderHours] = useState<string>("24");
   const [sendToTeacher, setSendToTeacher] = useState<boolean>(false);
   const [isGenerating, setIsGenerating] = useState(false);
