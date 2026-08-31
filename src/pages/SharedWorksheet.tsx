@@ -39,6 +39,8 @@ const SharedWorksheet = () => {
   const [isStudyMode, setIsStudyMode] = useState(false);
   const [needsStudentAssignment, setNeedsStudentAssignment] = useState(false);
   const [answerVisibility, setAnswerVisibility] = useState<'all' | 'closed' | 'open' | 'hidden'>('all');
+  // P1.6 — one-time bridge banner pointing the student to their Hub
+  const [showHubBridge, setShowHubBridge] = useState(false);
 
   // PROBLEM 5: Check localStorage for remembered email on mount
   useEffect(() => {
