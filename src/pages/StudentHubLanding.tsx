@@ -83,6 +83,7 @@ const StudentHubLanding = () => {
     setSearched(true);
     setPasswordRequired(false);
     setPendingTeacher(null);
+    setNotFoundReason(null);
     try {
       const { data, error } = await supabase.functions.invoke('find-teachers-by-student-email', {
         body: { email: emailToSearch.trim() },
@@ -90,6 +91,7 @@ const StudentHubLanding = () => {
       if (error) throw error;
       const found = data?.teachers || [];
       setTeachers(found);
+      setNotFoundReason(found.length === 0 ? (data?.reason ?? 'email_not_found') : null);
       saveHubEmail(emailToSearch.trim());
 
       // Auto-redirect if single teacher (with password check)
@@ -98,8 +100,8 @@ const StudentHubLanding = () => {
       }
     } catch (err: any) {
       console.error('Error finding teachers:', err);
-      toast.error('Could not find teachers');
       setTeachers([]);
+      setNotFoundReason('lookup_failed');
     } finally {
       setLoading(false);
     }
