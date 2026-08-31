@@ -23,6 +23,8 @@ const StudentHubLanding = () => {
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
+  // P1.6 — diagnostic reason returned by the lookup edge function
+  const [notFoundReason, setNotFoundReason] = useState<string | null>(null);
   // Password flow state
   const [pendingTeacher, setPendingTeacher] = useState<Teacher | null>(null);
   const [passwordRequired, setPasswordRequired] = useState(false);
