@@ -268,6 +268,11 @@ const SharedWorksheet = () => {
       email: email,
       expiresAt: Date.now() + 48 * 60 * 60 * 1000 // 48 hours
     }));
+
+    // P1.6 — bridge to the Student Hub: reuse the verified email there so the
+    // student lands directly on their materials instead of retyping it.
+    saveHubEmail(email);
+    setShowHubBridge(true);
     
     toast({
       title: "Email verified!",
