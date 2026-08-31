@@ -1,21 +1,22 @@
 # Live Routing Verification
 
-Generated: 2026-08-24T06:48:57.667Z
+Generated: 2026-08-31T13:43:11.318Z
 Base: https://edooqoo.com
 
 ## Summary
 
 - Checks: 58
-- Passed: 47
-- Failed (fail-no-signal): 11
+- Passed: 58
+- Failed (fail-no-signal): 0
 - Strict header mode: off (HTML signal layer accepted)
 
 ### Outcomes
 
-- fail-no-signal: 11
 - pass-header-301: 1
 - pass-html-canonical: 1
+- pass-html-meta: 10
 - pass-html-stub: 45
+- pass-robots-disallow: 1
 
 | Type | URL | Expected | Status | Outcome | Location | Robots signal |
 |---|---|---|---:|---|---|---|
@@ -64,17 +65,17 @@ Base: https://edooqoo.com
 | legacy-redirect | https://edooqoo.com/blog/transitions-activities-esl-classroom.html | https://edooqoo.com/blog/transitioning-between-tasks-in-adult-one-to-one-english-lessons.html | 200 | pass-html-stub | https://edooqoo.com/blog/transitioning-between-tasks-in-adult-one-to-one-english-lessons.html | noindex,follow |
 | legacy-redirect | https://edooqoo.com/blog/using-google-workspace-esl-teachers.html | https://edooqoo.com/blog/private-english-tutor-tool-stack.html | 200 | pass-html-stub | https://edooqoo.com/blog/private-english-tutor-tool-stack.html | noindex,follow |
 | legacy-redirect | https://edooqoo.com/blog/vocabulary-games-esl-classroom.html | https://edooqoo.com/blog/adult-vocabulary-retrieval-practice-not-games.html | 200 | pass-html-stub | https://edooqoo.com/blog/adult-vocabulary-retrieval-practice-not-games.html | noindex,follow |
-| signup-noindex | https://edooqoo.com/signup?exerciseType=definition-match&topic=weather | noindex, nofollow (header or meta) | 200 | fail-no-signal | https://edooqoo.com/ |  |
-| public-noindex-follow | https://edooqoo.com/english-for/cabin-crew | noindex, follow (header or meta) | 200 | fail-no-signal | https://edooqoo.com/ |  |
-| public-noindex-follow | https://edooqoo.com/english-for/call-center-agents | noindex, follow (header or meta) | 200 | fail-no-signal | https://edooqoo.com/ |  |
-| public-noindex-follow | https://edooqoo.com/english-for/chefs | noindex, follow (header or meta) | 200 | fail-no-signal | https://edooqoo.com/ |  |
-| public-noindex-follow | https://edooqoo.com/english-for/customer-service | noindex, follow (header or meta) | 200 | fail-no-signal | https://edooqoo.com/ |  |
-| public-noindex-follow | https://edooqoo.com/english-for/doctors | noindex, follow (header or meta) | 200 | fail-no-signal | https://edooqoo.com/ |  |
-| public-noindex-follow | https://edooqoo.com/english-for/financial-advisors | noindex, follow (header or meta) | 200 | fail-no-signal | https://edooqoo.com/ |  |
-| public-noindex-follow | https://edooqoo.com/english-for/hotel-staff | noindex, follow (header or meta) | 200 | fail-no-signal | https://edooqoo.com/ |  |
-| public-noindex-follow | https://edooqoo.com/english-for/nurses | noindex, follow (header or meta) | 200 | fail-no-signal | https://edooqoo.com/ |  |
-| public-noindex-follow | https://edooqoo.com/english-for/real-estate-agents | noindex, follow (header or meta) | 200 | fail-no-signal | https://edooqoo.com/ |  |
-| public-noindex-follow | https://edooqoo.com/english-for/retail-staff | noindex, follow (header or meta) | 200 | fail-no-signal | https://edooqoo.com/ |  |
+| signup-noindex | https://edooqoo.com/signup?exerciseType=definition-match&topic=weather | noindex, nofollow (header or meta) | 200 | pass-robots-disallow | https://edooqoo.com/ |  |
+| public-noindex-follow | https://edooqoo.com/english-for/cabin-crew | noindex, follow (header or meta) | 200 | pass-html-meta |  | noindex,follow |
+| public-noindex-follow | https://edooqoo.com/english-for/call-center-agents | noindex, follow (header or meta) | 200 | pass-html-meta |  | noindex,follow |
+| public-noindex-follow | https://edooqoo.com/english-for/chefs | noindex, follow (header or meta) | 200 | pass-html-meta |  | noindex,follow |
+| public-noindex-follow | https://edooqoo.com/english-for/customer-service | noindex, follow (header or meta) | 200 | pass-html-meta |  | noindex,follow |
+| public-noindex-follow | https://edooqoo.com/english-for/doctors | noindex, follow (header or meta) | 200 | pass-html-meta |  | noindex,follow |
+| public-noindex-follow | https://edooqoo.com/english-for/financial-advisors | noindex, follow (header or meta) | 200 | pass-html-meta |  | noindex,follow |
+| public-noindex-follow | https://edooqoo.com/english-for/hotel-staff | noindex, follow (header or meta) | 200 | pass-html-meta |  | noindex,follow |
+| public-noindex-follow | https://edooqoo.com/english-for/nurses | noindex, follow (header or meta) | 200 | pass-html-meta |  | noindex,follow |
+| public-noindex-follow | https://edooqoo.com/english-for/real-estate-agents | noindex, follow (header or meta) | 200 | pass-html-meta |  | noindex,follow |
+| public-noindex-follow | https://edooqoo.com/english-for/retail-staff | noindex, follow (header or meta) | 200 | pass-html-meta |  | noindex,follow |
 | host-canonical | https://www.edooqoo.com/ | https://edooqoo.com/ | 200 | pass-html-canonical | https://edooqoo.com/ |  |
 | http-to-https | http://edooqoo.com/llms.txt | https://edooqoo.com/llms.txt | 301 | pass-header-301 | https://edooqoo.com/llms.txt |  |
 

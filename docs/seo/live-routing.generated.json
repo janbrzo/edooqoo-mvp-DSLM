@@ -1,14 +1,15 @@
 {
-  "generatedAt": "2026-08-24T06:48:57.667Z",
+  "generatedAt": "2026-08-31T13:43:11.318Z",
   "base": "https://edooqoo.com",
   "strictHeaders": false,
   "totals": {
     "checks": 58,
-    "passed": 47,
-    "failed": 11,
+    "passed": 58,
+    "failed": 0,
     "byOutcome": {
       "pass-html-stub": 45,
-      "fail-no-signal": 11,
+      "pass-robots-disallow": 1,
+      "pass-html-meta": 10,
       "pass-html-canonical": 1,
       "pass-header-301": 1
     }
@@ -32,7 +33,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "28a193d5-a07a-4e34-b3d4-37fef04aebfd",
         "server": "cloudflare"
       }
     },
@@ -54,7 +55,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "28a193d5-a07a-4e34-b3d4-37fef04aebfd",
         "server": "cloudflare"
       }
     },
@@ -76,7 +77,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "28a193d5-a07a-4e34-b3d4-37fef04aebfd",
         "server": "cloudflare"
       }
     },
@@ -98,7 +99,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "28a193d5-a07a-4e34-b3d4-37fef04aebfd",
         "server": "cloudflare"
       }
     },
@@ -120,7 +121,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "28a193d5-a07a-4e34-b3d4-37fef04aebfd",
         "server": "cloudflare"
       }
     },
@@ -142,7 +143,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "28a193d5-a07a-4e34-b3d4-37fef04aebfd",
         "server": "cloudflare"
       }
     },
@@ -164,7 +165,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "28a193d5-a07a-4e34-b3d4-37fef04aebfd",
         "server": "cloudflare"
       }
     },
@@ -186,7 +187,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "28a193d5-a07a-4e34-b3d4-37fef04aebfd",
         "server": "cloudflare"
       }
     },
@@ -208,7 +209,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "28a193d5-a07a-4e34-b3d4-37fef04aebfd",
         "server": "cloudflare"
       }
     },
@@ -230,7 +231,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "28a193d5-a07a-4e34-b3d4-37fef04aebfd",
         "server": "cloudflare"
       }
     },
@@ -252,7 +253,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "28a193d5-a07a-4e34-b3d4-37fef04aebfd",
         "server": "cloudflare"
       }
     },
@@ -274,7 +275,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "28a193d5-a07a-4e34-b3d4-37fef04aebfd",
         "server": "cloudflare"
       }
     },
@@ -296,7 +297,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "28a193d5-a07a-4e34-b3d4-37fef04aebfd",
         "server": "cloudflare"
       }
     },
@@ -318,7 +319,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "28a193d5-a07a-4e34-b3d4-37fef04aebfd",
         "server": "cloudflare"
       }
     },
@@ -340,7 +341,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "28a193d5-a07a-4e34-b3d4-37fef04aebfd",
         "server": "cloudflare"
       }
     },
@@ -362,7 +363,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "28a193d5-a07a-4e34-b3d4-37fef04aebfd",
         "server": "cloudflare"
       }
     },
@@ -384,7 +385,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "28a193d5-a07a-4e34-b3d4-37fef04aebfd",
         "server": "cloudflare"
       }
     },
@@ -406,7 +407,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "28a193d5-a07a-4e34-b3d4-37fef04aebfd",
         "server": "cloudflare"
       }
     },
@@ -428,7 +429,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "28a193d5-a07a-4e34-b3d4-37fef04aebfd",
         "server": "cloudflare"
       }
     },
@@ -450,7 +451,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "28a193d5-a07a-4e34-b3d4-37fef04aebfd",
         "server": "cloudflare"
       }
     },
@@ -472,7 +473,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "28a193d5-a07a-4e34-b3d4-37fef04aebfd",
         "server": "cloudflare"
       }
     },
@@ -494,7 +495,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "28a193d5-a07a-4e34-b3d4-37fef04aebfd",
         "server": "cloudflare"
       }
     },
@@ -516,7 +517,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "28a193d5-a07a-4e34-b3d4-37fef04aebfd",
         "server": "cloudflare"
       }
     },
@@ -538,7 +539,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "28a193d5-a07a-4e34-b3d4-37fef04aebfd",
         "server": "cloudflare"
       }
     },
@@ -560,7 +561,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "28a193d5-a07a-4e34-b3d4-37fef04aebfd",
         "server": "cloudflare"
       }
     },
@@ -582,7 +583,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "28a193d5-a07a-4e34-b3d4-37fef04aebfd",
         "server": "cloudflare"
       }
     },
@@ -604,7 +605,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "28a193d5-a07a-4e34-b3d4-37fef04aebfd",
         "server": "cloudflare"
       }
     },
@@ -626,7 +627,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "28a193d5-a07a-4e34-b3d4-37fef04aebfd",
         "server": "cloudflare"
       }
     },
@@ -648,7 +649,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "28a193d5-a07a-4e34-b3d4-37fef04aebfd",
         "server": "cloudflare"
       }
     },
@@ -670,7 +671,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "28a193d5-a07a-4e34-b3d4-37fef04aebfd",
         "server": "cloudflare"
       }
     },
@@ -692,7 +693,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "28a193d5-a07a-4e34-b3d4-37fef04aebfd",
         "server": "cloudflare"
       }
     },
@@ -714,7 +715,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "28a193d5-a07a-4e34-b3d4-37fef04aebfd",
         "server": "cloudflare"
       }
     },
@@ -736,7 +737,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "28a193d5-a07a-4e34-b3d4-37fef04aebfd",
         "server": "cloudflare"
       }
     },
@@ -758,7 +759,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "28a193d5-a07a-4e34-b3d4-37fef04aebfd",
         "server": "cloudflare"
       }
     },
@@ -780,7 +781,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "28a193d5-a07a-4e34-b3d4-37fef04aebfd",
         "server": "cloudflare"
       }
     },
@@ -802,7 +803,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "28a193d5-a07a-4e34-b3d4-37fef04aebfd",
         "server": "cloudflare"
       }
     },
@@ -824,7 +825,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "28a193d5-a07a-4e34-b3d4-37fef04aebfd",
         "server": "cloudflare"
       }
     },
@@ -846,7 +847,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "28a193d5-a07a-4e34-b3d4-37fef04aebfd",
         "server": "cloudflare"
       }
     },
@@ -868,7 +869,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "28a193d5-a07a-4e34-b3d4-37fef04aebfd",
         "server": "cloudflare"
       }
     },
@@ -890,7 +891,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "28a193d5-a07a-4e34-b3d4-37fef04aebfd",
         "server": "cloudflare"
       }
     },
@@ -912,7 +913,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "28a193d5-a07a-4e34-b3d4-37fef04aebfd",
         "server": "cloudflare"
       }
     },
@@ -934,7 +935,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "28a193d5-a07a-4e34-b3d4-37fef04aebfd",
         "server": "cloudflare"
       }
     },
@@ -956,7 +957,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "28a193d5-a07a-4e34-b3d4-37fef04aebfd",
         "server": "cloudflare"
       }
     },
@@ -978,7 +979,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "28a193d5-a07a-4e34-b3d4-37fef04aebfd",
         "server": "cloudflare"
       }
     },
@@ -1000,7 +1001,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "28a193d5-a07a-4e34-b3d4-37fef04aebfd",
         "server": "cloudflare"
       }
     },
@@ -1008,8 +1009,8 @@
       "type": "signup-noindex",
       "url": "https://edooqoo.com/signup?exerciseType=definition-match&topic=weather",
       "expected": "noindex, nofollow (header or meta)",
-      "outcome": "fail-no-signal",
-      "pass": false,
+      "outcome": "pass-robots-disallow",
+      "pass": true,
       "signals": {
         "robots": "",
         "canonical": "https://edooqoo.com/",
@@ -1022,7 +1023,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "no-cache, must-revalidate, max-age=0",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "28a193d5-a07a-4e34-b3d4-37fef04aebfd",
         "server": "cloudflare"
       }
     },
@@ -1030,11 +1031,11 @@
       "type": "public-noindex-follow",
       "url": "https://edooqoo.com/english-for/cabin-crew",
       "expected": "noindex, follow (header or meta)",
-      "outcome": "fail-no-signal",
-      "pass": false,
+      "outcome": "pass-html-meta",
+      "pass": true,
       "signals": {
-        "robots": "",
-        "canonical": "https://edooqoo.com/",
+        "robots": "noindex,follow",
+        "canonical": "",
         "refresh": ""
       },
       "ok": true,
@@ -1044,7 +1045,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "no-cache, must-revalidate, max-age=0",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "28a193d5-a07a-4e34-b3d4-37fef04aebfd",
         "server": "cloudflare"
       }
     },
@@ -1052,11 +1053,11 @@
       "type": "public-noindex-follow",
       "url": "https://edooqoo.com/english-for/call-center-agents",
       "expected": "noindex, follow (header or meta)",
-      "outcome": "fail-no-signal",
-      "pass": false,
+      "outcome": "pass-html-meta",
+      "pass": true,
       "signals": {
-        "robots": "",
-        "canonical": "https://edooqoo.com/",
+        "robots": "noindex,follow",
+        "canonical": "",
         "refresh": ""
       },
       "ok": true,
@@ -1066,7 +1067,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "no-cache, must-revalidate, max-age=0",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "28a193d5-a07a-4e34-b3d4-37fef04aebfd",
         "server": "cloudflare"
       }
     },
@@ -1074,11 +1075,11 @@
       "type": "public-noindex-follow",
       "url": "https://edooqoo.com/english-for/chefs",
       "expected": "noindex, follow (header or meta)",
-      "outcome": "fail-no-signal",
-      "pass": false,
+      "outcome": "pass-html-meta",
+      "pass": true,
       "signals": {
-        "robots": "",
-        "canonical": "https://edooqoo.com/",
+        "robots": "noindex,follow",
+        "canonical": "",
         "refresh": ""
       },
       "ok": true,
@@ -1088,7 +1089,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "no-cache, must-revalidate, max-age=0",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "28a193d5-a07a-4e34-b3d4-37fef04aebfd",
         "server": "cloudflare"
       }
     },
@@ -1096,11 +1097,11 @@
       "type": "public-noindex-follow",
       "url": "https://edooqoo.com/english-for/customer-service",
       "expected": "noindex, follow (header or meta)",
-      "outcome": "fail-no-signal",
-      "pass": false,
+      "outcome": "pass-html-meta",
+      "pass": true,
       "signals": {
-        "robots": "",
-        "canonical": "https://edooqoo.com/",
+        "robots": "noindex,follow",
+        "canonical": "",
         "refresh": ""
       },
       "ok": true,
@@ -1110,7 +1111,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "no-cache, must-revalidate, max-age=0",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "28a193d5-a07a-4e34-b3d4-37fef04aebfd",
         "server": "cloudflare"
       }
     },
@@ -1118,11 +1119,11 @@
       "type": "public-noindex-follow",
       "url": "https://edooqoo.com/english-for/doctors",
       "expected": "noindex, follow (header or meta)",
-      "outcome": "fail-no-signal",
-      "pass": false,
+      "outcome": "pass-html-meta",
+      "pass": true,
       "signals": {
-        "robots": "",
-        "canonical": "https://edooqoo.com/",
+        "robots": "noindex,follow",
+        "canonical": "",
         "refresh": ""
       },
       "ok": true,
@@ -1132,7 +1133,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "no-cache, must-revalidate, max-age=0",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "28a193d5-a07a-4e34-b3d4-37fef04aebfd",
         "server": "cloudflare"
       }
     },
@@ -1140,11 +1141,11 @@
       "type": "public-noindex-follow",
       "url": "https://edooqoo.com/english-for/financial-advisors",
       "expected": "noindex, follow (header or meta)",
-      "outcome": "fail-no-signal",
-      "pass": false,
+      "outcome": "pass-html-meta",
+      "pass": true,
       "signals": {
-        "robots": "",
-        "canonical": "https://edooqoo.com/",
+        "robots": "noindex,follow",
+        "canonical": "",
         "refresh": ""
       },
       "ok": true,
@@ -1154,7 +1155,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "no-cache, must-revalidate, max-age=0",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "28a193d5-a07a-4e34-b3d4-37fef04aebfd",
         "server": "cloudflare"
       }
     },
@@ -1162,11 +1163,11 @@
       "type": "public-noindex-follow",
       "url": "https://edooqoo.com/english-for/hotel-staff",
       "expected": "noindex, follow (header or meta)",
-      "outcome": "fail-no-signal",
-      "pass": false,
+      "outcome": "pass-html-meta",
+      "pass": true,
       "signals": {
-        "robots": "",
-        "canonical": "https://edooqoo.com/",
+        "robots": "noindex,follow",
+        "canonical": "",
         "refresh": ""
       },
       "ok": true,
@@ -1176,7 +1177,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "no-cache, must-revalidate, max-age=0",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "28a193d5-a07a-4e34-b3d4-37fef04aebfd",
         "server": "cloudflare"
       }
     },
@@ -1184,11 +1185,11 @@
       "type": "public-noindex-follow",
       "url": "https://edooqoo.com/english-for/nurses",
       "expected": "noindex, follow (header or meta)",
-      "outcome": "fail-no-signal",
-      "pass": false,
+      "outcome": "pass-html-meta",
+      "pass": true,
       "signals": {
-        "robots": "",
-        "canonical": "https://edooqoo.com/",
+        "robots": "noindex,follow",
+        "canonical": "",
         "refresh": ""
       },
       "ok": true,
@@ -1198,7 +1199,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "no-cache, must-revalidate, max-age=0",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "28a193d5-a07a-4e34-b3d4-37fef04aebfd",
         "server": "cloudflare"
       }
     },
@@ -1206,11 +1207,11 @@
       "type": "public-noindex-follow",
       "url": "https://edooqoo.com/english-for/real-estate-agents",
       "expected": "noindex, follow (header or meta)",
-      "outcome": "fail-no-signal",
-      "pass": false,
+      "outcome": "pass-html-meta",
+      "pass": true,
       "signals": {
-        "robots": "",
-        "canonical": "https://edooqoo.com/",
+        "robots": "noindex,follow",
+        "canonical": "",
         "refresh": ""
       },
       "ok": true,
@@ -1220,7 +1221,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "no-cache, must-revalidate, max-age=0",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "28a193d5-a07a-4e34-b3d4-37fef04aebfd",
         "server": "cloudflare"
       }
     },
@@ -1228,11 +1229,11 @@
       "type": "public-noindex-follow",
       "url": "https://edooqoo.com/english-for/retail-staff",
       "expected": "noindex, follow (header or meta)",
-      "outcome": "fail-no-signal",
-      "pass": false,
+      "outcome": "pass-html-meta",
+      "pass": true,
       "signals": {
-        "robots": "",
-        "canonical": "https://edooqoo.com/",
+        "robots": "noindex,follow",
+        "canonical": "",
         "refresh": ""
       },
       "ok": true,
@@ -1242,7 +1243,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "no-cache, must-revalidate, max-age=0",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "28a193d5-a07a-4e34-b3d4-37fef04aebfd",
         "server": "cloudflare"
       }
     },
@@ -1264,7 +1265,7 @@
         "xRobotsTag": "",
         "contentType": "text/html; charset=utf-8",
         "cacheControl": "no-cache, must-revalidate, max-age=0",
-        "deploymentId": "bc387b65-c8eb-4b1d-a27e-93844601f07c",
+        "deploymentId": "28a193d5-a07a-4e34-b3d4-37fef04aebfd",
         "server": "cloudflare"
       }
     },

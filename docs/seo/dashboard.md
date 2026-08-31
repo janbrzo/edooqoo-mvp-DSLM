@@ -1,18 +1,18 @@
 # SEO / GSC / AI Search Dashboard
 
-Generated: 2026-08-24T06:48:58.161Z
+Generated: 2026-08-31T13:43:12.115Z
 
 ## Current Health
 
 | Signal | Current | Target | Notes |
 |---|---:|---:|---|
-| Live routing: no crawl signal | 11 | 0 | docs/seo/live-routing.generated.md |
+| Live routing: no crawl signal | 0 | 0 | docs/seo/live-routing.generated.md |
 | Sitemap integrity issues | 0 | 0 | 552 URLs checked |
 | GSC indexed rows | 452 | rising for strategic URLs | docs/seo/gsc-coverage-analysis.generated.md |
 | GSC discovered not indexed | 1000 | falling or intentional noindex |  |
 | GSC crawled not indexed | 27 | falling for sitemap URLs |  |
 | GSC 404 | 24 | 0 | Only meaningful after live redirects return 301. |
-| AI mention rate | 0.0% | 20% after 60 days | docs/seo/runs/ai-search/2026-06-24.json |
+| AI mention rate | 0.0% | 20% after 60 days | docs/seo/runs/ai-search/2026-08-31.json |
 | AI avg correctness | not scored | 2.6 after 90 days |  |
 
 ## Routing Truth
@@ -22,18 +22,19 @@ to edooqoo.com. `pass-html-*` is a valid crawl-control signal; only `fail-no-sig
 
 | Outcome | Checks |
 |---|---:|
-| fail-no-signal | 11 |
 | pass-header-301 | 1 |
 | pass-html-canonical | 1 |
+| pass-html-meta | 10 |
 | pass-html-stub | 45 |
+| pass-robots-disallow | 1 |
 
 ## Latest Run Files
 
 | Area | Latest JSON | Status |
 |---|---|---|
 | GSC performance | docs/seo/runs/gsc-performance/baseline-2026-08-16.json | not run |
-| URL inspection sample | docs/seo/runs/url-inspection/2026-06-24.json | skipped |
-| AI search baseline | docs/seo/runs/ai-search/2026-06-24.json | manual-template |
+| URL inspection sample | docs/seo/runs/url-inspection/2026-08-31.json | skipped |
+| AI search baseline | docs/seo/runs/ai-search/2026-08-31.json | manual-template |
 
 ## GSC Performance Highlights
 
