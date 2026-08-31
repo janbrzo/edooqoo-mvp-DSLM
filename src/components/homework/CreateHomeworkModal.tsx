@@ -394,6 +394,7 @@ export function CreateHomeworkModal({
     setSelectedExercises(new Set());
     setDeadline(new Date(Date.now() + 6 * 24 * 60 * 60 * 1000)); // Reset to +6 days
     setSendReminder(true);
+    setNotifyStudent(true);
     setReminderHours("24");
     setSendToTeacher(false);
     setIsGenerating(false);
