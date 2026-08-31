@@ -363,6 +363,15 @@ export function CreateHomeworkModal({
       );
 
       toast.success("Homework assignment created successfully!");
+
+      // P1.6 — automatic notification (opt-out via the "Notify student by email" switch)
+      if (notifyStudent) {
+        if (studentEmail) {
+          await sendHomeworkEmail(homework.id, studentEmail);
+        } else {
+          toast.info("No email saved for this student — enter it below to send the notification.");
+        }
+      }
     } catch (error: any) {
       console.error('Error creating homework:', error);
       toast.error(error.message || "Failed to create homework assignment");
