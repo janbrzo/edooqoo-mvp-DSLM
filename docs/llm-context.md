@@ -1822,3 +1822,17 @@ EDOOQOO SOLUTION:
 TECHNICAL MECHANICS: components MediaSection, ExerciseSection, HomeworkExerciseRenderer, SharedWorksheetContent; lib normalizeExercise; edge function generateWorksheet (batch branch only — generation prompt untouched).
 
 RAG KEYWORDS: worksheet media, mixed media worksheet, image and audio, exercise shape drift, pairs vs items, matching exercise empty, synonyms antonyms rendering, categorize words, batch regeneration media, picture exercise, listening exercise, normalizer, canonical exercise schema, homework renderer, shared worksheet.
+
+## v6.9.106 — P1.6/P1.7 Student access recovery
+
+PROBLEM: Students hit dead ends when reaching their materials — "No teachers found" with no reason, teachers without a `hub_token` were hidden entirely, unassigned shared worksheets showed a hard "Student Not Assigned" wall, and homework notification emails were fully manual.
+
+EDOOQOO SOLUTION:
+- `find-teachers-by-student-email` returns a diagnostic `reason` (`email_not_found` | `hub_not_enabled`) and auto-provisions a missing `calendar_settings.hub_token` (service role) instead of hiding the teacher.
+- `StudentHubLanding` renders reason-specific guidance instead of the blind "No teachers found" line.
+- `SharedWorksheet` allows read-only access for unassigned shares when the verified email matches `share_recipient_email`, shows an explicit read-only notice, and bridges the student to `/my` (verified email persisted via `saveHubEmail`).
+- `CreateHomeworkModal` has a default-on "Notify student by email" switch that triggers the existing `send-homework-email` function right after creation.
+
+TECHNICAL MECHANICS: `supabase/functions/find-teachers-by-student-email/index.ts`, `src/pages/StudentHubLanding.tsx`, `src/pages/SharedWorksheet.tsx`, `src/components/homework/CreateHomeworkModal.tsx`, `src/hooks/useStudentHubData.tsx` (`saveHubEmail`), table `calendar_settings.hub_token`, RPC `verify_worksheet_student_email`.
+
+RAG KEYWORDS: student hub access, hub_token provisioning, share_recipient_email, read-only worksheet access, student email verification, no teachers found, homework notification email, send-homework-email, student hub bridge, diagnostic error messages, calendar_settings, shared worksheet dead end, student onboarding friction, ESL student portal, worksheet sharing access control.

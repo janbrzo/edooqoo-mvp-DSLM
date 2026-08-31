@@ -79,6 +79,8 @@ export function CreateHomeworkModal({
     return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
   });
   const [sendReminder, setSendReminder] = useState<boolean>(true);
+  // P1.6 — notify the student by email right after the homework is created
+  const [notifyStudent, setNotifyStudent] = useState<boolean>(true);
   const [reminderHours, setReminderHours] = useState<string>("24");
   const [sendToTeacher, setSendToTeacher] = useState<boolean>(false);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -361,6 +363,15 @@ export function CreateHomeworkModal({
       );
 
       toast.success("Homework assignment created successfully!");
+
+      // P1.6 — automatic notification (opt-out via the "Notify student by email" switch)
+      if (notifyStudent) {
+        if (studentEmail) {
+          await sendHomeworkEmail(homework.id, studentEmail);
+        } else {
+          toast.info("No email saved for this student — enter it below to send the notification.");
+        }
+      }
     } catch (error: any) {
       console.error('Error creating homework:', error);
       toast.error(error.message || "Failed to create homework assignment");
@@ -383,6 +394,7 @@ export function CreateHomeworkModal({
     setSelectedExercises(new Set());
     setDeadline(new Date(Date.now() + 6 * 24 * 60 * 60 * 1000)); // Reset to +6 days
     setSendReminder(true);
+    setNotifyStudent(true);
     setReminderHours("24");
     setSendToTeacher(false);
     setIsGenerating(false);
@@ -659,6 +671,17 @@ export function CreateHomeworkModal({
                   />
                   <Label htmlFor="send-reminder" className="cursor-pointer text-sm font-normal">
                     Send before deadline
+                  </Label>
+                </div>
+                {/* P1.6 — notify the student right after creation (was fully manual) */}
+                <div className="flex items-center gap-2">
+                  <Switch
+                    id="notify-student"
+                    checked={notifyStudent}
+                    onCheckedChange={setNotifyStudent}
+                  />
+                  <Label htmlFor="notify-student" className="cursor-pointer text-sm font-normal">
+                    Notify student by email
                   </Label>
                 </div>
                 {sendReminder && (

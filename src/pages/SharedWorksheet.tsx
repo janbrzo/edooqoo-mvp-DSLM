@@ -21,6 +21,7 @@ import type { SharedWorksheetData } from '@/types/interactiveSharedWorksheet';
 import type { DrawingTool, DrawingColor, StrokeWidth, DrawingState } from '@/types/drawing';
 import { DRAWING_COLORS, STROKE_WIDTHS } from '@/types/drawing';
 import { useForceLightTheme } from '@/hooks/useForceLightTheme';
+import { saveHubEmail } from '@/hooks/useStudentHubData';
 
 const SharedWorksheet = () => {
   useForceLightTheme();
@@ -38,6 +39,8 @@ const SharedWorksheet = () => {
   const [isStudyMode, setIsStudyMode] = useState(false);
   const [needsStudentAssignment, setNeedsStudentAssignment] = useState(false);
   const [answerVisibility, setAnswerVisibility] = useState<'all' | 'closed' | 'open' | 'hidden'>('all');
+  // P1.6 — one-time bridge banner pointing the student to their Hub
+  const [showHubBridge, setShowHubBridge] = useState(false);
 
   // PROBLEM 5: Check localStorage for remembered email on mount
   useEffect(() => {
@@ -268,6 +271,11 @@ const SharedWorksheet = () => {
       email: email,
       expiresAt: Date.now() + 48 * 60 * 60 * 1000 // 48 hours
     }));
+
+    // P1.6 — bridge to the Student Hub: reuse the verified email there so the
+    // student lands directly on their materials instead of retyping it.
+    saveHubEmail(email);
+    setShowHubBridge(true);
     
     toast({
       title: "Email verified!",
@@ -367,20 +375,25 @@ const SharedWorksheet = () => {
     );
   }
 
-  // Check if worksheet needs assigned student
-  if (needsStudentAssignment && !isTeacher) {
+  // P1.6 — read-only fallback: a worksheet without an assigned student is still
+  // readable by the recipient the teacher shared it with. Only block when there
+  // is no recipient email at all (nobody can prove they should see it).
+  const recipientEmail = (worksheet.share_recipient_email || '').trim().toLowerCase();
+  const isUnassignedShare = needsStudentAssignment && !isTeacher;
+
+  if (isUnassignedShare && !recipientEmail) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="text-center max-w-md mx-auto p-6">
           <AlertCircle className="h-12 w-12 text-amber-500 mx-auto mb-4" />
           <h1 className="text-xl font-semibold text-gray-900 mb-2">
-            Student Not Assigned
+            This worksheet isn't shared with anyone yet
           </h1>
           <p className="text-gray-600 mb-4">
-            This worksheet doesn't have a student assigned yet.
+            Your teacher created the link but hasn't assigned a student or a recipient email to it.
           </p>
           <p className="text-sm text-gray-500">
-            Please ask your teacher to assign a student to this worksheet before you can access it.
+            Ask your teacher to share it again from the worksheet page — the link will then open for you.
           </p>
         </div>
       </div>
@@ -392,10 +405,18 @@ const SharedWorksheet = () => {
 
   // Student needs to verify email (unless they are the teacher)
   const showEmailVerification = !isTeacher && !verifiedEmail;
+
+  // Unassigned share: verify against the recipient email locally (read-only access)
+  const verifyEmailForAccess = async (worksheetId: string, email: string) => {
+    if (isUnassignedShare) {
+      return email.trim().toLowerCase() === recipientEmail;
+    }
+    return interactiveHook.verifyStudentEmail(worksheetId, email);
+  };
   
   // PROBLEM 3: Teacher sees same view but read-only (automatically in study mode)
   // After verification, show Study button (unless in study mode or teacher)
-  const showStudyButton = verifiedEmail && !isStudyMode && !isTeacher;
+  const showStudyButton = verifiedEmail && !isStudyMode && !isTeacher && !isUnassignedShare;
   
   // Teacher is always in "view" mode (like study mode but read-only)
   const effectiveStudyMode = isStudyMode || isTeacher;
@@ -406,11 +427,36 @@ const SharedWorksheet = () => {
       {showEmailVerification && (
         <SharedWorksheetEmailVerification
           onVerified={handleEmailVerified}
-          verifyEmail={interactiveHook.verifyStudentEmail}
+          verifyEmail={verifyEmailForAccess}
           worksheetId={worksheet.id}
           worksheetTitle={worksheetTitle}
           teacherEmail={worksheet.teacher_email}
         />
+      )}
+
+      {/* P1.6 — read-only notice for unassigned shares */}
+      {isUnassignedShare && verifiedEmail && (
+        <div className="max-w-6xl mx-auto px-4 pt-4">
+          <div className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
+            Read-only preview: this worksheet isn't linked to your student profile yet, so your answers
+            won't be saved. Ask your teacher to assign it to you to start working on it.
+          </div>
+        </div>
+      )}
+
+      {/* P1.6 — bridge to the Student Hub */}
+      {showHubBridge && verifiedEmail && !isTeacher && (
+        <div className="max-w-6xl mx-auto px-4 pt-4">
+          <div className="flex items-center justify-between gap-3 rounded-md border border-primary/30 bg-primary/5 p-3 text-sm">
+            <span>See all your materials — homework, flashcards and lessons — in your Student Hub.</span>
+            <div className="flex items-center gap-2 shrink-0">
+              <Button size="sm" onClick={() => navigate('/my')}>Open Student Hub</Button>
+              <Button size="sm" variant="ghost" onClick={() => setShowHubBridge(false)} aria-label="Dismiss Student Hub suggestion">
+                <X className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Big Study Button (after email verified) */}

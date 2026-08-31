@@ -23,6 +23,8 @@ const StudentHubLanding = () => {
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
+  // P1.6 — diagnostic reason returned by the lookup edge function
+  const [notFoundReason, setNotFoundReason] = useState<string | null>(null);
   // Password flow state
   const [pendingTeacher, setPendingTeacher] = useState<Teacher | null>(null);
   const [passwordRequired, setPasswordRequired] = useState(false);
@@ -83,6 +85,7 @@ const StudentHubLanding = () => {
     setSearched(true);
     setPasswordRequired(false);
     setPendingTeacher(null);
+    setNotFoundReason(null);
     try {
       const { data, error } = await supabase.functions.invoke('find-teachers-by-student-email', {
         body: { email: emailToSearch.trim() },
@@ -90,6 +93,7 @@ const StudentHubLanding = () => {
       if (error) throw error;
       const found = data?.teachers || [];
       setTeachers(found);
+      setNotFoundReason(found.length === 0 ? (data?.reason ?? 'email_not_found') : null);
       saveHubEmail(emailToSearch.trim());
 
       // Auto-redirect if single teacher (with password check)
@@ -98,8 +102,8 @@ const StudentHubLanding = () => {
       }
     } catch (err: any) {
       console.error('Error finding teachers:', err);
-      toast.error('Could not find teachers');
       setTeachers([]);
+      setNotFoundReason('lookup_failed');
     } finally {
       setLoading(false);
     }
@@ -189,9 +193,28 @@ const StudentHubLanding = () => {
               )}
 
               {searched && !loading && teachers.length === 0 && (
-                <p className="text-sm text-muted-foreground text-center py-4">
-                  No teachers found for this email. Make sure your teacher has added you as a student.
-                </p>
+                <div className="rounded-md border border-amber-500/40 bg-amber-500/10 p-3 text-sm text-foreground">
+                  {notFoundReason === 'hub_not_enabled' ? (
+                    <>
+                      <p className="font-medium">Your teacher hasn't enabled the Student Hub yet.</p>
+                      <p className="text-muted-foreground mt-1">
+                        Ask your teacher to open their Calendar settings and turn on the Student Hub, then try again.
+                      </p>
+                    </>
+                  ) : notFoundReason === 'lookup_failed' ? (
+                    <>
+                      <p className="font-medium">We couldn't check your email right now.</p>
+                      <p className="text-muted-foreground mt-1">Please try again in a moment.</p>
+                    </>
+                  ) : (
+                    <>
+                      <p className="font-medium">We couldn't find this email in your teacher's student list.</p>
+                      <p className="text-muted-foreground mt-1">
+                        Ask your teacher to check the email address they registered for you — it must match exactly.
+                      </p>
+                    </>
+                  )}
+                </div>
               )}
 
               {teachers.length > 1 && (
