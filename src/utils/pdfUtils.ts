@@ -36,6 +36,11 @@ export const generatePDF = async (elementId: string, filename: string, isTeacher
       teacherTipElements.forEach(el => el.remove());
     }
 
+    // P2.1 — structural safety net: strip any remaining app controls + audio players
+    devLog('[PDF] Export hygiene:', applyPdfExportHygiene(clonedElement));
+
+
+
     // Create a temporary container for the cloned content
     const container = document.createElement('div');
     container.appendChild(clonedElement);
