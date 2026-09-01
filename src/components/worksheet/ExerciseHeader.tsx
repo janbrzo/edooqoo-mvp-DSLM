@@ -128,6 +128,7 @@ const ExerciseHeader: React.FC<ExerciseHeaderProps> = ({
             variant="ghost"
             size="sm"
             onClick={onMarkDone}
+            data-no-pdf="true"
             className={cn(
               "h-8 px-3 gap-1.5 transition-colors ml-2 font-medium rounded-md",
               isMarkedDone 
@@ -142,8 +143,9 @@ const ExerciseHeader: React.FC<ExerciseHeaderProps> = ({
       </div>
     </div>
     <div className="flex items-center gap-1">
-      {/* Exercise management buttons - always visible */}
+      {/* Exercise management buttons - always visible (teacher tools, never exported) */}
       {onMoveUp && (
+
         <Button
           type="button"
           variant="ghost"
