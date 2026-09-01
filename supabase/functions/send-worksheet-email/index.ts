@@ -20,7 +20,11 @@ interface SendWorksheetEmailRequest {
   worksheetId: string;
   studentEmail: string;
   updateShareRecipientEmail?: boolean; // If true, save email to worksheets.share_recipient_email
+  force?: boolean; // Bypass the duplicate-send guard
 }
+
+// P2.3 — duplicate send guard window (ms)
+const DEDUPE_WINDOW_MS = 10 * 60 * 1000;
 
 serve(async (req: Request) => {
   // Handle CORS preflight
@@ -79,7 +83,8 @@ serve(async (req: Request) => {
     }
 
     const supabase = supabaseAdmin;
-    const { worksheetId, studentEmail, updateShareRecipientEmail } = (await req.json()) as SendWorksheetEmailRequest;
+    const { worksheetId, studentEmail, updateShareRecipientEmail, force } =
+      (await req.json()) as SendWorksheetEmailRequest;
 
     console.log(`[send-worksheet-email] Sending worksheet email for ${worksheetId} to ${studentEmail}`);
 
@@ -120,6 +125,26 @@ serve(async (req: Request) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(studentEmail)) {
       throw new Error("Invalid email format");
+    }
+
+    // P2.3 — duplicate send guard: same recipient within the dedupe window
+    const normalizedEmail = studentEmail.toLowerCase();
+    if (!force && worksheet.last_shared_at && worksheet.share_recipient_email === normalizedEmail) {
+      const elapsed = Date.now() - new Date(worksheet.last_shared_at).getTime();
+      if (elapsed >= 0 && elapsed < DEDUPE_WINDOW_MS) {
+        console.log("[send-worksheet-email] Skipped duplicate send", { worksheetId, elapsed });
+        return new Response(
+          JSON.stringify({
+            success: true,
+            sent: false,
+            skipped: true,
+            reason: "duplicate_recent_send",
+            recipient: normalizedEmail,
+            message: "This worksheet was already emailed to this student a few minutes ago.",
+          }),
+          { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } },
+        );
+      }
     }
 
     // Update share_recipient_email if requested
@@ -170,9 +195,21 @@ serve(async (req: Request) => {
 
     console.log("[send-worksheet-email] Email sent successfully:", emailData);
 
+    // P2.3 — record delivery timestamp for the duplicate send guard
+    const { error: stampError } = await supabase
+      .from("worksheets")
+      .update({ last_shared_at: new Date().toISOString() })
+      .eq("id", worksheetId)
+      .eq("teacher_id", user.id);
+    if (stampError) {
+      console.error("[send-worksheet-email] Failed to record last_shared_at:", stampError);
+    }
+
     return new Response(
       JSON.stringify({
         success: true,
+        sent: true,
+        recipient: normalizedEmail,
         emailId: emailData?.id,
         message: "Worksheet email sent successfully",
       }),
