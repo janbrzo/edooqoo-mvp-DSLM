@@ -1,5 +1,7 @@
 import html2pdf from 'html2pdf.js';
 import { devLog, devWarn } from '@/utils/logger';
+import { applyPdfExportHygiene } from '@/lib/worksheet/exportHygiene';
+
 
 export const generatePDF = async (elementId: string, filename: string, isTeacherView = false, title = 'English Worksheet') => {
   try {
