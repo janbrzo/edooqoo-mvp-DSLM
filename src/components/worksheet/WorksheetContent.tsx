@@ -294,7 +294,7 @@ export default function WorksheetContent({
     <div className="worksheet-content mb-8 relative w-full" id="worksheet-content">
       {/* Live Session Connection Status */}
       {viewMode === 'live-session' && (
-        <div className={`mb-4 p-3 rounded-lg flex items-center gap-2 ${isLiveConnected ? 'bg-green-50 border border-green-200' : 'bg-yellow-50 border border-yellow-200'}`}>
+        <div data-no-pdf="true" className={`mb-4 p-3 rounded-lg flex items-center gap-2 ${isLiveConnected ? 'bg-green-50 border border-green-200' : 'bg-yellow-50 border border-yellow-200'}`}>
           <div className={`w-2 h-2 rounded-full ${isLiveConnected ? 'bg-green-500 animate-pulse' : 'bg-yellow-500'}`} />
           <span className="text-sm font-medium">
             {isLiveConnected 

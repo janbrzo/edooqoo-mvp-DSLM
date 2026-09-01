@@ -164,7 +164,7 @@ const FloatingExerciseButtons: React.FC<{
   };
 
   return (
-    <div className="fixed left-4 top-20 z-40 flex flex-col gap-1">
+    <div className="fixed left-4 top-20 z-40 flex flex-col gap-1" data-no-pdf="true">
       {/* Eye button for expand/collapse all */}
       {!hideCollapseControls && (
       <Button
