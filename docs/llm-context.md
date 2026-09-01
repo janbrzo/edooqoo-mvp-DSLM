@@ -1836,3 +1836,20 @@ EDOOQOO SOLUTION:
 TECHNICAL MECHANICS: `supabase/functions/find-teachers-by-student-email/index.ts`, `src/pages/StudentHubLanding.tsx`, `src/pages/SharedWorksheet.tsx`, `src/components/homework/CreateHomeworkModal.tsx`, `src/hooks/useStudentHubData.tsx` (`saveHubEmail`), table `calendar_settings.hub_token`, RPC `verify_worksheet_student_email`.
 
 RAG KEYWORDS: student hub access, hub_token provisioning, share_recipient_email, read-only worksheet access, student email verification, no teachers found, homework notification email, send-homework-email, student hub bridge, diagnostic error messages, calendar_settings, shared worksheet dead end, student onboarding friction, ESL student portal, worksheet sharing access control.
+
+## v6.9.107 — P2.1 Export hygiene + P2.3 Share auto-notify
+
+PROBLEM: Printed/exported worksheets contained application-only chrome (navigation sidebar, regenerate/delete/move controls, live-session banner, media pin/fullscreen controls, nano-skill badges, audio transport sliders), so PDFs looked like screenshots of the app instead of teaching material. Separately, sharing a worksheet required the teacher to copy the link and then remember to send an email manually, and repeated sends produced duplicate student emails.
+
+EDOOQOO SOLUTION:
+- New `src/lib/worksheet/exportHygiene.ts` defines the export contract (`NO_EXPORT` = `data-no-pdf="true"`, `KEEP_IN_EXPORT` = `data-keep-in-export="true"`, `INTERACTIVE_SELECTOR`) plus `stripInteractiveForPdf()`, `replaceAudioWithPrintableLink()` and `applyPdfExportHygiene()`.
+- Both PDF export paths in `src/utils/pdfUtils.ts` run `applyPdfExportHygiene()` on the cloned node after existing teacher-tip handling: remaining app controls are removed structurally and `<audio>` elements are replaced with a printable "Listen: <url>" line.
+- Explicit `data-no-pdf` markers added to teacher tooling: `ExerciseNavSidebar` (sheet trigger, desktop trigger, floating exercise buttons, sidebar root), `ExerciseHeader` (regenerate, mark-done, move up/down, delete — title and duration stay), `MediaSection` (collapse, pin, fullscreen controls — image, attribution, transcript stay), `NanoSkillBadge`, and the live-session connection banner in `WorksheetContent`.
+- Standalone HTML export (`src/utils/htmlExport.ts`) already strips `[data-no-pdf="true"]:not([data-teacher-tip="true"])`, so the new markers apply there too without weakening HTML interactivity.
+- P2.3: `worksheets.last_shared_at timestamptz` added. `send-worksheet-email` accepts `force`, skips a send when the same `share_recipient_email` was notified within 10 minutes (`{success:true, sent:false, skipped:true, reason:"duplicate_recent_send"}`), returns `{sent:true, recipient}` on success and stamps `last_shared_at`.
+- `ShareWorksheetModal` prefills the assigned student email and shows a default-on switch "Email this worksheet to … when I copy the link"; copying the link then sends the notification, with duplicate responses silenced in that automatic path.
+- Out of scope by explicit decision: P2.2 multi-voice TTS (`generate-audio` untouched). Worksheet generation prompt untouched.
+
+TECHNICAL MECHANICS: lib exportHygiene; utils pdfUtils, htmlExport; components ExerciseNavSidebar, ExerciseHeader, MediaSection, NanoSkillBadge, WorksheetContent, ShareWorksheetModal; edge function send-worksheet-email; table public.worksheets (`last_shared_at`, `share_recipient_email`, `share_token`).
+
+RAG KEYWORDS: worksheet pdf export, print hygiene, data-no-pdf, remove app controls from pdf, printable audio link, html2pdf cleanup, standalone html export, share worksheet email, auto notify student, duplicate email guard, last_shared_at, share_recipient_email, teacher print worksheet, export contract, worksheet sharing workflow.
