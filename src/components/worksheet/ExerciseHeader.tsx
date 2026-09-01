@@ -152,6 +152,7 @@ const ExerciseHeader: React.FC<ExerciseHeaderProps> = ({
           size="sm"
           onClick={onMoveUp}
           disabled={!canMoveUp}
+          data-no-pdf="true"
           className="text-white hover:bg-white/20 h-8 w-8 p-0 transition-colors"
           title="Move up"
         >
@@ -165,6 +166,7 @@ const ExerciseHeader: React.FC<ExerciseHeaderProps> = ({
           size="sm"
           onClick={onMoveDown}
           disabled={!canMoveDown}
+          data-no-pdf="true"
           className="text-white hover:bg-white/20 h-8 w-8 p-0 transition-colors"
           title="Move down"
         >
@@ -177,12 +179,14 @@ const ExerciseHeader: React.FC<ExerciseHeaderProps> = ({
           variant="ghost"
           size="sm"
           onClick={onDelete}
+          data-no-pdf="true"
           className="text-red-300 hover:bg-red-500/20 hover:text-red-200 h-8 w-8 p-0 transition-colors"
           title="Delete exercise"
         >
           <Trash2 className="h-4 w-4" />
         </Button>
       )}
+
       <div className="flex items-center bg-white/20 px-3 py-1 rounded-md ml-2">
         <Clock className="h-4 w-4 mr-1" />
         <span className="text-sm">{time} min</span>
