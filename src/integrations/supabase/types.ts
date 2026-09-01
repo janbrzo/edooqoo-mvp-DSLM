@@ -3431,6 +3431,7 @@ export type Database = {
           ip_address: string | null
           is_public: boolean
           last_modified_at: string
+          last_shared_at: string | null
           media_metadata: Json | null
           prompt: string
           public_exercise_types: string[] | null
@@ -3473,6 +3474,7 @@ export type Database = {
           ip_address?: string | null
           is_public?: boolean
           last_modified_at?: string
+          last_shared_at?: string | null
           media_metadata?: Json | null
           prompt: string
           public_exercise_types?: string[] | null
@@ -3515,6 +3517,7 @@ export type Database = {
           ip_address?: string | null
           is_public?: boolean
           last_modified_at?: string
+          last_shared_at?: string | null
           media_metadata?: Json | null
           prompt?: string
           public_exercise_types?: string[] | null

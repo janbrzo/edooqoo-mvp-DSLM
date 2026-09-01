@@ -164,7 +164,7 @@ const FloatingExerciseButtons: React.FC<{
   };
 
   return (
-    <div className="fixed left-4 top-20 z-40 flex flex-col gap-1">
+    <div className="fixed left-4 top-20 z-40 flex flex-col gap-1" data-no-pdf="true">
       {/* Eye button for expand/collapse all */}
       {!hideCollapseControls && (
       <Button
@@ -271,10 +271,12 @@ export const ExerciseNavSidebar: React.FC<ExerciseNavSidebarProps> = (props) => 
             variant="outline"
             size="sm"
             className="fixed top-4 left-4 z-50 shadow-lg"
+            data-no-pdf="true"
           >
             <Menu className="h-4 w-4" />
           </Button>
         </SheetTrigger>
+
         <SheetContent side="left" className="w-80 p-0">
           <SheetHeader className="p-4 pb-0">
             <SheetTitle>Exercise Navigation</SheetTitle>
@@ -294,31 +296,38 @@ export const ExerciseNavSidebar: React.FC<ExerciseNavSidebarProps> = (props) => 
         size="sm"
         onClick={() => setIsOpen(!isOpen)}
         className="fixed top-4 left-4 z-50 shadow-lg bg-background/95 backdrop-blur-sm nav-menu-button"
+        data-no-pdf="true"
       >
         <Menu className="h-4 w-4" />
       </Button>
 
       {/* Floating exercise buttons */}
-      <FloatingExerciseButtons
-        exercises={props.exercises}
-        activeExercise={props.activeExercise}
-        onScrollToExercise={props.onScrollToExercise}
-        onCollapseAll={props.onCollapseAll}
-        onExpandAll={props.onExpandAll}
-        isAllExpanded={props.isAllExpanded}
-        hasGrammar={props.hasGrammar}
-        hasVocabulary={props.hasVocabulary}
-        isGrammarActive={props.isGrammarActive}
-        isVocabularyActive={props.isVocabularyActive}
-        hideCollapseControls={props.hideCollapseControls}
-      />
+      <div data-no-pdf="true">
+        <FloatingExerciseButtons
+          exercises={props.exercises}
+          activeExercise={props.activeExercise}
+          onScrollToExercise={props.onScrollToExercise}
+          onCollapseAll={props.onCollapseAll}
+          onExpandAll={props.onExpandAll}
+          isAllExpanded={props.isAllExpanded}
+          hasGrammar={props.hasGrammar}
+          hasVocabulary={props.hasVocabulary}
+          isGrammarActive={props.isGrammarActive}
+          isVocabularyActive={props.isVocabularyActive}
+          hideCollapseControls={props.hideCollapseControls}
+        />
+      </div>
 
       {/* Floating sidebar */}
       {isOpen && (
-        <div className="fixed left-4 top-16 h-[calc(100vh-5rem)] w-80 z-40 shadow-lg border bg-background/95 backdrop-blur-sm rounded-lg nav-sidebar">
+        <div
+          className="fixed left-4 top-16 h-[calc(100vh-5rem)] w-80 z-40 shadow-lg border bg-background/95 backdrop-blur-sm rounded-lg nav-sidebar"
+          data-no-pdf="true"
+        >
           <ExerciseNavContent {...props} />
         </div>
       )}
+
     </>
   );
 };

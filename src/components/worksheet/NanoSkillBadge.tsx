@@ -100,7 +100,7 @@ const SingleBadge: React.FC<{
   };
 
   return (
-    <span className="inline-flex items-center gap-0.5">
+    <span className="inline-flex items-center gap-0.5" data-no-pdf="true">
       <Badge
         variant="outline"
         className={`text-xs cursor-help ${getBadgeColor(nanoSkill.confidence)}`}

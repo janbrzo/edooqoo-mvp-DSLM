@@ -1,5 +1,7 @@
 import html2pdf from 'html2pdf.js';
 import { devLog, devWarn } from '@/utils/logger';
+import { applyPdfExportHygiene } from '@/lib/worksheet/exportHygiene';
+
 
 export const generatePDF = async (elementId: string, filename: string, isTeacherView = false, title = 'English Worksheet') => {
   try {
@@ -33,6 +35,11 @@ export const generatePDF = async (elementId: string, filename: string, isTeacher
       const teacherTipElements = clonedElement.querySelectorAll('[class*="teacher-tip"], .bg-amber-50');
       teacherTipElements.forEach(el => el.remove());
     }
+
+    // P2.1 — structural safety net: strip any remaining app controls + audio players
+    devLog('[PDF] Export hygiene:', applyPdfExportHygiene(clonedElement));
+
+
 
     // Create a temporary container for the cloned content
     const container = document.createElement('div');
@@ -431,6 +438,10 @@ export async function exportAsHTML(elementId: string, filename: string, viewMode
       const teacherTipElements = clonedElement.querySelectorAll('[class*="teacher-tip"], .bg-amber-50');
       teacherTipElements.forEach(el => el.remove());
     }
+
+    // P2.1 — structural safety net: strip any remaining app controls + audio players
+    devLog('[PDF PRINT] Export hygiene:', applyPdfExportHygiene(clonedElement));
+
 
     // Create a header to show whether it's a student or teacher version
     const versionHeader = docClone.createElement('div');

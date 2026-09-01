@@ -1,0 +1,1 @@
+ALTER TABLE public.worksheets ADD COLUMN IF NOT EXISTS last_shared_at timestamptz;
