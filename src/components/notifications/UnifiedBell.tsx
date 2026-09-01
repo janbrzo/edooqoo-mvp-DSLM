@@ -198,19 +198,23 @@ export function UnifiedBell() {
                       <div className="flex flex-col gap-1">
                         {!alert.is_read && (
                           <button
+                            type="button"
                             onClick={() => markAlertRead(alert.id)}
                             className="p-1 hover:bg-muted rounded"
                             title="Mark read"
+                            aria-label={`Mark notification "${alert.title}" as read`}
                           >
-                            <Check className="h-3 w-3" />
+                            <Check className="h-3 w-3" aria-hidden="true" />
                           </button>
                         )}
                         <button
+                          type="button"
                           onClick={() => dismissAlert(alert.id)}
                           className="p-1 hover:bg-muted rounded"
                           title="Dismiss"
+                          aria-label={`Dismiss notification "${alert.title}"`}
                         >
-                          <XIcon className="h-3 w-3" />
+                          <XIcon className="h-3 w-3" aria-hidden="true" />
                         </button>
                       </div>
                     </div>
