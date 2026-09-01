@@ -439,6 +439,10 @@ export async function exportAsHTML(elementId: string, filename: string, viewMode
       teacherTipElements.forEach(el => el.remove());
     }
 
+    // P2.1 — structural safety net: strip any remaining app controls + audio players
+    devLog('[PDF PRINT] Export hygiene:', applyPdfExportHygiene(clonedElement));
+
+
     // Create a header to show whether it's a student or teacher version
     const versionHeader = docClone.createElement('div');
     versionHeader.style.textAlign = 'center';
