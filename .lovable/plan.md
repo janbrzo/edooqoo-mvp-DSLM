@@ -1,132 +1,163 @@
-# v6.9.108 — Docelowy widok dla zalogowanych: „One Job Per Screen”
+# v6.9.108 — Docelowy widok dla zalogowanych (`/dashboard` + `/student/:id`)
 
-Poziom: duże klocki. Bez szczegółów technicznych, bez kroków pośrednich. Celem jest ustalenie docelowego obrazu interfejsu nauczyciela, żeby kolejne sprinty miały jeden punkt odniesienia.
-
----
-
-## 1. Diagnoza: dlaczego nauczyciel się gubi
-
-Sprawdziłem realną strukturę aplikacji po zalogowaniu:
-
-- `/dashboard` renderuje jednocześnie: pasek 6 statystyk (`CompactStatsBar`), pasek „Next Prep” (`NextPrepStrip`), dwie równorzędne kolumny (lista uczniów z wyszukiwarką i sortowaniem + lista worksheetów z 6 ikonami akcji na kartę), listy homework rozwijane pod worksheetami, banery (`FreeWeekBanner`), `StickyNav` z osobnym generatorem.
-- `/student/:id` ma 7 widocznych zakładek (Overview, DSLM, Worksheets, Homework, Flashcards, Calendar, Tests) plus 4 dalsze sekcje w kodzie (progress, skills, knowledge, events). DSLM ma jeszcze własną, zawsze widoczną podnawigację.
-- Do tego osobne trasy najwyższego poziomu: `/worksheets`, `/calendar`, `/calendar/settings`, `/profile`, `/one-minute-prep`.
-
-**Root cause (jedno zdanie):** interfejs jest zorganizowany wokół *obiektów systemu* (uczniowie, worksheety, homework, flashcards, kalendarz, DSLM), a nie wokół *jednego powtarzalnego rytuału nauczyciela* — „przygotuj następną lekcję dla tego ucznia w minutę” — więc każdy ekran wymaga od użytkownika samodzielnego złożenia tych obiektów w proces.
-
-To nie jest problem nadmiaru funkcji. To problem braku hierarchii: wszystko na ekranie ma tę samą wagę wizualną i tę samą głośność.
+Poziom: duże klocki. Bez szczegółów technicznych, bez kroków pośrednich. Cel: ustalić jeden docelowy obraz interfejsu nauczyciela, do którego będą się odnosić kolejne sprinty. Punkt ciężkości tej wersji: **strona ucznia**.
 
 ---
 
-## 2. Zasady docelowe (przyjęte, nie do dyskusji w implementacji)
+## 1. Co realnie jest dziś na ekranie
 
-1. **One Job Per Screen.** Każdy ekran ma jedno zdanie odpowiedzi na pytanie „co tu robię”. Reszta jest podporządkowana wizualnie.
-2. **Student jest jednostką pracy, nie obiektem w tabeli.** Nauczyciel nigdy nie myśli „worksheety”; myśli „Anna, wtorek 18:00”. Nawigacja globalna ma być studentocentryczna.
-3. **Progressive disclosure zamiast usuwania.** Nic nie kasujemy. Zaawansowane elementy (DSLM, mastery, Tests, statystyki) schodzą o jeden poziom głębiej, dostępne w jednym kliknięciu, ale nie krzyczą na starcie.
-4. **Maksymalnie jedna akcja primary na ekran.** Dziś na dashboardzie konkuruje ich co najmniej pięć.
-5. **Nowy nauczyciel widzi mniej niż doświadczony.** Interfejs odsłania się z użyciem, a nie z instrukcji.
-6. **Liczby tylko wtedy, gdy prowadzą do decyzji.** „Students: 3” obok nagłówka „Students (3)” to szum, nie dashboard.
+### `/dashboard` (531 linii)
+`FreeWeekBanner` → `StickyNav` (z własnym CTA generowania) → `CompactStatsBar` (6 kafli: tokens, this month, all time, students, active homework, upcoming lessons + CTA Student Hub) → `NextPrepStrip` (do 3 kart uczniów) → dwie równorzędne kolumny: lista uczniów z wyszukiwarką i przełącznikiem sortowania oraz lista worksheetów, gdzie każda karta ma rząd ikon (rename, assign, copy, share, delete) plus zwijaną listę homework.
+
+Ocena: **to jest stan „w miarę OK”**. Problemem nie jest liczba bloków, tylko że `CompactStatsBar` i `NextPrepStrip` mówią częściowo to samo co listy poniżej, a żaden element nie jest wyraźnie ważniejszy od innych.
+
+### `/student/:id` (1256 linii) — tu jest właściwy problem
+- **7 widocznych zakładek** w jednym pasku (`grid-cols-7`): Overview, 1 MINUTE, Worksheets, Homework, Flashcards, Calendar, Tests. Poniżej `lg` zamieniają się w **7 nieopisanych ikon obok siebie**.
+- W kodzie żyją jeszcze 4 dodatkowe `TabsContent`: progress, skills, knowledge, events — dostępne, ale bez wejścia w pasku. Nauczyciel nie wie, że istnieją.
+- Sama zakładka **Overview** to już pełny ekran: banner welcome testu, `OneMinutePrepCard`, banner Student Hub, siatka 3 kolumn z kartami (Student Details z edycją i type-to-confirm delete, Worksheets, kolejne panele).
+- **DSLM** (zakładka „1 MINUTE”) to 452 linie i ~30 komponentów podrzędnych: Goals, Pathway, Skills, Profile, Timeline, Macro Timeline, Next Steps, Pacing, Event Log, Behavioral Stats, Attention Dots, własna zawsze widoczna podnawigacja.
+- Nazewnictwo jest niespójne: zakładka nazywa się „1 MINUTE”, funkcja nazywa się DSLM, obietnica produktu nazywa się „1-Minute Prep”, a karta na Overview to `OneMinutePrepCard`. To trzy różne nazwy tej samej rzeczy w jednym widoku.
+
+**Root cause (jedno zdanie):** strona ucznia jest zorganizowana jako **spis modułów systemu** (po jednej zakładce na tabelę w bazie), a nie jako **przebieg pracy nauczyciela** (przygotuj → prowadź → domknij), więc nauczyciel musi sam zbudować sobie proces z siedmiu równorzędnych szuflad — i przy pierwszym kontakcie nie wie, którą otworzyć.
+
+Wniosek dodatkowy: „1 MINUTE” jako druga zakładka jest najgłośniejszym elementem obietnicy produktowej, a prowadzi do najbardziej złożonego widoku w całej aplikacji. To dokładna odwrotność tego, co powinno się stać.
 
 ---
 
-## 3. Docelowa architektura informacji — trzy poziomy
+## 2. Zasady docelowe (przyjęte, nie do renegocjacji w implementacji)
+
+1. **Jedno zadanie na ekran.** Ekran odpowiada jednym zdaniem na „co ja tu robię”.
+2. **Rytuał, nie moduły.** Nawigacja odwzorowuje cykl tygodniowy nauczyciela, nie strukturę danych.
+3. **Progressive disclosure zamiast usuwania.** Nic nie kasujemy — rzeczy zaawansowane schodzą o jeden poziom niżej, zawsze osiągalne w jednym kliknięciu.
+4. **Jedna akcja primary na ekran.**
+5. **Jedna nazwa na jedną rzecz.** „1-Minute Prep” to nazwa rytuału. „Learning model” to nazwa DSLM. „1 MINUTE” jako etykieta zakładki znika.
+6. **Nowy widzi mniej niż doświadczony.** Odsłanianie z użyciem, nie z instrukcji.
+7. **Liczba pojawia się tylko wtedy, gdy prowadzi do decyzji.**
+
+---
+
+## 3. Docelowa architektura informacji
 
 ```text
-POZIOM 1  TODAY            "co robię teraz"        -> /dashboard
-POZIOM 2  STUDENT WORKSPACE "wszystko o tej osobie" -> /student/:id
-POZIOM 3  LIBRARY & SETUP   "archiwum i ustawienia" -> /worksheets, /calendar, /profile
+POZIOM 1  TODAY              "co robię teraz"           /dashboard
+POZIOM 2  STUDENT WORKSPACE  "wszystko o tej osobie"    /student/:id
+POZIOM 3  DEEP VIEWS         "dowód i archiwum"         /student/:id/model, /worksheets, /calendar, /profile
 ```
 
-Cała reszta (homework, flashcards, tests, DSLM, progress, knowledge) przestaje być bytem nawigacyjnym najwyższego rzędu i staje się warstwą wewnątrz Poziomu 2.
+Homework, flashcards, tests, progress, knowledge, events przestają być bytami nawigacyjnymi. Stają się warstwami wewnątrz Poziomu 2.
 
 ---
 
-### Poziom 1 — „Today” (nowy dashboard)
+## 4. `/dashboard` → „Today”
 
-Jedno zadanie: **wskazać nauczycielowi następny ruch.**
+Jedno zadanie: **wskazać następny ruch.** Jedna kolumna, trzy bloki:
 
-Struktura pionowa, jedna kolumna, maksymalnie trzy bloki:
+1. **Next up** — 1–3 karty uczniów sortowane po najbliższej lekcji (fallback: ostatnia aktywność). Karta: imię, kiedy lekcja, jedno zdanie „co ostatnio było trudne”, jeden przycisk **Prepare next lesson**. Jedyny primary CTA na ekranie.
+2. **Needs your attention** — maks. 5 pozycji wymagających reakcji (oddane homework, ukończony welcome test, nowa rezerwacja). Każda z jedną akcją. Puste = blok znika.
+3. **Everything else** — jeden spokojny pas: „All students · All worksheets · Calendar”.
 
-1. **Next up** — 1–3 karty uczniów posortowane po najbliższej lekcji (fallback: ostatnia aktywność). Na karcie: imię, kiedy lekcja, jedno zdanie „co ostatnio było trudne”, jeden przycisk **Prepare next lesson**. To jest jedyny primary CTA na ekranie.
-2. **Needs your attention** — lista zdarzeń wymagających reakcji: oddana praca domowa do sprawdzenia, ukończony welcome test, nieodebrana rezerwacja. Maksymalnie 5 pozycji, każda z jedną akcją. Puste = blok znika.
-3. **Everything else** — jeden zwinięty pas: „All students · All worksheets · Calendar”. Bez liczników poza jednym „X students”.
+Zmiany względem dziś: `CompactStatsBar` przenosi się do `/profile` jako sekcja „Usage” (tokeny zostają w nawigacji, bo są ograniczeniem, nie statystyką). Dwie kolumny stają się jedną. Rząd ikon na karcie worksheetu redukuje się do „Open” + menu `…`. Wyszukiwarka i sortowanie uczniów przenoszą się na `/students` (pełna lista), bo na ekranie startowym z trzema uczniami są szumem.
 
-Znika z pierwszego ekranu: pasek 6 statystyk (przenosimy do `/profile` jako „Usage”), dwukolumnowy layout, wyszukiwarka i sortowanie uczniów, rząd 6 ikon na karcie worksheetu (zostaje „Open” + menu `…`).
-
-Stan pusty (0 uczniów) to jeden ekran z jedną akcją: „Add your first student” + drugorzędne „Try a sample student”.
+Stan pusty: jeden ekran, jedna akcja — „Add your first student”, obok drugorzędne „Try a sample student”.
 
 ---
 
-### Poziom 2 — „Student Workspace” (przebudowa `/student/:id`)
+## 5. `/student/:id` → „Student Workspace” (sedno zmiany)
 
-Jedno zadanie: **przygotować i domknąć lekcję z tą osobą.**
+Jedno zadanie: **przygotować następną lekcję i domknąć poprzednią.**
 
-Zamiast 7 równorzędnych zakładek — **3 zakładki + panel kontekstowy**:
+Zamiast 7 zakładek (+4 ukrytych) — **3 zakładki + stały panel kontekstowy**:
 
 ```text
-[ Prep ]   [ Timeline ]   [ Library ]        + prawy panel: Student snapshot
+┌──────────────────────────────────────────────┬────────────────────┐
+│  Anna Kowalska · B1 · next lesson Tue 18:00  │  STUDENT SNAPSHOT  │
+│  [ Prep ]   [ Timeline ]   [ Library ]       │                    │
+├──────────────────────────────────────────────┤  Level  B1         │
+│                                              │  Goal   job intervw│
+│   ← treść aktywnej zakładki →                │  Deadline  12 Nov  │
+│                                              │  Focus areas       │
+│                                              │   · past simple    │
+│                                              │   · phrasal verbs  │
+│                                              │   · fluency        │
+│                                              │                    │
+│                                              │  [Full learning    │
+│                                              │   model →]         │
+└──────────────────────────────────────────────┴────────────────────┘
 ```
 
-- **Prep** (domyślna) — jedyne miejsce, w którym powstaje lekcja: propozycja tematu z Next Lesson Ideas, przycisk generowania, ostatni worksheet, szybkie „Add note”. To jest ekran, na którym nauczyciel spędza 90% czasu.
-- **Timeline** — chronologia zdarzeń ucznia: lekcje, worksheety, homework, notatki, testy. Zastępuje osobne zakładki Homework, Tests, Events i część DSLM. Jeden strumień zamiast pięciu list.
-- **Library** — materiały ucznia: worksheety, flashcards, przypisane homework. Archiwum, nie miejsce pracy.
-- **Student snapshot** (panel boczny, zawsze widoczny na desktopie, zwijany na mobile) — poziom, cel, deadline, 3 najsłabsze obszary, link „Full learning model” otwierający pełny DSLM jako **osobny widok**, nie zakładkę.
+### Zakładka 1 — **Prep** (domyślna, tu nauczyciel spędza 90% czasu)
+Jedyne miejsce, w którym powstaje lekcja. Zawiera w jednym pionowym ciągu:
+- proponowany temat następnej lekcji (dzisiejszy `OneMinutePrepCard` + Next Lesson Ideas z DSLM, złączone w jedną kartę),
+- jeden przycisk primary **Generate worksheet**,
+- ostatni worksheet z tym uczniem z akcją „Reuse / Continue”,
+- szybkie „Add note” (dzisiejszy Quick Capture),
+- ewentualny banner welcome testu, jeśli profil jest pusty.
 
-DSLM nie znika — przestaje być czymś, co nowy nauczyciel musi zrozumieć w pierwszym tygodniu. Staje się „dowodem pod maską”, do którego wchodzi się świadomie.
+Wszystko inne z dzisiejszego Overview (Student Details, edycja, usuwanie, Student Hub info, meeting link, ustawienia maili) przenosi się do **snapshotu i jego menu `…`**. To są ustawienia, nie praca.
 
----
+### Zakładka 2 — **Timeline**
+Jeden chronologiczny strumień zdarzeń ucznia: lekcje, wygenerowane worksheety, wysłane i oddane homework, notatki nauczyciela, wyniki testów, zmiany mastery. Zastępuje dzisiejsze zakładki Homework, Tests, Calendar (część uczniowska) i Events. Filtr typu zdarzenia jako pigułki nad strumieniem, nie osobne zakładki.
 
-### Poziom 3 — „Library & Setup”
+To jest największa pojedyncza redukcja złożoności: pięć list zamienia się w jedną narrację „co się dzieje z tym uczniem”.
 
-Bez zmian koncepcyjnych: `/worksheets` (globalne archiwum z filtrami), `/calendar`, `/profile` (subskrypcja, tokeny, statystyki użycia, integracje). To są miejsca, do których wchodzi się rzadko i celowo.
+### Zakładka 3 — **Library**
+Materiały tego ucznia: worksheety, flashcards, przypisane homework. Archiwum i ponowne użycie, nie miejsce pracy. Gęstość listy, nie kart.
 
----
+### Panel — **Student snapshot** (zawsze widoczny na desktopie, zwijany na mobile)
+Poziom, cel, deadline, 3 obszary do pracy, link **Full learning model →**. Panel jest jedynym miejscem, gdzie dziś rozproszone dane profilowe żyją razem.
 
-## 4. Warstwa dla nowych — „Guided mode”
+### DSLM → osobny widok „Learning model”
+Cały dzisiejszy `DSLMTab` (Goals, Pathway, Skills, Profile, Timeline, Pacing, Event Log, Behavioral Stats) przenosi się na **osobny, pełnoekranowy widok** wchodzony świadomie z panelu snapshot. Nic nie znika, nic nie traci funkcji. Przestaje być drugą zakładką, którą nowy nauczyciel otwiera z ciekawości i odbija się od ściany.
 
-Nowe konto startuje w trybie uproszczonym, sterowanym jednym flagiem na profilu:
-
-- Widoczne tylko: Next up, Add student, Prepare next lesson.
-- Trzy kroki w nagłówku: **1. Add a student → 2. Prepare a lesson → 3. Send homework**. Pasek znika po domknięciu trzeciego kroku i nie wraca.
-- Po pierwszej wygenerowanej lekcji odsłaniają się Timeline i Library. Po pierwszym homework — Needs your attention.
-- W dowolnym momencie „Show everything” wyłącza tryb na stałe.
-
-To rozwiązuje wprost zgłoszenie nauczycieli: problemem nie jest liczba funkcji, tylko to, że wszystkie pojawiają się w minucie zerowej.
-
----
-
-## 5. Warstwa wizualna
-
-- **Jedna gęstość informacji na ekran.** Dziś dashboard miesza karty, tabele, badge'e, ikony i collapsible. Docelowo: karta = jednostka pracy, lista = archiwum, i nic pomiędzy.
-- **Kolor tylko dla znaczenia.** Primary wyłącznie dla „Prepare next lesson”. Amber = wymaga uwagi. Reszta neutralna (tokeny `muted-foreground`, `border-border`). Koniec z zielonymi outline'ami przy nawigacji.
-- **Typografia zamiast ramek.** Sekcje oddzielane nagłówkiem i odstępem, nie kolejnym `Card`. Zredukuje to postrzeganą złożoność bez usuwania treści.
-- **Ikony zawsze z etykietą** na poziomie 1 i 2. Same ikony dopuszczalne wyłącznie w archiwum (Poziom 3).
-- **Puste stany są treścią**, nie komunikatem błędu: każdy pusty blok mówi, co zrobić, żeby się wypełnił.
+Nazwa „1 MINUTE” w pasku zakładek znika. Obietnica „1-Minute Prep” zostaje wyrażona **działaniem** (zakładka Prep i jeden przycisk), a nie etykietą.
 
 ---
 
-## 6. Jak wygląda sukces (mierzalnie)
+## 6. Warstwa dla nowych — „Guided mode”
 
-| Metryka | Dziś (szacunek ze struktury) | Cel |
+Nowe konto startuje w trybie uproszczonym, sterowanym jedną flagą na profilu:
+
+- Dashboard pokazuje tylko: Next up + Add student.
+- Strona ucznia startuje z **jedną** zakładką Prep; Timeline i Library odsłaniają się po pierwszym wygenerowanym worksheecie.
+- Panel snapshot pokazuje wyłącznie poziom i cel; „Full learning model” pojawia się po pierwszym tygodniu danych — wcześniej i tak jest pusty.
+- Trzy kroki w nagłówku: **1. Add a student → 2. Prepare a lesson → 3. Send homework**. Znikają po domknięciu i nie wracają.
+- „Show everything” wyłącza tryb na stałe, w każdej chwili.
+
+To odpowiada wprost na feedback nauczycieli: problemem nie jest liczba funkcji, tylko to, że wszystkie pojawiają się w minucie zerowej.
+
+---
+
+## 7. Warstwa wizualna
+
+- **Karta = jednostka pracy. Lista = archiwum.** Nic pomiędzy. Dziś Overview miesza oba.
+- **Kolor tylko dla znaczenia.** Primary wyłącznie dla „Prepare / Generate”. Amber = wymaga uwagi. Destructive tylko w menu `…`, nigdy jako widoczna ikona kosza obok tytułu.
+- **Typografia zamiast ramek.** Sekcja to nagłówek plus odstęp, nie kolejny `Card` w `Card`.
+- **Ikony zawsze z etykietą** na Poziomie 1 i 2. Pasek 7 nieopisanych ikon poniżej `lg` znika razem z siedmioma zakładkami.
+- **Puste stany są treścią**: mówią, co zrobić, żeby się wypełniły.
+
+---
+
+## 8. Miara sukcesu
+
+| Metryka | Dziś | Cel |
 |---|---|---|
-| Elementy interaktywne na pierwszym ekranie po zalogowaniu | ~40+ | poniżej 12 |
-| Kliknięcia od logowania do wygenerowanej lekcji | 3–5 | 1–2 |
 | Zakładki na stronie ucznia | 7 widocznych (11 w kodzie) | 3 + panel |
+| Elementy interaktywne na pierwszym ekranie ucznia | ~35 | poniżej 12 |
+| Kliknięcia od logowania do wygenerowanej lekcji | 3–5 | 1–2 |
 | Akcje primary na dashboardzie | ~5 | 1 |
+| Nazwy tej samej funkcji w UI | 3 („1 MINUTE”, DSLM, 1-Minute Prep) | 2 (1-Minute Prep, Learning model) |
 
-Test Marthy dla tego kierunku: nauczyciel z 10-letnim stażem, który nigdy nie widział edooqoo, ma po zalogowaniu wiedzieć bez czytania czegokolwiek, co kliknąć, żeby przygotować jutrzejszą lekcję.
+Test Marthy: nauczycielka z 10-letnim stażem, która nigdy nie widziała edooqoo, po wejściu na stronę ucznia wie bez czytania czegokolwiek, co kliknąć, żeby przygotować jutrzejszą lekcję.
 
 ---
 
-## 7. Kolejność późniejszego wdrażania (tylko orientacyjnie)
+## 9. Orientacyjna kolejność (bez szczegółów, do rozpisania po akceptacji)
 
-1. Poziom 1 — przebudowa dashboardu do „Today”, przeniesienie statystyk do profilu.
-2. Guided mode dla nowych kont.
-3. Poziom 2 — konsolidacja 7 zakładek do 3 + snapshot, DSLM jako osobny widok.
-4. Przejście wizualne (kolor, typografia, puste stany) jako warstwa na wszystkim powyżej.
-
-Szczegóły techniczne, mapowanie komponentów i migracja stanu — dopiero po akceptacji tego kierunku.
+1. Strona ucznia: 7 zakładek → 3 + snapshot, DSLM jako osobny widok. Największy zwrot.
+2. Dashboard → „Today”, statystyki do `/profile`.
+3. Guided mode dla nowych kont.
+4. Przejście wizualne jako warstwa na wszystkim powyżej.
 
 ## Poza zakresem
 
-Silnik generowania worksheetów, logika DSLM, backend, RLS, migracje, SEO, Student Hub (`/my`).
+Silnik generowania worksheetów, logika DSLM (zmieniamy tylko miejsce wejścia, nie działanie), backend, RLS, migracje, SEO, Student Hub (`/my`).
