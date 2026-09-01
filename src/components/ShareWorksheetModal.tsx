@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Switch } from '@/components/ui/switch';
 import { useToast } from '@/hooks/use-toast';
 import { Copy, Share2, ExternalLink, Loader2, Mail, Send } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
@@ -31,6 +32,8 @@ const ShareWorksheetModal = ({
   const [isSendingEmail, setIsSendingEmail] = useState(false);
   const [recipientEmail, setRecipientEmail] = useState(initialStudentEmail || '');
   const [saveEmailForVerification, setSaveEmailForVerification] = useState(true);
+  // P2.3 — auto-notify the assigned student when the teacher copies the link
+  const [autoNotify, setAutoNotify] = useState(true);
   const { toast } = useToast();
   const { refreshProgress } = useOnboardingProgress();
   const { isDemoMode, showDemoBlockedToast } = useDemoContext();
@@ -113,6 +116,10 @@ const ShareWorksheetModal = ({
         description: "Share link has been copied to clipboard",
         className: "bg-green-50 border-green-200"
       });
+      // P2.3 — send the worksheet email automatically when enabled
+      if (autoNotify && recipientEmail) {
+        await sendEmail({ silentDuplicate: true });
+      }
     } catch (error) {
       toast({
         title: "Copy failed",
@@ -126,7 +133,7 @@ const ShareWorksheetModal = ({
     window.open(shareUrl, '_blank');
   };
 
-  const sendEmail = async () => {
+  const sendEmail = async (options?: { silentDuplicate?: boolean }) => {
     if (!recipientEmail) {
       toast({ title: "Email required", description: "Please enter a recipient email address", variant: "destructive" });
       return;
@@ -153,9 +160,19 @@ const ShareWorksheetModal = ({
 
       if (response.error) throw new Error(response.error.message || 'Failed to send email');
 
+      if (response.data?.skipped) {
+        if (!options?.silentDuplicate) {
+          toast({
+            title: "Already sent",
+            description: response.data.message || 'This worksheet was emailed to the student recently.',
+          });
+        }
+        return;
+      }
+
       toast({
         title: "Email sent!",
-        description: `Worksheet link sent to ${recipientEmail}`,
+        description: `Worksheet link sent to ${response.data?.recipient || recipientEmail}`,
         className: "bg-green-50 border-green-200"
       });
     } catch (error) {
@@ -241,6 +258,18 @@ const ShareWorksheetModal = ({
                     />
                   </div>
 
+                  <div className="flex items-center justify-between rounded-md border p-3">
+                    <Label htmlFor="autoNotify" className="text-sm font-normal pr-3">
+                      Email this worksheet to {recipientEmail || 'the student'} when I copy the link
+                    </Label>
+                    <Switch
+                      id="autoNotify"
+                      checked={autoNotify}
+                      onCheckedChange={setAutoNotify}
+                      disabled={!recipientEmail}
+                    />
+                  </div>
+
                   <div className="flex items-center space-x-2">
                     <Checkbox 
                       id="saveEmail" 
@@ -253,7 +282,7 @@ const ShareWorksheetModal = ({
                   </div>
 
                   <Button
-                    onClick={sendEmail}
+                    onClick={() => sendEmail()}
                     disabled={isSendingEmail || !recipientEmail}
                     variant="outline"
                     className="w-full border-worksheet-purple text-worksheet-purple hover:bg-worksheet-purple/5"
