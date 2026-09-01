@@ -101,6 +101,7 @@ export default function MediaSection({
             <Button
               variant="outline"
               size="sm"
+              data-no-pdf="true"
               onClick={() => setIsImageCollapsed(!isImageCollapsed)}
               className="flex items-center gap-2"
             >
@@ -156,7 +157,7 @@ export default function MediaSection({
                     title="Click to expand image"
                   />
                   {onTogglePin && onToggleFullScreen && (
-                    <div className="absolute top-2 right-2 flex flex-col gap-2">
+                    <div className="absolute top-2 right-2 flex flex-col gap-2" data-no-pdf="true">
                       <div
                         className={cn(
                           "absolute -left-32 top-0 bg-worksheet-purple text-white text-xs font-medium px-3 py-1.5 rounded-lg shadow-lg whitespace-nowrap transition-opacity duration-500",
@@ -271,7 +272,7 @@ export default function MediaSection({
               {hasImage ? 'Lesson Audio' : 'Lesson Media'}
             </h2>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2" data-no-pdf="true">
               {onTogglePin && !hasImage && (
                 <div className="flex items-center gap-2 pointer-events-none">
                   <div
