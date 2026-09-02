@@ -8,7 +8,7 @@ Reference: `docs/ux/target-teacher-experience.md` (approved 2026-09-02).
 
 - [ ] Dashboard → Today (v6.9.109) — spec: `docs/ux/dashboard-today-spec.md`
   - [x] Phase 0 — docs + roadmap
-  - [ ] Phase 1 — data hooks (`useNextUpStudents`, `useDashboardAttention`, `useDashboardCounts`) + `formatGoal` lib
+  - [x] Phase 1 — data hooks (`useNextUpStudents`, `useDashboardAttention`, `useDashboardCounts`) + `formatGoal` lib (not yet wired to UI; unit tests in `src/hooks/__tests__/dashboardToday.test.ts`)
   - [ ] Phase 2+3 — dashboard components + `Dashboard.tsx` rewrite
   - [ ] Phase 4 — `/students` (`AllStudentsPage`)
   - [ ] Phase 5 — `/profile` Usage card + `AddStudentDialog` Hub helper text
