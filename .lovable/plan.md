@@ -1,254 +1,437 @@
-# v6.9.109 — `/dashboard` → „Today”: szczegółowy plan wdrożenia
+# v6.9.109 — `/dashboard` → „Today”: pełny plan wdrożenia
 
-Ten plan schodzi dwa poziomy niżej od zaakceptowanej wizji „One Job Per Screen” i dotyczy wyłącznie `/dashboard`. Strona ucznia (`/student/:id`) będzie osobnym planem. Wizja ogólna zostaje zapisana na stałe w repo jako punkt odniesienia (krok 0).
+Plan implementacyjny zaakceptowanego układu. Zawiera kolejność prac, pełne specyfikacje komponentów i hooków, gotowe sygnatury, zapytania, warunki brzegowe, listę usunięć oraz weryfikację. Wszystkie decyzje projektowe są podjęte — implementacja ma być mechaniczna.
 
----
-
-## Krok 0 — utrwalenie wizji (pierwsze zadanie implementacji)
-
-1. Zapisać zaakceptowany plan wizji jako `docs/ux/target-teacher-experience.md` (po angielsku, ta sama treść: diagnoza, 7 zasad, 3 poziomy, Today, Student Workspace, Guided mode, warstwa wizualna, metryki). Każdy kolejny plan UX odwołuje się do tego pliku.
-2. Dodać w `roadmap.md` sekcję „UX North Star” z trzema pozycjami: Dashboard → Today (ten plan), Student Workspace, Guided mode.
+Stan zweryfikowany przed planem: polityki RLS na `calendar_slots`, `homework_assignments`, `student_knowledge_entries`, `homework_notifications`, `calendar_notifications` pozwalają nauczycielowi czytać własne wiersze (`auth.uid() = teacher_id`) — **żadna migracja nie jest potrzebna**. `DemoDataSet` ma już `calendarSlots`, `homework`, `knowledgeEntries`. `onboarding_progress` w `profiles` istnieje i jest obsługiwany przez `useOnboardingProgress`.
 
 ---
 
-## 1. Co dokładnie jest nie tak na obecnym `/dashboard` (zweryfikowane w kodzie)
+## Faza 0 — utrwalenie wizji i roadmapy (30 min)
 
-| Element | Stan | Problem |
-|---|---|---|
-| `CompactStatsBar` | 6 liczników + CTA Student Hub | 4 z 6 liczb powtarzają się niżej lub nie prowadzą do żadnej decyzji; CTA Hub to informacja, nie akcja nauczyciela |
-| `NextPrepStrip` | 3 karty wg `updated_at` | Dobry kierunek, ale sortowanie po „ostatnio edytowany” ≠ „następna lekcja”; przycisk `variant="outline"` nie jest primary; brak informacji „co ostatnio było trudne” |
-| Kolumna „Students” | wyszukiwarka, sortowanie A-Z/Z-A/Recent, `StudentCard` | Każdy `StudentCard` odpala **własne** `useWorksheetHistory` + `useAllWorksheetHomework` → N+1 zapytań; karta ma zielony „View Profile”, zwijane „Recent” i osobny licznik worksheetów |
-| Kolumna „Recent Worksheets” | 5 kart, każda z 5 ikonami akcji + badge + `StudentSelector` + `MediaBadges` + zwijana lista homework | ~12 elementów interaktywnych na kartę; to archiwum udające miejsce pracy |
-| `OnboardingChecklist` | pływająca karta 8 kroków w prawym dolnym rogu, montowana globalnie w `App.tsx` | Konkuruje z `BugReportButton` i `BackgroundPatternSwitcher` o ten sam róg; 8 kroków to instrukcja, nie prowadzenie |
-| Loader | pełnoekranowy spinner „Loading dashboard...” | Niespójne z `PageLoadingState` wdrożonym w v6.9.92 |
-
-**Root cause:** dashboard składa się z pięciu równorzędnych bloków, z których każdy był dodawany jako osobna funkcja, i nie istnieje jedna reguła, która decyduje, co jest ważniejsze od czego.
+1. `docs/ux/target-teacher-experience.md` — angielska wersja zaakceptowanej wizji „One Job Per Screen” (diagnoza, 7 zasad, 3 poziomy: Today / Student Workspace / Deep Views, Guided mode, warstwa wizualna, metryki sukcesu). Nagłówek: `Status: NORTH STAR — approved 2026-09-02`. Kolejne plany UX linkują ten plik.
+2. `docs/ux/dashboard-today-spec.md` — angielska wersja układu z sekcji 2–3 tego planu (ASCII, strefy, reguły). To jest spec, do którego wraca się przy modyfikacjach.
+3. `roadmap.md` — sekcja `## UX North Star`:
+   - `[ ] Dashboard → Today (v6.9.109)` — ten plan
+   - `[ ] Student Workspace (3 tabs + snapshot, DSLM as deep view)`
+   - `[ ] Guided mode beyond dashboard`
 
 ---
 
-## 2. Docelowy układ „Today” — jedna kolumna, trzy strefy
+## Faza 1 — warstwa danych (3 hooki, bez UI)
 
-```text
-┌────────────────────────────────────────────────────────────┐
-│ StickyNav (bez zmian)                                       │
-├────────────────────────────────────────────────────────────┤
-│ FreeWeekBanner (bez zmian, tylko gdy dotyczy)               │
-├────────────────────────────────────────────────────────────┤
-│ Good evening, Jan.                    [+ Add student]       │  ← nagłówek
-│ 3 students · 2 lessons this week                            │
-├────────────────────────────────────────────────────────────┤
-│ NEXT UP                                                     │  ← strefa A
-│ ┌──────────────┐ ┌──────────────┐ ┌──────────────┐          │
-│ │ Anna K.  B1  │ │ Marek W. A2  │ │ Ola N.   B2  │          │
-│ │ Tue 18:00    │ │ Thu 09:30    │ │ no lesson    │          │
-│ │ ↳ struggled  │ │ ↳ struggled  │ │   booked     │          │
-│ │   with past  │ │   with       │ │ ↳ last: ...  │          │
-│ │   simple     │ │   articles   │ │              │          │
-│ │[Prepare next │ │[Prepare next │ │[Prepare next │          │
-│ │  lesson  →]  │ │  lesson  →]  │ │  lesson  →]  │          │
-│ └──────────────┘ └──────────────┘ └──────────────┘          │
-├────────────────────────────────────────────────────────────┤
-│ NEEDS YOUR ATTENTION (2)                                    │  ← strefa B
-│ • Marek submitted homework "Phrasal verbs"   [Review]       │
-│ • Ola finished the Welcome Test              [See results]  │
-├────────────────────────────────────────────────────────────┤
-│ EVERYTHING ELSE                                             │  ← strefa C
-│ All students (3) ›   Worksheets (24) ›   Calendar ›         │
-│ ▸ Recent worksheets (5)      ← domyślnie zwinięte           │
-└────────────────────────────────────────────────────────────┘
-```
+Wspólne reguły dla wszystkich trzech hooków:
+- `@tanstack/react-query`, `staleTime: 60_000`, `refetchOnWindowFocus: false`.
+- `teacherId` z `useAuthUser()`; `enabled: !!teacherId || isDemoMode`.
+- Demo: pierwsza linia `queryFn` to `if (isDemoMode) return deriveFromDemo(demoData)` — zero zapytań do Supabase (reguła pamięci o UUID).
+- Błąd zapytania → `devWarn` + pusta tablica (dashboard nie może się wywrócić przez sekcję pomocniczą).
 
-Maksymalna szerokość treści `max-w-4xl` (dziś `container` bez limitu). Jedna kolumna na każdej szerokości. Jedyny przycisk `variant="default"` na stronie: **Prepare next lesson** (i „Add your first student” w stanie pustym).
+### 1.1 `src/hooks/useNextUpStudents.ts`
 
----
-
-## 3. Specyfikacja stref
-
-### Nagłówek (`DashboardHeader`)
-- Powitanie wg pory dnia (`Good morning / afternoon / evening, {first_name}`; fallback „Teacher”).
-- Podtytuł: `{n} students · {m} lessons this week` — jedyne dwie liczby na ekranie. Gdy `m = 0`: „no lessons booked this week”.
-- Po prawej: `Add student` (`variant="outline"`, `size="sm"`). Otwiera istniejący `AddStudentDialog`.
-- Zachowuje obsługę `?action=add-student` z maila powitalnego (bez zmian).
-
-### Strefa A — `NextUpSection`
-Źródło: nowy hook `useNextUpStudents(students)` (sekcja 5). Zasady kolejności:
-1. Uczniowie z lekcją w najbliższych 7 dniach — rosnąco po dacie/godzinie.
-2. Potem pozostali — malejąco po `updated_at` (dzisiejsza logika `NextPrepStrip`).
-3. Maksymalnie 3 karty. Przy 1–2 uczniach siatka ma odpowiednio 1–2 kolumny, nie puste miejsca.
-
-Karta `NextUpCard`:
-- Wiersz 1: imię (link do `/student/:id`) + `Badge` poziomu.
-- Wiersz 2: termin lekcji `Tue 18:00` (z `calendar_slots`) albo `No lesson booked` w `text-muted-foreground`.
-- Wiersz 3 „Focus”: ostatni wpis `student_knowledge_entries` kategorii `Skill Assessment` z `metadata.skill_subtype ∈ {weakness, mistake, practice}`; format `Struggled with: {title}` (`line-clamp-1`). Fallback: `main_goal` w formie „Goal: …”. Drugi fallback: „No signals yet — start with a worksheet”.
-- Przycisk `Prepare next lesson →`, `variant="default"`, pełna szerokość, `aria-label="Prepare next lesson for {name}"`, nawigacja do `/student/:id` (docelowo zakładka Prep; do czasu przebudowy strony ucznia — `?tab=dslm`, bo tam dziś są Next Lesson Ideas).
-- Brak innych akcji na karcie. Żadnych liczników worksheetów.
-
-### Strefa B — `AttentionSection`
-Źródło: nowy hook `useDashboardAttention()` (sekcja 5). Trzy typy pozycji, każda z dokładnie jedną akcją:
-
-| Typ | Warunek | Tekst | Akcja |
-|---|---|---|---|
-| `homework_to_review` | `homework_assignments.completed_at IS NOT NULL AND reviewed_at IS NULL` | `{student} submitted "{title}"` | `Review` → `/homework/{id}/review` |
-| `welcome_test_done` | `homework_notifications.notification_type = 'welcome_test_completed' AND is_read = false` | `{student} finished the Welcome Test` | `See results` → `/student/{student_id}?tab=tests` |
-| `booking_new` | `calendar_notifications.is_resolved = false` | istniejące `message` | `Open calendar` → `/calendar` |
-
-- Sortowanie: po `created_at` malejąco, limit 5, link „View all in notifications” otwiera istniejący `UnifiedBell` (nie budujemy drugiego inboxu — dzwonek zostaje jedynym pełnym archiwum).
-- Pusta lista → sekcja **nie renderuje się** (żadnego „All caught up” — to szum).
-- Lista, nie karty: `ul` z `divide-y`, ikona typu + tekst + przycisk `variant="ghost" size="sm"` po prawej.
-
-### Strefa C — `EverythingElseSection`
-- Trzy linki-kafle w jednym wierszu (`grid-cols-3`, na mobile `grid-cols-1`): `All students (n)` → `/students` (nowa trasa, sekcja 6), `Worksheets (n)` → `/worksheets`, `Calendar` → `/calendar`. Styl: `border border-border rounded-lg p-3 hover:bg-muted/50`, ikona + etykieta + chevron. Bez `variant="default"`.
-- Pod spodem `Collapsible` „Recent worksheets (5)”, **domyślnie zwinięty**, stan zapamiętany w `localStorage['edooqoo.dashboard.recentOpen']`. W środku uproszczona lista `RecentWorksheetRow`: tytuł (link), badge ucznia, `MediaBadges`, po prawej jeden `DropdownMenu` `…` z pozycjami: Rename, Assign to student, Duplicate, Copy share link, Delete. Wszystkie te akcje istnieją już dziś jako osobne przyciski — przenosimy je 1:1 do menu, reużywając `RenameDialog`, `StudentSelector`, `DuplicateWorksheetButton`, `DeleteWorksheetButton` (te dwa ostatnie mają już warianty; użyć `asChild`/trigger w `DropdownMenuItem` albo wywołać ich handlery). Zwijana lista homework pod worksheetem znika z dashboardu (pozostaje na `/worksheets` i stronie ucznia).
-
-### Stan pusty (0 uczniów)
-Cały ekran pod nagłówkiem zastępuje jeden blok `EmptyDashboard`: ilustracyjna ikona `Users`, nagłówek „Add your first student”, jedno zdanie „Edooqoo builds the learner context once, then every weekly prep starts from it.”, przycisk primary `Add your first student`, pod nim link tekstowy `See a sample student` → `/demo`. Strefy B i C nie renderują się.
-
-### Stan ładowania
-Pełnoekranowy spinner zastępuje `PageLoadingState` (z v6.9.92) z etykietą „Loading your dashboard”. Logika `hasEverLoaded` zostaje.
-
----
-
-## 4. Guided mode na dashboardzie (zakres tego planu — tylko dashboard)
-
-Sygnał: istniejący `onboarding_progress` w `profiles` (żadnej nowej kolumny). `guided = !progress.completed && !progress.dismissed && !progress.steps.generate_worksheet`.
-
-W trybie guided:
-- Strefa C renderuje **tylko** kafel `All students`; „Recent worksheets” i „Worksheets” pojawiają się po pierwszym wygenerowanym worksheecie.
-- Nad strefą A pasek `GuidedStepsBar`: trzy kroki `1 Add a student → 2 Prepare a lesson → 3 Send homework`, każdy z ikoną ✓/○, bieżący podświetlony `text-primary`. Mapowanie na istniejące klucze: `add_student`, `generate_worksheet`, `create_homework` (klucz istnieje w typie jako deprecated — przywracamy go do `ACTIVE_KEYS` tylko dla tego paska; 8-krokowa lista `OnboardingChecklist` pozostaje bez zmian dla tych, którzy ją mają otwartą).
-- Po prawej paska link `Show everything` → ustawia `dismissed: true` przez istniejące `useOnboardingProgress`.
-- Pływający `OnboardingChecklist` **nie renderuje się na `/dashboard`** (warunek na `location.pathname` w `App.tsx`), bo pasek go zastępuje. Na innych trasach bez zmian.
-
----
-
-## 5. Warstwa danych (dokładne zapytania)
-
-Wszystkie hooki: React Query, `staleTime: 60_000`, wczesny `return` w demo (`isDemoMode`) z danymi z `demoData` lub pustą tablicą — zgodnie z regułą pamięci o UUID.
-
-### `useNextUpStudents(students: Student[])` → `NextUpStudent[]`
-Dwa zapytania batchowe, zero N+1:
 ```ts
-// 1. next lesson per student (7 days)
-supabase.from('calendar_slots')
-  .select('student_id, slot_date, start_time')
-  .eq('teacher_id', teacherId).eq('status', 'booked')
-  .in('student_id', ids)
-  .gte('slot_date', today).lte('slot_date', todayPlus7)
-  .order('slot_date').order('start_time');
-// 2. latest weakness signal per student
-supabase.from('student_knowledge_entries')
-  .select('student_id, title, metadata, created_at')
-  .eq('teacher_id', teacherId).in('student_id', ids)
-  .eq('category', 'Skill Assessment').is('deleted_at', null).eq('is_outdated', false)
-  .order('created_at', { ascending: false }).limit(ids.length * 5);
-```
-Grupowanie po `student_id` po stronie klienta (pierwszy pasujący `skill_subtype`). Sortowanie i `slice(0, 3)` w hooku. `queryKey: ['dashboard-next-up', teacherId, ids.join(',')]`.
+import type { Tables } from '@/integrations/supabase/types';
+type Student = Tables<'students'>;
 
-### `useDashboardAttention()` → `AttentionItem[]`
-Trzy zapytania równolegle (`Promise.all`):
+export interface NextUpStudent {
+  id: string;
+  name: string;
+  englishLevel: string | null;
+  mainGoal: string | null;
+  nextLesson: { date: string; time: string } | null; // slot_date 'YYYY-MM-DD', start_time 'HH:MM:SS'
+  focusSignal: string | null;                        // latest weakness/mistake/practice title
+}
+
+export function useNextUpStudents(students: Student[], limit = 3): {
+  items: NextUpStudent[];
+  loading: boolean;
+}
+```
+
+Zapytania (tylko gdy `students.length > 0`; `ids = students.map(s => s.id)`):
+
+```ts
+const today = format(new Date(), 'yyyy-MM-dd');
+const in7 = format(addDays(new Date(), 7), 'yyyy-MM-dd');
+
+const [slotsRes, signalsRes] = await Promise.all([
+  supabase.from('calendar_slots')
+    .select('student_id, slot_date, start_time')
+    .eq('teacher_id', teacherId)
+    .eq('status', 'booked')
+    .in('student_id', ids)
+    .gte('slot_date', today)
+    .lte('slot_date', in7)
+    .order('slot_date', { ascending: true })
+    .order('start_time', { ascending: true }),
+  supabase.from('student_knowledge_entries')
+    .select('student_id, title, metadata, created_at')
+    .eq('teacher_id', teacherId)
+    .in('student_id', ids)
+    .eq('category', 'Skill Assessment')
+    .is('deleted_at', null)
+    .eq('is_outdated', false)
+    .order('created_at', { ascending: false })
+    .limit(Math.max(ids.length * 5, 20)),
+]);
+```
+
+Agregacja po stronie klienta:
+- `nextLessonByStudent`: pierwszy slot na `student_id` (dane już posortowane).
+- `focusByStudent`: pierwszy wpis, którego `metadata.skill_subtype ∈ {'weakness','mistake','practice'}`.
+- Sortowanie: uczniowie z `nextLesson` rosnąco po `date + time`; potem reszta w kolejności wejściowej (`useStudents` już sortuje po `updated_at desc`). `slice(0, limit)`.
+
+Demo: `demoData.calendarSlots` filtrowane po `status === 'booked'` i 7 dniach; `demoData.knowledgeEntries` filtrowane po kategorii i `skill_subtype`. Ta sama funkcja agregująca (`aggregateNextUp(students, slots, signals, limit)` wyeksportowana, testowalna).
+
+`queryKey: ['dashboard-next-up', teacherId, ids.join(','), isDemoMode]`.
+
+### 1.2 `src/hooks/useDashboardAttention.ts`
+
+```ts
+export type AttentionKind = 'homework_to_review' | 'welcome_test_done' | 'booking_new';
+
+export interface AttentionItem {
+  id: string;            // `${kind}:${sourceId}`
+  kind: AttentionKind;
+  text: string;          // English sentence, student name resolved
+  ctaLabel: 'Review' | 'See results' | 'Open calendar';
+  href: string;
+  createdAt: string;
+}
+
+export function useDashboardAttention(students: Student[], limit = 5): {
+  items: AttentionItem[];
+  loading: boolean;
+}
+```
+
+Zapytania równolegle:
+
 ```ts
 supabase.from('homework_assignments')
   .select('id, title, student_id, completed_at')
-  .eq('teacher_id', teacherId).not('completed_at', 'is', null).is('reviewed_at', null)
-  .order('completed_at', { ascending: false }).limit(5);
+  .eq('teacher_id', teacherId)
+  .not('completed_at', 'is', null)
+  .is('reviewed_at', null)
+  .order('completed_at', { ascending: false })
+  .limit(limit);
+
 supabase.from('homework_notifications')
   .select('id, student_id, message, created_at')
-  .eq('teacher_id', teacherId).eq('notification_type', 'welcome_test_completed').eq('is_read', false)
-  .limit(5);
+  .eq('teacher_id', teacherId)
+  .eq('notification_type', 'welcome_test_completed')
+  .eq('is_read', false)
+  .order('created_at', { ascending: false })
+  .limit(limit);
+
 supabase.from('calendar_notifications')
-  .select('id, message, student_name, created_at')
-  .eq('teacher_id', teacherId).eq('is_resolved', false).limit(5);
+  .select('id, message, student_name, slot_id, created_at')
+  .eq('teacher_id', teacherId)
+  .eq('is_resolved', false)
+  .order('created_at', { ascending: false })
+  .limit(limit);
 ```
-Imiona uczniów mapowane z już pobranej listy `students` (bez join). Typ wspólny: `{ id, kind, text, ctaLabel, href, createdAt }`.
 
-### `useDashboardCounts()`
-Zastępuje `useWorksheetStats` + `useUpcomingLessonsCount` na dashboardzie: `students.length` (z `useStudents`), `worksheets` count (`head: true, count: 'exact'`), `lessonsThisWeek` (istniejący `useUpcomingLessonsCount` — reużyty bez zmian).
+Mapowanie:
+- homework → `text: \`${name} submitted "${title}"\``, `href: /homework/${id}/review`, `createdAt: completed_at`. Nazwa z `students.find(s => s.id === student_id)?.name ?? 'A student'`.
+- welcome test → `text: \`${name} finished the Welcome Test\``, `href: /student/${student_id}?tab=tests`.
+- booking → `text: message` (już po angielsku z backendu), `href: /calendar`.
 
-### Co znika z `Dashboard.tsx`
-`useWorksheetStats`, `useAllWorksheetHomework` (dla całej listy), `useTokenSystem` zostaje tylko dla `StickyNav`, stany `studentSearch` / `sortMode` / `selectedTimeFrame`.
+Scalenie, sort `createdAt desc`, `slice(0, limit)`. Demo: `demoData.homework.filter(h => h.completed_at && !h.reviewed_at)`; pozostałe dwa źródła puste.
 
----
+`queryKey: ['dashboard-attention', teacherId, isDemoMode]`.
 
-## 6. Przeniesienia (nic nie ginie)
+### 1.3 `src/hooks/useDashboardCounts.ts`
 
-| Co | Skąd | Dokąd |
-|---|---|---|
-| 6 liczników `CompactStatsBar` | dashboard | `/profile` — nowa karta „Usage” między „Token Usage Details” a „Plan & Billing”; ten sam komponent, prop `variant="profile"` (pionowa lista zamiast pastylek), bez części Hub |
-| Informacja o Student Hub (`edooqoo.com/my`) | `CompactStatsBar` | `AddStudentDialog` (jedno zdanie pod polem e-mail) + `/profile` w karcie „Usage” |
-| Wyszukiwarka + sortowanie uczniów + `StudentCard` | dashboard | nowa trasa `/students` (`AllStudentsPage`), lista tabelaryczna: imię, poziom, cel, ostatnia aktywność, następna lekcja; ta sama logika filtrowania; `StudentCard` upraszczamy do wiersza bez własnych hooków (dane z jednego zapytania strony) |
-| Lista homework pod worksheetami | dashboard | pozostaje na `/worksheets` i na stronie ucznia |
-| `OnboardingChecklist` | pływająca na dashboardzie | `GuidedStepsBar` inline (sekcja 4); na innych trasach bez zmian |
-
-`NavStudentSwitcher` zgodnie z pamięcią **nie** trafia na `/dashboard` — strefa A i kafel „All students” pełnią tę rolę.
-
----
-
-## 7. Struktura plików
-
-```text
-src/pages/Dashboard.tsx                      — przepisany do ~150 linii: hooki + 4 sekcje
-src/pages/AllStudentsPage.tsx                — nowa (/students)
-src/components/dashboard/DashboardHeader.tsx — nowy
-src/components/dashboard/NextUpSection.tsx   — nowy (zastępuje NextPrepStrip)
-src/components/dashboard/NextUpCard.tsx      — nowy
-src/components/dashboard/AttentionSection.tsx— nowy
-src/components/dashboard/EverythingElseSection.tsx — nowy
-src/components/dashboard/RecentWorksheetRow.tsx    — nowy (menu … z 5 akcjami)
-src/components/dashboard/GuidedStepsBar.tsx  — nowy
-src/components/dashboard/EmptyDashboard.tsx  — nowy
-src/components/dashboard/CompactStatsBar.tsx — prop variant, użycie tylko w Profile
-src/hooks/useNextUpStudents.ts               — nowy
-src/hooks/useDashboardAttention.ts           — nowy
-src/hooks/useDashboardCounts.ts              — nowy
-src/App.tsx                                  — trasa /students; OnboardingChecklist ukryty na /dashboard
-src/pages/Profile.tsx                        — karta Usage
-src/data/demoData.ts                         — 2 booked slots + 3 wpisy Skill Assessment + 1 homework do review, żeby /demo pokazywał pełny Today
+```ts
+export function useDashboardCounts(): {
+  worksheetsCount: number;
+  lessonsThisWeek: number;
+  loading: boolean;
+}
 ```
-Usuwane: `NextPrepStrip.tsx`, `WorksheetHomeworkList.tsx` (jeśli po zmianie nie ma innych importów — sprawdzić `rg`).
+- `worksheetsCount`: `supabase.from('worksheets').select('id', { count: 'exact', head: true }).eq('teacher_id', teacherId).is('deleted_at', null)`. Demo: `demoData.worksheets.length`.
+- `lessonsThisWeek`: reużycie `useUpcomingLessonsCount()` (bez zmian; zwraca 0 w błędzie).
+- `studentsCount` nie jest tu — bierzemy `students.length` z `useStudents` w komponencie.
 
 ---
 
-## 8. Warstwa wizualna (konkretne klasy)
+## Faza 2 — komponenty dashboardu
 
-- Kontener: `max-w-4xl mx-auto px-4 py-6 space-y-8`.
-- Nagłówki stref: `text-xs font-semibold uppercase tracking-wider text-muted-foreground` + opcjonalny licznik w nawiasie. Bez ikon w nagłówkach stref.
-- Strefy oddzielane `space-y-8`, nie `Card`. Jedyne `Card` na stronie to `NextUpCard` (`border-border`, `hover:border-primary/40`).
-- Kolor: primary tylko na `Prepare next lesson`; amber (`text-amber-600 dark:text-amber-400`) tylko na ikonach strefy B; destructive tylko wewnątrz menu `…`.
-- Dark mode: wyłącznie tokeny (`bg-card`, `text-foreground`, `text-muted-foreground`, `border-border`). Zero `text-white`, `bg-white`, `text-gray-*`, `text-green-*`.
-- Touch targets: wszystkie przyciski ≥ `min-h-11` na mobile (`sm:min-h-9`).
-- Każdy przycisk ikonowy (`…`) ma `aria-label`; sekcje mają `aria-labelledby` wskazujący nagłówek.
+Wszystkie w `src/components/dashboard/`. Tokeny kolorów wyłącznie semantyczne. Każda sekcja to `<section aria-labelledby={headingId}>` z nagłówkiem `h2` w stylu `text-xs font-semibold uppercase tracking-wider text-muted-foreground`.
+
+### 2.1 `DashboardHeader.tsx`
+
+```ts
+interface Props {
+  firstName: string | null;
+  studentsCount: number;
+  lessonsThisWeek: number;
+  onAddStudent: () => void;
+}
+```
+- Powitanie: `getGreeting(new Date().getHours())` → `Good morning` (<12) / `Good afternoon` (<18) / `Good evening`. Wyjście: `<h1 className="text-2xl font-semibold tracking-tight">Good evening, Jan.</h1>`; fallback `Teacher`.
+- Podtytuł `<p className="text-sm text-muted-foreground">`: `3 students · 2 lessons this week`. Liczba pojedyncza/mnoga przez prosty helper `plural(n, 'student')`. Gdy `lessonsThisWeek === 0`: `3 students · no lessons booked this week`.
+- Prawa strona: `<Button variant="outline" size="sm" onClick={onAddStudent}><UserPlus className="mr-2 h-4 w-4" />Add student</Button>`.
+- Layout: `flex flex-wrap items-start justify-between gap-4`.
+
+### 2.2 `GuidedStepsBar.tsx`
+
+```ts
+interface Props {
+  steps: { key: 'add_student' | 'generate_worksheet' | 'create_homework'; label: string; done: boolean }[];
+  onShowEverything: () => void;
+}
+```
+- Render: `<div className="rounded-lg border border-border bg-muted/30 px-4 py-3 flex flex-wrap items-center gap-x-6 gap-y-2">`.
+- Krok: ikona `CheckCircle2` (done, `text-primary`) lub `Circle` (`text-muted-foreground`), numer + etykieta. Pierwszy niedokończony krok ma `font-medium text-foreground`, reszta `text-muted-foreground`.
+- Etykiety stałe: `1 Add a student`, `2 Prepare a lesson`, `3 Send homework`.
+- Prawa strona: `<Button variant="link" size="sm" className="ml-auto text-xs" onClick={onShowEverything}>Show everything</Button>`.
+- `role="list"`, każdy krok `role="listitem"`, ikony `aria-hidden`.
+
+### 2.3 `NextUpSection.tsx` + `NextUpCard.tsx`
+
+```ts
+// NextUpSection
+interface Props { items: NextUpStudent[]; loading: boolean; }
+// NextUpCard
+interface Props { item: NextUpStudent; }
+```
+- Siatka: `grid gap-3` + `sm:grid-cols-${min(items.length, 2)} lg:grid-cols-${min(items.length, 3)}` — użyć mapy klas (`{1:'', 2:'sm:grid-cols-2', 3:'sm:grid-cols-2 lg:grid-cols-3'}`), nie interpolacji, żeby Tailwind je wygenerował.
+- Loading: 3 × `Skeleton` `h-40`.
+- Karta (`Card className="border-border transition-colors hover:border-primary/40"`, `CardContent className="flex h-full flex-col gap-3 p-4"`):
+  1. `<div className="flex items-center justify-between gap-2">` — `<Link to={/student/${id}} className="truncate font-semibold hover:underline">{name}</Link>` + `Badge variant="secondary"` z poziomem (tylko gdy jest).
+  2. Termin: `nextLesson ? formatLesson(nextLesson) : 'No lesson booked'`. `formatLesson` → `EEE HH:mm` (np. `Tue 18:00`), a gdy data to dziś → `Today HH:mm`, jutro → `Tomorrow HH:mm`. Ikona `CalendarClock h-3.5 w-3.5`. Klasa `text-sm text-muted-foreground`.
+  3. Focus (`text-sm line-clamp-2`): 
+     - `focusSignal` → `<span className="text-muted-foreground">Struggled with:</span> {focusSignal}`
+     - inaczej `mainGoal` → `Goal: {formatGoal(mainGoal)}` (przenieść `formatGoal` z `StudentCard` do `src/lib/students/formatGoal.ts`)
+     - inaczej → `No signals yet — start with a worksheet`.
+  4. `<Button className="mt-auto w-full" onClick={() => navigate(\`/student/${id}?tab=dslm\`)} aria-label={\`Prepare next lesson for ${name}\`}>Prepare next lesson<ArrowRight className="ml-2 h-4 w-4" /></Button>` — jedyny `variant="default"`.
+- Uwaga techniczna: `StudentPage` czyta `?tab=` przez `handleTabChange`/`activeTab` — sprawdzić nazwę parametru w kodzie przy implementacji (jeśli strona używa `location.hash` lub innego klucza, dopasować); docelowo po przebudowie strony ucznia link będzie prowadził do zakładki Prep.
+
+### 2.4 `AttentionSection.tsx`
+
+```ts
+interface Props { items: AttentionItem[]; loading: boolean; onOpenInbox: () => void; }
+```
+- `if (!loading && items.length === 0) return null;` — brak sekcji, brak „all caught up”.
+- Nagłówek: `Needs your attention ({items.length})`.
+- `<ul className="divide-y divide-border rounded-lg border border-border">`; wiersz `li className="flex items-center gap-3 px-4 py-3"`:
+  - ikona wg `kind`: `ClipboardCheck` / `GraduationCap` / `CalendarPlus`, `className="h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400"`, `aria-hidden`.
+  - `<span className="min-w-0 flex-1 truncate text-sm">{text}</span>`
+  - `<Button asChild variant="ghost" size="sm"><Link to={href}>{ctaLabel}</Link></Button>`
+- Pod listą: `<button className="text-xs text-muted-foreground hover:text-foreground" onClick={onOpenInbox}>View all in notifications</button>`. `onOpenInbox` dispatchuje `window.dispatchEvent(new CustomEvent('unifiedBell:open'))`; w `UnifiedBell` dodać listener ustawiający `open=true` (wzorzec identyczny z `dslm:openSubsection`).
+
+### 2.5 `EverythingElseSection.tsx` + `RecentWorksheetRow.tsx`
+
+```ts
+interface EverythingElseProps {
+  studentsCount: number;
+  worksheetsCount: number;
+  showWorksheets: boolean;          // false in guided mode before first worksheet
+  recentWorksheets: WorksheetListItem[];
+  students: Student[];
+  onRename: (w) => void;
+  onRefetch: () => void;
+}
+```
+- Kafle: `<nav className="grid grid-cols-1 gap-3 sm:grid-cols-3">`, każdy `<Link className="flex items-center justify-between rounded-lg border border-border p-3 text-sm hover:bg-muted/50">` z ikoną + etykietą + `ChevronRight`. Etykiety: `All students (n)` → `/students`; `Worksheets (n)` → `/worksheets` (ukryty gdy `!showWorksheets`); `Calendar` → `/calendar`.
+- Collapsible „Recent worksheets (5)”:
+  - `open` z `localStorage['edooqoo.dashboard.recentOpen'] === '1'`, domyślnie zwinięte; `onOpenChange` zapisuje.
+  - Trigger: `<Button variant="ghost" size="sm" className="px-0 text-sm text-muted-foreground"><ChevronRight className={cn('mr-1 h-4 w-4 transition-transform', open && 'rotate-90')} />Recent worksheets ({n})</Button>` z `aria-expanded`.
+  - Ukryty gdy `!showWorksheets` lub `recentWorksheets.length === 0`.
+- `RecentWorksheetRow`:
+  ```ts
+  interface Props { worksheet; studentName: string | null; onRename; onRefetch; }
+  ```
+  `<li className="flex items-center gap-3 px-3 py-2">` → `<Link to={/worksheet/${id}} className="min-w-0 flex-1 truncate text-sm font-medium hover:underline">{title}</Link>`, `<Badge variant="outline" className="shrink-0 text-xs">{studentName ?? 'Unassigned'}</Badge>`, `<MediaBadges size="sm" />`, po prawej `DropdownMenu`:
+  - trigger `<Button variant="ghost" size="icon" aria-label={\`Actions for ${title}\`} className="h-8 w-8 min-h-11 min-w-11 sm:min-h-8 sm:min-w-8"><MoreHorizontal /></Button>`
+  - pozycje: `Rename` (→ `onRename(worksheet)` → istniejący `RenameDialog` w `Dashboard`), `Assign to student` (otwiera `StudentSelector` — jeśli komponent wymaga własnego triggera, opakować w `DropdownMenuItem onSelect={e => e.preventDefault()}`), `Duplicate` (wywołanie logiki `DuplicateWorksheetButton` — wyodrębnić handler do `src/services/worksheetService/duplicateService.ts` jeśli jeszcze nie jest eksportowany; jest tam `duplicateService.ts`), `Copy share link` (dzisiejszy handler z `Dashboard.tsx` przeniesiony 1:1), `DropdownMenuSeparator`, `Delete` (`className="text-destructive"`, otwiera istniejący dialog `DeleteWorksheetButton` — użyć jego trybu kontrolowanego lub przenieść `AlertDialog` do wiersza).
+  - W demo: pozycje mutujące wywołują `showDemoBlockedToast` (dzisiejsze zachowanie).
+
+### 2.6 `EmptyDashboard.tsx`
+
+```ts
+interface Props { onAddStudent: () => void; }
+```
+`<section className="rounded-xl border border-dashed border-border px-6 py-16 text-center">` → `Users h-10 w-10 mx-auto text-muted-foreground`, `<h2 className="mt-4 text-xl font-semibold">Add your first student</h2>`, `<p className="mx-auto mt-2 max-w-md text-sm text-muted-foreground">Edooqoo builds the learner context once, then every weekly prep starts from it.</p>`, `<Button className="mt-6" onClick={onAddStudent}><UserPlus .../>Add your first student</Button>`, `<Link to="/demo" className="mt-3 block text-xs text-muted-foreground hover:text-foreground">See a sample student instead</Link>`. W demo (`isDemoMode`) link do `/demo` nie renderuje się.
+
+### 2.7 `CompactStatsBar.tsx` — zmiana na potrzeby Profile
+
+- Nowy prop `variant?: 'bar' | 'list'` (domyślnie `'bar'`, zachowanie bez zmian).
+- `variant="list"`: `<dl className="grid grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-3">`, każdy stat jako `dt` (pełna etykieta `full`) + `dd` (`text-lg font-semibold tabular-nums`). Bez `HubInfo`, bez tooltipów.
+- Komponent przestaje być importowany w `Dashboard.tsx`.
 
 ---
 
-## 9. Ryzyka i decyzje podjęte z góry
+## Faza 3 — `src/pages/Dashboard.tsx` (przepisanie)
 
-| Ryzyko | Decyzja |
-|---|---|
-| Nauczyciele przyzwyczajeni do dwóch kolumn | Zachowujemy wszystkie akcje (menu `…`, `/students`, `/worksheets`); przez 30 dni w strefie C dyskretny link „Looking for the old layout? Everything moved here” |
-| `calendar_slots` ma 2 polityki RLS — batch `.in()` musi działać dla nauczyciela | Sprawdzić przed implementacją zapytaniem read-only; jeśli polityka ogranicza, fallback do sortowania po `updated_at` (dzisiejsze zachowanie) |
-| Demo (`/demo`) używa fałszywych UUID | Wszystkie trzy nowe hooki mają `if (isDemoMode) return demoDerived` na początku `queryFn`; brak zapytań do Supabase w demo |
-| `create_homework` jest deprecated w `useOnboardingProgress` | Wracamy z nim wyłącznie do `GuidedStepsBar`; `ACTIVE_KEYS` w `OnboardingChecklist` bez zmian, żeby nie zmieniać procentu ukończenia u istniejących kont |
-| Usunięcie homework list z dashboardu | Zero utraty funkcji — te same dane na `/worksheets`, stronie ucznia i w strefie B jako „to review” |
+Docelowa struktura (~160 linii):
 
-Silnik generowania worksheetów, DSLM, backend, RLS i migracje — nietknięte. Ten plan nie wymaga żadnej migracji.
+```tsx
+const Dashboard = () => {
+  // auth + redirect (bez zmian)
+  const { user, loading, isRegisteredUser } = useAuthFlow();
+  const { tokenLeft, profile } = useTokenSystem(user?.id);           // tylko dla StickyNav
+  const { profile: userProfile } = useProfile();
+  const { students, loading: studentsLoading } = useStudents();
+  const { worksheets, loading: historyLoading, refetch: refetchWorksheets, deleteWorksheet }
+    = useWorksheetHistory(undefined, true, true);                    // listView, 5 pierwszych
+  const { items: nextUp, loading: nextUpLoading } = useNextUpStudents(students);
+  const { items: attention, loading: attentionLoading } = useDashboardAttention(students);
+  const { worksheetsCount, lessonsThisWeek } = useDashboardCounts();
+  const { progress, dismissOnboarding } = useOnboardingProgress();   // sprawdzić nazwę settera; jeśli brak — dodać `dismiss()`
+  const { isDemoMode, showDemoBlockedToast } = useDemoContext();
+
+  const guided = !isDemoMode && !progress.completed && !progress.dismissed && !progress.steps.generate_worksheet;
+  const showWorksheets = !guided || !!progress.steps.generate_worksheet;
+
+  // ?action=add-student (bez zmian), hasEverLoaded (bez zmian)
+  // rename handler + RenameDialog (bez zmian)
+
+  if (!hasEverLoaded && (...loading)) return <PageLoadingState label="Loading your dashboard" />;
+
+  return (
+    <AuthenticatedPageShell>
+      <FreeWeekBanner />
+      <StickyNav isRegisteredUser tokenLeft={tokenLeft} user={user} subscriptionType={...} onGenerateWorksheet={handleGenerateWorksheet} />
+      <main className="mx-auto max-w-4xl space-y-8 px-4 py-6">
+        <DashboardHeader firstName={userProfile?.first_name ?? null} studentsCount={students.length} lessonsThisWeek={lessonsThisWeek} onAddStudent={() => setAddStudentModalOpen(true)} />
+        {students.length === 0 ? (
+          <EmptyDashboard onAddStudent={() => setAddStudentModalOpen(true)} />
+        ) : (
+          <>
+            {guided && <GuidedStepsBar steps={guidedSteps(progress.steps)} onShowEverything={dismissOnboarding} />}
+            <NextUpSection items={nextUp} loading={nextUpLoading} />
+            <AttentionSection items={attention} loading={attentionLoading} onOpenInbox={openBell} />
+            <EverythingElseSection
+              studentsCount={students.length}
+              worksheetsCount={worksheetsCount}
+              showWorksheets={showWorksheets}
+              recentWorksheets={worksheets.slice(0, 5)}
+              students={students}
+              onRename={(w) => setRenameWorksheetData({ id: w.id, title: formatWorksheetTitle(w) })}
+              onRefetch={refetchWorksheets}
+              onDelete={handleDeleteWorksheet}
+            />
+          </>
+        )}
+      </main>
+      <AddStudentDialog ... /> <RenameDialog ... />
+    </AuthenticatedPageShell>
+  );
+};
+```
+
+Usunięte z pliku: `CompactStatsBar`, `NextPrepStrip`, `StudentCard`, `WorksheetHomeworkList`, `useWorksheetStats`, `useAllWorksheetHomework`, `useUpcomingLessonsCount` (przeniesiony do `useDashboardCounts`), stany `studentSearch`, `sortMode`, `selectedTimeFrame`, cały dwukolumnowy `grid`.
+
+Uwaga: `AuthenticatedPageShell` nie renderuje `<main>` — dashboard sam renderuje jeden `<main>`; sprawdzić, że `App.tsx` nie opakowuje tras w drugi `<main>` (jest `</main>` w `App.tsx:240` — jeśli globalny `<main>` istnieje, użyć `<div>` w Dashboardzie zamiast drugiego `<main>`).
+
+`guidedSteps(steps)`:
+```ts
+[
+  { key: 'add_student',        label: 'Add a student',    done: !!steps.add_student },
+  { key: 'generate_worksheet', label: 'Prepare a lesson', done: !!steps.generate_worksheet },
+  { key: 'create_homework',    label: 'Send homework',    done: !!steps.create_homework },
+]
+```
+`create_homework` pozostaje deprecated w `ACTIVE_KEYS` (procent w `OnboardingChecklist` bez zmian); `checkSteps` w `useOnboardingProgress` musi nadal ustawiać `create_homework` — sprawdzić, czy istnieje detekcja (`homework_assignments` count > 0); jeśli została usunięta, przywrócić jako jedno zapytanie `head: true`.
 
 ---
 
-## 10. Weryfikacja (Playwright na `/demo`, 1280 i 390 px)
+## Faza 4 — nowa trasa `/students` (`src/pages/AllStudentsPage.tsx`)
 
-1. Liczba elementów `button, a, input` w `main` na `/dashboard` ≤ 14 przy 3 uczniach i zwiniętych „Recent worksheets”.
-2. Dokładnie jeden przycisk z klasą wariantu `default` na karcie „Next up” × liczba kart; żaden inny `default` poza stanem pustym.
-3. Karty „Next up” posortowane po dacie lekcji (demo: 2 z lekcją, 1 bez).
-4. Strefa B pokazuje wpis homework do review z działającym linkiem `/homework/:id/review`.
-5. Strefa B nie renderuje się, gdy hooki zwrócą puste tablice (test z pustym `demoData`).
-6. `/students` renderuje listę z wyszukiwarką; `/profile` pokazuje kartę „Usage” z 6 liczbami.
-7. 390 px: `scrollWidth === innerWidth`; brak pływającej karty onboardingu na `/dashboard`.
-8. Konsola: brak ostrzeżeń React; `bunx tsgo --noEmit -p tsconfig.app.json` = 0 błędów.
-9. Guided mode: konto z `onboarding_progress.steps.generate_worksheet=false` widzi `GuidedStepsBar` i tylko kafel „All students”.
+Przejmuje funkcje usunięte z dashboardu bez N+1.
 
-## 11. RAG
+- Dane: `useStudents()` + jedno zapytanie agregujące `useStudentsOverview(ids)`:
+  ```ts
+  supabase.from('worksheets').select('student_id').eq('teacher_id', teacherId).is('deleted_at', null).in('student_id', ids)
+  ```
+  → mapa `worksheetCountByStudent` (liczenie po stronie klienta; przy >1000 worksheetów użyć `count` per uczeń dopiero po kliknięciu — na dziś limit 1000 wystarcza, odnotować w komentarzu). Plus reużycie `useNextUpStudents(students, students.length)` dla następnej lekcji.
+- UI: `StickyNav` (z `NavStudentSwitcher` — trasa ≠ `/dashboard`, więc pamięć na to pozwala), nagłówek `Students (n)` + `Add student`, pole `Input` „Search students…” (`aria-label`), `Select` sortowania: `Recently active` (domyślnie) / `Name A–Z` / `Name Z–A` / `Next lesson`.
+- Lista: `<ul className="divide-y divide-border rounded-lg border border-border">`, wiersz `StudentRow`: imię (link), `Badge` poziomu, cel (`formatGoal`), `Next: Tue 18:00` lub `—`, `{n} worksheets`, po prawej `Button variant="ghost" size="sm"` → `Open`. Bez zwijania, bez własnych hooków w wierszu.
+- Stan pusty i „No students matching …” jak dziś.
+- `PageSeo`: `title="Students — Edooqoo"`, `noindex` (strona zalogowanego).
+- `App.tsx`: `<Route path="/students" element={<AllStudentsPage />} />` (lazy, obok `/worksheets`).
+- `StudentCard.tsx`: po zmianie nieużywany na dashboardzie; sprawdzić `rg StudentCard` — jeśli brak innych importów, usunąć.
 
-`docs/llm-context.md`: wpis v6.9.109 (PROBLEM / EDOOQOO SOLUTION / TECHNICAL MECHANICS / RAG KEYWORDS) obejmujący Today layout, trzy nowe hooki, `/students`, Guided mode na dashboardzie. `public/llms.txt`: aktualizacja opisu dashboardu w sekcji produktu bez zmiany struktury pliku. Nowy plik `docs/ux/target-teacher-experience.md` (krok 0).
+---
+
+## Faza 5 — `/profile`: karta „Usage”
+
+W `src/pages/Profile.tsx` między kartą „Token Usage Details” a „Plan & Billing”:
+```tsx
+<Card>
+  <CardHeader className="pb-3">
+    <CardTitle className="flex items-center gap-2 text-lg"><BarChart3 className="h-5 w-5" />Usage</CardTitle>
+    <CardDescription>Your activity at a glance</CardDescription>
+  </CardHeader>
+  <CardContent>
+    <CompactStatsBar variant="list" tokenLeft={...} thisMonthCount={thisMonthCount} totalWorksheets={profile?.total_worksheets_created ?? 0} studentsCount={students.length} activeHomeworkCount={activeHomework} upcomingLessonsCount={upcoming} />
+    <p className="mt-4 text-xs text-muted-foreground">Student Hub: your students log in with just their email at <a href="https://edooqoo.com/my" ...>edooqoo.com/my</a>.</p>
+  </CardContent>
+</Card>
+```
+Hooki w Profile: `useWorksheetStats` (przenosi się tu z dashboardu), `useStudents`, `useUpcomingLessonsCount`, `activeHomework` — jedno zapytanie `homework_assignments` `count: 'exact', head: true` z `is('completed_at', null)` (zamiast dotychczasowego liczenia z pełnej listy).
+
+`AddStudentDialog.tsx`: pod polem e-mail jedno zdanie `text-xs text-muted-foreground`: „With an email, your student gets access to worksheets, homework and flashcards at edooqoo.com/my — no password needed.” (informacja o Hubie przenosi się tam, gdzie nauczyciel podejmuje decyzję).
+
+---
+
+## Faza 6 — `App.tsx` i `UnifiedBell`
+
+- `OnboardingChecklist`: renderować warunkowo — utworzyć mały wrapper `OnboardingChecklistGate` z `useLocation()`; `if (pathname === '/dashboard') return null; return <OnboardingChecklist />;`. Na innych trasach bez zmian.
+- `UnifiedBell.tsx`: `useEffect` z listenerem `unifiedBell:open` → `setOpen(true)`.
+
+---
+
+## Faza 7 — dane demo (`src/data/demoData.ts`)
+
+Aby `/demo` pokazywał pełny Today:
+- `calendarSlots`: upewnić się, że dla 2 z 3 uczniów istnieje slot `status: 'booked'` z `slot_date` w najbliższych 7 dniach (generować relatywnie do `new Date()`, nie na sztywno).
+- `knowledgeEntries`: dla każdego z 3 uczniów co najmniej 1 wpis `category: 'Skill Assessment'`, `metadata.skill_subtype: 'weakness'`, `title` np. `Past simple vs present perfect`, `Articles a/an/the`, `Linking words in emails`.
+- `homework`: 1 wpis z `completed_at` ustawionym, `reviewed_at: null`, `student_id` pierwszego ucznia, `title: 'Phrasal verbs — follow-up'`.
+- `teacher.onboarding_progress` pozostaje `completed: true` (demo nie pokazuje Guided mode).
+
+---
+
+## Faza 8 — porządki
+
+Usunąć po potwierdzeniu `rg` braku importów: `NextPrepStrip.tsx`, `StudentCard.tsx`, `WorksheetHomeworkList.tsx` (uwaga: `AllWorksheetsPage.tsx` i `WorksheetHomeworkSection.tsx` go importują — **zostaje**, usuwamy tylko import z dashboardu). Zaktualizować `mem://features/dashboard/compact-stats-bar` (użycie w Profile) i dodać `mem://features/dashboard/today-layout`.
+
+---
+
+## Kolejność commitów (każdy zostawia aplikację działającą)
+
+1. Faza 0 (docs + roadmap).
+2. Faza 1 (3 hooki + `formatGoal` lib) — bez użycia w UI; typecheck.
+3. Faza 2 komponenty + Faza 3 Dashboard — jeden commit, bo dashboard bez komponentów nie ma sensu.
+4. Faza 4 `/students`.
+5. Faza 5 Profile + AddStudentDialog.
+6. Faza 6 App/UnifiedBell + Faza 7 demo.
+7. Faza 8 porządki + RAG.
+
+---
+
+## Weryfikacja (Playwright, `/demo`, 1280 i 390 px)
+
+1. `document.querySelectorAll('main button, main a, main input').length ≤ 14` przy 3 uczniach i zwiniętych Recent worksheets.
+2. Liczba przycisków z tekstem `Prepare next lesson` = 3; żaden inny przycisk w `main` nie ma klasy wariantu `default` (sprawdzić przez brak `bg-primary` poza tymi trzema).
+3. Kolejność kart Next up = kolejność dat slotów demo; trzecia karta ma `No lesson booked`.
+4. Sekcja `Needs your attention (1)` zawiera wiersz homework z linkiem `/homework/<id>/review`.
+5. Po podmianie `demoData.homework` na `[]` sekcja B nie istnieje w DOM.
+6. `/students`: wyszukiwarka filtruje; sortowanie `Next lesson` działa. `/profile`: karta Usage z 6 wartościami.
+7. 390 px: `document.documentElement.scrollWidth === window.innerWidth`; brak `.fixed` karty onboardingu na `/dashboard`.
+8. Guided mode: test jednostkowy `guidedSteps()` + render `Dashboard` z mockiem `useOnboardingProgress` (`generate_worksheet: false`) → widoczny `GuidedStepsBar`, brak kafla Worksheets.
+9. Test jednostkowy `aggregateNextUp()` (3 przypadki: z lekcją, bez lekcji, bez sygnału) i mapowania `useDashboardAttention` (3 rodzaje).
+10. `bunx tsgo --noEmit -p tsconfig.app.json` = 0; konsola bez ostrzeżeń React na `/dashboard`.
+
+---
+
+## RAG
+
+- `docs/llm-context.md`: sekcja `## v6.9.109 — Dashboard "Today" layout — PRODUCTION` w formacie PROBLEM / EDOOQOO SOLUTION / TECHNICAL MECHANICS (hooki, komponenty, `/students`, Guided mode, przeniesienie statystyk) / RAG KEYWORDS (15).
+- `public/llms.txt`: aktualizacja jednego zdania opisu dashboardu w sekcji produktu; struktura pliku bez zmian.
+- Nowe: `docs/ux/target-teacher-experience.md`, `docs/ux/dashboard-today-spec.md`.
 
 ## Poza zakresem
 
-Strona ucznia (`/student/:id`), pełny Guided mode poza dashboardem, zmiany `StickyNav`, `UnifiedBell`, `CalendarPage`, silnik worksheetów.
+Strona ucznia, `StickyNav`, `CalendarPage`, `UnifiedBell` poza jednym listenerem, silnik worksheetów, DSLM, migracje, RLS, SEO.
