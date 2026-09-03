@@ -141,6 +141,7 @@ export const useOnboardingProgress = () => {
         ideasRes,
         ideasUsedRes,
         calendarRes,
+        homeworkRes,
       ] = await Promise.all([
         supabase.from('students').select('id', { head: true, count: 'exact' }).eq('teacher_id', teacherId),
         supabase
