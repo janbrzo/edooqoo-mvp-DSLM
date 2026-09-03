@@ -10,11 +10,17 @@ interface CompactStatsBarProps {
   studentsCount: number;
   activeHomeworkCount: number;
   upcomingLessonsCount: number;
+  /**
+   * v6.9.109 — `'bar'` (default) is the original dashboard strip.
+   * `'list'` is a plain definition list used by the Profile "Usage" card:
+   * no HubInfo, no tooltips.
+   */
+  variant?: 'bar' | 'list';
 }
 
 const CompactStatsBar: React.FC<CompactStatsBarProps> = ({
   tokenLeft, thisMonthCount, totalWorksheets, studentsCount,
-  activeHomeworkCount, upcomingLessonsCount,
+  activeHomeworkCount, upcomingLessonsCount, variant = 'bar',
 }) => {
   const isMobile = useIsMobile();
 
@@ -63,6 +69,22 @@ const CompactStatsBar: React.FC<CompactStatsBarProps> = ({
       </Tooltip>
     </TooltipProvider>
   );
+
+  if (variant === 'list') {
+    return (
+      <dl className="grid grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-3">
+        {stats.map(({ full, value, Icon }) => (
+          <div key={full} className="min-w-0">
+            <dt className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <Icon className="h-3.5 w-3.5 shrink-0 text-primary" aria-hidden="true" />
+              <span className="truncate">{full}</span>
+            </dt>
+            <dd className="text-lg font-semibold tabular-nums text-foreground">{value}</dd>
+          </div>
+        ))}
+      </dl>
+    );
+  }
 
   if (isMobile) {
     return (
