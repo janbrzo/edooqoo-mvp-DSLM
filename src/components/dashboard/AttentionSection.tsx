@@ -2,7 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { CalendarPlus, ClipboardCheck, GraduationCap } from 'lucide-react';
+import { CalendarPlus, ClipboardCheck, GraduationCap, type LucideIcon } from 'lucide-react';
 import type { AttentionItem, AttentionKind } from '@/hooks/useDashboardAttention';
 
 interface AttentionSectionProps {
@@ -11,7 +11,7 @@ interface AttentionSectionProps {
   onOpenInbox: () => void;
 }
 
-const ICONS: Record<AttentionKind, React.ComponentType<{ className?: string; 'aria-hidden'?: boolean | 'true' }>> = {
+const ICONS: Record<AttentionKind, LucideIcon> = {
   homework_to_review: ClipboardCheck,
   welcome_test_done: GraduationCap,
   booking_new: CalendarPlus,
