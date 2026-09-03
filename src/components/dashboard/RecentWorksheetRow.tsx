@@ -30,6 +30,7 @@ import { DuplicateWorksheetModal } from '@/components/DuplicateWorksheetModal';
 import { hasImage, hasAudio } from '@/utils/worksheetUtils';
 import { useDemoContext } from '@/contexts/DemoContext';
 import { useStudentSelector } from '@/hooks/useStudentSelector';
+import { useAuthUser } from '@/hooks/useAuthUser';
 import type { Tables } from '@/integrations/supabase/types';
 
 type Student = Tables<'students'>;
@@ -69,6 +70,7 @@ export const RecentWorksheetRow: React.FC<RecentWorksheetRowProps> = ({
   onDelete,
 }) => {
   const { isDemoMode, showDemoBlockedToast } = useDemoContext();
+  const { data: user } = useAuthUser();
   const { updateWorksheetStudent } = useStudentSelector();
   const [duplicateOpen, setDuplicateOpen] = useState(false);
   const [deleteOpen, setDeleteOpen] = useState(false);
@@ -89,7 +91,9 @@ export const RecentWorksheetRow: React.FC<RecentWorksheetRowProps> = ({
 
   const handleAssign = async (studentId: string | null) => {
     if (studentId === (worksheet.student_id ?? null)) return;
-    const ok = await updateWorksheetStudent(worksheet.id, studentId, title);
+    if (!user?.id) return;
+    const newName = studentId ? students.find((s) => s.id === studentId)?.name : undefined;
+    const ok = await updateWorksheetStudent(worksheet.id, studentId, user.id, title, newName);
     if (ok) onRefetch();
   };
 
