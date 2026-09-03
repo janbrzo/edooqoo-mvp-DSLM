@@ -179,6 +179,12 @@ export const useOnboardingProgress = () => {
           .from('calendar_slots')
           .select('id', { head: true, count: 'exact' })
           .eq('teacher_id', teacherId),
+        // v6.9.109 — `create_homework` is deprecated in the checklist but the
+        // dashboard GuidedStepsBar ("3 Send homework") still reads it.
+        supabase
+          .from('homework_assignments')
+          .select('id', { head: true, count: 'exact' })
+          .eq('teacher_id', teacherId),
       ]);
 
       const safeCount = (res: any): number => (res?.error ? 0 : res?.count ?? 0);
@@ -192,6 +198,7 @@ export const useOnboardingProgress = () => {
         pick_idea: safeCount(ideasUsedRes) > 0,
         generate_worksheet: safeCount(worksheetsRes) > 0,
         setup_calendar: safeCount(calendarRes) > 0,
+        create_homework: safeCount(homeworkRes) > 0,
       };
 
       // v6.9.33 — Reset window: for 5 minutes after `Reset Onboarding`,
