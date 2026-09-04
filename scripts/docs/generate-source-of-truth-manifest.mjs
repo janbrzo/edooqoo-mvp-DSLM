@@ -318,6 +318,7 @@ function classifyRoute(routePath, element) {
     routePath.startsWith("/profile") ||
     routePath.startsWith("/student/") ||
     routePath === "/worksheets" ||
+    routePath === "/students" ||
     routePath.startsWith("/worksheet/") ||
     routePath.startsWith("/calendar") ||
     routePath.startsWith("/teacher/")
