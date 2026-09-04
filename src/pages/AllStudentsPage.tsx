@@ -13,7 +13,6 @@ import { useTokenSystem } from '@/hooks/useTokenSystem';
 import { useStudents } from '@/hooks/useStudents';
 import { useNextUpStudents, type NextUpStudent } from '@/hooks/useNextUpStudents';
 import { useStudentsOverview } from '@/hooks/useStudentsOverview';
-import { useDemoContext } from '@/contexts/DemoContext';
 import { formatGoal } from '@/lib/students/formatGoal';
 import { formatLesson } from '@/components/dashboard/NextUpCard';
 import { ArrowLeft, Plus, Search, Users } from 'lucide-react';
@@ -58,7 +57,6 @@ const AllStudentsPage = () => {
   const { user, loading, isRegisteredUser } = useAuthFlow();
   const { tokenLeft, profile } = useTokenSystem(user?.id);
   const { students, loading: studentsLoading } = useStudents();
-  const { isDemoMode } = useDemoContext();
   const navigate = useNavigate();
 
   const ids = useMemo(() => students.map((s) => s.id), [students]);
@@ -215,9 +213,7 @@ const AllStudentsPage = () => {
         )}
       </div>
 
-      {!isDemoMode && (
-        <AddStudentDialog triggerButton={false} open={addOpen} onOpenChange={setAddOpen} />
-      )}
+      <AddStudentDialog triggerButton={false} open={addOpen} onOpenChange={setAddOpen} />
     </AuthenticatedPageShell>
   );
 };
