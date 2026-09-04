@@ -35,6 +35,7 @@ const PaymentSuccess = lazy(() => import("./pages/PaymentSuccess"));
 const SharedWorksheet = lazy(() => import("./pages/SharedWorksheet"));
 const TestExercises = lazy(() => import("./pages/TestExercises"));
 const AllWorksheetsPage = lazy(() => import("./pages/AllWorksheetsPage"));
+const AllStudentsPage = lazy(() => import("./pages/AllStudentsPage"));
 const WorksheetPage = lazy(() => import("./pages/WorksheetPage"));
 const WorksheetExpiredPage = lazy(() => import("./pages/WorksheetExpiredPage"));
 const HomeworkPage = lazy(() => import("./pages/HomeworkPage"));
@@ -158,6 +159,7 @@ const App = () => (
               <Route path="/cookie-policy" element={<CookiePolicy />} />
               <Route path="/student/:id" element={<StudentPage />} />
               <Route path="/worksheets" element={<AllWorksheetsPage />} />
+              <Route path="/students" element={<AllStudentsPage />} />
               <Route path="/worksheet/:id" element={<WorksheetPage />} />
               <Route path="/worksheet-expired" element={<WorksheetExpiredPage />} />
               <Route path="/homework/:token" element={<HomeworkPage />} />
