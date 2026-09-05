@@ -33,6 +33,11 @@ const Profile = () => {
   const { currentPlan, plans, canUpgradeTo, getUpgradePrice, getUpgradeTokens, getRecommendedFullTimePlan } = usePlanLogic(profile?.subscription_type);
   const { resetOnboarding } = useOnboardingProgress();
   const { isDemoMode } = useDemoContext();
+  // v6.9.109 Phase 5 — Usage card (stats moved here from the dashboard)
+  const { thisMonthCount } = useWorksheetStats();
+  const { students } = useStudents();
+  const { count: upcomingLessonsCount } = useUpcomingLessonsCount();
+  const { count: activeHomeworkCount } = useActiveHomeworkCount();
   const navigate = useNavigate();
   
   // FIXED: Use ref to track if user manually selected a plan
