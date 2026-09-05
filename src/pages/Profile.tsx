@@ -14,12 +14,17 @@ import { usePlanLogic } from '@/hooks/usePlanLogic';
 import { EditableProfileField } from '@/components/profile/EditableProfileField';
 import { ConfirmDowngradeDialog } from '@/components/ConfirmDowngradeDialog';
 import { toast } from '@/hooks/use-toast';
-import { User, Coins, CreditCard, Calendar, Zap, GraduationCap, Users, Mail } from 'lucide-react';
+import { User, Coins, CreditCard, Calendar, Zap, GraduationCap, Users, Mail, BarChart3 } from 'lucide-react';
 import { FreeWeekBanner } from '@/components/FreeWeekBanner';
 import StickyNav from '@/components/landing/StickyNav';
 import { useOnboardingProgress } from '@/hooks/useOnboardingProgress';
 import { useDemoContext } from '@/contexts/DemoContext';
 import { devLog } from '@/utils/logger';
+import CompactStatsBar from '@/components/dashboard/CompactStatsBar';
+import { useWorksheetStats } from '@/hooks/useWorksheetStats';
+import { useStudents } from '@/hooks/useStudents';
+import { useUpcomingLessonsCount } from '@/hooks/useUpcomingLessonsCount';
+import { useActiveHomeworkCount } from '@/hooks/useActiveHomeworkCount';
 
 const Profile = () => {
   const { user, loading, isRegisteredUser } = useAuthFlow();
@@ -28,6 +33,11 @@ const Profile = () => {
   const { currentPlan, plans, canUpgradeTo, getUpgradePrice, getUpgradeTokens, getRecommendedFullTimePlan } = usePlanLogic(profile?.subscription_type);
   const { resetOnboarding } = useOnboardingProgress();
   const { isDemoMode } = useDemoContext();
+  // v6.9.109 Phase 5 — Usage card (stats moved here from the dashboard)
+  const { thisMonthCount } = useWorksheetStats();
+  const { students } = useStudents();
+  const { count: upcomingLessonsCount } = useUpcomingLessonsCount();
+  const { count: activeHomeworkCount } = useActiveHomeworkCount();
   const navigate = useNavigate();
   
   // FIXED: Use ref to track if user manually selected a plan
@@ -745,6 +755,39 @@ const Profile = () => {
                       </div>
                     )}
                   </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <BarChart3 className="h-5 w-5" />
+                    Usage
+                  </CardTitle>
+                  <CardDescription>Your activity at a glance</CardDescription>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <CompactStatsBar
+                    variant="list"
+                    tokenLeft={tokensAvailableForUse}
+                    thisMonthCount={thisMonthCount}
+                    totalWorksheets={totalWorksheetsCreated}
+                    studentsCount={students.length}
+                    activeHomeworkCount={activeHomeworkCount}
+                    upcomingLessonsCount={upcomingLessonsCount}
+                  />
+                  <p className="mt-4 text-xs text-muted-foreground">
+                    Student Hub: your students log in with just their email at{' '}
+                    <a
+                      href="https://edooqoo.com/my"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-medium text-primary hover:underline"
+                    >
+                      edooqoo.com/my
+                    </a>
+                    {' '}— no password needed.
+                  </p>
                 </CardContent>
               </Card>
             </div>
