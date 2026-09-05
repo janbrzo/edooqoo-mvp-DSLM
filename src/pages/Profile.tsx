@@ -757,6 +757,39 @@ const Profile = () => {
                   </div>
                 </CardContent>
               </Card>
+
+              <Card>
+                <CardHeader className="pb-3">
+                  <CardTitle className="flex items-center gap-2 text-lg">
+                    <BarChart3 className="h-5 w-5" />
+                    Usage
+                  </CardTitle>
+                  <CardDescription>Your activity at a glance</CardDescription>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <CompactStatsBar
+                    variant="list"
+                    tokenLeft={tokensAvailableForUse}
+                    thisMonthCount={thisMonthCount}
+                    totalWorksheets={totalWorksheetsCreated}
+                    studentsCount={students.length}
+                    activeHomeworkCount={activeHomeworkCount}
+                    upcomingLessonsCount={upcomingLessonsCount}
+                  />
+                  <p className="mt-4 text-xs text-muted-foreground">
+                    Student Hub: your students log in with just their email at{' '}
+                    <a
+                      href="https://edooqoo.com/my"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-medium text-primary hover:underline"
+                    >
+                      edooqoo.com/my
+                    </a>
+                    {' '}— no password needed.
+                  </p>
+                </CardContent>
+              </Card>
             </div>
           </div>
 
