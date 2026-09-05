@@ -564,6 +564,9 @@ export const AddStudentDialog = ({
                 />
               </div>
             </div>
+            <p className="text-xs text-muted-foreground -mt-1">
+              With an email, your student gets access to worksheets, homework and flashcards at edooqoo.com/my — no password needed.
+            </p>
 
             {/* Row 2: native language (always shown — short) */}
             <div className="space-y-1">
