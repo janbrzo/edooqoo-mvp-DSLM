@@ -73,7 +73,7 @@ const CompactStatsBar: React.FC<CompactStatsBarProps> = ({
   if (variant === 'list') {
     const listLabels: Record<string, string> = {
       Tokens: 'Tokens left', Month: 'This month', Total: 'All time',
-      Students: 'Students', Homework: 'Active homework', Lessons: 'Lessons (7 days)',
+      Students: 'Students', Homework: 'Homework', Lessons: 'Lessons (7 days)',
     };
     return (
       <dl className="grid grid-cols-2 gap-x-4 gap-y-3">
