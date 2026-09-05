@@ -76,7 +76,7 @@ const CompactStatsBar: React.FC<CompactStatsBarProps> = ({
       Students: 'Students', Homework: 'Active homework', Lessons: 'Lessons (7 days)',
     };
     return (
-      <dl className="grid grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-3">
+      <dl className="grid grid-cols-2 gap-x-4 gap-y-3">
         {stats.map(({ label, full, value, Icon }) => (
           <div key={full} className="min-w-0">
             <dt className="flex items-center gap-1.5 text-xs text-muted-foreground" title={full}>
