@@ -71,13 +71,17 @@ const CompactStatsBar: React.FC<CompactStatsBarProps> = ({
   );
 
   if (variant === 'list') {
+    const listLabels: Record<string, string> = {
+      Tokens: 'Tokens left', Month: 'This month', Total: 'All time',
+      Students: 'Students', Homework: 'Active homework', Lessons: 'Lessons (7 days)',
+    };
     return (
       <dl className="grid grid-cols-2 gap-x-6 gap-y-3 sm:grid-cols-3">
-        {stats.map(({ full, value, Icon }) => (
+        {stats.map(({ label, full, value, Icon }) => (
           <div key={full} className="min-w-0">
-            <dt className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <dt className="flex items-center gap-1.5 text-xs text-muted-foreground" title={full}>
               <Icon className="h-3.5 w-3.5 shrink-0 text-primary" aria-hidden="true" />
-              <span className="truncate">{full}</span>
+              <span className="truncate">{listLabels[label] ?? full}</span>
             </dt>
             <dd className="text-lg font-semibold tabular-nums text-foreground">{value}</dd>
           </div>
