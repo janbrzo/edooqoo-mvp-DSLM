@@ -14,12 +14,17 @@ import { usePlanLogic } from '@/hooks/usePlanLogic';
 import { EditableProfileField } from '@/components/profile/EditableProfileField';
 import { ConfirmDowngradeDialog } from '@/components/ConfirmDowngradeDialog';
 import { toast } from '@/hooks/use-toast';
-import { User, Coins, CreditCard, Calendar, Zap, GraduationCap, Users, Mail } from 'lucide-react';
+import { User, Coins, CreditCard, Calendar, Zap, GraduationCap, Users, Mail, BarChart3 } from 'lucide-react';
 import { FreeWeekBanner } from '@/components/FreeWeekBanner';
 import StickyNav from '@/components/landing/StickyNav';
 import { useOnboardingProgress } from '@/hooks/useOnboardingProgress';
 import { useDemoContext } from '@/contexts/DemoContext';
 import { devLog } from '@/utils/logger';
+import CompactStatsBar from '@/components/dashboard/CompactStatsBar';
+import { useWorksheetStats } from '@/hooks/useWorksheetStats';
+import { useStudents } from '@/hooks/useStudents';
+import { useUpcomingLessonsCount } from '@/hooks/useUpcomingLessonsCount';
+import { useActiveHomeworkCount } from '@/hooks/useActiveHomeworkCount';
 
 const Profile = () => {
   const { user, loading, isRegisteredUser } = useAuthFlow();
