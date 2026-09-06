@@ -12,7 +12,7 @@ import Signup from "./pages/Signup";
 import NotFound from "./pages/NotFound";
 import CookieBanner from "./components/CookieBanner";
 import GlobalFooter from "./components/GlobalFooter";
-import OnboardingChecklist from "./components/OnboardingChecklist";
+import OnboardingChecklistGate from "./components/OnboardingChecklistGate";
 import AdminImpersonationBanner from "./components/AdminImpersonationBanner";
 import RouteCanonicalUpdater from "./components/RouteCanonicalUpdater";
 import SpotlightOverlay from "./components/onboarding/SpotlightOverlay";
@@ -241,7 +241,7 @@ const App = () => (
             </Suspense>
           </main>
           <GlobalFooter />
-          <OnboardingChecklist />
+          <OnboardingChecklistGate />
           <SpotlightOverlay />
           <ActiveGenerationMiniPanel />
           <GlobalGeneratingModal />
