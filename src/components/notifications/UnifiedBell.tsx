@@ -11,7 +11,7 @@
  * its own unread count badge in the tab header. Combined unread count is shown
  * on the bell badge itself, capped at "9+".
  */
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Bell, BookOpen, Sparkles, AlertCircle, AlertTriangle, Info, Check, X as XIcon, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
