@@ -181,6 +181,7 @@ const HOMEWORK = [
     created_at: daysAgo(2),
     updated_at: daysAgo(2),
     completed_at: daysAgo(1),
+    reviewed_at: null,
     view_count: 3,
     viewed_at: daysAgo(1),
     deadline: null,
@@ -198,6 +199,7 @@ const HOMEWORK = [
     created_at: daysAgo(5),
     updated_at: daysAgo(3),
     completed_at: null,
+    reviewed_at: null,
     view_count: 1,
     viewed_at: daysAgo(4),
     deadline: daysFromNow(2),
@@ -215,6 +217,7 @@ const HOMEWORK = [
     created_at: daysAgo(9),
     updated_at: daysAgo(7),
     completed_at: daysAgo(7),
+    reviewed_at: daysAgo(6),
     view_count: 5,
     viewed_at: daysAgo(7),
     deadline: null,
@@ -232,6 +235,7 @@ const HOMEWORK = [
     created_at: daysAgo(3),
     updated_at: daysAgo(1),
     completed_at: daysAgo(1),
+    reviewed_at: daysAgo(0),
     view_count: 2,
     viewed_at: daysAgo(1),
     deadline: null,
@@ -249,6 +253,7 @@ const HOMEWORK = [
     created_at: daysAgo(4),
     updated_at: daysAgo(2),
     completed_at: null,
+    reviewed_at: null,
     view_count: 0,
     viewed_at: null,
     deadline: daysFromNow(5),
@@ -387,16 +392,19 @@ const KNOWLEDGE_ENTRIES = [
   { id: 'demo-know-4', student_id: 'demo-student-1', teacher_id: 'demo-teacher', category: 'Skill Assessment', content: 'Strong reading comprehension. Writing needs work — especially formal register. Speaking is fluent but lacks precision in business idioms. Grammar: conditionals and reported speech need review.', entry_source: 'manual', tags: ['Writing', 'Speaking', 'Grammar'], created_at: daysAgo(20), metadata: { mastery: 65, skills: ['conditionals', 'reported-speech', 'formal-register'] } },
   { id: 'demo-know-5', student_id: 'demo-student-1', teacher_id: 'demo-teacher', category: 'Notes', content: 'Responds well to role-play exercises. Prefers correction after speaking, not during.', entry_source: 'manual', tags: [], created_at: daysAgo(15) },
   { id: 'demo-know-6', student_id: 'demo-student-1', teacher_id: 'demo-teacher', category: 'Next Lesson Ideas', content: 'Practice handling difficult questions during Q&A sessions. Use TED Talk as model.', entry_source: 'manual', tags: [], created_at: daysAgo(3) },
+  { id: 'demo-know-13', student_id: 'demo-student-1', teacher_id: 'demo-teacher', category: 'Skill Assessment', title: 'Past simple vs present perfect', content: 'Mixes past simple and present perfect when summarising campaign results ("We have launched it last quarter").', entry_source: 'manual', tags: ['Grammar'], created_at: daysAgo(2), metadata: { skill_subtype: 'weakness', skill_slug: 'past-simple-vs-present-perfect' } },
 
   // Student 2
   { id: 'demo-know-7', student_id: 'demo-student-2', teacher_id: 'demo-teacher', category: 'Personal', content: 'University student, 22 years old. Planning a backpacking trip across Southeast Asia. Loves cooking and watching Netflix series in English.', entry_source: 'manual', tags: ['Travel', 'Hobbies'], created_at: daysAgo(20) },
   { id: 'demo-know-8', student_id: 'demo-student-2', teacher_id: 'demo-teacher', category: 'Goals', content: 'Reach B1 before the trip in August. Focus: survival English — airports, hotels, restaurants, asking for help.', entry_source: 'manual', tags: [], created_at: daysAgo(18) },
   { id: 'demo-know-9', student_id: 'demo-student-2', teacher_id: 'demo-teacher', category: 'Skill Assessment', content: 'Basic grammar is solid. Vocabulary limited to everyday topics. Listening comprehension: struggles with native speaker speed. Pronunciation: good intonation, needs work on /θ/ and /ð/.', entry_source: 'manual', tags: ['Vocabulary', 'Listening', 'Pronunciation'], created_at: daysAgo(15), metadata: { mastery: 35, skills: ['basic-grammar', 'travel-vocabulary', 'pronunciation'] } },
+  { id: 'demo-know-14', student_id: 'demo-student-2', teacher_id: 'demo-teacher', category: 'Skill Assessment', title: 'Articles a/an/the', content: 'Drops articles in travel situations ("I need taxi to airport").', entry_source: 'manual', tags: ['Grammar'], created_at: daysAgo(4), metadata: { skill_subtype: 'weakness', skill_slug: 'articles' } },
 
   // Student 3
   { id: 'demo-know-10', student_id: 'demo-student-3', teacher_id: 'demo-teacher', category: 'Personal', content: 'PhD candidate in Environmental Science. Needs to publish in English-language journals. Native Mandarin speaker with strong IELTS score (7.5).', entry_source: 'manual', tags: ['Work', 'Academic'], created_at: daysAgo(25) },
   { id: 'demo-know-11', student_id: 'demo-student-3', teacher_id: 'demo-teacher', category: 'Goals', content: 'Submit first paper to Nature Sustainability. Improve academic hedging and argumentation. Prepare for viva voce (oral defense).', entry_source: 'manual', tags: [], created_at: daysAgo(22) },
   { id: 'demo-know-12', student_id: 'demo-student-3', teacher_id: 'demo-teacher', category: 'Skill Assessment', content: 'Excellent grammar and vocabulary range. Academic writing style sometimes too direct — needs more hedging. Speaking: occasionally over-relies on memorized phrases. Needs to develop spontaneous argumentation skills.', entry_source: 'manual', tags: ['Academic Writing', 'Hedging', 'Speaking'], created_at: daysAgo(18), metadata: { mastery: 82, skills: ['academic-writing', 'hedging', 'argumentation'] } },
+  { id: 'demo-know-15', student_id: 'demo-student-3', teacher_id: 'demo-teacher', category: 'Skill Assessment', title: 'Linking words in emails', content: 'Overuses "moreover" and "furthermore" in correspondence with journal editors; needs lighter connectors.', entry_source: 'manual', tags: ['Academic Writing'], created_at: daysAgo(5), metadata: { skill_subtype: 'weakness', skill_slug: 'linking-words' } },
 ];
 
 // Teacher profile
