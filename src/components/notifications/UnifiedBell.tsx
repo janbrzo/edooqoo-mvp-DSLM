@@ -11,7 +11,7 @@
  * its own unread count badge in the tab header. Combined unread count is shown
  * on the bell badge itself, capped at "9+".
  */
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Bell, BookOpen, Sparkles, AlertCircle, AlertTriangle, Info, Check, X as XIcon, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -55,6 +55,16 @@ export function UnifiedBell() {
   } = useTeacherAlerts();
 
   const totalUnread = notifUnread + alertUnread;
+
+  // Dashboard Today ("View all in notifications") opens the bell via a global event.
+  useEffect(() => {
+    const handler = () => {
+      setActiveTab('notifications');
+      setOpen(true);
+    };
+    window.addEventListener('unifiedBell:open', handler);
+    return () => window.removeEventListener('unifiedBell:open', handler);
+  }, []);
 
   const handleNotifClick = (n: AppNotification) => {
     if (!n.is_read) markNotifRead(n.id);
