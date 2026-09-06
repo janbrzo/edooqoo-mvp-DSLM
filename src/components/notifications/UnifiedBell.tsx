@@ -56,6 +56,16 @@ export function UnifiedBell() {
 
   const totalUnread = notifUnread + alertUnread;
 
+  // Dashboard Today ("View all in notifications") opens the bell via a global event.
+  useEffect(() => {
+    const handler = () => {
+      setActiveTab('notifications');
+      setOpen(true);
+    };
+    window.addEventListener('unifiedBell:open', handler);
+    return () => window.removeEventListener('unifiedBell:open', handler);
+  }, []);
+
   const handleNotifClick = (n: AppNotification) => {
     if (!n.is_read) markNotifRead(n.id);
     if (n.notification_type === 'welcome_test_completed') {
