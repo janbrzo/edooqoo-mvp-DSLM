@@ -47,3 +47,4 @@
 - [Worksheet Failure Taxonomy](mem://features/worksheet-generation/failure-alert-taxonomy) — validation = client input error (no email/log), parse_recovered = quality signal, rest = real failure
 - [Cluster Hubs](mem://seo/cluster-hubs) — 4 topical hub-and-spoke SEO/GEO hubs, backlink injector, cluster audit
 - [Indexation Truth Layer](mem://seo/indexation-truth-layer) — No Cloudflare worker in prod; HTML/robots.txt crawl signals, 3-layer pSEO policy cross-check, sitemap integrity guard
+- [Dashboard Today Layout](mem://features/dashboard/today-layout) — v6.9.109 /dashboard = Next up / Needs your attention / Everything else; students list on /students, counters on /profile
