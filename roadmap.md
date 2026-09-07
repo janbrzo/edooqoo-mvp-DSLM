@@ -6,14 +6,15 @@ Lean task list. Details live in `docs/` and `.lovable/plan/`.
 
 Reference: `docs/ux/target-teacher-experience.md` (approved 2026-09-02).
 
-- [ ] Dashboard → Today (v6.9.109) — spec: `docs/ux/dashboard-today-spec.md`
+- [x] Dashboard → Today (v6.9.109) — spec: `docs/ux/dashboard-today-spec.md`
   - [x] Phase 0 — docs + roadmap
-  - [x] Phase 1 — data hooks (`useNextUpStudents`, `useDashboardAttention`, `useDashboardCounts`) + `formatGoal` lib (not yet wired to UI; unit tests in `src/hooks/__tests__/dashboardToday.test.ts`)
-  - [x] Phase 2+3 — dashboard components (`DashboardHeader`, `GuidedStepsBar`, `NextUpSection/Card`, `AttentionSection`, `EverythingElseSection`, `RecentWorksheetRow`, `EmptyDashboard`, `CompactStatsBar variant="list"`) + `Dashboard.tsx` rewrite; `create_homework` detection restored in `useOnboardingProgress`. Note: `/students` tile links to a route that ships in Phase 4; `unifiedBell:open` listener ships in Phase 6.
-  - [x] Phase 4 — `/students` (`AllStudentsPage` + `useStudentsOverview`, route in `App.tsx`, `StudentCard.tsx` removed, manifest classifier updated)
-  - [x] Phase 5 — `/profile` Usage card (`CompactStatsBar variant="list"`, new `useActiveHomeworkCount` HEAD count) + `AddStudentDialog` Hub helper text under email
-  - [x] Phase 6+7 — `OnboardingChecklistGate` hides floating checklist on `/dashboard`; `UnifiedBell` listens to `unifiedBell:open`; demo data: `reviewed_at` on homework, 3 `skill_subtype: weakness` focus signals
-  - [ ] Phase 8 — cleanup + RAG (`docs/llm-context.md`, `public/llms.txt`)
+  - [x] Phase 1 — data hooks (`useNextUpStudents`, `useDashboardAttention`, `useDashboardCounts`) + `formatGoal` lib
+  - [x] Phase 2+3 — dashboard components + `Dashboard.tsx` rewrite
+  - [x] Phase 4 — `/students` (`AllStudentsPage` + `useStudentsOverview`)
+  - [x] Phase 5 — `/profile` Usage card + `AddStudentDialog` Hub helper text
+  - [x] Phase 6+7 — `OnboardingChecklistGate`, `unifiedBell:open`, demo data signals
+  - [x] Phase 8 — cleanup (`NextPrepStrip` removed) + RAG (`docs/llm-context.md`, `public/llms.txt`)
+
 - [ ] Student Workspace — 3 tabs (Prep / Timeline / Library) + snapshot panel, DSLM as deep view
 - [ ] Guided mode beyond the dashboard
 
