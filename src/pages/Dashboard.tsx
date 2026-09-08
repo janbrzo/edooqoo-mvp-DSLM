@@ -172,6 +172,10 @@ const Dashboard = () => {
           <EmptyDashboard onAddStudent={openAddStudent} />
         ) : (
           <>
+            <div className="space-y-3">
+              <StudentQuickSearch students={students as any} />
+              <RecentStudentsBar students={students as any} excludeIds={nextUpIds} />
+            </div>
             {guided && <GuidedStepsBar steps={steps} onShowEverything={() => { void dismissOnboarding(); }} />}
             <NextUpSection items={nextUp} loading={nextUpLoading} />
             <AttentionSection items={attention} loading={attentionLoading} onOpenInbox={openBell} />
