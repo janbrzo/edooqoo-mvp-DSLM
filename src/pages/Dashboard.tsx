@@ -191,6 +191,7 @@ const Dashboard = () => {
               showWorksheets={showWorksheets}
               recentWorksheets={recentWorksheets}
               students={students}
+              nextLessonById={nextLessonById}
               onRename={(w) => setRenameWorksheetData({ id: w.id, title: formatWorksheetTitle(w) })}
               onRefetch={refetchWorksheets}
               onDelete={handleDeleteWorksheet}
