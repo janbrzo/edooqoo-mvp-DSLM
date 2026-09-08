@@ -5,11 +5,14 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Calendar, ChevronRight, FileText, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { RecentWorksheetRow, type RecentWorksheet } from './RecentWorksheetRow';
+import { AllStudentsInline } from './AllStudentsInline';
+import type { NextUpStudent } from '@/hooks/useNextUpStudents';
 import type { Tables } from '@/integrations/supabase/types';
 
 type Student = Tables<'students'>;
 
 const RECENT_OPEN_KEY = 'edooqoo.dashboard.recentOpen';
+const STUDENTS_OPEN_KEY = 'edooqoo.dashboard.allStudentsOpen';
 
 interface EverythingElseSectionProps {
   studentsCount: number;
@@ -18,16 +21,25 @@ interface EverythingElseSectionProps {
   showWorksheets: boolean;
   recentWorksheets: RecentWorksheet[];
   students: Student[];
+  nextLessonById?: Record<string, NextUpStudent['nextLesson']>;
   onRename: (worksheet: RecentWorksheet) => void;
   onRefetch: () => void;
   onDelete: (id: string) => Promise<{ success: boolean; error?: string }>;
 }
 
-function readRecentOpen(): boolean {
+function readFlag(key: string): boolean {
   try {
-    return localStorage.getItem(RECENT_OPEN_KEY) === '1';
+    return localStorage.getItem(key) === '1';
   } catch {
     return false;
+  }
+}
+
+function writeFlag(key: string, value: boolean) {
+  try {
+    localStorage.setItem(key, value ? '1' : '0');
+  } catch {
+    /* storage unavailable — ignore */
   }
 }
 
@@ -38,20 +50,24 @@ export const EverythingElseSection: React.FC<EverythingElseSectionProps> = ({
   showWorksheets,
   recentWorksheets,
   students,
+  nextLessonById,
   onRename,
   onRefetch,
   onDelete,
 }) => {
-  const [open, setOpen] = useState<boolean>(readRecentOpen);
+  const [open, setOpen] = useState<boolean>(() => readFlag(RECENT_OPEN_KEY));
+  const [studentsOpen, setStudentsOpen] = useState<boolean>(() => readFlag(STUDENTS_OPEN_KEY));
 
   const handleOpenChange = (next: boolean) => {
     setOpen(next);
-    try {
-      localStorage.setItem(RECENT_OPEN_KEY, next ? '1' : '0');
-    } catch {
-      /* storage unavailable — ignore */
-    }
+    writeFlag(RECENT_OPEN_KEY, next);
   };
+
+  const handleStudentsOpenChange = (next: boolean) => {
+    setStudentsOpen(next);
+    writeFlag(STUDENTS_OPEN_KEY, next);
+  };
+
 
   const tileClass =
     'flex items-center justify-between rounded-lg border border-border p-3 text-sm text-foreground hover:bg-muted/50';
@@ -63,13 +79,24 @@ export const EverythingElseSection: React.FC<EverythingElseSectionProps> = ({
       </h2>
 
       <nav aria-label="Deep views" className={cn('grid grid-cols-1 gap-3', showWorksheets ? 'sm:grid-cols-3' : 'sm:grid-cols-2')}>
-        <Link to="/students" className={tileClass}>
-          <span className="flex items-center gap-2">
+        <div className={cn(tileClass, 'gap-2 p-0 hover:bg-transparent')}>
+          <Link to="/students" className="flex flex-1 items-center gap-2 rounded-l-lg p-3 hover:bg-muted/50">
             <Users className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
             All students ({studentsCount})
-          </span>
-          <ChevronRight className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-        </Link>
+          </Link>
+          <button
+            type="button"
+            onClick={() => handleStudentsOpenChange(!studentsOpen)}
+            aria-expanded={studentsOpen}
+            aria-label={studentsOpen ? 'Hide student list' : 'Show student list'}
+            className="h-full rounded-r-lg px-3 py-3 hover:bg-muted/50"
+          >
+            <ChevronRight
+              className={cn('h-4 w-4 text-muted-foreground transition-transform', studentsOpen && 'rotate-90')}
+              aria-hidden="true"
+            />
+          </button>
+        </div>
         {showWorksheets && (
           <Link to="/worksheets" className={tileClass}>
             <span className="flex items-center gap-2">
@@ -87,6 +114,9 @@ export const EverythingElseSection: React.FC<EverythingElseSectionProps> = ({
           <ChevronRight className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
         </Link>
       </nav>
+
+      {studentsOpen && <AllStudentsInline students={students} nextLessonById={nextLessonById} />}
+
 
       {showWorksheets && recentWorksheets.length > 0 && (
         <Collapsible open={open} onOpenChange={handleOpenChange}>
