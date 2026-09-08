@@ -15,6 +15,13 @@ Reference: `docs/ux/target-teacher-experience.md` (approved 2026-09-02).
   - [x] Phase 6+7 — `OnboardingChecklistGate`, `unifiedBell:open`, demo data signals
   - [x] Phase 8 — cleanup (`NextPrepStrip` removed) + RAG (`docs/llm-context.md`, `public/llms.txt`)
 
+- [ ] Quick student access (v6.9.110) — header search, recent pills, inline All students, nav switcher on /dashboard
+  - [x] Step 1 — `src/lib/students/quickAccess.ts` + unit tests
+  - [ ] Step 2 — `StudentQuickSearch` + `RecentStudentsBar` in `Dashboard.tsx`
+  - [ ] Step 3 — expandable All students tile
+  - [ ] Step 4 — `StickyNav` on /dashboard + filter in `NavStudentSwitcher`
+  - [ ] Step 5 — memory + RAG docs
+
 - [ ] Student Workspace — 3 tabs (Prep / Timeline / Library) + snapshot panel, DSLM as deep view
 - [ ] Guided mode beyond the dashboard
 
