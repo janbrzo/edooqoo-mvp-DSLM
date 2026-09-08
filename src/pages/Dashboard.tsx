@@ -24,6 +24,8 @@ import { NextUpSection } from "@/components/dashboard/NextUpSection";
 import { AttentionSection } from "@/components/dashboard/AttentionSection";
 import { EverythingElseSection } from "@/components/dashboard/EverythingElseSection";
 import { EmptyDashboard } from "@/components/dashboard/EmptyDashboard";
+import { StudentQuickSearch } from "@/components/dashboard/StudentQuickSearch";
+import { RecentStudentsBar } from "@/components/dashboard/RecentStudentsBar";
 import { formatWorksheetTitle, type RecentWorksheet } from "@/components/dashboard/RecentWorksheetRow";
 
 /**
