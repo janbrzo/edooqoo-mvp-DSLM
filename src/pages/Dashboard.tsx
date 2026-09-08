@@ -59,6 +59,8 @@ const Dashboard = () => {
   const showWorksheets = !guided || !!progress.steps.generate_worksheet;
   const steps = useMemo(() => guidedSteps(progress.steps), [progress.steps]);
   const recentWorksheets = useMemo(() => worksheets.slice(0, 5) as RecentWorksheet[], [worksheets]);
+  const nextUpIds = useMemo(() => nextUp.map((i) => i.id), [nextUp]);
+
 
   // v6.9.8 — auto-open Add Student dialog when arriving from Welcome email CTA
   useEffect(() => {
