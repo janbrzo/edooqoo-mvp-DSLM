@@ -60,6 +60,12 @@ const Dashboard = () => {
   const steps = useMemo(() => guidedSteps(progress.steps), [progress.steps]);
   const recentWorksheets = useMemo(() => worksheets.slice(0, 5) as RecentWorksheet[], [worksheets]);
   const nextUpIds = useMemo(() => nextUp.map((i) => i.id), [nextUp]);
+  const nextLessonById = useMemo(() => {
+    const map: Record<string, (typeof nextUp)[number]['nextLesson']> = {};
+    for (const item of nextUp) map[item.id] = item.nextLesson;
+    return map;
+  }, [nextUp]);
+
 
 
   // v6.9.8 — auto-open Add Student dialog when arriving from Welcome email CTA
