@@ -63,13 +63,24 @@ export const EverythingElseSection: React.FC<EverythingElseSectionProps> = ({
       </h2>
 
       <nav aria-label="Deep views" className={cn('grid grid-cols-1 gap-3', showWorksheets ? 'sm:grid-cols-3' : 'sm:grid-cols-2')}>
-        <Link to="/students" className={tileClass}>
-          <span className="flex items-center gap-2">
+        <div className={cn(tileClass, 'gap-2 p-0 hover:bg-transparent')}>
+          <Link to="/students" className="flex flex-1 items-center gap-2 rounded-l-lg p-3 hover:bg-muted/50">
             <Users className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
             All students ({studentsCount})
-          </span>
-          <ChevronRight className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
-        </Link>
+          </Link>
+          <button
+            type="button"
+            onClick={() => handleStudentsOpenChange(!studentsOpen)}
+            aria-expanded={studentsOpen}
+            aria-label={studentsOpen ? 'Hide student list' : 'Show student list'}
+            className="h-full rounded-r-lg px-3 py-3 hover:bg-muted/50"
+          >
+            <ChevronRight
+              className={cn('h-4 w-4 text-muted-foreground transition-transform', studentsOpen && 'rotate-90')}
+              aria-hidden="true"
+            />
+          </button>
+        </div>
         {showWorksheets && (
           <Link to="/worksheets" className={tileClass}>
             <span className="flex items-center gap-2">
@@ -87,6 +98,9 @@ export const EverythingElseSection: React.FC<EverythingElseSectionProps> = ({
           <ChevronRight className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
         </Link>
       </nav>
+
+      {studentsOpen && <AllStudentsInline students={students} nextLessonById={nextLessonById} />}
+
 
       {showWorksheets && recentWorksheets.length > 0 && (
         <Collapsible open={open} onOpenChange={handleOpenChange}>
