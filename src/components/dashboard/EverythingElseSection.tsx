@@ -21,16 +21,25 @@ interface EverythingElseSectionProps {
   showWorksheets: boolean;
   recentWorksheets: RecentWorksheet[];
   students: Student[];
+  nextLessonById?: Record<string, NextUpStudent['nextLesson']>;
   onRename: (worksheet: RecentWorksheet) => void;
   onRefetch: () => void;
   onDelete: (id: string) => Promise<{ success: boolean; error?: string }>;
 }
 
-function readRecentOpen(): boolean {
+function readFlag(key: string): boolean {
   try {
-    return localStorage.getItem(RECENT_OPEN_KEY) === '1';
+    return localStorage.getItem(key) === '1';
   } catch {
     return false;
+  }
+}
+
+function writeFlag(key: string, value: boolean) {
+  try {
+    localStorage.setItem(key, value ? '1' : '0');
+  } catch {
+    /* storage unavailable — ignore */
   }
 }
 
@@ -41,20 +50,24 @@ export const EverythingElseSection: React.FC<EverythingElseSectionProps> = ({
   showWorksheets,
   recentWorksheets,
   students,
+  nextLessonById,
   onRename,
   onRefetch,
   onDelete,
 }) => {
-  const [open, setOpen] = useState<boolean>(readRecentOpen);
+  const [open, setOpen] = useState<boolean>(() => readFlag(RECENT_OPEN_KEY));
+  const [studentsOpen, setStudentsOpen] = useState<boolean>(() => readFlag(STUDENTS_OPEN_KEY));
 
   const handleOpenChange = (next: boolean) => {
     setOpen(next);
-    try {
-      localStorage.setItem(RECENT_OPEN_KEY, next ? '1' : '0');
-    } catch {
-      /* storage unavailable — ignore */
-    }
+    writeFlag(RECENT_OPEN_KEY, next);
   };
+
+  const handleStudentsOpenChange = (next: boolean) => {
+    setStudentsOpen(next);
+    writeFlag(STUDENTS_OPEN_KEY, next);
+  };
+
 
   const tileClass =
     'flex items-center justify-between rounded-lg border border-border p-3 text-sm text-foreground hover:bg-muted/50';
