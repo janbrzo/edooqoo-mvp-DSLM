@@ -24,6 +24,8 @@ import { NextUpSection } from "@/components/dashboard/NextUpSection";
 import { AttentionSection } from "@/components/dashboard/AttentionSection";
 import { EverythingElseSection } from "@/components/dashboard/EverythingElseSection";
 import { EmptyDashboard } from "@/components/dashboard/EmptyDashboard";
+import { StudentQuickSearch } from "@/components/dashboard/StudentQuickSearch";
+import { RecentStudentsBar } from "@/components/dashboard/RecentStudentsBar";
 import { formatWorksheetTitle, type RecentWorksheet } from "@/components/dashboard/RecentWorksheetRow";
 
 /**
@@ -57,6 +59,8 @@ const Dashboard = () => {
   const showWorksheets = !guided || !!progress.steps.generate_worksheet;
   const steps = useMemo(() => guidedSteps(progress.steps), [progress.steps]);
   const recentWorksheets = useMemo(() => worksheets.slice(0, 5) as RecentWorksheet[], [worksheets]);
+  const nextUpIds = useMemo(() => nextUp.map((i) => i.id), [nextUp]);
+
 
   // v6.9.8 — auto-open Add Student dialog when arriving from Welcome email CTA
   useEffect(() => {
@@ -168,6 +172,10 @@ const Dashboard = () => {
           <EmptyDashboard onAddStudent={openAddStudent} />
         ) : (
           <>
+            <div className="space-y-3">
+              <StudentQuickSearch students={students as any} />
+              <RecentStudentsBar students={students as any} excludeIds={nextUpIds} />
+            </div>
             {guided && <GuidedStepsBar steps={steps} onShowEverything={() => { void dismissOnboarding(); }} />}
             <NextUpSection items={nextUp} loading={nextUpLoading} />
             <AttentionSection items={attention} loading={attentionLoading} onOpenInbox={openBell} />
