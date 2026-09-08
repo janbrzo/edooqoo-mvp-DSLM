@@ -5,11 +5,14 @@ import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/component
 import { Calendar, ChevronRight, FileText, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { RecentWorksheetRow, type RecentWorksheet } from './RecentWorksheetRow';
+import { AllStudentsInline } from './AllStudentsInline';
+import type { NextUpStudent } from '@/hooks/useNextUpStudents';
 import type { Tables } from '@/integrations/supabase/types';
 
 type Student = Tables<'students'>;
 
 const RECENT_OPEN_KEY = 'edooqoo.dashboard.recentOpen';
+const STUDENTS_OPEN_KEY = 'edooqoo.dashboard.allStudentsOpen';
 
 interface EverythingElseSectionProps {
   studentsCount: number;
