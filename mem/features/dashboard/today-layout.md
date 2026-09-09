@@ -11,6 +11,7 @@ type: feature
   2. **Needs your attention** — homework awaiting review, completed Welcome Tests, new bookings. Hidden when empty.
   3. **Everything else** — tiles (All students, Worksheets, Calendar) + collapsible Recent worksheets; row actions live in one `…` menu.
 - `DashboardHeader` (greeting + counts + Add student), `GuidedStepsBar` (3 onboarding steps), `EmptyDashboard` (zero students).
+- All students and Worksheets use split-action tiles: the main segment links to the full page; the stronger-muted chevron segment toggles the inline list.
 - Aggregate statistics belong on `/profile` (Usage card, `CompactStatsBar variant="list"`), NOT on the dashboard.
 - Full student list lives on `/students` (`AllStudentsPage` + `useStudentsOverview`, single grouped query — never N+1).
 - Data hooks: `useNextUpStudents`, `useDashboardAttention`, `useDashboardCounts`, `useActiveHomeworkCount`. All return early in demo mode.
