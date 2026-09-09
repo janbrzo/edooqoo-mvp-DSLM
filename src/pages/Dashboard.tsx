@@ -178,9 +178,13 @@ const Dashboard = () => {
           <EmptyDashboard onAddStudent={openAddStudent} />
         ) : (
           <>
-            <div className="space-y-3">
-              <StudentQuickSearch students={students as any} />
-              <RecentStudentsBar students={students as any} excludeIds={nextUpIds} />
+            <div className="flex flex-col items-start gap-3 sm:flex-row">
+              <div className="w-full sm:w-64">
+                <StudentQuickSearch students={students as any} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <RecentStudentsBar students={students as any} excludeIds={nextUpIds} />
+              </div>
             </div>
             {guided && <GuidedStepsBar steps={steps} onShowEverything={() => { void dismissOnboarding(); }} />}
             <NextUpSection items={nextUp} loading={nextUpLoading} />
