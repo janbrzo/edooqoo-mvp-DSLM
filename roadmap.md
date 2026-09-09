@@ -17,8 +17,8 @@ Reference: `docs/ux/target-teacher-experience.md` (approved 2026-09-02).
 
 - [ ] Quick student access (v6.9.110) — header search, recent pills, inline All students, nav switcher on /dashboard
   - [x] Step 1 — `src/lib/students/quickAccess.ts` + unit tests
-  - [ ] Step 2 — `StudentQuickSearch` + `RecentStudentsBar` in `Dashboard.tsx`
-  - [ ] Step 3 — expandable All students tile
+  - [x] Step 2 — `StudentQuickSearch` + `RecentStudentsBar` in `Dashboard.tsx`
+  - [x] Step 3 — expandable All students tile; split Worksheets tile opens recent items from its chevron
   - [ ] Step 4 — `StickyNav` on /dashboard + filter in `NavStudentSwitcher`
   - [ ] Step 5 — memory + RAG docs
 
