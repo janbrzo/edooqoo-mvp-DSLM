@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Calendar, ChevronRight, FileText, Users } from 'lucide-react';
+import { Calendar, ChevronDown, FileText, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { RecentWorksheetRow, type RecentWorksheet } from './RecentWorksheetRow';
 import { AllStudentsInline } from './AllStudentsInline';
