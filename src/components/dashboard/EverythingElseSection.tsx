@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Calendar, ChevronRight, FileText, Users } from 'lucide-react';
+import { Calendar, ChevronDown, FileText, Users } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { RecentWorksheetRow, type RecentWorksheet } from './RecentWorksheetRow';
 import { AllStudentsInline } from './AllStudentsInline';
@@ -89,21 +89,24 @@ export const EverythingElseSection: React.FC<EverythingElseSectionProps> = ({
             onClick={() => handleStudentsOpenChange(!studentsOpen)}
             aria-expanded={studentsOpen}
             aria-label={studentsOpen ? 'Hide student list' : 'Show student list'}
-            className="h-full rounded-r-lg px-3 py-3 hover:bg-muted/50"
+            className="h-full rounded-r-lg bg-muted/40 px-3 py-3 hover:bg-muted/70"
           >
-            <ChevronRight
-              className={cn('h-4 w-4 text-muted-foreground transition-transform', studentsOpen && 'rotate-90')}
+            <ChevronDown
+              className={cn('h-4 w-4 text-muted-foreground transition-transform', studentsOpen && 'rotate-180')}
               aria-hidden="true"
             />
           </button>
         </div>
         {showWorksheets && (
-          <Link to="/worksheets" className={tileClass}>
-            <span className="flex items-center gap-2">
+          <Link to="/worksheets" className={cn(tileClass, 'gap-2 p-0')}
+            aria-label={`Worksheets (${worksheetsCount})`}>
+            <span className="flex flex-1 items-center gap-2 rounded-l-lg p-3">
               <FileText className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
               Worksheets ({worksheetsCount})
             </span>
-            <ChevronRight className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+            <span className="flex h-full items-center rounded-r-lg bg-muted/40 px-3 py-3">
+              <ChevronDown className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+            </span>
           </Link>
         )}
         <Link to="/calendar" className={tileClass}>
@@ -111,7 +114,7 @@ export const EverythingElseSection: React.FC<EverythingElseSectionProps> = ({
             <Calendar className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
             Calendar
           </span>
-          <ChevronRight className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
+          <ChevronDown className="h-4 w-4 text-muted-foreground" aria-hidden="true" />
         </Link>
       </nav>
 
@@ -122,7 +125,7 @@ export const EverythingElseSection: React.FC<EverythingElseSectionProps> = ({
         <Collapsible open={open} onOpenChange={handleOpenChange}>
           <CollapsibleTrigger asChild>
             <Button variant="ghost" size="sm" className="px-0 text-sm text-muted-foreground hover:bg-transparent" aria-expanded={open}>
-              <ChevronRight className={cn('mr-1 h-4 w-4 transition-transform', open && 'rotate-90')} aria-hidden="true" />
+              <ChevronDown className={cn('mr-1 h-4 w-4 transition-transform', open && 'rotate-180')} aria-hidden="true" />
               Recent worksheets ({recentWorksheets.length})
             </Button>
           </CollapsibleTrigger>
