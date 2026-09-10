@@ -202,3 +202,12 @@
   height: 24px !important;
   vertical-align: middle !important;
 }
+
+/* Hide horizontal scrollbar while keeping swipe/scroll behavior */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
