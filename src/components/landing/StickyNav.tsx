@@ -37,9 +37,9 @@ const StickyNav: React.FC<StickyNavProps> = ({ isRegisteredUser, tokenLeft, user
   const isProfile = location.pathname === '/profile';
   const isCalendar = location.pathname === '/calendar';
   const isStudentPage = /^\/student\//.test(location.pathname);
-  // v6.9.33 — show NavStudentSwitcher on every authenticated page except
-  // dashboard / profile (incl. /student/:id where it replaces the local popover).
-  const showStudentSwitcher = isRegisteredUser && !isDashboard && !isProfile;
+  // v6.9.110 — show NavStudentSwitcher on every authenticated page except /profile
+  // (now also on /dashboard, as a fourth quick-access path to a student).
+  const showStudentSwitcher = isRegisteredUser && !isProfile;
   const { isDemoMode, exitDemo } = useDemoContext();
 
   // Position class for ANON nav (non-sticky on worksheet pages, sticky elsewhere)

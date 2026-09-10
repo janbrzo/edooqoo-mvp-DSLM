@@ -17,6 +17,7 @@ export const NavStudentSwitcher: React.FC = () => {
   const { students = [], loading } = useStudents();
   const [open, setOpen] = React.useState(false);
   const [addOpen, setAddOpen] = React.useState(false);
+  const [query, setQuery] = React.useState('');
 
   const sorted = React.useMemo(
     () => [...students].sort(
@@ -24,6 +25,19 @@ export const NavStudentSwitcher: React.FC = () => {
     ),
     [students]
   );
+
+  // v6.9.110 — inline filter, useful for teachers with 20+ students.
+  const visible = React.useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return sorted;
+    return sorted.filter((s: any) =>
+      [s.name, s.email, s.main_goal].some((v: any) => typeof v === 'string' && v.toLowerCase().includes(q))
+    );
+  }, [sorted, query]);
+
+  React.useEffect(() => {
+    if (!open) setQuery('');
+  }, [open]);
 
   // v6.9.33 — show current student name when we're on /student/:id.
   const currentStudentId = React.useMemo(() => {
@@ -58,6 +72,18 @@ export const NavStudentSwitcher: React.FC = () => {
             Add
           </button>
         </div>
+        {!loading && sorted.length > 0 && (
+          <div className="border-b p-2">
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Filter students…"
+              aria-label="Filter students"
+              className="w-full rounded-md border border-input bg-background px-2 py-1.5 text-sm outline-none focus:ring-1 focus:ring-ring"
+            />
+          </div>
+        )}
         <div className="max-h-80 overflow-y-auto p-1">
           {loading && (
             <div className="px-3 py-2 text-sm text-muted-foreground">Loading…</div>
@@ -67,7 +93,12 @@ export const NavStudentSwitcher: React.FC = () => {
               No students yet. Add your first one below.
             </div>
           )}
-          {!loading && sorted.map((s: any) => (
+          {!loading && sorted.length > 0 && visible.length === 0 && (
+            <div className="px-3 py-3 text-xs text-muted-foreground">
+              No student matching “{query}”.
+            </div>
+          )}
+          {!loading && visible.map((s: any) => (
             <a
               key={s.id}
               href={`/student/${s.id}`}
