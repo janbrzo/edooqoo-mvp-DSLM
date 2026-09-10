@@ -72,6 +72,18 @@ export const NavStudentSwitcher: React.FC = () => {
             Add
           </button>
         </div>
+        {!loading && sorted.length > 0 && (
+          <div className="border-b p-2">
+            <input
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Filter students…"
+              aria-label="Filter students"
+              className="w-full rounded-md border border-input bg-background px-2 py-1.5 text-sm outline-none focus:ring-1 focus:ring-ring"
+            />
+          </div>
+        )}
         <div className="max-h-80 overflow-y-auto p-1">
           {loading && (
             <div className="px-3 py-2 text-sm text-muted-foreground">Loading…</div>
@@ -81,7 +93,12 @@ export const NavStudentSwitcher: React.FC = () => {
               No students yet. Add your first one below.
             </div>
           )}
-          {!loading && sorted.map((s: any) => (
+          {!loading && sorted.length > 0 && visible.length === 0 && (
+            <div className="px-3 py-3 text-xs text-muted-foreground">
+              No student matching “{query}”.
+            </div>
+          )}
+          {!loading && visible.map((s: any) => (
             <a
               key={s.id}
               href={`/student/${s.id}`}
