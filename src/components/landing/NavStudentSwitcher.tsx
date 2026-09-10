@@ -17,6 +17,7 @@ export const NavStudentSwitcher: React.FC = () => {
   const { students = [], loading } = useStudents();
   const [open, setOpen] = React.useState(false);
   const [addOpen, setAddOpen] = React.useState(false);
+  const [query, setQuery] = React.useState('');
 
   const sorted = React.useMemo(
     () => [...students].sort(
@@ -24,6 +25,19 @@ export const NavStudentSwitcher: React.FC = () => {
     ),
     [students]
   );
+
+  // v6.9.110 — inline filter, useful for teachers with 20+ students.
+  const visible = React.useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return sorted;
+    return sorted.filter((s: any) =>
+      [s.name, s.email, s.main_goal].some((v: any) => typeof v === 'string' && v.toLowerCase().includes(q))
+    );
+  }, [sorted, query]);
+
+  React.useEffect(() => {
+    if (!open) setQuery('');
+  }, [open]);
 
   // v6.9.33 — show current student name when we're on /student/:id.
   const currentStudentId = React.useMemo(() => {
