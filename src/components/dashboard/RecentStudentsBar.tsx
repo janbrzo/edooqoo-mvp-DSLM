@@ -19,7 +19,7 @@ export const RecentStudentsBar: React.FC<RecentStudentsBarProps> = ({ students, 
   if (recent.length === 0) return null;
 
   return (
-    <nav aria-label="Recent students" className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
+    <nav aria-label="Recent students" className="no-scrollbar -mx-1 flex gap-2 overflow-x-auto px-1 pb-1">
       <span className="shrink-0 self-center text-xs font-medium uppercase tracking-wider text-muted-foreground">
         Recent
       </span>
