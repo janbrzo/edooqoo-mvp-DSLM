@@ -1,67 +1,61 @@
-# Plan v6.9.110 — Szybki dostęp do ucznia (Quick Student Access)
+# v6.9.111 — Student Workspace: 7 zakładek → 3 + snapshot
 
-## Problem
+Kontynuacja north star z `docs/ux/target-teacher-experience.md` (punkt 5, sekwencja krok 2). Dashboard „Today" (v6.9.109) i szybki dostęp do ucznia (v6.9.110) są gotowe. Teraz porządkujemy stronę ucznia.
 
-Po przebudowie dashboardu na widok „Today” jedyna droga do konkretnego ucznia (poza 3 kartami Next up) prowadzi przez kafel *All students* → strona `/students` → wiersz ucznia. Dla nauczyciela z 20 uczniami to 3 kliknięcia i zmiana strony za każdym razem. Wcześniej lista uczniów z wyszukiwarką i sortowaniem była wprost na `/dashboard`.
+## Przypomnienie planu z dużych klocków
 
-Przyczyna strukturalna: dashboard zoptymalizowano pod rytuał „co teraz”, ale nie zostawiono żadnego kanału nawigacji student-centrycznej — a to najczęstsza intencja nauczyciela w ciągu dnia.
+Strona ucznia ma jedno zadanie: **przygotować następną lekcję i domknąć poprzednią.**
 
-## Rozwiązanie — cztery warstwy dostępu (wszystkie wybrane)
+Zamiast 7 widocznych zakładek (+4 ukrytych w kodzie) wchodzą:
 
-Kolejność od najszybszej do najbardziej „przeglądowej”. Żadna nie dokłada nowej sekcji-hałasu: dwie są jednowierszowe, jedna jest w nawigacji, jedna schowana pod istniejącym kaflem.
+```text
+┌──────────────────────────────────────────────┬────────────────────┐
+│  Anna Kowalska · B1 · next lesson Tue 18:00  │  STUDENT SNAPSHOT  │
+│  [ Prep ] [ Timeline ] [ Library ] [ Model ] │  Level  B1         │
+├──────────────────────────────────────────────┤  Goal   job intervw│
+│   treść aktywnej zakładki                    │  Deadline 12 Nov   │
+│                                              │  Focus areas       │
+│                                              │  [Full learning    │
+│                                              │   model →]         │
+└──────────────────────────────────────────────┴────────────────────┘
+```
 
-### 1. Wyszukiwarka „Jump to student” w nagłówku dashboardu
-- Jedno pole tuż pod powitaniem: placeholder `Jump to student…  /`.
-- Wpisanie 2+ znaków → lista podpowiedzi (imię, poziom, cel), maks. 8 wyników, dopasowanie po imieniu, e-mailu i celu (`formatGoal`).
-- Nawigacja klawiaturą (strzałki + Enter), Esc zamyka, klawisz `/` (i `Cmd/Ctrl+K`) ustawia fokus z dowolnego miejsca dashboardu — z pominięciem sytuacji, gdy fokus jest już w polu tekstowym.
-- Pusty stan (brak dopasowania): „No student matching …”.
-- Widoczne tylko, gdy nauczyciel ma co najmniej 1 ucznia.
+- **Prep** (domyślna) — jedyne miejsce, gdzie powstaje lekcja: propozycja tematu (OneMinutePrepCard + Next Lesson Ideas w jednej karcie), jeden przycisk **Generate worksheet**, ostatni worksheet z „Reuse / Continue", szybka notatka, baner welcome testu tylko przy pustym profilu.
+- **Timeline** — jeden chronologiczny strumień: lekcje, worksheety, homework wysłany/zwrócony, notatki, wyniki testów, zmiany mastery. Zastępuje zakładki Homework, Tests, Calendar (część uczniowska) i Events. Filtry typów jako pigułki nad strumieniem.
+- **Library** — worksheety, fiszki i przypisany homework tego ucznia. Archiwum i ponowne użycie, gęsta lista zamiast kafelków.
+- **Model (DSLM)** — zgodnie z Twoją decyzją **zostaje zakładką** (czwartą), nie osobną stroną. Nazwa „1 MINUTE" znika, zostaje „Learning model".
+- **Snapshot** — stały panel po prawej (na mobile zwijany): poziom, cel, deadline, trzy focus areas, skrót do Modelu oraz menu `…` z ustawieniami (Student Details, edycja, usuwanie, Hub, link do spotkania, e-mail).
 
-### 2. Pasek „Recent” — ostatnio używani uczniowie
-- Poziomy pasek pigułek z imionami, maks. 8, tuż pod wyszukiwarką.
-- Kolejność: `updated_at DESC` z istniejącego `useStudents` (to samo źródło co dawne sortowanie „ostatnia akcja”), z pominięciem uczniów już pokazanych w Next up, żeby nie dublować.
-- Na telefonie przewijalny poziomo, bez łamania układu (`overflow-x-auto`, brak poziomego scrolla strony).
-- Każda pigułka to `<a href>` — środkowy klik / Ctrl-klik otwiera nową kartę (obowiązujący wzorzec middle-click anchor).
+Zasady, których nie łamiemy: nic nie usuwamy — przenosimy o poziom głębiej; jedna główna akcja na ekranie; ikony zawsze z etykietą; tylko tokeny semantyczne. Silnik generowania worksheetów, logika DSLM, backend, RLS i migracje pozostają nietknięte.
 
-### 3. Globalny przełącznik uczniów w górnej nawigacji także na `/dashboard`
-- Istniejący `NavStudentSwitcher` jest dziś ukrywany na `/dashboard` i `/profile`. Włączamy go na `/dashboard` (na `/profile` zostaje ukryty).
-- Do popovera dokładamy pole filtrowania na górze listy (przydatne przy 20+ uczniach) — zmiana obejmuje wszystkie strony, na których switcher już działa.
-- Aktualizujemy zapis w pamięci projektu, bo dotychczasowa reguła „nie na /dashboard” przestaje obowiązywać.
+„Prepare next lesson" z dashboardu przestaje prowadzić do `?tab=dslm` i prowadzi do zakładki **Prep**.
 
-### 4. Kafel „All students” rozwijany w miejscu
-- Kafel w sekcji *Everything else* zyskuje strzałkę rozwijania obok linku: klik w tekst → nadal przejście na `/students`, klik w strzałkę → rozwinięcie lekkiej listy w miejscu.
-- Rozwinięta lista: pole wyszukiwania, sortowanie (Recently active / Name A–Z / Next lesson), płaskie wiersze (imię, poziom, cel), maks. 10 widocznych z przewijaniem i stopką „See all N students”.
-- Stan rozwinięcia zapamiętany w `localStorage`, domyślnie zwinięty — dashboard w stanie spoczynku wygląda jak teraz.
+## Etapy wdrożenia (osobne commity, jak przy dashboardzie)
 
-### Cel kliknięcia
-Wszystkie cztery ścieżki prowadzą do `/student/:id?tab=dslm` — od razu w przygotowanie lekcji, spójnie z przyciskiem *Prepare next lesson*.
+**Faza 0 — dokumentacja i roadmapa.** `docs/ux/student-workspace-spec.md` (mapowanie stara zakładka → nowe miejsce, kontrakty propsów, reguły migracji URL), wpis w `roadmap.md`.
+
+**Faza 1 — logika bez UI.** `src/lib/students/workspaceTabs.ts`: kanoniczne wartości zakładek (`prep` | `timeline` | `library` | `model`), mapa aliasów ze starych URL-i (`overview`→`prep`, `dslm`/`1minute`→`model`, `worksheets`/`flashcards`→`library`, `homework`/`tests`/`calendar`/`events`/`progress`→`timeline`, `skills`/`knowledge`→`model`), `resolveTab()`. Hook `useStudentTimeline.ts` scalający istniejące dane (lekcje, worksheety, homework, notatki, testy) w jeden posortowany strumień — bez nowych zapytań do bazy, tylko kompozycja hooków już używanych na stronie. Testy jednostkowe dla mapy aliasów i sortowania/filtrowania strumienia.
+
+**Faza 2 — snapshot.** `src/components/student/StudentSnapshotPanel.tsx` + menu `…` z przeniesionymi ustawieniami. Montaż obok istniejących zakładek (jeszcze bez zmiany ich liczby), żeby zmiana była odwracalna.
+
+**Faza 3 — zakładka Prep.** `src/components/student/prep/PrepTab.tsx` scalająca OneMinutePrepCard, Next Lesson Ideas, ostatni worksheet i szybką notatkę.
+
+**Faza 4 — zakładka Timeline.** `TimelineTab.tsx` + `TimelineEventRow.tsx` + pigułki filtrów.
+
+**Faza 5 — zakładka Library.** `LibraryTab.tsx` — gęsta lista worksheetów, fiszek i homeworku z akcjami w menu `…`.
+
+**Faza 6 — przełączenie nawigacji i routingu.** `StudentPage.tsx` schodzi do 4 zakładek, stare `?tab=` przekierowywane przez `resolveTab()` z `replace: true`; `studentPrepPath()` w `src/lib/students/quickAccess.ts` zmienia się na `?tab=prep`; przegląd wszystkich linków `?tab=` w kodzie (dashboard, nav, e-maile w Edge Functions — tam tylko odczyt i ewentualna korekta linków, bez zmian logiki).
+
+**Faza 7 — porządki i RAG.** Usunięcie martwych paneli, aktualizacja `docs/llm-context.md`, `public/llms.txt`, pamięci projektu i `roadmap.md`.
 
 ## Szczegóły techniczne
 
-Nowe pliki:
-- `src/components/dashboard/StudentQuickSearch.tsx` — pole + lista podpowiedzi + obsługa klawiatury i skrótów; czysto prezentacyjne, uczniowie wstrzykiwani przez props.
-- `src/components/dashboard/RecentStudentsBar.tsx` — pasek pigułek.
-- `src/components/dashboard/AllStudentsInline.tsx` — rozwijana lista pod kaflem; reuse `sortStudents` wyeksportowanego z `src/pages/AllStudentsPage.tsx` oraz `formatGoal`.
-- `src/lib/students/quickAccess.ts` — czyste funkcje `filterStudents(students, query)` i `pickRecentStudents(students, excludeIds, limit)` + testy jednostkowe.
+- `src/pages/StudentPage.tsx` (1256 linii) jest rozbijany na komponenty zakładek; plik strony zostaje kontrolerem: dane, routing zakładek, shell.
+- Zero nowych zapytań i zero zmian schematu — Timeline składa dane z hooków już pobieranych przez stronę.
+- Kompatybilność URL: każdy stary `?tab=` nadal działa (przekierowanie po stronie klienta), więc linki w wysłanych e-mailach i zakładkach przeglądarki nie umierają.
+- Tryb demo, `AuthenticatedPageShell`, dark mode nauczyciela i guardy demo pozostają bez zmian.
+- Po każdej fazie: `bunx tsgo --noEmit -p tsconfig.app.json` + testy + weryfikacja Playwright na `/demo`.
 
-Zmiany:
-- `src/pages/Dashboard.tsx` — render `StudentQuickSearch` i `RecentStudentsBar` między `DashboardHeader` a `GuidedStepsBar`/`NextUpSection`; przekazanie `students` i id-ków z Next up.
-- `src/components/dashboard/EverythingElseSection.tsx` — kafel All students jako `Collapsible` z `AllStudentsInline`; obecne zachowanie linku i kaflów Worksheets/Calendar bez zmian.
-- `src/components/landing/StickyNav.tsx` — `showStudentSwitcher = isRegisteredUser && !isProfile`.
-- `src/components/landing/NavStudentSwitcher.tsx` — pole filtrowania na górze popovera.
-- `mem/features/navigation/nav-student-switcher.md`, `mem/features/dashboard/today-layout.md` — aktualizacja reguł.
-- `docs/llm-context.md`, `public/llms.txt`, `roadmap.md` — wpis RAG (PROBLEM / EDOOQOO SOLUTION / TECHNICAL MECHANICS / RAG KEYWORDS).
+## Poza zakresem
 
-Bez zmian: żadnych nowych zapytań do bazy (wszystko z istniejących `useStudents` i `useNextUpStudents`), zero ruchu w Worksheet Generation Engine, DSLM, backendzie i RLS. Demo mode działa bez dodatkowych wywołań Supabase.
-
-## Weryfikacja
-- `bunx tsgo --noEmit -p tsconfig.app.json`.
-- Testy jednostkowe dla `filterStudents` / `pickRecentStudents` (dopasowanie po imieniu, e-mailu, celu; wykluczenia; limit).
-- Playwright na `/demo`: wpisanie fragmentu imienia → Enter → ląduje na `/student/:id?tab=dslm`; klik pigułki Recent; rozwinięcie kafla All students i sortowanie; switcher w nawigacji widoczny na `/dashboard`; 390 px bez poziomego scrolla; zero błędów konsoli.
-
-## Kolejność wdrożenia
-1. `quickAccess.ts` + testy (bez UI).
-2. `StudentQuickSearch` + `RecentStudentsBar` + montaż w `Dashboard.tsx`.
-3. Rozwijany kafel `All students`.
-4. `StickyNav` + filtr w `NavStudentSwitcher`.
-5. Pamięć + RAG + roadmap.
+Worksheet Generation Engine, logika DSLM (zmieniamy tylko punkt wejścia i nazwę), backend, RLS, migracje, SEO, Student Hub (`/my`), guided mode poza dashboardem (osobny etap 3 sekwencji).
