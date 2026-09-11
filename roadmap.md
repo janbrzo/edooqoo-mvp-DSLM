@@ -22,7 +22,16 @@ Reference: `docs/ux/target-teacher-experience.md` (approved 2026-09-02).
   - [x] Step 4 — `StickyNav` on /dashboard + filter in `NavStudentSwitcher`
   - [x] Step 5 — memory (`mem/features/dashboard/quick-student-access.md`) + RAG (`docs/llm-context.md` v6.9.110)
 
-- [ ] Student Workspace — 3 tabs (Prep / Timeline / Library) + snapshot panel, DSLM as deep view
+- [ ] Student Workspace (v6.9.111) — 4 tabs (Prep / Timeline / Library / Learning model) + snapshot panel — spec: `docs/ux/student-workspace-spec.md`
+  - [x] M0 — spec document + roadmap entry (code-verified current state, permanent `?tab=` alias map, data-source field audit)
+  - [ ] M1 — `src/lib/students/workspaceTabs.ts` + `resolveTab()` alias tests (no UI)
+  - [ ] M2 — `EntityRow` + `MeetingLinkField` extracted from `StudentPage.tsx`
+  - [ ] M3 — `StudentHeaderBar` + `StudentSnapshotPanel` + `StudentSettingsMenu`
+  - [ ] M4 — `PrepTab` (`NextLessonCard`, `LastLessonStrip`, `QuickNoteBox`)
+  - [ ] M5 — `useStudentTimeline` (zero queries) + `TimelineTab`
+  - [ ] M6 — `LibraryTab` with segments and collapsed Deleted
+  - [ ] M7 — switch to 4 tabs, `resolveTab` routing, `studentPrepPath()` → `?tab=prep`, `React.lazy`
+  - [ ] M8 — dead-code removal + RAG (`docs/llm-context.md`, `public/llms.txt`, memory)
 - [ ] Guided mode beyond the dashboard
 
 ## Deferred
