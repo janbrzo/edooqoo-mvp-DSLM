@@ -77,7 +77,7 @@ Legacy links live in sent emails, browser bookmarks and Edge Function templates.
 |---|---|---|
 | `overview` | `prep` | — |
 | `dslm` | `model` | keep `view`, `focus` |
-| `1minute` | `model` | — |
+| `1minute` | `model` | — (defensive: "1 MINUTE" is only a label today, `TabsTrigger value="dslm"`; no producer emits `?tab=1minute`) |
 | `progress` | `model` | `view=pathway` |
 | `skills` | `model` | `view=skills` |
 | `knowledge` | `model` | `view=profile` |
@@ -103,9 +103,11 @@ Known producers of `?tab=` links (verified with `rg -n "tab=" src/ supabase/func
 - `?tab=tests` — `supabase/functions/process-welcome-test/index.ts` (email CTA), `useDashboardAttention.ts`, `UnifiedBell.tsx`, `HomeworkNotificationBadge.tsx`, `WelcomeTestSuggestion.tsx` (also `&testId=`), `WelcomeTestPage.tsx`
 - `?tab=dslm` — `quickAccess.ts`, `NextUpCard.tsx`, `SlotDetailModal.tsx`, `PacingProposalsBell.tsx`, `NextStepsPresetBanner.tsx` (`&view=pathway`), `AddStudentDialog.tsx` (`&view=…&focus=…&_=…`), `OnboardingChecklist.tsx` (`&view=…&focus=…`)
 - `?tab=flashcards` — `ViewFlashcardSetsModal.tsx`
-- `?tab=overview` — legacy links only, no current producer
+- `?tab=overview`, `?tab=worksheets`, `?tab=homework`, `?tab=calendar`, `?tab=1minute` — no current producer; reachable from bookmarks, older emails and manual URLs only
+- `?tab=progress|skills|knowledge|events` — no producer; today they are absorbed by `redirectMap` in `StudentPage.tsx` (`skills→dslm/skills`, `knowledge→dslm/profile`, `progress→dslm/pathway`, `events→dslm/profile`), which the section 4 table reproduces one-to-one
+- `OnboardingChecklist.tsx` emits relative query strings (`?tab=dslm&view=…&focus=…`) rather than absolute paths; `resolveTab()` must therefore run on `searchParams`, not on a parsed full URL
 
-The Edge Function email link is **not** edited; the alias map absorbs it.
+The rg sweep on 2026-09-11 returned no `?tab=` value outside the table above. The Edge Function email link is **not** edited; the alias map absorbs it.
 
 ---
 
@@ -259,7 +261,7 @@ No `any` in any new interface.
 
 ## 7. Data sources
 
-Field names below were verified against the hooks and types on 2026-09-11.
+Field names below were verified on 2026-09-11 against `src/hooks/useCalendarSlots.tsx` (`CalendarSlot`), `src/hooks/useAllWorksheetHomework.tsx` (`HomeworkAssignment`), `src/types/studentTests.ts` (`StudentTest`) and `src/types/studentKnowledge.ts` (`StudentKnowledgeEntry`, `KnowledgeMetadata`). Note the hook files use the `.tsx` extension, not `.ts`.
 
 | Event type | Source | Date field | `needsAction` when |
 |---|---|---|---|
@@ -269,7 +271,7 @@ Field names below were verified against the hooks and types on 2026-09-11.
 | `homework_returned` | `useAllWorksheetHomework` → `HomeworkAssignment` | `completed_at` | `completed_at != null && completed_by_teacher !== true` |
 | `note` | `useStudentKnowledge` → `StudentKnowledgeEntry` | `created_at` | never |
 | `test_result` | `useStudentTests` → `StudentTest` | `completed_at ?? created_at` | `completed_at != null && reviewed_at == null` |
-| `mastery_change` | `useStudentKnowledge`, `category === 'Skill Assessment'` with `metadata.mastery` | `updated_at` | never |
+| `mastery_change` | `useStudentKnowledge`, `category === 'Skill Assessment'` with `metadata.mastery` (`KnowledgeMetadata.mastery?: number`, 0–100) | `updated_at` | never |
 
 Architectural rule, binding for M5: **`useStudentTimeline` performs no Supabase query.** It is a `useMemo` composition over data the page already holds. This is what prevents the N+1 pattern that `StudentCard` caused on the dashboard before v6.9.109. `useAllWorksheetHomework` is keyed by worksheet ids, so Timeline reuses the array the page already passes it and adds no round trip.
 
