@@ -1,0 +1,159 @@
+import { describe, expect, it } from 'vitest';
+import {
+  DEFAULT_TAB,
+  PRESERVED_PARAMS,
+  TAB_ALIASES,
+  WORKSPACE_TABS,
+  isWorkspaceTab,
+  resolveTab,
+  resolveWorkspaceParams,
+  studentTabPath,
+} from '../workspaceTabs';
+
+describe('resolveTab — canonical values', () => {
+  for (const tab of WORKSPACE_TABS) {
+    it(`passes through "${tab}" unchanged`, () => {
+      expect(resolveTab(tab)).toEqual({ tab, changed: false });
+    });
+  }
+});
+
+describe('resolveTab — legacy aliases', () => {
+  const cases: Array<[string, Record<string, unknown>]> = [
+    ['overview', { tab: 'prep' }],
+    ['dslm', { tab: 'model' }],
+    ['1minute', { tab: 'model' }],
+    ['progress', { tab: 'model', view: 'pathway' }],
+    ['skills', { tab: 'model', view: 'skills' }],
+    ['knowledge', { tab: 'model', view: 'profile' }],
+    ['events', { tab: 'model', view: 'profile' }],
+    ['worksheets', { tab: 'library', section: 'worksheets' }],
+    ['flashcards', { tab: 'library', section: 'flashcards' }],
+    ['homework', { tab: 'timeline', filter: 'homework' }],
+    ['tests', { tab: 'timeline', filter: 'tests' }],
+    ['calendar', { tab: 'timeline', filter: 'lessons' }],
+  ];
+
+  it('covers every alias in the map', () => {
+    expect(cases.map(([k]) => k).sort()).toEqual(Object.keys(TAB_ALIASES).sort());
+  });
+
+  for (const [legacy, expected] of cases) {
+    it(`maps "${legacy}"`, () => {
+      expect(resolveTab(legacy)).toEqual({ ...expected, changed: true });
+    });
+  }
+});
+
+describe('resolveTab — fallbacks and hygiene', () => {
+  for (const raw of [null, undefined, '', '   ', 'nonsense']) {
+    it(`falls back to prep for ${JSON.stringify(raw)}`, () => {
+      expect(resolveTab(raw)).toEqual({ tab: DEFAULT_TAB, changed: true });
+    });
+  }
+
+  it('is case-insensitive', () => {
+    expect(resolveTab('DSLM').tab).toBe('model');
+  });
+
+  it('trims whitespace', () => {
+    expect(resolveTab(' tests ')).toEqual({ tab: 'timeline', filter: 'tests', changed: true });
+  });
+
+  it('isWorkspaceTab guards correctly', () => {
+    expect(isWorkspaceTab('prep')).toBe(true);
+    expect(isWorkspaceTab('dslm')).toBe(false);
+    expect(isWorkspaceTab(null)).toBe(false);
+  });
+});
+
+const q = (s: string) => new URLSearchParams(s);
+
+describe('resolveWorkspaceParams', () => {
+  it('preserves the flashcard set', () => {
+    const { next, changed } = resolveWorkspaceParams(q('tab=flashcards&set=abc'));
+    expect(next.toString()).toBe('tab=library&section=flashcards&set=abc');
+    expect(changed).toBe(true);
+  });
+
+  it('preserves testId', () => {
+    const { next } = resolveWorkspaceParams(q('tab=tests&testId=t1'));
+    expect(next.toString()).toBe('tab=timeline&filter=tests&testId=t1');
+  });
+
+  it('preserves every pass-through param', () => {
+    const input = q('tab=dslm&set=s&intake=i&view=goals&focus=f&testId=t&_=1');
+    const { next } = resolveWorkspaceParams(input);
+    for (const key of PRESERVED_PARAMS) {
+      expect(next.get(key)).toBe(input.get(key));
+    }
+  });
+
+  it('lets an explicit view beat the alias view', () => {
+    const { resolved } = resolveWorkspaceParams(q('tab=progress&view=goals'));
+    expect(resolved).toMatchObject({ tab: 'model', view: 'goals' });
+  });
+
+  it('lets an explicit section beat the alias section', () => {
+    const { next } = resolveWorkspaceParams(q('tab=worksheets&section=homework'));
+    expect(next.get('section')).toBe('homework');
+  });
+
+  it('is idempotent', () => {
+    const first = resolveWorkspaceParams(q('tab=dslm&view=pathway&focus=pick-idea'));
+    const second = resolveWorkspaceParams(first.next);
+    expect(second.changed).toBe(false);
+    expect(second.next.toString()).toBe(first.next.toString());
+  });
+
+  it('leaves a canonical URL untouched', () => {
+    const { next, changed } = resolveWorkspaceParams(q('tab=prep'));
+    expect(changed).toBe(false);
+    expect(next.toString()).toBe('tab=prep');
+  });
+
+  it('does not mutate the input', () => {
+    const input = q('tab=dslm');
+    resolveWorkspaceParams(input);
+    expect(input.toString()).toBe('tab=dslm');
+  });
+
+  it('ignores param order when deciding changed', () => {
+    const { changed } = resolveWorkspaceParams(q('view=pathway&tab=model'));
+    expect(changed).toBe(false);
+  });
+});
+
+describe('real producers emit URLs that still resolve', () => {
+  const cases: Array<[string, string]> = [
+    ['tab=tests', 'tab=timeline&filter=tests'],
+    ['tab=tests&testId=x', 'tab=timeline&filter=tests&testId=x'],
+    ['tab=dslm', 'tab=model'],
+    ['tab=dslm&view=pathway', 'tab=model&view=pathway'],
+    ['tab=dslm&view=goals&focus=add-goal-modal&_=1', 'tab=model&view=goals&focus=add-goal-modal&_=1'],
+    ['tab=dslm&view=pathway&focus=pick-idea', 'tab=model&view=pathway&focus=pick-idea'],
+    ['tab=flashcards', 'tab=library&section=flashcards'],
+    ['tab=overview', 'tab=prep'],
+    ['tab=worksheets', 'tab=library&section=worksheets'],
+    ['tab=homework', 'tab=timeline&filter=homework'],
+    ['tab=calendar', 'tab=timeline&filter=lessons'],
+  ];
+
+  for (const [input, expected] of cases) {
+    it(`${input} → ${expected}`, () => {
+      expect(resolveWorkspaceParams(q(input)).next.toString()).toBe(expected);
+    });
+  }
+});
+
+describe('studentTabPath', () => {
+  it('builds a canonical prep link', () => {
+    expect(studentTabPath('abc', 'prep')).toBe('/student/abc?tab=prep');
+  });
+
+  it('appends extras and skips empty values', () => {
+    expect(studentTabPath('abc', 'model', { view: 'goals', focus: '' })).toBe(
+      '/student/abc?tab=model&view=goals',
+    );
+  });
+});
