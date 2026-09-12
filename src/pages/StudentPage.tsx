@@ -62,7 +62,7 @@ import {
 import ShareWorksheetModal from '@/components/ShareWorksheetModal';
 import RenameDialog from '@/components/RenameDialog';
 import { toast } from 'sonner';
-import { Label } from '@/components/ui/label';
+
 
 
 const StudentPage = () => {
