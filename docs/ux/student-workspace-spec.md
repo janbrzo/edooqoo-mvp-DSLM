@@ -180,22 +180,37 @@ export interface StudentTimelineResult {
 ```
 
 ```ts
-// src/components/student/EntityRow.tsx
+// src/components/student/EntityRow.tsx — implemented in M2
+export type EntityRowTone = 'default' | 'destructive';
+export type EntityRowMode = 'link' | 'button' | 'static';
+
 export interface EntityRowProps {
   icon: LucideIcon;
   title: string;
-  subtitle?: string;
-  meta?: string;                 // right-aligned, usually a formatted date
-  href?: string;                 // renders <a> so middle-click still works
+  subtitle?: React.ReactNode;
+  meta?: React.ReactNode;        // right-aligned, usually a formatted date
+  href?: string;                 // renders <a> + ::after overlay, middle-click works
   onClick?: () => void;
-  needsAction?: boolean;         // amber dot + amber action button
+  needsAction?: boolean;         // AttentionDot + amber action button
   actionLabel?: string;
   onAction?: () => void;
   menu?: React.ReactNode;        // DropdownMenu content behind the `…` trigger
   badges?: React.ReactNode;      // MediaBadges and similar
+  actions?: React.ReactNode;     // existing buttons (Delete/Duplicate/Transfer)
   dense?: boolean;               // Library archive density
+  tone?: EntityRowTone;          // 'destructive' for the Deleted section
+  className?: string;
+  'data-testid'?: string;
 }
+
+// Pure decision helper, unit-tested without a DOM renderer.
+export function resolveRowClasses(
+  props: Pick<EntityRowProps, 'href' | 'onClick' | 'dense' | 'tone' | 'className'>,
+): ResolvedRowClasses;
 ```
+
+Interaction contract: `href` wins over `onClick` (`mode: 'link'`); `onClick` alone yields
+`role="button"` with Enter/Space; neither yields a static row with no hover affordance.
 
 ```ts
 export interface StudentHeaderBarProps {

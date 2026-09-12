@@ -25,7 +25,7 @@ Reference: `docs/ux/target-teacher-experience.md` (approved 2026-09-02).
 - [ ] Student Workspace (v6.9.111) — 4 tabs (Prep / Timeline / Library / Learning model) + snapshot panel — spec: `docs/ux/student-workspace-spec.md`
   - [x] M0 — spec document + roadmap entry (code-verified current state, permanent `?tab=` alias map, data-source field audit)
   - [x] M1 — `src/lib/students/workspaceTabs.ts` + `resolveTab()` alias tests (no UI)
-  - [ ] M2 — `EntityRow` + `MeetingLinkField` extracted from `StudentPage.tsx`
+  - [x] M2 — `EntityRow` + `MeetingLinkField` extracted from `StudentPage.tsx` (no visual change; `StudentPage.tsx` 1256 → 1081 lines)
   - [ ] M3 — `StudentHeaderBar` + `StudentSnapshotPanel` + `StudentSettingsMenu`
   - [ ] M4 — `PrepTab` (`NextLessonCard`, `LastLessonStrip`, `QuickNoteBox`)
   - [ ] M5 — `useStudentTimeline` (zero queries) + `TimelineTab`
