@@ -17,6 +17,7 @@ import { useWorksheetHistory } from '@/hooks/useWorksheetHistory';
 import { useDeletedWorksheets } from '@/hooks/useDeletedWorksheets';
 import { StudentEditDialog } from '@/components/StudentEditDialog';
 import { IntakeExtractionBanner } from '@/components/student/IntakeExtractionBanner';
+import { MeetingLinkField } from '@/components/student/MeetingLinkField';
 import { DeleteWorksheetButton } from "@/components/DeleteWorksheetButton";
 import { DuplicateWorksheetButton } from "@/components/DuplicateWorksheetButton";
 import { StudentSelector } from '@/components/StudentSelector';
