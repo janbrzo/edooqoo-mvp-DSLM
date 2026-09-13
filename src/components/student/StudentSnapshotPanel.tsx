@@ -36,7 +36,7 @@ const Row: React.FC<{ label: string; children: React.ReactNode }> = ({ label, ch
   </div>
 );
 
-function useSnapshotContent({
+function buildSnapshotContent({
   englishLevel,
   mainGoal,
   mainGoalTargetDate,
@@ -88,7 +88,7 @@ function useSnapshotContent({
 
 export const StudentSnapshotPanel: React.FC<StudentSnapshotPanelProps> = (props) => {
   const [open, setOpen] = useState(false);
-  const content = useSnapshotContent(props);
+  const content = buildSnapshotContent(props);
   const summary = [props.englishLevel || NOT_SET, formatGoal(props.mainGoal) || NOT_SET]
     .filter(Boolean)
     .join(' · ');
