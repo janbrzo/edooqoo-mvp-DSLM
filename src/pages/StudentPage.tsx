@@ -1069,7 +1069,9 @@ const StudentPage = () => {
             hubEmail={student.student_email}
             onOpenModel={() => handleTabChange('dslm')}
           />
+          </div>
         </div>
+
 
 
         {/* Student Edit Dialog */}
