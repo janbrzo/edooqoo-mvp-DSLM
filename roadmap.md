@@ -31,6 +31,10 @@ Reference: `docs/ux/target-teacher-experience.md` (approved 2026-09-02).
     - [x] M3.2 — `StudentHeaderBar` + `StudentSnapshotPanel` + `StudentSettingsMenu` components (built, not yet mounted)
     - [x] M3.3 — mounted in `StudentPage.tsx`; duplicated Back/Edit/Delete/meeting-link controls removed
   - [ ] M4 — `PrepTab` (`NextLessonCard`, `LastLessonStrip`, `QuickNoteBox`)
+    - [x] M4.1 — `src/lib/students/prepPlan.ts` + 21 unit tests (no UI)
+    - [ ] M4.2 — `NextLessonCard`, `LastLessonStrip`, `QuickNoteBox` (built, not mounted)
+    - [ ] M4.3 — `PrepTab.tsx` composition
+    - [ ] M4.4 — mount as eighth tab in `StudentPage.tsx` (`?tab=prep`, default stays `dslm`)
   - [ ] M5 — `useStudentTimeline` (zero queries) + `TimelineTab`
   - [ ] M6 — `LibraryTab` with segments and collapsed Deleted
   - [ ] M7 — switch to 4 tabs, `resolveTab` routing, `studentPrepPath()` → `?tab=prep`, `React.lazy`
