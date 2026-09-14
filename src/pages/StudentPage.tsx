@@ -1060,6 +1060,7 @@ const StudentPage = () => {
         </Tabs>
           </div>
 
+          <div className="order-1 lg:order-2">
           <StudentSnapshotPanel
             englishLevel={student.english_level}
             mainGoal={student.main_goal}
