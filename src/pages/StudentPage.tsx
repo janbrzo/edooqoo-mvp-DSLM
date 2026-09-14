@@ -1048,6 +1048,18 @@ const StudentPage = () => {
             />
           </TabsContent>
         </Tabs>
+          </div>
+
+          <StudentSnapshotPanel
+            englishLevel={student.english_level}
+            mainGoal={student.main_goal}
+            mainGoalTargetDate={(student as any).main_goal_target_date ?? null}
+            focusAreas={focusAreas}
+            hubEmail={student.student_email}
+            onOpenModel={() => handleTabChange('dslm')}
+          />
+        </div>
+
 
         {/* Student Edit Dialog */}
         <StudentEditDialog
