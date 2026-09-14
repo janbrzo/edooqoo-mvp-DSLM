@@ -17,7 +17,12 @@ import { useWorksheetHistory } from '@/hooks/useWorksheetHistory';
 import { useDeletedWorksheets } from '@/hooks/useDeletedWorksheets';
 import { StudentEditDialog } from '@/components/StudentEditDialog';
 import { IntakeExtractionBanner } from '@/components/student/IntakeExtractionBanner';
-import { MeetingLinkField } from '@/components/student/MeetingLinkField';
+
+import { StudentHeaderBar } from '@/components/student/StudentHeaderBar';
+import { StudentSnapshotPanel } from '@/components/student/StudentSnapshotPanel';
+import { StudentSettingsMenu } from '@/components/student/StudentSettingsMenu';
+import { useStudentNextLesson } from '@/hooks/useStudentNextLesson';
+import { selectFocusAreas, formatNextLessonLabel } from '@/lib/students/studentSnapshot';
 import { DeleteWorksheetButton } from "@/components/DeleteWorksheetButton";
 import { DuplicateWorksheetButton } from "@/components/DuplicateWorksheetButton";
 import { StudentSelector } from '@/components/StudentSelector';
@@ -160,6 +165,17 @@ const StudentPage = () => {
     teacherId: student?.teacher_id || '',
   });
 
+  // v6.9.111 M3.3 — workspace frame: focus areas + next lesson summary.
+  const focusAreas = useMemo(
+    () => selectFocusAreas(studentKnowledge.entries),
+    [studentKnowledge.entries],
+  );
+  const { lesson: nextLesson, isLoading: nextLessonLoading } = useStudentNextLesson(
+    id,
+    student?.teacher_id,
+  );
+  const nextLessonLabel = useMemo(() => formatNextLessonLabel(nextLesson), [nextLesson]);
+
   useEffect(() => {
     refetchWorksheets();
   }, [currentPage, deletedCurrentPage]);
@@ -255,18 +271,28 @@ const StudentPage = () => {
         tokenLeft={tokenLeft} 
         user={user}
         onGenerateWorksheet={handleGenerateWorksheet}
-        leftContent={
-          <>
-            <Button variant="ghost" size="sm" asChild className="gap-1">
-              <Link to="/dashboard">
-                <ArrowLeft className="h-4 w-4" />
-                <span className="hidden sm:inline">Back</span>
-              </Link>
-            </Button>
-          </>
-        }
       />
       <div className="max-w-6xl mx-auto p-4">
+        <StudentHeaderBar
+          name={student.name}
+          englishLevel={student.english_level}
+          mainGoal={student.main_goal}
+          nextLessonLabel={nextLessonLabel}
+          isNextLessonLoading={nextLessonLoading}
+          menu={
+            <StudentSettingsMenu
+              student={student as any}
+              teacherId={student.teacher_id}
+              gcalEnabled={gcalEnabled}
+              onEdit={() => setIsEditDialogOpen(true)}
+              onDelete={handleDeleteStudent}
+            />
+          }
+        />
+
+        <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_280px] lg:gap-6">
+          <div className="order-2 min-w-0 lg:order-1">
+
 
         {/* v6.9.62 P6 — intake extraction banner: shown when ?intake=<id> is present. */}
         {searchParams.get('intake') && id ? (
@@ -357,58 +383,12 @@ const StudentPage = () => {
               {/* Student Details */}
               <Card>
               <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center">
-                    <User className="h-5 w-5 mr-2" />
-                    Student Details
-                  </CardTitle>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setIsEditDialogOpen(true)}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <Trash2 className="h-5 w-5 text-destructive" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle className="flex items-center gap-2">
-                            <Trash2 className="h-5 w-5 text-destructive" />
-                            Delete Student: {student.name}
-                          </AlertDialogTitle>
-                          <AlertDialogDescription>
-                            This action cannot be undone. To confirm deletion, please type the student's full name below:
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        
-                        <div className="py-4">
-                          <Input
-                            placeholder={`Type "${student.name}" to confirm`}
-                            value={deleteConfirmName}
-                            onChange={(e) => setDeleteConfirmName(e.target.value)}
-                          />
-                        </div>
-                        
-                        <AlertDialogFooter>
-                          <AlertDialogCancel onClick={() => setDeleteConfirmName('')}>Cancel</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={handleDeleteStudent}
-                            disabled={deleteConfirmName !== student.name}
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90 disabled:opacity-50"
-                          >
-                            Delete Student
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </div>
-                </div>
+                {/* v6.9.111 M3.3 — edit/delete/meeting link now live in the single
+                    StudentSettingsMenu in the workspace header. */}
+                <CardTitle className="flex items-center">
+                  <User className="h-5 w-5 mr-2" />
+                  Student Details
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
@@ -461,8 +441,6 @@ const StudentPage = () => {
                     <span>{format(new Date(student.created_at), 'MMM dd, yyyy')}</span>
                   </div>
                 </div>
-                {/* Default Meeting Link */}
-                <MeetingLinkField studentId={student.id} teacherId={student.teacher_id} hasGcal={gcalEnabled} />
               </CardContent>
             </Card>
 
@@ -1032,6 +1010,21 @@ const StudentPage = () => {
             />
           </TabsContent>
         </Tabs>
+          </div>
+
+          <div className="order-1 lg:order-2">
+          <StudentSnapshotPanel
+            englishLevel={student.english_level}
+            mainGoal={student.main_goal}
+            mainGoalTargetDate={(student as any).main_goal_target_date ?? null}
+            focusAreas={focusAreas}
+            hubEmail={student.student_email}
+            onOpenModel={() => handleTabChange('dslm')}
+          />
+          </div>
+        </div>
+
+
 
         {/* Student Edit Dialog */}
         <StudentEditDialog
