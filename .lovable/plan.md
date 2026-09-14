@@ -1,294 +1,280 @@
-# M3 — Student Workspace: szczegółowy plan małych klocków
+# Faza M4 — PrepTab (małe klocki)
 
-## Cel fazy
+Wersja: v6.9.111 · zakres: `/student/:id`, zakładka „Prep"
+Zasada nadrzędna: **nic nie usuwamy, nic nie przełączamy** — M4 dodaje nową zakładkę obok siedmiu istniejących. Przełączenie na 4 zakładki i aliasy URL to M7.
 
-M3 buduje stałą ramę kontekstu ucznia, zanim zmienimy zawartość zakładek. Po tej fazie nauczyciel, niezależnie od otwartej starej zakładki, zawsze widzi: **u kogo jest, jaki jest poziom i cel, kiedy jest następna lekcja, co wymaga uwagi oraz gdzie są ustawienia ucznia**.
+---
 
-M3 nie przełącza jeszcze strony na `Prep / Timeline / Library / Learning model`. Obecne zakładki i ich adresy pozostają aktywne do M7. Dzięki temu nowa rama może zostać zweryfikowana osobno, bez jednoczesnego ryzyka zmiany routingu i całej zawartości strony.
+## 1. Co dziś jest źle na pierwszym ekranie
 
-## Affected surface
+Zakładka Overview to trzy równorzędne karty w siatce 3 kolumn: „Student Details" (8 pól, dziś już bez Edit/Delete — te przeniosły się do menu w nagłówku w M3), „Recent Worksheets" (Generate Another + View All + 5 wierszy z przyciskiem usuwania + sekcja pracy domowej pod każdym wierszem) i „Recent Notes" (Add Note + View All + 3 karty wpisów). Nad nimi jeszcze `WelcomeTestSuggestion`, `OneMinutePrepCard` i baner o Student Hub.
 
-- `src/pages/StudentPage.tsx` — montaż nowego nagłówka, panelu i menu; istniejące dane oraz handlery pozostają właścicielem strony.
-- `src/components/student/StudentHeaderBar.tsx` — nowy, prezentacyjny nagłówek rekordu ucznia.
-- `src/components/student/StudentSnapshotPanel.tsx` — nowy desktopowy panel i mobilne rozwinięcie.
-- `src/components/student/StudentSettingsMenu.tsx` — nowe menu ustawień, dialog linku spotkania i type-to-confirm delete.
-- `src/hooks/useStudentNextLesson.ts` — jeden lekki, ograniczony odczyt najbliższej lekcji, z pełną gałęzią demo.
-- `src/lib/students/studentSnapshot.ts` — czyste selektory i formatowanie dla M3.
-- `src/lib/students/__tests__/studentSnapshot.test.ts` — testy bez DOM.
-- `docs/ux/student-workspace-spec.md` — zapis ostatecznych kontraktów M3 i świadomych stanów przejściowych.
-- `roadmap.md` — M3 oznaczone jako wykonane dopiero po pełnej weryfikacji.
+Efekt: ~35 elementów interaktywnych, trzy przyciski w wariancie podstawowym, żadnej odpowiedzi na jedyne pytanie, z którym nauczyciel wchodzi na tę stronę: **czego uczyć na najbliższej lekcji i czym to wygenerować**.
 
-Nie dotykamy: Worksheet Generation Engine, logiki DSLM, Supabase schema/RLS, Edge Functions, Student Hub `/my`, M4–M8 ani nowych czterech zakładek.
+Dodatkowo dane potrzebne do tej odpowiedzi już istnieją, ale leżą w trzech różnych miejscach: proponowane tematy w DSLM (`useFutureTimeline` → `nextSteps`/`phaseSteps`), sygnały do pracy w `OneMinutePrepCard`, ostatni arkusz w „Recent Worksheets". Nauczyciel składa to ręcznie.
 
-## Potwierdzony stan i root cause
+Root cause: Overview pokazuje **stan obiektu „student"**, a nie **następny krok rytuału**.
 
-`StudentPage.tsx` nadal zarządza starym modelem siedmiu widocznych zakładek, lokalnym `activeTab`, danymi ucznia, ustawieniami, usuwaniem i modalami. M1 (`workspaceTabs.ts`) oraz M2 (`EntityRow`) istnieją, ale celowo nie są jeszcze podłączone do routingu strony. Informacje o uczniu i akcje są dziś dostępne głównie wewnątrz `Overview`, więc znikają z pola widzenia po zmianie zakładki.
+---
 
-**Root cause:** kontekst ucznia i ustawienia są częścią jednej zakładki roboczej zamiast stałej ramy rekordu, dlatego nauczyciel traci orientację podczas przechodzenia między modułami.
-
-## Badania UX i wnioski zastosowane w Edooqoo
-
-Wzorce stron rekordu w narzędziach profesjonalnych rozdzielają trzy warstwy: trwałą identyfikację rekordu, bieżącą pracę i rzadkie ustawienia. ServiceNow, Blackbaud SKY UX i Infor opisują nagłówek rekordu jako stały punkt orientacyjny; Nielsen Norman Group i Primer zalecają progressive disclosure dla rzadkich oraz destrukcyjnych działań; Workday stosuje panel boczny do kontekstu pomocniczego, nie do duplikowania głównej pracy.
-
-Źródła referencyjne:
-
-- ServiceNow Workspace record page: https://horizon.servicenow.com/workspace/page-templates/record
-- Blackbaud record page: https://developer.blackbaud.com/skyux/design/guidelines/page-layouts/record-page
-- Infor profile record: https://design.infor.com/patterns/page-layouts/profile-record/
-- Nielsen Norman Group, progressive disclosure: https://www.nngroup.com/articles/progressive-disclosure/
-- Primer, progressive disclosure: https://primer.github.io/design/ui-patterns/progressive-disclosure/
-- Workday side panel: https://canvas.workday.com/components/containers/side-panel/
-
-Przekład na Edooqoo: nagłówek identyfikuje ucznia, snapshot podaje wyłącznie informacje potrzebne do decyzji o kolejnej lekcji, a edycja i usuwanie nie konkurują wizualnie z pracą nauczyciela.
-
-## Rozważone rozwiązania
-
-| Opcja | Podejście | Zaleta | Ryzyko regresji |
-|---|---|---|---|
-| A. Tylko nowy nagłówek | Dodać imię, poziom i menu nad starymi zakładkami | Najmniejsza zmiana | Wysokie UX: cel, deadline i focus nadal są rozproszone |
-| B. Nagłówek + snapshot z `useCalendarSlots` | Użyć pełnego hooka kalendarza również w ramie strony | Szybkie użycie istniejącego kodu | Średnie/wysokie: pełny zakres dat, realtime i możliwe zdublowane odczyty z zakładką Calendar |
-| C. Nagłówek + snapshot + lekkie źródło najbliższej lekcji | Jeden limitowany odczyt najbliższego terminu, a focus z już pobranych wpisów wiedzy | Najmniej danych, pełny kontrakt M3, dobra separacja | Niskie |
-
-**Wybrane rozwiązanie: C.** Zapewnia docelową ramę bez podpinania M7 i bez uruchamiania pełnego kalendarza tylko po to, by wyświetlić jedną datę. Czyste selektory oddzielają reguły prezentacji od komponentów i mogą być sprawdzone testami bez dodawania biblioteki do renderowania React.
-
-## Docelowa kompozycja M3
+## 2. Docelowy widok Prep (M4)
 
 ```text
-StickyNav (bez własnego przycisku Back)
-└── StudentHeaderBar
-    ├── Back to dashboard
-    ├── H1: student name
-    ├── level badge
-    ├── goal summary
-    ├── next lesson summary
-    └── More actions
-
-mobile: StudentSnapshotPanel (collapsed summary → expandable details)
-
-grid lg:grid-cols-[minmax(0,1fr)_280px]
-├── existing 7-tab workspace (unchanged routing and content)
-└── desktop StudentSnapshotPanel (sticky)
+┌───────────────────────────────────────────── kolumna główna ─────────────┐
+│ [WelcomeTestSuggestion]          (bez zmian, tylko gdy warunek spełniony)│
+│ [Student Hub banner]             (bez zmian, tylko gdy jest e-mail)      │
+├──────────────────────────────────────────────────────────────────────────┤
+│ NEXT LESSON                                     Tue 18:00                │
+│ Past simple w opowiadaniu o projekcie                                    │
+│ Dlaczego: 3 błędy w czasach przeszłych w ostatnich 2 arkuszach           │
+│ [Generate worksheet]   [Change topic ▾]                     (…)          │
+│ ── Focus: past simple · phrasal verbs · fluency ──                       │
+├──────────────────────────────────────────────────────────────────────────┤
+│ LAST LESSON                                                              │
+│ 📄 Job interview small talk        4 dni temu    [Open] [Reuse]     (…)  │
+├──────────────────────────────────────────────────────────────────────────┤
+│ QUICK NOTE                                                               │
+│ [ Co zauważyłeś? …………………………………………………………… ] [Save]   │
+│ · „Myli past perfect w narracji"                       2 dni temu        │
+│ · „Wraca z Lizbony 12 maja — zapytać"                  5 dni temu        │
+│ · „Chce ćwiczyć telefonowanie"                         1 tyg. temu       │
+│                                       Wszystkie notatki → Learning model │
+└──────────────────────────────────────────────────────────────────────────┘
 ```
 
-`IntakeExtractionBanner`, jeśli aktywny przez `?intake=`, pozostaje pomiędzy nagłówkiem a obszarem roboczym. Nie może zostać przeniesiony do snapshotu ani utracić parametru URL.
+Reguły UI (zgodne z sekcją 8 i 9 specyfikacji):
 
-## 1. Czysty model danych snapshotu
+- **Jeden przycisk `variant="default"` na całej stronie**: „Generate worksheet" w `NextLessonCard`. „Save" w notatce dostaje `variant="secondary"`, „Open"/„Reuse" → `variant="outline"` w rozmiarze `sm`.
+- Wszystko, co nie jest akcją główną sekcji, ląduje za `…` (`aria-label="More actions"`). Zero widocznych ikon kosza.
+- Każdy wiersz to `EntityRow` z M2 — ten sam rytm co Timeline (M5) i Library (M6).
+- Kolejność pionowa jest kolejnością rytuału: *co dalej → co było → co zapamiętać*. Nic nie stoi obok siebie w kolumnach; wzrok idzie jedną ścieżką.
+- Tokeny semantyczne. Zakaz `text-white`, `bg-white`, `text-gray-*`, `text-green-*`, `bg-[#…]`. Bursztyn tylko przez klasę `action` z `resolveRowClasses`.
 
-Utworzyć `src/lib/students/studentSnapshot.ts` bez Reacta i Supabase.
+---
 
-### `selectFocusAreas(entries)`
+## 3. Nowe pliki
 
-- przyjmuje `StudentKnowledgeEntry[]`;
-- bierze wyłącznie aktywne wpisy `category === 'Skill Assessment'`;
-- pomija `deleted_at`, `is_outdated === true` i wpisy z `archived_at`;
-- uwzględnia `metadata.skill_subtype` równe `weakness`, `mistake` lub `practice`; strength nie jest „focus area”;
-- etykieta: najpierw niepusty `metadata.nano_skill`, potem pierwsza niepusta linia `content`;
-- usuwa duplikaty bez rozróżniania wielkości liter, zachowując najnowszy wpis;
-- sortuje deterministycznie po `updated_at`, potem `created_at`, malejąco;
-- zwraca maksymalnie trzy krótkie etykiety; tekst dłuższy niż 60 znaków jest skracany z wielokropkiem.
+| Plik | Rola |
+|---|---|
+| `src/lib/students/prepPlan.ts` | Czyste reguły: wybór propozycji tematu, budowa etykiety „dlaczego", formatowanie wieku wpisu. Zero Reacta, zero Supabase. |
+| `src/lib/students/__tests__/prepPlan.test.ts` | Testy jednostkowe powyższego. |
+| `src/components/student/prep/NextLessonCard.tsx` | Propozycja tematu + uzasadnienie + Generate + Change topic. |
+| `src/components/student/prep/LastLessonStrip.tsx` | Ostatni arkusz: Open / Reuse / menu. |
+| `src/components/student/prep/QuickNoteBox.tsx` | Jedno pole notatki + trzy ostatnie wpisy. |
+| `src/components/student/prep/PrepTab.tsx` | Kompozycja trzech powyższych + banery. |
 
-### `formatNextLessonLabel(lesson, now)`
+Żaden z tych plików nie wykonuje zapytania do Supabase. Dane przychodzą propsami z `StudentPage.tsx`, dokładnie tak jak w M3.
 
-- wejście: `{ date: string; time: string } | null`;
-- wynik: `Today 18:00`, `Tomorrow 18:00` albo `Tue 18:00`;
-- nie pokazuje sekund;
-- nie parsuje daty przez niejawny UTC; łączy lokalny dzień i godzinę zgodnie z semantyką istniejącego kalendarza nauczyciela;
-- `null` daje `null`, a interfejs pokazuje wtedy „No lesson booked”.
+---
 
-Testy obejmą: kolejność, duplikaty, wszystkie dozwolone subtype, pomijanie strength/outdated/deleted/archived, fallback do content, limit trzech, skracanie, dziś/jutro/dzień tygodnia oraz `null`.
-
-## 2. Lekki odczyt najbliższej lekcji
-
-Utworzyć `src/hooks/useStudentNextLesson.ts` oparty na React Query.
-
-Kontrakt:
+## 4. `src/lib/students/prepPlan.ts` — reguły (gotowe do przepisania)
 
 ```ts
-interface StudentNextLesson {
-  date: string;
-  time: string;
+import type { WorksheetSuggestion } from '@/types/studentProgress';
+import type { StudentKnowledgeEntry } from '@/types/studentKnowledge';
+
+export interface PrepSuggestion {
+  id: string | null;
+  topic: string;
+  goal: string;
+  additionalInfo: string;
+  grammarFocus: string;
+  exercises: string[];
+  exerciseFocusMap: Record<string, 'vocabulary' | 'grammar'>;
+  rationale: string | null;
+  source: 'phase_step' | 'next_step' | 'fallback';
 }
 
-interface UseStudentNextLessonResult {
-  lesson: StudentNextLesson | null;
-  isLoading: boolean;
-}
+export const RATIONALE_MAX_LEN = 160;
+
+export function selectPrepSuggestion(
+  phaseSteps: WorksheetSuggestion[],
+  nextSteps: WorksheetSuggestion[],
+  fallback: { mainGoal: string | null; focusAreas: string[] },
+): PrepSuggestion;
+
+export function buildRationale(
+  suggestion: PrepSuggestion,
+  focusAreas: string[],
+): string;
+
+export function formatRelativeAge(iso: string | null, now?: Date): string;
 ```
 
-Reguły:
+Reguły szczegółowe (żadnych decyzji na etapie implementacji):
 
-- query key: `['student-next-lesson', teacherId, studentId, isDemoMode]`;
-- query jest wyłączone bez obu identyfikatorów;
-- produkcja: `calendar_slots`, tylko wskazany nauczyciel i uczeń, od dzisiaj wzwyż, status `booked`, sort `slot_date` + `start_time`, `limit(1)`;
-- brak realtime i brak automatycznej mutacji statusu;
-- demo: wybór z `demoData.calendarSlots`, zero wywołań Supabase;
-- błąd degraduje do `null`, logowany przez `src/utils/logger.ts`, bez blokowania całej strony;
-- `staleTime: 60_000`, bez refetch przy focusie, zgodnie z rolą pomocniczego podsumowania.
+1. `selectPrepSuggestion`
+   - pomija wpisy z `is_used === true` i `deleted_at !== null`;
+   - najpierw `phaseSteps` posortowane rosnąco po `sequence_number`, potem `id` (stabilność); jeśli pusto — `nextSteps` w tym samym porządku;
+   - `topic` = `suggested_topic.trim()`; jeśli po trimie puste → wpis pomijany;
+   - `goal` = `suggested_goal ?? ''`, `additionalInfo` = `suggested_additional_info ?? ''`, `grammarFocus` = `suggested_grammar_focus ?? ''`;
+   - `exercises` = `suggested_exercises ?? []`; `exerciseFocusMap` = `suggested_exercise_focus_map` przefiltrowana do wartości `'vocabulary' | 'grammar'` (inne klucze odrzucone);
+   - brak kandydata → fallback: `{ id: null, source: 'fallback', topic: pierwszy focus area lub sformatowany main goal lub 'General practice', goal: mainGoal ?? '', reszta pusta, rationale: null }`.
+2. `buildRationale`
+   - jeśli `suggestion.rationale` niepuste → przycięte do 160 znaków ze znakiem `…` (cięcie na granicy słowa);
+   - w przeciwnym razie, jeśli są `focusAreas` → `Based on recent focus: a, b, c` (maks. 3, już ograniczone przez `selectFocusAreas`);
+   - w przeciwnym razie → `No signals yet — this is a general practice suggestion.`
+3. `formatRelativeAge` — `Today`, `Yesterday`, `N days ago` do 6 dni, `N weeks ago` do 4 tygodni, dalej `MMM d, yyyy`; `null` → `''`. Brak zależności od lokalizacji przeglądarki poza `date-fns/format`.
 
-Nie używamy `useCalendarSlots`, ponieważ pobiera zakres widoku, uruchamia realtime i posiada operacje kalendarza niepotrzebne nagłówkowi.
+Testy (min. 18 przypadków): pierwszeństwo phase → next, pomijanie `is_used`, sort po `sequence_number`, pusty `suggested_topic`, filtr `exerciseFocusMap`, trzy gałęzie `buildRationale`, cięcie na 160 znaków, wszystkie progi `formatRelativeAge` plus przełom miesiąca.
 
-## 3. `StudentHeaderBar`
+---
 
-Komponent jest prezentacyjny i nie wykonuje zapytań.
-
-Ostateczny kontrakt:
-
-```ts
-interface StudentHeaderBarProps {
-  name: string;
-  englishLevel: string | null;
-  mainGoal: string | null;
-  nextLessonLabel: string | null;
-  isNextLessonLoading: boolean;
-  menu: React.ReactNode;
-}
-```
-
-Budowa:
-
-- semantyczny `<header>` i jeden `<h1>` z imieniem;
-- prawdziwy link do `/dashboard` jako opisany przycisk „Back”; zachowuje middle-click i Cmd/Ctrl+click;
-- poziom jako `Badge variant="secondary"`, pomijany, gdy brak wartości;
-- cel przez wspólny `formatGoal()`; maksymalnie jedna linia desktop i dwie linie mobile;
-- termin z ikoną kalendarza; skeleton podczas odczytu, potem termin albo „No lesson booked”;
-- jeden przycisk ikonowy `MoreHorizontal`, ale z `aria-label="More actions"` i tooltipem;
-- brak przycisku Generate — pojawi się dopiero w Prep w M4 i ma pozostać jedyną primary action.
-
-Responsywność:
-
-- desktop: Back, tożsamość i termin w jednym stabilnym rzędzie;
-- mobile: Back + imię + menu w pierwszym rzędzie, poziom/cel/termin w drugim;
-- długie imię i cel używają `min-w-0`, `truncate`/`line-clamp`, nigdy nie wypychają menu;
-- minimalny obszar dotyku przycisku menu: 44×44 px.
-
-Dotychczasowy `Back` zostaje usunięty z `StickyNav.leftContent` dopiero po zamontowaniu nowego linku. Nie mogą istnieć dwa przyciski Back.
-
-## 4. `StudentSnapshotPanel`
-
-Komponent czysto prezentacyjny; nie pobiera danych i nie zapisuje zmian.
-
-Ostateczny kontrakt:
+## 5. Kontrakty komponentów
 
 ```ts
-interface StudentSnapshotPanelProps {
-  englishLevel: string | null;
-  mainGoal: string | null;
-  mainGoalTargetDate: string | null;
+// NextLessonCard.tsx
+export interface NextLessonCardProps {
+  studentName: string;
+  nextLessonLabel: string | null;   // z M3: formatNextLessonLabel()
+  isLessonLoading: boolean;
+  suggestion: PrepSuggestion;
+  rationale: string;
   focusAreas: string[];
-  hubEmail: string | null;
-  onOpenModel: () => void;
+  isSuggestionsLoading: boolean;
+  onGenerate: () => void;           // auto-generate na bazie suggestion
+  onChangeTopic: () => void;        // prefill bez odpalania
+  onOpenModel: () => void;          // „See all suggestions" w menu …
 }
-```
 
-`studentId`, `teacherId` i `menu` zostają usunięte z kontraktu, bo panel ich nie potrzebuje. Menu istnieje tylko raz — w nagłówku.
+// LastLessonStrip.tsx
+export interface LastLessonStripProps {
+  worksheet: { id: string; title: string | null; created_at: string } | null;
+  isLoading: boolean;
+  onReuse: (worksheetId: string) => void;
+  onOpenLibrary: () => void;        // „View all worksheets" w menu …
+  menu?: React.ReactNode;           // pass-through: Share / Rename / Delete
+}
 
-Zawartość w stałej kolejności:
+// QuickNoteBox.tsx
+export interface QuickNoteBoxProps {
+  recentNotes: StudentKnowledgeEntry[];   // już przycięte do 3 przez PrepTab
+  isLoading: boolean;
+  isSaving: boolean;
+  onSave: (content: string) => Promise<void>;
+  onExpand: () => void;             // otwiera StudentKnowledgeQuickAddModal (tagi)
+  onViewAll: () => void;
+}
 
-1. **Level** — wartość lub „Not set”.
-2. **Goal** — `formatGoal()` lub „Not set”.
-3. **Deadline** — lokalnie sformatowane `MMM d, yyyy` lub „Not set”. Pole `main_goal_target_date` jest obecne w wygenerowanym typie `students`, więc nie używamy `any`.
-4. **Focus areas** — maksymalnie trzy pozycje z selektora; pusty stan „No focus areas yet”.
-5. **Student Hub** — „Enabled” i skrócony email, jeśli `student_email` istnieje; w przeciwnym razie „Not set”. Nie utożsamiamy tego ze stanem automatycznych emaili.
-6. **Open learning model** — secondary/ghost action wywołująca w M3 istniejące `handleTabChange('dslm')`. Dopiero M7 przełączy ją na kanoniczne `tab=model`.
-
-Panel nie jest kartą w karcie. Desktop używa `<aside aria-label="Student snapshot">`, pionowej granicy i typografii. Jest `lg:sticky lg:top-20 lg:self-start`.
-
-Na mobile ten sam komponent renderuje wariant `Collapsible`: zamknięty rząd pokazuje „Student snapshot”, poziom i skrócony cel; przycisk ma `aria-expanded`, opisany chevron i rozwija pełne dane. Stan początkowy jest zamknięty, aby stare siedem zakładek nie zostało zepchnięte poza pierwszy ekran.
-
-Komponent może renderować wariant mobile i desktop w jednym pliku z klasami `lg:hidden` / `hidden lg:block`. Ukryty wariant nie wykonuje efektów ani zapytań, więc nie powiela pracy.
-
-## 5. `StudentSettingsMenu`
-
-Menu jest jedynym nowym wejściem do ustawień ucznia.
-
-Kontrakt:
-
-```ts
-interface StudentSettingsMenuProps {
+// PrepTab.tsx
+export interface PrepTabProps {
   student: Tables<'students'>;
   teacherId: string;
-  gcalEnabled: boolean;
-  onEdit: () => void;
-  onDelete: () => Promise<void>;
+  worksheets: WorksheetHistoryItem[];
+  worksheetsLoading: boolean;
+  focusAreas: string[];
+  nextLessonLabel: string | null;
+  isNextLessonLoading: boolean;
+  recentNotes: StudentKnowledgeEntry[];
+  notesLoading: boolean;
+  onAddNote: (content: string) => Promise<void>;
+  onOpenNoteModal: () => void;
+  onGenerateFromSuggestion: (s: PrepSuggestion, autoGenerate: boolean) => void;
+  onReuseWorksheet: (worksheetId: string) => void;
+  onNavigateTab: (tab: string) => void;   // 'dslm' | 'worksheets' | 'knowledge'
+  banners?: React.ReactNode;              // WelcomeTestSuggestion + Hub banner
 }
 ```
 
-Pozycje:
+Zero `any` w nowych interfejsach. `WorksheetHistoryItem` bierzemy z typu zwracanego przez `useWorksheetHistory`; jeśli hook nie eksportuje typu, w M4 dodajemy `export type WorksheetHistoryItem = ...` w jego pliku — to jedyna dozwolona zmiana poza `src/components/student/prep/`, `src/lib/students/` i `StudentPage.tsx`.
 
-1. **Edit student details** — otwiera istniejący `StudentEditDialog`; obejmuje również email, Student Hub i overdue-email setting, więc nie tworzymy drugiego formularza tych samych danych.
-2. **Meeting link** — otwiera kontrolowany `Dialog` zawierający istniejący `MeetingLinkField`.
-3. separator;
-4. **Delete student** — destructive item otwiera kontrolowany `AlertDialog` z istniejącym type-to-confirm.
+---
 
-Zasady:
+## 6. Skąd biorą się dane (bez nowych zapytań)
 
-- trigger korzysta z projektu `Button variant="ghost" size="icon"`;
-- pozycje mają ikony i tekst; Delete jest ostatnie i używa semantycznego `text-destructive`;
-- wpisane potwierdzenie jest zerowane po anulowaniu i zamknięciu;
-- przy usuwaniu menu/dialog pokazuje stan oczekiwania i blokuje wielokrotne wywołanie;
-- `onDelete` zamyka dialog tylko po pomyślnym wyniku; nawigacją do dashboardu nadal zarządza `StudentPage`;
-- otwieranie edycji, linku spotkania i usuwania przechodzi przez `useDemoGuard`; demo pokazuje istniejący komunikat i nie otwiera formularza mutacji;
-- komponent nie wykonuje własnych zapytań poza już istniejącym zachowaniem `MeetingLinkField`.
+| Element | Źródło | Kto już to pobiera |
+|---|---|---|
+| propozycja tematu | `useFutureTimeline({ studentId, teacherId })` → `nextSteps`, `phaseSteps`, `loading` | dziś `OneMinutePrepCard`; w M4 wołane raz w `StudentPage` i przekazane w dół |
+| focus areas | `selectFocusAreas(studentKnowledge.entries)` | już jest w `StudentPage` od M3.3 |
+| najbliższa lekcja | `useStudentNextLesson` + `formatNextLessonLabel` | już jest w `StudentPage` od M3.3 |
+| ostatni arkusz | `worksheets[0]` z `useWorksheetHistory` | już jest |
+| notatki | `studentKnowledge.entries.slice(0, 3)` | już jest |
 
-## 6. Montaż w `StudentPage.tsx`
+`useFutureTimeline` jest jedynym nowym wywołaniem hooka na stronie, ale **nie jest nowym zapytaniem sieciowym netto**: `OneMinutePrepCard` woła go dziś na Overview. Po M4 obie karty istnieją równolegle (Overview zostaje do M7), więc przejściowo hook uruchamia się dwa razy. To świadoma cena kompatybilności; w M7, gdy Overview znika, zostaje jedno wywołanie. Alternatywa (podnoszenie hooka i przekazywanie go do `OneMinutePrepCard`) wymagałaby zmiany kontraktu tego komponentu — poza zakresem M4.
 
-1. Wyliczyć `focusAreas` przez `useMemo` z już istniejącego `studentKnowledge.entries`; bez nowego odczytu wiedzy.
-2. Pobrać `nextLesson` przez nowy lekki hook i sformatować czystym helperem.
-3. Utworzyć jedną instancję `StudentSettingsMenu` przekazaną tylko do `StudentHeaderBar`.
-4. Zamontować nagłówek bezpośrednio pod `StickyNav`.
-5. Zachować `IntakeExtractionBanner` i wszystkie query params.
-6. Objąć obecny `<Tabs>` oraz desktop snapshot gridem `lg:grid-cols-[minmax(0,1fr)_280px]`.
-7. Mobile snapshot umieścić między bannerem a zakładkami; desktop snapshot w prawej kolumnie.
-8. `onOpenModel` w M3 wywołuje starą ścieżkę `handleTabChange('dslm')`, zachowując `view` zgodnie z aktualnym zachowaniem strony.
-9. Po potwierdzeniu działania menu usunąć ze starej karty Overview wyłącznie zdublowane kontrolki Edit/Delete oraz inline `MeetingLinkField`; dane karty pozostają do M4/M7. Nie usuwamy pozostałej zawartości Overview.
-10. Usunąć stary lokalny stan `deleteConfirmName` i importy używane wyłącznie przez przeniesiony dialog.
+Tryb demo: `useFutureTimeline` filtruje po UUID i zwraca puste tablice, więc `selectPrepSuggestion` schodzi do gałęzi `fallback` i karta pokazuje sensowną treść zamiast pustki. Zapis notatki przechodzi przez `useDemoGuard`.
 
-To daje stan przejściowy bez dwóch destrukcyjnych przycisków i bez dwóch edytorów meeting linku, ale nie zmienia żadnego starego celu zakładki.
+---
 
-## 7. Kompatybilność z M4–M8
+## 7. Ścieżka generowania — bez dotykania silnika
 
-- M4 dostanie gotową ramę i nie będzie ponownie projektować identyfikacji ucznia.
-- M5/M6 wchodzą wyłącznie w lewą kolumnę; snapshot nie zależy od ich danych.
-- M7 wymieni siedem zakładek na cztery oraz zmieni wyłącznie implementację `onOpenModel`; M3 nie importuje `resolveTab()`.
-- Stare `?tab=dslm&view=pathway`, `?tab=tests&testId=...`, `?tab=flashcards&set=...` pozostają nietknięte.
-- `StudentEditDialog` i `MeetingLinkField` zachowują obecne kontrakty i logikę zapisu.
-- RAG (`docs/llm-context.md`, `public/llms.txt`) pozostaje świadomie w M8, zgodnie z zaakceptowaną kolejnością całego Student Workspace; M3 aktualizuje tylko specyfikację techniczną i roadmapę.
+`PrepTab` **nie** zna `sessionStorage` ani `writeAutoGenerateIntent`. Obie ścieżki zostają w `StudentPage.tsx` jako jedna funkcja, kopiująca 1:1 istniejące zachowanie `onUseWorksheetSuggestion` z linii ~886:
 
-## 8. Weryfikacja atomowa
+```ts
+const handlePrepGenerate = (s: PrepSuggestion, autoGenerate: boolean) => {
+  sessionStorage.setItem('preSelectedStudent', JSON.stringify({ id: student.id, name: student.name }));
+  if (autoGenerate) {
+    writeAutoGenerateIntent({
+      studentId: student.id,
+      suggestionId: s.id,
+      topic: s.topic,
+      goal: s.goal,
+      additionalInfo: s.additionalInfo,
+      grammarFocus: s.grammarFocus,
+      exercises: s.exercises,
+      exerciseFocusMap: s.exerciseFocusMap,
+      studentName: student.name || null,
+      studentEmail: student.student_email || null,
+    });
+  } else {
+    sessionStorage.setItem('prefillWorksheet', JSON.stringify({
+      topic: s.topic, goal: s.goal, additionalInfo: s.additionalInfo, grammarFocus: s.grammarFocus,
+    }));
+    if (s.id) sessionStorage.setItem('prefillSuggestionId', s.id);
+    else sessionStorage.removeItem('prefillSuggestionId');
+    if (s.exercises.length) sessionStorage.setItem('prefillExercises', JSON.stringify(s.exercises));
+    if (Object.keys(s.exerciseFocusMap).length) {
+      sessionStorage.setItem('prefillExerciseFocusMap', JSON.stringify(s.exerciseFocusMap));
+    }
+    sessionStorage.setItem('forceNewWorksheet', 'true');
+    navigate('/');
+  }
+};
+```
 
-1. Testy helperów snapshotu.
-2. `bunx tsgo --noEmit -p tsconfig.app.json`.
-3. Uruchomienie właściwego zestawu testów Vitest dla `src/lib/students`.
-4. Playwright od `/demo`: wejście do przykładowego ucznia przez interfejs, nie przez zgadywany identyfikator.
-5. Screenshot 1280×1800: nagłówek, stare zakładki i desktop snapshot; brak nakładania oraz poziomego scrolla.
-6. Sprawdzenie menu: Edit, Meeting link, Delete; Delete wymaga pełnego imienia.
-7. Sprawdzenie demo: każda próba mutacji kończy się komunikatem demo i zerem requestów zapisu.
-8. Sprawdzenie adresów: `dslm`, `overview`, `tests&testId`, `flashcards&set`, `intake` nie tracą parametrów ani nie zmieniają znaczenia.
-9. Sprawdzenie klawiaturą: Back → More actions → tabs → treść → snapshot; Escape zamyka menu/dialog, focus wraca do triggera.
-10. Sprawdzenie ciemnego motywu i tokenów semantycznych; brak surowych kolorów w nowym kodzie.
-11. Kontrola pojedynczości: jeden H1, jeden Back, jedno menu ustawień, jeden edytor meeting linku, brak widocznego kosza przy Student Details.
-12. Po PASS: aktualizacja angielskiej specyfikacji i oznaczenie M3 jako ukończonego w roadmapie.
+- „Generate worksheet" → `handlePrepGenerate(suggestion, true)`.
+- „Change topic" → `handlePrepGenerate(suggestion, false)` (prefill + `/`, nauczyciel edytuje formularz).
+- „Reuse" w `LastLessonStrip` → istniejące `handleGenerateWorksheet()` rozszerzone o `prefillWorksheet` zbudowany z `worksheet.form_data` (`topic`, `goal`, `grammar`), jeśli te pola istnieją; w przeciwnym razie zachowanie identyczne z dzisiejszym „Generate Another".
 
-## Zero regressions confirmed — lista obowiązkowa przed zamknięciem
+Prompt i logika generowania arkuszy pozostają nietknięte.
 
-- wszystkie stare zakładki nadal otwierają tę samą treść;
-- URL i parametry głębokich linków nie są przepisywane w M3;
-- generowanie arkusza używa dokładnie obecnego przepływu;
-- DSLM i jego podwidoki nie są zmieniane;
-- edycja ucznia zapisuje te same pola przez `updateStudent`;
-- usuwanie nadal używa `soft_delete_student` i type-to-confirm;
-- meeting link nadal używa `MeetingLinkField` oraz istniejącego `gcal-sync`;
-- demo nie wykonuje mutacji;
-- brak migracji, zmian RLS i nowych zależności.
+---
 
-## Out of scope issues noted
+## 8. Kolejność wdrożenia (5 kroków, każdy osobno weryfikowalny)
 
-- Pełne przejście na cztery zakładki i kanoniczny routing — M7.
-- Zastąpienie Overview przez Prep — M4/M7.
-- Lazy loading zakładek — M7.
-- Porządki w starych panelach i martwym kodzie — M8.
-- Znany wcześniejszy przypadek zatrzymania `/demo` na szkielecie ładowania: M3 najpierw reprodukuje go przez nawigację UI; naprawa nastąpi tylko wtedy, gdy nowy kod M3 okaże się przyczyną. Inaczej zostaje osobnym zadaniem.
+**Krok 1 — reguły.** `prepPlan.ts` + testy. Brak zmian w UI.
+Weryfikacja: `bunx vitest run src/lib/students`, `bunx tsgo --noEmit -p tsconfig.app.json`.
 
-## Kryterium zakończenia M3
+**Krok 2 — komponenty prezentacyjne.** `NextLessonCard`, `LastLessonStrip`, `QuickNoteBox` — zbudowane, jeszcze niepodpięte.
+Weryfikacja: typecheck. Ekran bez zmian.
 
-M3 jest ukończone dopiero wtedy, gdy nowa rama jest czytelna i funkcjonalna, wszystkie stare zakładki nadal działają, ustawienia nie są zdublowane, demo pozostaje read-only, testy oraz TypeScript przechodzą, a Playwright potwierdza rzeczywisty widok. Samo utworzenie trzech komponentów nie wystarcza.
+**Krok 3 — kompozycja.** `PrepTab.tsx` składa trzy komponenty plus sloty na banery; nadal niepodpięty do `Tabs`.
+Weryfikacja: typecheck.
+
+**Krok 4 — montaż jako ósma zakładka.** W `StudentPage.tsx`: `useFutureTimeline`, `handlePrepGenerate`, `handleReuseWorksheet`, `<TabsTrigger value="prep">` na **pierwszej pozycji**, `TabsList` → `grid-cols-8`, `<TabsContent value="prep">` z `PrepTab`. Domyślna zakładka zostaje `dslm` — zmiana defaultu to M7.
+Weryfikacja: Playwright na `/demo` — wejście na `?tab=prep`, zrzut ekranu, brak błędów w konsoli; ręczne przejście ścieżki „Generate worksheet" na koncie testowym.
+
+**Krok 5 — roadmapa.** `roadmap.md`: M4 zamknięte, podkroki M4.1–M4.4. RAG (`docs/llm-context.md`, `public/llms.txt`) dopiero w M8, zgodnie ze specyfikacją.
+
+---
+
+## 9. Kompatybilność — co gwarantujemy
+
+1. Siedem istniejących zakładek działa identycznie; Overview nietknięty.
+2. Żaden istniejący link `?tab=` nie zmienia zachowania. `?tab=prep` to nowa, dodatkowa wartość — `resolveTab` z M1 już ją zna jako kanoniczną, więc M7 nie będzie musiał nic korygować.
+3. `studentPrepPath()` nadal zwraca `?tab=dslm` — zmiana w M7.
+4. Modal `StudentKnowledgeQuickAddModal` pozostaje jeden na stronę; `QuickNoteBox` otwiera go przez `onExpand`, a szybki zapis bez tagów woła `studentKnowledge.addEntry` z `category: 'Notes'`, `entry_source: 'manual'` — dokładnie ten sam kontrakt, który dziś przechodzi przez modal, więc klasyfikacja AI w tle działa bez zmian.
+5. Bez migracji, bez Edge Functions, bez zmian RLS.
+
+## 10. Ryzyka
+
+| Ryzyko | Waga | Mitygacja |
+|---|---|---|
+| Podwójne wywołanie `useFutureTimeline` (Prep + Overview) do czasu M7 | niska | ten sam klucz zapytania w warstwie hooka; Overview znika w M7 |
+| Pusty stan propozycji u nowego ucznia | średnia | gałąź `fallback` w `selectPrepSuggestion` + tekst „No signals yet" zamiast pustej karty |
+| „Reuse" bez `form_data` w starych arkuszach | niska | fallback do dzisiejszego `handleGenerateWorksheet()` |
+| Rozjazd bursztynu z Timeline/Library | niska | jedyne źródło klas to `resolveRowClasses` z M2 |
+
+## 11. Poza zakresem M4
+
+Timeline, Library, przełączenie na 4 zakładki, `React.lazy`, usuwanie Overview, RAG, `studentPrepPath()`, silnik generowania arkuszy, DSLM, backend.
