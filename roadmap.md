@@ -29,7 +29,7 @@ Reference: `docs/ux/target-teacher-experience.md` (approved 2026-09-02).
   - [ ] M3 — `StudentHeaderBar` + `StudentSnapshotPanel` + `StudentSettingsMenu`
     - [x] M3.1 — `studentSnapshot.ts` selectors + `useStudentNextLesson` (no UI)
     - [x] M3.2 — `StudentHeaderBar` + `StudentSnapshotPanel` + `StudentSettingsMenu` components (built, not yet mounted)
-    - [ ] M3.3 — mount in `StudentPage.tsx`, remove duplicated Edit/Delete/meeting-link controls
+    - [x] M3.3 — mounted in `StudentPage.tsx`; duplicated Back/Edit/Delete/meeting-link controls removed
   - [ ] M4 — `PrepTab` (`NextLessonCard`, `LastLessonStrip`, `QuickNoteBox`)
   - [ ] M5 — `useStudentTimeline` (zero queries) + `TimelineTab`
   - [ ] M6 — `LibraryTab` with segments and collapsed Deleted
