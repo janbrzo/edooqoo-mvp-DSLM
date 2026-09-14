@@ -271,18 +271,28 @@ const StudentPage = () => {
         tokenLeft={tokenLeft} 
         user={user}
         onGenerateWorksheet={handleGenerateWorksheet}
-        leftContent={
-          <>
-            <Button variant="ghost" size="sm" asChild className="gap-1">
-              <Link to="/dashboard">
-                <ArrowLeft className="h-4 w-4" />
-                <span className="hidden sm:inline">Back</span>
-              </Link>
-            </Button>
-          </>
-        }
       />
       <div className="max-w-6xl mx-auto p-4">
+        <StudentHeaderBar
+          name={student.name}
+          englishLevel={student.english_level}
+          mainGoal={student.main_goal}
+          nextLessonLabel={nextLessonLabel}
+          isNextLessonLoading={nextLessonLoading}
+          menu={
+            <StudentSettingsMenu
+              student={student as any}
+              teacherId={student.teacher_id}
+              gcalEnabled={gcalEnabled}
+              onEdit={() => setIsEditDialogOpen(true)}
+              onDelete={handleDeleteStudent}
+            />
+          }
+        />
+
+        <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,1fr)_280px] lg:gap-6">
+          <div className="order-2 min-w-0 lg:order-1">
+
 
         {/* v6.9.62 P6 — intake extraction banner: shown when ?intake=<id> is present. */}
         {searchParams.get('intake') && id ? (
