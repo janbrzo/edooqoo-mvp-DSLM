@@ -17,7 +17,7 @@ import { useWorksheetHistory } from '@/hooks/useWorksheetHistory';
 import { useDeletedWorksheets } from '@/hooks/useDeletedWorksheets';
 import { StudentEditDialog } from '@/components/StudentEditDialog';
 import { IntakeExtractionBanner } from '@/components/student/IntakeExtractionBanner';
-import { MeetingLinkField } from '@/components/student/MeetingLinkField';
+
 import { StudentHeaderBar } from '@/components/student/StudentHeaderBar';
 import { StudentSnapshotPanel } from '@/components/student/StudentSnapshotPanel';
 import { StudentSettingsMenu } from '@/components/student/StudentSettingsMenu';
