@@ -165,6 +165,17 @@ const StudentPage = () => {
     teacherId: student?.teacher_id || '',
   });
 
+  // v6.9.111 M3.3 — workspace frame: focus areas + next lesson summary.
+  const focusAreas = useMemo(
+    () => selectFocusAreas(studentKnowledge.entries),
+    [studentKnowledge.entries],
+  );
+  const { lesson: nextLesson, isLoading: nextLessonLoading } = useStudentNextLesson(
+    id,
+    student?.teacher_id,
+  );
+  const nextLessonLabel = useMemo(() => formatNextLessonLabel(nextLesson), [nextLesson]);
+
   useEffect(() => {
     refetchWorksheets();
   }, [currentPage, deletedCurrentPage]);
