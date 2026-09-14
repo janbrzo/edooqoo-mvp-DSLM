@@ -441,8 +441,6 @@ const StudentPage = () => {
                     <span>{format(new Date(student.created_at), 'MMM dd, yyyy')}</span>
                   </div>
                 </div>
-                {/* Default Meeting Link */}
-                <MeetingLinkField studentId={student.id} teacherId={student.teacher_id} hasGcal={gcalEnabled} />
               </CardContent>
             </Card>
 
