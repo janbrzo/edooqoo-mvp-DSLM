@@ -383,58 +383,12 @@ const StudentPage = () => {
               {/* Student Details */}
               <Card>
               <CardHeader>
-                <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center">
-                    <User className="h-5 w-5 mr-2" />
-                    Student Details
-                  </CardTitle>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setIsEditDialogOpen(true)}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <Trash2 className="h-5 w-5 text-destructive" />
-                        </Button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle className="flex items-center gap-2">
-                            <Trash2 className="h-5 w-5 text-destructive" />
-                            Delete Student: {student.name}
-                          </AlertDialogTitle>
-                          <AlertDialogDescription>
-                            This action cannot be undone. To confirm deletion, please type the student's full name below:
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        
-                        <div className="py-4">
-                          <Input
-                            placeholder={`Type "${student.name}" to confirm`}
-                            value={deleteConfirmName}
-                            onChange={(e) => setDeleteConfirmName(e.target.value)}
-                          />
-                        </div>
-                        
-                        <AlertDialogFooter>
-                          <AlertDialogCancel onClick={() => setDeleteConfirmName('')}>Cancel</AlertDialogCancel>
-                          <AlertDialogAction
-                            onClick={handleDeleteStudent}
-                            disabled={deleteConfirmName !== student.name}
-                            className="bg-destructive text-destructive-foreground hover:bg-destructive/90 disabled:opacity-50"
-                          >
-                            Delete Student
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  </div>
-                </div>
+                {/* v6.9.111 M3.3 — edit/delete/meeting link now live in the single
+                    StudentSettingsMenu in the workspace header. */}
+                <CardTitle className="flex items-center">
+                  <User className="h-5 w-5 mr-2" />
+                  Student Details
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
