@@ -23,6 +23,9 @@ import { StudentSnapshotPanel } from '@/components/student/StudentSnapshotPanel'
 import { StudentSettingsMenu } from '@/components/student/StudentSettingsMenu';
 import { useStudentNextLesson } from '@/hooks/useStudentNextLesson';
 import { selectFocusAreas, formatNextLessonLabel } from '@/lib/students/studentSnapshot';
+import { PrepTab } from '@/components/student/prep/PrepTab';
+import { useFutureTimeline } from '@/hooks/useFutureTimeline';
+import { selectPrepSuggestion, buildRationale, type PrepSuggestion } from '@/lib/students/prepPlan';
 import { DeleteWorksheetButton } from "@/components/DeleteWorksheetButton";
 import { DuplicateWorksheetButton } from "@/components/DuplicateWorksheetButton";
 import { StudentSelector } from '@/components/StudentSelector';
@@ -176,6 +179,26 @@ const StudentPage = () => {
   );
   const nextLessonLabel = useMemo(() => formatNextLessonLabel(nextLesson), [nextLesson]);
 
+  // v6.9.111 M4.4 — Prep tab data (no new network call in the target state:
+  // OneMinutePrepCard already calls this hook on the Overview tab today).
+  const futureTimeline = useFutureTimeline({
+    // Demo ids are not UUIDs — keep Supabase out of it (see demo-mode rule).
+    studentId: isDemoMode ? '' : id || '',
+    teacherId: isDemoMode ? '' : student?.teacher_id || '',
+  });
+  const prepSuggestion = useMemo(
+    () =>
+      selectPrepSuggestion(futureTimeline.phaseSteps as any, futureTimeline.nextSteps as any, {
+        mainGoal: student?.main_goal ?? null,
+        focusAreas,
+      }),
+    [futureTimeline.phaseSteps, futureTimeline.nextSteps, student?.main_goal, focusAreas],
+  );
+  const prepRationale = useMemo(
+    () => buildRationale(prepSuggestion, focusAreas),
+    [prepSuggestion, focusAreas],
+  );
+
   useEffect(() => {
     refetchWorksheets();
   }, [currentPage, deletedCurrentPage]);
@@ -226,6 +249,62 @@ const StudentPage = () => {
       id: student.id,
       name: student.name
     }));
+    sessionStorage.setItem('forceNewWorksheet', 'true');
+    navigate('/');
+  };
+
+  // v6.9.111 M4.4 — Prep tab: same contract as `onUseWorksheetSuggestion`
+  // below. The Worksheet Generation Engine itself is untouched; this only
+  // prefills the form / writes the auto-generate intent.
+  const handlePrepGenerate = (s: PrepSuggestion, autoGenerate: boolean) => {
+    sessionStorage.setItem('preSelectedStudent', JSON.stringify({ id: student.id, name: student.name }));
+    if (autoGenerate) {
+      writeAutoGenerateIntent({
+        studentId: student.id,
+        suggestionId: s.id,
+        topic: s.topic,
+        goal: s.goal,
+        additionalInfo: s.additionalInfo,
+        grammarFocus: s.grammarFocus,
+        exercises: s.exercises,
+        exerciseFocusMap: s.exerciseFocusMap,
+        studentName: student.name || null,
+        studentEmail: (student as any).student_email || null,
+      });
+    } else {
+      sessionStorage.setItem('prefillWorksheet', JSON.stringify({
+        topic: s.topic,
+        goal: s.goal,
+        additionalInfo: s.additionalInfo,
+        grammarFocus: s.grammarFocus,
+      }));
+      if (s.id) sessionStorage.setItem('prefillSuggestionId', s.id);
+      else sessionStorage.removeItem('prefillSuggestionId');
+      if (s.exercises.length > 0) {
+        sessionStorage.setItem('prefillExercises', JSON.stringify(s.exercises));
+      }
+      if (Object.keys(s.exerciseFocusMap).length > 0) {
+        sessionStorage.setItem('prefillExerciseFocusMap', JSON.stringify(s.exerciseFocusMap));
+      }
+      sessionStorage.setItem('forceNewWorksheet', 'true');
+    }
+    navigate('/');
+  };
+
+  /** Reuse: prefill the form from an existing worksheet's saved form_data. */
+  const handleReuseWorksheet = (worksheetId: string) => {
+    const source: any = worksheets.find((w: any) => w.id === worksheetId);
+    const fd = source?.form_data || null;
+    sessionStorage.setItem('preSelectedStudent', JSON.stringify({ id: student.id, name: student.name }));
+    if (fd) {
+      sessionStorage.setItem('prefillWorksheet', JSON.stringify({
+        topic: fd.topic || fd.lessonTopic || '',
+        goal: fd.lessonGoal || fd.goal || '',
+        additionalInfo: fd.additionalInformation || fd.additionalInfo || '',
+        grammarFocus: fd.grammarFocus || '',
+      }));
+      sessionStorage.removeItem('prefillSuggestionId');
+    }
     sessionStorage.setItem('forceNewWorksheet', 'true');
     navigate('/');
   };
@@ -312,7 +391,13 @@ const StudentPage = () => {
           {/* v6.8.6 P4 — on <lg widths show icon-only triggers (with aria-label
               + tooltip via title) so the 7-tab strip never overflows on
               narrower laptop windows; full text returns at lg: breakpoint. */}
-          <TabsList className="grid w-full grid-cols-7 mb-6">
+          <TabsList className="grid w-full grid-cols-8 mb-6">
+            {/* v6.9.111 M4.4 — Prep tab mounted alongside the legacy tabs.
+                Switching the default tab happens in M7. */}
+            <TabsTrigger value="prep" className="flex items-center gap-2" aria-label="Prep" title="Prep">
+              <Target className="h-4 w-4" />
+              <span className="hidden lg:inline">Prep</span>
+            </TabsTrigger>
             <TabsTrigger value="overview" className="flex items-center gap-2" aria-label="Overview" title="Overview">
               <User className="h-4 w-4" />
               <span className="hidden lg:inline">Overview</span>
@@ -350,6 +435,56 @@ const StudentPage = () => {
               <span className="hidden lg:inline">Tests</span>
             </TabsTrigger>
           </TabsList>
+
+          {/* Prep Tab (v6.9.111 M4.4) */}
+          <TabsContent value="prep">
+            <PrepTab
+              banners={
+                <WelcomeTestSuggestion
+                  studentId={student.id}
+                  teacherId={student.teacher_id}
+                  studentName={student.name}
+                  studentEmail={student.student_email}
+                  surface="overview"
+                />
+              }
+              studentName={student.name}
+              nextLessonLabel={nextLessonLabel}
+              isLessonLoading={nextLessonLoading}
+              suggestion={prepSuggestion}
+              rationale={prepRationale}
+              focusAreas={focusAreas}
+              isSuggestionsLoading={futureTimeline.loading}
+              onGenerate={() => handlePrepGenerate(prepSuggestion, true)}
+              onChangeTopic={() => handlePrepGenerate(prepSuggestion, false)}
+              onOpenModel={() => handleTabChange('dslm')}
+              lastWorksheet={
+                worksheets && worksheets.length > 0
+                  ? {
+                      id: (worksheets[0] as any).id,
+                      title: (worksheets[0] as any).title ?? null,
+                      created_at: (worksheets[0] as any).created_at,
+                    }
+                  : null
+              }
+              isWorksheetLoading={loading}
+              onReuse={handleReuseWorksheet}
+              onOpenLibrary={() => handleTabChange('worksheets')}
+              recentNotes={studentKnowledge.entries.slice(0, 3)}
+              isNotesLoading={studentKnowledge.isLoading}
+              isNoteSaving={false}
+              onSaveNote={async (content) => {
+                await studentKnowledge.addEntry({
+                  content,
+                  category: 'Notes',
+                  entry_source: 'manual',
+                } as any);
+              }}
+              onExpandNote={() => setQuickAddNoteOpen(true)}
+              onViewAllNotes={() => handleTabChange('knowledge')}
+            />
+          </TabsContent>
+
 
           {/* Overview Tab */}
           <TabsContent value="overview">
