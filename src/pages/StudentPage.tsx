@@ -23,6 +23,9 @@ import { StudentSnapshotPanel } from '@/components/student/StudentSnapshotPanel'
 import { StudentSettingsMenu } from '@/components/student/StudentSettingsMenu';
 import { useStudentNextLesson } from '@/hooks/useStudentNextLesson';
 import { selectFocusAreas, formatNextLessonLabel } from '@/lib/students/studentSnapshot';
+import { PrepTab } from '@/components/student/prep/PrepTab';
+import { useFutureTimeline } from '@/hooks/useFutureTimeline';
+import { selectPrepSuggestion, buildRationale, type PrepSuggestion } from '@/lib/students/prepPlan';
 import { DeleteWorksheetButton } from "@/components/DeleteWorksheetButton";
 import { DuplicateWorksheetButton } from "@/components/DuplicateWorksheetButton";
 import { StudentSelector } from '@/components/StudentSelector';
@@ -175,6 +178,25 @@ const StudentPage = () => {
     student?.teacher_id,
   );
   const nextLessonLabel = useMemo(() => formatNextLessonLabel(nextLesson), [nextLesson]);
+
+  // v6.9.111 M4.4 — Prep tab data (no new network call in the target state:
+  // OneMinutePrepCard already calls this hook on the Overview tab today).
+  const futureTimeline = useFutureTimeline({
+    studentId: id || '',
+    teacherId: student?.teacher_id || '',
+  });
+  const prepSuggestion = useMemo(
+    () =>
+      selectPrepSuggestion(futureTimeline.phaseSteps as any, futureTimeline.nextSteps as any, {
+        mainGoal: student?.main_goal ?? null,
+        focusAreas,
+      }),
+    [futureTimeline.phaseSteps, futureTimeline.nextSteps, student?.main_goal, focusAreas],
+  );
+  const prepRationale = useMemo(
+    () => buildRationale(prepSuggestion, focusAreas),
+    [prepSuggestion, focusAreas],
+  );
 
   useEffect(() => {
     refetchWorksheets();
