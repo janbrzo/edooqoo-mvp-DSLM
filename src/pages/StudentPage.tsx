@@ -435,6 +435,56 @@ const StudentPage = () => {
             </TabsTrigger>
           </TabsList>
 
+          {/* Prep Tab (v6.9.111 M4.4) */}
+          <TabsContent value="prep">
+            <PrepTab
+              banners={
+                <WelcomeTestSuggestion
+                  studentId={student.id}
+                  teacherId={student.teacher_id}
+                  studentName={student.name}
+                  studentEmail={student.student_email}
+                  surface="overview"
+                />
+              }
+              studentName={student.name}
+              nextLessonLabel={nextLessonLabel}
+              isLessonLoading={nextLessonLoading}
+              suggestion={prepSuggestion}
+              rationale={prepRationale}
+              focusAreas={focusAreas}
+              isSuggestionsLoading={futureTimeline.loading}
+              onGenerate={() => handlePrepGenerate(prepSuggestion, true)}
+              onChangeTopic={() => handlePrepGenerate(prepSuggestion, false)}
+              onOpenModel={() => handleTabChange('dslm')}
+              lastWorksheet={
+                worksheets && worksheets.length > 0
+                  ? {
+                      id: (worksheets[0] as any).id,
+                      title: (worksheets[0] as any).title ?? null,
+                      created_at: (worksheets[0] as any).created_at,
+                    }
+                  : null
+              }
+              isWorksheetLoading={loading}
+              onReuse={handleReuseWorksheet}
+              onOpenLibrary={() => handleTabChange('worksheets')}
+              recentNotes={studentKnowledge.entries.slice(0, 3)}
+              isNotesLoading={studentKnowledge.isLoading}
+              isNoteSaving={false}
+              onSaveNote={async (content) => {
+                await studentKnowledge.addEntry({
+                  content,
+                  category: 'Notes',
+                  entry_source: 'manual',
+                } as any);
+              }}
+              onExpandNote={() => setQuickAddNoteOpen(true)}
+              onViewAllNotes={() => handleTabChange('knowledge')}
+            />
+          </TabsContent>
+
+
           {/* Overview Tab */}
           <TabsContent value="overview">
             {/* Welcome Test Suggestion Banner */}
