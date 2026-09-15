@@ -182,8 +182,9 @@ const StudentPage = () => {
   // v6.9.111 M4.4 — Prep tab data (no new network call in the target state:
   // OneMinutePrepCard already calls this hook on the Overview tab today).
   const futureTimeline = useFutureTimeline({
-    studentId: id || '',
-    teacherId: student?.teacher_id || '',
+    // Demo ids are not UUIDs — keep Supabase out of it (see demo-mode rule).
+    studentId: isDemoMode ? '' : id || '',
+    teacherId: isDemoMode ? '' : student?.teacher_id || '',
   });
   const prepSuggestion = useMemo(
     () =>
