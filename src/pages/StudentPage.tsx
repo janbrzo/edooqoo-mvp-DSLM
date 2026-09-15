@@ -252,6 +252,62 @@ const StudentPage = () => {
     navigate('/');
   };
 
+  // v6.9.111 M4.4 — Prep tab: same contract as `onUseWorksheetSuggestion`
+  // below. The Worksheet Generation Engine itself is untouched; this only
+  // prefills the form / writes the auto-generate intent.
+  const handlePrepGenerate = (s: PrepSuggestion, autoGenerate: boolean) => {
+    sessionStorage.setItem('preSelectedStudent', JSON.stringify({ id: student.id, name: student.name }));
+    if (autoGenerate) {
+      writeAutoGenerateIntent({
+        studentId: student.id,
+        suggestionId: s.id,
+        topic: s.topic,
+        goal: s.goal,
+        additionalInfo: s.additionalInfo,
+        grammarFocus: s.grammarFocus,
+        exercises: s.exercises,
+        exerciseFocusMap: s.exerciseFocusMap,
+        studentName: student.name || null,
+        studentEmail: (student as any).student_email || null,
+      });
+    } else {
+      sessionStorage.setItem('prefillWorksheet', JSON.stringify({
+        topic: s.topic,
+        goal: s.goal,
+        additionalInfo: s.additionalInfo,
+        grammarFocus: s.grammarFocus,
+      }));
+      if (s.id) sessionStorage.setItem('prefillSuggestionId', s.id);
+      else sessionStorage.removeItem('prefillSuggestionId');
+      if (s.exercises.length > 0) {
+        sessionStorage.setItem('prefillExercises', JSON.stringify(s.exercises));
+      }
+      if (Object.keys(s.exerciseFocusMap).length > 0) {
+        sessionStorage.setItem('prefillExerciseFocusMap', JSON.stringify(s.exerciseFocusMap));
+      }
+      sessionStorage.setItem('forceNewWorksheet', 'true');
+    }
+    navigate('/');
+  };
+
+  /** Reuse: prefill the form from an existing worksheet's saved form_data. */
+  const handleReuseWorksheet = (worksheetId: string) => {
+    const source: any = worksheets.find((w: any) => w.id === worksheetId);
+    const fd = source?.form_data || null;
+    sessionStorage.setItem('preSelectedStudent', JSON.stringify({ id: student.id, name: student.name }));
+    if (fd) {
+      sessionStorage.setItem('prefillWorksheet', JSON.stringify({
+        topic: fd.topic || fd.lessonTopic || '',
+        goal: fd.lessonGoal || fd.goal || '',
+        additionalInfo: fd.additionalInformation || fd.additionalInfo || '',
+        grammarFocus: fd.grammarFocus || '',
+      }));
+      sessionStorage.removeItem('prefillSuggestionId');
+    }
+    sessionStorage.setItem('forceNewWorksheet', 'true');
+    navigate('/');
+  };
+
   // Use centralized goal formatting from constants
   const formatGoal = formatGoalLabel;
 
