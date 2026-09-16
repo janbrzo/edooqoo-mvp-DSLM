@@ -294,7 +294,7 @@ describe('counts and filters', () => {
 
   it('counts every filter, including notes covering mastery changes', () => {
     expect(countByFilter(events)).toEqual({
-      all: 6,
+      all: 7,
       lessons: 1,
       worksheets: 1,
       homework: 2,
@@ -308,7 +308,7 @@ describe('counts and filters', () => {
       'homework_returned',
       'homework_sent',
     ]);
-    expect(filterEvents(events, 'all')).toHaveLength(6);
+    expect(filterEvents(events, 'all')).toHaveLength(7);
     expect(filterEvents(events, 'tests')).toHaveLength(1);
   });
 });
