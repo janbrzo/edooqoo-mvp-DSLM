@@ -24,6 +24,11 @@ import { StudentSettingsMenu } from '@/components/student/StudentSettingsMenu';
 import { useStudentNextLesson } from '@/hooks/useStudentNextLesson';
 import { selectFocusAreas, formatNextLessonLabel } from '@/lib/students/studentSnapshot';
 import { PrepTab } from '@/components/student/prep/PrepTab';
+// v6.9.111 M5.4 — Timeline tab (data hooks + presentational composition).
+import { TimelineTab } from '@/components/student/timeline/TimelineTab';
+import { useStudentTimeline } from '@/hooks/useStudentTimeline';
+import { useStudentTimelineSources } from '@/hooks/useStudentTimelineSources';
+import { TIMELINE_PAGE_SIZE, type TimelineFilter } from '@/lib/students/timelineEvents';
 import { useFutureTimeline } from '@/hooks/useFutureTimeline';
 import { selectPrepSuggestion, buildRationale, type PrepSuggestion } from '@/lib/students/prepPlan';
 import { DeleteWorksheetButton } from "@/components/DeleteWorksheetButton";
@@ -88,6 +93,9 @@ const StudentPage = () => {
   // existing `?tab=overview` links still open the Overview tab as before.
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'dslm');
   const [deleteConfirmName, setDeleteConfirmName] = useState('');
+  // v6.9.111 M5.4 — Timeline tab local state (moves into the URL in M7).
+  const [timelineFilter, setTimelineFilter] = useState<TimelineFilter>('all');
+  const [timelineVisibleCount, setTimelineVisibleCount] = useState(TIMELINE_PAGE_SIZE);
 
   // Sync activeTab when URL searchParams change (Issue 8: programmatic navigation)
   useEffect(() => {
@@ -198,6 +206,37 @@ const StudentPage = () => {
     () => buildRationale(prepSuggestion, focusAreas),
     [prepSuggestion, focusAreas],
   );
+
+  // v6.9.111 M5.4 — Timeline data. The three extra reads only fire once the
+  // Timeline tab is actually open; worksheets and notes are already loaded.
+  const timelineSources = useStudentTimelineSources(
+    id,
+    student?.teacher_id,
+    activeTab === 'timeline',
+  );
+  const timeline = useStudentTimeline({
+    lessons: timelineSources.lessons,
+    homework: timelineSources.homework,
+    tests: timelineSources.tests,
+    worksheets: worksheets as any,
+    knowledgeEntries: studentKnowledge.entries as any,
+    filter: timelineFilter,
+    visibleCount: timelineVisibleCount,
+  });
+
+  const handleTimelineFilterChange = (next: TimelineFilter) => {
+    setTimelineFilter(next);
+    setTimelineVisibleCount(TIMELINE_PAGE_SIZE);
+  };
+
+  /** Timeline hrefs are either real routes or in-page `?tab=` aliases. */
+  const handleTimelineNavigate = (href: string) => {
+    if (href.startsWith('?tab=')) {
+      handleTabChange(new URLSearchParams(href.slice(1)).get('tab') || 'overview');
+      return;
+    }
+    navigate(href);
+  };
 
   useEffect(() => {
     refetchWorksheets();
@@ -391,12 +430,17 @@ const StudentPage = () => {
           {/* v6.8.6 P4 — on <lg widths show icon-only triggers (with aria-label
               + tooltip via title) so the 7-tab strip never overflows on
               narrower laptop windows; full text returns at lg: breakpoint. */}
-          <TabsList className="grid w-full grid-cols-8 mb-6">
+          <TabsList className="grid w-full grid-cols-9 mb-6">
             {/* v6.9.111 M4.4 — Prep tab mounted alongside the legacy tabs.
                 Switching the default tab happens in M7. */}
             <TabsTrigger value="prep" className="flex items-center gap-2" aria-label="Prep" title="Prep">
               <Target className="h-4 w-4" />
               <span className="hidden lg:inline">Prep</span>
+            </TabsTrigger>
+            {/* v6.9.111 M5.4 — Timeline tab mounted alongside the legacy tabs. */}
+            <TabsTrigger value="timeline" className="flex items-center gap-2" aria-label="Timeline" title="Timeline">
+              <Activity className="h-4 w-4" />
+              <span className="hidden lg:inline">Timeline</span>
             </TabsTrigger>
             <TabsTrigger value="overview" className="flex items-center gap-2" aria-label="Overview" title="Overview">
               <User className="h-4 w-4" />
@@ -485,6 +529,23 @@ const StudentPage = () => {
             />
           </TabsContent>
 
+          {/* Timeline Tab (v6.9.111 M5.4) */}
+          <TabsContent value="timeline">
+            <TimelineTab
+              groups={timeline.groups}
+              counts={timeline.counts}
+              filter={timelineFilter}
+              onFilterChange={handleTimelineFilterChange}
+              isLoading={timelineSources.isLoading}
+              isEmpty={timeline.isEmpty}
+              hasMore={timeline.hasMore}
+              onLoadMore={() =>
+                setTimelineVisibleCount((count) => count + TIMELINE_PAGE_SIZE)
+              }
+              onNavigate={handleTimelineNavigate}
+              onGoToPrep={() => handleTabChange('prep')}
+            />
+          </TabsContent>
 
           {/* Overview Tab */}
           <TabsContent value="overview">
