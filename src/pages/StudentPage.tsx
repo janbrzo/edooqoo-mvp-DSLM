@@ -437,6 +437,11 @@ const StudentPage = () => {
               <Target className="h-4 w-4" />
               <span className="hidden lg:inline">Prep</span>
             </TabsTrigger>
+            {/* v6.9.111 M5.4 — Timeline tab mounted alongside the legacy tabs. */}
+            <TabsTrigger value="timeline" className="flex items-center gap-2" aria-label="Timeline" title="Timeline">
+              <Activity className="h-4 w-4" />
+              <span className="hidden lg:inline">Timeline</span>
+            </TabsTrigger>
             <TabsTrigger value="overview" className="flex items-center gap-2" aria-label="Overview" title="Overview">
               <User className="h-4 w-4" />
               <span className="hidden lg:inline">Overview</span>
