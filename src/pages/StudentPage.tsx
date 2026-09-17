@@ -430,7 +430,7 @@ const StudentPage = () => {
           {/* v6.8.6 P4 — on <lg widths show icon-only triggers (with aria-label
               + tooltip via title) so the 7-tab strip never overflows on
               narrower laptop windows; full text returns at lg: breakpoint. */}
-          <TabsList className="grid w-full grid-cols-8 mb-6">
+          <TabsList className="grid w-full grid-cols-9 mb-6">
             {/* v6.9.111 M4.4 — Prep tab mounted alongside the legacy tabs.
                 Switching the default tab happens in M7. */}
             <TabsTrigger value="prep" className="flex items-center gap-2" aria-label="Prep" title="Prep">
