@@ -529,6 +529,23 @@ const StudentPage = () => {
             />
           </TabsContent>
 
+          {/* Timeline Tab (v6.9.111 M5.4) */}
+          <TabsContent value="timeline">
+            <TimelineTab
+              groups={timeline.groups}
+              counts={timeline.counts}
+              filter={timelineFilter}
+              onFilterChange={handleTimelineFilterChange}
+              isLoading={timelineSources.isLoading}
+              isEmpty={timeline.isEmpty}
+              hasMore={timeline.hasMore}
+              onLoadMore={() =>
+                setTimelineVisibleCount((count) => count + TIMELINE_PAGE_SIZE)
+              }
+              onNavigate={handleTimelineNavigate}
+              onGoToPrep={() => handleTabChange('prep')}
+            />
+          </TabsContent>
 
           {/* Overview Tab */}
           <TabsContent value="overview">
