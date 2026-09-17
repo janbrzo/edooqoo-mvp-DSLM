@@ -88,6 +88,9 @@ const StudentPage = () => {
   // existing `?tab=overview` links still open the Overview tab as before.
   const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'dslm');
   const [deleteConfirmName, setDeleteConfirmName] = useState('');
+  // v6.9.111 M5.4 — Timeline tab local state (moves into the URL in M7).
+  const [timelineFilter, setTimelineFilter] = useState<TimelineFilter>('all');
+  const [timelineVisibleCount, setTimelineVisibleCount] = useState(TIMELINE_PAGE_SIZE);
 
   // Sync activeTab when URL searchParams change (Issue 8: programmatic navigation)
   useEffect(() => {
