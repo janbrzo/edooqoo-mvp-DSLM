@@ -207,6 +207,37 @@ const StudentPage = () => {
     [prepSuggestion, focusAreas],
   );
 
+  // v6.9.111 M5.4 — Timeline data. The three extra reads only fire once the
+  // Timeline tab is actually open; worksheets and notes are already loaded.
+  const timelineSources = useStudentTimelineSources(
+    id,
+    student?.teacher_id,
+    activeTab === 'timeline',
+  );
+  const timeline = useStudentTimeline({
+    lessons: timelineSources.lessons,
+    homework: timelineSources.homework,
+    tests: timelineSources.tests,
+    worksheets: worksheets as any,
+    knowledgeEntries: studentKnowledge.entries as any,
+    filter: timelineFilter,
+    visibleCount: timelineVisibleCount,
+  });
+
+  const handleTimelineFilterChange = (next: TimelineFilter) => {
+    setTimelineFilter(next);
+    setTimelineVisibleCount(TIMELINE_PAGE_SIZE);
+  };
+
+  /** Timeline hrefs are either real routes or in-page `?tab=` aliases. */
+  const handleTimelineNavigate = (href: string) => {
+    if (href.startsWith('?tab=')) {
+      handleTabChange(new URLSearchParams(href.slice(1)).get('tab') || 'overview');
+      return;
+    }
+    navigate(href);
+  };
+
   useEffect(() => {
     refetchWorksheets();
   }, [currentPage, deletedCurrentPage]);
