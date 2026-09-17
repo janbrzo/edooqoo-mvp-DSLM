@@ -24,6 +24,11 @@ import { StudentSettingsMenu } from '@/components/student/StudentSettingsMenu';
 import { useStudentNextLesson } from '@/hooks/useStudentNextLesson';
 import { selectFocusAreas, formatNextLessonLabel } from '@/lib/students/studentSnapshot';
 import { PrepTab } from '@/components/student/prep/PrepTab';
+// v6.9.111 M5.4 — Timeline tab (data hooks + presentational composition).
+import { TimelineTab } from '@/components/student/timeline/TimelineTab';
+import { useStudentTimeline } from '@/hooks/useStudentTimeline';
+import { useStudentTimelineSources } from '@/hooks/useStudentTimelineSources';
+import { TIMELINE_PAGE_SIZE, type TimelineFilter } from '@/lib/students/timelineEvents';
 import { useFutureTimeline } from '@/hooks/useFutureTimeline';
 import { selectPrepSuggestion, buildRationale, type PrepSuggestion } from '@/lib/students/prepPlan';
 import { DeleteWorksheetButton } from "@/components/DeleteWorksheetButton";
