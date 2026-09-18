@@ -37,10 +37,10 @@ Reference: `docs/ux/target-teacher-experience.md` (approved 2026-09-02).
     - [x] M4.4 — mounted as first tab in `StudentPage.tsx` (`?tab=prep`); default stays `dslm` until M7
   - [ ] M5 — `useStudentTimeline` (zero queries) + `TimelineTab`
     - [x] M5.1 — `src/lib/students/timelineEvents.ts` + 26 unit tests (no UI)
-    - [ ] M5.2 — `useStudentTimelineSources` (3 lazy queries + demo) + pure `useStudentTimeline`
-    - [ ] M5.3 — `TimelineFilters` + `TimelineEventRow`
-    - [ ] M5.4 — `TimelineTab` composition + mount as second tab in `StudentPage.tsx`
-    - [ ] M5.5 — spec section 7 update + roadmap (RAG stays in M8)
+    - [x] M5.2 — `useStudentTimelineSources` (3 lazy queries + demo) + pure `useStudentTimeline`
+    - [x] M5.3 — `TimelineFilters` + `TimelineEventRow`
+    - [x] M5.4 — `TimelineTab` composition + mount as second tab in `StudentPage.tsx`
+    - [x] M5.5 — spec section 7 update + roadmap (RAG stays in M8)
   - [ ] M6 — `LibraryTab` with segments and collapsed Deleted
   - [ ] M7 — switch to 4 tabs, `resolveTab` routing, `studentPrepPath()` → `?tab=prep`, `React.lazy`
   - [ ] M8 — dead-code removal + RAG (`docs/llm-context.md`, `public/llms.txt`, memory)
