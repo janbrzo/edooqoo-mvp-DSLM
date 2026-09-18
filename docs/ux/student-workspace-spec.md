@@ -274,23 +274,41 @@ No `any` in any new interface.
 
 ---
 
-## 7. Data sources
+## 7. Data sources (as built, M5)
 
-Field names below were verified on 2026-09-11 against `src/hooks/useCalendarSlots.tsx` (`CalendarSlot`), `src/hooks/useAllWorksheetHomework.tsx` (`HomeworkAssignment`), `src/types/studentTests.ts` (`StudentTest`) and `src/types/studentKnowledge.ts` (`StudentKnowledgeEntry`, `KnowledgeMetadata`). Note the hook files use the `.tsx` extension, not `.ts`.
+Timeline uses a deliberate two-layer split: a **pure composition layer** and a **lazy sources layer**.
+
+### 7.1 `useStudentTimeline` — pure layer (no queries)
+
+`src/hooks/useStudentTimeline.ts` is a `useMemo` composition over `src/lib/students/timelineEvents.ts` rules (`buildTimelineEvents`, `countByFilter`, `filterEvents`, `groupEventsByDate`). It performs **zero Supabase queries** — this is what prevents the N+1 pattern that `StudentCard` caused on the dashboard before v6.9.109. Every array it consumes is passed in by the caller.
+
+### 7.2 `useStudentTimelineSources` — lazy sources layer
+
+`src/hooks/useStudentTimelineSources.ts` fetches only what nothing else on `StudentPage` provides: lessons, homework assignments and tests. Worksheets and knowledge entries are reused from the page's existing `useWorksheetHistory` / `useStudentKnowledge` results. The single `useQuery` (key `['student-timeline-sources', teacherId, studentId, isDemoMode]`) is `enabled`-gated on the Timeline tab being active — it never fires on page load, and uses `staleTime: 60_000` + `refetchOnWindowFocus: false`. Errors degrade to empty lists via `devWarn`; the timeline never breaks the page.
+
+| Source | Table / demo origin | Constraints | Limit |
+|---|---|---|---|
+| `lessons` | `calendar_slots` (demo: `demoData.calendarSlots` filtered by `student_id`) | `teacher_id` + `student_id`, `status != 'deleted'`, `slot_date >= today − 180 days`, order `slot_date desc, start_time desc` | 100 |
+| `homework` | `homework_assignments` (demo: `demoData.homework` filtered by `student_id`) | `student_id`, order `created_at desc` | 100 |
+| `tests` | `student_tests` (demo: always empty) | `student_id` + `teacher_id`, `deleted_at is null`, order `created_at desc` | 50 |
+
+### 7.3 Event mapping (as built)
 
 | Event type | Source | Date field | `needsAction` when |
 |---|---|---|---|
-| `lesson` | `useCalendarSlots` → `CalendarSlot` | `slot_date` + `start_time` (combined to ISO) | `status === 'needs_review'` |
-| `worksheet` | `useWorksheetHistory` → `WorksheetHistoryItem` | `created_at` | never |
-| `homework_sent` | `useAllWorksheetHomework` → `HomeworkAssignment` | `created_at` | never |
-| `homework_returned` | `useAllWorksheetHomework` → `HomeworkAssignment` | `completed_at` | `completed_at != null && completed_by_teacher !== true` |
-| `note` | `useStudentKnowledge` → `StudentKnowledgeEntry` | `created_at` | never |
-| `test_result` | `useStudentTests` → `StudentTest` | `completed_at ?? created_at` | `completed_at != null && reviewed_at == null` |
-| `mastery_change` | `useStudentKnowledge`, `category === 'Skill Assessment'` with `metadata.mastery` (`KnowledgeMetadata.mastery?: number`, 0–100) | `updated_at` | never |
+| `lesson` | `lessons` (`CalendarSlot`) | `slot_date` + `start_time` | `status === 'needs_review'` → action `Mark done` → `?tab=calendar` |
+| `worksheet` | page's `worksheets` (`WorksheetHistoryItem`) | `created_at` | never; href `/worksheet/{id}` |
+| `homework_sent` | `homework` (`HomeworkAssignment`) | `created_at` | never |
+| `homework_returned` | `homework` (`HomeworkAssignment`) | `completed_at` | `completed_at != null && completed_by_teacher !== true` (returned homework yields two events) |
+| `note` | page's knowledge entries (`StudentKnowledgeEntry`) | `created_at` | never; first line of `content`, max 80 chars, href `?tab=knowledge` |
+| `test_result` | `tests` (`StudentTest`) | `completed_at ?? created_at` | `completed_at != null && reviewed_at == null`; href `?tab=tests` |
+| `mastery_change` | knowledge entries, `category === 'Skill Assessment'` with `metadata.mastery` (0–100) | `updated_at` | never |
 
-Architectural rule, binding for M5: **`useStudentTimeline` performs no Supabase query.** It is a `useMemo` composition over data the page already holds. This is what prevents the N+1 pattern that `StudentCard` caused on the dashboard before v6.9.109. `useAllWorksheetHomework` is keyed by worksheet ids, so Timeline reuses the array the page already passes it and adds no round trip.
+Rules shared by all events: entries with `deleted_at` / `is_outdated` / `archived_at` or without a date are skipped; event `id` is `${type}:${sourceId}` (deduplicates the homework sent/returned pair); sort is `at` descending with `id` as the tiebreaker; `TIMELINE_PAGE_SIZE = 25` for client-side paging.
 
-Demo mode: `useAllWorksheetHomework` already returns an empty map under `isDemoMode`; `useStudentTimeline` inherits that behaviour because it never queries. Every mutating action in new components goes through `useDemoGuard`.
+### 7.4 Demo mode
+
+`useStudentTimelineSources` answers from `demoData` and issues zero Supabase calls in demo mode. Worksheets and notes come from `demoData` through the page's existing hooks; tests are always empty in demo. Every mutating action in new components goes through `useDemoGuard`.
 
 ---
 
