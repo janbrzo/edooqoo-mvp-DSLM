@@ -35,7 +35,7 @@ Reference: `docs/ux/target-teacher-experience.md` (approved 2026-09-02).
     - [x] M4.2 — `NextLessonCard`, `LastLessonStrip`, `QuickNoteBox` (built, mounted in M4.4)
     - [x] M4.3 — `PrepTab.tsx` composition
     - [x] M4.4 — mounted as first tab in `StudentPage.tsx` (`?tab=prep`); default stays `dslm` until M7
-  - [ ] M5 — `useStudentTimeline` (zero queries) + `TimelineTab`
+  - [x] M5 — `useStudentTimeline` (zero queries) + `TimelineTab`
     - [x] M5.1 — `src/lib/students/timelineEvents.ts` + 26 unit tests (no UI)
     - [x] M5.2 — `useStudentTimelineSources` (3 lazy queries + demo) + pure `useStudentTimeline`
     - [x] M5.3 — `TimelineFilters` + `TimelineEventRow`
