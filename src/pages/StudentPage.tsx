@@ -31,6 +31,16 @@ import { useStudentTimelineSources } from '@/hooks/useStudentTimelineSources';
 import { TIMELINE_PAGE_SIZE, type TimelineFilter } from '@/lib/students/timelineEvents';
 import { useFutureTimeline } from '@/hooks/useFutureTimeline';
 import { selectPrepSuggestion, buildRationale, type PrepSuggestion } from '@/lib/students/prepPlan';
+// v6.9.111 M6.4 — Library tab (pure rules + presentational composition).
+import { LibraryTab } from '@/components/student/library/LibraryTab';
+import {
+  buildWorksheetItems,
+  filterBySearch,
+  sortItems,
+  type LibrarySection,
+  type LibrarySort,
+  type LibraryWorksheetItem,
+} from '@/lib/students/libraryItems';
 import { DeleteWorksheetButton } from "@/components/DeleteWorksheetButton";
 import { DuplicateWorksheetButton } from "@/components/DuplicateWorksheetButton";
 import { StudentSelector } from '@/components/StudentSelector';
@@ -53,7 +63,7 @@ import { WelcomeTestSuggestion } from '@/components/dashboard/WelcomeTestSuggest
 import { StudentCalendarTab } from '@/components/calendar/StudentCalendarTab';
 import { useStudentAttentionDots } from '@/hooks/useStudentAttentionDots';
 import { AttentionDot } from '@/components/ui/AttentionDot';
-import { ArrowLeft, FileText, Calendar, User, BookOpen, Target, Edit, Plus, Trash2, Brain, GraduationCap, StickyNote, Mail, Globe, Share2, TrendingUp, ClipboardCheck, Activity, Pencil, BarChart3, DollarSign } from 'lucide-react';
+import { ArrowLeft, FileText, Calendar, User, BookOpen, Target, Edit, Plus, Trash2, Brain, GraduationCap, StickyNote, Mail, Globe, Share2, TrendingUp, ClipboardCheck, Activity, Pencil, BarChart3, DollarSign, Library } from 'lucide-react';
 import { formatGoalLabel } from '@/constants/studentGoals';
 import { Input } from '@/components/ui/input';
 import { writeAutoGenerateIntent } from '@/lib/worksheet/autoGenerateBootstrap';
@@ -96,6 +106,10 @@ const StudentPage = () => {
   // v6.9.111 M5.4 — Timeline tab local state (moves into the URL in M7).
   const [timelineFilter, setTimelineFilter] = useState<TimelineFilter>('all');
   const [timelineVisibleCount, setTimelineVisibleCount] = useState(TIMELINE_PAGE_SIZE);
+  // v6.9.111 M6.4 — Library tab local state (moves into the URL in M7).
+  const [librarySection, setLibrarySection] = useState<LibrarySection>('worksheets');
+  const [librarySearch, setLibrarySearch] = useState('');
+  const [librarySort, setLibrarySort] = useState<LibrarySort>('newest');
 
   // Sync activeTab when URL searchParams change (Issue 8: programmatic navigation)
   useEffect(() => {
@@ -236,6 +250,44 @@ const StudentPage = () => {
       return;
     }
     navigate(href);
+  };
+
+  // v6.9.111 M6.4 — Library items: no extra queries, reuse the page worksheets.
+  const libraryItems = useMemo(() => {
+    const built = buildWorksheetItems(
+      (worksheets as any[]).map((w) => ({
+        id: w.id,
+        title: w.title,
+        created_at: w.created_at,
+        form_data: w.form_data,
+        share_token: w.share_token,
+        student_id: w.student_id,
+        hasImage: hasImage(w),
+        hasAudio: hasAudio(w),
+      })),
+    );
+    return sortItems(filterBySearch(built, librarySearch), librarySort);
+  }, [worksheets, librarySearch, librarySort]);
+
+  const libraryDeletedItems = useMemo(
+    () =>
+      (deletedWorksheets as any[]).map((w) => ({
+        id: w.id,
+        title: w.title,
+        deletedAt: w.deleted_at,
+      })),
+    [deletedWorksheets],
+  );
+
+  const handleLibrarySectionChange = (section: LibrarySection) => {
+    setLibrarySection(section);
+    setLibrarySearch('');
+    setCurrentPage(1);
+  };
+
+  const handleLibraryRestore = async (worksheetId: string) => {
+    const result = await restoreDeleted(worksheetId);
+    if (result.success) refetchWorksheets();
   };
 
   useEffect(() => {
