@@ -45,7 +45,7 @@ Reference: `docs/ux/target-teacher-experience.md` (approved 2026-09-02).
     - [x] M6.1 — `src/lib/students/libraryItems.ts` + 15 unit tests (no UI)
     - [x] M6.2 — Library presentation components
     - [x] M6.3 — `LibraryTab` composition
-    - [ ] M6.4 — mount Library beside legacy tabs
+    - [x] M6.4 — mount Library beside legacy tabs (StudentPage `?tab=library`, 10 tabs)
     - [ ] M6.5 — spec + roadmap documentation (RAG stays in M8)
   - [ ] M7 — switch to 4 tabs, `resolveTab` routing, `studentPrepPath()` → `?tab=prep`, `React.lazy`
   - [ ] M8 — dead-code removal + RAG (`docs/llm-context.md`, `public/llms.txt`, memory)
