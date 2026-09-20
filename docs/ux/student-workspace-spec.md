@@ -263,15 +263,57 @@ export interface TimelineTabProps {
   onFilterChange: (next: TimelineFilter) => void;
 }
 
+// src/lib/students/libraryItems.ts — implemented in M6
+export type LibrarySort = 'newest' | 'oldest' | 'title';
+export const LIBRARY_PAGE_SIZE = 10;
+
+export interface LibraryWorksheetItem {
+  id: string;
+  title: string;            // '' → 'Untitled worksheet'
+  createdAt: string;
+  grammar: string | null;   // from form_data.grammar
+  hasImage: boolean;
+  hasAudio: boolean;
+  isShared: boolean;
+  shareToken: string | null;
+  studentId: string | null;
+}
+
+export function buildWorksheetItems(rows: readonly LibraryWorksheetSource[]): LibraryWorksheetItem[];
+export function filterBySearch(items: readonly LibraryWorksheetItem[], query: string): readonly LibraryWorksheetItem[];
+export function sortItems(items: readonly LibraryWorksheetItem[], sort: LibrarySort): LibraryWorksheetItem[];
+export function formatLibraryDate(iso: string): string; // 'MMM dd, yyyy HH:mm'
+
+// src/components/student/library/LibraryTab.tsx — as built in M6.3
 export interface LibraryTabProps {
-  studentId: string;
-  teacherId: string;
-  studentName: string;
-  studentNativeLanguage: string;
   section: LibrarySection;
-  onSectionChange: (next: LibrarySection) => void;
-  teacherCalendarToken: string | null;
-  flashcardSetId: string | null;
+  counts: LibrarySectionCounts;            // Partial<Record<LibrarySection, number>>
+  onSectionChange: (section: LibrarySection) => void;
+
+  items: readonly LibraryWorksheetItem[];  // already filtered and sorted by the page
+  isLoading?: boolean;
+  search: string;
+  onSearchChange: (value: string) => void;
+  sort: LibrarySort;
+  onSortChange: (value: LibrarySort) => void;
+  onGenerate: () => void;
+  onOpen: (id: string) => void;
+  onReuse: (id: string) => void;
+  onRename: (id: string, currentTitle: string) => void;
+  onShare: (item: LibraryWorksheetItem) => void;
+  renderWorksheetActions?: (item: LibraryWorksheetItem) => React.ReactNode;
+
+  page: number;                            // server pagination, worksheets only
+  pageCount: number;
+  onPageChange: (page: number) => void;
+
+  deletedItems: readonly LibraryDeletedItem[]; // { id, title?, deletedAt }
+  deletedTotalCount: number;
+  isDeletedLoading?: boolean;
+  onRestore: (id: string) => void;
+
+  flashcardsSlot?: React.ReactNode;        // mounted only while that section is active
+  homeworkSlot?: React.ReactNode;
 }
 ```
 
