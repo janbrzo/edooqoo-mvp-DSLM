@@ -359,7 +359,30 @@ Rules shared by all events: entries with `deleted_at` / `is_outdated` / `archive
 
 ---
 
-## 8. Interaction patterns
+## 8. Library data sources (as built, M6)
+
+Library introduces **no new queries**. It is a pure projection of data the page already holds.
+
+| Section | Origin | Notes |
+|---|---|---|
+| Worksheets | `useWorksheetHistory(studentId, page, pageSize = 10)` — the same hook the legacy Worksheets tab uses | Rows → `buildWorksheetItems` → `filterBySearch` → `sortItems`, all inside one `useMemo` on `StudentPage` |
+| Deleted | `useDeletedWorksheets(studentId, …, deletedCurrentPage, pageSize)` | Mapped to `{ id, title, deletedAt }`; `onRestore` calls the hook's `restoreWorksheet` |
+| Flashcards | not mounted yet (slot) | Count stays `undefined` until the section is mounted — no count query is issued |
+| Homework | not mounted yet (slot) | Same rule |
+
+Rules that follow from this:
+
+- **Pagination is server-side** for worksheets (`page` / `pageCount` derived from `totalCount / LIBRARY_PAGE_SIZE`); search and sort apply to the current page only, matching the legacy tab's behaviour.
+- **Counts are honest.** `counts.worksheets = totalCount`; sections without a mounted data source pass `undefined` and render no number rather than a wrong zero.
+- **Deleted rows are restore-only.** No hard delete, no destructive icon; the section disappears entirely when `totalCount === 0`.
+- **Section switching resets** `librarySearch` and the worksheet page to 1, so a teacher never returns to a filtered view they cannot see.
+- Demo mode needs no special branch: both hooks already answer from `demoData`.
+
+Library state (`librarySection`, `librarySearch`, `librarySort`) is local to `StudentPage` in M6 and moves into the URL (`?tab=library&section=…`) in M7.
+
+---
+
+## 10. Interaction patterns
 
 Three patterns hold the workspace together and are defined once here:
 
@@ -383,7 +406,7 @@ Navigation rule: anything that leads to another address renders as `<a>` with mo
 
 ---
 
-## 10. Migration and compatibility rules
+## 11. Migration and compatibility rules
 
 1. Nothing is deleted until its replacement works. Dead-code removal happens only in M8.
 2. Every phase ends with the application in a shippable state; no phase leaves a half-wired tab.
@@ -396,7 +419,7 @@ Navigation rule: anything that leads to another address renders as `<a>` with mo
 
 ---
 
-## 11. Phase plan
+## 12. Phase plan
 
 | Phase | Scope | Verification |
 |---|---|---|
@@ -414,7 +437,7 @@ After every phase: `bunx tsgo --noEmit -p tsconfig.app.json`, unit tests, and a 
 
 ---
 
-## 12. Acceptance criteria
+## 13. Acceptance criteria
 
 Checked after M7:
 
@@ -429,6 +452,6 @@ Checked after M7:
 
 ---
 
-## 13. Out of scope
+## 14. Out of scope
 
 Worksheet Generation Engine, DSLM internals, backend, RLS, migrations, SEO, Student Hub (`/my`), guided mode beyond the dashboard.
