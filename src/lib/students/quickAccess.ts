@@ -74,5 +74,5 @@ export function pickRecentStudents<T extends QuickAccessStudent>(
 
 /** Canonical destination for every quick-access click: straight into prep. */
 export function studentPrepPath(studentId: string): string {
-  return `/student/${studentId}?tab=dslm`;
+  return `/student/${studentId}?tab=prep`;
 }
