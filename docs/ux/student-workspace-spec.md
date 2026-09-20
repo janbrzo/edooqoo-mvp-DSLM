@@ -382,7 +382,7 @@ Library state (`librarySection`, `librarySearch`, `librarySort`) is local to `St
 
 ---
 
-## 10. Interaction patterns
+## 9. Interaction patterns
 
 Three patterns hold the workspace together and are defined once here:
 
@@ -394,7 +394,7 @@ Navigation rule: anything that leads to another address renders as `<a>` with mo
 
 ---
 
-## 9. Accessibility and styling contract
+## 10. Accessibility and styling contract
 
 - Tabs: `role="tablist"`, each trigger with `aria-controls` and a visible text label.
 - Snapshot: `<aside aria-label="Student snapshot">`; the mobile collapse toggle is a `button` with `aria-expanded`.
