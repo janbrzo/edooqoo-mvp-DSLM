@@ -129,7 +129,12 @@ The rg sweep on 2026-09-11 returned no `?tab=` value outside the table above. Th
 | `src/components/student/timeline/TimelineTab.tsx` | M5 | new | Stream, date grouping, load more |
 | `src/components/student/timeline/TimelineEventRow.tsx` | M5 | new | `EntityRow` bound to `TimelineEvent` |
 | `src/components/student/timeline/TimelineFilters.tsx` | M5 | new | Filter pills bound to `?filter=` |
+| `src/lib/students/libraryItems.ts` | M6 | new | Pure Library rules: item mapping, search, sort, date format |
 | `src/components/student/library/LibraryTab.tsx` | M6 | new | Segmented archive + collapsed Deleted |
+| `src/components/student/library/LibrarySegments.tsx` | M6 | new | Always-visible section switcher with counts |
+| `src/components/student/library/LibraryToolbar.tsx` | M6 | new | Search, sort, `Generate worksheet` |
+| `src/components/student/library/WorksheetLibraryRow.tsx` | M6 | new | Dense `EntityRow` for one worksheet + `…` menu |
+| `src/components/student/library/DeletedWorksheetsSection.tsx` | M6 | new | Collapsed restore-only list |
 
 Used unchanged: `DSLMTab`, `DslmExplainerBanner`, `FlashcardSetsSection`, `StudentHomeworkTab`, `StudentTestsTab`, `StudentCalendarTab`, `WelcomeTestSuggestion`, `IntakeExtractionBanner`, `StudentEditDialog`, `ShareWorksheetModal`, `RenameDialog`, `StudentKnowledgeQuickAddModal`, `MediaBadges`, `SectionSkeleton`, `DeleteWorksheetButton`, `DuplicateWorksheetButton`, `AttentionDot`.
 
@@ -258,15 +263,57 @@ export interface TimelineTabProps {
   onFilterChange: (next: TimelineFilter) => void;
 }
 
+// src/lib/students/libraryItems.ts — implemented in M6
+export type LibrarySort = 'newest' | 'oldest' | 'title';
+export const LIBRARY_PAGE_SIZE = 10;
+
+export interface LibraryWorksheetItem {
+  id: string;
+  title: string;            // '' → 'Untitled worksheet'
+  createdAt: string;
+  grammar: string | null;   // from form_data.grammar
+  hasImage: boolean;
+  hasAudio: boolean;
+  isShared: boolean;
+  shareToken: string | null;
+  studentId: string | null;
+}
+
+export function buildWorksheetItems(rows: readonly LibraryWorksheetSource[]): LibraryWorksheetItem[];
+export function filterBySearch(items: readonly LibraryWorksheetItem[], query: string): readonly LibraryWorksheetItem[];
+export function sortItems(items: readonly LibraryWorksheetItem[], sort: LibrarySort): LibraryWorksheetItem[];
+export function formatLibraryDate(iso: string): string; // 'MMM dd, yyyy HH:mm'
+
+// src/components/student/library/LibraryTab.tsx — as built in M6.3
 export interface LibraryTabProps {
-  studentId: string;
-  teacherId: string;
-  studentName: string;
-  studentNativeLanguage: string;
   section: LibrarySection;
-  onSectionChange: (next: LibrarySection) => void;
-  teacherCalendarToken: string | null;
-  flashcardSetId: string | null;
+  counts: LibrarySectionCounts;            // Partial<Record<LibrarySection, number>>
+  onSectionChange: (section: LibrarySection) => void;
+
+  items: readonly LibraryWorksheetItem[];  // already filtered and sorted by the page
+  isLoading?: boolean;
+  search: string;
+  onSearchChange: (value: string) => void;
+  sort: LibrarySort;
+  onSortChange: (value: LibrarySort) => void;
+  onGenerate: () => void;
+  onOpen: (id: string) => void;
+  onReuse: (id: string) => void;
+  onRename: (id: string, currentTitle: string) => void;
+  onShare: (item: LibraryWorksheetItem) => void;
+  renderWorksheetActions?: (item: LibraryWorksheetItem) => React.ReactNode;
+
+  page: number;                            // server pagination, worksheets only
+  pageCount: number;
+  onPageChange: (page: number) => void;
+
+  deletedItems: readonly LibraryDeletedItem[]; // { id, title?, deletedAt }
+  deletedTotalCount: number;
+  isDeletedLoading?: boolean;
+  onRestore: (id: string) => void;
+
+  flashcardsSlot?: React.ReactNode;        // mounted only while that section is active
+  homeworkSlot?: React.ReactNode;
 }
 ```
 
@@ -312,7 +359,30 @@ Rules shared by all events: entries with `deleted_at` / `is_outdated` / `archive
 
 ---
 
-## 8. Interaction patterns
+## 8. Library data sources (as built, M6)
+
+Library introduces **no new queries**. It is a pure projection of data the page already holds.
+
+| Section | Origin | Notes |
+|---|---|---|
+| Worksheets | `useWorksheetHistory(studentId, page, pageSize = 10)` — the same hook the legacy Worksheets tab uses | Rows → `buildWorksheetItems` → `filterBySearch` → `sortItems`, all inside one `useMemo` on `StudentPage` |
+| Deleted | `useDeletedWorksheets(studentId, …, deletedCurrentPage, pageSize)` | Mapped to `{ id, title, deletedAt }`; `onRestore` calls the hook's `restoreWorksheet` |
+| Flashcards | not mounted yet (slot) | Count stays `undefined` until the section is mounted — no count query is issued |
+| Homework | not mounted yet (slot) | Same rule |
+
+Rules that follow from this:
+
+- **Pagination is server-side** for worksheets (`page` / `pageCount` derived from `totalCount / LIBRARY_PAGE_SIZE`); search and sort apply to the current page only, matching the legacy tab's behaviour.
+- **Counts are honest.** `counts.worksheets = totalCount`; sections without a mounted data source pass `undefined` and render no number rather than a wrong zero.
+- **Deleted rows are restore-only.** No hard delete, no destructive icon; the section disappears entirely when `totalCount === 0`.
+- **Section switching resets** `librarySearch` and the worksheet page to 1, so a teacher never returns to a filtered view they cannot see.
+- Demo mode needs no special branch: both hooks already answer from `demoData`.
+
+Library state (`librarySection`, `librarySearch`, `librarySort`) is local to `StudentPage` in M6 and moves into the URL (`?tab=library&section=…`) in M7.
+
+---
+
+## 9. Interaction patterns
 
 Three patterns hold the workspace together and are defined once here:
 
@@ -324,7 +394,7 @@ Navigation rule: anything that leads to another address renders as `<a>` with mo
 
 ---
 
-## 9. Accessibility and styling contract
+## 10. Accessibility and styling contract
 
 - Tabs: `role="tablist"`, each trigger with `aria-controls` and a visible text label.
 - Snapshot: `<aside aria-label="Student snapshot">`; the mobile collapse toggle is a `button` with `aria-expanded`.
@@ -336,7 +406,7 @@ Navigation rule: anything that leads to another address renders as `<a>` with mo
 
 ---
 
-## 10. Migration and compatibility rules
+## 11. Migration and compatibility rules
 
 1. Nothing is deleted until its replacement works. Dead-code removal happens only in M8.
 2. Every phase ends with the application in a shippable state; no phase leaves a half-wired tab.
@@ -349,7 +419,7 @@ Navigation rule: anything that leads to another address renders as `<a>` with mo
 
 ---
 
-## 11. Phase plan
+## 12. Phase plan
 
 | Phase | Scope | Verification |
 |---|---|---|
@@ -367,7 +437,7 @@ After every phase: `bunx tsgo --noEmit -p tsconfig.app.json`, unit tests, and a 
 
 ---
 
-## 12. Acceptance criteria
+## 13. Acceptance criteria
 
 Checked after M7:
 
@@ -382,6 +452,6 @@ Checked after M7:
 
 ---
 
-## 13. Out of scope
+## 14. Out of scope
 
 Worksheet Generation Engine, DSLM internals, backend, RLS, migrations, SEO, Student Hub (`/my`), guided mode beyond the dashboard.

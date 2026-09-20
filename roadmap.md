@@ -41,12 +41,12 @@ Reference: `docs/ux/target-teacher-experience.md` (approved 2026-09-02).
     - [x] M5.3 — `TimelineFilters` + `TimelineEventRow`
     - [x] M5.4 — `TimelineTab` composition + mount as second tab in `StudentPage.tsx`
     - [x] M5.5 — spec section 7 update + roadmap (RAG stays in M8)
-  - [ ] M6 — `LibraryTab` with segments and collapsed Deleted
+  - [x] M6 — `LibraryTab` with segments and collapsed Deleted
     - [x] M6.1 — `src/lib/students/libraryItems.ts` + 15 unit tests (no UI)
     - [x] M6.2 — Library presentation components
     - [x] M6.3 — `LibraryTab` composition
     - [x] M6.4 — mount Library beside legacy tabs (StudentPage `?tab=library`, 10 tabs)
-    - [ ] M6.5 — spec + roadmap documentation (RAG stays in M8)
+    - [x] M6.5 — spec sections 5/6 (real `LibraryTabProps`) + new section 8 "Library data sources" + roadmap (RAG stays in M8)
   - [ ] M7 — switch to 4 tabs, `resolveTab` routing, `studentPrepPath()` → `?tab=prep`, `React.lazy`
   - [ ] M8 — dead-code removal + RAG (`docs/llm-context.md`, `public/llms.txt`, memory)
 - [ ] Guided mode beyond the dashboard
