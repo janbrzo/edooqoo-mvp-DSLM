@@ -48,7 +48,7 @@ Reference: `docs/ux/target-teacher-experience.md` (approved 2026-09-02).
     - [x] M6.4 — mount Library beside legacy tabs (StudentPage `?tab=library`, 10 tabs)
     - [x] M6.5 — spec sections 5/6 (real `LibraryTabProps`) + new section 8 "Library data sources" + roadmap (RAG stays in M8)
   - [ ] M7 — switch to 4 tabs, `resolveTab` routing, `studentPrepPath()` → `?tab=prep`, `React.lazy`
-    - [ ] M7.1 — harden the routing contract (`buildWorkspaceParams`, preserved deep-link params, canonical Prep quick access; no UI)
+    - [x] M7.1 — harden the routing contract (`buildWorkspaceParams`, preserved deep-link params, canonical Prep quick access; no UI)
   - [ ] M8 — dead-code removal + RAG (`docs/llm-context.md`, `public/llms.txt`, memory)
 - [ ] Guided mode beyond the dashboard
 
