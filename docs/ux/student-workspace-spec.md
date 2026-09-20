@@ -129,7 +129,12 @@ The rg sweep on 2026-09-11 returned no `?tab=` value outside the table above. Th
 | `src/components/student/timeline/TimelineTab.tsx` | M5 | new | Stream, date grouping, load more |
 | `src/components/student/timeline/TimelineEventRow.tsx` | M5 | new | `EntityRow` bound to `TimelineEvent` |
 | `src/components/student/timeline/TimelineFilters.tsx` | M5 | new | Filter pills bound to `?filter=` |
+| `src/lib/students/libraryItems.ts` | M6 | new | Pure Library rules: item mapping, search, sort, date format |
 | `src/components/student/library/LibraryTab.tsx` | M6 | new | Segmented archive + collapsed Deleted |
+| `src/components/student/library/LibrarySegments.tsx` | M6 | new | Always-visible section switcher with counts |
+| `src/components/student/library/LibraryToolbar.tsx` | M6 | new | Search, sort, `Generate worksheet` |
+| `src/components/student/library/WorksheetLibraryRow.tsx` | M6 | new | Dense `EntityRow` for one worksheet + `…` menu |
+| `src/components/student/library/DeletedWorksheetsSection.tsx` | M6 | new | Collapsed restore-only list |
 
 Used unchanged: `DSLMTab`, `DslmExplainerBanner`, `FlashcardSetsSection`, `StudentHomeworkTab`, `StudentTestsTab`, `StudentCalendarTab`, `WelcomeTestSuggestion`, `IntakeExtractionBanner`, `StudentEditDialog`, `ShareWorksheetModal`, `RenameDialog`, `StudentKnowledgeQuickAddModal`, `MediaBadges`, `SectionSkeleton`, `DeleteWorksheetButton`, `DuplicateWorksheetButton`, `AttentionDot`.
 
