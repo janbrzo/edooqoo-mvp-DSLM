@@ -4,6 +4,7 @@ import {
   PRESERVED_PARAMS,
   TAB_ALIASES,
   WORKSPACE_TABS,
+  buildWorkspaceParams,
   isWorkspaceTab,
   resolveTab,
   resolveWorkspaceParams,
@@ -82,7 +83,7 @@ describe('resolveWorkspaceParams', () => {
   });
 
   it('preserves every pass-through param', () => {
-    const input = q('tab=dslm&set=s&intake=i&view=goals&focus=f&testId=t&_=1');
+    const input = q('tab=dslm&set=s&intake=i&view=goals&focus=f&testId=t&_=1&editSuggestion=e');
     const { next } = resolveWorkspaceParams(input);
     for (const key of PRESERVED_PARAMS) {
       expect(next.get(key)).toBe(input.get(key));
@@ -97,6 +98,11 @@ describe('resolveWorkspaceParams', () => {
   it('lets an explicit section beat the alias section', () => {
     const { next } = resolveWorkspaceParams(q('tab=worksheets&section=homework'));
     expect(next.get('section')).toBe('homework');
+  });
+
+  it('preserves editSuggestion for model deep links', () => {
+    const { next } = resolveWorkspaceParams(q('tab=dslm&view=pathway&editSuggestion=s1'));
+    expect(next.toString()).toBe('tab=model&view=pathway&editSuggestion=s1');
   });
 
   it('is idempotent', () => {
@@ -121,6 +127,90 @@ describe('resolveWorkspaceParams', () => {
   it('ignores param order when deciding changed', () => {
     const { changed } = resolveWorkspaceParams(q('view=pathway&tab=model'));
     expect(changed).toBe(false);
+  });
+});
+
+describe('buildWorkspaceParams', () => {
+  it('builds Prep and removes state owned by other tabs', () => {
+    const current = q('tab=model&section=homework&filter=tests&view=goals&focus=f&testId=t&set=s&editSuggestion=e&_=1');
+    expect(buildWorkspaceParams(current, { tab: 'prep' }).toString()).toBe('tab=prep');
+  });
+
+  it('builds Timeline with a filter and removes foreign state', () => {
+    const current = q('tab=library&section=flashcards&set=s&view=goals&focus=f');
+    expect(buildWorkspaceParams(current, { tab: 'timeline', filter: 'homework' }).toString()).toBe(
+      'tab=timeline&filter=homework',
+    );
+  });
+
+  it('keeps testId only for the Tests filter', () => {
+    expect(
+      buildWorkspaceParams(q('tab=prep'), { tab: 'timeline', filter: 'tests', testId: 't1' }).toString(),
+    ).toBe('tab=timeline&filter=tests&testId=t1');
+    expect(
+      buildWorkspaceParams(q('tab=timeline&filter=tests&testId=t1'), {
+        tab: 'timeline',
+        filter: 'lessons',
+        testId: 't1',
+      }).toString(),
+    ).toBe('tab=timeline&filter=lessons');
+  });
+
+  it('builds Library with a section and removes foreign state', () => {
+    const current = q('tab=timeline&filter=tests&testId=t1&view=profile');
+    expect(buildWorkspaceParams(current, { tab: 'library', section: 'worksheets' }).toString()).toBe(
+      'tab=library&section=worksheets',
+    );
+  });
+
+  it('keeps set only for the Flashcards section', () => {
+    expect(
+      buildWorkspaceParams(q('tab=prep'), { tab: 'library', section: 'flashcards', set: 's1' }).toString(),
+    ).toBe('tab=library&section=flashcards&set=s1');
+    expect(
+      buildWorkspaceParams(q('tab=library&section=flashcards&set=s1'), {
+        tab: 'library',
+        section: 'homework',
+        set: 's1',
+      }).toString(),
+    ).toBe('tab=library&section=homework');
+  });
+
+  it('builds Model with its supported deep-link state', () => {
+    expect(
+      buildWorkspaceParams(q('tab=prep'), {
+        tab: 'model',
+        view: 'pathway',
+        focus: 'pick-idea',
+        editSuggestion: 's1',
+        cacheKey: '123',
+      }).toString(),
+    ).toBe('tab=model&view=pathway&focus=pick-idea&editSuggestion=s1&_=123');
+  });
+
+  it('preserves intake across every canonical tab', () => {
+    const current = q('tab=prep&intake=welcome');
+    const targets = [
+      { tab: 'prep' },
+      { tab: 'timeline', filter: 'all' },
+      { tab: 'library', section: 'worksheets' },
+      { tab: 'model', view: 'goals' },
+    ] as const;
+
+    for (const target of targets) {
+      expect(buildWorkspaceParams(current, target).get('intake')).toBe('welcome');
+    }
+  });
+
+  it('does not mutate current params', () => {
+    const current = q('tab=model&view=goals&intake=i');
+    buildWorkspaceParams(current, { tab: 'prep' });
+    expect(current.toString()).toBe('tab=model&view=goals&intake=i');
+  });
+
+  it('does not preserve unknown params', () => {
+    const next = buildWorkspaceParams(q('tab=prep&utm_source=x&ref=y'), { tab: 'model' });
+    expect(next.toString()).toBe('tab=model');
   });
 });
 

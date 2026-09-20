@@ -62,6 +62,6 @@ describe('pickRecentStudents', () => {
 
 describe('studentPrepPath', () => {
   it('points straight into prep', () => {
-    expect(studentPrepPath('abc')).toBe('/student/abc?tab=dslm');
+    expect(studentPrepPath('abc')).toBe('/student/abc?tab=prep');
   });
 });

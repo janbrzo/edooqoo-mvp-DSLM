@@ -28,6 +28,19 @@ export interface ResolvedTab {
   changed: boolean;
 }
 
+/** A deliberate in-workspace navigation initiated by the teacher. */
+export type WorkspaceNavigationTarget =
+  | { tab: 'prep' }
+  | { tab: 'timeline'; filter?: TimelineFilter; testId?: string }
+  | { tab: 'library'; section?: LibrarySection; set?: string }
+  | {
+      tab: 'model';
+      view?: string;
+      focus?: string;
+      editSuggestion?: string;
+      cacheKey?: string;
+    };
+
 /** Render order of the tab strip. */
 export const WORKSPACE_TABS: readonly WorkspaceTab[] = [
   'prep',
@@ -84,6 +97,7 @@ export const PRESERVED_PARAMS: readonly string[] = [
   'focus',
   'testId',
   '_',
+  'editSuggestion',
 ] as const;
 
 export function isWorkspaceTab(value: string | null | undefined): value is WorkspaceTab {
@@ -174,6 +188,49 @@ export function resolveWorkspaceParams(params: URLSearchParams): {
   };
 
   return { resolved, next, changed };
+}
+
+function setNonEmpty(params: URLSearchParams, key: string, value: string | undefined): void {
+  if (value?.trim()) params.set(key, value);
+}
+
+/**
+ * Build params for an intentional navigation inside the workspace.
+ *
+ * Unlike resolveWorkspaceParams(), this removes state owned by other tabs.
+ * `intake` is the only cross-tab workflow param and therefore survives every
+ * teacher-initiated navigation until its owning flow consumes it.
+ */
+export function buildWorkspaceParams(
+  current: URLSearchParams,
+  target: WorkspaceNavigationTarget,
+): URLSearchParams {
+  const next = new URLSearchParams();
+  next.set('tab', target.tab);
+
+  const intake = current.get('intake');
+  if (intake !== null) next.set('intake', intake);
+
+  switch (target.tab) {
+    case 'prep':
+      break;
+    case 'timeline':
+      if (target.filter) next.set('filter', target.filter);
+      if (target.filter === 'tests') setNonEmpty(next, 'testId', target.testId);
+      break;
+    case 'library':
+      if (target.section) next.set('section', target.section);
+      if (target.section === 'flashcards') setNonEmpty(next, 'set', target.set);
+      break;
+    case 'model':
+      setNonEmpty(next, 'view', target.view);
+      setNonEmpty(next, 'focus', target.focus);
+      setNonEmpty(next, 'editSuggestion', target.editSuggestion);
+      setNonEmpty(next, '_', target.cacheKey);
+      break;
+  }
+
+  return next;
 }
 
 /** Canonical link builder for the student workspace. */
