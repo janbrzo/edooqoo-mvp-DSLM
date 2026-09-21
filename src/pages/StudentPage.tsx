@@ -41,6 +41,13 @@ import {
   type LibrarySort,
   type LibraryWorksheetItem,
 } from '@/lib/students/libraryItems';
+// v6.9.111 M7.2 — canonical URL contract for the student workspace.
+import {
+  buildWorkspaceParams,
+  resolveTab,
+  resolveWorkspaceParams,
+  type WorkspaceNavigationTarget,
+} from '@/lib/students/workspaceTabs';
 import { DeleteWorksheetButton } from "@/components/DeleteWorksheetButton";
 import { DuplicateWorksheetButton } from "@/components/DuplicateWorksheetButton";
 import { StudentSelector } from '@/components/StudentSelector';
