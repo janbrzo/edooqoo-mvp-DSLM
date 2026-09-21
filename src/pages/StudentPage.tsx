@@ -41,6 +41,13 @@ import {
   type LibrarySort,
   type LibraryWorksheetItem,
 } from '@/lib/students/libraryItems';
+// v6.9.111 M7.2 — canonical URL contract for the student workspace.
+import {
+  buildWorkspaceParams,
+  resolveTab,
+  resolveWorkspaceParams,
+  type WorkspaceNavigationTarget,
+} from '@/lib/students/workspaceTabs';
 import { DeleteWorksheetButton } from "@/components/DeleteWorksheetButton";
 import { DuplicateWorksheetButton } from "@/components/DuplicateWorksheetButton";
 import { StudentSelector } from '@/components/StudentSelector';
@@ -88,6 +95,28 @@ import { toast } from 'sonner';
 
 
 
+/**
+ * v6.9.111 M7.2 — `?tab=` values that still own a dedicated legacy panel.
+ * They are rendered verbatim until M7.3/M7.5 fold them into the four
+ * canonical tabs, so the resolver must not rewrite them yet.
+ */
+const LEGACY_PANEL_TABS = new Set([
+  'overview',
+  'dslm',
+  'worksheets',
+  'homework',
+  'flashcards',
+  'calendar',
+  'tests',
+  'progress',
+  'skills',
+  'knowledge',
+  'events',
+]);
+
+/** Default panel while the legacy strip is still on screen (flips in M7.3). */
+const LEGACY_DEFAULT_TAB = 'dslm';
+
 const StudentPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -98,48 +127,72 @@ const StudentPage = () => {
   const { students, updateStudent, deleteStudent, loading: studentsLoading } = useStudents();
   const [currentPage, setCurrentPage] = useState(1);
   const [deletedCurrentPage, setDeletedCurrentPage] = useState(1);
-  // v6.8.4 — "1 MINUTE" (DSLM) is now the default tab. The Edooqoo promise:
-  // ~1 minute weekly prep per student instead of 1–2 hours. Backward-compat:
-  // existing `?tab=overview` links still open the Overview tab as before.
-  const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'dslm');
   const [deleteConfirmName, setDeleteConfirmName] = useState('');
-  // v6.9.111 M5.4 — Timeline tab local state (moves into the URL in M7).
-  const [timelineFilter, setTimelineFilter] = useState<TimelineFilter>('all');
   const [timelineVisibleCount, setTimelineVisibleCount] = useState(TIMELINE_PAGE_SIZE);
-  // v6.9.111 M6.4 — Library tab local state (moves into the URL in M7).
-  const [librarySection, setLibrarySection] = useState<LibrarySection>('worksheets');
   const [librarySearch, setLibrarySearch] = useState('');
   const [librarySort, setLibrarySort] = useState<LibrarySort>('newest');
 
-  // Sync activeTab when URL searchParams change (Issue 8: programmatic navigation)
+  /**
+   * v6.9.111 M7.2 — the URL is the single source of truth for workspace state.
+   *
+   * The legacy tab strip is still rendered (it is replaced in M7.3), so any
+   * `?tab=` value that still owns a legacy panel keeps rendering that panel
+   * verbatim and is never rewritten. Canonical values (prep | timeline |
+   * library | model) and unknown values go through the resolver, which also
+   * owns the Timeline filter, the Library section and every deep-link param.
+   */
+  const rawTab = (searchParams.get('tab') ?? '').trim().toLowerCase();
+  const isLegacyPanelTab = LEGACY_PANEL_TABS.has(rawTab);
+  const workspace = useMemo(() => resolveWorkspaceParams(searchParams), [searchParams]);
+
+  const activeTab = isLegacyPanelTab
+    ? rawTab
+    : rawTab
+      ? workspace.resolved.tab
+      : LEGACY_DEFAULT_TAB;
+
+  // Canonicalise only URLs the resolver owns; legacy panels keep their URL.
   useEffect(() => {
-    const tab = searchParams.get('tab');
-    if (tab && tab !== activeTab) {
-      setActiveTab(tab);
-    }
-  }, [searchParams]);
+    if (!rawTab || isLegacyPanelTab || !workspace.changed) return;
+    setSearchParams(workspace.next, { replace: true });
+  }, [rawTab, isLegacyPanelTab, workspace, setSearchParams]);
+
+  const timelineFilter: TimelineFilter = workspace.resolved.filter ?? 'all';
+  const librarySection: LibrarySection = workspace.resolved.section ?? 'worksheets';
+
   const pageSize = 10;
 
   // Get flashcard set ID from URL
   const flashcardSetId = searchParams.get('set');
 
-  // Sync tab with URL — backward compat redirects
+  /** Writes canonical workspace state into the URL (teacher-initiated nav). */
+  const navigateWorkspace = (target: WorkspaceNavigationTarget) => {
+    setSearchParams(buildWorkspaceParams(searchParams, target));
+  };
+
+  // Sync tab with URL — legacy values keep their historical behaviour.
   const handleTabChange = (tab: string) => {
+    const value = (tab ?? '').trim().toLowerCase();
+
     const redirectMap: Record<string, { tab: string; view?: string }> = {
       skills: { tab: 'dslm', view: 'skills' },
       knowledge: { tab: 'dslm', view: 'profile' },
       progress: { tab: 'dslm', view: 'pathway' },
       events: { tab: 'dslm', view: 'profile' },
     };
-    const redirect = redirectMap[tab];
+    const redirect = redirectMap[value];
     if (redirect) {
-      setActiveTab(redirect.tab);
       setSearchParams({ tab: redirect.tab, ...(redirect.view ? { view: redirect.view } : {}) });
       return;
     }
-    setActiveTab(tab);
-    // Remove set param when changing tabs
-    setSearchParams({ tab });
+
+    if (LEGACY_PANEL_TABS.has(value)) {
+      // Remove set param when changing tabs
+      setSearchParams({ tab: value });
+      return;
+    }
+
+    navigateWorkspace({ tab: resolveTab(value).tab } as WorkspaceNavigationTarget);
   };
 
   // Handle flashcard set change
@@ -239,7 +292,7 @@ const StudentPage = () => {
   });
 
   const handleTimelineFilterChange = (next: TimelineFilter) => {
-    setTimelineFilter(next);
+    navigateWorkspace({ tab: 'timeline', filter: next });
     setTimelineVisibleCount(TIMELINE_PAGE_SIZE);
   };
 
@@ -280,7 +333,7 @@ const StudentPage = () => {
   );
 
   const handleLibrarySectionChange = (section: LibrarySection) => {
-    setLibrarySection(section);
+    navigateWorkspace({ tab: 'library', section });
     setLibrarySearch('');
     setCurrentPage(1);
   };
@@ -772,7 +825,7 @@ const StudentPage = () => {
                       <Button 
                         variant="outline" 
                         size="sm"
-                        onClick={() => setActiveTab('worksheets')}
+                        onClick={() => handleTabChange('worksheets')}
                       >
                         View All
                       </Button>
