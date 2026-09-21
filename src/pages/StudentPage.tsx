@@ -8,8 +8,6 @@ import { useAuthFlow } from '@/hooks/useAuthFlow';
 import { useTokenSystem } from '@/hooks/useTokenSystem';
 import StickyNav from '@/components/landing/StickyNav';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useStudents } from '@/hooks/useStudents';
 import { useStudent } from '@/hooks/useStudent';
@@ -53,44 +51,15 @@ import {
 import { DeleteWorksheetButton } from "@/components/DeleteWorksheetButton";
 import { DuplicateWorksheetButton } from "@/components/DuplicateWorksheetButton";
 import { StudentSelector } from '@/components/StudentSelector';
-import { StudentKnowledgeSection } from '@/components/student-knowledge/StudentKnowledgeSection';
 import { useStudentKnowledge } from '@/hooks/useStudentKnowledge';
-import { StudentKnowledgeEntryCard } from '@/components/student-knowledge/StudentKnowledgeEntryCard';
 import { StudentKnowledgeQuickAddModal } from '@/components/student-knowledge/StudentKnowledgeQuickAddModal';
-import { OneMinutePrepCard } from '@/components/student-knowledge/OneMinutePrepCard';
 import { useAllWorksheetHomework } from '@/hooks/useAllWorksheetHomework';
-import { WorksheetHomeworkSection } from '@/components/worksheet/WorksheetHomeworkSection';
-import { StudentHomeworkTab } from '@/components/student-homework/StudentHomeworkTab';
-import { FlashcardSetsSection } from '@/components/flashcards/FlashcardSetsSection';
-import { StudentProgressTab } from '@/components/student-progress/StudentProgressTab';
 import { DSLMTab } from '@/components/dslm/DSLMTab';
 import { DslmExplainerBanner } from '@/components/student/DslmExplainerBanner';
-import { StudentTestsTab } from '@/components/student-tests/StudentTestsTab';
-import { EventLogPanel } from '@/components/dslm/EventLogPanel';
-import { SkillsOverviewPanel } from '@/components/dslm/SkillsOverviewPanel';
 import { WelcomeTestSuggestion } from '@/components/dashboard/WelcomeTestSuggestion';
-import { StudentCalendarTab } from '@/components/calendar/StudentCalendarTab';
-import { useStudentAttentionDots } from '@/hooks/useStudentAttentionDots';
-import { AttentionDot } from '@/components/ui/AttentionDot';
-import { ArrowLeft, FileText, Calendar, User, BookOpen, Target, Edit, Plus, Trash2, Brain, GraduationCap, StickyNote, Mail, Globe, Share2, TrendingUp, ClipboardCheck, Activity, Pencil, BarChart3, DollarSign, Library, Sparkles } from 'lucide-react';
-import { formatGoalLabel } from '@/constants/studentGoals';
-import { Input } from '@/components/ui/input';
+import { Activity, Brain, FileText, Sparkles } from 'lucide-react';
 import { writeAutoGenerateIntent } from '@/lib/worksheet/autoGenerateBootstrap';
-import { format } from 'date-fns';
-import { deepFixTextObjects } from '@/utils/textObjectFixer';
-import { MediaBadges } from '@/components/worksheet/MediaBadges';
 import { hasImage, hasAudio } from '@/utils/worksheetUtils';
-import { 
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import ShareWorksheetModal from '@/components/ShareWorksheetModal';
 import RenameDialog from '@/components/RenameDialog';
 import { toast } from 'sonner';
@@ -438,9 +407,6 @@ const StudentPage = () => {
     sessionStorage.setItem('forceNewWorksheet', 'true');
     navigate('/');
   };
-
-  // Use centralized goal formatting from constants
-  const formatGoal = formatGoalLabel;
 
   const handleDeleteStudent = async () => {
     try {
