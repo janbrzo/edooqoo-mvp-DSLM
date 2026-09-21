@@ -292,7 +292,7 @@ const StudentPage = () => {
   });
 
   const handleTimelineFilterChange = (next: TimelineFilter) => {
-    setTimelineFilter(next);
+    navigateWorkspace({ tab: 'timeline', filter: next });
     setTimelineVisibleCount(TIMELINE_PAGE_SIZE);
   };
 
@@ -333,7 +333,7 @@ const StudentPage = () => {
   );
 
   const handleLibrarySectionChange = (section: LibrarySection) => {
-    setLibrarySection(section);
+    navigateWorkspace({ tab: 'library', section });
     setLibrarySearch('');
     setCurrentPage(1);
   };
@@ -825,7 +825,7 @@ const StudentPage = () => {
                       <Button 
                         variant="outline" 
                         size="sm"
-                        onClick={() => setActiveTab('worksheets')}
+                        onClick={() => handleTabChange('worksheets')}
                       >
                         View All
                       </Button>
