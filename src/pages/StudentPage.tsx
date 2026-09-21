@@ -95,6 +95,28 @@ import { toast } from 'sonner';
 
 
 
+/**
+ * v6.9.111 M7.2 — `?tab=` values that still own a dedicated legacy panel.
+ * They are rendered verbatim until M7.3/M7.5 fold them into the four
+ * canonical tabs, so the resolver must not rewrite them yet.
+ */
+const LEGACY_PANEL_TABS = new Set([
+  'overview',
+  'dslm',
+  'worksheets',
+  'homework',
+  'flashcards',
+  'calendar',
+  'tests',
+  'progress',
+  'skills',
+  'knowledge',
+  'events',
+]);
+
+/** Default panel while the legacy strip is still on screen (flips in M7.3). */
+const LEGACY_DEFAULT_TAB = 'dslm';
+
 const StudentPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
