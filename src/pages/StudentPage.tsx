@@ -8,8 +8,6 @@ import { useAuthFlow } from '@/hooks/useAuthFlow';
 import { useTokenSystem } from '@/hooks/useTokenSystem';
 import StickyNav from '@/components/landing/StickyNav';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useStudents } from '@/hooks/useStudents';
 import { useStudent } from '@/hooks/useStudent';
@@ -46,76 +44,35 @@ import {
   buildWorkspaceParams,
   resolveTab,
   resolveWorkspaceParams,
+  WORKSPACE_TABS,
   type WorkspaceNavigationTarget,
+  type WorkspaceTab,
 } from '@/lib/students/workspaceTabs';
 import { DeleteWorksheetButton } from "@/components/DeleteWorksheetButton";
 import { DuplicateWorksheetButton } from "@/components/DuplicateWorksheetButton";
 import { StudentSelector } from '@/components/StudentSelector';
-import { StudentKnowledgeSection } from '@/components/student-knowledge/StudentKnowledgeSection';
 import { useStudentKnowledge } from '@/hooks/useStudentKnowledge';
-import { StudentKnowledgeEntryCard } from '@/components/student-knowledge/StudentKnowledgeEntryCard';
 import { StudentKnowledgeQuickAddModal } from '@/components/student-knowledge/StudentKnowledgeQuickAddModal';
-import { OneMinutePrepCard } from '@/components/student-knowledge/OneMinutePrepCard';
 import { useAllWorksheetHomework } from '@/hooks/useAllWorksheetHomework';
-import { WorksheetHomeworkSection } from '@/components/worksheet/WorksheetHomeworkSection';
-import { StudentHomeworkTab } from '@/components/student-homework/StudentHomeworkTab';
-import { FlashcardSetsSection } from '@/components/flashcards/FlashcardSetsSection';
-import { StudentProgressTab } from '@/components/student-progress/StudentProgressTab';
 import { DSLMTab } from '@/components/dslm/DSLMTab';
 import { DslmExplainerBanner } from '@/components/student/DslmExplainerBanner';
-import { StudentTestsTab } from '@/components/student-tests/StudentTestsTab';
-import { EventLogPanel } from '@/components/dslm/EventLogPanel';
-import { SkillsOverviewPanel } from '@/components/dslm/SkillsOverviewPanel';
 import { WelcomeTestSuggestion } from '@/components/dashboard/WelcomeTestSuggestion';
-import { StudentCalendarTab } from '@/components/calendar/StudentCalendarTab';
-import { useStudentAttentionDots } from '@/hooks/useStudentAttentionDots';
-import { AttentionDot } from '@/components/ui/AttentionDot';
-import { ArrowLeft, FileText, Calendar, User, BookOpen, Target, Edit, Plus, Trash2, Brain, GraduationCap, StickyNote, Mail, Globe, Share2, TrendingUp, ClipboardCheck, Activity, Pencil, BarChart3, DollarSign, Library } from 'lucide-react';
-import { formatGoalLabel } from '@/constants/studentGoals';
-import { Input } from '@/components/ui/input';
+import { Activity, Brain, FileText, Sparkles } from 'lucide-react';
 import { writeAutoGenerateIntent } from '@/lib/worksheet/autoGenerateBootstrap';
-import { format } from 'date-fns';
-import { deepFixTextObjects } from '@/utils/textObjectFixer';
-import { MediaBadges } from '@/components/worksheet/MediaBadges';
 import { hasImage, hasAudio } from '@/utils/worksheetUtils';
-import { 
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from "@/components/ui/alert-dialog";
 import ShareWorksheetModal from '@/components/ShareWorksheetModal';
 import RenameDialog from '@/components/RenameDialog';
 import { toast } from 'sonner';
 
 
 
-/**
- * v6.9.111 M7.2 — `?tab=` values that still own a dedicated legacy panel.
- * They are rendered verbatim until M7.3/M7.5 fold them into the four
- * canonical tabs, so the resolver must not rewrite them yet.
- */
-const LEGACY_PANEL_TABS = new Set([
-  'overview',
-  'dslm',
-  'worksheets',
-  'homework',
-  'flashcards',
-  'calendar',
-  'tests',
-  'progress',
-  'skills',
-  'knowledge',
-  'events',
-]);
-
-/** Default panel while the legacy strip is still on screen (flips in M7.3). */
-const LEGACY_DEFAULT_TAB = 'dslm';
+/** Four task-oriented destinations shown in the canonical workspace tab strip. */
+const WORKSPACE_TAB_PRESENTATION = {
+  prep: { label: 'Prep', Icon: Sparkles },
+  timeline: { label: 'Timeline', Icon: Activity },
+  library: { label: 'Library', Icon: FileText },
+  model: { label: 'Learning model', Icon: Brain },
+} satisfies Record<WorkspaceTab, { label: string; Icon: typeof Sparkles }>;
 
 const StudentPage = () => {
   const { id } = useParams<{ id: string }>();
@@ -133,29 +90,17 @@ const StudentPage = () => {
   const [librarySort, setLibrarySort] = useState<LibrarySort>('newest');
 
   /**
-   * v6.9.111 M7.2 — the URL is the single source of truth for workspace state.
-   *
-   * The legacy tab strip is still rendered (it is replaced in M7.3), so any
-   * `?tab=` value that still owns a legacy panel keeps rendering that panel
-   * verbatim and is never rewritten. Canonical values (prep | timeline |
-   * library | model) and unknown values go through the resolver, which also
-   * owns the Timeline filter, the Library section and every deep-link param.
+   * v6.9.111 M7.3 — the canonical URL contract now owns all four visible tabs.
+   * Legacy aliases are normalised with replace, so bookmarks and email links
+   * enter the matching task-oriented workspace without polluting Back history.
    */
-  const rawTab = (searchParams.get('tab') ?? '').trim().toLowerCase();
-  const isLegacyPanelTab = LEGACY_PANEL_TABS.has(rawTab);
   const workspace = useMemo(() => resolveWorkspaceParams(searchParams), [searchParams]);
+  const activeTab = workspace.resolved.tab;
 
-  const activeTab = isLegacyPanelTab
-    ? rawTab
-    : rawTab
-      ? workspace.resolved.tab
-      : LEGACY_DEFAULT_TAB;
-
-  // Canonicalise only URLs the resolver owns; legacy panels keep their URL.
   useEffect(() => {
-    if (!rawTab || isLegacyPanelTab || !workspace.changed) return;
+    if (!workspace.changed) return;
     setSearchParams(workspace.next, { replace: true });
-  }, [rawTab, isLegacyPanelTab, workspace, setSearchParams]);
+  }, [workspace, setSearchParams]);
 
   const timelineFilter: TimelineFilter = workspace.resolved.filter ?? 'all';
   const librarySection: LibrarySection = workspace.resolved.section ?? 'worksheets';
@@ -170,29 +115,9 @@ const StudentPage = () => {
     setSearchParams(buildWorkspaceParams(searchParams, target));
   };
 
-  // Sync tab with URL — legacy values keep their historical behaviour.
+  /** Main tab clicks always write one of the four canonical destinations. */
   const handleTabChange = (tab: string) => {
-    const value = (tab ?? '').trim().toLowerCase();
-
-    const redirectMap: Record<string, { tab: string; view?: string }> = {
-      skills: { tab: 'dslm', view: 'skills' },
-      knowledge: { tab: 'dslm', view: 'profile' },
-      progress: { tab: 'dslm', view: 'pathway' },
-      events: { tab: 'dslm', view: 'profile' },
-    };
-    const redirect = redirectMap[value];
-    if (redirect) {
-      setSearchParams({ tab: redirect.tab, ...(redirect.view ? { view: redirect.view } : {}) });
-      return;
-    }
-
-    if (LEGACY_PANEL_TABS.has(value)) {
-      // Remove set param when changing tabs
-      setSearchParams({ tab: value });
-      return;
-    }
-
-    navigateWorkspace({ tab: resolveTab(value).tab } as WorkspaceNavigationTarget);
+    navigateWorkspace({ tab: resolveTab(tab).tab } as WorkspaceNavigationTarget);
   };
 
   // Handle flashcard set change
@@ -296,13 +221,43 @@ const StudentPage = () => {
     setTimelineVisibleCount(TIMELINE_PAGE_SIZE);
   };
 
-  /** Timeline hrefs are either real routes or in-page `?tab=` aliases. */
+  /** Resolve relative timeline aliases through the canonical workspace contract. */
   const handleTimelineNavigate = (href: string) => {
-    if (href.startsWith('?tab=')) {
-      handleTabChange(new URLSearchParams(href.slice(1)).get('tab') || 'overview');
+    if (!href.startsWith('?')) {
+      navigate(href);
       return;
     }
-    navigate(href);
+
+    const targetParams = new URLSearchParams(href.slice(1));
+    const target = resolveWorkspaceParams(targetParams).resolved;
+
+    if (target.tab === 'timeline') {
+      navigateWorkspace({
+        tab: 'timeline',
+        filter: target.filter,
+        testId: targetParams.get('testId') ?? undefined,
+      });
+      return;
+    }
+    if (target.tab === 'library') {
+      navigateWorkspace({
+        tab: 'library',
+        section: target.section,
+        set: targetParams.get('set') ?? undefined,
+      });
+      return;
+    }
+    if (target.tab === 'model') {
+      navigateWorkspace({
+        tab: 'model',
+        view: target.view,
+        focus: targetParams.get('focus') ?? undefined,
+        editSuggestion: targetParams.get('editSuggestion') ?? undefined,
+        cacheKey: targetParams.get('_') ?? undefined,
+      });
+      return;
+    }
+    navigateWorkspace({ tab: 'prep' });
   };
 
   // v6.9.111 M6.4 — Library items: no extra queries, reuse the page worksheets.
@@ -453,9 +408,6 @@ const StudentPage = () => {
     navigate('/');
   };
 
-  // Use centralized goal formatting from constants
-  const formatGoal = formatGoalLabel;
-
   const handleDeleteStudent = async () => {
     try {
       const result = await deleteStudent(student.id);
@@ -530,63 +482,31 @@ const StudentPage = () => {
           />
         ) : null}
 
-        {/* Tabs Navigation */}
+        {/* v6.9.111 M7.3 — four task-oriented workspace tabs. */}
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
-          {/* v6.8.6 P4 — on <lg widths show icon-only triggers (with aria-label
-              + tooltip via title) so the 7-tab strip never overflows on
-              narrower laptop windows; full text returns at lg: breakpoint. */}
-          <TabsList className="grid w-full grid-cols-10 mb-6">
-            {/* v6.9.111 M4.4 — Prep tab mounted alongside the legacy tabs.
-                Switching the default tab happens in M7. */}
-            <TabsTrigger value="prep" className="flex items-center gap-2" aria-label="Prep" title="Prep">
-              <Target className="h-4 w-4" />
-              <span className="hidden lg:inline">Prep</span>
-            </TabsTrigger>
-            {/* v6.9.111 M5.4 — Timeline tab mounted alongside the legacy tabs. */}
-            <TabsTrigger value="timeline" className="flex items-center gap-2" aria-label="Timeline" title="Timeline">
-              <Activity className="h-4 w-4" />
-              <span className="hidden lg:inline">Timeline</span>
-            </TabsTrigger>
-            <TabsTrigger value="library" className="flex items-center gap-2" aria-label="Library" title="Library">
-              <Library className="h-4 w-4" />
-              <span className="hidden lg:inline">Library</span>
-            </TabsTrigger>
-            <TabsTrigger value="overview" className="flex items-center gap-2" aria-label="Overview" title="Overview">
-              <User className="h-4 w-4" />
-              <span className="hidden lg:inline">Overview</span>
-            </TabsTrigger>
-            {/* v6.9.33 — separate TabsTrigger from Tooltip so Radix `data-state`
-                propagation isn't broken by `TooltipTrigger asChild`. The Tooltip
-                wraps a transparent overlay span instead of the trigger itself. */}
-            <TabsTrigger
-              value="dslm"
-              className="flex items-center gap-2 relative"
-              aria-label="1 MINUTE"
-              title="1 MINUTE — Edooqoo's promise: ~1 minute weekly prep per student"
-            >
-              <Brain className="h-4 w-4" />
-              <span className="hidden lg:inline">1 MINUTE</span>
-            </TabsTrigger>
-            <TabsTrigger value="worksheets" className="flex items-center gap-2" aria-label="Worksheets" title="Worksheets">
-              <FileText className="h-4 w-4" />
-              <span className="hidden lg:inline">Worksheets</span>
-            </TabsTrigger>
-            <TabsTrigger value="homework" className="flex items-center gap-2" aria-label="Homework" title="Homework">
-              <BookOpen className="h-4 w-4" />
-              <span className="hidden lg:inline">Homework</span>
-            </TabsTrigger>
-            <TabsTrigger value="flashcards" className="flex items-center gap-2" aria-label="Flashcards" title="Flashcards">
-              <GraduationCap className="h-4 w-4" />
-              <span className="hidden lg:inline">Flashcards</span>
-            </TabsTrigger>
-            <TabsTrigger value="calendar" className="flex items-center gap-2" aria-label="Calendar" title="Calendar">
-              <Calendar className="h-4 w-4" />
-              <span className="hidden lg:inline">Calendar</span>
-            </TabsTrigger>
-            <TabsTrigger value="tests" className="flex items-center gap-2" aria-label="Tests" title="Tests">
-              <ClipboardCheck className="h-4 w-4" />
-              <span className="hidden lg:inline">Tests</span>
-            </TabsTrigger>
+          <TabsList className="mb-6 grid h-auto min-h-11 w-full grid-cols-4">
+            {WORKSPACE_TABS.map((tab) => {
+              const { label, Icon } = WORKSPACE_TAB_PRESENTATION[tab];
+              return (
+                <TabsTrigger
+                  key={tab}
+                  value={tab}
+                  className="min-w-0 gap-1 px-1 text-xs sm:gap-2 sm:px-3 sm:text-sm"
+                  aria-label={label}
+                  title={label}
+                >
+                  <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
+                  {tab === 'model' ? (
+                    <>
+                      <span className="sm:hidden">Model</span>
+                      <span className="hidden sm:inline">Learning model</span>
+                    </>
+                  ) : (
+                    <span>{label}</span>
+                  )}
+                </TabsTrigger>
+              );
+            })}
           </TabsList>
 
           {/* Prep Tab (v6.9.111 M4.4) */}
@@ -610,7 +530,7 @@ const StudentPage = () => {
               isSuggestionsLoading={futureTimeline.loading}
               onGenerate={() => handlePrepGenerate(prepSuggestion, true)}
               onChangeTopic={() => handlePrepGenerate(prepSuggestion, false)}
-              onOpenModel={() => handleTabChange('dslm')}
+              onOpenModel={() => navigateWorkspace({ tab: 'model' })}
               lastWorksheet={
                 worksheets && worksheets.length > 0
                   ? {
@@ -622,7 +542,7 @@ const StudentPage = () => {
               }
               isWorksheetLoading={loading}
               onReuse={handleReuseWorksheet}
-              onOpenLibrary={() => handleTabChange('worksheets')}
+              onOpenLibrary={() => navigateWorkspace({ tab: 'library', section: 'worksheets' })}
               recentNotes={studentKnowledge.entries.slice(0, 3)}
               isNotesLoading={studentKnowledge.isLoading}
               isNoteSaving={false}
@@ -634,7 +554,7 @@ const StudentPage = () => {
                 } as any);
               }}
               onExpandNote={() => setQuickAddNoteOpen(true)}
-              onViewAllNotes={() => handleTabChange('knowledge')}
+              onViewAllNotes={() => navigateWorkspace({ tab: 'model', view: 'profile' })}
             />
           </TabsContent>
 
@@ -712,507 +632,8 @@ const StudentPage = () => {
             />
           </TabsContent>
 
-          {/* Overview Tab */}
-          <TabsContent value="overview">
-            {/* Welcome Test Suggestion Banner */}
-            <WelcomeTestSuggestion
-              studentId={student.id}
-              teacherId={student.teacher_id}
-              studentName={student.name}
-              studentEmail={student.student_email}
-              surface="overview"
-            />
-            {/* v6.9.29 — 1-Minute Prep digest (Personal hooks + Focus on + Lesson ideas) */}
-            <OneMinutePrepCard
-              studentId={student.id}
-              teacherId={student.teacher_id}
-              studentName={student.name}
-              profileReady={Boolean(student.english_level || student.main_goal || student.student_email)}
-              hasMainGoal={Boolean(student.main_goal)}
-            />
-            {student.student_email && (
-              <div className="bg-muted/50 border border-border rounded-md p-3 text-sm mb-4 flex items-start gap-3">
-                <BookOpen className="h-4 w-4 text-primary mt-0.5 shrink-0" />
-                <p className="text-muted-foreground text-xs">
-                  This student can access their worksheets, homework, flashcards & lessons at{' '}
-                  <a href="https://edooqoo.com/my" target="_blank" rel="noopener noreferrer" className="font-medium text-primary hover:underline">edooqoo.com/my</a>
-                  {' '}— no login needed, just their email.
-                </p>
-              </div>
-            )}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-              {/* Student Details */}
-              <Card>
-              <CardHeader>
-                {/* v6.9.111 M3.3 — edit/delete/meeting link now live in the single
-                    StudentSettingsMenu in the workspace header. */}
-                <CardTitle className="flex items-center">
-                  <User className="h-5 w-5 mr-2" />
-                  Student Details
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">English Level</label>
-                  <Badge variant="secondary" className="ml-2">{student.english_level}</Badge>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Main Goal</label>
-                  <div className="flex items-center mt-1">
-                    <Target className="h-4 w-4 mr-2 text-primary" />
-                    <span>{formatGoal(student.main_goal)}</span>
-                  </div>
-                </div>
-                {student.student_email && (
-                  <div>
-                    <label className="text-sm font-medium text-muted-foreground">Email</label>
-                    <div className="flex items-center mt-1">
-                      <Mail className="h-4 w-4 mr-2 text-primary" />
-                      <span className="text-sm">{student.student_email}</span>
-                    </div>
-                  </div>
-                )}
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Native Language</label>
-                  <div className="flex items-center mt-1">
-                    <Globe className="h-4 w-4 mr-2 text-primary" />
-                    <span>{student.native_language || 'Not set'}</span>
-                  </div>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Overdue Homework Emails</label>
-                  <div className="flex items-center mt-1">
-                    <Mail className="h-4 w-4 mr-2 text-primary" />
-                    <Badge variant={student.send_overdue_emails !== false ? 'default' : 'secondary'}>
-                      {student.send_overdue_emails !== false ? 'Enabled' : 'Disabled'}
-                    </Badge>
-                  </div>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Total Worksheets</label>
-                  <div className="flex items-center mt-1">
-                    <BookOpen className="h-4 w-4 mr-2 text-primary" />
-                    <span className="font-semibold">{totalCount || 0}</span>
-                  </div>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Student Since</label>
-                  <div className="flex items-center mt-1">
-                    <Calendar className="h-4 w-4 mr-2 text-primary" />
-                    <span>{format(new Date(student.created_at), 'MMM dd, yyyy')}</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-
-              {/* Recent Worksheets */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center mb-2">
-                    <FileText className="h-5 w-5 mr-2" />
-                    Recent Worksheets
-                  </CardTitle>
-                  <div className="flex gap-2">
-                    <Button 
-                      size="sm"
-                      onClick={handleGenerateWorksheet}
-                      className="flex-1"
-                    >
-                      <Plus className="h-4 w-4 mr-1" />
-                      Generate Another
-                    </Button>
-                    {worksheets.length > 0 && (
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => handleTabChange('worksheets')}
-                      >
-                        View All
-                      </Button>
-                    )}
-                  </div>
-                </CardHeader>
-              <CardContent>
-                {loading ? (
-                  <div className="text-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-                  </div>
-                ) : worksheets.length > 0 ? (
-                  <div className="space-y-3">
-                    {worksheets.slice(0, 5).map((worksheet) => (
-                      <div key={worksheet.id}>
-                        <div className="flex items-center justify-between p-3 bg-muted/30 rounded-lg hover:bg-muted/50 transition-colors">
-                          <Link
-                            to={`/worksheet/${worksheet.id}`}
-                            className="flex items-center space-x-3 flex-1 cursor-pointer"
-                          >
-                            <FileText className="h-4 w-4 text-primary" />
-                            <div className="flex-1">
-                              <div className="flex items-center gap-2">
-                                <h3 className="font-medium text-sm">
-                                  {worksheet.title || 'Untitled Worksheet'}
-                                </h3>
-                                <MediaBadges 
-                                  hasImage={hasImage(worksheet)} 
-                                  hasAudio={hasAudio(worksheet)}
-                                  size="sm"
-                                />
-                              </div>
-                              <p className="text-xs text-muted-foreground">
-                                {format(new Date(worksheet.created_at), 'MMM dd, yyyy')}
-                              </p>
-                            </div>
-                          </Link>
-                          <DeleteWorksheetButton
-                            worksheetId={worksheet.id}
-                            worksheetTitle={worksheet.title || 'Untitled Worksheet'}
-                            onDelete={deleteWorksheet}
-                            variant="ghost"
-                            size="sm"
-                          />
-                        </div>
-                        <WorksheetHomeworkSection 
-                          worksheetId={worksheet.id}
-                          compact={true}
-                          displayMode="simplified"
-                        />
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <FileText className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
-                    <p className="text-muted-foreground">No worksheets generated yet</p>
-                    <Button onClick={handleGenerateWorksheet} className="mt-4" size="sm">
-                      Generate First Worksheet
-                    </Button>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-
-              {/* Recent Notes */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center mb-2">
-                    <StickyNote className="h-5 w-5 mr-2" />
-                    Recent Notes
-                  </CardTitle>
-                  <div className="flex gap-2">
-                    <Button 
-                      size="sm"
-                      onClick={() => setQuickAddNoteOpen(true)}
-                      className="flex-1"
-                    >
-                      <Plus className="h-4 w-4 mr-1" />
-                      Add Note
-                    </Button>
-                    {studentKnowledge.entries.length > 0 && (
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => handleTabChange('knowledge')}
-                      >
-                        View All
-                      </Button>
-                    )}
-                  </div>
-                </CardHeader>
-              <CardContent>
-                {studentKnowledge.isLoading ? (
-                  <div className="text-center py-8">
-                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-                  </div>
-                ) : studentKnowledge.entries.length > 0 ? (
-                  <div className="space-y-3">
-                    {studentKnowledge.entries.slice(0, 3).map((entry) => (
-                      <StudentKnowledgeEntryCard
-                        key={entry.id}
-                        entry={entry}
-                        onView={(entryToView) => {
-                          // Switch to Knowledge Base tab for viewing
-                          handleTabChange('knowledge');
-                        }}
-                        onEdit={(entryToEdit) => {
-                          // Switch to Knowledge Base tab for editing
-                          handleTabChange('knowledge');
-                        }}
-                        onDelete={studentKnowledge.deleteEntry}
-                        onMarkOutdated={studentKnowledge.markAsOutdated}
-                        onMarkCurrent={studentKnowledge.markAsCurrent}
-                      />
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8">
-                    <StickyNote className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
-                    <p className="text-muted-foreground">No notes added yet</p>
-                    <Button 
-                      onClick={() => setQuickAddNoteOpen(true)} 
-                      className="mt-4" 
-                      size="sm"
-                    >
-                      Add First Note
-                    </Button>
-                  </div>
-                )}
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          {/* Worksheets Tab */}
-          <TabsContent value="worksheets">
-            <div className="space-y-6">
-              {/* Active Worksheets */}
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center justify-between">
-                    <CardTitle className="flex items-center">
-                      <FileText className="h-5 w-5 mr-2" />
-                      All Worksheets ({totalCount || 0})
-                    </CardTitle>
-                    {worksheets.length > 0 && (
-                      <Button onClick={handleGenerateWorksheet} size="sm">
-                        <Plus className="h-4 w-4 mr-2" />
-                        Generate another
-                      </Button>
-                    )}
-                  </div>
-                </CardHeader>
-                <CardContent>
-                  {loading ? (
-                    <div className="text-center py-8">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-                      <p className="mt-4 text-muted-foreground">Loading worksheets...</p>
-                    </div>
-                  ) : worksheets.length > 0 ? (
-                    <>
-                      <div className="space-y-3">
-                        {worksheets.map((worksheet) => (
-                          <div key={worksheet.id}>
-                            <div className="flex items-center justify-between p-4 bg-muted/30 rounded-lg hover:bg-muted/50 transition-colors">
-                              <Link 
-                                to={`/worksheet/${worksheet.id}`}
-                                className="flex items-center space-x-3 flex-1"
-                              >
-                                <FileText className="h-5 w-5 text-primary" />
-                                <div className="flex-1">
-                                  <div className="flex items-center gap-2">
-                                    <h3 className="font-medium">
-                                      {worksheet.title || 'Untitled Worksheet'}
-                                    </h3>
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
-                                      className="h-6 w-6"
-                                      onClick={(e) => {
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                        setRenameWorksheetData({
-                                          id: worksheet.id,
-                                          title: worksheet.title || 'Untitled Worksheet'
-                                        });
-                                      }}
-                                      title="Rename worksheet"
-                                    >
-                                      <Pencil className="h-3 w-3" />
-                                    </Button>
-                                    <MediaBadges 
-                                      hasImage={hasImage(worksheet)} 
-                                      hasAudio={hasAudio(worksheet)}
-                                      size="sm"
-                                    />
-                                  </div>
-                                  {worksheet.form_data?.grammar && (
-                                    <p className="text-sm text-muted-foreground">
-                                      Grammar: {worksheet.form_data.grammar}
-                                    </p>
-                                  )}
-                                </div>
-                              </Link>
-                              <div className="flex items-center space-x-2">
-                                {/* PROBLEM 8: Date and time on same line */}
-                                <div className="text-sm font-medium whitespace-nowrap">
-                                  {format(new Date(worksheet.created_at), 'MMM dd, yyyy HH:mm')}
-                                </div>
-                                {/* PROBLEM 7: Share button with green border if active */}
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className={`${
-                                    worksheet.share_token
-                                      ? 'border-2 border-green-500 rounded-md'
-                                      : ''
-                                  }`}
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    setShareWorksheetData({
-                                      id: worksheet.id,
-                                      title: worksheet.title || 'Untitled Worksheet',
-                                      shareToken: worksheet.share_token || undefined
-                                    });
-                                    setShareModalOpen(true);
-                                  }}
-                                >
-                                  <Share2 className="h-4 w-4" />
-                                </Button>
-                                <DuplicateWorksheetButton
-                                  worksheetId={worksheet.id}
-                                  worksheetTitle={worksheet.title || 'Untitled Worksheet'}
-                                  onDuplicate={refetchWorksheets}
-                                />
-                                <StudentSelector
-                                  worksheetId={worksheet.id}
-                                  currentStudentId={worksheet.student_id}
-                                  worksheetTitle={worksheet.title || 'Untitled Worksheet'}
-                                  onTransferSuccess={refetchWorksheets}
-                                />
-                                <DeleteWorksheetButton
-                                  worksheetId={worksheet.id}
-                                  worksheetTitle={worksheet.title || 'Untitled Worksheet'}
-                                  onDelete={deleteWorksheet}
-                                />
-                              </div>
-                            </div>
-                            <WorksheetHomeworkSection 
-                              worksheetId={worksheet.id}
-                            />
-                          </div>
-                        ))}
-                      </div>
-                      
-                      {totalCount > pageSize && (
-                        <div className="flex items-center justify-between pt-4 mt-4 border-t">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                            disabled={currentPage === 1}
-                          >
-                            Previous
-                          </Button>
-                          <span className="text-sm text-muted-foreground">
-                            Page {currentPage} of {Math.ceil(totalCount / pageSize)}
-                          </span>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setCurrentPage(p => p + 1)}
-                            disabled={currentPage >= Math.ceil(totalCount / pageSize)}
-                          >
-                            Next
-                          </Button>
-                        </div>
-                      )}
-                    </>
-                  ) : (
-                    <div className="text-center py-8">
-                      <FileText className="h-12 w-12 text-muted-foreground/50 mx-auto mb-4" />
-                      <p className="text-muted-foreground">No worksheets generated yet</p>
-                      <Button onClick={handleGenerateWorksheet} className="mt-4">
-                        Generate First Worksheet
-                      </Button>
-                    </div>
-                  )}
-                </CardContent>
-              </Card>
-
-              {/* Deleted Worksheets */}
-              {deletedWorksheets.length > 0 && (
-                <Card className="border-red-200 bg-red-50/50">
-                  <CardHeader>
-                    <CardTitle className="flex items-center text-red-700">
-                      <Trash2 className="h-5 w-5 mr-2" />
-                      Deleted Worksheets ({deletedTotalCount || 0})
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    {deletedLoading ? (
-                      <div className="text-center py-8">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-500 mx-auto"></div>
-                      </div>
-                    ) : (
-                      <>
-                        <div className="space-y-3">
-                          {deletedWorksheets.map((worksheet) => (
-                            <div
-                              key={worksheet.id}
-                              className="flex items-center justify-between p-4 bg-card rounded-lg border border-destructive/30"
-                            >
-                              <div className="flex items-center space-x-3 flex-1">
-                                <FileText className="h-5 w-5 text-destructive/70" />
-                                <div>
-                                  <h3 className="font-medium text-foreground">
-                                    {worksheet.title || 'Untitled Worksheet'}
-                                  </h3>
-                                  <p className="text-sm text-destructive">
-                                    Deleted: {format(new Date(worksheet.deleted_at), 'MMM dd, yyyy HH:mm')}
-                                  </p>
-                                </div>
-                              </div>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={async () => {
-                                  const result = await restoreDeleted(worksheet.id);
-                                  if (result.success) {
-                                    refetchWorksheets();
-                                  }
-                                }}
-                              >
-                                Restore
-                              </Button>
-                            </div>
-                          ))}
-                        </div>
-                        
-                        {deletedTotalCount > pageSize && (
-                          <div className="flex items-center justify-between pt-4 mt-4 border-t">
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => setDeletedCurrentPage(p => Math.max(1, p - 1))}
-                              disabled={deletedCurrentPage === 1}
-                            >
-                              Previous
-                            </Button>
-                            <span className="text-sm text-muted-foreground">
-                              Page {deletedCurrentPage} of {Math.ceil(deletedTotalCount / pageSize)}
-                            </span>
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => setDeletedCurrentPage(p => p + 1)}
-                              disabled={deletedCurrentPage >= Math.ceil(deletedTotalCount / pageSize)}
-                            >
-                              Next
-                            </Button>
-                          </div>
-                        )}
-                      </>
-                    )}
-                  </CardContent>
-                </Card>
-              )}
-            </div>
-          </TabsContent>
-
-          {/* Homework Tab */}
-          <TabsContent value="homework">
-            <Card>
-              <CardContent className="pt-6">
-                <StudentHomeworkTab
-                  studentId={id!}
-                  teacherId={student.teacher_id}
-                  studentName={student.name}
-                />
-              </CardContent>
-            </Card>
-          </TabsContent>
-
-          {/* DSLM Tab */}
-          <TabsContent value="dslm">
+          {/* Learning model tab */}
+          <TabsContent value="model">
             <WelcomeTestSuggestion
               studentId={student.id}
               teacherId={student.teacher_id}
@@ -1287,89 +708,6 @@ const StudentPage = () => {
             />
           </TabsContent>
 
-          {/* Progress Tab (backup) */}
-          <TabsContent value="progress">
-            <StudentProgressTab
-              studentId={id || ''}
-              teacherId={student.teacher_id}
-              studentName={student.name}
-              englishLevel={student.english_level}
-              mainGoal={student.main_goal}
-              studentNotes={studentKnowledge.entries.slice(0, 10).map(e => e.content)}
-              onMainGoalChange={async (newGoal) => {
-                await updateStudent(student.id, { main_goal: newGoal });
-              }}
-              onUseWorksheetSuggestion={(topic, goal, additionalInfo, grammarFocus, exercises) => {
-                sessionStorage.setItem('preSelectedStudent', JSON.stringify({
-                  id: student.id,
-                  name: student.name
-                }));
-                sessionStorage.setItem('prefillWorksheet', JSON.stringify({
-                  topic,
-                  goal,
-                  additionalInfo: additionalInfo || '',
-                  grammarFocus: grammarFocus || ''
-                }));
-                if (exercises && exercises.length > 0) {
-                  sessionStorage.setItem('prefillExercises', JSON.stringify(exercises));
-                }
-                sessionStorage.setItem('forceNewWorksheet', 'true');
-                navigate('/');
-              }}
-            />
-          </TabsContent>
-
-          {/* Tests Tab */}
-          <TabsContent value="tests">
-            <StudentTestsTab
-              studentId={id || ''}
-              teacherId={student.teacher_id}
-              studentName={student.name}
-            />
-          </TabsContent>
-
-          {/* Skills Overview Tab - DSLM Layer B */}
-          <TabsContent value="skills">
-            <SkillsOverviewPanel
-              studentId={id || ''}
-              teacherId={student.teacher_id}
-            />
-          </TabsContent>
-
-          {/* Knowledge Base Tab */}
-          <TabsContent value="knowledge">
-            <StudentKnowledgeSection
-              studentId={id || ''}
-              teacherId={student.teacher_id}
-              studentName={student.name}
-            />
-          </TabsContent>
-
-          {/* Flashcards Tab */}
-          <TabsContent value="flashcards">
-            <FlashcardSetsSection
-              studentId={id || ''}
-              teacherId={student.teacher_id}
-              studentName={student.name || 'Student'}
-              studentNativeLanguage={student.native_language || 'Spanish'}
-              initialEditingSetId={activeTab === 'flashcards' ? flashcardSetId : null}
-              onSetChange={handleFlashcardSetChange}
-              teacherCalendarToken={teacherCalendarToken}
-            />
-          </TabsContent>
-
-          {/* Calendar Tab */}
-          <TabsContent value="calendar">
-            <StudentCalendarTab studentId={id || ''} teacherId={student.teacher_id} />
-          </TabsContent>
-
-          {/* Events Tab - DSLM Debug Panel */}
-          <TabsContent value="events">
-            <EventLogPanel
-              studentId={id || ''}
-              teacherId={student.teacher_id}
-            />
-          </TabsContent>
         </Tabs>
           </div>
 
@@ -1380,7 +718,7 @@ const StudentPage = () => {
             mainGoalTargetDate={(student as any).main_goal_target_date ?? null}
             focusAreas={focusAreas}
             hubEmail={student.student_email}
-            onOpenModel={() => handleTabChange('dslm')}
+            onOpenModel={() => navigateWorkspace({ tab: 'model' })}
           />
           </div>
         </div>
