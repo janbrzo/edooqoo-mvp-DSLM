@@ -50,6 +50,7 @@ Reference: `docs/ux/target-teacher-experience.md` (approved 2026-09-02).
   - [ ] M7 — switch to 4 tabs, `resolveTab` routing, `studentPrepPath()` → `?tab=prep`, `React.lazy`
     - [x] M7.1 — harden the routing contract (`buildWorkspaceParams`, preserved deep-link params, canonical Prep quick access; no UI)
     - [x] M7.2 — URL is the source of truth in `StudentPage.tsx` (`resolveWorkspaceParams`, canonicalisation with `replace`, Timeline filter + Library section read from the URL); legacy `?tab=` panels still render verbatim
+    - [x] M7.3 — replace the 10-tab strip with Prep / Timeline / Library / Learning model; canonicalise legacy panels and route internal workspace actions through the URL contract
   - [ ] M8 — dead-code removal + RAG (`docs/llm-context.md`, `public/llms.txt`, memory)
 - [ ] Guided mode beyond the dashboard
 
