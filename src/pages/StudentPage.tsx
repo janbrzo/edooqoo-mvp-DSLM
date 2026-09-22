@@ -665,6 +665,7 @@ const StudentPage = () => {
               studentEmail={student.student_email}
               surface="oneMinute"
             />
+            <Suspense fallback={<SectionSkeleton />}>
             <DslmExplainerBanner teacherId={student.teacher_id} />
             <DSLMTab
               studentId={id || ''}
