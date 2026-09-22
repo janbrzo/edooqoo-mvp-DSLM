@@ -29,7 +29,6 @@ import { TIMELINE_PAGE_SIZE, type TimelineFilter } from '@/lib/students/timeline
 import { useFutureTimeline } from '@/hooks/useFutureTimeline';
 import { selectPrepSuggestion, buildRationale, type PrepSuggestion } from '@/lib/students/prepPlan';
 // v6.9.111 M6.4 — Library tab (pure rules + presentational composition).
-import { LibraryTab } from '@/components/student/library/LibraryTab';
 import {
   buildWorksheetItems,
   filterBySearch,
