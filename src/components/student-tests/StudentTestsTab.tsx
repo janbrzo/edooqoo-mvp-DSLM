@@ -38,11 +38,38 @@ interface StudentTestsTabProps {
   studentId: string;
   teacherId: string;
   studentName?: string;
+  /**
+   * v6.9.111 M7.5 — test details are addressable from the workspace URL
+   * (`?tab=timeline&filter=tests&testId=<id>`). The parent owns the param;
+   * this component mirrors it into local selection state.
+   */
+  initialSelectedTestId?: string | null;
+  /** Fired whenever the teacher opens or closes a test details view. */
+  onSelectedTestChange?: (testId: string | null) => void;
 }
 
-export function StudentTestsTab({ studentId, teacherId, studentName }: StudentTestsTabProps) {
+export function StudentTestsTab({
+  studentId,
+  teacherId,
+  studentName,
+  initialSelectedTestId = null,
+  onSelectedTestChange,
+}: StudentTestsTabProps) {
   const { tests, loading, getTestStats, refetch, createTest, addQuestions, generateShareToken } = useStudentTests({ studentId, teacherId });
-  const [selectedTestId, setSelectedTestId] = useState<string | null>(null);
+  const [selectedTestId, setSelectedTestId] = useState<string | null>(initialSelectedTestId);
+
+  // Keep local selection in sync with the URL-owned param (deep links, back/forward).
+  useEffect(() => {
+    setSelectedTestId(initialSelectedTestId);
+  }, [initialSelectedTestId]);
+
+  const selectTest = useCallback(
+    (testId: string | null) => {
+      setSelectedTestId(testId);
+      onSelectedTestChange?.(testId);
+    },
+    [onSelectedTestChange],
+  );
   const [creatingPreview, setCreatingPreview] = useState(false);
   const [showComparison, setShowComparison] = useState(false);
   const stats = getTestStats();
