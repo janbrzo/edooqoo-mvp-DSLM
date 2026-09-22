@@ -315,7 +315,8 @@ export function buildTimelineEvents(input: TimelineSourceData): TimelineEvent[] 
       title: test.title?.trim() || 'Untitled test',
       subtitle,
       needsAction,
-      href: '?tab=tests',
+      // v6.9.111 M7.5 — deep link straight into the test details panel.
+      href: `?tab=timeline&filter=tests&testId=${encodeURIComponent(test.id)}`,
       ...(needsAction ? { actionLabel: 'Review' } : {}),
     });
   }
