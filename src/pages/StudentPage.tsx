@@ -634,6 +634,43 @@ const StudentPage = () => {
               onGoToPrep={() => handleTabChange('prep')}
             />
             </Suspense>
+
+            {/*
+              v6.9.111 M7.5 — contextual tool panel, rendered as a sibling of the
+              timeline (never a card inside a card). Only the panel matching the
+              active filter is mounted, so its queries stay scoped to the view.
+            */}
+            {timelineFilter === 'lessons' && (
+              <div className="mt-6">
+                <Suspense fallback={<SectionSkeleton />}>
+                  <StudentCalendarTab studentId={student.id} teacherId={student.teacher_id} />
+                </Suspense>
+              </div>
+            )}
+            {timelineFilter === 'homework' && (
+              <div className="mt-6">
+                <Suspense fallback={<SectionSkeleton />}>
+                  <StudentHomeworkTab
+                    studentId={student.id}
+                    teacherId={student.teacher_id}
+                    studentName={student.name}
+                  />
+                </Suspense>
+              </div>
+            )}
+            {timelineFilter === 'tests' && (
+              <div className="mt-6">
+                <Suspense fallback={<SectionSkeleton />}>
+                  <StudentTestsTab
+                    studentId={student.id}
+                    teacherId={student.teacher_id}
+                    studentName={student.name}
+                    initialSelectedTestId={selectedTestId}
+                    onSelectedTestChange={handleSelectedTestChange}
+                  />
+                </Suspense>
+              </div>
+            )}
           </TabsContent>
 
           {/* v6.9.111 M6.4 — Library tab */}
