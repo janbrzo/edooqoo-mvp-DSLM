@@ -84,6 +84,34 @@ const DslmExplainerBanner = lazy(() =>
   })),
 );
 
+/**
+ * v6.9.111 M7.5 — contextual tools carried over from the legacy tab strip.
+ *
+ * They are no longer top-level destinations; each one mounts only while the
+ * matching timeline filter / library section is active, so a teacher never
+ * loses a capability that used to live behind an old tab.
+ */
+const StudentCalendarTab = lazy(() =>
+  import('@/components/calendar/StudentCalendarTab').then((m) => ({
+    default: m.StudentCalendarTab,
+  })),
+);
+const StudentHomeworkTab = lazy(() =>
+  import('@/components/student-homework/StudentHomeworkTab').then((m) => ({
+    default: m.StudentHomeworkTab,
+  })),
+);
+const StudentTestsTab = lazy(() =>
+  import('@/components/student-tests/StudentTestsTab').then((m) => ({
+    default: m.StudentTestsTab,
+  })),
+);
+const FlashcardSetsSection = lazy(() =>
+  import('@/components/flashcards/FlashcardSetsSection').then((m) => ({
+    default: m.FlashcardSetsSection,
+  })),
+);
+
 
 
 /** Four task-oriented destinations shown in the canonical workspace tab strip. */
