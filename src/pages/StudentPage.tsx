@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import { AuthenticatedPageShell } from '@/components/AuthenticatedPageShell';
 import { PageLoadingState } from '@/components/ui/PageLoadingState';
 import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
@@ -23,14 +23,12 @@ import { useStudentNextLesson } from '@/hooks/useStudentNextLesson';
 import { selectFocusAreas, formatNextLessonLabel } from '@/lib/students/studentSnapshot';
 import { PrepTab } from '@/components/student/prep/PrepTab';
 // v6.9.111 M5.4 — Timeline tab (data hooks + presentational composition).
-import { TimelineTab } from '@/components/student/timeline/TimelineTab';
 import { useStudentTimeline } from '@/hooks/useStudentTimeline';
 import { useStudentTimelineSources } from '@/hooks/useStudentTimelineSources';
 import { TIMELINE_PAGE_SIZE, type TimelineFilter } from '@/lib/students/timelineEvents';
 import { useFutureTimeline } from '@/hooks/useFutureTimeline';
 import { selectPrepSuggestion, buildRationale, type PrepSuggestion } from '@/lib/students/prepPlan';
 // v6.9.111 M6.4 — Library tab (pure rules + presentational composition).
-import { LibraryTab } from '@/components/student/library/LibraryTab';
 import {
   buildWorksheetItems,
   filterBySearch,
@@ -54,8 +52,6 @@ import { StudentSelector } from '@/components/StudentSelector';
 import { useStudentKnowledge } from '@/hooks/useStudentKnowledge';
 import { StudentKnowledgeQuickAddModal } from '@/components/student-knowledge/StudentKnowledgeQuickAddModal';
 import { useAllWorksheetHomework } from '@/hooks/useAllWorksheetHomework';
-import { DSLMTab } from '@/components/dslm/DSLMTab';
-import { DslmExplainerBanner } from '@/components/student/DslmExplainerBanner';
 import { WelcomeTestSuggestion } from '@/components/dashboard/WelcomeTestSuggestion';
 import { Activity, Brain, FileText, Sparkles } from 'lucide-react';
 import { writeAutoGenerateIntent } from '@/lib/worksheet/autoGenerateBootstrap';
@@ -63,6 +59,30 @@ import { hasImage, hasAudio } from '@/utils/worksheetUtils';
 import ShareWorksheetModal from '@/components/ShareWorksheetModal';
 import RenameDialog from '@/components/RenameDialog';
 import { toast } from 'sonner';
+import { SectionSkeleton } from '@/components/dslm/SectionSkeleton';
+
+/**
+ * v6.9.111 M7.4 — lazy workspace areas.
+ *
+ * Prep stays eager: it is the default tab and must paint without a second
+ * network round-trip. Timeline, Library and Learning model are code-split and
+ * only requested once their tab becomes active (Radix unmounts inactive
+ * TabsContent), each behind a local SectionSkeleton — never a full-page spinner.
+ */
+const TimelineTab = lazy(() =>
+  import('@/components/student/timeline/TimelineTab').then((m) => ({ default: m.TimelineTab })),
+);
+const LibraryTab = lazy(() =>
+  import('@/components/student/library/LibraryTab').then((m) => ({ default: m.LibraryTab })),
+);
+const DSLMTab = lazy(() =>
+  import('@/components/dslm/DSLMTab').then((m) => ({ default: m.DSLMTab })),
+);
+const DslmExplainerBanner = lazy(() =>
+  import('@/components/student/DslmExplainerBanner').then((m) => ({
+    default: m.DslmExplainerBanner,
+  })),
+);
 
 
 
@@ -560,6 +580,7 @@ const StudentPage = () => {
 
           {/* Timeline Tab (v6.9.111 M5.4) */}
           <TabsContent value="timeline">
+            <Suspense fallback={<SectionSkeleton />}>
             <TimelineTab
               groups={timeline.groups}
               counts={timeline.counts}
@@ -574,10 +595,12 @@ const StudentPage = () => {
               onNavigate={handleTimelineNavigate}
               onGoToPrep={() => handleTabChange('prep')}
             />
+            </Suspense>
           </TabsContent>
 
           {/* v6.9.111 M6.4 — Library tab */}
           <TabsContent value="library">
+            <Suspense fallback={<SectionSkeleton />}>
             <LibraryTab
               section={librarySection}
               counts={{ worksheets: totalCount || 0 }}
@@ -630,6 +653,7 @@ const StudentPage = () => {
               isDeletedLoading={deletedLoading}
               onRestore={handleLibraryRestore}
             />
+            </Suspense>
           </TabsContent>
 
           {/* Learning model tab */}
@@ -641,6 +665,7 @@ const StudentPage = () => {
               studentEmail={student.student_email}
               surface="oneMinute"
             />
+            <Suspense fallback={<SectionSkeleton />}>
             <DslmExplainerBanner teacherId={student.teacher_id} />
             <DSLMTab
               studentId={id || ''}
@@ -706,6 +731,7 @@ const StudentPage = () => {
                 navigate('/');
               }}
             />
+            </Suspense>
           </TabsContent>
 
         </Tabs>
