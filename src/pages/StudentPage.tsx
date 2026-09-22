@@ -580,6 +580,7 @@ const StudentPage = () => {
 
           {/* Timeline Tab (v6.9.111 M5.4) */}
           <TabsContent value="timeline">
+            <Suspense fallback={<SectionSkeleton />}>
             <TimelineTab
               groups={timeline.groups}
               counts={timeline.counts}
