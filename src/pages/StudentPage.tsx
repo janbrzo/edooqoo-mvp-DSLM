@@ -595,6 +595,7 @@ const StudentPage = () => {
               onNavigate={handleTimelineNavigate}
               onGoToPrep={() => handleTabChange('prep')}
             />
+            </Suspense>
           </TabsContent>
 
           {/* v6.9.111 M6.4 — Library tab */}
