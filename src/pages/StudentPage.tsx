@@ -140,13 +140,23 @@ const StudentPage = () => {
     navigateWorkspace({ tab: resolveTab(tab).tab } as WorkspaceNavigationTarget);
   };
 
-  // Handle flashcard set change
+  // v6.9.111 M7.5 — flashcard set selection writes the canonical library URL.
   const handleFlashcardSetChange = (setId: string | null) => {
-    if (setId) {
-      setSearchParams({ tab: 'flashcards', set: setId });
-    } else {
-      setSearchParams({ tab: 'flashcards' });
-    }
+    navigateWorkspace({
+      tab: 'library',
+      section: 'flashcards',
+      set: setId ?? undefined,
+    });
+  };
+
+  /** Test details are addressable: ?tab=timeline&filter=tests&testId=<id>. */
+  const selectedTestId = searchParams.get('testId');
+  const handleSelectedTestChange = (testId: string | null) => {
+    navigateWorkspace({
+      tab: 'timeline',
+      filter: 'tests',
+      testId: testId ?? undefined,
+    });
   };
   
   // Single-student fetch (cached) — falls back to the list lookup for demo mode / pre-warmed cache
