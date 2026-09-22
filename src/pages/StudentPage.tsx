@@ -52,8 +52,6 @@ import { StudentSelector } from '@/components/StudentSelector';
 import { useStudentKnowledge } from '@/hooks/useStudentKnowledge';
 import { StudentKnowledgeQuickAddModal } from '@/components/student-knowledge/StudentKnowledgeQuickAddModal';
 import { useAllWorksheetHomework } from '@/hooks/useAllWorksheetHomework';
-import { DSLMTab } from '@/components/dslm/DSLMTab';
-import { DslmExplainerBanner } from '@/components/student/DslmExplainerBanner';
 import { WelcomeTestSuggestion } from '@/components/dashboard/WelcomeTestSuggestion';
 import { Activity, Brain, FileText, Sparkles } from 'lucide-react';
 import { writeAutoGenerateIntent } from '@/lib/worksheet/autoGenerateBootstrap';
