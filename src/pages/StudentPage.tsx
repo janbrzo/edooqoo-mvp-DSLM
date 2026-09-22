@@ -653,6 +653,7 @@ const StudentPage = () => {
               isDeletedLoading={deletedLoading}
               onRestore={handleLibraryRestore}
             />
+            </Suspense>
           </TabsContent>
 
           {/* Learning model tab */}
