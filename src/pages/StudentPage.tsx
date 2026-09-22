@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, lazy, Suspense } from 'react';
 import { AuthenticatedPageShell } from '@/components/AuthenticatedPageShell';
 import { PageLoadingState } from '@/components/ui/PageLoadingState';
 import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
