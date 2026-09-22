@@ -727,6 +727,33 @@ const StudentPage = () => {
               deletedTotalCount={deletedTotalCount || 0}
               isDeletedLoading={deletedLoading}
               onRestore={handleLibraryRestore}
+              /* v6.9.111 M7.5 — legacy flashcards / homework tools as library segments. */
+              flashcardsSlot={
+                librarySection === 'flashcards' ? (
+                  <Suspense fallback={<SectionSkeleton />}>
+                    <FlashcardSetsSection
+                      studentId={student.id}
+                      teacherId={student.teacher_id}
+                      studentName={student.name}
+                      studentNativeLanguage={(student as any).native_language || 'Spanish'}
+                      initialEditingSetId={flashcardSetId}
+                      onSetChange={handleFlashcardSetChange}
+                      teacherCalendarToken={teacherCalendarToken}
+                    />
+                  </Suspense>
+                ) : undefined
+              }
+              homeworkSlot={
+                librarySection === 'homework' ? (
+                  <Suspense fallback={<SectionSkeleton />}>
+                    <StudentHomeworkTab
+                      studentId={student.id}
+                      teacherId={student.teacher_id}
+                      studentName={student.name}
+                    />
+                  </Suspense>
+                ) : undefined
+              }
             />
             </Suspense>
           </TabsContent>
