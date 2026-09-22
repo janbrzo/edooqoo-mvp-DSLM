@@ -84,6 +84,34 @@ const DslmExplainerBanner = lazy(() =>
   })),
 );
 
+/**
+ * v6.9.111 M7.5 — contextual tools carried over from the legacy tab strip.
+ *
+ * They are no longer top-level destinations; each one mounts only while the
+ * matching timeline filter / library section is active, so a teacher never
+ * loses a capability that used to live behind an old tab.
+ */
+const StudentCalendarTab = lazy(() =>
+  import('@/components/calendar/StudentCalendarTab').then((m) => ({
+    default: m.StudentCalendarTab,
+  })),
+);
+const StudentHomeworkTab = lazy(() =>
+  import('@/components/student-homework/StudentHomeworkTab').then((m) => ({
+    default: m.StudentHomeworkTab,
+  })),
+);
+const StudentTestsTab = lazy(() =>
+  import('@/components/student-tests/StudentTestsTab').then((m) => ({
+    default: m.StudentTestsTab,
+  })),
+);
+const FlashcardSetsSection = lazy(() =>
+  import('@/components/flashcards/FlashcardSetsSection').then((m) => ({
+    default: m.FlashcardSetsSection,
+  })),
+);
+
 
 
 /** Four task-oriented destinations shown in the canonical workspace tab strip. */
@@ -140,13 +168,23 @@ const StudentPage = () => {
     navigateWorkspace({ tab: resolveTab(tab).tab } as WorkspaceNavigationTarget);
   };
 
-  // Handle flashcard set change
+  // v6.9.111 M7.5 — flashcard set selection writes the canonical library URL.
   const handleFlashcardSetChange = (setId: string | null) => {
-    if (setId) {
-      setSearchParams({ tab: 'flashcards', set: setId });
-    } else {
-      setSearchParams({ tab: 'flashcards' });
-    }
+    navigateWorkspace({
+      tab: 'library',
+      section: 'flashcards',
+      set: setId ?? undefined,
+    });
+  };
+
+  /** Test details are addressable: ?tab=timeline&filter=tests&testId=<id>. */
+  const selectedTestId = searchParams.get('testId');
+  const handleSelectedTestChange = (testId: string | null) => {
+    navigateWorkspace({
+      tab: 'timeline',
+      filter: 'tests',
+      testId: testId ?? undefined,
+    });
   };
   
   // Single-student fetch (cached) — falls back to the list lookup for demo mode / pre-warmed cache
@@ -596,6 +634,43 @@ const StudentPage = () => {
               onGoToPrep={() => handleTabChange('prep')}
             />
             </Suspense>
+
+            {/*
+              v6.9.111 M7.5 — contextual tool panel, rendered as a sibling of the
+              timeline (never a card inside a card). Only the panel matching the
+              active filter is mounted, so its queries stay scoped to the view.
+            */}
+            {timelineFilter === 'lessons' && (
+              <div className="mt-6">
+                <Suspense fallback={<SectionSkeleton />}>
+                  <StudentCalendarTab studentId={student.id} teacherId={student.teacher_id} />
+                </Suspense>
+              </div>
+            )}
+            {timelineFilter === 'homework' && (
+              <div className="mt-6">
+                <Suspense fallback={<SectionSkeleton />}>
+                  <StudentHomeworkTab
+                    studentId={student.id}
+                    teacherId={student.teacher_id}
+                    studentName={student.name}
+                  />
+                </Suspense>
+              </div>
+            )}
+            {timelineFilter === 'tests' && (
+              <div className="mt-6">
+                <Suspense fallback={<SectionSkeleton />}>
+                  <StudentTestsTab
+                    studentId={student.id}
+                    teacherId={student.teacher_id}
+                    studentName={student.name}
+                    initialSelectedTestId={selectedTestId}
+                    onSelectedTestChange={handleSelectedTestChange}
+                  />
+                </Suspense>
+              </div>
+            )}
           </TabsContent>
 
           {/* v6.9.111 M6.4 — Library tab */}
@@ -652,6 +727,33 @@ const StudentPage = () => {
               deletedTotalCount={deletedTotalCount || 0}
               isDeletedLoading={deletedLoading}
               onRestore={handleLibraryRestore}
+              /* v6.9.111 M7.5 — legacy flashcards / homework tools as library segments. */
+              flashcardsSlot={
+                librarySection === 'flashcards' ? (
+                  <Suspense fallback={<SectionSkeleton />}>
+                    <FlashcardSetsSection
+                      studentId={student.id}
+                      teacherId={student.teacher_id}
+                      studentName={student.name}
+                      studentNativeLanguage={(student as any).native_language || 'Spanish'}
+                      initialEditingSetId={flashcardSetId}
+                      onSetChange={handleFlashcardSetChange}
+                      teacherCalendarToken={teacherCalendarToken}
+                    />
+                  </Suspense>
+                ) : undefined
+              }
+              homeworkSlot={
+                librarySection === 'homework' ? (
+                  <Suspense fallback={<SectionSkeleton />}>
+                    <StudentHomeworkTab
+                      studentId={student.id}
+                      teacherId={student.teacher_id}
+                      studentName={student.name}
+                    />
+                  </Suspense>
+                ) : undefined
+              }
             />
             </Suspense>
           </TabsContent>

@@ -148,6 +148,8 @@ describe('buildTimelineEvents — type mapping', () => {
     expect(e.subtitle).toBe('Score 71%');
     expect(e.needsAction).toBe(true);
     expect(e.actionLabel).toBe('Review');
+    // v6.9.111 M7.5 — deep link opens the test details panel directly.
+    expect(e.href).toBe('?tab=timeline&filter=tests&testId=t1');
   });
 
   it('falls back to created_at and status for a test that was never completed', () => {
