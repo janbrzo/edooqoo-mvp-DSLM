@@ -731,6 +731,7 @@ const StudentPage = () => {
                 navigate('/');
               }}
             />
+            </Suspense>
           </TabsContent>
 
         </Tabs>
