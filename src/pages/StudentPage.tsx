@@ -600,6 +600,7 @@ const StudentPage = () => {
 
           {/* v6.9.111 M6.4 — Library tab */}
           <TabsContent value="library">
+            <Suspense fallback={<SectionSkeleton />}>
             <LibraryTab
               section={librarySection}
               counts={{ worksheets: totalCount || 0 }}
