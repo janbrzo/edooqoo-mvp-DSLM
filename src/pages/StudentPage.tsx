@@ -59,6 +59,30 @@ import { hasImage, hasAudio } from '@/utils/worksheetUtils';
 import ShareWorksheetModal from '@/components/ShareWorksheetModal';
 import RenameDialog from '@/components/RenameDialog';
 import { toast } from 'sonner';
+import { SectionSkeleton } from '@/components/dslm/SectionSkeleton';
+
+/**
+ * v6.9.111 M7.4 — lazy workspace areas.
+ *
+ * Prep stays eager: it is the default tab and must paint without a second
+ * network round-trip. Timeline, Library and Learning model are code-split and
+ * only requested once their tab becomes active (Radix unmounts inactive
+ * TabsContent), each behind a local SectionSkeleton — never a full-page spinner.
+ */
+const TimelineTab = lazy(() =>
+  import('@/components/student/timeline/TimelineTab').then((m) => ({ default: m.TimelineTab })),
+);
+const LibraryTab = lazy(() =>
+  import('@/components/student/library/LibraryTab').then((m) => ({ default: m.LibraryTab })),
+);
+const DSLMTab = lazy(() =>
+  import('@/components/dslm/DSLMTab').then((m) => ({ default: m.DSLMTab })),
+);
+const DslmExplainerBanner = lazy(() =>
+  import('@/components/student/DslmExplainerBanner').then((m) => ({
+    default: m.DslmExplainerBanner,
+  })),
+);
 
 
 
