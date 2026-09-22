@@ -316,7 +316,7 @@ export function StudentTestsTab({
         teacherId={teacherId}
         studentId={studentId}
         onBack={() => {
-          setSelectedTestId(null);
+          selectTest(null);
           refetch();
         }}
       />
@@ -410,7 +410,7 @@ export function StudentTestsTab({
               <div className="flex flex-col lg:flex-row lg:items-center lg:gap-4 gap-2">
                 <div
                   className="flex items-start gap-3 min-w-0 flex-1 cursor-pointer"
-                  onClick={() => setSelectedTestId(attempt.id)}
+                  onClick={() => selectTest(attempt.id)}
                 >
                 <div className="p-2 rounded-lg bg-primary/10 text-primary flex-shrink-0">
                   <Sparkles className="h-5 w-5" />
@@ -451,7 +451,7 @@ export function StudentTestsTab({
                     onSend={handleSendEmail}
                     onRefreshLink={handleRefreshWelcomeLink}
                     onPreview={handlePreviewTest}
-                    onViewResults={() => setSelectedTestId(attempt.id)}
+                    onViewResults={() => selectTest(attempt.id)}
                     onRetake={handleRetake}
                     canRetake={panelState === 'completed'}
                     sending={creatingPreview}
@@ -460,7 +460,7 @@ export function StudentTestsTab({
                     className="justify-start lg:justify-end"
                   />
                 ) : (
-                  <Button variant="outline" size="sm" onClick={() => setSelectedTestId(attempt.id)}>
+                  <Button variant="outline" size="sm" onClick={() => selectTest(attempt.id)}>
                     <Eye className="h-4 w-4 mr-1" /> View
                   </Button>
                 )}
@@ -488,7 +488,7 @@ export function StudentTestsTab({
             <TestCard 
               key={test.id} 
               test={test} 
-              onClick={() => setSelectedTestId(test.id)}
+              onClick={() => selectTest(test.id)}
             />
           ))}
         </div>
