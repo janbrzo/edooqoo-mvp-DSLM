@@ -23,6 +23,7 @@ import { Badge } from '@/components/ui/badge';
 import { Bell } from 'lucide-react';
 import { SuggestedLevelChangeBanner } from '@/components/student-tests/SuggestedLevelChangeBanner';
 import { useStudentAttentionDots } from '@/hooks/useStudentAttentionDots';
+import { buildWorkspaceParams } from '@/lib/students/workspaceTabs';
 import { AttentionDot } from '@/components/ui/AttentionDot';
 
 interface DSLMTabProps {
