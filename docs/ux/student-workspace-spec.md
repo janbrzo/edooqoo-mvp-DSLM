@@ -457,3 +457,49 @@ Checked after M7:
 ## 14. Out of scope
 
 Worksheet Generation Engine, DSLM internals, backend, RLS, migrations, SEO, Student Hub (`/my`), guided mode beyond the dashboard.
+
+---
+
+## 15. M7 as built — lazy boundaries and compatibility tools
+
+Verified by reading the code on 2026-09-23, after M7.1–M7.6.
+
+### 15.1 Routing
+
+- `StudentPage.tsx` derives all navigation state from the URL: `resolveWorkspaceParams(searchParams)` in a `useMemo`, a normalising effect (`replace`) for non-canonical URLs, and `navigateWorkspace(target)` → `buildWorkspaceParams` for every in-page navigation.
+- The tab strip is `grid-cols-4` with always-visible labels: Prep (`Sparkles`), Timeline (`Activity`), Library (`FileText`), Learning model (`Brain`).
+- `DSLMTab.handleScrollTo()` writes `tab=model&view=<section>` through `buildWorkspaceParams`; no internal code path writes a legacy alias any more. External historical producers (`PacingProposalsBell`, onboarding deep links, the Welcome Test email from `process-welcome-test`) are intentionally left on legacy values — they are the live proof that the alias map is permanent.
+
+### 15.2 Lazy boundaries
+
+| Area | Loading | Fallback |
+|---|---|---|
+| Prep | eager | — |
+| Timeline | `React.lazy` (named-export adapter) | local `SectionSkeleton` inside `Suspense` |
+| Library | `React.lazy` | local `SectionSkeleton` |
+| Learning model (`DSLMTab`) | `React.lazy` | local `SectionSkeleton` |
+| `StudentCalendarTab`, `StudentHomeworkTab`, `StudentTestsTab`, `FlashcardSetsSection` | `React.lazy`, mounted only for the matching filter/section | local `SectionSkeleton` |
+
+No route-level change was made in `App.tsx`; no full-page spinner was introduced.
+
+### 15.3 Compatibility tools (option C)
+
+Old full-featured panels were not deleted or reduced — they became contextual tools rendered beside the new surfaces:
+
+| URL | New surface | Contextual tool mounted |
+|---|---|---|
+| `tab=timeline&filter=lessons` | Timeline stream | `StudentCalendarTab` |
+| `tab=timeline&filter=homework` | Timeline stream | `StudentHomeworkTab` |
+| `tab=timeline&filter=tests[&testId=]` | Timeline stream | `StudentTestsTab`, selected test owned by the URL |
+| `tab=library&section=flashcards[&set=]` | Library segments | `FlashcardSetsSection`, selected set owned by the URL |
+| `tab=library&section=homework` | Library segments | `StudentHomeworkTab` |
+
+`timelineEvents.ts` emits `?tab=timeline&filter=tests&testId=<id>` for `test_result` events. `StudentTestsTab` accepts `initialSelectedTestId` / `onSelectedTestChange`; closing test details removes only `testId`.
+
+### 15.4 What the URL does *not* own
+
+The URL owns only the tab, the Timeline `filter`, the Library `section` and the deep-link params listed in section 4. Timeline paging, and Library search, sort and pagination remain component-local state by design — they are transient view preferences, not shareable locations.
+
+### 15.5 Verification status
+
+`bunx tsgo --noEmit -p tsconfig.app.json` PASS and 218/218 unit tests PASS after each of M7.1–M7.6; `/demo` loads with an empty console. The full regression matrix in the M7 plan (section M7.7) covering real-account deep links (`testId`, `intake`, onboarding `focus`) requires a signed-in production account and is therefore marked **manual verification pending**, not an assumed PASS — this environment reports `LOVABLE_BROWSER_AUTH_STATUS=external_unmanaged`.
