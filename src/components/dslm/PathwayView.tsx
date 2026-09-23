@@ -218,9 +218,16 @@ export const PathwayView: React.FC<PathwayViewProps> = ({
     const target = all.find((s: any) => s.id === editId);
     if (target) {
       handleEditSuggestion(target);
-      const next = new URLSearchParams(searchParams);
-      next.delete('editSuggestion');
-      setSearchParams(next, { replace: true });
+      // v6.9.111 M7.6 — consume `editSuggestion` on the live params so a
+      // concurrent canonical rewrite of `tab`/`view` is preserved.
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          next.delete('editSuggestion');
+          return next;
+        },
+        { replace: true },
+      );
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams, phaseSteps, nextSteps]);

@@ -23,6 +23,7 @@ import { Badge } from '@/components/ui/badge';
 import { Bell } from 'lucide-react';
 import { SuggestedLevelChangeBanner } from '@/components/student-tests/SuggestedLevelChangeBanner';
 import { useStudentAttentionDots } from '@/hooks/useStudentAttentionDots';
+import { buildWorkspaceParams } from '@/lib/students/workspaceTabs';
 import { AttentionDot } from '@/components/ui/AttentionDot';
 
 interface DSLMTabProps {
@@ -148,7 +149,9 @@ export const DSLMTab: React.FC<DSLMTabProps> = ({
     if (!el) return;
     isScrollingRef.current = true;
     setActiveSection(viewId);
-    setSearchParams({ tab: 'dslm', view: viewId });
+    // v6.9.111 M7.6 — internal navigation inside an already open Learning model
+    // writes the canonical `tab=model` and keeps cross-tab params (e.g. intake).
+    setSearchParams((prev) => buildWorkspaceParams(prev, { tab: 'model', view: viewId }));
     el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     // Reset after scroll completes
     setTimeout(() => { isScrollingRef.current = false; }, 800);
@@ -216,10 +219,17 @@ export const DSLMTab: React.FC<DSLMTabProps> = ({
         handleScrollTo('pathway');
         window.dispatchEvent(new CustomEvent('pathway:pickIdea'));
       }
-      const next = new URLSearchParams(searchParams);
-      next.delete('focus');
-      next.delete('_');
-      setSearchParams(next, { replace: true });
+      // v6.9.111 M7.6 — consume `focus`/`_` on the live params so the canonical
+      // `tab=model&view=…` written by handleScrollTo is not overwritten.
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          next.delete('focus');
+          next.delete('_');
+          return next;
+        },
+        { replace: true },
+      );
     });
     return () => cancelAnimationFrame(raf);
     // eslint-disable-next-line react-hooks/exhaustive-deps
