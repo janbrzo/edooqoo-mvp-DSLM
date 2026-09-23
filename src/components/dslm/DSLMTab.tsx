@@ -149,7 +149,9 @@ export const DSLMTab: React.FC<DSLMTabProps> = ({
     if (!el) return;
     isScrollingRef.current = true;
     setActiveSection(viewId);
-    setSearchParams({ tab: 'dslm', view: viewId });
+    // v6.9.111 M7.6 — internal navigation inside an already open Learning model
+    // writes the canonical `tab=model` and keeps cross-tab params (e.g. intake).
+    setSearchParams((prev) => buildWorkspaceParams(prev, { tab: 'model', view: viewId }));
     el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     // Reset after scroll completes
     setTimeout(() => { isScrollingRef.current = false; }, 800);
