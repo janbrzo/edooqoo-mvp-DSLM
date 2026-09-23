@@ -94,9 +94,11 @@ The `view`/`focus` mappings mirror the existing `redirectMap` in `StudentPage.ts
 Rules:
 
 1. Canonical tab values: `prep | timeline | library | model`. Canonical `section`: `worksheets | flashcards | homework`. Canonical `filter`: `all | lessons | worksheets | homework | notes | tests`.
-2. Pass-through params, never dropped during rewriting: `set`, `intake`, `view`, `focus`, `testId`, `_`.
-3. Rewriting happens once, on mount and on `searchParams` change, via `setSearchParams(next, { replace: true })` — history must not grow and Back must not loop.
-4. `studentPrepPath()` in `src/lib/students/quickAccess.ts` returns `/student/${id}?tab=prep` from M7 onward.
+2. Pass-through params, never dropped during **normalisation** (`resolveWorkspaceParams`): `set`, `intake`, `view`, `focus`, `testId`, `_`, `editSuggestion`.
+3. Normalisation happens on mount and on every `searchParams` change, via `setSearchParams(next, { replace: true })` — history must not grow and Back must not loop. It is idempotent: feeding the canonical result back in reports `changed: false`.
+4. **Deliberate navigation** uses `buildWorkspaceParams(current, target)` and a *push* (no `replace`), so Back returns to the previous tab. Unlike normalisation, it drops state owned by other tabs: `testId` survives only with `filter=tests`, `set` only with `section=flashcards`, and `view`/`focus`/`editSuggestion`/`_` only on `tab=model`. `intake` is the single cross-tab workflow param and survives every teacher-initiated navigation until its owning banner consumes it.
+5. Params consumed by a feature (`focus`, `_`, `editSuggestion`, `intake`, `testId`) are removed with a **functional** `setSearchParams(prev => …, { replace: true })` updater, so a concurrent canonical rewrite is never overwritten by a stale snapshot.
+6. `studentPrepPath()` in `src/lib/students/quickAccess.ts` returns `/student/${id}?tab=prep` from M7 onward.
 
 Known producers of `?tab=` links (verified with `rg -n "tab=" src/ supabase/functions/`):
 
