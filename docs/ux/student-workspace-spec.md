@@ -11,7 +11,7 @@ This document is the single source of truth for phases M1–M8. Where it refines
 
 ## 1. Verified current state
 
-All rows below were verified by reading the code on 2026-09-11.
+All rows below describe the **pre-M7 baseline**, verified by reading the code on 2026-09-11. They are kept as the historical starting point; the as-built post-M7 state is documented in section 15.
 
 | Element | State | Problem |
 |---|---|---|
