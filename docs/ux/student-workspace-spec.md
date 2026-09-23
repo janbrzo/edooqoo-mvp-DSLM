@@ -1,6 +1,6 @@
 # Student Workspace — Specification (v6.9.111)
 
-Status: APPROVED 2026-09-11 — implementation pending
+Status: APPROVED 2026-09-11 — M1–M7 implemented (see section 15 for the as-built M7 state); M8 pending
 Parent: `docs/ux/target-teacher-experience.md` (Level 2)
 Route: `/student/:id`
 Sibling: `docs/ux/dashboard-today-spec.md` (Level 1)
