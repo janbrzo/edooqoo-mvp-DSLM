@@ -53,6 +53,7 @@ Reference: `docs/ux/target-teacher-experience.md` (approved 2026-09-02).
     - [x] M7.3 — replace the 10-tab strip with Prep / Timeline / Library / Learning model; canonicalise legacy panels and route internal workspace actions through the URL contract
     - [x] M7.4 — code-split Timeline / Library / Learning model with `React.lazy` named-export adapters behind local `SectionSkeleton` Suspense boundaries; Prep stays eager, no route-level changes in `App.tsx`
     - [x] M7.5 — legacy tools kept fully usable as contextual panels: Timeline `filter=lessons|homework|tests` mount `StudentCalendarTab` / `StudentHomeworkTab` / `StudentTestsTab` (URL-owned `testId`), Library `flashcards` / `homework` segments mount `FlashcardSetsSection` (URL-owned `set`) / `StudentHomeworkTab`
+    - [x] M7.6 — internal writes are canonical: `DSLMTab.handleScrollTo()` writes `tab=model&view=…` via `buildWorkspaceParams`; `focus`/`_`/`editSuggestion` consumed through functional `setSearchParams` updaters; external legacy producers intentionally untouched (permanent alias map)
   - [ ] M8 — dead-code removal + RAG (`docs/llm-context.md`, `public/llms.txt`, memory)
 - [ ] Guided mode beyond the dashboard
 
