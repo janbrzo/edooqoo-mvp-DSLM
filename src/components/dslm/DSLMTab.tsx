@@ -219,10 +219,17 @@ export const DSLMTab: React.FC<DSLMTabProps> = ({
         handleScrollTo('pathway');
         window.dispatchEvent(new CustomEvent('pathway:pickIdea'));
       }
-      const next = new URLSearchParams(searchParams);
-      next.delete('focus');
-      next.delete('_');
-      setSearchParams(next, { replace: true });
+      // v6.9.111 M7.6 — consume `focus`/`_` on the live params so the canonical
+      // `tab=model&view=…` written by handleScrollTo is not overwritten.
+      setSearchParams(
+        (prev) => {
+          const next = new URLSearchParams(prev);
+          next.delete('focus');
+          next.delete('_');
+          return next;
+        },
+        { replace: true },
+      );
     });
     return () => cancelAnimationFrame(raf);
     // eslint-disable-next-line react-hooks/exhaustive-deps
