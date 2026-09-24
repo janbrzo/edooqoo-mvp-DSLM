@@ -236,6 +236,41 @@ describe('real producers emit URLs that still resolve', () => {
   }
 });
 
+/**
+ * M7.9 regression guard — every legacy producer found in the codebase
+ * (onboarding, AddStudentDialog intake, Welcome Test email/notifications,
+ * PacingProposalsBell, SlotDetailModal, NextUpCard, flashcard modal,
+ * timeline event hrefs) must resolve to a working canonical surface
+ * without losing its deep-link context.
+ */
+describe('M7.9 — legacy producer inventory', () => {
+  const cases: Array<[string, string]> = [
+    ['tab=dslm&view=pathway&focus=send-welcome-test', 'tab=model&view=pathway&focus=send-welcome-test'],
+    ['tab=dslm&view=goals&focus=add-goal-modal', 'tab=model&view=goals&focus=add-goal-modal'],
+    ['tab=dslm&view=pathway&focus=learning-roadmap', 'tab=model&view=pathway&focus=learning-roadmap'],
+    ['tab=dslm&view=pathway&focus=next-lesson-ideas', 'tab=model&view=pathway&focus=next-lesson-ideas'],
+    [
+      'tab=dslm&view=goals&focus=add-goal-modal&_=42&intake=abc',
+      'tab=model&intake=abc&view=goals&focus=add-goal-modal&_=42',
+    ],
+    [
+      'tab=dslm&view=pathway&focus=send-welcome-test&_=42&intake=abc',
+      'tab=model&intake=abc&view=pathway&focus=send-welcome-test&_=42',
+    ],
+    ['tab=tests&testId=t-9', 'tab=timeline&filter=tests&testId=t-9'],
+    ['tab=knowledge', 'tab=model&view=profile'],
+    ['tab=timeline&filter=tests&testId=t-9', 'tab=timeline&filter=tests&testId=t-9'],
+  ];
+
+  for (const [input, expected] of cases) {
+    it(`${input} → ${expected}`, () => {
+      const first = resolveWorkspaceParams(q(input));
+      expect(first.next.toString()).toBe(expected);
+      expect(resolveWorkspaceParams(first.next).changed).toBe(false);
+    });
+  }
+});
+
 describe('studentTabPath', () => {
   it('builds a canonical prep link', () => {
     expect(studentTabPath('abc', 'prep')).toBe('/student/abc?tab=prep');

@@ -503,3 +503,22 @@ The URL owns only the tab, the Timeline `filter`, the Library `section` and the 
 ### 15.5 Verification status
 
 `bunx tsgo --noEmit -p tsconfig.app.json` PASS and 218/218 unit tests PASS after each of M7.1–M7.6; `/demo` loads with an empty console. The full regression matrix in the M7 plan (section M7.7) covering real-account deep links (`testId`, `intake`, onboarding `focus`) requires a signed-in production account and is therefore marked **manual verification pending**, not an assumed PASS — this environment reports `LOVABLE_BROWSER_AUTH_STATUS=external_unmanaged`.
+
+## 16. M7.9 impact analysis — regression guards
+
+Code-level audit of every legacy `?tab=` producer (2026-09-24). None were migrated; all resolve through the permanent alias map and are pinned by `workspaceTabs.test.ts` ("real producers" + "M7.9 — legacy producer inventory", each asserting idempotency).
+
+| Producer | Emitted URL | Canonical result |
+|---|---|---|
+| Dashboard quick search / All students / recent pills | `studentPrepPath()` → `?tab=prep` | Prep |
+| `OnboardingChecklist` (5 steps) | `?tab=dslm&view=…&focus=…` | `tab=model`, view + focus kept |
+| `AddStudentDialog` | `?tab=dslm&view=…&focus=…&_=…&intake=…` | `tab=model`, intake/focus/_ kept |
+| `process-welcome-test` email, `UnifiedBell`, `HomeworkNotificationBadge`, `useDashboardAttention`, `WelcomeTestPage` | `?tab=tests` | Timeline, filter=tests |
+| `WelcomeTestSuggestion` | `?tab=tests&testId=…` | Timeline tests, testId kept → `StudentTestsTab` opens it |
+| `ViewFlashcardSetsModal` | `?tab=flashcards` | Library, section=flashcards |
+| `PacingProposalsBell`, `NextUpCard`, `SlotDetailModal` | `?tab=dslm` | Learning model |
+| Timeline event hrefs | `?tab=calendar|homework|dslm|knowledge` | Timeline lessons/homework, Model, Model profile |
+
+Structural safeguards verified in `StudentPage.tsx`: resolver in `useMemo`, normalisation only on `changed` and always `replace` (no loop); Timeline / Library / DSLMTab and all compatibility tools are `lazy` + conditionally mounted inside local `Suspense` (first Prep paint mounts none of them); demo mode blanks student/teacher IDs before queries; `writeAutoGenerateIntent()` call sites unchanged.
+
+Open: M7.7 browser matrix on a real account (environment is `external_unmanaged`).
