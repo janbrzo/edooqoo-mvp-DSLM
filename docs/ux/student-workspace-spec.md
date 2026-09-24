@@ -502,7 +502,20 @@ The URL owns only the tab, the Timeline `filter`, the Library `section` and the 
 
 ### 15.5 Verification status
 
-`bunx tsgo --noEmit -p tsconfig.app.json` PASS and 218/218 unit tests PASS after each of M7.1–M7.6; `/demo` loads with an empty console. The full regression matrix in the M7 plan (section M7.7) covering real-account deep links (`testId`, `intake`, onboarding `focus`) requires a signed-in production account and is therefore marked **manual verification pending**, not an assumed PASS — this environment reports `LOVABLE_BROWSER_AUTH_STATUS=external_unmanaged`.
+`bunx tsgo --noEmit -p tsconfig.app.json` PASS and 218/218 unit tests PASS after each of M7.1–M7.6; `/demo` loads with an empty console.
+
+**M7.10 final verification (2026-09-24, real teacher test account signed in through `/login`, student with no flashcard sets / tests):**
+
+- Automated: `tsgo` PASS, `vitest run` 227/227 PASS.
+- URL matrix (16 entries, desktop 1280×1800): 15 PASS. Every alias normalises to its canonical URL with the matching active tab; unknown and whitespace values fall back to Prep; deep link `tab=dslm&view=goals&focus=…&_=…&intake=1&editSuggestion=…` lands on `tab=model&view=goals&intake=1` after the owning flows consume `focus`, `_` and `editSuggestion` (expected).
+- `tab=flashcards&set=x` → `tab=library&section=flashcards` (the non-existent set id is dropped because the student has no sets). Opening a real set by `set=` is **not yet verified** — needs a student with at least one set.
+- `tests&testId=x` keeps `testId` in the URL; the fake id produces an expected `22P02` fetch error. Opening a real test result is **not yet verified** — needs a student with a completed test.
+- Lazy loading: fresh `?tab=prep` downloads no Timeline / Library / Model / compatibility-tool chunks. PASS.
+- Back ×3 / Forward ×3 after Prep → Timeline → Library → Model: `library, timeline, prep, timeline, library, model`. PASS.
+- Mobile 360×800: horizontal overflow exists, caused by the global `StickyNav` (Generate / Tokens / Pacing row), not by the workspace. Logged out of scope.
+- Console: one React "Cannot update a component while rendering a different component" warning seen during the alias sweep, not reproduced on direct loads of the four canonical tabs. Logged for M8 investigation.
+
+Still manual: real `set=` and `testId=` targets, Homework review from Timeline, Calendar action from Lessons, Generate/Reuse payload, onboarding `focus` spotlights.
 
 ## 16. M7.9 impact analysis — regression guards
 
