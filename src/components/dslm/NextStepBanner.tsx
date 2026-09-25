@@ -133,7 +133,7 @@ export const NextStepBanner: React.FC<NextStepBannerProps> = ({
               </ul>
             </div>
           )}
-          <div className="flex items-center justify-center gap-2">
+          <div className="flex flex-wrap items-center justify-center gap-2">
             <Button onClick={onGenerate} disabled={generating || !hasGoals}>
               {generating ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Sparkles className="h-4 w-4 mr-2" />}
               Generate 1-Minute Prep suggestions

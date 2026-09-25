@@ -221,8 +221,10 @@ export const DSLMTab: React.FC<DSLMTabProps> = ({
       }
       // v6.9.111 M7.6 — consume `focus`/`_` on the live params so the canonical
       // `tab=model&view=…` written by handleScrollTo is not overwritten.
+      // v6.9.112 M8 — no-op when nothing to consume (avoids redundant navigations).
       setSearchParams(
         (prev) => {
+          if (!prev.has('focus') && !prev.has('_')) return prev;
           const next = new URLSearchParams(prev);
           next.delete('focus');
           next.delete('_');
