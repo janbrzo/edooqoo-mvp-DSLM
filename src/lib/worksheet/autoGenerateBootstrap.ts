@@ -52,6 +52,23 @@ export interface PersistentAutoGenerateIntent {
   // "For {name} · {email}" without re-fetching from Supabase.
   studentName?: string | null;
   studentEmail?: string | null;
+  // Generator level band derived from the student's CEFR level. Optional so
+  // intents persisted by older builds still parse (they fall back to B1/B2).
+  englishLevel?: EnglishLevel | null;
+}
+
+/**
+ * Map a student's CEFR level (A1…C2) to the generator's level band — the same
+ * mapping WorksheetForm applies when a student is selected. Unknown or empty
+ * levels return null so the caller keeps its default.
+ */
+export function toEnglishLevelBand(level: string | null | undefined): EnglishLevel | null {
+  const value = (level ?? '').trim().toUpperCase();
+  if (value === 'A1/A2' || value === 'B1/B2' || value === 'C1/C2') return value;
+  if (value === 'A1' || value === 'A2') return 'A1/A2';
+  if (value === 'B1' || value === 'B2') return 'B1/B2';
+  if (value === 'C1' || value === 'C2') return 'C1/C2';
+  return null;
 }
 
 function generateRequestId(): string {
@@ -81,6 +98,8 @@ export interface WriteAutoGenerateIntentInput {
   mediaTypes?: MediaType[];
   studentName?: string | null;
   studentEmail?: string | null;
+  /** Raw `students.english_level` (A1…C2, 'unknown' or null). */
+  studentEnglishLevel?: string | null;
 }
 
 /**
@@ -107,6 +126,7 @@ export function writeAutoGenerateIntent(input: WriteAutoGenerateIntentInput): Pe
     status: 'pending',
     studentName: input.studentName ?? null,
     studentEmail: input.studentEmail ?? null,
+    englishLevel: toEnglishLevelBand(input.studentEnglishLevel),
   };
 
   if (typeof window !== 'undefined') {
@@ -287,9 +307,11 @@ export function buildAutoGeneratePayload(): (FormData & { __autoGenerateRequestI
   const studentId = persistent?.studentId ?? intent?.studentId ?? undefined;
   const suggestionId = persistent?.suggestionId ?? intent?.suggestionId ?? null;
 
-  // Default lesson time / level mirror WorksheetForm initial state.
+  // Default lesson time mirrors WorksheetForm initial state. The level follows
+  // the student's CEFR level like the form does for a selected student; this
+  // path bypasses the form, so without it every one-click generation was B1/B2.
   const lessonTime: LessonTime = '60min';
-  const englishLevel: EnglishLevel = 'B1/B2';
+  const englishLevel: EnglishLevel = persistent?.englishLevel || 'B1/B2';
   const is45 = (lessonTime as LessonTime) === '45min';
   const maxExercises = is45 ? 6 : 8;
 

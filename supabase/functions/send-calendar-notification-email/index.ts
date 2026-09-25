@@ -42,8 +42,8 @@ Deno.serve(async (req) => {
     
     const isStudentEmail = ['booking_confirmation', 'booking_pending', 'booking_rejected', 'cancellation_student', 'cancellation_confirmed_by_student', 'reschedule_confirmation', 'reschedule_pending', 'reschedule_rejected', 'lesson_reminder', 'lesson_time_changed', 'new_booking_student'].includes(type);
     const fromName = isStudentEmail
-      ? `${teacherName || 'Your Teacher'} via EDOQOO`
-      : 'EDOQOO';
+      ? `${teacherName || 'Your Teacher'} via Edooqoo`
+      : 'Edooqoo';
     
     const teacherButton = calendarUrl 
       ? `<div style="margin-top: 20px;"><a href="${calendarUrl}" style="display: inline-block; padding: 10px 24px; background: #2563eb; color: white; border-radius: 6px; text-decoration: none; font-weight: 500;">Open Calendar</a></div>` 
