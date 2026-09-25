@@ -182,7 +182,7 @@ const Dashboard = () => {
               <div className="w-full sm:w-64">
                 <StudentQuickSearch students={students as any} />
               </div>
-              <div className="min-w-0 flex-1">
+              <div className="w-full min-w-0 flex-1">
                 <RecentStudentsBar students={students as any} excludeIds={nextUpIds} />
               </div>
             </div>

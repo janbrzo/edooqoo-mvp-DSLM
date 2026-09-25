@@ -52,7 +52,7 @@ export const NavStudentSwitcher: React.FC = () => {
     <>
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" className="gap-1.5 max-w-[200px]">
+        <Button variant="outline" size="sm" className="gap-1.5 min-w-0 shrink max-w-[200px]">
           <Users className="h-4 w-4 flex-shrink-0" />
           <span className="truncate">{currentStudent?.name || 'Students'}</span>
           <ChevronDown className="h-3 w-3 opacity-60 flex-shrink-0" />

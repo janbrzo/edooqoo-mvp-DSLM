@@ -13,7 +13,7 @@ interface StudentQuickSearchProps {
 /**
  * v6.9.110 — "Jump to student" search on the Today dashboard.
  * Keyboard: arrows + Enter, Esc closes, `/` or Cmd/Ctrl+K focuses from anywhere.
- * Every result navigates straight into prep (`/student/:id?tab=dslm`).
+ * Every result navigates straight into prep (`/student/:id?tab=prep`).
  */
 export const StudentQuickSearch: React.FC<StudentQuickSearchProps> = ({ students }) => {
   const navigate = useNavigate();

@@ -86,50 +86,56 @@ const StickyNav: React.FC<StickyNavProps> = ({ isRegisteredUser, tokenLeft, user
       return (
         <>
         <DemoBanner />
-        <nav className={`sticky ${isDemoMode ? 'top-[36px]' : 'top-0'} z-50 bg-background/90 backdrop-blur-md border-b border-border h-14 px-4 flex items-center justify-between`}>
-          <div className="flex items-center gap-2 min-w-0">
+        <nav className={`sticky ${isDemoMode ? 'top-[36px]' : 'top-0'} z-50 bg-background/90 backdrop-blur-md border-b border-border h-14 px-3 sm:px-4 flex items-center justify-between gap-2 max-w-full overflow-hidden`}>
+          <div className="flex items-center gap-2 min-w-0 flex-1">
             <Logo />
             {showStudentSwitcher && <NavStudentSwitcher />}
             {leftContent}
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1 sm:gap-2 shrink-0">
             {onGenerateWorksheet && isDashboard && (
-              <Button size="sm" onClick={onGenerateWorksheet} className="h-8 text-xs">
-                <Plus className="h-3.5 w-3.5 mr-1" />
-                Generate
+              <Button size="sm" onClick={onGenerateWorksheet} className="h-8 px-2 sm:px-3 text-xs" aria-label="Generate worksheet">
+                <Plus className="h-3.5 w-3.5 sm:mr-1" />
+                <span className="hidden sm:inline">Generate</span>
               </Button>
             )}
             {onGenerateWorksheet && !isDashboard && (
-              <Button asChild size="sm" className="h-8 text-xs">
+              <Button asChild size="sm" className="h-8 px-2 sm:px-3 text-xs">
                 <a
                   href="/"
+                  aria-label="Generate worksheet"
                   onClick={(e) => {
                     if (e.metaKey || e.ctrlKey || e.shiftKey || e.button === 1) return;
                     e.preventDefault();
                     onGenerateWorksheet();
                   }}
                 >
-                  <Plus className="h-3.5 w-3.5 mr-1" />
-                  Generate
+                  <Plus className="h-3.5 w-3.5 sm:mr-1" />
+                  <span className="hidden sm:inline">Generate</span>
                 </a>
               </Button>
             )}
             {subscriptionType && (
-              <Badge variant="secondary" className="text-xs shrink-0">{subscriptionType}</Badge>
+              <Badge variant="secondary" className="hidden sm:inline-flex text-xs shrink-0">{subscriptionType}</Badge>
             )}
-            <Badge variant="outline" className="text-xs">
+            <Badge variant="outline" className="hidden sm:inline-flex text-xs shrink-0">
               Tokens: {tokenLeft}
             </Badge>
             <UnifiedBell />
             <PacingProposalsBell />
             <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
               <SheetTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-10 w-10 focus-visible:ring-2 focus-visible:ring-offset-2" aria-label="Open navigation">
+                <Button variant="ghost" size="icon" className="h-10 w-10 shrink-0 focus-visible:ring-2 focus-visible:ring-offset-2" aria-label="Open navigation">
                   <Menu className="h-5 w-5" />
                 </Button>
               </SheetTrigger>
               <SheetContent side="right" className="w-64">
                 <div className="flex flex-col gap-3 pt-8">
+                  {/* v6.9.112 M8 — plan + tokens live here below 640px to prevent horizontal overflow */}
+                  <div className="flex flex-wrap items-center gap-2 sm:hidden">
+                    {subscriptionType && <Badge variant="secondary" className="text-xs">{subscriptionType}</Badge>}
+                    <Badge variant="outline" className="text-xs">Tokens: {tokenLeft}</Badge>
+                  </div>
                   {!isDashboard && (
                     <Button asChild variant="outline" size="sm" onClick={() => setSheetOpen(false)}>
                       <Link to="/dashboard"><GraduationCap className="h-4 w-4 mr-2" />Dashboard</Link>

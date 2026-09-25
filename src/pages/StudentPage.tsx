@@ -51,7 +51,6 @@ import { DuplicateWorksheetButton } from "@/components/DuplicateWorksheetButton"
 import { StudentSelector } from '@/components/StudentSelector';
 import { useStudentKnowledge } from '@/hooks/useStudentKnowledge';
 import { StudentKnowledgeQuickAddModal } from '@/components/student-knowledge/StudentKnowledgeQuickAddModal';
-import { useAllWorksheetHomework } from '@/hooks/useAllWorksheetHomework';
 import { WelcomeTestSuggestion } from '@/components/dashboard/WelcomeTestSuggestion';
 import { Activity, Brain, FileText, Sparkles } from 'lucide-react';
 import { writeAutoGenerateIntent } from '@/lib/worksheet/autoGenerateBootstrap';
@@ -132,7 +131,6 @@ const StudentPage = () => {
   const { students, updateStudent, deleteStudent, loading: studentsLoading } = useStudents();
   const [currentPage, setCurrentPage] = useState(1);
   const [deletedCurrentPage, setDeletedCurrentPage] = useState(1);
-  const [deleteConfirmName, setDeleteConfirmName] = useState('');
   const [timelineVisibleCount, setTimelineVisibleCount] = useState(TIMELINE_PAGE_SIZE);
   const [librarySearch, setLibrarySearch] = useState('');
   const [librarySort, setLibrarySort] = useState<LibrarySort>('newest');
@@ -147,7 +145,14 @@ const StudentPage = () => {
 
   useEffect(() => {
     if (!workspace.changed) return;
-    setSearchParams(workspace.next, { replace: true });
+    // v6.9.112 M8 — functional update against live params; skip when already canonical.
+    setSearchParams(
+      (prev) => {
+        const again = resolveWorkspaceParams(prev);
+        return again.changed ? again.next : prev;
+      },
+      { replace: true },
+    );
   }, [workspace, setSearchParams]);
 
   const timelineFilter: TimelineFilter = workspace.resolved.filter ?? 'all';

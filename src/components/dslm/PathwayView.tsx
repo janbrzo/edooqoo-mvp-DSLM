@@ -217,11 +217,13 @@ export const PathwayView: React.FC<PathwayViewProps> = ({
     const all = [...phaseSteps, ...nextSteps];
     const target = all.find((s: any) => s.id === editId);
     if (target) {
-      handleEditSuggestion(target);
+      // v6.9.112 M8 — open the dialog outside the render/commit of the URL update.
+      queueMicrotask(() => handleEditSuggestion(target));
       // v6.9.111 M7.6 — consume `editSuggestion` on the live params so a
       // concurrent canonical rewrite of `tab`/`view` is preserved.
       setSearchParams(
         (prev) => {
+          if (!prev.has('editSuggestion')) return prev;
           const next = new URLSearchParams(prev);
           next.delete('editSuggestion');
           return next;
