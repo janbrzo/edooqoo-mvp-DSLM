@@ -117,7 +117,7 @@ const McpTokensPage: React.FC = () => {
             <div>
               <div className="mb-1 text-muted-foreground">MCP endpoint</div>
               <div className="flex items-center gap-2">
-                <code className="flex-1 rounded bg-muted px-3 py-2 text-xs">{MCP_ENDPOINT}</code>
+                <code className="min-w-0 flex-1 break-all rounded bg-muted px-3 py-2 text-xs">{MCP_ENDPOINT}</code>
                 <Button size="sm" variant="outline" onClick={() => copy(MCP_ENDPOINT)}>
                   <Copy className="h-3.5 w-3.5" />
                 </Button>
