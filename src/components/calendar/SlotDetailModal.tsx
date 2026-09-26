@@ -427,7 +427,7 @@ export function SlotDetailModal({ open, onOpenChange, slot, studentName, student
 
       supabase.functions.invoke('send-calendar-notification-email', {
         body: {
-          type, studentEmail, studentName: studentName || 'Student',
+          type, slotId: slot.id, studentEmail, studentName: studentName || 'Student',
           slotDate: extraParams.slotDate || slot.slot_date, slotTime: extraParams.slotTime || slot.start_time.slice(0, 5),
           endTime: extraParams.endTime || slot.end_time.slice(0, 5),
           teacherName, teacherEmail, bookUrl, calendarUrl,

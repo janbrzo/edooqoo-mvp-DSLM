@@ -224,6 +224,8 @@ export function usePublicBooking(token?: string) {
         supabase.functions.invoke('send-calendar-notification-email', {
           body: {
             type: autoConfirm ? 'booking_confirmation' : 'booking_pending',
+            // The function re-derives recipients and content from this slot.
+            slotId, publicToken: settings.public_calendar_token,
             studentEmail: normalizedEmail, studentName: resolvedName, slotDate, slotTime,
             teacherName, teacherEmail, bookUrl, calendarUrl,
             worksheetUrl, sharedWorksheetUrl, meetingLink,
@@ -234,6 +236,7 @@ export function usePublicBooking(token?: string) {
           supabase.functions.invoke('send-calendar-notification-email', {
             body: {
               type: 'new_booking_teacher',
+              slotId, publicToken: settings.public_calendar_token,
               teacherEmail, studentEmail: normalizedEmail,
               studentName: resolvedName, slotDate, slotTime,
               teacherName, bookUrl, calendarUrl,
