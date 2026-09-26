@@ -540,7 +540,7 @@ Open: M7.7 browser matrix on a real account (environment is `external_unmanaged`
 
 In scope and delivered: four canonical tabs, permanent aliases + canonical URLs, URL as source of truth for tab/filter/section/view, lazy panels, legacy tools kept as contextual panels, tests + Playwright + docs.
 
-Confirmed untouched by M7: Worksheet Generation Engine (prompt, parameters, pipeline); backend, RLS, migrations, Edge Functions; internals of `StudentHomeworkTab`, `StudentTestsTab` (only the additive `initialSelectedTestId` / `onSelectedTestChange` props), `StudentCalendarTab`, `FlashcardSetsSection`; DSLM internals (only URL writes in `DSLMTab` / `PathwayView`); `App.tsx` routes.
+Confirmed untouched by M7 (git history since 2026-09-10): Worksheet Generation Engine (prompt, parameters, pipeline); Edge Functions; RLS policies. Two unrelated billing-hardening migrations (20260918065241, 20260918065254 — `prevent_profile_billing_self_update`) landed in the same window and are not part of M7; internals of `StudentHomeworkTab`, `StudentTestsTab` (only the additive `initialSelectedTestId` / `onSelectedTestChange` props), `StudentCalendarTab`, `FlashcardSetsSection`; DSLM internals (only URL writes in `DSLMTab` / `PathwayView`); `App.tsx` routes.
 
 Out-of-scope issues logged, not fixed:
 - `TimelineFilters` / `LibrarySegments` do not implement the full WAI-ARIA APG roving-tabindex keyboard model — separate accessibility audit.
