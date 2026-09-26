@@ -548,3 +548,11 @@ Out-of-scope issues logged, not fixed:
 - External legacy link producers (emails, notifications, `PacingProposalsBell`, onboarding) still emit legacy `?tab=` values — intentionally served by the permanent alias map (section 16).
 - Deleted suggestions (`deleted_at` set) cannot be opened via `editSuggestion`; the param is dropped silently — no user-facing notice.
 - Items that belonged to M8/M9 (dead code, RAG, 360 px overflow) were handled in those phases, not in M7.
+
+## 18. M7.12 change report
+
+- Delivered: 4 canonical tabs (Prep / Timeline / Library / Learning model), permanent `?tab=` aliases, URL as source of truth, lazy Timeline/Library/Model panels, legacy tools as contextual panels, canonical internal writes.
+- Files modified in M7: `src/lib/students/workspaceTabs.ts`, `src/lib/students/__tests__/workspaceTabs.test.ts`, `src/pages/StudentPage.tsx`, `src/components/student-tests/StudentTestsTab.tsx`, `src/components/dslm/DSLMTab.tsx`, `src/components/dslm/PathwayView.tsx`, `docs/ux/student-workspace-spec.md`, `roadmap.md`.
+- Documentation updated: YES (spec sections 4, 15–18; roadmap). RAG updated: done in M8.
+- Out-of-scope issues: see section 17.
+- Verification (2026-09-26): typecheck PASS; `bun test` 227/227 PASS; browser alias sweep on real account (dslm, overview, calendar, flashcards+set, library, timeline) 6/6 PASS, zero page errors. Result: PASS.
