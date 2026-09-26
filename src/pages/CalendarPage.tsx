@@ -390,23 +390,23 @@ const CalendarPage = () => {
         user={user}
       />
       <div className="max-w-7xl mx-auto px-4 py-6 space-y-4">
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <Button variant="ghost" size="sm" onClick={() => navigate('/dashboard')}>
             <ArrowLeft className="h-4 w-4 mr-1" /> Dashboard
           </Button>
           <h1 className="text-2xl font-bold">Calendar</h1>
-          <div className="ml-auto flex items-center gap-2">
-            <div className="relative">
+          <div className="flex w-full flex-wrap items-center gap-2 sm:ml-auto sm:w-auto">
+            <div className="relative min-w-0 flex-1 sm:flex-none">
               <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-muted-foreground" />
               <Input
                 placeholder="Search..."
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                className="h-8 w-40 pl-7 text-xs"
+                className="h-8 w-full pl-7 text-xs sm:w-40"
               />
             </div>
             <Select value={studentFilter} onValueChange={setStudentFilter}>
-              <SelectTrigger className="h-8 w-40 text-xs">
+              <SelectTrigger className="h-8 min-w-0 flex-1 text-xs sm:w-40 sm:flex-none">
                 <Filter className="h-3 w-3 mr-1" />
                 <SelectValue placeholder="All students" />
               </SelectTrigger>
@@ -431,7 +431,7 @@ const CalendarPage = () => {
                 Bulk Actions
               </Button>
             ) : (
-              <div className="flex items-center gap-1">
+              <div className="flex flex-wrap items-center gap-1">
                 {(!selectionType || selectionType === 'available') && (
                   <Button variant="destructive" size="sm" className="h-8 text-xs" onClick={handleBatchDelete} disabled={selectedSlotIds.size === 0}>
                     Delete ({selectedSlotIds.size})

@@ -504,7 +504,8 @@ const AllWorksheetsPage = () => {
 
         {/* Worksheets List */}
         <Card>
-          <CardContent className="p-0">
+          <CardContent className="overflow-x-auto p-0">
+            <div className="min-w-[640px]">
             {/* Table Header */}
             <div className="border-b bg-gray-50 p-4">
               <div className="grid grid-cols-12 gap-4 items-center text-sm font-medium text-gray-700">
@@ -564,6 +565,7 @@ const AllWorksheetsPage = () => {
                 })}
               </div>
             )}
+            </div>
           </CardContent>
         </Card>
 
