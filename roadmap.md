@@ -22,11 +22,11 @@ Reference: `docs/ux/target-teacher-experience.md` (approved 2026-09-02).
   - [x] Step 4 — `StickyNav` on /dashboard + filter in `NavStudentSwitcher`
   - [x] Step 5 — memory (`mem/features/dashboard/quick-student-access.md`) + RAG (`docs/llm-context.md` v6.9.110)
 
-- [ ] Student Workspace (v6.9.111) — 4 tabs (Prep / Timeline / Library / Learning model) + snapshot panel — spec: `docs/ux/student-workspace-spec.md`
+- [x] Student Workspace (v6.9.111) — 4 tabs (Prep / Timeline / Library / Learning model) + snapshot panel — spec: `docs/ux/student-workspace-spec.md`
   - [x] M0 — spec document + roadmap entry (code-verified current state, permanent `?tab=` alias map, data-source field audit)
   - [x] M1 — `src/lib/students/workspaceTabs.ts` + `resolveTab()` alias tests (no UI)
   - [x] M2 — `EntityRow` + `MeetingLinkField` extracted from `StudentPage.tsx` (no visual change; `StudentPage.tsx` 1256 → 1081 lines)
-  - [ ] M3 — `StudentHeaderBar` + `StudentSnapshotPanel` + `StudentSettingsMenu`
+  - [x] M3 — `StudentHeaderBar` + `StudentSnapshotPanel` + `StudentSettingsMenu`
     - [x] M3.1 — `studentSnapshot.ts` selectors + `useStudentNextLesson` (no UI)
     - [x] M3.2 — `StudentHeaderBar` + `StudentSnapshotPanel` + `StudentSettingsMenu` components (built, not yet mounted)
     - [x] M3.3 — mounted in `StudentPage.tsx`; duplicated Back/Edit/Delete/meeting-link controls removed
@@ -47,7 +47,7 @@ Reference: `docs/ux/target-teacher-experience.md` (approved 2026-09-02).
     - [x] M6.3 — `LibraryTab` composition
     - [x] M6.4 — mount Library beside legacy tabs (StudentPage `?tab=library`, 10 tabs)
     - [x] M6.5 — spec sections 5/6 (real `LibraryTabProps`) + new section 8 "Library data sources" + roadmap (RAG stays in M8)
-  - [ ] M7 — switch to 4 tabs, `resolveTab` routing, `studentPrepPath()` → `?tab=prep`, `React.lazy`
+  - [x] M7 — switch to 4 tabs, `resolveTab` routing, `studentPrepPath()` → `?tab=prep`, `React.lazy`
     - [x] M7.1 — harden the routing contract (`buildWorkspaceParams`, preserved deep-link params, canonical Prep quick access; no UI)
     - [x] M7.2 — URL is the source of truth in `StudentPage.tsx` (`resolveWorkspaceParams`, canonicalisation with `replace`, Timeline filter + Library section read from the URL); legacy `?tab=` panels still render verbatim
     - [x] M7.3 — replace the 10-tab strip with Prep / Timeline / Library / Learning model; canonicalise legacy panels and route internal workspace actions through the URL contract
@@ -59,6 +59,7 @@ Reference: `docs/ux/target-teacher-experience.md` (approved 2026-09-02).
     - [x] M7.9 — impact analysis: legacy producer inventory (spec section 16) + 9 regression-guard tests
     - [x] M7.10 — final verification on a real account: 15/16 URL matrix PASS (set= needs a student with sets), lazy PASS, Back/Forward PASS; mobile overflow from global StickyNav + one render warning logged (spec 15.5)
   - [x] M7.11 — scope lock audit (spec section 17)
+  - [x] M7.12 — change report (spec section 18)
   - [x] M8 — dead-code removal + RAG (`docs/llm-context.md`, `public/llms.txt`, memory)
 - [ ] Guided mode beyond the dashboard
 

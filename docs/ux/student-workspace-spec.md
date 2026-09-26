@@ -540,7 +540,7 @@ Open: M7.7 browser matrix on a real account (environment is `external_unmanaged`
 
 In scope and delivered: four canonical tabs, permanent aliases + canonical URLs, URL as source of truth for tab/filter/section/view, lazy panels, legacy tools kept as contextual panels, tests + Playwright + docs.
 
-Confirmed untouched by M7: Worksheet Generation Engine (prompt, parameters, pipeline); backend, RLS, migrations, Edge Functions; internals of `StudentHomeworkTab`, `StudentTestsTab` (only the additive `initialSelectedTestId` / `onSelectedTestChange` props), `StudentCalendarTab`, `FlashcardSetsSection`; DSLM internals (only URL writes in `DSLMTab` / `PathwayView`); `App.tsx` routes.
+Confirmed untouched by M7 (git history since 2026-09-10): Worksheet Generation Engine (prompt, parameters, pipeline); Edge Functions; RLS policies. Two unrelated billing-hardening migrations (20260918065241, 20260918065254 — `prevent_profile_billing_self_update`) landed in the same window and are not part of M7; internals of `StudentHomeworkTab`, `StudentTestsTab` (only the additive `initialSelectedTestId` / `onSelectedTestChange` props), `StudentCalendarTab`, `FlashcardSetsSection`; DSLM internals (only URL writes in `DSLMTab` / `PathwayView`); `App.tsx` routes.
 
 Out-of-scope issues logged, not fixed:
 - `TimelineFilters` / `LibrarySegments` do not implement the full WAI-ARIA APG roving-tabindex keyboard model — separate accessibility audit.
@@ -548,3 +548,11 @@ Out-of-scope issues logged, not fixed:
 - External legacy link producers (emails, notifications, `PacingProposalsBell`, onboarding) still emit legacy `?tab=` values — intentionally served by the permanent alias map (section 16).
 - Deleted suggestions (`deleted_at` set) cannot be opened via `editSuggestion`; the param is dropped silently — no user-facing notice.
 - Items that belonged to M8/M9 (dead code, RAG, 360 px overflow) were handled in those phases, not in M7.
+
+## 18. M7.12 change report
+
+- Delivered: 4 canonical tabs (Prep / Timeline / Library / Learning model), permanent `?tab=` aliases, URL as source of truth, lazy Timeline/Library/Model panels, legacy tools as contextual panels, canonical internal writes.
+- Files modified in M7: `src/lib/students/workspaceTabs.ts`, `src/lib/students/__tests__/workspaceTabs.test.ts`, `src/pages/StudentPage.tsx`, `src/components/student-tests/StudentTestsTab.tsx`, `src/components/dslm/DSLMTab.tsx`, `src/components/dslm/PathwayView.tsx`, `docs/ux/student-workspace-spec.md`, `roadmap.md`.
+- Documentation updated: YES (spec sections 4, 15–18; roadmap). RAG updated: done in M8.
+- Out-of-scope issues: see section 17.
+- Verification (2026-09-26): typecheck PASS; `bun test` 227/227 PASS; browser alias sweep on real account (dslm, overview, calendar, flashcards+set, library, timeline) 6/6 PASS, zero page errors. Result: PASS.
