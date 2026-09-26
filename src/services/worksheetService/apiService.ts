@@ -2,6 +2,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { FormData as WorksheetFormData } from '@/components/WorksheetForm';
 import { toast } from 'sonner';
 import { devLog, devWarn } from '@/utils/logger';
+import { edgeFunctionHeaders } from '@/lib/edgeFunctionHeaders';
 
 // URLs for the Edge Functions
 const GENERATE_WORKSHEET_URL = 'https://bvfrkzdlklyvnhlpleck.supabase.co/functions/v1/generateWorksheet';
@@ -59,9 +60,7 @@ export async function generateWorksheetAPI(prompt: WorksheetFormData & { fullPro
     
     const response = await fetch(GENERATE_WORKSHEET_URL, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: await edgeFunctionHeaders(),
       body: JSON.stringify({
         prompt: formattedPrompt,  // This will be saved as the full prompt in database
         formData: formData,

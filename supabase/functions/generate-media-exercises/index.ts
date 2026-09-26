@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import OpenAI from "npm:openai@4.77.0";
+import { authorizedTeacherId, jsonResponse, resolveCaller } from "../_shared/auth.ts";
 
 const openai = new OpenAI({ apiKey: Deno.env.get('OPENAI_API_KEY')! });
 
@@ -126,12 +127,16 @@ serve(async (req) => {
     // Get current worksheet
     const { data: worksheet, error: fetchError } = await supabase
       .from('worksheets')
-      .select('ai_response')
+      .select('ai_response, teacher_id')
       .eq('id', worksheetId)
       .single();
 
     if (fetchError || !worksheet) {
       throw new Error('Worksheet not found');
+    }
+    // Only the worksheet owner (or an internal service call) may rewrite it.
+    if (!worksheet.teacher_id || !authorizedTeacherId(await resolveCaller(req), worksheet.teacher_id)) {
+      return jsonResponse({ error: 'Forbidden' }, 403, corsHeaders);
     }
 
     const worksheetData = JSON.parse(worksheet.ai_response);

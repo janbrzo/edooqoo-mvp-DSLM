@@ -10,7 +10,7 @@ import { useToast } from '@/hooks/use-toast';
 import { EmailConfirmationModal } from '@/components/EmailConfirmationModal';
 import { GoogleSignInButton } from '@/components/GoogleSignInButton';
 import { DashboardPreviewBackground } from '@/components/DashboardPreviewBackground';
-import { claimPendingWorksheets, getPendingClaimIds } from '@/hooks/useWorksheetClaim';
+import { CLAIM_TOAST_ID, claimPendingWorksheets, getPendingClaimIds } from '@/hooks/useWorksheetClaim';
 import { toast as sonnerToast } from 'sonner';
 import { devLog } from '@/utils/logger';
 import { setRobotsMeta } from '@/hooks/useCanonical';
@@ -63,7 +63,8 @@ const Signup = () => {
           sonnerToast.success(
             claimedIds.length === 1
               ? 'Your worksheet was saved to your account'
-              : `${claimedIds.length} worksheets saved to your account`
+              : `${claimedIds.length} worksheets saved to your account`,
+            { id: CLAIM_TOAST_ID }
           );
           navigate(`/worksheet/${claimedIds[0]}`);
         } else {

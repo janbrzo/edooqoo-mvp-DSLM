@@ -376,15 +376,28 @@ const StudentPage = () => {
     });
   }, []);
 
-  if (loading || (studentsLoading && studentLoading) || !authChecked) {
+  const isPageLoading = loading || (studentsLoading && studentLoading) || !authChecked;
+  const shouldRedirectToLogin = !isPageLoading && !student && !isAuthenticated;
+
+  // Logged-out visitor on a student link (e.g. the Welcome Test results email):
+  // send them to login and back here afterwards. Login reads `state.from` (a
+  // `?redirect=` param was ignored, so teachers landed on /dashboard), and
+  // navigating from an effect keeps the render free of side effects.
+  useEffect(() => {
+    if (!shouldRedirectToLogin) return;
+    const query = searchParams.toString();
+    navigate('/login', {
+      replace: true,
+      state: { from: `/student/${id}${query ? `?${query}` : ''}` },
+    });
+  }, [shouldRedirectToLogin, id, searchParams, navigate]);
+
+  if (isPageLoading) {
     return <PageLoadingState label="Loading student profile" />;
   }
 
   if (!student) {
-    // If not authenticated, redirect to login with return URL
     if (!isAuthenticated) {
-      const returnUrl = `/student/${id}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
-      navigate(`/login?redirect=${encodeURIComponent(returnUrl)}`);
       return <div className="min-h-screen flex items-center justify-center">Redirecting to login...</div>;
     }
 
@@ -432,6 +445,7 @@ const StudentPage = () => {
         exerciseFocusMap: s.exerciseFocusMap,
         studentName: student.name || null,
         studentEmail: (student as any).student_email || null,
+        studentEnglishLevel: student.english_level,
       });
     } else {
       sessionStorage.setItem('prefillWorksheet', JSON.stringify({
@@ -815,6 +829,7 @@ const StudentPage = () => {
                     // v6.9.55 — surface in GeneratingModal header.
                     studentName: student.name || null,
                     studentEmail: (student as any).student_email || null,
+                    studentEnglishLevel: student.english_level,
                   });
                 } else {
                   // Manual "Use this" — only prefill, never auto-fire.

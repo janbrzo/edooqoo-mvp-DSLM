@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { authorizedTeacherId, jsonResponse, resolveCaller } from '../_shared/auth.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -17,6 +18,11 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: 'teacherId, dateFrom and dateTo are required' }), {
         status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
+    }
+
+    // Only the teacher themselves (or an internal service call) may export.
+    if (!authorizedTeacherId(await resolveCaller(req), teacherId)) {
+      return jsonResponse({ error: 'Forbidden' }, 403, corsHeaders);
     }
 
     const supabase = createClient(

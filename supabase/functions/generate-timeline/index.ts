@@ -7,6 +7,7 @@
  */
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+import { authorizedTeacherId, jsonResponse, resolveCaller } from "../_shared/auth.ts";
 import { ALL_EXERCISE_IDS } from "../_shared/exerciseTaxonomy.ts";
 import {
   computePacingIndex,
@@ -57,6 +58,11 @@ serve(async (req) => {
 
     const count = Math.min(6, Math.max(1, Number.isInteger(rawCount) ? rawCount : 3));
     const finalMode: 'next_steps' | 'phase_steps' = mode === 'phase_steps' ? 'phase_steps' : 'next_steps';
+
+    // Teachers may only work on their own students (crons use the service role).
+    if (!authorizedTeacherId(await resolveCaller(req), teacherId)) {
+      return jsonResponse({ error: 'Forbidden' }, 403, corsHeaders);
+    }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;

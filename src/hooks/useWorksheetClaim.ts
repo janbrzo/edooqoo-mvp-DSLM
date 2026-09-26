@@ -69,12 +69,32 @@ export function clearClaims() {
   } catch {/* ignore */}
 }
 
+/** Shared sonner toast id so concurrent claim listeners show one toast. */
+export const CLAIM_TOAST_ID = 'worksheets-claimed';
+
+// Several auth listeners react to the same SIGNED_IN event (useAuthFlow via the
+// global generating modal, plus Login / Signup). Without sharing, each posted
+// the same ids; the edge function only transfers rows still owned by nobody, so
+// whichever request lost the race got [] and Login sent the teacher to
+// /dashboard instead of the worksheet they had just claimed.
+let inFlightClaim: Promise<string[]> | null = null;
+
 /**
  * Call after a successful auth event. Returns the list of worksheet IDs that
  * were successfully transferred to the now-authenticated user, so callers can
- * redirect the user to the most relevant worksheet.
+ * redirect the user to the most relevant worksheet. Concurrent callers share
+ * one request and receive the same result.
  */
-export async function claimPendingWorksheets(): Promise<string[]> {
+export function claimPendingWorksheets(): Promise<string[]> {
+  if (!inFlightClaim) {
+    inFlightClaim = runClaim().finally(() => {
+      inFlightClaim = null;
+    });
+  }
+  return inFlightClaim;
+}
+
+async function runClaim(): Promise<string[]> {
   const pending = getPendingClaimIds();
   const anonUserId = getPendingAnonUserId();
   if (pending.length === 0) return [];
