@@ -57,19 +57,22 @@ describe('splitAnswerVariants', () => {
 });
 
 describe('matchAnswer — correct verdicts', () => {
-  const cases: Array<[string, string, Parameters<typeof matchAnswer>[2]?]> = [
-    ['he is late', 'He is late'],
-    ['He is late.', 'he is late'],
-    ['  he   is late  ', 'he is late'],
+  // NOTE: every tuple carries an explicit options object. A 2-element tuple makes
+  // the Bun/Vitest runner treat the third callback parameter as a `done` callback,
+  // which turns the case into an async test that never resolves.
+  const cases: Array<[string, string, NonNullable<Parameters<typeof matchAnswer>[2]>]> = [
+    ['he is late', 'He is late', {}],
+    ['He is late.', 'he is late', {}],
+    ['  he   is late  ', 'he is late', {}],
     ["don't", 'do not', { mode: 'word' }],
     ['do not', "don't", { mode: 'word' }],
-    ['I\u2019m ready', 'I am ready'],
-    ['she will not come', "she won't come"],
+    ['I\u2019m ready', 'I am ready', {}],
+    ['she will not come', "she won't come", {}],
     ['large', 'big OR large', { mode: 'word' }],
     ['big', 'big / large', { mode: 'word' }],
     ['in', 'un/in', { mode: 'word' }],
-    ['he has gone', 'he (has) gone'],
-    ['It is raining', 'it\u2019s raining'],
+    ['he has gone', 'he (has) gone', {}],
+    ['It is raining', 'it\u2019s raining', {}],
   ];
 
   it.each(cases)('accepts "%s" against "%s"', (student, key, opts) => {
