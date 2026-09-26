@@ -29,15 +29,15 @@ export const PacingProposalsBell: React.FC = () => {
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" className="h-8 relative gap-1.5">
+        <Button variant="outline" size="sm" className="h-8 relative shrink-0 gap-1 px-2 sm:gap-1.5 sm:px-3" aria-label={`Pacing proposals (${count})`}>
           <Gauge className="h-3.5 w-3.5" />
-          <span className="text-[11px]">Pacing</span>
+          <span className="hidden text-[11px] sm:inline">Pacing</span>
           <Badge className="h-4 min-w-4 p-0 px-1 text-[10px] bg-primary text-primary-foreground">
             {count}
           </Badge>
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-96 p-0" align="end">
+      <PopoverContent className="w-[calc(100vw-1rem)] max-w-96 p-0" align="end">
         <div className="px-3 py-2 border-b border-border flex items-center justify-between">
           <span className="text-sm font-semibold">Pacing Proposals</span>
           <span className="text-[10px] text-muted-foreground">{count} pending</span>

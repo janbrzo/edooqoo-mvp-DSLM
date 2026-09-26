@@ -117,7 +117,7 @@ const McpTokensPage: React.FC = () => {
             <div>
               <div className="mb-1 text-muted-foreground">MCP endpoint</div>
               <div className="flex items-center gap-2">
-                <code className="flex-1 rounded bg-muted px-3 py-2 text-xs">{MCP_ENDPOINT}</code>
+                <code className="min-w-0 flex-1 break-all rounded bg-muted px-3 py-2 text-xs">{MCP_ENDPOINT}</code>
                 <Button size="sm" variant="outline" onClick={() => copy(MCP_ENDPOINT)}>
                   <Copy className="h-3.5 w-3.5" />
                 </Button>
@@ -125,7 +125,7 @@ const McpTokensPage: React.FC = () => {
             </div>
             <ol className="list-decimal space-y-1 pl-5 text-muted-foreground">
               <li>Generate a Personal MCP Token below (shown only once — copy immediately).</li>
-              <li>In your AI client (e.g. Claude Desktop), add an MCP server with URL <code>{MCP_ENDPOINT}</code> and header <code>Authorization: Bearer &lt;your token&gt;</code>.</li>
+              <li>In your AI client (e.g. Claude Desktop), add an MCP server with URL <code className="break-all">{MCP_ENDPOINT}</code> and header <code>Authorization: Bearer &lt;your token&gt;</code>.</li>
               <li>The assistant will see tools: <code>list_students</code>, <code>get_student_summary</code>, <code>list_recent_worksheets</code> (plus public catalog tools).</li>
             </ol>
           </CardContent>

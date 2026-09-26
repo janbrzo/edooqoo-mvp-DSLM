@@ -65,3 +65,5 @@ Reference: `docs/ux/target-teacher-experience.md` (approved 2026-09-02).
 
 - [ ] P2.2 Multi-voice TTS (explicitly excluded until further notice)
 - [ ] SEO growth: `/blog/communicative-language-teaching-activities.html` content + meta rewrite
+
+- [x] M9 — 360px overflow fixes: /calendar header wrap, /worksheets table scroll container, /settings/mcp endpoint break-all, PacingProposalsBell icon-only <640px
