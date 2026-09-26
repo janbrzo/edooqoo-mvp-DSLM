@@ -535,3 +535,16 @@ Code-level audit of every legacy `?tab=` producer (2026-09-24). None were migrat
 Structural safeguards verified in `StudentPage.tsx`: resolver in `useMemo`, normalisation only on `changed` and always `replace` (no loop); Timeline / Library / DSLMTab and all compatibility tools are `lazy` + conditionally mounted inside local `Suspense` (first Prep paint mounts none of them); demo mode blanks student/teacher IDs before queries; `writeAutoGenerateIntent()` call sites unchanged.
 
 Open: M7.7 browser matrix on a real account (environment is `external_unmanaged`).
+
+## 17. M7.11 scope lock — audit result
+
+In scope and delivered: four canonical tabs, permanent aliases + canonical URLs, URL as source of truth for tab/filter/section/view, lazy panels, legacy tools kept as contextual panels, tests + Playwright + docs.
+
+Confirmed untouched by M7: Worksheet Generation Engine (prompt, parameters, pipeline); backend, RLS, migrations, Edge Functions; internals of `StudentHomeworkTab`, `StudentTestsTab` (only the additive `initialSelectedTestId` / `onSelectedTestChange` props), `StudentCalendarTab`, `FlashcardSetsSection`; DSLM internals (only URL writes in `DSLMTab` / `PathwayView`); `App.tsx` routes.
+
+Out-of-scope issues logged, not fixed:
+- `TimelineFilters` / `LibrarySegments` do not implement the full WAI-ARIA APG roving-tabindex keyboard model — separate accessibility audit.
+- Public `/demo` student page can stay on the loading skeleton — pre-existing, unrelated to routing.
+- External legacy link producers (emails, notifications, `PacingProposalsBell`, onboarding) still emit legacy `?tab=` values — intentionally served by the permanent alias map (section 16).
+- Deleted suggestions (`deleted_at` set) cannot be opened via `editSuggestion`; the param is dropped silently — no user-facing notice.
+- Items that belonged to M8/M9 (dead code, RAG, 360 px overflow) were handled in those phases, not in M7.

@@ -58,6 +58,7 @@ Reference: `docs/ux/target-teacher-experience.md` (approved 2026-09-02).
     - [x] M7.8 — phase documentation: spec section 4 rules (`buildWorkspaceParams`, `editSuggestion`, push vs replace) + new section 15 "M7 as built — lazy boundaries and compatibility tools"; no RAG (stays in M8)
     - [x] M7.9 — impact analysis: legacy producer inventory (spec section 16) + 9 regression-guard tests
     - [x] M7.10 — final verification on a real account: 15/16 URL matrix PASS (set= needs a student with sets), lazy PASS, Back/Forward PASS; mobile overflow from global StickyNav + one render warning logged (spec 15.5)
+  - [x] M7.11 — scope lock audit (spec section 17)
   - [x] M8 — dead-code removal + RAG (`docs/llm-context.md`, `public/llms.txt`, memory)
 - [ ] Guided mode beyond the dashboard
 
