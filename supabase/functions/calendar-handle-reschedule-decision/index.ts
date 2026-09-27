@@ -177,7 +177,7 @@ Deno.serve(async (req) => {
 
         await fetch(`${supabaseUrl}/functions/v1/send-calendar-notification-email`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}` },
           body: JSON.stringify({
             type: 'reschedule_confirmation', studentEmail, studentName,
             slotDate: newSlot.slot_date, slotTime: newSlot.start_time.slice(0, 5),
@@ -258,7 +258,7 @@ Deno.serve(async (req) => {
       if (studentEmail) {
         await fetch(`${supabaseUrl}/functions/v1/send-calendar-notification-email`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}` },
           body: JSON.stringify({
             type: 'reschedule_rejected', studentEmail, studentName,
             slotDate: newSlot.slot_date, slotTime: newSlot.start_time.slice(0, 5),

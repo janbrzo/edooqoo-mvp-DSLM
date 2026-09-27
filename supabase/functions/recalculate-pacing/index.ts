@@ -12,6 +12,7 @@
 // Output: { pacingMode, reasoning, mode, proposalId?, skipped?: boolean }
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { authorizedTeacherId, jsonResponse, resolveCaller } from "../_shared/auth.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -36,6 +37,12 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: 'studentId and teacherId required' }), {
         status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
+    }
+
+    // Teachers may only recalculate their own students; crons and other edge
+    // functions call with the service role key.
+    if (!authorizedTeacherId(await resolveCaller(req), teacherId)) {
+      return jsonResponse({ error: 'Forbidden' }, 403, corsHeaders);
     }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;

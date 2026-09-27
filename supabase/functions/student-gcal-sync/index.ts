@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { authorizedTeacherId, jsonResponse, resolveCaller } from '../_shared/auth.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -84,14 +85,26 @@ Deno.serve(async (req) => {
 
     // Get slot details
     const { data: slot } = await supabase.from('calendar_slots')
-      .select('*, students(name)')
+      .select('*, students(name, student_email)')
       .eq('id', slotId)
-      .single();
+      .eq('teacher_id', teacherId)
+      .maybeSingle();
 
     if (!slot) {
       return new Response(JSON.stringify({ skipped: true, reason: 'slot not found' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
+    }
+
+    // The slot's teacher and internal service calls may sync any of its slots;
+    // anyone else (public booking page) only a slot booked by this email.
+    if (!authorizedTeacherId(await resolveCaller(req), teacherId)) {
+      const normalized = String(email).trim().toLowerCase();
+      const studentEmail = String((slot as any).students?.student_email || '').trim().toLowerCase();
+      const noteEmail = String(slot.student_notes || '').match(/\(([^)]+@[^)]+)\)/)?.[1]?.trim().toLowerCase() || '';
+      if (!normalized || (normalized !== studentEmail && normalized !== noteEmail)) {
+        return jsonResponse({ error: 'Forbidden' }, 403, corsHeaders);
+      }
     }
 
     // Check sync toggles

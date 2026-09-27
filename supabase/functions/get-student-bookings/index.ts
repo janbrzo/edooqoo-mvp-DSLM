@@ -79,7 +79,7 @@ Deno.serve(async (req) => {
       try {
         await fetch(`${supabaseUrl}/functions/v1/send-calendar-notification-email`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
+          headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}` },
           body: JSON.stringify({ type, ...params }),
         });
       } catch (e) { console.error('Email send error:', e); }

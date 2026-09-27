@@ -12,7 +12,7 @@ import { ArrowLeft } from 'lucide-react';
 import { GoogleSignInButton } from '@/components/GoogleSignInButton';
 import { DashboardPreviewBackground } from '@/components/DashboardPreviewBackground';
 import { setRobotsMeta } from '@/hooks/useCanonical';
-import { claimPendingWorksheets } from '@/hooks/useWorksheetClaim';
+import { CLAIM_TOAST_ID, claimPendingWorksheets } from '@/hooks/useWorksheetClaim';
 import { toast as sonnerToast } from 'sonner';
 
 const Login = () => {
@@ -40,7 +40,8 @@ const Login = () => {
           sonnerToast.success(
             claimedIds.length === 1
               ? 'Your worksheet was saved to your account'
-              : `${claimedIds.length} worksheets saved to your account`
+              : `${claimedIds.length} worksheets saved to your account`,
+            { id: CLAIM_TOAST_ID }
           );
           navigate(`/worksheet/${claimedIds[0]}`);
         } else {
@@ -58,7 +59,8 @@ const Login = () => {
           sonnerToast.success(
             claimedIds.length === 1
               ? 'Your worksheet was saved to your account'
-              : `${claimedIds.length} worksheets saved to your account`
+              : `${claimedIds.length} worksheets saved to your account`,
+            { id: CLAIM_TOAST_ID }
           );
           navigate(`/worksheet/${claimedIds[0]}`);
         } else {

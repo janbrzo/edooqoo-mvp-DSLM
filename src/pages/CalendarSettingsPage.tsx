@@ -85,7 +85,10 @@ const CalendarSettingsPage = () => {
     if (code && user?.id) {
       setGcalLoading(true);
       supabase.functions.invoke('gcal-auth-callback', {
-        body: { code, redirectUri: `${window.location.origin}/calendar/settings`, teacherId: user.id },
+        // The signed `state` from gcal-auth-start binds this code to the teacher.
+        // redirectUri/teacherId are ignored by the hardened function and only
+        // kept so this build also works against the previous deployment.
+        body: { code, state: params.get('state'), redirectUri: `${window.location.origin}/calendar/settings`, teacherId: user.id },
       }).then(({ error }) => {
         if (error) {
           toast.error('Failed to connect Google Calendar');

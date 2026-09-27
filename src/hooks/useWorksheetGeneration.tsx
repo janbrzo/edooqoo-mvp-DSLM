@@ -41,7 +41,16 @@ export const useWorksheetGeneration = (
   studentId?: string | null,
   entitlement?: WorksheetGenerationEntitlement
 ) => {
-  const [isGenerating, setIsGenerating] = useState(false);
+  const [isGenerating, setIsGeneratingState] = useState(false);
+  // Synchronous mirror of `isGenerating`. State is only visible to the next
+  // render, so a second submit arriving while the handler still awaits its
+  // pre-flight call (e.g. a double-click during check-subscription-status)
+  // would otherwise start a second generation and consume a second token.
+  const isGeneratingRef = useRef(false);
+  const setIsGenerating = (value: boolean) => {
+    isGeneratingRef.current = value;
+    setIsGeneratingState(value);
+  };
   const [startGenerationTime, setStartGenerationTime] = useState<number>(0);
   const [mediaGenerating, setMediaGenerating] = useState(false);
   const [generationError, setGenerationError] = useState<string | null>(null);
@@ -70,11 +79,13 @@ export const useWorksheetGeneration = (
       showDemoBlockedToast('Generating worksheets');
       return;
     }
-    // Guard against double-click / duplicate requests
-    if (isGenerating) {
+    // Guard against double-click / duplicate requests. The ref is claimed
+    // synchronously, before the first await below.
+    if (isGeneratingRef.current) {
       devWarn('⚠️ Generation already in progress, ignoring duplicate click');
       return;
     }
+    isGeneratingRef.current = true;
     // v6.9.45 — prefer the studentId carried by the form submission. Parent state
     // may not have synced yet when an auto-generate request races with the
     // navigation that just pre-selected the student.
@@ -114,6 +125,7 @@ export const useWorksheetGeneration = (
 
     // PROBLEM 4 FIX: Check token requirements ONLY for authenticated users
     if (userId && !isDemo && !canGenerateWorksheet) {
+      isGeneratingRef.current = false;
       toast({
         title: "No tokens available",
         description: "You need tokens to generate worksheets. Please upgrade your plan or purchase tokens.",
@@ -338,6 +350,9 @@ export const useWorksheetGeneration = (
         abortControllerRef.current?.abort();
         setStreamProgress(null);
         setGenerationError("Generation took too long. Please try again.");
+        // The job registry reports the timeout; release the guard so the
+        // teacher can retry without reloading the page.
+        setIsGenerating(false);
       }, 240_000);
 
       abortControllerRef.current = streamWorksheetGeneration(
@@ -386,8 +401,13 @@ export const useWorksheetGeneration = (
             worksheetResult = result.worksheet;
             worksheetResult.id = result.worksheetId;
             setStreamProgress(null);
-            
-            await handleWorksheetCompletion(worksheetResult, data, startTime);
+
+            try {
+              await handleWorksheetCompletion(worksheetResult, data, startTime);
+            } catch (completionError) {
+              console.error('❌ Worksheet completion failed:', completionError);
+              setIsGenerating(false);
+            }
           },
           onStreamEndedWithoutTerminalEvent: async (lastProgress) => {
             clearTimeout(generationTimeoutId);
@@ -404,7 +424,12 @@ export const useWorksheetGeneration = (
             if (recovered) {
               devLog('✅ Recovered worksheet after stream EOF:', recovered.id);
               setStreamProgress(null);
-              await handleWorksheetCompletion(recovered, data, startTime);
+              try {
+                await handleWorksheetCompletion(recovered, data, startTime);
+              } catch (completionError) {
+                console.error('❌ Worksheet completion failed:', completionError);
+                setIsGenerating(false);
+              }
               return;
             }
             // v6.9.60 — Do NOT immediately mark this job as failed. The
@@ -476,6 +501,11 @@ export const useWorksheetGeneration = (
               devWarn('[useWorksheetGeneration] onError recovery attempt threw', e);
             }
             setGenerationError(error.message || "Something went wrong during generation.");
+            // v6.9.61 moved the error UI to the global job registry (mini
+            // panel), so nothing calls clearGenerationError() any more. Release
+            // the guard here, otherwise the next "Generate" click is silently
+            // ignored until the page is reloaded.
+            setIsGenerating(false);
             try {
               // v6.9.61 — failGenerationJob now sets a 60s recoveryDeadlineAt
               // so the global DB poller can still promote the job back to

@@ -10,6 +10,7 @@
  */
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
+import { authorizedTeacherId, jsonResponse, resolveCaller } from "../_shared/auth.ts";
 import { chatCompletion } from "../_shared/aiChat.ts";
 
 // v6.9.13 — helpers inlined (previously imported from ../_shared/dslmPromptCore.ts).
@@ -281,6 +282,11 @@ serve(async (req) => {
         JSON.stringify({ error: 'Missing studentId or teacherId' }),
         { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
+    }
+
+    // Teachers may only work on their own students (crons use the service role).
+    if (!authorizedTeacherId(await resolveCaller(req), teacherId)) {
+      return jsonResponse({ error: 'Forbidden' }, 403, corsHeaders);
     }
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
