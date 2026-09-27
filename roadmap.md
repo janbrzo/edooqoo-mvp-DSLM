@@ -61,6 +61,13 @@ Reference: `docs/ux/target-teacher-experience.md` (approved 2026-09-02).
   - [x] M7.11 — scope lock audit (spec section 17)
   - [x] M7.12 — change report (spec section 18)
   - [x] M8 — dead-code removal + RAG (`docs/llm-context.md`, `public/llms.txt`, memory)
+    - [x] M8.1 — unused code sweep in `StudentPage.tsx` (`handleWorksheetClick`, `restoreWorksheet`, `setDeletedCurrentPage`)
+    - [ ] M8.2 — RAG entry v6.9.111 in `docs/llm-context.md`
+    - [ ] M8.3 — `public/llms.txt` decision (no change)
+    - [ ] M8.4 — project memory
+    - [ ] M8.5 — AGENTS.md rule
+    - [ ] M8.6 — roadmap + spec section 18
+    - [ ] M8.7 — final verification
 - [ ] Guided mode beyond the dashboard
 
 ## Deferred
