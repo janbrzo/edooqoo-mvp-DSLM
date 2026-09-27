@@ -556,3 +556,4 @@ Out-of-scope issues logged, not fixed:
 - Documentation updated: YES (spec sections 4, 15–18; roadmap). RAG updated: done in M8.
 - Out-of-scope issues: see section 17.
 - Verification (2026-09-26): typecheck PASS; `bun test` 227/227 PASS; browser alias sweep on real account (dslm, overview, calendar, flashcards+set, library, timeline) 6/6 PASS, zero page errors. Result: PASS.
+- M8.3 decision (2026-09-27): `public/llms.txt` is left unchanged — the 4-tab workspace rework is an internal teacher-facing screen layout, not a public product fact, and public AI resources deliberately do not describe internal UI details. The full RAG entry for the workspace lives only in the internal `docs/llm-context.md` (added in M8.2).
