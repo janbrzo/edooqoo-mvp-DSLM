@@ -49,3 +49,5 @@
 - [Indexation Truth Layer](mem://seo/indexation-truth-layer) — No Cloudflare worker in prod; HTML/robots.txt crawl signals, 3-layer pSEO policy cross-check, sitemap integrity guard
 - [Dashboard Today Layout](mem://features/dashboard/today-layout) — v6.9.109 /dashboard = Next up / Needs your attention / Everything else; students list on /students, counters on /profile
 - [Quick Student Access](mem://features/dashboard/quick-student-access) — v6.9.110 four paths to any student (jump search, recent pills, inline list, nav switcher), all via quickAccess.ts, no new queries
+- [Student Workspace 4 Tabs](mem://features/student-page/workspace-4-tabs) — v6.9.111 final Prep/Timeline/Library/Learning model; legacy ?tab= aliases permanent; never restore Overview/Worksheets/Skills
+- [Quick Add Note](mem://features/student-page/quick-add-note-from-overview) — Add Note opens inline modal in Prep tab QuickNoteBox; never route through tabs
