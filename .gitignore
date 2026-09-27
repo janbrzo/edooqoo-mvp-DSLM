@@ -4,3 +4,4 @@ node_modules
 .ssh_known_hosts
 data/seo/gsc-exports/
 data/seo/ai-raw/
+supabase/.temp/
