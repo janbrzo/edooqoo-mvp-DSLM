@@ -52,6 +52,7 @@ export interface PersistentAutoGenerateIntent {
   // "For {name} · {email}" without re-fetching from Supabase.
   studentName?: string | null;
   studentEmail?: string | null;
+  studentEnglishLevel?: string | null;
 }
 
 function generateRequestId(): string {
@@ -81,6 +82,7 @@ export interface WriteAutoGenerateIntentInput {
   mediaTypes?: MediaType[];
   studentName?: string | null;
   studentEmail?: string | null;
+  studentEnglishLevel?: string | null;
 }
 
 /**
@@ -107,6 +109,7 @@ export function writeAutoGenerateIntent(input: WriteAutoGenerateIntentInput): Pe
     status: 'pending',
     studentName: input.studentName ?? null,
     studentEmail: input.studentEmail ?? null,
+    studentEnglishLevel: input.studentEnglishLevel ?? null,
   };
 
   if (typeof window !== 'undefined') {
