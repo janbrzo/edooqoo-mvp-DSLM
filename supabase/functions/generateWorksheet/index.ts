@@ -8,6 +8,7 @@ import { isValidUUID, sanitizeInput, validatePrompt } from "./security.ts";
 import { RateLimiter } from "./rateLimiter.ts";
 import { getGeolocation } from "./geolocation.ts";
 import { composeSystemMessage } from "./prompts/prompt-composer.ts";
+import { resolveCaller } from "../_shared/auth.ts";
 import {
   createSSEStream,
   countExercisesInPartialJSON,
@@ -357,8 +358,37 @@ serve(async (req) => {
   const generationStartTime = Date.now();
 
   try {
-    const { prompt, formData, userId, studentId, isRegeneration, isBatchGeneration, enableStreaming } =
+    const { prompt, formData, userId: requestedUserId, studentId: requestedStudentId, isRegeneration, isBatchGeneration, enableStreaming } =
       await req.json();
+
+    // Identity comes from the caller's session token, never from the body:
+    // worksheets are inserted with the service role, so a body `userId` would
+    // let anyone write into any teacher's account. Anonymous Supabase sessions
+    // keep their own id (worksheet page access + post-signup claim rely on it);
+    // no session means anonymous generation with no owner.
+    const caller = await resolveCaller(req);
+    const userId: string | null = caller.kind === "user" ? caller.user.id : null;
+    if (requestedUserId && requestedUserId !== "anonymous" && requestedUserId !== userId) {
+      return new Response(JSON.stringify({
+        error: "Your session could not be verified. Please refresh the page and try again.",
+      }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    let studentId: string | null = null;
+    if (requestedStudentId) {
+      const { data: ownedStudent } = userId
+        ? await supabase.from("students").select("id").eq("id", requestedStudentId).eq("teacher_id", userId).maybeSingle()
+        : { data: null };
+      if (!ownedStudent) {
+        return new Response(JSON.stringify({ error: "Student not found" }), {
+          status: 403,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      studentId = requestedStudentId;
+    }
     const ip =
       req.headers.get("x-forwarded-for") ||
       req.headers.get("cf-connecting-ip") ||

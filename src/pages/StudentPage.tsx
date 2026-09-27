@@ -130,8 +130,7 @@ const StudentPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { students, updateStudent, deleteStudent, loading: studentsLoading } = useStudents();
   const [currentPage, setCurrentPage] = useState(1);
-  // Deleted section always shows the first page (collapsed list, no pager).
-  const deletedCurrentPage = 1;
+  const [deletedCurrentPage, setDeletedCurrentPage] = useState(1);
   const [timelineVisibleCount, setTimelineVisibleCount] = useState(TIMELINE_PAGE_SIZE);
   const [librarySearch, setLibrarySearch] = useState('');
   const [librarySort, setLibrarySort] = useState<LibrarySort>('newest');
@@ -197,7 +196,7 @@ const StudentPage = () => {
   const { data: studentFromQuery, isLoading: studentLoading } = useStudent(id);
   const student = studentFromQuery || students.find(s => s.id === id);
   
-  const { worksheets, loading, deleteWorksheet, refetch: refetchWorksheets, totalCount } = 
+  const { worksheets, loading, deleteWorksheet, refetch: refetchWorksheets, restoreWorksheet, totalCount } = 
     useWorksheetHistory(id || '', false, true, currentPage, pageSize);
   const { deletedWorksheets, loading: deletedLoading, restoreWorksheet: restoreDeleted, totalCount: deletedTotalCount } = 
     useDeletedWorksheets(id || '', false, true, deletedCurrentPage, pageSize);
@@ -416,6 +415,9 @@ const StudentPage = () => {
     );
   }
 
+  const handleWorksheetClick = (worksheet: any) => {
+    navigate(`/worksheet/${worksheet.id}`);
+  };
 
   const handleGenerateWorksheet = () => {
     sessionStorage.setItem('preSelectedStudent', JSON.stringify({

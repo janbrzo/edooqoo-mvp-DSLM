@@ -18,9 +18,22 @@ export default function GlobalGeneratingModal() {
   const tabId = useTabId();
   const { user } = useAuthFlow();
   const [activeJobIdx, setActiveJobIdx] = useState(0);
+  // Failed jobs stay "recovering" until their recoveryDeadlineAt. Nothing in
+  // the registry changes when that deadline passes, so re-render on it —
+  // otherwise the "Checking server…" modal never closes and blocks the page.
+  const [clock, setClock] = useState(() => Date.now());
+  useEffect(() => {
+    const now = Date.now();
+    const deadlines = allJobs
+      .filter((j) => j.status === 'failed' && !!j.recoveryDeadlineAt && j.recoveryDeadlineAt > now)
+      .map((j) => j.recoveryDeadlineAt as number);
+    if (deadlines.length === 0) return;
+    const handle = window.setTimeout(() => setClock(Date.now()), Math.min(...deadlines) - now + 50);
+    return () => window.clearTimeout(handle);
+  }, [allJobs, clock]);
 
   const myPollableJobs = useMemo(() => {
-    const now = Date.now();
+    const now = Math.max(clock, Date.now());
     return allJobs
       // v6.9.62 P1 — accept legacy jobs without an originTabId so multi-job
       // switcher reappears after a refresh on tabs that started >1 job.
@@ -30,7 +43,7 @@ export default function GlobalGeneratingModal() {
         || (j.status === 'failed' && !!j.recoveryDeadlineAt && now < j.recoveryDeadlineAt),
       )
       .sort((a, b) => a.startedAt - b.startedAt);
-  }, [allJobs, tabId]);
+  }, [allJobs, tabId, clock]);
 
   // Auto-focus the newest pollable job when the set grows.
   useEffect(() => {

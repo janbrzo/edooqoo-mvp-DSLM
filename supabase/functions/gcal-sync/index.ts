@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { authorizedTeacherId, jsonResponse, resolveCaller } from '../_shared/auth.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -61,6 +62,25 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_URL')!,
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     );
+
+    // The teacher (or an internal service call) may run any action. The public
+    // booking page may only ask to upsert a slot of that teacher, whose content
+    // is then read from the database.
+    const caller = await resolveCaller(req);
+    if (!teacherId || typeof teacherId !== 'string') {
+      return jsonResponse({ error: 'teacherId is required' }, 400, corsHeaders);
+    }
+    if (!authorizedTeacherId(caller, teacherId)) {
+      const publicUpsert = caller.kind !== 'user' || caller.isAnonymous;
+      if (!publicUpsert || action !== 'upsert' || !slotId) {
+        return jsonResponse({ error: 'Forbidden' }, 403, corsHeaders);
+      }
+    }
+    if (studentId) {
+      const { data: ownStudent } = await supabase.from('students')
+        .select('id').eq('id', studentId).eq('teacher_id', teacherId).maybeSingle();
+      if (!ownStudent) return jsonResponse({ error: 'Student not found' }, 404, corsHeaders);
+    }
 
     const token = await getValidToken(supabase, teacherId);
     if (!token) {
@@ -169,7 +189,8 @@ Deno.serve(async (req) => {
       .from('calendar_slots')
       .select('*')
       .eq('id', slotId)
-      .single();
+      .eq('teacher_id', teacherId)
+      .maybeSingle();
 
     if (!slot) {
       return new Response(JSON.stringify({ error: 'Slot not found' }), {

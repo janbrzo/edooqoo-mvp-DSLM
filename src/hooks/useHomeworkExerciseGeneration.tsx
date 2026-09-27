@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { devLog } from '@/utils/logger';
+import { edgeFunctionHeaders } from '@/lib/edgeFunctionHeaders';
 
 interface GeneratedExercise {
   id: string;
@@ -51,9 +52,7 @@ export const useHomeworkExerciseGeneration = () => {
         
         const response = await fetch('https://bvfrkzdlklyvnhlpleck.supabase.co/functions/v1/generateWorksheet', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: await edgeFunctionHeaders(),
           body: JSON.stringify({
             prompt: prompt,
             formData: {
@@ -106,9 +105,7 @@ export const useHomeworkExerciseGeneration = () => {
         
         const response = await fetch('https://bvfrkzdlklyvnhlpleck.supabase.co/functions/v1/generateWorksheet', {
           method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
+          headers: await edgeFunctionHeaders(),
           body: JSON.stringify({
             prompt: prompt,
             formData: {

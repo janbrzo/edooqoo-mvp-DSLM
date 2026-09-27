@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { jsonResponse, resolveCaller, teacherIdOf, verifyPayload } from '../_shared/auth.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -11,7 +12,18 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { code, redirectUri, teacherId } = await req.json();
+    const { code, state } = await req.json();
+    // Tokens are stored for the signed-in teacher, and only when the signed
+    // state proves this teacher started the flow in gcal-auth-start.
+    const teacherId = teacherIdOf(await resolveCaller(req));
+    if (!teacherId) {
+      return jsonResponse({ error: 'Unauthorized' }, 401, corsHeaders);
+    }
+    const statePayload = await verifyPayload<{ teacherId: string; redirectUri: string }>(state);
+    if (!statePayload || statePayload.teacherId !== teacherId || typeof code !== 'string' || !code) {
+      return jsonResponse({ error: 'Invalid or expired authorization state. Please connect again.' }, 400, corsHeaders);
+    }
+    const redirectUri = statePayload.redirectUri;
     const clientId = Deno.env.get('GOOGLE_CLIENT_ID');
     const clientSecret = Deno.env.get('GOOGLE_CLIENT_SECRET');
 

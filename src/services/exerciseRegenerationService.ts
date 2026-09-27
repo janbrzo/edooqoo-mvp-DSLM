@@ -1,6 +1,7 @@
 import { supabase } from '@/integrations/supabase/client';
 import { updateWorksheetAPI } from './worksheetService/updateService';
 import { devLog } from '@/utils/logger';
+import { edgeFunctionHeaders } from '@/lib/edgeFunctionHeaders';
 
 // URLs for the Edge Functions
 const REGENERATE_EXERCISE_URL = 'https://bvfrkzdlklyvnhlpleck.supabase.co/functions/v1/generateWorksheet';
@@ -65,9 +66,7 @@ class ExerciseRegenerationService {
 
       const response = await fetch(REGENERATE_EXERCISE_URL, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: await edgeFunctionHeaders(),
         body: JSON.stringify(requestBody)
       });
       
@@ -206,9 +205,7 @@ Return the response in the same JSON format as a full worksheet, but with only o
 
       const response = await fetch(REGENERATE_EXERCISE_URL, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: await edgeFunctionHeaders(),
         body: JSON.stringify({
           prompt: regenerationPrompt,
           formData: {
@@ -262,9 +259,7 @@ Return the response in the same JSON format as a full worksheet, but with only o
 
       const response = await fetch(REGENERATE_EXERCISE_URL, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: await edgeFunctionHeaders(),
         body: JSON.stringify({
           prompt: regenerationPrompt,
           formData: {
