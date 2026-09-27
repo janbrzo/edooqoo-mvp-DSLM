@@ -130,7 +130,8 @@ const StudentPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const { students, updateStudent, deleteStudent, loading: studentsLoading } = useStudents();
   const [currentPage, setCurrentPage] = useState(1);
-  const [deletedCurrentPage, setDeletedCurrentPage] = useState(1);
+  // Deleted section always shows the first page (collapsed list, no pager).
+  const deletedCurrentPage = 1;
   const [timelineVisibleCount, setTimelineVisibleCount] = useState(TIMELINE_PAGE_SIZE);
   const [librarySearch, setLibrarySearch] = useState('');
   const [librarySort, setLibrarySort] = useState<LibrarySort>('newest');
@@ -196,7 +197,7 @@ const StudentPage = () => {
   const { data: studentFromQuery, isLoading: studentLoading } = useStudent(id);
   const student = studentFromQuery || students.find(s => s.id === id);
   
-  const { worksheets, loading, deleteWorksheet, refetch: refetchWorksheets, restoreWorksheet, totalCount } = 
+  const { worksheets, loading, deleteWorksheet, refetch: refetchWorksheets, totalCount } = 
     useWorksheetHistory(id || '', false, true, currentPage, pageSize);
   const { deletedWorksheets, loading: deletedLoading, restoreWorksheet: restoreDeleted, totalCount: deletedTotalCount } = 
     useDeletedWorksheets(id || '', false, true, deletedCurrentPage, pageSize);
@@ -376,15 +377,28 @@ const StudentPage = () => {
     });
   }, []);
 
-  if (loading || (studentsLoading && studentLoading) || !authChecked) {
+  const isPageLoading = loading || (studentsLoading && studentLoading) || !authChecked;
+  const shouldRedirectToLogin = !isPageLoading && !student && !isAuthenticated;
+
+  // Logged-out visitor on a student link (e.g. the Welcome Test results email):
+  // send them to login and back here afterwards. Login reads `state.from` (a
+  // `?redirect=` param was ignored, so teachers landed on /dashboard), and
+  // navigating from an effect keeps the render free of side effects.
+  useEffect(() => {
+    if (!shouldRedirectToLogin) return;
+    const query = searchParams.toString();
+    navigate('/login', {
+      replace: true,
+      state: { from: `/student/${id}${query ? `?${query}` : ''}` },
+    });
+  }, [shouldRedirectToLogin, id, searchParams, navigate]);
+
+  if (isPageLoading) {
     return <PageLoadingState label="Loading student profile" />;
   }
 
   if (!student) {
-    // If not authenticated, redirect to login with return URL
     if (!isAuthenticated) {
-      const returnUrl = `/student/${id}${searchParams.toString() ? `?${searchParams.toString()}` : ''}`;
-      navigate(`/login?redirect=${encodeURIComponent(returnUrl)}`);
       return <div className="min-h-screen flex items-center justify-center">Redirecting to login...</div>;
     }
 
@@ -402,9 +416,6 @@ const StudentPage = () => {
     );
   }
 
-  const handleWorksheetClick = (worksheet: any) => {
-    navigate(`/worksheet/${worksheet.id}`);
-  };
 
   const handleGenerateWorksheet = () => {
     sessionStorage.setItem('preSelectedStudent', JSON.stringify({
@@ -432,6 +443,7 @@ const StudentPage = () => {
         exerciseFocusMap: s.exerciseFocusMap,
         studentName: student.name || null,
         studentEmail: (student as any).student_email || null,
+        studentEnglishLevel: student.english_level,
       });
     } else {
       sessionStorage.setItem('prefillWorksheet', JSON.stringify({
@@ -815,6 +827,7 @@ const StudentPage = () => {
                     // v6.9.55 — surface in GeneratingModal header.
                     studentName: student.name || null,
                     studentEmail: (student as any).student_email || null,
+                    studentEnglishLevel: student.english_level,
                   });
                 } else {
                   // Manual "Use this" — only prefill, never auto-fire.
