@@ -64,7 +64,7 @@ Reference: `docs/ux/target-teacher-experience.md` (approved 2026-09-02).
     - [x] M8.1 — unused code review on StudentPage (no visual change)
     - [x] M8.2 — RAG entry v6.9.111 Student Workspace in `docs/llm-context.md` + stale `studentPrepPath` line fixed
     - [x] M8.3 — `public/llms.txt` decision (no change — internal UI detail, see spec section 18)
-    - [ ] M8.4 — project memory
+    - [x] M8.4 — project memory (workspace-4-tabs added, quick-add-note updated, index updated)
     - [ ] M8.5 — AGENTS.md rule
     - [ ] M8.6 — roadmap + spec section 18
     - [ ] M8.7 — final verification
