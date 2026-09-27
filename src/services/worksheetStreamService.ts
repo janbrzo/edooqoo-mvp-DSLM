@@ -1,5 +1,4 @@
 import { devLog } from '@/utils/logger';
-import { edgeFunctionHeaders } from '@/lib/edgeFunctionHeaders';
 /**
  * Worksheet Streaming Service
  * Handles SSE connection to backend for real-time worksheet generation
@@ -96,17 +95,19 @@ export function streamWorksheetGeneration(
 
   const startRequest = () => {
     resetHeartbeat();
-    // The function takes the teacher from this token, not from `userId`.
-    edgeFunctionHeaders().then((headers) => fetch(GENERATE_WORKSHEET_URL, {
+    fetch(GENERATE_WORKSHEET_URL, {
     method: 'POST',
-    headers,
+    headers: { 
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`
+    },
     body: JSON.stringify({
       ...formData,
       enableStreaming: true,  // ← KEY FLAG: enables streaming mode
       userId: userId || null  // ← FIXED: Pass null for anonymous mode (edge function accepts it)
     }),
     signal: innerController.signal
-  })).then(async response => {
+  }).then(async response => {
     if (!response.ok) {
       // v6.9.94 — surface the backend's own error message (e.g. prompt too
       // long) instead of an opaque "HTTP 400", which used to send teachers

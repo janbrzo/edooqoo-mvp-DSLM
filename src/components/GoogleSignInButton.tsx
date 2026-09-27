@@ -32,13 +32,10 @@ export const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
       const fromPath = (location.state as { from?: string } | null)?.from;
       // v6.9.36 — signup mode without pending claims lands on the generator
       // page with `?action=add-student` so Index opens AddStudentDialog after
-      // OAuth roundtrip. Sign-in returns to the page that sent the teacher to
-      // login (e.g. a student deep link), like the email/password path does.
+      // OAuth roundtrip. Existing signin and claim flows are unchanged.
       const redirectPath = hasClaims && fromPath
         ? fromPath
-        : mode === 'signup'
-          ? '/?action=add-student'
-          : (fromPath && fromPath !== '/' ? fromPath : '/dashboard');
+        : (mode === 'signup' ? '/?action=add-student' : '/dashboard');
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {

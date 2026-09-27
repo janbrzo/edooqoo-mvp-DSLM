@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { User, Session } from '@supabase/supabase-js';
 import { devLog, devWarn } from '@/utils/logger';
 import { useDemoContext } from '@/contexts/DemoContext';
-import { CLAIM_TOAST_ID, claimPendingWorksheets, getPendingClaimIds } from '@/hooks/useWorksheetClaim';
+import { claimPendingWorksheets, getPendingClaimIds } from '@/hooks/useWorksheetClaim';
 import { toast } from 'sonner';
 import { useQueryClient } from '@tanstack/react-query';
 
@@ -64,8 +64,7 @@ export function useAuthFlow() {
                 toast.success(
                   claimed.length === 1
                     ? '1 worksheet saved to your account'
-                    : `${claimed.length} worksheets saved to your account`,
-                  { id: CLAIM_TOAST_ID }
+                    : `${claimed.length} worksheets saved to your account`
                 );
                 window.dispatchEvent(new CustomEvent('worksheetsClaimed', {
                   detail: { ids: claimed },
