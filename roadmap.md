@@ -60,7 +60,14 @@ Reference: `docs/ux/target-teacher-experience.md` (approved 2026-09-02).
     - [x] M7.10 — final verification on a real account: 15/16 URL matrix PASS (set= needs a student with sets), lazy PASS, Back/Forward PASS; mobile overflow from global StickyNav + one render warning logged (spec 15.5)
   - [x] M7.11 — scope lock audit (spec section 17)
   - [x] M7.12 — change report (spec section 18)
-  - [x] M8 — dead-code removal + RAG (`docs/llm-context.md`, `public/llms.txt`, memory)
+  - [ ] M8 — docs/memory closure
+    - [x] M8.1 — unused code review on StudentPage (no visual change)
+    - [x] M8.2 — RAG entry v6.9.111 Student Workspace in `docs/llm-context.md` + stale `studentPrepPath` line fixed
+    - [ ] M8.3 — `public/llms.txt` decision (no change)
+    - [ ] M8.4 — project memory
+    - [ ] M8.5 — AGENTS.md rule
+    - [ ] M8.6 — roadmap + spec section 18
+    - [ ] M8.7 — final verification
 - [ ] Guided mode beyond the dashboard
 
 ## Deferred
