@@ -66,6 +66,20 @@ Deno.serve(async (req) => {
 
     const studentName = student?.name || email;
 
+    // A slot belongs to this caller only when it is both on this teacher's
+    // calendar AND currently booked by the account matching `email`. Every
+    // action below that reads or mutates an existing slotId must go through
+    // this check — without it, a valid public token + any email from the
+    // roster let a caller cancel, reschedule, or read the history of ANY
+    // student's lesson, or (via reschedule's target slot / book_batch)
+    // even slots belonging to a completely different teacher.
+    const loadOwnedSlot = async (id: string) => {
+      const { data: slot } = await supabase
+        .from('calendar_slots').select('*').eq('id', id).eq('teacher_id', teacherId).maybeSingle();
+      if (!slot || !student?.id || slot.student_id !== student.id) return null;
+      return slot;
+    };
+
     // Helper: get teacher info for emails
     const getTeacherInfo = async () => {
       const { data: p } = await supabase.from('profiles').select('email, first_name, last_name').eq('id', teacherId).maybeSingle();
@@ -128,8 +142,7 @@ Deno.serve(async (req) => {
 
     // Handle CANCEL
     if (action === 'cancel' && slotId) {
-      const { data: slot } = await supabase
-        .from('calendar_slots').select('*').eq('id', slotId).eq('teacher_id', teacherId).single();
+      const slot = await loadOwnedSlot(slotId);
 
       if (!slot) {
         return new Response(JSON.stringify({ error: 'Slot not found' }), {
@@ -157,7 +170,8 @@ Deno.serve(async (req) => {
             student_notes: null, title: null,
             recurrence_rule_id: null,
           })
-          .eq('id', slotId);
+          .eq('id', slotId)
+          .eq('teacher_id', teacherId);
       } else {
         // Confirmed lesson cancellation — keep cancellation record
         await supabase
@@ -170,7 +184,8 @@ Deno.serve(async (req) => {
             cancellation_reason: `Cancelled by student (${email})`,
             recurrence_rule_id: null,
           })
-          .eq('id', slotId);
+          .eq('id', slotId)
+          .eq('teacher_id', teacherId);
       }
 
       await logAction(slotId, 'cancelled_by_student', {
@@ -230,8 +245,7 @@ Deno.serve(async (req) => {
 
     // Handle RESCHEDULE
     if (action === 'reschedule' && slotId && newSlotId) {
-      const { data: oldSlot } = await supabase
-        .from('calendar_slots').select('*').eq('id', slotId).single();
+      const oldSlot = await loadOwnedSlot(slotId);
 
       if (!oldSlot) {
         return new Response(JSON.stringify({ error: 'Original slot not found' }), {
@@ -239,8 +253,18 @@ Deno.serve(async (req) => {
         });
       }
 
+      // The target slot must also belong to this teacher — otherwise a
+      // caller could pass any teacher's slotId here and, if it happened to
+      // be 'available', silently book it for themselves on rescheduling.
       const { data: newSlotData } = await supabase
-        .from('calendar_slots').select('slot_date, start_time, end_time').eq('id', newSlotId).single();
+        .from('calendar_slots').select('slot_date, start_time, end_time')
+        .eq('id', newSlotId).eq('teacher_id', teacherId).maybeSingle();
+
+      if (!newSlotData) {
+        return new Response(JSON.stringify({ error: 'Target slot not found' }), {
+          status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
 
       const { teacherName, teacherEmail } = await getTeacherInfo();
 
@@ -258,7 +282,8 @@ Deno.serve(async (req) => {
             cancellation_reason: `Rescheduled by student (${email}) to new slot`,
             recurrence_rule_id: null,
           })
-          .eq('id', slotId);
+          .eq('id', slotId)
+          .eq('teacher_id', teacherId);
 
         const { data: updateResult } = await supabase
           .from('calendar_slots')
@@ -271,6 +296,7 @@ Deno.serve(async (req) => {
             title: `${studentName} — English lesson`,
           })
           .eq('id', newSlotId)
+          .eq('teacher_id', teacherId)
           .eq('status', 'available')
           .select();
 
@@ -355,14 +381,16 @@ Deno.serve(async (req) => {
               cancellation_reason: `Replaced by reschedule request (${email})`,
               recurrence_rule_id: null,
             })
-            .eq('id', slotId);
+            .eq('id', slotId)
+            .eq('teacher_id', teacherId);
 
           await resolveNotifications([slotId], ['booking_pending']);
         } else {
           await supabase
             .from('calendar_slots')
             .update({ reschedule_request_to_slot_id: newSlotId })
-            .eq('id', slotId);
+            .eq('id', slotId)
+            .eq('teacher_id', teacherId);
         }
 
         const { data: updateResult } = await supabase
@@ -377,12 +405,13 @@ Deno.serve(async (req) => {
             reschedule_request_from_slot_id: slotId,
           })
           .eq('id', newSlotId)
+          .eq('teacher_id', teacherId)
           .eq('status', 'available')
           .select();
 
         if (!updateResult || updateResult.length === 0) {
           if (!oldIsPending) {
-            await supabase.from('calendar_slots').update({ reschedule_request_to_slot_id: null }).eq('id', slotId);
+            await supabase.from('calendar_slots').update({ reschedule_request_to_slot_id: null }).eq('id', slotId).eq('teacher_id', teacherId);
           }
           return new Response(JSON.stringify({ success: false, error: 'Slot no longer available' }), {
             status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -445,8 +474,11 @@ Deno.serve(async (req) => {
       const failedIds: string[] = [];
 
       for (const sid of slotIds) {
+        // Scope to this teacher — without it, any valid Hub caller could
+        // pass a slotId belonging to a different teacher's calendar and,
+        // if it happened to be 'available', book it out from under them.
         const { data: check } = await supabase
-          .from('calendar_slots').select('status, slot_type').eq('id', sid).single();
+          .from('calendar_slots').select('status, slot_type').eq('id', sid).eq('teacher_id', teacherId).maybeSingle();
         if (!check || check.status !== 'available' || check.slot_type === 'block') {
           failedIds.push(sid);
           continue;
@@ -465,6 +497,7 @@ Deno.serve(async (req) => {
             title: `${batchStudentName} — English lesson`,
           })
           .eq('id', sid)
+          .eq('teacher_id', teacherId)
           .eq('status', 'available');
 
         if (!bookErr) {
@@ -548,6 +581,38 @@ Deno.serve(async (req) => {
 
     // Handle GET_LOGS
     if (action === 'get_logs' && slotId) {
+      // Previously returned any slot's logs for any valid token, with no
+      // ownership check at all — a caller could read another student's (or
+      // another teacher's) slot history, including student_email metadata.
+      //
+      // Ownership here is "currently booked by this student" OR "this
+      // student's email appears on an existing log for the slot" — checking
+      // calendar_slots.student_id alone isn't enough, because cancelling a
+      // lesson resets it to null, which would otherwise break History for
+      // cancelled bookings.
+      const { data: slotForLogs } = await supabase
+        .from('calendar_slots').select('id, student_id').eq('id', slotId).eq('teacher_id', teacherId).maybeSingle();
+      if (!slotForLogs) {
+        return new Response(JSON.stringify({ error: 'Slot not found' }), {
+          status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+      let owns = !!student?.id && slotForLogs.student_id === student.id;
+      if (!owns) {
+        const { data: ownershipProof } = await supabase
+          .from('calendar_slot_logs')
+          .select('id')
+          .eq('slot_id', slotId)
+          .eq('teacher_id', teacherId)
+          .filter('details->>student_email', 'ilike', emailPattern)
+          .limit(1);
+        owns = !!ownershipProof && ownershipProof.length > 0;
+      }
+      if (!owns) {
+        return new Response(JSON.stringify({ error: 'Slot not found' }), {
+          status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
       const { data: logs } = await supabase
         .from('calendar_slot_logs')
         .select('action, actor, details, created_at')
