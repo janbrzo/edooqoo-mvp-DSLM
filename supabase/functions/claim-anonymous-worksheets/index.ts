@@ -86,13 +86,22 @@ serve(async (req) => {
     const isUuid = typeof anonUserId === 'string'
       && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(anonUserId);
 
+    // anonUserId comes from the client, so confirm it really is an anonymous
+    // account — otherwise a teacher could pass another teacher's id and take
+    // over that teacher's recent worksheets.
+    let isAnonymousOwner = false;
+    if (isUuid && anonUserId !== user.id) {
+      const { data: owner } = await adminClient.auth.admin.getUserById(anonUserId);
+      isAnonymousOwner = owner?.user?.is_anonymous === true;
+    }
+
     let query = adminClient
       .from('worksheets')
       .update({ teacher_id: user.id, user_id: user.id })
       .in('id', cleanIds)
       .gte('created_at', sevenDaysAgo);
 
-    if (isUuid && anonUserId !== user.id) {
+    if (isAnonymousOwner) {
       query = query.or(`teacher_id.is.null,teacher_id.eq.${anonUserId}`);
     } else {
       query = query.is('teacher_id', null);

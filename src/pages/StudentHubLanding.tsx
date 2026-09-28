@@ -8,7 +8,7 @@ import { GraduationCap, ArrowRight, Loader2, LogOut, Lock } from 'lucide-react';
 import { HubGoogleSignInButton } from '@/components/student-hub/HubGoogleSignInButton';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { getSavedHubEmail, saveHubEmail, clearHubEmail } from '@/hooks/useStudentHubData';
+import { getSavedHubEmail, saveHubEmail, clearHubEmail, saveHubSession, clearHubSession } from '@/hooks/useStudentHubData';
 import { AppBackground } from '@/components/ui/AppBackground';
 import { BackgroundPatternSwitcher } from '@/components/ui/BackgroundPatternSwitcher';
 
@@ -27,6 +27,15 @@ const StudentHubLanding = () => {
   const [notFoundReason, setNotFoundReason] = useState<string | null>(null);
   // Password flow state
   const [pendingTeacher, setPendingTeacher] = useState<Teacher | null>(null);
+  // The email the pending password check/verify is for. Deliberately NOT the
+  // `email` state: the auto-login-on-mount effect below calls
+  // checkPasswordAndNavigate() synchronously right after setEmail(saved), so
+  // `email` is still '' in that closure until the next render. Reading state
+  // here silently sent an empty email to check_password_required for every
+  // returning visitor, which always resolves to "no password needed" and so
+  // skipped the prompt entirely for password-protected Hubs (and clobbered
+  // the saved email with saveHubEmail('') on the way to the dashboard).
+  const [pendingEmail, setPendingEmail] = useState('');
   const [passwordRequired, setPasswordRequired] = useState(false);
   const [password, setPassword] = useState('');
   const [verifying, setVerifying] = useState(false);
@@ -39,22 +48,24 @@ const StudentHubLanding = () => {
     }
   }, []);
 
-  const checkPasswordAndNavigate = async (teacher: Teacher) => {
+  const checkPasswordAndNavigate = async (teacher: Teacher, emailForCheck: string) => {
+    const trimmedEmail = emailForCheck.trim();
     try {
       const { data } = await supabase.functions.invoke('get-student-hub-data', {
-        body: { token: teacher.token, email: email.trim(), action: 'check_password_required' },
+        body: { token: teacher.token, email: trimmedEmail, action: 'check_password_required' },
       });
       if (data?.requiresPassword) {
         setPendingTeacher(teacher);
+        setPendingEmail(trimmedEmail);
         setPasswordRequired(true);
         setPassword('');
       } else {
-        saveHubEmail(email.trim());
+        saveHubEmail(trimmedEmail);
         navigate(`/my/${teacher.token}`);
       }
     } catch {
       // Fallback: navigate without check
-      saveHubEmail(email.trim());
+      saveHubEmail(trimmedEmail);
       navigate(`/my/${teacher.token}`);
     }
   };
@@ -64,10 +75,11 @@ const StudentHubLanding = () => {
     setVerifying(true);
     try {
       const { data } = await supabase.functions.invoke('get-student-hub-data', {
-        body: { token: pendingTeacher.token, email: email.trim(), action: 'verify_password', password },
+        body: { token: pendingTeacher.token, email: pendingEmail, action: 'verify_password', password },
       });
       if (data?.verified) {
-        saveHubEmail(email.trim());
+        saveHubEmail(pendingEmail);
+        if (data.hubSessionToken) saveHubSession(data.hubSessionToken);
         navigate(`/my/${pendingTeacher.token}`);
       } else {
         toast.error('Incorrect password');
@@ -98,7 +110,7 @@ const StudentHubLanding = () => {
 
       // Auto-redirect if single teacher (with password check)
       if (found.length === 1) {
-        await checkPasswordAndNavigate(found[0]);
+        await checkPasswordAndNavigate(found[0], emailToSearch);
       }
     } catch (err: any) {
       console.error('Error finding teachers:', err);
@@ -116,6 +128,7 @@ const StudentHubLanding = () => {
 
   const handleLogout = () => {
     clearHubEmail();
+    clearHubSession();
     setEmail('');
     setTeachers([]);
     setSearched(false);
@@ -225,7 +238,7 @@ const StudentHubLanding = () => {
                       key={i}
                       variant="outline"
                       className="w-full justify-between h-auto py-3"
-                      onClick={() => checkPasswordAndNavigate(t)}
+                      onClick={() => checkPasswordAndNavigate(t, email)}
                     >
                       <span className="font-medium">{t.name}</span>
                       <ArrowRight className="h-4 w-4 text-muted-foreground" />

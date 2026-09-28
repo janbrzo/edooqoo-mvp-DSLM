@@ -615,13 +615,25 @@ function auditPagesFallbackRouting() {
   const redirects = fs.readFileSync(redirectsPath, 'utf8');
   const headers = fs.readFileSync(headersPath, 'utf8');
 
+  // Host/protocol canonicalization is intentionally NOT in _redirects: Workers
+  // static assets rejects an absolute https:// source ("Only relative URLs
+  // are allowed"), which broke every deploy. It's enforced instead by
+  // cloudflare/worker.mjs on every real request (checked below), which is
+  // what actually serves edooqoo.com/* per wrangler.toml.
+  const workerSource = fs.readFileSync(path.join(ROOT, 'cloudflare', 'worker.mjs'), 'utf8');
+  if (/hostname\s*===\s*['"]www\.edooqoo\.com['"]/.test(workerSource) && /protocol\s*===\s*['"]http:['"]/.test(workerSource)) {
+    pass('cloudflare/worker.mjs enforces www/http canonicalization on every request');
+  } else {
+    fail('cloudflare/worker.mjs is missing www/http canonicalization logic');
+  }
   for (const line of [
     'http://edooqoo.com/* https://edooqoo.com/:splat 301',
     'http://www.edooqoo.com/* https://edooqoo.com/:splat 301',
     'https://www.edooqoo.com/* https://edooqoo.com/:splat 301',
   ]) {
-    if (!redirects.includes(line)) fail(`public/_redirects missing canonical host rule: ${line}`);
-    else pass(`public/_redirects contains canonical host rule ${line}`);
+    if (redirects.includes(line)) {
+      fail(`public/_redirects contains an absolute-URL canonical host rule Workers static assets rejects: ${line}`);
+    }
   }
 
   for (const [from, to] of Object.entries(decisions.redirects)) {
@@ -640,15 +652,22 @@ function auditPagesFallbackRouting() {
     else pass(`public/_headers contains signup noindex rule ${fragment.split('\n')[0]}`);
   }
 
-  const pseoNoindexRoutes = decisions.noindex.filter((route) =>
-    /^\/(?:esl-worksheets\/[^/]+\/[^/]+|worksheets\/[^/]+\/[^/]+|english-for\/[^/]+)$/.test(route)
-  );
-  for (const route of pseoNoindexRoutes) {
-    if (!headers.includes(`${route}\n  X-Robots-Tag: noindex, follow`)) {
-      fail(`public/_headers missing noindex fallback for ${route}`);
-    }
+  // Cloudflare caps _headers at 100 rules total (a hard, plan-independent
+  // platform limit), far fewer than the pSEO route count, so per-route
+  // noindex fallback rules are not generated here — the Worker itself
+  // (cloudflare/worker.mjs) enforces `x-robots-tag: noindex, follow` for
+  // every NOINDEX_ROUTES route on every real request, since production
+  // routes are bound to the Worker (see wrangler.toml), not served as bare
+  // static assets. Guard against the file silently growing past the limit
+  // again instead of asserting per-route coverage that cannot fit.
+  const headerRuleCount = headers
+    .split('\n')
+    .filter((line) => line.length > 0 && !line.startsWith('#') && !line.startsWith(' ')).length;
+  if (headerRuleCount > 100) {
+    fail(`public/_headers has ${headerRuleCount} rules, exceeding Cloudflare's 100-rule limit`);
+  } else {
+    pass(`public/_headers has ${headerRuleCount} rules, within Cloudflare's 100-rule limit`);
   }
-  pass(`public/_headers contains ${pseoNoindexRoutes.length} pSEO noindex fallback rules`);
 }
 
 function auditCanonicalAliases() {
