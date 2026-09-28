@@ -568,6 +568,6 @@ Out-of-scope issues logged, not fixed:
 | M8.4 project memory | DONE — workspace-4-tabs memory added, quick-add-note memory updated, index updated | `mem/` |
 | M8.5 technical rule | DONE — URL-only tab state + permanent alias rule | `AGENTS.md` |
 | M8.6 roadmap + spec | DONE — this section; roadmap M8 items ticked | `roadmap.md`, this file |
-| M8.7 final verification | PENDING | — |
+| M8.7 final verification | DONE — typecheck PASS; `bun test` 230/233 (3 failures in `autoGenerateBootstrap.test.ts` use vitest-only `vi.stubGlobal`; 6/6 PASS under `vitest run`; file is unrelated to M8, from a parallel change); browser re-run not possible this session (no teacher session available); last real-account browser matrix 2026-09-27 PASS (4 tabs, legacy `set=`/`testId=` deep links, Back/Forward 8/8, 360 px no overflow) and no UI code changed since | none |
 
 Known leftovers (unchanged, see section 17): older `docs/llm-context.md` entries still mention `?tab=dslm` as historical state; legacy link producers keep emitting legacy `?tab=` values by design.
