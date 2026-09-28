@@ -557,3 +557,17 @@ Out-of-scope issues logged, not fixed:
 - Out-of-scope issues: see section 17.
 - Verification (2026-09-26): typecheck PASS; `bun test` 227/227 PASS; browser alias sweep on real account (dslm, overview, calendar, flashcards+set, library, timeline) 6/6 PASS, zero page errors. Result: PASS.
 - M8.3 decision (2026-09-27): `public/llms.txt` is left unchanged — the 4-tab workspace rework is an internal teacher-facing screen layout, not a public product fact, and public AI resources deliberately do not describe internal UI details. The full RAG entry for the workspace lives only in the internal `docs/llm-context.md` (added in M8.2).
+
+### 18.1 M8 closure result (2026-09-28)
+
+| Step | Result | Files |
+|---|---|---|
+| M8.1 unused code review | DONE — 3 unused StudentPage fragments removed (legacy open-worksheet shortcut, unused restore handler, unused deleted-worksheets page counter); no visual change | `src/pages/StudentPage.tsx` |
+| M8.2 RAG entry | DONE — full v6.9.111 Student Workspace entry (PROBLEM / SOLUTION / MECHANICS / 15 keywords); stale `studentPrepPath → ?tab=dslm` line corrected to `?tab=prep` | `docs/llm-context.md` |
+| M8.3 public llms.txt | DONE — intentionally unchanged (decision above) | none |
+| M8.4 project memory | DONE — workspace-4-tabs memory added, quick-add-note memory updated, index updated | `mem/` |
+| M8.5 technical rule | DONE — URL-only tab state + permanent alias rule | `AGENTS.md` |
+| M8.6 roadmap + spec | DONE — this section; roadmap M8 items ticked | `roadmap.md`, this file |
+| M8.7 final verification | PENDING | — |
+
+Known leftovers (unchanged, see section 17): older `docs/llm-context.md` entries still mention `?tab=dslm` as historical state; legacy link producers keep emitting legacy `?tab=` values by design.

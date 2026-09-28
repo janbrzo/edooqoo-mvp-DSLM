@@ -66,7 +66,7 @@ Reference: `docs/ux/target-teacher-experience.md` (approved 2026-09-02).
     - [x] M8.3 — `public/llms.txt` decision (no change — internal UI detail, see spec section 18)
     - [x] M8.4 — project memory (workspace-4-tabs added, quick-add-note updated, index updated)
     - [x] M8.5 — AGENTS.md rule
-    - [ ] M8.6 — roadmap + spec section 18
+    - [x] M8.6 — roadmap + spec section 18 (18.1 M8 closure result)
     - [ ] M8.7 — final verification
 - [ ] Guided mode beyond the dashboard
 
