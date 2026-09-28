@@ -8,7 +8,7 @@ import { GraduationCap, ArrowRight, Loader2, LogOut, Lock } from 'lucide-react';
 import { HubGoogleSignInButton } from '@/components/student-hub/HubGoogleSignInButton';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-import { getSavedHubEmail, saveHubEmail, clearHubEmail } from '@/hooks/useStudentHubData';
+import { getSavedHubEmail, saveHubEmail, clearHubEmail, saveHubSession, clearHubSession } from '@/hooks/useStudentHubData';
 import { AppBackground } from '@/components/ui/AppBackground';
 import { BackgroundPatternSwitcher } from '@/components/ui/BackgroundPatternSwitcher';
 
@@ -68,6 +68,7 @@ const StudentHubLanding = () => {
       });
       if (data?.verified) {
         saveHubEmail(email.trim());
+        if (data.hubSessionToken) saveHubSession(data.hubSessionToken);
         navigate(`/my/${pendingTeacher.token}`);
       } else {
         toast.error('Incorrect password');
@@ -116,6 +117,7 @@ const StudentHubLanding = () => {
 
   const handleLogout = () => {
     clearHubEmail();
+    clearHubSession();
     setEmail('');
     setTeachers([]);
     setSearched(false);

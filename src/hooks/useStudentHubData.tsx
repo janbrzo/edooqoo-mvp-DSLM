@@ -28,6 +28,39 @@ export function clearHubEmail() {
   localStorage.removeItem(STORAGE_KEY);
 }
 
+// Session proof that this browser already supplied the correct Hub
+// password for the current (teacherToken, email). Issued by
+// get-student-hub-data's `verify_password` action and required back on
+// every other Hub call for a student who has a password set (see
+// supabase/functions/_shared/hubSession.ts). sessionStorage (not
+// localStorage): this is a credential proof, not a convenience value, so it
+// should not silently persist across browser restarts on a shared machine.
+const SESSION_KEY = 'student_hub_session';
+
+export function getSavedHubSession(): string | null {
+  try {
+    return sessionStorage.getItem(SESSION_KEY);
+  } catch {
+    return null;
+  }
+}
+
+export function saveHubSession(token: string) {
+  try {
+    sessionStorage.setItem(SESSION_KEY, token);
+  } catch {
+    /* sessionStorage may be unavailable in privacy-restricted browsers */
+  }
+}
+
+export function clearHubSession() {
+  try {
+    sessionStorage.removeItem(SESSION_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
 export interface StudentHubData {
   teacherName: string;
   teacherEmail: string | null;
@@ -105,9 +138,16 @@ export function useStudentHubData(token: string | undefined, email: string | und
     setError(null);
     try {
       const { data: result, error: err } = await supabase.functions.invoke('get-student-hub-data', {
-        body: { token, email: email.trim() },
+        body: { token, email: email.trim(), hubSessionToken: getSavedHubSession() || undefined },
       });
       if (err) throw err;
+      if (result?.requiresPassword) {
+        // The stored session (if any) is no longer valid for this student —
+        // drop it so a future `/my` visit prompts for the password again
+        // instead of silently reusing a stale token.
+        clearHubSession();
+        throw new Error('This Hub is password-protected. Please sign in again.');
+      }
       if (result?.error) throw new Error(result.error);
       setData(result);
     } catch (err: any) {

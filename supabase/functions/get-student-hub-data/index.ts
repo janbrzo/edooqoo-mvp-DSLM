@@ -1,4 +1,5 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+import { signHubSession, verifyHubSession } from '../_shared/hubSession.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -11,7 +12,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { token, email, action, gcalSettings, password } = await req.json();
+    const { token, email, action, gcalSettings, password, hubSessionToken } = await req.json();
     if (!token || !email) {
       return new Response(JSON.stringify({ error: 'Token and email are required' }), {
         status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -57,6 +58,40 @@ Deno.serve(async (req) => {
     // like "%" cannot match (and unlock) another student of this teacher.
     const emailPattern = normalizedEmail.replace(/[%_\\]/g, '\\$&');
 
+    // Password gate: `check_password_required` / `verify_password` /
+    // `get_password_status` only ever gated the frontend UI — every other
+    // action (the default hub-data fetch, set_password, remove_password,
+    // and all gcal_* actions) accepted just the public token + email, i.e.
+    // exactly the pair that gets a caller INTO the password screen in the
+    // first place. So a Hub password protected nothing once a request went
+    // straight to this function — including remove_password, which let
+    // anyone who knew token + email strip a password they never supplied.
+    //
+    // Fix: once a student has a hub_password_hash set, every action below
+    // other than the three bootstrap ones must present a valid
+    // hubSessionToken for this exact (teacherId, email) — issued by
+    // verify_password on success. Students with no password set are
+    // unaffected: there's nothing yet to prove.
+    const PASSWORD_EXEMPT_ACTIONS = new Set(['check_password_required', 'verify_password', 'get_password_status']);
+    if (!PASSWORD_EXEMPT_ACTIONS.has(action)) {
+      const { data: authCheck } = await supabase
+        .from('students')
+        .select('hub_password_hash')
+        .eq('teacher_id', teacherId)
+        .ilike('student_email', emailPattern)
+        .is('deleted_at', null)
+        .maybeSingle();
+      if (authCheck?.hub_password_hash) {
+        const ok = await verifyHubSession(hubSessionToken, teacherId, normalizedEmail);
+        if (!ok) {
+          return new Response(JSON.stringify({
+            error: 'Password verification required',
+            requiresPassword: true,
+          }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+        }
+      }
+    }
+
     // Handle password actions
     if (action === 'check_password_required') {
       const { data: studentPw } = await supabase
@@ -97,7 +132,11 @@ Deno.serve(async (req) => {
       const key = await crypto.subtle.importKey('raw', encoder.encode(password || ''), 'PBKDF2', false, ['deriveBits']);
       const bits = await crypto.subtle.deriveBits({ name: 'PBKDF2', salt, iterations: 100000, hash: 'SHA-256' }, key, 256);
       const computedHex = Array.from(new Uint8Array(bits)).map(b => b.toString(16).padStart(2, '0')).join('');
-      return new Response(JSON.stringify({ verified: computedHex === hashHex }), {
+      const verified = computedHex === hashHex;
+      return new Response(JSON.stringify({
+        verified,
+        ...(verified ? { hubSessionToken: await signHubSession(teacherId, normalizedEmail) } : {}),
+      }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }

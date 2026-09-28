@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useSearchParams } from 'react-router-dom';
+import { useParams, useSearchParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Button } from '@/components/ui/button';
 import { Calendar, Settings, Loader2, CheckCircle2, XCircle, Lock, Unlock } from 'lucide-react';
 import { StudentHubLayout } from '@/components/student-hub/StudentHubLayout';
-import { getSavedHubEmail } from '@/hooks/useStudentHubData';
+import { getSavedHubEmail, getSavedHubSession, clearHubSession } from '@/hooks/useStudentHubData';
 import { toast } from 'sonner';
 
 const GCAL_COLORS = [
@@ -45,8 +45,17 @@ const DEFAULT_SETTINGS: Record<string, any> = {
 
 export default function StudentHubSettings() {
   const { teacherToken } = useParams<{ teacherToken: string }>();
+  const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
   const email = getSavedHubEmail();
+  // Sensitive get-student-hub-data actions require this once a Hub password
+  // is set — see supabase/functions/_shared/hubSession.ts.
+  const withHubSession = () => ({ hubSessionToken: getSavedHubSession() || undefined });
+  const redirectToReAuth = () => {
+    clearHubSession();
+    toast.error('Please re-enter your Hub password to continue.');
+    navigate('/my');
+  };
   const [connected, setConnected] = useState(false);
   const [loading, setLoading] = useState(true);
   const [connecting, setConnecting] = useState(false);
@@ -97,9 +106,10 @@ export default function StudentHubSettings() {
     setPasswordLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('get-student-hub-data', {
-        body: { token: teacherToken, email, action: 'set_password', password: newPassword },
+        body: { token: teacherToken, email, action: 'set_password', password: newPassword, ...withHubSession() },
       });
       if (error) throw error;
+      if (data?.requiresPassword) { redirectToReAuth(); return; }
       if (data?.success) {
         toast.success('Password set successfully');
         setHasPassword(true);
@@ -118,9 +128,10 @@ export default function StudentHubSettings() {
     setPasswordLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('get-student-hub-data', {
-        body: { token: teacherToken, email, action: 'remove_password' },
+        body: { token: teacherToken, email, action: 'remove_password', ...withHubSession() },
       });
       if (error) throw error;
+      if (data?.requiresPassword) { redirectToReAuth(); return; }
       if (data?.success) {
         toast.success('Password removed');
         setHasPassword(false);
@@ -136,7 +147,7 @@ export default function StudentHubSettings() {
     setLoading(true);
     try {
       const { data } = await supabase.functions.invoke('get-student-hub-data', {
-        body: { token: teacherToken, email, action: 'get_gcal_status' },
+        body: { token: teacherToken, email, action: 'get_gcal_status', ...withHubSession() },
       });
       if (data?.gcal_connected) {
         setConnected(true);
@@ -170,7 +181,7 @@ export default function StudentHubSettings() {
   const handleDisconnect = async () => {
     try {
       const { error } = await supabase.functions.invoke('get-student-hub-data', {
-        body: { token: teacherToken, email, action: 'disconnect_gcal' },
+        body: { token: teacherToken, email, action: 'disconnect_gcal', ...withHubSession() },
       });
       if (error) throw error;
       setConnected(false);
@@ -185,7 +196,7 @@ export default function StudentHubSettings() {
     setSettings(newSettings);
     try {
       await supabase.functions.invoke('get-student-hub-data', {
-        body: { token: teacherToken, email, action: 'update_gcal_settings', gcalSettings: newSettings },
+        body: { token: teacherToken, email, action: 'update_gcal_settings', gcalSettings: newSettings, ...withHubSession() },
       });
     } catch (err) {
       console.error('Error saving gcal settings:', err);
@@ -196,7 +207,7 @@ export default function StudentHubSettings() {
     setSyncing(true);
     try {
       const { data, error } = await supabase.functions.invoke('get-student-hub-data', {
-        body: { token: teacherToken, email, action: 'sync_all_lessons_gcal' },
+        body: { token: teacherToken, email, action: 'sync_all_lessons_gcal', ...withHubSession() },
       });
       if (error) throw error;
       toast.success(`Synced ${data?.count || 0} lessons to your calendar`);

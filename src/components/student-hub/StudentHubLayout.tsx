@@ -2,7 +2,7 @@ import React from 'react';
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { BookOpen, ClipboardList, FileText, Calendar, LayoutDashboard, LogOut, Settings, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { clearHubEmail, getSavedHubEmail } from '@/hooks/useStudentHubData';
+import { clearHubEmail, clearHubSession, getSavedHubEmail } from '@/hooks/useStudentHubData';
 import { AppBackground } from '@/components/ui/AppBackground';
 import { BackgroundPatternSwitcher } from '@/components/ui/BackgroundPatternSwitcher';
 
@@ -32,6 +32,7 @@ export function StudentHubLayout({ children, studentName, teacherName }: Student
 
   const handleLogout = () => {
     clearHubEmail();
+    clearHubSession();
     navigate('/my');
   };
 
