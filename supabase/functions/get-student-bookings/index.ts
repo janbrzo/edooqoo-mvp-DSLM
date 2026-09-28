@@ -52,13 +52,16 @@ Deno.serve(async (req) => {
 
     const teacherId = settingsData.teacher_id;
     const teacherTz = settingsData.timezone || 'Europe/Warsaw';
+    // ilike is only for case-insensitivity: escape LIKE wildcards so an input
+    // like "%" cannot match other students or their bookings.
+    const emailPattern = email.toLowerCase().trim().replace(/[%_\\]/g, '\\$&');
 
     // Find student by email
     const { data: student } = await supabase
       .from('students')
       .select('id, name')
       .eq('teacher_id', teacherId)
-      .ilike('student_email', email.toLowerCase().trim())
+      .ilike('student_email', emailPattern)
       .maybeSingle();
 
     const studentName = student?.name || email;
@@ -601,7 +604,7 @@ Deno.serve(async (req) => {
     if (student?.id) {
       query = query.eq('student_id', student.id);
     } else {
-      query = query.ilike('student_notes', `%${email}%`);
+      query = query.ilike('student_notes', `%${emailPattern}%`);
     }
 
     const { data: bookings, error: bookingsError } = await query;

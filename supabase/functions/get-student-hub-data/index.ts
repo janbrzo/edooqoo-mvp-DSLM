@@ -53,6 +53,9 @@ Deno.serve(async (req) => {
 
     const teacherId = settingsData.teacher_id;
     const normalEmail = normalizedEmail;
+    // ilike is only for case-insensitivity: escape LIKE wildcards so an input
+    // like "%" cannot match (and unlock) another student of this teacher.
+    const emailPattern = normalizedEmail.replace(/[%_\\]/g, '\\$&');
 
     // Handle password actions
     if (action === 'check_password_required') {
@@ -60,7 +63,7 @@ Deno.serve(async (req) => {
         .from('students')
         .select('hub_password_hash')
         .eq('teacher_id', teacherId)
-        .ilike('student_email', normalEmail)
+        .ilike('student_email', emailPattern)
         .is('deleted_at', null)
         .maybeSingle();
       return new Response(JSON.stringify({
@@ -73,7 +76,7 @@ Deno.serve(async (req) => {
         .from('students')
         .select('id, hub_password_hash')
         .eq('teacher_id', teacherId)
-        .ilike('student_email', normalEmail)
+        .ilike('student_email', emailPattern)
         .is('deleted_at', null)
         .maybeSingle();
       if (!studentPw?.hub_password_hash) {
@@ -109,7 +112,7 @@ Deno.serve(async (req) => {
         .from('students')
         .select('id')
         .eq('teacher_id', teacherId)
-        .ilike('student_email', normalEmail)
+        .ilike('student_email', emailPattern)
         .is('deleted_at', null)
         .maybeSingle();
       if (!studentPw) {
@@ -135,7 +138,7 @@ Deno.serve(async (req) => {
         .from('students')
         .select('id')
         .eq('teacher_id', teacherId)
-        .ilike('student_email', normalEmail)
+        .ilike('student_email', emailPattern)
         .is('deleted_at', null)
         .maybeSingle();
       if (studentPw) {
@@ -151,7 +154,7 @@ Deno.serve(async (req) => {
         .from('students')
         .select('hub_password_hash')
         .eq('teacher_id', teacherId)
-        .ilike('student_email', normalEmail)
+        .ilike('student_email', emailPattern)
         .is('deleted_at', null)
         .maybeSingle();
       return new Response(JSON.stringify({ hasPassword: !!studentPw?.hub_password_hash }), {
@@ -199,7 +202,7 @@ Deno.serve(async (req) => {
         .from('students')
         .select('id')
         .eq('teacher_id', teacherId)
-        .ilike('student_email', normalEmail)
+        .ilike('student_email', emailPattern)
         .is('deleted_at', null)
         .maybeSingle();
       
@@ -254,7 +257,7 @@ Deno.serve(async (req) => {
       .from('students')
       .select('id, name, english_level, student_email, native_language')
       .eq('teacher_id', teacherId)
-      .ilike('student_email', normalizedEmail)
+      .ilike('student_email', emailPattern)
       .is('deleted_at', null)
       .single();
 
@@ -347,7 +350,7 @@ Deno.serve(async (req) => {
       const { data: answers } = await supabase
         .from('homework_student_answers')
         .select('homework_id, is_submitted')
-        .ilike('student_email', normalizedEmail)
+        .ilike('student_email', emailPattern)
         .in('homework_id', homeworkIds);
 
       (answers || []).forEach(a => {
@@ -400,7 +403,7 @@ Deno.serve(async (req) => {
       .from('worksheets')
       .select('id, title, share_token, created_at, form_data, ai_response')
       .eq('teacher_id', teacherId)
-      .ilike('share_recipient_email', normalEmail)
+      .ilike('share_recipient_email', emailPattern)
       .not('share_token', 'is', null)
       .is('student_id', null)
       .order('created_at', { ascending: false });
