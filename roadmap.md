@@ -60,17 +60,19 @@ Reference: `docs/ux/target-teacher-experience.md` (approved 2026-09-02).
     - [x] M7.10 — final verification on a real account: 15/16 URL matrix PASS (set= needs a student with sets), lazy PASS, Back/Forward PASS; mobile overflow from global StickyNav + one render warning logged (spec 15.5)
   - [x] M7.11 — scope lock audit (spec section 17)
   - [x] M7.12 — change report (spec section 18)
-  - [ ] M8 — docs/memory closure
+  - [x] M8 — docs/memory closure
     - [x] M8.1 — unused code review on StudentPage (no visual change)
     - [x] M8.2 — RAG entry v6.9.111 Student Workspace in `docs/llm-context.md` + stale `studentPrepPath` line fixed
     - [x] M8.3 — `public/llms.txt` decision (no change — internal UI detail, see spec section 18)
     - [x] M8.4 — project memory (workspace-4-tabs added, quick-add-note updated, index updated)
     - [x] M8.5 — AGENTS.md rule
     - [x] M8.6 — roadmap + spec section 18 (18.1 M8 closure result)
-    - [ ] M8.7 — final verification
+    - [x] M8.7 — final verification (spec 18.1)
 - [ ] Guided mode beyond the dashboard
 
 ## Deferred
+
+- [ ] Test runner mismatch: `autoGenerateBootstrap.test.ts` uses vitest-only APIs, fails under `bun test`
 
 - [ ] P2.2 Multi-voice TTS (explicitly excluded until further notice)
 - [ ] SEO growth: `/blog/communicative-language-teaching-activities.html` content + meta rewrite
