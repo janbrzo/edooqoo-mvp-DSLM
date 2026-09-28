@@ -571,3 +571,23 @@ Out-of-scope issues logged, not fixed:
 | M8.7 final verification | DONE — typecheck PASS; `bun test` 230/233 (3 failures in `autoGenerateBootstrap.test.ts` use vitest-only `vi.stubGlobal`; 6/6 PASS under `vitest run`; file is unrelated to M8, from a parallel change); browser re-run not possible this session (no teacher session available); last real-account browser matrix 2026-09-27 PASS (4 tabs, legacy `set=`/`testId=` deep links, Back/Forward 8/8, 360 px no overflow) and no UI code changed since | none |
 
 Known leftovers (unchanged, see section 17): older `docs/llm-context.md` entries still mention `?tab=dslm` as historical state; legacy link producers keep emitting legacy `?tab=` values by design.
+
+### 18.2 Live browser re-verification (2026-09-28, account +44)
+
+Executed with Playwright against the running app, signed in as the real teacher account (`/login` → `/dashboard`, auth token present in localStorage).
+
+| Check | Result |
+|---|---|
+| Canonical tabs `?tab=prep|timeline|library|model` (student `8144a198…`) | PASS — each resolves without rewrite; Prep renders welcome-test banner, Next lesson, Last lesson, Quick note |
+| Legacy alias `?tab=dslm` | PASS → `?tab=model` |
+| Legacy alias `?tab=overview` | PASS → `?tab=prep` |
+| Legacy alias `?tab=calendar` | PASS → `?tab=timeline&filter=lessons` |
+| Legacy alias `?tab=homework` | PASS → `?tab=timeline&filter=homework` |
+| Legacy alias `?tab=flashcards` | PASS → `?tab=library&section=flashcards` |
+| Deep link `?tab=flashcards&set=ca1c16d8…` | PASS → `?tab=library&section=flashcards&set=…`; BIG set editor renders (Back / Share / Add Card / Import from Worksheet, 1 card) |
+| Deep link `?tab=tests&testId=47b31a47…` (student `1d31a7db…`) | PASS → `?tab=timeline&filter=tests&testId=…`; "Welcome Test - Jarek" detail renders, status Assigned, 1/58 answered, 0/21 skill, 37 profile questions |
+| Browser Back ×3 from `model` | PASS — `library → timeline → prep` |
+| Browser Forward ×3 | PASS — `timeline → library → model` |
+| Mobile 360 px, all 4 tabs | PASS — `scrollWidth === innerWidth === 360` on every tab; top bar collapses to icon-only + hamburger, Student snapshot collapsed, tab pills fit on one row (`Model` label shortened) |
+
+Result: PASS. No code changes were required by this run.
