@@ -574,7 +574,7 @@ Known leftovers (unchanged, see section 17): older `docs/llm-context.md` entries
 
 ### 18.2 Live browser re-verification (2026-09-28, account +44)
 
-Executed with Playwright against the running app, signed in as the real teacher account (`/login` → `/dashboard`, auth token present in localStorage, zero console errors during login).
+Executed with Playwright against the running app, signed in as the real teacher account (`/login` → `/dashboard`, auth token present in localStorage).
 
 | Check | Result |
 |---|---|
