@@ -12,8 +12,9 @@ Deno.serve(async (req) => {
 
   try {
     const { email } = await req.json();
-    if (!email) {
-      return new Response(JSON.stringify({ error: 'Email is required' }), {
+    const normalizedEmail = typeof email === 'string' ? email.toLowerCase().trim() : '';
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+      return new Response(JSON.stringify({ error: 'A valid email is required' }), {
         status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
@@ -22,11 +23,14 @@ Deno.serve(async (req) => {
     const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
     const supabase = createClient(supabaseUrl, supabaseKey);
 
-    // Find all students with this email
+    // Find all students with this email. ilike is only for case-insensitivity:
+    // escape LIKE wildcards so an input like "%@%" cannot match every student
+    // and hand out every teacher's hub token.
     const { data: students, error: studentsError } = await supabase
       .from('students')
       .select('teacher_id')
-      .ilike('student_email', email.toLowerCase().trim());
+      .is('deleted_at', null)
+      .ilike('student_email', normalizedEmail.replace(/[%_\\]/g, '\\$&'));
 
     if (studentsError) throw studentsError;
     if (!students || students.length === 0) {

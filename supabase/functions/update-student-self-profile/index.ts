@@ -73,7 +73,8 @@ serve(async (req) => {
       .from('students')
       .select('id')
       .eq('teacher_id', teacherId)
-      .ilike('student_email', normalizedEmail)
+      // Escape LIKE wildcards: ilike is only for case-insensitivity.
+      .ilike('student_email', normalizedEmail.replace(/[%_\\]/g, '\\$&'))
       .is('deleted_at', null)
       .maybeSingle();
     if (stErr) throw stErr;
