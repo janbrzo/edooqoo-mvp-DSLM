@@ -166,7 +166,7 @@ const Dashboard = () => {
       />
 
       {/* App.tsx already renders the global <main>; this is a plain container. */}
-      <div className="mx-auto max-w-4xl space-y-8 px-4 py-6">
+      <div className="mx-auto max-w-6xl space-y-8 px-4 sm:px-6 lg:px-8 py-6">
         <DashboardHeader
           firstName={userProfile?.first_name ?? null}
           studentsCount={students.length}
