@@ -153,6 +153,15 @@
   @apply focus:outline-none focus:ring-2 focus:ring-worksheet-purple rounded-md p-1;
 }
 
+/* Hide scrollbar chrome while keeping scroll/swipe behaviour intact. */
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 /* Rainbow gradient styles */
 .rainbow-text {
   background: linear-gradient(to right, #ff0000, #ff8000, #ffff00, #80ff00, #00ff00, #00ffff, #0000ff, #8000ff, #ff00ff);
