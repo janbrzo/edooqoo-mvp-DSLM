@@ -56,7 +56,7 @@ Root cause: five equal-weight blocks added feature by feature, with no rule deci
 └────────────────────────────────────────────────────────────┘
 ```
 
-Container: `mx-auto max-w-4xl space-y-8 px-4 py-6`. Single column at every width. The only `variant="default"` button on the page: **Prepare next lesson** (and "Add your first student" in the empty state).
+Container: `mx-auto max-w-6xl space-y-8 px-4 sm:px-6 lg:px-8 py-6` (1152 px since v6.9.113, matching StudentPage; previously max-w-4xl). Single column of zones at every width; Next up cards grid 1/2/3 columns. The only `variant="default"` button on the page: **Prepare next lesson** (and "Add your first student" in the empty state).
 
 ---
 
