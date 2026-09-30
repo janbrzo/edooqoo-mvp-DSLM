@@ -6,7 +6,7 @@ type: feature
 
 ## Dashboard Today — invariants
 
-- `/dashboard` is single-column and ritual-based, not object-based. Three zones only:
+- `/dashboard` is single-column and ritual-based, not object-based. Container `max-w-6xl` (1152 px, same as /student) — do not narrow back to max-w-4xl or go full-width. Three zones only:
   1. **Next up** — max 3 students, nearest booked lesson first, DSLM focus signal or goal, one primary action `Prepare next lesson` → `/student/:id?tab=dslm`.
   2. **Needs your attention** — homework awaiting review, completed Welcome Tests, new bookings. Hidden when empty.
   3. **Everything else** — tiles (All students, Worksheets, Calendar) + collapsible Recent worksheets; row actions live in one `…` menu.
