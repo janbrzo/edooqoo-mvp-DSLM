@@ -359,6 +359,7 @@ export const DSLMTab: React.FC<DSLMTabProps> = ({
   if (isMobile) {
     return (
       <div className="space-y-2">
+        {cockpit}
         {/* Sticky horizontal tabs + nav badges */}
         <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm pb-2 pt-1 space-y-1.5">
           <div className="flex justify-end">{navBadges}</div>
@@ -390,6 +391,7 @@ export const DSLMTab: React.FC<DSLMTabProps> = ({
 
   return (
     <div className="space-y-3">
+      {cockpit}
       <div className="flex gap-6">
         {/* Sticky sidebar */}
         <div className="w-44 shrink-0">
