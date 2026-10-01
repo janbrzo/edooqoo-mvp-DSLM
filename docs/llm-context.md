@@ -17,6 +17,14 @@ Status vocabulary:
 - BETA: code is present and partially wired, but completeness depends on scheduler/external execution not visible in the React source.
 - ROADMAP: not used in this audit because roadmap-only claims are excluded unless code exists.
 
+Maintenance contract (read before editing this file):
+- Scope: this file describes the CURRENT architecture of the production modules listed in the Table of Contents. It is not a changelog.
+- Update trigger: edit only for architectural changes (new module, new table, new Edge Function, new route contract, changed data flow). Do not add entries for UI tweaks, copy changes, layout widths, or bugfixes; those belong in tests, `docs/ux/*-spec.md`, and project memory.
+- Edit style: update the existing feature section in place using `PROBLEM -> EDOOQOO SOLUTION -> TECHNICAL MECHANICS -> RAG KEYWORDS`. Factual, no marketing language.
+- Anchor stability: section headings (`## ...`) are referenced as `llm-context.md#<anchor>` by `llms.txt`, `public/llms.txt`, and SEO scripts, and are verified by `scripts/seo/audit-seo-assets.mjs`. Never rename or delete a heading without updating `scripts/seo/generate-ai-resources.mjs` in the same change.
+- Versioned `v6.9.x` sections below the feature sections are a historical record. Do not add new ones; when a historical entry contradicts current code, current code and the feature section win.
+- Rules for agents live in `AGENTS.md`; this file never overrides them.
+
 ## Table of Contents
 - [Product Runtime and Routing](#product-runtime-and-routing) - PRODUCTION
 - [Authentication Anonymous Sessions and Account Claiming](#authentication-anonymous-sessions-and-account-claiming) - PRODUCTION
