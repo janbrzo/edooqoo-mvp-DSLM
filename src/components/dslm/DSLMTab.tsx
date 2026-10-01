@@ -19,8 +19,7 @@ import { Route, BarChart3, Target, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { PacingModeSlider } from './PacingModeSlider';
 import { usePacingProposals } from '@/hooks/usePacingProposals';
-import { Badge } from '@/components/ui/badge';
-import { Bell } from 'lucide-react';
+import { ModelCockpitHeader } from './ModelCockpitHeader';
 import { SuggestedLevelChangeBanner } from '@/components/student-tests/SuggestedLevelChangeBanner';
 import { useStudentAttentionDots } from '@/hooks/useStudentAttentionDots';
 import { buildWorkspaceParams } from '@/lib/students/workspaceTabs';
@@ -255,35 +254,37 @@ export const DSLMTab: React.FC<DSLMTabProps> = ({
     </div>
   );
 
-  const pathwayBadges = (
-    <div className="flex items-center gap-2 flex-wrap justify-end">
-      {pacingProposals.length > 0 && (
-        <Badge variant="outline" className="gap-1 text-[10px] border-orange-500/40 bg-orange-500/10 text-orange-700 dark:text-orange-400 animate-pulse">
-          <Bell className="h-3 w-3" />
-          {pacingProposals.length} pacing proposal{pacingProposals.length > 1 ? 's' : ''}
-        </Badge>
-      )}
-      {onPacingModeChange && (
+  // Model Cockpit v1.0 (step 1) — pacing + goal badges moved from the Pathway
+  // header into one status strip shown above every Learning model section.
+  const cockpit = (
+    <ModelCockpitHeader
+      englishLevel={englishLevel}
+      totalLessons={stats?.totalLessons ?? 0}
+      totalWorksheets={totalWorksheetCount}
+      pacingProposalsCount={pacingProposals.length}
+      pacingSlot={onPacingModeChange ? (
         <PacingModeSlider
           value={pacingMode}
           onChange={onPacingModeChange}
           studentId={studentId}
           teacherId={teacherId}
         />
-      )}
-      <StudentPathwayBadges
-        totalLessons={stats?.totalLessons ?? 0}
-        mainGoal={mainGoal}
-        mainGoalTargetDate={mainGoalTargetDate}
-        nearestGoalDeadline={nearestGoalDeadline}
-      />
-    </div>
+      ) : null}
+      goalSlot={
+        <StudentPathwayBadges
+          totalLessons={stats?.totalLessons ?? 0}
+          mainGoal={mainGoal}
+          mainGoalTargetDate={mainGoalTargetDate}
+          nearestGoalDeadline={nearestGoalDeadline}
+        />
+      }
+    />
   );
 
   const sections = (
     <>
       <div ref={sectionRefs.pathway} data-section="pathway" className="scroll-mt-4">
-        {sectionHeader('Pathway', pathwayBadges)}
+        {sectionHeader('Pathway')}
         {/* v6.9.49 — surface Welcome Test level-change suggestion on DSLM tab. */}
         <div className="mb-3">
           <SuggestedLevelChangeBanner studentId={studentId} currentLevel={englishLevel} />
@@ -358,6 +359,7 @@ export const DSLMTab: React.FC<DSLMTabProps> = ({
   if (isMobile) {
     return (
       <div className="space-y-2">
+        {cockpit}
         {/* Sticky horizontal tabs + nav badges */}
         <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm pb-2 pt-1 space-y-1.5">
           <div className="flex justify-end">{navBadges}</div>
@@ -389,6 +391,7 @@ export const DSLMTab: React.FC<DSLMTabProps> = ({
 
   return (
     <div className="space-y-3">
+      {cockpit}
       <div className="flex gap-6">
         {/* Sticky sidebar */}
         <div className="w-44 shrink-0">
