@@ -1,11 +1,9 @@
 /**
- * DSLMTab — all 4 DSLM sections on one scrollable page ("wall" layout)
- * Sidebar buttons scroll to the relevant section. Sidebar is sticky.
- * Mobile: horizontal tabs that scroll to sections.
+ * DSLMTab — Model Cockpit with three URL-controlled perspectives.
+ * Legacy `view=goals` remains a permanent alias inside Roadmap & Goals.
  */
 import React, { useRef, useCallback, useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { useIsMobile } from '@/hooks/use-mobile';
 import { PathwayView } from './PathwayView';
 import { SkillsView } from './SkillsView';
 import { GoalsView } from './GoalsView';
@@ -15,15 +13,20 @@ import { StudentNavBadges } from './StudentNavBadges';
 import { StudentPathwayBadges } from './StudentPathwayBadges';
 import { useBehavioralStats } from '@/hooks/dslm/useBehavioralStats';
 import { useStudentProgress } from '@/hooks/useStudentProgress';
-import { Route, BarChart3, Target, User } from 'lucide-react';
+import { Route, BarChart3, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { PacingModeSlider } from './PacingModeSlider';
 import { usePacingProposals } from '@/hooks/usePacingProposals';
 import { ModelCockpitHeader } from './ModelCockpitHeader';
 import { SuggestedLevelChangeBanner } from '@/components/student-tests/SuggestedLevelChangeBanner';
 import { useStudentAttentionDots } from '@/hooks/useStudentAttentionDots';
-import { buildWorkspaceParams } from '@/lib/students/workspaceTabs';
+import {
+  buildWorkspaceParams,
+  resolveModelPerspective,
+  type ModelPerspective,
+} from '@/lib/students/workspaceTabs';
 import { AttentionDot } from '@/components/ui/AttentionDot';
+import { Button } from '@/components/ui/button';
 
 interface DSLMTabProps {
   studentId: string;
@@ -50,44 +53,11 @@ interface DSLMTabProps {
   ) => void;
 }
 
-const VIEWS = [
-  { id: 'pathway', label: 'Pathway', icon: Route },
-  { id: 'goals', label: 'Goals', icon: Target },
-  { id: 'skills', label: 'Skills', icon: BarChart3 },
-  { id: 'profile', label: 'Profile', icon: User },
+const PERSPECTIVES = [
+  { id: 'roadmap', view: 'pathway', label: 'Roadmap & Goals', description: 'Direction and next steps', icon: Route },
+  { id: 'skills', view: 'skills', label: 'Skills & Level', description: 'Current ability', icon: BarChart3 },
+  { id: 'profile', view: 'profile', label: 'Learner DNA', description: 'Profile and learning patterns', icon: User },
 ] as const;
-
-type ViewId = typeof VIEWS[number]['id'];
-
-// v6.9.13 — sub-nav map. Clicking a child dispatches `dslm:openSubsection` (handled by CollapsibleSection).
-const SUBSECTIONS: Record<ViewId, { id: string; label: string }[]> = {
-  pathway: [
-    { id: 'pathway-next-steps', label: 'Next Steps' },
-    { id: 'pathway-roadmap', label: 'Learning Roadmap' },
-    { id: 'pathway-notes', label: 'Next Lesson Ideas' },
-  ],
-  goals: [
-    { id: 'goals-supporting', label: 'Supporting' },
-    { id: 'goals-additional', label: 'Additional' },
-    { id: 'goals-achieved', label: 'Achieved' },
-    { id: 'goals-archived', label: 'Archived' },
-    { id: 'goals-notes', label: 'Goal Notes' },
-  ],
-  skills: [
-    { id: 'skills-heatmap', label: 'Heat Map' },
-    { id: 'skills-micro', label: 'Micro Skills' },
-    { id: 'skills-notes', label: 'Notes' },
-  ],
-  profile: [
-    { id: 'profile-ai-summary', label: 'AI Summary' },
-    { id: 'profile-psych', label: 'Psychological' },
-    { id: 'profile-behavioral', label: 'Behavioral' },
-    { id: 'profile-personal', label: 'Personal Notes' },
-    { id: 'profile-all-notes', label: 'All Notes' },
-  ],
-};
-
-// Sub-nav clicks dispatch `dslm:openSubsection` (handled inline at click site).
 
 export const DSLMTab: React.FC<DSLMTabProps> = ({
   studentId,
@@ -107,12 +77,10 @@ export const DSLMTab: React.FC<DSLMTabProps> = ({
   onUseWorksheetSuggestion,
 }) => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const isMobile = useIsMobile();
-  const [activeSection, setActiveSection] = useState<ViewId>('pathway');
   const [pendingAddGoal, setPendingAddGoal] = useState(false);
   // v6.9.37 — stable consume callback to avoid effect re-fires in GoalsView.
   const handleConsumePendingAddGoal = useCallback(() => setPendingAddGoal(false), []);
-  const isScrollingRef = useRef(false);
+  const goalsRef = useRef<HTMLDivElement>(null);
   const { data: stats } = useBehavioralStats({ studentId, teacherId });
   const { proposals: pacingProposals } = usePacingProposals(studentId);
   const { goals: progressGoals } = useStudentProgress({ studentId, teacherId });
@@ -135,62 +103,32 @@ export const DSLMTab: React.FC<DSLMTabProps> = ({
     return { date: top.target_date as string, title: top.title as string, goalType: top.goal_type as string };
   }, [progressGoals, mainGoalTargetDate]);
 
-  const sectionRefs = {
-    pathway: useRef<HTMLDivElement>(null),
-    skills: useRef<HTMLDivElement>(null),
-    goals: useRef<HTMLDivElement>(null),
-    profile: useRef<HTMLDivElement>(null),
-  };
+  const requestedView = searchParams.get('view') || searchParams.get('section');
+  const activePerspective = resolveModelPerspective(requestedView);
 
-  // Scroll to section on sidebar click
-  const handleScrollTo = useCallback((viewId: ViewId) => {
-    const el = sectionRefs[viewId].current;
-    if (!el) return;
-    isScrollingRef.current = true;
-    setActiveSection(viewId);
-    // v6.9.111 M7.6 — internal navigation inside an already open Learning model
-    // writes the canonical `tab=model` and keeps cross-tab params (e.g. intake).
-    setSearchParams((prev) => buildWorkspaceParams(prev, { tab: 'model', view: viewId }));
-    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    // Reset after scroll completes
-    setTimeout(() => { isScrollingRef.current = false; }, 800);
+  const selectPerspective = useCallback((perspective: ModelPerspective) => {
+    const item = PERSPECTIVES.find(candidate => candidate.id === perspective);
+    if (!item) return;
+    if (perspective === 'roadmap') attention.dismiss('pathway');
+    setSearchParams((prev) => buildWorkspaceParams(prev, { tab: 'model', view: item.view }));
+  }, [attention, setSearchParams]);
+
+  const openGoals = useCallback((openModal: boolean) => {
+    setSearchParams((prev) => buildWorkspaceParams(prev, { tab: 'model', view: 'goals' }));
+    if (openModal) setPendingAddGoal(true);
+    requestAnimationFrame(() => {
+      goalsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
   }, [setSearchParams]);
 
-  // Track which section is in view via IntersectionObserver
+  // Preserve `view=goals` as a deep link into the combined Roadmap perspective.
   useEffect(() => {
-    const refs = sectionRefs;
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (isScrollingRef.current) return;
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            const id = entry.target.getAttribute('data-section') as ViewId;
-            if (id) setActiveSection(id);
-          }
-        }
-      },
-      { rootMargin: '-20% 0px -60% 0px', threshold: 0 }
-    );
-
-    for (const key of Object.keys(refs) as ViewId[]) {
-      const el = refs[key].current;
-      if (el) observer.observe(el);
-    }
-    return () => observer.disconnect();
-  }, []);
-
-  // On mount, scroll to URL view param
-  useEffect(() => {
-    const urlView = searchParams.get('view') as ViewId | null;
-    // v6.9.32 — accept legacy `?section=` as alias for `?view=`.
-    const legacy = searchParams.get('section');
-    const effectiveView = (urlView || (legacy as ViewId | null)) as ViewId | null;
-    if (urlView && VIEWS.some(v => v.id === urlView) && urlView !== 'pathway') {
-      setTimeout(() => handleScrollTo(urlView), 100);
-    } else if (effectiveView && VIEWS.some(v => v.id === effectiveView) && effectiveView !== 'pathway') {
-      setTimeout(() => handleScrollTo(effectiveView), 100);
-    }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+    if (searchParams.get('view') !== 'goals') return;
+    const frame = requestAnimationFrame(() => {
+      goalsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [searchParams]);
 
   // v6.9.33 — Re-fire focus handlers EVERY time `focus` param changes
   // (including same-value re-navigation thanks to cache-buster `_=ts`).
@@ -206,8 +144,7 @@ export const DSLMTab: React.FC<DSLMTabProps> = ({
     focusHandledRef.current = cacheKey;
     const raf = requestAnimationFrame(() => {
       if (focusParam === 'add-goal-modal') {
-        handleScrollTo('goals');
-        setPendingAddGoal(true);
+        openGoals(true);
         // v6.9.41 P2 — also dispatch event after the scroll/eager-mount so a late
         // GoalsView mount still receives the open-modal signal even if the prop
         // path was consumed before mount.
@@ -215,7 +152,7 @@ export const DSLMTab: React.FC<DSLMTabProps> = ({
           window.dispatchEvent(new CustomEvent('dslm:addGoal', { detail: { studentId, source: 'focus-param' } }));
         }, 200);
       } else if (focusParam === 'pick-idea') {
-        handleScrollTo('pathway');
+        selectPerspective('roadmap');
         window.dispatchEvent(new CustomEvent('pathway:pickIdea'));
       }
       // v6.9.111 M7.6 — consume `focus`/`_` on the live params so the canonical
@@ -240,12 +177,11 @@ export const DSLMTab: React.FC<DSLMTabProps> = ({
   // Goals section and signal GoalsView to open its add-goal modal.
   useEffect(() => {
     const handler = () => {
-      handleScrollTo('goals');
-      setPendingAddGoal(true);
+      openGoals(true);
     };
     window.addEventListener('dslm:addGoal', handler);
     return () => window.removeEventListener('dslm:addGoal', handler);
-  }, [handleScrollTo]);
+  }, [openGoals]);
 
   const sectionHeader = (label: string, rightSlot?: React.ReactNode) => (
     <div className="flex items-end justify-between gap-3 border-b border-border pb-2 mb-4">
@@ -281,10 +217,37 @@ export const DSLMTab: React.FC<DSLMTabProps> = ({
     />
   );
 
-  const sections = (
-    <>
-      <div ref={sectionRefs.pathway} data-section="pathway" className="scroll-mt-4">
-        {sectionHeader('Pathway')}
+  const perspectiveContent = (() => {
+    if (activePerspective === 'skills') {
+      return (
+        <LazySection eager>
+          <SkillsView
+            studentId={studentId}
+            teacherId={teacherId}
+            englishLevel={englishLevel}
+            totalWorksheetCount={totalWorksheetCount}
+          />
+        </LazySection>
+      );
+    }
+
+    if (activePerspective === 'profile') {
+      return (
+        <LazySection eager>
+          <ProfileView
+            studentId={studentId}
+            teacherId={teacherId}
+            studentName={studentName}
+          />
+        </LazySection>
+      );
+    }
+
+    return (
+      <div className="space-y-8">
+        <section aria-labelledby="model-roadmap-heading">
+          {sectionHeader('Roadmap & Next Steps')}
+          <h2 id="model-roadmap-heading" className="sr-only">Roadmap and next steps</h2>
         {/* v6.9.49 — surface Welcome Test level-change suggestion on DSLM tab. */}
         <div className="mb-3">
           <SuggestedLevelChangeBanner studentId={studentId} currentLevel={englishLevel} />
@@ -302,13 +265,14 @@ export const DSLMTab: React.FC<DSLMTabProps> = ({
           onPacingModeChange={onPacingModeChange}
           onUseWorksheetSuggestion={onUseWorksheetSuggestion}
         />
-      </div>
+        </section>
 
-      <div ref={sectionRefs.goals} data-section="goals" className="scroll-mt-4 pt-8">
-        {sectionHeader('Goals')}
+        <section ref={goalsRef} className="scroll-mt-24" aria-labelledby="model-goals-heading">
+          {sectionHeader('Goals & Objectives')}
+          <h2 id="model-goals-heading" className="sr-only">Goals and objectives</h2>
         {/* v6.9.37 — eager-mount when arriving via focus=add-goal-modal so the
             modal opens immediately instead of waiting for IntersectionObserver. */}
-        <LazySection eager={pendingAddGoal || searchParams.get('focus') === 'add-goal-modal'}>
+        <LazySection eager>
           <GoalsView
             studentId={studentId}
             teacherId={teacherId}
@@ -322,32 +286,10 @@ export const DSLMTab: React.FC<DSLMTabProps> = ({
             onConsumePendingAddGoal={handleConsumePendingAddGoal}
           />
         </LazySection>
+        </section>
       </div>
-
-      <div ref={sectionRefs.skills} data-section="skills" className="scroll-mt-4 pt-8">
-        {sectionHeader('Skills')}
-        <LazySection>
-          <SkillsView
-            studentId={studentId}
-            teacherId={teacherId}
-            englishLevel={englishLevel}
-            totalWorksheetCount={totalWorksheetCount}
-          />
-        </LazySection>
-      </div>
-
-      <div ref={sectionRefs.profile} data-section="profile" className="scroll-mt-4 pt-8">
-        {sectionHeader('Profile')}
-        <LazySection>
-          <ProfileView
-            studentId={studentId}
-            teacherId={teacherId}
-            studentName={studentName}
-          />
-        </LazySection>
-      </div>
-    </>
-  );
+    );
+  })();
 
   const navBadges = (
     <StudentNavBadges
@@ -356,111 +298,45 @@ export const DSLMTab: React.FC<DSLMTabProps> = ({
     />
   );
 
-  if (isMobile) {
-    return (
-      <div className="space-y-2">
-        {cockpit}
-        {/* Sticky horizontal tabs + nav badges */}
-        <div className="sticky top-0 z-10 bg-background/95 backdrop-blur-sm pb-2 pt-1 space-y-1.5">
-          <div className="flex justify-end">{navBadges}</div>
-          <div className="flex gap-1 overflow-x-auto">
-            {VIEWS.map(view => {
-              const Icon = view.icon;
-              return (
-                <button
-                  key={view.id}
-                  onClick={() => handleScrollTo(view.id)}
-                  className={cn(
-                    'flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors',
-                    activeSection === view.id
-                      ? 'bg-primary text-primary-foreground'
-                      : 'bg-muted text-muted-foreground hover:text-foreground'
-                  )}
-                >
-                  <Icon className="h-4 w-4" />
-                  {view.label}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-        {sections}
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-3">
       {cockpit}
-      <div className="flex gap-6">
-        {/* Sticky sidebar */}
-        <div className="w-44 shrink-0">
-          <div className="sticky top-20 space-y-3">
-            <div className="px-1">{navBadges}</div>
-            <nav className="space-y-1">
-              {VIEWS.map(view => {
-                const Icon = view.icon;
-                const subs = SUBSECTIONS[view.id];
-                return (
-                  <div key={view.id}>
-                    <button
-                      onClick={() => {
-                        handleScrollTo(view.id);
-                        if (view.id === 'goals') attention.dismiss('goalsAny');
-                        if (view.id === 'pathway') attention.dismiss('pathway');
-                      }}
-                      className={cn(
-                        'w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors text-left',
-                        activeSection === view.id
-                          ? 'bg-primary text-primary-foreground'
-                          : 'text-muted-foreground hover:bg-muted hover:text-foreground'
-                      )}
-                    >
-                      <Icon className="h-4 w-4" />
-                      {view.label}
-                      {view.id === 'goals' && <AttentionDot show={attention.goalsAny} />}
-                      {view.id === 'pathway' && <AttentionDot show={attention.pathway} />}
-                    </button>
-                    {subs.length > 0 && (
-                      <div className={cn(
-                        "ml-6 mt-1 mb-1 space-y-0.5 border-l pl-2",
-                        activeSection === view.id ? "border-primary" : "border-border opacity-70"
-                      )}>
-                        {subs.map(s => (
-                          <button
-                            key={s.id}
-                            onClick={() => {
-                              handleScrollTo(view.id);
-                              if (s.id === 'goals-supporting') attention.dismiss('supporting');
-                              if (s.id === 'goals-additional') attention.dismiss('additional');
-                              setTimeout(() => {
-                                window.dispatchEvent(new CustomEvent('dslm:openSubsection', { detail: { id: s.id } }));
-                              }, 250);
-                            }}
-                            className="block w-full text-left px-2 py-1 rounded text-xs text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors"
-                          >
-                            {s.label}
-                            {view.id === 'goals' && s.id === 'goals-supporting' && (
-                              <AttentionDot show={attention.supporting} />
-                            )}
-                            {view.id === 'goals' && s.id === 'goals-additional' && (
-                              <AttentionDot show={attention.additional} />
-                            )}
-                          </button>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </nav>
-          </div>
-        </div>
+      <div className="sticky top-0 z-10 border-b border-border bg-background/95 py-2 backdrop-blur-sm">
+        <div className="mb-2 flex justify-end">{navBadges}</div>
+        <nav aria-label="Learning model perspectives" className="grid grid-cols-3 gap-1 rounded-md bg-muted p-1">
+          {PERSPECTIVES.map((perspective) => {
+            const Icon = perspective.icon;
+            const active = activePerspective === perspective.id;
+            return (
+              <Button
+                key={perspective.id}
+                type="button"
+                variant="ghost"
+                onClick={() => selectPerspective(perspective.id)}
+                aria-current={active ? 'page' : undefined}
+                className={cn(
+                  'h-auto min-w-0 justify-start gap-2 px-2 py-2 text-left sm:px-3',
+                  active && 'bg-background text-foreground shadow-sm hover:bg-background',
+                )}
+              >
+                <Icon className="h-4 w-4 shrink-0" />
+                <span className="min-w-0">
+                  <span className="block truncate text-xs font-semibold sm:text-sm">{perspective.label}</span>
+                  <span className="hidden truncate text-[11px] font-normal text-muted-foreground md:block">
+                    {perspective.description}
+                  </span>
+                </span>
+                {perspective.id === 'roadmap' && (
+                  <AttentionDot show={attention.pathway || attention.goalsAny} />
+                )}
+              </Button>
+            );
+          })}
+        </nav>
+      </div>
 
-        {/* All sections in one scrollable column */}
-        <div className="flex-1 min-w-0">
-          {sections}
-        </div>
+      <div className="min-w-0 pt-1">
+        {perspectiveContent}
       </div>
     </div>
   );

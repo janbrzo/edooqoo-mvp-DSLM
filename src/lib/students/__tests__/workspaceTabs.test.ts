@@ -6,10 +6,26 @@ import {
   WORKSPACE_TABS,
   buildWorkspaceParams,
   isWorkspaceTab,
+  resolveModelPerspective,
   resolveTab,
   resolveWorkspaceParams,
   studentTabPath,
 } from '../workspaceTabs';
+
+describe('resolveModelPerspective', () => {
+  it.each([
+    ['pathway', 'roadmap'],
+    ['goals', 'roadmap'],
+    ['skills', 'skills'],
+    ['profile', 'profile'],
+  ] as const)('maps view=%s to the %s perspective', (view, expected) => {
+    expect(resolveModelPerspective(view)).toBe(expected);
+  });
+
+  it.each([null, undefined, '', 'unknown'])('defaults %s to roadmap', (view) => {
+    expect(resolveModelPerspective(view)).toBe('roadmap');
+  });
+});
 
 describe('resolveTab — canonical values', () => {
   for (const tab of WORKSPACE_TABS) {

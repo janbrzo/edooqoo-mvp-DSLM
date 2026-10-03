@@ -11,6 +11,7 @@
 
 export type WorkspaceTab = 'prep' | 'timeline' | 'library' | 'model';
 export type LibrarySection = 'worksheets' | 'flashcards' | 'homework';
+export type ModelPerspective = 'roadmap' | 'skills' | 'profile';
 export type TimelineFilter =
   | 'all'
   | 'lessons'
@@ -65,6 +66,23 @@ export const TIMELINE_FILTERS: readonly TimelineFilter[] = [
 ] as const;
 
 export const DEFAULT_TAB: WorkspaceTab = 'prep';
+
+/**
+ * Resolve the Learning model's legacy four-view URL contract into its three
+ * visible cockpit perspectives. `goals` remains a permanent Roadmap alias.
+ */
+export function resolveModelPerspective(view: string | null | undefined): ModelPerspective {
+  switch (clean(view)) {
+    case 'skills':
+      return 'skills';
+    case 'profile':
+      return 'profile';
+    case 'goals':
+    case 'pathway':
+    default:
+      return 'roadmap';
+  }
+}
 
 interface AliasTarget {
   tab: WorkspaceTab;
