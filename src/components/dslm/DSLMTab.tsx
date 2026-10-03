@@ -109,7 +109,10 @@ export const DSLMTab: React.FC<DSLMTabProps> = ({
   const selectPerspective = useCallback((perspective: ModelPerspective) => {
     const item = PERSPECTIVES.find(candidate => candidate.id === perspective);
     if (!item) return;
-    if (perspective === 'roadmap') attention.dismiss('pathway');
+    if (perspective === 'roadmap') {
+      attention.dismiss('pathway');
+      attention.dismiss('goalsAny');
+    }
     setSearchParams((prev) => buildWorkspaceParams(prev, { tab: 'model', view: item.view }));
   }, [attention, setSearchParams]);
 
@@ -129,6 +132,18 @@ export const DSLMTab: React.FC<DSLMTabProps> = ({
     });
     return () => cancelAnimationFrame(frame);
   }, [searchParams]);
+
+  // A suggestion editor belongs to Roadmap. Normalize malformed or old links
+  // that carry the editor id alongside another perspective before it opens.
+  const editSuggestionParam = searchParams.get('editSuggestion');
+  useEffect(() => {
+    if (!editSuggestionParam || activePerspective === 'roadmap') return;
+    setSearchParams((prev) => buildWorkspaceParams(prev, {
+      tab: 'model',
+      view: 'pathway',
+      editSuggestion: editSuggestionParam,
+    }), { replace: true });
+  }, [activePerspective, editSuggestionParam, setSearchParams]);
 
   // v6.9.33 — Re-fire focus handlers EVERY time `focus` param changes
   // (including same-value re-navigation thanks to cache-buster `_=ts`).
