@@ -22,7 +22,7 @@ Source of truth for the model list: `supabase/functions/_shared/modelRegistry.ts
 |---|---|---|
 | `gemini-generate` (3 output tokens, thinking off) | gemini-2.5-flash, gemini-2.5-flash-lite | negligible |
 | `openai-chat` (3 tokens) | gpt-4o-mini, gpt-4.1-2025-04-14 | negligible |
-| `openai-chat-reasoning` (`max_completion_tokens: 16`, `reasoning_effort: minimal`) | gpt-5-mini-2025-08-07 | negligible |
+| `openai-chat-reasoning` (`max_completion_tokens: 256`, `reasoning_effort: minimal`; reasoning tokens count against the limit, 16 failed with HTTP 400) | gpt-5-mini-2025-08-07 | negligible |
 | `openai-tts` (input "OK") | gpt-4o-mini-tts, tts-1 | negligible |
 | `metadata` (GET model resource) | whisper-1, Vertex gemini-2.5-flash-image, gemini-3.1-flash-image | free |
 
