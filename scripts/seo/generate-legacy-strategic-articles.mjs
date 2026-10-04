@@ -3,6 +3,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { NEWSLETTER_EMBED_CSS, renderNewsletterEmbed } from './newsletter-embed.mjs';
+import { clampDescription, clampTitle } from './snippet-clamp.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..', '..');
@@ -300,13 +301,13 @@ function renderDocument(article, published, body, words) {
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${escapeHtml(article.metaTitle)}</title>
-  <meta name="description" content="${escapeHtml(article.metaDescription)}">
+  <title>${escapeHtml(clampTitle(article.metaTitle))}</title>
+  <meta name="description" content="${escapeHtml(clampDescription(article.metaDescription))}">
   <meta name="robots" content="index,follow">
   <link rel="canonical" href="${canonical}">
   <meta property="og:type" content="article">
-  <meta property="og:title" content="${escapeHtml(article.metaTitle)}">
-  <meta property="og:description" content="${escapeHtml(article.metaDescription)}">
+  <meta property="og:title" content="${escapeHtml(clampTitle(article.metaTitle))}">
+  <meta property="og:description" content="${escapeHtml(clampDescription(article.metaDescription))}">
   <meta property="og:url" content="${canonical}">
   <script type="application/ld+json">${jsonLd}</script>
   <style>

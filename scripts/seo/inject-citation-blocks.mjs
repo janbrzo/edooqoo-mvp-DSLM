@@ -11,6 +11,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildCitation, citationHtml, CITATION_BLOCK_REGEX } from './citation-blocks.mjs';
+import { clampDescription } from './snippet-clamp.mjs';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, '..', '..');
@@ -26,6 +27,35 @@ const readMeta = (html, pattern) => {
   const match = html.match(pattern);
   return match ? match[1].replace(/&amp;/g, '&').replace(/&quot;/g, '"').trim() : '';
 };
+
+/**
+ * `<meta name="description">` is clamped for the SERP, which can end a sentence
+ * mid-clause. When the page's JSON-LD carries the full description that the meta
+ * tag was clamped from, cite the full text instead of the clamped snippet.
+ */
+function fullDescription(html, metaDescription) {
+  for (const [, json] of html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/gi)) {
+    let data;
+    try {
+      data = JSON.parse(json);
+    } catch {
+      continue;
+    }
+    const stack = [data];
+    while (stack.length) {
+      const node = stack.pop();
+      if (Array.isArray(node)) stack.push(...node);
+      else if (node && typeof node === 'object') {
+        if (typeof node.description === 'string' && node.description !== metaDescription
+          && clampDescription(node.description) === metaDescription) {
+          return node.description;
+        }
+        stack.push(...Object.values(node));
+      }
+    }
+  }
+  return metaDescription;
+}
 
 async function collectTargets() {
   const files = [];
@@ -73,7 +103,8 @@ async function main() {
     const url = `${BASE}/${rel}`;
 
     const title = readMeta(html, /<title[^>]*>([\s\S]*?)<\/title>/i);
-    const description = readMeta(html, /<meta\s+name="description"\s+content="([^"]*)"/i);
+    const metaDescription = readMeta(html, /<meta\s+name="description"\s+content="([^"]*)"/i);
+    const description = fullDescription(html, metaDescription);
 
     const citation = buildCitation({ slug, title, description, url });
     if (!citation) {

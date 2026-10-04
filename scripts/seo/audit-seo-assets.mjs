@@ -962,9 +962,13 @@ function auditPrerenderManifest() {
     else pass(`Prerender manifest includes ${route}`);
   }
 
+  // Every persona is prerendered, noindex ones included: a noindex page still needs
+  // static HTML carrying `robots: noindex,follow` (see getPersonaRoutes in seo-route-manifest.mjs).
+  const pseoInventory = getPseoRouteInventory({ root: ROOT });
   const expectedCount = new Set([
     ...CORE_SEO_ROUTES,
-    ...getPseoRouteInventory({ root: ROOT }).indexable,
+    ...pseoInventory.indexable,
+    ...pseoInventory.allPersonaRoutes,
     ...getDecisionContentRoutes({ root: ROOT }),
   ]).size;
   if (routes.length !== expectedCount) {

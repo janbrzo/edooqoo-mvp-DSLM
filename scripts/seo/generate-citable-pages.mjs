@@ -8,6 +8,7 @@ import {
 } from './x1000-content-plan.mjs';
 import { NEWSLETTER_EMBED_CSS, renderNewsletterEmbed } from './newsletter-embed.mjs';
 import { SEO_TITLE_OVERRIDES } from './x1000-editorial-plan.mjs';
+import { clampDescription, clampTitle } from './snippet-clamp.mjs';
 
 /** Hand-written SEO titles never take the brand suffix — they are already keyword-complete. */
 const CURATED_SEO_TITLES = new Set(Object.values(SEO_TITLE_OVERRIDES));
@@ -1559,20 +1560,23 @@ function layout({ title, description, canonical, body, jsonLd, robots = '' }) {
   // Keep the SERP title under ~60 chars: drop the brand suffix on long, curated titles.
   const BRAND_SUFFIX = ' | Edooqoo';
   const isCuratedTitle = CURATED_SEO_TITLES.has(title);
-  const headTitle = isCuratedTitle || title.length + BRAND_SUFFIX.length > 60
-    ? title
-    : `${title}${BRAND_SUFFIX}`;
+  const headTitle = clampTitle(
+    isCuratedTitle || title.length + BRAND_SUFFIX.length > 60 ? title : `${title}${BRAND_SUFFIX}`,
+  );
+  // SERP snippets only: JSON-LD keeps the full page description.
+  const metaTitle = clampTitle(title);
+  const metaDescription = clampDescription(description);
   return `<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>${escapeHtml(headTitle)}</title>
-  <meta name="description" content="${escapeHtml(description)}">
+  <meta name="description" content="${escapeHtml(metaDescription)}">
 ${robotsMeta}  <meta name="llm-intent" content="adult 1:1 English tutoring reference">
   <link rel="canonical" href="${canonical}">
-  <meta property="og:title" content="${escapeHtml(title)}">
-  <meta property="og:description" content="${escapeHtml(description)}">
+  <meta property="og:title" content="${escapeHtml(metaTitle)}">
+  <meta property="og:description" content="${escapeHtml(metaDescription)}">
   <meta property="og:url" content="${canonical}">
   <meta property="og:type" content="article">
   <script type="application/ld+json">${JSON.stringify(jsonLd)}</script>

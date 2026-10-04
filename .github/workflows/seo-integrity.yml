@@ -79,6 +79,14 @@ jobs:
       - name: Generate AI discovery resources
         run: node scripts/seo/generate-ai-resources.mjs
 
+      # build:seo runs the GEO pass after the generators; without it the committed
+      # citation blocks look like drift and this check can never pass.
+      - name: Inject GEO citation blocks
+        run: npm run seo:inject-citation-blocks
+
+      - name: Dedupe JSON-LD blocks
+        run: npm run seo:dedupe-jsonld
+
       - name: Verify generated files are committed
         run: git diff --exit-code
 

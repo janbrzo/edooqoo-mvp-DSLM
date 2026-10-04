@@ -17,6 +17,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { clampDescription, clampTitle } from './snippet-clamp.mjs';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
 const PUBLIC_DIR = path.join(ROOT, 'public');
@@ -24,35 +25,6 @@ const CHECK_ONLY = process.argv.includes('--check');
 const DIRS = process.argv
   .filter((arg) => arg.startsWith('--dir='))
   .map((arg) => arg.slice('--dir='.length));
-
-// Keep in sync with src/utils/seoSnippet.ts and scripts/seo/audit-duplicate-meta.mjs.
-const TITLE_MAX = 60;
-const DESCRIPTION_MAX = 155;
-const BRAND_SUFFIX_PATTERN = /\s*[|—-]\s*Edooqoo\s*$/;
-
-function trimToWordBoundary(text, max) {
-  if (text.length <= max) return text;
-  const cut = text.slice(0, max);
-  const lastSpace = cut.lastIndexOf(' ');
-  return (lastSpace > max * 0.5 ? cut.slice(0, lastSpace) : cut).replace(/[\s,;:.\-—|]+$/, '');
-}
-
-function clampTitle(title) {
-  const normalized = title.trim().replace(/\s+/g, ' ');
-  if (normalized.length <= TITLE_MAX) return normalized;
-  const bare = normalized.replace(BRAND_SUFFIX_PATTERN, '').trim();
-  if (bare.length <= TITLE_MAX) return bare;
-  return trimToWordBoundary(bare, TITLE_MAX);
-}
-
-function clampDescription(description) {
-  const text = description.trim().replace(/\s+/g, ' ');
-  if (text.length <= DESCRIPTION_MAX) return text;
-  const window = text.slice(0, DESCRIPTION_MAX);
-  const lastSentence = Math.max(window.lastIndexOf('. '), window.lastIndexOf('? '));
-  if (lastSentence > DESCRIPTION_MAX * 0.55) return window.slice(0, lastSentence + 1).trim();
-  return `${trimToWordBoundary(text, DESCRIPTION_MAX - 1)}.`;
-}
 
 const decode = (value) =>
   value
