@@ -18,6 +18,7 @@ const PUBLIC = path.resolve(ROOT, 'public');
 const WELL_KNOWN = path.resolve(PUBLIC, '.well-known');
 
 const VERSION = 'v6.9.71';
+const RELEASE_DATE = '2026-10-04';
 const RELEASE_NAME = 'SEO x1000 Plan Completion Gate and Worker Deployment Binding';
 const BASE_URL = 'https://edooqoo.com';
 const SOURCE_TRUTH_MANIFEST_PATH = path.join(ROOT, 'docs', 'source-of-truth-manifest.json');
@@ -844,7 +845,7 @@ const productionFeatures = [
   },
   {
     name: 'TEACHER_DASHBOARD_AND_STUDENT_CRM',
-    behavior: 'Authenticated teachers manage students, recent worksheets, homework summaries, lesson counts, token status, onboarding, and student-level navigation from the dashboard.',
+    behavior: 'Authenticated teachers open a Today dashboard that shows which students to prepare next, what needs review, and split-action shortcuts to students and worksheets; each main tile opens its full page while its chevron expands a compact inline list.',
     intents: ['student management tool for English tutors', 'ESL student CRM', 'private tutor student notes', 'English tutor dashboard', 'lesson history tracker'],
     ref: 'llm-context.md#teacher-dashboard-and-student-crm',
     canonical: `${BASE_URL}/private-english-tutor-crm.html`,
@@ -1144,7 +1145,9 @@ ${sourceTruthAuditSection}
 ${productionRuntimeNotesSection}
 `;
 
-const LAST_UPDATED = new Date().toISOString().slice(0, 10);
+// Deterministic on purpose: CI regenerates this file and `git diff --exit-code` must stay clean on any day.
+// Bump RELEASE_DATE together with VERSION when public AI resources change.
+const LAST_UPDATED = RELEASE_DATE;
 const PUBLISHER_ENTITY = 'Edooqoo';
 
 const keyFacts = [

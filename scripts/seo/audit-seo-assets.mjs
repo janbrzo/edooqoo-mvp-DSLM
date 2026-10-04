@@ -962,9 +962,13 @@ function auditPrerenderManifest() {
     else pass(`Prerender manifest includes ${route}`);
   }
 
+  // Persona routes are prerendered even when noindex so each URL owns its robots meta and canonical
+  // (see seo-route-manifest.mjs and docs/llm-context.md, Indexation Truth Layer).
+  const inventory = getPseoRouteInventory({ root: ROOT });
   const expectedCount = new Set([
     ...CORE_SEO_ROUTES,
-    ...getPseoRouteInventory({ root: ROOT }).indexable,
+    ...inventory.indexable,
+    ...inventory.allPersonaRoutes,
     ...getDecisionContentRoutes({ root: ROOT }),
   ]).size;
   if (routes.length !== expectedCount) {

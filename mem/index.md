@@ -52,3 +52,4 @@
 - [Student Workspace 4 Tabs](mem://features/student-page/workspace-4-tabs) — v6.9.111 final Prep/Timeline/Library/Learning model; legacy ?tab= aliases permanent; never restore Overview/Worksheets/Skills
 - [Quick Add Note](mem://features/student-page/quick-add-note-from-overview) — Add Note opens inline modal in Prep tab QuickNoteBox; never route through tabs
 - [User-flow audit 2026-10](mem://features/dashboard/audit-2026-10-user-flow) — demo student page fix + demoFetchGuard, wrap-safe worksheet toolbars, Prep-first CTAs, useTeacherAuthRedirect, homework error card, vitest in CI
+- [Generated SEO files CI contract](mem://seo/generated-files-ci-contract) — deterministic generators, seo:sync-generated, post-processing passes in CI before git diff --exit-code

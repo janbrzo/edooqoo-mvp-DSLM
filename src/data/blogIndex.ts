@@ -19,7 +19,7 @@ export interface LandingPageMeta {
 
 export const BLOG_POSTS: BlogPostMeta[] = [
   {
-    "title": "One-to-One English Lesson Planning for Adults: Complete",
+    "title": "One-to-One English Lesson Planning for Adults: Complete Guide",
     "description": "A complete system for planning one-to-one adult English lessons using goals, evidence, CEFR, retrieval, realistic tasks, homework, and review.",
     "url": "/blog/teaching-english-one-to-one.html",
     "date": "2026-06-14",
