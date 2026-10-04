@@ -31,6 +31,7 @@ import { useStudentTests } from '@/hooks/useStudentTests';
 import { ALL_WELCOME_TEST_QUESTIONS } from '@/data/welcomeTestQuestions';
 import { toast } from 'sonner';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useDemoContext } from '@/contexts/DemoContext';
 import {
   WelcomeTestActionsPanel,
   type WelcomeTestActionsState,
@@ -78,6 +79,8 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
   // creating a duplicate welcome test row.
   const checkPromiseRef = useRef<Promise<void> | null>(null);
   const { createTest, addQuestions, generateShareToken } = useStudentTests({ studentId, teacherId });
+  // Demo students have no real rows; Welcome Test actions need a database test, so they are blocked.
+  const { isDemoMode, showDemoBlockedToast } = useDemoContext();
 
   useEffect(() => {
     checkPromiseRef.current = checkWelcomeTest();
@@ -230,6 +233,7 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
   };
 
   const handleCopy = async () => {
+    if (isDemoMode) { showDemoBlockedToast('Copying the Welcome Test link'); return; }
     const ensured = await ensureWelcomeTest();
     if (!ensured) return;
     const url = `${window.location.origin}/welcome-test/${ensured.token}`;
@@ -242,6 +246,7 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
   };
 
   const handleSend = async () => {
+    if (isDemoMode) { showDemoBlockedToast('Sending the Welcome Test'); return; }
     setCreating(true);
     try {
       const ensured = await ensureWelcomeTest();
@@ -294,6 +299,7 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
   };
 
   const handlePreview = async () => {
+    if (isDemoMode) { showDemoBlockedToast('Previewing the Welcome Test'); return; }
     const ensured = await ensureWelcomeTest();
     if (!ensured) return;
     window.open(`${window.location.origin}/welcome-test/${ensured.token}?preview=1`, '_blank');
@@ -325,6 +331,7 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
   }, [status, searchParams]);
 
   const handleRefreshLink = async (): Promise<string | null> => {
+    if (isDemoMode) { showDemoBlockedToast('Refreshing the Welcome Test link'); return null; }
     // Lazily create the test if it does not yet exist so Refresh works on day 0.
     const ensured = await ensureWelcomeTest();
     if (!ensured) return null;
@@ -355,6 +362,7 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
   // Prevents teachers from accidentally stacking 5+ retake attempts.
   const [confirmRetakeOpen, setConfirmRetakeOpen] = useState(false);
   const handleRetake = () => {
+    if (isDemoMode) { showDemoBlockedToast('Retaking the Welcome Test'); return; }
     if (status !== 'completed') {
       setConfirmRetakeOpen(true);
       return;
