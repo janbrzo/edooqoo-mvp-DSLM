@@ -240,7 +240,7 @@ async function logScheduledShutdowns(sb: SupabaseClient, rows: LifecycleRow[], m
   // until a model actually fails; admins see it in error_logs.
   const { error } = await sb.from("error_logs").insert(due.map((l) => ({
     severity: l.status.level === "warn" ? "warning" : "critical",
-    source: "edge-function",
+    source: "edge_function",
     source_name: "audit-llm-models",
     component: l.provider,
     error_code: "model_shutdown_scheduled",
