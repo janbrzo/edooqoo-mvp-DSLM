@@ -22,20 +22,29 @@ interface CollapsibleSectionProps {
   description?: string;
   children: React.ReactNode;
   className?: string;
+  /** Also open when a `dslm:openSubsection` event targets one of these nested ids. */
+  alsoOpenFor?: string[];
+  /** Keep children mounted while closed so nested sections keep their event listeners. */
+  forceMountContent?: boolean;
 }
 
 export const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
   id, title, icon: Icon, count, badge, defaultOpen = false, rightSlot, description, children, className,
+  alsoOpenFor, forceMountContent,
 }) => {
   const [open, setOpen] = useState(defaultOpen);
   const cardRef = useRef<HTMLDivElement>(null);
 
   // v6.9.13 — open + scroll into view when a sub-nav button targets this section.
   useEffect(() => {
-    if (!id) return;
+    if (!id && !alsoOpenFor?.length) return;
     const handler = (e: Event) => {
       const detail = (e as CustomEvent).detail as { id?: string } | undefined;
-      if (!detail || detail.id !== id) return;
+      if (!detail?.id) return;
+      if (detail.id !== id) {
+        if (alsoOpenFor?.includes(detail.id)) setOpen(true);
+        return;
+      }
       setOpen(true);
       requestAnimationFrame(() => {
         cardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -43,7 +52,7 @@ export const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
     };
     window.addEventListener('dslm:openSubsection', handler as EventListener);
     return () => window.removeEventListener('dslm:openSubsection', handler as EventListener);
-  }, [id]);
+  }, [id, alsoOpenFor?.join('|')]);
 
   return (
     <Card ref={cardRef} id={id ? `dslm-sub-${id}` : undefined} className={cn('overflow-hidden scroll-mt-24', className)}>
@@ -62,7 +71,7 @@ export const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
           </CollapsibleTrigger>
           {rightSlot && <div className="shrink-0">{rightSlot}</div>}
         </div>
-        <CollapsibleContent>
+        <CollapsibleContent forceMount={forceMountContent ? true : undefined} className={forceMountContent ? 'data-[state=closed]:hidden' : undefined}>
           <CardContent className="p-3 pt-3">
             {description && <p className="text-xs text-muted-foreground mb-2">{description}</p>}
             {children}
