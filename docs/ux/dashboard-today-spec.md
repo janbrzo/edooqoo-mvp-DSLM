@@ -70,7 +70,7 @@ Container: `mx-auto max-w-6xl space-y-8 px-4 sm:px-6 lg:px-8 py-6` (1152 px sinc
 ### Zone A — `NextUpSection` / `NextUpCard`
 - Source: `useNextUpStudents(students)`. Order: students with a booked lesson in the next 7 days ascending by date+time, then the rest in `updated_at desc` order. Max 3.
 - Grid columns = min(items, 3); no empty slots.
-- Card rows: (1) name link + level badge; (2) `Tue 18:00` / `Today 18:00` / `Tomorrow 09:30` / `No lesson booked`; (3) focus: `Struggled with: {latest Skill Assessment entry with skill_subtype ∈ weakness|mistake|practice}` → fallback `Goal: {main_goal}` → fallback `No signals yet — start with a worksheet`; (4) `Prepare next lesson →` full width, primary, `aria-label="Prepare next lesson for {name}"`, navigates to `/student/:id` (Prep tab once it exists; `?tab=dslm` until then).
+- Card rows: (1) name link + level badge; (2) `Tue 18:00` / `Today 18:00` / `Tomorrow 09:30` / `No lesson booked`; (3) focus: `Struggled with: {latest Skill Assessment entry with skill_subtype ∈ weakness|mistake|practice}` → fallback `Goal: {main_goal}` → fallback `No signals yet — start with a worksheet`; (4) `Prepare next lesson →` full width, primary, `aria-label="Prepare next lesson for {name}"`, navigates with `studentPrepPath(id)` = `/student/:id?tab=prep`.
 - No other actions, no counters.
 
 ### Zone B — `AttentionSection`

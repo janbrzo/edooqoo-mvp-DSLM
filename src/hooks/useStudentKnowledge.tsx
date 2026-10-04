@@ -2,6 +2,7 @@ import { useState, useCallback, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { useDemoContext } from '@/contexts/DemoContext';
 import {
   StudentKnowledgeEntry,
   NewKnowledgeEntry,
@@ -30,16 +31,25 @@ export const useStudentKnowledge = ({ studentId, teacherId }: UseStudentKnowledg
   const queryClient = useQueryClient();
   const [filters, setFiltersState] = useState<KnowledgeFilters>(DEFAULT_FILTERS);
 
+  const { isDemoMode, demoData } = useDemoContext();
+  // Demo ids are not UUIDs: read-only entries come from the demo data set instead of Supabase.
+  const demoReady = isDemoMode && !!demoData;
   const idsValid = isValidUUID(studentId) && isValidUUID(teacherId);
 
   // Stable serialization of filters for queryKey
   const filtersKey = useMemo(() => JSON.stringify(filters), [filters]);
 
   const entriesQuery = useQuery<KnowledgeQueryResult>({
-    queryKey: ['knowledge', 'entries', studentId, teacherId, filtersKey],
-    enabled: idsValid,
+    queryKey: ['knowledge', 'entries', studentId, teacherId, filtersKey, demoReady],
+    enabled: idsValid || demoReady,
     placeholderData: keepPreviousData,
     queryFn: async () => {
+      if (demoReady) {
+        const mine = (demoData!.knowledgeEntries as unknown as StudentKnowledgeEntry[])
+          .filter((e) => e.student_id === studentId && (!filters.category || e.category === filters.category))
+          .sort((a, b) => (a.created_at < b.created_at ? 1 : -1));
+        return { entries: mine, totalCount: mine.length };
+      }
       let query = supabase
         .from('student_knowledge_entries')
         .select('*', { count: 'exact' })

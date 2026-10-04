@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AddStudentDialog } from '@/components/dashboard/AddStudentDialog';
 import { useAuthFlow } from '@/hooks/useAuthFlow';
+import { useTeacherAuthRedirect } from '@/hooks/useTeacherAuthRedirect';
 import { useTokenSystem } from '@/hooks/useTokenSystem';
 import { useStudents } from '@/hooks/useStudents';
 import { useNextUpStudents, type NextUpStudent } from '@/hooks/useNextUpStudents';
@@ -73,9 +74,7 @@ const AllStudentsPage = () => {
   const [sort, setSort] = useState<SortKey>('recent');
   const [addOpen, setAddOpen] = useState(false);
 
-  useEffect(() => {
-    if (!loading && !isRegisteredUser) navigate('/');
-  }, [loading, isRegisteredUser, navigate]);
+  useTeacherAuthRedirect(loading, !!isRegisteredUser);
 
   const visible = useMemo(() => {
     const q = search.trim().toLowerCase();

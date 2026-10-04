@@ -100,6 +100,9 @@ export const useWorksheetHistory = (
   }, [studentId, page, pageSize, user?.id, isDemoMode]);
 
   const refetchWorksheets = async () => {
+    // Demo data is derived synchronously from context; fetchWorksheets is a no-op
+    // there and would never clear the loading flag set below.
+    if (isDemoMode) return;
     setLoading(true);
     await fetchWorksheets();
   };

@@ -17,6 +17,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
+import { studentPrepPath } from '@/lib/students/quickAccess';
 
 interface Student {
   id: string;
@@ -844,7 +845,7 @@ export function SlotDetailModal({ open, onOpenChange, slot, studentName, student
                         size="sm"
                         variant="outline"
                         className="h-6 text-[11px] px-2 border-amber-400 text-amber-900 hover:bg-amber-100"
-                        onClick={() => navigate(`/student/${slot.student_id}?tab=dslm`)}
+                        onClick={() => navigate(studentPrepPath(slot.student_id))}
                       >
                         <Sparkles className="h-3 w-3 mr-1" /> Generate with 1-Minute Prep
                       </Button>
@@ -879,7 +880,7 @@ export function SlotDetailModal({ open, onOpenChange, slot, studentName, student
                         <button
                           type="button"
                           className="underline text-primary hover:text-primary/80"
-                          onClick={() => navigate(`/student/${slot.student_id}?tab=dslm`)}
+                          onClick={() => navigate(studentPrepPath(slot.student_id))}
                         >
                           generate one with 1-Minute Prep
                         </button>
@@ -1006,7 +1007,7 @@ export function SlotDetailModal({ open, onOpenChange, slot, studentName, student
                       variant="outline"
                       onClick={async () => {
                         await handleConfirm();
-                        navigate(`/student/${slot.student_id}?tab=dslm`);
+                        navigate(studentPrepPath(slot.student_id));
                       }}
                       disabled={actionInProgress}
                       className="text-xs h-7 border-primary/40 text-primary hover:bg-primary/10"

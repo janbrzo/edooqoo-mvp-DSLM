@@ -55,6 +55,8 @@ export default function HomeworkPage() {
   const navigate = useNavigate();
   const [homework, setHomework] = useState<HomeworkData | null>(null);
   const [loading, setLoading] = useState(true);
+  // Invalid/expired links and network failures render an in-place card (students must not land on the teacher marketing page).
+  const [loadError, setLoadError] = useState<'missing' | 'network' | null>(null);
   const [isCompleting, setIsCompleting] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
   const [verifiedEmail, setVerifiedEmail] = useState<string | null>(null);
@@ -156,8 +158,8 @@ export default function HomeworkPage() {
 
   useEffect(() => {
     if (!token) {
-      toast.error("Invalid homework link");
-      navigate("/");
+      setLoadError('missing');
+      setLoading(false);
       return;
     }
 
@@ -305,6 +307,7 @@ export default function HomeworkPage() {
   };
 
   const loadHomework = async () => {
+    setLoadError(null);
     try {
       const { data, error } = await supabase
         .rpc('get_homework_by_share_token', { p_share_token: token })
@@ -313,8 +316,7 @@ export default function HomeworkPage() {
       if (error) throw error;
 
       if (!data) {
-        toast.error("Homework not found or link expired");
-        navigate("/");
+        setLoadError('missing');
         return;
       }
 
@@ -347,8 +349,7 @@ export default function HomeworkPage() {
       }
     } catch (error) {
       console.error('Error loading homework:', error);
-      toast.error("Failed to load homework");
-      navigate("/");
+      setLoadError('network');
     } finally {
       setLoading(false);
     }
@@ -525,8 +526,38 @@ export default function HomeworkPage() {
     );
   }
 
-  if (!homework) {
-    return null;
+  if (loadError || !homework) {
+    const isNetwork = loadError === 'network';
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <Card className="max-w-md w-full p-6 text-center space-y-3">
+          <FileText className="h-10 w-10 text-muted-foreground mx-auto" />
+          <h1 className="text-lg font-semibold">
+            {isNetwork ? "We couldn't load this homework" : 'Homework not available'}
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            {isNetwork
+              ? 'Check your connection and try again.'
+              : 'This homework link is invalid or has expired. Ask your teacher to send you a new link, or open your Student Hub.'}
+          </p>
+          <div className="flex flex-wrap justify-center gap-2 pt-1">
+            {isNetwork && (
+              <Button
+                onClick={() => {
+                  setLoading(true);
+                  loadHomework();
+                }}
+              >
+                Try again
+              </Button>
+            )}
+            <Button variant={isNetwork ? 'outline' : 'default'} onClick={() => navigate('/my')}>
+              Open Student Hub
+            </Button>
+          </div>
+        </Card>
+      </div>
+    );
   }
 
   const teacherName = homework.teacher_first_name && homework.teacher_last_name

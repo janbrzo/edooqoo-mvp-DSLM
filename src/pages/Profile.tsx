@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuthFlow } from '@/hooks/useAuthFlow';
+import { useTeacherAuthRedirect } from '@/hooks/useTeacherAuthRedirect';
 import { useProfile } from '@/hooks/useProfile';
 import { useTokenSystem } from '@/hooks/useTokenSystem';
 import { usePlanLogic } from '@/hooks/usePlanLogic';
@@ -70,11 +71,7 @@ const Profile = () => {
   };
 
   // Check if user is properly authenticated (not anonymous) and redirect immediately
-  useEffect(() => {
-    if (!loading && !isRegisteredUser) {
-      navigate('/');
-    }
-  }, [loading, isRegisteredUser, navigate]);
+  useTeacherAuthRedirect(loading, !!isRegisteredUser);
 
   // FIXED: Handle Stripe return with idempotency protection
   useEffect(() => {

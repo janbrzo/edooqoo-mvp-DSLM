@@ -111,9 +111,9 @@ function WorksheetHeader({
 
   return (
     <div className="mb-6">
-      <div className="flex gap-2 mb-4 justify-between items-center">
+      <div className="flex flex-wrap gap-2 mb-4 justify-between items-center">
         {/* Left side: Back and Generate */}
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button variant="ghost" onClick={handleBack}>
             <ArrowLeft className="mr-2 h-4 w-4" /> Back
           </Button>
@@ -124,7 +124,7 @@ function WorksheetHeader({
         
         {/* Right side: Tokens, bell, Dashboard, Profile - ONLY FOR REGISTERED USERS */}
         {isRegisteredUser && (
-          <div className="flex items-center gap-3">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             {tokenLeft !== undefined && (
               <Badge variant="outline" className="text-sm px-3 py-1">
                 Tokens Left: {tokenLeft}
@@ -150,7 +150,7 @@ function WorksheetHeader({
       <div className="bg-worksheet-purple rounded-lg p-6">
         <div className="flex flex-col md:flex-row justify-between">
           <div>
-            <h1 className="mb-1 font-bald text-white text-2xl font-semibold flex items-center gap-2">
+            <h1 className="mb-1 font-bald text-white text-2xl font-semibold flex flex-wrap items-center gap-2">
               {/* PROBLEM 1: Dynamic title truncation based on student name length */}
               {(() => {
                 const studentNameLength = displayStudentName?.length || 10;
@@ -177,7 +177,7 @@ function WorksheetHeader({
                   <Pencil className="h-4 w-4" />
                 </Button>
               )}
-              <span className="text-yellow-300 flex items-center gap-2">
+              <span className="text-yellow-300 flex flex-wrap items-center gap-2">
                 <span>for</span>
                 {displayStudentName ? (
                   studentId ? (
@@ -203,7 +203,7 @@ function WorksheetHeader({
               </span>
             </h1>
           </div>
-          <div className="flex gap-4 mt-4 md:mt-0">
+          <div className="flex flex-wrap gap-2 sm:gap-4 mt-4 md:mt-0">
             <div className="flex items-center gap-1 bg-white/20 px-4 py-2 rounded-md">
               <Zap className="h-4 w-4 text-yellow-300" />
               <span className="text-sm text-white">Generated in {generationTime}s</span>

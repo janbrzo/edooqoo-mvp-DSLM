@@ -12,7 +12,7 @@ type: feature
   3. `AllStudentsInline` — inline expandable list under the All students tile (own search + sorting, max 10 rows, "See all" → `/students`).
   4. `NavStudentSwitcher` in `StickyNav` — now also on `/dashboard`, with an inline filter input.
 - Matching logic lives only in `src/lib/students/quickAccess.ts` (`filterStudents`, `pickRecentStudents`, `studentPrepPath`). Name matches rank above email/goal matches; default limit 8.
-- Canonical destination for every quick-access click: `studentPrepPath(id)` = `/student/:id?tab=dslm` (straight into prep), never the plain student overview.
+- Canonical destination for every quick-access click: `studentPrepPath(id)` = `/student/:id?tab=prep` (also used by `NextUpCard` and `SlotDetailModal`), never the plain student overview.
 - All items render as real `<a href>` with modifier/aux-click passthrough (middle-click, Ctrl/Cmd/Shift open a new tab); plain click is `preventDefault()` + SPA `navigate`.
 
 **Why:** with 20+ students the Today dashboard shows only 3, so teachers had no fast path to an arbitrary student.

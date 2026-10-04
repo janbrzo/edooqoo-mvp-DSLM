@@ -361,10 +361,6 @@ const StudentPage = () => {
     if (result.success) refetchWorksheets();
   };
 
-  useEffect(() => {
-    refetchWorksheets();
-  }, [currentPage, deletedCurrentPage]);
-
   // Auth check for "student not found" - redirect to login if not authenticated
   const [authChecked, setAuthChecked] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -376,7 +372,15 @@ const StudentPage = () => {
     });
   }, []);
 
-  const isPageLoading = loading || (studentsLoading && studentLoading) || !authChecked;
+  // Full-page skeleton only until the first worksheet load settles; later refetches
+  // (pagination, restore, rename, duplicate) keep the workspace mounted and scroll position intact.
+  const [worksheetsReady, setWorksheetsReady] = useState(false);
+  useEffect(() => {
+    if (!loading) setWorksheetsReady(true);
+  }, [loading]);
+
+  const isPageLoading =
+    (loading && !worksheetsReady) || (studentsLoading && studentLoading) || !authChecked;
   const shouldRedirectToLogin = !isPageLoading && !student && !isAuthenticated;
 
   // Logged-out visitor on a student link (e.g. the Welcome Test results email):

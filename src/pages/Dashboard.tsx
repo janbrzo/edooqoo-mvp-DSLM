@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { AuthenticatedPageShell } from "@/components/AuthenticatedPageShell";
 import { useAuthFlow } from "@/hooks/useAuthFlow";
+import { useTeacherAuthRedirect } from '@/hooks/useTeacherAuthRedirect';
 import { useTokenSystem } from "@/hooks/useTokenSystem";
 import { useStudents } from "@/hooks/useStudents";
 import { useWorksheetHistory } from "@/hooks/useWorksheetHistory";
@@ -85,11 +86,7 @@ const Dashboard = () => {
     }
   }, [loading, studentsLoading, historyLoading, hasEverLoaded]);
 
-  useEffect(() => {
-    if (!loading && !isRegisteredUser) {
-      navigate('/');
-    }
-  }, [loading, isRegisteredUser, navigate]);
+  useTeacherAuthRedirect(loading, !!isRegisteredUser);
 
   if (!hasEverLoaded && (loading || studentsLoading || historyLoading)) {
     return (
