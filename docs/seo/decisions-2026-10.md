@@ -4,8 +4,8 @@ Approved by the owner on 2026-10-04 (proposals from the audit, accepted as state
 
 ## 1. Pruning templated pages (staged)
 
-Stage 1 (this list, below): templated pSEO pages () with fewer than 10 impressions in 3 months → , removed from the sitemap, removed from the indexable set in . 84 pages, 3 clicks and 125 impressions in total.
-Stage 2 (only after 4 weeks and a look at indexing): profession scenario triplets → 1 page per profession, the rest ; "AI alternative" cluster → 3 pages (, , ); blog and root pages templated with < 10 impressions (212) → .
+Stage 1 (this list, below): templated pSEO pages (`maxContainment >= 0.5`) with fewer than 10 impressions in 3 months → `noindex,follow`, removed from the sitemap, removed from the indexable set in `src/data/pseoIndexPolicy.json`. 84 pages, 3 clicks and 125 impressions in total.
+Stage 2 (only after 4 weeks and a look at indexing): profession scenario triplets → 1 page per profession, the rest `noindex`; "AI alternative" cluster → 3 pages (`edooqoo-vs-chatgpt`, `best-ai-tools-for-english-tutors`, `ai-worksheet-generator-for-english-teachers`); blog and root pages templated with < 10 impressions (212) → `noindex`.
 Rule: a URL with >= 10 impressions in the last 90 days is never pruned.
 
 ## 2. Rewrite of "reframed" blog posts
@@ -14,15 +14,15 @@ Rule: a URL with >= 10 impressions in the last 90 days is never pruned.
 
 ## 3. "Reviewed by Martha" → automated verification (amended)
 
-Martha will not review pages, so the claim "Reviewed by Martha" is removed everywhere (visible text and  JSON-LD, in the four generators and ). It is replaced by an automated verifier whose result is shown honestly as **"Automated quality checks passed on <date>"**, linking to a methodology page that lists exactly what is checked. No wording may imply human review. Jan Brzostowski stays as the named author/publisher.  is removed (or kept only as the credited author of the "Martha Test" criteria, if she wrote them: owner to confirm).
+Martha will not review pages, so the claim "Reviewed by Martha" is removed everywhere (visible text and `reviewedBy` JSON-LD, in the four generators and `src/data/contentAuthors.ts`). It is replaced by an automated verifier whose result is shown honestly as **"Automated quality checks passed on <date>"**, linking to a methodology page that lists exactly what is checked. No wording may imply human review. Jan Brzostowski stays as the named author/publisher.  is removed (or kept only as the credited author of the "Martha Test" criteria, if she wrote them: owner to confirm).
 
-### Verifier spec (new pages and rewrites must pass; fail closed = page stays )
+### Verifier spec (new pages and rewrites must pass; fail closed = page stays `noindex`)
 
 | Layer | Check | Type |
 |---|---|---|
-| 1 | :  vs every other indexable page | deterministic |
+| 1 | `seo:audit-uniqueness`: `maxContainment < 0.3` vs every other indexable page | deterministic |
 | 1 | No bot-directed visible text ("When to cite", "Primary audience", "RAG Keywords"); max ~10 contextual links | deterministic |
-| 1 | Product statements only from PRODUCTION list in ; no BETA/ROADMAP; no guarantees, stats, ratings or testimonials without a source | deterministic + LLM |
+| 1 | Product statements only from PRODUCTION list in `docs/llm-context.md`; no BETA/ROADMAP; no guarantees, stats, ratings or testimonials without a source | deterministic + LLM |
 | 1 | Every external citation URL returns 200, is on an allowlist (CEFR/Council of Europe, peer-reviewed, publishers) and supports the sentence it is attached to | deterministic + LLM |
 | 1 | JSON-LD matches visible content; dates change only with real content change | deterministic |
 | 2 | LLM judge (a different model than the writer) against a fixed rubric: adult relevance, ELT accuracy, information gain vs the current top-5 results (fetched), no invented facts | LLM |
@@ -31,11 +31,11 @@ Martha will not review pages, so the claim "Reviewed by Martha" is removed every
 | 3 | Monthly: owner spot-checks 5 random verified pages (10 minutes); disagreement with the verifier tightens the rubric | human, sampled |
 | 3 | Post-publish: GSC indexation and clicks at +28/+56 days; pages that stay "crawled – not indexed" go back to rewrite or noindex | data |
 
-The result is stored in a generated file (: route, date, per-check result, model names) and  fails if a page shows the label without a passing record.
+The result is stored in a generated file (`docs/seo/content-verification.generated.json`: route, date, per-check result, model names) and `seo:audit` fails if a page shows the label without a passing record.
 
 ## 4. Audience of top-of-funnel content
 
-Product and conversion stay for adult 1:1 tutors. Top-of-funnel content (CEFR, grammar, tools, worksheets) serves general ESL teachers, with a clear next step: free tool → account → first student. First candidates:  (25 clicks) and the CEFR level checker (94 impressions at position 26.6).
+Product and conversion stay for adult 1:1 tutors. Top-of-funnel content (CEFR, grammar, tools, worksheets) serves general ESL teachers, with a clear next step: free tool → account → first student. First candidates: `/tools/vocab-cefr-checker` (25 clicks) and the CEFR level checker (94 impressions at position 26.6).
 
 ---
 
