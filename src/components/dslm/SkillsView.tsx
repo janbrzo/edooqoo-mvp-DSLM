@@ -7,6 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { SkillsOverviewPanel } from '@/components/dslm/SkillsOverviewPanel';
 import { useStudentKnowledge } from '@/hooks/useStudentKnowledge';
+import { useStudentProfile } from '@/hooks/dslm/useStudentProfile';
 import { StudentKnowledgeEntryCard } from '@/components/student-knowledge/StudentKnowledgeEntryCard';
 import { CollapsibleSection } from './CollapsibleSection';
 import { BarChart3, Layers, StickyNote } from 'lucide-react';
@@ -26,6 +27,7 @@ export const SkillsView: React.FC<SkillsViewProps> = ({
 }) => {
   const skillNotes = useStudentKnowledge({ studentId, teacherId });
   const skillAssessmentNotes = skillNotes.entries.filter(e => e.category === 'Skill Assessment');
+  const { data: profile } = useStudentProfile({ studentId, teacherId });
 
   return (
     <div className="space-y-3">
@@ -36,6 +38,14 @@ export const SkillsView: React.FC<SkillsViewProps> = ({
             <div className="flex items-center gap-1.5">
               <span className="text-muted-foreground text-xs">Level:</span>
               <Badge variant="secondary">{englishLevel || 'N/A'}</Badge>
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="text-muted-foreground text-xs">Placement test:</span>
+              {profile ? (
+                <span className="font-semibold">{profile.estimated_level || 'Done'}</span>
+              ) : (
+                <span className="text-xs text-muted-foreground">Not taken yet</span>
+              )}
             </div>
             <div className="flex items-center gap-1.5">
               <span className="text-muted-foreground text-xs">Worksheets:</span>
