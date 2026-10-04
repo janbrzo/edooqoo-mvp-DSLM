@@ -16,6 +16,7 @@ import {
   renderAuditReportHtml,
   scanDeprecationText,
   shouldLogProbeFailure,
+  shouldSendAuditEmail,
   stripHtml,
   summariseAudit,
   validateAdvisorRecommendations,
@@ -59,6 +60,15 @@ describe('classifyProbeStatus', () => {
     expect(shouldLogProbeFailure('client')).toBe(false);
     expect(shouldLogProbeFailure('missing_key')).toBe(false);
     expect(shouldLogProbeFailure('ok')).toBe(false);
+  });
+});
+
+describe('shouldSendAuditEmail', () => {
+  it('stays silent on a clean daily run and mails on failures or monthly runs', () => {
+    expect(shouldSendAuditEmail('daily', { failed: 0 })).toBe(false);
+    expect(shouldSendAuditEmail('daily', { failed: 1 })).toBe(true);
+    expect(shouldSendAuditEmail('monthly', { failed: 0 })).toBe(true);
+    expect(shouldSendAuditEmail('monthly', { failed: 3 })).toBe(true);
   });
 });
 

@@ -595,6 +595,14 @@ export function summariseAudit(input: AuditReportInput): AuditSummary {
   };
 }
 
+/**
+ * Email policy: the monthly optimisation report is always sent; the daily
+ * "does it work" run is silent unless at least one probe failed.
+ */
+export function shouldSendAuditEmail(mode: "daily" | "monthly", summary: Pick<AuditSummary, "failed">): boolean {
+  return mode === "monthly" || summary.failed > 0;
+}
+
 const TD = 'style="padding:6px 10px;border-bottom:1px solid #e5e7eb;vertical-align:top;"';
 const TH = 'style="padding:6px 10px;text-align:left;background:#f3f4f6;"';
 const TABLE = 'style="border-collapse:collapse;width:100%;font-size:13px;margin:0 0 18px;"';

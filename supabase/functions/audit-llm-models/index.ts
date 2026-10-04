@@ -17,7 +17,7 @@
 //
 // Results: model_health_checks (one row per probe), model_audit_reports (one
 // row per run), error_logs (failures + scheduled shutdowns) and an email via
-// send-model-audit-email. Auth: header `x-cron-secret` must equal CRON_SECRET.
+// send-model-audit-email (monthly always; daily only when a probe failed). Auth: header `x-cron-secret` must equal CRON_SECRET.
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { logModelFailure } from "../_shared/modelFailureLogger.ts";
@@ -49,6 +49,7 @@ import {
   renderAuditReportHtml,
   scanDeprecationText,
   shouldLogProbeFailure,
+  shouldSendAuditEmail,
   stripHtml,
   summariseAudit,
   validateAdvisorRecommendations,
@@ -499,18 +500,24 @@ async function runAudit(mode: "daily" | "monthly") {
   });
   if (stored.error) console.error("[audit-llm-models] report insert failed:", stored.error.message);
 
-  try {
-    const r = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/send-model-audit-email`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", "x-internal-call": Deno.env.get("CRON_SECRET") ?? "" },
-      body: JSON.stringify({ reportHtml: renderAuditReportHtml(report), summary, generatedAt: now.toISOString(), mode }),
-    });
-    console.log("[audit-llm-models] email dispatch status", r.status, (await r.text()).slice(0, 300));
-  } catch (e) {
-    console.error("[audit-llm-models] email dispatch failed", e);
+  // Daily runs email only when a probe failed; monthly always emails.
+  const emailSent = shouldSendAuditEmail(mode, summary);
+  if (emailSent) {
+    try {
+      const r = await fetch(`${Deno.env.get("SUPABASE_URL")}/functions/v1/send-model-audit-email`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "x-internal-call": Deno.env.get("CRON_SECRET") ?? "" },
+        body: JSON.stringify({ reportHtml: renderAuditReportHtml(report), summary, generatedAt: now.toISOString(), mode }),
+      });
+      console.log("[audit-llm-models] email dispatch status", r.status, (await r.text()).slice(0, 300));
+    } catch (e) {
+      console.error("[audit-llm-models] email dispatch failed", e);
+    }
+  } else {
+    console.log("[audit-llm-models] daily run clean, email skipped");
   }
 
-  return { ok: true, mode, checked: probes.length, summary, results: probes, lifecycle, deprecationScan, advisor, unregistered };
+  return { ok: true, mode, checked: probes.length, emailSent, summary, results: probes, lifecycle, deprecationScan, advisor, unregistered };
 }
 
 serve(async (req) => {

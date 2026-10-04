@@ -41,3 +41,5 @@ type: feature
 - Scan layout matters: OpenAI rows put the date before the id, Gemini/Vertex rows after it (`DEPRECATION_ROW_LAYOUT`); reading both sides produced false positives from adjacent rows.
 
 **Why:** the old audit only pinged availability, so it reported all-OK while 6 of 10 models had announced shutdowns (gpt-5-mini-2025-08-07 on 2026-12-11 inside the protected engine). Providers answer 200 until removal day.
+
+- Email policy (v6.9.91): monthly always mails; daily mails only when at least one probe failed (`shouldSendAuditEmail`). Silent clean days are intentional.

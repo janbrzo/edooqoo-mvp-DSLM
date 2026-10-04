@@ -46,7 +46,7 @@ The monthly run returns 202 immediately and finishes in the background. Pass `"s
 
 ## Results
 
-- Email to edooqoo@gmail.com. The subject counts failures, shutdowns ≤30 days, switch suggestions and deprecation notices.
+- Email to edooqoo@gmail.com: **monthly always; daily only when at least one probe failed** (a clean daily run sends nothing, the response has `emailSent: false`). The subject counts failures, shutdowns ≤30 days, switch suggestions and deprecation notices. A shutdown ≤30 days alone does not trigger a daily email; it is logged in `error_logs` and shown in the monthly report.
 - `public.model_audit_reports`: one row per run (`summary`, `probes`, `lifecycle`, `deprecation_scan`, `advisor`, `unregistered`).
 - `public.model_health_checks`: one row per probe.
 
