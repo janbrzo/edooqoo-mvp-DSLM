@@ -5,6 +5,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { AuthenticatedPageShell } from '@/components/AuthenticatedPageShell';
 import { useTeacherAlerts, type TeacherAlert } from '@/hooks/useTeacherAlerts';
+import { useAuthFlow } from '@/hooks/useAuthFlow';
+import { useTeacherAuthRedirect } from '@/hooks/useTeacherAuthRedirect';
 import { formatDistanceToNow } from 'date-fns';
 
 const severityMeta = (s: TeacherAlert['severity']) => {
@@ -19,6 +21,8 @@ const severityMeta = (s: TeacherAlert['severity']) => {
  */
 export default function TeacherAlertsPage() {
   const navigate = useNavigate();
+  const { loading: authLoading, isRegisteredUser } = useAuthFlow();
+  useTeacherAuthRedirect(authLoading, !!isRegisteredUser);
   const { alerts, loading, unreadCount, markRead, dismiss, markAllRead } = useTeacherAlerts();
 
   const handleCta = (alert: TeacherAlert) => {

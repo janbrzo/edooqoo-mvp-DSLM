@@ -9,6 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuthFlow } from '@/hooks/useAuthFlow';
+import { useTeacherAuthRedirect } from '@/hooks/useTeacherAuthRedirect';
 import { useTokenSystem } from '@/hooks/useTokenSystem';
 import StickyNav from '@/components/landing/StickyNav';
 import { useWorksheetHistory } from '@/hooks/useWorksheetHistory';
@@ -246,11 +247,7 @@ const AllWorksheetsPage = () => {
   const navigate = useNavigate();
 
   // Authentication check
-  useEffect(() => {
-    if (!authLoading && !isRegisteredUser) {
-      navigate('/');
-    }
-  }, [authLoading, isRegisteredUser, navigate]);
+  useTeacherAuthRedirect(authLoading, !!isRegisteredUser);
 
   // Refetch when page or tab changes
   useEffect(() => {

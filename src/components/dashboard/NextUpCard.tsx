@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ArrowRight, CalendarClock } from 'lucide-react';
 import { formatGoal } from '@/lib/students/formatGoal';
+import { studentPrepPath } from '@/lib/students/quickAccess';
 import type { NextUpStudent } from '@/hooks/useNextUpStudents';
 
 interface NextUpCardProps {
@@ -64,7 +65,7 @@ export const NextUpCard: React.FC<NextUpCardProps> = ({ item }) => {
 
         <Button
           className="mt-auto w-full"
-          onClick={() => navigate(`/student/${item.id}?tab=dslm`)}
+          onClick={() => navigate(studentPrepPath(item.id))}
           aria-label={`Prepare next lesson for ${item.name}`}
         >
           Prepare next lesson
