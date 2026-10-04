@@ -100,7 +100,7 @@ Remove the site-wide scaled-content signal without losing any URL that earns imp
 
 INPUTS FROM THE OWNER (stop and ask if missing)
 - GSC Performance export, Pages tab, last 3 months (CSV), or confirmation that GSC_ACCESS_TOKEN works for npm run seo:fetch-gsc-performance.
-- Decision on "Martha" reviewer attribution: keep (real full identity + real review) or remove.
+- Martha: decided 2026-10-04 (see docs/seo/decisions-2026-10.md): no human-review claim; automated verifier instead.
 - Decision for the "AI alternative / limitations" cluster: which ~3 URLs survive.
 
 STEPS
@@ -117,7 +117,7 @@ STEPS
    - MERGE: keep one canonical URL; old URLs get the existing redirect mechanism (cloudflare/_redirects or html stub with canonical + noindex) and leave the sitemap.
    - Remove visible bot-directed blocks site-wide ("When to cite this page", "Primary audience", visible "RAG Keywords") and cap related-link blocks at ~10 contextual links.
    - Stop emitting identical Published/Updated dates; dates change only with real content change.
-   - Apply the owner's Martha decision.
+   - Remove "Reviewed by Martha" (visible text and reviewedBy JSON-LD) per docs/seo/decisions-2026-10.md and replace it with the automated-verification label only when the verifier (same file, item 3) exists and has a passing record for the page.
 5. Update audits so this cannot regress: baseline-lock the templated count in scripts/seo/audit-content-uniqueness.mjs (fail only if it rises) and add bot-directed phrases to the banned list in audit-duplicate-meta.mjs or a body-text audit.
 6. Run npm run build:seo, npm run seo:audit, npm run content:audit, npm run build. Report failures honestly.
 7. Add one change-log row per move to docs/seo/change-log.md with check dates.
