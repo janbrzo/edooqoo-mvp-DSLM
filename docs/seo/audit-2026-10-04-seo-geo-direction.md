@@ -4,17 +4,17 @@ Zakres: czy dotychczasowa praca nad SEO/GEO szła w dobrą stronę i czy coś sz
 
 Źródła: aktualny checkout `main` (commit `0ee806c`), `docs/seo/*` (eksport GSC z 2026-06-23, baseline GSC z 2026-08-16, live-routing z 2026-08-24), odpytanie produkcji `edooqoo.com` (2026-10-04) oraz nowy pomiar `npm run seo:audit-uniqueness` (`docs/seo/content-uniqueness.generated.md`).
 
-Ograniczenie: w repo nie ma danych GSC po 2026-08-16 ani żadnych odpowiedzi z panelu AI (baseline AI ma 0 wypełnionych wierszy). Wnioski o przyczynach są więc mocne co do *stanu strony*, ale kierunkowe co do *wpływu na ruch*.
+Aktualizacja tego samego dnia: właściciel dostarczył eksporty GSC (Skuteczność za 3 miesiące 2026-06-30 → 2026-09-29, Indeksowanie stron, Breadcrumbs, HTTPS). Sprawdziłem też na produkcji każdy URL z eksportu. Pełny pakiet danych: `docs/seo/runs/monthly/2026-10.md`. Sekcje poniżej uwzględniają te dane; tam, gdzie zmieniły wcześniejszy wniosek, jest to zaznaczone.
 
 ---
 
-## Werdykt w 3 zdaniach
+## Werdykt
 
-1. **Strategia jest dobra**: nisza (freelance tutorzy 1:1 dorosłych), pozycjonowanie „workflow + kontekst ucznia, nauczyciel kontroluje”, dyscyplina claimów, prerender SPA, polityka noindex dla 1330 kombinacji pSEO, czyste robots/sitemap.
-2. **Wykonanie poszło w wolumen szablonowych stron i to jest dziś największe ryzyko**: 65% indeksowalnych stron (358 z 550) ma co najmniej połowę treści wspólnej z inną stroną, 59% (327) to praktycznie duplikaty. Wszystkie są w `sitemap.xml`.
-3. **Dane, które mamy, wskazują to samo**: ruch robią unikalne, ręcznie pisane strony; szablonowe strony nie zbierają wyświetleń, a Google nie chce nawet crawlować części stron produktowych („wykryta, niezindeksowana”).
-
----
+1. **Strategia produktu jest dobra, strategia treści się nie sprawdziła.** Około 200 stron zbudowanych pod tę strategię dało w 3 miesiące 15 kliknięć: 45 stron „AI/ChatGPT alternative” → 1 kliknięcie, 51 stron zawodowych → 0, 13 stron what-to-teach-next → 0, 95 stron pSEO → 14.
+2. **Ruch robią rzeczy unikalne i użyteczne.** 12 URL-i (5 darmowych narzędzi + 7 stron funkcji) dało 42 kliknięcia; `/tools/vocab-cefr-checker` to strona nr 1 w całym serwisie. Do tego unikalne artykuły dla nauczycieli i strony gramatyczne z arkuszami.
+3. **Nie było nagłego spadku po sierpniowym spam update.** Jest powolna erozja: liczba zindeksowanych stron spadła z 622 do 559 (−10% od lipca), a „zeskanowana, niezindeksowana” wzrosła z 27 do 128. Google crawluje strony i coraz częściej ich nie przyjmuje. 65% indeksowalnych stron jest szablonowych (358 z 550), więc to wciąż największe ryzyko, ale nie ma pożaru.
+4. **Nowy, najpilniejszy problem: 38 URL-i, które w ostatnich 3 miesiącach dały 34 kliknięcia i 1042 wyświetlenia, zwraca dziś 404**, bez przekierowania. To 11% wszystkich kliknięć serwisu.
+5. **Zapytania z ICP praktycznie nie istnieją w GSC**: „tutor” → 2 wyświetlenia, a „private”, „adult”, „business english”, „chatgpt” → 0. Ruch z Google to nauczyciele ESL szukający ćwiczeń, narzędzi CEFR i arkuszy. Marka: „edooqoo” → 5 wyświetleń.
 
 ## Co działa — zostawić
 
@@ -56,6 +56,8 @@ Kontekst zewnętrzny: Google wprost nazwał scaled content abuse głównym celem
 
 ### 2. Google nie chce crawlować stron, na których zależy nam najbardziej
 
+> **Korekta po danych z 2026-10-04**: „wykryta, niezindeksowana” spadła z 1000+ do 143, a „zeskanowana, niezindeksowana” wzrosła z 27 do 128. Google crawluje już prawie wszystko, ale coraz częściej odrzuca strony po przeczytaniu. Wniosek o niskiej ocenie jakości stoi; jego mechanizm się zmienił.
+
 Eksport GSC (2026-06-23): 452 zindeksowane, **1000+ „wykryta – obecnie niezindeksowana”** (to limit eksportu, faktycznie może być więcej). Wśród nich są strony produktowe: `/ai-worksheet-generator-for-english-teachers.html`, `/ai-grading-tool-for-english-homework.html`, `/about`, `/blog`. Status „wykryta, niezindeksowana” dla stron, które są w sitemapie i mają linki wewnętrzne, zwykle oznacza, że Google ocenił serwis jako mało wart crawlowania. Problemem nie jest więc brak linków; obecna akcja w analizatorze („strengthen-prerender-internal-links”) leczy objaw.
 
 Wynik: przez 3 miesiące do 2026-08-16 serwis miał **184 kliknięcia i 9020 wyświetleń**. Przy 550 indeksowalnych stronach to ok. 16 wyświetleń na stronę na kwartał.
@@ -87,19 +89,22 @@ Nie ma dowodów, że to zwiększa cytowania przez AI. Systemy AI wybierają źr�
 
 ---
 
-## Rekomendacje (do decyzji, kolejność wg wpływu/ryzyka)
+## Rekomendacje po danych GSC (do decyzji, kolejność wg wpływu/ryzyka)
 
-| # | Ruch | Dlaczego | Kto |
+| # | Ruch | Dowód | Kto |
 |---|---|---|---|
-| 0 | **Sprawdź teraz w GSC**: wykres wyświetleń wokół 18–21.08.2026 i marca 2026; Ręczne działania; Strony → zindeksowane vs niezindeksowane dziś | Rozstrzyga, czy democja już nastąpiła | człowiek, 10 min |
-| 1 | **Przycinanie**: `noindex` i usunięcie z sitemap (lub scalenie z 301 tam, gdzie hosting pozwala) stron szablonowych, które nie miały wyświetleń w GSC przez ostatnie 3 miesiące. Najpierw 79 identycznych „reframed”, potem trójki zawodów (1 strona na zawód), potem klaster „AI alternative” (scalić do ~3 mocnych stron) | Usuwa sygnał scaled content dla całego serwisu, a crawl trafia na strony, które warto indeksować | generator + decyzja |
-| 2 | **Usunąć widoczne bloki dla botów** („When to cite”, „Primary audience”, „RAG Keywords”, blok 60 linków). Zostawić to, co służy ludziom: odpowiedź na początku, tabele, FAQ, 5–10 kontekstowych linków | Sygnał jakości dla Google, zaufanie i konwersja nauczyciela | generatory |
-| 3 | **Martha**: prawdziwa tożsamość + realna recenzja albo usunięcie podpisu | Ryzyko mylącego E-E-A-T | decyzja |
-| 4 | **Prawdziwe przykłady na stronach pSEO**: na 95 indeksowalnych stronach `/worksheets` i `/esl-worksheets` pokazać realny, wygenerowany i sprawdzony przez nauczyciela arkusz (podgląd + klucz odpowiedzi), wytworzony zwykłym flow aplikacji, bez zmian w silniku | Trafia w intencję i daje unikalną wartość, której konkurenci z bibliotekami mają dużo, a Edooqoo dziś nie pokazuje | generator + treść |
-| 5 | **Off-site GEO** (największa dźwignia AI): Bing Webmaster Tools + IndexNow; obecność w zewnętrznych zestawieniach „best AI tools for ESL teachers/tutors”; autentyczny udział w r/TEFL, r/ESL_Teachers, grupach FB nauczycieli; demo na YouTube; katalogi AI/EdTech; jeden spójny opis encji wszędzie | Badania 2026: wzmianki o marce korelują z widocznością w AI Overviews ok. 3× silniej niż backlinki; Perplexity najczęściej cytuje Reddit, ChatGPT treści encyklopedyczne | człowiek |
-| 6 | **Pomiar efektu**: token GSC dla `seo:fetch-gsc-performance`, stały panel 30 zapytań × 4 silniki raz w miesiącu, rejestracje z ruchu organicznego i referral z `chatgpt.com` / `perplexity.ai` | Bez tego nie wiadomo, co działa | człowiek + skrypty |
+| 1 | **Naprawić 38 URL-i z 404**, które mają wyświetlenia: przekierować każdy do najbliższej żywej strony (np. `/blog/modal-verbs-exercises-esl-guide.html` → `/modal-verbs-worksheets-esl.html`) albo odtworzyć treść | 34 kliknięcia i 1042 wyświetlenia tracone teraz; zerowe ryzyko | generator przekierowań, 1 PR |
+| 2 | **Wzmocnić to, co działa**: narzędzia `/tools/*` i `/features/placement-test`. `cefr level checker` ma 94 wyświetlenia na poz. 26.6, `cefr writing checker` poz. 25.8: dopracować tytuł, H1 i treść narzędzia, linki z bloga, ścieżkę narzędzie → rejestracja | Narzędzia mają 98 wyśw./stronę vs 3–6 dla stron strategicznych i przyciągają nauczycieli z realną potrzebą | kod + treść |
+| 3 | **Przycinanie oparte na danych**: `noindex` + usunięcie z sitemap dla 296 stron szablonowych z < 10 wyświetleniami (128 blog, 84 root, 46 `/worksheets`, 31 `/esl-worksheets`, 7 `/english-for`). Trójki zawodowe → 1 strona na zawód albo usunięcie; klaster „AI alternative” → ~3 strony. **Wyjątek: 53 z 79 identycznych „reframed”** mają wyświetlenia (URL-e niosą historię sprzed podmiany treści). Te przepisać do realnej, unikalnej treści, nie wyłączać | Szablony: 7,2 wyśw./stronę vs 29 dla unikalnych; rośnie „zeskanowana, niezindeksowana” | generator + decyzja |
+| 4 | **Usunąć widoczne bloki dla botów** („When to cite”, „Primary audience”, „RAG Keywords”, blok 60 linków) | Strony z nimi nie dostają ruchu; strony, które go dostają, ich nie mają | generatory |
+| 5 | **Promować pSEO, które zarabia**: 19 tras `noindex` z kliknięciami (np. `/esl-worksheets/news-media/c1-advanced`: 14 kliknięć, poz. 6.9) przenieść do zestawu indeksowalnego + prerender, a polityka indeksacji ma odtąd korzystać z danych GSC | Polityka wyłączyła stronę nr 5 w serwisie; w surowym HTML ma canonical na `/` | generator polityki |
+| 6 | **Prawdziwe arkusze na stronach arkuszy**: na indeksowalnych `/worksheets` i `/esl-worksheets` pokazać realny arkusz z aplikacji (podgląd + klucz), bez zmian w silniku | Publiczne strony galerii `/gallery/*` z prawdziwymi arkuszami dostają kliknięcia, a opisowe strony pSEO 3,4 wyśw./stronę | generator + treść |
+| 7 | **Martha**: prawdziwa tożsamość + realna recenzja albo usunięcie podpisu | Ryzyko mylącego E-E-A-T | decyzja |
+| 8 | **Off-site + marka**: Bing Webmaster Tools + IndexNow; zestawienia „best AI tools for ESL teachers”; Reddit/FB (autentycznie); demo na YouTube; katalogi; jeden opis encji | Popyt na markę ≈ 0 („edooqoo” 5 wyśw.), a to najsilniejszy predyktor rekomendacji przez AI | człowiek |
+| 9 | **Decyzja strategiczna o ICP w treściach** (tylko człowiek): produkt zostaje dla tutorów 1:1 dorosłych, ale treści top-of-funnel obsługują szerszą grupę nauczycieli ESL, którzy już przychodzą (ćwiczenia, CEFR, gramatyka), i kierują ich do narzędzi i produktu | Zapytania z ICP mają ~0 wyświetleń; ruch to ogólni nauczyciele ESL | decyzja |
+| 10 | **Pomiar**: token GSC dla `seo:fetch-gsc-performance`, panel 30 zapytań × 4 silniki, rejestracje wg źródła, referral z `chatgpt.com` / `perplexity.ai` | Bez tego retro nie zadziała | człowiek + skrypty |
 
-Czego **nie** robić: nie tworzyć nowych stron, dopóki 1–2 nie są zrobione; nie przepisywać szablonów innymi słowami (parafraza nadal jest scaled content); nie usuwać stron, które mają wyświetlenia.
+Czego **nie** robić: nie tworzyć nowych stron, dopóki 1–5 nie są zrobione; nie przepisywać szablonów innymi słowami (parafraza nadal jest scaled content); nie usuwać stron, które mają wyświetlenia.
 
 Nowy miesięczny workflow: `docs/seo/monthly-workflow.md`.
 

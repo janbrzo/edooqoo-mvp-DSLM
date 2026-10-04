@@ -104,9 +104,13 @@ INPUTS FROM THE OWNER (stop and ask if missing)
 - Decision for the "AI alternative / limitations" cluster: which ~3 URLs survive.
 
 STEPS
+0. First, the zero-risk fixes from docs/seo/runs/monthly/2026-10.md:
+   - Every URL in "404 URLs that earned impressions" gets a redirect (existing legacy-redirect mechanism) to the closest live page by topic; list the mapping in the PR.
+   - The pSEO routes in "Noindexed pSEO routes that earn clicks" move to the indexable set in src/data/pseoIndexPolicy.json and get prerendered.
 1. Run npm run seo:audit-uniqueness. Join docs/seo/content-uniqueness.generated.json with the GSC pages export on route.
 2. Build a portfolio table for every templated page (maxContainment >= 0.5): route, maxContainment, nearest page, 90-day impressions, clicks, best position, proposed label (KEEP / IMPROVE-DEPTH / MERGE / PRUNE / WAIT), merge target.
    Any page with impressions >= 10 is never PRUNE; propose MERGE or IMPROVE-DEPTH instead.
+   Templated pages whose URL still earns impressions (e.g. the "reframed" blog posts) get IMPROVE-DEPTH: real, unique content for the query they rank for, not noindex.
 3. Present the table and the proposed counts per label. STOP and wait for owner approval.
 4. After approval, implement at generator level (generate-strategic-content, generate-legacy-strategic-articles, generate-citable-pages, inject-citation-blocks, cluster hub injection, sitemap and pSEO policy sources):
    - PRUNE: noindex + remove from sitemap and llms resources + remove internal links to it.
@@ -174,7 +178,8 @@ Find what currently holds Edooqoo back and where the nearest wins are, judged by
 
 PART A — HARM CHECK (each item: status OK / RISK / HARM, with evidence)
 1. Scaled or templated content: npm run seo:audit-uniqueness; trend vs last month.
-2. Indexation health: indexed share of sitemap URLs; strategic product pages in "discovered/crawled – not indexed".
+2. Indexation health: indexed share of sitemap URLs; trend of "crawled – currently not indexed"; strategic product pages in "discovered/crawled – not indexed".
+2b. Lost equity: fetch every URL from the GSC Pages export live. Any URL with impressions that now returns 404, a homepage shell, a canonical to another page, or noindex is HARM unless a human decided it. List it with clicks/impressions and the closest live target.
 3. Cannibalisation from GSC (same query, several URLs).
 4. Intent mismatch: pages ranking for queries they do not answer (e.g. a "worksheet" query landing on a page with no worksheet).
 5. Trust signals: unverifiable authors or reviewers, fake freshness, claims not supported by production code (spot-check 10 pages against src/ and docs/llm-context.md), bot-directed visible text.
