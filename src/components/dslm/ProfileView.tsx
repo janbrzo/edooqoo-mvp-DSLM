@@ -156,8 +156,8 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
         )}
       </CollapsibleSection>
 
-      {/* Behavioral Stats — collapsed (key info already in nav badge) */}
-      <CollapsibleSection id="profile-behavioral" title="Behavioral Stats" icon={ActivityIcon} badge="CALCULATED">
+      {/* Learning patterns — open: how the student actually behaves week to week */}
+      <CollapsibleSection id="profile-behavioral" title="Learning Patterns" icon={ActivityIcon} badge="CALCULATED" defaultOpen>
         <BehavioralStatsCard
           stats={behavioralStats || {
             lessonsPerWeek: null, totalLessons: 0, cancellationRate: null,
@@ -169,26 +169,15 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
         />
       </CollapsibleSection>
 
-      {/* Personal Notes — collapsed */}
-      <CollapsibleSection id="profile-personal" title="Personal Notes" icon={User} count={personalNotes.length}>
-        {personalNotes.length === 0 ? (
-          <p className="text-xs text-muted-foreground text-center py-2">No personal notes yet</p>
-        ) : (
-          <div className="space-y-2">
-            {personalNotes.map(entry => (
-              <StudentKnowledgeEntryCard
-                key={entry.id} entry={entry}
-                onView={() => {}} onEdit={() => {}} onDelete={knowledge.deleteEntry}
-                onMarkOutdated={knowledge.markAsOutdated}
-                onMarkCurrent={knowledge.markAsCurrent}
-              />
-            ))}
-          </div>
-        )}
-      </CollapsibleSection>
-
-      {/* All Notes — collapsed */}
-      <CollapsibleSection id="profile-all-notes" title="All Notes" icon={StickyNote} count={knowledge.totalCount}>
+      {/* Single notes stream (category filter lives inside StudentKnowledgeSection) */}
+      <CollapsibleSection
+        id="profile-all-notes"
+        title="Notes"
+        icon={StickyNote}
+        count={knowledge.totalCount}
+        badge={personalNotes.length > 0 ? `${personalNotes.length} personal` : undefined}
+        alsoOpenFor={['profile-personal']}
+      >
         <StudentKnowledgeSection
           studentId={studentId}
           teacherId={teacherId}
@@ -196,8 +185,8 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
         />
       </CollapsibleSection>
 
-      {/* Event Log — collapsed debug */}
-      <CollapsibleSection id="profile-debug" title="Event Log" icon={Bug}>
+      {/* Advanced diagnostics — collapsed, for troubleshooting only */}
+      <CollapsibleSection id="profile-debug" title="Advanced: diagnostic log" icon={Bug} description="Raw learning events the model received. Useful only when something looks wrong.">
         <EventLogPanel studentId={studentId} teacherId={teacherId} />
       </CollapsibleSection>
     </div>
