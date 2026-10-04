@@ -591,3 +591,18 @@ Executed with Playwright against the running app, signed in as the real teacher 
 | Mobile 360 px, all 4 tabs | PASS — `scrollWidth === innerWidth === 360` on every tab; top bar collapses to icon-only + hamburger, Student snapshot collapsed, tab pills fit on one row (`Model` label shortened) |
 
 Result: PASS. No code changes were required by this run.
+
+## 19. Learning model — Model Cockpit v1.0
+
+Problem: the Learning model tab was a single scroll wall (sidebar + six stacked sections) with no hierarchy between direction, current ability and learner profile.
+
+As built:
+- `ModelCockpitHeader` (always visible): model health (`computeModelHealth`: lessons + worksheets; >=8 tuned, >=3 learning, else calibrating), level, lessons, worksheets, pacing slot, main goal slot.
+- Segmented control with three perspectives, resolved by `resolveModelPerspective(view)` in `workspaceTabs.ts`:
+  - `roadmap` (`view=pathway` or `view=goals`): PathwayView + GoalsView. Main goal hero card, supporting goals open, additional/achieved/archived goals and goal notes behind one "More goals & notes" disclosure.
+  - `skills` (`view=skills`): summary row (level, placement test estimated level, worksheets), heat map open, micro skills and skill notes collapsed.
+  - `profile` (`view=profile`): AI Summary, Psychological Profile, Learning Patterns (open), single Notes stream, "Advanced: diagnostic log" (collapsed).
+- Compatibility: legacy aliases (`dslm`, `progress`, `skills`, `knowledge`, `events`), `focus=add-goal-modal`, `focus=pick-idea`, `dslm:addGoal`, `editSuggestion` all route to the correct perspective. Old `profile-personal` subsection id opens the Notes section.
+- Worksheet Generation Engine untouched.
+
+Verification (2026-10-04): tsgo clean; vitest workspaceTabs + modelHealth 78/78. Live browser check not performed — this project's auth status is `external_unmanaged` and the demo account stalls on the loading screen; manual check on a real account pending.
