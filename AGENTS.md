@@ -8,7 +8,7 @@ One rule per entry, with a one-line why. Replace an existing rule instead of add
 
 ## Student Workspace
 
-- Student Workspace tab state lives only in the URL and is resolved via `src/lib/students/workspaceTabs.ts`; legacy `?tab=` aliases are permanent — because sent emails and bookmarks carry them.
+- Student Workspace tab and Learning model perspective state live only in the URL and are resolved via `src/lib/students/workspaceTabs.ts` (`resolveModelPerspective` for `view=`); legacy `?tab=` aliases are permanent — because sent emails and bookmarks carry them.
 
 ## Answers & Evaluation
 
