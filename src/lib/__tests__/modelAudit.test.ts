@@ -23,7 +23,7 @@ import {
 
 const NOW = new Date('2026-10-04T12:00:00Z');
 
-function entry(overrides: Partial<ModelRegistryEntry> & { lifecycle?: Partial<ModelRegistryEntry['lifecycle']> } = {}): ModelRegistryEntry {
+function entry(overrides: Partial<Omit<ModelRegistryEntry, 'lifecycle'>> & { lifecycle?: Partial<ModelRegistryEntry['lifecycle']> } = {}): ModelRegistryEntry {
   const { lifecycle, ...rest } = overrides;
   return {
     id: 'gpt-4o-mini',
