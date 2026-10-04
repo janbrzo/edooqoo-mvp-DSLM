@@ -24,7 +24,7 @@
     "edgeFunctions": 81,
     "typedTables": 61,
     "typedRpcs": 86,
-    "migrationIndexes": 18
+    "migrationIndexes": 19
   },
   "routes": [
     {
@@ -43893,35 +43893,33 @@
         ],
         "requestFields": [],
         "visibleResponseFields": [
-          "checked",
           "contents",
-          "error",
           "generatedAt",
           "generationConfig",
-          "max_tokens",
-          "messages",
+          "input",
           "mode",
           "model",
-          "ok",
           "reportHtml",
-          "results",
-          "summary"
+          "response_format",
+          "summary",
+          "systemInstruction",
+          "voice"
         ],
         "dataDependencies": {
           "tables": [
+            "error_logs",
+            "model_audit_reports",
             "model_health_checks"
           ],
           "rpcs": [],
           "edgeFunctions": [],
-          "fetchTargets": [
-            "${target.endpoint}?key=${key}",
-            "${url}/functions/v1/send-model-audit-email"
-          ]
+          "fetchTargets": []
         },
         "environmentVariables": [
           "CRON_SECRET",
           "GEMINI_API_KEY",
           "GEMINI_VERTEX_API_KEY",
+          "MODEL_ADVISOR_MODEL",
           "OPENAI_API_KEY",
           "SUPABASE_SERVICE_ROLE_KEY",
           "SUPABASE_URL"
@@ -49890,6 +49888,7 @@
         "featureOwnership": {
           "clientFiles": [],
           "edgeFunctions": [
+            "audit-llm-models",
             "backfill-welcome-test-auto-apply",
             "send-welcome-test-completion-email"
           ]
@@ -55877,6 +55876,12 @@
         "table": "mcp_tokens",
         "unique": false,
         "migration": "supabase/migrations/20260725124453_86489a73-813a-457d-aff2-4f7037b4d6c5.sql"
+      },
+      {
+        "name": "idx_model_audit_reports_recent",
+        "table": "model_audit_reports",
+        "unique": false,
+        "migration": "supabase/migrations/20261004120000_model_audit_lifecycle.sql"
       }
     ],
     "migrationFunctions": [
@@ -56504,6 +56509,12 @@
           "supabase/functions/gcal-sync/index.ts",
           "supabase/functions/student-gcal-auth-callback/index.ts",
           "supabase/functions/student-gcal-sync/index.ts"
+        ]
+      },
+      {
+        "name": "MODEL_ADVISOR_MODEL",
+        "callsites": [
+          "supabase/functions/audit-llm-models/index.ts"
         ]
       },
       {
