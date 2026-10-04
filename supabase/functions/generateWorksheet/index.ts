@@ -337,6 +337,12 @@ async function generateWithGeminiStream(
 
   console.log("🔵 Gemini 2.5 Flash streaming with JSON mode enabled...");
   const result = await model.generateContentStream(fullPrompt);
+  // v6.9.96 — the SDK's aggregated `response` promise rejects with the same
+  // "Failed to parse stream" error as `result.stream`. Nobody awaits it, so it
+  // surfaced as an unhandled rejection ("event loop error") that killed the
+  // worker before the DB insert. The stream loop below still throws and
+  // triggers recovery/fallback; this only marks the rejection as observed.
+  result.response.catch(() => {});
 
   let fullContent = "";
   for await (const chunk of result.stream) {
@@ -753,6 +759,9 @@ serve(async (req) => {
         try {
           safeSend("start", { message: "Starting generation..." });
 
+          let geminiFailed = false;
+          let salvaged: { data: any; content: string; repairMethod: string; modelOverride?: string } | null = null;
+
           try {
             console.log("🔵 Trying Gemini 2.5 Flash streaming...");
             streamUsedModel = "gemini-2.5-flash";
@@ -777,7 +786,32 @@ serve(async (req) => {
             fullContent = geminiResult.content;
             console.log(`✅ Gemini streaming completed`);
           } catch (geminiError) {
-            console.warn("⚠️ Gemini streaming failed, falling back to OpenAI:", (geminiError as Error).message);
+            geminiFailed = true;
+            // v6.9.96 — Gemini can throw "Failed to parse stream" AFTER every
+            // exercise already arrived (callback buffered it in `fullContent`).
+            // Try to salvage that content before paying for a slow OpenAI
+            // regeneration.
+            if (lastExerciseCount >= expectedTotal && fullContent.trim()) {
+              try {
+                const rescued = await parseWithRecovery(fullContent, expectedTotal);
+                if (Array.isArray(rescued.data?.exercises) && rescued.data.exercises.length >= expectedTotal) {
+                  console.warn(
+                    "🛟 Gemini stream errored after full content — salvaged without fallback:",
+                    (geminiError as Error).message,
+                  );
+                  salvaged = {
+                    data: rescued.data,
+                    content: fullContent,
+                    repairMethod: rescued.repairMethod === 'none' ? 'stream-salvage' : `stream-salvage+${rescued.repairMethod}`,
+                  };
+                }
+              } catch (salvageError) {
+                console.warn("⚠️ Stream salvage failed, using OpenAI fallback:", (salvageError as Error).message);
+              }
+            }
+          }
+          if (geminiFailed && !salvaged) {
+            console.warn("⚠️ Gemini streaming failed, falling back to OpenAI");
             streamUsedModel = "gpt-5-mini-2025-08-07";
             // v6.9.60 — keep progress monotonic across the fallback so the
             // client UI does not visually regress from e.g. 3/8 back to 1/8.
@@ -836,7 +870,7 @@ serve(async (req) => {
             // v6.9.64 — allow a parse-safe model fallback for picture worksheets
             // (the long visual description is the dominant cause of malformed
             // JSON). Non-picture worksheets keep the old behavior.
-            const result = await parseOrRegenerateWithFallback({
+            const result = salvaged ?? await parseOrRegenerateWithFallback({
               rawContent: fullContent,
               expectedExerciseCount: expectedTotal,
               systemMessage,
