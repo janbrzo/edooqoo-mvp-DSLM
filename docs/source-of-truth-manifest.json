@@ -1715,7 +1715,7 @@
       "redirectTo": null,
       "crawl": {
         "robotsBlocked": false,
-        "sitemapMatches": 35,
+        "sitemapMatches": 8,
         "status": "indexable-generated-family"
       },
       "dataDependencies": {
@@ -1738,7 +1738,7 @@
       "redirectTo": null,
       "crawl": {
         "robotsBlocked": false,
-        "sitemapMatches": 50,
+        "sitemapMatches": 5,
         "status": "indexable-generated-family"
       },
       "dataDependencies": {
@@ -1761,7 +1761,7 @@
       "redirectTo": null,
       "crawl": {
         "robotsBlocked": false,
-        "sitemapMatches": 10,
+        "sitemapMatches": 3,
         "status": "indexable-generated-family"
       },
       "dataDependencies": {

@@ -1,7 +1,7 @@
 {
   "generatedBy": "scripts/seo/audit-internal-link-graph.mjs",
   "totals": {
-    "pages": 631,
+    "pages": 597,
     "strategic": 420,
     "orphanStrategic": 0,
     "weakTop40": 0,
@@ -24,14 +24,14 @@
       "route": "/chatgpt-alternative-for-english-tutors.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 393,
+      "incoming": 321,
       "outgoing": 21
     },
     {
       "route": "/edooqoo-vs-chatgpt.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 388,
+      "incoming": 316,
       "outgoing": 10
     },
     {
@@ -45,42 +45,42 @@
       "route": "/features/dslm",
       "type": "spa-route",
       "state": "keep",
-      "incoming": 396,
+      "incoming": 324,
       "outgoing": 64
     },
     {
       "route": "/features/homework",
       "type": "spa-route",
       "state": "keep",
-      "incoming": 429,
+      "incoming": 357,
       "outgoing": 64
     },
     {
       "route": "/gallery",
       "type": "spa-route",
       "state": "keep",
-      "incoming": 301,
+      "incoming": 280,
       "outgoing": 65
     },
     {
       "route": "/how-it-works",
       "type": "spa-route",
       "state": "keep",
-      "incoming": 409,
+      "incoming": 337,
       "outgoing": 64
     },
     {
       "route": "/one-minute-prep",
       "type": "spa-route",
       "state": "keep",
-      "incoming": 432,
+      "incoming": 360,
       "outgoing": 64
     },
     {
       "route": "/resources",
       "type": "spa-route",
       "state": "keep",
-      "incoming": 307,
+      "incoming": 235,
       "outgoing": 105
     },
     {
@@ -164,7 +164,7 @@
       "route": "/chatgpt-for-esl-teachers-limitations.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 172,
+      "incoming": 100,
       "outgoing": 46
     },
     {
@@ -192,91 +192,91 @@
       "route": "/edooqoo-vs-busyteacher.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 160,
+      "incoming": 88,
       "outgoing": 10
     },
     {
       "route": "/edooqoo-vs-claude.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 160,
+      "incoming": 88,
       "outgoing": 10
     },
     {
       "route": "/edooqoo-vs-copilot.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 160,
+      "incoming": 88,
       "outgoing": 10
     },
     {
       "route": "/edooqoo-vs-gemini.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 160,
+      "incoming": 88,
       "outgoing": 10
     },
     {
       "route": "/edooqoo-vs-general-purpose-ai.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 160,
+      "incoming": 88,
       "outgoing": 10
     },
     {
       "route": "/edooqoo-vs-islcollective.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 160,
+      "incoming": 88,
       "outgoing": 10
     },
     {
       "route": "/edooqoo-vs-kahoot.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 160,
+      "incoming": 88,
       "outgoing": 10
     },
     {
       "route": "/edooqoo-vs-liveworksheets.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 160,
+      "incoming": 88,
       "outgoing": 10
     },
     {
       "route": "/edooqoo-vs-magicschool.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 160,
+      "incoming": 88,
       "outgoing": 10
     },
     {
       "route": "/edooqoo-vs-perplexity.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 160,
+      "incoming": 88,
       "outgoing": 10
     },
     {
       "route": "/edooqoo-vs-quizlet.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 160,
+      "incoming": 88,
       "outgoing": 10
     },
     {
       "route": "/edooqoo-vs-twee.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 160,
+      "incoming": 88,
       "outgoing": 10
     },
     {
       "route": "/edooqoo-vs-wordwall.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 160,
+      "incoming": 88,
       "outgoing": 10
     },
     {
@@ -297,7 +297,7 @@
       "route": "/blog/adult-business-english-homework-feedback-loop.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 13,
+      "incoming": 14,
       "outgoing": 59
     },
     {
@@ -353,7 +353,7 @@
       "route": "/blog/best-workflow-for-private-english-tutors.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 13,
+      "incoming": 14,
       "outgoing": 59
     },
     {
@@ -388,14 +388,14 @@
       "route": "/blog/creating-interactive-worksheets-online.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 16,
+      "incoming": 17,
       "outgoing": 59
     },
     {
       "route": "/blog/digital-homework-tools-esl-teachers.html",
       "type": "blog",
       "state": "hold",
-      "incoming": 15,
+      "incoming": 16,
       "outgoing": 59
     },
     {
@@ -689,14 +689,14 @@
       "route": "/adult-business-english-lesson-prep.html",
       "type": "static-landing",
       "state": "keep",
-      "incoming": 229,
+      "incoming": 230,
       "outgoing": 18
     },
     {
       "route": "/ai-chatbot-vs-student-context-system.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 172,
+      "incoming": 100,
       "outgoing": 44
     },
     {
@@ -717,7 +717,7 @@
       "route": "/ai-lesson-planning-for-english-teachers.html",
       "type": "static-landing",
       "state": "keep",
-      "incoming": 232,
+      "incoming": 233,
       "outgoing": 18
     },
     {
@@ -766,14 +766,14 @@
       "route": "/ai-tools-for-online-esl-teachers.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 173,
+      "incoming": 101,
       "outgoing": 21
     },
     {
       "route": "/ai-tools-for-private-english-tutors.html",
       "type": "static-landing",
       "state": "keep",
-      "incoming": 172,
+      "incoming": 100,
       "outgoing": 21
     },
     {
@@ -787,7 +787,7 @@
       "route": "/ai-worksheet-generator-for-english-teachers.html",
       "type": "static-landing",
       "state": "keep",
-      "incoming": 83,
+      "incoming": 57,
       "outgoing": 18
     },
     {
@@ -836,7 +836,7 @@
       "route": "/best-ai-tools-for-private-english-tutors.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 172,
+      "incoming": 100,
       "outgoing": 21
     },
     {
@@ -850,7 +850,7 @@
       "route": "/best-ai-worksheet-tools-for-english-tutors.html",
       "type": "static-landing",
       "state": "hold",
-      "incoming": 172,
+      "incoming": 100,
       "outgoing": 43
     }
   ],

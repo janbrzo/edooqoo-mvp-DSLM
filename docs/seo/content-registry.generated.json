@@ -26,14 +26,14 @@
   },
   "counts": {
     "total": 1988,
-    "indexable": 557,
+    "indexable": 473,
     "byState": {
       "keep": 93,
       "improve": 0,
       "merge": 83,
       "retire": 0,
-      "hold": 464,
-      "noindex": 1348
+      "hold": 380,
+      "noindex": 1432
     }
   },
   "entries": [
@@ -8421,11 +8421,11 @@
       "route": "/english-for/accountants",
       "canonical": "https://edooqoo.com/english-for/accountants",
       "type": "persona",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Adult and Business English",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/english-for/cabin-crew",
@@ -8461,11 +8461,11 @@
       "route": "/english-for/consultants",
       "canonical": "https://edooqoo.com/english-for/consultants",
       "type": "persona",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Adult and Business English",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/english-for/customer-service",
@@ -8491,21 +8491,21 @@
       "route": "/english-for/entrepreneurs",
       "canonical": "https://edooqoo.com/english-for/entrepreneurs",
       "type": "persona",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Adult and Business English",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/english-for/executives",
       "canonical": "https://edooqoo.com/english-for/executives",
       "type": "persona",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Adult and Business English",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/english-for/financial-advisors",
@@ -8541,21 +8541,21 @@
       "route": "/english-for/lawyers",
       "canonical": "https://edooqoo.com/english-for/lawyers",
       "type": "persona",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Adult and Business English",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/english-for/marketing-managers",
       "canonical": "https://edooqoo.com/english-for/marketing-managers",
       "type": "persona",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Adult and Business English",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/english-for/nurses",
@@ -8571,11 +8571,11 @@
       "route": "/english-for/project-managers",
       "canonical": "https://edooqoo.com/english-for/project-managers",
       "type": "persona",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Adult and Business English",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/english-for/real-estate-agents",
@@ -9051,11 +9051,11 @@
       "route": "/esl-worksheets/business-email/c1-advanced",
       "canonical": "https://edooqoo.com/esl-worksheets/business-email/c1-advanced",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Adult and Business English",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/business-email/c2-proficiency",
@@ -9211,31 +9211,31 @@
       "route": "/esl-worksheets/conditionals/b1-intermediate",
       "canonical": "https://edooqoo.com/esl-worksheets/conditionals/b1-intermediate",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/conditionals/b2-upper-intermediate",
       "canonical": "https://edooqoo.com/esl-worksheets/conditionals/b2-upper-intermediate",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/conditionals/c1-advanced",
       "canonical": "https://edooqoo.com/esl-worksheets/conditionals/c1-advanced",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/conditionals/c2-proficiency",
@@ -10001,31 +10001,31 @@
       "route": "/esl-worksheets/ielts-writing-task-2/b2-upper-intermediate",
       "canonical": "https://edooqoo.com/esl-worksheets/ielts-writing-task-2/b2-upper-intermediate",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/ielts-writing-task-2/c1-advanced",
       "canonical": "https://edooqoo.com/esl-worksheets/ielts-writing-task-2/c1-advanced",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/ielts-writing-task-2/c2-proficiency",
       "canonical": "https://edooqoo.com/esl-worksheets/ielts-writing-task-2/c2-proficiency",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/job-interview/a1-beginner",
@@ -10041,41 +10041,41 @@
       "route": "/esl-worksheets/job-interview/a2-elementary",
       "canonical": "https://edooqoo.com/esl-worksheets/job-interview/a2-elementary",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/job-interview/b1-intermediate",
       "canonical": "https://edooqoo.com/esl-worksheets/job-interview/b1-intermediate",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/job-interview/b2-upper-intermediate",
       "canonical": "https://edooqoo.com/esl-worksheets/job-interview/b2-upper-intermediate",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/job-interview/c1-advanced",
       "canonical": "https://edooqoo.com/esl-worksheets/job-interview/c1-advanced",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/job-interview/c2-proficiency",
@@ -10111,31 +10111,31 @@
       "route": "/esl-worksheets/meetings/b1-intermediate",
       "canonical": "https://edooqoo.com/esl-worksheets/meetings/b1-intermediate",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/meetings/b2-upper-intermediate",
       "canonical": "https://edooqoo.com/esl-worksheets/meetings/b2-upper-intermediate",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/meetings/c1-advanced",
       "canonical": "https://edooqoo.com/esl-worksheets/meetings/c1-advanced",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/meetings/c2-proficiency",
@@ -10161,41 +10161,41 @@
       "route": "/esl-worksheets/modal-verbs/a2-elementary",
       "canonical": "https://edooqoo.com/esl-worksheets/modal-verbs/a2-elementary",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/modal-verbs/b1-intermediate",
       "canonical": "https://edooqoo.com/esl-worksheets/modal-verbs/b1-intermediate",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/modal-verbs/b2-upper-intermediate",
       "canonical": "https://edooqoo.com/esl-worksheets/modal-verbs/b2-upper-intermediate",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/modal-verbs/c1-advanced",
       "canonical": "https://edooqoo.com/esl-worksheets/modal-verbs/c1-advanced",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/modal-verbs/c2-proficiency",
@@ -10391,41 +10391,41 @@
       "route": "/esl-worksheets/past-simple/a1-beginner",
       "canonical": "https://edooqoo.com/esl-worksheets/past-simple/a1-beginner",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/past-simple/a2-elementary",
       "canonical": "https://edooqoo.com/esl-worksheets/past-simple/a2-elementary",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/past-simple/b1-intermediate",
       "canonical": "https://edooqoo.com/esl-worksheets/past-simple/b1-intermediate",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/past-simple/b2-upper-intermediate",
       "canonical": "https://edooqoo.com/esl-worksheets/past-simple/b2-upper-intermediate",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/past-simple/c1-advanced",
@@ -10531,21 +10531,21 @@
       "route": "/esl-worksheets/phrasal-verbs/b1-intermediate",
       "canonical": "https://edooqoo.com/esl-worksheets/phrasal-verbs/b1-intermediate",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/phrasal-verbs/b2-upper-intermediate",
       "canonical": "https://edooqoo.com/esl-worksheets/phrasal-verbs/b2-upper-intermediate",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/phrasal-verbs/c1-advanced",
@@ -10641,41 +10641,41 @@
       "route": "/esl-worksheets/present-perfect/a2-elementary",
       "canonical": "https://edooqoo.com/esl-worksheets/present-perfect/a2-elementary",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/present-perfect/b1-intermediate",
       "canonical": "https://edooqoo.com/esl-worksheets/present-perfect/b1-intermediate",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/present-perfect/b2-upper-intermediate",
       "canonical": "https://edooqoo.com/esl-worksheets/present-perfect/b2-upper-intermediate",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/present-perfect/c1-advanced",
       "canonical": "https://edooqoo.com/esl-worksheets/present-perfect/c1-advanced",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/present-perfect/c2-proficiency",
@@ -11171,11 +11171,11 @@
       "route": "/esl-worksheets/travel-vocabulary/a1-beginner",
       "canonical": "https://edooqoo.com/esl-worksheets/travel-vocabulary/a1-beginner",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Homework and Retention",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/travel-vocabulary/a2-elementary",
@@ -11191,21 +11191,21 @@
       "route": "/esl-worksheets/travel-vocabulary/b1-intermediate",
       "canonical": "https://edooqoo.com/esl-worksheets/travel-vocabulary/b1-intermediate",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Homework and Retention",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/travel-vocabulary/b2-upper-intermediate",
       "canonical": "https://edooqoo.com/esl-worksheets/travel-vocabulary/b2-upper-intermediate",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Homework and Retention",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/travel-vocabulary/c1-advanced",
@@ -14861,11 +14861,11 @@
       "route": "/worksheets/collocations-match/phrasal-verbs",
       "canonical": "https://edooqoo.com/worksheets/collocations-match/phrasal-verbs",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/collocations-match/prepositions",
@@ -15661,11 +15661,11 @@
       "route": "/worksheets/definition-match/phrasal-verbs",
       "canonical": "https://edooqoo.com/worksheets/definition-match/phrasal-verbs",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/definition-match/prepositions",
@@ -15981,31 +15981,31 @@
       "route": "/worksheets/dialogue-completion/job-interview",
       "canonical": "https://edooqoo.com/worksheets/dialogue-completion/job-interview",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/dialogue-completion/meetings",
       "canonical": "https://edooqoo.com/worksheets/dialogue-completion/meetings",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/dialogue-completion/modal-verbs",
       "canonical": "https://edooqoo.com/worksheets/dialogue-completion/modal-verbs",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/dialogue-completion/negotiations",
@@ -16041,11 +16041,11 @@
       "route": "/worksheets/dialogue-completion/past-simple",
       "canonical": "https://edooqoo.com/worksheets/dialogue-completion/past-simple",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/dialogue-completion/phrasal-business",
@@ -16061,11 +16061,11 @@
       "route": "/worksheets/dialogue-completion/phrasal-verbs",
       "canonical": "https://edooqoo.com/worksheets/dialogue-completion/phrasal-verbs",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/dialogue-completion/prepositions",
@@ -16081,11 +16081,11 @@
       "route": "/worksheets/dialogue-completion/present-perfect",
       "canonical": "https://edooqoo.com/worksheets/dialogue-completion/present-perfect",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/dialogue-completion/presentations",
@@ -16171,11 +16171,11 @@
       "route": "/worksheets/dialogue-completion/travel-vocabulary",
       "canonical": "https://edooqoo.com/worksheets/dialogue-completion/travel-vocabulary",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Homework and Retention",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/dialogue-completion/weather",
@@ -16641,11 +16641,11 @@
       "route": "/worksheets/error-correction/conditionals",
       "canonical": "https://edooqoo.com/worksheets/error-correction/conditionals",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Student Evidence and Progress",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/error-correction/conflict-resolution",
@@ -16771,11 +16771,11 @@
       "route": "/worksheets/error-correction/ielts-writing-task-2",
       "canonical": "https://edooqoo.com/worksheets/error-correction/ielts-writing-task-2",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Student Evidence and Progress",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/error-correction/job-interview",
@@ -16801,11 +16801,11 @@
       "route": "/worksheets/error-correction/modal-verbs",
       "canonical": "https://edooqoo.com/worksheets/error-correction/modal-verbs",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Student Evidence and Progress",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/error-correction/negotiations",
@@ -16841,11 +16841,11 @@
       "route": "/worksheets/error-correction/past-simple",
       "canonical": "https://edooqoo.com/worksheets/error-correction/past-simple",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Student Evidence and Progress",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/error-correction/phrasal-business",
@@ -17241,11 +17241,11 @@
       "route": "/worksheets/fill-in-the-blanks/past-simple",
       "canonical": "https://edooqoo.com/worksheets/fill-in-the-blanks/past-simple",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/fill-in-the-blanks/phrasal-business",
@@ -17661,11 +17661,11 @@
       "route": "/worksheets/gap-fill/phrasal-verbs",
       "canonical": "https://edooqoo.com/worksheets/gap-fill/phrasal-verbs",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/gap-fill/prepositions",
@@ -17681,11 +17681,11 @@
       "route": "/worksheets/gap-fill/present-perfect",
       "canonical": "https://edooqoo.com/worksheets/gap-fill/present-perfect",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/gap-fill/presentations",
@@ -18241,11 +18241,11 @@
       "route": "/worksheets/matching/conditionals",
       "canonical": "https://edooqoo.com/worksheets/matching/conditionals",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/matching/conflict-resolution",
@@ -18381,11 +18381,11 @@
       "route": "/worksheets/matching/job-interview",
       "canonical": "https://edooqoo.com/worksheets/matching/job-interview",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/matching/meetings",
@@ -18571,11 +18571,11 @@
       "route": "/worksheets/matching/travel-vocabulary",
       "canonical": "https://edooqoo.com/worksheets/matching/travel-vocabulary",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Homework and Retention",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/matching/weather",
@@ -18801,11 +18801,11 @@
       "route": "/worksheets/multiple-choice/modal-verbs",
       "canonical": "https://edooqoo.com/worksheets/multiple-choice/modal-verbs",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/multiple-choice/negotiations",
@@ -19041,11 +19041,11 @@
       "route": "/worksheets/open-question/conditionals",
       "canonical": "https://edooqoo.com/worksheets/open-question/conditionals",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/open-question/conflict-resolution",
@@ -19181,31 +19181,31 @@
       "route": "/worksheets/open-question/job-interview",
       "canonical": "https://edooqoo.com/worksheets/open-question/job-interview",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/open-question/meetings",
       "canonical": "https://edooqoo.com/worksheets/open-question/meetings",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/open-question/modal-verbs",
       "canonical": "https://edooqoo.com/worksheets/open-question/modal-verbs",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/open-question/negotiations",
@@ -19261,11 +19261,11 @@
       "route": "/worksheets/open-question/phrasal-verbs",
       "canonical": "https://edooqoo.com/worksheets/open-question/phrasal-verbs",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/open-question/prepositions",
@@ -19281,11 +19281,11 @@
       "route": "/worksheets/open-question/present-perfect",
       "canonical": "https://edooqoo.com/worksheets/open-question/present-perfect",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/open-question/presentations",
@@ -19371,11 +19371,11 @@
       "route": "/worksheets/open-question/travel-vocabulary",
       "canonical": "https://edooqoo.com/worksheets/open-question/travel-vocabulary",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Homework and Retention",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/open-question/weather",
@@ -19411,11 +19411,11 @@
       "route": "/worksheets/ordering/business-email",
       "canonical": "https://edooqoo.com/worksheets/ordering/business-email",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Adult and Business English",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/ordering/collocations",
@@ -19571,11 +19571,11 @@
       "route": "/worksheets/ordering/ielts-writing-task-2",
       "canonical": "https://edooqoo.com/worksheets/ordering/ielts-writing-task-2",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/ordering/job-interview",
@@ -19641,11 +19641,11 @@
       "route": "/worksheets/ordering/past-simple",
       "canonical": "https://edooqoo.com/worksheets/ordering/past-simple",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/ordering/phrasal-business",
@@ -19811,11 +19811,11 @@
       "route": "/worksheets/paragraph-writing/business-email",
       "canonical": "https://edooqoo.com/worksheets/paragraph-writing/business-email",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Adult and Business English",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/paragraph-writing/collocations",
@@ -19841,11 +19841,11 @@
       "route": "/worksheets/paragraph-writing/conditionals",
       "canonical": "https://edooqoo.com/worksheets/paragraph-writing/conditionals",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/paragraph-writing/conflict-resolution",
@@ -19971,11 +19971,11 @@
       "route": "/worksheets/paragraph-writing/ielts-writing-task-2",
       "canonical": "https://edooqoo.com/worksheets/paragraph-writing/ielts-writing-task-2",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/paragraph-writing/job-interview",
@@ -21771,11 +21771,11 @@
       "route": "/worksheets/picture-vocabulary/travel-vocabulary",
       "canonical": "https://edooqoo.com/worksheets/picture-vocabulary/travel-vocabulary",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Homework and Retention",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/picture-vocabulary/weather",
@@ -21981,11 +21981,11 @@
       "route": "/worksheets/pronunciation-drill/job-interview",
       "canonical": "https://edooqoo.com/worksheets/pronunciation-drill/job-interview",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/pronunciation-drill/meetings",
@@ -22211,11 +22211,11 @@
       "route": "/worksheets/rewriting/business-email",
       "canonical": "https://edooqoo.com/worksheets/rewriting/business-email",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Adult and Business English",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/rewriting/collocations",
@@ -22371,11 +22371,11 @@
       "route": "/worksheets/rewriting/ielts-writing-task-2",
       "canonical": "https://edooqoo.com/worksheets/rewriting/ielts-writing-task-2",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/rewriting/job-interview",
@@ -22401,11 +22401,11 @@
       "route": "/worksheets/rewriting/modal-verbs",
       "canonical": "https://edooqoo.com/worksheets/rewriting/modal-verbs",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/rewriting/negotiations",
@@ -22611,11 +22611,11 @@
       "route": "/worksheets/short-answer/business-email",
       "canonical": "https://edooqoo.com/worksheets/short-answer/business-email",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Adult and Business English",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/short-answer/collocations",
@@ -22781,21 +22781,21 @@
       "route": "/worksheets/short-answer/job-interview",
       "canonical": "https://edooqoo.com/worksheets/short-answer/job-interview",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/short-answer/meetings",
       "canonical": "https://edooqoo.com/worksheets/short-answer/meetings",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/short-answer/modal-verbs",
@@ -22841,11 +22841,11 @@
       "route": "/worksheets/short-answer/past-simple",
       "canonical": "https://edooqoo.com/worksheets/short-answer/past-simple",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/short-answer/phrasal-business",
@@ -22881,11 +22881,11 @@
       "route": "/worksheets/short-answer/present-perfect",
       "canonical": "https://edooqoo.com/worksheets/short-answer/present-perfect",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/short-answer/presentations",
@@ -22971,11 +22971,11 @@
       "route": "/worksheets/short-answer/travel-vocabulary",
       "canonical": "https://edooqoo.com/worksheets/short-answer/travel-vocabulary",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Homework and Retention",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/short-answer/weather",
@@ -23441,11 +23441,11 @@
       "route": "/worksheets/transformation/conditionals",
       "canonical": "https://edooqoo.com/worksheets/transformation/conditionals",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/transformation/conflict-resolution",
@@ -24371,11 +24371,11 @@
       "route": "/worksheets/word-formation/ielts-writing-task-2",
       "canonical": "https://edooqoo.com/worksheets/word-formation/ielts-writing-task-2",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/word-formation/job-interview",

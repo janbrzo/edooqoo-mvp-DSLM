@@ -1,10 +1,10 @@
 {
   "generatedAt": "deterministic from committed source files",
-  "totalArticles": 306,
+  "totalArticles": 343,
   "counts": {
     "promote-rewrite-now": 6,
     "promote-or-refresh": 238,
-    "merge-redirect-or-noindex": 45,
+    "merge-redirect-or-noindex": 82,
     "noindex-keep-accessible": 17
   },
   "priorityRewriteSlugs": [
@@ -5744,6 +5744,31 @@
       ]
     },
     {
+      "route": "/blog/adult-esl-lesson-ideas-by-level.html",
+      "slug": "adult-esl-lesson-ideas-by-level.html",
+      "title": "Moved",
+      "description": "",
+      "cluster": "Adult and Business English",
+      "state": "merge",
+      "indexable": false,
+      "words": 43,
+      "action": "merge-redirect-or-noindex",
+      "priority": 4,
+      "reason": "Legacy page is merged into a stronger adult 1:1 target by x1000 editorial policy.",
+      "strategicCluster": "Adult and professional English",
+      "rewriteStage": "stage-3-merge-redirect-or-noindex",
+      "canonicalDecision": "merge, redirect, or noindex unless rewritten for adult 1:1 tutoring",
+      "marthaTestScore": 70,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "CEFR worksheet planning",
+        "EFL tutor workflow",
+        "adult ESL tutor",
+        "adult learner level evidence",
+        "private English tutor"
+      ]
+    },
+    {
       "route": "/blog/advocating-for-ell-students.html",
       "slug": "advocating-for-ell-students.html",
       "title": "Advocating for ELL Students",
@@ -5759,6 +5784,29 @@
       "rewriteStage": "stage-3-noindex-legacy",
       "canonicalDecision": "keep accessible with noindex,follow and exclude from sitemap",
       "marthaTestScore": 55,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "EFL tutor workflow",
+        "adult ESL tutor",
+        "private English tutor"
+      ]
+    },
+    {
+      "route": "/blog/ai-placement-tests-english-students.html",
+      "slug": "ai-placement-tests-english-students.html",
+      "title": "Moved",
+      "description": "",
+      "cluster": "Adult and Business English",
+      "state": "merge",
+      "indexable": false,
+      "words": 43,
+      "action": "merge-redirect-or-noindex",
+      "priority": 4,
+      "reason": "Legacy page is merged into a stronger adult 1:1 target by x1000 editorial policy.",
+      "strategicCluster": "LLM vs tutor workflow",
+      "rewriteStage": "stage-3-merge-redirect-or-noindex",
+      "canonicalDecision": "merge, redirect, or noindex unless rewritten for adult 1:1 tutoring",
+      "marthaTestScore": 78,
       "ragKeywords": [
         "1:1 English lesson prep",
         "EFL tutor workflow",
@@ -5997,6 +6045,29 @@
       ]
     },
     {
+      "route": "/blog/conversation-topics-adult-esl-students.html",
+      "slug": "conversation-topics-adult-esl-students.html",
+      "title": "Moved",
+      "description": "",
+      "cluster": "Adult and Business English",
+      "state": "merge",
+      "indexable": false,
+      "words": 43,
+      "action": "merge-redirect-or-noindex",
+      "priority": 4,
+      "reason": "Legacy page is merged into a stronger adult 1:1 target by x1000 editorial policy.",
+      "strategicCluster": "Adult and professional English",
+      "rewriteStage": "stage-3-merge-redirect-or-noindex",
+      "canonicalDecision": "merge, redirect, or noindex unless rewritten for adult 1:1 tutoring",
+      "marthaTestScore": 70,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "EFL tutor workflow",
+        "adult ESL tutor",
+        "private English tutor"
+      ]
+    },
+    {
       "route": "/blog/dictation-activities-esl-classroom.html",
       "slug": "dictation-activities-esl-classroom.html",
       "title": "Moved",
@@ -6112,6 +6183,29 @@
       ]
     },
     {
+      "route": "/blog/english-lesson-plan-template-free.html",
+      "slug": "english-lesson-plan-template-free.html",
+      "title": "Moved",
+      "description": "",
+      "cluster": "Adult and Business English",
+      "state": "merge",
+      "indexable": false,
+      "words": 43,
+      "action": "merge-redirect-or-noindex",
+      "priority": 4,
+      "reason": "Legacy page is merged into a stronger adult 1:1 target by x1000 editorial policy.",
+      "strategicCluster": "Adult and professional English",
+      "rewriteStage": "stage-3-merge-redirect-or-noindex",
+      "canonicalDecision": "merge, redirect, or noindex unless rewritten for adult 1:1 tutoring",
+      "marthaTestScore": 70,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "EFL tutor workflow",
+        "adult ESL tutor",
+        "private English tutor"
+      ]
+    },
+    {
       "route": "/blog/english-songs-activities-esl.html",
       "slug": "english-songs-activities-esl.html",
       "title": "English Songs Activities for ESL",
@@ -6135,6 +6229,31 @@
       ]
     },
     {
+      "route": "/blog/english-worksheet-generator-ai.html",
+      "slug": "english-worksheet-generator-ai.html",
+      "title": "Moved",
+      "description": "",
+      "cluster": "Adult and Business English",
+      "state": "merge",
+      "indexable": false,
+      "words": 43,
+      "action": "merge-redirect-or-noindex",
+      "priority": 4,
+      "reason": "Legacy page is merged into a stronger adult 1:1 target by x1000 editorial policy.",
+      "strategicCluster": "LLM vs tutor workflow",
+      "rewriteStage": "stage-3-merge-redirect-or-noindex",
+      "canonicalDecision": "merge, redirect, or noindex unless rewritten for adult 1:1 tutoring",
+      "marthaTestScore": 78,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "AI worksheet generator",
+        "EFL tutor workflow",
+        "ESL worksheet workflow",
+        "adult ESL tutor",
+        "private English tutor"
+      ]
+    },
+    {
       "route": "/blog/esl-games-for-kids.html",
       "slug": "esl-games-for-kids.html",
       "title": "ESL Games for Kids",
@@ -6150,6 +6269,29 @@
       "rewriteStage": "stage-3-noindex-legacy",
       "canonicalDecision": "keep accessible with noindex,follow and exclude from sitemap",
       "marthaTestScore": 47,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "EFL tutor workflow",
+        "adult ESL tutor",
+        "private English tutor"
+      ]
+    },
+    {
+      "route": "/blog/esl-speaking-assessment-rubric.html",
+      "slug": "esl-speaking-assessment-rubric.html",
+      "title": "Moved",
+      "description": "",
+      "cluster": "Adult and Business English",
+      "state": "merge",
+      "indexable": false,
+      "words": 43,
+      "action": "merge-redirect-or-noindex",
+      "priority": 4,
+      "reason": "Legacy page is merged into a stronger adult 1:1 target by x1000 editorial policy.",
+      "strategicCluster": "Adult and professional English",
+      "rewriteStage": "stage-3-merge-redirect-or-noindex",
+      "canonicalDecision": "merge, redirect, or noindex unless rewritten for adult 1:1 tutoring",
+      "marthaTestScore": 58,
       "ragKeywords": [
         "1:1 English lesson prep",
         "EFL tutor workflow",
@@ -6275,6 +6417,29 @@
       ]
     },
     {
+      "route": "/blog/getting-more-esl-students-marketing.html",
+      "slug": "getting-more-esl-students-marketing.html",
+      "title": "Moved",
+      "description": "",
+      "cluster": "Adult and Business English",
+      "state": "merge",
+      "indexable": false,
+      "words": 43,
+      "action": "merge-redirect-or-noindex",
+      "priority": 4,
+      "reason": "Legacy page is merged into a stronger adult 1:1 target by x1000 editorial policy.",
+      "strategicCluster": "Adult and professional English",
+      "rewriteStage": "stage-3-merge-redirect-or-noindex",
+      "canonicalDecision": "merge, redirect, or noindex unless rewritten for adult 1:1 tutoring",
+      "marthaTestScore": 70,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "EFL tutor workflow",
+        "adult ESL tutor",
+        "private English tutor"
+      ]
+    },
+    {
       "route": "/blog/giving-instructions-esl-classroom.html",
       "slug": "giving-instructions-esl-classroom.html",
       "title": "Moved",
@@ -6367,6 +6532,102 @@
       ]
     },
     {
+      "route": "/blog/homework-feedback-students-read.html",
+      "slug": "homework-feedback-students-read.html",
+      "title": "Moved",
+      "description": "",
+      "cluster": "Adult and Business English",
+      "state": "merge",
+      "indexable": false,
+      "words": 43,
+      "action": "merge-redirect-or-noindex",
+      "priority": 4,
+      "reason": "Legacy page is merged into a stronger adult 1:1 target by x1000 editorial policy.",
+      "strategicCluster": "Homework evidence and retention",
+      "rewriteStage": "stage-3-merge-redirect-or-noindex",
+      "canonicalDecision": "merge, redirect, or noindex unless rewritten for adult 1:1 tutoring",
+      "marthaTestScore": 78,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "EFL tutor workflow",
+        "English homework review",
+        "adult ESL tutor",
+        "homework evidence",
+        "private English tutor"
+      ]
+    },
+    {
+      "route": "/blog/how-to-give-english-level-test.html",
+      "slug": "how-to-give-english-level-test.html",
+      "title": "Moved",
+      "description": "",
+      "cluster": "Adult and Business English",
+      "state": "merge",
+      "indexable": false,
+      "words": 43,
+      "action": "merge-redirect-or-noindex",
+      "priority": 4,
+      "reason": "Legacy page is merged into a stronger adult 1:1 target by x1000 editorial policy.",
+      "strategicCluster": "Adult and professional English",
+      "rewriteStage": "stage-3-merge-redirect-or-noindex",
+      "canonicalDecision": "merge, redirect, or noindex unless rewritten for adult 1:1 tutoring",
+      "marthaTestScore": 70,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "CEFR worksheet planning",
+        "EFL tutor workflow",
+        "adult ESL tutor",
+        "adult learner level evidence",
+        "private English tutor"
+      ]
+    },
+    {
+      "route": "/blog/how-to-run-esl-business-online.html",
+      "slug": "how-to-run-esl-business-online.html",
+      "title": "Moved",
+      "description": "",
+      "cluster": "Adult and Business English",
+      "state": "merge",
+      "indexable": false,
+      "words": 43,
+      "action": "merge-redirect-or-noindex",
+      "priority": 4,
+      "reason": "Legacy page is merged into a stronger adult 1:1 target by x1000 editorial policy.",
+      "strategicCluster": "Adult and professional English",
+      "rewriteStage": "stage-3-merge-redirect-or-noindex",
+      "canonicalDecision": "merge, redirect, or noindex unless rewritten for adult 1:1 tutoring",
+      "marthaTestScore": 70,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "EFL tutor workflow",
+        "adult ESL tutor",
+        "private English tutor"
+      ]
+    },
+    {
+      "route": "/blog/how-to-teach-past-tenses-esl.html",
+      "slug": "how-to-teach-past-tenses-esl.html",
+      "title": "Moved",
+      "description": "",
+      "cluster": "Adult and Business English",
+      "state": "merge",
+      "indexable": false,
+      "words": 43,
+      "action": "merge-redirect-or-noindex",
+      "priority": 4,
+      "reason": "Legacy page is merged into a stronger adult 1:1 target by x1000 editorial policy.",
+      "strategicCluster": "Adult and professional English",
+      "rewriteStage": "stage-3-merge-redirect-or-noindex",
+      "canonicalDecision": "merge, redirect, or noindex unless rewritten for adult 1:1 tutoring",
+      "marthaTestScore": 70,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "EFL tutor workflow",
+        "adult ESL tutor",
+        "private English tutor"
+      ]
+    },
+    {
       "route": "/blog/input-output-hypotheses-classroom.html",
       "slug": "input-output-hypotheses-classroom.html",
       "title": "Moved",
@@ -6436,6 +6697,29 @@
       ]
     },
     {
+      "route": "/blog/live-english-lessons-online-tools.html",
+      "slug": "live-english-lessons-online-tools.html",
+      "title": "Moved",
+      "description": "",
+      "cluster": "Adult and Business English",
+      "state": "merge",
+      "indexable": false,
+      "words": 43,
+      "action": "merge-redirect-or-noindex",
+      "priority": 4,
+      "reason": "Legacy page is merged into a stronger adult 1:1 target by x1000 editorial policy.",
+      "strategicCluster": "Adult and professional English",
+      "rewriteStage": "stage-3-merge-redirect-or-noindex",
+      "canonicalDecision": "merge, redirect, or noindex unless rewritten for adult 1:1 tutoring",
+      "marthaTestScore": 70,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "EFL tutor workflow",
+        "adult ESL tutor",
+        "private English tutor"
+      ]
+    },
+    {
       "route": "/blog/managing-behavior-esl-classroom.html",
       "slug": "managing-behavior-esl-classroom.html",
       "title": "Managing Behavior in ESL Classrooms",
@@ -6477,6 +6761,54 @@
       "ragKeywords": [
         "1:1 English lesson prep",
         "EFL tutor workflow",
+        "adult ESL tutor",
+        "private English tutor"
+      ]
+    },
+    {
+      "route": "/blog/micro-lessons-busy-adult-esl-students.html",
+      "slug": "micro-lessons-busy-adult-esl-students.html",
+      "title": "Moved",
+      "description": "",
+      "cluster": "Adult and Business English",
+      "state": "merge",
+      "indexable": false,
+      "words": 43,
+      "action": "merge-redirect-or-noindex",
+      "priority": 4,
+      "reason": "Legacy page is merged into a stronger adult 1:1 target by x1000 editorial policy.",
+      "strategicCluster": "Adult and professional English",
+      "rewriteStage": "stage-3-merge-redirect-or-noindex",
+      "canonicalDecision": "merge, redirect, or noindex unless rewritten for adult 1:1 tutoring",
+      "marthaTestScore": 70,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "EFL tutor workflow",
+        "adult ESL tutor",
+        "private English tutor"
+      ]
+    },
+    {
+      "route": "/blog/modal-verbs-exercises-esl-guide.html",
+      "slug": "modal-verbs-exercises-esl-guide.html",
+      "title": "Moved",
+      "description": "",
+      "cluster": "Adult and Business English",
+      "state": "merge",
+      "indexable": false,
+      "words": 43,
+      "action": "merge-redirect-or-noindex",
+      "priority": 4,
+      "reason": "Legacy page is merged into a stronger adult 1:1 target by x1000 editorial policy.",
+      "strategicCluster": "Adult and professional English",
+      "rewriteStage": "stage-3-merge-redirect-or-noindex",
+      "canonicalDecision": "merge, redirect, or noindex unless rewritten for adult 1:1 tutoring",
+      "marthaTestScore": 70,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "AI worksheet generator",
+        "EFL tutor workflow",
+        "ESL worksheet workflow",
         "adult ESL tutor",
         "private English tutor"
       ]
@@ -6553,6 +6885,54 @@
       ]
     },
     {
+      "route": "/blog/online-english-tutor-tools-2026.html",
+      "slug": "online-english-tutor-tools-2026.html",
+      "title": "Moved",
+      "description": "",
+      "cluster": "Adult and Business English",
+      "state": "merge",
+      "indexable": false,
+      "words": 43,
+      "action": "merge-redirect-or-noindex",
+      "priority": 4,
+      "reason": "Legacy page is merged into a stronger adult 1:1 target by x1000 editorial policy.",
+      "strategicCluster": "Adult and professional English",
+      "rewriteStage": "stage-3-merge-redirect-or-noindex",
+      "canonicalDecision": "merge, redirect, or noindex unless rewritten for adult 1:1 tutoring",
+      "marthaTestScore": 70,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "EFL tutor workflow",
+        "adult ESL tutor",
+        "private English tutor"
+      ]
+    },
+    {
+      "route": "/blog/online-homework-guide-esl-teachers.html",
+      "slug": "online-homework-guide-esl-teachers.html",
+      "title": "Moved",
+      "description": "",
+      "cluster": "Adult and Business English",
+      "state": "merge",
+      "indexable": false,
+      "words": 43,
+      "action": "merge-redirect-or-noindex",
+      "priority": 4,
+      "reason": "Legacy page is merged into a stronger adult 1:1 target by x1000 editorial policy.",
+      "strategicCluster": "Homework evidence and retention",
+      "rewriteStage": "stage-3-merge-redirect-or-noindex",
+      "canonicalDecision": "merge, redirect, or noindex unless rewritten for adult 1:1 tutoring",
+      "marthaTestScore": 78,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "EFL tutor workflow",
+        "English homework review",
+        "adult ESL tutor",
+        "homework evidence",
+        "private English tutor"
+      ]
+    },
+    {
       "route": "/blog/oral-correction-timing-techniques.html",
       "slug": "oral-correction-timing-techniques.html",
       "title": "Moved",
@@ -6571,6 +6951,31 @@
       "ragKeywords": [
         "1:1 English lesson prep",
         "EFL tutor workflow",
+        "adult ESL tutor",
+        "private English tutor"
+      ]
+    },
+    {
+      "route": "/blog/phrasal-verbs-exercises-esl-worksheets.html",
+      "slug": "phrasal-verbs-exercises-esl-worksheets.html",
+      "title": "Moved",
+      "description": "",
+      "cluster": "Adult and Business English",
+      "state": "merge",
+      "indexable": false,
+      "words": 43,
+      "action": "merge-redirect-or-noindex",
+      "priority": 4,
+      "reason": "Legacy page is merged into a stronger adult 1:1 target by x1000 editorial policy.",
+      "strategicCluster": "Adult and professional English",
+      "rewriteStage": "stage-3-merge-redirect-or-noindex",
+      "canonicalDecision": "merge, redirect, or noindex unless rewritten for adult 1:1 tutoring",
+      "marthaTestScore": 70,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "AI worksheet generator",
+        "EFL tutor workflow",
+        "ESL worksheet workflow",
         "adult ESL tutor",
         "private English tutor"
       ]
@@ -6645,6 +7050,31 @@
       ]
     },
     {
+      "route": "/blog/sentence-transformation-exercises-english.html",
+      "slug": "sentence-transformation-exercises-english.html",
+      "title": "Moved",
+      "description": "",
+      "cluster": "Adult and Business English",
+      "state": "merge",
+      "indexable": false,
+      "words": 43,
+      "action": "merge-redirect-or-noindex",
+      "priority": 4,
+      "reason": "Legacy page is merged into a stronger adult 1:1 target by x1000 editorial policy.",
+      "strategicCluster": "Adult and professional English",
+      "rewriteStage": "stage-3-merge-redirect-or-noindex",
+      "canonicalDecision": "merge, redirect, or noindex unless rewritten for adult 1:1 tutoring",
+      "marthaTestScore": 70,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "AI worksheet generator",
+        "EFL tutor workflow",
+        "ESL worksheet workflow",
+        "adult ESL tutor",
+        "private English tutor"
+      ]
+    },
+    {
       "route": "/blog/shadowing-technique-esl.html",
       "slug": "shadowing-technique-esl.html",
       "title": "Moved",
@@ -6663,6 +7093,31 @@
       "ragKeywords": [
         "1:1 English lesson prep",
         "EFL tutor workflow",
+        "adult ESL tutor",
+        "private English tutor"
+      ]
+    },
+    {
+      "route": "/blog/sharing-worksheets-students-online.html",
+      "slug": "sharing-worksheets-students-online.html",
+      "title": "Moved",
+      "description": "",
+      "cluster": "Adult and Business English",
+      "state": "merge",
+      "indexable": false,
+      "words": 43,
+      "action": "merge-redirect-or-noindex",
+      "priority": 4,
+      "reason": "Legacy page is merged into a stronger adult 1:1 target by x1000 editorial policy.",
+      "strategicCluster": "Adult and professional English",
+      "rewriteStage": "stage-3-merge-redirect-or-noindex",
+      "canonicalDecision": "merge, redirect, or noindex unless rewritten for adult 1:1 tutoring",
+      "marthaTestScore": 70,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "AI worksheet generator",
+        "EFL tutor workflow",
+        "ESL worksheet workflow",
         "adult ESL tutor",
         "private English tutor"
       ]
@@ -6714,6 +7169,52 @@
       ]
     },
     {
+      "route": "/blog/student-booking-page-english-lessons.html",
+      "slug": "student-booking-page-english-lessons.html",
+      "title": "Moved",
+      "description": "",
+      "cluster": "Adult and Business English",
+      "state": "merge",
+      "indexable": false,
+      "words": 43,
+      "action": "merge-redirect-or-noindex",
+      "priority": 4,
+      "reason": "Legacy page is merged into a stronger adult 1:1 target by x1000 editorial policy.",
+      "strategicCluster": "Adult and professional English",
+      "rewriteStage": "stage-3-merge-redirect-or-noindex",
+      "canonicalDecision": "merge, redirect, or noindex unless rewritten for adult 1:1 tutoring",
+      "marthaTestScore": 70,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "EFL tutor workflow",
+        "adult ESL tutor",
+        "private English tutor"
+      ]
+    },
+    {
+      "route": "/blog/student-portal-english-tutoring.html",
+      "slug": "student-portal-english-tutoring.html",
+      "title": "Moved",
+      "description": "",
+      "cluster": "Adult and Business English",
+      "state": "merge",
+      "indexable": false,
+      "words": 43,
+      "action": "merge-redirect-or-noindex",
+      "priority": 4,
+      "reason": "Legacy page is merged into a stronger adult 1:1 target by x1000 editorial policy.",
+      "strategicCluster": "Adult and professional English",
+      "rewriteStage": "stage-3-merge-redirect-or-noindex",
+      "canonicalDecision": "merge, redirect, or noindex unless rewritten for adult 1:1 tutoring",
+      "marthaTestScore": 70,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "EFL tutor workflow",
+        "adult ESL tutor",
+        "private English tutor"
+      ]
+    },
+    {
       "route": "/blog/teacher-talking-time-reducing.html",
       "slug": "teacher-talking-time-reducing.html",
       "title": "Moved",
@@ -6726,6 +7227,29 @@
       "priority": 4,
       "reason": "Legacy page is merged into a stronger adult 1:1 target by x1000 editorial policy.",
       "strategicCluster": "One-to-One Lesson Planning",
+      "rewriteStage": "stage-3-merge-redirect-or-noindex",
+      "canonicalDecision": "merge, redirect, or noindex unless rewritten for adult 1:1 tutoring",
+      "marthaTestScore": 70,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "EFL tutor workflow",
+        "adult ESL tutor",
+        "private English tutor"
+      ]
+    },
+    {
+      "route": "/blog/teaching-comparative-superlative-esl.html",
+      "slug": "teaching-comparative-superlative-esl.html",
+      "title": "Moved",
+      "description": "",
+      "cluster": "Adult and Business English",
+      "state": "merge",
+      "indexable": false,
+      "words": 43,
+      "action": "merge-redirect-or-noindex",
+      "priority": 4,
+      "reason": "Legacy page is merged into a stronger adult 1:1 target by x1000 editorial policy.",
+      "strategicCluster": "Adult and professional English",
       "rewriteStage": "stage-3-merge-redirect-or-noindex",
       "canonicalDecision": "merge, redirect, or noindex unless rewritten for adult 1:1 tutoring",
       "marthaTestScore": 70,
@@ -6783,6 +7307,52 @@
       ]
     },
     {
+      "route": "/blog/teaching-english-customer-service.html",
+      "slug": "teaching-english-customer-service.html",
+      "title": "Moved",
+      "description": "",
+      "cluster": "Adult and Business English",
+      "state": "merge",
+      "indexable": false,
+      "words": 43,
+      "action": "merge-redirect-or-noindex",
+      "priority": 4,
+      "reason": "Legacy page is merged into a stronger adult 1:1 target by x1000 editorial policy.",
+      "strategicCluster": "Adult and professional English",
+      "rewriteStage": "stage-3-merge-redirect-or-noindex",
+      "canonicalDecision": "merge, redirect, or noindex unless rewritten for adult 1:1 tutoring",
+      "marthaTestScore": 70,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "EFL tutor workflow",
+        "adult ESL tutor",
+        "private English tutor"
+      ]
+    },
+    {
+      "route": "/blog/teaching-english-job-interviews-activities.html",
+      "slug": "teaching-english-job-interviews-activities.html",
+      "title": "Moved",
+      "description": "",
+      "cluster": "Adult and Business English",
+      "state": "merge",
+      "indexable": false,
+      "words": 43,
+      "action": "merge-redirect-or-noindex",
+      "priority": 4,
+      "reason": "Legacy page is merged into a stronger adult 1:1 target by x1000 editorial policy.",
+      "strategicCluster": "Adult and professional English",
+      "rewriteStage": "stage-3-merge-redirect-or-noindex",
+      "canonicalDecision": "merge, redirect, or noindex unless rewritten for adult 1:1 tutoring",
+      "marthaTestScore": 70,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "EFL tutor workflow",
+        "adult ESL tutor",
+        "private English tutor"
+      ]
+    },
+    {
       "route": "/blog/teaching-english-learning-disabilities.html",
       "slug": "teaching-english-learning-disabilities.html",
       "title": "Moved",
@@ -6821,6 +7391,52 @@
       "rewriteStage": "stage-3-noindex-legacy",
       "canonicalDecision": "keep accessible with noindex,follow and exclude from sitemap",
       "marthaTestScore": 90,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "EFL tutor workflow",
+        "adult ESL tutor",
+        "private English tutor"
+      ]
+    },
+    {
+      "route": "/blog/teaching-english-senior-learners.html",
+      "slug": "teaching-english-senior-learners.html",
+      "title": "Moved",
+      "description": "",
+      "cluster": "Adult and Business English",
+      "state": "merge",
+      "indexable": false,
+      "words": 43,
+      "action": "merge-redirect-or-noindex",
+      "priority": 4,
+      "reason": "Legacy page is merged into a stronger adult 1:1 target by x1000 editorial policy.",
+      "strategicCluster": "Adult and professional English",
+      "rewriteStage": "stage-3-merge-redirect-or-noindex",
+      "canonicalDecision": "merge, redirect, or noindex unless rewritten for adult 1:1 tutoring",
+      "marthaTestScore": 70,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "EFL tutor workflow",
+        "adult ESL tutor",
+        "private English tutor"
+      ]
+    },
+    {
+      "route": "/blog/teaching-english-tenses-complete-guide.html",
+      "slug": "teaching-english-tenses-complete-guide.html",
+      "title": "Moved",
+      "description": "",
+      "cluster": "Adult and Business English",
+      "state": "merge",
+      "indexable": false,
+      "words": 43,
+      "action": "merge-redirect-or-noindex",
+      "priority": 4,
+      "reason": "Legacy page is merged into a stronger adult 1:1 target by x1000 editorial policy.",
+      "strategicCluster": "Adult and professional English",
+      "rewriteStage": "stage-3-merge-redirect-or-noindex",
+      "canonicalDecision": "merge, redirect, or noindex unless rewritten for adult 1:1 tutoring",
+      "marthaTestScore": 70,
       "ragKeywords": [
         "1:1 English lesson prep",
         "EFL tutor workflow",
@@ -6898,6 +7514,144 @@
       ]
     },
     {
+      "route": "/blog/teaching-future-tenses-esl-guide.html",
+      "slug": "teaching-future-tenses-esl-guide.html",
+      "title": "Moved",
+      "description": "",
+      "cluster": "Adult and Business English",
+      "state": "merge",
+      "indexable": false,
+      "words": 43,
+      "action": "merge-redirect-or-noindex",
+      "priority": 4,
+      "reason": "Legacy page is merged into a stronger adult 1:1 target by x1000 editorial policy.",
+      "strategicCluster": "Adult and professional English",
+      "rewriteStage": "stage-3-merge-redirect-or-noindex",
+      "canonicalDecision": "merge, redirect, or noindex unless rewritten for adult 1:1 tutoring",
+      "marthaTestScore": 70,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "EFL tutor workflow",
+        "adult ESL tutor",
+        "private English tutor"
+      ]
+    },
+    {
+      "route": "/blog/teaching-gerunds-infinitives-esl.html",
+      "slug": "teaching-gerunds-infinitives-esl.html",
+      "title": "Moved",
+      "description": "",
+      "cluster": "Adult and Business English",
+      "state": "merge",
+      "indexable": false,
+      "words": 43,
+      "action": "merge-redirect-or-noindex",
+      "priority": 4,
+      "reason": "Legacy page is merged into a stronger adult 1:1 target by x1000 editorial policy.",
+      "strategicCluster": "Adult and professional English",
+      "rewriteStage": "stage-3-merge-redirect-or-noindex",
+      "canonicalDecision": "merge, redirect, or noindex unless rewritten for adult 1:1 tutoring",
+      "marthaTestScore": 70,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "EFL tutor workflow",
+        "adult ESL tutor",
+        "private English tutor"
+      ]
+    },
+    {
+      "route": "/blog/teaching-linking-expressions-esl.html",
+      "slug": "teaching-linking-expressions-esl.html",
+      "title": "Moved",
+      "description": "",
+      "cluster": "Adult and Business English",
+      "state": "merge",
+      "indexable": false,
+      "words": 43,
+      "action": "merge-redirect-or-noindex",
+      "priority": 4,
+      "reason": "Legacy page is merged into a stronger adult 1:1 target by x1000 editorial policy.",
+      "strategicCluster": "Adult and professional English",
+      "rewriteStage": "stage-3-merge-redirect-or-noindex",
+      "canonicalDecision": "merge, redirect, or noindex unless rewritten for adult 1:1 tutoring",
+      "marthaTestScore": 70,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "EFL tutor workflow",
+        "adult ESL tutor",
+        "private English tutor"
+      ]
+    },
+    {
+      "route": "/blog/teaching-paraphrasing-skills-esl.html",
+      "slug": "teaching-paraphrasing-skills-esl.html",
+      "title": "Moved",
+      "description": "",
+      "cluster": "Adult and Business English",
+      "state": "merge",
+      "indexable": false,
+      "words": 43,
+      "action": "merge-redirect-or-noindex",
+      "priority": 4,
+      "reason": "Legacy page is merged into a stronger adult 1:1 target by x1000 editorial policy.",
+      "strategicCluster": "Adult and professional English",
+      "rewriteStage": "stage-3-merge-redirect-or-noindex",
+      "canonicalDecision": "merge, redirect, or noindex unless rewritten for adult 1:1 tutoring",
+      "marthaTestScore": 70,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "EFL tutor workflow",
+        "adult ESL tutor",
+        "private English tutor"
+      ]
+    },
+    {
+      "route": "/blog/teaching-prepositions-time-place-esl.html",
+      "slug": "teaching-prepositions-time-place-esl.html",
+      "title": "Moved",
+      "description": "",
+      "cluster": "Adult and Business English",
+      "state": "merge",
+      "indexable": false,
+      "words": 43,
+      "action": "merge-redirect-or-noindex",
+      "priority": 4,
+      "reason": "Legacy page is merged into a stronger adult 1:1 target by x1000 editorial policy.",
+      "strategicCluster": "Adult and professional English",
+      "rewriteStage": "stage-3-merge-redirect-or-noindex",
+      "canonicalDecision": "merge, redirect, or noindex unless rewritten for adult 1:1 tutoring",
+      "marthaTestScore": 70,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "EFL tutor workflow",
+        "adult ESL tutor",
+        "private English tutor"
+      ]
+    },
+    {
+      "route": "/blog/teaching-question-formation-esl.html",
+      "slug": "teaching-question-formation-esl.html",
+      "title": "Moved",
+      "description": "",
+      "cluster": "Adult and Business English",
+      "state": "merge",
+      "indexable": false,
+      "words": 43,
+      "action": "merge-redirect-or-noindex",
+      "priority": 4,
+      "reason": "Legacy page is merged into a stronger adult 1:1 target by x1000 editorial policy.",
+      "strategicCluster": "Adult and professional English",
+      "rewriteStage": "stage-3-merge-redirect-or-noindex",
+      "canonicalDecision": "merge, redirect, or noindex unless rewritten for adult 1:1 tutoring",
+      "marthaTestScore": 70,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "EFL tutor workflow",
+        "adult ESL tutor",
+        "private English tutor"
+      ]
+    },
+    {
       "route": "/blog/teaching-reading-fluency-esl.html",
       "slug": "teaching-reading-fluency-esl.html",
       "title": "Moved",
@@ -6910,6 +7664,29 @@
       "priority": 4,
       "reason": "Legacy page is merged into a stronger adult 1:1 target by x1000 editorial policy.",
       "strategicCluster": "One-to-One Lesson Planning",
+      "rewriteStage": "stage-3-merge-redirect-or-noindex",
+      "canonicalDecision": "merge, redirect, or noindex unless rewritten for adult 1:1 tutoring",
+      "marthaTestScore": 70,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "EFL tutor workflow",
+        "adult ESL tutor",
+        "private English tutor"
+      ]
+    },
+    {
+      "route": "/blog/teaching-second-conditional-activities.html",
+      "slug": "teaching-second-conditional-activities.html",
+      "title": "Moved",
+      "description": "",
+      "cluster": "Adult and Business English",
+      "state": "merge",
+      "indexable": false,
+      "words": 43,
+      "action": "merge-redirect-or-noindex",
+      "priority": 4,
+      "reason": "Legacy page is merged into a stronger adult 1:1 target by x1000 editorial policy.",
+      "strategicCluster": "Adult and professional English",
       "rewriteStage": "stage-3-merge-redirect-or-noindex",
       "canonicalDecision": "merge, redirect, or noindex unless rewritten for adult 1:1 tutoring",
       "marthaTestScore": 70,
@@ -6946,6 +7723,52 @@
     {
       "route": "/blog/teaching-test-taking-strategies-esl.html",
       "slug": "teaching-test-taking-strategies-esl.html",
+      "title": "Moved",
+      "description": "",
+      "cluster": "Adult and Business English",
+      "state": "merge",
+      "indexable": false,
+      "words": 43,
+      "action": "merge-redirect-or-noindex",
+      "priority": 4,
+      "reason": "Legacy page is merged into a stronger adult 1:1 target by x1000 editorial policy.",
+      "strategicCluster": "Adult and professional English",
+      "rewriteStage": "stage-3-merge-redirect-or-noindex",
+      "canonicalDecision": "merge, redirect, or noindex unless rewritten for adult 1:1 tutoring",
+      "marthaTestScore": 70,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "EFL tutor workflow",
+        "adult ESL tutor",
+        "private English tutor"
+      ]
+    },
+    {
+      "route": "/blog/teaching-third-conditional-esl.html",
+      "slug": "teaching-third-conditional-esl.html",
+      "title": "Moved",
+      "description": "",
+      "cluster": "Adult and Business English",
+      "state": "merge",
+      "indexable": false,
+      "words": 43,
+      "action": "merge-redirect-or-noindex",
+      "priority": 4,
+      "reason": "Legacy page is merged into a stronger adult 1:1 target by x1000 editorial policy.",
+      "strategicCluster": "Adult and professional English",
+      "rewriteStage": "stage-3-merge-redirect-or-noindex",
+      "canonicalDecision": "merge, redirect, or noindex unless rewritten for adult 1:1 tutoring",
+      "marthaTestScore": 70,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "EFL tutor workflow",
+        "adult ESL tutor",
+        "private English tutor"
+      ]
+    },
+    {
+      "route": "/blog/teaching-vocabulary-in-context-methods.html",
+      "slug": "teaching-vocabulary-in-context-methods.html",
       "title": "Moved",
       "description": "",
       "cluster": "Adult and Business English",
@@ -7061,6 +7884,29 @@
       ]
     },
     {
+      "route": "/blog/tracking-student-progress-ai-esl.html",
+      "slug": "tracking-student-progress-ai-esl.html",
+      "title": "Moved",
+      "description": "",
+      "cluster": "Adult and Business English",
+      "state": "merge",
+      "indexable": false,
+      "words": 43,
+      "action": "merge-redirect-or-noindex",
+      "priority": 4,
+      "reason": "Legacy page is merged into a stronger adult 1:1 target by x1000 editorial policy.",
+      "strategicCluster": "LLM vs tutor workflow",
+      "rewriteStage": "stage-3-merge-redirect-or-noindex",
+      "canonicalDecision": "merge, redirect, or noindex unless rewritten for adult 1:1 tutoring",
+      "marthaTestScore": 78,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "EFL tutor workflow",
+        "adult ESL tutor",
+        "private English tutor"
+      ]
+    },
+    {
       "route": "/blog/transitions-activities-esl-classroom.html",
       "slug": "transitions-activities-esl-classroom.html",
       "title": "Moved",
@@ -7122,6 +7968,29 @@
       "rewriteStage": "stage-3-noindex-legacy",
       "canonicalDecision": "keep accessible with noindex,follow and exclude from sitemap",
       "marthaTestScore": 55,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "EFL tutor workflow",
+        "adult ESL tutor",
+        "private English tutor"
+      ]
+    },
+    {
+      "route": "/blog/v-esl-classroom.html",
+      "slug": "v-esl-classroom.html",
+      "title": "Moved",
+      "description": "",
+      "cluster": "Adult and Business English",
+      "state": "merge",
+      "indexable": false,
+      "words": 43,
+      "action": "merge-redirect-or-noindex",
+      "priority": 4,
+      "reason": "Legacy page is merged into a stronger adult 1:1 target by x1000 editorial policy.",
+      "strategicCluster": "Adult and professional English",
+      "rewriteStage": "stage-3-merge-redirect-or-noindex",
+      "canonicalDecision": "merge, redirect, or noindex unless rewritten for adult 1:1 tutoring",
+      "marthaTestScore": 35,
       "ragKeywords": [
         "1:1 English lesson prep",
         "EFL tutor workflow",

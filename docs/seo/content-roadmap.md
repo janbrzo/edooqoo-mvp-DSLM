@@ -24,9 +24,9 @@ Generated: deterministic from scripts/seo/x1000-content-plan.mjs and docs/seo/bl
 
 ## Current Triage Counts
 
-- Total articles: 306
+- Total articles: 343
 - promote-or-refresh: 238
-- merge-redirect-or-noindex: 45
+- merge-redirect-or-noindex: 82
 - noindex-keep-accessible: 17
 - promote-rewrite-now: 6
 
