@@ -30,6 +30,7 @@
     "seo:audit-sitemap-integrity": "node scripts/seo/audit-sitemap-integrity.mjs",
     "seo:routing-truth": "npm run seo:audit-sitemap-integrity && npm run seo:audit-pseo-policy && npm run seo:verify-live-routing -- --soft",
     "seo:generate-ai": "node scripts/seo/generate-ai-resources.mjs",
+    "seo:sync-generated": "npm run docs:audit-source && node scripts/seo/generate-citable-pages.mjs && npm run seo:generate-strategic-content && npm run seo:generate-legacy-strategic-content && node scripts/seo/generate-citable-pages.mjs && npm run content:repair-encoding && node scripts/seo/build-blog-index.mjs && npm run seo:generate-blog-triage && npm run seo:generate-x1000-docs && npm run seo:apply-pseo-policy && npm run seo:generate-decision-content && npm run seo:test-decision-tool && npm run seo:test-newsletter && npm run content:generate && npm run seo:inject-cluster-hub-links && npm run seo:audit-cluster-hubs && npm run seo:generate-edge-routing && npm run seo:sync-sitemap-edge && npm run seo:generate-ai && npm run seo:inject-citation-blocks && npm run seo:dedupe-jsonld && npm run seo:repair-snapshot-snippets && npm run seo:repair-snapshot-head",
     "seo:generate-edge-routing": "node scripts/seo/generate-edge-routing.mjs",
     "seo:test-edge-routing": "node scripts/seo/test-edge-routing.mjs",
     "seo:audit-strategic-content": "node scripts/seo/audit-strategic-content.mjs",

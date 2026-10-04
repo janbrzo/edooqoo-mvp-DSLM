@@ -11,7 +11,7 @@
 - [Welcome Test Auto-Apply + Brain Reset](mem://features/welcome-test/auto-apply-and-brain-reset) — v6.9.29 auto-upsert to student_learning_elements, Resend completion email, monthly model-audit report, emoji Memory Pairs minigame on paused stage
 - [Onboarding Checklist v2 + Bulk Gallery + Brain-Reset Trio](mem://features/welcome-test/checklist-v2) — v6.9.31 7-step onboarding split (one-time setup + weekly 1-Minute Prep), realtime checklist progress, bulk-publish-worksheets edge function, 3 language-neutral minigames, full 25-language profiling translation parity
 - [SSE Keepalive Pattern](mem://infrastructure/sse-keepalive-pattern) — v6.9.27 worksheet stream: 15s server keepalive + 45s client watchdog + one silent retry
-- [Model Health Monitoring](mem://infrastructure/model-health-monitoring) — v6.9.27 audit-llm-models edge + model_health_checks table + expanded logModelFailure wiring
+- [Model Health Monitoring](mem://infrastructure/model-health-monitoring) — v6.9.27 audit-llm-models edge + model_health_checks; v6.9.90 modelRegistry.ts source of truth, daily health vs monthly optimisation (deprecation scan + model advisor), model_audit_reports
 - [Signup Return-To Flow](mem://features/auth/signup-return-to-flow) — v6.9.27 useSignupLinkState propagates state.from across all signup/login callsites + visible Back CTA
 - [Reconciliation Codex v6.9.26](mem://decisions/reconciliation-v6926-codex) — Files owned by Codex SEO branch; do not modify
 - [Onboarding Spotlight v2](mem://features/onboarding/spotlight-v2) — v6.9.32 Global SpotlightOverlay (data-spotlight + ?focus=), force-show reset flag, AddStudent v2 (deferred level/goal + autosend WT), NavSwitcher +Add CTA, 904 bulk-publish
@@ -52,3 +52,4 @@
 - [Student Workspace 4 Tabs](mem://features/student-page/workspace-4-tabs) — v6.9.111 final Prep/Timeline/Library/Learning model; legacy ?tab= aliases permanent; never restore Overview/Worksheets/Skills
 - [Quick Add Note](mem://features/student-page/quick-add-note-from-overview) — Add Note opens inline modal in Prep tab QuickNoteBox; never route through tabs
 - [User-flow audit 2026-10](mem://features/dashboard/audit-2026-10-user-flow) — demo student page fix + demoFetchGuard, wrap-safe worksheet toolbars, Prep-first CTAs, useTeacherAuthRedirect, homework error card, vitest in CI
+- [Generated SEO files CI contract](mem://seo/generated-files-ci-contract) — deterministic generators, seo:sync-generated, post-processing passes in CI before git diff --exit-code

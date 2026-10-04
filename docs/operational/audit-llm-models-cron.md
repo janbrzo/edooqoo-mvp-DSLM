@@ -1,153 +1,109 @@
-# audit-llm-models — scheduling guide
+# audit-llm-models — operator guide
 
-Daily health check that pings Lovable Gateway + OpenAI models and writes results to `public.model_health_checks`. Deprecation responses (404/410) and 5xx also flow into `error_logs` via `logModelFailure`, which the StatusPage banner reads.
+Two cadences, two questions:
+
+| Mode | Schedule (pg_cron) | Question | What runs |
+|---|---|---|---|
+| daily | `audit-llm-models-daily`, `0 6 * * *` (06:00 UTC), body `{}` | Does every production model still work? | One probe per model, urgent shutdown alerts (≤30 days) |
+| monthly | `audit-llm-models-monthly`, 1st of the month (currently fires 07:00 UTC), body `{"mode":"monthly"}` | Is every model still the best fit for its use case? | Daily probes + full shutdown countdown + provider deprecation-page scan + model advisor |
+
+Source of truth for the model list: `supabase/functions/_shared/modelRegistry.ts`. Pure logic: `supabase/functions/_shared/modelAudit.ts` (tests: `src/lib/__tests__/modelAudit.test.ts`).
 
 ## Prerequisites
 
-1. Secret `CRON_SECRET` exists in project secrets (Lovable Cloud → Settings → Secrets).
-2. Edge function `audit-llm-models` is deployed.
-3. Extensions `pg_cron` and `pg_net` are enabled in Supabase.
+1. Project secrets: `CRON_SECRET` (required; without it the function returns 503), `OPENAI_API_KEY`, `GEMINI_API_KEY`, `GEMINI_VERTEX_API_KEY`, `RESEND_API_KEY`.
+2. Optional secret `MODEL_ADVISOR_MODEL` forces the advisor model; by default the newest stable `gemini-X.Y-flash` in the live Gemini model list is used, with `gemini-2.5-flash` as fallback.
+3. Migration `20261004120000_model_audit_lifecycle.sql` applied (lifecycle columns + `model_audit_reports`). Until then health rows are still written without the new columns and the report row insert is skipped with a log line.
+4. Extensions `pg_cron` and `pg_net`.
 
-## One-time setup (run in Supabase SQL editor)
+## Daily probes
 
-The SQL below contains the project URL + the CRON_SECRET value, so it must NOT be committed to `supabase/migrations/`. Run it once from the Supabase SQL editor.
+| Probe | Models | Cost |
+|---|---|---|
+| `gemini-generate` (3 output tokens, thinking off) | gemini-2.5-flash, gemini-2.5-flash-lite | negligible |
+| `openai-chat` (3 tokens) | gpt-4o-mini, gpt-4.1-2025-04-14 | negligible |
+| `openai-chat-reasoning` (`max_completion_tokens: 16`, `reasoning_effort: minimal`) | gpt-5-mini-2025-08-07 | negligible |
+| `openai-tts` (input "OK") | gpt-4o-mini-tts, tts-1 | negligible |
+| `metadata` (GET model resource) | whisper-1, Vertex gemini-2.5-flash-image, gemini-3.1-flash-image | free |
+
+If the secrets `GEMINI_IMAGE_MODEL` or `GEMINI_DESCRIPTION_MODEL` point to a model that is not in the registry, it is probed too and listed as "Not in registry".
+
+Outcome routing:
+- 404/410 → `error_logs` `model_deprecation`; 401/403, 429, 5xx → `model_failure`. Both feed the public StatusPage banner (`get_active_model_issues`, last 24 h).
+- Other 4xx (malformed probe), missing key, network errors → email + `model_health_checks` only.
+- Shutdown within 30 days → `error_logs` `model_shutdown_scheduled` (admin only, not on the banner). Monthly also logs the 31–120 day window as `warning`.
+
+## Monthly optimisation
+
+1. **Shutdown countdown** from the registry: `warn` ≤120 days, `crit` ≤30 days.
+2. **Deprecation-page scan** of the OpenAI, Gemini API and Vertex model-versions pages. A future date next to one of our model ids that is neither the registry `shutdownDate` nor in `acknowledgedDates` is flagged, as is a registry date that disappeared from the page. Verify on the page, then update the registry.
+3. **Advisor**: receives the registry roles and use cases, the live model lists of each provider (`/v1/models`, Gemini `models.list`, Vertex `publishers/google/models`) and excerpts of the official pricing pages, and may use Google Search for quality evidence. Per role it returns `keep`, `switch` or `evaluate`:
+   - `switch` only when the candidate is better and cheaper, better at the same price, or at most 30% more expensive with clearly better results for that use case, or when the current model has a shutdown date;
+   - a suggested id that the provider does not list for our key is downgraded to `evaluate`;
+   - roles inside the Worksheet Generation Engine are marked as needing the literal instruction "update the Worksheet Generation Engine". The audit never changes a model by itself.
+
+The monthly run returns 202 immediately and finishes in the background. Pass `"sync": true` to wait for the full JSON.
+
+## Results
+
+- Email to edooqoo@gmail.com. The subject counts failures, shutdowns ≤30 days, switch suggestions and deprecation notices.
+- `public.model_audit_reports`: one row per run (`summary`, `probes`, `lifecycle`, `deprecation_scan`, `advisor`, `unregistered`).
+- `public.model_health_checks`: one row per probe.
 
 ```sql
-create extension if not exists pg_cron;
-create extension if not exists pg_net;
+select created_at, mode, summary from public.model_audit_reports order by created_at desc limit 10;
 
-select cron.schedule(
-  'audit-llm-models-daily',
-  '0 6 * * *',  -- 06:00 UTC daily
-  $$
+select created_at, jsonb_pretty(advisor) from public.model_audit_reports
+where mode = 'monthly' order by created_at desc limit 1;
+
+select provider, model, check_kind, status, ok, days_to_shutdown, error, checked_at
+from public.model_health_checks order by checked_at desc limit 30;
+```
+
+## Scheduling (operator-only SQL, never commit — contains the secret)
+
+```sql
+select cron.schedule('audit-llm-models-daily', '0 6 * * *', $$
   select net.http_post(
     url     := 'https://bvfrkzdlklyvnhlpleck.supabase.co/functions/v1/audit-llm-models',
-    headers := jsonb_build_object(
-      'Content-Type',   'application/json',
-      'x-cron-secret',  '<PASTE_CRON_SECRET_VALUE_HERE>'
-    ),
-    body    := '{}'::jsonb
-  );
-  $$
-);
+    headers := jsonb_build_object('Content-Type','application/json','x-cron-secret','<CRON_SECRET>'),
+    body    := '{}'::jsonb);
+$$);
+
+select cron.schedule('audit-llm-models-monthly', '15 6 1 * *', $$
+  select net.http_post(
+    url     := 'https://bvfrkzdlklyvnhlpleck.supabase.co/functions/v1/audit-llm-models',
+    headers := jsonb_build_object('Content-Type','application/json','x-cron-secret','<CRON_SECRET>'),
+    body    := jsonb_build_object('mode','monthly'));
+$$);
 ```
 
-## Manual smoke-test
-
-```bash
-curl -X POST \
-  -H "x-cron-secret: <CRON_SECRET>" \
-  https://bvfrkzdlklyvnhlpleck.supabase.co/functions/v1/audit-llm-models
-```
-
-Expected: JSON `{ ok: true, checked: 4, results: [...] }`. New rows appear in `public.model_health_checks` for each target model.
-
-## Operations
-
-- Inspect runs:
-  ```sql
-  select * from cron.job_run_details
-  where jobname = 'audit-llm-models-daily'
-  order by start_time desc limit 10;
-  ```
-- Unschedule (e.g. before rotating `CRON_SECRET`):
-  ```sql
-  select cron.unschedule('audit-llm-models-daily');
-  ```
-  Then re-run the `cron.schedule(...)` block with the new secret value.
-- Recent health check rows:
-  ```sql
-  select provider, model, status, latency_ms, ok, checked_at
-  from public.model_health_checks
-  order by checked_at desc limit 20;
-  ```
-
-## What the function checks
-
-Daily (hot-path, runs at 06:00 UTC) — v6.9.66:
-- `gemini-2.5-flash` (Google Generative Language direct) — aiChat primary
-- `gemini-2.5-flash-lite` (Google Generative Language direct) — lightweight chat
-- `gpt-4o-mini` (OpenAI direct) — aiChat OpenAI fallback + generate-audio chat step
-- `gpt-5-mini-2025-08-07` (OpenAI direct) — generateWorksheet JSON fallback + welcome-test
-- `gpt-4.1-2025-04-14` (OpenAI direct) — generate-media-exercises
-- `whisper-1` (OpenAI direct) — transcribe-audio (live session STT)
-- `gpt-4o-mini-tts` (OpenAI direct) — TTS primary
-- `tts-1` (OpenAI direct) — TTS for welcome-test-audio + generate-audio fallback
-- `gemini-2.5-flash-image` (Google Vertex AI, v1beta1 publisher metadata) — worksheet images
-
-Monthly (full breadth, runs on the 1st at 06:15 UTC):
-- Daily set, plus
-- `gemini-3.1-flash-image` (Vertex AI) — Nano Banana 2 fallback
-- `check: "smoke"` real inference calls for the Gemini and OpenAI text models
-
-Lovable Gateway probes were removed in v6.9.82 — the platform no longer uses that provider.
-
-A non-OK response that returns 404/410/5xx is additionally written to `error_logs` so the StatusPage banner picks it up within the next page load.
-
-## Monthly schedule (operator-only)
-
-```sql
-select cron.schedule(
-  'audit-llm-models-monthly',
-  '15 6 1 * *',
-  $$select net.http_post(
-      url := 'https://bvfrkzdlklyvnhlpleck.supabase.co/functions/v1/audit-llm-models',
-      headers := jsonb_build_object(
-        'Content-Type','application/json',
-        'x-cron-secret', current_setting('app.cron_secret', true)
-      ),
-      body := jsonb_build_object('mode','monthly')
-    )$$
-);
-```
+Inspect runs: `select * from cron.job_run_details order by start_time desc limit 10;`
+Unschedule before rotating the secret: `select cron.unschedule('audit-llm-models-daily');` (same for monthly).
 
 ## Manual invocation
 
-The Supabase SQL Editor executes SQL only. Pasting a `curl` command there fails with
-`42601: syntax error at or near "curl"`. Use one of the three options below.
-
-### Option A — from the SQL Editor via pg_net
+The SQL Editor only runs SQL (pasting `curl` gives `42601`). Either:
 
 ```sql
 select net.http_post(
   url     := 'https://bvfrkzdlklyvnhlpleck.supabase.co/functions/v1/audit-llm-models',
-  headers := jsonb_build_object(
-    'Content-Type', 'application/json',
-    'x-cron-secret', '<CRON_SECRET>'
-  ),
-  body    := jsonb_build_object('mode', 'monthly')
+  headers := jsonb_build_object('Content-Type','application/json','x-cron-secret','<CRON_SECRET>'),
+  body    := jsonb_build_object('mode','monthly')
 ) as request_id;
+-- results arrive by email and in model_audit_reports
 ```
 
-Read the response a few seconds later:
-
-```sql
-select id, status_code, content
-from net._http_response
-order by created desc
-limit 5;
-```
-
-### Option B — from a local terminal
+or from a terminal:
 
 ```bash
-curl -X POST \
-  "https://bvfrkzdlklyvnhlpleck.supabase.co/functions/v1/audit-llm-models" \
-  -H "x-cron-secret: <CRON_SECRET>" \
-  -H "Content-Type: application/json" \
-  -d '{"mode":"monthly"}'
+curl -X POST "https://bvfrkzdlklyvnhlpleck.supabase.co/functions/v1/audit-llm-models" \
+  -H "x-cron-secret: <CRON_SECRET>" -H "Content-Type: application/json" \
+  -d '{"mode":"monthly","sync":true}'
 ```
 
-### Option C — inspect results without invoking
+## Maintaining the registry
 
-```sql
-select provider, model, status, ok, expected, latency_ms, error, checked_at
-from public.model_health_checks
-order by checked_at desc
-limit 30;
-```
-
-### Secret hygiene
-
-Never paste the raw `CRON_SECRET` into a shared SQL Editor tab or screenshot. If it leaks,
-rotate the secret and update both pg_cron jobs (`audit-llm-models-daily`, `audit-llm-models-monthly`).
+- Adding or changing a model id in `supabase/functions/**` requires a registry entry; the Vitest guard fails otherwise.
+- When a deprecation notice is confirmed: set `shutdownDate`, `replacement`, `verifiedAt`. For "earliest retirement / or later" notices add the date to `acknowledgedDates`.
+- Never paste the raw `CRON_SECRET` into shared tabs or screenshots; rotate it and reschedule both jobs if it leaks.

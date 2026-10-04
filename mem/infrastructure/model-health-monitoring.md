@@ -29,3 +29,15 @@ type: feature
 - `model_health_checks.expected` remains for backward compatibility with old rows, but current audits should report `Expected: 0`.
 
 **Why:** Edooqoo intentionally does not use Lovable AI credits for model runtime; monitoring must test the direct providers that can actually break teacher workflows.
+## v6.9.90 — Model Registry, daily health vs monthly optimisation
+
+- `supabase/functions/_shared/modelRegistry.ts` is the single source of truth for every model id (role, use case, consumers, `protectedEngine`, probe kind, curated `shutdownDate`/`replacement`/`acknowledgedDates` + source URL). `audit-llm-models` no longer keeps its own target list.
+- **Daily = "does it work"**: one probe per model (minimal inference for Gemini/OpenAI chat and TTS, metadata for whisper-1 and Vertex images). 401/403/429 now reach `error_logs` (`model_failure`) alongside 404/410/5xx. Shutdowns ≤30 days → `error_logs` `model_shutdown_scheduled` (admin only; StatusPage banner ignores this code).
+- **Monthly = "is it still optimal"**: shutdown countdown (warn ≤120 d, crit ≤30 d), scan of the OpenAI / Gemini API / Vertex deprecation pages for dates the registry does not know, and a Gemini advisor (newest stable Flash + Google Search, live model lists, pricing-page excerpts) returning keep/switch/evaluate per role. Switch rule: better & cheaper, better at same price, or ≤30% pricier with clearly better results. Ids missing from the provider list are downgraded to evaluate. Runs in `EdgeRuntime.waitUntil` (202) unless `sync:true`.
+- Auth is fail-closed: missing `CRON_SECRET` → 503.
+- New table `model_audit_reports` (service role only) stores each run; `model_health_checks` gained `check_kind`, `shutdown_date`, `days_to_shutdown`.
+- `scripts/audit-llm-models.ts` removed (stale: Anthropic/ElevenLabs, no Vertex, never produced reports).
+- Vitest guard `src/lib/__tests__/modelAudit.test.ts` fails when a quoted model id in `supabase/functions/**` is missing from the registry.
+- Scan layout matters: OpenAI rows put the date before the id, Gemini/Vertex rows after it (`DEPRECATION_ROW_LAYOUT`); reading both sides produced false positives from adjacent rows.
+
+**Why:** the old audit only pinged availability, so it reported all-OK while 6 of 10 models had announced shutdowns (gpt-5-mini-2025-08-07 on 2026-12-11 inside the protected engine). Providers answer 200 until removal day.
