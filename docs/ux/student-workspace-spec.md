@@ -103,7 +103,7 @@ Rules:
 Known producers of `?tab=` links (verified with `rg -n "tab=" src/ supabase/functions/`):
 
 - `?tab=tests` — `supabase/functions/process-welcome-test/index.ts` (email CTA), `useDashboardAttention.ts`, `UnifiedBell.tsx`, `HomeworkNotificationBadge.tsx`, `WelcomeTestSuggestion.tsx` (also `&testId=`), `WelcomeTestPage.tsx`
-- `?tab=dslm` — `quickAccess.ts`, `NextUpCard.tsx`, `SlotDetailModal.tsx`, `PacingProposalsBell.tsx`, `NextStepsPresetBanner.tsx` (`&view=pathway`), `AddStudentDialog.tsx` (`&view=…&focus=…&_=…`), `OnboardingChecklist.tsx` (`&view=…&focus=…`)
+- `?tab=dslm` — `PacingProposalsBell.tsx`, `NextStepsPresetBanner.tsx` (`&view=pathway`), `AddStudentDialog.tsx` (`&view=…&focus=…&_=…`), `OnboardingChecklist.tsx` (`&view=…&focus=…`)
 - `?tab=flashcards` — `ViewFlashcardSetsModal.tsx`
 - `?tab=overview`, `?tab=worksheets`, `?tab=homework`, `?tab=calendar`, `?tab=1minute` — no current producer; reachable from bookmarks, older emails and manual URLs only
 - `?tab=progress|skills|knowledge|events` — no producer; today they are absorbed by `redirectMap` in `StudentPage.tsx` (`skills→dslm/skills`, `knowledge→dslm/profile`, `progress→dslm/pathway`, `events→dslm/profile`), which the section 4 table reproduces one-to-one
@@ -523,13 +523,13 @@ Code-level audit of every legacy `?tab=` producer (2026-09-24). None were migrat
 
 | Producer | Emitted URL | Canonical result |
 |---|---|---|
-| Dashboard quick search / All students / recent pills | `studentPrepPath()` → `?tab=prep` | Prep |
+| Dashboard quick search / All students / recent pills, `NextUpCard`, `SlotDetailModal` (3 CTAs) | `studentPrepPath()` → `?tab=prep` | Prep |
 | `OnboardingChecklist` (5 steps) | `?tab=dslm&view=…&focus=…` | `tab=model`, view + focus kept |
 | `AddStudentDialog` | `?tab=dslm&view=…&focus=…&_=…&intake=…` | `tab=model`, intake/focus/_ kept |
 | `process-welcome-test` email, `UnifiedBell`, `HomeworkNotificationBadge`, `useDashboardAttention`, `WelcomeTestPage` | `?tab=tests` | Timeline, filter=tests |
 | `WelcomeTestSuggestion` | `?tab=tests&testId=…` | Timeline tests, testId kept → `StudentTestsTab` opens it |
 | `ViewFlashcardSetsModal` | `?tab=flashcards` | Library, section=flashcards |
-| `PacingProposalsBell`, `NextUpCard`, `SlotDetailModal` | `?tab=dslm` | Learning model |
+| `PacingProposalsBell` | `?tab=dslm` | Learning model |
 | Timeline event hrefs | `?tab=calendar|homework|dslm|knowledge` | Timeline lessons/homework, Model, Model profile |
 
 Structural safeguards verified in `StudentPage.tsx`: resolver in `useMemo`, normalisation only on `changed` and always `replace` (no loop); Timeline / Library / DSLMTab and all compatibility tools are `lazy` + conditionally mounted inside local `Suspense` (first Prep paint mounts none of them); demo mode blanks student/teacher IDs before queries; `writeAutoGenerateIntent()` call sites unchanged.
@@ -606,3 +606,9 @@ As built:
 - Worksheet Generation Engine untouched.
 
 Verification (2026-10-04): tsgo clean; vitest workspaceTabs + modelHealth 78/78. Live browser check not performed — this project's auth status is `external_unmanaged` and the demo account stalls on the loading screen; manual check on a real account pending.
+
+## 18. Loading behaviour (2026-10 audit)
+
+- The full-page skeleton (`PageLoadingState`) shows only until the first worksheet load settles (`worksheetsReady` in `StudentPage.tsx`). Later refetches (Library pagination, restore, rename, duplicate, transfer) keep the workspace mounted so scroll position and open panels survive; Prep and Library own their inline loading states.
+- `useWorksheetHistory.refetch` is a no-op in demo mode (demo worksheets come from `DemoContext`); before this it left `loading=true` forever and the demo student page never rendered.
+- The Welcome Test banner (`no_test` branch) uses `flex-wrap` with a `basis-64` title so actions drop below the title instead of overlapping it at 768-1500 px.
