@@ -79,6 +79,17 @@ jobs:
       - name: Generate AI discovery resources
         run: node scripts/seo/generate-ai-resources.mjs
 
+      # Committed snapshots are the generators' output PLUS these post-processing passes
+      # (the same ones build:seo applies); without them the diff below can never be clean.
+      - name: Inject citation blocks into snapshots
+        run: npm run seo:inject-citation-blocks
+
+      - name: Dedupe JSON-LD ids
+        run: npm run seo:dedupe-jsonld
+
+      - name: Repair snapshot snippets and heads
+        run: npm run seo:repair-snapshot-snippets && npm run seo:repair-snapshot-head
+
       - name: Verify generated files are committed
         run: git diff --exit-code
 
