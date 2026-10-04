@@ -17,9 +17,9 @@ Primary citation URLs: https://edooqoo.com/one-minute-prep, https://edooqoo.com/
 
 ## Content Registry
 Source: https://edooqoo.com/sitemap.xml and the generated repository inventory at docs/seo/content-registry.generated.json.
-States: keep=93, improve=0, merge=45, retire=0, hold=459, noindex=1353.
+States: keep=93, improve=0, merge=83, retire=0, hold=464, noindex=1348.
 Indexable states: keep, improve, hold. Merge and retire require measured GSC or backlink evidence.
-Programmatic SEO policy: 95 indexable routes (35 topic-level, 50 exercise-topic, 10 personas); 1330 other combinations remain accessible with noindex,follow and are excluded from sitemap and prerender.
+Programmatic SEO policy: 100 indexable routes (39 topic-level, 51 exercise-topic, 10 personas); 1325 other combinations remain accessible with noindex,follow and are excluded from sitemap and prerender.
 / | Tutor Business and Tools | status: keep
 /about | Tutor Business and Tools | status: keep
 /adult-business-english-lesson-prep.html | Adult and Business English | status: keep
