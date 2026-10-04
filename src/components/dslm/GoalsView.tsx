@@ -244,8 +244,8 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
   return (
     <div className="space-y-3">
       {/* Main Goal — compact inline */}
-      <Card>
-        <CardContent className="p-3">
+      <Card className="border-primary/40 bg-primary/5">
+        <CardContent className="p-4">
           {isEditingMainGoal ? (
             <div className="space-y-2">
               <div className="flex items-center gap-2">
@@ -273,8 +273,8 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
           ) : (
             <div className="flex items-center gap-2 flex-wrap">
               <Target className="h-4 w-4 text-primary shrink-0" />
-              <span className="text-sm font-semibold">Main Goal:</span>
-              <Badge variant="secondary" className="text-xs">{formatGoalLabel(mainGoal)}</Badge>
+              <span className="text-xs uppercase tracking-wide text-muted-foreground">Main goal</span>
+              <span className="text-base font-semibold">{formatGoalLabel(mainGoal)}</span>
               {deadlineDisplay && (
                 <Badge variant="outline" className="flex items-center gap-1 text-xs">
                   <Calendar className="h-3 w-3" />
@@ -283,7 +283,7 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
               )}
               <GoalProgressBar value={mainAggregate.pct} signalsLabel={mainAggregate.signalsLabel} className="ml-2" />
               <Button
-                size="sm" variant="ghost" className="h-7 ml-auto"
+                size="sm" variant="ghost" className="h-7 ml-auto" aria-label="Edit main goal"
                 onClick={() => { setEditedMainGoal(mainGoal); setEditedTargetDate(mainGoalTargetDate || ''); setIsEditingMainGoal(true); }}
               >
                 <Edit className="h-3.5 w-3.5" />
@@ -356,58 +356,72 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
         )}
       </CollapsibleSection>
 
-      {/* Additional Goals — collapsed by default */}
+      {/* Model Cockpit K3 — secondary goal lists behind one disclosure. */}
       <CollapsibleSection
-        id="goals-additional"
-        title="Additional Goals"
-        icon={BookOpen}
-        count={additionalGoals.length}
-        rightSlot={addBtn('additional')}
-        description="Important side objectives for the student"
+        id="goals-more"
+        title="More goals & notes"
+        icon={StickyNote}
+        count={additionalGoals.length + achievedGoals.length + archivedGoals.length + goalNotesEntries.length}
+        description="Side objectives, achieved and archived goals, and goal notes"
+        alsoOpenFor={['goals-additional', 'goals-achieved', 'goals-archived', 'goals-notes']}
+        forceMountContent
+        className="border-dashed"
       >
-        {additionalGoals.length === 0 ? (
-          <p className="text-xs text-muted-foreground text-center py-2">No additional goals yet</p>
-        ) : (
-          <div className="grid md:grid-cols-2 gap-3">
-            {additionalGoals.map(renderGoalCard)}
-          </div>
-        )}
-      </CollapsibleSection>
-
-      {/* v5.0: Achieved Goals — collapsed by default */}
-      {achievedGoals.length > 0 && (
-        <CollapsibleSection id="goals-achieved" title="Achieved Goals" icon={CheckCircle2} count={achievedGoals.length}>
-          <div className="grid md:grid-cols-2 gap-3">
-            {achievedGoals.map(renderGoalCard)}
-          </div>
+        <div className="space-y-3">
+        {/* Additional Goals — collapsed by default */}
+        <CollapsibleSection
+          id="goals-additional"
+          title="Additional Goals"
+          icon={BookOpen}
+          count={additionalGoals.length}
+          rightSlot={addBtn('additional')}
+          description="Important side objectives for the student"
+        >
+          {additionalGoals.length === 0 ? (
+            <p className="text-xs text-muted-foreground text-center py-2">No additional goals yet</p>
+          ) : (
+            <div className="grid md:grid-cols-2 gap-3">
+              {additionalGoals.map(renderGoalCard)}
+            </div>
+          )}
         </CollapsibleSection>
-      )}
 
-      {/* v5.0: Archived Goals — collapsed by default */}
-      {archivedGoals.length > 0 && (
-        <CollapsibleSection id="goals-archived" title="Archived Goals" icon={Archive} count={archivedGoals.length}>
-          <div className="grid md:grid-cols-2 gap-3">
-            {archivedGoals.map(renderGoalCard)}
-          </div>
-        </CollapsibleSection>
-      )}
-
-      {/* Goal Notes — collapsed */}
-      <CollapsibleSection id="goals-notes" title="Goal Notes" icon={StickyNote} count={goalNotesEntries.length}>
-        {goalNotesEntries.length === 0 ? (
-          <p className="text-xs text-muted-foreground text-center py-2">No goal notes yet</p>
-        ) : (
-          <div className="space-y-2">
-            {goalNotesEntries.map(entry => (
-              <StudentKnowledgeEntryCard
-                key={entry.id} entry={entry}
-                onView={() => {}} onEdit={() => {}} onDelete={goalNotes.deleteEntry}
-                onMarkOutdated={goalNotes.markAsOutdated}
-                onMarkCurrent={goalNotes.markAsCurrent}
-              />
-            ))}
-          </div>
+        {/* v5.0: Achieved Goals — collapsed by default */}
+        {achievedGoals.length > 0 && (
+          <CollapsibleSection id="goals-achieved" title="Achieved Goals" icon={CheckCircle2} count={achievedGoals.length}>
+            <div className="grid md:grid-cols-2 gap-3">
+              {achievedGoals.map(renderGoalCard)}
+            </div>
+          </CollapsibleSection>
         )}
+
+        {/* v5.0: Archived Goals — collapsed by default */}
+        {archivedGoals.length > 0 && (
+          <CollapsibleSection id="goals-archived" title="Archived Goals" icon={Archive} count={archivedGoals.length}>
+            <div className="grid md:grid-cols-2 gap-3">
+              {archivedGoals.map(renderGoalCard)}
+            </div>
+          </CollapsibleSection>
+        )}
+
+        {/* Goal Notes — collapsed */}
+        <CollapsibleSection id="goals-notes" title="Goal Notes" icon={StickyNote} count={goalNotesEntries.length}>
+          {goalNotesEntries.length === 0 ? (
+            <p className="text-xs text-muted-foreground text-center py-2">No goal notes yet</p>
+          ) : (
+            <div className="space-y-2">
+              {goalNotesEntries.map(entry => (
+                <StudentKnowledgeEntryCard
+                  key={entry.id} entry={entry}
+                  onView={() => {}} onEdit={() => {}} onDelete={goalNotes.deleteEntry}
+                  onMarkOutdated={goalNotes.markAsOutdated}
+                  onMarkCurrent={goalNotes.markAsCurrent}
+                />
+              ))}
+            </div>
+          )}
+        </CollapsibleSection>
+        </div>
       </CollapsibleSection>
 
       {/* Add Goal Dialog */}
