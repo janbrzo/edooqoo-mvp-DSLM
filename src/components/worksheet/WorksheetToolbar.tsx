@@ -280,7 +280,7 @@ const WorksheetToolbar = ({
   return (
     <>
       <div className="sticky top-0 z-[60] bg-white border-b mb-6 py-3 px-4">
-        <div className={`flex ${isMobile ? 'flex-col gap-3' : 'justify-between items-center'} max-w-[98%] mx-auto`}>
+        <div className={`flex ${isMobile ? 'flex-col gap-3' : 'flex-wrap justify-between items-center gap-y-2'} max-w-[98%] mx-auto`}>
           <div className={`flex ${isMobile ? 'justify-center flex-wrap' : ''} space-x-2 items-center`}>
             <Button
               variant={viewMode === 'student' ? 'default' : 'outline'}
@@ -322,7 +322,7 @@ const WorksheetToolbar = ({
               </TooltipContent>
             </Tooltip>
           </div>
-          <div className={`flex ${isMobile ? 'flex-col gap-2' : 'items-center'}`}>
+          <div className={`flex ${isMobile ? 'flex-col gap-2' : 'flex-wrap items-center gap-y-2'}`}>
             {/* P1.4 — autosave indicator */}
             {autosaveStatus !== 'disabled' && (
               <span
@@ -511,7 +511,7 @@ const WorksheetToolbar = ({
             )}
             {/* In Live Session mode: show Draw button instead of Download buttons */}
             {viewMode === 'live-session' && onDrawingToggle ? (
-              <div className="flex gap-2">
+              <div className="flex flex-wrap gap-2">
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
@@ -549,7 +549,7 @@ const WorksheetToolbar = ({
                 )}
               </div>
             ) : (
-              <div className={`flex ${isMobile ? 'flex-col gap-2' : 'gap-2'}`}>
+              <div className={`flex ${isMobile ? 'flex-col gap-2' : 'flex-wrap gap-2'}`}>
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button

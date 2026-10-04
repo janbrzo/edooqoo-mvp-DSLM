@@ -84,18 +84,18 @@ const ExerciseHeader: React.FC<ExerciseHeaderProps> = ({
 
   return (
   <div className={cn(
-    "bg-worksheet-purple text-white p-2 flex justify-between items-center exercise-header",
+    "bg-worksheet-purple text-white p-2 flex flex-wrap gap-y-2 justify-between items-center exercise-header",
     // PROBLEM 5: Apply "done" styling when exercise is marked done in Live Session
     isMarkedDone && "bg-gray-400 opacity-80"
   )}>
-    <div className="flex items-center">
+    <div className="flex items-center min-w-0">
       <div className={cn(
-        "p-2 rounded-full mr-3",
+        "p-2 rounded-full mr-3 shrink-0",
         isMarkedDone ? "bg-white/30" : "bg-white/20"
       )}>
         {isMarkedDone ? <Check className="h-5 w-5" /> : getIconComponent(icon)}
       </div>
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2 min-w-0">
         <h3 className="text-lg font-semibold">
           {isEditing ? (
             <input

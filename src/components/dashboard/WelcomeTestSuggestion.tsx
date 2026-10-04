@@ -538,12 +538,12 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
           // description in row 2. Lets description span the full card width
           // so it stays on a single line on desktop.
           <div className="flex flex-col gap-2">
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-              <div className="flex items-center gap-3 min-w-0">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center gap-3 min-w-0 flex-1 basis-64">
                 <Sparkles className="h-7 w-7 text-primary flex-shrink-0" />
                 <p className="font-medium">Send a Welcome (placement) Test to {studentName}</p>
               </div>
-              <div className="md:flex-shrink-0">
+              <div className="flex-shrink-0 max-w-full">
                 <WelcomeTestActionsPanel
                   state={panelState}
                   shareUrl={shareUrl}
