@@ -71,12 +71,16 @@ describe('deterministicChecks', () => {
 
 describe('checkExternalLinks', () => {
   it('rejects hosts outside the allowlist and non-200 responses', async () => {
-    const fetchImpl = async (url) => ({ ok: !url.includes('gone'), status: url.includes('gone') ? 404 : 200 });
+    const fetchImpl = async (url) => {
+      if (url.includes('gone')) return { ok: false, status: 404 };
+      if (url.includes('blocked')) return { ok: false, status: 403 };
+      return { ok: true, status: 200 };
+    };
     const results = await checkExternalLinks(
-      ['https://www.coe.int/a', 'https://www.coe.int/gone', 'https://random-blog.com/x'],
+      ['https://www.coe.int/a', 'https://www.coe.int/gone', 'https://random-blog.com/x', 'https://www.coe.int/blocked'],
       { allowlist: ['coe.int'], fetchImpl },
     );
-    expect(results.map((r) => r.status)).toEqual(['pass', 'fail', 'fail']);
+    expect(results.map((r) => r.status)).toEqual(['pass', 'fail', 'fail', 'warn']);
   });
 });
 

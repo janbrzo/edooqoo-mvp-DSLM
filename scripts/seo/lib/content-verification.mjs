@@ -203,7 +203,10 @@ export async function checkExternalLinks(urls, { allowlist, fetchImpl }) {
     }
     try {
       const response = await fetchImpl(url);
-      results.push({ url, status: response.ok ? 'pass' : 'fail', detail: `HTTP ${response.status}` });
+      // 401/403/429 usually mean the publisher blocks automated requests, not that the link is dead:
+      // warn so a human opens it once; 404/410/5xx and network errors still fail.
+      const botBlocked = [401, 403, 429].includes(response.status);
+      results.push({ url, status: response.ok ? 'pass' : botBlocked ? 'warn' : 'fail', detail: `HTTP ${response.status}${botBlocked ? ' (blocked for automated requests; open it manually once)' : ''}` });
     } catch (error) {
       results.push({ url, status: 'fail', detail: `fetch error: ${error.message}` });
     }
@@ -216,10 +219,12 @@ export function buildRecord({ route, page, layer1, links, layer2, checkedAt }) {
   const checks = [...layer1];
   if (links) {
     const failing = links.filter((link) => link.status === 'fail');
+    const warned = links.filter((link) => link.status === 'warn');
+    const describe = (list) => list.map((link) => `${link.url} (${link.detail})`).join('; ');
     checks.push({
       id: 'external-citations',
-      status: failing.length ? 'fail' : 'pass',
-      detail: failing.length ? failing.map((link) => `${link.url} (${link.detail})`).join('; ') : `${links.length} checked`,
+      status: failing.length ? 'fail' : warned.length ? 'warn' : 'pass',
+      detail: failing.length ? describe(failing) : warned.length ? describe(warned) : `${links.length} checked`,
     });
   }
   const l1 = layer1Status(checks);

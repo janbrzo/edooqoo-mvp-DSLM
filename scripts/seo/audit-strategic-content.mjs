@@ -71,8 +71,8 @@ async function main() {
     if (!html.includes(`<link rel="canonical" href="https://edooqoo.com/blog/${slug}">`)) {
       failures.push(`${slug}: canonical mismatch`);
     }
-    if (minimumWords === 900 && article?.dateModified !== '2026-06-15') {
-      failures.push(`${slug}: dateModified must be 2026-06-15`);
+    if (minimumWords === 900 && !(article?.dateModified >= '2026-06-15')) {
+      failures.push(`${slug}: dateModified must be 2026-06-15 or later (later only when the content really changed)`);
     }
   }
 

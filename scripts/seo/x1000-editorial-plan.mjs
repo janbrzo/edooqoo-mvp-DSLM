@@ -1,3 +1,5 @@
+import { ARTICLE_REWRITES } from './article-rewrites.mjs';
+
 const workflowLinks = [
   // Sprint 3 (Faza 3) topical cluster hubs — see scripts/seo/cluster-hubs.mjs
   ['/cefr-assessment', 'CEFR assessment hub'],
@@ -273,6 +275,7 @@ function buildFallbackSnippet(slug) {
  * is too thin to earn a page-1 click (Martha Standard: adult, 1:1, decision-driven).
  */
 export const ARTICLE_DETAIL_OVERRIDES = {
+  ...ARTICLE_REWRITES,
   'communicative-language-teaching-activities': {
     directAnswer:
       'In 1:1 adult lessons, communicative activities work when the information gap is real: the tutor holds data the learner does not, the learner has to negotiate meaning to get it, and the task mirrors a workplace exchange the learner will actually have.',
@@ -326,9 +329,12 @@ function articleSpec({
 }) {
   const slugKey = slug.replace(/\.html$/, '');
   const detail = ARTICLE_DETAIL_OVERRIDES[slugKey] || {};
+  // A hand-written entry that supplies its own problem/solution is "bespoke": the shared
+  // boilerplate sections (generic mechanics, workflow paragraph, FAQ, source list) are not rendered.
+  const bespoke = Boolean(detail.problem && detail.solution);
   problem = detail.problem || problem;
   solution = detail.solution || solution;
-  mechanics = detail.mechanics || mechanics;
+  mechanics = detail.mechanics || (bespoke ? [] : mechanics);
   works = detail.works || works;
   notEnough = detail.notEnough || notEnough;
   directAnswer = detail.directAnswer || directAnswer;
@@ -337,7 +343,7 @@ function articleSpec({
   const fallback = buildFallbackSnippet(slug);
   const title = clampTitle(SEO_TITLE_OVERRIDES[slugKey] || explicitTitle || fallback.title);
   // H1 stays the plain topic phrase; the SERP title carries the click-earning angle.
-  const h1 = explicitTitle || fallback.h1;
+  const h1 = detail.h1 || explicitTitle || fallback.h1;
   const description = clampDescription(
     SEO_DESCRIPTION_OVERRIDES[slugKey] || explicitDescription || fallback.description,
   );
@@ -353,7 +359,7 @@ function articleSpec({
     mechanics,
     works,
     notEnough,
-    workflowFocus: 'Move from learner evidence to one bounded next decision, then use an editable worksheet, homework task, or live activity to test that decision in an adult-relevant context.',
+    workflowFocus: bespoke ? null : 'Move from learner evidence to one bounded next decision, then use an editable worksheet, homework task, or live activity to test that decision in an adult-relevant context.',
     tutorDecision: tutorDecision || 'If the tutor cannot name the learner evidence behind the task, the material should remain a draft rather than becoming the next lesson plan.',
     example: example || 'A recurring adult learner needs English for a real workplace task. The tutor should use recent evidence to decide whether to repair a blocking gap, continue the same skill with less support, or advance into a more independent transfer task.',
     ragKeywords: [
@@ -362,10 +368,14 @@ function articleSpec({
       '1:1 English lesson prep',
       'teacher-controlled AI',
       'Edooqoo workflow',
+      ...(detail.keywords || []),
       ...ragKeywords,
     ],
-    links: [...links, ...strategicCitationMeshLinks],
-    faqs: [
+    links: [...(detail.links || []), ...links, ...strategicCitationMeshLinks],
+    sources: detail.sources || null,
+    bespoke,
+    updatedDate: detail.updated || null,
+    faqs: detail.faqs || [
       ['Who is this page for?', 'Private 1:1 adult ESL/EFL tutors, Business English coaches, and online English teachers.'],
       ['Does this advice apply to children or school classes?', 'No. The framing is adult 1:1 tutoring unless the page explicitly rejects school-like material.'],
       ['Where does Edooqoo fit?', 'Edooqoo fits when the tutor needs recurring learner context, homework evidence, editable worksheet output, and teacher-controlled review.'],

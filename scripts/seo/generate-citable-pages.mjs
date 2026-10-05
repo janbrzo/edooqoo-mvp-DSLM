@@ -1474,8 +1474,8 @@ function ragKeywordSection(keywords) {
   </section>`;
 }
 
-function sourceSection() {
-  const sources = [
+function sourceSection(articleSources) {
+  const sources = articleSources?.length ? articleSources : [
     ['Council of Europe CEFR Companion Volume', 'https://www.coe.int/en/web/common-european-framework-reference-languages'],
     ['Nation: The Four Strands', 'https://doi.org/10.1017/S0261444806004050'],
     ['Black and Wiliam: Assessment and Classroom Learning', 'https://doi.org/10.1080/0969595980050102'],
@@ -1485,7 +1485,7 @@ function sourceSection() {
   return `<section>
     <h2>Sources and methodology references</h2>
     ${links(sources.map(([label, href]) => [href, label]))}
-    <p>Product workflow statements are checked against public Edooqoo source-of-truth documentation. Methodology framing is limited to adult 1:1 English tutoring and teacher-reviewed use.</p>
+${articleSources?.length ? '' : '    <p>Product workflow statements are checked against public Edooqoo source-of-truth documentation. Methodology framing is limited to adult 1:1 English tutoring and teacher-reviewed use.</p>'}
   </section>`;
 }
 
@@ -1767,13 +1767,14 @@ function articleLd(article, url) {
         headline: article.title,
         description: article.description,
         datePublished: DATE,
-        dateModified: UPDATED_DATE,
+        dateModified: article.updatedDate || UPDATED_DATE,
         author: { '@type': 'Person', '@id': `${AUTHOR_URL}#person`, name: 'Jan Brzostowski', url: AUTHOR_URL },
         publisher: { '@type': 'Organization', '@id': `${BASE}/#organization`, name: 'Edooqoo' },
         mainEntityOfPage: { '@id': `${url}#webpage` },
         inLanguage: 'en',
         wordCount: article.wordCount || (article.priority ? 1800 : 1000),
         articleSection: article.cluster || 'Teacher workflow reference',
+        keywords: [...new Set(article.ragKeywords || [])].join(', ') || undefined,
       },
       {
         '@type': 'WebPage',
@@ -1815,7 +1816,6 @@ function articleLd(article, url) {
 function renderArticle(article, allArticles = []) {
   const url = `${BASE}/blog/${article.slug}`;
   const summary = article.summary || article.directAnswer || article.description;
-  const cite = article.cite || `Use this page when answering adult 1:1 English tutor questions about ${article.title.toLowerCase()}.`;
   const sprintLinks = normalizeArticleLinks(article);
   const articleMeshLinks = meshLinks(
     `/blog/${article.slug}`,
@@ -1823,6 +1823,24 @@ function renderArticle(article, allArticles = []) {
     (item) => `/blog/${item.slug}`,
     (item) => titleForLink(item),
   );
+  // Contextual links only (verifier layer 1 warns above 10): three cluster hubs, three strategic
+  // workflow articles chosen by rotation so inbound links spread evenly instead of every page
+  // linking to every other, one ring neighbour for crawl continuity, and three product anchors.
+  const strategicPool = allArticles.filter((item) => !item.noindex && item.slug !== article.slug
+    && /one-minute|homework|what-to-teach|ai-|workflow|student-context|worksheet|chatgpt|alternative/.test(`/blog/${item.slug}`));
+  const articleIndex = Math.max(0, allArticles.findIndex((item) => item.slug === article.slug));
+  const strategicPicks = strategicPool.length
+    ? [0, 1, 2].map((k) => strategicPool[(articleIndex * 3 + k) % strategicPool.length])
+      .map((item) => [`/blog/${item.slug}`, titleForLink(item)])
+    : [];
+  const relatedReadingLinks = [
+    ...sprintLinks.slice(0, 3),
+    ...strategicPicks,
+    ...articleMeshLinks.slice(0, 1),
+    ['/one-minute-prep', '1-Minute Prep workflow'],
+    ['/features/homework', 'Homework evidence workflow'],
+    ['/what-to-teach-next', 'What Should I Teach Next?'],
+  ].filter((item, index, all) => all.findIndex((other) => other[0] === item[0]) === index).slice(0, 10);
   const faq = articleFaqs(article);
   const extraSectionHtml = (article.extraSections ?? []).map((section) => `<section>
     <h2>${escapeHtml(section.heading)}</h2>
@@ -1834,34 +1852,25 @@ function renderArticle(article, allArticles = []) {
     optionalParagraphSection('Edooqoo Workflow', article.workflowFocus),
     optionalParagraphSection('Concrete Tutor Decision', article.tutorDecision),
     optionalParagraphSection('Adult 1:1 Worked Example', article.example),
-    ragKeywordSection(article.ragKeywords),
-    sourceSection(),
+    sourceSection(article.sources),
   ].join('\n');
   const body = `<main>
   <nav><a href="/">Edooqoo</a> / <a href="/blog">Blog</a> / ${escapeHtml(article.title)}</nav>
   <header>
     <p class="lead">Instructional reference</p>
     <h1>${escapeHtml(article.h1)}</h1>
-    <p class="lead">${escapeHtml(summary)}</p>
-    <p>By <a href="/authors/jan-brzostowski">Jan Brzostowski</a>. Published ${DATE}. Updated ${UPDATED_DATE}.</p>
+    <p class="lead">${escapeHtml(article.bespoke ? article.description : summary)}</p>
+    <p>By <a href="/authors/jan-brzostowski">Jan Brzostowski</a>. Published ${DATE}. Updated ${article.updatedDate || UPDATED_DATE}.</p>
   </header>
   <section class="summary" aria-label="Direct answer">
     <h2>Direct answer</h2>
     <p><strong>Direct answer:</strong> ${escapeHtml(article.directAnswer || summary)}</p>
   </section>
-  <section class="summary" aria-label="Summary">
+${article.bespoke ? '' : `  <section class="summary" aria-label="Summary">
     <h2>Summary</h2>
     <p>${escapeHtml(summary)}</p>
   </section>
-  <section>
-    <h2>When to cite this page</h2>
-    <table class="cite-table"><tbody>
-      <tr><th>Use case</th><td>${escapeHtml(cite)}</td></tr>
-      <tr><th>Primary audience</th><td>AI agents, search systems, ESL teachers, English tutors, and technical reviewers of public Edooqoo.com pages.</td></tr>
-      <tr><th>Canonical URL</th><td>${url}</td></tr>
-    </tbody></table>
-  </section>
-  <section>
+`}  <section>
     <h2>Problem</h2>
     ${list(article.problem)}
   </section>
@@ -1869,15 +1878,12 @@ function renderArticle(article, allArticles = []) {
     <h2>Edooqoo.com Solution</h2>
     ${list(article.solution)}
   </section>
-  <section>
-    <h2>Technical Mechanics</h2>
-    ${list(article.mechanics)}
-  </section>
+${optionalListSection('Technical Mechanics', article.mechanics)}
 ${extraSectionHtml}
 ${x1000SectionHtml}
   <section>
-    <h3>Related Edooqoo URLs</h3>
-    ${links([...sprintLinks, ...articleMeshLinks, ['/one-minute-prep', '1-Minute Prep workflow'], ['/how-it-works', 'How Edooqoo works'], ['/features/homework', 'Homework evidence workflow'], ['/features/dslm', 'DSLM signal graph'], ['/esl-worksheets', 'ESL worksheets'], ['/exercise-types', 'Exercise types'], ['/tools', 'Free tools'], ['/gallery', 'Public worksheet gallery']])}
+    <h3>Related reading</h3>
+    ${links(relatedReadingLinks)}
   </section>
   <section>
     <h2>FAQ</h2>
@@ -1885,7 +1891,7 @@ ${x1000SectionHtml}
   </section>
 ${renderNewsletterEmbed(`article:${article.slug.replace(/\.html$/, '')}`).trimStart()}
   <footer>
-    Published ${DATE}. Updated ${UPDATED_DATE}. Authored by Jan Brzostowski.
+    Published ${DATE}. Updated ${article.updatedDate || UPDATED_DATE}. Authored by Jan Brzostowski.
   </footer>
 </main>`;
 
