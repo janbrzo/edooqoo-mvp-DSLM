@@ -31,7 +31,7 @@ export const useStudentKnowledge = ({ studentId, teacherId }: UseStudentKnowledg
   const queryClient = useQueryClient();
   const [filters, setFiltersState] = useState<KnowledgeFilters>(DEFAULT_FILTERS);
 
-  const { isDemoMode, demoData } = useDemoContext();
+  const { isDemoMode, demoData, showDemoBlockedToast } = useDemoContext();
   // Demo ids are not UUIDs: read-only entries come from the demo data set instead of Supabase.
   const demoReady = isDemoMode && !!demoData;
   const idsValid = isValidUUID(studentId) && isValidUUID(teacherId);
@@ -80,9 +80,15 @@ export const useStudentKnowledge = ({ studentId, teacherId }: UseStudentKnowledg
   });
 
   const tagsQuery = useQuery<string[]>({
-    queryKey: ['knowledge', 'tags', studentId, teacherId],
-    enabled: idsValid,
+    queryKey: ['knowledge', 'tags', studentId, teacherId, demoReady],
+    enabled: idsValid || demoReady,
     queryFn: async () => {
+      if (demoReady) {
+        const tags = (demoData!.knowledgeEntries as unknown as StudentKnowledgeEntry[])
+          .filter((e) => e.student_id === studentId)
+          .flatMap((e) => e.tags || []);
+        return Array.from(new Set(tags)).sort();
+      }
       const { data, error } = await supabase.rpc('get_student_tags', {
         p_student_id: studentId,
         p_teacher_id: teacherId,
@@ -336,6 +342,13 @@ export const useStudentKnowledge = ({ studentId, teacherId }: UseStudentKnowledg
 
   const isMutating = addMutation.isPending || updateMutation.isPending || deleteMutation.isPending || markOutdatedMutation.isPending || markCurrentMutation.isPending || archiveMutation.isPending || confirmCurrentMutation.isPending;
 
+  // Demo lockdown: every write is blocked before it reaches Supabase (demo ids are not UUIDs).
+  const demoBlocked = (action: string): Promise<null> | undefined => {
+    if (!isDemoMode) return undefined;
+    showDemoBlockedToast(action);
+    return Promise.resolve(null);
+  };
+
   return {
     entries,
     isLoading: entriesQuery.isLoading || isMutating,
@@ -346,13 +359,13 @@ export const useStudentKnowledge = ({ studentId, teacherId }: UseStudentKnowledg
     suggestedTags: tagsQuery.data || [],
     fetchEntries,
     fetchSuggestedTags,
-    addEntry: (entry: Omit<NewKnowledgeEntry, 'student_id' | 'teacher_id'>) => addMutation.mutateAsync(entry),
-    updateEntry: (entryId: string, updates: UpdateKnowledgeEntry) => updateMutation.mutateAsync({ entryId, updates }),
-    deleteEntry: (entryId: string) => deleteMutation.mutateAsync(entryId),
-    markAsOutdated: (entryId: string, reason?: string) => markOutdatedMutation.mutateAsync({ entryId, reason }),
-    markAsCurrent: (entryId: string) => markCurrentMutation.mutateAsync(entryId),
-    archiveEntry: (entryId: string, worksheetId?: string | null) => archiveMutation.mutateAsync({ entryId, worksheetId }),
-    confirmCurrent: (entryId: string) => confirmCurrentMutation.mutateAsync(entryId),
+    addEntry: (entry: Omit<NewKnowledgeEntry, 'student_id' | 'teacher_id'>) => demoBlocked('Adding notes') ?? addMutation.mutateAsync(entry),
+    updateEntry: (entryId: string, updates: UpdateKnowledgeEntry) => demoBlocked('Editing notes') ?? updateMutation.mutateAsync({ entryId, updates }),
+    deleteEntry: (entryId: string) => demoBlocked('Deleting notes') ?? deleteMutation.mutateAsync(entryId),
+    markAsOutdated: (entryId: string, reason?: string) => demoBlocked('Marking notes outdated') ?? markOutdatedMutation.mutateAsync({ entryId, reason }),
+    markAsCurrent: (entryId: string) => demoBlocked('Marking notes current') ?? markCurrentMutation.mutateAsync(entryId),
+    archiveEntry: (entryId: string, worksheetId?: string | null) => demoBlocked('Archiving notes') ?? archiveMutation.mutateAsync({ entryId, worksheetId }),
+    confirmCurrent: (entryId: string) => demoBlocked('Confirming notes') ?? confirmCurrentMutation.mutateAsync(entryId),
     loadMore,
     resetFilters,
     setFilters,
