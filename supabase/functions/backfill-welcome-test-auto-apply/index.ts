@@ -90,7 +90,7 @@ serve(async (req) => {
       const msg = String((err as Error)?.message || err);
       results.push({ testId: t.id, applied: 0, status: "error", error: msg.slice(0, 300) });
       await sb.from("error_logs").insert({
-        severity: "warning", source: "edge-function",
+        severity: "warning", source: "edge_function",
         source_name: "backfill-welcome-test-auto-apply",
         component: "welcome-test-auto-apply", error_code: "backfill_failed",
         message: `backfill failed for test ${t.id}`,
