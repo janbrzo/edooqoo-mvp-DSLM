@@ -5,7 +5,7 @@ import { getContentRegistry } from './content-registry.mjs';
 import { getPseoRouteInventory } from './pseo-index-policy.mjs';
 import {
   argValue,
-  bearerToken,
+  resolveBearerToken,
   googleJsonFetch,
   todayIso,
   writeRunFiles,
@@ -19,7 +19,7 @@ const DATE = argValue(argv, '--date') || todayIso();
 const SITE_URL = argValue(argv, '--site') || process.env.GSC_SITE_URL || 'sc-domain:edooqoo.com';
 const LIMIT = Number(argValue(argv, '--limit') || process.env.GSC_URL_INSPECTION_LIMIT || 120);
 const STRICT = argv.includes('--strict');
-const TOKEN = bearerToken();
+const { token: TOKEN, error: TOKEN_ERROR } = await resolveBearerToken();
 
 const strategicPrefixes = [
   '/edooqoo-vs-',
@@ -102,7 +102,7 @@ async function main() {
     report = {
       generatedAt: new Date().toISOString(),
       status: 'skipped',
-      reason: 'Missing GSC_ACCESS_TOKEN, GOOGLE_SEARCH_CONSOLE_ACCESS_TOKEN, or GOOGLE_ACCESS_TOKEN.',
+      reason: TOKEN_ERROR || 'Missing GSC_ACCESS_TOKEN, GOOGLE_SEARCH_CONSOLE_ACCESS_TOKEN, GOOGLE_ACCESS_TOKEN or GSC_SERVICE_ACCOUNT_JSON.',
       siteUrl: SITE_URL,
       urls,
       inspections: [],

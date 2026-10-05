@@ -3,7 +3,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import {
   argValue,
-  bearerToken,
+  resolveBearerToken,
   daysAgoIso,
   googleJsonFetch,
   todayIso,
@@ -20,7 +20,7 @@ const END_DATE = argValue(argv, '--end') || process.env.GSC_END_DATE || daysAgoI
 const START_7 = argValue(argv, '--start7') || daysAgoIso(10);
 const START_28 = argValue(argv, '--start28') || daysAgoIso(31);
 const STRICT = argv.includes('--strict');
-const TOKEN = bearerToken();
+const { token: TOKEN, error: TOKEN_ERROR } = await resolveBearerToken();
 
 const endpoint = `https://www.googleapis.com/webmasters/v3/sites/${encodeURIComponent(SITE_URL)}/searchAnalytics/query`;
 
@@ -99,7 +99,7 @@ async function main() {
     report = {
       generatedAt: new Date().toISOString(),
       status: 'skipped',
-      reason: 'Missing GSC_ACCESS_TOKEN, GOOGLE_SEARCH_CONSOLE_ACCESS_TOKEN, or GOOGLE_ACCESS_TOKEN.',
+      reason: TOKEN_ERROR || 'Missing GSC_ACCESS_TOKEN, GOOGLE_SEARCH_CONSOLE_ACCESS_TOKEN, GOOGLE_ACCESS_TOKEN or GSC_SERVICE_ACCOUNT_JSON.',
       siteUrl: SITE_URL,
       queryPlans,
       reports: [],
