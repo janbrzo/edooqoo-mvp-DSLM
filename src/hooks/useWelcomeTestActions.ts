@@ -1,5 +1,5 @@
 /**
- * useWelcomeTestActions — v6.9.15c
+ * useWelcomeTestActions: v6.9.15c
  *
  * Reusable subset of WelcomeTestSuggestion's ensure-and-send flow. Lets any
  * surface (Roadmap warnings, etc.) ensure a Welcome Test exists and dispatch
@@ -139,7 +139,7 @@ export function useWelcomeTestActions({
           return true;
         }
       } else {
-        toast.success('Welcome Test created. No student email on file — link copied to clipboard.');
+        toast.success('Welcome Test created. No student email on file, link copied to clipboard.');
         return true;
       }
     } finally {

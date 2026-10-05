@@ -27,23 +27,23 @@ export interface FormData {
   requiresAudio?: boolean;  // Whether audio is required by selected exercises
   requiresImage?: boolean;  // Whether image is required by selected exercises
   hasGrammar?: boolean;     // Whether grammar focus was provided
-  // v6.9.45 — internal transport flags, not part of the AI prompt.
+  // v6.9.45: internal transport flags, not part of the AI prompt.
   __autoGenerateFromSuggestion?: boolean;
   __tokenRetry?: number;
-  // v6.9.47 — correlation id so Index.tsx can ack/refuse the auto-generate
+  // v6.9.47: correlation id so Index.tsx can ack/refuse the auto-generate
   // request before the form drops sessionStorage flags.
   __autoGenerateRequestId?: string;
-  // v6.9.53 — carry suggestionId through the FormData payload so the
+  // v6.9.53: carry suggestionId through the FormData payload so the
   // generation hook can flip `future_worksheet_suggestions.is_used` even when
   // sessionStorage was cleared between intent write and completion.
   __autoGenerateSuggestionId?: string | null;
-  // v6.9.55 — UI/transport metadata (NOT prompt input). Used by
+  // v6.9.55: UI/transport metadata (NOT prompt input). Used by
   // `GeneratingModal` to show "For Evelyn H · evelyn@example.com" without
   // depending on fragile sessionStorage round-trips. Never injected into
   // the AI prompt by `format-worksheet-prompt`.
   studentName?: string | null;
   studentEmail?: string | null;
-  // v6.9.55 — Stable id correlating a single client generation attempt
+  // v6.9.55: Stable id correlating a single client generation attempt
   // with the saved `worksheets.form_data.clientGenerationId`. Used by
   // post-stream reconciliation polling (problems 3 + 4) so we can mark
   // suggestions used / consume tokens only when a real worksheet row

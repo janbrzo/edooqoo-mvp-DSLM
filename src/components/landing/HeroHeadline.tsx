@@ -56,7 +56,7 @@ const HeroHeadline: React.FC<HeroHeadlineProps> = ({
       <div className="w-full min-w-0 max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_minmax(360px,460px)] gap-10 lg:gap-14 items-start">
         <div className="min-w-0 max-w-full text-center lg:text-left">
           {/* Headline */}
-          {/* v6.9.36 — leading + span padding so gradient-clipped descenders
+          {/* v6.9.36: leading + span padding so gradient-clipped descenders
               (lowercase "g" in "teachers") are not cut on Safari/Chrome. */}
           <h1 className="max-w-full break-words text-[2.5rem] sm:text-5xl md:text-6xl lg:text-[4rem] xl:text-[5rem] 2xl:text-[5.5rem] font-extrabold tracking-tight text-foreground mb-8 leading-[1.12]">
             <span className="block">1-Minute Prep</span>
@@ -65,13 +65,13 @@ const HeroHeadline: React.FC<HeroHeadlineProps> = ({
             </span>
           </h1>
 
-          {/* Subheadline — LCP element, hint browser to prioritize */}
+          {/* Subheadline: LCP element, hint browser to prioritize */}
           <p
             className="max-w-full text-lg sm:text-xl lg:text-[1.5rem] text-muted-foreground mb-8 sm:max-w-2xl lg:max-w-[36rem] mx-auto lg:mx-0 leading-relaxed"
             // @ts-expect-error fetchpriority is valid HTML but not yet typed in React
             fetchpriority="high"
           >
-            Edooqoo turns student goals, lesson notes, homework and flashcard progress into a clear next focus — and a ready-to-teach worksheet with audio, images and AI-assisted review.
+            Edooqoo turns student goals, lesson notes, homework and flashcard progress into a clear next focus, and a ready-to-teach worksheet with audio, images and AI-assisted review.
           </p>
 
           {/* CTA Area */}

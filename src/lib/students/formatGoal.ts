@@ -1,6 +1,6 @@
 /**
- * formatGoal — maps legacy short goal codes stored in `students.main_goal`
- * to human-readable labels. Free-text goals (e.g. "Business English — meetings")
+ * formatGoal: maps legacy short goal codes stored in `students.main_goal`
+ * to human-readable labels. Free-text goals (e.g. "Business English: meetings")
  * pass through unchanged.
  *
  * Extracted from `StudentCard` (v6.9.109) so the dashboard, `/students` and

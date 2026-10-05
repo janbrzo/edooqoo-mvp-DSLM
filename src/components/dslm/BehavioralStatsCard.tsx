@@ -1,5 +1,5 @@
 /**
- * BehavioralStatsCard — grid of behavioral statistics calculated from system data
+ * BehavioralStatsCard: grid of behavioral statistics calculated from system data
  */
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';

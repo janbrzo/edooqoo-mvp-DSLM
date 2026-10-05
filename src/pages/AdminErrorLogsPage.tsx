@@ -1,5 +1,5 @@
 /**
- * AdminErrorLogsPage — admin-only page listing recent error_logs and bug_reports.
+ * AdminErrorLogsPage: admin-only page listing recent error_logs and bug_reports.
  * Read-only listing with severity/component filters; click a row to expand details.
  * Allows marking error_logs as resolved with a short note.
  */
@@ -154,7 +154,7 @@ export default function AdminErrorLogsPage() {
     const p = reporters[teacherId];
     if (!p) return teacherId;
     const name = [p.first_name, p.last_name].filter(Boolean).join(' ').trim();
-    return `${name || '(no name)'} — ${p.email || '(no email)'}`;
+    return `${name || '(no name)'}: ${p.email || '(no email)'}`;
   };
 
   useEffect(() => {
@@ -178,14 +178,14 @@ export default function AdminErrorLogsPage() {
     return Array.from(s).sort();
   }, [logs]);
 
-  /** v6.9.95 — Phase E: error_code filter options, sourced from loaded logs. */
+  /** v6.9.95: Phase E: error_code filter options, sourced from loaded logs. */
   const errorCodes = useMemo(() => {
     const s = new Set<string>();
     logs.forEach((l) => l.error_code && s.add(l.error_code));
     return Array.from(s).sort();
   }, [logs]);
 
-  /** v6.9.95 — Phase E: last-7-days rollup shown above the list. */
+  /** v6.9.95: Phase E: last-7-days rollup shown above the list. */
   const last7Days = useMemo(() => {
     const cutoff = Date.now() - 7 * 24 * 60 * 60 * 1000;
     const recent = logs.filter((l) => new Date(l.created_at).getTime() >= cutoff);
@@ -456,8 +456,8 @@ export default function AdminErrorLogsPage() {
                         {expanded === b.id && (
                           <div className="mt-3 space-y-2 text-xs">
                             <div className="whitespace-pre-wrap bg-muted/40 p-2 rounded">{b.description}</div>
-                            <div><strong>Page:</strong> {b.page_url ?? '—'}</div>
-                            <div><strong>UA:</strong> <code className="text-[10px] break-all">{b.user_agent ?? '—'}</code></div>
+                            <div><strong>Page:</strong> {b.page_url ?? '-'}</div>
+                            <div><strong>UA:</strong> <code className="text-[10px] break-all">{b.user_agent ?? '-'}</code></div>
                             <div>
                               <strong>Reporter:</strong>{' '}
                               <span>{formatReporter(b.teacher_id)}</span>{' '}
@@ -535,7 +535,7 @@ export default function AdminErrorLogsPage() {
                                 </Button>
                               </div>
                               <p className="text-[10px] text-muted-foreground">
-                                Use <code>wontfix</code> for "not relevant", "not a real bug", or "duplicate" — clarify in the note.
+                                Use <code>wontfix</code> for "not relevant", "not a real bug", or "duplicate", clarify in the note.
                               </p>
                             </div>
                           </div>

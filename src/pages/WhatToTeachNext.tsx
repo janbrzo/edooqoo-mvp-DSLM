@@ -102,7 +102,7 @@ const WhatToTeachNext: React.FC = () => {
   return (
     <div className="min-h-screen bg-background">
       <PageSeo
-        title="What Should I Teach Next? — Adult 1:1 English Lessons"
+        title="What Should I Teach Next?: Adult 1:1 English Lessons"
         description="Use student context and recent evidence to decide whether the next adult 1:1 English lesson should continue, repair, or advance. Includes 12 worked examples and a free local tool."
         path="/what-to-teach-next"
         jsonLd={jsonLd}

@@ -14,22 +14,22 @@ const LiveSessionMockup = () => (
   <div className="p-6 space-y-4 text-sm">
     <div className="flex items-center justify-between">
       <div>
-        <div className="font-semibold text-foreground">Business English — Unit 3</div>
+        <div className="font-semibold text-foreground">Business English: Unit 3</div>
         <div className="text-xs text-muted-foreground">Julia Kowalski · B2</div>
       </div>
       <div className="flex items-center gap-2">
         <span className="flex items-center gap-1.5 bg-red-50 text-red-600 border border-red-200 rounded-full px-3 py-1 text-xs font-mono font-semibold">
           <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
-          LIVE — 14:32
+          LIVE: 14:32
         </span>
       </div>
     </div>
     {/* Exercise progress */}
     <div className="space-y-2">
       {[
-        { name: 'Fill in the gaps — Present Perfect', status: 'done', score: '9/10', time: '3:12' },
+        { name: 'Fill in the gaps: Present Perfect', status: 'done', score: '9/10', time: '3:12' },
         { name: 'Vocabulary Matching', status: 'done', score: '7/10', time: '2:45' },
-        { name: 'Reading Comprehension', status: 'active', score: '—', time: '4:02' },
+        { name: 'Reading Comprehension', status: 'active', score: '-', time: '4:02' },
         { name: 'Writing Task', status: 'upcoming', score: '', time: '' },
       ].map(ex => (
         <div key={ex.name} className={`flex items-center justify-between rounded-lg px-3 py-2 border ${
@@ -67,13 +67,13 @@ const benefits = [
 const faqItems = [
   { question: 'What is Live Session mode?', answer: 'Live Session transforms any worksheet into a real-time teaching tool. You start a session, and the student works through exercises one by one. You see their answers in real-time, with a timer per exercise and a running score.' },
   { question: 'Can I adapt during the lesson?', answer: 'Yes. Live Session gives you a shared worksheet surface, real-time answers, drawing tools, and review context so you can adjust how you teach the material during the lesson.' },
-  { question: 'What is the drawing canvas?', answer: 'The drawing canvas lets you annotate the worksheet during online lessons — circle errors, underline patterns, draw diagrams. Essential for screen-sharing during Zoom/Meet lessons.' },
+  { question: 'What is the drawing canvas?', answer: 'The drawing canvas lets you annotate the worksheet during online lessons: circle errors, underline patterns, draw diagrams. Essential for screen-sharing during Zoom/Meet lessons.' },
   { question: 'How does Live Session connect to DSLM?', answer: 'Live answers, teacher notes, and supported evaluation signals can inform future prep. Edooqoo uses available lesson signals as context, while teacher review remains responsible for final lesson decisions.' },
 ];
 
 const FeatureLiveSessions: React.FC = () => (
   <FeaturePageLayout
-    title="Interactive Live Worksheet Sessions for ESL — Real-Time Teaching | Edooqoo"
+    title="Interactive Live Worksheet Sessions for ESL: Real-Time Teaching | Edooqoo"
     metaDescription="Teach live with real-time student answer monitoring, timer per exercise, drawing canvas, and AI-assisted review where supported."
   >
     <FeatureHero

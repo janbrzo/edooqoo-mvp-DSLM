@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Sprint 3 — inject spoke -> hub backlinks into pre-rendered/static HTML.
+ * Sprint 3: inject spoke -> hub backlinks into pre-rendered/static HTML.
  *
  * Runs after every content generator so regenerated pages never lose the backlink.
  * Idempotent: the marker attribute is the presence check, and the block is rewritten

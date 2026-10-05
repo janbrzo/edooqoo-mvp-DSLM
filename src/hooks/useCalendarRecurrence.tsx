@@ -161,14 +161,14 @@ export function useCalendarRecurrence(teacherId?: string) {
       const ex = existingByKey.get(key);
       if (ex) {
         if (ex.student_id && s.student_id) {
-          // Lesson vs lesson overlap — skip (overbooking protection)
+          // Lesson vs lesson overlap, skip (overbooking protection)
           continue;
         }
         if (!ex.student_id && s.student_id) {
           // Available slot → replace with lesson
           toDelete.push(ex.id);
         } else {
-          // Same type exists — skip
+          // Same type exists, skip
           continue;
         }
       }

@@ -2,6 +2,7 @@ import { serve } from "https://deno.land/std@0.208.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 import OpenAI from "npm:openai@4.77.0";
 import { authorizedTeacherId, jsonResponse, resolveCaller } from "../_shared/auth.ts";
+import { NO_EM_DASH_RULE } from "../_shared/writingStyle.ts";
 
 const openai = new OpenAI({ apiKey: Deno.env.get('OPENAI_API_KEY')! });
 
@@ -191,7 +192,7 @@ CRITICAL: Return ONLY the JSON exercise object, no additional text or markdown.`
       model: "gpt-4.1-2025-04-14",
       temperature: 0.3,
       messages: [
-        { role: "system", content: systemPrompt },
+        { role: "system", content: systemPrompt + NO_EM_DASH_RULE },
         { role: "user", content: "Generate the complete picture-based exercise content now." }
       ],
       max_completion_tokens: 2000

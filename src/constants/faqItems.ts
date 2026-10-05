@@ -43,7 +43,7 @@ export const faqItems: FaqItem[] = [
   },
   {
     question: "How does Homework Assignments work?",
-    answer: "You can assign any worksheet or specific exercises as homework. Set deadlines, send email notifications to students, track completion status, and add teacher comments. Students can complete homework interactively online — either through the direct link or via the Student Hub portal. AI can pre-evaluate supported open-ended answers and pre-fill scores for teacher review."
+    answer: "You can assign any worksheet or specific exercises as homework. Set deadlines, send email notifications to students, track completion status, and add teacher comments. Students can complete homework interactively online, either through the direct link or via the Student Hub portal. AI can pre-evaluate supported open-ended answers and pre-fill scores for teacher review."
   },
   {
     question: "Can I draw on worksheets?",
@@ -95,7 +95,7 @@ export const faqItems: FaqItem[] = [
   },
   {
     question: "What is the Student Hub?",
-    answer: "The Student Hub is a dedicated portal for your students. Students visit the portal, enter their email, and select their teacher to access a personalized dashboard. From there they can view quick stats, browse shared worksheets, study flashcards with spaced repetition, complete homework assignments, book and manage lessons, and sync with Google Calendar — all without needing a teacher account."
+    answer: "The Student Hub is a dedicated portal for your students. Students visit the portal, enter their email, and select their teacher to access a personalized dashboard. From there they can view quick stats, browse shared worksheets, study flashcards with spaced repetition, complete homework assignments, book and manage lessons, and sync with Google Calendar, all without needing a teacher account."
   },
   {
     question: "What is the Welcome Test & Learning Path?",
@@ -103,7 +103,7 @@ export const faqItems: FaqItem[] = [
   },
   {
     question: "How does Lesson Booking work?",
-    answer: "Teachers get a public booking page link to share with students. Students enter their email, browse available time slots, and book lessons — including weekly recurring bookings. Reschedule and cancellation options are configurable by the teacher. The system integrates with Google Calendar for automatic sync and supports Google Meet link auto-generation. Teachers set availability rules, buffer times, booking modes, and slot limits in Calendar Settings."
+    answer: "Teachers get a public booking page link to share with students. Students enter their email, browse available time slots, and book lessons, including weekly recurring bookings. Reschedule and cancellation options are configurable by the teacher. The system integrates with Google Calendar for automatic sync and supports Google Meet link auto-generation. Teachers set availability rules, buffer times, booking modes, and slot limits in Calendar Settings."
   },
   {
     question: "How does Student Progress tracking work?",
@@ -111,10 +111,10 @@ export const faqItems: FaqItem[] = [
   },
   {
     question: "How does AI Evaluation work?",
-    answer: "AI can evaluate open-ended student answers — such as sentence transformation, paraphrasing, discussion questions, and descriptions — and pre-fill mastery scores (0-100) for each item. Teachers can review, adjust, and confirm the AI scores across worksheet review, homework submissions, and live sessions."
+    answer: "AI can evaluate open-ended student answers, such as sentence transformation, paraphrasing, discussion questions, and descriptions, and pre-fill mastery scores (0-100) for each item. Teachers can review, adjust, and confirm the AI scores across worksheet review, homework submissions, and live sessions."
   },
   {
     question: "What is Google Calendar integration?",
-    answer: "Teachers can connect their Google Calendar to automatically sync lesson bookings, cancellations, and reschedules. Students can also connect their own Google Calendar via the Student Hub. The integration supports Google Meet link auto-generation for online lessons, customizable calendar event colors by status (available, booked, completed, no-show), and configurable sync preferences — all managed in Calendar Settings."
+    answer: "Teachers can connect their Google Calendar to automatically sync lesson bookings, cancellations, and reschedules. Students can also connect their own Google Calendar via the Student Hub. The integration supports Google Meet link auto-generation for online lessons, customizable calendar event colors by status (available, booked, completed, no-show), and configurable sync preferences, all managed in Calendar Settings."
   }
 ];

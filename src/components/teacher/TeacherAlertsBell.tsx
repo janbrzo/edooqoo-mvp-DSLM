@@ -18,7 +18,7 @@ const severityIcon = (s: TeacherAlert['severity']) => {
 };
 
 /**
- * Closed-Loop Company — bell badge in teacher header.
+ * Closed-Loop Company: bell badge in teacher header.
  * Shows top 5 unread/recent alerts, links to /teacher/alerts for the full inbox.
  */
 export function TeacherAlertsBell() {

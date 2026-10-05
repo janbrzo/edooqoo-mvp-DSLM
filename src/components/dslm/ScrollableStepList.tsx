@@ -1,5 +1,5 @@
 /**
- * ScrollableStepList — wraps children in a scroll container when count exceeds maxVisible.
+ * ScrollableStepList: wraps children in a scroll container when count exceeds maxVisible.
  * Below the threshold it renders a plain spaced div.
  */
 import React from 'react';

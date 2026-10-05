@@ -1,6 +1,6 @@
 /**
- * v6.9.53 — Worksheet generation job registry.
- * v6.9.58 — Refactored to a multi-job map so several concurrent generations
+ * v6.9.53: Worksheet generation job registry.
+ * v6.9.58: Refactored to a multi-job map so several concurrent generations
  * can each drive their own mini panel and survive page reloads. The legacy
  * single-job localStorage key is migrated on first read.
  */
@@ -24,14 +24,14 @@ export interface WorksheetGenerationJob {
   suggestionMarkedAt: number | null;
   errorMessage: string | null;
   /**
-   * v6.9.59 — sessionStorage-backed id of the tab that started this job.
+   * v6.9.59: sessionStorage-backed id of the tab that started this job.
    * The Index page only shows a full-screen modal for jobs whose
    * `originTabId` matches the current tab, so opening edooqoo.com in
    * another tab does not auto-open the modal there.
    */
   originTabId?: string | null;
   /**
-   * v6.9.57 — Form metadata snapshot used to rehydrate the GeneratingModal
+   * v6.9.57: Form metadata snapshot used to rehydrate the GeneratingModal
    * after a page refresh, so the modal can re-render with the same exercise
    * list / media flags / student label as the original attempt.
    * Worksheet generation prompt and engine are NOT derived from this.
@@ -45,7 +45,7 @@ export interface WorksheetGenerationJob {
     studentEmail?: string | null;
   } | null;
   /**
-   * v6.9.60 — Live per-job progress. Set from `useWorksheetGeneration` on
+   * v6.9.60: Live per-job progress. Set from `useWorksheetGeneration` on
    * every SSE `progress` event so the modal switcher and mini-panel can
    * render correct values even when the active card is not the one
    * receiving live callbacks in this render.
@@ -54,11 +54,11 @@ export interface WorksheetGenerationJob {
     exercisesGenerated: number;
     expectedTotal: number;
     phase?: string;
-    /** v6.9.64 — optional smooth percent emitted by SSE or computed by UI. */
+    /** v6.9.64: optional smooth percent emitted by SSE or computed by UI. */
     percent?: number;
   } | null;
   /**
-   * v6.9.61 — Epoch ms after which a `failed` job is no longer pollable for
+   * v6.9.61: Epoch ms after which a `failed` job is no longer pollable for
    * background recovery. Set when `failGenerationJob` flips a job to failed
    * (default: now + 60 s). Cancellations explicitly clear this (null) so the
    * poller does not try to "recover" a user-aborted run.
@@ -68,7 +68,7 @@ export interface WorksheetGenerationJob {
 
 const STORAGE_KEY_V2 = 'edooqoo.activeWorksheetGenerations'; // v6.9.58 multi-job map
 const LEGACY_STORAGE_KEY = 'edooqoo.activeWorksheetGeneration'; // v6.9.53 single-job
-// v6.9.61 — Hard backend timeout for `running` jobs. After this window, the
+// v6.9.61: Hard backend timeout for `running` jobs. After this window, the
 // global poller flips them to `failed` with a clear timeout message so the
 // modal/mini-panel doesn't spin forever when the backend actually crashed.
 const RUNNING_TTL_MS = 4 * 60 * 1000; // 4 minutes
@@ -116,7 +116,7 @@ function readMap(): JobMap {
       }
       return pruned;
     }
-    // v6.9.58 — migrate legacy single-job key if present.
+    // v6.9.58: migrate legacy single-job key if present.
     const legacyRaw = ls.getItem(LEGACY_STORAGE_KEY);
     if (legacyRaw) {
       try {
@@ -280,7 +280,7 @@ export function failGenerationJob(
     status: 'failed',
     errorMessage: message,
     updatedAt: Date.now(),
-    // v6.9.61 — open a recovery window so the global DB poller can still
+    // v6.9.61: open a recovery window so the global DB poller can still
     // promote this job back to `completed` if the backend (running via
     // EdgeRuntime.waitUntil) saves the worksheet within RECOVERY_WINDOW_MS.
     recoveryDeadlineAt: Date.now() + RECOVERY_WINDOW_MS,
@@ -291,8 +291,8 @@ export function failGenerationJob(
 }
 
 /**
- * v6.9.61 — Promote a `failed` job back to `completed` after the DB poller
- * located the worksheet that was saved in the background. Idempotent —
+ * v6.9.61: Promote a `failed` job back to `completed` after the DB poller
+ * located the worksheet that was saved in the background. Idempotent: 
  * returns null if jobId is unknown.
  */
 export function recoverJobToCompleted(
@@ -315,7 +315,7 @@ export function recoverJobToCompleted(
 }
 
 /**
- * v6.9.61 — Joblist eligible for DB polling: still running, OR recently
+ * v6.9.61: Joblist eligible for DB polling: still running, OR recently
  * failed but inside the recovery window (backend may still save).
  */
 export function getPollableJobs(): WorksheetGenerationJob[] {
@@ -328,7 +328,7 @@ export function getPollableJobs(): WorksheetGenerationJob[] {
 }
 
 /**
- * v6.9.61 — Flip `running` jobs older than RUNNING_TTL_MS to `failed` with a
+ * v6.9.61: Flip `running` jobs older than RUNNING_TTL_MS to `failed` with a
  * timeout message. Called periodically from the global poller so a dead
  * backend does not leave a spinner forever. Returns the jobs that flipped.
  */
@@ -342,7 +342,7 @@ export function expireStaleRunningJobs(): WorksheetGenerationJob[] {
         ...job,
         status: 'failed',
         errorMessage: 'Backend did not respond within 4 minutes. No tokens were consumed.',
-        recoveryDeadlineAt: null, // hard timeout — no recovery
+        recoveryDeadlineAt: null, // hard timeout; no recovery
         updatedAt: now,
       };
       flipped.push(map[id]);

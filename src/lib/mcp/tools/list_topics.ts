@@ -1,4 +1,4 @@
-// Public MCP tool — returns the ESL topic catalog used by Edooqoo's
+// Public MCP tool, returns the ESL topic catalog used by Edooqoo's
 // programmatic SEO and lesson planning. Read-only public taxonomy.
 // Topic list mirrored from src/data/pseoMatrix.json (inlined so the emitted
 // Deno function does not need a JSON import assertion).

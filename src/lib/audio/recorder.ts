@@ -4,7 +4,7 @@
  * Two components record audio (welcome test SpeakingRecorder and
  * HomeworkSpeakingRecorder). Both used to call getUserMedia without checking
  * that the API exists, and one of them fabricated a fake "recording_<ts>"
- * answer when the upload failed — reporting a hard failure as success.
+ * answer when the upload failed, reporting a hard failure as success.
  *
  * This module centralises:
  *  - capability detection with actionable, user-facing messages
@@ -22,7 +22,7 @@ export interface RecordingSupport {
 
 /**
  * Check whether the current browser/context can record audio at all.
- * Must be called before `getUserMedia` — on insecure origins
+ * Must be called before `getUserMedia`: on insecure origins
  * `navigator.mediaDevices` is `undefined` and the call throws a bare
  * TypeError that is impossible to explain to a student.
  */
@@ -113,7 +113,7 @@ export interface UploadRecordingOptions {
 
 /**
  * Upload a recording to R2 and return its public URL.
- * Retries transient failures. THROWS when the upload ultimately fails —
+ * Retries transient failures. THROWS when the upload ultimately fails, 
  * callers must surface the error, never substitute a placeholder answer.
  */
 export async function uploadRecording(

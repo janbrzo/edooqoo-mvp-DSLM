@@ -1,5 +1,5 @@
 /**
- * PacingProposalsBell — DSLM v4.9
+ * PacingProposalsBell: DSLM v4.9
  *
  * Header bell for teachers showing all pending pacing proposals across all
  * students. Click → popover with accept/reject per proposal.

@@ -1,7 +1,7 @@
 import { ARTICLE_REWRITES } from './article-rewrites.mjs';
 
 const workflowLinks = [
-  // Sprint 3 (Faza 3) topical cluster hubs — see scripts/seo/cluster-hubs.mjs
+  // Sprint 3 (Faza 3) topical cluster hubs, see scripts/seo/cluster-hubs.mjs
   ['/cefr-assessment', 'CEFR assessment hub'],
   ['/teaching-english-pronunciation', 'Pronunciation teaching hub'],
   ['/esl-exercise-design', 'ESL exercise design hub'],
@@ -94,11 +94,11 @@ function titleFromSlug(slug) {
 }
 
 /**
- * Curated SEO snippets (Sprint 1 — CTR recovery).
+ * Curated SEO snippets (Sprint 1: CTR recovery).
  * Single source of truth for generated blog pages. Keys are slugs without ".html".
  * Rules: title <= 60 chars, description <= 155 chars, unique per page,
  * keyword-first, no "| Edooqoo" suffix, description ends in a tutor action.
- * NEVER hand-edit the produced files in public/blog — edit these maps instead.
+ * NEVER hand-edit the produced files in public/blog, edit these maps instead.
  */
 export const SEO_TITLE_OVERRIDES = {
   'fill-in-the-blanks-exercises-best-practices': 'Fill-in-the-Blank Tasks: 7 Rules That Make Them Work',
@@ -110,7 +110,7 @@ export const SEO_TITLE_OVERRIDES = {
   'cambridge-exam-preparation-tips-teachers': 'Cambridge B2 First & C1 Advanced: Tutor Prep Plan',
   'digital-homework-tools-esl-teachers': 'Digital Homework Tools for ESL Tutors, 2026 Compared',
   'accent-reduction-activities-esl': 'Accent Reduction: 9 Activities for Adult Professionals',
-  // Sprint 2 (S2-C) — intent realignment: the query is learner-facing, the page is
+  // Sprint 2 (S2-C): intent realignment: the query is learner-facing, the page is
   // for the tutor who has to answer "which app should I recommend?".
   'best-apps-learning-english-2026': 'Which English App to Recommend to an Adult Student',
   // Growth opportunity (position ~13.8, 266 impressions): keyword-first title with a 1:1 angle.
@@ -143,7 +143,7 @@ export const SEO_DESCRIPTION_OVERRIDES = {
 };
 
 /**
- * Sprint 2 (S2-B) — deterministic snippet fallback.
+ * Sprint 2 (S2-B): deterministic snippet fallback.
  *
  * PROBLEM: the previous fallback produced `titleFromSlug(slug)` as the title and a
  * single boilerplate description for every uncurated page. That one template is the
@@ -220,7 +220,7 @@ function trimToWordBoundary(text, max) {
 
 /** Title never exceeds 60 chars and never carries the brand suffix. */
 function clampTitle(title) {
-  const bare = title.replace(/\s*[|—-]\s*Edooqoo\s*$/, '').trim();
+  const bare = title.replace(/\s*[|:\u2014-]\s*Edooqoo\s*$/, '').trim();
   return bare.length <= TITLE_MAX ? bare : trimToWordBoundary(bare, TITLE_MAX);
 }
 
@@ -259,7 +259,7 @@ function buildFallbackSnippet(slug) {
   const lowerTopic = topicPhrase.charAt(0) + topicPhrase.slice(1);
   let description = clampDescription(pattern(lowerTopic, action));
   if (!description.includes(action)) {
-    // Keep the tutor action — it is what earns the click — and shrink the topic instead.
+    // Keep the tutor action, it is what earns the click, and shrink the topic instead.
     const room = DESCRIPTION_MAX - action.length - 4;
     description = clampDescription(`${trimToWordBoundary(lowerTopic, room)}. ${action}`);
   }

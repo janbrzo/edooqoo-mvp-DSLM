@@ -1,5 +1,5 @@
 // publish-worksheet
-// Sprint 3 / Plan v6.9.20 — toggles worksheets.is_public=true, generates SEO
+// Sprint 3 / Plan v6.9.20, toggles worksheets.is_public=true, generates SEO
 // slug, denormalizes topic/level/exercise_types for fast public listing.
 // Caller: authenticated teacher who owns the worksheet.
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
@@ -48,7 +48,7 @@ serve(async (req) => {
       .maybeSingle();
     if (fetchErr || !ws) return json({ error: "Worksheet not found" }, 404);
     const owner = ws.teacher_id || ws.user_id;
-    if (owner !== userId) return json({ error: "Forbidden — not your worksheet" }, 403);
+    if (owner !== userId) return json({ error: "Forbidden: not your worksheet" }, 403);
 
     // Validation
     if (!ws.title || ws.title.trim().length < 3) {
@@ -79,7 +79,7 @@ serve(async (req) => {
         : [];
     } catch (_) { /* keep [] */ }
 
-    // Slug — reuse existing if already set, else generate
+    // Slug: reuse existing if already set, else generate
     let slug = ws.public_slug;
     if (!slug) {
       const { data: slugData, error: slugErr } = await sbAdmin.rpc("generate_public_slug", {

@@ -18,7 +18,7 @@ const FeatureHero: React.FC<FeatureHeroProps> = ({
   badgeColor = 'bg-primary/10 text-primary border-primary/20',
   headline,
   subheadline,
-  ctaText = 'Try Free — No Credit Card',
+  ctaText = 'Try Free: No Credit Card',
   ctaLink = '/signup',
   children,
 }) => {

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Sprint 4 (Faza 4) — remove conflicting duplicate JSON-LD @id nodes from shipped HTML.
+ * Sprint 4 (Faza 4): remove conflicting duplicate JSON-LD @id nodes from shipped HTML.
  *
  * PROBLEM: Helmet emits a route-level node (WebPage, SoftwareApplication) and the prerender
  * step or the sitewide index.html graph emits a node with the SAME @id. Two nodes sharing an

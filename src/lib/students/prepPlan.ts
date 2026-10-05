@@ -1,12 +1,12 @@
 /**
- * prepPlan — pure data rules for the Prep tab of the Student Workspace
+ * prepPlan: pure data rules for the Prep tab of the Student Workspace
  * (v6.9.111, M4 step 1).
  *
  * `NextLessonCard`, `LastLessonStrip` and `QuickNoteBox` must stay purely
  * presentational, so every decision about *which* topic is proposed, *why* it
  * is proposed and how ages are phrased lives here.
  *
- * No React, no Supabase, no globals — every rule below is unit-testable.
+ * No React, no Supabase, no globals; every rule below is unit-testable.
  * The Worksheet Generation Engine is not touched: this module only selects and
  * normalises an existing suggestion row into the payload shape the page
  * already sends to `writeAutoGenerateIntent` / the sessionStorage prefill.
@@ -42,7 +42,7 @@ export const RATIONALE_MAX_LEN = 160;
 export const PREP_TOPIC_MAX_LEN = FIELD_LIMITS.lessonTopic;
 export const FALLBACK_TOPIC = 'General practice';
 export const NO_SIGNAL_RATIONALE =
-  'No signals yet — this is a general practice suggestion.';
+  'No signals yet: this is a general practice suggestion.';
 
 function text(raw: string | null | undefined): string {
   return (raw ?? '').trim();
@@ -60,7 +60,7 @@ function normalizeFocusMap(
   return out;
 }
 
-/** Sequence first, id second — stable across re-renders and refetches. */
+/** Sequence first, id second, stable across re-renders and refetches. */
 function bySequence(a: PrepSuggestionInput, b: PrepSuggestionInput): number {
   const seqA = Number.isFinite(a.sequence_number) ? a.sequence_number : Number.MAX_SAFE_INTEGER;
   const seqB = Number.isFinite(b.sequence_number) ? b.sequence_number : Number.MAX_SAFE_INTEGER;
@@ -178,7 +178,7 @@ function startOfDay(d: Date): Date {
 
 /**
  * `Today` / `Yesterday` / `N days ago` / `N weeks ago` / `MMM d, yyyy`.
- * Empty string when the input is missing or unparseable — the caller then
+ * Empty string when the input is missing or unparseable; the caller then
  * renders no meta column at all.
  */
 export function formatRelativeAge(iso: string | null | undefined, now: Date = new Date()): string {

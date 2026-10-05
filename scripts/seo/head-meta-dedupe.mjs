@@ -1,10 +1,10 @@
 /**
- * Sprint 2 (S2-A) — head metadata deduplication (shared helper).
+ * Sprint 2 (S2-A): head metadata deduplication (shared helper).
  *
  * PROBLEM: prerendered SPA snapshots inherit the static <head> from index.html
  * while react-helmet APPENDS its route-specific tags (data-rh="true") instead of
  * replacing them. 131 snapshots therefore shipped two <meta name="description">
- * tags, the first one being the homepage boilerplate — and the first tag is the
+ * tags, the first one being the homepage boilerplate, and the first tag is the
  * one search engines read.
  *
  * RULE: when a data-rh variant of a managed tag exists, every non-data-rh

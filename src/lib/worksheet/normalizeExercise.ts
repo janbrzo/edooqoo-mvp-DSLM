@@ -1,5 +1,5 @@
 /**
- * P1.5 — Exercise shape normalizer.
+ * P1.5: Exercise shape normalizer.
  *
  * The generator (and older saved worksheets) drift between equivalent field
  * names for the same exercise data: `pairs` vs `items`, `word`/`match` vs

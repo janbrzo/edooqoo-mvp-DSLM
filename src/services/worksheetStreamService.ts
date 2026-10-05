@@ -16,7 +16,7 @@ interface StreamCallbacks {
   onDone?: (result: { worksheetId: string; worksheet: any }) => void;
   onError?: (error: Error) => void;
   /**
-   * v6.9.55 — Fired when the underlying fetch/SSE stream closed cleanly but
+   * v6.9.55: Fired when the underlying fetch/SSE stream closed cleanly but
    * NO `done` and NO `error` event arrived AND the model had already
    * streamed at least one exercise. The caller is expected to attempt a
    * DB-based reconciliation (look up the worksheet row by
@@ -72,18 +72,18 @@ export function streamWorksheetGeneration(
         // Silent retry: nothing was streamed yet, so the user did not see any
         // partial state. Tear down the inner stream and start a fresh one.
         retryAttempted = true;
-        console.warn('⏱️ Heartbeat timeout before first exercise — silent retry');
+        console.warn('⏱️ Heartbeat timeout before first exercise, silent retry');
         try { innerController.abort(); } catch {}
         innerController = new AbortController();
         startRequest();
         return;
       }
-      console.error('⏱️ Heartbeat timeout — aborting stream after 45s of silence');
+      console.error('⏱️ Heartbeat timeout: aborting stream after 45s of silence');
       try { innerController.abort(); } catch {}
       try { outerController.abort(); } catch {}
       const detail = lastProgress.exercisesGenerated > 0
-        ? `Connection lost — generated ${lastProgress.exercisesGenerated}/${lastProgress.expectedTotal || '?'} exercises before disconnect. Please retry.`
-        : 'Connection lost — server stopped responding for 45s. Please retry.';
+        ? `Connection lost: generated ${lastProgress.exercisesGenerated}/${lastProgress.expectedTotal || '?'} exercises before disconnect. Please retry.`
+        : 'Connection lost: server stopped responding for 45s. Please retry.';
       callbacks.onError?.(new Error(detail));
     }, HEARTBEAT_MS);
   };
@@ -108,7 +108,7 @@ export function streamWorksheetGeneration(
     signal: innerController.signal
   })).then(async response => {
     if (!response.ok) {
-      // v6.9.94 — surface the backend's own error message (e.g. prompt too
+      // v6.9.94: surface the backend's own error message (e.g. prompt too
       // long) instead of an opaque "HTTP 400", which used to send teachers
       // into a blind retry loop.
       let serverMessage: string | null = null;
@@ -194,7 +194,7 @@ export function streamWorksheetGeneration(
     
     if (!receivedDoneOrError) {
       console.error('⚠️ Stream ended without done/error event');
-      // v6.9.55 — if at least one exercise streamed, the worksheet may be
+      // v6.9.55: if at least one exercise streamed, the worksheet may be
       // saved on the backend already. Hand the decision to the caller, who
       // will reconcile against the `worksheets` table before showing a
       // hard failure to the user.
@@ -221,7 +221,7 @@ export function streamWorksheetGeneration(
     }
 
     console.error('❌ Stream error:', error);
-    // v6.9.60 — Treat network-class transport errors as RECOVERABLE when any
+    // v6.9.60: Treat network-class transport errors as RECOVERABLE when any
     // progress has streamed and the caller wired the reconciliation callback.
     // The backend `EdgeRuntime.waitUntil(backgroundWork)` keeps the worker
     // alive after a client disconnect, so the worksheet row is very likely

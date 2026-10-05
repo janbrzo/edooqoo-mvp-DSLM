@@ -15,9 +15,9 @@ export interface AppNotification {
 
 /**
  * Shared notifications hook used by both the legacy `HomeworkNotificationBadge`
- * and the new `UnifiedBell` (v6.8.4 — Problem 4: merge Alerts + Notifications).
+ * and the new `UnifiedBell` (v6.8.4: Problem 4: merge Alerts + Notifications).
  *
- * Source: `homework_notifications` table — covers homework events AND
+ * Source: `homework_notifications` table: covers homework events AND
  * `welcome_test_completed` notifications.
  */
 export function useHomeworkNotifications() {

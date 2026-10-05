@@ -123,7 +123,7 @@ export default function WorksheetDisplay({
   tokenLeft,
   worksheetTitle
 }: WorksheetDisplayProps) {
-  // v6.9.55 — Worksheet UI must never invert to dark mode, regardless of
+  // v6.9.55: Worksheet UI must never invert to dark mode, regardless of
   // teacher theme settings or OS preference. This covers the case where
   // a freshly generated worksheet is rendered inline on `/` (Index.tsx),
   // not only on `/worksheet/:id` (already locked at the page level).
@@ -134,7 +134,7 @@ export default function WorksheetDisplay({
   );
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  // P1.4 — autosave keeps the database (what the student sees) in sync with edits.
+  // P1.4: autosave keeps the database (what the student sees) in sync with edits.
   const autosave = useWorksheetAutosave({
     worksheetId,
     userId,
@@ -590,7 +590,7 @@ export default function WorksheetDisplay({
       return;
     }
 
-    // Anonymous users have no database row of their own — be honest about it.
+    // Anonymous users have no database row of their own, be honest about it.
     if (!userId) {
       setIsEditing(false);
       toast({

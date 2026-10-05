@@ -6,12 +6,12 @@ import { useUpcomingLessonsCount } from '@/hooks/useUpcomingLessonsCount';
 import { devWarn } from '@/utils/logger';
 
 /**
- * useDashboardCounts — lightweight numbers for the Today dashboard header
+ * useDashboardCounts: lightweight numbers for the Today dashboard header
  * and the "Everything else" zone.
  *
  * - worksheetsCount: HEAD count of non-deleted worksheets (no row transfer).
  * - lessonsThisWeek: reuses `useUpcomingLessonsCount` (booked slots, next 7 days).
- * - studentsCount is intentionally NOT here — take `students.length` from `useStudents`.
+ * - studentsCount is intentionally NOT here, take `students.length` from `useStudents`.
  *
  * Demo mode: counts derived from `demoData`, zero Supabase calls for worksheets.
  */

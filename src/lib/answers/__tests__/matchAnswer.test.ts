@@ -56,7 +56,7 @@ describe('splitAnswerVariants', () => {
   });
 });
 
-describe('matchAnswer — correct verdicts', () => {
+describe('matchAnswer: correct verdicts', () => {
   // NOTE: every tuple carries an explicit options object. A 2-element tuple makes
   // the Bun/Vitest runner treat the third callback parameter as a `done` callback,
   // which turns the case into an async test that never resolves.
@@ -80,7 +80,7 @@ describe('matchAnswer — correct verdicts', () => {
   });
 });
 
-describe('matchAnswer — sentinel "This sentence is correct"', () => {
+describe('matchAnswer: sentinel "This sentence is correct"', () => {
   const opts = { sourceSentence: 'She has lived here since 2010.', mode: 'sentence' as const };
 
   it('accepts repeating the source sentence', () => {
@@ -97,7 +97,7 @@ describe('matchAnswer — sentinel "This sentence is correct"', () => {
   });
 });
 
-describe('matchAnswer — review verdicts (never red when unsure)', () => {
+describe('matchAnswer: review verdicts (never red when unsure)', () => {
   it('flags a one-character typo in a word answer', () => {
     expect(verdict('beautifull', 'beautiful', { mode: 'word' })).toBe('review');
   });
@@ -116,7 +116,7 @@ describe('matchAnswer — review verdicts (never red when unsure)', () => {
   });
 });
 
-describe('matchAnswer — wrong and empty verdicts', () => {
+describe('matchAnswer: wrong and empty verdicts', () => {
   it('marks a genuinely different answer wrong', () => {
     expect(verdict('the dog ate my homework', 'he is late')).toBe('wrong');
     expect(verdict('cat', 'beautiful', { mode: 'word' })).toBe('wrong');
@@ -129,7 +129,7 @@ describe('matchAnswer — wrong and empty verdicts', () => {
   });
 });
 
-describe('regression guard — never stricter than the legacy comparison', () => {
+describe('regression guard: never stricter than the legacy comparison', () => {
   const legacy = (a: string, b: string) => a.toLowerCase().trim() === b.toLowerCase().trim();
 
   const pairs: Array<[string, string]> = [

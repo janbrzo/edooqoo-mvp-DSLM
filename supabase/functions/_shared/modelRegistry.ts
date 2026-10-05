@@ -1,4 +1,4 @@
-// Model Registry — single source of truth for every AI model Edooqoo calls.
+// Model Registry: single source of truth for every AI model Edooqoo calls.
 //
 // `audit-llm-models` builds its probe list from this file:
 //   - daily mode checks that each model still works (smoke or metadata probe),
@@ -50,7 +50,7 @@ export interface ModelRegistryEntry {
   provider: ModelProvider;
   /** Stable role key, unique per entry (used in reports). */
   role: string;
-  /** What the model does for Edooqoo — the advisor judges fitness against this. */
+  /** What the model does for Edooqoo; the advisor judges fitness against this. */
   useCase: string;
   /** Edge functions / shared helpers that call the model. */
   consumers: string[];

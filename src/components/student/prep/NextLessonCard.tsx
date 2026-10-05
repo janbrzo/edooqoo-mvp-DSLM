@@ -1,5 +1,5 @@
 /**
- * NextLessonCard — the answer to "what do I teach next?" (v6.9.111, M4 step 2).
+ * NextLessonCard: the answer to "what do I teach next?" (v6.9.111, M4 step 2).
  *
  * Purely presentational: it receives an already-selected `PrepSuggestion`
  * (see `src/lib/students/prepPlan.ts`) plus a pre-built rationale sentence and
@@ -7,7 +7,7 @@
  * "Generate worksheet".
  *
  * It knows nothing about sessionStorage, auto-generate intents or the Worksheet
- * Generation Engine — the page owns those and passes callbacks down.
+ * Generation Engine: the page owns those and passes callbacks down.
  */
 
 import React from 'react';

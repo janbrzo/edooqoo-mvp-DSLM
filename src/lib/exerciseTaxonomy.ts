@@ -3,7 +3,7 @@
  * MUST stay in sync with `supabase/functions/_shared/exerciseTaxonomy.ts`.
  * IDs here MUST match those rendered by `WorksheetForm/ExerciseSelector.tsx`.
  *
- * v4.2: `sentence-transformation` removed — currently disabled (coming-soon) in UI.
+ * v4.2: `sentence-transformation` removed: currently disabled (coming-soon) in UI.
  * Re-add when the exercise type is fully available end-to-end.
  */
 
@@ -57,7 +57,7 @@ export const isValidExerciseId = (id: string): id is ExerciseId =>
 
 /**
  * Human-readable labels for the Edit dialog picker.
- * Keep concise — used as checkbox labels in a 2-col grid.
+ * Keep concise: used as checkbox labels in a 2-col grid.
  */
 export const EXERCISE_LABELS: Record<string, string> = {
   reading: 'Reading',

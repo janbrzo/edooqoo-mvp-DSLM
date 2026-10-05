@@ -29,31 +29,31 @@ interface GeneratingModalProps {
   studentName?: string;
   studentEmail?: string | null;
   /**
-   * v6.9.57 — true when the modal was rehydrated after a page refresh
+   * v6.9.57: true when the modal was rehydrated after a page refresh
    * because the backend is still generating in the background. Shows a
    * dedicated banner and skips the "expected time" hint since we no longer
    * own the original startedAt.
    */
   isResumed?: boolean;
   /**
-   * v6.9.58 — epoch ms when generation actually started. Used to seed
+   * v6.9.58: epoch ms when generation actually started. Used to seed
    * elapsed time + progress bar after a refresh so the user sees live
    * values instead of 0.
    */
   startedAt?: number;
   /**
-   * v6.9.58 — student id used to deep-link the student name in the
+   * v6.9.58: student id used to deep-link the student name in the
    * "For {student}" header to their profile in a new tab.
    */
   studentId?: string | null;
   /**
-   * v6.9.58 — jobId of the underlying generation job. Dispatched in the
+   * v6.9.58: jobId of the underlying generation job. Dispatched in the
    * `generation-modal:mount` / `:unmount` events so the global mini panel
    * can hide ONLY the job represented by this modal (not all jobs).
    */
   jobId?: string | null;
   /**
-   * v6.9.59 — Multi-generation switcher. When more than one generation is
+   * v6.9.59: Multi-generation switcher. When more than one generation is
    * running on this tab, Index passes the full count and the currently
    * shown index so the modal can render arrow + dot navigation.
    */
@@ -61,7 +61,7 @@ interface GeneratingModalProps {
   currentIndex?: number;
   onSelectIndex?: (index: number) => void;
   /**
-   * v6.9.60 — Per-job metadata so the multi-generation switcher renders as a
+   * v6.9.60: Per-job metadata so the multi-generation switcher renders as a
    * row of selectable cards (one card per concurrent generation) instead of
    * arrow + dot navigation. Order matches the index used by `onSelectIndex`.
    */
@@ -72,7 +72,7 @@ interface GeneratingModalProps {
     progress?: { exercisesGenerated: number; expectedTotal: number } | null;
   }>;
   /**
-   * v6.9.61 — When true the job is in a transient `failed` state inside the
+   * v6.9.61: When true the job is in a transient `failed` state inside the
    * recovery window: backend may still save the worksheet. We show a
    * "checking server" banner instead of the destructive error UI.
    */
@@ -200,7 +200,7 @@ export default function GeneratingModal({
   jobs,
   recovering = false,
 }: GeneratingModalProps) {
-  // v6.9.58 — seed live values from startedAt so a refresh resumes the bar
+  // v6.9.58: seed live values from startedAt so a refresh resumes the bar
   // and timer instead of restarting them from zero.
   const initialElapsed = startedAt ? Math.max(0, Math.floor((Date.now() - startedAt) / 1000)) : 0;
   const [elapsedTime, setElapsedTime] = useState(initialElapsed);
@@ -212,7 +212,7 @@ export default function GeneratingModal({
   const exerciseCount = selectedExercises?.length || 6;
   const expectedSeconds = calculateExpectedTime(requiresAudio, requiresImage, hasGrammar, exerciseCount);
 
-  // v6.9.57 — Notify global listeners (mini panel) that the in-page modal is
+  // v6.9.57: Notify global listeners (mini panel) that the in-page modal is
   // currently mounted so they can avoid duplicating UI. v6.9.58: include
   // jobId in the event detail so the panel hides ONLY the matching job.
   useEffect(() => {
@@ -240,7 +240,7 @@ export default function GeneratingModal({
     // Initialize sections with grammar condition and selected exercises
     setSections(getGenerationSections(requiresAudio, requiresImage, hasGrammar, selectedExercises));
 
-    // v6.9.58 — seed timer from startedAt (if known) so a refresh-resumed
+    // v6.9.58: seed timer from startedAt (if known) so a refresh-resumed
     // modal continues from realistic values.
     const seedElapsed = startedAt ? Math.max(0, Math.floor((Date.now() - startedAt) / 1000)) : 0;
     setElapsedTime(seedElapsed);
@@ -254,7 +254,7 @@ export default function GeneratingModal({
     };
   }, [isOpen, requiresAudio, requiresImage, hasGrammar, selectedExercises, startedAt]);
 
-  // v6.9.65 — Progress computed from the same shared helper as the mini panel,
+  // v6.9.65: Progress computed from the same shared helper as the mini panel,
   // so the two surfaces never disagree.
   const progress = computeGenerationProgress(
     {
@@ -377,7 +377,7 @@ export default function GeneratingModal({
     return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
   };
 
-  // RECOVERY STATE (v6.9.61) — backend may still save the worksheet.
+  // RECOVERY STATE (v6.9.61): backend may still save the worksheet.
   if (recovering) {
     return createPortal(
       <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[100] p-4 overflow-y-auto">
@@ -420,7 +420,7 @@ export default function GeneratingModal({
             <p className="text-muted-foreground">
               {errorMessage?.includes('Invalid JSON') || errorMessage?.includes('repair')
                 ? "The AI response was incomplete on our side. This happens occasionally with complex worksheets."
-                : "We're sorry — an error occurred during worksheet generation."}
+                : "We're sorry: an error occurred during worksheet generation."}
             </p>
             <p className="text-sm font-medium text-foreground">
               No token was consumed. Your form data is preserved.
@@ -453,7 +453,7 @@ export default function GeneratingModal({
             'bg-white rounded-lg shadow-xl mx-4 w-full',
             // Mobile: allow internal scroll if needed.
             'max-h-[calc(100vh-2rem)] overflow-y-auto',
-            // Desktop (lg+): cap height AND hide scrollbar — content is sized
+            // Desktop (lg+): cap height AND hide scrollbar, content is sized
             // to fit a 720p viewport without a scrollbar.
             'lg:max-h-[calc(100dvh-2rem)] lg:overflow-hidden',
             'max-w-[520px] lg:max-w-[1080px]'
@@ -471,7 +471,7 @@ export default function GeneratingModal({
         >
           <div className="flex flex-col h-full space-y-2.5 min-w-0 min-h-0">
         <div className="space-y-1 min-w-0">
-          {/* v6.9.64 — two-row responsive header: title+student, then email+topic. */}
+          {/* v6.9.64: two-row responsive header: title+student, then email+topic. */}
           <div className="flex flex-col items-center justify-center gap-1 lg:flex-row lg:gap-2 min-w-0">
             <h2 className="shrink-0 text-xl lg:text-2xl font-semibold bg-gradient-to-r from-pink-500 via-violet-500 to-blue-500 bg-clip-text text-transparent">
               Generating Your Worksheet
@@ -585,7 +585,7 @@ export default function GeneratingModal({
         >
           <span className="leading-snug">
             {isResumed && <strong className="mr-1">Generation resumed.</strong>}
-            Generation runs in the background — keep prepping for
+            Generation runs in the background, keep prepping for
             {studentName ? (
               <>
                 {' '}

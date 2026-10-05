@@ -1,7 +1,7 @@
 /**
- * v6.9.53 — Global mini panel that keeps the worksheet generation visible
+ * v6.9.53: Global mini panel that keeps the worksheet generation visible
  *            after navigation/refresh mid-generation.
- * v6.9.58 — Multi-job stack. One floating card per concurrent generation,
+ * v6.9.58: Multi-job stack. One floating card per concurrent generation,
  *            stacked bottom-right. A given job is hidden only while the
  *            in-page GeneratingModal is mounted for THAT exact jobId.
  */
@@ -18,7 +18,7 @@ import {
 import { useActiveWorksheetGenerationJobs } from '@/hooks/useActiveWorksheetGenerationJob';
 import { computeGenerationProgress } from '@/lib/worksheet/computeProgress';
 
-// v6.9.60 — cards now live inside a single flex stack so each card's
+// v6.9.60: cards now live inside a single flex stack so each card's
 // natural height drives layout; concurrent cards always sit adjacent
 // with a small fixed gap and never overlap. Cap visible to 4.
 const MAX_VISIBLE_PANELS = 4;
@@ -28,9 +28,9 @@ export default function ActiveGenerationMiniPanel() {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // v6.9.60 — Track which jobIds have an in-page modal currently mounted on
+  // v6.9.60: Track which jobIds have an in-page modal currently mounted on
   // ANY tab. We use this to suppress the mini-card ONLY when the foreground
-  // modal of that exact job is showing in this window — so the user does
+  // modal of that exact job is showing in this window; so the user does
   // not see a duplicate. Other concurrent jobs remain visible as mini-cards
   // even if one of them is currently the active modal card.
   const [mountedJobIds, setMountedJobIds] = useState<Set<string>>(new Set());
@@ -65,7 +65,7 @@ export default function ActiveGenerationMiniPanel() {
 
   const visibleJobs = jobs
     .filter((job) => {
-      // v6.9.60 — Show running jobs as mini-cards even on the generation
+      // v6.9.60: Show running jobs as mini-cards even on the generation
       // page; only hide a completed job's CTA when the user is already
       // viewing that exact worksheet.
       if (
@@ -118,7 +118,7 @@ function MiniPanelCard({
   const studentName = job.formMeta?.studentName;
   const progress = job.progress ?? null;
 
-  // v6.9.62 P5 — live elapsed counter + % for running mini-cards.
+  // v6.9.62 P5: live elapsed counter + % for running mini-cards.
   const [elapsedSec, setElapsedSec] = useState<number>(() =>
     Math.max(0, Math.floor((Date.now() - (job.startedAt ?? Date.now())) / 1000)),
   );
@@ -130,7 +130,7 @@ function MiniPanelCard({
     return () => window.clearInterval(id);
   }, [isRunning, job.startedAt]);
 
-  // v6.9.65 — Use shared computeGenerationProgress so this mini-panel and
+  // v6.9.65: Use shared computeGenerationProgress so this mini-panel and
   // the foreground GeneratingModal always show the same %.
   const pct = computeGenerationProgress(
     { progress: job.progress ?? null, formMeta: job.formMeta ?? null },
@@ -167,7 +167,7 @@ function MiniPanelCard({
               </p>
               <p className="text-xs text-muted-foreground mt-0.5 leading-snug">
                 {studentName ? <>For <span className="font-medium text-foreground">{studentName}</span> · </> : null}
-                {job.topic ? `“${job.topic}” — ` : ''}keeps running in the background.
+                {job.topic ? `“${job.topic}”: ` : ''}keeps running in the background.
               </p>
               <div className="mt-1.5 flex items-center justify-between text-[11px] tabular-nums text-muted-foreground/90">
                 <span>{formatElapsed(elapsedSec)} · {pct}%</span>

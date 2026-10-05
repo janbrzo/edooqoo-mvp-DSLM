@@ -7,7 +7,7 @@ Paste the prompt below into a frontier LLM together with the 6 GSC CSV exports
 
 ## ROLE
 
-You are the Head of Organic Growth for **edooqoo.com** — a "1-Minute Prep" system for
+You are the Head of Organic Growth for **edooqoo.com**; a "1-Minute Prep" system for
 freelance 1:1 English tutors teaching **adults** (DSLM student model, AI worksheet
 generator with 29 exercise types, placement/welcome test, flashcards, homework review,
 calendar). You own both **SEO** (Google blue links) and **GEO/AEO** (visibility inside
@@ -19,17 +19,17 @@ generic advice, and you optimise for *revenue-qualified signups*, not impression
 - 90-day totals: **184 clicks / 9,020 impressions / CTR 2.0% / avg position 14.2**.
 - Desktop 133 clicks @ CTR 1.67%, pos 14.9 · Mobile 51 clicks @ **CTR 5.21%, pos 8.84** ·
   Tablet 0/64.
-- Top country by impressions = US (3,965 imp, 16 clicks, CTR 0.4%, pos 15.0) — huge
+- Top country by impressions = US (3,965 imp, 16 clicks, CTR 0.4%, pos 15.0), huge
   impression volume, near-zero conversion of impressions to clicks.
 - Highest-CTR countries: Poland 10.9%, Brazil 7.0%, Italy 7.1%, France 8.1%, Egypt 8.1%.
 - 441 URLs ranked; only ~40 earn any click. Homepage: 34 clicks / 137 imp / CTR 24.8%.
-- **Money leak #1 — the "best apps 2026" cluster**: `best apps for learning english 2026`
+- **Money leak #1; the "best apps 2026" cluster**: `best apps for learning english 2026`
   (355 imp), `best apps to learn english 2026` (218), `best english learning apps 2026`
   (174) + ~15 long-tail variants ≈ **900+ impressions, 0 clicks, positions 14–18**.
   Landing page: `/blog/best-apps-learning-english-2026.html` (1,422 imp, 1 click, 0.07%).
-  This is **learner** intent, not tutor intent — decide explicitly: re-target, split, or
+  This is **learner** intent, not tutor intent: decide explicitly: re-target, split, or
   monetise as top-of-funnel.
-- **Money leak #2 — striking-distance, zero-click pages** (pos 8–13, high impressions):
+- **Money leak #2: striking-distance, zero-click pages** (pos 8–13, high impressions):
   `/blog/teaching-english-intonation-stress.html` (309 imp, pos 10.8),
   `/modal-verbs-worksheets-esl.html` (187, pos 7.7),
   `/blog/fill-in-the-blanks-exercises-best-practices.html` (112, pos 12.8),
@@ -40,7 +40,7 @@ generic advice, and you optimise for *revenue-qualified signups*, not impression
   `/blog/digital-homework-tools-esl-teachers.html` (51, **pos 4.35, 0 clicks**).
 - **Signal of GEO demand**: quoted-phrase queries such as
   `"stressed syllables occur at roughly regular intervals"` (111+21+5 imp, pos ~9–10) and
-  `"good girl" /gʊg gɜːl/ assimilation` — these are people/agents verifying a sentence,
+  `"good girl" /gʊg gɜːl/ assimilation`; these are people/agents verifying a sentence,
   i.e. citation-shaped queries. Treat as an AEO extraction opportunity.
 - **Product-intent winners to defend/scale**: `/tools/vocab-cefr-checker` (12 clicks, 276 imp,
   pos 16.3; queries `cefr writing checker` pos 25, `cefr level checker` pos 23.4,
@@ -49,7 +49,7 @@ generic advice, and you optimise for *revenue-qualified signups*, not impression
 - **Competitor-name traffic**: `islcollective`/`isl collective` = 400+ imp, pos 5.6, 1 click →
   `/edooqoo-vs-islcollective.html` (447 imp, 0.22% CTR).
 - Off-persona drag: `esl games for kids`, `esl activities for kids`, `esl kids` at positions
-  38–55 on `/blog/esl-games-for-kids.html` — contradicts the adults-only positioning.
+  38–55 on `/blog/esl-games-for-kids.html`: contradicts the adults-only positioning.
 
 ## PRODUCT CONSTRAINTS (non-negotiable)
 
@@ -60,7 +60,7 @@ generic advice, and you optimise for *revenue-qualified signups*, not impression
    appear in public content: worksheet generator (29 exercise types), DSLM, welcome/
    placement test, flashcards + spaced repetition, homework review, calendar/booking,
    public gallery, free tools.
-3. The worksheet generation prompt/engine is protected IP — no changes to it, ever.
+3. The worksheet generation prompt/engine is protected IP; no changes to it, ever.
 4. Existing architecture you must reuse, not reinvent: `PageSeo` + `src/constants/seoMeta.ts`
    (canonical per route), `src/constants/pseoMatrix.ts` + `src/lib/seo/pseoIndexPolicy.ts`
    (programmatic pages and index policy), `public/sitemap.xml`, `public/llms.txt`,
@@ -86,9 +86,9 @@ Titles must be written for a tutor scanning a SERP at position 9, not for a keyw
 
 **3. Intent realignment.**
 Decide, with justification, for each of: the "best apps 2026" cluster, `/blog/esl-games-for-kids.html`,
-and the other kids/learner pages — **keep & re-angle for tutors / consolidate via 301 /
+and the other kids/learner pages, **keep & re-angle for tutors / consolidate via 301 /
 noindex**. Where you keep, specify the exact re-angle (e.g. "Best apps for learning English
-2026 — what to recommend to your adult 1:1 students, and what to do in the lesson instead").
+2026: what to recommend to your adult 1:1 students, and what to do in the lesson instead").
 Every kept page must carry a tutor-facing CTA path into `/esl-worksheets` or `/signup`.
 
 **4. Cluster strategy (topical authority).**
@@ -140,6 +140,6 @@ programmatic bloat, fake reviews, touching the worksheet engine).
 ## OUTPUT FORMAT
 
 Markdown. Tables wherever comparative. No marketing language. Every claim traced to a number
-in the CSVs — write `(source: Zapytania.csv, 355 imp, pos 14.75)` inline. If the data is
+in the CSVs: write `(source: Zapytania.csv, 355 imp, pos 14.75)` inline. If the data is
 insufficient for a decision, say so and state the exact query you would run in GSC or Semrush
 instead of guessing. All content, code, filenames and documentation in **English**.

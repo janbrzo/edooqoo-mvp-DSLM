@@ -3,7 +3,7 @@ import { SectionSkeleton } from './SectionSkeleton';
 
 interface LazySectionProps {
   children: React.ReactNode;
-  /** rootMargin for the IntersectionObserver — render content when within this distance from viewport */
+  /** rootMargin for the IntersectionObserver, render content when within this distance from viewport */
   rootMargin?: string;
   /** Force render immediately (e.g. for the first/visible section) */
   eager?: boolean;
@@ -41,7 +41,7 @@ export const LazySection: React.FC<LazySectionProps> = ({
     return () => obs.disconnect();
   }, [shouldRender, rootMargin]);
 
-  // v6.9.38 — honor late eager flips (e.g. add-goal-modal deep link).
+  // v6.9.38: honor late eager flips (e.g. add-goal-modal deep link).
   useEffect(() => {
     if (eager && !shouldRender) setShouldRender(true);
   }, [eager, shouldRender]);

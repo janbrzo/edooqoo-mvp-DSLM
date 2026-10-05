@@ -9,7 +9,7 @@ interface AnonPostWorksheetCTAProps {
 
 /**
  * Slide-up panel rendered immediately below GenerationView for anonymous
- * users right after worksheet generation completes — peak motivation moment.
+ * users right after worksheet generation completes, peak motivation moment.
  */
 export const AnonPostWorksheetCTA: React.FC<AnonPostWorksheetCTAProps> = ({ onSeePricing }) => {
   const location = useLocation();
@@ -20,7 +20,7 @@ export const AnonPostWorksheetCTA: React.FC<AnonPostWorksheetCTAProps> = ({ onSe
         <div className="bg-card rounded-2xl border border-border shadow-lg p-6 md:p-8">
           <div className="text-center mb-6">
             <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
-              🎉 Your worksheet is ready — now save the prep context
+              🎉 Your worksheet is ready, now save the prep context
             </h2>
             <p className="text-muted-foreground">
               Create a free account to keep this worksheet, re-edit it later, and start building the student context behind 1-Minute Prep.

@@ -1,5 +1,5 @@
 /**
- * v6.9.59 — Per-browser-tab identifier.
+ * v6.9.59: Per-browser-tab identifier.
  *
  * Stored in sessionStorage so it is unique to a single tab (sessionStorage
  * is NOT shared between tabs of the same origin). Used by the worksheet

@@ -1,5 +1,5 @@
 /**
- * useStudentTimelineSources — the three extra reads the Timeline tab needs
+ * useStudentTimelineSources: the three extra reads the Timeline tab needs
  * (v6.9.111, M5 step 2).
  *
  * Worksheets and knowledge entries are already loaded by `StudentPage`, so this
@@ -8,7 +8,7 @@
  * the first time the Timeline tab is opened, never on page load.
  *
  * Demo mode answers from `demoData` and issues zero Supabase calls. Any failure
- * degrades to an empty list — the timeline must never break the student page.
+ * degrades to an empty list; the timeline must never break the student page.
  */
 
 import { useQuery } from '@tanstack/react-query';

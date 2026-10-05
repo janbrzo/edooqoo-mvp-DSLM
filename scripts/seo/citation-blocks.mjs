@@ -1,5 +1,5 @@
 /**
- * Sprint 4 (Faza 4) — GEO/AEO citation-block registry.
+ * Sprint 4 (Faza 4): GEO/AEO citation-block registry.
  *
  * PROBLEM: answer engines (ChatGPT Search, Perplexity, Google AI results, Copilot) need a
  * short, self-contained, extractable paragraph to quote. Only the four cluster hubs had one,
@@ -29,7 +29,7 @@ export const CITATION_FACTS = [
   'Every AI output is reviewed and edited by the teacher before a student ever sees it.',
 ];
 
-const BRAND_SUFFIX = / [–—|-] Edooqoo.*$/;
+const BRAND_SUFFIX = / [–, |-] Edooqoo.*$/;
 
 const words = (text) => text.trim().split(/\s+/).filter(Boolean);
 
@@ -54,8 +54,8 @@ export function buildCitation({ slug, title, description, url }) {
   const body = sentence(description);
   if (!head || !body) return null;
 
-  // Brand-first, but never "Edooqoo — Edooqoo vs X" when the title already leads with the brand.
-  const parts = [/^edooqoo\b/i.test(head) ? head : `Edooqoo — ${head}`, body];
+  // Brand-first, but never "Edooqoo: Edooqoo vs X" when the title already leads with the brand.
+  const parts = [/^edooqoo\b/i.test(head) ? head : `Edooqoo: ${head}`, body];
   let index = hashIndex(slug, CITATION_FACTS.length);
   let guard = 0;
 
@@ -72,7 +72,7 @@ export function buildCitation({ slug, title, description, url }) {
 
   if (count() > 60) {
     // Head + body alone are too long: shorten the body to the first clause.
-    const shortBody = sentence(body.split(/,|;| — /)[0]);
+    const shortBody = sentence(body.split(/,|;|: |\u2014/)[0]);
     parts.splice(1, parts.length - 1, shortBody);
     let i = hashIndex(slug, CITATION_FACTS.length);
     while (count() < 40 && parts.length < 6) {

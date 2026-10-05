@@ -75,7 +75,7 @@ export const CONTRACTION_MAP: Record<string, string> = {
 /**
  * Generic suffix expansions applied to any word not covered by the map
  * (e.g. `Peter's going` -> `peter is going`, `students'll` -> `students will`).
- * Note: possessive `'s` is intentionally NOT expanded here — it is handled by
+ * Note: possessive `'s` is intentionally NOT expanded here; it is handled by
  * the map only for known pronouns, to avoid mangling `John's book`.
  */
 const SUFFIX_RULES: Array<[RegExp, string]> = [

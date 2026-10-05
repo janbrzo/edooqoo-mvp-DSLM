@@ -1,4 +1,4 @@
-// v6.9.68 P4 — Aggregates "needs review" signals for a single student so
+// v6.9.68 P4: Aggregates "needs review" signals for a single student so
 // the DSLM sidebar can show subtle attention dots in logically-located spots.
 // Sources: pending Welcome Test goal suggestions, pending pacing proposals,
 // and a level-suggestion banner that hasn't been dismissed.
@@ -90,7 +90,7 @@ export function useStudentAttentionDots(studentId?: string, teacherId?: string, 
 
   useEffect(() => { fetchDots(); }, [fetchDots]);
 
-  // v6.9.76 — react to cross-component mutations so dots clear after an action
+  // v6.9.76: react to cross-component mutations so dots clear after an action
   // anywhere in the app (accept/reject pacing, goal mutations, etc.).
   useEffect(() => {
     const handler = () => { fetchDots(); };
@@ -104,7 +104,7 @@ export function useStudentAttentionDots(studentId?: string, teacherId?: string, 
     };
   }, [fetchDots]);
 
-  // v6.9.76 — optimistic local dismiss for instant UI feedback. The next
+  // v6.9.76: optimistic local dismiss for instant UI feedback. The next
   // fetchDots() will reconcile with reality.
   const dismiss = useCallback((key: keyof StudentAttentionDots) => {
     setDots((prev) => ({ ...prev, [key]: false }));

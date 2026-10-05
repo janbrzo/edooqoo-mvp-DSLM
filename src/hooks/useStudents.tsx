@@ -36,7 +36,7 @@ export const useStudents = () => {
   });
 
   const students = studentsQuery.data || [];
-  // v6.9.8 — in demo mode the query is disabled until demoData arrives; expose
+  // v6.9.8: in demo mode the query is disabled until demoData arrives; expose
   // a synthetic loading state so consumers (Dashboard / AllWorksheets) don't
   // treat "no students yet" as the empty state.
   const loading = (isDemoMode && !demoData) || studentsQuery.isLoading;
@@ -158,7 +158,7 @@ export const useStudents = () => {
 
       if (error) throw error;
 
-      // v5.2: trigger pacing proposal (proposal mode — teacher must approve)
+      // v5.2: trigger pacing proposal (proposal mode: teacher must approve)
       // and surface the result via toast + event so the bell refreshes immediately.
       if (goalChanged || targetDateChanged) {
         (async () => {
@@ -182,11 +182,11 @@ export const useStudents = () => {
               window.dispatchEvent(new CustomEvent('pacingProposalChanged'));
               toast({
                 title: 'Pacing review proposed',
-                description: `${result.current ?? '?'} → ${result.proposed} — open the bell to accept or dismiss.`,
+                description: `${result.current ?? '?'} → ${result.proposed}: open the bell to accept or dismiss.`,
               });
             } else if (result.skipped) {
               toast({
-                title: 'Pacing checked — no change needed',
+                title: 'Pacing checked: no change needed',
                 description: `Current ${result.current ?? '?'}/100 stays optimal (${result.skipReason || 'no significant change'}).`,
               });
             }

@@ -46,7 +46,7 @@ describe('toEnglishLevelBand', () => {
   });
 });
 
-describe('buildAutoGeneratePayload — student level', () => {
+describe('buildAutoGeneratePayload: student level', () => {
   beforeEach(() => {
     const localStorage = memoryStorage();
     vi.stubGlobal('window', { localStorage });

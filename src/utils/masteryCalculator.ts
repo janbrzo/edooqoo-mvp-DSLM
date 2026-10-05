@@ -368,7 +368,7 @@ export const calculateItemMastery = (
       }
     }
 
-    // Gap text (cloze) — supports multi-blank with keys like `${sIndex}_${blankIndex}`
+    // Gap text (cloze): supports multi-blank with keys like `${sIndex}_${blankIndex}`
     if (exerciseType === 'gap-text' && exerciseData?.sentences?.[itemIndex]) {
       const sentence = exerciseData.sentences[itemIndex];
       const sentenceText = typeof sentence === 'string' ? sentence : (sentence?.text || '');

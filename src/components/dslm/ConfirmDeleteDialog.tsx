@@ -1,5 +1,5 @@
 /**
- * v6.9.15c — Single-click confirm dialog for destructive DSLM actions.
+ * v6.9.15c: Single-click confirm dialog for destructive DSLM actions.
  * Replaces the type-to-confirm UX (`ConfirmTypeToDeleteDialog`) per product decision.
  */
 import React, { useState } from 'react';

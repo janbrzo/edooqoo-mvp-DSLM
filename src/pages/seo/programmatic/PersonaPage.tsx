@@ -17,7 +17,7 @@ const PersonaPage: React.FC = () => {
 
   const policy = getPersonaIndexPolicy(persona.slug);
   const isIndexable = isIndexablePersona(persona.slug);
-  const title = clampSeoTitle(`English for ${persona.label} — Worksheets and Lessons | Edooqoo`);
+  const title = clampSeoTitle(`English for ${persona.label} | Worksheets and Lessons | Edooqoo`);
   const description = clampSeoDescription(
     `Teach English for ${persona.professionPlural} with worksheets calibrated to their daily tasks. CEFR A1-C2. Free to start.`
   );
@@ -75,7 +75,7 @@ const PersonaPage: React.FC = () => {
       bodyIntro={`Adult ${persona.professionPlural} need English materials that reflect their work context. Edooqoo lets tutors draft personalized worksheets, role-plays, email templates, and vocabulary banks that map to the learner's ${persona.domain} domain.`}
       howItWorks={[
         `Add your ${persona.label.replace(/s$/, '').toLowerCase()} student in Edooqoo with their CEFR level and goal.`,
-        'Open the worksheet form — fields pre-fill with their profile.',
+        'Open the worksheet form, fields pre-fill with their profile.',
         `Choose a topic (e.g., meetings, telephone English, ${persona.domain} vocabulary).`,
         'Generate. Review. Share to Student Hub or export PDF.',
         'Edooqoo organizes available learning signals so the next worksheet can build on what stuck.',

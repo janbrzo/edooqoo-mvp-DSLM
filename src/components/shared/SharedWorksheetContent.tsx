@@ -166,7 +166,7 @@ const SharedWorksheetContent: React.FC<SharedWorksheetContentProps> = ({
   // PROBLEM 3: Effective interactive mode (disabled if read-only)
   const effectiveInteractive = isInteractive && !isReadOnly;
   
-  // Answer visibility filter — controls which exercise types show correct answers
+  // Answer visibility filter, controls which exercise types show correct answers
   const shouldShowCorrectForExercise = (exerciseType: string): boolean => {
     if (!showCorrectAnswers) return false;
     if (answerVisibilityFilter === 'hidden') return false;
@@ -402,7 +402,7 @@ const SharedWorksheetContent: React.FC<SharedWorksheetContentProps> = ({
 
       {/* Exercises - using proper React components with FIXED ICONS */}
       {worksheetData.exercises && worksheetData.exercises.map((rawExercise: any, index: number) => {
-        // P1.5 — canonicalize drifted exercise shapes before rendering.
+        // P1.5: canonicalize drifted exercise shapes before rendering.
         const exercise = normalizeExerciseShape(rawExercise);
         devLog(`🔧 Rendering exercise ${index + 1}: ${exercise.type}`, exercise);
         

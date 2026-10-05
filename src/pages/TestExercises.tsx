@@ -11,7 +11,7 @@ import WorksheetContent from "@/components/worksheet/WorksheetContent";
  * Accessible at /test-exercises for immediate testing without generation
  */
 const TestExercises = () => {
-  // v6.9.7 — lazy-load mock content so it stays out of the main bundle.
+  // v6.9.7: lazy-load mock content so it stays out of the main bundle.
   const [editableWorksheet, setEditableWorksheet] = useState<any>(null);
   useEffect(() => {
     import("@/mockNewExercisesData").then((m) => setEditableWorksheet(m.mockNewExercisesData));

@@ -1,8 +1,8 @@
 /**
- * GoalProgressBar — DSLM v5.0
+ * GoalProgressBar: DSLM v5.0
  *
  * Renders a compact progress bar + percentage for a goal.
- * `value === null` renders a dash ("—") instead of 0% to distinguish "no signals"
+ * `value === null` renders a dash ("-") instead of 0% to distinguish "no signals"
  * from "0% completed".
  */
 import React from 'react';
@@ -20,7 +20,7 @@ interface GoalProgressBarProps {
 export const GoalProgressBar: React.FC<GoalProgressBarProps> = ({ value, isManualOverride, signalsLabel, className }) => {
   if (value === null) {
     return (
-      <span className={`text-[11px] text-muted-foreground ${className || ''}`} title="No ratings or skill matches yet — rate elements or generate skill metrics to see progress.">—</span>
+      <span className={`text-[11px] text-muted-foreground ${className || ''}`} title="No ratings or skill matches yet: rate elements or generate skill metrics to see progress.">-</span>
     );
   }
   const tooltipLines = [

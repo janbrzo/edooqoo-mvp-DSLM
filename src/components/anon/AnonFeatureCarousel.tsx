@@ -34,7 +34,7 @@ export const AnonFeatureCarousel: React.FC = () => {
   return (
     <div className="flex flex-col h-full bg-gradient-to-br from-secondary/30 to-accent/20 rounded-lg p-5 border border-border">
       <div className="text-[11px] font-semibold uppercase tracking-widest text-muted-foreground mb-3">
-        While we build your worksheet — meet the full ecosystem
+        While we build your worksheet, meet the full ecosystem
       </div>
 
       <div className="overflow-hidden flex-1" ref={emblaRef}>

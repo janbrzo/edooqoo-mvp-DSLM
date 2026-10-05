@@ -80,7 +80,7 @@ export interface StudentHubData {
     back_type: string;
     created_at: string;
     updated_at: string;
-    /** v6.9.72 — propagated from students.native_language for the Add Card dialog. */
+    /** v6.9.72: propagated from students.native_language for the Add Card dialog. */
     student_native_language?: string | null;
   }>;
   homeworks: Array<{
@@ -142,7 +142,7 @@ export function useStudentHubData(token: string | undefined, email: string | und
       });
       if (err) throw err;
       if (result?.requiresPassword) {
-        // The stored session (if any) is no longer valid for this student —
+        // The stored session (if any) is no longer valid for this student, 
         // drop it so a future `/my` visit prompts for the password again
         // instead of silently reusing a stale token.
         clearHubSession();

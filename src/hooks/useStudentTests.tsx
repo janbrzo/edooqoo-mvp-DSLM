@@ -96,7 +96,7 @@ export function useStudentTests({ studentId, teacherId }: UseStudentTestsProps) 
           ...testData,
           teacher_id: teacherId,
           linked_element_ids: testData.linked_element_ids || [],
-          // Plan v6.0 — attempt tracking
+          // Plan v6.0: attempt tracking
           attempt_number: testData.attempt_number ?? 1,
           previous_attempt_id: testData.previous_attempt_id ?? null,
         })

@@ -34,7 +34,7 @@ const Profile = () => {
   const { currentPlan, plans, canUpgradeTo, getUpgradePrice, getUpgradeTokens, getRecommendedFullTimePlan } = usePlanLogic(profile?.subscription_type);
   const { resetOnboarding } = useOnboardingProgress();
   const { isDemoMode } = useDemoContext();
-  // v6.9.109 Phase 5 — Usage card (stats moved here from the dashboard)
+  // v6.9.109 Phase 5, Usage card (stats moved here from the dashboard)
   const { thisMonthCount } = useWorksheetStats();
   const { students } = useStudents();
   const { count: upcomingLessonsCount } = useUpcomingLessonsCount();
@@ -702,7 +702,7 @@ const Profile = () => {
                         title: "Onboarding Reset",
                         description: "The onboarding checklist will appear again when you visit the dashboard.",
                       });
-                      // v6.9.34 — navigate to dashboard so user immediately
+                      // v6.9.34: navigate to dashboard so user immediately
                       // sees the freshly-reset checklist.
                       navigate('/dashboard');
                     }}
@@ -783,7 +783,7 @@ const Profile = () => {
                     >
                       edooqoo.com/my
                     </a>
-                    {' '}— no password needed.
+                    {' '}: no password needed.
                   </p>
                 </CardContent>
               </Card>

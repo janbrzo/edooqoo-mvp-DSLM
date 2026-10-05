@@ -1,4 +1,4 @@
-// v6.9.62 P6 — Banner shown on /student/:id when `?intake=<extraction_id>` is
+// v6.9.62 P6: Banner shown on /student/:id when `?intake=<extraction_id>` is
 // present in the URL. Lets the teacher review what was applied and bulk-undo.
 import React, { useEffect, useState } from 'react';
 import { Alert, AlertDescription } from '@/components/ui/alert';
@@ -86,7 +86,7 @@ export const IntakeExtractionBanner: React.FC<{ extractionId: string; studentId:
         <Sparkles className="h-4 w-4 text-violet-600" />
         <AlertDescription className="flex items-center justify-between gap-2 flex-wrap">
           <span className="text-sm">
-            Profile seeded from your notes — <strong>{autoCount}</strong> auto-applied
+            Profile seeded from your notes, <strong>{autoCount}</strong> auto-applied
             {pendingCount ? <> · <strong>{pendingCount}</strong> pending pacing proposal</> : null}.
           </span>
           <div className="flex items-center gap-2">

@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { resolveRowClasses } from '../EntityRow';
 
-describe('resolveRowClasses — interaction mode', () => {
+describe('resolveRowClasses: interaction mode', () => {
   it('returns link mode when href is present', () => {
     expect(resolveRowClasses({ href: '/worksheet/1' }).mode).toBe('link');
   });
@@ -19,7 +19,7 @@ describe('resolveRowClasses — interaction mode', () => {
   });
 });
 
-describe('resolveRowClasses — container', () => {
+describe('resolveRowClasses: container', () => {
   it('uses p-4 by default and p-3 when dense', () => {
     expect(resolveRowClasses({}).container).toContain('p-4');
     expect(resolveRowClasses({ dense: true }).container).toContain('p-3');
@@ -53,7 +53,7 @@ describe('resolveRowClasses — container', () => {
   });
 });
 
-describe('resolveRowClasses — parts', () => {
+describe('resolveRowClasses: parts', () => {
   it('scales the icon with density and tone', () => {
     expect(resolveRowClasses({}).icon).toContain('h-5 w-5');
     expect(resolveRowClasses({ dense: true }).icon).toContain('h-4 w-4');

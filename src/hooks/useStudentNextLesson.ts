@@ -1,5 +1,5 @@
 /**
- * useStudentNextLesson — the single booked lesson shown in the Student
+ * useStudentNextLesson: the single booked lesson shown in the Student
  * Workspace header (v6.9.111, M3).
  *
  * Deliberately NOT `useCalendarSlots`: that hook loads a whole view range,
@@ -7,7 +7,7 @@
  * The header needs one row, so this reads one row.
  *
  * Demo mode derives the answer from `demoData` and issues zero Supabase calls.
- * Any failure degrades to "no lesson booked" — a summary line must never break
+ * Any failure degrades to "no lesson booked"; a summary line must never break
  * the student page.
  */
 
@@ -27,7 +27,7 @@ interface NextLessonRow {
   start_time: string;
 }
 
-/** Local `YYYY-MM-DD` — the calendar stores plain calendar days, not instants. */
+/** Local `YYYY-MM-DD`: the calendar stores plain calendar days, not instants. */
 function todayKey(now: Date = new Date()): string {
   const m = `${now.getMonth() + 1}`.padStart(2, '0');
   const d = `${now.getDate()}`.padStart(2, '0');
@@ -35,7 +35,7 @@ function todayKey(now: Date = new Date()): string {
 }
 
 /**
- * Pure picker — exported for tests and demo reuse.
+ * Pure picker: exported for tests and demo reuse.
  * Returns the earliest booked slot from today onward.
  */
 export function pickNextLesson(

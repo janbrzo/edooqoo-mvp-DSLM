@@ -1,4 +1,4 @@
-// Closed-Loop Company — student-engagement-decay (Wave 1).
+// Closed-Loop Company: student-engagement-decay (Wave 1).
 // Cadence: daily 05:00 UTC.
 // Detects 14d-vs-14d engagement drops and emits teacher_alerts (medium/high).
 
@@ -125,7 +125,7 @@ Deno.serve(async req => {
     }
   } catch (err) {
     if (err instanceof Error && err.message === '__noop__') {
-      // no eligible students — not a failure
+      // no eligible students; not a failure
     } else {
       status = 'failure';
       errorMessage = formatErr(err);

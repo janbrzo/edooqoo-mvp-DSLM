@@ -33,7 +33,7 @@ jobs:
           cache: npm
 
       - name: Install dependencies
-        run: npm ci || (echo "lockfile out of sync — falling back to npm install" && npm install --no-audit --no-fund)
+        run: npm ci || (echo "lockfile out of sync, falling back to npm install" && npm install --no-audit --no-fund)
 
       - name: Generate edge routing manifest
         run: npm run seo:generate-edge-routing
@@ -41,12 +41,12 @@ jobs:
       - name: Build static assets
         run: npm run build
         env:
-          # vite build wymaga tych env żeby wygenerować SPA — bierzemy je z Secrets
+          # vite build wymaga tych env żeby wygenerować SPA, bierzemy je z Secrets
           VITE_SUPABASE_URL: https://bvfrkzdlklyvnhlpleck.supabase.co
           VITE_SUPABASE_PUBLISHABLE_KEY: ${{ secrets.VITE_SUPABASE_PUBLISHABLE_KEY }}
           VITE_SUPABASE_PROJECT_ID: bvfrkzdlklyvnhlpleck
 
-      - name: Preflight — verify Cloudflare secrets are visible to this job
+      - name: Preflight: verify Cloudflare secrets are visible to this job
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}

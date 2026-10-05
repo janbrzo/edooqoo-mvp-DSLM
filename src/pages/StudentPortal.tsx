@@ -55,7 +55,7 @@ export default function StudentPortal() {
 
       if (setsError) throw setsError;
 
-      // v6.9.87 — learner progress is read through a SECURITY DEFINER RPC
+      // v6.9.87: learner progress is read through a SECURITY DEFINER RPC
       // scoped to the learner's own identifier (mastered = repetition >= 4).
       const { data: progressData } = await supabase.rpc('get_learner_mastered_counts', {
         p_learner_identifier: studentEmail || '',

@@ -1,9 +1,9 @@
 /**
- * TimelineTab — the Timeline tab composition (v6.9.111, M5 step 4).
+ * TimelineTab: the Timeline tab composition (v6.9.111, M5 step 4).
  *
  * One stream of everything that happened for this student: lessons,
  * worksheets, homework, notes, mastery changes and tests. The tab owns no
- * data and no rules — it receives already-grouped events from
+ * data and no rules; it receives already-grouped events from
  * `useStudentTimeline` and renders filters, sticky date headers, rows and the
  * "Load more" pager.
  *

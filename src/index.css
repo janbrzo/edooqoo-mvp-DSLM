@@ -15,7 +15,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    /* v6.9.0 — darkened from 255 85% 76% (#B9A0FB, contrast 2.0:1 with white)
+    /* v6.9.0: darkened from 255 85% 76% (#B9A0FB, contrast 2.0:1 with white)
        to 255 70% 55% (#5E3FD9, contrast 5.9:1) for WCAG AA compliance on
        primary CTAs while preserving violet brand identity. */
     --primary: 255 70% 55%;
@@ -66,7 +66,7 @@
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    /* v6.9.0 — dark mode keeps lighter violet so primary-foreground stays dark
+    /* v6.9.0: dark mode keeps lighter violet so primary-foreground stays dark
        (contrast 4.9:1 with #1A1A2E). Darkening would invert UX in dark theme. */
     --primary: 255 85% 76%;
     --primary-foreground: 222.2 47.4% 11.2%;

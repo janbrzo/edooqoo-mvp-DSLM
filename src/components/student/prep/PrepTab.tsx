@@ -1,9 +1,9 @@
 /**
- * PrepTab — composition of the Prep tab (v6.9.111, M4 step 3).
+ * PrepTab: composition of the Prep tab (v6.9.111, M4 step 3).
  *
  * Pure composition: it stacks the banners slot, NextLessonCard, LastLessonStrip
  * and QuickNoteBox. It owns no data fetching, no sessionStorage and no
- * navigation — `StudentPage.tsx` passes everything down as props (M4 step 4).
+ * navigation: `StudentPage.tsx` passes everything down as props (M4 step 4).
  */
 
 import React from 'react';

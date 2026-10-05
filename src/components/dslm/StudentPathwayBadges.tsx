@@ -1,5 +1,5 @@
 /**
- * StudentPathwayBadges — secondary context badges (lessons, goal, deadline) shown next to the "Pathway" section header.
+ * StudentPathwayBadges: secondary context badges (lessons, goal, deadline) shown next to the "Pathway" section header.
  */
 import React from 'react';
 import { Calendar, Target } from 'lucide-react';

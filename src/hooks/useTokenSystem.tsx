@@ -14,7 +14,7 @@ export const useTokenSystem = (userId?: string | null) => {
   const { isDemoMode, demoData } = useDemoContext();
 
   // Tri-state: null = not yet resolved (still loading auth status).
-  // Critical: must NOT default to `true` — that produced the false "no tokens" race
+  // Critical: must NOT default to `true`; that produced the false "no tokens" race
   // because the second effect would then short-circuit with tokenLeft=0, loading=false,
   // and Index.tsx would open the paywall modal even for users with positive balance.
   const [isAnonymousUser, setIsAnonymousUser] = useState<boolean | null>(null);
@@ -38,7 +38,7 @@ export const useTokenSystem = (userId?: string | null) => {
   useEffect(() => {
     if (isDemoMode) return;
     if (isAnonymousUser === null) {
-      // Auth status not yet resolved — keep `loading` true and wait.
+      // Auth status not yet resolved, keep `loading` true and wait.
       return;
     }
     if (userId && isAnonymousUser === false) {

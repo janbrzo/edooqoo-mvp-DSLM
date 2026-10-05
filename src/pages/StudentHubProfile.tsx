@@ -1,5 +1,5 @@
 /**
- * StudentHubProfile (v5.2) — "Tell us about yourself"
+ * StudentHubProfile (v5.2): "Tell us about yourself"
  * Each of the 10 categories saves to student_knowledge_entries with category='Self-Profile'.
  * Auto-save on blur / on selection change. Single edge function call per field group.
  */
@@ -74,7 +74,7 @@ const StudentHubProfile: React.FC = () => {
       setTimeout(() => setSavedField((s) => (s === field ? null : s)), 2000);
     } catch (e: any) {
       console.error('Save failed', e);
-      toast.error(e?.message || 'Could not save — try again');
+      toast.error(e?.message || 'Could not save: try again');
     } finally {
       setSavingField((s) => (s === field ? null : s));
     }

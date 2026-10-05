@@ -1,4 +1,4 @@
-// v6.9.62 P6 — Preview UI for an AI student-profile extraction.
+// v6.9.62 P6: Preview UI for an AI student-profile extraction.
 // Accordion: Notes / Signals / Goals / Level / Main Goal / Native lang / Pacing.
 // Each item has an "Include" switch + confidence + evidence quote.
 import React, { useMemo } from 'react';
@@ -340,7 +340,7 @@ export const ExtractionPreviewCard: React.FC<Props> = ({
                   ) : null}
                   <Evidence quote={extraction.pacing.evidence_quote} />
                   <p className="text-[11px] mt-1 text-amber-700">
-                    Always saved as a pending pacing proposal — accept it from the Pacing bell.
+                    Always saved as a pending pacing proposal, accept it from the Pacing bell.
                   </p>
                 </div>
                 <Switch

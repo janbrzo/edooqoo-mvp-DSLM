@@ -125,7 +125,7 @@ export function RecurringBookingModal({ open, onOpenChange, notification, teache
       if (allHandled) {
         onDone();
       } else {
-        // Partial — refresh slots, clear selection
+        // Partial: refresh slots, clear selection
         setSelectedIds(new Set());
         fetchSlots();
       }

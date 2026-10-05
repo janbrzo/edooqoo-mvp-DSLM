@@ -87,7 +87,7 @@ serve(async (req) => {
       && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(anonUserId);
 
     // anonUserId comes from the client, so confirm it really is an anonymous
-    // account — otherwise a teacher could pass another teacher's id and take
+    // account: otherwise a teacher could pass another teacher's id and take
     // over that teacher's recent worksheets.
     let isAnonymousOwner = false;
     if (isUuid && anonUserId !== user.id) {

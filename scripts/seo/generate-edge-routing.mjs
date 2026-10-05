@@ -23,7 +23,7 @@ const publicRoutes = entries.filter((entry) => entry.indexable).map((entry) => e
 // production: cloudflare/worker.mjs performs the identical canonicalization
 // in code, unconditionally, before it even looks at routing.redirects or
 // serves a static asset (see its `incoming.hostname === 'www.edooqoo.com' ||
-// incoming.protocol === 'http:'` check) — and the Worker, not this file, is
+// incoming.protocol === 'http:'` check): and the Worker, not this file, is
 // what actually handles every request, since wrangler.toml binds
 // edooqoo.com/* directly to it. _redirects here is only a fallback for the
 // (here, inapplicable) case of the Worker script not executing.

@@ -57,7 +57,7 @@ interface TeacherComment {
 }
 
 export default function HomeworkReviewPage() {
-  // v6.9.55 — Teacher homework review must stay light regardless of dark
+  // v6.9.55: Teacher homework review must stay light regardless of dark
   // mode preference; worksheet/homework surfaces never invert.
   useHardLightSurface('homework-review');
   const { id } = useParams<{ id: string }>();

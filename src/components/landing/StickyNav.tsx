@@ -37,7 +37,7 @@ const StickyNav: React.FC<StickyNavProps> = ({ isRegisteredUser, tokenLeft, user
   const isProfile = location.pathname === '/profile';
   const isCalendar = location.pathname === '/calendar';
   const isStudentPage = /^\/student\//.test(location.pathname);
-  // v6.9.110 — show NavStudentSwitcher on every authenticated page except /profile
+  // v6.9.110: show NavStudentSwitcher on every authenticated page except /profile
   // (now also on /dashboard, as a fourth quick-access path to a student).
   const showStudentSwitcher = isRegisteredUser && !isProfile;
   const { isDemoMode, exitDemo } = useDemoContext();
@@ -54,7 +54,7 @@ const StickyNav: React.FC<StickyNavProps> = ({ isRegisteredUser, tokenLeft, user
   const DemoBanner = () => isDemoMode ? (
     <div className="fixed top-0 left-0 right-0 z-[60] bg-amber-400 text-amber-900 text-center text-sm font-medium py-1.5 flex items-center justify-center gap-3">
       <Eye className="h-4 w-4" />
-      <span>DEMO MODE — Explore freely!</span>
+      <span>DEMO MODE: Explore freely!</span>
       <Button size="sm" variant="outline" className="h-6 text-xs bg-white/80 border-amber-600 text-amber-900 hover:bg-white" onClick={() => navigate('/signup', { state: fromState })}>
         Sign Up Free →
       </Button>
@@ -131,7 +131,7 @@ const StickyNav: React.FC<StickyNavProps> = ({ isRegisteredUser, tokenLeft, user
               </SheetTrigger>
               <SheetContent side="right" className="w-64">
                 <div className="flex flex-col gap-3 pt-8">
-                  {/* v6.9.112 M8 — plan + tokens live here below 640px to prevent horizontal overflow */}
+                  {/* v6.9.112 M8: plan + tokens live here below 640px to prevent horizontal overflow */}
                   <div className="flex flex-wrap items-center gap-2 sm:hidden">
                     {subscriptionType && <Badge variant="secondary" className="text-xs">{subscriptionType}</Badge>}
                     <Badge variant="outline" className="text-xs">Tokens: {tokenLeft}</Badge>

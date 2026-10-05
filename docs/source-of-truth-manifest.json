@@ -2783,7 +2783,7 @@
         "Edooqoo is a 1-Minute Prep system built for 1:1 English teachers. It helps teachers move recurring weekly prep toward one focused minute per student by combining student profile, goals, Welcome Test context, homework, flashcard progress, live lesson signals, calendar rhythm, and DSLM nano-skill evidence.",
         "Edooqoo is used by private English tutors, ESL/EFL instructors, Business English coaches, language-school teachers, online English teachers, and corporate language trainers. It works in the browser and keeps teacher review, editing, and lesson decisions in the teacher's hands.",
         "Edooqoo vs Alternatives",
-        "Edooqoo — 1-Minute Prep for 1:1 English Teachers",
+        "Edooqoo: 1-Minute Prep for 1:1 English Teachers",
         "Feature",
         "Features",
         "Frequently Asked Questions",
@@ -3123,7 +3123,7 @@
         "Sort students",
         "Students (",
         "Students list",
-        "Students — Edooqoo"
+        "Students | Edooqoo"
       ],
       "userFacingBehavior": {
         "actionHandlers": [],
@@ -3768,6 +3768,7 @@
       "userFacingText": [
         "/book/",
         "/my",
+        "; they can enter their email to access their Student Hub (lessons, flashcards, homework).",
         "Add",
         "Allow student rescheduling without your confirmation",
         "Auto-confirm",
@@ -3784,8 +3785,7 @@
         "Buffer Between Lessons (minutes)",
         "Calendar",
         "Calendar Settings",
-        "Confirmed lessons with students",
-        "Creates a different Google Meet link for every lesson. Not recommended if permanent student links are enabled."
+        "Confirmed lessons with students"
       ],
       "userFacingBehavior": {
         "actionHandlers": [
@@ -4261,10 +4261,10 @@
       "storage": [],
       "userFacingText": [
         "A comprehensive glossary of English Language Teaching terminology. Each term includes a definition and how Edooqoo helps teachers apply the concept in practice.",
-        "ELT Glossary — English Language Teaching Terms",
+        "ELT Glossary | English Language Teaching Terms",
         "Edooqoo helps English teachers apply ELT best practices with AI-powered worksheet generation.",
         "Ready to put these concepts into practice?",
-        "Try Edooqoo Free — 2 Worksheets Included",
+        "Try Edooqoo Free: 2 Worksheets Included",
         "← Back to Edooqoo"
       ],
       "userFacingBehavior": {
@@ -4642,7 +4642,7 @@
         "For the bounded workflow definition, read the",
         "Frequently Asked Questions",
         "How 1-Minute Prep Works",
-        "How 1-Minute Prep Works — Edooqoo Student Learning Loop",
+        "How 1-Minute Prep Works | Edooqoo Student Learning Loop",
         "One-time student setup",
         "Phase 1: One-time student setup",
         "Phase 2: Weekly 1-Minute Prep",
@@ -4650,7 +4650,7 @@
         "Sign up free, add a student profile, and start building the context for 1-Minute Prep.",
         "This is the recurring prep loop: generate candidate next steps, use optional booking context, choose the focus, then create the worksheet output.",
         "This phase creates the learner record, baseline and goals. It is separate from the recurring 1-Minute Prep promise.",
-        "Try Edooqoo Free — 2 Worksheets Included",
+        "Try Edooqoo Free: 2 Worksheets Included",
         "Weekly 1-Minute Prep",
         "canonical 1-Minute Prep page",
         "← Back to Edooqoo"
@@ -5472,6 +5472,7 @@
         "$0.60 per worksheet",
         "/month",
         "15 worksheets/month",
+        ": no password needed.",
         "Available tokens",
         "Choose worksheets/month",
         "Current Plan",
@@ -5487,8 +5488,7 @@
         "Plan & Billing",
         "Quick Actions",
         "Reset Onboarding",
-        "Rollover tokens",
-        "Side-Gig Plan"
+        "Rollover tokens"
       ],
       "userFacingBehavior": {
         "actionHandlers": [
@@ -5563,7 +5563,7 @@
         "No prompts match your search. Try different keywords.",
         "Ready to Create Your Worksheet?",
         "Search prompts by topic, level, or keyword...",
-        "Sign Up Free — 2 Worksheets Included"
+        "Sign Up Free: 2 Worksheets Included"
       ],
       "userFacingBehavior": {
         "actionHandlers": [
@@ -5985,7 +5985,7 @@
       "userFacingText": [
         "All",
         "Answers",
-        "Ask your teacher to share it again from the worksheet page — the link will then open for you.",
+        "Ask your teacher to share it again from the worksheet page; the link will then open for you.",
         "Back",
         "Closed",
         "Create your own worksheets at edooqoo.com",
@@ -6435,7 +6435,7 @@
       },
       "storage": [],
       "userFacingText": [
-        "Ask your teacher to check the email address they registered for you — it must match exactly.",
+        "Ask your teacher to check the email address they registered for you; it must match exactly.",
         "Ask your teacher to open their Calendar settings and turn on the Student Hub, then try again.",
         "Enter your Hub password",
         "Enter your email to access your flashcards, homework, worksheets & lessons",
@@ -7776,7 +7776,7 @@
         "Updated June 15, 2026",
         "Use evidence, then make one bounded decision",
         "What Should I Teach Next?",
-        "What Should I Teach Next? — Adult 1:1 English Lessons",
+        "What Should I Teach Next?: Adult 1:1 English Lessons",
         "Worked example"
       ],
       "userFacingBehavior": {
@@ -8025,7 +8025,7 @@
       "storage": [],
       "userFacingText": [
         "April 14–18, 2026",
-        "Lesson Calendar for English Teachers — Google Calendar Sync | Edooqoo",
+        "Lesson Calendar for English Teachers: Google Calendar Sync | Edooqoo",
         "Pending lesson booking modal with confirm and reject controls",
         "Teacher calendar with availability, booked lessons, pending bookings, and completed lessons"
       ],
@@ -8063,7 +8063,7 @@
         "DSLM is the decision layer inside 1-Minute Prep.",
         "DSLM skills heat map showing nano-skill mastery and category breakdown",
         "DSLM uses pacing and roadmap context to decide whether the next step should be more input-first, balanced, or output-heavy. The teacher reviews every proposal before accepting it.",
-        "DSLM — Student Context for 1-Minute Prep | Edooqoo",
+        "DSLM: Student Context for 1-Minute Prep | Edooqoo",
         "Example Nano-skills Tracked",
         "From stored learner evidence to teacher-reviewed next-step suggestions.",
         "How DSLM Powers Every Feature",
@@ -8116,7 +8116,7 @@
         "Day 14",
         "Day 60",
         "Flashcard sets page with student-specific cards and study sessions",
-        "Flashcards for Adult Learners — Spaced Repetition",
+        "Flashcards for Adult Learners: Spaced Repetition",
         "Flashcards: Edooqoo vs alternatives",
         "Memory Retention",
         "Translation",
@@ -8157,7 +8157,7 @@
       "userFacingText": [
         "40/50 (80%)",
         "AI-Assisted Homework Review for ESL Teachers | Edooqoo",
-        "Business English — Unit 3",
+        "Business English: Unit 3",
         "Homework assignments list with completed homework and source worksheet links",
         "Homework closes the lesson loop",
         "Homework review: Edooqoo vs alternatives",
@@ -8196,10 +8196,10 @@
       "storage": [],
       "userFacingText": [
         "16/20 (80%)",
-        "Business English — Unit 3",
-        "Interactive Live Worksheet Sessions for ESL — Real-Time Teaching | Edooqoo",
+        "Business English: Unit 3",
+        "Interactive Live Worksheet Sessions for ESL: Real-Time Teaching | Edooqoo",
         "Julia Kowalski · B2",
-        "LIVE — 14:32",
+        "LIVE: 14:32",
         "Live Session teacher worksheet with answer evidence and nano-skill tooltip",
         "Running score",
         "Shared worksheet student view with progress and lesson content"
@@ -8232,15 +8232,15 @@
       },
       "storage": [],
       "userFacingText": [
-        "AI English Placement Test — 58 Questions, CEFR Assessment | Edooqoo",
+        ", focus on listening skills while maintaining C1 areas.",
+        "AI English Placement Test: 58 Questions, CEFR Assessment | Edooqoo",
         "AI Summary:",
         "Anna Chen · Completed Apr 12, 2026",
         "Guided",
         "Placement Test Results",
         "Placement Test profile summary with level assessment, skill scores, and preferences",
         "Strong overall C1 profile with particular strength in reading comprehension. Listening is the weakest area (B2 level). Recommended path:",
-        "Welcome Test question screen with sections and progress",
-        "— focus on listening skills while maintaining C1 areas."
+        "Welcome Test question screen with sections and progress"
       ],
       "userFacingBehavior": {
         "actionHandlers": [],
@@ -8274,7 +8274,7 @@
         "Recent Activity",
         "Student Hub dashboard with worksheets, homework, flashcards, and next lesson",
         "Student Hub lessons and booking calendar with available and pending slots",
-        "Student Portal for ESL — Worksheets, Homework, Flashcards | Edooqoo",
+        "Student Portal for ESL | Worksheets, Homework, Flashcards | Edooqoo",
         "Teacher: Sarah M. · B2 Business English"
       ],
       "userFacingBehavior": {
@@ -8345,7 +8345,7 @@
         "Pagination",
         "Previous",
         "Public ESL Worksheets Gallery",
-        "Public ESL Worksheets Gallery — Edooqoo",
+        "Public ESL Worksheets Gallery | Edooqoo",
         "Summary",
         "TL;DR:"
       ],
@@ -8403,18 +8403,18 @@
       "userFacingText": [
         "Back to gallery",
         "Browse other worksheets",
-        "Edooqoo's DSLM workflow turns your student's goals into a tailored worksheet — fully editable, with audio, images and AI-grading built in. Free to start, no credit card.",
+        "Edooqoo's DSLM workflow turns your student's goals into a tailored worksheet, fully editable, with audio, images and AI-grading built in. Free to start, no credit card.",
         "From idea to a teacher-reviewed worksheet workflow",
         "Loading…",
         "Preview mode.",
         "Preview notice",
         "The author has removed it from the gallery.",
-        "This is a static read-only preview of a worksheet a teacher published. Interactive answers, AI-assisted review, audio playback and downloads are available only in the full editor —",
+        "This is a static read-only preview of a worksheet a teacher published. Interactive answers, AI-assisted review, audio playback and downloads are available only in the full editor,",
         "This worksheet is no longer public",
         "This worksheet may have been unpublished by its author.",
         "Try 1-Minute Prep free",
         "Worksheet content unavailable in preview format.",
-        "Worksheet no longer public — Edooqoo",
+        "Worksheet no longer public | Edooqoo",
         "Worksheet not found",
         "sign up free",
         "to generate or open this worksheet interactively.",
@@ -8476,7 +8476,7 @@
       },
       "storage": [],
       "userFacingText": [
-        "Adults rarely call them games — they call them activities. The label matters less than the mechanic. What matters is that the learner is doing something cognitively engaging that produces language, not passively listening. A 5-minute Two Truths and a Lie at the start of a lesson generates more authentic question-formation practice than a 20-minute grammar drill.",
+        "Adults rarely call them games; they call them activities. The label matters less than the mechanic. What matters is that the learner is doing something cognitively engaging that produces language, not passively listening. A 5-minute Two Truths and a Lie at the start of a lesson generates more authentic question-formation practice than a 20-minute grammar drill.",
         "For more on the underlying methodology, see",
         "How to integrate games into a 60-minute lesson",
         "The risk with games is they become content-free entertainment. The fix is pairing every game with a follow-up worksheet that locks in the target language. After the Idiom Charades game, assign a short homework exercise covering the same idioms in writing. Edooqoo can draft that worksheet, you review it, assign it as homework, and the learner reviews errors before the next lesson.",
@@ -8563,8 +8563,8 @@
         "Martha (10 years adult ESL, our internal quality benchmark) has one rule: if a game would make a 40-year-old CFO feel patronized, do not run it. That rules out many of the games on typical ESL resource lists. What is left is short, cognitively engaging, and produces measurable language output.",
         "Martha's rule for adult ESL games",
         "Pair every game with a follow-up worksheet. The game produces fluency; the worksheet locks in accuracy. After Idiom Charades, assign a 10-minute Idiom Matching exercise from Edooqoo as homework. Objective answers can be checked automatically, and teacher-reviewed results can inform future prep. Three lessons later, the same 8 idioms can reappear in a Reading Comprehension because the teacher uses vocabulary signals in the DSLM layer.",
-        "Want the matching worksheet for any game on this list? Create it through Edooqoo's structured worksheet workflow — see",
-        "Warm-up game (5–7 min). Main input + controlled practice (25 min). Production game (10 min). Worksheet preview + homework assignment (5 min). Closing (3 min). The two games sandwich the lesson — opening to lower the affective filter, closing to apply new language. See our",
+        "Want the matching worksheet for any game on this list? Create it through Edooqoo's structured worksheet workflow, see",
+        "Warm-up game (5–7 min). Main input + controlled practice (25 min). Production game (10 min). Worksheet preview + homework assignment (5 min). Closing (3 min). The two games sandwich the lesson, opening to lower the affective filter, closing to apply new language. See our",
         "all 29 exercise types",
         "for a similar list framed for student perspective.",
         "or jump to the"
@@ -8597,15 +8597,15 @@
       },
       "storage": [],
       "userFacingText": [
-        ", ongoing exercise results, and teacher notes. DSLM organizes available context so the worksheet output can align with the next teacher-approved focus — see",
-        "Adult ESL students pay $30–80 per lesson and they audit value lesson by lesson. The moment a worksheet feels school-like — cartoon clipart, drills about Susan and her dog, vocabulary about playgrounds — they mentally check out. They booked you because they need English for a promotion, a visa interview, or a meeting next week. Static worksheet libraries cannot deliver that context. The same fill-in-the-blank on the present perfect goes to a 17-year-old high schooler and a 45-year-old M&A lawyer.",
+        ", ongoing exercise results, and teacher notes. DSLM organizes available context so the worksheet output can align with the next teacher-approved focus, see",
+        "Adult ESL students pay $30–80 per lesson and they audit value lesson by lesson. The moment a worksheet feels school-like, cartoon clipart, drills about Susan and her dog, vocabulary about playgrounds, they mentally check out. They booked you because they need English for a promotion, a visa interview, or a meeting next week. Static worksheet libraries cannot deliver that context. The same fill-in-the-blank on the present perfect goes to a 17-year-old high schooler and a 45-year-old M&A lawyer.",
         "After generation, every worksheet has a permanent shareable link. Send it to the student before the lesson, use it live on screen-share, or assign specific exercises as homework with deadlines. Objective tasks can be auto-checked. Open-answer exercises can use AI-assisted evaluation for teacher review and adjustment.",
         "DSLM",
-        "Edooqoo's worksheet generator takes the student profile — their job, their goals, their identified weak skills from the placement test — and produces a worksheet that references their actual world. A banker drilling the present perfect gets sentences about quarterly reports and client onboarding. A software engineer drilling the same grammar point gets sentences about deployments and code reviews. The grammar focus is identical; the content is theirs.",
+        "Edooqoo's worksheet generator takes the student profile, their job, their goals, their identified weak skills from the placement test, and produces a worksheet that references their actual world. A banker drilling the present perfect gets sentences about quarterly reports and client onboarding. A software engineer drilling the same grammar point gets sentences about deployments and code reviews. The grammar focus is identical; the content is theirs.",
         "Every worksheet generation can use four data points: CEFR level, lesson topic, grammar focus, and the student's Learning Profile. The Learning Profile is built from the 49-question",
         "How the AI personalization layer works",
         "Pricing for ESL worksheet generation",
-        "The Free plan includes 2 worksheets and unlimited students — enough to test the generator with one student. Side-Gig ($9/month) gives 15 worksheets per month, suitable for a tutor with 5-10 weekly students. Full-Time (from $19/month) gives 30-90 worksheets per month for full-time teachers. Every plan includes all 29 exercise types, AI-assisted homework review, flashcards with SM-2 spaced repetition, and the Student Hub portal. See full",
+        "The Free plan includes 2 worksheets and unlimited students, enough to test the generator with one student. Side-Gig ($9/month) gives 15 worksheets per month, suitable for a tutor with 5-10 weekly students. Full-Time (from $19/month) gives 30-90 worksheets per month for full-time teachers. Every plan includes all 29 exercise types, AI-assisted homework review, flashcards with SM-2 spaced repetition, and the Student Hub portal. See full",
         "Welcome Test",
         "Why generic ESL worksheets fail adult learners",
         "pricing"
@@ -8670,8 +8670,8 @@
         "Built by tutors, for tutors",
         "Edooqoo is built with Martha (10 years adult ESL) as the quality benchmark. Every feature is rejected if it feels generic, school-like, or fails the adult-learner test. Read more in",
         "Paid plans for full-time tutors",
-        "Platforms like Cambly, Preply, and italki take 15-30% commission and dictate pricing. An independent tutor with their own booking page, payment processing, and student management workflow keeps 100% of revenue and sets their own rate. The historical blocker has been the operational complexity — building that stack with 5+ separate tools added 10 hours per week of admin. Edooqoo collapses the stack into one platform, making independent tutoring genuinely more profitable than platform work.",
-        "Side-Gig ($9/month): 15 worksheets/month, suitable for 5-10 weekly students. Full-Time (from $19/month): 30-90 worksheets/month for tutors with 15+ weekly students. Every plan includes every feature — the only meter is worksheet generation volume. See",
+        "Platforms like Cambly, Preply, and italki take 15-30% commission and dictate pricing. An independent tutor with their own booking page, payment processing, and student management workflow keeps 100% of revenue and sets their own rate. The historical blocker has been the operational complexity, building that stack with 5+ separate tools added 10 hours per week of admin. Edooqoo collapses the stack into one platform, making independent tutoring genuinely more profitable than platform work.",
+        "Side-Gig ($9/month): 15 worksheets/month, suitable for 5-10 weekly students. Full-Time (from $19/month): 30-90 worksheets/month for tutors with 15+ weekly students. Every plan includes every feature; the only meter is worksheet generation volume. See",
         "Unlimited students. All 29 exercise types. 2 worksheet generations to test the engine. AI-assisted homework review on those 2 worksheets. Public booking page. Stripe payment integration. Student Hub portal. Flashcards with spaced repetition. The Free plan is enough to run 1-2 paying students end-to-end before deciding to upgrade.",
         "What you get on the Free plan",
         "Why independent tutors win in 2026",
@@ -8734,12 +8734,12 @@
       "storage": [],
       "userFacingText": [
         "1. The night before: open Edooqoo, pick the student, and draft a worksheet for the next lesson. 2. Share the link with the student via email or Student Hub. 3. During the lesson: screen-share the worksheet and work through 4-6 exercises live. 4. End of lesson: select 2-3 unused exercises, assign as homework with a deadline. 5. Use AI-assisted evaluation and teacher review for submitted answers. 6. Before the next lesson: review the student progress dashboard and choose the next focus.",
-        "Cambly pays $0.17/minute ($10.20/hour) with no scheduling control. Preply takes 18-33% commission on every lesson and 100% of the first lesson with each new student. italki charges 15% commission. Working independently with 5-10 weekly students at $30-50/hour replaces a $10/hour platform job in roughly 3 months. The bottleneck is not student supply — there is enormous demand. The bottleneck is the time cost of running the business yourself: marketing, scheduling, payments, lesson prep, homework review.",
+        "Cambly pays $0.17/minute ($10.20/hour) with no scheduling control. Preply takes 18-33% commission on every lesson and 100% of the first lesson with each new student. italki charges 15% commission. Working independently with 5-10 weekly students at $30-50/hour replaces a $10/hour platform job in roughly 3 months. The bottleneck is not student supply; there is enormous demand. The bottleneck is the time cost of running the business yourself: marketing, scheduling, payments, lesson prep, homework review.",
         "Edooqoo pricing",
         "Edooqoo reduces the two biggest time costs (lesson prep and homework review) and bundles a public booking page so you do not need Calendly. That collapses the independent-tutor stack from 5 tools (Calendly + Stripe + Zoom + Notion + Google Docs) to 2 (Edooqoo + video platform).",
         "English tutor tools",
         "For the full tutor toolkit see",
-        "General English conversation: $25-40/hour. Business English (banking, tech, M&A, legal): $40-80/hour. IELTS or Cambridge exam prep: $50-100/hour. Academic English (university applications, dissertations): $60-120/hour. Pricing scales with measurable outcomes — a tutor who can guarantee +0.5 IELTS band in 10 weeks charges 3x a general conversation tutor.",
+        "General English conversation: $25-40/hour. Business English (banking, tech, M&A, legal): $40-80/hour. IELTS or Cambridge exam prep: $50-100/hour. Academic English (university applications, dissertations): $60-120/hour. Pricing scales with measurable outcomes; a tutor who can guarantee +0.5 IELTS band in 10 weeks charges 3x a general conversation tutor.",
         "Pricing benchmarks for online English tutors in 2026",
         "The lesson workflow that saves 8 hours per week",
         "Why platforms like Cambly and Preply destroy your rate",
@@ -8948,7 +8948,7 @@
         "Copy your token now",
         "Created",
         "Generate Personal MCP Token",
-        "Generate a Personal MCP Token below (shown only once — copy immediately).",
+        "Generate a Personal MCP Token below (shown only once: copy immediately).",
         "Generate token",
         "Give the token a memorable name (e.g. \"Claude Desktop\").",
         "How to connect",
@@ -9009,13 +9009,13 @@
       "userFacingText": [
         ". Next step: generate a worksheet calibrated to your level.",
         ". Result is private to your device.",
-        "25 questions. ~5 minutes. Get your A1–C2 level instantly. No sign-up, no email — runs entirely in your browser.",
+        "25 questions. ~5 minutes. Get your A1–C2 level instantly. No sign-up, no email, runs entirely in your browser.",
         "Breadcrumb",
         "CEFR Level Test",
         "Click an answer for each of the 25 questions, then press",
         "Edooqoo creates printable worksheets using teacher-selected CEFR levels. Free plan, no credit card.",
         "Free CEFR English Level Test",
-        "Free CEFR English Level Test — A1 to C2 in 5 Minutes",
+        "Free CEFR English Level Test: A1 to C2 in 5 Minutes",
         "Frequently asked questions",
         "Generate a worksheet for",
         "Home",
@@ -9087,7 +9087,7 @@
         "Edooqoo creates personalized worksheets that teachers can review and place into the plan.",
         "Fill 5 fields → press Generate → copy text or download HTML. Runs locally; nothing is uploaded.",
         "Fill the practice stage automatically",
-        "Free ESL Lesson Plan Generator — 1-on-1 Adult Learners",
+        "Free ESL Lesson Plan Generator: 1-on-1 Adult Learners",
         "Frequently asked questions",
         "Generate lesson plan",
         "Home",
@@ -9132,7 +9132,7 @@
       "userFacingText": [
         "Four browser-based tools built with Martha (10 yrs ESL). No login, no installs, no data leaves your device.",
         "Free Tools for English Teachers",
-        "Free Tools for English Teachers — Edooqoo"
+        "Free Tools for English Teachers | Edooqoo"
       ],
       "userFacingBehavior": {
         "actionHandlers": [],
@@ -9180,7 +9180,7 @@
         "Check the spread.",
         "Clear",
         "Compare with the input text.",
-        "Copy the words highlighted above the learner's level — that is your five-word warm-up, not a guess.",
+        "Copy the words highlighted above the learner's level: that is your five-word warm-up, not a guess.",
         "Edooqoo creates printable worksheets using teacher-selected CEFR levels.",
         "Evidence a level claim.",
         "Faded words were not in the lookup and are estimated by length/suffix heuristic.",
@@ -9188,7 +9188,7 @@
         "Home",
         "How teachers use this vocabulary checker",
         "How to check a student's writing against CEFR",
-        "If almost every word lands in A1–A2, the draft is functionally A2 even when the task was set at B1 — the learner avoided the target range.",
+        "If almost every word lands in A1–A2, the draft is functionally A2 even when the task was set at B1; the learner avoided the target range.",
         "In 1:1 adult lessons, the fastest way to justify a level claim is the learner's own output. Paste the writing sample above and read the histogram instead of the score:",
         "Level",
         "Level a worksheet you wrote yourself."
@@ -9335,7 +9335,7 @@
       "userFacingText": [
         "ADMIN VIEW",
         "Exit",
-        "— Viewing as:"
+        "Viewing as:"
       ],
       "userFacingBehavior": {
         "actionHandlers": [
@@ -10124,7 +10124,7 @@
         "Generating...",
         "Generation",
         "Generation resumed.",
-        "Generation runs in the background — keep prepping for",
+        "Generation runs in the background, keep prepping for",
         "No token was consumed. Your form data is preserved.",
         "No tokens were consumed yet.",
         "Open dashboard ↗",
@@ -10429,7 +10429,7 @@
         "Dismiss checklist",
         "Get started with Edooqoo 🚀",
         "Start",
-        "Teach Edooqoo about your student — one-time.",
+        "Teach Edooqoo about your student, one-time.",
         "You've completed all the onboarding steps. Happy teaching with Edooqoo!",
         "🎉 Congratulations! You're all set up!"
       ],
@@ -10846,7 +10846,7 @@
         "Choose Your Plan",
         "Draw on Worksheet",
         "Duplicate Worksheet",
-        "Estimate how much recurring prep is costing you — and how much you stop losing with 1-Minute Prep.",
+        "Estimate how much recurring prep is costing you, and how much you stop losing with 1-Minute Prep.",
         "Flashcards auto-synced",
         "For professional English teachers",
         "Free Demo",
@@ -11368,9 +11368,9 @@
       },
       "storage": [],
       "userFacingText": [
+        ": Student Required",
         "Got it",
         "Why assign a student?",
-        "— Student Required",
         "✓ Flashcard sets linked to student progress",
         "✓ Homework assignments",
         "✓ Lesson ideas tied to student profile",
@@ -12738,7 +12738,7 @@
         {
           "value": "selectedExercises",
           "setter": "setSelectedExercises",
-          "initial": "() => { // v6.9.41 — when an auto-generate intent exists, prefer the DSLM exercises // saved in sessionStorage so the readiness gate sees them on first render. if (initialAutoIntentRef.current) { const exFromStorage = readPrefillField<string[]>('prefillExercises', []); if (Array.isArray(exFromStorage) && exFromStorage.length > 0) return exFromStorage; } return getInitialExercises(); }"
+          "initial": "() => { // v6.9.41: when an auto-generate intent exists, prefer the DSLM exercises // saved in sessionStorage so the readiness gate sees them on first render. if (initialAutoIntentRef.current) { const exFromStorage = readPrefillField<string[]>('prefillExercises', []); if (Array.isArray(exFromStorage) && exFromStorage.length > 0) return exFromStorage; } return getInitialExercises(); }"
         },
         {
           "value": "selectionMode",
@@ -13067,7 +13067,7 @@
       },
       "storage": [],
       "userFacingText": [
-        "While we build your worksheet — meet the full ecosystem"
+        "While we build your worksheet, meet the full ecosystem"
       ],
       "userFacingBehavior": {
         "actionHandlers": [
@@ -13140,7 +13140,7 @@
         "Save this worksheet",
         "See pricing →",
         "Start with 2 free worksheet credits",
-        "🎉 Your worksheet is ready — now save the prep context"
+        "🎉 Your worksheet is ready, now save the prep context"
       ],
       "userFacingBehavior": {
         "actionHandlers": [],
@@ -13196,7 +13196,7 @@
       "userFacingText": [
         "Create Free Account",
         "Create a free account to keep this worksheet and start building 1-Minute Prep context for your students.",
-        "🎉 Your worksheet is ready — now save the prep context"
+        "🎉 Your worksheet is ready, now save the prep context"
       ],
       "userFacingBehavior": {
         "actionHandlers": [],
@@ -13623,14 +13623,14 @@
         "All students",
         "Calendar",
         "Calendar Logs",
+        "Date:",
         "Filter by action",
         "From",
         "Loading logs...",
         "No logs found.",
         "Page",
         "Search logs...",
-        "— Date:",
-        "— Student:"
+        "Student:"
       ],
       "userFacingBehavior": {
         "actionHandlers": [],
@@ -14625,6 +14625,7 @@
       ],
       "userFacingText": [
         "(was:",
+        ", assign or generate a worksheet.",
         "Add comment",
         "By:",
         "Cancel",
@@ -14642,8 +14643,7 @@
         "Lesson starts in",
         "Meeting Link",
         "No Show",
-        "No student (Available)",
-        "No student found."
+        "No student (Available)"
       ],
       "userFacingBehavior": {
         "actionHandlers": [
@@ -15134,12 +15134,13 @@
       "storage": [],
       "userFacingText": [
         "...and",
+        ": Lesson with",
         "Add Time Slot",
         "Available Slot",
         "Batch Slots",
         "Block",
         "Cancel",
-        "Conflicts detected — cannot proceed",
+        "Conflicts detected: cannot proceed",
         "Date",
         "Days of the week",
         "Discount % (optional)",
@@ -15151,8 +15152,7 @@
         "Link worksheet",
         "Location (optional)",
         "No student found.",
-        "No worksheet",
-        "None"
+        "No worksheet"
       ],
       "userFacingBehavior": {
         "actionHandlers": [
@@ -15668,11 +15668,11 @@
       },
       "storage": [],
       "userFacingText": [
+        ": no login needed. They access their worksheets, homework, flashcards & lessons.",
         "Student Hub:",
         "edooqoo.com/my",
         "login at",
-        "students log in with just their email at",
-        "— no login needed. They access their worksheets, homework, flashcards & lessons."
+        "students log in with just their email at"
       ],
       "userFacingBehavior": {
         "actionHandlers": [],
@@ -15942,7 +15942,7 @@
         ". AI value will be saved as a suggestion.",
         "/week",
         "AI extracted profile",
-        "Always saved as a pending pacing proposal — accept it from the Pacing bell.",
+        "Always saved as a pending pacing proposal, accept it from the Pacing bell.",
         "English level",
         "Goals (",
         "Include goal",
@@ -16090,7 +16090,7 @@
       "storage": [],
       "userFacingText": [
         "Goal:",
-        "No signals yet — start with a worksheet",
+        "No signals yet: start with a worksheet",
         "Prepare next lesson",
         "Struggled with:"
       ],
@@ -16247,7 +16247,7 @@
       "storage": [],
       "userFacingText": [
         "Analyzing…",
-        "Drop an email, intake form, or your meeting notes — AI will extract goals, signals and level.",
+        "Drop an email, intake form, or your meeting notes, AI will extract goals, signals and level.",
         "Paste anything you know about the student here…",
         "Paste notes about student to set up profile (AI, optional)",
         "Paste notes toggle",
@@ -18046,7 +18046,7 @@
         "Focused goals",
         "How long each phase lasts. AI will still respect the deadline as a hard cap.",
         "Macro learning blocks (foundations → application → fluency). Suggested: 3–5.",
-        "No active goals — add some on the Goals tab.",
+        "No active goals: add some on the Goals tab.",
         "Number of phases",
         "Phase",
         "Tell AI which goals matter most. Others still inform pacing but won't drive phases.",
@@ -18172,11 +18172,11 @@
         "Phase",
         "Target phase",
         "Wait",
-        "active next-steps. DSLM gets sharper after each completed worksheet, homework, flashcard set, or note — generating more now risks stale suggestions.",
+        "active next-steps. DSLM gets sharper after each completed worksheet, homework, flashcard set, or note, generating more now risks stale suggestions.",
         "steps",
         "suggestion",
         "⚠ You already have",
-        "🎯 Recommended —"
+        "🎯 Recommended:"
       ],
       "userFacingBehavior": {
         "actionHandlers": [],
@@ -19002,8 +19002,8 @@
         "Grammar:",
         "Just added some? Refresh the page to see them.",
         "Mark as already used",
-        "No curriculum plan yet — optional, but strongly recommended for recurring students.",
-        "No learning goals set — AI will infer from main goal only.",
+        "No curriculum plan yet, optional, but strongly recommended for recurring students.",
+        "No learning goals set, AI will infer from main goal only.",
         "Open form pre-filled and start generating immediately",
         "Pacing",
         "Refresh",
@@ -19275,7 +19275,7 @@
         "Learning Pacing",
         "Manually set by teacher",
         "Natural order respected, but topics anchored in student's domain from lesson 1. Default for most learners.",
-        "No automatic calculation yet — click \"Auto AI Recalculate\" to compute one.",
+        "No automatic calculation yet, click \"Auto AI Recalculate\" to compute one.",
         "Pacing",
         "Pragmatic",
         "Pragmatic (70-100):",
@@ -19325,7 +19325,7 @@
       "storage": [],
       "userFacingText": [
         "Accept",
-        "Auto-recalculated based on the student's latest signals — teacher approval required.",
+        "Auto-recalculated based on the student's latest signals: teacher approval required.",
         "Dismiss",
         "Now:",
         "Pacing recheck suggested",
@@ -23548,7 +23548,7 @@
         "Copy",
         "Due Mon",
         "Each feature adds context or turns that context into the next ready-to-teach worksheet.",
-        "Estimated B2 — Upper Intermediate",
+        "Estimated B2: Upper Intermediate",
         "Fill in the gaps",
         "Julia K. · B2 Business English",
         "Learn more →",
@@ -23727,7 +23727,7 @@
         "2 worksheets free",
         "Best with profile + goals",
         "Edooqoo canonical teacher workflows",
-        "Edooqoo turns student goals, lesson notes, homework and flashcard progress into a clear next focus — and a ready-to-teach worksheet with audio, images and AI-assisted review.",
+        "Edooqoo turns student goals, lesson notes, homework and flashcard progress into a clear next focus, and a ready-to-teach worksheet with audio, images and AI-assisted review.",
         "No credit card",
         "Start 1-Minute Prep Free",
         "Start Free",
@@ -24133,7 +24133,7 @@
       "storage": [],
       "userFacingText": [
         "See full pricing",
-        "Simple pricing — pay for what you use",
+        "Simple pricing: pay for what you use",
         "Start free. Upgrade only when you need more worksheets."
       ],
       "userFacingBehavior": {
@@ -24380,7 +24380,7 @@
       "storage": [],
       "userFacingText": [
         "2 FREE",
-        "DEMO MODE — Explore freely!",
+        "DEMO MODE: Explore freely!",
         "Dashboard",
         "Features",
         "Generate",
@@ -25324,7 +25324,7 @@
       "storage": [],
       "userFacingText": [
         "See pricing",
-        "Sign up free — 2 worksheets included",
+        "Sign up free: 2 worksheets included",
         "The problem most English teachers face",
         "← Back to Edooqoo"
       ],
@@ -26209,7 +26209,7 @@
       },
       "storage": [],
       "userFacingText": [
-        "1-Minute Prep —",
+        "1-Minute Prep:",
         "Add a placement test, goal, or lesson note to make 1-Minute Prep useful for this student."
       ],
       "userFacingBehavior": {
@@ -26961,11 +26961,11 @@
       "storage": [],
       "userFacingText": [
         "Cancel",
-        "Just write — AI organizes it for you in a moment.",
+        "Just write: AI organizes it for you in a moment.",
         "Quick Note",
         "Tags (optional)",
         "What did you notice?",
-        "e.g. \"Struggles with past perfect when telling stories\" or \"Coming back from Lisbon May 12 — ask about it\"",
+        "e.g. \"Struggles with past perfect when telling stories\" or \"Coming back from Lisbon May 12, ask about it\"",
         "grammar, past_tense"
       ],
       "userFacingBehavior": {
@@ -27575,7 +27575,7 @@
       "userFacingText": [
         "Click the (?) icon → \"Learn more about Goal Progress\".",
         "Learn more about Goal Progress",
-        "No ratings or skill matches yet — rate elements or generate skill metrics to see progress."
+        "No ratings or skill matches yet: rate elements or generate skill metrics to see progress."
       ],
       "userFacingBehavior": {
         "actionHandlers": [],
@@ -28633,7 +28633,7 @@
         "Cancel",
         "Dismiss",
         "Intake extraction has been rolled back. Nothing from that paste remains active.",
-        "Profile seeded from your notes —",
+        "Profile seeded from your notes,",
         "This archives every entry, goal and rejects the pending pacing proposal created from this paste. Profile fields the AI set are restored to their previous values. This action is reversible only via support.",
         "Undo all",
         "Undo all intake suggestions?",
@@ -29414,7 +29414,7 @@
       "userFacingText": [
         "Last lesson",
         "More actions",
-        "No worksheet yet — the first one becomes this student's history.",
+        "No worksheet yet: the first one becomes this student's history.",
         "Reuse",
         "View all worksheets"
       ],
@@ -29715,7 +29715,7 @@
       "userFacingText": [
         "Add with details",
         "All notes → Learning model",
-        "No notes yet — anything you type here feeds the learning model.",
+        "No notes yet: anything you type here feeds the learning model.",
         "Quick note",
         "What did you notice in this lesson?"
       ],
@@ -31708,7 +31708,7 @@
       },
       "storage": [],
       "userFacingText": [
-        "Match the pairs while your test is paused. No English required — just relax.",
+        "Match the pairs while your test is paused. No English required: just relax.",
         "Moves:",
         "New game",
         "Quick brain reset",
@@ -31751,7 +31751,7 @@
       "storage": [],
       "userFacingText": [
         "Memory",
-        "No English required — just relax for a minute.",
+        "No English required: just relax for a minute.",
         "Quick brain reset · Pick a game",
         "Reaction",
         "Sequence"
@@ -31924,7 +31924,7 @@
         "Use the \"Skip\" button to move to the next question. You can always go back.",
         "You can pause anytime",
         "You can skip questions",
-        "Your progress is saved automatically. Close the browser and come back later — you'll continue where you left off.",
+        "Your progress is saved automatically. Close the browser and come back later; you'll continue where you left off.",
         "questions • ~30 min"
       ],
       "userFacingBehavior": {
@@ -31995,7 +31995,7 @@
         "Listen to the audio, then answer below",
         "Played",
         "Replay",
-        "⚠️ Audio not available — transcript shown below"
+        "⚠️ Audio not available, transcript shown below"
       ],
       "userFacingBehavior": {
         "actionHandlers": [],
@@ -32314,7 +32314,7 @@
         "Only one attempt completed so far. A comparison will be available after the second attempt is finished.",
         "Strongest:",
         "Weakest:",
-        "Welcome Test — Progress Comparison",
+        "Welcome Test: Progress Comparison",
         "answered"
       ],
       "userFacingBehavior": {

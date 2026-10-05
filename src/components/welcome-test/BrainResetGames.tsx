@@ -5,7 +5,7 @@ import { BrainResetReactionGame } from "./BrainResetReactionGame";
 import { BrainResetSequenceGame } from "./BrainResetSequenceGame";
 
 /**
- * BrainResetGames — orchestrator for the 3 language-free minigames
+ * BrainResetGames: orchestrator for the 3 language-free minigames
  * shown on the Welcome Test pause screen. Default tab is randomized so
  * students get variety across pauses.
  */
@@ -20,7 +20,7 @@ export function BrainResetGames() {
       <div className="text-center space-y-1">
         <p className="text-sm font-semibold">Quick brain reset · Pick a game</p>
         <p className="text-xs text-muted-foreground">
-          No English required — just relax for a minute.
+          No English required: just relax for a minute.
         </p>
       </div>
 

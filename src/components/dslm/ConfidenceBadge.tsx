@@ -1,5 +1,5 @@
 /**
- * ConfidenceBadge — standalone, focusable trigger for the DSLM confidence tooltip.
+ * ConfidenceBadge: standalone, focusable trigger for the DSLM confidence tooltip.
  *
  * Why it exists: previous implementation used <Badge> (a div) wrapped via TooltipTrigger
  * asChild and was sometimes nested inside a parent <button> (collapsible trigger),

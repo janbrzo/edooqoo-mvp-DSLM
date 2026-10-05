@@ -1,4 +1,4 @@
-// v6.9.29 — Debug-only smoke test for logModelFailure. Auth: x-cron-secret.
+// v6.9.29: Debug-only smoke test for logModelFailure. Auth: x-cron-secret.
 // Inserts a sentinel row into error_logs so we can verify the logger pipeline end-to-end.
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { logModelFailure } from "../_shared/modelFailureLogger.ts";

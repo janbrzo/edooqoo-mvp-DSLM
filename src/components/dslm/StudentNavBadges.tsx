@@ -1,5 +1,5 @@
 /**
- * StudentNavBadges — compact inline badges (level + activity) for the top nav area on DSLM tab.
+ * StudentNavBadges: compact inline badges (level + activity) for the top nav area on DSLM tab.
  * Rendered as a sticky strip just below the global StickyNav so it stays visible while scrolling DSLM.
  */
 import React from 'react';
@@ -27,7 +27,7 @@ const getActivityColorClass = (days: number | null): string => {
 };
 
 export const StudentNavBadges: React.FC<StudentNavBadgesProps> = ({ englishLevel, daysSinceLastActivity }) => {
-  // v6.9.39 P6 — show ONLY the current CEFR level. Previous version always
+  // v6.9.39 P6: show ONLY the current CEFR level. Previous version always
   // displayed `current → next` from a hard-coded progression map, which
   // misled teachers into thinking it was an evidence-based prediction.
   // Edooqoo has no current signal (no `target_level` on curriculum phases,

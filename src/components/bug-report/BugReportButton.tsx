@@ -1,9 +1,9 @@
 /**
- * BugReportButton — fixed bottom-right floating button.
+ * BugReportButton: fixed bottom-right floating button.
  *
  * Visibility rules:
  *  - Only on authenticated teacher routes (mounted from AuthenticatedPageShell).
- *  - Hidden on /demo* and on Student Hub (/student-hub*) — Student Hub renders
+ *  - Hidden on /demo* and on Student Hub (/student-hub*): Student Hub renders
  *    its own shell so this won't appear there.
  *
  * Position: bottom-6 right-6, with a 64px lift above the calendar FAB if it
@@ -17,7 +17,7 @@ import { BugReportModal } from './BugReportModal';
 export const BugReportButton: React.FC = () => {
   const [open, setOpen] = useState(false);
 
-  // Don't render on demo route — keeps the demo experience clean.
+  // Don't render on demo route, keeps the demo experience clean.
   if (typeof window !== 'undefined' && window.location.pathname.startsWith('/demo')) {
     return null;
   }
