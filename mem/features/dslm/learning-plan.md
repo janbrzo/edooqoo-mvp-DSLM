@@ -11,3 +11,4 @@ type: feature
 - The #1 suggestion in Prep and Plan comes from `orderUpNext` (`src/lib/dslm/learningPlan.ts`) — never sort suggestions elsewhere; `sequence_number` restarts per phase.
 - One primary button per panel; no cockpit stats, no pacing slider on top, no "What is DSLM?" banner, no Welcome Test banner on this tab — do not reintroduce.
 - Confidence is shown as Strong / Good / Rough fit (`describeFit`), never as a percentage on cards.
+- Onboarding steps `generate_next_ideas` / `pick_idea` complete from lesson suggestions OR the legacy "Next Lesson Ideas" notes (`resolveIdeaSteps`); never drop the notes signal (stored progress would regress).
