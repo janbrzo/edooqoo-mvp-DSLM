@@ -3,7 +3,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Plus, Calendar, Eye, Copy, ExternalLink, Trash2, FileText, CheckCircle2, Mail, Clock, Pencil } from 'lucide-react';
+import { Plus, Calendar, Eye, Copy, ExternalLink, Trash2, FileText, CheckCircle2, Mail, Clock, Pencil, ClipboardCheck } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 import { Input } from '@/components/ui/input';
@@ -30,6 +30,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import RenameDialog from '@/components/RenameDialog';
 import { devLog } from '@/utils/logger';
+import { hasStudentReturnedHomework, homeworkReviewPath, isHomeworkAwaitingReview } from '@/lib/homework/reviewState';
 
 interface StudentHomeworkTabProps {
   studentId: string;
@@ -50,7 +51,14 @@ export const StudentHomeworkTab = ({ studentId, teacherId, studentName }: Studen
   
   const { students } = useStudents();
   const { worksheets } = useWorksheetHistory(studentId);
-  const { isDemoMode, showDemoBlockedToast } = useDemoContext();
+  const { isDemoMode, demoData, showDemoBlockedToast } = useDemoContext();
+
+  /** Demo: every write and every link to a real student page is blocked with the standard toast. */
+  const blockedInDemo = (action: string): boolean => {
+    if (!isDemoMode) return false;
+    showDemoBlockedToast(action);
+    return true;
+  };
   
   // Fetch homework directly for this student, regardless of worksheet assignment
   const [allHomework, setAllHomework] = useState<any[]>([]);
@@ -58,7 +66,18 @@ export const StudentHomeworkTab = ({ studentId, teacherId, studentName }: Studen
   
   const fetchHomework = async () => {
     if (isDemoMode) {
-      setAllHomework([]);
+      // Same source as the Timeline and the dashboard, so the demo never says
+      // "no homework" next to a timeline full of homework events.
+      const demoStudent = demoData?.students.find((s) => s.id === studentId);
+      setAllHomework(
+        (demoData?.homework ?? [])
+          .filter((hw) => hw.student_id === studentId)
+          .map((hw) => ({
+            ...hw,
+            student_name: demoStudent?.name || studentName,
+            student_email: demoStudent?.student_email || null,
+          })),
+      );
       setLoading(false);
       return;
     }
@@ -93,7 +112,7 @@ export const StudentHomeworkTab = ({ studentId, teacherId, studentName }: Studen
   
   useEffect(() => {
     fetchHomework();
-  }, [studentId]);
+  }, [studentId, isDemoMode, demoData]);
   
   const refetch = fetchHomework;
   
@@ -135,6 +154,7 @@ export const StudentHomeworkTab = ({ studentId, teacherId, studentName }: Studen
   };
   
   const handleCopyLink = async (shareToken: string | null, title: string) => {
+    if (blockedInDemo('Sharing homework links')) return;
     if (!shareToken) {
       toast.error("Share link not available");
       return;
@@ -150,6 +170,7 @@ export const StudentHomeworkTab = ({ studentId, teacherId, studentName }: Studen
   };
   
   const handleOpenHomework = (shareToken: string | null) => {
+    if (blockedInDemo('Opening the student view')) return;
     if (!shareToken) {
       toast.error("Share link not available");
       return;
@@ -158,11 +179,13 @@ export const StudentHomeworkTab = ({ studentId, teacherId, studentName }: Studen
   };
   
   const handleOpenEmailDialog = (hw: HomeworkAssignment) => {
+    if (blockedInDemo('Emailing homework')) return;
     setSelectedHomeworkForEmail(hw);
     setEmailDialogOpen(true);
   };
   
   const handleMarkCompleted = async (homeworkId: string) => {
+    if (blockedInDemo('Marking homework done')) return;
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
@@ -206,6 +229,7 @@ export const StudentHomeworkTab = ({ studentId, teacherId, studentName }: Studen
   };
   
   const handleUpdateDeadline = async (homeworkId: string, newDate: Date, newTime: string) => {
+    if (blockedInDemo('Changing homework deadlines')) return;
     try {
       // Combine date and time
       const [hours, minutes] = newTime.split(':');
@@ -230,6 +254,7 @@ export const StudentHomeworkTab = ({ studentId, teacherId, studentName }: Studen
   };
   
   const handleCreateNew = () => {
+    if (blockedInDemo('Creating homework')) return;
     if (worksheets.length === 0) {
       toast.error("No worksheets available. Create a worksheet first.");
       return;
@@ -266,7 +291,7 @@ export const StudentHomeworkTab = ({ studentId, teacherId, studentName }: Studen
   return (
     <div className="space-y-4">
       {/* Header */}
-      <div className="flex justify-between items-center">
+      <div className="flex flex-wrap justify-between items-center gap-2">
         <h2 className="text-xl font-semibold">
           Homework Assignments ({allHomework.length})
         </h2>
@@ -323,10 +348,10 @@ export const StudentHomeworkTab = ({ studentId, teacherId, studentName }: Studen
             
             return (
               <Card key={hw.id} className="p-4">
-                <div className="flex justify-between items-start gap-4">
+                <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-start sm:gap-4">
                 <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      {hw.share_token ? (
+                      {hw.share_token && !isDemoMode ? (
                         <Link 
                           to={`/homework/${hw.share_token}`}
                           className="font-semibold mb-2 truncate block hover:text-primary hover:underline transition-colors"
@@ -446,7 +471,21 @@ export const StudentHomeworkTab = ({ studentId, teacherId, studentName }: Studen
                     </div>
                   </div>
                   
-                  <div className="flex gap-2 flex-shrink-0">
+                  <div className="flex flex-wrap gap-2 sm:flex-shrink-0">
+                    {/* Teacher review page: answers, AI feedback, comments, Send Review */}
+                    {hasStudentReturnedHomework(hw) && (
+                      <Button
+                        asChild
+                        size="sm"
+                        variant={isHomeworkAwaitingReview(hw) ? 'default' : 'outline'}
+                      >
+                        <Link to={homeworkReviewPath(hw.id)}>
+                          <ClipboardCheck className="h-4 w-4 mr-1" />
+                          {isHomeworkAwaitingReview(hw) ? 'Review' : 'View review'}
+                        </Link>
+                      </Button>
+                    )}
+
                     {/* Mark as Completed button */}
                     {!hw.completed_at && (
                       <Button 
@@ -548,7 +587,10 @@ export const StudentHomeworkTab = ({ studentId, teacherId, studentName }: Studen
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => setDeletingHomeworkId(hw.id)}
+                      onClick={() => {
+                        if (blockedInDemo('Deleting homework')) return;
+                        setDeletingHomeworkId(hw.id);
+                      }}
                       title="Delete homework"
                     >
                       <Trash2 className="h-4 w-4" />
