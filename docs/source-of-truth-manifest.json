@@ -22,7 +22,7 @@
     "contextModules": 1,
     "serviceModules": 11,
     "edgeFunctions": 81,
-    "typedTables": 61,
+    "typedTables": 62,
     "typedRpcs": 86,
     "migrationIndexes": 19
   },
@@ -51115,11 +51115,78 @@
         }
       },
       {
+        "name": "model_audit_reports",
+        "fields": [
+          {
+            "name": "advisor",
+            "type": "Json | null",
+            "optional": false
+          },
+          {
+            "name": "created_at",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "deprecation_scan",
+            "type": "Json | null",
+            "optional": false
+          },
+          {
+            "name": "id",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "lifecycle",
+            "type": "Json",
+            "optional": false
+          },
+          {
+            "name": "mode",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "probes",
+            "type": "Json",
+            "optional": false
+          },
+          {
+            "name": "summary",
+            "type": "Json",
+            "optional": false
+          },
+          {
+            "name": "unregistered",
+            "type": "Json",
+            "optional": false
+          }
+        ],
+        "relationships": [],
+        "featureOwnership": {
+          "clientFiles": [],
+          "edgeFunctions": [
+            "audit-llm-models"
+          ]
+        }
+      },
+      {
         "name": "model_health_checks",
         "fields": [
           {
+            "name": "check_kind",
+            "type": "string | null",
+            "optional": false
+          },
+          {
             "name": "checked_at",
             "type": "string",
+            "optional": false
+          },
+          {
+            "name": "days_to_shutdown",
+            "type": "number | null",
             "optional": false
           },
           {
@@ -51159,6 +51226,11 @@
           },
           {
             "name": "purpose",
+            "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "shutdown_date",
             "type": "string | null",
             "optional": false
           },

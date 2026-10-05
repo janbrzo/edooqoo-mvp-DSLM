@@ -92,7 +92,7 @@ Language of product UI: English.
 - Public tool pages: /tools, /tools/cefr-level-test, /tools/lesson-plan-generator, /tools/what-should-i-teach-next, /tools/vocab-cefr-checker.
 - Neutral comparison pages: the comparison .html URLs listed below.
 - Public proof dataset page: /public-esl-worksheet-examples.html.
-- Public citation articles: the 136 /blog/*.html URLs listed below.
+- Public citation articles: the 137 /blog/*.html URLs listed below.
 - Programmatic topic-level pages: 8 policy-approved /esl-worksheets/:topic/:level routes.
 - Programmatic exercise-topic pages: 5 policy-approved /worksheets/:exerciseType/:topic routes.
 - Programmatic persona pages: 3 policy-approved /english-for/:persona routes.
@@ -527,6 +527,7 @@ landing UX correction, two-column hero, vertical hero calculator, Start 1-Minute
 - https://edooqoo.com/blog/transitioning-between-tasks-in-adult-one-to-one-english-lessons.html - Transitioning Between Tasks in Adult 1:1 English Lessons. Transitioning Between Tasks In Adult 1:1 English Lessons. Prepare the follow-up homework in one click.
 - https://edooqoo.com/blog/private-english-tutor-tool-stack.html - Private English Tutor Tool Stack. Private English Tutor Tool Stack. Build the exercise for your student level.
 - https://edooqoo.com/blog/adult-vocabulary-retrieval-practice-not-games.html - Adult Vocabulary Retrieval Practice, Not Games. Adult Vocabulary Retrieval Practice Not Games. Generate a matching worksheet in one minute.
+- https://edooqoo.com/blog/lexical-approach-language-teaching.html - Lexical Approach Language Teaching: Guide for 1:1 Tutors. Lexical Approach Language Teaching. Generate a matching worksheet in one minute.
 - https://edooqoo.com/blog/adult-esl-student-profile-lesson-planning.html - Adult ESL Student Profile Lesson Planning: Tutor Playbook. Adult ESL Student Profile Lesson Planning. Turn it into an editable task for your next lesson.
 - https://edooqoo.com/blog/ai-generated-listening-exercises-esl.html - AI Generated Listening Exercises ESL: A Tutor's Checklist. AI Generated Listening Exercises ESL. Build the exercise for your student level.
 - https://edooqoo.com/blog/ai-homework-grading-for-english-teachers.html - AI Homework Grading For English Teachers: Tutor Playbook. AI Homework Grading For English Teachers for professional adult learners: choices, sequence and review. Build the exercise for your student level.

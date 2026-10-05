@@ -520,6 +520,58 @@
         ]
       },
       "layer2": null
+    },
+    {
+      "route": "/blog/lexical-approach-language-teaching.html",
+      "contentHash": "c4e380b456068bfb",
+      "checkedAt": "2026-10-05T08:04:55.115Z",
+      "status": "layer1-only",
+      "layer1": {
+        "status": "pass",
+        "checks": [
+          {
+            "id": "uniqueness",
+            "status": "pass",
+            "detail": "maxContainment 0.12 (limit < 0.3), nearest /blog/extensive-reading-programs-esl.html"
+          },
+          {
+            "id": "no-bot-text",
+            "status": "pass",
+            "detail": ""
+          },
+          {
+            "id": "no-unsupported-claims",
+            "status": "pass",
+            "detail": ""
+          },
+          {
+            "id": "statistics-sourced",
+            "status": "pass",
+            "detail": ""
+          },
+          {
+            "id": "link-count",
+            "status": "warn",
+            "detail": "11 internal links in <main> (warn > 10, fail > 15)"
+          },
+          {
+            "id": "jsonld-matches-page",
+            "status": "pass",
+            "detail": ""
+          },
+          {
+            "id": "substance",
+            "status": "pass",
+            "detail": "811 words"
+          },
+          {
+            "id": "external-citations",
+            "status": "warn",
+            "detail": "https://doi.org/10.1111/j.1467-9280.2006.01693.x (HTTP 403 (blocked for automated requests; open it manually once))"
+          }
+        ]
+      },
+      "layer2": null
     }
   ]
 }

@@ -213,6 +213,15 @@
       "nearest": ""
     },
     {
+      "route": "/authors/martha",
+      "section": "/authors",
+      "words": 114,
+      "inSitemap": true,
+      "maxContainment": 0,
+      "uniqueShare": 1,
+      "nearest": ""
+    },
+    {
       "route": "/b1-intermediate-english-worksheets.html",
       "section": "/ (root pages)",
       "words": 457,
@@ -641,7 +650,7 @@
       "words": 645,
       "inSitemap": true,
       "maxContainment": 0.121,
-      "uniqueShare": 0.87,
+      "uniqueShare": 0.868,
       "nearest": "/blog/digital-homework-tools-esl-teachers.html"
     },
     {
@@ -668,7 +677,7 @@
       "words": 719,
       "inSitemap": true,
       "maxContainment": 0.129,
-      "uniqueShare": 0.85,
+      "uniqueShare": 0.848,
       "nearest": "/blog/adult-one-to-one-neurodivergent-english-lesson-adaptations.html"
     },
     {
@@ -686,7 +695,7 @@
       "words": 732,
       "inSitemap": true,
       "maxContainment": 0.942,
-      "uniqueShare": 0.056,
+      "uniqueShare": 0.053,
       "nearest": "/blog/best-workflow-for-private-english-tutors.html"
     },
     {
@@ -704,7 +713,7 @@
       "words": 739,
       "inSitemap": true,
       "maxContainment": 0.936,
-      "uniqueShare": 0.056,
+      "uniqueShare": 0.054,
       "nearest": "/blog/data-driven-learning-esl-corpora.html"
     },
     {
@@ -973,9 +982,9 @@
       "section": "/blog",
       "words": 671,
       "inSitemap": true,
-      "maxContainment": 0.104,
-      "uniqueShare": 0.891,
-      "nearest": "/blog/adapting-textbook-tasks-for-adult-one-to-one-english-lessons.html"
+      "maxContainment": 0.107,
+      "uniqueShare": 0.887,
+      "nearest": "/blog/lexical-approach-language-teaching.html"
     },
     {
       "route": "/blog/esl-exercise-type-selection-guide.html",
@@ -989,10 +998,10 @@
     {
       "route": "/blog/esl-games-for-teachers",
       "section": "/blog",
-      "words": 639,
+      "words": 641,
       "inSitemap": true,
       "maxContainment": 0.011,
-      "uniqueShare": 0.981,
+      "uniqueShare": 0.978,
       "nearest": "/resources/esl-class-toolkit"
     },
     {
@@ -1010,7 +1019,7 @@
       "words": 700,
       "inSitemap": true,
       "maxContainment": 0.11,
-      "uniqueShare": 0.885,
+      "uniqueShare": 0.881,
       "nearest": "/blog/how-long-should-private-english-tutors-spend-on-lesson-prep.html"
     },
     {
@@ -1385,7 +1394,7 @@
     {
       "route": "/blog/ielts-preparation-worksheets-guide.html",
       "section": "/blog",
-      "words": 886,
+      "words": 883,
       "inSitemap": true,
       "maxContainment": 0.007,
       "uniqueShare": 0.993,
@@ -1511,11 +1520,11 @@
     {
       "route": "/blog/lexical-approach-language-teaching.html",
       "section": "/blog",
-      "words": 593,
+      "words": 762,
       "inSitemap": true,
-      "maxContainment": 0.877,
-      "uniqueShare": 0.101,
-      "nearest": "/blog/phrasal-verbs-teaching-strategies.html"
+      "maxContainment": 0.12,
+      "uniqueShare": 0.865,
+      "nearest": "/blog/extensive-reading-programs-esl.html"
     },
     {
       "route": "/blog/low-friction-review-loops-for-adult-english-learners.html",
@@ -3059,7 +3068,7 @@
     {
       "route": "/esl-student-progress-tracking-tool.html",
       "section": "/ (root pages)",
-      "words": 490,
+      "words": 484,
       "inSitemap": true,
       "maxContainment": 0.019,
       "uniqueShare": 0.981,
@@ -3107,7 +3116,7 @@
       "words": 842,
       "inSitemap": true,
       "maxContainment": 0.006,
-      "uniqueShare": 0.988,
+      "uniqueShare": 0.986,
       "nearest": "/cefr-assessment"
     },
     {
@@ -3995,10 +4004,10 @@
     {
       "route": "/tools/vocab-cefr-checker",
       "section": "/tools",
-      "words": 144,
+      "words": 653,
       "inSitemap": true,
-      "maxContainment": 0.015,
-      "uniqueShare": 0.985,
+      "maxContainment": 0.003,
+      "uniqueShare": 0.997,
       "nearest": "/tools/cefr-level-test"
     },
     {

@@ -1,6 +1,6 @@
 {
-  "auditedRoutes": 147,
-  "passedRoutes": 147,
+  "auditedRoutes": 148,
+  "passedRoutes": 148,
   "failedRoutes": 0,
   "warningCount": 3,
   "routes": [
@@ -217,6 +217,14 @@
       "file": "public/blog/adult-vocabulary-retrieval-practice-not-games.html",
       "state": "hold",
       "cluster": "Homework and Retention",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "route": "/blog/lexical-approach-language-teaching.html",
+      "file": "public/blog/lexical-approach-language-teaching.html",
+      "state": "hold",
+      "cluster": "Tutor Business and Tools",
       "pass": true,
       "errors": []
     },

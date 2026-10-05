@@ -4399,6 +4399,24 @@
     },
     {
       "@type": "Article",
+      "@id": "https://edooqoo.com/blog/lexical-approach-language-teaching.html#article",
+      "url": "https://edooqoo.com/blog/lexical-approach-language-teaching.html",
+      "headline": "Lexical Approach Language Teaching: Guide for 1:1 Tutors",
+      "description": "Lexical Approach Language Teaching. Generate a matching worksheet in one minute.",
+      "author": {
+        "@id": "https://edooqoo.com/#organization"
+      },
+      "publisher": {
+        "@id": "https://edooqoo.com/#organization"
+      },
+      "mainEntityOfPage": "https://edooqoo.com/blog/lexical-approach-language-teaching.html#webpage",
+      "isPartOf": {
+        "@id": "https://edooqoo.com/#website"
+      },
+      "inLanguage": "en"
+    },
+    {
+      "@type": "Article",
       "@id": "https://edooqoo.com/blog/adult-esl-student-profile-lesson-planning.html#article",
       "url": "https://edooqoo.com/blog/adult-esl-student-profile-lesson-planning.html",
       "headline": "Adult ESL Student Profile Lesson Planning: Tutor Playbook",

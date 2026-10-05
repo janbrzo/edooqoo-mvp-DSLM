@@ -545,6 +545,7 @@ export const x1000LegacyRewriteArticles = [
 ];
 
 const refreshSlugs = [
+  'lexical-approach-language-teaching.html',
   'adult-business-english-homework-feedback-loop.html',
   'adult-esl-student-profile-lesson-planning.html',
   'ai-generated-listening-exercises-esl.html',

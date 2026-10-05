@@ -8,16 +8,16 @@ Method: visible body text of every indexable static HTML page in `public/` (navi
 
 | Metric | Value |
 |---|---:|
-| Indexable static pages analysed | 470 |
-| Templated (maxContainment >= 0.5) | 269 (57%) |
-| Near-duplicate (maxContainment >= 0.8) | 236 (50%) |
-| Templated pages listed in sitemap.xml | 269 |
+| Indexable static pages analysed | 471 |
+| Templated (maxContainment >= 0.5) | 268 (57%) |
+| Near-duplicate (maxContainment >= 0.8) | 235 (50%) |
+| Templated pages listed in sitemap.xml | 268 |
 
 ## By section
 
 | Section | Indexable pages | Templated >= 0.5 | Near-duplicate >= 0.8 |
 |---|---:|---:|---:|
-| /blog | 247 | 157 (64%) | 146 |
+| /blog | 247 | 156 (63%) | 145 |
 | / (root pages) | 182 | 96 (53%) | 86 |
 | /what-to-teach-next | 12 | 0 (0%) | 0 |
 | /esl-worksheets | 8 | 8 (100%) | 2 |
@@ -25,7 +25,7 @@ Method: visible body text of every indexable static HTML page in `public/` (navi
 | /worksheets | 5 | 5 (100%) | 2 |
 | /tools | 4 | 0 (0%) | 0 |
 | /english-for | 3 | 3 (100%) | 0 |
-| /authors | 1 | 0 (0%) | 0 |
+| /authors | 2 | 0 (0%) | 0 |
 | /resources | 1 | 0 (0%) | 0 |
 
 ## Most duplicated pages
@@ -36,7 +36,7 @@ Method: visible body text of every indexable static HTML page in `public/` (navi
 | /blog/accent-coaching-techniques-esl.html | 0.944 | 0.05 | 733 | /blog/adult-business-english-homework-feedback-loop.html |
 | /blog/building-esl-teaching-portfolio.html | 0.943 | 0.057 | 736 | /blog/adult-business-english-homework-feedback-loop.html |
 | /blog/consciousness-raising-grammar-tasks.html | 0.942 | 0.058 | 733 | /blog/how-to-plan-english-lessons-effectively.html |
-| /blog/contrastive-analysis-language-teaching.html | 0.942 | 0.056 | 732 | /blog/best-workflow-for-private-english-tutors.html |
+| /blog/contrastive-analysis-language-teaching.html | 0.942 | 0.053 | 732 | /blog/best-workflow-for-private-english-tutors.html |
 | /blog/extensive-reading-programs-esl.html | 0.942 | 0.053 | 733 | /blog/learning-pacing-scientific-vs-pragmatic-esl.html |
 | /blog/academic-vocabulary-teaching-strategies.html | 0.941 | 0.055 | 731 | /blog/emi-english-medium-instruction-guide.html |
 | /blog/gender-inclusive-language-esl.html | 0.941 | 0.054 | 737 | /blog/english-for-specific-purposes-guide.html |
@@ -49,7 +49,7 @@ Method: visible body text of every indexable static HTML page in `public/` (navi
 | /blog/learning-pacing-scientific-vs-pragmatic-esl.html | 0.938 | 0.062 | 737 | /blog/extensive-reading-programs-esl.html |
 | /blog/adult-business-english-homework-feedback-loop.html | 0.937 | 0.054 | 742 | /blog/building-esl-teaching-portfolio.html |
 | /blog/best-workflow-for-private-english-tutors.html | 0.936 | 0.047 | 740 | /blog/contrastive-analysis-language-teaching.html |
-| /blog/corpus-linguistics-esl-teaching.html | 0.936 | 0.056 | 739 | /blog/data-driven-learning-esl-corpora.html |
+| /blog/corpus-linguistics-esl-teaching.html | 0.936 | 0.054 | 739 | /blog/data-driven-learning-esl-corpora.html |
 | /blog/ai-worksheet-generator-vs-lesson-planning-chatbot.html | 0.935 | 0.061 | 731 | /blog/ai-tools-for-english-teachers-2026.html |
 | /blog/clil-methodology-complete-guide.html | 0.935 | 0.059 | 736 | /blog/course-evaluation-esl-programs.html |
 | /blog/energy-management-esl-lessons.html | 0.935 | 0.062 | 731 | /blog/formative-assessment-english-teaching.html |

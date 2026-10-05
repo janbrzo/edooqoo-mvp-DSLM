@@ -333,6 +333,52 @@ export const ARTICLE_REWRITES = {
     ],
   },
 
+  'lexical-approach-language-teaching': {
+    h1: 'The Lexical Approach for Adult One-to-One Lessons',
+    updated: '2026-10-05',
+    keywords: ['lexical approach', 'chunks and collocations', 'adult vocabulary teaching'],
+    sources: [RETRIEVAL],
+    directAnswer:
+      'The lexical approach, associated with Michael Lewis, treats chunks, collocations and fixed phrases as the unit of learning instead of single words plus grammar rules. With an adult one-to-one learner, collect the chunks they need for their own tasks, teach them as whole phrases, and recycle them until the learner produces them without prompting.',
+    problem: [
+      'Adults often know the individual words but combine them in ways that sound unnatural, so their English is correct yet effortful for the listener.',
+      'Vocabulary lists teach isolated words; the learner then builds sentences word by word and slows down in live conversation.',
+      'Without recycling, a new phrase is used once in the lesson and forgotten by the next one.',
+    ],
+    solution: [
+      'Harvest chunks from the learner\'s own material: emails they sent, a meeting they run, a procedure they follow. Pick five to eight phrases per lesson, not twenty.',
+      'Teach each chunk whole, with its typical partners: "raise a concern", "meet a deadline", "as far as I\'m aware", not "raise" and "concern" separately.',
+      'Notice before drilling: show the phrase in two real sentences, ask what pattern the learner sees, then have them use it in one sentence of their own.',
+      'Recycle on a schedule: retrieve the phrases at the start of the next lesson and again a week later, using a different prompt each time.',
+      'Check use, not recognition: the target is that the learner says the phrase unprompted in a task, such as a status update or a negotiation.',
+      'Teacher review decides the list: any generated word list or exercise is a draft until you have removed phrases the learner will never use.',
+    ],
+    mechanics: [
+      'Edooqoo worksheets include collocation-matching and gap-fill exercise types that the teacher edits before use, so a chunk list from the learner\'s own work can become practice quickly.',
+      'Vocabulary from a worksheet can be imported into a flashcard set, and flashcards use spaced repetition so the phrases return at growing intervals.',
+    ],
+    works: [
+      'The learner\'s grammar is sound but their speech or writing sounds unnatural.',
+      'You teach the same learner repeatedly and can recycle phrases across lessons.',
+      'The learner has concrete tasks (meetings, emails, calls) that supply real phrases.',
+    ],
+    notEnough: [
+      'The learner has a systematic grammar gap; chunks will not repair it.',
+      'The goal is receptive reading of specialist texts, where word-level vocabulary matters more.',
+      'There is no later lesson in which the phrases can be recycled.',
+    ],
+    tutorDecision:
+      'At the end of each lesson list the phrases the learner produced on their own; drop them from the list and keep only the ones that still needed prompting.',
+    example:
+      'Constructed example. A B2 operations manager writes status emails that are accurate but stiff. From three of her emails the tutor picks six chunks ("flag a risk", "on track to", "pending approval", "as it stands", "by close of business", "follow up with"). She uses them in a spoken status update, the tutor notes which ones she needed prompting for, and two of them return in next week\'s retrieval warm-up.',
+    faqs: [
+      ['What is a chunk?', 'A multi-word unit that is learned and used as one piece, such as a collocation, a fixed expression or a sentence frame.'],
+      ['How many chunks per lesson is realistic?', 'Five to eight for an adult one-to-one lesson, because each needs retrieval and a production attempt.'],
+      ['Does this replace grammar teaching?', 'No. It changes the starting point: phrases carry grammar with them, and you still teach a grammar point when an error repeats.'],
+      ['How do I know the phrases stuck?', 'Check whether the learner uses them unprompted in a task a week later; recognition in an exercise is not enough.'],
+    ],
+  },
+
   'cloze-test-design-esl': {
     h1: 'Cloze Test Design for Adult ESL Learners',
     updated: '2026-10-05',
