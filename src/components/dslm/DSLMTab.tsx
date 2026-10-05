@@ -122,8 +122,10 @@ export const DSLMTab: React.FC<DSLMTabProps> = ({
     if (!focusParam) return;
     const cacheKey = `${focusParam}:${cacheBuster || ''}`;
     if (focusHandledRef.current === cacheKey) return;
-    focusHandledRef.current = cacheKey;
     const raf = requestAnimationFrame(() => {
+      // Mark as handled only when the frame actually runs: a cancelled frame
+      // (StrictMode double effect, fast re-render) must not swallow the link.
+      focusHandledRef.current = cacheKey;
       if (focusParam === 'add-goal-modal') requestPlanAction('add_goal');
       else if (focusParam === 'pick-idea') requestPlanAction('pick_idea');
       // Other focus ids (send-welcome-test, learning-roadmap, next-lesson-ideas)
