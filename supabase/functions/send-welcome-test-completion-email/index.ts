@@ -79,7 +79,7 @@ serve(async (req) => {
 
     if (!r.ok) {
       await sb.from("error_logs").insert({
-        severity: "warning", source: "edge-function", source_name: "send-welcome-test-completion-email",
+        severity: "warning", source: "edge_function", source_name: "send-welcome-test-completion-email",
         component: "resend", error_code: "welcome_test_email_failed",
         message: `Resend ${r.status}`,
         context: { testId, status: r.status, body: body.slice(0, 500) },
