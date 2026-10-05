@@ -8,7 +8,8 @@ One rule per entry, with a one-line why. Replace an existing rule instead of add
 
 ## Student Workspace
 
-- Student Workspace tab and Learning model perspective state live only in the URL and are resolved via `src/lib/students/workspaceTabs.ts` (`resolveModelPerspective` for `view=`); legacy `?tab=` aliases are permanent — because sent emails and bookmarks carry them.
+- Student Workspace tab and Learning plan segment state live only in the URL and are resolved via `src/lib/students/workspaceTabs.ts` (`resolveModelSegment` for `view=`); legacy `?tab=` and `view=` values are permanent — because sent emails and bookmarks carry them.
+- The next lesson shown anywhere (Prep card, Learning plan Up next) is ordered only by `orderUpNext` in `src/lib/dslm/learningPlan.ts` — because suggestion `sequence_number` restarts per phase and two selectors once proposed different lessons.
 
 ## Answers & Evaluation
 

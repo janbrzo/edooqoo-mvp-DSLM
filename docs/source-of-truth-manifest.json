@@ -17,8 +17,8 @@
   "counts": {
     "routes": 94,
     "pageModules": 88,
-    "componentModules": 379,
-    "hookModules": 92,
+    "componentModules": 389,
+    "hookModules": 94,
     "contextModules": 1,
     "serviceModules": 11,
     "edgeFunctions": 81,
@@ -511,6 +511,7 @@
       },
       "hooks": [
         "useAuthFlow",
+        "useCurriculumPhases",
         "useDeletedWorksheets",
         "useDemoContext",
         "useEffect",
@@ -6968,6 +6969,7 @@
       ],
       "hooks": [
         "useAuthFlow",
+        "useCurriculumPhases",
         "useDeletedWorksheets",
         "useDemoContext",
         "useEffect",
@@ -7145,8 +7147,8 @@
       ],
       "userFacingText": [
         "Back to Dashboard",
-        "Learning model",
-        "Model",
+        "Learning plan",
+        "Plan",
         "Redirecting to login...",
         "Student not found"
       ],
@@ -16766,14 +16768,14 @@
         "Hide this banner from the",
         "Keep current attempt",
         "Send a Welcome (placement) Test to",
-        "The Welcome Test stays available in the Tests tab. (",
+        "The Welcome Test stays available in Timeline › Tests. (",
         "The latest attempt is still open. Retakes are usually useful after 8–12 weeks of lessons or after a clear learning block has finished. Creating another one now will leave multiple unfinished links active and can confuse the student.",
         "Understand their learning style, motivation, and actual English level with our comprehensive profiling test.",
         "Undo",
         "View the learning profile and test results.",
         "Waiting for student",
         "answered",
-        "tab. The Welcome Test stays available in the Tests tab.",
+        "tab. The Welcome Test stays available in Timeline › Tests.",
         "· Sent"
       ],
       "userFacingBehavior": {
@@ -17218,7 +17220,9 @@
         "fetchTargets": []
       },
       "storage": [],
-      "userFacingText": [],
+      "userFacingText": [
+        "No lessons, homework or flashcard activity yet. Patterns appear after the first booked lesson or homework."
+      ],
       "userFacingBehavior": {
         "actionHandlers": [],
         "navigationTargets": []
@@ -17286,11 +17290,6 @@
               "optional": true
             },
             {
-              "name": "alsoOpenFor",
-              "type": "string[]",
-              "optional": true
-            },
-            {
               "name": "forceMountContent",
               "type": "boolean",
               "optional": true
@@ -17306,7 +17305,6 @@
         }
       ],
       "hooks": [
-        "useEffect",
         "useRef",
         "useState"
       ],
@@ -17489,7 +17487,7 @@
       },
       "storage": [],
       "userFacingText": [
-        "Deterministic client-side fit heuristic based on goals, rationale, focus tags, and recent signals."
+        "Fit heuristic based on goals, rationale, focus tags, and recent signals."
       ],
       "userFacingBehavior": {
         "actionHandlers": [],
@@ -17741,29 +17739,35 @@
               "name": "onUseWorksheetSuggestion",
               "type": "( topic: string, goal: string, additionalInfo?: string, grammarFocus?: string, exercises?: string[], exerciseFocusMap?: Record<string, string>, autoGenerate?: boolean, suggestionId?: string ) => void",
               "optional": true
+            },
+            {
+              "name": "studentEmail",
+              "type": "string | null",
+              "optional": true
             }
           ]
         }
       ],
       "state": [
         {
-          "value": "pendingAddGoal",
-          "setter": "setPendingAddGoal",
-          "initial": "false"
+          "value": "pendingAction",
+          "setter": "setPendingAction",
+          "initial": "null"
         }
       ],
       "hooks": [
-        "useBehavioralStats",
         "useCallback",
+        "useDemoGuard",
         "useEffect",
-        "usePacingProposals",
+        "useLearningPlanData",
         "useRef",
         "useSearchParams",
         "useState",
-        "useStudentAttentionDots",
-        "useStudentProgress"
+        "useWelcomeTestActions"
       ],
-      "actions": [],
+      "actions": [
+        "handleImprovement"
+      ],
       "navigateTargets": [],
       "dataDependencies": {
         "tables": [],
@@ -17772,13 +17776,11 @@
         "fetchTargets": []
       },
       "storage": [],
-      "userFacingText": [
-        "Goals and objectives",
-        "Learning model perspectives",
-        "Roadmap and next steps"
-      ],
+      "userFacingText": [],
       "userFacingBehavior": {
-        "actionHandlers": [],
+        "actionHandlers": [
+          "handleImprovement"
+        ],
         "navigationTargets": []
       }
     },
@@ -18231,6 +18233,11 @@
               "name": "onConsumePendingAddGoal",
               "type": "() => void",
               "optional": true
+            },
+            {
+              "name": "listenForAddGoalEvents",
+              "type": "boolean",
+              "optional": true
             }
           ]
         }
@@ -18262,9 +18269,9 @@
           "initial": "null"
         },
         {
-          "value": "newGoal",
-          "setter": "setNewGoal",
-          "initial": "{ type: 'supporting', title: '', description: '', targetDate: '' }"
+          "value": "addGoalType",
+          "setter": "setAddGoalType",
+          "initial": "'supporting'"
         },
         {
           "value": "newElement",
@@ -18275,16 +18282,6 @@
           "value": "editingGoalId",
           "setter": "setEditingGoalId",
           "initial": "null"
-        },
-        {
-          "value": "acceptingAll",
-          "setter": "setAcceptingAll",
-          "initial": "false"
-        },
-        {
-          "value": "dismissingAll",
-          "setter": "setDismissingAll",
-          "initial": "false"
         }
       ],
       "hooks": [
@@ -18300,35 +18297,33 @@
       ],
       "navigateTargets": [],
       "dataDependencies": {
-        "tables": [
-          "student_progress_goals"
-        ],
+        "tables": [],
         "rpcs": [],
         "edgeFunctions": [],
         "fetchTargets": []
       },
       "storage": [],
       "userFacingText": [
-        "Accept",
-        "Accept all",
         "Achieved Goals",
         "Add",
         "Add Element",
-        "Add Goal",
         "Add Learning Element",
-        "Add New Goal",
         "Add a specific skill or knowledge item to track",
         "Additional Goals",
         "Archived Goals",
         "Cancel",
-        "Create a new learning goal for",
-        "Deadline (optional)",
         "Description (optional)",
-        "Dismiss",
-        "Dismiss all",
         "Edit main goal",
         "Element Type",
-        "Goal Notes"
+        "Goal Notes",
+        "Main Goal",
+        "Main goal",
+        "More goals & notes",
+        "No additional goals yet",
+        "No goal notes yet",
+        "No supporting goals yet",
+        "Save",
+        "Supporting Goals"
       ],
       "userFacingBehavior": {
         "actionHandlers": [
@@ -18336,62 +18331,6 @@
           "handleAddGoal",
           "handleSaveMainGoal"
         ],
-        "navigationTargets": []
-      }
-    },
-    {
-      "path": "src/components/dslm/LazySection.tsx",
-      "domain": "dslm",
-      "purpose": "Implements Lazy Section behavior in the dslm domain.",
-      "exports": [
-        "LazySection"
-      ],
-      "props": [
-        {
-          "name": "LazySectionProps",
-          "fields": [
-            {
-              "name": "children",
-              "type": "React.ReactNode",
-              "optional": false
-            },
-            {
-              "name": "rootMargin",
-              "type": "string",
-              "optional": true
-            },
-            {
-              "name": "eager",
-              "type": "boolean",
-              "optional": true
-            }
-          ]
-        }
-      ],
-      "state": [
-        {
-          "value": "shouldRender",
-          "setter": "setShouldRender",
-          "initial": "eager"
-        }
-      ],
-      "hooks": [
-        "useEffect",
-        "useRef",
-        "useState"
-      ],
-      "actions": [],
-      "navigateTargets": [],
-      "dataDependencies": {
-        "tables": [],
-        "rpcs": [],
-        "edgeFunctions": [],
-        "fetchTargets": []
-      },
-      "storage": [],
-      "userFacingText": [],
-      "userFacingBehavior": {
-        "actionHandlers": [],
         "navigationTargets": []
       }
     },
@@ -18584,6 +18523,11 @@
               "name": "onGenerateForPhase",
               "type": "(phaseId: string, count: number, teacherComment: string) => Promise<boolean> | boolean",
               "optional": false
+            },
+            {
+              "name": "initialExpandedPhaseId",
+              "type": "string | null",
+              "optional": true
             }
           ]
         }
@@ -18612,12 +18556,12 @@
         {
           "value": "expandedPhaseId",
           "setter": "setExpandedPhaseId",
-          "initial": "null"
+          "initial": "initialExpandedPhaseId ?? null"
         },
         {
           "value": "userTouchedExpand",
           "setter": "setUserTouchedExpand",
-          "initial": "false"
+          "initial": "!!initialExpandedPhaseId"
         },
         {
           "value": "editingPhase",
@@ -18767,428 +18711,6 @@
       },
       "storage": [],
       "userFacingText": [],
-      "userFacingBehavior": {
-        "actionHandlers": [],
-        "navigationTargets": []
-      }
-    },
-    {
-      "path": "src/components/dslm/ModelCockpitHeader.tsx",
-      "domain": "dslm",
-      "purpose": "Implements Model Cockpit Header behavior in the dslm domain.",
-      "exports": [
-        "ModelCockpitHeader"
-      ],
-      "props": [
-        {
-          "name": "ModelCockpitHeaderProps",
-          "fields": [
-            {
-              "name": "englishLevel",
-              "type": "string",
-              "optional": false
-            },
-            {
-              "name": "totalLessons",
-              "type": "number",
-              "optional": false
-            },
-            {
-              "name": "totalWorksheets",
-              "type": "number",
-              "optional": false
-            },
-            {
-              "name": "pacingProposalsCount",
-              "type": "number",
-              "optional": false
-            },
-            {
-              "name": "pacingSlot",
-              "type": "React.ReactNode",
-              "optional": true
-            },
-            {
-              "name": "goalSlot",
-              "type": "React.ReactNode",
-              "optional": true
-            }
-          ]
-        }
-      ],
-      "state": [],
-      "hooks": [],
-      "actions": [],
-      "navigateTargets": [],
-      "dataDependencies": {
-        "tables": [],
-        "rpcs": [],
-        "edgeFunctions": [],
-        "fetchTargets": []
-      },
-      "storage": [],
-      "userFacingText": [
-        "Learning model status",
-        "Model:",
-        "pacing proposal"
-      ],
-      "userFacingBehavior": {
-        "actionHandlers": [],
-        "navigationTargets": []
-      }
-    },
-    {
-      "path": "src/components/dslm/NextStepBanner.tsx",
-      "domain": "dslm",
-      "purpose": "Implements Next Step Banner behavior in the dslm domain.",
-      "exports": [
-        "NextStepBanner"
-      ],
-      "props": [
-        {
-          "name": "NextStepBannerProps",
-          "fields": [
-            {
-              "name": "suggestion",
-              "type": "any | null",
-              "optional": false
-            },
-            {
-              "name": "studentId",
-              "type": "string",
-              "optional": false
-            },
-            {
-              "name": "onUse",
-              "type": "(suggestion: any) => void",
-              "optional": false
-            },
-            {
-              "name": "onUseAndGenerate",
-              "type": "(suggestion: any) => void",
-              "optional": false
-            },
-            {
-              "name": "onEdit",
-              "type": "(suggestion: any) => void",
-              "optional": false
-            },
-            {
-              "name": "onSkip",
-              "type": "(suggestionId: string) => void",
-              "optional": true
-            },
-            {
-              "name": "onGenerate",
-              "type": "() => void",
-              "optional": false
-            },
-            {
-              "name": "onRegenerateWithComment",
-              "type": "(suggestion: any) => void",
-              "optional": true
-            },
-            {
-              "name": "onMarkUsed",
-              "type": "(suggestionId: string) => void",
-              "optional": true
-            },
-            {
-              "name": "onDelete",
-              "type": "(suggestionId: string) => void",
-              "optional": true
-            },
-            {
-              "name": "generating",
-              "type": "boolean",
-              "optional": false
-            },
-            {
-              "name": "hasGoals",
-              "type": "boolean",
-              "optional": false
-            },
-            {
-              "name": "wtCompleted",
-              "type": "boolean",
-              "optional": true
-            },
-            {
-              "name": "hasPhases",
-              "type": "boolean",
-              "optional": true
-            },
-            {
-              "name": "onAddGoal",
-              "type": "() => void",
-              "optional": true
-            },
-            {
-              "name": "onSendWelcomeTest",
-              "type": "() => void",
-              "optional": true
-            },
-            {
-              "name": "onGoToRoadmap",
-              "type": "() => void",
-              "optional": true
-            }
-          ]
-        }
-      ],
-      "state": [
-        {
-          "value": "detailsOpen",
-          "setter": "setDetailsOpen",
-          "initial": "false"
-        },
-        {
-          "value": "confirmDeleteOpen",
-          "setter": "setConfirmDeleteOpen",
-          "initial": "false"
-        }
-      ],
-      "hooks": [
-        "useEffect",
-        "useState"
-      ],
-      "actions": [
-        "handleToggleDetails"
-      ],
-      "navigateTargets": [],
-      "dataDependencies": {
-        "tables": [],
-        "rpcs": [],
-        "edgeFunctions": [],
-        "fetchTargets": []
-      },
-      "storage": [
-        {
-          "storage": "localStorage",
-          "operation": "getItem",
-          "key": "storageKey",
-          "file": "src/components/dslm/NextStepBanner.tsx"
-        },
-        {
-          "storage": "localStorage",
-          "operation": "setItem",
-          "key": "storageKey",
-          "file": "src/components/dslm/NextStepBanner.tsx"
-        }
-      ],
-      "userFacingText": [
-        "1-Minute Prep suggestion #1",
-        "Add goal",
-        "Difficulty",
-        "Edit",
-        "Edit suggestion details",
-        "Expected:",
-        "For sharper 1-Minute Prep suggestions, add this first",
-        "Generate 1-Minute Prep suggestions",
-        "Generate worksheet ↗",
-        "Go to roadmap",
-        "Grammar:",
-        "Just added some? Refresh the page to see them.",
-        "Mark as already used",
-        "No curriculum plan yet — optional, but strongly recommended for recurring students.",
-        "No learning goals set — AI will infer from main goal only.",
-        "Open form pre-filled and start generating immediately",
-        "Pacing",
-        "Refresh",
-        "Regenerate with comment",
-        "Remove"
-      ],
-      "userFacingBehavior": {
-        "actionHandlers": [
-          "handleToggleDetails"
-        ],
-        "navigationTargets": []
-      }
-    },
-    {
-      "path": "src/components/dslm/NextStepsSection.tsx",
-      "domain": "dslm",
-      "purpose": "Implements Next Steps Section behavior in the dslm domain.",
-      "exports": [
-        "NextStepsSection"
-      ],
-      "props": [
-        {
-          "name": "NextStepsSectionProps",
-          "fields": [
-            {
-              "name": "items",
-              "type": "DisplayItem[]",
-              "optional": false
-            },
-            {
-              "name": "studentId",
-              "type": "string",
-              "optional": false
-            },
-            {
-              "name": "generating",
-              "type": "boolean",
-              "optional": false
-            },
-            {
-              "name": "hasGoals",
-              "type": "boolean",
-              "optional": false
-            },
-            {
-              "name": "currentPhaseLabel",
-              "type": "string | null",
-              "optional": true
-            },
-            {
-              "name": "onUseAndGenerate",
-              "type": "(s: any) => void",
-              "optional": false
-            },
-            {
-              "name": "onUse",
-              "type": "(s: any) => void",
-              "optional": false
-            },
-            {
-              "name": "onEdit",
-              "type": "(s: any) => void",
-              "optional": false
-            },
-            {
-              "name": "onDelete",
-              "type": "(id: string) => void",
-              "optional": false
-            },
-            {
-              "name": "onGenerateMore",
-              "type": "(count: number, excludeIds: string[], phaseId: string | null) => Promise<boolean> | boolean",
-              "optional": false
-            },
-            {
-              "name": "onRegenerateOne",
-              "type": "(id: string, teacherComment: string) => Promise<boolean> | boolean",
-              "optional": false
-            },
-            {
-              "name": "onMarkUsed",
-              "type": "(id: string) => void",
-              "optional": true
-            },
-            {
-              "name": "usedSteps",
-              "type": "any[]",
-              "optional": true
-            },
-            {
-              "name": "onRestore",
-              "type": "(id: string) => void",
-              "optional": true
-            },
-            {
-              "name": "phaseOptions",
-              "type": "PhaseOption[]",
-              "optional": true
-            },
-            {
-              "name": "defaultTargetPhaseId",
-              "type": "string | null",
-              "optional": true
-            },
-            {
-              "name": "showPhaseSelector",
-              "type": "boolean",
-              "optional": true
-            },
-            {
-              "name": "wtCompleted",
-              "type": "boolean",
-              "optional": true
-            },
-            {
-              "name": "hasPhases",
-              "type": "boolean",
-              "optional": true
-            },
-            {
-              "name": "onAddGoal",
-              "type": "() => void",
-              "optional": true
-            },
-            {
-              "name": "onSendWelcomeTest",
-              "type": "() => void",
-              "optional": true
-            },
-            {
-              "name": "onGoToRoadmap",
-              "type": "() => void",
-              "optional": true
-            }
-          ]
-        }
-      ],
-      "state": [
-        {
-          "value": "moreListOpen",
-          "setter": "setMoreListOpen",
-          "initial": "false"
-        },
-        {
-          "value": "usedOpen",
-          "setter": "setUsedOpen",
-          "initial": "false"
-        },
-        {
-          "value": "commentDialog",
-          "setter": "setCommentDialog",
-          "initial": "{ open: false }"
-        },
-        {
-          "value": "comment",
-          "setter": "setComment",
-          "initial": "''"
-        },
-        {
-          "value": "genDialogOpen",
-          "setter": "setGenDialogOpen",
-          "initial": "false"
-        },
-        {
-          "value": "genMode",
-          "setter": "setGenMode",
-          "initial": "'first'"
-        }
-      ],
-      "hooks": [
-        "useEffect",
-        "useState"
-      ],
-      "actions": [],
-      "navigateTargets": [],
-      "dataDependencies": {
-        "tables": [],
-        "rpcs": [],
-        "edgeFunctions": [],
-        "fetchTargets": []
-      },
-      "storage": [],
-      "userFacingText": [
-        ", oldest =",
-        ". Sorted by date used. Restore is available only for the most recent (−1).",
-        "1-Minute Prep suggestions",
-        "Cancel",
-        "Generate more suggestions",
-        "Newest used =",
-        "Queued recommendations beyond the top priority suggestion",
-        "Regenerate",
-        "Regenerate this suggestion",
-        "Tell the AI what to change. Leave empty to regenerate with default logic. Only this single suggestion will be replaced.",
-        "Used suggestions (",
-        "e.g., Focus more on speaking practice for negotiations. Avoid grammar drills.",
-        "more suggestion"
-      ],
       "userFacingBehavior": {
         "actionHandlers": [],
         "navigationTargets": []
@@ -19355,157 +18877,6 @@
       ],
       "userFacingBehavior": {
         "actionHandlers": [],
-        "navigationTargets": []
-      }
-    },
-    {
-      "path": "src/components/dslm/PathwayView.tsx",
-      "domain": "dslm",
-      "purpose": "Implements Pathway View behavior in the dslm domain.",
-      "exports": [
-        "PathwayView"
-      ],
-      "props": [
-        {
-          "name": "PathwayViewProps",
-          "fields": [
-            {
-              "name": "studentId",
-              "type": "string",
-              "optional": false
-            },
-            {
-              "name": "teacherId",
-              "type": "string",
-              "optional": false
-            },
-            {
-              "name": "studentName",
-              "type": "string",
-              "optional": false
-            },
-            {
-              "name": "englishLevel",
-              "type": "string",
-              "optional": false
-            },
-            {
-              "name": "mainGoal",
-              "type": "string",
-              "optional": false
-            },
-            {
-              "name": "studentNotes",
-              "type": "string[]",
-              "optional": true
-            },
-            {
-              "name": "useRoadmap",
-              "type": "boolean",
-              "optional": true
-            },
-            {
-              "name": "onUseRoadmapChange",
-              "type": "(next: boolean) => void",
-              "optional": true
-            },
-            {
-              "name": "pacingMode",
-              "type": "number",
-              "optional": true
-            },
-            {
-              "name": "onPacingModeChange",
-              "type": "(next: number) => void",
-              "optional": true
-            },
-            {
-              "name": "onUseWorksheetSuggestion",
-              "type": "( topic: string, goal: string, additionalInfo?: string, grammarFocus?: string, exercises?: string[], exerciseFocusMap?: Record<string, string>, autoGenerate?: boolean, suggestionId?: string ) => void",
-              "optional": true
-            }
-          ]
-        }
-      ],
-      "state": [
-        {
-          "value": "wtCompleted",
-          "setter": "setWtCompleted",
-          "initial": "false"
-        },
-        {
-          "value": "editingSuggestionId",
-          "setter": "setEditingSuggestionId",
-          "initial": "null"
-        },
-        {
-          "value": "editedSuggestion",
-          "setter": "setEditedSuggestion",
-          "initial": "EMPTY_EDIT"
-        },
-        {
-          "value": "notesOpen",
-          "setter": "setNotesOpen",
-          "initial": "false"
-        },
-        {
-          "value": "roadmapOpen",
-          "setter": "setRoadmapOpen",
-          "initial": "true"
-        }
-      ],
-      "hooks": [
-        "useCurriculumPhases",
-        "useEffect",
-        "useFutureTimeline",
-        "useMemo",
-        "usePacingProposals",
-        "useSearchParams",
-        "useState",
-        "useStudent",
-        "useStudentKnowledge",
-        "useStudentProgress",
-        "useSuggestion",
-        "useWelcomeTestActions"
-      ],
-      "actions": [
-        "handleAddGoal",
-        "handleEditSuggestion",
-        "handleGoToRoadmap",
-        "handleMarkUsed",
-        "handleSaveSuggestion",
-        "handleSendWelcomeTest",
-        "handleUse",
-        "handleUseAndGenerate"
-      ],
-      "navigateTargets": [],
-      "dataDependencies": {
-        "tables": [
-          "student_tests"
-        ],
-        "rpcs": [],
-        "edgeFunctions": [],
-        "fetchTargets": []
-      },
-      "storage": [],
-      "userFacingText": [
-        "Disabled",
-        "Learning Roadmap",
-        "Next Lesson Ideas (",
-        "No planning notes yet",
-        "Roadmap"
-      ],
-      "userFacingBehavior": {
-        "actionHandlers": [
-          "handleAddGoal",
-          "handleEditSuggestion",
-          "handleGoToRoadmap",
-          "handleMarkUsed",
-          "handleSaveSuggestion",
-          "handleSendWelcomeTest",
-          "handleUse",
-          "handleUseAndGenerate"
-        ],
         "navigationTargets": []
       }
     },
@@ -19759,167 +19130,6 @@
       }
     },
     {
-      "path": "src/components/dslm/SkillsView.tsx",
-      "domain": "dslm",
-      "purpose": "Implements Skills View behavior in the dslm domain.",
-      "exports": [
-        "SkillsView"
-      ],
-      "props": [
-        {
-          "name": "SkillsViewProps",
-          "fields": [
-            {
-              "name": "studentId",
-              "type": "string",
-              "optional": false
-            },
-            {
-              "name": "teacherId",
-              "type": "string",
-              "optional": false
-            },
-            {
-              "name": "englishLevel",
-              "type": "string",
-              "optional": false
-            },
-            {
-              "name": "totalWorksheetCount",
-              "type": "number",
-              "optional": false
-            }
-          ]
-        }
-      ],
-      "state": [],
-      "hooks": [
-        "useStudentKnowledge",
-        "useStudentProfile"
-      ],
-      "actions": [],
-      "navigateTargets": [],
-      "dataDependencies": {
-        "tables": [],
-        "rpcs": [],
-        "edgeFunctions": [],
-        "fetchTargets": []
-      },
-      "storage": [],
-      "userFacingText": [
-        "Level:",
-        "Micro Skills",
-        "No skill assessment notes yet",
-        "Not taken yet",
-        "Placement test:",
-        "Skill Assessment Notes",
-        "Skills Heat Map",
-        "Worksheets:"
-      ],
-      "userFacingBehavior": {
-        "actionHandlers": [],
-        "navigationTargets": []
-      }
-    },
-    {
-      "path": "src/components/dslm/StudentNavBadges.tsx",
-      "domain": "dslm",
-      "purpose": "Implements Student Nav Badges behavior in the dslm domain.",
-      "exports": [
-        "StudentNavBadges"
-      ],
-      "props": [
-        {
-          "name": "StudentNavBadgesProps",
-          "fields": [
-            {
-              "name": "englishLevel",
-              "type": "string",
-              "optional": false
-            },
-            {
-              "name": "daysSinceLastActivity",
-              "type": "number | null",
-              "optional": false
-            }
-          ]
-        }
-      ],
-      "state": [],
-      "hooks": [],
-      "actions": [],
-      "navigateTargets": [],
-      "dataDependencies": {
-        "tables": [],
-        "rpcs": [],
-        "edgeFunctions": [],
-        "fetchTargets": []
-      },
-      "storage": [],
-      "userFacingText": [],
-      "userFacingBehavior": {
-        "actionHandlers": [],
-        "navigationTargets": []
-      }
-    },
-    {
-      "path": "src/components/dslm/StudentPathwayBadges.tsx",
-      "domain": "dslm",
-      "purpose": "Implements Student Pathway Badges behavior in the dslm domain.",
-      "exports": [
-        "StudentPathwayBadges"
-      ],
-      "props": [
-        {
-          "name": "StudentPathwayBadgesProps",
-          "fields": [
-            {
-              "name": "totalLessons",
-              "type": "number",
-              "optional": false
-            },
-            {
-              "name": "mainGoal",
-              "type": "string",
-              "optional": false
-            },
-            {
-              "name": "mainGoalTargetDate",
-              "type": "string | null",
-              "optional": false
-            },
-            {
-              "name": "nearestGoalDeadline",
-              "type": "{ date: string; title: string; goalType: string } | null",
-              "optional": true
-            }
-          ]
-        }
-      ],
-      "state": [],
-      "hooks": [],
-      "actions": [],
-      "navigateTargets": [],
-      "dataDependencies": {
-        "tables": [],
-        "rpcs": [],
-        "edgeFunctions": [],
-        "fetchTargets": []
-      },
-      "storage": [],
-      "userFacingText": [
-        "Deadline:",
-        "Main goal",
-        "Main goal:",
-        "Nearest goal:",
-        "goal"
-      ],
-      "userFacingBehavior": {
-        "actionHandlers": [],
-        "navigationTargets": []
-      }
-    },
-    {
       "path": "src/components/dslm/SuggestionEditDialog.tsx",
       "domain": "dslm",
       "purpose": "Implements Suggestion Edit Dialog behavior in the dslm domain.",
@@ -19981,6 +19191,1670 @@
         "Topic",
         "Update topic, goal, focus and exercise types.",
         "e.g., Present Perfect..."
+      ],
+      "userFacingBehavior": {
+        "actionHandlers": [],
+        "navigationTargets": []
+      }
+    },
+    {
+      "path": "src/components/dslm/plan/AddGoalDialog.tsx",
+      "domain": "dslm",
+      "purpose": "Implements Add Goal Dialog behavior in the dslm domain.",
+      "exports": [
+        "AddGoalDialog"
+      ],
+      "props": [
+        {
+          "name": "AddGoalDialogProps",
+          "fields": [
+            {
+              "name": "open",
+              "type": "boolean",
+              "optional": false
+            },
+            {
+              "name": "onOpenChange",
+              "type": "(open: boolean) => void",
+              "optional": false
+            },
+            {
+              "name": "studentName",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "initialType",
+              "type": "string",
+              "optional": true
+            },
+            {
+              "name": "onSubmit",
+              "type": "(value: NewGoalValue) => Promise<unknown> | void",
+              "optional": false
+            }
+          ]
+        }
+      ],
+      "state": [
+        {
+          "value": "value",
+          "setter": "setValue",
+          "initial": "emptyGoal(initialType)"
+        },
+        {
+          "value": "saving",
+          "setter": "setSaving",
+          "initial": "false"
+        }
+      ],
+      "hooks": [
+        "useEffect",
+        "useState"
+      ],
+      "actions": [],
+      "navigateTargets": [],
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "storage": [],
+      "userFacingText": [
+        "Add Goal",
+        "Add New Goal",
+        "Cancel",
+        "Create a new learning goal for",
+        "Deadline (optional)",
+        "Description (optional)",
+        "Goal Type",
+        "More details about this goal...",
+        "Title",
+        "When set, AI will pace phases/steps to complete before this date.",
+        "e.g. Master business email writing"
+      ],
+      "userFacingBehavior": {
+        "actionHandlers": [],
+        "navigationTargets": []
+      }
+    },
+    {
+      "path": "src/components/dslm/plan/GoalsSheet.tsx",
+      "domain": "dslm",
+      "purpose": "Implements Goals Sheet behavior in the dslm domain.",
+      "exports": [
+        "GoalsSheet"
+      ],
+      "props": [
+        {
+          "name": "GoalsSheetProps",
+          "fields": [
+            {
+              "name": "open",
+              "type": "boolean",
+              "optional": false
+            },
+            {
+              "name": "onOpenChange",
+              "type": "(open: boolean) => void",
+              "optional": false
+            },
+            {
+              "name": "studentId",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "teacherId",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "studentName",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "englishLevel",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "mainGoal",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "mainGoalTargetDate",
+              "type": "string | null",
+              "optional": false
+            },
+            {
+              "name": "onMainGoalChange",
+              "type": "(newGoal: string) => void",
+              "optional": true
+            },
+            {
+              "name": "onMainGoalTargetDateChange",
+              "type": "(date: string | null) => void",
+              "optional": true
+            }
+          ]
+        }
+      ],
+      "state": [],
+      "hooks": [],
+      "actions": [],
+      "navigateTargets": [],
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "storage": [],
+      "userFacingText": [
+        "Goals & notes",
+        "Where the student is going. Deadlines pace the roadmap and the lesson suggestions."
+      ],
+      "userFacingBehavior": {
+        "actionHandlers": [],
+        "navigationTargets": []
+      }
+    },
+    {
+      "path": "src/components/dslm/plan/GoalsSummary.tsx",
+      "domain": "dslm",
+      "purpose": "Implements Goals Summary behavior in the dslm domain.",
+      "exports": [
+        "GoalsSummary"
+      ],
+      "props": [
+        {
+          "name": "GoalsSummaryProps",
+          "fields": [
+            {
+              "name": "mainGoalLabel",
+              "type": "string | null",
+              "optional": false
+            },
+            {
+              "name": "mainGoalTargetDate",
+              "type": "string | null",
+              "optional": false
+            },
+            {
+              "name": "mainGoalPct",
+              "type": "number | null",
+              "optional": false
+            },
+            {
+              "name": "goals",
+              "type": "readonly GoalSummaryRow[]",
+              "optional": false
+            },
+            {
+              "name": "totalGoals",
+              "type": "number",
+              "optional": false
+            },
+            {
+              "name": "onEditMainGoal",
+              "type": "() => void",
+              "optional": false
+            },
+            {
+              "name": "onAddGoal",
+              "type": "() => void",
+              "optional": false
+            },
+            {
+              "name": "onOpenAll",
+              "type": "() => void",
+              "optional": false
+            }
+          ]
+        }
+      ],
+      "state": [],
+      "hooks": [],
+      "actions": [],
+      "navigateTargets": [],
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "storage": [],
+      "userFacingText": [
+        "Add goal",
+        "All goals & notes (",
+        "Edit",
+        "Goals",
+        "No specific goals yet. A concrete goal (\"Run a 30-minute client meeting\") makes suggestions sharper.",
+        "due"
+      ],
+      "userFacingBehavior": {
+        "actionHandlers": [],
+        "navigationTargets": []
+      }
+    },
+    {
+      "path": "src/components/dslm/plan/HowItWorksPopover.tsx",
+      "domain": "dslm",
+      "purpose": "Implements How It Works Popover behavior in the dslm domain.",
+      "exports": [
+        "HowItWorksPopover"
+      ],
+      "props": [],
+      "state": [],
+      "hooks": [],
+      "actions": [],
+      "navigateTargets": [],
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "storage": [],
+      "userFacingText": [
+        "Every lesson, homework answer, test result and note sharpens the plan. It is powered by DSLM (Dynamic Student Learning Model), Edooqoo's student model.",
+        "How it works",
+        "How the learning plan works",
+        "Learn more"
+      ],
+      "userFacingBehavior": {
+        "actionHandlers": [],
+        "navigationTargets": []
+      }
+    },
+    {
+      "path": "src/components/dslm/plan/InsightsView.tsx",
+      "domain": "dslm",
+      "purpose": "Implements Insights View behavior in the dslm domain.",
+      "exports": [
+        "InsightsView"
+      ],
+      "props": [
+        {
+          "name": "InsightsViewProps",
+          "fields": [
+            {
+              "name": "studentId",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "teacherId",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "studentName",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "englishLevel",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "anchor",
+              "type": "ModelAnchor",
+              "optional": false
+            },
+            {
+              "name": "welcomeTestState",
+              "type": "WelcomeTestState",
+              "optional": false
+            },
+            {
+              "name": "welcomeTest",
+              "type": "WelcomeTestControls",
+              "optional": false
+            }
+          ]
+        }
+      ],
+      "state": [
+        {
+          "value": "exploreOpen",
+          "setter": "setExploreOpen",
+          "initial": "false"
+        }
+      ],
+      "hooks": [
+        "useBehavioralStats",
+        "useDemoGuard",
+        "useEffect",
+        "useMemo",
+        "useRef",
+        "useSkillMetrics",
+        "useState",
+        "useStudentProfile"
+      ],
+      "actions": [],
+      "navigateTargets": [],
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "storage": [],
+      "userFacingText": [
+        "All skills",
+        "Edooqoo has no skill evidence for",
+        "Explore all skills",
+        "Loading skills…",
+        "Mastery by category, micro skill and nano skill, with period and CEFR filters.",
+        "Send Welcome Test",
+        "Skill bars appear after the first homework, test answer or flashcard review.",
+        "Skills",
+        "Skills, weakest first",
+        "Summary",
+        "The Welcome Test is waiting for",
+        "declining",
+        "improving",
+        "stable",
+        "yet. It appears after the Welcome Test, homework or flashcard reviews."
+      ],
+      "userFacingBehavior": {
+        "actionHandlers": [],
+        "navigationTargets": []
+      }
+    },
+    {
+      "path": "src/components/dslm/plan/LearningPlanView.tsx",
+      "domain": "dslm",
+      "purpose": "Implements Learning Plan View behavior in the dslm domain.",
+      "exports": [
+        "LearningPlanView"
+      ],
+      "props": [
+        {
+          "name": "LearningPlanViewProps",
+          "fields": [
+            {
+              "name": "plan",
+              "type": "LearningPlanData",
+              "optional": false
+            },
+            {
+              "name": "studentId",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "teacherId",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "studentName",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "englishLevel",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "mainGoal",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "mainGoalTargetDate",
+              "type": "string | null",
+              "optional": false
+            },
+            {
+              "name": "useRoadmap",
+              "type": "boolean",
+              "optional": false
+            },
+            {
+              "name": "onUseRoadmapChange",
+              "type": "(next: boolean) => void",
+              "optional": true
+            },
+            {
+              "name": "pacingMode",
+              "type": "number",
+              "optional": false
+            },
+            {
+              "name": "onPacingModeChange",
+              "type": "(next: number) => void",
+              "optional": true
+            },
+            {
+              "name": "onMainGoalChange",
+              "type": "(newGoal: string) => void",
+              "optional": true
+            },
+            {
+              "name": "onMainGoalTargetDateChange",
+              "type": "(date: string | null) => void",
+              "optional": true
+            },
+            {
+              "name": "onUseWorksheetSuggestion",
+              "type": "( topic: string, goal: string, additionalInfo?: string, grammarFocus?: string, exercises?: string[], exerciseFocusMap?: Record<string, string>, autoGenerate?: boolean, suggestionId?: string ) => void",
+              "optional": true
+            },
+            {
+              "name": "anchor",
+              "type": "ModelAnchor",
+              "optional": false
+            },
+            {
+              "name": "pendingAction",
+              "type": "PlanAction | null",
+              "optional": false
+            },
+            {
+              "name": "onConsumePendingAction",
+              "type": "() => void",
+              "optional": false
+            },
+            {
+              "name": "welcomeTest",
+              "type": "WelcomeTestControls",
+              "optional": false
+            },
+            {
+              "name": "onOpenTestResults",
+              "type": "() => void",
+              "optional": false
+            }
+          ]
+        }
+      ],
+      "state": [
+        {
+          "value": "editing",
+          "setter": "setEditing",
+          "initial": "null"
+        },
+        {
+          "value": "regenTarget",
+          "setter": "setRegenTarget",
+          "initial": "null"
+        },
+        {
+          "value": "regenComment",
+          "setter": "setRegenComment",
+          "initial": "''"
+        },
+        {
+          "value": "removeTarget",
+          "setter": "setRemoveTarget",
+          "initial": "null"
+        },
+        {
+          "value": "stepsDialog",
+          "setter": "setStepsDialog",
+          "initial": "null"
+        },
+        {
+          "value": "roadmapDialogOpen",
+          "setter": "setRoadmapDialogOpen",
+          "initial": "false"
+        },
+        {
+          "value": "noGoalsConfirmOpen",
+          "setter": "setNoGoalsConfirmOpen",
+          "initial": "false"
+        },
+        {
+          "value": "addGoalOpen",
+          "setter": "setAddGoalOpen",
+          "initial": "false"
+        },
+        {
+          "value": "mainGoalOpen",
+          "setter": "setMainGoalOpen",
+          "initial": "false"
+        },
+        {
+          "value": "roadmapSheet",
+          "setter": "setRoadmapSheet",
+          "initial": "{ open: false, phaseId: null }"
+        },
+        {
+          "value": "goalsSheetOpen",
+          "setter": "setGoalsSheetOpen",
+          "initial": "false"
+        }
+      ],
+      "hooks": [
+        "useCallback",
+        "useDemoGuard",
+        "useEffect",
+        "useGoalProgress",
+        "useMemo",
+        "useRef",
+        "useSearchParams",
+        "useState"
+      ],
+      "actions": [],
+      "navigateTargets": [],
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "storage": [],
+      "userFacingText": [
+        "Add goal first",
+        "Cancel",
+        "Generate anyway",
+        "Generate roadmap without goals?",
+        "Regenerate",
+        "Regenerate this suggestion",
+        "Tell the AI what to change. Leave empty to regenerate with default logic. Only this suggestion is replaced, in the same place in the queue.",
+        "This student has no learning goals defined. The AI will fall back to the main goal and English level only, which usually produces a more generic plan. You can add a goal first for a sharper roadmap.",
+        "e.g., Focus more on speaking practice for negotiations. Avoid grammar drills."
+      ],
+      "userFacingBehavior": {
+        "actionHandlers": [],
+        "navigationTargets": []
+      }
+    },
+    {
+      "path": "src/components/dslm/plan/LessonIdeasNotes.tsx",
+      "domain": "dslm",
+      "purpose": "Implements Lesson Ideas Notes behavior in the dslm domain.",
+      "exports": [
+        "LessonIdeasNotes"
+      ],
+      "props": [
+        {
+          "name": "LessonIdeasNotesProps",
+          "fields": [
+            {
+              "name": "studentId",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "teacherId",
+              "type": "string",
+              "optional": false
+            }
+          ]
+        }
+      ],
+      "state": [
+        {
+          "value": "open",
+          "setter": "setOpen",
+          "initial": "false"
+        }
+      ],
+      "hooks": [
+        "useState",
+        "useStudentKnowledge"
+      ],
+      "actions": [],
+      "navigateTargets": [],
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "storage": [],
+      "userFacingText": [
+        "Notes you saved for the next lessons. New suggestions take them into account.",
+        "Your lesson ideas ("
+      ],
+      "userFacingBehavior": {
+        "actionHandlers": [],
+        "navigationTargets": []
+      }
+    },
+    {
+      "path": "src/components/dslm/plan/MainGoalDialog.tsx",
+      "domain": "dslm",
+      "purpose": "Implements Main Goal Dialog behavior in the dslm domain.",
+      "exports": [
+        "MainGoalDialog"
+      ],
+      "props": [
+        {
+          "name": "MainGoalDialogProps",
+          "fields": [
+            {
+              "name": "open",
+              "type": "boolean",
+              "optional": false
+            },
+            {
+              "name": "onOpenChange",
+              "type": "(open: boolean) => void",
+              "optional": false
+            },
+            {
+              "name": "mainGoal",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "mainGoalTargetDate",
+              "type": "string | null",
+              "optional": false
+            },
+            {
+              "name": "onMainGoalChange",
+              "type": "(newGoal: string) => Promise<void> | void",
+              "optional": true
+            },
+            {
+              "name": "onMainGoalTargetDateChange",
+              "type": "(date: string | null) => Promise<void> | void",
+              "optional": true
+            }
+          ]
+        }
+      ],
+      "state": [
+        {
+          "value": "goal",
+          "setter": "setGoal",
+          "initial": "mainGoal"
+        },
+        {
+          "value": "date",
+          "setter": "setDate",
+          "initial": "mainGoalTargetDate || ''"
+        },
+        {
+          "value": "saving",
+          "setter": "setSaving",
+          "initial": "false"
+        }
+      ],
+      "hooks": [
+        "useEffect",
+        "useState"
+      ],
+      "actions": [],
+      "navigateTargets": [],
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "storage": [],
+      "userFacingText": [
+        "Cancel",
+        "Choose a main goal",
+        "Deadline (optional)",
+        "Goal",
+        "Main goal",
+        "Save",
+        "What the student needs English for, and by when."
+      ],
+      "userFacingBehavior": {
+        "actionHandlers": [],
+        "navigationTargets": []
+      }
+    },
+    {
+      "path": "src/components/dslm/plan/ModelStatusLine.tsx",
+      "domain": "dslm",
+      "purpose": "Implements Model Status Line behavior in the dslm domain.",
+      "exports": [
+        "ModelStatusLine"
+      ],
+      "props": [
+        {
+          "name": "ModelStatusLineProps",
+          "fields": [
+            {
+              "name": "stage",
+              "type": "ReadinessStage | 'loading'",
+              "optional": false
+            },
+            {
+              "name": "studentName",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "doneCount",
+              "type": "number",
+              "optional": false
+            },
+            {
+              "name": "totalSteps",
+              "type": "number",
+              "optional": false
+            },
+            {
+              "name": "pendingReviewCount",
+              "type": "number",
+              "optional": false
+            },
+            {
+              "name": "queuedCount",
+              "type": "number",
+              "optional": false
+            },
+            {
+              "name": "phaseProgress",
+              "type": "string | null",
+              "optional": false
+            },
+            {
+              "name": "roadmapPaused",
+              "type": "boolean",
+              "optional": false
+            },
+            {
+              "name": "improvement",
+              "type": "ReadinessImprovement | null",
+              "optional": false
+            },
+            {
+              "name": "improvementBusy",
+              "type": "boolean",
+              "optional": true
+            },
+            {
+              "name": "onImprovement",
+              "type": "(improvement: ReadinessImprovement) => void",
+              "optional": false
+            }
+          ]
+        }
+      ],
+      "state": [],
+      "hooks": [],
+      "actions": [],
+      "navigateTargets": [],
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "storage": [],
+      "userFacingText": [
+        "Learning plan status",
+        "Sharper plan:"
+      ],
+      "userFacingBehavior": {
+        "actionHandlers": [],
+        "navigationTargets": []
+      }
+    },
+    {
+      "path": "src/components/dslm/plan/PlanSection.tsx",
+      "domain": "dslm",
+      "purpose": "Implements Plan Section behavior in the dslm domain.",
+      "exports": [
+        "PlanSection"
+      ],
+      "props": [
+        {
+          "name": "PlanSectionProps",
+          "fields": [
+            {
+              "name": "id",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "title",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "action",
+              "type": "React.ReactNode",
+              "optional": true
+            },
+            {
+              "name": "className",
+              "type": "string",
+              "optional": true
+            },
+            {
+              "name": "children",
+              "type": "React.ReactNode",
+              "optional": false
+            },
+            {
+              "name": "spotlight",
+              "type": "string",
+              "optional": true
+            }
+          ]
+        }
+      ],
+      "state": [],
+      "hooks": [],
+      "actions": [],
+      "navigateTargets": [],
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "storage": [],
+      "userFacingText": [],
+      "userFacingBehavior": {
+        "actionHandlers": [],
+        "navigationTargets": []
+      }
+    },
+    {
+      "path": "src/components/dslm/plan/PlanSegmentSwitch.tsx",
+      "domain": "dslm",
+      "purpose": "Implements Plan Segment Switch behavior in the dslm domain.",
+      "exports": [
+        "PlanSegmentSwitch"
+      ],
+      "props": [
+        {
+          "name": "PlanSegmentSwitchProps",
+          "fields": [
+            {
+              "name": "value",
+              "type": "ModelSegment",
+              "optional": false
+            },
+            {
+              "name": "onChange",
+              "type": "(segment: ModelSegment) => void",
+              "optional": false
+            }
+          ]
+        }
+      ],
+      "state": [],
+      "hooks": [],
+      "actions": [],
+      "navigateTargets": [],
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "storage": [],
+      "userFacingText": [
+        "Learning plan views"
+      ],
+      "userFacingBehavior": {
+        "actionHandlers": [],
+        "navigationTargets": []
+      }
+    },
+    {
+      "path": "src/components/dslm/plan/ReviewStrip.tsx",
+      "domain": "dslm",
+      "purpose": "Implements Review Strip behavior in the dslm domain.",
+      "exports": [
+        "ReviewStrip"
+      ],
+      "props": [
+        {
+          "name": "ReviewStripProps",
+          "fields": [
+            {
+              "name": "studentId",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "englishLevel",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "pendingCount",
+              "type": "number",
+              "optional": false
+            },
+            {
+              "name": "showLevelChange",
+              "type": "boolean",
+              "optional": false
+            },
+            {
+              "name": "pacingProposals",
+              "type": "readonly PacingProposal[]",
+              "optional": false
+            },
+            {
+              "name": "goals",
+              "type": "readonly ProgressGoal[]",
+              "optional": false
+            },
+            {
+              "name": "hasSuggestedGoals",
+              "type": "boolean",
+              "optional": false
+            },
+            {
+              "name": "updateGoal",
+              "type": "(goalId: string, updates: { accepted_at?: string | null }) => Promise<boolean>",
+              "optional": false
+            },
+            {
+              "name": "deleteGoal",
+              "type": "(goalId: string) => Promise<unknown>",
+              "optional": false
+            },
+            {
+              "name": "onResolved",
+              "type": "() => void",
+              "optional": false
+            }
+          ]
+        }
+      ],
+      "state": [],
+      "hooks": [],
+      "actions": [],
+      "navigateTargets": [],
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "storage": [],
+      "userFacingText": [],
+      "userFacingBehavior": {
+        "actionHandlers": [],
+        "navigationTargets": []
+      }
+    },
+    {
+      "path": "src/components/dslm/plan/RoadmapSheet.tsx",
+      "domain": "dslm",
+      "purpose": "Implements Roadmap Sheet behavior in the dslm domain.",
+      "exports": [
+        "RoadmapSheet"
+      ],
+      "props": [
+        {
+          "name": "RoadmapSheetProps",
+          "fields": [
+            {
+              "name": "open",
+              "type": "boolean",
+              "optional": false
+            },
+            {
+              "name": "onOpenChange",
+              "type": "(open: boolean) => void",
+              "optional": false
+            },
+            {
+              "name": "initialPhaseId",
+              "type": "string | null",
+              "optional": false
+            },
+            {
+              "name": "studentId",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "teacherId",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "useRoadmap",
+              "type": "boolean",
+              "optional": false
+            },
+            {
+              "name": "onUseRoadmapChange",
+              "type": "(next: boolean) => void",
+              "optional": true
+            },
+            {
+              "name": "pacingMode",
+              "type": "number",
+              "optional": false
+            },
+            {
+              "name": "onPacingModeChange",
+              "type": "(next: number) => void",
+              "optional": true
+            },
+            {
+              "name": "phaseSteps",
+              "type": "readonly PlanSuggestion[]",
+              "optional": false
+            },
+            {
+              "name": "displayIndexById",
+              "type": "Record<string, number>",
+              "optional": false
+            },
+            {
+              "name": "generatingSteps",
+              "type": "boolean",
+              "optional": false
+            },
+            {
+              "name": "onUseSuggestion",
+              "type": "(s: PlanSuggestion) => void",
+              "optional": false
+            },
+            {
+              "name": "onUseAndGenerate",
+              "type": "(s: PlanSuggestion) => void",
+              "optional": false
+            },
+            {
+              "name": "onEditSuggestion",
+              "type": "(s: PlanSuggestion) => void",
+              "optional": false
+            },
+            {
+              "name": "onDeleteSuggestion",
+              "type": "(id: string) => void",
+              "optional": false
+            },
+            {
+              "name": "onMarkUsed",
+              "type": "(id: string) => void",
+              "optional": false
+            },
+            {
+              "name": "onRegenerateOne",
+              "type": "(id: string, comment: string) => Promise<boolean> | boolean",
+              "optional": false
+            },
+            {
+              "name": "onGenerateForPhase",
+              "type": "(phaseId: string, count: number, comment: string) => Promise<boolean> | boolean",
+              "optional": false
+            }
+          ]
+        }
+      ],
+      "state": [],
+      "hooks": [],
+      "actions": [],
+      "navigateTargets": [],
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "storage": [],
+      "userFacingText": [
+        "Phases from today to the goal. New lesson suggestions follow the phase in progress.",
+        "Roadmap",
+        "Use roadmap when proposing lessons"
+      ],
+      "userFacingBehavior": {
+        "actionHandlers": [],
+        "navigationTargets": []
+      }
+    },
+    {
+      "path": "src/components/dslm/plan/RoadmapStrip.tsx",
+      "domain": "dslm",
+      "purpose": "Implements Roadmap Strip behavior in the dslm domain.",
+      "exports": [
+        "RoadmapStrip"
+      ],
+      "props": [
+        {
+          "name": "RoadmapStripProps",
+          "fields": [
+            {
+              "name": "phases",
+              "type": "readonly RoadmapPhaseView[]",
+              "optional": false
+            },
+            {
+              "name": "currentPhaseId",
+              "type": "string | null",
+              "optional": false
+            },
+            {
+              "name": "queuedInCurrentPhase",
+              "type": "number",
+              "optional": false
+            },
+            {
+              "name": "useRoadmap",
+              "type": "boolean",
+              "optional": false
+            },
+            {
+              "name": "generating",
+              "type": "boolean",
+              "optional": false
+            },
+            {
+              "name": "onOpenPhase",
+              "type": "(phaseId: string | null) => void",
+              "optional": false
+            },
+            {
+              "name": "onGenerateRoadmap",
+              "type": "() => void",
+              "optional": false
+            }
+          ]
+        }
+      ],
+      "state": [],
+      "hooks": [],
+      "actions": [],
+      "navigateTargets": [],
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "storage": [],
+      "userFacingText": [
+        "Edit roadmap",
+        "Generate roadmap",
+        "New suggestions ignore the roadmap until you turn it back on.",
+        "No roadmap yet. Optional — it splits the way to the goal into phases, so lessons come in a sensible order.",
+        "Now:",
+        "Roadmap",
+        "Roadmap paused",
+        "Roadmap phases"
+      ],
+      "userFacingBehavior": {
+        "actionHandlers": [],
+        "navigationTargets": []
+      }
+    },
+    {
+      "path": "src/components/dslm/plan/SetupChecklist.tsx",
+      "domain": "dslm",
+      "purpose": "Implements Setup Checklist behavior in the dslm domain.",
+      "exports": [
+        "SetupChecklist"
+      ],
+      "props": [
+        {
+          "name": "SetupChecklistProps",
+          "fields": [
+            {
+              "name": "studentName",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "steps",
+              "type": "readonly SetupStep[]",
+              "optional": false
+            },
+            {
+              "name": "nextStepKey",
+              "type": "SetupStepKey | null",
+              "optional": false
+            },
+            {
+              "name": "mainGoalLabel",
+              "type": "string | null",
+              "optional": false
+            },
+            {
+              "name": "activeGoalsCount",
+              "type": "number",
+              "optional": false
+            },
+            {
+              "name": "welcomeTest",
+              "type": "{ state: WelcomeTestState; sentAt: string | null }",
+              "optional": false
+            },
+            {
+              "name": "phasesCount",
+              "type": "number",
+              "optional": false
+            },
+            {
+              "name": "currentPhaseCaption",
+              "type": "string | null",
+              "optional": false
+            },
+            {
+              "name": "testBusy",
+              "type": "boolean",
+              "optional": false
+            },
+            {
+              "name": "roadmapBusy",
+              "type": "boolean",
+              "optional": false
+            },
+            {
+              "name": "suggestionsBusy",
+              "type": "boolean",
+              "optional": false
+            },
+            {
+              "name": "onSetMainGoal",
+              "type": "() => void",
+              "optional": false
+            },
+            {
+              "name": "onAddGoal",
+              "type": "() => void",
+              "optional": false
+            },
+            {
+              "name": "onManageGoals",
+              "type": "() => void",
+              "optional": false
+            },
+            {
+              "name": "onSendTest",
+              "type": "() => void",
+              "optional": false
+            },
+            {
+              "name": "onCopyTestLink",
+              "type": "() => void",
+              "optional": false
+            },
+            {
+              "name": "onOpenTestResults",
+              "type": "() => void",
+              "optional": false
+            },
+            {
+              "name": "onGenerateRoadmap",
+              "type": "() => void",
+              "optional": false
+            },
+            {
+              "name": "onOpenRoadmap",
+              "type": "() => void",
+              "optional": false
+            },
+            {
+              "name": "onGetSuggestions",
+              "type": "() => void",
+              "optional": false
+            }
+          ]
+        }
+      ],
+      "state": [],
+      "hooks": [],
+      "actions": [],
+      "navigateTargets": [],
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "storage": [],
+      "userFacingText": [
+        "Add a specific goal",
+        "Copy link",
+        "Generate roadmap",
+        "Get lesson suggestions",
+        "Manage goals",
+        "One-time setup",
+        "Resend email",
+        "See results",
+        "Send Welcome Test",
+        "Set main goal",
+        "View roadmap"
+      ],
+      "userFacingBehavior": {
+        "actionHandlers": [],
+        "navigationTargets": []
+      }
+    },
+    {
+      "path": "src/components/dslm/plan/SuggestedGoalsCard.tsx",
+      "domain": "dslm",
+      "purpose": "Implements Suggested Goals Card behavior in the dslm domain.",
+      "exports": [
+        "SuggestedGoalsCard"
+      ],
+      "props": [
+        {
+          "name": "SuggestedGoalsCardProps",
+          "fields": [
+            {
+              "name": "goals",
+              "type": "readonly ProgressGoal[]",
+              "optional": false
+            },
+            {
+              "name": "updateGoal",
+              "type": "(goalId: string, updates: { accepted_at?: string | null }) => Promise<boolean>",
+              "optional": false
+            },
+            {
+              "name": "deleteGoal",
+              "type": "(goalId: string) => Promise<unknown>",
+              "optional": false
+            },
+            {
+              "name": "onChanged",
+              "type": "() => void",
+              "optional": true
+            }
+          ]
+        }
+      ],
+      "state": [
+        {
+          "value": "optimisticAccepted",
+          "setter": "setOptimisticAccepted",
+          "initial": "new Set()"
+        },
+        {
+          "value": "optimisticDismissed",
+          "setter": "setOptimisticDismissed",
+          "initial": "new Set()"
+        },
+        {
+          "value": "acceptingAll",
+          "setter": "setAcceptingAll",
+          "initial": "false"
+        },
+        {
+          "value": "dismissingAll",
+          "setter": "setDismissingAll",
+          "initial": "false"
+        }
+      ],
+      "hooks": [
+        "useState"
+      ],
+      "actions": [],
+      "navigateTargets": [],
+      "dataDependencies": {
+        "tables": [
+          "student_progress_goals"
+        ],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "storage": [],
+      "userFacingText": [
+        "Accept",
+        "Accept all",
+        "Dismiss",
+        "Dismiss all",
+        "Suggested from Welcome Test",
+        "These goals were inferred from the student's Welcome Test results. Accept to keep them in the plan, dismiss to remove, or edit individual goals below."
+      ],
+      "userFacingBehavior": {
+        "actionHandlers": [],
+        "navigationTargets": []
+      }
+    },
+    {
+      "path": "src/components/dslm/plan/SuggestionActionsMenu.tsx",
+      "domain": "dslm",
+      "purpose": "Implements Suggestion Actions Menu behavior in the dslm domain.",
+      "exports": [
+        "SuggestionActionsMenu"
+      ],
+      "props": [
+        {
+          "name": "SuggestionActionsMenuProps",
+          "fields": [
+            {
+              "name": "topic",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "generating",
+              "type": "boolean",
+              "optional": true
+            },
+            {
+              "name": "onGenerate",
+              "type": "() => void",
+              "optional": true
+            },
+            {
+              "name": "onFillForm",
+              "type": "() => void",
+              "optional": true
+            },
+            {
+              "name": "onEdit",
+              "type": "() => void",
+              "optional": true
+            },
+            {
+              "name": "onRegenerate",
+              "type": "() => void",
+              "optional": true
+            },
+            {
+              "name": "onMarkTaught",
+              "type": "() => void",
+              "optional": true
+            },
+            {
+              "name": "onRestore",
+              "type": "() => void",
+              "optional": true
+            },
+            {
+              "name": "onRemove",
+              "type": "() => void",
+              "optional": true
+            }
+          ]
+        }
+      ],
+      "state": [],
+      "hooks": [],
+      "actions": [],
+      "navigateTargets": [],
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "storage": [],
+      "userFacingText": [
+        "Already taught",
+        "Edit",
+        "Fill the form without generating",
+        "Generate worksheet",
+        "Regenerate with a comment",
+        "Remove",
+        "Restore to the queue"
+      ],
+      "userFacingBehavior": {
+        "actionHandlers": [],
+        "navigationTargets": []
+      }
+    },
+    {
+      "path": "src/components/dslm/plan/SuggestionWhyPanel.tsx",
+      "domain": "dslm",
+      "purpose": "Implements Suggestion Why Panel behavior in the dslm domain.",
+      "exports": [
+        "SuggestionWhyPanel",
+        "buildEvidenceLine"
+      ],
+      "props": [
+        {
+          "name": "SuggestionWhyPanelProps",
+          "fields": [
+            {
+              "name": "suggestion",
+              "type": "SuggestionLike",
+              "optional": false
+            },
+            {
+              "name": "hideRationale",
+              "type": "boolean",
+              "optional": true
+            }
+          ]
+        }
+      ],
+      "state": [],
+      "hooks": [],
+      "actions": [],
+      "navigateTargets": [],
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "storage": [],
+      "userFacingText": [
+        "Expected:",
+        "Grammar:",
+        "Lesson goal:",
+        "Targets:"
+      ],
+      "userFacingBehavior": {
+        "actionHandlers": [],
+        "navigationTargets": []
+      }
+    },
+    {
+      "path": "src/components/dslm/plan/UpNextSection.tsx",
+      "domain": "dslm",
+      "purpose": "Implements Up Next Section behavior in the dslm domain.",
+      "exports": [
+        "UpNextSection"
+      ],
+      "props": [
+        {
+          "name": "UpNextSectionProps",
+          "fields": [
+            {
+              "name": "studentId",
+              "type": "string",
+              "optional": false
+            },
+            {
+              "name": "items",
+              "type": "readonly UpNextItem<PlanSuggestion>[]",
+              "optional": false
+            },
+            {
+              "name": "usedSteps",
+              "type": "readonly PlanSuggestion[]",
+              "optional": false
+            },
+            {
+              "name": "generating",
+              "type": "boolean",
+              "optional": false
+            },
+            {
+              "name": "onAddMore",
+              "type": "() => void",
+              "optional": false
+            },
+            {
+              "name": "onRestore",
+              "type": "(s: PlanSuggestion) => void",
+              "optional": false
+            },
+            {
+              "name": "onRemoveUsed",
+              "type": "(s: PlanSuggestion) => void",
+              "optional": false
+            },
+            {
+              "name": "children",
+              "type": "React.ReactNode",
+              "optional": true
+            }
+          ]
+        }
+      ],
+      "state": [
+        {
+          "value": "open",
+          "setter": "setOpen",
+          "initial": "false"
+        },
+        {
+          "value": "open",
+          "setter": "setOpen",
+          "initial": "false"
+        },
+        {
+          "value": "historyOpen",
+          "setter": "setHistoryOpen",
+          "initial": "false"
+        }
+      ],
+      "hooks": [
+        "useEffect",
+        "useState"
+      ],
+      "actions": [],
+      "navigateTargets": [],
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "storage": [
+        {
+          "storage": "localStorage",
+          "operation": "getItem",
+          "key": "storageKey",
+          "file": "src/components/dslm/plan/UpNextSection.tsx"
+        },
+        {
+          "storage": "localStorage",
+          "operation": "setItem",
+          "key": "storageKey",
+          "file": "src/components/dslm/plan/UpNextSection.tsx"
+        }
+      ],
+      "userFacingText": [
+        "Add suggestions",
+        "Also in Prep",
+        "Edit",
+        "Generate worksheet",
+        "History (",
+        "Later lessons",
+        "Next lesson",
+        "Only the most recent lesson can be restored to the queue.",
+        "Taught lessons",
+        "Up next",
+        "Why:"
       ],
       "userFacingBehavior": {
         "actionHandlers": [],
@@ -28016,6 +28890,11 @@
               "name": "onApplied",
               "type": "(newLevel: string) => void",
               "optional": true
+            },
+            {
+              "name": "onDismissed",
+              "type": "() => void",
+              "optional": true
             }
           ]
         }
@@ -28392,74 +29271,6 @@
       ],
       "userFacingBehavior": {
         "actionHandlers": [],
-        "navigationTargets": []
-      }
-    },
-    {
-      "path": "src/components/student/DslmExplainerBanner.tsx",
-      "domain": "student",
-      "purpose": "Implements Dslm Explainer Banner behavior in the student domain.",
-      "exports": [
-        "DslmExplainerBanner"
-      ],
-      "props": [
-        {
-          "name": "Props",
-          "fields": [
-            {
-              "name": "teacherId",
-              "type": "string",
-              "optional": false
-            }
-          ]
-        }
-      ],
-      "state": [
-        {
-          "value": "dismissed",
-          "setter": "setDismissed",
-          "initial": "() => { try { return localStorage.getItem(storageKey) === 'true'; } catch { return false; } }"
-        }
-      ],
-      "hooks": [
-        "useState"
-      ],
-      "actions": [
-        "handleDismiss"
-      ],
-      "navigateTargets": [],
-      "dataDependencies": {
-        "tables": [],
-        "rpcs": [],
-        "edgeFunctions": [],
-        "fetchTargets": []
-      },
-      "storage": [
-        {
-          "storage": "localStorage",
-          "operation": "getItem",
-          "key": "storageKey",
-          "file": "src/components/student/DslmExplainerBanner.tsx"
-        },
-        {
-          "storage": "localStorage",
-          "operation": "setItem",
-          "key": "storageKey",
-          "file": "src/components/student/DslmExplainerBanner.tsx"
-        }
-      ],
-      "userFacingText": [
-        "(Dynamic Student Learning Model) is the student context layer behind 1-Minute Prep. It organizes stored signals from profile data, goals, Welcome Test answers, nano-skill ratings, homework, notes, worksheet history, flashcard progress, pacing mode, and roadmap phases. Use it to choose, edit, and approve the next lesson direction before worksheet output.",
-        "DSLM",
-        "Dismiss",
-        "Got it",
-        "Learn more",
-        "What is DSLM?"
-      ],
-      "userFacingBehavior": {
-        "actionHandlers": [
-          "handleDismiss"
-        ],
         "navigationTargets": []
       }
     },
@@ -28943,7 +29754,7 @@
       "storage": [],
       "userFacingText": [
         "No focus areas yet",
-        "Open learning model",
+        "Open learning plan",
         "Student snapshot"
       ],
       "userFacingBehavior": {
@@ -29487,12 +30298,15 @@
       },
       "storage": [],
       "userFacingText": [
+        "'s plan",
         "Change topic",
         "Focus",
+        "From",
         "Generate worksheet",
-        "More actions",
         "Next lesson",
-        "See all suggestions"
+        "No plan yet —",
+        "See the plan",
+        "set up"
       ],
       "userFacingBehavior": {
         "actionHandlers": [],
@@ -29702,8 +30516,8 @@
       "storage": [],
       "userFacingText": [
         "Add with details",
-        "All notes → Learning model",
-        "No notes yet — anything you type here feeds the learning model.",
+        "All notes → Learning plan",
+        "No notes yet — anything you type here feeds the learning plan.",
         "Quick note",
         "What did you notice in this lesson?"
       ],
@@ -38321,6 +39135,78 @@
         }
       },
       {
+        "path": "src/hooks/dslm/useLearningPlanData.ts",
+        "domain": "dslm",
+        "purpose": "Implements use Learning Plan Data behavior in the dslm domain.",
+        "exports": [
+          "useLearningPlanData"
+        ],
+        "props": [
+          {
+            "name": "UseLearningPlanDataProps",
+            "fields": [
+              {
+                "name": "studentId",
+                "type": "string",
+                "optional": false
+              },
+              {
+                "name": "teacherId",
+                "type": "string",
+                "optional": false
+              },
+              {
+                "name": "englishLevel",
+                "type": "string",
+                "optional": false
+              },
+              {
+                "name": "mainGoal",
+                "type": "string",
+                "optional": false
+              },
+              {
+                "name": "useRoadmap",
+                "type": "boolean",
+                "optional": false
+              }
+            ]
+          }
+        ],
+        "state": [
+          {
+            "value": "hasLoaded",
+            "setter": "setHasLoaded",
+            "initial": "false"
+          }
+        ],
+        "hooks": [
+          "useCurriculumPhases",
+          "useEffect",
+          "useFutureTimeline",
+          "useMemo",
+          "usePacingProposals",
+          "useState",
+          "useStudentAttentionDots",
+          "useStudentProgress",
+          "useWelcomeTestState"
+        ],
+        "actions": [],
+        "navigateTargets": [],
+        "dataDependencies": {
+          "tables": [],
+          "rpcs": [],
+          "edgeFunctions": [],
+          "fetchTargets": []
+        },
+        "storage": [],
+        "userFacingText": [],
+        "userFacingBehavior": {
+          "actionHandlers": [],
+          "navigationTargets": []
+        }
+      },
+      {
         "path": "src/hooks/dslm/useStudentEvents.tsx",
         "domain": "dslm",
         "purpose": "Implements use Student Events behavior in the dslm domain.",
@@ -38422,6 +39308,39 @@
         "dataDependencies": {
           "tables": [
             "student_learning_profiles"
+          ],
+          "rpcs": [],
+          "edgeFunctions": [],
+          "fetchTargets": []
+        },
+        "storage": [],
+        "userFacingText": [],
+        "userFacingBehavior": {
+          "actionHandlers": [],
+          "navigationTargets": []
+        }
+      },
+      {
+        "path": "src/hooks/dslm/useWelcomeTestState.ts",
+        "domain": "dslm",
+        "purpose": "Implements use Welcome Test State behavior in the dslm domain.",
+        "exports": [
+          "useWelcomeTestState",
+          "welcomeTestStateKey"
+        ],
+        "props": [],
+        "state": [],
+        "hooks": [
+          "useCallback",
+          "useDemoContext",
+          "useQuery",
+          "useQueryClient"
+        ],
+        "actions": [],
+        "navigateTargets": [],
+        "dataDependencies": {
+          "tables": [
+            "student_tests"
           ],
           "rpcs": [],
           "edgeFunctions": [],
@@ -39863,6 +40782,7 @@
           "useCallback",
           "useEffect",
           "useMemo",
+          "useRef",
           "useState"
         ],
         "actions": [],
@@ -43185,8 +44105,7 @@
           "setItem"
         ],
         "files": [
-          "src/components/dslm/NextStepBanner.tsx",
-          "src/components/student/DslmExplainerBanner.tsx",
+          "src/components/dslm/plan/UpNextSection.tsx",
           "src/components/worksheet/DraftTeacherNotes.tsx",
           "src/components/worksheet/ExerciseSection.tsx",
           "src/hooks/useWorksheetFormPersistence.ts",
@@ -52601,7 +53520,7 @@
         ],
         "featureOwnership": {
           "clientFiles": [
-            "src/components/dslm/GoalsView.tsx",
+            "src/components/dslm/plan/SuggestedGoalsCard.tsx",
             "src/hooks/useOnboardingProgress.tsx",
             "src/hooks/useStudentAttentionDots.tsx",
             "src/hooks/useStudentProgress.tsx"
@@ -53021,8 +53940,8 @@
           "clientFiles": [
             "src/components/dashboard/WelcomeTestSuggestion.tsx",
             "src/components/dslm/MacroTimeline.tsx",
-            "src/components/dslm/PathwayView.tsx",
             "src/components/student-tests/TestDetailsView.tsx",
+            "src/hooks/dslm/useWelcomeTestState.ts",
             "src/hooks/useOnboardingProgress.tsx",
             "src/hooks/useStudentTests.tsx",
             "src/hooks/useStudentTimelineSources.ts",

@@ -189,6 +189,36 @@ Header → collapsed snapshot → workspace tabs → status line → 2 segments 
 
 ---
 
-## 12. As built
+## 12. As built (2026-10-05)
 
-Filled in at L8.
+### 12.1 Files
+
+| Path | Role |
+|---|---|
+| `src/lib/dslm/learningPlan.ts` | `orderUpNext`, `findCurrentPhase`, `sortPhases`, `formatPhaseCaption` |
+| `src/lib/dslm/modelReadiness.ts` | `computeModelReadiness`, `resolveWelcomeTestState` |
+| `src/lib/dslm/insightsSummary.ts` | `buildInsightsSummary`, `rankCategories` |
+| `src/lib/dslm/goals.ts` | `isActiveGoal`, `isSuggestedGoal` |
+| `src/lib/dslm/confidenceScore.ts` | `describeFit` (added) |
+| `src/lib/students/workspaceTabs.ts` | `resolveModelSegment`, `MODEL_SEGMENT_VIEWS` (added) |
+| `src/hooks/dslm/useLearningPlanData.ts` | single owner of plan data on the tab |
+| `src/hooks/dslm/useWelcomeTestState.ts` | none / sent / completed (React Query, demo early return) |
+| `src/components/dslm/DSLMTab.tsx` | status line, segments, deep links, `dslm:addGoal` owner |
+| `src/components/dslm/plan/*` | `ModelStatusLine`, `PlanSegmentSwitch`, `HowItWorksPopover`, `SetupChecklist`, `ReviewStrip`, `SuggestedGoalsCard`, `UpNextSection`, `SuggestionWhyPanel`, `SuggestionActionsMenu`, `LessonIdeasNotes`, `RoadmapStrip`, `RoadmapSheet`, `GoalsSummary`, `GoalsSheet`, `AddGoalDialog`, `MainGoalDialog`, `LearningPlanView`, `InsightsView`, `PlanSection` |
+
+Additive changes: `MacroTimeline.initialExpandedPhaseId`, `GoalsView.listenForAddGoalEvents`, `SuggestedLevelChangeBanner.onDismissed`, `useStudentAttentionDots().level`, `DSLMTab.studentEmail`, `PrepSuggestion.phaseCaption`, `selectPrepSuggestion(…, phases)`, `useFutureTimeline` broadcasts `dslm:suggestionsUpdated` (with an `origin` so an instance ignores its own event).
+
+Removed (no importers left): `PathwayView`, `NextStepsSection`, `NextStepBanner`, `ModelCockpitHeader`, `StudentNavBadges`, `StudentPathwayBadges`, `SkillsView`, `LazySection`, `DslmExplainerBanner`, `modelHealth` (+ test), the dead `dslm:openSubsection` listener and `CollapsibleSection.alsoOpenFor`.
+
+### 12.2 Deliberate deviations from the plan
+
+- Onboarding checklist labels ("Generate Next Lesson Ideas", "Use one Next Lesson suggestion") are **unchanged**: `useOnboardingProgress` completes those steps from `student_knowledge_entries` of category "Next Lesson Ideas", not from lesson suggestions, so renaming them to "suggestions" would deepen the mismatch. Tracked separately.
+- The teacher's own "Next Lesson Ideas" notes stay next to the queue ("Your lesson ideas (n)" under Up next and under the setup checklist) instead of moving only into Insights › Notes — they are planning input, not evidence.
+- The DSLMTab `focus` handler marks a deep link as handled inside the animation frame, not before it: under React StrictMode the old order cancelled the frame and swallowed `focus=add-goal-modal` in development.
+
+### 12.3 Verification
+
+- `npx tsc --noEmit -p tsconfig.app.json` clean; `npx vitest run` 340/340 (new: learningPlan 11, modelReadiness 12, insightsSummary 7, workspaceTabs segment cases, prepPlan regression cases; modelHealth tests removed with the module).
+- Playwright on `/demo` (setup stage, 1440×900 and 390×844): content starts at 413 px (was ≈900) and 535 px (was ≈1330); 8 interactive elements in the panel (was 28); one primary button; spotlight ids unique.
+- Playwright on `/demo` with a scratch fixture harness for a populated plan (4 phases, 6 suggestions, 2 used, 3 goals, one Welcome Test goal suggestion): 35 interactive elements in the Plan (≈120 before), 13 on the first 1440×900 screen; `scrollWidth === innerWidth` at 360, 390 and 1440 px; 29/29 checks PASS — 8 legacy aliases, `view=goals` scroll, `focus=add-goal-modal` (exactly one dialog), `focus=pick-idea`, `editSuggestion` from Insights, focus/param consumption, spotlight uniqueness, Up next order, single primary, level not repeated, segment push + Back, roadmap stepper → sheet with the phase expanded, goals sheet, six-action menu, How it works, Explore skills, Generate worksheet hand-off, no page errors.
+- Not verified here (environment has no teacher session): real Supabase data, pacing proposals (need an authenticated teacher), real Welcome Test state. Pending: real-account pass and the 5-teacher Martha test (section 11.7).

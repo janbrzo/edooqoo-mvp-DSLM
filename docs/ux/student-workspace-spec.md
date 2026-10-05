@@ -63,7 +63,7 @@ The only `variant="default"` button on the page is **Generate worksheet** in Pre
 | `prep` | Prep | `Sparkles` | Create the next lesson | eager (default) |
 | `timeline` | Timeline | `Activity` | See what happened and react | `React.lazy` |
 | `library` | Library | `FileText` | Find and reuse existing material | `React.lazy` |
-| `model` | Learning model | `Brain` | Inspect and steer the DSLM | `React.lazy` |
+| `model` | Learning plan (was "Learning model" until 2026-10-05) | `Brain` | Inspect and steer the DSLM — spec: `learning-model-spec.md` | `React.lazy` |
 
 Labels are always visible, at every breakpoint. Four labelled tabs fit on a 360 px viewport, so the icon-only mode is removed from the project. `TabsList` becomes `grid w-full grid-cols-4`.
 
