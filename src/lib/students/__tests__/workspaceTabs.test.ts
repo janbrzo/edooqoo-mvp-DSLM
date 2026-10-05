@@ -1,12 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import {
   DEFAULT_TAB,
+  MODEL_SEGMENT_VIEWS,
   PRESERVED_PARAMS,
   TAB_ALIASES,
   WORKSPACE_TABS,
   buildWorkspaceParams,
   isWorkspaceTab,
   resolveModelPerspective,
+  resolveModelSegment,
   resolveTab,
   resolveWorkspaceParams,
   studentTabPath,
@@ -24,6 +26,36 @@ describe('resolveModelPerspective', () => {
 
   it.each([null, undefined, '', 'unknown'])('defaults %s to roadmap', (view) => {
     expect(resolveModelPerspective(view)).toBe('roadmap');
+  });
+});
+
+describe('resolveModelSegment (Learning plan, 2026-10)', () => {
+  it.each([
+    ['pathway', 'plan', null],
+    ['goals', 'plan', 'goals'],
+    ['GOALS ', 'plan', 'goals'],
+    ['insights', 'insights', null],
+    ['skills', 'insights', 'skills'],
+    ['profile', 'insights', 'profile'],
+  ] as const)('maps view=%s to %s / %s', (view, segment, anchor) => {
+    expect(resolveModelSegment(view)).toEqual({ segment, anchor });
+  });
+
+  it.each([null, undefined, '', 'unknown'])('defaults %s to the plan', (view) => {
+    expect(resolveModelSegment(view)).toEqual({ segment: 'plan', anchor: null });
+  });
+
+  it('writes views that resolve back to the same segment', () => {
+    expect(resolveModelSegment(MODEL_SEGMENT_VIEWS.plan).segment).toBe('plan');
+    expect(resolveModelSegment(MODEL_SEGMENT_VIEWS.insights).segment).toBe('insights');
+  });
+
+  it('legacy aliases keep landing on the right segment', () => {
+    for (const [legacy, segment] of [['skills', 'insights'], ['knowledge', 'insights'], ['events', 'insights'], ['progress', 'plan'], ['dslm', 'plan']] as const) {
+      const { resolved } = resolveWorkspaceParams(new URLSearchParams(`tab=${legacy}`));
+      expect(resolved.tab).toBe('model');
+      expect(resolveModelSegment(resolved.view).segment).toBe(segment);
+    }
   });
 });
 
