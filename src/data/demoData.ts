@@ -1,6 +1,6 @@
 
 import { getDemoLocale, type DemoLocaleNames } from './demoLocales';
-// v6.9.7 — DEMO_WORKSHEET_CONTENT is lazy-imported below to keep ~150 KiB of
+// v6.9.7: DEMO_WORKSHEET_CONTENT is lazy-imported below to keep ~150 KiB of
 // production-grade demo content out of the initial bundle (IP protection +
 // LCP). Static import would defeat the manualChunks split in vite.config.ts.
 
@@ -28,7 +28,7 @@ const STUDENT_PROFILES = [
   {
     id: 'demo-student-1',
     english_level: 'B2',
-    main_goal: 'Business English — prepare for presentations and meetings',
+    main_goal: 'Business English: prepare for presentations and meetings',
     native_language: 'Polish',
     send_overdue_emails: true,
     is_demo_student: false,
@@ -36,7 +36,7 @@ const STUDENT_PROFILES = [
   {
     id: 'demo-student-2',
     english_level: 'A2',
-    main_goal: 'General English — travel and daily communication',
+    main_goal: 'General English: travel and daily communication',
     native_language: 'Spanish',
     send_overdue_emails: true,
     is_demo_student: false,
@@ -44,7 +44,7 @@ const STUDENT_PROFILES = [
   {
     id: 'demo-student-3',
     english_level: 'C1',
-    main_goal: 'Academic English — PhD research papers',
+    main_goal: 'Academic English: PhD research papers',
     native_language: 'Chinese',
     send_overdue_emails: false,
     is_demo_student: false,
@@ -56,7 +56,7 @@ const WORKSHEETS = [
   // Student 1 worksheets (B2 Business)
   {
     id: 'demo-ws-1',
-    title: 'Business Presentations — Persuasive Language',
+    title: 'Business Presentations: Persuasive Language',
     student_id: 'demo-student-1',
     created_at: daysAgo(2),
     form_data: { topic: 'Business Presentations', english_level: 'B2', exercise_types: ['gap-fill', 'matching', 'open-ended'] },
@@ -67,7 +67,7 @@ const WORKSHEETS = [
   },
   {
     id: 'demo-ws-2',
-    title: 'Email Writing — Professional Correspondence',
+    title: 'Email Writing: Professional Correspondence',
     student_id: 'demo-student-1',
     created_at: daysAgo(5),
     form_data: { topic: 'Professional Emails', english_level: 'B2', exercise_types: ['rewriting', 'gap-fill', 'categorization'] },
@@ -78,7 +78,7 @@ const WORKSHEETS = [
   },
   {
     id: 'demo-ws-3',
-    title: 'Meeting Vocabulary — Chairing and Contributing',
+    title: 'Meeting Vocabulary: Chairing and Contributing',
     student_id: 'demo-student-1',
     created_at: daysAgo(9),
     form_data: { topic: 'Meeting Skills', english_level: 'B2', exercise_types: ['matching', 'gap-fill'] },
@@ -89,7 +89,7 @@ const WORKSHEETS = [
   },
   {
     id: 'demo-ws-4',
-    title: 'Negotiation Strategies — Conditionals in Action',
+    title: 'Negotiation Strategies: Conditionals in Action',
     student_id: 'demo-student-1',
     created_at: daysAgo(14),
     form_data: { topic: 'Negotiation Language', english_level: 'B2', exercise_types: ['gap-fill', 'sentence-transformation'] },
@@ -112,7 +112,7 @@ const WORKSHEETS = [
   // Student 2 worksheets (A2 General)
   {
     id: 'demo-ws-6',
-    title: 'At the Airport — Travel Vocabulary',
+    title: 'At the Airport: Travel Vocabulary',
     student_id: 'demo-student-2',
     created_at: daysAgo(3),
     form_data: { topic: 'Airport Travel', english_level: 'A2', exercise_types: ['gap-fill', 'matching'] },
@@ -123,7 +123,7 @@ const WORKSHEETS = [
   },
   {
     id: 'demo-ws-7',
-    title: 'Ordering Food — Restaurant English',
+    title: 'Ordering Food: Restaurant English',
     student_id: 'demo-student-2',
     created_at: daysAgo(8),
     form_data: { topic: 'Restaurant English', english_level: 'A2', exercise_types: ['gap-fill', 'dialogue-completion'] },
@@ -134,7 +134,7 @@ const WORKSHEETS = [
   },
   {
     id: 'demo-ws-8',
-    title: 'Asking for Directions — City Navigation',
+    title: 'Asking for Directions: City Navigation',
     student_id: 'demo-student-2',
     created_at: daysAgo(15),
     form_data: { topic: 'Asking Directions', english_level: 'A2', exercise_types: ['matching', 'gap-fill'] },
@@ -146,7 +146,7 @@ const WORKSHEETS = [
   // Student 3 worksheets (C1 Academic)
   {
     id: 'demo-ws-9',
-    title: 'Academic Writing — Hedging and Modality',
+    title: 'Academic Writing: Hedging and Modality',
     student_id: 'demo-student-3',
     created_at: daysAgo(4),
     form_data: { topic: 'Hedging Language', english_level: 'C1', exercise_types: ['gap-fill', 'rewriting', 'categorization'] },
@@ -157,7 +157,7 @@ const WORKSHEETS = [
   },
   {
     id: 'demo-ws-10',
-    title: 'Research Paper Vocabulary — Linking Words',
+    title: 'Research Paper Vocabulary: Linking Words',
     student_id: 'demo-student-3',
     created_at: daysAgo(12),
     form_data: { topic: 'Linking Words', english_level: 'C1', exercise_types: ['gap-fill', 'categorization'] },
@@ -172,7 +172,7 @@ const WORKSHEETS = [
 const HOMEWORK = [
   {
     id: 'demo-hw-1',
-    title: 'Business Presentations — Homework',
+    title: 'Business Presentations: Homework',
     teacher_id: 'demo-teacher',
     student_id: 'demo-student-1',
     source_worksheet_id: 'demo-ws-1',
@@ -226,7 +226,7 @@ const HOMEWORK = [
   },
   {
     id: 'demo-hw-4',
-    title: 'Airport Vocabulary — Homework',
+    title: 'Airport Vocabulary: Homework',
     teacher_id: 'demo-teacher',
     student_id: 'demo-student-2',
     source_worksheet_id: 'demo-ws-6',
@@ -304,7 +304,7 @@ const FLASHCARD_SETS = [
   },
   {
     id: 'demo-fc-set-3',
-    title: 'Travel Vocabulary — Airport',
+    title: 'Travel Vocabulary: Airport',
     description: 'Essential airport and travel words',
     teacher_id: 'demo-teacher',
     student_id: 'demo-student-2',
@@ -389,21 +389,21 @@ const KNOWLEDGE_ENTRIES = [
   { id: 'demo-know-1', student_id: 'demo-student-1', teacher_id: 'demo-teacher', category: 'Personal', content: 'Works as a marketing manager at a tech startup. Needs English for international client meetings and quarterly presentations.', entry_source: 'manual', tags: ['Work'], created_at: daysAgo(30) },
   { id: 'demo-know-2', student_id: 'demo-student-1', teacher_id: 'demo-teacher', category: 'Personal', content: 'Enjoys hiking and photography. Traveled to Scotland last summer. Interested in British culture.', entry_source: 'manual', tags: ['Hobbies', 'Travel'], created_at: daysAgo(28) },
   { id: 'demo-know-3', student_id: 'demo-student-1', teacher_id: 'demo-teacher', category: 'Goals', content: 'Wants to achieve C1 level within 6 months. Immediate goal: deliver a 15-minute presentation at the European Marketing Summit in September.', entry_source: 'manual', tags: [], created_at: daysAgo(25) },
-  { id: 'demo-know-4', student_id: 'demo-student-1', teacher_id: 'demo-teacher', category: 'Skill Assessment', content: 'Strong reading comprehension. Writing needs work — especially formal register. Speaking is fluent but lacks precision in business idioms. Grammar: conditionals and reported speech need review.', entry_source: 'manual', tags: ['Writing', 'Speaking', 'Grammar'], created_at: daysAgo(20), metadata: { mastery: 65, skills: ['conditionals', 'reported-speech', 'formal-register'] } },
+  { id: 'demo-know-4', student_id: 'demo-student-1', teacher_id: 'demo-teacher', category: 'Skill Assessment', content: 'Strong reading comprehension. Writing needs work: especially formal register. Speaking is fluent but lacks precision in business idioms. Grammar: conditionals and reported speech need review.', entry_source: 'manual', tags: ['Writing', 'Speaking', 'Grammar'], created_at: daysAgo(20), metadata: { mastery: 65, skills: ['conditionals', 'reported-speech', 'formal-register'] } },
   { id: 'demo-know-5', student_id: 'demo-student-1', teacher_id: 'demo-teacher', category: 'Notes', content: 'Responds well to role-play exercises. Prefers correction after speaking, not during.', entry_source: 'manual', tags: [], created_at: daysAgo(15) },
   { id: 'demo-know-6', student_id: 'demo-student-1', teacher_id: 'demo-teacher', category: 'Next Lesson Ideas', content: 'Practice handling difficult questions during Q&A sessions. Use TED Talk as model.', entry_source: 'manual', tags: [], created_at: daysAgo(3) },
   { id: 'demo-know-13', student_id: 'demo-student-1', teacher_id: 'demo-teacher', category: 'Skill Assessment', title: 'Past simple vs present perfect', content: 'Mixes past simple and present perfect when summarising campaign results ("We have launched it last quarter").', entry_source: 'manual', tags: ['Grammar'], created_at: daysAgo(2), metadata: { skill_subtype: 'weakness', skill_slug: 'past-simple-vs-present-perfect' } },
 
   // Student 2
   { id: 'demo-know-7', student_id: 'demo-student-2', teacher_id: 'demo-teacher', category: 'Personal', content: 'University student, 22 years old. Planning a backpacking trip across Southeast Asia. Loves cooking and watching Netflix series in English.', entry_source: 'manual', tags: ['Travel', 'Hobbies'], created_at: daysAgo(20) },
-  { id: 'demo-know-8', student_id: 'demo-student-2', teacher_id: 'demo-teacher', category: 'Goals', content: 'Reach B1 before the trip in August. Focus: survival English — airports, hotels, restaurants, asking for help.', entry_source: 'manual', tags: [], created_at: daysAgo(18) },
+  { id: 'demo-know-8', student_id: 'demo-student-2', teacher_id: 'demo-teacher', category: 'Goals', content: 'Reach B1 before the trip in August. Focus: survival English: airports, hotels, restaurants, asking for help.', entry_source: 'manual', tags: [], created_at: daysAgo(18) },
   { id: 'demo-know-9', student_id: 'demo-student-2', teacher_id: 'demo-teacher', category: 'Skill Assessment', content: 'Basic grammar is solid. Vocabulary limited to everyday topics. Listening comprehension: struggles with native speaker speed. Pronunciation: good intonation, needs work on /θ/ and /ð/.', entry_source: 'manual', tags: ['Vocabulary', 'Listening', 'Pronunciation'], created_at: daysAgo(15), metadata: { mastery: 35, skills: ['basic-grammar', 'travel-vocabulary', 'pronunciation'] } },
   { id: 'demo-know-14', student_id: 'demo-student-2', teacher_id: 'demo-teacher', category: 'Skill Assessment', title: 'Articles a/an/the', content: 'Drops articles in travel situations ("I need taxi to airport").', entry_source: 'manual', tags: ['Grammar'], created_at: daysAgo(4), metadata: { skill_subtype: 'weakness', skill_slug: 'articles' } },
 
   // Student 3
   { id: 'demo-know-10', student_id: 'demo-student-3', teacher_id: 'demo-teacher', category: 'Personal', content: 'PhD candidate in Environmental Science. Needs to publish in English-language journals. Native Mandarin speaker with strong IELTS score (7.5).', entry_source: 'manual', tags: ['Work', 'Academic'], created_at: daysAgo(25) },
   { id: 'demo-know-11', student_id: 'demo-student-3', teacher_id: 'demo-teacher', category: 'Goals', content: 'Submit first paper to Nature Sustainability. Improve academic hedging and argumentation. Prepare for viva voce (oral defense).', entry_source: 'manual', tags: [], created_at: daysAgo(22) },
-  { id: 'demo-know-12', student_id: 'demo-student-3', teacher_id: 'demo-teacher', category: 'Skill Assessment', content: 'Excellent grammar and vocabulary range. Academic writing style sometimes too direct — needs more hedging. Speaking: occasionally over-relies on memorized phrases. Needs to develop spontaneous argumentation skills.', entry_source: 'manual', tags: ['Academic Writing', 'Hedging', 'Speaking'], created_at: daysAgo(18), metadata: { mastery: 82, skills: ['academic-writing', 'hedging', 'argumentation'] } },
+  { id: 'demo-know-12', student_id: 'demo-student-3', teacher_id: 'demo-teacher', category: 'Skill Assessment', content: 'Excellent grammar and vocabulary range. Academic writing style sometimes too direct, needs more hedging. Speaking: occasionally over-relies on memorized phrases. Needs to develop spontaneous argumentation skills.', entry_source: 'manual', tags: ['Academic Writing', 'Hedging', 'Speaking'], created_at: daysAgo(18), metadata: { mastery: 82, skills: ['academic-writing', 'hedging', 'argumentation'] } },
   { id: 'demo-know-15', student_id: 'demo-student-3', teacher_id: 'demo-teacher', category: 'Skill Assessment', title: 'Linking words in emails', content: 'Overuses "moreover" and "furthermore" in correspondence with journal editors; needs lighter connectors.', entry_source: 'manual', tags: ['Academic Writing'], created_at: daysAgo(5), metadata: { skill_subtype: 'weakness', skill_slug: 'linking-words' } },
 ];
 
@@ -484,7 +484,7 @@ export async function buildDemoData(countryCode: string): Promise<DemoDataSet> {
     if (slot.student_id) {
       const studentIdx = STUDENT_PROFILES.findIndex((s) => s.id === slot.student_id);
       if (studentIdx >= 0) {
-        slot.title = `Lesson — ${locale.students[studentIdx].firstName} ${locale.students[studentIdx].lastName}`;
+        slot.title = `Lesson: ${locale.students[studentIdx].firstName} ${locale.students[studentIdx].lastName}`;
       }
     }
     return slot;

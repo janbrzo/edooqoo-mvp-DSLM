@@ -26,7 +26,7 @@ interface Stage {
 const FAQS = [
   { question: 'Is this lesson plan generator free?', answer: 'Yes. The plan is rendered locally in your browser. No sign-up, no email, no payment.' },
   { question: 'Can I edit the result?', answer: 'Yes. Copy the plan, download it as HTML, or paste it into Google Docs and edit freely.' },
-  { question: 'Does it work for 1-on-1 adult lessons?', answer: 'Yes — the structure follows andragogical principles (relevance to learner goals, immediate application, autonomy).' },
+  { question: 'Does it work for 1-on-1 adult lessons?', answer: 'Yes: the structure follows andragogical principles (relevance to learner goals, immediate application, autonomy).' },
   { question: 'How is this different from the worksheets I generate inside Edooqoo?', answer: 'This tool produces a structured plan (stages, timing, materials). Edooqoo worksheets fill the practice and production stages with personalized exercises.' },
 ];
 
@@ -82,15 +82,15 @@ function buildStages(form: FormState): Stage[] {
 
 function renderHtml(form: FormState, stages: Stage[]): string {
   const total = stages.reduce((s, x) => s + x.minutes, 0);
-  return `<!doctype html><html><head><meta charset="utf-8"><title>Lesson Plan — ${form.topic || 'Untitled'} (${form.level})</title>
+  return `<!doctype html><html><head><meta charset="utf-8"><title>Lesson Plan: ${form.topic || 'Untitled'} (${form.level})</title>
 <style>body{font-family:system-ui,sans-serif;max-width:780px;margin:2rem auto;padding:0 1rem;color:#111}h1{margin-bottom:.25rem}table{border-collapse:collapse;width:100%;margin-top:1rem}th,td{border:1px solid #ddd;padding:.5rem;vertical-align:top;text-align:left}th{background:#f6f6f6}small{color:#666}</style></head>
 <body>
 <h1>${form.topic || 'Lesson plan'}</h1>
-<small>Level: ${form.level} · Duration: ${total} min · Learner: ${form.persona || 'adult learner'} · Goal: ${form.goal || '—'}</small>
+<small>Level: ${form.level} · Duration: ${total} min · Learner: ${form.persona || 'adult learner'} · Goal: ${form.goal || '-'}</small>
 <table><thead><tr><th>Stage</th><th>Min</th><th>Description</th><th>Materials</th></tr></thead><tbody>
 ${stages.map((s) => `<tr><td>${s.name}</td><td>${s.minutes}</td><td>${s.description}</td><td>${s.materials.join('<br>')}</td></tr>`).join('')}
 </tbody></table>
-<p><small>Generated with Edooqoo — https://edooqoo.com/tools/lesson-plan-generator</small></p>
+<p><small>Generated with Edooqoo: https://edooqoo.com/tools/lesson-plan-generator</small></p>
 </body></html>`;
 }
 
@@ -136,8 +136,8 @@ const LessonPlanGenerator: React.FC = () => {
   return (
     <div className="min-h-screen bg-background">
       <PageSeo
-        title="Free ESL Lesson Plan Generator — 1-on-1 Adult Learners"
-        description="Free ESL lesson plan generator. Choose topic, CEFR level, duration — get a printable 6-stage plan for adult 1-on-1 English lessons. No sign-up."
+        title="Free ESL Lesson Plan Generator: 1-on-1 Adult Learners"
+        description="Free ESL lesson plan generator. Choose topic, CEFR level, duration, get a printable 6-stage plan for adult 1-on-1 English lessons. No sign-up."
         path="/tools/lesson-plan-generator"
         ogType="article"
         jsonLd={[
@@ -253,7 +253,7 @@ const LessonPlanGenerator: React.FC = () => {
               </div>
             </div>
             <p className="text-sm text-muted-foreground mb-4">
-              Level {form.level} · {form.duration} minutes · Goal: {form.goal || '—'}
+              Level {form.level} · {form.duration} minutes · Goal: {form.goal || '-'}
             </p>
             <ol className="space-y-3">
               {stages.map((s, i) => (

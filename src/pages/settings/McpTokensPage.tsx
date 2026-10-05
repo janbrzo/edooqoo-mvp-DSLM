@@ -3,6 +3,7 @@ import { AuthenticatedPageShell } from '@/components/AuthenticatedPageShell';
 import StickyNav from '@/components/landing/StickyNav';
 import { useNavigate } from 'react-router-dom';
 import { useAuthFlow } from '@/hooks/useAuthFlow';
+import { useTeacherAuthRedirect } from '@/hooks/useTeacherAuthRedirect';
 import { useTokenSystem } from '@/hooks/useTokenSystem';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -44,9 +45,7 @@ const McpTokensPage: React.FC = () => {
   const [createOpen, setCreateOpen] = useState(false);
   const [freshToken, setFreshToken] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!authLoading && (!user || !isRegisteredUser)) navigate('/login');
-  }, [authLoading, user, isRegisteredUser, navigate]);
+  useTeacherAuthRedirect(authLoading, !!user && !!isRegisteredUser);
 
   const load = async () => {
     setLoading(true);
@@ -124,7 +123,7 @@ const McpTokensPage: React.FC = () => {
               </div>
             </div>
             <ol className="list-decimal space-y-1 pl-5 text-muted-foreground">
-              <li>Generate a Personal MCP Token below (shown only once — copy immediately).</li>
+              <li>Generate a Personal MCP Token below (shown only once: copy immediately).</li>
               <li>In your AI client (e.g. Claude Desktop), add an MCP server with URL <code className="break-all">{MCP_ENDPOINT}</code> and header <code>Authorization: Bearer &lt;your token&gt;</code>.</li>
               <li>The assistant will see tools: <code>list_students</code>, <code>get_student_summary</code>, <code>list_recent_worksheets</code> (plus public catalog tools).</li>
             </ol>

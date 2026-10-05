@@ -1,4 +1,4 @@
-/** WorksheetLibraryRow — dense worksheet row with one consolidated action menu. */
+/** WorksheetLibraryRow: dense worksheet row with one consolidated action menu. */
 import React from 'react';
 import { CopyPlus, ExternalLink, FileText, MoreHorizontal, Pencil, Share2 } from 'lucide-react';
 import { EntityRow } from '@/components/student/EntityRow';

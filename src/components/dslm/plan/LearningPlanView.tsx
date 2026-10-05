@@ -1,5 +1,5 @@
 /**
- * LearningPlanView — the "Plan" segment of the Learning plan tab.
+ * LearningPlanView: the "Plan" segment of the Learning plan tab.
  *
  * Stage-driven (see `computeModelReadiness`):
  *  - setup  → SetupChecklist (Goal → Level check → Roadmap → Next lessons)
@@ -10,7 +10,7 @@
  * once by DSLMTab. The full editors (MacroTimeline, GoalsView) open unchanged
  * in side sheets. Generation keeps the existing contract:
  * `onUseWorksheetSuggestion` → `writeAutoGenerateIntent` / sessionStorage
- * prefill in StudentPage — the Worksheet Generation Engine is untouched.
+ * prefill in StudentPage: the Worksheet Generation Engine is untouched.
  */
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';

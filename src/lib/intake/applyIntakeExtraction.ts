@@ -1,6 +1,6 @@
-// v6.9.62 P6 — Thin client wrapper around the apply_intake_extraction RPC.
+// v6.9.62 P6: Thin client wrapper around the apply_intake_extraction RPC.
 // Used by AddStudentDialog (after the student row is created) to seed the
-// profile from an AI extraction. The RPC is atomic — all-or-nothing.
+// profile from an AI extraction. The RPC is atomic, all-or-nothing.
 import { supabase } from '@/integrations/supabase/client';
 
 export interface IntakeExtractionPayload {

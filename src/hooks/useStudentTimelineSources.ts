@@ -1,5 +1,5 @@
 /**
- * useStudentTimelineSources — the three extra reads the Timeline tab needs
+ * useStudentTimelineSources: the three extra reads the Timeline tab needs
  * (v6.9.111, M5 step 2).
  *
  * Worksheets and knowledge entries are already loaded by `StudentPage`, so this
@@ -8,7 +8,7 @@
  * the first time the Timeline tab is opened, never on page load.
  *
  * Demo mode answers from `demoData` and issues zero Supabase calls. Any failure
- * degrades to an empty list — the timeline must never break the student page.
+ * degrades to an empty list; the timeline must never break the student page.
  */
 
 import { useQuery } from '@tanstack/react-query';
@@ -83,6 +83,7 @@ export function useStudentTimelineSources(
             title: (hw.title as string | null) ?? null,
             created_at: (hw.created_at as string | null) ?? null,
             completed_at: (hw.completed_at as string | null) ?? null,
+            reviewed_at: (hw.reviewed_at as string | null) ?? null,
             completed_by_teacher: (hw.completed_by_teacher as boolean | null) ?? null,
           }));
 
@@ -102,7 +103,7 @@ export function useStudentTimelineSources(
           .limit(LESSON_LIMIT),
         supabase
           .from('homework_assignments')
-          .select('id, title, created_at, completed_at, completed_by_teacher')
+          .select('id, title, created_at, completed_at, reviewed_at, completed_by_teacher')
           .eq('student_id', studentId!)
           .order('created_at', { ascending: false })
           .limit(HOMEWORK_LIMIT),

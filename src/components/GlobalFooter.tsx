@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
-// v6.9.22 — Footer link helper. .html → static file (full-page nav); clean path → SPA Link.
+// v6.9.22: Footer link helper. .html → static file (full-page nav); clean path → SPA Link.
 const FooterLink: React.FC<{ href: string; children: React.ReactNode }> = ({ href, children }) => {
   if (href.endsWith('.html')) {
     return (
@@ -106,7 +106,7 @@ const GlobalFooter = () => {
             </ul>
           </div>
 
-          {/* Column 5: Compare (restored v6.9.22 — all .html files exist) */}
+          {/* Column 5: Compare (restored v6.9.22: all .html files exist) */}
           <div>
             <h3 className="font-semibold text-foreground mb-3 text-sm">Compare</h3>
             <ul className="space-y-2 text-sm">

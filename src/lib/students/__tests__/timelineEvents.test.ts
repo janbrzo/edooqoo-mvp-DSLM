@@ -43,7 +43,7 @@ describe('combineSlotDateTime', () => {
   });
 });
 
-describe('buildTimelineEvents — type mapping', () => {
+describe('buildTimelineEvents: type mapping', () => {
   it('maps a lesson with needs_review to an actionable event', () => {
     const [e] = buildTimelineEvents({
       lessons: [{ id: 'l1', slot_date: '2026-09-10', start_time: '18:00:00', status: 'needs_review' }],
@@ -111,7 +111,7 @@ describe('buildTimelineEvents — type mapping', () => {
     });
     expect(events).toHaveLength(1);
     expect(events[0].type).toBe('mastery_change');
-    expect(events[0].title).toBe('past simple — mastery 42%');
+    expect(events[0].title).toBe('past simple: mastery 42%');
     expect(events[0].at).toBe(iso('2026-09-10T10:00:00'));
     expect(events[0].href).toBe('?tab=dslm');
   });
@@ -148,7 +148,7 @@ describe('buildTimelineEvents — type mapping', () => {
     expect(e.subtitle).toBe('Score 71%');
     expect(e.needsAction).toBe(true);
     expect(e.actionLabel).toBe('Review');
-    // v6.9.111 M7.5 — deep link opens the test details panel directly.
+    // v6.9.111 M7.5: deep link opens the test details panel directly.
     expect(e.href).toBe('?tab=timeline&filter=tests&testId=t1');
   });
 
@@ -163,7 +163,7 @@ describe('buildTimelineEvents — type mapping', () => {
   });
 });
 
-describe('buildTimelineEvents — homework pairing', () => {
+describe('buildTimelineEvents: homework pairing', () => {
   it('emits two events for a returned homework', () => {
     const events = buildTimelineEvents({
       homework: [
@@ -177,7 +177,7 @@ describe('buildTimelineEvents — homework pairing', () => {
       ],
     });
     expect(events.map((e) => e.type)).toEqual(['homework_returned', 'homework_sent']);
-    expect(events[0].title).toBe('Homework returned — Past Simple drill');
+    expect(events[0].title).toBe('Homework returned: Past Simple drill');
     expect(events[0].needsAction).toBe(true);
     expect(events[0].subtitle).toBe('Waiting for your review');
     expect(events[1].needsAction).toBe(false);
@@ -201,6 +201,57 @@ describe('buildTimelineEvents — homework pairing', () => {
     expect(returned.actionLabel).toBeUndefined();
   });
 
+  it('marks a return the teacher already reviewed as not actionable', () => {
+    const events = buildTimelineEvents({
+      homework: [
+        {
+          id: 'h4',
+          title: 'Drill',
+          created_at: iso('2026-09-08T09:00:00'),
+          completed_at: iso('2026-09-10T09:12:00'),
+          reviewed_at: iso('2026-09-11T10:00:00'),
+          completed_by_teacher: null,
+        },
+      ],
+    });
+    const returned = events.find((e) => e.type === 'homework_returned')!;
+    expect(returned.needsAction).toBe(false);
+    expect(returned.subtitle).toBe('Reviewed');
+    expect(returned.actionLabel).toBeUndefined();
+    expect(returned.href).toBe('/homework/h4/review');
+  });
+
+  it('opens the review page for a student return and the list for the sent event', () => {
+    const events = buildTimelineEvents({
+      homework: [
+        {
+          id: 'h5',
+          title: 'Drill',
+          created_at: iso('2026-09-08T09:00:00'),
+          completed_at: iso('2026-09-10T09:12:00'),
+          reviewed_at: null,
+        },
+      ],
+    });
+    expect(events.find((e) => e.type === 'homework_returned')!.href).toBe('/homework/h5/review');
+    expect(events.find((e) => e.type === 'homework_sent')!.href).toBe('?tab=homework');
+  });
+
+  it('keeps teacher-marked completion on the homework list', () => {
+    const events = buildTimelineEvents({
+      homework: [
+        {
+          id: 'h6',
+          title: 'Drill',
+          created_at: iso('2026-09-08T09:00:00'),
+          completed_at: iso('2026-09-10T09:12:00'),
+          completed_by_teacher: true,
+        },
+      ],
+    });
+    expect(events.find((e) => e.type === 'homework_returned')!.href).toBe('?tab=homework');
+  });
+
   it('emits only the sent event when homework is still open', () => {
     const events = buildTimelineEvents({
       homework: [{ id: 'h3', title: 'Open', created_at: iso('2026-09-08T09:00:00') }],
@@ -210,7 +261,7 @@ describe('buildTimelineEvents — homework pairing', () => {
   });
 });
 
-describe('buildTimelineEvents — exclusions', () => {
+describe('buildTimelineEvents: exclusions', () => {
   it('skips deleted, outdated and archived knowledge entries', () => {
     const events = buildTimelineEvents({
       knowledgeEntries: [

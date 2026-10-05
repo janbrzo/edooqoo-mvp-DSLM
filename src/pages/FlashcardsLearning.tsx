@@ -62,7 +62,7 @@ export default function FlashcardsLearning() {
 
   const fetchAllCards = async (_setId: string) => {
     try {
-      // v6.9.83 — share-token scoped RPC (public table policy removed for security)
+      // v6.9.83: share-token scoped RPC (public table policy removed for security)
       const { data, error } = await supabase.rpc('get_flashcard_cards_by_share_token', {
         p_share_token: token,
       });

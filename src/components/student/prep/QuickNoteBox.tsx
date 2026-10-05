@@ -1,5 +1,5 @@
 /**
- * QuickNoteBox — "what should I remember" (v6.9.111, M4 step 2).
+ * QuickNoteBox: "what should I remember" (v6.9.111, M4 step 2).
  *
  * One frictionless field plus the three most recent notes. Saving and tagging
  * are owned by the page (`studentKnowledge.addEntry` / the quick-add modal);
@@ -99,7 +99,7 @@ export const QuickNoteBox: React.FC<QuickNoteBoxProps> = ({
             ))
           ) : (
             <p className="text-sm text-muted-foreground">
-              No notes yet — anything you type here feeds the learning plan.
+              No notes yet: anything you type here feeds the learning plan.
             </p>
           )}
         </div>

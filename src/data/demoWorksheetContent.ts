@@ -1,6 +1,6 @@
 // AUTO-GENERATED demo worksheet content sourced from production preview env (10 worksheets).
 // Used to enrich demoData.ts so demo worksheets render full UI in /worksheet/:id.
-// Do not edit by hand — re-run scripts/build-demo-worksheets.mjs.
+// Do not edit by hand, re-run scripts/build-demo-worksheets.mjs.
 export const DEMO_WORKSHEET_CONTENT: Record<string, { title: string; form_data: any; ai_response: string; html_content: string; generation_time_seconds: number }> = {
   "demo-ws-1": {
     "title": "Planning Our Alpine Adventure",
@@ -96,7 +96,7 @@ export const DEMO_WORKSHEET_CONTENT: Record<string, { title: string; form_data: 
         "voice": "nova",
         "source": "openai-tts-generated",
         "duration": 90,
-        "transcript": "Hey Sarah, so here’s the plan. We’re going to throw a surprise party for Jake’s birthday next Saturday. I was thinking we could have it at my house around 7 p.m. – it’s a Saturday, so that should work for most people, right?\n\nI’ve already checked with Mark and Emily, and they’re in. But we still need to figure out food and decorations. I was thinking we could order a big pizza, maybe a couple of them, since Jake loves pizza. What do you think? Should we also have some snacks on the side, maybe chips and dip?\n\nOh, and about decorations—I can pick up some balloons and a “Happy Birthday” banner from that party store on Main Street. They usually have good stuff for like 10 bucks. \n\nNow, here's the tricky part—how do we get Jake to my house without him suspecting anything? Maybe you can invite him to dinner and casually swing by? Let’s figure that out. Oh, and we can ask everyone to arrive 30 minutes early, so we’re ready when he gets there.\n\nThis is gonna be so much fun! Let’s make it a birthday he won’t forget. Let me know what you think about the food and the plan, okay?",
+        "transcript": "Hey Sarah, so here’s the plan. We’re going to throw a surprise party for Jake’s birthday next Saturday. I was thinking we could have it at my house around 7 p.m. – it’s a Saturday, so that should work for most people, right?\n\nI’ve already checked with Mark and Emily, and they’re in. But we still need to figure out food and decorations. I was thinking we could order a big pizza, maybe a couple of them, since Jake loves pizza. What do you think? Should we also have some snacks on the side, maybe chips and dip?\n\nOh, and about decorations; I can pick up some balloons and a “Happy Birthday” banner from that party store on Main Street. They usually have good stuff for like 10 bucks. \n\nNow, here's the tricky part: how do we get Jake to my house without him suspecting anything? Maybe you can invite him to dinner and casually swing by? Let’s figure that out. Oh, and we can ask everyone to arrive 30 minutes early, so we’re ready when he gets there.\n\nThis is gonna be so much fun! Let’s make it a birthday he won’t forget. Let me know what you think about the food and the plan, okay?",
         "ai_generated_audio_url": "https://pub-1b974ada9ae240948229c52d927980ee.r2.dev/audio/audio-1772700127994-nova.mp3"
       },
       "selectedImage": null,

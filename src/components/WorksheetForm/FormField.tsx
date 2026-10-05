@@ -12,10 +12,10 @@ interface FormFieldProps {
   suggestions: Array<{ id: string; title: string }>;
   isOptional?: boolean;
   isRequired?: boolean;
-  /** Optional input name attribute — used for DOM-fallback reads (v4.7 stale-closure recovery). */
+  /** Optional input name attribute, used for DOM-fallback reads (v4.7 stale-closure recovery). */
   name?: string;
   /**
-   * v6.9.94 — hard character budget for this field. The backend rejects any
+   * v6.9.94: hard character budget for this field. The backend rejects any
    * assembled prompt over 5000 chars (generateWorksheet/security.ts), and the
    * prompt scaffolding alone consumes ~2.6k, so unbounded pasting into a single
    * field used to produce an opaque HTTP 400 for the teacher.

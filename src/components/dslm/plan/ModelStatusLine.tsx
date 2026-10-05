@@ -1,5 +1,5 @@
 /**
- * ModelStatusLine — one sentence about the state of the student's plan,
+ * ModelStatusLine: one sentence about the state of the student's plan,
  * at most one optional hint, and "How it works". Replaces the cockpit stats
  * (level, lessons, worksheets, pacing, goal badges): every number here
  * drives a decision.
@@ -18,7 +18,7 @@ export interface ModelStatusLineProps {
   totalSteps: number;
   pendingReviewCount: number;
   queuedCount: number;
-  /** `Phase 2 of 4` — null when there is no phase in progress. */
+  /** `Phase 2 of 4`: null when there is no phase in progress. */
   phaseProgress: string | null;
   roadmapPaused: boolean;
   improvement: ReadinessImprovement | null;

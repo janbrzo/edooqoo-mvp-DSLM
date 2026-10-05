@@ -103,7 +103,7 @@ export const useStudentProgress = ({ studentId, teacherId }: UseStudentProgressP
       setGoals(prev => [...prev, newGoal]);
       toast.success('Goal added successfully');
 
-      // v5.1: trigger pacing proposal — and surface the result to the teacher.
+      // v5.1: trigger pacing proposal, and surface the result to the teacher.
       if (targetDate) {
         (async () => {
           try {
@@ -122,10 +122,10 @@ export const useStudentProgress = ({ studentId, teacherId }: UseStudentProgressP
             if (result.proposalId) {
               window.dispatchEvent(new CustomEvent('pacingProposalChanged'));
               toast.message('Pacing review proposed', {
-                description: `${result.current ?? '?'} → ${result.proposed} — open the bell to accept or dismiss.`,
+                description: `${result.current ?? '?'} → ${result.proposed}: open the bell to accept or dismiss.`,
               });
             } else if (result.skipped) {
-              toast.message('Pacing checked — no change needed', {
+              toast.message('Pacing checked: no change needed', {
                 description: `Current ${result.current ?? '?'}/100 stays optimal (${result.skipReason || 'no significant change'}).`,
               });
             }
@@ -203,10 +203,10 @@ export const useStudentProgress = ({ studentId, teacherId }: UseStudentProgressP
             if (result.proposalId) {
               window.dispatchEvent(new CustomEvent('pacingProposalChanged'));
               toast.message('Pacing review proposed', {
-                description: `${result.current ?? '?'} → ${result.proposed} — open the bell to accept or dismiss.`,
+                description: `${result.current ?? '?'} → ${result.proposed}: open the bell to accept or dismiss.`,
               });
             } else if (result.skipped) {
-              toast.message('Pacing checked — no change needed', {
+              toast.message('Pacing checked: no change needed', {
                 description: `Current ${result.current ?? '?'}/100 stays optimal (${result.skipReason || 'no significant change'}).`,
               });
             }
@@ -243,7 +243,7 @@ export const useStudentProgress = ({ studentId, teacherId }: UseStudentProgressP
     }
   };
 
-  // v5.0: archive / unarchive (different from soft-delete — kept visible in dedicated section).
+  // v5.0: archive / unarchive (different from soft-delete: kept visible in dedicated section).
   const archiveGoal = async (goalId: string): Promise<boolean> => {
     try {
       const { error } = await supabase

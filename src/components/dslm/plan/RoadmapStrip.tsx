@@ -1,5 +1,5 @@
 /**
- * RoadmapStrip — the roadmap at a glance: one marker per phase (done / now /
+ * RoadmapStrip: the roadmap at a glance: one marker per phase (done / now /
  * planned) and one sentence about the phase in progress. Every phase opens
  * the roadmap panel, where the full editor (MacroTimeline) lives unchanged.
  */
@@ -82,7 +82,7 @@ export const RoadmapStrip: React.FC<RoadmapStripProps> = ({
       {phases.length === 0 ? (
         <div className="flex flex-col gap-3 rounded-lg border border-dashed border-border p-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-sm text-muted-foreground">
-            No roadmap yet. Optional — it splits the way to the goal into phases, so lessons come in a sensible order.
+            No roadmap yet. Optional: it splits the way to the goal into phases, so lessons come in a sensible order.
           </p>
           <Button variant="outline" size="sm" onClick={onGenerateRoadmap} disabled={generating} className="shrink-0">
             <Map className="mr-1.5 h-4 w-4" aria-hidden="true" /> Generate roadmap

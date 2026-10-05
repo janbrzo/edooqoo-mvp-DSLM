@@ -49,7 +49,7 @@ interface WelcomeTestSuggestionProps {
    * NOT also hide it in 1 MINUTE (and vice versa). v6.8.5.
    */
   surface?: 'overview' | 'oneMinute';
-  /** v6.9.33 — compact layout for embedding inside DSLM Pathway. */
+  /** v6.9.33: compact layout for embedding inside DSLM Pathway. */
   compact?: boolean;
 }
 
@@ -62,11 +62,11 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
   const [testId, setTestId] = useState<string | null>(null);
   const [answeredCount, setAnsweredCount] = useState(0);
   const [totalQuestions, setTotalQuestions] = useState(0);
-  // v6.9.34 — track when the pending test was sent so we can show a reminder
+  // v6.9.34: track when the pending test was sent so we can show a reminder
   // CTA after 48h of student inactivity.
   const [sentAt, setSentAt] = useState<string | null>(null);
   const [reminderSending, setReminderSending] = useState(false);
-  // v6.9.40 P2C — track latest attempt number so banners can label retakes.
+  // v6.9.40 P2C: track latest attempt number so banners can label retakes.
   const [attemptNumber, setAttemptNumber] = useState<number>(1);
   // 10-second dismiss countdown state. When non-null, the banner area renders
   // an ephemeral confirmation message with an Undo button instead of the full banner.
@@ -114,7 +114,7 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
       if (!data || data.length === 0) {
         setStatus('no_test');
       } else {
-        // v6.9.39 P2 — the LATEST attempt always wins. A freshly created
+        // v6.9.39 P2: the LATEST attempt always wins. A freshly created
         // retake (status pending/assigned/in_progress) must show as active
         // even though older attempts may already be completed/reviewed.
         // We only fall back to a completed attempt when the latest row is
@@ -288,7 +288,7 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
             toast.success('Welcome Test created! Link copied. (Email send failed)');
           }
         } else {
-          toast.success('Welcome Test created. No student email on file — link copied to clipboard.');
+          toast.success('Welcome Test created. No student email on file, link copied to clipboard.');
         }
     } catch (err) {
       console.error('handleSend failed', err);
@@ -352,13 +352,13 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
   };
 
   /**
-   * Plan v6.1 — Re-take Test: creates a new attempt linked to the previous one.
+   * Plan v6.1: Re-take Test: creates a new attempt linked to the previous one.
    * Reuses the same questions for now (Form B variant will be added when the
    * question bank is split). Generates a fresh share token + navigates the
    * teacher to the Tests tab so they can send/preview the new attempt.
    */
   const [retaking, setRetaking] = useState(false);
-  // v6.9.39 P2 — guard modal when the current attempt is not yet completed.
+  // v6.9.39 P2: guard modal when the current attempt is not yet completed.
   // Prevents teachers from accidentally stacking 5+ retake attempts.
   const [confirmRetakeOpen, setConfirmRetakeOpen] = useState(false);
   const handleRetake = () => {
@@ -387,7 +387,7 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
         student_id: studentId,
         test_type: 'welcome',
         title: `Welcome Test - ${studentName} (Retake ${nextAttempt - 1})`,
-        description: 'Re-take — comparing growth against the previous attempt',
+        description: 'Re-take: comparing growth against the previous attempt',
         attempt_number: nextAttempt,
         previous_attempt_id: testId,
       });
@@ -414,7 +414,7 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
       setAnsweredCount(0);
       setStatus('pending');
       setAttemptNumber(nextAttempt);
-      // v6.9.41 P3 — auto-email the new retake link to the student so the
+      // v6.9.41 P3: auto-email the new retake link to the student so the
       // teacher doesn't need a second click. Falls back to clipboard when
       // student email is missing.
       if (studentEmail) {
@@ -430,13 +430,13 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
         } catch (mailErr) {
           console.error('retake email failed', mailErr);
           try { await navigator.clipboard.writeText(`${window.location.origin}/welcome-test/${token}`); } catch {}
-          toast.success(`Retake ${nextAttempt - 1} created. Email failed — link copied to clipboard.`);
+          toast.success(`Retake ${nextAttempt - 1} created. Email failed: link copied to clipboard.`);
         }
       } else {
         try { await navigator.clipboard.writeText(`${window.location.origin}/welcome-test/${token}`); } catch {}
-        toast.success(`Retake ${nextAttempt - 1} created. No student email on file — link copied to clipboard.`);
+        toast.success(`Retake ${nextAttempt - 1} created. No student email on file, link copied to clipboard.`);
       }
-      // v6.9.39 P2 — notify Tests tab list so the new attempt card appears
+      // v6.9.39 P2: notify Tests tab list so the new attempt card appears
       // immediately without waiting for re-poll.
       window.dispatchEvent(new CustomEvent('student-tests:refresh', { detail: { studentId } }));
     } catch (err) {
@@ -463,7 +463,7 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
 
   const handleDismiss = () => {
     // Persist dismissal IMMEDIATELY so a refresh during the countdown keeps
-    // the banner hidden — Undo will clear it back.
+    // the banner hidden, Undo will clear it back.
     localStorage.setItem(DISMISS_KEY, 'true');
     preDismissStatusRef.current = status;
     setDismissCountdown(10);
@@ -498,7 +498,7 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
   };
 
   // While countdown is active, render the ephemeral confirmation card in place
-  // of the full banner — keeps the layout stable so other Overview content
+  // of the full banner, keeps the layout stable so other Overview content
   // doesn't jump.
   if (dismissCountdown !== null) {
     return (
@@ -523,7 +523,7 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
   return (
     <Card data-spotlight="send-welcome-test" className={`border-primary/30 bg-primary/5 ${compact ? 'mb-3' : 'mb-4'} relative`}>
       <CardContent className={compact ? 'py-2 px-3' : 'py-3 px-4'}>
-        {/* Always-on dismiss button — hides the banner from Overview only.
+        {/* Always-on dismiss button, hides the banner from Overview only.
             The Welcome Test remains accessible in the Tests tab. */}
         <TooltipProvider delayDuration={200}>
           <Tooltip>
@@ -542,7 +542,7 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
           </Tooltip>
         </TooltipProvider>
         {status === 'no_test' ? (
-          // v6.8.2 — 2-row layout: title + buttons in row 1, full-width
+          // v6.8.2: 2-row layout: title + buttons in row 1, full-width
           // description in row 2. Lets description span the full card width
           // so it stays on a single line on desktop.
           <div className="flex flex-col gap-2">
@@ -574,7 +574,7 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
             </p>
           </div>
         ) : (
-        // v6.9.44 — single-row on lg: title block + actions inline, no wasted
+        // v6.9.44: single-row on lg: title block + actions inline, no wasted
         // vertical space. Falls back to stack on smaller viewports.
         <div className="flex flex-col lg:flex-row lg:items-center lg:gap-4 gap-2">
           <div className="flex items-start gap-3 min-w-0 flex-1">
@@ -614,7 +614,7 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
                           disabled={reminderSending}
                           onClick={async () => {
                             if (!studentEmail || !testId) {
-                              toast.error('Cannot send reminder — missing email or test.');
+                              toast.error('Cannot send reminder: missing email or test.');
                               return;
                             }
                             setReminderSending(true);

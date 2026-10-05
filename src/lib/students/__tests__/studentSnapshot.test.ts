@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   selectFocusAreas,
+  selectFocusAreaTexts,
   formatNextLessonLabel,
   formatDeadline,
   describeHubStatus,
@@ -111,6 +112,25 @@ describe('selectFocusAreas', () => {
 
   it('skips entries with no usable text', () => {
     expect(selectFocusAreas([entry({ content: '   ', metadata: { skill_subtype: 'weakness' } })])).toEqual([]);
+  });
+});
+
+describe('selectFocusAreaTexts', () => {
+  const long = 'Mixes past simple and present perfect when summarising campaign results in meetings';
+
+  it('returns the full label without the display ellipsis', () => {
+    const entries = [entry({ metadata: { skill_subtype: 'weakness', nano_skill: long } })];
+    expect(selectFocusAreaTexts(entries)).toEqual([long]);
+    expect(selectFocusAreas(entries)[0].endsWith('…')).toBe(true);
+  });
+
+  it('applies the same selection rules as selectFocusAreas', () => {
+    const entries = [
+      entry({ id: 'a', updated_at: '2026-09-10T00:00:00Z', metadata: { skill_subtype: 'weakness', nano_skill: 'Past Simple' } }),
+      entry({ id: 'b', updated_at: '2026-09-01T00:00:00Z', metadata: { skill_subtype: 'mistake', nano_skill: 'past simple' } }),
+      entry({ id: 'c', metadata: { skill_subtype: 'strength', nano_skill: 'fluency' } }),
+    ];
+    expect(selectFocusAreaTexts(entries)).toEqual(selectFocusAreas(entries));
   });
 });
 

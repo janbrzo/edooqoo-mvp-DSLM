@@ -1,5 +1,5 @@
 /**
- * NextLessonCard — the answer to "what do I teach next?" (v6.9.111, M4 step 2).
+ * NextLessonCard: the answer to "what do I teach next?" (v6.9.111, M4 step 2).
  *
  * Purely presentational: it receives an already-selected `PrepSuggestion`
  * (see `src/lib/students/prepPlan.ts`) plus a pre-built rationale sentence and
@@ -7,7 +7,7 @@
  * "Generate worksheet".
  *
  * It knows nothing about sessionStorage, auto-generate intents or the Worksheet
- * Generation Engine — the page owns those and passes callbacks down.
+ * Generation Engine: the page owns those and passes callbacks down.
  */
 
 import React from 'react';
@@ -69,15 +69,18 @@ export const NextLessonCard: React.FC<NextLessonCardProps> = ({
             </>
           ) : (
             <>
-              <h2 className="text-lg font-semibold leading-snug sm:text-xl">
+              <h2
+                className="line-clamp-2 break-words text-lg font-semibold leading-snug sm:text-xl"
+                title={suggestion.topic}
+              >
                 {suggestion.topic}
               </h2>
               <p className="mt-1 text-sm text-muted-foreground">{rationale}</p>
-              {/* 2026-10 — Prep and the Learning plan share one queue; say where #1 comes from. */}
+              {/* 2026-10: Prep and the Learning plan share one queue; say where #1 comes from. */}
               <p className="mt-2 flex flex-wrap items-center gap-x-1 text-xs text-muted-foreground">
                 {suggestion.source === 'fallback' ? (
                   <>
-                    <span>No plan yet —</span>
+                    <span>No plan yet:</span>
                     <Button variant="link" size="sm" className="h-auto p-0 text-xs" onClick={onOpenModel}>
                       set up {firstName}'s plan
                       <ChevronRight className="ml-0.5 h-3 w-3" aria-hidden="true" />

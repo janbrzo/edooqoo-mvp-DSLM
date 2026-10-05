@@ -25,7 +25,7 @@ const rememberPostSignupAddStudent = () => {
 
 const Signup = () => {
   useEffect(() => {
-    document.title = "Start 1-Minute Prep Free — Edooqoo | 2 Free Worksheets";
+    document.title = "Start 1-Minute Prep Free | Edooqoo | 2 Free Worksheets";
     const meta = document.querySelector('meta[name="description"]');
     if (meta) meta.setAttribute('content', 'Create your free Edooqoo account, add your first student, and start building the context for 1-Minute Prep. Includes 2 free worksheets. No credit card required.');
     return setRobotsMeta('noindex,nofollow');
@@ -46,7 +46,7 @@ const Signup = () => {
   const signupState = location.state as { from?: string; startOneMinutePrep?: boolean } | null;
   const fromPath = signupState?.from || '/';
   const shouldStartOneMinutePrep = signupState?.startOneMinutePrep === true || fromPath.startsWith('/one-minute-prep');
-  // v6.9.34 — ALWAYS land on the generator with Add Student modal queued up
+  // v6.9.34: ALWAYS land on the generator with Add Student modal queued up
   // after a fresh signup. This is the 1-Minute Prep onboarding entry point.
   const postSignupPath = fromPath !== '/' && !shouldStartOneMinutePrep
     ? fromPath
@@ -254,7 +254,11 @@ const Signup = () => {
               <div className="mt-4 text-center space-y-2">
                 <p className="text-sm text-gray-600">
                   Already have an account?{' '}
-                  <Link to="/login" className="text-worksheet-purple hover:underline font-medium">
+                  <Link
+                    to="/login"
+                    state={fromPath !== '/' ? { from: fromPath } : undefined}
+                    className="text-worksheet-purple hover:underline font-medium"
+                  >
                     Sign in here
                   </Link>
                 </p>

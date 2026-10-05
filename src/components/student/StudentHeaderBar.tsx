@@ -1,5 +1,5 @@
 /**
- * StudentHeaderBar — identity row of the Student Workspace (v6.9.111, M3.2).
+ * StudentHeaderBar: identity row of the Student Workspace (v6.9.111, M3.2).
  *
  * Purely presentational: no queries, no navigation logic beyond a real
  * `<Link>` back to the dashboard (middle-click and Cmd/Ctrl+click preserved).
@@ -19,7 +19,7 @@ export interface StudentHeaderBarProps {
   mainGoal: string | null;
   nextLessonLabel: string | null;
   isNextLessonLoading: boolean;
-  /** Single `StudentSettingsMenu` instance — the only settings entry point. */
+  /** Single `StudentSettingsMenu` instance: the only settings entry point. */
   menu: React.ReactNode;
 }
 

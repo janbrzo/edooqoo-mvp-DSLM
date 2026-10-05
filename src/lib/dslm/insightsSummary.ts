@@ -1,9 +1,9 @@
 /**
- * insightsSummary — plain-language summary for the Learning plan "Insights"
+ * insightsSummary: plain-language summary for the Learning plan "Insights"
  * segment. Built only from data the page already loads (skill category
  * metrics, Welcome Test profile, behavioural stats); no AI call.
  *
- * No React, no Supabase, no globals — every rule here is unit-testable.
+ * No React, no Supabase, no globals: every rule here is unit-testable.
  */
 
 export const SKILL_CATEGORY_LABELS: Readonly<Record<string, string>> = {

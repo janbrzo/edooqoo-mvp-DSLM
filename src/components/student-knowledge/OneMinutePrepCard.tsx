@@ -16,7 +16,7 @@ interface OneMinutePrepCardProps {
 }
 
 /**
- * v6.9.29 — Visible 1-Minute Prep digest card on Student Overview.
+ * v6.9.29: Visible 1-Minute Prep digest card on Student Overview.
  * Shows the 3 most actionable signals per bucket so the teacher knows
  * exactly what to focus on next lesson.
  */
@@ -54,7 +54,7 @@ export const OneMinutePrepCard = ({
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-base">
           <Sparkles className="h-4 w-4 text-primary" />
-          1-Minute Prep — {studentName}
+          1-Minute Prep: {studentName}
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3 text-sm">
@@ -90,7 +90,7 @@ export const OneMinutePrepCard = ({
               label="Focus on"
               entries={data.topWeaknesses.map((e) => {
                 const ns = (e.metadata as any)?.nano_skill;
-                return ns ? `${ns} — ${e.content}` : e.content;
+                return ns ? `${ns}: ${e.content}` : e.content;
               })}
             />
             <Section

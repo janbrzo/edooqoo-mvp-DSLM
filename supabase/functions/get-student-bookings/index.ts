@@ -69,7 +69,7 @@ Deno.serve(async (req) => {
     // A slot belongs to this caller only when it is both on this teacher's
     // calendar AND currently booked by the account matching `email`. Every
     // action below that reads or mutates an existing slotId must go through
-    // this check — without it, a valid public token + any email from the
+    // this check: without it, a valid public token + any email from the
     // roster let a caller cancel, reschedule, or read the history of ANY
     // student's lesson, or (via reschedule's target slot / book_batch)
     // even slots belonging to a completely different teacher.
@@ -161,7 +161,7 @@ Deno.serve(async (req) => {
       }
 
       if (isPending) {
-        // Request withdrawal — no cancellation record, no badge C
+        // Request withdrawal: no cancellation record, no badge C
         await supabase
           .from('calendar_slots')
           .update({
@@ -173,7 +173,7 @@ Deno.serve(async (req) => {
           .eq('id', slotId)
           .eq('teacher_id', teacherId);
       } else {
-        // Confirmed lesson cancellation — keep cancellation record
+        // Confirmed lesson cancellation, keep cancellation record
         await supabase
           .from('calendar_slots')
           .update({
@@ -253,7 +253,7 @@ Deno.serve(async (req) => {
         });
       }
 
-      // The target slot must also belong to this teacher — otherwise a
+      // The target slot must also belong to this teacher, otherwise a
       // caller could pass any teacher's slotId here and, if it happened to
       // be 'available', silently book it for themselves on rescheduling.
       const { data: newSlotData } = await supabase
@@ -293,7 +293,7 @@ Deno.serve(async (req) => {
             booked_at: new Date().toISOString(), booked_by: 'student',
             confirmed_at: new Date().toISOString(),
             student_notes: oldSlot.student_notes,
-            title: `${studentName} — English lesson`,
+            title: `${studentName} | English lesson`,
           })
           .eq('id', newSlotId)
           .eq('teacher_id', teacherId)
@@ -337,7 +337,7 @@ Deno.serve(async (req) => {
           meetingLink: rescheduleMeetingLink,
         });
 
-        // GCal sync for reschedule — teacher + student
+        // GCal sync for reschedule, teacher + student
         const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
         const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
         try {
@@ -401,7 +401,7 @@ Deno.serve(async (req) => {
             booked_at: new Date().toISOString(), booked_by: 'student',
             confirmed_at: null,
             student_notes: `Reschedule from ${oldSlot.slot_date} ${oldSlot.start_time.slice(0, 5)}. ${oldSlot.student_notes || ''}`.trim(),
-            title: `${studentName} — English lesson`,
+            title: `${studentName} | English lesson`,
             reschedule_request_from_slot_id: slotId,
           })
           .eq('id', newSlotId)
@@ -426,7 +426,7 @@ Deno.serve(async (req) => {
         // Problem 8C: updated reschedule message format
         await supabase.from('calendar_notifications').insert({
           teacher_id: teacherId, notification_type: 'reschedule_request',
-          message: `${studentName} requests to reschedule: ${oldSlot.slot_date} ${oldSlot.start_time.slice(0, 5)} → ${newSlotData?.slot_date} ${newSlotData?.start_time?.slice(0, 5)} — awaiting confirmation`,
+          message: `${studentName} requests to reschedule: ${oldSlot.slot_date} ${oldSlot.start_time.slice(0, 5)} → ${newSlotData?.slot_date} ${newSlotData?.start_time?.slice(0, 5)}: awaiting confirmation`,
           student_name: studentName, slot_id: newSlotId,
           metadata: { old_slot_id: slotId, new_slot_id: newSlotId, student_email: email, old_date: oldSlot.slot_date, old_time: oldSlot.start_time.slice(0, 5) },
         });
@@ -443,7 +443,7 @@ Deno.serve(async (req) => {
           oldSlotDate: oldSlot.slot_date, oldSlotTime: oldSlot.start_time.slice(0, 5),
         });
 
-        // GCal sync for reschedule request — upsert new pending slot
+        // GCal sync for reschedule request, upsert new pending slot
         const supabaseUrl2 = Deno.env.get('SUPABASE_URL')!;
         const supabaseKey2 = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
         try {
@@ -474,7 +474,7 @@ Deno.serve(async (req) => {
       const failedIds: string[] = [];
 
       for (const sid of slotIds) {
-        // Scope to this teacher — without it, any valid Hub caller could
+        // Scope to this teacher, without it, any valid Hub caller could
         // pass a slotId belonging to a different teacher's calendar and,
         // if it happened to be 'available', book it out from under them.
         const { data: check } = await supabase
@@ -494,7 +494,7 @@ Deno.serve(async (req) => {
             booked_by: 'student',
             confirmed_at: autoConfirm ? new Date().toISOString() : null,
             student_notes: `Booked by: ${batchStudentName} (${normalizedEmail})`,
-            title: `${batchStudentName} — English lesson`,
+            title: `${batchStudentName} | English lesson`,
           })
           .eq('id', sid)
           .eq('teacher_id', teacherId)
@@ -515,7 +515,7 @@ Deno.serve(async (req) => {
         let batchMessage = `${batchStudentName} booked ${successIds.length} weekly lessons`;
         if (firstSlot) {
           const dayName = new Date(firstSlot.slot_date + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase() + 's';
-          batchMessage = `${batchStudentName} booked ${successIds.length} weekly lessons since ${firstSlot.slot_date} ${dayName} ${firstSlot.start_time.slice(0,5)}–${firstSlot.end_time.slice(0,5)}${autoConfirm ? ' (auto-confirmed)' : ' — awaiting confirmation'}`;
+          batchMessage = `${batchStudentName} booked ${successIds.length} weekly lessons since ${firstSlot.slot_date} ${dayName} ${firstSlot.start_time.slice(0,5)}–${firstSlot.end_time.slice(0,5)}${autoConfirm ? ' (auto-confirmed)' : ', awaiting confirmation'}`;
         }
 
         await supabase.from('calendar_notifications').insert({
@@ -582,11 +582,11 @@ Deno.serve(async (req) => {
     // Handle GET_LOGS
     if (action === 'get_logs' && slotId) {
       // Previously returned any slot's logs for any valid token, with no
-      // ownership check at all — a caller could read another student's (or
+      // ownership check at all; a caller could read another student's (or
       // another teacher's) slot history, including student_email metadata.
       //
       // Ownership here is "currently booked by this student" OR "this
-      // student's email appears on an existing log for the slot" — checking
+      // student's email appears on an existing log for the slot", checking
       // calendar_slots.student_id alone isn't enough, because cancelling a
       // lesson resets it to null, which would otherwise break History for
       // cancelled bookings.

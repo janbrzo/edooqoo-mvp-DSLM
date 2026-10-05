@@ -209,7 +209,7 @@ const faqItems = [
   { question: 'What are nano-skills?', answer: 'Nano-skills are atomic grammar, vocabulary, reading, writing, speaking, listening, or communication labels. Examples in Edooqoo include ns.grammar.present_perfect_continuous, ns.writing.formal_narrative, and ns.listening.detail_extraction. They are more useful than broad labels like "Grammar" because each signal can point to a concrete next lesson focus.' },
   { question: 'How does trend detection work?', answer: 'DSLM can compare available mastery and activity signals over time. Improving, stable, or declining indicators help teachers decide whether to review, maintain, or push a skill further.' },
   { question: 'Can DSLM suggest what to teach next?', answer: 'Yes. DSLM can generate next-step suggestions from available student context and recent signals. The teacher still chooses, edits, and approves the lesson direction before using the worksheet output.' },
-  { question: 'Is my students\' data private?', answer: 'Absolutely. All DSLM data is scoped to your account. Students cannot see each other\'s data. The system only stores learning metrics — never personal information beyond what you enter in the student profile.' },
+  { question: 'Is my students\' data private?', answer: 'Absolutely. All DSLM data is scoped to your account. Students cannot see each other\'s data. The system only stores learning metrics, never personal information beyond what you enter in the student profile.' },
 ];
 
 const benefits = [
@@ -223,12 +223,12 @@ const steps = [
   { number: 1, title: 'Student context is created', description: 'Profile, goals, Welcome Test results, homework, flashcards, live work, or teacher observations provide the starting signals.', mockup: undefined },
   { number: 2, title: 'DSLM organizes available signals', description: 'The system turns raw activity and teacher context into profile, nano-skill mastery, trend, pacing, and planning information.' },
   { number: 3, title: 'You review the next-step view', description: 'Open the student profile to see nano-skill signals, trend indicators, confidence context, and suggested worksheet directions.' },
-  { number: 4, title: 'Teach with teacher control', description: 'Use DSLM next-focus suggestions to generate the next worksheet, or choose your own focus — then review and edit before use.' },
+  { number: 4, title: 'Teach with teacher control', description: 'Use DSLM next-focus suggestions to generate the next worksheet, or choose your own focus: then review and edit before use.' },
 ];
 
 const FeatureDSLM: React.FC = () => (
   <FeaturePageLayout
-    title="DSLM — Student Context for 1-Minute Prep | Edooqoo"
+    title="DSLM: Student Context for 1-Minute Prep | Edooqoo"
     metaDescription="Use Edooqoo's Dynamic Student Learning Model to organize student context, learning signals and teacher-reviewed next steps for 1:1 English lessons."
   >
     <FeatureHero

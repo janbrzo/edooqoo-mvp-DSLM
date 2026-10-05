@@ -61,7 +61,7 @@ export const SUGGESTION_SETS: SuggestionSet[] = [
     id: "set-8",
     lessonTopic: "Asking for help at an electronics store abroad",
     lessonFocus: "Explaining problems and understanding instructions",
-    additionalInformation: "Emma [27] is in Paris and her laptop suddenly stopped working — she needs help fast.",
+    additionalInformation: "Emma [27] is in Paris and her laptop suddenly stopped working; she needs help fast.",
     grammarFocus: "Relative Clauses"
   },
   {
@@ -220,8 +220,13 @@ export const SUGGESTION_SETS: SuggestionSet[] = [
   }
 ];
 
-export const getRandomSuggestionSets = (count: number = 2): SuggestionSet[] => {
-  const shuffled = [...SUGGESTION_SETS].sort(() => 0.5 - Math.random());
+/** `excludeIds` keeps a set already on screen from appearing twice as a tile. */
+export const getRandomSuggestionSets = (
+  count: number = 2,
+  excludeIds: readonly string[] = [],
+): SuggestionSet[] => {
+  const pool = SUGGESTION_SETS.filter((set) => !excludeIds.includes(set.id));
+  const shuffled = [...pool].sort(() => 0.5 - Math.random());
   return shuffled.slice(0, count);
 };
 

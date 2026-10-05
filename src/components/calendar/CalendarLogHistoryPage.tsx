@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthFlow } from '@/hooks/useAuthFlow';
+import { useTeacherAuthRedirect } from '@/hooks/useTeacherAuthRedirect';
 import { useCalendarSlotLogs, SlotLog } from '@/hooks/useCalendarSlotLogs';
 import { useStudents } from '@/hooks/useStudents';
 import { Button } from '@/components/ui/button';
@@ -27,9 +28,7 @@ const CalendarLogHistoryPage = () => {
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
 
-  useEffect(() => {
-    if (!authLoading && !isRegisteredUser) navigate('/login');
-  }, [authLoading, isRegisteredUser, navigate]);
+  useTeacherAuthRedirect(authLoading, !!isRegisteredUser);
 
   useEffect(() => {
     if (user?.id) {
@@ -123,16 +122,16 @@ const CalendarLogHistoryPage = () => {
                   <span className="font-medium">{humanizeAction(log.action)}</span>
                   <span className="text-muted-foreground ml-1">by {log.actor}</span>
                   {log.details?.student_name && (
-                    <span className="text-muted-foreground ml-1">— Student: {log.details.student_name}</span>
+                    <span className="text-muted-foreground ml-1">Student: {log.details.student_name}</span>
                   )}
                   {log.details?.slot_date && (
-                    <span className="text-muted-foreground ml-1">— Date: {log.details.slot_date}</span>
+                    <span className="text-muted-foreground ml-1">Date: {log.details.slot_date}</span>
                   )}
                   {log.details?.start_time && (
                     <span className="text-muted-foreground"> at {String(log.details.start_time).slice(0, 5)}</span>
                   )}
                   {log.details?.old_status && log.details?.new_status && (
-                    <span className="text-muted-foreground ml-1">— {log.details.old_status} → {log.details.new_status}</span>
+                    <span className="text-muted-foreground ml-1">{log.details.old_status} → {log.details.new_status}</span>
                   )}
                   {log.details?.student_email && (
                     <span className="text-muted-foreground ml-1">({log.details.student_email})</span>

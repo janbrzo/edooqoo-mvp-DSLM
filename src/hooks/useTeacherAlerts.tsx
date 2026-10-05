@@ -22,7 +22,7 @@ export interface TeacherAlert {
 const POLL_INTERVAL_MS = 60_000;
 
 /**
- * Closed-Loop Company — teacher alert inbox.
+ * Closed-Loop Company: teacher alert inbox.
  * Polls every 60s. Returns early in demo mode to avoid UUID errors.
  */
 export function useTeacherAlerts() {

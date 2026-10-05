@@ -1,5 +1,5 @@
 /**
- * PlanSection — heading + body for one Learning plan section.
+ * PlanSection: heading + body for one Learning plan section.
  * Typography instead of frames: the heading style matches the dashboard
  * zones, sections are separated by spacing, never by a card around a card.
  */

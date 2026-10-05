@@ -99,7 +99,7 @@ const getMainGoalTargetDate = (extraction: IntakeExtractionPayload | null): stri
   return hasMeaningfulValue(goal?.target_date) ? goal!.target_date!.trim() : '';
 };
 
-// v6.9.76 — UI-side safety net used when AI extraction returns no identity
+// v6.9.76: UI-side safety net used when AI extraction returns no identity
 // fields but the raw paste clearly contains them. Mirrors the server-side
 // detector but stays intentionally simple.
 const extractIdentityFallbackFromNotes = (raw: string): { name?: string; email?: string } => {
@@ -147,7 +147,7 @@ const extractIdentityFallbackFromNotes = (raw: string): { name?: string; email?:
 };
 
 interface AddStudentDialogProps {
-  /** If provided, the dialog will NOT navigate to /student/:id on success —
+  /** If provided, the dialog will NOT navigate to /student/:id on success, 
    *  the caller takes over (e.g. WorksheetForm auto-selects the new student). */
   onStudentAdded?: (newStudent?: { id: string; name: string }) => void;
   triggerButton?: boolean;
@@ -182,22 +182,22 @@ export const AddStudentDialog = ({
   const [studentEmail, setStudentEmail] = useState('');
   const [sendOverdueEmails, setSendOverdueEmails] = useState(true);
   const [nativeLanguage, setNativeLanguage] = useState('Spanish');
-  // v6.9.34 — 2-mode flow: `know` (teacher fills level+goal now),
+  // v6.9.34: 2-mode flow: `know` (teacher fills level+goal now),
   // `defer` (recommended; level/goal inferred from Welcome Test). The
-  // `manual` opt-out was removed — teachers can still skip the test from
+  // `manual` opt-out was removed: teachers can still skip the test from
   // the student page after creation.
   const [mode, setMode] = useState<'know' | 'defer'>('defer');
   const knowsStudent = mode === 'know';
   const deferProfile = !knowsStudent;
   const [mainGoalDeadline, setMainGoalDeadline] = useState<string>('');
-  // v6.9.34 — default ON in both modes.
+  // v6.9.34: default ON in both modes.
   const [sendTestWhenKnown, setSendTestWhenKnown] = useState(true);
   const autoSendWelcomeTest = mode === 'defer' ? true : sendTestWhenKnown;
   const [loading, setLoading] = useState(false);
   const { addStudent, refetch } = useStudents();
   const { refreshProgress } = useOnboardingProgress();
 
-  // v6.9.62 P6 — paste intake state
+  // v6.9.62 P6: paste intake state
   const [pasteEnabled, setPasteEnabled] = useState(false);
   const [pasteRaw, setPasteRaw] = useState('');
   const [extraction, setExtraction] = useState<IntakeExtractionPayload | null>(null);
@@ -236,7 +236,7 @@ export const AddStudentDialog = ({
     sonnerToast.success('Form cleared.');
   };
 
-  // v6.9.74 — After AI extraction lands, convert the preview into the editable
+  // v6.9.74: After AI extraction lands, convert the preview into the editable
   // draft fields. This deliberately ignores default UI values as evidence and
   // only applies native language when the quoted evidence exists in the paste.
   useEffect(() => {
@@ -284,7 +284,7 @@ export const AddStudentDialog = ({
       changed = true;
     }
 
-    // v6.9.76 safety net — if AI dropped identity but the raw paste has it, fill from regex.
+    // v6.9.76 safety net; if AI dropped identity but the raw paste has it, fill from regex.
     if ((!name.trim() || !studentEmail.trim()) && pasteRaw.trim()) {
       const fb = extractIdentityFallbackFromNotes(pasteRaw);
       if (fb.name && !name.trim()) { setName(fb.name); changed = true; }
@@ -294,7 +294,7 @@ export const AddStudentDialog = ({
       }
     }
 
-    if (changed) sonnerToast.success('AI filled the form — review and adjust before adding.');
+    if (changed) sonnerToast.success('AI filled the form, review and adjust before adding.');
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [extraction]);
 
@@ -396,7 +396,7 @@ export const AddStudentDialog = ({
         deferProfile ? null : (mainGoalDeadline || null)
       );
 
-      // v6.9.62 P6 — Apply paste intake extraction (atomic RPC). Best-effort:
+      // v6.9.62 P6: Apply paste intake extraction (atomic RPC). Best-effort:
       // if it fails, the student row already exists; surface a retry toast.
       let intakeExtractionId: string | null = null;
       if (pasteEnabled && extraction && newStudent?.id) {
@@ -409,7 +409,7 @@ export const AddStudentDialog = ({
             model: extractionModel ?? 'google/gemini-2.5-flash',
           });
           intakeExtractionId = res.extraction_id;
-          sonnerToast.success(`Profile seeded — ${res.auto_count} item${res.auto_count === 1 ? '' : 's'} applied.`);
+          sonnerToast.success(`Profile seeded: ${res.auto_count} item${res.auto_count === 1 ? '' : 's'} applied.`);
         } catch (err: any) {
           console.error('[AddStudentDialog] applyIntakeExtraction failed', err);
           sonnerToast.error('Student created, but intake suggestions failed to apply. Open the profile to retry.');
@@ -446,7 +446,7 @@ export const AddStudentDialog = ({
       await refetch();
       refreshProgress();
 
-      // v6.9.34 — If autosend was requested, fire-and-forget the test
+      // v6.9.34: If autosend was requested, fire-and-forget the test
       // creation + email so the side-effect happens regardless of whether
       // the caller takes over navigation (inline-add in WorksheetForm).
       if (autoSendWelcomeTest && newStudent?.id && studentEmail) {
@@ -456,7 +456,7 @@ export const AddStudentDialog = ({
             const { data: { user } } = await supabase.auth.getUser();
             const teacherId = user?.id;
             if (!teacherId) return;
-            // v6.9.36 — canonical helper (status='draft' → seed questions →
+            // v6.9.36: canonical helper (status='draft' → seed questions →
             // share token → status='assigned') eliminates the previous
             // invalid `status: 'pending'` and `.single()`-on-update paths
             // that caused the autosend 400.
@@ -480,13 +480,13 @@ export const AddStudentDialog = ({
       }
 
       // Notify parent component that student was added
-      // v6.9.33 — when caller provides onStudentAdded it owns next navigation
+      // v6.9.33: when caller provides onStudentAdded it owns next navigation
       // (e.g. WorksheetForm auto-selects the new student without page nav).
       if (onStudentAdded) {
         devLog('🔄 Calling onStudentAdded callback (caller-controlled nav) ...');
         onStudentAdded(newStudent ? { id: newStudent.id, name: newStudent.name } : undefined);
       } else if (newStudent?.id) {
-        // v6.9.34 — Default flow per Plan v6.9.34:
+        // v6.9.34: Default flow per Plan v6.9.34:
         //  • autosend ON  → focus Add Goal modal (test runs in background)
         //  • autosend OFF → focus Send Welcome Test banner
         const ts = Date.now();
@@ -565,10 +565,10 @@ export const AddStudentDialog = ({
               </div>
             </div>
             <p className="text-xs text-muted-foreground -mt-1">
-              With an email, your student gets access to worksheets, homework and flashcards at edooqoo.com/my — no password needed.
+              With an email, your student gets access to worksheets, homework and flashcards at edooqoo.com/my; no password needed.
             </p>
 
-            {/* Row 2: native language (always shown — short) */}
+            {/* Row 2: native language (always shown: short) */}
             <div className="space-y-1">
               <Label htmlFor="native-language" className="text-xs">Native Language</Label>
               <Select value={nativeLanguage} onValueChange={setNativeLanguage}>
@@ -588,14 +588,14 @@ export const AddStudentDialog = ({
               </p>
             </div>
 
-            {/* v6.9.76 — Segmented control: both modes visually active */}
+            {/* v6.9.76: Segmented control: both modes visually active */}
             <div
               role="radiogroup"
               aria-label="Student knowledge mode"
               className="grid grid-cols-2 gap-1 rounded-md border bg-background p-0.5"
             >
               {[
-                { value: 'defer' as const, title: "I don't know my student yet", hint: 'Recommended — fill from Welcome Test' },
+                { value: 'defer' as const, title: "I don't know my student yet", hint: 'Recommended: fill from Welcome Test' },
                 { value: 'know' as const,  title: 'I already know my student',   hint: 'Set CEFR + goal now' },
               ].map((opt) => (
                 <button
@@ -686,7 +686,7 @@ export const AddStudentDialog = ({
               </div>
             )}
 
-            {/* Overdue email toggle — collapsed under details in know mode to save vertical space */}
+            {/* Overdue email toggle, collapsed under details in know mode to save vertical space */}
             {knowsStudent ? (
               <details className="rounded-md border bg-background px-2 py-1.5">
                 <summary className="text-[11px] text-muted-foreground cursor-pointer select-none">More options</summary>
@@ -716,7 +716,7 @@ export const AddStudentDialog = ({
           </div>
 
           <div className={pasteEnabled ? 'lg:border-l lg:pl-5 lg:min-w-0' : ''}>
-            {/* v6.9.62 P6 — Paste intake (AI). Opt-in, independent of know/defer. */}
+            {/* v6.9.62 P6: Paste intake (AI). Opt-in, independent of know/defer. */}
             <PasteIntakeSection
               enabled={pasteEnabled}
               onEnabledChange={setPasteEnabled}

@@ -4,9 +4,9 @@ import { Button } from "@/components/ui/button";
 import { Sparkles, RotateCw } from "lucide-react";
 
 /**
- * BrainResetGame — lightweight, language-free Memory Pairs minigame
+ * BrainResetGame: lightweight, language-free Memory Pairs minigame
  * shown on the Welcome Test "paused" screen so students can
- * mentally reset before resuming. NO English knowledge required —
+ * mentally reset before resuming. NO English knowledge required, 
  * uses emoji symbols only. Purely client-side; nothing is persisted.
  */
 
@@ -78,7 +78,7 @@ export function BrainResetGame({ pairs = 6 }: { pairs?: number }) {
           <span className="text-xs text-muted-foreground">Moves: {moves}</span>
         </div>
         <p className="text-xs text-muted-foreground">
-          Match the pairs while your test is paused. No English required — just relax.
+          Match the pairs while your test is paused. No English required: just relax.
         </p>
 
         <div className="grid grid-cols-4 gap-2">

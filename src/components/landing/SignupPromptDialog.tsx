@@ -1,5 +1,5 @@
 /**
- * SignupPromptDialog — soft signup nudge shown 2.5s after a teacher clicks
+ * SignupPromptDialog: soft signup nudge shown 2.5s after a teacher clicks
  * a FeatureNavPill on the landing page. Per-feature copy from
  * `src/constants/featurePromptCopy.ts`.
  *

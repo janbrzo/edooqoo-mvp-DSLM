@@ -11,7 +11,7 @@ describe('formatGoal', () => {
     expect(formatGoal('listening-skills')).toBe('Listening Skills & Understanding');
   });
   it('passes free text through and blanks empty input', () => {
-    expect(formatGoal('Business English — meetings')).toBe('Business English — meetings');
+    expect(formatGoal('Business English: meetings')).toBe('Business English: meetings');
     expect(formatGoal(null)).toBe('');
     expect(formatGoal('')).toBe('');
   });

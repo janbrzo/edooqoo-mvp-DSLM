@@ -23,7 +23,7 @@ const StudentHubLanding = () => {
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
-  // P1.6 — diagnostic reason returned by the lookup edge function
+  // P1.6: diagnostic reason returned by the lookup edge function
   const [notFoundReason, setNotFoundReason] = useState<string | null>(null);
   // Password flow state
   const [pendingTeacher, setPendingTeacher] = useState<Teacher | null>(null);
@@ -223,7 +223,7 @@ const StudentHubLanding = () => {
                     <>
                       <p className="font-medium">We couldn't find this email in your teacher's student list.</p>
                       <p className="text-muted-foreground mt-1">
-                        Ask your teacher to check the email address they registered for you — it must match exactly.
+                        Ask your teacher to check the email address they registered for you; it must match exactly.
                       </p>
                     </>
                   )}

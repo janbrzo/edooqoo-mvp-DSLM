@@ -1,5 +1,5 @@
 /**
- * v6.9.48 — Auto-generate worksheet bootstrap helper.
+ * v6.9.48: Auto-generate worksheet bootstrap helper.
  *
  * Reads sessionStorage flags written by DSLM PathwayView "Generate worksheet ↗"
  * suggestions and produces a complete `FormData` payload ready for
@@ -20,7 +20,7 @@ const MANUAL_60 = ['reading', 'true-false', 'matching', 'fill-in-blanks', 'categ
 const MANUAL_45 = ['reading', 'true-false', 'matching', 'fill-in-blanks', 'categorize', 'odd-one-out'];
 
 /**
- * v6.9.53 — Persistent auto-generate intent.
+ * v6.9.53: Persistent auto-generate intent.
  *
  * Older versions stored the auto-generate request as several brittle
  * `sessionStorage` flags (`autoGenerateWorksheet`, `prefillWorksheet`, ...).
@@ -48,7 +48,7 @@ export interface PersistentAutoGenerateIntent {
   mediaTypes: MediaType[];
   createdAt: number;
   status: PersistentIntentStatus;
-  // v6.9.55 — UI metadata so the generation modal can render
+  // v6.9.55: UI metadata so the generation modal can render
   // "For {name} · {email}" without re-fetching from Supabase.
   studentName?: string | null;
   studentEmail?: string | null;
@@ -58,7 +58,7 @@ export interface PersistentAutoGenerateIntent {
 }
 
 /**
- * Map a student's CEFR level (A1…C2) to the generator's level band — the same
+ * Map a student's CEFR level (A1…C2) to the generator's level band: the same
  * mapping WorksheetForm applies when a student is selected. Unknown or empty
  * levels return null so the caller keeps its default.
  */
@@ -219,7 +219,7 @@ export interface AutoGenerateIntent {
 
 export function readAutoGenerateIntent(): AutoGenerateIntent | null {
   if (typeof window === 'undefined') return null;
-  // v6.9.53 — persistent intent wins over legacy session flags.
+  // v6.9.53: persistent intent wins over legacy session flags.
   const persistent = readPersistentAutoGenerateIntent();
   if (persistent && persistent.status !== 'completed' && persistent.status !== 'failed') {
     return {
@@ -244,7 +244,7 @@ export function readAutoGenerateIntent(): AutoGenerateIntent | null {
 }
 
 /**
- * v6.9.49 — Cheap synchronous check used by Index mount-effect to decide
+ * v6.9.49: Cheap synchronous check used by Index mount-effect to decide
  * whether to wire the bootstrap interval at all (avoids polling cost when
  * the page was opened normally).
  */
@@ -267,7 +267,7 @@ export function hasAutoGenerateIntent(): boolean {
  * (we never start an empty AI generation).
  */
 export function buildAutoGeneratePayload(): (FormData & { __autoGenerateRequestId: string }) | null {
-  // v6.9.53 — prefer the persistent intent as the single source of truth.
+  // v6.9.53: prefer the persistent intent as the single source of truth.
   const persistent = readPersistentAutoGenerateIntent();
   const intent = readAutoGenerateIntent();
   if (!persistent && !intent) return null;
@@ -348,10 +348,10 @@ export function buildAutoGeneratePayload(): (FormData & { __autoGenerateRequestI
     exerciseFocusMap: focusMap && Object.keys(focusMap).length > 0 ? focusMap : undefined,
     __autoGenerateFromSuggestion: true,
     __autoGenerateRequestId: requestId,
-    // v6.9.53 — carry suggestionId in the payload so generation hook can
+    // v6.9.53: carry suggestionId in the payload so generation hook can
     // mark `is_used` even when sessionStorage gets cleared mid-flight.
     __autoGenerateSuggestionId: suggestionId,
-    // v6.9.55 — UI/transport metadata for GeneratingModal.
+    // v6.9.55: UI/transport metadata for GeneratingModal.
     studentName: persistent?.studentName ?? null,
     studentEmail: persistent?.studentEmail ?? null,
   };

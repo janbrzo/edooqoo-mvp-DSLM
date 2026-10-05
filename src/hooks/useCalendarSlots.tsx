@@ -82,7 +82,7 @@ export function useCalendarSlots(teacherId?: string, options: UseCalendarSlotsOp
   const weekStart = useMemo(() => startOfWeek(currentDate, { weekStartsOn: 1 }), [currentDate]);
   const weekEnd = useMemo(() => endOfWeek(currentDate, { weekStartsOn: 1 }), [currentDate]);
 
-  // Core fetch query — extracted to avoid duplication
+  // Core fetch query, extracted to avoid duplication
   const runFetchQuery = useCallback(async () => {
     const from = format(dateRange.from, 'yyyy-MM-dd');
     const to = format(dateRange.to, 'yyyy-MM-dd');
@@ -149,7 +149,7 @@ export function useCalendarSlots(teacherId?: string, options: UseCalendarSlotsOp
     }
   }, [teacherId, isDemoMode, runFetchQuery, autoMarkNeedsReview]);
 
-  // Silent refetch — same query but WITHOUT setLoading(true)
+  // Silent refetch: same query but WITHOUT setLoading(true)
   const silentRefetch = useCallback(async () => {
     if (!teacherId || isDemoMode) return;
     if (fetchingRef.current) {
@@ -175,7 +175,7 @@ export function useCalendarSlots(teacherId?: string, options: UseCalendarSlotsOp
 
   useEffect(() => { fetchSlots(); }, [fetchSlots]);
 
-  // Supabase Realtime — use silentRefetch to avoid loading flash
+  // Supabase Realtime: use silentRefetch to avoid loading flash
   useEffect(() => {
     if (!teacherId || isDemoMode) return;
     const channel = supabase
@@ -284,7 +284,7 @@ export function useCalendarSlots(teacherId?: string, options: UseCalendarSlotsOp
         a.slot_date.localeCompare(b.slot_date) || a.start_time.localeCompare(b.start_time)
       ));
 
-      // Fire-and-forget side effects — don't block UI
+      // Fire-and-forget side effects, don't block UI
       logAction(data.id, 'created', 'teacher', {
         slot_type: input.slot_type || 'slot',
         student_id: input.student_id,
@@ -293,9 +293,9 @@ export function useCalendarSlots(teacherId?: string, options: UseCalendarSlotsOp
         end_time: input.end_time,
       }).catch(() => {});
 
-      // Teacher notification + email for lesson — fire-and-forget
+      // Teacher notification + email for lesson, fire-and-forget
       if (input.student_id) {
-        const studentLabel = input.title?.split(' — ')[0] || 'Student';
+        const studentLabel = input.title?.split(/ \u2014 |: /)[0] || 'Student';
         (async () => {
           let studentEmail = '';
           try {
@@ -352,7 +352,7 @@ export function useCalendarSlots(teacherId?: string, options: UseCalendarSlotsOp
       // Silent refetch to sync with DB (non-blocking)
       silentRefetch();
 
-      // GCal sync — fire-and-forget
+      // GCal sync: fire-and-forget
       (async () => {
         try {
           const { data: syncSettings } = await supabase.from('calendar_settings')

@@ -14,6 +14,7 @@ One rule per entry, with a one-line why. Replace an existing rule instead of add
 ## Answers & Evaluation
 
 - All worksheet text answer checking goes through `src/lib/answers/matchAnswer.ts`; an uncertain match returns `review`, never `wrong` — because false negatives destroy learner trust and DSLM accuracy.
+- "Homework waiting for review" is decided only by `isHomeworkAwaitingReview` in `src/lib/homework/reviewState.ts`, and every review entry point links to `/homework/:id/review` — because the dashboard, timeline and homework list used to disagree and the review page was unreachable after the first review.
 
 ## Runtime Safety
 
@@ -22,6 +23,10 @@ One rule per entry, with a one-line why. Replace an existing rule instead of add
 - Teacher-only pages call `useTeacherAuthRedirect` instead of ad-hoc `navigate('/')` — because email deep links must survive login via `state.from`.
 - Edge Functions build links from the `APP_BASE_URL` secret, never a hardcoded domain — because preview, published and custom domains differ.
 - Every AI model id used in `supabase/functions/**` is registered in `supabase/functions/_shared/modelRegistry.ts` (enforced by `src/lib/__tests__/modelAudit.test.ts`) — because `audit-llm-models` monitors and advises only on registered models.
+
+## Writing Style
+
+- No em dashes (U+2014, `&mdash;`) in English user-facing, generated or SEO text; use a comma, colon, parentheses, period or a pipe in titles, and use `\u2014` escapes in regexes (enforced by `src/lib/__tests__/noEmDash.test.ts`) — because they read as AI-generated English. En dashes in numeric ranges (`1–6`) stay.
 
 ## Documentation & AI Resources
 

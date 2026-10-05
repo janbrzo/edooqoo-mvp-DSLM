@@ -1,5 +1,5 @@
 /**
- * SuggestionWhyPanel — "why this lesson": everything the old banner hid
+ * SuggestionWhyPanel: "why this lesson": everything the old banner hid
  * behind "Show details" plus the fit reasons, in one readable block.
  * Built only from fields stored on the suggestion row.
  */
@@ -95,7 +95,7 @@ export const SuggestionWhyPanel: React.FC<SuggestionWhyPanelProps> = ({ suggesti
       <div className="rounded-md bg-muted/50 px-3 py-2 text-xs text-muted-foreground">
         <p>
           <span className="font-semibold text-foreground">{fit}</span>
-          {confidence.reasons.length > 0 ? ` — ${confidence.reasons.join(' · ')}` : ''}
+          {confidence.reasons.length > 0 ? `: ${confidence.reasons.join(' · ')}` : ''}
         </p>
         {(evidence || ctx.pacing_label || s.difficulty_level) && (
           <p className="mt-1">

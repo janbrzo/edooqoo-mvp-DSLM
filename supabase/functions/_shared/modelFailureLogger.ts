@@ -1,4 +1,4 @@
-// v6.9.21 — Centralized provider-failure logger.
+// v6.9.21: Centralized provider-failure logger.
 // Inserts a row into public.error_logs whenever an LLM/TTS provider returns
 // 404/410 (deprecation) or 5xx (transient failure). Surfaces to /admin/error-logs
 // and powers the StatusPage "Active model issues" banner.

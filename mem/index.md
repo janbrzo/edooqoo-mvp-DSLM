@@ -52,5 +52,7 @@
 - [Student Workspace 4 Tabs](mem://features/student-page/workspace-4-tabs) — v6.9.111 final Prep/Timeline/Library/Learning model; legacy ?tab= aliases permanent; never restore Overview/Worksheets/Skills
 - [Learning Plan Tab](mem://features/dslm/learning-plan) — stage-driven Plan / Insights tab (setup checklist, Needs your OK, Up next, Roadmap, Goals); Prep and Plan share orderUpNext
 - [Quick Add Note](mem://features/student-page/quick-add-note-from-overview) — Add Note opens inline modal in Prep tab QuickNoteBox; never route through tabs
-- [User-flow audit 2026-10](mem://features/dashboard/audit-2026-10-user-flow) — demo student page fix + demoFetchGuard, wrap-safe worksheet toolbars, Prep-first CTAs, useTeacherAuthRedirect, homework error card, vitest in CI
+- [User-flow audit 2026-10](mem://features/dashboard/audit-2026-10-user-flow) — demo student page fix + demoFetchGuard, wrap-safe worksheet toolbars, Prep-first CTAs, useTeacherAuthRedirect, homework error card, vitest in CI; 10-05 follow-up: calendar/MCP/worksheet login return paths, untrimmed Prep topic, no duplicate suggestion tiles
+- [Homework Review Loop](mem://features/homework/review-loop) — isHomeworkAwaitingReview single rule, Review/View review from timeline + homework list, review page login redirect + error card + cache invalidation, demo review card
 - [Generated SEO files CI contract](mem://seo/generated-files-ci-contract) — deterministic generators, seo:sync-generated, post-processing passes in CI before git diff --exit-code
+- [No em dashes](mem://decisions/no-em-dashes) — v6.9.72 U+2014 banned in English user-facing/generated text; replacement rules, exclusions, noEmDash test guard

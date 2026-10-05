@@ -86,12 +86,29 @@ describe('mapAttentionItems', () => {
     );
     expect(all[0].text).toBe('A student submitted "Homework"');
   });
+
+  it('skips reviewed homework and homework the teacher marked done', () => {
+    const items = mapAttentionItems(
+      {
+        homework: [
+          { id: 'hw1', title: 'A', student_id: 's1', completed_at: '2026-09-01T10:00:00Z', reviewed_at: '2026-09-02T10:00:00Z' },
+          { id: 'hw2', title: 'B', student_id: 's1', completed_at: '2026-09-01T10:00:00Z', completed_by_teacher: true },
+          { id: 'hw3', title: 'C', student_id: 's1', completed_at: '2026-09-01T10:00:00Z', completed_by_teacher: false },
+        ],
+        welcomeTests: [],
+        bookings: [],
+      },
+      nameOf,
+      5,
+    );
+    expect(items.map((i) => i.id)).toEqual(['homework_to_review:hw3']);
+  });
 });
 
 describe('formatGoal', () => {
   it('maps legacy codes and passes free text through', () => {
     expect(formatGoal('work')).toBe('Work/Business');
-    expect(formatGoal('Business English — meetings')).toBe('Business English — meetings');
+    expect(formatGoal('Business English, meetings')).toBe('Business English, meetings');
     expect(formatGoal(null)).toBe('');
   });
 });

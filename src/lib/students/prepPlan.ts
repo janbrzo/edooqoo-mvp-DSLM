@@ -1,18 +1,19 @@
 /**
- * prepPlan — pure data rules for the Prep tab of the Student Workspace
+ * prepPlan: pure data rules for the Prep tab of the Student Workspace
  * (v6.9.111, M4 step 1).
  *
  * `NextLessonCard`, `LastLessonStrip` and `QuickNoteBox` must stay purely
  * presentational, so every decision about *which* topic is proposed, *why* it
  * is proposed and how ages are phrased lives here.
  *
- * No React, no Supabase, no globals — every rule below is unit-testable.
+ * No React, no Supabase, no globals; every rule below is unit-testable.
  * The Worksheet Generation Engine is not touched: this module only selects and
  * normalises an existing suggestion row into the payload shape the page
  * already sends to `writeAutoGenerateIntent` / the sessionStorage prefill.
  */
 
 import { formatGoalLabel } from '@/constants/studentGoals';
+import { FIELD_LIMITS } from '@/components/WorksheetForm/constants';
 import type { WorksheetSuggestion } from '@/types/studentProgress';
 import { formatPhaseCaption, orderUpNext, type PlanPhaseLite } from '@/lib/dslm/learningPlan';
 
@@ -41,9 +42,11 @@ export interface PrepSuggestion {
 }
 
 export const RATIONALE_MAX_LEN = 160;
+/** The fallback topic lands in the form's Lesson topic field, so it obeys that field's budget. */
+export const PREP_TOPIC_MAX_LEN = FIELD_LIMITS.lessonTopic;
 export const FALLBACK_TOPIC = 'General practice';
 export const NO_SIGNAL_RATIONALE =
-  'No signals yet — this is a general practice suggestion.';
+  'No signals yet: this is a general practice suggestion.';
 
 function text(raw: string | null | undefined): string {
   return (raw ?? '').trim();
@@ -83,8 +86,8 @@ function toPrepSuggestion(
 /**
  * The one topic Prep proposes for the next lesson.
  *
- * The order comes from `orderUpNext` — the same queue the Learning plan tab
- * shows as "Up next" — so both tabs always agree on #1: steps of the
+ * The order comes from `orderUpNext`: the same queue the Learning plan tab
+ * shows as "Up next": so both tabs always agree on #1: steps of the
  * in-progress phase first, then the other phases in roadmap order, then
  * free-floating next steps. Used, soft-deleted and topic-less rows are
  * ignored. Pass `phases` whenever they are loaded; without them phase steps
@@ -114,7 +117,7 @@ export function selectPrepSuggestion(
 
   return {
     id: null,
-    topic: focus || goalLabel || FALLBACK_TOPIC,
+    topic: clampTopic(focus || goalLabel) || FALLBACK_TOPIC,
     goal: goalLabel,
     additionalInfo: '',
     grammarFocus: '',
@@ -124,6 +127,17 @@ export function selectPrepSuggestion(
     source: 'fallback',
     phaseCaption: null,
   };
+}
+
+/**
+ * Fit a generator input into the Lesson topic budget on a word boundary.
+ * Never appends an ellipsis: this value is sent to the generator, not displayed.
+ */
+function clampTopic(raw: string): string {
+  if (raw.length <= PREP_TOPIC_MAX_LEN) return raw;
+  const slice = raw.slice(0, PREP_TOPIC_MAX_LEN);
+  const lastSpace = slice.lastIndexOf(' ');
+  return (lastSpace > PREP_TOPIC_MAX_LEN / 2 ? slice.slice(0, lastSpace) : slice).trimEnd();
 }
 
 /** Trim on a word boundary, appending an ellipsis when anything was cut. */
@@ -164,7 +178,7 @@ function startOfDay(d: Date): Date {
 
 /**
  * `Today` / `Yesterday` / `N days ago` / `N weeks ago` / `MMM d, yyyy`.
- * Empty string when the input is missing or unparseable — the caller then
+ * Empty string when the input is missing or unparseable; the caller then
  * renders no meta column at all.
  */
 export function formatRelativeAge(iso: string | null | undefined, now: Date = new Date()): string {

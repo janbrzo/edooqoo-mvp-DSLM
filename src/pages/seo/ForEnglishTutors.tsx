@@ -15,17 +15,17 @@ const serviceLd = {
 const ForEnglishTutors = () => (
   <SeoLandingLayout
     seo={{
-      title: 'English Tutor Tools — Run a Pro Tutoring Business',
+      title: 'English Tutor Tools: Run a Pro Tutoring Business',
       description: 'Tools for English tutors: 1-Minute Prep workflow, worksheet output, AI-assisted homework review, student context, calendar with payments.',
       path: '/for-english-tutors',
       ogType: 'website',
       extraJsonLd: serviceLd,
     }}
-    h1="English Tutor Tools — Run a Pro Tutoring Business"
-    lead="The complete toolkit for independent English tutors. 1-Minute Prep workflow, worksheet generation, AI-assisted homework review, student context, public booking page with Stripe payments — all in one platform."
+    h1="English Tutor Tools: Run a Pro Tutoring Business"
+    lead="The complete toolkit for independent English tutors. 1-Minute Prep workflow, worksheet generation, AI-assisted homework review, student context, public booking page with Stripe payments, all in one platform."
     problems={[
       'Independent English tutors juggle 5+ tools (Google Docs, Calendly, Stripe, Zoom, a notes app) just to run one student.',
-      'Lesson preparation and homework review consume 10-15 hours per week — destroying the effective hourly rate.',
+      'Lesson preparation and homework review consume 10-15 hours per week, destroying the effective hourly rate.',
       'No centralized view of student progress means every lesson starts with what did we cover last time?',
     ]}
     solutionHeading="One platform replaces the typical 5-tool stack"
@@ -43,17 +43,17 @@ const ForEnglishTutors = () => (
       { title: 'Notion / Apple Notes for student notes', body: 'Supported by DSLM Student Knowledge and teacher-reviewed context classification.', href: '/features/dslm' },
       { title: 'Quizlet for vocabulary', body: 'Replaced by Edooqoo Flashcards with SM-2 spaced repetition.', href: '/features/flashcards' },
       { title: 'Manual placement testing', body: 'Accelerated by a 49-question Welcome Test with AI-generated Learning Profile input for teacher review.', href: '/features/placement-test' },
-      { title: 'WhatsApp / email for student materials', body: 'Replaced by Student Hub portal — students access worksheets, homework, flashcards in one place.', href: '/features/student-hub' },
+      { title: 'WhatsApp / email for student materials', body: 'Replaced by Student Hub portal: students access worksheets, homework, flashcards in one place.', href: '/features/student-hub' },
       { title: 'Excel for progress tracking', body: 'Supported by DSLM nano-skill metrics and reviewed learning signals from available activity.', href: '/features/dslm' },
     ]}
     body={
       <>
         <h2 className="text-xl font-bold text-foreground mt-0">Why independent tutors win in 2026</h2>
-        <p>Platforms like Cambly, Preply, and italki take 15-30% commission and dictate pricing. An independent tutor with their own booking page, payment processing, and student management workflow keeps 100% of revenue and sets their own rate. The historical blocker has been the operational complexity — building that stack with 5+ separate tools added 10 hours per week of admin. Edooqoo collapses the stack into one platform, making independent tutoring genuinely more profitable than platform work.</p>
+        <p>Platforms like Cambly, Preply, and italki take 15-30% commission and dictate pricing. An independent tutor with their own booking page, payment processing, and student management workflow keeps 100% of revenue and sets their own rate. The historical blocker has been the operational complexity, building that stack with 5+ separate tools added 10 hours per week of admin. Edooqoo collapses the stack into one platform, making independent tutoring genuinely more profitable than platform work.</p>
         <h2 className="text-xl font-bold text-foreground">What you get on the Free plan</h2>
         <p>Unlimited students. All 29 exercise types. 2 worksheet generations to test the engine. AI-assisted homework review on those 2 worksheets. Public booking page. Stripe payment integration. Student Hub portal. Flashcards with spaced repetition. The Free plan is enough to run 1-2 paying students end-to-end before deciding to upgrade.</p>
         <h2 className="text-xl font-bold text-foreground">Paid plans for full-time tutors</h2>
-        <p>Side-Gig ($9/month): 15 worksheets/month, suitable for 5-10 weekly students. Full-Time (from $19/month): 30-90 worksheets/month for tutors with 15+ weekly students. Every plan includes every feature — the only meter is worksheet generation volume. See <Link to="/pricing" className="text-primary hover:underline">full pricing</Link>.</p>
+        <p>Side-Gig ($9/month): 15 worksheets/month, suitable for 5-10 weekly students. Full-Time (from $19/month): 30-90 worksheets/month for tutors with 15+ weekly students. Every plan includes every feature; the only meter is worksheet generation volume. See <Link to="/pricing" className="text-primary hover:underline">full pricing</Link>.</p>
         <h2 className="text-xl font-bold text-foreground">Built by tutors, for tutors</h2>
         <p>Edooqoo is built with Martha (10 years adult ESL) as the quality benchmark. Every feature is rejected if it feels generic, school-like, or fails the adult-learner test. Read more in <Link to="/about" className="text-primary hover:underline">About Edooqoo</Link>.</p>
       </>

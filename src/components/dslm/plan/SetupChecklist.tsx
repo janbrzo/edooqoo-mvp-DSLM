@@ -1,5 +1,5 @@
 /**
- * SetupChecklist — the Learning plan for a student without lesson suggestions.
+ * SetupChecklist: the Learning plan for a student without lesson suggestions.
  *
  * Four steps in dependency order (Goal → Level check → Roadmap → Next lessons).
  * Only the first actionable step gets the primary button; every step can be
@@ -158,7 +158,7 @@ export const SetupChecklist: React.FC<SetupChecklistProps> = (props) => {
         return {
           detail: stepsBeforeLessonsDone
             ? 'Lesson suggestions you approve. Prep shows the first one.'
-            : 'Lesson suggestions you approve. Works now — sharper after the steps above.',
+            : 'Lesson suggestions you approve. Works now, sharper after the steps above.',
           actions: (
             <Button size="sm" variant={variantFor('suggestions')} onClick={props.onGetSuggestions} disabled={props.suggestionsBusy}>
               {props.suggestionsBusy ? <Loader2 className="mr-1.5 h-4 w-4 animate-spin" aria-hidden="true" /> : <Sparkles className="mr-1.5 h-4 w-4" aria-hidden="true" />}

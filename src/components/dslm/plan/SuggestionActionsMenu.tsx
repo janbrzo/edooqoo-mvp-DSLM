@@ -1,5 +1,5 @@
 /**
- * SuggestionActionsMenu — the single `…` menu for a lesson suggestion.
+ * SuggestionActionsMenu: the single `…` menu for a lesson suggestion.
  * Every action the old cards exposed as icons lives here; destructive
  * actions only ever appear inside this menu.
  */

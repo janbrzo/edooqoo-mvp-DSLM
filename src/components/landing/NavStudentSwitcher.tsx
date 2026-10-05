@@ -7,7 +7,7 @@ import { useStudents } from '@/hooks/useStudents';
 import { AddStudentDialog } from '@/components/dashboard/AddStudentDialog';
 
 /**
- * v6.9.13 — Global student switcher in StickyNav.
+ * v6.9.13: Global student switcher in StickyNav.
  * Anchor-based items so middle-click / Ctrl/Cmd-click open the student page
  * in a new tab natively (browser default for <a href>).
  */
@@ -26,7 +26,7 @@ export const NavStudentSwitcher: React.FC = () => {
     [students]
   );
 
-  // v6.9.110 — inline filter, useful for teachers with 20+ students.
+  // v6.9.110: inline filter, useful for teachers with 20+ students.
   const visible = React.useMemo(() => {
     const q = query.trim().toLowerCase();
     if (!q) return sorted;
@@ -39,7 +39,7 @@ export const NavStudentSwitcher: React.FC = () => {
     if (!open) setQuery('');
   }, [open]);
 
-  // v6.9.33 — show current student name when we're on /student/:id.
+  // v6.9.33: show current student name when we're on /student/:id.
   const currentStudentId = React.useMemo(() => {
     const m = location.pathname.match(/^\/student\/([^/?#]+)/);
     return m ? m[1] : null;

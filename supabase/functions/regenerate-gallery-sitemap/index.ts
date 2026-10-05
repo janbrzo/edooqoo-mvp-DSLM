@@ -1,5 +1,5 @@
 // regenerate-gallery-sitemap
-// Sprint 3 / Plan v6.9.20 — returns a fresh sitemap-gallery.xml for all
+// Sprint 3 / Plan v6.9.20, returns a fresh sitemap-gallery.xml for all
 // public worksheets. Designed to be fetched by build tooling or a cron.
 // Output is XML so external crawlers (Google Search Console) can ingest
 // directly via Supabase URL or via a proxied /sitemap-gallery.xml route.

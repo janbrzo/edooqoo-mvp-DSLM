@@ -1,8 +1,8 @@
 /**
- * Student Self-Profile (v5.2) — 10 categories filled by the student in /my hub.
+ * Student Self-Profile (v5.2): 10 categories filled by the student in /my hub.
  * Each maps to one student_knowledge_entries row (category='Self-Profile',
  * metadata.field=<id>). All fields chosen for direct use in worksheet generation
- * context — no vanity fields.
+ * context: no vanity fields.
  */
 export type SelfProfileFieldType = 'text' | 'textarea' | 'single' | 'multi' | 'slider';
 
@@ -59,7 +59,7 @@ export const SELF_PROFILE_FIELDS: SelfProfileFieldDef[] = [
   {
     id: 'english_use_contexts',
     label: 'When do you use English?',
-    helper: 'Pick all that apply — drives skill emphasis.',
+    helper: 'Pick all that apply, drives skill emphasis.',
     type: 'multi',
     options: [
       { value: 'Meetings', label: 'Meetings' },

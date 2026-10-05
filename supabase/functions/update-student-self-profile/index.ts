@@ -1,4 +1,4 @@
-// update-student-self-profile — v5.2
+// update-student-self-profile: v5.2
 // Lets a student (authenticated via student-hub flow: knows teacher token + their own email)
 // upsert "Self-Profile" entries into student_knowledge_entries.
 //

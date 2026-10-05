@@ -1,5 +1,5 @@
 /**
- * Sprint 2 (S2-E) — SERP snippet limits for programmatic (pSEO) routes.
+ * Sprint 2 (S2-E): SERP snippet limits for programmatic (pSEO) routes.
  *
  * PROBLEM: pSEO templates interpolate variable-length labels, so the same
  * template produced 60-char titles for short topics and 90-char titles for long
@@ -12,13 +12,13 @@
 export const SEO_TITLE_MAX = 60;
 export const SEO_DESCRIPTION_MAX = 155;
 
-const BRAND_SUFFIX_PATTERN = /\s*[|—-]\s*Edooqoo\s*$/;
+const BRAND_SUFFIX_PATTERN = /\s*[|:\u2014-]\s*Edooqoo\s*$/;
 
 function trimToWordBoundary(text: string, max: number): string {
   if (text.length <= max) return text;
   const cut = text.slice(0, max);
   const lastSpace = cut.lastIndexOf(' ');
-  return (lastSpace > max * 0.5 ? cut.slice(0, lastSpace) : cut).replace(/[\s,;:.\-—|]+$/, '');
+  return (lastSpace > max * 0.5 ? cut.slice(0, lastSpace) : cut).replace(/[\s,;:.\-\u2014|]+$/, '');
 }
 
 /** Keeps " | Edooqoo" only when the full title still fits in 60 characters. */

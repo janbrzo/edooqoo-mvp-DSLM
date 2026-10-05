@@ -67,7 +67,7 @@ export const ANON_FEATURES: AnonFeature[] = [
     id: 'student-hub',
     icon: User,
     title: 'Your students get their own dashboard',
-    benefit: 'Self-profile, homework, flashcards — branded as you.',
+    benefit: 'Self-profile, homework, flashcards: branded as you.',
     ctaHref: '/signup',
     ctaLabel: 'Sign up free →',
   },

@@ -20,7 +20,7 @@ export const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
 
   const handleGoogleSignIn = async () => {
     try {
-      // v6.9.35 — persist post-signup intent so Index can open AddStudent
+      // v6.9.35: persist post-signup intent so Index can open AddStudent
       // modal after OAuth roundtrip (separate from short-lived ?action= param).
       if (mode === 'signup') {
         try { localStorage.setItem('post-signup-add-student', '1'); } catch {}
@@ -30,7 +30,7 @@ export const GoogleSignInButton: React.FC<GoogleSignInButtonProps> = ({
       // (in Signup/Login) runs and redirects to the claimed worksheet.
       const hasClaims = getPendingClaimIds().length > 0;
       const fromPath = (location.state as { from?: string } | null)?.from;
-      // v6.9.36 — signup mode without pending claims lands on the generator
+      // v6.9.36: signup mode without pending claims lands on the generator
       // page with `?action=add-student` so Index opens AddStudentDialog after
       // OAuth roundtrip. Sign-in returns to the page that sent the teacher to
       // login (e.g. a student deep link), like the email/password path does.

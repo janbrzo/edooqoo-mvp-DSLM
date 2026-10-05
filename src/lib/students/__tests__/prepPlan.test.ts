@@ -6,8 +6,10 @@ import {
   RATIONALE_MAX_LEN,
   FALLBACK_TOPIC,
   NO_SIGNAL_RATIONALE,
+  PREP_TOPIC_MAX_LEN,
   type PrepSuggestionInput,
 } from '../prepPlan';
+import { FIELD_LIMITS } from '@/components/WorksheetForm/constants';
 
 function row(over: Partial<PrepSuggestionInput> = {}): PrepSuggestionInput {
   return {
@@ -152,6 +154,22 @@ describe('selectPrepSuggestion', () => {
       topic: 'phrasal verbs',
       goal: 'Work/Business',
     });
+  });
+
+  it('keeps a long focus area intact as the fallback topic (no display ellipsis)', () => {
+    const focus = 'Mixes past simple and present perfect when summarising campaign results in meetings';
+    const result = selectPrepSuggestion([], [], { mainGoal: null, focusAreas: [focus] });
+    expect(result.topic).toBe(focus);
+    expect(result.topic).not.toContain('…');
+  });
+
+  it('fits the fallback topic into the Lesson topic field on a word boundary', () => {
+    const focus = `${'word '.repeat(60)}end`;
+    const result = selectPrepSuggestion([], [], { mainGoal: null, focusAreas: [focus] });
+    expect(PREP_TOPIC_MAX_LEN).toBe(FIELD_LIMITS.lessonTopic);
+    expect(result.topic.length).toBeLessThanOrEqual(PREP_TOPIC_MAX_LEN);
+    expect(result.topic.endsWith('word')).toBe(true);
+    expect(result.topic).not.toContain('…');
   });
 
   it('falls back to the formatted main goal when there are no focus areas', () => {

@@ -1,5 +1,5 @@
 /**
- * GoalsSummary — the destination in a few lines: main goal (deadline +
+ * GoalsSummary: the destination in a few lines: main goal (deadline +
  * progress) and up to three active goals. Everything else (elements,
  * ratings, achieved/archived goals, goal notes) opens in the goals panel.
  */

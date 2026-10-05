@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * verify-content.mjs — automated content verification (operator-run, not part of build:seo).
+ * verify-content.mjs: automated content verification (operator-run, not part of build:seo).
  *
  *   npm run seo:audit-uniqueness                      # layer 1 needs this measurement
  *   npm run seo:verify-content -- --routes=/blog/x.html,/tools/y

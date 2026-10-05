@@ -51,7 +51,7 @@ export default function WorksheetForm({
   userId: userIdProp,
 }: ExtendedWorksheetFormProps) {
   const [lessonTime, setLessonTime] = useState<LessonTime>("60min");
-  // v6.9.38 — read autoGenerate intent + prefill topic synchronously so the
+  // v6.9.38: read autoGenerate intent + prefill topic synchronously so the
   // readiness gate has a deterministic snapshot on the very first render.
   const readAutoGenerateIntent = () => {
     if (typeof window === 'undefined') return null;
@@ -70,7 +70,7 @@ export default function WorksheetForm({
       return typeof p?.topic === 'string' ? p.topic : '';
     } catch { return ''; }
   };
-  // v6.9.41 — synchronous reads of DSLM prefill so initial state already contains
+  // v6.9.41: synchronous reads of DSLM prefill so initial state already contains
   // exercises/focus/media. Eliminates the race where the readiness gate fires
   // before the prefill effect re-runs.
   const readPrefillField = <T,>(key: string, fallback: T): T => {
@@ -108,7 +108,7 @@ export default function WorksheetForm({
     return lessonTime === '45min' ? MANUAL_EXERCISES_45MIN : MANUAL_EXERCISES_60MIN;
   };
   const [selectedExercises, setSelectedExercises] = useState<string[]>(() => {
-    // v6.9.41 — when an auto-generate intent exists, prefer the DSLM exercises
+    // v6.9.41: when an auto-generate intent exists, prefer the DSLM exercises
     // saved in sessionStorage so the readiness gate sees them on first render.
     if (initialAutoIntentRef.current) {
       const exFromStorage = readPrefillField<string[]>('prefillExercises', []);
@@ -138,9 +138,9 @@ export default function WorksheetForm({
   const [activeTab, setActiveTab] = useState<'exercises' | 'advanced' | null>(null);
   const [showMoreFields, setShowMoreFields] = useState(false);
   const formRef = useRef<HTMLFormElement>(null);
-  // v6.9.36 — auto-submit readiness refs (deterministic gate, not timeout).
+  // v6.9.36: auto-submit readiness refs (deterministic gate, not timeout).
   const autoSubmitFiredRef = useRef(false);
-  // v6.9.48 — Index.tsx now owns the auto-generate dispatch. When it fires,
+  // v6.9.48: Index.tsx now owns the auto-generate dispatch. When it fires,
   // it emits `worksheet:autoGenerateStarted` so this form stands down (no
   // double submit) and clears the sessionStorage flags exactly once.
   useEffect(() => {
@@ -150,7 +150,7 @@ export default function WorksheetForm({
         sessionStorage.removeItem('autoGenerateWorksheet');
         sessionStorage.removeItem('autoGenerateWorksheetRequest');
       } catch { /* ignore */ }
-      // v6.9.53 — DO NOT clear `edooqoo.pendingWorksheetIntent` here.
+      // v6.9.53: DO NOT clear `edooqoo.pendingWorksheetIntent` here.
       // The Index dispatcher owns its lifecycle; clearing it from the form
       // listener races with the dispatcher and reintroduces the original
       // "navigates but never starts" bug. Index marks it `completed`/`failed`
@@ -178,10 +178,10 @@ export default function WorksheetForm({
     refreshProgress
   } = useOnboardingProgress();
 
-  // v6.9.33 — inline "+ Add Student" SelectItem opens this dialog.
+  // v6.9.33: inline "+ Add Student" SelectItem opens this dialog.
   const [inlineAddStudentOpen, setInlineAddStudentOpen] = useState(false);
 
-  // v6.9.15b — `no-next-steps` hint removed from this form because
+  // v6.9.15b: `no-next-steps` hint removed from this form because
   // NextStepsPresetBanner already shows the canonical "No learning plan" CTA
   // for the same condition. Keeping both was redundant.
 
@@ -190,7 +190,7 @@ export default function WorksheetForm({
     lessonTime, lessonTopic, lessonGoal, grammarFocus, additionalInformation,
     englishLevel, languageStyle, selectedExercises, selectedMediaTypes,
     exerciseFocusMap, selectionMode,
-    // v6.9.60 — persist selected student id so a failed generation does
+    // v6.9.60: persist selected student id so a failed generation does
     // not clear it on re-hydration.
     selectedStudentId: selectedStudentId && selectedStudentId !== 'no-student' ? selectedStudentId : undefined,
   };
@@ -225,7 +225,7 @@ export default function WorksheetForm({
         if (draft.selectionMode === 'manual' || draft.selectionMode === 'random' || draft.selectionMode === 'smart') {
           setSelectionMode(draft.selectionMode as ExerciseSelectionMode);
         }
-        // v6.9.60 — Restore previously selected student so a retry after a
+        // v6.9.60: Restore previously selected student so a retry after a
         // generation error keeps the same learner context (and the CEFR
         // band / exercise defaults that follow from it).
         if (typeof draft.selectedStudentId === 'string' && draft.selectedStudentId.length > 0) {
@@ -254,7 +254,7 @@ export default function WorksheetForm({
     toast({ title: 'Form cleared', description: 'All fields reset to defaults.' });
   };
 
-  // v6.9.46 — mounted-form auto intent hardening. The first-render lazy reads
+  // v6.9.46: mounted-form auto intent hardening. The first-render lazy reads
   // cover normal route navigation; this catches the rarer case where the form is
   // already mounted and DSLM writes the auto-generate session flags afterward.
   useEffect(() => {
@@ -339,7 +339,7 @@ export default function WorksheetForm({
       } catch (e) {
         devWarn('[WorksheetForm] Failed to clear draft', e);
       }
-      // v6.9.10 — if this generation originated from a Next-Step preset chip,
+      // v6.9.10: if this generation originated from a Next-Step preset chip,
       // propagate to NextStepsPresetBanner so it can mark the suggestion as used.
       try {
         const sid = sessionStorage.getItem('appliedPresetSuggestionId');
@@ -384,7 +384,7 @@ export default function WorksheetForm({
 
     // Handle prefill exercises from Layer D suggestions
     // v4.2: filter against ALL_EXERCISE_IDS (drops sentence-transformation / future coming-soon ids).
-    // v4.6: unified prefill — read exercises + focus map together, then normalize as
+    // v4.6: unified prefill, read exercises + focus map together, then normalize as
     // a single payload so selectedExercises / selectedMediaTypes / exerciseFocusMap
     // are always coherent (no more "8/8 counter, 6 visible checkboxes").
     const prefillExercisesRaw = sessionStorage.getItem('prefillExercises');
@@ -402,7 +402,7 @@ export default function WorksheetForm({
             mediaTypes,
             lessonTime: lessonTime as '45min' | '60min',
           });
-          // ORDER MATTERS: media first, then exercises, then focus map — so the grid
+          // ORDER MATTERS: media first, then exercises, then focus map; so the grid
           // re-renders with the correct visible exercise pool BEFORE the checkboxes
           // attempt to highlight them.
           setSelectedMediaTypes(norm.selectedMediaTypes as MediaType[]);
@@ -423,8 +423,8 @@ export default function WorksheetForm({
       }
     }
 
-    // v6.9.36 — auto-submit if DSLM "Generate worksheet ↗" was clicked.
-    // v6.9.38 — intent + studentId + lessonTopic are now read synchronously
+    // v6.9.36: auto-submit if DSLM "Generate worksheet ↗" was clicked.
+    // v6.9.38: intent + studentId + lessonTopic are now read synchronously
     // via lazy useState/useRef initializers above, so the readiness gate
     // has a deterministic snapshot on the very first render. Nothing else
     // is needed here.
@@ -433,7 +433,7 @@ export default function WorksheetForm({
     }
   }, []);
 
-  // v6.9.50 — RAF auto-submit and 1.5s watchdog REMOVED. Index.tsx is now the
+  // v6.9.50: RAF auto-submit and 1.5s watchdog REMOVED. Index.tsx is now the
   // single source of truth for auto-generate dispatch (see autoGenerateBootstrap.ts).
   // The form only listens for `worksheet:autoGenerateStarted` to stand down and
   // clear sessionStorage flags. Eliminates race conditions where two competing
@@ -462,7 +462,7 @@ export default function WorksheetForm({
   useEffect(() => {
     if (isInitialLoad) {
       const matchingSet = getSuggestionSetMatchingPlaceholder(currentPlaceholders);
-      const randomSets = getRandomSuggestionSets(1);
+      const randomSets = getRandomSuggestionSets(1, matchingSet ? [matchingSet.id] : []);
       if (matchingSet) {
         setCurrentSuggestions([matchingSet, randomSets[0]]);
       } else {
@@ -494,7 +494,7 @@ export default function WorksheetForm({
       });
       return;
     }
-    // v6.9.94 — client-side prompt budget guard. The backend rejects any
+    // v6.9.94: client-side prompt budget guard. The backend rejects any
     // assembled prompt over PROMPT_HARD_LIMIT chars with an opaque 400; catch
     // it here with an actionable message instead of burning a request and
     // firing a false "generation failed" alert email.
@@ -519,7 +519,7 @@ export default function WorksheetForm({
     // PROBLEM 2: Media-aware exercise auto-complete
     const PICTURE_COMPATIBLE_EXERCISES = ['describe-picture', 'answer-questions-picture', 'true-false-picture', 'multiple-choice-picture'];
     const AUDIO_COMPATIBLE_EXERCISES = ['listening-comprehension', 'answer-questions-audio', 'true-false-audio', 'multiple-choice-audio', 'fill-in-blanks-audio'];
-    // sentence-transformation is currently disabled — never auto-pick it.
+    // sentence-transformation is currently disabled, never auto-pick it.
     const GENERAL_EXERCISES = ['reading', 'true-false', 'matching', 'fill-in-blanks', 'multiple-choice', 'dialogue', 'discussion', 'error-correction', 'odd-one-out', 'synonyms', 'antonyms', 'word-order', 'gap-text', 'negative-prefixes', 'categorize', 'paraphrasing', 'complete-word', 'matching-halves'];
     
     const isPictureMode = selectedMediaTypes.includes('picture');
@@ -587,14 +587,14 @@ export default function WorksheetForm({
       selectedMediaTypes,
       exerciseFocusMap: Object.keys(exerciseFocusMap).length > 0 ? exerciseFocusMap : undefined,
       selectedImage: selectedImage,
-      // v6.9.45 — flag any submit that originated from the DSLM auto-generate intent
+      // v6.9.45: flag any submit that originated from the DSLM auto-generate intent
       // so Index.tsx can queue the request until tokens/profile are ready instead of
       // silently dropping it after 2 short retries.
       __autoGenerateFromSuggestion: Boolean(initialAutoIntentRef.current),
       __autoGenerateRequestId: autoRequestIdRef.current || undefined,
     } as any;
 
-    // v6.9.55 — attach UI/transport metadata (student name + email) for
+    // v6.9.55: attach UI/transport metadata (student name + email) for
     // GeneratingModal. Not part of the AI prompt; the prompt formatter
     // never reads these fields.
     try {
@@ -613,7 +613,7 @@ export default function WorksheetForm({
     refreshProgress();
     setTimeout(refreshProgress, 1000);
     setTimeout(refreshProgress, 2000);
-    // v6.9.61 — Snapshot the EXACT submitted form state synchronously, so a
+    // v6.9.61: Snapshot the EXACT submitted form state synchronously, so a
     // generation error that remounts the form rehydrates with the same
     // exercise list, focus map, student, etc. (avoids the "word-order [G]
     // becomes Gap Text (Cloze) [V] after retry" bug caused by the debounced
@@ -670,7 +670,7 @@ export default function WorksheetForm({
     } else if (mode === 'random') {
       const PICTURE_EXERCISES = ['describe-picture', 'answer-questions-picture', 'true-false-picture', 'multiple-choice-picture'];
       const AUDIO_EXERCISES = ['listening-comprehension', 'answer-questions-audio', 'true-false-audio', 'multiple-choice-audio', 'fill-in-blanks-audio'];
-      // sentence-transformation is disabled — exclude from random picks too.
+      // sentence-transformation is disabled, exclude from random picks too.
       const GENERAL_EXERCISES = ['reading', 'true-false', 'matching', 'fill-in-blanks', 'multiple-choice', 'dialogue', 'discussion', 'error-correction', 'odd-one-out', 'synonyms', 'antonyms', 'word-order', 'gap-text', 'negative-prefixes', 'categorize', 'paraphrasing', 'complete-word', 'matching-halves'];
       if (isPictureMode) {
         const sp = [...PICTURE_EXERCISES].sort(() => Math.random() - 0.5).slice(0, 2);
@@ -724,7 +724,7 @@ export default function WorksheetForm({
         // canonical first-8 manual defaults. ExerciseSelector now treats 'smart'
         // exactly like 'manual' for editability (checkboxes + V/G toggles).
         const mediaLabel = recommended === 'audio' ? 'audio' : recommended === 'picture' ? 'picture' : 'no';
-        toast({ title: 'Smart selection ready', description: `AI picked ${aiExercises.length} exercises with ${mediaLabel} media — adjust V/G or checkboxes as needed.` });
+        toast({ title: 'Smart selection ready', description: `AI picked ${aiExercises.length} exercises with ${mediaLabel} media: adjust V/G or checkboxes as needed.` });
       } catch (err: any) {
         console.error('Smart selection failed', err);
         toast({ title: 'Smart selection failed', description: err?.message || 'Falling back to manual defaults.', variant: 'destructive' });
@@ -743,7 +743,7 @@ export default function WorksheetForm({
     }));
   };
 
-  // v6.9.10 — apply a Next-Step preset (chip click) into form state.
+  // v6.9.10: apply a Next-Step preset (chip click) into form state.
   const applyPreset = (p: PresetPayload) => {
     setLessonTopic(p.topic || '');
     setLessonGoal(p.goal || '');
@@ -762,7 +762,7 @@ export default function WorksheetForm({
     setSelectionMode('manual');
     setActiveTab('exercises');
     sessionStorage.setItem('appliedPresetSuggestionId', p.sourceSuggestionId);
-    // v6.9.61 — persist the preset deterministically so an immediate
+    // v6.9.61: persist the preset deterministically so an immediate
     // auto-submit + failure path still recovers the EXACT preset on retry.
     try {
       saveDraftNow({
@@ -884,7 +884,7 @@ export default function WorksheetForm({
                   <FormField label="Grammar focus" placeholder={currentPlaceholders.grammarFocus} value={grammarFocus} onChange={setGrammarFocus} suggestions={createSuggestionTiles('grammarFocus')} isOptional={true} maxLength={FIELD_LIMITS.grammarFocus} />
                 </div>}
 
-              {/* v6.9.10 — Next-Step preset banner (per selected student) */}
+              {/* v6.9.10: Next-Step preset banner (per selected student) */}
               {userId && selectedStudentId !== 'no-student' && (
                 <NextStepsPresetBanner
                   studentId={selectedStudentId}
@@ -1108,7 +1108,7 @@ export default function WorksheetForm({
                   </Card>
                 </div>
 
-                {/* v6.9.15a — Contextual hint about student selection state */}
+                {/* v6.9.15a: Contextual hint about student selection state */}
                 {userId && students.length === 0 && (
                   <StudentContextHint variant="no-students" />
                 )}
@@ -1163,7 +1163,7 @@ export default function WorksheetForm({
           </form>
         </CardContent>
       </Card>
-      {/* v6.9.33 — inline Add Student dialog: caller controls post-add navigation
+      {/* v6.9.33: inline Add Student dialog: caller controls post-add navigation
           (auto-select the new student instead of navigating to /student/:id). */}
       <AddStudentDialog
         triggerButton={false}

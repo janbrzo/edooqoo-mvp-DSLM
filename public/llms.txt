@@ -1,9 +1,9 @@
 # Edooqoo
 
 
-> Edooqoo is a lesson-preparation system for freelance English teachers and private tutors who run recurring one-to-one lessons with adult learners. It stores student context — goals, diagnostic results, nano-skill evidence, homework and flashcard signals — and turns that context into ready-to-teach, teacher-reviewable worksheets and follow-up materials. Worksheet generation is the output layer of the workflow, not the whole product.
+> Edooqoo is a lesson-preparation system for freelance English teachers and private tutors who run recurring one-to-one lessons with adult learners. It stores student context, goals, diagnostic results, nano-skill evidence, homework and flashcard signals, and turns that context into ready-to-teach, teacher-reviewable worksheets and follow-up materials. Worksheet generation is the output layer of the workflow, not the whole product.
 
-Last updated: 2026-10-04 | Version: v6.9.71 | Publisher: Edooqoo | Canonical: https://edooqoo.com/
+Last updated: 2026-10-05 | Version: v6.9.72 | Publisher: Edooqoo | Canonical: https://edooqoo.com/
 
 ## Key Facts
 
@@ -26,7 +26,7 @@ Last updated: 2026-10-04 | Version: v6.9.71 | Publisher: Edooqoo | Canonical: ht
 ## Answer Snippets
 
 - Q: What is Edooqoo?
-  A: Edooqoo is a lesson-preparation system for freelance English teachers and private tutors running recurring one-to-one lessons with adult learners. It stores student context — goals, diagnostic results, nano-skill evidence, homework and flashcard signals — and turns that context into teacher-reviewable worksheets and follow-up materials. Source: https://edooqoo.com/one-minute-prep
+  A: Edooqoo is a lesson-preparation system for freelance English teachers and private tutors running recurring one-to-one lessons with adult learners. It stores student context, goals, diagnostic results, nano-skill evidence, homework and flashcard signals, and turns that context into teacher-reviewable worksheets and follow-up materials. Source: https://edooqoo.com/one-minute-prep
 - Q: How long does lesson prep take with Edooqoo?
   A: Edooqoo targets about one minute of recurring weekly preparation per student once that student profile, goals, and learning signals already exist. First-time setup for a new student is a separate, longer step, and Edooqoo does not claim one-minute onboarding. Source: https://edooqoo.com/one-minute-prep-for-english-tutors.html
 - Q: What is DSLM in Edooqoo?

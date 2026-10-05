@@ -1,5 +1,5 @@
-// v6.9.8 — Auto-classify a Student Knowledge entry.
-// v6.9.65 — Use chatCompletion helper for automatic OpenAI fallback
+// v6.9.8: Auto-classify a Student Knowledge entry.
+// v6.9.65: Use chatCompletion helper for automatic OpenAI fallback
 // when the direct Gemini primary path returns 402/429/5xx.
 // Fire-and-forget: called from useStudentKnowledge after a Quick Add.
 // Returns a category + structured metadata + confidence; client patches the row.

@@ -11,7 +11,7 @@ const ALERT_EMAILS = ["j4n.brz0@gmail.com", "edooqoo@gmail.com"];
 const APP_BASE_URL = Deno.env.get('APP_BASE_URL') || 'https://edooqoo.com';
 
 /**
- * v6.9.94 — failure taxonomy.
+ * v6.9.94: failure taxonomy.
  *
  * `INFO_TYPES` are NOT incidents: the worksheet reached the teacher. They are
  * quality/telemetry signals and must never be dressed up as "Generation
@@ -19,7 +19,7 @@ const APP_BASE_URL = Deno.env.get('APP_BASE_URL') || 'https://edooqoo.com';
  */
 const INFO_TYPES = new Set(['parse_recovered']);
 /**
- * v6.9.95 — client input errors. The teacher filled the form incorrectly
+ * v6.9.95: client input errors. The teacher filled the form incorrectly
  * (e.g. lesson details over the prompt budget). Never an incident: no email,
  * no error_logs row, no admin noise.
  */
@@ -68,7 +68,7 @@ serve(async (req) => {
     }
     const severity: 'warning' | 'error' = WARNING_TYPES.has(errorType) ? 'warning' : 'error';
 
-    // Persist FIRST and ALWAYS — the alert email is best-effort, the audit
+    // Persist FIRST and ALWAYS; the alert email is best-effort, the audit
     // trail in /admin/error-logs is not.
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
@@ -92,7 +92,7 @@ serve(async (req) => {
         user_id: typeof userId === 'string' && UUID_RE.test(userId) ? userId : null,
       });
     } else {
-      console.warn('⚠️ Supabase service credentials missing — error_logs row skipped');
+      console.warn('⚠️ Supabase service credentials missing, error_logs row skipped');
     }
 
     const resendKey = Deno.env.get('RESEND_API_KEY');
@@ -115,14 +115,14 @@ serve(async (req) => {
       ? 'ℹ️ Worksheet saved with AI repair (quality signal)'
       : '⚠️ Worksheet Generation Failed';
     const emailSubject = isInfo
-      ? `ℹ️ Quality signal: ${errorType} — ${teacherEmail || 'anonymous'}`
-      : `⚠️ Worksheet generation failed: ${errorType} — ${teacherEmail || 'anonymous'}`;
+      ? `ℹ️ Quality signal: ${errorType}, ${teacherEmail || 'anonymous'}`
+      : `⚠️ Worksheet generation failed: ${errorType}, ${teacherEmail || 'anonymous'}`;
     const badgeBg = isInfo ? '#fffbeb' : '#fef2f2';
     const badgeColor = isInfo ? '#b45309' : '#dc2626';
 
     const solutions: Record<string, string> = {
       'quota': 'Gemini API quota exceeded. Check <a href="https://aistudio.google.com/">Google AI Studio</a> billing or switch primary model to OpenAI.',
-      'validation': 'Prompt validation failed — likely empty or malformed prompt. Check frontend for race conditions or double-click issues.',
+      'validation': 'Prompt validation failed: likely empty or malformed prompt. Check frontend for race conditions or double-click issues.',
       'timeout': 'Generation timed out. Consider reducing exercise count or simplifying prompt.',
       'parse': 'AI returned invalid JSON. Model may need temperature adjustment or JSON mode enforcement.',
       'parse_recovered': 'Gemini returned malformed JSON, recovered via AI fallback. Worksheet was saved successfully, but prompt or temperature may be drifting. Investigate sample output to prevent quality degradation.',

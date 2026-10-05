@@ -1,5 +1,5 @@
 /**
- * EntityRow — the single row anatomy for the Student Workspace (v6.9.111, M2).
+ * EntityRow: the single row anatomy for the Student Workspace (v6.9.111, M2).
  *
  * Prep (M4), Timeline (M5) and Library (M6) all render lists of "things that
  * happened or exist for this student". Before M2 each list hand-rolled its own
@@ -56,7 +56,7 @@ export interface ResolvedRowClasses {
 }
 
 /**
- * Pure class/mode resolver — all row decisions live here so they can be
+ * Pure class/mode resolver, all row decisions live here so they can be
  * unit-tested without a DOM renderer.
  */
 export function resolveRowClasses(

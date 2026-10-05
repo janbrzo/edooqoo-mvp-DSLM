@@ -1,5 +1,5 @@
 /**
- * ReviewStrip — "Needs your OK": every change the system proposes and the
+ * ReviewStrip: "Needs your OK": every change the system proposes and the
  * teacher must approve, in one place (it used to be spread over the roadmap
  * header, the pathway body and the goals section). Same amber language as
  * the dashboard "Needs your attention" zone. Renders nothing when empty.

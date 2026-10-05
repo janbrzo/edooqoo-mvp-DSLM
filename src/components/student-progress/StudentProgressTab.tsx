@@ -552,6 +552,6 @@ export const StudentProgressTab: React.FC<StudentProgressTabProps> = ({
   );
 };
 
-// GoalCard extracted to ./GoalCard.tsx — import used above
+// GoalCard extracted to ./GoalCard.tsx, import used above
 
 export default StudentProgressTab;

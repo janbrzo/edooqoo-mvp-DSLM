@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Sprint 4 (Faza 4) — merge recorded AI-search baseline rounds into one trend report.
+ * Sprint 4 (Faza 4): merge recorded AI-search baseline rounds into one trend report.
  *
  * Input:  docs/seo/runs/ai-search/*.json (written by scripts/seo/run-ai-search-baseline.mjs)
  * Output: docs/seo/ai-visibility-trend.generated.md + .json
@@ -41,7 +41,7 @@ const rounds = (fs.existsSync(RUNS_DIR) ? fs.readdirSync(RUNS_DIR) : [])
   });
 
 const delta = (current, previous) =>
-  previous === undefined ? '—' : `${current - previous >= 0 ? '+' : ''}${(current - previous).toFixed(1)} pp`;
+  previous === undefined ? '-' : `${current - previous >= 0 ? '+' : ''}${(current - previous).toFixed(1)} pp`;
 
 const latest = rounds[rounds.length - 1];
 const pending = rounds.filter((round) => round.answered === 0);
@@ -58,7 +58,7 @@ const lines = [
   '|---|---|---:|---:|---:|---:|---:|---:|',
   ...rounds.map((round, index) => {
     const previous = rounds[index - 1]?.mentionRate;
-    return `| ${round.date} | ${round.status} | ${round.prompts} | ${round.answered} | ${round.mentions} | ${round.mentionRate}% | ${delta(round.mentionRate, previous)} | ${round.avgCorrectness ?? '—'} |`;
+    return `| ${round.date} | ${round.status} | ${round.prompts} | ${round.answered} | ${round.mentions} | ${round.mentionRate}% | ${delta(round.mentionRate, previous)} | ${round.avgCorrectness ?? '-'} |`;
   }),
   '',
 ];
@@ -66,13 +66,13 @@ const lines = [
 if (latest) {
   const models = Object.entries(latest.byModel);
   lines.push(
-    '## Latest round — per model',
+    '## Latest round: per model',
     '',
     ...(models.length
       ? models.map(([model, stats]) => `- ${model}: ${JSON.stringify(stats)}`)
       : ['- no answers recorded yet']),
     '',
-    '## Latest round — content gaps to close',
+    '## Latest round: content gaps to close',
     '',
     ...(latest.contentGaps.length
       ? latest.contentGaps.map((gap) => `- ${typeof gap === 'string' ? gap : JSON.stringify(gap)}`)

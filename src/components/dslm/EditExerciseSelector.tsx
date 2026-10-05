@@ -1,5 +1,5 @@
 /**
- * EditExerciseSelector — compact picker for SuggestionEditDialog.
+ * EditExerciseSelector: compact picker for SuggestionEditDialog.
  * Lets the teacher (de)select up to 8 exercise types and toggle V/G focus per item.
  * Reuses ALL_EXERCISE_IDS / EXERCISE_LABELS from the shared taxonomy.
  */

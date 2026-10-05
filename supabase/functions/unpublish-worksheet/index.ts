@@ -1,5 +1,5 @@
 // unpublish-worksheet
-// Sprint 3 / Plan v6.9.20 — toggles worksheets.is_public=false but keeps
+// Sprint 3 / Plan v6.9.20, toggles worksheets.is_public=false but keeps
 // public_slug so the old URL can return 410-style "removed" instead of 404.
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";

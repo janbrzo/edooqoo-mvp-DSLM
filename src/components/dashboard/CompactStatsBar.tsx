@@ -11,7 +11,7 @@ interface CompactStatsBarProps {
   activeHomeworkCount: number;
   upcomingLessonsCount: number;
   /**
-   * v6.9.109 — `'bar'` (default) is the original dashboard strip.
+   * v6.9.109: `'bar'` (default) is the original dashboard strip.
    * `'list'` is a plain definition list used by the Profile "Usage" card:
    * no HubInfo, no tooltips.
    */
@@ -50,7 +50,7 @@ const CompactStatsBar: React.FC<CompactStatsBarProps> = ({
         >
           edooqoo.com/my
         </a>
-        <span className="hidden lg:inline text-muted-foreground"> — no login needed. They access their worksheets, homework, flashcards & lessons.</span>
+        <span className="hidden lg:inline text-muted-foreground">: no login needed. They access their worksheets, homework, flashcards & lessons.</span>
       </span>
     </div>
   );

@@ -1,12 +1,12 @@
 /**
- * ideaSteps — completion rule for the two weekly-prep onboarding steps.
+ * ideaSteps: completion rule for the two weekly-prep onboarding steps.
  *
  * The checklist sends teachers to the Learning plan's lesson suggestions
  * ("Get lesson suggestions", "Use a lesson suggestion"), so suggestions are
  * the primary signal. The teacher's own "Next Lesson Ideas" notes keep
  * counting as before, so no teacher loses a step that was already ticked.
  *
- * No React, no Supabase — unit-testable.
+ * No React, no Supabase: unit-testable.
  */
 export interface IdeaStepCounts {
   /** future_worksheet_suggestions rows (active or used, not deleted). */

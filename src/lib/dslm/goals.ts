@@ -1,5 +1,5 @@
 /**
- * goals — pure predicates shared by the Learning plan and GoalsView.
+ * goals: pure predicates shared by the Learning plan and GoalsView.
  */
 import type { ProgressGoal } from '@/types/studentProgress';
 

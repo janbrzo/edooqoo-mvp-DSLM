@@ -1,12 +1,12 @@
 /**
- * studentSnapshot — pure data rules for the Student Workspace frame (v6.9.111, M3).
+ * studentSnapshot: pure data rules for the Student Workspace frame (v6.9.111, M3).
  *
  * `StudentHeaderBar` and `StudentSnapshotPanel` must stay presentational, so
  * every decision about *what* the teacher sees lives here: which knowledge
  * entries count as focus areas, how they are ordered and trimmed, and how a
  * booked lesson is phrased.
  *
- * No React, no Supabase, no globals — every rule below is unit-testable.
+ * No React, no Supabase, no globals; every rule below is unit-testable.
  */
 
 import type { StudentKnowledgeEntry } from '@/types/studentKnowledge';
@@ -41,13 +41,25 @@ function recency(entry: StudentKnowledgeEntry): string {
 
 /**
  * Up to three short "what to work on" labels for the snapshot panel.
+ * Display only: labels are trimmed to `FOCUS_LABEL_MAX_LEN` with an ellipsis.
+ */
+export function selectFocusAreas(
+  entries: readonly StudentKnowledgeEntry[] | null | undefined,
+  limit: number = MAX_FOCUS_AREAS,
+): string[] {
+  return selectFocusAreaTexts(entries, limit).map((label) => truncate(label));
+}
+
+/**
+ * The same focus areas as `selectFocusAreas`, untrimmed: the input for a
+ * generated lesson topic, which must never carry a display ellipsis.
  *
  * Only active Skill Assessment entries qualify: soft-deleted, outdated and
  * archived rows are ignored, as are strengths. The label prefers the precise
  * `metadata.nano_skill` and falls back to the first line of the note.
  * Case-insensitive duplicates collapse to their most recent occurrence.
  */
-export function selectFocusAreas(
+export function selectFocusAreaTexts(
   entries: readonly StudentKnowledgeEntry[] | null | undefined,
   limit: number = MAX_FOCUS_AREAS,
 ): string[] {
@@ -80,7 +92,7 @@ export function selectFocusAreas(
     const key = label.toLowerCase();
     if (seen.has(key)) continue;
     seen.add(key);
-    labels.push(truncate(label));
+    labels.push(label);
     if (labels.length >= limit) break;
   }
 
@@ -95,7 +107,7 @@ function sameDay(a: Date, b: Date): boolean {
   );
 }
 
-/** Parse `YYYY-MM-DD` as a local calendar day — never through UTC. */
+/** Parse `YYYY-MM-DD` as a local calendar day, never through UTC. */
 function parseLocalDate(date: string): Date | null {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date.trim());
   if (!match) return null;
@@ -106,7 +118,7 @@ function parseLocalDate(date: string): Date | null {
 
 /**
  * `Today 18:00` / `Tomorrow 18:00` / `Tue 18:00`.
- * Returns `null` when there is no booked lesson or the row is malformed —
+ * Returns `null` when there is no booked lesson or the row is malformed, 
  * the header then renders "No lesson booked".
  */
 export function formatNextLessonLabel(

@@ -14,7 +14,7 @@ export interface OneMinutePrepData {
 }
 
 /**
- * v6.9.8 — 1-Minute Prep digest.
+ * v6.9.8: 1-Minute Prep digest.
  * Pulls the 3 most actionable signals per category from `student_knowledge_entries`
  * so a teacher can plan the next lesson in ~60 seconds.
  * - personalHooks: latest Personal entries (last 30 days)
@@ -41,7 +41,7 @@ export const useOneMinutePrep = (studentId: string, teacherId: string) => {
 
       const [personal, skill, ideas] = await Promise.all([
         base.eq('category', 'Personal').gte('created_at', since).order('created_at', { ascending: false }).limit(3),
-        // Skill Assessment — order by recency; client filters subtype
+        // Skill Assessment: order by recency; client filters subtype
         supabase.from('student_knowledge_entries')
           .select('*')
           .eq('student_id', studentId)

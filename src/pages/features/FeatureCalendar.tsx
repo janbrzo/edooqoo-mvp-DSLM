@@ -77,7 +77,7 @@ const benefits = [
 
 const steps = [
   { number: 1, title: 'Set your availability', description: 'Define weekly recurring slots (e.g., Monday 9:00–10:00, Thursday 14:00–15:00). Set buffer time between lessons.' },
-  { number: 2, title: 'Share your booking page', description: 'Send students your public booking link. They see available slots and book directly — no messages needed.' },
+  { number: 2, title: 'Share your booking page', description: 'Send students your public booking link. They see available slots and book directly: no messages needed.' },
   { number: 3, title: 'Manage bookings', description: 'Confirm or reject bookings. Handle reschedule requests. Use bulk actions for batch operations. Everything syncs to Google Calendar.' },
   { number: 4, title: 'Teach and track', description: 'Mark lessons as completed or no-show. Lesson cadence and attendance context can support future planning.' },
 ];
@@ -92,7 +92,7 @@ const faqItems = [
 
 const FeatureCalendar: React.FC = () => (
   <FeaturePageLayout
-    title="Lesson Calendar for English Teachers — Google Calendar Sync | Edooqoo"
+    title="Lesson Calendar for English Teachers: Google Calendar Sync | Edooqoo"
     metaDescription="Students book lessons through your public page. Auto-syncs with Google Calendar. Reschedule system, bulk actions, payment tracking. All in one place."
   >
     <FeatureHero

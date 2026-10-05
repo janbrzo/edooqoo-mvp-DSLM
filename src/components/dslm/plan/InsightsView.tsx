@@ -1,5 +1,5 @@
 /**
- * InsightsView — "What Edooqoo knows about the student": the former
+ * InsightsView: "What Edooqoo knows about the student": the former
  * Skills & Level and Learner DNA perspectives in one readable page.
  *
  * Order: plain-language summary → skill bars (weakest first) → how the

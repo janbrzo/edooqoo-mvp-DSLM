@@ -14,7 +14,7 @@ interface Props {
 const APP_BASE_URL = 'https://edooqoo.com';
 
 /**
- * PublishWorksheetButton — teacher toolbar action that toggles a worksheet's
+ * PublishWorksheetButton: teacher toolbar action that toggles a worksheet's
  * `is_public` flag via the publish-worksheet / unpublish-worksheet edge
  * functions. Shows the public URL after publish for one-click copy.
  */
@@ -26,7 +26,7 @@ export const PublishWorksheetButton: React.FC<Props> = ({ worksheetId, isPublic 
   const [copied, setCopied] = useState(false);
   const { toast } = useToast();
 
-  // v6.9.23 — Hydrate publish state from DB so the button stays "Public"
+  // v6.9.23: Hydrate publish state from DB so the button stays "Public"
   // after page reload (sessionStorage doesn't persist is_public/public_slug).
   useEffect(() => {
     let cancelled = false;

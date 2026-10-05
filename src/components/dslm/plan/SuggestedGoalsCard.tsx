@@ -1,5 +1,5 @@
 /**
- * SuggestedGoalsCard — goals inferred by `process-welcome-test`
+ * SuggestedGoalsCard: goals inferred by `process-welcome-test`
  * (`source = 'welcome_test_auto'`, no `accepted_at`) waiting for the teacher.
  *
  * Extracted 1:1 from GoalsView (v6.9.47 optimistic accept/dismiss) so the same
@@ -135,7 +135,7 @@ export const SuggestedGoalsCard: React.FC<SuggestedGoalsCardProps> = ({ goals, u
                 <span className="mt-0.5 text-primary" aria-hidden="true">•</span>
                 <span className="break-words">
                   <span className="font-medium">{g.title}</span>
-                  {g.description ? ` — ${g.description}` : ''}
+                  {g.description ? `: ${g.description}` : ''}
                 </span>
               </div>
               <div className="flex justify-end gap-1">

@@ -1,5 +1,5 @@
 /**
- * BugReportModal — collects a bug report with title, description, optional
+ * BugReportModal: collects a bug report with title, description, optional
  * screenshots (paste, drag&drop, or file picker), and submits via the
  * `submit-bug-report` edge function.
  *
@@ -210,13 +210,13 @@ export const BugReportModal: React.FC<Props> = ({ open, onOpenChange }) => {
       const data = await response.json().catch(() => ({}));
       if ((data as any)?.error) throw new Error((data as any).error);
 
-      // Success — clear draft, close, toast.
+      // Success: clear draft, close, toast.
       try { sessionStorage.removeItem(DRAFT_KEY); } catch { /* ignore */ }
       onOpenChange(false);
       sonnerToast.success(
         uploadFailed
           ? 'Report sent (some screenshots failed to upload).'
-          : 'Bug report sent — thanks! We\'ll take a look as soon as possible.',
+          : 'Bug report sent: thanks! We\'ll take a look as soon as possible.',
       );
     } catch (err: any) {
       console.error('[BugReportModal] submit failed', err);
@@ -226,7 +226,7 @@ export const BugReportModal: React.FC<Props> = ({ open, onOpenChange }) => {
       const msg = err?.message ?? 'Unknown error.';
       onOpenChange(false);
       sonnerToast.error('Could not send report', {
-        description: `${msg} — your draft is saved. Email us at edooqoo@gmail.com if this persists.`,
+        description: `${msg}: your draft is saved. Email us at edooqoo@gmail.com if this persists.`,
         action: {
           label: 'Retry',
           onClick: () => onOpenChange(true),

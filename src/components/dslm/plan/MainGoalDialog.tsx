@@ -1,5 +1,5 @@
 /**
- * MainGoalDialog — edit the student's main goal and its deadline. Same
+ * MainGoalDialog: edit the student's main goal and its deadline. Same
  * fields and save order as the inline editor in GoalsView.
  */
 import React, { useEffect, useState } from 'react';

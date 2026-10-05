@@ -2,6 +2,7 @@
 // Returns { exercises: string[], focusMap: Record<string,'vocabulary'|'grammar'> }
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { chatCompletion } from "../_shared/aiChat.ts";
+import { NO_EM_DASH_RULE } from "../_shared/writingStyle.ts";
 import {
   NO_MEDIA_EXERCISE_IDS,
   PICTURE_EXERCISE_IDS,
@@ -54,10 +55,10 @@ serve(async (req) => {
     const systemMsg = `You are an expert ESL curriculum designer working inside Edooqoo's Dynamic Student Learning Model (DSLM).
 
 DSLM REASONING FRAME (apply this before picking exercises):
-1. Skill axis — Every adult ESL exercise trains one of: vocabulary acquisition, grammar accuracy, listening comprehension, reading comprehension, productive speaking, productive writing, pragmatic/discourse competence. Map the lesson topic + goal + grammar focus to the 2-3 PRIMARY skills the lesson must move forward.
-2. Bloom axis — Sequence from REMEMBER → UNDERSTAND → APPLY → ANALYZE → CREATE. A balanced 1-on-1 adult lesson covers at least 3 Bloom levels and ENDS in production (APPLY or higher).
-3. Pacing axis — Adult learners need RECYCLING (revisit prior forms) + CHALLENGE (1 step beyond comfort). Avoid stacking 3+ low-Bloom drill exercises in a row.
-4. Targeting — Treat lessonTopic + lessonGoal as the student's CURRENT learning need. The exercise mix must visibly serve THAT goal — a generic "always reading + fill-in-blanks + MCQ + T/F" template is a FAILURE.
+1. Skill axis: Every adult ESL exercise trains one of: vocabulary acquisition, grammar accuracy, listening comprehension, reading comprehension, productive speaking, productive writing, pragmatic/discourse competence. Map the lesson topic + goal + grammar focus to the 2-3 PRIMARY skills the lesson must move forward.
+2. Bloom axis: Sequence from REMEMBER → UNDERSTAND → APPLY → ANALYZE → CREATE. A balanced 1-on-1 adult lesson covers at least 3 Bloom levels and ENDS in production (APPLY or higher).
+3. Pacing axis: Adult learners need RECYCLING (revisit prior forms) + CHALLENGE (1 step beyond comfort). Avoid stacking 3+ low-Bloom drill exercises in a row.
+4. Targeting: Treat lessonTopic + lessonGoal as the student's CURRENT learning need. The exercise mix must visibly serve THAT goal; a generic "always reading + fill-in-blanks + MCQ + T/F" template is a FAILURE.
 
 Pick the best ${exerciseCount} exercises from the allowed list for the lesson described below.
 
@@ -71,13 +72,13 @@ Return ONLY a JSON object via the tool call.`;
 
     const autoMediaBlock = isAuto ? `
 
-AUTO MEDIA MODE — IMPORTANT BIAS (v4.8):
+AUTO MEDIA MODE: IMPORTANT BIAS (v4.8):
 The teacher did not pre-select audio or picture. Adult ESL lessons benefit from visual/audio anchors in MOST cases. Bias STRONGLY toward including media.
-- DEFAULT (most common, ~60% of topics): include 1-2 PICTURE exercises (e.g., describe-picture, answer-questions-picture, multiple-choice-picture, true-false-picture). Pictures help visualise scenarios — appropriate for almost any topic involving people, places, objects, situations, professions, hobbies, daily life, travel, business, medicine, food, sports.
+- DEFAULT (most common, ~60% of topics): include 1-2 PICTURE exercises (e.g., describe-picture, answer-questions-picture, multiple-choice-picture, true-false-picture). Pictures help visualise scenarios: appropriate for almost any topic involving people, places, objects, situations, professions, hobbies, daily life, travel, business, medicine, food, sports.
 - AUDIO instead of picture (~25% of topics): when topic explicitly involves listening (podcasts, conversations, interviews, music, news, accents, pronunciation, phone calls, dictation). Include 1-2 audio exercises (listening-comprehension, answer-questions-audio, fill-in-blanks-audio, multiple-choice-audio, true-false-audio).
 - NO MEDIA (rare, ~15%): ONLY when topic is purely abstract grammar mechanics (e.g., "subject-verb agreement drill", "modal verbs review") or formal academic writing with no real-world scenario.
 - NEVER mix picture and audio in the same selection.
-- Do NOT default to no-media for normal everyday topics like "Visiting a doctor", "Job interview", "Ordering food", "Workplace meeting" — these benefit from pictures.` : '';
+- Do NOT default to no-media for normal everyday topics like "Visiting a doctor", "Job interview", "Ordering food", "Workplace meeting"; these benefit from pictures.` : '';
 
     const userMsg = `LESSON TOPIC: ${lessonTopic || '(not specified)'}
 LESSON GOAL: ${lessonGoal || '(not specified)'}
@@ -93,7 +94,7 @@ ${hasAudio ? 'Include 2 audio exercises.' : ''}${autoMediaBlock}`;
 
     const aiResp = await chatCompletion({
       messages: [
-          { role: 'system', content: systemMsg },
+          { role: 'system', content: systemMsg + NO_EM_DASH_RULE },
           { role: 'user', content: userMsg },
         ],
       tools: [{

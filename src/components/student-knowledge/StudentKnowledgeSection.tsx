@@ -335,7 +335,7 @@ export const StudentKnowledgeSection = ({
               <PrepGroup icon={<Heart className="h-3.5 w-3.5 text-rose-500" />} label="Personal hooks" entries={prepData.personalHooks.map((e) => e.content)} />
               <PrepGroup icon={<AlertCircle className="h-3.5 w-3.5 text-amber-600" />} label="Focus on" entries={prepData.topWeaknesses.map((e) => {
                 const ns = (e.metadata as any)?.nano_skill;
-                return ns ? `${ns} — ${e.content}` : e.content;
+                return ns ? `${ns}: ${e.content}` : e.content;
               })} />
               <PrepGroup icon={<Lightbulb className="h-3.5 w-3.5 text-yellow-500" />} label="Lesson ideas" entries={prepData.lessonIdeas.map((e) => e.content)} />
             </>

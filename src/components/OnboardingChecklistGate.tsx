@@ -1,5 +1,5 @@
 /**
- * OnboardingChecklistGate — Dashboard Today (v6.9.109, Phase 6).
+ * OnboardingChecklistGate: Dashboard Today (v6.9.109, Phase 6).
  *
  * `/dashboard` renders its own inline `GuidedStepsBar`, so the floating
  * `OnboardingChecklist` is suppressed there to avoid two competing onboarding

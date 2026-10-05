@@ -1,5 +1,5 @@
 /**
- * useWelcomeTestState — compact Welcome Test status for the Learning plan
+ * useWelcomeTestState: compact Welcome Test status for the Learning plan
  * setup checklist: never issued / sent and waiting / completed.
  *
  * Read-only; the actions (send, copy link) stay in `useWelcomeTestActions`.

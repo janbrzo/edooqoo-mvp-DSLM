@@ -1,4 +1,4 @@
-// v6.9.90 — LLM model audit (daily health + monthly optimisation).
+// v6.9.90: LLM model audit (daily health + monthly optimisation).
 //
 // Daily  (pg_cron 06:00 UTC, body {}):          does every production model still work?
 //   - one probe per model from _shared/modelRegistry.ts (minimal inference for
@@ -174,7 +174,7 @@ async function probe(target: Target): Promise<ProbeOutcome> {
         });
         return done(r.status, await errorText(r), endpoint);
       }
-      // models.get returns metadata if the key has access — no token spend.
+      // models.get returns metadata if the key has access; no token spend.
       const endpoint = metadataEndpoint("google", target.model);
       const r = await timedFetch(endpoint, { headers: { "x-goog-api-key": key } });
       return done(r.status, await errorText(r), endpoint);
@@ -215,7 +215,7 @@ function buildTargets(unregistered: string[]): Target[] {
       provider: o.provider,
       model: value,
       role: o.role,
-      purpose: `Runtime override from secret ${o.envVar} — not in modelRegistry.ts`,
+      purpose: `Runtime override from secret ${o.envVar}; not in modelRegistry.ts`,
       probe: "metadata",
       entry: null,
     });

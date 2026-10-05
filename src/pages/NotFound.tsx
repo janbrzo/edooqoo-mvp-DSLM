@@ -10,7 +10,7 @@ const NotFound = () => {
       "404 Error: User attempted to access non-existent route:",
       location.pathname
     );
-    document.title = "404 — Page Not Found | Edooqoo";
+    document.title = "404: Page Not Found | Edooqoo";
     // SEO: tell Google not to index unknown SPA routes (mitigates "Soft 404" report)
     // Lovable hosting always serves SPA fallback as HTTP 200, so we cannot return a real 404 status.
     // Instead we combine: noindex meta + prerender-status-code=404 hint + removed canonical.

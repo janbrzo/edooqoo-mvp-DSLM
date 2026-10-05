@@ -1,5 +1,5 @@
 /**
- * AddGoalDialog — create a learning goal. Extracted 1:1 from GoalsView so the
+ * AddGoalDialog: create a learning goal. Extracted 1:1 from GoalsView so the
  * Learning plan (setup checklist, Goals section, `focus=add-goal-modal`,
  * `dslm:addGoal`) and GoalsView share one form.
  */

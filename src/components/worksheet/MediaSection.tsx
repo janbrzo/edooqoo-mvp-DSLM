@@ -37,7 +37,7 @@ interface MediaSectionProps {
 }
 
 /**
- * P1.5 — Renders BOTH image and audio when a worksheet carries both.
+ * P1.5: Renders BOTH image and audio when a worksheet carries both.
  * Previously the audio branch returned early, silently dropping the image
  * on mixed-media worksheets.
  */
@@ -63,7 +63,7 @@ export default function MediaSection({
   }, []);
 
   // Determine which URL to use with intelligent fallback.
-  // NOTE: hooks must run unconditionally — never move this below an early return.
+  // NOTE: hooks must run unconditionally, never move this below an early return.
   const imageUrl = React.useMemo(() => {
     if (!selectedImage) return "";
     if (!imageError) {

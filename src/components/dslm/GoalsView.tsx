@@ -1,5 +1,5 @@
 /**
- * GoalsView — "Where they're going" — learning goals and objectives.
+ * GoalsView, "Where they're going", learning goals and objectives.
  * Compact: Main Goal inline, Supporting open by default, Additional collapsed, Notes collapsed.
  */
 import React, { useState } from 'react';
@@ -35,11 +35,11 @@ interface GoalsViewProps {
   mainGoalTargetDate: string | null;
   onMainGoalChange?: (newGoal: string) => void;
   onMainGoalTargetDateChange?: (date: string | null) => void;
-  /** v6.9.29 — set by DSLMTab when window event `dslm:addGoal` fires from Roadmap. */
+  /** v6.9.29: set by DSLMTab when window event `dslm:addGoal` fires from Roadmap. */
   pendingAddGoal?: boolean;
   onConsumePendingAddGoal?: () => void;
   /**
-   * 2026-10 — when false, GoalsView ignores the global `dslm:addGoal` event.
+   * 2026-10: when false, GoalsView ignores the global `dslm:addGoal` event.
    * The Learning plan owns that event (one dialog, never two); GoalsView
    * inside the goals panel only reacts to its own "Add" buttons.
    */
@@ -81,10 +81,10 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
   const { map: progressMap, mainAggregate } = useGoalProgress(goals as any, studentId, teacherId);
   const editingGoal = editingGoalId ? (goals.find(g => g.id === editingGoalId) || null) : null;
 
-  // v6.9.29 — open Add-Goal modal when DSLMTab signals a pending request.
+  // v6.9.29: open Add-Goal modal when DSLMTab signals a pending request.
   React.useEffect(() => {
     if (pendingAddGoal) {
-      // v6.9.36 — default new goal type to 'supporting' so the modal opens
+      // v6.9.36: default new goal type to 'supporting' so the modal opens
       // in the expected mode (matches the Add button used elsewhere).
       setAddGoalType('supporting');
       setShowAddGoal(true);
@@ -92,7 +92,7 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
     }
   }, [pendingAddGoal, onConsumePendingAddGoal]);
 
-  // v6.9.41 P2 — also open via window event so late mounts still
+  // v6.9.41 P2: also open via window event so late mounts still
   // catch the request after focus=add-goal-modal has already been consumed.
   React.useEffect(() => {
     if (!listenForAddGoalEvents) return;
@@ -173,7 +173,7 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
 
   return (
     <div className="space-y-3">
-      {/* Main Goal — compact inline */}
+      {/* Main Goal: compact inline */}
       <Card className="border-primary/40 bg-primary/5">
         <CardContent className="p-4">
           {isEditingMainGoal ? (
@@ -225,7 +225,7 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
 
       <SuggestedGoalsCard goals={goals} updateGoal={updateGoal} deleteGoal={deleteGoal} />
 
-      {/* Supporting Goals — open by default */}
+      {/* Supporting Goals: open by default */}
       <CollapsibleSection
         id="goals-supporting"
         title="Supporting Goals"
@@ -244,7 +244,7 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
         )}
       </CollapsibleSection>
 
-      {/* Model Cockpit K3 — secondary goal lists behind one disclosure. */}
+      {/* Model Cockpit K3, secondary goal lists behind one disclosure. */}
       <CollapsibleSection
         id="goals-more"
         title="More goals & notes"
@@ -255,7 +255,7 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
         className="border-dashed"
       >
         <div className="space-y-3">
-        {/* Additional Goals — collapsed by default */}
+        {/* Additional Goals: collapsed by default */}
         <CollapsibleSection
           id="goals-additional"
           title="Additional Goals"
@@ -273,7 +273,7 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
           )}
         </CollapsibleSection>
 
-        {/* v5.0: Achieved Goals — collapsed by default */}
+        {/* v5.0: Achieved Goals, collapsed by default */}
         {achievedGoals.length > 0 && (
           <CollapsibleSection id="goals-achieved" title="Achieved Goals" icon={CheckCircle2} count={achievedGoals.length}>
             <div className="grid md:grid-cols-2 gap-3">
@@ -282,7 +282,7 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
           </CollapsibleSection>
         )}
 
-        {/* v5.0: Archived Goals — collapsed by default */}
+        {/* v5.0: Archived Goals, collapsed by default */}
         {archivedGoals.length > 0 && (
           <CollapsibleSection id="goals-archived" title="Archived Goals" icon={Archive} count={archivedGoals.length}>
             <div className="grid md:grid-cols-2 gap-3">
@@ -291,7 +291,7 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
           </CollapsibleSection>
         )}
 
-        {/* Goal Notes — collapsed */}
+        {/* Goal Notes: collapsed */}
         <CollapsibleSection id="goals-notes" title="Goal Notes" icon={StickyNote} count={goalNotesEntries.length}>
           {goalNotesEntries.length === 0 ? (
             <p className="text-xs text-muted-foreground text-center py-2">No goal notes yet</p>

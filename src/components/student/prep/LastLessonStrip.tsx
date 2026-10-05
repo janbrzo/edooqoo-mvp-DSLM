@@ -1,5 +1,5 @@
 /**
- * LastLessonStrip — "what happened last time" (v6.9.111, M4 step 2).
+ * LastLessonStrip: "what happened last time" (v6.9.111, M4 step 2).
  *
  * A single EntityRow so Prep, Timeline (M5) and Library (M6) share one row
  * anatomy. Purely presentational; the page owns navigation and reuse logic.
@@ -84,7 +84,7 @@ export const LastLessonStrip: React.FC<LastLessonStripProps> = ({
         ) : (
           <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg bg-muted/30 p-4">
             <p className="text-sm text-muted-foreground">
-              No worksheet yet — the first one becomes this student's history.
+              No worksheet yet: the first one becomes this student's history.
             </p>
             <Button variant="outline" size="sm" onClick={onOpenLibrary}>
               View all worksheets

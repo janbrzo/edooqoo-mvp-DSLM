@@ -1,5 +1,5 @@
 /**
- * DSLMTab — the Learning plan tab (`?tab=model`), 2026-10.
+ * DSLMTab: the Learning plan tab (`?tab=model`), 2026-10.
  *
  * One status line, two segments (Plan / Insights), stage-driven content.
  * Spec: docs/ux/learning-model-spec.md.
@@ -39,7 +39,7 @@ interface DSLMTabProps {
   mainGoalTargetDate: string | null;
   totalWorksheetCount: number;
   studentNotes?: string[];
-  /** v4.2: per-student toggle — when false, Roadmap is excluded from Next-Steps generation. */
+  /** v4.2: per-student toggle; when false, Roadmap is excluded from Next-Steps generation. */
   useRoadmap?: boolean;
   onUseRoadmapChange?: (next: boolean) => void;
   /** v4.4: pacing 0-100 (Scientific ↔ Pragmatic). */
@@ -53,7 +53,7 @@ interface DSLMTabProps {
     autoGenerate?: boolean,
     suggestionId?: string
   ) => void;
-  /** 2026-10 — Welcome Test email recipient (Learning plan setup step 2). */
+  /** 2026-10: Welcome Test email recipient (Learning plan setup step 2). */
   studentEmail?: string | null;
 }
 
@@ -112,7 +112,7 @@ export const DSLMTab: React.FC<DSLMTabProps> = ({
     }), { replace: true });
   }, [segment, editSuggestionParam, setSearchParams]);
 
-  // v6.9.33 — re-fire focus handlers every time `focus` changes (including a
+  // v6.9.33: re-fire focus handlers every time `focus` changes (including a
   // same-value re-navigation thanks to the `_` cache buster), then strip both
   // params so the next click on the same deep link still triggers.
   const focusParam = searchParams.get('focus');
@@ -147,7 +147,7 @@ export const DSLMTab: React.FC<DSLMTabProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [focusParam, cacheBuster, setSearchParams]);
 
-  // v6.9.29 — "Add goal" buttons anywhere (MacroTimeline warnings, onboarding)
+  // v6.9.29: "Add goal" buttons anywhere (MacroTimeline warnings, onboarding)
   // dispatch `dslm:addGoal`; the Plan owns the single Add-goal dialog.
   useEffect(() => {
     const handler = (e: Event) => {

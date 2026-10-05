@@ -1,5 +1,5 @@
 /**
- * useLearningPlanData — the single owner of plan data on the Learning plan tab.
+ * useLearningPlanData: the single owner of plan data on the Learning plan tab.
  *
  * Composes the existing DSLM hooks once (instead of every sub-view mounting
  * its own copies) and derives the queue order, the setup stage and the

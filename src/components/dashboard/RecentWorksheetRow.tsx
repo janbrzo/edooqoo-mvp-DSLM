@@ -59,7 +59,7 @@ export function formatWorksheetTitle(worksheet: Pick<RecentWorksheet, 'title' | 
 }
 
 /**
- * v6.9.109 — list-density worksheet row for the Today dashboard.
+ * v6.9.109: list-density worksheet row for the Today dashboard.
  * All five former inline actions collapse into one `…` menu.
  */
 export const RecentWorksheetRow: React.FC<RecentWorksheetRowProps> = ({

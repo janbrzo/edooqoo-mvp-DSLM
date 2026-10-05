@@ -1,5 +1,5 @@
 /**
- * consoleInterceptor — captures the most recent client-side console errors
+ * consoleInterceptor: captures the most recent client-side console errors
  * and warnings into a bounded ring buffer. Used by the bug-report modal so
  * teachers don't have to manually copy the dev console.
  *
@@ -32,7 +32,7 @@ function safeStringify(arg: unknown): string {
 }
 
 function getBuffer(): ConsoleEntry[] {
-  // @ts-ignore — global ring buffer
+  // @ts-ignore: global ring buffer
   return (window as any)[STORAGE_KEY] ?? [];
 }
 

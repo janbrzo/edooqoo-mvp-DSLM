@@ -1,5 +1,5 @@
 /**
- * learningPlan — the single ordering rule for "what is taught next".
+ * learningPlan: the single ordering rule for "what is taught next".
  *
  * Both the Prep tab (`selectPrepSuggestion`) and the Learning plan tab
  * (Up next) read the queue from `orderUpNext`, so the teacher never sees two
@@ -10,10 +10,10 @@
  *  2. steps of the other phases, by phase `sequence_number`,
  *  3. steps whose phase is unknown,
  *  4. free-floating next steps (no phase).
- * Inside a phase, steps follow their own `sequence_number` — it restarts at 1
+ * Inside a phase, steps follow their own `sequence_number`: it restarts at 1
  * in every phase, so it must never be compared across phases. `id` breaks ties.
  *
- * No React, no Supabase, no globals — every rule here is unit-testable.
+ * No React, no Supabase, no globals: every rule here is unit-testable.
  */
 
 export interface PlanPhaseLite {
@@ -37,7 +37,7 @@ export interface UpNextItem<T extends PlanSuggestionLite> {
   /** 1-based position inside its own scope (phase or free steps). */
   displayIndex: number;
   phaseId: string | null;
-  /** `Phase 2` — null for free steps or unknown phases. */
+  /** `Phase 2`: null for free steps or unknown phases. */
   phaseLabel: string | null;
   phaseTitle: string | null;
   isCurrentPhase: boolean;
@@ -145,7 +145,7 @@ export function orderUpNext<T extends PlanSuggestionLite>(
   });
 }
 
-/** `Phase 2: Meetings language` — or null for free steps. */
+/** `Phase 2: Meetings language`: or null for free steps. */
 export function formatPhaseCaption(item: Pick<UpNextItem<PlanSuggestionLite>, 'phaseLabel' | 'phaseTitle'>): string | null {
   if (!item.phaseLabel) return null;
   return item.phaseTitle ? `${item.phaseLabel}: ${item.phaseTitle}` : item.phaseLabel;

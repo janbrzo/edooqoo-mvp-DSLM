@@ -1,5 +1,5 @@
 /**
- * SpotlightOverlay — Plan v6.9.32
+ * SpotlightOverlay: Plan v6.9.32
  * Renders a fixed full-viewport dim with a transparent "hole" around the
  * element annotated `data-spotlight="<id>"`. Listens for app:spotlight
  * events (see useSpotlight) and also auto-fires for ?focus=<id> URL param.
@@ -98,11 +98,11 @@ export const SpotlightOverlay: React.FC = () => {
 
   if (!active || !rect) return null;
 
-  // 4 dim panels around the hole — no SVG mask hassle, fully clickable hole.
+  // 4 dim panels around the hole; no SVG mask hassle, fully clickable hole.
   const vw = window.innerWidth;
   const vh = window.innerHeight;
 
-  // v6.9.34 — dim panels are NON-interactive. They MUST NOT swallow clicks,
+  // v6.9.34: dim panels are NON-interactive. They MUST NOT swallow clicks,
   // otherwise users can't interact with elements visually outside the dim
   // (which appears to be the case for buttons rendered above the fold).
   // The user closes spotlight via ESC, the explicit × button, or by clicking

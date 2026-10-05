@@ -1,4 +1,4 @@
-// v6.9.21 — Map historical .html SEO landing slugs to existing programmatic routes.
+// v6.9.21: Map historical .html SEO landing slugs to existing programmatic routes.
 // Anything ending with .html that is NOT in this map is treated as "coming soon"
 // (rendered as a non-clickable tile by resolveLegacyHref consumers).
 export const LEGACY_LINK_MAP: Record<string, string> = {

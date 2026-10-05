@@ -1,5 +1,5 @@
 /**
- * CollapsibleSection — compact section wrapper with header trigger.
+ * CollapsibleSection: compact section wrapper with header trigger.
  * Used in Goals/Skills/Profile to densify layout while keeping content discoverable.
  */
 import React, { useRef, useState } from 'react';

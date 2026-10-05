@@ -82,7 +82,7 @@ export function SpeakingRecorder({ maxSeconds = 60, answer, onAnswer, questionId
             } else if (url) {
               onAnswer(url);
             } else {
-              // Never fabricate a placeholder answer — an unsaved recording
+              // Never fabricate a placeholder answer; an unsaved recording
               // must stay unsaved so the student can retry.
               console.error('[SpeakingRecorder] Auto-save upload failed for:', capturedPrevId);
               toast.error('We could not save your recording. Please record it again.');
@@ -279,7 +279,7 @@ export function SpeakingRecorder({ maxSeconds = 60, answer, onAnswer, questionId
       console.error('Upload error:', err);
       setStatus('recorded');
       setErrorMsg("We couldn't upload your recording. Check your connection and tap Save again.");
-      toast.error('Recording not saved — please try again.');
+      toast.error('Recording not saved: please try again.');
     }
   }, [onAnswer]);
 

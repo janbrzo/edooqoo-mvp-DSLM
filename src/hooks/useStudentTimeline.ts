@@ -1,5 +1,5 @@
 /**
- * useStudentTimeline — pure composition layer for the Timeline tab
+ * useStudentTimeline: pure composition layer for the Timeline tab
  * (v6.9.111, M5 step 2).
  *
  * Zero queries by design: every source array is passed in by `StudentPage`
@@ -28,7 +28,7 @@ export interface UseStudentTimelineInput extends TimelineSourceData {
 }
 
 export interface UseStudentTimelineResult {
-  /** All events, unfiltered — the source of the pill counts. */
+  /** All events, unfiltered; the source of the pill counts. */
   events: TimelineEvent[];
   counts: Record<TimelineFilter, number>;
   /** Events matching the active filter, before paging. */

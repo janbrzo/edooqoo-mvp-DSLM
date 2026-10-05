@@ -1,4 +1,4 @@
-// v6.9.30 — One-shot backfill of Welcome Test auto-apply.
+// v6.9.30: One-shot backfill of Welcome Test auto-apply.
 // Targets historical tests with status='completed' (created before v6.9.29
 // auto-apply was introduced). Reads existing test_skill_results, copies
 // suggested_rating into student_learning_elements, and flips status to

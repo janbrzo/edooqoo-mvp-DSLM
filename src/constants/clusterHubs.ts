@@ -1,5 +1,5 @@
 /**
- * Sprint 3 (Faza 3) — cluster hub content.
+ * Sprint 3 (Faza 3): cluster hub content.
  *
  * Mirrors scripts/seo/cluster-hubs.mjs (routes, tool funnel, spoke set).
  * Copy rules: adult 1:1 tutor persona only, no school framing, no kids content,
@@ -137,7 +137,7 @@ export const CLUSTER_HUBS: Record<string, ClusterHub> = {
   pronunciation: {
     id: 'pronunciation',
     route: '/teaching-english-pronunciation',
-    title: 'Teaching English Pronunciation to Adults — Tutor Hub',
+    title: 'Teaching English Pronunciation to Adults: Tutor Hub',
     description:
       'Stress, intonation, minimal pairs and connected speech for adult 1:1 lessons, with drills you can turn into a worksheet in a minute.',
     h1: 'Teaching English Pronunciation to Adult 1:1 Students',
@@ -225,7 +225,7 @@ export const CLUSTER_HUBS: Record<string, ClusterHub> = {
   'exercise-design': {
     id: 'exercise-design',
     route: '/esl-exercise-design',
-    title: 'ESL Exercise Design — Cloze, Gap-Fill, Transformation',
+    title: 'ESL Exercise Design: Cloze, Gap-Fill, Transformation',
     description:
       'How to design cloze, gap-fill, word formation and transformation tasks that diagnose an adult learner instead of filling lesson time.',
     h1: 'ESL Exercise Design for Adult 1:1 Lessons',
@@ -313,7 +313,7 @@ export const CLUSTER_HUBS: Record<string, ClusterHub> = {
   'tutor-operations': {
     id: 'tutor-operations',
     route: '/tutor-operations',
-    title: 'Tutor Operations — Homework, Reports, Lesson Records',
+    title: 'Tutor Operations: Homework, Reports, Lesson Records',
     description:
       'Run a 1:1 English tutoring practice: homework review, progress reports, what-to-teach-next decisions and lesson records in one workflow.',
     h1: 'Tutor Operations for 1:1 English Teachers',
@@ -322,7 +322,7 @@ export const CLUSTER_HUBS: Record<string, ClusterHub> = {
     toolCtaLabel: 'Decide what to teach next',
     toolHeading: 'The tool this cluster funnels into',
     toolBody:
-      'The what-should-I-teach-next tool turns the evidence you already have — recent errors, homework results, stated goals — into a defensible next objective, which is the decision that eats most prep time.',
+      'The what-should-I-teach-next tool turns the evidence you already have, recent errors, homework results, stated goals, into a defensible next objective, which is the decision that eats most prep time.',
     definitionHeading: 'What tutor operations covers',
     citation:
       'Tutor operations is the administrative layer of a 1:1 English practice: assigning homework, reviewing submissions, recording lesson evidence, reporting progress to the learner, and choosing the next objective. For a freelance tutor with ten students it typically consumes more hours than lesson delivery. Edooqoo consolidates it so weekly prep per student stays under one minute.',

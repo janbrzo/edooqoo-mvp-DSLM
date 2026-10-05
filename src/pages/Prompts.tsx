@@ -98,7 +98,7 @@ const Prompts = () => {
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
 
   useEffect(() => {
-    document.title = "50+ Ready-to-Use Prompts for English Teachers — Edooqoo";
+    document.title = "50+ Ready-to-Use Prompts for English Teachers | Edooqoo";
     const meta = document.querySelector('meta[name="description"]');
     if (meta) meta.setAttribute('content', 'Copy-paste prompts for creating English worksheets with AI. Vocabulary, Grammar, Reading, Speaking, Business English, and Exam Prep prompts for CEFR levels A1-C2.');
   }, []);
@@ -207,7 +207,7 @@ const Prompts = () => {
           <h2 className="text-2xl font-bold text-foreground mb-2">Ready to Create Your Worksheet?</h2>
           <p className="text-muted-foreground mb-4">Copy any prompt above and paste it into Edooqoo. Your first 2 worksheets are free.</p>
           <Button asChild size="lg">
-            <Link to="/signup" state={fromState}>Sign Up Free — 2 Worksheets Included</Link>
+            <Link to="/signup" state={fromState}>Sign Up Free: 2 Worksheets Included</Link>
           </Button>
         </div>
       </main>

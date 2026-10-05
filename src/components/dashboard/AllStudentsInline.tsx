@@ -20,7 +20,7 @@ interface AllStudentsInlineProps {
 const MAX_ROWS = 10;
 
 /**
- * v6.9.110 — lightweight student list expanded in place under the
+ * v6.9.110: lightweight student list expanded in place under the
  * "All students" tile. Same matching rules as the header quick search;
  * every row goes straight into prep.
  */

@@ -588,7 +588,7 @@ const NanoSkillMasteryModal: React.FC<NanoSkillMasteryModalProps> = ({
                   </p>
                 </div>
                 <div className={`text-2xl font-bold ${getMasteryColor(rating.mastery)}`}>
-                  {rating.mastery !== null ? `${rating.mastery}%` : '—'}
+                  {rating.mastery !== null ? `${rating.mastery}%` : '-'}
                 </div>
               </div>
 

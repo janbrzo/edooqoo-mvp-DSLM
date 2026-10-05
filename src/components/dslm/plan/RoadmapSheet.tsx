@@ -1,5 +1,5 @@
 /**
- * RoadmapSheet — the full roadmap editor, one click away from the Plan.
+ * RoadmapSheet: the full roadmap editor, one click away from the Plan.
  * MacroTimeline is mounted unchanged (every phase action, dialog and
  * regeneration flow), together with the two settings that steer how lessons
  * are proposed: "use roadmap" and pacing.

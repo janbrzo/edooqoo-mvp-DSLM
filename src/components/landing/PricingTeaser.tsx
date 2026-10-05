@@ -49,7 +49,7 @@ export const PricingTeaser: React.FC<PricingTeaserProps> = ({ onSeeFullPricing }
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-8">
           <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
-            Simple pricing — pay for what you use
+            Simple pricing: pay for what you use
           </h2>
           <p className="text-muted-foreground">Start free. Upgrade only when you need more worksheets.</p>
         </div>

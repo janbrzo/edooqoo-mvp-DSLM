@@ -104,7 +104,7 @@ export function usePublicBooking(token?: string) {
 
       const normalizedEmail = studentEmail.toLowerCase().trim();
 
-      // v6.9.87 — anonymous visitors can no longer update calendar_slots directly.
+      // v6.9.87: anonymous visitors can no longer update calendar_slots directly.
       // A single SECURITY DEFINER RPC validates the public calendar, locks the slot,
       // resolves an existing student by email and performs the booking atomically.
       const { data: bookingResult, error: err } = await supabase
@@ -138,10 +138,10 @@ export function usePublicBooking(token?: string) {
         meeting_link: booking.meeting_link,
       }) as any;
 
-      // Notification for teacher — new vs existing student
+      // Notification for teacher, new vs existing student
       if (!existingStudent) {
         try {
-          // v6.9.86 — anonymous visitors insert notifications only through a
+          // v6.9.86: anonymous visitors insert notifications only through a
           // validated SECURITY DEFINER RPC (teacher must have public booking on).
           await supabase.rpc('insert_public_booking_notification', {
             p_teacher_id: settings.teacher_id,
@@ -160,11 +160,11 @@ export function usePublicBooking(token?: string) {
         } catch (e) { console.error(e); }
       }
 
-      // Booking notification — Problem 8A: updated message format
+      // Booking notification: Problem 8A: updated message format
       try {
         const messageText = autoConfirm
           ? `${resolvedName} booked a lesson ${slot?.slot_date} at ${slot?.start_time?.slice(0,5)}–${slot?.end_time?.slice(0,5)} (auto-confirmed)`
-          : `${resolvedName} requested a lesson ${slot?.slot_date} at ${slot?.start_time?.slice(0,5)}–${slot?.end_time?.slice(0,5)} — awaiting confirmation`;
+          : `${resolvedName} requested a lesson ${slot?.slot_date} at ${slot?.start_time?.slice(0,5)}–${slot?.end_time?.slice(0,5)}: awaiting confirmation`;
         await supabase.rpc('insert_public_booking_notification', {
           p_teacher_id: settings.teacher_id,
           p_notification_type: autoConfirm ? 'booking_confirmed' : 'booking_pending',
@@ -184,7 +184,7 @@ export function usePublicBooking(token?: string) {
       if (slot && settings.notify_email_on_booking) {
         const slotDate = slot.slot_date;
         const slotTime = slot.start_time.slice(0, 5);
-        // v6.9.84 — anonymous visitors can no longer read `profiles` directly.
+        // v6.9.84: anonymous visitors can no longer read `profiles` directly.
         // Token-scoped RPC exposes only teachers with a public booking page.
         const { data: contactRows } = await supabase.rpc('get_public_teacher_contact', {
           p_teacher_id: settings.teacher_id,
@@ -192,7 +192,7 @@ export function usePublicBooking(token?: string) {
         const teacherProfile = Array.isArray(contactRows) ? contactRows[0] : (contactRows as any);
         const teacherName = [teacherProfile?.first_name, teacherProfile?.last_name].filter(Boolean).join(' ') || 'Your Teacher';
         const teacherEmail = teacherProfile?.email || '';
-        // Settings already came from the token-scoped RPC — no extra read needed.
+        // Settings already came from the token-scoped RPC; no extra read needed.
         const hubToken = (settings as any).hub_token || settings.public_calendar_token;
         const bookUrl = `${window.location.origin}/my/${hubToken}/lessons`;
         const calendarUrl = `${window.location.origin}/calendar`;

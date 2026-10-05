@@ -27,7 +27,7 @@ const About = () => {
       <main className="container mx-auto px-4 py-12 max-w-4xl">
         {/* H1 */}
         <h1 className="text-4xl font-bold text-foreground mb-6">
-          Edooqoo — 1-Minute Prep for 1:1 English Teachers
+          Edooqoo: 1-Minute Prep for 1:1 English Teachers
         </h1>
 
         {/* What is Edooqoo */}

@@ -1,10 +1,10 @@
 /**
- * TimelineFilters — the filter pill row of the Timeline tab
+ * TimelineFilters: the filter pill row of the Timeline tab
  * (v6.9.111, M5 step 3).
  *
  * Purely presentational: the six pills are always rendered in a fixed order so
  * the row never reflows while the teacher scans it. A pill with a count of 0
- * stays visible but is muted and disabled — absence of data is information too.
+ * stays visible but is muted and disabled, absence of data is information too.
  *
  * All rules (order, labels, counts) come from `@/lib/students/timelineEvents`.
  */

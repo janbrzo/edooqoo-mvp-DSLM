@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Sprint 4 (Faza 4) — CI guard for AI-readable structured data and citation coverage.
+ * Sprint 4 (Faza 4): CI guard for AI-readable structured data and citation coverage.
  *
  * Verifies, without a browser:
  * 1. every JSON-LD script in public/**.html parses as valid JSON;

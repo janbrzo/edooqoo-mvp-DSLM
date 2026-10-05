@@ -1,15 +1,15 @@
 /**
- * modelReadiness — which stage the Learning plan tab is in, and what the
+ * modelReadiness: which stage the Learning plan tab is in, and what the
  * teacher should do next. Replaces the old lessons+worksheets "model health"
  * heuristic, which reported "Learning" for a student with no plan at all.
  *
  * Stages:
- *  - `setup`  — no active lesson suggestion yet → 4-step checklist.
- *  - `review` — the plan exists and the system proposes changes that need
+ *  - `setup` : no active lesson suggestion yet → 4-step checklist.
+ *  - `review`: the plan exists and the system proposes changes that need
  *               the teacher's OK (level change, pacing, suggested goals).
- *  - `ready`  — the plan exists and nothing waits for approval.
+ *  - `ready` : the plan exists and nothing waits for approval.
  *
- * No React, no Supabase, no globals — every rule here is unit-testable.
+ * No React, no Supabase, no globals: every rule here is unit-testable.
  */
 
 export type ReadinessStage = 'setup' | 'review' | 'ready';
@@ -32,7 +32,7 @@ export interface ReadinessInput {
 export interface SetupStep {
   key: SetupStepKey;
   done: boolean;
-  /** Welcome Test sent but not completed — the teacher can only wait or resend. */
+  /** Welcome Test sent but not completed: the teacher can only wait or resend. */
   waiting: boolean;
 }
 

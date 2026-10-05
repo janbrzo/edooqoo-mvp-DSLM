@@ -4,21 +4,21 @@ import { devLog, devWarn } from '@/utils/logger';
 import { supabase } from "@/integrations/supabase/client";
 
 /**
- * v6.9.7 — IP protection.
+ * v6.9.7: IP protection.
  * Prompt formatting (language-style ladder, CEFR ladder, exercise specs) was
  * moved to the `format-worksheet-prompt` edge function. This wrapper preserves
- * the synchronous-looking call site contract but is now `async` — callers must
+ * the synchronous-looking call site contract but is now `async`, callers must
  * `await` it.
  *
  * Fallback chain:
  *   1. POST /functions/v1/format-worksheet-prompt
  *   2. On network/5xx: 1 retry after 250ms
- *   3. On final failure: throw — caller is expected to surface the error.
+ *   3. On final failure: throw, caller is expected to surface the error.
  */
 export const formatPromptForAI = async (data: FormData): Promise<string> => {
   devLog('📝 Requesting prompt format from edge fn');
 
-  // v6.9.51 — Bypass `supabase.functions.invoke` and call the edge function
+  // v6.9.51: Bypass `supabase.functions.invoke` and call the edge function
   // directly so anonymous users (no Supabase session yet) still send a valid
   // Authorization header. Without this, the gateway returns 401 even though
   // the function is declared `verify_jwt = false` in supabase/config.toml.

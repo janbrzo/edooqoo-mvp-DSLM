@@ -1,5 +1,5 @@
 /**
- * LessonIdeasNotes — the teacher's own "Next Lesson Ideas" notes (captured
+ * LessonIdeasNotes: the teacher's own "Next Lesson Ideas" notes (captured
  * e.g. during a live session), shown next to the lesson queue they inform.
  * Collapsed by default; hidden when there are none.
  */

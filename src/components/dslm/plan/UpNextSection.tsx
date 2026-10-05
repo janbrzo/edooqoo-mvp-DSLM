@@ -1,5 +1,5 @@
 /**
- * UpNextSection — the lesson queue of the Learning plan.
+ * UpNextSection: the lesson queue of the Learning plan.
  *
  * #1 is a card with one primary action ("Generate worksheet"); it is the same
  * suggestion Prep shows (both read `orderUpNext`). #2…N are rows with a single

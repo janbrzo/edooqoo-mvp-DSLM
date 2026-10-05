@@ -1,5 +1,5 @@
 /**
- * BehavioralStatsCard — grid of behavioral statistics calculated from system data
+ * BehavioralStatsCard: grid of behavioral statistics calculated from system data
  */
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -32,7 +32,7 @@ export const BehavioralStatsCard: React.FC<BehavioralStatsCardProps> = ({ stats,
     );
   }
 
-  // 2026-10 — six "No data" tiles say one thing; say it once.
+  // 2026-10: six "No data" tiles say one thing; say it once.
   const isEmpty =
     stats.lessonsPerWeek === null &&
     stats.cancellationRate === null &&

@@ -1,5 +1,5 @@
 /**
- * PlanSegmentSwitch — Plan / Insights. Two short labels fit at 360 px, so the
+ * PlanSegmentSwitch: Plan / Insights. Two short labels fit at 360 px, so the
  * switch is never truncated and never sticky (it used to slide under the
  * StickyNav).
  */

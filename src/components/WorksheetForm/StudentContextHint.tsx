@@ -2,7 +2,7 @@ import React from 'react';
 import { Info, Sparkles } from 'lucide-react';
 
 /**
- * v6.9.15a — Contextual info box for the student selector area on WorksheetForm.
+ * v6.9.15a: Contextual info box for the student selector area on WorksheetForm.
  * Variants:
  *  - "no-students"   → teacher has zero students
  *  - "no-selection"  → teacher has students but selected "no-student"

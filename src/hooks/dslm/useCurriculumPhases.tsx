@@ -1,5 +1,5 @@
 /**
- * useCurriculumPhases — DSLM Pathway v3 (Macro Timeline)
+ * useCurriculumPhases: DSLM Pathway v3 (Macro Timeline)
  * Manages curriculum phases (macro learning blocks) for a student.
  */
 import { useState, useEffect, useCallback } from 'react';
@@ -62,7 +62,7 @@ export const useCurriculumPhases = ({ studentId, teacherId }: UseCurriculumPhase
 
   useEffect(() => { fetchPhases(); }, [fetchPhases]);
 
-  // v6.9.15b — single helper to broadcast phase mutations across hook instances.
+  // v6.9.15b: single helper to broadcast phase mutations across hook instances.
   const emitPhasesUpdated = useCallback(() => {
     try {
       window.dispatchEvent(new CustomEvent('dslm:phasesUpdated', { detail: { studentId } }));
@@ -91,7 +91,7 @@ export const useCurriculumPhases = ({ studentId, teacherId }: UseCurriculumPhase
     return null;
   };
 
-  // v6.9.14 — cross-instance sync: when one hook generates phases,
+  // v6.9.14: cross-instance sync: when one hook generates phases,
   // other instances (e.g. PathwayView vs MacroTimeline) refetch.
   useEffect(() => {
     const h = (e: Event) => {
@@ -190,7 +190,7 @@ export const useCurriculumPhases = ({ studentId, teacherId }: UseCurriculumPhase
         .eq('id', id)
         .eq('teacher_id', teacherId);
       if (error) throw error;
-      // v6.9.15c — detach phase-bound next steps so they become free steps.
+      // v6.9.15c: detach phase-bound next steps so they become free steps.
       // The DB FK is ON DELETE SET NULL, but soft delete bypasses it; we mirror
       // that semantic at the application layer for active and used suggestions.
       const { error: detachErr } = await supabase
@@ -201,7 +201,7 @@ export const useCurriculumPhases = ({ studentId, teacherId }: UseCurriculumPhase
       if (detachErr) {
         console.error('Failed to detach next steps from deleted phase', detachErr);
       }
-      // v6.9.15b — deterministic renumber: re-read remaining rows from DB and
+      // v6.9.15b: deterministic renumber: re-read remaining rows from DB and
       // assign sequence_number = idx+1 in order. Fixes the "2 -> 1" edge case
       // where the legacy delta-shift left phases out of order.
       const { data: remaining, error: readErr } = await supabase
@@ -229,7 +229,7 @@ export const useCurriculumPhases = ({ studentId, teacherId }: UseCurriculumPhase
       }
       await fetchPhases();
       emitPhasesUpdated();
-      // v6.9.15c — notify timeline hook instances to refetch suggestions
+      // v6.9.15c: notify timeline hook instances to refetch suggestions
       try {
         window.dispatchEvent(new CustomEvent('dslm:suggestionsUpdated', { detail: { studentId } }));
       } catch { /* ignore */ }

@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { AuthenticatedPageShell } from '@/components/AuthenticatedPageShell';
 import { useNavigate } from 'react-router-dom';
 import { useAuthFlow } from '@/hooks/useAuthFlow';
+import { useTeacherAuthRedirect } from '@/hooks/useTeacherAuthRedirect';
 import { useTokenSystem } from '@/hooks/useTokenSystem';
 import StickyNav from '@/components/landing/StickyNav';
 import { useCalendarSettings } from '@/hooks/useCalendarSettings';
@@ -51,9 +52,7 @@ const CalendarSettingsPage = () => {
   const { tokenLeft } = useTokenSystem(user?.id);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (!authLoading && !isRegisteredUser) navigate('/login');
-  }, [authLoading, isRegisteredUser, navigate]);
+  useTeacherAuthRedirect(authLoading, !!isRegisteredUser);
 
   const { settings, loading, updateSettings, generatePublicToken } = useCalendarSettings(user?.id);
   const { vacations, addVacation, removeVacation } = useCalendarVacations(user?.id);
@@ -178,12 +177,12 @@ const CalendarSettingsPage = () => {
         </div>
         {isDemoMode && (
           <div className="mb-4 rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900 dark:bg-amber-950/40 dark:text-amber-200 dark:border-amber-800">
-            👁 Demo view — settings are visible but cannot be modified. Sign up free to unlock editing.
+            👁 Demo view: settings are visible but cannot be modified. Sign up free to unlock editing.
           </div>
         )}
 
         <div className="flex gap-6">
-          {/* Sidebar navigation — hidden on mobile */}
+          {/* Sidebar navigation: hidden on mobile */}
           <nav className="hidden lg:block w-48 shrink-0">
             <div className="sticky top-20 space-y-1">
               {SECTIONS.map(s => (
@@ -320,7 +319,7 @@ const CalendarSettingsPage = () => {
                       <p className="text-xs text-muted-foreground mt-1">Lowercase letters, numbers, and hyphens only (3-50 characters)</p>
                     </div>
                     <div className="bg-muted/50 rounded-md p-3 text-xs text-muted-foreground">
-                      💡 Share the booking link above with students, or direct them to <strong>{window.location.origin}/my</strong> — they can enter their email to access their Student Hub (lessons, flashcards, homework).
+                      💡 Share the booking link above with students, or direct them to <strong>{window.location.origin}/my</strong>; they can enter their email to access their Student Hub (lessons, flashcards, homework).
                     </div>
                   </>
                 )}
@@ -494,7 +493,7 @@ const CalendarSettingsPage = () => {
                 <div className="bg-muted/50 rounded-md p-3 text-xs text-muted-foreground space-y-2">
                   <p><strong>How it works:</strong></p>
                   <ul className="list-disc pl-4 space-y-1">
-                    <li><strong>Permanent Student Link (recommended):</strong> Each student gets one permanent meeting room. All lessons use the same link — simple for students.</li>
+                    <li><strong>Permanent Student Link (recommended):</strong> Each student gets one permanent meeting room. All lessons use the same link, simple for students.</li>
                     <li>You can manually override any student's link in their profile page.</li>
                     <li>Students see a "Join Lesson" button in their Hub.</li>
                   </ul>
@@ -512,7 +511,7 @@ const CalendarSettingsPage = () => {
                         disabled={!!(settings as any).auto_create_student_meeting_link}
                       />
                       {(settings as any).auto_create_student_meeting_link && (
-                        <p className="text-xs text-amber-600 mt-1">Disabled — permanent student links are active.</p>
+                        <p className="text-xs text-amber-600 mt-1">Disabled: permanent student links are active.</p>
                       )}
                     </div>
                   </div>

@@ -1,5 +1,5 @@
 /**
- * HowItWorksPopover — the one place that explains the Learning plan (and
+ * HowItWorksPopover: the one place that explains the Learning plan (and
  * names DSLM). Replaces the dismissible "What is DSLM?" banner: the
  * explanation stays one click away instead of pushing the plan below the fold.
  */

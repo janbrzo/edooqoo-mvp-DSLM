@@ -1,5 +1,5 @@
 /**
- * GoalsSheet — the complete goals editor (GoalsView, unchanged) in a side
+ * GoalsSheet: the complete goals editor (GoalsView, unchanged) in a side
  * panel: main goal editor, suggested goals, supporting/additional/achieved/
  * archived goals with their learning elements, and goal notes.
  */

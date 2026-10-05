@@ -1,5 +1,5 @@
 /**
- * ConfidenceBadge — standalone, focusable trigger for the DSLM confidence tooltip.
+ * ConfidenceBadge: standalone, focusable trigger for the DSLM confidence tooltip.
  *
  * Why it exists: previous implementation used <Badge> (a div) wrapped via TooltipTrigger
  * asChild and was sometimes nested inside a parent <button> (collapsible trigger),
@@ -32,7 +32,7 @@ export const ConfidenceBadge: React.FC<ConfidenceBadgeProps> = ({
   score, reasons = [], variant = 'outline', className,
 }) => {
   const stop = (e: React.SyntheticEvent) => { e.stopPropagation(); };
-  // 2026-10 — the score is a completeness heuristic, not a measurement:
+  // 2026-10: the score is a completeness heuristic, not a measurement:
   // show a word ("Strong fit"), keep the reasons in the tooltip.
   const fit = describeFit(score);
   const colorCls = variant === 'inverse'
@@ -48,7 +48,7 @@ export const ConfidenceBadge: React.FC<ConfidenceBadgeProps> = ({
             onClick={stop}
             onPointerDown={stop}
             onMouseDown={stop}
-            aria-label={`${fit} — why`}
+            aria-label={`${fit}: why`}
             className={cn(
               'inline-flex items-center rounded-md text-[10px] font-medium px-1.5 py-0.5 h-4 cursor-help',
               'focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1',

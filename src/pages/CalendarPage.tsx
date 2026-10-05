@@ -3,6 +3,7 @@ import { AuthenticatedPageShell } from '@/components/AuthenticatedPageShell';
 import { useNavigate } from 'react-router-dom';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useAuthFlow } from '@/hooks/useAuthFlow';
+import { useTeacherAuthRedirect } from '@/hooks/useTeacherAuthRedirect';
 import { useTokenSystem } from '@/hooks/useTokenSystem';
 import StickyNav from '@/components/landing/StickyNav';
 import { useCalendarSlots, CalendarSlot, ViewMode } from '@/hooks/useCalendarSlots';
@@ -52,9 +53,8 @@ const CalendarPage = () => {
   const { tokenLeft } = useTokenSystem(user?.id);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (!authLoading && !isRegisteredUser) navigate('/login');
-  }, [authLoading, isRegisteredUser, navigate]);
+  // Booking emails link here: keep the path through the login round trip.
+  useTeacherAuthRedirect(authLoading, !!isRegisteredUser);
 
   const {
     slots, loading, viewMode, setViewMode, currentDate, setCurrentDate,
@@ -180,7 +180,7 @@ const CalendarPage = () => {
   };
 
   const handleSlotClick = (slot: CalendarSlot) => {
-    // v6.9.8 — demo: opening modals is allowed (read-only preview); blocking happens on Save
+    // v6.9.8: demo: opening modals is allowed (read-only preview); blocking happens on Save
     if (selectionMode) {
       const slotType = getSlotSelectionType(slot);
       if (selectionType && slotType !== selectionType) return;
@@ -232,9 +232,9 @@ const CalendarPage = () => {
 
   // handleWorksheetLinked is only used by UnifiedSlotModal (new lesson creation)
   const handleWorksheetLinked = async (worksheetId: string | null) => {
-    // For UnifiedSlotModal flow only — SlotDetailModal now manages worksheet locally
+    // For UnifiedSlotModal flow only, SlotDetailModal now manages worksheet locally
     if (linkWorksheetSlot && linkWorksheetSlot.id === '__new__') {
-      // This is a new lesson workflow — just store the worksheetId for the modal
+      // This is a new lesson workflow, just store the worksheetId for the modal
       // The actual save happens in UnifiedSlotModal
     }
   };
