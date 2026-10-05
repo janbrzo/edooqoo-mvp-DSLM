@@ -106,8 +106,10 @@ function normalizeSnapshotHtml(html, route) {
   html = dedupeHeadMeta(html);
   const canonical = route === '/' ? `${SITE_ORIGIN}/` : `${SITE_ORIGIN}${route}`;
   const title = html.match(/<title[^>]*>([^<]*)<\/title>/i)?.[1]?.trim() || 'Edooqoo';
-  const descriptions = [...html.matchAll(/<meta[^>]+name=["']description["'][^>]+content=["']([^"']*)["'][^>]*>/gi)];
-  const description = descriptions.at(-1)?.[1]?.trim() || '';
+  // (["'])(.*?)\1 matches up to the SAME quote that opened the attribute; [^"']* would stop at an
+  // apostrophe inside a double-quoted value and truncate the description (e.g. "Martha's criteria").
+  const descriptions = [...html.matchAll(/<meta[^>]+name=["']description["'][^>]+content=(["'])(.*?)\1[^>]*>/gi)];
+  const description = descriptions.at(-1)?.[2]?.trim() || '';
 
   let normalized = html
     .replace(/<noscript\b[^>]*>[\s\S]*?<\/noscript>/gi, '')

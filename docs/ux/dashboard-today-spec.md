@@ -78,7 +78,7 @@ Container: `mx-auto max-w-6xl space-y-8 px-4 sm:px-6 lg:px-8 py-6` (1152 px sinc
 
 | kind | condition | text | CTA |
 |---|---|---|---|
-| `homework_to_review` | `homework_assignments.completed_at IS NOT NULL AND reviewed_at IS NULL` | `{student} submitted "{title}"` | `Review` → `/homework/{id}/review` |
+| `homework_to_review` | `homework_assignments.completed_at IS NOT NULL AND reviewed_at IS NULL AND completed_by_teacher IS NOT TRUE` (rule: `isHomeworkAwaitingReview`) | `{student} submitted "{title}"` | `Review` → `/homework/{id}/review`; `Send Review` invalidates `['dashboard-attention']` so the row disappears on return |
 | `welcome_test_done` | `homework_notifications.notification_type = 'welcome_test_completed' AND is_read = false` | `{student} finished the Welcome Test` | `See results` → `/student/{id}?tab=tests` |
 | `booking_new` | `calendar_notifications.is_resolved = false` | backend `message` | `Open calendar` → `/calendar` |
 

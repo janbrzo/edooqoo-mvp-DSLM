@@ -189,6 +189,7 @@ const UNSUPPORTED_CLAIM_PATTERNS = [
   [/2,400\+/i, 'unsupported usage-count claim'],
   [/official\s+[A-Z0-9-]*\s*CEFR/i, 'unsupported official CEFR claim'],
   [/Martha[^.]*validated/i, 'unsupported external validation claim'],
+  [/Reviewed by\s*(?:<[^>]+>\s*)?Martha|Methodology review by Martha|ESL Methodology Reviewer/i, 'unsupported human-review attribution (see docs/seo/decisions-2026-10.md)'],
   [/Gemini\s+2(?:\.5)?/i, 'unnecessary public model-version claim'],
 ];
 

@@ -108,6 +108,19 @@ export default function WorksheetPage() {
         }
 
         if (!worksheet) {
+          // A teacher's worksheet is invisible without a session (RLS), e.g. a
+          // calendar email link after the session expired: log in, come back.
+          if (!user) {
+            toast({
+              title: "Log in to open this worksheet",
+              description: "You'll come back to it right after logging in.",
+            });
+            navigate('/login', {
+              replace: true,
+              state: { from: `/worksheet/${id}${window.location.search}` },
+            });
+            return;
+          }
           toast({
             variant: "destructive",
             title: "Worksheet Not Found",

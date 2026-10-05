@@ -57,21 +57,16 @@ const AuthorProfile: React.FC = () => {
           <p className="leading-relaxed text-muted-foreground">{profile.bio}</p>
         </section>
 
-        {slug === 'jan-brzostowski' ? (
-          <section className="mb-10">
-            <h2 className="mb-3 text-2xl font-semibold text-foreground">Authorship boundary</h2>
-            <p className="leading-relaxed text-muted-foreground">
-              Jan authors product, workflow, and operating-system explanations. ESL methodology claims in strategic teaching content are reviewed separately by Martha.
-            </p>
-          </section>
-        ) : (
-          <section className="mb-10">
-            <h2 className="mb-3 text-2xl font-semibold text-foreground">Review standard</h2>
-            <p className="leading-relaxed text-muted-foreground">
-              Review checks whether advice leads to a specific adult learner performance, uses current evidence, preserves teacher judgment, and avoids generic classroom or school-like tasks.
-            </p>
-          </section>
-        )}
+        <section className="mb-10">
+          <h2 className="mb-3 text-2xl font-semibold text-foreground">
+            {slug === 'jan-brzostowski' ? 'Authorship boundary' : 'What this profile means'}
+          </h2>
+          <p className="leading-relaxed text-muted-foreground">
+            {slug === 'jan-brzostowski'
+              ? 'Jan authors product, workflow, and operating-system explanations. Teaching-method statements in strategic content cite the published sources listed on each page.'
+              : 'This profile describes the quality benchmark Edooqoo is built against. It is not an editorial sign-off on any page: individual articles are not reviewed or approved by Martha.'}
+          </p>
+        </section>
 
         <Link
           to="/what-to-teach-next"

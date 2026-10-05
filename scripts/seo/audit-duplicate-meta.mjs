@@ -76,7 +76,7 @@ for (const file of files) {
   const rel = path.relative(ROOT, file);
   const title = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1]?.trim() ?? '';
   const description =
-    html.match(/<meta[^>]+name=["']description["'][^>]+content=["']([^"']*)["']/i)?.[1]?.trim() ?? '';
+    html.match(/<meta[^>]+name=["']description["'][^>]+content=(["'])(.*?)\1/i)?.[2]?.trim() ?? '';
 
   if (description) {
     if (!byDescription.has(description)) byDescription.set(description, []);

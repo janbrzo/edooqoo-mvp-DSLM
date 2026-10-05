@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuthUser } from '@/hooks/useAuthUser';
 import { useDemoContext } from '@/contexts/DemoContext';
 import { devWarn } from '@/utils/logger';
+import { homeworkReviewPath, isHomeworkAwaitingReview } from '@/lib/homework/reviewState';
 import type { Tables } from '@/integrations/supabase/types';
 
 /**
@@ -38,6 +39,8 @@ export interface AttentionHomeworkRow {
   title: string | null;
   student_id: string | null;
   completed_at: string | null;
+  reviewed_at?: string | null;
+  completed_by_teacher?: boolean | null;
 }
 export interface AttentionWelcomeTestRow {
   id: string;
@@ -71,13 +74,13 @@ export function mapAttentionItems(
   limit: number,
 ): AttentionItem[] {
   const homework: AttentionItem[] = input.homework
-    .filter((h) => !!h.completed_at)
+    .filter(isHomeworkAwaitingReview)
     .map((h) => ({
       id: `homework_to_review:${h.id}`,
       kind: 'homework_to_review',
       text: `${nameOf(h.student_id)} submitted "${h.title ?? 'Homework'}"`,
       ctaLabel: 'Review',
-      href: `/homework/${h.id}/review`,
+      href: homeworkReviewPath(h.id),
       createdAt: h.completed_at as string,
     }));
 
@@ -120,19 +123,19 @@ export function useDashboardAttention(students: Student[], limit = 5): { items: 
     queryFn: async () => {
       if (isDemoMode) {
         if (!demoData) return [];
-        const homework: AttentionHomeworkRow[] = demoData.homework.filter(
-          (h) => !!h.completed_at && !h.reviewed_at,
-        );
+        const homework: AttentionHomeworkRow[] = demoData.homework.filter(isHomeworkAwaitingReview);
         return mapAttentionItems({ homework, welcomeTests: [], bookings: [] }, nameOf, limit);
       }
 
       const [hwRes, wtRes, bkRes] = await Promise.all([
         supabase
           .from('homework_assignments')
-          .select('id, title, student_id, completed_at')
+          .select('id, title, student_id, completed_at, reviewed_at, completed_by_teacher')
           .eq('teacher_id', teacherId!)
           .not('completed_at', 'is', null)
           .is('reviewed_at', null)
+          // Teacher "Mark done" has no student answers to review.
+          .not('completed_by_teacher', 'is', true)
           .order('completed_at', { ascending: false })
           .limit(limit),
         supabase

@@ -21,6 +21,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { useFutureTimeline } from '@/hooks/useFutureTimeline';
 import { useCurriculumPhases } from '@/hooks/dslm/useCurriculumPhases';
 import { SuggestionEditDialog, type SuggestionEditValue } from '@/components/dslm/SuggestionEditDialog';
+import { useDemoContext } from '@/contexts/DemoContext';
 import {
   PICTURE_EXERCISE_IDS,
   AUDIO_EXERCISE_IDS,
@@ -66,9 +67,12 @@ export function NextStepsPresetBanner({
   onApplyPreset,
 }: NextStepsPresetBannerProps) {
   const navigate = useNavigate();
+  const { isDemoMode } = useDemoContext();
 
-  const enabledStudentId = studentId || '';
-  const enabledTeacherId = teacherId || '';
+  // Demo has no suggestion rows; empty ids keep demo ids out of Supabase and
+  // the banner is hidden below (it would claim the demo student has no context).
+  const enabledStudentId = isDemoMode ? '' : studentId || '';
+  const enabledTeacherId = isDemoMode ? '' : teacherId || '';
   const { nextSteps, phaseSteps, loading, useSuggestion, updateSuggestion } = useFutureTimeline({
     studentId: enabledStudentId,
     teacherId: enabledTeacherId,
@@ -177,7 +181,7 @@ export function NextStepsPresetBanner({
     return () => window.removeEventListener('markPresetUsed', handler as EventListener);
   }, [useSuggestion]);
 
-  if (!studentId || !teacherId) return null;
+  if (!studentId || !teacherId || isDemoMode) return null;
 
   if (loading) {
     return (

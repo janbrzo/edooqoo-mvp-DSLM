@@ -25,15 +25,15 @@
     ]
   },
   "counts": {
-    "total": 1950,
-    "indexable": 552,
+    "total": 1988,
+    "indexable": 473,
     "byState": {
       "keep": 93,
       "improve": 0,
-      "merge": 45,
+      "merge": 83,
       "retire": 0,
-      "hold": 459,
-      "noindex": 1353
+      "hold": 380,
+      "noindex": 1432
     }
   },
   "entries": [
@@ -723,8 +723,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1142,
+      "reviewer": "",
+      "wordCount": 804,
       "hasEncodingIssue": false
     },
     {
@@ -743,8 +743,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1140,
+      "reviewer": "",
+      "wordCount": 805,
       "hasEncodingIssue": false
     },
     {
@@ -763,8 +763,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1141,
+      "reviewer": "",
+      "wordCount": 807,
       "hasEncodingIssue": false
     },
     {
@@ -783,8 +783,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1140,
+      "reviewer": "",
+      "wordCount": 812,
       "hasEncodingIssue": false
     },
     {
@@ -803,8 +803,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1142,
+      "reviewer": "",
+      "wordCount": 814,
       "hasEncodingIssue": false
     },
     {
@@ -823,8 +823,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1101,
+      "reviewer": "",
+      "wordCount": 769,
       "hasEncodingIssue": false
     },
     {
@@ -843,8 +843,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1122,
+      "reviewer": "",
+      "wordCount": 788,
       "hasEncodingIssue": false
     },
     {
@@ -883,8 +883,28 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1163,
+      "reviewer": "",
+      "wordCount": 820,
+      "hasEncodingIssue": false
+    },
+    {
+      "route": "/blog/adult-esl-lesson-ideas-by-level.html",
+      "canonical": "https://edooqoo.com/blog/how-to-build-an-adult-esl-lesson-from-real-work-tasks.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "Adult and Business English",
+      "redirectTo": "/blog/how-to-build-an-adult-esl-lesson-from-real-work-tasks.html",
+      "reason": "GSC 404 repair (2026-10): URL earned impressions, now returns 404; redirect to the closest live page.",
+      "source": "public/blog/adult-esl-lesson-ideas-by-level.html",
+      "sourceName": "adult-esl-lesson-ideas-by-level.html",
+      "title": "Moved",
+      "description": "",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
+      "reviewer": "",
+      "wordCount": 43,
       "hasEncodingIssue": false
     },
     {
@@ -903,8 +923,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1153,
+      "reviewer": "",
+      "wordCount": 820,
       "hasEncodingIssue": false
     },
     {
@@ -923,8 +943,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1095,
+      "reviewer": "",
+      "wordCount": 761,
       "hasEncodingIssue": false
     },
     {
@@ -943,8 +963,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1101,
+      "reviewer": "",
+      "wordCount": 772,
       "hasEncodingIssue": false
     },
     {
@@ -963,8 +983,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1090,
+      "reviewer": "",
+      "wordCount": 762,
       "hasEncodingIssue": false
     },
     {
@@ -983,8 +1003,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1098,
+      "reviewer": "",
+      "wordCount": 771,
       "hasEncodingIssue": false
     },
     {
@@ -1003,8 +1023,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1093,
+      "reviewer": "",
+      "wordCount": 766,
       "hasEncodingIssue": false
     },
     {
@@ -1023,8 +1043,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1083,
+      "reviewer": "",
+      "wordCount": 749,
       "hasEncodingIssue": false
     },
     {
@@ -1043,8 +1063,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1001,
+      "reviewer": "",
+      "wordCount": 751,
       "hasEncodingIssue": false
     },
     {
@@ -1063,8 +1083,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1149,
+      "reviewer": "",
+      "wordCount": 819,
       "hasEncodingIssue": false
     },
     {
@@ -1083,8 +1103,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1156,
+      "reviewer": "",
+      "wordCount": 827,
       "hasEncodingIssue": false
     },
     {
@@ -1103,8 +1123,28 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1226,
+      "reviewer": "",
+      "wordCount": 897,
+      "hasEncodingIssue": false
+    },
+    {
+      "route": "/blog/ai-placement-tests-english-students.html",
+      "canonical": "https://edooqoo.com/english-placement-test-for-private-tutors.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "Adult and Business English",
+      "redirectTo": "/english-placement-test-for-private-tutors.html",
+      "reason": "GSC 404 repair (2026-10): URL earned impressions, now returns 404; redirect to the closest live page.",
+      "source": "public/blog/ai-placement-tests-english-students.html",
+      "sourceName": "ai-placement-tests-english-students.html",
+      "title": "Moved",
+      "description": "",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
+      "reviewer": "",
+      "wordCount": 43,
       "hasEncodingIssue": false
     },
     {
@@ -1123,8 +1163,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1135,
+      "reviewer": "",
+      "wordCount": 801,
       "hasEncodingIssue": false
     },
     {
@@ -1143,8 +1183,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1161,
+      "reviewer": "",
+      "wordCount": 818,
       "hasEncodingIssue": false
     },
     {
@@ -1163,8 +1203,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1254,
+      "reviewer": "",
+      "wordCount": 911,
       "hasEncodingIssue": false
     },
     {
@@ -1183,8 +1223,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1171,
+      "reviewer": "",
+      "wordCount": 824,
       "hasEncodingIssue": false
     },
     {
@@ -1223,8 +1263,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1151,
+      "reviewer": "",
+      "wordCount": 814,
       "hasEncodingIssue": false
     },
     {
@@ -1259,12 +1299,12 @@
       "source": "public/blog/authentic-listening-materials-esl.html",
       "sourceName": "authentic-listening-materials-esl.html",
       "title": "Authentic Listening Materials ESL: How to Run It With Adults",
-      "description": "Authentic Listening Materials ESL: what to check in your student",
+      "description": "Authentic Listening Materials ESL: what to check in your student's evidence before you plan the next session. Build the exercise for your student level.",
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1146,
+      "reviewer": "",
+      "wordCount": 819,
       "hasEncodingIssue": false
     },
     {
@@ -1281,10 +1321,10 @@
       "title": "Which English App to Recommend to an Adult Student",
       "description": "What to recommend to a working adult between lessons, what each app actually trains, and where it stops. Written for the tutor making the call.",
       "datePublished": "2026-05-24",
-      "dateModified": "2026-06-15",
+      "dateModified": "2026-10-05",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1152,
+      "reviewer": "",
+      "wordCount": 736,
       "hasEncodingIssue": false
     },
     {
@@ -1303,8 +1343,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1167,
+      "reviewer": "",
+      "wordCount": 831,
       "hasEncodingIssue": false
     },
     {
@@ -1323,8 +1363,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1166,
+      "reviewer": "",
+      "wordCount": 829,
       "hasEncodingIssue": false
     },
     {
@@ -1343,8 +1383,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1089,
+      "reviewer": "",
+      "wordCount": 765,
       "hasEncodingIssue": false
     },
     {
@@ -1363,8 +1403,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1142,
+      "reviewer": "",
+      "wordCount": 808,
       "hasEncodingIssue": false
     },
     {
@@ -1379,12 +1419,12 @@
       "source": "public/blog/bottom-up-top-down-listening-esl.html",
       "sourceName": "bottom-up-top-down-listening-esl.html",
       "title": "Bottom Up Top Down Listening ESL: Tutor Playbook",
-      "description": "Bottom Up Top Down Listening ESL: what to check in your student",
+      "description": "Bottom Up Top Down Listening ESL: what to check in your student's evidence before you plan the next session. Build the exercise for your student level.",
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1153,
+      "reviewer": "",
+      "wordCount": 823,
       "hasEncodingIssue": false
     },
     {
@@ -1403,8 +1443,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1145,
+      "reviewer": "",
+      "wordCount": 816,
       "hasEncodingIssue": false
     },
     {
@@ -1423,8 +1463,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1149,
+      "reviewer": "",
+      "wordCount": 816,
       "hasEncodingIssue": false
     },
     {
@@ -1443,8 +1483,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1147,
+      "reviewer": "",
+      "wordCount": 811,
       "hasEncodingIssue": false
     },
     {
@@ -1463,8 +1503,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1175,
+      "reviewer": "",
+      "wordCount": 826,
       "hasEncodingIssue": false
     },
     {
@@ -1483,8 +1523,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1150,
+      "reviewer": "",
+      "wordCount": 816,
       "hasEncodingIssue": false
     },
     {
@@ -1503,8 +1543,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1167,
+      "reviewer": "",
+      "wordCount": 818,
       "hasEncodingIssue": false
     },
     {
@@ -1563,8 +1603,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1145,
+      "reviewer": "",
+      "wordCount": 813,
       "hasEncodingIssue": false
     },
     {
@@ -1581,10 +1621,10 @@
       "title": "Cloze Tests: Every-Nth-Word vs Rational Deletion",
       "description": "Every-nth-word versus rational deletion: which one measures what, deletion rate, and scoring. Design a cloze that matches your student CEFR level.",
       "datePublished": "2026-05-24",
-      "dateModified": "2026-06-15",
+      "dateModified": "2026-10-05",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1137,
+      "reviewer": "",
+      "wordCount": 709,
       "hasEncodingIssue": false
     },
     {
@@ -1603,8 +1643,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 997,
+      "reviewer": "",
+      "wordCount": 746,
       "hasEncodingIssue": false
     },
     {
@@ -1623,8 +1663,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1147,
+      "reviewer": "",
+      "wordCount": 807,
       "hasEncodingIssue": false
     },
     {
@@ -1643,8 +1683,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 999,
+      "reviewer": "",
+      "wordCount": 755,
       "hasEncodingIssue": false
     },
     {
@@ -1663,8 +1703,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1349,
+      "reviewer": "",
+      "wordCount": 870,
       "hasEncodingIssue": false
     },
     {
@@ -1721,10 +1761,10 @@
       "title": "Connected Speech Teaching Activities: A Tutor's Checklist",
       "description": "Connected Speech Teaching Activities. Generate a matching worksheet in one minute.",
       "datePublished": "2026-05-24",
-      "dateModified": "2026-06-15",
+      "dateModified": "2026-10-05",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1140,
+      "reviewer": "",
+      "wordCount": 761,
       "hasEncodingIssue": false
     },
     {
@@ -1743,8 +1783,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1142,
+      "reviewer": "",
+      "wordCount": 805,
       "hasEncodingIssue": false
     },
     {
@@ -1763,8 +1803,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1003,
+      "reviewer": "",
+      "wordCount": 755,
       "hasEncodingIssue": false
     },
     {
@@ -1783,8 +1823,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1142,
+      "reviewer": "",
+      "wordCount": 808,
       "hasEncodingIssue": false
     },
     {
@@ -1798,6 +1838,26 @@
       "reason": "GSC 404 repair: redirect retired conversation-class slug to the live speaking guide.",
       "source": "public/blog/conversation-classes-esl-structure.html",
       "sourceName": "conversation-classes-esl-structure.html",
+      "title": "Moved",
+      "description": "",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
+      "reviewer": "",
+      "wordCount": 43,
+      "hasEncodingIssue": false
+    },
+    {
+      "route": "/blog/conversation-topics-adult-esl-students.html",
+      "canonical": "https://edooqoo.com/blog/discussion-questions-esl-topics.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "Adult and Business English",
+      "redirectTo": "/blog/discussion-questions-esl-topics.html",
+      "reason": "GSC 404 repair (2026-10): URL earned impressions, now returns 404; redirect to the closest live page.",
+      "source": "public/blog/conversation-topics-adult-esl-students.html",
+      "sourceName": "conversation-topics-adult-esl-students.html",
       "title": "Moved",
       "description": "",
       "datePublished": "",
@@ -1823,8 +1883,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1143,
+      "reviewer": "",
+      "wordCount": 805,
       "hasEncodingIssue": false
     },
     {
@@ -1843,8 +1903,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1145,
+      "reviewer": "",
+      "wordCount": 807,
       "hasEncodingIssue": false
     },
     {
@@ -1863,8 +1923,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1145,
+      "reviewer": "",
+      "wordCount": 807,
       "hasEncodingIssue": false
     },
     {
@@ -1883,8 +1943,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1147,
+      "reviewer": "",
+      "wordCount": 811,
       "hasEncodingIssue": false
     },
     {
@@ -1903,8 +1963,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1141,
+      "reviewer": "",
+      "wordCount": 808,
       "hasEncodingIssue": false
     },
     {
@@ -1923,8 +1983,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1145,
+      "reviewer": "",
+      "wordCount": 816,
       "hasEncodingIssue": false
     },
     {
@@ -1943,8 +2003,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1158,
+      "reviewer": "",
+      "wordCount": 812,
       "hasEncodingIssue": false
     },
     {
@@ -1963,8 +2023,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1150,
+      "reviewer": "",
+      "wordCount": 813,
       "hasEncodingIssue": false
     },
     {
@@ -1983,8 +2043,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1143,
+      "reviewer": "",
+      "wordCount": 807,
       "hasEncodingIssue": false
     },
     {
@@ -2003,8 +2063,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1141,
+      "reviewer": "",
+      "wordCount": 816,
       "hasEncodingIssue": false
     },
     {
@@ -2019,12 +2079,12 @@
       "source": "public/blog/culturally-responsive-teaching-esl.html",
       "sourceName": "culturally-responsive-teaching-esl.html",
       "title": "Culturally Responsive Teaching ESL: Step-by-Step for Tutors",
-      "description": "Culturally Responsive Teaching ESL: what to check in your student",
+      "description": "Culturally Responsive Teaching ESL: what to check in your student's evidence before you plan the next session. Prepare the follow-up homework in one click.",
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1145,
+      "reviewer": "",
+      "wordCount": 814,
       "hasEncodingIssue": false
     },
     {
@@ -2041,10 +2101,10 @@
       "title": "Current Events ESL Lessons: Guide for 1:1 Tutors",
       "description": "A working approach to Current Events ESL Lessons for recurring adult learners, plus the traps to avoid. Prepare the follow-up homework in one click.",
       "datePublished": "2026-05-24",
-      "dateModified": "2026-06-15",
+      "dateModified": "2026-10-05",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1146,
+      "reviewer": "",
+      "wordCount": 769,
       "hasEncodingIssue": false
     },
     {
@@ -2063,8 +2123,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1148,
+      "reviewer": "",
+      "wordCount": 814,
       "hasEncodingIssue": false
     },
     {
@@ -2079,12 +2139,12 @@
       "source": "public/blog/debate-activities-english-class.html",
       "sourceName": "debate-activities-english-class.html",
       "title": "Debate Activities English Class: How to Run It With Adults",
-      "description": "Debate Activities English Class: what to check in your student",
+      "description": "Debate Activities English Class: what to check in your student's evidence before you plan the next session. Generate a matching worksheet in one minute.",
       "datePublished": "2026-05-24",
-      "dateModified": "2026-06-15",
+      "dateModified": "2026-10-05",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1156,
+      "reviewer": "",
+      "wordCount": 668,
       "hasEncodingIssue": false
     },
     {
@@ -2103,8 +2163,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1159,
+      "reviewer": "",
+      "wordCount": 820,
       "hasEncodingIssue": false
     },
     {
@@ -2121,10 +2181,10 @@
       "title": "Diagnostic Testing Adult English Learners in 15 Min",
       "description": "Run a 15-minute diagnostic on a new adult student: what to test, what to skip, how to turn the result into lesson one. Start with a free placement test.",
       "datePublished": "2026-05-24",
-      "dateModified": "2026-06-15",
+      "dateModified": "2026-10-05",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1142,
+      "reviewer": "",
+      "wordCount": 889,
       "hasEncodingIssue": false
     },
     {
@@ -2163,8 +2223,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1111,
+      "reviewer": "",
+      "wordCount": 786,
       "hasEncodingIssue": false
     },
     {
@@ -2183,8 +2243,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1142,
+      "reviewer": "",
+      "wordCount": 809,
       "hasEncodingIssue": false
     },
     {
@@ -2223,8 +2283,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1164,
+      "reviewer": "",
+      "wordCount": 819,
       "hasEncodingIssue": false
     },
     {
@@ -2243,8 +2303,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1156,
+      "reviewer": "",
+      "wordCount": 815,
       "hasEncodingIssue": false
     },
     {
@@ -2263,8 +2323,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1146,
+      "reviewer": "",
+      "wordCount": 810,
       "hasEncodingIssue": false
     },
     {
@@ -2323,8 +2383,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1162,
+      "reviewer": "",
+      "wordCount": 831,
       "hasEncodingIssue": false
     },
     {
@@ -2343,8 +2403,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1235,
+      "reviewer": "",
+      "wordCount": 908,
       "hasEncodingIssue": false
     },
     {
@@ -2383,8 +2443,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1161,
+      "reviewer": "",
+      "wordCount": 810,
       "hasEncodingIssue": false
     },
     {
@@ -2399,12 +2459,12 @@
       "source": "public/blog/end-of-term-activities-esl.html",
       "sourceName": "end-of-term-activities-esl.html",
       "title": "End Of Term Activities ESL: What Works in 1:1",
-      "description": "End Of Term Activities ESL: what to check in your student",
+      "description": "End Of Term Activities ESL: what to check in your student's evidence before you plan the next session. Build the exercise for your student level.",
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1168,
+      "reviewer": "",
+      "wordCount": 817,
       "hasEncodingIssue": false
     },
     {
@@ -2423,8 +2483,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1162,
+      "reviewer": "",
+      "wordCount": 814,
       "hasEncodingIssue": false
     },
     {
@@ -2443,8 +2503,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1149,
+      "reviewer": "",
+      "wordCount": 822,
       "hasEncodingIssue": false
     },
     {
@@ -2469,12 +2529,32 @@
       "source": "public/blog/english-homework-ai-grading-workflow.html",
       "sourceName": "english-homework-ai-grading-workflow.html",
       "title": "English Homework AI Grading Workflow: A Tutor's Checklist",
-      "description": "English Homework AI Grading Workflow: what to check in your student",
+      "description": "English Homework AI Grading Workflow: what to check in your student's evidence before you plan the next session. Build the exercise for your student level.",
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1150,
+      "reviewer": "",
+      "wordCount": 811,
+      "hasEncodingIssue": false
+    },
+    {
+      "route": "/blog/english-lesson-plan-template-free.html",
+      "canonical": "https://edooqoo.com/ai-lesson-planning-for-english-teachers.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "Adult and Business English",
+      "redirectTo": "/ai-lesson-planning-for-english-teachers.html",
+      "reason": "GSC 404 repair (2026-10): URL earned impressions, now returns 404; redirect to the closest live page.",
+      "source": "public/blog/english-lesson-plan-template-free.html",
+      "sourceName": "english-lesson-plan-template-free.html",
+      "title": "Moved",
+      "description": "",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
+      "reviewer": "",
+      "wordCount": 43,
       "hasEncodingIssue": false
     },
     {
@@ -2493,8 +2573,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1005,
+      "reviewer": "",
+      "wordCount": 760,
       "hasEncodingIssue": false
     },
     {
@@ -2513,8 +2593,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1146,
+      "reviewer": "",
+      "wordCount": 815,
       "hasEncodingIssue": false
     },
     {
@@ -2533,8 +2613,28 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1168,
+      "reviewer": "",
+      "wordCount": 825,
+      "hasEncodingIssue": false
+    },
+    {
+      "route": "/blog/english-worksheet-generator-ai.html",
+      "canonical": "https://edooqoo.com/ai-worksheet-generator-for-english-teachers.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "Adult and Business English",
+      "redirectTo": "/ai-worksheet-generator-for-english-teachers.html",
+      "reason": "GSC 404 repair (2026-10): URL earned impressions, now returns 404; redirect to the closest live page.",
+      "source": "public/blog/english-worksheet-generator-ai.html",
+      "sourceName": "english-worksheet-generator-ai.html",
+      "title": "Moved",
+      "description": "",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
+      "reviewer": "",
+      "wordCount": 43,
       "hasEncodingIssue": false
     },
     {
@@ -2551,10 +2651,10 @@
       "title": "ESL Error Correction: 6 Techniques for 1:1 Lessons",
       "description": "Recast, elicitation, delayed correction and three more, with when each one helps an adult 1:1 student. Turn recurring errors into a targeted worksheet.",
       "datePublished": "2026-05-24",
-      "dateModified": "2026-06-15",
+      "dateModified": "2026-10-05",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1150,
+      "reviewer": "",
+      "wordCount": 741,
       "hasEncodingIssue": false
     },
     {
@@ -2573,8 +2673,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1135,
+      "reviewer": "",
+      "wordCount": 798,
       "hasEncodingIssue": false
     },
     {
@@ -2593,8 +2693,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 998,
+      "reviewer": "",
+      "wordCount": 746,
       "hasEncodingIssue": false
     },
     {
@@ -2606,6 +2706,26 @@
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
       "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+    },
+    {
+      "route": "/blog/esl-speaking-assessment-rubric.html",
+      "canonical": "https://edooqoo.com/blog/rubrics-for-english-teachers.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "Adult and Business English",
+      "redirectTo": "/blog/rubrics-for-english-teachers.html",
+      "reason": "GSC 404 repair (2026-10): URL earned impressions, now returns 404; redirect to the closest live page.",
+      "source": "public/blog/esl-speaking-assessment-rubric.html",
+      "sourceName": "esl-speaking-assessment-rubric.html",
+      "title": "Moved",
+      "description": "",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
+      "reviewer": "",
+      "wordCount": 43,
+      "hasEncodingIssue": false
     },
     {
       "route": "/blog/extensive-reading-programs-esl.html",
@@ -2623,8 +2743,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1145,
+      "reviewer": "",
+      "wordCount": 815,
       "hasEncodingIssue": false
     },
     {
@@ -2641,10 +2761,10 @@
       "title": "Fill-in-the-Blank Tasks: 7 Rules That Make Them Work",
       "description": "Seven rules that stop gap-fill turning into guesswork: one defensible answer, context length, distractors, scoring. Build one for your next lesson.",
       "datePublished": "2026-05-24",
-      "dateModified": "2026-06-15",
+      "dateModified": "2026-10-05",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1169,
+      "reviewer": "",
+      "wordCount": 752,
       "hasEncodingIssue": false
     },
     {
@@ -2663,8 +2783,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1107,
+      "reviewer": "",
+      "wordCount": 781,
       "hasEncodingIssue": false
     },
     {
@@ -2783,8 +2903,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1151,
+      "reviewer": "",
+      "wordCount": 805,
       "hasEncodingIssue": false
     },
     {
@@ -2803,8 +2923,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1162,
+      "reviewer": "",
+      "wordCount": 820,
       "hasEncodingIssue": false
     },
     {
@@ -2823,8 +2943,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1149,
+      "reviewer": "",
+      "wordCount": 812,
       "hasEncodingIssue": false
     },
     {
@@ -2863,8 +2983,28 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1146,
+      "reviewer": "",
+      "wordCount": 818,
+      "hasEncodingIssue": false
+    },
+    {
+      "route": "/blog/getting-more-esl-students-marketing.html",
+      "canonical": "https://edooqoo.com/for-english-tutors",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "Adult and Business English",
+      "redirectTo": "/for-english-tutors",
+      "reason": "GSC 404 repair (2026-10): URL earned impressions, now returns 404; redirect to the closest live page.",
+      "source": "public/blog/getting-more-esl-students-marketing.html",
+      "sourceName": "getting-more-esl-students-marketing.html",
+      "title": "Moved",
+      "description": "",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
+      "reviewer": "",
+      "wordCount": 43,
       "hasEncodingIssue": false
     },
     {
@@ -2923,8 +3063,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1004,
+      "reviewer": "",
+      "wordCount": 750,
       "hasEncodingIssue": false
     },
     {
@@ -2943,8 +3083,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1146,
+      "reviewer": "",
+      "wordCount": 810,
       "hasEncodingIssue": false
     },
     {
@@ -2963,8 +3103,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1004,
+      "reviewer": "",
+      "wordCount": 749,
       "hasEncodingIssue": false
     },
     {
@@ -3003,8 +3143,28 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1088,
+      "reviewer": "",
+      "wordCount": 753,
+      "hasEncodingIssue": false
+    },
+    {
+      "route": "/blog/homework-feedback-students-read.html",
+      "canonical": "https://edooqoo.com/blog/adult-business-english-homework-feedback-loop.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "Adult and Business English",
+      "redirectTo": "/blog/adult-business-english-homework-feedback-loop.html",
+      "reason": "GSC 404 repair (2026-10): URL earned impressions, now returns 404; redirect to the closest live page.",
+      "source": "public/blog/homework-feedback-students-read.html",
+      "sourceName": "homework-feedback-students-read.html",
+      "title": "Moved",
+      "description": "",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
+      "reviewer": "",
+      "wordCount": 43,
       "hasEncodingIssue": false
     },
     {
@@ -3023,8 +3183,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1164,
+      "reviewer": "",
+      "wordCount": 819,
       "hasEncodingIssue": false
     },
     {
@@ -3043,8 +3203,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1182,
+      "reviewer": "",
+      "wordCount": 830,
       "hasEncodingIssue": false
     },
     {
@@ -3063,8 +3223,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1190,
+      "reviewer": "",
+      "wordCount": 836,
       "hasEncodingIssue": false
     },
     {
@@ -3083,8 +3243,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1167,
+      "reviewer": "",
+      "wordCount": 827,
       "hasEncodingIssue": false
     },
     {
@@ -3101,10 +3261,10 @@
       "title": "How To Assess English Level CEFR: What Works in 1:1",
       "description": "How To Assess English Level CEFR for professional adult learners: choices, sequence and review. Turn it into an editable task for your next lesson.",
       "datePublished": "2026-05-24",
-      "dateModified": "2026-06-15",
+      "dateModified": "2026-10-05",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1169,
+      "reviewer": "",
+      "wordCount": 656,
       "hasEncodingIssue": false
     },
     {
@@ -3123,8 +3283,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1174,
+      "reviewer": "",
+      "wordCount": 819,
       "hasEncodingIssue": false
     },
     {
@@ -3143,8 +3303,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1103,
+      "reviewer": "",
+      "wordCount": 781,
       "hasEncodingIssue": false
     },
     {
@@ -3163,8 +3323,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1194,
+      "reviewer": "",
+      "wordCount": 824,
       "hasEncodingIssue": false
     },
     {
@@ -3183,8 +3343,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1176,
+      "reviewer": "",
+      "wordCount": 829,
       "hasEncodingIssue": false
     },
     {
@@ -3203,8 +3363,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1184,
+      "reviewer": "",
+      "wordCount": 821,
       "hasEncodingIssue": false
     },
     {
@@ -3223,8 +3383,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1181,
+      "reviewer": "",
+      "wordCount": 813,
       "hasEncodingIssue": false
     },
     {
@@ -3241,10 +3401,10 @@
       "title": "Create Grammar Worksheets With AI in Under a Minute",
       "description": "Prompt structure, level control and the checks to run before you send it. Turn one grammar gap into an editable worksheet in under a minute.",
       "datePublished": "2026-05-24",
-      "dateModified": "2026-06-15",
+      "dateModified": "2026-10-05",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1171,
+      "reviewer": "",
+      "wordCount": 707,
       "hasEncodingIssue": false
     },
     {
@@ -3263,8 +3423,28 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1171,
+      "reviewer": "",
+      "wordCount": 821,
+      "hasEncodingIssue": false
+    },
+    {
+      "route": "/blog/how-to-give-english-level-test.html",
+      "canonical": "https://edooqoo.com/blog/what-should-adult-english-placement-test-include.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "Adult and Business English",
+      "redirectTo": "/blog/what-should-adult-english-placement-test-include.html",
+      "reason": "GSC 404 repair (2026-10): URL earned impressions, now returns 404; redirect to the closest live page.",
+      "source": "public/blog/how-to-give-english-level-test.html",
+      "sourceName": "how-to-give-english-level-test.html",
+      "title": "Moved",
+      "description": "",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
+      "reviewer": "",
+      "wordCount": 43,
       "hasEncodingIssue": false
     },
     {
@@ -3283,8 +3463,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1182,
+      "reviewer": "",
+      "wordCount": 822,
       "hasEncodingIssue": false
     },
     {
@@ -3303,8 +3483,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1175,
+      "reviewer": "",
+      "wordCount": 812,
       "hasEncodingIssue": false
     },
     {
@@ -3323,8 +3503,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1166,
+      "reviewer": "",
+      "wordCount": 820,
       "hasEncodingIssue": false
     },
     {
@@ -3343,8 +3523,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1179,
+      "reviewer": "",
+      "wordCount": 827,
       "hasEncodingIssue": false
     },
     {
@@ -3363,8 +3543,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1181,
+      "reviewer": "",
+      "wordCount": 838,
       "hasEncodingIssue": false
     },
     {
@@ -3383,8 +3563,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1192,
+      "reviewer": "",
+      "wordCount": 840,
       "hasEncodingIssue": false
     },
     {
@@ -3403,8 +3583,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1180,
+      "reviewer": "",
+      "wordCount": 827,
       "hasEncodingIssue": false
     },
     {
@@ -3423,8 +3603,28 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1171,
+      "reviewer": "",
+      "wordCount": 824,
+      "hasEncodingIssue": false
+    },
+    {
+      "route": "/blog/how-to-run-esl-business-online.html",
+      "canonical": "https://edooqoo.com/blog/best-workflow-for-private-english-tutors.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "Adult and Business English",
+      "redirectTo": "/blog/best-workflow-for-private-english-tutors.html",
+      "reason": "GSC 404 repair (2026-10): URL earned impressions, now returns 404; redirect to the closest live page.",
+      "source": "public/blog/how-to-run-esl-business-online.html",
+      "sourceName": "how-to-run-esl-business-online.html",
+      "title": "Moved",
+      "description": "",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
+      "reviewer": "",
+      "wordCount": 43,
       "hasEncodingIssue": false
     },
     {
@@ -3465,6 +3665,26 @@
       "author": "Edooqoo",
       "reviewer": "",
       "wordCount": 1015,
+      "hasEncodingIssue": false
+    },
+    {
+      "route": "/blog/how-to-teach-past-tenses-esl.html",
+      "canonical": "https://edooqoo.com/past-simple-worksheets.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "Adult and Business English",
+      "redirectTo": "/past-simple-worksheets.html",
+      "reason": "GSC 404 repair (2026-10): URL earned impressions, now returns 404; redirect to the closest live page.",
+      "source": "public/blog/how-to-teach-past-tenses-esl.html",
+      "sourceName": "how-to-teach-past-tenses-esl.html",
+      "title": "Moved",
+      "description": "",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
+      "reviewer": "",
+      "wordCount": 43,
       "hasEncodingIssue": false
     },
     {
@@ -3523,8 +3743,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1122,
+      "reviewer": "",
+      "wordCount": 785,
       "hasEncodingIssue": false
     },
     {
@@ -3543,8 +3763,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1164,
+      "reviewer": "",
+      "wordCount": 812,
       "hasEncodingIssue": false
     },
     {
@@ -3563,8 +3783,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1176,
+      "reviewer": "",
+      "wordCount": 816,
       "hasEncodingIssue": false
     },
     {
@@ -3583,8 +3803,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1143,
+      "reviewer": "",
+      "wordCount": 804,
       "hasEncodingIssue": false
     },
     {
@@ -3603,8 +3823,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1175,
+      "reviewer": "",
+      "wordCount": 809,
       "hasEncodingIssue": false
     },
     {
@@ -3623,8 +3843,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1192,
+      "reviewer": "",
+      "wordCount": 860,
       "hasEncodingIssue": false
     },
     {
@@ -3643,8 +3863,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1183,
+      "reviewer": "",
+      "wordCount": 816,
       "hasEncodingIssue": false
     },
     {
@@ -3659,12 +3879,12 @@
       "source": "public/blog/ielts-preparation-worksheets-guide.html",
       "sourceName": "ielts-preparation-worksheets-guide.html",
       "title": "IELTS Preparation Worksheets: A Teacher's Guide",
-      "description": "Teacher",
+      "description": "Teacher's guide to IELTS preparation worksheets: all 4 sections with AI-generated practice, scoring tips and a 4-week prep plan.",
       "datePublished": "2025-06-15",
       "dateModified": "2025-06-15",
       "author": "Edooqoo",
       "reviewer": "",
-      "wordCount": 870,
+      "wordCount": 881,
       "hasEncodingIssue": false
     },
     {
@@ -3703,8 +3923,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1101,
+      "reviewer": "",
+      "wordCount": 773,
       "hasEncodingIssue": false
     },
     {
@@ -3723,8 +3943,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1102,
+      "reviewer": "",
+      "wordCount": 766,
       "hasEncodingIssue": false
     },
     {
@@ -3763,8 +3983,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1086,
+      "reviewer": "",
+      "wordCount": 756,
       "hasEncodingIssue": false
     },
     {
@@ -3943,8 +4163,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1163,
+      "reviewer": "",
+      "wordCount": 817,
       "hasEncodingIssue": false
     },
     {
@@ -3963,8 +4183,8 @@
       "datePublished": "2025-11-29",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1408,
+      "reviewer": "",
+      "wordCount": 1391,
       "hasEncodingIssue": false
     },
     {
@@ -3978,13 +4198,33 @@
       "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action.",
       "source": "public/blog/lexical-approach-language-teaching.html",
       "sourceName": "lexical-approach-language-teaching.html",
-      "title": "The Lexical Approach in Language Teaching: Chunks and",
-      "description": "Lewis",
-      "datePublished": "2025-12-02",
-      "dateModified": "2025-12-02",
-      "author": "Edooqoo",
+      "title": "Lexical Approach Language Teaching: Guide for 1:1 Tutors",
+      "description": "Lexical Approach Language Teaching. Generate a matching worksheet in one minute.",
+      "datePublished": "2026-05-24",
+      "dateModified": "2026-10-05",
+      "author": "Jan Brzostowski",
       "reviewer": "",
-      "wordCount": 614,
+      "wordCount": 816,
+      "hasEncodingIssue": false
+    },
+    {
+      "route": "/blog/live-english-lessons-online-tools.html",
+      "canonical": "https://edooqoo.com/blog/private-english-tutor-tool-stack.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "Adult and Business English",
+      "redirectTo": "/blog/private-english-tutor-tool-stack.html",
+      "reason": "GSC 404 repair (2026-10): URL earned impressions, now returns 404; redirect to the closest live page.",
+      "source": "public/blog/live-english-lessons-online-tools.html",
+      "sourceName": "live-english-lessons-online-tools.html",
+      "title": "Moved",
+      "description": "",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
+      "reviewer": "",
+      "wordCount": 43,
       "hasEncodingIssue": false
     },
     {
@@ -4003,8 +4243,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1090,
+      "reviewer": "",
+      "wordCount": 757,
       "hasEncodingIssue": false
     },
     {
@@ -4023,8 +4263,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1001,
+      "reviewer": "",
+      "wordCount": 750,
       "hasEncodingIssue": false
     },
     {
@@ -4063,8 +4303,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1112,
+      "reviewer": "",
+      "wordCount": 778,
       "hasEncodingIssue": false
     },
     {
@@ -4103,8 +4343,8 @@
       "datePublished": "2025-12-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1378,
+      "reviewer": "",
+      "wordCount": 1361,
       "hasEncodingIssue": false
     },
     {
@@ -4125,6 +4365,46 @@
       "author": "Edooqoo",
       "reviewer": "",
       "wordCount": 454,
+      "hasEncodingIssue": false
+    },
+    {
+      "route": "/blog/micro-lessons-busy-adult-esl-students.html",
+      "canonical": "https://edooqoo.com/blog/how-to-build-an-adult-esl-lesson-from-real-work-tasks.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "Adult and Business English",
+      "redirectTo": "/blog/how-to-build-an-adult-esl-lesson-from-real-work-tasks.html",
+      "reason": "GSC 404 repair (2026-10): URL earned impressions, now returns 404; redirect to the closest live page.",
+      "source": "public/blog/micro-lessons-busy-adult-esl-students.html",
+      "sourceName": "micro-lessons-busy-adult-esl-students.html",
+      "title": "Moved",
+      "description": "",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
+      "reviewer": "",
+      "wordCount": 43,
+      "hasEncodingIssue": false
+    },
+    {
+      "route": "/blog/modal-verbs-exercises-esl-guide.html",
+      "canonical": "https://edooqoo.com/modal-verbs-worksheets-esl.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "Adult and Business English",
+      "redirectTo": "/modal-verbs-worksheets-esl.html",
+      "reason": "GSC 404 repair (2026-10): URL earned impressions, now returns 404; redirect to the closest live page.",
+      "source": "public/blog/modal-verbs-exercises-esl-guide.html",
+      "sourceName": "modal-verbs-exercises-esl-guide.html",
+      "title": "Moved",
+      "description": "",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
+      "reviewer": "",
+      "wordCount": 43,
       "hasEncodingIssue": false
     },
     {
@@ -4163,8 +4443,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1103,
+      "reviewer": "",
+      "wordCount": 769,
       "hasEncodingIssue": false
     },
     {
@@ -4183,8 +4463,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 996,
+      "reviewer": "",
+      "wordCount": 750,
       "hasEncodingIssue": false
     },
     {
@@ -4203,8 +4483,8 @@
       "datePublished": "2025-11-26",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1413,
+      "reviewer": "",
+      "wordCount": 1396,
       "hasEncodingIssue": false
     },
     {
@@ -4263,8 +4543,48 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1322,
+      "reviewer": "",
+      "wordCount": 990,
+      "hasEncodingIssue": false
+    },
+    {
+      "route": "/blog/online-english-tutor-tools-2026.html",
+      "canonical": "https://edooqoo.com/blog/private-english-tutor-tool-stack.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "Adult and Business English",
+      "redirectTo": "/blog/private-english-tutor-tool-stack.html",
+      "reason": "GSC 404 repair (2026-10): URL earned impressions, now returns 404; redirect to the closest live page.",
+      "source": "public/blog/online-english-tutor-tools-2026.html",
+      "sourceName": "online-english-tutor-tools-2026.html",
+      "title": "Moved",
+      "description": "",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
+      "reviewer": "",
+      "wordCount": 43,
+      "hasEncodingIssue": false
+    },
+    {
+      "route": "/blog/online-homework-guide-esl-teachers.html",
+      "canonical": "https://edooqoo.com/blog/digital-homework-tools-esl-teachers.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "Adult and Business English",
+      "redirectTo": "/blog/digital-homework-tools-esl-teachers.html",
+      "reason": "GSC 404 repair (2026-10): URL earned impressions, now returns 404; redirect to the closest live page.",
+      "source": "public/blog/online-homework-guide-esl-teachers.html",
+      "sourceName": "online-homework-guide-esl-teachers.html",
+      "title": "Moved",
+      "description": "",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
+      "reviewer": "",
+      "wordCount": 43,
       "hasEncodingIssue": false
     },
     {
@@ -4403,8 +4723,8 @@
       "datePublished": "2025-06-12",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1352,
+      "reviewer": "",
+      "wordCount": 1335,
       "hasEncodingIssue": false
     },
     {
@@ -4425,6 +4745,26 @@
       "author": "Edooqoo",
       "reviewer": "",
       "wordCount": 624,
+      "hasEncodingIssue": false
+    },
+    {
+      "route": "/blog/phrasal-verbs-exercises-esl-worksheets.html",
+      "canonical": "https://edooqoo.com/phrasal-verbs-worksheets-esl.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "Adult and Business English",
+      "redirectTo": "/phrasal-verbs-worksheets-esl.html",
+      "reason": "GSC 404 repair (2026-10): URL earned impressions, now returns 404; redirect to the closest live page.",
+      "source": "public/blog/phrasal-verbs-exercises-esl-worksheets.html",
+      "sourceName": "phrasal-verbs-exercises-esl-worksheets.html",
+      "title": "Moved",
+      "description": "",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
+      "reviewer": "",
+      "wordCount": 43,
       "hasEncodingIssue": false
     },
     {
@@ -4523,8 +4863,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1106,
+      "reviewer": "",
+      "wordCount": 778,
       "hasEncodingIssue": false
     },
     {
@@ -4543,8 +4883,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1104,
+      "reviewer": "",
+      "wordCount": 769,
       "hasEncodingIssue": false
     },
     {
@@ -4563,8 +4903,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1119,
+      "reviewer": "",
+      "wordCount": 785,
       "hasEncodingIssue": false
     },
     {
@@ -4603,8 +4943,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 551,
+      "reviewer": "",
+      "wordCount": 421,
       "hasEncodingIssue": false
     },
     {
@@ -4619,7 +4959,7 @@
       "source": "public/blog/readers-theatre-esl-activities.html",
       "sourceName": "readers-theatre-esl-activities.html",
       "title": "Reader's Theatre in ESL: Scripts and Activities",
-      "description": "Script selection, fluency practice, intonation work, and performance preparation for ESL reader",
+      "description": "Script selection, fluency practice, intonation work, and performance preparation for ESL reader's theatre.",
       "datePublished": "2025-12-02",
       "dateModified": "2025-12-02",
       "author": "Edooqoo",
@@ -4659,7 +4999,7 @@
       "source": "public/blog/reflective-practice-language-teaching.html",
       "sourceName": "reflective-practice-language-teaching.html",
       "title": "Reflective Practice in Language Teaching",
-      "description": "Reflective journals, critical incidents, Kolb",
+      "description": "Reflective journals, critical incidents, Kolb's cycle, and peer reflection groups for ESL teachers.",
       "datePublished": "2025-12-16",
       "dateModified": "2025-12-16",
       "author": "Edooqoo",
@@ -4703,8 +5043,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1097,
+      "reviewer": "",
+      "wordCount": 771,
       "hasEncodingIssue": false
     },
     {
@@ -4783,8 +5123,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1004,
+      "reviewer": "",
+      "wordCount": 754,
       "hasEncodingIssue": false
     },
     {
@@ -4848,6 +5188,26 @@
       "hasEncodingIssue": false
     },
     {
+      "route": "/blog/sentence-transformation-exercises-english.html",
+      "canonical": "https://edooqoo.com/blog/how-to-teach-english-grammar-effectively.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "Adult and Business English",
+      "redirectTo": "/blog/how-to-teach-english-grammar-effectively.html",
+      "reason": "GSC 404 repair (2026-10): URL earned impressions, now returns 404; redirect to the closest live page.",
+      "source": "public/blog/sentence-transformation-exercises-english.html",
+      "sourceName": "sentence-transformation-exercises-english.html",
+      "title": "Moved",
+      "description": "",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
+      "reviewer": "",
+      "wordCount": 43,
+      "hasEncodingIssue": false
+    },
+    {
       "route": "/blog/setting-up-freelance-esl-business.html",
       "canonical": "https://edooqoo.com/blog/setting-up-freelance-esl-business.html",
       "type": "blog",
@@ -4863,8 +5223,8 @@
       "datePublished": "2025-07-27",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1371,
+      "reviewer": "",
+      "wordCount": 1354,
       "hasEncodingIssue": false
     },
     {
@@ -4878,6 +5238,26 @@
       "reason": "GSC 404 repair: redirect retired pronunciation technique slug to the closest live adult ESL pronunciation guide.",
       "source": "public/blog/shadowing-technique-esl.html",
       "sourceName": "shadowing-technique-esl.html",
+      "title": "Moved",
+      "description": "",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
+      "reviewer": "",
+      "wordCount": 43,
+      "hasEncodingIssue": false
+    },
+    {
+      "route": "/blog/sharing-worksheets-students-online.html",
+      "canonical": "https://edooqoo.com/blog/creating-interactive-worksheets-online.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "Adult and Business English",
+      "redirectTo": "/blog/creating-interactive-worksheets-online.html",
+      "reason": "GSC 404 repair (2026-10): URL earned impressions, now returns 404; redirect to the closest live page.",
+      "source": "public/blog/sharing-worksheets-students-online.html",
+      "sourceName": "sharing-worksheets-students-online.html",
       "title": "Moved",
       "description": "",
       "datePublished": "",
@@ -4903,8 +5283,8 @@
       "datePublished": "2025-06-08",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1386,
+      "reviewer": "",
+      "wordCount": 1369,
       "hasEncodingIssue": false
     },
     {
@@ -4968,6 +5348,46 @@
       "hasEncodingIssue": false
     },
     {
+      "route": "/blog/student-booking-page-english-lessons.html",
+      "canonical": "https://edooqoo.com/english-tutor-calendar-booking-software.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "Adult and Business English",
+      "redirectTo": "/english-tutor-calendar-booking-software.html",
+      "reason": "GSC 404 repair (2026-10): URL earned impressions, now returns 404; redirect to the closest live page.",
+      "source": "public/blog/student-booking-page-english-lessons.html",
+      "sourceName": "student-booking-page-english-lessons.html",
+      "title": "Moved",
+      "description": "",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
+      "reviewer": "",
+      "wordCount": 43,
+      "hasEncodingIssue": false
+    },
+    {
+      "route": "/blog/student-portal-english-tutoring.html",
+      "canonical": "https://edooqoo.com/student-hub-for-english-tutors.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "Adult and Business English",
+      "redirectTo": "/student-hub-for-english-tutors.html",
+      "reason": "GSC 404 repair (2026-10): URL earned impressions, now returns 404; redirect to the closest live page.",
+      "source": "public/blog/student-portal-english-tutoring.html",
+      "sourceName": "student-portal-english-tutoring.html",
+      "title": "Moved",
+      "description": "",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
+      "reviewer": "",
+      "wordCount": 43,
+      "hasEncodingIssue": false
+    },
+    {
       "route": "/blog/student-progress-to-worksheet-feedback-loop.html",
       "canonical": "https://edooqoo.com/blog/student-progress-to-worksheet-feedback-loop.html",
       "type": "blog",
@@ -4983,8 +5403,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1160,
+      "reviewer": "",
+      "wordCount": 816,
       "hasEncodingIssue": false
     },
     {
@@ -5063,8 +5483,8 @@
       "datePublished": "2025-06-17",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1371,
+      "reviewer": "",
+      "wordCount": 1354,
       "hasEncodingIssue": false
     },
     {
@@ -5093,8 +5513,8 @@
       "datePublished": "2025-07-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1344,
+      "reviewer": "",
+      "wordCount": 1327,
       "hasEncodingIssue": false
     },
     {
@@ -5113,8 +5533,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1098,
+      "reviewer": "",
+      "wordCount": 778,
       "hasEncodingIssue": false
     },
     {
@@ -5233,8 +5653,8 @@
       "datePublished": "2025-06-14",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1359,
+      "reviewer": "",
+      "wordCount": 1342,
       "hasEncodingIssue": false
     },
     {
@@ -5269,12 +5689,32 @@
       "source": "public/blog/teaching-collocations-esl.html",
       "sourceName": "teaching-collocations-esl.html",
       "title": "Teaching Collocations: 10 Activities That Stick",
-      "description": "Why adults produce grammatical but unnatural English, and ten activities that build collocation range at B1-C1. Turn a student",
+      "description": "Why adults produce grammatical but unnatural English, and ten activities that build collocation range at B1-C1. Turn a student's own errors into practice.",
       "datePublished": "2025-07-03",
       "dateModified": "2025-07-03",
       "author": "Edooqoo",
       "reviewer": "",
       "wordCount": 804,
+      "hasEncodingIssue": false
+    },
+    {
+      "route": "/blog/teaching-comparative-superlative-esl.html",
+      "canonical": "https://edooqoo.com/comparatives-superlatives-worksheets.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "Adult and Business English",
+      "redirectTo": "/comparatives-superlatives-worksheets.html",
+      "reason": "GSC 404 repair (2026-10): URL earned impressions, now returns 404; redirect to the closest live page.",
+      "source": "public/blog/teaching-comparative-superlative-esl.html",
+      "sourceName": "teaching-comparative-superlative-esl.html",
+      "title": "Moved",
+      "description": "",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
+      "reviewer": "",
+      "wordCount": 43,
       "hasEncodingIssue": false
     },
     {
@@ -5398,6 +5838,26 @@
       "hasEncodingIssue": false
     },
     {
+      "route": "/blog/teaching-english-customer-service.html",
+      "canonical": "https://edooqoo.com/adult-business-english-lesson-prep.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "Adult and Business English",
+      "redirectTo": "/adult-business-english-lesson-prep.html",
+      "reason": "GSC 404 repair (2026-10): URL earned impressions, now returns 404; redirect to the closest live page.",
+      "source": "public/blog/teaching-english-customer-service.html",
+      "sourceName": "teaching-english-customer-service.html",
+      "title": "Moved",
+      "description": "",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
+      "reviewer": "",
+      "wordCount": 43,
+      "hasEncodingIssue": false
+    },
+    {
       "route": "/blog/teaching-english-hospitality-tourism.html",
       "canonical": "https://edooqoo.com/blog/teaching-english-hospitality-tourism.html",
       "type": "blog",
@@ -5478,6 +5938,26 @@
       "hasEncodingIssue": false
     },
     {
+      "route": "/blog/teaching-english-job-interviews-activities.html",
+      "canonical": "https://edooqoo.com/job-interview-english-worksheets.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "Adult and Business English",
+      "redirectTo": "/job-interview-english-worksheets.html",
+      "reason": "GSC 404 repair (2026-10): URL earned impressions, now returns 404; redirect to the closest live page.",
+      "source": "public/blog/teaching-english-job-interviews-activities.html",
+      "sourceName": "teaching-english-job-interviews-activities.html",
+      "title": "Moved",
+      "description": "",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
+      "reviewer": "",
+      "wordCount": 43,
+      "hasEncodingIssue": false
+    },
+    {
       "route": "/blog/teaching-english-learning-disabilities.html",
       "canonical": "https://edooqoo.com/blog/adult-one-to-one-accessibility-adaptations-for-english-lessons.html",
       "type": "blog",
@@ -5513,8 +5993,8 @@
       "datePublished": "2026-06-14",
       "dateModified": "2026-06-14",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 3198,
+      "reviewer": "",
+      "wordCount": 3181,
       "hasEncodingIssue": false
     },
     {
@@ -5533,8 +6013,8 @@
       "datePublished": "2025-06-07",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1385,
+      "reviewer": "",
+      "wordCount": 1368,
       "hasEncodingIssue": false
     },
     {
@@ -5553,8 +6033,48 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 996,
+      "reviewer": "",
+      "wordCount": 742,
+      "hasEncodingIssue": false
+    },
+    {
+      "route": "/blog/teaching-english-senior-learners.html",
+      "canonical": "https://edooqoo.com/blog/adult-one-to-one-accessibility-adaptations-for-english-lessons.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "Adult and Business English",
+      "redirectTo": "/blog/adult-one-to-one-accessibility-adaptations-for-english-lessons.html",
+      "reason": "GSC 404 repair (2026-10): URL earned impressions, now returns 404; redirect to the closest live page.",
+      "source": "public/blog/teaching-english-senior-learners.html",
+      "sourceName": "teaching-english-senior-learners.html",
+      "title": "Moved",
+      "description": "",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
+      "reviewer": "",
+      "wordCount": 43,
+      "hasEncodingIssue": false
+    },
+    {
+      "route": "/blog/teaching-english-tenses-complete-guide.html",
+      "canonical": "https://edooqoo.com/blog/how-to-teach-english-grammar-effectively.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "Adult and Business English",
+      "redirectTo": "/blog/how-to-teach-english-grammar-effectively.html",
+      "reason": "GSC 404 repair (2026-10): URL earned impressions, now returns 404; redirect to the closest live page.",
+      "source": "public/blog/teaching-english-tenses-complete-guide.html",
+      "sourceName": "teaching-english-tenses-complete-guide.html",
+      "title": "Moved",
+      "description": "",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
+      "reviewer": "",
+      "wordCount": 43,
       "hasEncodingIssue": false
     },
     {
@@ -5589,12 +6109,12 @@
       "source": "public/blog/teaching-english-to-teenagers.html",
       "sourceName": "teaching-english-to-teenagers.html",
       "title": "Teaching English to Teenagers",
-      "description": "Teaching English To Teenagers: what to check in your student",
+      "description": "Teaching English To Teenagers: what to check in your student's evidence before you plan the next session. Generate a matching worksheet in one minute.",
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 996,
+      "reviewer": "",
+      "wordCount": 748,
       "hasEncodingIssue": false
     },
     {
@@ -5613,8 +6133,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1002,
+      "reviewer": "",
+      "wordCount": 750,
       "hasEncodingIssue": false
     },
     {
@@ -5668,6 +6188,46 @@
       "reason": "GSC 404 repair: redirect retired functional-language slug to the closest live pragmatics guide.",
       "source": "public/blog/teaching-functional-language-esl.html",
       "sourceName": "teaching-functional-language-esl.html",
+      "title": "Moved",
+      "description": "",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
+      "reviewer": "",
+      "wordCount": 43,
+      "hasEncodingIssue": false
+    },
+    {
+      "route": "/blog/teaching-future-tenses-esl-guide.html",
+      "canonical": "https://edooqoo.com/future-tenses-worksheets-english.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "Adult and Business English",
+      "redirectTo": "/future-tenses-worksheets-english.html",
+      "reason": "GSC 404 repair (2026-10): URL earned impressions, now returns 404; redirect to the closest live page.",
+      "source": "public/blog/teaching-future-tenses-esl-guide.html",
+      "sourceName": "teaching-future-tenses-esl-guide.html",
+      "title": "Moved",
+      "description": "",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
+      "reviewer": "",
+      "wordCount": 43,
+      "hasEncodingIssue": false
+    },
+    {
+      "route": "/blog/teaching-gerunds-infinitives-esl.html",
+      "canonical": "https://edooqoo.com/gerunds-infinitives-worksheets.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "Adult and Business English",
+      "redirectTo": "/gerunds-infinitives-worksheets.html",
+      "reason": "GSC 404 repair (2026-10): URL earned impressions, now returns 404; redirect to the closest live page.",
+      "source": "public/blog/teaching-gerunds-infinitives-esl.html",
+      "sourceName": "teaching-gerunds-infinitives-esl.html",
       "title": "Moved",
       "description": "",
       "datePublished": "",
@@ -5738,6 +6298,26 @@
       "hasEncodingIssue": false
     },
     {
+      "route": "/blog/teaching-linking-expressions-esl.html",
+      "canonical": "https://edooqoo.com/blog/teaching-linking-words-connectors.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "Adult and Business English",
+      "redirectTo": "/blog/teaching-linking-words-connectors.html",
+      "reason": "GSC 404 repair (2026-10): URL earned impressions, now returns 404; redirect to the closest live page.",
+      "source": "public/blog/teaching-linking-expressions-esl.html",
+      "sourceName": "teaching-linking-expressions-esl.html",
+      "title": "Moved",
+      "description": "",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
+      "reviewer": "",
+      "wordCount": 43,
+      "hasEncodingIssue": false
+    },
+    {
       "route": "/blog/teaching-linking-words-connectors.html",
       "canonical": "https://edooqoo.com/blog/teaching-linking-words-connectors.html",
       "type": "blog",
@@ -5793,8 +6373,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1102,
+      "reviewer": "",
+      "wordCount": 773,
       "hasEncodingIssue": false
     },
     {
@@ -5938,6 +6518,26 @@
       "hasEncodingIssue": false
     },
     {
+      "route": "/blog/teaching-paraphrasing-skills-esl.html",
+      "canonical": "https://edooqoo.com/writing-worksheets-esl.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "Adult and Business English",
+      "redirectTo": "/writing-worksheets-esl.html",
+      "reason": "GSC 404 repair (2026-10): URL earned impressions, now returns 404; redirect to the closest live page.",
+      "source": "public/blog/teaching-paraphrasing-skills-esl.html",
+      "sourceName": "teaching-paraphrasing-skills-esl.html",
+      "title": "Moved",
+      "description": "",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
+      "reviewer": "",
+      "wordCount": 43,
+      "hasEncodingIssue": false
+    },
+    {
       "route": "/blog/teaching-passive-voice-activities.html",
       "canonical": "https://edooqoo.com/blog/teaching-passive-voice-activities.html",
       "type": "blog",
@@ -5978,6 +6578,26 @@
       "hasEncodingIssue": false
     },
     {
+      "route": "/blog/teaching-prepositions-time-place-esl.html",
+      "canonical": "https://edooqoo.com/prepositions-worksheets-english.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "Adult and Business English",
+      "redirectTo": "/prepositions-worksheets-english.html",
+      "reason": "GSC 404 repair (2026-10): URL earned impressions, now returns 404; redirect to the closest live page.",
+      "source": "public/blog/teaching-prepositions-time-place-esl.html",
+      "sourceName": "teaching-prepositions-time-place-esl.html",
+      "title": "Moved",
+      "description": "",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
+      "reviewer": "",
+      "wordCount": 43,
+      "hasEncodingIssue": false
+    },
+    {
       "route": "/blog/teaching-presentation-skills-english.html",
       "canonical": "https://edooqoo.com/blog/teaching-presentation-skills-english.html",
       "type": "blog",
@@ -5995,6 +6615,26 @@
       "author": "Edooqoo",
       "reviewer": "",
       "wordCount": 284,
+      "hasEncodingIssue": false
+    },
+    {
+      "route": "/blog/teaching-question-formation-esl.html",
+      "canonical": "https://edooqoo.com/blog/how-to-teach-english-grammar-effectively.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "Adult and Business English",
+      "redirectTo": "/blog/how-to-teach-english-grammar-effectively.html",
+      "reason": "GSC 404 repair (2026-10): URL earned impressions, now returns 404; redirect to the closest live page.",
+      "source": "public/blog/teaching-question-formation-esl.html",
+      "sourceName": "teaching-question-formation-esl.html",
+      "title": "Moved",
+      "description": "",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
+      "reviewer": "",
+      "wordCount": 43,
       "hasEncodingIssue": false
     },
     {
@@ -6098,6 +6738,26 @@
       "hasEncodingIssue": false
     },
     {
+      "route": "/blog/teaching-second-conditional-activities.html",
+      "canonical": "https://edooqoo.com/conditionals-worksheets-english.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "Adult and Business English",
+      "redirectTo": "/conditionals-worksheets-english.html",
+      "reason": "GSC 404 repair (2026-10): URL earned impressions, now returns 404; redirect to the closest live page.",
+      "source": "public/blog/teaching-second-conditional-activities.html",
+      "sourceName": "teaching-second-conditional-activities.html",
+      "title": "Moved",
+      "description": "",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
+      "reviewer": "",
+      "wordCount": 43,
+      "hasEncodingIssue": false
+    },
+    {
       "route": "/blog/teaching-skimming-scanning-esl.html",
       "canonical": "https://edooqoo.com/blog/reading-comprehension-activities-english.html",
       "type": "blog",
@@ -6168,6 +6828,46 @@
       "reason": "GSC 404 repair: redirect retired test-taking slug to the live exam-prep worksheet page.",
       "source": "public/blog/teaching-test-taking-strategies-esl.html",
       "sourceName": "teaching-test-taking-strategies-esl.html",
+      "title": "Moved",
+      "description": "",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
+      "reviewer": "",
+      "wordCount": 43,
+      "hasEncodingIssue": false
+    },
+    {
+      "route": "/blog/teaching-third-conditional-esl.html",
+      "canonical": "https://edooqoo.com/conditionals-worksheets-english.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "Adult and Business English",
+      "redirectTo": "/conditionals-worksheets-english.html",
+      "reason": "GSC 404 repair (2026-10): URL earned impressions, now returns 404; redirect to the closest live page.",
+      "source": "public/blog/teaching-third-conditional-esl.html",
+      "sourceName": "teaching-third-conditional-esl.html",
+      "title": "Moved",
+      "description": "",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
+      "reviewer": "",
+      "wordCount": 43,
+      "hasEncodingIssue": false
+    },
+    {
+      "route": "/blog/teaching-vocabulary-in-context-methods.html",
+      "canonical": "https://edooqoo.com/vocabulary-exercise-generator.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "Adult and Business English",
+      "redirectTo": "/vocabulary-exercise-generator.html",
+      "reason": "GSC 404 repair (2026-10): URL earned impressions, now returns 404; redirect to the closest live page.",
+      "source": "public/blog/teaching-vocabulary-in-context-methods.html",
+      "sourceName": "teaching-vocabulary-in-context-methods.html",
       "title": "Moved",
       "description": "",
       "datePublished": "",
@@ -6253,8 +6953,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1003,
+      "reviewer": "",
+      "wordCount": 748,
       "hasEncodingIssue": false
     },
     {
@@ -6353,8 +7053,28 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 995,
+      "reviewer": "",
+      "wordCount": 742,
+      "hasEncodingIssue": false
+    },
+    {
+      "route": "/blog/tracking-student-progress-ai-esl.html",
+      "canonical": "https://edooqoo.com/esl-student-progress-tracking-tool.html",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "Adult and Business English",
+      "redirectTo": "/esl-student-progress-tracking-tool.html",
+      "reason": "GSC 404 repair (2026-10): URL earned impressions, now returns 404; redirect to the closest live page.",
+      "source": "public/blog/tracking-student-progress-ai-esl.html",
+      "sourceName": "tracking-student-progress-ai-esl.html",
+      "title": "Moved",
+      "description": "",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
+      "reviewer": "",
+      "wordCount": 43,
       "hasEncodingIssue": false
     },
     {
@@ -6373,8 +7093,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1117,
+      "reviewer": "",
+      "wordCount": 777,
       "hasEncodingIssue": false
     },
     {
@@ -6433,8 +7153,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1105,
+      "reviewer": "",
+      "wordCount": 775,
       "hasEncodingIssue": false
     },
     {
@@ -6453,8 +7173,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1281,
+      "reviewer": "",
+      "wordCount": 952,
       "hasEncodingIssue": false
     },
     {
@@ -6573,8 +7293,28 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1002,
+      "reviewer": "",
+      "wordCount": 748,
+      "hasEncodingIssue": false
+    },
+    {
+      "route": "/blog/v-esl-classroom.html",
+      "canonical": "https://edooqoo.com/blog",
+      "type": "blog",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "Adult and Business English",
+      "redirectTo": "/blog",
+      "reason": "GSC 404 repair (2026-10): URL earned impressions, now returns 404; redirect to the closest live page.",
+      "source": "public/blog/v-esl-classroom.html",
+      "sourceName": "v-esl-classroom.html",
+      "title": "Moved",
+      "description": "",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
+      "reviewer": "",
+      "wordCount": 43,
       "hasEncodingIssue": false
     },
     {
@@ -6713,8 +7453,8 @@
       "datePublished": "2026-06-14",
       "dateModified": "2026-06-14",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 651,
+      "reviewer": "",
+      "wordCount": 634,
       "hasEncodingIssue": false
     },
     {
@@ -6733,8 +7473,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1102,
+      "reviewer": "",
+      "wordCount": 775,
       "hasEncodingIssue": false
     },
     {
@@ -6753,8 +7493,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1123,
+      "reviewer": "",
+      "wordCount": 795,
       "hasEncodingIssue": false
     },
     {
@@ -6773,8 +7513,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1276,
+      "reviewer": "",
+      "wordCount": 947,
       "hasEncodingIssue": false
     },
     {
@@ -6793,8 +7533,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1139,
+      "reviewer": "",
+      "wordCount": 806,
       "hasEncodingIssue": false
     },
     {
@@ -6813,8 +7553,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1103,
+      "reviewer": "",
+      "wordCount": 780,
       "hasEncodingIssue": false
     },
     {
@@ -6853,8 +7593,8 @@
       "datePublished": "2025-09-22",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1366,
+      "reviewer": "",
+      "wordCount": 1349,
       "hasEncodingIssue": false
     },
     {
@@ -7429,7 +8169,7 @@
       "source": "public/edooqoo-vs-chatgpt.html",
       "sourceName": "edooqoo-vs-chatgpt.html",
       "title": "Edooqoo vs ChatGPT for English Teachers",
-      "description": "ChatGPT drafts text; Edooqoo keeps one adult learner",
+      "description": "ChatGPT drafts text; Edooqoo keeps one adult learner's context, homework evidence and editable worksheets. See where each one actually fits.",
       "datePublished": "",
       "dateModified": "",
       "author": "",
@@ -7529,7 +8269,7 @@
       "source": "public/edooqoo-vs-islcollective.html",
       "sourceName": "edooqoo-vs-islcollective.html",
       "title": "Edooqoo vs iSLCollective for English Teachers",
-      "description": "iSLCollective is a shared worksheet library; Edooqoo generates material from your student",
+      "description": "iSLCollective is a shared worksheet library; Edooqoo generates material from your student's evidence. Compare reuse, CEFR fit and editing.",
       "datePublished": "",
       "dateModified": "",
       "author": "",
@@ -7649,7 +8389,7 @@
       "source": "public/edooqoo-vs-twee.html",
       "sourceName": "edooqoo-vs-twee.html",
       "title": "Edooqoo vs Twee for English Teachers",
-      "description": "Twee generates ESL tasks; Edooqoo links them to one adult learner",
+      "description": "Twee generates ESL tasks; Edooqoo links them to one adult learner's history. Compare worksheet structure, editing and homework review.",
       "datePublished": "",
       "dateModified": "",
       "author": "",
@@ -7681,11 +8421,11 @@
       "route": "/english-for/accountants",
       "canonical": "https://edooqoo.com/english-for/accountants",
       "type": "persona",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Adult and Business English",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/english-for/cabin-crew",
@@ -7721,11 +8461,11 @@
       "route": "/english-for/consultants",
       "canonical": "https://edooqoo.com/english-for/consultants",
       "type": "persona",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Adult and Business English",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/english-for/customer-service",
@@ -7751,21 +8491,21 @@
       "route": "/english-for/entrepreneurs",
       "canonical": "https://edooqoo.com/english-for/entrepreneurs",
       "type": "persona",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Adult and Business English",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/english-for/executives",
       "canonical": "https://edooqoo.com/english-for/executives",
       "type": "persona",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Adult and Business English",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/english-for/financial-advisors",
@@ -7801,21 +8541,21 @@
       "route": "/english-for/lawyers",
       "canonical": "https://edooqoo.com/english-for/lawyers",
       "type": "persona",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Adult and Business English",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/english-for/marketing-managers",
       "canonical": "https://edooqoo.com/english-for/marketing-managers",
       "type": "persona",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Adult and Business English",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/english-for/nurses",
@@ -7831,11 +8571,11 @@
       "route": "/english-for/project-managers",
       "canonical": "https://edooqoo.com/english-for/project-managers",
       "type": "persona",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Adult and Business English",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/english-for/real-estate-agents",
@@ -8189,12 +8929,12 @@
       "source": "public/esl-student-progress-tracking-tool.html",
       "sourceName": "esl-student-progress-tracking-tool.html",
       "title": "ESL Student Progress Tracking Tool",
-      "description": "Track ESL student progress with Edooqoo",
+      "description": "Track ESL student progress with Edooqoo's nano-skill mastery system: grammar, vocabulary, reading, writing, speaking and listening, with CEFR tags.",
       "datePublished": "",
       "dateModified": "",
       "author": "",
       "reviewer": "",
-      "wordCount": 513,
+      "wordCount": 507,
       "hasEncodingIssue": false
     },
     {
@@ -8311,11 +9051,11 @@
       "route": "/esl-worksheets/business-email/c1-advanced",
       "canonical": "https://edooqoo.com/esl-worksheets/business-email/c1-advanced",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Adult and Business English",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/business-email/c2-proficiency",
@@ -8371,11 +9111,11 @@
       "route": "/esl-worksheets/collocations/c1-advanced",
       "canonical": "https://edooqoo.com/esl-worksheets/collocations/c1-advanced",
       "type": "topic-level",
-      "state": "noindex",
-      "indexable": false,
+      "state": "hold",
+      "indexable": true,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
+      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
     },
     {
       "route": "/esl-worksheets/collocations/c2-proficiency",
@@ -8471,31 +9211,31 @@
       "route": "/esl-worksheets/conditionals/b1-intermediate",
       "canonical": "https://edooqoo.com/esl-worksheets/conditionals/b1-intermediate",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/conditionals/b2-upper-intermediate",
       "canonical": "https://edooqoo.com/esl-worksheets/conditionals/b2-upper-intermediate",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/conditionals/c1-advanced",
       "canonical": "https://edooqoo.com/esl-worksheets/conditionals/c1-advanced",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/conditionals/c2-proficiency",
@@ -8781,11 +9521,11 @@
       "route": "/esl-worksheets/environment/b2-upper-intermediate",
       "canonical": "https://edooqoo.com/esl-worksheets/environment/b2-upper-intermediate",
       "type": "topic-level",
-      "state": "noindex",
-      "indexable": false,
+      "state": "hold",
+      "indexable": true,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
+      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
     },
     {
       "route": "/esl-worksheets/environment/c1-advanced",
@@ -9261,31 +10001,31 @@
       "route": "/esl-worksheets/ielts-writing-task-2/b2-upper-intermediate",
       "canonical": "https://edooqoo.com/esl-worksheets/ielts-writing-task-2/b2-upper-intermediate",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/ielts-writing-task-2/c1-advanced",
       "canonical": "https://edooqoo.com/esl-worksheets/ielts-writing-task-2/c1-advanced",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/ielts-writing-task-2/c2-proficiency",
       "canonical": "https://edooqoo.com/esl-worksheets/ielts-writing-task-2/c2-proficiency",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/job-interview/a1-beginner",
@@ -9301,41 +10041,41 @@
       "route": "/esl-worksheets/job-interview/a2-elementary",
       "canonical": "https://edooqoo.com/esl-worksheets/job-interview/a2-elementary",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/job-interview/b1-intermediate",
       "canonical": "https://edooqoo.com/esl-worksheets/job-interview/b1-intermediate",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/job-interview/b2-upper-intermediate",
       "canonical": "https://edooqoo.com/esl-worksheets/job-interview/b2-upper-intermediate",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/job-interview/c1-advanced",
       "canonical": "https://edooqoo.com/esl-worksheets/job-interview/c1-advanced",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/job-interview/c2-proficiency",
@@ -9371,31 +10111,31 @@
       "route": "/esl-worksheets/meetings/b1-intermediate",
       "canonical": "https://edooqoo.com/esl-worksheets/meetings/b1-intermediate",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/meetings/b2-upper-intermediate",
       "canonical": "https://edooqoo.com/esl-worksheets/meetings/b2-upper-intermediate",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/meetings/c1-advanced",
       "canonical": "https://edooqoo.com/esl-worksheets/meetings/c1-advanced",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/meetings/c2-proficiency",
@@ -9421,41 +10161,41 @@
       "route": "/esl-worksheets/modal-verbs/a2-elementary",
       "canonical": "https://edooqoo.com/esl-worksheets/modal-verbs/a2-elementary",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/modal-verbs/b1-intermediate",
       "canonical": "https://edooqoo.com/esl-worksheets/modal-verbs/b1-intermediate",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/modal-verbs/b2-upper-intermediate",
       "canonical": "https://edooqoo.com/esl-worksheets/modal-verbs/b2-upper-intermediate",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/modal-verbs/c1-advanced",
       "canonical": "https://edooqoo.com/esl-worksheets/modal-verbs/c1-advanced",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/modal-verbs/c2-proficiency",
@@ -9571,11 +10311,11 @@
       "route": "/esl-worksheets/news-media/c1-advanced",
       "canonical": "https://edooqoo.com/esl-worksheets/news-media/c1-advanced",
       "type": "topic-level",
-      "state": "noindex",
-      "indexable": false,
+      "state": "hold",
+      "indexable": true,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
+      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
     },
     {
       "route": "/esl-worksheets/news-media/c2-proficiency",
@@ -9651,41 +10391,41 @@
       "route": "/esl-worksheets/past-simple/a1-beginner",
       "canonical": "https://edooqoo.com/esl-worksheets/past-simple/a1-beginner",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/past-simple/a2-elementary",
       "canonical": "https://edooqoo.com/esl-worksheets/past-simple/a2-elementary",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/past-simple/b1-intermediate",
       "canonical": "https://edooqoo.com/esl-worksheets/past-simple/b1-intermediate",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/past-simple/b2-upper-intermediate",
       "canonical": "https://edooqoo.com/esl-worksheets/past-simple/b2-upper-intermediate",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/past-simple/c1-advanced",
@@ -9791,21 +10531,21 @@
       "route": "/esl-worksheets/phrasal-verbs/b1-intermediate",
       "canonical": "https://edooqoo.com/esl-worksheets/phrasal-verbs/b1-intermediate",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/phrasal-verbs/b2-upper-intermediate",
       "canonical": "https://edooqoo.com/esl-worksheets/phrasal-verbs/b2-upper-intermediate",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/phrasal-verbs/c1-advanced",
@@ -9901,41 +10641,41 @@
       "route": "/esl-worksheets/present-perfect/a2-elementary",
       "canonical": "https://edooqoo.com/esl-worksheets/present-perfect/a2-elementary",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/present-perfect/b1-intermediate",
       "canonical": "https://edooqoo.com/esl-worksheets/present-perfect/b1-intermediate",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/present-perfect/b2-upper-intermediate",
       "canonical": "https://edooqoo.com/esl-worksheets/present-perfect/b2-upper-intermediate",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/present-perfect/c1-advanced",
       "canonical": "https://edooqoo.com/esl-worksheets/present-perfect/c1-advanced",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/present-perfect/c2-proficiency",
@@ -10431,11 +11171,11 @@
       "route": "/esl-worksheets/travel-vocabulary/a1-beginner",
       "canonical": "https://edooqoo.com/esl-worksheets/travel-vocabulary/a1-beginner",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Homework and Retention",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/travel-vocabulary/a2-elementary",
@@ -10451,21 +11191,21 @@
       "route": "/esl-worksheets/travel-vocabulary/b1-intermediate",
       "canonical": "https://edooqoo.com/esl-worksheets/travel-vocabulary/b1-intermediate",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Homework and Retention",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/travel-vocabulary/b2-upper-intermediate",
       "canonical": "https://edooqoo.com/esl-worksheets/travel-vocabulary/b2-upper-intermediate",
       "type": "topic-level",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Homework and Retention",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/esl-worksheets/travel-vocabulary/c1-advanced",
@@ -10501,11 +11241,11 @@
       "route": "/esl-worksheets/weather/a2-elementary",
       "canonical": "https://edooqoo.com/esl-worksheets/weather/a2-elementary",
       "type": "topic-level",
-      "state": "noindex",
-      "indexable": false,
+      "state": "hold",
+      "indexable": true,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
+      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
     },
     {
       "route": "/esl-worksheets/weather/b1-intermediate",
@@ -10709,12 +11449,12 @@
       "source": "public/exercise-types.html",
       "sourceName": "exercise-types.html",
       "title": "29 English Exercise Types: AI Worksheet Generator",
-      "description": "Explore all 29 exercise types available in Edooqoo",
+      "description": "Explore all 29 exercise types in Edooqoo's worksheet output layer, from fill-in-the-blanks to listening comprehension, across CEFR A1-C2 lessons.",
       "datePublished": "",
       "dateModified": "",
       "author": "",
       "reviewer": "",
-      "wordCount": 709,
+      "wordCount": 705,
       "hasEncodingIssue": false
     },
     {
@@ -11735,6 +12475,26 @@
       "author": "",
       "reviewer": "",
       "wordCount": 884,
+      "hasEncodingIssue": false
+    },
+    {
+      "route": "/present-simple-worksheet.html",
+      "canonical": "https://edooqoo.com/present-simple-worksheets.html",
+      "type": "static-landing",
+      "state": "merge",
+      "indexable": false,
+      "cluster": "Adult and Business English",
+      "redirectTo": "/present-simple-worksheets.html",
+      "reason": "GSC 404 repair (2026-10): URL earned impressions, now returns 404; redirect to the closest live page.",
+      "source": "public/present-simple-worksheet.html",
+      "sourceName": "present-simple-worksheet.html",
+      "title": "Moved",
+      "description": "",
+      "datePublished": "",
+      "dateModified": "",
+      "author": "",
+      "reviewer": "",
+      "wordCount": 43,
       "hasEncodingIssue": false
     },
     {
@@ -14101,11 +14861,11 @@
       "route": "/worksheets/collocations-match/phrasal-verbs",
       "canonical": "https://edooqoo.com/worksheets/collocations-match/phrasal-verbs",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/collocations-match/prepositions",
@@ -14901,11 +15661,11 @@
       "route": "/worksheets/definition-match/phrasal-verbs",
       "canonical": "https://edooqoo.com/worksheets/definition-match/phrasal-verbs",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/definition-match/prepositions",
@@ -15221,31 +15981,31 @@
       "route": "/worksheets/dialogue-completion/job-interview",
       "canonical": "https://edooqoo.com/worksheets/dialogue-completion/job-interview",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/dialogue-completion/meetings",
       "canonical": "https://edooqoo.com/worksheets/dialogue-completion/meetings",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/dialogue-completion/modal-verbs",
       "canonical": "https://edooqoo.com/worksheets/dialogue-completion/modal-verbs",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/dialogue-completion/negotiations",
@@ -15281,11 +16041,11 @@
       "route": "/worksheets/dialogue-completion/past-simple",
       "canonical": "https://edooqoo.com/worksheets/dialogue-completion/past-simple",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/dialogue-completion/phrasal-business",
@@ -15301,11 +16061,11 @@
       "route": "/worksheets/dialogue-completion/phrasal-verbs",
       "canonical": "https://edooqoo.com/worksheets/dialogue-completion/phrasal-verbs",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/dialogue-completion/prepositions",
@@ -15321,11 +16081,11 @@
       "route": "/worksheets/dialogue-completion/present-perfect",
       "canonical": "https://edooqoo.com/worksheets/dialogue-completion/present-perfect",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/dialogue-completion/presentations",
@@ -15411,11 +16171,11 @@
       "route": "/worksheets/dialogue-completion/travel-vocabulary",
       "canonical": "https://edooqoo.com/worksheets/dialogue-completion/travel-vocabulary",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Homework and Retention",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/dialogue-completion/weather",
@@ -15881,11 +16641,11 @@
       "route": "/worksheets/error-correction/conditionals",
       "canonical": "https://edooqoo.com/worksheets/error-correction/conditionals",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Student Evidence and Progress",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/error-correction/conflict-resolution",
@@ -16011,11 +16771,11 @@
       "route": "/worksheets/error-correction/ielts-writing-task-2",
       "canonical": "https://edooqoo.com/worksheets/error-correction/ielts-writing-task-2",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Student Evidence and Progress",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/error-correction/job-interview",
@@ -16041,11 +16801,11 @@
       "route": "/worksheets/error-correction/modal-verbs",
       "canonical": "https://edooqoo.com/worksheets/error-correction/modal-verbs",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Student Evidence and Progress",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/error-correction/negotiations",
@@ -16081,11 +16841,11 @@
       "route": "/worksheets/error-correction/past-simple",
       "canonical": "https://edooqoo.com/worksheets/error-correction/past-simple",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Student Evidence and Progress",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/error-correction/phrasal-business",
@@ -16481,11 +17241,11 @@
       "route": "/worksheets/fill-in-the-blanks/past-simple",
       "canonical": "https://edooqoo.com/worksheets/fill-in-the-blanks/past-simple",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/fill-in-the-blanks/phrasal-business",
@@ -16811,11 +17571,11 @@
       "route": "/worksheets/gap-fill/ielts-writing-task-2",
       "canonical": "https://edooqoo.com/worksheets/gap-fill/ielts-writing-task-2",
       "type": "exercise-topic",
-      "state": "noindex",
-      "indexable": false,
+      "state": "hold",
+      "indexable": true,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
+      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
     },
     {
       "route": "/worksheets/gap-fill/job-interview",
@@ -16901,11 +17661,11 @@
       "route": "/worksheets/gap-fill/phrasal-verbs",
       "canonical": "https://edooqoo.com/worksheets/gap-fill/phrasal-verbs",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/gap-fill/prepositions",
@@ -16921,11 +17681,11 @@
       "route": "/worksheets/gap-fill/present-perfect",
       "canonical": "https://edooqoo.com/worksheets/gap-fill/present-perfect",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/gap-fill/presentations",
@@ -17481,11 +18241,11 @@
       "route": "/worksheets/matching/conditionals",
       "canonical": "https://edooqoo.com/worksheets/matching/conditionals",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/matching/conflict-resolution",
@@ -17621,11 +18381,11 @@
       "route": "/worksheets/matching/job-interview",
       "canonical": "https://edooqoo.com/worksheets/matching/job-interview",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/matching/meetings",
@@ -17811,11 +18571,11 @@
       "route": "/worksheets/matching/travel-vocabulary",
       "canonical": "https://edooqoo.com/worksheets/matching/travel-vocabulary",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Homework and Retention",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/matching/weather",
@@ -18041,11 +18801,11 @@
       "route": "/worksheets/multiple-choice/modal-verbs",
       "canonical": "https://edooqoo.com/worksheets/multiple-choice/modal-verbs",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/multiple-choice/negotiations",
@@ -18281,11 +19041,11 @@
       "route": "/worksheets/open-question/conditionals",
       "canonical": "https://edooqoo.com/worksheets/open-question/conditionals",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/open-question/conflict-resolution",
@@ -18421,31 +19181,31 @@
       "route": "/worksheets/open-question/job-interview",
       "canonical": "https://edooqoo.com/worksheets/open-question/job-interview",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/open-question/meetings",
       "canonical": "https://edooqoo.com/worksheets/open-question/meetings",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/open-question/modal-verbs",
       "canonical": "https://edooqoo.com/worksheets/open-question/modal-verbs",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/open-question/negotiations",
@@ -18501,11 +19261,11 @@
       "route": "/worksheets/open-question/phrasal-verbs",
       "canonical": "https://edooqoo.com/worksheets/open-question/phrasal-verbs",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/open-question/prepositions",
@@ -18521,11 +19281,11 @@
       "route": "/worksheets/open-question/present-perfect",
       "canonical": "https://edooqoo.com/worksheets/open-question/present-perfect",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/open-question/presentations",
@@ -18611,11 +19371,11 @@
       "route": "/worksheets/open-question/travel-vocabulary",
       "canonical": "https://edooqoo.com/worksheets/open-question/travel-vocabulary",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Homework and Retention",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/open-question/weather",
@@ -18651,11 +19411,11 @@
       "route": "/worksheets/ordering/business-email",
       "canonical": "https://edooqoo.com/worksheets/ordering/business-email",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Adult and Business English",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/ordering/collocations",
@@ -18811,11 +19571,11 @@
       "route": "/worksheets/ordering/ielts-writing-task-2",
       "canonical": "https://edooqoo.com/worksheets/ordering/ielts-writing-task-2",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/ordering/job-interview",
@@ -18881,11 +19641,11 @@
       "route": "/worksheets/ordering/past-simple",
       "canonical": "https://edooqoo.com/worksheets/ordering/past-simple",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/ordering/phrasal-business",
@@ -19051,11 +19811,11 @@
       "route": "/worksheets/paragraph-writing/business-email",
       "canonical": "https://edooqoo.com/worksheets/paragraph-writing/business-email",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Adult and Business English",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/paragraph-writing/collocations",
@@ -19081,11 +19841,11 @@
       "route": "/worksheets/paragraph-writing/conditionals",
       "canonical": "https://edooqoo.com/worksheets/paragraph-writing/conditionals",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/paragraph-writing/conflict-resolution",
@@ -19211,11 +19971,11 @@
       "route": "/worksheets/paragraph-writing/ielts-writing-task-2",
       "canonical": "https://edooqoo.com/worksheets/paragraph-writing/ielts-writing-task-2",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/paragraph-writing/job-interview",
@@ -21011,11 +21771,11 @@
       "route": "/worksheets/picture-vocabulary/travel-vocabulary",
       "canonical": "https://edooqoo.com/worksheets/picture-vocabulary/travel-vocabulary",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Homework and Retention",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/picture-vocabulary/weather",
@@ -21221,11 +21981,11 @@
       "route": "/worksheets/pronunciation-drill/job-interview",
       "canonical": "https://edooqoo.com/worksheets/pronunciation-drill/job-interview",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/pronunciation-drill/meetings",
@@ -21451,11 +22211,11 @@
       "route": "/worksheets/rewriting/business-email",
       "canonical": "https://edooqoo.com/worksheets/rewriting/business-email",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Adult and Business English",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/rewriting/collocations",
@@ -21611,11 +22371,11 @@
       "route": "/worksheets/rewriting/ielts-writing-task-2",
       "canonical": "https://edooqoo.com/worksheets/rewriting/ielts-writing-task-2",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/rewriting/job-interview",
@@ -21641,11 +22401,11 @@
       "route": "/worksheets/rewriting/modal-verbs",
       "canonical": "https://edooqoo.com/worksheets/rewriting/modal-verbs",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/rewriting/negotiations",
@@ -21851,11 +22611,11 @@
       "route": "/worksheets/short-answer/business-email",
       "canonical": "https://edooqoo.com/worksheets/short-answer/business-email",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Adult and Business English",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/short-answer/collocations",
@@ -22021,21 +22781,21 @@
       "route": "/worksheets/short-answer/job-interview",
       "canonical": "https://edooqoo.com/worksheets/short-answer/job-interview",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/short-answer/meetings",
       "canonical": "https://edooqoo.com/worksheets/short-answer/meetings",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/short-answer/modal-verbs",
@@ -22081,11 +22841,11 @@
       "route": "/worksheets/short-answer/past-simple",
       "canonical": "https://edooqoo.com/worksheets/short-answer/past-simple",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/short-answer/phrasal-business",
@@ -22121,11 +22881,11 @@
       "route": "/worksheets/short-answer/present-perfect",
       "canonical": "https://edooqoo.com/worksheets/short-answer/present-perfect",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/short-answer/presentations",
@@ -22211,11 +22971,11 @@
       "route": "/worksheets/short-answer/travel-vocabulary",
       "canonical": "https://edooqoo.com/worksheets/short-answer/travel-vocabulary",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Homework and Retention",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/short-answer/weather",
@@ -22681,11 +23441,11 @@
       "route": "/worksheets/transformation/conditionals",
       "canonical": "https://edooqoo.com/worksheets/transformation/conditionals",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/transformation/conflict-resolution",
@@ -23611,11 +24371,11 @@
       "route": "/worksheets/word-formation/ielts-writing-task-2",
       "canonical": "https://edooqoo.com/worksheets/word-formation/ielts-writing-task-2",
       "type": "exercise-topic",
-      "state": "hold",
-      "indexable": true,
+      "state": "noindex",
+      "indexable": false,
       "cluster": "Tutor Business and Tools",
       "redirectTo": null,
-      "reason": "Awaiting GSC and backlink evidence; preserve current URL without destructive action."
+      "reason": "Combination remains accessible but is excluded from indexing by the programmatic SEO quality policy."
     },
     {
       "route": "/worksheets/word-formation/job-interview",

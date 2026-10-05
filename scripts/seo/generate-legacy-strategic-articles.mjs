@@ -17,13 +17,6 @@ const AUTHOR = {
   url: `${BASE}/authors/jan-brzostowski`,
 };
 
-const REVIEWER = {
-  name: 'Martha',
-  role: 'ESL Methodology Reviewer',
-  experience: '10 years of experience',
-  url: `${BASE}/authors/martha`,
-};
-
 const SOURCE_LIBRARY = {
   cefr: {
     label: 'Council of Europe: Common European Framework of Reference for Languages, Companion Volume',
@@ -225,14 +218,6 @@ function buildJsonLd(article, published, words) {
         datePublished: published,
         dateModified: MODIFIED,
         author: { '@type': 'Person', '@id': `${AUTHOR.url}#person`, name: AUTHOR.name, url: AUTHOR.url },
-        reviewedBy: {
-          '@type': 'Person',
-          '@id': `${REVIEWER.url}#person`,
-          name: REVIEWER.name,
-          jobTitle: REVIEWER.role,
-          description: REVIEWER.experience,
-          url: REVIEWER.url,
-        },
         publisher: { '@type': 'Organization', '@id': `${BASE}/#organization`, name: 'Edooqoo' },
         mainEntityOfPage: { '@id': `${url}#webpage` },
         inLanguage: 'en',
@@ -253,14 +238,6 @@ function buildJsonLd(article, published, words) {
         name: AUTHOR.name,
         url: AUTHOR.url,
         description: 'Founder of Edooqoo and author of product workflow documentation.',
-      },
-      {
-        '@type': 'Person',
-        '@id': `${REVIEWER.url}#person`,
-        name: REVIEWER.name,
-        url: REVIEWER.url,
-        jobTitle: REVIEWER.role,
-        description: REVIEWER.experience,
       },
       {
         '@type': 'FAQPage',
@@ -336,7 +313,6 @@ ${NEWSLETTER_EMBED_CSS}
       <h1>${escapeHtml(article.h1)}</h1>
       <div class="byline">
         <span>By <a href="/authors/jan-brzostowski">${AUTHOR.name}</a></span>
-        <span>Reviewed by <a href="/authors/martha">${REVIEWER.name}, ${REVIEWER.role}</a></span>
         <span>Published ${published}</span>
         <span>Updated ${MODIFIED}</span>
       </div>
@@ -357,7 +333,7 @@ ${renderNewsletterEmbed(`article:${article.slug.replace(/\.html$/, '')}`)}
       <h2>Next step</h2>
       <p>Use the <a href="/what-to-teach-next">What Should I Teach Next?</a> framework to convert the evidence into one bounded decision for the next adult one-to-one lesson.</p>
     </section>
-    <footer>Authored by ${AUTHOR.name}. Methodology review by ${REVIEWER.name}, ${REVIEWER.role}, ${REVIEWER.experience}.</footer>
+    <footer>Authored by ${AUTHOR.name}.</footer>
   </main>
 </body>
 </html>

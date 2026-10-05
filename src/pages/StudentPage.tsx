@@ -20,7 +20,7 @@ import { StudentHeaderBar } from '@/components/student/StudentHeaderBar';
 import { StudentSnapshotPanel } from '@/components/student/StudentSnapshotPanel';
 import { StudentSettingsMenu } from '@/components/student/StudentSettingsMenu';
 import { useStudentNextLesson } from '@/hooks/useStudentNextLesson';
-import { selectFocusAreas, formatNextLessonLabel } from '@/lib/students/studentSnapshot';
+import { selectFocusAreas, selectFocusAreaTexts, formatNextLessonLabel } from '@/lib/students/studentSnapshot';
 import { PrepTab } from '@/components/student/prep/PrepTab';
 // v6.9.111 M5.4: Timeline tab (data hooks + presentational composition).
 import { useStudentTimeline } from '@/hooks/useStudentTimeline';
@@ -236,6 +236,12 @@ const StudentPage = () => {
     () => selectFocusAreas(studentKnowledge.entries),
     [studentKnowledge.entries],
   );
+  // Untrimmed twin of `focusAreas`: the fallback lesson topic is generator
+  // input, so it must not inherit the display ellipsis.
+  const focusAreaTexts = useMemo(
+    () => selectFocusAreaTexts(studentKnowledge.entries),
+    [studentKnowledge.entries],
+  );
   const { lesson: nextLesson, isLoading: nextLessonLoading } = useStudentNextLesson(
     id,
     student?.teacher_id,
@@ -253,9 +259,9 @@ const StudentPage = () => {
     () =>
       selectPrepSuggestion(futureTimeline.phaseSteps as any, futureTimeline.nextSteps as any, {
         mainGoal: student?.main_goal ?? null,
-        focusAreas,
+        focusAreas: focusAreaTexts,
       }),
-    [futureTimeline.phaseSteps, futureTimeline.nextSteps, student?.main_goal, focusAreas],
+    [futureTimeline.phaseSteps, futureTimeline.nextSteps, student?.main_goal, focusAreaTexts],
   );
   const prepRationale = useMemo(
     () => buildRationale(prepSuggestion, focusAreas),

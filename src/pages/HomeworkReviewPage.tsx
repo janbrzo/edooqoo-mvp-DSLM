@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import ExerciseSection from "@/components/worksheet/ExerciseSection";
@@ -10,12 +11,15 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { 
   Loader2, Calendar, User, Mail, CheckCircle2, FileText, 
-  Send, ArrowLeft, MessageSquare, Clock, Eye
+  Send, ArrowLeft, MessageSquare, Clock, Eye, ClipboardCheck
 } from "lucide-react";
 import { format } from "date-fns";
 import { deepFixTextObjects } from "@/utils/textObjectFixer";
 import { AiEvaluationBadge, type AiEvaluation } from "@/components/homework/AiEvaluationBadge";
 import { useHardLightSurface } from "@/hooks/useHardLightSurface";
+import { useAuthFlow } from "@/hooks/useAuthFlow";
+import { useTeacherAuthRedirect } from "@/hooks/useTeacherAuthRedirect";
+import { useDemoContext } from "@/contexts/DemoContext";
 
 interface HomeworkData {
   id: string;
@@ -58,37 +62,38 @@ export default function HomeworkReviewPage() {
   useHardLightSurface('homework-review');
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
+  const { loading: authLoading, isRegisteredUser } = useAuthFlow();
+  const { isDemoMode, demoData } = useDemoContext();
   const [homework, setHomework] = useState<HomeworkData | null>(null);
   const [studentAnswers, setStudentAnswers] = useState<StudentAnswer[]>([]);
   const [teacherComments, setTeacherComments] = useState<Record<number, string>>({});
   const [loading, setLoading] = useState(true);
   const [isSending, setIsSending] = useState(false);
   const [savingComment, setSavingComment] = useState<number | null>(null);
+  const [loadFailed, setLoadFailed] = useState(false);
 
-  // Check if user is authenticated teacher
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        toast.error("Please log in to review homework");
-        navigate("/login");
-        return;
-      }
-    };
-    checkAuth();
-  }, [navigate]);
+  // Review links come from the dashboard and the timeline and are bookmarked:
+  // a visitor without a session goes to /login and comes back here afterwards.
+  useTeacherAuthRedirect(authLoading, !!isRegisteredUser);
 
-  // Load homework data
+  // Load homework data once auth is known (demo renders its own card below).
   useEffect(() => {
+    if (isDemoMode) {
+      setLoading(false);
+      return;
+    }
     if (!id) {
       toast.error("Invalid homework ID");
       navigate("/dashboard");
       return;
     }
+    if (authLoading || !isRegisteredUser) return;
     loadHomework();
-  }, [id]);
+  }, [id, isDemoMode, authLoading, isRegisteredUser]);
 
   const loadHomework = async () => {
+    setLoadFailed(false);
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) return;
@@ -157,7 +162,7 @@ export default function HomeworkReviewPage() {
       }
     } catch (error) {
       console.error('Error loading homework:', error);
-      toast.error("Failed to load homework");
+      setLoadFailed(true);
     } finally {
       setLoading(false);
     }
@@ -211,6 +216,11 @@ export default function HomeworkReviewPage() {
 
       // Create notification for student (optional - could be email)
       toast.success("Review sent to student! They can now see correct answers and your comments.");
+
+      // The dashboard and timeline caches do not refetch on mount; drop the
+      // stale "waiting for your review" entries now.
+      void queryClient.invalidateQueries({ queryKey: ['dashboard-attention'], refetchType: 'all' });
+      void queryClient.invalidateQueries({ queryKey: ['student-timeline-sources'], refetchType: 'all' });
       
       // Reload to reflect changes
       await loadHomework();
@@ -238,6 +248,35 @@ export default function HomeworkReviewPage() {
   const hasStudentSubmitted = studentAnswers.some(a => a.is_submitted);
   const submittedAt = studentAnswers.find(a => a.submitted_at)?.submitted_at;
 
+  // Demo: no real answers exist, so explain the page instead of sending the
+  // visitor to /login from the most visible dashboard action.
+  if (isDemoMode) {
+    const demoHomework = demoData?.homework.find((hw) => hw.id === id);
+    const demoStudent = demoData?.students.find((s) => s.id === demoHomework?.student_id);
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <Card className="max-w-md w-full p-6 text-center space-y-3">
+          <ClipboardCheck className="h-10 w-10 text-primary mx-auto" aria-hidden="true" />
+          <h1 className="text-lg font-semibold">{demoHomework?.title || 'Homework review'}</h1>
+          <p className="text-sm text-muted-foreground">
+            In your account this page shows {demoStudent?.name || 'the student'}&apos;s answers next to the correct
+            ones, AI feedback on open and speaking answers, and a comment box for every exercise. One click sends the
+            review back to the student.
+          </p>
+          <p className="text-xs text-muted-foreground">Homework review is not available in demo mode.</p>
+          <div className="flex flex-wrap justify-center gap-2 pt-1">
+            <Button asChild variant="outline">
+              <Link to={demoStudent ? `/student/${demoStudent.id}?tab=library&section=homework` : '/dashboard'}>
+                {demoStudent ? `Back to ${demoStudent.name}` : 'Back to dashboard'}
+              </Link>
+            </Button>
+            <Button onClick={() => navigate('/signup', { state: { from: '/dashboard' } })}>Sign up free</Button>
+          </div>
+        </Card>
+      </div>
+    );
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -247,7 +286,31 @@ export default function HomeworkReviewPage() {
   }
 
   if (!homework) {
-    return null;
+    // Deleted homework, another teacher's homework or a failed request: never a blank page.
+    if (!loadFailed) return null;
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background p-4">
+        <Card className="max-w-md w-full p-6 text-center space-y-3">
+          <FileText className="h-10 w-10 text-muted-foreground mx-auto" aria-hidden="true" />
+          <h1 className="text-lg font-semibold">Homework not available</h1>
+          <p className="text-sm text-muted-foreground">
+            This homework may have been deleted, or the connection failed. Try again or go back to your dashboard.
+          </p>
+          <div className="flex flex-wrap justify-center gap-2 pt-1">
+            <Button
+              variant="outline"
+              onClick={() => {
+                setLoading(true);
+                loadHomework();
+              }}
+            >
+              Try again
+            </Button>
+            <Button onClick={() => navigate('/dashboard')}>Back to dashboard</Button>
+          </div>
+        </Card>
+      </div>
+    );
   }
 
   const studentName = homework.students?.name || 'Unknown Student';

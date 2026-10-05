@@ -7,6 +7,7 @@
 // curriculum, worksheet generation, or any other educational data path.
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { isHomeworkAwaitingReview } from '@/lib/homework/reviewState';
 
 export interface StudentAttentionDots {
   goalsAny: boolean;
@@ -42,7 +43,7 @@ export function useStudentAttentionDots(studentId?: string, teacherId?: string, 
             .select('estimated_level, updated_at').eq('student_id', studentId)
             .not('estimated_level', 'is', null).order('updated_at', { ascending: false }).limit(1),
           supabase.from('homework_assignments')
-            .select('id, completed_at, reviewed_at').eq('student_id', studentId).eq('teacher_id', teacherId),
+            .select('id, completed_at, reviewed_at, completed_by_teacher').eq('student_id', studentId).eq('teacher_id', teacherId),
           supabase.from('flashcard_sets')
             .select('id').eq('student_id', studentId).eq('teacher_id', teacherId).is('deleted_at', null),
         ]);
@@ -64,7 +65,7 @@ export function useStudentAttentionDots(studentId?: string, teacherId?: string, 
         }
         const pathway = pacingPending || levelSuggested;
 
-        const homework = (hw.data || []).some((h: any) => !!h.completed_at && !h.reviewed_at);
+        const homework = (hw.data || []).some(isHomeworkAwaitingReview);
 
         // Student-added flashcards: count any card with created_by_student=true
         // within the teacher's sets for this student.

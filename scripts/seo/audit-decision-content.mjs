@@ -41,7 +41,7 @@ for (const fragment of [
   if (!app.includes(fragment)) failures.push(`App routing missing ${fragment}`);
 }
 
-for (const fragment of ['Worked example', 'not a report of a real student', "'@type': 'Article'", 'reviewedBy', "'@type': 'BreadcrumbList'"]) {
+for (const fragment of ['Worked example', 'not a report of a real student', "'@type': 'Article'", "'@type': 'BreadcrumbList'"]) {
   if (!casePage.includes(fragment)) failures.push(`Worked example page missing ${fragment}`);
 }
 

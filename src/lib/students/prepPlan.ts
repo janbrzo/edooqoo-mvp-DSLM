@@ -13,6 +13,7 @@
  */
 
 import { formatGoalLabel } from '@/constants/studentGoals';
+import { FIELD_LIMITS } from '@/components/WorksheetForm/constants';
 import type { WorksheetSuggestion } from '@/types/studentProgress';
 
 /** Superset of `WorksheetSuggestion` as returned by `useFutureTimeline`. */
@@ -37,6 +38,8 @@ export interface PrepSuggestion {
 }
 
 export const RATIONALE_MAX_LEN = 160;
+/** The fallback topic lands in the form's Lesson topic field, so it obeys that field's budget. */
+export const PREP_TOPIC_MAX_LEN = FIELD_LIMITS.lessonTopic;
 export const FALLBACK_TOPIC = 'General practice';
 export const NO_SIGNAL_RATIONALE =
   'No signals yet: this is a general practice suggestion.';
@@ -115,7 +118,7 @@ export function selectPrepSuggestion(
 
   return {
     id: null,
-    topic: focus || goalLabel || FALLBACK_TOPIC,
+    topic: clampTopic(focus || goalLabel) || FALLBACK_TOPIC,
     goal: goalLabel,
     additionalInfo: '',
     grammarFocus: '',
@@ -124,6 +127,17 @@ export function selectPrepSuggestion(
     rationale: null,
     source: 'fallback',
   };
+}
+
+/**
+ * Fit a generator input into the Lesson topic budget on a word boundary.
+ * Never appends an ellipsis: this value is sent to the generator, not displayed.
+ */
+function clampTopic(raw: string): string {
+  if (raw.length <= PREP_TOPIC_MAX_LEN) return raw;
+  const slice = raw.slice(0, PREP_TOPIC_MAX_LEN);
+  const lastSpace = slice.lastIndexOf(' ');
+  return (lastSpace > PREP_TOPIC_MAX_LEN / 2 ? slice.slice(0, lastSpace) : slice).trimEnd();
 }
 
 /** Trim on a word boundary, appending an ellipsis when anything was cut. */

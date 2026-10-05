@@ -120,8 +120,8 @@ async function auditUrl(url) {
         const titleMatch = html.match(/<title[^>]*>([^<]*)<\/title>/i);
         row.title = titleMatch ? titleMatch[1].trim().slice(0, 200) : '';
 
-        const descMatch = html.match(/<meta[^>]+name=["']description["'][^>]*content=["']([^"']*)["']/i);
-        row.meta_description_len = descMatch ? descMatch[1].length : 0;
+        const descMatch = html.match(/<meta[^>]+name=["']description["'][^>]*content=(["'])(.*?)\1/i);
+        row.meta_description_len = descMatch ? descMatch[2].length : 0;
 
         const canonMatch = html.match(/<link[^>]+rel=["']canonical["'][^>]*href=["']([^"']+)["']/i);
         row.canonical = canonMatch ? canonMatch[1] : '';

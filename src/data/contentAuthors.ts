@@ -9,8 +9,8 @@ export const CONTENT_AUTHORS = {
   martha: {
     name: 'Martha',
     path: '/authors/martha',
-    role: 'ESL Methodology Reviewer',
-    scope: 'Adult 1:1 lesson logic, task relevance, instructional clarity, and avoidance of generic school-like material.',
-    bio: 'Martha has 10 years of ESL experience and reviews strategic Edooqoo content against adult-learning and one-to-one teaching criteria.',
+    role: 'ESL quality benchmark for adult 1:1 teaching',
+    scope: 'The adult one-to-one quality standard Edooqoo is built against: task relevance, instructional clarity, and avoiding generic or school-like material.',
+    bio: 'Martha has 10 years of ESL experience. Edooqoo is built with her as the quality benchmark for adult one-to-one teaching. She does not review or approve individual blog posts or articles.',
   },
 } as const;

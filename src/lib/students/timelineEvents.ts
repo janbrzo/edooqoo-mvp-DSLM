@@ -10,6 +10,12 @@
  * No React, no Supabase, no globals; every rule below is unit-testable.
  */
 
+import {
+  hasStudentReturnedHomework,
+  homeworkReviewPath,
+  isHomeworkAwaitingReview,
+} from '../homework/reviewState';
+
 export type TimelineEventType =
   | 'lesson'
   | 'worksheet'
@@ -110,6 +116,7 @@ export interface TimelineHomeworkSource {
   title?: string | null;
   created_at: string | null;
   completed_at?: string | null;
+  reviewed_at?: string | null;
   completed_by_teacher?: boolean | null;
 }
 
@@ -250,7 +257,7 @@ export function buildTimelineEvents(input: TimelineSourceData): TimelineEvent[] 
     }
 
     if (isValidIso(hw.completed_at)) {
-      const needsAction = hw.completed_by_teacher !== true;
+      const needsAction = isHomeworkAwaitingReview(hw);
       events.push({
         id: `homework_returned:${hw.id}`,
         type: 'homework_returned',
@@ -258,7 +265,9 @@ export function buildTimelineEvents(input: TimelineSourceData): TimelineEvent[] 
         title: `Homework returned: ${label}`,
         subtitle: needsAction ? 'Waiting for your review' : 'Reviewed',
         needsAction,
-        href: '?tab=homework',
+        // Student returns open the teacher review page (answers, AI feedback,
+        // comments); teacher-marked completion has nothing to review.
+        href: hasStudentReturnedHomework(hw) ? homeworkReviewPath(hw.id) : '?tab=homework',
         ...(needsAction ? { actionLabel: 'Review' } : {}),
       });
     }

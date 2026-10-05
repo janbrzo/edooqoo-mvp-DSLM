@@ -462,7 +462,7 @@ export default function WorksheetForm({
   useEffect(() => {
     if (isInitialLoad) {
       const matchingSet = getSuggestionSetMatchingPlaceholder(currentPlaceholders);
-      const randomSets = getRandomSuggestionSets(1);
+      const randomSets = getRandomSuggestionSets(1, matchingSet ? [matchingSet.id] : []);
       if (matchingSet) {
         setCurrentSuggestions([matchingSet, randomSets[0]]);
       } else {

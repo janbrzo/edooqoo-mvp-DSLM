@@ -2,6 +2,7 @@ import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { AuthenticatedPageShell } from '@/components/AuthenticatedPageShell';
 import { useNavigate } from 'react-router-dom';
 import { useAuthFlow } from '@/hooks/useAuthFlow';
+import { useTeacherAuthRedirect } from '@/hooks/useTeacherAuthRedirect';
 import { useTokenSystem } from '@/hooks/useTokenSystem';
 import StickyNav from '@/components/landing/StickyNav';
 import { useCalendarSettings } from '@/hooks/useCalendarSettings';
@@ -51,9 +52,7 @@ const CalendarSettingsPage = () => {
   const { tokenLeft } = useTokenSystem(user?.id);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (!authLoading && !isRegisteredUser) navigate('/login');
-  }, [authLoading, isRegisteredUser, navigate]);
+  useTeacherAuthRedirect(authLoading, !!isRegisteredUser);
 
   const { settings, loading, updateSettings, generatePublicToken } = useCalendarSettings(user?.id);
   const { vacations, addVacation, removeVacation } = useCalendarVacations(user?.id);

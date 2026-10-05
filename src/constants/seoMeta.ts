@@ -42,9 +42,9 @@ export const SEO_META = {
     path: "/blog/english-games-for-learners",
   },
   eslGamesForTeachers: {
-    title: "ESL Games for Teachers: 15 Tested Activities",
+    title: "ESL Games for Teachers: 15 Activities for Adult Learners",
     description:
-      "15 ESL games tested by Martha (10 yrs ESL). Speaking, grammar, vocab: each game pairs with an AI-generated Edooqoo worksheet.",
+      "15 ESL games designed with Martha's criteria (10 yrs ESL). Speaking, grammar, vocab: each game pairs with an AI-generated Edooqoo worksheet.",
     path: "/blog/esl-games-for-teachers",
   },
   teachEnglishOnlineGuide: {

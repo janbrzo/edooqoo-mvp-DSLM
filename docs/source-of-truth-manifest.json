@@ -22,7 +22,7 @@
     "contextModules": 1,
     "serviceModules": 11,
     "edgeFunctions": 81,
-    "typedTables": 61,
+    "typedTables": 62,
     "typedRpcs": 86,
     "migrationIndexes": 19
   },
@@ -657,6 +657,7 @@
       ],
       "navigateTargets": [
         "/",
+        "/login",
         "/worksheet-expired"
       ]
     },
@@ -756,17 +757,21 @@
         "fetchTargets": []
       },
       "hooks": [
+        "useAuthFlow",
         "useCallback",
+        "useDemoContext",
         "useEffect",
         "useHardLightSurface",
         "useNavigate",
         "useParams",
-        "useState"
+        "useQueryClient",
+        "useState",
+        "useTeacherAuthRedirect"
       ],
       "userActions": [],
       "navigateTargets": [
         "/dashboard",
-        "/login"
+        "/signup"
       ]
     },
     {
@@ -1083,6 +1088,7 @@
         "useNavigate",
         "useState",
         "useStudents",
+        "useTeacherAuthRedirect",
         "useTokenSystem"
       ],
       "userActions": [
@@ -1106,8 +1112,7 @@
         "/calendar/logs",
         "/calendar/settings",
         "/calendar/settings#gcal",
-        "/dashboard",
-        "/login"
+        "/dashboard"
       ]
     },
     {
@@ -1147,6 +1152,7 @@
         "useNavigate",
         "useRef",
         "useState",
+        "useTeacherAuthRedirect",
         "useTokenSystem"
       ],
       "userActions": [
@@ -1155,8 +1161,7 @@
         "handleDisconnectGcal"
       ],
       "navigateTargets": [
-        "/calendar",
-        "/login"
+        "/calendar"
       ]
     },
     {
@@ -1186,15 +1191,14 @@
         "useEffect",
         "useNavigate",
         "useState",
+        "useTeacherAuthRedirect",
         "useTokenSystem"
       ],
       "userActions": [
         "handleCreate",
         "handleRevoke"
       ],
-      "navigateTargets": [
-        "/login"
-      ]
+      "navigateTargets": []
     },
     {
       "path": "/calendar/logs",
@@ -1220,12 +1224,12 @@
         "useMemo",
         "useNavigate",
         "useState",
-        "useStudents"
+        "useStudents",
+        "useTeacherAuthRedirect"
       ],
       "userActions": [],
       "navigateTargets": [
-        "/calendar",
-        "/login"
+        "/calendar"
       ]
     },
     {
@@ -1715,7 +1719,7 @@
       "redirectTo": null,
       "crawl": {
         "robotsBlocked": false,
-        "sitemapMatches": 35,
+        "sitemapMatches": 8,
         "status": "indexable-generated-family"
       },
       "dataDependencies": {
@@ -1738,7 +1742,7 @@
       "redirectTo": null,
       "crawl": {
         "robotsBlocked": false,
-        "sitemapMatches": 50,
+        "sitemapMatches": 5,
         "status": "indexable-generated-family"
       },
       "dataDependencies": {
@@ -1761,7 +1765,7 @@
       "redirectTo": null,
       "crawl": {
         "robotsBlocked": false,
-        "sitemapMatches": 10,
+        "sitemapMatches": 3,
         "status": "indexable-generated-family"
       },
       "dataDependencies": {
@@ -3596,6 +3600,7 @@
         "useNavigate",
         "useState",
         "useStudents",
+        "useTeacherAuthRedirect",
         "useTokenSystem"
       ],
       "actions": [
@@ -3619,8 +3624,7 @@
         "/calendar/logs",
         "/calendar/settings",
         "/calendar/settings#gcal",
-        "/dashboard",
-        "/login"
+        "/dashboard"
       ],
       "dataDependencies": {
         "tables": [
@@ -3676,8 +3680,7 @@
           "/calendar/logs",
           "/calendar/settings",
           "/calendar/settings#gcal",
-          "/dashboard",
-          "/login"
+          "/dashboard"
         ]
       },
       "routes": [
@@ -3734,6 +3737,7 @@
         "useNavigate",
         "useRef",
         "useState",
+        "useTeacherAuthRedirect",
         "useTokenSystem"
       ],
       "actions": [
@@ -3742,8 +3746,7 @@
         "handleDisconnectGcal"
       ],
       "navigateTargets": [
-        "/calendar",
-        "/login"
+        "/calendar"
       ],
       "dataDependencies": {
         "tables": [
@@ -3791,8 +3794,7 @@
           "handleDisconnectGcal"
         ],
         "navigationTargets": [
-          "/calendar",
-          "/login"
+          "/calendar"
         ]
       },
       "routes": [
@@ -4541,20 +4543,29 @@
           "value": "savingComment",
           "setter": "setSavingComment",
           "initial": "null"
+        },
+        {
+          "value": "loadFailed",
+          "setter": "setLoadFailed",
+          "initial": "false"
         }
       ],
       "hooks": [
+        "useAuthFlow",
         "useCallback",
+        "useDemoContext",
         "useEffect",
         "useHardLightSurface",
         "useNavigate",
         "useParams",
-        "useState"
+        "useQueryClient",
+        "useState",
+        "useTeacherAuthRedirect"
       ],
       "actions": [],
       "navigateTargets": [
         "/dashboard",
-        "/login"
+        "/signup"
       ],
       "dataDependencies": {
         "tables": [
@@ -4570,30 +4581,32 @@
       },
       "storage": [],
       "userFacingText": [
+        "&apos;s answers next to the correct ones, AI feedback on open and speaking answers, and a comment box for every exercise. One click sends the review back to the student.",
         "Add feedback for the student about this exercise...",
         "Back to Student",
+        "Back to dashboard",
         "Deadline:",
         "Exercises answered:",
+        "Homework not available",
+        "Homework review is not available in demo mode.",
+        "In your account this page shows",
         "Needs Review",
         "No student answer yet",
         "Review Sent!",
         "Reviewed",
         "Save Comment",
         "Send Review to Student",
+        "Sign up free",
         "Student has submitted",
         "Student:",
         "Submitted:",
-        "View as Student",
-        "Waiting for Student",
-        "Waiting for student to submit their answers...",
-        "Your Comment for Exercise",
-        "views"
+        "This homework may have been deleted, or the connection failed. Try again or go back to your dashboard."
       ],
       "userFacingBehavior": {
         "actionHandlers": [],
         "navigationTargets": [
           "/dashboard",
-          "/login"
+          "/signup"
         ]
       },
       "routes": [
@@ -7745,7 +7758,6 @@
       },
       "storage": [],
       "userFacingText": [
-        ", ESL Methodology Reviewer, 10 years of experience",
         "12 constructed cases",
         "Blog",
         "Browse worked examples",
@@ -7759,12 +7771,13 @@
         "Open the decision tool",
         "Read the full decision",
         "Repair when a missing prerequisite or recurring error blocks the goal. Continue when the learner has partial control, needs prompts, or the evidence is not strong enough. Advance only after accurate independent use without an established recurring target error.",
-        "Reviewed by",
         "The decision rule",
         "The local tool converts seven teaching signals into a transparent recommendation, objective, activity structure, worksheet brief, and next evidence criteria.",
         "Updated June 15, 2026",
         "Use evidence, then make one bounded decision",
-        "What Should I Teach Next?"
+        "What Should I Teach Next?",
+        "What Should I Teach Next?: Adult 1:1 English Lessons",
+        "Worked example"
       ],
       "userFacingBehavior": {
         "actionHandlers": [],
@@ -7805,7 +7818,6 @@
       },
       "storage": [],
       "userFacingText": [
-        ", ESL Methodology Reviewer, 10 years of experience",
         "Activity sequence",
         "All worked examples",
         "Breadcrumb",
@@ -7815,7 +7827,6 @@
         "Evidence to collect next",
         "Lesson objective",
         "Published and updated June 15, 2026",
-        "Reviewed by",
         "Student context",
         "This is a constructed teaching example, not a report of a real student or a claimed learning outcome.",
         "Worked example"
@@ -7925,6 +7936,7 @@
       ],
       "navigateTargets": [
         "/",
+        "/login",
         "/worksheet-expired"
       ],
       "dataDependencies": {
@@ -7946,6 +7958,7 @@
         ],
         "navigationTargets": [
           "/",
+          "/login",
           "/worksheet-expired"
         ]
       },
@@ -7976,16 +7989,12 @@
       },
       "storage": [],
       "userFacingText": [
-        "Authorship boundary",
         "Blog",
         "Editorial profile",
         "Editorial responsibility",
         "Edooqoo",
-        "Jan authors product, workflow, and operating-system explanations. ESL methodology claims in strategic teaching content are reviewed separately by Martha.",
         "Profile",
-        "Read the What Should I Teach Next? resource hub",
-        "Review checks whether advice leads to a specific adult learner performance, uses current evidence, preserves teacher judgment, and avoids generic classroom or school-like tasks.",
-        "Review standard"
+        "Read the What Should I Teach Next? resource hub"
       ],
       "userFacingBehavior": {
         "actionHandlers": [],
@@ -8551,7 +8560,7 @@
         "12 games for learners",
         "ESL worksheets generator",
         "How to time games in a 60-minute lesson",
-        "Martha (10 years adult ESL, our internal quality benchmark) has one rule: if a game would make a 40-year-old CFO feel patronized, do not run it. That eliminates 80% of the games on the typical ESL-resources internet. What is left is short, cognitively engaging, and produces measurable language output.",
+        "Martha (10 years adult ESL, our internal quality benchmark) has one rule: if a game would make a 40-year-old CFO feel patronized, do not run it. That rules out many of the games on typical ESL resource lists. What is left is short, cognitively engaging, and produces measurable language output.",
         "Martha's rule for adult ESL games",
         "Pair every game with a follow-up worksheet. The game produces fluency; the worksheet locks in accuracy. After Idiom Charades, assign a 10-minute Idiom Matching exercise from Edooqoo as homework. Objective answers can be checked automatically, and teacher-reviewed results can inform future prep. Three lessons later, the same 8 idioms can reappear in a Reading Comprehension because the teacher uses vocabulary signals in the DSLM layer.",
         "Want the matching worksheet for any game on this list? Create it through Edooqoo's structured worksheet workflow, see",
@@ -8907,15 +8916,14 @@
         "useEffect",
         "useNavigate",
         "useState",
+        "useTeacherAuthRedirect",
         "useTokenSystem"
       ],
       "actions": [
         "handleCreate",
         "handleRevoke"
       ],
-      "navigateTargets": [
-        "/login"
-      ],
+      "navigateTargets": [],
       "dataDependencies": {
         "tables": [
           "mcp_tokens"
@@ -8955,9 +8963,7 @@
           "handleCreate",
           "handleRevoke"
         ],
-        "navigationTargets": [
-          "/login"
-        ]
+        "navigationTargets": []
       },
       "routes": [
         "/settings/mcp"
@@ -12478,6 +12484,7 @@
       ],
       "hooks": [
         "useCurriculumPhases",
+        "useDemoContext",
         "useEffect",
         "useFutureTimeline",
         "useMemo",
@@ -13598,12 +13605,12 @@
         "useMemo",
         "useNavigate",
         "useState",
-        "useStudents"
+        "useStudents",
+        "useTeacherAuthRedirect"
       ],
       "actions": [],
       "navigateTargets": [
-        "/calendar",
-        "/login"
+        "/calendar"
       ],
       "dataDependencies": {
         "tables": [],
@@ -13628,8 +13635,7 @@
       "userFacingBehavior": {
         "actionHandlers": [],
         "navigationTargets": [
-          "/calendar",
-          "/login"
+          "/calendar"
         ]
       }
     },
@@ -51121,11 +51127,78 @@
         }
       },
       {
+        "name": "model_audit_reports",
+        "fields": [
+          {
+            "name": "advisor",
+            "type": "Json | null",
+            "optional": false
+          },
+          {
+            "name": "created_at",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "deprecation_scan",
+            "type": "Json | null",
+            "optional": false
+          },
+          {
+            "name": "id",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "lifecycle",
+            "type": "Json",
+            "optional": false
+          },
+          {
+            "name": "mode",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "probes",
+            "type": "Json",
+            "optional": false
+          },
+          {
+            "name": "summary",
+            "type": "Json",
+            "optional": false
+          },
+          {
+            "name": "unregistered",
+            "type": "Json",
+            "optional": false
+          }
+        ],
+        "relationships": [],
+        "featureOwnership": {
+          "clientFiles": [],
+          "edgeFunctions": [
+            "audit-llm-models"
+          ]
+        }
+      },
+      {
         "name": "model_health_checks",
         "fields": [
           {
+            "name": "check_kind",
+            "type": "string | null",
+            "optional": false
+          },
+          {
             "name": "checked_at",
             "type": "string",
+            "optional": false
+          },
+          {
+            "name": "days_to_shutdown",
+            "type": "number | null",
             "optional": false
           },
           {
@@ -51165,6 +51238,11 @@
           },
           {
             "name": "purpose",
+            "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "shutdown_date",
             "type": "string | null",
             "optional": false
           },

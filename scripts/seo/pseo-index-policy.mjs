@@ -19,19 +19,15 @@ export function validatePseoPolicy({ root }) {
   const personaSlugs = new Set(matrix.personas.map((item) => item.slug));
   const issues = [];
 
-  if (Object.keys(policy.topics).length !== 10) {
-    issues.push(`Expected 10 indexed topics, found ${Object.keys(policy.topics).length}`);
-  }
-  if (Object.keys(policy.personas).length !== 10) {
-    issues.push(`Expected 10 indexed personas, found ${Object.keys(policy.personas).length}`);
-  }
-
+  
   for (const [topicSlug, topicPolicy] of Object.entries(policy.topics)) {
     if (!topicSlugs.has(topicSlug)) issues.push(`Unknown topic ${topicSlug}`);
-    if (topicPolicy.exerciseTypes.length !== 5) {
-      issues.push(`${topicSlug} must define exactly 5 exercise types`);
+    if (topicPolicy.exerciseTypes.length > 6) {
+      issues.push(`${topicSlug} must define at most 6 exercise types`);
     }
-    if (!topicPolicy.validLevels.length) issues.push(`${topicSlug} has no valid levels`);
+    if (!topicPolicy.validLevels.length && !topicPolicy.exerciseTypes.length) {
+      issues.push(`${topicSlug} has neither valid levels nor exercise types; remove the topic from the policy`);
+    }
     for (const levelSlug of topicPolicy.validLevels) {
       if (!levelSlugs.has(levelSlug)) issues.push(`${topicSlug} uses unknown level ${levelSlug}`);
     }

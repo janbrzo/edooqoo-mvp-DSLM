@@ -17,9 +17,9 @@ Primary citation URLs: https://edooqoo.com/one-minute-prep, https://edooqoo.com/
 
 ## Content Registry
 Source: https://edooqoo.com/sitemap.xml and the generated repository inventory at docs/seo/content-registry.generated.json.
-States: keep=93, improve=0, merge=45, retire=0, hold=459, noindex=1353.
+States: keep=93, improve=0, merge=83, retire=0, hold=380, noindex=1432.
 Indexable states: keep, improve, hold. Merge and retire require measured GSC or backlink evidence.
-Programmatic SEO policy: 95 indexable routes (35 topic-level, 50 exercise-topic, 10 personas); 1330 other combinations remain accessible with noindex,follow and are excluded from sitemap and prerender.
+Programmatic SEO policy: 16 indexable routes (8 topic-level, 5 exercise-topic, 3 personas); 1409 other combinations remain accessible with noindex,follow and are excluded from sitemap and prerender.
 / | Tutor Business and Tools | status: keep
 /about | Tutor Business and Tools | status: keep
 /adult-business-english-lesson-prep.html | Adult and Business English | status: keep
@@ -403,6 +403,7 @@ SEO x1000 plan completion, audit-x1000-plan-completion, Cloudflare Worker deploy
 - https://edooqoo.com/blog/transitioning-between-tasks-in-adult-one-to-one-english-lessons.html - Transitioning Between Tasks in Adult 1:1 English Lessons. Transitioning Between Tasks In Adult 1:1 English Lessons. Prepare the follow-up homework in one click.
 - https://edooqoo.com/blog/private-english-tutor-tool-stack.html - Private English Tutor Tool Stack. Private English Tutor Tool Stack. Build the exercise for your student level.
 - https://edooqoo.com/blog/adult-vocabulary-retrieval-practice-not-games.html - Adult Vocabulary Retrieval Practice, Not Games. Adult Vocabulary Retrieval Practice Not Games. Generate a matching worksheet in one minute.
+- https://edooqoo.com/blog/lexical-approach-language-teaching.html - Lexical Approach Language Teaching: Guide for 1:1 Tutors. Lexical Approach Language Teaching. Generate a matching worksheet in one minute.
 - https://edooqoo.com/blog/adult-esl-student-profile-lesson-planning.html - Adult ESL Student Profile Lesson Planning: Tutor Playbook. Adult ESL Student Profile Lesson Planning. Turn it into an editable task for your next lesson.
 - https://edooqoo.com/blog/ai-generated-listening-exercises-esl.html - AI Generated Listening Exercises ESL: A Tutor's Checklist. AI Generated Listening Exercises ESL. Build the exercise for your student level.
 - https://edooqoo.com/blog/ai-homework-grading-for-english-teachers.html - AI Homework Grading For English Teachers: Tutor Playbook. AI Homework Grading For English Teachers for professional adult learners: choices, sequence and review. Build the exercise for your student level.
@@ -540,7 +541,7 @@ SEO x1000 plan completion, audit-x1000-plan-completion, Cloudflare Worker deploy
 - Stable conceptual documentation: `docs/llm-context.md`.
 - Exhaustive machine-readable inventory: `docs/source-of-truth-manifest.json`.
 - Regenerate after syncing main with `npm run docs:audit-source`.
-- Current audited counts: 94 routes, 88 page modules, 379 component TSX modules, 92 hook modules, 11 service modules, 81 Edge Functions, 61 typed tables, 86 typed RPCs, and 19 migration indexes.
+- Current audited counts: 94 routes, 88 page modules, 379 component TSX modules, 92 hook modules, 11 service modules, 81 Edge Functions, 62 typed tables, 86 typed RPCs, and 19 migration indexes.
 - Manifest collections: `routes`, `pages`, `components`, `state`, `api`, `database`, and `integrations`.
 - Protected worksheet-generation prompt bodies are excluded. Do not infer or reproduce them from the manifest.
 
