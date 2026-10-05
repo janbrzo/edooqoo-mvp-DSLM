@@ -92,7 +92,7 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
     }
   }, [pendingAddGoal, onConsumePendingAddGoal]);
 
-  // v6.9.41 P2 — also open via window event so late mounts (LazySection) still
+  // v6.9.41 P2 — also open via window event so late mounts still
   // catch the request after focus=add-goal-modal has already been consumed.
   React.useEffect(() => {
     if (!listenForAddGoalEvents) return;
@@ -251,7 +251,6 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
         icon={StickyNote}
         count={additionalGoals.length + achievedGoals.length + archivedGoals.length + goalNotesEntries.length}
         description="Side objectives, achieved and archived goals, and goal notes"
-        alsoOpenFor={['goals-additional', 'goals-achieved', 'goals-archived', 'goals-notes']}
         forceMountContent
         className="border-dashed"
       >

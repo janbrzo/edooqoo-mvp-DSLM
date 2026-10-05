@@ -176,7 +176,6 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
         icon={StickyNote}
         count={knowledge.totalCount}
         badge={personalNotes.length > 0 ? `${personalNotes.length} personal` : undefined}
-        alsoOpenFor={['profile-personal']}
       >
         <StudentKnowledgeSection
           studentId={studentId}
