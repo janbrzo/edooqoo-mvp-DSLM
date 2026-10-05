@@ -7,12 +7,12 @@ import { devWarn } from '@/utils/logger';
 import type { Tables } from '@/integrations/supabase/types';
 
 /**
- * useNextUpStudents — data layer for the "Next up" zone of the Today dashboard.
+ * useNextUpStudents: data layer for the "Next up" zone of the Today dashboard.
  *
  * For each student resolves (a) the next booked lesson within 7 days and
  * (b) the most recent DSLM focus signal (Skill Assessment entry whose
  * `metadata.skill_subtype` is weakness / mistake / practice).
- * Two batched queries — no per-student fetching.
+ * Two batched queries; no per-student fetching.
  *
  * Demo mode: derives everything from `demoData`, zero Supabase calls.
  * Any query error degrades to an empty list (dashboard must never crash
@@ -63,7 +63,7 @@ function toFocusText(row: NextUpSignalRow): string | null {
 }
 
 /**
- * Pure aggregation — exported for unit tests and demo reuse.
+ * Pure aggregation: exported for unit tests and demo reuse.
  * `slots` must be sorted by slot_date, start_time ascending;
  * `signals` must be sorted by created_at descending.
  */

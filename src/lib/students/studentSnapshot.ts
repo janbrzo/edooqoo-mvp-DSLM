@@ -1,12 +1,12 @@
 /**
- * studentSnapshot — pure data rules for the Student Workspace frame (v6.9.111, M3).
+ * studentSnapshot: pure data rules for the Student Workspace frame (v6.9.111, M3).
  *
  * `StudentHeaderBar` and `StudentSnapshotPanel` must stay presentational, so
  * every decision about *what* the teacher sees lives here: which knowledge
  * entries count as focus areas, how they are ordered and trimmed, and how a
  * booked lesson is phrased.
  *
- * No React, no Supabase, no globals — every rule below is unit-testable.
+ * No React, no Supabase, no globals; every rule below is unit-testable.
  */
 
 import type { StudentKnowledgeEntry } from '@/types/studentKnowledge';
@@ -51,7 +51,7 @@ export function selectFocusAreas(
 }
 
 /**
- * The same focus areas as `selectFocusAreas`, untrimmed — the input for a
+ * The same focus areas as `selectFocusAreas`, untrimmed: the input for a
  * generated lesson topic, which must never carry a display ellipsis.
  *
  * Only active Skill Assessment entries qualify: soft-deleted, outdated and
@@ -107,7 +107,7 @@ function sameDay(a: Date, b: Date): boolean {
   );
 }
 
-/** Parse `YYYY-MM-DD` as a local calendar day — never through UTC. */
+/** Parse `YYYY-MM-DD` as a local calendar day, never through UTC. */
 function parseLocalDate(date: string): Date | null {
   const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date.trim());
   if (!match) return null;
@@ -118,7 +118,7 @@ function parseLocalDate(date: string): Date | null {
 
 /**
  * `Today 18:00` / `Tomorrow 18:00` / `Tue 18:00`.
- * Returns `null` when there is no booked lesson or the row is malformed —
+ * Returns `null` when there is no booked lesson or the row is malformed, 
  * the header then renders "No lesson booked".
  */
 export function formatNextLessonLabel(

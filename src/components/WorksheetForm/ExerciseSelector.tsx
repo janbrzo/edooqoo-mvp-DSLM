@@ -568,7 +568,7 @@ export default function ExerciseSelector({
         } else if (selectionMode === 'random') {
           onChange(generateRandomExercises());
         }
-        // v4.6: NEVER reset for 'smart' — Smart writes its AI result and must persist.
+        // v4.6: NEVER reset for 'smart', Smart writes its AI result and must persist.
         // Previously this branch implicitly fell through and Smart selections survived,
         // but the parent used to flip the mode back to 'manual' immediately, which
         // re-triggered this effect and clobbered the AI result with manualDefaults.
@@ -580,7 +580,7 @@ export default function ExerciseSelector({
   }, [lessonTime, selectionMode, generateRandomExercises, onChange, manualDefaults, selectedExercises.length]);
 
   const handleExerciseToggle = useCallback((exerciseId: string, checked: boolean) => {
-    // v4.6: allow editing in both 'manual' AND 'smart' — teacher can always
+    // v4.6: allow editing in both 'manual' AND 'smart', teacher can always
     // tweak the AI's picks. Random remains read-only (re-roll instead).
     if (selectionMode === 'random') return;
 
@@ -792,7 +792,7 @@ export default function ExerciseSelector({
                     )}
                   </label>
 
-                  {/* V/G Focus toggles — stacked vertically next to Audio/Picture badge to avoid overlap */}
+                  {/* V/G Focus toggles, stacked vertically next to Audio/Picture badge to avoid overlap */}
                   {isSelected && isEditable && (
                     <div className="flex flex-col gap-0.5 flex-shrink-0 ml-auto">
                       <button

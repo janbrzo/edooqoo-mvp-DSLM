@@ -1,4 +1,4 @@
-// recalculate-pacing — v6.3
+// recalculate-pacing: v6.3
 // Computes a fresh DSLM pacing index (0-100). Two modes:
 //   - 'apply'    (default): persists to students.dslm_pacing_mode immediately
 //   - 'proposal': inserts a row into pacing_proposals (status='pending')
@@ -70,7 +70,7 @@ serve(async (req) => {
 
     // v6.3 Deadline-First Override.
     // Scan ALL active goals (main + supporting + additional) and the legacy
-    // students.main_goal_target_date. The shortest effective deadline wins —
+    // students.main_goal_target_date. The shortest effective deadline wins, 
     // a real-world time constraint trumps other signals.
     const { data: progressGoals } = await supabase
       .from('student_progress_goals')
@@ -121,7 +121,7 @@ serve(async (req) => {
     const declining = recent.filter((m: any) => m.trend === 'declining').length;
     if (declining >= 3) { p -= 10; reasoning.push(`${declining}/5 recent skills declining → −10 (consolidate)`); }
 
-    // v6.3 — Behavioral signals from welcome test profile
+    // v6.3: Behavioral signals from welcome test profile
     const { data: profile } = await supabase
       .from('student_learning_profiles' as any)
       .select('behavioral_traits, level_confidence, output_readiness')
@@ -142,7 +142,7 @@ serve(async (req) => {
       if (outR > 75) { p += 5; reasoning.push(`High output readiness ${outR}% → +5`); }
     }
 
-    // v6.3 — Self-Profile signals (Student Hub "Tell us about yourself")
+    // v6.3: Self-Profile signals (Student Hub "Tell us about yourself")
     const { data: selfEntries } = await supabase
       .from('student_knowledge_entries')
       .select('metadata, content')
@@ -153,7 +153,7 @@ serve(async (req) => {
       const f = e?.metadata?.field;
       if (f && sp[f] === undefined) sp[f] = e?.metadata?.raw_value ?? e.content;
     }
-    // v6.8.6 — Self-Profile mapper aligned with src/constants/studentSelfProfile.ts.
+    // v6.8.6: Self-Profile mapper aligned with src/constants/studentSelfProfile.ts.
     // Source of truth = the UI enum. Legacy values from older entries are
     // normalised via alias dictionaries (zero-data-migration backward compat).
     const LEGACY_OBSTACLE_ALIASES: Record<string, string> = {
@@ -207,7 +207,7 @@ serve(async (req) => {
     }
 
     const pacingMode = clamp(p, 0, 100);
-    if (reasoning.length === 0) reasoning.push('No strong signals — defaulting near 50.');
+    if (reasoning.length === 0) reasoning.push('No strong signals: defaulting near 50.');
 
     const currentPacing = Number((student as any).dslm_pacing_mode ?? 50);
 
@@ -229,12 +229,12 @@ serve(async (req) => {
       });
     }
 
-    // proposal mode — dynamic threshold: 3 for goal_added (manual UX-sensitive), 5 for cron
+    // proposal mode: dynamic threshold: 3 for goal_added (manual UX-sensitive), 5 for cron
     const threshold = triggerType === 'goal_added' ? 3 : 5;
     if (Math.abs(pacingMode - currentPacing) < threshold) {
       return new Response(JSON.stringify({
         pacingMode, proposed: pacingMode, current: currentPacing, reasoning, mode: 'proposal', skipped: true,
-        skipReason: `Δ ${Math.abs(pacingMode - currentPacing)} < ${threshold} — no proposal created`,
+        skipReason: `Δ ${Math.abs(pacingMode - currentPacing)} < ${threshold}; no proposal created`,
       }), { headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
 

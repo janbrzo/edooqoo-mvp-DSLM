@@ -1,5 +1,5 @@
 /**
- * CollapsibleSection — compact section wrapper with header trigger.
+ * CollapsibleSection: compact section wrapper with header trigger.
  * Used in Goals/Skills/Profile to densify layout while keeping content discoverable.
  */
 import React, { useEffect, useRef, useState } from 'react';
@@ -35,7 +35,7 @@ export const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
   const [open, setOpen] = useState(defaultOpen);
   const cardRef = useRef<HTMLDivElement>(null);
 
-  // v6.9.13 — open + scroll into view when a sub-nav button targets this section.
+  // v6.9.13: open + scroll into view when a sub-nav button targets this section.
   useEffect(() => {
     if (!id && !alsoOpenFor?.length) return;
     const handler = (e: Event) => {

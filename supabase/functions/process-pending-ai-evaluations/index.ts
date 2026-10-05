@@ -313,7 +313,7 @@ serve(async (req) => {
           const validSkills = nanoSkills.filter((ns: any) => ns && ns.name);
           
           if (validSkills.length === 0) {
-            // No nano_skills — skip (don't create junk question_* metrics)
+            // No nano_skills: skip (don't create junk question_* metrics)
             console.warn(`[process-pending] Question ${qIdx}: no nano_skills, skipping item_evaluation`);
             continue;
           }
@@ -329,7 +329,7 @@ serve(async (req) => {
             } else if ((nsName.includes('.speaking.') || nsName.includes('.sp.')) && hasAudio && e.speaking_score !== undefined) {
               mastery = Math.round(e.speaking_score * 100);
             } else if ((nsName.includes('.speaking.') || nsName.includes('.sp.')) && !hasAudio) {
-              // No audio submitted — don't evaluate speaking skill
+              // No audio submitted, don't evaluate speaking skill
               mastery = -1;
             } else {
               mastery = Math.round((e.quality_score || 0.7) * 100);

@@ -1,4 +1,4 @@
-// v6.9.68 P4 — Subtle "needs review" indicator. Semantic-token only.
+// v6.9.68 P4: Subtle "needs review" indicator. Semantic-token only.
 // Use next to a label/icon to flag pending teacher attention.
 import React from 'react';
 import { cn } from '@/lib/utils';

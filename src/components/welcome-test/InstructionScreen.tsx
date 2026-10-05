@@ -60,7 +60,7 @@ export function InstructionScreen({ totalQuestions, onStart }: InstructionScreen
               <div>
                 <p className="font-medium text-sm">You can pause anytime</p>
                 <p className="text-xs text-muted-foreground">
-                  Your progress is saved automatically. Close the browser and come back later — you'll continue where you left off.
+                  Your progress is saved automatically. Close the browser and come back later; you'll continue where you left off.
                 </p>
               </div>
             </div>

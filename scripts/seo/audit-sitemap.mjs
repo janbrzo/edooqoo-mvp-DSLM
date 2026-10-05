@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Sitemap Audit Script — reusable SEO diagnostic tool.
+ * Sitemap Audit Script, reusable SEO diagnostic tool.
  *
  * USE WHEN:
  *   - Google Search Console reports "Discovered – currently not indexed",

@@ -179,19 +179,19 @@ export function HomeworkSpeakingRecorder({
       setAudioUrl(url); setStatus('done'); onAudioSavedRef.current(url);
       toast.success('Recording saved!');
     } catch (err) {
-      // Keep the recorded blob so the student can retry — never fake a success.
+      // Keep the recorded blob so the student can retry, never fake a success.
       console.error('[HomeworkSpeakingRecorder] Upload failed:', err);
       uploadFailedRef.current = true;
       setStatus('recorded');
       setErrorMsg('Upload failed. Check your connection and tap Save again.');
-      toast.error('Recording not saved — please try again.');
+      toast.error('Recording not saved: please try again.');
     }
 
   }, []); // STABLE - no dependency on onAudioSaved
 
 
   // FIX 1.1: Single ref-based effect for auto-save timer + countdown
-  // Only depends on [status, registryKey] — uploadAndSave is stable (deps=[])
+  // Only depends on [status, registryKey], uploadAndSave is stable (deps=[])
   useEffect(() => {
     // Cleanup previous timers
     if (autoSaveTimerRef.current) { clearTimeout(autoSaveTimerRef.current); autoSaveTimerRef.current = null; }
@@ -202,7 +202,7 @@ export function HomeworkSpeakingRecorder({
         (window as any).__pendingSpeakingRecordings?.set(registryKey, { blob: blobRef.current, save: uploadAndSave });
       }
 
-      // After a failed upload the student retries manually — do not loop the timer.
+      // After a failed upload the student retries manually, do not loop the timer.
       if (uploadFailedRef.current) return;
 
       

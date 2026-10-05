@@ -1,5 +1,5 @@
 /**
- * GoalCard — extracted from StudentProgressTab for reuse in DSLM GoalsView.
+ * GoalCard: extracted from StudentProgressTab for reuse in DSLM GoalsView.
  * v4.2: shows deadline badge ("Due in X days") when goal.target_date is set.
  */
 import React from 'react';

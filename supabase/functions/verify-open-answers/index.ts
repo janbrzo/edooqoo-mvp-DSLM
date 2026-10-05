@@ -1,6 +1,7 @@
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { chatCompletion } from "../_shared/aiChat.ts";
+import { NO_EM_DASH_RULE } from "../_shared/writingStyle.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -140,7 +141,7 @@ Return exactly ${answers.length} evaluation objects in a JSON array:
 
     const aiResponse = await chatCompletion({
       messages: [
-        { role: "system", content: systemPrompt },
+        { role: "system", content: systemPrompt + NO_EM_DASH_RULE },
         { role: "user", content: userPrompt },
       ],
       temperature: 0.3,

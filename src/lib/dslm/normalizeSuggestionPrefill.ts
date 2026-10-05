@@ -1,6 +1,6 @@
 import { devWarn } from '@/utils/logger';
 /**
- * normalizeSuggestionPrefill — single source of truth for converting a DSLM
+ * normalizeSuggestionPrefill: single source of truth for converting a DSLM
  * suggestion (next step / phase step) or a persisted draft into a coherent
  * WorksheetForm state: { selectedExercises, selectedMediaTypes, exerciseFocusMap }.
  *

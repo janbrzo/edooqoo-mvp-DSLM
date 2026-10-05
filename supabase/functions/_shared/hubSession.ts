@@ -1,11 +1,11 @@
-// hubSession — short-lived proof that a Student Hub visitor already supplied
+// hubSession: short-lived proof that a Student Hub visitor already supplied
 // the correct hub password for (teacherId, email).
 //
 // Before this, `get-student-hub-data`'s `check_password_required` /
 // `verify_password` actions gated only the frontend UI: the data-returning
 // default action, and the `set_password` / `remove_password` /
 // `get_gcal_status` / `disconnect_gcal` / `update_gcal_settings` /
-// `sync_all_lessons_gcal` actions, accepted just `{ token, email }` — the
+// `sync_all_lessons_gcal` actions, accepted just `{ token, email }`; the
 // same public token + email pair that gets a student INTO the password
 // screen in the first place. So a password on a Hub protected nothing once
 // the request went straight to the API: any caller who knew (or guessed) a
@@ -24,7 +24,7 @@
 // key, so deriving a key from it here does not weaken the service role key.
 
 const encoder = new TextEncoder();
-const SESSION_TTL_MS = 12 * 60 * 60 * 1000; // 12h — a generous single Hub visit
+const SESSION_TTL_MS = 12 * 60 * 60 * 1000; // 12h; a generous single Hub visit
 
 async function hmacKey(): Promise<CryptoKey> {
   const secret = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');

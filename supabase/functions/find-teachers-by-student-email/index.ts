@@ -34,7 +34,7 @@ Deno.serve(async (req) => {
 
     if (studentsError) throw studentsError;
     if (!students || students.length === 0) {
-      // P1.6 — diagnostic reason instead of a blind empty list
+      // P1.6: diagnostic reason instead of a blind empty list
       return new Response(JSON.stringify({ teachers: [], reason: 'email_not_found' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -58,7 +58,7 @@ Deno.serve(async (req) => {
       if (s.hub_token) tokenByTeacher.set(s.teacher_id, s.hub_token);
     }
 
-    // P1.6 — auto-provision a hub_token for teachers that don't have one yet,
+    // P1.6: auto-provision a hub_token for teachers that don't have one yet,
     // instead of silently hiding them from the student ("No teachers found").
     const provisionFailures: string[] = [];
     for (const teacherId of teacherIds) {

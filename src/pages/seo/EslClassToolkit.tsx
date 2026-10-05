@@ -5,7 +5,7 @@ import SeoLandingLayout from '@/components/seo/SeoLandingLayout';
 const collectionLd = {
   '@context': 'https://schema.org',
   '@type': 'CollectionPage',
-  name: 'ESL Class Toolkit — Materials, Plans, Activities',
+  name: 'ESL Class Toolkit: Materials, Plans, Activities',
   description: 'Complete ESL class toolkit: lesson plan templates, AI worksheet generator, placement test, flashcards. Designed for 1-on-1 and small group adult classes.',
   url: 'https://edooqoo.com/resources/esl-class-toolkit',
 };
@@ -13,15 +13,15 @@ const collectionLd = {
 const EslClassToolkit = () => (
   <SeoLandingLayout
     seo={{
-      title: 'ESL Class Toolkit — Materials, Plans, Activities',
+      title: 'ESL Class Toolkit: Materials, Plans, Activities',
       description: 'Complete ESL class toolkit: lesson plan templates, worksheet generator, placement test, flashcards. For 1-on-1 and small group classes.',
       path: '/resources/esl-class-toolkit',
       extraJsonLd: collectionLd,
     }}
-    h1="ESL Class Toolkit — Materials, Plans, Activities"
+    h1="ESL Class Toolkit: Materials, Plans, Activities"
     lead="Everything you need to run an ESL class for adult learners: placement test, lesson plan templates, worksheet generator, homework engine, vocabulary flashcards, and progress tracking. Designed for 1-on-1 and small groups (2-6 learners)."
     problems={[
-      'Free ESL resource sites give you isolated PDFs with no system — no placement test, no progress tracking, no homework follow-up.',
+      'Free ESL resource sites give you isolated PDFs with no system; no placement test, no progress tracking, no homework follow-up.',
       'Paid ESL coursebooks (Headway, Outcomes, Business Result) lock you into a fixed syllabus that does not adapt to individual learner needs.',
       'Building your own ESL system from scratch with Google Docs and Quizlet takes 40+ hours of setup and falls apart by month 3.',
     ]}
@@ -57,13 +57,13 @@ const EslClassToolkit = () => (
       </>
     }
     faqs={[
-      { question: 'Is this for kids or adults?', answer: 'Adults only. Every component is designed andragogically — vocabulary, scenarios, and tone target adult learners.' },
+      { question: 'Is this for kids or adults?', answer: 'Adults only. Every component is designed andragogically: vocabulary, scenarios, and tone target adult learners.' },
       { question: 'Does this replace coursebooks like Headway or Outcomes?', answer: 'Yes for 1-on-1 tutoring. For institutional teaching alongside a coursebook, Edooqoo generates personalized supplementary material per learner.' },
       { question: 'Can I export materials offline?', answer: 'Yes. Every worksheet exports to HTML or PDF for in-person printing. The Student Hub remains online for digital submission.' },
       { question: 'Is the toolkit free?', answer: 'The Free plan includes the full toolkit with 2 worksheet generations. Paid plans add volume (15-90 worksheets/month). All features available on all plans.' },
     ]}
     ctaTitle="Run your full ESL class on one platform"
-    ctaBody="Placement test, worksheets, homework, flashcards, progress tracking — included on the Free plan. Sign up in 30 seconds."
+    ctaBody="Placement test, worksheets, homework, flashcards, progress tracking, included on the Free plan. Sign up in 30 seconds."
   />
 );
 

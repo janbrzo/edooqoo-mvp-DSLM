@@ -44,7 +44,7 @@ const PublicWorkflowNav: React.FC<PublicWorkflowNavProps> = ({ className }) => {
 
   return (
     <nav className={cn('sticky top-0 z-50 border-b border-border bg-background/90 backdrop-blur-md', className)}>
-      {/* v6.9.39 P8 — full-width container + flex-1 left block pushes
+      {/* v6.9.39 P8: full-width container + flex-1 left block pushes
           feature pills to the left next to the logo so the action cluster
           on the right no longer crushes them at ~1200px viewports. */}
       <div className="flex h-14 items-center justify-between gap-3 px-4 lg:px-6">

@@ -1,5 +1,5 @@
 /**
- * Welcome Test — canonical sequential question IDs (wt_q1..wt_qN).
+ * Welcome Test: canonical sequential question IDs (wt_q1..wt_qN).
  *
  * Source of truth for analytics-facing IDs stored in
  * `student_events.event_payload.answer_id`. The legacy `id` field on each
@@ -7,7 +7,7 @@
  * `legacy_answer_id` on the same event payload so prior records remain
  * traceable.
  *
- * The map is built at module load from the live question array — this
+ * The map is built at module load from the live question array; this
  * guarantees parity with `welcomeTestQuestions.ts` regardless of how the
  * legacy IDs evolve.
  */
@@ -16,7 +16,7 @@ import { ALL_WELCOME_TEST_QUESTIONS } from '@/data/welcomeTestQuestions';
 export const QUESTION_CANONICAL_MAP: Record<string, string> = (() => {
   const map: Record<string, string> = {};
   ALL_WELCOME_TEST_QUESTIONS.forEach((q, i) => {
-    // Zero-padded canonical IDs (wt_q01..wt_q58) — keeps lexicographic order
+    // Zero-padded canonical IDs (wt_q01..wt_q58): keeps lexicographic order
     // aligned with display order and is human-friendly in analytics dashboards.
     const canonical = `wt_q${String(i + 1).padStart(2, '0')}`;
     map[q.id] = canonical;        // legacy → canonical

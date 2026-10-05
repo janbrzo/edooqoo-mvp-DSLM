@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useDemoContext } from '@/contexts/DemoContext';
 
 /**
- * useActiveHomeworkCount — v6.9.109 (Phase 5).
+ * useActiveHomeworkCount: v6.9.109 (Phase 5).
  * Single HEAD count of the teacher's homework assignments that are not yet
  * completed. Replaces the old "fetch everything then filter" approach used by
  * the dashboard stats strip. Returns 0 on error (graceful degradation) and

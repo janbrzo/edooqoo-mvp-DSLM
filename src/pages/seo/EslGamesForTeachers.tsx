@@ -5,7 +5,7 @@ import SeoLandingLayout from '@/components/seo/SeoLandingLayout';
 const blogPostingLd = {
   '@context': 'https://schema.org',
   '@type': 'BlogPosting',
-  headline: 'ESL Games for Teachers — 15 Activities for Adult Learners',
+  headline: 'ESL Games for Teachers, 15 Activities for Adult Learners',
   description: "15 ESL games designed with Martha's criteria (10 years adult ESL). Each pairs with an AI-generated Edooqoo worksheet for follow-up.",
   author: { '@type': 'Organization', name: 'Edooqoo' },
   publisher: { '@type': 'Organization', name: 'Edooqoo' },
@@ -16,12 +16,12 @@ const blogPostingLd = {
 const EslGamesForTeachers = () => (
   <SeoLandingLayout
     seo={{
-      title: 'ESL Games for Teachers — 15 Activities for Adult Learners',
-      description: "15 ESL games designed with Martha's criteria (10 yrs ESL). Speaking, grammar, vocab — each game pairs with an AI-generated Edooqoo worksheet.",
+      title: 'ESL Games for Teachers: 15 Activities for Adult Learners',
+      description: "15 ESL games designed with Martha's criteria (10 yrs ESL). Speaking, grammar, vocab: each game pairs with an AI-generated Edooqoo worksheet.",
       path: '/blog/esl-games-for-teachers',
       extraJsonLd: blogPostingLd,
     }}
-    h1="ESL Games for Teachers — 15 Activities for Adult Learners"
+    h1="ESL Games for Teachers, 15 Activities for Adult Learners"
     lead="A curated list of 15 ESL games for adult learners, chosen against Martha's criteria for adult lessons. Each game maps to an Edooqoo worksheet so the language practice continues as homework."
     problems={[
       'Most ESL game lists copy-paste childrens activities and call them adult-friendly.',
@@ -59,8 +59,8 @@ const EslGamesForTeachers = () => (
         <p>Martha (10 years adult ESL, our internal quality benchmark) has one rule: if a game would make a 40-year-old CFO feel patronized, do not run it. That rules out many of the games on typical ESL resource lists. What is left is short, cognitively engaging, and produces measurable language output.</p>
         <p>Pair every game with a follow-up worksheet. The game produces fluency; the worksheet locks in accuracy. After Idiom Charades, assign a 10-minute Idiom Matching exercise from Edooqoo as homework. Objective answers can be checked automatically, and teacher-reviewed results can inform future prep. Three lessons later, the same 8 idioms can reappear in a Reading Comprehension because the teacher uses vocabulary signals in the DSLM layer.</p>
         <h2 className="text-xl font-bold text-foreground">How to time games in a 60-minute lesson</h2>
-        <p>Warm-up game (5–7 min). Main input + controlled practice (25 min). Production game (10 min). Worksheet preview + homework assignment (5 min). Closing (3 min). The two games sandwich the lesson — opening to lower the affective filter, closing to apply new language. See our <Link to="/blog/english-games-for-learners" className="text-primary hover:underline">12 games for learners</Link> for a similar list framed for student perspective.</p>
-        <p>Want the matching worksheet for any game on this list? Create it through Edooqoo's structured worksheet workflow — see <Link to="/exercise-types" className="text-primary hover:underline">all 29 exercise types</Link> or jump to the <Link to="/esl-worksheets" className="text-primary hover:underline">ESL worksheets generator</Link>.</p>
+        <p>Warm-up game (5–7 min). Main input + controlled practice (25 min). Production game (10 min). Worksheet preview + homework assignment (5 min). Closing (3 min). The two games sandwich the lesson, opening to lower the affective filter, closing to apply new language. See our <Link to="/blog/english-games-for-learners" className="text-primary hover:underline">12 games for learners</Link> for a similar list framed for student perspective.</p>
+        <p>Want the matching worksheet for any game on this list? Create it through Edooqoo's structured worksheet workflow, see <Link to="/exercise-types" className="text-primary hover:underline">all 29 exercise types</Link> or jump to the <Link to="/esl-worksheets" className="text-primary hover:underline">ESL worksheets generator</Link>.</p>
       </>
     }
     faqs={[

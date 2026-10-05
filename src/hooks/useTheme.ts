@@ -8,7 +8,7 @@ export function useTheme() {
     return (localStorage.getItem(STORAGE_KEY) as Theme) || 'system';
   });
 
-  // v6.9.54 — Dark mode is teacher-only and must be an explicit opt-in.
+  // v6.9.54: Dark mode is teacher-only and must be an explicit opt-in.
   // 'system' resolves to light so anonymous worksheet/homework surfaces
   // never inherit the OS dark preference and invert their tokens.
   const applyTheme = (t: Theme) => {

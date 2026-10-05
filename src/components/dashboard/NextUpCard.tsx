@@ -23,7 +23,7 @@ export function formatLesson(lesson: { date: string; time: string }): string {
 }
 
 /**
- * v6.9.109 — unit of work on the Today dashboard. The "Prepare next lesson"
+ * v6.9.109: unit of work on the Today dashboard. The "Prepare next lesson"
  * button is the only `variant="default"` control on the page.
  */
 export const NextUpCard: React.FC<NextUpCardProps> = ({ item }) => {
@@ -59,7 +59,7 @@ export const NextUpCard: React.FC<NextUpCardProps> = ({ item }) => {
               <span className="text-muted-foreground">Goal:</span> {goal}
             </>
           ) : (
-            <span className="text-muted-foreground">No signals yet — start with a worksheet</span>
+            <span className="text-muted-foreground">No signals yet: start with a worksheet</span>
           )}
         </p>
 

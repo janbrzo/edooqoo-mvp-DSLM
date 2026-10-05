@@ -36,7 +36,7 @@ export const generatePDF = async (elementId: string, filename: string, isTeacher
       teacherTipElements.forEach(el => el.remove());
     }
 
-    // P2.1 — structural safety net: strip any remaining app controls + audio players
+    // P2.1: structural safety net: strip any remaining app controls + audio players
     devLog('[PDF] Export hygiene:', applyPdfExportHygiene(clonedElement));
 
 
@@ -439,7 +439,7 @@ export async function exportAsHTML(elementId: string, filename: string, viewMode
       teacherTipElements.forEach(el => el.remove());
     }
 
-    // P2.1 — structural safety net: strip any remaining app controls + audio players
+    // P2.1: structural safety net: strip any remaining app controls + audio players
     devLog('[PDF PRINT] Export hygiene:', applyPdfExportHygiene(clonedElement));
 
 

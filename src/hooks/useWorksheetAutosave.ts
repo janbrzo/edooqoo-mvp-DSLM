@@ -1,5 +1,5 @@
 /**
- * useWorksheetAutosave — P1.4
+ * useWorksheetAutosave: P1.4
  *
  * Root cause it fixes: worksheet edits lived only in React state + sessionStorage,
  * while students and the share link read from the database. Teachers assumed
@@ -7,7 +7,7 @@
  *
  * Contract:
  * - Debounced (2.5s) persistence of `worksheet` through `updateWorksheetAPI`
- *   (the single write path — it keeps `ai_response`, `title` and `html_content` in sync).
+ *   (the single write path; it keeps `ai_response`, `title` and `html_content` in sync).
  * - Hard early returns: no worksheetId, no userId (anonymous), demo mode, disabled.
  * - "Last write wins": while a save is in flight, further changes are queued and
  *   flushed once the current request settles.
@@ -76,7 +76,7 @@ export function useWorksheetAutosave({
     }
 
     if (isSavingRef.current) {
-      // Last write wins — remember that another save is needed.
+      // Last write wins, remember that another save is needed.
       pendingSnapshotRef.current = snapshot;
       return false;
     }

@@ -62,10 +62,10 @@ const ForgettingCurveDiagram = () => (
       {/* Axes */}
       <line x1="40" y1="20" x2="40" y2="160" stroke="hsl(var(--border))" strokeWidth="1" />
       <line x1="40" y1="160" x2="390" y2="160" stroke="hsl(var(--border))" strokeWidth="1" />
-      {/* Without review — steep decline */}
+      {/* Without review: steep decline */}
       <path d="M40,30 Q100,90 180,140 Q250,155 390,158" fill="none" stroke="hsl(var(--destructive))" strokeWidth="2" strokeDasharray="4" />
       <text x="300" y="150" className="fill-destructive text-[9px]">Without review</text>
-      {/* With SM-2 — sawtooth pattern */}
+      {/* With SM-2: sawtooth pattern */}
       <path d="M40,30 L80,70 L80,35 L130,75 L130,38 L200,72 L200,40 L290,68 L290,42 L390,58" fill="none" stroke="hsl(var(--primary))" strokeWidth="2" />
       <text x="300" y="50" className="fill-primary text-[9px] font-medium">With SM-2</text>
       {/* Labels */}
@@ -78,22 +78,22 @@ const ForgettingCurveDiagram = () => (
 
 const benefits = [
   { icon: Brain, title: 'SM-2 scheduling logic', description: 'Spaced-repetition scheduling based on SM-2 logic. Cards the student struggles with appear more often.' },
-  { icon: Repeat, title: 'Auto-generated from worksheets', description: 'One click creates a flashcard set from any worksheet. Vocabulary, key phrases, grammar patterns — extracted automatically.' },
+  { icon: Repeat, title: 'Auto-generated from worksheets', description: 'One click creates a flashcard set from any worksheet. Vocabulary, key phrases, grammar patterns: extracted automatically.' },
   { icon: Link2, title: 'Word-level skill context', description: 'Each word/card can act as a vocabulary nano-skill context item while SM-2 progress records retention behavior.' },
-  { icon: Zap, title: 'Student Hub access', description: 'Students study through their Hub — no app needed. Share via link. Track progress in real-time.' },
+  { icon: Zap, title: 'Student Hub access', description: 'Students study through their Hub: no app needed. Share via link. Track progress in real-time.' },
 ];
 
 const steps = [
   { number: 1, title: 'Generate a worksheet', description: 'Create any worksheet with vocabulary, grammar, or mixed exercises.' },
-  { number: 2, title: 'Create flashcards with one click', description: 'Click "Create Flashcards" — Edooqoo extracts key vocabulary and creates a set automatically. You can edit, add, or remove cards.' },
-  { number: 3, title: 'Share with the student', description: 'Send a link or let students access through Student Hub. No account needed — just email-based access.' },
+  { number: 2, title: 'Create flashcards with one click', description: 'Click "Create Flashcards" | Edooqoo extracts key vocabulary and creates a set automatically. You can edit, add, or remove cards.' },
+  { number: 3, title: 'Share with the student', description: 'Send a link or let students access through Student Hub. No account needed: just email-based access.' },
   { number: 4, title: 'SM-2 schedules reviews', description: 'Students rate difficulty (Again/Hard/Good/Easy), and the system schedules harder cards more frequently.' },
 ];
 
 const faqItems = [
   { question: 'What is the SM-2 algorithm?', answer: 'SM-2 (SuperMemo 2) is a spaced repetition algorithm developed by Piotr Wozniak. It schedules review intervals from the student\'s previous performance: easier cards appear less frequently, and harder cards appear more often.' },
   { question: 'Can I create flashcards manually?', answer: 'Yes. While auto-generation from worksheets is the fastest method, you can also create cards manually. Set the front text, back text, example sentence, and CEFR level for each card.' },
-  { question: 'Do students need an account?', answer: 'No. Students access flashcards through a shared link or their Student Hub. Access is email-based — no registration, no password, no app to install.' },
+  { question: 'Do students need an account?', answer: 'No. Students access flashcards through a shared link or their Student Hub. Access is email-based: no registration, no password, no app to install.' },
   { question: 'Can flashcards be bidirectional?', answer: 'Yes. You can enable bidirectional mode so students practice both directions: English → translation and translation → English. Each direction is tracked separately in the SM-2 algorithm.' },
   { question: 'How do flashcards connect to DSLM?', answer: 'Each flashcard is a word/card-level vocabulary item. Student reviews store per-card SM-2 retention progress, which can support vocabulary continuity in future prep. Teacher review remains part of the lesson decision.' },
 ];
@@ -110,7 +110,7 @@ const comparisonRows = [
 
 const FeatureFlashcards: React.FC = () => (
   <FeaturePageLayout
-    title="Flashcards for Adult Learners — Spaced Repetition"
+    title="Flashcards for Adult Learners: Spaced Repetition"
     metaDescription="Auto-generate flashcard sets from any worksheet, with SM-2 spaced repetition and no student app to install. Share a set with your student in one click."
   >
     <FeatureHero

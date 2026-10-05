@@ -164,7 +164,7 @@ const WhatShouldITeachNextTool: React.FC = () => {
   return (
     <div className="min-h-screen bg-background">
       <PageSeo
-        title="What Should I Teach Next? — Decision Tool for English Tutors"
+        title="What Should I Teach Next?: Decision Tool for English Tutors"
         description="Choose Repair, Continue, or Advance for an adult 1:1 English student. Local rule-based tool with a next objective, lesson structure, worksheet brief, and evidence criteria."
         path="/tools/what-should-i-teach-next"
         jsonLd={jsonLd}

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Sprint 4 (Faza 4) — inject GEO citation blocks into static/prerendered HTML.
+ * Sprint 4 (Faza 4): inject GEO citation blocks into static/prerendered HTML.
  *
  * Idempotent: existing blocks are stripped and rewritten, so running twice is a no-op diff.
  * Runs after every content generator (build:seo) so regenerated pages never lose the block.

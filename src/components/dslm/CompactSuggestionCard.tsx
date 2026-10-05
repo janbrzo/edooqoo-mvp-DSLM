@@ -1,5 +1,5 @@
 /**
- * CompactSuggestionCard — shared compact card for Next Steps and Phase steps.
+ * CompactSuggestionCard: shared compact card for Next Steps and Phase steps.
  * v4.2: Whole header is click-to-expand (entire title row toggles open/close).
  * Toolbar buttons are siblings (NOT children of the trigger), so they don't toggle.
  */
@@ -87,7 +87,7 @@ export const CompactSuggestionCard: React.FC<CompactSuggestionCardProps> = ({
                         used
                       </Badge>
                     )}
-                    {/* Confidence renders OUTSIDE the collapsible trigger — see toolbar below */}
+                    {/* Confidence renders OUTSIDE the collapsible trigger, see toolbar below */}
                   </div>
                   {s.suggested_grammar_focus && (
                     <p className="text-[11px] text-primary truncate">{s.suggested_grammar_focus}</p>
@@ -96,7 +96,7 @@ export const CompactSuggestionCard: React.FC<CompactSuggestionCardProps> = ({
               </button>
             </CollapsibleTrigger>
 
-            {/* Toolbar — NOT inside the trigger, so clicks here don't toggle */}
+            {/* Toolbar: NOT inside the trigger, so clicks here don't toggle */}
             <div className="flex items-center gap-0.5 shrink-0">
               <ConfidenceBadge
                 score={confidence.score}

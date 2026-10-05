@@ -24,7 +24,7 @@ interface UseInteractiveHomeworkProps {
   totalExercises: number;
   exerciseQuestionCounts?: Record<number, number>;
   exercises?: any[];
-  /** v6.9.84 — required for anonymous students: direct table writes were
+  /** v6.9.84: required for anonymous students: direct table writes were
    *  replaced by the token-scoped RPC `update_homework_answer_by_share_token`. */
   shareToken?: string;
 }
@@ -290,7 +290,7 @@ export const useInteractiveHomework = ({
 
       // Emit homework_submitted event for DSLM Layer A
       try {
-        // v6.9.83 — SECURITY DEFINER RPC (public table policy removed for security)
+        // v6.9.83: SECURITY DEFINER RPC (public table policy removed for security)
         const { data: hwData } = await supabase
           .rpc('get_homework_owner_ids', { p_homework_id: homeworkId })
           .maybeSingle();
@@ -346,7 +346,7 @@ export const useInteractiveHomework = ({
           // Transcribe all audio using shared utility
           const transcriptionCache = await transcribeAllAudio(audioAnswers, '[submitHomework]');
           
-          // Merge transcriptions into local savedAnswers for AI eval (NO DB writes yet — will persist with AI eval)
+          // Merge transcriptions into local savedAnswers for AI eval (NO DB writes yet, will persist with AI eval)
           if (Object.keys(transcriptionCache).length > 0) {
             for (const [cacheKey, transcription] of Object.entries(transcriptionCache)) {
               const [exIdxStr, qIdxStr] = cacheKey.split('_');

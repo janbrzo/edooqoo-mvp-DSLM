@@ -1,5 +1,5 @@
 /**
- * generate-timeline — DSLM Pathway v4
+ * generate-timeline: DSLM Pathway v4
  * Two modes:
  *  - 'next_steps' (default): generate immediate next worksheets (1-3) with V/G focus per exercise
  *  - 'phase_steps': generate worksheets for a specific curriculum phase (uses phase title/desc/focus_areas)
@@ -22,6 +22,7 @@ import {
   getAdaptiveExerciseRules,
 } from "../_shared/dslmPromptCore.ts";
 import { chatCompletion } from "../_shared/aiChat.ts";
+import { NO_EM_DASH_RULE } from "../_shared/writingStyle.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -86,7 +87,7 @@ serve(async (req) => {
       excludeIds.length > 0
         ? supabase.from('future_worksheet_suggestions').select('suggested_topic').in('id', excludeIds)
         : Promise.resolve({ data: [] }),
-      // v6.9.49 — join curriculum phases so prompt can label each pending step
+      // v6.9.49: join curriculum phases so prompt can label each pending step
       // with `[Phase #N "title"]`. Helps the AI complement across phases
       // rather than duplicating topics already planned elsewhere.
       supabase.from('future_worksheet_suggestions')
@@ -123,7 +124,7 @@ serve(async (req) => {
     const pacing = computePacingIndex(student as any, weeksUntilDeadline);
     const pLabel = pacingLabel(pacing);
 
-    // v6.9.15c — trim per-section limits to keep prompt compact for batch (count>1)
+    // v6.9.15c: trim per-section limits to keep prompt compact for batch (count>1)
     // generation. Sanitizer downstream still enforces hard guarantees.
     const scientificFramework = buildScientificPrinciplesBlock((student as any).english_level, pacing);
     const studentProfile = buildStudentProfileBlock(student as any, pacing);
@@ -143,11 +144,11 @@ serve(async (req) => {
       modeBrief = `MODE: PHASE-BOUND WORKSHEETS for phase "${phase.title}".
 Phase description: ${phase.description || '(none)'}.
 Phase focus areas: [${(phase.focus_areas || []).join(', ')}].
-These are LESSON-LEVEL steps WITHIN this phase — do NOT introduce unrelated topics.`;
+These are LESSON-LEVEL steps WITHIN this phase, do NOT introduce unrelated topics.`;
     } else {
       modeBrief = `MODE: IMMEDIATE NEXT STEPS.
 These are the most urgent ${count} concrete worksheets to assign THIS WEEK or NEXT.
-They are NOT macro phases — they are concrete lesson plans for the very near term.`;
+They are NOT macro phases; they are concrete lesson plans for the very near term.`;
     }
 
     const LESSON_EXERCISE_COUNT = 8;
@@ -163,17 +164,17 @@ ${studentProfile}${mainDeadline}
 ACTIVE PENDING STEPS already queued for this student (do NOT duplicate, build COMPLEMENTARILY):
 ${existingStepsBlock}
 
-COMPLEMENTARITY RULE: New steps must EXTEND this queue logically — fill skill gaps not yet addressed, or apply spaced practice to weak skills last touched ≥2 steps ago. NEVER repeat a topic already in the queue.
+COMPLEMENTARITY RULE: New steps must EXTEND this queue logically, fill skill gaps not yet addressed, or apply spaced practice to weak skills last touched ≥2 steps ago. NEVER repeat a topic already in the queue.
 
-WEAK AREAS (recency-weighted — RECENT SIGNALS CARRY MORE AUTHORITY):
+WEAK AREAS (recency-weighted: RECENT SIGNALS CARRY MORE AUTHORITY):
   ${weakBlock}
 
-RECENCY RULE: Skill metrics updated within the last 7 days are AUTHORITATIVE. Signals older than 30 days are STALE — treat as hypotheses to verify, not facts.
+RECENCY RULE: Skill metrics updated within the last 7 days are AUTHORITATIVE. Signals older than 30 days are STALE, treat as hypotheses to verify, not facts.
 
 GOALS (deadline-pressured ones determine pacing):
 ${goalsBlock}
 
-CONTEXT NOTES (most recent first — newer notes override older):
+CONTEXT NOTES (most recent first: newer notes override older):
   ${knowledgeBlock}
 
 RECENT WORKSHEET TOPICS (do NOT repeat): ${worksheetHistory}
@@ -196,7 +197,7 @@ Return EXACTLY ${count} suggestions. NO MORE, NO LESS. Each suggestion must incl
   Backend will validate, normalize, and pad/truncate to exactly ${LESSON_EXERCISE_COUNT}.
 - exerciseFocusMap: object mapping each exercise ID to one of "vocabulary" | "grammar" | "none"
 
-MEDIA FAMILY RULE: each suggestion may use AT MOST ONE media family — picture-* OR audio-* OR none. Never mix picture and audio in the same step.
+MEDIA FAMILY RULE: each suggestion may use AT MOST ONE media family, picture-* OR audio-* OR none. Never mix picture and audio in the same step.
 
 FOCUS DISTRIBUTION RULE: do NOT mark all exercises as "none". When grammarFocus is set, at least 2 exercises must be tagged "grammar". At least 2 exercises must be tagged "vocabulary". Remaining may be "none".
 - rationale (cite student data: weak skill, deadline, complementarity), focusSkills, difficulty (CEFR level), estimatedImpact
@@ -217,12 +218,12 @@ Return ONLY a valid JSON array of EXACTLY ${count} objects (no markdown, no comm
   "estimatedImpact": { "key": "value" }
 }`;
 
-    // v6.9.15c — plain text JSON output (mirrors generate-curriculum-phases which works
+    // v6.9.15c: plain text JSON output (mirrors generate-curriculum-phases which works
     // reliably for batches). Tool calling with `additionalProperties` on nested object
     // schemas was triggering Gemini "too many states" / INVALID_ARGUMENT for count>1.
     const buildAiBody = (temp: number, extraInstruction?: string) => ({
       messages: [
-        { role: 'system', content: 'You are an expert ESL curriculum planner. Return only a valid JSON array. No markdown, no commentary.' },
+        { role: 'system', content: 'You are an expert ESL curriculum planner. Return only a valid JSON array. No markdown, no commentary.' + NO_EM_DASH_RULE },
         { role: 'user', content: extraInstruction ? `${prompt}\n\n${extraInstruction}` : prompt }
       ],
       temperature: temp,
@@ -270,7 +271,7 @@ Return ONLY a valid JSON array of EXACTLY ${count} objects (no markdown, no comm
       console.error('AI error (attempt 1):', aiResponse.status, lastErrorText.slice(0, 500));
     }
 
-    // v6.9.15c — single retry with stricter temperature + explicit final reminder.
+    // v6.9.15c: single retry with stricter temperature + explicit final reminder.
     if (!aiResponse.ok || suggestions.length === 0) {
       retryUsed = true;
       const retryHint = `Return EXACTLY ${count} items. JSON array only. No prose. No markdown.`;
@@ -349,7 +350,7 @@ Return ONLY a valid JSON array of EXACTLY ${count} objects (no markdown, no comm
         if (countTag('grammar') >= minGrammar) break;
         if (exerciseFocusMap[ex] === 'none') exerciseFocusMap[ex] = 'grammar';
       }
-      // Enforce single media family — drop minority, refill with no-media defaults
+      // Enforce single media family, drop minority, refill with no-media defaults
       const PIC = ['describe-picture','answer-questions-picture','true-false-picture','multiple-choice-picture'];
       const AUD = ['listening-comprehension','answer-questions-audio','true-false-audio','multiple-choice-audio','fill-in-blanks-audio'];
       const picCount = exercises.filter(e => PIC.includes(e)).length;
@@ -398,13 +399,13 @@ Return ONLY a valid JSON array of EXACTLY ${count} objects (no markdown, no comm
       goals_count: goals.length,
       knowledge_count: knowledge.length,
       generated_at: new Date().toISOString(),
-      // v6.9.15a — surface partial-success / truncation so frontend can warn the user.
+      // v6.9.15a: surface partial-success / truncation so frontend can warn the user.
       finish_reason: finishReason || null,
       warning: suggestions.length < count
         ? (finishReason === 'length' ? 'truncated' : 'partial')
         : null,
       requested_count: count,
-      // v6.9.15c — output diagnostics
+      // v6.9.15c: output diagnostics
       output_mode: 'plain_json',
       retry_used: retryUsed,
     };

@@ -1,5 +1,5 @@
 /**
- * LibrarySegments — stable section switcher for the Student Library (M6 step 2).
+ * LibrarySegments: stable section switcher for the Student Library (M6 step 2).
  * All sections remain visible, including sections whose count is zero or not loaded.
  */
 import React from 'react';

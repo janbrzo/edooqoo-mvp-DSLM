@@ -44,7 +44,7 @@ export const StudentKnowledgeEntryCard = ({
   const categoryMeta = getCategoryMetadata(entry.category);
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // v6.9.10 — Stale freshness check (client-side only, zero infra).
+  // v6.9.10: Stale freshness check (client-side only, zero infra).
   // Uses max(created_at, metadata.last_confirmed_at) as the "freshness anchor".
   const STALE_AFTER_DAYS = 90;
   const STALE_CATEGORIES: ReadonlyArray<string> = ['Personal', 'Skill Assessment', 'Goals'];
@@ -274,12 +274,12 @@ export const StudentKnowledgeEntryCard = ({
           </div>
         )}
 
-        {/* v6.9.10 — Stale freshness prompt */}
+        {/* v6.9.10: Stale freshness prompt */}
         {isStale && (
           <div className="mb-3 flex items-center justify-between gap-2 rounded-md border border-amber-300/60 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-700/50 px-2.5 py-1.5">
             <div className="flex items-center gap-1.5 text-xs text-amber-800 dark:text-amber-200">
               <Clock className="h-3.5 w-3.5" />
-              <span>Stale ({ageDays}d old) — still true?</span>
+              <span>Stale ({ageDays}d old): still true?</span>
             </div>
             <div className="flex items-center gap-1">
               {onConfirmCurrent && (

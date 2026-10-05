@@ -1,5 +1,5 @@
 /**
- * dslmPromptCore — DSLM Pathway v4.3
+ * dslmPromptCore: DSLM Pathway v4.3
  * Shared prompt-building helpers for `generate-curriculum-phases` and `generate-timeline`.
  * Encodes Second Language Acquisition (SLA) science into the prompts:
  *   - Krashen Natural Order Hypothesis (Dulay & Burt 1974; Goldschneider & DeKeyser 2005)
@@ -21,7 +21,7 @@ export interface StudentProfileLite {
   main_goal_target_date?: string | null;
   dslm_pacing_mode?: number | null;
   dslm_use_roadmap?: boolean | null;
-  // Optional fields (may not exist in DB yet — accessed defensively)
+  // Optional fields (may not exist in DB yet, accessed defensively)
   profession?: string | null;
   industry?: string | null;
   interests?: string | null;
@@ -91,7 +91,7 @@ function recencyWeight(iso: string | null | undefined): 'AUTHORITATIVE' | 'RECEN
 }
 
 /**
- * SLA scientific framework — injected at the top of every prompt.
+ * SLA scientific framework, injected at the top of every prompt.
  * Citations are explicit so the LLM understands the authority and does not drift.
  * Length: ~450 tokens.
  */
@@ -108,16 +108,16 @@ export function buildScientificPrinciplesBlock(level: string | null | undefined,
   const pacingDirective = label === 'Scientific'
     ? 'STRICT Natural Order Hypothesis enforcement. Heavy input phase before output. Sequence grammar bottom-up.'
     : label === 'Pragmatic'
-      ? 'TBLT-FIRST. Just-in-time grammar. Give student usable phrases TODAY even if they technically "skip" the natural order — front-load high-frequency formulaic chunks.'
+      ? 'TBLT-FIRST. Just-in-time grammar. Give student usable phrases TODAY even if they technically "skip" the natural order: front-load high-frequency formulaic chunks.'
       : 'Balanced: respect Natural Order, but anchor every step in student professional/personal domain from day one.';
 
-  return `═══ SLA SCIENTIFIC FRAMEWORK (mandatory — these rules override stylistic preferences) ═══
+  return `═══ SLA SCIENTIFIC FRAMEWORK (mandatory: these rules override stylistic preferences) ═══
 
-PACING MODE: ${pacing}/100 (${label}) — ${pacingDirective}
+PACING MODE: ${pacing}/100 (${label}): ${pacingDirective}
 
 GRANULAR PACING SIGNALS (use the EXACT numeric value above, not just the bucket label):
 - INPUT/OUTPUT RATIO: ${100 - pacing}% input-focused (reading/listening/recognition) / ${pacing}% output-focused (speaking/writing/production).
-- GRAMMAR EXPLICITNESS: ${pacing < 30 ? 'high — explicit rules introduced before exposure, with clear meta-language.' : pacing > 70 ? 'low — just-in-time micro-rules embedded in formulaic chunks; avoid meta-language.' : 'medium — short rule reminders introduced after exposure to examples.'}
+- GRAMMAR EXPLICITNESS: ${pacing < 30 ? 'high, explicit rules introduced before exposure, with clear meta-language.' : pacing > 70 ? 'low, just-in-time micro-rules embedded in formulaic chunks; avoid meta-language.' : 'medium: short rule reminders introduced after exposure to examples.'}
 - CONTEXT IMMERSION: ${pacing}% of vocabulary/scenarios drawn from the student's professional/personal domain (the rest may be generic high-frequency).
 - TASK AUTHENTICITY: ${pacing < 30 ? 'controlled, didactic micro-tasks dominate.' : pacing > 70 ? 'real-world communicative tasks dominate from step 1.' : 'mixed: each step pairs one controlled task with one communicative task.'}
 
@@ -129,7 +129,7 @@ GRANULAR PACING SIGNALS (use the EXACT numeric value above, not just the bucket 
    - All vocabulary MUST originate from the student's profession / interests / stated goal domain.
    - Generic "school topics" (animals, generic holidays, third-party hobbies) are FORBIDDEN.
 
-3. TBLT — Task-Based Language Teaching (Ellis 2009, 2017):
+3. TBLT: Task-Based Language Teaching (Ellis 2009, 2017):
    - Step / phase titles are REAL ADULT TASKS, not grammar labels.
      ❌ "Present Perfect Continuous Practice"
      ✅ "Explaining a Long-Standing Bug to Your CTO at the Standup"
@@ -144,7 +144,7 @@ GRANULAR PACING SIGNALS (use the EXACT numeric value above, not just the bucket 
    - Each step MUST include ≥2 productive exercises (answer-questions, dialogue, discussion,
      fill-in-blanks WITHOUT options) to force retrieval, not just recognition.
 
-6. ESP — English for Specific Purposes (Hutchinson & Waters 1987; Basturkmen 2022):
+6. ESP: English for Specific Purposes (Hutchinson & Waters 1987; Basturkmen 2022):
    - Every step explicitly anchored in the student's career/domain.
 
 7. ANDRAGOGY (Knowles 1980):
@@ -174,7 +174,7 @@ export function buildStudentProfileBlock(student: StudentProfileLite, pacing: nu
 - Interests: ${interests}
 - Preferred register: ${style} (1=very casual, 5=very formal)
 - Pacing mode: ${pacing}/100 (${pacingLabel(pacing)})
-- Roadmap influence: ${useRoadmap ? 'ACTIVE — phases drive step generation' : 'IGNORED — generate free-floating steps'}${notes}
+- Roadmap influence: ${useRoadmap ? 'ACTIVE, phases drive step generation' : 'IGNORED, generate free-floating steps'}${notes}
 
 CRITICAL CLT RULE: All vocabulary, examples, and scenarios in generated content MUST originate from the student's profession/industry/interests domain (or main goal domain when those are unspecified). Cross-domain vocabulary is FORBIDDEN unless the student's goal is explicitly multi-domain.`;
 }
@@ -191,7 +191,7 @@ export function buildWeakAreasBlock(metrics: any[], limit = 10): string {
 
   return weak.map((m: any) => {
     const w = recencyWeight(m.updated_at);
-    const tag = w === 'AUTHORITATIVE' ? '⚡ AUTHORITATIVE' : w === 'STALE' ? '(STALE — re-test)' : '';
+    const tag = w === 'AUTHORITATIVE' ? '⚡ AUTHORITATIVE' : w === 'STALE' ? '(STALE: re-test)' : '';
     const trend = m.trend === 'declining' ? ', declining' : m.trend === 'improving' ? ', improving' : '';
     const cat = `${m.skill_category || 'general'}/${m.micro_skill || m.skill_name || 'general'}`;
     return `- ${cat}: ${m.current_mastery || 0}% [${daysAgoLabel(m.updated_at)}${trend}] ${tag}`.trim();
@@ -230,27 +230,27 @@ export function buildGoalsBlock(goals: any[]): string {
 }
 
 /**
- * Existing roadmap phases — for complementarity in generate-curriculum-phases.
+ * Existing roadmap phases, for complementarity in generate-curriculum-phases.
  */
 export function buildExistingPhasesBlock(phases: any[]): string {
-  if (!phases || phases.length === 0) return 'NONE — this is a fresh roadmap.';
+  if (!phases || phases.length === 0) return 'NONE: this is a fresh roadmap.';
   return phases.map((p: any) => {
     const focus = Array.isArray(p.focus_areas) && p.focus_areas.length
-      ? ` — focus: [${p.focus_areas.join(', ')}]`
+      ? `: focus: [${p.focus_areas.join(', ')}]`
       : '';
-    const desc = p.description ? ` — ${p.description.slice(0, 100)}` : '';
+    const desc = p.description ? `, ${p.description.slice(0, 100)}` : '';
     return `[seq ${p.sequence_number}, status=${p.status}] "${p.title}"${focus}${desc}`;
   }).join('\n');
 }
 
 /**
- * Existing pending steps — for complementarity in generate-timeline.
+ * Existing pending steps, for complementarity in generate-timeline.
  */
 export function buildExistingStepsBlock(steps: any[], limit = 20): string {
-  if (!steps || steps.length === 0) return 'NONE — queue is empty.';
+  if (!steps || steps.length === 0) return 'NONE: queue is empty.';
   return steps.slice(0, limit).map((s: any) => {
     const grammar = s.suggested_grammar_focus ? ` (grammar: ${s.suggested_grammar_focus})` : '';
-    // v6.9.49 — when caller joined `dslm_curriculum_phases(sequence_number,title)`
+    // v6.9.49: when caller joined `dslm_curriculum_phases(sequence_number,title)`
     // we surface `[Phase #N "title"]` so the AI understands which macro block a
     // step belongs to and can correctly complement *across* phases.
     const joinedPhase = s.dslm_curriculum_phases || s.phase || null;

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * audit-content-uniqueness.mjs — report-only body-text duplication audit.
+ * audit-content-uniqueness.mjs: report-only body-text duplication audit.
  *
  * The meta audits (audit-duplicate-meta.mjs) check titles and descriptions;
  * nothing checked whether the visible body of indexable pages is unique.

@@ -1,4 +1,4 @@
-// Closed-Loop Company — worksheet-quality-feedback aggregator (Wave 1).
+// Closed-Loop Company: worksheet-quality-feedback aggregator (Wave 1).
 // Cadence: weekly Sun 04:00 UTC (configured via pg_cron).
 // Input: feedbacks (last 7d), worksheets metadata.
 // Output: rows in closed_loop_signals + run log in system_health_metrics.

@@ -1,5 +1,5 @@
 /**
- * WelcomeTestActionsPanel — unified action buttons for the Welcome Test.
+ * WelcomeTestActionsPanel: unified action buttons for the Welcome Test.
  * Plan v6.0: ALWAYS-ON design. All 5 buttons are visible regardless of test
  * state. The first click on any button lazily creates the test + token via
  * the parent's `ensureWelcomeTest()` helper, then runs the requested action.
@@ -46,12 +46,12 @@ export type WelcomeTestActionsState =
 
 interface WelcomeTestActionsPanelProps {
   state: WelcomeTestActionsState;
-  /** Share URL when known. Always-on buttons may still be enabled before a URL exists — handlers must lazily create the test. */
+  /** Share URL when known. Always-on buttons may still be enabled before a URL exists, handlers must lazily create the test. */
   shareUrl: string | null;
   /** Whether the student has answered ≥1 question (drives View Results enabled-state in pending). */
   hasAnyAnswer?: boolean;
 
-  // Handlers — all OPTIONAL. If omitted, the corresponding button is hidden.
+  // Handlers: all OPTIONAL. If omitted, the corresponding button is hidden.
   // Each handler is responsible for calling ensureWelcomeTest() internally
   // before performing its action.
   onSend?: () => void | Promise<void>;
@@ -61,7 +61,7 @@ interface WelcomeTestActionsPanelProps {
   onViewResults?: () => void;
   onRetake?: () => void | Promise<void>;
   /**
-   * v6.9.44 — gate "Create retake" / "Re-take Test" button independently of
+   * v6.9.44: gate "Create retake" / "Re-take Test" button independently of
    * onRetake presence. Defaults to true only when the latest attempt is
    * actually completed/reviewed.
    */
@@ -73,7 +73,7 @@ interface WelcomeTestActionsPanelProps {
   retaking?: boolean;
 
   size?: "sm" | "default";
-  /** When true: tighter padding/text — used in narrow banner contexts. */
+  /** When true: tighter padding/text, used in narrow banner contexts. */
   compact?: boolean;
   className?: string;
 }
@@ -103,7 +103,7 @@ export function WelcomeTestActionsPanel({
   const [confirmRefreshOpen, setConfirmRefreshOpen] = useState(false);
 
   const isCompleted = state === "completed";
-  // v6.9.44 — fallback: when caller doesn't specify, only show retake on completed.
+  // v6.9.44: fallback: when caller doesn't specify, only show retake on completed.
   const retakeAllowed = canRetake ?? isCompleted;
   // View Results is meaningful once the student has ≥1 answer OR test is completed.
   const viewResultsEnabled = hasAnyAnswer || isCompleted;
@@ -138,7 +138,7 @@ export function WelcomeTestActionsPanel({
         try {
           await navigator.clipboard.writeText(newUrl);
         } catch {
-          // Clipboard may be unavailable — silent.
+          // Clipboard may be unavailable, silent.
         }
         toast.success("New link copied (valid for 90 days). Old link no longer works.");
       }
@@ -153,7 +153,7 @@ export function WelcomeTestActionsPanel({
       setConfirmRefreshOpen(true);
       return;
     }
-    // For a fresh test, no link exists yet — generate immediately.
+    // For a fresh test, no link exists yet, generate immediately.
     void runRefresh();
   };
 
@@ -164,7 +164,7 @@ export function WelcomeTestActionsPanel({
   return (
     <TooltipProvider delayDuration={200}>
       <div className={"flex flex-wrap items-center gap-2 " + (className ?? "")}>
-        {/* Copy Link — always visible if handler provided */}
+        {/* Copy Link: always visible if handler provided */}
         {onCopy && (
           <Tooltip>
             <TooltipTrigger asChild>
@@ -187,7 +187,7 @@ export function WelcomeTestActionsPanel({
           </Tooltip>
         )}
 
-        {/* Refresh Link — hidden on completed */}
+        {/* Refresh Link: hidden on completed */}
         {onRefreshLink && !isCompleted && (
           <Tooltip>
             <TooltipTrigger asChild>
@@ -212,7 +212,7 @@ export function WelcomeTestActionsPanel({
           </Tooltip>
         )}
 
-        {/* Preview — always visible if handler provided */}
+        {/* Preview: always visible if handler provided */}
         {onPreview && (
           <Tooltip>
             <TooltipTrigger asChild>
@@ -237,7 +237,7 @@ export function WelcomeTestActionsPanel({
           </Tooltip>
         )}
 
-        {/* View Results — disabled until first answer (with tooltip) */}
+        {/* View Results: disabled until first answer (with tooltip) */}
         {onViewResults && (
           viewResultsEnabled ? (
             <Button
@@ -264,7 +264,7 @@ export function WelcomeTestActionsPanel({
           )
         )}
 
-        {/* Send Welcome Test — visible until completed, then replaced by Re-take */}
+        {/* Send Welcome Test, visible until completed, then replaced by Re-take */}
         {!isCompleted && onSend && (
           <Tooltip>
             <TooltipTrigger asChild>

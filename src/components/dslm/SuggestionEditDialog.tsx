@@ -1,5 +1,5 @@
 /**
- * SuggestionEditDialog — shared modal for editing a suggestion.
+ * SuggestionEditDialog: shared modal for editing a suggestion.
  * v4.2: now also edits exercises[] and exerciseFocusMap{} via EditExerciseSelector.
  */
 import React from 'react';

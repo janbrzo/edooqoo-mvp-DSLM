@@ -655,7 +655,7 @@ function auditPagesFallbackRouting() {
 
   // Cloudflare caps _headers at 100 rules total (a hard, plan-independent
   // platform limit), far fewer than the pSEO route count, so per-route
-  // noindex fallback rules are not generated here — the Worker itself
+  // noindex fallback rules are not generated here; the Worker itself
   // (cloudflare/worker.mjs) enforces `x-robots-tag: noindex, follow` for
   // every NOINDEX_ROUTES route on every real request, since production
   // routes are bound to the Worker (see wrangler.toml), not served as bare

@@ -48,7 +48,7 @@ interface HomeworkData {
 }
 
 export default function HomeworkPage() {
-  // v6.9.55 — Homework must NEVER invert to dark mode, regardless of any
+  // v6.9.55: Homework must NEVER invert to dark mode, regardless of any
   // teacher theme preference or system setting.
   useHardLightSurface('homework-page');
   const { token } = useParams<{ token: string }>();
@@ -334,7 +334,7 @@ export default function HomeworkPage() {
       setHomework(fixedData as HomeworkData);
       
       // Fetch reviewed_at status and source_worksheet_id separately (not in main RPC)
-      // v6.9.83 — share-token scoped RPC (public table policy removed for security)
+      // v6.9.83: share-token scoped RPC (public table policy removed for security)
       const { data: homeworkStatus } = await supabase
         .rpc('get_homework_status_by_share_token', { p_share_token: token })
         .maybeSingle();

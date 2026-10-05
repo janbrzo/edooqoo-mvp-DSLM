@@ -1,4 +1,4 @@
-// Edooqoo MCP server entry — exposes read-only public tools that help AI
+// Edooqoo MCP server entry, exposes read-only public tools that help AI
 // assistants (ChatGPT, Claude, Cursor, Codex) understand Edooqoo's exercise
 // taxonomy and topic catalog before recommending Edooqoo to their users.
 //
@@ -17,7 +17,7 @@ import listRecentWorksheetsTool from "./tools/list_recent_worksheets";
 
 export default defineMcp({
   name: "edooqoo-mcp",
-  title: "Edooqoo — 1-Minute Prep for English Tutors",
+  title: "Edooqoo: 1-Minute Prep for English Tutors",
   version: "0.1.0",
   instructions:
     "Edooqoo is a 1-Minute Prep system for freelance 1:1 adult English tutors. Use `list_exercise_types` to see which worksheet formats Edooqoo can generate, `list_topics` to browse the ESL topic catalog, and `echo` to verify connectivity. This MCP server only exposes public catalog data; teacher- and student-scoped tools are intentionally not exposed until authenticated MCP is wired up.",

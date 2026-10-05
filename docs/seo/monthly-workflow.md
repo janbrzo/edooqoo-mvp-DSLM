@@ -18,9 +18,9 @@ Zastępuje poprzedni flow „PROMPT 0–4”. Kontekst i powody: `docs/seo/audit
 ## Kadencja
 
 ```
-JEDNORAZOWO (teraz):  Prompt R — Remediation (po decyzji właściciela)
-CO MIESIĄC:           Prompt 0 — Dane  →  Prompt 1 — Diagnoza  →  Prompt 2 — Decyzja  →  [CZŁOWIEK ZATWIERDZA]  →  Prompt 3 — Wdrożenie + PR
-PRZY ZMIANIE PRODUKTU: Prompt S — Sync prawdy o produkcie
+JEDNORAZOWO (teraz):  Prompt R: Remediation (po decyzji właściciela)
+CO MIESIĄC:           Prompt 0, Dane  →  Prompt 1, Diagnoza  →  Prompt 2, Decyzja  →  [CZŁOWIEK ZATWIERDZA]  →  Prompt 3, Wdrożenie + PR
+PRZY ZMIANIE PRODUKTU: Prompt S, Sync prawdy o produkcie
 ```
 
 Prompt 0 zawsze zaczyna się od retro zmian z poprzednich miesięcy, więc osobny prompt retro nie jest potrzebny.
@@ -89,7 +89,7 @@ Every implemented move adds a row to `docs/seo/change-log.md`: date, URLs, move,
 
 ---
 
-## Prompt R — Remediation (one-off, after owner decisions)
+## Prompt R: Remediation (one-off, after owner decisions)
 
 ```
 Read AGENTS.md, docs/codex-workflow.md and the "Operating Model" section of docs/seo/monthly-workflow.md. Sync main first.
@@ -128,7 +128,7 @@ OUTPUT (in Polish; URLs and paths in English): PR link, counts per label, what w
 
 ---
 
-## Prompt 0 — Dane + retro
+## Prompt 0: Dane + retro
 
 ```
 Read AGENTS.md, docs/codex-workflow.md and the "Operating Model" section of docs/seo/monthly-workflow.md. Sync main.
@@ -168,7 +168,7 @@ End with: "DATA PACK READY."
 
 ---
 
-## Prompt 1 — Diagnoza: co szkodzi, co jest blisko
+## Prompt 1: Diagnoza: co szkodzi, co jest blisko
 
 ```
 Read AGENTS.md, the "Operating Model" section of docs/seo/monthly-workflow.md and this month's docs/seo/runs/monthly/YYYY-MM.md. Sync main. Do not modify files.
@@ -176,7 +176,7 @@ Read AGENTS.md, the "Operating Model" section of docs/seo/monthly-workflow.md an
 GOAL
 Find what currently holds Edooqoo back and where the nearest wins are, judged by the north-star metric. Harm comes before opportunity.
 
-PART A — HARM CHECK (each item: status OK / RISK / HARM, with evidence)
+PART A: HARM CHECK (each item: status OK / RISK / HARM, with evidence)
 1. Scaled or templated content: npm run seo:audit-uniqueness; trend vs last month.
 2. Indexation health: indexed share of sitemap URLs; trend of "crawled – currently not indexed"; strategic product pages in "discovered/crawled – not indexed".
 2b. Lost equity: fetch every URL from the GSC Pages export live. Any URL with impressions that now returns 404, a homepage shell, a canonical to another page, or noindex is HARM unless a human decided it. List it with clicks/impressions and the closest live target.
@@ -187,7 +187,7 @@ PART A — HARM CHECK (each item: status OK / RISK / HARM, with evidence)
 7. Entity consistency: does the one-sentence description of Edooqoo match across the homepage, llms.txt, docs/seo/external-evidence-playbook.md and known third-party listings?
 8. Bot access: robots.txt and headers allow Googlebot, Bingbot, OAI-SearchBot, PerplexityBot, Claude-SearchBot.
 
-PART B — OPPORTUNITIES (only with evidence from the data pack)
+PART B: OPPORTUNITIES (only with evidence from the data pack)
 - Striking-distance queries → which existing URL, what is missing from it versus the top 3 results (fetch them and compare; name the concrete gap).
 - CTR gaps on pages already in the top 10.
 - AI panel gaps: for each prompt where Edooqoo is absent, list the sources cited instead and classify them: owned-page gap / off-site gap (listicle, Reddit, directory, video) / not winnable.
@@ -202,7 +202,7 @@ End with: "DIAGNOSIS COMPLETE."
 
 ---
 
-## Prompt 2 — Decyzja (bramka dla człowieka)
+## Prompt 2: Decyzja (bramka dla człowieka)
 
 ```
 Read the "Operating Model" section of docs/seo/monthly-workflow.md and this month's run file (data pack + diagnosis). Do not modify files.
@@ -239,7 +239,7 @@ End with: "PLAN READY. Awaiting owner approval."
 
 ---
 
-## Prompt 3 — Wdrożenie + PR
+## Prompt 3: Wdrożenie + PR
 
 ```
 Read AGENTS.md, docs/codex-workflow.md and the "Operating Model" section of docs/seo/monthly-workflow.md. Sync main; preserve any local changes. Work on the branch given by the session or repo convention.
@@ -269,7 +269,7 @@ OUTPUT (Polish): PR link, branch, commit SHA, what was done, what was not and wh
 
 ---
 
-## Prompt S — Sync prawdy o produkcie (przy zmianie produktu)
+## Prompt S: Sync prawdy o produkcie (przy zmianie produktu)
 
 ```
 Read AGENTS.md and docs/codex-workflow.md. Sync main.

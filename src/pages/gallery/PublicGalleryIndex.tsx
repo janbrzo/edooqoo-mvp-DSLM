@@ -31,7 +31,7 @@ const PublicGalleryIndex: React.FC = () => {
     let cancelled = false;
     setLoading(true);
     (async () => {
-      // v6.9.88 — read through a security-definer RPC that exposes only safe
+      // v6.9.88: read through a security-definer RPC that exposes only safe
       // display columns; the worksheets table no longer has a public policy.
       const { data } = await supabase.rpc('list_public_worksheets', {
         p_level: levelFilter || null,
@@ -70,7 +70,7 @@ const PublicGalleryIndex: React.FC = () => {
     <div className="min-h-screen bg-background">
       <PublicTopNav />
       <PageSeo
-        title="Public ESL Worksheets Gallery — Edooqoo"
+        title="Public ESL Worksheets Gallery | Edooqoo"
         description="Browse free, ready-to-use English worksheets shared by tutors. Filter by CEFR level (A1–C2) and topic. No sign-up required."
         path="/gallery"
         jsonLd={itemListLd}
@@ -84,7 +84,7 @@ const PublicGalleryIndex: React.FC = () => {
           </aside>
         </header>
 
-        {/* v6.9.34 — single granular CEFR chip row. Old composite chips
+        {/* v6.9.34: single granular CEFR chip row. Old composite chips
             (A1/A2 …) and the legacy dropdown were removed because they
             collided with each other and produced empty results. */}
         <div className="flex flex-wrap items-center gap-2 mb-3">

@@ -315,7 +315,7 @@ export function UnifiedSlotModal({
         const studentName = students.find(s => s.id === studentId)?.name;
         const result = await onCreateSingle({
           slot_date: date, start_time: startTime, end_time: endTime,
-          student_id: studentId, title: studentName ? `${studentName} — English lesson` : undefined,
+          student_id: studentId, title: studentName ? `${studentName} | English lesson` : undefined,
           notes: notes || undefined, worksheet_id: worksheetId !== 'none' ? worksheetId : undefined,
         });
         if (!result) {
@@ -331,7 +331,7 @@ export function UnifiedSlotModal({
         for (const r of replaceable) await onDeleteSlot(r.id);
         const studentName = students.find(s => s.id === studentId)?.name;
         const slotsWithMeta = recurringSlots.map(s => ({
-          ...s, title: studentName ? `${studentName} — English lesson` : undefined,
+          ...s, title: studentName ? `${studentName} | English lesson` : undefined,
           notes: notes || undefined, booking_type: 'recurring_instance',
         }));
         const result = await onCreateBatch(slotsWithMeta);
@@ -367,7 +367,7 @@ export function UnifiedSlotModal({
         </DraggableDialogHeader>
 
         <div className="space-y-4">
-          {/* Top tabs — 3 tabs: Available Slot | Lesson | Block */}
+          {/* Top tabs: 3 tabs: Available Slot | Lesson | Block */}
           <Tabs value={slotType} onValueChange={v => { setSlotType(v as SlotType); setConflicts([]); setConflictBlocked(false); }}>
             <TabsList className="grid grid-cols-3 w-full">
               <TabsTrigger value="available" className="text-xs">
@@ -382,7 +382,7 @@ export function UnifiedSlotModal({
             </TabsList>
           </Tabs>
 
-          {/* Sub-mode toggle — only for available and lesson */}
+          {/* Sub-mode toggle: only for available and lesson */}
           {slotType === 'available' && (
             <div className="flex gap-1 p-0.5 bg-muted rounded-md">
               <button className={`flex-1 text-xs py-1.5 rounded-sm transition-colors ${availableMode === 'single' ? 'bg-background shadow-sm font-medium' : 'text-muted-foreground hover:text-foreground'}`} onClick={() => setAvailableMode('single')}>Single Slot</button>
@@ -396,7 +396,7 @@ export function UnifiedSlotModal({
             </div>
           )}
 
-          {/* Student selector (lesson only) — Combobox with search */}
+          {/* Student selector (lesson only): Combobox with search */}
           {slotType === 'lesson' && (
             <div>
               <Label className="text-xs">Student *</Label>
@@ -548,7 +548,7 @@ export function UnifiedSlotModal({
             </>
           )}
 
-          {/* 2B: Worksheet link ONLY for lesson mode single — removed from Available Slot */}
+          {/* 2B: Worksheet link ONLY for lesson mode single, removed from Available Slot */}
           {slotType === 'lesson' && mode === 'single' && (
             <div className="flex justify-between items-center">
               <span className="text-xs text-muted-foreground">Worksheet</span>
@@ -592,11 +592,11 @@ export function UnifiedSlotModal({
           {slotType === 'block' && (
             <div className="bg-muted/50 border border-border rounded-md px-3 py-2 text-xs text-muted-foreground">
               <Lock className="h-3 w-3 inline mr-1" />
-              Private block — only visible to you. Prevents adding slots or lessons in this time range.
+              Private block: only visible to you. Prevents adding slots or lessons in this time range.
             </div>
           )}
 
-          {/* Discount — available slot single mode only */}
+          {/* Discount: available slot single mode only */}
           {slotType === 'available' && mode === 'single' && (
             <div>
               <Label className="text-xs">Discount % (optional)</Label>
@@ -633,12 +633,12 @@ export function UnifiedSlotModal({
             <div className="bg-destructive/10 border border-destructive/30 rounded-md px-3 py-2 text-sm space-y-1">
               <div className="flex items-center gap-1 font-medium text-destructive">
                 <AlertTriangle className="h-4 w-4" />
-                Conflicts detected — cannot proceed
+                Conflicts detected: cannot proceed
               </div>
               <p className="text-xs text-muted-foreground">Remove existing lessons first, then add new ones or edit existing ones.</p>
               {conflicts.filter(c => c.type === 'blocked').slice(0, 5).map((c, i) => (
                 <div key={i} className="text-xs text-muted-foreground">
-                  {c.date} {c.time} — Lesson with {c.studentName || 'student'}
+                  {c.date} {c.time}: Lesson with {c.studentName || 'student'}
                 </div>
               ))}
               {conflicts.filter(c => c.type === 'blocked').length > 5 && <div className="text-xs text-muted-foreground">...and {conflicts.filter(c => c.type === 'blocked').length - 5} more</div>}

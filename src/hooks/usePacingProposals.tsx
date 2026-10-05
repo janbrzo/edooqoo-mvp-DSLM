@@ -1,5 +1,5 @@
 /**
- * usePacingProposals — DSLM v4.9
+ * usePacingProposals: DSLM v4.9
  *
  * Manages pending pacing proposals for the current teacher.
  * Used by PacingProposalsBell (header) + PacingProposalCard (Pathway sidebar).
@@ -88,7 +88,7 @@ export const usePacingProposals = (studentId?: string) => {
       if (pErr) throw pErr;
 
       toast.success(`Pacing updated to ${proposal.proposed_pacing}/100`, {
-        description: `${proposal.student_name || 'Student'} — ${proposal.current_pacing} → ${proposal.proposed_pacing}`,
+        description: `${proposal.student_name || 'Student'}: ${proposal.current_pacing} → ${proposal.proposed_pacing}`,
       });
       window.dispatchEvent(new CustomEvent('pacingProposalChanged'));
     } catch (e: any) {
@@ -103,7 +103,7 @@ export const usePacingProposals = (studentId?: string) => {
         .update({ status: 'rejected', decided_at: new Date().toISOString(), decided_by: teacherId })
         .eq('id', proposal.id);
       if (error) throw error;
-      toast.message('Proposal dismissed', { description: `${proposal.student_name || 'Student'} — keeping ${proposal.current_pacing}/100` });
+      toast.message('Proposal dismissed', { description: `${proposal.student_name || 'Student'}: keeping ${proposal.current_pacing}/100` });
       window.dispatchEvent(new CustomEvent('pacingProposalChanged'));
     } catch (e: any) {
       toast.error('Failed to reject', { description: e?.message || 'Unknown error' });

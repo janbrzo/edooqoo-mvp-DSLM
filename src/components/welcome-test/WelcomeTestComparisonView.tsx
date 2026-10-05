@@ -1,10 +1,10 @@
 /**
- * WelcomeTestComparisonView — v6.2
+ * WelcomeTestComparisonView: v6.2
  *
  * Side-by-side comparison of Welcome Test attempts for a single student.
  * Renders:
  * - A timeline of all attempts (#1, #2, ...) with status + completion date
- * - The current learning profile (latest completed attempt) — CEFR level,
+ * - The current learning profile (latest completed attempt): CEFR level,
  *   skill scores, traits, strongest/weakest skill
  * - The Gemini-generated `evolution_summary` (when ≥2 attempts have been
  *   completed) describing measurable deltas vs the previous attempt
@@ -30,14 +30,14 @@ interface Props {
 }
 
 const formatDate = (iso: string | null) => {
-  if (!iso) return '—';
+  if (!iso) return '-';
   try { return new Date(iso).toLocaleDateString(undefined, { dateStyle: 'medium' }); }
   catch { return iso; }
 };
 
 const ScoreCell: React.FC<{ label: string; value: number | null | undefined }> = ({ label, value }) => (
   <div className="text-center p-2 bg-muted/40 rounded">
-    <div className="text-base font-bold leading-none">{value !== null && value !== undefined ? `${Math.round(Number(value))}%` : '—'}</div>
+    <div className="text-base font-bold leading-none">{value !== null && value !== undefined ? `${Math.round(Number(value))}%` : '-'}</div>
     <div className="text-[10px] text-muted-foreground mt-1">{label}</div>
   </div>
 );
@@ -45,7 +45,7 @@ const ScoreCell: React.FC<{ label: string; value: number | null | undefined }> =
 const TraitCell: React.FC<{ label: string; value: string | null | undefined }> = ({ label, value }) => (
   <div>
     <div className="text-[10px] text-muted-foreground uppercase tracking-wide">{label}</div>
-    <Badge variant="outline" className="text-xs mt-0.5">{value || '—'}</Badge>
+    <Badge variant="outline" className="text-xs mt-0.5">{value || '-'}</Badge>
   </div>
 );
 
@@ -96,11 +96,11 @@ const AttemptRow: React.FC<{ attempt: WelcomeAttempt; isLatest: boolean }> = ({ 
             <div className="grid grid-cols-2 gap-2 text-xs pt-1">
               <div>
                 <span className="text-muted-foreground">Strongest: </span>
-                <span className="font-medium">{profile.strongest_skill || '—'}</span>
+                <span className="font-medium">{profile.strongest_skill || '-'}</span>
               </div>
               <div>
                 <span className="text-muted-foreground">Weakest: </span>
-                <span className="font-medium">{profile.weakest_skill || '—'}</span>
+                <span className="font-medium">{profile.weakest_skill || '-'}</span>
               </div>
             </div>
           </>
@@ -130,7 +130,7 @@ export const WelcomeTestComparisonView: React.FC<Props> = ({
         </Button>
         <h2 className="text-xl font-bold flex items-center gap-2">
           <TrendingUp className="h-5 w-5 text-primary" />
-          Welcome Test — Progress Comparison
+          Welcome Test: Progress Comparison
           {studentName && <span className="text-muted-foreground font-normal">· {studentName}</span>}
         </h2>
       </div>

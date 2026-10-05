@@ -1,8 +1,8 @@
 /**
- * DslmExplainerBanner — collapsible DSLM explainer shown above
+ * DslmExplainerBanner: collapsible DSLM explainer shown above
  * the DSLM tab. Dismissed once per teacher via `localStorage`.
  *
- * v6.8.4 — Problem 5: rebrand DSLM tab to "1 MINUTE" with concept explanation.
+ * v6.8.4: Problem 5: rebrand DSLM tab to "1 MINUTE" with concept explanation.
  */
 import React, { useState } from 'react';
 import { Brain, X, ExternalLink } from 'lucide-react';

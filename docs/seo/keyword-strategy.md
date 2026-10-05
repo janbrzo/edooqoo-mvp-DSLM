@@ -13,9 +13,9 @@
 
 ## Out of scope (do NOT chase as a new site)
 
-- `esl` (110,000/mo) — too broad, no commercial differentiation.
-- `dave's esl cafe` (~70,000/mo) — branded competitor.
-- `tefl` / `tesol` (~9,000/mo) — certification queries, not product.
+- `esl` (110,000/mo): too broad, no commercial differentiation.
+- `dave's esl cafe` (~70,000/mo): branded competitor.
+- `tefl` / `tesol` (~9,000/mo): certification queries, not product.
 
 ## Implementation notes
 

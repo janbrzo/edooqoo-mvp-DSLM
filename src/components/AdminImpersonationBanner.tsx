@@ -46,7 +46,7 @@ export function AdminImpersonationBanner() {
       <div className="flex items-center gap-2">
         <ShieldAlert className="h-4 w-4" />
         <span className="font-semibold">ADMIN VIEW</span>
-        <span className="opacity-90">— Viewing as: {teacherEmail}</span>
+        <span className="opacity-90">Viewing as: {teacherEmail}</span>
       </div>
       <Button
         variant="ghost"

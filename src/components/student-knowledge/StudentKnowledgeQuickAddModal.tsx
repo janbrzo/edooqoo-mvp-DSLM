@@ -18,7 +18,7 @@ interface StudentKnowledgeQuickAddModalProps {
 }
 
 /**
- * v6.9.8 — Frictionless capture.
+ * v6.9.8: Frictionless capture.
  * Teacher writes free text; AI classifies in the background after Save
  * (handled by useStudentKnowledge.addEntry → classify-knowledge-entry).
  * Optional tags only. No category picker.
@@ -76,7 +76,7 @@ export const StudentKnowledgeQuickAddModal = ({
           <DialogTitle>Quick Note</DialogTitle>
           <DialogDescription className="flex items-center gap-1.5">
             <Sparkles className="h-3.5 w-3.5 text-primary" />
-            Just write — AI organizes it for you in a moment.
+            Just write: AI organizes it for you in a moment.
           </DialogDescription>
         </DialogHeader>
 
@@ -87,7 +87,7 @@ export const StudentKnowledgeQuickAddModal = ({
               id="quick-content"
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder='e.g. "Struggles with past perfect when telling stories" or "Coming back from Lisbon May 12 — ask about it"'
+              placeholder='e.g. "Struggles with past perfect when telling stories" or "Coming back from Lisbon May 12, ask about it"'
               rows={5}
               className="resize-none"
               autoFocus

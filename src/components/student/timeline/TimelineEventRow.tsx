@@ -1,5 +1,5 @@
 /**
- * TimelineEventRow — one event in the Timeline stream (v6.9.111, M5 step 3).
+ * TimelineEventRow: one event in the Timeline stream (v6.9.111, M5 step 3).
  *
  * A thin adapter over the shared `EntityRow` (M2): it only picks the icon for
  * the event type, formats the timestamp and forwards navigation upwards. Every

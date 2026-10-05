@@ -18,7 +18,7 @@ const ICONS: Record<AttentionKind, LucideIcon> = {
 };
 
 /**
- * v6.9.109 — zone B of the Today dashboard. Renders nothing when empty:
+ * v6.9.109: zone B of the Today dashboard. Renders nothing when empty:
  * no "all caught up" filler, the zone simply does not exist.
  */
 export const AttentionSection: React.FC<AttentionSectionProps> = ({ items, loading, onOpenInbox }) => {

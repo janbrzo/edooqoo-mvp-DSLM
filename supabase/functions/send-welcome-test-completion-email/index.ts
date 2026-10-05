@@ -1,4 +1,4 @@
-// v6.9.29 — Sends a "thanks for completing" email to the student after Welcome Test.
+// v6.9.29: Sends a "thanks for completing" email to the student after Welcome Test.
 // Idempotent via student_tests.completion_email_sent_at. Reply-To = teacher email.
 // Resend direct API (RESEND_API_KEY). Matches send-welcome-email pattern.
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";

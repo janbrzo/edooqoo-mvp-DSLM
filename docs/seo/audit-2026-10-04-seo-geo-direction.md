@@ -1,4 +1,4 @@
-# Audyt kierunku SEO/GEO — 2026-10-04
+# Audyt kierunku SEO/GEO, 2026-10-04
 
 Zakres: czy dotychczasowa praca nad SEO/GEO szła w dobrą stronę i czy coś szkodzi. Ten audyt niczego nie zmienia na stronie. Każda zmiana z sekcji „Rekomendacje” wymaga decyzji właściciela.
 
@@ -16,7 +16,7 @@ Aktualizacja tego samego dnia: właściciel dostarczył eksporty GSC (Skuteczno�
 4. **Nowy, najpilniejszy problem: 38 URL-i, które w ostatnich 3 miesiącach dały 34 kliknięcia i 1042 wyświetlenia, zwraca dziś 404**, bez przekierowania. To 11% wszystkich kliknięć serwisu.
 5. **Zapytania z ICP praktycznie nie istnieją w GSC**: „tutor” → 2 wyświetlenia, a „private”, „adult”, „business english”, „chatgpt” → 0. Ruch z Google to nauczyciele ESL szukający ćwiczeń, narzędzi CEFR i arkuszy. Marka: „edooqoo” → 5 wyświetleń.
 
-## Co działa — zostawić
+## Co działa: zostawić
 
 | Element | Dowód |
 |---|---|
@@ -25,14 +25,14 @@ Aktualizacja tego samego dnia: właściciel dostarczył eksporty GSC (Skuteczno�
 | Polityka indeksacji pSEO | 1330 kombinacji `noindex`, 95 indeksowalnych (`pseo-index-policy.generated.json`) |
 | robots.txt | prywatne trasy wyłączone, boty AI nie są blokowane |
 | Unikalne strony | `/features/*`, `/what-to-teach-next/*`, `/tools/*`: 0% szablonowości |
-| Strony, które realnie zbierają ruch | `/blog/teaching-english-intonation-stress` (309 wyśw.), `/modal-verbs-worksheets-esl` (poz. 7.7), `/blog/teaching-collocations-esl` — wszystkie unikalne (podobieństwo do innych stron ≈1%) |
+| Strony, które realnie zbierają ruch | `/blog/teaching-english-intonation-stress` (309 wyśw.), `/modal-verbs-worksheets-esl` (poz. 7.7), `/blog/teaching-collocations-esl`, wszystkie unikalne (podobieństwo do innych stron ≈1%) |
 | `llms.txt` | dobrze napisany, z granicami claimów. Tani w utrzymaniu, ale nie oczekiwać mierzalnego efektu; Google go nie używa |
 
 ---
 
-## Co szkodzi — dowody
+## Co szkodzi: dowody
 
-### 1. Treści generowane masowo z szablonu (scaled content) — ryzyko krytyczne
+### 1. Treści generowane masowo z szablonu (scaled content): ryzyko krytyczne
 
 `npm run seo:audit-uniqueness` (8-wyrazowe shingle widocznego tekstu, bez nawigacji i tekstu linków):
 

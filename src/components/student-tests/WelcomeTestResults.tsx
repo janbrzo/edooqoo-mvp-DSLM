@@ -26,7 +26,7 @@ interface WelcomeTestResultsProps {
   testId: string;
   studentId: string;
   teacherId: string;
-  /** Optional — when provided, listening/other skills can fall back to a
+  /** Optional: when provided, listening/other skills can fall back to a
    *  per-question computation if `test_skill_results` lacks an entry. */
   questions?: TestQuestionLike[];
 }
@@ -54,7 +54,7 @@ export function WelcomeTestResults({ testId, studentId, teacherId, questions }: 
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        // v6.9.47 — prefer the profile bound to THIS testId so retakes never
+        // v6.9.47: prefer the profile bound to THIS testId so retakes never
         // show analysis from a previous attempt. Fallback to the latest profile
         // for the student when no test-specific row exists yet.
         let data: any = null;
@@ -92,7 +92,7 @@ export function WelcomeTestResults({ testId, studentId, teacherId, questions }: 
           }
         }
 
-        // v6.9.47 — skill results should match the rendered test, not the
+        // v6.9.47: skill results should match the rendered test, not the
         // student-wide newest welcome test (matters for retakes).
         if (testId) {
           const { data: results } = await supabase
@@ -200,11 +200,11 @@ export function WelcomeTestResults({ testId, studentId, teacherId, questions }: 
         <CardContent>
           <div className="grid grid-cols-3 gap-4">
             <div className="text-center p-4 bg-primary/5 rounded-lg">
-              <div className="text-2xl font-bold text-primary">{profile.estimated_level || '—'}</div>
+              <div className="text-2xl font-bold text-primary">{profile.estimated_level || '-'}</div>
               <div className="text-xs text-muted-foreground">Estimated Level</div>
             </div>
             <div className="text-center p-4 bg-muted/30 rounded-lg">
-              <div className="text-2xl font-bold">{profile.self_assessed_level || '—'}</div>
+              <div className="text-2xl font-bold">{profile.self_assessed_level || '-'}</div>
               <div className="text-xs text-muted-foreground">Self-Assessed</div>
             </div>
             <div className="text-center p-4 bg-muted/30 rounded-lg">
@@ -288,7 +288,7 @@ export function WelcomeTestResults({ testId, studentId, teacherId, questions }: 
                         <Progress value={displayScore || 0} className="h-2" />
                       </div>
                       <span className="w-12 text-right text-sm font-medium">
-                        {isSkipped ? '—' : (displayScore !== null ? `${Math.round(displayScore)}%` : '—')}
+                        {isSkipped ? '-' : (displayScore !== null ? `${Math.round(displayScore)}%` : '-')}
                       </span>
                       {result && (
                         <span className="w-14 text-right text-xs text-muted-foreground">
@@ -314,11 +314,11 @@ export function WelcomeTestResults({ testId, studentId, teacherId, questions }: 
                     <div className="flex gap-4 mt-4 text-sm">
                       <div className="flex items-center gap-1">
                         <span className="text-muted-foreground">Strongest:</span>
-                        <Badge variant="default">{strongest?.label || '—'}</Badge>
+                        <Badge variant="default">{strongest?.label || '-'}</Badge>
                       </div>
                       <div className="flex items-center gap-1">
                         <span className="text-muted-foreground">Weakest:</span>
-                        <Badge variant="destructive">{weakest?.label || '—'}</Badge>
+                        <Badge variant="destructive">{weakest?.label || '-'}</Badge>
                       </div>
                     </div>
                   );
@@ -341,22 +341,22 @@ export function WelcomeTestResults({ testId, studentId, teacherId, questions }: 
           <CardContent className="space-y-3 text-sm">
             <div className="flex justify-between">
               <span className="text-muted-foreground">Motivation</span>
-              <Badge variant="outline">{profile.motivation_type || '—'}</Badge>
+              <Badge variant="outline">{profile.motivation_type || '-'}</Badge>
             </div>
             <div className="flex justify-between items-center">
               <span className="text-muted-foreground">Anxiety Level</span>
               <div className="flex items-center gap-1">
                 {anxietyIcon}
-                <span>{profile.anxiety_level || '—'}</span>
+                <span>{profile.anxiety_level || '-'}</span>
               </div>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Ambiguity Tolerance</span>
-              <span>{profile.ambiguity_tolerance || '—'}</span>
+              <span>{profile.ambiguity_tolerance || '-'}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Error Attitude</span>
-              <span>{profile.error_attitude || '—'}</span>
+              <span>{profile.error_attitude || '-'}</span>
             </div>
           </CardContent>
         </Card>
@@ -371,15 +371,15 @@ export function WelcomeTestResults({ testId, studentId, teacherId, questions }: 
           <CardContent className="space-y-3 text-sm">
             <div className="flex justify-between">
               <span className="text-muted-foreground">Input Channel</span>
-              <Badge variant="outline">{profile.preferred_input_channel || '—'}</Badge>
+              <Badge variant="outline">{profile.preferred_input_channel || '-'}</Badge>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Feedback</span>
-              <span>{profile.feedback_preference || '—'}</span>
+              <span>{profile.feedback_preference || '-'}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-muted-foreground">Weekly Time</span>
-              <span>{profile.weekly_study_time || '—'}</span>
+              <span>{profile.weekly_study_time || '-'}</span>
             </div>
             <div>
               <span className="text-muted-foreground block mb-1">Preferred Activities</span>

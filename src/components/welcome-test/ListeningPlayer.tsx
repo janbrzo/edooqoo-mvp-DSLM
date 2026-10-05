@@ -91,7 +91,7 @@ export function ListeningPlayer({ audioUrl, transcript }: ListeningPlayerProps) 
         </div>
       ) : (
         <div className="text-xs text-amber-600 dark:text-amber-400 italic">
-          ⚠️ Audio not available — transcript shown below
+          ⚠️ Audio not available, transcript shown below
         </div>
       )}
 

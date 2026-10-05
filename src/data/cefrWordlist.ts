@@ -39,7 +39,7 @@ export function lookupCefr(word: string): CefrWordLevel | null {
   return map.get(word.toLowerCase()) ?? null;
 }
 
-// Heuristic fallback for unknown words — based on length + simple suffix cues.
+// Heuristic fallback for unknown words, based on length + simple suffix cues.
 export function guessCefr(word: string): CefrWordLevel {
   const w = word.toLowerCase();
   const len = w.length;

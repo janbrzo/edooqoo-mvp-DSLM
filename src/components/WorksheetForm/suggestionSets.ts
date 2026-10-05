@@ -61,7 +61,7 @@ export const SUGGESTION_SETS: SuggestionSet[] = [
     id: "set-8",
     lessonTopic: "Asking for help at an electronics store abroad",
     lessonFocus: "Explaining problems and understanding instructions",
-    additionalInformation: "Emma [27] is in Paris and her laptop suddenly stopped working — she needs help fast.",
+    additionalInformation: "Emma [27] is in Paris and her laptop suddenly stopped working; she needs help fast.",
     grammarFocus: "Relative Clauses"
   },
   {

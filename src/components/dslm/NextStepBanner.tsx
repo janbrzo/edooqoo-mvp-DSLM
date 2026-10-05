@@ -1,5 +1,5 @@
 /**
- * NextStepBanner v4 — prominent #1 suggestion card.
+ * NextStepBanner v4: prominent #1 suggestion card.
  * Buttons:
  *  - "Generate worksheet ↗" → onUseAndGenerate (auto-start generation)
  *  - "Use this" → onUse (prefill only)
@@ -36,11 +36,11 @@ interface NextStepBannerProps {
   onRegenerateWithComment?: (suggestion: any) => void;
   /** v4.8: mark this suggestion as already used (manual flag, no worksheet link). */
   onMarkUsed?: (suggestionId: string) => void;
-  /** v6.9.14 — delete the #1 next step (with type-to-confirm). */
+  /** v6.9.14: delete the #1 next step (with type-to-confirm). */
   onDelete?: (suggestionId: string) => void;
   generating: boolean;
   hasGoals: boolean;
-  /** v6.9.40 P5 — readiness signals for the empty state. */
+  /** v6.9.40 P5: readiness signals for the empty state. */
   wtCompleted?: boolean;
   hasPhases?: boolean;
   onAddGoal?: () => void;
@@ -108,7 +108,7 @@ export const NextStepBanner: React.FC<NextStepBannerProps> = ({
               <ul className="text-xs text-muted-foreground space-y-1.5">
                 {!hasGoals && onAddGoal && (
                   <li className="grid grid-cols-1 sm:grid-cols-[1fr_auto] items-center gap-2">
-                    <span>No learning goals set — AI will infer from main goal only.</span>
+                    <span>No learning goals set, AI will infer from main goal only.</span>
                     <Button size="sm" variant="outline" className="h-7 text-[11px] justify-self-end" onClick={onAddGoal}>
                       <Target className="h-3 w-3 mr-1" /> Add goal
                     </Button>
@@ -116,7 +116,7 @@ export const NextStepBanner: React.FC<NextStepBannerProps> = ({
                 )}
                 {!wtCompleted && onSendWelcomeTest && (
                   <li className="grid grid-cols-1 sm:grid-cols-[1fr_auto] items-center gap-2">
-                    <span>Welcome Placement Test not completed — level signals are weaker.</span>
+                    <span>Welcome Placement Test not completed, level signals are weaker.</span>
                     <Button size="sm" variant="outline" className="h-7 text-[11px] justify-self-end" onClick={onSendWelcomeTest}>
                       <Send className="h-3 w-3 mr-1" /> Send test
                     </Button>
@@ -124,7 +124,7 @@ export const NextStepBanner: React.FC<NextStepBannerProps> = ({
                 )}
                 {!hasPhases && onGoToRoadmap && (
                   <li className="grid grid-cols-1 sm:grid-cols-[1fr_auto] items-center gap-2">
-                    <span>No curriculum plan yet — optional, but strongly recommended for recurring students.</span>
+                    <span>No curriculum plan yet, optional, but strongly recommended for recurring students.</span>
                     <Button size="sm" variant="outline" className="h-7 text-[11px] justify-self-end" onClick={onGoToRoadmap}>
                       <Map className="h-3 w-3 mr-1" /> Go to roadmap
                     </Button>
@@ -211,7 +211,7 @@ export const NextStepBanner: React.FC<NextStepBannerProps> = ({
             </div>
           )}
 
-          {/* v6.9.15a — single-row action bar; secondary actions shrink to icon+short label, full text in tooltips. */}
+          {/* v6.9.15a: single-row action bar; secondary actions shrink to icon+short label, full text in tooltips. */}
           <div className="flex flex-wrap sm:flex-nowrap items-center gap-1.5 pt-1 sm:overflow-x-auto">
             <Tooltip>
               <TooltipTrigger asChild>
@@ -227,7 +227,7 @@ export const NextStepBanner: React.FC<NextStepBannerProps> = ({
                   <ClipboardCopy className="h-3.5 w-3.5 mr-1" /> Use this
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>Use this — copy to form &amp; edit before generating</TooltipContent>
+              <TooltipContent>Use this: copy to form &amp; edit before generating</TooltipContent>
             </Tooltip>
             <Tooltip>
               <TooltipTrigger asChild>

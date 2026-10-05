@@ -9,7 +9,7 @@ import {
 import { NEWSLETTER_EMBED_CSS, renderNewsletterEmbed } from './newsletter-embed.mjs';
 import { SEO_TITLE_OVERRIDES } from './x1000-editorial-plan.mjs';
 
-/** Hand-written SEO titles never take the brand suffix — they are already keyword-complete. */
+/** Hand-written SEO titles never take the brand suffix; they are already keyword-complete. */
 const CURATED_SEO_TITLES = new Set(Object.values(SEO_TITLE_OVERRIDES));
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -22,7 +22,7 @@ const UPDATED_DATE = '2026-06-15';
 const AUTHOR_URL = `${BASE}/authors/jan-brzostowski`;
 
 const productLinks = [
-  // Sprint 3 (Faza 3) topical cluster hubs — see scripts/seo/cluster-hubs.mjs
+  // Sprint 3 (Faza 3) topical cluster hubs, see scripts/seo/cluster-hubs.mjs
   ['/cefr-assessment', 'CEFR assessment hub'],
   ['/teaching-english-pronunciation', 'Pronunciation teaching hub'],
   ['/esl-exercise-design', 'ESL exercise design hub'],
@@ -1906,7 +1906,7 @@ ${renderNewsletterEmbed(`article:${article.slug.replace(/\.html$/, '')}`).trimSt
 }
 
 /**
- * Sprint 2 (S2-D) — conquest pages need an explicit disqualification block.
+ * Sprint 2 (S2-D): conquest pages need an explicit disqualification block.
  * Comparison queries convert on trust: a page that only lists strengths reads as
  * marketing and gets skipped by both tutors and AI answer engines.
  */

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Sprint 3 — CI guard for the four topical cluster hubs.
+ * Sprint 3: CI guard for the four topical cluster hubs.
  *
  * Verifies, without a browser:
  * 1. every hub route is registered in CORE_SEO_ROUTES (so it gets prerendered + sitemapped);

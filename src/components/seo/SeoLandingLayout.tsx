@@ -172,7 +172,7 @@ const SeoLandingLayout: React.FC<SeoLandingLayoutProps> = ({
               state={ctaState('/signup')}
               className="inline-block bg-primary text-primary-foreground px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity"
             >
-              Sign up free — 2 worksheets included
+              Sign up free: 2 worksheets included
             </Link>
             <Link
               to="/pricing"

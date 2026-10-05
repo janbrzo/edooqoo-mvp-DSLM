@@ -9,7 +9,7 @@ export interface LoadingButtonProps extends ButtonProps {
 }
 
 /**
- * P7 — Standardised loading state for any async action button.
+ * P7: Standardised loading state for any async action button.
  * Disables the button while loading and shows a spinner + optional label.
  * Uses semantic tokens via the underlying Button component.
  */

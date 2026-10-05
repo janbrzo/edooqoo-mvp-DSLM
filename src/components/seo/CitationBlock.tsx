@@ -1,7 +1,7 @@
 import React from 'react';
 
 /**
- * Sprint 4 (Faza 4) — GEO/AEO citation block.
+ * Sprint 4 (Faza 4): GEO/AEO citation block.
  *
  * One extractable 40-60 word paragraph answer engines can quote verbatim.
  * The `data-citation-block` marker is the contract used by

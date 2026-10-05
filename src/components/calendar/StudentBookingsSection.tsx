@@ -64,8 +64,8 @@ function formatLogAction(log: any): React.ReactNode {
   parts.push(<span key="action" className="font-medium">{action}</span>);
   parts.push(<span key="actor" className="text-muted-foreground ml-1">by {log.actor}</span>);
   parts.push(<span key="time" className="text-muted-foreground ml-1">{format(new Date(log.created_at), 'MMM d HH:mm')}</span>);
-  if (d.student_name) parts.push(<span key="sn" className="text-muted-foreground"> — {d.student_name}</span>);
-  if (d.slot_date) parts.push(<span key="sd" className="text-muted-foreground"> — {d.slot_date}</span>);
+  if (d.student_name) parts.push(<span key="sn" className="text-muted-foreground">: {d.student_name}</span>);
+  if (d.slot_date) parts.push(<span key="sd" className="text-muted-foreground">: {d.slot_date}</span>);
   if (d.start_time) parts.push(<span key="st" className="text-muted-foreground"> at {String(d.start_time).slice(0, 5)}</span>);
   if (d.old_status) parts.push(<span key="os" className="text-muted-foreground"> ({d.old_status} → {d.new_status})</span>);
   if (d.previous_student) parts.push(<span key="ps" className="text-muted-foreground"> (was: {d.previous_student})</span>);
@@ -243,7 +243,7 @@ export function StudentBookingsSection({ settings, token, availableSlots, onBook
       }));
       result = [...result, ...cancelledMapped];
     }
-    // Single descending sort — newest first
+    // Single descending sort, newest first
     result.sort((a: any, b: any) => 
       `${b.slot_date}${b.start_time}`.localeCompare(`${a.slot_date}${a.start_time}`)
     );
@@ -277,7 +277,7 @@ export function StudentBookingsSection({ settings, token, availableSlots, onBook
     }
   }, []);
 
-  // Auto-scroll to today on initial load — only once
+  // Auto-scroll to today on initial load, only once
   const hasScrolledRef = React.useRef(false);
   useEffect(() => {
     if (allBookings.length > 0 && !loading && !hasScrolledRef.current) {

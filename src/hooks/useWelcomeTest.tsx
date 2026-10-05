@@ -221,7 +221,7 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
   // commitAnswer with fixed element_type, enriched payload, and fixed dedup
 
   // Commit answer to DB + log event (called on blur/navigate for text, immediately for radio/checkbox)
-  // v6.9.67 — opts.isIdk flags the event_payload so analytics can distinguish
+  // v6.9.67: opts.isIdk flags the event_payload so analytics can distinguish
   // an honest "I don't know" from a wrong guess.
   const commitAnswer = useCallback(async (
     questionId: string,
@@ -439,7 +439,7 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
   }, [commitAnswer]);
 
   // Flush pending speaking recording before navigation.
-  // P1.8: never fabricate a "recording_pending_*" placeholder — a failed upload
+  // P1.8: never fabricate a "recording_pending_*" placeholder: a failed upload
   // must stay unanswered so the student (and teacher) see the truth.
   const flushSpeakingIfNeeded = useCallback(async () => {
     const pending = (window as any).__pendingSpeakingRecording;
@@ -481,7 +481,7 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
 
   // Skip question (v6.9.67: log a lightweight test_answer_skipped event so
   // teachers can see which questions the student avoided, without polluting
-  // skill scoring — process-welcome-test ignores unknown event types).
+  // skill scoring: process-welcome-test ignores unknown event types).
   const skipQuestion = useCallback(async () => {
     await flushSpeakingIfNeeded();
     await flushPendingAnswer();
@@ -582,7 +582,7 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
           student_id: state.studentId,
           teacher_id: state.teacherId,
           answers: state.answers,
-          // v6.9.56 — attach integrity snapshot (tab-blur count + recent
+          // v6.9.56: attach integrity snapshot (tab-blur count + recent
           // events) buffered by `useWelcomeTestIntegrity`. Stored on the
           // backend under `raw_answers.__integrity__`.
           integrity: consumeWelcomeTestIntegrity(state.testId),

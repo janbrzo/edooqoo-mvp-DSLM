@@ -1,5 +1,5 @@
 /**
- * DeadlinePicker — DSLM v5.0
+ * DeadlinePicker: DSLM v5.0
  *
  * Reusable deadline input with two modes:
  *  1. Quick-pick dropdown (default): 1w, 2w, 1mo, 3mo, 6mo, 12mo, 2y → today + N days.

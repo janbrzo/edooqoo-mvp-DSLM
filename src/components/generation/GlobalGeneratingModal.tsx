@@ -1,5 +1,5 @@
 /**
- * v6.9.61 — Global GeneratingModal mount.
+ * v6.9.61: Global GeneratingModal mount.
  *
  * Previously the modal was only mounted in Index.tsx, which meant starting
  * a second generation from StudentPage (or any other route) hid the
@@ -19,7 +19,7 @@ export default function GlobalGeneratingModal() {
   const { user } = useAuthFlow();
   const [activeJobIdx, setActiveJobIdx] = useState(0);
   // Failed jobs stay "recovering" until their recoveryDeadlineAt. Nothing in
-  // the registry changes when that deadline passes, so re-render on it —
+  // the registry changes when that deadline passes, so re-render on it, 
   // otherwise the "Checking server…" modal never closes and blocks the page.
   const [clock, setClock] = useState(() => Date.now());
   useEffect(() => {
@@ -35,7 +35,7 @@ export default function GlobalGeneratingModal() {
   const myPollableJobs = useMemo(() => {
     const now = Math.max(clock, Date.now());
     return allJobs
-      // v6.9.62 P1 — accept legacy jobs without an originTabId so multi-job
+      // v6.9.62 P1: accept legacy jobs without an originTabId so multi-job
       // switcher reappears after a refresh on tabs that started >1 job.
       .filter((j) => j.originTabId == null || j.originTabId === tabId)
       .filter((j) =>

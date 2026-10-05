@@ -144,17 +144,17 @@ Deno.serve(async (req) => {
 
     // Build summary with status suffix
     const statusSuffix: Record<string, string> = {
-      booked: ' — Booked',
-      pending: ' — Pending',
-      completed: ' — Completed',
-      no_show: ' — No Show',
+      booked: ': Booked',
+      pending: ': Pending',
+      completed: ': Completed',
+      no_show: ': No Show',
     };
     let summary = `English Lesson with ${teacherName}`;
     if (slot.cancelled_by) {
       if (slot.cancelled_by === 'system' && slot.cancellation_reason?.includes('Rescheduled')) {
-        summary += ' — Rescheduled';
+        summary += ': Rescheduled';
       } else {
-        summary += slot.cancelled_by === 'student' ? ' — Student Cancellation' : ' — Teacher Cancellation';
+        summary += slot.cancelled_by === 'student' ? ', Student Cancellation' : ', Teacher Cancellation';
       }
     } else if (statusSuffix[effectiveStatus]) {
       summary += statusSuffix[effectiveStatus];
@@ -182,7 +182,7 @@ Deno.serve(async (req) => {
       },
     };
 
-    // Meeting link — from slot or per-student settings
+    // Meeting link: from slot or per-student settings
     let meetingLink = slot.meeting_link;
     if (!meetingLink && slot.student_id) {
       const { data: css } = await supabase.from('calendar_student_settings')

@@ -24,7 +24,7 @@ const unlockFeatures = [
 ];
 
 /**
- * v6.9.89 — extracted from HeroHeadline to reduce first-screen density.
+ * v6.9.89: extracted from HeroHeadline to reduce first-screen density.
  * Content is unchanged; it now sits directly below the worksheet generator,
  * where the "create an account to keep student context" message is relevant.
  */

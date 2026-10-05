@@ -11,12 +11,12 @@ const FAQS = [
 ];
 
 const LEVEL_LABELS: Record<CefrTestLevel, string> = {
-  A1: 'A1 — Beginner',
-  A2: 'A2 — Elementary',
-  B1: 'B1 — Intermediate',
-  B2: 'B2 — Upper-Intermediate',
-  C1: 'C1 — Advanced',
-  C2: 'C2 — Proficiency',
+  A1: 'A1: Beginner',
+  A2: 'A2: Elementary',
+  B1: 'B1: Intermediate',
+  B2: 'B2: Upper-Intermediate',
+  C1: 'C1: Advanced',
+  C2: 'C2: Proficiency',
 };
 
 const CefrLevelTest: React.FC = () => {
@@ -41,7 +41,7 @@ const CefrLevelTest: React.FC = () => {
   return (
     <div className="min-h-screen bg-background">
       <PageSeo
-        title="Free CEFR English Level Test — A1 to C2 in 5 Minutes"
+        title="Free CEFR English Level Test: A1 to C2 in 5 Minutes"
         description="Free CEFR English level test. 25 questions, instant A1–C2 result, no sign-up. Built by Edooqoo for English teachers and adult learners."
         path="/tools/cefr-level-test"
         ogType="article"
@@ -71,7 +71,7 @@ const CefrLevelTest: React.FC = () => {
         <header className="mb-8">
           <h1 className="text-4xl md:text-5xl font-bold text-foreground mb-4">Free CEFR English Level Test</h1>
           <p className="text-lg text-muted-foreground">
-            25 questions. ~5 minutes. Get your A1–C2 level instantly. No sign-up, no email — runs entirely in your browser.
+            25 questions. ~5 minutes. Get your A1–C2 level instantly. No sign-up, no email, runs entirely in your browser.
           </p>
         </header>
 

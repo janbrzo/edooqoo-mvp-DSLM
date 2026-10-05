@@ -2,7 +2,7 @@
 import { Tile } from './types';
 
 /**
- * v6.9.94 — Field character budgets.
+ * v6.9.94: Field character budgets.
  *
  * Mirrors the server-side sanitizer limits in `src/utils/securityUtils.ts`
  * (`sanitizeWorksheetForm`) and keeps the assembled prompt under the 5000-char

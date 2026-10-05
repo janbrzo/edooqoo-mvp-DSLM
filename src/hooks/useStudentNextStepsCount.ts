@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
 /**
- * v6.9.15a — lightweight check whether a student has any pending Next Steps.
+ * v6.9.15a: lightweight check whether a student has any pending Next Steps.
  * Returns null while loading, then 0 / >0. Used by WorksheetForm StudentContextHint.
  */
 export function useStudentNextStepsCount(studentId: string | null | undefined) {

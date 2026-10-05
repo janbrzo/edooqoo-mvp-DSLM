@@ -43,7 +43,7 @@ const TopicLevelPage: React.FC = () => {
   )
     .slice(0, 5)
     .map((l) => ({
-      label: `${topic.label} — ${l.label}`,
+      label: `${topic.label}: ${l.label}`,
       to: `/esl-worksheets/${topic.slug}/${l.slug}`,
     }));
   const sameCategoryTopics = PSEO_TOPICS.filter(
@@ -54,7 +54,7 @@ const TopicLevelPage: React.FC = () => {
   )
     .slice(0, 4)
     .map((t) => ({
-      label: `${t.label} — ${level.label}`,
+      label: `${t.label}: ${level.label}`,
       to: `/esl-worksheets/${t.slug}/${level.slug}`,
     }));
   const exerciseLinks = (policy?.exerciseTypes || [])
@@ -119,7 +119,7 @@ const TopicLevelPage: React.FC = () => {
         },
         { title: 'Homework review workflow', body: 'Assign to your student, review submitted answers, and use results as input for follow-up planning.' },
         { title: 'Printable + interactive', body: 'Download PDF or share an interactive link. Works on phone and laptop.' },
-        { title: 'Personalized to goal', body: 'Specify business email, IELTS, travel — examples adapt to the student\'s profession.' },
+        { title: 'Personalized to goal', body: 'Specify business email, IELTS, travel: examples adapt to the student\'s profession.' },
         { title: 'Editable after generation', body: 'Click any question to edit text, answer, or distractors before teaching or assigning.' },
       ]}
       bodyIntro={`Most ${level.cefr} learners need ${topic.label} practice that is level-aware, varied, and tied to a real goal. Edooqoo supports this with worksheet-generation inputs for learner context, profession, topic, and selected CEFR level.`}
@@ -152,7 +152,7 @@ const TopicLevelPage: React.FC = () => {
         },
         {
           question: 'Can I edit the generated questions?',
-          answer: 'Yes. Every question is editable in place — text, correct answer, distractors, and instructions. No template lock-in.',
+          answer: 'Yes. Every question is editable in place: text, correct answer, distractors, and instructions. No template lock-in.',
         },
         {
           question: 'Can my student do the worksheet online?',
@@ -160,7 +160,7 @@ const TopicLevelPage: React.FC = () => {
         },
         {
           question: 'Does Edooqoo work for 1-on-1 adult learners?',
-          answer: 'Yes — that is the primary use case. The generator personalizes examples to the learner\'s profession and goals.',
+          answer: 'Yes: that is the primary use case. The generator personalizes examples to the learner\'s profession and goals.',
         },
       ]}
       extraJsonLd={courseLd}

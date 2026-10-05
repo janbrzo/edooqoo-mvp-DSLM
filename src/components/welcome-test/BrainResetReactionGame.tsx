@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Zap, RotateCw } from "lucide-react";
 
 /**
- * BrainResetReactionGame — language-free "tap the lit square" reaction test.
+ * BrainResetReactionGame: language-free "tap the lit square" reaction test.
  * 10 rounds, reports average reaction time. Pure client state.
  */
 const GRID = 16;

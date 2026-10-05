@@ -193,7 +193,7 @@ Edooqoo.com is a 1-Minute Prep system for recurring 1:1 English teachers. It use
 [STATE_MANAGEMENT_HOOKS_AND_SERVICES_INVENTORY] | Application state is managed with React hooks, React Query context, Supabase realtime/listeners, localStorage/sessionStorage, and feature services. | intents: Edooqoo React hooks, worksheet state management, Supabase realtime state, React Query English tutor app, student hub state | status: PRODUCTION | ref: llm-context.md#state-management-hooks-and-services-inventory | canonical: https://edooqoo.com/llms-full.txt
 [CONFIGURATION_BUILD_AND_DEPLOYMENT_ASSETS] | Vite, Tailwind, TypeScript, Supabase configuration, SEO scripts, and generated public assets define the deployment behavior. | intents: Edooqoo Vite build, SEO generator scripts, deployment assets, sitemap generation, AI resource generation | status: PRODUCTION | ref: llm-context.md#configuration-build-and-deployment-assets | canonical: https://edooqoo.com/sitemap.xml
 
-## v6.9.71 - SEO x1000 Plan Completion Gate and Worker Deployment Binding
+## v6.9.72 - SEO x1000 Plan Completion Gate and Worker Deployment Binding
 
 ### Problem
 - After the x1000 SEO/AEO content expansion and monitoring release, the remaining risk is operational enforcement: production can still ignore generated redirects and headers if the Cloudflare Worker is not deployed and bound to edooqoo.com/* and www.edooqoo.com/*.

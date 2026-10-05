@@ -161,7 +161,7 @@ export const useFlashcardLearning = (setId: string, learnerEmail: string) => {
       const nextReviewDate = new Date();
       nextReviewDate.setDate(nextReviewDate.getDate() + newInterval);
 
-      // v6.9.87 — learners no longer write to flashcard_progress directly.
+      // v6.9.87: learners no longer write to flashcard_progress directly.
       // The SECURITY DEFINER RPC scopes the row to the learner's own identifier.
       const { error } = await supabase.rpc('save_flashcard_progress', {
         p_card_id: cardId,

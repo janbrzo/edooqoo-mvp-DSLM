@@ -1,5 +1,5 @@
 // submit-bug-report
-// v6.8.6 — adds email_status / email_error tracking on bug_reports so
+// v6.8.6: adds email_status / email_error tracking on bug_reports so
 // /admin/error-logs can show whether the Resend send succeeded.
 // Frontend calls this function via direct fetch() (BugReportModal v6.8.5).
 // Receives a bug report from a teacher (auth required), inserts into
@@ -40,7 +40,7 @@ serve(async (req) => {
   // still be configured for the future verified-domain path, so ignore it while
   // the sender remains sandboxed. This prevents repeated HTTP 403 failures.
   const bugReportFrom = Deno.env.get("BUG_REPORT_FROM_EMAIL") || "Edooqoo Bugs <onboarding@resend.dev>";
-  // v6.9.21 — both monitoring inboxes always notified when sender is verified.
+  // v6.9.21: both monitoring inboxes always notified when sender is verified.
   // In Resend sandbox mode only the account owner inbox can receive mail.
   const resendSandboxRecipient = "j4n.brz0@gmail.com";
   const isSandboxSender = bugReportFrom.includes("onboarding@resend.dev");
@@ -168,16 +168,16 @@ serve(async (req) => {
 
         const html = `
           <div style="font-family:-apple-system,Segoe UI,Roboto,sans-serif;max-width:680px;margin:0 auto;padding:20px;color:#111;">
-            <h2 style="color:#7c3aed;margin:0 0 8px;">🐛 New Bug Report — Edooqoo</h2>
+            <h2 style="color:#7c3aed;margin:0 0 8px;">🐛 New Bug Report, Edooqoo</h2>
             <p style="color:#666;font-size:13px;margin:0 0 16px;">Report ID: <code>${inserted.id}</code></p>
             <h3 style="margin:16px 0 4px;">${escapeHtml(title)}</h3>
             <div style="white-space:pre-wrap;background:#f9fafb;padding:12px;border-radius:6px;border:1px solid #eee;">${escapeHtml(description)}</div>
             <table style="margin-top:16px;font-size:13px;color:#374151;">
               <tr><td style="padding:2px 8px 2px 0;color:#6b7280;">Reporter</td><td>${escapeHtml(teacherDisplay)}</td></tr>
               <tr><td style="padding:2px 8px 2px 0;color:#6b7280;">User ID</td><td><code>${userId}</code></td></tr>
-              <tr><td style="padding:2px 8px 2px 0;color:#6b7280;">Page URL</td><td>${escapeHtml(body.page_url ?? "—")}</td></tr>
-              <tr><td style="padding:2px 8px 2px 0;color:#6b7280;">Viewport</td><td>${escapeHtml(body.viewport ?? "—")}</td></tr>
-              <tr><td style="padding:2px 8px 2px 0;color:#6b7280;">User Agent</td><td>${escapeHtml(body.user_agent ?? "—")}</td></tr>
+              <tr><td style="padding:2px 8px 2px 0;color:#6b7280;">Page URL</td><td>${escapeHtml(body.page_url ?? "-")}</td></tr>
+              <tr><td style="padding:2px 8px 2px 0;color:#6b7280;">Viewport</td><td>${escapeHtml(body.viewport ?? "-")}</td></tr>
+              <tr><td style="padding:2px 8px 2px 0;color:#6b7280;">User Agent</td><td>${escapeHtml(body.user_agent ?? "-")}</td></tr>
             </table>
             <h4 style="margin-top:20px;">Screenshots / Attachments</h4>
             ${attachmentsHtml}
@@ -229,7 +229,7 @@ serve(async (req) => {
     }
 
     // Persist email outcome. Failure to persist is logged but does not affect
-    // the response — the bug itself is already recorded.
+    // the response: the bug itself is already recorded.
     try {
       await sbAdmin
         .from("bug_reports")

@@ -4,7 +4,7 @@ import SeoLandingLayout from '@/components/seo/SeoLandingLayout';
 import type { ClusterHub } from '@/constants/clusterHubs';
 
 /**
- * Sprint 3 (Faza 3) — shared renderer for the four topical cluster hubs.
+ * Sprint 3 (Faza 3): shared renderer for the four topical cluster hubs.
  *
  * Structure is fixed on purpose so every hub emits the same GEO surface:
  * citation block -> comparison table -> spoke list -> tool funnel -> FAQ.
@@ -103,7 +103,7 @@ const ClusterHubPage: React.FC<{ hub: ClusterHub }> = ({ hub }) => {
                 ) : (
                   <Link to={spoke.href} className="text-primary hover:underline">{spoke.label}</Link>
                 )}
-                {' — '}
+                {': '}
                 {spoke.note}
               </li>
             ))}

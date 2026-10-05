@@ -64,13 +64,13 @@ export function TestDetailsView({ testId, teacherId, studentId, onBack }: TestDe
   const [sharingLoading, setSharingLoading] = useState(false);
   const [shareModalOpen, setShareModalOpen] = useState(false);
   const [studentEmail, setStudentEmail] = useState<string>('');
-  // v6.9.48 — read live student name & english_level for dynamic test title
+  // v6.9.48: read live student name & english_level for dynamic test title
   // (Welcome Test heading) and the suggested-level-change banner.
   const [studentName, setStudentName] = useState<string>('');
   const [studentLevel, setStudentLevel] = useState<string>('');
   const [teacherName, setTeacherName] = useState<string>('');
   const [retaking, setRetaking] = useState(false);
-  // v6.9.40 P3 — Track whether the teacher just clicked "Apply to Progress"
+  // v6.9.40 P3: Track whether the teacher just clicked "Apply to Progress"
   // so the success card stops claiming results were applied "automatically".
   const [manualApplyCompleted, setManualApplyCompleted] = useState(false);
 
@@ -129,7 +129,7 @@ export function TestDetailsView({ testId, teacherId, studentId, onBack }: TestDe
   };
 
   const handleApplyResults = async () => {
-    // v6.9.48 — Try re-running process-welcome-test with force=true first.
+    // v6.9.48: Try re-running process-welcome-test with force=true first.
     // This repairs Welcome Tests that completed before the v6.9.40 auto-apply
     // fix (status stuck at 'completed'). Falls back to client-side rating
     // application for non-welcome tests or when the function is unreachable.
@@ -168,7 +168,7 @@ export function TestDetailsView({ testId, teacherId, studentId, onBack }: TestDe
     if (!test || test.test_type !== 'welcome') return;
     setRetaking(true);
     try {
-      // v6.9.41 P3 — compute next attempt from existing welcome rows so the
+      // v6.9.41 P3: compute next attempt from existing welcome rows so the
       // new attempt carries the right attempt_number + previous_attempt_id.
       const { data: student } = await supabase
         .from('students')
@@ -187,7 +187,7 @@ export function TestDetailsView({ testId, teacherId, studentId, onBack }: TestDe
         student_id: studentId,
         test_type: 'welcome',
         title: `Welcome Test - ${student?.name || 'Student'} (Retake ${nextAttempt - 1})`,
-        description: 'Re-take — comparing growth against the previous attempt',
+        description: 'Re-take: comparing growth against the previous attempt',
         attempt_number: nextAttempt,
         previous_attempt_id: test.id,
       });
@@ -221,14 +221,14 @@ export function TestDetailsView({ testId, teacherId, studentId, onBack }: TestDe
             } catch (mailErr) {
               console.error('retake email failed', mailErr);
               try { await navigator.clipboard.writeText(url); } catch {}
-              toast.success(`Retake ${nextAttempt - 1} created. Email failed — link copied to clipboard.`);
+              toast.success(`Retake ${nextAttempt - 1} created. Email failed: link copied to clipboard.`);
             }
           } else {
             try { await navigator.clipboard.writeText(url); } catch {}
-            toast.success(`Retake ${nextAttempt - 1} created. No student email on file — link copied.`);
+            toast.success(`Retake ${nextAttempt - 1} created. No student email on file, link copied.`);
           }
         }
-        // v6.9.39 P2 — ensure StudentTestsTab list rebuilds with the new card.
+        // v6.9.39 P2: ensure StudentTestsTab list rebuilds with the new card.
         window.dispatchEvent(new CustomEvent('student-tests:refresh', { detail: { studentId } }));
         onBack(); // Go back to test list
       }
@@ -328,7 +328,7 @@ export function TestDetailsView({ testId, teacherId, studentId, onBack }: TestDe
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="text-xl">
-                {/* v6.9.48 — render Welcome Test heading from live student.name
+                {/* v6.9.48: render Welcome Test heading from live student.name
                     so renaming a student updates the test heading immediately. */}
                 {(() => {
                   if (test.test_type !== 'welcome' || !studentName) return test.title;
@@ -400,7 +400,7 @@ export function TestDetailsView({ testId, teacherId, studentId, onBack }: TestDe
         <WelcomeTestResults testId={testId} studentId={studentId} teacherId={teacherId} questions={questions} />
       )}
 
-      {/* v6.9.49 — Reusable suggested-level-change banner (also rendered on DSLM tab). */}
+      {/* v6.9.49: Reusable suggested-level-change banner (also rendered on DSLM tab). */}
       {isWelcomeTest && studentLevel && (
         <SuggestedLevelChangeBanner
           studentId={studentId}
@@ -410,7 +410,7 @@ export function TestDetailsView({ testId, teacherId, studentId, onBack }: TestDe
         />
       )}
 
-      {/* v6.9.29 — Results are auto-applied by process-welcome-test (status=reviewed).
+      {/* v6.9.29: Results are auto-applied by process-welcome-test (status=reviewed).
           If auto-apply failed, the test stays in 'completed' and we expose a manual
           fallback button so the teacher can retry once. */}
       {test.status === 'reviewed' && (

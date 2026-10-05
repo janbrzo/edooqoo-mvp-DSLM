@@ -79,7 +79,7 @@ export function CreateHomeworkModal({
     return `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
   });
   const [sendReminder, setSendReminder] = useState<boolean>(true);
-  // P1.6 — notify the student by email right after the homework is created
+  // P1.6: notify the student by email right after the homework is created
   const [notifyStudent, setNotifyStudent] = useState<boolean>(true);
   const [reminderHours, setReminderHours] = useState<string>("24");
   const [sendToTeacher, setSendToTeacher] = useState<boolean>(false);
@@ -185,7 +185,7 @@ export function CreateHomeworkModal({
     setSelectedExercises(newSelected);
   };
 
-  // v6.9.44 — bulk helpers for the redesigned Exercises section.
+  // v6.9.44: bulk helpers for the redesigned Exercises section.
   const selectAllExercises = () => {
     setSelectedExercises(new Set(exercises.map((_, i) => i)));
   };
@@ -364,12 +364,12 @@ export function CreateHomeworkModal({
 
       toast.success("Homework assignment created successfully!");
 
-      // P1.6 — automatic notification (opt-out via the "Notify student by email" switch)
+      // P1.6: automatic notification (opt-out via the "Notify student by email" switch)
       if (notifyStudent) {
         if (studentEmail) {
           await sendHomeworkEmail(homework.id, studentEmail);
         } else {
-          toast.info("No email saved for this student — enter it below to send the notification.");
+          toast.info("No email saved for this student, enter it below to send the notification.");
         }
       }
     } catch (error: any) {
@@ -550,7 +550,7 @@ export function CreateHomeworkModal({
             </Button>
           </div>
         ) : (
-          // v6.9.44 — redesigned creation form: grid sections, no duplicate labels,
+          // v6.9.44: redesigned creation form: grid sections, no duplicate labels,
           // generator collapsed by default, sticky action bar.
           <div className="space-y-3 py-2">
 
@@ -629,7 +629,7 @@ export function CreateHomeworkModal({
             <section className="border rounded-lg p-3 space-y-2">
               <div className="flex items-center justify-between gap-2 flex-wrap">
                 <h3 className="text-sm font-semibold">
-                  Exercises <span className="text-muted-foreground font-normal">— {selectedExercises.size} of {exercises.length} selected</span>
+                  Exercises <span className="text-muted-foreground font-normal">: {selectedExercises.size} of {exercises.length} selected</span>
                 </h3>
                 <div className="flex gap-1">
                   <Button type="button" variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={selectAllExercises}>
@@ -673,7 +673,7 @@ export function CreateHomeworkModal({
                     Send before deadline
                   </Label>
                 </div>
-                {/* P1.6 — notify the student right after creation (was fully manual) */}
+                {/* P1.6: notify the student right after creation (was fully manual) */}
                 <div className="flex items-center gap-2">
                   <Switch
                     id="notify-student"
@@ -728,8 +728,8 @@ export function CreateHomeworkModal({
                     Generate additional exercises
                     <span className="text-xs text-muted-foreground font-normal">
                       {selectedGeneratedTypes.length > 0
-                        ? `— ${selectedGeneratedTypes.length} types · ${generatedExercises.length} generated`
-                        : '— optional AI add-on'}
+                        ? `: ${selectedGeneratedTypes.length} types · ${generatedExercises.length} generated`
+                        : ': optional AI add-on'}
                     </span>
                   </span>
                   <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform" />

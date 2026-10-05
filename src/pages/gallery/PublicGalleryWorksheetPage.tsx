@@ -31,7 +31,7 @@ const PublicGalleryWorksheetPage: React.FC = () => {
     if (!slug) return;
     let cancelled = false;
     (async () => {
-      // v6.9.88 — safe-column RPC (no teacher PII / tracking metadata).
+      // v6.9.88: safe-column RPC (no teacher PII / tracking metadata).
       const { data: rows } = await supabase.rpc('get_public_worksheet_by_slug', { p_slug: slug });
       const data = Array.isArray(rows) ? rows[0] ?? null : rows ?? null;
       if (cancelled) return;
@@ -65,7 +65,7 @@ const PublicGalleryWorksheetPage: React.FC = () => {
   if (!worksheet.is_public) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center gap-4 p-6 text-center">
-        <PageSeo title="Worksheet no longer public — Edooqoo" description="This worksheet has been unpublished." path={`/gallery/${slug}`} />
+        <PageSeo title="Worksheet no longer public | Edooqoo" description="This worksheet has been unpublished." path={`/gallery/${slug}`} />
         <h1 className="text-3xl font-bold">This worksheet is no longer public</h1>
         <p className="text-muted-foreground">The author has removed it from the gallery.</p>
         <Link to="/gallery" className="text-primary underline">Browse other worksheets</Link>
@@ -75,7 +75,7 @@ const PublicGalleryWorksheetPage: React.FC = () => {
 
   let parsed: any = null;
   try { parsed = worksheet.ai_response ? JSON.parse(worksheet.ai_response) : null; } catch (_) { /* ignore */ }
-  // v6.9.36 — accept legacy/alternate JSON shapes so the gallery preview is
+  // v6.9.36: accept legacy/alternate JSON shapes so the gallery preview is
   // never blank for valid worksheets. Storage is not changed.
   const exercises: any[] = (() => {
     if (!parsed) return [];
@@ -105,7 +105,7 @@ const PublicGalleryWorksheetPage: React.FC = () => {
     <div className="min-h-screen bg-background">
       <PublicTopNav />
       <PageSeo
-        title={`${worksheet.title} — Free ESL Worksheet`}
+        title={`${worksheet.title} | Free ESL Worksheet`}
         description={`Free ${worksheet.public_level || ''} English worksheet about ${worksheet.public_topic || 'general topics'}. Published on Edooqoo gallery.`.slice(0, 158)}
         path={`/gallery/${worksheet.public_slug}`}
         jsonLd={learningResourceLd}
@@ -123,7 +123,7 @@ const PublicGalleryWorksheetPage: React.FC = () => {
         </header>
 
         <aside aria-label="Preview notice" className="mb-6 rounded-md border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
-          <strong>Preview mode.</strong> This is a static read-only preview of a worksheet a teacher published. Interactive answers, AI-assisted review, audio playback and downloads are available only in the full editor — <Link to="/signup" state={fromState} className="font-semibold underline">sign up free</Link> to generate or open this worksheet interactively.
+          <strong>Preview mode.</strong> This is a static read-only preview of a worksheet a teacher published. Interactive answers, AI-assisted review, audio playback and downloads are available only in the full editor, <Link to="/signup" state={fromState} className="font-semibold underline">sign up free</Link> to generate or open this worksheet interactively.
         </aside>
 
         {exercises.length > 0 ? (
@@ -141,7 +141,7 @@ const PublicGalleryWorksheetPage: React.FC = () => {
         <div className="mt-10 rounded-lg border bg-primary/5 p-6 text-center">
           <h2 className="text-xl font-bold mb-2">From idea to a teacher-reviewed worksheet workflow</h2>
           <p className="text-sm text-muted-foreground mb-4">
-            Edooqoo's DSLM workflow turns your student's goals into a tailored worksheet —
+            Edooqoo's DSLM workflow turns your student's goals into a tailored worksheet, 
             fully editable, with audio, images and AI-grading built in. Free to start, no credit card.
           </p>
           <Link to="/signup" state={fromState} className="inline-block rounded-md bg-primary px-5 py-2 text-primary-foreground font-semibold">
