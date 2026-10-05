@@ -10,6 +10,7 @@
 //    teacher input. Worksheet Generation Engine NOT touched.
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { chatCompletion } from "../_shared/aiChat.ts";
+import { NO_EM_DASH_RULE } from "../_shared/writingStyle.ts";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -141,7 +142,7 @@ Deno.serve(async (req) => {
     `Extract the profile. Return ONLY the JSON object described in the system message.`;
 
   const messages = [
-    { role: "system", content: SYSTEM_PROMPT },
+    { role: "system", content: SYSTEM_PROMPT + NO_EM_DASH_RULE },
     { role: "user", content: userMsg },
   ];
 

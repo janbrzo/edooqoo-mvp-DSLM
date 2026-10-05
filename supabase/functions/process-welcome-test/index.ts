@@ -1,6 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { chatCompletion } from "../_shared/aiChat.ts";
+import { NO_EM_DASH_RULE } from "../_shared/writingStyle.ts";
 
 const RESEND_API_KEY = Deno.env.get('RESEND_API_KEY');
 const HAS_DIRECT_AI_PROVIDER = Boolean(Deno.env.get('GEMINI_API_KEY') || Deno.env.get('OPENAI_API_KEY'));
@@ -1210,7 +1211,7 @@ SCORING SCALE:
 
 BE STRICT. Do NOT inflate scores. Most brief or off-topic answers should score below 30.
 
-Format as JSON: {"summary": "...", "recommendations": ["...", "..."], "writing_quality": "basic|intermediate|advanced", "key_observations": ["...", "..."], "per_question_scores": {"wt_q16": 45, "wt_q36": 70, "wt_q16s": 15, ...}}`
+Format as JSON: {"summary": "...", "recommendations": ["...", "..."], "writing_quality": "basic|intermediate|advanced", "key_observations": ["...", "..."], "per_question_scores": {"wt_q16": 45, "wt_q36": 70, "wt_q16s": 15, ...}}` + NO_EM_DASH_RULE
                 },
                 { role: 'user', content: userPromptBody },
               ],
@@ -1433,7 +1434,7 @@ Format as JSON: {"summary": "...", "recommendations": ["...", "..."], "writing_q
           messages: [
               {
                 role: 'system',
-                content: `You are an ESL diagnostic analyst. Compare two Welcome Test attempts of the same adult learner and produce a concise evolution report (3-6 sentences) covering: (1) measurable score deltas (grammar, vocabulary, writing, speaking, reading) with direction and magnitude, (2) CEFR level shift (if any), (3) psychological/behavioral trait transitions (motivation, anxiety, error attitude), (4) one concrete teaching recommendation based on the change. Be factual, no praise, no marketing language.`,
+                content: `You are an ESL diagnostic analyst. Compare two Welcome Test attempts of the same adult learner and produce a concise evolution report (3-6 sentences) covering: (1) measurable score deltas (grammar, vocabulary, writing, speaking, reading) with direction and magnitude, (2) CEFR level shift (if any), (3) psychological/behavioral trait transitions (motivation, anxiety, error attitude), (4) one concrete teaching recommendation based on the change. Be factual, no praise, no marketing language.` + NO_EM_DASH_RULE,
               },
               {
                 role: 'user',

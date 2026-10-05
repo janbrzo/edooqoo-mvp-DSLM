@@ -2,6 +2,7 @@
 // Returns { exercises: string[], focusMap: Record<string,'vocabulary'|'grammar'> }
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { chatCompletion } from "../_shared/aiChat.ts";
+import { NO_EM_DASH_RULE } from "../_shared/writingStyle.ts";
 import {
   NO_MEDIA_EXERCISE_IDS,
   PICTURE_EXERCISE_IDS,
@@ -93,7 +94,7 @@ ${hasAudio ? 'Include 2 audio exercises.' : ''}${autoMediaBlock}`;
 
     const aiResp = await chatCompletion({
       messages: [
-          { role: 'system', content: systemMsg },
+          { role: 'system', content: systemMsg + NO_EM_DASH_RULE },
           { role: 'user', content: userMsg },
         ],
       tools: [{

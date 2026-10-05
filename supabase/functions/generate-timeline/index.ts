@@ -22,6 +22,7 @@ import {
   getAdaptiveExerciseRules,
 } from "../_shared/dslmPromptCore.ts";
 import { chatCompletion } from "../_shared/aiChat.ts";
+import { NO_EM_DASH_RULE } from "../_shared/writingStyle.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -222,7 +223,7 @@ Return ONLY a valid JSON array of EXACTLY ${count} objects (no markdown, no comm
     // schemas was triggering Gemini "too many states" / INVALID_ARGUMENT for count>1.
     const buildAiBody = (temp: number, extraInstruction?: string) => ({
       messages: [
-        { role: 'system', content: 'You are an expert ESL curriculum planner. Return only a valid JSON array. No markdown, no commentary.' },
+        { role: 'system', content: 'You are an expert ESL curriculum planner. Return only a valid JSON array. No markdown, no commentary.' + NO_EM_DASH_RULE },
         { role: 'user', content: extraInstruction ? `${prompt}\n\n${extraInstruction}` : prompt }
       ],
       temperature: temp,

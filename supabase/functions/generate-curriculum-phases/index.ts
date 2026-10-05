@@ -12,6 +12,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 import { authorizedTeacherId, jsonResponse, resolveCaller } from "../_shared/auth.ts";
 import { chatCompletion } from "../_shared/aiChat.ts";
+import { NO_EM_DASH_RULE } from "../_shared/writingStyle.ts";
 
 // v6.9.13: helpers inlined (previously imported from ../_shared/dslmPromptCore.ts).
 // Inlined to keep deploy self-contained. Behavior preserved.
@@ -562,7 +563,7 @@ Return ONLY a valid JSON array (no markdown), with this exact format:
 
     const aiResponse = await chatCompletion({
       messages: [
-        { role: 'system', content: 'You are an expert ESL curriculum architect. Return only valid JSON arrays. No markdown.' },
+        { role: 'system', content: 'You are an expert ESL curriculum architect. Return only valid JSON arrays. No markdown.' + NO_EM_DASH_RULE },
         { role: 'user', content: prompt }
       ],
       temperature: 0.6,
