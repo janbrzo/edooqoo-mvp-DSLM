@@ -1762,9 +1762,47 @@ export type Database = {
         }
         Relationships: []
       }
+      model_audit_reports: {
+        Row: {
+          advisor: Json | null
+          created_at: string
+          deprecation_scan: Json | null
+          id: string
+          lifecycle: Json
+          mode: string
+          probes: Json
+          summary: Json
+          unregistered: Json
+        }
+        Insert: {
+          advisor?: Json | null
+          created_at?: string
+          deprecation_scan?: Json | null
+          id?: string
+          lifecycle?: Json
+          mode: string
+          probes?: Json
+          summary?: Json
+          unregistered?: Json
+        }
+        Update: {
+          advisor?: Json | null
+          created_at?: string
+          deprecation_scan?: Json | null
+          id?: string
+          lifecycle?: Json
+          mode?: string
+          probes?: Json
+          summary?: Json
+          unregistered?: Json
+        }
+        Relationships: []
+      }
       model_health_checks: {
         Row: {
+          check_kind: string | null
           checked_at: string
+          days_to_shutdown: number | null
           error: string | null
           expected: boolean
           id: string
@@ -1773,10 +1811,13 @@ export type Database = {
           ok: boolean
           provider: string
           purpose: string | null
+          shutdown_date: string | null
           status: number
         }
         Insert: {
+          check_kind?: string | null
           checked_at?: string
+          days_to_shutdown?: number | null
           error?: string | null
           expected?: boolean
           id?: string
@@ -1785,10 +1826,13 @@ export type Database = {
           ok: boolean
           provider: string
           purpose?: string | null
+          shutdown_date?: string | null
           status: number
         }
         Update: {
+          check_kind?: string | null
           checked_at?: string
+          days_to_shutdown?: number | null
           error?: string | null
           expected?: boolean
           id?: string
@@ -1797,6 +1841,7 @@ export type Database = {
           ok?: boolean
           provider?: string
           purpose?: string | null
+          shutdown_date?: string | null
           status?: number
         }
         Relationships: []
