@@ -1481,7 +1481,7 @@
       "redirectTo": null,
       "crawl": {
         "robotsBlocked": false,
-        "sitemapMatches": 1,
+        "sitemapMatches": 2,
         "status": "indexable-generated-family"
       },
       "dataDependencies": {
@@ -7974,12 +7974,10 @@
       },
       "storage": [],
       "userFacingText": [
-        "Authorship boundary",
         "Blog",
         "Editorial profile",
         "Editorial responsibility",
         "Edooqoo",
-        "Jan authors product, workflow, and operating-system explanations. Teaching-method statements in strategic content cite the published sources listed on each page.",
         "Profile",
         "Read the What Should I Teach Next? resource hub"
       ],

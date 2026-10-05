@@ -24,6 +24,7 @@ export const PUBLIC_ROUTES = new Set([
   "/ai-worksheet-generator-for-english-teachers.html",
   "/articles-a-an-the-worksheets.html",
   "/authors/jan-brzostowski",
+  "/authors/martha",
   "/b1-intermediate-english-worksheets.html",
   "/b2-upper-intermediate-english-worksheets.html",
   "/best-ai-homework-tools-for-private-english-tutors.html",
@@ -474,7 +475,6 @@ export const PUBLIC_ROUTES = new Set([
   "/writing-worksheets-esl.html"
 ]);
 export const REDIRECTS = {
-  "/authors/martha": "/authors/jan-brzostowski",
   "/blog/adapting-textbooks-esl-classroom.html": "/blog/adapting-textbook-tasks-for-adult-one-to-one-english-lessons.html",
   "/blog/adult-esl-lesson-ideas-by-level.html": "/blog/how-to-build-an-adult-esl-lesson-from-real-work-tasks.html",
   "/blog/ai-placement-tests-english-students.html": "/english-placement-test-for-private-tutors.html",

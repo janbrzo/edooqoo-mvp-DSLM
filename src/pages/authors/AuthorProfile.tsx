@@ -5,6 +5,7 @@ import { CONTENT_AUTHORS } from '@/data/contentAuthors';
 
 const profiles = {
   'jan-brzostowski': CONTENT_AUTHORS.jan,
+  martha: CONTENT_AUTHORS.martha,
 } as const;
 
 const AuthorProfile: React.FC = () => {
@@ -57,9 +58,13 @@ const AuthorProfile: React.FC = () => {
         </section>
 
         <section className="mb-10">
-          <h2 className="mb-3 text-2xl font-semibold text-foreground">Authorship boundary</h2>
+          <h2 className="mb-3 text-2xl font-semibold text-foreground">
+            {slug === 'jan-brzostowski' ? 'Authorship boundary' : 'What this profile means'}
+          </h2>
           <p className="leading-relaxed text-muted-foreground">
-            Jan authors product, workflow, and operating-system explanations. Teaching-method statements in strategic content cite the published sources listed on each page.
+            {slug === 'jan-brzostowski'
+              ? 'Jan authors product, workflow, and operating-system explanations. Teaching-method statements in strategic content cite the published sources listed on each page.'
+              : 'This profile describes the quality benchmark Edooqoo is built against. It is not an editorial sign-off on any page: individual articles are not reviewed or approved by Martha.'}
           </p>
         </section>
 

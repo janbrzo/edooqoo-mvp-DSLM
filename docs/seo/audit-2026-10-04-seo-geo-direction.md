@@ -83,7 +83,7 @@ Nie ma dowodów, że to zwiększa cytowania przez AI. Systemy AI wybierają źr�
 
 ### 6. Problemy techniczne (średnie)
 
-- **Soft 404**: każdy nieistniejący URL zwraca `200` z HTML strony głównej (sprawdzone: `/this-page-does-not-exist-xyz` → 200). Stare przekierowania działają jako stuby `noindex` zamiast `301`, a 11 tras ma `fail-no-signal`. Przyczyna: Worker Cloudflare z `wrangler.toml` nie obsługuje domeny produkcyjnej.
+- **Soft 404** (downgraded 2026-10-05: unknown paths with a file extension return a real 404, and the SPA `NotFound` page already sets `noindex`; moving hosting to Cloudflare only for this is not recommended, see `docs/seo/off-site-and-infra-runbook.md`): każdy nieistniejący URL zwraca `200` z HTML strony głównej (sprawdzone: `/this-page-does-not-exist-xyz` → 200). Stare przekierowania działają jako stuby `noindex` zamiast `301`, a 11 tras ma `fail-no-signal`. Przyczyna: Worker Cloudflare z `wrangler.toml` nie obsługuje domeny produkcyjnej.
 - **Niespójny opis encji**: `external-evidence-playbook.md` opisuje Edooqoo jako „platform … to generate, organize, assign, reuse…”, a `llms.txt` jako „lesson-preparation system for … recurring one-to-one lessons with adult learners”. Dla GEO liczy się, żeby w całym webie powtarzał się ten sam opis.
 - **Bing**: brak śladu Bing Webmaster Tools i IndexNow. ChatGPT search opiera się m.in. na indeksie Bing, więc to tani i pominięty kanał GEO.
 

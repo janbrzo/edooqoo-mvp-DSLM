@@ -11,6 +11,7 @@ export const CORE_SEO_ROUTES = [
   '/blog',
   '/what-to-teach-next',
   '/authors/jan-brzostowski',
+  '/authors/martha',
   '/glossary',
   '/prompts',
   '/exercise-types',

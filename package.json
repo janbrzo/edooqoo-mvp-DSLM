@@ -52,6 +52,7 @@
     "seo:audit-duplicate-meta": "node scripts/seo/audit-duplicate-meta.mjs",
     "seo:audit-uniqueness": "node scripts/seo/audit-content-uniqueness.mjs",
     "seo:verify-content": "node scripts/seo/verify-content.mjs",
+    "seo:indexnow": "node scripts/seo/submit-indexnow.mjs",
     "seo:audit-verification": "node scripts/seo/audit-content-verification.mjs",
     "seo:repair-snapshot-snippets": "node scripts/seo/repair-snapshot-snippets.mjs",
     "seo:check-snapshot-snippets": "node scripts/seo/repair-snapshot-snippets.mjs --check",

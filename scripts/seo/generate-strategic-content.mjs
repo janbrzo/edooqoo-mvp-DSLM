@@ -475,6 +475,7 @@ async function main() {
   await ensureSitemapRoutes([
     '/what-to-teach-next',
     '/authors/jan-brzostowski',
+    '/authors/martha',
   ]);
 
   const summary = articles.map((article) => `${article.slug}:${article.words}`).join(', ');

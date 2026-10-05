@@ -3,7 +3,6 @@
 # Host/protocol canonicalization is enforced by the Worker itself
 # (cloudflare/worker.mjs) on every real request, not listed here: Workers
 # static assets' _redirects parser rejects absolute https:// sources.
-/authors/martha /authors/jan-brzostowski 301
 /blog/adapting-textbooks-esl-classroom.html /blog/adapting-textbook-tasks-for-adult-one-to-one-english-lessons.html 301
 /blog/adult-esl-lesson-ideas-by-level.html /blog/how-to-build-an-adult-esl-lesson-from-real-work-tasks.html 301
 /blog/ai-placement-tests-english-students.html /english-placement-test-for-private-tutors.html 301

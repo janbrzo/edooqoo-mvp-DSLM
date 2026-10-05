@@ -77,7 +77,7 @@ async function main() {
   }
 
   const sitemap = await fs.readFile(path.join(ROOT, 'public', 'sitemap.xml'), 'utf8');
-  for (const route of ['/what-to-teach-next', '/authors/jan-brzostowski']) {
+  for (const route of ['/what-to-teach-next', '/authors/jan-brzostowski', '/authors/martha']) {
     if (!sitemap.includes(`<loc>https://edooqoo.com${route}</loc>`)) {
       failures.push(`${route}: missing from sitemap`);
     }

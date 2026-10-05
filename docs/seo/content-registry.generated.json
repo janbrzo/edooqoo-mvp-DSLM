@@ -26,11 +26,11 @@
   },
   "counts": {
     "total": 1988,
-    "indexable": 472,
+    "indexable": 473,
     "byState": {
-      "keep": 92,
+      "keep": 93,
       "improve": 0,
-      "merge": 84,
+      "merge": 83,
       "retire": 0,
       "hold": 380,
       "noindex": 1432
@@ -491,11 +491,11 @@
       "route": "/authors/martha",
       "canonical": "https://edooqoo.com/authors/martha",
       "type": "spa-route",
-      "state": "merge",
-      "indexable": false,
-      "cluster": "Adult and Business English",
-      "redirectTo": "/authors/jan-brzostowski",
-      "reason": "Reviewer profile retired (2026-10): no human review is claimed; see docs/seo/decisions-2026-10.md."
+      "state": "keep",
+      "indexable": true,
+      "cluster": "Tutor Business and Tools",
+      "redirectTo": null,
+      "reason": "Strategic product, workflow, evidence, or public resource URL."
     },
     {
       "route": "/b1-intermediate-english-worksheets.html",
