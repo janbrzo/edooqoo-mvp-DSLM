@@ -80,7 +80,7 @@ function buildSnapshotContent({
       </Row>
       <Button variant="ghost" size="sm" className="w-full justify-start px-2" onClick={onOpenModel}>
         <GraduationCap className="mr-2 h-4 w-4" />
-        Open learning model
+        Open learning plan
       </Button>
     </div>
   );

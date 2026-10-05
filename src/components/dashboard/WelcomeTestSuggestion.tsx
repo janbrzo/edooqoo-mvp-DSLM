@@ -459,7 +459,7 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
     : 'pending';
 
   const DISMISS_KEY = `welcome_test_dismissed_${surface}_${studentId}`;
-  const surfaceLabel = surface === 'oneMinute' ? '1 MINUTE' : 'Overview';
+  const surfaceLabel = surface === 'oneMinute' ? 'Learning plan' : 'Prep';
 
   const handleDismiss = () => {
     // Persist dismissal IMMEDIATELY so a refresh during the countdown keeps
@@ -508,7 +508,7 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
           <div className="flex-1 min-w-0 text-sm">
             <span className="font-medium">Banner hidden from {surfaceLabel}.</span>{' '}
             <span className="text-muted-foreground">
-              The Welcome Test stays available in the Tests tab. ({dismissCountdown}s)
+              The Welcome Test stays available in Timeline › Tests. ({dismissCountdown}s)
             </span>
           </div>
           <Button variant="ghost" size="sm" onClick={handleUndoDismiss} className="h-8">
@@ -537,7 +537,7 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
               </button>
             </TooltipTrigger>
             <TooltipContent side="left" className="max-w-xs">
-              Hide this banner from the {surfaceLabel} tab. The Welcome Test stays available in the Tests tab.
+              Hide this banner from the {surfaceLabel} tab. The Welcome Test stays available in Timeline › Tests.
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>

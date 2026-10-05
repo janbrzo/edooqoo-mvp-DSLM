@@ -11,17 +11,11 @@
  */
 
 import React from 'react';
-import { CalendarClock, MoreHorizontal, Sparkles, Wand2 } from 'lucide-react';
+import { CalendarClock, ChevronRight, Wand2 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import type { PrepSuggestion } from '@/lib/students/prepPlan';
 
 export interface NextLessonCardProps {
@@ -49,6 +43,7 @@ export const NextLessonCard: React.FC<NextLessonCardProps> = ({
   onChangeTopic,
   onOpenModel,
 }) => {
+  const firstName = studentName.split(' ')[0] || studentName;
   return (
     <Card data-testid="prep-next-lesson">
       <CardContent className="p-4 sm:p-6">
@@ -78,6 +73,28 @@ export const NextLessonCard: React.FC<NextLessonCardProps> = ({
                 {suggestion.topic}
               </h2>
               <p className="mt-1 text-sm text-muted-foreground">{rationale}</p>
+              {/* 2026-10 — Prep and the Learning plan share one queue; say where #1 comes from. */}
+              <p className="mt-2 flex flex-wrap items-center gap-x-1 text-xs text-muted-foreground">
+                {suggestion.source === 'fallback' ? (
+                  <>
+                    <span>No plan yet —</span>
+                    <Button variant="link" size="sm" className="h-auto p-0 text-xs" onClick={onOpenModel}>
+                      set up {firstName}'s plan
+                      <ChevronRight className="ml-0.5 h-3 w-3" aria-hidden="true" />
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <span>
+                      From {firstName}'s plan{suggestion.phaseCaption ? ` · ${suggestion.phaseCaption}` : ''} ·
+                    </span>
+                    <Button variant="link" size="sm" className="h-auto p-0 text-xs" onClick={onOpenModel}>
+                      See the plan
+                      <ChevronRight className="ml-0.5 h-3 w-3" aria-hidden="true" />
+                    </Button>
+                  </>
+                )}
+              </p>
             </>
           )}
         </div>
@@ -90,19 +107,6 @@ export const NextLessonCard: React.FC<NextLessonCardProps> = ({
           <Button variant="outline" onClick={onChangeTopic} disabled={isSuggestionsLoading}>
             Change topic
           </Button>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" aria-label="More actions">
-                <MoreHorizontal className="h-4 w-4" aria-hidden="true" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={onOpenModel}>
-                <Sparkles className="mr-2 h-4 w-4" aria-hidden="true" />
-                See all suggestions
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
         </div>
 
         {focusAreas.length > 0 && (
