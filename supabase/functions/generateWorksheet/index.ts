@@ -17,6 +17,11 @@ import {
 
 const openai = new OpenAI({ apiKey: Deno.env.get("OPENAI_API_KEY")! });
 
+// OpenAI fallback model (used only when Gemini fails). gpt-5-mini-2025-08-07 shuts
+// down on 2026-12-11; gpt-5.6-terra is OpenAI's recommended replacement.
+// Keep in sync with supabase/functions/_shared/modelRegistry.ts.
+const OPENAI_FALLBACK_MODEL = "gpt-5.6-terra";
+
 // Initialize Gemini AI (primary model for faster generation)
 const geminiApiKey = Deno.env.get("GEMINI_API_KEY");
 const genAI = geminiApiKey ? new GoogleGenerativeAI(geminiApiKey) : null;
@@ -64,7 +69,7 @@ function buildWorksheetMediaContextImage(selectedImage: any): any {
 // v6.9.64 — Parse-safe model fallback for picture worksheets.
 // When the streamed Gemini JSON cannot be parsed even after the
 // deterministic + AI repair passes, regenerate the worksheet JSON
-// once via GPT-5-mini in strict JSON-object mode. This protects the
+// once via the OpenAI fallback model in strict JSON-object mode. This protects the
 // large picture-worksheet payload without altering the protected
 // worksheet generation prompt.
 // ============================================================
@@ -72,9 +77,9 @@ async function generateFallbackJsonWithOpenAI(
   systemMessage: string,
   userMessage: string,
 ): Promise<{ content: string; model: string }> {
-  console.log('🟠 [JSON-FALLBACK] Regenerating worksheet JSON with GPT-5-mini after malformed Gemini JSON');
+  console.log(`🟠 [JSON-FALLBACK] Regenerating worksheet JSON with ${OPENAI_FALLBACK_MODEL} after malformed Gemini JSON`);
   const response = await (openai.chat.completions.create as any)({
-    model: 'gpt-5-mini-2025-08-07',
+    model: OPENAI_FALLBACK_MODEL,
     temperature: 1,
     messages: [
       { role: 'system', content: systemMessage },
@@ -85,7 +90,7 @@ async function generateFallbackJsonWithOpenAI(
   });
   return {
     content: response.choices?.[0]?.message?.content || '',
-    model: 'gpt-5-mini-2025-08-07-json-fallback',
+    model: `${OPENAI_FALLBACK_MODEL}-json-fallback`,
   };
 }
 
@@ -531,9 +536,9 @@ serve(async (req) => {
         usedModel = geminiResult.model;
         console.log(`✅ [BATCH-MODE] Gemini 2.5 Flash succeeded`);
       } catch (geminiError) {
-        console.warn("⚠️ [BATCH-MODE] Gemini failed, falling back to GPT-5-mini:", (geminiError as Error).message);
+        console.warn("⚠️ [BATCH-MODE] Gemini failed, falling back to OpenAI fallback model:", (geminiError as Error).message);
         const batchResponse = await (openai.chat.completions.create as any)({
-          model: "gpt-5-mini-2025-08-07",
+          model: OPENAI_FALLBACK_MODEL,
           temperature: 1,
           messages: [
             { role: "system", content: batchSystemMessage },
@@ -542,8 +547,8 @@ serve(async (req) => {
           max_completion_tokens: 30000,
         });
         batchContent = batchResponse.choices[0].message.content || "";
-        usedModel = "gpt-5-mini-2025-08-07";
-        console.log(`✅ [BATCH-MODE] GPT-5-mini fallback succeeded`);
+        usedModel = OPENAI_FALLBACK_MODEL;
+        console.log(`✅ [BATCH-MODE] OpenAI fallback succeeded`);
       }
 
       const batchGenerationTime = ((Date.now() - batchStartTime) / 1000).toFixed(2);
@@ -693,7 +698,7 @@ serve(async (req) => {
       timestamp: new Date().toISOString(),
       elapsedSinceStart: Math.round((openaiStartTime - generationStartTime) / 1000) + "s",
       primaryModel: "gemini-2.5-flash",
-      fallbackModel: "gpt-5-mini-2025-08-07",
+      fallbackModel: OPENAI_FALLBACK_MODEL,
       exerciseCount,
       promptLength: sanitizedPrompt.length,
     });
@@ -812,7 +817,7 @@ serve(async (req) => {
           }
           if (geminiFailed && !salvaged) {
             console.warn("⚠️ Gemini streaming failed, falling back to OpenAI");
-            streamUsedModel = "gpt-5-mini-2025-08-07";
+            streamUsedModel = OPENAI_FALLBACK_MODEL;
             // v6.9.60 — keep progress monotonic across the fallback so the
             // client UI does not visually regress from e.g. 3/8 back to 1/8.
             // We only restart the content buffer (because Gemini output was
@@ -822,7 +827,7 @@ serve(async (req) => {
             const fallbackProgressFloor = lastExerciseCount;
 
             const stream = await (openai.chat.completions.create as any)({
-              model: "gpt-5-mini-2025-08-07",
+              model: OPENAI_FALLBACK_MODEL,
               temperature: 1,
               messages: [
                 { role: "system", content: systemMessage },
@@ -1084,9 +1089,9 @@ serve(async (req) => {
       usedModel = geminiResult.model;
       console.log(`✅ Gemini 2.5 Flash succeeded`);
     } catch (geminiError) {
-      console.warn("⚠️ Gemini failed, falling back to GPT-5-mini:", (geminiError as Error).message);
+      console.warn("⚠️ Gemini failed, falling back to OpenAI fallback model:", (geminiError as Error).message);
       const aiResponse = await (openai.chat.completions.create as any)({
-        model: "gpt-5-mini-2025-08-07",
+        model: OPENAI_FALLBACK_MODEL,
         temperature: 1,
         messages: [
           { role: "system", content: systemMessage },
@@ -1095,8 +1100,8 @@ serve(async (req) => {
         max_completion_tokens: 30000,
       });
       jsonContent = aiResponse.choices[0].message.content;
-      usedModel = "gpt-5-mini-2025-08-07";
-      console.log(`✅ GPT-5-mini fallback succeeded`);
+      usedModel = OPENAI_FALLBACK_MODEL;
+      console.log(`✅ OpenAI fallback succeeded`);
     }
 
     // HEARTBEAT LOG: After AI API call
@@ -1352,7 +1357,7 @@ serve(async (req) => {
   🎯 Configuration:
      • Model Used:         ${usedModel}
      • Primary Model:      gemini-2.5-flash
-     • Fallback Model:     gpt-5-mini-2025-08-07
+     • Fallback Model:     ${OPENAI_FALLBACK_MODEL}
      • Exercise Count:     ${exerciseCount}
      • Has Picture:        ${!!selectedImage}
      • Has Audio:          ${!!selectedAudio}

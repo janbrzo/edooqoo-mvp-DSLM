@@ -43,3 +43,10 @@ type: feature
 **Why:** the old audit only pinged availability, so it reported all-OK while 6 of 10 models had announced shutdowns (gpt-5-mini-2025-08-07 on 2026-12-11 inside the protected engine). Providers answer 200 until removal day.
 
 - Email policy (v6.9.91): monthly always mails; daily mails only when at least one probe failed (`shouldSendAuditEmail`). Silent clean days are intentional.
+
+## 2026-10-05 — Worksheet fallback gpt-5-mini → gpt-5.6-terra (Worksheet Generation Engine, explicit instruction given)
+
+- `generateWorksheet` now reads the OpenAI fallback id from one constant, `OPENAI_FALLBACK_MODEL = "gpt-5.6-terra"` (was `gpt-5-mini-2025-08-07`, shutdown 2026-12-11). Only the model id and log wording changed; prompts and call parameters (`temperature: 1`, `max_completion_tokens: 30000`, `response_format`, `stream`) are untouched. The stored `usedModel` / json-fallback label now carry the new id.
+- Cost: list price $2 in / $12 out vs $0.25 / $2 per 1M tokens (verified on developers.openai.com), used only when Gemini fails. Terra defaults to reasoning effort medium like gpt-5-mini did; if fallbacks truncate at the 30k completion cap, lower `reasoning_effort` (accepts none|low|medium|high|xhigh|max, NOT minimal) as a separate, tested change.
+- Audit probe for reasoning models: `max_completion_tokens: 1024`, `reasoning_effort: low` (16 tokens failed with HTTP 400; `minimal` is rejected by terra).
+- Deprecation-page scanner: dates are attributed only to models in the row's subject list (`rowSubjectDate`), and ISO dates inside snapshot ids are ignored. Without this a model that appears as another row's replacement (terra) was flagged with that row's date.

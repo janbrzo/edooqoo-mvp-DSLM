@@ -141,6 +141,23 @@ describe('scanDeprecationText', () => {
     expect(r.registryDateFound).toBe(false);
   });
 
+  it('gives a model that only appears as a replacement no date', () => {
+    const page =
+      'Oct 23, 2026 ft-o4-mini-2025-04-16 gpt-5.6-terra Oct 23, 2026 o4-mini | o4-mini-2025-04-16 gpt-5.6-terra Dec 11, 2026 gpt-5-mini-2025-08-07 gpt-5.6-terra';
+    const r = scanDeprecationText(page, entry({ id: 'gpt-5.6-terra' }), NOW);
+    expect(r.status).toBe('clear');
+    expect(r.futureDates).toEqual([]);
+  });
+
+  it('attributes the row date to every model in a "|" / "," subject list', () => {
+    const page = 'Oct 23, 2026 gpt-4-turbo | gpt-4-turbo-2024-04-09 , gpt-4-turbo-completions gpt-5.6-sol Dec 1, 2026 other-model';
+    for (const id of ['gpt-4-turbo', 'gpt-4-turbo-completions']) {
+      const r = scanDeprecationText(page, entry({ id }), NOW);
+      expect(r.futureDates).toEqual(['2026-10-23']);
+    }
+    expect(scanDeprecationText(page, entry({ id: 'gpt-5.6-sol' }), NOW).futureDates).toEqual([]);
+  });
+
   it('does not attribute the next row date to a Gemini model', () => {
     const r = scanDeprecationText(geminiPage, entry({ id: 'gemini-2.5-flash', provider: 'google' }), NOW);
     expect(r.status).toBe('clear');
@@ -278,7 +295,7 @@ describe('MODEL_REGISTRY integrity', () => {
     const root = join(__dirname, '../../../supabase/functions');
     const skip = new Set(['audit-llm-models', 'test-model-failure-logger', 'mcp']);
     // Strings that look like model ids but are labels or aliases rewritten to a registry model.
-    const ignored = new Set(['gpt-5-mini-2025-08-07-json-fallback', 'gemini-3.1-flash-image-preview']);
+    const ignored = new Set(['gemini-3.1-flash-image-preview']);
     const files: string[] = [];
     const walk = (dir: string) => {
       for (const name of readdirSync(dir)) {

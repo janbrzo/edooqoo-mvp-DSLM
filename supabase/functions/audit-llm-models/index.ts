@@ -139,8 +139,9 @@ async function probe(target: Target): Promise<ProbeOutcome> {
           ? { model: target.model, messages: [{ role: "user", content: "Return OK." }], max_tokens: 3 }
           // Reasoning models reject max_tokens, and reasoning tokens count against
           // max_completion_tokens: 16 failed with HTTP 400 "output limit was reached"
-          // (an earlier audit already needed 128). 256 leaves headroom and stays cheap.
-          : { model: target.model, messages: [{ role: "user", content: "Return OK." }], max_completion_tokens: 256, reasoning_effort: "minimal" };
+          // (an earlier audit already needed 128). "low" is accepted by every GPT-5.x
+          // reasoning model ("minimal" is not accepted by gpt-5.6-terra).
+          : { model: target.model, messages: [{ role: "user", content: "Return OK." }], max_completion_tokens: 1024, reasoning_effort: "low" };
         const r = await timedFetch(endpoint, { method: "POST", headers, body: JSON.stringify(body) });
         return done(r.status, await errorText(r), endpoint);
       }

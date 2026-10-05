@@ -103,27 +103,40 @@ const MONTHS: Record<string, number> = {
   jan: 1, feb: 2, mar: 3, apr: 4, may: 5, jun: 6, jul: 7, aug: 8, sep: 9, sept: 9, oct: 10, nov: 11, dec: 12,
 };
 
+// ISO dates glued to a model id ("gpt-4-turbo-2024-04-09") are snapshot names, not
+// deadlines: the ISO alternative must not follow a word character, "." or "-".
 const DATE_RE =
-  /\b(?:(\d{4})-(\d{2})-(\d{2})|(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|June?|July?|Aug(?:ust)?|Sept?(?:ember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\.? (\d{1,2})(?:st|nd|rd|th)?,? (\d{4}))\b/g;
+  /(?:(?<![\w.-])(\d{4})-(\d{2})-(\d{2})(?![\w-])|\b(Jan(?:uary)?|Feb(?:ruary)?|Mar(?:ch)?|Apr(?:il)?|May|June?|July?|Aug(?:ust)?|Sept?(?:ember)?|Oct(?:ober)?|Nov(?:ember)?|Dec(?:ember)?)\.? (\d{1,2})(?:st|nd|rd|th)?,? (\d{4}))\b/g;
 
 function pad(n: number): string {
   return String(n).padStart(2, "0");
 }
 
-/** Extracts ISO dates from "2026-12-11", "Dec 11, 2026" and "December 11th, 2026" forms. */
-export function extractDates(text: string): string[] {
-  const out: string[] = [];
+interface DateSpan {
+  iso: string;
+  start: number;
+  end: number;
+}
+
+function findDateSpans(text: string): DateSpan[] {
+  const out: DateSpan[] = [];
   DATE_RE.lastIndex = 0;
   let m: RegExpExecArray | null;
   while ((m = DATE_RE.exec(text)) !== null) {
+    const span = { start: m.index, end: m.index + m[0].length };
     if (m[1]) {
-      out.push(`${m[1]}-${m[2]}-${m[3]}`);
+      out.push({ iso: `${m[1]}-${m[2]}-${m[3]}`, ...span });
     } else {
       const month = MONTHS[m[4].toLowerCase().slice(0, m[4].toLowerCase().startsWith("sept") ? 4 : 3)];
-      if (month) out.push(`${m[6]}-${pad(month)}-${pad(Number(m[5]))}`);
+      if (month) out.push({ iso: `${m[6]}-${pad(month)}-${pad(Number(m[5]))}`, ...span });
     }
   }
   return out;
+}
+
+/** Extracts ISO dates from "2026-12-11", "Dec 11, 2026" and "December 11th, 2026" forms. */
+export function extractDates(text: string): string[] {
+  return findDateSpans(text).map((d) => d.iso);
 }
 
 // ── Deprecation page scan ──────────────────────────────────────────────────
@@ -188,8 +201,25 @@ export interface DeprecationScanResult {
   snippet: string | null;
 }
 
-const BEFORE_WINDOW = 120;
+const BEFORE_WINDOW = 300;
 const AFTER_WINDOW = 200;
+
+/**
+ * "date-before-id" rows read "<date> <subject> | <subject> <replacement>".
+ * A mention owns the preceding date only when it is part of the subject list:
+ * everything between that date and the mention must be tokens joined by "|" or
+ * ",". A model that is the replacement is separated from the date by the
+ * subject (plain whitespace between two tokens) and gets no date, so a model
+ * that merely appears as someone else's replacement is never flagged.
+ */
+function rowSubjectDate(text: string, mentionStart: number): string[] {
+  const windowStart = Math.max(0, mentionStart - BEFORE_WINDOW);
+  const dates = findDateSpans(text.slice(windowStart, mentionStart));
+  const last = dates[dates.length - 1];
+  if (!last) return [];
+  const between = text.slice(windowStart + last.end, mentionStart);
+  return /^\s*(?:[^\s|,]+\s*[|,]\s*)*$/.test(between) ? [last.iso] : [];
+}
 
 /**
  * Where the shutdown date sits relative to the model id in a flattened table
@@ -236,13 +266,12 @@ export function scanDeprecationText(
   let firstSnippet: string | null = null;
 
   for (const mention of mentions) {
-    const prevToken = [...tokens].reverse().find((t) => t.end <= mention.start);
     const nextToken = tokens.find((t) => t.start >= mention.end);
-    const context =
-      layout === "date-before-id"
-        ? text.slice(Math.max(prevToken ? prevToken.end : 0, mention.start - BEFORE_WINDOW), mention.start)
-        : text.slice(mention.end, Math.min(nextToken ? nextToken.start : text.length, mention.end + AFTER_WINDOW));
-    const dates = extractDates(context);
+    const dates = layout === "date-before-id"
+      ? rowSubjectDate(text, mention.start)
+      : extractDates(
+        text.slice(mention.end, Math.min(nextToken ? nextToken.start : text.length, mention.end + AFTER_WINDOW)),
+      );
     dates.forEach((d) => nearby.add(d));
     const snippet = text.slice(Math.max(0, mention.start - 80), Math.min(text.length, mention.end + 160)).trim();
     firstSnippet ??= snippet;
