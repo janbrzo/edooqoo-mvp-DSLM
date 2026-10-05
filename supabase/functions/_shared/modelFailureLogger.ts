@@ -23,9 +23,9 @@ export async function logModelFailure(opts: {
       : "info";
     const errorCode =
       opts.status === 404 || opts.status === 410 ? "model_deprecation" : "model_failure";
-    await sb.from("error_logs").insert({
+    const { error } = await sb.from("error_logs").insert({
       severity,
-      source: "edge-function",
+      source: "edge_function", // error_logs_source_check allows edge_function | client | cron
       source_name: opts.functionName,
       component: opts.provider,
       error_code: errorCode,
@@ -38,6 +38,9 @@ export async function logModelFailure(opts: {
         error: String(opts.error).slice(0, 1000),
       },
     });
+    // supabase-js returns insert failures instead of throwing; surface them so a
+    // rejected row (e.g. a CHECK violation) cannot silently disable the banner.
+    if (error) console.error("[logModelFailure] insert rejected:", error.message);
   } catch (e) {
     console.error("[logModelFailure] insert failed:", e);
   }

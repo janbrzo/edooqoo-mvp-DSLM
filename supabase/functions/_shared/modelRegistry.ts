@@ -141,7 +141,7 @@ export const MODEL_REGISTRY: ModelRegistryEntry[] = [
     },
   },
   {
-    id: "gpt-5-mini-2025-08-07",
+    id: "gpt-5.6-terra",
     provider: "openai",
     role: "worksheet-json-fallback",
     useCase:
@@ -151,10 +151,14 @@ export const MODEL_REGISTRY: ModelRegistryEntry[] = [
     protectedEngine: true,
     probe: "openai-chat-reasoning",
     lifecycle: {
-      shutdownDate: "2026-12-11",
-      replacement: "gpt-5.6-terra",
+      shutdownDate: null,
+      replacement: null,
+      note:
+        "Replaced gpt-5-mini-2025-08-07 (shutdown 2026-12-11) on 2026-10-05. " +
+        "List price $2 in / $12 out per 1M tokens vs $0.25 / $2 for gpt-5-mini; used only on the Gemini-failure path. " +
+        "Reasoning model, default effort medium; reasoning_effort accepts none|low|medium|high|xhigh|max (not minimal).",
       sourceUrl: DEPRECATION_PAGES.openai,
-      verifiedAt: "2026-10-04",
+      verifiedAt: "2026-10-05",
     },
   },
   {
