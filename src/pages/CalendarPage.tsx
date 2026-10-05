@@ -3,6 +3,7 @@ import { AuthenticatedPageShell } from '@/components/AuthenticatedPageShell';
 import { useNavigate } from 'react-router-dom';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { useAuthFlow } from '@/hooks/useAuthFlow';
+import { useTeacherAuthRedirect } from '@/hooks/useTeacherAuthRedirect';
 import { useTokenSystem } from '@/hooks/useTokenSystem';
 import StickyNav from '@/components/landing/StickyNav';
 import { useCalendarSlots, CalendarSlot, ViewMode } from '@/hooks/useCalendarSlots';
@@ -52,9 +53,8 @@ const CalendarPage = () => {
   const { tokenLeft } = useTokenSystem(user?.id);
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (!authLoading && !isRegisteredUser) navigate('/login');
-  }, [authLoading, isRegisteredUser, navigate]);
+  // Booking emails link here: keep the path through the login round trip.
+  useTeacherAuthRedirect(authLoading, !!isRegisteredUser);
 
   const {
     slots, loading, viewMode, setViewMode, currentDate, setCurrentDate,
