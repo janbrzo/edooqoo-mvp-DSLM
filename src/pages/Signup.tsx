@@ -254,7 +254,11 @@ const Signup = () => {
               <div className="mt-4 text-center space-y-2">
                 <p className="text-sm text-gray-600">
                   Already have an account?{' '}
-                  <Link to="/login" className="text-worksheet-purple hover:underline font-medium">
+                  <Link
+                    to="/login"
+                    state={fromPath !== '/' ? { from: fromPath } : undefined}
+                    className="text-worksheet-purple hover:underline font-medium"
+                  >
                     Sign in here
                   </Link>
                 </p>

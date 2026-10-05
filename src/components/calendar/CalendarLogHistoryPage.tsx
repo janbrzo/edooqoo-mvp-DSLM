@@ -1,6 +1,7 @@
 import React, { useEffect, useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthFlow } from '@/hooks/useAuthFlow';
+import { useTeacherAuthRedirect } from '@/hooks/useTeacherAuthRedirect';
 import { useCalendarSlotLogs, SlotLog } from '@/hooks/useCalendarSlotLogs';
 import { useStudents } from '@/hooks/useStudents';
 import { Button } from '@/components/ui/button';
@@ -27,9 +28,7 @@ const CalendarLogHistoryPage = () => {
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
 
-  useEffect(() => {
-    if (!authLoading && !isRegisteredUser) navigate('/login');
-  }, [authLoading, isRegisteredUser, navigate]);
+  useTeacherAuthRedirect(authLoading, !!isRegisteredUser);
 
   useEffect(() => {
     if (user?.id) {

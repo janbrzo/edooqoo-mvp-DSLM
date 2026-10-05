@@ -201,6 +201,57 @@ describe('buildTimelineEvents — homework pairing', () => {
     expect(returned.actionLabel).toBeUndefined();
   });
 
+  it('marks a return the teacher already reviewed as not actionable', () => {
+    const events = buildTimelineEvents({
+      homework: [
+        {
+          id: 'h4',
+          title: 'Drill',
+          created_at: iso('2026-09-08T09:00:00'),
+          completed_at: iso('2026-09-10T09:12:00'),
+          reviewed_at: iso('2026-09-11T10:00:00'),
+          completed_by_teacher: null,
+        },
+      ],
+    });
+    const returned = events.find((e) => e.type === 'homework_returned')!;
+    expect(returned.needsAction).toBe(false);
+    expect(returned.subtitle).toBe('Reviewed');
+    expect(returned.actionLabel).toBeUndefined();
+    expect(returned.href).toBe('/homework/h4/review');
+  });
+
+  it('opens the review page for a student return and the list for the sent event', () => {
+    const events = buildTimelineEvents({
+      homework: [
+        {
+          id: 'h5',
+          title: 'Drill',
+          created_at: iso('2026-09-08T09:00:00'),
+          completed_at: iso('2026-09-10T09:12:00'),
+          reviewed_at: null,
+        },
+      ],
+    });
+    expect(events.find((e) => e.type === 'homework_returned')!.href).toBe('/homework/h5/review');
+    expect(events.find((e) => e.type === 'homework_sent')!.href).toBe('?tab=homework');
+  });
+
+  it('keeps teacher-marked completion on the homework list', () => {
+    const events = buildTimelineEvents({
+      homework: [
+        {
+          id: 'h6',
+          title: 'Drill',
+          created_at: iso('2026-09-08T09:00:00'),
+          completed_at: iso('2026-09-10T09:12:00'),
+          completed_by_teacher: true,
+        },
+      ],
+    });
+    expect(events.find((e) => e.type === 'homework_returned')!.href).toBe('?tab=homework');
+  });
+
   it('emits only the sent event when homework is still open', () => {
     const events = buildTimelineEvents({
       homework: [{ id: 'h3', title: 'Open', created_at: iso('2026-09-08T09:00:00') }],

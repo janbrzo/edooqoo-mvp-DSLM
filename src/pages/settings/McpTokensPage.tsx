@@ -3,6 +3,7 @@ import { AuthenticatedPageShell } from '@/components/AuthenticatedPageShell';
 import StickyNav from '@/components/landing/StickyNav';
 import { useNavigate } from 'react-router-dom';
 import { useAuthFlow } from '@/hooks/useAuthFlow';
+import { useTeacherAuthRedirect } from '@/hooks/useTeacherAuthRedirect';
 import { useTokenSystem } from '@/hooks/useTokenSystem';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -44,9 +45,7 @@ const McpTokensPage: React.FC = () => {
   const [createOpen, setCreateOpen] = useState(false);
   const [freshToken, setFreshToken] = useState<string | null>(null);
 
-  useEffect(() => {
-    if (!authLoading && (!user || !isRegisteredUser)) navigate('/login');
-  }, [authLoading, user, isRegisteredUser, navigate]);
+  useTeacherAuthRedirect(authLoading, !!user && !!isRegisteredUser);
 
   const load = async () => {
     setLoading(true);

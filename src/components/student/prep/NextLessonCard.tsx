@@ -74,7 +74,10 @@ export const NextLessonCard: React.FC<NextLessonCardProps> = ({
             </>
           ) : (
             <>
-              <h2 className="text-lg font-semibold leading-snug sm:text-xl">
+              <h2
+                className="line-clamp-2 break-words text-lg font-semibold leading-snug sm:text-xl"
+                title={suggestion.topic}
+              >
                 {suggestion.topic}
               </h2>
               <p className="mt-1 text-sm text-muted-foreground">{rationale}</p>

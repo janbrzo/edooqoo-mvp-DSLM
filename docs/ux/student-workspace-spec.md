@@ -338,7 +338,7 @@ Timeline uses a deliberate two-layer split: a **pure composition layer** and a *
 | Source | Table / demo origin | Constraints | Limit |
 |---|---|---|---|
 | `lessons` | `calendar_slots` (demo: `demoData.calendarSlots` filtered by `student_id`) | `teacher_id` + `student_id`, `status != 'deleted'`, `slot_date >= today − 180 days`, order `slot_date desc, start_time desc` | 100 |
-| `homework` | `homework_assignments` (demo: `demoData.homework` filtered by `student_id`) | `student_id`, order `created_at desc` | 100 |
+| `homework` | `homework_assignments` (demo: `demoData.homework` filtered by `student_id`); selects `reviewed_at` and `completed_by_teacher` | `student_id`, order `created_at desc` | 100 |
 | `tests` | `student_tests` (demo: always empty) | `student_id` + `teacher_id`, `deleted_at is null`, order `created_at desc` | 50 |
 
 ### 7.3 Event mapping (as built)
@@ -348,7 +348,7 @@ Timeline uses a deliberate two-layer split: a **pure composition layer** and a *
 | `lesson` | `lessons` (`CalendarSlot`) | `slot_date` + `start_time` | `status === 'needs_review'` → action `Mark done` → `?tab=calendar` |
 | `worksheet` | page's `worksheets` (`WorksheetHistoryItem`) | `created_at` | never; href `/worksheet/{id}` |
 | `homework_sent` | `homework` (`HomeworkAssignment`) | `created_at` | never |
-| `homework_returned` | `homework` (`HomeworkAssignment`) | `completed_at` | `completed_at != null && completed_by_teacher !== true` (returned homework yields two events) |
+| `homework_returned` | `homework` (`HomeworkAssignment`) | `completed_at` | `isHomeworkAwaitingReview` (`src/lib/homework/reviewState.ts`): `completed_at != null && reviewed_at == null && completed_by_teacher !== true` (returned homework yields two events); href `/homework/{id}/review` for student returns, `?tab=homework` for teacher-marked completion |
 | `note` | page's knowledge entries (`StudentKnowledgeEntry`) | `created_at` | never; first line of `content`, max 80 chars, href `?tab=knowledge` |
 | `test_result` | `tests` (`StudentTest`) | `completed_at ?? created_at` | `completed_at != null && reviewed_at == null`; href `?tab=tests` |
 | `mastery_change` | knowledge entries, `category === 'Skill Assessment'` with `metadata.mastery` (0–100) | `updated_at` | never |
@@ -515,7 +515,7 @@ The URL owns only the tab, the Timeline `filter`, the Library `section` and the 
 - Mobile 360×800: horizontal overflow exists, caused by the global `StickyNav` (Generate / Tokens / Pacing row), not by the workspace. Logged out of scope.
 - Console: one React "Cannot update a component while rendering a different component" warning seen during the alias sweep, not reproduced on direct loads of the four canonical tabs. Logged for M8 investigation.
 
-Still manual: real `set=` and `testId=` targets, Homework review from Timeline, Calendar action from Lessons, Generate/Reuse payload, onboarding `focus` spotlights.
+Still manual: real `set=` and `testId=` targets, Calendar action from Lessons, Generate/Reuse payload, onboarding `focus` spotlights. Homework review from Timeline is wired (2026-10-05): the `Review` action opens `/homework/{id}/review`, and the homework list (`StudentHomeworkTab`) shows `Review` / `View review` for every student return.
 
 ## 16. M7.9 impact analysis — regression guards
 
