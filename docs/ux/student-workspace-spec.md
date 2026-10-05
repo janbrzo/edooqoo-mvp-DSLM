@@ -594,6 +594,8 @@ Result: PASS. No code changes were required by this run.
 
 ## 19. Learning model — Model Cockpit v1.0
 
+> Superseded on 2026-10-05 by `docs/ux/learning-model-spec.md` (Learning plan: stage-driven Plan / Insights). Kept below as the historical record.
+
 Problem: the Learning model tab was a single scroll wall (sidebar + six stacked sections) with no hierarchy between direction, current ability and learner profile.
 
 As built:
