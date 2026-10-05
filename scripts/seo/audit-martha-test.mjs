@@ -91,7 +91,7 @@ function stripHtml(html) {
 }
 
 function getMetaDescription(html) {
-  return html.match(/<meta\s+name=["']description["']\s+content=["']([^"']*)["']/i)?.[1] || '';
+  return html.match(/<meta\s+name=["']description["']\s+content=(["'])(.*?)\1/i)?.[2] || '';
 }
 
 function getTitleBlock(route, html) {

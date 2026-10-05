@@ -229,7 +229,7 @@ const steps = [
 const FeatureDSLM: React.FC = () => (
   <FeaturePageLayout
     title="DSLM — Student Context for 1-Minute Prep | Edooqoo"
-    metaDescription="Use Edooqoo's Dynamic Student Learning Model to organize student context, learning signals, and teacher-reviewed next-step suggestions for 1:1 English lessons."
+    metaDescription="Use Edooqoo's Dynamic Student Learning Model to organize student context, learning signals and teacher-reviewed next steps for 1:1 English lessons."
   >
     <FeatureHero
       badge="DSLM"

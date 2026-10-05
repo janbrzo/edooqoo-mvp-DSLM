@@ -461,8 +461,8 @@ function extractMetadata(html) {
     .replace(/\s+[—|]\s+Edooqoo.*$/i, '')
     .trim();
   const description = (
-    html.match(/<meta\s+name=["']description["']\s+content=["']([^"']*)["']/i)?.[1] ||
-    html.match(/<meta\s+content=["']([^"']*)["']\s+name=["']description["']/i)?.[1] ||
+    html.match(/<meta\s+name=["']description["']\s+content=(["'])(.*?)\1/i)?.[2] ||
+    html.match(/<meta\s+content=(["'])(.*?)\1\s+name=["']description["']/i)?.[2] ||
     ''
   ).trim();
   const canonical = (

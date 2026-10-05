@@ -1916,7 +1916,7 @@ export const BLOG_POSTS: BlogPostMeta[] = [
   },
   {
     "title": "IELTS Preparation Worksheets — A Teacher's Guide",
-    "description": "Teacher's guide to creating effective IELTS preparation worksheets. All 4 sections covered with AI-generated practice materials, scoring tips, and 4-week prep plan.",
+    "description": "Teacher's guide to IELTS preparation worksheets: all 4 sections with AI-generated practice, scoring tips and a 4-week prep plan.",
     "url": "/blog/ielts-preparation-worksheets-guide.html",
     "date": "2025-06-15",
     "category": "Tutor Business and Tools",
@@ -2473,7 +2473,7 @@ export const LANDING_PAGES: LandingPageMeta[] = [
   },
   {
     "title": "ESL Student Progress Tracking Tool",
-    "description": "Track ESL student progress with Edooqoo's nano-skill mastery system. DSLM tracks grammar, vocabulary, reading, writing, speaking, and listening skills with CEFR tags and trend analysis.",
+    "description": "Track ESL student progress with Edooqoo's nano-skill mastery system: grammar, vocabulary, reading, writing, speaking and listening, with CEFR tags.",
     "url": "/esl-student-progress-tracking-tool.html",
     "state": "hold"
   },

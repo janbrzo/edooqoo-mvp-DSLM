@@ -5,7 +5,7 @@ import SeoLandingLayout from '@/components/seo/SeoLandingLayout';
 const blogPostingLd = {
   '@context': 'https://schema.org',
   '@type': 'BlogPosting',
-  headline: 'ESL Games for Teachers — 15 Tested Activities',
+  headline: 'ESL Games for Teachers — 15 Activities for Adult Learners',
   description: "15 ESL games designed with Martha's criteria (10 years adult ESL). Each pairs with an AI-generated Edooqoo worksheet for follow-up.",
   author: { '@type': 'Organization', name: 'Edooqoo' },
   publisher: { '@type': 'Organization', name: 'Edooqoo' },
@@ -16,12 +16,12 @@ const blogPostingLd = {
 const EslGamesForTeachers = () => (
   <SeoLandingLayout
     seo={{
-      title: 'ESL Games for Teachers — 15 Tested Activities',
+      title: 'ESL Games for Teachers — 15 Activities for Adult Learners',
       description: "15 ESL games designed with Martha's criteria (10 yrs ESL). Speaking, grammar, vocab — each game pairs with an AI-generated Edooqoo worksheet.",
       path: '/blog/esl-games-for-teachers',
       extraJsonLd: blogPostingLd,
     }}
-    h1="ESL Games for Teachers — 15 Tested Activities"
+    h1="ESL Games for Teachers — 15 Activities for Adult Learners"
     lead="A curated list of 15 ESL games for adult learners, chosen against Martha's criteria for adult lessons. Each game maps to an Edooqoo worksheet so the language practice continues as homework."
     problems={[
       'Most ESL game lists copy-paste childrens activities and call them adult-friendly.',
