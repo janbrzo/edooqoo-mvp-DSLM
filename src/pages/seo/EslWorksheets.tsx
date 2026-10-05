@@ -23,7 +23,7 @@ const EslWorksheets = () => (
     problems={[
       'Static PDF libraries (esl-brains, teach-this, Daves ESL Cafe) give you the same generic worksheet every adult learner sees, zero personalization to a banker preparing for an IELTS interview vs. a software engineer needing meeting English.',
       'Manual worksheet creation in Word or Google Docs eats 60–90 minutes per lesson. Multiply by 10 students and you lose your evenings.',
-      'Adult learners disengage instantly with school-style content, fill-in-the-blanks about Tom and his cat, kids vocabulary, childish images. They quit lessons over it.',
+      'Adult learners disengage instantly with school-style content: fill-in-the-blanks about Tom and his cat, kids vocabulary, childish images. They quit lessons over it.',
     ]}
     solutionHeading="How Edooqoo solves it"
     solutions={[
@@ -56,7 +56,7 @@ const EslWorksheets = () => (
       </>
     }
     faqs={[
-      { question: 'Can I edit worksheets after generation?', answer: 'Yes. Every generated worksheet is fully editable, change instructions, swap exercises, regenerate individual sections, or add your own. The worksheet stays at its permanent shareable link.' },
+      { question: 'Can I edit worksheets after generation?', answer: 'Yes. Every generated worksheet is fully editable: change instructions, swap exercises, regenerate individual sections, or add your own. The worksheet stays at its permanent shareable link.' },
       { question: 'Do students need to install anything?', answer: 'No. Students open the worksheet link in any browser. Interactive completion, audio playback, image rendering, and homework submission all work without an account or app.' },
       { question: 'How is this different from ChatGPT for worksheets?', answer: 'ChatGPT gives raw text. Edooqoo gives 29 structured exercise types with answer keys, distractors, audio, images, AI-assisted homework review, student context, and shareable links, all integrated.' },
       { question: 'Is it free to start?', answer: 'Yes. The Free plan includes 2 worksheets, unlimited students, all 29 exercise types, and AI-assisted homework review. No credit card required to start.' },

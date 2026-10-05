@@ -54,7 +54,7 @@ const glossaryTerms = [
   { term: "Interlanguage", definition: "A learner's developing language system between L1 and target language. Edooqoo's error correction exercises help students notice and correct interlanguage errors." },
   { term: "Backwash", definition: "See Washback Effect. The impact of assessment on curriculum and teaching practice." },
   { term: "Communicative Competence", definition: "The ability to use language effectively in real communication. Edooqoo develops this through dialogue practice, discussion questions, and situational exercises." },
-  { term: "Fluency vs. Accuracy", definition: "Fluency is smooth, natural communication; accuracy is grammatical correctness. Edooqoo exercises target both, discussion questions for fluency, error correction for accuracy." },
+  { term: "Fluency vs. Accuracy", definition: "Fluency is smooth, natural communication; accuracy is grammatical correctness. Edooqoo exercises target both: discussion questions for fluency, error correction for accuracy." },
 ];
 
 const alphabet = [...new Set(glossaryTerms.map(t => t.term[0].toUpperCase()))].sort();

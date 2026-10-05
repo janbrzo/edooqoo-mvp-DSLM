@@ -152,7 +152,7 @@ const TopicLevelPage: React.FC = () => {
         },
         {
           question: 'Can I edit the generated questions?',
-          answer: 'Yes. Every question is editable in place, text, correct answer, distractors, and instructions. No template lock-in.',
+          answer: 'Yes. Every question is editable in place: text, correct answer, distractors, and instructions. No template lock-in.',
         },
         {
           question: 'Can my student do the worksheet online?',

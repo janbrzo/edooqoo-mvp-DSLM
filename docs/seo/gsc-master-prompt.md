@@ -27,9 +27,9 @@ generic advice, and you optimise for *revenue-qualified signups*, not impression
   (355 imp), `best apps to learn english 2026` (218), `best english learning apps 2026`
   (174) + ~15 long-tail variants ≈ **900+ impressions, 0 clicks, positions 14–18**.
   Landing page: `/blog/best-apps-learning-english-2026.html` (1,422 imp, 1 click, 0.07%).
-  This is **learner** intent, not tutor intent, decide explicitly: re-target, split, or
+  This is **learner** intent, not tutor intent: decide explicitly: re-target, split, or
   monetise as top-of-funnel.
-- **Money leak #2, striking-distance, zero-click pages** (pos 8–13, high impressions):
+- **Money leak #2: striking-distance, zero-click pages** (pos 8–13, high impressions):
   `/blog/teaching-english-intonation-stress.html` (309 imp, pos 10.8),
   `/modal-verbs-worksheets-esl.html` (187, pos 7.7),
   `/blog/fill-in-the-blanks-exercises-best-practices.html` (112, pos 12.8),

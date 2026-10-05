@@ -48,6 +48,6 @@ export const FEATURE_PROMPT_COPY: Record<string, FeaturePromptCopy> = {
 
 export const DEFAULT_FEATURE_PROMPT: FeaturePromptCopy = {
   headline: 'Want to use this with your students?',
-  subline: 'Create a free account, 2 worksheets included, no credit card.',
+  subline: 'Create a free account: 2 worksheets included, no credit card.',
   cta: 'Start Free',
 };

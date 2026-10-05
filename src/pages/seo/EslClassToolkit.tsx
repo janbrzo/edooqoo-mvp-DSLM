@@ -57,7 +57,7 @@ const EslClassToolkit = () => (
       </>
     }
     faqs={[
-      { question: 'Is this for kids or adults?', answer: 'Adults only. Every component is designed andragogically, vocabulary, scenarios, and tone target adult learners.' },
+      { question: 'Is this for kids or adults?', answer: 'Adults only. Every component is designed andragogically: vocabulary, scenarios, and tone target adult learners.' },
       { question: 'Does this replace coursebooks like Headway or Outcomes?', answer: 'Yes for 1-on-1 tutoring. For institutional teaching alongside a coursebook, Edooqoo generates personalized supplementary material per learner.' },
       { question: 'Can I export materials offline?', answer: 'Yes. Every worksheet exports to HTML or PDF for in-person printing. The Student Hub remains online for digital submission.' },
       { question: 'Is the toolkit free?', answer: 'The Free plan includes the full toolkit with 2 worksheet generations. Paid plans add volume (15-90 worksheets/month). All features available on all plans.' },

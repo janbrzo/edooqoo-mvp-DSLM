@@ -23,7 +23,7 @@ const HomeworkMockup = () => (
     </div>
     <div className="space-y-2">
       {[
-        { ex: 'Fill in the gaps, Present Perfect', score: '9/10', status: 'Checked', color: 'text-green-700 bg-green-50 border-green-200' },
+        { ex: 'Fill in the gaps: Present Perfect', score: '9/10', status: 'Checked', color: 'text-green-700 bg-green-50 border-green-200' },
         { ex: 'Vocabulary Matching: Business', score: '7/10', status: 'Checked', color: 'text-green-700 bg-green-50 border-green-200' },
         { ex: 'Reading Comprehension', score: '8/10', status: 'Reviewed', color: 'text-green-700 bg-green-50 border-green-200' },
         { ex: 'Writing Task: Email', score: '6/10', status: 'AI-assisted', color: 'text-amber-700 bg-amber-50 border-amber-200' },

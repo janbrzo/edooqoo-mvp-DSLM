@@ -2803,7 +2803,7 @@ export const LANDING_PAGES: LandingPageMeta[] = [
   },
   {
     "title": "Question Tags Worksheets: AI Generated",
-    "description": "Generate question tags worksheets with AI. Practice tag questions in English, positive/negative patterns, auxiliary verbs, intonation.",
+    "description": "Generate question tags worksheets with AI. Practice tag questions in English: positive/negative patterns, auxiliary verbs, intonation.",
     "url": "/question-tags-worksheets.html",
     "state": "hold"
   },

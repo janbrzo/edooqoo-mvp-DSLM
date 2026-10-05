@@ -73,7 +73,7 @@ Return ONLY a JSON object via the tool call.`;
 
 AUTO MEDIA MODE: IMPORTANT BIAS (v4.8):
 The teacher did not pre-select audio or picture. Adult ESL lessons benefit from visual/audio anchors in MOST cases. Bias STRONGLY toward including media.
-- DEFAULT (most common, ~60% of topics): include 1-2 PICTURE exercises (e.g., describe-picture, answer-questions-picture, multiple-choice-picture, true-false-picture). Pictures help visualise scenarios, appropriate for almost any topic involving people, places, objects, situations, professions, hobbies, daily life, travel, business, medicine, food, sports.
+- DEFAULT (most common, ~60% of topics): include 1-2 PICTURE exercises (e.g., describe-picture, answer-questions-picture, multiple-choice-picture, true-false-picture). Pictures help visualise scenarios: appropriate for almost any topic involving people, places, objects, situations, professions, hobbies, daily life, travel, business, medicine, food, sports.
 - AUDIO instead of picture (~25% of topics): when topic explicitly involves listening (podcasts, conversations, interviews, music, news, accents, pronunciation, phone calls, dictation). Include 1-2 audio exercises (listening-comprehension, answer-questions-audio, fill-in-blanks-audio, multiple-choice-audio, true-false-audio).
 - NO MEDIA (rare, ~15%): ONLY when topic is purely abstract grammar mechanics (e.g., "subject-verb agreement drill", "modal verbs review") or formal academic writing with no real-world scenario.
 - NEVER mix picture and audio in the same selection.

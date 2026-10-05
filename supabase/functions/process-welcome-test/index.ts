@@ -443,7 +443,7 @@ serve(async (req) => {
       motivation_type: {
         questionId: 'wt_q3',
         options: [
-          'I need it for work, meetings, emails, presentations',
+          'I need it for work: meetings, emails, presentations',
           'I am preparing for an exam (IELTS, Cambridge, etc.)',
           'I want to travel and talk freely',
           'I want to watch films and read books without subtitles',
