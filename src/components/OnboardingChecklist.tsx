@@ -74,7 +74,7 @@ export const OnboardingChecklist = () => {
   // This eliminates the "second click does nothing" bug where the URL was
   // already cleaned by a prior visit so the URL-driven effect no-ops.
   // We also kick off a `refreshProgress()` ~1.8s later so a completed
-  // action (e.g. Generate Next Lesson Ideas) updates the checklist quickly.
+  // action (e.g. getting lesson suggestions) updates the checklist quickly.
   const navAndSpotlight = (suffix: string, focusId: string) => {
     navigate(studentDeepLink(suffix));
     setTimeout(() => triggerSpotlight({ id: focusId }), 700);
@@ -127,7 +127,7 @@ export const OnboardingChecklist = () => {
   const prepSteps: Step[] = [
     {
       key: 'generate_next_ideas',
-      label: 'Generate Next Lesson Ideas',
+      label: 'Get lesson suggestions',
       icon: Lightbulb,
       completed: !!progress.steps.generate_next_ideas,
       action: () => navAndSpotlight('?tab=dslm&view=pathway&focus=next-lesson-ideas', 'next-lesson-ideas'),
@@ -135,7 +135,7 @@ export const OnboardingChecklist = () => {
     },
     {
       key: 'pick_idea',
-      label: 'Use one Next Lesson suggestion',
+      label: 'Use a lesson suggestion',
       icon: MousePointerClick,
       completed: !!progress.steps.pick_idea,
       action: () => navAndSpotlight('?tab=dslm&view=pathway&focus=pick-idea', 'pick-idea'),

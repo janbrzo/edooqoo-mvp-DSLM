@@ -41396,6 +41396,7 @@
           "tables": [
             "calendar_slots",
             "dslm_curriculum_phases",
+            "future_worksheet_suggestions",
             "homework_assignments",
             "profiles",
             "student_knowledge_entries",
@@ -51432,6 +51433,7 @@
             "src/hooks/dslm/useCurriculumPhases.tsx",
             "src/hooks/useActiveWorksheetGenerationJob.tsx",
             "src/hooks/useFutureTimeline.tsx",
+            "src/hooks/useOnboardingProgress.tsx",
             "src/hooks/useStudentNextStepsCount.ts",
             "src/hooks/useWorksheetGeneration.tsx"
           ],
