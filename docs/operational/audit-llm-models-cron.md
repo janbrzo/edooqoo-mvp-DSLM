@@ -22,7 +22,7 @@ Source of truth for the model list: `supabase/functions/_shared/modelRegistry.ts
 |---|---|---|
 | `gemini-generate` (3 output tokens, thinking off) | gemini-2.5-flash, gemini-2.5-flash-lite | negligible |
 | `openai-chat` (3 tokens) | gpt-4o-mini, gpt-4.1-2025-04-14 | negligible |
-| `openai-chat-reasoning` (`max_completion_tokens: 256`, `reasoning_effort: minimal`; reasoning tokens count against the limit, 16 failed with HTTP 400) | gpt-5-mini-2025-08-07 | negligible |
+| `openai-chat-reasoning` (`max_completion_tokens: 1024`, `reasoning_effort: low`; reasoning tokens count against the limit, 16 failed with HTTP 400, and gpt-5.6-terra rejects `minimal`) | gpt-5.6-terra | negligible |
 | `openai-tts` (input "OK") | gpt-4o-mini-tts, tts-1 | negligible |
 | `metadata` (GET model resource) | whisper-1, Vertex gemini-2.5-flash-image, gemini-3.1-flash-image | free |
 
@@ -46,7 +46,7 @@ The monthly run returns 202 immediately and finishes in the background. Pass `"s
 
 ## Results
 
-- Email to edooqoo@gmail.com. The subject counts failures, shutdowns ≤30 days, switch suggestions and deprecation notices.
+- Email to edooqoo@gmail.com: **monthly always; daily only when at least one probe failed** (a clean daily run sends nothing, the response has `emailSent: false`). The subject counts failures, shutdowns ≤30 days, switch suggestions and deprecation notices. A shutdown ≤30 days alone does not trigger a daily email; it is logged in `error_logs` and shown in the monthly report.
 - `public.model_audit_reports`: one row per run (`summary`, `probes`, `lifecycle`, `deprecation_scan`, `advisor`, `unregistered`).
 - `public.model_health_checks`: one row per probe.
 
