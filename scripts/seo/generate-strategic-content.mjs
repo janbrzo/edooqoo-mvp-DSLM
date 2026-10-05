@@ -18,13 +18,6 @@ const AUTHOR = {
   url: `${BASE}/authors/jan-brzostowski`,
 };
 
-const REVIEWER = {
-  name: 'Martha',
-  role: 'ESL Methodology Reviewer',
-  experience: '10 years of experience',
-  url: `${BASE}/authors/martha`,
-};
-
 const SOURCES = [
   {
     label: 'Council of Europe: Common European Framework of Reference for Languages',
@@ -327,14 +320,6 @@ function articleJsonLd(article) {
         datePublished: PUBLISHED,
         dateModified: MODIFIED,
         author: { '@type': 'Person', '@id': `${AUTHOR.url}#person`, name: AUTHOR.name, url: AUTHOR.url },
-        reviewedBy: {
-          '@type': 'Person',
-          '@id': `${REVIEWER.url}#person`,
-          name: REVIEWER.name,
-          jobTitle: REVIEWER.role,
-          description: REVIEWER.experience,
-          url: REVIEWER.url,
-        },
         publisher: { '@type': 'Organization', '@id': `${BASE}/#organization`, name: 'Edooqoo' },
         mainEntityOfPage: { '@id': `${url}#webpage` },
         inLanguage: 'en',
@@ -355,14 +340,6 @@ function articleJsonLd(article) {
         name: AUTHOR.name,
         url: AUTHOR.url,
         description: 'Founder of Edooqoo and author of product workflow documentation.',
-      },
-      {
-        '@type': 'Person',
-        '@id': `${REVIEWER.url}#person`,
-        name: REVIEWER.name,
-        url: REVIEWER.url,
-        jobTitle: REVIEWER.role,
-        description: REVIEWER.experience,
       },
       ...(article.faq.length
         ? [{
@@ -438,7 +415,6 @@ ${NEWSLETTER_EMBED_CSS}
       <h1>${escapeHtml(article.h1)}</h1>
       <div class="byline">
         <span>By <a href="/authors/jan-brzostowski">${AUTHOR.name}</a></span>
-        <span>Reviewed by <a href="/authors/martha">${REVIEWER.name}, ${REVIEWER.role}</a></span>
         <span>Published ${PUBLISHED}</span>
         <span>Updated ${MODIFIED}</span>
       </div>
@@ -466,7 +442,7 @@ ${renderNewsletterEmbed(`article:${article.slug.replace(/\.html$/, '')}`)}
       <p>Use the <a href="/what-to-teach-next">What Should I Teach Next?</a> framework to turn this guidance into one bounded decision for your next adult 1:1 lesson.</p>
     </section>
     <footer>
-      Authored by ${AUTHOR.name}. Methodology review by ${REVIEWER.name}, ${REVIEWER.role}, ${REVIEWER.experience}.
+      Authored by ${AUTHOR.name}.
     </footer>
   </main>
 </body>
@@ -499,7 +475,6 @@ async function main() {
   await ensureSitemapRoutes([
     '/what-to-teach-next',
     '/authors/jan-brzostowski',
-    '/authors/martha',
   ]);
 
   const summary = articles.map((article) => `${article.slug}:${article.words}`).join(', ');

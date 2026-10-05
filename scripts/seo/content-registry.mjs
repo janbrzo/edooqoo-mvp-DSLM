@@ -76,6 +76,12 @@ const STRATEGIC_ROOT_HTML = new Set([
 ]);
 
 export const CONTENT_OVERRIDES = {
+  '/authors/martha': {
+    state: 'merge',
+    redirectTo: '/authors/jan-brzostowski',
+    cluster: 'Adult and Business English',
+    reason: 'Reviewer profile retired (2026-10): no human review is claimed; see docs/seo/decisions-2026-10.md.',
+  },
   // Add measured keep/improve/merge/retire decisions here after GSC and backlink
   // evidence is recorded. Unknown content remains hold to prevent destructive
   // redirects based only on code inspection.
@@ -378,7 +384,6 @@ const CORE_KEEP_ROUTES = new Set([
   '/',
   '/about',
   '/authors/jan-brzostowski',
-  '/authors/martha',
   '/blog',
   '/esl-worksheets',
   '/exercise-types',

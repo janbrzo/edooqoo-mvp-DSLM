@@ -74,7 +74,6 @@ const WhatToTeachNext: React.FC = () => {
         name: 'What Should I Teach Next?',
         description: 'An evidence-based resource hub, worked-example library, and local decision tool for recurring one-to-one adult English lessons.',
         author: { '@type': 'Person', name: CONTENT_AUTHORS.jan.name, url: `https://edooqoo.com${CONTENT_AUTHORS.jan.path}` },
-        reviewedBy: { '@type': 'Person', name: CONTENT_AUTHORS.martha.name, url: `https://edooqoo.com${CONTENT_AUTHORS.martha.path}` },
         inLanguage: 'en',
       },
       {
@@ -128,7 +127,6 @@ const WhatToTeachNext: React.FC = () => {
             </p>
             <div className="mt-6 flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted-foreground">
               <span>By <Link className="font-semibold text-primary hover:underline" to={CONTENT_AUTHORS.jan.path}>{CONTENT_AUTHORS.jan.name}</Link></span>
-              <span>Reviewed by <Link className="font-semibold text-primary hover:underline" to={CONTENT_AUTHORS.martha.path}>{CONTENT_AUTHORS.martha.name}</Link>, ESL Methodology Reviewer, 10 years of experience</span>
               <span>Updated June 15, 2026</span>
             </div>
             <div className="mt-8 flex flex-wrap gap-3">

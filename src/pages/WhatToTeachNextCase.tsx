@@ -41,11 +41,6 @@ const WhatToTeachNextCase: React.FC = () => {
           name: CONTENT_AUTHORS.jan.name,
           url: `https://edooqoo.com${CONTENT_AUTHORS.jan.path}`,
         },
-        reviewedBy: {
-          '@type': 'Person',
-          name: CONTENT_AUTHORS.martha.name,
-          url: `https://edooqoo.com${CONTENT_AUTHORS.martha.path}`,
-        },
         about: ['adult one-to-one English tutoring', 'next lesson decision', example.decision],
         inLanguage: 'en',
       },
@@ -101,7 +96,6 @@ const WhatToTeachNextCase: React.FC = () => {
           </p>
           <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 text-sm text-muted-foreground">
             <span>By <Link to={CONTENT_AUTHORS.jan.path} className="font-semibold text-primary hover:underline">{CONTENT_AUTHORS.jan.name}</Link></span>
-            <span>Reviewed by <Link to={CONTENT_AUTHORS.martha.path} className="font-semibold text-primary hover:underline">{CONTENT_AUTHORS.martha.name}</Link>, ESL Methodology Reviewer, 10 years of experience</span>
             <span>Published and updated June 15, 2026</span>
           </div>
         </header>

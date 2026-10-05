@@ -100,7 +100,7 @@ Language of product UI: English.
 
 ## Content Registry
 - Machine-readable repository inventory: docs/seo/content-registry.generated.json.
-- Current states: keep=93, improve=0, merge=83, retire=0, hold=380, noindex=1432.
+- Current states: keep=92, improve=0, merge=84, retire=0, hold=380, noindex=1432.
 - Indexable states: keep, improve, hold.
 - Destructive decisions: merge and retire require measured GSC or verified backlink evidence.
 - Programmatic index policy source: src/data/pseoIndexPolicy.json; generated inventory: docs/seo/pseo-index-policy.generated.json.

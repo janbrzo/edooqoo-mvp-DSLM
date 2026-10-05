@@ -26,11 +26,11 @@
   },
   "counts": {
     "total": 1988,
-    "indexable": 473,
+    "indexable": 472,
     "byState": {
-      "keep": 93,
+      "keep": 92,
       "improve": 0,
-      "merge": 83,
+      "merge": 84,
       "retire": 0,
       "hold": 380,
       "noindex": 1432
@@ -491,11 +491,11 @@
       "route": "/authors/martha",
       "canonical": "https://edooqoo.com/authors/martha",
       "type": "spa-route",
-      "state": "keep",
-      "indexable": true,
-      "cluster": "Tutor Business and Tools",
-      "redirectTo": null,
-      "reason": "Strategic product, workflow, evidence, or public resource URL."
+      "state": "merge",
+      "indexable": false,
+      "cluster": "Adult and Business English",
+      "redirectTo": "/authors/jan-brzostowski",
+      "reason": "Reviewer profile retired (2026-10): no human review is claimed; see docs/seo/decisions-2026-10.md."
     },
     {
       "route": "/b1-intermediate-english-worksheets.html",
@@ -723,8 +723,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1142,
+      "reviewer": "",
+      "wordCount": 1128,
       "hasEncodingIssue": false
     },
     {
@@ -743,8 +743,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1140,
+      "reviewer": "",
+      "wordCount": 1126,
       "hasEncodingIssue": false
     },
     {
@@ -763,8 +763,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1141,
+      "reviewer": "",
+      "wordCount": 1127,
       "hasEncodingIssue": false
     },
     {
@@ -783,8 +783,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1140,
+      "reviewer": "",
+      "wordCount": 1126,
       "hasEncodingIssue": false
     },
     {
@@ -803,8 +803,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1142,
+      "reviewer": "",
+      "wordCount": 1128,
       "hasEncodingIssue": false
     },
     {
@@ -823,8 +823,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1101,
+      "reviewer": "",
+      "wordCount": 1087,
       "hasEncodingIssue": false
     },
     {
@@ -843,8 +843,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1122,
+      "reviewer": "",
+      "wordCount": 1108,
       "hasEncodingIssue": false
     },
     {
@@ -883,8 +883,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1163,
+      "reviewer": "",
+      "wordCount": 1149,
       "hasEncodingIssue": false
     },
     {
@@ -923,8 +923,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1153,
+      "reviewer": "",
+      "wordCount": 1139,
       "hasEncodingIssue": false
     },
     {
@@ -943,8 +943,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1095,
+      "reviewer": "",
+      "wordCount": 1081,
       "hasEncodingIssue": false
     },
     {
@@ -963,8 +963,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1101,
+      "reviewer": "",
+      "wordCount": 1087,
       "hasEncodingIssue": false
     },
     {
@@ -983,8 +983,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1090,
+      "reviewer": "",
+      "wordCount": 1076,
       "hasEncodingIssue": false
     },
     {
@@ -1003,8 +1003,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1098,
+      "reviewer": "",
+      "wordCount": 1084,
       "hasEncodingIssue": false
     },
     {
@@ -1023,8 +1023,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1093,
+      "reviewer": "",
+      "wordCount": 1079,
       "hasEncodingIssue": false
     },
     {
@@ -1043,8 +1043,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1083,
+      "reviewer": "",
+      "wordCount": 1069,
       "hasEncodingIssue": false
     },
     {
@@ -1063,8 +1063,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1001,
+      "reviewer": "",
+      "wordCount": 987,
       "hasEncodingIssue": false
     },
     {
@@ -1083,8 +1083,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1149,
+      "reviewer": "",
+      "wordCount": 1135,
       "hasEncodingIssue": false
     },
     {
@@ -1103,8 +1103,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1156,
+      "reviewer": "",
+      "wordCount": 1142,
       "hasEncodingIssue": false
     },
     {
@@ -1123,8 +1123,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1226,
+      "reviewer": "",
+      "wordCount": 1212,
       "hasEncodingIssue": false
     },
     {
@@ -1163,8 +1163,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1135,
+      "reviewer": "",
+      "wordCount": 1121,
       "hasEncodingIssue": false
     },
     {
@@ -1183,8 +1183,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1161,
+      "reviewer": "",
+      "wordCount": 1147,
       "hasEncodingIssue": false
     },
     {
@@ -1203,8 +1203,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1254,
+      "reviewer": "",
+      "wordCount": 1240,
       "hasEncodingIssue": false
     },
     {
@@ -1223,8 +1223,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1171,
+      "reviewer": "",
+      "wordCount": 1157,
       "hasEncodingIssue": false
     },
     {
@@ -1263,8 +1263,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1151,
+      "reviewer": "",
+      "wordCount": 1137,
       "hasEncodingIssue": false
     },
     {
@@ -1303,8 +1303,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1146,
+      "reviewer": "",
+      "wordCount": 1132,
       "hasEncodingIssue": false
     },
     {
@@ -1323,8 +1323,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1152,
+      "reviewer": "",
+      "wordCount": 1138,
       "hasEncodingIssue": false
     },
     {
@@ -1343,8 +1343,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1167,
+      "reviewer": "",
+      "wordCount": 1153,
       "hasEncodingIssue": false
     },
     {
@@ -1363,8 +1363,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1166,
+      "reviewer": "",
+      "wordCount": 1152,
       "hasEncodingIssue": false
     },
     {
@@ -1383,8 +1383,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1089,
+      "reviewer": "",
+      "wordCount": 1075,
       "hasEncodingIssue": false
     },
     {
@@ -1403,8 +1403,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1142,
+      "reviewer": "",
+      "wordCount": 1128,
       "hasEncodingIssue": false
     },
     {
@@ -1423,8 +1423,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1153,
+      "reviewer": "",
+      "wordCount": 1139,
       "hasEncodingIssue": false
     },
     {
@@ -1443,8 +1443,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1145,
+      "reviewer": "",
+      "wordCount": 1131,
       "hasEncodingIssue": false
     },
     {
@@ -1463,8 +1463,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1149,
+      "reviewer": "",
+      "wordCount": 1135,
       "hasEncodingIssue": false
     },
     {
@@ -1483,8 +1483,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1147,
+      "reviewer": "",
+      "wordCount": 1133,
       "hasEncodingIssue": false
     },
     {
@@ -1503,8 +1503,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1175,
+      "reviewer": "",
+      "wordCount": 1161,
       "hasEncodingIssue": false
     },
     {
@@ -1523,8 +1523,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1150,
+      "reviewer": "",
+      "wordCount": 1136,
       "hasEncodingIssue": false
     },
     {
@@ -1543,8 +1543,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1167,
+      "reviewer": "",
+      "wordCount": 1153,
       "hasEncodingIssue": false
     },
     {
@@ -1603,8 +1603,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1145,
+      "reviewer": "",
+      "wordCount": 1131,
       "hasEncodingIssue": false
     },
     {
@@ -1623,8 +1623,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1137,
+      "reviewer": "",
+      "wordCount": 1123,
       "hasEncodingIssue": false
     },
     {
@@ -1643,8 +1643,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 997,
+      "reviewer": "",
+      "wordCount": 983,
       "hasEncodingIssue": false
     },
     {
@@ -1663,8 +1663,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1147,
+      "reviewer": "",
+      "wordCount": 1133,
       "hasEncodingIssue": false
     },
     {
@@ -1683,8 +1683,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 999,
+      "reviewer": "",
+      "wordCount": 985,
       "hasEncodingIssue": false
     },
     {
@@ -1703,8 +1703,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1349,
+      "reviewer": "",
+      "wordCount": 1335,
       "hasEncodingIssue": false
     },
     {
@@ -1763,8 +1763,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1140,
+      "reviewer": "",
+      "wordCount": 1126,
       "hasEncodingIssue": false
     },
     {
@@ -1783,8 +1783,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1142,
+      "reviewer": "",
+      "wordCount": 1128,
       "hasEncodingIssue": false
     },
     {
@@ -1803,8 +1803,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1003,
+      "reviewer": "",
+      "wordCount": 989,
       "hasEncodingIssue": false
     },
     {
@@ -1823,8 +1823,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1142,
+      "reviewer": "",
+      "wordCount": 1128,
       "hasEncodingIssue": false
     },
     {
@@ -1883,8 +1883,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1143,
+      "reviewer": "",
+      "wordCount": 1129,
       "hasEncodingIssue": false
     },
     {
@@ -1903,8 +1903,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1145,
+      "reviewer": "",
+      "wordCount": 1131,
       "hasEncodingIssue": false
     },
     {
@@ -1923,8 +1923,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1145,
+      "reviewer": "",
+      "wordCount": 1131,
       "hasEncodingIssue": false
     },
     {
@@ -1943,8 +1943,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1147,
+      "reviewer": "",
+      "wordCount": 1133,
       "hasEncodingIssue": false
     },
     {
@@ -1963,8 +1963,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1141,
+      "reviewer": "",
+      "wordCount": 1127,
       "hasEncodingIssue": false
     },
     {
@@ -1983,8 +1983,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1145,
+      "reviewer": "",
+      "wordCount": 1131,
       "hasEncodingIssue": false
     },
     {
@@ -2003,8 +2003,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1158,
+      "reviewer": "",
+      "wordCount": 1144,
       "hasEncodingIssue": false
     },
     {
@@ -2023,8 +2023,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1150,
+      "reviewer": "",
+      "wordCount": 1136,
       "hasEncodingIssue": false
     },
     {
@@ -2043,8 +2043,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1143,
+      "reviewer": "",
+      "wordCount": 1129,
       "hasEncodingIssue": false
     },
     {
@@ -2063,8 +2063,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1141,
+      "reviewer": "",
+      "wordCount": 1127,
       "hasEncodingIssue": false
     },
     {
@@ -2083,8 +2083,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1145,
+      "reviewer": "",
+      "wordCount": 1131,
       "hasEncodingIssue": false
     },
     {
@@ -2103,8 +2103,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1146,
+      "reviewer": "",
+      "wordCount": 1132,
       "hasEncodingIssue": false
     },
     {
@@ -2123,8 +2123,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1148,
+      "reviewer": "",
+      "wordCount": 1134,
       "hasEncodingIssue": false
     },
     {
@@ -2143,8 +2143,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1156,
+      "reviewer": "",
+      "wordCount": 1142,
       "hasEncodingIssue": false
     },
     {
@@ -2163,8 +2163,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1159,
+      "reviewer": "",
+      "wordCount": 1145,
       "hasEncodingIssue": false
     },
     {
@@ -2183,8 +2183,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1142,
+      "reviewer": "",
+      "wordCount": 1128,
       "hasEncodingIssue": false
     },
     {
@@ -2223,8 +2223,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1111,
+      "reviewer": "",
+      "wordCount": 1097,
       "hasEncodingIssue": false
     },
     {
@@ -2243,8 +2243,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1142,
+      "reviewer": "",
+      "wordCount": 1128,
       "hasEncodingIssue": false
     },
     {
@@ -2283,8 +2283,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1164,
+      "reviewer": "",
+      "wordCount": 1150,
       "hasEncodingIssue": false
     },
     {
@@ -2303,8 +2303,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1156,
+      "reviewer": "",
+      "wordCount": 1142,
       "hasEncodingIssue": false
     },
     {
@@ -2323,8 +2323,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1146,
+      "reviewer": "",
+      "wordCount": 1132,
       "hasEncodingIssue": false
     },
     {
@@ -2383,8 +2383,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1162,
+      "reviewer": "",
+      "wordCount": 1148,
       "hasEncodingIssue": false
     },
     {
@@ -2403,8 +2403,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1235,
+      "reviewer": "",
+      "wordCount": 1221,
       "hasEncodingIssue": false
     },
     {
@@ -2443,8 +2443,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1161,
+      "reviewer": "",
+      "wordCount": 1147,
       "hasEncodingIssue": false
     },
     {
@@ -2463,8 +2463,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1168,
+      "reviewer": "",
+      "wordCount": 1154,
       "hasEncodingIssue": false
     },
     {
@@ -2483,8 +2483,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1162,
+      "reviewer": "",
+      "wordCount": 1148,
       "hasEncodingIssue": false
     },
     {
@@ -2503,8 +2503,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1149,
+      "reviewer": "",
+      "wordCount": 1135,
       "hasEncodingIssue": false
     },
     {
@@ -2533,8 +2533,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1150,
+      "reviewer": "",
+      "wordCount": 1136,
       "hasEncodingIssue": false
     },
     {
@@ -2573,8 +2573,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1005,
+      "reviewer": "",
+      "wordCount": 991,
       "hasEncodingIssue": false
     },
     {
@@ -2593,8 +2593,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1146,
+      "reviewer": "",
+      "wordCount": 1132,
       "hasEncodingIssue": false
     },
     {
@@ -2613,8 +2613,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1168,
+      "reviewer": "",
+      "wordCount": 1154,
       "hasEncodingIssue": false
     },
     {
@@ -2653,8 +2653,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1150,
+      "reviewer": "",
+      "wordCount": 1136,
       "hasEncodingIssue": false
     },
     {
@@ -2673,8 +2673,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1135,
+      "reviewer": "",
+      "wordCount": 1121,
       "hasEncodingIssue": false
     },
     {
@@ -2693,8 +2693,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 998,
+      "reviewer": "",
+      "wordCount": 984,
       "hasEncodingIssue": false
     },
     {
@@ -2743,8 +2743,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1145,
+      "reviewer": "",
+      "wordCount": 1131,
       "hasEncodingIssue": false
     },
     {
@@ -2763,8 +2763,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1169,
+      "reviewer": "",
+      "wordCount": 1155,
       "hasEncodingIssue": false
     },
     {
@@ -2783,8 +2783,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1107,
+      "reviewer": "",
+      "wordCount": 1093,
       "hasEncodingIssue": false
     },
     {
@@ -2903,8 +2903,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1151,
+      "reviewer": "",
+      "wordCount": 1137,
       "hasEncodingIssue": false
     },
     {
@@ -2923,8 +2923,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1162,
+      "reviewer": "",
+      "wordCount": 1148,
       "hasEncodingIssue": false
     },
     {
@@ -2943,8 +2943,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1149,
+      "reviewer": "",
+      "wordCount": 1135,
       "hasEncodingIssue": false
     },
     {
@@ -2983,8 +2983,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1146,
+      "reviewer": "",
+      "wordCount": 1132,
       "hasEncodingIssue": false
     },
     {
@@ -3063,8 +3063,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1004,
+      "reviewer": "",
+      "wordCount": 990,
       "hasEncodingIssue": false
     },
     {
@@ -3083,8 +3083,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1146,
+      "reviewer": "",
+      "wordCount": 1132,
       "hasEncodingIssue": false
     },
     {
@@ -3103,8 +3103,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1004,
+      "reviewer": "",
+      "wordCount": 990,
       "hasEncodingIssue": false
     },
     {
@@ -3143,8 +3143,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1088,
+      "reviewer": "",
+      "wordCount": 1074,
       "hasEncodingIssue": false
     },
     {
@@ -3183,8 +3183,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1164,
+      "reviewer": "",
+      "wordCount": 1150,
       "hasEncodingIssue": false
     },
     {
@@ -3203,8 +3203,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1182,
+      "reviewer": "",
+      "wordCount": 1168,
       "hasEncodingIssue": false
     },
     {
@@ -3223,8 +3223,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1190,
+      "reviewer": "",
+      "wordCount": 1176,
       "hasEncodingIssue": false
     },
     {
@@ -3243,8 +3243,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1167,
+      "reviewer": "",
+      "wordCount": 1153,
       "hasEncodingIssue": false
     },
     {
@@ -3263,8 +3263,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1169,
+      "reviewer": "",
+      "wordCount": 1155,
       "hasEncodingIssue": false
     },
     {
@@ -3283,8 +3283,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1174,
+      "reviewer": "",
+      "wordCount": 1160,
       "hasEncodingIssue": false
     },
     {
@@ -3303,8 +3303,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1103,
+      "reviewer": "",
+      "wordCount": 1089,
       "hasEncodingIssue": false
     },
     {
@@ -3323,8 +3323,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1194,
+      "reviewer": "",
+      "wordCount": 1180,
       "hasEncodingIssue": false
     },
     {
@@ -3343,8 +3343,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1176,
+      "reviewer": "",
+      "wordCount": 1162,
       "hasEncodingIssue": false
     },
     {
@@ -3363,8 +3363,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1184,
+      "reviewer": "",
+      "wordCount": 1170,
       "hasEncodingIssue": false
     },
     {
@@ -3383,8 +3383,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1181,
+      "reviewer": "",
+      "wordCount": 1167,
       "hasEncodingIssue": false
     },
     {
@@ -3403,8 +3403,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1171,
+      "reviewer": "",
+      "wordCount": 1157,
       "hasEncodingIssue": false
     },
     {
@@ -3423,8 +3423,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1171,
+      "reviewer": "",
+      "wordCount": 1157,
       "hasEncodingIssue": false
     },
     {
@@ -3463,8 +3463,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1182,
+      "reviewer": "",
+      "wordCount": 1168,
       "hasEncodingIssue": false
     },
     {
@@ -3483,8 +3483,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1175,
+      "reviewer": "",
+      "wordCount": 1161,
       "hasEncodingIssue": false
     },
     {
@@ -3503,8 +3503,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1166,
+      "reviewer": "",
+      "wordCount": 1152,
       "hasEncodingIssue": false
     },
     {
@@ -3523,8 +3523,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1179,
+      "reviewer": "",
+      "wordCount": 1165,
       "hasEncodingIssue": false
     },
     {
@@ -3543,8 +3543,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1181,
+      "reviewer": "",
+      "wordCount": 1167,
       "hasEncodingIssue": false
     },
     {
@@ -3563,8 +3563,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1192,
+      "reviewer": "",
+      "wordCount": 1178,
       "hasEncodingIssue": false
     },
     {
@@ -3583,8 +3583,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1180,
+      "reviewer": "",
+      "wordCount": 1166,
       "hasEncodingIssue": false
     },
     {
@@ -3603,8 +3603,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1171,
+      "reviewer": "",
+      "wordCount": 1157,
       "hasEncodingIssue": false
     },
     {
@@ -3743,8 +3743,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1122,
+      "reviewer": "",
+      "wordCount": 1108,
       "hasEncodingIssue": false
     },
     {
@@ -3763,8 +3763,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1164,
+      "reviewer": "",
+      "wordCount": 1150,
       "hasEncodingIssue": false
     },
     {
@@ -3783,8 +3783,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1176,
+      "reviewer": "",
+      "wordCount": 1162,
       "hasEncodingIssue": false
     },
     {
@@ -3803,8 +3803,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1143,
+      "reviewer": "",
+      "wordCount": 1129,
       "hasEncodingIssue": false
     },
     {
@@ -3823,8 +3823,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1175,
+      "reviewer": "",
+      "wordCount": 1161,
       "hasEncodingIssue": false
     },
     {
@@ -3843,8 +3843,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1192,
+      "reviewer": "",
+      "wordCount": 1178,
       "hasEncodingIssue": false
     },
     {
@@ -3863,8 +3863,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1183,
+      "reviewer": "",
+      "wordCount": 1169,
       "hasEncodingIssue": false
     },
     {
@@ -3923,8 +3923,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1101,
+      "reviewer": "",
+      "wordCount": 1087,
       "hasEncodingIssue": false
     },
     {
@@ -3943,8 +3943,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1102,
+      "reviewer": "",
+      "wordCount": 1088,
       "hasEncodingIssue": false
     },
     {
@@ -3983,8 +3983,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1086,
+      "reviewer": "",
+      "wordCount": 1072,
       "hasEncodingIssue": false
     },
     {
@@ -4163,8 +4163,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1163,
+      "reviewer": "",
+      "wordCount": 1149,
       "hasEncodingIssue": false
     },
     {
@@ -4183,8 +4183,8 @@
       "datePublished": "2025-11-29",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1408,
+      "reviewer": "",
+      "wordCount": 1391,
       "hasEncodingIssue": false
     },
     {
@@ -4243,8 +4243,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1090,
+      "reviewer": "",
+      "wordCount": 1076,
       "hasEncodingIssue": false
     },
     {
@@ -4263,8 +4263,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1001,
+      "reviewer": "",
+      "wordCount": 987,
       "hasEncodingIssue": false
     },
     {
@@ -4303,8 +4303,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1112,
+      "reviewer": "",
+      "wordCount": 1098,
       "hasEncodingIssue": false
     },
     {
@@ -4343,8 +4343,8 @@
       "datePublished": "2025-12-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1378,
+      "reviewer": "",
+      "wordCount": 1361,
       "hasEncodingIssue": false
     },
     {
@@ -4443,8 +4443,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1103,
+      "reviewer": "",
+      "wordCount": 1089,
       "hasEncodingIssue": false
     },
     {
@@ -4463,8 +4463,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 996,
+      "reviewer": "",
+      "wordCount": 982,
       "hasEncodingIssue": false
     },
     {
@@ -4483,8 +4483,8 @@
       "datePublished": "2025-11-26",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1413,
+      "reviewer": "",
+      "wordCount": 1396,
       "hasEncodingIssue": false
     },
     {
@@ -4543,8 +4543,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1322,
+      "reviewer": "",
+      "wordCount": 1308,
       "hasEncodingIssue": false
     },
     {
@@ -4723,8 +4723,8 @@
       "datePublished": "2025-06-12",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1352,
+      "reviewer": "",
+      "wordCount": 1335,
       "hasEncodingIssue": false
     },
     {
@@ -4863,8 +4863,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1106,
+      "reviewer": "",
+      "wordCount": 1092,
       "hasEncodingIssue": false
     },
     {
@@ -4883,8 +4883,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1104,
+      "reviewer": "",
+      "wordCount": 1090,
       "hasEncodingIssue": false
     },
     {
@@ -4903,8 +4903,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1119,
+      "reviewer": "",
+      "wordCount": 1105,
       "hasEncodingIssue": false
     },
     {
@@ -4943,8 +4943,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 551,
+      "reviewer": "",
+      "wordCount": 537,
       "hasEncodingIssue": false
     },
     {
@@ -5043,8 +5043,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1097,
+      "reviewer": "",
+      "wordCount": 1083,
       "hasEncodingIssue": false
     },
     {
@@ -5123,8 +5123,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1004,
+      "reviewer": "",
+      "wordCount": 990,
       "hasEncodingIssue": false
     },
     {
@@ -5223,8 +5223,8 @@
       "datePublished": "2025-07-27",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1371,
+      "reviewer": "",
+      "wordCount": 1354,
       "hasEncodingIssue": false
     },
     {
@@ -5283,8 +5283,8 @@
       "datePublished": "2025-06-08",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1386,
+      "reviewer": "",
+      "wordCount": 1369,
       "hasEncodingIssue": false
     },
     {
@@ -5403,8 +5403,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1160,
+      "reviewer": "",
+      "wordCount": 1146,
       "hasEncodingIssue": false
     },
     {
@@ -5483,8 +5483,8 @@
       "datePublished": "2025-06-17",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1371,
+      "reviewer": "",
+      "wordCount": 1354,
       "hasEncodingIssue": false
     },
     {
@@ -5513,8 +5513,8 @@
       "datePublished": "2025-07-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1344,
+      "reviewer": "",
+      "wordCount": 1327,
       "hasEncodingIssue": false
     },
     {
@@ -5533,8 +5533,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1098,
+      "reviewer": "",
+      "wordCount": 1084,
       "hasEncodingIssue": false
     },
     {
@@ -5653,8 +5653,8 @@
       "datePublished": "2025-06-14",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1359,
+      "reviewer": "",
+      "wordCount": 1342,
       "hasEncodingIssue": false
     },
     {
@@ -5993,8 +5993,8 @@
       "datePublished": "2026-06-14",
       "dateModified": "2026-06-14",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 3198,
+      "reviewer": "",
+      "wordCount": 3181,
       "hasEncodingIssue": false
     },
     {
@@ -6013,8 +6013,8 @@
       "datePublished": "2025-06-07",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1385,
+      "reviewer": "",
+      "wordCount": 1368,
       "hasEncodingIssue": false
     },
     {
@@ -6033,8 +6033,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 996,
+      "reviewer": "",
+      "wordCount": 982,
       "hasEncodingIssue": false
     },
     {
@@ -6113,8 +6113,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 996,
+      "reviewer": "",
+      "wordCount": 982,
       "hasEncodingIssue": false
     },
     {
@@ -6133,8 +6133,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1002,
+      "reviewer": "",
+      "wordCount": 988,
       "hasEncodingIssue": false
     },
     {
@@ -6373,8 +6373,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1102,
+      "reviewer": "",
+      "wordCount": 1088,
       "hasEncodingIssue": false
     },
     {
@@ -6953,8 +6953,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1003,
+      "reviewer": "",
+      "wordCount": 989,
       "hasEncodingIssue": false
     },
     {
@@ -7053,8 +7053,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 995,
+      "reviewer": "",
+      "wordCount": 981,
       "hasEncodingIssue": false
     },
     {
@@ -7093,8 +7093,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1117,
+      "reviewer": "",
+      "wordCount": 1103,
       "hasEncodingIssue": false
     },
     {
@@ -7153,8 +7153,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1105,
+      "reviewer": "",
+      "wordCount": 1091,
       "hasEncodingIssue": false
     },
     {
@@ -7173,8 +7173,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1281,
+      "reviewer": "",
+      "wordCount": 1267,
       "hasEncodingIssue": false
     },
     {
@@ -7293,8 +7293,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1002,
+      "reviewer": "",
+      "wordCount": 988,
       "hasEncodingIssue": false
     },
     {
@@ -7453,8 +7453,8 @@
       "datePublished": "2026-06-14",
       "dateModified": "2026-06-14",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 651,
+      "reviewer": "",
+      "wordCount": 634,
       "hasEncodingIssue": false
     },
     {
@@ -7473,8 +7473,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1102,
+      "reviewer": "",
+      "wordCount": 1088,
       "hasEncodingIssue": false
     },
     {
@@ -7493,8 +7493,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1123,
+      "reviewer": "",
+      "wordCount": 1109,
       "hasEncodingIssue": false
     },
     {
@@ -7513,8 +7513,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1276,
+      "reviewer": "",
+      "wordCount": 1262,
       "hasEncodingIssue": false
     },
     {
@@ -7533,8 +7533,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1139,
+      "reviewer": "",
+      "wordCount": 1125,
       "hasEncodingIssue": false
     },
     {
@@ -7553,8 +7553,8 @@
       "datePublished": "2026-05-24",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1103,
+      "reviewer": "",
+      "wordCount": 1089,
       "hasEncodingIssue": false
     },
     {
@@ -7593,8 +7593,8 @@
       "datePublished": "2025-09-22",
       "dateModified": "2026-06-15",
       "author": "Jan Brzostowski",
-      "reviewer": "Martha",
-      "wordCount": 1366,
+      "reviewer": "",
+      "wordCount": 1349,
       "hasEncodingIssue": false
     },
     {

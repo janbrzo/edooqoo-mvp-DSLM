@@ -16,6 +16,8 @@ Rule: a URL with >= 10 impressions in the last 90 days is never pruned.
 
 Martha will not review pages, so the claim "Reviewed by Martha" is removed everywhere (visible text and `reviewedBy` JSON-LD, in the four generators and `src/data/contentAuthors.ts`). It is replaced by an automated verifier whose result is shown honestly as **"Automated quality checks passed on <date>"**, linking to a methodology page that lists exactly what is checked. No wording may imply human review. Jan Brzostowski stays as the named author/publisher.  is removed (or kept only as the credited author of the "Martha Test" criteria, if she wrote them: owner to confirm).
 
+Status 2026-10-05: the claim is already removed (generators, React pages, `reviewedBy` JSON-LD) and `/authors/martha` redirects to Jan's profile; `seo:audit` and the strategic-content audit now fail if a human-review attribution reappears. The verifier and its label are not built yet.
+
 ### Verifier spec (new pages and rewrites must pass; fail closed = page stays `noindex`)
 
 | Layer | Check | Type |

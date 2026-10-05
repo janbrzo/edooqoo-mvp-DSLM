@@ -20,7 +20,6 @@ const BASE = 'https://edooqoo.com';
 const DATE = '2026-05-24';
 const UPDATED_DATE = '2026-06-15';
 const AUTHOR_URL = `${BASE}/authors/jan-brzostowski`;
-const REVIEWER_URL = `${BASE}/authors/martha`;
 
 const productLinks = [
   // Sprint 3 (Faza 3) topical cluster hubs — see scripts/seo/cluster-hubs.mjs
@@ -1770,14 +1769,6 @@ function articleLd(article, url) {
         datePublished: DATE,
         dateModified: UPDATED_DATE,
         author: { '@type': 'Person', '@id': `${AUTHOR_URL}#person`, name: 'Jan Brzostowski', url: AUTHOR_URL },
-        reviewedBy: {
-          '@type': 'Person',
-          '@id': `${REVIEWER_URL}#person`,
-          name: 'Martha',
-          jobTitle: 'ESL Methodology Reviewer',
-          description: '10 years of ESL experience',
-          url: REVIEWER_URL,
-        },
         publisher: { '@type': 'Organization', '@id': `${BASE}/#organization`, name: 'Edooqoo' },
         mainEntityOfPage: { '@id': `${url}#webpage` },
         inLanguage: 'en',
@@ -1798,14 +1789,6 @@ function articleLd(article, url) {
         name: 'Jan Brzostowski',
         url: AUTHOR_URL,
         description: 'Founder of Edooqoo and author of product workflow documentation.',
-      },
-      {
-        '@type': 'Person',
-        '@id': `${REVIEWER_URL}#person`,
-        name: 'Martha',
-        url: REVIEWER_URL,
-        jobTitle: 'ESL Methodology Reviewer',
-        description: '10 years of ESL experience',
       },
       {
         '@type': 'FAQPage',
@@ -1860,7 +1843,7 @@ function renderArticle(article, allArticles = []) {
     <p class="lead">Instructional reference</p>
     <h1>${escapeHtml(article.h1)}</h1>
     <p class="lead">${escapeHtml(summary)}</p>
-    <p>By <a href="/authors/jan-brzostowski">Jan Brzostowski</a>. Reviewed by <a href="/authors/martha">Martha, ESL Methodology Reviewer</a>. Published ${DATE}. Updated ${UPDATED_DATE}.</p>
+    <p>By <a href="/authors/jan-brzostowski">Jan Brzostowski</a>. Published ${DATE}. Updated ${UPDATED_DATE}.</p>
   </header>
   <section class="summary" aria-label="Direct answer">
     <h2>Direct answer</h2>
@@ -1902,7 +1885,7 @@ ${x1000SectionHtml}
   </section>
 ${renderNewsletterEmbed(`article:${article.slug.replace(/\.html$/, '')}`).trimStart()}
   <footer>
-    Published ${DATE}. Updated ${UPDATED_DATE}. Authored by Jan Brzostowski and reviewed by Martha, ESL Methodology Reviewer.
+    Published ${DATE}. Updated ${UPDATED_DATE}. Authored by Jan Brzostowski.
   </footer>
 </main>`;
 

@@ -59,9 +59,7 @@ async function main() {
     if (article?.author?.['@type'] !== 'Person' || article?.author?.name !== 'Jan Brzostowski') {
       failures.push(`${slug}: Jan Brzostowski Person author missing`);
     }
-    if (article?.reviewedBy?.['@type'] !== 'Person' || article?.reviewedBy?.name !== 'Martha') {
-      failures.push(`${slug}: Martha reviewedBy missing`);
-    }
+    if (article?.reviewedBy) failures.push(`${slug}: reviewedBy must not be claimed (no human review; see docs/seo/decisions-2026-10.md)`);
     if (!breadcrumb) failures.push(`${slug}: BreadcrumbList schema missing`);
     if ((faq?.mainEntity?.length || 0) < expectedFaqs) {
       failures.push(`${slug}: expected ${expectedFaqs} FAQ items`);
@@ -69,7 +67,7 @@ async function main() {
     if (!html.includes('<strong>Direct answer:</strong>')) failures.push(`${slug}: direct answer missing`);
     if (!html.includes('Sources and methodology references')) failures.push(`${slug}: sources section missing`);
     if (!html.includes('href="/authors/jan-brzostowski"')) failures.push(`${slug}: visible author link missing`);
-    if (!html.includes('href="/authors/martha"')) failures.push(`${slug}: visible reviewer link missing`);
+    if (/Reviewed by|Methodology review by|href="\/authors\/martha"/.test(html)) failures.push(`${slug}: human-review attribution must not appear`);
     if (!html.includes(`<link rel="canonical" href="https://edooqoo.com/blog/${slug}">`)) {
       failures.push(`${slug}: canonical mismatch`);
     }
@@ -79,7 +77,7 @@ async function main() {
   }
 
   const sitemap = await fs.readFile(path.join(ROOT, 'public', 'sitemap.xml'), 'utf8');
-  for (const route of ['/what-to-teach-next', '/authors/jan-brzostowski', '/authors/martha']) {
+  for (const route of ['/what-to-teach-next', '/authors/jan-brzostowski']) {
     if (!sitemap.includes(`<loc>https://edooqoo.com${route}</loc>`)) {
       failures.push(`${route}: missing from sitemap`);
     }

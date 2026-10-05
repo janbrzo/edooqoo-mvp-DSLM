@@ -1704,7 +1704,6 @@ const decisionCaseGraphNodes = decisionCases.map((item) => {
     headline: item.title,
     description: item.summary,
     author: { '@type': 'Person', name: 'Jan Brzostowski', url: `${BASE_URL}/authors/jan-brzostowski` },
-    reviewedBy: { '@type': 'Person', name: 'Martha', url: `${BASE_URL}/authors/martha` },
     isPartOf: { '@id': `${BASE_URL}/#website` },
     inLanguage: 'en',
   };
