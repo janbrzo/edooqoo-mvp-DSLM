@@ -1,4 +1,4 @@
-// Closed-Loop Company — pacing-drift-aggregation (Wave 1).
+// Closed-Loop Company: pacing-drift-aggregation (Wave 1).
 // Cadence: weekly Sat 04:00 UTC.
 // Detects systemic drift across (cefr_level × goal) cohorts.
 

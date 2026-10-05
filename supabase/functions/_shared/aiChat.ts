@@ -1,4 +1,4 @@
-// v6.9.66 — Shared chat-completion helper.
+// v6.9.66: Shared chat-completion helper.
 // Primary: Google Generative Language direct (GEMINI_API_KEY).
 // Fallback: OpenAI Chat Completions (gpt-4o-mini by default).
 // Lovable AI Gateway removed from hot path (workspace credits exhausted).
@@ -10,7 +10,7 @@ import { logModelFailure } from "./modelFailureLogger.ts";
 const GOOGLE_ENDPOINT_BASE = "https://generativelanguage.googleapis.com/v1beta/models";
 const OPENAI_ENDPOINT      = "https://api.openai.com/v1/chat/completions";
 
-// v6.9.67 — Gemini rejects many JSON-Schema keywords accepted by OpenAI tools.
+// v6.9.67: Gemini rejects many JSON-Schema keywords accepted by OpenAI tools.
 // Strip them recursively before sending functionDeclarations.
 const GEMINI_DISALLOWED_SCHEMA_KEYS = new Set([
   "additionalProperties","maxLength","minLength","minimum","maximum",
@@ -40,7 +40,7 @@ export interface ChatCompletionOpts {
   /** Caller function name for logModelFailure. */
   functionName: string;
   /**
-   * v6.9.72 — when true, skip the Google primary call entirely and go straight
+   * v6.9.72: when true, skip the Google primary call entirely and go straight
    * to OpenAI. The `primaryModel` is then ignored and `fallbackModel` (or the
    * default "gpt-4o-mini") is used. Lets callers force a second-stage retry on
    * a different provider without duplicating helper logic.

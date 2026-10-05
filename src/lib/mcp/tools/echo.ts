@@ -1,4 +1,4 @@
-// Public MCP tool — used by connecting AI assistants to verify the transport
+// Public MCP tool, used by connecting AI assistants to verify the transport
 // is wired end-to-end before exercising real tools.
 import { defineTool } from "@lovable.dev/mcp-js";
 import { z } from "zod";

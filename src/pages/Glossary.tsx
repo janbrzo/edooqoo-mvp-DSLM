@@ -12,7 +12,7 @@ const glossaryTerms = [
   { term: "TESOL", definition: "Teaching English to Speakers of Other Languages. An umbrella term covering both ESL and EFL. Edooqoo serves the entire TESOL community." },
   { term: "Spaced Repetition", definition: "A learning technique that reviews material at increasing intervals to optimize long-term retention. Edooqoo's flashcards use the SM-2 spaced repetition algorithm." },
   { term: "SM-2 Algorithm", definition: "SuperMemo 2, a spaced repetition algorithm that calculates optimal review intervals based on recall difficulty. Used in Edooqoo's flashcard system for vocabulary retention." },
-  { term: "Nano-skill", definition: "A granular, specific competency tracked by Edooqoo's DSLM — e.g., 'B1.grammar.present_perfect.negative'. Enables precise identification of skill gaps." },
+  { term: "Nano-skill", definition: "A granular, specific competency tracked by Edooqoo's DSLM: e.g., 'B1.grammar.present_perfect.negative'. Enables precise identification of skill gaps." },
   { term: "DSLM", definition: "Dynamic Student Learning Model. Edooqoo's proprietary 4-layer system for tracking student progress: Event Log → Metrics → Profile → Decision Engine." },
   { term: "Mastery", definition: "A score (0-100) indicating how well a student has learned a specific skill. Edooqoo tracks mastery per nano-skill with exponential decay weighting for recency." },
   { term: "Scaffolding", definition: "Providing structured support to help learners achieve tasks just beyond their current ability. Edooqoo's AI scaffolds exercises by adjusting difficulty to the student's level." },
@@ -20,7 +20,7 @@ const glossaryTerms = [
   { term: "Cloze Test", definition: "A text with words removed (gaps) that students must fill in from context. Edooqoo's 'Gap Text (Cloze)' exercise type generates AI-created cloze tests." },
   { term: "Gap-fill", definition: "An exercise where students fill in missing words in sentences or texts. Edooqoo offers both sentence-level (Fill in the Blanks) and text-level (Gap Text) gap-fill exercises." },
   { term: "Collocation", definition: "Words that naturally occur together (e.g., 'make a decision', 'heavy rain'). Edooqoo generates exercises testing collocational knowledge at each CEFR level." },
-  { term: "Reading Comprehension", definition: "The ability to understand written text. One of Edooqoo's 29 exercise types — AI generates original texts with comprehension questions at any CEFR level." },
+  { term: "Reading Comprehension", definition: "The ability to understand written text. One of Edooqoo's 29 exercise types, AI generates original texts with comprehension questions at any CEFR level." },
   { term: "Listening Comprehension", definition: "The ability to understand spoken language. Edooqoo generates 5 types of audio exercises with AI-generated speech for listening practice." },
   { term: "Error Correction", definition: "Identifying and fixing mistakes in written text. An Edooqoo exercise type where students find grammatical or vocabulary errors in sentences." },
   { term: "Sentence Transformation", definition: "Rewriting sentences using different grammatical structures while preserving meaning. An AI-assisted exercise type in Edooqoo, common in Cambridge exams, with teacher review for open-ended answers." },
@@ -40,8 +40,8 @@ const glossaryTerms = [
   { term: "Placement Test", definition: "An assessment to determine a student's current language level. Edooqoo's Welcome Test is a 49-question AI placement test covering all skills." },
   { term: "Learning Roadmap", definition: "A structured sequence of next learning steps based on student goals, skill evidence, pacing context, and teacher review." },
   { term: "Exponential Decay", definition: "A mathematical model where recent data is weighted more heavily than older data. Edooqoo's DSLM uses exponential decay to ensure mastery scores reflect current ability." },
-  { term: "Productive Skills", definition: "Speaking and writing — skills where students produce language. Edooqoo exercises like paraphrasing, discussion questions, and describe picture develop productive skills." },
-  { term: "Receptive Skills", definition: "Reading and listening — skills where students receive and understand language. Edooqoo's reading and listening comprehension exercises develop receptive skills." },
+  { term: "Productive Skills", definition: "Speaking and writing: skills where students produce language. Edooqoo exercises like paraphrasing, discussion questions, and describe picture develop productive skills." },
+  { term: "Receptive Skills", definition: "Reading and listening: skills where students receive and understand language. Edooqoo's reading and listening comprehension exercises develop receptive skills." },
   { term: "Blended Learning", definition: "Combining face-to-face instruction with online activities. Edooqoo enables blended learning through live sessions, homework, Student Hub, and flashcards." },
   { term: "Flipped Classroom", definition: "Students learn content before class and practice during class. Edooqoo supports this: assign reading/exercises as homework, then use Live Session for interactive practice." },
   { term: "L1 Interference", definition: "When a student's first language patterns negatively affect their English. Edooqoo's AI can target common L1 interference errors in exercises." },
@@ -54,7 +54,7 @@ const glossaryTerms = [
   { term: "Interlanguage", definition: "A learner's developing language system between L1 and target language. Edooqoo's error correction exercises help students notice and correct interlanguage errors." },
   { term: "Backwash", definition: "See Washback Effect. The impact of assessment on curriculum and teaching practice." },
   { term: "Communicative Competence", definition: "The ability to use language effectively in real communication. Edooqoo develops this through dialogue practice, discussion questions, and situational exercises." },
-  { term: "Fluency vs. Accuracy", definition: "Fluency is smooth, natural communication; accuracy is grammatical correctness. Edooqoo exercises target both — discussion questions for fluency, error correction for accuracy." },
+  { term: "Fluency vs. Accuracy", definition: "Fluency is smooth, natural communication; accuracy is grammatical correctness. Edooqoo exercises target both, discussion questions for fluency, error correction for accuracy." },
 ];
 
 const alphabet = [...new Set(glossaryTerms.map(t => t.term[0].toUpperCase()))].sort();
@@ -70,7 +70,7 @@ const Glossary = () => {
           <Link to="/" className="text-primary hover:underline text-sm">← Back to Edooqoo</Link>
         </div>
 
-        <h1 className="text-4xl font-bold text-foreground mb-4">ELT Glossary — English Language Teaching Terms</h1>
+        <h1 className="text-4xl font-bold text-foreground mb-4">ELT Glossary | English Language Teaching Terms</h1>
         <p className="text-lg text-muted-foreground mb-8">
           A comprehensive glossary of English Language Teaching terminology. Each term includes a definition and how Edooqoo helps teachers apply the concept in practice.
         </p>
@@ -105,7 +105,7 @@ const Glossary = () => {
           <p className="text-lg font-semibold text-foreground mb-2">Ready to put these concepts into practice?</p>
           <p className="text-muted-foreground mb-4">Edooqoo helps English teachers apply ELT best practices with AI-powered worksheet generation.</p>
           <Link to="/signup" state={fromState} className="inline-block bg-primary text-primary-foreground px-6 py-3 rounded-lg font-semibold hover:opacity-90 transition-opacity">
-            Try Edooqoo Free — 2 Worksheets Included
+            Try Edooqoo Free: 2 Worksheets Included
           </Link>
         </div>
       </div>

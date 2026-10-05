@@ -1,5 +1,5 @@
 /**
- * v6.9.53 — Drives refresh-safe worksheet generation UI.
+ * v6.9.53: Drives refresh-safe worksheet generation UI.
  *
  * Subscribes to the localStorage-backed generation job registry and, while a
  * job is `running`, polls the `worksheets` table for the row the backend
@@ -33,9 +33,9 @@ const POLL_INTERVAL_MS = 5000;
 async function locateBackendWorksheet(job: WorksheetGenerationJob): Promise<string | null> {
   if (!job.teacherId) return null;
 
-  // v6.9.55 — exact correlation via `form_data->>clientGenerationId`
+  // v6.9.55: exact correlation via `form_data->>clientGenerationId`
   // (set by `useWorksheetGeneration` for every attempt).
-  // v6.9.59 — fallback window query removed. If a job has no requestId
+  // v6.9.59: fallback window query removed. If a job has no requestId
   // (legacy job started before v6.9.55) we refuse to guess, because the
   // wider teacher/student window query was causing job B to be falsely
   // marked completed using a worksheet actually saved by job A when two
@@ -82,7 +82,7 @@ async function applyCompletionSideEffects(job: WorksheetGenerationJob, worksheet
   }
 
   // 2. Consume token once for authenticated, non-demo users.
-  // v6.9.59 — optimistic local claim BEFORE the network call: prevents the
+  // v6.9.59: optimistic local claim BEFORE the network call: prevents the
   // single-job and multi-job pollers (or two pollers across two browser
   // tabs) from issuing the RPC concurrently for the same worksheet. The
   // DB function `public.consume_token` is also idempotent on
@@ -129,7 +129,7 @@ export function useActiveWorksheetGenerationJob() {
     return () => unsub();
   }, []);
 
-  // v6.9.61 — periodic stale-running expiry so a dead backend cannot leave
+  // v6.9.61: periodic stale-running expiry so a dead backend cannot leave
   // a spinner forever in the mini-panel / modal.
   useEffect(() => {
     const handle = window.setInterval(() => {
@@ -169,7 +169,7 @@ export function useActiveWorksheetGenerationJob() {
 }
 
 /**
- * v6.9.58 — Multi-job variant. Returns ALL active generation jobs (running +
+ * v6.9.58: Multi-job variant. Returns ALL active generation jobs (running +
  * recently completed/failed) and runs per-job polling so each can finish its
  * own side effects independently. Used by ActiveGenerationMiniPanel.
  */
@@ -183,7 +183,7 @@ export function useActiveWorksheetGenerationJobs(): WorksheetGenerationJob[] {
     return () => unsub();
   }, []);
 
-  // v6.9.61 — periodic stale-running expiry (4 min hard timeout).
+  // v6.9.61: periodic stale-running expiry (4 min hard timeout).
   useEffect(() => {
     const handle = window.setInterval(() => {
       try { expireStaleRunningJobs(); } catch { /* ignore */ }
@@ -191,7 +191,7 @@ export function useActiveWorksheetGenerationJobs(): WorksheetGenerationJob[] {
     return () => window.clearInterval(handle);
   }, []);
 
-  // v6.9.61 — Per-job polling covers running jobs AND recently-failed jobs
+  // v6.9.61: Per-job polling covers running jobs AND recently-failed jobs
   // still inside their recovery window. This lets a network-error fail
   // promote back to completed once the backend (EdgeRuntime.waitUntil)
   // saves the worksheet, so tokens/next-step side effects still run.

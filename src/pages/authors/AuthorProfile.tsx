@@ -31,7 +31,7 @@ const AuthorProfile: React.FC = () => {
   return (
     <div className="min-h-screen bg-background">
       <PageSeo
-        title={`${profile.name} — ${profile.role} | Edooqoo`}
+        title={`${profile.name}: ${profile.role} | Edooqoo`}
         description={description}
         path={canonical}
         jsonLd={personLd}

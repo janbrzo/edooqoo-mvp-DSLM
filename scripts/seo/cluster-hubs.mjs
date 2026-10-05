@@ -1,5 +1,5 @@
 /**
- * Sprint 3 (Faza 3) — cluster hub registry.
+ * Sprint 3 (Faza 3): cluster hub registry.
  *
  * PROBLEM: 441 URLs rank, ~40 earn a click. Every article fights alone at position 12-18
  * because there is no topical hub consolidating internal link equity, and LLMs have no
@@ -37,7 +37,7 @@ export const CLUSTER_HUBS = [
     route: '/teaching-english-pronunciation',
     anchor: 'pronunciation teaching hub',
     tool: '/esl-worksheets',
-    title: 'Teaching English Pronunciation to Adults — Tutor Hub',
+    title: 'Teaching English Pronunciation to Adults: Tutor Hub',
     description:
       'Stress, intonation, minimal pairs and connected speech for adult 1:1 lessons, with drills you can turn into a worksheet in a minute.',
     htmlSpokes: [
@@ -55,7 +55,7 @@ export const CLUSTER_HUBS = [
     route: '/esl-exercise-design',
     anchor: 'ESL exercise design hub',
     tool: '/exercise-types',
-    title: 'ESL Exercise Design — Cloze, Gap-Fill, Transformation',
+    title: 'ESL Exercise Design: Cloze, Gap-Fill, Transformation',
     description:
       'How to design cloze, gap-fill, word formation and transformation tasks that diagnose an adult learner instead of filling lesson time.',
     htmlSpokes: [
@@ -73,7 +73,7 @@ export const CLUSTER_HUBS = [
     route: '/tutor-operations',
     anchor: 'tutor operations hub',
     tool: '/tools/what-should-i-teach-next',
-    title: 'Tutor Operations — Homework, Reports, Lesson Records',
+    title: 'Tutor Operations: Homework, Reports, Lesson Records',
     description:
       'Run a 1:1 English tutoring practice: homework review, progress reports, what-to-teach-next decisions and lesson records in one workflow.',
     htmlSpokes: [

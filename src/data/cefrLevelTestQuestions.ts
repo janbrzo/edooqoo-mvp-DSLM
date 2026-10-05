@@ -1,4 +1,4 @@
-// CEFR Level Test — 25 questions distributed across A1→C2.
+// CEFR Level Test, 25 questions distributed across A1→C2.
 // Pure client-side scoring; no PII, no network.
 export type CefrTestLevel = 'A1' | 'A2' | 'B1' | 'B2' | 'C1' | 'C2';
 

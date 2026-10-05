@@ -259,7 +259,7 @@ export function SkillsOverviewPanel({ studentId, teacherId, onlySection }: Skill
       {hasNoData ? null : (
       <>
 
-      {/* Summary Cards — heatmap-only */}
+      {/* Summary Cards: heatmap-only */}
       {onlySection !== 'micro' && (
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <Card>
@@ -289,7 +289,7 @@ export function SkillsOverviewPanel({ studentId, teacherId, onlySection }: Skill
       </div>
       )}
 
-      {/* Radar Chart + Category List — heatmap-only */}
+      {/* Radar Chart + Category List, heatmap-only */}
       {onlySection !== 'micro' && (
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {radarData.length >= 3 && (
@@ -348,7 +348,7 @@ export function SkillsOverviewPanel({ studentId, teacherId, onlySection }: Skill
       </div>
       )}
 
-      {/* Skills List — micro-only */}
+      {/* Skills List: micro-only */}
       {onlySection !== 'heatmap' && (
       <Card>
         <CardHeader>

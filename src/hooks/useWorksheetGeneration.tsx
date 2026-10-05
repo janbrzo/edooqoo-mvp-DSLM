@@ -61,7 +61,7 @@ export const useWorksheetGeneration = (
     percent?: number;
   } | null>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
-  // v6.9.60 — jobId of the in-flight generation. Shared between
+  // v6.9.60: jobId of the in-flight generation. Shared between
   // generateWorksheetHandler and handleWorksheetCompletion so the
   // completion/token/suggestion mutations are scoped to the exact job.
   const activeJobIdRef = useRef<string | null>(null);
@@ -74,7 +74,7 @@ export const useWorksheetGeneration = (
   const consumeToken = entitlement?.consumeToken ?? (async () => false);
 
   const generateWorksheetHandler = async (data: FormData) => {
-    // v6.9.7-patch — hard demo guard before any work or navigation
+    // v6.9.7-patch: hard demo guard before any work or navigation
     if (isDemoMode) {
       showDemoBlockedToast('Generating worksheets');
       return;
@@ -86,7 +86,7 @@ export const useWorksheetGeneration = (
       return;
     }
     isGeneratingRef.current = true;
-    // v6.9.45 — prefer the studentId carried by the form submission. Parent state
+    // v6.9.45: prefer the studentId carried by the form submission. Parent state
     // may not have synced yet when an auto-generate request races with the
     // navigation that just pre-selected the student.
     const effectiveStudentId: string | null = (data?.studentId as string | undefined) || studentId || null;
@@ -98,7 +98,7 @@ export const useWorksheetGeneration = (
       studentId: effectiveStudentId
     });
 
-    // v6.9.55 — stable correlation id for THIS generation attempt.
+    // v6.9.55: stable correlation id for THIS generation attempt.
     // Used to (a) reconcile against `worksheets.form_data->>clientGenerationId`
     // when the SSE stream drops without a terminal event, (b) drive the
     // refresh-safe job registry, (c) gate Next Step `is_used` side effect on
@@ -175,10 +175,10 @@ export const useWorksheetGeneration = (
     const startTime = Date.now();
     setStartGenerationTime(startTime);
 
-    // v6.9.53 — persist the generation as an active job so the mini panel
+    // v6.9.53: persist the generation as an active job so the mini panel
     // and refresh-safe polling can finish the side effects if the user
     // refreshes or navigates away mid-generation.
-    // v6.9.60 — capture the returned jobId so every later mutation
+    // v6.9.60: capture the returned jobId so every later mutation
     // (progress, complete, fail, token, suggestion) is scoped to THIS job
     // and cannot accidentally affect another concurrent generation.
     let activeJobId: string | null = null;
@@ -196,7 +196,7 @@ export const useWorksheetGeneration = (
         origin: !userId ? 'anonymous' : ((data as any).__autoGenerateFromSuggestion ? 'dslm-auto' : 'manual'),
         requestId: clientGenerationId,
         originTabId: getTabId(),
-        // v6.9.57 — snapshot UI metadata so the modal can rehydrate after refresh
+        // v6.9.57: snapshot UI metadata so the modal can rehydrate after refresh
         formMeta: {
           requiresAudio: !!requiresAudio,
           requiresImage: !!requiresImage,
@@ -226,7 +226,7 @@ export const useWorksheetGeneration = (
       
       const fullPrompt = await formatPromptForAI(data);
       const formDataForStorage = createFormDataForStorage(data);
-      // v6.9.55 — persist the correlation id into the row's `form_data` so a
+      // v6.9.55: persist the correlation id into the row's `form_data` so a
       // post-EOF reconciliation can locate THIS attempt's worksheet
       // unambiguously. Prompt input itself is NOT modified.
       (formDataForStorage as any).clientGenerationId = clientGenerationId;
@@ -262,12 +262,12 @@ export const useWorksheetGeneration = (
           selectedAudio = await generateAudioForWorksheet(data);
           devLog('✅ Audio pre-generated successfully');
         } catch (error) {
-          console.error('❌ Audio generation failed — aborting (no token consumed):', error);
+          console.error('❌ Audio generation failed, aborting (no token consumed):', error);
           setMediaGenerating(false);
           setIsGenerating(false);
           setGenerationError(
             "We couldn't generate the audio for your worksheet. " +
-            "No tokens were used. Please try again — your form is ready."
+            "No tokens were used. Please try again: your form is ready."
           );
           return;
         } finally {
@@ -294,12 +294,12 @@ export const useWorksheetGeneration = (
           selectedImage = await generateImageForWorksheet(data);
           devLog('✅ Image pre-generated successfully');
         } catch (error) {
-          console.error('❌ Image generation failed — aborting (no token consumed):', error);
+          console.error('❌ Image generation failed, aborting (no token consumed):', error);
           setMediaGenerating(false);
           setIsGenerating(false);
           setGenerationError(
             "We couldn't generate the image for your worksheet. " +
-            "No tokens were used. Please try again — your form is ready."
+            "No tokens were used. Please try again: your form is ready."
           );
           return;
         } finally {
@@ -323,12 +323,12 @@ export const useWorksheetGeneration = (
       
       let worksheetResult: any = null;
       
-      // v6.9.95 — exact prompt budget pre-flight. `fullPrompt` is the very
+      // v6.9.95: exact prompt budget pre-flight. `fullPrompt` is the very
       // string the edge function validates, so check it here and never start
       // a generation that is guaranteed to 400. Form input errors must not
       // reach the failure alert pipeline.
       if (typeof fullPrompt === 'string' && fullPrompt.length > PROMPT_HARD_LIMIT) {
-        devWarn('[useWorksheetGeneration] Prompt over budget — generation not started', {
+        devWarn('[useWorksheetGeneration] Prompt over budget, generation not started', {
           length: fullPrompt.length,
           limit: PROMPT_HARD_LIMIT,
         });
@@ -412,7 +412,7 @@ export const useWorksheetGeneration = (
           onStreamEndedWithoutTerminalEvent: async (lastProgress) => {
             clearTimeout(generationTimeoutId);
             devWarn(
-              '[useWorksheetGeneration] stream EOF without done/error — attempting DB reconciliation',
+              '[useWorksheetGeneration] stream EOF without done/error, attempting DB reconciliation',
               { lastProgress, clientGenerationId }
             );
             const recovered = await recoverWorksheetAfterStreamLoss({
@@ -432,7 +432,7 @@ export const useWorksheetGeneration = (
               }
               return;
             }
-            // v6.9.60 — Do NOT immediately mark this job as failed. The
+            // v6.9.60: Do NOT immediately mark this job as failed. The
             // backend keeps generating via `EdgeRuntime.waitUntil` and the
             // global hook `useActiveWorksheetGenerationJobs` keeps polling
             // for the saved worksheet by clientGenerationId. Close the
@@ -440,11 +440,11 @@ export const useWorksheetGeneration = (
             // `running` state so the mini-panel keeps showing it.
             setStreamProgress(null);
             setIsGenerating(false);
-            devLog('🛟 Transport loss — keeping job running for DB polling', {
+            devLog('🛟 Transport loss: keeping job running for DB polling', {
               clientGenerationId,
               activeJobId,
             });
-            // v6.9.94 — Do NOT alert yet. A stream EOF is only an incident if
+            // v6.9.94: Do NOT alert yet. A stream EOF is only an incident if
             // the backend never persisted the worksheet. Wait out the DB
             // reconciliation window (the global poller runs every 5s) and
             // alert only when the row is genuinely missing. This removes the
@@ -458,13 +458,13 @@ export const useWorksheetGeneration = (
                   startedAt: startTime,
                 });
                 if (late) {
-                  devLog('✅ Stream EOF reconciled by DB — no alert sent', { clientGenerationId });
+                  devLog('✅ Stream EOF reconciled by DB; no alert sent', { clientGenerationId });
                   return;
                 }
                 await supabase.functions.invoke('notify-generation-failure', {
                   body: {
                     errorType: 'client_stream_lost_no_saved_worksheet',
-                    errorMessage: `Stream EOF after ${lastProgress.exercisesGenerated}/${lastProgress.expectedTotal || '?'} — no worksheet row after 90s of DB reconciliation`,
+                    errorMessage: `Stream EOF after ${lastProgress.exercisesGenerated}/${lastProgress.expectedTotal || '?'}: no worksheet row after 90s of DB reconciliation`,
                     userId: userId || null,
                     teacherEmail: null,
                     model: 'unknown',
@@ -482,7 +482,7 @@ export const useWorksheetGeneration = (
             clearTimeout(generationTimeoutId);
             console.error('❌ Stream error:', error);
             setStreamProgress(null);
-            // v6.9.61 — Before declaring failure, attempt a single DB recovery
+            // v6.9.61: Before declaring failure, attempt a single DB recovery
             // pass (covers the case where the SSE socket died but the backend
             // already saved the worksheet via EdgeRuntime.waitUntil).
             try {
@@ -507,7 +507,7 @@ export const useWorksheetGeneration = (
             // ignored until the page is reloaded.
             setIsGenerating(false);
             try {
-              // v6.9.61 — failGenerationJob now sets a 60s recoveryDeadlineAt
+              // v6.9.61: failGenerationJob now sets a 60s recoveryDeadlineAt
               // so the global DB poller can still promote the job back to
               // completed if the backend persists the worksheet later.
               if (activeJobId) {
@@ -588,7 +588,7 @@ export const useWorksheetGeneration = (
   };
 
   /**
-   * v6.9.55 — Post-stream reconciliation. After an SSE EOF without a
+   * v6.9.55: Post-stream reconciliation. After an SSE EOF without a
    * terminal event, look up the worksheet row that THIS attempt may have
    * already saved. Returns a worksheet-shaped object compatible with
    * `handleWorksheetCompletion`, or null if nothing matches.
@@ -660,7 +660,7 @@ export const useWorksheetGeneration = (
       finalWorksheetId
     });
 
-    // v6.9.57 — Token consumption policy:
+    // v6.9.57: Token consumption policy:
     //   - Consumed ONLY after a worksheet row exists in DB AND was validated
     //     client-side. Backend never consumes tokens itself.
     //   - Idempotent via consume_token RPC keyed on worksheet_id, so the
@@ -745,7 +745,7 @@ export const useWorksheetGeneration = (
         worksheetState.setEditableWorksheet(deepFixedWorksheet);
         
         devLog('🔗 Updating URL to /worksheet/' + finalWorksheetId);
-        // v6.9.64 — raw pushState does not notify React Router, so the SPA
+        // v6.9.64: raw pushState does not notify React Router, so the SPA
         // could keep showing the form while the URL silently changed. Emit a
         // typed navigation event; Index.tsx listens and calls `navigate()`.
         // Fallback to a hard assign only if dispatch throws (e.g. headless).
@@ -774,10 +774,10 @@ export const useWorksheetGeneration = (
       });
       
       devLog('🎉 Worksheet generation completed successfully with ID:', finalWorksheetId);
-      // v6.9.53 — flip the active generation job to `completed` so the global
+      // v6.9.53: flip the active generation job to `completed` so the global
       // mini panel switches to its CTA and the persistent intent stops firing.
       try {
-        // v6.9.60 — scope to THIS job so a sibling running generation is not
+        // v6.9.60: scope to THIS job so a sibling running generation is not
         // flipped to completed by accident.
         const jid = activeJobIdRef.current;
         if (jid) completeGenerationJob(jid, finalWorksheetId);
@@ -804,7 +804,7 @@ export const useWorksheetGeneration = (
 
       // v4.8: if this generation originated from a DSLM suggestion, flip is_used.
       try {
-        // v6.9.57 — Only honor the suggestion id that came in WITH this exact
+        // v6.9.57: Only honor the suggestion id that came in WITH this exact
         // form submission. Removing the sessionStorage fallback prevents a
         // failed previous attempt from leaking a stale id into the next retry.
         const sourceSuggestionId = (data as any).__autoGenerateSuggestionId || null;
@@ -836,7 +836,7 @@ export const useWorksheetGeneration = (
         devWarn('[v4.8] suggestion-used update threw', e);
       }
       
-      // v6.9.45 — use the studentId that came in with the FormData payload so
+      // v6.9.45: use the studentId that came in with the FormData payload so
       // DSLM auto-generate dispatches the event for the right student even when
       // parent state had not yet hydrated.
       const completionStudentId: string | null = (data?.studentId as string | undefined) || studentId || null;
@@ -880,7 +880,7 @@ export const useWorksheetGeneration = (
       setStreamProgress(null);
       setMediaGenerating(false);
       setGenerationError(null);
-      // v6.9.61 — explicit user cancellation: flip job to failed AND clear the
+      // v6.9.61: explicit user cancellation: flip job to failed AND clear the
       // recovery window so the DB poller does not "recover" a cancelled run.
       try {
         const jid = activeJobIdRef.current;

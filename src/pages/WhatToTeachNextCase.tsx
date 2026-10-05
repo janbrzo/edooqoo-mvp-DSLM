@@ -78,7 +78,7 @@ const WhatToTeachNextCase: React.FC = () => {
   return (
     <div className="min-h-screen bg-background">
       <PageSeo
-        title={`${example.title} — Worked Example`}
+        title={`${example.title} | Worked Example`}
         description={example.summary}
         path={path}
         ogType="article"

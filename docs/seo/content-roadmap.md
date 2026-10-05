@@ -146,7 +146,7 @@ Priority rule: choose indexed or near-product URLs first, especially adult/busin
 | /blog/extensive-reading-programs-esl.html | 1145 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
 | /blog/fill-in-the-blanks-exercises-best-practices.html | 1169 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
 | /blog/first-adult-one-to-one-english-lesson-evidence-capture.html | 1107 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
-| /blog/five-minute-filler-activities-esl.html | 469 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
+| /blog/five-minute-filler-activities-esl.html | 466 | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
 | /blog/formative-assessment-english-teaching.html | 1151 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
 | /blog/from-lesson-evidence-to-next-lesson-plan.html | 1162 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
 | /blog/from-student-goals-to-worksheet.html | 1149 | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |

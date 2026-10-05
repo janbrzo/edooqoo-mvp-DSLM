@@ -17,8 +17,8 @@ const ROOT = path.resolve(__dirname, '..', '..');
 const PUBLIC = path.resolve(ROOT, 'public');
 const WELL_KNOWN = path.resolve(PUBLIC, '.well-known');
 
-const VERSION = 'v6.9.71';
-const RELEASE_DATE = '2026-10-04';
+const VERSION = 'v6.9.72';
+const RELEASE_DATE = '2026-10-05';
 const RELEASE_NAME = 'SEO x1000 Plan Completion Gate and Worker Deployment Binding';
 const BASE_URL = 'https://edooqoo.com';
 const SOURCE_TRUTH_MANIFEST_PATH = path.join(ROOT, 'docs', 'source-of-truth-manifest.json');
@@ -446,10 +446,10 @@ const oneMinutePrepCanonicalMechanics = [
   'src/components/student-knowledge/OneMinutePrepCard.tsx keeps query key semantics and uses read-only data from useOneMinutePrep, useStudentProgress, useFutureTimeline, and StudentPage profile props to render readiness status.',
   'src/components/WorksheetForm/NextStepsPresetBanner.tsx, src/components/dslm/NextStepsSection.tsx, src/components/dslm/GenerateStepsDialog.tsx, and src/components/dslm/NextStepBanner.tsx rename visible labels from next-step language to 1-Minute Prep suggestions.',
   'The future_worksheet_suggestions table, suggestion_kind values, normalizeSuggestionPrefill, useFutureTimeline, useCurriculumPhases, onApplyPreset, Supabase/RLS, Edge Functions, Stripe, and the Worksheet Generation Engine remain unchanged.',
-  'v6.9.45 — `Generate worksheet ↗` from a 1-Minute Prep suggestion is readiness-aware: auto-generated submissions carry an internal `__autoGenerateFromSuggestion` flag and Index.tsx silently retries up to ~12 s while `useTokenSystem` resolves, instead of dropping the request after 2 short retries; `useWorksheetGeneration` prefers `data.studentId` over parent state so the generator never starts without a student.',
-  'v6.9.45 — `Regenerate Learning Roadmap` physically preserves every `done` and `in_progress` phase record. `generate-curriculum-phases` soft-deletes only `planned`/`draft` rows scoped by `student_id + teacher_id`, refuses to insert a second `in_progress` phase, and re-reads kept phase IDs after the write — returning `500 { preservationInvariantFailed: true }` if any kept row was touched. Because kept phase row IDs survive, every `future_worksheet_suggestions.phase_id` pointing at them stays valid and existing 1-Minute Prep suggestions inside `done`/`in_progress` phases remain visible.',
-  'v6.9.46 — `Generate worksheet ↗` uses a single token entitlement source: `Index.tsx` owns `useTokenSystem` and passes `hasTokens`, `canGenerateWorksheet`, `isDemo`, and `consumeToken` into `useWorksheetGeneration`; `WorksheetForm` can hydrate a mounted `autoGenerateWorksheetRequest` from sessionStorage before direct `submitForm()` fires.',
-  'v6.9.46 — `Regenerate Learning Roadmap` audits preservation field-by-field: `generate-curriculum-phases` snapshots kept `done`/`in_progress` phases plus active `future_worksheet_suggestions.phase_id` bindings, replaces only `planned`/`draft`, rolls back inserted rows/restores replaceable rows on `preservationInvariantFailed`, and `useCurriculumPhases` refreshes suggestions after successful regeneration.',
+  'v6.9.45: `Generate worksheet ↗` from a 1-Minute Prep suggestion is readiness-aware: auto-generated submissions carry an internal `__autoGenerateFromSuggestion` flag and Index.tsx silently retries up to ~12 s while `useTokenSystem` resolves, instead of dropping the request after 2 short retries; `useWorksheetGeneration` prefers `data.studentId` over parent state so the generator never starts without a student.',
+  'v6.9.45: `Regenerate Learning Roadmap` physically preserves every `done` and `in_progress` phase record. `generate-curriculum-phases` soft-deletes only `planned`/`draft` rows scoped by `student_id + teacher_id`, refuses to insert a second `in_progress` phase, and re-reads kept phase IDs after the write, returning `500 { preservationInvariantFailed: true }` if any kept row was touched. Because kept phase row IDs survive, every `future_worksheet_suggestions.phase_id` pointing at them stays valid and existing 1-Minute Prep suggestions inside `done`/`in_progress` phases remain visible.',
+  'v6.9.46: `Generate worksheet ↗` uses a single token entitlement source: `Index.tsx` owns `useTokenSystem` and passes `hasTokens`, `canGenerateWorksheet`, `isDemo`, and `consumeToken` into `useWorksheetGeneration`; `WorksheetForm` can hydrate a mounted `autoGenerateWorksheetRequest` from sessionStorage before direct `submitForm()` fires.',
+  'v6.9.46: `Regenerate Learning Roadmap` audits preservation field-by-field: `generate-curriculum-phases` snapshots kept `done`/`in_progress` phases plus active `future_worksheet_suggestions.phase_id` bindings, replaces only `planned`/`draft`, rolls back inserted rows/restores replaceable rows on `preservationInvariantFailed`, and `useCurriculumPhases` refreshes suggestions after successful regeneration.',
 ];
 
 const oneMinutePrepCanonicalKeywords = [
@@ -1180,13 +1180,13 @@ function publicFeatureIndexLines() {
     .join('\n');
 }
 
-// Sprint 4 (Faza 4) — verbatim, brand-first answer snippets for answer engines.
+// Sprint 4 (Faza 4): verbatim, brand-first answer snippets for answer engines.
 // Each snippet is self-contained, states the boundary of the claim, and carries its source URL,
 // so an engine can quote it without inventing capability that does not ship.
 const answerSnippets = [
   [
     'What is Edooqoo?',
-    'Edooqoo is a lesson-preparation system for freelance English teachers and private tutors running recurring one-to-one lessons with adult learners. It stores student context — goals, diagnostic results, nano-skill evidence, homework and flashcard signals — and turns that context into teacher-reviewable worksheets and follow-up materials.',
+    'Edooqoo is a lesson-preparation system for freelance English teachers and private tutors running recurring one-to-one lessons with adult learners. It stores student context, goals, diagnostic results, nano-skill evidence, homework and flashcard signals, and turns that context into teacher-reviewable worksheets and follow-up materials.',
     `${BASE_URL}/one-minute-prep`,
   ],
   [
@@ -1229,7 +1229,7 @@ const answerSnippets = [
 const publicLlmsTxt = `# ${PUBLISHER_ENTITY}
 
 
-> Edooqoo is a lesson-preparation system for freelance English teachers and private tutors who run recurring one-to-one lessons with adult learners. It stores student context — goals, diagnostic results, nano-skill evidence, homework and flashcard signals — and turns that context into ready-to-teach, teacher-reviewable worksheets and follow-up materials. Worksheet generation is the output layer of the workflow, not the whole product.
+> Edooqoo is a lesson-preparation system for freelance English teachers and private tutors who run recurring one-to-one lessons with adult learners. It stores student context, goals, diagnostic results, nano-skill evidence, homework and flashcard signals, and turns that context into ready-to-teach, teacher-reviewable worksheets and follow-up materials. Worksheet generation is the output layer of the workflow, not the whole product.
 
 Last updated: ${LAST_UPDATED} | Version: ${VERSION} | Publisher: ${PUBLISHER_ENTITY} | Canonical: ${BASE_URL}/
 

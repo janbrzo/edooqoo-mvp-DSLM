@@ -24,8 +24,8 @@ function renderWelcomeHtml(firstName: string, signupSource: string): string {
   const howItWorksUrl = `${APP_BASE_URL}/how-it-works`
   const glossaryUrl = `${APP_BASE_URL}/glossary`
   const sourceLine = signupSource === 'google'
-    ? 'Glad you signed in with Google — your account is ready to go.'
-    : "Glad you confirmed your email — your account is now active."
+    ? 'Glad you signed in with Google; your account is ready to go.'
+    : "Glad you confirmed your email; your account is now active."
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -42,13 +42,13 @@ function renderWelcomeHtml(firstName: string, signupSource: string): string {
           <div style="font-size:14px;color:#5E3FD9;font-weight:600;letter-spacing:0.04em;text-transform:uppercase;">Edooqoo</div>
           <h1 style="margin:12px 0 8px;font-size:26px;line-height:1.25;color:#0b1220;font-weight:700;">Welcome${safeName ? ', ' + safeName : ''} 👋</h1>
           <p style="margin:0 0 8px;font-size:15px;line-height:1.6;color:#4b5563;">${sourceLine}</p>
-          <p style="margin:0;font-size:15px;line-height:1.6;color:#4b5563;">Edooqoo helps English tutors prep professional, adult‑level lessons in minutes — not hours.</p>
+          <p style="margin:0;font-size:15px;line-height:1.6;color:#4b5563;">Edooqoo helps English tutors prep professional, adult‑level lessons in minutes; not hours.</p>
         </td></tr>
 
         <tr><td style="padding:24px 32px 8px;">
           <h2 style="margin:0 0 12px;font-size:16px;color:#0b1220;font-weight:700;">What you can do right now</h2>
           <table role="presentation" width="100%" cellpadding="0" cellspacing="0">
-            <tr><td style="padding:6px 0;font-size:14px;line-height:1.6;color:#374151;"><strong>👤&nbsp;&nbsp;Add your first student</strong> — capture their professional goals (start here)</td></tr>
+            <tr><td style="padding:6px 0;font-size:14px;line-height:1.6;color:#374151;"><strong>👤&nbsp;&nbsp;Add your first student</strong>, capture their professional goals (start here)</td></tr>
             <tr><td style="padding:6px 0;font-size:14px;line-height:1.6;color:#374151;">📊&nbsp;&nbsp;Run the Welcome Placement Test to map their level &amp; gaps</td></tr>
             <tr><td style="padding:6px 0;font-size:14px;line-height:1.6;color:#374151;">📅&nbsp;&nbsp;Set your calendar availability so students can book lessons</td></tr>
             <tr><td style="padding:6px 0;font-size:14px;line-height:1.6;color:#374151;">📝&nbsp;&nbsp;Generate a fully editable, goal‑specific worksheet</td></tr>
@@ -66,7 +66,7 @@ function renderWelcomeHtml(firstName: string, signupSource: string): string {
         </td></tr>
 
         <tr><td style="padding:20px 32px 28px;border-top:1px solid #f1f5f9;">
-          <p style="margin:0 0 4px;font-size:12px;line-height:1.6;color:#9ca3af;">Questions? Just reply to this email — we read every message.</p>
+          <p style="margin:0 0 4px;font-size:12px;line-height:1.6;color:#9ca3af;">Questions? Just reply to this email; we read every message.</p>
           <p style="margin:0;font-size:12px;line-height:1.6;color:#9ca3af;">Edooqoo · helping English tutors save prep time</p>
         </td></tr>
       </table>

@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 
 /**
- * v6.9.55 — Block Chrome / Google Translate auto-translation on a specific
+ * v6.9.55: Block Chrome / Google Translate auto-translation on a specific
  * route. Used by Welcome Test so the placement diagnostic stays in English
  * and the result is meaningful.
  *

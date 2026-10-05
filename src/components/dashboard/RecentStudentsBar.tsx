@@ -4,14 +4,14 @@ import { pickRecentStudents, studentPrepPath, type QuickAccessStudent } from '@/
 
 interface RecentStudentsBarProps {
   students: QuickAccessStudent[];
-  /** ids already visible in Next up — skipped to avoid duplication */
+  /** ids already visible in Next up, skipped to avoid duplication */
   excludeIds?: string[];
 }
 
 const DRAG_THRESHOLD_PX = 5;
 
 /**
- * v6.9.110 — one-line horizontal strip of recently touched students.
+ * v6.9.110: one-line horizontal strip of recently touched students.
  * Anchors keep native middle-click / Ctrl-click "open in new tab".
  * Supports mouse drag-to-scroll and vertical wheel → horizontal scroll.
  */

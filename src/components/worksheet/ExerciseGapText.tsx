@@ -55,7 +55,7 @@ const ExerciseGapText: React.FC<ExerciseGapTextProps> = ({
           return blanksCount === 1 ? sIndex : `${sIndex}_${blankIndex}`;
         };
         
-        // Get correct answers array — handle "answer1 / answer2" format for multi-blank
+        // Get correct answers array, handle "answer1 / answer2" format for multi-blank
         const correctAnswers: string[] = (() => {
           if (sentence?.answers && Array.isArray(sentence.answers) && sentence.answers.length > 0) {
             return sentence.answers;
@@ -101,7 +101,7 @@ const ExerciseGapText: React.FC<ExerciseGapTextProps> = ({
                       <span>
                         {sIndex + 1}. {parts.map((part: string, pIndex: number, arr: string[]) => {
                           if (pIndex >= arr.length - 1) {
-                            // Last part — just text, plus overall feedback
+                            // Last part: just text, plus overall feedback
                             return (
                               <React.Fragment key={pIndex}>
                                 {part}

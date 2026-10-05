@@ -1,5 +1,5 @@
 /**
- * EditGoalDialog — DSLM v5.0
+ * EditGoalDialog: DSLM v5.0
  *
  * Edit any goal (supporting/additional): title, description, deadline.
  * Deadline uses the new DeadlinePicker (quick-pick presets + custom date toggle).

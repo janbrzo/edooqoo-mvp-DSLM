@@ -1,8 +1,8 @@
 /**
- * ModelCockpitHeader — Learning model cockpit (Model Cockpit v1.0, step 1).
+ * ModelCockpitHeader: Learning model cockpit (Model Cockpit v1.0, step 1).
  * One compact status strip above all Learning model perspectives:
  * model maturity, signal counts, level, pacing and goal deadlines.
- * Presentation only — reuses existing hooks/props, no new queries.
+ * Presentation only: reuses existing hooks/props, no new queries.
  */
 import React from 'react';
 import { Activity, BookOpen, FileText, GraduationCap, Bell } from 'lucide-react';
@@ -65,7 +65,7 @@ export const ModelCockpitHeader: React.FC<ModelCockpitHeaderProps> = ({
         </div>
       </div>
       <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-        <Stat icon={GraduationCap} label="level" value={englishLevel || '—'} />
+        <Stat icon={GraduationCap} label="level" value={englishLevel || '-'} />
         <Stat icon={BookOpen} label={totalLessons === 1 ? 'lesson' : 'lessons'} value={totalLessons} />
         <Stat icon={FileText} label={totalWorksheets === 1 ? 'worksheet' : 'worksheets'} value={totalWorksheets} />
         {goalSlot && <div className="min-w-0 sm:ml-auto">{goalSlot}</div>}

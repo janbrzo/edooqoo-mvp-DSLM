@@ -1,5 +1,5 @@
 /**
- * useGoalProgress — DSLM v5.0
+ * useGoalProgress: DSLM v5.0
  *
  * Computes a 0-100 progress percentage per goal by combining three signals:
  *  1. Element ratings: average of (current_rating × 20) across the goal's learning elements.

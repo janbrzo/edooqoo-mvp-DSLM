@@ -126,7 +126,7 @@ const WelcomeTestMockup = () => (
       </div>
     </div>
     <div className="bg-violet-50 border border-violet-100 rounded-lg px-2 py-1.5 text-[10px] text-violet-700">
-      <span className="font-semibold">AI result:</span> Estimated B2 — Upper Intermediate
+      <span className="font-semibold">AI result:</span> Estimated B2: Upper Intermediate
     </div>
   </div>
 );

@@ -22,6 +22,10 @@ One rule per entry, with a one-line why. Replace an existing rule instead of add
 - Edge Functions build links from the `APP_BASE_URL` secret, never a hardcoded domain — because preview, published and custom domains differ.
 - Every AI model id used in `supabase/functions/**` is registered in `supabase/functions/_shared/modelRegistry.ts` (enforced by `src/lib/__tests__/modelAudit.test.ts`) — because `audit-llm-models` monitors and advises only on registered models.
 
+## Writing Style
+
+- No em dashes (U+2014, `&mdash;`) in English user-facing, generated or SEO text; use a comma, colon, parentheses, period or a pipe in titles, and use `\u2014` escapes in regexes (enforced by `src/lib/__tests__/noEmDash.test.ts`) — because they read as AI-generated English. En dashes in numeric ranges (`1–6`) stay.
+
 ## Documentation & AI Resources
 
 - `public/llms.txt` and root `llms.txt` are generated only by `scripts/seo/generate-ai-resources.mjs` (`npm run seo:generate-ai`) and gated by `scripts/seo/audit-seo-assets.mjs`; never hand-edit them or append release notes, and change wording in the generator, not the output; generators stay deterministic (no `new Date()`; bump `RELEASE_DATE`/`VERSION`) and `npm run seo:sync-generated` must leave `git diff` clean — because CI runs `git diff --exit-code` after regenerating.

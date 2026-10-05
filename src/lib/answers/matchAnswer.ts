@@ -13,7 +13,7 @@
  * 2. When we cannot prove an answer is wrong, we return `review`
  *    ("needs teacher review") instead of `wrong`. We never tell a student
  *    they are wrong on a guess.
- * 3. Pure module — no React, no I/O — so it can be unit tested and reused
+ * 3. Pure module, no React, no I/O, so it can be unit tested and reused
  *    by both the UI layer and the DSLM mastery calculator.
  */
 
@@ -123,7 +123,7 @@ export const splitAnswerVariants = (raw: unknown): string[] => {
     .filter(Boolean);
 
   // A bare "a/b" (no surrounding spaces) is only a variant separator for short,
-  // single-token keys — never inside a sentence (dates, "and/or" in prose).
+  // single-token keys: never inside a sentence (dates, "and/or" in prose).
   const expanded: string[] = [];
   for (const part of parts) {
     if (!/\s/.test(part) && part.includes('/')) {
@@ -185,7 +185,7 @@ const isNearMatch = (student: string, key: string, mode: 'word' | 'sentence'): b
 
 /**
  * Compares a student answer against an answer key.
- * Never returns `wrong` for a plausible-but-unproven answer — returns `review`.
+ * Never returns `wrong` for a plausible-but-unproven answer, returns `review`.
  */
 export const matchAnswer = (
   studentAnswer: unknown,
@@ -202,7 +202,7 @@ export const matchAnswer = (
   }
 
   if (variants.length === 0) {
-    // No key to compare against — never mark the student wrong.
+    // No key to compare against, never mark the student wrong.
     return { verdict: 'review', reason: 'no-key', acceptedAnswers: [] };
   }
 

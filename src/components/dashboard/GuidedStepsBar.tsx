@@ -16,7 +16,7 @@ interface GuidedStepsBarProps {
   onShowEverything: () => void;
 }
 
-/** Pure helper — builds the 3 guided steps from `onboarding_progress.steps`. */
+/** Pure helper: builds the 3 guided steps from `onboarding_progress.steps`. */
 export function guidedSteps(steps: Partial<Record<GuidedStepKey, boolean>> | undefined): GuidedStep[] {
   return [
     { key: 'add_student', label: 'Add a student', done: !!steps?.add_student },
@@ -26,7 +26,7 @@ export function guidedSteps(steps: Partial<Record<GuidedStepKey, boolean>> | und
 }
 
 /**
- * v6.9.109 — three-step guided bar shown to new accounts on the Today dashboard.
+ * v6.9.109: three-step guided bar shown to new accounts on the Today dashboard.
  * Disappears permanently once the teacher generates a worksheet or clicks
  * "Show everything" (which dismisses onboarding).
  */

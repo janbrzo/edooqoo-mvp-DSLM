@@ -58,7 +58,7 @@ CRITICAL RULES:
 
 OUTPUT FORMAT: Return ONLY the spoken text (no JSON, no markdown).`;
 
-    // STEP A — Generate transcript via stable chat.completions (gpt-4o-mini)
+    // STEP A: Generate transcript via stable chat.completions (gpt-4o-mini)
     // 2-step pipeline replaces deprecated/unavailable gpt-4o-audio-preview.
     // Transcript returned to client === literal TTS input → guaranteed parity.
     const scriptResponse = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -75,7 +75,7 @@ OUTPUT FORMAT: Return ONLY the spoken text (no JSON, no markdown).`;
           { role: "system", content: systemPrompt },
           {
             role: "user",
-            content: `Generate a ${duration}-second audio scenario based on the requirements above. Return ONLY spoken text — no stage directions, no markdown, no JSON.`,
+            content: `Generate a ${duration}-second audio scenario based on the requirements above. Return ONLY spoken text; no stage directions, no markdown, no JSON.`,
           },
         ],
       }),
@@ -102,7 +102,7 @@ OUTPUT FORMAT: Return ONLY the spoken text (no JSON, no markdown).`;
     }
     console.log(`✅ [AUDIO] Transcript generated: ${transcript.length} chars`);
 
-    // STEP B — Synthesize speech via /v1/audio/speech with fallback chain
+    // STEP B: Synthesize speech via /v1/audio/speech with fallback chain
     async function generateTTS(model: string): Promise<ArrayBuffer> {
       const r = await fetch("https://api.openai.com/v1/audio/speech", {
         method: "POST",
@@ -207,7 +207,7 @@ OUTPUT FORMAT: Return ONLY the spoken text (no JSON, no markdown).`;
 
   } catch (error) {
     console.error("❌ [AUDIO] Error:", error);
-    // Fire-and-forget failure notification (do not await — keep 500 fast)
+    // Fire-and-forget failure notification (do not await: keep 500 fast)
     try {
       const supabaseUrl = Deno.env.get("SUPABASE_URL");
       const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");

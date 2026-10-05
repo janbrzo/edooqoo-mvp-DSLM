@@ -34,7 +34,7 @@ export const BackgroundPatternSwitcher: React.FC = () => {
 
   // Load saved pattern on mount
   useEffect(() => {
-    // v6.9.62 P4 — migration v1 kept for backwards-compat; v2 is owned by
+    // v6.9.62 P4: migration v1 kept for backwards-compat; v2 is owned by
     // AppBackground and decides default per auth state (waves for teachers,
     // particles for anon). Once a user picks a pattern here it persists.
     const MIGRATION_KEY_V1 = 'edooqoo-bg-pattern-migrated-v1';

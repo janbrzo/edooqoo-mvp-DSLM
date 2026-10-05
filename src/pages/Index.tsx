@@ -45,17 +45,17 @@ const Index = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // v6.9.49 — when DSLM "Generate worksheet ↗" navigated us here, StudentPage
+  // v6.9.49: when DSLM "Generate worksheet ↗" navigated us here, StudentPage
   // writes `sessionStorage.forceNewWorksheet='true'`. useWorksheetState consumes
   // that flag on its own restore-effect; we additionally call resetWorksheetState
   // to be defensive in case a previous worksheet was already hydrated in this
   // component's state. Idempotent.
   const autoBootstrapFiredRef = React.useRef(false);
-  // v6.9.50 — track the last requestId we already auto-fired so a second click on
+  // v6.9.50: track the last requestId we already auto-fired so a second click on
   // a different "Generate worksheet ↗" suggestion (without page reload) re-triggers.
   const lastBootstrappedRequestIdRef = React.useRef<string | null>(null);
 
-  // v6.9.6 — force light theme on public landing (mobile dark mode was inheriting
+  // v6.9.6: force light theme on public landing (mobile dark mode was inheriting
   // prefers-color-scheme:dark and rendering the marketing page with poor contrast).
   useEffect(() => {
     const html = document.documentElement;
@@ -92,11 +92,11 @@ const Index = () => {
   const [showTokenModal, setShowTokenModal] = useState(false);
   const [showWelcomeBackModal, setShowWelcomeBackModal] = useState(false);
   const [showOneMinutePrepDialog, setShowOneMinutePrepDialog] = useState(false);
-  // v6.9.33 — open Add Student modal on `?action=add-student` (sent by Signup
+  // v6.9.33: open Add Student modal on `?action=add-student` (sent by Signup
   // page right after first-time login, and by other deep links).
   const [addStudentOpen, setAddStudentOpen] = useState(false);
   useEffect(() => {
-    // v6.9.35 — open AddStudentDialog from `?action=add-student` OR persisted
+    // v6.9.35: open AddStudentDialog from `?action=add-student` OR persisted
     // localStorage flag (`post-signup-add-student=1`). Flag is more robust
     // than the query param which Supabase email confirmation can strip.
     const hasFlag =
@@ -133,7 +133,7 @@ const Index = () => {
     localStorage.setItem('worksheetAppLastVisit', Date.now().toString());
   }, [authLoading, isRegisteredUser, user]);
 
-  // v6.9.53 — accept any `forceNew` value (Profile sends `true`, WorksheetHeader
+  // v6.9.53: accept any `forceNew` value (Profile sends `true`, WorksheetHeader
   // historically sent a timestamp). Previously only `=== 'true'` matched, so the
   // anonymous "Generate New Worksheet" button silently no-oped.
   useEffect(() => {
@@ -146,7 +146,7 @@ const Index = () => {
     }
   }, [searchParams, setSearchParams, worksheetState]);
 
-  // v6.9.64 — react to completion event dispatched by useWorksheetGeneration
+  // v6.9.64: react to completion event dispatched by useWorksheetGeneration
   // and navigate via React Router. Replaces the previous raw history.pushState
   // path which silently changed the URL without re-rendering the route.
   useEffect(() => {
@@ -262,7 +262,7 @@ const Index = () => {
     }
   }, [bothWorksheetsReady, isRegisteredUser, worksheetState.worksheetId]);
 
-  // v6.9.48 — Deterministic auto-generate bootstrap. When DSLM "Generate
+  // v6.9.48: Deterministic auto-generate bootstrap. When DSLM "Generate
   // worksheet ↗" navigates to '/' with sessionStorage flags, Index waits for
   // tokens to resolve and fires handleGenerateWorksheet itself. This avoids
   // the WorksheetForm mount race that previously dropped the intent.
@@ -272,11 +272,11 @@ const Index = () => {
     if (!hasAutoGenerateIntent()) return;
     const intent = readAutoGenerateIntent();
     if (!intent) return;
-    // v6.9.50 — allow re-firing on a NEW requestId (different suggestion clicked
+    // v6.9.50: allow re-firing on a NEW requestId (different suggestion clicked
     // without page reload). Skip only when this exact requestId already fired.
     if (autoBootstrapFiredRef.current && lastBootstrappedRequestIdRef.current === intent.requestId) return;
     autoBootstrapFiredRef.current = false;
-    // v6.9.49 — if a previous worksheet is on-screen, hard-reset state so the
+    // v6.9.49: if a previous worksheet is on-screen, hard-reset state so the
     // GenerationView unmounts and FormView shows the GeneratingModal again.
     if (bothWorksheetsReady) {
       try { worksheetState.resetWorksheetState(); } catch { /* ignore */ }
@@ -323,7 +323,7 @@ const Index = () => {
   }
 
   const handleGenerateWorksheet = (data: any) => {
-    // v6.9.48 — acknowledge auto-generate intent so the form clears its
+    // v6.9.48: acknowledge auto-generate intent so the form clears its
     // sessionStorage flags exactly once, whichever path fired (Index bootstrap
     // or WorksheetForm RAF gate).
     if (data?.__autoGenerateRequestId) {
@@ -344,7 +344,7 @@ const Index = () => {
       tokensLoading,
     });
 
-    // v4.7: lesson topic guard — if a caller (e.g. DSLM auto-submit race)
+    // v4.7: lesson topic guard; if a caller (e.g. DSLM auto-submit race)
     // dispatches generation with empty topic, abort with explicit feedback
     // instead of starting an empty AI generation.
     if (!data?.lessonTopic || String(data.lessonTopic).trim().length === 0) {
@@ -372,11 +372,11 @@ const Index = () => {
     if (isRegisteredUser && tokensLoading) {
       const maxRetries = isAutoGenerateFromSuggestion ? 40 : 2;
       if (retryCount >= maxRetries) {
-        devWarn(`⏳ Token check still in progress after ${maxRetries} retries — aborting (auto=${isAutoGenerateFromSuggestion})`);
+        devWarn(`⏳ Token check still in progress after ${maxRetries} retries, aborting (auto=${isAutoGenerateFromSuggestion})`);
         return;
       }
       const delay = isAutoGenerateFromSuggestion ? 300 : (retryCount === 0 ? 250 : 500);
-      devLog(`⏳ Token entitlement still resolving — retry ${retryCount + 1}/${maxRetries} in ${delay}ms (auto=${isAutoGenerateFromSuggestion})`);
+      devLog(`⏳ Token entitlement still resolving, retry ${retryCount + 1}/${maxRetries} in ${delay}ms (auto=${isAutoGenerateFromSuggestion})`);
       setTimeout(() => handleGenerateWorksheet({ ...data, __tokenRetry: retryCount + 1 }), delay);
       return;
     }
@@ -442,7 +442,7 @@ const Index = () => {
           }}
         />
 
-        {/* v6.9.36 — post-signup AddStudent modal also mounted in the
+        {/* v6.9.36: post-signup AddStudent modal also mounted in the
             authenticated branch (previously only public branch). Without
             this, email/Google signups landing on `/` as registered users
             never saw the dialog because Index returned the auth shell early. */}
@@ -517,7 +517,7 @@ const Index = () => {
                   if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
                 }}
               />
-              {/* v6.9.53 — anon top banner mirrors /worksheet/:id render path so
+              {/* v6.9.53: anon top banner mirrors /worksheet/:id render path so
                   it appears immediately after in-memory generation, not only
                   after refresh. */}
               <AnonPreWorksheetBanner />
@@ -554,7 +554,7 @@ const Index = () => {
         onTryWorksheetGenerator={scrollToWorksheetForm}
       />
 
-      {/* v6.9.33 — first-time Add Student dialog after signup. */}
+      {/* v6.9.33: first-time Add Student dialog after signup. */}
       <AddStudentDialog
         triggerButton={false}
         open={addStudentOpen}

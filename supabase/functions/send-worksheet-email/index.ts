@@ -23,7 +23,7 @@ interface SendWorksheetEmailRequest {
   force?: boolean; // Bypass the duplicate-send guard
 }
 
-// P2.3 — duplicate send guard window (ms)
+// P2.3: duplicate send guard window (ms)
 const DEDUPE_WINDOW_MS = 10 * 60 * 1000;
 
 serve(async (req: Request) => {
@@ -127,7 +127,7 @@ serve(async (req: Request) => {
       throw new Error("Invalid email format");
     }
 
-    // P2.3 — duplicate send guard: same recipient within the dedupe window
+    // P2.3: duplicate send guard: same recipient within the dedupe window
     const normalizedEmail = studentEmail.toLowerCase();
     if (!force && worksheet.last_shared_at && worksheet.share_recipient_email === normalizedEmail) {
       const elapsed = Date.now() - new Date(worksheet.last_shared_at).getTime();
@@ -195,7 +195,7 @@ serve(async (req: Request) => {
 
     console.log("[send-worksheet-email] Email sent successfully:", emailData);
 
-    // P2.3 — record delivery timestamp for the duplicate send guard
+    // P2.3: record delivery timestamp for the duplicate send guard
     const { error: stampError } = await supabase
       .from("worksheets")
       .update({ last_shared_at: new Date().toISOString() })

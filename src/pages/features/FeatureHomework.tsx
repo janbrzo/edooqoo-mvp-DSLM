@@ -16,18 +16,18 @@ const HomeworkMockup = () => (
   <div className="p-6 space-y-4 text-sm">
     <div className="flex items-center justify-between">
       <div>
-        <div className="font-semibold text-foreground">Business English — Unit 3</div>
+        <div className="font-semibold text-foreground">Business English: Unit 3</div>
         <div className="text-xs text-muted-foreground">Julia Kowalski · B2 · Assigned Apr 10</div>
       </div>
       <span className="bg-green-100 text-green-700 border border-green-200 rounded-full px-3 py-1 text-xs font-medium">✓ Completed</span>
     </div>
     <div className="space-y-2">
       {[
-        { ex: 'Fill in the gaps — Present Perfect', score: '9/10', status: 'Checked', color: 'text-green-700 bg-green-50 border-green-200' },
-        { ex: 'Vocabulary Matching — Business', score: '7/10', status: 'Checked', color: 'text-green-700 bg-green-50 border-green-200' },
+        { ex: 'Fill in the gaps, Present Perfect', score: '9/10', status: 'Checked', color: 'text-green-700 bg-green-50 border-green-200' },
+        { ex: 'Vocabulary Matching: Business', score: '7/10', status: 'Checked', color: 'text-green-700 bg-green-50 border-green-200' },
         { ex: 'Reading Comprehension', score: '8/10', status: 'Reviewed', color: 'text-green-700 bg-green-50 border-green-200' },
-        { ex: 'Writing Task — Email', score: '6/10', status: 'AI-assisted', color: 'text-amber-700 bg-amber-50 border-amber-200' },
-        { ex: 'Multiple Choice — Grammar', score: '10/10', status: 'Auto-checked', color: 'text-green-700 bg-green-50 border-green-200' },
+        { ex: 'Writing Task: Email', score: '6/10', status: 'AI-assisted', color: 'text-amber-700 bg-amber-50 border-amber-200' },
+        { ex: 'Multiple Choice: Grammar', score: '10/10', status: 'Auto-checked', color: 'text-green-700 bg-green-50 border-green-200' },
       ].map(e => (
         <div key={e.ex} className="flex items-center justify-between bg-muted/40 rounded-lg px-3 py-2">
           <span className="text-xs text-foreground">{e.ex}</span>
@@ -55,7 +55,7 @@ const benefits = [
 const steps = [
   { number: 1, title: 'Generate a worksheet', description: 'Create a worksheet for your student with any combination of 29 exercise types, then review it before assignment.' },
   { number: 2, title: 'Assign as homework', description: 'Click "Send as Homework." Set a deadline, add optional notes. Student receives an email with a direct link.' },
-  { number: 3, title: 'Student completes it online', description: 'Interactive interface — fill gaps, drag & drop, write essays, record audio. Progress auto-saves.' },
+  { number: 3, title: 'Student completes it online', description: 'Interactive interface: fill gaps, drag & drop, write essays, record audio. Progress auto-saves.' },
   { number: 4, title: 'AI assists evaluation', description: 'Objective exercises can be auto-checked. Open-ended answers can receive AI-assisted feedback for teacher review.' },
   { number: 5, title: 'You review and adjust', description: 'See all results in one view. Override AI scores if needed. Add teacher comments. Mark as reviewed.' },
 ];
@@ -63,7 +63,7 @@ const steps = [
 const faqItems = [
   { question: 'What types of exercises can AI help evaluate?', answer: 'Objective exercises can be auto-checked. Open-ended answers such as writing, explanations, sentence transformation, and discussion responses can use AI-assisted evaluation with rubric-based scoring for teacher review.' },
   { question: 'Can I override AI-assisted scores?', answer: 'Yes. Every AI-assisted score can be manually adjusted. You can change the score, add comments, and mark corrections. The student sees both the AI evaluation and your adjustments.' },
-  { question: 'How does the student receive homework?', answer: 'When you assign homework, the student receives an email with a direct link. They complete it in the browser — no account needed, no app to download. You can set deadlines and enable reminders.' },
+  { question: 'How does the student receive homework?', answer: 'When you assign homework, the student receives an email with a direct link. They complete it in the browser; no account needed, no app to download. You can set deadlines and enable reminders.' },
   { question: 'Can I track if the student opened the homework?', answer: 'Yes. You see when the student viewed the homework, when they started, and when they submitted. View count and time spent per exercise are tracked.' },
   { question: 'How does homework connect to DSLM?', answer: 'Reviewed homework results can generate learning signals for DSLM. If a student struggles with Present Perfect exercises, that signal can help Edooqoo suggest a more relevant next worksheet focus.' },
 ];

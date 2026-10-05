@@ -2,7 +2,7 @@ import React from 'react';
 import type { AnonFeatureMockupId } from '@/constants/anonFeaturesShowcase';
 
 /**
- * Schematic SVG wireframes per feature — intentionally abstract to suggest
+ * Schematic SVG wireframes per feature, intentionally abstract to suggest
  * UI shape without promising specific pixel-perfect screens. Cheap to ship,
  * easy to swap for real screenshots later.
  */

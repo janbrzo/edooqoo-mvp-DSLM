@@ -3,7 +3,7 @@ import Particles, { initParticlesEngine } from '@tsparticles/react';
 import { loadSlim } from '@tsparticles/slim';
 
 /**
- * v6.9.8 — Animated particle background for the public landing page only.
+ * v6.9.8: Animated particle background for the public landing page only.
  * Config converted from particles.js JSON (vincentgarreau.com) to tsparticles v3.
  * Renders fixed full-viewport, behind all content (z-index: -10).
  */

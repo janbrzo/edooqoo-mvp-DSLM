@@ -1,8 +1,8 @@
-// v6.9.62 P7 — Lets a student add a flashcard to one of their shared sets.
+// v6.9.62 P7: Lets a student add a flashcard to one of their shared sets.
 // Uses the SECURITY DEFINER RPC `student_add_flashcard` which enforces
 // student_email == student.student_email + allow_student_contributions=true.
 //
-// v6.9.67 — UX parity with teacher AddFlashcardModal: dynamic labels per
+// v6.9.67: UX parity with teacher AddFlashcardModal: dynamic labels per
 // set.back_type (translation vs definition), AI auto-suggest via
 // useFlashcardTranslation / useFlashcardDefinition, CEFR preview badge.
 import React, { useEffect, useState } from 'react';
@@ -38,7 +38,7 @@ export const AddStudentFlashcardDialog: React.FC<Props> = ({
   const [userEditedBackText, setUserEditedBackText] = useState(false);
   const [busy, setBusy] = useState(false);
 
-  // v6.9.68 — do NOT silently fall back to English; that hides a missing
+  // v6.9.68: do NOT silently fall back to English; that hides a missing
   // native_language on the student record and shows "English Translation"
   // for translation sets, which is confusing for Spanish/Polish/etc. learners.
   const nativeLang = (studentNativeLanguage || '').trim();
@@ -98,7 +98,7 @@ export const AddStudentFlashcardDialog: React.FC<Props> = ({
     }
     setBusy(true);
     try {
-      // v6.9.68 — use v2 RPC which matches the actual flashcard_cards schema
+      // v6.9.68: use v2 RPC which matches the actual flashcard_cards schema
       // (front_example, cefr_level, card_position) and avoids the 400 from
       // the legacy column names.
       const { error } = await (supabase as any).rpc('student_add_flashcard_v2', {

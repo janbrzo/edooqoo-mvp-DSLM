@@ -1,5 +1,5 @@
 /**
- * StudentSettingsMenu — the single settings entry point for a student
+ * StudentSettingsMenu: the single settings entry point for a student
  * (v6.9.111, M3.2).
  *
  * Wraps existing behaviour rather than reimplementing it:

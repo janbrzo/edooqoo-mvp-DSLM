@@ -1,5 +1,5 @@
 /**
- * PacingModeSlider — DSLM v4.4 UI for "Scientific ↔ Pragmatic" spectrum (0-100).
+ * PacingModeSlider: DSLM v4.4 UI for "Scientific ↔ Pragmatic" spectrum (0-100).
  *
  * 0-30  = Scientific  (strict Natural Order Hypothesis)
  * 31-69 = Balanced    (default 50)
@@ -207,7 +207,7 @@ export const PacingModeSlider: React.FC<PacingModeSliderProps> = ({
             </div>
           </div>
 
-          {/* v5.1 — Last calculation reasoning */}
+          {/* v5.1: Last calculation reasoning */}
           <div className="rounded-md border border-border p-2 text-[11px] space-y-1">
             <div className="font-semibold text-foreground flex items-center gap-1.5">
               <Wand2 className="h-3 w-3" /> Last calculation
@@ -227,7 +227,7 @@ export const PacingModeSlider: React.FC<PacingModeSliderProps> = ({
                 </ul>
               </>
             ) : (
-              <p className="text-muted-foreground italic">No automatic calculation yet — click "Auto AI Recalculate" to compute one.</p>
+              <p className="text-muted-foreground italic">No automatic calculation yet, click "Auto AI Recalculate" to compute one.</p>
             )}
           </div>
 

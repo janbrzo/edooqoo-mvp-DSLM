@@ -1,5 +1,5 @@
 /**
- * StudentSnapshotPanel — the "who is this student" summary of the Student
+ * StudentSnapshotPanel: the "who is this student" summary of the Student
  * Workspace (v6.9.111, M3.2).
  *
  * Presentational only. Every rule (focus-area selection, deadline formatting,

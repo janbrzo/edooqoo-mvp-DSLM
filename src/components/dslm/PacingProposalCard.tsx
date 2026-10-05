@@ -1,5 +1,5 @@
 /**
- * PacingProposalCard — DSLM v4.9
+ * PacingProposalCard: DSLM v4.9
  *
  * Inline card shown inside a single student's Pathway view when a pending
  * pacing proposal exists for them. Lets the teacher accept or reject in 1 click.
@@ -24,7 +24,7 @@ const bucketColor = (v: number) => {
 
 const TRIGGER_SENTENCES: Record<string, string> = {
   goal_added:     'A new goal was added with a fixed deadline, so the system rebalanced the learning rhythm to match the available time.',
-  placement_test: 'The placement test exposed a clearer profile of this learner — strengths, weaknesses, and behavioural traits — that shifts the optimal pace.',
+  placement_test: 'The placement test exposed a clearer profile of this learner, strengths, weaknesses, and behavioural traits, that shifts the optimal pace.',
   periodic_30d:   'A scheduled 30-day re-check looked at the latest skill mastery, deadline pressure, and behavioural signals to keep the pace honest.',
   manual:         'The teacher requested a recalculation. The system aggregated all current signals.',
 };
@@ -34,8 +34,8 @@ const buildExplanation = (p: PacingProposal): string => {
   const delta = Math.abs(p.proposed_pacing - p.current_pacing);
   const trigger = TRIGGER_SENTENCES[p.trigger_type] ?? 'The system re-evaluated all available signals.';
   const directionSentence = direction === 'pragmatic'
-    ? 'Signals point toward task-based, just-in-time grammar (TBLT) — the learner benefits from producing language for real situations rather than drilling rules in isolation.'
-    : 'Signals point toward Krashen Natural Order — the learner needs more comprehensible input and structured grammar progression before being pushed to produce.';
+    ? 'Signals point toward task-based, just-in-time grammar (TBLT): the learner benefits from producing language for real situations rather than drilling rules in isolation.'
+    : 'Signals point toward Krashen Natural Order; the learner needs more comprehensible input and structured grammar progression before being pushed to produce.';
   const magnitude = delta >= 20
     ? `The shift is significant (${delta} points), so review the reasoning carefully before accepting.`
     : `The shift is modest (${delta} points) but worth confirming.`;
@@ -60,7 +60,7 @@ export const PacingProposalCard: React.FC<Props> = ({ proposal }) => {
             </Badge>
           </div>
           <p className="text-[11px] text-muted-foreground mt-0.5">
-            Auto-recalculated based on the student's latest signals — teacher approval required.
+            Auto-recalculated based on the student's latest signals: teacher approval required.
           </p>
         </div>
       </div>

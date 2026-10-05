@@ -94,7 +94,7 @@ const GenerationContextPanel: React.FC<GenerationContextPanelProps> = ({
       </div>
 
       {variant === 'anonymous' ? (
-        // v6.9.54 — open signup in a new tab so worksheet generation in
+        // v6.9.54: open signup in a new tab so worksheet generation in
         // the current tab is not interrupted.
         <Button asChild className="mt-2 rounded-full h-9">
           <a href="/signup" target="_blank" rel="noopener noreferrer">

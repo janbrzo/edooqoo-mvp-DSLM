@@ -40,7 +40,7 @@ if (!fs.existsSync(generatedPath)) {
 
 
 /**
- * Sprint 5 (Faza 6) — three-layer cross-check.
+ * Sprint 5 (Faza 6): three-layer cross-check.
  * Policy (pseoIndexPolicy.json), prerendered HTML (meta robots) and sitemap membership must
  * agree for every pSEO route that has a static file. A disagreement means Google receives two
  * contradictory instructions for the same URL.

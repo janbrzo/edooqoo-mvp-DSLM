@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * audit-duplicate-meta.mjs — Sprint 1 (CTR recovery) regression guard.
+ * audit-duplicate-meta.mjs: Sprint 1 (CTR recovery) regression guard.
  *
  * Fails the build when static HTML metadata regresses:
  *   1. the same meta description is used on more than DUPLICATE_GROUP_LIMIT pages
@@ -31,7 +31,7 @@ const BANNED_PHRASES = [
   'non-school-like framing',
 ];
 
-/** Baseline lock — lower these as pages get rewritten. Never raise them. */
+/** Baseline lock: lower these as pages get rewritten. Never raise them. */
 const BASELINE = {
   duplicateGroups: 0,
   duplicatePages: 0,
@@ -89,7 +89,7 @@ for (const file of files) {
     const slug = path.basename(file, '.html') === 'index'
       ? path.basename(path.dirname(file))
       : path.basename(file, '.html');
-    const bare = title.replace(/\s*[|—-]\s*Edooqoo\s*$/, '').trim();
+    const bare = title.replace(/\s*[|:\u2014-]\s*Edooqoo\s*$/, '').trim();
     if (bare && bare === titleFromSlug(slug)) slugTitles.push(rel);
     if (title.length > TITLE_MAX) longTitles.push({ rel, length: title.length });
   }
@@ -121,7 +121,7 @@ const lines = [
   '## Largest duplicate-description groups',
   '',
   ...duplicateGroups.slice(0, 10).flatMap(([description, pages]) => [
-    `- **${pages.length} pages** — "${description.slice(0, 110)}…"`,
+    `- **${pages.length} pages**: "${description.slice(0, 110)}…"`,
     `  - e.g. ${pages.slice(0, 3).join(', ')}`,
   ]),
   '',
@@ -146,7 +146,7 @@ console.log('[audit-duplicate-meta]', JSON.stringify(actual));
 console.log(`[audit-duplicate-meta] report: ${path.relative(ROOT, REPORT)}`);
 
 if (failures.length) {
-  console.error('[audit-duplicate-meta] FAILED — metadata regressed:');
+  console.error('[audit-duplicate-meta] FAILED: metadata regressed:');
   for (const failure of failures) console.error(`  - ${failure}`);
   process.exit(1);
 }

@@ -236,7 +236,7 @@ serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  // v6.9.50 — extracted, idempotent. Applies skill ratings to learning
+  // v6.9.50: extracted, idempotent. Applies skill ratings to learning
   // elements and promotes status to 'reviewed'. Safe to call multiple times.
   // Returns final status string for the response payload.
   async function applyAndPromote(supabase: any, p_test_id: string, p_student_id: string): Promise<'reviewed' | 'completed'> {
@@ -296,7 +296,7 @@ serve(async (req) => {
     let student_id = bodyStudentId;
     let teacher_id = bodyTeacherId;
 
-    // v6.9.48 — "force" re-run for retroactive auto-apply repair. Teacher-side
+    // v6.9.48: "force" re-run for retroactive auto-apply repair. Teacher-side
     // "Apply to Progress" can call us with just { test_id, force: true } so we
     // resolve student/teacher from the test row itself and bypass the
     // already-reviewed/dedupe guards.
@@ -316,7 +316,7 @@ serve(async (req) => {
       }
     }
 
-    // v6.9.48 — when caller did not provide answers (force re-run from teacher
+    // v6.9.48: when caller did not provide answers (force re-run from teacher
     // UI), reconstruct them from the persisted student_test_questions.
     if (force && (!answers || Object.keys(answers).length === 0) && test_id) {
       const supabaseTmp = createClient(
@@ -389,7 +389,7 @@ serve(async (req) => {
     const strongest = scores.length > 0 ? scores.reduce((a, b) => (a.score! > b.score! ? a : b)).skill : null;
     const weakest = scores.length > 0 ? scores.reduce((a, b) => (a.score! < b.score! ? a : b)).skill : null;
 
-    // v6.9.56 — IDK signal aggregation. Promoted from "ignored sentinel" to
+    // v6.9.56: IDK signal aggregation. Promoted from "ignored sentinel" to
     // a pedagogical metacognition metric. We measure on skill questions
     // (grammar/vocabulary/reading/listening) where the student had a defined
     // correct_answer. self_awareness_score = % of "should have admitted not
@@ -443,7 +443,7 @@ serve(async (req) => {
       motivation_type: {
         questionId: 'wt_q3',
         options: [
-          'I need it for work — meetings, emails, presentations',
+          'I need it for work, meetings, emails, presentations',
           'I am preparing for an exam (IELTS, Cambridge, etc.)',
           'I want to travel and talk freely',
           'I want to watch films and read books without subtitles',
@@ -478,7 +478,7 @@ serve(async (req) => {
       anxiety_level: {
         questionId: 'wt_q7',
         options: [
-          'I do not mind — that is how you learn',
+          'I do not mind; that is how you learn',
           'I prefer not to, but I can handle it',
           'I feel shy, but I keep going',
           'I avoid speaking because I fear mistakes',
@@ -583,7 +583,7 @@ serve(async (req) => {
         ],
         mapping: { '0': 'urgent_specific', '1': 'ongoing_important', '2': 'long_term_steady', '3': 'hobby_growth' },
       },
-      // v5.4 — 4 new behavioral traits
+      // v5.4: 4 new behavioral traits
       latent_goal: {
         questionId: 'wt_q3c',
         options: [
@@ -602,14 +602,14 @@ serve(async (req) => {
           'I do it carefully, even if it takes an hour',
           "I message the teacher that I didn't make it and will do it later",
           'I start it but stop after about 10 minutes',
-          "I already did it earlier — I don't leave things until the last minute",
+          "I already did it earlier; I don't leave things until the last minute",
         ],
         mapping: { '0': 'pragmatic', '1': 'high', '2': 'avoidant', '3': 'low', '4': 'proactive' },
       },
       plateau_response: {
         questionId: 'wt_q13c',
         options: [
-          'Push harder — more hours, more material',
+          'Push harder: more hours, more material',
           'Change the method, teacher, or approach',
           'Take a break for a week or two',
           'Accept the plateau as part of the process and keep going',
@@ -620,9 +620,9 @@ serve(async (req) => {
       correction_preference: {
         questionId: 'wt_q7b',
         options: [
-          'Correct me immediately — I want to know right away',
+          'Correct me immediately: I want to know right away',
           'Take notes and tell me after I finish my thought',
-          'Only correct serious mistakes — small ones discourage me',
+          'Only correct serious mistakes, small ones discourage me',
           'Explain the rule every time I make a mistake',
           'Send me a written summary after the lesson',
         ],
@@ -682,7 +682,7 @@ serve(async (req) => {
       .eq('teacher_id', teacher_id)
       .maybeSingle();
 
-    // v6.9.48 — fetch current student level early so we can attach a
+    // v6.9.48: fetch current student level early so we can attach a
     // level_change_suggestion to raw_answers when it differs from estimate.
     const { data: studentLevelRow } = await supabase
       .from('students')
@@ -699,7 +699,7 @@ serve(async (req) => {
     if (levelChangeSuggestion) {
       enrichedAnswers.level_change_suggestion = levelChangeSuggestion;
     }
-    // v6.9.56 — integrity snapshot (tab-blur count + recent events) captured
+    // v6.9.56: integrity snapshot (tab-blur count + recent events) captured
     // client-side. Surfaces as a teacher-only signal of potential outside
     // help (translator/AI) during the placement test.
     if (integrity && typeof integrity === 'object') {
@@ -776,14 +776,14 @@ serve(async (req) => {
       console.error('[process-welcome-test] WT-4 status update failed', statusErr);
     }
 
-    // v6.9.50 — initial auto-apply pass (idempotent, helper handles errors).
+    // v6.9.50: initial auto-apply pass (idempotent, helper handles errors).
     // A second pass runs at the very end of the function so that any later
     // calls to `calculate_test_results` (AI rescoring path) cannot leave us
     // with applied_at=NULL on the regenerated skill rows.
     await applyAndPromote(supabase, test_id, student_id);
 
-    // v6.9.39 P5 — Auto-fill student level + suggest goals from Welcome Test.
-    // v6.9.40 P4 — Also auto-fill students.main_goal when missing/unknown,
+    // v6.9.39 P5: Auto-fill student level + suggest goals from Welcome Test.
+    // v6.9.40 P4: Also auto-fill students.main_goal when missing/unknown,
     // and ALWAYS insert 2-3 goal suggestions tied to this specific test_id
     // (skip when suggestions for the same test already exist).
     try {
@@ -802,7 +802,7 @@ serve(async (req) => {
           .eq('id', student_id);
       }
 
-      // v6.9.40 — derive a suggested main_goal from motivation/interests and
+      // v6.9.40: derive a suggested main_goal from motivation/interests and
       // auto-apply when students.main_goal is missing. Custom-only/empty are
       // treated as missing; otherwise we keep teacher's choice.
       const VALID_MAIN_GOALS = new Set([
@@ -847,7 +847,7 @@ serve(async (req) => {
         .eq('source', 'welcome_test_auto')
         .contains('metadata', { test_id });
 
-      // v6.9.48 — `force` lets the teacher repair stuck tests; suggestions are
+      // v6.9.48: `force` lets the teacher repair stuck tests; suggestions are
       // not regenerated to avoid duplicates, only auto-apply + status promotion.
       if ((existingForThisTest ?? 0) === 0) {
         // Build 2-3 suggested goals from the just-computed profile signals.
@@ -905,7 +905,7 @@ serve(async (req) => {
       console.error('[process-welcome-test] level/goal auto-suggest failed', autoLevelErr);
     }
 
-    // v6.9.29 — Fire-and-forget thank-you email to the student. Idempotent server-side.
+    // v6.9.29: Fire-and-forget thank-you email to the student. Idempotent server-side.
     try {
       const { data: studentRow } = await supabase
         .from('students')
@@ -966,7 +966,7 @@ serve(async (req) => {
     }
 
     // v5.0: trigger pacing proposal (B) after Welcome Test finalisation.
-    // Fire-and-forget — must not block test completion or notification flow.
+    // Fire-and-forget: must not block test completion or notification flow.
     try {
       supabase.functions.invoke('recalculate-pacing', {
         body: {
@@ -1021,7 +1021,7 @@ serve(async (req) => {
                   </div>` : ''}
                 </div>
                 ${strongest ? `<p style="margin-top: 12px; font-size: 14px; color: #374151;">
-                  <strong>Strongest:</strong> ${strongest} | <strong>Weakest:</strong> ${weakest || '—'}
+                  <strong>Strongest:</strong> ${strongest} | <strong>Weakest:</strong> ${weakest || '-'}
                 </p>` : ''}
                 ${selfAssessedLevel ? `<p style="font-size: 14px; color: #374151;">
                   <strong>Self-assessed:</strong> ${selfAssessedLevel} (${levelConfidence})
@@ -1030,7 +1030,7 @@ serve(async (req) => {
               <p>View the full learning profile in the student's profile page:</p>
               <a href="${Deno.env.get('APP_BASE_URL') || 'https://edooqoo.com'}/student/${student_id}?tab=tests" style="display: inline-block; background: #7c3aed; color: white; padding: 10px 20px; border-radius: 6px; text-decoration: none; margin: 10px 0; font-weight: bold;">View Results →</a>
               <p style="color: #6b7280; font-size: 12px; margin-top: 20px;">
-                — edooqoo
+                edooqoo
               </p>
             </div>
           `;
@@ -1151,7 +1151,7 @@ serve(async (req) => {
           })
           .join('\n');
 
-        // v6.9.47 — when no open/speaking answers exist, generate AI Analysis
+        // v6.9.47: when no open/speaking answers exist, generate AI Analysis
         // from the deterministic profile + scenario answers so the teacher
         // never sees an empty "AI Analysis" section after completion/review.
         const integrityBlur = (enrichedAnswers as any).__integrity__?.blur_count;
@@ -1183,7 +1183,7 @@ OUTPUT RULES (HARD CONSTRAINTS):
 - Teachers read these texts and they only know sequential numbers (1..N), never internal IDs.
 
 INDIRECT/SCENARIO ANSWER WEIGHTING (CRITICAL):
-You also have access to indirect, scenario-based answers — the latent-goal scenario ("wake up 2 years from now"), the homework-commitment scenario (under low motivation), the plateau-response scenario (after 6 months stagnation), and the correction-preference question (during speaking).
+You also have access to indirect, scenario-based answers; the latent-goal scenario ("wake up 2 years from now"), the homework-commitment scenario (under low motivation), the plateau-response scenario (after 6 months stagnation), and the correction-preference question (during speaking).
 These four items reveal LATENT goals and behaviors and bypass social-desirability bias far better than direct self-reports (q3, q5, q13).
 When direct answers conflict with indirect ones, weight the indirect/scenario responses HIGHER. Synthesize the most probable TRUE profile, not the self-presented one.
 Example: if the direct motivation answer says "travel" but the latent-goal scenario picks the "leading international meetings" / "promotion" option, treat the true motivation as career_critical and note the discrepancy in the summary WITHOUT mentioning any question ID.
@@ -1232,7 +1232,7 @@ Format as JSON: {"summary": "...", "recommendations": ["...", "..."], "writing_q
             }
           } else {
             await aiResponse.text().catch(() => '');
-            // v6.9.47 — deterministic fallback so the UI never shows an empty
+            // v6.9.47: deterministic fallback so the UI never shows an empty
             // AI Analysis card even when the model gateway is unavailable.
             aiSummary = JSON.stringify({
               summary: `Deterministic profile: estimated CEFR ${estimatedLevel} (self-assessed ${selfAssessedLevel || 'unknown'}, ${levelConfidence}). Strongest skill ${strongest || 'n/a'}, weakest ${weakest || 'n/a'}. Motivation ${traits.motivation_type || 'unknown'}, anxiety ${traits.anxiety_level || 'unknown'}, feedback preference ${traits.feedback_preference || 'unknown'}.`,
@@ -1480,7 +1480,7 @@ Format as JSON: {"summary": "...", "recommendations": ["...", "..."], "writing_q
       console.error('[process-welcome-test] Error calculating Learning Path Score:', lpError);
     }
 
-    // v6.9.50 — final auto-apply + promotion pass. Re-runs the helper after the
+    // v6.9.50: final auto-apply + promotion pass. Re-runs the helper after the
     // AI rescoring block (which may have called calculate_test_results and
     // regenerated test_skill_results rows). The DB migration also preserves
     // applied_at on UPSERT now, but this is a second defense.

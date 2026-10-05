@@ -5,7 +5,7 @@ import SeoLandingLayout from '@/components/seo/SeoLandingLayout';
 const blogPostingLd = {
   '@context': 'https://schema.org',
   '@type': 'BlogPosting',
-  headline: 'English Games for Learners — 12 Adult-Friendly Ideas',
+  headline: 'English Games for Learners, 12 Adult-Friendly Ideas',
   description: '12 classroom games for adult English learners across vocabulary, grammar and speaking. Each game pairs with an AI-generated Edooqoo worksheet.',
   author: { '@type': 'Organization', name: 'Edooqoo' },
   publisher: { '@type': 'Organization', name: 'Edooqoo' },
@@ -16,21 +16,21 @@ const blogPostingLd = {
 const EnglishGamesForLearners = () => (
   <SeoLandingLayout
     seo={{
-      title: 'English Games for Learners — 12 Adult-Friendly Ideas',
+      title: 'English Games for Learners: 12 Adult-Friendly Ideas',
       description: '12 classroom games for adult English learners: vocabulary, grammar, speaking. Includes worksheet follow-up ideas for teacher review.',
       path: '/blog/english-games-for-learners',
       extraJsonLd: blogPostingLd,
     }}
-    h1="English Games for Learners — 12 Adult-Friendly Ideas"
+    h1="English Games for Learners, 12 Adult-Friendly Ideas"
     lead="Most English games on the internet were built for children. These 12 are tested with adult learners in 1-on-1 and small-group ESL lessons. Each pairs with an Edooqoo worksheet workflow a teacher can review."
     problems={[
-      'Adult learners refuse to do anything that looks like a kids game — no Bingo with cartoon animals, no Snakes and Ladders, no Hangman with food clipart.',
+      'Adult learners refuse to do anything that looks like a kids game; no Bingo with cartoon animals, no Snakes and Ladders, no Hangman with food clipart.',
       'Most game lists on the web mix childrens and adult activities without labels, so teachers waste 20 minutes filtering.',
-      'Games without a printable worksheet rarely get repeated — there is no follow-up, no homework, no progress tracking.',
+      'Games without a printable worksheet rarely get repeated; there is no follow-up, no homework, no progress tracking.',
     ]}
     solutionHeading="What makes a game work with adults"
     solutions={[
-      { title: 'Real-world context', body: 'Vocabulary and scenarios from the learners actual life — work, travel, relationships, money. No school playground content.' },
+      { title: 'Real-world context', body: 'Vocabulary and scenarios from the learners actual life: work, travel, relationships, money. No school playground content.' },
       { title: 'Cognitive challenge, not luck', body: 'Adults disengage from pure-chance games. Use games that reward thinking, deduction, or strategy.' },
       { title: 'Pairs with a worksheet', body: 'Every game on this list maps to an exercise type you can generate in Edooqoo and assign as homework.' },
     ]}
@@ -53,7 +53,7 @@ const EnglishGamesForLearners = () => (
     body={
       <>
         <h2 className="text-xl font-bold text-foreground mt-0">Why games still matter in adult ESL</h2>
-        <p>Adults rarely call them games — they call them activities. The label matters less than the mechanic. What matters is that the learner is doing something cognitively engaging that produces language, not passively listening. A 5-minute Two Truths and a Lie at the start of a lesson generates more authentic question-formation practice than a 20-minute grammar drill.</p>
+        <p>Adults rarely call them games; they call them activities. The label matters less than the mechanic. What matters is that the learner is doing something cognitively engaging that produces language, not passively listening. A 5-minute Two Truths and a Lie at the start of a lesson generates more authentic question-formation practice than a 20-minute grammar drill.</p>
         <p>The risk with games is they become content-free entertainment. The fix is pairing every game with a follow-up worksheet that locks in the target language. After the Idiom Charades game, assign a short homework exercise covering the same idioms in writing. Edooqoo can draft that worksheet, you review it, assign it as homework, and the learner reviews errors before the next lesson.</p>
         <h2 className="text-xl font-bold text-foreground">How to integrate games into a 60-minute lesson</h2>
         <p>Warm-up (5 min): a fast speaking game from this list. Main input (20 min): grammar or vocabulary presentation. Controlled practice (15 min): Edooqoo worksheet exercises. Freer practice (15 min): a second game from the list applying the new language. Closing + homework assignment (5 min): assign 10–15 minutes of homework from the worksheet for teacher-reviewed AI assistance.</p>

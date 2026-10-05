@@ -1,5 +1,5 @@
 /**
- * v6.9.29 — Shared "Generate 1-Minute Prep suggestions" dialog with phase target selector.
+ * v6.9.29: Shared "Generate 1-Minute Prep suggestions" dialog with phase target selector.
  * Used by NextStepsSection for both first-time and "Generate more" flows.
  */
 import React, { useEffect, useMemo, useState } from 'react';
@@ -20,9 +20,9 @@ export interface PhaseOption {
   sequence: number;
   status: string;
   have: number;
-  /** v6.9.48 — total target steps for the phase (1 per week, no clamp). */
+  /** v6.9.48: total target steps for the phase (1 per week, no clamp). */
   need: number;
-  /** v6.9.48 — max steps per single generation batch (1–6, optional). */
+  /** v6.9.48: max steps per single generation batch (1–6, optional). */
   perBatch?: number;
   weeks: number | null;
 }
@@ -40,10 +40,10 @@ interface GenerateStepsDialogProps {
   generating: boolean;
   onConfirm: (count: number, phaseId: string | null) => void | Promise<void>;
   /**
-   * v6.9.50 — total active (unused, not-dismissed) next-step suggestions in the
+   * v6.9.50: total active (unused, not-dismissed) next-step suggestions in the
    * student's pipeline. When ≥ QUEUE_SOFT_LIMIT and mode='more', show a soft
    * gate explaining DSLM learns from completed activity and offering a Wait /
-   * Generate anyway choice. Soft only — never blocks.
+   * Generate anyway choice. Soft only: never blocks.
    */
   activeQueueSize?: number;
 }
@@ -65,10 +65,10 @@ export const GenerateStepsDialog: React.FC<GenerateStepsDialogProps> = ({
   useEffect(() => { if (open) setQueueAcknowledged(false); }, [open]);
   const showQueueGate = mode === 'more' && activeQueueSize >= QUEUE_SOFT_LIMIT && !queueAcknowledged;
 
-  // v6.9.14 — Reset every open. Initial count = (need - have) for recommended phase, else defaultCount.
+  // v6.9.14: Reset every open. Initial count = (need - have) for recommended phase, else defaultCount.
   useEffect(() => {
     if (!open) return;
-    // v6.9.15a — guard against stale defaultTargetPhaseId after a phase was deleted.
+    // v6.9.15a: guard against stale defaultTargetPhaseId after a phase was deleted.
     const validId = defaultTargetPhaseId && phaseOptions.some(p => p.id === defaultTargetPhaseId)
       ? defaultTargetPhaseId
       : null;
@@ -96,10 +96,10 @@ export const GenerateStepsDialog: React.FC<GenerateStepsDialogProps> = ({
 
   const helperText = (() => {
     if (!showPhaseSelector) {
-      return 'Roadmap disabled — new steps will be free (not bound to any phase).';
+      return 'Roadmap disabled: new steps will be free (not bound to any phase).';
     }
     if (phaseValue === FREE_VALUE) {
-      return 'Free step — not bound to any phase. Use after current phase is complete or for ad-hoc topics.';
+      return 'Free step: not bound to any phase. Use after current phase is complete or for ad-hoc topics.';
     }
     if (!selectedPhase) return null;
     if (selectedPhase.have >= selectedPhase.need) {
@@ -108,12 +108,12 @@ export const GenerateStepsDialog: React.FC<GenerateStepsDialogProps> = ({
     const gap = selectedPhase.need - selectedPhase.have;
     const capped = Math.min(6, gap);
     if (gap > 6) {
-      return `Phase has ${selectedPhase.have}/${selectedPhase.need} steps — adding ${capped} now (max 6 per batch, repeat to fill). AI receives all existing steps from this AND other phases to avoid duplicates and complement them.`;
+      return `Phase has ${selectedPhase.have}/${selectedPhase.need} steps, adding ${capped} now (max 6 per batch, repeat to fill). AI receives all existing steps from this AND other phases to avoid duplicates and complement them.`;
     }
     return `Phase has ${selectedPhase.have}/${selectedPhase.need} steps. Recommended add: ${capped}. AI receives all existing steps from this AND other phases to avoid duplicates and complement them.`;
   })();
 
-  // v6.9.15a — only treat as "recommended" if the phase still exists.
+  // v6.9.15a: only treat as "recommended" if the phase still exists.
   const recommendedId = defaultTargetPhaseId && phaseOptions.some(p => p.id === defaultTargetPhaseId)
     ? defaultTargetPhaseId
     : null;
@@ -160,14 +160,14 @@ export const GenerateStepsDialog: React.FC<GenerateStepsDialogProps> = ({
                 <SelectContent className="bg-popover">
                   {recommendedId && phaseOptions.find(p => p.id === recommendedId) && (
                     <SelectItem value={recommendedId}>
-                      <span className="block text-left">🎯 Recommended — {phaseRecommendedLabel}</span>
+                      <span className="block text-left">🎯 Recommended: {phaseRecommendedLabel}</span>
                     </SelectItem>
                   )}
                   {phaseOptions
                     .filter(p => p.id !== recommendedId)
                     .map(p => (
                       <SelectItem key={p.id} value={p.id}>
-                        Phase {p.sequence}: {p.label} — {p.have}/{p.need} steps
+                        Phase {p.sequence}: {p.label}: {p.have}/{p.need} steps
                         {p.weeks ? ` (${p.weeks}w)` : ''}
                       </SelectItem>
                     ))}
@@ -186,7 +186,7 @@ export const GenerateStepsDialog: React.FC<GenerateStepsDialogProps> = ({
           {showQueueGate ? (
             <div className="w-full rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900 space-y-2">
               <p>
-                ⚠ You already have <b>{activeQueueSize}</b> active next-steps. DSLM gets sharper after each completed worksheet, homework, flashcard set, or note — generating more now risks stale suggestions.
+                ⚠ You already have <b>{activeQueueSize}</b> active next-steps. DSLM gets sharper after each completed worksheet, homework, flashcard set, or note, generating more now risks stale suggestions.
               </p>
               <div className="flex gap-2 justify-end">
                 <Button variant="ghost" size="sm" onClick={() => onOpenChange(false)}>Wait</Button>

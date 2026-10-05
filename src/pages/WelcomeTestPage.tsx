@@ -79,7 +79,7 @@ type Stage =
 
 export default function WelcomeTestPage() {
   useForceLightTheme();
-  // v6.9.55 — Block Chrome / Google Translate auto-translation. A placement
+  // v6.9.55: Block Chrome / Google Translate auto-translation. A placement
   // diagnostic translated to the student's native language defeats the test.
   useNoTranslatePage('welcome-test');
   const { token } = useParams<{ token: string }>();
@@ -153,7 +153,7 @@ export default function WelcomeTestPage() {
     };
   }, [saveAnswer]);
 
-  // v6.9.56 — integrity layer (tab-blur logging + paste blocker on
+  // v6.9.56: integrity layer (tab-blur logging + paste blocker on
   // open-ended). Must run BEFORE any early returns to keep hook order
   // stable. Skipped while in teacher preview mode.
   const isOpenEndedQ =
@@ -181,7 +181,7 @@ export default function WelcomeTestPage() {
   // Translation language is OFF by default (null).
   // The Translate button will auto-detect language from profile when clicked.
 
-  // Check localStorage for email — v6.9.53 re-validates against the shared
+  // Check localStorage for email, v6.9.53 re-validates against the shared
   // email regex so an older invalid value cannot bypass the new validation.
   useEffect(() => {
     if (!token) return;
@@ -269,14 +269,14 @@ export default function WelcomeTestPage() {
       return;
     }
     const raw = emailInput.trim();
-    // v6.9.50 — basic RFC-5322-lite regex; rejects "asdf", "a@b", "@x.co", etc.
+    // v6.9.50: basic RFC-5322-lite regex; rejects "asdf", "a@b", "@x.co", etc.
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(raw)) {
       toast.error("Please enter a valid email address (e.g. name@example.com)");
       return;
     }
     const email = raw.toLowerCase();
 
-    // v6.9.54 — verify via SECURITY DEFINER RPC so RLS on `students`
+    // v6.9.54: verify via SECURITY DEFINER RPC so RLS on `students`
     // cannot silently let any email through for anonymous visitors.
     if (!token) {
       toast.error("Missing test token. Please use the link from your teacher.");
@@ -621,12 +621,12 @@ export default function WelcomeTestPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-background to-secondary/20 px-2 sm:px-3 py-1">
       <div className="max-w-2xl mx-auto">
-        {/* Teacher Preview Mode — sticky banner. Shown when ?preview=1 or after
+        {/* Teacher Preview Mode, sticky banner. Shown when ?preview=1 or after
             the teacher chose "Preview Test (Read-only)" from the access screen. */}
         {teacherPreviewMode && (
           <div className="sticky top-0 z-50 -mx-3 sm:-mx-4 mb-3 px-3 sm:px-4 py-2 bg-primary text-primary-foreground shadow-md flex items-center justify-center gap-3 text-xs sm:text-sm font-medium">
             <Eye className="h-4 w-4" />
-            <span>Teacher Preview Mode — answers are NOT saved to the student's profile.</span>
+            <span>Teacher Preview Mode: answers are NOT saved to the student's profile.</span>
             {studentId && (
               <button
                 onClick={() => navigate(`/student/${studentId}?tab=tests`)}
@@ -830,8 +830,8 @@ export default function WelcomeTestPage() {
                   className="text-xs h-7 text-muted-foreground"
                   onClick={() => saveIdontKnow(currentQuestion.id)}
                   title={isSkillQuestion
-                    ? "Honest 'I don't know' helps your teacher calibrate the right level — far better than guessing."
-                    : "Skip this if you really have no preference — your teacher will fill it in together with you."}
+                    ? "Honest 'I don't know' helps your teacher calibrate the right level, far better than guessing."
+                    : "Skip this if you really have no preference; your teacher will fill it in together with you."}
                 >
                   <HelpCircle className="h-3 w-3 mr-1" />I don't know
                 </Button>
@@ -1162,7 +1162,7 @@ function QuestionInputInner({
             <div key={idx} className="space-y-1">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-medium">{item}</span>
-                <span className="text-[10px] text-muted-foreground font-medium">{matrixAnswers[item] || "—"}</span>
+                <span className="text-[10px] text-muted-foreground font-medium">{matrixAnswers[item] || "-"}</span>
               </div>
               <div className="flex gap-1.5">
                 {Array.from(

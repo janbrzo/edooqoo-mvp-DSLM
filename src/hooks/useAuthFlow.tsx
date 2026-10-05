@@ -47,7 +47,7 @@ export function useAuthFlow() {
       setUser(session?.user ?? null);
       setIsAnonymous(anonymous);
       setLoading(false);
-      // v6.9.29 — sync TanStack cache so hooks reading ['auth-user'] (staleTime Infinity)
+      // v6.9.29: sync TanStack cache so hooks reading ['auth-user'] (staleTime Infinity)
       // see the new identity immediately and the dashboard renders without F5.
       queryClient.setQueryData(['auth-user'], session?.user ?? null);
 

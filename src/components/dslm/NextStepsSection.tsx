@@ -1,9 +1,9 @@
 /**
- * NextStepsSection — DSLM Pathway v4.1
+ * NextStepsSection: DSLM Pathway v4.1
  * Shows: prominent banner (#1) + collapsible compact list (#2..N) using shared
  * CompactSuggestionCard. Numbering uses stable displayIndex (computed by parent).
  * Toolbar: [+ Generate more suggestions] (with phase info).
- * "Regenerate all steps" REMOVED — only per-step regeneration via comment dialog.
+ * "Regenerate all steps" REMOVED: only per-step regeneration via comment dialog.
  */
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -45,13 +45,13 @@ interface NextStepsSectionProps {
   usedSteps?: any[];
   /** v5.0: restore the most recent used step back to active list. */
   onRestore?: (id: string) => void;
-  /** v6.9.13 — phase metadata for the shared GenerateStepsDialog. */
+  /** v6.9.13: phase metadata for the shared GenerateStepsDialog. */
   phaseOptions?: PhaseOption[];
-  /** v6.9.13 — recommended target phase id (null = free). */
+  /** v6.9.13: recommended target phase id (null = free). */
   defaultTargetPhaseId?: string | null;
-  /** v6.9.13 — when false, hide phase selector (roadmap disabled). */
+  /** v6.9.13: when false, hide phase selector (roadmap disabled). */
   showPhaseSelector?: boolean;
-  /** v6.9.40 P5 — readiness signals for empty state of #1 banner. */
+  /** v6.9.40 P5: readiness signals for empty state of #1 banner. */
   wtCompleted?: boolean;
   hasPhases?: boolean;
   onAddGoal?: () => void;
@@ -87,11 +87,11 @@ export const NextStepsSection: React.FC<NextStepsSectionProps> = ({
   const [usedOpen, setUsedOpen] = useState(false);
   const [commentDialog, setCommentDialog] = useState<{ open: boolean; suggestion?: any }>({ open: false });
   const [comment, setComment] = useState('');
-  // v6.9.13 — unified shared dialog for both first/more flows.
+  // v6.9.13: unified shared dialog for both first/more flows.
   const [genDialogOpen, setGenDialogOpen] = useState(false);
   const [genMode, setGenMode] = useState<'first' | 'more'>('first');
 
-  // v6.9.33 — Onboarding "Use one Next Lesson suggestion" deep-link: if there
+  // v6.9.33: Onboarding "Use one Next Lesson suggestion" deep-link: if there
   // are no suggestions yet, open the generation dialog so the teacher has a
   // visible next action; otherwise scroll to the top banner.
   useEffect(() => {
@@ -201,7 +201,7 @@ export const NextStepsSection: React.FC<NextStepsSectionProps> = ({
         </Collapsible>
       )}
 
-      {/* Toolbar: only "Generate more" — opens shared dialog with phase selector */}
+      {/* Toolbar: only "Generate more", opens shared dialog with phase selector */}
       {items.length > 0 && (
         <div className="flex flex-wrap gap-2 pt-1">
           <Button
@@ -239,7 +239,7 @@ export const NextStepsSection: React.FC<NextStepsSectionProps> = ({
         </DialogContent>
       </Dialog>
 
-      {/* v6.9.13 — unified Generate Steps dialog (first or more). */}
+      {/* v6.9.13: unified Generate Steps dialog (first or more). */}
       <GenerateStepsDialog
         open={genDialogOpen}
         onOpenChange={setGenDialogOpen}

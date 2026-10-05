@@ -6,7 +6,7 @@ import { devWarn } from '@/utils/logger';
 import type { Tables } from '@/integrations/supabase/types';
 
 /**
- * useDashboardAttention — data layer for the "Needs your attention" zone
+ * useDashboardAttention: data layer for the "Needs your attention" zone
  * of the Today dashboard. Merges three teacher-facing signals into one
  * time-ordered list:
  *   - homework submitted by a student but not yet reviewed
@@ -60,7 +60,7 @@ export function buildStudentNameResolver(students: Pick<Student, 'id' | 'name'>[
   return (id) => (id ? byId.get(id) : undefined) ?? 'A student';
 }
 
-/** Pure mapping + merge — exported for unit tests and demo reuse. */
+/** Pure mapping + merge, exported for unit tests and demo reuse. */
 export function mapAttentionItems(
   input: {
     homework: AttentionHomeworkRow[];

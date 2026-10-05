@@ -19,7 +19,7 @@ const normalize = (t: string): string => {
   return aliases[base] || base;
 };
 
-// v6.9.33 — Defensive: extract plain text from string|number|object so
+// v6.9.33: Defensive: extract plain text from string|number|object so
 // objects like { text: "..." } never render as "[object Object]" or raw JSON.
 // Also filters out nano-skill metadata objects which sometimes leak into
 // exercise items (`{name, mastery, reason}` shape).
@@ -28,7 +28,7 @@ const toText = (v: unknown): string => {
   if (typeof v === "string" || typeof v === "number") return String(v);
   if (typeof v === "object") {
     const o = v as Record<string, unknown>;
-    // Skip nano-skill rating shapes — they don't belong in exercise content.
+    // Skip nano-skill rating shapes; they don't belong in exercise content.
     if ("mastery" in o || "reason" in o) {
       return typeof o.name === "string" ? o.name as string : "";
     }
@@ -56,7 +56,7 @@ const QuestionText = (q: any): string => {
   return String(q ?? "");
 };
 
-// v6.9.36 — defensive normalizers shared across exercise types.
+// v6.9.36: defensive normalizers shared across exercise types.
 const asArray = (v: unknown): any[] => {
   if (Array.isArray(v)) return v;
   if (v && typeof v === "object") return Object.values(v as Record<string, unknown>);
@@ -162,7 +162,7 @@ const GalleryExerciseRenderer: React.FC<Props> = ({ exercise, index }) => {
       }
       case "matching":
       case "matching-halves": {
-        // v6.9.36 — broader normalization. Accepts paired rows, parallel
+        // v6.9.36: broader normalization. Accepts paired rows, parallel
         // arrays (left/right, first/second, halves_left/halves_right,
         // starts/endings, sentence_start/sentence_end), nested `halves` /
         // `matching_halves`, and rich item shapes for MC variant.
@@ -178,7 +178,7 @@ const GalleryExerciseRenderer: React.FC<Props> = ({ exercise, index }) => {
           }
         }
         if (pairs.length === 0) return null;
-        // v6.9.35 — multiple-choice variant of "matching halves": rows look
+        // v6.9.35: multiple-choice variant of "matching halves": rows look
         // like `{ prompt, options }`. Render as A/B/C list instead of a 2-col
         // table so the question + endings are both visible.
         if (pairs.length && pairs[0] && typeof pairs[0] === 'object'
@@ -266,7 +266,7 @@ const GalleryExerciseRenderer: React.FC<Props> = ({ exercise, index }) => {
         );
       }
       case "word-order": {
-        // v6.9.36 — accept many container keys and any item shape, including
+        // v6.9.36: accept many container keys and any item shape, including
         // a plain shuffled string at top level (`ex.scrambled_sentence`).
         let items: any[] = firstNonEmptyArr(
           ex.sentences, ex.items, ex.questions, ex.scrambled_sentences,
@@ -325,7 +325,7 @@ const GalleryExerciseRenderer: React.FC<Props> = ({ exercise, index }) => {
                   it?.sentence ?? it?.text ?? it?.question ?? it?.word ?? it?.base ??
                   it?.input ?? it?.root ?? it?.original ?? it?.stem ?? it?.before
                 );
-                // v6.9.36 — for complete-word/negative-prefixes show masked
+                // v6.9.36: for complete-word/negative-prefixes show masked
                 // form when available, otherwise generate one from the answer
                 // so the preview shows the actual exercise prompt, not just
                 // the solution.
@@ -352,7 +352,7 @@ const GalleryExerciseRenderer: React.FC<Props> = ({ exercise, index }) => {
                 <tr key={i} className="border-b border-border/40">
                   <td className="py-1.5 pr-3 font-medium">{left || toText(it)}</td>
                   <td className="py-1.5 text-muted-foreground">
-                    <span>{rightPrimary || "—"}</span>
+                    <span>{rightPrimary || "-"}</span>
                     {showMask && answer && rightPrimary !== answer && (
                       <span className="ml-2 text-[11px] opacity-60 italic">→ {answer}</span>
                     )}

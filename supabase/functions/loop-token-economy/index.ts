@@ -1,4 +1,4 @@
-// Closed-Loop Company — token-economy-health (Wave 1).
+// Closed-Loop Company: token-economy-health (Wave 1).
 // Cadence: monthly 1st 05:00 UTC.
 // Segments teachers (under/over/at-risk/healthy) and emits teacher_alerts.
 // NEVER auto-upgrade Stripe subscriptions.

@@ -49,7 +49,7 @@ export default function StudentHubSettings() {
   const [searchParams, setSearchParams] = useSearchParams();
   const email = getSavedHubEmail();
   // Sensitive get-student-hub-data actions require this once a Hub password
-  // is set — see supabase/functions/_shared/hubSession.ts.
+  // is set: see supabase/functions/_shared/hubSession.ts.
   const withHubSession = () => ({ hubSessionToken: getSavedHubSession() || undefined });
   const redirectToReAuth = () => {
     clearHubSession();
@@ -417,7 +417,7 @@ export default function StudentHubSettings() {
                 <li>When you connect your Google account, new lessons will be automatically added to your calendar.</li>
                 <li>Each lesson gets a reminder notification before it starts.</li>
                 <li>If a lesson is cancelled, it will be removed from your calendar.</li>
-                <li>Your Google account is only used for calendar events — we don't access any other data.</li>
+                <li>Your Google account is only used for calendar events; we don't access any other data.</li>
                 <li>Event colors change based on lesson status (booked, pending, completed).</li>
               </ul>
             </div>

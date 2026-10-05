@@ -1,5 +1,5 @@
 /**
- * v6.9.65 — Single source of truth for worksheet generation progress %.
+ * v6.9.65: Single source of truth for worksheet generation progress %.
  * Both GeneratingModal (foreground) and ActiveGenerationMiniPanel
  * (background) must call this so their bars never disagree.
  *

@@ -23,7 +23,7 @@ const ExerciseTopicPage: React.FC = () => {
 
   const policy = getTopicIndexPolicy(topic.slug);
   const isIndexable = isIndexableExerciseTopic(exercise.slug, topic.slug);
-  const title = clampSeoTitle(`${exercise.label} Worksheet: ${topic.label} — Edooqoo`);
+  const title = clampSeoTitle(`${exercise.label} Worksheet: ${topic.label} | Edooqoo`);
   const description = clampSeoDescription(
     `Create a ${exercise.label} worksheet on ${topic.label} for adult learners. CEFR A1-C2 labels, editable output, free to start.`
   );

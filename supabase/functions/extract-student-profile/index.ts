@@ -1,10 +1,10 @@
-// v6.9.72 — Extract a structured student profile from a teacher's free-form
+// v6.9.72: Extract a structured student profile from a teacher's free-form
 // paste of notes. Pure extraction: returns JSON for the client to apply via
 // the apply_intake_extraction RPC (so the teacher can preview before commit).
 //
 // History
 //  - v6.9.67/68: dropped Gemini tool-calling; switched to JSON-object response.
-//  - v6.9.72: hardened error handling — robust JSON parser, explicit OpenAI
+//  - v6.9.72: hardened error handling, robust JSON parser, explicit OpenAI
 //    fallback when Gemini errors or returns unparsable content, and a
 //    deterministic preview fallback so the UI never shows 502 for valid
 //    teacher input. Worksheet Generation Engine NOT touched.
@@ -40,7 +40,7 @@ RULES:
 - Native language may be returned only when the raw notes explicitly mention it or clearly state
   nationality/mother tongue. A dropdown default such as Spanish is not evidence.
 
-OUTPUT FORMAT — return a SINGLE JSON object with EXACTLY these top-level keys (no prose,
+OUTPUT FORMAT: return a SINGLE JSON object with EXACTLY these top-level keys (no prose,
 no markdown fences):
 {
   "language": "<BCP-47 like 'en' or 'pl'>",
@@ -308,7 +308,7 @@ function quoteAppearsInRaw(quote: unknown, rawText: string): boolean {
   return normalizeForEvidence(rawText).includes(q);
 }
 
-// v6.9.76 — name/email use lenient evidence (literal value present, or all
+// v6.9.76: name/email use lenient evidence (literal value present, or all
 // >2-char tokens within 40 normalized chars). Avoids dropping correct AI
 // extractions when the cited quote is paraphrased or translated.
 function valueAppearsInRaw(value: unknown, rawText: string): boolean {
@@ -344,14 +344,14 @@ function clearIfNoEvidence(extraction: any, key: string): void {
 function enforceEvidenceQuotes(extraction: any, rawText: string): void {
   extraction.__rawTextForEvidence = rawText;
 
-  // student_name: lenient — keep if quote OR tokens appear in raw.
+  // student_name: lenient: keep if quote OR tokens appear in raw.
   const sn = extraction.student_name;
   if (sn && typeof sn === "object") {
     const ok = quoteAppearsInRaw(sn.evidence_quote, rawText) || nameTokensAppearInRaw(sn.value, rawText);
     if (!ok) extraction.student_name = null;
   }
 
-  // student_email: lenient — keep if the literal email value is present.
+  // student_email: lenient: keep if the literal email value is present.
   const se = extraction.student_email;
   if (se && typeof se === "object") {
     const ok = quoteAppearsInRaw(se.evidence_quote, rawText) || valueAppearsInRaw(se.value, rawText);
@@ -390,7 +390,7 @@ function enrichDeterministicIdentity(extraction: any, rawText: string): void {
   }
 }
 
-// v6.9.76 — multi-pass name detector:
+// v6.9.76: multi-pass name detector:
 //  (1) explicit label "Name:" / "Imię:" etc.
 //  (2) "First Last <email>" / "First Last - email" / "First Last, email"
 //  (3) line adjacent to the email line, picking the first 2–4 capitalised

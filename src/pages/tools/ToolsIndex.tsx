@@ -32,7 +32,7 @@ const TOOLS = [
 const ToolsIndex: React.FC = () => (
   <div className="min-h-screen bg-background">
     <PageSeo
-      title="Free Tools for English Teachers — Edooqoo"
+      title="Free Tools for English Teachers | Edooqoo"
       description="Free English teaching tools: CEFR level test, ESL lesson plan generator, CEFR vocabulary checker. No sign-up, runs in your browser."
       path="/tools"
       jsonLd={{

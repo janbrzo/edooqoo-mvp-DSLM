@@ -1,11 +1,11 @@
 /**
- * PathwayView v4.2 — Unified Next Steps × Phases + Roadmap toggle.
+ * PathwayView v4.2: Unified Next Steps × Phases + Roadmap toggle.
  *
  * Next Steps section = ALL active phase_steps (across phases) + legacy free-floating next_steps,
  * sorted by (phase.sequence_number ASC, suggestion.sequence_number ASC).
  * displayIndex is stable per item (1..N global), shown in both Next Steps and inside the phase.
  * Edit dialog is shared via SuggestionEditDialog (now incl. exercises + V/G focus map).
- * Per-step regeneration uses regenerateInPlace — preserves the original sequence position.
+ * Per-step regeneration uses regenerateInPlace, preserves the original sequence position.
  * When useRoadmap=false: phase context is ignored when generating next steps.
  */
 import React, { useEffect, useMemo, useState } from 'react';
@@ -77,7 +77,7 @@ export const PathwayView: React.FC<PathwayViewProps> = ({
   const planningNotes = useStudentKnowledge({ studentId, teacherId });
   const { proposals: pacingProposals } = usePacingProposals(studentId);
 
-  // v6.9.40 P5 — Readiness signals for the 1-Minute Prep empty state.
+  // v6.9.40 P5: Readiness signals for the 1-Minute Prep empty state.
   const { data: studentRow } = useStudent(studentId);
   const welcomeActions = useWelcomeTestActions({
     studentId,
@@ -116,7 +116,7 @@ export const PathwayView: React.FC<PathwayViewProps> = ({
   const [roadmapOpen, setRoadmapOpen] = useState(true);
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // v6.9.13 — listen for sub-nav events; force-open the targeted Collapsible.
+  // v6.9.13: listen for sub-nav events; force-open the targeted Collapsible.
   useEffect(() => {
     const handler = (e: Event) => {
       const id = (e as CustomEvent).detail?.id;
@@ -217,9 +217,9 @@ export const PathwayView: React.FC<PathwayViewProps> = ({
     const all = [...phaseSteps, ...nextSteps];
     const target = all.find((s: any) => s.id === editId);
     if (target) {
-      // v6.9.112 M8 — open the dialog outside the render/commit of the URL update.
+      // v6.9.112 M8: open the dialog outside the render/commit of the URL update.
       queueMicrotask(() => handleEditSuggestion(target));
-      // v6.9.111 M7.6 — consume `editSuggestion` on the live params so a
+      // v6.9.111 M7.6: consume `editSuggestion` on the live params so a
       // concurrent canonical rewrite of `tab`/`view` is preserved.
       setSearchParams(
         (prev) => {
@@ -249,7 +249,7 @@ export const PathwayView: React.FC<PathwayViewProps> = ({
   const currentPhaseLabelForUI = useRoadmap && currentPhase
     ? `${phaseLabelById[currentPhase.id]}: ${currentPhase.title}` : null;
 
-  // v6.9.13 — phase metadata for the shared GenerateStepsDialog.
+  // v6.9.13: phase metadata for the shared GenerateStepsDialog.
   const phaseOptions: PhaseOption[] = useMemo(() => {
     const counts: Record<string, number> = {};
     for (const s of phaseSteps) {
@@ -263,7 +263,7 @@ export const PathwayView: React.FC<PathwayViewProps> = ({
         sequence: p.sequence_number,
         status: p.status,
         have: counts[p.id] || 0,
-        // v6.9.48 — `need` reflects the full per-phase target (1/week, no clamp)
+        // v6.9.48: `need` reflects the full per-phase target (1/week, no clamp)
         // so recommendedTargetPhaseId only moves on to the next phase once the
         // current one is genuinely full. `perBatch` keeps the 1–6 cap for inputs.
         need: targetStepsForPhase(p),
@@ -272,7 +272,7 @@ export const PathwayView: React.FC<PathwayViewProps> = ({
       }));
   }, [phases, phaseSteps]);
 
-  // v6.9.13 — pick best target: in_progress with have<need, else planned with have<need, else null.
+  // v6.9.13: pick best target: in_progress with have<need, else planned with have<need, else null.
   const recommendedTargetPhaseId = useMemo<string | null>(() => {
     if (!useRoadmap) return null;
     const inProgress = phaseOptions.filter(p => p.status === 'in_progress');
@@ -320,7 +320,7 @@ export const PathwayView: React.FC<PathwayViewProps> = ({
         onGoToRoadmap={handleGoToRoadmap}
         onGenerateMore={(count, excludeIds, phaseId) =>
           {
-            // v6.9.15b — final guard against stale phaseId from a dialog opened
+            // v6.9.15b: final guard against stale phaseId from a dialog opened
             // before a phase deletion landed in this hook instance.
             const validPhaseId = phaseId && phaseOptions.some(p => p.id === phaseId) ? phaseId : null;
             return generateNextSteps({

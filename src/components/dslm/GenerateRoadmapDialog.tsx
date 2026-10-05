@@ -1,5 +1,5 @@
 /**
- * v6.9.41 P6 — Guided roadmap generation dialog.
+ * v6.9.41 P6: Guided roadmap generation dialog.
  *
  * Teacher can influence:
  *  - Phase count (auto-fit by default, manual 1..8)
@@ -35,7 +35,7 @@ export interface GenerateRoadmapDialogProps {
   mode: 'replace' | 'add';
   goals: RoadmapGoalOption[];
   generating: boolean;
-  /** v6.9.42 — adjusts title/description/CTA copy for regen vs first-time. */
+  /** v6.9.42: adjusts title/description/CTA copy for regen vs first-time. */
   isRegeneration?: boolean;
   onConfirm: (opts: {
     count?: number;
@@ -134,7 +134,7 @@ export const GenerateRoadmapDialog: React.FC<GenerateRoadmapDialogProps> = ({
           </DialogTitle>
           <DialogDescription>
             {isRegeneration
-              ? 'This regenerates ONLY planned and draft phases. Phases marked done or in progress keep their exact records, week ranges, and worksheet suggestions. Auto-fit gives full control to the AI — toggle anything off to steer the plan yourself.'
+              ? 'This regenerates ONLY planned and draft phases. Phases marked done or in progress keep their exact records, week ranges, and worksheet suggestions. Auto-fit gives full control to the AI, toggle anything off to steer the plan yourself.'
               : 'Auto-fit gives full control to the AI. Toggle anything off to steer the plan yourself.'}
           </DialogDescription>
         </DialogHeader>
@@ -238,7 +238,7 @@ export const GenerateRoadmapDialog: React.FC<GenerateRoadmapDialogProps> = ({
             </div>
             {!autoGoals && (
               goals.length === 0 ? (
-                <p className="text-[11px] text-muted-foreground pt-1">No active goals — add some on the Goals tab.</p>
+                <p className="text-[11px] text-muted-foreground pt-1">No active goals: add some on the Goals tab.</p>
               ) : (
                 <ScrollArea className="max-h-44 pr-2">
                   <div className="space-y-1.5 pt-1">

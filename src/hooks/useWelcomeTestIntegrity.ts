@@ -1,5 +1,5 @@
 /**
- * useWelcomeTestIntegrity — v6.9.56
+ * useWelcomeTestIntegrity: v6.9.56
  *
  * Lightweight test-integrity layer for the Welcome Test:
  *  - Logs `welcome_test_tab_blur` events to `student_events` whenever the
@@ -9,7 +9,7 @@
  *  - Blocks paste into open-ended / speaking-transcript inputs to prevent
  *    one-click translator dumps that defeat the writing assessment.
  *
- * No new tables — `student_events` already exists. We never block tab switches
+ * No new tables, `student_events` already exists. We never block tab switches
  * (that would harm UX for students who legitimately need to check a dictionary
  * the teacher allowed). We only RECORD the signal and surface it as part of
  * the AI summary downstream.
@@ -117,7 +117,7 @@ export function useWelcomeTestIntegrity({
       if (!target) return;
       if (target.matches && target.matches(OPEN_ENDED_SELECTOR)) {
         e.preventDefault();
-        // Quiet hint — toast would be overkill on every keystroke.
+        // Quiet hint: toast would be overkill on every keystroke.
         (target as HTMLElement).setAttribute('data-paste-blocked', '1');
       }
     };

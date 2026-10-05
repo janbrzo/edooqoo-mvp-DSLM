@@ -131,7 +131,7 @@ export async function updateFeedbackAPI(id: string, comment: string, userId: str
   try {
     devLog('Updating feedback with comment:', { id, comment });
 
-    // v6.9.86 — RLS: authenticated users may update only their own rows.
+    // v6.9.86: RLS: authenticated users may update only their own rows.
     // Anonymous feedback goes through a time-boxed SECURITY DEFINER RPC
     // (comment allowed within 1 hour of submission) instead of a blanket policy.
     let error: { message: string } | null = null;

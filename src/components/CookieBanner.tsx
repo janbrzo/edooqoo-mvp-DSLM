@@ -1,11 +1,11 @@
 /**
- * CookieBanner v6.9.4 — Always-visible pill, scroll-triggered expand.
+ * CookieBanner v6.9.4: Always-visible pill, scroll-triggered expand.
  *
  * Behavior:
  *  - On mount: if no prior consent, render the floating pill IMMEDIATELY
  *    (cookie icon, 48x48, bottom-right, above safe-area inset).
  *  - First scroll ≥ 100px → auto-expand into the full consent card (once
- *    per session — gated by sessionStorage('edooqoo.cookie.autoExpanded')).
+ *    per session: gated by sessionStorage('edooqoo.cookie.autoExpanded')).
  *  - Tapping the pill → manually expand the card.
  *  - Choice (Accept / Decline) → persisted in localStorage('cookie-consent')
  *    and the whole banner is removed.

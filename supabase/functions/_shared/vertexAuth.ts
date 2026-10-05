@@ -1,4 +1,4 @@
-// v6.9.65 — Shared Vertex AI access-token helper.
+// v6.9.65: Shared Vertex AI access-token helper.
 // Extracted from generate-image/index.ts so audit-llm-models can ping
 // Vertex publisher-model endpoints with the same service-account JSON.
 import { create, getNumericDate } from "https://deno.land/x/djwt@v3.0.2/mod.ts";

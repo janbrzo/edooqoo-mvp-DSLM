@@ -1,6 +1,6 @@
-// v6.9.29 — Sends the LLM audit report (daily and monthly) to edooqoo@gmail.com via Resend.
+// v6.9.29: Sends the LLM audit report (daily and monthly) to edooqoo@gmail.com via Resend.
 // Called only by audit-llm-models. Auth: x-internal-call == CRON_SECRET.
-// v6.9.90 — Subject also counts shutdowns due within 30 days and advisor
+// v6.9.90: Subject also counts shutdowns due within 30 days and advisor
 // switch suggestions when the summary carries them.
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 
@@ -47,11 +47,11 @@ serve(async (req) => {
       switchSuggestions > 0 ? `${switchSuggestions} model switch suggested` : "",
       scanFlags > 0 ? `${scanFlags} deprecation notice to review` : "",
     ].filter(Boolean).join(" · ");
-    const subject = `[Edooqoo] ${label} — ${dateStr} — ${failed}/${total} failed${subjectExtras ? ` · ${subjectExtras}` : ""}`;
+    const subject = `[Edooqoo] ${label}, ${dateStr}, ${failed}/${total} failed${subjectExtras ? ` · ${subjectExtras}` : ""}`;
 
     const html = `
 <div style="font-family: -apple-system, Segoe UI, Arial, sans-serif; max-width: 900px; margin: 0 auto; padding: 24px; color: #111;">
-  <h2 style="margin: 0 0 8px;">${label} — ${dateStr}</h2>
+  <h2 style="margin: 0 0 8px;">${label}: ${dateStr}</h2>
   <p style="color:#374151;">Checked: <strong>${total}</strong> · OK: <strong>${(summary?.ok ?? 0)}</strong>${expectedCount > 0 ? ` · Expected: <strong style="color:#b45309;">${expectedCount}</strong>` : ''} · Failed: <strong style="color:${failed > 0 ? '#dc2626' : '#16a34a'};">${failed}</strong></p>
   ${reportHtml || "<p>No report body.</p>"}
   <p style="color:#6b7280; font-size:12px; margin-top: 24px;">Source: audit-llm-models (mode=${mode || 'daily'}). Inspect model_health_checks for raw rows.</p>

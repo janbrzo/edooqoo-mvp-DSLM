@@ -124,7 +124,7 @@ const McpTokensPage: React.FC = () => {
               </div>
             </div>
             <ol className="list-decimal space-y-1 pl-5 text-muted-foreground">
-              <li>Generate a Personal MCP Token below (shown only once — copy immediately).</li>
+              <li>Generate a Personal MCP Token below (shown only once: copy immediately).</li>
               <li>In your AI client (e.g. Claude Desktop), add an MCP server with URL <code className="break-all">{MCP_ENDPOINT}</code> and header <code>Authorization: Bearer &lt;your token&gt;</code>.</li>
               <li>The assistant will see tools: <code>list_students</code>, <code>get_student_summary</code>, <code>list_recent_worksheets</code> (plus public catalog tools).</li>
             </ol>

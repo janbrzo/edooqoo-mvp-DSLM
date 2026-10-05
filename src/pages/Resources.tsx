@@ -17,7 +17,7 @@ const ResourceCardItem = ({ card }: { card: ResourceCard }) => {
       <p className="text-xs text-muted-foreground">{card.description}</p>
     </>
   );
-  // v6.9.22 — .html → static file (full-page nav); clean path → React Router.
+  // v6.9.22: .html → static file (full-page nav); clean path → React Router.
   if (card.href.endsWith('.html')) {
     return (
       <a href={card.href} className="block rounded-lg border bg-card p-5 hover:shadow-md transition-shadow">
@@ -45,7 +45,7 @@ const Resources = () => {
   const location = useLocation();
   const fromState = { from: location.pathname + location.search };
   useEffect(() => {
-    document.title = 'English Teaching Resources — AI Worksheets, Guides & Tools | Edooqoo';
+    document.title = 'English Teaching Resources: AI Worksheets, Guides & Tools | Edooqoo';
     const meta = document.querySelector('meta[name="description"]');
     if (meta) {
       meta.setAttribute('content', 'Free resources for English teachers: AI worksheet generators, CEFR level guides, exercise tutorials, tool comparisons, blog articles, and teaching tips. Browse 100+ resources.');

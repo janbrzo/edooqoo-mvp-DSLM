@@ -52,7 +52,7 @@ const PlacementTestMockup = () => (
 
     {/* AI Summary */}
     <div className="bg-primary/5 border border-primary/10 rounded-xl p-4 text-xs text-foreground">
-      <span className="font-semibold">AI Summary:</span> Strong overall C1 profile with particular strength in reading comprehension. Listening is the weakest area (B2 level). Recommended path: <span className="font-semibold text-primary">Guided</span> — focus on listening skills while maintaining C1 areas.
+      <span className="font-semibold">AI Summary:</span> Strong overall C1 profile with particular strength in reading comprehension. Listening is the weakest area (B2 level). Recommended path: <span className="font-semibold text-primary">Guided</span>, focus on listening skills while maintaining C1 areas.
     </div>
   </div>
 );
@@ -61,11 +61,11 @@ const benefits = [
   { icon: ClipboardCheck, title: '58-question assessment', description: 'Multi-skill, CEFR-oriented diagnostic covering grammar, vocabulary, reading, listening, and speaking.' },
   { icon: Brain, title: 'AI-generated profile input', description: 'Detailed learning profile with per-skill CEFR indicators, strengths, weaknesses, and pacing context for teacher review.' },
   { icon: Route, title: 'Roadmap starting point', description: 'Results can initialize profile context, skill scores, confidence signals, and a starting point for pacing and roadmap review.' },
-  { icon: Mic, title: 'Speaking & listening', description: 'Not just grammar and vocabulary — the test includes audio comprehension and speaking tasks for a complete assessment.' },
+  { icon: Mic, title: 'Speaking & listening', description: 'Not just grammar and vocabulary: the test includes audio comprehension and speaking tasks for a complete assessment.' },
 ];
 
 const steps = [
-  { number: 1, title: 'Send the test link', description: 'Generate a unique test link for your new student. They can take it on any device — phone, tablet, or computer.' },
+  { number: 1, title: 'Send the test link', description: 'Generate a unique test link for your new student. They can take it on any device: phone, tablet, or computer.' },
   { number: 2, title: 'Student completes 58 questions', description: '20-30 minutes. Questions cover grammar, vocabulary, reading, listening, and speaking sections across CEFR-oriented difficulty bands.' },
   { number: 3, title: 'AI analyzes results', description: 'AI evaluates answers including open-ended speaking tasks and generates a detailed learning profile for teacher review.' },
   { number: 4, title: 'You review the profile', description: 'See the breakdown: strengths, weaknesses, confidence levels, and starting profile context. Test results become a starting input for DSLM.' },
@@ -81,7 +81,7 @@ const faqItems = [
 
 const FeaturePlacementTest: React.FC = () => (
   <FeaturePageLayout
-    title="AI English Placement Test — 58 Questions, CEFR Assessment | Edooqoo"
+    title="AI English Placement Test: 58 Questions, CEFR Assessment | Edooqoo"
     metaDescription="Send a link, student completes 58 questions (grammar, vocabulary, reading, listening, speaking). AI generates a detailed CEFR profile with learning path recommendation."
   >
     <FeatureHero

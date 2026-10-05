@@ -1,9 +1,9 @@
 // bulk-publish-worksheets
-// Plan v6.9.31 — one-shot backfill that flips eligible private worksheets to
+// Plan v6.9.31: one-shot backfill that flips eligible private worksheets to
 // is_public=true in the gallery. Mirrors the validation logic from
 // `publish-worksheet` so individual records still must pass: title length >= 3,
 // >= 6 exercises in ai_response, no PII in form_data.additionalInformation.
-// Idempotent — re-runs simply skip already-public rows.
+// Idempotent: re-runs simply skip already-public rows.
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
@@ -45,7 +45,7 @@ serve(async (req) => {
     if (typeof body?.limit === "number") limit = Math.max(1, Math.min(2000, body.limit));
     if (typeof body?.dry_run === "boolean") dryRun = body.dry_run;
     if (typeof body?.only_teacher_id === "string") onlyTeacherId = body.only_teacher_id;
-  } catch (_) { /* ignore — defaults */ }
+  } catch (_) { /* ignore, defaults */ }
 
   let q = sb
     .from("worksheets")

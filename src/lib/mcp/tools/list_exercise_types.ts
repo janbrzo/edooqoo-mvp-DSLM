@@ -1,4 +1,4 @@
-// Public MCP tool — returns the catalog of ESL exercise types Edooqoo can
+// Public MCP tool, returns the catalog of ESL exercise types Edooqoo can
 // generate. Read-only public taxonomy, no user data.
 import { defineTool } from "@lovable.dev/mcp-js";
 import { z } from "zod";

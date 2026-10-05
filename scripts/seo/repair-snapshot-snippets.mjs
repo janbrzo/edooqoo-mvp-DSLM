@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Sprint 3 (S3-A) — clamp SERP snippets in already committed HTML snapshots.
+ * Sprint 3 (S3-A): clamp SERP snippets in already committed HTML snapshots.
  *
  * The React pSEO templates now clamp titles/descriptions through
  * `src/utils/seoSnippet.ts`, but the snapshots committed under `public/`
@@ -28,13 +28,13 @@ const DIRS = process.argv
 // Keep in sync with src/utils/seoSnippet.ts and scripts/seo/audit-duplicate-meta.mjs.
 const TITLE_MAX = 60;
 const DESCRIPTION_MAX = 155;
-const BRAND_SUFFIX_PATTERN = /\s*[|—-]\s*Edooqoo\s*$/;
+const BRAND_SUFFIX_PATTERN = /\s*[|:\u2014-]\s*Edooqoo\s*$/;
 
 function trimToWordBoundary(text, max) {
   if (text.length <= max) return text;
   const cut = text.slice(0, max);
   const lastSpace = cut.lastIndexOf(' ');
-  return (lastSpace > max * 0.5 ? cut.slice(0, lastSpace) : cut).replace(/[\s,;:.\-—|]+$/, '');
+  return (lastSpace > max * 0.5 ? cut.slice(0, lastSpace) : cut).replace(/[\s,;:.\-\u2014|]+$/, '');
 }
 
 function clampTitle(title) {
@@ -121,7 +121,7 @@ for (const file of files) {
 }
 
 console.log(
-  `[repair-snapshot-snippets] scope: ${DIRS.length ? DIRS.join(', ') : 'public/'} — scanned ${files.length} files, ${changed.length} ${CHECK_ONLY ? 'need repair' : 'repaired'}`,
+  `[repair-snapshot-snippets] scope: ${DIRS.length ? DIRS.join(', ') : 'public/'}: scanned ${files.length} files, ${changed.length} ${CHECK_ONLY ? 'need repair' : 'repaired'}`,
 );
 for (const rel of changed.slice(0, 10)) console.log(`  - ${rel}`);
 if (changed.length > 10) console.log(`  … and ${changed.length - 10} more`);

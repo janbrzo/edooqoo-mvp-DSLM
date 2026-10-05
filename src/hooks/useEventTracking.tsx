@@ -4,9 +4,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { v4 as uuidv4 } from 'uuid';
 import { devLog } from '@/utils/logger';
 
-// v6.9.0 — Defer non-critical analytics to idle so they exit the LCP/TBT
+// v6.9.0: Defer non-critical analytics to idle so they exit the LCP/TBT
 // critical path. requestIdleCallback fallback for Safari (setTimeout 0).
-// v6.9.1 — Additionally hold the FIRST event back by 3s so it is fully
+// v6.9.1: Additionally hold the FIRST event back by 3s so it is fully
 // outside the LCP window on mobile 4G. PageSpeed report showed
 // `track-user-event` was still in the critical request chain at 2.7s.
 const scheduleIdle = (cb: () => void, delayMs = 0) => {

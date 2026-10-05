@@ -15,7 +15,7 @@ const GRID_COLS: Record<number, string> = {
   3: 'sm:grid-cols-2 lg:grid-cols-3',
 };
 
-/** v6.9.109 — zone A of the Today dashboard: 1–3 students to prepare for next. */
+/** v6.9.109: zone A of the Today dashboard: 1–3 students to prepare for next. */
 export const NextUpSection: React.FC<NextUpSectionProps> = ({ items, loading }) => {
   const cols = GRID_COLS[Math.min(Math.max(items.length, 1), 3)];
 

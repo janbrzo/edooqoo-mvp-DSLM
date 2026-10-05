@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * SPA Route Prerenderer — generates static HTML snapshots for SEO-critical SPA routes.
+ * SPA Route Prerenderer, generates static HTML snapshots for SEO-critical SPA routes.
  *
  * USE WHEN:
  *   - GSC reports "Discovered – currently not indexed" or "Alternate page with proper
@@ -26,7 +26,7 @@
  *   node scripts/seo/prerender-spa-routes.mjs --dist=dist --port=4173
  *
  * REQUIREMENTS:
- *   - Puppeteer (`bun add -d puppeteer`) — only needed at build time, not runtime.
+ *   - Puppeteer (`bun add -d puppeteer`): only needed at build time, not runtime.
  *   - Node 18+ (native fetch + fs/promises).
  *
  * SAFETY:
@@ -99,7 +99,7 @@ function escapeHtmlAttribute(value) {
     .replace(/>/g, '&gt;');
 }
 
-// Sprint 2 (S2-A) — head metadata deduplication lives in ./head-meta-dedupe.mjs
+// Sprint 2 (S2-A): head metadata deduplication lives in ./head-meta-dedupe.mjs
 // so the one-off repair script can apply the exact same transformation.
 
 function normalizeSnapshotHtml(html, route) {
@@ -162,7 +162,7 @@ function softExit(reason) {
 
 /**
  * Routes to prerender. Source: scripts/seo/seo-route-manifest.mjs.
- * Only public informational/SEO routes — never auth-gated app routes.
+ * Only public informational/SEO routes, never auth-gated app routes.
  */
 const SEO_ROUTES = getPrerenderRoutes({ root: ROOT });
 const SEO_ROUTE_SET = new Set(
@@ -218,7 +218,7 @@ async function validateCompletedSnapshotSet() {
     if (h1Count !== 1) {
       issues.push(`${route}: expected one H1, found ${h1Count}`);
     }
-    // Sprint 2 (S2-A) — duplicated description tags must never ship again.
+    // Sprint 2 (S2-A): duplicated description tags must never ship again.
     if (descriptionCount !== 1) {
       issues.push(`${route}: expected one meta description, found ${descriptionCount}`);
     }
@@ -397,7 +397,7 @@ async function main() {
     try {
       page = await withTimeout(browser.newPage(), 5000, 'new page');
     } catch (err) {
-      console.warn(`[prerender] FAIL ${route} attempt ${attempt}/${MAX_ROUTE_ATTEMPTS} — cannot open new page: ${err.message}`);
+      console.warn(`[prerender] FAIL ${route} attempt ${attempt}/${MAX_ROUTE_ATTEMPTS}, cannot open new page: ${err.message}`);
       await closeBrowser(browser);
       try {
         browser = await launchBrowser();
@@ -425,7 +425,7 @@ async function main() {
       });
       const resp = await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 15000 });
       if (!resp || !resp.ok()) {
-        console.warn(`[prerender] SKIP ${route} attempt ${attempt}/${MAX_ROUTE_ATTEMPTS} — status ${resp?.status() ?? 'no-response'}`);
+        console.warn(`[prerender] SKIP ${route} attempt ${attempt}/${MAX_ROUTE_ATTEMPTS}, status ${resp?.status() ?? 'no-response'}`);
         return false;
       }
       const expectedCanonical = `${SITE_ORIGIN}${route === '/' ? '/' : route}`;
@@ -480,7 +480,7 @@ async function main() {
       );
       return true;
     } catch (err) {
-      console.warn(`[prerender] FAIL ${route} attempt ${attempt}/${MAX_ROUTE_ATTEMPTS} — ${err.message}`);
+      console.warn(`[prerender] FAIL ${route} attempt ${attempt}/${MAX_ROUTE_ATTEMPTS}, ${err.message}`);
       if (/detached|connection|timeout/i.test(err.message)) {
         restartBrowser = true;
       }
@@ -515,7 +515,7 @@ async function main() {
         rendered = await renderRoute(route, attempt);
         if (rendered) break;
         if (attempt < MAX_ROUTE_ATTEMPTS) {
-          console.warn(`[prerender] RETRY ${route} — next attempt ${attempt + 1}/${MAX_ROUTE_ATTEMPTS}`);
+          console.warn(`[prerender] RETRY ${route}: next attempt ${attempt + 1}/${MAX_ROUTE_ATTEMPTS}`);
         }
       }
       if (rendered) {

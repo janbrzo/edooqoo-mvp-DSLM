@@ -1,5 +1,5 @@
 /**
- * useCanonical — keeps <link rel="canonical" id="dynamic-canonical"> in sync with the
+ * useCanonical: keeps <link rel="canonical" id="dynamic-canonical"> in sync with the
  * current SPA route. Mounted once via <RouteCanonicalUpdater />. Also exposes setNoindex
  * helpers used by NotFound / Login.
  *

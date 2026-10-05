@@ -24,7 +24,7 @@ export const StudentRequiredModal: React.FC<StudentRequiredModalProps> = ({
             <div className="p-2 bg-amber-100 rounded-full">
               <UserCheck className="h-5 w-5 text-amber-600" />
             </div>
-            <DialogTitle>{featureName} — Student Required</DialogTitle>
+            <DialogTitle>{featureName}: Student Required</DialogTitle>
           </div>
           <DialogDescription className="text-left">
             {description || `The "${featureName}" feature is available when a worksheet is assigned to a student. Use the student selector (👥 icon) in the worksheet header to assign this worksheet to a student.`}

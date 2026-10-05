@@ -20,7 +20,7 @@ export function plural(n: number, noun: string): string {
 }
 
 /**
- * v6.9.109 — Today dashboard header: greeting + one-line context + the only
+ * v6.9.109: Today dashboard header: greeting + one-line context + the only
  * secondary action on the page (Add student).
  */
 export const DashboardHeader: React.FC<DashboardHeaderProps> = ({

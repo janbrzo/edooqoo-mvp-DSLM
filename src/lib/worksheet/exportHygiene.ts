@@ -13,7 +13,7 @@ export const KEEP_IN_EXPORT = { 'data-keep-in-export': 'true' } as const;
 
 /**
  * Structural safety net: any application control that reached the export
- * without being tagged. Applied to PDF exports only — the standalone HTML
+ * without being tagged. Applied to PDF exports only; the standalone HTML
  * export stays attribute-driven so its injected navigation keeps working.
  */
 export const INTERACTIVE_SELECTOR = [

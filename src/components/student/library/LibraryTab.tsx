@@ -1,8 +1,8 @@
 /**
- * LibraryTab — the Library tab composition (v6.9.111, M6 step 3).
+ * LibraryTab: the Library tab composition (v6.9.111, M6 step 3).
  *
  * Answers one question: "where is the material I already used, and how do I
- * reuse it fast?". The tab owns no data and no rules — it receives already
+ * reuse it fast?". The tab owns no data and no rules; it receives already
  * built, filtered and sorted items from the page and renders the section
  * switcher, the toolbar, worksheet rows, server pagination and the collapsed
  * Deleted section.

@@ -1,5 +1,5 @@
 /**
- * modelHealth — pure maturity heuristic for the Learning model cockpit.
+ * modelHealth: pure maturity heuristic for the Learning model cockpit.
  * Counts how many learning signals feed the DSLM. Display-only; never
  * used by generation or evaluation logic.
  */

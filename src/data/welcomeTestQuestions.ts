@@ -2,15 +2,15 @@
  * Welcome Test Questions - 45 predefined questions across 7 sections
  * This is the FULL version (largest of 3 planned options)
  *
- * Plan v6.0 — Question Map (58 questions across 5 learning-design goals)
+ * Plan v6.0: Question Map (58 questions across 5 learning-design goals)
  * ────────────────────────────────────────────────────────────────────────
- * Goal A — Latent learning goal: q3, q3c, q17b, q41, q41b
- * Goal B — Skill diagnosis: q1, q16-q19, q16s, q18l, q20-q40 (skill items)
- * Goal C — Engagement / effort: q5, q5c, q9, q10, q13b, q43
- * Goal D — Learning Pacing profile: q4, q5b, q7, q13b, q13c, q14, q41b
- * Goal E — Teacher pedagogy hints: q7b, q8, q12, q13, q40, q42, q44, q45
+ * Goal A: Latent learning goal: q3, q3c, q17b, q41, q41b
+ * Goal B: Skill diagnosis: q1, q16-q19, q16s, q18l, q20-q40 (skill items)
+ * Goal C: Engagement / effort: q5, q5c, q9, q10, q13b, q43
+ * Goal D: Learning Pacing profile: q4, q5b, q7, q13b, q13c, q14, q41b
+ * Goal E: Teacher pedagogy hints: q7b, q8, q12, q13, q40, q42, q44, q45
  *
- * Triangulation rules (anti-social-desirability — applied in
+ * Triangulation rules (anti-social-desirability: applied in
  * supabase/functions/process-welcome-test/index.ts):
  *   - q3c (latent_goal) overrides q3 (motivation_type) on conflict
  *   - q5c (homework_commitment) overrides q5 (weekly_study_time) on conflict
@@ -73,7 +73,7 @@ const aboutYouQuestions: WelcomeTestQuestionDef[] = [
     question_type: 'preference_choice',
     question_text: 'What is your main reason for learning English?',
     options: [
-      'I need it for work — meetings, emails, presentations',
+      'I need it for work, meetings, emails, presentations',
       'I am preparing for an exam (IELTS, Cambridge, etc.)',
       'I want to travel and talk freely',
       'I want to watch films and read books without subtitles',
@@ -117,13 +117,13 @@ const aboutYouQuestions: WelcomeTestQuestionDef[] = [
       mapping: { '0': 'work_formal', '1': 'travel', '2': 'online_informal', '3': 'social', '4': 'content_consumption', '5': 'professional_field' },
     },
   },
-  // Q3c: Latent goal — indirect triangulation (gap A1, social-desirability bypass)
+  // Q3c: Latent goal, indirect triangulation (gap A1, social-desirability bypass)
   {
     id: 'wt_q3c',
     section: 'about_you',
     question_type: 'scenario_reaction',
     question_text: 'Imagine you wake up 2 years from now and your English is amazing. Which scenario would feel MOST satisfying?',
-    description: 'Pick the one that genuinely feels most rewarding — not the one that sounds most impressive.',
+    description: 'Pick the one that genuinely feels most rewarding; not the one that sounds most impressive.',
     options: [
       'I confidently lead meetings with international clients',
       'I watch Netflix shows without subtitles, effortlessly',
@@ -214,7 +214,7 @@ const aboutYouQuestions: WelcomeTestQuestionDef[] = [
       'I do it carefully, even if it takes an hour',
       'I message the teacher that I didn\'t make it and will do it later',
       'I start it but stop after about 10 minutes',
-      'I already did it earlier — I don\'t leave things until the last minute',
+      'I already did it earlier; I don\'t leave things until the last minute',
     ],
     scoring_logic: 'Real behavior under low-motivation pressure. Stronger predictor of homework completion than self-rated commitment.',
     detected_trait: {
@@ -247,7 +247,7 @@ const aboutYouQuestions: WelcomeTestQuestionDef[] = [
     question_type: 'self_assessment',
     question_text: 'How do you feel about making mistakes in English?',
     options: [
-      'I do not mind — that is how you learn',
+      'I do not mind; that is how you learn',
       'I prefer not to, but I can handle it',
       'I feel shy, but I keep going',
       'I avoid speaking because I fear mistakes',
@@ -265,16 +265,16 @@ const aboutYouQuestions: WelcomeTestQuestionDef[] = [
       },
     },
   },
-  // Q7b: Correction preference (gap E1 — how teacher should correct speech)
+  // Q7b: Correction preference (gap E1: how teacher should correct speech)
   {
     id: 'wt_q7b',
     section: 'about_you',
     question_type: 'preference_choice',
     question_text: 'When you make a mistake while speaking, how do you want your teacher to react?',
     options: [
-      'Correct me immediately — I want to know right away',
+      'Correct me immediately: I want to know right away',
       'Take notes and tell me after I finish my thought',
-      'Only correct serious mistakes — small ones discourage me',
+      'Only correct serious mistakes, small ones discourage me',
       'Explain the rule every time I make a mistake',
       'Send me a written summary after the lesson',
     ],
@@ -398,14 +398,14 @@ const experienceQuestions: WelcomeTestQuestionDef[] = [
       mapping: { '0': 'high', '1': 'medium', '2': 'low', '3': 'high' },
     },
   },
-  // Q13c: Plateau response — CRITICAL for Pacing (gap D1, B1-B2 wall behavior)
+  // Q13c: Plateau response, CRITICAL for Pacing (gap D1, B1-B2 wall behavior)
   {
     id: 'wt_q13c',
     section: 'experience',
     question_type: 'scenario_reaction',
     question_text: "You've been studying English for 6 months and you feel like you're not improving. What do you do?",
     options: [
-      'Push harder — more hours, more material',
+      'Push harder: more hours, more material',
       'Change the method, teacher, or approach',
       'Take a break for a week or two',
       'Accept the plateau as part of the process and keep going',
@@ -458,7 +458,7 @@ const scenarioQuestions: WelcomeTestQuestionDef[] = [
       'I struggle to understand and need to translate most of it',
       'I don\'t try to understand, I use ChatGPT',
     ],
-    scoring_logic: 'Behavioral: reading comprehension strategy + self-reported coping. NOT a skill test — detects reading_strategy trait for Learning Path.',
+    scoring_logic: 'Behavioral: reading comprehension strategy + self-reported coping. NOT a skill test, detects reading_strategy trait for Learning Path.',
     detected_trait: {
       trait_name: 'reading_strategy',
       mapping: {
@@ -512,7 +512,7 @@ const scenarioQuestions: WelcomeTestQuestionDef[] = [
     id: 'wt_q18',
     section: 'scenarios',
     question_type: 'multiple_choice',
-    question_text: 'Read this short dialogue and answer the question below.\n\nA: "Hi, I tried logging in this morning, but the system kept saying my password was wrong."\nB: "I see — and did you try the reset link?"\nA: "Yes, three times. The reset email never arrived, and now I am locked out completely."\nB: "Okay, that explains it. I will create a new account for you and migrate your old data this afternoon."\n\nWhat will B do to solve A\'s problem?',
+    question_text: 'Read this short dialogue and answer the question below.\n\nA: "Hi, I tried logging in this morning, but the system kept saying my password was wrong."\nB: "I see: and did you try the reset link?"\nA: "Yes, three times. The reset email never arrived, and now I am locked out completely."\nB: "Okay, that explains it. I will create a new account for you and migrate your old data this afternoon."\n\nWhat will B do to solve A\'s problem?',
     options: [
       'Send another password reset email',
       'Unlock the existing account',
@@ -547,8 +547,8 @@ const scenarioQuestions: WelcomeTestQuestionDef[] = [
     id: 'wt_q16s',
     section: 'scenarios',
     question_type: 'speaking_record',
-    question_text: 'Describe a problem with your hotel room — speaking task.\n\nImagine you are at the reception. Pick one problem (broken AC, dirty bathroom, loud neighbours, missing towels) and record yourself explaining it and asking for help.',
-    description: 'Record up to 60 seconds. Speak naturally — fluency and pronunciation matter more than perfect grammar.',
+    question_text: 'Describe a problem with your hotel room, speaking task.\n\nImagine you are at the reception. Pick one problem (broken AC, dirty bathroom, loud neighbours, missing towels) and record yourself explaining it and asking for help.',
+    description: 'Record up to 60 seconds. Speak naturally: fluency and pronunciation matter more than perfect grammar.',
     element_type: 'speaking',
     max_recording_seconds: 60,
     scoring_logic: 'Speaking fluency, pronunciation, pragmatic appropriateness. Compare with written version (Q16).',
@@ -1078,10 +1078,10 @@ export const WELCOME_TEST_TOTAL_QUESTIONS = ALL_WELCOME_TEST_QUESTIONS.length;
 // Short version exports removed - always full test
 
 // =====================================================
-// Plan v6.0 — EQUIVALENT-FORM SKILL VARIANTS (Form B)
+// Plan v6.0: EQUIVALENT-FORM SKILL VARIANTS (Form B)
 // =====================================================
 // Profiling questions (About You, Experience, Goals, Communication-style)
-// stay identical across attempts — we want to measure trait evolution.
+// stay identical across attempts; we want to measure trait evolution.
 // Skill questions (Grammar, Vocabulary, Reading, Listening) are swapped
 // for equivalent items with the same nano_skill and difficulty_level so
 // the student does not face the exact same item twice (test-effect).
@@ -1212,7 +1212,7 @@ export const WELCOME_TEST_SKILL_VARIANTS_B: Record<string, WelcomeTestQuestionDe
   },
   wt_q32: {
     id: 'wt_q32', section: 'vocabulary', question_type: 'multiple_choice',
-    question_text: 'The meeting was cancelled — let\'s ___ it off until next week.',
+    question_text: 'The meeting was cancelled, let\'s ___ it off until next week.',
     options: ['put', 'take', 'set', 'go'],
     correct_answer: 'put',
     element_type: 'vocabulary', difficulty_level: 2,
@@ -1244,7 +1244,7 @@ export const WELCOME_TEST_SKILL_VARIANTS_B: Record<string, WelcomeTestQuestionDe
   },
   wt_q35: {
     id: 'wt_q35', section: 'vocabulary', question_type: 'multiple_choice',
-    question_text: 'Don\'t worry about the small stuff — it\'s a ___.',
+    question_text: 'Don\'t worry about the small stuff; it\'s a ___.',
     options: [
       'piece of cake',
       'cup of tea',
@@ -1259,7 +1259,7 @@ export const WELCOME_TEST_SKILL_VARIANTS_B: Record<string, WelcomeTestQuestionDe
   // Reading
   wt_q18: {
     id: 'wt_q18', section: 'scenarios', question_type: 'multiple_choice',
-    question_text: 'Read this short dialogue and answer: What is the main problem the speakers are discussing?\n\nA: "I haven\'t received the refund yet — it\'s been almost a month."\nB: "I\'m sorry to hear that. Could you give me your order number?"\nA: "I sent it twice already. Your team keeps saying it will be processed soon."\nB: "Let me speak with our finance team and get back to you today."',
+    question_text: 'Read this short dialogue and answer: What is the main problem the speakers are discussing?\n\nA: "I haven\'t received the refund yet; it\'s been almost a month."\nB: "I\'m sorry to hear that. Could you give me your order number?"\nA: "I sent it twice already. Your team keeps saying it will be processed soon."\nB: "Let me speak with our finance team and get back to you today."',
     options: [
       'A delayed refund',
       'A wrong product delivered',
@@ -1285,7 +1285,7 @@ export const WELCOME_TEST_SKILL_VARIANTS_B: Record<string, WelcomeTestQuestionDe
     scoring_logic: 'Reading comprehension - inference, not just surface-level understanding. B2 level.',
     nano_skill: 'ns.reading.inference_from_text',
   },
-  // Listening — Form B reuses same audio asset; only options differ slightly to avoid memory
+  // Listening: Form B reuses same audio asset; only options differ slightly to avoid memory
   wt_q18l: {
     id: 'wt_q18l', section: 'scenarios', question_type: 'listening_comprehension',
     question_text: 'Listen to this short conversation and answer: What did the customer change about their order?',

@@ -1,4 +1,4 @@
-// v6.9.62 P6 — Opt-in "Paste notes about student" section embedded in
+// v6.9.62 P6: Opt-in "Paste notes about student" section embedded in
 // AddStudentDialog. Calls extract-student-profile edge function and renders
 // ExtractionPreviewCard. Does NOT touch the DB; commit happens on form submit.
 import React, { useState } from 'react';
@@ -84,8 +84,8 @@ export const PasteIntakeSection: React.FC<Props> = ({
       });
       if (error) {
         const status = (error as any)?.context?.status;
-        if (status === 429) toast.error('Rate limited — please wait a minute.');
-        else if (status === 402) toast.error('AI credits exhausted — add credits in workspace settings.');
+        if (status === 429) toast.error('Rate limited: please wait a minute.');
+        else if (status === 402) toast.error('AI credits exhausted: add credits in workspace settings.');
         else toast.error('AI extraction failed. You can still create the student.');
         onExtractionChange(null);
         return;
@@ -128,7 +128,7 @@ export const PasteIntakeSection: React.FC<Props> = ({
             Paste notes about student to set up profile (AI, optional)
           </Label>
           <p className="text-[11px] text-muted-foreground mt-0.5">
-            Drop an email, intake form, or your meeting notes — AI will extract goals, signals and level.
+            Drop an email, intake form, or your meeting notes, AI will extract goals, signals and level.
           </p>
         </div>
         <Switch checked={enabled} onCheckedChange={onEnabledChange} aria-label="Paste notes toggle" />

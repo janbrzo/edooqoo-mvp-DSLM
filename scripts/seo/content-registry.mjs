@@ -448,7 +448,7 @@ function normalizeDate(value) {
 
 function extractMetadata(html) {
   const title = (html.match(/<title[^>]*>([\s\S]*?)<\/title>/i)?.[1] || '')
-    .replace(/\s+[—|]\s+Edooqoo.*$/i, '')
+    .replace(/\s+[:\u2014|]\s+Edooqoo.*$/i, '')
     .trim();
   const description = (
     html.match(/<meta\s+name=["']description["']\s+content=["']([^"']*)["']/i)?.[1] ||

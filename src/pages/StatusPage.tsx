@@ -1,6 +1,6 @@
 /**
- * StatusPage — public status of Edooqoo's components over the last 24 hours.
- * Calls the get_public_status() RPC. Never reveals error details — only a
+ * StatusPage: public status of Edooqoo's components over the last 24 hours.
+ * Calls the get_public_status() RPC. Never reveals error details, only a
  * status (operational / degraded / down) and a count.
  */
 import { useEffect, useState } from 'react';
@@ -41,7 +41,7 @@ export default function StatusPage() {
   const [updatedAt, setUpdatedAt] = useState<Date | null>(null);
 
   useEffect(() => {
-    document.title = 'System Status — Edooqoo';
+    document.title = 'System Status | Edooqoo';
     let metaDesc = document.querySelector('meta[name="description"]');
     if (!metaDesc) {
       metaDesc = document.createElement('meta');
@@ -112,7 +112,7 @@ export default function StatusPage() {
                   <ul className="text-xs text-red-700 dark:text-red-300 space-y-1">
                     {modelIssues.map((m) => (
                       <li key={`${m.provider}-${m.model}`}>
-                        <span className="font-mono">{m.provider}</span> · {m.model} — {Number(m.count)} incident{Number(m.count) === 1 ? '' : 's'} (last {new Date(m.last_seen).toLocaleTimeString()})
+                        <span className="font-mono">{m.provider}</span> · {m.model}: {Number(m.count)} incident{Number(m.count) === 1 ? '' : 's'} (last {new Date(m.last_seen).toLocaleTimeString()})
                       </li>
                     ))}
                   </ul>

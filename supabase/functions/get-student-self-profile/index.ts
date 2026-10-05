@@ -1,4 +1,4 @@
-// get-student-self-profile — v5.2
+// get-student-self-profile: v5.2
 // Reads the latest Self-Profile entries for a student in the hub flow.
 // Body: { teacherToken, studentEmail }
 // Output: { fields: { [fieldName]: string }, studentId }

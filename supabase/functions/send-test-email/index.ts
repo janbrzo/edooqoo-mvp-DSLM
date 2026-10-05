@@ -37,7 +37,7 @@ serve(async (req) => {
 
     const reminderBody = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-        <h2 style="color: #7c3aed;">⏰ Friendly reminder — Welcome Test</h2>
+        <h2 style="color: #7c3aed;">⏰ Friendly reminder: Welcome Test</h2>
         <p>Hello,</p>
         <p><strong>${teacherName || "Your teacher"}</strong> noticed you haven't completed the Welcome Test yet.</p>
         <p>It only takes 20–30 minutes and helps your teacher tailor every lesson to you.</p>
@@ -56,7 +56,7 @@ serve(async (req) => {
     const emailBody = isWelcomeTest
       ? `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-        <h2 style="color: #7c3aed;">🎯 Welcome Test${isRetake ? ` — Retake ${retakeN}` : ""}</h2>
+        <h2 style="color: #7c3aed;">🎯 Welcome Test${isRetake ? `, Retake ${retakeN}` : ""}</h2>
         ${retakeBanner}
         <p>Hello,</p>
         <p><strong>${teacherName || "Your teacher"}</strong> has invited you to take a Welcome Test to help personalize your English learning experience.</p>
@@ -66,7 +66,7 @@ serve(async (req) => {
             <li>Questions about your learning style and preferences</li>
             <li>Grammar and vocabulary assessment</li>
             <li>Takes 20-30 minutes</li>
-            <li>No grades — this helps your teacher understand you better</li>
+            <li>No grades: this helps your teacher understand you better</li>
           </ul>
         </div>
         <a href="${shareUrl}" 
@@ -74,7 +74,7 @@ serve(async (req) => {
           Start Welcome Test
         </a>
         <p style="color: #6b7280; font-size: 14px; margin-top: 30px;">
-          <strong>Tip:</strong> Answer honestly — there are no wrong answers for the profile questions. If you don't know a grammar answer, just click "I don't know".
+          <strong>Tip:</strong> Answer honestly: there are no wrong answers for the profile questions. If you don't know a grammar answer, just click "I don't know".
         </p>
         <p style="color: #6b7280; font-size: 12px; margin-top: 20px;">
           Or copy and paste this URL: ${shareUrl}

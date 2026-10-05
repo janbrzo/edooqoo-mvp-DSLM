@@ -41,7 +41,7 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const stored = localStorage.getItem(DEMO_STORAGE_KEY);
     if (stored) {
       setIsDemoMode(true);
-      // v6.9.7 — async demo build (lazy chunk for ~150 KiB demo worksheet content).
+      // v6.9.7: async demo build (lazy chunk for ~150 KiB demo worksheet content).
       buildDemoData(stored).then(setDemoData);
     }
   }, []);

@@ -1,7 +1,7 @@
 import { formatGoal } from './formatGoal';
 
 /**
- * quickAccess — pure helpers behind the dashboard quick student access
+ * quickAccess: pure helpers behind the dashboard quick student access
  * (v6.9.110: header search + recent pills + inline All students list).
  *
  * Kept free of React/Supabase so the matching rules can be unit-tested and

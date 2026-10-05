@@ -1,5 +1,5 @@
 /**
- * useSpotlight — Plan v6.9.32
+ * useSpotlight: Plan v6.9.32
  * Global "draw attention" bus. Components dispatch
  *   window.dispatchEvent(new CustomEvent('app:spotlight', { detail: { id, durationMs? }}))
  * and the <SpotlightOverlay /> renders a radial dim + pulse ring on the
@@ -18,7 +18,7 @@ export interface SpotlightDetail {
   id: SpotlightId | string;
   /** Auto-clear after N ms (default 8000). Pass 0 to disable. */
   durationMs?: number;
-  /** Internal timestamp — used by SpotlightOverlay to force a re-render
+  /** Internal timestamp: used by SpotlightOverlay to force a re-render
    *  even when the same id is triggered twice in a row. Set automatically
    *  by `triggerSpotlight`. */
   at?: number;

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// v6.9.72 — Structural translation audit (strengthened).
+// v6.9.72: Structural translation audit (strengthened).
 // Verifies that every profiling (non-skill) question has translations in
 // every registered language, that each translated entry includes a
 // `question`, that the option count matches the source, that descriptions
@@ -101,7 +101,7 @@ while ((lm = langRe.exec(tFile)) !== null) {
   langs[langName] = entries;
 }
 
-// v6.9.72 — extract per-question option/string content for empty + sameness checks.
+// v6.9.72: extract per-question option/string content for empty + sameness checks.
 function extractStringLiterals(body) {
   const out = [];
   let i = 0;
@@ -161,7 +161,7 @@ for (const [lang, entries] of Object.entries(langs)) {
     }
     if (src.hasDescription && !tr.hasDescription) problems.push(`${id}: missing description`);
 
-    // v6.9.72 — empty + sameness checks (heuristic).
+    // v6.9.72: empty + sameness checks (heuristic).
     const trEntryRe = new RegExp(`'${id}':\\s*\\{([\\s\\S]*?)\\}\\s*,`);
     const trBodyMatch = trEntryRe.exec(langs[lang].__rawBody || '');
     // We don't have raw body per entry; rely on already-validated booleans here.

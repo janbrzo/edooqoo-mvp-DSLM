@@ -85,7 +85,7 @@ const steps = [
 
 const faqItems = [
   { q: "Is first setup the same as 1-Minute Prep?", a: "No. First setup is separate. You create the account, add a student, add known context or send the Welcome Test, then build the signal base that moves recurring weekly prep toward 1 minute per student." },
-  { q: "What emails will I receive after signing up?", a: "Two emails. First, a confirmation email from Supabase (no-reply) with an activation link — click it to activate your account. After confirming, you'll receive a branded welcome email from hello@edooqoo.com with quick-start guidance and a link to your dashboard." },
+  { q: "What emails will I receive after signing up?", a: "Two emails. First, a confirmation email from Supabase (no-reply) with an activation link, click it to activate your account. After confirming, you'll receive a branded welcome email from hello@edooqoo.com with quick-start guidance and a link to your dashboard." },
   { q: "Do students need to create accounts?", a: "No. Students access everything via links or the Student Hub portal using just their email. No account creation, no password, no app installation needed." },
   { q: "Can I skip the Welcome Test?", a: "Yes. The Welcome Test is optional. You can start generating worksheets immediately by manually setting the student's CEFR level. The test is recommended for new students where you want a detailed skill assessment." },
   { q: "How many worksheets can I generate?", a: "Free plan: 2 worksheets. Side-Gig ($9/mo): 15 worksheets/month. Full-Time (from $19/mo): 30-90 worksheets/month. Each worksheet can contain up to 12 exercises." },
@@ -156,10 +156,10 @@ const HowItWorks = () => {
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
-        <title>How 1-Minute Prep Works — Edooqoo Student Learning Loop</title>
+        <title>How 1-Minute Prep Works | Edooqoo Student Learning Loop</title>
         <meta name="description" content="See how Edooqoo's 1-Minute Prep loop connects student context, Live Session answers, homework, teacher notes, flashcards and DSLM recommendations for the next lesson." />
         <link rel="canonical" href="https://edooqoo.com/how-it-works" />
-        <meta property="og:title" content="How 1-Minute Prep Works — Edooqoo Student Learning Loop" />
+        <meta property="og:title" content="How 1-Minute Prep Works | Edooqoo Student Learning Loop" />
         <meta property="og:description" content="See how Edooqoo's 1-Minute Prep loop connects student context, Live Session answers, homework, teacher notes, flashcards and DSLM recommendations for the next lesson." />
         <meta property="og:url" content="https://edooqoo.com/how-it-works" />
         <meta property="og:type" content="article" />
@@ -238,7 +238,7 @@ const HowItWorks = () => {
           <p className="mb-2 text-lg font-semibold text-foreground">Ready to get started?</p>
           <p className="mb-4 text-muted-foreground">Sign up free, add a student profile, and start building the context for 1-Minute Prep.</p>
           <Link to="/signup" state={fromState} className="inline-block rounded-lg bg-primary px-6 py-3 font-semibold text-primary-foreground transition-opacity hover:opacity-90">
-            Try Edooqoo Free — 2 Worksheets Included
+            Try Edooqoo Free: 2 Worksheets Included
           </Link>
         </div>
       </div>

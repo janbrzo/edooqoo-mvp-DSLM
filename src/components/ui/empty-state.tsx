@@ -13,7 +13,7 @@ export interface EmptyStateProps {
 }
 
 /**
- * P9 — Unified empty state for lists, tables, dashboards.
+ * P9: Unified empty state for lists, tables, dashboards.
  * Replaces ad-hoc "No data" markup scattered across the app.
  */
 export const EmptyState: React.FC<EmptyStateProps> = ({

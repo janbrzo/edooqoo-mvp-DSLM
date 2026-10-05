@@ -16,7 +16,7 @@ const severityMeta = (s: TeacherAlert['severity']) => {
 };
 
 /**
- * Closed-Loop Company — full teacher alerts inbox.
+ * Closed-Loop Company: full teacher alerts inbox.
  * Lists all non-dismissed alerts with details + CTA actions.
  */
 export default function TeacherAlertsPage() {

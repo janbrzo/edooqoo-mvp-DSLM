@@ -1,5 +1,5 @@
 /**
- * v6.9.14 — Reusable type-to-confirm delete modal.
+ * v6.9.14: Reusable type-to-confirm delete modal.
  * Used for destructive ops where accidental click would lose user work
  * (Suggestion #1, Curriculum Phase, etc.).
  */

@@ -123,16 +123,16 @@ const CalendarLogHistoryPage = () => {
                   <span className="font-medium">{humanizeAction(log.action)}</span>
                   <span className="text-muted-foreground ml-1">by {log.actor}</span>
                   {log.details?.student_name && (
-                    <span className="text-muted-foreground ml-1">— Student: {log.details.student_name}</span>
+                    <span className="text-muted-foreground ml-1">Student: {log.details.student_name}</span>
                   )}
                   {log.details?.slot_date && (
-                    <span className="text-muted-foreground ml-1">— Date: {log.details.slot_date}</span>
+                    <span className="text-muted-foreground ml-1">Date: {log.details.slot_date}</span>
                   )}
                   {log.details?.start_time && (
                     <span className="text-muted-foreground"> at {String(log.details.start_time).slice(0, 5)}</span>
                   )}
                   {log.details?.old_status && log.details?.new_status && (
-                    <span className="text-muted-foreground ml-1">— {log.details.old_status} → {log.details.new_status}</span>
+                    <span className="text-muted-foreground ml-1">{log.details.old_status} → {log.details.new_status}</span>
                   )}
                   {log.details?.student_email && (
                     <span className="text-muted-foreground ml-1">({log.details.student_email})</span>
