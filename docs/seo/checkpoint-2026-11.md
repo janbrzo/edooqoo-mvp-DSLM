@@ -72,6 +72,6 @@ If at least 6 of the 10 rewrites improved position by 2 or more places or beat t
 ## 6. Open items waiting for the owner
 
 - API key for the paid verifier layer (`ANTHROPIC_API_KEY` or `ant auth login`); cost estimate: about 3 to 6 USD for the 10 rewrites, 15 to 30 USD for all 53 "reframed" posts; set a monthly limit in the Console first. Until then no page is `verified` and no quality label is shown.
-- Martha: "Built with Martha" stays (decided 2026-10-05). Still open: "15 ESL games tested by Martha" (games page copy and meta description). Keep only if such testing happened.
+- Martha: "Built with Martha" stays (decided 2026-10-05). Resolved: the games page now says "designed with Martha's criteria".
 - Off-site and infrastructure: follow `docs/seo/off-site-and-infra-runbook.md` (Bing Webmaster Tools, IndexNow submit, brand mentions, mention log). The Cloudflare Worker is deliberately not being deployed for now (hosting change, small gain). GSC API token for `npm run seo:fetch-gsc-performance` is still open.
 - Possible title and description test for `/modal-verbs-worksheets-esl` (364 impressions, position 8.3, 1 click) and `/features/flashcards` (90 impressions, position 10.4, 0 clicks).

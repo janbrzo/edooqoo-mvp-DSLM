@@ -44,7 +44,7 @@ export const SEO_META = {
   eslGamesForTeachers: {
     title: "ESL Games for Teachers — 15 Tested Activities",
     description:
-      "15 ESL games tested by Martha (10 yrs ESL). Speaking, grammar, vocab — each game pairs with an AI-generated Edooqoo worksheet.",
+      "15 ESL games designed with Martha's criteria (10 yrs ESL). Speaking, grammar, vocab — each game pairs with an AI-generated Edooqoo worksheet.",
     path: "/blog/esl-games-for-teachers",
   },
   teachEnglishOnlineGuide: {
