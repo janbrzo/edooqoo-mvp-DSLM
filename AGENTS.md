@@ -13,6 +13,7 @@ One rule per entry, with a one-line why. Replace an existing rule instead of add
 ## Answers & Evaluation
 
 - All worksheet text answer checking goes through `src/lib/answers/matchAnswer.ts`; an uncertain match returns `review`, never `wrong` — because false negatives destroy learner trust and DSLM accuracy.
+- "Homework waiting for review" is decided only by `isHomeworkAwaitingReview` in `src/lib/homework/reviewState.ts`, and every review entry point links to `/homework/:id/review` — because the dashboard, timeline and homework list used to disagree and the review page was unreachable after the first review.
 
 ## Runtime Safety
 

@@ -657,6 +657,7 @@
       ],
       "navigateTargets": [
         "/",
+        "/login",
         "/worksheet-expired"
       ]
     },
@@ -756,17 +757,21 @@
         "fetchTargets": []
       },
       "hooks": [
+        "useAuthFlow",
         "useCallback",
+        "useDemoContext",
         "useEffect",
         "useHardLightSurface",
         "useNavigate",
         "useParams",
-        "useState"
+        "useQueryClient",
+        "useState",
+        "useTeacherAuthRedirect"
       ],
       "userActions": [],
       "navigateTargets": [
         "/dashboard",
-        "/login"
+        "/signup"
       ]
     },
     {
@@ -1083,6 +1088,7 @@
         "useNavigate",
         "useState",
         "useStudents",
+        "useTeacherAuthRedirect",
         "useTokenSystem"
       ],
       "userActions": [
@@ -1106,8 +1112,7 @@
         "/calendar/logs",
         "/calendar/settings",
         "/calendar/settings#gcal",
-        "/dashboard",
-        "/login"
+        "/dashboard"
       ]
     },
     {
@@ -1147,6 +1152,7 @@
         "useNavigate",
         "useRef",
         "useState",
+        "useTeacherAuthRedirect",
         "useTokenSystem"
       ],
       "userActions": [
@@ -1155,8 +1161,7 @@
         "handleDisconnectGcal"
       ],
       "navigateTargets": [
-        "/calendar",
-        "/login"
+        "/calendar"
       ]
     },
     {
@@ -1186,15 +1191,14 @@
         "useEffect",
         "useNavigate",
         "useState",
+        "useTeacherAuthRedirect",
         "useTokenSystem"
       ],
       "userActions": [
         "handleCreate",
         "handleRevoke"
       ],
-      "navigateTargets": [
-        "/login"
-      ]
+      "navigateTargets": []
     },
     {
       "path": "/calendar/logs",
@@ -1220,12 +1224,12 @@
         "useMemo",
         "useNavigate",
         "useState",
-        "useStudents"
+        "useStudents",
+        "useTeacherAuthRedirect"
       ],
       "userActions": [],
       "navigateTargets": [
-        "/calendar",
-        "/login"
+        "/calendar"
       ]
     },
     {
@@ -3596,6 +3600,7 @@
         "useNavigate",
         "useState",
         "useStudents",
+        "useTeacherAuthRedirect",
         "useTokenSystem"
       ],
       "actions": [
@@ -3619,8 +3624,7 @@
         "/calendar/logs",
         "/calendar/settings",
         "/calendar/settings#gcal",
-        "/dashboard",
-        "/login"
+        "/dashboard"
       ],
       "dataDependencies": {
         "tables": [
@@ -3676,8 +3680,7 @@
           "/calendar/logs",
           "/calendar/settings",
           "/calendar/settings#gcal",
-          "/dashboard",
-          "/login"
+          "/dashboard"
         ]
       },
       "routes": [
@@ -3734,6 +3737,7 @@
         "useNavigate",
         "useRef",
         "useState",
+        "useTeacherAuthRedirect",
         "useTokenSystem"
       ],
       "actions": [
@@ -3742,8 +3746,7 @@
         "handleDisconnectGcal"
       ],
       "navigateTargets": [
-        "/calendar",
-        "/login"
+        "/calendar"
       ],
       "dataDependencies": {
         "tables": [
@@ -3791,8 +3794,7 @@
           "handleDisconnectGcal"
         ],
         "navigationTargets": [
-          "/calendar",
-          "/login"
+          "/calendar"
         ]
       },
       "routes": [
@@ -4541,20 +4543,29 @@
           "value": "savingComment",
           "setter": "setSavingComment",
           "initial": "null"
+        },
+        {
+          "value": "loadFailed",
+          "setter": "setLoadFailed",
+          "initial": "false"
         }
       ],
       "hooks": [
+        "useAuthFlow",
         "useCallback",
+        "useDemoContext",
         "useEffect",
         "useHardLightSurface",
         "useNavigate",
         "useParams",
-        "useState"
+        "useQueryClient",
+        "useState",
+        "useTeacherAuthRedirect"
       ],
       "actions": [],
       "navigateTargets": [
         "/dashboard",
-        "/login"
+        "/signup"
       ],
       "dataDependencies": {
         "tables": [
@@ -4570,30 +4581,32 @@
       },
       "storage": [],
       "userFacingText": [
+        "&apos;s answers next to the correct ones, AI feedback on open and speaking answers, and a comment box for every exercise. One click sends the review back to the student.",
         "Add feedback for the student about this exercise...",
         "Back to Student",
+        "Back to dashboard",
         "Deadline:",
         "Exercises answered:",
+        "Homework not available",
+        "Homework review is not available in demo mode.",
+        "In your account this page shows",
         "Needs Review",
         "No student answer yet",
         "Review Sent!",
         "Reviewed",
         "Save Comment",
         "Send Review to Student",
+        "Sign up free",
         "Student has submitted",
         "Student:",
         "Submitted:",
-        "View as Student",
-        "Waiting for Student",
-        "Waiting for student to submit their answers...",
-        "Your Comment for Exercise",
-        "views"
+        "This homework may have been deleted, or the connection failed. Try again or go back to your dashboard."
       ],
       "userFacingBehavior": {
         "actionHandlers": [],
         "navigationTargets": [
           "/dashboard",
-          "/login"
+          "/signup"
         ]
       },
       "routes": [
@@ -7923,6 +7936,7 @@
       ],
       "navigateTargets": [
         "/",
+        "/login",
         "/worksheet-expired"
       ],
       "dataDependencies": {
@@ -7944,6 +7958,7 @@
         ],
         "navigationTargets": [
           "/",
+          "/login",
           "/worksheet-expired"
         ]
       },
@@ -8901,15 +8916,14 @@
         "useEffect",
         "useNavigate",
         "useState",
+        "useTeacherAuthRedirect",
         "useTokenSystem"
       ],
       "actions": [
         "handleCreate",
         "handleRevoke"
       ],
-      "navigateTargets": [
-        "/login"
-      ],
+      "navigateTargets": [],
       "dataDependencies": {
         "tables": [
           "mcp_tokens"
@@ -8949,9 +8963,7 @@
           "handleCreate",
           "handleRevoke"
         ],
-        "navigationTargets": [
-          "/login"
-        ]
+        "navigationTargets": []
       },
       "routes": [
         "/settings/mcp"
@@ -12472,6 +12484,7 @@
       ],
       "hooks": [
         "useCurriculumPhases",
+        "useDemoContext",
         "useEffect",
         "useFutureTimeline",
         "useMemo",
@@ -13592,12 +13605,12 @@
         "useMemo",
         "useNavigate",
         "useState",
-        "useStudents"
+        "useStudents",
+        "useTeacherAuthRedirect"
       ],
       "actions": [],
       "navigateTargets": [
-        "/calendar",
-        "/login"
+        "/calendar"
       ],
       "dataDependencies": {
         "tables": [],
@@ -13622,8 +13635,7 @@
       "userFacingBehavior": {
         "actionHandlers": [],
         "navigationTargets": [
-          "/calendar",
-          "/login"
+          "/calendar"
         ]
       }
     },
