@@ -27,6 +27,7 @@ import { useStudentTimeline } from '@/hooks/useStudentTimeline';
 import { useStudentTimelineSources } from '@/hooks/useStudentTimelineSources';
 import { TIMELINE_PAGE_SIZE, type TimelineFilter } from '@/lib/students/timelineEvents';
 import { useFutureTimeline } from '@/hooks/useFutureTimeline';
+import { useCurriculumPhases } from '@/hooks/dslm/useCurriculumPhases';
 import { selectPrepSuggestion, buildRationale, type PrepSuggestion } from '@/lib/students/prepPlan';
 // v6.9.111 M6.4 — Library tab (pure rules + presentational composition).
 import {
@@ -249,13 +250,24 @@ const StudentPage = () => {
     studentId: isDemoMode ? '' : id || '',
     teacherId: isDemoMode ? '' : student?.teacher_id || '',
   });
+  // Phases decide which step is "now" — Prep and the Learning plan tab share
+  // one queue order (`orderUpNext`), so both always propose the same lesson.
+  const curriculum = useCurriculumPhases({
+    studentId: isDemoMode ? '' : id || '',
+    teacherId: isDemoMode ? '' : student?.teacher_id || '',
+  });
   const prepSuggestion = useMemo(
     () =>
-      selectPrepSuggestion(futureTimeline.phaseSteps as any, futureTimeline.nextSteps as any, {
-        mainGoal: student?.main_goal ?? null,
-        focusAreas,
-      }),
-    [futureTimeline.phaseSteps, futureTimeline.nextSteps, student?.main_goal, focusAreas],
+      selectPrepSuggestion(
+        futureTimeline.phaseSteps as any,
+        futureTimeline.nextSteps as any,
+        {
+          mainGoal: student?.main_goal ?? null,
+          focusAreas,
+        },
+        curriculum.phases,
+      ),
+    [futureTimeline.phaseSteps, futureTimeline.nextSteps, student?.main_goal, focusAreas, curriculum.phases],
   );
   const prepRationale = useMemo(
     () => buildRationale(prepSuggestion, focusAreas),

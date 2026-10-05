@@ -90,6 +90,31 @@ describe('selectPrepSuggestion', () => {
     expect(result.topic).toBe('Tie winner');
   });
 
+  it('regression: agrees with the Learning plan queue across phases', () => {
+    // sequence_number restarts at 1 in every phase; the in-progress phase wins.
+    const phases = [
+      { id: 'P1', sequence_number: 1, status: 'in_progress', title: 'Meetings' },
+      { id: 'P2', sequence_number: 2, status: 'planned', title: 'Negotiation' },
+    ];
+    const result = selectPrepSuggestion(
+      [
+        row({ id: 'p2-s1', phase_id: 'P2', sequence_number: 1, suggested_topic: 'Phase 2 step 1' }),
+        row({ id: 'p1-s2', phase_id: 'P1', sequence_number: 2, suggested_topic: 'Phase 1 step 2' }),
+      ],
+      [],
+      NO_FALLBACK,
+      phases,
+    );
+    expect(result.topic).toBe('Phase 1 step 2');
+    expect(result.source).toBe('phase_step');
+    expect(result.phaseCaption).toBe('Phase 1: Meetings');
+  });
+
+  it('reports no phase caption for free steps and the fallback', () => {
+    expect(selectPrepSuggestion([], [row({ id: 'n1' })], NO_FALLBACK).phaseCaption).toBeNull();
+    expect(selectPrepSuggestion([], [], NO_FALLBACK).phaseCaption).toBeNull();
+  });
+
   it('trims text fields and defaults missing ones to empty strings', () => {
     const result = selectPrepSuggestion(
       [],
