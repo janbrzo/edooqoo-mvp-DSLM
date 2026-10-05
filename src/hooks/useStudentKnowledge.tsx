@@ -80,9 +80,15 @@ export const useStudentKnowledge = ({ studentId, teacherId }: UseStudentKnowledg
   });
 
   const tagsQuery = useQuery<string[]>({
-    queryKey: ['knowledge', 'tags', studentId, teacherId],
-    enabled: idsValid,
+    queryKey: ['knowledge', 'tags', studentId, teacherId, demoReady],
+    enabled: idsValid || demoReady,
     queryFn: async () => {
+      if (demoReady) {
+        const tags = (demoData!.knowledgeEntries as unknown as StudentKnowledgeEntry[])
+          .filter((e) => e.student_id === studentId)
+          .flatMap((e) => e.tags || []);
+        return Array.from(new Set(tags)).sort();
+      }
       const { data, error } = await supabase.rpc('get_student_tags', {
         p_student_id: studentId,
         p_teacher_id: teacherId,
