@@ -75,6 +75,8 @@ interface MacroTimelineProps {
   onMarkUsed?: (id: string) => void;
   onRegenerateOne: (id: string, comment: string) => Promise<boolean> | boolean;
   onGenerateForPhase: (phaseId: string, count: number, teacherComment: string) => Promise<boolean> | boolean;
+  /** 2026-10 — phase to expand on mount (Learning plan roadmap stepper click). */
+  initialExpandedPhaseId?: string | null;
 }
 
 const STATUS_LABEL: Record<PhaseStatus, string> = {
@@ -92,7 +94,7 @@ const StatusDot: React.FC<{ status: PhaseStatus; sequence: number }> = ({ status
 export const MacroTimeline: React.FC<MacroTimelineProps> = ({
   studentId, teacherId, suggestions, displayIndexById, generatingSteps,
   onUseSuggestion, onUseAndGenerate, onEditSuggestion, onDeleteSuggestion,
-  onRegenerateOne, onGenerateForPhase, onMarkUsed,
+  onRegenerateOne, onGenerateForPhase, onMarkUsed, initialExpandedPhaseId,
 }) => {
   const { phases, loading, generating, generatePhases, updatePhase, deletePhase, addPhase } = useCurriculumPhases({ studentId, teacherId });
   // v6.9.15c — readiness signals for "best-effort" roadmap generation warnings.
@@ -149,8 +151,8 @@ export const MacroTimeline: React.FC<MacroTimelineProps> = ({
   const dispatchAddGoal = () => {
     window.dispatchEvent(new CustomEvent('dslm:addGoal', { detail: { studentId } }));
   };
-  const [expandedPhaseId, setExpandedPhaseId] = useState<string | null>(null);
-  const [userTouchedExpand, setUserTouchedExpand] = useState(false);
+  const [expandedPhaseId, setExpandedPhaseId] = useState<string | null>(initialExpandedPhaseId ?? null);
+  const [userTouchedExpand, setUserTouchedExpand] = useState(!!initialExpandedPhaseId);
   const [editingPhase, setEditingPhase] = useState<CurriculumPhase | null>(null);
   const [editForm, setEditForm] = useState({ title: '', description: '', status: 'planned' as PhaseStatus, weeks_start: '', weeks_end: '' });
   const [deletingPhase, setDeletingPhase] = useState<CurriculumPhase | null>(null);

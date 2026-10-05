@@ -78,11 +78,6 @@ const LibraryTab = lazy(() =>
 const DSLMTab = lazy(() =>
   import('@/components/dslm/DSLMTab').then((m) => ({ default: m.DSLMTab })),
 );
-const DslmExplainerBanner = lazy(() =>
-  import('@/components/student/DslmExplainerBanner').then((m) => ({
-    default: m.DslmExplainerBanner,
-  })),
-);
 
 /**
  * v6.9.111 M7.5 — contextual tools carried over from the legacy tab strip.
@@ -119,7 +114,7 @@ const WORKSPACE_TAB_PRESENTATION = {
   prep: { label: 'Prep', Icon: Sparkles },
   timeline: { label: 'Timeline', Icon: Activity },
   library: { label: 'Library', Icon: FileText },
-  model: { label: 'Learning model', Icon: Brain },
+  model: { label: 'Learning plan', Icon: Brain },
 } satisfies Record<WorkspaceTab, { label: string; Icon: typeof Sparkles }>;
 
 const StudentPage = () => {
@@ -591,8 +586,8 @@ const StudentPage = () => {
                   <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
                   {tab === 'model' ? (
                     <>
-                      <span className="sm:hidden">Model</span>
-                      <span className="hidden sm:inline">Learning model</span>
+                      <span className="sm:hidden">Plan</span>
+                      <span className="hidden sm:inline">Learning plan</span>
                     </>
                   ) : (
                     <span>{label}</span>
@@ -793,21 +788,16 @@ const StudentPage = () => {
             </Suspense>
           </TabsContent>
 
-          {/* Learning model tab */}
+          {/* Learning plan tab (2026-10, docs/ux/learning-model-spec.md).
+              The Welcome Test and the DSLM explainer live inside the plan now
+              (setup step 2 and "How it works"), not as banners above it. */}
           <TabsContent value="model">
-            <WelcomeTestSuggestion
-              studentId={student.id}
-              teacherId={student.teacher_id}
-              studentName={student.name}
-              studentEmail={student.student_email}
-              surface="oneMinute"
-            />
             <Suspense fallback={<SectionSkeleton />}>
-            <DslmExplainerBanner teacherId={student.teacher_id} />
             <DSLMTab
               studentId={id || ''}
               teacherId={student.teacher_id}
               studentName={student.name}
+              studentEmail={student.student_email}
               englishLevel={student.english_level}
               mainGoal={student.main_goal}
               mainGoalTargetDate={(student as any).main_goal_target_date || null}
