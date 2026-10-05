@@ -8,10 +8,10 @@ Method: visible body text of every indexable static HTML page in `public/` (navi
 
 | Metric | Value |
 |---|---:|
-| Indexable static pages analysed | 550 |
-| Templated (maxContainment >= 0.5) | 358 (65%) |
-| Near-duplicate (maxContainment >= 0.8) | 327 (59%) |
-| Templated pages listed in sitemap.xml | 358 |
+| Indexable static pages analysed | 470 |
+| Templated (maxContainment >= 0.5) | 279 (59%) |
+| Near-duplicate (maxContainment >= 0.8) | 246 (52%) |
+| Templated pages listed in sitemap.xml | 279 |
 
 ## By section
 
@@ -19,13 +19,13 @@ Method: visible body text of every indexable static HTML page in `public/` (navi
 |---|---:|---:|---:|
 | /blog | 247 | 167 (68%) | 156 |
 | / (root pages) | 182 | 96 (53%) | 86 |
-| /worksheets | 50 | 50 (100%) | 50 |
-| /esl-worksheets | 35 | 35 (100%) | 35 |
 | /what-to-teach-next | 12 | 0 (0%) | 0 |
-| /english-for | 10 | 10 (100%) | 0 |
+| /esl-worksheets | 8 | 8 (100%) | 2 |
 | /features | 7 | 0 (0%) | 0 |
+| /worksheets | 5 | 5 (100%) | 2 |
 | /tools | 4 | 0 (0%) | 0 |
-| /authors | 2 | 0 (0%) | 0 |
+| /english-for | 3 | 3 (100%) | 0 |
+| /authors | 1 | 0 (0%) | 0 |
 | /resources | 1 | 0 (0%) | 0 |
 
 ## Most duplicated pages
@@ -42,7 +42,7 @@ Method: visible body text of every indexable static HTML page in `public/` (navi
 | /lawyer-client-risk-explanation-what-to-teach-next.html | 0.913 | 0.032 | 607 | /lawyer-client-risk-explanation-worksheet.html |
 | /consultant-executive-summary-what-to-teach-next.html | 0.911 | 0.043 | 598 | /consultant-executive-summary-lesson-prep.html |
 | /consultant-executive-summary-lesson-prep.html | 0.91 | 0.048 | 593 | /consultant-executive-summary-what-to-teach-next.html |
-| /blog/accent-coaching-techniques-esl.html | 0.908 | 0.074 | 817 | /blog/how-private-english-tutors-use-ai-safely.html |
+| /blog/accent-coaching-techniques-esl.html | 0.908 | 0.076 | 817 | /blog/how-private-english-tutors-use-ai-safely.html |
 | /blog/building-esl-teaching-portfolio.html | 0.908 | 0.092 | 822 | /blog/adult-business-english-homework-feedback-loop.html |
 | /accountant-variance-explanation-what-to-teach-next.html | 0.906 | 0.034 | 602 | /lawyer-client-risk-explanation-what-to-teach-next.html |
 | /blog/bilingual-education-models-comparison.html | 0.906 | 0.092 | 811 | /blog/art-based-language-activities-esl.html |

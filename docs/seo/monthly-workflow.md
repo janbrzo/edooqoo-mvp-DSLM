@@ -254,6 +254,7 @@ RULES
 - New or rewritten pages: include the Information Gain answers in the PR and confirm maxContainment < 0.3 via npm run seo:audit-uniqueness.
 - Human-ops moves: deliver the ready-to-use text, target list and steps in docs/seo/runs/monthly/YYYY-MM.md. Do not post anything to external sites yourself.
 - Worksheet Generation Engine untouched.
+- New or rewritten indexable pages: run `npm run seo:audit-uniqueness`, then `npm run seo:verify-content -- --routes=<routes> --links` (add `--llm` once credentials exist). A page that does not reach `verified` stays `noindex` or unpublished; never add the "Automated quality checks" label by hand.
 
 VERIFY
 npm run build:seo (if SEO generators or public assets changed), npm run seo:audit, npm run content:audit, npm run seo:audit-uniqueness, npm run build. Do not commit build output unless the repo tracks it. Report any failure with its output.
