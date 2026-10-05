@@ -5,7 +5,7 @@ Approved by the owner on 2026-10-04 (proposals from the audit, accepted as state
 ## 1. Pruning templated pages (staged)
 
 Stage 1 (this list, below): templated pSEO pages (`maxContainment >= 0.5`) with fewer than 10 impressions in 3 months → `noindex,follow`, removed from the sitemap, removed from the indexable set in `src/data/pseoIndexPolicy.json`. 84 pages, 3 clicks and 125 impressions in total.
-Stage 2 (only after 4 weeks and a look at indexing): profession scenario triplets → 1 page per profession, the rest `noindex`; "AI alternative" cluster → 3 pages (`edooqoo-vs-chatgpt`, `best-ai-tools-for-english-tutors`, `ai-worksheet-generator-for-english-teachers`); blog and root pages templated with < 10 impressions (212) → `noindex`.
+Stage 2 (only after 4 weeks and a look at indexing; candidate list and go/no-go in `docs/seo/stage2-prune-candidates-2026-11.md` and `docs/seo/checkpoint-2026-11.md`): profession scenario triplets → 1 page per profession, the rest `noindex`; "AI alternative" cluster → 3 pages (`edooqoo-vs-chatgpt`, `best-ai-tools-for-english-tutors`, `ai-worksheet-generator-for-english-teachers`); blog and root pages templated with < 10 impressions (212) → `noindex`.
 Rule: a URL with >= 10 impressions in the last 90 days is never pruned.
 
 ## 2. Rewrite of "reframed" blog posts
