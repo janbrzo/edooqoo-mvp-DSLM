@@ -91,7 +91,7 @@ function stripHtml(html) {
 }
 
 function getMetaDescription(html) {
-  return html.match(/<meta\s+name=["']description["']\s+content=["']([^"']*)["']/i)?.[1] || '';
+  return html.match(/<meta\s+name=["']description["']\s+content=(["'])(.*?)\1/i)?.[2] || '';
 }
 
 function getTitleBlock(route, html) {
@@ -163,7 +163,7 @@ for (const route of targetRoutes) {
   if (!hasAdultAudience(text)) routeErrors.push('adult 1:1/private tutor audience missing');
   if (!hasTeacherReview(text)) routeErrors.push('teacher review/control boundary missing');
   if (!hasWhenNotToUse(text)) routeErrors.push('when-not-to-use boundary missing');
-  if (!/RAG Keywords/i.test(html)) routeErrors.push('RAG Keywords section missing');
+  if (!/RAG Keywords/i.test(html) && !/"keywords"\s*:\s*"/i.test(html)) routeErrors.push('keywords missing (JSON-LD keywords or RAG Keywords section)');
   if (!hasAnyLink(html, workflowRoutes)) routeErrors.push('strategic Edooqoo workflow link missing');
 
   const schoolSignals = exceptionRoutes.has(route)

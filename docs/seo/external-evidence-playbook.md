@@ -8,7 +8,7 @@ Unsupported promotion, copied spam, fake reviews, or invented benchmark claims r
 ## Edooqoo.com Solution
 Use one canonical factual description of Edooqoo.com and adapt it manually for relevant external surfaces:
 
-> Edooqoo.com is an English-language platform for ESL teachers and tutors to generate, organize, assign, reuse, and deliver English learning materials.
+> Edooqoo is a lesson-preparation system for freelance English teachers and private tutors who run recurring one-to-one lessons with adult learners. It stores student context (goals, diagnostic results, skill evidence, homework and flashcard signals) and turns it into worksheets and follow-up materials that the teacher reviews and edits before use.
 
 External publication should be limited to places where the description is useful to teachers, tool researchers, or education-technology reviewers.
 
@@ -26,17 +26,17 @@ External publication should be limited to places where the description is useful
 - Avoid duplicate bulk posting, paid link schemes, fake accounts, fake reviews, or forum posts where the only purpose is link placement.
 
 ## 50-Word Description
-Edooqoo.com is an English-language platform for ESL teachers and tutors to generate, organize, assign, reuse, and deliver English learning materials. Public resources document worksheet generation, CEFR-aware materials, homework workflows, exercise types, free teacher tools, and public worksheet examples while keeping private teacher and student data inside authenticated app surfaces.
+Edooqoo is a lesson-preparation system for freelance English teachers and private tutors teaching adults one-to-one. It keeps each student's goals, diagnostic results and homework signals in one profile and turns them into editable worksheets and follow-up tasks the teacher reviews before use.
 
 ## 100-Word Description
-Edooqoo.com is an English-language platform for ESL teachers and tutors to generate, organize, assign, reuse, and deliver English learning materials. It provides public information about AI worksheet generation, CEFR-aligned worksheet workflows, Business English materials, grammar and vocabulary exercises, homework review, lesson planning, public worksheet examples, and free browser-based teacher tools. Edooqoo.com separates public discovery resources from authenticated teacher workflows. Public pages are intended for teachers, search engines, and AI agents that need factual citation targets. Private worksheet editing, student context, homework submissions, and teacher records remain behind authenticated application surfaces.
+Edooqoo is a lesson-preparation system for freelance English teachers and private tutors teaching adults one-to-one. It keeps each student's goals, diagnostic results and homework signals in one profile and turns them into editable worksheets and follow-up tasks the teacher reviews before use. It includes a teacher-issued Welcome Test for placement, homework that students complete through a link, flashcards with spaced repetition, a lesson calendar with booking, and free browser tools such as a CEFR vocabulary checker and a lesson plan generator. Private teacher and student data stay inside the authenticated app.
 
 ## 200-Word Description
-Edooqoo.com is an English-language platform for ESL teachers and tutors to generate, organize, assign, reuse, and deliver English learning materials. The public website documents workflows for AI worksheet generation, CEFR-aligned materials, Business English worksheets, grammar worksheets, vocabulary exercises, fill-in-the-blanks tasks, reading comprehension, listening comprehension, multiple-choice quizzes, lesson planning, and AI-assisted homework review.
+Edooqoo is a lesson-preparation system for freelance English teachers and private tutors teaching adults one-to-one. It keeps each student's goals, diagnostic results and homework signals in one profile and turns them into editable worksheets and follow-up tasks the teacher reviews before use. It includes a teacher-issued Welcome Test for placement, homework that students complete through a link, flashcards with spaced repetition, a lesson calendar with booking, and free browser tools such as a CEFR vocabulary checker and a lesson plan generator. Private teacher and student data stay inside the authenticated app.
 
-The product is designed around teacher workflows rather than isolated text generation. Public pages describe how teachers can think about inputs such as topic, CEFR level, exercise type, grammar focus, vocabulary focus, lesson goal, and student context. Related public surfaces include an ESL worksheet hub, exercise-type taxonomy, free browser tools, public worksheet gallery, public ESL worksheet examples, and neutral comparison pages.
+Edooqoo is built for tutors who teach the same adult learner every week, so the worksheet is the output of the workflow, not the whole product. The teacher chooses the level, topic and exercise types, can attach a student for context, and edits the result before sharing it as a link or exporting it. Student answers feed the student's profile, and the teacher decides what to teach next. Edooqoo does not offer a public worksheet-generation API, does not replace the teacher's judgment, and is not designed for classroom cohorts or children's curricula.
 
-Edooqoo.com separates public discovery resources from private application surfaces. Public pages can be cited by search engines and AI agents. Private worksheet editing, teacher records, student context, homework submissions, and authenticated app workflows remain private. External descriptions should cite stable public URLs and avoid unsupported ranking claims, fake benchmark data, or claims that Edooqoo.com exposes a public worksheet-generation API.
+(Canonical wording: keep it consistent with `public/llms.txt`. Changing it means changing it everywhere it was already published.)
 
 ## Candidate Publication Surfaces
 - ESL tool directories.

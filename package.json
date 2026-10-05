@@ -12,7 +12,7 @@
     "preview": "vite preview",
     "docs:audit-source": "node scripts/docs/generate-source-of-truth-manifest.mjs",
     "content:generate": "node scripts/seo/generate-content-registry.mjs",
-    "content:audit": "node scripts/seo/repair-blog-encoding.mjs --check && node scripts/seo/audit-content-registry.mjs && npm run seo:audit-strategic-content && npm run seo:audit-pseo-policy && npm run seo:audit-sitemap-integrity && npm run seo:audit-decision-content && npm run seo:audit-newsletter && npm run seo:audit-evidence && npm run seo:audit-martha-test && npm run seo:audit-internal-links && npm run seo:audit-x1000-plan",
+    "content:audit": "node scripts/seo/repair-blog-encoding.mjs --check && node scripts/seo/audit-content-registry.mjs && npm run seo:audit-strategic-content && npm run seo:audit-pseo-policy && npm run seo:audit-sitemap-integrity && npm run seo:audit-decision-content && npm run seo:audit-newsletter && npm run seo:audit-evidence && npm run seo:audit-martha-test && npm run seo:audit-internal-links && npm run seo:audit-x1000-plan && npm run seo:audit-verification",
     "content:repair-encoding": "node scripts/seo/repair-blog-encoding.mjs",
     "seo:generate-citable": "node scripts/seo/generate-citable-pages.mjs",
     "seo:generate-strategic-content": "node scripts/seo/generate-strategic-content.mjs",
@@ -50,6 +50,10 @@
     "seo:sync-sitemap-edge": "node scripts/seo/sync-sitemap-edge.mjs",
     "seo:gsc-analyze": "node scripts/seo/analyze-gsc-coverage-export.mjs",
     "seo:audit-duplicate-meta": "node scripts/seo/audit-duplicate-meta.mjs",
+    "seo:audit-uniqueness": "node scripts/seo/audit-content-uniqueness.mjs",
+    "seo:verify-content": "node scripts/seo/verify-content.mjs",
+    "seo:indexnow": "node scripts/seo/submit-indexnow.mjs",
+    "seo:audit-verification": "node scripts/seo/audit-content-verification.mjs",
     "seo:repair-snapshot-snippets": "node scripts/seo/repair-snapshot-snippets.mjs",
     "seo:check-snapshot-snippets": "node scripts/seo/repair-snapshot-snippets.mjs --check",
     "seo:repair-snapshot-head": "node scripts/seo/repair-snapshot-head.mjs",
@@ -132,6 +136,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "@anthropic-ai/sdk": "^0.131.0",
     "@eslint/js": "^9.9.0",
     "@tailwindcss/typography": "^0.5.15",
     "@types/node": "^22.5.5",

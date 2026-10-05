@@ -1,8 +1,12 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { getPseoRouteInventory } from './pseo-index-policy.mjs';
 import { getDecisionContentRoutes } from './decision-content.mjs';
 import { legacyEditorialDecisions } from './x1000-editorial-plan.mjs';
+
+const GSC_404_REPAIR_PATH = path.join(path.dirname(fileURLToPath(import.meta.url)), 'gsc-404-repair.json');
+const gsc404Redirects = JSON.parse(fs.readFileSync(GSC_404_REPAIR_PATH, 'utf8')).redirects;
 
 export const CONTENT_STATES = ['keep', 'improve', 'merge', 'retire', 'hold', 'noindex'];
 export const INDEXABLE_STATES = new Set(['keep', 'improve', 'hold']);
@@ -362,6 +366,12 @@ export const CONTENT_OVERRIDES = {
       state: 'keep',
     }];
   })),
+  ...Object.fromEntries(Object.entries(gsc404Redirects).map(([route, redirectTo]) => [route, {
+    state: 'merge',
+    redirectTo,
+    cluster: 'Adult and Business English',
+    reason: 'GSC 404 repair (2026-10): URL earned impressions, now returns 404; redirect to the closest live page.',
+  }])),
 };
 
 const CORE_KEEP_ROUTES = new Set([
@@ -451,8 +461,8 @@ function extractMetadata(html) {
     .replace(/\s+[—|]\s+Edooqoo.*$/i, '')
     .trim();
   const description = (
-    html.match(/<meta\s+name=["']description["']\s+content=["']([^"']*)["']/i)?.[1] ||
-    html.match(/<meta\s+content=["']([^"']*)["']\s+name=["']description["']/i)?.[1] ||
+    html.match(/<meta\s+name=["']description["']\s+content=(["'])(.*?)\1/i)?.[2] ||
+    html.match(/<meta\s+content=(["'])(.*?)\1\s+name=["']description["']/i)?.[2] ||
     ''
   ).trim();
   const canonical = (

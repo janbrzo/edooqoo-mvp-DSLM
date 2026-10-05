@@ -1,6 +1,6 @@
 # Duplicate & weak metadata audit (generated)
 
-Scanned 631 HTML files under `public/`.
+Scanned 597 HTML files under `public/`.
 
 | Metric | Current | Baseline lock |
 | --- | --- | --- |

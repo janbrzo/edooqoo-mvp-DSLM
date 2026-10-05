@@ -132,7 +132,7 @@ const TopicLevelPage: React.FC = () => {
       ]}
       trustNumbers={[
         { value: 'Workflow', label: 'Teacher-controlled generation' },
-        { value: policy ? '5' : '29', label: policy ? 'Selected exercise types' : 'Available exercise types' },
+        { value: policy?.exerciseTypes.length ? String(policy.exerciseTypes.length) : '29', label: policy?.exerciseTypes.length ? 'Selected exercise types' : 'Available exercise types' },
         { value: policy ? String(policy.validLevels.length) : 'A1-C2', label: policy ? 'Indexed level fits' : 'Available CEFR levels' },
         { value: '2', label: 'Free worksheets / month' },
       ]}

@@ -157,10 +157,10 @@ const HowItWorks = () => {
     <div className="min-h-screen bg-background">
       <Helmet>
         <title>How 1-Minute Prep Works — Edooqoo Student Learning Loop</title>
-        <meta name="description" content="See how Edooqoo's 1-Minute Prep loop connects student context, Live Session answers, homework, teacher notes, flashcards and DSLM recommendations for the next lesson." />
+        <meta name="description" content="See how Edooqoo's 1-Minute Prep loop connects student context, Live Session answers, homework, notes, flashcards and DSLM recommendations." />
         <link rel="canonical" href="https://edooqoo.com/how-it-works" />
         <meta property="og:title" content="How 1-Minute Prep Works — Edooqoo Student Learning Loop" />
-        <meta property="og:description" content="See how Edooqoo's 1-Minute Prep loop connects student context, Live Session answers, homework, teacher notes, flashcards and DSLM recommendations for the next lesson." />
+        <meta property="og:description" content="See how Edooqoo's 1-Minute Prep loop connects student context, Live Session answers, homework, notes, flashcards and DSLM recommendations." />
         <meta property="og:url" content="https://edooqoo.com/how-it-works" />
         <meta property="og:type" content="article" />
         <script type="application/ld+json">{JSON.stringify(howToJsonLd)}</script>

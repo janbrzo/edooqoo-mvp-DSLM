@@ -81,14 +81,14 @@ function repairHtml(html) {
     const isTitle = TITLE_META.includes(name);
     const attr = name.startsWith('og:') ? 'property' : 'name';
     const pattern = new RegExp(
-      `(<meta\\b[^>]*\\b${attr}=["']${name}["'][^>]*\\bcontent=["'])([^"']*)(["'])`,
+      `(<meta\\b[^>]*\\b${attr}=["']${name}["'][^>]*\\bcontent=(["']))(.*?)(\\2)`,
       'gi',
     );
     const patternReversed = new RegExp(
-      `(<meta\\b[^>]*\\bcontent=["'])([^"']*)(["'][^>]*\\b${attr}=["']${name}["'])`,
+      `(<meta\\b[^>]*\\bcontent=(["']))(.*?)(\\2[^>]*\\b${attr}=["']${name}["'])`,
       'gi',
     );
-    const apply = (_m, before, value, after) => {
+    const apply = (_m, before, _quote, value, after) => {
       const clamped = isTitle ? clampTitle(decode(value)) : clampDescription(decode(value));
       return `${before}${encodeAttr(clamped)}${after}`;
     };

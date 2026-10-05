@@ -1,0 +1,577 @@
+{
+  "schemaVersion": 1,
+  "records": [
+    {
+      "route": "/blog/best-apps-learning-english-2026.html",
+      "contentHash": "09b21929a70244c5",
+      "checkedAt": "2026-10-05T06:43:54.156Z",
+      "status": "layer1-only",
+      "layer1": {
+        "status": "pass",
+        "checks": [
+          {
+            "id": "uniqueness",
+            "status": "pass",
+            "detail": "maxContainment 0.107 (limit < 0.3), nearest /blog/how-to-create-grammar-worksheets-with-ai.html"
+          },
+          {
+            "id": "no-bot-text",
+            "status": "pass",
+            "detail": ""
+          },
+          {
+            "id": "no-unsupported-claims",
+            "status": "pass",
+            "detail": ""
+          },
+          {
+            "id": "statistics-sourced",
+            "status": "pass",
+            "detail": ""
+          },
+          {
+            "id": "link-count",
+            "status": "warn",
+            "detail": "11 internal links in <main> (warn > 10, fail > 15)"
+          },
+          {
+            "id": "jsonld-matches-page",
+            "status": "pass",
+            "detail": ""
+          },
+          {
+            "id": "substance",
+            "status": "pass",
+            "detail": "719 words"
+          },
+          {
+            "id": "external-citations",
+            "status": "warn",
+            "detail": "https://doi.org/10.1111/j.1467-9280.2006.01693.x (HTTP 403 (blocked for automated requests; open it manually once))"
+          }
+        ]
+      },
+      "layer2": null
+    },
+    {
+      "route": "/blog/cloze-test-design-esl.html",
+      "contentHash": "fbc73e0dfd6c1ce6",
+      "checkedAt": "2026-10-05T06:43:54.868Z",
+      "status": "layer1-only",
+      "layer1": {
+        "status": "pass",
+        "checks": [
+          {
+            "id": "uniqueness",
+            "status": "pass",
+            "detail": "maxContainment 0.121 (limit < 0.3), nearest /blog/digital-homework-tools-esl-teachers.html"
+          },
+          {
+            "id": "no-bot-text",
+            "status": "pass",
+            "detail": ""
+          },
+          {
+            "id": "no-unsupported-claims",
+            "status": "pass",
+            "detail": ""
+          },
+          {
+            "id": "statistics-sourced",
+            "status": "pass",
+            "detail": ""
+          },
+          {
+            "id": "link-count",
+            "status": "warn",
+            "detail": "11 internal links in <main> (warn > 10, fail > 15)"
+          },
+          {
+            "id": "jsonld-matches-page",
+            "status": "pass",
+            "detail": ""
+          },
+          {
+            "id": "substance",
+            "status": "pass",
+            "detail": "705 words"
+          },
+          {
+            "id": "external-citations",
+            "status": "warn",
+            "detail": "https://doi.org/10.1111/j.1467-9280.2006.01693.x (HTTP 403 (blocked for automated requests; open it manually once)); https://www.coe.int/en/web/common-european-framework-reference-languages (HTTP 403 (blocked for automated requests; open it manually once))"
+          }
+        ]
+      },
+      "layer2": null
+    },
+    {
+      "route": "/blog/connected-speech-teaching-activities.html",
+      "contentHash": "fb8204110b8a5556",
+      "checkedAt": "2026-10-05T06:43:53.855Z",
+      "status": "layer1-only",
+      "layer1": {
+        "status": "pass",
+        "checks": [
+          {
+            "id": "uniqueness",
+            "status": "pass",
+            "detail": "maxContainment 0.129 (limit < 0.3), nearest /blog/adult-one-to-one-neurodivergent-english-lesson-adaptations.html"
+          },
+          {
+            "id": "no-bot-text",
+            "status": "pass",
+            "detail": ""
+          },
+          {
+            "id": "no-unsupported-claims",
+            "status": "pass",
+            "detail": ""
+          },
+          {
+            "id": "statistics-sourced",
+            "status": "pass",
+            "detail": ""
+          },
+          {
+            "id": "link-count",
+            "status": "warn",
+            "detail": "11 internal links in <main> (warn > 10, fail > 15)"
+          },
+          {
+            "id": "jsonld-matches-page",
+            "status": "pass",
+            "detail": ""
+          },
+          {
+            "id": "substance",
+            "status": "pass",
+            "detail": "772 words"
+          },
+          {
+            "id": "external-citations",
+            "status": "warn",
+            "detail": "https://www.coe.int/en/web/common-european-framework-reference-languages (HTTP 403 (blocked for automated requests; open it manually once))"
+          }
+        ]
+      },
+      "layer2": null
+    },
+    {
+      "route": "/blog/current-events-esl-lessons.html",
+      "contentHash": "6c8f1291c69206a8",
+      "checkedAt": "2026-10-05T06:43:53.931Z",
+      "status": "layer1-only",
+      "layer1": {
+        "status": "pass",
+        "checks": [
+          {
+            "id": "uniqueness",
+            "status": "pass",
+            "detail": "maxContainment 0.116 (limit < 0.3), nearest /blog/academic-vocabulary-teaching-strategies.html"
+          },
+          {
+            "id": "no-bot-text",
+            "status": "pass",
+            "detail": ""
+          },
+          {
+            "id": "no-unsupported-claims",
+            "status": "pass",
+            "detail": ""
+          },
+          {
+            "id": "statistics-sourced",
+            "status": "pass",
+            "detail": ""
+          },
+          {
+            "id": "link-count",
+            "status": "warn",
+            "detail": "11 internal links in <main> (warn > 10, fail > 15)"
+          },
+          {
+            "id": "jsonld-matches-page",
+            "status": "pass",
+            "detail": ""
+          },
+          {
+            "id": "substance",
+            "status": "pass",
+            "detail": "761 words"
+          },
+          {
+            "id": "external-citations",
+            "status": "warn",
+            "detail": "https://www.coe.int/en/web/common-european-framework-reference-languages (HTTP 403 (blocked for automated requests; open it manually once))"
+          }
+        ]
+      },
+      "layer2": null
+    },
+    {
+      "route": "/blog/debate-activities-english-class.html",
+      "contentHash": "c5dd05c7e9405379",
+      "checkedAt": "2026-10-05T06:43:54.960Z",
+      "status": "layer1-only",
+      "layer1": {
+        "status": "pass",
+        "checks": [
+          {
+            "id": "uniqueness",
+            "status": "pass",
+            "detail": "maxContainment 0.138 (limit < 0.3), nearest /blog/authentic-listening-materials-esl.html"
+          },
+          {
+            "id": "no-bot-text",
+            "status": "pass",
+            "detail": ""
+          },
+          {
+            "id": "no-unsupported-claims",
+            "status": "pass",
+            "detail": ""
+          },
+          {
+            "id": "statistics-sourced",
+            "status": "pass",
+            "detail": ""
+          },
+          {
+            "id": "link-count",
+            "status": "warn",
+            "detail": "11 internal links in <main> (warn > 10, fail > 15)"
+          },
+          {
+            "id": "jsonld-matches-page",
+            "status": "pass",
+            "detail": ""
+          },
+          {
+            "id": "substance",
+            "status": "pass",
+            "detail": "650 words"
+          },
+          {
+            "id": "external-citations",
+            "status": "warn",
+            "detail": "https://www.coe.int/en/web/common-european-framework-reference-languages (HTTP 403 (blocked for automated requests; open it manually once))"
+          }
+        ]
+      },
+      "layer2": null
+    },
+    {
+      "route": "/blog/diagnostic-testing-english-learners.html",
+      "contentHash": "fa9123aea11748f6",
+      "checkedAt": "2026-10-05T06:43:53.446Z",
+      "status": "layer1-only",
+      "layer1": {
+        "status": "pass",
+        "checks": [
+          {
+            "id": "uniqueness",
+            "status": "pass",
+            "detail": "maxContainment 0.084 (limit < 0.3), nearest /blog/cloze-test-design-esl.html"
+          },
+          {
+            "id": "no-bot-text",
+            "status": "pass",
+            "detail": ""
+          },
+          {
+            "id": "no-unsupported-claims",
+            "status": "pass",
+            "detail": ""
+          },
+          {
+            "id": "statistics-sourced",
+            "status": "pass",
+            "detail": ""
+          },
+          {
+            "id": "link-count",
+            "status": "warn",
+            "detail": "11 internal links in <main> (warn > 10, fail > 15)"
+          },
+          {
+            "id": "jsonld-matches-page",
+            "status": "pass",
+            "detail": ""
+          },
+          {
+            "id": "substance",
+            "status": "pass",
+            "detail": "883 words"
+          },
+          {
+            "id": "external-citations",
+            "status": "warn",
+            "detail": "https://www.coe.int/en/web/common-european-framework-reference-languages (HTTP 403 (blocked for automated requests; open it manually once)); https://doi.org/10.1080/0969595980050102 (HTTP 403 (blocked for automated requests; open it manually once))"
+          }
+        ]
+      },
+      "layer2": null
+    },
+    {
+      "route": "/blog/error-correction-techniques-esl.html",
+      "contentHash": "a18ef0e034b354a9",
+      "checkedAt": "2026-10-05T06:43:54.578Z",
+      "status": "layer1-only",
+      "layer1": {
+        "status": "pass",
+        "checks": [
+          {
+            "id": "uniqueness",
+            "status": "pass",
+            "detail": "maxContainment 0.104 (limit < 0.3), nearest /blog/adapting-textbook-tasks-for-adult-one-to-one-english-lessons.html"
+          },
+          {
+            "id": "no-bot-text",
+            "status": "pass",
+            "detail": ""
+          },
+          {
+            "id": "no-unsupported-claims",
+            "status": "pass",
+            "detail": ""
+          },
+          {
+            "id": "statistics-sourced",
+            "status": "pass",
+            "detail": ""
+          },
+          {
+            "id": "link-count",
+            "status": "warn",
+            "detail": "11 internal links in <main> (warn > 10, fail > 15)"
+          },
+          {
+            "id": "jsonld-matches-page",
+            "status": "pass",
+            "detail": ""
+          },
+          {
+            "id": "substance",
+            "status": "pass",
+            "detail": "727 words"
+          },
+          {
+            "id": "external-citations",
+            "status": "warn",
+            "detail": "https://doi.org/10.1080/0969595980050102 (HTTP 403 (blocked for automated requests; open it manually once)); https://www.coe.int/en/web/common-european-framework-reference-languages (HTTP 403 (blocked for automated requests; open it manually once))"
+          }
+        ]
+      },
+      "layer2": null
+    },
+    {
+      "route": "/blog/fill-in-the-blanks-exercises-best-practices.html",
+      "contentHash": "e16b008fe5c0fd21",
+      "checkedAt": "2026-10-05T06:43:53.759Z",
+      "status": "layer1-only",
+      "layer1": {
+        "status": "pass",
+        "checks": [
+          {
+            "id": "uniqueness",
+            "status": "pass",
+            "detail": "maxContainment 0.11 (limit < 0.3), nearest /blog/how-long-should-private-english-tutors-spend-on-lesson-prep.html"
+          },
+          {
+            "id": "no-bot-text",
+            "status": "pass",
+            "detail": ""
+          },
+          {
+            "id": "no-unsupported-claims",
+            "status": "pass",
+            "detail": ""
+          },
+          {
+            "id": "statistics-sourced",
+            "status": "pass",
+            "detail": ""
+          },
+          {
+            "id": "link-count",
+            "status": "warn",
+            "detail": "11 internal links in <main> (warn > 10, fail > 15)"
+          },
+          {
+            "id": "jsonld-matches-page",
+            "status": "pass",
+            "detail": ""
+          },
+          {
+            "id": "substance",
+            "status": "pass",
+            "detail": "754 words"
+          },
+          {
+            "id": "external-citations",
+            "status": "warn",
+            "detail": "https://doi.org/10.1111/j.1467-9280.2006.01693.x (HTTP 403 (blocked for automated requests; open it manually once))"
+          }
+        ]
+      },
+      "layer2": null
+    },
+    {
+      "route": "/blog/how-to-assess-english-level-cefr.html",
+      "contentHash": "fec5692fa6a2ae8e",
+      "checkedAt": "2026-10-05T06:43:55.342Z",
+      "status": "layer1-only",
+      "layer1": {
+        "status": "pass",
+        "checks": [
+          {
+            "id": "uniqueness",
+            "status": "pass",
+            "detail": "maxContainment 0.155 (limit < 0.3), nearest /blog/action-research-esl-teachers.html"
+          },
+          {
+            "id": "no-bot-text",
+            "status": "pass",
+            "detail": ""
+          },
+          {
+            "id": "no-unsupported-claims",
+            "status": "pass",
+            "detail": ""
+          },
+          {
+            "id": "statistics-sourced",
+            "status": "pass",
+            "detail": ""
+          },
+          {
+            "id": "link-count",
+            "status": "warn",
+            "detail": "11 internal links in <main> (warn > 10, fail > 15)"
+          },
+          {
+            "id": "jsonld-matches-page",
+            "status": "pass",
+            "detail": ""
+          },
+          {
+            "id": "substance",
+            "status": "pass",
+            "detail": "638 words"
+          },
+          {
+            "id": "external-citations",
+            "status": "warn",
+            "detail": "https://www.coe.int/en/web/common-european-framework-reference-languages (HTTP 403 (blocked for automated requests; open it manually once)); https://doi.org/10.1080/0969595980050102 (HTTP 403 (blocked for automated requests; open it manually once))"
+          }
+        ]
+      },
+      "layer2": null
+    },
+    {
+      "route": "/blog/how-to-create-grammar-worksheets-with-ai.html",
+      "contentHash": "54daeeb6cd3af5f2",
+      "checkedAt": "2026-10-05T06:43:54.229Z",
+      "status": "layer1-only",
+      "layer1": {
+        "status": "pass",
+        "checks": [
+          {
+            "id": "uniqueness",
+            "status": "pass",
+            "detail": "maxContainment 0.111 (limit < 0.3), nearest /blog/adult-one-to-one-neurodivergent-english-lesson-adaptations.html"
+          },
+          {
+            "id": "no-bot-text",
+            "status": "pass",
+            "detail": ""
+          },
+          {
+            "id": "no-unsupported-claims",
+            "status": "pass",
+            "detail": ""
+          },
+          {
+            "id": "statistics-sourced",
+            "status": "pass",
+            "detail": ""
+          },
+          {
+            "id": "link-count",
+            "status": "warn",
+            "detail": "11 internal links in <main> (warn > 10, fail > 15)"
+          },
+          {
+            "id": "jsonld-matches-page",
+            "status": "pass",
+            "detail": ""
+          },
+          {
+            "id": "substance",
+            "status": "pass",
+            "detail": "701 words"
+          },
+          {
+            "id": "external-citations",
+            "status": "warn",
+            "detail": "https://www.coe.int/en/web/common-european-framework-reference-languages (HTTP 403 (blocked for automated requests; open it manually once))"
+          }
+        ]
+      },
+      "layer2": null
+    },
+    {
+      "route": "/blog/lexical-approach-language-teaching.html",
+      "contentHash": "c4e380b456068bfb",
+      "checkedAt": "2026-10-05T08:04:55.115Z",
+      "status": "layer1-only",
+      "layer1": {
+        "status": "pass",
+        "checks": [
+          {
+            "id": "uniqueness",
+            "status": "pass",
+            "detail": "maxContainment 0.12 (limit < 0.3), nearest /blog/extensive-reading-programs-esl.html"
+          },
+          {
+            "id": "no-bot-text",
+            "status": "pass",
+            "detail": ""
+          },
+          {
+            "id": "no-unsupported-claims",
+            "status": "pass",
+            "detail": ""
+          },
+          {
+            "id": "statistics-sourced",
+            "status": "pass",
+            "detail": ""
+          },
+          {
+            "id": "link-count",
+            "status": "warn",
+            "detail": "11 internal links in <main> (warn > 10, fail > 15)"
+          },
+          {
+            "id": "jsonld-matches-page",
+            "status": "pass",
+            "detail": ""
+          },
+          {
+            "id": "substance",
+            "status": "pass",
+            "detail": "811 words"
+          },
+          {
+            "id": "external-citations",
+            "status": "warn",
+            "detail": "https://doi.org/10.1111/j.1467-9280.2006.01693.x (HTTP 403 (blocked for automated requests; open it manually once))"
+          }
+        ]
+      },
+      "layer2": null
+    }
+  ]
+}

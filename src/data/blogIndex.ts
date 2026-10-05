@@ -963,6 +963,14 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "keep"
   },
   {
+    "title": "Lexical Approach Language Teaching: Guide for 1:1 Tutors",
+    "description": "Lexical Approach Language Teaching. Generate a matching worksheet in one minute.",
+    "url": "/blog/lexical-approach-language-teaching.html",
+    "date": "2026-05-24",
+    "category": "Tutor Business and Tools",
+    "state": "hold"
+  },
+  {
     "title": "Low-Friction Review Loops for Adult English Learners",
     "description": "Low Friction Review Loops For Adult English Learners. Turn it into an editable task for your next lesson.",
     "url": "/blog/low-friction-review-loops-for-adult-english-learners.html",
@@ -1288,14 +1296,6 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "url": "/blog/vocabulary-notebook-strategies-esl.html",
     "date": "2025-12-03",
     "category": "Homework and Retention",
-    "state": "hold"
-  },
-  {
-    "title": "The Lexical Approach in Language Teaching — Chunks and",
-    "description": "Lewis's lexical approach framework, teaching chunks and collocations, and practical classroom implementation strategies for ESL.",
-    "url": "/blog/lexical-approach-language-teaching.html",
-    "date": "2025-12-02",
-    "category": "Tutor Business and Tools",
     "state": "hold"
   },
   {
@@ -1916,7 +1916,7 @@ export const BLOG_POSTS: BlogPostMeta[] = [
   },
   {
     "title": "IELTS Preparation Worksheets — A Teacher's Guide",
-    "description": "Teacher's guide to creating effective IELTS preparation worksheets. All 4 sections covered with AI-generated practice materials, scoring tips, and 4-week prep plan.",
+    "description": "Teacher's guide to IELTS preparation worksheets: all 4 sections with AI-generated practice, scoring tips and a 4-week prep plan.",
     "url": "/blog/ielts-preparation-worksheets-guide.html",
     "date": "2025-06-15",
     "category": "Tutor Business and Tools",
@@ -2473,7 +2473,7 @@ export const LANDING_PAGES: LandingPageMeta[] = [
   },
   {
     "title": "ESL Student Progress Tracking Tool",
-    "description": "Track ESL student progress with Edooqoo's nano-skill mastery system. DSLM tracks grammar, vocabulary, reading, writing, speaking, and listening skills with CEFR tags and trend analysis.",
+    "description": "Track ESL student progress with Edooqoo's nano-skill mastery system: grammar, vocabulary, reading, writing, speaking and listening, with CEFR tags.",
     "url": "/esl-student-progress-tracking-tool.html",
     "state": "hold"
   },
