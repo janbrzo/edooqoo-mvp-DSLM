@@ -81,6 +81,8 @@ export function CreateHomeworkModal({
   const [sendReminder, setSendReminder] = useState<boolean>(true);
   // P1.6: notify the student by email right after the homework is created
   const [notifyStudent, setNotifyStudent] = useState<boolean>(true);
+  // Address the notification already went to, so the success screen does not invite a duplicate send.
+  const [emailSentTo, setEmailSentTo] = useState<string | null>(null);
   const [reminderHours, setReminderHours] = useState<string>("24");
   const [sendToTeacher, setSendToTeacher] = useState<boolean>(false);
   const [isGenerating, setIsGenerating] = useState(false);
@@ -228,6 +230,7 @@ export function CreateHomeworkModal({
       if (error) throw error;
 
       toast.success(`Homework notification sent to ${studentEmail}`);
+      if (!isReminder) setEmailSentTo(studentEmail);
       
       // If sendToTeacher is enabled, send email to teacher as well
       if (sendToTeacher && teacherEmail && !isReminder) {
@@ -395,6 +398,7 @@ export function CreateHomeworkModal({
     setDeadline(new Date(Date.now() + 6 * 24 * 60 * 60 * 1000)); // Reset to +6 days
     setSendReminder(true);
     setNotifyStudent(true);
+    setEmailSentTo(null);
     setReminderHours("24");
     setSendToTeacher(false);
     setIsGenerating(false);
@@ -493,7 +497,12 @@ export function CreateHomeworkModal({
 
             {/* Email section */}
             <div className="space-y-3 pt-4 border-t">
-              <Label htmlFor="student-email">Send Email Notification</Label>
+              <Label htmlFor="student-email">{emailSentTo ? 'Send the email again' : 'Send Email Notification'}</Label>
+              {emailSentTo && (
+                <p className="text-sm text-green-700 dark:text-green-400">
+                  ✓ Email sent to {emailSentTo}
+                </p>
+              )}
               <Input
                 id="student-email"
                 type="email"
@@ -546,7 +555,7 @@ export function CreateHomeworkModal({
             </div>
 
             <Button onClick={handleClose} className="w-full" variant="outline">
-              Done (skip sending email)
+              {emailSentTo ? 'Done' : 'Done (skip sending email)'}
             </Button>
           </div>
         ) : (

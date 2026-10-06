@@ -22,6 +22,8 @@ One rule per entry, with a one-line why. Replace an existing rule instead of add
 - Supabase hooks return early when demo mode (`edooqoo_demo_mode`) is active; `src/lib/demo/demoFetchGuard.ts` (first import of `main.tsx`) answers any remaining REST read carrying a `demo-` id with an empty result — because demo IDs are not UUIDs and crash queries.
 - Teacher-only pages call `useTeacherAuthRedirect` instead of ad-hoc `navigate('/')` — because email deep links must survive login via `state.from`.
 - Edge Functions build links from the `APP_BASE_URL` secret, never a hardcoded domain — because preview, published and custom domains differ.
+- Student-facing pages (Welcome Test, homework) log DSLM events only through token/email-authorised RPCs (`log_welcome_test_event_by_share_token`, `log_homework_submitted_event`), never `add_student_event` or direct `student_events` writes — because those are teacher-only and anonymous calls fail silently with 401.
+- The profile billing guard trigger tests `current_user = 'authenticated'`, never `auth.role()` — because the JWT role is still `authenticated` inside SECURITY DEFINER billing functions like `consume_token`, which then could not charge tokens.
 - Every AI model id used in `supabase/functions/**` is registered in `supabase/functions/_shared/modelRegistry.ts` (enforced by `src/lib/__tests__/modelAudit.test.ts`) — because `audit-llm-models` monitors and advises only on registered models.
 
 ## Writing Style

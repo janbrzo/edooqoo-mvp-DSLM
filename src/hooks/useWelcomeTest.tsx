@@ -299,26 +299,9 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
           question_index: 0,
         }] : [];
 
-        // DELETE previous event for this question (dedup).
-        // We delete by both canonical and legacy answer_id to cover
-        // pre-renumber events that may still reference the legacy ID.
+        // Dedup + insert happen server-side in log_welcome_test_event_by_share_token
+        // (anonymous students may not call add_student_event or touch student_events).
         const canonicalId = toCanonicalId(questionId);
-        await supabase
-          .from('student_events')
-          .delete()
-          .eq('student_id', state.studentId)
-          .eq('source_id', state.testId)
-          .eq('event_type', 'test_answer_submitted')
-          .filter('event_payload->>answer_id', 'eq', canonicalId);
-        if (canonicalId !== questionId) {
-          await supabase
-            .from('student_events')
-            .delete()
-            .eq('student_id', state.studentId)
-            .eq('source_id', state.testId)
-            .eq('event_type', 'test_answer_submitted')
-            .filter('event_payload->>answer_id', 'eq', questionId);
-        }
 
         // Detect trait value for profiling questions - handle multi-select
         let detectedTraitData: Record<string, string> | undefined;
@@ -375,12 +358,11 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
           }
         }
 
-        await supabase.rpc('add_student_event', {
-          p_student_id: state.studentId,
-          p_teacher_id: state.teacherId,
+        const { error: eventError } = await (supabase.rpc as any)('log_welcome_test_event_by_share_token', {
+          p_share_token: shareToken as string,
           p_event_type: 'test_answer_submitted',
-          p_event_source: 'welcome_test',
-          p_source_id: state.testId,
+          p_answer_id: canonicalId,
+          p_legacy_answer_id: questionId,
           p_element_type: questionDef.element_type || questionDef.question_type || null,
           p_event_payload: {
             answer_id: canonicalId,
@@ -395,6 +377,7 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
           } as unknown as Json,
           p_skill_ids: questionDef.nano_skill ? [questionDef.nano_skill] : [],
         });
+        if (eventError) devWarn('[useWelcomeTest] answer event not logged:', eventError.message);
       }
     } catch (err) {
       console.error('Error committing answer:', err);
@@ -500,12 +483,11 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
         });
 
         const canonicalId = toCanonicalId(questionDef.id);
-        await supabase.rpc('add_student_event', {
-          p_student_id: state.studentId,
-          p_teacher_id: state.teacherId,
+        await (supabase.rpc as any)('log_welcome_test_event_by_share_token', {
+          p_share_token: shareToken as string,
           p_event_type: 'test_answer_skipped',
-          p_event_source: 'welcome_test',
-          p_source_id: state.testId,
+          p_answer_id: canonicalId,
+          p_legacy_answer_id: questionDef.id,
           p_element_type: questionDef.element_type || questionDef.question_type || null,
           p_event_payload: {
             answer_id: canonicalId,

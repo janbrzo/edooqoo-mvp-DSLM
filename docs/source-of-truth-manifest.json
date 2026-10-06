@@ -748,7 +748,8 @@
       "dataDependencies": {
         "tables": [
           "homework_assignments",
-          "homework_student_answers"
+          "homework_student_answers",
+          "worksheets"
         ],
         "rpcs": [
           "get_homework_comments",
@@ -4549,6 +4550,11 @@
           "value": "loadFailed",
           "setter": "setLoadFailed",
           "initial": "false"
+        },
+        {
+          "value": "lessonMedia",
+          "setter": "setLessonMedia",
+          "initial": "null"
         }
       ],
       "hooks": [
@@ -4571,7 +4577,8 @@
       "dataDependencies": {
         "tables": [
           "homework_assignments",
-          "homework_student_answers"
+          "homework_student_answers",
+          "worksheets"
         ],
         "rpcs": [
           "get_homework_comments",
@@ -4593,6 +4600,7 @@
         "In your account this page shows",
         "Needs Review",
         "No student answer yet",
+        "Question",
         "Review Sent!",
         "Reviewed",
         "Save Comment",
@@ -4600,8 +4608,7 @@
         "Sign up free",
         "Student has submitted",
         "Student:",
-        "Submitted:",
-        "This homework may have been deleted, or the connection failed. Try again or go back to your dashboard."
+        "Submitted:"
       ],
       "userFacingBehavior": {
         "actionHandlers": [],
@@ -23627,6 +23634,11 @@
           "initial": "true"
         },
         {
+          "value": "emailSentTo",
+          "setter": "setEmailSentTo",
+          "initial": "null"
+        },
+        {
           "value": "reminderHours",
           "setter": "setReminderHours",
           "initial": "\"24\""
@@ -23754,7 +23766,7 @@
         "Create a homework assignment from \"",
         "Creating...",
         "Deadline",
-        "Done (skip sending email)"
+        "Exercise types (max 6):"
       ],
       "userFacingBehavior": {
         "actionHandlers": [
@@ -41083,8 +41095,6 @@
         "dataDependencies": {
           "tables": [],
           "rpcs": [
-            "add_student_event",
-            "get_homework_owner_ids",
             "get_student_homework_answers",
             "insert_homework_submission_notification",
             "save_homework_answer",
@@ -42834,11 +42844,8 @@
         "actions": [],
         "navigateTargets": [],
         "dataDependencies": {
-          "tables": [
-            "student_events"
-          ],
+          "tables": [],
           "rpcs": [
-            "add_student_event",
             "calculate_test_results",
             "get_test_by_share_token",
             "get_test_context_by_share_token",
@@ -48396,9 +48403,7 @@
         "name": "add_student_event",
         "callsites": [
           "src/components/worksheet/ExerciseSection.tsx",
-          "src/hooks/dslm/useStudentEvents.tsx",
-          "src/hooks/useInteractiveHomework.tsx",
-          "src/hooks/useWelcomeTest.tsx"
+          "src/hooks/dslm/useStudentEvents.tsx"
         ],
         "payloadFields": [
           "p_element_type",
@@ -48595,16 +48600,6 @@
         "payloadFields": [
           "p_homework_id",
           "p_student_email"
-        ],
-        "payloadExpressions": []
-      },
-      {
-        "name": "get_homework_owner_ids",
-        "callsites": [
-          "src/hooks/useInteractiveHomework.tsx"
-        ],
-        "payloadFields": [
-          "p_homework_id"
         ],
         "payloadExpressions": []
       },
@@ -52736,8 +52731,7 @@
           "clientFiles": [
             "src/components/worksheet/ExerciseSection.tsx",
             "src/hooks/dslm/useBehavioralStats.tsx",
-            "src/hooks/dslm/useStudentEvents.tsx",
-            "src/hooks/useWelcomeTest.tsx"
+            "src/hooks/dslm/useStudentEvents.tsx"
           ],
           "edgeFunctions": [
             "loop-student-engagement",
@@ -55151,6 +55145,7 @@
             "src/lib/mcp/tools/get_student_summary.ts",
             "src/lib/mcp/tools/list_recent_worksheets.ts",
             "src/pages/Dashboard.tsx",
+            "src/pages/HomeworkReviewPage.tsx",
             "src/pages/SharedWorksheet.tsx",
             "src/pages/StudentPage.tsx",
             "src/pages/WorksheetPage.tsx",
@@ -56987,12 +56982,24 @@
         "migration": "supabase/migrations/20260809180315_754eca52-5bfe-4330-b4c4-27f58070b8f2.sql"
       },
       {
+        "name": "log_homework_submitted_event",
+        "migration": "supabase/migrations/20261006090000_billing_guard_and_student_events.sql"
+      },
+      {
+        "name": "log_welcome_test_event_by_share_token",
+        "migration": "supabase/migrations/20261006090000_billing_guard_and_student_events.sql"
+      },
+      {
         "name": "mark_attention_seen",
         "migration": "supabase/migrations/20260623202114_6dc3ae03-5d7e-4e9d-b3a7-56a0763ba472.sql"
       },
       {
         "name": "prevent_profile_billing_self_update",
         "migration": "supabase/migrations/20260918065241_9d5c395e-0bec-4e3a-b25f-f0a709f0ce3a.sql"
+      },
+      {
+        "name": "prevent_profile_billing_self_update",
+        "migration": "supabase/migrations/20261006090000_billing_guard_and_student_events.sql"
       },
       {
         "name": "revoke_mcp_token",

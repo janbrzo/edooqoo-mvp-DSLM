@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import ExerciseSection from "@/components/worksheet/ExerciseSection";
+import MediaSection from "@/components/worksheet/MediaSection";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -16,6 +17,7 @@ import {
 import { format } from "date-fns";
 import { deepFixTextObjects } from "@/utils/textObjectFixer";
 import { AiEvaluationBadge, type AiEvaluation } from "@/components/homework/AiEvaluationBadge";
+import { parseAiEvaluation } from "@/utils/aiEvaluationMapper";
 import { useHardLightSurface } from "@/hooks/useHardLightSurface";
 import { useAuthFlow } from "@/hooks/useAuthFlow";
 import { useTeacherAuthRedirect } from "@/hooks/useTeacherAuthRedirect";
@@ -72,6 +74,9 @@ export default function HomeworkReviewPage() {
   const [isSending, setIsSending] = useState(false);
   const [savingComment, setSavingComment] = useState<number | null>(null);
   const [loadFailed, setLoadFailed] = useState(false);
+  // Lesson media of the source worksheet: picture/listening exercises refer to it
+  // ("Look at the picture in the Lesson Media section above").
+  const [lessonMedia, setLessonMedia] = useState<{ image: any; audio: any } | null>(null);
 
   // Review links come from the dashboard and the timeline and are bookmarked:
   // a visitor without a session goes to /login and comes back here afterwards.
@@ -124,6 +129,18 @@ export default function HomeworkReviewPage() {
       };
 
       setHomework(fixedData as HomeworkData);
+
+      const sourceWorksheetId = (homeworkData as any).source_worksheet_id as string | null;
+      if (sourceWorksheetId) {
+        const { data: ws } = await supabase
+          .from('worksheets')
+          .select('selected_image, selected_audio')
+          .eq('id', sourceWorksheetId)
+          .maybeSingle();
+        const image = (ws?.selected_image as any)?.url ? { ...(ws!.selected_image as any), id: 'review-image' } : null;
+        const audio = (ws?.selected_audio as any)?.url ? { ...(ws!.selected_audio as any), id: 'review-audio' } : null;
+        setLessonMedia(image || audio ? { image, audio } : null);
+      }
 
       // Load student answers if student email exists
       const studentEmail = homeworkData.students?.student_email;
@@ -239,9 +256,11 @@ export default function HomeworkReviewPage() {
   };
   
   // Get AI evaluation for a specific exercise
-  const getAiEvaluationForExercise = (exerciseIndex: number): AiEvaluation | null => {
+  // Stored shape is { question_evaluations: [...] }; reading it as a single
+  // AiEvaluation rendered "AI Score: NaN%".
+  const getAiEvaluationForExercise = (exerciseIndex: number): Record<number, AiEvaluation> | undefined => {
     const answer = studentAnswers.find(a => a.exercise_index === exerciseIndex);
-    return answer?.ai_evaluation || null;
+    return parseAiEvaluation(answer?.ai_evaluation);
   };
 
   // Check if student has submitted
@@ -438,6 +457,16 @@ export default function HomeworkReviewPage() {
         </Card>
       </div>
 
+      {lessonMedia && (
+        <div className="max-w-5xl mx-auto px-4">
+          <MediaSection
+            selectedImage={lessonMedia.image}
+            selectedAudio={lessonMedia.audio}
+            isDownloadUnlocked={true}
+          />
+        </div>
+      )}
+
       {/* Exercises with student answers */}
       <div className="max-w-5xl mx-auto px-4 py-8">
         <div className="space-y-8">
@@ -457,19 +486,26 @@ export default function HomeworkReviewPage() {
                   editableWorksheet={{ exercises: homework.selected_exercises }}
                   setEditableWorksheet={() => {}}
                   hideExerciseMedia={false}
-                  // Show student answers in read-only mode
-                  isInteractive={false}
+                  // Student answers render only in interactive mode; `disabled`
+                  // keeps every input read-only (same as the homework teacher view).
+                  isInteractive={true}
+                  disabled={true}
+                  onAnswerChange={() => {}}
                   studentAnswers={studentAnswer as any}
                   showCorrectAnswers={true}
                 />
                 
-                {/* AI Evaluation Badge - show for open-ended exercises */}
+                {/* AI feedback per question (ai_evaluation.question_evaluations) */}
                 {aiEvaluation && (
-                  <div className="ml-4 mt-2">
-                    <AiEvaluationBadge 
-                      evaluation={aiEvaluation} 
-                      showFeedback={true} 
-                    />
+                  <div className="ml-4 mt-2 space-y-2">
+                    {Object.values(aiEvaluation).map((evaluation) => (
+                      <div key={evaluation.question_index} className="text-sm">
+                        <span className="font-medium text-muted-foreground">
+                          Question {(evaluation.question_index ?? 0) + 1}
+                        </span>
+                        <AiEvaluationBadge evaluation={evaluation} showFeedback={true} />
+                      </div>
+                    ))}
                   </div>
                 )}
                 

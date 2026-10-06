@@ -36,7 +36,7 @@ import {
   WelcomeTestActionsPanel,
   type WelcomeTestActionsState,
 } from '@/components/welcome-test/WelcomeTestActionsPanel';
-import { sendWelcomeTestEmail } from '@/lib/welcomeTest/ensureWelcomeTest';
+import { sendWelcomeTestEmail, ensureWelcomeTest as ensureWelcomeTestRecord } from '@/lib/welcomeTest/ensureWelcomeTest';
 
 interface WelcomeTestSuggestionProps {
   studentId: string;
@@ -134,7 +134,11 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
           setShareUrl(`${window.location.origin}/welcome-test/${test.share_token}`);
         }
 
-        if (test.status === 'completed' || test.status === 'reviewed') {
+        if (test.status === 'draft' || (!test.share_token && !['completed', 'reviewed'].includes(test.status))) {
+          // Unfinished setup (e.g. the tab closed during autosend): never claim
+          // "Sent"; offer Send, which resumes the draft via ensureWelcomeTest.
+          setStatus('no_test');
+        } else if (test.status === 'completed' || test.status === 'reviewed') {
           setStatus('completed');
         } else if (test.status === 'in_progress') {
           setStatus('in_progress');
@@ -182,12 +186,14 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
       const existingToken = shareUrl.split('/').pop() ?? '';
       return { testId, token: existingToken };
     }
-    // Test exists but no token (defensive)
+    // Test exists but setup never finished (draft without token): the shared
+    // helper seeds missing questions, issues the token and moves draft → assigned.
     if (testId && !shareUrl) {
-      const newToken = await generateShareToken(testId, 'welcome');
-      if (!newToken) return null;
-      setShareUrl(`${window.location.origin}/welcome-test/${newToken}`);
-      return { testId, token: newToken };
+      const ensured = await ensureWelcomeTestRecord({ studentId, teacherId, studentName });
+      setTestId(ensured.testId);
+      setShareUrl(ensured.shareUrl);
+      setStatus('pending');
+      return { testId: ensured.testId, token: ensured.token };
     }
 
     // Create everything from scratch

@@ -290,29 +290,19 @@ export const useInteractiveHomework = ({
 
       // Emit homework_submitted event for DSLM Layer A
       try {
-        // v6.9.83: SECURITY DEFINER RPC (public table policy removed for security)
-        const { data: hwData } = await supabase
-          .rpc('get_homework_owner_ids', { p_homework_id: homeworkId })
-          .maybeSingle();
-        
-        if (hwData?.student_id && hwData?.teacher_id) {
-          await supabase.rpc('add_student_event', {
-            p_student_id: hwData.student_id,
-            p_teacher_id: hwData.teacher_id,
-            p_event_type: 'homework_submitted',
-            p_event_source: 'homework',
-            p_source_id: homeworkId,
-            p_event_payload: {
-              homework_id: homeworkId,
-              total_exercises: totalExercises,
-              answered_exercises: Object.keys(answers).length
-            } as unknown as Record<string, never>,
-            p_skill_ids: null,
-            p_element_type: null,
-            p_session_id: null
-          });
-          devLog('[submitHomework] homework_submitted event emitted');
-        }
+        // Authorised by the student's email server-side; anonymous students
+        // may not call add_student_event directly.
+        const { error: eventError } = await (supabase.rpc as any)('log_homework_submitted_event', {
+          p_homework_id: homeworkId,
+          p_student_email: studentEmail,
+          p_event_payload: {
+            homework_id: homeworkId,
+            total_exercises: totalExercises,
+            answered_exercises: Object.keys(answers).length,
+          },
+        });
+        if (eventError) throw eventError;
+        devLog('[submitHomework] homework_submitted event emitted');
       } catch (e) {
         devWarn('[submitHomework] Failed to emit homework_submitted event:', e);
       }
