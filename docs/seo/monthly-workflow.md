@@ -138,7 +138,7 @@ Produce the month's evidence pack and judge last months' moves. Do not plan or c
 
 COLLECT (run what scripts can; ask the owner for the rest in ONE message listing exactly what to paste)
 Scripts:
-- npm run seo:fetch-gsc-performance (needs GSC token), npm run seo:audit-uniqueness, npm run seo:verify-live-routing -- --soft
+- npm run seo:fetch-gsc-performance (needs Search Console access: GSC_SERVICE_ACCOUNT_JSON or an access token; setup in docs/seo/gsc-api-access.md; it returns page x query rows, so ask the owner for CSV exports only if it reports `skipped`), npm run seo:audit-uniqueness, npm run seo:verify-live-routing -- --soft
 Owner:
 - GSC Performance: last 28 days vs previous 28 days, Queries and Pages tabs (CSV), plus the 16-month chart if anything looks like a step drop.
 - GSC Pages (indexing) export and Manual actions status.
