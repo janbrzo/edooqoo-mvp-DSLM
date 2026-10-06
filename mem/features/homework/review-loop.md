@@ -16,6 +16,7 @@ type: feature
 - `Badge` forwards refs (Radix `asChild` triggers, e.g. homework deadline popover).
 - CreateHomeworkModal remembers `emailSentTo`; the success screen says "Email sent to …" instead of inviting a duplicate send.
 - Migration `20261006090000_billing_guard_and_student_events.sql` fixes the billing guard (`current_user` instead of `auth.role()`, which blocked `consume_token` since 2026-09-18) and adds token/email-authorised event RPCs used by `useWelcomeTest` and `useInteractiveHomework` (anonymous `add_student_event` calls were rejected since 2026-08-07).
+- Welcome Test event dedup deletes by canonical `answer_id`, and by legacy id only on events without `legacy_answer_id` (migration `20261006120000`): legacy ids such as `wt_q12` equal canonical ids of other questions, so the old rule wiped unrelated events.
 - Review page shows the source worksheet's lesson media (picture/listening exercises point to it).
 - `WelcomeTestSuggestion` never shows "Sent" for a draft without a share token; Send resumes it through the shared `ensureWelcomeTest` helper.
 
