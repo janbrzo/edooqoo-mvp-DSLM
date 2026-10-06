@@ -61,7 +61,7 @@ const AllStudentsPage = () => {
   const navigate = useNavigate();
 
   const ids = useMemo(() => students.map((s) => s.id), [students]);
-  const { worksheetCountByStudent } = useStudentsOverview(ids);
+  const { worksheetCountByStudent, loading: countsLoading } = useStudentsOverview(ids);
   const { items: nextUp } = useNextUpStudents(students, Math.max(students.length, 1));
 
   const nextLessonById = useMemo(() => {
@@ -199,7 +199,7 @@ const AllStudentsPage = () => {
                     <div className="mt-0.5 flex flex-wrap gap-x-3 text-xs text-muted-foreground">
                       {goal && <span className="truncate">Goal: {goal}</span>}
                       <span>Next: {lesson ? formatLesson(lesson) : '—'}</span>
-                      <span>{count} {count === 1 ? 'worksheet' : 'worksheets'}</span>
+                      <span>{countsLoading ? '… worksheets' : `${count} ${count === 1 ? 'worksheet' : 'worksheets'}`}</span>
                     </div>
                   </div>
                   <Button variant="ghost" size="sm" asChild className="shrink-0">

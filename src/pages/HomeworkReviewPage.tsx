@@ -4,6 +4,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import ExerciseSection from "@/components/worksheet/ExerciseSection";
+import MediaSection from "@/components/worksheet/MediaSection";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -73,6 +74,9 @@ export default function HomeworkReviewPage() {
   const [isSending, setIsSending] = useState(false);
   const [savingComment, setSavingComment] = useState<number | null>(null);
   const [loadFailed, setLoadFailed] = useState(false);
+  // Lesson media of the source worksheet: picture/listening exercises refer to it
+  // ("Look at the picture in the Lesson Media section above").
+  const [lessonMedia, setLessonMedia] = useState<{ image: any; audio: any } | null>(null);
 
   // Review links come from the dashboard and the timeline and are bookmarked:
   // a visitor without a session goes to /login and comes back here afterwards.
@@ -125,6 +129,18 @@ export default function HomeworkReviewPage() {
       };
 
       setHomework(fixedData as HomeworkData);
+
+      const sourceWorksheetId = (homeworkData as any).source_worksheet_id as string | null;
+      if (sourceWorksheetId) {
+        const { data: ws } = await supabase
+          .from('worksheets')
+          .select('selected_image, selected_audio')
+          .eq('id', sourceWorksheetId)
+          .maybeSingle();
+        const image = (ws?.selected_image as any)?.url ? { ...(ws!.selected_image as any), id: 'review-image' } : null;
+        const audio = (ws?.selected_audio as any)?.url ? { ...(ws!.selected_audio as any), id: 'review-audio' } : null;
+        setLessonMedia(image || audio ? { image, audio } : null);
+      }
 
       // Load student answers if student email exists
       const studentEmail = homeworkData.students?.student_email;
@@ -440,6 +456,16 @@ export default function HomeworkReviewPage() {
           </div>
         </Card>
       </div>
+
+      {lessonMedia && (
+        <div className="max-w-5xl mx-auto px-4">
+          <MediaSection
+            selectedImage={lessonMedia.image}
+            selectedAudio={lessonMedia.audio}
+            isDownloadUnlocked={true}
+          />
+        </div>
+      )}
 
       {/* Exercises with student answers */}
       <div className="max-w-5xl mx-auto px-4 py-8">
