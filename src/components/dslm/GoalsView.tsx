@@ -167,12 +167,18 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
     const handler = (e: Event) => {
       const detail = (e as CustomEvent).detail;
       if (detail?.studentId && detail.studentId !== studentId) return;
+      if (detail?.goalType === 'main') {
+        setEditedMainGoal(mainGoal);
+        setEditedTargetDate(mainGoalTargetDate || '');
+        setIsEditingMainGoal(true);
+        return;
+      }
       setNewGoal((prev) => ({ ...prev, type: 'supporting' }));
       setShowAddGoal(true);
     };
     window.addEventListener('dslm:addGoal', handler as EventListener);
     return () => window.removeEventListener('dslm:addGoal', handler as EventListener);
-  }, [studentId]);
+  }, [studentId, mainGoal, mainGoalTargetDate]);
 
   const renderGoalCard = (goal: any) => {
     const r = progressMap.get(goal.id);
