@@ -6,6 +6,7 @@ import { useStudents } from '@/hooks/useStudents';
 import { useDemoContext } from '@/contexts/DemoContext';
 import { useAuthUser } from '@/hooks/useAuthUser';
 import { devLog } from '@/utils/logger';
+import { resolveIdeaSteps } from '@/lib/onboarding/ideaSteps';
 
 interface OnboardingStep {
   // Section 1: One-time student setup
@@ -142,6 +143,8 @@ export const useOnboardingProgress = () => {
         ideasUsedRes,
         calendarRes,
         homeworkRes,
+        suggestionsRes,
+        suggestionsUsedRes,
       ] = await Promise.all([
         supabase.from('students').select('id', { head: true, count: 'exact' }).eq('teacher_id', teacherId),
         supabase
@@ -186,17 +189,36 @@ export const useOnboardingProgress = () => {
           .from('homework_assignments')
           .select('id', { head: true, count: 'exact' })
           .eq('teacher_id', teacherId),
+        // 2026-10: the weekly-prep steps point to Learning plan lesson
+        // suggestions, so suggestions complete them (notes still count).
+        supabase
+          .from('future_worksheet_suggestions')
+          .select('id', { head: true, count: 'exact' })
+          .eq('teacher_id', teacherId)
+          .is('deleted_at', null),
+        supabase
+          .from('future_worksheet_suggestions')
+          .select('id', { head: true, count: 'exact' })
+          .eq('teacher_id', teacherId)
+          .is('deleted_at', null)
+          .eq('is_used', true),
       ]);
 
       const safeCount = (res: any): number => (res?.error ? 0 : res?.count ?? 0);
+      const ideaSteps = resolveIdeaSteps({
+        suggestions: safeCount(suggestionsRes),
+        usedSuggestions: safeCount(suggestionsUsedRes),
+        ideaNotes: safeCount(ideasRes),
+        usedIdeaNotes: safeCount(ideasUsedRes),
+      });
 
       let newSteps: OnboardingStep = {
         add_student: safeCount(studentsRes) > 0,
         send_welcome_test: safeCount(testsRes) > 0,
         add_goals: safeCount(goalsRes) > 0,
         generate_roadmap: safeCount(phasesRes) > 0,
-        generate_next_ideas: safeCount(ideasRes) > 0,
-        pick_idea: safeCount(ideasUsedRes) > 0,
+        generate_next_ideas: ideaSteps.generate_next_ideas,
+        pick_idea: ideaSteps.pick_idea,
         generate_worksheet: safeCount(worksheetsRes) > 0,
         setup_calendar: safeCount(calendarRes) > 0,
         create_homework: safeCount(homeworkRes) > 0,

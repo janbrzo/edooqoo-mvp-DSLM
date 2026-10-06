@@ -285,7 +285,7 @@ export function buildTimelineEvents(input: TimelineSourceData): TimelineEvent[] 
         type: 'mastery_change',
         at,
         title: `${skill}: mastery ${entry.metadata?.mastery}%`,
-        subtitle: 'Learning model',
+        subtitle: 'Learning plan',
         needsAction: false,
         href: '?tab=dslm',
       });

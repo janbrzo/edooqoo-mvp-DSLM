@@ -26,6 +26,8 @@ interface SuggestedLevelChangeBannerProps {
   currentLevel: string | null | undefined;
   /** Optional callback after a successful Apply (so parents can refresh local state). */
   onApplied?: (newLevel: string) => void;
+  /** Optional callback after "Keep current level" (so attention signals can refresh). */
+  onDismissed?: () => void;
 }
 
 export function SuggestedLevelChangeBanner({
@@ -33,6 +35,7 @@ export function SuggestedLevelChangeBanner({
   testId,
   currentLevel,
   onApplied,
+  onDismissed,
 }: SuggestedLevelChangeBannerProps) {
   const [estimatedLevel, setEstimatedLevel] = useState<string | null>(null);
   const [applying, setApplying] = useState(false);
@@ -103,7 +106,7 @@ export function SuggestedLevelChangeBanner({
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={dismiss} disabled={applying}>
+            <Button variant="outline" size="sm" onClick={() => { dismiss(); onDismissed?.(); }} disabled={applying}>
               Keep {currentLevel}
             </Button>
             <Button size="sm" onClick={apply} disabled={applying}>

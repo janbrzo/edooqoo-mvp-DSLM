@@ -91,6 +91,19 @@ export function computeConfidence({ suggestion, recentTopics = [] }: ConfidenceI
   };
 }
 
+export type FitLabel = 'Strong fit' | 'Good fit' | 'Rough fit';
+
+/**
+ * Teacher-facing wording for the confidence heuristic. The score is a
+ * completeness heuristic, not a measurement, so cards show a word instead of
+ * a percentage. Thresholds match the badge colours (80 / 65).
+ */
+export function describeFit(score: number): FitLabel {
+  if (score >= 80) return 'Strong fit';
+  if (score >= 65) return 'Good fit';
+  return 'Rough fit';
+}
+
 /** Confidence for a curriculum phase (uses simpler signals). */
 export function computePhaseConfidence(phase: any): ConfidenceResult {
   if (!phase) return { score: 50, label: '50% match to student needs', reasons: [] };

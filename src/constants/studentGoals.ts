@@ -32,9 +32,26 @@ export const ENGLISH_LEVELS = [
  * Helper function to format goal value to display label.
  * Falls back to the raw value if not found (for custom goals).
  */
+/**
+ * Codes written by the retired AddStudentButton form. Students created
+ * there still carry them in `students.main_goal`; they are display-only
+ * (never offered in a dropdown).
+ */
+export const LEGACY_GOAL_LABELS: Readonly<Record<string, string>> = {
+  'business-communication': 'Business Communication & Presentations',
+  'academic-writing': 'Academic Writing & Research',
+  'conversation-speaking': 'Conversation & Speaking Fluency',
+  'exam-preparation': 'Exam Preparation (IELTS/TOEFL/Cambridge)',
+  'grammar-structure': 'Grammar & Language Structure',
+  'vocabulary-building': 'Vocabulary Building & Usage',
+  'reading-comprehension': 'Reading Comprehension & Analysis',
+  'listening-skills': 'Listening Skills & Understanding',
+  'travel-practical': 'Travel & Practical English',
+};
+
 export const formatGoalLabel = (goalValue: string): string => {
   const goal = MAIN_GOALS.find(g => g.value === goalValue);
-  return goal?.label || goalValue;
+  return goal?.label || LEGACY_GOAL_LABELS[goalValue] || goalValue;
 };
 
 /**

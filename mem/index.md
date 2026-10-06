@@ -50,6 +50,7 @@
 - [Dashboard Today Layout](mem://features/dashboard/today-layout) — v6.9.109 /dashboard = Next up / Needs your attention / Everything else; students list on /students, counters on /profile
 - [Quick Student Access](mem://features/dashboard/quick-student-access) — v6.9.110 four paths to any student (jump search, recent pills, inline list, nav switcher), all via quickAccess.ts, no new queries
 - [Student Workspace 4 Tabs](mem://features/student-page/workspace-4-tabs) — v6.9.111 final Prep/Timeline/Library/Learning model; legacy ?tab= aliases permanent; never restore Overview/Worksheets/Skills
+- [Learning Plan Tab](mem://features/dslm/learning-plan) — stage-driven Plan / Insights tab (setup checklist, Needs your OK, Up next, Roadmap, Goals); Prep and Plan share orderUpNext
 - [Quick Add Note](mem://features/student-page/quick-add-note-from-overview) — Add Note opens inline modal in Prep tab QuickNoteBox; never route through tabs
 - [User-flow audit 2026-10](mem://features/dashboard/audit-2026-10-user-flow) — demo student page fix + demoFetchGuard, wrap-safe worksheet toolbars, Prep-first CTAs, useTeacherAuthRedirect, homework error card, vitest in CI; 10-05 follow-up: calendar/MCP/worksheet login return paths, untrimmed Prep topic, no duplicate suggestion tiles
 - [Homework Review Loop](mem://features/homework/review-loop) — isHomeworkAwaitingReview single rule, Review/View review from timeline + homework list, review page login redirect + error card + cache invalidation, demo review card

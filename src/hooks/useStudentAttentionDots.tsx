@@ -14,6 +14,7 @@ export interface StudentAttentionDots {
   supporting: boolean;
   additional: boolean;
   pathway: boolean; // pacing or level
+  level: boolean; // Welcome Test level differs from the profile level (not dismissed)
   flashcards: boolean; // student-added cards
   homework: boolean; // submitted, not reviewed
 }
@@ -23,6 +24,7 @@ const EMPTY: StudentAttentionDots = {
   supporting: false,
   additional: false,
   pathway: false,
+  level: false,
   flashcards: false,
   homework: false,
 };
@@ -81,7 +83,7 @@ export function useStudentAttentionDots(studentId?: string, teacherId?: string, 
           flashcards = (count ?? 0) > 0;
         }
 
-        setDots({ goalsAny, supporting, additional, pathway, flashcards, homework });
+        setDots({ goalsAny, supporting, additional, pathway, level: levelSuggested, flashcards, homework });
       } catch (err) {
         console.warn('[useStudentAttentionDots] failed', err);
         setDots(EMPTY);
@@ -108,7 +110,7 @@ export function useStudentAttentionDots(studentId?: string, teacherId?: string, 
   // fetchDots() will reconcile with reality.
   const dismiss = useCallback((key: keyof StudentAttentionDots) => {
     setDots((prev) => ({ ...prev, [key]: false }));
-    if (key === 'pathway' && studentId) {
+    if ((key === 'pathway' || key === 'level') && studentId) {
       try { sessionStorage.setItem(`wt-level-change-dismissed:student:${studentId}`, '1'); } catch { /* noop */ }
     }
   }, [studentId]);

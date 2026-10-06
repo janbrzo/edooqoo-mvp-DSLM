@@ -32,6 +32,22 @@ export const BehavioralStatsCard: React.FC<BehavioralStatsCardProps> = ({ stats,
     );
   }
 
+  // 2026-10: six "No data" tiles say one thing; say it once.
+  const isEmpty =
+    stats.lessonsPerWeek === null &&
+    stats.cancellationRate === null &&
+    stats.homeworkTotal === 0 &&
+    stats.flashcardSetsCount === 0 &&
+    stats.totalFlashcardReviews === 0 &&
+    stats.daysSinceLastActivity === null;
+  if (isEmpty) {
+    return (
+      <p className="text-sm text-muted-foreground">
+        No lessons, homework or flashcard activity yet. Patterns appear after the first booked lesson or homework.
+      </p>
+    );
+  }
+
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
       <StatItem

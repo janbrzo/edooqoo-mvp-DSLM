@@ -84,6 +84,39 @@ export function resolveModelPerspective(view: string | null | undefined): ModelP
   }
 }
 
+export type ModelSegment = 'plan' | 'insights';
+export type ModelAnchor = 'goals' | 'skills' | 'profile' | null;
+
+/** `view` values written by the Learning plan segment switch. */
+export const MODEL_SEGMENT_VIEWS: Readonly<Record<ModelSegment, string>> = {
+  plan: 'pathway',
+  insights: 'insights',
+};
+
+/**
+ * Learning plan (2026-10): two visible segments. Every historical `view`
+ * value keeps working: `goals` scrolls Plan to Goals, `skills` / `profile`
+ * open Insights at the matching section.
+ */
+export function resolveModelSegment(view: string | null | undefined): {
+  segment: ModelSegment;
+  anchor: ModelAnchor;
+} {
+  switch (clean(view)) {
+    case 'insights':
+      return { segment: 'insights', anchor: null };
+    case 'skills':
+      return { segment: 'insights', anchor: 'skills' };
+    case 'profile':
+      return { segment: 'insights', anchor: 'profile' };
+    case 'goals':
+      return { segment: 'plan', anchor: 'goals' };
+    case 'pathway':
+    default:
+      return { segment: 'plan', anchor: null };
+  }
+}
+
 interface AliasTarget {
   tab: WorkspaceTab;
   section?: LibrarySection;

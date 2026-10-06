@@ -68,6 +68,14 @@ Reference: `docs/ux/target-teacher-experience.md` (approved 2026-09-02).
     - [x] M8.5 — AGENTS.md rule
     - [x] M8.6 — roadmap + spec section 18 (18.1 M8 closure result)
     - [x] M8.7 — final verification (spec 18.1)
+- [x] Learning plan tab (2026-10) — stage-driven Plan / Insights replaces the Model Cockpit — spec: `docs/ux/learning-model-spec.md`
+  - [x] L0 spec + memory
+  - [x] L1 pure rules (`orderUpNext`, `computeModelReadiness`, `buildInsightsSummary`, `describeFit`, `resolveModelSegment`) + unit tests
+  - [x] L2 Prep and Learning plan share one next-lesson order; suggestion mutations broadcast across instances
+  - [x] L3–L5 Plan (setup checklist, Needs your OK, Up next, roadmap stepper, goals) and Insights; legacy editors in side sheets
+  - [x] L6 Prep "From the plan" link, "Learning plan" labels
+  - [x] L7 dead code removed (PathwayView, NextStepsSection, NextStepBanner, cockpit, badges, SkillsView, DSLM explainer, modelHealth, dslm:openSubsection), docs
+  - [ ] L8 real-account browser pass + 5-teacher Martha test
 - [ ] Guided mode beyond the dashboard
 
 ## Deferred

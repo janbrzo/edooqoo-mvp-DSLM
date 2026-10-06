@@ -99,14 +99,14 @@ export const QuickNoteBox: React.FC<QuickNoteBoxProps> = ({
             ))
           ) : (
             <p className="text-sm text-muted-foreground">
-              No notes yet: anything you type here feeds the learning model.
+              No notes yet: anything you type here feeds the learning plan.
             </p>
           )}
         </div>
 
         <div className="mt-3 text-right">
           <Button variant="link" size="sm" className="h-auto p-0" onClick={onViewAll}>
-            All notes → Learning model
+            All notes → Learning plan
           </Button>
         </div>
       </CardContent>

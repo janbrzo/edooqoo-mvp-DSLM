@@ -15,12 +15,14 @@
 import { formatGoalLabel } from '@/constants/studentGoals';
 import { FIELD_LIMITS } from '@/components/WorksheetForm/constants';
 import type { WorksheetSuggestion } from '@/types/studentProgress';
+import { formatPhaseCaption, orderUpNext, type PlanPhaseLite } from '@/lib/dslm/learningPlan';
 
 /** Superset of `WorksheetSuggestion` as returned by `useFutureTimeline`. */
 export interface PrepSuggestionInput extends WorksheetSuggestion {
   suggested_additional_info?: string | null;
   suggested_grammar_focus?: string | null;
   suggested_exercise_focus_map?: Record<string, string> | null;
+  phase_id?: string | null;
 }
 
 export type PrepSuggestionSource = 'phase_step' | 'next_step' | 'fallback';
@@ -35,6 +37,8 @@ export interface PrepSuggestion {
   exerciseFocusMap: Record<string, 'vocabulary' | 'grammar'>;
   rationale: string | null;
   source: PrepSuggestionSource;
+  /** `Phase 2: Meetings language` when the step belongs to a known phase. */
+  phaseCaption: string | null;
 }
 
 export const RATIONALE_MAX_LEN = 160;
@@ -60,27 +64,11 @@ function normalizeFocusMap(
   return out;
 }
 
-/** Sequence first, id second, stable across re-renders and refetches. */
-function bySequence(a: PrepSuggestionInput, b: PrepSuggestionInput): number {
-  const seqA = Number.isFinite(a.sequence_number) ? a.sequence_number : Number.MAX_SAFE_INTEGER;
-  const seqB = Number.isFinite(b.sequence_number) ? b.sequence_number : Number.MAX_SAFE_INTEGER;
-  if (seqA !== seqB) return seqA - seqB;
-  return String(a.id).localeCompare(String(b.id));
-}
-
-function firstUsable(
-  rows: readonly PrepSuggestionInput[] | null | undefined,
+function toPrepSuggestion(
+  row: PrepSuggestionInput,
   source: Exclude<PrepSuggestionSource, 'fallback'>,
-): PrepSuggestion | null {
-  if (!rows || rows.length === 0) return null;
-
-  const candidates = rows
-    .filter((row) => !row.is_used && !row.deleted_at && text(row.suggested_topic).length > 0)
-    .sort(bySequence);
-
-  const row = candidates[0];
-  if (!row) return null;
-
+  phaseCaption: string | null,
+): PrepSuggestion {
   return {
     id: row.id ?? null,
     topic: text(row.suggested_topic),
@@ -91,26 +79,37 @@ function firstUsable(
     exerciseFocusMap: normalizeFocusMap(row.suggested_exercise_focus_map),
     rationale: text(row.rationale) || null,
     source,
+    phaseCaption,
   };
 }
 
 /**
  * The one topic Prep proposes for the next lesson.
  *
- * Phase-bound steps win over free-floating next steps, because they carry the
- * curriculum order the teacher already approved. Used and soft-deleted rows are
- * ignored. When nothing qualifies, the fallback keeps the card useful instead
- * of empty: the first focus area, else the student's main goal, else a generic
+ * The order comes from `orderUpNext`: the same queue the Learning plan tab
+ * shows as "Up next": so both tabs always agree on #1: steps of the
+ * in-progress phase first, then the other phases in roadmap order, then
+ * free-floating next steps. Used, soft-deleted and topic-less rows are
+ * ignored. Pass `phases` whenever they are loaded; without them phase steps
+ * still win over free steps, but the in-progress phase cannot be recognised.
+ * When nothing qualifies, the fallback keeps the card useful instead of
+ * empty: the first focus area, else the student's main goal, else a generic
  * practice topic.
  */
 export function selectPrepSuggestion(
   phaseSteps: readonly PrepSuggestionInput[] | null | undefined,
   nextSteps: readonly PrepSuggestionInput[] | null | undefined,
   fallback: { mainGoal: string | null; focusAreas: readonly string[] },
+  phases?: readonly PlanPhaseLite[] | null,
 ): PrepSuggestion {
-  const picked =
-    firstUsable(phaseSteps, 'phase_step') ?? firstUsable(nextSteps, 'next_step');
-  if (picked) return picked;
+  const phaseIds = new Set((phaseSteps ?? []).map((row) => row.id));
+  const first = orderUpNext<PrepSuggestionInput>({ phases, phaseSteps, nextSteps }).find(
+    (item) => text(item.suggestion.suggested_topic).length > 0,
+  );
+  if (first) {
+    const source = phaseIds.has(first.suggestion.id) ? 'phase_step' : 'next_step';
+    return toPrepSuggestion(first.suggestion, source, formatPhaseCaption(first));
+  }
 
   const mainGoal = text(fallback.mainGoal);
   const goalLabel = mainGoal ? formatGoalLabel(mainGoal) : '';
@@ -126,6 +125,7 @@ export function selectPrepSuggestion(
     exerciseFocusMap: {},
     rationale: null,
     source: 'fallback',
+    phaseCaption: null,
   };
 }
 
