@@ -10,7 +10,7 @@ import React from 'react';
 import { Check, Copy, Loader2, Map, Plus, Send, Sparkles, Target } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { formatRelativeAge } from '@/lib/students/prepPlan';
+import { formatRelativeAgeInline } from '@/lib/students/prepPlan';
 import type { SetupStep, SetupStepKey, WelcomeTestState } from '@/lib/dslm/modelReadiness';
 import { PlanSection } from './PlanSection';
 
@@ -51,9 +51,8 @@ const STEP_SPOTLIGHT: Partial<Record<SetupStepKey, string>> = {
 };
 
 function sentAgo(iso: string | null): string {
-  const age = formatRelativeAge(iso);
-  if (!age) return 'sent';
-  return `sent ${age.charAt(0).toLowerCase()}${age.slice(1)}`;
+  const age = formatRelativeAgeInline(iso);
+  return age ? `sent ${age}` : 'sent';
 }
 
 export const SetupChecklist: React.FC<SetupChecklistProps> = (props) => {

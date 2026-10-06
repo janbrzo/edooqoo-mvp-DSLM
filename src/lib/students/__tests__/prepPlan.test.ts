@@ -3,6 +3,7 @@ import {
   selectPrepSuggestion,
   buildRationale,
   formatRelativeAge,
+  formatRelativeAgeInline,
   RATIONALE_MAX_LEN,
   FALLBACK_TOPIC,
   NO_SIGNAL_RATIONALE,
@@ -209,6 +210,21 @@ describe('buildRationale', () => {
 
   it('reports honestly when there is no signal at all', () => {
     expect(buildRationale(base, [])).toBe(NO_SIGNAL_RATIONALE);
+  });
+});
+
+describe('formatRelativeAgeInline', () => {
+  const now = new Date(2026, 8, 14, 12, 0, 0);
+
+  it('lowercases only the relative words', () => {
+    expect(formatRelativeAgeInline(new Date(2026, 8, 14, 8, 0, 0).toISOString(), now)).toBe('today');
+    expect(formatRelativeAgeInline(new Date(2026, 8, 13, 8, 0, 0).toISOString(), now)).toBe('yesterday');
+    expect(formatRelativeAgeInline(new Date(2026, 8, 10).toISOString(), now)).toBe('4 days ago');
+  });
+
+  it('keeps the month capital in an absolute date', () => {
+    expect(formatRelativeAgeInline(new Date(2026, 5, 26).toISOString(), now)).toBe('Jun 26, 2026');
+    expect(formatRelativeAgeInline(null, now)).toBe('');
   });
 });
 
