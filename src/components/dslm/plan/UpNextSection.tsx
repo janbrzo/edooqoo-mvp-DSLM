@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { cn } from '@/lib/utils';
 import { formatPhaseCaption, type UpNextItem } from '@/lib/dslm/learningPlan';
-import { formatRelativeAge } from '@/lib/students/prepPlan';
+import { formatRelativeAgeInline } from '@/lib/students/prepPlan';
 import { PlanSection } from './PlanSection';
 import { SuggestionActionsMenu } from './SuggestionActionsMenu';
 import { SuggestionWhyPanel, type SuggestionLike } from './SuggestionWhyPanel';
@@ -218,13 +218,13 @@ export const UpNextSection: React.FC<UpNextSectionProps> = ({
           <CollapsibleContent className="pt-1">
             <ul className="divide-y divide-border rounded-lg border border-border bg-card" aria-label="Taught lessons">
               {usedSteps.map((s, index) => {
-                const usedAge = formatRelativeAge(s.used_at);
+                const usedAge = formatRelativeAgeInline(s.used_at);
                 return (
                   <li key={s.id} className="flex items-center gap-2 px-3 py-2">
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-sm text-foreground">{topicOf(s)}</span>
                       <span className="block truncate text-xs text-muted-foreground">
-                        {usedAge ? `Used ${usedAge.charAt(0).toLowerCase()}${usedAge.slice(1)}` : 'Used'}
+                        {usedAge ? `Used ${usedAge}` : 'Used'}
                         {s.used_worksheet_id ? '' : ' · marked manually'}
                       </span>
                     </span>

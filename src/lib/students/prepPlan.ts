@@ -199,3 +199,12 @@ export function formatRelativeAge(iso: string | null | undefined, now: Date = ne
   }
   return `${MONTHS[parsed.getMonth()]} ${parsed.getDate()}, ${parsed.getFullYear()}`;
 }
+
+/**
+ * `formatRelativeAge` for use mid-sentence ("sent today", "used Jun 26, 2026"):
+ * only the relative words are lowercased, an absolute date keeps its month capital.
+ */
+export function formatRelativeAgeInline(iso: string | null | undefined, now: Date = new Date()): string {
+  const age = formatRelativeAge(iso, now);
+  return age === 'Today' || age === 'Yesterday' ? age.toLowerCase() : age;
+}
