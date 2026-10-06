@@ -46776,6 +46776,7 @@
         },
         "environmentVariables": [
           "APP_BASE_URL",
+          "CRON_SECRET",
           "RESEND_API_KEY",
           "SUPABASE_ANON_KEY",
           "SUPABASE_SERVICE_ROLE_KEY",
@@ -57449,6 +57450,7 @@
           "supabase/functions/audit-llm-models/index.ts",
           "supabase/functions/backfill-welcome-test-auto-apply/index.ts",
           "supabase/functions/bulk-publish-worksheets/index.ts",
+          "supabase/functions/send-homework-reminders/index.ts",
           "supabase/functions/send-model-audit-email/index.ts",
           "supabase/functions/send-next-lesson-newsletter/index.ts",
           "supabase/functions/test-model-failure-logger/index.ts"
