@@ -16,6 +16,7 @@ import {
 import { format } from "date-fns";
 import { deepFixTextObjects } from "@/utils/textObjectFixer";
 import { AiEvaluationBadge, type AiEvaluation } from "@/components/homework/AiEvaluationBadge";
+import { parseAiEvaluation } from "@/utils/aiEvaluationMapper";
 import { useHardLightSurface } from "@/hooks/useHardLightSurface";
 import { useAuthFlow } from "@/hooks/useAuthFlow";
 import { useTeacherAuthRedirect } from "@/hooks/useTeacherAuthRedirect";
@@ -239,9 +240,11 @@ export default function HomeworkReviewPage() {
   };
   
   // Get AI evaluation for a specific exercise
-  const getAiEvaluationForExercise = (exerciseIndex: number): AiEvaluation | null => {
+  // Stored shape is { question_evaluations: [...] }; reading it as a single
+  // AiEvaluation rendered "AI Score: NaN%".
+  const getAiEvaluationForExercise = (exerciseIndex: number): Record<number, AiEvaluation> | undefined => {
     const answer = studentAnswers.find(a => a.exercise_index === exerciseIndex);
-    return answer?.ai_evaluation || null;
+    return parseAiEvaluation(answer?.ai_evaluation);
   };
 
   // Check if student has submitted
@@ -457,19 +460,26 @@ export default function HomeworkReviewPage() {
                   editableWorksheet={{ exercises: homework.selected_exercises }}
                   setEditableWorksheet={() => {}}
                   hideExerciseMedia={false}
-                  // Show student answers in read-only mode
-                  isInteractive={false}
+                  // Student answers render only in interactive mode; `disabled`
+                  // keeps every input read-only (same as the homework teacher view).
+                  isInteractive={true}
+                  disabled={true}
+                  onAnswerChange={() => {}}
                   studentAnswers={studentAnswer as any}
                   showCorrectAnswers={true}
                 />
                 
-                {/* AI Evaluation Badge - show for open-ended exercises */}
+                {/* AI feedback per question (ai_evaluation.question_evaluations) */}
                 {aiEvaluation && (
-                  <div className="ml-4 mt-2">
-                    <AiEvaluationBadge 
-                      evaluation={aiEvaluation} 
-                      showFeedback={true} 
-                    />
+                  <div className="ml-4 mt-2 space-y-2">
+                    {Object.values(aiEvaluation).map((evaluation) => (
+                      <div key={evaluation.question_index} className="text-sm">
+                        <span className="font-medium text-muted-foreground">
+                          Question {(evaluation.question_index ?? 0) + 1}
+                        </span>
+                        <AiEvaluationBadge evaluation={evaluation} showFeedback={true} />
+                      </div>
+                    ))}
                   </div>
                 )}
                 

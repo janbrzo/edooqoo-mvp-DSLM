@@ -12,4 +12,9 @@ type: feature
 - Demo: the review page renders an explanation card (Back to student / Sign up free) instead of redirecting to `/login`; `StudentHomeworkTab` lists `demoData.homework` for the student and every write or student-link action shows `showDemoBlockedToast`.
 - `StudentHomeworkTab` rows wrap (`flex-col sm:flex-row`, `flex-wrap` action group); verified scrollWidth == viewport at 360/375/1024/1280.
 
+- Review page renders exercises with `isInteractive` + `disabled` (answers only render in interactive mode) and AI feedback via `parseAiEvaluation` per question; the stored `ai_evaluation` is `{question_evaluations: [...]}`, never a single `AiEvaluation`.
+- `Badge` forwards refs (Radix `asChild` triggers, e.g. homework deadline popover).
+- CreateHomeworkModal remembers `emailSentTo`; the success screen says "Email sent to …" instead of inviting a duplicate send.
+- Open DB issues found 2026-10-06 (need a migration, not applied from the repo): `prevent_profile_billing_self_update` checks `auth.role()` and blocks `consume_token` (no token charged since 2026-09-18); anon students cannot call `add_student_event` since 2026-08-07, so Welcome Test answer events and `homework_submitted` events are lost.
+
 **Why:** the 2026-10-05 user-flow audit found the review page reachable only from the dashboard (max 5 unreviewed items), the timeline showing "Waiting for your review" for reviewed homework, the demo's main attention CTA ending on `/login`, and a stale attention row after sending a review.
