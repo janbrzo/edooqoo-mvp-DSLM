@@ -54,9 +54,9 @@ interface DSLMTabProps {
 }
 
 const PERSPECTIVES = [
-  { id: 'roadmap', view: 'pathway', label: 'Roadmap & Goals', description: 'Direction and next steps', icon: Route },
-  { id: 'skills', view: 'skills', label: 'Skills & Level', description: 'Current ability', icon: BarChart3 },
-  { id: 'profile', view: 'profile', label: 'Learner DNA', description: 'Profile and learning patterns', icon: User },
+  { id: 'roadmap', view: 'pathway', label: 'Roadmap & Goals', shortLabel: 'Roadmap', description: 'Direction and next steps', icon: Route },
+  { id: 'skills', view: 'skills', label: 'Skills & Level', shortLabel: 'Skills', description: 'Current ability', icon: BarChart3 },
+  { id: 'profile', view: 'profile', label: 'Learner DNA', shortLabel: 'DNA', description: 'Profile and learning patterns', icon: User },
 ] as const;
 
 export const DSLMTab: React.FC<DSLMTabProps> = ({
@@ -336,7 +336,8 @@ export const DSLMTab: React.FC<DSLMTabProps> = ({
               >
                 <Icon className="h-4 w-4 shrink-0" />
                 <span className="min-w-0">
-                  <span className="block truncate text-xs font-semibold sm:text-sm">{perspective.label}</span>
+                  <span className="block truncate text-xs font-semibold sm:hidden" aria-hidden="true">{perspective.shortLabel}</span>
+                  <span className="sr-only sm:not-sr-only sm:block sm:truncate sm:text-sm sm:font-semibold">{perspective.label}</span>
                   <span className="hidden truncate text-[11px] font-normal text-muted-foreground md:block">
                     {perspective.description}
                   </span>
