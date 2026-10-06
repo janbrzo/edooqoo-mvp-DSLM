@@ -3,12 +3,13 @@ import { Resend } from "npm:resend@4.0.0";
 import { renderAsync } from "npm:@react-email/components@0.0.22";
 import React from "npm:react@18.3.1";
 import { HomeworkReminderEmail } from "../_shared/email-templates/homework-reminder.tsx";
+import { hasValidCronSecret } from "../_shared/cronAuth.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY") as string);
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-cron-secret",
 };
 
 Deno.serve(async (req) => {
@@ -17,12 +18,16 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  // Authorization: only allow calls with the anon key (from cron) or service role key
+  // Authorization: allow the cron secret (x-cron-secret, used by the pg_cron job),
+  // the anon key or the service role key. The anon-key path alone was rejected in
+  // production (the function's SUPABASE_ANON_KEY differs from the public client key),
+  // so the pg_cron job authenticates with CRON_SECRET instead.
   const authHeader = req.headers.get("Authorization");
   const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
   const isAuthorized =
+    hasValidCronSecret(req.headers.get("x-cron-secret"), Deno.env.get("CRON_SECRET")) ||
     authHeader === `Bearer ${anonKey}` ||
     authHeader === `Bearer ${serviceKey}`;
 
