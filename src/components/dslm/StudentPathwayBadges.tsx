@@ -61,7 +61,7 @@ export const StudentPathwayBadges: React.FC<StudentPathwayBadgesProps> = ({
       {!goalLabel && (
         <button
           type="button"
-          onClick={() => window.dispatchEvent(new CustomEvent('dslm:addGoal'))}
+          onClick={() => window.dispatchEvent(new CustomEvent('dslm:addGoal', { detail: { goalType: 'main' } }))}
           className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium whitespace-nowrap border border-dashed border-primary/40 text-primary hover:bg-primary/10 transition-colors"
         >
           <Target className="h-3 w-3" />
