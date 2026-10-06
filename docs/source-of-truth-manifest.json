@@ -56990,6 +56990,10 @@
         "migration": "supabase/migrations/20261006090000_billing_guard_and_student_events.sql"
       },
       {
+        "name": "log_welcome_test_event_by_share_token",
+        "migration": "supabase/migrations/20261006120000_welcome_test_event_dedup_fix.sql"
+      },
+      {
         "name": "mark_attention_seen",
         "migration": "supabase/migrations/20260623202114_6dc3ae03-5d7e-4e9d-b3a7-56a0763ba472.sql"
       },
