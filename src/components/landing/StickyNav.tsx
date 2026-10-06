@@ -15,6 +15,8 @@ import { NavStudentSwitcher } from '@/components/landing/NavStudentSwitcher';
 interface StickyNavProps {
   isRegisteredUser: boolean;
   tokenLeft: number;
+  /** True while the token balance is still loading; the badge shows an ellipsis instead of a misleading 0. */
+  tokensLoading?: boolean;
   user: any;
   scrollToPricing?: () => void;
   subscriptionType?: string;
@@ -28,7 +30,7 @@ interface StickyNavProps {
   nonSticky?: boolean;
 }
 
-const StickyNav: React.FC<StickyNavProps> = ({ isRegisteredUser, tokenLeft, user, scrollToPricing, subscriptionType, onGenerateWorksheet, leftContent, nonSticky = false }) => {
+const StickyNav: React.FC<StickyNavProps> = ({ isRegisteredUser, tokenLeft, tokensLoading = false, user, scrollToPricing, subscriptionType, onGenerateWorksheet, leftContent, nonSticky = false }) => {
   const isMobile = useIsMobile();
   const [sheetOpen, setSheetOpen] = useState(false);
   const navigate = useNavigate();
@@ -119,7 +121,7 @@ const StickyNav: React.FC<StickyNavProps> = ({ isRegisteredUser, tokenLeft, user
               <Badge variant="secondary" className="hidden sm:inline-flex text-xs shrink-0">{subscriptionType}</Badge>
             )}
             <Badge variant="outline" className="hidden sm:inline-flex text-xs shrink-0">
-              Tokens: {tokenLeft}
+              Tokens: {tokensLoading ? '…' : tokenLeft}
             </Badge>
             <UnifiedBell />
             <PacingProposalsBell />
@@ -134,7 +136,7 @@ const StickyNav: React.FC<StickyNavProps> = ({ isRegisteredUser, tokenLeft, user
                   {/* v6.9.112 M8: plan + tokens live here below 640px to prevent horizontal overflow */}
                   <div className="flex flex-wrap items-center gap-2 sm:hidden">
                     {subscriptionType && <Badge variant="secondary" className="text-xs">{subscriptionType}</Badge>}
-                    <Badge variant="outline" className="text-xs">Tokens: {tokenLeft}</Badge>
+                    <Badge variant="outline" className="text-xs">Tokens: {tokensLoading ? '…' : tokenLeft}</Badge>
                   </div>
                   {!isDashboard && (
                     <Button asChild variant="outline" size="sm" onClick={() => setSheetOpen(false)}>
@@ -191,7 +193,7 @@ const StickyNav: React.FC<StickyNavProps> = ({ isRegisteredUser, tokenLeft, user
             <Badge variant="secondary" className="text-sm shrink-0">{subscriptionType}</Badge>
           )}
           <Badge variant="outline" className="text-sm">
-            Tokens: {tokenLeft}
+            Tokens: {tokensLoading ? '…' : tokenLeft}
           </Badge>
           <UnifiedBell />
           <PacingProposalsBell />

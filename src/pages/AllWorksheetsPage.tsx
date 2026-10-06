@@ -212,7 +212,7 @@ const WorksheetTableRow = ({
 
 const AllWorksheetsPage = () => {
   const { user, loading: authLoading, isRegisteredUser } = useAuthFlow();
-  const { tokenLeft } = useTokenSystem(user?.id);
+  const { tokenLeft, loading: tokensLoading } = useTokenSystem(user?.id);
   const { isDemoMode, showDemoBlockedToast } = useDemoContext();
   
   // Pagination state
@@ -370,7 +370,7 @@ const AllWorksheetsPage = () => {
     <AuthenticatedPageShell>
       <StickyNav 
         isRegisteredUser={!!isRegisteredUser} 
-        tokenLeft={tokenLeft} 
+        tokenLeft={tokenLeft} tokensLoading={tokensLoading} 
         user={user}
       />
       <div className="container mx-auto px-4 py-8 max-w-7xl">

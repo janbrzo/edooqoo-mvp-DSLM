@@ -115,8 +115,8 @@ const ExerciseFillInBlanks: React.FC<ExerciseFillInBlanksProps> = ({
 
           return (
             <div key={sIndex} className="border rounded-lg p-3 bg-white">
-              <div className="flex flex-row items-start gap-2">
-                <div className="flex-grow">
+              <div className="flex flex-col sm:flex-row items-start gap-2">
+                <div className="flex-grow min-w-0 w-full sm:w-auto">
                   <div className="flex items-center gap-2 mb-2">
                     <p className="leading-snug flex-grow">
                       {isEditing ? (

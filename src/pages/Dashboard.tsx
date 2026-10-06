@@ -37,7 +37,7 @@ import { formatWorksheetTitle, type RecentWorksheet } from "@/components/dashboa
  */
 const Dashboard = () => {
   const { user, loading, isRegisteredUser } = useAuthFlow();
-  const { tokenLeft, profile } = useTokenSystem(user?.id);
+  const { tokenLeft, profile, loading: tokensLoading } = useTokenSystem(user?.id);
   const { profile: userProfile } = useProfile();
   const { students, loading: studentsLoading } = useStudents();
   // lightweight + listView: only the columns the row needs, first page only
@@ -156,7 +156,7 @@ const Dashboard = () => {
       <FreeWeekBanner />
       <StickyNav
         isRegisteredUser={true}
-        tokenLeft={tokenLeft}
+        tokenLeft={tokenLeft} tokensLoading={tokensLoading}
         user={user}
         subscriptionType={subscriptionType}
         onGenerateWorksheet={handleGenerateWorksheet}

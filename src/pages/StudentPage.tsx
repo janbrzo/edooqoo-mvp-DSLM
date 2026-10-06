@@ -121,7 +121,7 @@ const StudentPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { user, isRegisteredUser } = useAuthFlow();
-  const { tokenLeft } = useTokenSystem(user?.id);
+  const { tokenLeft, loading: tokensLoading } = useTokenSystem(user?.id);
   const { isDemoMode, showDemoBlockedToast } = useDemoContext();
   const [searchParams, setSearchParams] = useSearchParams();
   const { students, updateStudent, deleteStudent, loading: studentsLoading } = useStudents();
@@ -537,7 +537,7 @@ const StudentPage = () => {
     <AuthenticatedPageShell>
       <StickyNav 
         isRegisteredUser={!!isRegisteredUser} 
-        tokenLeft={tokenLeft} 
+        tokenLeft={tokenLeft} tokensLoading={tokensLoading} 
         user={user}
         onGenerateWorksheet={handleGenerateWorksheet}
       />

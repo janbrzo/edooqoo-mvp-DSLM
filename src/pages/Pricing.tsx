@@ -25,7 +25,7 @@ import PublicWorkflowNav from '@/components/public/PublicWorkflowNav';
 
 const Pricing = () => {
   const { user, isRegisteredUser } = useAuthFlow();
-  const { tokenLeft, profile } = useTokenSystem(user?.id);
+  const { tokenLeft, profile, loading: tokensLoading } = useTokenSystem(user?.id);
   const { currentPlan, plans, canUpgradeTo, getUpgradePrice, getUpgradeTokens, getRecommendedFullTimePlan, getRecommendedPlanByLessons } = usePlanLogic(profile?.subscription_type);
   const { toast } = useToast();
   const navigate = useNavigate();
@@ -335,7 +335,7 @@ const Pricing = () => {
     <Wrapper>
       <PageSeo {...SEO_META.pricing} jsonLd={buildFaqPageLd(faqItems)} />
       {isRegisteredUser ? (
-        <StickyNav isRegisteredUser={!!isRegisteredUser} tokenLeft={tokenLeft} user={user} />
+        <StickyNav isRegisteredUser={!!isRegisteredUser} tokenLeft={tokenLeft} tokensLoading={tokensLoading} user={user} />
       ) : (
         <PublicWorkflowNav />
       )}

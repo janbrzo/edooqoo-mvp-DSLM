@@ -401,7 +401,7 @@ const Index = () => {
         {!bothWorksheetsReady && (
           <StickyNav
             isRegisteredUser={true}
-            tokenLeft={tokenLeft}
+            tokenLeft={tokenLeft} tokensLoading={tokensLoading}
             user={user}
             scrollToPricing={scrollToPricing}
           />
@@ -465,7 +465,7 @@ const Index = () => {
       {!bothWorksheetsReady && (
         <StickyNav
           isRegisteredUser={!!isRegisteredUser}
-          tokenLeft={tokenLeft}
+          tokenLeft={tokenLeft} tokensLoading={tokensLoading}
           user={user}
           scrollToPricing={scrollToPricing}
         />
