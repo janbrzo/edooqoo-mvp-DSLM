@@ -19446,6 +19446,7 @@
         "Edit",
         "Goals",
         "No specific goals yet. A concrete goal (\"Run a 30-minute client meeting\") makes suggestions sharper.",
+        "Set main goal",
         "due"
       ],
       "userFacingBehavior": {
