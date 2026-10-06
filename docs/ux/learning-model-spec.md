@@ -129,6 +129,7 @@ Header → collapsed snapshot → workspace tabs → status line → 2 segments 
 | `view=profile`, `tab=knowledge`, `tab=events` | Insights, profile section |
 | `view=insights` | Insights (written by the segment switch) |
 | `focus=add-goal-modal`, event `dslm:addGoal` | `AddGoalDialog` (single owner: `DSLMTab` listener → `pendingAddGoal`) |
+| event `dslm:addGoal` with `detail.goalType: 'main'` | `MainGoalDialog` (the main goal editor, never the supporting-goal modal) |
 | `focus=pick-idea`, event `pathway:pickIdea` | scroll to Up next; empty queue opens `GenerateStepsDialog` |
 | `editSuggestion=<id>` | `SuggestionEditDialog`; param consumed with a functional `setSearchParams` |
 | spotlights `send-welcome-test`, `learning-roadmap`, `next-lesson-ideas`, `pick-idea` | exactly one DOM target per id in each stage |
@@ -215,6 +216,8 @@ Removed (no importers left): `PathwayView`, `NextStepsSection`, `NextStepBanner`
 - Onboarding (resolved the same day): the two weekly-prep steps used to complete only from `student_knowledge_entries` of category "Next Lesson Ideas" while the checklist pointed at lesson suggestions. `resolveIdeaSteps` (`src/lib/onboarding/ideaSteps.ts`) now completes them from `future_worksheet_suggestions` (any / `is_used = true`) **or** the old note signal, so no teacher loses a ticked step; labels are "Get lesson suggestions" / "Use a lesson suggestion" (step keys unchanged).
 - The teacher's own "Next Lesson Ideas" notes stay next to the queue ("Your lesson ideas (n)" under Up next and under the setup checklist) instead of moving only into Insights › Notes — they are planning input, not evidence.
 - The DSLMTab `focus` handler marks a deep link as handled inside the animation frame, not before it: under React StrictMode the old order cancelled the frame and swallowed `focus=add-goal-modal` in development.
+
+- 2026-10-06 merge with `main`: Lovable commits had added short mobile labels (Roadmap / Skills / DNA) to the three old perspective buttons and a "+ Set main goal" badge to the old cockpit. The two segments are already short at every width, so the labels have no new home. The main goal entry point is kept: when no main goal is set, the status line hint is "set a main goal" (first in priority, `computeModelReadiness`) and Goals shows "Set main goal"; both open `MainGoalDialog`, and so does `dslm:addGoal` with `goalType: 'main'` (GoalsView honours it too when it listens).
 
 ### 12.3 Verification
 

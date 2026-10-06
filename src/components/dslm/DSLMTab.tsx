@@ -8,7 +8,8 @@
  *  - `view=pathway|goals` → Plan (`goals` scrolls to Goals)
  *  - `view=skills|profile|insights` → Insights
  *  - `focus=add-goal-modal` / `focus=pick-idea` and the `dslm:addGoal` event
- *    are handled here and forwarded to the Plan as one pending action.
+ *    (`detail.goalType: 'main'` = main goal editor) are handled here and
+ *    forwarded to the Plan as one pending action.
  *  - `editSuggestion` always opens on the Plan.
  * The prop contract below is unchanged; `studentEmail` is an optional addition.
  */
@@ -94,7 +95,8 @@ export const DSLMTab: React.FC<DSLMTabProps> = ({
   /** Ask the Plan to do something; switches to the Plan first when needed. */
   const requestPlanAction = useCallback(
     (action: PlanAction) => {
-      if (segment !== 'plan') goToSegment('plan', action === 'add_goal' ? 'goals' : MODEL_SEGMENT_VIEWS.plan);
+      const toGoals = action === 'add_goal' || action === 'set_main_goal';
+      if (segment !== 'plan') goToSegment('plan', toGoals ? 'goals' : MODEL_SEGMENT_VIEWS.plan);
       setPendingAction(action);
     },
     [goToSegment, segment],
@@ -149,11 +151,12 @@ export const DSLMTab: React.FC<DSLMTabProps> = ({
 
   // v6.9.29: "Add goal" buttons anywhere (MacroTimeline warnings, onboarding)
   // dispatch `dslm:addGoal`; the Plan owns the single Add-goal dialog.
+  // `detail.goalType === 'main'` opens the main goal editor instead.
   useEffect(() => {
     const handler = (e: Event) => {
       const detail = (e as CustomEvent).detail;
       if (detail?.studentId && detail.studentId !== studentId) return;
-      requestPlanAction('add_goal');
+      requestPlanAction(detail?.goalType === 'main' ? 'set_main_goal' : 'add_goal');
     };
     window.addEventListener('dslm:addGoal', handler);
     return () => window.removeEventListener('dslm:addGoal', handler);
@@ -184,6 +187,8 @@ export const DSLMTab: React.FC<DSLMTabProps> = ({
       guardAction('Sending the Welcome Test', () => { void welcomeTest.send(); });
     } else if (improvement === 'generate_roadmap') {
       requestPlanAction('generate_roadmap');
+    } else if (improvement === 'set_main_goal') {
+      requestPlanAction('set_main_goal');
     } else {
       requestPlanAction('add_goal');
     }

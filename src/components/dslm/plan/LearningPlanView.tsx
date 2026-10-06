@@ -52,7 +52,7 @@ import { AddGoalDialog, type NewGoalValue } from './AddGoalDialog';
 import { MainGoalDialog } from './MainGoalDialog';
 import { LessonIdeasNotes } from './LessonIdeasNotes';
 
-export type PlanAction = 'add_goal' | 'pick_idea' | 'generate_roadmap';
+export type PlanAction = 'add_goal' | 'set_main_goal' | 'pick_idea' | 'generate_roadmap';
 
 export interface WelcomeTestControls {
   send: () => Promise<boolean>;
@@ -277,6 +277,12 @@ export const LearningPlanView: React.FC<LearningPlanViewProps> = ({
     setAddGoalOpen(true);
   }, []);
 
+  const openMainGoal = useCallback(() => {
+    setRoadmapSheet((prev) => (prev.open ? { ...prev, open: false } : prev));
+    setGoalsSheetOpen(false);
+    setMainGoalOpen(true);
+  }, []);
+
   const submitGoal = async (value: NewGoalValue) => {
     let added: unknown = null;
     guardAction('Adding goals', () => {
@@ -290,6 +296,8 @@ export const LearningPlanView: React.FC<LearningPlanViewProps> = ({
     if (!pendingAction || !plan.isReady) return;
     if (pendingAction === 'add_goal') {
       openAddGoal();
+    } else if (pendingAction === 'set_main_goal') {
+      openMainGoal();
     } else if (pendingAction === 'generate_roadmap') {
       requestGenerateRoadmap();
     } else if (pendingAction === 'pick_idea') {
@@ -301,7 +309,7 @@ export const LearningPlanView: React.FC<LearningPlanViewProps> = ({
       }
     }
     onConsumePendingAction();
-  }, [pendingAction, plan.isReady, upNext.length, openAddGoal, requestGenerateRoadmap, openStepsDialog, onConsumePendingAction]);
+  }, [pendingAction, plan.isReady, upNext.length, openAddGoal, openMainGoal, requestGenerateRoadmap, openStepsDialog, onConsumePendingAction]);
 
   // Any other surface may still ask for a suggestion pick (legacy event).
   useEffect(() => {

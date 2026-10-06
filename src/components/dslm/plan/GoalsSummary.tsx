@@ -53,9 +53,15 @@ export const GoalsSummary = forwardRef<HTMLElement, GoalsSummaryProps>(
             </span>
             {mainDeadline && <span className="text-xs text-muted-foreground">by {mainDeadline}</span>}
             <GoalProgressBar value={mainGoalPct} />
-            <Button variant="ghost" size="sm" className="ml-auto h-8" onClick={onEditMainGoal}>
-              <Pencil className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" /> Edit
-            </Button>
+            {mainGoalLabel ? (
+              <Button variant="ghost" size="sm" className="ml-auto h-8" onClick={onEditMainGoal}>
+                <Pencil className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" /> Edit
+              </Button>
+            ) : (
+              <Button variant="outline" size="sm" className="ml-auto h-8" onClick={onEditMainGoal}>
+                <Plus className="mr-1.5 h-3.5 w-3.5" aria-hidden="true" /> Set main goal
+              </Button>
+            )}
           </div>
           {goals.slice(0, MAX_ROWS).map((goal) => {
             const due = formatDeadline(goal.targetDate);

@@ -27,6 +27,7 @@ export interface ModelStatusLineProps {
 }
 
 const IMPROVEMENT_LABEL: Record<ReadinessImprovement, string> = {
+  set_main_goal: 'set a main goal',
   send_test: 'send the Welcome Test',
   generate_roadmap: 'generate a roadmap',
   add_goal: 'add a specific goal',

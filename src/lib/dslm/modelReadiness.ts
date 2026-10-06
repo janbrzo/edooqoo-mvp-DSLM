@@ -15,7 +15,7 @@
 export type ReadinessStage = 'setup' | 'review' | 'ready';
 export type SetupStepKey = 'goal' | 'test' | 'roadmap' | 'suggestions';
 export type WelcomeTestState = 'none' | 'sent' | 'completed';
-export type ReadinessImprovement = 'send_test' | 'generate_roadmap' | 'add_goal';
+export type ReadinessImprovement = 'set_main_goal' | 'send_test' | 'generate_roadmap' | 'add_goal';
 
 export interface ReadinessInput {
   hasMainGoal: boolean;
@@ -76,7 +76,9 @@ export function computeModelReadiness(input: ReadinessInput): Readiness {
 
   let improvement: ReadinessImprovement | null = null;
   if (stage !== 'setup') {
-    if (input.welcomeTest === 'none') improvement = 'send_test';
+    // The main goal is the plan's destination, so it comes first.
+    if (!input.hasMainGoal) improvement = 'set_main_goal';
+    else if (input.welcomeTest === 'none') improvement = 'send_test';
     else if (phases === 0 && input.useRoadmap !== false) improvement = 'generate_roadmap';
     else if (activeGoals === 0) improvement = 'add_goal';
   }

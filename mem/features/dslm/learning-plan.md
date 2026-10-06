@@ -12,3 +12,6 @@ type: feature
 - One primary button per panel; no cockpit stats, no pacing slider on top, no "What is DSLM?" banner, no Welcome Test banner on this tab — do not reintroduce.
 - Confidence is shown as Strong / Good / Rough fit (`describeFit`), never as a percentage on cards.
 - Onboarding steps `generate_next_ideas` / `pick_idea` complete from lesson suggestions OR the legacy "Next Lesson Ideas" notes (`resolveIdeaSteps`); never drop the notes signal (stored progress would regress).
+- Segment labels (Plan / Insights) are short at every width; the old three perspective buttons and their mobile short labels (Roadmap / Skills / DNA) are gone.
+- No main goal: the status line hint "set a main goal" (first priority) and Goals "Set main goal" open `MainGoalDialog`, never the supporting-goal modal; `dslm:addGoal` with `detail.goalType: 'main'` does the same.
+- Demo mode: all student-knowledge mutations show the demo toast; useWorksheetHistory never leaves loading=true in demo.

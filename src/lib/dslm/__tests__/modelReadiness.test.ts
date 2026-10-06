@@ -63,6 +63,13 @@ describe('computeModelReadiness', () => {
     ).toBeNull();
   });
 
+  it('suggests setting a main goal first when the plan has none', () => {
+    const noMain = { ...base, hasMainGoal: false, activeGoalsCount: 2, activeSuggestionsCount: 3 };
+    expect(computeModelReadiness(noMain).improvement).toBe('set_main_goal');
+    expect(computeModelReadiness({ ...noMain, pendingReviewCount: 1 }).improvement).toBe('set_main_goal');
+    expect(computeModelReadiness({ ...noMain, activeSuggestionsCount: 0 }).improvement).toBeNull();
+  });
+
   it('never suggests a roadmap while the roadmap is paused', () => {
     const r = computeModelReadiness({
       ...base, hasMainGoal: true, activeGoalsCount: 1, welcomeTest: 'completed', activeSuggestionsCount: 2, useRoadmap: false,
