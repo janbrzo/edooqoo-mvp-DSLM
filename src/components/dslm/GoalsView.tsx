@@ -178,7 +178,7 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
     };
     window.addEventListener('dslm:addGoal', handler as EventListener);
     return () => window.removeEventListener('dslm:addGoal', handler as EventListener);
-  }, [studentId]);
+  }, [studentId, mainGoal, mainGoalTargetDate]);
 
   const renderGoalCard = (goal: any) => {
     const r = progressMap.get(goal.id);
