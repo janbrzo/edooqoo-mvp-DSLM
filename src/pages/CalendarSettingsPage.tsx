@@ -49,7 +49,7 @@ const GCAL_COLOR_HEX: Record<string, string> = {
 
 const CalendarSettingsPage = () => {
   const { user, loading: authLoading, isRegisteredUser } = useAuthFlow();
-  const { tokenLeft } = useTokenSystem(user?.id);
+  const { tokenLeft, loading: tokensLoading } = useTokenSystem(user?.id);
   const navigate = useNavigate();
 
   useTeacherAuthRedirect(authLoading, !!isRegisteredUser);
@@ -165,7 +165,7 @@ const CalendarSettingsPage = () => {
     <AuthenticatedPageShell>
       <StickyNav 
         isRegisteredUser={!!isRegisteredUser} 
-        tokenLeft={tokenLeft} 
+        tokenLeft={tokenLeft} tokensLoading={tokensLoading} 
         user={user}
       />
       <div className="max-w-4xl mx-auto px-4 py-6">

@@ -83,8 +83,8 @@ const ExerciseAnswerQuestionsAudio: React.FC<ExerciseAnswerQuestionsAudioProps> 
                 </p>
               </div>
               {viewMode === 'teacher' && (
-                <div className="flex items-center gap-2 flex-wrap ml-3">
-                  <div className="text-green-600 italic text-sm">
+                <div className="flex items-center gap-2 flex-wrap ml-3 min-w-0">
+                  <div className="text-green-600 italic text-sm min-w-0 break-words">
                     {isEditing ? (
                       <input
                         type="text"

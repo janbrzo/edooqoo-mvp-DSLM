@@ -50,7 +50,7 @@ const LEGEND_ITEMS = [
 
 const CalendarPage = () => {
   const { user, loading: authLoading, isRegisteredUser } = useAuthFlow();
-  const { tokenLeft } = useTokenSystem(user?.id);
+  const { tokenLeft, loading: tokensLoading } = useTokenSystem(user?.id);
   const navigate = useNavigate();
 
   // Booking emails link here: keep the path through the login round trip.
@@ -386,7 +386,7 @@ const CalendarPage = () => {
     <AuthenticatedPageShell>
       <StickyNav 
         isRegisteredUser={!!isRegisteredUser} 
-        tokenLeft={tokenLeft} 
+        tokenLeft={tokenLeft} tokensLoading={tokensLoading} 
         user={user}
       />
       <div className="max-w-7xl mx-auto px-4 py-6 space-y-4">

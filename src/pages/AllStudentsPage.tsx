@@ -56,7 +56,7 @@ export function sortStudents(
 
 const AllStudentsPage = () => {
   const { user, loading, isRegisteredUser } = useAuthFlow();
-  const { tokenLeft, profile } = useTokenSystem(user?.id);
+  const { tokenLeft, profile, loading: tokensLoading } = useTokenSystem(user?.id);
   const { students, loading: studentsLoading } = useStudents();
   const navigate = useNavigate();
 
@@ -114,7 +114,7 @@ const AllStudentsPage = () => {
       />
       <StickyNav
         isRegisteredUser={true}
-        tokenLeft={tokenLeft}
+        tokenLeft={tokenLeft} tokensLoading={tokensLoading}
         user={user}
         subscriptionType={subscriptionType}
         onGenerateWorksheet={() => {
