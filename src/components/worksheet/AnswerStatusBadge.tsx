@@ -13,7 +13,7 @@ interface AnswerStatusBadgeProps {
 /**
  * Shared answer status indicator with THREE states.
  * `review` exists so we never tell a student they are wrong when the matcher
- * is not certain — the teacher decides instead.
+ * is not certain; the teacher decides instead.
  */
 export const AnswerStatusBadge: React.FC<AnswerStatusBadgeProps> = ({
   verdict,

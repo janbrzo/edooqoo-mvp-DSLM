@@ -23,7 +23,7 @@ type Student = Tables<'students'>;
 type SortKey = 'recent' | 'name-asc' | 'name-desc' | 'next-lesson';
 
 /**
- * v6.9.109 Phase 4 — `/students`.
+ * v6.9.109 Phase 4, `/students`.
  * Takes over the student search/sort that was removed from the Today dashboard.
  * Flat rows, no per-row hooks: one `useStudents` + one `useStudentsOverview`
  * (worksheet counts) + one `useNextUpStudents` (next booked lesson).
@@ -107,7 +107,7 @@ const AllStudentsPage = () => {
   return (
     <AuthenticatedPageShell>
       <PageSeo
-        title="Students — Edooqoo"
+        title="Students | Edooqoo"
         description="All your students in one place: level, goal, next lesson and worksheets."
         path="/students"
         robots="noindex,nofollow"
@@ -198,7 +198,7 @@ const AllStudentsPage = () => {
                     </div>
                     <div className="mt-0.5 flex flex-wrap gap-x-3 text-xs text-muted-foreground">
                       {goal && <span className="truncate">Goal: {goal}</span>}
-                      <span>Next: {lesson ? formatLesson(lesson) : '—'}</span>
+                      <span>Next: {lesson ? formatLesson(lesson) : '-'}</span>
                       <span>{countsLoading ? '… worksheets' : `${count} ${count === 1 ? 'worksheet' : 'worksheets'}`}</span>
                     </div>
                   </div>

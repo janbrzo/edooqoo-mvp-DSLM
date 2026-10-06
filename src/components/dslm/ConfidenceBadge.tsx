@@ -1,5 +1,5 @@
 /**
- * ConfidenceBadge — standalone, focusable trigger for the DSLM confidence tooltip.
+ * ConfidenceBadge: standalone, focusable trigger for the DSLM confidence tooltip.
  *
  * Why it exists: previous implementation used <Badge> (a div) wrapped via TooltipTrigger
  * asChild and was sometimes nested inside a parent <button> (collapsible trigger),
@@ -11,6 +11,7 @@
 import React from 'react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
+import { describeFit } from '@/lib/dslm/confidenceScore';
 
 export interface ConfidenceBadgeProps {
   score: number;
@@ -28,9 +29,12 @@ const colorForScore = (s: number) => {
 };
 
 export const ConfidenceBadge: React.FC<ConfidenceBadgeProps> = ({
-  score, label, reasons = [], variant = 'outline', className,
+  score, reasons = [], variant = 'outline', className,
 }) => {
   const stop = (e: React.SyntheticEvent) => { e.stopPropagation(); };
+  // 2026-10: the score is a completeness heuristic, not a measurement:
+  // show a word ("Strong fit"), keep the reasons in the tooltip.
+  const fit = describeFit(score);
   const colorCls = variant === 'inverse'
     ? 'bg-white/25 text-primary-foreground border-0'
     : `border ${colorForScore(score)}`;
@@ -44,7 +48,7 @@ export const ConfidenceBadge: React.FC<ConfidenceBadgeProps> = ({
             onClick={stop}
             onPointerDown={stop}
             onMouseDown={stop}
-            aria-label={`Confidence ${score}%`}
+            aria-label={`${fit}: why`}
             className={cn(
               'inline-flex items-center rounded-md text-[10px] font-medium px-1.5 py-0.5 h-4 cursor-help',
               'focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-1',
@@ -52,18 +56,18 @@ export const ConfidenceBadge: React.FC<ConfidenceBadgeProps> = ({
               className
             )}
           >
-            {variant === 'inverse' ? `Confidence: ${score}%` : `${score}%`}
+            {fit}
           </button>
         </TooltipTrigger>
         <TooltipContent className="max-w-xs" side="top">
-          <p className="font-semibold">{label || `${score}% match to student needs`}</p>
+          <p className="font-semibold">{fit}</p>
           {reasons.length > 0 ? (
             <ul className="text-xs mt-1 list-disc pl-4 space-y-0.5">
               {reasons.map((r, i) => <li key={i}>{r}</li>)}
             </ul>
           ) : (
             <p className="text-xs mt-1 opacity-80">
-              Deterministic client-side fit heuristic based on goals, rationale, focus tags, and recent signals.
+              Fit heuristic based on goals, rationale, focus tags, and recent signals.
             </p>
           )}
         </TooltipContent>

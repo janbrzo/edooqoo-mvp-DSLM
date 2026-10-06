@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * submit-indexnow.mjs — tell Bing (and other IndexNow engines) which URLs changed.
+ * submit-indexnow.mjs: tell Bing (and other IndexNow engines) which URLs changed.
  *
  * ChatGPT search relies in part on Bing's index, so fast Bing recrawling of new, changed,
  * redirected and de-indexed URLs helps AI visibility. IndexNow keys are public by design:

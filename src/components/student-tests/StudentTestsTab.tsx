@@ -39,7 +39,7 @@ interface StudentTestsTabProps {
   teacherId: string;
   studentName?: string;
   /**
-   * v6.9.111 M7.5 — test details are addressable from the workspace URL
+   * v6.9.111 M7.5: test details are addressable from the workspace URL
    * (`?tab=timeline&filter=tests&testId=<id>`). The parent owns the param;
    * this component mirrors it into local selection state.
    */
@@ -74,7 +74,7 @@ export function StudentTestsTab({
   const [showComparison, setShowComparison] = useState(false);
   const stats = getTestStats();
 
-  // v6.9.40 P2 — Each Welcome Test attempt is now its own card. The
+  // v6.9.40 P2: Each Welcome Test attempt is now its own card. The
   // "latest" attempt (highest attempt_number, fallback created_at) owns the
   // action panel for sending/retake; older ones are read-only entries.
   const welcomeAttempts = useMemo(() => {
@@ -91,7 +91,7 @@ export function StudentTestsTab({
 
   const welcomeCardTitle = (t: StudentTest): string => {
     const n = (t as any).attempt_number ?? 1;
-    return n <= 1 ? 'Initial Welcome Test' : `Welcome Test — Retake ${n - 1}`;
+    return n <= 1 ? 'Initial Welcome Test' : `Welcome Test: Retake ${n - 1}`;
   };
 
   // WT-6 (v6.9.27): only count COMPLETED/reviewed attempts so the Compare
@@ -103,7 +103,7 @@ export function StudentTestsTab({
     [tests],
   );
 
-  /** Plan v6.0 — lazy-creates a Welcome Test + share token if missing. */
+  /** Plan v6.0: lazy-creates a Welcome Test + share token if missing. */
   const ensureWelcomeTest = useCallback(async (): Promise<{ testId: string; token: string } | null> => {
     let testToUse = welcomeTest;
     if (!testToUse) {
@@ -168,7 +168,7 @@ export function StudentTestsTab({
       .from('students').select('student_email, name').eq('id', studentId).maybeSingle();
     if (!student?.student_email) {
       try { await navigator.clipboard.writeText(`${window.location.origin}/welcome-test/${ensured.token}`); } catch {}
-      toast.message('No student email on file — link copied to clipboard.');
+      toast.message('No student email on file, link copied to clipboard.');
       return;
     }
     const { data: teacher } = await supabase
@@ -207,7 +207,7 @@ export function StudentTestsTab({
     return newToken;
   };
 
-  /** v6.9.40 — Re-take always uses the latest attempt as previous, and asks
+  /** v6.9.40: Re-take always uses the latest attempt as previous, and asks
    *  for confirmation when the latest attempt is not yet completed. */
   const [retaking, setRetaking] = useState(false);
   const [confirmRetakeOpen, setConfirmRetakeOpen] = useState(false);
@@ -237,7 +237,7 @@ export function StudentTestsTab({
         student_id: studentId,
         test_type: 'welcome',
         title: `Welcome Test - ${student?.name || studentName || 'Student'} (Retake ${nextAttempt - 1})`,
-        description: 'Re-take — comparing growth against the previous attempt',
+        description: 'Re-take: comparing growth against the previous attempt',
         attempt_number: nextAttempt,
         previous_attempt_id: welcomeTest.id,
       });
@@ -255,7 +255,7 @@ export function StudentTestsTab({
       await addQuestions(newTest.id, questionsToAdd);
       const newToken = await generateShareToken(newTest.id, 'welcome');
       refetch();
-      // v6.9.41 P3 — auto-email the new retake link.
+      // v6.9.41 P3: auto-email the new retake link.
       const studentEmail = (student as any)?.student_email as string | null | undefined;
       if (newToken && studentEmail) {
         try {
@@ -272,13 +272,13 @@ export function StudentTestsTab({
           if (newToken) {
             try { await navigator.clipboard.writeText(`${window.location.origin}/welcome-test/${newToken}`); } catch {}
           }
-          toast.success(`Retake ${nextAttempt - 1} created. Email failed — link copied to clipboard.`);
+          toast.success(`Retake ${nextAttempt - 1} created. Email failed: link copied to clipboard.`);
         }
       } else {
         if (newToken) {
           try { await navigator.clipboard.writeText(`${window.location.origin}/welcome-test/${newToken}`); } catch {}
         }
-        toast.success(`Retake ${nextAttempt - 1} created. No student email on file — link copied to clipboard.`);
+        toast.success(`Retake ${nextAttempt - 1} created. No student email on file, link copied to clipboard.`);
       }
       window.dispatchEvent(new CustomEvent('student-tests:refresh', { detail: { studentId } }));
     } catch (err) {
@@ -289,7 +289,7 @@ export function StudentTestsTab({
     }
   };
 
-  // v6.9.39 P2 — refresh list whenever any retake path fires the event.
+  // v6.9.39 P2: refresh list whenever any retake path fires the event.
   useEffect(() => {
     const handler = (e: Event) => {
       const detail = (e as CustomEvent).detail;
@@ -352,7 +352,7 @@ export function StudentTestsTab({
         </div>
       </div>
 
-      {/* v6.9.40 P2 — one card per Welcome Test attempt. Latest attempt owns
+      {/* v6.9.40 P2: one card per Welcome Test attempt. Latest attempt owns
           the full WelcomeTestActionsPanel; older attempts are read-only. */}
       {!hasWelcomeTest && (
         <Card className="border-primary/30 border-dashed">
@@ -406,7 +406,7 @@ export function StudentTestsTab({
         return (
           <Card key={attempt.id} className={`border-primary/30 ${isLatest ? '' : 'opacity-90'}`}>
             <CardContent className="py-3">
-              {/* v6.9.44 — single-row on lg: title + meta + actions inline. */}
+              {/* v6.9.44: single-row on lg: title + meta + actions inline. */}
               <div className="flex flex-col lg:flex-row lg:items-center lg:gap-4 gap-2">
                 <div
                   className="flex items-start gap-3 min-w-0 flex-1 cursor-pointer"

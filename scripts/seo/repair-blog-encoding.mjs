@@ -10,7 +10,7 @@ const PUBLIC = path.join(ROOT, 'public');
 const CHECK_ONLY = process.argv.includes('--check');
 
 const REPLACEMENTS = new Map([
-  ['â€”', '—'],
+  ['â€”', '-'],
   ['â€“', '–'],
   ['Â·', '·'],
   ['â†’', '→'],
@@ -20,7 +20,7 @@ const REPLACEMENTS = new Map([
   ['â­', '⭐'],
   ['←', '←'],
   ['←’', '→'],
-  ['"”', '—'],
+  ['"”', '-'],
 ]);
 
 const SUSPICIOUS = /â€”|â€“|Â·|â†[’]|âťŚ|âś…|â­|←[’]|�/g;

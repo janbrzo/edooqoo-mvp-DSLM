@@ -1,8 +1,8 @@
 /**
- * Mirror of `src/lib/exerciseTaxonomy.ts` — keep in sync.
+ * Mirror of `src/lib/exerciseTaxonomy.ts`, keep in sync.
  * Used by suggest-exercises and generate-timeline edge functions.
  *
- * v4.2: `sentence-transformation` removed — currently disabled in UI.
+ * v4.2: `sentence-transformation` removed: currently disabled in UI.
  */
 
 export const NO_MEDIA_EXERCISE_IDS = [

@@ -1,4 +1,4 @@
-// pacing-periodic-check — v4.9
+// pacing-periodic-check: v4.9
 // Cron-triggered. For every active student whose last_pacing_recalc_at is
 // older than 30 days (or NULL), invoke recalculate-pacing in 'proposal' mode
 // with triggerType='periodic_30d'.

@@ -1,4 +1,4 @@
-/** DeletedWorksheetsSection — collapsible restore-only list for soft-deleted worksheets. */
+/** DeletedWorksheetsSection: collapsible restore-only list for soft-deleted worksheets. */
 import React from 'react';
 import { ChevronDown, FileText, RotateCcw } from 'lucide-react';
 import { EntityRow } from '@/components/student/EntityRow';

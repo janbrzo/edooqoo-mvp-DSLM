@@ -45,7 +45,7 @@ interface WorksheetToolbarProps {
   onCreateHomework?: () => void;
   onAddExercise?: () => void;
   onDuplicateSuccess?: () => void;
-  // P1.4 — autosave state surfaced to the teacher
+  // P1.4: autosave state surfaced to the teacher
   autosaveStatus?: 'disabled' | 'idle' | 'dirty' | 'saving' | 'saved' | 'error';
   autosaveLastSavedAt?: Date | null;
   /** Forces a save (used before sharing) and resolves when the DB is up to date. */
@@ -256,7 +256,7 @@ const WorksheetToolbar = ({
   const handleShareClick = async () => {
     devLog('Share button clicked');
 
-    // P1.4 — never hand a student a link to a stale version.
+    // P1.4: never hand a student a link to a stale version.
     if (onFlushSave) {
       setIsPreparingShare(true);
       try {
@@ -323,7 +323,7 @@ const WorksheetToolbar = ({
             </Tooltip>
           </div>
           <div className={`flex ${isMobile ? 'flex-col gap-2' : 'flex-wrap items-center gap-y-2'}`}>
-            {/* P1.4 — autosave indicator */}
+            {/* P1.4: autosave indicator */}
             {autosaveStatus !== 'disabled' && (
               <span
                 className={`text-xs mr-3 whitespace-nowrap ${
@@ -333,7 +333,7 @@ const WorksheetToolbar = ({
               >
                 {autosaveStatus === 'saving' && 'Saving…'}
                 {autosaveStatus === 'dirty' && 'Unsaved changes'}
-                {autosaveStatus === 'error' && 'Not saved — click Save Changes'}
+                {autosaveStatus === 'error' && 'Not saved: click Save Changes'}
                 {autosaveStatus === 'saved' && (
                   autosaveLastSavedAt
                     ? `Saved • ${autosaveLastSavedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
@@ -383,7 +383,7 @@ const WorksheetToolbar = ({
                   )
                 )}
 
-                {/* Sprint 3 (Plan v6.9.20) — Publish to public gallery (teachers only) */}
+                {/* Sprint 3 (Plan v6.9.20): Publish to public gallery (teachers only) */}
                 {worksheetId && isRegisteredUser && (
                   <span className="mr-2">
                     <PublishWorksheetButton worksheetId={worksheetId} />

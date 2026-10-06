@@ -32,7 +32,7 @@ const ShareWorksheetModal = ({
   const [isSendingEmail, setIsSendingEmail] = useState(false);
   const [recipientEmail, setRecipientEmail] = useState(initialStudentEmail || '');
   const [saveEmailForVerification, setSaveEmailForVerification] = useState(true);
-  // P2.3 — auto-notify the assigned student when the teacher copies the link
+  // P2.3: auto-notify the assigned student when the teacher copies the link
   const [autoNotify, setAutoNotify] = useState(true);
   const { toast } = useToast();
   const { refreshProgress } = useOnboardingProgress();
@@ -73,7 +73,7 @@ const ShareWorksheetModal = ({
       if (data?.share_token) {
         setShareUrl(`${window.location.origin}/shared/${data.share_token}`);
       } else {
-        // Fallback for old worksheets without token — auto-generate
+        // Fallback for old worksheets without token, auto-generate
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) throw new Error('Not authenticated');
         
@@ -116,7 +116,7 @@ const ShareWorksheetModal = ({
         description: "Share link has been copied to clipboard",
         className: "bg-green-50 border-green-200"
       });
-      // P2.3 — send the worksheet email automatically when enabled
+      // P2.3: send the worksheet email automatically when enabled
       if (autoNotify && recipientEmail) {
         await sendEmail({ silentDuplicate: true });
       }

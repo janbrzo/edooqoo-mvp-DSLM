@@ -12,8 +12,8 @@ interface Props {
 }
 
 const fmt = (iso?: string | null) => {
-  if (!iso) return "—";
-  try { return format(new Date(iso), "dd MMM yyyy"); } catch { return "—"; }
+  if (!iso) return "-";
+  try { return format(new Date(iso), "dd MMM yyyy"); } catch { return "-"; }
 };
 
 export function TestDates({ createdAt, completedAt, reviewedAt, className }: Props) {

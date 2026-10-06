@@ -228,9 +228,9 @@ Deno.serve(async (req) => {
         }
         console.log('GCal cancel-delete:', res.status);
       } else {
-        const cancelSuffix = slot.cancelled_by === 'student' ? ' — Student Cancellation' : ' — Teacher Cancellation';
+        const cancelSuffix = slot.cancelled_by === 'student' ? ', Student Cancellation' : ', Teacher Cancellation';
         const event = {
-          summary: `Available Slot — English Lesson${cancelSuffix}`,
+          summary: `Available Slot: English Lesson${cancelSuffix}`,
           colorId: settings?.gcal_color_available || '2',
           reminders: { useDefault: false, overrides: [] },
           start: { dateTime: `${slot.slot_date}T${slot.start_time}`, timeZone: timezone },
@@ -250,23 +250,23 @@ Deno.serve(async (req) => {
       let summary = slot.title || 'English Lesson';
       if (slot.student_id) {
         const { data: student } = await supabase.from('students').select('name').eq('id', slot.student_id).maybeSingle();
-        if (student?.name) summary = `${student.name} — English Lesson`;
+        if (student?.name) summary = `${student.name}: English Lesson`;
       }
 
       // Add status suffix
       const isPendingSlot = slot.status === 'booked' && !slot.confirmed_at;
       const effectiveStatus = isPendingSlot ? 'pending' : (slot.status === 'needs_review' ? 'booked' : slot.status);
       const statusSuffixMap: Record<string, string> = {
-        booked: ' — Booked',
-        pending: ' — Pending',
-        completed: ' — Complete',
-        no_show: ' — No Show',
+        booked: ': Booked',
+        pending: ': Pending',
+        completed: ': Complete',
+        no_show: ': No Show',
       };
       if (effectiveStatus === 'available' && slot.cancelled_by) {
         if (slot.cancelled_by === 'system' && slot.cancellation_reason?.includes('Rescheduled')) {
-          summary += ' — Rescheduled';
+          summary += ': Rescheduled';
         } else {
-          summary += slot.cancelled_by === 'student' ? ' — Student Cancellation' : ' — Teacher Cancellation';
+          summary += slot.cancelled_by === 'student' ? ', Student Cancellation' : ', Teacher Cancellation';
         }
       } else if (statusSuffixMap[effectiveStatus]) {
         summary += statusSuffixMap[effectiveStatus];
@@ -315,7 +315,7 @@ Deno.serve(async (req) => {
         event.location = meetingLink;
       }
 
-      // Google Meet auto-creation — skip if student has a permanent meeting link
+      // Google Meet auto-creation, skip if student has a permanent meeting link
       let hasPermStudentLink = false;
       if (slot.student_id) {
         const { data: studentSettings } = await supabase.from('calendar_student_settings')

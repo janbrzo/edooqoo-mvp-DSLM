@@ -1,5 +1,5 @@
 /**
- * timelineEvents — pure data rules for the Timeline tab of the Student
+ * timelineEvents: pure data rules for the Timeline tab of the Student
  * Workspace (v6.9.111, M5 step 1).
  *
  * `TimelineTab`, `TimelineFilters` and `TimelineEventRow` must stay purely
@@ -7,7 +7,7 @@
  * phrased, when it needs the teacher's attention, how events are ordered,
  * counted, grouped and time-stamped lives here.
  *
- * No React, no Supabase, no globals — every rule below is unit-testable.
+ * No React, no Supabase, no globals; every rule below is unit-testable.
  */
 
 import {
@@ -34,7 +34,7 @@ export type TimelineFilter =
   | 'tests';
 
 export interface TimelineEvent {
-  /** `${type}:${sourceId}` — dedupe key. */
+  /** `${type}:${sourceId}`: dedupe key. */
   id: string;
   type: TimelineEventType;
   /** ISO 8601; descending sort key. */
@@ -94,7 +94,7 @@ export const TIMELINE_FILTER_LABELS: Record<TimelineFilter, string> = {
 };
 
 // ---------------------------------------------------------------------------
-// Source shapes — structural subsets of the hooks that feed the Timeline.
+// Source shapes: structural subsets of the hooks that feed the Timeline.
 // Kept local so this module depends on nothing.
 // ---------------------------------------------------------------------------
 
@@ -205,7 +205,7 @@ function isMasteryEntry(entry: TimelineKnowledgeSource): boolean {
 
 /**
  * Maps every available source row into one flat, deduped, descending stream.
- * Rows without a usable date are dropped — a timeline entry without a moment
+ * Rows without a usable date are dropped; a timeline entry without a moment
  * in time is noise.
  */
 export function buildTimelineEvents(input: TimelineSourceData): TimelineEvent[] {
@@ -249,7 +249,7 @@ export function buildTimelineEvents(input: TimelineSourceData): TimelineEvent[] 
         id: `homework_sent:${hw.id}`,
         type: 'homework_sent',
         at: hw.created_at,
-        title: `Homework sent — ${label}`,
+        title: `Homework sent: ${label}`,
         subtitle: 'Sent to student',
         needsAction: false,
         href: '?tab=homework',
@@ -262,7 +262,7 @@ export function buildTimelineEvents(input: TimelineSourceData): TimelineEvent[] 
         id: `homework_returned:${hw.id}`,
         type: 'homework_returned',
         at: hw.completed_at,
-        title: `Homework returned — ${label}`,
+        title: `Homework returned: ${label}`,
         subtitle: needsAction ? 'Waiting for your review' : 'Reviewed',
         needsAction,
         // Student returns open the teacher review page (answers, AI feedback,
@@ -284,8 +284,8 @@ export function buildTimelineEvents(input: TimelineSourceData): TimelineEvent[] 
         id: `mastery_change:${entry.id}`,
         type: 'mastery_change',
         at,
-        title: `${skill} — mastery ${entry.metadata?.mastery}%`,
-        subtitle: 'Learning model',
+        title: `${skill}: mastery ${entry.metadata?.mastery}%`,
+        subtitle: 'Learning plan',
         needsAction: false,
         href: '?tab=dslm',
       });
@@ -324,7 +324,7 @@ export function buildTimelineEvents(input: TimelineSourceData): TimelineEvent[] 
       title: test.title?.trim() || 'Untitled test',
       subtitle,
       needsAction,
-      // v6.9.111 M7.5 — deep link straight into the test details panel.
+      // v6.9.111 M7.5: deep link straight into the test details panel.
       href: `?tab=timeline&filter=tests&testId=${encodeURIComponent(test.id)}`,
       ...(needsAction ? { actionLabel: 'Review' } : {}),
     });
@@ -431,7 +431,7 @@ export function groupEventsByDate(
 }
 
 /**
- * Recent groups show a clock, older ones show a date — the teacher never has
+ * Recent groups show a clock, older ones show a date; the teacher never has
  * to guess which "09:12" belongs to which day.
  */
 export function formatEventTime(iso: string, group: TimelineGroupKey): string {

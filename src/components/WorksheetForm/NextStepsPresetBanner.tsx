@@ -1,5 +1,5 @@
 /**
- * v6.9.10 — NextStepsPresetBanner
+ * v6.9.10: NextStepsPresetBanner
  *
  * Renders a thin banner above the Exercise Selection cards that surfaces up to 3
  * pre-existing learning-plan suggestions (`future_worksheet_suggestions`) for the
@@ -137,7 +137,7 @@ export function NextStepsPresetBanner({
   const canPrev = windowStart > 0;
   const canNext = windowStart + 3 < total;
 
-  // v6.9.13 — local Edit dialog (no nav away from form).
+  // v6.9.13: local Edit dialog (no nav away from form).
   const EMPTY_EDIT: SuggestionEditValue = {
     topic: '', goal: '', additionalInfo: '', grammarFocus: '',
     exercises: [], exerciseFocusMap: {},

@@ -40,7 +40,7 @@ serve(async (req) => {
       callerInfo = 'anon-frontend';
       console.log('[transcribe-audio] Authorized via anon key (anonymous frontend call)');
     } else {
-      // Frontend call with user JWT — validate
+      // Frontend call with user JWT, validate
       const supabase = createClient(
         Deno.env.get('SUPABASE_URL')!,
         Deno.env.get('SUPABASE_ANON_KEY')!,

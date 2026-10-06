@@ -1,4 +1,4 @@
-/** LibraryToolbar — search, sort and primary action for worksheet materials. */
+/** LibraryToolbar: search, sort and primary action for worksheet materials. */
 import React from 'react';
 import { Plus, Search } from 'lucide-react';
 import { Button } from '@/components/ui/button';

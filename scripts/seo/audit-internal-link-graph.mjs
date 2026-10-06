@@ -15,7 +15,7 @@ const MIN_TOP_40_INCOMING = 10;
 const MIN_TOP_120_INCOMING = 5;
 
 const priorityRoutes = new Set([
-  // Sprint 3 (Faza 3) cluster hubs — see scripts/seo/cluster-hubs.mjs
+  // Sprint 3 (Faza 3) cluster hubs, see scripts/seo/cluster-hubs.mjs
   '/cefr-assessment',
   '/teaching-english-pronunciation',
   '/esl-exercise-design',

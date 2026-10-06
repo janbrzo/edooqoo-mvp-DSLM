@@ -19,7 +19,7 @@ import SpotlightOverlay from "./components/onboarding/SpotlightOverlay";
 import ActiveGenerationMiniPanel from "./components/generation/ActiveGenerationMiniPanel";
 import GlobalGeneratingModal from "./components/generation/GlobalGeneratingModal";
 
-// v6.9.0 — Route-level code splitting via React.lazy. Eager: Index, Login,
+// v6.9.0: Route-level code splitting via React.lazy. Eager: Index, Login,
 // Signup, NotFound (critical entry & auth flows). Everything else lazy → cuts
 // initial JS bundle from ~1154 KiB to ~400 KiB, lowers TBT from 380 ms to ~150 ms.
 const Dashboard = lazy(() => import("./pages/Dashboard"));

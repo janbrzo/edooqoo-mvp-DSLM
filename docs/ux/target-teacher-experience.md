@@ -31,7 +31,7 @@ The most prominent element of the product promise ("1 MINUTE", second tab) leads
 2. **Ritual, not modules.** Navigation mirrors the weekly teacher cycle (prepare → teach → close), not the data model.
 3. **Progressive disclosure, never deletion.** Nothing is removed. Advanced surfaces move one level deeper and stay one click away.
 4. **One primary action per screen.**
-5. **One name per thing.** "1-Minute Prep" is the ritual. "Learning model" is DSLM. The tab label "1 MINUTE" disappears.
+5. **One name per thing.** "1-Minute Prep" is the ritual. "Learning plan" is DSLM's teacher-facing name (renamed from "Learning model" on 2026-10-05, see `learning-model-spec.md`). The tab label "1 MINUTE" disappears.
 6. **New teachers see less than experienced ones.** Disclosure is driven by usage, not by instructions.
 7. **A number appears only when it drives a decision.**
 
@@ -134,7 +134,7 @@ Signal: existing `profiles.onboarding_progress` (no new column). `guided = !comp
 | Interactive elements on `/dashboard` (3 students, recent list collapsed) | ~40 | ≤ 14 |
 | Clicks from login to a generated lesson | 3–5 | 1–2 |
 | Primary actions on the dashboard | ~5 | 1 |
-| UI names for the same capability | 3 | 2 (1-Minute Prep, Learning model) |
+| UI names for the same capability | 3 | 2 (1-Minute Prep, Learning plan) |
 
 Martha Test for this direction: a tutor with ten years of experience who has never seen Edooqoo opens a student page and knows, without reading anything, what to click to prepare tomorrow's lesson.
 

@@ -1,12 +1,12 @@
 /**
- * workspaceTabs — pure URL contract for the Student Workspace (v6.9.111, phase M1).
+ * workspaceTabs: pure URL contract for the Student Workspace (v6.9.111, phase M1).
  *
  * The student page moves from 7 visible (+4 hidden) tabs to 4 canonical tabs:
  * prep | timeline | library | model. Legacy `?tab=` links live in sent emails,
  * bookmarks and Edge Function templates, so the alias map below is permanent,
  * not transitional.
  *
- * No React, no Supabase, no globals — every rule here is unit-testable.
+ * No React, no Supabase, no globals; every rule here is unit-testable.
  */
 
 export type WorkspaceTab = 'prep' | 'timeline' | 'library' | 'model';
@@ -81,6 +81,39 @@ export function resolveModelPerspective(view: string | null | undefined): ModelP
     case 'pathway':
     default:
       return 'roadmap';
+  }
+}
+
+export type ModelSegment = 'plan' | 'insights';
+export type ModelAnchor = 'goals' | 'skills' | 'profile' | null;
+
+/** `view` values written by the Learning plan segment switch. */
+export const MODEL_SEGMENT_VIEWS: Readonly<Record<ModelSegment, string>> = {
+  plan: 'pathway',
+  insights: 'insights',
+};
+
+/**
+ * Learning plan (2026-10): two visible segments. Every historical `view`
+ * value keeps working: `goals` scrolls Plan to Goals, `skills` / `profile`
+ * open Insights at the matching section.
+ */
+export function resolveModelSegment(view: string | null | undefined): {
+  segment: ModelSegment;
+  anchor: ModelAnchor;
+} {
+  switch (clean(view)) {
+    case 'insights':
+      return { segment: 'insights', anchor: null };
+    case 'skills':
+      return { segment: 'insights', anchor: 'skills' };
+    case 'profile':
+      return { segment: 'insights', anchor: 'profile' };
+    case 'goals':
+      return { segment: 'plan', anchor: 'goals' };
+    case 'pathway':
+    default:
+      return { segment: 'plan', anchor: null };
   }
 }
 
@@ -164,7 +197,7 @@ function serialize(params: URLSearchParams): string {
  * URL-level wrapper: resolves the tab and rebuilds the query string with
  * canonical values, preserving every pass-through param.
  * Explicit params in the input always win over alias defaults.
- * Idempotent — feeding `next` back in yields `changed: false`.
+ * Idempotent: feeding `next` back in yields `changed: false`.
  */
 export function resolveWorkspaceParams(params: URLSearchParams): {
   resolved: ResolvedTab;

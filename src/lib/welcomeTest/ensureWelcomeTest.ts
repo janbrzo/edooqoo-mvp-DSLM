@@ -1,7 +1,7 @@
 /**
- * v6.9.36 — Canonical helper for ensuring a Welcome Test exists for a given
+ * v6.9.36: Canonical helper for ensuring a Welcome Test exists for a given
  * (student, teacher) pair and sending its share link by email. Plain async
- * functions (no React hooks) so they can be called from anywhere — including
+ * functions (no React hooks) so they can be called from anywhere, including
  * UI dialogs that own their own navigation (e.g. AddStudentDialog inline
  * auto-send after creating a student).
  *
@@ -133,7 +133,7 @@ export interface SendWelcomeTestEmailArgs {
   teacherId: string;
   reminder?: boolean;
   /**
-   * v6.9.42 — attempt number for retake-aware subject/body. 1 = initial,
+   * v6.9.42: attempt number for retake-aware subject/body. 1 = initial,
    * 2+ = retake (retake index = attemptNumber - 1).
    */
   attemptNumber?: number;

@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 
 /**
- * v6.9.35 — Lightweight sticky header for public, unauthenticated routes
+ * v6.9.35: Lightweight sticky header for public, unauthenticated routes
  * (gallery index + worksheet preview). Does NOT depend on auth hooks so it
  * is safe to mount on routes accessed by anonymous visitors and crawlers.
  */

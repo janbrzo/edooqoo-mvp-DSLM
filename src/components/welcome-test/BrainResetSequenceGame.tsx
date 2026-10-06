@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Brain, RotateCw } from "lucide-react";
 
 /**
- * BrainResetSequenceGame — Simon-says style sequence memory.
+ * BrainResetSequenceGame: Simon-says style sequence memory.
  * 4 colored pads, sequence grows each round. Language-free.
  */
 const PADS = [
@@ -73,7 +73,7 @@ export function BrainResetSequenceGame() {
     }
     const next = playerIndex + 1;
     if (next >= sequence.length) {
-      // Round cleared — extend sequence
+      // Round cleared: extend sequence
       setTimeout(() => {
         setSequence((s) => [...s, Math.floor(Math.random() * 4)]);
         setMode("watch");

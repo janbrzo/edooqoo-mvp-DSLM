@@ -71,7 +71,7 @@ export async function logError(
       user_id: params.user_id ?? null,
     });
   } catch (err) {
-    // Logging must never throw — swallow.
+    // Logging must never throw, swallow.
     console.error('[logError] failed to insert error log:', err);
   }
 }

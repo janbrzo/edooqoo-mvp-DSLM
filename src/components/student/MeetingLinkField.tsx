@@ -1,5 +1,5 @@
 /**
- * MeetingLinkField — per-student meeting room link editor.
+ * MeetingLinkField: per-student meeting room link editor.
  *
  * Extracted verbatim from `StudentPage.tsx` in phase M2 of the Student
  * Workspace refactor (v6.9.111). Behaviour is unchanged.

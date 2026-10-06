@@ -272,7 +272,7 @@ Deno.serve(async (req) => {
 
       case 'new_booking_teacher':
         to = recipientTeacherEmail;
-        subject = `New booking: ${plainStudentName} — ${lessonInfo}`;
+        subject = `New booking: ${plainStudentName}: ${lessonInfo}`;
         html = `<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
             <h2 style="color: #1a1a1a;">New Booking 📅</h2>
             <p>A student has booked a lesson:</p>
@@ -288,7 +288,7 @@ Deno.serve(async (req) => {
 
       case 'cancellation_teacher':
         to = recipientTeacherEmail;
-        subject = `Lesson cancelled: ${plainStudentName} — ${lessonInfo}`;
+        subject = `Lesson cancelled: ${plainStudentName}: ${lessonInfo}`;
         html = `<div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
             <h2 style="color: #1a1a1a;">Lesson Cancelled ❌</h2>
             <p>${studentName} (${studentEmail}) has cancelled their lesson on ${lessonInfo}.</p>

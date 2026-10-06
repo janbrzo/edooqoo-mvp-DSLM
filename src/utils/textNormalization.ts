@@ -1,7 +1,7 @@
 /**
  * Text Normalization Utilities for Answer Comparison
  *
- * DEPRECATED as a matching engine — kept as a thin backwards-compatible
+ * DEPRECATED as a matching engine, kept as a thin backwards-compatible
  * wrapper. The single source of truth for answer correctness is
  * `src/lib/answers/matchAnswer.ts`.
  */
@@ -16,7 +16,7 @@ export const normalizeForComparison = (text: string): string => {
   if (!text) return '';
 
   return normalizeAnswerText(text)
-    .replace(/[.,!?;:'"()[\]{}\-–—]/g, '')
+    .replace(/[.,!?;:'"()[\]{}\-–\u2014]/g, '')
     .replace(/\s+/g, ' ')
     .trim();
 };

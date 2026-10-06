@@ -22,13 +22,14 @@ import { StudentSettingsMenu } from '@/components/student/StudentSettingsMenu';
 import { useStudentNextLesson } from '@/hooks/useStudentNextLesson';
 import { selectFocusAreas, selectFocusAreaTexts, formatNextLessonLabel } from '@/lib/students/studentSnapshot';
 import { PrepTab } from '@/components/student/prep/PrepTab';
-// v6.9.111 M5.4 — Timeline tab (data hooks + presentational composition).
+// v6.9.111 M5.4: Timeline tab (data hooks + presentational composition).
 import { useStudentTimeline } from '@/hooks/useStudentTimeline';
 import { useStudentTimelineSources } from '@/hooks/useStudentTimelineSources';
 import { TIMELINE_PAGE_SIZE, type TimelineFilter } from '@/lib/students/timelineEvents';
 import { useFutureTimeline } from '@/hooks/useFutureTimeline';
+import { useCurriculumPhases } from '@/hooks/dslm/useCurriculumPhases';
 import { selectPrepSuggestion, buildRationale, type PrepSuggestion } from '@/lib/students/prepPlan';
-// v6.9.111 M6.4 — Library tab (pure rules + presentational composition).
+// v6.9.111 M6.4: Library tab (pure rules + presentational composition).
 import {
   buildWorksheetItems,
   filterBySearch,
@@ -37,7 +38,7 @@ import {
   type LibrarySort,
   type LibraryWorksheetItem,
 } from '@/lib/students/libraryItems';
-// v6.9.111 M7.2 — canonical URL contract for the student workspace.
+// v6.9.111 M7.2: canonical URL contract for the student workspace.
 import {
   buildWorkspaceParams,
   resolveTab,
@@ -61,12 +62,12 @@ import { toast } from 'sonner';
 import { SectionSkeleton } from '@/components/dslm/SectionSkeleton';
 
 /**
- * v6.9.111 M7.4 — lazy workspace areas.
+ * v6.9.111 M7.4: lazy workspace areas.
  *
  * Prep stays eager: it is the default tab and must paint without a second
  * network round-trip. Timeline, Library and Learning model are code-split and
  * only requested once their tab becomes active (Radix unmounts inactive
- * TabsContent), each behind a local SectionSkeleton — never a full-page spinner.
+ * TabsContent), each behind a local SectionSkeleton, never a full-page spinner.
  */
 const TimelineTab = lazy(() =>
   import('@/components/student/timeline/TimelineTab').then((m) => ({ default: m.TimelineTab })),
@@ -77,14 +78,9 @@ const LibraryTab = lazy(() =>
 const DSLMTab = lazy(() =>
   import('@/components/dslm/DSLMTab').then((m) => ({ default: m.DSLMTab })),
 );
-const DslmExplainerBanner = lazy(() =>
-  import('@/components/student/DslmExplainerBanner').then((m) => ({
-    default: m.DslmExplainerBanner,
-  })),
-);
 
 /**
- * v6.9.111 M7.5 — contextual tools carried over from the legacy tab strip.
+ * v6.9.111 M7.5: contextual tools carried over from the legacy tab strip.
  *
  * They are no longer top-level destinations; each one mounts only while the
  * matching timeline filter / library section is active, so a teacher never
@@ -118,7 +114,7 @@ const WORKSPACE_TAB_PRESENTATION = {
   prep: { label: 'Prep', Icon: Sparkles },
   timeline: { label: 'Timeline', Icon: Activity },
   library: { label: 'Library', Icon: FileText },
-  model: { label: 'Learning model', Icon: Brain },
+  model: { label: 'Learning plan', Icon: Brain },
 } satisfies Record<WorkspaceTab, { label: string; Icon: typeof Sparkles }>;
 
 const StudentPage = () => {
@@ -136,7 +132,7 @@ const StudentPage = () => {
   const [librarySort, setLibrarySort] = useState<LibrarySort>('newest');
 
   /**
-   * v6.9.111 M7.3 — the canonical URL contract now owns all four visible tabs.
+   * v6.9.111 M7.3: the canonical URL contract now owns all four visible tabs.
    * Legacy aliases are normalised with replace, so bookmarks and email links
    * enter the matching task-oriented workspace without polluting Back history.
    */
@@ -145,7 +141,7 @@ const StudentPage = () => {
 
   useEffect(() => {
     if (!workspace.changed) return;
-    // v6.9.112 M8 — functional update against live params; skip when already canonical.
+    // v6.9.112 M8: functional update against live params; skip when already canonical.
     setSearchParams(
       (prev) => {
         const again = resolveWorkspaceParams(prev);
@@ -173,7 +169,7 @@ const StudentPage = () => {
     navigateWorkspace({ tab: resolveTab(tab).tab } as WorkspaceNavigationTarget);
   };
 
-  // v6.9.111 M7.5 — flashcard set selection writes the canonical library URL.
+  // v6.9.111 M7.5: flashcard set selection writes the canonical library URL.
   const handleFlashcardSetChange = (setId: string | null) => {
     navigateWorkspace({
       tab: 'library',
@@ -192,7 +188,7 @@ const StudentPage = () => {
     });
   };
   
-  // Single-student fetch (cached) — falls back to the list lookup for demo mode / pre-warmed cache
+  // Single-student fetch (cached): falls back to the list lookup for demo mode / pre-warmed cache
   const { data: studentFromQuery, isLoading: studentLoading } = useStudent(id);
   const student = studentFromQuery || students.find(s => s.id === id);
   
@@ -222,7 +218,7 @@ const StudentPage = () => {
   // Rename worksheet state
   const [renameWorksheetData, setRenameWorksheetData] = useState<{id: string; title: string} | null>(null);
 
-  // v6.9.13 — local Add-Note quick modal triggered from overview tab.
+  // v6.9.13: local Add-Note quick modal triggered from overview tab.
   const [quickAddNoteOpen, setQuickAddNoteOpen] = useState(false);
 
   // Get recent notes for overview
@@ -231,7 +227,7 @@ const StudentPage = () => {
     teacherId: student?.teacher_id || '',
   });
 
-  // v6.9.111 M3.3 — workspace frame: focus areas + next lesson summary.
+  // v6.9.111 M3.3: workspace frame: focus areas + next lesson summary.
   const focusAreas = useMemo(
     () => selectFocusAreas(studentKnowledge.entries),
     [studentKnowledge.entries],
@@ -248,27 +244,38 @@ const StudentPage = () => {
   );
   const nextLessonLabel = useMemo(() => formatNextLessonLabel(nextLesson), [nextLesson]);
 
-  // v6.9.111 M4.4 — Prep tab data (no new network call in the target state:
+  // v6.9.111 M4.4: Prep tab data (no new network call in the target state:
   // OneMinutePrepCard already calls this hook on the Overview tab today).
   const futureTimeline = useFutureTimeline({
-    // Demo ids are not UUIDs — keep Supabase out of it (see demo-mode rule).
+    // Demo ids are not UUIDs, keep Supabase out of it (see demo-mode rule).
+    studentId: isDemoMode ? '' : id || '',
+    teacherId: isDemoMode ? '' : student?.teacher_id || '',
+  });
+  // Phases decide which step is "now": Prep and the Learning plan tab share
+  // one queue order (`orderUpNext`), so both always propose the same lesson.
+  const curriculum = useCurriculumPhases({
     studentId: isDemoMode ? '' : id || '',
     teacherId: isDemoMode ? '' : student?.teacher_id || '',
   });
   const prepSuggestion = useMemo(
     () =>
-      selectPrepSuggestion(futureTimeline.phaseSteps as any, futureTimeline.nextSteps as any, {
-        mainGoal: student?.main_goal ?? null,
-        focusAreas: focusAreaTexts,
-      }),
-    [futureTimeline.phaseSteps, futureTimeline.nextSteps, student?.main_goal, focusAreaTexts],
+      selectPrepSuggestion(
+        futureTimeline.phaseSteps as any,
+        futureTimeline.nextSteps as any,
+        {
+          mainGoal: student?.main_goal ?? null,
+          focusAreas: focusAreaTexts,
+        },
+        curriculum.phases,
+      ),
+    [futureTimeline.phaseSteps, futureTimeline.nextSteps, student?.main_goal, focusAreaTexts, curriculum.phases],
   );
   const prepRationale = useMemo(
     () => buildRationale(prepSuggestion, focusAreas),
     [prepSuggestion, focusAreas],
   );
 
-  // v6.9.111 M5.4 — Timeline data. The three extra reads only fire once the
+  // v6.9.111 M5.4: Timeline data. The three extra reads only fire once the
   // Timeline tab is actually open; worksheets and notes are already loaded.
   const timelineSources = useStudentTimelineSources(
     id,
@@ -329,7 +336,7 @@ const StudentPage = () => {
     navigateWorkspace({ tab: 'prep' });
   };
 
-  // v6.9.111 M6.4 — Library items: no extra queries, reuse the page worksheets.
+  // v6.9.111 M6.4: Library items: no extra queries, reuse the page worksheets.
   const libraryItems = useMemo(() => {
     const built = buildWorksheetItems(
       (worksheets as any[]).map((w) => ({
@@ -438,7 +445,7 @@ const StudentPage = () => {
     navigate('/');
   };
 
-  // v6.9.111 M4.4 — Prep tab: same contract as `onUseWorksheetSuggestion`
+  // v6.9.111 M4.4: Prep tab: same contract as `onUseWorksheetSuggestion`
   // below. The Worksheet Generation Engine itself is untouched; this only
   // prefills the form / writes the auto-generate intent.
   const handlePrepGenerate = (s: PrepSuggestion, autoGenerate: boolean) => {
@@ -556,7 +563,7 @@ const StudentPage = () => {
           <div className="order-2 min-w-0 lg:order-1">
 
 
-        {/* v6.9.62 P6 — intake extraction banner: shown when ?intake=<id> is present. */}
+        {/* v6.9.62 P6: intake extraction banner: shown when ?intake=<id> is present. */}
         {searchParams.get('intake') && id ? (
           <IntakeExtractionBanner
             extractionId={searchParams.get('intake') as string}
@@ -569,7 +576,7 @@ const StudentPage = () => {
           />
         ) : null}
 
-        {/* v6.9.111 M7.3 — four task-oriented workspace tabs. */}
+        {/* v6.9.111 M7.3: four task-oriented workspace tabs. */}
         <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
           <TabsList className="mb-6 grid h-auto min-h-11 w-full grid-cols-4">
             {WORKSPACE_TABS.map((tab) => {
@@ -585,8 +592,8 @@ const StudentPage = () => {
                   <Icon className="h-4 w-4 shrink-0" aria-hidden="true" />
                   {tab === 'model' ? (
                     <>
-                      <span className="sm:hidden">Model</span>
-                      <span className="hidden sm:inline">Learning model</span>
+                      <span className="sm:hidden">Plan</span>
+                      <span className="hidden sm:inline">Learning plan</span>
                     </>
                   ) : (
                     <span>{label}</span>
@@ -665,7 +672,7 @@ const StudentPage = () => {
             </Suspense>
 
             {/*
-              v6.9.111 M7.5 — contextual tool panel, rendered as a sibling of the
+              v6.9.111 M7.5: contextual tool panel, rendered as a sibling of the
               timeline (never a card inside a card). Only the panel matching the
               active filter is mounted, so its queries stay scoped to the view.
             */}
@@ -702,7 +709,7 @@ const StudentPage = () => {
             )}
           </TabsContent>
 
-          {/* v6.9.111 M6.4 — Library tab */}
+          {/* v6.9.111 M6.4: Library tab */}
           <TabsContent value="library">
             <Suspense fallback={<SectionSkeleton />}>
             <LibraryTab
@@ -756,7 +763,7 @@ const StudentPage = () => {
               deletedTotalCount={deletedTotalCount || 0}
               isDeletedLoading={deletedLoading}
               onRestore={handleLibraryRestore}
-              /* v6.9.111 M7.5 — legacy flashcards / homework tools as library segments. */
+              /* v6.9.111 M7.5: legacy flashcards / homework tools as library segments. */
               flashcardsSlot={
                 librarySection === 'flashcards' ? (
                   <Suspense fallback={<SectionSkeleton />}>
@@ -787,21 +794,16 @@ const StudentPage = () => {
             </Suspense>
           </TabsContent>
 
-          {/* Learning model tab */}
+          {/* Learning plan tab (2026-10, docs/ux/learning-model-spec.md).
+              The Welcome Test and the DSLM explainer live inside the plan now
+              (setup step 2 and "How it works"), not as banners above it. */}
           <TabsContent value="model">
-            <WelcomeTestSuggestion
-              studentId={student.id}
-              teacherId={student.teacher_id}
-              studentName={student.name}
-              studentEmail={student.student_email}
-              surface="oneMinute"
-            />
             <Suspense fallback={<SectionSkeleton />}>
-            <DslmExplainerBanner teacherId={student.teacher_id} />
             <DSLMTab
               studentId={id || ''}
               teacherId={student.teacher_id}
               studentName={student.name}
+              studentEmail={student.student_email}
               englishLevel={student.english_level}
               mainGoal={student.main_goal}
               mainGoalTargetDate={(student as any).main_goal_target_date || null}
@@ -824,7 +826,7 @@ const StudentPage = () => {
               onUseWorksheetSuggestion={(topic, goal, additionalInfo, grammarFocus, exercises, exerciseFocusMap, autoGenerate, suggestionId) => {
                 sessionStorage.setItem('preSelectedStudent', JSON.stringify({ id: student.id, name: student.name }));
                 if (autoGenerate) {
-                  // v6.9.53 — single source of truth: persistent intent in
+                  // v6.9.53: single source of truth: persistent intent in
                   // localStorage + legacy session flags mirrored inside the
                   // helper. Survives refresh, mount-race and premature clears.
                   writeAutoGenerateIntent({
@@ -836,13 +838,13 @@ const StudentPage = () => {
                     grammarFocus: grammarFocus || '',
                     exercises: exercises || [],
                     exerciseFocusMap: (exerciseFocusMap || {}) as Record<string, 'vocabulary' | 'grammar'>,
-                    // v6.9.55 — surface in GeneratingModal header.
+                    // v6.9.55: surface in GeneratingModal header.
                     studentName: student.name || null,
                     studentEmail: (student as any).student_email || null,
                     studentEnglishLevel: student.english_level,
                   });
                 } else {
-                  // Manual "Use this" — only prefill, never auto-fire.
+                  // Manual "Use this", only prefill, never auto-fire.
                   sessionStorage.setItem('prefillWorksheet', JSON.stringify({ topic, goal, additionalInfo: additionalInfo || '', grammarFocus: grammarFocus || '' }));
                   if (suggestionId) sessionStorage.setItem('prefillSuggestionId', suggestionId);
                   else sessionStorage.removeItem('prefillSuggestionId');
@@ -917,7 +919,7 @@ const StudentPage = () => {
           />
         )}
 
-        {/* v6.9.13 — Quick Add Note (from overview tab) */}
+        {/* v6.9.13: Quick Add Note (from overview tab) */}
         <StudentKnowledgeQuickAddModal
           isOpen={quickAddNoteOpen}
           onClose={() => setQuickAddNoteOpen(false)}

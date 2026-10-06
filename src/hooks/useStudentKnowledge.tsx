@@ -121,7 +121,7 @@ export const useStudentKnowledge = ({ studentId, teacherId }: UseStudentKnowledg
         .select()
         .single();
       if (error) throw error;
-      // v6.9.8 — fire-and-forget AI classification (only when teacher didn't pick a specific category)
+      // v6.9.8: fire-and-forget AI classification (only when teacher didn't pick a specific category)
       if (entry.category === 'Notes' && data?.id) {
         (async () => {
           try {
@@ -258,7 +258,7 @@ export const useStudentKnowledge = ({ studentId, teacherId }: UseStudentKnowledg
     },
   });
 
-  // v6.9.9 — manual archive (e.g. Next Lesson Idea used in a worksheet)
+  // v6.9.9: manual archive (e.g. Next Lesson Idea used in a worksheet)
   const archiveMutation = useMutation({
     mutationFn: async ({ entryId, worksheetId }: { entryId: string; worksheetId?: string | null }) => {
       const update: Record<string, unknown> = { archived_at: new Date().toISOString() };
@@ -281,7 +281,7 @@ export const useStudentKnowledge = ({ studentId, teacherId }: UseStudentKnowledg
     },
   });
 
-  // v6.9.10 — confirm a stale note is still current (resets the staleness clock
+  // v6.9.10: confirm a stale note is still current (resets the staleness clock
   // by writing metadata.last_confirmed_at). No DB schema change required.
   const confirmCurrentMutation = useMutation({
     mutationFn: async (entryId: string) => {

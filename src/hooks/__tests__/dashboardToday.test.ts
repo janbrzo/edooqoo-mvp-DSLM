@@ -108,7 +108,7 @@ describe('mapAttentionItems', () => {
 describe('formatGoal', () => {
   it('maps legacy codes and passes free text through', () => {
     expect(formatGoal('work')).toBe('Work/Business');
-    expect(formatGoal('Business English — meetings')).toBe('Business English — meetings');
+    expect(formatGoal('Business English, meetings')).toBe('Business English, meetings');
     expect(formatGoal(null)).toBe('');
   });
 });

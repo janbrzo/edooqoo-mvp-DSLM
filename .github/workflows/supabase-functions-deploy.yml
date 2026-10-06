@@ -20,7 +20,7 @@ jobs:
       - name: Check out repository
         uses: actions/checkout@v5
 
-      - name: Preflight — verify Supabase access token is visible to this job
+      - name: "Preflight: verify Supabase access token is visible to this job"
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
         run: |

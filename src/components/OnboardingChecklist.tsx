@@ -28,7 +28,7 @@ export const OnboardingChecklist = () => {
     setIsTemporarilyDismissed(tempDismissed);
   }, []);
 
-  // v6.9.34 — allow any component to request a checklist refresh:
+  // v6.9.34: allow any component to request a checklist refresh:
   //   window.dispatchEvent(new CustomEvent('onboarding:refresh'))
   useEffect(() => {
     const h = () => { try { refreshProgress(); } catch {} };
@@ -59,9 +59,9 @@ export const OnboardingChecklist = () => {
 
   const completionPercentage = getCompletionPercentage();
 
-  // Pick a target student for deep links — first real (non-demo) student if available.
+  // Pick a target student for deep links, first real (non-demo) student if available.
   const firstStudentId = students?.[0]?.id;
-  // v6.9.33 — append cache-buster so React Router fires a fresh navigation
+  // v6.9.33: append cache-buster so React Router fires a fresh navigation
   // even when the user clicks the same focus link twice in a row.
   const studentDeepLink = (suffix: string) => {
     if (!firstStudentId) return '/dashboard';
@@ -70,11 +70,11 @@ export const OnboardingChecklist = () => {
   };
   const hasStudent = !!firstStudentId;
 
-  // v6.9.34 — navigate AND re-fire the spotlight from the click handler.
+  // v6.9.34: navigate AND re-fire the spotlight from the click handler.
   // This eliminates the "second click does nothing" bug where the URL was
   // already cleaned by a prior visit so the URL-driven effect no-ops.
   // We also kick off a `refreshProgress()` ~1.8s later so a completed
-  // action (e.g. Generate Next Lesson Ideas) updates the checklist quickly.
+  // action (e.g. getting lesson suggestions) updates the checklist quickly.
   const navAndSpotlight = (suffix: string, focusId: string) => {
     navigate(studentDeepLink(suffix));
     setTimeout(() => triggerSpotlight({ id: focusId }), 700);
@@ -127,7 +127,7 @@ export const OnboardingChecklist = () => {
   const prepSteps: Step[] = [
     {
       key: 'generate_next_ideas',
-      label: 'Generate Next Lesson Ideas',
+      label: 'Get lesson suggestions',
       icon: Lightbulb,
       completed: !!progress.steps.generate_next_ideas,
       action: () => navAndSpotlight('?tab=dslm&view=pathway&focus=next-lesson-ideas', 'next-lesson-ideas'),
@@ -135,7 +135,7 @@ export const OnboardingChecklist = () => {
     },
     {
       key: 'pick_idea',
-      label: 'Use one Next Lesson suggestion',
+      label: 'Use a lesson suggestion',
       icon: MousePointerClick,
       completed: !!progress.steps.pick_idea,
       action: () => navAndSpotlight('?tab=dslm&view=pathway&focus=pick-idea', 'pick-idea'),
@@ -303,7 +303,7 @@ export const OnboardingChecklist = () => {
                     1. One-time student setup
                   </div>
                   <p className="text-[10px] text-muted-foreground mb-1.5">
-                    Teach Edooqoo about your student — one-time.
+                    Teach Edooqoo about your student, one-time.
                   </p>
                   <div className="space-y-1.5">{setupSteps.map(renderStep)}</div>
                 </div>

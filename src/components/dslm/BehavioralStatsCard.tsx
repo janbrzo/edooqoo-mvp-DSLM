@@ -1,5 +1,5 @@
 /**
- * BehavioralStatsCard — grid of behavioral statistics calculated from system data
+ * BehavioralStatsCard: grid of behavioral statistics calculated from system data
  */
 import React from 'react';
 import { Card, CardContent } from '@/components/ui/card';
@@ -29,6 +29,22 @@ export const BehavioralStatsCard: React.FC<BehavioralStatsCardProps> = ({ stats,
           <div key={i} className="h-16 bg-muted/50 rounded-lg animate-pulse" />
         ))}
       </div>
+    );
+  }
+
+  // 2026-10: six "No data" tiles say one thing; say it once.
+  const isEmpty =
+    stats.lessonsPerWeek === null &&
+    stats.cancellationRate === null &&
+    stats.homeworkTotal === 0 &&
+    stats.flashcardSetsCount === 0 &&
+    stats.totalFlashcardReviews === 0 &&
+    stats.daysSinceLastActivity === null;
+  if (isEmpty) {
+    return (
+      <p className="text-sm text-muted-foreground">
+        No lessons, homework or flashcard activity yet. Patterns appear after the first booked lesson or homework.
+      </p>
     );
   }
 

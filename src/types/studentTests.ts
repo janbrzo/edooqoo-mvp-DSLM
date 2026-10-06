@@ -231,7 +231,7 @@ export interface NewTestData {
   description?: string;
   linked_goal_id?: string;
   linked_element_ids?: string[];
-  // Plan v6.0 — attempt tracking for welcome test retakes
+  // Plan v6.0: attempt tracking for welcome test retakes
   attempt_number?: number;
   previous_attempt_id?: string | null;
 }

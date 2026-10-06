@@ -1,8 +1,8 @@
 /**
- * CollapsibleSection — compact section wrapper with header trigger.
+ * CollapsibleSection: compact section wrapper with header trigger.
  * Used in Goals/Skills/Profile to densify layout while keeping content discoverable.
  */
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -11,7 +11,7 @@ import { ChevronDown, type LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface CollapsibleSectionProps {
-  /** v6.9.13: stable id used by `dslm:openSubsection` events for sub-nav scrolling. */
+  /** Stable id; rendered as `dslm-sub-{id}` for anchors and tests. */
   id?: string;
   title: string;
   icon?: LucideIcon;
@@ -22,37 +22,16 @@ interface CollapsibleSectionProps {
   description?: string;
   children: React.ReactNode;
   className?: string;
-  /** Also open when a `dslm:openSubsection` event targets one of these nested ids. */
-  alsoOpenFor?: string[];
-  /** Keep children mounted while closed so nested sections keep their event listeners. */
+  /** Keep children mounted (hidden) while closed, e.g. to preserve nested section state. */
   forceMountContent?: boolean;
 }
 
 export const CollapsibleSection: React.FC<CollapsibleSectionProps> = ({
   id, title, icon: Icon, count, badge, defaultOpen = false, rightSlot, description, children, className,
-  alsoOpenFor, forceMountContent,
+  forceMountContent,
 }) => {
   const [open, setOpen] = useState(defaultOpen);
   const cardRef = useRef<HTMLDivElement>(null);
-
-  // v6.9.13 — open + scroll into view when a sub-nav button targets this section.
-  useEffect(() => {
-    if (!id && !alsoOpenFor?.length) return;
-    const handler = (e: Event) => {
-      const detail = (e as CustomEvent).detail as { id?: string } | undefined;
-      if (!detail?.id) return;
-      if (detail.id !== id) {
-        if (alsoOpenFor?.includes(detail.id)) setOpen(true);
-        return;
-      }
-      setOpen(true);
-      requestAnimationFrame(() => {
-        cardRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-      });
-    };
-    window.addEventListener('dslm:openSubsection', handler as EventListener);
-    return () => window.removeEventListener('dslm:openSubsection', handler as EventListener);
-  }, [id, alsoOpenFor?.join('|')]);
 
   return (
     <Card ref={cardRef} id={id ? `dslm-sub-${id}` : undefined} className={cn('overflow-hidden scroll-mt-24', className)}>

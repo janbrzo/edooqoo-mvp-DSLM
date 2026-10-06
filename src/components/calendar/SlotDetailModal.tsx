@@ -62,7 +62,7 @@ const DURATION_OPTIONS = [
   { value: '120', label: '120 min' },
 ];
 
-// Safe default for hooks — NEVER do early return before hooks
+// Safe default for hooks, NEVER do early return before hooks
 const EMPTY_SLOT = {
   slot_date: '', start_time: '00:00', end_time: '01:00', notes: '',
   student_id: null, status: 'available', teacher_id: '', id: '',
@@ -151,7 +151,7 @@ export function SlotDetailModal({ open, onOpenChange, slot, studentName, student
     }
   }, [slot?.teacher_id]);
 
-  // Duration calculation — uses safe values
+  // Duration calculation: uses safe values
   const durationMinutes = useMemo(() => {
     const [sh, sm] = editStartTime.split(':').map(Number);
     const [eh, em] = editEndTime.split(':').map(Number);
@@ -159,7 +159,7 @@ export function SlotDetailModal({ open, onOpenChange, slot, studentName, student
     return (eh * 60 + em) - (sh * 60 + sm);
   }, [editStartTime, editEndTime]);
 
-  // Derived values — uses safeSlot
+  // Derived values: uses safeSlot
   const isBlock = (safeSlot as any).slot_type === 'block';
   const isPending = safeSlot.status === 'booked' && !safeSlot.confirmed_at;
   const isNeedsReview = (safeSlot.status as string) === 'needs_review';
@@ -177,7 +177,7 @@ export function SlotDetailModal({ open, onOpenChange, slot, studentName, student
     editWorksheetId !== (safeSlot.worksheet_id || 'none') ||
     editDiscountPercent !== ((safeSlot as any).discount_percent != null ? String((safeSlot as any).discount_percent) : '');
 
-  // v6.9.53 — Booked confirmed lesson with no worksheet, starting in ≤24h.
+  // v6.9.53: Booked confirmed lesson with no worksheet, starting in ≤24h.
   const minutesUntilStart = (() => {
     if (!safeSlot.slot_date || !safeSlot.start_time) return Number.POSITIVE_INFINITY;
     const lessonStart = new Date(`${safeSlot.slot_date}T${safeSlot.start_time}`);
@@ -228,9 +228,9 @@ export function SlotDetailModal({ open, onOpenChange, slot, studentName, student
   const handleCancel = () => { resetChanges(); onOpenChange(false); };
 
   const handleSave = async (opts: { skipClose?: boolean } = {}) => {
-    // v6.9.8 — demo guard (modal can open in demo, save is blocked)
+    // v6.9.8: demo guard (modal can open in demo, save is blocked)
     if (typeof window !== 'undefined' && localStorage.getItem('edooqoo_demo_mode') === 'true') {
-      toast.info('Demo mode — Saving slot changes is disabled.');
+      toast.info('Demo mode: Saving slot changes is disabled.');
       return;
     }
     setSaving(true);
@@ -285,7 +285,7 @@ export function SlotDetailModal({ open, onOpenChange, slot, studentName, student
       if (conflicts && conflicts.length > 0) {
         const hasLesson = conflicts.some(c => c.student_id);
         if (hasLesson) {
-          toast.error('Cannot change time — conflicts with an existing lesson.');
+          toast.error('Cannot change time: conflicts with an existing lesson.');
           setSaving(false);
           return;
         }
@@ -446,7 +446,7 @@ export function SlotDetailModal({ open, onOpenChange, slot, studentName, student
     } catch { return true; }
   };
 
-  // Batch logic disabled — handled exclusively via RecurringBookingModal from notifications
+  // Batch logic disabled, handled exclusively via RecurringBookingModal from notifications
   const getValidBatchSlotIds = async (): Promise<string[] | null> => {
     return null;
   };
@@ -477,7 +477,7 @@ export function SlotDetailModal({ open, onOpenChange, slot, studentName, student
         await onUpdate(slot.id, { confirmed_at: new Date().toISOString() } as any);
         const canSend = await shouldSendEmail('notify_email_on_confirmation');
         if (canSend) await sendCalendarEmail('booking_confirmation', { confirmationComment: inlineComment || undefined });
-        // Student GCal sync — update from Pending to Booked
+        // Student GCal sync, update from Pending to Booked
         const sEmail = extractStudentEmail(slot.student_notes);
         if (sEmail) {
           supabase.functions.invoke('student-gcal-sync', {
@@ -508,7 +508,7 @@ export function SlotDetailModal({ open, onOpenChange, slot, studentName, student
     } catch (err: any) {
       console.error('Confirm failed:', err);
       toast.error(err.message || 'Failed to confirm booking');
-      // Do NOT close dialogs on error — let user retry
+      // Do NOT close dialogs on error, let user retry
     } finally {
       setActionInProgress(false);
     }
@@ -543,7 +543,7 @@ export function SlotDetailModal({ open, onOpenChange, slot, studentName, student
         await onUpdate(slot.id, rejectUpdates as any);
         const canSend = await shouldSendEmail('notify_email_on_rejection');
         if (canSend) await sendCalendarEmail('booking_rejected', { rejectionReason: inlineComment || undefined });
-        // Student GCal sync — delete rejected booking
+        // Student GCal sync, delete rejected booking
         const sEmail = extractStudentEmail(slot.student_notes);
         if (sEmail) {
           supabase.functions.invoke('student-gcal-sync', {
@@ -608,7 +608,7 @@ export function SlotDetailModal({ open, onOpenChange, slot, studentName, student
     await resolveNotifications(slot.id, ['booking_pending', 'booking_confirmed'], 'cancelled');
     // GCal: update to Available or delete based on settings
     supabase.functions.invoke('gcal-sync', { body: { teacherId: slot.teacher_id, slotId: slot.id, action: 'cancel' } }).catch(console.error);
-    // Student GCal sync — delete cancelled lesson
+    // Student GCal sync, delete cancelled lesson
     const tcEmail = extractStudentEmail(slot.student_notes);
     if (tcEmail) {
       supabase.functions.invoke('student-gcal-sync', {
@@ -637,9 +637,9 @@ export function SlotDetailModal({ open, onOpenChange, slot, studentName, student
       } as any);
     } catch (_) {}
     await resolveNotifications(slot.id, ['booking_pending', 'booking_confirmed'], 'cancelled');
-    // GCal: same behavior as teacher cancellation — update to Available or delete
+    // GCal: same behavior as teacher cancellation, update to Available or delete
     supabase.functions.invoke('gcal-sync', { body: { teacherId: slot.teacher_id, slotId: slot.id, action: 'cancel' } }).catch(console.error);
-    // Student GCal sync — delete cancelled lesson
+    // Student GCal sync, delete cancelled lesson
     const scEmail = extractStudentEmail(slot.student_notes);
     if (scEmail) {
       supabase.functions.invoke('student-gcal-sync', {
@@ -838,7 +838,7 @@ export function SlotDetailModal({ open, onOpenChange, slot, studentName, student
                   <div className="mb-2 rounded-md border border-amber-300 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-700/50 px-2 py-1.5 text-[11px] text-amber-900 dark:text-amber-100 flex flex-wrap items-center gap-2">
                     <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
                     <span className="flex-1 min-w-[160px]">
-                      Lesson starts in {lessonStartLabel} — assign or generate a worksheet.
+                      Lesson starts in {lessonStartLabel}, assign or generate a worksheet.
                     </span>
                     {slot.student_id && (
                       <Button
@@ -872,11 +872,11 @@ export function SlotDetailModal({ open, onOpenChange, slot, studentName, student
                         </Button>
                       )}
                     </div>
-                    {/* v6.9.50 — empty-state CTA: nudge teacher to 1-Minute Prep when no worksheet exists for this student */}
+                    {/* v6.9.50: empty-state CTA: nudge teacher to 1-Minute Prep when no worksheet exists for this student */}
                     {studentWorksheets.length === 0 && slot.student_id && (
                       <p className="mt-1 text-[11px] text-muted-foreground flex items-center gap-1 flex-wrap">
                         <Sparkles className="h-3 w-3 text-primary" />
-                        No worksheets yet —
+                        No worksheets yet: 
                         <button
                           type="button"
                           className="underline text-primary hover:text-primary/80"
@@ -956,8 +956,8 @@ export function SlotDetailModal({ open, onOpenChange, slot, studentName, student
                     <span className="font-medium">{log.action.replace(/_/g, ' ')}</span>
                     <span className="text-muted-foreground ml-1">by {log.actor}</span>
                     <span className="text-muted-foreground ml-1">{format(new Date(log.created_at), 'MMM d HH:mm')}</span>
-                    {log.details?.student_name && <span className="text-muted-foreground"> — {log.details.student_name}</span>}
-                    {log.details?.slot_date && <span className="text-muted-foreground"> — {log.details.slot_date}</span>}
+                    {log.details?.student_name && <span className="text-muted-foreground">: {log.details.student_name}</span>}
+                    {log.details?.slot_date && <span className="text-muted-foreground">: {log.details.slot_date}</span>}
                     {log.details?.start_time && <span className="text-muted-foreground"> at {String(log.details.start_time).slice(0, 5)}</span>}
                     {log.details?.old_status && <span className="text-muted-foreground"> ({log.details.old_status} → {log.details.new_status})</span>}
                     {log.details?.previous_student && <span className="text-muted-foreground"> (was: {log.details.previous_student})</span>}
@@ -981,7 +981,7 @@ export function SlotDetailModal({ open, onOpenChange, slot, studentName, student
                   <Button
                     size="sm"
                     onClick={async () => {
-                      // v6.9.50 — when teacher already picked a worksheet, save it as part of confirm.
+                      // v6.9.50: when teacher already picked a worksheet, save it as part of confirm.
                       if (editWorksheetId !== 'none' && hasChanges) {
                         await handleSave({ skipClose: true });
                       }
@@ -1000,7 +1000,7 @@ export function SlotDetailModal({ open, onOpenChange, slot, studentName, student
                   <Button size="sm" variant="outline" onClick={handleReject} disabled={actionInProgress} className="text-destructive text-xs h-7">
                     <Ban className="h-3 w-3 mr-1" /> Reject
                   </Button>
-                  {/* v6.9.50 — Confirm + jump to 1-Minute Prep, shown only when no worksheet picked yet */}
+                  {/* v6.9.50: Confirm + jump to 1-Minute Prep, shown only when no worksheet picked yet */}
                   {editWorksheetId === 'none' && slot.student_id && (
                     <Button
                       size="sm"

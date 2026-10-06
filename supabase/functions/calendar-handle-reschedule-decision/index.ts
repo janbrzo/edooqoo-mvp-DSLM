@@ -188,7 +188,7 @@ Deno.serve(async (req) => {
         }).catch(console.error);
       }
 
-      // GCal sync — teacher: upsert old (now available/rescheduled) + upsert new (now confirmed)
+      // GCal sync: teacher: upsert old (now available/rescheduled) + upsert new (now confirmed)
       try {
         if (oldSlotId) {
           await fetch(`${supabaseUrl}/functions/v1/gcal-sync`, {
@@ -203,7 +203,7 @@ Deno.serve(async (req) => {
           body: JSON.stringify({ teacherId: user.id, slotId: newSlotId, action: 'upsert' }),
         });
       } catch (_) {}
-      // Student GCal sync — delete old event, upsert new as Booked
+      // Student GCal sync, delete old event, upsert new as Booked
       if (studentEmail) {
         try {
           if (oldSlotId) {
@@ -267,7 +267,7 @@ Deno.serve(async (req) => {
         }).catch(console.error);
       }
 
-      // GCal sync — remove pending from both calendars
+      // GCal sync: remove pending from both calendars
       try {
         await fetch(`${supabaseUrl}/functions/v1/gcal-sync`, {
           method: 'POST',

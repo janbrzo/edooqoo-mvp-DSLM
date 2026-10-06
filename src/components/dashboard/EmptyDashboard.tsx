@@ -8,7 +8,7 @@ interface EmptyDashboardProps {
   onAddStudent: () => void;
 }
 
-/** v6.9.109 — the only thing a teacher with 0 students sees: one block, one action. */
+/** v6.9.109: the only thing a teacher with 0 students sees: one block, one action. */
 export const EmptyDashboard: React.FC<EmptyDashboardProps> = ({ onAddStudent }) => {
   const { isDemoMode } = useDemoContext();
 

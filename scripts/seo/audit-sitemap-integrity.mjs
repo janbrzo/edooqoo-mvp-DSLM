@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Sprint 5 (Faza 6) — sitemap integrity guard.
+ * Sprint 5 (Faza 6): sitemap integrity guard.
  *
  * PROBLEM: Search Console reports ~1000 "discovered - not indexed" URLs and 24 404s. A sitemap
  * that advertises redirect stubs, noindex pages, duplicates or missing files burns crawl budget

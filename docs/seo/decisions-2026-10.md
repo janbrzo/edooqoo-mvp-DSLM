@@ -1,4 +1,4 @@
-# SEO/GEO decisions — 2026-10-04
+# SEO/GEO decisions: 2026-10-04
 
 Approved by the owner on 2026-10-04 (proposals from the audit, accepted as stated; item 3 amended by the owner).
 

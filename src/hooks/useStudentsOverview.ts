@@ -5,12 +5,12 @@ import { useDemoContext } from '@/contexts/DemoContext';
 import { devWarn } from '@/utils/logger';
 
 /**
- * useStudentsOverview — worksheet counts per student for `/students`.
+ * useStudentsOverview: worksheet counts per student for `/students`.
  *
  * One batched query instead of a `useWorksheetHistory` per row (the old
  * dashboard `StudentCard` N+1). Counting happens client-side; the default
  * PostgREST page is 1000 rows, so a teacher with >1000 live worksheets would
- * see a floor value here. Acceptable today — revisit with a per-student
+ * see a floor value here. Acceptable today: revisit with a per-student
  * `count` RPC if that ceiling is ever reached.
  *
  * Demo mode: counts from `demoData.worksheets`, zero Supabase calls.

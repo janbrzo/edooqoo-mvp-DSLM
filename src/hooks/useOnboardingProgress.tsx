@@ -6,20 +6,21 @@ import { useStudents } from '@/hooks/useStudents';
 import { useDemoContext } from '@/contexts/DemoContext';
 import { useAuthUser } from '@/hooks/useAuthUser';
 import { devLog } from '@/utils/logger';
+import { resolveIdeaSteps } from '@/lib/onboarding/ideaSteps';
 
 interface OnboardingStep {
-  // Section 1 — One-time student setup
+  // Section 1: One-time student setup
   add_student: boolean;
   send_welcome_test: boolean;
   add_goals: boolean;
   generate_roadmap: boolean;
-  // Section 2 — Weekly 1-Minute Prep
+  // Section 2: Weekly 1-Minute Prep
   generate_next_ideas: boolean;
   pick_idea: boolean;
   generate_worksheet: boolean;
-  // Section 2 — final step (v6.9.33)
+  // Section 2: final step (v6.9.33)
   setup_calendar: boolean;
-  // Deprecated — kept for backward compatibility with stored profile state
+  // Deprecated: kept for backward compatibility with stored profile state
   share_worksheet?: boolean;
   create_homework?: boolean;
 }
@@ -71,7 +72,7 @@ export const useOnboardingProgress = () => {
   const { data: authUser } = useAuthUser();
   const isAnonymousUser = !!authUser?.is_anonymous;
 
-  // Throttling refs — prevent request storms
+  // Throttling refs: prevent request storms
   const inFlightRef = useRef(false);
   const lastRunRef = useRef(0);
   const errorBackoffUntilRef = useRef(0);
@@ -129,7 +130,7 @@ export const useOnboardingProgress = () => {
     devLog('[Onboarding] Checking steps from database', { studentsCount: students.length });
 
     try {
-      // Run all detection queries in parallel — each is treated as `false` on error
+      // Run all detection queries in parallel; each is treated as `false` on error
       // so a single broken query never blocks the whole checklist.
       const teacherId = profile.id;
       const [
@@ -142,6 +143,8 @@ export const useOnboardingProgress = () => {
         ideasUsedRes,
         calendarRes,
         homeworkRes,
+        suggestionsRes,
+        suggestionsUsedRes,
       ] = await Promise.all([
         supabase.from('students').select('id', { head: true, count: 'exact' }).eq('teacher_id', teacherId),
         supabase
@@ -180,29 +183,48 @@ export const useOnboardingProgress = () => {
           .from('calendar_slots')
           .select('id', { head: true, count: 'exact' })
           .eq('teacher_id', teacherId),
-        // v6.9.109 — `create_homework` is deprecated in the checklist but the
+        // v6.9.109: `create_homework` is deprecated in the checklist but the
         // dashboard GuidedStepsBar ("3 Send homework") still reads it.
         supabase
           .from('homework_assignments')
           .select('id', { head: true, count: 'exact' })
           .eq('teacher_id', teacherId),
+        // 2026-10: the weekly-prep steps point to Learning plan lesson
+        // suggestions, so suggestions complete them (notes still count).
+        supabase
+          .from('future_worksheet_suggestions')
+          .select('id', { head: true, count: 'exact' })
+          .eq('teacher_id', teacherId)
+          .is('deleted_at', null),
+        supabase
+          .from('future_worksheet_suggestions')
+          .select('id', { head: true, count: 'exact' })
+          .eq('teacher_id', teacherId)
+          .is('deleted_at', null)
+          .eq('is_used', true),
       ]);
 
       const safeCount = (res: any): number => (res?.error ? 0 : res?.count ?? 0);
+      const ideaSteps = resolveIdeaSteps({
+        suggestions: safeCount(suggestionsRes),
+        usedSuggestions: safeCount(suggestionsUsedRes),
+        ideaNotes: safeCount(ideasRes),
+        usedIdeaNotes: safeCount(ideasUsedRes),
+      });
 
       let newSteps: OnboardingStep = {
         add_student: safeCount(studentsRes) > 0,
         send_welcome_test: safeCount(testsRes) > 0,
         add_goals: safeCount(goalsRes) > 0,
         generate_roadmap: safeCount(phasesRes) > 0,
-        generate_next_ideas: safeCount(ideasRes) > 0,
-        pick_idea: safeCount(ideasUsedRes) > 0,
+        generate_next_ideas: ideaSteps.generate_next_ideas,
+        pick_idea: ideaSteps.pick_idea,
         generate_worksheet: safeCount(worksheetsRes) > 0,
         setup_calendar: safeCount(calendarRes) > 0,
         create_homework: safeCount(homeworkRes) > 0,
       };
 
-      // v6.9.33 — Reset window: for 5 minutes after `Reset Onboarding`,
+      // v6.9.33: Reset window: for 5 minutes after `Reset Onboarding`,
       // zero out detected steps (except objective `add_student`) so the
       // teacher actually sees an empty checklist instead of an instantly
       // re-completed one. Window auto-expires.
@@ -338,7 +360,7 @@ export const useOnboardingProgress = () => {
       )
       .subscribe();
 
-    // v6.9.31 — track student_tests, goals, roadmap phases and next-lesson-ideas
+    // v6.9.31: track student_tests, goals, roadmap phases and next-lesson-ideas
     const extraChannel = supabase
       .channel('onboarding-extras')
       .on('postgres_changes', { event: '*', schema: 'public', table: 'student_tests', filter: `teacher_id=eq.${profile.id}` },
@@ -351,10 +373,10 @@ export const useOnboardingProgress = () => {
         () => setTimeout(checkSteps, 500))
       .subscribe();
 
-    // Periodic safety net — realtime is the primary trigger
+    // Periodic safety net, realtime is the primary trigger
     intervalRef.current = setInterval(() => {
       checkSteps();
-    }, 60000); // 60s — realtime + window focus already cover most cases
+    }, 60000); // 60s, realtime + window focus already cover most cases
     
     // ADDED: Force refresh on window focus for better responsiveness
     const handleWindowFocus = () => {
@@ -443,7 +465,7 @@ export const useOnboardingProgress = () => {
     // even if checkSteps re-marks every step as completed.
     sessionStorage.removeItem('onboarding-temp-dismissed');
     localStorage.setItem('onboarding_force_show', 'true');
-    // v6.9.33 — open a 5-min window where checkSteps zeroes detected steps.
+    // v6.9.33: open a 5-min window where checkSteps zeroes detected steps.
     localStorage.setItem('onboarding_reset_at', String(Date.now()));
     // Block the next automatic checkSteps so the empty state renders first.
     lastRunRef.current = Date.now();

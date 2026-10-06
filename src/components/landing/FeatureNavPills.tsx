@@ -44,7 +44,7 @@ interface FeatureNavPillsProps {
    */
   suppressSignupPrompt?: boolean;
   /**
-   * v6.9.89 — first-screen density reduction. When set, the inline variant shows
+   * v6.9.89: first-screen density reduction. When set, the inline variant shows
    * only the first N pills and collapses the rest into a "More features" menu.
    * Ignored by the stacked (mobile sheet) variant.
    */

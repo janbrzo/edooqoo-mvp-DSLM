@@ -84,7 +84,7 @@ const StudentHubLessons = () => {
       if (data?.autoRescheduled) {
         toast({ title: 'Lesson rescheduled successfully' });
       } else if (data?.success) {
-        toast({ title: 'Reschedule request sent — awaiting teacher confirmation' });
+        toast({ title: 'Reschedule request sent: awaiting teacher confirmation' });
       } else {
         toast({ title: data?.error || 'Could not reschedule', variant: 'destructive' });
       }
@@ -193,7 +193,7 @@ const StudentHubLessons = () => {
           </div>
         </div>
 
-        {/* Your Classroom — universal meeting link */}
+        {/* Your Classroom: universal meeting link */}
         {settings && (settings as any).default_meeting_link && (
           <Card>
             <CardContent className="p-4 flex items-center justify-between">

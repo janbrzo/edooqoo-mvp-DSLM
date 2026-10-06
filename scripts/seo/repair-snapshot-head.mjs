@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * Sprint 2 (S2-A) — one-off repair of already committed prerender snapshots.
+ * Sprint 2 (S2-A): one-off repair of already committed prerender snapshots.
  *
  * `prerender-spa-routes.mjs` now dedupes head metadata at generation time, but
  * the snapshots currently committed under `public/**\/index.html` were produced

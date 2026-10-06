@@ -59,17 +59,17 @@ Deno.serve(async (req) => {
     const emailPattern = normalizedEmail.replace(/[%_\\]/g, '\\$&');
 
     // Password gate: `check_password_required` / `verify_password` /
-    // `get_password_status` only ever gated the frontend UI — every other
+    // `get_password_status` only ever gated the frontend UI; every other
     // action (the default hub-data fetch, set_password, remove_password,
     // and all gcal_* actions) accepted just the public token + email, i.e.
     // exactly the pair that gets a caller INTO the password screen in the
     // first place. So a Hub password protected nothing once a request went
-    // straight to this function — including remove_password, which let
+    // straight to this function, including remove_password, which let
     // anyone who knew token + email strip a password they never supplied.
     //
     // Fix: once a student has a hub_password_hash set, every action below
     // other than the three bootstrap ones must present a valid
-    // hubSessionToken for this exact (teacherId, email) — issued by
+    // hubSessionToken for this exact (teacherId, email): issued by
     // verify_password on success. Students with no password set are
     // unaffected: there's nothing yet to prove.
     const PASSWORD_EXEMPT_ACTIONS = new Set(['check_password_required', 'verify_password', 'get_password_status']);
@@ -317,7 +317,7 @@ Deno.serve(async (req) => {
 
     const teacherName = [teacherProfile?.first_name, teacherProfile?.last_name].filter(Boolean).join(' ') || 'Teacher';
 
-    // 4. Flashcard sets (no share_token filter — Hub shows ALL student's sets)
+    // 4. Flashcard sets (no share_token filter: Hub shows ALL student's sets)
     const { data: flashcardSets } = await supabase
       .from('flashcard_sets')
       .select('id, title, description, share_token, is_bidirectional, back_type, created_at, updated_at')
@@ -363,7 +363,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    // v6.9.72 — embed student's native_language on each set so the Add Card
+    // v6.9.72: embed student's native_language on each set so the Add Card
     // dialog can auto-translate even if the top-level field is stale.
     const enrichedFlashcardSets = (flashcardSets || []).map(s => ({
       ...s,
@@ -429,7 +429,7 @@ Deno.serve(async (req) => {
       };
     });
 
-    // 6. Shared worksheets — by student_id OR share_recipient_email
+    // 6. Shared worksheets: by student_id OR share_recipient_email
     const { data: sharedByStudentId } = await supabase
       .from('worksheets')
       .select('id, title, share_token, created_at, form_data, ai_response')

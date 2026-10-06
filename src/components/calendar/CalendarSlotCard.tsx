@@ -74,7 +74,7 @@ export const CalendarSlotCard = React.memo(function CalendarSlotCard({ slot, stu
         isSelected && 'ring-2 ring-primary bg-primary/20'
       )}
     >
-      {/* Badge R — rescheduled */}
+      {/* Badge R: rescheduled */}
       {isRescheduled ? (
         <div className={cn(
           'absolute top-0 left-0 min-w-[14px] h-[14px] rounded-br text-[8px] font-bold flex items-center justify-center z-10 px-0.5',

@@ -56,8 +56,8 @@ const StudentHubMockup = () => (
 );
 
 const benefits = [
-  { icon: GraduationCap, title: 'Everything in one place', description: 'Worksheets, homework, flashcards, lesson schedule, and settings — all accessible through a single link.' },
-  { icon: MailOpen, title: 'No account needed', description: 'Students access their Hub via email — no registration, no password, no app to install. Just click the link.' },
+  { icon: GraduationCap, title: 'Everything in one place', description: 'Worksheets, homework, flashcards, lesson schedule, and settings: all accessible through a single link.' },
+  { icon: MailOpen, title: 'No account needed', description: 'Students access their Hub via email: no registration, no password, no app to install. Just click the link.' },
   { icon: Shield, title: 'Teacher control', description: 'You decide what\'s shared. Students see their materials and progress, but can\'t access other students\' data.' },
   { icon: CalendarDays, title: 'GCal integration', description: 'Students sync lessons to their own Google Calendar with customizable event colors and reminder settings.' },
 ];
@@ -66,13 +66,13 @@ const faqItems = [
   { question: 'What can students see in the Hub?', answer: 'Students see their assigned worksheets, pending and completed homework, flashcard sets with study interface, upcoming lessons, and basic settings. They cannot see other students\' data or your internal notes.' },
   { question: 'Do students need to create an account?', answer: 'No. Access is email-based. When you add a student, they receive a link to their Hub. They can bookmark it for easy access. No password, no registration form.' },
   { question: 'Can students sync with Google Calendar?', answer: 'Yes. Students can connect their own Google Calendar through the Hub settings. Lessons sync automatically with customizable event colors per status (upcoming, completed, cancelled).' },
-  { question: 'How does Student Hub connect to DSLM?', answer: 'Supported Hub activity — such as homework completion, flashcard review, and worksheet access — can contribute learning signals for future prep. The Hub is both a student workspace and a source of context for teacher-reviewed planning.' },
+  { question: 'How does Student Hub connect to DSLM?', answer: 'Supported Hub activity, such as homework completion, flashcard review, and worksheet access, can contribute learning signals for future prep. The Hub is both a student workspace and a source of context for teacher-reviewed planning.' },
 ];
 
 const FeatureStudentHub: React.FC = () => (
   <FeaturePageLayout
-    title="Student Portal for ESL — Worksheets, Homework, Flashcards | Edooqoo"
-    metaDescription="Your students' personal learning space. Worksheets, homework, flashcards, and lesson schedule — all in one link. No account needed."
+    title="Student Portal for ESL | Worksheets, Homework, Flashcards | Edooqoo"
+    metaDescription="Your students' personal learning space. Worksheets, homework, flashcards, and lesson schedule, all in one link. No account needed."
   >
     <FeatureHero
       badge="Student Portal"

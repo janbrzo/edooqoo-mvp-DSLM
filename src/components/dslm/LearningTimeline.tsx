@@ -1,6 +1,6 @@
 /**
- * LearningTimeline — vertical list of worksheet suggestions.
- * Supports `compact` mode (used inside MacroTimeline phases) — hides rationale/skills/impact behind a toggle.
+ * LearningTimeline: vertical list of worksheet suggestions.
+ * Supports `compact` mode (used inside MacroTimeline phases), hides rationale/skills/impact behind a toggle.
  */
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';

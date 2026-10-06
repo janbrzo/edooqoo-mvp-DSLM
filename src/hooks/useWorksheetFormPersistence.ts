@@ -1,5 +1,5 @@
 /**
- * useWorksheetFormPersistence — auto-saves the public worksheet form draft to localStorage
+ * useWorksheetFormPersistence: auto-saves the public worksheet form draft to localStorage
  * for 24h, so accidental refresh / tab-close doesn't wipe the teacher's work.
  *
  * Scope: anonymous + authenticated users on the home form. Keyed per-user when possible.
@@ -23,7 +23,7 @@ export interface WorksheetDraft {
   exerciseFocusMap?: Record<string, string>;
   selectionMode?: string;
   /**
-   * v6.9.60 — Persist the selected student so a failed generation does not
+   * v6.9.60: Persist the selected student so a failed generation does not
    * silently drop the student context on re-hydration. Stored as a plain id;
    * a hydration step in WorksheetForm restores it (and the parent Index
    * state via the existing `onStudentChange` effect).
@@ -98,7 +98,7 @@ export function useWorksheetFormPersistence(
   }, [storageKey]);
 
   /**
-   * v6.9.61 — Synchronous draft write, bypassing the 600 ms debounce. Used
+   * v6.9.61: Synchronous draft write, bypassing the 600 ms debounce. Used
    * by the form right before submitting, so a generation error that
    * remounts the form rehydrates with the EXACT submitted state (including
    * the auto-completed `selectedExercises` list).

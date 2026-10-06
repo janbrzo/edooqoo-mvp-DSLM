@@ -8,7 +8,8 @@ One rule per entry, with a one-line why. Replace an existing rule instead of add
 
 ## Student Workspace
 
-- Student Workspace tab and Learning model perspective state live only in the URL and are resolved via `src/lib/students/workspaceTabs.ts` (`resolveModelPerspective` for `view=`); legacy `?tab=` aliases are permanent — because sent emails and bookmarks carry them.
+- Student Workspace tab and Learning plan segment state live only in the URL and are resolved via `src/lib/students/workspaceTabs.ts` (`resolveModelSegment` for `view=`); legacy `?tab=` and `view=` values are permanent — because sent emails and bookmarks carry them.
+- The next lesson shown anywhere (Prep card, Learning plan Up next) is ordered only by `orderUpNext` in `src/lib/dslm/learningPlan.ts` — because suggestion `sequence_number` restarts per phase and two selectors once proposed different lessons.
 
 ## Answers & Evaluation
 
@@ -24,6 +25,10 @@ One rule per entry, with a one-line why. Replace an existing rule instead of add
 - Student-facing pages (Welcome Test, homework) log DSLM events only through token/email-authorised RPCs (`log_welcome_test_event_by_share_token`, `log_homework_submitted_event`), never `add_student_event` or direct `student_events` writes — because those are teacher-only and anonymous calls fail silently with 401.
 - The profile billing guard trigger tests `current_user = 'authenticated'`, never `auth.role()` — because the JWT role is still `authenticated` inside SECURITY DEFINER billing functions like `consume_token`, which then could not charge tokens.
 - Every AI model id used in `supabase/functions/**` is registered in `supabase/functions/_shared/modelRegistry.ts` (enforced by `src/lib/__tests__/modelAudit.test.ts`) — because `audit-llm-models` monitors and advises only on registered models.
+
+## Writing Style
+
+- No em dashes (U+2014, `&mdash;`) in English user-facing, generated or SEO text; use a comma, colon, parentheses, period or a pipe in titles, and use `\u2014` escapes in regexes (enforced by `src/lib/__tests__/noEmDash.test.ts`) — because they read as AI-generated English. En dashes in numeric ranges (`1–6`) stay.
 
 ## Documentation & AI Resources
 

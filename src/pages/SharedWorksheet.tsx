@@ -39,7 +39,7 @@ const SharedWorksheet = () => {
   const [isStudyMode, setIsStudyMode] = useState(false);
   const [needsStudentAssignment, setNeedsStudentAssignment] = useState(false);
   const [answerVisibility, setAnswerVisibility] = useState<'all' | 'closed' | 'open' | 'hidden'>('all');
-  // P1.6 — one-time bridge banner pointing the student to their Hub
+  // P1.6: one-time bridge banner pointing the student to their Hub
   const [showHubBridge, setShowHubBridge] = useState(false);
 
   // PROBLEM 5: Check localStorage for remembered email on mount
@@ -272,7 +272,7 @@ const SharedWorksheet = () => {
       expiresAt: Date.now() + 48 * 60 * 60 * 1000 // 48 hours
     }));
 
-    // P1.6 — bridge to the Student Hub: reuse the verified email there so the
+    // P1.6: bridge to the Student Hub: reuse the verified email there so the
     // student lands directly on their materials instead of retyping it.
     saveHubEmail(email);
     setShowHubBridge(true);
@@ -295,7 +295,7 @@ const SharedWorksheet = () => {
 
     setIsSavingTeacherEdits(true);
     try {
-      // P1.4 — single write path: keeps ai_response, title and html_content in sync.
+      // P1.4: single write path: keeps ai_response, title and html_content in sync.
       if (currentTeacherId) {
         await updateWorksheetAPI(worksheet.id, editableWorksheet, currentTeacherId);
       } else {
@@ -375,7 +375,7 @@ const SharedWorksheet = () => {
     );
   }
 
-  // P1.6 — read-only fallback: a worksheet without an assigned student is still
+  // P1.6: read-only fallback: a worksheet without an assigned student is still
   // readable by the recipient the teacher shared it with. Only block when there
   // is no recipient email at all (nobody can prove they should see it).
   const recipientEmail = (worksheet.share_recipient_email || '').trim().toLowerCase();
@@ -393,7 +393,7 @@ const SharedWorksheet = () => {
             Your teacher created the link but hasn't assigned a student or a recipient email to it.
           </p>
           <p className="text-sm text-gray-500">
-            Ask your teacher to share it again from the worksheet page — the link will then open for you.
+            Ask your teacher to share it again from the worksheet page; the link will then open for you.
           </p>
         </div>
       </div>
@@ -434,7 +434,7 @@ const SharedWorksheet = () => {
         />
       )}
 
-      {/* P1.6 — read-only notice for unassigned shares */}
+      {/* P1.6: read-only notice for unassigned shares */}
       {isUnassignedShare && verifiedEmail && (
         <div className="max-w-6xl mx-auto px-4 pt-4">
           <div className="rounded-md border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
@@ -444,11 +444,11 @@ const SharedWorksheet = () => {
         </div>
       )}
 
-      {/* P1.6 — bridge to the Student Hub */}
+      {/* P1.6: bridge to the Student Hub */}
       {showHubBridge && verifiedEmail && !isTeacher && (
         <div className="max-w-6xl mx-auto px-4 pt-4">
           <div className="flex items-center justify-between gap-3 rounded-md border border-primary/30 bg-primary/5 p-3 text-sm">
-            <span>See all your materials — homework, flashcards and lessons — in your Student Hub.</span>
+            <span>See all your materials, homework, flashcards and lessons, in your Student Hub.</span>
             <div className="flex items-center gap-2 shrink-0">
               <Button size="sm" onClick={() => navigate('/my')}>Open Student Hub</Button>
               <Button size="sm" variant="ghost" onClick={() => setShowHubBridge(false)} aria-label="Dismiss Student Hub suggestion">

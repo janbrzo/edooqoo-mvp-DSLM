@@ -1,5 +1,5 @@
 /**
- * MacroTimeline — DSLM Pathway v4 vertical timeline of curriculum phases.
+ * MacroTimeline: DSLM Pathway v4 vertical timeline of curriculum phases.
  * Per-phase: [Generate steps for phase] [Generate with comment].
  * Global toolbar: [Add phase] [Generate phases ▾] [Regenerate roadmap ▾ (just / with comment)].
  */
@@ -31,7 +31,7 @@ import { useWelcomeTestActions } from '@/hooks/useWelcomeTestActions';
 import { GenerateRoadmapDialog } from './GenerateRoadmapDialog';
 
 /**
- * v6.9.12 — Per-batch suggestion (clamped 1–6, hard limit per generation).
+ * v6.9.12: Per-batch suggestion (clamped 1–6, hard limit per generation).
  * Falls back to 3 (rolling 3-lesson plan) when weeks are not set.
  */
 export function recommendedStepsPerBatch(phase: CurriculumPhase): number {
@@ -42,7 +42,7 @@ export function recommendedStepsPerBatch(phase: CurriculumPhase): number {
   return Math.max(1, Math.min(6, weeks));
 }
 /**
- * v6.9.48 — Full target number of steps for the phase = 1 step per week,
+ * v6.9.48: Full target number of steps for the phase = 1 step per week,
  * NOT clamped to 6. Used by recommendedTargetPhaseId so the "next" phase is
  * not surfaced before the current phase is actually full.
  */
@@ -75,6 +75,8 @@ interface MacroTimelineProps {
   onMarkUsed?: (id: string) => void;
   onRegenerateOne: (id: string, comment: string) => Promise<boolean> | boolean;
   onGenerateForPhase: (phaseId: string, count: number, teacherComment: string) => Promise<boolean> | boolean;
+  /** 2026-10: phase to expand on mount (Learning plan roadmap stepper click). */
+  initialExpandedPhaseId?: string | null;
 }
 
 const STATUS_LABEL: Record<PhaseStatus, string> = {
@@ -92,16 +94,16 @@ const StatusDot: React.FC<{ status: PhaseStatus; sequence: number }> = ({ status
 export const MacroTimeline: React.FC<MacroTimelineProps> = ({
   studentId, teacherId, suggestions, displayIndexById, generatingSteps,
   onUseSuggestion, onUseAndGenerate, onEditSuggestion, onDeleteSuggestion,
-  onRegenerateOne, onGenerateForPhase, onMarkUsed,
+  onRegenerateOne, onGenerateForPhase, onMarkUsed, initialExpandedPhaseId,
 }) => {
   const { phases, loading, generating, generatePhases, updatePhase, deletePhase, addPhase } = useCurriculumPhases({ studentId, teacherId });
-  // v6.9.15c — readiness signals for "best-effort" roadmap generation warnings.
+  // v6.9.15c: readiness signals for "best-effort" roadmap generation warnings.
   const { data: studentRow } = useStudent(studentId);
   const { goals } = useStudentProgress({ studentId, teacherId });
   const studentName = studentRow?.name || 'Student';
   const studentEmail = studentRow?.student_email ?? null;
   const welcomeActions = useWelcomeTestActions({ studentId, teacherId, studentName, studentEmail });
-  // v6.9.39 P3 — treat WT as completed if ANY attempt for this student is
+  // v6.9.39 P3: treat WT as completed if ANY attempt for this student is
   // completed/reviewed (not only the latest). Prevents the "Send test" CTA
   // from reappearing after a retake is created.
   const [wtCompleted, setWtCompleted] = useState<boolean>(false);
@@ -121,12 +123,12 @@ export const MacroTimeline: React.FC<MacroTimelineProps> = ({
     return () => { cancelled = true; };
   }, [studentId, teacherId]);
   const hasGoals = (goals?.length ?? 0) > 0;
-  // Pending generate-phases action — confirmed via AlertDialog when goals are missing.
+  // Pending generate-phases action, confirmed via AlertDialog when goals are missing.
   const [pendingGenerate, setPendingGenerate] = useState<null | { mode: 'replace' | 'add'; count?: number }>(null);
-  // v6.9.41 P6 — guided generation dialog state.
+  // v6.9.41 P6: guided generation dialog state.
   const [guidedDialog, setGuidedDialog] = useState<null | { mode: 'replace' | 'add' }>(null);
   const openGuidedDialog = (mode: 'replace' | 'add') => setGuidedDialog({ mode });
-  // v6.9.42 — confirm regen with existing phases before opening guided dialog.
+  // v6.9.42: confirm regen with existing phases before opening guided dialog.
   const [confirmRegenOpen, setConfirmRegenOpen] = useState(false);
   const openRegenFlow = () => {
     if (phases.length > 0) setConfirmRegenOpen(true);
@@ -149,8 +151,8 @@ export const MacroTimeline: React.FC<MacroTimelineProps> = ({
   const dispatchAddGoal = () => {
     window.dispatchEvent(new CustomEvent('dslm:addGoal', { detail: { studentId } }));
   };
-  const [expandedPhaseId, setExpandedPhaseId] = useState<string | null>(null);
-  const [userTouchedExpand, setUserTouchedExpand] = useState(false);
+  const [expandedPhaseId, setExpandedPhaseId] = useState<string | null>(initialExpandedPhaseId ?? null);
+  const [userTouchedExpand, setUserTouchedExpand] = useState(!!initialExpandedPhaseId);
   const [editingPhase, setEditingPhase] = useState<CurriculumPhase | null>(null);
   const [editForm, setEditForm] = useState({ title: '', description: '', status: 'planned' as PhaseStatus, weeks_start: '', weeks_end: '' });
   const [deletingPhase, setDeletingPhase] = useState<CurriculumPhase | null>(null);
@@ -268,7 +270,7 @@ export const MacroTimeline: React.FC<MacroTimelineProps> = ({
     if (phaseQuickCount[id] !== undefined) return phaseQuickCount[id];
     const phase = phases.find(p => p.id === id);
     if (!phase) return 3;
-    // v6.9.48 — default = gap to target (1 step/week), clamped 1..6.
+    // v6.9.48: default = gap to target (1 step/week), clamped 1..6.
     const target = targetStepsForPhase(phase);
     const gap = Math.max(1, target - haveCount);
     return Math.min(6, gap);
@@ -295,7 +297,7 @@ export const MacroTimeline: React.FC<MacroTimelineProps> = ({
                 <ul className="text-xs text-muted-foreground space-y-1.5">
                   {!hasGoals && (
                     <li className="flex items-center justify-between gap-2">
-                      <span>No learning goals set — AI will infer from main goal only.</span>
+                      <span>No learning goals set, AI will infer from main goal only.</span>
                       <Button size="sm" variant="outline" className="h-6 text-[10px]" onClick={dispatchAddGoal}>
                         <Target className="h-3 w-3 mr-1" /> Add goal
                       </Button>
@@ -303,7 +305,7 @@ export const MacroTimeline: React.FC<MacroTimelineProps> = ({
                   )}
                   {!wtCompleted && (
                     <li className="flex items-center justify-between gap-2">
-                      <span>Welcome Placement Test not completed — level signals are weaker.</span>
+                      <span>Welcome Placement Test not completed, level signals are weaker.</span>
                       <Button size="sm" variant="outline" className="h-6 text-[10px]" onClick={() => welcomeActions.send()} disabled={welcomeActions.busy}>
                         <Send className="h-3 w-3 mr-1" /> Send test
                       </Button>
@@ -338,7 +340,7 @@ export const MacroTimeline: React.FC<MacroTimelineProps> = ({
             </AlertDialogFooter>
           </AlertDialogContent>
         </AlertDialog>
-        {/* v6.9.77 — guided roadmap dialog must be mounted in empty-state too. */}
+        {/* v6.9.77: guided roadmap dialog must be mounted in empty-state too. */}
         <GenerateRoadmapDialog
           open={guidedDialog?.mode === 'replace'}
           onOpenChange={(o) => { if (!o) setGuidedDialog(null); }}
@@ -491,13 +493,13 @@ export const MacroTimeline: React.FC<MacroTimelineProps> = ({
                                 if (w <= 6) {
                                   return (
                                     <p className="text-[10px] text-muted-foreground leading-snug">
-                                      Suggested: {Math.min(6, Math.max(1, gap || w))} (one per week of {w}-week phase, {have}/{target} added). The AI sees your {have} existing step{have === 1 ? '' : 's'} in this phase AND steps from other phases — new ones won't duplicate, they complement and fill gaps.
+                                      Suggested: {Math.min(6, Math.max(1, gap || w))} (one per week of {w}-week phase, {have}/{target} added). The AI sees your {have} existing step{have === 1 ? '' : 's'} in this phase AND steps from other phases, new ones won't duplicate, they complement and fill gaps.
                                     </p>
                                   );
                                 }
                                 return (
                                   <p className="text-[10px] text-muted-foreground leading-snug">
-                                    Suggested: {Math.min(6, Math.max(1, gap || 6))} per batch ({have}/{target} added — max 6 per generation, repeat to fill). The AI sees your {have} existing step{have === 1 ? '' : 's'} in this phase AND steps from other phases — new ones complement instead of duplicating.
+                                    Suggested: {Math.min(6, Math.max(1, gap || 6))} per batch ({have}/{target} added: max 6 per generation, repeat to fill). The AI sees your {have} existing step{have === 1 ? '' : 's'} in this phase AND steps from other phases, new ones complement instead of duplicating.
                                   </p>
                                 );
                               })()}
@@ -564,7 +566,7 @@ export const MacroTimeline: React.FC<MacroTimelineProps> = ({
             <AlertTriangle className="h-3.5 w-3.5 text-amber-600 dark:text-amber-400 shrink-0" />
             {!hasGoals && (
               <>
-                <span className="text-muted-foreground">No goals — roadmap is best-effort.</span>
+                <span className="text-muted-foreground">No goals: roadmap is best-effort.</span>
                 <Button size="sm" variant="outline" className="h-6 text-[10px]" onClick={dispatchAddGoal}>
                   <Target className="h-3 w-3 mr-1" /> Add goal
                 </Button>
@@ -713,7 +715,7 @@ export const MacroTimeline: React.FC<MacroTimelineProps> = ({
         </DialogContent>
       </Dialog>
 
-      {/* Phase delete confirmation — v6.9.15c: single-click Confirm (no typing). */}
+      {/* Phase delete confirmation, v6.9.15c: single-click Confirm (no typing). */}
       {deletingPhase && (
         <ConfirmDeleteDialog
           open={!!deletingPhase}
@@ -723,7 +725,7 @@ export const MacroTimeline: React.FC<MacroTimelineProps> = ({
           onConfirm={async () => {
             const id = deletingPhase.id;
             await deletePhase(id);
-            // v6.9.15b — clear local UI state tied to the deleted phase id.
+            // v6.9.15b: clear local UI state tied to the deleted phase id.
             if (expandedPhaseId === id) setExpandedPhaseId(null);
             setPhaseQuickCount(p => { const { [id]: _, ...rest } = p; return rest; });
             setPhaseStepsOpen(p => { const { [id]: _, ...rest } = p; return rest; });
@@ -752,7 +754,7 @@ export const MacroTimeline: React.FC<MacroTimelineProps> = ({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-      {/* v6.9.41 P6 — guided roadmap generation dialog (non-empty state). */}
+      {/* v6.9.41 P6: guided roadmap generation dialog (non-empty state). */}
       <GenerateRoadmapDialog
         open={guidedDialog?.mode === 'replace'}
         onOpenChange={(o) => { if (!o) setGuidedDialog(null); }}
@@ -762,7 +764,7 @@ export const MacroTimeline: React.FC<MacroTimelineProps> = ({
         isRegeneration={phases.length > 0}
         onConfirm={async (opts) => { await generatePhases('replace', opts); }}
       />
-      {/* v6.9.42 — regen confirm gate. Empty state still goes straight to the
+      {/* v6.9.42: regen confirm gate. Empty state still goes straight to the
           guided dialog without this step (no destructive action). */}
       <AlertDialog open={confirmRegenOpen} onOpenChange={setConfirmRegenOpen}>
         <AlertDialogContent>
@@ -770,7 +772,7 @@ export const MacroTimeline: React.FC<MacroTimelineProps> = ({
             <AlertDialogTitle>Regenerate Learning Roadmap?</AlertDialogTitle>
             <AlertDialogDescription>
               This regenerates only <strong>planned</strong> and <strong>draft</strong> phases.
-              Phases marked <strong>done</strong> or <strong>in progress</strong> keep their exact records, week ranges, and existing worksheet suggestions — because those phase rows are not replaced.
+              Phases marked <strong>done</strong> or <strong>in progress</strong> keep their exact records, week ranges, and existing worksheet suggestions, because those phase rows are not replaced.
               Existing planned and draft phases (and their AI rationale) will be archived (soft-deleted).
               On the next screen you can steer the new roadmap with phase count, weeks, focused goals, and a teacher comment.
             </AlertDialogDescription>

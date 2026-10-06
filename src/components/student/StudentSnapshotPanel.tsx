@@ -1,5 +1,5 @@
 /**
- * StudentSnapshotPanel — the "who is this student" summary of the Student
+ * StudentSnapshotPanel: the "who is this student" summary of the Student
  * Workspace (v6.9.111, M3.2).
  *
  * Presentational only. Every rule (focus-area selection, deadline formatting,
@@ -80,7 +80,7 @@ function buildSnapshotContent({
       </Row>
       <Button variant="ghost" size="sm" className="w-full justify-start px-2" onClick={onOpenModel}>
         <GraduationCap className="mr-2 h-4 w-4" />
-        Open learning model
+        Open learning plan
       </Button>
     </div>
   );

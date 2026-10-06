@@ -30,7 +30,7 @@ import { RecentStudentsBar } from "@/components/dashboard/RecentStudentsBar";
 import { formatWorksheetTitle, type RecentWorksheet } from "@/components/dashboard/RecentWorksheetRow";
 
 /**
- * v6.9.109 — `/dashboard` → "Today".
+ * v6.9.109: `/dashboard` → "Today".
  * One job: point the teacher to the next move. Single column, three zones
  * (Next up · Needs your attention · Everything else). Spec:
  * docs/ux/dashboard-today-spec.md
@@ -69,7 +69,7 @@ const Dashboard = () => {
 
 
 
-  // v6.9.8 — auto-open Add Student dialog when arriving from Welcome email CTA
+  // v6.9.8: auto-open Add Student dialog when arriving from Welcome email CTA
   useEffect(() => {
     if (searchParams.get('action') === 'add-student' && isRegisteredUser && !isDemoMode) {
       setAddStudentModalOpen(true);
@@ -79,7 +79,7 @@ const Dashboard = () => {
     }
   }, [searchParams, isRegisteredUser, isDemoMode, setSearchParams]);
 
-  // Mark as loaded once core data is ready (first time only) — later navigations do not flash a spinner.
+  // Mark as loaded once core data is ready (first time only): later navigations do not flash a spinner.
   useEffect(() => {
     if (!loading && !studentsLoading && !historyLoading && !hasEverLoaded) {
       setHasEverLoaded(true);
@@ -106,7 +106,7 @@ const Dashboard = () => {
   const subscriptionType = profile?.subscription_type || 'Free Demo';
 
   const handleGenerateWorksheet = () => {
-    // v6.9.8 — navigation handler MUST NOT block in demo (the generation guard lives in useWorksheetGeneration)
+    // v6.9.8: navigation handler MUST NOT block in demo (the generation guard lives in useWorksheetGeneration)
     sessionStorage.setItem('forceNewWorksheet', 'true');
     navigate('/');
   };

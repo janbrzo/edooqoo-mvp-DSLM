@@ -1,5 +1,5 @@
 /**
- * SuggestedLevelChangeBanner — v6.9.49
+ * SuggestedLevelChangeBanner: v6.9.49
  *
  * Reusable banner shown when a Welcome Test's estimated CEFR level differs
  * from the level currently set on the student profile. Mounts in both
@@ -26,6 +26,8 @@ interface SuggestedLevelChangeBannerProps {
   currentLevel: string | null | undefined;
   /** Optional callback after a successful Apply (so parents can refresh local state). */
   onApplied?: (newLevel: string) => void;
+  /** Optional callback after "Keep current level" (so attention signals can refresh). */
+  onDismissed?: () => void;
 }
 
 export function SuggestedLevelChangeBanner({
@@ -33,6 +35,7 @@ export function SuggestedLevelChangeBanner({
   testId,
   currentLevel,
   onApplied,
+  onDismissed,
 }: SuggestedLevelChangeBannerProps) {
   const [estimatedLevel, setEstimatedLevel] = useState<string | null>(null);
   const [applying, setApplying] = useState(false);
@@ -58,7 +61,7 @@ export function SuggestedLevelChangeBanner({
         const { data } = await query;
         const lvl = Array.isArray(data) && data[0] ? String((data[0] as any).estimated_level || '') : '';
         if (!cancelled && lvl) setEstimatedLevel(lvl);
-      } catch { /* silent — banner just stays hidden */ }
+      } catch { /* silent, banner just stays hidden */ }
     })();
     return () => { cancelled = true; };
   }, [studentId, testId]);
@@ -103,7 +106,7 @@ export function SuggestedLevelChangeBanner({
             </div>
           </div>
           <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" onClick={dismiss} disabled={applying}>
+            <Button variant="outline" size="sm" onClick={() => { dismiss(); onDismissed?.(); }} disabled={applying}>
               Keep {currentLevel}
             </Button>
             <Button size="sm" onClick={apply} disabled={applying}>

@@ -1,10 +1,10 @@
 /**
- * UnifiedBell — single notification entry-point combining:
- *   1. Notifications (homework events + welcome_test_completed) — `homework_notifications` table
- *   2. Alerts (Closed-Loop Company: pacing/engagement/tokens) — `teacher_alerts` table
+ * UnifiedBell: single notification entry-point combining:
+ *   1. Notifications (homework events + welcome_test_completed), `homework_notifications` table
+ *   2. Alerts (Closed-Loop Company: pacing/engagement/tokens): `teacher_alerts` table
  *
  * Replaces the side-by-side `<HomeworkNotificationBadge />` + `<TeacherAlertsBell />`
- * pair in StickyNav (v6.8.4 — Problem 4). Both legacy components remain in code
+ * pair in StickyNav (v6.8.4: Problem 4). Both legacy components remain in code
  * for use elsewhere (WorksheetHeader, WorksheetPage).
  *
  * Tabs: "Notifications" is the default (more frequent traffic). Each tab shows

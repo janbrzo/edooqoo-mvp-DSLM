@@ -1,12 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import {
   DEFAULT_TAB,
+  MODEL_SEGMENT_VIEWS,
   PRESERVED_PARAMS,
   TAB_ALIASES,
   WORKSPACE_TABS,
   buildWorkspaceParams,
   isWorkspaceTab,
   resolveModelPerspective,
+  resolveModelSegment,
   resolveTab,
   resolveWorkspaceParams,
   studentTabPath,
@@ -27,7 +29,37 @@ describe('resolveModelPerspective', () => {
   });
 });
 
-describe('resolveTab — canonical values', () => {
+describe('resolveModelSegment (Learning plan, 2026-10)', () => {
+  it.each([
+    ['pathway', 'plan', null],
+    ['goals', 'plan', 'goals'],
+    ['GOALS ', 'plan', 'goals'],
+    ['insights', 'insights', null],
+    ['skills', 'insights', 'skills'],
+    ['profile', 'insights', 'profile'],
+  ] as const)('maps view=%s to %s / %s', (view, segment, anchor) => {
+    expect(resolveModelSegment(view)).toEqual({ segment, anchor });
+  });
+
+  it.each([null, undefined, '', 'unknown'])('defaults %s to the plan', (view) => {
+    expect(resolveModelSegment(view)).toEqual({ segment: 'plan', anchor: null });
+  });
+
+  it('writes views that resolve back to the same segment', () => {
+    expect(resolveModelSegment(MODEL_SEGMENT_VIEWS.plan).segment).toBe('plan');
+    expect(resolveModelSegment(MODEL_SEGMENT_VIEWS.insights).segment).toBe('insights');
+  });
+
+  it('legacy aliases keep landing on the right segment', () => {
+    for (const [legacy, segment] of [['skills', 'insights'], ['knowledge', 'insights'], ['events', 'insights'], ['progress', 'plan'], ['dslm', 'plan']] as const) {
+      const { resolved } = resolveWorkspaceParams(new URLSearchParams(`tab=${legacy}`));
+      expect(resolved.tab).toBe('model');
+      expect(resolveModelSegment(resolved.view).segment).toBe(segment);
+    }
+  });
+});
+
+describe('resolveTab: canonical values', () => {
   for (const tab of WORKSPACE_TABS) {
     it(`passes through "${tab}" unchanged`, () => {
       expect(resolveTab(tab)).toEqual({ tab, changed: false });
@@ -35,7 +67,7 @@ describe('resolveTab — canonical values', () => {
   }
 });
 
-describe('resolveTab — legacy aliases', () => {
+describe('resolveTab: legacy aliases', () => {
   const cases: Array<[string, Record<string, unknown>]> = [
     ['overview', { tab: 'prep' }],
     ['dslm', { tab: 'model' }],
@@ -62,7 +94,7 @@ describe('resolveTab — legacy aliases', () => {
   }
 });
 
-describe('resolveTab — fallbacks and hygiene', () => {
+describe('resolveTab: fallbacks and hygiene', () => {
   for (const raw of [null, undefined, '', '   ', 'nonsense']) {
     it(`falls back to prep for ${JSON.stringify(raw)}`, () => {
       expect(resolveTab(raw)).toEqual({ tab: DEFAULT_TAB, changed: true });
@@ -253,13 +285,13 @@ describe('real producers emit URLs that still resolve', () => {
 });
 
 /**
- * M7.9 regression guard — every legacy producer found in the codebase
+ * M7.9 regression guard; every legacy producer found in the codebase
  * (onboarding, AddStudentDialog intake, Welcome Test email/notifications,
  * PacingProposalsBell, SlotDetailModal, NextUpCard, flashcard modal,
  * timeline event hrefs) must resolve to a working canonical surface
  * without losing its deep-link context.
  */
-describe('M7.9 — legacy producer inventory', () => {
+describe('M7.9: legacy producer inventory', () => {
   const cases: Array<[string, string]> = [
     ['tab=dslm&view=pathway&focus=send-welcome-test', 'tab=model&view=pathway&focus=send-welcome-test'],
     ['tab=dslm&view=goals&focus=add-goal-modal', 'tab=model&view=goals&focus=add-goal-modal'],

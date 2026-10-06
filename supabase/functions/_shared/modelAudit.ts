@@ -18,9 +18,9 @@ const DAY_MS = 86_400_000;
 
 export type ProbeCategory =
   | "ok"
-  | "deprecated" // 404 / 410 — model removed or renamed
-  | "auth" // 401 / 403 — key revoked, billing or permission problem
-  | "rate_limited" // 429 — quota exhausted
+  | "deprecated" // 404 / 410, model removed or renamed
+  | "auth" // 401 / 403, key revoked, billing or permission problem
+  | "rate_limited" // 429: quota exhausted
   | "server" // 5xx
   | "client" // other 4xx (usually a malformed probe request)
   | "missing_key" // status -1: secret not configured
@@ -420,7 +420,7 @@ export function buildAdvisorUserPrompt(input: AdvisorPromptInput): string {
   }));
   const available = (Object.keys(input.availableModels) as ModelProvider[]).map((p) => {
     const ids = input.availableModels[p];
-    return `${p}: ${ids && ids.length ? ids.join(", ") : "(list unavailable — mark suggestions as evaluate)"}`;
+    return `${p}: ${ids && ids.length ? ids.join(", ") : "(list unavailable: mark suggestions as evaluate)"}`;
   });
   const pricing = (Object.keys(input.pricingExcerpts) as ModelProvider[]).map(
     (p) => `### ${p}\n${input.pricingExcerpts[p] || "(pricing page unavailable)"}`,
@@ -664,8 +664,8 @@ export function renderAuditReportHtml(input: AuditReportInput): string {
 
   parts.push(
     input.mode === "monthly"
-      ? `<div style="padding:10px 14px;border-radius:6px;background:#eef2ff;border:1px solid #c7d2fe;color:#3730a3;font-size:13px;margin:0 0 14px;"><b>Monthly LLM Audit</b> — is every model still the best fit? Health probes, shutdown countdown, provider deprecation-page scan and model advisor.</div>`
-      : `<div style="padding:10px 14px;border-radius:6px;background:#ecfeff;border:1px solid #a5f3fc;color:#155e75;font-size:13px;margin:0 0 14px;"><b>Daily LLM Audit</b> — does every model in production still work?</div>`,
+      ? `<div style="padding:10px 14px;border-radius:6px;background:#eef2ff;border:1px solid #c7d2fe;color:#3730a3;font-size:13px;margin:0 0 14px;"><b>Monthly LLM Audit</b>, is every model still the best fit? Health probes, shutdown countdown, provider deprecation-page scan and model advisor.</div>`
+      : `<div style="padding:10px 14px;border-radius:6px;background:#ecfeff;border:1px solid #a5f3fc;color:#155e75;font-size:13px;margin:0 0 14px;"><b>Daily LLM Audit</b>, does every model in production still work?</div>`,
   );
 
   // Advisor first in monthly mode: it is the actionable part.
@@ -685,11 +685,11 @@ export function renderAuditReportHtml(input: AuditReportInput): string {
           escapeHtml(r.role),
           `<code>${escapeHtml(r.currentModel)}</code>`,
           r.verdict === "switch" ? badge("SWITCH", "#dc2626") : r.verdict === "evaluate" ? badge("EVALUATE", "#b45309") : badge("KEEP", "#16a34a"),
-          r.suggestedModel ? `<code>${escapeHtml(r.suggestedModel)}</code>${r.suggestedProvider ? ` <span style="color:#6b7280;">(${escapeHtml(r.suggestedProvider)})</span>` : ""}` : "—",
+          r.suggestedModel ? `<code>${escapeHtml(r.suggestedModel)}</code>${r.suggestedProvider ? ` <span style="color:#6b7280;">(${escapeHtml(r.suggestedProvider)})</span>` : ""}` : "-",
           escapeHtml(r.reason) + (r.validationNotes.length ? `<div style="color:#b45309;font-size:11px;margin-top:4px;">${r.validationNotes.map(escapeHtml).join("<br>")}</div>` : ""),
           escapeHtml(r.costComparison),
           escapeHtml(r.qualityEvidence),
-          `${escapeHtml(r.migrationEffort ?? "—")} / ${escapeHtml(r.confidence)}`,
+          `${escapeHtml(r.migrationEffort ?? "-")} / ${escapeHtml(r.confidence)}`,
         ]),
       ),
     );
@@ -713,7 +713,7 @@ export function renderAuditReportHtml(input: AuditReportInput): string {
               escapeHtml(l.role) + (l.protectedEngine ? ' <span style="color:#7c3aed;font-size:11px;">[protected engine]</span>' : ""),
               escapeHtml(l.shutdownDate),
               badge(String(l.status.daysToShutdown), colour),
-              l.replacement ? `<code>${escapeHtml(l.replacement)}</code>` : "—",
+              l.replacement ? `<code>${escapeHtml(l.replacement)}</code>` : "-",
               escapeHtml(l.note ?? ""),
             ];
           }),
@@ -747,7 +747,7 @@ export function renderAuditReportHtml(input: AuditReportInput): string {
   }
 
   if (input.unregistered.length) {
-    parts.push(`<p style="font-size:13px;color:#b45309;"><b>Not in registry:</b> ${input.unregistered.map((u) => `<code>${escapeHtml(u)}</code>`).join(", ")} — add to modelRegistry.ts.</p>`);
+    parts.push(`<p style="font-size:13px;color:#b45309;"><b>Not in registry:</b> ${input.unregistered.map((u) => `<code>${escapeHtml(u)}</code>`).join(", ")}: add to modelRegistry.ts.</p>`);
   }
 
   parts.push(`<h3 style="margin:8px 0;">Health probes (${s.ok}/${s.total} OK)</h3>`);

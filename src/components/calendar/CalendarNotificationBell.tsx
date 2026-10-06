@@ -53,14 +53,14 @@ export function CalendarNotificationBell({ students, onNotificationClick, onAddS
               const resolvedLabel = (() => {
                 if (!isResolved) return null;
                 const action = n.resolved_action;
-                if (action === 'approved') return 'Done — Approved';
-                if (action === 'rejected') return 'Done — Rejected';
-                if (action === 'cancelled') return 'Done — Cancelled';
-                if (action === 'rescheduled') return 'Done — Rescheduled';
-                if (action === 'added') return 'Done — Added';
-                if (action === 'noted') return 'Done — Noted';
-                if (n.notification_type === 'booking_pending') return 'Done — Resolved';
-                if (n.notification_type === 'new_student') return 'Done — Added';
+                if (action === 'approved') return 'Done: Approved';
+                if (action === 'rejected') return 'Done: Rejected';
+                if (action === 'cancelled') return 'Done: Cancelled';
+                if (action === 'rescheduled') return 'Done: Rescheduled';
+                if (action === 'added') return 'Done: Added';
+                if (action === 'noted') return 'Done: Noted';
+                if (n.notification_type === 'booking_pending') return 'Done: Resolved';
+                if (n.notification_type === 'new_student') return 'Done: Added';
                 return 'Done';
               })();
 

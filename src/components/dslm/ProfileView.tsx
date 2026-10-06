@@ -1,5 +1,5 @@
 /**
- * ProfileView — "Who they are" — psychological, behavioral, and notes.
+ * ProfileView, "Who they are", psychological, behavioral, and notes.
  * Compact: AI Summary open, Psychological Profile open, Behavioral Stats collapsed
  * (key activity stat already in nav badge), Notes collapsed.
  */
@@ -64,7 +64,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
 
   return (
     <div className="space-y-3">
-      {/* AI Summary — open by default if exists */}
+      {/* AI Summary: open by default if exists */}
       {aiSummary && (
         <CollapsibleSection id="profile-ai-summary" title="AI Summary" icon={Sparkles} badge="PLACEMENT TEST" defaultOpen>
           <div className="space-y-2 text-sm">
@@ -93,7 +93,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
         </CollapsibleSection>
       )}
 
-      {/* Psychological Profile — open by default */}
+      {/* Psychological Profile: open by default */}
       <CollapsibleSection id="profile-psych" title="Psychological Profile" icon={Brain} badge="PLACEMENT TEST" defaultOpen>
         {profileLoading ? (
           <div className="h-16 flex items-center justify-center">
@@ -145,7 +145,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                 <div className="grid grid-cols-6 gap-1.5">
                   {confidenceScores.map(({ label, value }) => (
                     <div key={label} className="text-center p-1.5 bg-muted/50 rounded">
-                      <div className="text-base font-bold leading-none">{value ?? '—'}</div>
+                      <div className="text-base font-bold leading-none">{value ?? '-'}</div>
                       <div className="text-[9px] text-muted-foreground mt-1 leading-tight">{label}</div>
                     </div>
                   ))}
@@ -156,7 +156,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
         )}
       </CollapsibleSection>
 
-      {/* Learning patterns — open: how the student actually behaves week to week */}
+      {/* Learning patterns: open: how the student actually behaves week to week */}
       <CollapsibleSection id="profile-behavioral" title="Learning Patterns" icon={ActivityIcon} badge="CALCULATED" defaultOpen>
         <BehavioralStatsCard
           stats={behavioralStats || {
@@ -176,7 +176,6 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
         icon={StickyNote}
         count={knowledge.totalCount}
         badge={personalNotes.length > 0 ? `${personalNotes.length} personal` : undefined}
-        alsoOpenFor={['profile-personal']}
       >
         <StudentKnowledgeSection
           studentId={studentId}
@@ -185,7 +184,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
         />
       </CollapsibleSection>
 
-      {/* Advanced diagnostics — collapsed, for troubleshooting only */}
+      {/* Advanced diagnostics: collapsed, for troubleshooting only */}
       <CollapsibleSection id="profile-debug" title="Advanced: diagnostic log" icon={Bug} description="Raw learning events the model received. Useful only when something looks wrong.">
         <EventLogPanel studentId={studentId} teacherId={teacherId} />
       </CollapsibleSection>

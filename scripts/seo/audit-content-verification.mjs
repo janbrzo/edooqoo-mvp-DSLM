@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * audit-content-verification.mjs — gate for the "Automated quality checks" label.
+ * audit-content-verification.mjs: gate for the "Automated quality checks" label.
  *
  * A public page may show the label "Automated quality checks passed" only when
  * docs/seo/content-verification.generated.json holds a `verified` record for its route whose

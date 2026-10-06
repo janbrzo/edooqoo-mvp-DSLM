@@ -17,7 +17,7 @@ export const useFlashcardSets = (teacherId?: string, studentId?: string) => {
     }
 
     if (isDemoMode) {
-      // Return demo data — no Supabase queries
+      // Return demo data; no Supabase queries
       const demoSets = (demoData?.flashcardSets || [])
         .filter((fs: any) => !studentId || fs.student_id === studentId)
         .map((fs: any) => ({

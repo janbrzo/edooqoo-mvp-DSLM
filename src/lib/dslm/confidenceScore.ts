@@ -1,11 +1,11 @@
 /**
- * DSLM Confidence Score — client-side heuristic that estimates how well a generated
+ * DSLM Confidence Score, client-side heuristic that estimates how well a generated
  * suggestion (next step or phase step) matches the student's stated needs.
  *
- * NOT an AI call — pure deterministic scoring from the data we already have, so the
+ * NOT an AI call, pure deterministic scoring from the data we already have, so the
  * UI can show "Confidence: 82% match to student needs" without extra latency or cost.
  *
- * Scale: 40-98 (we never claim 100% — keeps it honest).
+ * Scale: 40-98 (we never claim 100%, keeps it honest).
  *
  * Inputs we look at on a suggestion:
  *  - rationale length & whether it cites a focus skill
@@ -13,7 +13,7 @@
  *  - presence of suggested_grammar_focus or focus_skill_names
  *  - presence of an exerciseFocusMap (V/G tagging done)
  *  - generation_context.metrics_count / goals_count / knowledge_count (more data → higher confidence)
- *  - topic uniqueness vs recent worksheet history (penalize obvious repeats — a length-only proxy)
+ *  - topic uniqueness vs recent worksheet history (penalize obvious repeats: a length-only proxy)
  */
 export interface ConfidenceInput {
   suggestion: any;
@@ -60,7 +60,7 @@ export function computeConfidence({ suggestion, recentTopics = [] }: ConfidenceI
   if (suggestion.suggested_grammar_focus) { score += 3; reasons.push('Grammar focus specified'); }
   if (suggestion.suggested_additional_info && String(suggestion.suggested_additional_info).length > 30) score += 2;
 
-  // Generation context — how rich was the AI's input?
+  // Generation context: how rich was the AI's input?
   const ctx = suggestion.generation_context || {};
   const metrics = Number(ctx.metrics_count || 0);
   const goals = Number(ctx.goals_count || 0);
@@ -78,7 +78,7 @@ export function computeConfidence({ suggestion, recentTopics = [] }: ConfidenceI
       if (!tt || tt.length < 5) return false;
       return tt === topic || tt.includes(topic) || topic.includes(tt);
     });
-    if (dup) { score -= 12; reasons.push('Topic overlaps recent lesson — verify novelty'); }
+    if (dup) { score -= 12; reasons.push('Topic overlaps recent lesson, verify novelty'); }
   }
 
   // Clamp 40..98
@@ -89,6 +89,19 @@ export function computeConfidence({ suggestion, recentTopics = [] }: ConfidenceI
     label: `${score}% match to student needs`,
     reasons: reasons.slice(0, 4),
   };
+}
+
+export type FitLabel = 'Strong fit' | 'Good fit' | 'Rough fit';
+
+/**
+ * Teacher-facing wording for the confidence heuristic. The score is a
+ * completeness heuristic, not a measurement, so cards show a word instead of
+ * a percentage. Thresholds match the badge colours (80 / 65).
+ */
+export function describeFit(score: number): FitLabel {
+  if (score >= 80) return 'Strong fit';
+  if (score >= 65) return 'Good fit';
+  return 'Rough fit';
 }
 
 /** Confidence for a curriculum phase (uses simpler signals). */

@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 
 /**
- * v6.9.55 — Hard light-mode lock for worksheet / homework / welcome-test
+ * v6.9.55: Hard light-mode lock for worksheet / homework / welcome-test
  * surfaces. Stronger than `useForceLightTheme`:
  *   - removes the `.dark` class on mount,
  *   - forces `color-scheme: light` so the browser cannot auto-darken,

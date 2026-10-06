@@ -3,7 +3,7 @@
  * Splits suggestions into next_steps (legacy free-floating) and phase_steps (phase-bound).
  * Also exposes usedSteps for displayIndex calculation (negative numbers for used items).
  */
-import { useState, useEffect, useCallback, useMemo } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import type { WorksheetSuggestion } from '@/types/studentProgress';
@@ -46,6 +46,16 @@ export const useFutureTimeline = ({ studentId, teacherId }: UseFutureTimelinePro
   const [usedSteps, setUsedSteps] = useState<ExtendedWorksheetSuggestion[]>([]);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  // 2026-10: every mounted instance (Prep tab, Learning plan tab) must show
+  // the same queue, so each successful mutation is broadcast to the others.
+  const instanceIdRef = useRef(`ft-${Math.random().toString(36).slice(2)}`);
+  const emitSuggestionsUpdated = useCallback(() => {
+    try {
+      window.dispatchEvent(new CustomEvent('dslm:suggestionsUpdated', {
+        detail: { studentId, origin: instanceIdRef.current },
+      }));
+    } catch { /* ignore */ }
+  }, [studentId]);
 
   const fetchSuggestions = useCallback(async () => {
     if (!studentId || !teacherId) {
@@ -103,11 +113,12 @@ export const useFutureTimeline = ({ studentId, teacherId }: UseFutureTimelinePro
 
   useEffect(() => { fetchSuggestions(); }, [fetchSuggestions]);
 
-  // v6.9.15c — cross-instance refresh trigger. Emitted e.g. by `useCurriculumPhases.deletePhase`
+  // v6.9.15c: cross-instance refresh trigger. Emitted e.g. by `useCurriculumPhases.deletePhase`
   // after detaching phase-bound suggestions, so any mounted timeline reflects them as free steps.
   useEffect(() => {
     const h = (e: Event) => {
       const detail = (e as CustomEvent).detail;
+      if (detail?.origin && detail.origin === instanceIdRef.current) return;
       if (!detail || detail.studentId === studentId) fetchSuggestions();
     };
     window.addEventListener('dslm:suggestionsUpdated', h);
@@ -137,7 +148,7 @@ export const useFutureTimeline = ({ studentId, teacherId }: UseFutureTimelinePro
       const targetPhaseId = opts.phaseId ?? null;
       const isPhaseBound = !!targetPhaseId;
       const requestedCount = opts.count ?? 3;
-      // v6.9.14 — defensive: cap excludeIds payload (large UUID arrays caused 500s).
+      // v6.9.14: defensive: cap excludeIds payload (large UUID arrays caused 500s).
       const safeExcludeIds = (opts.excludeIds ?? []).slice(0, 25);
 
       const invokePayload = {
@@ -148,14 +159,14 @@ export const useFutureTimeline = ({ studentId, teacherId }: UseFutureTimelinePro
         teacherComment: opts.teacherComment ?? '',
         excludeIds: safeExcludeIds,
       };
-      // v6.9.15c — single call only. The previous "phase-bound failed → retry as free step"
+      // v6.9.15c: single call only. The previous "phase-bound failed → retry as free step"
       // fallback silently changed user intent. Edge Function now performs its own retry
       // server-side (plain JSON output) and surfaces precise error metadata.
       const response = await supabase.functions.invoke('generate-timeline', { body: invokePayload });
       if (response.error) throw response.error;
       const rawSuggestions = response.data?.suggestions || [];
       const generationContext = response.data?.generationContext || {};
-      // v6.9.15a — warn when AI returned fewer than requested (truncation / partial).
+      // v6.9.15a: warn when AI returned fewer than requested (truncation / partial).
       if (generationContext?.warning && rawSuggestions.length > 0 && rawSuggestions.length < requestedCount) {
         toast.info(`AI returned only ${rawSuggestions.length}/${requestedCount} steps (${generationContext.warning}). Try a smaller count for full output.`);
       }
@@ -177,7 +188,7 @@ export const useFutureTimeline = ({ studentId, teacherId }: UseFutureTimelinePro
         if (isPhaseBound) {
           await q.eq('phase_id', targetPhaseId);
         } else {
-          // Only delete legacy next_step (no phase) — never touch phase-bound items.
+          // Only delete legacy next_step (no phase): never touch phase-bound items.
           await q.eq('suggestion_kind', 'next_step').is('phase_id', null);
         }
       }
@@ -213,6 +224,7 @@ export const useFutureTimeline = ({ studentId, teacherId }: UseFutureTimelinePro
       const { error } = await supabase.from('future_worksheet_suggestions').insert(insertData);
       if (error) throw error;
       await fetchSuggestions();
+      emitSuggestionsUpdated();
       const label = isPhaseBound ? 'phase step' : 'next step';
       toast.success(`Generated ${newSuggestions.length} ${label}${newSuggestions.length > 1 ? 's' : ''}`);
       return true;
@@ -225,7 +237,7 @@ export const useFutureTimeline = ({ studentId, teacherId }: UseFutureTimelinePro
       } else if (status === 429) {
         toast.error('Too many AI requests. Wait a moment and retry.');
       } else if (status === 502) {
-        // v6.9.15b — distinguish AI schema rejection (Gemini "too many states")
+        // v6.9.15b: distinguish AI schema rejection (Gemini "too many states")
         // from generic gateway failures so the teacher sees actionable copy.
         const reqCount = opts.count ?? 3;
         const ctx: any = (error as any)?.context;
@@ -239,7 +251,7 @@ export const useFutureTimeline = ({ studentId, teacherId }: UseFutureTimelinePro
         } else {
           toast.error(
             reqCount > 1
-              ? 'AI generator overloaded for batch requests — try generating 1 step at a time.'
+              ? 'AI generator overloaded for batch requests, try generating 1 step at a time.'
               : 'AI generator is temporarily unavailable. Please retry in a moment.',
             { duration: 7000 }
           );
@@ -300,6 +312,7 @@ export const useFutureTimeline = ({ studentId, teacherId }: UseFutureTimelinePro
             }
           : s
       ));
+      emitSuggestionsUpdated();
       toast.success('Suggestion updated');
       return true;
     } catch (error) {
@@ -310,7 +323,7 @@ export const useFutureTimeline = ({ studentId, teacherId }: UseFutureTimelinePro
   };
 
   /**
-   * v4.2: Regenerate ONE suggestion in-place — preserves its sequence_number and phase scope,
+   * v4.2: Regenerate ONE suggestion in-place, preserves its sequence_number and phase scope,
    * so the new step replaces the old one at the same visual position.
    */
   const regenerateInPlace = async (suggestionId: string, teacherComment: string): Promise<boolean> => {
@@ -350,6 +363,7 @@ export const useFutureTimeline = ({ studentId, teacherId }: UseFutureTimelinePro
       if (raw.length === 0) {
         toast.info('AI returned no replacement; original removed.');
         await fetchSuggestions();
+        emitSuggestionsUpdated();
         return false;
       }
       const s = raw[0];
@@ -376,6 +390,7 @@ export const useFutureTimeline = ({ studentId, teacherId }: UseFutureTimelinePro
         });
       if (insErr) throw insErr;
       await fetchSuggestions();
+      emitSuggestionsUpdated();
       toast.success('Step regenerated');
       return true;
     } catch (error) {
@@ -404,6 +419,7 @@ export const useFutureTimeline = ({ studentId, teacherId }: UseFutureTimelinePro
       setSuggestions(prev => prev.filter(s => s.id !== suggestionId));
       // Refresh usedSteps list so the marked item shows up immediately.
       fetchSuggestions();
+      emitSuggestionsUpdated();
       return true;
     } catch (error) {
       console.error('Error marking suggestion as used:', error);
@@ -434,6 +450,7 @@ export const useFutureTimeline = ({ studentId, teacherId }: UseFutureTimelinePro
         .eq('teacher_id', teacherId);
       if (error) throw error;
       await fetchSuggestions();
+      emitSuggestionsUpdated();
       toast.success('Step restored to active list');
       return true;
     } catch (error) {
@@ -471,6 +488,7 @@ export const useFutureTimeline = ({ studentId, teacherId }: UseFutureTimelinePro
         .select().single();
       if (error) throw error;
       setSuggestions(prev => [...prev, data as any]);
+      emitSuggestionsUpdated();
       toast.success('Suggestion added');
       return data as any;
     } catch (error) {
@@ -489,6 +507,7 @@ export const useFutureTimeline = ({ studentId, teacherId }: UseFutureTimelinePro
         .eq('teacher_id', teacherId);
       if (error) throw error;
       setSuggestions(prev => prev.filter(s => s.id !== suggestionId));
+      emitSuggestionsUpdated();
       toast.success('Suggestion removed');
       return true;
     } catch (error) {

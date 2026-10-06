@@ -39,11 +39,11 @@ function writeFlag(key: string, value: boolean) {
   try {
     localStorage.setItem(key, value ? '1' : '0');
   } catch {
-    /* storage unavailable — ignore */
+    /* storage unavailable: ignore */
   }
 }
 
-/** v6.9.109 — zone C of the Today dashboard: quiet navigation + collapsed archive. */
+/** v6.9.109: zone C of the Today dashboard: quiet navigation + collapsed archive. */
 export const EverythingElseSection: React.FC<EverythingElseSectionProps> = ({
   studentsCount,
   worksheetsCount,
