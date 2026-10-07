@@ -43,21 +43,21 @@ export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isDemoMode, setIsDemoMode] = useState(false);
   const [demoData, setDemoData] = useState<DemoDataSet | null>(null);
 
-  // Check localStorage on mount
+  // v6.9.114: demo is disabled. On every app start we hard-clear any stale
+  // demo flag so every visitor (and every hook) lands on the production path.
   useEffect(() => {
-    const stored = localStorage.getItem(DEMO_STORAGE_KEY);
-    if (stored) {
-      setIsDemoMode(true);
-      // v6.9.7: async demo build (lazy chunk for ~150 KiB demo worksheet content).
-      buildDemoData(stored).then(setDemoData);
+    try {
+      if (localStorage.getItem(DEMO_STORAGE_KEY)) {
+        localStorage.removeItem(DEMO_STORAGE_KEY);
+      }
+    } catch {
+      // storage unavailable: nothing to clear
     }
   }, []);
 
-  const enterDemo = useCallback((countryCode: string) => {
-    const code = countryCode || 'DEFAULT';
-    localStorage.setItem(DEMO_STORAGE_KEY, code);
-    setIsDemoMode(true);
-    buildDemoData(code).then(setDemoData);
+  // Disabled: keeps the same signature so call sites keep compiling.
+  const enterDemo = useCallback((_countryCode: string) => {
+    // no-op: demo mode is disabled (see kill-switch note above)
   }, []);
 
   const exitDemo = useCallback(() => {
