@@ -1,9 +1,16 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { toast } from '@/hooks/use-toast';
-import { buildDemoData, type DemoDataSet } from '@/data/demoData';
+import type { DemoDataSet } from '@/data/demoData';
 
 const DEMO_STORAGE_KEY = 'edooqoo_demo_mode';
+
+/**
+ * v6.9.114: Public demo mode is DISABLED (hard kill-switch) while /dashboard
+ * and /student are being redesigned. DemoContext stays as a dormant shell so
+ * the 25+ hooks that read isDemoMode keep compiling and always take the
+ * production path. Re-enable = restore enterDemo body + /demo route.
+ */
 
 interface DemoContextType {
   isDemoMode: boolean;
@@ -33,24 +40,25 @@ export function forceExitDemo() {
 }
 
 export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isDemoMode, setIsDemoMode] = useState(false);
-  const [demoData, setDemoData] = useState<DemoDataSet | null>(null);
+  // Both states are frozen: demo can never be entered while the kill-switch is on.
+  const [isDemoMode] = useState(false);
+  const [demoData] = useState<DemoDataSet | null>(null);
 
-  // Check localStorage on mount
+  // v6.9.114: demo is disabled. On every app start we hard-clear any stale
+  // demo flag so every visitor (and every hook) lands on the production path.
   useEffect(() => {
-    const stored = localStorage.getItem(DEMO_STORAGE_KEY);
-    if (stored) {
-      setIsDemoMode(true);
-      // v6.9.7: async demo build (lazy chunk for ~150 KiB demo worksheet content).
-      buildDemoData(stored).then(setDemoData);
+    try {
+      if (localStorage.getItem(DEMO_STORAGE_KEY)) {
+        localStorage.removeItem(DEMO_STORAGE_KEY);
+      }
+    } catch {
+      // storage unavailable: nothing to clear
     }
   }, []);
 
-  const enterDemo = useCallback((countryCode: string) => {
-    const code = countryCode || 'DEFAULT';
-    localStorage.setItem(DEMO_STORAGE_KEY, code);
-    setIsDemoMode(true);
-    buildDemoData(code).then(setDemoData);
+  // Disabled: keeps the same signature so call sites keep compiling.
+  const enterDemo = useCallback((_countryCode: string) => {
+    // no-op: demo mode is disabled (see kill-switch note above)
   }, []);
 
   const exitDemo = useCallback(() => {
