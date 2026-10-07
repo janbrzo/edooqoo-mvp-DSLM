@@ -1,9 +1,16 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { toast } from '@/hooks/use-toast';
-import { buildDemoData, type DemoDataSet } from '@/data/demoData';
+import type { DemoDataSet } from '@/data/demoData';
 
 const DEMO_STORAGE_KEY = 'edooqoo_demo_mode';
+
+/**
+ * v6.9.114: Public demo mode is DISABLED (hard kill-switch) while /dashboard
+ * and /student are being redesigned. DemoContext stays as a dormant shell so
+ * the 25+ hooks that read isDemoMode keep compiling and always take the
+ * production path. Re-enable = restore enterDemo body + /demo route.
+ */
 
 interface DemoContextType {
   isDemoMode: boolean;
