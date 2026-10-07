@@ -4236,6 +4236,26 @@ export type Database = {
           title: string
         }[]
       }
+      log_homework_submitted_event: {
+        Args: {
+          p_event_payload: Json
+          p_homework_id: string
+          p_student_email: string
+        }
+        Returns: string
+      }
+      log_welcome_test_event_by_share_token: {
+        Args: {
+          p_answer_id: string
+          p_element_type?: string
+          p_event_payload: Json
+          p_event_type: string
+          p_legacy_answer_id: string
+          p_share_token: string
+          p_skill_ids?: string[]
+        }
+        Returns: string
+      }
       mark_ai_evaluation_done: {
         Args: {
           p_exercise_index: number
