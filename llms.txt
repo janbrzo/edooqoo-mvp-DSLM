@@ -541,7 +541,7 @@ SEO x1000 plan completion, audit-x1000-plan-completion, Cloudflare Worker deploy
 - Stable conceptual documentation: `docs/llm-context.md`.
 - Exhaustive machine-readable inventory: `docs/source-of-truth-manifest.json`.
 - Regenerate after syncing main with `npm run docs:audit-source`.
-- Current audited counts: 94 routes, 88 page modules, 389 component TSX modules, 94 hook modules, 11 service modules, 81 Edge Functions, 62 typed tables, 86 typed RPCs, and 19 migration indexes.
+- Current audited counts: 94 routes, 88 page modules, 389 component TSX modules, 94 hook modules, 11 service modules, 81 Edge Functions, 62 typed tables, 88 typed RPCs, and 19 migration indexes.
 - Manifest collections: `routes`, `pages`, `components`, `state`, `api`, `database`, and `integrations`.
 - Protected worksheet-generation prompt bodies are excluded. Do not infer or reproduce them from the manifest.
 
