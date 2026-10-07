@@ -95,7 +95,6 @@ const FeatureCalendar = lazy(() => import("./pages/features/FeatureCalendar"));
 const FeatureLiveSessions = lazy(() => import("./pages/features/FeatureLiveSessions"));
 const FeaturePlacementTest = lazy(() => import("./pages/features/FeaturePlacementTest"));
 const FeatureStudentHub = lazy(() => import("./pages/features/FeatureStudentHub"));
-const DemoEntry = lazy(() => import("./pages/DemoEntry"));
 const ExitDemo = lazy(() => import("./pages/ExitDemo"));
 const ToolsIndex = lazy(() => import("./pages/tools/ToolsIndex"));
 const CefrLevelTest = lazy(() => import("./pages/tools/CefrLevelTest"));
@@ -143,7 +142,9 @@ const App = () => (
             <Suspense fallback={<RouteFallback />}>
               <Routes>
               <Route path="/" element={<Index />} />
-              <Route path="/demo" element={<DemoEntry />} />
+              {/* Demo mode disabled (v6.9.113+ kill-switch): /demo is a hard redirect.
+                  Legacy /exit-demo entry kept so stale bookmarks clear cleanly. */}
+              <Route path="/demo" element={<Navigate to="/" replace />} />
               <Route path="/exit-demo" element={<ExitDemo />} />
               <Route path="/auth" element={<Navigate to="/signup" replace />} />
               <Route path="/login" element={<Login />} />
