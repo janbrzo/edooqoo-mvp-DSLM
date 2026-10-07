@@ -40,8 +40,9 @@ export function forceExitDemo() {
 }
 
 export const DemoProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isDemoMode, setIsDemoMode] = useState(false);
-  const [demoData, setDemoData] = useState<DemoDataSet | null>(null);
+  // Both states are frozen: demo can never be entered while the kill-switch is on.
+  const [isDemoMode] = useState(false);
+  const [demoData] = useState<DemoDataSet | null>(null);
 
   // v6.9.114: demo is disabled. On every app start we hard-clear any stale
   // demo flag so every visitor (and every hook) lands on the production path.
