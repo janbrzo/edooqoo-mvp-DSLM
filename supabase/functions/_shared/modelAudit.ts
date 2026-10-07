@@ -626,10 +626,14 @@ export function summariseAudit(input: AuditReportInput): AuditSummary {
 
 /**
  * Email policy: the monthly optimisation report is always sent; the daily
- * "does it work" run is silent unless at least one probe failed.
+ * "does it work" run is silent unless a probe failed or a model is within
+ * LIFECYCLE_CRIT_DAYS of its shutdown date (or already past it).
  */
-export function shouldSendAuditEmail(mode: "daily" | "monthly", summary: Pick<AuditSummary, "failed">): boolean {
-  return mode === "monthly" || summary.failed > 0;
+export function shouldSendAuditEmail(
+  mode: "daily" | "monthly",
+  summary: Pick<AuditSummary, "failed" | "shutdownCrit">,
+): boolean {
+  return mode === "monthly" || summary.failed > 0 || summary.shutdownCrit > 0;
 }
 
 const TD = 'style="padding:6px 10px;border-bottom:1px solid #e5e7eb;vertical-align:top;"';

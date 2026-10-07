@@ -42,7 +42,7 @@ type: feature
 
 **Why:** the old audit only pinged availability, so it reported all-OK while 6 of 10 models had announced shutdowns (gpt-5-mini-2025-08-07 on 2026-12-11 inside the protected engine). Providers answer 200 until removal day.
 
-- Email policy (v6.9.91): monthly always mails; daily mails only when at least one probe failed (`shouldSendAuditEmail`). Silent clean days are intentional.
+- Email policy (v6.9.91, extended 2026-10-07): monthly always mails; daily mails only when at least one probe failed or a model is <=30 days from its shutdown date or past it (`shouldSendAuditEmail`, uses `summary.shutdownCrit`). Silent clean days are intentional. Inside the last 30 days the daily mail repeats every day until the model is replaced and dropped from the registry; the 120/30-day warnings before that come in the monthly mail.
 
 ## 2026-10-05 — Worksheet fallback gpt-5-mini → gpt-5.6-terra (Worksheet Generation Engine, explicit instruction given)
 

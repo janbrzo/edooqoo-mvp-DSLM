@@ -17,7 +17,7 @@
 //
 // Results: model_health_checks (one row per probe), model_audit_reports (one
 // row per run), error_logs (failures + scheduled shutdowns) and an email via
-// send-model-audit-email (monthly always; daily only when a probe failed). Auth: header `x-cron-secret` must equal CRON_SECRET.
+// send-model-audit-email (monthly always; daily only when a probe failed or a model is <=30 days from shutdown). Auth: header `x-cron-secret` must equal CRON_SECRET.
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient, type SupabaseClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 import { logModelFailure } from "../_shared/modelFailureLogger.ts";
@@ -501,7 +501,7 @@ async function runAudit(mode: "daily" | "monthly") {
   });
   if (stored.error) console.error("[audit-llm-models] report insert failed:", stored.error.message);
 
-  // Daily runs email only when a probe failed; monthly always emails.
+  // Daily runs email only when a probe failed or a shutdown is <=30 days away; monthly always emails.
   const emailSent = shouldSendAuditEmail(mode, summary);
   if (emailSent) {
     try {

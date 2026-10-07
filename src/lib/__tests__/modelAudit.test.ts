@@ -64,11 +64,13 @@ describe('classifyProbeStatus', () => {
 });
 
 describe('shouldSendAuditEmail', () => {
-  it('stays silent on a clean daily run and mails on failures or monthly runs', () => {
-    expect(shouldSendAuditEmail('daily', { failed: 0 })).toBe(false);
-    expect(shouldSendAuditEmail('daily', { failed: 1 })).toBe(true);
-    expect(shouldSendAuditEmail('monthly', { failed: 0 })).toBe(true);
-    expect(shouldSendAuditEmail('monthly', { failed: 3 })).toBe(true);
+  it('stays silent on a clean daily run and mails on failures, near shutdowns or monthly runs', () => {
+    expect(shouldSendAuditEmail('daily', { failed: 0, shutdownCrit: 0 })).toBe(false);
+    expect(shouldSendAuditEmail('daily', { failed: 1, shutdownCrit: 0 })).toBe(true);
+    expect(shouldSendAuditEmail('daily', { failed: 0, shutdownCrit: 1 })).toBe(true);
+    expect(shouldSendAuditEmail('daily', { failed: 2, shutdownCrit: 3 })).toBe(true);
+    expect(shouldSendAuditEmail('monthly', { failed: 0, shutdownCrit: 0 })).toBe(true);
+    expect(shouldSendAuditEmail('monthly', { failed: 3, shutdownCrit: 1 })).toBe(true);
   });
 });
 

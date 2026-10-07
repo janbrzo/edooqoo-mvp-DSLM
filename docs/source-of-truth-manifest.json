@@ -23,7 +23,7 @@
     "serviceModules": 11,
     "edgeFunctions": 81,
     "typedTables": 62,
-    "typedRpcs": 86,
+    "typedRpcs": 88,
     "migrationIndexes": 19
   },
   "routes": [
@@ -63,33 +63,24 @@
     },
     {
       "path": "/demo",
-      "element": "DemoEntry",
-      "source": "src/pages/DemoEntry.tsx",
-      "type": "public-functional-or-auth",
-      "redirectTo": null,
+      "element": "Navigate",
+      "source": null,
+      "type": "redirect",
+      "redirectTo": "/",
       "crawl": {
         "robotsBlocked": false,
         "sitemapMatches": 0,
-        "status": "not-in-sitemap"
+        "status": "redirect"
       },
       "dataDependencies": {
         "tables": [],
         "rpcs": [],
-        "edgeFunctions": [
-          "get-demo-locale"
-        ],
+        "edgeFunctions": [],
         "fetchTargets": []
       },
-      "hooks": [
-        "useDemoContext",
-        "useEffect",
-        "useNavigate",
-        "useState"
-      ],
+      "hooks": [],
       "userActions": [],
-      "navigateTargets": [
-        "/dashboard"
-      ]
+      "navigateTargets": []
     },
     {
       "path": "/exit-demo",
@@ -3977,9 +3968,7 @@
           "/dashboard"
         ]
       },
-      "routes": [
-        "/demo"
-      ]
+      "routes": []
     },
     {
       "path": "src/pages/ExerciseTypes.tsx",
@@ -43829,12 +43818,12 @@
         "state": [
           {
             "value": "isDemoMode",
-            "setter": "setIsDemoMode",
+            "setter": null,
             "initial": "false"
           },
           {
             "value": "demoData",
-            "setter": "setDemoData",
+            "setter": null,
             "initial": "null"
           }
         ],
@@ -43867,7 +43856,7 @@
           },
           {
             "storage": "localStorage",
-            "operation": "setItem",
+            "operation": "removeItem",
             "key": "DEMO_STORAGE_KEY",
             "file": "src/contexts/DemoContext.tsx"
           }
@@ -43931,8 +43920,7 @@
         "key": "DEMO_STORAGE_KEY",
         "operations": [
           "getItem",
-          "removeItem",
-          "setItem"
+          "removeItem"
         ],
         "files": [
           "src/contexts/DemoContext.tsx",
@@ -55991,6 +55979,68 @@
           }
         ],
         "returns": "{ id: string public_exercise_types: string[] public_level: string public_slug: string public_topic: string public_view_count: number published_at: string title: string }[]"
+      },
+      {
+        "name": "log_homework_submitted_event",
+        "args": [
+          {
+            "name": "p_event_payload",
+            "type": "Json",
+            "optional": false
+          },
+          {
+            "name": "p_homework_id",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_student_email",
+            "type": "string",
+            "optional": false
+          }
+        ],
+        "returns": "string"
+      },
+      {
+        "name": "log_welcome_test_event_by_share_token",
+        "args": [
+          {
+            "name": "p_answer_id",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_element_type",
+            "type": "string",
+            "optional": true
+          },
+          {
+            "name": "p_event_payload",
+            "type": "Json",
+            "optional": false
+          },
+          {
+            "name": "p_event_type",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_legacy_answer_id",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_share_token",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_skill_ids",
+            "type": "string[]",
+            "optional": true
+          }
+        ],
+        "returns": "string"
       },
       {
         "name": "mark_ai_evaluation_done",
