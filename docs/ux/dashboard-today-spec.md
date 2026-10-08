@@ -91,7 +91,7 @@ Container: `mx-auto max-w-6xl space-y-8 px-4 sm:px-6 lg:px-8 py-6` (1152 px sinc
 - `Recent worksheets (5)` collapsible, default collapsed, state in `localStorage['edooqoo.dashboard.recentOpen']`. Row: title link, student badge, `MediaBadges`, one `…` menu: Rename, Assign to student, Duplicate, Copy share link, Delete. Homework sub-lists are not shown on the dashboard.
 
 ### Empty state (0 students) — `EmptyDashboard`
-Single dashed block: `Users` icon, "Add your first student", one sentence, primary button, secondary link `See a sample student instead` → `/demo` (hidden in demo mode). Zones A–C do not render.
+Single dashed block: `Users` icon, "Add your first student", one sentence, primary button. No secondary link: demo mode is disabled (v6.9.114 kill-switch), so `/demo` hard-redirects to `/`. Zones A–C do not render.
 
 ### Loading
 `PageLoadingState label="Loading your dashboard"`; `hasEverLoaded` logic retained.

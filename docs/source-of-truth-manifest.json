@@ -15752,9 +15752,7 @@
         }
       ],
       "state": [],
-      "hooks": [
-        "useDemoContext"
-      ],
+      "hooks": [],
       "actions": [],
       "navigateTargets": [],
       "dataDependencies": {
@@ -15766,8 +15764,7 @@
       "storage": [],
       "userFacingText": [
         "Add your first student",
-        "Edooqoo builds the learner context once, then every weekly prep starts from it.",
-        "See a sample student instead"
+        "Edooqoo builds the learner context once, then every weekly prep starts from it."
       ],
       "userFacingBehavior": {
         "actionHandlers": [],

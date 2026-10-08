@@ -1,8 +1,6 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Users, UserPlus } from 'lucide-react';
-import { useDemoContext } from '@/contexts/DemoContext';
 
 interface EmptyDashboardProps {
   onAddStudent: () => void;
@@ -10,7 +8,6 @@ interface EmptyDashboardProps {
 
 /** v6.9.109: the only thing a teacher with 0 students sees: one block, one action. */
 export const EmptyDashboard: React.FC<EmptyDashboardProps> = ({ onAddStudent }) => {
-  const { isDemoMode } = useDemoContext();
 
   return (
     <section
@@ -28,11 +25,6 @@ export const EmptyDashboard: React.FC<EmptyDashboardProps> = ({ onAddStudent }) 
         <UserPlus className="mr-2 h-4 w-4" aria-hidden="true" />
         Add your first student
       </Button>
-      {!isDemoMode && (
-        <Link to="/demo" className="mt-3 block text-xs text-muted-foreground hover:text-foreground">
-          See a sample student instead
-        </Link>
-      )}
     </section>
   );
 };
