@@ -5,6 +5,8 @@
 
 import { supabase } from '@/integrations/supabase/client';
 import { devLog, devWarn } from '@/utils/logger';
+import { isClosedExerciseType } from '@/utils/masteryCalculator';
+import { buildClosedItemContext } from '@/lib/answers/closedItemContext';
 
 export interface TranscriptionResult {
   text: string;
@@ -107,6 +109,28 @@ export function buildAnswersToVerify(params: {
     });
   const exerciseAudio = audioAnswers[savedAnswer.exercise_index] || {};
   Object.keys(exerciseAudio).forEach(k => allQuestionIndexes.add(parseInt(k)));
+
+  // Closed exercises: answer key is sent as ground truth (see closedItemContext.ts).
+  if (isClosedExerciseType(savedAnswer.exercise_type)) {
+    for (const qIdx of [...allQuestionIndexes].sort((a, b) => a - b)) {
+      const ctx = buildClosedItemContext(
+        savedAnswer.exercise_type,
+        exerciseData,
+        qIdx,
+        studentAnswersForExercise,
+      );
+      if (!ctx) continue;
+      result.push({
+        exercise_index: savedAnswer.exercise_index,
+        question_index: qIdx,
+        question_text: ctx.question_text,
+        student_answer: ctx.student_answer,
+        suggested_answer: ctx.suggested_answer,
+        exercise_type: savedAnswer.exercise_type,
+      });
+    }
+    return result;
+  }
 
   for (const qIdx of allQuestionIndexes) {
     const questionItem = questionItems[qIdx];
