@@ -59,7 +59,7 @@ One job: **point the teacher to the next move.** Single column, three zones.
 
 Moves: the 6-tile stats bar goes to `/profile` as "Usage" (tokens stay in the nav because they are a constraint, not a statistic). Student search/sort moves to `/students`. Worksheet card actions collapse into one `…` menu.
 
-Empty state (0 students): one block, one primary action — "Add your first student" — with a secondary "See a sample student".
+Empty state (0 students): one block, one primary action: "Add your first student". No secondary sample-student link, because demo mode is disabled.
 
 Detailed spec: `docs/ux/dashboard-today-spec.md`.
 
