@@ -43,7 +43,7 @@ function seededRandom(seed: string) {
   };
 }
 
-function shuffleArrayWithSeed(array: any[], seed: string) {
+export function shuffleArrayWithSeed(array: any[], seed: string) {
   const newArray = [...array];
   const random = seededRandom(seed);
   for (let i = newArray.length - 1; i > 0; i--) {
