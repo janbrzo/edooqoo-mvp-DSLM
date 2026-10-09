@@ -89,7 +89,7 @@ SPEAKING-SPECIFIC SCORING:
 ` : ''}
 IMPORTANT: Be demanding but fair. A score of 0.7+ means the student genuinely tried and produced meaningful English. Do NOT give 0.7+ to lazy or empty responses under any circumstances.
 
-CRITICAL: Return ONLY a valid JSON array. No markdown code blocks. No extra text. Just the array.`${hasAnyClosed ? CLOSED_RULES_PROMPT : ""}`;
+CRITICAL: Return ONLY a valid JSON array. No markdown code blocks. No extra text. Just the array.${hasAnyClosed ? CLOSED_RULES_PROMPT : ""}`;
 
   const userPrompt = `Evaluate these ${answers.length} student answers:
 
