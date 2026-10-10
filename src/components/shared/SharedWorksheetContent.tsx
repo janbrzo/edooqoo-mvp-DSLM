@@ -3,6 +3,7 @@ import React from 'react';
 import { AlertCircle, MessageCircle, BookOpen, Clock, FileText } from 'lucide-react';
 import { AiEvaluation, AiEvaluationBadge } from '@/components/homework/AiEvaluationBadge';
 import { isClosedExerciseType } from '@/utils/masteryCalculator';
+import { ClosedAiExplanations } from '@/components/homework/ClosedAiExplanations';
 import ExerciseMatching from '../worksheet/ExerciseMatching';
 import { normalizeExerciseShape } from '@/lib/worksheet/normalizeExercise';
 import ExerciseFillInBlanks from '../worksheet/ExerciseFillInBlanks';
@@ -901,6 +902,11 @@ const SharedWorksheetContent: React.FC<SharedWorksheetContentProps> = ({
                   showCorrectAnswers={shouldShowCorrectForExercise(exercise.type)}
                   disabled={disabled}
                 />
+              )}
+
+              {/* Closed exercises: AI explanation under the exercise (marks come from the answer key) */}
+              {isClosedExerciseType(exercise.type) && (
+                <ClosedAiExplanations evaluations={getFilteredAiEvals(exercise.type, index)} />
               )}
             </div>
           </div>
