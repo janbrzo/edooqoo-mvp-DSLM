@@ -11,6 +11,7 @@ import {
   buildItemEvaluations, 
   calculateOverallMastery,
   OPEN_ENDED_EXERCISE_TYPES,
+  isClosedExerciseType,
   ItemEvaluation 
 } from '@/utils/masteryCalculator';
 import { devLog, devWarn } from '@/utils/logger';
