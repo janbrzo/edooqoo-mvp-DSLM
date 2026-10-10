@@ -86,4 +86,4 @@ Reference: `docs/ux/target-teacher-experience.md` (approved 2026-09-02).
 - [ ] SEO growth: `/blog/communicative-language-teaching-activities.html` content + meta rewrite
 
 - [x] M9 — 360px overflow fixes: /calendar header wrap, /worksheets table scroll container, /settings/mcp endpoint break-all, PacingProposalsBell icon-only <640px
-- [ ] AI eval for closed items in Create Homework (live session) and worksheet Mark done
+- [x] AI eval for closed items in Create Homework (live session) and worksheet Mark done
