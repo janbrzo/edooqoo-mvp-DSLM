@@ -1,6 +1,6 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.1';
-import { isClosedType } from "../verify-open-answers/closedEvaluation.ts";
+import { isClosedType } from "../_shared/closedEvaluation.ts";
 import { buildClosedItemContext } from "../_shared/closedItemContext.ts";
 
 const corsHeaders = {
