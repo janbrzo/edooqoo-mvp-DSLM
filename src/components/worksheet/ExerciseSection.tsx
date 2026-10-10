@@ -49,7 +49,7 @@ import {
   getMatchedItems,
   renderOtherExerciseTypes
 } from "./ExerciseSectionUtils";
-import { devLog } from '@/utils/logger';
+import { devLog, devWarn } from '@/utils/logger';
 import { safeGetNanoSkill, safeGetAllNanoSkills } from "@/utils/textObjectFixer";
 import NanoSkillBadge, { NanoSkill } from "./NanoSkillBadge";
 import { supabase } from "@/integrations/supabase/client";
