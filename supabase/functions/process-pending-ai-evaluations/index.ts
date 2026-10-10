@@ -217,6 +217,7 @@ serve(async (req) => {
               question_text: String(ci.question_text || ''),
               student_answer: String(ci.student_answer),
               suggested_answer: String(ci.suggested_answer || ''),
+              key_verdict: ['correct', 'wrong', 'review'].includes(ci.key_verdict) ? ci.key_verdict : undefined,
               exercise_type: pending.exercise_type,
             });
           }
@@ -307,6 +308,7 @@ serve(async (req) => {
             is_acceptable: e.is_acceptable ?? ((e.quality_score || 0) >= 0.5),
             quality_score: e.quality_score ?? 0,
             feedback: e.feedback || '',
+            ...(e.key_verdict ? { key_verdict: e.key_verdict } : {}),
             // Only include writing_score if student provided written text
             writing_score: hasWritten ? e.writing_score : undefined,
             // Only include speaking_score if student provided audio

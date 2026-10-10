@@ -5,9 +5,11 @@ import { NO_EM_DASH_RULE } from "../_shared/writingStyle.ts";
 import {
   CLOSED_RULES_PROMPT,
   chunkAnswers,
+  applyClosedKeyRules,
+  fallbackClosedEvaluation,
   isClosedType,
   isSelectionType,
-  matchesKey,
+  type KeyVerdict,
 } from "./closedEvaluation.ts";
 
 const corsHeaders = {
@@ -20,6 +22,7 @@ interface AnswerToEvaluate {
   question_text: string;
   student_answer: string;
   suggested_answer?: string;
+  key_verdict?: KeyVerdict;
   exercise_type: string;
   exercise_index?: number;
   // Speaking data
@@ -34,6 +37,7 @@ interface EvaluationResult {
   quality_score: number;
   is_acceptable: boolean;
   feedback: string;
+  key_verdict?: KeyVerdict;
   writing_score?: number;
   speaking_score?: number;
 }
@@ -102,7 +106,7 @@ ${a.audio_transcription ? `Student's spoken answer (transcription): ${a.audio_tr
 ${a.audio_duration_seconds ? `Audio duration: ${a.audio_duration_seconds} seconds` : ""}
 ${a.audio_word_count ? `Spoken word count: ${a.audio_word_count}` : ""}
 ${isClosedType(a.exercise_type) && a.suggested_answer
-? `Item kind: CLOSED (${isSelectionType(a.exercise_type) ? "selection" : "typed"})\nAnswer key: ${a.suggested_answer}`
+? `Item kind: CLOSED (${isSelectionType(a.exercise_type) ? "selection" : "typed"})\nAnswer key: ${a.suggested_answer}${a.key_verdict ? `\nKey check: ${a.key_verdict === "correct" ? "the student's answer MATCHES the key" : a.key_verdict === "wrong" ? "the student's answer does NOT match the key" : "uncertain, judge against the key"}` : ""}`
 : a.suggested_answer ? `Suggested answer: ${a.suggested_answer}` : ""}
 Exercise type: ${a.exercise_type}
 `,
@@ -117,18 +121,31 @@ Return exactly ${answers.length} evaluation objects in a JSON array:
   console.log("[verify-open-answers] System prompt length:", systemPrompt.length);
   console.log("[verify-open-answers] User prompt length:", userPrompt.length);
 
-  const aiResponse = await chatCompletion({
-    messages: [
-      { role: "system", content: systemPrompt + NO_EM_DASH_RULE },
-      { role: "user", content: userPrompt },
-    ],
-    temperature: 0.3,
-    max_tokens: 4000,
-  }, { primaryModel: "google/gemini-2.5-flash", functionName: "verify-open-answers" });
+  const allClosed = answers.every((a) => isClosedType(a.exercise_type) && !!a.suggested_answer);
+  const closedFallback = () => answers.map((a) => fallbackClosedEvaluation(a));
+
+  let aiResponse: Response;
+  try {
+    aiResponse = await chatCompletion({
+      messages: [
+        { role: "system", content: systemPrompt + NO_EM_DASH_RULE },
+        { role: "user", content: userPrompt },
+      ],
+      temperature: 0.3,
+      max_tokens: 4000,
+    }, { primaryModel: "google/gemini-2.5-flash", functionName: "verify-open-answers" });
+  } catch (e) {
+    const errorText = (e as Error)?.message ?? String(e);
+    console.error("[verify-open-answers] AI call threw:", errorText);
+    // A closed-only chunk never takes open evaluations down with it: the key alone is enough.
+    if (allClosed) return { ok: true, evaluations: closedFallback() };
+    return { ok: false, errorText };
+  }
 
   if (!aiResponse.ok) {
     const errorText = await aiResponse.text();
     console.error("[verify-open-answers] AI API error:", errorText);
+    if (allClosed) return { ok: true, evaluations: closedFallback() };
     return { ok: false, errorText };
   }
 
@@ -200,6 +217,10 @@ Return exactly ${answers.length} evaluation objects in a JSON array:
       parsedContent = [parsedContent];
     }
 
+    // The model must return one object per answer: extra objects have no request to map to.
+    const modelCount = parsedContent.length;
+    parsedContent = parsedContent.slice(0, answers.length);
+
     // Map using ORIGINAL indices from request
     evaluations = parsedContent.map((e: any, idx: number) => {
       let qualityScore = parseFloat(e.quality_score);
@@ -257,15 +278,19 @@ Return exactly ${answers.length} evaluation objects in a JSON array:
 
       // Answer key is ground truth: selection items are scored by the key, typed exact matches are full marks.
       let keyVerdict: boolean | undefined;
+      let reportedVerdict: KeyVerdict | undefined;
       if (closed && !isNonAnswer) {
-        const exact = matchesKey(answers[idx]?.student_answer, answers[idx]?.suggested_answer);
-        if (exact) {
-          qualityScore = 1.0;
-          keyVerdict = true;
-        } else if (isSelectionType(answers[idx]?.exercise_type)) {
-          qualityScore = Math.min(qualityScore, 0.2);
-          keyVerdict = false;
-        }
+        const r = applyClosedKeyRules({
+          aiScore: qualityScore,
+          exerciseType: answers[idx].exercise_type,
+          student: answers[idx].student_answer,
+          key: answers[idx].suggested_answer,
+          keyVerdict: answers[idx].key_verdict,
+        });
+        qualityScore = r.qualityScore;
+        reportedVerdict = r.keyVerdict;
+        if (r.keyVerdict === "correct") keyVerdict = true;
+        else if (isSelectionType(answers[idx].exercise_type) && r.keyVerdict === "wrong") keyVerdict = false;
       }
 
       let feedback = e.feedback;
@@ -300,10 +325,18 @@ Return exactly ${answers.length} evaluation objects in a JSON array:
         quality_score: qualityScore,
         is_acceptable: !isNonAnswer && (keyVerdict ?? (closed ? qualityScore >= 0.7 : (e.is_acceptable ?? qualityScore >= 0.7))),
         feedback: feedback,
+        ...(reportedVerdict ? { key_verdict: reportedVerdict } : {}),
         ...(writingScore !== undefined && !isNaN(writingScore) ? { writing_score: Math.max(0, Math.min(1, writingScore)) } : {}),
         ...(speakingScore !== undefined && !isNaN(speakingScore) ? { speaking_score: Math.max(0, Math.min(1, speakingScore)) } : {}),
       };
     });
+
+    // Missing replies for closed items fall back to the key; open items are left out as before.
+    for (let i = modelCount; i < answers.length; i++) {
+      if (isClosedType(answers[i].exercise_type) && answers[i].suggested_answer) {
+        evaluations.push(fallbackClosedEvaluation(answers[i]) as EvaluationResult);
+      }
+    }
 
     console.log("[verify-open-answers] Successfully parsed", evaluations.length, "evaluations");
     console.log("[verify-open-answers] Evaluations:", JSON.stringify(evaluations, null, 2));
@@ -314,13 +347,7 @@ Return exactly ${answers.length} evaluation objects in a JSON array:
     // FIX 2.2: Dynamic fallback instead of generic
     evaluations = answers.map((a) => {
       if (isClosedType(a.exercise_type) && a.suggested_answer) {
-        const exact = matchesKey(a.student_answer, a.suggested_answer);
-        if (exact) {
-          return { exercise_index: a.exercise_index, question_index: a.question_index, quality_score: 1.0, is_acceptable: true, feedback: "Correct. This matches the answer key." };
-        }
-        if (isSelectionType(a.exercise_type)) {
-          return { exercise_index: a.exercise_index, question_index: a.question_index, quality_score: 0.0, is_acceptable: false, feedback: `Not quite. The correct answer is ${a.suggested_answer}.` };
-        }
+        return fallbackClosedEvaluation(a) as EvaluationResult;
       }
       return {
         exercise_index: a.exercise_index,
@@ -373,7 +400,12 @@ serve(async (req) => {
     }
 
     // Large worksheets (all closed + open items) are split so the JSON reply is never truncated.
-    const chunks = chunkAnswers(answers);
+    // Closed and open items go in separate calls so a failed closed chunk cannot sink open evaluations.
+    const isClosedItem = (a: AnswerToEvaluate) => isClosedType(a.exercise_type) && !!a.suggested_answer;
+    const chunks = [
+      ...chunkAnswers(answers.filter((a) => !isClosedItem(a))).filter((c) => c.length > 0),
+      ...chunkAnswers(answers.filter(isClosedItem)).filter((c) => c.length > 0),
+    ];
     console.log("[verify-open-answers] Evaluating in", chunks.length, "chunk(s)");
     const results = await Promise.all(chunks.map((c) => evaluateChunk(c, english_level, context)));
     const failed = results.find((r) => !r.ok);

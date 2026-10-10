@@ -22,6 +22,7 @@ export interface AnswerToVerify {
   question_text: string;
   student_answer: string;
   suggested_answer?: string;
+  key_verdict?: 'correct' | 'wrong' | 'review';
   exercise_type: string;
   audio_transcription?: string;
   audio_word_count?: number;
@@ -126,6 +127,7 @@ export function buildAnswersToVerify(params: {
         question_text: ctx.question_text,
         student_answer: ctx.student_answer,
         suggested_answer: ctx.suggested_answer,
+        key_verdict: ctx.key_verdict,
         exercise_type: savedAnswer.exercise_type,
       });
     }

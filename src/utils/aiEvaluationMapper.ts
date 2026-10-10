@@ -32,6 +32,7 @@ export function parseAiEvaluation(aiEval: any): Record<number, AiEvaluation> | u
       question_index: qIdx,
       writing_score: qe.writing_score,
       speaking_score: qe.speaking_score,
+      key_verdict: qe.key_verdict,
     };
   }
   

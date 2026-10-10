@@ -15,6 +15,7 @@ import {
   ItemEvaluation 
 } from '@/utils/masteryCalculator';
 import { buildClosedItemContext } from '@/lib/answers/closedItemContext';
+import { hasRevealedAnswers } from '@/lib/answers/revealState';
 import { parseAiEvaluation, mapItemEvaluationsToAiEvaluations } from '@/utils/aiEvaluationMapper';
 import type { AiEvaluation } from '@/components/homework/AiEvaluationBadge';
 import { devLog, devWarn } from '@/utils/logger';
@@ -127,7 +128,7 @@ export const useInteractiveSharedWorksheet = ({
         setAiEvaluations(loadedAiEvals);
         
         // Check if any answer has been completed or has AI evaluation
-        const hasCompletedOrAiEval = data.some((a: any) => a.is_completed || a.ai_evaluation);
+        const hasCompletedOrAiEval = hasRevealedAnswers(data);
         if (hasCompletedOrAiEval) {
           setIsSubmittedForReview(true);
         }
@@ -564,7 +565,7 @@ export const useInteractiveSharedWorksheet = ({
           setAiEvaluations(loadedAiEvals);
           
           // Check if any answer has AI evaluation now
-          const hasAiEval = data.some((a: any) => a.is_completed || a.ai_evaluation);
+          const hasAiEval = hasRevealedAnswers(data);
           if (hasAiEval) {
             setIsSubmittedForReview(true);
           }
