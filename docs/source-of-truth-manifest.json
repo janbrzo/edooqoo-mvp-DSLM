@@ -17,7 +17,7 @@
   "counts": {
     "routes": 94,
     "pageModules": 88,
-    "componentModules": 389,
+    "componentModules": 390,
     "hookModules": 94,
     "contextModules": 1,
     "serviceModules": 11,
@@ -23520,6 +23520,50 @@
       }
     },
     {
+      "path": "src/components/homework/ClosedAiExplanations.tsx",
+      "domain": "homework",
+      "purpose": "Implements Closed Ai Explanations behavior in the homework domain.",
+      "exports": [
+        "ClosedAiExplanations",
+        "closedMark"
+      ],
+      "props": [
+        {
+          "name": "ClosedAiExplanationsProps",
+          "fields": [
+            {
+              "name": "evaluations",
+              "type": "Record<number, AiEvaluation>",
+              "optional": true
+            },
+            {
+              "name": "className",
+              "type": "string",
+              "optional": true
+            }
+          ]
+        }
+      ],
+      "state": [],
+      "hooks": [],
+      "actions": [],
+      "navigateTargets": [],
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "storage": [],
+      "userFacingText": [
+        "AI explanations"
+      ],
+      "userFacingBehavior": {
+        "actionHandlers": [],
+        "navigationTargets": []
+      }
+    },
+    {
       "path": "src/components/homework/CreateHomeworkModal.tsx",
       "domain": "homework",
       "purpose": "Implements Create Homework Modal behavior in the homework domain.",
@@ -46360,7 +46404,9 @@
           "OPTIONS",
           "POST"
         ],
-        "requestFields": [],
+        "requestFields": [
+          "exercise_index"
+        ],
         "visibleResponseFields": [
           "answers",
           "audio_url",
@@ -48105,6 +48151,7 @@
           "src/hooks/useLiveSessionAnswers.tsx"
         ],
         "payloadFields": [
+          "exercise_index",
           "trigger_source",
           "worksheet_id"
         ],
