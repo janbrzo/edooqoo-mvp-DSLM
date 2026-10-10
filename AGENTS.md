@@ -21,6 +21,7 @@ One rule per entry, with a one-line why. Replace an existing rule instead of add
 ## Runtime Safety
 
 - Homework and shared worksheet answers are autosaved only through `createPendingSaves` in `src/lib/answers/pendingSaves.ts` (one debounce timer per exercise, `flush()` on submit and unmount), never a single shared timer — because a shared timer dropped the pending save of one exercise whenever another was edited within 1.5 s.
+- Student-facing pages never infer "unassigned" or "not shared" from an anonymous read of `worksheets` (RLS hides the row, so null means unknown, see `isKnownUnassigned` in `src/lib/worksheet/shareAssignment.ts`); access is decided by `verify_worksheet_student_email` — because that inference blocked every anonymous student on shared worksheet links.
 - Client logging goes through `src/utils/logger.ts`, never raw `console.*` — because production logs must not leak student data.
 - Supabase hooks return early when demo mode (`edooqoo_demo_mode`) is active; `src/lib/demo/demoFetchGuard.ts` (first import of `main.tsx`) answers any remaining REST read carrying a `demo-` id with an empty result — because demo IDs are not UUIDs and crash queries.
 - Teacher-only pages call `useTeacherAuthRedirect` instead of ad-hoc `navigate('/')` — because email deep links must survive login via `state.from`.
