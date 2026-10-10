@@ -11,8 +11,10 @@ import {
   buildItemEvaluations, 
   calculateOverallMastery,
   OPEN_ENDED_EXERCISE_TYPES,
+  isClosedExerciseType,
   ItemEvaluation 
 } from '@/utils/masteryCalculator';
+import { buildClosedItemContext } from '@/lib/answers/closedItemContext';
 import { parseAiEvaluation, mapItemEvaluationsToAiEvaluations } from '@/utils/aiEvaluationMapper';
 import type { AiEvaluation } from '@/components/homework/AiEvaluationBadge';
 import { devLog, devWarn } from '@/utils/logger';
@@ -449,7 +451,8 @@ export const useInteractiveSharedWorksheet = ({
           const exerciseIndex = parseInt(exerciseIndexStr);
           const exerciseType = exerciseTypesRef.current[exerciseIndex];
           
-          if (!OPEN_ENDED_EXERCISE_TYPES.includes(exerciseType)) continue;
+          const isClosed = !!exerciseType && isClosedExerciseType(exerciseType);
+          if (!OPEN_ENDED_EXERCISE_TYPES.includes(exerciseType) && !isClosed) continue;
           
           const exerciseAnswers = answers[exerciseIndex];
           if (!exerciseAnswers || Object.keys(exerciseAnswers).length === 0) continue;
@@ -464,6 +467,19 @@ export const useInteractiveSharedWorksheet = ({
             
             if (needsEval) {
               const exercise = exercises[exerciseIndex];
+              // Closed items: answer key resolved client-side (same extractor as homework)
+              const closedItems = isClosed
+                ? Object.keys(exerciseAnswers)
+                    .filter(k => !k.startsWith('_') && !isNaN(parseInt(k)))
+                    .map(k => parseInt(k))
+                    .sort((a, b) => a - b)
+                    .map(qIdx => {
+                      const ctx = buildClosedItemContext(exerciseType, exercise, qIdx, exerciseAnswers as Record<string | number, any>);
+                      return ctx ? { question_index: qIdx, ...ctx } : null;
+                    })
+                    .filter(Boolean)
+                : undefined;
+              if (isClosed && (!closedItems || closedItems.length === 0)) continue;
               await supabase.rpc('queue_worksheet_ai_evaluation', {
                 p_worksheet_id: worksheetId,
                 p_student_email: studentEmail.trim().toLowerCase(),
@@ -473,8 +489,9 @@ export const useInteractiveSharedWorksheet = ({
                 p_english_level: 'Intermediate',
                 p_context: {
                   title: exercise?.title || `Exercise ${exerciseIndex + 1}`,
-                  questions: exercise?.questions || exercise?.prompts || exercise?.sentences || exercise?.expressions || exercise?.items || []
-                }
+                  questions: exercise?.questions || exercise?.prompts || exercise?.sentences || exercise?.expressions || exercise?.items || [],
+                  ...(closedItems ? { closed_items: closedItems } : {}),
+                } as any
               });
               devLog(`[useInteractiveSharedWorksheet] Queued AI eval for exercise ${exerciseIndex}`);
             }
