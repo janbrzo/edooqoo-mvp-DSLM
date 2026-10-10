@@ -16,6 +16,7 @@ import {
 } from '@/utils/masteryCalculator';
 import { buildClosedItemContext } from '@/lib/answers/closedItemContext';
 import { hasRevealedAnswers } from '@/lib/answers/revealState';
+import { createPendingSaves } from '@/lib/answers/pendingSaves';
 import { parseAiEvaluation, mapItemEvaluationsToAiEvaluations } from '@/utils/aiEvaluationMapper';
 import type { AiEvaluation } from '@/components/homework/AiEvaluationBadge';
 import { devLog, devWarn } from '@/utils/logger';
@@ -44,7 +45,7 @@ export const useInteractiveSharedWorksheet = ({
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
   const [isSubmittedForReview, setIsSubmittedForReview] = useState(false);
   
-  const saveTimeoutRef = useRef<NodeJS.Timeout>();
+  const pendingSavesQueueRef = useRef(createPendingSaves());
   const pendingSavesRef = useRef<Set<number>>(new Set());
   
   // PROBLEM 1 FIX: Active time tracking per exercise
@@ -207,11 +208,6 @@ export const useInteractiveSharedWorksheet = ({
 
   // Debounced auto-save function (1.5 seconds for real-time feel)
   const scheduleAutoSave = useCallback((exerciseIndex: number, exerciseType: string, exerciseAnswers: ExerciseAnswers) => {
-    // Clear existing timeout
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
-    }
-
     // Mark this exercise as pending save
     pendingSavesRef.current.add(exerciseIndex);
     setIsSaving(true);
@@ -235,10 +231,10 @@ export const useInteractiveSharedWorksheet = ({
       sendingEvals: !!evalToSend
     });
     
-    // Schedule new save (1.5 seconds for faster real-time updates)
-    saveTimeoutRef.current = setTimeout(() => {
-      saveAnswer(exerciseIndex, exerciseType, exerciseAnswers, mastery, evalToSend);
-    }, 1500);
+    // Per-exercise debounce (1.5 s): another exercise's edits must not cancel this save
+    pendingSavesQueueRef.current.schedule(exerciseIndex, () =>
+      saveAnswer(exerciseIndex, exerciseType, exerciseAnswers, mastery, evalToSend)
+    );
   }, [saveAnswer, exercises]);
 
   // Update answer and schedule auto-save
@@ -275,10 +271,8 @@ export const useInteractiveSharedWorksheet = ({
 
   // Save immediately on blur (when user leaves input field)
   const saveOnBlur = useCallback((exerciseIndex: number, exerciseType: string) => {
-    // Clear any pending auto-save
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
-    }
+    // This exercise is saved right now; other exercises keep their pending saves
+    pendingSavesQueueRef.current.cancel(exerciseIndex);
 
     const exerciseAnswers = answers[exerciseIndex];
     if (exerciseAnswers) {
@@ -419,12 +413,11 @@ export const useInteractiveSharedWorksheet = ({
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
   }, [answers, worksheetId, studentEmail, exercises, getActiveTimeMs]);
 
-  // Cleanup timeout on unmount
+  // Flush pending saves on unmount so the last second of answers is not dropped
   useEffect(() => {
+    const queue = pendingSavesQueueRef.current;
     return () => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
+      void queue.flush();
     };
   }, []);
 
