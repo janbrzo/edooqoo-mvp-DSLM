@@ -200,7 +200,25 @@ serve(async (req) => {
         const answersToVerify: any[] = [];
         let audioQuestionsSentToAi = 0;
 
-        for (const qIdx of allQuestionIndexes) {
+        // Closed items arrive with the answer key precomputed client-side
+        // (src/lib/answers/closedItemContext.ts) in context.closed_items.
+        const closedItems: any[] = Array.isArray(context.closed_items) ? context.closed_items : [];
+        const isClosedPending = closedItems.length > 0;
+        if (isClosedPending) {
+          for (const ci of closedItems) {
+            if (!ci || typeof ci.question_index !== 'number' || !ci.student_answer) continue;
+            answersToVerify.push({
+              exercise_index: pending.exercise_index,
+              question_index: ci.question_index,
+              question_text: String(ci.question_text || ''),
+              student_answer: String(ci.student_answer),
+              suggested_answer: String(ci.suggested_answer || ''),
+              exercise_type: pending.exercise_type,
+            });
+          }
+        }
+
+        for (const qIdx of (isClosedPending ? [] : allQuestionIndexes)) {
           const writtenAnswer = answers[String(qIdx)];
           const transcription = transcriptionMap[qIdx];
           const hasAudioForQuestion = audioAnswers[String(qIdx)] !== undefined;
@@ -366,12 +384,16 @@ serve(async (req) => {
         console.log(`[process-pending] Mastery: ${overallMastery}% for ${itemEvaluations.length} items (${audioQuestionsSentToAi} audio)`);
 
         // Update worksheet_student_answers with BOTH ai_evaluation and item_evaluations
-        const updateData: Record<string, unknown> = {
-          ai_evaluation: aiEvaluation,
-          item_evaluations: itemEvaluations,
-          mastery: overallMastery,
-          last_ai_eval_at: new Date().toISOString()
-        };
+        // Closed items: AI adds feedback only; DSLM mastery stays the deterministic
+        // score already saved by the client (item_evaluations/mastery untouched).
+        const updateData: Record<string, unknown> = isClosedPending
+          ? { ai_evaluation: aiEvaluation, last_ai_eval_at: new Date().toISOString() }
+          : {
+              ai_evaluation: aiEvaluation,
+              item_evaluations: itemEvaluations,
+              mastery: overallMastery,
+              last_ai_eval_at: new Date().toISOString()
+            };
         
         if (effectiveTriggerSource) {
           updateData.eval_trigger = effectiveTriggerSource;

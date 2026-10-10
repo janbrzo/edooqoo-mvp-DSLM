@@ -11,6 +11,7 @@ import {
   buildItemEvaluations, 
   calculateOverallMastery,
   OPEN_ENDED_EXERCISE_TYPES,
+  isClosedExerciseType,
   ItemEvaluation 
 } from '@/utils/masteryCalculator';
 import { devLog, devWarn } from '@/utils/logger';
@@ -351,10 +352,14 @@ export const useInteractiveHomework = ({
             devLog('[submitHomework] Transcriptions merged into local savedAnswers (DB write deferred)');
           }
           
+          // Open and closed exercises both go to AI. Closed items carry the answer key
+          // (buildAnswersToVerify -> closedItemContext); DSLM mastery for closed types
+          // stays deterministic in buildItemEvaluations.
           for (const ans of savedAnswers.filter((a: any) => {
             const isOpen = openAnswerTypes.includes(a.exercise_type);
-            devLog(`[submitHomework] Exercise ${a.exercise_index}: type=${a.exercise_type}, isOpen=${isOpen}`);
-            return isOpen;
+            const isClosed = !!a.exercise_type && isClosedExerciseType(a.exercise_type);
+            devLog(`[submitHomework] Exercise ${a.exercise_index}: type=${a.exercise_type}, isOpen=${isOpen}, isClosed=${isClosed}`);
+            return isOpen || isClosed;
           })) {
             const exerciseData = exercises[ans.exercise_index];
             
