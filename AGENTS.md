@@ -16,7 +16,7 @@ One rule per entry, with a one-line why. Replace an existing rule instead of add
 - All worksheet text answer checking goes through `src/lib/answers/matchAnswer.ts`; an uncertain match returns `review`, never `wrong` — because false negatives destroy learner trust and DSLM accuracy.
 - "Homework waiting for review" is decided only by `isHomeworkAwaitingReview` in `src/lib/homework/reviewState.ts`, and every review entry point links to `/homework/:id/review` — because the dashboard, timeline and homework list used to disagree and the review page was unreachable after the first review.
 
-- Closed exercises go to AI evaluation with their answer key as ground truth (`src/lib/answers/closedItemContext.ts` -> `verify-open-answers`); AI adds only the explanation, mastery stays computed deterministically by `masteryCalculator`, and `CLOSED_EXERCISE_TYPES` in `verify-open-answers/closedEvaluation.ts` mirrors the client list (enforced by `closedEvaluation.test.ts`) - because model errors must never lower a key-correct score.
+- Closed exercises go to AI evaluation with their answer key as ground truth, built once by `supabase/functions/_shared/closedItemContext.ts` (client re-exports it; used by homework, shared worksheets, Create Homework and Mark done); AI adds only the explanation, mastery stays computed deterministically by `masteryCalculator`, and `CLOSED_EXERCISE_TYPES` in `_shared/closedEvaluation.ts` mirrors the client list (enforced by `closedEvaluation.test.ts`) - because model errors must never lower a key-correct score.
 
 ## Runtime Safety
 

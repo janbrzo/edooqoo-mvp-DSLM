@@ -61,3 +61,15 @@ describe('buildAnswersToVerify', () => {
     expect(out[0]).toMatchObject({ question_text: 'Do you?', student_answer: 'Yes' });
   });
 });
+
+import { shuffleArrayWithSeed as sharedShuffle } from '../closedItemContext';
+import { shuffleArrayWithSeed as clientShuffle } from '@/utils/masteryCalculator';
+
+describe('shared shuffle parity', () => {
+  it('Edge copy matches masteryCalculator shuffle', () => {
+    for (const seed of ['a|b|c', 'syn-x|y', 'longer seed with spaces', '']) {
+      const arr = Array.from({ length: 9 }, (_, i) => i);
+      expect(sharedShuffle(arr, seed)).toEqual(clientShuffle(arr, seed));
+    }
+  });
+});
