@@ -50,6 +50,7 @@ import {
   renderOtherExerciseTypes
 } from "./ExerciseSectionUtils";
 import { devLog, devWarn } from '@/utils/logger';
+import { isClosedExerciseType } from '@/utils/masteryCalculator';
 import { safeGetNanoSkill, safeGetAllNanoSkills } from "@/utils/textObjectFixer";
 import NanoSkillBadge, { NanoSkill } from "./NanoSkillBadge";
 import { supabase } from "@/integrations/supabase/client";
