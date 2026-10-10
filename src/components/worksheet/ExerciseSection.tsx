@@ -499,6 +499,21 @@ const ExerciseSection = forwardRef<HTMLDivElement, ExerciseSectionProps>(({
         }
       }
       setIsLoadingAiEvaluation(false);
+    } else if (
+      isClosedExerciseType(exercise.type) &&
+      worksheetIdForStorage &&
+      liveSessionAnswer &&
+      Object.keys(liveSessionAnswer).length > 0
+    ) {
+      // Closed items: mastery stays deterministic (answer key). AI only adds the rule
+      // explanation, queued server-side with the shared extractor and delivered to
+      // the per-question badges via Realtime (useLiveSessionAnswers).
+      supabase.functions
+        .invoke('process-pending-ai-evaluations', {
+          body: { worksheet_id: worksheetIdForStorage, trigger_source: 'mark_done', exercise_index: exerciseIdx },
+        })
+        .then(({ error }) => { if (error) devWarn('[AI Evaluation] Closed mark-done queue failed:', error); })
+        .catch((err) => devWarn('[AI Evaluation] Closed mark-done queue exception:', err));
     }
   };
   
