@@ -87,3 +87,4 @@ Reference: `docs/ux/target-teacher-experience.md` (approved 2026-09-02).
 
 - [x] M9 — 360px overflow fixes: /calendar header wrap, /worksheets table scroll container, /settings/mcp endpoint break-all, PacingProposalsBell icon-only <640px
 - [x] AI eval for closed items in Create Homework (live session) and worksheet Mark done
+- [x] Closed AI eval hardening: shared key verdict (`key_verdict`), no answer reveal, `ClosedAiExplanations` display
