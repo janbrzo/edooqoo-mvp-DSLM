@@ -16,7 +16,7 @@
  * Copy of `shuffleArrayWithSeed` in src/utils/masteryCalculator.ts (Edge Functions
  * cannot import from src/). Parity is enforced by closedItemContext.test.ts.
  */
-export function shuffleArrayWithSeed<T>(array: T[], seed: string): T[] {
+export function shuffleArrayWithSeed(array: any[], seed: string): any[] {
   let hash = 0;
   for (let i = 0; i < seed.length; i++) {
     hash = (hash << 5) - hash + seed.charCodeAt(i);
