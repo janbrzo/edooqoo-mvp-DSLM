@@ -28,10 +28,12 @@ serve(async (req) => {
 
     let worksheetIdFilter: string | null = null;
     let triggerSource: string | null = null;
+    let exerciseIndexFilter: number | null = null;
     try {
       const body = await req.json();
       worksheetIdFilter = body?.worksheet_id || null;
       triggerSource = body?.trigger_source || null;
+      exerciseIndexFilter = typeof body?.exercise_index === 'number' ? body.exercise_index : null;
     } catch {
       // No body provided - process all pending
     }
@@ -39,8 +41,8 @@ serve(async (req) => {
     console.log(`[process-pending] trigger_source: ${triggerSource}, worksheet_id: ${worksheetIdFilter}`);
 
     // === Auto-queue for create_homework ===
-    if (triggerSource === 'create_homework' && worksheetIdFilter) {
-      await autoQueueForCreateHomework(supabase, worksheetIdFilter);
+    if ((triggerSource === 'create_homework' || triggerSource === 'mark_done') && worksheetIdFilter) {
+      await autoQueueForCreateHomework(supabase, worksheetIdFilter, triggerSource, exerciseIndexFilter);
     }
 
     // Get pending evaluations (limit to avoid timeout)
@@ -49,7 +51,7 @@ serve(async (req) => {
       .select('*')
       .eq('status', 'pending')
       .order('created_at', { ascending: true })
-      .limit(10);
+      .limit(worksheetIdFilter ? 25 : 10);
     
     if (worksheetIdFilter) {
       query = query.eq('worksheet_id', worksheetIdFilter);
@@ -451,7 +453,12 @@ serve(async (req) => {
  * Auto-queue evaluations for all open-ended exercises
  * when teacher clicks Create Homework.
  */
-async function autoQueueForCreateHomework(supabase: any, worksheetId: string) {
+async function autoQueueForCreateHomework(
+  supabase: any,
+  worksheetId: string,
+  triggerSource: string = 'create_homework',
+  exerciseIndexFilter: number | null = null,
+) {
   console.log(`[auto-queue] Fetching answers for worksheet ${worksheetId}`);
   
   const { data: studentAnswers, error } = await supabase
@@ -472,7 +479,9 @@ async function autoQueueForCreateHomework(supabase: any, worksheetId: string) {
   let queued = 0;
   
   for (const answer of studentAnswers) {
-    if (!OPEN_ENDED_EXERCISE_TYPES.includes(answer.exercise_type)) continue;
+    if (exerciseIndexFilter !== null && answer.exercise_index !== exerciseIndexFilter) continue;
+    const isClosed = isClosedType(answer.exercise_type);
+    if (!isClosed && !OPEN_ENDED_EXERCISE_TYPES.includes(answer.exercise_type)) continue;
     
     const { data: needsEval } = await supabase.rpc('needs_ai_evaluation', {
       p_worksheet_id: worksheetId,
@@ -507,7 +516,7 @@ async function autoQueueForCreateHomework(supabase: any, worksheetId: string) {
       continue;
     }
     
-    let context: Record<string, unknown> = { trigger_source: 'create_homework' };
+    let context: Record<string, unknown> = { trigger_source: triggerSource };
     try {
       const { data: worksheet } = await supabase
         .from('worksheets')
@@ -524,10 +533,30 @@ async function autoQueueForCreateHomework(supabase: any, worksheetId: string) {
         if (exercise) {
           context.title = exercise.title || `Exercise ${answer.exercise_index + 1}`;
           context.questions = exercise.questions || exercise.prompts || exercise.sentences || exercise.expressions || exercise.items || [];
+          if (isClosed) {
+            // Same extractor as the client (src/lib/answers/closedItemContext.ts re-exports it).
+            const studentAnswers = answer.answers || {};
+            const idx = new Set<number>();
+            for (const k of Object.keys(studentAnswers)) {
+              if (k.startsWith('_')) continue;
+              const n = parseInt(k);
+              if (!isNaN(n)) idx.add(n);
+            }
+            const closedItems: any[] = [];
+            for (const q of [...idx].sort((a, b) => a - b)) {
+              const ctx = buildClosedItemContext(answer.exercise_type, exercise, q, studentAnswers);
+              if (ctx) closedItems.push({ question_index: q, ...ctx });
+            }
+            context.closed_items = closedItems;
+          }
         }
       }
     } catch (e) {
       console.error(`[auto-queue] Error parsing worksheet context:`, e);
+    }
+    if (isClosed && !(Array.isArray(context.closed_items) && context.closed_items.length > 0)) {
+      console.log(`[auto-queue] Skipping closed exercise ${answer.exercise_index} - no resolvable items`);
+      continue;
     }
     
     const { error: insertError } = await supabase
