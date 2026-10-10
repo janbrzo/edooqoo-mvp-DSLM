@@ -620,7 +620,29 @@ const HomeworkExerciseRenderer: React.FC<HomeworkExerciseRendererProps> = ({
           </div>
         )}
         
-        {/* AI Evaluations are now rendered inline in each exercise component */}
+        {/* AI Evaluations for open-ended types are rendered inline in each exercise component */}
+        {/* Closed types: score stays key-based (shown by ✓/✗ above); AI adds only the "why" */}
+        {!isOpenEnded && disabled && aiEvaluation && (() => {
+          const items = Object.values(aiEvaluation)
+            .filter(e => e && e.quality_score >= 0 && e.feedback?.trim())
+            .sort((a, b) => (a.question_index ?? 0) - (b.question_index ?? 0));
+          if (items.length === 0) return null;
+          return (
+            <div className="mt-4 rounded-md border bg-muted/40 p-3" data-testid="closed-ai-feedback">
+              <p className="text-xs font-semibold text-muted-foreground mb-2">AI explanations</p>
+              <ul className="space-y-1.5">
+                {items.map(e => (
+                  <li key={e.question_index} className="flex items-start gap-2 text-xs leading-snug">
+                    <span className={`font-semibold shrink-0 ${e.is_acceptable ? 'text-green-600' : 'text-red-600'}`}>
+                      {(e.question_index ?? 0) + 1}. {e.is_acceptable ? '✓' : '✗'}
+                    </span>
+                    <span className="text-muted-foreground">{e.feedback}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          );
+        })()}
         {/* AI waiting indicator moved to HomeworkPage.tsx as fixed sidebar */}
       </div>
     </div>
