@@ -582,8 +582,8 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
         ) : (
         // v6.9.44: single-row on lg: title block + actions inline, no wasted
         // vertical space. Falls back to stack on smaller viewports.
-        <div className="flex flex-col lg:flex-row lg:items-center lg:gap-4 gap-2">
-          <div className="flex items-start gap-3 min-w-0 flex-1">
+        <div className="flex flex-col gap-3 pr-8">
+          <div className="flex items-start gap-3 min-w-0">
             <Sparkles className="h-7 w-7 text-primary flex-shrink-0" />
             <div className="min-w-0 flex-1">
             {status === 'pending' && (
@@ -670,13 +670,13 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
             )}
             {status === 'in_progress' && (
               <>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-wrap">
                   <p className="font-medium text-sm">
                     {retakeLabel ? `Student is taking ${retakeLabel}` : 'Student is taking the test'}
                   </p>
-                  <Badge variant="secondary">{answeredCount}/{totalQuestions} answered</Badge>
+                  <Badge variant="secondary" className="shrink-0 whitespace-nowrap">{answeredCount}/{totalQuestions} answered</Badge>
                 </div>
-                <Progress value={progressPercent} className="h-1.5 mt-1.5" />
+                <Progress value={progressPercent} className="h-1.5 mt-1.5 max-w-md" />
               </>
             )}
             {status === 'completed' && (
@@ -696,7 +696,7 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
             )}
             </div>
           </div>
-          <div className="lg:flex-shrink-0">
+          <div className="min-w-0 md:pl-10">
             <WelcomeTestActionsPanel
               state={panelState}
               shareUrl={shareUrl}
@@ -711,7 +711,7 @@ export function WelcomeTestSuggestion({ studentId, teacherId, studentName, stude
               sending={creating}
               retaking={retaking}
               compact
-              className="justify-start lg:justify-end"
+              className="justify-start"
             />
           </div>
         </div>

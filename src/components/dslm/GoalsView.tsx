@@ -244,7 +244,7 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
         {supportingGoals.length === 0 ? (
           <p className="text-xs text-muted-foreground text-center py-2">No supporting goals yet</p>
         ) : (
-          <div className="grid md:grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3">
             {supportingGoals.map(renderGoalCard)}
           </div>
         )}
@@ -273,7 +273,7 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
           {additionalGoals.length === 0 ? (
             <p className="text-xs text-muted-foreground text-center py-2">No additional goals yet</p>
           ) : (
-            <div className="grid md:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3">
               {additionalGoals.map(renderGoalCard)}
             </div>
           )}
@@ -282,7 +282,7 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
         {/* v5.0: Achieved Goals, collapsed by default */}
         {achievedGoals.length > 0 && (
           <CollapsibleSection id="goals-achieved" title="Achieved Goals" icon={CheckCircle2} count={achievedGoals.length}>
-            <div className="grid md:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3">
               {achievedGoals.map(renderGoalCard)}
             </div>
           </CollapsibleSection>
@@ -291,7 +291,7 @@ export const GoalsView: React.FC<GoalsViewProps> = ({
         {/* v5.0: Archived Goals, collapsed by default */}
         {archivedGoals.length > 0 && (
           <CollapsibleSection id="goals-archived" title="Archived Goals" icon={Archive} count={archivedGoals.length}>
-            <div className="grid md:grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 gap-3">
               {archivedGoals.map(renderGoalCard)}
             </div>
           </CollapsibleSection>
