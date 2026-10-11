@@ -74,8 +74,8 @@ export const StudentKnowledgeEntryCard = ({
     <Card className={`hover:shadow-md transition-shadow ${entry.is_outdated ? 'opacity-60' : ''}`}>
       <CardContent className="p-4">
         {/* Header: Category + Outdated Badge + Actions */}
-        <div className="flex items-start justify-between mb-3">
-          <div className="flex items-center gap-2">
+        <div className="flex items-start justify-between gap-2 mb-3">
+          <div className="flex items-center gap-2 flex-wrap min-w-0 flex-1">
             <Badge
               variant="outline"
               className={`${categoryMeta?.color} border gap-1.5 px-2 py-1`}
@@ -111,7 +111,7 @@ export const StudentKnowledgeEntryCard = ({
             )}
           </div>
 
-          <div className="flex items-center gap-1">
+          <div className="flex items-center gap-1 shrink-0">
             {onArchive && entry.category === 'Next Lesson Ideas' && !entry.archived_at && (
               <TooltipProvider delayDuration={200}>
                 <Tooltip>
@@ -276,12 +276,12 @@ export const StudentKnowledgeEntryCard = ({
 
         {/* v6.9.10: Stale freshness prompt */}
         {isStale && (
-          <div className="mb-3 flex items-center justify-between gap-2 rounded-md border border-amber-300/60 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-700/50 px-2.5 py-1.5">
+          <div className="mb-3 flex flex-wrap items-center justify-between gap-x-2 gap-y-1 rounded-md border border-amber-300/60 bg-amber-50 dark:bg-amber-900/20 dark:border-amber-700/50 px-2.5 py-1.5">
             <div className="flex items-center gap-1.5 text-xs text-amber-800 dark:text-amber-200">
-              <Clock className="h-3.5 w-3.5" />
-              <span>Stale ({ageDays}d old): still true?</span>
+              <Clock className="h-3.5 w-3.5 shrink-0" />
+              <span className="whitespace-nowrap font-medium">Stale ({ageDays}d old): still true?</span>
             </div>
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 shrink-0">
               {onConfirmCurrent && (
                 <Button
                   variant="ghost"
@@ -306,7 +306,7 @@ export const StudentKnowledgeEntryCard = ({
 
         {/* Footer: Worksheet Link + Timestamp */}
         <div className="flex items-center justify-between text-xs text-muted-foreground pt-3 border-t">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap min-w-0 flex-1">
             {entry.worksheet_id && (
               <button
                 onClick={handleWorksheetClick}
