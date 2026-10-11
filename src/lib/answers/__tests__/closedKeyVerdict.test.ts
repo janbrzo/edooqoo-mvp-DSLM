@@ -14,7 +14,7 @@ import {
 const LETTERS = ['A', 'B', 'C', 'D', 'E'];
 
 /** Brute force the letter the renderer shuffle maps to the right (or a wrong) definition. */
-const letterWhere = (type: string, data: any, idx: number, expected: 100 | 0): string => {
+const letterWhere = (type: string, data: unknown, idx: number, expected: 100 | 0): string => {
   const found = LETTERS.find((l) => calculateItemMastery(type, data, idx, l, { [idx]: l }) === expected);
   if (!found) throw new Error(`no letter with mastery ${expected} for ${type}`);
   return found;
@@ -22,9 +22,9 @@ const letterWhere = (type: string, data: any, idx: number, expected: 100 | 0): s
 
 interface Fixture {
   type: string;
-  data: any;
-  correct: any;
-  wrong: any;
+  data: unknown;
+  correct: unknown;
+  wrong: unknown;
 }
 
 const mcData = {
