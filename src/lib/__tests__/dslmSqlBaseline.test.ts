@@ -29,6 +29,7 @@ const PIPELINE_FUNCTIONS = [
 const PIPELINE_TRIGGERS = [
   'trg_refresh_skill_metrics', 'trg_homework_answer_to_events', 'trg_worksheet_answer_to_events',
   'trigger_log_flashcard_review_event', 'trigger_log_knowledge_entry_event', 'trigger_log_test_answer_event',
+  'trigger_update_homework_ai_evaluation',
 ];
 
 describe('DSLM pipeline SQL is versioned in migrations', () => {

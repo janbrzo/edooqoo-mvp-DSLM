@@ -11,6 +11,9 @@
 -- Not included on purpose: the legacy 5/6/7-argument overloads of
 -- save_homework_answer and save_worksheet_answer (unused by the client).
 
+-- Fail fast instead of queueing behind live traffic on the trigger tables.
+SET LOCAL lock_timeout = '5s';
+
 -- extract_skill_category
 CREATE OR REPLACE FUNCTION public.extract_skill_category(skill_name text)
  RETURNS text

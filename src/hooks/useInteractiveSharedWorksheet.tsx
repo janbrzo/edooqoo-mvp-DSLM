@@ -154,7 +154,7 @@ export const useInteractiveSharedWorksheet = ({
     } finally {
       setIsLoading(false);
     }
-  }, [worksheetId, studentEmail]);
+  }, [worksheetId, studentEmail, shareToken]);
 
   // PROBLEM 1 FIX: Calculate active time for an exercise
   const getActiveTimeMs = useCallback((exerciseIndex: number): number => {
@@ -212,7 +212,7 @@ export const useInteractiveSharedWorksheet = ({
       });
       setIsSaving(false);
     }
-  }, [worksheetId, studentEmail, getActiveTimeMs]);
+  }, [worksheetId, studentEmail, getActiveTimeMs, shareToken]);
 
   // Debounced auto-save function (1.5 seconds for real-time feel)
   const scheduleAutoSave = useCallback((exerciseIndex: number, exerciseType: string, exerciseAnswers: ExerciseAnswers) => {
@@ -421,7 +421,7 @@ export const useInteractiveSharedWorksheet = ({
 
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [answers, worksheetId, studentEmail, exercises, getActiveTimeMs]);
+  }, [answers, worksheetId, studentEmail, exercises, getActiveTimeMs, shareToken]);
 
   // Flush pending saves on unmount so the last second of answers is not dropped
   useEffect(() => {
@@ -585,7 +585,7 @@ export const useInteractiveSharedWorksheet = ({
     
     const interval = setInterval(pollEvaluations, POLL_INTERVAL);
     return () => clearInterval(interval);
-  }, [worksheetId, studentEmail, itemEvaluations]);
+  }, [worksheetId, studentEmail, itemEvaluations, shareToken]);
 
   // Update audio answer for a specific exercise/question
   const updateAudioAnswer = useCallback((exerciseIndex: number, questionIndex: number, audioUrl: string) => {

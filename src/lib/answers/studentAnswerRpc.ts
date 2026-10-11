@@ -42,13 +42,15 @@ export async function callStudentAnswerRpc<N extends TokenRpc>(
 ): Promise<RpcResult<StudentAnswerRpcRows<N>>> {
   // bind keeps `this` on the client object.
   const rpc = supabase.rpc.bind(supabase) as unknown as RpcCall<StudentAnswerRpcRows<N>>;
-  if (shareToken) {
+  if (shareToken && tokenRpcAvailable !== false) {
     const res = await rpc(`${legacyName}_by_share_token`, { p_share_token: shareToken, ...params });
-    if (!isMissingRpcError(res.error)) {
-      tokenRpcAvailable = true;
+    if (isMissingRpcError(res.error)) {
+      tokenRpcAvailable = false;
+    } else {
+      // Only a real answer from the function proves it exists; a network error proves nothing.
+      if (!res.error || res.error.code === '42501') tokenRpcAvailable = true;
       return res;
     }
-    tokenRpcAvailable = false;
   }
   return rpc(legacyName, params);
 }

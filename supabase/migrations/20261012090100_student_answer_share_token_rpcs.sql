@@ -5,7 +5,8 @@
 -- email, so anyone who knows both can read or overwrite a student's answers.
 -- These *_by_share_token wrappers add the check the link already implies: the
 -- share token must belong to that homework/worksheet and the email must be the
--- assigned student's. They delegate to the existing functions, so the stored
+-- assigned student's. The owning teacher (auth.uid()) always passes, so the
+-- teacher view of a shared worksheet keeps loading and saving as before. They delegate to the existing functions, so the stored
 -- data and the DSLM triggers behave exactly as before.
 --
 -- The legacy functions stay executable for now (cached clients); a later
@@ -18,6 +19,12 @@ CREATE OR REPLACE FUNCTION public.has_homework_student_access(p_share_token text
  SET search_path TO 'public'
 AS $function$
 BEGIN
+  IF p_homework_id IS NOT NULL AND auth.uid() IS NOT NULL AND EXISTS (
+    SELECT 1 FROM public.homework_assignments ha
+    WHERE ha.id = p_homework_id AND ha.teacher_id = auth.uid()
+  ) THEN
+    RETURN TRUE;
+  END IF;
   IF coalesce(p_share_token, '') = '' OR p_homework_id IS NULL OR coalesce(trim(p_student_email), '') = '' THEN
     RETURN FALSE;
   END IF;
@@ -38,6 +45,12 @@ CREATE OR REPLACE FUNCTION public.has_worksheet_student_access(p_share_token tex
  SET search_path TO 'public'
 AS $function$
 BEGIN
+  IF p_worksheet_id IS NOT NULL AND auth.uid() IS NOT NULL AND EXISTS (
+    SELECT 1 FROM public.worksheets w
+    WHERE w.id = p_worksheet_id AND (w.teacher_id = auth.uid() OR w.user_id = auth.uid())
+  ) THEN
+    RETURN TRUE;
+  END IF;
   IF coalesce(p_share_token, '') = '' OR p_worksheet_id IS NULL OR coalesce(trim(p_student_email), '') = '' THEN
     RETURN FALSE;
   END IF;

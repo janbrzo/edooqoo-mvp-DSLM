@@ -29,6 +29,20 @@ describe('callStudentAnswerRpc', () => {
     expect(rpc).toHaveBeenNthCalledWith(2, 'get_worksheet_student_answers', { p_worksheet_id: 'w' });
     expect(res.error).toBeNull();
     expect(studentAnswerRpcName('save_worksheet_answer', 'tok')).toBe('save_worksheet_answer');
+
+    // Once known missing, later calls go straight to the legacy RPC (no extra 404 each time).
+    rpc.mockResolvedValueOnce({ data: [], error: null });
+    await callStudentAnswerRpc('get_worksheet_student_answers', { p_worksheet_id: 'w' }, 'tok');
+    expect(rpc).toHaveBeenCalledTimes(3);
+    expect(rpc).toHaveBeenLastCalledWith('get_worksheet_student_answers', { p_worksheet_id: 'w' });
+  });
+
+  it('does not mark the token RPC available after a network error', async () => {
+    const { callStudentAnswerRpc, studentAnswerRpcName } = await load();
+    rpc.mockResolvedValueOnce({ data: null, error: { code: '', message: 'TypeError: Failed to fetch' } });
+    const res = await callStudentAnswerRpc('save_worksheet_answer', {}, 'tok');
+    expect(res.error.message).toContain('Failed to fetch');
+    expect(studentAnswerRpcName('save_worksheet_answer', 'tok')).toBe('save_worksheet_answer');
   });
 
   it('never falls back when the server rejects the token', async () => {

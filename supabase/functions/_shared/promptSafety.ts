@@ -18,19 +18,21 @@ export function wrapStudentText(tag: "student_answer" | "student_speech", text: 
   return `<${tag}>${safe}</${tag}>`;
 }
 
-const INJECTION_PATTERNS: RegExp[] = [
-  /\bignore\s+(all\s+|any\s+|the\s+)?(previous|prior|above|earlier)\s+(instructions|rules|prompts?)\b/i,
-  /\b(system|developer)\s+(note|prompt|message|instructions?)\s*(from\b|:)/i,
-  /\bquality_score\b|\bis_acceptable\b|\bwriting_score\b|\bspeaking_score\b/i,
-  /\b(give|return|set|assign|output)\s+(me\s+)?(a\s+)?(score|grade|mark|quality)\b/i,
-  /\byou\s+are\s+now\s+(a|an|the)\b|\bas\s+an\s+ai\b/i,
-];
+/**
+ * Only unambiguous signals cap a score. Ordinary sentences such as "ignore the
+ * previous instructions about the delivery", "give quality service" or "I work
+ * as an AI engineer" must never be capped; the prompt rule handles the rest.
+ */
+const GRADER_FIELD = /\b(quality_score|is_acceptable|writing_score|speaking_score|key_verdict)\b/i;
+const OVERRIDE_REQUEST = /\b(ignore|disregard|forget|override)\b[^.!?\n]{0,40}\b(instructions?|rules|prompts?|guidelines)\b/i;
+const SCORE_REQUEST = /\b(score|grade|mark|points?|rate|rating)\b[^.!?\n]{0,30}(\b100\b|1\.0\b|\b10\s*\/\s*10\b|\bfull\b|\bmaximum\b|\bmax\b|\bperfect\b|\bhighest\b)|\b(full|maximum|perfect|highest)\s+(score|marks?|grade|points)\b/i;
 
-/** True when the answer addresses the grader instead of the question. */
+/** True when the answer unambiguously tries to steer the grader instead of answering. */
 export function looksLikeInstructionInjection(text: string | undefined | null): boolean {
   const t = String(text ?? "");
   if (!t.trim()) return false;
-  return INJECTION_PATTERNS.some((p) => p.test(t));
+  if (GRADER_FIELD.test(t)) return true;
+  return OVERRIDE_REQUEST.test(t) && SCORE_REQUEST.test(t);
 }
 
 /** Highest quality score an answer flagged by `looksLikeInstructionInjection` may keep. */
