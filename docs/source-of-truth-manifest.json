@@ -518,6 +518,7 @@
         "useStudentTimeline",
         "useStudentTimelineSources",
         "useStudents",
+        "useTeacherAuthRedirect",
         "useTokenSystem",
         "useWorksheetHistory"
       ],
@@ -538,8 +539,7 @@
       ],
       "navigateTargets": [
         "/",
-        "/dashboard",
-        "/login"
+        "/dashboard"
       ]
     },
     {
@@ -6961,16 +6961,6 @@
           "initial": "false"
         },
         {
-          "value": "authChecked",
-          "setter": "setAuthChecked",
-          "initial": "false"
-        },
-        {
-          "value": "isAuthenticated",
-          "setter": "setIsAuthenticated",
-          "initial": "false"
-        },
-        {
           "value": "worksheetsReady",
           "setter": "setWorksheetsReady",
           "initial": "false"
@@ -6994,6 +6984,7 @@
         "useStudentTimeline",
         "useStudentTimelineSources",
         "useStudents",
+        "useTeacherAuthRedirect",
         "useTokenSystem",
         "useWorksheetHistory"
       ],
@@ -7014,8 +7005,7 @@
       ],
       "navigateTargets": [
         "/",
-        "/dashboard",
-        "/login"
+        "/dashboard"
       ],
       "dataDependencies": {
         "tables": [
@@ -7179,8 +7169,7 @@
         ],
         "navigationTargets": [
           "/",
-          "/dashboard",
-          "/login"
+          "/dashboard"
         ]
       },
       "routes": [
@@ -41129,9 +41118,7 @@
         "dataDependencies": {
           "tables": [],
           "rpcs": [
-            "get_student_homework_answers",
             "insert_homework_submission_notification",
-            "save_homework_answer",
             "submit_homework_answers",
             "update_homework_answer_by_share_token",
             "verify_homework_student_email"
@@ -41184,6 +41171,11 @@
               {
                 "name": "exercises",
                 "type": "any[]",
+                "optional": true
+              },
+              {
+                "name": "shareToken",
+                "type": "string",
                 "optional": true
               }
             ]
@@ -41245,17 +41237,15 @@
         "dataDependencies": {
           "tables": [],
           "rpcs": [
-            "get_worksheet_student_answers",
             "needs_ai_evaluation",
             "queue_worksheet_ai_evaluation",
-            "save_worksheet_answer",
             "verify_worksheet_student_email"
           ],
           "edgeFunctions": [
             "process-pending-ai-evaluations"
           ],
           "fetchTargets": [
-            "https://bvfrkzdlklyvnhlpleck.supabase.co/rest/v1/rpc/save_worksheet_answer"
+            "${SUPABASE_URL}/rest/v1/rpc/${rpcName}"
           ]
         },
         "storage": [],
@@ -46404,7 +46394,9 @@
           "POST"
         ],
         "requestFields": [
-          "exercise_index"
+          "exercise_index",
+          "trigger_source",
+          "worksheet_id"
         ],
         "visibleResponseFields": [
           "answers",
@@ -47707,7 +47699,9 @@
           "OPTIONS",
           "POST"
         ],
-        "requestFields": [],
+        "requestFields": [
+          "answers"
+        ],
         "visibleResponseFields": [
           "details",
           "error"
@@ -47720,7 +47714,9 @@
         },
         "environmentVariables": [
           "GEMINI_API_KEY",
-          "OPENAI_API_KEY"
+          "OPENAI_API_KEY",
+          "SUPABASE_SERVICE_ROLE_KEY",
+          "SUPABASE_URL"
         ]
       },
       {
@@ -48151,6 +48147,8 @@
         ],
         "payloadFields": [
           "exercise_index",
+          "share_token",
+          "student_email",
           "trigger_source",
           "worksheet_id"
         ],
@@ -48427,6 +48425,7 @@
           "src/hooks/useInteractiveHomework.tsx"
         ],
         "payloadFields": [
+          "access",
           "answers",
           "context",
           "english_level"
@@ -48698,17 +48697,6 @@
         "payloadExpressions": []
       },
       {
-        "name": "get_student_homework_answers",
-        "callsites": [
-          "src/hooks/useInteractiveHomework.tsx"
-        ],
-        "payloadFields": [
-          "p_homework_id",
-          "p_student_email"
-        ],
-        "payloadExpressions": []
-      },
-      {
         "name": "get_student_meeting_link",
         "callsites": [
           "src/hooks/usePublicBooking.tsx"
@@ -48785,17 +48773,6 @@
           "src/hooks/useLiveSessionAnswers.tsx"
         ],
         "payloadFields": [
-          "p_worksheet_id"
-        ],
-        "payloadExpressions": []
-      },
-      {
-        "name": "get_worksheet_student_answers",
-        "callsites": [
-          "src/hooks/useInteractiveSharedWorksheet.tsx"
-        ],
-        "payloadFields": [
-          "p_student_email",
           "p_worksheet_id"
         ],
         "payloadExpressions": []
@@ -48950,24 +48927,6 @@
         ]
       },
       {
-        "name": "save_homework_answer",
-        "callsites": [
-          "src/hooks/useInteractiveHomework.tsx"
-        ],
-        "payloadFields": [
-          "p_answers",
-          "p_audio_answers",
-          "p_exercise_index",
-          "p_exercise_type",
-          "p_homework_id",
-          "p_item_evaluations",
-          "p_mastery",
-          "p_student_email",
-          "p_time_spent_ms"
-        ],
-        "payloadExpressions": []
-      },
-      {
         "name": "save_teacher_comment",
         "callsites": [
           "src/pages/HomeworkReviewPage.tsx"
@@ -48992,24 +48951,6 @@
           "p_question_index",
           "p_share_token",
           "p_time_spent_seconds"
-        ],
-        "payloadExpressions": []
-      },
-      {
-        "name": "save_worksheet_answer",
-        "callsites": [
-          "src/hooks/useInteractiveSharedWorksheet.tsx"
-        ],
-        "payloadFields": [
-          "p_answers",
-          "p_audio_answers",
-          "p_exercise_index",
-          "p_exercise_type",
-          "p_item_evaluations",
-          "p_mastery",
-          "p_student_email",
-          "p_time_spent_ms",
-          "p_worksheet_id"
         ],
         "payloadExpressions": []
       },
@@ -56980,6 +56921,10 @@
     ],
     "migrationFunctions": [
       {
+        "name": "add_student_event",
+        "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
+      },
+      {
         "name": "apply_intake_extraction",
         "migration": "supabase/migrations/20260617162941_66b70675-3140-44e5-b81e-6b034065a814.sql"
       },
@@ -56992,12 +56937,24 @@
         "migration": "supabase/migrations/20260626192112_6086f5ef-d4e1-47cf-9691-0666c77e8673.sql"
       },
       {
+        "name": "backfill_skill_metrics",
+        "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
+      },
+      {
         "name": "book_public_slot",
         "migration": "supabase/migrations/20260807134305_4fefd413-26a5-465b-af2f-30820627dde8.sql"
       },
       {
         "name": "calculate_test_results",
         "migration": "supabase/migrations/20260609191429_f1209887-288d-49d1-98f8-e3de2a43be52.sql"
+      },
+      {
+        "name": "compute_skill_metric",
+        "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
+      },
+      {
+        "name": "compute_skill_metric",
+        "migration": "supabase/migrations/20261012120000_dslm_event_triggers_v2.sql"
       },
       {
         "name": "consume_newsletter_rate_limit",
@@ -57010,6 +56967,18 @@
       {
         "name": "create_mcp_token",
         "migration": "supabase/migrations/20260725124453_86489a73-813a-457d-aff2-4f7037b4d6c5.sql"
+      },
+      {
+        "name": "delete_mark_done_evaluation",
+        "migration": "supabase/migrations/20261012120000_dslm_event_triggers_v2.sql"
+      },
+      {
+        "name": "extract_micro_skill",
+        "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
+      },
+      {
+        "name": "extract_skill_category",
+        "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
       },
       {
         "name": "generate_public_slug",
@@ -57056,6 +57025,14 @@
         "migration": "supabase/migrations/20260809180315_754eca52-5bfe-4330-b4c4-27f58070b8f2.sql"
       },
       {
+        "name": "get_student_homework_answers_by_share_token",
+        "migration": "supabase/migrations/20261012090100_student_answer_share_token_rpcs.sql"
+      },
+      {
+        "name": "get_student_homework_answers",
+        "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
+      },
+      {
         "name": "get_test_context_by_share_token",
         "migration": "supabase/migrations/20260804200705_0c128cfa-b83a-47b2-8d69-90962554c973.sql"
       },
@@ -57064,8 +57041,28 @@
         "migration": "supabase/migrations/20260804200705_0c128cfa-b83a-47b2-8d69-90962554c973.sql"
       },
       {
+        "name": "get_worksheet_live_answers",
+        "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
+      },
+      {
+        "name": "get_worksheet_student_answers_by_share_token",
+        "migration": "supabase/migrations/20261012090100_student_answer_share_token_rpcs.sql"
+      },
+      {
+        "name": "get_worksheet_student_answers",
+        "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
+      },
+      {
         "name": "handle_email_confirmed",
         "migration": "supabase/migrations/20260505064801_45a8e80c-6a10-4530-9c60-06c0e31371cf.sql"
+      },
+      {
+        "name": "has_homework_student_access",
+        "migration": "supabase/migrations/20261012090100_student_answer_share_token_rpcs.sql"
+      },
+      {
+        "name": "has_worksheet_student_access",
+        "migration": "supabase/migrations/20261012090100_student_answer_share_token_rpcs.sql"
       },
       {
         "name": "increment_download_session_by_token",
@@ -57080,8 +57077,28 @@
         "migration": "supabase/migrations/20260809180315_754eca52-5bfe-4330-b4c4-27f58070b8f2.sql"
       },
       {
+        "name": "log_flashcard_review_event",
+        "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
+      },
+      {
+        "name": "log_homework_answer_to_events",
+        "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
+      },
+      {
+        "name": "log_homework_answer_to_events",
+        "migration": "supabase/migrations/20261012120000_dslm_event_triggers_v2.sql"
+      },
+      {
         "name": "log_homework_submitted_event",
         "migration": "supabase/migrations/20261006090000_billing_guard_and_student_events.sql"
+      },
+      {
+        "name": "log_knowledge_entry_event",
+        "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
+      },
+      {
+        "name": "log_test_answer_event",
+        "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
       },
       {
         "name": "log_welcome_test_event_by_share_token",
@@ -57092,8 +57109,20 @@
         "migration": "supabase/migrations/20261006120000_welcome_test_event_dedup_fix.sql"
       },
       {
+        "name": "log_worksheet_answer_to_events",
+        "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
+      },
+      {
+        "name": "log_worksheet_answer_to_events",
+        "migration": "supabase/migrations/20261012120000_dslm_event_triggers_v2.sql"
+      },
+      {
         "name": "mark_attention_seen",
         "migration": "supabase/migrations/20260623202114_6dc3ae03-5d7e-4e9d-b3a7-56a0763ba472.sql"
+      },
+      {
+        "name": "needs_ai_evaluation",
+        "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
       },
       {
         "name": "prevent_profile_billing_self_update",
@@ -57102,6 +57131,18 @@
       {
         "name": "prevent_profile_billing_self_update",
         "migration": "supabase/migrations/20261006090000_billing_guard_and_student_events.sql"
+      },
+      {
+        "name": "queue_worksheet_ai_evaluation",
+        "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
+      },
+      {
+        "name": "refresh_skill_metrics_on_event",
+        "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
+      },
+      {
+        "name": "refresh_skill_metrics_on_event",
+        "migration": "supabase/migrations/20261012120000_dslm_event_triggers_v2.sql"
       },
       {
         "name": "revoke_mcp_token",
@@ -57116,8 +57157,28 @@
         "migration": "supabase/migrations/20260807134305_4fefd413-26a5-465b-af2f-30820627dde8.sql"
       },
       {
+        "name": "save_homework_answer_by_share_token",
+        "migration": "supabase/migrations/20261012090100_student_answer_share_token_rpcs.sql"
+      },
+      {
+        "name": "save_homework_answer",
+        "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
+      },
+      {
+        "name": "save_mark_done_evaluation",
+        "migration": "supabase/migrations/20261012120000_dslm_event_triggers_v2.sql"
+      },
+      {
         "name": "save_test_answer_by_share_token",
         "migration": "supabase/migrations/20260804200705_0c128cfa-b83a-47b2-8d69-90962554c973.sql"
+      },
+      {
+        "name": "save_worksheet_answer_by_share_token",
+        "migration": "supabase/migrations/20261012090100_student_answer_share_token_rpcs.sql"
+      },
+      {
+        "name": "save_worksheet_answer",
+        "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
       },
       {
         "name": "set_test_answered_count_by_share_token",
@@ -57150,6 +57211,10 @@
       {
         "name": "update_homework_answer_by_share_token",
         "migration": "supabase/migrations/20260731162257_e03802c9-4606-4a66-a957-86030183f689.sql"
+      },
+      {
+        "name": "update_homework_event_with_ai_evaluation",
+        "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
       },
       {
         "name": "verify_welcome_test_email",
@@ -57214,7 +57279,6 @@
         "host": "bvfrkzdlklyvnhlpleck.supabase.co",
         "callsites": [
           "src/hooks/useHomeworkExerciseGeneration.tsx",
-          "src/hooks/useInteractiveSharedWorksheet.tsx",
           "src/integrations/supabase/client.ts",
           "src/pages/NewsletterAction.tsx",
           "src/pages/settings/McpTokensPage.tsx",
@@ -57369,6 +57433,7 @@
           "supabase/functions/update-student-self-profile/index.ts",
           "supabase/functions/upload-to-r2/index.ts",
           "supabase/functions/verify-export-payment/index.ts",
+          "supabase/functions/verify-open-answers/index.ts",
           "supabase/functions/verify-subscription-payment/index.ts"
         ]
       },
@@ -57829,6 +57894,7 @@
           "supabase/functions/update-student-self-profile/index.ts",
           "supabase/functions/upload-to-r2/index.ts",
           "supabase/functions/verify-export-payment/index.ts",
+          "supabase/functions/verify-open-answers/index.ts",
           "supabase/functions/verify-subscription-payment/index.ts"
         ]
       },
@@ -57902,6 +57968,7 @@
           "supabase/functions/update-student-self-profile/index.ts",
           "supabase/functions/upload-to-r2/index.ts",
           "supabase/functions/verify-export-payment/index.ts",
+          "supabase/functions/verify-open-answers/index.ts",
           "supabase/functions/verify-subscription-payment/index.ts"
         ]
       },
@@ -57921,6 +57988,7 @@
       {
         "name": "VITE_SUPABASE_PUBLISHABLE_KEY",
         "callsites": [
+          "src/hooks/useInteractiveSharedWorksheet.tsx",
           "src/lib/edgeFunctionHeaders.ts",
           "src/utils/promptFormatter.ts"
         ]
@@ -57928,6 +57996,7 @@
       {
         "name": "VITE_SUPABASE_URL",
         "callsites": [
+          "src/hooks/useInteractiveSharedWorksheet.tsx",
           "src/services/worksheetStreamService.ts",
           "src/utils/promptFormatter.ts"
         ]
