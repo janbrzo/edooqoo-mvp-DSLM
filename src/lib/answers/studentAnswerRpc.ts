@@ -54,3 +54,8 @@ export async function callStudentAnswerRpc<N extends TokenRpc>(
   }
   return rpc(legacyName, params);
 }
+
+/** Call an RPC that is not in the generated types yet (added by a migration that may not be applied). */
+export function callUntypedRpc<T = unknown>(fn: string, args: Record<string, unknown>): Promise<RpcResult<T>> {
+  return (supabase.rpc.bind(supabase) as unknown as RpcCall<T>)(fn, args);
+}

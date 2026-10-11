@@ -323,6 +323,11 @@ serve(async (req) => {
 
         const aiResult = await verifyResponse.json();
         console.log(`[process-pending] AI returned ${aiResult.evaluations?.length || 0} evaluations`);
+        if (!Array.isArray(aiResult.evaluations) || aiResult.evaluations.length === 0) {
+          // Nothing evaluated: keep the stored answer row untouched (an empty write
+          // would wipe earlier evaluations) and leave this row failed for a retry.
+          throw new Error('AI returned no evaluations');
+        }
         
         // ========= BUILD CANONICAL ai_evaluation (same as homework) =========
         const questionEvaluations = (aiResult.evaluations || []).map((e: any) => {

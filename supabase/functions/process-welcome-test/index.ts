@@ -1264,28 +1264,42 @@ Format as JSON: {"summary": "...", "recommendations": ["...", "..."], "writing_q
           // PROBLEM 2 & 4: Update mastery, is_correct, question_data.ai_score, and event_payload
           try {
             const parsed = JSON.parse(aiSummary);
-            const writingQuality = parsed.writing_quality;
-            const fallbackMastery = writingQuality === 'advanced' ? 75 :
-                                    writingQuality === 'intermediate' ? 50 : 25;
             const perScores = parsed.per_question_scores || {};
             
             const allOpenSpeakingIds = [...openQuestionIds, ...speakingQuestionIds];
             let updatedCount = 0;
+            let unscoredCount = 0;
             for (const qId of allOpenSpeakingIds) {
               if (answers?.[qId] && answers[qId] !== '__IDK__') {
-                const score = perScores[qId] !== undefined ? Math.round(perScores[qId]) : fallbackMastery;
-                
-                // Update is_correct and ai_score in student_test_questions
-                const matchQ = questions.find((q: any) => {
-                  // Match by student_answer value for speaking, or by index position
-                  const sa = String(q.student_answer || '');
-                  if (qId.endsWith('s')) {
-                    // Speaking question - match by audio URL
-                    return sa === String(answers[qId]);
-                  }
-                  // Open-ended - match by answer text
-                  return sa === String(answers[qId]);
-                });
+                // No AI score for this item (model omitted it or the AI step fell back):
+                // leave it unevaluated instead of recording a made-up 25 / "wrong".
+                const rawScore = Number(perScores[qId]);
+                if (perScores[qId] === undefined || perScores[qId] === null || !Number.isFinite(rawScore)) {
+                  unscoredCount++;
+                  continue;
+                }
+                const score = Math.round(rawScore);
+
+                // The event of THIS question: legacy ids (wt_q12, wt_q16...) are also
+                // canonical ids of other questions, so match legacy_answer_id, or
+                // answer_id only on pre-renumber events that carry no legacy id.
+                const { data: evtRows } = await supabase
+                  .from('student_events')
+                  .select('id, event_payload')
+                  .eq('source_id', test_id)
+                  .eq('event_type', 'test_answer_submitted')
+                  .eq('event_source', 'welcome_test')
+                  .or(`event_payload->>legacy_answer_id.eq.${qId},and(event_payload->>answer_id.eq.${qId},event_payload->>legacy_answer_id.is.null)`)
+                  .order('created_at', { ascending: false })
+                  .limit(1);
+                const evt = evtRows?.[0] ?? null;
+                const evtIndex = Number((evt?.event_payload as any)?.exercise_index);
+
+                // Question row: by the event's exercise_index (= question_index); the
+                // answer-text match is kept only for events without an index.
+                const matchQ = Number.isInteger(evtIndex)
+                  ? questions.find((q: any) => q.question_index === evtIndex)
+                  : questions.find((q: any) => String(q.student_answer || '') === String(answers[qId]));
                 if (matchQ) {
                   // Fetch FRESH data from DB (transcription may have been saved above and cache is stale)
                   const { data: freshQ } = await supabase
@@ -1303,26 +1317,9 @@ Format as JSON: {"summary": "...", "recommendations": ["...", "..."], "writing_q
                     .eq('id', matchQ.id);
                 }
 
-                // Update mastery column in student_events
-                await supabase
-                  .from('student_events')
-                  .update({ mastery: score })
-                  .eq('source_id', test_id)
-                  .eq('event_type', 'test_answer_submitted')
-                  .or(`event_payload->>answer_id.eq.${qId},event_payload->>legacy_answer_id.eq.${qId}`);
-                
-                // PROBLEM 4: Also update nano_skill_ratings inside event_payload
-                const { data: evt } = await supabase
-                  .from('student_events')
-                  .select('id, event_payload')
-                  .eq('source_id', test_id)
-                  .eq('event_type', 'test_answer_submitted')
-                  .eq('event_source', 'welcome_test')
-                  .or(`event_payload->>answer_id.eq.${qId},event_payload->>legacy_answer_id.eq.${qId}`)
-                  .maybeSingle();
-                
-                if (evt?.event_payload) {
-                  const payload = evt.event_payload as any;
+                // One update of that event: mastery column and its skill rating.
+                if (evt) {
+                  const payload = (evt.event_payload || {}) as any;
                   if (payload.nano_skill_ratings?.length > 0) {
                     payload.nano_skill_ratings[0].mastery = score;
                     payload.nano_skill_ratings[0].hasValue = true;
@@ -1335,6 +1332,9 @@ Format as JSON: {"summary": "...", "recommendations": ["...", "..."], "writing_q
                 
                 updatedCount++;
               }
+            }
+            if (unscoredCount > 0) {
+              console.warn(`[process-welcome-test] ${unscoredCount} open/speaking answers left unevaluated (no AI score)`);
             }
             console.log(`[process-welcome-test] Updated mastery/is_correct for ${updatedCount} open/speaking questions (per_question_scores: ${Object.keys(perScores).length} keys)`);
             

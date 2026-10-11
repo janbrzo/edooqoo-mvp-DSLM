@@ -54,6 +54,7 @@ import { isClosedExerciseType } from '@/utils/masteryCalculator';
 import { safeGetNanoSkill, safeGetAllNanoSkills } from "@/utils/textObjectFixer";
 import NanoSkillBadge, { NanoSkill } from "./NanoSkillBadge";
 import { supabase } from "@/integrations/supabase/client";
+import { isMissingRpcError, callUntypedRpc } from '@/lib/answers/studentAnswerRpc';
 import { useStudentEvents } from "@/hooks/dslm/useStudentEvents";
 import { AiEvaluationBadge, type AiEvaluation } from "@/components/homework/AiEvaluationBadge";
 import { ClosedAiExplanations } from "@/components/homework/ClosedAiExplanations";
@@ -550,78 +551,93 @@ const ExerciseSection = forwardRef<HTMLDivElement, ExerciseSectionProps>(({
           ratingsCount: ratingsWithValue.length
         });
         
-        // PROBLEM 3: UPSERT - Check if event already exists for this exercise
-        const { data: existingEvents, error: fetchError } = await supabase
-          .from('student_events')
-          .select('id, event_payload')
-          .eq('student_id', studentIdProp)
-          .eq('source_id', worksheetIdForStorage || '')
-          .eq('event_type', 'mark_done_evaluation')
-          .eq('element_type', exercise.type);
-        
-        if (fetchError) {
-          console.error('Error checking existing events:', fetchError);
-        }
-        
-        // Find event with matching exercise_index in payload
-        const existingEvent = existingEvents?.find((e: any) => {
-          const payload = e.event_payload as any;
-          return payload?.exercise_index === exerciseIdx;
+        // Teacher-checked upsert (student_events has no UPDATE policy for teachers,
+        // so a direct update silently changed nothing). Falls back to the legacy
+        // path only while the RPC migration is not applied.
+        const { error: saveRpcError } = await callUntypedRpc('save_mark_done_evaluation', {
+          p_student_id: studentIdProp,
+          p_worksheet_id: worksheetIdForStorage,
+          p_exercise_index: exerciseIdx,
+          p_element_type: exercise.type,
+          p_exercise_title: exercise.title ?? null,
+          p_ratings: ratingsWithValue,
         });
-        
-        if (existingEvent) {
-          // UPDATE existing record
-          const { error: updateError } = await supabase
+        if (saveRpcError && !isMissingRpcError(saveRpcError)) throw saveRpcError;
+        if (saveRpcError) {
+          // PROBLEM 3: UPSERT - Check if event already exists for this exercise
+          const { data: existingEvents, error: fetchError } = await supabase
             .from('student_events')
-            .update({
-              event_payload: {
+            .select('id, event_payload')
+            .eq('student_id', studentIdProp)
+            .eq('source_id', worksheetIdForStorage || '')
+            .eq('event_type', 'mark_done_evaluation')
+            .eq('element_type', exercise.type);
+        
+          if (fetchError) {
+            console.error('Error checking existing events:', fetchError);
+          }
+        
+          // Find event with matching exercise_index in payload
+          const existingEvent = existingEvents?.find((e: any) => {
+            const payload = e.event_payload as any;
+            return payload?.exercise_index === exerciseIdx;
+          });
+        
+          if (existingEvent) {
+            // UPDATE existing record
+            const { error: updateError } = await supabase
+              .from('student_events')
+              .update({
+                event_payload: {
+                  exercise_index: exerciseIdx,
+                  exercise_title: exercise.title,
+                  nano_skill_ratings: ratingsWithValue
+                },
+                skill_ids: ratingsWithValue.map(r => r.name)
+              })
+              .eq('id', existingEvent.id);
+          
+            if (updateError) throw updateError;
+          
+            devLog('✅ Updated existing mastery evaluation:', existingEvent.id);
+          } else {
+            // INSERT new record - use direct RPC call with validated props to bypass hook issues
+            devLog('📤 [Mastery] Calling add_student_event RPC with:', {
+              p_student_id: studentIdProp,
+              p_teacher_id: teacherIdProp,
+              p_event_type: 'exercise_mastery_evaluation',
+              p_source_id: worksheetIdForStorage
+            });
+          
+            const { data: eventResult, error: rpcError } = await supabase.rpc('add_student_event', {
+              p_student_id: studentIdProp,
+              p_teacher_id: teacherIdProp,
+              p_event_type: 'mark_done_evaluation',
+              p_event_source: 'teacher',
+              p_source_id: worksheetIdForStorage || null,
+              p_event_payload: {
                 exercise_index: exerciseIdx,
                 exercise_title: exercise.title,
                 nano_skill_ratings: ratingsWithValue
-              },
-              skill_ids: ratingsWithValue.map(r => r.name)
-            })
-            .eq('id', existingEvent.id);
+              } as unknown as Record<string, never>,
+              p_skill_ids: ratingsWithValue.map(r => r.name),
+              p_element_type: exercise.type,
+              p_session_id: null
+            });
           
-          if (updateError) throw updateError;
+            if (rpcError) {
+              console.error('❌ [Mastery] RPC error:', rpcError);
+              throw rpcError;
+            }
           
-          devLog('✅ Updated existing mastery evaluation:', existingEvent.id);
-        } else {
-          // INSERT new record - use direct RPC call with validated props to bypass hook issues
-          devLog('📤 [Mastery] Calling add_student_event RPC with:', {
-            p_student_id: studentIdProp,
-            p_teacher_id: teacherIdProp,
-            p_event_type: 'exercise_mastery_evaluation',
-            p_source_id: worksheetIdForStorage
-          });
+            if (!eventResult) {
+              console.error('❌ [Mastery] RPC returned null - event may not be saved');
+              throw new Error('Event creation returned null');
+            }
           
-          const { data: eventResult, error: rpcError } = await supabase.rpc('add_student_event', {
-            p_student_id: studentIdProp,
-            p_teacher_id: teacherIdProp,
-            p_event_type: 'mark_done_evaluation',
-            p_event_source: 'teacher',
-            p_source_id: worksheetIdForStorage || null,
-            p_event_payload: {
-              exercise_index: exerciseIdx,
-              exercise_title: exercise.title,
-              nano_skill_ratings: ratingsWithValue
-            } as unknown as Record<string, never>,
-            p_skill_ids: ratingsWithValue.map(r => r.name),
-            p_element_type: exercise.type,
-            p_session_id: null
-          });
-          
-          if (rpcError) {
-            console.error('❌ [Mastery] RPC error:', rpcError);
-            throw rpcError;
+            devLog('✅ [Mastery] Created new mastery evaluation, event ID:', eventResult);
           }
-          
-          if (!eventResult) {
-            console.error('❌ [Mastery] RPC returned null - event may not be saved');
-            throw new Error('Event creation returned null');
-          }
-          
-          devLog('✅ [Mastery] Created new mastery evaluation, event ID:', eventResult);
+        
         }
         
         toast({
@@ -662,13 +678,26 @@ const ExerciseSection = forwardRef<HTMLDivElement, ExerciseSectionProps>(({
   const handleUndoConfirm = async (deleteFromEvents: boolean) => {
     if (deleteFromEvents && studentIdProp && worksheetIdForStorage) {
       try {
-        const { error } = await supabase
-          .from('student_events')
-          .delete()
-          .eq('student_id', studentIdProp)
-          .eq('source_id', worksheetIdForStorage)
-          .eq('event_type', 'mark_done_evaluation')
-          .contains('event_payload', { exercise_index: originalIndex !== undefined ? originalIndex : index - 1 });
+        const undoIndex = originalIndex !== undefined ? originalIndex : index - 1;
+        // Teacher-checked delete; a direct delete is blocked by RLS and reported success while removing nothing.
+        let { data: deletedCount, error } = await callUntypedRpc<number>('delete_mark_done_evaluation', {
+          p_student_id: studentIdProp,
+          p_worksheet_id: worksheetIdForStorage,
+          p_exercise_index: undoIndex,
+        });
+        if (error && isMissingRpcError(error)) {
+          ({ error } = await supabase
+            .from('student_events')
+            .delete()
+            .eq('student_id', studentIdProp)
+            .eq('source_id', worksheetIdForStorage)
+            .eq('event_type', 'mark_done_evaluation')
+            .contains('event_payload', { exercise_index: undoIndex }));
+          deletedCount = null;
+        }
+        if (!error && deletedCount === 0) {
+          error = new Error('No saved evaluation was found for this exercise.');
+        }
         
         if (error) {
           console.error('Error deleting mastery events:', error);

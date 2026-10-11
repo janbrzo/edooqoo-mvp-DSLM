@@ -5,6 +5,7 @@ import { NO_EM_DASH_RULE } from "../_shared/writingStyle.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { resolveCaller } from "../_shared/auth.ts";
 import { homeworkIdForStudentAccess } from "../_shared/evaluationAccess.ts";
+import { itemId, pairEvaluationsWithAnswers, callModelWithRetry } from "./evaluationMapping.ts";
 import {
   STUDENT_TEXT_RULE,
   wrapStudentText,
@@ -111,7 +112,7 @@ CRITICAL: Return ONLY a valid JSON array. No markdown code blocks. No extra text
 
 ${answers
 .map(
-  (a, i) => `[Answer ${i + 1}]
+  (a, i) => `[Answer ${i + 1}] (id: ${itemId(i)})
 Question: ${a.question_text}
 Student's written answer: ${a.student_answer ? wrapStudentText("student_answer", a.student_answer) : "(no written answer)"}
 ${a.audio_transcription ? `Student's spoken answer (transcription): ${wrapStudentText("student_speech", a.audio_transcription)}` : ""}
@@ -126,8 +127,8 @@ Exercise type: ${a.exercise_type}
 .join("\n")}
 ${context ? `Context: ${context}` : ""}
 
-Return exactly ${answers.length} evaluation objects in a JSON array:
-[{"question_index": 0, "quality_score": 0.85, "is_acceptable": true, "feedback": "...", "writing_score": 0.80, "speaking_score": 0.75}]`;
+Return exactly ${answers.length} evaluation objects in a JSON array, one per answer, each with the answer's "id":
+[{"id": "${itemId(0)}", "question_index": 0, "quality_score": 0.85, "is_acceptable": true, "feedback": "...", "writing_score": 0.80, "speaking_score": 0.75}]`;
 
   console.log("[verify-open-answers] ========== PROMPTS ==========");
   console.log("[verify-open-answers] System prompt length:", systemPrompt.length);
@@ -138,14 +139,14 @@ Return exactly ${answers.length} evaluation objects in a JSON array:
 
   let aiResponse: Response;
   try {
-    aiResponse = await chatCompletion({
+    aiResponse = await callModelWithRetry(() => chatCompletion({
       messages: [
         { role: "system", content: systemPrompt + NO_EM_DASH_RULE },
         { role: "user", content: userPrompt },
       ],
       temperature: 0.3,
       max_tokens: 4000,
-    }, { primaryModel: "google/gemini-2.5-flash", functionName: "verify-open-answers" });
+    }, { primaryModel: "google/gemini-2.5-flash", functionName: "verify-open-answers" }));
   } catch (e) {
     const errorText = (e as Error)?.message ?? String(e);
     console.error("[verify-open-answers] AI call threw:", errorText);
@@ -163,10 +164,14 @@ Return exactly ${answers.length} evaluation objects in a JSON array:
 
   const aiData = await aiResponse.json();
   const rawContent = aiData.choices?.[0]?.message?.content || "[]";
+  const finishReason = String(aiData.choices?.[0]?.finish_reason ?? "");
+  if (finishReason && finishReason !== "stop") {
+    // Truncated or filtered output: items the model did not return stay unevaluated.
+    console.warn("[verify-open-answers] finish_reason:", finishReason);
+  }
 
   console.log("[verify-open-answers] ========== RAW AI RESPONSE ==========");
   console.log("[verify-open-answers] Raw content length:", rawContent.length);
-  console.log("[verify-open-answers] Raw content:", rawContent);
 
   let evaluations: EvaluationResult[];
   try {
@@ -229,14 +234,20 @@ Return exactly ${answers.length} evaluation objects in a JSON array:
       parsedContent = [parsedContent];
     }
 
-    // The model must return one object per answer: extra objects have no request to map to.
-    const modelCount = parsedContent.length;
-    parsedContent = parsedContent.slice(0, answers.length);
+    // Results are matched to answers by the id echoed back; position is used only
+    // when the model returned no ids at all (older behaviour).
+    const pairs = pairEvaluationsWithAnswers<Record<string, any>>(parsedContent, answers.length);
+    const answered = new Set(pairs.map(([idx]) => idx));
 
-    // Map using ORIGINAL indices from request
-    evaluations = parsedContent.map((e: any, idx: number) => {
-      let qualityScore = parseFloat(e.quality_score);
-      if (isNaN(qualityScore)) qualityScore = 0.7;
+    evaluations = pairs.map(([idx, e]): EvaluationResult | null => {
+      let qualityScore = parseFloat(e?.quality_score);
+      if (isNaN(qualityScore)) {
+        // No usable score: closed items fall back to the key, open items stay unevaluated.
+        const a = answers[idx];
+        return isClosedType(a?.exercise_type) && a?.suggested_answer
+          ? fallbackClosedEvaluation(a) as EvaluationResult
+          : null;
+      }
       qualityScore = Math.max(0, Math.min(1, qualityScore));
 
       // PROBLEM 3 FIX: Server-side non-answer detection - override AI score
@@ -354,34 +365,25 @@ Return exactly ${answers.length} evaluation objects in a JSON array:
         ...(writingScore !== undefined && !isNaN(writingScore) ? { writing_score: Math.max(0, Math.min(1, writingScore)) } : {}),
         ...(speakingScore !== undefined && !isNaN(speakingScore) ? { speaking_score: Math.max(0, Math.min(1, speakingScore)) } : {}),
       };
-    });
+    }).filter((e): e is EvaluationResult => e !== null);
 
-    // Missing replies for closed items fall back to the key; open items are left out as before.
-    for (let i = modelCount; i < answers.length; i++) {
-      if (isClosedType(answers[i].exercise_type) && answers[i].suggested_answer) {
-        evaluations.push(fallbackClosedEvaluation(answers[i]) as EvaluationResult);
+    // Missing replies for closed items fall back to the key; open items stay unevaluated.
+    answers.forEach((a, i) => {
+      if (!answered.has(i) && isClosedType(a.exercise_type) && a.suggested_answer) {
+        evaluations.push(fallbackClosedEvaluation(a) as EvaluationResult);
       }
-    }
+    });
 
     console.log("[verify-open-answers] Successfully parsed", evaluations.length, "evaluations");
-    console.log("[verify-open-answers] Evaluations:", JSON.stringify(evaluations, null, 2));
   } catch (parseError) {
     console.error("[verify-open-answers] Failed to parse AI response:", parseError);
-    console.error("[verify-open-answers] Raw content was:", rawContent);
+    console.error("[verify-open-answers] Raw content length was:", rawContent.length);
 
-    // FIX 2.2: Dynamic fallback instead of generic
-    evaluations = answers.map((a) => {
-      if (isClosedType(a.exercise_type) && a.suggested_answer) {
-        return fallbackClosedEvaluation(a) as EvaluationResult;
-      }
-      return {
-        exercise_index: a.exercise_index,
-        question_index: a.question_index,
-        quality_score: 0.7,
-        is_acceptable: true,
-        feedback: "Good effort on this answer. Your teacher will provide detailed feedback.",
-      };
-    });
+    // Unparseable reply: closed items fall back to the key; open items stay
+    // unevaluated instead of receiving a made-up "Good effort" score.
+    evaluations = answers
+      .filter((a) => isClosedType(a.exercise_type) && a.suggested_answer)
+      .map((a) => fallbackClosedEvaluation(a) as EvaluationResult);
   }
 
   return { ok: true, evaluations };
@@ -454,12 +456,18 @@ serve(async (req) => {
     ];
     console.log("[verify-open-answers] Evaluating in", chunks.length, "chunk(s)");
     const results = await Promise.all(chunks.map((c) => evaluateChunk(c, english_level, context)));
-    const failed = results.find((r) => !r.ok);
-    if (failed && !failed.ok) {
-      return new Response(JSON.stringify({ error: "AI evaluation failed", details: failed.errorText }), {
+    const failedChunks = results.filter((r) => !r.ok);
+    // Only when every chunk failed is the whole request an error; otherwise the
+    // successful chunks are returned and the rest stay unevaluated.
+    if (failedChunks.length === results.length) {
+      const first = failedChunks[0];
+      return new Response(JSON.stringify({ error: "AI evaluation failed", details: first && !first.ok ? first.errorText : "" }), {
         status: 500,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    }
+    if (failedChunks.length > 0) {
+      console.warn("[verify-open-answers] partial result:", failedChunks.length, "of", results.length, "chunks failed");
     }
     const evaluations: EvaluationResult[] = results.flatMap((r) => (r.ok ? r.evaluations : []));
 
@@ -468,6 +476,8 @@ serve(async (req) => {
       evaluated_at: new Date().toISOString(),
       model: "google/gemini-2.5-flash",
       evaluations,
+      // Requested items with no evaluation (model omitted them or a chunk failed).
+      unevaluated_count: answers.length - evaluations.length,
     };
 
     console.log("[verify-open-answers] Evaluation complete:", evaluations.length, "answers processed");

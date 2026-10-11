@@ -24,12 +24,14 @@ const PIPELINE_FUNCTIONS = [
   'save_flashcard_progress',
   'save_homework_answer_by_share_token', 'get_student_homework_answers_by_share_token',
   'save_worksheet_answer_by_share_token', 'get_worksheet_student_answers_by_share_token',
+  'save_mark_done_evaluation', 'delete_mark_done_evaluation',
 ];
 
 const PIPELINE_TRIGGERS = [
   'trg_refresh_skill_metrics', 'trg_homework_answer_to_events', 'trg_worksheet_answer_to_events',
   'trigger_log_flashcard_review_event', 'trigger_log_knowledge_entry_event', 'trigger_log_test_answer_event',
   'trigger_update_homework_ai_evaluation',
+  'trg_refresh_skill_metrics_on_update', 'trg_refresh_skill_metrics_on_delete',
 ];
 
 describe('DSLM pipeline SQL is versioned in migrations', () => {
