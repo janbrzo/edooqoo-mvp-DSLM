@@ -23524,8 +23524,7 @@
       "domain": "homework",
       "purpose": "Implements Closed Ai Explanations behavior in the homework domain.",
       "exports": [
-        "ClosedAiExplanations",
-        "closedMark"
+        "ClosedAiExplanations"
       ],
       "props": [
         {
