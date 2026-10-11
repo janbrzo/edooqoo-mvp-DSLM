@@ -24,15 +24,18 @@ export function wrapStudentText(tag: "student_answer" | "student_speech", text: 
  * as an AI engineer" must never be capped; the prompt rule handles the rest.
  */
 const GRADER_FIELD = /\b(quality_score|is_acceptable|writing_score|speaking_score|key_verdict)\b/i;
-const OVERRIDE_REQUEST = /\b(ignore|disregard|forget|override)\b[^.!?\n]{0,40}\b(instructions?|rules|prompts?|guidelines)\b/i;
-const SCORE_REQUEST = /\b(score|grade|mark|points?|rate|rating)\b[^.!?\n]{0,30}(\b100\b|1\.0\b|\b10\s*\/\s*10\b|\bfull\b|\bmaximum\b|\bmax\b|\bperfect\b|\bhighest\b)|\b(full|maximum|perfect|highest)\s+(score|marks?|grade|points)\b/i;
+const OVERRIDE_REQUEST = /\b(ignore|disregard|override)\b[^.!?\n]{0,40}\b(instructions?|rules|prompts?|guidelines)\b/i;
+/** A score request aimed at this answer ("give me 100", "rate this 10/10", "my answer deserves full marks"). */
+const SCORE_REQUEST = /\b(give|assign|award|rate|mark|score|grade)\s+(me|this|it|my\s+answer|this\s+answer)\b[^.!?\n]{0,30}(\b100\b|\b1\.0\b|\b10\s*\/\s*10\b|\bfull\b|\bmaximum\b|\bmax\b|\bperfect\b|\bhighest\b|\btop\b)|\b(this|my)\s+answer\b[^.!?\n]{0,30}(\b100\b|\b1\.0\b|\b10\s*\/\s*10\b|\bfull\b|\bmaximum\b|\bperfect\b|\bhighest\b)/i;
 
 /** True when the answer unambiguously tries to steer the grader instead of answering. */
 export function looksLikeInstructionInjection(text: string | undefined | null): boolean {
   const t = String(text ?? "");
   if (!t.trim()) return false;
   if (GRADER_FIELD.test(t)) return true;
-  return OVERRIDE_REQUEST.test(t) && SCORE_REQUEST.test(t);
+  // Both parts must sit in the same sentence, so a review that mentions rules
+  // in one sentence and a "perfect score" in another is never flagged.
+  return t.split(/[.!?\n]+/).some((sentence) => OVERRIDE_REQUEST.test(sentence) && SCORE_REQUEST.test(sentence));
 }
 
 /** Highest quality score an answer flagged by `looksLikeInstructionInjection` may keep. */
