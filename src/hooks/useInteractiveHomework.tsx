@@ -10,6 +10,7 @@ import { AiEvaluation } from '@/components/homework/AiEvaluationBadge';
 import { 
   buildItemEvaluations, 
   calculateOverallMastery,
+  averageScoredMastery,
   OPEN_ENDED_EXERCISE_TYPES,
   isClosedExerciseType,
   ItemEvaluation 
@@ -17,6 +18,7 @@ import {
 import { devLog, devWarn } from '@/utils/logger';
 import { transcribeAllAudio, buildAnswersToVerify } from '@/utils/audioEvalUtils';
 import { createPendingSaves } from '@/lib/answers/pendingSaves';
+import { callStudentAnswerRpc } from '@/lib/answers/studentAnswerRpc';
 
 
 interface UseInteractiveHomeworkProps {
@@ -41,6 +43,10 @@ export const useInteractiveHomework = ({
   shareToken
 }: UseInteractiveHomeworkProps) => {
   const [answers, setAnswers] = useState<Record<number, ExerciseAnswers>>({});
+  // submitHomework is memoised without `answers` in its deps; it reads the latest
+  // answers through this ref so a submit in the same session never sees a stale copy.
+  const answersRef = useRef<Record<number, ExerciseAnswers>>(answers);
+  answersRef.current = answers;
   const [audioAnswers, setAudioAnswers] = useState<Record<number, Record<number, string>>>({});
   const [aiEvaluations, setAiEvaluations] = useState<Record<number, Record<number, AiEvaluation>>>({});
   const [isLoading, setIsLoading] = useState(true);
@@ -80,10 +86,10 @@ export const useInteractiveHomework = ({
     try {
       setIsLoading(true);
       
-      const { data, error } = await supabase.rpc('get_student_homework_answers', {
+      const { data, error } = await callStudentAnswerRpc('get_student_homework_answers', {
         p_homework_id: homeworkId,
         p_student_email: studentEmail
-      });
+      }, shareToken);
 
       if (error) throw error;
 
@@ -143,7 +149,7 @@ export const useInteractiveHomework = ({
     } finally {
       setIsLoading(false);
     }
-  }, [homeworkId, studentEmail]);
+  }, [homeworkId, studentEmail, shareToken]);
 
   const getActiveTimeMs = useCallback((exerciseIndex: number): number => {
     const accumulated = exerciseActiveTimeRef.current[exerciseIndex] || 0;
@@ -168,7 +174,7 @@ export const useInteractiveHomework = ({
       
       const activeTimeMs = getActiveTimeMs(exerciseIndex);
       
-      const { error } = await supabase.rpc('save_homework_answer', {
+      const { error } = await callStudentAnswerRpc('save_homework_answer', {
         p_homework_id: homeworkId,
         p_student_email: studentEmail,
         p_exercise_index: exerciseIndex,
@@ -178,7 +184,7 @@ export const useInteractiveHomework = ({
         p_mastery: mastery ?? null,
         p_item_evaluations: itemEvaluations ? JSON.parse(JSON.stringify(itemEvaluations)) : null,
         p_audio_answers: audioAnswersForExercise ? JSON.parse(JSON.stringify(audioAnswersForExercise)) : null
-      });
+      }, shareToken);
 
       if (error) throw error;
 
@@ -197,7 +203,7 @@ export const useInteractiveHomework = ({
       });
       setIsSaving(false);
     }
-  }, [homeworkId, studentEmail, getActiveTimeMs]);
+  }, [homeworkId, studentEmail, getActiveTimeMs, shareToken]);
 
   const scheduleAutoSave = useCallback((exerciseIndex: number, exerciseType: string, exerciseAnswers: ExerciseAnswers) => {
     if (isSubmitted) return;
@@ -277,6 +283,7 @@ export const useInteractiveHomework = ({
 
       // Persist every answer still waiting in the autosave debounce before submitting.
       await pendingSavesQueueRef.current.flush();
+      const latestAnswers = answersRef.current;
 
       const { error } = await supabase.rpc('submit_homework_answers', {
         p_homework_id: homeworkId,
@@ -298,7 +305,7 @@ export const useInteractiveHomework = ({
           p_event_payload: {
             homework_id: homeworkId,
             total_exercises: totalExercises,
-            answered_exercises: Object.keys(answers).length,
+            answered_exercises: Object.keys(latestAnswers).length,
           },
         });
         if (eventError) throw eventError;
@@ -320,10 +327,10 @@ export const useInteractiveHomework = ({
       setIsWaitingForAiEval(true);
       
       try {
-        const { data: savedAnswers } = await supabase.rpc('get_student_homework_answers', {
+        const { data: savedAnswers } = await callStudentAnswerRpc('get_student_homework_answers', {
           p_homework_id: homeworkId,
           p_student_email: studentEmail
-        });
+        }, shareToken);
 
         devLog('[submitHomework] Fetched saved answers:', savedAnswers?.length || 0);
         
@@ -379,7 +386,9 @@ export const useInteractiveHomework = ({
               body: { 
                 answers: answersToVerify, 
                 english_level: 'Intermediate',
-                context: 'Homework submission - individual question evaluation'
+                context: 'Homework submission - individual question evaluation',
+                // Anonymous students prove access with the homework link token + their email.
+                access: { share_token: shareToken || '', student_email: studentEmail },
               }
             });
 
@@ -436,7 +445,7 @@ export const useInteractiveHomework = ({
                     };
                   });
                 }
-                const studentAnswersForThisExercise = answers[exIdx] || {};
+                const studentAnswersForThisExercise = latestAnswers[exIdx] || {};
                 const itemEvals = buildItemEvaluations(
                   exerciseData, studentAnswersForThisExercise as Record<string | number, any>, 
                   savedAnswers.find((a: any) => a.exercise_index === exIdx)?.exercise_type || '',
@@ -448,9 +457,7 @@ export const useInteractiveHomework = ({
                 // the AI never changes DSLM mastery for them.
                 const overallMastery = isClosedExerciseType(exType)
                   ? calculateOverallMastery(exType, exerciseData, studentAnswersForThisExercise as Record<string | number, any>)
-                  : itemEvals.length > 0
-                    ? Math.round(itemEvals.reduce((sum, e) => sum + e.mastery, 0) / itemEvals.length)
-                    : null;
+                  : averageScoredMastery(itemEvals);
                 
                 // Merge transcriptions into answers for this exercise (single DB write with AI eval)
                 const ansForEx = savedAnswers.find((a: any) => a.exercise_index === exIdx);
@@ -463,7 +470,8 @@ export const useInteractiveHomework = ({
                   p_exercise_index: exIdx,
                   p_answers: mergedAnswers as any,
                   p_ai_evaluation: evalData as any,
-                  p_item_evaluations: isClosedExerciseType(exType) ? null : JSON.parse(JSON.stringify(itemEvals)),
+                  // null keeps the stored value (COALESCE server-side); [] would wipe it.
+                  p_item_evaluations: isClosedExerciseType(exType) || itemEvals.length === 0 ? null : JSON.parse(JSON.stringify(itemEvals)),
                   p_mastery: overallMastery,
                   p_eval_trigger: 'submit_homework',
                 });
@@ -564,7 +572,7 @@ export const useInteractiveHomework = ({
     } finally {
       setIsSaving(false);
     }
-  }, [homeworkId, studentEmail, audioAnswers, exercises]);
+  }, [homeworkId, studentEmail, audioAnswers, exercises, shareToken, totalExercises]);
 
   const getProgress = useCallback((): HomeworkProgress => {
     let answeredExercises = 0;

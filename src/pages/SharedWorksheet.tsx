@@ -123,7 +123,8 @@ const SharedWorksheet = () => {
     studentEmail: verifiedEmail || '',
     totalExercises,
     exerciseQuestionCounts,
-    exercises: worksheetData?.exercises || [] // PROBLEM 1/2 FIX: Pass exercises for mastery calculation
+    exercises: worksheetData?.exercises || [], // PROBLEM 1/2 FIX: Pass exercises for mastery calculation
+    shareToken: token || '',
   });
 
   // PROBLEM 3: Navigation sidebar for shared worksheet

@@ -910,7 +910,7 @@ serve(async (req) => {
     try {
       const { data: studentRow } = await supabase
         .from('students')
-        .select('name, email')
+        .select('name, student_email')
         .eq('id', student_id)
         .maybeSingle();
       const { data: teacherRow } = await supabase
@@ -918,7 +918,7 @@ serve(async (req) => {
         .select('first_name, last_name, email')
         .eq('id', teacher_id)
         .maybeSingle();
-      const studentEmail = studentRow?.email;
+      const studentEmail = studentRow?.student_email;
       if (studentEmail) {
         const teacherName = [teacherRow?.first_name, teacherRow?.last_name].filter(Boolean).join(' ').trim() || 'your teacher';
         fetch(`${supabaseUrl}/functions/v1/send-welcome-test-completion-email`, {
@@ -1469,12 +1469,12 @@ Format as JSON: {"summary": "...", "recommendations": ["...", "..."], "writing_q
       learningPathResult = calculateLearningPathScore(traits, answers, questions);
       console.log(`[process-welcome-test] Learning Path Score: ${learningPathResult.score} (${learningPathResult.path}), overrides: ${learningPathResult.overrides_applied.join(', ') || 'none'}`);
 
-      // Save to raw_answers in learning profile
-      const existingRaw = answers || {};
-      existingRaw.learning_path = learningPathResult;
+      // Merge into the raw_answers written by the profile upsert above so
+      // level_change_suggestion and __integrity__ are kept.
+      const rawWithLearningPath = { ...enrichedAnswers, learning_path: learningPathResult };
       await supabase
         .from('student_learning_profiles')
-        .update({ raw_answers: existingRaw })
+        .update({ raw_answers: rawWithLearningPath })
         .eq('student_id', student_id)
         .eq('teacher_id', teacher_id);
     } catch (lpError) {

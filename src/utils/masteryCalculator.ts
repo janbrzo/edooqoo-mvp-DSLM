@@ -11,10 +11,10 @@
  */
 
 
-import { calculateItemMastery, isClosedExerciseType, CLOSED_EXERCISE_TYPES, shuffleArrayWithSeed } from '../../supabase/functions/_shared/itemMastery';
+import { calculateItemMastery, isClosedExerciseType, CLOSED_EXERCISE_TYPES, shuffleArrayWithSeed, averageScoredMastery, scoreToMastery } from '../../supabase/functions/_shared/itemMastery';
 
 // Closed-item scoring lives in supabase/functions/_shared/itemMastery.ts so Edge Functions and the client share one verdict.
-export { calculateItemMastery, isClosedExerciseType, CLOSED_EXERCISE_TYPES, shuffleArrayWithSeed };
+export { calculateItemMastery, isClosedExerciseType, CLOSED_EXERCISE_TYPES, shuffleArrayWithSeed, averageScoredMastery, scoreToMastery };
 
 export interface ItemEvaluation {
   question_index: number;  // Index pytania w ćwiczeniu (0-based)

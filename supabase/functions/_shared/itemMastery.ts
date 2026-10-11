@@ -335,4 +335,28 @@ export const calculateItemMastery = (
   }
 };
 
+/**
+ * AI quality score (0..1) -> item mastery (0..100). A real 0 stays 0; a missing,
+ * empty or non-numeric score returns -1 (unevaluated, excluded from mastery),
+ * never a made-up default.
+ */
+export function scoreToMastery(score: unknown): number {
+  const n = typeof score === 'number'
+    ? score
+    : typeof score === 'string' && score.trim() !== '' ? Number(score) : NaN;
+  if (!Number.isFinite(n)) return -1;
+  return Math.round(Math.max(0, Math.min(1, n)) * 100);
+}
 
+/**
+ * Exercise mastery = mean of the scored items only. Items flagged hasValue=false
+ * or with a negative sentinel (-1: not evaluated, e.g. speaking with no audio)
+ * are left out instead of dragging the mean down. Null when nothing was scored.
+ */
+export function averageScoredMastery(
+  items: ReadonlyArray<{ mastery: number; hasValue?: boolean }>,
+): number | null {
+  const scored = items.filter((e) => e.hasValue !== false && typeof e.mastery === 'number' && e.mastery >= 0);
+  if (scored.length === 0) return null;
+  return Math.round(scored.reduce((sum, e) => sum + e.mastery, 0) / scored.length);
+}

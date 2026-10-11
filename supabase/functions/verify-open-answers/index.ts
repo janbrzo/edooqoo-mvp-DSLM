@@ -2,6 +2,15 @@ import "https://deno.land/x/xhr@0.1.0/mod.ts";
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { chatCompletion } from "../_shared/aiChat.ts";
 import { NO_EM_DASH_RULE } from "../_shared/writingStyle.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { resolveCaller } from "../_shared/auth.ts";
+import { homeworkIdForStudentAccess } from "../_shared/evaluationAccess.ts";
+import {
+  STUDENT_TEXT_RULE,
+  wrapStudentText,
+  looksLikeInstructionInjection,
+  INJECTION_SCORE_CAP,
+} from "../_shared/promptSafety.ts";
 import {
   CLOSED_RULES_PROMPT,
   chunkAnswers,
@@ -11,6 +20,9 @@ import {
   isSelectionType,
   type KeyVerdict,
 } from "./closedEvaluation.ts";
+
+/** Upper bound per request; a full worksheet stays well below it. */
+const MAX_ANSWERS_PER_REQUEST = 200;
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -93,7 +105,7 @@ SPEAKING-SPECIFIC SCORING:
 ` : ''}
 IMPORTANT: Be demanding but fair. A score of 0.7+ means the student genuinely tried and produced meaningful English. Do NOT give 0.7+ to lazy or empty responses under any circumstances.
 
-CRITICAL: Return ONLY a valid JSON array. No markdown code blocks. No extra text. Just the array.${hasAnyClosed ? CLOSED_RULES_PROMPT : ""}`;
+CRITICAL: Return ONLY a valid JSON array. No markdown code blocks. No extra text. Just the array.${hasAnyClosed ? CLOSED_RULES_PROMPT : ""}${STUDENT_TEXT_RULE}`;
 
   const userPrompt = `Evaluate these ${answers.length} student answers:
 
@@ -101,8 +113,8 @@ ${answers
 .map(
   (a, i) => `[Answer ${i + 1}]
 Question: ${a.question_text}
-Student's written answer: ${a.student_answer || "(no written answer)"}
-${a.audio_transcription ? `Student's spoken answer (transcription): ${a.audio_transcription}` : ""}
+Student's written answer: ${a.student_answer ? wrapStudentText("student_answer", a.student_answer) : "(no written answer)"}
+${a.audio_transcription ? `Student's spoken answer (transcription): ${wrapStudentText("student_speech", a.audio_transcription)}` : ""}
 ${a.audio_duration_seconds ? `Audio duration: ${a.audio_duration_seconds} seconds` : ""}
 ${a.audio_word_count ? `Spoken word count: ${a.audio_word_count}` : ""}
 ${isClosedType(a.exercise_type) && a.suggested_answer
@@ -276,6 +288,16 @@ Return exactly ${answers.length} evaluation objects in a JSON array:
         qualityScore = Math.min(qualityScore, 0.2);
       }
 
+      // An answer that talks to the grader instead of answering never keeps a high score.
+      const isInjection = !closed && (
+        looksLikeInstructionInjection(answers[idx]?.student_answer) ||
+        looksLikeInstructionInjection(answers[idx]?.audio_transcription)
+      );
+      if (isInjection && qualityScore > INJECTION_SCORE_CAP) {
+        console.log(`[verify-open-answers] SERVER-SIDE OVERRIDE: instruction-like answer at idx ${idx}, capping score`);
+        qualityScore = INJECTION_SCORE_CAP;
+      }
+
       // Answer key is ground truth: selection items are scored by the key, typed exact matches are full marks.
       let keyVerdict: boolean | undefined;
       let reportedVerdict: KeyVerdict | undefined;
@@ -314,6 +336,9 @@ Return exactly ${answers.length} evaluation objects in a JSON array:
       if (isNonAnswer) {
         feedback = "No answer provided. Try to form at least one sentence about the topic.";
       }
+      if (isInjection && !isNonAnswer) {
+        feedback = "This response does not answer the question. Write your own answer about the topic.";
+      }
 
       // Extract writing and speaking scores
       const writingScore = e.writing_score !== undefined ? parseFloat(e.writing_score) : undefined;
@@ -323,7 +348,7 @@ Return exactly ${answers.length} evaluation objects in a JSON array:
         exercise_index: answers[idx]?.exercise_index,
         question_index: answers[idx]?.question_index,
         quality_score: qualityScore,
-        is_acceptable: !isNonAnswer && (keyVerdict ?? (closed ? qualityScore >= 0.7 : (e.is_acceptable ?? qualityScore >= 0.7))),
+        is_acceptable: !isNonAnswer && !isInjection && (keyVerdict ?? (closed ? qualityScore >= 0.7 : (e.is_acceptable ?? qualityScore >= 0.7))),
         feedback: feedback,
         ...(reportedVerdict ? { key_verdict: reportedVerdict } : {}),
         ...(writingScore !== undefined && !isNaN(writingScore) ? { writing_score: Math.max(0, Math.min(1, writingScore)) } : {}),
@@ -372,8 +397,22 @@ serve(async (req) => {
   try {
     const body = await req.json();
 
-    console.log("[verify-open-answers] ========== FULL REQUEST ==========");
-    console.log("[verify-open-answers] Request body:", JSON.stringify(body, null, 2));
+    // AI evaluation is never open to anonymous callers: service role, a signed-in
+    // user, or a student proving access to one homework (share token + email).
+    const caller = await resolveCaller(req);
+    let authorised = caller.kind === "service" || caller.kind === "user";
+    if (!authorised) {
+      const admin = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!);
+      authorised = !!(await homeworkIdForStudentAccess(admin, body?.access));
+    }
+    if (!authorised) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    console.log("[verify-open-answers] Request:", Array.isArray(body?.answers) ? body.answers.length : 0, "answers, caller:", caller.kind);
 
     const { answers, english_level, context } = body as {
       answers: AnswerToEvaluate[];
@@ -382,6 +421,13 @@ serve(async (req) => {
     };
 
     console.log("[verify-open-answers] Parsed: answers=", answers?.length, "level=", english_level);
+
+    if (Array.isArray(answers) && answers.length > MAX_ANSWERS_PER_REQUEST) {
+      return new Response(JSON.stringify({ error: `Too many answers (max ${MAX_ANSWERS_PER_REQUEST})` }), {
+        status: 400,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     if (!answers || answers.length === 0) {
       return new Response(JSON.stringify({ error: "No answers to evaluate" }), {

@@ -2,6 +2,9 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.1';
 import { isClosedType } from "../_shared/closedEvaluation.ts";
 import { buildClosedItemContext } from "../_shared/closedItemContext.ts";
+import { scoreToMastery } from "../_shared/itemMastery.ts";
+import { resolveCaller } from "../_shared/auth.ts";
+import { hasWorksheetStudentAccess, userOwnsWorksheet } from "../_shared/evaluationAccess.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -31,13 +34,34 @@ serve(async (req) => {
     let worksheetIdFilter: string | null = null;
     let triggerSource: string | null = null;
     let exerciseIndexFilter: number | null = null;
+    let body: Record<string, unknown> | null = null;
     try {
-      const body = await req.json();
-      worksheetIdFilter = body?.worksheet_id || null;
-      triggerSource = body?.trigger_source || null;
+      body = await req.json();
+      worksheetIdFilter = typeof body?.worksheet_id === 'string' ? body.worksheet_id : null;
+      triggerSource = typeof body?.trigger_source === 'string' ? body.trigger_source : null;
       exerciseIndexFilter = typeof body?.exercise_index === 'number' ? body.exercise_index : null;
     } catch {
-      // No body provided - process all pending
+      // No body provided - process all pending (service callers only)
+    }
+
+    // Access: the service role may drain the whole queue; a signed-in user only
+    // worksheets they own; a student only their own rows of one shared worksheet
+    // (share token + assigned email) and never the teacher-only triggers.
+    let studentEmailFilter: string | null = null;
+    const caller = await resolveCaller(req);
+    if (caller.kind !== 'service') {
+      const isOwner = await userOwnsWorksheet(supabase, caller, worksheetIdFilter);
+      if (!isOwner) {
+        const isStudent = triggerSource !== 'create_homework' && triggerSource !== 'mark_done' &&
+          await hasWorksheetStudentAccess(supabase, worksheetIdFilter, body);
+        if (!isStudent) {
+          return new Response(
+            JSON.stringify({ error: 'Unauthorized' }),
+            { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+          );
+        }
+        studentEmailFilter = String(body?.student_email ?? '').trim().toLowerCase();
+      }
     }
     
     console.log(`[process-pending] trigger_source: ${triggerSource}, worksheet_id: ${worksheetIdFilter}`);
@@ -57,6 +81,9 @@ serve(async (req) => {
     
     if (worksheetIdFilter) {
       query = query.eq('worksheet_id', worksheetIdFilter);
+    }
+    if (studentEmailFilter) {
+      query = query.eq('student_email', studentEmailFilter);
     }
 
     const { data: pendingEvals, error: fetchError } = await query;
@@ -349,14 +376,15 @@ serve(async (req) => {
             
             // Map writing_score/speaking_score to matching nano_skills
             if ((nsName.includes('.writing.') || nsName.includes('.wr.')) && hasWritten && e.writing_score !== undefined) {
-              mastery = Math.round(e.writing_score * 100);
+              mastery = scoreToMastery(e.writing_score);
             } else if ((nsName.includes('.speaking.') || nsName.includes('.sp.')) && hasAudio && e.speaking_score !== undefined) {
-              mastery = Math.round(e.speaking_score * 100);
+              mastery = scoreToMastery(e.speaking_score);
             } else if ((nsName.includes('.speaking.') || nsName.includes('.sp.')) && !hasAudio) {
               // No audio submitted, don't evaluate speaking skill
               mastery = -1;
             } else {
-              mastery = Math.round((e.quality_score || 0.7) * 100);
+              // A real 0 (non-answer, off-topic) stays 0; a missing or invalid score is unevaluated.
+              mastery = scoreToMastery(e.quality_score);
             }
             
             // Adjust confidence based on answer type
