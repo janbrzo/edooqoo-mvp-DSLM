@@ -56,6 +56,7 @@ import NanoSkillBadge, { NanoSkill } from "./NanoSkillBadge";
 import { supabase } from "@/integrations/supabase/client";
 import { useStudentEvents } from "@/hooks/dslm/useStudentEvents";
 import { AiEvaluationBadge, type AiEvaluation } from "@/components/homework/AiEvaluationBadge";
+import { ClosedAiExplanations } from "@/components/homework/ClosedAiExplanations";
 import { resolveAiEvaluations } from "@/utils/aiEvaluationMapper";
 
 // Helper: convert liveItemEvaluations array to Record<number, AiEvaluation> for exercise components
@@ -1825,6 +1826,11 @@ const ExerciseSection = forwardRef<HTMLDivElement, ExerciseSectionProps>(({
               setEditableWorksheet({ ...editableWorksheet, exercises: updatedExercises });
             }}
           />
+        )}
+
+        {/* Live session teacher view: AI explanation for closed exercises (marks come from the answer key) */}
+        {viewMode === 'live-session' && isClosedExerciseType(exercise.type) && (
+          <ClosedAiExplanations evaluations={liveAiEvaluations} />
         )}
 
         {/* TeacherTipSection moved to after ExerciseContent (line ~797) */}

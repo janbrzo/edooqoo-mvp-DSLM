@@ -6,9 +6,9 @@ describe('buildClosedItemContext', () => {
   it('multiple choice: options listed, key as ground truth', () => {
     const data = { questions: [{ text: 'She ___ tea.', options: [{ text: 'drink' }, { text: 'drinks', correct: true }] }] };
     const ctx = buildClosedItemContext('multiple-choice', data, 0, { 0: 'drink' })!;
-    expect(ctx.question_text).toContain('Options: A) drink; B) drinks');
-    expect(ctx.student_answer).toBe('A) drink');
-    expect(ctx.suggested_answer).toBe('B) drinks');
+    expect(ctx.question_text).toContain('Options: drink; drinks');
+    expect(ctx.student_answer).toBe('drink');
+    expect(ctx.suggested_answer).toBe('drinks');
   });
 
   it('true/false maps booleans', () => {

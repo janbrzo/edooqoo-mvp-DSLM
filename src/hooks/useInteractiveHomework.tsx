@@ -16,6 +16,7 @@ import {
 } from '@/utils/masteryCalculator';
 import { devLog, devWarn } from '@/utils/logger';
 import { transcribeAllAudio, buildAnswersToVerify } from '@/utils/audioEvalUtils';
+import { createPendingSaves } from '@/lib/answers/pendingSaves';
 
 
 interface UseInteractiveHomeworkProps {
@@ -49,7 +50,7 @@ export const useInteractiveHomework = ({
   const [submittedAt, setSubmittedAt] = useState<Date | null>(null);
   const [isWaitingForAiEval, setIsWaitingForAiEval] = useState(false);
   
-  const saveTimeoutRef = useRef<NodeJS.Timeout>();
+  const pendingSavesQueueRef = useRef(createPendingSaves());
   const pendingSavesRef = useRef<Set<number>>(new Set());
   
   const exerciseStartTimeRef = useRef<Record<number, number>>({});
@@ -201,10 +202,6 @@ export const useInteractiveHomework = ({
   const scheduleAutoSave = useCallback((exerciseIndex: number, exerciseType: string, exerciseAnswers: ExerciseAnswers) => {
     if (isSubmitted) return;
 
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
-    }
-
     pendingSavesRef.current.add(exerciseIndex);
     setIsSaving(true);
 
@@ -220,9 +217,9 @@ export const useInteractiveHomework = ({
       itemEvaluationsCount: itemEvaluations?.length || 0
     });
 
-    saveTimeoutRef.current = setTimeout(() => {
-      saveAnswer(exerciseIndex, exerciseType, exerciseAnswers, mastery, itemEvaluations);
-    }, 1500);
+    pendingSavesQueueRef.current.schedule(exerciseIndex, () =>
+      saveAnswer(exerciseIndex, exerciseType, exerciseAnswers, mastery, itemEvaluations)
+    );
   }, [saveAnswer, exercises, isSubmitted]);
 
   const updateAnswer = useCallback((
@@ -254,9 +251,8 @@ export const useInteractiveHomework = ({
   const saveOnBlur = useCallback((exerciseIndex: number, exerciseType: string) => {
     if (isSubmitted) return;
 
-    if (saveTimeoutRef.current) {
-      clearTimeout(saveTimeoutRef.current);
-    }
+    // This exercise is saved right now; other exercises keep their pending saves.
+    pendingSavesQueueRef.current.cancel(exerciseIndex);
 
     const exerciseAnswers = answers[exerciseIndex];
     if (exerciseAnswers) {
@@ -278,6 +274,9 @@ export const useInteractiveHomework = ({
         await Promise.all(Array.from(pendingMap.values()).map(e => e.save().catch(console.error)));
         await new Promise(r => setTimeout(r, 500));
       }
+
+      // Persist every answer still waiting in the autosave debounce before submitting.
+      await pendingSavesQueueRef.current.flush();
 
       const { error } = await supabase.rpc('submit_homework_answers', {
         p_homework_id: homeworkId,
@@ -405,6 +404,7 @@ export const useInteractiveHomework = ({
                   writing_score: evaluation.writing_score,
                   speaking_score: evaluation.speaking_score,
                   feedback: evaluation.feedback,
+                  key_verdict: evaluation.key_verdict,
                   question_index: qIdx
                 };
                 
@@ -414,7 +414,8 @@ export const useInteractiveHomework = ({
                   quality_score: evaluation.quality_score,
                   writing_score: evaluation.writing_score,
                   speaking_score: evaluation.speaking_score,
-                  feedback: evaluation.feedback
+                  feedback: evaluation.feedback,
+                  ...(evaluation.key_verdict ? { key_verdict: evaluation.key_verdict } : {})
                 });
               }
               
@@ -442,9 +443,14 @@ export const useInteractiveHomework = ({
                   aiEvalLookup, audioAnswers[exIdx] || null
                 ) || [];
                 
-                const overallMastery = itemEvals.length > 0
-                  ? Math.round(itemEvals.reduce((sum, e) => sum + e.mastery, 0) / itemEvals.length)
-                  : null;
+                const exType = savedAnswers.find((a: any) => a.exercise_index === exIdx)?.exercise_type || '';
+                // Closed items: same formula as autosave (key-based, uncertain items excluded);
+                // the AI never changes DSLM mastery for them.
+                const overallMastery = isClosedExerciseType(exType)
+                  ? calculateOverallMastery(exType, exerciseData, studentAnswersForThisExercise as Record<string | number, any>)
+                  : itemEvals.length > 0
+                    ? Math.round(itemEvals.reduce((sum, e) => sum + e.mastery, 0) / itemEvals.length)
+                    : null;
                 
                 // Merge transcriptions into answers for this exercise (single DB write with AI eval)
                 const ansForEx = savedAnswers.find((a: any) => a.exercise_index === exIdx);
@@ -457,7 +463,7 @@ export const useInteractiveHomework = ({
                   p_exercise_index: exIdx,
                   p_answers: mergedAnswers as any,
                   p_ai_evaluation: evalData as any,
-                  p_item_evaluations: JSON.parse(JSON.stringify(itemEvals)),
+                  p_item_evaluations: isClosedExerciseType(exType) ? null : JSON.parse(JSON.stringify(itemEvals)),
                   p_mastery: overallMastery,
                   p_eval_trigger: 'submit_homework',
                 });
@@ -636,10 +642,10 @@ export const useInteractiveHomework = ({
   }, []);
 
   useEffect(() => {
+    const queue = pendingSavesQueueRef.current;
     return () => {
-      if (saveTimeoutRef.current) {
-        clearTimeout(saveTimeoutRef.current);
-      }
+      // Leaving the page must not drop answers typed in the last second.
+      void queue.flush();
     };
   }, []);
 

@@ -6,25 +6,16 @@
  * The key is ground truth: the model explains the rule, it never overrules the key
  * for selection items. Typed items may accept a valid alternative.
  *
- * CLOSED_EXERCISE_TYPES mirrors `src/utils/masteryCalculator.ts`; keep in sync.
+ * CLOSED_EXERCISE_TYPES is defined once in `_shared/itemMastery.ts` and re-exported here.
  */
 
-export const CLOSED_EXERCISE_TYPES = [
-  "multiple-choice", "multiple-choice-audio", "multiple-choice-picture",
-  "true-false", "true-false-audio", "true-false-picture", "matching", "matching-halves",
-  "fill-in-blanks", "fill-in-blanks-audio", "categorize",
-  "complete-word", "negative-prefixes", "odd-one-out", "synonyms-antonyms",
-  "synonyms", "antonyms", "error-correction", "gap-text", "word-order",
-];
+import { CLOSED_EXERCISE_TYPES, isClosedExerciseType } from './itemMastery.ts';
+export { CLOSED_EXERCISE_TYPES };
 
 /** Selection items: the student picks from a fixed set, so no alternative can be right. */
 const SELECTION_PREFIXES = ["multiple-choice", "true-false", "matching", "categorize", "odd-one-out"];
 
-export const isClosedType = (t: string | undefined): boolean => {
-  if (!t) return false;
-  const n = t.replace("-picture", "").replace("-audio", "");
-  return CLOSED_EXERCISE_TYPES.some((c) => t === c || n === c.replace("-audio", "").replace("-picture", ""));
-};
+export const isClosedType = (t: string | undefined): boolean => !!t && isClosedExerciseType(t);
 
 export const isSelectionType = (t: string | undefined): boolean =>
   !!t && SELECTION_PREFIXES.some((p) => t.startsWith(p));
@@ -60,3 +51,58 @@ CLOSED ITEMS WITH AN ANSWER KEY (items marked "Item kind: CLOSED"):
 - TYPED items (fill in blanks, gap text, complete word, prefixes, synonyms, antonyms, error correction, word order): exact key match (ignoring case, punctuation and extra spaces) is 1.0. A grammatically correct alternative that fits the context and keeps the meaning is acceptable: quality_score 0.85-0.95, is_acceptable true, and the feedback names it as an acceptable alternative. Spelling slips on the right word: 0.6-0.7. Wrong word or form: 0.0-0.2, is_acceptable false.
 - Feedback for closed items: 1-2 sentences, max 30 words, written for an adult learner. Explain WHY using the grammar or vocabulary rule (for example the tense signal word or collocation). When wrong, state the correct answer. Do not use the "Writing:"/"Speaking:" format and do not ask the student to write more.
 - The non-answer, wrong-language and minimal-effort rules above do not apply to short closed answers such as a letter, "True", or a single word.`;
+
+export type KeyVerdict = "correct" | "wrong" | "review";
+
+/**
+ * Applies the answer key to the model score (key is ground truth).
+ * - key says correct (or exact normalised match): always 1.0 and acceptable.
+ * - selection item the key says wrong (or no verdict and no exact match): max 0.2, not acceptable.
+ * - typed item that is not an exact match: the model decides (valid alternatives allowed).
+ * `keyVerdict` comes from `calculateItemMastery`; when absent (old queue rows) only the exact match is used.
+ */
+export function applyClosedKeyRules(args: {
+  aiScore: number;
+  exerciseType: string;
+  student?: string;
+  key?: string;
+  keyVerdict?: KeyVerdict;
+}): { qualityScore: number; keyVerdict?: KeyVerdict } {
+  const { aiScore, exerciseType, student, key } = args;
+  const verdict: KeyVerdict | undefined =
+    args.keyVerdict === "correct" || matchesKey(student, key) ? "correct" : args.keyVerdict;
+  if (verdict === "correct") return { qualityScore: 1.0, keyVerdict: "correct" };
+  if (isSelectionType(exerciseType) && verdict !== "review") {
+    return { qualityScore: Math.min(aiScore, 0.2), keyVerdict: "wrong" };
+  }
+  return { qualityScore: aiScore, keyVerdict: verdict };
+}
+
+/** Evaluation built from the key alone, used when the model reply is missing or unusable. */
+export function fallbackClosedEvaluation(a: {
+  exercise_index?: number;
+  question_index: number;
+  exercise_type: string;
+  student_answer?: string;
+  suggested_answer?: string;
+  key_verdict?: KeyVerdict;
+}) {
+  const base = { exercise_index: a.exercise_index, question_index: a.question_index };
+  const r = applyClosedKeyRules({
+    aiScore: 0.7,
+    exerciseType: a.exercise_type,
+    student: a.student_answer,
+    key: a.suggested_answer,
+    keyVerdict: a.key_verdict,
+  });
+  if (r.keyVerdict === "correct") {
+    return { ...base, key_verdict: "correct" as KeyVerdict, quality_score: 1.0, is_acceptable: true, feedback: "Correct. This matches the answer key." };
+  }
+  if (isSelectionType(a.exercise_type)) {
+    return { ...base, key_verdict: "wrong" as KeyVerdict, quality_score: 0.0, is_acceptable: false, feedback: `Not quite. The correct answer is ${a.suggested_answer}.` };
+  }
+  if (r.keyVerdict === "wrong") {
+    return { ...base, key_verdict: "wrong" as KeyVerdict, quality_score: 0.2, is_acceptable: false, feedback: `Not quite. The answer key gives ${a.suggested_answer}.` };
+  }
+  return { ...base, key_verdict: "review" as KeyVerdict, quality_score: 0.7, is_acceptable: true, feedback: "Your teacher will check this answer." };
+}

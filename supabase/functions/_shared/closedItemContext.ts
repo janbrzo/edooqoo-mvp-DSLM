@@ -7,37 +7,20 @@
  * mapped back through the same seeded shuffle the renderers use) and the
  * answer key as `suggested_answer` (ground truth anchor for the model).
  *
- * Field fallbacks MUST mirror `calculateItemMastery` in masteryCalculator.ts,
+ * Field fallbacks MUST mirror `calculateItemMastery` in itemMastery.ts,
  * otherwise the AI and the deterministic DSLM score read different keys.
  * Shared by the client (re-exported from src/lib/answers/closedItemContext.ts)
  * and process-pending-ai-evaluations. Pure, no I/O, no path aliases. Returns null when the item or the answer cannot be resolved.
  */
-/**
- * Copy of `shuffleArrayWithSeed` in src/utils/masteryCalculator.ts (Edge Functions
- * cannot import from src/). Parity is enforced by closedItemContext.test.ts.
- */
-export function shuffleArrayWithSeed(array: any[], seed: string): any[] {
-  let hash = 0;
-  for (let i = 0; i < seed.length; i++) {
-    hash = (hash << 5) - hash + seed.charCodeAt(i);
-    hash = hash & hash;
-  }
-  const random = () => {
-    hash = (hash * 1103515245 + 12345) & 0x7fffffff;
-    return (hash % 1000) / 1000;
-  };
-  const out = [...array];
-  for (let i = out.length - 1; i > 0; i--) {
-    const j = Math.floor(random() * (i + 1));
-    [out[i], out[j]] = [out[j], out[i]];
-  }
-  return out;
-}
+import { shuffleArrayWithSeed, calculateItemMastery } from './itemMastery.ts';
+export { shuffleArrayWithSeed };
 
 export interface ClosedItemContext {
   question_text: string;
   student_answer: string;
   suggested_answer: string;
+  /** Deterministic answer-key verdict, identical to the DSLM score (calculateItemMastery). */
+  key_verdict: 'correct' | 'wrong' | 'review';
 }
 
 const str = (v: unknown): string => (v === undefined || v === null ? '' : String(v).trim());
@@ -66,7 +49,7 @@ const shuffleIndicesWithSeed = (length: number, seedStr: string): number[] => {
   return indices;
 };
 
-const build = (question: string, student: unknown, key: unknown): ClosedItemContext | null => {
+const build = (question: string, student: unknown, key: unknown): Omit<ClosedItemContext, 'key_verdict'> | null => {
   if (isEmpty(student) || isEmpty(key)) return null;
   return { question_text: question, student_answer: str(student), suggested_answer: str(key) };
 };
@@ -77,6 +60,24 @@ export function buildClosedItemContext(
   itemIndex: number,
   allAnswers: Record<string | number, any>,
 ): ClosedItemContext | null {
+  const base = buildBaseContext(exerciseType, exerciseData, itemIndex, allAnswers);
+  if (!base) return null;
+  let mastery: number | null = null;
+  try {
+    mastery = calculateItemMastery(exerciseType, exerciseData, itemIndex, allAnswers?.[itemIndex], allAnswers);
+  } catch {
+    mastery = null;
+  }
+  const key_verdict = mastery === 100 ? 'correct' : mastery === 0 ? 'wrong' : 'review';
+  return { ...base, key_verdict };
+}
+
+function buildBaseContext(
+  exerciseType: string,
+  exerciseData: any,
+  itemIndex: number,
+  allAnswers: Record<string | number, any>,
+): Omit<ClosedItemContext, 'key_verdict'> | null {
   if (!exerciseData) return null;
   const raw = allAnswers?.[itemIndex];
 
@@ -93,12 +94,9 @@ export function buildClosedItemContext(
       if (!correct) return null;
       let chosen = options.find((o: any) => o.text === str(raw) || o.label === str(raw));
       if (!chosen && isLetter(raw)) chosen = options[letterIndex(raw)];
-      const optionList = options.map((o: any) => `${o.label}) ${o.text}`).join('; ');
-      return build(
-        `${textOf(q)}\nOptions: ${optionList}`,
-        chosen ? `${chosen.label}) ${chosen.text}` : raw,
-        `${correct.label}) ${correct.text}`,
-      );
+      // Option text only: the renderer re-labels shuffled options, so letters would mislead the explanation.
+      const optionList = options.map((o: any) => o.text).join('; ');
+      return build(`${textOf(q)}\nOptions: ${optionList}`, chosen ? chosen.text : raw, correct.text);
     }
 
     // True / False (all variants)
@@ -219,7 +217,8 @@ export function buildClosedItemContext(
     if (exerciseType === 'odd-one-out') {
       const q = exerciseData.questions?.[itemIndex];
       if (!q) return null;
-      const words = Array.isArray(q.words) ? q.words.map(textOf).join(', ') : textOf(q);
+      const wordList = Array.isArray(q.options) ? q.options : Array.isArray(q.words) ? q.words : null;
+      const words = wordList ? wordList.map(textOf).join(', ') : textOf(q);
       return build(`Which word is the odd one out? ${words}`, raw, q.odd_word || q.correct || q.correct_answer);
     }
 
@@ -236,7 +235,7 @@ export function buildClosedItemContext(
     if (exerciseType === 'word-order') {
       const s = exerciseData.sentences?.[itemIndex];
       if (!s) return null;
-      const scrambled = Array.isArray(s.words) ? s.words.join(' / ') : str(s.scrambled ?? s.text);
+      const scrambled = Array.isArray(s.words) ? s.words.join(' / ') : str(s.scrambled_words ?? s.scrambled ?? s.text);
       return build(`Put the words in the correct order: ${scrambled}`, raw, s.correct_order || s.correct || s.answer);
     }
   } catch {

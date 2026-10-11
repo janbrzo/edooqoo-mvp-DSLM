@@ -17,6 +17,8 @@ import {
 import { format } from "date-fns";
 import { deepFixTextObjects } from "@/utils/textObjectFixer";
 import { AiEvaluationBadge, type AiEvaluation } from "@/components/homework/AiEvaluationBadge";
+import { ClosedAiExplanations } from "@/components/homework/ClosedAiExplanations";
+import { isClosedExerciseType } from "@/utils/masteryCalculator";
 import { parseAiEvaluation } from "@/utils/aiEvaluationMapper";
 import { useHardLightSurface } from "@/hooks/useHardLightSurface";
 import { useAuthFlow } from "@/hooks/useAuthFlow";
@@ -496,7 +498,10 @@ export default function HomeworkReviewPage() {
                 />
                 
                 {/* AI feedback per question (ai_evaluation.question_evaluations) */}
-                {aiEvaluation && (
+                {aiEvaluation && isClosedExerciseType(exercise.type) && (
+                  <ClosedAiExplanations evaluations={aiEvaluation} className="ml-4 mt-2" />
+                )}
+                {aiEvaluation && !isClosedExerciseType(exercise.type) && (
                   <div className="ml-4 mt-2 space-y-2">
                     {Object.values(aiEvaluation).map((evaluation) => (
                       <div key={evaluation.question_index} className="text-sm">

@@ -11,6 +11,8 @@ import { AiEvalFeedbackButtons } from "./AiEvalFeedbackButtons";
 export interface AiEvaluation {
   is_acceptable: boolean;
   quality_score: number;
+  /** Closed items only: deterministic answer-key verdict (never set by the model). */
+  key_verdict?: 'correct' | 'wrong' | 'review';
   feedback: string;
   question_index?: number;
   writing_score?: number;

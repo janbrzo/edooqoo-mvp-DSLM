@@ -22,6 +22,7 @@ import type { DrawingTool, DrawingColor, StrokeWidth, DrawingState } from '@/typ
 import { DRAWING_COLORS, STROKE_WIDTHS } from '@/types/drawing';
 import { useForceLightTheme } from '@/hooks/useForceLightTheme';
 import { saveHubEmail } from '@/hooks/useStudentHubData';
+import { isKnownUnassigned } from '@/lib/worksheet/shareAssignment';
 
 const SharedWorksheet = () => {
   useForceLightTheme();
@@ -210,9 +211,11 @@ const SharedWorksheet = () => {
         .eq('id', worksheetRow.id)
         .single();
       
-      if (!fullWorksheet?.student_id) {
+      // Anonymous students get no row back (RLS): that is "unknown", not "unassigned".
+      // Access is enforced server-side by verify_worksheet_student_email.
+      if (isKnownUnassigned(fullWorksheet)) {
         setNeedsStudentAssignment(true);
-      } else {
+      } else if (fullWorksheet?.student_id) {
         // PROBLEM 3: Fetch student name for teacher toolbar
         const { data: studentData } = await supabase
           .from('students')
