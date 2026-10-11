@@ -5,6 +5,7 @@ import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { supabase } from '@/integrations/supabase/client';
 import { useDemoContext } from '@/contexts/DemoContext';
 import { useAuthFlow } from '@/hooks/useAuthFlow';
+import { useTeacherAuthRedirect } from '@/hooks/useTeacherAuthRedirect';
 import { useTokenSystem } from '@/hooks/useTokenSystem';
 import StickyNav from '@/components/landing/StickyNav';
 import { Button } from '@/components/ui/button';
@@ -120,7 +121,7 @@ const WORKSPACE_TAB_PRESENTATION = {
 const StudentPage = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { user, isRegisteredUser } = useAuthFlow();
+  const { user, isRegisteredUser, loading: authLoading } = useAuthFlow();
   const { tokenLeft, loading: tokensLoading } = useTokenSystem(user?.id);
   const { isDemoMode, showDemoBlockedToast } = useDemoContext();
   const [searchParams, setSearchParams] = useSearchParams();
@@ -374,16 +375,9 @@ const StudentPage = () => {
     if (result.success) refetchWorksheets();
   };
 
-  // Auth check for "student not found" - redirect to login if not authenticated
-  const [authChecked, setAuthChecked] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-
-  useEffect(() => {
-    supabase.auth.getUser().then(({ data: { user } }) => {
-      setIsAuthenticated(!!user);
-      setAuthChecked(true);
-    });
-  }, []);
+  // Teacher-only page: logged-out visitors (e.g. Welcome Test results email) go to
+  // login and back here via `state.from` (AGENTS.md: useTeacherAuthRedirect).
+  useTeacherAuthRedirect(authLoading, !!isRegisteredUser);
 
   // Full-page skeleton only until the first worksheet load settles; later refetches
   // (pagination, restore, rename, duplicate) keep the workspace mounted and scroll position intact.
@@ -393,28 +387,14 @@ const StudentPage = () => {
   }, [loading]);
 
   const isPageLoading =
-    (loading && !worksheetsReady) || (studentsLoading && studentLoading) || !authChecked;
-  const shouldRedirectToLogin = !isPageLoading && !student && !isAuthenticated;
-
-  // Logged-out visitor on a student link (e.g. the Welcome Test results email):
-  // send them to login and back here afterwards. Login reads `state.from` (a
-  // `?redirect=` param was ignored, so teachers landed on /dashboard), and
-  // navigating from an effect keeps the render free of side effects.
-  useEffect(() => {
-    if (!shouldRedirectToLogin) return;
-    const query = searchParams.toString();
-    navigate('/login', {
-      replace: true,
-      state: { from: `/student/${id}${query ? `?${query}` : ''}` },
-    });
-  }, [shouldRedirectToLogin, id, searchParams, navigate]);
+    (loading && !worksheetsReady) || (studentsLoading && studentLoading) || authLoading;
 
   if (isPageLoading) {
     return <PageLoadingState label="Loading student profile" />;
   }
 
   if (!student) {
-    if (!isAuthenticated) {
+    if (!isRegisteredUser) {
       return <div className="min-h-screen flex items-center justify-center">Redirecting to login...</div>;
     }
 
