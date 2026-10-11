@@ -16,6 +16,7 @@ import AnonPreWorksheetBanner from '@/components/anon/AnonPreWorksheetBanner';
 import StickyNav from '@/components/landing/StickyNav';
 import { markWorksheetForClaim } from '@/hooks/useWorksheetClaim';
 import { devLog } from '@/utils/logger';
+import { isValidUUID } from '@/utils/securityUtils';
 import { useForceLightTheme } from '@/hooks/useForceLightTheme';
 
 // PROBLEM 3 FIX: Calculate source count deterministically based on worksheet parameters
@@ -87,6 +88,21 @@ export default function WorksheetPage() {
         navigate('/');
         return;
       }
+
+      // Malformed ids (truncated email links, typos) would make Postgres
+      // answer 22P02; treat them as "not found" without querying.
+      if (!isValidUUID(id)) {
+        setLoading(false);
+        toast({
+          variant: "destructive",
+          title: "Worksheet Not Found",
+          description: "This link looks incomplete. Please check it and try again.",
+        });
+        navigate('/');
+        return;
+      }
+
+
 
       try {
         setLoading(true);

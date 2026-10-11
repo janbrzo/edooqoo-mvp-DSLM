@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Tables } from '@/integrations/supabase/types';
 import { useDemoContext } from '@/contexts/DemoContext';
+import { isValidUUID } from '@/utils/securityUtils';
 
 type Student = Tables<'students'>;
 
@@ -29,6 +30,7 @@ export const useStudent = (studentId?: string) => {
       if (error) throw error;
       return (data ?? null) as Student | null;
     },
-    enabled: !!studentId,
+    // Malformed ids would make Postgres answer 22P02; skip the query instead.
+    enabled: !!studentId && (isDemoMode || isValidUUID(studentId)),
   });
 };
