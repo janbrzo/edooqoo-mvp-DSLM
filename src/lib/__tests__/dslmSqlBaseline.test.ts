@@ -60,3 +60,14 @@ describe('Mark done supersedes the student event (decision D2)', () => {
     expect(body).toMatch(/md\.event_type = 'mark_done_evaluation'/);
   });
 });
+
+describe('Flashcard review events (iteration 4)', () => {
+  it('the first review (an INSERT by the upsert) is logged too', () => {
+    expect(sql).toMatch(/CREATE TRIGGER trigger_log_flashcard_review_event\s+AFTER INSERT OR UPDATE ON public\.flashcard_progress/);
+  });
+  it('event mastery is the review outcome; the card state is kept separately', () => {
+    const body = latestDefinition('log_flashcard_review_event');
+    expect(body).toMatch(/v_raw_mastery := CASE WHEN NEW\.last_quality_rating >= 2 THEN 100 ELSE 0 END/);
+    expect(body).toMatch(/'card_state_mastery', v_state_mastery/);
+  });
+});
