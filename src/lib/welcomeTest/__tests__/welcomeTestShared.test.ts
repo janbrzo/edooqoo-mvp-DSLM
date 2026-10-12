@@ -6,7 +6,7 @@ import {
   answersFromQuestionRows,
   reconstructTraits,
 } from '../../../../supabase/functions/_shared/welcomeTestTraits';
-import { computeLearningPathScore, pathForScore } from '../../../../supabase/functions/_shared/learningPathScore';
+import { computeLearningPathScore, pathForScore, Q3B_OPTIONS, Q9_OPTIONS, Q10_OPTIONS } from '../../../../supabase/functions/_shared/learningPathScore';
 import { answerBehaviour, computeDivergences } from '../../../../supabase/functions/_shared/welcomeTestSignals';
 
 const byId = new Map(ALL_WELCOME_TEST_QUESTIONS.map((q) => [q.id, q]));
@@ -20,6 +20,23 @@ describe('Welcome Test shared tables match the question bank', () => {
     const q = byId.get(cfg.questionId) as { options?: unknown[] } | undefined;
     expect(q, cfg.questionId).toBeDefined();
     expect(q!.options).toEqual(cfg.options);
+  });
+
+  it.each(Object.entries(TRAIT_QUESTIONS))('trait %s maps options like the client detected_trait', (trait, cfg) => {
+    const q = byId.get(cfg.questionId) as { detected_trait?: { trait_name?: string; mapping?: Record<string, string> } } | undefined;
+    if (!q?.detected_trait?.mapping) return; // traits the client does not detect itself
+    expect(q.detected_trait.trait_name).toBe(trait);
+    expect(Object.fromEntries(Object.entries(q.detected_trait.mapping).map(([k, v]) => [String(k), v]))).toEqual(cfg.mapping);
+  });
+
+  it('LPS option lists and confidence matrix labels match the question bank', () => {
+    expect((byId.get('wt_q3b') as any).options).toEqual(Q3B_OPTIONS);
+    expect((byId.get('wt_q9') as any).options).toEqual(Q9_OPTIONS);
+    expect((byId.get('wt_q10') as any).options).toEqual(Q10_OPTIONS);
+    const matrix = (byId.get('wt_q44') as any).matrix_items as string[];
+    for (const label of ['Speaking with strangers', 'Writing formal emails', 'Reading news articles']) {
+      expect(matrix).toContain(label);
+    }
   });
 
   it('force re-run rebuilds answers under the real ids (not wt_q{index+1})', () => {

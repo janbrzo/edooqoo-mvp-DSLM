@@ -52,7 +52,7 @@ const triangulate = (direct: number | null, scenario: number | null): number | n
   return Math.round((direct + 2 * scenario) / 3);
 };
 
-const Q3B_OPTIONS = [
+export const Q3B_OPTIONS = [
   'At work - emails, meetings, calls',
   'Traveling - airports, hotels, restaurants',
   'Online - social media, forums, gaming',
@@ -61,9 +61,9 @@ const Q3B_OPTIONS = [
   'In my professional field (medical, legal, IT, etc.)',
 ];
 const Q3B_SCORES: Record<number, number> = { 0: 70, 1: 40, 2: 30, 3: 35, 4: 25, 5: 80 };
-const Q9_OPTIONS = ['Less than 1 year', '1-3 years', '3-5 years', '5-10 years', 'More than 10 years'];
+export const Q9_OPTIONS = ['Less than 1 year', '1-3 years', '3-5 years', '5-10 years', 'More than 10 years'];
 const Q9_SCORES: Record<number, number> = { 0: 70, 1: 60, 2: 45, 3: 30, 4: 15 };
-const Q10_OPTIONS = [
+export const Q10_OPTIONS = [
   'School (as a subject)', 'University', 'Private lessons with a teacher', 'Language school/course',
   'Self-study (apps, books, YouTube)', 'Living/working in an English-speaking country', 'Through work (using English daily)',
 ];

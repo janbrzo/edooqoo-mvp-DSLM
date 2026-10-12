@@ -553,6 +553,8 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
           test_id: state.testId,
           student_id: state.studentId,
           teacher_id: state.teacherId,
+          // Proves access to this test (process-welcome-test refuses replays without it).
+          share_token: shareToken,
           answers: state.answers,
           // v6.9.56: attach integrity snapshot (tab-blur count + recent
           // events) buffered by `useWelcomeTestIntegrity`. Stored on the

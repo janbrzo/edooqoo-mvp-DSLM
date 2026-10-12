@@ -133,8 +133,11 @@ function deadlineDaysList(
   for (const g of goals || []) {
     if (g?.target_date) out.push(daysUntil(g.target_date, now));
   }
-  return out;
+  return out.filter((d) => Number.isFinite(d)); // an unparseable date is no deadline
 }
+
+/** A goal date passed more than this many days ago is stale, not urgent. */
+export const STALE_DEADLINE_DAYS = 14;
 
 /**
  * Style pacing (Scientific 0 to Pragmatic 100) from goals, deadlines, level,
@@ -156,7 +159,11 @@ export function computeStylePacing(input: StylePacingInput): StylePacingResult {
   // Scan ALL active goals (main + supporting + additional) and the legacy
   // students.main_goal_target_date. The shortest effective deadline wins.
   const activeGoals = (input.goals || []).filter((g) => g?.target_date);
-  const allDeadlineDays = deadlineDaysList(student, activeGoals, now);
+  const datedDays = deadlineDaysList(student, activeGoals, now);
+  // A date long past means the goal was not updated, not that the learner is in a
+  // permanent emergency: it is ignored (with a note) instead of pinning 100.
+  const staleCount = datedDays.filter((d) => d < -STALE_DEADLINE_DAYS).length;
+  const allDeadlineDays = datedDays.filter((d) => d >= -STALE_DEADLINE_DAYS);
   const effectiveDays = allDeadlineDays.length > 0 ? Math.min(...allDeadlineDays) : null;
 
   // Pressure aggregation across multiple urgent goals (<=90d)
@@ -234,14 +241,21 @@ export function computeStylePacing(input: StylePacingInput): StylePacingResult {
   }
 
   // Deadline-First Override, applied LAST so later signals cannot undercut it.
+  // Its line goes FIRST in the reasoning: it decides the value and the UI shows
+  // only the first few lines.
+  const deadlineLines: string[] = [];
   if (effectiveDays !== null) {
-    if (effectiveDays <= 0)        { p = 100;                   reasoning.push(`Overdue deadline (${effectiveDays}d) → forced Pragmatic 100`); }
-    else if (effectiveDays <= 14)  { p = Math.max(p, 100);      reasoning.push(`Deadline ≤2 weeks (${effectiveDays}d) → forced Pragmatic 100 (no time for fundamentals)`); }
-    else if (effectiveDays <= 30)  { p = Math.max(p + 25, 75);  reasoning.push(`Deadline ≤30 days (${effectiveDays}d) → +25, floor 75 (Pragmatic)`); }
-    else if (effectiveDays <= 90)  { p = Math.max(p + 15, 50);  reasoning.push(`Deadline ≤90 days (${effectiveDays}d) → +15, floor 50`); }
-    else if (effectiveDays <= 180) { p += 5;                    reasoning.push(`Deadline ≤180 days (${effectiveDays}d) → +5`); }
-    else                           { p -= 5;                    reasoning.push(`Deadline >180 days (${effectiveDays}d) → −5 (room for fundamentals)`); }
+    if (effectiveDays <= 0)        { p = 100;                   deadlineLines.push(`Overdue deadline (${effectiveDays}d) → forced Pragmatic 100`); }
+    else if (effectiveDays <= 14)  { p = Math.max(p, 100);      deadlineLines.push(`Deadline ≤2 weeks (${effectiveDays}d) → forced Pragmatic 100 (no time for fundamentals)`); }
+    else if (effectiveDays <= 30)  { p = Math.max(p + 25, 75);  deadlineLines.push(`Deadline ≤30 days (${effectiveDays}d) → +25, floor 75 (Pragmatic)`); }
+    else if (effectiveDays <= 90)  { p = Math.max(p + 15, 50);  deadlineLines.push(`Deadline ≤90 days (${effectiveDays}d) → +15, floor 50`); }
+    else if (effectiveDays <= 180) { p += 5;                    deadlineLines.push(`Deadline ≤180 days (${effectiveDays}d) → +5`); }
+    else                           { p -= 5;                    deadlineLines.push(`Deadline >180 days (${effectiveDays}d) → −5 (room for fundamentals)`); }
   }
+  if (staleCount > 0) {
+    deadlineLines.push(`${staleCount} goal date(s) passed over ${STALE_DEADLINE_DAYS} days ago: ignored, update or archive the goal`);
+  }
+  reasoning.unshift(...deadlineLines);
 
   const pacing = clampPacing(p, 0, 100);
   if (reasoning.length === 0) reasoning.push('No strong signals: defaulting near 50.');
@@ -415,7 +429,7 @@ export async function loadLearningProfileForPacing(
 export function intensityPromptLines(intensity: IntensityResult): string {
   if (!intensity.intensity) return '';
   const score = intensity.score !== null ? ` (score ${intensity.score})` : '';
-  let out = `\n- Intensity (Welcome Test Learning Path): ${intensity.intensity}${score}. Use it for phase count/length and homework load, not for the Scientific/Pragmatic style.`;
+  let out = `\n- Intensity (Welcome Test Learning Path): ${intensity.intensity}${score}. Use it for lesson density and homework load within the fixed phases and weeks, not for the Scientific/Pragmatic style.`;
   if (intensity.capacityWarning) {
     out += `\n- Capacity warning: declared study capacity is low for this deadline; keep homework realistic and flag the risk.`;
   }

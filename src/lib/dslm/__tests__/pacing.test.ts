@@ -72,13 +72,26 @@ describe('computeStylePacing: parity with the pre-iteration-5 recalculate-pacing
     expect(r.pacing).toBe(100);
     expect(r.reasoning).toContain('Overdue deadline (-5d) → forced Pragmatic 100');
   });
+
+  it('ignores a goal date passed long ago instead of pinning 100 forever, and says so', () => {
+    const r = run({ student: { main_goal_target_date: inDays(-60), english_level: 'B1' } });
+    expect(r.pacing).toBe(50);
+    expect(r.deadlineDays).toBeNull();
+    expect(r.reasoning[0]).toMatch(/passed over 14 days ago: ignored, update or archive the goal/);
+  });
+
+  it('an unparseable date is not a deadline', () => {
+    const r = run({ student: { main_goal_target_date: 'not a date' } });
+    expect(r.deadlineDays).toBeNull();
+    expect(r.reasoning.join(' ')).not.toMatch(/NaN/);
+  });
 });
 
 describe('computeStylePacing: deadline floors are applied last (W3a N2)', () => {
   it('a <=2 week deadline stays 100 even with a later negative signal (old code gave 90)', () => {
     const r = run({ student: { main_goal_target_date: inDays(10), english_level: 'A1' } });
     expect(r.pacing).toBe(100);
-    expect(r.reasoning[r.reasoning.length - 1]).toBe(
+    expect(r.reasoning[0]).toBe(
       'Deadline ≤2 weeks (10d) → forced Pragmatic 100 (no time for fundamentals)',
     );
   });
@@ -202,7 +215,7 @@ describe('intensityPromptLines', () => {
   it('renders one line, plus the capacity warning when set, with no em dash', () => {
     expect(intensityPromptLines(computeIntensity(null, null))).toBe('');
     const one = intensityPromptLines(computeIntensity({ score: 64, path: 'accelerated' }, null));
-    expect(one).toBe('\n- Intensity (Welcome Test Learning Path): accelerated (score 64). Use it for phase count/length and homework load, not for the Scientific/Pragmatic style.');
+    expect(one).toBe('\n- Intensity (Welcome Test Learning Path): accelerated (score 64). Use it for lesson density and homework load within the fixed phases and weeks, not for the Scientific/Pragmatic style.');
     const two = intensityPromptLines(computeIntensity({ version: 2, score: 40, path: 'guided', capacity_warning: 'unrealistic_goal' }, 10));
     expect(two.split('\n- ')).toHaveLength(3);
     expect(two).toContain('Capacity warning: declared study capacity is low for this deadline');

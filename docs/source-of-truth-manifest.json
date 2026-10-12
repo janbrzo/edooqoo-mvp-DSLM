@@ -18865,6 +18865,7 @@
         "How intense the plan can be (phase length, homework load). This is separate from the Scientific/Pragmatic style slider.",
         "Learning path (intensity)",
         "Low signal coverage",
+        "Older test: unanswered questions were counted as average, so treat this score as a rough hint.",
         "Strongest signals:",
         "based on",
         "· Observed:"
@@ -46491,6 +46492,7 @@
           "last_rated_at",
           "nano_skill_ratings",
           "reviewed_at",
+          "share_token",
           "student_id",
           "suggested_rating",
           "teacher_id"
@@ -46505,6 +46507,7 @@
           "html",
           "key_observations",
           "learning_path",
+          "profile_unchanged",
           "recommendations",
           "reviewed_at",
           "status",
@@ -48209,6 +48212,7 @@
           "detected_traits",
           "force",
           "integrity",
+          "share_token",
           "student_id",
           "teacher_id",
           "test_id"

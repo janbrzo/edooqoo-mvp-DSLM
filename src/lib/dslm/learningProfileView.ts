@@ -73,6 +73,7 @@ export interface LearningPathView {
   score: number | null;
   /** 0..100, null when the result carries no coverage (v1). */
   coveragePercent: number | null;
+  /** Empty for v1 results (unanswered signals were stored as 50). */
   topComponents: { name: string; label: string; score: number }[];
   overrides: string[];
   capacityWarning: string | null;
@@ -83,7 +84,10 @@ export const UNREALISTIC_GOAL_WARNING = "Declared study capacity looks too low f
 export const describeLearningPath = (lp: LearningPathResult | null): LearningPathView | null => {
   if (!lp) return null;
   const components = isRecord(lp.component_scores) ? lp.component_scores : {};
-  const topComponents = Object.entries(components)
+  const version = isFiniteNumber(lp.version) ? lp.version : 1;
+  // v1 scored every unanswered signal as 50, so its "strongest" list could show
+  // defaults as measurements: only v2 (missing = null) lists components.
+  const topComponents = version < 2 ? [] : Object.entries(components)
     .filter((entry): entry is [string, number] => isFiniteNumber(entry[1]))
     .sort((a, b) => b[1] - a[1])
     .slice(0, 3)
@@ -94,7 +98,7 @@ export const describeLearningPath = (lp: LearningPathResult | null): LearningPat
     : [];
 
   return {
-    version: isFiniteNumber(lp.version) ? lp.version : 1,
+    version,
     pathLabel: typeof lp.path === 'string' && lp.path ? PATH_LABELS[lp.path] ?? capitalize(humanize(lp.path)) : null,
     score: isFiniteNumber(lp.score) ? Math.round(lp.score) : null,
     coveragePercent: isFiniteNumber(lp.coverage) ? Math.round(Math.max(0, Math.min(1, lp.coverage)) * 100) : null,

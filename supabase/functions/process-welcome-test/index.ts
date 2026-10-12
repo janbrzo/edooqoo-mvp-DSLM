@@ -80,7 +80,7 @@ serve(async (req) => {
 
   try {
     const body = await req.json();
-    const { test_id, student_id: bodyStudentId, teacher_id: bodyTeacherId, detected_traits, answered_count, force, integrity } = body || {};
+    const { test_id, student_id: bodyStudentId, teacher_id: bodyTeacherId, detected_traits, answered_count, force, integrity, share_token: bodyShareToken } = body || {};
     let answers = (body && body.answers) || null;
     let student_id = bodyStudentId;
     let teacher_id = bodyTeacherId;
@@ -100,7 +100,7 @@ serve(async (req) => {
     );
     const { data: testOwnerRow } = await supabaseAdmin
       .from('student_tests')
-      .select('student_id, teacher_id')
+      .select('student_id, teacher_id, share_token, attempt_number')
       .eq('id', test_id)
       .maybeSingle();
     if (!testOwnerRow) {
@@ -117,12 +117,57 @@ serve(async (req) => {
     student_id = (testOwnerRow as any).student_id;
     teacher_id = (testOwnerRow as any).teacher_id;
 
+    const caller = await resolveCaller(req);
+    const isOwnerOrService = !!authorizedTeacherId(caller, teacher_id);
+
     // v6.9.48: "force" re-run (teacher "Apply to Progress") rewrites the profile
     // from stored answers, so only the owning teacher or the service role may ask.
-    if (force && !authorizedTeacherId(await resolveCaller(req), teacher_id)) {
+    if (force && !isOwnerOrService) {
       return new Response(JSON.stringify({ error: 'Forbidden' }), {
         status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
+    }
+
+    // Which attempt the stored profile currently describes.
+    const { data: profileOwnerRow } = await supabaseAdmin
+      .from('student_learning_profiles')
+      .select('welcome_test_id')
+      .eq('student_id', student_id)
+      .eq('teacher_id', teacher_id)
+      .maybeSingle();
+    const profileTestId: string | null = (profileOwnerRow as any)?.welcome_test_id ?? null;
+
+    // A student proves access with the test link token. A call without it (a
+    // client released before the token was sent) is accepted only for the first
+    // processing of this test, so a known test id cannot be replayed to rewrite
+    // the profile, re-send emails and spend AI calls.
+    if (!force && !isOwnerOrService) {
+      const tokenOk = typeof bodyShareToken === 'string' && !!bodyShareToken
+        && bodyShareToken === (testOwnerRow as any).share_token;
+      if (!tokenOk && profileTestId === test_id) {
+        return new Response(JSON.stringify({ error: 'Forbidden' }), {
+          status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+    }
+
+    // Apply to Progress on an attempt that is not the one the profile describes
+    // (e.g. attempt 1 stuck after attempt 2 was processed): apply its skill
+    // results only, never rewrite the profile of the newer attempt with it.
+    if (force && profileTestId && profileTestId !== test_id) {
+      const { data: profileTest } = await supabaseAdmin
+        .from('student_tests')
+        .select('attempt_number')
+        .eq('id', profileTestId)
+        .maybeSingle();
+      const profileAttempt = Number((profileTest as any)?.attempt_number ?? 0);
+      const thisAttempt = Number((testOwnerRow as any).attempt_number ?? 0);
+      if (profileAttempt > thisAttempt) {
+        const status = await applyAndPromote(supabaseAdmin, test_id, student_id);
+        return new Response(JSON.stringify({ success: true, status, profile_unchanged: true }), {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
     }
 
     // Force re-run without answers: rebuild them from student_test_questions,
@@ -313,19 +358,6 @@ serve(async (req) => {
       fallback: true,
     });
 
-    // Keep the previous profile before this run overwrites it.
-    if (previousProfile) {
-      const { error: versionError } = await supabase
-        .from('student_learning_profile_versions')
-        .insert({
-          student_id,
-          teacher_id,
-          welcome_test_id: (previousProfile as any).welcome_test_id ?? null,
-          snapshot: previousProfile,
-        });
-      if (versionError) console.warn('[process-welcome-test] profile version not saved:', versionError.message);
-    }
-
     // Upsert learning profile
     const profileData: Record<string, unknown> = {
       student_id,
@@ -370,7 +402,8 @@ serve(async (req) => {
     // A teacher's force re-run rebuilds from stored rows, which can lack what
     // only the original submission carried (client traits, integrity): never
     // replace a known value with nothing.
-    if (force && previousProfile) {
+    const rerunOfSameAttempt = (previousProfile as any)?.welcome_test_id === test_id;
+    if (force && previousProfile && rerunOfSameAttempt) {
       const prev = previousProfile as Record<string, unknown>;
       for (const key of [
         'self_assessed_level', 'motivation_type', 'anxiety_level', 'ambiguity_tolerance', 'error_attitude',
@@ -392,11 +425,13 @@ serve(async (req) => {
         profileData.raw_answers = { ...(prev.raw_answers as Record<string, unknown>), ...enrichedAnswers };
       }
       if (prev.speaking_score !== null && prev.speaking_score !== undefined) profileData.speaking_score = prev.speaking_score;
-      // Same attempt: keep its analyses until this run replaces them.
-      if ((prev as any).welcome_test_id === test_id) {
-        if (prev.ai_summary) profileData.ai_summary = prev.ai_summary;
-        if (prev.evolution_summary) profileData.evolution_summary = prev.evolution_summary;
-      }
+    }
+    // A re-run of the same attempt (teacher force or a client retry) keeps its
+    // analyses until this run replaces them; the evolution report is not regenerated.
+    if (rerunOfSameAttempt && previousProfile) {
+      const prev = previousProfile as Record<string, unknown>;
+      if (prev.ai_summary) profileData.ai_summary = prev.ai_summary;
+      if (prev.evolution_summary) profileData.evolution_summary = prev.evolution_summary;
     }
 
     const v2Columns = {
@@ -422,6 +457,21 @@ serve(async (req) => {
       console.error('Error upserting learning profile:', upsertError);
       throw upsertError;
     }
+
+    // Keep the profile this run replaced (written after a successful upsert, so a
+    // failed run that is retried does not store duplicates).
+    if (previousProfile) {
+      const { error: versionError } = await supabase
+        .from('student_learning_profile_versions')
+        .insert({
+          student_id,
+          teacher_id,
+          welcome_test_id: (previousProfile as any).welcome_test_id ?? null,
+          snapshot: previousProfile,
+        });
+      if (versionError) console.warn('[process-welcome-test] profile version not saved:', versionError.message);
+    }
+
 
     // Update student_tests with answered_count
     if (answered_count !== undefined) {
@@ -919,6 +969,8 @@ Format as JSON: {"summary": "...", "recommendations": ["...", "..."], "writing_q
             const allOpenSpeakingIds = [...openQuestionIds, ...speakingQuestionIds];
             let updatedCount = 0;
             let unscoredCount = 0;
+            // Only scores accepted below (answered, not IDK, numeric) feed the averages.
+            const acceptedScores: Record<string, number> = {};
             for (const qId of allOpenSpeakingIds) {
               if (answers?.[qId] && answers[qId] !== '__IDK__') {
                 // No AI score for this item (model omitted it or the AI step fell back):
@@ -929,6 +981,7 @@ Format as JSON: {"summary": "...", "recommendations": ["...", "..."], "writing_q
                   continue;
                 }
                 const score = Math.round(rawScore);
+                acceptedScores[qId] = score;
 
                 // The event of THIS question: legacy ids (wt_q12, wt_q16...) are also
                 // canonical ids of other questions, so match legacy_answer_id, or
@@ -995,13 +1048,13 @@ Format as JSON: {"summary": "...", "recommendations": ["...", "..."], "writing_q
             
             // PROBLEM 2: Calculate speaking_score and update writing_score from AI scores
             const speakingIds = ['wt_q16s', 'wt_q36s', 'wt_q41s'];
-            const speakingScoresArr = speakingIds.map(id => perScores[id]).filter((s: any) => s !== undefined);
+            const speakingScoresArr = speakingIds.map(id => acceptedScores[id]).filter((s): s is number => typeof s === 'number');
             const speakingScoreAI = speakingScoresArr.length > 0
               ? Math.round(speakingScoresArr.reduce((a: number, b: number) => a + b, 0) / speakingScoresArr.length)
               : null;
 
             const writingIds = ['wt_q16', 'wt_q17', 'wt_q36', 'wt_q37', 'wt_q40'];
-            const writingScoresArr = writingIds.map(id => perScores[id]).filter((s: any) => s !== undefined);
+            const writingScoresArr = writingIds.map(id => acceptedScores[id]).filter((s): s is number => typeof s === 'number');
             const writingScoreAI = writingScoresArr.length > 0
               ? Math.round(writingScoresArr.reduce((a: number, b: number) => a + b, 0) / writingScoresArr.length)
               : null;
@@ -1142,7 +1195,7 @@ Format as JSON: {"summary": "...", "recommendations": ["...", "..."], "writing_q
     // v5.0: pacing proposal after the Welcome Test. Runs last, so it reads the
     // complete profile of THIS attempt (learning path, AI scores, metrics).
     try {
-      await supabase.functions.invoke('recalculate-pacing', {
+      const { error: pacingError } = await supabase.functions.invoke('recalculate-pacing', {
         body: {
           studentId: student_id,
           teacherId: teacher_id,
@@ -1151,6 +1204,7 @@ Format as JSON: {"summary": "...", "recommendations": ["...", "..."], "writing_q
           triggerDetails: { estimatedLevel, source: 'welcome_test' },
         },
       });
+      if (pacingError) console.warn('[v5.0] placement_test pacing trigger failed', pacingError);
     } catch (e) {
       console.warn('[v5.0] placement_test pacing trigger failed', e);
     }

@@ -122,3 +122,11 @@ describe('describeAnswerBehaviour', () => {
     expect(parts.some((p) => p.startsWith('median'))).toBe(false);
   });
 });
+
+describe('v1 learning path (unanswered signals stored as 50)', () => {
+  it('lists no "strongest signals" and reports version 1', () => {
+    const view = describeLearningPath({ score: 60, path: 'accelerated', component_scores: { deadline_response: 50, learning_timeline: 95 }, overrides_applied: [] } as any);
+    expect(view?.version).toBe(1);
+    expect(view?.topComponents).toEqual([]);
+  });
+});

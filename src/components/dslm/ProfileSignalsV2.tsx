@@ -83,6 +83,11 @@ export const LearningPathBlock: React.FC<{ profile: LearningProfileV2Columns }> 
         <p className="text-[11px] text-muted-foreground">
           How intense the plan can be (phase length, homework load). This is separate from the Scientific/Pragmatic style slider.
         </p>
+        {view.version < 2 && (
+          <p className="text-[11px] text-muted-foreground">
+            Older test: unanswered questions were counted as average, so treat this score as a rough hint.
+          </p>
+        )}
         {view.topComponents.length > 0 && (
           <p>
             <span className="text-muted-foreground">Strongest signals: </span>
