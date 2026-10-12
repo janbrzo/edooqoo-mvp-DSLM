@@ -17,3 +17,15 @@ type: feature
 - Iteration 2 (v6.9.116): triggers keep teacher events and skip unchanged rows, metrics on UPDATE/DELETE, Mark done RPCs, verify-open-answers id mapping + retry + partial results, process-pending never overwrites with nothing, Welcome Test event lookup fixed and no 25 fallback. Verified on a local Postgres 16 with the production bodies and on production REST (the new Welcome Test filter returns exactly one event where the old one returned two).
 - Remaining iterations: (2, done) answer triggers delete only own event types and skip unchanged rows, metric trigger on UPDATE/DELETE, verify-open-answers id mapping + allSettled + no fabricated 0.7, WT legacy-id collision, Mark done RPCs (no teacher UPDATE/DELETE RLS on student_events); (3) queue claim/retry/cron, server-side enqueue for shared worksheets; (4) one verdict policy (D1, D2); (5) WT profile + pacing (recalculate-pacing queries non-existent columns); (6) backfill; then revoke legacy answer RPCs from anon.
 - Known: `test_answer_skipped` events never appear because anonymous WT pages cannot call add_student_event (see skip-idk-semantics); fix with the share-token RPC in the WT iteration.
+- Iteration 3 (v6.9.117): queue claim/retry/stale recovery, scheduled stale-answer queueing, evaluation of stored answers, parallel processing, 202 for students. Homework AI failures are NOT queued (no homework queue table); handled when homework scoring moves to the shared module (iteration 4).
+- pg_cron job (run once in the SQL editor after migration 20261012140000; replace the secret with the current CRON_SECRET, and update it together with the reminder and audit jobs when the secret is rotated):
+  ```sql
+  select cron.schedule('process-ai-evaluations-5min', '*/5 * * * *', $$
+    select net.http_post(
+      url := 'https://bvfrkzdlklyvnhlpleck.supabase.co/functions/v1/process-pending-ai-evaluations',
+      headers := jsonb_build_object('Content-Type', 'application/json', 'x-cron-secret', '<CRON_SECRET>'),
+      body := '{}'::jsonb
+    );
+  $$);
+  ```
+  First run queues at most 20 stale rows per tick (saved within the last 7 days), so the backlog is drained gradually and AI cost stays bounded.

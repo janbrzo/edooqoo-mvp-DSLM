@@ -25,6 +25,7 @@ const PIPELINE_FUNCTIONS = [
   'save_homework_answer_by_share_token', 'get_student_homework_answers_by_share_token',
   'save_worksheet_answer_by_share_token', 'get_worksheet_student_answers_by_share_token',
   'save_mark_done_evaluation', 'delete_mark_done_evaluation',
+  'claim_pending_ai_evaluations', 'list_worksheet_answers_needing_ai_evaluation',
 ];
 
 const PIPELINE_TRIGGERS = [

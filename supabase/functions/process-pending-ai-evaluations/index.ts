@@ -5,6 +5,13 @@ import { buildClosedItemContext } from "../_shared/closedItemContext.ts";
 import { scoreToMastery } from "../_shared/itemMastery.ts";
 import { resolveCaller } from "../_shared/auth.ts";
 import { hasWorksheetStudentAccess, userOwnsWorksheet } from "../_shared/evaluationAccess.ts";
+import { hasValidCronSecret } from "../_shared/cronAuth.ts";
+
+// Supabase Edge runtime hook for work that continues after the response.
+declare const EdgeRuntime: { waitUntil(promise: Promise<unknown>): void } | undefined;
+
+/** Parallel queue rows per run (each row is one AI call). */
+const QUEUE_CONCURRENCY = 3;
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -49,7 +56,10 @@ serve(async (req) => {
     // (share token + assigned email) and never the teacher-only triggers.
     let studentEmailFilter: string | null = null;
     const caller = await resolveCaller(req);
-    if (caller.kind !== 'service') {
+    // pg_cron authenticates with CRON_SECRET (same as send-homework-reminders).
+    const isCron = hasValidCronSecret(req.headers.get('x-cron-secret'), Deno.env.get('CRON_SECRET'));
+    const isServiceLike = isCron || caller.kind === 'service';
+    if (!isServiceLike) {
       const isOwner = await userOwnsWorksheet(supabase, caller, worksheetIdFilter);
       if (!isOwner) {
         const isStudent = triggerSource !== 'create_homework' && triggerSource !== 'mark_done' &&
@@ -71,24 +81,18 @@ serve(async (req) => {
       await autoQueueForCreateHomework(supabase, worksheetIdFilter, triggerSource, exerciseIndexFilter);
     }
 
-    // Get pending evaluations (limit to avoid timeout)
-    let query = supabase
-      .from('pending_worksheet_ai_evaluations')
-      .select('*')
-      .eq('status', 'pending')
-      .order('created_at', { ascending: true })
-      .limit(worksheetIdFilter ? 25 : 10);
-    
-    if (worksheetIdFilter) {
-      query = query.eq('worksheet_id', worksheetIdFilter);
-    }
-    if (studentEmailFilter) {
-      query = query.eq('student_email', studentEmailFilter);
+    // Scheduled run: queue saved answers that still need evaluation (the
+    // student's tab may have been closed before the 10-minute client timer).
+    if (isServiceLike && !worksheetIdFilter) {
+      await queueStaleWorksheetAnswers(supabase);
     }
 
-    const { data: pendingEvals, error: fetchError } = await query;
+    // Claim rows atomically (also recovers stale 'processing' rows and retries
+    // 'failed' ones); falls back to the old select while the migration is missing.
+    const pendingEvals = await claimPendingEvaluations(
+      supabase, worksheetIdFilter ? 25 : 10, worksheetIdFilter, studentEmailFilter,
+    );
 
-    if (fetchError) throw fetchError;
     if (!pendingEvals || pendingEvals.length === 0) {
       console.log('[process-pending] No pending evaluations found');
       return new Response(
@@ -103,7 +107,10 @@ serve(async (req) => {
     let failed = 0;
     let skipped = 0;
     
-    for (const pending of pendingEvals) {
+    const workQueue = [...pendingEvals];
+    const runWorker = async () => {
+    while (workQueue.length > 0) {
+      const pending = workQueue.shift()!;
       try {
         // Check if AI eval is actually needed
         const { data: needsEval } = await supabase.rpc('needs_ai_evaluation', {
@@ -128,8 +135,8 @@ serve(async (req) => {
           .update({ status: 'processing' })
           .eq('id', pending.id);
 
-        const answers = pending.answers || {};
-        const context = pending.context || {};
+        let answers = pending.answers || {};
+        let context = pending.context || {};
         const questionItems = context.questions || [];
         const effectiveTriggerSource = triggerSource || context.trigger_source || null;
         
@@ -138,7 +145,7 @@ serve(async (req) => {
         try {
           const { data: answerRow } = await supabase
             .from('worksheet_student_answers')
-            .select('audio_answers')
+            .select('answers, audio_answers')
             .eq('worksheet_id', pending.worksheet_id)
             .eq('student_email', pending.student_email)
             .eq('exercise_index', pending.exercise_index)
@@ -146,6 +153,19 @@ serve(async (req) => {
           
           if (answerRow?.audio_answers && typeof answerRow.audio_answers === 'object') {
             audioAnswers = answerRow.audio_answers as Record<string, string>;
+          }
+          // Evaluate what is stored now, not the copy queued earlier (another tab or
+          // device may have saved since); closed items are rebuilt for those answers.
+          const stored = answerRow?.answers;
+          if (stored && typeof stored === 'object' && Object.keys(stored).length > 0
+              && JSON.stringify(stored) !== JSON.stringify(answers)) {
+            answers = stored as Record<string, unknown>;
+            if (Array.isArray(context.closed_items)) {
+              const rebuilt = await buildClosedItemsFromWorksheet(
+                supabase, pending.worksheet_id, pending.exercise_index, pending.exercise_type, answers,
+              );
+              if (rebuilt) context = { ...context, closed_items: rebuilt };
+            }
           }
         } catch (e) {
           console.error('[process-pending] Error fetching audio_answers:', e);
@@ -474,8 +494,24 @@ serve(async (req) => {
           .eq('id', pending.id);
       }
     }
+    };
 
-    console.log(`[process-pending] Finished: ${processed} processed, ${skipped} skipped, ${failed} failed`);
+    const runAll = async () => {
+      await Promise.all(Array.from({ length: Math.min(QUEUE_CONCURRENCY, workQueue.length) }, () => runWorker()));
+      console.log(`[process-pending] Finished: ${processed} processed, ${skipped} skipped, ${failed} failed`);
+    };
+
+    // A student's tab only needs the work started (the page polls for results);
+    // answering at once avoids the ~30 s client timeout on long worksheets.
+    if (studentEmailFilter && typeof EdgeRuntime !== 'undefined' && EdgeRuntime?.waitUntil) {
+      EdgeRuntime.waitUntil(runAll());
+      return new Response(
+        JSON.stringify({ accepted: true, total: pendingEvals.length }),
+        { status: 202, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    await runAll();
 
     return new Response(
       JSON.stringify({ processed, skipped, failed, total: pendingEvals.length }),
@@ -500,6 +536,7 @@ async function autoQueueForCreateHomework(
   worksheetId: string,
   triggerSource: string = 'create_homework',
   exerciseIndexFilter: number | null = null,
+  studentEmailFilter: string | null = null,
 ) {
   console.log(`[auto-queue] Fetching answers for worksheet ${worksheetId}`);
   
@@ -522,6 +559,7 @@ async function autoQueueForCreateHomework(
   
   for (const answer of studentAnswers) {
     if (exerciseIndexFilter !== null && answer.exercise_index !== exerciseIndexFilter) continue;
+    if (studentEmailFilter !== null && answer.student_email !== studentEmailFilter) continue;
     const isClosed = isClosedType(answer.exercise_type);
     if (!isClosed && !OPEN_ENDED_EXERCISE_TYPES.includes(answer.exercise_type)) continue;
     
@@ -623,4 +661,93 @@ async function autoQueueForCreateHomework(
   }
   
   console.log(`[auto-queue] Queued ${queued} evaluations for create_homework`);
+}
+
+/**
+ * Atomically claim queue rows (claim_pending_ai_evaluations). Until that
+ * migration is applied the RPC is missing and the previous select of 'pending'
+ * rows is used; the caller still marks rows 'processing' itself.
+ */
+async function claimPendingEvaluations(
+  supabase: any,
+  limit: number,
+  worksheetId: string | null,
+  studentEmail: string | null,
+): Promise<any[]> {
+  const { data, error } = await supabase.rpc('claim_pending_ai_evaluations', {
+    p_limit: limit,
+    p_worksheet_id: worksheetId,
+    p_student_email: studentEmail,
+  });
+  if (!error) return data || [];
+  const missing = error.code === 'PGRST202' || error.code === '42883' || /could not find the function/i.test(error.message || '');
+  if (!missing) throw error;
+
+  let query = supabase
+    .from('pending_worksheet_ai_evaluations')
+    .select('*')
+    .eq('status', 'pending')
+    .order('created_at', { ascending: true })
+    .limit(limit);
+  if (worksheetId) query = query.eq('worksheet_id', worksheetId);
+  if (studentEmail) query = query.eq('student_email', studentEmail);
+  const { data: rows, error: fetchError } = await query;
+  if (fetchError) throw fetchError;
+  return rows || [];
+}
+
+/**
+ * Queue saved worksheet answers that still need AI evaluation (last save 10+
+ * minutes ago, not evaluated since, within 7 days). Context is rebuilt from the
+ * worksheet server-side, exactly like Create Homework.
+ */
+async function queueStaleWorksheetAnswers(supabase: any): Promise<void> {
+  const { data: rows, error } = await supabase.rpc('list_worksheet_answers_needing_ai_evaluation', { p_limit: 20 });
+  if (error) {
+    console.warn('[process-pending] stale answer scan unavailable:', error.message);
+    return;
+  }
+  for (const row of rows || []) {
+    try {
+      await autoQueueForCreateHomework(supabase, row.worksheet_id, '10min_inactivity', row.exercise_index, row.student_email);
+    } catch (e) {
+      console.error('[process-pending] stale answer queue failed:', (e as Error).message);
+    }
+  }
+}
+
+/** Closed items (answer key context) for the given answers, built from the worksheet. */
+async function buildClosedItemsFromWorksheet(
+  supabase: any,
+  worksheetId: string,
+  exerciseIndex: number,
+  exerciseType: string,
+  answers: Record<string, unknown>,
+): Promise<any[] | null> {
+  try {
+    const { data: worksheet } = await supabase
+      .from('worksheets')
+      .select('ai_response')
+      .eq('id', worksheetId)
+      .single();
+    if (!worksheet?.ai_response) return null;
+    const parsed = typeof worksheet.ai_response === 'string' ? JSON.parse(worksheet.ai_response) : worksheet.ai_response;
+    const exercise = (parsed?.exercises || [])[exerciseIndex];
+    if (!exercise) return null;
+    const idx = new Set<number>();
+    for (const k of Object.keys(answers)) {
+      if (k.startsWith('_')) continue;
+      const n = parseInt(k);
+      if (!isNaN(n)) idx.add(n);
+    }
+    const items: any[] = [];
+    for (const q of [...idx].sort((a, b) => a - b)) {
+      const ctx = buildClosedItemContext(exerciseType, exercise, q, answers as Record<string | number, any>);
+      if (ctx) items.push({ question_index: q, ...ctx });
+    }
+    return items.length > 0 ? items : null;
+  } catch (e) {
+    console.error('[process-pending] closed item rebuild failed:', (e as Error).message);
+    return null;
+  }
 }

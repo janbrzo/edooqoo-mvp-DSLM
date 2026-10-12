@@ -46399,6 +46399,7 @@
           "worksheet_id"
         ],
         "visibleResponseFields": [
+          "accepted",
           "answers",
           "audio_url",
           "context",
@@ -46417,6 +46418,8 @@
             "worksheets"
           ],
           "rpcs": [
+            "claim_pending_ai_evaluations",
+            "list_worksheet_answers_needing_ai_evaluation",
             "needs_ai_evaluation"
           ],
           "edgeFunctions": [],
@@ -46426,6 +46429,7 @@
           ]
         },
         "environmentVariables": [
+          "CRON_SECRET",
           "SUPABASE_SERVICE_ROLE_KEY",
           "SUPABASE_URL"
         ]
@@ -56949,6 +56953,10 @@
         "migration": "supabase/migrations/20260609191429_f1209887-288d-49d1-98f8-e3de2a43be52.sql"
       },
       {
+        "name": "claim_pending_ai_evaluations",
+        "migration": "supabase/migrations/20261012140000_ai_evaluation_queue_v2.sql"
+      },
+      {
         "name": "compute_skill_metric",
         "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
       },
@@ -57077,6 +57085,10 @@
         "migration": "supabase/migrations/20260809180315_754eca52-5bfe-4330-b4c4-27f58070b8f2.sql"
       },
       {
+        "name": "list_worksheet_answers_needing_ai_evaluation",
+        "migration": "supabase/migrations/20261012140000_ai_evaluation_queue_v2.sql"
+      },
+      {
         "name": "log_flashcard_review_event",
         "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
       },
@@ -57135,6 +57147,10 @@
       {
         "name": "queue_worksheet_ai_evaluation",
         "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
+      },
+      {
+        "name": "queue_worksheet_ai_evaluation",
+        "migration": "supabase/migrations/20261012140000_ai_evaluation_queue_v2.sql"
       },
       {
         "name": "refresh_skill_metrics_on_event",
@@ -57624,6 +57640,7 @@
           "supabase/functions/audit-llm-models/index.ts",
           "supabase/functions/backfill-welcome-test-auto-apply/index.ts",
           "supabase/functions/bulk-publish-worksheets/index.ts",
+          "supabase/functions/process-pending-ai-evaluations/index.ts",
           "supabase/functions/send-homework-reminders/index.ts",
           "supabase/functions/send-model-audit-email/index.ts",
           "supabase/functions/send-next-lesson-newsletter/index.ts",
