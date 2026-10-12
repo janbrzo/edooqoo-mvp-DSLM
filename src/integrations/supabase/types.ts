@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "12.2.3 (519615d)"
+    PostgrestVersion: "12.2.3"
   }
   public: {
     Tables: {
@@ -861,6 +861,39 @@ export type Database = {
         }
         Relationships: []
       }
+      dslm_backfill_audit: {
+        Row: {
+          after: Json | null
+          before: Json | null
+          created_at: string
+          id: number
+          row_id: string
+          run_id: string
+          step: string
+          table_name: string
+        }
+        Insert: {
+          after?: Json | null
+          before?: Json | null
+          created_at?: string
+          id?: number
+          row_id: string
+          run_id: string
+          step: string
+          table_name: string
+        }
+        Update: {
+          after?: Json | null
+          before?: Json | null
+          created_at?: string
+          id?: number
+          row_id?: string
+          run_id?: string
+          step?: string
+          table_name?: string
+        }
+        Relationships: []
+      }
       dslm_curriculum_phases: {
         Row: {
           created_at: string
@@ -929,6 +962,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      dslm_event_errors: {
+        Row: {
+          created_at: string
+          id: string
+          message: string | null
+          row_id: string | null
+          source: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          message?: string | null
+          row_id?: string | null
+          source: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          message?: string | null
+          row_id?: string | null
+          source?: string
+        }
+        Relationships: []
       }
       email_send_log: {
         Row: {
@@ -1960,6 +2017,7 @@ export type Database = {
       pending_worksheet_ai_evaluations: {
         Row: {
           answers: Json
+          attempts: number
           context: Json | null
           created_at: string
           english_level: string | null
@@ -1967,6 +2025,7 @@ export type Database = {
           exercise_index: number
           exercise_type: string
           id: string
+          locked_at: string | null
           processed_at: string | null
           status: string
           student_email: string
@@ -1974,6 +2033,7 @@ export type Database = {
         }
         Insert: {
           answers: Json
+          attempts?: number
           context?: Json | null
           created_at?: string
           english_level?: string | null
@@ -1981,6 +2041,7 @@ export type Database = {
           exercise_index: number
           exercise_type: string
           id?: string
+          locked_at?: string | null
           processed_at?: string | null
           status?: string
           student_email: string
@@ -1988,6 +2049,7 @@ export type Database = {
         }
         Update: {
           answers?: Json
+          attempts?: number
           context?: Json | null
           created_at?: string
           english_level?: string | null
@@ -1995,6 +2057,7 @@ export type Database = {
           exercise_index?: number
           exercise_type?: string
           id?: string
+          locked_at?: string | null
           processed_at?: string | null
           status?: string
           student_email?: string
@@ -2438,10 +2501,38 @@ export type Database = {
           },
         ]
       }
+      student_learning_profile_versions: {
+        Row: {
+          created_at: string
+          id: string
+          snapshot: Json
+          student_id: string
+          teacher_id: string
+          welcome_test_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          snapshot: Json
+          student_id: string
+          teacher_id: string
+          welcome_test_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          snapshot?: Json
+          student_id?: string
+          teacher_id?: string
+          welcome_test_id?: string | null
+        }
+        Relationships: []
+      }
       student_learning_profiles: {
         Row: {
           ai_summary: string | null
           ambiguity_tolerance: string | null
+          answer_behaviour: Json | null
           anxiety_level: string | null
           communication_score: number | null
           confidence_listening: number | null
@@ -2451,6 +2542,7 @@ export type Database = {
           confidence_speaking: number | null
           confidence_writing: number | null
           created_at: string
+          divergences: Json | null
           error_attitude: string | null
           estimated_level: string | null
           evolution_summary: string | null
@@ -2460,6 +2552,7 @@ export type Database = {
           idk_count_skill: number
           idk_count_total: number
           interest_topics: string[] | null
+          learning_path: Json | null
           level_confidence: string | null
           motivation_type: string | null
           preferred_activities: string[] | null
@@ -2468,10 +2561,12 @@ export type Database = {
           reading_score: number | null
           self_assessed_level: string | null
           self_awareness_score: number | null
+          signal_coverage: number | null
           speaking_score: number | null
           strongest_skill: string | null
           student_id: string
           teacher_id: string
+          traits: Json | null
           updated_at: string
           vocabulary_score: number | null
           weakest_skill: string | null
@@ -2482,6 +2577,7 @@ export type Database = {
         Insert: {
           ai_summary?: string | null
           ambiguity_tolerance?: string | null
+          answer_behaviour?: Json | null
           anxiety_level?: string | null
           communication_score?: number | null
           confidence_listening?: number | null
@@ -2491,6 +2587,7 @@ export type Database = {
           confidence_speaking?: number | null
           confidence_writing?: number | null
           created_at?: string
+          divergences?: Json | null
           error_attitude?: string | null
           estimated_level?: string | null
           evolution_summary?: string | null
@@ -2500,6 +2597,7 @@ export type Database = {
           idk_count_skill?: number
           idk_count_total?: number
           interest_topics?: string[] | null
+          learning_path?: Json | null
           level_confidence?: string | null
           motivation_type?: string | null
           preferred_activities?: string[] | null
@@ -2508,10 +2606,12 @@ export type Database = {
           reading_score?: number | null
           self_assessed_level?: string | null
           self_awareness_score?: number | null
+          signal_coverage?: number | null
           speaking_score?: number | null
           strongest_skill?: string | null
           student_id: string
           teacher_id: string
+          traits?: Json | null
           updated_at?: string
           vocabulary_score?: number | null
           weakest_skill?: string | null
@@ -2522,6 +2622,7 @@ export type Database = {
         Update: {
           ai_summary?: string | null
           ambiguity_tolerance?: string | null
+          answer_behaviour?: Json | null
           anxiety_level?: string | null
           communication_score?: number | null
           confidence_listening?: number | null
@@ -2531,6 +2632,7 @@ export type Database = {
           confidence_speaking?: number | null
           confidence_writing?: number | null
           created_at?: string
+          divergences?: Json | null
           error_attitude?: string | null
           estimated_level?: string | null
           evolution_summary?: string | null
@@ -2540,6 +2642,7 @@ export type Database = {
           idk_count_skill?: number
           idk_count_total?: number
           interest_topics?: string[] | null
+          learning_path?: Json | null
           level_confidence?: string | null
           motivation_type?: string | null
           preferred_activities?: string[] | null
@@ -2548,10 +2651,12 @@ export type Database = {
           reading_score?: number | null
           self_assessed_level?: string | null
           self_awareness_score?: number | null
+          signal_coverage?: number | null
           speaking_score?: number | null
           strongest_skill?: string | null
           student_id?: string
           teacher_id?: string
+          traits?: Json | null
           updated_at?: string
           vocabulary_score?: number | null
           weakest_skill?: string | null
@@ -3712,6 +3817,35 @@ export type Database = {
         Returns: Json
       }
       calculate_test_results: { Args: { p_test_id: string }; Returns: Json }
+      claim_pending_ai_evaluations: {
+        Args: {
+          p_limit?: number
+          p_student_email?: string
+          p_worksheet_id?: string
+        }
+        Returns: {
+          answers: Json
+          attempts: number
+          context: Json | null
+          created_at: string
+          english_level: string | null
+          error_message: string | null
+          exercise_index: number
+          exercise_type: string
+          id: string
+          locked_at: string | null
+          processed_at: string | null
+          status: string
+          student_email: string
+          worksheet_id: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "pending_worksheet_ai_evaluations"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       clean_old_geolocation_cache: { Args: never; Returns: undefined }
       cleanup_worksheet_base64: {
         Args: never
@@ -3750,6 +3884,14 @@ export type Database = {
           token: string
           token_prefix: string
         }[]
+      }
+      delete_mark_done_evaluation: {
+        Args: {
+          p_exercise_index: number
+          p_student_id: string
+          p_worksheet_id: string
+        }
+        Returns: number
       }
       extract_micro_skill: { Args: { skill_name: string }; Returns: string }
       extract_skill_category: { Args: { skill_name: string }; Returns: string }
@@ -4025,6 +4167,27 @@ export type Database = {
           submitted_at: string
         }[]
       }
+      get_student_homework_answers_by_share_token: {
+        Args: {
+          p_homework_id: string
+          p_share_token: string
+          p_student_email: string
+        }
+        Returns: {
+          ai_evaluation: Json
+          answers: Json
+          audio_answers: Json
+          exercise_index: number
+          exercise_type: string
+          id: string
+          is_submitted: boolean
+          item_evaluations: Json
+          last_saved_at: string
+          mastery: number
+          started_at: string
+          submitted_at: string
+        }[]
+      }
       get_student_meeting_link: {
         Args: { p_student_id: string; p_teacher_id: string }
         Returns: string
@@ -4142,10 +4305,47 @@ export type Database = {
           started_at: string
         }[]
       }
+      get_worksheet_student_answers_by_share_token: {
+        Args: {
+          p_share_token: string
+          p_student_email: string
+          p_worksheet_id: string
+        }
+        Returns: {
+          ai_evaluation: Json
+          answers: Json
+          audio_answers: Json
+          completed_at: string
+          exercise_index: number
+          exercise_type: string
+          id: string
+          is_completed: boolean
+          item_evaluations: Json
+          last_saved_at: string
+          mastery: number
+          started_at: string
+        }[]
+      }
+      has_homework_student_access: {
+        Args: {
+          p_homework_id: string
+          p_share_token: string
+          p_student_email: string
+        }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
+        }
+        Returns: boolean
+      }
+      has_worksheet_student_access: {
+        Args: {
+          p_share_token: string
+          p_student_email: string
+          p_worksheet_id: string
         }
         Returns: boolean
       }
@@ -4236,6 +4436,15 @@ export type Database = {
           title: string
         }[]
       }
+      list_worksheet_answers_needing_ai_evaluation: {
+        Args: { p_limit?: number }
+        Returns: {
+          exercise_index: number
+          exercise_type: string
+          student_email: string
+          worksheet_id: string
+        }[]
+      }
       log_homework_submitted_event: {
         Args: {
           p_event_payload: Json
@@ -4289,6 +4498,15 @@ export type Database = {
       mark_knowledge_outdated: {
         Args: { p_entry_id: string; p_reason?: string; p_teacher_id: string }
         Returns: boolean
+      }
+      mark_worksheet_answer_not_evaluable: {
+        Args: {
+          p_exercise_index: number
+          p_exercise_type: string
+          p_student_email: string
+          p_worksheet_id: string
+        }
+        Returns: undefined
       }
       needs_ai_evaluation: {
         Args: {
@@ -4399,6 +4617,32 @@ export type Database = {
             }
             Returns: string
           }
+      save_homework_answer_by_share_token: {
+        Args: {
+          p_answers: Json
+          p_audio_answers?: Json
+          p_exercise_index: number
+          p_exercise_type: string
+          p_homework_id: string
+          p_item_evaluations?: Json
+          p_mastery?: number
+          p_share_token: string
+          p_student_email: string
+          p_time_spent_ms?: number
+        }
+        Returns: string
+      }
+      save_mark_done_evaluation: {
+        Args: {
+          p_element_type: string
+          p_exercise_index: number
+          p_exercise_title: string
+          p_ratings: Json
+          p_student_id: string
+          p_worksheet_id: string
+        }
+        Returns: string
+      }
       save_teacher_comment: {
         Args: {
           p_comment_text: string
@@ -4480,6 +4724,21 @@ export type Database = {
             }
             Returns: string
           }
+      save_worksheet_answer_by_share_token: {
+        Args: {
+          p_answers: Json
+          p_audio_answers?: Json
+          p_exercise_index: number
+          p_exercise_type: string
+          p_item_evaluations?: Json
+          p_mastery?: number
+          p_share_token: string
+          p_student_email: string
+          p_time_spent_ms?: number
+          p_worksheet_id: string
+        }
+        Returns: string
+      }
       set_test_answered_count_by_share_token: {
         Args: { p_answered_count: number; p_share_token: string }
         Returns: boolean
