@@ -9,7 +9,8 @@
 --    - match the student email case-insensitively;
 --    - record failures in dslm_event_errors instead of only a WARNING.
 -- 2. Skill metrics follow every change of student_events, not only INSERT:
---    UPDATE (Welcome Test AI scores, Mark done re-evaluation) and DELETE
+--    UPDATE (Mark done re-evaluation; Welcome Test score updates are excluded
+--    until the pacing iteration) and DELETE
 --    recompute the affected skills; a skill left without events loses its
 --    metric row instead of keeping a stale value.
 -- 3. Mark done re-evaluation and undo go through teacher-checked RPCs
@@ -326,7 +327,10 @@ BEGIN
       se.created_at,
       EXTRACT(EPOCH FROM (now() - se.created_at)) / 86400.0 AS days_ago
     FROM student_events se,
-         jsonb_array_elements(se.event_payload->'nano_skill_ratings') AS nsr
+         jsonb_array_elements(
+           CASE WHEN jsonb_typeof(se.event_payload->'nano_skill_ratings') = 'array'
+                THEN se.event_payload->'nano_skill_ratings' ELSE '[]'::jsonb END
+         ) AS nsr
     WHERE se.student_id = p_student_id
       AND se.teacher_id = p_teacher_id
       AND nsr->>'name' = p_skill_name
@@ -517,7 +521,11 @@ DROP TRIGGER IF EXISTS trg_refresh_skill_metrics_on_update ON public.student_eve
 CREATE TRIGGER trg_refresh_skill_metrics_on_update
   AFTER UPDATE OF event_payload, mastery ON public.student_events
   FOR EACH ROW
-  WHEN (OLD.event_payload IS DISTINCT FROM NEW.event_payload OR OLD.mastery IS DISTINCT FROM NEW.mastery)
+  -- Welcome Test AI-score updates are excluded for now: feeding them into the
+  -- metrics changes pacing (recalculate-pacing reads output mastery), which is
+  -- decided together with the Welcome Test / pacing iteration.
+  WHEN ((OLD.event_payload IS DISTINCT FROM NEW.event_payload OR OLD.mastery IS DISTINCT FROM NEW.mastery)
+        AND NEW.event_source IS DISTINCT FROM 'welcome_test')
   EXECUTE FUNCTION refresh_skill_metrics_on_event();
 
 DROP TRIGGER IF EXISTS trg_refresh_skill_metrics_on_delete ON public.student_events;
@@ -572,7 +580,7 @@ BEGIN
   SELECT se.id INTO v_event_id
   FROM public.student_events se
   WHERE se.student_id = p_student_id AND se.teacher_id = v_teacher_id
-    AND se.source_id = p_worksheet_id AND se.event_type = 'mark_done_evaluation'
+    AND se.source_id IS NOT DISTINCT FROM p_worksheet_id AND se.event_type = 'mark_done_evaluation'
     AND (se.event_payload->>'exercise_index')::int = p_exercise_index
   ORDER BY se.created_at DESC
   LIMIT 1;
@@ -612,7 +620,7 @@ BEGIN
   END IF;
   DELETE FROM public.student_events se
   WHERE se.student_id = p_student_id AND se.teacher_id = v_teacher_id
-    AND se.source_id = p_worksheet_id AND se.event_type = 'mark_done_evaluation'
+    AND se.source_id IS NOT DISTINCT FROM p_worksheet_id AND se.event_type = 'mark_done_evaluation'
     AND (se.event_payload->>'exercise_index')::int = p_exercise_index;
   GET DIAGNOSTICS v_deleted = ROW_COUNT;
   RETURN v_deleted;

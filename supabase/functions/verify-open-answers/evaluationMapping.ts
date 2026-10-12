@@ -3,13 +3,15 @@
  * Pure helpers (no Deno APIs) so they are unit-tested from vitest.
  */
 
-/** Stable per-request id the model must echo back for each answer. */
-export const itemId = (index: number): string => `a${index}`;
+/** Per-request id the model must echo back; numbered like the "[Answer N]" label (a1 = first). */
+export const itemId = (index: number): string => `a${index + 1}`;
 
 const parseItemId = (value: unknown): number | null => {
   if (typeof value !== "string") return null;
   const m = /^a(\d+)$/.exec(value.trim());
-  return m ? Number(m[1]) : null;
+  if (!m) return null;
+  const n = Number(m[1]) - 1;
+  return n >= 0 ? n : null;
 };
 
 /**

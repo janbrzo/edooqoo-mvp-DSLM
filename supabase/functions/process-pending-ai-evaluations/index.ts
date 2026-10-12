@@ -328,6 +328,11 @@ serve(async (req) => {
           // would wipe earlier evaluations) and leave this row failed for a retry.
           throw new Error('AI returned no evaluations');
         }
+        if (!isClosedPending && Number(aiResult.unevaluated_count) > 0) {
+          // Partial result for an open exercise: writing it would replace the whole
+          // exercise's item evaluations with a subset. Keep the row and mark it failed.
+          throw new Error(`AI left ${aiResult.unevaluated_count} item(s) unevaluated`);
+        }
         
         // ========= BUILD CANONICAL ai_evaluation (same as homework) =========
         const questionEvaluations = (aiResult.evaluations || []).map((e: any) => {

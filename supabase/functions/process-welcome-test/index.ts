@@ -1292,14 +1292,19 @@ Format as JSON: {"summary": "...", "recommendations": ["...", "..."], "writing_q
                   .or(`event_payload->>legacy_answer_id.eq.${qId},and(event_payload->>answer_id.eq.${qId},event_payload->>legacy_answer_id.is.null)`)
                   .order('created_at', { ascending: false })
                   .limit(1);
-                const evt = evtRows?.[0] ?? null;
-                const evtIndex = Number((evt?.event_payload as any)?.exercise_index);
-
-                // Question row: by the event's exercise_index (= question_index); the
-                // answer-text match is kept only for events without an index.
-                const matchQ = Number.isInteger(evtIndex)
+                const answerText = String(answers[qId]);
+                const byText = questions.find((q: any) => String(q.student_answer || '') === answerText);
+                const evtIndex = Number((evtRows?.[0]?.event_payload as any)?.exercise_index);
+                const byIndex = Number.isInteger(evtIndex)
                   ? questions.find((q: any) => q.question_index === evtIndex)
-                  : questions.find((q: any) => String(q.student_answer || '') === String(answers[qId]));
+                  : undefined;
+                // The event's question is trusted only when it holds this answer: the
+                // "Apply to Progress" re-run keys answers by position, so its ids can
+                // point at another question. Otherwise fall back to the answer-text
+                // match for the question row and leave the event untouched.
+                const indexAgrees = !!byIndex && String(byIndex.student_answer || '') === answerText;
+                const evt = indexAgrees ? evtRows?.[0] ?? null : null;
+                const matchQ = indexAgrees ? byIndex : byText;
                 if (matchQ) {
                   // Fetch FRESH data from DB (transcription may have been saved above and cache is stale)
                   const { data: freshQ } = await supabase

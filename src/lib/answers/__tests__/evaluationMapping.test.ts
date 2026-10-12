@@ -6,6 +6,11 @@ import {
 } from '../../../../supabase/functions/verify-open-answers/evaluationMapping';
 
 describe('pairEvaluationsWithAnswers', () => {
+  it('numbers ids like the [Answer N] label', () => {
+    expect(itemId(0)).toBe('a1');
+    expect(itemId(4)).toBe('a5');
+  });
+
   it('maps by echoed id even when the model reorders or skips items', () => {
     const results = [
       { id: itemId(2), quality_score: 0.2 },
@@ -19,9 +24,10 @@ describe('pairEvaluationsWithAnswers', () => {
 
   it('drops unknown, out-of-range and duplicate ids', () => {
     const results = [
-      { id: 'a0', quality_score: 0.9 },
-      { id: 'a0', quality_score: 0.1 },
+      { id: 'a1', quality_score: 0.9 },
+      { id: 'a1', quality_score: 0.1 },
       { id: 'a7', quality_score: 0.5 },
+      { id: 'a0', quality_score: 0.5 },
       { id: 'x', quality_score: 0.5 },
     ];
     expect(pairEvaluationsWithAnswers(results, 2)).toEqual([[0, results[0]]]);
