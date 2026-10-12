@@ -10,6 +10,9 @@ import { AiEvaluation } from '@/components/homework/AiEvaluationBadge';
 import { 
   buildItemEvaluations, 
   calculateOverallMastery,
+  calculateItemMastery,
+  aiAlternativeMastery,
+  applyAiAlternatives,
   averageScoredMastery,
   OPEN_ENDED_EXERCISE_TYPES,
   isClosedExerciseType,
@@ -453,10 +456,22 @@ export const useInteractiveHomework = ({
                 ) || [];
                 
                 const exType = savedAnswers.find((a: any) => a.exercise_index === exIdx)?.exercise_type || '';
-                // Closed items: same formula as autosave (key-based, uncertain items excluded);
-                // the AI never changes DSLM mastery for them.
+                // Closed items: key-based like autosave. Decision D1: the AI may only raise a
+                // typed answer the key marks wrong or uncertain (accepted alternative, 85-95).
+                const closedAnswers = studentAnswersForThisExercise as Record<string | number, any>;
+                const raised: Record<number, number> = {};
+                if (isClosedExerciseType(exType)) {
+                  for (const qEval of evalData.question_evaluations || []) {
+                    const qi = qEval.question_index ?? 0;
+                    const keyMastery = calculateItemMastery(exType, exerciseData, qi, closedAnswers[qi], closedAnswers);
+                    const up = aiAlternativeMastery(exType, keyMastery, qEval);
+                    if (up !== null) raised[qi] = up;
+                  }
+                }
+                const hasRaised = Object.keys(raised).length > 0;
+                const closedItemEvals = hasRaised ? applyAiAlternatives(itemEvals, raised).items : null;
                 const overallMastery = isClosedExerciseType(exType)
-                  ? calculateOverallMastery(exType, exerciseData, studentAnswersForThisExercise as Record<string | number, any>)
+                  ? calculateOverallMastery(exType, exerciseData, closedAnswers, hasRaised ? raised : undefined)
                   : averageScoredMastery(itemEvals);
                 
                 // Merge transcriptions into answers for this exercise (single DB write with AI eval)
@@ -471,7 +486,9 @@ export const useInteractiveHomework = ({
                   p_answers: mergedAnswers as any,
                   p_ai_evaluation: evalData as any,
                   // null keeps the stored value (COALESCE server-side); [] would wipe it.
-                  p_item_evaluations: isClosedExerciseType(exType) || itemEvals.length === 0 ? null : JSON.parse(JSON.stringify(itemEvals)),
+                  p_item_evaluations: isClosedExerciseType(exType)
+                    ? (closedItemEvals ? JSON.parse(JSON.stringify(closedItemEvals)) : null)
+                    : (itemEvals.length === 0 ? null : JSON.parse(JSON.stringify(itemEvals))),
                   p_mastery: overallMastery,
                   p_eval_trigger: 'submit_homework',
                 });

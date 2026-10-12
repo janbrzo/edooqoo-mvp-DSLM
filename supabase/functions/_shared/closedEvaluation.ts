@@ -9,16 +9,10 @@
  * CLOSED_EXERCISE_TYPES is defined once in `_shared/itemMastery.ts` and re-exported here.
  */
 
-import { CLOSED_EXERCISE_TYPES, isClosedExerciseType } from './itemMastery.ts';
-export { CLOSED_EXERCISE_TYPES };
-
-/** Selection items: the student picks from a fixed set, so no alternative can be right. */
-const SELECTION_PREFIXES = ["multiple-choice", "true-false", "matching", "categorize", "odd-one-out"];
+import { CLOSED_EXERCISE_TYPES, isClosedExerciseType, isSelectionType } from './itemMastery.ts';
+export { CLOSED_EXERCISE_TYPES, isSelectionType };
 
 export const isClosedType = (t: string | undefined): boolean => !!t && isClosedExerciseType(t);
-
-export const isSelectionType = (t: string | undefined): boolean =>
-  !!t && SELECTION_PREFIXES.some((p) => t.startsWith(p));
 
 /** Max items per model call; larger requests are split and evaluated in parallel. */
 export const CHUNK_SIZE = 10;

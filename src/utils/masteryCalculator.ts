@@ -11,10 +11,10 @@
  */
 
 
-import { calculateItemMastery, isClosedExerciseType, CLOSED_EXERCISE_TYPES, shuffleArrayWithSeed, averageScoredMastery, scoreToMastery } from '../../supabase/functions/_shared/itemMastery';
+import { calculateItemMastery, isClosedExerciseType, CLOSED_EXERCISE_TYPES, shuffleArrayWithSeed, averageScoredMastery, scoreToMastery, aiAlternativeMastery, applyAiAlternatives, isSelectionType } from '../../supabase/functions/_shared/itemMastery';
 
 // Closed-item scoring lives in supabase/functions/_shared/itemMastery.ts so Edge Functions and the client share one verdict.
-export { calculateItemMastery, isClosedExerciseType, CLOSED_EXERCISE_TYPES, shuffleArrayWithSeed, averageScoredMastery, scoreToMastery };
+export { calculateItemMastery, isClosedExerciseType, CLOSED_EXERCISE_TYPES, shuffleArrayWithSeed, averageScoredMastery, scoreToMastery, aiAlternativeMastery, applyAiAlternatives, isSelectionType };
 
 export interface ItemEvaluation {
   question_index: number;  // Index pytania w ćwiczeniu (0-based)
@@ -249,7 +249,9 @@ export const buildItemEvaluations = (
 export const calculateOverallMastery = (
   exerciseType: string,
   exerciseData: any,
-  answers: Record<string | number, any>
+  answers: Record<string | number, any>,
+  /** question_index -> mastery raised by an accepted AI alternative (aiAlternativeMastery). */
+  overrides?: Record<number, number>
 ): number | null => {
   if (!exerciseData || !answers || Object.keys(answers).length === 0) return null;
   if (!isClosedExerciseType(exerciseType)) return null;
@@ -259,7 +261,7 @@ export const calculateOverallMastery = (
   let total = 0;
   
   items.forEach((item: any, idx: number) => {
-    const mastery = calculateItemMastery(exerciseType, exerciseData, idx, answers[idx], answers);
+    const mastery = overrides?.[idx] ?? calculateItemMastery(exerciseType, exerciseData, idx, answers[idx], answers);
     if (mastery !== null) {
       if (mastery >= 50) correct++;
       total++;

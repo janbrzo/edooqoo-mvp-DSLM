@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.1';
 import { isClosedType } from "../_shared/closedEvaluation.ts";
 import { buildClosedItemContext } from "../_shared/closedItemContext.ts";
-import { scoreToMastery } from "../_shared/itemMastery.ts";
+import { scoreToMastery, aiAlternativeMastery, applyAiAlternatives } from "../_shared/itemMastery.ts";
 import { resolveCaller } from "../_shared/auth.ts";
 import { hasWorksheetStudentAccess, userOwnsWorksheet } from "../_shared/evaluationAccess.ts";
 import { hasValidCronSecret } from "../_shared/cronAuth.ts";
@@ -160,10 +160,11 @@ serve(async (req) => {
         
         // Fetch audio answers from the source table
         let audioAnswers: Record<string, string> = {};
+        let storedItemEvaluations: any[] | null = null;
         try {
           const { data: answerRow } = await supabase
             .from('worksheet_student_answers')
-            .select('answers, audio_answers')
+            .select('answers, audio_answers, item_evaluations')
             .eq('worksheet_id', pending.worksheet_id)
             .eq('student_email', pending.student_email)
             .eq('exercise_index', pending.exercise_index)
@@ -171,6 +172,9 @@ serve(async (req) => {
           
           if (answerRow?.audio_answers && typeof answerRow.audio_answers === 'object') {
             audioAnswers = answerRow.audio_answers as Record<string, string>;
+          }
+          if (Array.isArray(answerRow?.item_evaluations)) {
+            storedItemEvaluations = answerRow.item_evaluations as any[];
           }
           // Evaluate what is stored now, not the copy queued earlier (another tab or
           // device may have saved since); closed items are rebuilt for those answers.
@@ -468,8 +472,31 @@ serve(async (req) => {
         // Update worksheet_student_answers with BOTH ai_evaluation and item_evaluations
         // Closed items: AI adds feedback only; DSLM mastery stays the deterministic
         // score already saved by the client (item_evaluations/mastery untouched).
+        // Decision D1: the AI may only raise a typed closed answer that the key marks
+        // wrong or uncertain; the key verdict of each item comes from closed_items.
+        const closedRaised: Record<number, number> = {};
+        if (isClosedPending) {
+          const keyByQuestion = new Map<number, number | null>();
+          for (const ci of closedItems) {
+            if (typeof ci?.question_index !== 'number') continue;
+            keyByQuestion.set(ci.question_index, ci.key_verdict === 'correct' ? 100 : ci.key_verdict === 'wrong' ? 0 : null);
+          }
+          for (const e of (aiResult.evaluations || [])) {
+            if (typeof e?.question_index !== 'number' || !keyByQuestion.has(e.question_index)) continue;
+            const up = aiAlternativeMastery(pending.exercise_type, keyByQuestion.get(e.question_index) ?? null, e);
+            if (up !== null) closedRaised[e.question_index] = up;
+          }
+        }
+        const raisedApplied = isClosedPending && storedItemEvaluations && Object.keys(closedRaised).length > 0
+          ? applyAiAlternatives(storedItemEvaluations, closedRaised)
+          : null;
+
         const updateData: Record<string, unknown> = isClosedPending
-          ? { ai_evaluation: aiEvaluation, last_ai_eval_at: new Date().toISOString() }
+          ? {
+              ai_evaluation: aiEvaluation,
+              last_ai_eval_at: new Date().toISOString(),
+              ...(raisedApplied?.changed ? { item_evaluations: raisedApplied.items, mastery: raisedApplied.mastery } : {}),
+            }
           : {
               ai_evaluation: aiEvaluation,
               item_evaluations: itemEvaluations,

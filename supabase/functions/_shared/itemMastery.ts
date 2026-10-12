@@ -360,3 +360,77 @@ export function averageScoredMastery(
   if (scored.length === 0) return null;
   return Math.round(scored.reduce((sum, e) => sum + e.mastery, 0) / scored.length);
 }
+
+/** Selection items: the student picks from a fixed set, so no alternative answer can be right. */
+const SELECTION_PREFIXES = ['multiple-choice', 'true-false', 'matching', 'categorize', 'odd-one-out'];
+
+export const isSelectionType = (t: string | undefined): boolean =>
+  !!t && SELECTION_PREFIXES.some((p) => t.startsWith(p));
+
+/** Lowest AI quality score that may raise a typed closed answer the key does not accept. */
+export const AI_ALTERNATIVE_MIN_SCORE = 0.85;
+/** A raised answer never scores like an exact key match. */
+export const AI_ALTERNATIVE_MAX_MASTERY = 95;
+
+export interface ClosedAiEvaluation {
+  quality_score?: number;
+  is_acceptable?: boolean;
+  key_verdict?: string;
+}
+
+/**
+ * Owner decision D1: the answer key decides; the AI may only RAISE a typed
+ * closed answer that the key marks wrong or uncertain (a valid alternative,
+ * e.g. "manager" for "boss"), never lower one and never touch selection items.
+ * Returns the raised mastery (85-95), or null when the key result stands.
+ */
+export function aiAlternativeMastery(
+  exerciseType: string,
+  keyMastery: number | null,
+  ai: ClosedAiEvaluation | null | undefined,
+): number | null {
+  if (!ai || isSelectionType(exerciseType)) return null;
+  if (keyMastery !== null && keyMastery >= 50) return null; // the key already accepts it
+  if (ai.key_verdict === 'correct') return null;
+  const q = typeof ai.quality_score === 'number' ? ai.quality_score : NaN;
+  if (ai.is_acceptable !== true || !Number.isFinite(q) || q < AI_ALTERNATIVE_MIN_SCORE) return null;
+  return Math.min(AI_ALTERNATIVE_MAX_MASTERY, Math.round(q * 100));
+}
+
+export interface ScoredItem {
+  question_index?: number;
+  mastery: number;
+  hasValue?: boolean;
+}
+
+/**
+ * Apply raised answers (question_index -> mastery) to key-based item
+ * evaluations. Every rating of a raised question gets the raised mastery and
+ * `source: 'ai_alternative'`. The exercise mastery is recomputed the way
+ * calculateOverallMastery does it: share of scored questions at >= 50.
+ */
+export function applyAiAlternatives<T extends ScoredItem>(
+  items: readonly T[],
+  raised: Record<number, number>,
+): { items: Array<T & { source?: string }>; mastery: number | null; changed: boolean } {
+  let changed = false;
+  const out = items.map((it) => {
+    const q = typeof it.question_index === 'number' ? it.question_index : -1;
+    if (q in raised) {
+      changed = true;
+      return { ...it, mastery: raised[q], hasValue: true, source: 'ai_alternative' };
+    }
+    return it as T & { source?: string };
+  });
+  const byQuestion = new Map<number, number>();
+  for (const it of out) {
+    const q = typeof it.question_index === 'number' ? it.question_index : -1;
+    if (q < 0 || it.hasValue === false || !(it.mastery >= 0) || byQuestion.has(q)) continue;
+    byQuestion.set(q, it.mastery);
+  }
+  const scores = [...byQuestion.values()];
+  const mastery = scores.length > 0
+    ? Math.round((scores.filter((m) => m >= 50).length / scores.length) * 100)
+    : null;
+  return { items: out, mastery, changed };
+}

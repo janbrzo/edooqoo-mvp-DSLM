@@ -146,18 +146,29 @@ export const splitAnswerVariants = (raw: unknown): string[] => {
   return Array.from(new Set(withOptional.map((p) => p.replace(/\s+/g, ' ').trim()).filter(Boolean)));
 };
 
+/**
+ * Optimal string alignment distance (Levenshtein plus adjacent transposition):
+ * "departmnet" is 1 edit from "department", so a swapped-letter typo goes to
+ * review like any other one-letter slip instead of being marked wrong.
+ */
 const levenshtein = (a: string, b: string): number => {
   if (a === b) return 0;
   if (!a.length) return b.length;
   if (!b.length) return a.length;
 
+  let prevPrev: number[] = [];
   let prev = Array.from({ length: b.length + 1 }, (_, i) => i);
   for (let i = 1; i <= a.length; i++) {
     const curr = [i];
     for (let j = 1; j <= b.length; j++) {
       const cost = a[i - 1] === b[j - 1] ? 0 : 1;
-      curr[j] = Math.min(prev[j] + 1, curr[j - 1] + 1, prev[j - 1] + cost);
+      let d = Math.min(prev[j] + 1, curr[j - 1] + 1, prev[j - 1] + cost);
+      if (i > 1 && j > 1 && a[i - 1] === b[j - 2] && a[i - 2] === b[j - 1]) {
+        d = Math.min(d, prevPrev[j - 2] + 1);
+      }
+      curr[j] = d;
     }
+    prevPrev = prev;
     prev = curr;
   }
   return prev[b.length];
