@@ -2286,6 +2286,7 @@
       "hooks": [
         "useEffect",
         "useNavigate",
+        "useSearchParams",
         "useState"
       ],
       "userActions": [
@@ -2319,9 +2320,7 @@
         "useStudentHubData"
       ],
       "userActions": [],
-      "navigateTargets": [
-        "/my"
-      ]
+      "navigateTargets": []
     },
     {
       "path": "/my/:teacherToken/flashcards",
@@ -2347,9 +2346,7 @@
         "useStudentHubData"
       ],
       "userActions": [],
-      "navigateTargets": [
-        "/my"
-      ]
+      "navigateTargets": []
     },
     {
       "path": "/my/:teacherToken/homework",
@@ -2377,9 +2374,7 @@
         "useStudentHubData"
       ],
       "userActions": [],
-      "navigateTargets": [
-        "/my"
-      ]
+      "navigateTargets": []
     },
     {
       "path": "/my/:teacherToken/worksheets",
@@ -2406,9 +2401,7 @@
         "useStudentHubData"
       ],
       "userActions": [],
-      "navigateTargets": [
-        "/my"
-      ]
+      "navigateTargets": []
     },
     {
       "path": "/my/:teacherToken/lessons",
@@ -2447,9 +2440,7 @@
         "handleReschedule",
         "handleSlotClick"
       ],
-      "navigateTargets": [
-        "/my"
-      ]
+      "navigateTargets": []
     },
     {
       "path": "/my/:teacherToken/settings",
@@ -2485,9 +2476,7 @@
         "handleSetPassword",
         "handleSyncAllLessons"
       ],
-      "navigateTargets": [
-        "/my"
-      ]
+      "navigateTargets": []
     },
     {
       "path": "/my/:teacherToken/profile",
@@ -2517,9 +2506,7 @@
         "useState"
       ],
       "userActions": [],
-      "navigateTargets": [
-        "/my"
-      ]
+      "navigateTargets": []
     },
     {
       "path": "/gcal-student-callback",
@@ -6208,9 +6195,7 @@
         "useStudentHubData"
       ],
       "actions": [],
-      "navigateTargets": [
-        "/my"
-      ],
+      "navigateTargets": [],
       "dataDependencies": {
         "tables": [],
         "rpcs": [],
@@ -6242,9 +6227,7 @@
       ],
       "userFacingBehavior": {
         "actionHandlers": [],
-        "navigationTargets": [
-          "/my"
-        ]
+        "navigationTargets": []
       },
       "routes": [
         "/my/:teacherToken"
@@ -6266,9 +6249,7 @@
         "useStudentHubData"
       ],
       "actions": [],
-      "navigateTargets": [
-        "/my"
-      ],
+      "navigateTargets": [],
       "dataDependencies": {
         "tables": [],
         "rpcs": [],
@@ -6288,9 +6269,7 @@
       ],
       "userFacingBehavior": {
         "actionHandlers": [],
-        "navigationTargets": [
-          "/my"
-        ]
+        "navigationTargets": []
       },
       "routes": [
         "/my/:teacherToken/flashcards"
@@ -6320,9 +6299,7 @@
         "useStudentHubData"
       ],
       "actions": [],
-      "navigateTargets": [
-        "/my"
-      ],
+      "navigateTargets": [],
       "dataDependencies": {
         "tables": [],
         "rpcs": [],
@@ -6342,9 +6319,7 @@
       ],
       "userFacingBehavior": {
         "actionHandlers": [],
-        "navigationTargets": [
-          "/my"
-        ]
+        "navigationTargets": []
       },
       "routes": [
         "/my/:teacherToken/homework"
@@ -6413,6 +6388,7 @@
       "hooks": [
         "useEffect",
         "useNavigate",
+        "useSearchParams",
         "useState"
       ],
       "actions": [
@@ -6517,9 +6493,7 @@
         "handleReschedule",
         "handleSlotClick"
       ],
-      "navigateTargets": [
-        "/my"
-      ],
+      "navigateTargets": [],
       "dataDependencies": {
         "tables": [
           "calendar_slots"
@@ -6558,9 +6532,7 @@
           "handleReschedule",
           "handleSlotClick"
         ],
-        "navigationTargets": [
-          "/my"
-        ]
+        "navigationTargets": []
       },
       "routes": [
         "/my/:teacherToken/lessons"
@@ -6640,9 +6612,7 @@
         "useState"
       ],
       "actions": [],
-      "navigateTargets": [
-        "/my"
-      ],
+      "navigateTargets": [],
       "dataDependencies": {
         "tables": [],
         "rpcs": [],
@@ -6661,9 +6631,7 @@
       ],
       "userFacingBehavior": {
         "actionHandlers": [],
-        "navigationTargets": [
-          "/my"
-        ]
+        "navigationTargets": []
       },
       "routes": [
         "/my/:teacherToken/profile"
@@ -6738,9 +6706,7 @@
         "handleSetPassword",
         "handleSyncAllLessons"
       ],
-      "navigateTargets": [
-        "/my"
-      ],
+      "navigateTargets": [],
       "dataDependencies": {
         "tables": [],
         "rpcs": [],
@@ -6781,9 +6747,7 @@
           "handleSetPassword",
           "handleSyncAllLessons"
         ],
-        "navigationTargets": [
-          "/my"
-        ]
+        "navigationTargets": []
       },
       "routes": [
         "/my/:teacherToken/settings"
@@ -6806,9 +6770,7 @@
         "useStudentHubData"
       ],
       "actions": [],
-      "navigateTargets": [
-        "/my"
-      ],
+      "navigateTargets": [],
       "dataDependencies": {
         "tables": [],
         "rpcs": [],
@@ -6826,9 +6788,7 @@
       ],
       "userFacingBehavior": {
         "actionHandlers": [],
-        "navigationTargets": [
-          "/my"
-        ]
+        "navigationTargets": []
       },
       "routes": [
         "/my/:teacherToken/worksheets"
