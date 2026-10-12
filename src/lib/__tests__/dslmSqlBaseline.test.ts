@@ -71,3 +71,22 @@ describe('Flashcard review events (iteration 4)', () => {
     expect(body).toMatch(/'card_state_mastery', v_state_mastery/);
   });
 });
+
+describe('Iteration 6: backfill with audit and legacy RPC revoke', () => {
+  const read = (f: string) => readFileSync(join(MIGRATIONS, f), 'utf8');
+  it('the backfill records every change in dslm_backfill_audit', () => {
+    const body = read('20261012200000_dslm_backfill_v1.sql');
+    expect(body).toMatch(/CREATE TABLE IF NOT EXISTS public\.dslm_backfill_audit/);
+    for (const step of ['A_zero_score_stored_as_70', 'B_welcome_test_event_mastery', 'C_metric_recompute']) {
+      expect(body).toContain(step);
+    }
+  });
+  it('the legacy answer RPCs are revoked from client roles only after the token RPCs exist', () => {
+    const body = read('20261012200100_revoke_legacy_student_answer_rpcs.sql');
+    expect(body).toMatch(/save_homework_answer_by_share_token/);
+    expect(body).toMatch(/REVOKE EXECUTE ON FUNCTION %s FROM PUBLIC, anon, authenticated/);
+    for (const fn of ['save_homework_answer', 'get_student_homework_answers', 'save_worksheet_answer', 'get_worksheet_student_answers']) {
+      expect(body).toContain(`'${fn}'`);
+    }
+  });
+});
