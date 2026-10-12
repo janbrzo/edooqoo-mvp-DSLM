@@ -11,10 +11,10 @@
  */
 
 
-import { calculateItemMastery, isClosedExerciseType, CLOSED_EXERCISE_TYPES, shuffleArrayWithSeed, averageScoredMastery, scoreToMastery, aiAlternativeMastery, applyAiAlternatives, isSelectionType } from '../../supabase/functions/_shared/itemMastery';
+import { calculateItemMastery, isClosedExerciseType, CLOSED_EXERCISE_TYPES, shuffleArrayWithSeed, averageScoredMastery, scoreToMastery, aiAlternativeMastery, applyAiAlternatives, isSelectionType, OPEN_EXERCISE_TYPES, isOpenExerciseType } from '../../supabase/functions/_shared/itemMastery';
 
 // Closed-item scoring lives in supabase/functions/_shared/itemMastery.ts so Edge Functions and the client share one verdict.
-export { calculateItemMastery, isClosedExerciseType, CLOSED_EXERCISE_TYPES, shuffleArrayWithSeed, averageScoredMastery, scoreToMastery, aiAlternativeMastery, applyAiAlternatives, isSelectionType };
+export { calculateItemMastery, isClosedExerciseType, CLOSED_EXERCISE_TYPES, shuffleArrayWithSeed, averageScoredMastery, scoreToMastery, aiAlternativeMastery, applyAiAlternatives, isSelectionType, OPEN_EXERCISE_TYPES, isOpenExerciseType };
 
 export interface ItemEvaluation {
   question_index: number;  // Index pytania w ćwiczeniu (0-based)
@@ -31,13 +31,8 @@ export interface NanoSkillData {
   confidence?: number;
 }
 
-export const OPEN_ENDED_EXERCISE_TYPES = [
-  'reading', 'discussion', 'describe', 'answer-questions', 
-  'dialogue', 'answer-questions-audio', 'describe-picture',
-  'answer-questions-picture', 'paraphrasing', 'speaking',
-  'sentence-transformation', 'essay',
-  'listening-comprehension'
-];
+/** Shared with Edge Functions: `OPEN_EXERCISE_TYPES` in supabase/functions/_shared/itemMastery.ts. */
+export const OPEN_ENDED_EXERCISE_TYPES = OPEN_EXERCISE_TYPES;
 
 /**
  * Safely extract nano_skill from an item (handles various data structures)

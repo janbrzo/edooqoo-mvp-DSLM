@@ -2,7 +2,8 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.1';
 import { isClosedType } from "../_shared/closedEvaluation.ts";
 import { buildClosedItemContext } from "../_shared/closedItemContext.ts";
-import { scoreToMastery, aiAlternativeMastery, applyAiAlternatives } from "../_shared/itemMastery.ts";
+import { scoreToMastery, aiAlternativeMastery, applyAiAlternatives, isOpenExerciseType } from "../_shared/itemMastery.ts";
+import { DEFAULT_ENGLISH_LEVEL, resolveEnglishLevel } from "../_shared/englishLevel.ts";
 import { resolveCaller } from "../_shared/auth.ts";
 import { hasWorksheetStudentAccess, userOwnsWorksheet } from "../_shared/evaluationAccess.ts";
 import { hasValidCronSecret } from "../_shared/cronAuth.ts";
@@ -18,16 +19,9 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Open-ended exercise types that need AI evaluation
-const OPEN_ENDED_EXERCISE_TYPES = [
-  'reading', 'dialogue', 'discussion', 'answer-questions',
-  'answer-questions-audio', 'answer-questions-picture',
-  'listening-comprehension', 'describe-picture',
-  'paraphrasing', 'sentence-transformation'
-];
-
 serve(async (req) => {
   console.log('[process-pending-ai-evaluations] Function invoked');
+  learnerLevelCache.clear(); // levels are cached per run only
   
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -354,7 +348,7 @@ serve(async (req) => {
           },
           body: JSON.stringify({
             answers: answersToVerify,
-            english_level: pending.english_level || 'Intermediate',
+            english_level: await learnerLevel(supabase, pending.worksheet_id, pending.english_level),
             context: context.title || `Exercise ${pending.exercise_index + 1}`
           })
         });
@@ -606,7 +600,7 @@ async function autoQueueForCreateHomework(
     if (exerciseIndexFilter !== null && answer.exercise_index !== exerciseIndexFilter) continue;
     if (studentEmailFilter !== null && answer.student_email !== studentEmailFilter) continue;
     const isClosed = isClosedType(answer.exercise_type);
-    if (!isClosed && !OPEN_ENDED_EXERCISE_TYPES.includes(answer.exercise_type)) continue;
+    if (!isClosed && !isOpenExerciseType(answer.exercise_type)) continue;
     
     const { data: needsEval } = await supabase.rpc('needs_ai_evaluation', {
       p_worksheet_id: worksheetId,
@@ -692,7 +686,7 @@ async function autoQueueForCreateHomework(
         exercise_index: answer.exercise_index,
         exercise_type: answer.exercise_type,
         answers: answer.answers,
-        english_level: 'Intermediate',
+        english_level: DEFAULT_ENGLISH_LEVEL, // resolved from the student/worksheet when processed
         context,
         status: 'pending'
       });
@@ -824,4 +818,38 @@ async function buildClosedItemsFromWorksheet(
     console.error('[process-pending] closed item rebuild failed:', (e as Error).message);
     return null;
   }
+}
+
+/**
+ * Level of the worksheet's student (CEFR), else the worksheet level, else the
+ * level stored on the queue row. Old clients queued every row as 'Intermediate'.
+ */
+const learnerLevelCache = new Map<string, Promise<string>>();
+function learnerLevel(supabase: any, worksheetId: string, queuedLevel: unknown): Promise<string> {
+  const key = `${worksheetId}|${queuedLevel ?? ''}`;
+  if (!learnerLevelCache.has(key)) {
+    learnerLevelCache.set(key, (async () => {
+      try {
+        const { data: ws } = await supabase
+          .from('worksheets')
+          .select('student_id, form_data')
+          .eq('id', worksheetId)
+          .maybeSingle();
+        let studentLevel: unknown = null;
+        if (ws?.student_id) {
+          const { data: st } = await supabase
+            .from('students')
+            .select('english_level')
+            .eq('id', ws.student_id)
+            .maybeSingle();
+          studentLevel = st?.english_level;
+        }
+        return resolveEnglishLevel(studentLevel, ws?.form_data?.englishLevel, queuedLevel);
+      } catch (e) {
+        console.warn('[process-pending] level lookup failed:', (e as Error).message);
+        return resolveEnglishLevel(queuedLevel);
+      }
+    })());
+  }
+  return learnerLevelCache.get(key)!;
 }

@@ -58,6 +58,21 @@ export const CLOSED_EXERCISE_TYPES = [
 ];
 
 /**
+ * Open exercise types: evaluated by the model (homework submit, worksheet queue,
+ * Mark done in a live session). Single list for client and Edge Functions; both
+ * the original and the '-picture'/'-audio' variants are listed because callers
+ * match exact type names. Never overlaps CLOSED_EXERCISE_TYPES (parity test).
+ */
+export const OPEN_EXERCISE_TYPES = [
+  'reading', 'discussion', 'describe', 'describe-picture', 'answer-questions',
+  'answer-questions-audio', 'answer-questions-picture', 'dialogue', 'paraphrasing',
+  'speaking', 'sentence-transformation', 'essay', 'listening-comprehension'
+];
+
+export const isOpenExerciseType = (exerciseType: string | null | undefined): boolean =>
+  !!exerciseType && OPEN_EXERCISE_TYPES.includes(exerciseType);
+
+/**
  * Check if exercise type is closed (auto-gradable)
  */
 export const isClosedExerciseType = (exerciseType: string): boolean => {

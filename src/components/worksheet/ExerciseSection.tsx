@@ -50,7 +50,7 @@ import {
   renderOtherExerciseTypes
 } from "./ExerciseSectionUtils";
 import { devLog, devWarn } from '@/utils/logger';
-import { isClosedExerciseType } from '@/utils/masteryCalculator';
+import { isClosedExerciseType, OPEN_EXERCISE_TYPES, CLOSED_EXERCISE_TYPES } from '@/utils/masteryCalculator';
 import { safeGetNanoSkill, safeGetAllNanoSkills } from "@/utils/textObjectFixer";
 import NanoSkillBadge, { NanoSkill } from "./NanoSkillBadge";
 import { supabase } from "@/integrations/supabase/client";
@@ -123,28 +123,12 @@ const convertLiveEvalsToAiEvals = (items: any[] | undefined): Record<number, AiE
   return Object.keys(result).length > 0 ? result : undefined;
 };
 
-// PROBLEM 3: Complete classification of all 29 exercise types
+// Exercise type classification; both lists come from supabase/functions/_shared/itemMastery.ts.
 export const EXERCISE_TYPE_CLASSIFICATION = {
   // OPEN-ENDED: Require AI verification or teacher evaluation
-  // NOTE: Include BOTH original and normalized versions for proper matching
-  open: [
-    'dialogue', 'discussion', 
-    'describe-picture', 'describe', // Both original and normalized versions
-    'answer-questions', 'answer-questions-picture', 'answer-questions-audio',
-    'paraphrasing', 'reading',
-    'listening-comprehension'
-  ],
+  open: OPEN_EXERCISE_TYPES,
   // CLOSED: Automatic verification (correct/incorrect)
-  closed: [
-    'fill-in-blanks', 'fill-in-blanks-audio',
-    'multiple-choice', 'multiple-choice-audio', 'multiple-choice-picture',
-    'true-false', 'true-false-audio', 'true-false-picture',
-    'matching', 'matching-halves',
-    'odd-one-out', 'word-order', 'gap-text',
-    'negative-prefixes', 'categorize', 'complete-word',
-    'sentence-transformation', 'synonyms', 'antonyms', 'synonyms-antonyms',
-    'error-correction'
-  ]
+  closed: CLOSED_EXERCISE_TYPES
 };
 
 // PROBLEM 1.2: Open-ended exercise types that require AI verification

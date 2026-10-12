@@ -16,6 +16,7 @@ import {
 } from '@/utils/masteryCalculator';
 import { buildClosedItemContext } from '@/lib/answers/closedItemContext';
 import { hasRevealedAnswers } from '@/lib/answers/revealState';
+import { DEFAULT_ENGLISH_LEVEL } from '../../supabase/functions/_shared/englishLevel';
 import { createPendingSaves } from '@/lib/answers/pendingSaves';
 import { parseAiEvaluation, mapItemEvaluationsToAiEvaluations } from '@/utils/aiEvaluationMapper';
 import type { AiEvaluation } from '@/components/homework/AiEvaluationBadge';
@@ -490,7 +491,9 @@ export const useInteractiveSharedWorksheet = ({
                 p_exercise_index: exerciseIndex,
                 p_exercise_type: exerciseType,
                 p_answers: exerciseAnswers as any, // Cast to any for JSON compatibility
-                p_english_level: 'Intermediate',
+                // Anonymous students cannot read their level; process-pending-ai-evaluations
+                // resolves it from the worksheet's student when the row is evaluated.
+                p_english_level: DEFAULT_ENGLISH_LEVEL,
                 p_context: {
                   title: exercise?.title || `Exercise ${exerciseIndex + 1}`,
                   questions: exercise?.questions || exercise?.prompts || exercise?.sentences || exercise?.expressions || exercise?.items || [],

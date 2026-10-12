@@ -21,6 +21,7 @@ import {
 import { devLog, devWarn } from '@/utils/logger';
 import { transcribeAllAudio, buildAnswersToVerify } from '@/utils/audioEvalUtils';
 import { createPendingSaves } from '@/lib/answers/pendingSaves';
+import { resolveEnglishLevel } from '../../supabase/functions/_shared/englishLevel';
 import { callStudentAnswerRpc } from '@/lib/answers/studentAnswerRpc';
 
 
@@ -34,6 +35,8 @@ interface UseInteractiveHomeworkProps {
   /** v6.9.84: required for anonymous students: direct table writes were
    *  replaced by the token-scoped RPC `update_homework_answer_by_share_token`. */
   shareToken?: string;
+  /** Student's CEFR level (students.english_level) sent to the evaluation model. */
+  englishLevel?: string | null;
 }
 
 export const useInteractiveHomework = ({
@@ -43,7 +46,8 @@ export const useInteractiveHomework = ({
   totalExercises,
   exerciseQuestionCounts = {},
   exercises = [],
-  shareToken
+  shareToken,
+  englishLevel
 }: UseInteractiveHomeworkProps) => {
   const [answers, setAnswers] = useState<Record<number, ExerciseAnswers>>({});
   // submitHomework is memoised without `answers` in its deps; it reads the latest
@@ -317,13 +321,7 @@ export const useInteractiveHomework = ({
         devWarn('[submitHomework] Failed to emit homework_submitted event:', e);
       }
 
-      const openAnswerTypes = [
-        'reading', 'discussion', 'describe', 'answer-questions', 
-        'dialogue', 'answer-questions-audio', 'describe-picture',
-        'answer-questions-picture', 'paraphrasing', 'speaking',
-        'sentence-transformation', 'essay',
-        'listening-comprehension'
-      ];
+      const openAnswerTypes = OPEN_ENDED_EXERCISE_TYPES;
       
       devLog('[submitHomework] Starting AI verification process...');
       devLog('[submitHomework] Recognized open answer types:', openAnswerTypes);
@@ -388,7 +386,7 @@ export const useInteractiveHomework = ({
             const { data: verifyResult, error: verifyError } = await supabase.functions.invoke('verify-open-answers', {
               body: { 
                 answers: answersToVerify, 
-                english_level: 'Intermediate',
+                english_level: resolveEnglishLevel(englishLevel),
                 context: 'Homework submission - individual question evaluation',
                 // Anonymous students prove access with the homework link token + their email.
                 access: { share_token: shareToken || '', student_email: studentEmail },
@@ -589,7 +587,7 @@ export const useInteractiveHomework = ({
     } finally {
       setIsSaving(false);
     }
-  }, [homeworkId, studentEmail, audioAnswers, exercises, shareToken, totalExercises]);
+  }, [homeworkId, studentEmail, audioAnswers, exercises, shareToken, totalExercises, englishLevel]);
 
   const getProgress = useCallback((): HomeworkProgress => {
     let answeredExercises = 0;
