@@ -84,6 +84,8 @@ export const RecentStudentsBar: React.FC<RecentStudentsBarProps> = ({ students, 
           key={s.id}
           href={studentPrepPath(s.id)}
           draggable={false}
+          // Scrollbar is hidden (.no-scrollbar), so keep the keyboard-focused tile visible.
+          onFocus={(e) => e.currentTarget.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' })}
           onClick={(e) => {
             if (drag.current.moved) {
               e.preventDefault();
