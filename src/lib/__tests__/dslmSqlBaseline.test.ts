@@ -44,3 +44,19 @@ describe('DSLM pipeline SQL is versioned in migrations', () => {
     expect(sql).toMatch(new RegExp(`CREATE TRIGGER ${tg}\\b`, 'i'));
   });
 });
+
+/** Body of the newest migration that (re)defines a function, by file name order. */
+const latestDefinition = (fn: string): string => {
+  const re = new RegExp(`CREATE OR REPLACE FUNCTION public\\.${fn}\\(`, 'i');
+  const file = readdirSync(MIGRATIONS).filter((f) => f.endsWith('.sql')).sort()
+    .filter((f) => re.test(readFileSync(join(MIGRATIONS, f), 'utf8'))).pop();
+  return file ? readFileSync(join(MIGRATIONS, file), 'utf8') : '';
+};
+
+describe('Mark done supersedes the student event (decision D2)', () => {
+  it('the latest compute_skill_metric skips worksheet ratings rated again by Mark done', () => {
+    const body = latestDefinition('compute_skill_metric');
+    expect(body).toMatch(/se\.event_source = 'worksheet' AND EXISTS/);
+    expect(body).toMatch(/md\.event_type = 'mark_done_evaluation'/);
+  });
+});

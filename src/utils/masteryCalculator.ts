@@ -270,3 +270,37 @@ export const calculateOverallMastery = (
   
   return total > 0 ? Math.round((correct / total) * 100) : null;
 };
+
+/** Prefill for an item whose answer exists but has no key verdict (open item, or a typed answer the key cannot decide). */
+const NEUTRAL_PREFILL = 50;
+
+/**
+ * Initial slider value for one exercise item (decision D2: Mark done is a teacher
+ * override on the 0-100 scale, prefilled from the same key verdict the student
+ * pipeline uses, so the teacher starts from what the student event already holds).
+ * - AI evaluation (open items) wins when present.
+ * - Closed items: `calculateItemMastery` (100 correct, 0 wrong); an uncertain
+ *   answer starts neutral for the teacher to decide.
+ * - No answer: no value, the item is not submitted unless the teacher moves the slider.
+ */
+export const calculateInitialMasteryForItem = (
+  itemIndex: number,
+  studentAnswers?: Record<number, any>,
+  exerciseData?: any,
+  aiEvaluations?: Record<number, number>
+): { mastery: number | null; hasValue: boolean } => {
+  if (aiEvaluations && aiEvaluations[itemIndex] !== undefined) {
+    return { mastery: aiEvaluations[itemIndex], hasValue: true };
+  }
+  const studentAnswer = studentAnswers?.[itemIndex];
+  const exerciseType: string = exerciseData?.type || '';
+  const hasCompositeAnswer =
+    exerciseType === 'gap-text' && studentAnswers?.[`${itemIndex}_0` as unknown as number] !== undefined;
+  if ((studentAnswer === undefined || studentAnswer === null || studentAnswer === '') && !hasCompositeAnswer) {
+    return { mastery: null, hasValue: false };
+  }
+  const keyMastery = isClosedExerciseType(exerciseType)
+    ? calculateItemMastery(exerciseType, exerciseData, itemIndex, studentAnswer, studentAnswers)
+    : null;
+  return { mastery: keyMastery ?? NEUTRAL_PREFILL, hasValue: true };
+};
