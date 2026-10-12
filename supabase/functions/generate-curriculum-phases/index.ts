@@ -13,15 +13,13 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 import { authorizedTeacherId, jsonResponse, resolveCaller } from "../_shared/auth.ts";
 import { chatCompletion } from "../_shared/aiChat.ts";
 import { NO_EM_DASH_RULE } from "../_shared/writingStyle.ts";
-import { autoPacingIndex, computeIntensity, intensityPromptLines, loadLearningProfileForPacing } from "../_shared/pacing.ts";
+import { resolvePromptPacing, computeIntensity, intensityPromptLines, loadLearningProfileForPacing } from "../_shared/pacing.ts";
 
 // v6.9.13: helpers inlined (previously imported from ../_shared/dslmPromptCore.ts).
 // Iteration 5: prompt-time pacing comes from the shared ../_shared/pacing.ts
-// (same auto rule as generate-timeline); a stored non-default value is respected.
+// (same rule as generate-timeline): the stored value counts whenever someone set it.
 function computePacingIndex(student: any, weeksUntilDeadline: number | null): number {
-  const stored = Number.isFinite(student?.dslm_pacing_mode) ? Number(student.dslm_pacing_mode) : 50;
-  if (stored !== 50) return Math.max(0, Math.min(100, stored));
-  return autoPacingIndex(student, weeksUntilDeadline);
+  return resolvePromptPacing(student, weeksUntilDeadline);
 }
 function pacingLabel(p: number): string {
   if (p >= 75) return 'Pragmatic';
@@ -295,7 +293,7 @@ serve(async (req) => {
     const [studentRes, metricsRes, knowledgeRes, goalsRes, worksheetsRes, existingPhasesRes, learningProfileRes] = await Promise.all([
       supabase
         .from('students')
-        .select('name, english_level, main_goal, main_goal_target_date, dslm_pacing_mode, dslm_use_roadmap')
+        .select('name, english_level, main_goal, main_goal_target_date, dslm_pacing_mode, last_pacing_set_manually, dslm_use_roadmap')
         .eq('id', studentId)
         .eq('teacher_id', teacherId)
         .single(),

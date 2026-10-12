@@ -330,11 +330,12 @@ export interface PromptPacingStudent {
   main_goal?: string | null;
   english_level?: string | null;
   dslm_pacing_mode?: number | null;
+  /** true: the teacher set it; false: recalculate-pacing (apply) or an accepted proposal wrote it; null: never set. */
+  last_pacing_set_manually?: boolean | null;
 }
 
 /**
- * Auto pacing used when the teacher has not set one (stored value is the
- * default 50 or missing). Goal keywords, deadline weeks and level.
+ * Auto pacing used when nobody has set one yet (see resolvePromptPacing). Goal keywords, deadline weeks and level.
  */
 export function autoPacingIndex(student: PromptPacingStudent, weeksUntilDeadline: number | null): number {
   let p = 50;
@@ -358,9 +359,23 @@ export function autoPacingIndex(student: PromptPacingStudent, weeksUntilDeadline
  * Prompt-time pacing: a stored non-default value (anything but 50) is respected
  * exactly; otherwise `autoPacingIndex`.
  */
+/**
+ * Pacing for a generation prompt. The stored value is used whenever it was
+ * set by someone (the teacher, recalculate-pacing, an accepted proposal),
+ * which `last_pacing_set_manually` records as true/false; it may be exactly 50.
+ * Only a value nobody set (flag null, e.g. a new student's initial default)
+ * falls back to the auto rule. When the flag was not selected at all, the old
+ * rule (any value other than 50 counts as set) is kept.
+ */
 export function resolvePromptPacing(student: PromptPacingStudent, weeksUntilDeadline: number | null): number {
   const stored = student?.dslm_pacing_mode;
-  if (typeof stored === 'number' && Number.isFinite(stored) && stored !== 50) return clampPacing(stored, 0, 100);
+  const hasStored = typeof stored === 'number' && Number.isFinite(stored);
+  const flag = student?.last_pacing_set_manually;
+  if (flag === undefined) {
+    if (hasStored && stored !== 50) return clampPacing(stored as number, 0, 100);
+    return autoPacingIndex(student, weeksUntilDeadline);
+  }
+  if (hasStored && typeof flag === 'boolean') return clampPacing(stored as number, 0, 100);
   return autoPacingIndex(student, weeksUntilDeadline);
 }
 

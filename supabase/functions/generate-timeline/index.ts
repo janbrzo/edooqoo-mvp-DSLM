@@ -72,7 +72,7 @@ serve(async (req) => {
 
     // Fetch context
     const [studentRes, metricsRes, knowledgeRes, goalsRes, worksheetsRes, phaseRes, excludeRes, existingStepsRes, learningProfileRes] = await Promise.all([
-      supabase.from('students').select('name, english_level, main_goal, main_goal_target_date, dslm_pacing_mode, dslm_use_roadmap').eq('id', studentId).eq('teacher_id', teacherId).single(),
+      supabase.from('students').select('name, english_level, main_goal, main_goal_target_date, dslm_pacing_mode, last_pacing_set_manually, dslm_use_roadmap').eq('id', studentId).eq('teacher_id', teacherId).single(),
       supabase.from('student_skill_metrics').select('skill_name, skill_category, micro_skill, current_mastery, trend, updated_at')
         .eq('student_id', studentId).eq('teacher_id', teacherId).order('current_mastery', { ascending: true }).limit(60),
       supabase.from('student_knowledge_entries').select('content, category, created_at')

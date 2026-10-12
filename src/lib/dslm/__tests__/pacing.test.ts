@@ -283,3 +283,19 @@ describe('loadLearningProfileForPacing', () => {
     expect(none).toEqual({ profile: null, error: null });
   });
 });
+
+describe('resolvePromptPacing: "set" is decided by last_pacing_set_manually (owner decision 2026-10-12)', () => {
+  it('a value someone set is used even when it is exactly 50', () => {
+    expect(resolvePromptPacing({ dslm_pacing_mode: 50, last_pacing_set_manually: false, main_goal: 'IELTS', english_level: 'A2' }, null)).toBe(50);
+    expect(resolvePromptPacing({ dslm_pacing_mode: 50, last_pacing_set_manually: true, main_goal: 'work' }, 4)).toBe(50);
+  });
+
+  it('a value nobody set (new student default) uses the auto rule', () => {
+    expect(resolvePromptPacing({ dslm_pacing_mode: 30, last_pacing_set_manually: null, main_goal: 'IELTS', english_level: 'A2' }, null)).toBe(10);
+  });
+
+  it('without the flag in the row, the previous rule applies', () => {
+    expect(resolvePromptPacing({ dslm_pacing_mode: 30 }, null)).toBe(30);
+    expect(resolvePromptPacing({ dslm_pacing_mode: 50, main_goal: 'IELTS', english_level: 'A2' }, null)).toBe(10);
+  });
+});

@@ -63,3 +63,27 @@ describe('formatWelcomeTestAnswer', () => {
     expect(formatWelcomeTestAnswer('goes')).toBe('goes');
   });
 });
+
+describe('grammar fill_blank is strict (owner decision 2026-10-12)', () => {
+  const grammar = (correct_answer: string | string[]) => ({ question_type: 'fill_blank' as const, section: 'grammar' as const, correct_answer });
+  const vocab = (correct_answer: string) => ({ question_type: 'fill_blank' as const, section: 'vocabulary' as const, correct_answer });
+
+  it('a wrong form is wrong, not a typo to review', () => {
+    expect(checkWelcomeTestKeyedAnswer(grammar('goes'), 'gos')).toBe(false);
+    expect(checkWelcomeTestKeyedAnswer(grammar('went'), 'goed')).toBe(false);
+    expect(checkWelcomeTestKeyedAnswer(grammar(['have studied', 'have been studying']), 'have studyed')).toBe(false);
+  });
+
+  it('case, spaces and final punctuation do not matter', () => {
+    expect(checkWelcomeTestKeyedAnswer(grammar('has been working'), '  Has  been working. ')).toBe(true);
+  });
+
+  it('empty and I do not know stay wrong', () => {
+    expect(checkWelcomeTestKeyedAnswer(grammar('goes'), '')).toBe(false);
+    expect(checkWelcomeTestKeyedAnswer(grammar('goes'), WELCOME_TEST_IDK)).toBe(false);
+  });
+
+  it('vocabulary items keep matchAnswer (a spelling slip goes to review)', () => {
+    expect(checkWelcomeTestKeyedAnswer(vocab('decision'), 'decison')).toBeNull();
+  });
+});

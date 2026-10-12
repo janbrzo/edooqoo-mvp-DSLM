@@ -1,9 +1,12 @@
 /**
  * Welcome Test keyed answer checking (D6).
  *
- * Typed answers (`fill_blank`) go through the shared matcher
+ * Typed vocabulary answers (`fill_blank`) go through the shared matcher
  * (`src/lib/answers/matchAnswer.ts`): an uncertain match is `null`
- * (unscored, needs review), never `false`. Selection items (multiple choice,
+ * (unscored, needs review), never `false`. Typed GRAMMAR answers are compared
+ * strictly (case, spaces and final punctuation ignored): the form of the word
+ * is what they test, so "gos" for "goes" is wrong, not a typo to review (owner
+ * decision, 2026-10-12). Selection items (multiple choice,
  * listening, scenario) keep the exact option comparison. "I don't know" stays
  * an honest wrong answer, as before.
  *
@@ -15,9 +18,14 @@ import type { WelcomeTestQuestionDef } from '@/types/welcomeTest';
 
 export const WELCOME_TEST_IDK = '__IDK__';
 
-type KeyedQuestion = Pick<WelcomeTestQuestionDef, 'question_type' | 'correct_answer'>;
+type KeyedQuestion = Pick<WelcomeTestQuestionDef, 'question_type' | 'correct_answer'> &
+  Partial<Pick<WelcomeTestQuestionDef, 'section'>>;
 
 const VERDICT_RANK: Record<MatchVerdict, number> = { correct: 3, review: 2, wrong: 1, empty: 0 };
+
+/** Lowercase, single spaces, no final punctuation: "Has been working." = "has  been working". */
+const normalizeTyped = (v: unknown): string =>
+  String(v ?? '').toLowerCase().replace(/\s+/g, ' ').trim().replace(/[.!?]+$/, '').trim();
 
 const exactMatch = (answer: unknown, key: string | string[]): boolean => {
   const answerStr = String(answer).toLowerCase().trim();
@@ -38,6 +46,12 @@ export const checkWelcomeTestKeyedAnswer = (
 
   if (question.question_type !== 'fill_blank' || answer === WELCOME_TEST_IDK) {
     return exactMatch(answer, key);
+  }
+
+  if (question.section === 'grammar') {
+    const typed = normalizeTyped(answer);
+    const keys = Array.isArray(key) ? key : [key];
+    return typed !== '' && keys.some((k) => normalizeTyped(k) === typed);
   }
 
   const keys = Array.isArray(key) ? key : [key];
