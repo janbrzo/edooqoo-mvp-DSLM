@@ -1,0 +1,92 @@
+import { describe, it, expect } from 'vitest';
+import { readdirSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
+/**
+ * The DSLM event and metric engine lived only in the production database.
+ * Every function and trigger of that pipeline must have a definition in
+ * supabase/migrations so changes are reviewable (AGENTS.md, Answers & Evaluation).
+ */
+const MIGRATIONS = join(__dirname, '../../../supabase/migrations');
+const sql = readdirSync(MIGRATIONS)
+  .filter((f) => f.endsWith('.sql'))
+  .map((f) => readFileSync(join(MIGRATIONS, f), 'utf8'))
+  .join('\n');
+
+const PIPELINE_FUNCTIONS = [
+  'add_student_event', 'compute_skill_metric', 'refresh_skill_metrics_on_event', 'backfill_skill_metrics',
+  'extract_skill_category', 'extract_micro_skill',
+  'log_homework_answer_to_events', 'log_worksheet_answer_to_events', 'log_flashcard_review_event',
+  'log_knowledge_entry_event', 'log_test_answer_event', 'update_homework_event_with_ai_evaluation',
+  'save_homework_answer', 'save_worksheet_answer', 'get_student_homework_answers', 'get_worksheet_student_answers',
+  'get_worksheet_live_answers', 'needs_ai_evaluation', 'queue_worksheet_ai_evaluation',
+  'update_homework_answer_by_share_token', 'log_homework_submitted_event', 'log_welcome_test_event_by_share_token',
+  'save_flashcard_progress',
+  'save_homework_answer_by_share_token', 'get_student_homework_answers_by_share_token',
+  'save_worksheet_answer_by_share_token', 'get_worksheet_student_answers_by_share_token',
+  'save_mark_done_evaluation', 'delete_mark_done_evaluation',
+  'claim_pending_ai_evaluations', 'list_worksheet_answers_needing_ai_evaluation', 'mark_worksheet_answer_not_evaluable',
+];
+
+const PIPELINE_TRIGGERS = [
+  'trg_refresh_skill_metrics', 'trg_homework_answer_to_events', 'trg_worksheet_answer_to_events',
+  'trigger_log_flashcard_review_event', 'trigger_log_knowledge_entry_event', 'trigger_log_test_answer_event',
+  'trigger_update_homework_ai_evaluation',
+  'trg_refresh_skill_metrics_on_update', 'trg_refresh_skill_metrics_on_delete',
+];
+
+describe('DSLM pipeline SQL is versioned in migrations', () => {
+  it.each(PIPELINE_FUNCTIONS)('function %s is defined', (fn) => {
+    expect(sql).toMatch(new RegExp(`CREATE OR REPLACE FUNCTION public\\.${fn}\\(`, 'i'));
+  });
+
+  it.each(PIPELINE_TRIGGERS)('trigger %s is defined', (tg) => {
+    expect(sql).toMatch(new RegExp(`CREATE TRIGGER ${tg}\\b`, 'i'));
+  });
+});
+
+/** Body of the newest migration that (re)defines a function, by file name order. */
+const latestDefinition = (fn: string): string => {
+  const re = new RegExp(`CREATE OR REPLACE FUNCTION public\\.${fn}\\(`, 'i');
+  const file = readdirSync(MIGRATIONS).filter((f) => f.endsWith('.sql')).sort()
+    .filter((f) => re.test(readFileSync(join(MIGRATIONS, f), 'utf8'))).pop();
+  return file ? readFileSync(join(MIGRATIONS, file), 'utf8') : '';
+};
+
+describe('Mark done supersedes the student event (decision D2)', () => {
+  it('the latest compute_skill_metric skips worksheet ratings rated again by Mark done', () => {
+    const body = latestDefinition('compute_skill_metric');
+    expect(body).toMatch(/se\.event_source = 'worksheet' AND EXISTS/);
+    expect(body).toMatch(/md\.event_type = 'mark_done_evaluation'/);
+  });
+});
+
+describe('Flashcard review events (iteration 4)', () => {
+  it('the first review (an INSERT by the upsert) is logged too', () => {
+    expect(sql).toMatch(/CREATE TRIGGER trigger_log_flashcard_review_event\s+AFTER INSERT OR UPDATE ON public\.flashcard_progress/);
+  });
+  it('event mastery is the review outcome; the card state is kept separately', () => {
+    const body = latestDefinition('log_flashcard_review_event');
+    expect(body).toMatch(/v_raw_mastery := CASE WHEN NEW\.last_quality_rating >= 2 THEN 100 ELSE 0 END/);
+    expect(body).toMatch(/'card_state_mastery', v_state_mastery/);
+  });
+});
+
+describe('Iteration 6: backfill with audit and legacy RPC revoke', () => {
+  const read = (f: string) => readFileSync(join(MIGRATIONS, f), 'utf8');
+  it('the backfill records every change in dslm_backfill_audit', () => {
+    const body = read('20261012200000_dslm_backfill_v1.sql');
+    expect(body).toMatch(/CREATE TABLE IF NOT EXISTS public\.dslm_backfill_audit/);
+    for (const step of ['A_zero_score_stored_as_70', 'B_welcome_test_event_mastery', 'C_metric_recompute']) {
+      expect(body).toContain(step);
+    }
+  });
+  it('the legacy answer RPCs are revoked from client roles only after the token RPCs exist', () => {
+    const body = read('20261012200100_revoke_legacy_student_answer_rpcs.sql');
+    expect(body).toMatch(/save_homework_answer_by_share_token/);
+    expect(body).toMatch(/REVOKE EXECUTE ON FUNCTION %s FROM PUBLIC, anon, authenticated/);
+    for (const fn of ['save_homework_answer', 'get_student_homework_answers', 'save_worksheet_answer', 'get_worksheet_student_answers']) {
+      expect(body).toContain(`'${fn}'`);
+    }
+  });
+});

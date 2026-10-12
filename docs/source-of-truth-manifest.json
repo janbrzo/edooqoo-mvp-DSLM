@@ -17,14 +17,14 @@
   "counts": {
     "routes": 94,
     "pageModules": 88,
-    "componentModules": 390,
+    "componentModules": 392,
     "hookModules": 94,
     "contextModules": 1,
     "serviceModules": 11,
     "edgeFunctions": 81,
     "typedTables": 62,
     "typedRpcs": 88,
-    "migrationIndexes": 19
+    "migrationIndexes": 21
   },
   "routes": [
     {
@@ -518,6 +518,7 @@
         "useStudentTimeline",
         "useStudentTimelineSources",
         "useStudents",
+        "useTeacherAuthRedirect",
         "useTokenSystem",
         "useWorksheetHistory"
       ],
@@ -538,8 +539,7 @@
       ],
       "navigateTargets": [
         "/",
-        "/dashboard",
-        "/login"
+        "/dashboard"
       ]
     },
     {
@@ -2286,6 +2286,7 @@
       "hooks": [
         "useEffect",
         "useNavigate",
+        "useSearchParams",
         "useState"
       ],
       "userActions": [
@@ -2319,9 +2320,7 @@
         "useStudentHubData"
       ],
       "userActions": [],
-      "navigateTargets": [
-        "/my"
-      ]
+      "navigateTargets": []
     },
     {
       "path": "/my/:teacherToken/flashcards",
@@ -2347,9 +2346,7 @@
         "useStudentHubData"
       ],
       "userActions": [],
-      "navigateTargets": [
-        "/my"
-      ]
+      "navigateTargets": []
     },
     {
       "path": "/my/:teacherToken/homework",
@@ -2377,9 +2374,7 @@
         "useStudentHubData"
       ],
       "userActions": [],
-      "navigateTargets": [
-        "/my"
-      ]
+      "navigateTargets": []
     },
     {
       "path": "/my/:teacherToken/worksheets",
@@ -2406,9 +2401,7 @@
         "useStudentHubData"
       ],
       "userActions": [],
-      "navigateTargets": [
-        "/my"
-      ]
+      "navigateTargets": []
     },
     {
       "path": "/my/:teacherToken/lessons",
@@ -2447,9 +2440,7 @@
         "handleReschedule",
         "handleSlotClick"
       ],
-      "navigateTargets": [
-        "/my"
-      ]
+      "navigateTargets": []
     },
     {
       "path": "/my/:teacherToken/settings",
@@ -2485,9 +2476,7 @@
         "handleSetPassword",
         "handleSyncAllLessons"
       ],
-      "navigateTargets": [
-        "/my"
-      ]
+      "navigateTargets": []
     },
     {
       "path": "/my/:teacherToken/profile",
@@ -2517,9 +2506,7 @@
         "useState"
       ],
       "userActions": [],
-      "navigateTargets": [
-        "/my"
-      ]
+      "navigateTargets": []
     },
     {
       "path": "/gcal-student-callback",
@@ -6208,9 +6195,7 @@
         "useStudentHubData"
       ],
       "actions": [],
-      "navigateTargets": [
-        "/my"
-      ],
+      "navigateTargets": [],
       "dataDependencies": {
         "tables": [],
         "rpcs": [],
@@ -6242,9 +6227,7 @@
       ],
       "userFacingBehavior": {
         "actionHandlers": [],
-        "navigationTargets": [
-          "/my"
-        ]
+        "navigationTargets": []
       },
       "routes": [
         "/my/:teacherToken"
@@ -6266,9 +6249,7 @@
         "useStudentHubData"
       ],
       "actions": [],
-      "navigateTargets": [
-        "/my"
-      ],
+      "navigateTargets": [],
       "dataDependencies": {
         "tables": [],
         "rpcs": [],
@@ -6288,9 +6269,7 @@
       ],
       "userFacingBehavior": {
         "actionHandlers": [],
-        "navigationTargets": [
-          "/my"
-        ]
+        "navigationTargets": []
       },
       "routes": [
         "/my/:teacherToken/flashcards"
@@ -6320,9 +6299,7 @@
         "useStudentHubData"
       ],
       "actions": [],
-      "navigateTargets": [
-        "/my"
-      ],
+      "navigateTargets": [],
       "dataDependencies": {
         "tables": [],
         "rpcs": [],
@@ -6342,9 +6319,7 @@
       ],
       "userFacingBehavior": {
         "actionHandlers": [],
-        "navigationTargets": [
-          "/my"
-        ]
+        "navigationTargets": []
       },
       "routes": [
         "/my/:teacherToken/homework"
@@ -6413,6 +6388,7 @@
       "hooks": [
         "useEffect",
         "useNavigate",
+        "useSearchParams",
         "useState"
       ],
       "actions": [
@@ -6517,9 +6493,7 @@
         "handleReschedule",
         "handleSlotClick"
       ],
-      "navigateTargets": [
-        "/my"
-      ],
+      "navigateTargets": [],
       "dataDependencies": {
         "tables": [
           "calendar_slots"
@@ -6558,9 +6532,7 @@
           "handleReschedule",
           "handleSlotClick"
         ],
-        "navigationTargets": [
-          "/my"
-        ]
+        "navigationTargets": []
       },
       "routes": [
         "/my/:teacherToken/lessons"
@@ -6640,9 +6612,7 @@
         "useState"
       ],
       "actions": [],
-      "navigateTargets": [
-        "/my"
-      ],
+      "navigateTargets": [],
       "dataDependencies": {
         "tables": [],
         "rpcs": [],
@@ -6661,9 +6631,7 @@
       ],
       "userFacingBehavior": {
         "actionHandlers": [],
-        "navigationTargets": [
-          "/my"
-        ]
+        "navigationTargets": []
       },
       "routes": [
         "/my/:teacherToken/profile"
@@ -6738,9 +6706,7 @@
         "handleSetPassword",
         "handleSyncAllLessons"
       ],
-      "navigateTargets": [
-        "/my"
-      ],
+      "navigateTargets": [],
       "dataDependencies": {
         "tables": [],
         "rpcs": [],
@@ -6781,9 +6747,7 @@
           "handleSetPassword",
           "handleSyncAllLessons"
         ],
-        "navigationTargets": [
-          "/my"
-        ]
+        "navigationTargets": []
       },
       "routes": [
         "/my/:teacherToken/settings"
@@ -6806,9 +6770,7 @@
         "useStudentHubData"
       ],
       "actions": [],
-      "navigateTargets": [
-        "/my"
-      ],
+      "navigateTargets": [],
       "dataDependencies": {
         "tables": [],
         "rpcs": [],
@@ -6826,9 +6788,7 @@
       ],
       "userFacingBehavior": {
         "actionHandlers": [],
-        "navigationTargets": [
-          "/my"
-        ]
+        "navigationTargets": []
       },
       "routes": [
         "/my/:teacherToken/worksheets"
@@ -6961,16 +6921,6 @@
           "initial": "false"
         },
         {
-          "value": "authChecked",
-          "setter": "setAuthChecked",
-          "initial": "false"
-        },
-        {
-          "value": "isAuthenticated",
-          "setter": "setIsAuthenticated",
-          "initial": "false"
-        },
-        {
           "value": "worksheetsReady",
           "setter": "setWorksheetsReady",
           "initial": "false"
@@ -6994,6 +6944,7 @@
         "useStudentTimeline",
         "useStudentTimelineSources",
         "useStudents",
+        "useTeacherAuthRedirect",
         "useTokenSystem",
         "useWorksheetHistory"
       ],
@@ -7014,8 +6965,7 @@
       ],
       "navigateTargets": [
         "/",
-        "/dashboard",
-        "/login"
+        "/dashboard"
       ],
       "dataDependencies": {
         "tables": [
@@ -7179,8 +7129,7 @@
         ],
         "navigationTargets": [
           "/",
-          "/dashboard",
-          "/login"
+          "/dashboard"
         ]
       },
       "routes": [
@@ -7710,6 +7659,7 @@
         "Go to Student Results",
         "Great job! 🎉",
         "I don't know",
+        "Leave this question unanswered for now. You can come back to it.",
         "Loading your Welcome Test...",
         "Marked as \"I don't know\"",
         "Next",
@@ -7718,8 +7668,7 @@
         "Preview Test (Read-only)",
         "Previous",
         "Question",
-        "Question 1 of 58",
-        "Questions answered"
+        "Question 1 of 58"
       ],
       "userFacingBehavior": {
         "actionHandlers": [
@@ -18886,6 +18835,47 @@
       }
     },
     {
+      "path": "src/components/dslm/ProfileSignalsV2.tsx",
+      "domain": "dslm",
+      "purpose": "Implements Answer Behaviour Line behavior in the dslm domain.",
+      "exports": [
+        "AnswerBehaviourLine",
+        "DeclaredVsMeasured",
+        "LearningPathBlock",
+        "LowCoverageBadge"
+      ],
+      "props": [],
+      "state": [],
+      "hooks": [],
+      "actions": [],
+      "navigateTargets": [],
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "storage": [],
+      "userFacingText": [
+        "% of the signals",
+        "/100",
+        "Answer behaviour",
+        "Declared vs measured",
+        "Declared:",
+        "How intense the plan can be (phase length, homework load). This is separate from the Scientific/Pragmatic style slider.",
+        "Learning path (intensity)",
+        "Low signal coverage",
+        "Older test: unanswered questions were counted as average, so treat this score as a rough hint.",
+        "Strongest signals:",
+        "based on",
+        "· Observed:"
+      ],
+      "userFacingBehavior": {
+        "actionHandlers": [],
+        "navigationTargets": []
+      }
+    },
+    {
       "path": "src/components/dslm/ProfileView.tsx",
       "domain": "dslm",
       "purpose": "Implements Profile View behavior in the dslm domain.",
@@ -18932,6 +18922,7 @@
       "userFacingText": [
         "AI Summary",
         "Advanced: diagnostic log",
+        "Deterministic fallback",
         "Interest Topics",
         "Key Observations:",
         "Learning Patterns",
@@ -18941,7 +18932,8 @@
         "Psychological Profile",
         "Recommendations:",
         "Self-Efficacy",
-        "Send a Welcome Test to unlock the psychological profile."
+        "Send a Welcome Test to unlock the psychological profile.",
+        "The AI step failed, so this summary was built from the test answers by rules."
       ],
       "userFacingBehavior": {
         "actionHandlers": [],
@@ -19197,6 +19189,29 @@
         "Update topic, goal, focus and exercise types.",
         "e.g., Present Perfect..."
       ],
+      "userFacingBehavior": {
+        "actionHandlers": [],
+        "navigationTargets": []
+      }
+    },
+    {
+      "path": "src/components/dslm/__tests__/ProfileSignalsV2.test.tsx",
+      "domain": "dslm",
+      "purpose": "Implements Profile Signals V2 behavior in the dslm domain.",
+      "exports": [],
+      "props": [],
+      "state": [],
+      "hooks": [],
+      "actions": [],
+      "navigateTargets": [],
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "storage": [],
+      "userFacingText": [],
       "userFacingBehavior": {
         "actionHandlers": [],
         "navigationTargets": []
@@ -29216,13 +29231,13 @@
         "Correct",
         "Correct answer:",
         "Generate Share Link",
+        "Needs review",
         "Profile Questions",
         "Questions",
         "Re-take Test",
         "Recording was not uploaded (saved as:",
         "Results by Skill",
-        "Score",
-        "Share Test"
+        "Score"
       ],
       "userFacingBehavior": {
         "actionHandlers": [
@@ -32776,15 +32791,15 @@
       },
       "storage": [],
       "userFacingText": [
+        "\"Skip\" is not the same as \"I don't know\"",
+        "\"Skip\" moves on and leaves the question unanswered, so your teacher learns nothing from it. You can always go back and answer later.",
         "Before You Begin",
         "Don't guess on grammar/vocabulary questions",
-        "If you don't know the answer, use the \"I don't know\" button or skip it. Honest answers help your teacher more than lucky guesses.",
+        "If you don't know the answer, tap \"I don't know\". It is the honest choice and helps your teacher find the right level, much more than a lucky guess.",
         "Start",
         "There are no right or wrong answers for most questions. Your teacher wants to understand how you learn best.",
         "This is NOT a graded exam",
-        "Use the \"Skip\" button to move to the next question. You can always go back.",
         "You can pause anytime",
-        "You can skip questions",
         "Your progress is saved automatically. Close the browser and come back later; you'll continue where you left off.",
         "questions • ~30 min"
       ],
@@ -37489,6 +37504,11 @@
               "optional": true
             },
             {
+              "name": "storedEvaluations",
+              "type": "Record<number, number>",
+              "optional": true
+            },
+            {
               "name": "isLoadingAiEvaluation",
               "type": "boolean",
               "optional": true
@@ -41065,6 +41085,11 @@
                 "name": "shareToken",
                 "type": "string",
                 "optional": true
+              },
+              {
+                "name": "englishLevel",
+                "type": "string | null",
+                "optional": true
               }
             ]
           }
@@ -41129,9 +41154,7 @@
         "dataDependencies": {
           "tables": [],
           "rpcs": [
-            "get_student_homework_answers",
             "insert_homework_submission_notification",
-            "save_homework_answer",
             "submit_homework_answers",
             "update_homework_answer_by_share_token",
             "verify_homework_student_email"
@@ -41184,6 +41207,11 @@
               {
                 "name": "exercises",
                 "type": "any[]",
+                "optional": true
+              },
+              {
+                "name": "shareToken",
+                "type": "string",
                 "optional": true
               }
             ]
@@ -41245,17 +41273,15 @@
         "dataDependencies": {
           "tables": [],
           "rpcs": [
-            "get_worksheet_student_answers",
             "needs_ai_evaluation",
             "queue_worksheet_ai_evaluation",
-            "save_worksheet_answer",
             "verify_worksheet_student_email"
           ],
           "edgeFunctions": [
             "process-pending-ai-evaluations"
           ],
           "fetchTargets": [
-            "https://bvfrkzdlklyvnhlpleck.supabase.co/rest/v1/rpc/save_worksheet_answer"
+            "${SUPABASE_URL}/rest/v1/rpc/${rpcName}"
           ]
         },
         "storage": [],
@@ -46404,9 +46430,12 @@
           "POST"
         ],
         "requestFields": [
-          "exercise_index"
+          "exercise_index",
+          "trigger_source",
+          "worksheet_id"
         ],
         "visibleResponseFields": [
+          "accepted",
           "answers",
           "audio_url",
           "context",
@@ -46421,10 +46450,14 @@
         "dataDependencies": {
           "tables": [
             "pending_worksheet_ai_evaluations",
+            "students",
             "worksheet_student_answers",
             "worksheets"
           ],
           "rpcs": [
+            "claim_pending_ai_evaluations",
+            "list_worksheet_answers_needing_ai_evaluation",
+            "mark_worksheet_answer_not_evaluable",
             "needs_ai_evaluation"
           ],
           "edgeFunctions": [],
@@ -46434,6 +46467,7 @@
           ]
         },
         "environmentVariables": [
+          "CRON_SECRET",
           "SUPABASE_SERVICE_ROLE_KEY",
           "SUPABASE_URL"
         ]
@@ -46458,6 +46492,7 @@
           "last_rated_at",
           "nano_skill_ratings",
           "reviewed_at",
+          "share_token",
           "student_id",
           "suggested_rating",
           "teacher_id"
@@ -46472,6 +46507,7 @@
           "html",
           "key_observations",
           "learning_path",
+          "profile_unchanged",
           "recommendations",
           "reviewed_at",
           "status",
@@ -46492,6 +46528,7 @@
             "profiles",
             "student_events",
             "student_learning_elements",
+            "student_learning_profile_versions",
             "student_learning_profiles",
             "student_progress_goals",
             "student_test_questions",
@@ -46569,6 +46606,7 @@
         "visibleResponseFields": [
           "current",
           "error",
+          "intensity",
           "mode",
           "pacingMode",
           "proposalId",
@@ -47707,7 +47745,9 @@
           "OPTIONS",
           "POST"
         ],
-        "requestFields": [],
+        "requestFields": [
+          "answers"
+        ],
         "visibleResponseFields": [
           "details",
           "error"
@@ -47720,7 +47760,9 @@
         },
         "environmentVariables": [
           "GEMINI_API_KEY",
-          "OPENAI_API_KEY"
+          "OPENAI_API_KEY",
+          "SUPABASE_SERVICE_ROLE_KEY",
+          "SUPABASE_URL"
         ]
       },
       {
@@ -48151,6 +48193,8 @@
         ],
         "payloadFields": [
           "exercise_index",
+          "share_token",
+          "student_email",
           "trigger_source",
           "worksheet_id"
         ],
@@ -48168,6 +48212,7 @@
           "detected_traits",
           "force",
           "integrity",
+          "share_token",
           "student_id",
           "teacher_id",
           "test_id"
@@ -48427,6 +48472,7 @@
           "src/hooks/useInteractiveHomework.tsx"
         ],
         "payloadFields": [
+          "access",
           "answers",
           "context",
           "english_level"
@@ -48698,17 +48744,6 @@
         "payloadExpressions": []
       },
       {
-        "name": "get_student_homework_answers",
-        "callsites": [
-          "src/hooks/useInteractiveHomework.tsx"
-        ],
-        "payloadFields": [
-          "p_homework_id",
-          "p_student_email"
-        ],
-        "payloadExpressions": []
-      },
-      {
         "name": "get_student_meeting_link",
         "callsites": [
           "src/hooks/usePublicBooking.tsx"
@@ -48785,17 +48820,6 @@
           "src/hooks/useLiveSessionAnswers.tsx"
         ],
         "payloadFields": [
-          "p_worksheet_id"
-        ],
-        "payloadExpressions": []
-      },
-      {
-        "name": "get_worksheet_student_answers",
-        "callsites": [
-          "src/hooks/useInteractiveSharedWorksheet.tsx"
-        ],
-        "payloadFields": [
-          "p_student_email",
           "p_worksheet_id"
         ],
         "payloadExpressions": []
@@ -48950,24 +48974,6 @@
         ]
       },
       {
-        "name": "save_homework_answer",
-        "callsites": [
-          "src/hooks/useInteractiveHomework.tsx"
-        ],
-        "payloadFields": [
-          "p_answers",
-          "p_audio_answers",
-          "p_exercise_index",
-          "p_exercise_type",
-          "p_homework_id",
-          "p_item_evaluations",
-          "p_mastery",
-          "p_student_email",
-          "p_time_spent_ms"
-        ],
-        "payloadExpressions": []
-      },
-      {
         "name": "save_teacher_comment",
         "callsites": [
           "src/pages/HomeworkReviewPage.tsx"
@@ -48992,24 +48998,6 @@
           "p_question_index",
           "p_share_token",
           "p_time_spent_seconds"
-        ],
-        "payloadExpressions": []
-      },
-      {
-        "name": "save_worksheet_answer",
-        "callsites": [
-          "src/hooks/useInteractiveSharedWorksheet.tsx"
-        ],
-        "payloadFields": [
-          "p_answers",
-          "p_audio_answers",
-          "p_exercise_index",
-          "p_exercise_type",
-          "p_item_evaluations",
-          "p_mastery",
-          "p_student_email",
-          "p_time_spent_ms",
-          "p_worksheet_id"
         ],
         "payloadExpressions": []
       },
@@ -54152,6 +54140,7 @@
             "loop-student-engagement",
             "mcp",
             "pacing-periodic-check",
+            "process-pending-ai-evaluations",
             "process-welcome-test",
             "recalculate-pacing",
             "send-calendar-notification-email",
@@ -56976,9 +56965,25 @@
         "table": "model_audit_reports",
         "unique": false,
         "migration": "supabase/migrations/20261004120000_model_audit_lifecycle.sql"
+      },
+      {
+        "name": "idx_student_events_mark_done_lookup",
+        "table": "student_events",
+        "unique": false,
+        "migration": "supabase/migrations/20261012160000_mark_done_supersedes_student_events.sql"
+      },
+      {
+        "name": "idx_learning_profile_versions_student",
+        "table": "student_learning_profile_versions",
+        "unique": false,
+        "migration": "supabase/migrations/20261012180000_welcome_test_profile_v2.sql"
       }
     ],
     "migrationFunctions": [
+      {
+        "name": "add_student_event",
+        "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
+      },
       {
         "name": "apply_intake_extraction",
         "migration": "supabase/migrations/20260617162941_66b70675-3140-44e5-b81e-6b034065a814.sql"
@@ -56992,12 +56997,32 @@
         "migration": "supabase/migrations/20260626192112_6086f5ef-d4e1-47cf-9691-0666c77e8673.sql"
       },
       {
+        "name": "backfill_skill_metrics",
+        "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
+      },
+      {
         "name": "book_public_slot",
         "migration": "supabase/migrations/20260807134305_4fefd413-26a5-465b-af2f-30820627dde8.sql"
       },
       {
         "name": "calculate_test_results",
         "migration": "supabase/migrations/20260609191429_f1209887-288d-49d1-98f8-e3de2a43be52.sql"
+      },
+      {
+        "name": "claim_pending_ai_evaluations",
+        "migration": "supabase/migrations/20261012140000_ai_evaluation_queue_v2.sql"
+      },
+      {
+        "name": "compute_skill_metric",
+        "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
+      },
+      {
+        "name": "compute_skill_metric",
+        "migration": "supabase/migrations/20261012120000_dslm_event_triggers_v2.sql"
+      },
+      {
+        "name": "compute_skill_metric",
+        "migration": "supabase/migrations/20261012160000_mark_done_supersedes_student_events.sql"
       },
       {
         "name": "consume_newsletter_rate_limit",
@@ -57010,6 +57035,18 @@
       {
         "name": "create_mcp_token",
         "migration": "supabase/migrations/20260725124453_86489a73-813a-457d-aff2-4f7037b4d6c5.sql"
+      },
+      {
+        "name": "delete_mark_done_evaluation",
+        "migration": "supabase/migrations/20261012120000_dslm_event_triggers_v2.sql"
+      },
+      {
+        "name": "extract_micro_skill",
+        "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
+      },
+      {
+        "name": "extract_skill_category",
+        "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
       },
       {
         "name": "generate_public_slug",
@@ -57056,6 +57093,14 @@
         "migration": "supabase/migrations/20260809180315_754eca52-5bfe-4330-b4c4-27f58070b8f2.sql"
       },
       {
+        "name": "get_student_homework_answers_by_share_token",
+        "migration": "supabase/migrations/20261012090100_student_answer_share_token_rpcs.sql"
+      },
+      {
+        "name": "get_student_homework_answers",
+        "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
+      },
+      {
         "name": "get_test_context_by_share_token",
         "migration": "supabase/migrations/20260804200705_0c128cfa-b83a-47b2-8d69-90962554c973.sql"
       },
@@ -57064,8 +57109,28 @@
         "migration": "supabase/migrations/20260804200705_0c128cfa-b83a-47b2-8d69-90962554c973.sql"
       },
       {
+        "name": "get_worksheet_live_answers",
+        "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
+      },
+      {
+        "name": "get_worksheet_student_answers_by_share_token",
+        "migration": "supabase/migrations/20261012090100_student_answer_share_token_rpcs.sql"
+      },
+      {
+        "name": "get_worksheet_student_answers",
+        "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
+      },
+      {
         "name": "handle_email_confirmed",
         "migration": "supabase/migrations/20260505064801_45a8e80c-6a10-4530-9c60-06c0e31371cf.sql"
+      },
+      {
+        "name": "has_homework_student_access",
+        "migration": "supabase/migrations/20261012090100_student_answer_share_token_rpcs.sql"
+      },
+      {
+        "name": "has_worksheet_student_access",
+        "migration": "supabase/migrations/20261012090100_student_answer_share_token_rpcs.sql"
       },
       {
         "name": "increment_download_session_by_token",
@@ -57080,8 +57145,36 @@
         "migration": "supabase/migrations/20260809180315_754eca52-5bfe-4330-b4c4-27f58070b8f2.sql"
       },
       {
+        "name": "list_worksheet_answers_needing_ai_evaluation",
+        "migration": "supabase/migrations/20261012140000_ai_evaluation_queue_v2.sql"
+      },
+      {
+        "name": "log_flashcard_review_event",
+        "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
+      },
+      {
+        "name": "log_flashcard_review_event",
+        "migration": "supabase/migrations/20261012160100_flashcard_review_events_v2.sql"
+      },
+      {
+        "name": "log_homework_answer_to_events",
+        "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
+      },
+      {
+        "name": "log_homework_answer_to_events",
+        "migration": "supabase/migrations/20261012120000_dslm_event_triggers_v2.sql"
+      },
+      {
         "name": "log_homework_submitted_event",
         "migration": "supabase/migrations/20261006090000_billing_guard_and_student_events.sql"
+      },
+      {
+        "name": "log_knowledge_entry_event",
+        "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
+      },
+      {
+        "name": "log_test_answer_event",
+        "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
       },
       {
         "name": "log_welcome_test_event_by_share_token",
@@ -57092,8 +57185,24 @@
         "migration": "supabase/migrations/20261006120000_welcome_test_event_dedup_fix.sql"
       },
       {
+        "name": "log_worksheet_answer_to_events",
+        "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
+      },
+      {
+        "name": "log_worksheet_answer_to_events",
+        "migration": "supabase/migrations/20261012120000_dslm_event_triggers_v2.sql"
+      },
+      {
         "name": "mark_attention_seen",
         "migration": "supabase/migrations/20260623202114_6dc3ae03-5d7e-4e9d-b3a7-56a0763ba472.sql"
+      },
+      {
+        "name": "mark_worksheet_answer_not_evaluable",
+        "migration": "supabase/migrations/20261012160200_ai_queue_not_evaluable_marker.sql"
+      },
+      {
+        "name": "needs_ai_evaluation",
+        "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
       },
       {
         "name": "prevent_profile_billing_self_update",
@@ -57102,6 +57211,22 @@
       {
         "name": "prevent_profile_billing_self_update",
         "migration": "supabase/migrations/20261006090000_billing_guard_and_student_events.sql"
+      },
+      {
+        "name": "queue_worksheet_ai_evaluation",
+        "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
+      },
+      {
+        "name": "queue_worksheet_ai_evaluation",
+        "migration": "supabase/migrations/20261012140000_ai_evaluation_queue_v2.sql"
+      },
+      {
+        "name": "refresh_skill_metrics_on_event",
+        "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
+      },
+      {
+        "name": "refresh_skill_metrics_on_event",
+        "migration": "supabase/migrations/20261012120000_dslm_event_triggers_v2.sql"
       },
       {
         "name": "revoke_mcp_token",
@@ -57116,8 +57241,28 @@
         "migration": "supabase/migrations/20260807134305_4fefd413-26a5-465b-af2f-30820627dde8.sql"
       },
       {
+        "name": "save_homework_answer_by_share_token",
+        "migration": "supabase/migrations/20261012090100_student_answer_share_token_rpcs.sql"
+      },
+      {
+        "name": "save_homework_answer",
+        "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
+      },
+      {
+        "name": "save_mark_done_evaluation",
+        "migration": "supabase/migrations/20261012120000_dslm_event_triggers_v2.sql"
+      },
+      {
         "name": "save_test_answer_by_share_token",
         "migration": "supabase/migrations/20260804200705_0c128cfa-b83a-47b2-8d69-90962554c973.sql"
+      },
+      {
+        "name": "save_worksheet_answer_by_share_token",
+        "migration": "supabase/migrations/20261012090100_student_answer_share_token_rpcs.sql"
+      },
+      {
+        "name": "save_worksheet_answer",
+        "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
       },
       {
         "name": "set_test_answered_count_by_share_token",
@@ -57150,6 +57295,10 @@
       {
         "name": "update_homework_answer_by_share_token",
         "migration": "supabase/migrations/20260731162257_e03802c9-4606-4a66-a957-86030183f689.sql"
+      },
+      {
+        "name": "update_homework_event_with_ai_evaluation",
+        "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
       },
       {
         "name": "verify_welcome_test_email",
@@ -57214,7 +57363,6 @@
         "host": "bvfrkzdlklyvnhlpleck.supabase.co",
         "callsites": [
           "src/hooks/useHomeworkExerciseGeneration.tsx",
-          "src/hooks/useInteractiveSharedWorksheet.tsx",
           "src/integrations/supabase/client.ts",
           "src/pages/NewsletterAction.tsx",
           "src/pages/settings/McpTokensPage.tsx",
@@ -57369,6 +57517,7 @@
           "supabase/functions/update-student-self-profile/index.ts",
           "supabase/functions/upload-to-r2/index.ts",
           "supabase/functions/verify-export-payment/index.ts",
+          "supabase/functions/verify-open-answers/index.ts",
           "supabase/functions/verify-subscription-payment/index.ts"
         ]
       },
@@ -57559,6 +57708,7 @@
           "supabase/functions/audit-llm-models/index.ts",
           "supabase/functions/backfill-welcome-test-auto-apply/index.ts",
           "supabase/functions/bulk-publish-worksheets/index.ts",
+          "supabase/functions/process-pending-ai-evaluations/index.ts",
           "supabase/functions/send-homework-reminders/index.ts",
           "supabase/functions/send-model-audit-email/index.ts",
           "supabase/functions/send-next-lesson-newsletter/index.ts",
@@ -57829,6 +57979,7 @@
           "supabase/functions/update-student-self-profile/index.ts",
           "supabase/functions/upload-to-r2/index.ts",
           "supabase/functions/verify-export-payment/index.ts",
+          "supabase/functions/verify-open-answers/index.ts",
           "supabase/functions/verify-subscription-payment/index.ts"
         ]
       },
@@ -57902,6 +58053,7 @@
           "supabase/functions/update-student-self-profile/index.ts",
           "supabase/functions/upload-to-r2/index.ts",
           "supabase/functions/verify-export-payment/index.ts",
+          "supabase/functions/verify-open-answers/index.ts",
           "supabase/functions/verify-subscription-payment/index.ts"
         ]
       },
@@ -57921,6 +58073,7 @@
       {
         "name": "VITE_SUPABASE_PUBLISHABLE_KEY",
         "callsites": [
+          "src/hooks/useInteractiveSharedWorksheet.tsx",
           "src/lib/edgeFunctionHeaders.ts",
           "src/utils/promptFormatter.ts"
         ]
@@ -57928,6 +58081,7 @@
       {
         "name": "VITE_SUPABASE_URL",
         "callsites": [
+          "src/hooks/useInteractiveSharedWorksheet.tsx",
           "src/services/worksheetStreamService.ts",
           "src/utils/promptFormatter.ts"
         ]

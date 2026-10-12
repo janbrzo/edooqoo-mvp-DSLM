@@ -23,6 +23,7 @@ import {
 } from "../_shared/dslmPromptCore.ts";
 import { chatCompletion } from "../_shared/aiChat.ts";
 import { NO_EM_DASH_RULE } from "../_shared/writingStyle.ts";
+import { computeIntensity, intensityPromptLines, loadLearningProfileForPacing } from "../_shared/pacing.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -70,8 +71,8 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
     // Fetch context
-    const [studentRes, metricsRes, knowledgeRes, goalsRes, worksheetsRes, phaseRes, excludeRes, existingStepsRes] = await Promise.all([
-      supabase.from('students').select('name, english_level, main_goal, main_goal_target_date, dslm_pacing_mode, dslm_use_roadmap').eq('id', studentId).eq('teacher_id', teacherId).single(),
+    const [studentRes, metricsRes, knowledgeRes, goalsRes, worksheetsRes, phaseRes, excludeRes, existingStepsRes, learningProfileRes] = await Promise.all([
+      supabase.from('students').select('name, english_level, main_goal, main_goal_target_date, dslm_pacing_mode, last_pacing_set_manually, dslm_use_roadmap').eq('id', studentId).eq('teacher_id', teacherId).single(),
       supabase.from('student_skill_metrics').select('skill_name, skill_category, micro_skill, current_mastery, trend, updated_at')
         .eq('student_id', studentId).eq('teacher_id', teacherId).order('current_mastery', { ascending: true }).limit(60),
       supabase.from('student_knowledge_entries').select('content, category, created_at')
@@ -95,6 +96,8 @@ serve(async (req) => {
         .eq('student_id', studentId).eq('teacher_id', teacherId)
         .is('deleted_at', null).eq('is_used', false)
         .order('sequence_number', { ascending: true }).limit(20),
+      // Welcome Test Learning Path (intensity); tolerant of a missing row/column.
+      loadLearningProfileForPacing(supabase, studentId, teacherId),
     ]);
 
     const student = studentRes.data;
@@ -127,7 +130,12 @@ serve(async (req) => {
     // v6.9.15c: trim per-section limits to keep prompt compact for batch (count>1)
     // generation. Sanitizer downstream still enforces hard guarantees.
     const scientificFramework = buildScientificPrinciplesBlock((student as any).english_level, pacing);
-    const studentProfile = buildStudentProfileBlock(student as any, pacing);
+    if (learningProfileRes.error) console.warn('[generate-timeline] learning profile read failed', learningProfileRes.error);
+    const intensity = computeIntensity(
+      learningProfileRes.profile?.learning_path ?? null,
+      weeksUntilDeadline !== null ? weeksUntilDeadline * 7 : null,
+    );
+    const studentProfile = buildStudentProfileBlock(student as any, pacing, intensityPromptLines(intensity));
     const weakBlock = buildWeakAreasBlock(metrics, 8);
     const knowledgeBlock = buildKnowledgeBlock(knowledge, 6);
     const goalsBlock = buildGoalsBlock(goals);

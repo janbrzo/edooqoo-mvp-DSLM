@@ -16,10 +16,16 @@ import {
 } from '@/utils/masteryCalculator';
 import { buildClosedItemContext } from '@/lib/answers/closedItemContext';
 import { hasRevealedAnswers } from '@/lib/answers/revealState';
+import { DEFAULT_ENGLISH_LEVEL } from '../../supabase/functions/_shared/englishLevel';
 import { createPendingSaves } from '@/lib/answers/pendingSaves';
 import { parseAiEvaluation, mapItemEvaluationsToAiEvaluations } from '@/utils/aiEvaluationMapper';
 import type { AiEvaluation } from '@/components/homework/AiEvaluationBadge';
 import { devLog, devWarn } from '@/utils/logger';
+import { callStudentAnswerRpc, studentAnswerRpcName } from '@/lib/answers/studentAnswerRpc';
+
+// Same project values the generated client uses; read from env instead of hardcoding them.
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
+const SUPABASE_PUBLISHABLE_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
 
 interface UseInteractiveSharedWorksheetProps {
   worksheetId: string;
@@ -27,6 +33,8 @@ interface UseInteractiveSharedWorksheetProps {
   totalExercises: number;
   exerciseQuestionCounts?: Record<number, number>;
   exercises?: any[]; // For AI verification context
+  /** Share token from the /shared/:token URL; proves access when the queue is processed. */
+  shareToken?: string;
 }
 
 export const useInteractiveSharedWorksheet = ({
@@ -34,7 +42,8 @@ export const useInteractiveSharedWorksheet = ({
   studentEmail,
   totalExercises,
   exerciseQuestionCounts = {},
-  exercises = []
+  exercises = [],
+  shareToken = ''
 }: UseInteractiveSharedWorksheetProps) => {
   const [answers, setAnswers] = useState<Record<number, ExerciseAnswers>>({});
   const [audioAnswers, setAudioAnswers] = useState<Record<number, Record<number, string>>>({});
@@ -85,10 +94,10 @@ export const useInteractiveSharedWorksheet = ({
       setIsLoading(true);
       devLog('[useInteractiveSharedWorksheet] Loading answers for:', worksheetId, studentEmail);
       
-      const { data, error } = await supabase.rpc('get_worksheet_student_answers', {
+      const { data, error } = await callStudentAnswerRpc('get_worksheet_student_answers', {
         p_worksheet_id: worksheetId,
         p_student_email: studentEmail.trim().toLowerCase()
-      });
+      }, shareToken);
 
       if (error) throw error;
 
@@ -146,7 +155,7 @@ export const useInteractiveSharedWorksheet = ({
     } finally {
       setIsLoading(false);
     }
-  }, [worksheetId, studentEmail]);
+  }, [worksheetId, studentEmail, shareToken]);
 
   // PROBLEM 1 FIX: Calculate active time for an exercise
   const getActiveTimeMs = useCallback((exerciseIndex: number): number => {
@@ -174,7 +183,7 @@ export const useInteractiveSharedWorksheet = ({
       // PROBLEM 1 FIX: Include active time in save
       const activeTimeMs = getActiveTimeMs(exerciseIndex);
       
-      const { error } = await supabase.rpc('save_worksheet_answer', {
+      const { error } = await callStudentAnswerRpc('save_worksheet_answer', {
         p_worksheet_id: worksheetId,
         p_student_email: studentEmail.trim().toLowerCase(),
         p_exercise_index: exerciseIndex,
@@ -184,7 +193,7 @@ export const useInteractiveSharedWorksheet = ({
         p_mastery: mastery ?? null,
         p_item_evaluations: itemEvaluations ? JSON.parse(JSON.stringify(itemEvaluations)) : null,
         p_audio_answers: audioAnswersForExercise ? JSON.parse(JSON.stringify(audioAnswersForExercise)) : null
-      });
+      }, shareToken);
 
       if (error) throw error;
 
@@ -204,7 +213,7 @@ export const useInteractiveSharedWorksheet = ({
       });
       setIsSaving(false);
     }
-  }, [worksheetId, studentEmail, getActiveTimeMs]);
+  }, [worksheetId, studentEmail, getActiveTimeMs, shareToken]);
 
   // Debounced auto-save function (1.5 seconds for real-time feel)
   const scheduleAutoSave = useCallback((exerciseIndex: number, exerciseType: string, exerciseAnswers: ExerciseAnswers) => {
@@ -384,7 +393,9 @@ export const useInteractiveSharedWorksheet = ({
         const activeTimeMs = getActiveTimeMs(exerciseIndex);
         
         // 1. Save the answer itself using fetch with keepalive (ALWAYS)
+        const rpcName = studentAnswerRpcName('save_worksheet_answer', shareToken);
         const saveData = {
+          ...(rpcName.endsWith('_by_share_token') ? { p_share_token: shareToken } : {}),
           p_worksheet_id: worksheetId,
           p_student_email: studentEmail.trim().toLowerCase(),
           p_exercise_index: exerciseIndex,
@@ -393,12 +404,12 @@ export const useInteractiveSharedWorksheet = ({
           p_time_spent_ms: activeTimeMs
         };
         
-        fetch(`https://bvfrkzdlklyvnhlpleck.supabase.co/rest/v1/rpc/save_worksheet_answer`, {
+        fetch(`${SUPABASE_URL}/rest/v1/rpc/${rpcName}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ2ZnJremRsa2x5dm5obHBsZWNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUyNDYyMzQsImV4cCI6MjA2MDgyMjIzNH0.RXlVKVPO4WTD6c4sA9fZIYAQe6zKPqoMoVE6Ilit9ls',
-            'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJ2ZnJremRsa2x5dm5obHBsZWNrIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDUyNDYyMzQsImV4cCI6MjA2MDgyMjIzNH0.RXlVKVPO4WTD6c4sA9fZIYAQe6zKPqoMoVE6Ilit9ls',
+            'apikey': SUPABASE_PUBLISHABLE_KEY,
+            'Authorization': `Bearer ${SUPABASE_PUBLISHABLE_KEY}`,
             'Prefer': 'return=minimal'
           },
           body: JSON.stringify(saveData),
@@ -411,7 +422,7 @@ export const useInteractiveSharedWorksheet = ({
 
     window.addEventListener('beforeunload', handleBeforeUnload);
     return () => window.removeEventListener('beforeunload', handleBeforeUnload);
-  }, [answers, worksheetId, studentEmail, exercises, getActiveTimeMs]);
+  }, [answers, worksheetId, studentEmail, exercises, getActiveTimeMs, shareToken]);
 
   // Flush pending saves on unmount so the last second of answers is not dropped
   useEffect(() => {
@@ -480,7 +491,9 @@ export const useInteractiveSharedWorksheet = ({
                 p_exercise_index: exerciseIndex,
                 p_exercise_type: exerciseType,
                 p_answers: exerciseAnswers as any, // Cast to any for JSON compatibility
-                p_english_level: 'Intermediate',
+                // Anonymous students cannot read their level; process-pending-ai-evaluations
+                // resolves it from the worksheet's student when the row is evaluated.
+                p_english_level: DEFAULT_ENGLISH_LEVEL,
                 p_context: {
                   title: exercise?.title || `Exercise ${exerciseIndex + 1}`,
                   questions: exercise?.questions || exercise?.prompts || exercise?.sentences || exercise?.expressions || exercise?.items || [],
@@ -501,7 +514,12 @@ export const useInteractiveSharedWorksheet = ({
         try {
           devLog('[useInteractiveSharedWorksheet] Calling process-pending-ai-evaluations after 10-min timer');
           await supabase.functions.invoke('process-pending-ai-evaluations', {
-            body: { worksheet_id: worksheetId, trigger_source: '10min_inactivity' }
+            body: {
+              worksheet_id: worksheetId,
+              trigger_source: '10min_inactivity',
+              share_token: shareToken,
+              student_email: studentEmail.trim().toLowerCase(),
+            }
           });
           devLog('[useInteractiveSharedWorksheet] AI evaluations processed successfully');
           setIsSubmittedForReview(true);
@@ -515,7 +533,7 @@ export const useInteractiveSharedWorksheet = ({
     const interval = setInterval(checkAndTriggerAiEval, ONE_MINUTE);
     
     return () => clearInterval(interval);
-  }, [lastSavedAt, answers, worksheetId, studentEmail, exercises]);
+  }, [lastSavedAt, answers, worksheetId, studentEmail, exercises, shareToken]);
 
   // Polling: refresh aiEvaluations + itemEvaluations every 30s so student sees AI feedback without refresh
   useEffect(() => {
@@ -525,10 +543,10 @@ export const useInteractiveSharedWorksheet = ({
     
     const pollEvaluations = async () => {
       try {
-        const { data, error } = await supabase.rpc('get_worksheet_student_answers', {
+        const { data, error } = await callStudentAnswerRpc('get_worksheet_student_answers', {
           p_worksheet_id: worksheetId,
           p_student_email: studentEmail.trim().toLowerCase()
-        });
+        }, shareToken);
         
         if (error || !data) return;
         
@@ -570,7 +588,7 @@ export const useInteractiveSharedWorksheet = ({
     
     const interval = setInterval(pollEvaluations, POLL_INTERVAL);
     return () => clearInterval(interval);
-  }, [worksheetId, studentEmail, itemEvaluations]);
+  }, [worksheetId, studentEmail, itemEvaluations, shareToken]);
 
   // Update audio answer for a specific exercise/question
   const updateAudioAnswer = useCallback((exerciseIndex: number, questionIndex: number, audioUrl: string) => {

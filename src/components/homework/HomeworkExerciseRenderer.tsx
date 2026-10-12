@@ -37,6 +37,7 @@ import ExerciseFillInBlanksAudio from '@/components/worksheet/ExerciseFillInBlan
 import ExerciseDescribe from '@/components/worksheet/ExerciseDescribe';
 import ExerciseAnswerQuestions from '@/components/worksheet/ExerciseAnswerQuestions';
 import { ClosedAiExplanations } from '@/components/homework/ClosedAiExplanations';
+import { isOpenExerciseType } from '@/utils/masteryCalculator';
 
 interface HomeworkExerciseRendererProps {
   exercise: any;
@@ -59,14 +60,6 @@ const normalizeExerciseType = (type: string): string => {
   return type.replace('-picture', '').replace('-audio', '');
 };
 
-// Open-ended exercise types that can have AI evaluation
-const OPEN_ENDED_TYPES = [
-  'reading', 'discussion', 'describe', 'answer-questions', 
-  'dialogue', 'answer-questions-audio', 'describe-picture',
-  'answer-questions-picture', 'paraphrasing', 'speaking',
-  'sentence-transformation', 'essay',
-  'listening-comprehension'
-];
 
 const HomeworkExerciseRenderer: React.FC<HomeworkExerciseRendererProps> = ({
   exercise: rawExercise,
@@ -86,7 +79,7 @@ const HomeworkExerciseRenderer: React.FC<HomeworkExerciseRendererProps> = ({
   // P1.5: canonicalize drifted exercise shapes before rendering.
   const exercise = React.useMemo(() => normalizeExerciseShape(rawExercise), [rawExercise]);
   const normalizedType = normalizeExerciseType(exercise.type);
-  const isOpenEnded = OPEN_ENDED_TYPES.includes(exercise.type) || OPEN_ENDED_TYPES.includes(normalizedType);
+  const isOpenEnded = isOpenExerciseType(exercise.type) || isOpenExerciseType(normalizedType);
   
   // Render the exercise title using official exercise names (same as SharedWorksheetContent)
   const renderTitle = () => {

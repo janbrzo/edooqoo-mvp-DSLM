@@ -13,18 +13,13 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 import { authorizedTeacherId, jsonResponse, resolveCaller } from "../_shared/auth.ts";
 import { chatCompletion } from "../_shared/aiChat.ts";
 import { NO_EM_DASH_RULE } from "../_shared/writingStyle.ts";
+import { resolvePromptPacing, computeIntensity, intensityPromptLines, loadLearningProfileForPacing } from "../_shared/pacing.ts";
 
 // v6.9.13: helpers inlined (previously imported from ../_shared/dslmPromptCore.ts).
-// Inlined to keep deploy self-contained. Behavior preserved.
+// Iteration 5: prompt-time pacing comes from the shared ../_shared/pacing.ts
+// (same rule as generate-timeline): the stored value counts whenever someone set it.
 function computePacingIndex(student: any, weeksUntilDeadline: number | null): number {
-  const stored = Number.isFinite(student?.dslm_pacing_mode) ? Number(student.dslm_pacing_mode) : 50;
-  if (stored !== 50) return Math.max(0, Math.min(100, stored));
-  // Auto: tighter deadline → more pragmatic (higher index).
-  if (weeksUntilDeadline === null) return 50;
-  if (weeksUntilDeadline <= 8) return 80;
-  if (weeksUntilDeadline <= 16) return 65;
-  if (weeksUntilDeadline <= 32) return 50;
-  return 35;
+  return resolvePromptPacing(student, weeksUntilDeadline);
 }
 function pacingLabel(p: number): string {
   if (p >= 75) return 'Pragmatic';
@@ -295,10 +290,10 @@ serve(async (req) => {
     const supabase = createClient(supabaseUrl, serviceRoleKey);
 
     // Fetch context in parallel
-    const [studentRes, metricsRes, knowledgeRes, goalsRes, worksheetsRes, existingPhasesRes] = await Promise.all([
+    const [studentRes, metricsRes, knowledgeRes, goalsRes, worksheetsRes, existingPhasesRes, learningProfileRes] = await Promise.all([
       supabase
         .from('students')
-        .select('name, english_level, main_goal, main_goal_target_date, dslm_pacing_mode, dslm_use_roadmap')
+        .select('name, english_level, main_goal, main_goal_target_date, dslm_pacing_mode, last_pacing_set_manually, dslm_use_roadmap')
         .eq('id', studentId)
         .eq('teacher_id', teacherId)
         .single(),
@@ -339,6 +334,8 @@ serve(async (req) => {
         .eq('teacher_id', teacherId)
         .is('deleted_at', null)
         .order('sequence_number', { ascending: true }),
+      // Welcome Test Learning Path (intensity); tolerant of a missing row/column.
+      loadLearningProfileForPacing(supabase, studentId, teacherId),
     ]);
 
     const student = studentRes.data;
@@ -474,7 +471,12 @@ serve(async (req) => {
       : [];
 
     const scientificFramework = buildScientificPrinciplesBlock(student.english_level, pacing);
-    const studentProfile = buildStudentProfileBlock(student as any, pacing);
+    if (learningProfileRes.error) console.warn('[generate-curriculum-phases] learning profile read failed', learningProfileRes.error);
+    const intensity = computeIntensity(
+      learningProfileRes.profile?.learning_path ?? null,
+      weeksUntilDeadline !== null ? weeksUntilDeadline * 7 : null,
+    );
+    const studentProfile = buildStudentProfileBlock(student as any, pacing) + intensityPromptLines(intensity);
     const weakBlock = buildWeakAreasBlock(metrics, 12);
     const knowledgeBlock = buildKnowledgeBlock(knowledge, 10);
     const goalsBlock = focusedGoals.length > 0
@@ -905,7 +907,7 @@ Return ONLY a valid JSON array (no markdown), with this exact format:
   } catch (error) {
     console.error('Error in generate-curriculum-phases:', error);
     return new Response(
-      JSON.stringify({ error: error.message, phases: [] }),
+      JSON.stringify({ error: error instanceof Error ? error.message : String(error), phases: [] }),
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
   }

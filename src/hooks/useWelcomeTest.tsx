@@ -16,6 +16,7 @@ import type { Json } from '@/integrations/supabase/types';
 import { toCanonicalId } from '@/utils/welcomeTestNumbering';
 import { devLog, devWarn } from '@/utils/logger';
 import { consumeWelcomeTestIntegrity } from '@/hooks/useWelcomeTestIntegrity';
+import { checkWelcomeTestKeyedAnswer, welcomeTestRatingFor } from '@/lib/welcomeTest/keyedAnswer';
 
 interface UseWelcomeTestProps {
   shareToken: string | null;
@@ -242,18 +243,8 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
     accumulatedPauseRef.current = 0; // Reset for next question
     const timeSpent = Math.max(0, Math.round((rawTime - pauseTime) / 1000));
 
-    let isCorrect: boolean | null = null;
-    if (questionDef.correct_answer) {
-      if (Array.isArray(questionDef.correct_answer)) {
-        const answerStr = String(answer).toLowerCase().trim();
-        isCorrect = questionDef.correct_answer.some(
-          ca => ca.toLowerCase().trim() === answerStr
-        );
-      } else {
-        isCorrect = String(answer).toLowerCase().trim() === 
-                    String(questionDef.correct_answer).toLowerCase().trim();
-      }
-    }
+    // D6: typed (fill_blank) answers use matchAnswer; `review` is null (unscored).
+    const isCorrect = checkWelcomeTestKeyedAnswer(questionDef, answer);
 
     // Detect traits - handle both single-select (string) and multi-select (array)
     if (questionDef.detected_trait) {
@@ -294,8 +285,7 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
         const nanoSkillRatings = questionDef.nano_skill ? [{
           name: questionDef.nano_skill,
           reason: questionDef.scoring_logic || questionDef.description || '',
-          mastery: isCorrect === true ? 100 : isCorrect === false ? 0 : -1,
-          hasValue: isCorrect !== null,
+          ...welcomeTestRatingFor(isCorrect),
           question_index: 0,
         }] : [];
 
@@ -563,6 +553,8 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
           test_id: state.testId,
           student_id: state.studentId,
           teacher_id: state.teacherId,
+          // Proves access to this test (process-welcome-test refuses replays without it).
+          share_token: shareToken,
           answers: state.answers,
           // v6.9.56: attach integrity snapshot (tab-blur count + recent
           // events) buffered by `useWelcomeTestIntegrity`. Stored on the

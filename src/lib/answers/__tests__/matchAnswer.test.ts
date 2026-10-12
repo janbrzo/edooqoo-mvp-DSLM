@@ -100,6 +100,11 @@ describe('matchAnswer: sentinel "This sentence is correct"', () => {
 describe('matchAnswer: review verdicts (never red when unsure)', () => {
   it('flags a one-character typo in a word answer', () => {
     expect(verdict('beautifull', 'beautiful', { mode: 'word' })).toBe('review');
+    // Swapped adjacent letters are one slip, not a wrong word (live audit case).
+    expect(verdict('departmnet', 'department', { mode: 'word' })).toBe('review');
+    expect(verdict('recieve', 'receive', { mode: 'word' })).toBe('review');
+    // Two separate slips are still too far for a single word.
+    expect(verdict('depatrmnet', 'department', { mode: 'word' })).toBe('wrong');
   });
 
   it('flags reordered words in a sentence answer', () => {

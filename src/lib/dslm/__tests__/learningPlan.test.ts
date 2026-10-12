@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, it, expect } from 'vitest';
 import {
   findCurrentPhase,
@@ -153,5 +155,15 @@ describe('orderUpNext', () => {
   it('handles empty and missing input', () => {
     expect(orderUpNext({})).toEqual([]);
     expect(orderUpNext({ phases: null, phaseSteps: null, nextSteps: null })).toEqual([]);
+  });
+});
+
+describe('every "next lesson" surface uses orderUpNext', () => {
+  it.each([
+    'src/components/WorksheetForm/NextStepsPresetBanner.tsx',
+    'src/hooks/dslm/useLearningPlanData.ts',
+  ])('%s orders with orderUpNext', (file) => {
+    const src = readFileSync(join(__dirname, '../../../..', file), 'utf8');
+    expect(src).toMatch(/orderUpNext\(/);
   });
 });

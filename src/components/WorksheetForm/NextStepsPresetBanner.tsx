@@ -22,6 +22,7 @@ import { useFutureTimeline } from '@/hooks/useFutureTimeline';
 import { useCurriculumPhases } from '@/hooks/dslm/useCurriculumPhases';
 import { SuggestionEditDialog, type SuggestionEditValue } from '@/components/dslm/SuggestionEditDialog';
 import { useDemoContext } from '@/contexts/DemoContext';
+import { orderUpNext } from '@/lib/dslm/learningPlan';
 import {
   PICTURE_EXERCISE_IDS,
   AUDIO_EXERCISE_IDS,
@@ -82,46 +83,15 @@ export function NextStepsPresetBanner({
     teacherId: enabledTeacherId,
   });
 
-  // Sort identically to PathwayView: currentPhase first, then by phase order, then sequence.
-  // Compute a per-phase displayIndex (1..N within phase) and append legacy free next_steps at the end.
+  // Same queue as the Prep card and Learning plan Up next (AGENTS.md: orderUpNext).
   const { sortedItems } = useMemo(() => {
-    const currentPhase = phases.find((p: any) => p.status === 'in_progress') || null;
-    const phaseOrderById: Record<string, number> = {};
-    const phaseLabelById: Record<string, string> = {};
-    phases.forEach((p: any) => {
-      phaseOrderById[p.id] = p.sequence_number;
-      phaseLabelById[p.id] = `Phase ${p.sequence_number}`;
-    });
-
-    // displayIndex per phase
-    const displayIndexById: Record<string, number> = {};
-    const byPhase: Record<string, any[]> = {};
-    for (const s of phaseSteps) {
-      if (!s.phase_id) continue;
-      (byPhase[s.phase_id] ||= []).push(s);
-    }
-    Object.keys(byPhase).forEach(pid => {
-      const sorted = [...byPhase[pid]].sort((a, b) => a.sequence_number - b.sequence_number);
-      sorted.forEach((s, idx) => { displayIndexById[s.id] = idx + 1; });
-    });
-    const sortedLegacy = [...nextSteps].sort((a, b) => a.sequence_number - b.sequence_number);
-    sortedLegacy.forEach((s, idx) => { displayIndexById[s.id] = idx + 1; });
-
-    const phaseSorted = [...phaseSteps].sort((a, b) => {
-      const pa = a.phase_id ? (phaseOrderById[a.phase_id] ?? 999) : 999;
-      const pb = b.phase_id ? (phaseOrderById[b.phase_id] ?? 999) : 999;
-      const aActive = currentPhase && a.phase_id === currentPhase.id ? -1 : 0;
-      const bActive = currentPhase && b.phase_id === currentPhase.id ? -1 : 0;
-      if (aActive !== bActive) return aActive - bActive;
-      if (pa !== pb) return pa - pb;
-      return a.sequence_number - b.sequence_number;
-    });
-    const combined = [...phaseSorted, ...sortedLegacy];
-    const items = combined.map((s: any) => ({
-      s,
-      displayIndex: displayIndexById[s.id] ?? 0,
-      phaseLabel: s.phase_id ? (phaseLabelById[s.phase_id] ?? null) : null,
-      phaseSeq: s.phase_id ? (phaseOrderById[s.phase_id] ?? null) : null,
+    const phaseSeqById: Record<string, number> = {};
+    phases.forEach((p: any) => { phaseSeqById[p.id] = p.sequence_number; });
+    const items = orderUpNext({ phases, phaseSteps, nextSteps }).map((item) => ({
+      s: item.suggestion as any,
+      displayIndex: item.displayIndex,
+      phaseLabel: item.phaseLabel,
+      phaseSeq: item.phaseId ? (phaseSeqById[item.phaseId] ?? null) : null,
     }));
     return { sortedItems: items };
   }, [phaseSteps, nextSteps, phases]);

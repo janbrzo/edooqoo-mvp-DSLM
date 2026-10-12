@@ -76,7 +76,8 @@ export const usePacingProposals = (studentId?: string) => {
     try {
       const { error: uErr } = await supabase
         .from('students')
-        .update({ dslm_pacing_mode: proposal.proposed_pacing } as any)
+        // false = computed value (accepted proposal), not dragged by the teacher; marks it as set.
+        .update({ dslm_pacing_mode: proposal.proposed_pacing, last_pacing_set_manually: false } as any)
         .eq('id', proposal.student_id)
         .eq('teacher_id', teacherId!);
       if (uErr) throw uErr;

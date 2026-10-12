@@ -39,6 +39,7 @@ import { TestDates } from './TestDates';
 import { SuggestedLevelChangeBanner } from './SuggestedLevelChangeBanner';
 import { ALL_WELCOME_TEST_QUESTIONS } from '@/data/welcomeTestQuestions';
 import { sendWelcomeTestEmail } from '@/lib/welcomeTest/ensureWelcomeTest';
+import { formatWelcomeTestAnswer, isWelcomeTestIdk } from '@/lib/welcomeTest/answerDisplay';
 import { 
   TEST_STATUS_CONFIG, 
   TEST_TYPES, 
@@ -617,6 +618,9 @@ function QuestionCard({ question, index, isWelcomeTest, testId }: {
             {question.element_type && (
               <Badge variant="secondary" className="text-xs">{question.element_type}</Badge>
             )}
+            {isWelcomeTest && hasCorrectAnswer && hasAnswer && question.is_correct === null && !isWelcomeTestIdk(question.student_answer) && (
+              <Badge variant="outline" className="text-xs border-amber-300 text-amber-700 dark:text-amber-400">Needs review</Badge>
+            )}
             {showCorrectness && question.is_correct !== null && (
               question.is_correct ? (
                 <CheckCircle className="h-4 w-4 text-green-600" />
@@ -654,7 +658,7 @@ function QuestionCard({ question, index, isWelcomeTest, testId }: {
                   <div className="flex items-start gap-2">
                     <span className="text-muted-foreground flex-shrink-0">Student's answer:</span>
                     <span className={showCorrectness && question.is_correct === true ? 'text-green-600 font-medium' : showCorrectness && question.is_correct === false ? 'text-red-600' : ''}>
-                      {formatAnswer(question.student_answer)}
+                      {isWelcomeTest ? formatWelcomeTestAnswer(question.student_answer) : formatAnswer(question.student_answer)}
                     </span>
                   </div>
                   {showCorrectness && !question.is_correct && hasCorrectAnswer && (

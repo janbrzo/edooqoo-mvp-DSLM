@@ -58,6 +58,21 @@ export const CLOSED_EXERCISE_TYPES = [
 ];
 
 /**
+ * Open exercise types: evaluated by the model (homework submit, worksheet queue,
+ * Mark done in a live session). Single list for client and Edge Functions; both
+ * the original and the '-picture'/'-audio' variants are listed because callers
+ * match exact type names. Never overlaps CLOSED_EXERCISE_TYPES (parity test).
+ */
+export const OPEN_EXERCISE_TYPES = [
+  'reading', 'discussion', 'describe', 'describe-picture', 'answer-questions',
+  'answer-questions-audio', 'answer-questions-picture', 'dialogue', 'paraphrasing',
+  'speaking', 'sentence-transformation', 'essay', 'listening-comprehension'
+];
+
+export const isOpenExerciseType = (exerciseType: string | null | undefined): boolean =>
+  !!exerciseType && OPEN_EXERCISE_TYPES.includes(exerciseType);
+
+/**
  * Check if exercise type is closed (auto-gradable)
  */
 export const isClosedExerciseType = (exerciseType: string): boolean => {
@@ -335,4 +350,150 @@ export const calculateItemMastery = (
   }
 };
 
+/**
+ * AI quality score (0..1) -> item mastery (0..100). A real 0 stays 0; a missing,
+ * empty or non-numeric score returns -1 (unevaluated, excluded from mastery),
+ * never a made-up default.
+ */
+export function scoreToMastery(score: unknown): number {
+  const n = typeof score === 'number'
+    ? score
+    : typeof score === 'string' && score.trim() !== '' ? Number(score) : NaN;
+  if (!Number.isFinite(n)) return -1;
+  return Math.round(Math.max(0, Math.min(1, n)) * 100);
+}
 
+/**
+ * Exercise mastery = mean of the scored items only. Items flagged hasValue=false
+ * or with a negative sentinel (-1: not evaluated, e.g. speaking with no audio)
+ * are left out instead of dragging the mean down. Null when nothing was scored.
+ */
+export function averageScoredMastery(
+  items: ReadonlyArray<{ mastery: number; hasValue?: boolean }>,
+): number | null {
+  const scored = items.filter((e) => e.hasValue !== false && typeof e.mastery === 'number' && e.mastery >= 0);
+  if (scored.length === 0) return null;
+  return Math.round(scored.reduce((sum, e) => sum + e.mastery, 0) / scored.length);
+}
+
+/** Selection items: the student picks from a fixed set, so no alternative answer can be right. */
+const SELECTION_PREFIXES = ['multiple-choice', 'true-false', 'matching', 'categorize', 'odd-one-out'];
+
+export const isSelectionType = (t: string | undefined): boolean =>
+  !!t && SELECTION_PREFIXES.some((p) => t.startsWith(p));
+
+/** Lowest AI quality score that may raise a typed closed answer the key does not accept. */
+export const AI_ALTERNATIVE_MIN_SCORE = 0.85;
+/** A raised answer never scores like an exact key match. */
+export const AI_ALTERNATIVE_MAX_MASTERY = 95;
+
+export interface ClosedAiEvaluation {
+  quality_score?: number;
+  is_acceptable?: boolean;
+  key_verdict?: string;
+}
+
+/**
+ * Owner decision D1: the answer key decides; the AI may only RAISE a typed
+ * closed answer that the key marks wrong or uncertain (a valid alternative,
+ * e.g. "manager" for "boss"), never lower one and never touch selection items.
+ * Returns the raised mastery (85-95), or null when the key result stands.
+ */
+export function aiAlternativeMastery(
+  exerciseType: string,
+  keyMastery: number | null,
+  ai: ClosedAiEvaluation | null | undefined,
+  /** The student's answer: a single letter in synonyms/antonyms is a pick, not typed text. */
+  studentAnswer?: unknown,
+): number | null {
+  if (!ai || isSelectionType(exerciseType)) return null;
+  if (typeof studentAnswer === 'string' && /^[A-Z]$/i.test(studentAnswer.trim())) return null;
+  if (keyMastery !== null && keyMastery >= 50) return null; // the key already accepts it
+  if (ai.key_verdict === 'correct') return null;
+  const q = typeof ai.quality_score === 'number' ? ai.quality_score : NaN;
+  if (ai.is_acceptable !== true || !Number.isFinite(q) || q < AI_ALTERNATIVE_MIN_SCORE) return null;
+  return Math.min(AI_ALTERNATIVE_MAX_MASTERY, Math.round(q * 100));
+}
+
+export interface ScoredItem {
+  question_index?: number;
+  mastery: number;
+  hasValue?: boolean;
+}
+
+/**
+ * Apply raised answers (question_index -> mastery) to key-based item
+ * evaluations. Every rating of a raised question gets the raised mastery and
+ * `source: 'ai_alternative'`. The exercise mastery is recomputed the way
+ * calculateOverallMastery does it: share of scored questions at >= 50.
+ */
+export function applyAiAlternatives<T extends ScoredItem>(
+  items: readonly T[],
+  raised: Record<number, number>,
+): { items: Array<T & { source?: string }>; mastery: number | null; changed: boolean } {
+  let changed = false;
+  const out = items.map((it) => {
+    const q = typeof it.question_index === 'number' ? it.question_index : -1;
+    if (q in raised) {
+      changed = true;
+      return { ...it, mastery: raised[q], hasValue: true, source: 'ai_alternative' };
+    }
+    return it as T & { source?: string };
+  });
+  const byQuestion = new Map<number, number>();
+  for (const it of out) {
+    const q = typeof it.question_index === 'number' ? it.question_index : -1;
+    if (q < 0 || it.hasValue === false || !(it.mastery >= 0) || byQuestion.has(q)) continue;
+    byQuestion.set(q, it.mastery);
+  }
+  const scores = [...byQuestion.values()];
+  const mastery = scores.length > 0
+    ? Math.round((scores.filter((m) => m >= 50).length / scores.length) * 100)
+    : null;
+  return { items: out, mastery, changed };
+}
+
+/** The item array of an exercise, whatever its shape (questions, items, sentences...). */
+export const getExerciseItems = (exerciseData: any): any[] => {
+  if (!exerciseData) return [];
+  return exerciseData.questions ||
+         exerciseData.items ||
+         exerciseData.sentences ||
+         exerciseData.statements ||
+         exerciseData.words ||
+         exerciseData.sentence_halves ||
+         exerciseData.expressions ||
+         exerciseData.prompts ||
+         [];
+};
+
+/**
+ * Exercise mastery of a closed exercise: % of answered items the key (or an
+ * accepted AI alternative in `overrides`) marks correct, over ALL items of the
+ * exercise. Used by the client at save/submit and by the AI queue, so a raise
+ * can only move the exercise mastery up.
+ */
+export const calculateExerciseMastery = (
+  exerciseType: string,
+  exerciseData: any,
+  answers: Record<string | number, any>,
+  /** question_index -> mastery raised by an accepted AI alternative (aiAlternativeMastery). */
+  overrides?: Record<number, number>,
+): number | null => {
+  if (!exerciseData || !answers || Object.keys(answers).length === 0) return null;
+  if (!isClosedExerciseType(exerciseType)) return null;
+
+  const items = getExerciseItems(exerciseData);
+  let correct = 0;
+  let total = 0;
+
+  items.forEach((_item: any, idx: number) => {
+    const mastery = overrides?.[idx] ?? calculateItemMastery(exerciseType, exerciseData, idx, answers[idx], answers);
+    if (mastery !== null) {
+      if (mastery >= 50) correct++;
+      total++;
+    }
+  });
+
+  return total > 0 ? Math.round((correct / total) * 100) : null;
+};

@@ -831,7 +831,7 @@ export default function WelcomeTestPage() {
                   onClick={() => saveIdontKnow(currentQuestion.id)}
                   title={isSkillQuestion
                     ? "Honest 'I don't know' helps your teacher calibrate the right level, far better than guessing."
-                    : "Skip this if you really have no preference; your teacher will fill it in together with you."}
+                    : "Not sure? Choose this and your teacher will go through it with you."}
                 >
                   <HelpCircle className="h-3 w-3 mr-1" />I don't know
                 </Button>
@@ -859,8 +859,10 @@ export default function WelcomeTestPage() {
             onClick={skipQuestion}
             className="text-xs text-muted-foreground min-h-[34px]"
             disabled={isLastQuestion}
+            title="Leave this question unanswered for now. You can come back to it."
+            aria-label="Skip for now"
           >
-            <SkipForward className="h-3.5 w-3.5 sm:mr-1" /> <span className="hidden sm:inline">Skip</span>
+            <SkipForward className="h-3.5 w-3.5 sm:mr-1" /> <span className="hidden sm:inline">Skip for now</span>
           </Button>
 
           {isLastQuestion ? (
