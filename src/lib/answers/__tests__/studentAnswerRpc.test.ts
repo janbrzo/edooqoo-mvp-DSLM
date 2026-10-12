@@ -42,7 +42,8 @@ describe('callStudentAnswerRpc', () => {
     rpc.mockResolvedValueOnce({ data: null, error: { code: '', message: 'TypeError: Failed to fetch' } });
     const res = await callStudentAnswerRpc('save_worksheet_answer', {}, 'tok');
     expect(res.error.message).toContain('Failed to fetch');
-    expect(studentAnswerRpcName('save_worksheet_answer', 'tok')).toBe('save_worksheet_answer');
+    // Unknown state: the keepalive write still uses the token RPC (the legacy names are revoked).
+    expect(studentAnswerRpcName('save_worksheet_answer', 'tok')).toBe('save_worksheet_answer_by_share_token');
   });
 
   it('never falls back when the server rejects the token', async () => {

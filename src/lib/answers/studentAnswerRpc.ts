@@ -18,9 +18,14 @@ export type TokenRpc =
 /** null until the first token call answers; then whether the *_by_share_token RPCs exist. */
 let tokenRpcAvailable: boolean | null = null;
 
-/** RPC name for fire-and-forget writes (beforeunload) that cannot retry on a missing function. */
+/**
+ * RPC name for fire-and-forget writes (beforeunload) that cannot retry on a
+ * missing function. The token variant is used unless a call proved it missing:
+ * the legacy names are revoked from client roles (20261012200100), so an
+ * unknown state must not fall back to them.
+ */
 export const studentAnswerRpcName = (legacyName: TokenRpc, shareToken: string | null | undefined): string =>
-  shareToken && tokenRpcAvailable === true ? `${legacyName}_by_share_token` : legacyName;
+  shareToken && tokenRpcAvailable !== false ? `${legacyName}_by_share_token` : legacyName;
 
 const MISSING_FUNCTION_CODES = new Set(['PGRST202', '42883']);
 
