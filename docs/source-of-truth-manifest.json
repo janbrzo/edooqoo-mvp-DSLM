@@ -24,7 +24,7 @@
     "edgeFunctions": 81,
     "typedTables": 62,
     "typedRpcs": 88,
-    "migrationIndexes": 19
+    "migrationIndexes": 20
   },
   "routes": [
     {
@@ -41054,6 +41054,11 @@
                 "name": "shareToken",
                 "type": "string",
                 "optional": true
+              },
+              {
+                "name": "englishLevel",
+                "type": "string | null",
+                "optional": true
               }
             ]
           }
@@ -46414,12 +46419,14 @@
         "dataDependencies": {
           "tables": [
             "pending_worksheet_ai_evaluations",
+            "students",
             "worksheet_student_answers",
             "worksheets"
           ],
           "rpcs": [
             "claim_pending_ai_evaluations",
             "list_worksheet_answers_needing_ai_evaluation",
+            "mark_worksheet_answer_not_evaluable",
             "needs_ai_evaluation"
           ],
           "edgeFunctions": [],
@@ -54097,6 +54104,7 @@
             "loop-student-engagement",
             "mcp",
             "pacing-periodic-check",
+            "process-pending-ai-evaluations",
             "process-welcome-test",
             "recalculate-pacing",
             "send-calendar-notification-email",
@@ -56921,6 +56929,12 @@
         "table": "model_audit_reports",
         "unique": false,
         "migration": "supabase/migrations/20261004120000_model_audit_lifecycle.sql"
+      },
+      {
+        "name": "idx_student_events_mark_done_lookup",
+        "table": "student_events",
+        "unique": false,
+        "migration": "supabase/migrations/20261012160000_mark_done_supersedes_student_events.sql"
       }
     ],
     "migrationFunctions": [
@@ -56963,6 +56977,10 @@
       {
         "name": "compute_skill_metric",
         "migration": "supabase/migrations/20261012120000_dslm_event_triggers_v2.sql"
+      },
+      {
+        "name": "compute_skill_metric",
+        "migration": "supabase/migrations/20261012160000_mark_done_supersedes_student_events.sql"
       },
       {
         "name": "consume_newsletter_rate_limit",
@@ -57093,6 +57111,10 @@
         "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
       },
       {
+        "name": "log_flashcard_review_event",
+        "migration": "supabase/migrations/20261012160100_flashcard_review_events_v2.sql"
+      },
+      {
         "name": "log_homework_answer_to_events",
         "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
       },
@@ -57131,6 +57153,10 @@
       {
         "name": "mark_attention_seen",
         "migration": "supabase/migrations/20260623202114_6dc3ae03-5d7e-4e9d-b3a7-56a0763ba472.sql"
+      },
+      {
+        "name": "mark_worksheet_answer_not_evaluable",
+        "migration": "supabase/migrations/20261012160200_ai_queue_not_evaluable_marker.sql"
       },
       {
         "name": "needs_ai_evaluation",

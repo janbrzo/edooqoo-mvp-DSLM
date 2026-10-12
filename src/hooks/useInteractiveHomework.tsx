@@ -23,6 +23,7 @@ import { transcribeAllAudio, buildAnswersToVerify } from '@/utils/audioEvalUtils
 import { createPendingSaves } from '@/lib/answers/pendingSaves';
 import { resolveEnglishLevel } from '../../supabase/functions/_shared/englishLevel';
 import { callStudentAnswerRpc } from '@/lib/answers/studentAnswerRpc';
+import { invokeWithRetry } from '@/lib/answers/invokeWithRetry';
 
 
 interface UseInteractiveHomeworkProps {
@@ -383,7 +384,8 @@ export const useInteractiveHomework = ({
           if (answersToVerify.length > 0) {
             devLog('[submitHomework] Verifying', answersToVerify.length, 'individual questions');
             
-            const { data: verifyResult, error: verifyError } = await supabase.functions.invoke('verify-open-answers', {
+            // One retry on a transient failure: homework is evaluated only here.
+            const { data: verifyResult, error: verifyError } = await invokeWithRetry<any>(() => supabase.functions.invoke('verify-open-answers', {
               body: { 
                 answers: answersToVerify, 
                 english_level: resolveEnglishLevel(englishLevel),
@@ -391,7 +393,7 @@ export const useInteractiveHomework = ({
                 // Anonymous students prove access with the homework link token + their email.
                 access: { share_token: shareToken || '', student_email: studentEmail },
               }
-            });
+            }));
 
             if (!verifyError && verifyResult?.evaluations) {
               devLog('[submitHomework] AI evaluation received:', verifyResult.evaluations.length, 'results');

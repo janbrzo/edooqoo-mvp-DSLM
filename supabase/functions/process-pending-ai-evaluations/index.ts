@@ -155,6 +155,9 @@ serve(async (req) => {
         // Fetch audio answers from the source table
         let audioAnswers: Record<string, string> = {};
         let storedItemEvaluations: any[] | null = null;
+        // A save made after this read must still count as not evaluated, so
+        // last_ai_eval_at is the time the answers were read, not when the write ends.
+        const answersReadAt = new Date().toISOString();
         try {
           const { data: answerRow } = await supabase
             .from('worksheet_student_answers')
@@ -488,14 +491,14 @@ serve(async (req) => {
         const updateData: Record<string, unknown> = isClosedPending
           ? {
               ai_evaluation: aiEvaluation,
-              last_ai_eval_at: new Date().toISOString(),
+              last_ai_eval_at: answersReadAt,
               ...(raisedApplied?.changed ? { item_evaluations: raisedApplied.items, mastery: raisedApplied.mastery } : {}),
             }
           : {
               ai_evaluation: aiEvaluation,
               item_evaluations: itemEvaluations,
               mastery: overallMastery,
-              last_ai_eval_at: new Date().toISOString()
+              last_ai_eval_at: answersReadAt
             };
         
         if (effectiveTriggerSource) {
@@ -576,6 +579,7 @@ async function autoQueueForCreateHomework(
   triggerSource: string = 'create_homework',
   exerciseIndexFilter: number | null = null,
   studentEmailFilter: string | null = null,
+  outcome: { uncertain: number } = { uncertain: 0 },
 ): Promise<number> {
   console.log(`[auto-queue] Fetching answers for worksheet ${worksheetId}`);
   
@@ -602,12 +606,17 @@ async function autoQueueForCreateHomework(
     const isClosed = isClosedType(answer.exercise_type);
     if (!isClosed && !isOpenExerciseType(answer.exercise_type)) continue;
     
-    const { data: needsEval } = await supabase.rpc('needs_ai_evaluation', {
+    const { data: needsEval, error: needsEvalError } = await supabase.rpc('needs_ai_evaluation', {
       p_worksheet_id: worksheetId,
       p_student_email: answer.student_email,
       p_exercise_index: answer.exercise_index
     });
     
+    if (needsEvalError) {
+      outcome.uncertain++;
+      console.warn(`[auto-queue] needs_ai_evaluation failed for exercise ${answer.exercise_index}:`, needsEvalError.message);
+      continue;
+    }
     if (!needsEval) {
       console.log(`[auto-queue] Skipping exercise ${answer.exercise_index} - already evaluated`);
       continue;
@@ -637,11 +646,12 @@ async function autoQueueForCreateHomework(
     
     let context: Record<string, unknown> = { trigger_source: triggerSource };
     try {
-      const { data: worksheet } = await supabase
+      const { data: worksheet, error: worksheetError } = await supabase
         .from('worksheets')
         .select('ai_response')
         .eq('id', worksheetId)
         .single();
+      if (worksheetError) throw worksheetError;
       
       if (worksheet?.ai_response) {
         const parsed = typeof worksheet.ai_response === 'string' 
@@ -671,7 +681,10 @@ async function autoQueueForCreateHomework(
         }
       }
     } catch (e) {
+      // Read or parse failure: the skip below is not a property of the answer.
+      outcome.uncertain++;
       console.error(`[auto-queue] Error parsing worksheet context:`, e);
+      if (isClosed) continue;
     }
     if (isClosed && !(Array.isArray(context.closed_items) && context.closed_items.length > 0)) {
       console.log(`[auto-queue] Skipping closed exercise ${answer.exercise_index} - no resolvable items`);
@@ -692,6 +705,7 @@ async function autoQueueForCreateHomework(
       });
     
     if (insertError) {
+      outcome.uncertain++;
       console.error(`[auto-queue] Error queuing exercise ${answer.exercise_index}:`, insertError);
     } else {
       queued++;
@@ -750,33 +764,15 @@ async function queueStaleWorksheetAnswers(supabase: any): Promise<void> {
   }
   for (const row of rows || []) {
     try {
+      const outcome = { uncertain: 0 };
       const queued = await autoQueueForCreateHomework(
-        supabase, row.worksheet_id, '10min_inactivity', row.exercise_index, row.student_email,
+        supabase, row.worksheet_id, '10min_inactivity', row.exercise_index, row.student_email, outcome,
       );
-      const { data: active } = await supabase
-        .from('pending_worksheet_ai_evaluations')
-        .select('id')
-        .eq('worksheet_id', row.worksheet_id)
-        .eq('student_email', row.student_email)
-        .eq('exercise_index', row.exercise_index)
-        .in('status', ['pending', 'processing'])
-        .limit(1);
-      if (queued === 0 && !(active && active.length > 0)) {
-        // Unsupported type or no resolvable closed items: record this save as
-        // handled so the scan does not offer it again every run.
-        await supabase
-          .from('pending_worksheet_ai_evaluations')
-          .upsert({
-            worksheet_id: row.worksheet_id,
-            student_email: row.student_email,
-            exercise_index: row.exercise_index,
-            exercise_type: row.exercise_type,
-            answers: {},
-            status: 'completed',
-            error_message: 'not evaluable',
-            created_at: new Date().toISOString(),
-            processed_at: new Date().toISOString(),
-          }, { onConflict: 'worksheet_id,student_email,exercise_index' });
+      // Mark the save as handled only when nothing was queued for a certain
+      // reason (unsupported type, no resolvable closed items, already queued or
+      // evaluated). A transient read or insert failure leaves it for the next run.
+      if (queued === 0 && outcome.uncertain === 0) {
+        await markNotEvaluable(supabase, row);
       }
     } catch (e) {
       console.error('[process-pending] stale answer queue failed:', (e as Error).message);
@@ -852,4 +848,47 @@ function learnerLevel(supabase: any, worksheetId: string, queuedLevel: unknown):
     })());
   }
   return learnerLevelCache.get(key)!;
+}
+
+/**
+ * Record a save that cannot be evaluated so the stale scan does not offer it
+ * again. The RPC never overwrites a pending or processing row, so a student
+ * queueing the same exercise at the same moment wins; until that migration is
+ * applied, an upsert guarded by a fresh active-row check is used.
+ */
+async function markNotEvaluable(
+  supabase: any,
+  row: { worksheet_id: string; student_email: string; exercise_index: number; exercise_type: string },
+): Promise<void> {
+  const { error } = await supabase.rpc('mark_worksheet_answer_not_evaluable', {
+    p_worksheet_id: row.worksheet_id,
+    p_student_email: row.student_email,
+    p_exercise_index: row.exercise_index,
+    p_exercise_type: row.exercise_type,
+  });
+  if (!error) return;
+  const missing = error.code === 'PGRST202' || error.code === '42883' || /could not find the function/i.test(error.message || '');
+  if (!missing) throw error;
+  const { data: active } = await supabase
+    .from('pending_worksheet_ai_evaluations')
+    .select('id')
+    .eq('worksheet_id', row.worksheet_id)
+    .eq('student_email', row.student_email)
+    .eq('exercise_index', row.exercise_index)
+    .in('status', ['pending', 'processing'])
+    .limit(1);
+  if (active && active.length > 0) return;
+  await supabase
+    .from('pending_worksheet_ai_evaluations')
+    .upsert({
+      worksheet_id: row.worksheet_id,
+      student_email: row.student_email,
+      exercise_index: row.exercise_index,
+      exercise_type: row.exercise_type,
+      answers: {},
+      status: 'completed',
+      error_message: 'not evaluable',
+      created_at: new Date().toISOString(),
+      processed_at: new Date().toISOString(),
+    }, { onConflict: 'worksheet_id,student_email,exercise_index' });
 }
