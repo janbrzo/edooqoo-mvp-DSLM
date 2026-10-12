@@ -4,6 +4,7 @@
  * Auto-save on blur / on selection change. Single edge function call per field group.
  */
 import React, { useEffect, useMemo, useState } from 'react';
+import { hubLandingPath } from '@/lib/studentHub/hubLandingPath';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
