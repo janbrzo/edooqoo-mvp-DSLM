@@ -34,7 +34,7 @@ const StudentHubProfile: React.FC = () => {
 
   useEffect(() => {
     if (!email) {
-      navigate('/my');
+      navigate(hubLandingPath(teacherToken));
       return;
     }
     if (!teacherToken) return;

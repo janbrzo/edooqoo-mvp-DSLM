@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { hubLandingPath } from '@/lib/studentHub/hubLandingPath';
 import { useParams, useNavigate } from 'react-router-dom';
 import { StudentHubLayout } from '@/components/student-hub/StudentHubLayout';
 import { useStudentHubData, getSavedHubEmail } from '@/hooks/useStudentHubData';
@@ -14,7 +15,7 @@ const StudentHubWorksheets = () => {
   const navigate = useNavigate();
   const email = getSavedHubEmail();
 
-  useEffect(() => { if (!email) navigate('/my'); }, [email, navigate]);
+  useEffect(() => { if (!email) navigate(hubLandingPath(teacherToken)); }, [email, navigate]);
 
   const { data, loading } = useStudentHubData(teacherToken, email || undefined);
 

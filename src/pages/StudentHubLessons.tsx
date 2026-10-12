@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
+import { hubLandingPath } from '@/lib/studentHub/hubLandingPath';
 import { useToast } from '@/hooks/use-toast';
 import { useParams, useNavigate } from 'react-router-dom';
 import { StudentHubLayout } from '@/components/student-hub/StudentHubLayout';
@@ -25,7 +26,7 @@ const StudentHubLessons = () => {
   const navigate = useNavigate();
   const email = getSavedHubEmail();
 
-  useEffect(() => { if (!email) navigate('/my'); }, [email, navigate]);
+  useEffect(() => { if (!email) navigate(hubLandingPath(teacherToken)); }, [email, navigate]);
 
   const { settings, slots, loading, error, weekStart, weekEnd, bookSlot, navigateWeek, getSlotsForDay, refetchSlots } = usePublicBooking(teacherToken);
   const { vacations } = useCalendarVacations(settings?.teacher_id);
