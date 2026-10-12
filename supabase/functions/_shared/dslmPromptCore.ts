@@ -12,6 +12,8 @@
  *   - Knowles 1980 Andragogy
  */
 
+import { autoPacingIndex, resolvePromptPacing } from './pacing.ts';
+
 export type PacingLabel = 'Scientific' | 'Balanced' | 'Pragmatic';
 
 export interface StudentProfileLite {
@@ -41,32 +43,17 @@ export function pacingLabel(p: number): PacingLabel {
 
 /**
  * Auto-compute pacing index when teacher hasn't manually set it (default = 50).
- * Scientific (0) ↔ Pragmatic (100).
+ * Scientific (0) ↔ Pragmatic (100). Single implementation lives in `./pacing.ts`
+ * (shared with generate-curriculum-phases); a stored non-default value is respected.
  */
 export function computePacingIndex(
   student: StudentProfileLite,
   weeksUntilDeadline: number | null
 ): number {
-  // If teacher explicitly set non-default, respect it.
-  const stored = student.dslm_pacing_mode;
-  if (typeof stored === 'number' && stored !== 50) return clamp(stored, 0, 100);
-
-  let p = 50;
-  const goal = (student.main_goal || '').toLowerCase();
-
-  if (/academic|exam|cae|fce|cpe|ielts|toefl/.test(goal)) p -= 30;
-  if (/work|business|career|travel|conversation|social|meeting|interview/.test(goal)) p += 20;
-
-  if (weeksUntilDeadline !== null) {
-    if (weeksUntilDeadline <= 8) p += 25;
-    else if (weeksUntilDeadline <= 16) p += 15;
-  }
-
-  const lvl = (student.english_level || '').toUpperCase();
-  if (lvl.startsWith('A')) p -= 10;
-
-  return clamp(p, 0, 100);
+  return resolvePromptPacing(student, weeksUntilDeadline);
 }
+
+export { autoPacingIndex, resolvePromptPacing };
 
 /**
  * "X days ago" / "today" / "yesterday" badge for recency weighting.
@@ -156,8 +143,10 @@ GRANULAR PACING SIGNALS (use the EXACT numeric value above, not just the bucket 
 
 /**
  * Student profile block with explicit CLT anchoring instruction.
+ * `extraLines` (already formatted "\n- ..." lines, e.g. the Welcome Test
+ * intensity from `intensityPromptLines`) are appended to the profile list.
  */
-export function buildStudentProfileBlock(student: StudentProfileLite, pacing: number): string {
+export function buildStudentProfileBlock(student: StudentProfileLite, pacing: number, extraLines = ''): string {
   const profession = student.profession || 'unspecified';
   const industry = student.industry || 'unspecified';
   const interests = student.interests || 'unspecified';
@@ -174,7 +163,7 @@ export function buildStudentProfileBlock(student: StudentProfileLite, pacing: nu
 - Interests: ${interests}
 - Preferred register: ${style} (1=very casual, 5=very formal)
 - Pacing mode: ${pacing}/100 (${pacingLabel(pacing)})
-- Roadmap influence: ${useRoadmap ? 'ACTIVE, phases drive step generation' : 'IGNORED, generate free-floating steps'}${notes}
+- Roadmap influence: ${useRoadmap ? 'ACTIVE, phases drive step generation' : 'IGNORED, generate free-floating steps'}${notes}${extraLines}
 
 CRITICAL CLT RULE: All vocabulary, examples, and scenarios in generated content MUST originate from the student's profession/industry/interests domain (or main goal domain when those are unspecified). Cross-domain vocabulary is FORBIDDEN unless the student's goal is explicitly multi-domain.`;
 }

@@ -40,7 +40,7 @@ export function InstructionScreen({ totalQuestions, onStart }: InstructionScreen
               <div>
                 <p className="font-medium text-sm">Don't guess on grammar/vocabulary questions</p>
                 <p className="text-xs text-muted-foreground">
-                  If you don't know the answer, use the "I don't know" button or skip it. Honest answers help your teacher more than lucky guesses.
+                  If you don't know the answer, tap "I don't know". It is the honest choice and helps your teacher find the right level, much more than a lucky guess.
                 </p>
               </div>
             </div>
@@ -48,9 +48,9 @@ export function InstructionScreen({ totalQuestions, onStart }: InstructionScreen
             <div className="flex items-start gap-3">
               <SkipForward className="h-5 w-5 text-muted-foreground flex-shrink-0 mt-0.5" />
               <div>
-                <p className="font-medium text-sm">You can skip questions</p>
+                <p className="font-medium text-sm">"Skip" is not the same as "I don't know"</p>
                 <p className="text-xs text-muted-foreground">
-                  Use the "Skip" button to move to the next question. You can always go back.
+                  "Skip" moves on and leaves the question unanswered, so your teacher learns nothing from it. You can always go back and answer later.
                 </p>
               </div>
             </div>

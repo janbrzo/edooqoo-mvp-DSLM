@@ -1,6 +1,6 @@
 ---
 name: DSLM evaluation pipeline audit and fix plan
-description: 2026-10-11 real-account audit of AI evaluation + DSLM data flow, owner decisions D1-D7, and the iteration plan (iterations 1-4 shipped in v6.9.115-v6.9.118).
+description: 2026-10-11 real-account audit of AI evaluation + DSLM data flow, owner decisions D1-D7, and the iteration plan (iterations 1-5 shipped in v6.9.115-v6.9.119).
 type: feature
 ---
 - Audit (16 agents, cross-checked, read-only SQL + live tests on the test teacher account): closed items reach AI on every path but AI only explains; DSLM mastery stays key-based. Four closed scorers exist (shared itemMastery, Mark done modal 80/30/50, Welcome Test string equality, legacy). The event/metric SQL lived only in production.
@@ -19,6 +19,7 @@ type: feature
 - Known: `test_answer_skipped` events never appear because anonymous WT pages cannot call add_student_event (see skip-idk-semantics); fix with the share-token RPC in the WT iteration.
 - Iteration 3 (v6.9.117): queue claim/retry/stale recovery, scheduled stale-answer queueing, evaluation of stored answers, parallel processing, 202 for students. Homework AI failures are NOT queued (no homework queue table); handled when homework scoring moves to the shared module (iteration 4).
 - Iteration 4 (v6.9.118): D1 (aiAlternativeMastery) in homework submit and the queue; Mark done prefill from the shared scorer (100/0, neutral 50 only when the key cannot decide) and D2 supersession in compute_skill_metric (per exercise AND skill, so every recompute stays exact); one open/closed type list (word-formation is not generated, left unclassified); real learner level; flashcard first reviews logged (app quality scale is 0 = Again / 2 = I know this, not SM-2 0-5) with review-outcome mastery; NextSteps banner on orderUpNext; homework AI one retry. A homework answer whose AI call still fails is NOT re-evaluated server-side yet (no homework queue): candidate for iteration 7.
+- Iteration 5 (v6.9.119): Welcome Test profile v2 (typed traits, LPS v2 with null-not-50, coverage and capacity cap per D4, deterministic divergences explained by the AI, answer behaviour, profile versions), S3 enabled (WT AI scores update metrics), Apply-results re-run fixed (real question ids, no null overwrite, owner-only), one pacing function with intensity separate from style (D3), D5 copy, D6 matchAnswer for new WT fill_blank answers. Not done: backfill of v2 columns for old profiles (iteration 6, with the audit table); v1 profiles show their old learning path with a note.
 - pg_cron job (run once in the SQL editor after migration 20261012140000; replace the secret with the current CRON_SECRET, and update it together with the reminder and audit jobs when the secret is rotated):
   ```sql
   select cron.schedule('process-ai-evaluations-5min', '*/5 * * * *', $$

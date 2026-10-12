@@ -17,14 +17,14 @@
   "counts": {
     "routes": 94,
     "pageModules": 88,
-    "componentModules": 390,
+    "componentModules": 392,
     "hookModules": 94,
     "contextModules": 1,
     "serviceModules": 11,
     "edgeFunctions": 81,
     "typedTables": 62,
     "typedRpcs": 88,
-    "migrationIndexes": 20
+    "migrationIndexes": 21
   },
   "routes": [
     {
@@ -7699,6 +7699,7 @@
         "Go to Student Results",
         "Great job! 🎉",
         "I don't know",
+        "Leave this question unanswered for now. You can come back to it.",
         "Loading your Welcome Test...",
         "Marked as \"I don't know\"",
         "Next",
@@ -7707,8 +7708,7 @@
         "Preview Test (Read-only)",
         "Previous",
         "Question",
-        "Question 1 of 58",
-        "Questions answered"
+        "Question 1 of 58"
       ],
       "userFacingBehavior": {
         "actionHandlers": [
@@ -18875,6 +18875,46 @@
       }
     },
     {
+      "path": "src/components/dslm/ProfileSignalsV2.tsx",
+      "domain": "dslm",
+      "purpose": "Implements Answer Behaviour Line behavior in the dslm domain.",
+      "exports": [
+        "AnswerBehaviourLine",
+        "DeclaredVsMeasured",
+        "LearningPathBlock",
+        "LowCoverageBadge"
+      ],
+      "props": [],
+      "state": [],
+      "hooks": [],
+      "actions": [],
+      "navigateTargets": [],
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "storage": [],
+      "userFacingText": [
+        "% of the signals",
+        "/100",
+        "Answer behaviour",
+        "Declared vs measured",
+        "Declared:",
+        "How intense the plan can be (phase length, homework load). This is separate from the Scientific/Pragmatic style slider.",
+        "Learning path (intensity)",
+        "Low signal coverage",
+        "Strongest signals:",
+        "based on",
+        "· Observed:"
+      ],
+      "userFacingBehavior": {
+        "actionHandlers": [],
+        "navigationTargets": []
+      }
+    },
+    {
       "path": "src/components/dslm/ProfileView.tsx",
       "domain": "dslm",
       "purpose": "Implements Profile View behavior in the dslm domain.",
@@ -18921,6 +18961,7 @@
       "userFacingText": [
         "AI Summary",
         "Advanced: diagnostic log",
+        "Deterministic fallback",
         "Interest Topics",
         "Key Observations:",
         "Learning Patterns",
@@ -18930,7 +18971,8 @@
         "Psychological Profile",
         "Recommendations:",
         "Self-Efficacy",
-        "Send a Welcome Test to unlock the psychological profile."
+        "Send a Welcome Test to unlock the psychological profile.",
+        "The AI step failed, so this summary was built from the test answers by rules."
       ],
       "userFacingBehavior": {
         "actionHandlers": [],
@@ -19186,6 +19228,29 @@
         "Update topic, goal, focus and exercise types.",
         "e.g., Present Perfect..."
       ],
+      "userFacingBehavior": {
+        "actionHandlers": [],
+        "navigationTargets": []
+      }
+    },
+    {
+      "path": "src/components/dslm/__tests__/ProfileSignalsV2.test.tsx",
+      "domain": "dslm",
+      "purpose": "Implements Profile Signals V2 behavior in the dslm domain.",
+      "exports": [],
+      "props": [],
+      "state": [],
+      "hooks": [],
+      "actions": [],
+      "navigateTargets": [],
+      "dataDependencies": {
+        "tables": [],
+        "rpcs": [],
+        "edgeFunctions": [],
+        "fetchTargets": []
+      },
+      "storage": [],
+      "userFacingText": [],
       "userFacingBehavior": {
         "actionHandlers": [],
         "navigationTargets": []
@@ -29205,13 +29270,13 @@
         "Correct",
         "Correct answer:",
         "Generate Share Link",
+        "Needs review",
         "Profile Questions",
         "Questions",
         "Re-take Test",
         "Recording was not uploaded (saved as:",
         "Results by Skill",
-        "Score",
-        "Share Test"
+        "Score"
       ],
       "userFacingBehavior": {
         "actionHandlers": [
@@ -32765,15 +32830,15 @@
       },
       "storage": [],
       "userFacingText": [
+        "\"Skip\" is not the same as \"I don't know\"",
+        "\"Skip\" moves on and leaves the question unanswered, so your teacher learns nothing from it. You can always go back and answer later.",
         "Before You Begin",
         "Don't guess on grammar/vocabulary questions",
-        "If you don't know the answer, use the \"I don't know\" button or skip it. Honest answers help your teacher more than lucky guesses.",
+        "If you don't know the answer, tap \"I don't know\". It is the honest choice and helps your teacher find the right level, much more than a lucky guess.",
         "Start",
         "There are no right or wrong answers for most questions. Your teacher wants to understand how you learn best.",
         "This is NOT a graded exam",
-        "Use the \"Skip\" button to move to the next question. You can always go back.",
         "You can pause anytime",
-        "You can skip questions",
         "Your progress is saved automatically. Close the browser and come back later; you'll continue where you left off.",
         "questions • ~30 min"
       ],
@@ -37474,6 +37539,11 @@
             },
             {
               "name": "aiEvaluations",
+              "type": "Record<number, number>",
+              "optional": true
+            },
+            {
+              "name": "storedEvaluations",
               "type": "Record<number, number>",
               "optional": true
             },
@@ -46495,6 +46565,7 @@
             "profiles",
             "student_events",
             "student_learning_elements",
+            "student_learning_profile_versions",
             "student_learning_profiles",
             "student_progress_goals",
             "student_test_questions",
@@ -46572,6 +46643,7 @@
         "visibleResponseFields": [
           "current",
           "error",
+          "intensity",
           "mode",
           "pacingMode",
           "proposalId",
@@ -56935,6 +57007,12 @@
         "table": "student_events",
         "unique": false,
         "migration": "supabase/migrations/20261012160000_mark_done_supersedes_student_events.sql"
+      },
+      {
+        "name": "idx_learning_profile_versions_student",
+        "table": "student_learning_profile_versions",
+        "unique": false,
+        "migration": "supabase/migrations/20261012180000_welcome_test_profile_v2.sql"
       }
     ],
     "migrationFunctions": [

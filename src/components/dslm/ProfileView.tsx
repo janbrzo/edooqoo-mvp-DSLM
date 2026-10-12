@@ -14,6 +14,9 @@ import { EventLogPanel } from '@/components/dslm/EventLogPanel';
 import { StudentKnowledgeEntryCard } from '@/components/student-knowledge/StudentKnowledgeEntryCard';
 import { CollapsibleSection } from './CollapsibleSection';
 import { Brain, Activity as ActivityIcon, User, StickyNote, Bug, Sparkles } from 'lucide-react';
+import type { LearningProfileV2Columns } from '@/types/dslm/learningProfileV2';
+import { isFallbackSummary } from '@/lib/dslm/learningProfileView';
+import { AnswerBehaviourLine, DeclaredVsMeasured, LearningPathBlock, LowCoverageBadge } from './ProfileSignalsV2';
 
 interface ProfileViewProps {
   studentId: string;
@@ -53,6 +56,10 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
     }
   })();
 
+  // v2 columns (iteration 5) are not in the generated types yet; select('*') returns them once migrated.
+  const profileV2 = profile ? (profile as typeof profile & LearningProfileV2Columns) : null;
+  const summaryIsFallback = isFallbackSummary(profile?.ai_summary);
+
   const confidenceScores = profile ? [
     { label: 'Speaking', value: profile.confidence_speaking },
     { label: 'Writing', value: profile.confidence_writing },
@@ -68,6 +75,15 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
       {aiSummary && (
         <CollapsibleSection id="profile-ai-summary" title="AI Summary" icon={Sparkles} badge="PLACEMENT TEST" defaultOpen>
           <div className="space-y-2 text-sm">
+            {summaryIsFallback && (
+              <Badge
+                variant="outline"
+                className="text-[10px] border-amber-300 text-amber-700 dark:text-amber-400"
+                title="The AI step failed, so this summary was built from the test answers by rules."
+              >
+                Deterministic fallback
+              </Badge>
+            )}
             <p>{aiSummary.summary || aiSummary}</p>
             {aiSummary.key_observations?.length > 0 && (
               <div>
@@ -106,6 +122,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
           </div>
         ) : (
           <div className="space-y-3">
+            {profileV2 && <LowCoverageBadge profile={profileV2} />}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
               <TraitBadge label="Motivation" value={profile.motivation_type} />
               <TraitBadge label="Anxiety" value={profile.anxiety_level} />
@@ -151,6 +168,14 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
                   ))}
                 </div>
               </div>
+            )}
+
+            {profileV2 && (
+              <>
+                <DeclaredVsMeasured profile={profileV2} />
+                <LearningPathBlock profile={profileV2} />
+                <AnswerBehaviourLine profile={profileV2} />
+              </>
             )}
           </div>
         )}
