@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { pickHubTeacher, sanitizeHubTeacherToken } from '@/lib/studentHub/hubLandingPath';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -19,6 +20,9 @@ interface Teacher {
 
 const StudentHubLanding = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  // Teacher the student came from (/my/:teacherToken redirect), see hubLandingPath.ts.
+  const preferredTeacherToken = sanitizeHubTeacherToken(searchParams.get('teacher'));
   const [email, setEmail] = useState('');
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [loading, setLoading] = useState(false);
@@ -108,9 +112,10 @@ const StudentHubLanding = () => {
       setNotFoundReason(found.length === 0 ? (data?.reason ?? 'email_not_found') : null);
       saveHubEmail(emailToSearch.trim());
 
-      // Auto-redirect if single teacher (with password check)
-      if (found.length === 1) {
-        await checkPasswordAndNavigate(found[0], emailToSearch);
+      // Auto-redirect to the linked teacher, or the only teacher (with password check)
+      const target = pickHubTeacher(found as Teacher[], preferredTeacherToken);
+      if (target) {
+        await checkPasswordAndNavigate(target, emailToSearch);
       }
     } catch (err: any) {
       console.error('Error finding teachers:', err);

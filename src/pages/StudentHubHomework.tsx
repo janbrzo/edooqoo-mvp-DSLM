@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { hubLandingPath } from '@/lib/studentHub/hubLandingPath';
 import { useParams, useNavigate } from 'react-router-dom';
 import { StudentHubLayout } from '@/components/student-hub/StudentHubLayout';
 import { useStudentHubData, getSavedHubEmail } from '@/hooks/useStudentHubData';
@@ -18,7 +19,7 @@ const StudentHubHomework = () => {
   const email = getSavedHubEmail();
   const [filter, setFilter] = useState<Filter>('all');
 
-  useEffect(() => { if (!email) navigate('/my'); }, [email, navigate]);
+  useEffect(() => { if (!email) navigate(hubLandingPath(teacherToken)); }, [email, navigate]);
 
   const { data, loading } = useStudentHubData(teacherToken, email || undefined);
 
