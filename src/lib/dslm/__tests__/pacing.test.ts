@@ -206,7 +206,7 @@ describe('intensityPromptLines', () => {
     const two = intensityPromptLines(computeIntensity({ version: 2, score: 40, path: 'guided', capacity_warning: 'unrealistic_goal' }, 10));
     expect(two.split('\n- ')).toHaveLength(3);
     expect(two).toContain('Capacity warning: declared study capacity is low for this deadline');
-    expect(two).not.toContain('—');
+    expect(two).not.toContain('\u2014');
   });
 });
 
