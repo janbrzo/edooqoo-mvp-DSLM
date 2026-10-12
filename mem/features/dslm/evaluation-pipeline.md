@@ -24,7 +24,8 @@ type: feature
     select net.http_post(
       url := 'https://bvfrkzdlklyvnhlpleck.supabase.co/functions/v1/process-pending-ai-evaluations',
       headers := jsonb_build_object('Content-Type', 'application/json', 'x-cron-secret', '<CRON_SECRET>'),
-      body := '{}'::jsonb
+      body := '{}'::jsonb,
+      timeout_milliseconds := 120000
     );
   $$);
   ```

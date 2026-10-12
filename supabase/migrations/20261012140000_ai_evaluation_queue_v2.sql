@@ -11,8 +11,9 @@
 --    (at most 3 attempts, 5 minutes apart).
 -- 2. Re-queueing an exercise resets its attempt counter.
 -- 3. A list of saved worksheet answers that still need evaluation (10 minutes
---    after the last save, not evaluated since, saved within 7 days), so a
---    scheduled call can queue them server-side even when the tab was closed.
+--    after the last save, not evaluated since, saved within 7 days, no queue
+--    row since that save), so a scheduled call can queue them server-side even
+--    when the tab was closed. Each save is queued at most once by the scan.
 -- The schedule itself (pg_cron + CRON_SECRET) is created outside migrations;
 -- see mem://features/dslm/evaluation-pipeline.
 
@@ -33,6 +34,15 @@ CREATE OR REPLACE FUNCTION public.claim_pending_ai_evaluations(
  SET search_path TO 'public'
 AS $function$
 BEGIN
+  -- Rows that keep dying mid-run give up after 3 attempts like failed rows.
+  UPDATE public.pending_worksheet_ai_evaluations
+     SET status = 'failed',
+         error_message = coalesce(error_message, 'gave up after 3 attempts'),
+         processed_at = now(),
+         locked_at = NULL
+   WHERE status = 'processing' AND attempts >= 3
+     AND coalesce(locked_at, created_at) < now() - interval '10 minutes';
+
   RETURN QUERY
   UPDATE public.pending_worksheet_ai_evaluations q
      SET status = 'processing',
@@ -43,8 +53,8 @@ BEGIN
      FROM public.pending_worksheet_ai_evaluations p
      WHERE (
              p.status = 'pending'
-          OR (p.status = 'processing' AND p.locked_at IS NOT NULL AND p.locked_at < now() - interval '10 minutes')
-          OR (p.status = 'processing' AND p.locked_at IS NULL AND p.created_at < now() - interval '10 minutes')
+          OR (p.status = 'processing' AND p.attempts < 3
+              AND coalesce(p.locked_at, p.created_at) < now() - interval '10 minutes')
           OR (p.status = 'failed' AND p.attempts < 3
               AND coalesce(p.processed_at, p.created_at) < now() - interval '5 minutes')
            )
@@ -118,16 +128,16 @@ AS $function$
     AND a.last_saved_at >= now() - interval '7 days'
     AND (a.last_ai_eval_at IS NULL OR a.last_ai_eval_at < a.last_saved_at)
     AND a.answers IS NOT NULL AND a.answers <> '{}'::jsonb
+    -- Any queue row created since the last save (pending, processing, failed
+    -- with retries left, given up, or marked not evaluable) owns this save:
+    -- retries belong to claim_pending_ai_evaluations, so a failing exercise is
+    -- never re-queued with a fresh attempt counter.
     AND NOT EXISTS (
       SELECT 1 FROM public.pending_worksheet_ai_evaluations p
       WHERE p.worksheet_id = a.worksheet_id
         AND p.student_email = a.student_email
         AND p.exercise_index = a.exercise_index
-        AND (
-              p.status IN ('pending', 'processing')
-           -- gave up on this save already: do not queue it again until the student saves anew
-           OR (p.status = 'failed' AND p.attempts >= 3 AND p.created_at >= a.last_saved_at)
-        )
+        AND (p.status IN ('pending', 'processing') OR p.created_at >= a.last_saved_at)
     )
   ORDER BY a.last_saved_at
   LIMIT greatest(1, least(coalesce(p_limit, 20), 100));

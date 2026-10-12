@@ -87,13 +87,30 @@ serve(async (req) => {
       await queueStaleWorksheetAnswers(supabase);
     }
 
-    // Claim rows atomically (also recovers stale 'processing' rows and retries
-    // 'failed' ones); falls back to the old select while the migration is missing.
-    const pendingEvals = await claimPendingEvaluations(
-      supabase, worksheetIdFilter ? 25 : 10, worksheetIdFilter, studentEmailFilter,
-    );
+    // Rows are claimed one at a time per worker (atomic; also recovers stale
+    // 'processing' rows and retries 'failed' ones), so rows a run never reaches
+    // stay 'pending'. While the claim migration is missing, the previous select
+    // of 'pending' rows is used as a prefetched list.
+    const maxRows = worksheetIdFilter ? 25 : 10;
+    const isScheduledRun = isServiceLike && !worksheetIdFilter;
+    let claimedCount = 0;
+    let prefetched: any[] | null = null;
+    const nextPending = async (): Promise<any | null> => {
+      if (claimedCount >= maxRows) return null;
+      if (prefetched) {
+        const row = prefetched.shift() ?? null;
+        if (row) claimedCount++;
+        return row;
+      }
+      const res = await claimPendingEvaluations(supabase, 1, worksheetIdFilter, studentEmailFilter, maxRows);
+      if (!res.atomic) prefetched = res.rows;
+      const row = res.atomic ? (res.rows[0] ?? null) : (prefetched?.shift() ?? null);
+      if (row) claimedCount++;
+      return row;
+    };
 
-    if (!pendingEvals || pendingEvals.length === 0) {
+    const firstPending = await nextPending();
+    if (!firstPending) {
       console.log('[process-pending] No pending evaluations found');
       return new Response(
         JSON.stringify({ processed: 0, message: 'No pending evaluations' }),
@@ -101,16 +118,17 @@ serve(async (req) => {
       );
     }
 
-    console.log(`[process-pending] Found ${pendingEvals.length} pending evaluations`);
 
     let processed = 0;
     let failed = 0;
     let skipped = 0;
     
-    const workQueue = [...pendingEvals];
+    let seed: any | null = firstPending;
     const runWorker = async () => {
-    while (workQueue.length > 0) {
-      const pending = workQueue.shift()!;
+    while (true) {
+      const pending = seed ?? await nextPending();
+      seed = null;
+      if (!pending) break;
       try {
         // Check if AI eval is actually needed
         const { data: needsEval } = await supabase.rpc('needs_ai_evaluation', {
@@ -138,7 +156,7 @@ serve(async (req) => {
         let answers = pending.answers || {};
         let context = pending.context || {};
         const questionItems = context.questions || [];
-        const effectiveTriggerSource = triggerSource || context.trigger_source || null;
+        const effectiveTriggerSource = triggerSource || context.trigger_source || (isScheduledRun ? '10min_inactivity' : null);
         
         // Fetch audio answers from the source table
         let audioAnswers: Record<string, string> = {};
@@ -497,7 +515,7 @@ serve(async (req) => {
     };
 
     const runAll = async () => {
-      await Promise.all(Array.from({ length: Math.min(QUEUE_CONCURRENCY, workQueue.length) }, () => runWorker()));
+      await Promise.all(Array.from({ length: QUEUE_CONCURRENCY }, () => runWorker()));
       console.log(`[process-pending] Finished: ${processed} processed, ${skipped} skipped, ${failed} failed`);
     };
 
@@ -506,7 +524,7 @@ serve(async (req) => {
     if (studentEmailFilter && typeof EdgeRuntime !== 'undefined' && EdgeRuntime?.waitUntil) {
       EdgeRuntime.waitUntil(runAll());
       return new Response(
-        JSON.stringify({ accepted: true, total: pendingEvals.length }),
+        JSON.stringify({ accepted: true }),
         { status: 202, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -514,7 +532,7 @@ serve(async (req) => {
     await runAll();
 
     return new Response(
-      JSON.stringify({ processed, skipped, failed, total: pendingEvals.length }),
+      JSON.stringify({ processed, skipped, failed, total: processed + skipped + failed }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
@@ -537,7 +555,7 @@ async function autoQueueForCreateHomework(
   triggerSource: string = 'create_homework',
   exerciseIndexFilter: number | null = null,
   studentEmailFilter: string | null = null,
-) {
+): Promise<number> {
   console.log(`[auto-queue] Fetching answers for worksheet ${worksheetId}`);
   
   const { data: studentAnswers, error } = await supabase
@@ -547,12 +565,12 @@ async function autoQueueForCreateHomework(
   
   if (error) {
     console.error('[auto-queue] Error fetching answers:', error);
-    return;
+    return -1; // could not read answers: do not mark anything
   }
   
   if (!studentAnswers || studentAnswers.length === 0) {
     console.log('[auto-queue] No student answers found');
-    return;
+    return 0;
   }
   
   let queued = 0;
@@ -661,6 +679,7 @@ async function autoQueueForCreateHomework(
   }
   
   console.log(`[auto-queue] Queued ${queued} evaluations for create_homework`);
+  return queued;
 }
 
 /**
@@ -673,13 +692,14 @@ async function claimPendingEvaluations(
   limit: number,
   worksheetId: string | null,
   studentEmail: string | null,
-): Promise<any[]> {
+  fallbackLimit: number,
+): Promise<{ rows: any[]; atomic: boolean }> {
   const { data, error } = await supabase.rpc('claim_pending_ai_evaluations', {
     p_limit: limit,
     p_worksheet_id: worksheetId,
     p_student_email: studentEmail,
   });
-  if (!error) return data || [];
+  if (!error) return { rows: data || [], atomic: true };
   const missing = error.code === 'PGRST202' || error.code === '42883' || /could not find the function/i.test(error.message || '');
   if (!missing) throw error;
 
@@ -688,12 +708,12 @@ async function claimPendingEvaluations(
     .select('*')
     .eq('status', 'pending')
     .order('created_at', { ascending: true })
-    .limit(limit);
+    .limit(fallbackLimit);
   if (worksheetId) query = query.eq('worksheet_id', worksheetId);
   if (studentEmail) query = query.eq('student_email', studentEmail);
   const { data: rows, error: fetchError } = await query;
   if (fetchError) throw fetchError;
-  return rows || [];
+  return { rows: rows || [], atomic: false };
 }
 
 /**
@@ -709,7 +729,34 @@ async function queueStaleWorksheetAnswers(supabase: any): Promise<void> {
   }
   for (const row of rows || []) {
     try {
-      await autoQueueForCreateHomework(supabase, row.worksheet_id, '10min_inactivity', row.exercise_index, row.student_email);
+      const queued = await autoQueueForCreateHomework(
+        supabase, row.worksheet_id, '10min_inactivity', row.exercise_index, row.student_email,
+      );
+      const { data: active } = await supabase
+        .from('pending_worksheet_ai_evaluations')
+        .select('id')
+        .eq('worksheet_id', row.worksheet_id)
+        .eq('student_email', row.student_email)
+        .eq('exercise_index', row.exercise_index)
+        .in('status', ['pending', 'processing'])
+        .limit(1);
+      if (queued === 0 && !(active && active.length > 0)) {
+        // Unsupported type or no resolvable closed items: record this save as
+        // handled so the scan does not offer it again every run.
+        await supabase
+          .from('pending_worksheet_ai_evaluations')
+          .upsert({
+            worksheet_id: row.worksheet_id,
+            student_email: row.student_email,
+            exercise_index: row.exercise_index,
+            exercise_type: row.exercise_type,
+            answers: {},
+            status: 'completed',
+            error_message: 'not evaluable',
+            created_at: new Date().toISOString(),
+            processed_at: new Date().toISOString(),
+          }, { onConflict: 'worksheet_id,student_email,exercise_index' });
+      }
     } catch (e) {
       console.error('[process-pending] stale answer queue failed:', (e as Error).message);
     }
