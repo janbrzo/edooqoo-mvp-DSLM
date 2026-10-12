@@ -2,7 +2,7 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.49.1';
 import { isClosedType } from "../_shared/closedEvaluation.ts";
 import { buildClosedItemContext } from "../_shared/closedItemContext.ts";
-import { scoreToMastery, aiAlternativeMastery, applyAiAlternatives, isOpenExerciseType } from "../_shared/itemMastery.ts";
+import { scoreToMastery, aiAlternativeMastery, applyAiAlternatives, isOpenExerciseType, calculateExerciseMastery } from "../_shared/itemMastery.ts";
 import { DEFAULT_ENGLISH_LEVEL, resolveEnglishLevel } from "../_shared/englishLevel.ts";
 import { resolveCaller } from "../_shared/auth.ts";
 import { hasWorksheetStudentAccess, userOwnsWorksheet } from "../_shared/evaluationAccess.ts";
@@ -155,17 +155,20 @@ serve(async (req) => {
         // Fetch audio answers from the source table
         let audioAnswers: Record<string, string> = {};
         let storedItemEvaluations: any[] | null = null;
+        // Version of the stored row the closed raise is computed from (see the write below).
+        let readLastSavedAt: string | null = null;
         // A save made after this read must still count as not evaluated, so
         // last_ai_eval_at is the time the answers were read, not when the write ends.
         const answersReadAt = new Date().toISOString();
         try {
           const { data: answerRow } = await supabase
             .from('worksheet_student_answers')
-            .select('answers, audio_answers, item_evaluations')
+            .select('answers, audio_answers, item_evaluations, last_saved_at')
             .eq('worksheet_id', pending.worksheet_id)
             .eq('student_email', pending.student_email)
             .eq('exercise_index', pending.exercise_index)
             .maybeSingle();
+          readLastSavedAt = answerRow?.last_saved_at ?? null;
           
           if (answerRow?.audio_answers && typeof answerRow.audio_answers === 'object') {
             audioAnswers = answerRow.audio_answers as Record<string, string>;
@@ -480,19 +483,32 @@ serve(async (req) => {
           }
           for (const e of (aiResult.evaluations || [])) {
             if (typeof e?.question_index !== 'number' || !keyByQuestion.has(e.question_index)) continue;
-            const up = aiAlternativeMastery(pending.exercise_type, keyByQuestion.get(e.question_index) ?? null, e);
+            const up = aiAlternativeMastery(
+              pending.exercise_type, keyByQuestion.get(e.question_index) ?? null, e, answers[String(e.question_index)],
+            );
             if (up !== null) closedRaised[e.question_index] = up;
           }
         }
-        const raisedApplied = isClosedPending && storedItemEvaluations && Object.keys(closedRaised).length > 0
-          ? applyAiAlternatives(storedItemEvaluations, closedRaised)
-          : null;
+        // Raised item ratings and the exercise mastery recomputed over ALL items of
+        // the exercise (as the client does), so a raise can only move it up.
+        let raisedFields: Record<string, unknown> | null = null;
+        if (isClosedPending && Object.keys(closedRaised).length > 0) {
+          const exercise = await loadWorksheetExercise(supabase, pending.worksheet_id, pending.exercise_index);
+          const exerciseMastery = exercise
+            ? calculateExerciseMastery(pending.exercise_type, exercise, answers as Record<string, unknown>, closedRaised)
+            : null;
+          const raisedItems = storedItemEvaluations ? applyAiAlternatives(storedItemEvaluations, closedRaised) : null;
+          raisedFields = {
+            ...(raisedItems?.changed ? { item_evaluations: raisedItems.items } : {}),
+            ...(exerciseMastery !== null ? { mastery: exerciseMastery } : {}),
+          };
+          if (Object.keys(raisedFields).length === 0) raisedFields = null;
+        }
 
         const updateData: Record<string, unknown> = isClosedPending
           ? {
               ai_evaluation: aiEvaluation,
               last_ai_eval_at: answersReadAt,
-              ...(raisedApplied?.changed ? { item_evaluations: raisedApplied.items, mastery: raisedApplied.mastery } : {}),
             }
           : {
               ai_evaluation: aiEvaluation,
@@ -505,14 +521,32 @@ serve(async (req) => {
           updateData.eval_trigger = effectiveTriggerSource;
         }
         
-        const { error: updateError } = await supabase
-          .from('worksheet_student_answers')
-          .update(updateData)
-          .eq('worksheet_id', pending.worksheet_id)
-          .eq('student_email', pending.student_email)
-          .eq('exercise_index', pending.exercise_index);
+        let wroteRaise = false;
+        if (raisedFields) {
+          // Only onto the row version the raise was computed from: a save made while
+          // the model ran carries new key-based ratings that must not be overwritten.
+          let guarded = supabase
+            .from('worksheet_student_answers')
+            .update({ ...updateData, ...raisedFields })
+            .eq('worksheet_id', pending.worksheet_id)
+            .eq('student_email', pending.student_email)
+            .eq('exercise_index', pending.exercise_index);
+          guarded = readLastSavedAt ? guarded.eq('last_saved_at', readLastSavedAt) : guarded.is('last_saved_at', null);
+          const { data: guardedRows, error: guardedError } = await guarded.select('id');
+          if (guardedError) throw guardedError;
+          wroteRaise = Array.isArray(guardedRows) && guardedRows.length > 0;
+          if (!wroteRaise) console.log(`[process-pending] ${pending.id}: answers changed during evaluation, raise not applied`);
+        }
+        if (!wroteRaise) {
+          const { error: updateError } = await supabase
+            .from('worksheet_student_answers')
+            .update(updateData)
+            .eq('worksheet_id', pending.worksheet_id)
+            .eq('student_email', pending.student_email)
+            .eq('exercise_index', pending.exercise_index);
 
-        if (updateError) throw updateError;
+          if (updateError) throw updateError;
+        }
 
         // Mark as completed
         await supabase
@@ -789,14 +823,7 @@ async function buildClosedItemsFromWorksheet(
   answers: Record<string, unknown>,
 ): Promise<any[] | null> {
   try {
-    const { data: worksheet } = await supabase
-      .from('worksheets')
-      .select('ai_response')
-      .eq('id', worksheetId)
-      .single();
-    if (!worksheet?.ai_response) return null;
-    const parsed = typeof worksheet.ai_response === 'string' ? JSON.parse(worksheet.ai_response) : worksheet.ai_response;
-    const exercise = (parsed?.exercises || [])[exerciseIndex];
+    const exercise = await loadWorksheetExercise(supabase, worksheetId, exerciseIndex);
     if (!exercise) return null;
     const idx = new Set<number>();
     for (const k of Object.keys(answers)) {
@@ -891,4 +918,21 @@ async function markNotEvaluable(
       created_at: new Date().toISOString(),
       processed_at: new Date().toISOString(),
     }, { onConflict: 'worksheet_id,student_email,exercise_index' });
+}
+
+/** One exercise of a worksheet's generated content, or null when unavailable. */
+async function loadWorksheetExercise(supabase: any, worksheetId: string, exerciseIndex: number): Promise<any | null> {
+  try {
+    const { data: worksheet } = await supabase
+      .from('worksheets')
+      .select('ai_response')
+      .eq('id', worksheetId)
+      .single();
+    if (!worksheet?.ai_response) return null;
+    const parsed = typeof worksheet.ai_response === 'string' ? JSON.parse(worksheet.ai_response) : worksheet.ai_response;
+    return (parsed?.exercises || [])[exerciseIndex] ?? null;
+  } catch (e) {
+    console.error('[process-pending] worksheet exercise read failed:', (e as Error).message);
+    return null;
+  }
 }

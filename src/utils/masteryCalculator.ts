@@ -11,7 +11,7 @@
  */
 
 
-import { calculateItemMastery, isClosedExerciseType, CLOSED_EXERCISE_TYPES, shuffleArrayWithSeed, averageScoredMastery, scoreToMastery, aiAlternativeMastery, applyAiAlternatives, isSelectionType, OPEN_EXERCISE_TYPES, isOpenExerciseType } from '../../supabase/functions/_shared/itemMastery';
+import { calculateItemMastery, isClosedExerciseType, CLOSED_EXERCISE_TYPES, shuffleArrayWithSeed, averageScoredMastery, scoreToMastery, aiAlternativeMastery, applyAiAlternatives, isSelectionType, OPEN_EXERCISE_TYPES, isOpenExerciseType, getExerciseItems, calculateExerciseMastery } from '../../supabase/functions/_shared/itemMastery';
 
 // Closed-item scoring lives in supabase/functions/_shared/itemMastery.ts so Edge Functions and the client share one verdict.
 export { calculateItemMastery, isClosedExerciseType, CLOSED_EXERCISE_TYPES, shuffleArrayWithSeed, averageScoredMastery, scoreToMastery, aiAlternativeMastery, applyAiAlternatives, isSelectionType, OPEN_EXERCISE_TYPES, isOpenExerciseType };
@@ -94,18 +94,7 @@ export const safeGetAllNanoSkills = (item: any): NanoSkillData[] => {
 /**
  * Get exercise items array from exercise data (handles various structures)
  */
-export const getExerciseItems = (exerciseData: any): any[] => {
-  if (!exerciseData) return [];
-  return exerciseData.questions || 
-         exerciseData.items || 
-         exerciseData.sentences || 
-         exerciseData.statements || 
-         exerciseData.words || 
-         exerciseData.sentence_halves ||
-         exerciseData.expressions ||
-         exerciseData.prompts ||
-         [];
-};
+export { getExerciseItems };
 
 /**
  * Adjust nano_skill confidence based on answer type (audio vs text)
@@ -241,50 +230,44 @@ export const buildItemEvaluations = (
 /**
  * Calculate overall mastery for a closed exercise (average of item masteries)
  */
-export const calculateOverallMastery = (
-  exerciseType: string,
-  exerciseData: any,
-  answers: Record<string | number, any>,
-  /** question_index -> mastery raised by an accepted AI alternative (aiAlternativeMastery). */
-  overrides?: Record<number, number>
-): number | null => {
-  if (!exerciseData || !answers || Object.keys(answers).length === 0) return null;
-  if (!isClosedExerciseType(exerciseType)) return null;
-  
-  const items = getExerciseItems(exerciseData);
-  let correct = 0;
-  let total = 0;
-  
-  items.forEach((item: any, idx: number) => {
-    const mastery = overrides?.[idx] ?? calculateItemMastery(exerciseType, exerciseData, idx, answers[idx], answers);
-    if (mastery !== null) {
-      if (mastery >= 50) correct++;
-      total++;
-    }
-  });
-  
-  return total > 0 ? Math.round((correct / total) * 100) : null;
-};
+/** Shared with the AI queue: `calculateExerciseMastery` in supabase/functions/_shared/itemMastery.ts. */
+export const calculateOverallMastery = calculateExerciseMastery;
 
-/** Prefill for an item whose answer exists but has no key verdict (open item, or a typed answer the key cannot decide). */
+/** Prefill for a closed item whose answer exists but the key cannot decide. */
 const NEUTRAL_PREFILL = 50;
+
+/** question_index -> stored mastery (first scored rating per question) from saved item_evaluations. */
+export const storedItemMasteryByQuestion = (
+  itemEvaluations: ReadonlyArray<{ question_index?: number; mastery?: number; hasValue?: boolean }> | null | undefined,
+): Record<number, number> => {
+  const out: Record<number, number> = {};
+  for (const e of itemEvaluations || []) {
+    const q = e?.question_index;
+    if (typeof q !== 'number' || q in out) continue;
+    if (e.hasValue === false || typeof e.mastery !== 'number' || !(e.mastery >= 0)) continue;
+    out[q] = e.mastery;
+  }
+  return out;
+};
 
 /**
  * Initial slider value for one exercise item (decision D2: Mark done is a teacher
- * override on the 0-100 scale, prefilled from the same key verdict the student
- * pipeline uses, so the teacher starts from what the student event already holds).
- * - AI evaluation (open items) wins when present.
- * - Closed items: `calculateItemMastery` (100 correct, 0 wrong); an uncertain
- *   answer starts neutral for the teacher to decide.
- * - No answer: no value, the item is not submitted unless the teacher moves the slider.
+ * override on the 0-100 scale; saving it replaces the student's rating, so the
+ * teacher starts from what the student's evaluation already holds).
+ * Order: live AI evaluation, then the stored evaluation of the saved answer
+ * (AI queue result, accepted alternative), then for closed items the key verdict
+ * (`calculateItemMastery`: 100 correct, 0 wrong, 50 when the key cannot decide).
+ * An open item with neither has no value, so an unrated item never overrides a
+ * real evaluation; no answer has no value either.
  */
 export const calculateInitialMasteryForItem = (
   itemIndex: number,
   studentAnswers?: Record<number, any>,
   exerciseData?: any,
-  aiEvaluations?: Record<number, number>
+  aiEvaluations?: Record<number, number>,
+  storedEvaluations?: Record<number, number>,
 ): { mastery: number | null; hasValue: boolean } => {
-  if (aiEvaluations && aiEvaluations[itemIndex] !== undefined) {
+  if (aiEvaluations && typeof aiEvaluations[itemIndex] === 'number' && aiEvaluations[itemIndex] >= 0) {
     return { mastery: aiEvaluations[itemIndex], hasValue: true };
   }
   const studentAnswer = studentAnswers?.[itemIndex];
@@ -294,8 +277,10 @@ export const calculateInitialMasteryForItem = (
   if ((studentAnswer === undefined || studentAnswer === null || studentAnswer === '') && !hasCompositeAnswer) {
     return { mastery: null, hasValue: false };
   }
-  const keyMastery = isClosedExerciseType(exerciseType)
-    ? calculateItemMastery(exerciseType, exerciseData, itemIndex, studentAnswer, studentAnswers)
-    : null;
+  if (storedEvaluations && typeof storedEvaluations[itemIndex] === 'number') {
+    return { mastery: storedEvaluations[itemIndex], hasValue: true };
+  }
+  if (!isClosedExerciseType(exerciseType)) return { mastery: null, hasValue: false };
+  const keyMastery = calculateItemMastery(exerciseType, exerciseData, itemIndex, studentAnswer, studentAnswers);
   return { mastery: keyMastery ?? NEUTRAL_PREFILL, hasValue: true };
 };

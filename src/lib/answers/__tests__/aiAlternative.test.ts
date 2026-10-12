@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import {
   aiAlternativeMastery,
+  calculateExerciseMastery,
   applyAiAlternatives,
   isSelectionType,
 } from '../../../../supabase/functions/_shared/itemMastery';
@@ -81,5 +82,22 @@ describe('calculateOverallMastery overrides', () => {
   it('is unchanged without overrides and counts a raised answer as correct', () => {
     expect(calculateOverallMastery('fill-in-blanks', exercise, answers)).toBe(50);
     expect(calculateOverallMastery('fill-in-blanks', exercise, answers, { 0: 90 })).toBe(100);
+  });
+});
+
+describe('review fixes', () => {
+  const accepted = { quality_score: 0.9, is_acceptable: true, key_verdict: 'wrong' };
+  it('a single-letter pick in synonyms/antonyms is a selection, never raised', () => {
+    expect(aiAlternativeMastery('synonyms-antonyms', 0, accepted, 'B')).toBeNull();
+    expect(aiAlternativeMastery('synonyms-antonyms', 0, accepted, 'happy')).toBe(90);
+  });
+
+  it('a raise never lowers exercise mastery: mastery is over all items, not only rated ones', () => {
+    const ex = { type: 'fill-in-blanks', sentences: [
+      { text: 'a', answer: 'one' }, { text: 'b', answer: 'two' }, { text: 'c', answer: 'three' }, { text: 'd', answer: 'four' },
+    ] };
+    const answers = { 0: 'one', 1: 'two', 2: 'three', 3: 'quatre' };
+    expect(calculateExerciseMastery('fill-in-blanks', ex, answers)).toBe(75);
+    expect(calculateExerciseMastery('fill-in-blanks', ex, answers, { 3: 90 })).toBe(100);
   });
 });

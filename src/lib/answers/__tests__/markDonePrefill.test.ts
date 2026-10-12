@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { calculateInitialMasteryForItem, calculateItemMastery } from '@/utils/masteryCalculator';
+import { calculateInitialMasteryForItem, calculateItemMastery, storedItemMasteryByQuestion } from '@/utils/masteryCalculator';
 
 describe('Mark done prefill (D2): same key verdict as the student pipeline, 0-100 scale', () => {
   const fib = {
@@ -20,8 +20,26 @@ describe('Mark done prefill (D2): same key verdict as the student pipeline, 0-10
     expect(calculateInitialMasteryForItem(0, { 0: 'x' }, { type: 'discussion' }, { 0: 72 })).toEqual({ mastery: 72, hasValue: true });
   });
 
-  it('open item without AI evaluation starts neutral', () => {
-    expect(calculateInitialMasteryForItem(0, { 0: 'I think so' }, { type: 'discussion' })).toEqual({ mastery: 50, hasValue: true });
+  it('open item without AI or stored evaluation has no value (never overrides a real evaluation)', () => {
+    expect(calculateInitialMasteryForItem(0, { 0: 'I think so' }, { type: 'discussion' })).toEqual({ mastery: null, hasValue: false });
+  });
+
+  it('stored evaluation of the saved answer comes before the key (queue result, accepted alternative)', () => {
+    expect(calculateInitialMasteryForItem(0, { 0: 'I think so' }, { type: 'discussion' }, undefined, { 0: 85 })).toEqual({ mastery: 85, hasValue: true });
+    // key says 0, the queue raised it to 90 (D1): the teacher starts from 90
+    expect(calculateInitialMasteryForItem(1, { 1: 'eat' }, fib, undefined, { 1: 90 })).toEqual({ mastery: 90, hasValue: true });
+    // live AI evaluation still wins
+    expect(calculateInitialMasteryForItem(0, { 0: 'x' }, { type: 'discussion' }, { 0: 70 }, { 0: 85 }).mastery).toBe(70);
+  });
+
+  it('storedItemMasteryByQuestion keeps the first scored rating per question', () => {
+    expect(storedItemMasteryByQuestion([
+      { question_index: 0, mastery: -1, hasValue: false },
+      { question_index: 0, mastery: 80, hasValue: true },
+      { question_index: 0, mastery: 10, hasValue: true },
+      { question_index: 2, mastery: 0, hasValue: true },
+    ])).toEqual({ 0: 80, 2: 0 });
+    expect(storedItemMasteryByQuestion(null)).toEqual({});
   });
 
   it('matching-halves uses the seed the student screen uses (matches calculateItemMastery)', () => {

@@ -50,7 +50,9 @@ import {
   renderOtherExerciseTypes
 } from "./ExerciseSectionUtils";
 import { devLog, devWarn } from '@/utils/logger';
-import { isClosedExerciseType, OPEN_EXERCISE_TYPES, CLOSED_EXERCISE_TYPES } from '@/utils/masteryCalculator';
+import { isClosedExerciseType, OPEN_EXERCISE_TYPES, CLOSED_EXERCISE_TYPES, scoreToMastery, storedItemMasteryByQuestion } from '@/utils/masteryCalculator';
+import { invokeWithRetry } from '@/lib/answers/invokeWithRetry';
+import { resolveEnglishLevel } from '../../../supabase/functions/_shared/englishLevel';
 import { safeGetNanoSkill, safeGetAllNanoSkills } from "@/utils/textObjectFixer";
 import NanoSkillBadge, { NanoSkill } from "./NanoSkillBadge";
 import { supabase } from "@/integrations/supabase/client";
@@ -461,21 +463,23 @@ const ExerciseSection = forwardRef<HTMLDivElement, ExerciseSectionProps>(({
           
           devLog('[AI Evaluation] Context being sent:', fullContext);
           
-          const { data, error } = await supabase.functions.invoke('verify-open-answers', {
+          const { data, error } = await invokeWithRetry<any>(() => supabase.functions.invoke('verify-open-answers', {
             body: {
               answers: answersToEvaluate,
-              english_level: originalFormData?.englishLevel || 'B1',
+              english_level: resolveEnglishLevel(originalFormData?.englishLevel),
               context: fullContext
             }
-          });
+          }));
           
           if (error) {
-            console.error('[AI Evaluation] Error:', error);
+            // The modal then starts from the stored evaluation (or no value), never a guess.
+            devWarn('[AI Evaluation] Error:', error);
           } else if (data?.evaluations) {
-            // Convert quality_score (0-1) to percentage (0-100)
+            // quality_score (0-1) -> 0-100; a missing score stays unevaluated.
             const evaluationsMap: Record<number, number> = {};
             data.evaluations.forEach((e: any) => {
-              evaluationsMap[e.question_index] = Math.round(e.quality_score * 100);
+              const m = scoreToMastery(e.quality_score);
+              if (m >= 0) evaluationsMap[e.question_index] = m;
             });
             setAiEvaluations(evaluationsMap);
             devLog('[AI Evaluation] Results:', evaluationsMap);
@@ -758,6 +762,8 @@ const ExerciseSection = forwardRef<HTMLDivElement, ExerciseSectionProps>(({
   
   // Use canonical ai_evaluation first, fallback to item_evaluations conversion
   const liveAiEvaluations = resolveAiEvaluations(liveAiEvalProp, liveItemEvalsProp);
+  // Mark done starts from the stored evaluation of the saved answer (decision D2).
+  const storedMarkDoneEvaluations = React.useMemo(() => storedItemMasteryByQuestion(liveItemEvalsProp), [liveItemEvalsProp]);
   
   // DEBUG: Log structure for answer-questions-picture to diagnose editing issues
   if (exercise.type === 'answer-questions-picture') {
@@ -1874,6 +1880,7 @@ const ExerciseSection = forwardRef<HTMLDivElement, ExerciseSectionProps>(({
         studentAnswers={liveSessionAnswer}
         exerciseData={exercise}
         aiEvaluations={aiEvaluations}
+        storedEvaluations={storedMarkDoneEvaluations}
         isLoadingAiEvaluation={isLoadingAiEvaluation}
       />
       

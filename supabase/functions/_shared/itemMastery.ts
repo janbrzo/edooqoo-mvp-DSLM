@@ -403,8 +403,11 @@ export function aiAlternativeMastery(
   exerciseType: string,
   keyMastery: number | null,
   ai: ClosedAiEvaluation | null | undefined,
+  /** The student's answer: a single letter in synonyms/antonyms is a pick, not typed text. */
+  studentAnswer?: unknown,
 ): number | null {
   if (!ai || isSelectionType(exerciseType)) return null;
+  if (typeof studentAnswer === 'string' && /^[A-Z]$/i.test(studentAnswer.trim())) return null;
   if (keyMastery !== null && keyMastery >= 50) return null; // the key already accepts it
   if (ai.key_verdict === 'correct') return null;
   const q = typeof ai.quality_score === 'number' ? ai.quality_score : NaN;
@@ -449,3 +452,48 @@ export function applyAiAlternatives<T extends ScoredItem>(
     : null;
   return { items: out, mastery, changed };
 }
+
+/** The item array of an exercise, whatever its shape (questions, items, sentences...). */
+export const getExerciseItems = (exerciseData: any): any[] => {
+  if (!exerciseData) return [];
+  return exerciseData.questions ||
+         exerciseData.items ||
+         exerciseData.sentences ||
+         exerciseData.statements ||
+         exerciseData.words ||
+         exerciseData.sentence_halves ||
+         exerciseData.expressions ||
+         exerciseData.prompts ||
+         [];
+};
+
+/**
+ * Exercise mastery of a closed exercise: % of answered items the key (or an
+ * accepted AI alternative in `overrides`) marks correct, over ALL items of the
+ * exercise. Used by the client at save/submit and by the AI queue, so a raise
+ * can only move the exercise mastery up.
+ */
+export const calculateExerciseMastery = (
+  exerciseType: string,
+  exerciseData: any,
+  answers: Record<string | number, any>,
+  /** question_index -> mastery raised by an accepted AI alternative (aiAlternativeMastery). */
+  overrides?: Record<number, number>,
+): number | null => {
+  if (!exerciseData || !answers || Object.keys(answers).length === 0) return null;
+  if (!isClosedExerciseType(exerciseType)) return null;
+
+  const items = getExerciseItems(exerciseData);
+  let correct = 0;
+  let total = 0;
+
+  items.forEach((_item: any, idx: number) => {
+    const mastery = overrides?.[idx] ?? calculateItemMastery(exerciseType, exerciseData, idx, answers[idx], answers);
+    if (mastery !== null) {
+      if (mastery >= 50) correct++;
+      total++;
+    }
+  });
+
+  return total > 0 ? Math.round((correct / total) * 100) : null;
+};

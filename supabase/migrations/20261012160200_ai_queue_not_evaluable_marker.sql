@@ -26,7 +26,8 @@ AS $function$
     status, error_message, created_at, processed_at
   )
   VALUES (
-    p_worksheet_id, lower(p_student_email), p_exercise_index, p_exercise_type, '{}'::jsonb,
+    -- Same email as the answer row (the stale scan matches it exactly).
+    p_worksheet_id, p_student_email, p_exercise_index, p_exercise_type, '{}'::jsonb,
     'completed', 'not evaluable', now(), now()
   )
   ON CONFLICT (worksheet_id, student_email, exercise_index) DO UPDATE SET

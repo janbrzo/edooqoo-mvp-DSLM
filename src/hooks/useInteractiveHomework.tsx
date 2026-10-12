@@ -464,7 +464,7 @@ export const useInteractiveHomework = ({
                   for (const qEval of evalData.question_evaluations || []) {
                     const qi = qEval.question_index ?? 0;
                     const keyMastery = calculateItemMastery(exType, exerciseData, qi, closedAnswers[qi], closedAnswers);
-                    const up = aiAlternativeMastery(exType, keyMastery, qEval);
+                    const up = aiAlternativeMastery(exType, keyMastery, qEval, closedAnswers[qi]);
                     if (up !== null) raised[qi] = up;
                   }
                 }

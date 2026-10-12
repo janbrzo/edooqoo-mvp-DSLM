@@ -34,6 +34,8 @@ interface NanoSkillMasteryModalProps {
   exerciseData?: any;
   // PROBLEM 1.2: AI evaluations for open-ended exercises
   aiEvaluations?: Record<number, number>;
+  /** question_index -> mastery stored with the saved answer (see storedItemMasteryByQuestion). */
+  storedEvaluations?: Record<number, number>;
   isLoadingAiEvaluation?: boolean;
 }
 
@@ -114,6 +116,7 @@ const NanoSkillMasteryModal: React.FC<NanoSkillMasteryModalProps> = ({
   studentAnswers,
   exerciseData,
   aiEvaluations,
+  storedEvaluations,
   isLoadingAiEvaluation = false,
 }) => {
   const [ratings, setRatings] = useState<NanoSkillRating[]>([]);
@@ -169,7 +172,7 @@ const NanoSkillMasteryModal: React.FC<NanoSkillMasteryModalProps> = ({
           const itemIndex = mappedItem?.itemIndex ?? skillIndex;
           
           // Get mastery for this SPECIFIC item based on its answer (now includes AI evaluations)
-          const { mastery, hasValue } = calculateInitialMasteryForItem(itemIndex, studentAnswers, exerciseData, aiEvaluations);
+          const { mastery, hasValue } = calculateInitialMasteryForItem(itemIndex, studentAnswers, exerciseData, aiEvaluations, storedEvaluations);
           
           devLog(`[Mastery Init] SkillIndex: ${skillIndex}, Skill: ${skill.name}, ItemIndex: ${itemIndex}, Answer: ${studentAnswers?.[itemIndex]}, AI: ${aiEvaluations?.[itemIndex]}, Mastery: ${mastery}`);
           
@@ -188,7 +191,7 @@ const NanoSkillMasteryModal: React.FC<NanoSkillMasteryModalProps> = ({
     if (!isOpen) {
       hasInitialized.current = false;
     }
-  }, [isOpen, nanoSkills, studentAnswers, exerciseData, skillToItemMapping, aiEvaluations, isLoadingAiEvaluation]);
+  }, [isOpen, nanoSkills, studentAnswers, exerciseData, skillToItemMapping, aiEvaluations, storedEvaluations, isLoadingAiEvaluation]);
 
   const handleMasteryChange = (index: number, value: number[]) => {
     setRatings(prevRatings => {
