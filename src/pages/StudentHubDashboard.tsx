@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { hubLandingPath } from '@/lib/studentHub/hubLandingPath';
 import { useParams, useNavigate } from 'react-router-dom';
 import { StudentHubLayout } from '@/components/student-hub/StudentHubLayout';
 import { StudentHubStats } from '@/components/student-hub/StudentHubStats';
@@ -15,7 +16,7 @@ const StudentHubDashboard = () => {
   const email = getSavedHubEmail();
 
   useEffect(() => {
-    if (!email) navigate('/my');
+    if (!email) navigate(hubLandingPath(teacherToken));
   }, [email, navigate]);
 
   const { data, loading, error } = useStudentHubData(teacherToken, email || undefined);
@@ -37,7 +38,7 @@ const StudentHubDashboard = () => {
       <StudentHubLayout>
         <div className="text-center py-20">
           <p className="text-destructive mb-4">{error || 'Failed to load data'}</p>
-          <Button variant="outline" onClick={() => navigate('/my')}>Back</Button>
+          <Button variant="outline" onClick={() => navigate(hubLandingPath(teacherToken))}>Back</Button>
         </div>
       </StudentHubLayout>
     );
