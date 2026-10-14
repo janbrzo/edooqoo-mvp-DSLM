@@ -276,6 +276,8 @@ export function TestDetailsView({ testId, teacherId, studentId, onBack }: TestDe
   const skillScorePercent = skillQuestions.length > 0 
     ? Math.round((correctSkillQuestions.length / skillQuestions.length) * 100)
     : 0;
+  // No data (nothing scored yet) is shown as "-", never as 0%.
+  const hasScoredSkillQuestions = skillQuestions.some(q => q.is_correct !== null && q.is_correct !== undefined);
 
   return (
     <div className="space-y-6">
@@ -359,7 +361,7 @@ export function TestDetailsView({ testId, teacherId, studentId, onBack }: TestDe
             {isWelcomeTest ? (
               <>
                 <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
-                  <div className="text-2xl font-bold text-green-600">{skillScorePercent}%</div>
+                  <div className="text-2xl font-bold text-green-600">{hasScoredSkillQuestions ? `${skillScorePercent}%` : '-'}</div>
                   <div className="text-sm text-muted-foreground">Skill Score</div>
                 </div>
                 <div className="text-center p-4 bg-muted/30 rounded-lg">
