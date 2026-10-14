@@ -29,7 +29,7 @@ export interface RankedCategory {
   category: string;
   label: string;
   pct: number;
-  trend: 'improving' | 'declining' | 'stable';
+  trend: 'improving' | 'declining' | 'stable' | 'insufficient_data';
 }
 
 export interface InsightsSummaryInput {
