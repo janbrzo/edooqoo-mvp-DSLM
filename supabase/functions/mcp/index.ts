@@ -3,10 +3,10 @@
 // supabase function: mcp
 // Bundled from src/lib/mcp/index.ts by @lovable.dev/mcp-js.
 // src/lib/mcp/index.ts
-import { defineMcp } from "npm:@lovable.dev/mcp-js@0.20.1";
+import { defineMcp } from "npm:@lovable.dev/mcp-js@0.20.0";
 
 // src/lib/mcp/tools/echo.ts
-import { defineTool } from "npm:@lovable.dev/mcp-js@0.20.1";
+import { defineTool } from "npm:@lovable.dev/mcp-js@0.20.0";
 import { z } from "npm:zod@^3.23.8";
 var echo_default = defineTool({
   name: "echo",
@@ -18,7 +18,7 @@ var echo_default = defineTool({
 });
 
 // src/lib/mcp/tools/list_exercise_types.ts
-import { defineTool as defineTool2 } from "npm:@lovable.dev/mcp-js@0.20.1";
+import { defineTool as defineTool2 } from "npm:@lovable.dev/mcp-js@0.20.0";
 import { z as z2 } from "npm:zod@^3.23.8";
 
 // src/lib/exerciseTaxonomy.ts
@@ -86,7 +86,7 @@ var list_exercise_types_default = defineTool2({
 });
 
 // src/lib/mcp/tools/list_topics.ts
-import { defineTool as defineTool3 } from "npm:@lovable.dev/mcp-js@0.20.1";
+import { defineTool as defineTool3 } from "npm:@lovable.dev/mcp-js@0.20.0";
 import { z as z3 } from "npm:zod@^3.23.8";
 var TOPICS = [{ "slug": "present-perfect", "label": "Present Perfect", "category": "grammar" }, { "slug": "past-simple", "label": "Past Simple", "category": "grammar" }, { "slug": "conditionals", "label": "Conditionals", "category": "grammar" }, { "slug": "modal-verbs", "label": "Modal Verbs", "category": "grammar" }, { "slug": "phrasal-verbs", "label": "Phrasal Verbs", "category": "grammar" }, { "slug": "reported-speech", "label": "Reported Speech", "category": "grammar" }, { "slug": "passive-voice", "label": "Passive Voice", "category": "grammar" }, { "slug": "articles", "label": "Articles (a / an / the)", "category": "grammar" }, { "slug": "prepositions", "label": "Prepositions", "category": "grammar" }, { "slug": "comparatives", "label": "Comparatives and Superlatives", "category": "grammar" }, { "slug": "gerunds-infinitives", "label": "Gerunds and Infinitives", "category": "grammar" }, { "slug": "relative-clauses", "label": "Relative Clauses", "category": "grammar" }, { "slug": "business-email", "label": "Business Email Writing", "category": "business" }, { "slug": "job-interview", "label": "Job Interview English", "category": "business" }, { "slug": "small-talk", "label": "Small Talk", "category": "business" }, { "slug": "meetings", "label": "Meetings English", "category": "business" }, { "slug": "negotiations", "label": "Negotiations English", "category": "business" }, { "slug": "presentations", "label": "Presentation English", "category": "business" }, { "slug": "travel-vocabulary", "label": "Travel Vocabulary", "category": "vocabulary" }, { "slug": "food-restaurant", "label": "Food and Restaurant Vocabulary", "category": "vocabulary" }, { "slug": "shopping", "label": "Shopping Vocabulary", "category": "vocabulary" }, { "slug": "health-doctor", "label": "Health and Doctor Visits", "category": "vocabulary" }, { "slug": "weather", "label": "Weather Vocabulary", "category": "vocabulary" }, { "slug": "daily-routines", "label": "Daily Routines", "category": "vocabulary" }, { "slug": "hobbies", "label": "Hobbies and Free Time", "category": "vocabulary" }, { "slug": "family", "label": "Family Vocabulary", "category": "vocabulary" }, { "slug": "work-office", "label": "Work and Office Vocabulary", "category": "vocabulary" }, { "slug": "technology", "label": "Technology Vocabulary", "category": "vocabulary" }, { "slug": "environment", "label": "Environment and Sustainability", "category": "vocabulary" }, { "slug": "news-media", "label": "News and Media", "category": "vocabulary" }, { "slug": "idioms", "label": "English Idioms", "category": "vocabulary" }, { "slug": "collocations", "label": "Collocations", "category": "vocabulary" }, { "slug": "phrasal-business", "label": "Business Phrasal Verbs", "category": "business" }, { "slug": "formal-informal", "label": "Formal vs Informal English", "category": "skills" }, { "slug": "telephone-english", "label": "Telephone English", "category": "business" }, { "slug": "cv-resume", "label": "CV and Resume Writing", "category": "business" }, { "slug": "public-speaking", "label": "Public Speaking", "category": "skills" }, { "slug": "conflict-resolution", "label": "Conflict Resolution English", "category": "business" }, { "slug": "cross-cultural", "label": "Cross-Cultural Communication", "category": "skills" }, { "slug": "ielts-writing-task-2", "label": "IELTS Writing Task 2", "category": "exam" }];
 var list_topics_default = defineTool3({
@@ -110,7 +110,7 @@ var list_topics_default = defineTool3({
 });
 
 // src/lib/mcp/tools/list_students.ts
-import { defineTool as defineTool4 } from "npm:@lovable.dev/mcp-js@0.20.1";
+import { defineTool as defineTool4 } from "npm:@lovable.dev/mcp-js@0.20.0";
 import { z as z4 } from "npm:zod@^3.23.8";
 
 // src/lib/mcp/auth.ts
@@ -183,7 +183,7 @@ var list_students_default = defineTool4({
 });
 
 // src/lib/mcp/tools/get_student_summary.ts
-import { defineTool as defineTool5 } from "npm:@lovable.dev/mcp-js@0.20.1";
+import { defineTool as defineTool5 } from "npm:@lovable.dev/mcp-js@0.20.0";
 import { z as z5 } from "npm:zod@^3.23.8";
 var get_student_summary_default = defineTool5({
   name: "get_student_summary",
@@ -210,7 +210,7 @@ var get_student_summary_default = defineTool5({
 });
 
 // src/lib/mcp/tools/list_recent_worksheets.ts
-import { defineTool as defineTool6 } from "npm:@lovable.dev/mcp-js@0.20.1";
+import { defineTool as defineTool6 } from "npm:@lovable.dev/mcp-js@0.20.0";
 import { z as z6 } from "npm:zod@^3.23.8";
 var list_recent_worksheets_default = defineTool6({
   name: "list_recent_worksheets",
@@ -249,5 +249,5 @@ var mcp_default = defineMcp({
 });
 
 // lovable-mcp-supabase-entry.ts
-import { createSupabaseHandler } from "npm:@lovable.dev/mcp-js@0.20.1/stacks/supabase";
+import { createSupabaseHandler } from "npm:@lovable.dev/mcp-js@0.20.0/stacks/supabase";
 Deno.serve(createSupabaseHandler(mcp_default, { functionName: "mcp" }));
