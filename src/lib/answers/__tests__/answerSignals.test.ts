@@ -55,3 +55,22 @@ describe('injection cap on typed closed items', () => {
     expect(r.qualityScore).toBe(INJECTION_SCORE_CAP);
   });
 });
+
+describe('review fixes (iteration 7)', () => {
+  it('treats curly apostrophes like straight ones', () => {
+    expect(isNonAnswerText('I don’t know')).toBe(true);
+    expect(isNonAnswerText('I’m not sure')).toBe(true);
+  });
+
+  it('leaves the ambiguous (1, 10] range unevaluated instead of near zero', () => {
+    for (const v of [1.5, 5, 8, 10, '5', '10']) expect(parseModelScore(v)).toBeNull();
+    expect(parseModelScore(11)).toBeCloseTo(0.11);
+    expect(parseModelScore('85')).toBeCloseTo(0.85);
+  });
+
+  it('accepts leading or trailing decimal points', () => {
+    expect(parseModelScore('.5')).toBeCloseTo(0.5);
+    expect(parseModelScore('0.')).toBe(0);
+    expect(parseModelScore('.85%')).toBeCloseTo(0.0085);
+  });
+});

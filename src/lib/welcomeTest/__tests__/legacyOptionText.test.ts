@@ -15,7 +15,7 @@ const traitOf = (qid: string) => Object.entries(TRAIT_QUESTIONS).find(([, c]) =>
 describe('legacy Welcome Test option text (bf57f19)', () => {
   it('covers the six known edits', () => {
     expect(legacy).toHaveLength(6);
-    expect(legacy.every((l) => l.oldText.includes('—'))).toBe(true);
+    expect(legacy.every((l) => l.oldText.includes('\u2014'))).toBe(true);
   });
 
   it.each(legacy)('alias target exists in the current question options: $qid', ({ qid, newText }) => {
@@ -49,10 +49,10 @@ describe('legacy Welcome Test option text (bf57f19)', () => {
 
   it('fallback normalisation tolerates spacing and dash variants, on both sides', () => {
     const options = TRAIT_QUESTIONS.motivation_type.options;
-    expect(matchOptionIndex('wt_q3', options, '  I need it for work —  meetings, emails, presentations ')).toBe(0);
+    expect(matchOptionIndex('wt_q3', options, '  I need it for work \u2014  meetings, emails, presentations ')).toBe(0);
     expect(matchOptionIndex('wt_q3', options, 'I want to travel   and talk freely')).toBe(2);
     expect(matchOptionIndex('wt_q3', options, 'something else')).toBe(-1);
-    expect(normalizeOptionText('a — b')).toBe(normalizeOptionText('a - b'));
+    expect(normalizeOptionText('a \u2014 b')).toBe(normalizeOptionText('a - b'));
   });
 
   it('normalisation creates no collisions inside any question options', () => {

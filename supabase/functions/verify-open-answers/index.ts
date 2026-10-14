@@ -276,7 +276,7 @@ Return exactly ${answers.length} evaluation objects in a JSON array, one per ans
 
       // An answer that talks to the grader instead of answering never keeps a high score.
       // Typed closed items too: aiAlternativeMastery may raise them, so a crafted answer must not earn it.
-      const isInjection = (!closed || !isSelectionType(answers[idx].exercise_type)) && (
+      let isInjection = (!closed || !isSelectionType(answers[idx].exercise_type)) && (
         looksLikeInstructionInjection(answers[idx]?.student_answer) ||
         looksLikeInstructionInjection(answers[idx]?.audio_transcription)
       );
@@ -301,6 +301,9 @@ Return exactly ${answers.length} evaluation objects in a JSON array, one per ans
         if (r.keyVerdict === "correct") keyVerdict = true;
         else if (isSelectionType(answers[idx].exercise_type) && r.keyVerdict === "wrong") keyVerdict = false;
       }
+      // The key already marked the answer correct: the cap only guards the AI raise, so the
+      // item keeps its key verdict and feedback (AI never contradicts a key-correct item).
+      if (keyVerdict === true) isInjection = false;
 
       let feedback = e.feedback;
       if (!feedback || feedback.length < 10 || feedback === "Thank you for your answer.") {
