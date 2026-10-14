@@ -295,7 +295,8 @@ $function$;
 
 -- 4. submit_homework_answers ----------------------------------------------
 
--- Production body, versioned unchanged (it existed only in the database).
+-- Production body (it existed only in the database), with the email compared
+-- case-insensitively like has_homework_student_access.
 CREATE OR REPLACE FUNCTION public.submit_homework_answers(p_homework_id uuid, p_student_email text)
  RETURNS boolean
  LANGUAGE plpgsql
@@ -309,7 +310,7 @@ BEGIN
     is_submitted = true,
     submitted_at = NOW()
   WHERE homework_id = p_homework_id
-    AND student_email = p_student_email
+    AND lower(student_email) = lower(trim(p_student_email))
     AND is_submitted = false;
 
   -- Also mark the homework assignment as completed
