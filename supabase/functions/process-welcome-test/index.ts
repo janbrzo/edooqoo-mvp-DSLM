@@ -14,6 +14,8 @@ import {
   parseProfileModelOutput,
   type ProfileModelOutput,
 } from "../_shared/welcomeTestLevel.ts";
+import { buildReconcileEvents } from "../_shared/welcomeTestEventPayload.ts";
+import { WELCOME_TEST_EVENT_QUESTIONS } from "../_shared/welcomeTestQuestionMeta.ts";
 import {
   answerBehaviour,
   computeDivergences,
@@ -270,6 +272,22 @@ serve(async (req) => {
       return new Response(JSON.stringify({ error: 'No questions found' }), {
         status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
+    }
+
+    // Events of answered questions that lost theirs (fast sessions) are rebuilt
+    // here, BEFORE the AI step below updates events by answer id, so those
+    // updates find them. Idempotent; a failure only warns.
+    try {
+      const reconcileEvents = buildReconcileEvents(questions as any[], WELCOME_TEST_EVENT_QUESTIONS);
+      if (reconcileEvents.length > 0) {
+        const { error: reconcileError } = await supabase.rpc('reconcile_welcome_test_events', {
+          p_test_id: test_id,
+          p_events: reconcileEvents,
+        });
+        if (reconcileError) console.warn('[process-welcome-test] event reconciliation failed:', reconcileError.message);
+      }
+    } catch (reconcileErr) {
+      console.warn('[process-welcome-test] event reconciliation failed', reconcileErr);
     }
 
     // Percent per skill from the scored items (is_correct null = not scored).
@@ -548,6 +566,16 @@ serve(async (req) => {
       if (versionError) console.warn('[process-welcome-test] profile version not saved:', versionError.message);
     }
 
+
+    // D13: a completed retake replaces the earlier attempts' events. Runs only after
+    // the profile of this attempt is written (never in the early profile_unchanged
+    // path above); the RPC keeps the old evidence when this test has no events.
+    try {
+      const { error: supersedeError } = await supabase.rpc('supersede_previous_welcome_test_events', { p_test_id: test_id });
+      if (supersedeError) console.warn('[process-welcome-test] superseding earlier attempt events failed:', supersedeError.message);
+    } catch (supersedeErr) {
+      console.warn('[process-welcome-test] superseding earlier attempt events failed', supersedeErr);
+    }
 
     // Update student_tests with answered_count
     if (answered_count !== undefined) {

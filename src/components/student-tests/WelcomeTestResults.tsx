@@ -15,6 +15,7 @@ import { Progress } from '@/components/ui/progress';
 import { supabase } from '@/integrations/supabase/client';
 import type { LearningProfile } from '@/types/welcomeTest';
 import { sanitizeAiText, sanitizeAiList } from '@/utils/sanitizeAiSummary';
+import { isSkillSkipped } from '@/lib/welcomeTest/skillAttempts';
 
 interface TestQuestionLike {
   element_type?: string | null;
@@ -42,7 +43,7 @@ interface SkillResultData {
   element_type: string;
   correct_answers: number;
   total_questions: number;
-  score_percentage: number;
+  score_percentage: number | null;
 }
 
 export function WelcomeTestResults({ testId, studentId, teacherId, questions }: WelcomeTestResultsProps) {
@@ -275,11 +276,16 @@ export function WelcomeTestResults({ testId, studentId, teacherId, questions }: 
                       : (fallbackComputed ? fallbackComputed.score : (aiScore ?? null));
                   }
 
+                  // No attempted question: no score ('-' and 'Skipped'), also when the stored
+                  // result is an old 0% or a NULL, and never strongest/weakest.
+                  const noAttempt = isSkillSkipped(questions, skill);
+                  if (noAttempt) displayScore = null;
+
                   // Hide row entirely when there is zero signal anywhere.
-                  if (!result && !fallbackComputed && displayScore === null) return null;
-                  const isSkipped = !result && fallbackComputed && fallbackComputed.attempted === 0;
+                  if (!result && !fallbackComputed && displayScore === null && !noAttempt) return null;
+                  const isSkipped = noAttempt || (!result && fallbackComputed && fallbackComputed.attempted === 0);
                   
-                  mergedScores.push({ label, score: displayScore });
+                  if (!isSkipped) mergedScores.push({ label, score: displayScore });
                   
                   return (
                     <div key={label} className="flex items-center gap-3">
@@ -290,10 +296,13 @@ export function WelcomeTestResults({ testId, studentId, teacherId, questions }: 
                       <span className="w-12 text-right text-sm font-medium">
                         {isSkipped ? '-' : (displayScore !== null ? `${Math.round(displayScore)}%` : '-')}
                       </span>
-                      {result && (
+                      {result && !isSkipped && (
                         <span className="w-14 text-right text-xs text-muted-foreground">
                           ({result.correct_answers}/{result.total_questions})
                         </span>
+                      )}
+                      {isSkipped && result && (
+                        <span className="w-14 text-right text-xs text-muted-foreground">Skipped</span>
                       )}
                       {!result && fallbackComputed && (
                         <span className="w-14 text-right text-xs text-muted-foreground">

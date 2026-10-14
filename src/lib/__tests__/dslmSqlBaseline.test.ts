@@ -27,7 +27,7 @@ const PIPELINE_FUNCTIONS = [
   'save_mark_done_evaluation', 'delete_mark_done_evaluation',
   'submit_homework_answers', 'submit_homework_answers_by_share_token',
   'claim_pending_ai_evaluations', 'list_worksheet_answers_needing_ai_evaluation', 'mark_worksheet_answer_not_evaluable',
-  'reconcile_welcome_test_events', 'supersede_previous_welcome_test_events',
+  'reconcile_welcome_test_events', 'supersede_previous_welcome_test_events', 'calculate_test_results',
   'list_homework_answers_needing_ai_evaluation', 'claim_homework_answer_ai_attempt', 'mark_homework_answer_ai_not_evaluable',
   'worksheet_answers_differ', 'keep_ai_alternative_ratings',
 ];

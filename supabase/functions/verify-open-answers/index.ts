@@ -63,6 +63,7 @@ async function evaluateChunk(
 ): Promise<{ ok: true; evaluations: EvaluationResult[] } | { ok: false; errorText: string }> {
   // Check if any answers have audio transcription
   const hasAnySpeaking = answers.some(a => a.audio_transcription);
+  const hasAnyDuration = answers.some(a => Number(a.audio_duration_seconds) > 0);
   const hasAnyClosed = answers.some(a => isClosedType(a.exercise_type) && !!a.suggested_answer);
 
   const systemPrompt = `You are a STRICT English language teacher evaluating student answers.
@@ -74,9 +75,9 @@ Your task is to evaluate each answer based on:
 3. Completeness - Is the answer sufficiently developed?
 ${hasAnySpeaking ? `
 4. SPEAKING EVALUATION (only when audio_transcription is provided):
- - Fluency: Calculate words per second (audio_word_count / audio_duration_seconds). 
+ ${hasAnyDuration ? `- Fluency: Calculate words per second (audio_word_count / audio_duration_seconds). 
    A2 target: 1.0-1.5 wps. B1 target: 1.5-2.0 wps. B2+: 2.0+ wps.
-   Score 0.9+ if above target, 0.7-0.9 if near target, below 0.5 if very slow (<0.5 wps).
+   Score 0.9+ if above target, 0.7-0.9 if near target, below 0.5 if very slow (<0.5 wps).` : `- Fluency: audio duration is not available, do not estimate speed; judge fluency from the transcript only.`}
  - Coherence: Does the transcribed speech form logical, complete sentences?
  - Grammar accuracy: Are sentences grammatically correct for the level?
  - Task completion: Does the spoken response address the question/prompt?
