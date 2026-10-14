@@ -38,11 +38,9 @@ BEGIN
   );$cmd$, v_secret));
 END
 $$;
-
--- Job 3 has no secret and returns 401 every 15 minutes; job 31
--- (send-homework-reminders-auth-15min) is the working twin.
-SELECT cron.unschedule('send-homework-reminders-every-15min');
 ```
+
+Job 3 (`send-homework-reminders-every-15min`) has no secret and returns 401 every 15 minutes; job 31 (`send-homework-reminders-auth-15min`) is the working twin. Job 3 is owned by the role `supabase_read_only_user`, so `cron.unschedule` run as `postgres` cannot see it ("could not find valid entry for job"). It is harmless noise; remove it from the Supabase dashboard (Integrations > Cron) or as its owner role.
 
 Check: `select jobname, command ilike '%x-cron-secret%' from cron.job;` must be true for both jobs.
 
