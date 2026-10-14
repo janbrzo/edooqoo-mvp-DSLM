@@ -2,7 +2,7 @@
 --
 -- 1. add_student_event is SECURITY DEFINER and only RLS checked teacher_id,
 --    which SECURITY DEFINER bypasses: any signed-in user could write events
---    (and so skill metrics) for another teacher's student. The body moves to
+--    (and so skill metrics) for a student of another teacher. The body moves to
 --    add_student_event_internal (service role only) and add_student_event
 --    becomes a checked wrapper. The SQL wrappers that already authorise their
 --    caller (homework email, Welcome Test share token, Mark done teacher) call
@@ -10,7 +10,7 @@
 -- 2. The student_events INSERT policy also requires the student to belong to
 --    the teacher.
 -- 3. update_homework_answer_by_share_token checked only the link token, so
---    anyone with the link could overwrite any student's mastery; it now uses
+--    anyone with the link could overwrite the mastery of any student; it now uses
 --    has_homework_student_access (token + assigned email, owner teacher passes).
 -- 4. submit_homework_answers authorised nothing; it is now versioned here and
 --    the client calls submit_homework_answers_by_share_token. The legacy name
@@ -18,7 +18,7 @@
 -- 5. mark_ai_evaluation_done (no caller) is revoked from client roles: anon
 --    could suppress AI evaluation of any answer.
 -- 6. The dead trigger trigger_update_homework_ai_evaluation is dropped: it only
---    updated 'homework_answer_submitted' events, which no code writes (0 rows).
+--    updated homework_answer_submitted events, which no code writes (0 rows).
 --
 -- Rollback: re-run the previous definitions from 20261012090000 (add_student_event,
 -- policy), 20261006090000 / 20261006120000 (log_* wrappers) and
@@ -85,7 +85,7 @@ AS $function$
 BEGIN
   -- Service role (Edge Functions) and direct database sessions (migrations,
   -- SQL editor, pg_cron) are trusted. API callers come in through PostgREST,
-  -- whose session user is 'authenticator', and must be the student's teacher.
+  -- whose session user is authenticator, and must be the teacher of the student.
   IF NOT (
     coalesce(auth.role(), '') = 'service_role'
     OR session_user <> 'authenticator'

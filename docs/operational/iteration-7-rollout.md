@@ -2,6 +2,8 @@
 
 Order matters: steps 1-2 are safe before the release; step 3 is the release; step 4 waits a day.
 
+Run each step as its own query in the Supabase SQL Editor. The editor splits a script into statements and treats an apostrophe inside a `--` comment as the start of a string, so SQL run there must have no apostrophes in comments (an unbalanced one cut a function body and failed with "unterminated dollar-quoted string").
+
 ## 1. Cron jobs: send x-cron-secret instead of the anon key (before the release)
 
 `pacing-periodic-check-daily` (job 4) and `loop-pacing-aggregator` (job 6) call their functions with the anon key, which the new functions reject. The extra header is ignored by the current functions, so this step is safe before the release. The secret is copied server side from `process-ai-evaluations-5min`, never typed.
@@ -11,7 +13,7 @@ DO $$
 DECLARE
   v_secret text;
 BEGIN
-  SELECT substring(command FROM $re$'x-cron-secret'\s*,\s*'([^']+)'$re$) INTO v_secret
+  SELECT substring(command FROM $re$'x-cron-secret'\s*,\s*'([^\x27]+)'$re$) INTO v_secret
   FROM cron.job WHERE jobname = 'process-ai-evaluations-5min';
   IF v_secret IS NULL THEN
     RAISE EXCEPTION 'CRON_SECRET not found in process-ai-evaluations-5min';
