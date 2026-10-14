@@ -2,7 +2,7 @@
   "auditedRoutes": 148,
   "passedRoutes": 148,
   "failedRoutes": 0,
-  "warningCount": 3,
+  "warningCount": 0,
   "routes": [
     {
       "route": "/blog/action-research-esl-teachers.html",
@@ -1189,9 +1189,5 @@
       "errors": []
     }
   ],
-  "warnings": [
-    "/blog/parent-teacher-conferences-esl.html: indexable page has school-like title/H1/meta signal outside x1000 target set",
-    "/english-worksheets-for-kids.html: indexable page has school-like title/H1/meta signal outside x1000 target set",
-    "/english-worksheets-for-teenagers.html: indexable page has school-like title/H1/meta signal outside x1000 target set"
-  ]
+  "warnings": []
 }

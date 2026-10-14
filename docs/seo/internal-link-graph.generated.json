@@ -2,11 +2,11 @@
   "generatedBy": "scripts/seo/audit-internal-link-graph.mjs",
   "totals": {
     "pages": 597,
-    "strategic": 420,
+    "strategic": 417,
     "orphanStrategic": 0,
     "weakTop40": 0,
     "weakTop120": 0,
-    "noindexPriorityLinks": 0
+    "noindexPriorityLinks": 1
   },
   "thresholds": {
     "minTop40Incoming": 10,
@@ -857,5 +857,12 @@
   "orphanStrategic": [],
   "weakTop40": [],
   "weakTop120": [],
-  "noindexPriorityLinks": []
+  "noindexPriorityLinks": [
+    {
+      "route": "/blog/parent-teacher-conferences-esl.html",
+      "incoming": [
+        "/blog"
+      ]
+    }
+  ]
 }
