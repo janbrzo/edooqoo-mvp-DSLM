@@ -2,11 +2,21 @@
  * transcribe-audio - Edge function to transcribe audio URLs using OpenAI Whisper
  * Fetches audio binary from URL, sends to Whisper API for transcription
  * 
- * Auth: Accepts both user JWTs (frontend) and SUPABASE_SERVICE_ROLE_KEY (internal server-to-server calls)
+ * Auth: service role key, a signed-in user, or a student proving homework access (body.access = share token + email).
+ * The audio URL must be https on this project's Supabase/R2 media hosts and at most 25 MB.
  */
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
+import { resolveCaller } from "../_shared/auth.ts";
+import { homeworkIdForStudentAccess } from "../_shared/evaluationAccess.ts";
+import {
+  AudioTooLargeError,
+  buildAllowedAudioHosts,
+  exceedsDeclaredSize,
+  readBodyWithLimit,
+  validateAudioUrl,
+} from "../_shared/audioFetchGuard.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -27,39 +37,36 @@ serve(async (req) => {
       });
     }
 
-    const token = authHeader.replace('Bearer ', '');
-    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-    const anonKey = Deno.env.get('SUPABASE_ANON_KEY');
-    let callerInfo = 'unknown';
+    const body = await req.json();
 
-    if (token === serviceRoleKey) {
-      callerInfo = 'service-role-internal';
-      console.log('[transcribe-audio] Authorized via service role key (internal call)');
-    } else if (token === anonKey) {
-      // Anonymous frontend call (e.g. student on homework via share link, not logged in)
-      callerInfo = 'anon-frontend';
-      console.log('[transcribe-audio] Authorized via anon key (anonymous frontend call)');
-    } else {
-      // Frontend call with user JWT, validate
-      const supabase = createClient(
-        Deno.env.get('SUPABASE_URL')!,
-        Deno.env.get('SUPABASE_ANON_KEY')!,
-        { global: { headers: { Authorization: authHeader } } }
-      );
-
-      const { data: { user }, error: authError } = await supabase.auth.getUser();
-      if (authError || !user) {
-        return new Response(JSON.stringify({ error: 'Invalid authentication token' }), {
-          status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        });
+    // Same access rule as verify-open-answers: service role, a signed-in user, or a
+    // student proving access to one homework (share token + assigned email).
+    const caller = await resolveCaller(req);
+    let callerInfo: string = caller.kind === 'user' ? `user:${caller.user.id}` : caller.kind;
+    let authorised = caller.kind === 'service' || caller.kind === 'user';
+    if (!authorised) {
+      const admin = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!);
+      const homeworkId = await homeworkIdForStudentAccess(admin, body?.access);
+      if (homeworkId) {
+        authorised = true;
+        callerInfo = `student:${homeworkId}`;
       }
-      callerInfo = `user:${user.id}`;
+    }
+    if (!authorised) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
     // ── END AUTH CHECK ──
 
-    const { audio_url } = await req.json();
+    const allowedHosts = buildAllowedAudioHosts({
+      supabaseUrl: Deno.env.get('SUPABASE_URL'),
+      r2PublicUrl: Deno.env.get('R2_PUBLIC_URL'),
+      r2CustomDomain: Deno.env.get('R2_CUSTOM_DOMAIN'),
+    });
+    const audio_url = validateAudioUrl(body?.audio_url, allowedHosts);
 
-    if (!audio_url || !audio_url.startsWith('http')) {
+    if (!audio_url) {
       return new Response(JSON.stringify({ error: 'Valid audio_url is required' }), {
         status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -74,15 +81,29 @@ serve(async (req) => {
 
     // Step 1: Fetch the audio file as binary
     console.log('[transcribe-audio] Fetching audio from:', audio_url, 'caller:', callerInfo);
-    const audioResponse = await fetch(audio_url);
+    // Redirects are not followed: a redirect could leave the allowed hosts.
+    const audioResponse = await fetch(audio_url, { redirect: 'manual' });
     if (!audioResponse.ok) {
       return new Response(JSON.stringify({ error: `Failed to fetch audio: ${audioResponse.status}` }), {
         status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    const audioBlob = await audioResponse.blob();
+    const tooLarge = () => new Response(JSON.stringify({ error: 'Audio file is too large' }), {
+      status: 413, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+    if (exceedsDeclaredSize(audioResponse.headers.get('content-length'))) {
+      await audioResponse.body?.cancel();
+      return tooLarge();
+    }
     const contentType = audioResponse.headers.get('content-type') || 'audio/webm';
+    let audioBlob: Blob;
+    try {
+      audioBlob = new Blob([await readBodyWithLimit(audioResponse.body)], { type: contentType });
+    } catch (e) {
+      if (e instanceof AudioTooLargeError) return tooLarge();
+      throw e;
+    }
     
     // Determine file extension
     let ext = 'webm';

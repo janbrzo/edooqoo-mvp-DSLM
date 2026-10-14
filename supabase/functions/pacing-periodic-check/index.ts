@@ -4,10 +4,11 @@
 // with triggerType='periodic_30d'.
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+import { hasValidCronSecret } from "../_shared/cronAuth.ts";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-cron-secret',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
@@ -17,6 +18,17 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+
+    // Cron only: the project CRON_SECRET (x-cron-secret) or the service role key.
+    const bearer = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '').trim();
+    const authorised =
+      hasValidCronSecret(req.headers.get('x-cron-secret'), Deno.env.get('CRON_SECRET')) ||
+      (!!serviceKey && bearer === serviceKey);
+    if (!authorised) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
     const supabase = createClient(supabaseUrl, serviceKey);
 
     const cutoff = new Date(Date.now() - 30 * 86400000).toISOString();

@@ -2,6 +2,7 @@
 // Returns { exercises: string[], focusMap: Record<string,'vocabulary'|'grammar'> }
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { chatCompletion } from "../_shared/aiChat.ts";
+import { resolveCaller } from "../_shared/auth.ts";
 import { NO_EM_DASH_RULE } from "../_shared/writingStyle.ts";
 import {
   NO_MEDIA_EXERCISE_IDS,
@@ -18,6 +19,14 @@ serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
 
   try {
+    // Paid AI call: a signed-in user (teacher, anonymous trial accounts included) or the service role.
+    const caller = await resolveCaller(req);
+    if (caller.kind !== 'service' && caller.kind !== 'user') {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const body = await req.json();
     const {
       lessonTopic = '',

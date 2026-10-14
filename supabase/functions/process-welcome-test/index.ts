@@ -5,6 +5,8 @@ import { NO_EM_DASH_RULE } from "../_shared/writingStyle.ts";
 import { resolveCaller, authorizedTeacherId } from "../_shared/auth.ts";
 import { answersFromQuestionRows, reconstructTraits } from "../_shared/welcomeTestTraits.ts";
 import { computeLearningPathScore } from "../_shared/learningPathScore.ts";
+import { STUDENT_TEXT_RULE, wrapStudentText } from "../_shared/promptSafety.ts";
+import { acceptAiScores } from "../_shared/welcomeTestScoring.ts";
 import {
   answerBehaviour,
   computeDivergences,
@@ -836,11 +838,17 @@ serve(async (req) => {
         
         // Build open answers including transcriptions and time info for AI context
         const allAnswerIds = [...openQuestionIds, ...speakingQuestionIds];
-        const openAnswers = allAnswerIds
+        const sentForScoring = allAnswerIds
           .filter(id => {
             if (transcriptions[id]) return true; // has transcription
             return answers?.[id] && answers[id] !== '__IDK__' && !String(answers[id]).startsWith('http');
-          })
+          });
+        // Raw student text per id sent to the model (injection cap + allowed score keys).
+        const sentStudentTexts: Record<string, string> = {};
+        for (const id of sentForScoring) {
+          sentStudentTexts[id] = String(transcriptions[id] ? transcriptions[id] : answers[id]);
+        }
+        const openAnswers = sentForScoring
           .map(id => {
             // Find matching question to get time_spent_seconds
             const matchQ = questions.find((q: any) => {
@@ -852,9 +860,9 @@ serve(async (req) => {
             
             if (transcriptions[id]) {
               const wordCount = transcriptions[id].split(/\s+/).filter(Boolean).length;
-              return `${id} (speaking - transcribed, ${wordCount} words${timeInfo}): "${transcriptions[id]}"`;
+              return `${id} (speaking - transcribed, ${wordCount} words${timeInfo}): ${wrapStudentText('student_speech', transcriptions[id])}`;
             }
-            return `${id}${timeInfo}: "${answers[id]}"`;
+            return `${id}${timeInfo}: ${wrapStudentText('student_answer', String(answers[id]))}`;
           })
           .join('\n');
 
@@ -924,7 +932,7 @@ SCORING SCALE:
 
 BE STRICT. Do NOT inflate scores. Most brief or off-topic answers should score below 30.
 
-Format as JSON: {"summary": "...", "recommendations": ["...", "..."], "writing_quality": "basic|intermediate|advanced", "key_observations": ["...", "..."], "per_question_scores": {"wt_q16": 45, "wt_q36": 70, "wt_q16s": 15, ...}}` + NO_EM_DASH_RULE
+Format as JSON: {"summary": "...", "recommendations": ["...", "..."], "writing_quality": "basic|intermediate|advanced", "key_observations": ["...", "..."], "per_question_scores": {"<question_id>": <score 0-100>, ...}}` + NO_EM_DASH_RULE + STUDENT_TEXT_RULE
                 },
                 { role: 'user', content: userPromptBody },
               ],
@@ -970,17 +978,18 @@ Format as JSON: {"summary": "...", "recommendations": ["...", "..."], "writing_q
             let updatedCount = 0;
             let unscoredCount = 0;
             // Only scores accepted below (answered, not IDK, numeric) feed the averages.
+            // Only ids sent for scoring in this run are accepted, clamped to 0-100, injection-capped.
+            const validScores = acceptAiScores(perScores, sentStudentTexts);
             const acceptedScores: Record<string, number> = {};
             for (const qId of allOpenSpeakingIds) {
               if (answers?.[qId] && answers[qId] !== '__IDK__') {
                 // No AI score for this item (model omitted it or the AI step fell back):
                 // leave it unevaluated instead of recording a made-up 25 / "wrong".
-                const rawScore = Number(perScores[qId]);
-                if (perScores[qId] === undefined || perScores[qId] === null || !Number.isFinite(rawScore)) {
+                if (!Object.prototype.hasOwnProperty.call(validScores, qId)) {
                   unscoredCount++;
                   continue;
                 }
-                const score = Math.round(rawScore);
+                const score = validScores[qId];
                 acceptedScores[qId] = score;
 
                 // The event of THIS question: legacy ids (wt_q12, wt_q16...) are also

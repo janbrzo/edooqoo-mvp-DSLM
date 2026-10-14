@@ -7,6 +7,8 @@
  * src/lib/welcomeTest/__tests__/welcomeTestShared.test.ts).
  */
 
+import { matchOptionIndex } from './welcomeTestOptionAliases.ts';
+
 /**
  * Question id by question_index, the order of ALL_WELCOME_TEST_QUESTIONS.
  * student_test_questions stores only question_index; ids such as wt_q3b sit
@@ -247,7 +249,7 @@ export function reconstructTraits(
   for (const [traitName, config] of Object.entries(TRAIT_QUESTIONS)) {
     const answerVal = answers?.[config.questionId];
     if (answerVal && typeof answerVal === 'string') {
-      const optIdx = config.options.indexOf(answerVal);
+      const optIdx = matchOptionIndex(config.questionId, config.options, answerVal);
       if (optIdx >= 0) {
         const mapped = config.mapping[String(optIdx)];
         if (mapped) traits[traitName] = mapped;

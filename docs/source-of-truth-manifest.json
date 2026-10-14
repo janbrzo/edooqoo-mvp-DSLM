@@ -22,8 +22,8 @@
     "contextModules": 1,
     "serviceModules": 11,
     "edgeFunctions": 81,
-    "typedTables": 62,
-    "typedRpcs": 88,
+    "typedTables": 65,
+    "typedRpcs": 99,
     "migrationIndexes": 21
   },
   "routes": [
@@ -41155,7 +41155,6 @@
           "tables": [],
           "rpcs": [
             "insert_homework_submission_notification",
-            "submit_homework_answers",
             "update_homework_answer_by_share_token",
             "verify_homework_student_email"
           ],
@@ -46163,6 +46162,7 @@
         ],
         "requestFields": [],
         "visibleResponseFields": [
+          "error",
           "errorMessage",
           "ok",
           "rowsProcessed",
@@ -46180,6 +46180,7 @@
           "fetchTargets": []
         },
         "environmentVariables": [
+          "CRON_SECRET",
           "SUPABASE_SERVICE_ROLE_KEY",
           "SUPABASE_URL"
         ]
@@ -46417,6 +46418,7 @@
           "fetchTargets": []
         },
         "environmentVariables": [
+          "CRON_SECRET",
           "SUPABASE_SERVICE_ROLE_KEY",
           "SUPABASE_URL"
         ]
@@ -47552,9 +47554,7 @@
           "POST"
         ],
         "requestFields": [
-          "data",
-          "error",
-          "headers"
+          "access"
         ],
         "visibleResponseFields": [
           "details",
@@ -47572,7 +47572,8 @@
         },
         "environmentVariables": [
           "OPENAI_API_KEY",
-          "SUPABASE_ANON_KEY",
+          "R2_CUSTOM_DOMAIN",
+          "R2_PUBLIC_URL",
           "SUPABASE_SERVICE_ROLE_KEY",
           "SUPABASE_URL"
         ]
@@ -48400,10 +48401,10 @@
         "callsites": [
           "src/utils/audioEvalUtils.ts"
         ],
-        "payloadFields": [
-          "audio_url"
-        ],
-        "payloadExpressions": []
+        "payloadFields": [],
+        "payloadExpressions": [
+          "access ? { audio_url: audioUrl, access } : { audio_url: audioUrl }"
+        ]
       },
       {
         "name": "translate-flashcard",
@@ -49074,17 +49075,6 @@
           "p_front",
           "p_front_example",
           "p_set_id",
-          "p_student_email"
-        ],
-        "payloadExpressions": []
-      },
-      {
-        "name": "submit_homework_answers",
-        "callsites": [
-          "src/hooks/useInteractiveHomework.tsx"
-        ],
-        "payloadFields": [
-          "p_homework_id",
           "p_student_email"
         ],
         "payloadExpressions": []
@@ -50585,6 +50575,56 @@
         }
       },
       {
+        "name": "dslm_backfill_audit",
+        "fields": [
+          {
+            "name": "after",
+            "type": "Json | null",
+            "optional": false
+          },
+          {
+            "name": "before",
+            "type": "Json | null",
+            "optional": false
+          },
+          {
+            "name": "created_at",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "id",
+            "type": "number",
+            "optional": false
+          },
+          {
+            "name": "row_id",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "run_id",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "step",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "table_name",
+            "type": "string",
+            "optional": false
+          }
+        ],
+        "relationships": [],
+        "featureOwnership": {
+          "clientFiles": [],
+          "edgeFunctions": []
+        }
+      },
+      {
         "name": "dslm_curriculum_phases",
         "fields": [
           {
@@ -50696,6 +50736,41 @@
             "generate-curriculum-phases",
             "generate-timeline"
           ]
+        }
+      },
+      {
+        "name": "dslm_event_errors",
+        "fields": [
+          {
+            "name": "created_at",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "id",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "message",
+            "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "row_id",
+            "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "source",
+            "type": "string",
+            "optional": false
+          }
+        ],
+        "relationships": [],
+        "featureOwnership": {
+          "clientFiles": [],
+          "edgeFunctions": []
         }
       },
       {
@@ -52390,6 +52465,11 @@
             "optional": false
           },
           {
+            "name": "attempts",
+            "type": "number",
+            "optional": false
+          },
+          {
             "name": "context",
             "type": "Json | null",
             "optional": false
@@ -52422,6 +52502,11 @@
           {
             "name": "id",
             "type": "string",
+            "optional": false
+          },
+          {
+            "name": "locked_at",
+            "type": "string | null",
             "optional": false
           },
           {
@@ -53204,6 +53289,48 @@
         }
       },
       {
+        "name": "student_learning_profile_versions",
+        "fields": [
+          {
+            "name": "created_at",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "id",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "snapshot",
+            "type": "Json",
+            "optional": false
+          },
+          {
+            "name": "student_id",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "teacher_id",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "welcome_test_id",
+            "type": "string | null",
+            "optional": false
+          }
+        ],
+        "relationships": [],
+        "featureOwnership": {
+          "clientFiles": [],
+          "edgeFunctions": [
+            "process-welcome-test"
+          ]
+        }
+      },
+      {
         "name": "student_learning_profiles",
         "fields": [
           {
@@ -53214,6 +53341,11 @@
           {
             "name": "ambiguity_tolerance",
             "type": "string | null",
+            "optional": false
+          },
+          {
+            "name": "answer_behaviour",
+            "type": "Json | null",
             "optional": false
           },
           {
@@ -53262,6 +53394,11 @@
             "optional": false
           },
           {
+            "name": "divergences",
+            "type": "Json | null",
+            "optional": false
+          },
+          {
             "name": "error_attitude",
             "type": "string | null",
             "optional": false
@@ -53307,6 +53444,11 @@
             "optional": false
           },
           {
+            "name": "learning_path",
+            "type": "Json | null",
+            "optional": false
+          },
+          {
             "name": "level_confidence",
             "type": "string | null",
             "optional": false
@@ -53347,6 +53489,11 @@
             "optional": false
           },
           {
+            "name": "signal_coverage",
+            "type": "number | null",
+            "optional": false
+          },
+          {
             "name": "speaking_score",
             "type": "number | null",
             "optional": false
@@ -53364,6 +53511,11 @@
           {
             "name": "teacher_id",
             "type": "string",
+            "optional": false
+          },
+          {
+            "name": "traits",
+            "type": "Json | null",
             "optional": false
           },
           {
@@ -55355,6 +55507,27 @@
         "returns": "Json"
       },
       {
+        "name": "claim_pending_ai_evaluations",
+        "args": [
+          {
+            "name": "p_limit",
+            "type": "number",
+            "optional": true
+          },
+          {
+            "name": "p_student_email",
+            "type": "string",
+            "optional": true
+          },
+          {
+            "name": "p_worksheet_id",
+            "type": "string",
+            "optional": true
+          }
+        ],
+        "returns": "{ answers: Json attempts: number context: Json | null created_at: string english_level: string | null error_message: string | null exercise_index: number exercise_type: string id: string locked_at: string | null processed_at: string | null status: string student_email: string worksheet_id: string }[]"
+      },
+      {
         "name": "clean_old_geolocation_cache",
         "args": [],
         "returns": "undefined"
@@ -55447,6 +55620,27 @@
           }
         ],
         "returns": "{ id: string token: string token_prefix: string }[]"
+      },
+      {
+        "name": "delete_mark_done_evaluation",
+        "args": [
+          {
+            "name": "p_exercise_index",
+            "type": "number",
+            "optional": false
+          },
+          {
+            "name": "p_student_id",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_worksheet_id",
+            "type": "string",
+            "optional": false
+          }
+        ],
+        "returns": "number"
       },
       {
         "name": "extract_micro_skill",
@@ -55761,6 +55955,27 @@
         "returns": "{ ai_evaluation: Json answers: Json audio_answers: Json exercise_index: number exercise_type: string id: string is_submitted: boolean item_evaluations: Json last_saved_at: string mastery: number started_at: string submitted_at: string }[]"
       },
       {
+        "name": "get_student_homework_answers_by_share_token",
+        "args": [
+          {
+            "name": "p_homework_id",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_share_token",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_student_email",
+            "type": "string",
+            "optional": false
+          }
+        ],
+        "returns": "{ ai_evaluation: Json answers: Json audio_answers: Json exercise_index: number exercise_type: string id: string is_submitted: boolean item_evaluations: Json last_saved_at: string mastery: number started_at: string submitted_at: string }[]"
+      },
+      {
         "name": "get_student_meeting_link",
         "args": [
           {
@@ -55886,6 +56101,48 @@
         "returns": "{ ai_evaluation: Json answers: Json audio_answers: Json completed_at: string exercise_index: number exercise_type: string id: string is_completed: boolean item_evaluations: Json last_saved_at: string mastery: number started_at: string }[]"
       },
       {
+        "name": "get_worksheet_student_answers_by_share_token",
+        "args": [
+          {
+            "name": "p_share_token",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_student_email",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_worksheet_id",
+            "type": "string",
+            "optional": false
+          }
+        ],
+        "returns": "{ ai_evaluation: Json answers: Json audio_answers: Json completed_at: string exercise_index: number exercise_type: string id: string is_completed: boolean item_evaluations: Json last_saved_at: string mastery: number started_at: string }[]"
+      },
+      {
+        "name": "has_homework_student_access",
+        "args": [
+          {
+            "name": "p_homework_id",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_share_token",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_student_email",
+            "type": "string",
+            "optional": false
+          }
+        ],
+        "returns": "boolean"
+      },
+      {
         "name": "has_role",
         "args": [
           {
@@ -55895,6 +56152,27 @@
           },
           {
             "name": "_user_id",
+            "type": "string",
+            "optional": false
+          }
+        ],
+        "returns": "boolean"
+      },
+      {
+        "name": "has_worksheet_student_access",
+        "args": [
+          {
+            "name": "p_share_token",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_student_email",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_worksheet_id",
             "type": "string",
             "optional": false
           }
@@ -56011,6 +56289,17 @@
           }
         ],
         "returns": "{ id: string public_exercise_types: string[] public_level: string public_slug: string public_topic: string public_view_count: number published_at: string title: string }[]"
+      },
+      {
+        "name": "list_worksheet_answers_needing_ai_evaluation",
+        "args": [
+          {
+            "name": "p_limit",
+            "type": "number",
+            "optional": true
+          }
+        ],
+        "returns": "{ exercise_index: number exercise_type: string student_email: string worksheet_id: string }[]"
       },
       {
         "name": "log_homework_submitted_event",
@@ -56183,6 +56472,32 @@
           }
         ],
         "returns": "boolean"
+      },
+      {
+        "name": "mark_worksheet_answer_not_evaluable",
+        "args": [
+          {
+            "name": "p_exercise_index",
+            "type": "number",
+            "optional": false
+          },
+          {
+            "name": "p_exercise_type",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_student_email",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_worksheet_id",
+            "type": "string",
+            "optional": false
+          }
+        ],
+        "returns": "undefined"
       },
       {
         "name": "needs_ai_evaluation",
@@ -56362,6 +56677,98 @@
         "returns": "undefined"
       },
       {
+        "name": "save_homework_answer_by_share_token",
+        "args": [
+          {
+            "name": "p_answers",
+            "type": "Json",
+            "optional": false
+          },
+          {
+            "name": "p_audio_answers",
+            "type": "Json",
+            "optional": true
+          },
+          {
+            "name": "p_exercise_index",
+            "type": "number",
+            "optional": false
+          },
+          {
+            "name": "p_exercise_type",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_homework_id",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_item_evaluations",
+            "type": "Json",
+            "optional": true
+          },
+          {
+            "name": "p_mastery",
+            "type": "number",
+            "optional": true
+          },
+          {
+            "name": "p_share_token",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_student_email",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_time_spent_ms",
+            "type": "number",
+            "optional": true
+          }
+        ],
+        "returns": "string"
+      },
+      {
+        "name": "save_mark_done_evaluation",
+        "args": [
+          {
+            "name": "p_element_type",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_exercise_index",
+            "type": "number",
+            "optional": false
+          },
+          {
+            "name": "p_exercise_title",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_ratings",
+            "type": "Json",
+            "optional": false
+          },
+          {
+            "name": "p_student_id",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_worksheet_id",
+            "type": "string",
+            "optional": false
+          }
+        ],
+        "returns": "string"
+      },
+      {
         "name": "save_teacher_comment",
         "args": [
           {
@@ -56422,6 +56829,62 @@
           }
         ],
         "returns": "boolean"
+      },
+      {
+        "name": "save_worksheet_answer_by_share_token",
+        "args": [
+          {
+            "name": "p_answers",
+            "type": "Json",
+            "optional": false
+          },
+          {
+            "name": "p_audio_answers",
+            "type": "Json",
+            "optional": true
+          },
+          {
+            "name": "p_exercise_index",
+            "type": "number",
+            "optional": false
+          },
+          {
+            "name": "p_exercise_type",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_item_evaluations",
+            "type": "Json",
+            "optional": true
+          },
+          {
+            "name": "p_mastery",
+            "type": "number",
+            "optional": true
+          },
+          {
+            "name": "p_share_token",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_student_email",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_time_spent_ms",
+            "type": "number",
+            "optional": true
+          },
+          {
+            "name": "p_worksheet_id",
+            "type": "string",
+            "optional": false
+          }
+        ],
+        "returns": "string"
       },
       {
         "name": "set_test_answered_count_by_share_token",
@@ -56981,8 +57444,16 @@
     ],
     "migrationFunctions": [
       {
+        "name": "add_student_event_internal",
+        "migration": "supabase/migrations/20261014090000_event_and_homework_answer_access.sql"
+      },
+      {
         "name": "add_student_event",
         "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
+      },
+      {
+        "name": "add_student_event",
+        "migration": "supabase/migrations/20261014090000_event_and_homework_answer_access.sql"
       },
       {
         "name": "apply_intake_extraction",
@@ -57169,6 +57640,10 @@
         "migration": "supabase/migrations/20261006090000_billing_guard_and_student_events.sql"
       },
       {
+        "name": "log_homework_submitted_event",
+        "migration": "supabase/migrations/20261014090000_event_and_homework_answer_access.sql"
+      },
+      {
         "name": "log_knowledge_entry_event",
         "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
       },
@@ -57183,6 +57658,10 @@
       {
         "name": "log_welcome_test_event_by_share_token",
         "migration": "supabase/migrations/20261006120000_welcome_test_event_dedup_fix.sql"
+      },
+      {
+        "name": "log_welcome_test_event_by_share_token",
+        "migration": "supabase/migrations/20261014090000_event_and_homework_answer_access.sql"
       },
       {
         "name": "log_worksheet_answer_to_events",
@@ -57253,6 +57732,10 @@
         "migration": "supabase/migrations/20261012120000_dslm_event_triggers_v2.sql"
       },
       {
+        "name": "save_mark_done_evaluation",
+        "migration": "supabase/migrations/20261014090000_event_and_homework_answer_access.sql"
+      },
+      {
         "name": "save_test_answer_by_share_token",
         "migration": "supabase/migrations/20260804200705_0c128cfa-b83a-47b2-8d69-90962554c973.sql"
       },
@@ -57285,6 +57768,14 @@
         "migration": "supabase/migrations/20260623202114_6dc3ae03-5d7e-4e9d-b3a7-56a0763ba472.sql"
       },
       {
+        "name": "submit_homework_answers_by_share_token",
+        "migration": "supabase/migrations/20261014090000_event_and_homework_answer_access.sql"
+      },
+      {
+        "name": "submit_homework_answers",
+        "migration": "supabase/migrations/20261014090000_event_and_homework_answer_access.sql"
+      },
+      {
         "name": "try_parse_jsonb",
         "migration": "supabase/migrations/20260601082424_08261ec2-f683-4520-94d9-4c1bef3bab9b.sql"
       },
@@ -57295,6 +57786,10 @@
       {
         "name": "update_homework_answer_by_share_token",
         "migration": "supabase/migrations/20260731162257_e03802c9-4606-4a66-a957-86030183f689.sql"
+      },
+      {
+        "name": "update_homework_answer_by_share_token",
+        "migration": "supabase/migrations/20261014090000_event_and_homework_answer_access.sql"
       },
       {
         "name": "update_homework_event_with_ai_evaluation",
@@ -57308,6 +57803,24 @@
   },
   "integrations": {
     "externalHosts": [
+      {
+        "host": "169.254.169.254",
+        "callsites": [
+          "src/lib/answers/__tests__/audioFetchGuard.test.ts"
+        ]
+      },
+      {
+        "host": "abc.supabase.co",
+        "callsites": [
+          "src/lib/answers/__tests__/audioFetchGuard.test.ts"
+        ]
+      },
+      {
+        "host": "abc.supabase.co.evil.com",
+        "callsites": [
+          "src/lib/answers/__tests__/audioFetchGuard.test.ts"
+        ]
+      },
       {
         "host": "accounts.google.com",
         "callsites": [
@@ -57522,6 +58035,12 @@
         ]
       },
       {
+        "host": "evil.com",
+        "callsites": [
+          "src/lib/answers/__tests__/audioFetchGuard.test.ts"
+        ]
+      },
+      {
         "host": "example.invalid",
         "callsites": [
           "supabase/functions/test-model-failure-logger/index.ts"
@@ -57585,6 +58104,12 @@
         ]
       },
       {
+        "host": "pub-xyz.r2.dev",
+        "callsites": [
+          "src/lib/answers/__tests__/audioFetchGuard.test.ts"
+        ]
+      },
+      {
         "host": "schema.org",
         "callsites": [
           "src/components/seo/ClusterHubPage.tsx",
@@ -57634,6 +58159,12 @@
         "callsites": [
           "supabase/functions/audit-llm-models/index.ts",
           "supabase/functions/generate-image/index.ts"
+        ]
+      },
+      {
+        "host": "user",
+        "callsites": [
+          "src/lib/answers/__tests__/audioFetchGuard.test.ts"
         ]
       },
       {
@@ -57708,6 +58239,8 @@
           "supabase/functions/audit-llm-models/index.ts",
           "supabase/functions/backfill-welcome-test-auto-apply/index.ts",
           "supabase/functions/bulk-publish-worksheets/index.ts",
+          "supabase/functions/loop-pacing-aggregator/index.ts",
+          "supabase/functions/pacing-periodic-check/index.ts",
           "supabase/functions/process-pending-ai-evaluations/index.ts",
           "supabase/functions/send-homework-reminders/index.ts",
           "supabase/functions/send-model-audit-email/index.ts",
@@ -57827,6 +58360,7 @@
       {
         "name": "R2_CUSTOM_DOMAIN",
         "callsites": [
+          "supabase/functions/transcribe-audio/index.ts",
           "supabase/functions/upload-to-r2/index.ts"
         ]
       },
@@ -57839,6 +58373,7 @@
       {
         "name": "R2_PUBLIC_URL",
         "callsites": [
+          "supabase/functions/transcribe-audio/index.ts",
           "supabase/functions/upload-to-r2/index.ts"
         ]
       },
@@ -57909,7 +58444,6 @@
           "supabase/functions/publish-worksheet/index.ts",
           "supabase/functions/send-homework-reminders/index.ts",
           "supabase/functions/submit-bug-report/index.ts",
-          "supabase/functions/transcribe-audio/index.ts",
           "supabase/functions/unpublish-worksheet/index.ts",
           "supabase/functions/upload-to-r2/index.ts"
         ]
