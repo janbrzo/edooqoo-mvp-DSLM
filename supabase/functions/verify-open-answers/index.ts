@@ -91,7 +91,7 @@ For each answer, provide:
 - speaking_score: (0.0-1.0) Score for the SPOKEN answer (from transcription). Omit if no audio transcription provided.
 
 STRICT SCORING RULES (these override everything else):
-1. NON-ANSWERS (ALWAYS score 0.0-0.05): "I don't know", "idk", "nie wiem", "no idea", "no se", "не знаю", "dunno", "I have no idea", "I'm not sure", any equivalent in ANY language, or any response that does not attempt to answer the question. Score: 0.0. Feedback should be: "No answer provided. Try to form at least one sentence about the topic."
+1. NON-ANSWERS (ALWAYS score 0.0-0.05): "I don't know", "idk", "nie wiem", "no idea", "no se", "не знаю", "dunno", "I have no idea", "I'm not sure", any equivalent in ANY language, or any response that does not attempt to answer the question. Score: 0.0. Feedback for an empty answer or an explicit "I don't know": "No answer provided. Try to form at least one sentence about the topic." Feedback for any other response that does not address the question (nonsense, off-topic): "This answer does not address the question."
 2. WRONG LANGUAGE (score 0.05-0.10): Answer written entirely in a non-English language (Polish, Spanish, etc.) unless translation was explicitly requested. Feedback: "Please answer in English."
 3. MINIMAL EFFORT (score 0.1-0.4): Only 1-2 generic words like "yes", "no", "ok", "good", "bad" that don't demonstrate understanding. Feedback should suggest what to add.
 4. PARTIAL ANSWER (score 0.4-0.7): Shows some understanding but is incomplete, has significant errors, or doesn't fully address the question.
@@ -325,6 +325,11 @@ Return exactly ${answers.length} evaluation objects in a JSON array, one per ans
       // Override feedback for non-answers regardless
       if (isNonAnswer) {
         feedback = "No answer provided. Try to form at least one sentence about the topic.";
+      }
+      // The sentinel feedback belongs to real non-answers only: a scored nonsense or off-topic
+      // answer keeps the model feedback, or a neutral line when the model echoed the sentinel.
+      if (!isNonAnswer && typeof feedback === "string" && /^\s*no answer provided/i.test(feedback)) {
+        feedback = "This answer does not address the question.";
       }
       if (isInjection && !isNonAnswer) {
         feedback = "This response does not answer the question. Write your own answer about the topic.";

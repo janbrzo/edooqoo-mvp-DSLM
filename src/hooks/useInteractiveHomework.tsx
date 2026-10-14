@@ -470,8 +470,11 @@ export const useInteractiveHomework = ({
                 }
                 const hasRaised = Object.keys(raised).length > 0;
                 const closedItemEvals = hasRaised ? applyAiAlternatives(itemEvals, raised).items : null;
+                // The row mastery is the mean of the FINAL item evaluations (raises included),
+                // the same value the answer trigger writes to the event.
                 const overallMastery = isClosedExerciseType(exType)
-                  ? calculateOverallMastery(exType, exerciseData, closedAnswers, hasRaised ? raised : undefined)
+                  ? (closedItemEvals ? averageScoredMastery(closedItemEvals) : null)
+                    ?? calculateOverallMastery(exType, exerciseData, closedAnswers, hasRaised ? raised : undefined)
                   : averageScoredMastery(itemEvals);
                 
                 // Merge transcriptions into answers for this exercise (single DB write with AI eval)

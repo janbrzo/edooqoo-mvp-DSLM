@@ -233,9 +233,6 @@ export const buildItemEvaluations = (
 /** Shared with the AI queue: `calculateExerciseMastery` in supabase/functions/_shared/itemMastery.ts. */
 export const calculateOverallMastery = calculateExerciseMastery;
 
-/** Prefill for a closed item whose answer exists but the key cannot decide. */
-const NEUTRAL_PREFILL = 50;
-
 /** question_index -> stored mastery (first scored rating per question) from saved item_evaluations. */
 export const storedItemMasteryByQuestion = (
   itemEvaluations: ReadonlyArray<{ question_index?: number; mastery?: number; hasValue?: boolean }> | null | undefined,
@@ -256,7 +253,8 @@ export const storedItemMasteryByQuestion = (
  * teacher starts from what the student's evaluation already holds).
  * Order: live AI evaluation, then the stored evaluation of the saved answer
  * (AI queue result, accepted alternative), then for closed items the key verdict
- * (`calculateItemMastery`: 100 correct, 0 wrong, 50 when the key cannot decide).
+ * (`calculateItemMastery`: 100 correct, 0 wrong; when the key cannot decide the item
+ * is left unrated, never a made-up 50).
  * An open item with neither has no value, so an unrated item never overrides a
  * real evaluation; no answer has no value either.
  */
@@ -282,5 +280,6 @@ export const calculateInitialMasteryForItem = (
   }
   if (!isClosedExerciseType(exerciseType)) return { mastery: null, hasValue: false };
   const keyMastery = calculateItemMastery(exerciseType, exerciseData, itemIndex, studentAnswer, studentAnswers);
-  return { mastery: keyMastery ?? NEUTRAL_PREFILL, hasValue: true };
+  if (keyMastery === null || keyMastery === undefined) return { mastery: null, hasValue: false };
+  return { mastery: keyMastery, hasValue: true };
 };
