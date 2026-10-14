@@ -328,6 +328,21 @@ export const CONTENT_OVERRIDES = {
     cluster: 'Tutor Business and Tools',
     reason: 'Strategic tutor workload and burnout-prevention resource.',
   },
+  '/english-worksheets-for-kids.html': {
+    state: 'noindex',
+    cluster: 'Adult and Business English',
+    reason: 'Martha Test: children audience is outside the adult 1:1 tutor positioning; kept accessible, excluded from index and sitemap.',
+  },
+  '/english-worksheets-for-teenagers.html': {
+    state: 'noindex',
+    cluster: 'Adult and Business English',
+    reason: 'Martha Test: teenager audience is outside the adult 1:1 tutor positioning; kept accessible, excluded from index and sitemap.',
+  },
+  '/blog/parent-teacher-conferences-esl.html': {
+    state: 'noindex',
+    cluster: 'Adult and Business English',
+    reason: 'Martha Test: parent-teacher school context is outside the adult 1:1 tutor positioning; kept accessible, excluded from index and sitemap.',
+  },
   '/blog/materials-design-principles-elt.html': {
     state: 'keep',
     cluster: 'One-to-One Lesson Planning',
