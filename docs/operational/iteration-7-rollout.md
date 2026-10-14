@@ -2,7 +2,9 @@
 
 Order matters: steps 1-2 are safe before the release; step 3 is the release; step 4 waits a day.
 
-Run each step as its own query in the Supabase SQL Editor. The editor scans the script for new tables and appends `ALTER TABLE <name> ENABLE ROW LEVEL SECURITY` after statements it takes for `SELECT ... INTO <table>`; it also does this inside PL/pgSQL bodies, where `SELECT ... INTO <variable>` is an assignment, which cut the function body ("unterminated dollar-quoted string"). Apply migrations with PL/pgSQL functions from the editor as base64 text executed by one `DO` block (`EXECUTE convert_from(decode('<base64 of the file>', 'base64'), 'UTF8')`), or with the Supabase CLI / psql.
+Run each step as its own query in the Supabase SQL Editor. The editor scans the script for new tables and appends `ALTER TABLE <name> ENABLE ROW LEVEL SECURITY` after statements it takes for `SELECT ... INTO <table>`; it also does this inside PL/pgSQL bodies, where `SELECT ... INTO <variable>` is an assignment, which cut the function body ("unterminated dollar-quoted string"). Apply migrations with PL/pgSQL functions from the editor as base64 text executed by one `DO` block (`EXECUTE convert_from(decode('<base64 of the file>', 'base64'), 'UTF8')`), or with the Supabase CLI / psql. The editor also truncates long pastes (a 22 KB script was cut), so keep each run under about 8 KB. Through the Supabase MCP connector, statements containing DELETE or DROP wait for a confirmation that may never arrive and time out after 60 s; run those parts in the editor.
+
+Status 2026-10-14: steps 1 and 2 are applied in production (function bodies verified equal to the repo by md5). The student_events INSERT policy was changed with ALTER POLICY (same end state as the DROP/CREATE in the file).
 
 ## 1. Cron jobs: send x-cron-secret instead of the anon key (before the release)
 
