@@ -11,7 +11,7 @@ import { computeLearningPathScore } from '../../../../supabase/functions/_shared
 import { computeDivergences } from '../../../../supabase/functions/_shared/welcomeTestSignals';
 import { estimateLevel } from '../../../../supabase/functions/_shared/welcomeTestLevel';
 
-const EM = '—';
+const EM = '\u2014';
 
 /** The E2E test student of the live audit (WS6-b): A2 measured, self-assessed B2-C1, 5/5 confidence. */
 const LIVE = live as Record<string, unknown>;
