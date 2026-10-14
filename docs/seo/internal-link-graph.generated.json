@@ -6,7 +6,7 @@
     "orphanStrategic": 0,
     "weakTop40": 0,
     "weakTop120": 0,
-    "noindexPriorityLinks": 1
+    "noindexPriorityLinks": 0
   },
   "thresholds": {
     "minTop40Incoming": 10,
@@ -857,12 +857,5 @@
   "orphanStrategic": [],
   "weakTop40": [],
   "weakTop120": [],
-  "noindexPriorityLinks": [
-    {
-      "route": "/blog/parent-teacher-conferences-esl.html",
-      "incoming": [
-        "/blog"
-      ]
-    }
-  ]
+  "noindexPriorityLinks": []
 }
