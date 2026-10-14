@@ -18647,7 +18647,7 @@
             },
             {
               "name": "trend",
-              "type": "'improving' | 'declining' | 'stable'",
+              "type": "'improving' | 'declining' | 'stable' | 'insufficient_data'",
               "optional": false
             }
           ]
@@ -36000,6 +36000,16 @@
           "initial": "false"
         },
         {
+          "value": "savedMarkDoneRatings",
+          "setter": "setSavedMarkDoneRatings",
+          "initial": "null"
+        },
+        {
+          "value": "isLoadingSavedRatings",
+          "setter": "setIsLoadingSavedRatings",
+          "initial": "false"
+        },
+        {
           "value": "isUndoModalOpen",
           "setter": "setIsUndoModalOpen",
           "initial": "false"
@@ -37511,6 +37521,11 @@
             {
               "name": "isLoadingAiEvaluation",
               "type": "boolean",
+              "optional": true
+            },
+            {
+              "name": "savedRatings",
+              "type": "{ name: string; mastery: number }[] | null",
               "optional": true
             }
           ]
@@ -41088,6 +41103,11 @@
               },
               {
                 "name": "englishLevel",
+                "type": "string | null",
+                "optional": true
+              },
+              {
+                "name": "worksheetAudioTranscript",
                 "type": "string | null",
                 "optional": true
               }
@@ -46539,7 +46559,9 @@
             "test_skill_results"
           ],
           "rpcs": [
-            "calculate_test_results"
+            "calculate_test_results",
+            "reconcile_welcome_test_events",
+            "supersede_previous_welcome_test_events"
           ],
           "edgeFunctions": [
             "recalculate-pacing"
@@ -47558,6 +47580,7 @@
         ],
         "visibleResponseFields": [
           "details",
+          "duration",
           "error",
           "success",
           "transcription"
@@ -57480,6 +57503,14 @@
         "migration": "supabase/migrations/20260609191429_f1209887-288d-49d1-98f8-e3de2a43be52.sql"
       },
       {
+        "name": "calculate_test_results",
+        "migration": "supabase/migrations/20261015090500_test_results_null_for_unattempted.sql"
+      },
+      {
+        "name": "claim_homework_answer_ai_attempt",
+        "migration": "supabase/migrations/20261015090400_homework_ai_queue_and_worksheet_save.sql"
+      },
+      {
         "name": "claim_pending_ai_evaluations",
         "migration": "supabase/migrations/20261012140000_ai_evaluation_queue_v2.sql"
       },
@@ -57496,6 +57527,10 @@
         "migration": "supabase/migrations/20261012160000_mark_done_supersedes_student_events.sql"
       },
       {
+        "name": "compute_skill_metric",
+        "migration": "supabase/migrations/20261015090000_compute_skill_metric_v3.sql"
+      },
+      {
         "name": "consume_newsletter_rate_limit",
         "migration": "supabase/migrations/20260615143000_newsletter_double_opt_in.sql"
       },
@@ -57510,6 +57545,10 @@
       {
         "name": "delete_mark_done_evaluation",
         "migration": "supabase/migrations/20261012120000_dslm_event_triggers_v2.sql"
+      },
+      {
+        "name": "delete_mark_done_evaluation",
+        "migration": "supabase/migrations/20261015090200_mark_done_and_homework_mastery_fixes.sql"
       },
       {
         "name": "extract_micro_skill",
@@ -57612,6 +57651,14 @@
         "migration": "supabase/migrations/20260806201028_02ebb7c9-8cd2-4bb0-8599-492c78b6ae3e.sql"
       },
       {
+        "name": "keep_ai_alternative_ratings",
+        "migration": "supabase/migrations/20261015090400_homework_ai_queue_and_worksheet_save.sql"
+      },
+      {
+        "name": "list_homework_answers_needing_ai_evaluation",
+        "migration": "supabase/migrations/20261015090400_homework_ai_queue_and_worksheet_save.sql"
+      },
+      {
         "name": "list_public_worksheets",
         "migration": "supabase/migrations/20260809180315_754eca52-5bfe-4330-b4c4-27f58070b8f2.sql"
       },
@@ -57664,6 +57711,10 @@
         "migration": "supabase/migrations/20261014090000_event_and_homework_answer_access.sql"
       },
       {
+        "name": "log_welcome_test_event_by_share_token",
+        "migration": "supabase/migrations/20261015090300_welcome_test_event_reconciliation.sql"
+      },
+      {
         "name": "log_worksheet_answer_to_events",
         "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
       },
@@ -57674,6 +57725,10 @@
       {
         "name": "mark_attention_seen",
         "migration": "supabase/migrations/20260623202114_6dc3ae03-5d7e-4e9d-b3a7-56a0763ba472.sql"
+      },
+      {
+        "name": "mark_homework_answer_ai_not_evaluable",
+        "migration": "supabase/migrations/20261015090400_homework_ai_queue_and_worksheet_save.sql"
       },
       {
         "name": "mark_worksheet_answer_not_evaluable",
@@ -57700,12 +57755,20 @@
         "migration": "supabase/migrations/20261012140000_ai_evaluation_queue_v2.sql"
       },
       {
+        "name": "reconcile_welcome_test_events",
+        "migration": "supabase/migrations/20261015090300_welcome_test_event_reconciliation.sql"
+      },
+      {
         "name": "refresh_skill_metrics_on_event",
         "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
       },
       {
         "name": "refresh_skill_metrics_on_event",
         "migration": "supabase/migrations/20261012120000_dslm_event_triggers_v2.sql"
+      },
+      {
+        "name": "refresh_skill_metrics_on_event",
+        "migration": "supabase/migrations/20261015090000_compute_skill_metric_v3.sql"
       },
       {
         "name": "revoke_mcp_token",
@@ -57748,6 +57811,10 @@
         "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
       },
       {
+        "name": "save_worksheet_answer",
+        "migration": "supabase/migrations/20261015090400_homework_ai_queue_and_worksheet_save.sql"
+      },
+      {
         "name": "set_test_answered_count_by_share_token",
         "migration": "supabase/migrations/20260804200705_0c128cfa-b83a-47b2-8d69-90962554c973.sql"
       },
@@ -57776,6 +57843,10 @@
         "migration": "supabase/migrations/20261014090000_event_and_homework_answer_access.sql"
       },
       {
+        "name": "supersede_previous_welcome_test_events",
+        "migration": "supabase/migrations/20261015090300_welcome_test_event_reconciliation.sql"
+      },
+      {
         "name": "try_parse_jsonb",
         "migration": "supabase/migrations/20260601082424_08261ec2-f683-4520-94d9-4c1bef3bab9b.sql"
       },
@@ -57798,6 +57869,10 @@
       {
         "name": "verify_welcome_test_email",
         "migration": "supabase/migrations/20260611110910_b784b86f-9ccf-49e8-a222-0403bb67e6b3.sql"
+      },
+      {
+        "name": "worksheet_answers_differ",
+        "migration": "supabase/migrations/20261015090400_homework_ai_queue_and_worksheet_save.sql"
       }
     ]
   },
@@ -57807,6 +57882,12 @@
         "host": "169.254.169.254",
         "callsites": [
           "src/lib/answers/__tests__/audioFetchGuard.test.ts"
+        ]
+      },
+      {
+        "host": "a",
+        "callsites": [
+          "src/lib/answers/__tests__/openAnswerContext.test.ts"
         ]
       },
       {
