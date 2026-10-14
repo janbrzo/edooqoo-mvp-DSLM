@@ -2,7 +2,7 @@
 
 Order matters: steps 1-2 are safe before the release; step 3 is the release; step 4 waits a day.
 
-Run each step as its own query in the Supabase SQL Editor. The editor splits a script into statements and treats an apostrophe inside a `--` comment as the start of a string, so SQL run there must have no apostrophes in comments (an unbalanced one cut a function body and failed with "unterminated dollar-quoted string").
+Run each step as its own query in the Supabase SQL Editor. The editor scans the script for new tables and appends `ALTER TABLE <name> ENABLE ROW LEVEL SECURITY` after statements it takes for `SELECT ... INTO <table>`; it also does this inside PL/pgSQL bodies, where `SELECT ... INTO <variable>` is an assignment, which cut the function body ("unterminated dollar-quoted string"). Apply migrations with PL/pgSQL functions from the editor as base64 text executed by one `DO` block (`EXECUTE convert_from(decode('<base64 of the file>', 'base64'), 'UTF8')`), or with the Supabase CLI / psql.
 
 ## 1. Cron jobs: send x-cron-secret instead of the anon key (before the release)
 
