@@ -5,6 +5,7 @@ import { NO_EM_DASH_RULE } from "../_shared/writingStyle.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { resolveCaller } from "../_shared/auth.ts";
 import { homeworkIdForStudentAccess } from "../_shared/evaluationAccess.ts";
+import { isNonAnswerText, parseModelScore } from "./answerSignals.ts";
 import { itemId, pairEvaluationsWithAnswers, callModelWithRetry } from "./evaluationMapping.ts";
 import {
   STUDENT_TEXT_RULE,
@@ -240,7 +241,8 @@ Return exactly ${answers.length} evaluation objects in a JSON array, one per ans
     const answered = new Set(pairs.map(([idx]) => idx));
 
     evaluations = pairs.map(([idx, e]): EvaluationResult | null => {
-      let qualityScore = parseFloat(e?.quality_score);
+      // Out-of-scale replies (85, "85%", "8/10") are rescaled; unusable ones stay unevaluated.
+      let qualityScore = parseModelScore(e?.quality_score) ?? NaN;
       if (isNaN(qualityScore)) {
         // No usable score: closed items fall back to the key, open items stay unevaluated.
         const a = answers[idx];
@@ -248,44 +250,17 @@ Return exactly ${answers.length} evaluation objects in a JSON array, one per ans
           ? fallbackClosedEvaluation(a) as EvaluationResult
           : null;
       }
-      qualityScore = Math.max(0, Math.min(1, qualityScore));
 
       // PROBLEM 3 FIX: Server-side non-answer detection - override AI score
       // Use audio_transcription as fallback if student_answer is empty (audio-only questions)
       const rawStudentAnswer = answers[idx]?.student_answer?.toLowerCase().trim() || "";
       const audioTranscription = answers[idx]?.audio_transcription?.toLowerCase().trim() || "";
       const studentAnswer = rawStudentAnswer || audioTranscription;
-      const nonAnswerPatterns = [
-        /^i\s*don'?t\s*know/i,
-        /^idk$/i,
-        /^nie\s*wiem/i,
-        /^no\s*idea/i,
-        /^no\s*se$/i,
-        /^не\s*знаю/i,
-        /^dunno$/i,
-        /^i\s*have\s*no\s*idea/i,
-        /^i'?m?\s*not\s*sure$/i,
-        /^no\s*lo\s*se$/i,
-        /^je\s*ne\s*sais\s*pas$/i,
-        /^ich\s*wei(ss|ß)\s*nicht$/i,
-        /^não\s*sei$/i,
-        /^nwm$/i,
-        /^i\s*dont\s*know/i,
-        /^no\s*answer/i,
-        /^n\/a$/i,
-        /^-$/i,
-        /^\.+$/i,
-        /^x+$/i,
-        /^asdf/i,
-        /^test$/i,
-        /^nothing$/i,
-        /^none$/i,
-      ];
       const closed = isClosedType(answers[idx]?.exercise_type) && !!answers[idx]?.suggested_answer;
       // Closed answers are short by design ("B) drinks", "True", "none"): only an empty answer is a non-answer.
       const isNonAnswer = closed
         ? studentAnswer.length === 0
-        : nonAnswerPatterns.some((p) => p.test(studentAnswer)) || studentAnswer.length === 0;
+        : isNonAnswerText(studentAnswer);
 
       if (isNonAnswer && qualityScore > 0.05) {
         console.log(
@@ -300,7 +275,8 @@ Return exactly ${answers.length} evaluation objects in a JSON array, one per ans
       }
 
       // An answer that talks to the grader instead of answering never keeps a high score.
-      const isInjection = !closed && (
+      // Typed closed items too: aiAlternativeMastery may raise them, so a crafted answer must not earn it.
+      const isInjection = (!closed || !isSelectionType(answers[idx].exercise_type)) && (
         looksLikeInstructionInjection(answers[idx]?.student_answer) ||
         looksLikeInstructionInjection(answers[idx]?.audio_transcription)
       );
@@ -352,8 +328,8 @@ Return exactly ${answers.length} evaluation objects in a JSON array, one per ans
       }
 
       // Extract writing and speaking scores
-      const writingScore = e.writing_score !== undefined ? parseFloat(e.writing_score) : undefined;
-      const speakingScore = e.speaking_score !== undefined ? parseFloat(e.speaking_score) : undefined;
+      const writingScore = e.writing_score !== undefined ? (parseModelScore(e.writing_score) ?? NaN) : undefined;
+      const speakingScore = e.speaking_score !== undefined ? (parseModelScore(e.speaking_score) ?? NaN) : undefined;
 
       return {
         exercise_index: answers[idx]?.exercise_index,

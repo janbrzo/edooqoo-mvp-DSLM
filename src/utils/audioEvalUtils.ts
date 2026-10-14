@@ -35,7 +35,9 @@ export interface AnswerToVerify {
  */
 export async function transcribeAllAudio(
   audioAnswers: Record<number, Record<number, string>>,
-  logPrefix: string = '[transcribeAllAudio]'
+  logPrefix: string = '[transcribeAllAudio]',
+  // Anonymous students prove access with the homework link token + their email.
+  access?: { share_token: string; student_email: string }
 ): Promise<TranscriptionCache> {
   const cache: TranscriptionCache = {};
 
@@ -46,7 +48,7 @@ export async function transcribeAllAudio(
       try {
         devLog(`${logPrefix} Transcribing audio for exercise ${exIdxStr}, question ${qIdxStr}`);
         const { data: transcResult, error: transcError } = await supabase.functions.invoke('transcribe-audio', {
-          body: { audio_url: audioUrl }
+          body: access ? { audio_url: audioUrl, access } : { audio_url: audioUrl }
         });
         
         // Enhanced diagnostics

@@ -3,10 +3,11 @@
 // Detects systemic drift across (cefr_level × goal) cohorts.
 
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
+import { hasValidCronSecret } from '../_shared/cronAuth.ts';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, x-cron-secret',
 };
 
 const LOOP_ID = 'pacing-drift-aggregation';
@@ -24,9 +25,21 @@ function formatErr(err: unknown): string {
 Deno.serve(async req => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders });
 
+  // Cron only: the project CRON_SECRET (x-cron-secret) or the service role key.
+  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+  const bearer = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '').trim();
+  const authorised =
+    hasValidCronSecret(req.headers.get('x-cron-secret'), Deno.env.get('CRON_SECRET')) ||
+    (!!serviceKey && bearer === serviceKey);
+  if (!authorised) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+
   const supabase = createClient(
     Deno.env.get('SUPABASE_URL')!,
-    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
+    serviceKey,
   );
 
   const startedAt = new Date().toISOString();

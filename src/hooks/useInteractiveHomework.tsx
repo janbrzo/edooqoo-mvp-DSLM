@@ -22,7 +22,7 @@ import { devLog, devWarn } from '@/utils/logger';
 import { transcribeAllAudio, buildAnswersToVerify } from '@/utils/audioEvalUtils';
 import { createPendingSaves } from '@/lib/answers/pendingSaves';
 import { resolveEnglishLevel } from '../../supabase/functions/_shared/englishLevel';
-import { callStudentAnswerRpc } from '@/lib/answers/studentAnswerRpc';
+import { callStudentAnswerRpc, submitHomeworkAnswers } from '@/lib/answers/studentAnswerRpc';
 import { invokeWithRetry } from '@/lib/answers/invokeWithRetry';
 
 
@@ -293,10 +293,7 @@ export const useInteractiveHomework = ({
       await pendingSavesQueueRef.current.flush();
       const latestAnswers = answersRef.current;
 
-      const { error } = await supabase.rpc('submit_homework_answers', {
-        p_homework_id: homeworkId,
-        p_student_email: studentEmail
-      });
+      const { error } = await submitHomeworkAnswers(homeworkId, studentEmail, shareToken);
 
       if (error) throw error;
 
@@ -343,7 +340,10 @@ export const useInteractiveHomework = ({
           const answersToVerify: any[] = [];
           
           // Transcribe all audio using shared utility
-          const transcriptionCache = await transcribeAllAudio(audioAnswers, '[submitHomework]');
+          const transcriptionCache = await transcribeAllAudio(audioAnswers, '[submitHomework]', {
+            share_token: shareToken || '',
+            student_email: studentEmail,
+          });
           
           // Merge transcriptions into local savedAnswers for AI eval (NO DB writes yet, will persist with AI eval)
           if (Object.keys(transcriptionCache).length > 0) {
