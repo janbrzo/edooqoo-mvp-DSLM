@@ -6,6 +6,7 @@
  * (closedItemContext key_verdict). Pure, no I/O, no path aliases.
  */
 import { matchAnswer } from './matchAnswer.ts';
+import { normalizeExerciseShape } from './normalizeExercise.ts';
 
 /**
  * Text correctness for DSLM.
@@ -22,6 +23,49 @@ const textVerdict = (
   if (verdict === 'correct') return true;
   if (verdict === 'wrong') return false;
   return null; // 'review' / 'empty' => not scored
+};
+
+/** Number of blanks (runs of underscores) in a sentence text. */
+export const countBlanks = (text: unknown): number => (String(text ?? '').match(/_+/g) || []).length;
+
+/** Correct answer per blank: `answers` array, or "a / b" in `answer`, same convention as gap-text. */
+export const blankAnswers = (sentence: any, blanks: number): string[] => {
+  if (Array.isArray(sentence?.answers) && sentence.answers.length > 0) return sentence.answers.map(String);
+  const raw = String(sentence?.answer ?? sentence?.correct ?? sentence?.missing_word ?? '');
+  return blanks > 1 && raw.includes(' / ') ? raw.split(/\s*\/\s*/) : [raw];
+};
+
+/** True when a multi-blank sentence was answered blank by blank (keys `${i}_${b}`). */
+export const hasBlankKeys = (itemIndex: number, allAnswers?: Record<string | number, any>): boolean =>
+  !!allAnswers && allAnswers[`${itemIndex}_0`] !== undefined;
+
+/**
+ * Multi-blank fill-in-blanks: each blank is scored on its own and the item is the
+ * share of correct blanks. An empty blank counts as wrong, an uncertain match
+ * (review) is left out, never counted as wrong. Null when nothing can be scored.
+ */
+export const multiBlankMastery = (
+  sentence: any,
+  itemIndex: number,
+  allAnswers: Record<string | number, any>,
+): number | null => {
+  const text = typeof sentence === 'string' ? sentence : (sentence?.text ?? '');
+  const blanks = countBlanks(text);
+  const expected = blankAnswers(sentence, blanks);
+  let correct = 0;
+  let wrong = 0;
+  for (let b = 0; b < blanks; b++) {
+    const answer = allAnswers[`${itemIndex}_${b}`];
+    const key = expected[b] ?? expected[0] ?? '';
+    if (answer === undefined || answer === null || String(answer).trim() === '') {
+      wrong++;
+      continue;
+    }
+    const verdict = textVerdict(answer, key, 'word');
+    if (verdict === true) correct++;
+    else if (verdict === false) wrong++;
+  }
+  return correct + wrong === 0 ? null : Math.round((100 * correct) / (correct + wrong));
 };
 
 // Seeded random for deterministic shuffle (same algorithm as UI components)
@@ -93,10 +137,12 @@ export const calculateItemMastery = (
   studentAnswer: any,
   allAnswers?: Record<string | number, any>
 ): number | null => {
+  // Grade against the shape the student saw (renderers normalize the same way).
+  exerciseData = normalizeExerciseShape(exerciseData);
   // No answer = null mastery (but check for multi-blank gap-text composite keys first)
   if (studentAnswer === undefined || studentAnswer === null || studentAnswer === '') {
-    if (exerciseType === 'gap-text' && allAnswers && allAnswers[`${itemIndex}_0`] !== undefined) {
-      // Multi-blank gap-text: answer exists under composite keys, continue
+    if ((exerciseType === 'gap-text' || exerciseType === 'fill-in-blanks') && hasBlankKeys(itemIndex, allAnswers)) {
+      // Multi-blank sentence: answer exists under composite keys, continue
     } else {
       return null;
     }
@@ -201,6 +247,18 @@ export const calculateItemMastery = (
 
     // Fill in blanks (including fill-in-blanks-audio)
     if (exerciseType.startsWith('fill-in-blanks')) {
+      const multiSentence = exerciseData?.sentences?.[itemIndex];
+      if (exerciseType === 'fill-in-blanks' && multiSentence && allAnswers && hasBlankKeys(itemIndex, allAnswers)
+          && countBlanks(typeof multiSentence === 'string' ? multiSentence : multiSentence.text) > 1) {
+        return multiBlankMastery(multiSentence, itemIndex, allAnswers);
+      }
+      // Several blanks but a single string (saved before blanks had their own keys): the
+      // string cannot be matched to a blank, and treating it as an alternative of the
+      // whole key scored one word as 100. Leave it unscored (review) instead.
+      if (exerciseType === 'fill-in-blanks' && multiSentence
+          && countBlanks(typeof multiSentence === 'string' ? multiSentence : multiSentence.text) > 1) {
+        return null;
+      }
       // For fill-in-blanks-audio, answers may be in exerciseData.answers array
       if (exerciseType === 'fill-in-blanks-audio' && exerciseData?.answers?.[itemIndex]) {
         const correctAnswer = exerciseData.answers[itemIndex];
