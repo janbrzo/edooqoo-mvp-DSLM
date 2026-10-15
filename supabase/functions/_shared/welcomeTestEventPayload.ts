@@ -190,6 +190,7 @@ export function buildSkipEvent(q: WelcomeEventQuestion, questionIndex: number): 
 
 export interface StoredQuestionRow {
   question_index?: number | null;
+  question_type?: string | null;
   student_answer?: unknown;
   is_correct?: boolean | null;
   time_spent_seconds?: number | null;
@@ -220,6 +221,8 @@ export function buildReconcileEvents(
     if (typeof idx !== 'number' || idx < 0 || idx >= meta.length) continue;
     if (r.student_answer === null || r.student_answer === undefined) continue;
     const q = meta[idx];
+    // A row whose stored type differs from the bank at that index is another test layout.
+    if (typeof r.question_type === 'string' && r.question_type !== q.question_type) continue;
     const ai = Number(r.question_data?.ai_score);
     const hasAi = !q.has_key && r.question_data?.ai_score !== undefined && r.question_data?.ai_score !== null && Number.isFinite(ai);
     const draft = buildAnswerEvent(q, {

@@ -178,6 +178,21 @@ async function loadHomeworkMeta(supabase: any, homeworkId: string): Promise<Home
   return { exercises: hw.selected_exercises, studentLevel, worksheetAudioTranscript: transcript };
 }
 
+/** Recorded audio answers (http url) with no transcription. */
+export function missingTranscriptions(
+  audioAnswers: Record<string, string>,
+  transcriptions: Record<number, unknown>,
+): number[] {
+  const out: number[] = [];
+  for (const [q, url] of Object.entries(audioAnswers || {})) {
+    if (!url || typeof url !== 'string' || !url.startsWith('http')) continue;
+    const n = parseInt(q);
+    if (isNaN(n) || transcriptions[n]) continue;
+    out.push(n);
+  }
+  return out;
+}
+
 async function transcribeAll(
   supabaseUrl: string, serviceKey: string, audioAnswers: Record<string, string>,
 ): Promise<Record<number, { text: string; wordCount: number; duration?: number }>> {
@@ -242,12 +257,17 @@ export async function processHomeworkAiEvaluations(
         const audioAnswers = (row.audio_answers && typeof row.audio_answers === 'object' ? row.audio_answers : {}) as Record<string, string>;
         const isClosed = isClosedExerciseType(row.exercise_type);
         const transcriptions = isClosed ? {} : await transcribeAll(supabaseUrl, serviceKey, audioAnswers);
+        if (!isClosed) {
+          // A recorded answer without a transcription (transient failure) must be retried by the
+          // claim, not dropped: the row would otherwise finish with that item permanently unevaluated.
+          const missing = missingTranscriptions(audioAnswers, transcriptions);
+          if (missing.length > 0) throw new Error(`Transcription missing for audio answer(s) ${missing.join(', ')}`);
+        }
         const toVerify = isClosed
           ? buildClosedAnswersToVerify(row, exercise, answers)
           : buildOpenAnswersToVerify(row, exercise, answers, audioAnswers, transcriptions, meta.worksheetAudioTranscript);
-        const rateable = isClosed || toVerify.some((a) => validNanoSkills(openExerciseItems(exercise)[a.question_index]).length > 0);
-        if (toVerify.length === 0 || !rateable) {
-          await supabase.rpc('mark_homework_answer_ai_not_evaluable', { p_id: row.id, p_note: toVerify.length === 0 ? 'no evaluable answers' : 'no nano skills' });
+        if (toVerify.length === 0) {
+          await supabase.rpc('mark_homework_answer_ai_not_evaluable', { p_id: row.id, p_note: 'no evaluable answers' });
           result.skipped++;
           continue;
         }

@@ -278,7 +278,13 @@ serve(async (req) => {
     // here, BEFORE the AI step below updates events by answer id, so those
     // updates find them. Idempotent; a failure only warns.
     try {
-      const reconcileEvents = buildReconcileEvents(questions as any[], WELCOME_TEST_EVENT_QUESTIONS);
+      // The event metadata maps question_index onto the 58-question bank only; a
+      // legacy test (another total) would get events with wrong ids and skills.
+      const reconcileTotal = Number((testOwnerRow as any)?.total_questions ?? 0);
+      const reconcileIsLegacy = reconcileTotal > 0 && reconcileTotal !== WELCOME_TEST_QUESTION_IDS.length;
+      const reconcileEvents = reconcileIsLegacy
+        ? []
+        : buildReconcileEvents(questions as any[], WELCOME_TEST_EVENT_QUESTIONS);
       if (reconcileEvents.length > 0) {
         const { error: reconcileError } = await supabase.rpc('reconcile_welcome_test_events', {
           p_test_id: test_id,
@@ -932,16 +938,26 @@ serve(async (req) => {
         finalizeScores();
         const finalPrompt = buildUserPrompt();
         if (modelOk && finalPrompt !== firstPrompt) {
-          const second = await callProfileModel(finalPrompt);
-          modelOk = second.ok;
-          modelProfile = second.out.profile;
+          // A failed second call keeps the valid first summary instead of dropping it.
+          try {
+            const second = await callProfileModel(finalPrompt);
+            if (second.ok && second.out.profile) {
+              modelOk = true;
+              modelProfile = second.out.profile;
+            }
+          } catch (secondErr) {
+            console.warn('[process-welcome-test] second summary call failed, keeping the first', secondErr);
+          }
         }
         if (modelOk && modelProfile) {
           aiSummary = JSON.stringify(modelProfile);
         } else {
           // Gateway down or output that does not match the schema: store no AI text, keep
           // the deterministic summary (flagged as fallback) instead of garbage.
-          aiFallbackSummary = true;
+          // A same-attempt re-run keeps the previously stored summary (already in the
+          // profile row) rather than replacing it with the deterministic text.
+          const keepsPreviousSummary = rerunOfSameAttempt && !!(previousProfile as Record<string, unknown> | null)?.ai_summary;
+          if (!keepsPreviousSummary) aiFallbackSummary = true;
         }
       } catch (aiError) {
         console.error('Error generating AI summary:', aiError);

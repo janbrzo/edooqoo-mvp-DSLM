@@ -8,7 +8,7 @@ import { resolveCaller } from "../_shared/auth.ts";
 import { hasWorksheetStudentAccess, userOwnsWorksheet } from "../_shared/evaluationAccess.ts";
 import { hasValidCronSecret } from "../_shared/cronAuth.ts";
 import { buildOpenAnswerContext, openExerciseContextString, openExerciseItems } from "../_shared/openAnswerContext.ts";
-import { buildOpenItemEvaluations, buildQuestionEvaluations, validNanoSkills } from "./itemBuilder.ts";
+import { buildOpenItemEvaluations, buildQuestionEvaluations } from "./itemBuilder.ts";
 import { processHomeworkAiEvaluations } from "./homeworkEval.ts";
 
 // Supabase Edge runtime hook for work that continues after the response.
@@ -229,21 +229,6 @@ serve(async (req) => {
           ...(questionItems.length > 0 ? { questions: questionItems } : {}),
           title: worksheetExercise?.title || context.title,
         };
-        // Row left as completed ("not evaluable") so neither the claim nor the stale scan offers it again.
-        const markRowNotEvaluable = async (reason: string) => {
-          console.warn(`[process-pending] ${pending.id}: not evaluable (${reason})`);
-          await supabase
-            .from('pending_worksheet_ai_evaluations')
-            .update({ status: 'completed', processed_at: new Date().toISOString(), error_message: 'not evaluable' })
-            .eq('id', pending.id);
-          await markNotEvaluable(supabase, {
-            worksheet_id: pending.worksheet_id,
-            student_email: pending.student_email,
-            exercise_index: pending.exercise_index,
-            exercise_type: pending.exercise_type,
-          });
-        };
-
         console.log(`[process-pending] Written answers: ${Object.keys(answers).length}, Audio answers: ${Object.keys(audioAnswers).length}`);
 
         // Transcribe audio answers
@@ -403,13 +388,6 @@ serve(async (req) => {
           continue;
         }
 
-        // Nothing to rate: no item of this exercise has a nano skill. Skip the model call.
-        if (!isClosedPending && !answersToVerify.some((a: any) => validNanoSkills(questionItems[a.question_index]).length > 0)) {
-          await markRowNotEvaluable('no item with a nano skill');
-          skipped++;
-          continue;
-        }
-
         // Call verify-open-answers
         const verifyResponse = await fetch(`${supabaseUrl}/functions/v1/verify-open-answers`, {
           method: 'POST',
@@ -456,13 +434,6 @@ serve(async (req) => {
           hasAudio: hasAudioFor,
         });
 
-        if (!isClosedPending && itemEvaluations.length === 0) {
-          // No rating can be written: do not store an AI result with an empty array.
-          await markRowNotEvaluable('no nano skills resolved');
-          skipped++;
-          continue;
-        }
-
         const validEvaluations = itemEvaluations.filter((e: any) => e.hasValue && e.mastery >= 0);
         const overallMastery = validEvaluations.length > 0
           ? Math.round(validEvaluations.reduce((sum: number, e: any) => sum + e.mastery, 0) / validEvaluations.length)
@@ -506,7 +477,9 @@ serve(async (req) => {
           if (Object.keys(raisedFields).length === 0) raisedFields = null;
         }
 
-        const updateData: Record<string, unknown> = isClosedPending
+        // An open exercise with no nano skill still gets the model feedback in
+        // ai_evaluation; there is nothing to rate, so item_evaluations and mastery stay.
+        const updateData: Record<string, unknown> = (isClosedPending || itemEvaluations.length === 0)
           ? {
               ai_evaluation: aiEvaluation,
               last_ai_eval_at: answersReadAt,

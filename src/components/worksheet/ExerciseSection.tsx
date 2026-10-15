@@ -403,9 +403,10 @@ const ExerciseSection = forwardRef<HTMLDivElement, ExerciseSectionProps>(({
     setSavedMarkDoneRatings(null);
     if (isMarkedDone && studentIdProp && worksheetIdForStorage) {
       setIsLoadingSavedRatings(true);
+      let ratingsUnavailable = false;
       try {
         const markDoneIdx = originalIndex !== undefined ? originalIndex : index - 1;
-        const { data: savedEvents } = await supabase
+        const { data: savedEvents, error: savedError } = await supabase
           .from('student_events')
           .select('event_payload, created_at')
           .eq('student_id', studentIdProp)
@@ -415,7 +416,9 @@ const ExerciseSection = forwardRef<HTMLDivElement, ExerciseSectionProps>(({
           .order('created_at', { ascending: false })
           .limit(1);
         const saved = (savedEvents?.[0]?.event_payload as any)?.nano_skill_ratings;
-        if (Array.isArray(saved)) {
+        if (savedError || !Array.isArray(saved)) {
+          ratingsUnavailable = true;
+        } else {
           setSavedMarkDoneRatings(
             saved
               .filter((r: any) => r && r.hasValue !== false && typeof r.name === 'string' && typeof r.mastery === 'number')
@@ -424,8 +427,18 @@ const ExerciseSection = forwardRef<HTMLDivElement, ExerciseSectionProps>(({
         }
       } catch (err) {
         devWarn('[Mark done] Could not load saved ratings:', err);
+        ratingsUnavailable = true;
       }
       setIsLoadingSavedRatings(false);
+      if (ratingsUnavailable) {
+        // Opening with AI/key values could overwrite the teacher correction on save.
+        toast({
+          title: "Could not load saved ratings",
+          description: "Please try again in a moment.",
+          variant: "destructive",
+        });
+        return;
+      }
     }
 
     // PROBLEM 4 FIX: Open modal IMMEDIATELY for instant feedback

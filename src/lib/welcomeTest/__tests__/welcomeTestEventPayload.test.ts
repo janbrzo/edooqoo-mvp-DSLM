@@ -151,6 +151,14 @@ describe('reconcile events from stored rows', () => {
     expect((scored.event_payload.nano_skill_ratings as any)[0]).toMatchObject({ mastery: 0, hasValue: true });
   });
 
+  it('skips rows whose stored question_type differs from the bank at that index', () => {
+    const type = WELCOME_TEST_EVENT_QUESTIONS[keyedIdx].question_type;
+    const row = { question_index: keyedIdx, student_answer: 'x', is_correct: true };
+    expect(buildReconcileEvents([{ ...row, question_type: type }], WELCOME_TEST_EVENT_QUESTIONS)).toHaveLength(1);
+    expect(buildReconcileEvents([{ ...row, question_type: `${type}_other` }], WELCOME_TEST_EVENT_QUESTIONS)).toHaveLength(0);
+    expect(buildReconcileEvents([row], WELCOME_TEST_EVENT_QUESTIONS)).toHaveLength(1);
+  });
+
   it('IDK, profiling traits, unanswered and out-of-range rows', () => {
     const idk = buildReconcileEvents([{ question_index: keyedIdx, student_answer: '__IDK__', is_correct: false }], WELCOME_TEST_EVENT_QUESTIONS);
     expect(idk[0].event_payload.is_idk).toBe(true);
