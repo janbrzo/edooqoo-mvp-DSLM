@@ -83,7 +83,7 @@ AS $function$
         WHEN skill_name ~ '^ns\.[ABC][12]\.comprehension' THEN 'reading'
         WHEN skill_name ~ '^ns\.[ABC][12]\.morphology' THEN 'grammar_other'
         WHEN skill_name ~ '^ns\.[ABC][12]\.pronunciation' THEN 'pronunciation'
-        -- v2 (Pillar 1.1): adult professional communication domains (previously 'other')
+        -- v2 (Pillar 1.1): adult professional communication domains (previously other)
         WHEN skill_name ~ '^ns\.[ABC][12]\.(business\.)?telephon' THEN 'telephoning'
         WHEN skill_name ~ '^ns\.[ABC][12]\.(business\.)?negotiat' THEN 'negotiation'
         WHEN skill_name ~ '^ns\.[ABC][12]\.(business\.)?(email|e_mail)' THEN 'email_register'
