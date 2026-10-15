@@ -5,11 +5,11 @@
 -- queued context (answer key, skill names) was client supplied.
 -- insert_homework_submission_notification let anyone with a homework id write
 -- a notification (with a caller-chosen message) to the teacher.
--- The client calls the *_by_share_token variants since 20261015090000; those
+-- The client calls the *_by_share_token variants since 20261015090020; those
 -- are SECURITY DEFINER and keep calling these functions as their owner. The
 -- Edge Functions use the service role.
 --
--- APPLY ORDER: after 20261015090000 and after the client release that calls
+-- APPLY ORDER: after 20261015090020 and after the client release that calls
 -- the token variants has been live for at least a day (an open tab on an older
 -- release still calls the legacy names).
 -- Rollback: GRANT EXECUTE ON FUNCTION <name> TO anon, authenticated.
@@ -20,7 +20,7 @@ DO $revoke$
 BEGIN
   IF to_regprocedure('public.queue_worksheet_ai_evaluation_by_share_token(text, uuid, text, integer, text, jsonb, text, jsonb)') IS NULL
      OR to_regprocedure('public.insert_homework_submission_notification_by_share_token(text, uuid, text)') IS NULL THEN
-    RAISE EXCEPTION 'Apply 20261015090000 before revoking the legacy queue and notification RPCs';
+    RAISE EXCEPTION 'Apply 20261015090020 before revoking the legacy queue and notification RPCs';
   END IF;
 
   REVOKE EXECUTE ON FUNCTION public.queue_worksheet_ai_evaluation(uuid, text, integer, text, jsonb, text, jsonb) FROM PUBLIC, anon, authenticated;

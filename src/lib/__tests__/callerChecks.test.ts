@@ -8,8 +8,10 @@ import { join } from 'node:path';
  * verified separately with has_function_privilege and md5 of the definitions.
  */
 const MIGRATIONS = join(__dirname, '../../../supabase/migrations');
-const hotfix = readFileSync(join(MIGRATIONS, '20261015090000_w0_caller_checks_and_token_wrappers.sql'), 'utf8');
-const revoke = readFileSync(join(MIGRATIONS, '20261015090100_w0_revoke_legacy_queue_and_notification_rpcs.sql'), 'utf8');
+const hotfix = ['20261015090000_w0_a_consume_token_live_answers_soft_delete', '20261015090010_w0_b_mark_homework_completed', '20261015090015_w0_b_teacher_comments', '20261015090020_w0_c_share_token_queue_and_notification']
+  .map((f) => readFileSync(join(MIGRATIONS, `${f}.sql`), 'utf8'))
+  .join('\n');
+const revoke = readFileSync(join(MIGRATIONS, '20261016090100_w0_revoke_legacy_queue_and_notification_rpcs.sql'), 'utf8');
 
 const definition = (sql: string, fn: string): string => {
   const start = sql.search(new RegExp(`CREATE OR REPLACE FUNCTION public\\.${fn}\\(`, 'i'));
@@ -80,5 +82,21 @@ describe('Edge Functions authenticate their callers', () => {
     expect(src).toMatch(/APP_BASE_URL/);
     expect(src).not.toMatch(/headers\.get\("origin"\)/);
     expect(src).not.toMatch(/your-domain\.com/);
+  });
+});
+
+describe('W0 migrations stay applicable from the SQL Editor', () => {
+  it.each([
+    '20261015090000_w0_a_consume_token_live_answers_soft_delete',
+    '20261015090010_w0_b_mark_homework_completed', '20261015090015_w0_b_teacher_comments',
+    '20261015090020_w0_c_share_token_queue_and_notification',
+  ])('%s fits one paste and has no SELECT ... INTO', (f) => {
+    const sql = readFileSync(join(MIGRATIONS, `${f}.sql`), 'utf8');
+    expect(Buffer.byteLength(sql)).toBeLessThan(8000);
+    expect(sql).not.toMatch(/SELECT[^;]*\bINTO\b/i);
+  });
+
+  it('the revoke sorts after the day-later release gate, not next to the hotfix', () => {
+    expect(revoke.length).toBeGreaterThan(0);
   });
 });
