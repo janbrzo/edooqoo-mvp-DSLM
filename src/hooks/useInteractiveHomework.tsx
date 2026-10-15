@@ -22,7 +22,7 @@ import { devLog, devWarn } from '@/utils/logger';
 import { transcribeAllAudio, buildAnswersToVerify } from '@/utils/audioEvalUtils';
 import { createPendingSaves } from '@/lib/answers/pendingSaves';
 import { resolveEnglishLevel } from '../../supabase/functions/_shared/englishLevel';
-import { callStudentAnswerRpc, submitHomeworkAnswers } from '@/lib/answers/studentAnswerRpc';
+import { callStudentAnswerRpc, callTokenOrLegacyRpc, submitHomeworkAnswers } from '@/lib/answers/studentAnswerRpc';
 import { invokeWithRetry } from '@/lib/answers/invokeWithRetry';
 
 
@@ -559,9 +559,12 @@ export const useInteractiveHomework = ({
       }
 
       try {
-        const { error: notifError } = await supabase.rpc('insert_homework_submission_notification', {
-          p_homework_id: homeworkId
-        });
+        const { error: notifError } = await callTokenOrLegacyRpc(
+          'insert_homework_submission_notification_by_share_token',
+          { p_share_token: shareToken ?? '', p_homework_id: homeworkId, p_student_email: studentEmail },
+          'insert_homework_submission_notification',
+          { p_homework_id: homeworkId },
+        );
         
         if (notifError) {
           console.error('[submitHomework] RPC notification error:', notifError);

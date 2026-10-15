@@ -62,3 +62,34 @@ describe('callStudentAnswerRpc', () => {
     expect(rpc).toHaveBeenCalledWith('save_homework_answer', { a: 1 });
   });
 });
+
+describe('callTokenOrLegacyRpc', () => {
+  beforeEach(() => rpc.mockReset());
+
+  it('uses the token variant and returns its answer', async () => {
+    const { callTokenOrLegacyRpc } = await load();
+    rpc.mockResolvedValueOnce({ data: true, error: null });
+    const res = await callTokenOrLegacyRpc('x_by_share_token', { p_share_token: 't' }, 'x', {});
+    expect(rpc).toHaveBeenCalledTimes(1);
+    expect(rpc).toHaveBeenCalledWith('x_by_share_token', { p_share_token: 't' });
+    expect(res.data).toBe(true);
+  });
+
+  it('falls back to the legacy name only when the token variant does not exist', async () => {
+    const { callTokenOrLegacyRpc } = await load();
+    rpc
+      .mockResolvedValueOnce({ data: null, error: { code: 'PGRST202', message: 'Could not find the function' } })
+      .mockResolvedValueOnce({ data: 'ok', error: null });
+    const res = await callTokenOrLegacyRpc('x_by_share_token', { p_share_token: 't' }, 'x', { a: 1 });
+    expect(rpc).toHaveBeenNthCalledWith(2, 'x', { a: 1 });
+    expect(res.data).toBe('ok');
+  });
+
+  it('never falls back when the server rejects the token', async () => {
+    const { callTokenOrLegacyRpc } = await load();
+    rpc.mockResolvedValueOnce({ data: null, error: { code: '42501', message: 'Invalid share token' } });
+    const res = await callTokenOrLegacyRpc('x_by_share_token', {}, 'x', {});
+    expect(rpc).toHaveBeenCalledTimes(1);
+    expect(res.error?.code).toBe('42501');
+  });
+});

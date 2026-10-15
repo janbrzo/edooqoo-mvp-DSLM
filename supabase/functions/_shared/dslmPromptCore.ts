@@ -179,11 +179,13 @@ export function buildWeakAreasBlock(metrics: any[], limit = 10): string {
   if (weak.length === 0) return 'no weak areas under 60% mastery';
 
   return weak.map((m: any) => {
-    const w = recencyWeight(m.updated_at);
+    // last_event_at is when the evidence happened; updated_at is reset by recomputes and backfills.
+    const seenAt = m.last_event_at || m.updated_at;
+    const w = recencyWeight(seenAt);
     const tag = w === 'AUTHORITATIVE' ? '⚡ AUTHORITATIVE' : w === 'STALE' ? '(STALE: re-test)' : '';
     const trend = m.trend === 'declining' ? ', declining' : m.trend === 'improving' ? ', improving' : '';
     const cat = `${m.skill_category || 'general'}/${m.micro_skill || m.skill_name || 'general'}`;
-    return `- ${cat}: ${m.current_mastery || 0}% [${daysAgoLabel(m.updated_at)}${trend}] ${tag}`.trim();
+    return `- ${cat}: ${m.current_mastery || 0}% [${daysAgoLabel(seenAt)}${trend}] ${tag}`.trim();
   }).join('\n  ');
 }
 

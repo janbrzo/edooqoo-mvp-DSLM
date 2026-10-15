@@ -21,7 +21,7 @@ import { createPendingSaves } from '@/lib/answers/pendingSaves';
 import { parseAiEvaluation, mapItemEvaluationsToAiEvaluations } from '@/utils/aiEvaluationMapper';
 import type { AiEvaluation } from '@/components/homework/AiEvaluationBadge';
 import { devLog, devWarn } from '@/utils/logger';
-import { callStudentAnswerRpc, studentAnswerRpcName } from '@/lib/answers/studentAnswerRpc';
+import { callStudentAnswerRpc, callTokenOrLegacyRpc, studentAnswerRpcName } from '@/lib/answers/studentAnswerRpc';
 
 // Same project values the generated client uses; read from env instead of hardcoding them.
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
@@ -464,11 +464,13 @@ export const useInteractiveSharedWorksheet = ({
           
           // Check if AI eval is actually needed using RPC
           try {
-            const { data: needsEval } = await supabase.rpc('needs_ai_evaluation', {
-              p_worksheet_id: worksheetId,
-              p_student_email: studentEmail.trim().toLowerCase(),
-              p_exercise_index: exerciseIndex
-            });
+            const normalizedEmail = studentEmail.trim().toLowerCase();
+            const { data: needsEval } = await callTokenOrLegacyRpc<boolean>(
+              'needs_ai_evaluation_by_share_token',
+              { p_share_token: shareToken ?? '', p_worksheet_id: worksheetId, p_student_email: normalizedEmail, p_exercise_index: exerciseIndex },
+              'needs_ai_evaluation',
+              { p_worksheet_id: worksheetId, p_student_email: normalizedEmail, p_exercise_index: exerciseIndex },
+            );
             
             if (needsEval) {
               const exercise = exercises[exerciseIndex];
@@ -485,9 +487,9 @@ export const useInteractiveSharedWorksheet = ({
                     .filter(Boolean)
                 : undefined;
               if (isClosed && (!closedItems || closedItems.length === 0)) continue;
-              await supabase.rpc('queue_worksheet_ai_evaluation', {
+              const queueArgs = {
                 p_worksheet_id: worksheetId,
-                p_student_email: studentEmail.trim().toLowerCase(),
+                p_student_email: normalizedEmail,
                 p_exercise_index: exerciseIndex,
                 p_exercise_type: exerciseType,
                 p_answers: exerciseAnswers as any, // Cast to any for JSON compatibility
@@ -499,7 +501,13 @@ export const useInteractiveSharedWorksheet = ({
                   questions: exercise?.questions || exercise?.prompts || exercise?.sentences || exercise?.expressions || exercise?.items || [],
                   ...(closedItems ? { closed_items: closedItems } : {}),
                 } as any
-              });
+              };
+              await callTokenOrLegacyRpc(
+                'queue_worksheet_ai_evaluation_by_share_token',
+                { p_share_token: shareToken ?? '', ...queueArgs },
+                'queue_worksheet_ai_evaluation',
+                queueArgs,
+              );
               devLog(`[useInteractiveSharedWorksheet] Queued AI eval for exercise ${exerciseIndex}`);
             }
           } catch (err) {

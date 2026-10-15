@@ -13,6 +13,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 import { authorizedTeacherId, jsonResponse, resolveCaller } from "../_shared/auth.ts";
 import { chatCompletion } from "../_shared/aiChat.ts";
 import { NO_EM_DASH_RULE } from "../_shared/writingStyle.ts";
+import { WORKSHEET_HISTORY_COLUMNS, toWorksheetHistoryRows } from "../_shared/worksheetHistory.ts";
 import { resolvePromptPacing, computeIntensity, intensityPromptLines, loadLearningProfileForPacing } from "../_shared/pacing.ts";
 
 // v6.9.13: helpers inlined (previously imported from ../_shared/dslmPromptCore.ts).
@@ -299,7 +300,7 @@ serve(async (req) => {
         .single(),
       supabase
         .from('student_skill_metrics')
-        .select('skill_name, skill_category, micro_skill, current_mastery, trend, updated_at')
+        .select('skill_name, skill_category, micro_skill, current_mastery, trend, updated_at, last_event_at')
         .eq('student_id', studentId)
         .eq('teacher_id', teacherId)
         .order('current_mastery', { ascending: true })
@@ -322,9 +323,10 @@ serve(async (req) => {
         .eq('is_achieved', false),
       supabase
         .from('worksheets')
-        .select('topic, created_at')
+        .select(WORKSHEET_HISTORY_COLUMNS)
         .eq('student_id', studentId)
         .eq('teacher_id', teacherId)
+        .is('deleted_at', null)
         .order('created_at', { ascending: false })
         .limit(20),
       supabase
@@ -349,7 +351,7 @@ serve(async (req) => {
     const metrics = metricsRes.data || [];
     const knowledge = knowledgeRes.data || [];
     const goals = goalsRes.data || [];
-    const worksheets = worksheetsRes.data || [];
+    const worksheets = toWorksheetHistoryRows(worksheetsRes.data);
     const existingPhases = existingPhasesRes.data || [];
 
     // v6.9.46: hard preservation invariant: done AND in_progress phases are

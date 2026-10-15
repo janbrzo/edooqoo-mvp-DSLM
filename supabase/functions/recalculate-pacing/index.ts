@@ -62,7 +62,8 @@ serve(async (req) => {
       .from('student_skill_metrics' as any)
       .select('*')
       .eq('student_id', studentId)
-      .gte('updated_at', new Date(Date.now() - 30 * 86400000).toISOString())
+      .gte('last_event_at', new Date(Date.now() - 30 * 86400000).toISOString())
+      .order('last_event_at', { ascending: false })
       .limit(200);
 
     // v6.3 Deadline-First Override scans ALL active goals (main + supporting +
