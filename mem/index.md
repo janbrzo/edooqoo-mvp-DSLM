@@ -52,6 +52,7 @@
 - [Quick Student Access](mem://features/dashboard/quick-student-access) — v6.9.110 four paths to any student (jump search, recent pills, inline list, nav switcher), all via quickAccess.ts, no new queries
 - [Student Workspace 4 Tabs](mem://features/student-page/workspace-4-tabs) — v6.9.111 final Prep/Timeline/Library/Learning model; legacy ?tab= aliases permanent; never restore Overview/Worksheets/Skills
 - [DSLM Evaluation Pipeline](mem://features/dslm/evaluation-pipeline) — 2026-10 audit of AI evaluation + DSLM data flow, owner decisions D1-D7, iteration plan; v6.9.115 iteration 1 (SQL baseline, evaluation access, token RPCs, scoreToMastery)
+- [Worksheet + DSLM Audit 2026-10](mem://features/worksheet/audit-2026-10) — 14-agent audit of worksheets standalone and in DSLM, Welcome Test profile and signal validity; plan W0-W9 and owner decisions O1-O10 awaiting approval
 - [Learning Plan Tab](mem://features/dslm/learning-plan) — stage-driven Plan / Insights tab (setup checklist, Needs your OK, Up next, Roadmap, Goals); Prep and Plan share orderUpNext
 - [Quick Add Note](mem://features/student-page/quick-add-note-from-overview) — Add Note opens inline modal in Prep tab QuickNoteBox; never route through tabs
 - [User-flow audit 2026-10](mem://features/dashboard/audit-2026-10-user-flow) — demo student page fix + demoFetchGuard, wrap-safe worksheet toolbars, Prep-first CTAs, useTeacherAuthRedirect, homework error card, vitest in CI; 10-05 follow-up: calendar/MCP/worksheet login return paths, untrimmed Prep topic, no duplicate suggestion tiles
