@@ -1775,11 +1775,26 @@ const knowledgeGraph = {
       '@id': `${BASE_URL}/#organization`,
       name: 'Edooqoo',
       url: `${BASE_URL}/`,
+      founder: { '@id': `${BASE_URL}/authors/jan-brzostowski#person` },
+      knowsAbout: [
+        'Adult ESL one-to-one tutoring',
+        '1-Minute Prep lesson preparation',
+        'CEFR level diagnostics',
+        'Spaced repetition flashcards',
+      ],
       sameAs: [
         BASE_URL,
         'https://www.linkedin.com/company/edooqoo',
         'https://twitter.com/edooqoo',
       ],
+    },
+    {
+      '@type': 'Person',
+      '@id': `${BASE_URL}/authors/jan-brzostowski#person`,
+      name: 'Jan Brzostowski',
+      url: `${BASE_URL}/authors/jan-brzostowski`,
+      jobTitle: 'Founder of Edooqoo',
+      worksFor: { '@id': `${BASE_URL}/#organization` },
     },
     {
       '@type': 'WebSite',
