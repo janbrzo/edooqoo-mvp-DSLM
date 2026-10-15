@@ -3785,6 +3785,20 @@ export type Database = {
         }
         Returns: string
       }
+      add_student_event_internal: {
+        Args: {
+          p_element_type?: string
+          p_event_payload?: Json
+          p_event_source: string
+          p_event_type: string
+          p_session_id?: string
+          p_skill_ids?: string[]
+          p_source_id?: string
+          p_student_id: string
+          p_teacher_id: string
+        }
+        Returns: string
+      }
       add_tokens: {
         Args: {
           p_amount: number
@@ -4788,6 +4802,14 @@ export type Database = {
       }
       submit_homework_answers: {
         Args: { p_homework_id: string; p_student_email: string }
+        Returns: boolean
+      }
+      submit_homework_answers_by_share_token: {
+        Args: {
+          p_homework_id: string
+          p_share_token: string
+          p_student_email: string
+        }
         Returns: boolean
       }
       track_user_event: {
