@@ -308,12 +308,15 @@ export const calculateItemMastery = (
         // Multi-blank: check composite keys like "0_0", "0_1"
         const rawAnswer = sentence.answer || sentence.correct || '';
         const correctParts = rawAnswer.includes(' / ') ? rawAnswer.split(/\s*\/\s*/) : [rawAnswer];
+        const blankAnswers: unknown[] = [];
+        for (let b = 0; b < blanksCount; b++) blankAnswers.push(allAnswers[`${itemIndex}_${b}`]);
+        const hasEmptyBlank = blankAnswers.some((a) => a === undefined || a === null || String(a).trim() === '');
+        // A partial fill or a key that cannot be split into one part per blank cannot be
+        // judged: the item stays unevaluated instead of scoring 0.
+        if (hasEmptyBlank || correctParts.length < blanksCount) return null;
         let allCorrectFlag = true;
         for (let b = 0; b < blanksCount; b++) {
-          const blankKey = `${itemIndex}_${b}`;
-          const blankAnswer = allAnswers[blankKey];
-          const expected = correctParts[b] || correctParts[0] || '';
-          if (!blankAnswer || textVerdict(blankAnswer, expected, 'word') !== true) {
+          if (textVerdict(blankAnswers[b], correctParts[b], 'word') !== true) {
             allCorrectFlag = false;
             break;
           }

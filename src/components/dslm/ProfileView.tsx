@@ -130,6 +130,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
               <TraitBadge label="Ambiguity" value={profile.ambiguity_tolerance} />
               <TraitBadge label="Feedback" value={profile.feedback_preference} />
               <TraitBadge label="Input" value={profile.preferred_input_channel} />
+              <TraitBadge label="Level" value={profile.estimated_level ?? 'not enough data'} />
               <TraitBadge label="Confidence" value={profile.level_confidence} />
               <TraitBadge label="Study Time" value={profile.weekly_study_time} />
             </div>

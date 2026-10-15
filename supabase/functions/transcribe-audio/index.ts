@@ -117,6 +117,7 @@ serve(async (req) => {
     formData.append('file', audioBlob, `recording.${ext}`);
     formData.append('model', 'whisper-1');
     formData.append('language', 'en');
+    formData.append('response_format', 'verbose_json');
 
     console.log('[transcribe-audio] Sending to Whisper API, size:', audioBlob.size);
     const whisperResponse = await fetch('https://api.openai.com/v1/audio/transcriptions', {
@@ -140,7 +141,11 @@ serve(async (req) => {
 
     console.log('[transcribe-audio] Transcription successful, length:', transcription.length);
 
-    return new Response(JSON.stringify({ success: true, transcription }), {
+    // verbose_json carries the audio length in seconds (null when absent).
+    const durationNum = Number(whisperData.duration);
+    const duration = Number.isFinite(durationNum) && durationNum >= 0 ? Math.round(durationNum * 100) / 100 : null;
+
+    return new Response(JSON.stringify({ success: true, transcription, duration }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     });
   } catch (error) {

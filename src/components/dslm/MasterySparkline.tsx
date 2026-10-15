@@ -3,7 +3,7 @@ import { ResponsiveContainer, LineChart, Line } from 'recharts';
 
 interface MasterySparklineProps {
   history: Array<{ mastery: number; date: string }>;
-  trend: 'improving' | 'declining' | 'stable';
+  trend: 'improving' | 'declining' | 'stable' | 'insufficient_data';
 }
 
 export function MasterySparkline({ history, trend }: MasterySparklineProps) {

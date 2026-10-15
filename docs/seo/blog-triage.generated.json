@@ -3,9 +3,9 @@
   "totalArticles": 343,
   "counts": {
     "promote-rewrite-now": 6,
-    "promote-or-refresh": 238,
+    "promote-or-refresh": 237,
     "merge-redirect-or-noindex": 82,
-    "noindex-keep-accessible": 17
+    "noindex-keep-accessible": 18
   },
   "priorityRewriteSlugs": [
     "ai-lesson-planning-strategies.html",
@@ -3393,29 +3393,6 @@
       "rewriteStage": "stage-4-refresh-candidate",
       "canonicalDecision": "keep self-canonical and strengthen internal links",
       "marthaTestScore": 88,
-      "ragKeywords": [
-        "1:1 English lesson prep",
-        "EFL tutor workflow",
-        "adult ESL tutor",
-        "private English tutor"
-      ]
-    },
-    {
-      "route": "/blog/parent-teacher-conferences-esl.html",
-      "slug": "parent-teacher-conferences-esl.html",
-      "title": "Parent-Teacher Conferences for ESL: Preparation Guide",
-      "description": "Conference structure, visual aids, and navigating language barriers during parent-teacher meetings for ESL programs.",
-      "cluster": "Tutor Business and Tools",
-      "state": "hold",
-      "indexable": true,
-      "words": 236,
-      "action": "promote-or-refresh",
-      "priority": 2,
-      "reason": "Matches Edooqoo strategic audience or product workflow without strong school-like drift.",
-      "strategicCluster": "LLM vs tutor workflow",
-      "rewriteStage": "stage-4-refresh-candidate",
-      "canonicalDecision": "keep self-canonical and strengthen internal links",
-      "marthaTestScore": 64,
       "ragKeywords": [
         "1:1 English lesson prep",
         "EFL tutor workflow",
@@ -6948,6 +6925,29 @@
       "rewriteStage": "stage-3-merge-redirect-or-noindex",
       "canonicalDecision": "merge, redirect, or noindex unless rewritten for adult 1:1 tutoring",
       "marthaTestScore": 70,
+      "ragKeywords": [
+        "1:1 English lesson prep",
+        "EFL tutor workflow",
+        "adult ESL tutor",
+        "private English tutor"
+      ]
+    },
+    {
+      "route": "/blog/parent-teacher-conferences-esl.html",
+      "slug": "parent-teacher-conferences-esl.html",
+      "title": "Parent-Teacher Conferences for ESL: Preparation Guide",
+      "description": "Conference structure, visual aids, and navigating language barriers during parent-teacher meetings for ESL programs.",
+      "cluster": "Adult and Business English",
+      "state": "noindex",
+      "indexable": false,
+      "words": 236,
+      "action": "noindex-keep-accessible",
+      "priority": 4,
+      "reason": "Legacy school-like page kept accessible but excluded from indexing by x1000 editorial policy.",
+      "strategicCluster": "LLM vs tutor workflow",
+      "rewriteStage": "stage-3-noindex-legacy",
+      "canonicalDecision": "keep accessible with noindex,follow and exclude from sitemap",
+      "marthaTestScore": 58,
       "ragKeywords": [
         "1:1 English lesson prep",
         "EFL tutor workflow",

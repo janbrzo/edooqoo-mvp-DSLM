@@ -248,6 +248,16 @@ export function reconstructTraits(
   const traits: Record<string, string> = {};
   for (const [traitName, config] of Object.entries(TRAIT_QUESTIONS)) {
     const answerVal = answers?.[config.questionId];
+    if (traitName === 'usage_context' && Array.isArray(answerVal)) {
+      // Multi-select (wt_q3b): every selected option that resolves, joined with ', '.
+      const mapped = answerVal
+        .map((a) => matchOptionIndex(config.questionId, config.options, String(a)))
+        .filter((i) => i >= 0)
+        .map((i) => config.mapping[String(i)])
+        .filter(Boolean);
+      if (mapped.length > 0) traits[traitName] = mapped.join(', ');
+      continue;
+    }
     if (answerVal && typeof answerVal === 'string') {
       const optIdx = matchOptionIndex(config.questionId, config.options, answerVal);
       if (optIdx >= 0) {
