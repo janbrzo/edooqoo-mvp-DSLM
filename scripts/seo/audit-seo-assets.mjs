@@ -682,10 +682,12 @@ function auditCanonicalAliases() {
       pass(`public${alias} points to ${canonicalRoute}`);
     }
 
-    if (!/<meta[^>]+name=["']robots["'][^>]+content=["']noindex,follow["']/i.test(html)) {
-      fail(`public${alias} must use noindex,follow`);
+    // The static file is also what hosting serves for the clean sitemap route, so it must be
+    // indexable; the canonical (checked above) consolidates the .html alias into the clean URL.
+    if (!/<meta[^>]+name=["']robots["'][^>]+content=["']index,follow["']/i.test(html)) {
+      fail(`public${alias} must use index,follow (it backs the clean sitemap route ${canonicalRoute})`);
     } else {
-      pass(`public${alias} uses noindex,follow`);
+      pass(`public${alias} uses index,follow and canonicalizes to ${canonicalRoute}`);
     }
   }
 }

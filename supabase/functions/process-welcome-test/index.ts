@@ -3,8 +3,19 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { chatCompletion } from "../_shared/aiChat.ts";
 import { NO_EM_DASH_RULE } from "../_shared/writingStyle.ts";
 import { resolveCaller, authorizedTeacherId } from "../_shared/auth.ts";
-import { answersFromQuestionRows, reconstructTraits } from "../_shared/welcomeTestTraits.ts";
+import { WELCOME_TEST_QUESTION_IDS, answersFromQuestionRows, reconstructTraits } from "../_shared/welcomeTestTraits.ts";
 import { computeLearningPathScore } from "../_shared/learningPathScore.ts";
+import { STUDENT_TEXT_RULE, wrapStudentText } from "../_shared/promptSafety.ts";
+import { acceptAiScores } from "../_shared/welcomeTestScoring.ts";
+import {
+  LEVEL_VERSION_KEY,
+  decideLevel,
+  estimateLevel,
+  parseProfileModelOutput,
+  type ProfileModelOutput,
+} from "../_shared/welcomeTestLevel.ts";
+import { buildReconcileEvents } from "../_shared/welcomeTestEventPayload.ts";
+import { WELCOME_TEST_EVENT_QUESTIONS } from "../_shared/welcomeTestQuestionMeta.ts";
 import {
   answerBehaviour,
   computeDivergences,
@@ -19,6 +30,50 @@ const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
+
+/** System prompt of the single profile + open-answer scoring call. */
+const PROFILE_SYSTEM_PROMPT = `You are an expert ESL teacher analyzing a student's Welcome Test answers. Based on their open-ended responses, provide:
+1. A concise 3-4 sentence profile summary covering their English level, strengths, weaknesses, and personality as a learner. For speaking answers, analyze the transcription critically - comment on fluency, word count relative to recording time, relevance to the prompt, and grammatical accuracy. Do NOT be generous with praise for minimal effort.
+2. 2-3 specific teaching recommendations.
+3. For EACH open/speaking answer, rate the quality on a 0-100 scale using these STRICT criteria:
+
+OUTPUT RULES (HARD CONSTRAINTS):
+- NEVER reference question IDs (e.g. wt_q3, q3c, q5c, q13c, q45, q16s) anywhere in "summary", "recommendations", or "key_observations".
+- Refer to questions by TOPIC only: "the latent-goal scenario", "the homework-commitment scenario", "the plateau-response scenario", "the correction-preference question", "the optional external-resources reflection", "the speaking task about X".
+- IDs are allowed ONLY as keys inside the "per_question_scores" object.
+- Teachers read these texts and they only know sequential numbers (1..N), never internal IDs.
+- EVIDENCE ONLY: state only what the answers and the computed signals in the user message support. If the evidence for a claim is missing or too thin, write "not enough evidence" for it instead of guessing. Never quote a score, percentage or level that is not listed in the user message.
+
+INDIRECT/SCENARIO ANSWER WEIGHTING (CRITICAL):
+You also have access to indirect, scenario-based answers; the latent-goal scenario ("wake up 2 years from now"), the homework-commitment scenario (under low motivation), the plateau-response scenario (after 6 months stagnation), and the correction-preference question (during speaking).
+These four items reveal LATENT goals and behaviors and bypass social-desirability bias far better than direct self-reports (q3, q5, q13).
+When direct answers conflict with indirect ones, weight the indirect/scenario responses HIGHER. Synthesize the most probable TRUE profile, not the self-presented one.
+The user message lists the "Declared vs measured" pairs already detected in code. Mention the notable and strong ones in the summary or key_observations in plain words a teacher can act on; never contradict them and never add pairs of your own.
+Example: if the direct motivation answer says "travel" but the latent-goal scenario picks the "leading international meetings" / "promotion" option, treat the true motivation as career_critical and note the discrepancy in the summary WITHOUT mentioning any question ID.
+
+SPEAKING answers (IDs ending with "s"):
+- Evaluate: fluency (count words in transcription vs available recording time - e.g. 10 words in 30 seconds = very low fluency), grammatical correctness, vocabulary range, and RELEVANCE to the prompt.
+- A single greeting sentence like "Hello, my name is X, how are you?" for a 30-second prompt = max 20-30 points.
+- Off-topic, minimal, or generic responses = 0-15 points.
+- Only responses with sustained, relevant speech (at least 3-4 complete sentences addressing the prompt) can score above 50.
+
+WRITING answers (open_ended/open_reflection):
+- Evaluate: grammar accuracy, vocabulary range, coherence, and RELEVANCE to the prompt.
+- A 2-5 word answer to a question expecting a paragraph = max 15-25 points.
+- Only responses with complete, relevant sentences can score above 50.
+
+SCORING SCALE:
+- 0: No answer, gibberish, or completely off-topic
+- 1-15: Minimal attempt (1 short sentence, mostly off-topic)
+- 16-30: Very basic attempt (1-2 short sentences, partially relevant, major errors)
+- 31-50: Basic attempt (a few sentences, partially relevant, notable errors)
+- 51-70: Good attempt (mostly relevant, some errors, reasonable length)
+- 71-85: Strong response (fully relevant, few errors, good length)
+- 86-100: Excellent (near-native quality, fully addresses the prompt)
+
+BE STRICT. Do NOT inflate scores. Most brief or off-topic answers should score below 30.
+
+Format as JSON: {"summary": "...", "recommendations": ["...", "..."], "writing_quality": "basic|intermediate|advanced", "key_observations": ["...", "..."], "per_question_scores": {"<question_id>": <score 0-100>, ...}}` + NO_EM_DASH_RULE + STUDENT_TEXT_RULE;
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -100,7 +155,7 @@ serve(async (req) => {
     );
     const { data: testOwnerRow } = await supabaseAdmin
       .from('student_tests')
-      .select('student_id, teacher_id, share_token, attempt_number')
+      .select('student_id, teacher_id, share_token, attempt_number, total_questions')
       .eq('id', test_id)
       .maybeSingle();
     if (!testOwnerRow) {
@@ -131,7 +186,7 @@ serve(async (req) => {
     // Which attempt the stored profile currently describes.
     const { data: profileOwnerRow } = await supabaseAdmin
       .from('student_learning_profiles')
-      .select('welcome_test_id')
+      .select('welcome_test_id, raw_answers')
       .eq('student_id', student_id)
       .eq('teacher_id', teacher_id)
       .maybeSingle();
@@ -177,8 +232,23 @@ serve(async (req) => {
         .from('student_test_questions')
         .select('student_answer, question_index')
         .eq('test_id', test_id);
-      const map = answersFromQuestionRows((persistedQs || []) as any[]);
-      if (Object.keys(map).length > 0) answers = map;
+      // The positional id map exists only for the 58-question test. A legacy test
+      // (another total) has no such map: its answers are the stored raw_answers of
+      // the profile that describes this test.
+      const totalQuestions = Number((testOwnerRow as any).total_questions ?? 0);
+      const isLegacyTest = totalQuestions > 0 && totalQuestions !== WELCOME_TEST_QUESTION_IDS.length;
+      const storedRaw = profileTestId === test_id ? (profileOwnerRow as any)?.raw_answers : null;
+      if (isLegacyTest && storedRaw && typeof storedRaw === 'object' && !Array.isArray(storedRaw)) {
+        const fromRaw: Record<string, unknown> = {};
+        for (const [k, v] of Object.entries(storedRaw as Record<string, unknown>)) {
+          if (k.startsWith('wt_') && v !== null && v !== undefined) fromRaw[k] = v;
+        }
+        if (Object.keys(fromRaw).length > 0) answers = fromRaw;
+      }
+      if (!answers || Object.keys(answers).length === 0) {
+        const map = answersFromQuestionRows((persistedQs || []) as any[]);
+        if (Object.keys(map).length > 0) answers = map;
+      }
     }
 
     if (!test_id || !student_id || !teacher_id) {
@@ -204,36 +274,60 @@ serve(async (req) => {
       });
     }
 
-    // Calculate scores by element_type
-    const scoresByType: Record<string, { correct: number; total: number }> = {};
-    for (const q of questions) {
-      if (q.element_type && q.is_correct !== null) {
-        if (!scoresByType[q.element_type]) scoresByType[q.element_type] = { correct: 0, total: 0 };
-        scoresByType[q.element_type].total++;
-        if (q.is_correct) scoresByType[q.element_type].correct++;
+    // Events of answered questions that lost theirs (fast sessions) are rebuilt
+    // here, BEFORE the AI step below updates events by answer id, so those
+    // updates find them. Idempotent; a failure only warns.
+    try {
+      // The event metadata maps question_index onto the 58-question bank only; a
+      // legacy test (another total) would get events with wrong ids and skills.
+      const reconcileTotal = Number((testOwnerRow as any)?.total_questions ?? 0);
+      const reconcileIsLegacy = reconcileTotal > 0 && reconcileTotal !== WELCOME_TEST_QUESTION_IDS.length;
+      const reconcileEvents = reconcileIsLegacy
+        ? []
+        : buildReconcileEvents(questions as any[], WELCOME_TEST_EVENT_QUESTIONS);
+      if (reconcileEvents.length > 0) {
+        const { error: reconcileError } = await supabase.rpc('reconcile_welcome_test_events', {
+          p_test_id: test_id,
+          p_events: reconcileEvents,
+        });
+        if (reconcileError) console.warn('[process-welcome-test] event reconciliation failed:', reconcileError.message);
       }
+    } catch (reconcileErr) {
+      console.warn('[process-welcome-test] event reconciliation failed', reconcileErr);
     }
 
-    const calcPercent = (type: string) => {
-      const s = scoresByType[type];
-      return s ? Math.round((s.correct / s.total) * 100) : null;
+    // Percent per skill from the scored items (is_correct null = not scored).
+    const percentByType = (type: string): number | null => {
+      let correct = 0;
+      let total = 0;
+      for (const q of questions as any[]) {
+        if (q.element_type === type && q.is_correct !== null && q.is_correct !== undefined) {
+          total++;
+          if (q.is_correct) correct++;
+        }
+      }
+      return total > 0 ? Math.round((correct / total) * 100) : null;
+    };
+    const skillExtremes = (list: Array<{ skill: string; score: number | null }>) => {
+      const scored = list.filter(s => s.score !== null);
+      return {
+        strongest: scored.length > 0 ? scored.reduce((a, b) => (a.score! > b.score! ? a : b)).skill : null,
+        weakest: scored.length > 0 ? scored.reduce((a, b) => (a.score! < b.score! ? a : b)).skill : null,
+      };
     };
 
-    const grammarScore = calcPercent('grammar');
-    const vocabularyScore = calcPercent('vocabulary');
-    const readingScore = calcPercent('reading');
-    const writingScore = calcPercent('writing');
+    let grammarScore = percentByType('grammar');
+    let vocabularyScore = percentByType('vocabulary');
+    let readingScore = percentByType('reading');
+    let writingScore = percentByType('writing');
 
     // Determine strongest/weakest
-    const scores = [
+    let { strongest, weakest } = skillExtremes([
       { skill: 'grammar', score: grammarScore },
       { skill: 'vocabulary', score: vocabularyScore },
       { skill: 'reading', score: readingScore },
       { skill: 'writing', score: writingScore },
-    ].filter(s => s.score !== null);
-
-    const strongest = scores.length > 0 ? scores.reduce((a, b) => (a.score! > b.score! ? a : b)).skill : null;
-    const weakest = scores.length > 0 ? scores.reduce((a, b) => (a.score! < b.score! ? a : b)).skill : null;
+    ]);
 
     // v6.9.56: IDK signal aggregation. Promoted from "ignored sentinel" to
     // a pedagogical metacognition metric. We measure on skill questions
@@ -261,33 +355,9 @@ serve(async (req) => {
       ? Math.round((idkCountSkill / skillWrongOrIdk) * 100)
       : null;
 
-    // Estimate level from grammar + vocabulary scores
-    const avgScore = scores.length > 0 ? scores.reduce((sum, s) => sum + s.score!, 0) / scores.length : 0;
-    let estimatedLevel = 'A2';
-    if (avgScore >= 90) estimatedLevel = 'C1';
-    else if (avgScore >= 75) estimatedLevel = 'B2';
-    else if (avgScore >= 55) estimatedLevel = 'B1';
-    else if (avgScore >= 35) estimatedLevel = 'A2';
-    else estimatedLevel = 'A1';
-
     // Traits from the answers (option string -> value), then the client's
     // detected_traits for anything the answers do not resolve.
     const traits: Record<string, string> = reconstructTraits(answers, detected_traits);
-
-    const selfAssessedLevel = traits.self_assessed_level || null;
-
-    // Level confidence
-    const levelMap: Record<string, number> = { 'A1': 1, 'A1-A2': 1.5, 'A2': 2, 'A2-B1': 2.5, 'B1': 3, 'B1-B2': 3.5, 'B2': 4, 'B2-C1': 4.5, 'C1': 5, 'C1-C2': 5.5 };
-    const estNum = levelMap[estimatedLevel] || 3;
-    const selfNum = (selfAssessedLevel ? levelMap[selfAssessedLevel] : undefined) || estNum;
-    const levelConfidence = Math.abs(estNum - selfNum) <= 0.5 ? 'accurate' : selfNum > estNum ? 'overestimates' : 'underestimates';
-
-    // Extract preferred activities from answers (Q6)
-    const preferredActivities = Array.isArray(answers?.wt_q6) ? answers.wt_q6 : [];
-    const interestTopics = Array.isArray(answers?.wt_q43) ? answers.wt_q43 : [];
-
-    // Extract confidence matrix (Q44)
-    const matrix = answers?.wt_q44 || {};
 
     // PROBLEM 3 (v6.2): Snapshot previous profile BEFORE upsert so we can
     // generate an evolution_summary comparing this attempt to the prior one.
@@ -298,6 +368,31 @@ serve(async (req) => {
       .eq('student_id', student_id)
       .eq('teacher_id', teacher_id)
       .maybeSingle();
+    const sameAttemptAsStored = (previousProfile as any)?.welcome_test_id === test_id;
+
+    // A force re-run rebuilds from stored rows: a self-assessed level the rows no
+    // longer resolve is still the one the stored profile holds.
+    const selfAssessedLevel: string | null = traits.self_assessed_level
+      || (force && sameAttemptAsStored ? (previousProfile as any)?.self_assessed_level : null)
+      || null;
+
+    // Level (estimateLevel, _shared/welcomeTestLevel.ts). Written once from the key-scored
+    // items now and again after the AI step, from the final writing score. A force re-run of a
+    // stored profile keeps its level unless it was written by the current algorithm version.
+    const levelOpts = { force: !!force, sameAttempt: sameAttemptAsStored, previous: previousProfile as any };
+    let levelDecision = decideLevel(
+      estimateLevel({ grammar: grammarScore, vocabulary: vocabularyScore, reading: readingScore, writing: writingScore, selfAssessedLevel }),
+      levelOpts,
+    );
+    let estimatedLevel: string | null = levelDecision.level;
+    let levelConfidence: string | null = levelDecision.confidence;
+
+    // Extract preferred activities from answers (Q6)
+    const preferredActivities = Array.isArray(answers?.wt_q6) ? answers.wt_q6 : [];
+    const interestTopics = Array.isArray(answers?.wt_q43) ? answers.wt_q43 : [];
+
+    // Extract confidence matrix (Q44)
+    const matrix = answers?.wt_q44 || {};
 
     // v6.9.48: fetch current student level early so we can attach a
     // level_change_suggestion to raw_answers when it differs from estimate.
@@ -308,15 +403,17 @@ serve(async (req) => {
       .maybeSingle();
     const currentStudentLevel = ((studentLevelRow as any)?.english_level || '').toString().trim();
     const hasMeaningfulCurrent = currentStudentLevel && currentStudentLevel.toLowerCase() !== 'unknown';
-    const levelChangeSuggestion = hasMeaningfulCurrent && currentStudentLevel !== estimatedLevel
-      ? { current: currentStudentLevel, estimated: estimatedLevel, created_at: new Date().toISOString() }
-      : null;
+    const suggestionFor = (level: string | null) => (hasMeaningfulCurrent && level && currentStudentLevel !== level
+      ? { current: currentStudentLevel, estimated: level, created_at: new Date().toISOString() }
+      : null);
+    const levelChangeSuggestion = suggestionFor(estimatedLevel);
 
     const enrichedAnswers: Record<string, unknown> = { ...(answers || {}) };
     delete enrichedAnswers.learning_path; // recomputed below
     if (levelChangeSuggestion) {
       enrichedAnswers.level_change_suggestion = levelChangeSuggestion;
     }
+    if (levelDecision.stampVersion !== null) enrichedAnswers[LEVEL_VERSION_KEY] = levelDecision.stampVersion;
     // v6.9.56: integrity snapshot (tab-blur count + recent events) captured
     // client-side. Surfaces as a teacher-only signal of potential outside
     // help (translator/AI) during the placement test.
@@ -344,7 +441,7 @@ serve(async (req) => {
     // Shown until the AI analysis replaces it (and kept, flagged, when the AI step
     // is unavailable), so a retake never shows the previous attempt's analysis.
     const deterministicSummary = () => JSON.stringify({
-      summary: `Deterministic profile: estimated CEFR ${estimatedLevel} (self-assessed ${selfAssessedLevel || 'unknown'}, ${levelConfidence}). Strongest skill ${strongest || 'n/a'}, weakest ${weakest || 'n/a'}. Motivation ${traits.motivation_type || 'unknown'}, anxiety ${traits.anxiety_level || 'unknown'}, feedback preference ${traits.feedback_preference || 'unknown'}.`,
+      summary: `Deterministic profile: estimated CEFR ${estimatedLevel ?? 'not enough data'} (self-assessed ${selfAssessedLevel || 'unknown'}, ${levelConfidence ?? 'confidence unknown'}). Strongest skill ${strongest || 'n/a'}, weakest ${weakest || 'n/a'}. Motivation ${traits.motivation_type || 'unknown'}, anxiety ${traits.anxiety_level || 'unknown'}, feedback preference ${traits.feedback_preference || 'unknown'}.`,
       recommendations: [
         weakest ? `Prioritise targeted practice on ${weakest} to lift overall CEFR confidence.` : 'Confirm weakest skill in the next lesson before locking the curriculum.',
         'Anchor lessons in the surfaced interest topics to sustain motivation week over week.',
@@ -352,7 +449,7 @@ serve(async (req) => {
       ],
       writing_quality: 'unknown',
       key_observations: [
-        `Estimated level ${estimatedLevel}; self-assessed ${selfAssessedLevel || 'unknown'} (${levelConfidence}).`,
+        `Estimated level ${estimatedLevel ?? 'not enough data'}; self-assessed ${selfAssessedLevel || 'unknown'} (${levelConfidence ?? 'confidence unknown'}).`,
         `Weekly study time: ${traits.weekly_study_time || 'unknown'}; learning timeline: ${traits.learning_timeline || 'unknown'}.`,
       ],
       fallback: true,
@@ -402,7 +499,7 @@ serve(async (req) => {
     // A teacher's force re-run rebuilds from stored rows, which can lack what
     // only the original submission carried (client traits, integrity): never
     // replace a known value with nothing.
-    const rerunOfSameAttempt = (previousProfile as any)?.welcome_test_id === test_id;
+    const rerunOfSameAttempt = sameAttemptAsStored;
     if (force && previousProfile && rerunOfSameAttempt) {
       const prev = previousProfile as Record<string, unknown>;
       for (const key of [
@@ -445,6 +542,9 @@ serve(async (req) => {
       .from('student_learning_profiles')
       .upsert({ ...profileData, ...v2Columns }, { onConflict: 'student_id,teacher_id' });
     let hasV2Columns = true;
+    const writtenProfile: Record<string, unknown> = { ...profileData, ...v2Columns };
+    const writtenRawJson = JSON.stringify(profileData.raw_answers);
+    const writtenSummaryWasDeterministic = profileData.ai_summary === deterministicSummary();
     if (upsertError && isMissingColumnError(upsertError)) {
       // Migration 20261012180000 not applied yet: same profile without the new columns.
       hasV2Columns = false;
@@ -472,6 +572,16 @@ serve(async (req) => {
       if (versionError) console.warn('[process-welcome-test] profile version not saved:', versionError.message);
     }
 
+
+    // D13: a completed retake replaces the earlier attempts' events. Runs only after
+    // the profile of this attempt is written (never in the early profile_unchanged
+    // path above); the RPC keeps the old evidence when this test has no events.
+    try {
+      const { error: supersedeError } = await supabase.rpc('supersede_previous_welcome_test_events', { p_test_id: test_id });
+      if (supersedeError) console.warn('[process-welcome-test] superseding earlier attempt events failed:', supersedeError.message);
+    } catch (supersedeErr) {
+      console.warn('[process-welcome-test] superseding earlier attempt events failed', supersedeErr);
+    }
 
     // Update student_tests with answered_count
     if (answered_count !== undefined) {
@@ -503,6 +613,396 @@ serve(async (req) => {
     // with applied_at=NULL on the regenerated skill rows.
     await applyAndPromote(supabase, test_id, student_id);
 
+    // v6.9.29: Fire-and-forget thank-you email to the student. Idempotent server-side.
+    try {
+      const { data: studentRow } = await supabase
+        .from('students')
+        .select('name, student_email')
+        .eq('id', student_id)
+        .maybeSingle();
+      const { data: teacherRow } = await supabase
+        .from('profiles')
+        .select('first_name, last_name, email')
+        .eq('id', teacher_id)
+        .maybeSingle();
+      const studentEmail = studentRow?.student_email;
+      if (studentEmail) {
+        const teacherName = [teacherRow?.first_name, teacherRow?.last_name].filter(Boolean).join(' ').trim() || 'your teacher';
+        fetch(`${supabaseUrl}/functions/v1/send-welcome-test-completion-email`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${supabaseKey}`,
+          },
+          body: JSON.stringify({
+            testId: test_id,
+            studentEmail,
+            studentName: studentRow?.name || 'there',
+            teacherName,
+            teacherEmail: teacherRow?.email || null,
+          }),
+        }).catch((e: any) => console.warn('[process-welcome-test] thank-you email dispatch failed', e));
+      }
+    } catch (mailErr) {
+      console.warn('[process-welcome-test] thank-you email pre-dispatch failed', mailErr);
+    }
+
+    // --- Point 15: AI Analysis of open answers (including speaking transcriptions) ---
+    // The model scores the open items first; level, strongest/weakest and the divergences
+    // are then rebuilt from the FINAL scores, and the summary is generated again when those
+    // scores changed what it was told (so it cannot claim 0% writing when writing is 48).
+    let aiSummary: string | null = null;
+    let aiFallbackSummary = false;
+    let aiWritingScore: number | null = null;
+    let aiSpeakingScore: number | null = null;
+
+    const finalizeScores = () => {
+      grammarScore = percentByType('grammar');
+      vocabularyScore = percentByType('vocabulary');
+      readingScore = percentByType('reading');
+      writingScore = aiWritingScore ?? percentByType('writing');
+      ({ strongest, weakest } = skillExtremes([
+        { skill: 'grammar', score: grammarScore },
+        { skill: 'vocabulary', score: vocabularyScore },
+        { skill: 'reading', score: readingScore },
+        { skill: 'writing', score: writingScore },
+      ]));
+      levelDecision = decideLevel(
+        estimateLevel({ grammar: grammarScore, vocabulary: vocabularyScore, reading: readingScore, writing: writingScore, selfAssessedLevel }),
+        levelOpts,
+      );
+      estimatedLevel = levelDecision.level;
+      levelConfidence = levelDecision.confidence;
+      divergences = computeDivergences({
+        traits, estimatedLevel, selfAssessedLevel, confidenceMatrix: matrix,
+        readingScore,
+        writingScore,
+        speakingScore: aiSpeakingScore,
+        selfAwarenessScore, skillWrongOrIdk, behaviour,
+      });
+    };
+
+    if (HAS_DIRECT_AI_PROVIDER) {
+      try {
+        const openQuestionIds = ['wt_q12', 'wt_q13', 'wt_q16', 'wt_q17', 'wt_q36', 'wt_q37', 'wt_q40', 'wt_q41', 'wt_q45'];
+        const speakingQuestionIds = ['wt_q16s', 'wt_q36s', 'wt_q41s'];
+        
+        // Transcribe speaking answers before AI analysis
+        const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
+        const transcriptions: Record<string, string> = {};
+        
+        // Build question index map: answer_id -> question_index
+        const questionIndexMap: Record<string, number> = {};
+        for (let i = 0; i < questions.length; i++) {
+          // Map question_index to the question's ID from the welcomeTestQuestions
+          // speakingQuestionIds are like wt_q16s, wt_q36s, wt_q41s
+          // openQuestionIds are like wt_q12, wt_q16, wt_q17, etc.
+          // We need to find which question_index corresponds to which answer_id
+          // The answer_id is stored in event_payload, but here we work with questions array
+          // Question index i maps to ALL_WELCOME_TEST_QUESTIONS[i].id
+        }
+        // Build map from answers keys that match question indices
+        const allAnswerKeys = Object.keys(answers || {});
+        
+        if (OPENAI_API_KEY) {
+          for (const sqId of speakingQuestionIds) {
+            const audioUrl = answers?.[sqId];
+            if (audioUrl && typeof audioUrl === 'string' && audioUrl.startsWith('http') && (audioUrl.includes('r2.dev') || audioUrl.startsWith('https://pub-'))) {
+              try {
+                console.log(`[process-welcome-test] Transcribing speaking answer: ${sqId}`);
+                const transcribeResponse = await fetch(`${supabaseUrl}/functions/v1/transcribe-audio`, {
+                  method: 'POST',
+                  headers: {
+                    'Authorization': `Bearer ${supabaseKey}`,
+                    'Content-Type': 'application/json',
+                  },
+                  body: JSON.stringify({ audio_url: audioUrl }),
+                });
+                
+                if (transcribeResponse.ok) {
+                  const transcribeData = await transcribeResponse.json();
+                  if (transcribeData.transcription) {
+                    transcriptions[sqId] = transcribeData.transcription;
+                    console.log(`[process-welcome-test] Transcribed ${sqId}: ${transcribeData.transcription.substring(0, 50)}...`);
+                    
+                    // PROBLEM 1: Save transcription to question_data for teacher auto-view
+                    // Find the question index for this speaking question
+                    const speakingQ = questions.find((q: any) => {
+                      const sa = String(q.student_answer || '');
+                      return sa === audioUrl;
+                    });
+                    if (speakingQ) {
+                      const existingData = (speakingQ.question_data || {}) as Record<string, unknown>;
+                      await supabase
+                        .from('student_test_questions')
+                        .update({
+                          question_data: { ...existingData, transcription: transcribeData.transcription },
+                        })
+                        .eq('id', speakingQ.id);
+                      console.log(`[process-welcome-test] Saved transcription to question_data for ${sqId}`);
+                    }
+                  }
+                }
+              } catch (transcribeErr) {
+                console.error(`[process-welcome-test] Failed to transcribe ${sqId}:`, transcribeErr);
+              }
+            }
+          }
+        }
+        
+        // Build open answers including transcriptions and time info for AI context
+        const allAnswerIds = [...openQuestionIds, ...speakingQuestionIds];
+        const sentForScoring = allAnswerIds
+          .filter(id => {
+            if (transcriptions[id]) return true; // has transcription
+            return answers?.[id] && answers[id] !== '__IDK__' && !String(answers[id]).startsWith('http');
+          });
+        // Raw student text per id sent to the model (injection cap + allowed score keys).
+        const sentStudentTexts: Record<string, string> = {};
+        for (const id of sentForScoring) {
+          sentStudentTexts[id] = String(transcriptions[id] ? transcriptions[id] : answers[id]);
+        }
+        const openAnswers = sentForScoring
+          .map(id => {
+            // Find matching question to get time_spent_seconds
+            const matchQ = questions.find((q: any) => {
+              const sa = String(q.student_answer || '');
+              return sa === String(answers?.[id]);
+            });
+            const timeSec = matchQ?.time_spent_seconds || null;
+            const timeInfo = timeSec ? ` [recording/answering time: ${timeSec}s]` : '';
+            
+            if (transcriptions[id]) {
+              const wordCount = transcriptions[id].split(/\s+/).filter(Boolean).length;
+              return `${id} (speaking - transcribed, ${wordCount} words${timeInfo}): ${wrapStudentText('student_speech', transcriptions[id])}`;
+            }
+            return `${id}${timeInfo}: ${wrapStudentText('student_answer', String(answers[id]))}`;
+          })
+          .join('\n');
+
+        // v6.9.47: when no open/speaking answers exist, generate AI Analysis
+        // from the deterministic profile + scenario answers so the teacher
+        // never sees an empty "AI Analysis" section after completion/review.
+        const integrityBlur = (enrichedAnswers as any).__integrity__?.blur_count;
+        const integrityLine = typeof integrityBlur === 'number' && integrityBlur > 0
+          ? `- Integrity signal: tab-blur count = ${integrityBlur}. >3 suggests the student likely consulted an external translator/AI during open-ended items; downweight those answers and verify level in the first live session.`
+          : `- Integrity signal: no tab-blur events detected.`;
+        const idkSummaryLine = selfAwarenessScore === null
+          ? `- IDK signal: no metacognition signal (no incorrect/IDK on skill items).`
+          : `- IDK signal: self-awareness ${selfAwarenessScore}% (admitted "I don't know" on ${idkCountSkill}/${skillWrongOrIdk} skill items where they were uncertain; ${idkCountTotal} IDK overall). High = honest metacognition, prefer scaffolding before harder content. Low = compulsive guessing, recalibrate confidence and add formative checks.`;
+        const pct = (v: number | null) => (v === null ? 'no data' : `${v}%`);
+        const lpsLine = `- Learning Path Score: ${learningPath.score === null ? 'not computed (not enough signals)' : `${learningPath.score} (${learningPath.path})`}; signal coverage ${learningPath.coverage}; capacity ${learningPath.capacity ?? 'unknown'}${learningPath.overrides_applied.length > 0 ? `; overrides: ${learningPath.overrides_applied.join(', ')}` : ''}`;
+        const behaviourLine = `- Answer behaviour: skill items answered ${behaviour.keyed_answered}/${behaviour.keyed_total}, skipped ${behaviour.skip_count_skill}, "I don't know" ${behaviour.idk_count_skill}, median time ${behaviour.median_seconds_keyed ?? 'n/a'}s, very fast answers ${behaviour.rushed_count}`;
+        const answeredLine = `- Questions answered: ${questions.filter((q: any) => q.student_answer !== null).length}/${questions.length}`;
+        // Everything the model is told, from the current values. Built before the scoring call
+        // (key-scored items only) and again from the final scores.
+        const buildUserPrompt = () => {
+          const profileAnswerSummary = `Profile snapshot (deterministic):\n- Estimated level: ${estimatedLevel ?? 'not determined (no scored item)'}\n- Self-assessed level: ${selfAssessedLevel || 'unknown'} (${levelConfidence ?? 'unknown'})\n- Skill scores: grammar=${pct(grammarScore)}, vocabulary=${pct(vocabularyScore)}, reading=${pct(readingScore)}, writing=${pct(writingScore)}, speaking=${pct(aiSpeakingScore)}\n- Strongest skill: ${strongest || 'n/a'}; weakest: ${weakest || 'n/a'}\n${lpsLine}\n${behaviourLine}\n${idkSummaryLine}\n${integrityLine}\n- Motivation type: ${traits.motivation_type || 'unknown'}; latent goal: ${traits.latent_goal || 'unknown'}\n- Anxiety: ${traits.anxiety_level || 'unknown'}; ambiguity tolerance: ${traits.ambiguity_tolerance || 'unknown'}; error attitude: ${traits.error_attitude || 'unknown'}\n- Feedback preference: ${traits.feedback_preference || 'unknown'}; correction preference: ${traits.correction_preference || 'unknown'}\n- Weekly study time: ${traits.weekly_study_time || 'unknown'}; homework commitment: ${traits.homework_commitment || 'unknown'}\n- Deadline response: ${traits.deadline_response || 'unknown'}; learning timeline: ${traits.learning_timeline || 'unknown'}; persistence: ${traits.persistence_level || 'unknown'}; plateau response: ${traits.plateau_response || 'unknown'}\n- Career importance: ${traits.career_english_importance || 'unknown'}; usage context: ${traits.usage_context || 'unknown'}\n- Interest topics: ${(interestTopics || []).join(', ') || 'none'}; preferred activities: ${(preferredActivities || []).join(', ') || 'none'}\n- Confidence matrix (1-5): speaking=${matrix['Speaking with strangers'] ?? '-'}, writing=${matrix['Writing formal emails'] ?? '-'}, listening=${matrix['Understanding movies without subtitles'] ?? '-'}, reading=${matrix['Reading news articles'] ?? '-'}, presenting=${matrix['Giving presentations'] ?? '-'}, small_talk=${matrix['Small talk at parties'] ?? '-'}`;
+          // The scenario traits and the declared-vs-measured pairs are sent on every
+          // run (before, only when there were no open answers, so the model could not
+          // triangulate in the normal case). The pairs are computed in code; the
+          // model only explains them.
+          const divergenceBlock = `Declared vs measured (computed deterministically; explain these, do not invent others):\n${divergencePromptLines(divergences)}`;
+          return openAnswers
+            ? `${profileAnswerSummary}\n${answeredLine}\n\n${divergenceBlock}\n\nOpen-ended answers:\n${openAnswers}`
+            : `${profileAnswerSummary}\n${answeredLine}\n\n${divergenceBlock}\n\nNo open-ended or speaking answers were submitted. Build the analysis strictly from the deterministic profile snapshot above.`;
+        };
+        const callProfileModel = async (userBody: string): Promise<{ ok: boolean; out: ProfileModelOutput }> => {
+          const aiResponse = await chatCompletion({
+            messages: [
+              { role: 'system', content: PROFILE_SYSTEM_PROMPT },
+              { role: 'user', content: userBody },
+            ],
+          }, { primaryModel: 'google/gemini-2.5-flash', functionName: 'process-welcome-test' });
+          if (!aiResponse.ok) {
+            await aiResponse.text().catch(() => '');
+            return { ok: false, out: { profile: null, scores: {} } };
+          }
+          const aiData = await aiResponse.json();
+          return { ok: true, out: parseProfileModelOutput(aiData.choices?.[0]?.message?.content || '') };
+        };
+
+        const firstPrompt = buildUserPrompt();
+        const first = await callProfileModel(firstPrompt);
+        const modelScores = first.out.scores;
+        let modelOk = first.ok;
+        let modelProfile = first.out.profile;
+
+        // PROBLEM 2 & 4: Update mastery, is_correct, question_data.ai_score, and event_payload
+        try {
+          const perScores = modelScores;
+          const allOpenSpeakingIds = [...openQuestionIds, ...speakingQuestionIds];
+          let updatedCount = 0;
+          let unscoredCount = 0;
+            // Only scores accepted below (answered, not IDK, numeric) feed the averages.
+            // Only ids sent for scoring in this run are accepted, clamped to 0-100, injection-capped.
+            const validScores = acceptAiScores(modelScores, sentStudentTexts);
+            const acceptedScores: Record<string, number> = {};
+            for (const qId of allOpenSpeakingIds) {
+              if (answers?.[qId] && answers[qId] !== '__IDK__') {
+                // No AI score for this item (model omitted it or the AI step fell back):
+                // leave it unevaluated instead of recording a made-up 25 / "wrong".
+                if (!Object.prototype.hasOwnProperty.call(validScores, qId)) {
+                  unscoredCount++;
+                  continue;
+                }
+                const score = validScores[qId];
+                acceptedScores[qId] = score;
+
+                // The event of THIS question: legacy ids (wt_q12, wt_q16...) are also
+                // canonical ids of other questions, so match legacy_answer_id, or
+                // answer_id only on pre-renumber events that carry no legacy id.
+                const { data: evtRows } = await supabase
+                  .from('student_events')
+                  .select('id, event_payload')
+                  .eq('source_id', test_id)
+                  .eq('event_type', 'test_answer_submitted')
+                  .eq('event_source', 'welcome_test')
+                  .or(`event_payload->>legacy_answer_id.eq.${qId},and(event_payload->>answer_id.eq.${qId},event_payload->>legacy_answer_id.is.null)`)
+                  .order('created_at', { ascending: false })
+                  .limit(1);
+                const answerText = String(answers[qId]);
+                const byText = questions.find((q: any) => String(q.student_answer || '') === answerText);
+                const evtIndex = Number((evtRows?.[0]?.event_payload as any)?.exercise_index);
+                const byIndex = Number.isInteger(evtIndex)
+                  ? questions.find((q: any) => q.question_index === evtIndex)
+                  : undefined;
+                // The event's question is trusted only when it holds this answer: the
+                // "Apply to Progress" re-run keys answers by position, so its ids can
+                // point at another question. Otherwise fall back to the answer-text
+                // match for the question row and leave the event untouched.
+                const indexAgrees = !!byIndex && String(byIndex.student_answer || '') === answerText;
+                const evt = indexAgrees ? evtRows?.[0] ?? null : null;
+                const matchQ = indexAgrees ? byIndex : byText;
+                if (matchQ) {
+                  // Fetch FRESH data from DB (transcription may have been saved above and cache is stale)
+                  const { data: freshQ } = await supabase
+                    .from('student_test_questions')
+                    .select('question_data')
+                    .eq('id', matchQ.id)
+                    .single();
+                  const existingData = (freshQ?.question_data || {}) as Record<string, unknown>;
+                  await supabase
+                    .from('student_test_questions')
+                    .update({
+                      is_correct: score >= 40,
+                      question_data: { ...existingData, ai_score: score },
+                    })
+                    .eq('id', matchQ.id);
+                  matchQ.is_correct = score >= 40; // in-memory copy feeds the final skill scores
+                }
+
+                // One update of that event: mastery column and its skill rating.
+                if (evt) {
+                  const payload = (evt.event_payload || {}) as any;
+                  if (payload.nano_skill_ratings?.length > 0) {
+                    payload.nano_skill_ratings[0].mastery = score;
+                    payload.nano_skill_ratings[0].hasValue = true;
+                  }
+                  await supabase
+                    .from('student_events')
+                    .update({ event_payload: payload, mastery: score })
+                    .eq('id', evt.id);
+                }
+                
+                updatedCount++;
+              }
+            }
+          if (unscoredCount > 0) {
+            console.warn(`[process-welcome-test] ${unscoredCount} open/speaking answers left unevaluated (no AI score)`);
+          }
+          console.log(`[process-welcome-test] Updated mastery/is_correct for ${updatedCount} open/speaking questions (per_question_scores: ${Object.keys(perScores).length} keys)`);
+
+          // PROBLEM 2: Calculate speaking_score and update writing_score from AI scores
+          const speakingIds = ['wt_q16s', 'wt_q36s', 'wt_q41s'];
+          const speakingScoresArr = speakingIds.map(id => acceptedScores[id]).filter((s): s is number => typeof s === 'number');
+          aiSpeakingScore = speakingScoresArr.length > 0
+            ? Math.round(speakingScoresArr.reduce((a: number, b: number) => a + b, 0) / speakingScoresArr.length)
+            : null;
+
+          const writingIds = ['wt_q16', 'wt_q17', 'wt_q36', 'wt_q37', 'wt_q40'];
+          const writingScoresArr = writingIds.map(id => acceptedScores[id]).filter((s): s is number => typeof s === 'number');
+          aiWritingScore = writingScoresArr.length > 0
+            ? Math.round(writingScoresArr.reduce((a: number, b: number) => a + b, 0) / writingScoresArr.length)
+            : null;
+
+          // Re-calculate test results after updating is_correct
+          await supabase.rpc('calculate_test_results', { p_test_id: test_id });
+          console.log('[process-welcome-test] Re-calculated test results after AI scoring');
+        } catch (masteryErr) {
+          console.error('[process-welcome-test] Error updating mastery:', masteryErr);
+        }
+
+        // Level, strongest/weakest and divergences from the final scores; the summary is
+        // regenerated only when that changed what the model was told.
+        finalizeScores();
+        const finalPrompt = buildUserPrompt();
+        if (modelOk && finalPrompt !== firstPrompt) {
+          // A failed second call keeps the valid first summary instead of dropping it.
+          try {
+            const second = await callProfileModel(finalPrompt);
+            if (second.ok && second.out.profile) {
+              modelOk = true;
+              modelProfile = second.out.profile;
+            }
+          } catch (secondErr) {
+            console.warn('[process-welcome-test] second summary call failed, keeping the first', secondErr);
+          }
+        }
+        if (modelOk && modelProfile) {
+          aiSummary = JSON.stringify(modelProfile);
+        } else {
+          // Gateway down or output that does not match the schema: store no AI text, keep
+          // the deterministic summary (flagged as fallback) instead of garbage.
+          // A same-attempt re-run keeps the previously stored summary (already in the
+          // profile row) rather than replacing it with the deterministic text.
+          const keepsPreviousSummary = rerunOfSameAttempt && !!(previousProfile as Record<string, unknown> | null)?.ai_summary;
+          if (!keepsPreviousSummary) aiFallbackSummary = true;
+        }
+      } catch (aiError) {
+        console.error('Error generating AI summary:', aiError);
+      }
+    }
+
+    // Final scores, level and divergences (also when the AI step failed half way).
+    finalizeScores();
+    {
+      const finalRaw = (profileData.raw_answers && typeof profileData.raw_answers === 'object' ? profileData.raw_answers : {}) as Record<string, unknown>;
+      if (levelDecision.stampVersion !== null) finalRaw[LEVEL_VERSION_KEY] = levelDecision.stampVersion;
+      const finalSuggestion = suggestionFor(estimatedLevel);
+      if (finalSuggestion) finalRaw.level_change_suggestion = finalSuggestion;
+      else if (levelChangeSuggestion) delete finalRaw.level_change_suggestion;
+      const finalFields: Record<string, unknown> = {
+        estimated_level: estimatedLevel,
+        level_confidence: levelConfidence,
+        grammar_score: grammarScore,
+        vocabulary_score: vocabularyScore,
+        reading_score: readingScore,
+        writing_score: writingScore,
+        strongest_skill: strongest,
+        weakest_skill: weakest,
+        raw_answers: finalRaw,
+      };
+      if (aiSpeakingScore !== null) finalFields.speaking_score = aiSpeakingScore;
+      if (aiSummary) finalFields.ai_summary = aiSummary;
+      else if (aiFallbackSummary || writtenSummaryWasDeterministic) finalFields.ai_summary = deterministicSummary();
+      if (hasV2Columns) finalFields.divergences = divergences;
+      const profileUpdate: Record<string, unknown> = {};
+      for (const [key, value] of Object.entries(finalFields)) {
+        const before = key === 'raw_answers' ? writtenRawJson : JSON.stringify(writtenProfile[key] ?? null);
+        if (JSON.stringify(value ?? null) !== before) profileUpdate[key] = value;
+      }
+      if (Object.keys(profileUpdate).length > 0) {
+        const { error: finalError } = await supabase
+          .from('student_learning_profiles')
+          .update(profileUpdate)
+          .eq('student_id', student_id)
+          .eq('teacher_id', teacher_id);
+        if (finalError) console.error('[process-welcome-test] final profile update failed:', finalError);
+        else console.log(`[process-welcome-test] Final profile update: ${Object.keys(profileUpdate).join(', ')}`);
+      }
+    }
+
     // v6.9.39 P5: Auto-fill student level + suggest goals from Welcome Test.
     // v6.9.40 P4: Also auto-fill students.main_goal when missing/unknown,
     // and ALWAYS insert 2-3 goal suggestions tied to this specific test_id
@@ -516,7 +1016,7 @@ serve(async (req) => {
       const currentLevel = (studentRowForAutoFill as any)?.english_level;
       const isMissingLevel =
         !currentLevel || String(currentLevel).trim() === '' || String(currentLevel).trim().toLowerCase() === 'unknown';
-      if (isMissingLevel) {
+      if (isMissingLevel && estimatedLevel) {
         await supabase
           .from('students')
           .update({ english_level: estimatedLevel })
@@ -626,40 +1126,6 @@ serve(async (req) => {
       console.error('[process-welcome-test] level/goal auto-suggest failed', autoLevelErr);
     }
 
-    // v6.9.29: Fire-and-forget thank-you email to the student. Idempotent server-side.
-    try {
-      const { data: studentRow } = await supabase
-        .from('students')
-        .select('name, student_email')
-        .eq('id', student_id)
-        .maybeSingle();
-      const { data: teacherRow } = await supabase
-        .from('profiles')
-        .select('first_name, last_name, email')
-        .eq('id', teacher_id)
-        .maybeSingle();
-      const studentEmail = studentRow?.student_email;
-      if (studentEmail) {
-        const teacherName = [teacherRow?.first_name, teacherRow?.last_name].filter(Boolean).join(' ').trim() || 'your teacher';
-        fetch(`${supabaseUrl}/functions/v1/send-welcome-test-completion-email`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${supabaseKey}`,
-          },
-          body: JSON.stringify({
-            testId: test_id,
-            studentEmail,
-            studentName: studentRow?.name || 'there',
-            teacherName,
-            teacherEmail: teacherRow?.email || null,
-          }),
-        }).catch((e: any) => console.warn('[process-welcome-test] thank-you email dispatch failed', e));
-      }
-    } catch (mailErr) {
-      console.warn('[process-welcome-test] thank-you email pre-dispatch failed', mailErr);
-    }
-
     // Note: welcome_test_completed event removed - only test_answer_submitted events are logged per-question
 
     // --- Point 6: Create notification for teacher ---
@@ -678,7 +1144,7 @@ serve(async (req) => {
         student_id,
         teacher_id,
         notification_type: 'welcome_test_completed',
-        message: `${studentName} completed the Welcome Test (Level: ${estimatedLevel})`,
+        message: `${studentName} completed the Welcome Test (Level: ${estimatedLevel ?? 'not enough data'})`,
         is_read: false,
       });
     } catch (notifError) {
@@ -713,7 +1179,7 @@ serve(async (req) => {
               <div style="background: #f3f4f6; padding: 15px; border-radius: 8px; margin: 20px 0;">
                 <div style="display: flex; gap: 20px; flex-wrap: wrap;">
                   <div style="text-align: center; flex: 1; min-width: 100px;">
-                    <div style="font-size: 24px; font-weight: bold; color: #7c3aed;">${estimatedLevel}</div>
+                    <div style="font-size: 24px; font-weight: bold; color: #7c3aed;">${estimatedLevel ?? '-'}</div>
                     <div style="font-size: 12px; color: #6b7280;">Estimated Level</div>
                   </div>
                   ${grammarScore !== null ? `<div style="text-align: center; flex: 1; min-width: 100px;">
@@ -729,7 +1195,7 @@ serve(async (req) => {
                   <strong>Strongest:</strong> ${strongest} | <strong>Weakest:</strong> ${weakest || '-'}
                 </p>` : ''}
                 ${selfAssessedLevel ? `<p style="font-size: 14px; color: #374151;">
-                  <strong>Self-assessed:</strong> ${selfAssessedLevel} (${levelConfidence})
+                  <strong>Self-assessed:</strong> ${selfAssessedLevel}${levelConfidence ? ` (${levelConfidence})` : ''}
                 </p>` : ''}
               </div>
               <p>View the full learning profile in the student's profile page:</p>
@@ -749,7 +1215,7 @@ serve(async (req) => {
             body: JSON.stringify({
               from: 'edooqoo <noreply@edooqoo.com>',
               to: [teacherData.email],
-              subject: `${studentName} completed the Welcome Test (${estimatedLevel})`,
+              subject: `${studentName} completed the Welcome Test (${estimatedLevel ?? 'level not determined'})`,
               html: emailHtml,
             }),
           });
@@ -759,341 +1225,6 @@ serve(async (req) => {
       } catch (emailError) {
         console.error('Error sending teacher email:', emailError);
         // Non-critical
-      }
-    }
-
-    // --- Point 15: AI Analysis of open answers (including speaking transcriptions) ---
-    let aiSummary: string | null = null;
-    let aiWritingScore: number | null = null;
-    let aiSpeakingScore: number | null = null;
-    if (HAS_DIRECT_AI_PROVIDER) {
-      try {
-        const openQuestionIds = ['wt_q12', 'wt_q13', 'wt_q16', 'wt_q17', 'wt_q36', 'wt_q37', 'wt_q40', 'wt_q41', 'wt_q45'];
-        const speakingQuestionIds = ['wt_q16s', 'wt_q36s', 'wt_q41s'];
-        
-        // Transcribe speaking answers before AI analysis
-        const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY');
-        const transcriptions: Record<string, string> = {};
-        
-        // Build question index map: answer_id -> question_index
-        const questionIndexMap: Record<string, number> = {};
-        for (let i = 0; i < questions.length; i++) {
-          // Map question_index to the question's ID from the welcomeTestQuestions
-          // speakingQuestionIds are like wt_q16s, wt_q36s, wt_q41s
-          // openQuestionIds are like wt_q12, wt_q16, wt_q17, etc.
-          // We need to find which question_index corresponds to which answer_id
-          // The answer_id is stored in event_payload, but here we work with questions array
-          // Question index i maps to ALL_WELCOME_TEST_QUESTIONS[i].id
-        }
-        // Build map from answers keys that match question indices
-        const allAnswerKeys = Object.keys(answers || {});
-        
-        if (OPENAI_API_KEY) {
-          for (const sqId of speakingQuestionIds) {
-            const audioUrl = answers?.[sqId];
-            if (audioUrl && typeof audioUrl === 'string' && audioUrl.startsWith('http') && (audioUrl.includes('r2.dev') || audioUrl.startsWith('https://pub-'))) {
-              try {
-                console.log(`[process-welcome-test] Transcribing speaking answer: ${sqId}`);
-                const transcribeResponse = await fetch(`${supabaseUrl}/functions/v1/transcribe-audio`, {
-                  method: 'POST',
-                  headers: {
-                    'Authorization': `Bearer ${supabaseKey}`,
-                    'Content-Type': 'application/json',
-                  },
-                  body: JSON.stringify({ audio_url: audioUrl }),
-                });
-                
-                if (transcribeResponse.ok) {
-                  const transcribeData = await transcribeResponse.json();
-                  if (transcribeData.transcription) {
-                    transcriptions[sqId] = transcribeData.transcription;
-                    console.log(`[process-welcome-test] Transcribed ${sqId}: ${transcribeData.transcription.substring(0, 50)}...`);
-                    
-                    // PROBLEM 1: Save transcription to question_data for teacher auto-view
-                    // Find the question index for this speaking question
-                    const speakingQ = questions.find((q: any) => {
-                      const sa = String(q.student_answer || '');
-                      return sa === audioUrl;
-                    });
-                    if (speakingQ) {
-                      const existingData = (speakingQ.question_data || {}) as Record<string, unknown>;
-                      await supabase
-                        .from('student_test_questions')
-                        .update({
-                          question_data: { ...existingData, transcription: transcribeData.transcription },
-                        })
-                        .eq('id', speakingQ.id);
-                      console.log(`[process-welcome-test] Saved transcription to question_data for ${sqId}`);
-                    }
-                  }
-                }
-              } catch (transcribeErr) {
-                console.error(`[process-welcome-test] Failed to transcribe ${sqId}:`, transcribeErr);
-              }
-            }
-          }
-        }
-        
-        // Build open answers including transcriptions and time info for AI context
-        const allAnswerIds = [...openQuestionIds, ...speakingQuestionIds];
-        const openAnswers = allAnswerIds
-          .filter(id => {
-            if (transcriptions[id]) return true; // has transcription
-            return answers?.[id] && answers[id] !== '__IDK__' && !String(answers[id]).startsWith('http');
-          })
-          .map(id => {
-            // Find matching question to get time_spent_seconds
-            const matchQ = questions.find((q: any) => {
-              const sa = String(q.student_answer || '');
-              return sa === String(answers?.[id]);
-            });
-            const timeSec = matchQ?.time_spent_seconds || null;
-            const timeInfo = timeSec ? ` [recording/answering time: ${timeSec}s]` : '';
-            
-            if (transcriptions[id]) {
-              const wordCount = transcriptions[id].split(/\s+/).filter(Boolean).length;
-              return `${id} (speaking - transcribed, ${wordCount} words${timeInfo}): "${transcriptions[id]}"`;
-            }
-            return `${id}${timeInfo}: "${answers[id]}"`;
-          })
-          .join('\n');
-
-        // v6.9.47: when no open/speaking answers exist, generate AI Analysis
-        // from the deterministic profile + scenario answers so the teacher
-        // never sees an empty "AI Analysis" section after completion/review.
-        const integrityBlur = (enrichedAnswers as any).__integrity__?.blur_count;
-        const integrityLine = typeof integrityBlur === 'number' && integrityBlur > 0
-          ? `- Integrity signal: tab-blur count = ${integrityBlur}. >3 suggests the student likely consulted an external translator/AI during open-ended items; downweight those answers and verify level in the first live session.`
-          : `- Integrity signal: no tab-blur events detected.`;
-        const idkSummaryLine = selfAwarenessScore === null
-          ? `- IDK signal: no metacognition signal (no incorrect/IDK on skill items).`
-          : `- IDK signal: self-awareness ${selfAwarenessScore}% (admitted "I don't know" on ${idkCountSkill}/${skillWrongOrIdk} skill items where they were uncertain; ${idkCountTotal} IDK overall). High = honest metacognition, prefer scaffolding before harder content. Low = compulsive guessing, recalibrate confidence and add formative checks.`;
-        const profileAnswerSummary = `Profile snapshot (deterministic):\n- Estimated level: ${estimatedLevel}\n- Self-assessed level: ${selfAssessedLevel || 'unknown'} (${levelConfidence})\n- Skill scores: grammar=${grammarScore ?? '-'}%, vocabulary=${vocabularyScore ?? '-'}%, reading=${readingScore ?? '-'}%, writing=${writingScore ?? '-'}%\n- Strongest skill: ${strongest || 'n/a'}; weakest: ${weakest || 'n/a'}\n${idkSummaryLine}\n${integrityLine}\n- Motivation type: ${traits.motivation_type || 'unknown'}; latent goal: ${traits.latent_goal || 'unknown'}\n- Anxiety: ${traits.anxiety_level || 'unknown'}; ambiguity tolerance: ${traits.ambiguity_tolerance || 'unknown'}; error attitude: ${traits.error_attitude || 'unknown'}\n- Feedback preference: ${traits.feedback_preference || 'unknown'}; correction preference: ${traits.correction_preference || 'unknown'}\n- Weekly study time: ${traits.weekly_study_time || 'unknown'}; homework commitment: ${traits.homework_commitment || 'unknown'}\n- Deadline response: ${traits.deadline_response || 'unknown'}; learning timeline: ${traits.learning_timeline || 'unknown'}; persistence: ${traits.persistence_level || 'unknown'}; plateau response: ${traits.plateau_response || 'unknown'}\n- Career importance: ${traits.career_english_importance || 'unknown'}; usage context: ${traits.usage_context || 'unknown'}\n- Interest topics: ${(interestTopics || []).join(', ') || 'none'}; preferred activities: ${(preferredActivities || []).join(', ') || 'none'}\n- Confidence matrix (1-5): speaking=${matrix['Speaking with strangers'] ?? '-'}, writing=${matrix['Writing formal emails'] ?? '-'}, listening=${matrix['Understanding movies without subtitles'] ?? '-'}, reading=${matrix['Reading news articles'] ?? '-'}, presenting=${matrix['Giving presentations'] ?? '-'}, small_talk=${matrix['Small talk at parties'] ?? '-'}`;
-        // The scenario traits and the declared-vs-measured pairs are sent on every
-        // run (before, only when there were no open answers, so the model could not
-        // triangulate in the normal case). The pairs are computed in code; the
-        // model only explains them.
-        const divergenceBlock = `Declared vs measured (computed deterministically; explain these, do not invent others):\n${divergencePromptLines(divergences)}`;
-        const answeredLine = `- Questions answered: ${questions.filter((q: any) => q.student_answer !== null).length}/${questions.length}`;
-        const userPromptBody = openAnswers
-          ? `${profileAnswerSummary}\n${answeredLine}\n\n${divergenceBlock}\n\nOpen-ended answers:\n${openAnswers}`
-          : `${profileAnswerSummary}\n${answeredLine}\n\n${divergenceBlock}\n\nNo open-ended or speaking answers were submitted. Build the analysis strictly from the deterministic profile snapshot above.`;
-
-        if (openAnswers || profileAnswerSummary) {
-          const aiResponse = await chatCompletion({
-            messages: [
-                {
-                  role: 'system',
-                  content: `You are an expert ESL teacher analyzing a student's Welcome Test answers. Based on their open-ended responses, provide:
-1. A concise 3-4 sentence profile summary covering their English level, strengths, weaknesses, and personality as a learner. For speaking answers, analyze the transcription critically - comment on fluency, word count relative to recording time, relevance to the prompt, and grammatical accuracy. Do NOT be generous with praise for minimal effort.
-2. 2-3 specific teaching recommendations.
-3. For EACH open/speaking answer, rate the quality on a 0-100 scale using these STRICT criteria:
-
-OUTPUT RULES (HARD CONSTRAINTS):
-- NEVER reference question IDs (e.g. wt_q3, q3c, q5c, q13c, q45, q16s) anywhere in "summary", "recommendations", or "key_observations".
-- Refer to questions by TOPIC only: "the latent-goal scenario", "the homework-commitment scenario", "the plateau-response scenario", "the correction-preference question", "the optional external-resources reflection", "the speaking task about X".
-- IDs are allowed ONLY as keys inside the "per_question_scores" object.
-- Teachers read these texts and they only know sequential numbers (1..N), never internal IDs.
-
-INDIRECT/SCENARIO ANSWER WEIGHTING (CRITICAL):
-You also have access to indirect, scenario-based answers; the latent-goal scenario ("wake up 2 years from now"), the homework-commitment scenario (under low motivation), the plateau-response scenario (after 6 months stagnation), and the correction-preference question (during speaking).
-These four items reveal LATENT goals and behaviors and bypass social-desirability bias far better than direct self-reports (q3, q5, q13).
-When direct answers conflict with indirect ones, weight the indirect/scenario responses HIGHER. Synthesize the most probable TRUE profile, not the self-presented one.
-The user message lists the "Declared vs measured" pairs already detected in code. Mention the notable and strong ones in the summary or key_observations in plain words a teacher can act on; never contradict them and never add pairs of your own.
-Example: if the direct motivation answer says "travel" but the latent-goal scenario picks the "leading international meetings" / "promotion" option, treat the true motivation as career_critical and note the discrepancy in the summary WITHOUT mentioning any question ID.
-
-SPEAKING answers (IDs ending with "s"):
-- Evaluate: fluency (count words in transcription vs available recording time - e.g. 10 words in 30 seconds = very low fluency), grammatical correctness, vocabulary range, and RELEVANCE to the prompt.
-- A single greeting sentence like "Hello, my name is X, how are you?" for a 30-second prompt = max 20-30 points.
-- Off-topic, minimal, or generic responses = 0-15 points.
-- Only responses with sustained, relevant speech (at least 3-4 complete sentences addressing the prompt) can score above 50.
-
-WRITING answers (open_ended/open_reflection):
-- Evaluate: grammar accuracy, vocabulary range, coherence, and RELEVANCE to the prompt.
-- A 2-5 word answer to a question expecting a paragraph = max 15-25 points.
-- Only responses with complete, relevant sentences can score above 50.
-
-SCORING SCALE:
-- 0: No answer, gibberish, or completely off-topic
-- 1-15: Minimal attempt (1 short sentence, mostly off-topic)
-- 16-30: Very basic attempt (1-2 short sentences, partially relevant, major errors)
-- 31-50: Basic attempt (a few sentences, partially relevant, notable errors)
-- 51-70: Good attempt (mostly relevant, some errors, reasonable length)
-- 71-85: Strong response (fully relevant, few errors, good length)
-- 86-100: Excellent (near-native quality, fully addresses the prompt)
-
-BE STRICT. Do NOT inflate scores. Most brief or off-topic answers should score below 30.
-
-Format as JSON: {"summary": "...", "recommendations": ["...", "..."], "writing_quality": "basic|intermediate|advanced", "key_observations": ["...", "..."], "per_question_scores": {"wt_q16": 45, "wt_q36": 70, "wt_q16s": 15, ...}}` + NO_EM_DASH_RULE
-                },
-                { role: 'user', content: userPromptBody },
-              ],
-          }, { primaryModel: 'google/gemini-2.5-flash', functionName: 'process-welcome-test' });
-
-          if (aiResponse.ok) {
-            const aiData = await aiResponse.json();
-            const content = aiData.choices?.[0]?.message?.content || '';
-            try {
-              const jsonMatch = content.match(/\{[\s\S]*\}/);
-              if (jsonMatch) {
-                const parsed = JSON.parse(jsonMatch[0]);
-                aiSummary = JSON.stringify(parsed);
-              } else {
-                aiSummary = JSON.stringify({ summary: content, recommendations: [], writing_quality: 'unknown', key_observations: [] });
-              }
-            } catch {
-              aiSummary = JSON.stringify({ summary: content, recommendations: [], writing_quality: 'unknown', key_observations: [] });
-            }
-          } else {
-            await aiResponse.text().catch(() => '');
-            // v6.9.47: deterministic fallback so the UI never shows an empty
-            // AI Analysis card even when the model gateway is unavailable.
-            aiSummary = deterministicSummary();
-          }
-        }
-
-        // Save AI summary to profile
-        if (aiSummary) {
-          await supabase
-            .from('student_learning_profiles')
-            .update({ ai_summary: aiSummary })
-            .eq('student_id', student_id)
-            .eq('teacher_id', teacher_id);
-          console.log('[process-welcome-test] AI summary generated and saved');
-
-          // PROBLEM 2 & 4: Update mastery, is_correct, question_data.ai_score, and event_payload
-          try {
-            const parsed = JSON.parse(aiSummary);
-            const perScores = parsed.per_question_scores || {};
-            
-            const allOpenSpeakingIds = [...openQuestionIds, ...speakingQuestionIds];
-            let updatedCount = 0;
-            let unscoredCount = 0;
-            // Only scores accepted below (answered, not IDK, numeric) feed the averages.
-            const acceptedScores: Record<string, number> = {};
-            for (const qId of allOpenSpeakingIds) {
-              if (answers?.[qId] && answers[qId] !== '__IDK__') {
-                // No AI score for this item (model omitted it or the AI step fell back):
-                // leave it unevaluated instead of recording a made-up 25 / "wrong".
-                const rawScore = Number(perScores[qId]);
-                if (perScores[qId] === undefined || perScores[qId] === null || !Number.isFinite(rawScore)) {
-                  unscoredCount++;
-                  continue;
-                }
-                const score = Math.round(rawScore);
-                acceptedScores[qId] = score;
-
-                // The event of THIS question: legacy ids (wt_q12, wt_q16...) are also
-                // canonical ids of other questions, so match legacy_answer_id, or
-                // answer_id only on pre-renumber events that carry no legacy id.
-                const { data: evtRows } = await supabase
-                  .from('student_events')
-                  .select('id, event_payload')
-                  .eq('source_id', test_id)
-                  .eq('event_type', 'test_answer_submitted')
-                  .eq('event_source', 'welcome_test')
-                  .or(`event_payload->>legacy_answer_id.eq.${qId},and(event_payload->>answer_id.eq.${qId},event_payload->>legacy_answer_id.is.null)`)
-                  .order('created_at', { ascending: false })
-                  .limit(1);
-                const answerText = String(answers[qId]);
-                const byText = questions.find((q: any) => String(q.student_answer || '') === answerText);
-                const evtIndex = Number((evtRows?.[0]?.event_payload as any)?.exercise_index);
-                const byIndex = Number.isInteger(evtIndex)
-                  ? questions.find((q: any) => q.question_index === evtIndex)
-                  : undefined;
-                // The event's question is trusted only when it holds this answer: the
-                // "Apply to Progress" re-run keys answers by position, so its ids can
-                // point at another question. Otherwise fall back to the answer-text
-                // match for the question row and leave the event untouched.
-                const indexAgrees = !!byIndex && String(byIndex.student_answer || '') === answerText;
-                const evt = indexAgrees ? evtRows?.[0] ?? null : null;
-                const matchQ = indexAgrees ? byIndex : byText;
-                if (matchQ) {
-                  // Fetch FRESH data from DB (transcription may have been saved above and cache is stale)
-                  const { data: freshQ } = await supabase
-                    .from('student_test_questions')
-                    .select('question_data')
-                    .eq('id', matchQ.id)
-                    .single();
-                  const existingData = (freshQ?.question_data || {}) as Record<string, unknown>;
-                  await supabase
-                    .from('student_test_questions')
-                    .update({
-                      is_correct: score >= 40,
-                      question_data: { ...existingData, ai_score: score },
-                    })
-                    .eq('id', matchQ.id);
-                }
-
-                // One update of that event: mastery column and its skill rating.
-                if (evt) {
-                  const payload = (evt.event_payload || {}) as any;
-                  if (payload.nano_skill_ratings?.length > 0) {
-                    payload.nano_skill_ratings[0].mastery = score;
-                    payload.nano_skill_ratings[0].hasValue = true;
-                  }
-                  await supabase
-                    .from('student_events')
-                    .update({ event_payload: payload, mastery: score })
-                    .eq('id', evt.id);
-                }
-                
-                updatedCount++;
-              }
-            }
-            if (unscoredCount > 0) {
-              console.warn(`[process-welcome-test] ${unscoredCount} open/speaking answers left unevaluated (no AI score)`);
-            }
-            console.log(`[process-welcome-test] Updated mastery/is_correct for ${updatedCount} open/speaking questions (per_question_scores: ${Object.keys(perScores).length} keys)`);
-            
-            // PROBLEM 2: Calculate speaking_score and update writing_score from AI scores
-            const speakingIds = ['wt_q16s', 'wt_q36s', 'wt_q41s'];
-            const speakingScoresArr = speakingIds.map(id => acceptedScores[id]).filter((s): s is number => typeof s === 'number');
-            const speakingScoreAI = speakingScoresArr.length > 0
-              ? Math.round(speakingScoresArr.reduce((a: number, b: number) => a + b, 0) / speakingScoresArr.length)
-              : null;
-
-            const writingIds = ['wt_q16', 'wt_q17', 'wt_q36', 'wt_q37', 'wt_q40'];
-            const writingScoresArr = writingIds.map(id => acceptedScores[id]).filter((s): s is number => typeof s === 'number');
-            const writingScoreAI = writingScoresArr.length > 0
-              ? Math.round(writingScoresArr.reduce((a: number, b: number) => a + b, 0) / writingScoresArr.length)
-              : null;
-
-            aiWritingScore = writingScoreAI;
-            aiSpeakingScore = speakingScoreAI;
-            const profileUpdate: Record<string, any> = {};
-            if (speakingScoreAI !== null) profileUpdate.speaking_score = speakingScoreAI;
-            if (writingScoreAI !== null) profileUpdate.writing_score = writingScoreAI;
-            
-            if (hasV2Columns && (speakingScoreAI !== null || writingScoreAI !== null)) {
-              // Confidence vs measured writing/speaking needs the AI scores.
-              divergences = computeDivergences({
-                traits, estimatedLevel, selfAssessedLevel, confidenceMatrix: matrix,
-                readingScore,
-                writingScore: writingScoreAI ?? writingScore,
-                speakingScore: speakingScoreAI,
-                selfAwarenessScore, skillWrongOrIdk, behaviour,
-              });
-              profileUpdate.divergences = divergences;
-            }
-            if (Object.keys(profileUpdate).length > 0) {
-              await supabase
-                .from('student_learning_profiles')
-                .update(profileUpdate)
-                .eq('student_id', student_id)
-                .eq('teacher_id', teacher_id);
-              console.log(`[process-welcome-test] Updated profile scores: speaking=${speakingScoreAI}, writing=${writingScoreAI}`);
-            }
-
-            // Re-calculate test results after updating is_correct
-            await supabase.rpc('calculate_test_results', { p_test_id: test_id });
-            console.log('[process-welcome-test] Re-calculated test results after AI scoring');
-          } catch (masteryErr) {
-            console.error('[process-welcome-test] Error updating mastery:', masteryErr);
-          }
-        }
-      } catch (aiError) {
-        console.error('Error generating AI summary:', aiError);
       }
     }
 

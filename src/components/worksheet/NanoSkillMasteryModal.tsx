@@ -37,6 +37,12 @@ interface NanoSkillMasteryModalProps {
   /** question_index -> mastery stored with the saved answer (see storedItemMasteryByQuestion). */
   storedEvaluations?: Record<number, number>;
   isLoadingAiEvaluation?: boolean;
+  /**
+   * Ratings of the teacher's saved mark_done_evaluation for this exercise (null/absent = never
+   * marked done). When present they win over every AI or key value, so reopening and saving
+   * unchanged keeps the correction.
+   */
+  savedRatings?: { name: string; mastery: number }[] | null;
 }
 
 // Undo Mark Done Modal
@@ -118,6 +124,7 @@ const NanoSkillMasteryModal: React.FC<NanoSkillMasteryModalProps> = ({
   aiEvaluations,
   storedEvaluations,
   isLoadingAiEvaluation = false,
+  savedRatings = null,
 }) => {
   const [ratings, setRatings] = useState<NanoSkillRating[]>([]);
   const hasInitialized = useRef(false);
@@ -164,8 +171,20 @@ const NanoSkillMasteryModal: React.FC<NanoSkillMasteryModalProps> = ({
     if (isOpen && nanoSkills.length > 0 && !hasInitialized.current && !isLoadingAiEvaluation) {
       // PROBLEM 1 FIX: Use direct index mapping - each skill in nanoSkills array
       // corresponds to the same position in skillToItemMapping
+      // Saved teacher ratings by skill name (a name can repeat: consumed in order).
+      const savedQueue = new Map<string, number[]>();
+      for (const r of savedRatings || []) {
+        if (typeof r?.name !== 'string' || typeof r.mastery !== 'number' || !(r.mastery >= 0)) continue;
+        savedQueue.set(r.name, [...(savedQueue.get(r.name) || []), r.mastery]);
+      }
       setRatings(
         nanoSkills.map((skill, skillIndex) => {
+          if (savedRatings) {
+            const saved = savedQueue.get(skill.name)?.shift();
+            return saved === undefined
+              ? { name: skill.name, reason: skill.reason, mastery: null, hasValue: false }
+              : { name: skill.name, reason: skill.reason, mastery: saved, hasValue: true };
+          }
           // CRITICAL: Use skill's position in the array to find corresponding item index
           // skillToItemMapping[skillIndex] gives us the original exercise item this skill came from
           const mappedItem = skillToItemMapping[skillIndex];
@@ -191,7 +210,7 @@ const NanoSkillMasteryModal: React.FC<NanoSkillMasteryModalProps> = ({
     if (!isOpen) {
       hasInitialized.current = false;
     }
-  }, [isOpen, nanoSkills, studentAnswers, exerciseData, skillToItemMapping, aiEvaluations, storedEvaluations, isLoadingAiEvaluation]);
+  }, [isOpen, nanoSkills, studentAnswers, exerciseData, skillToItemMapping, aiEvaluations, storedEvaluations, isLoadingAiEvaluation, savedRatings]);
 
   const handleMasteryChange = (index: number, value: number[]) => {
     setRatings(prevRatings => {

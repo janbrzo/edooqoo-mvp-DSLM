@@ -7,6 +7,8 @@
  * src/lib/welcomeTest/__tests__/welcomeTestShared.test.ts).
  */
 
+import { matchOptionIndex } from './welcomeTestOptionAliases.ts';
+
 /**
  * Question id by question_index, the order of ALL_WELCOME_TEST_QUESTIONS.
  * student_test_questions stores only question_index; ids such as wt_q3b sit
@@ -246,8 +248,18 @@ export function reconstructTraits(
   const traits: Record<string, string> = {};
   for (const [traitName, config] of Object.entries(TRAIT_QUESTIONS)) {
     const answerVal = answers?.[config.questionId];
+    if (traitName === 'usage_context' && Array.isArray(answerVal)) {
+      // Multi-select (wt_q3b): every selected option that resolves, joined with ', '.
+      const mapped = answerVal
+        .map((a) => matchOptionIndex(config.questionId, config.options, String(a)))
+        .filter((i) => i >= 0)
+        .map((i) => config.mapping[String(i)])
+        .filter(Boolean);
+      if (mapped.length > 0) traits[traitName] = mapped.join(', ');
+      continue;
+    }
     if (answerVal && typeof answerVal === 'string') {
-      const optIdx = config.options.indexOf(answerVal);
+      const optIdx = matchOptionIndex(config.questionId, config.options, answerVal);
       if (optIdx >= 0) {
         const mapped = config.mapping[String(optIdx)];
         if (mapped) traits[traitName] = mapped;

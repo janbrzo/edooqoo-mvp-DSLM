@@ -22,7 +22,7 @@ import { devLog, devWarn } from '@/utils/logger';
 import { transcribeAllAudio, buildAnswersToVerify } from '@/utils/audioEvalUtils';
 import { createPendingSaves } from '@/lib/answers/pendingSaves';
 import { resolveEnglishLevel } from '../../supabase/functions/_shared/englishLevel';
-import { callStudentAnswerRpc } from '@/lib/answers/studentAnswerRpc';
+import { callStudentAnswerRpc, submitHomeworkAnswers } from '@/lib/answers/studentAnswerRpc';
 import { invokeWithRetry } from '@/lib/answers/invokeWithRetry';
 
 
@@ -38,6 +38,8 @@ interface UseInteractiveHomeworkProps {
   shareToken?: string;
   /** Student's CEFR level (students.english_level) sent to the evaluation model. */
   englishLevel?: string | null;
+  /** Transcript of the source worksheet audio (homework selected_audio.transcript), sent as source text for listening items. */
+  worksheetAudioTranscript?: string | null;
 }
 
 export const useInteractiveHomework = ({
@@ -48,7 +50,8 @@ export const useInteractiveHomework = ({
   exerciseQuestionCounts = {},
   exercises = [],
   shareToken,
-  englishLevel
+  englishLevel,
+  worksheetAudioTranscript
 }: UseInteractiveHomeworkProps) => {
   const [answers, setAnswers] = useState<Record<number, ExerciseAnswers>>({});
   // submitHomework is memoised without `answers` in its deps; it reads the latest
@@ -293,10 +296,7 @@ export const useInteractiveHomework = ({
       await pendingSavesQueueRef.current.flush();
       const latestAnswers = answersRef.current;
 
-      const { error } = await supabase.rpc('submit_homework_answers', {
-        p_homework_id: homeworkId,
-        p_student_email: studentEmail
-      });
+      const { error } = await submitHomeworkAnswers(homeworkId, studentEmail, shareToken);
 
       if (error) throw error;
 
@@ -343,7 +343,10 @@ export const useInteractiveHomework = ({
           const answersToVerify: any[] = [];
           
           // Transcribe all audio using shared utility
-          const transcriptionCache = await transcribeAllAudio(audioAnswers, '[submitHomework]');
+          const transcriptionCache = await transcribeAllAudio(audioAnswers, '[submitHomework]', {
+            share_token: shareToken || '',
+            student_email: studentEmail,
+          });
           
           // Merge transcriptions into local savedAnswers for AI eval (NO DB writes yet, will persist with AI eval)
           if (Object.keys(transcriptionCache).length > 0) {
@@ -376,7 +379,8 @@ export const useInteractiveHomework = ({
               savedAnswer: { exercise_index: ans.exercise_index, exercise_type: ans.exercise_type, answers: (ans.answers || {}) as Record<string | number, any> },
               exerciseData,
               audioAnswers,
-              transcriptionCache
+              transcriptionCache,
+              worksheetAudioTranscript
             });
             answersToVerify.push(...exerciseAnswers);
           }
@@ -470,8 +474,11 @@ export const useInteractiveHomework = ({
                 }
                 const hasRaised = Object.keys(raised).length > 0;
                 const closedItemEvals = hasRaised ? applyAiAlternatives(itemEvals, raised).items : null;
+                // The row mastery is the mean of the FINAL item evaluations (raises included),
+                // the same value the answer trigger writes to the event.
                 const overallMastery = isClosedExerciseType(exType)
-                  ? calculateOverallMastery(exType, exerciseData, closedAnswers, hasRaised ? raised : undefined)
+                  ? (closedItemEvals ? averageScoredMastery(closedItemEvals) : null)
+                    ?? calculateOverallMastery(exType, exerciseData, closedAnswers, hasRaised ? raised : undefined)
                   : averageScoredMastery(itemEvals);
                 
                 // Merge transcriptions into answers for this exercise (single DB write with AI eval)
@@ -589,7 +596,7 @@ export const useInteractiveHomework = ({
     } finally {
       setIsSaving(false);
     }
-  }, [homeworkId, studentEmail, audioAnswers, exercises, shareToken, totalExercises, englishLevel]);
+  }, [homeworkId, studentEmail, audioAnswers, exercises, shareToken, totalExercises, englishLevel, worksheetAudioTranscript]);
 
   const getProgress = useCallback((): HomeworkProgress => {
     let answeredExercises = 0;

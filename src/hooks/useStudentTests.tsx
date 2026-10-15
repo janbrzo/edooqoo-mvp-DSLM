@@ -327,7 +327,8 @@ export function useStudentTests({ studentId, teacherId }: UseStudentTestsProps) 
     try {
       // For each result with a suggested_rating, update or create learning element
       for (const result of results) {
-        if (result.applied_to_element_id) {
+        // A skill with no answered question has no rating: never overwrite an element with NULL.
+        if (result.applied_to_element_id && result.suggested_rating != null) {
           // Update existing element
           await supabase
             .from('student_learning_elements')

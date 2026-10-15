@@ -15,6 +15,8 @@
  *   but only up to "accelerated", and the teacher gets `unrealistic_goal`.
  */
 
+import { matchOptionIndex } from './welcomeTestOptionAliases.ts';
+
 export const LPS_VERSION = 2;
 
 export type LearningPathName = 'comfort' | 'guided' | 'accelerated' | 'target';
@@ -115,7 +117,7 @@ export function computeLearningPathScore(
   let context: number | null = null;
   const q3b = answers?.wt_q3b;
   if (Array.isArray(q3b)) {
-    const scores = q3b.map((a) => Q3B_OPTIONS.indexOf(String(a))).filter((i) => i >= 0).map((i) => Q3B_SCORES[i]);
+    const scores = q3b.map((a) => matchOptionIndex('wt_q3b', Q3B_OPTIONS, String(a))).filter((i) => i >= 0).map((i) => Q3B_SCORES[i]);
     if (scores.length > 0) context = Math.max(...scores);
   } else if (traits.usage_context) {
     const scores = traits.usage_context.split(',').map((v) => contextMap[v.trim()]).filter((v) => typeof v === 'number');
@@ -136,13 +138,13 @@ export function computeLearningPathScore(
 
   let durationIndex = -1;
   const q9 = answers?.wt_q9;
-  if (typeof q9 === 'string') durationIndex = Q9_OPTIONS.indexOf(q9);
+  if (typeof q9 === 'string') durationIndex = matchOptionIndex('wt_q9', Q9_OPTIONS, q9);
   c.learning_duration = durationIndex >= 0 ? Q9_SCORES[durationIndex] : null;
 
   let autonomy: number | null = null;
   const q10 = answers?.wt_q10;
   if (Array.isArray(q10) && q10.length > 0) {
-    const idx = q10.map((a) => Q10_OPTIONS.indexOf(String(a)));
+    const idx = q10.map((a) => matchOptionIndex('wt_q10', Q10_OPTIONS, String(a)));
     if (idx.includes(5)) autonomy = 80;
     else if (idx.includes(4) || idx.includes(6)) autonomy = 70;
     else if (idx.length === 1 && idx[0] === 0) autonomy = 20;

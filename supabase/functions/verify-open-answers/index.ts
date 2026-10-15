@@ -5,6 +5,7 @@ import { NO_EM_DASH_RULE } from "../_shared/writingStyle.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.49.1";
 import { resolveCaller } from "../_shared/auth.ts";
 import { homeworkIdForStudentAccess } from "../_shared/evaluationAccess.ts";
+import { isNonAnswerText, parseModelScore } from "./answerSignals.ts";
 import { itemId, pairEvaluationsWithAnswers, callModelWithRetry } from "./evaluationMapping.ts";
 import {
   STUDENT_TEXT_RULE,
@@ -62,6 +63,7 @@ async function evaluateChunk(
 ): Promise<{ ok: true; evaluations: EvaluationResult[] } | { ok: false; errorText: string }> {
   // Check if any answers have audio transcription
   const hasAnySpeaking = answers.some(a => a.audio_transcription);
+  const hasAnyDuration = answers.some(a => Number(a.audio_duration_seconds) > 0);
   const hasAnyClosed = answers.some(a => isClosedType(a.exercise_type) && !!a.suggested_answer);
 
   const systemPrompt = `You are a STRICT English language teacher evaluating student answers.
@@ -73,9 +75,9 @@ Your task is to evaluate each answer based on:
 3. Completeness - Is the answer sufficiently developed?
 ${hasAnySpeaking ? `
 4. SPEAKING EVALUATION (only when audio_transcription is provided):
- - Fluency: Calculate words per second (audio_word_count / audio_duration_seconds). 
+ ${hasAnyDuration ? `- Fluency: Calculate words per second (audio_word_count / audio_duration_seconds). 
    A2 target: 1.0-1.5 wps. B1 target: 1.5-2.0 wps. B2+: 2.0+ wps.
-   Score 0.9+ if above target, 0.7-0.9 if near target, below 0.5 if very slow (<0.5 wps).
+   Score 0.9+ if above target, 0.7-0.9 if near target, below 0.5 if very slow (<0.5 wps).` : `- Fluency: audio duration is not available, do not estimate speed; judge fluency from the transcript only.`}
  - Coherence: Does the transcribed speech form logical, complete sentences?
  - Grammar accuracy: Are sentences grammatically correct for the level?
  - Task completion: Does the spoken response address the question/prompt?
@@ -90,7 +92,7 @@ For each answer, provide:
 - speaking_score: (0.0-1.0) Score for the SPOKEN answer (from transcription). Omit if no audio transcription provided.
 
 STRICT SCORING RULES (these override everything else):
-1. NON-ANSWERS (ALWAYS score 0.0-0.05): "I don't know", "idk", "nie wiem", "no idea", "no se", "не знаю", "dunno", "I have no idea", "I'm not sure", any equivalent in ANY language, or any response that does not attempt to answer the question. Score: 0.0. Feedback should be: "No answer provided. Try to form at least one sentence about the topic."
+1. NON-ANSWERS (ALWAYS score 0.0-0.05): "I don't know", "idk", "nie wiem", "no idea", "no se", "не знаю", "dunno", "I have no idea", "I'm not sure", any equivalent in ANY language, or any response that does not attempt to answer the question. Score: 0.0. Feedback for an empty answer or an explicit "I don't know": "No answer provided. Try to form at least one sentence about the topic." Feedback for any other response that does not address the question (nonsense, off-topic): "This answer does not address the question."
 2. WRONG LANGUAGE (score 0.05-0.10): Answer written entirely in a non-English language (Polish, Spanish, etc.) unless translation was explicitly requested. Feedback: "Please answer in English."
 3. MINIMAL EFFORT (score 0.1-0.4): Only 1-2 generic words like "yes", "no", "ok", "good", "bad" that don't demonstrate understanding. Feedback should suggest what to add.
 4. PARTIAL ANSWER (score 0.4-0.7): Shows some understanding but is incomplete, has significant errors, or doesn't fully address the question.
@@ -240,7 +242,8 @@ Return exactly ${answers.length} evaluation objects in a JSON array, one per ans
     const answered = new Set(pairs.map(([idx]) => idx));
 
     evaluations = pairs.map(([idx, e]): EvaluationResult | null => {
-      let qualityScore = parseFloat(e?.quality_score);
+      // Out-of-scale replies (85, "85%", "8/10") are rescaled; unusable ones stay unevaluated.
+      let qualityScore = parseModelScore(e?.quality_score) ?? NaN;
       if (isNaN(qualityScore)) {
         // No usable score: closed items fall back to the key, open items stay unevaluated.
         const a = answers[idx];
@@ -248,44 +251,17 @@ Return exactly ${answers.length} evaluation objects in a JSON array, one per ans
           ? fallbackClosedEvaluation(a) as EvaluationResult
           : null;
       }
-      qualityScore = Math.max(0, Math.min(1, qualityScore));
 
       // PROBLEM 3 FIX: Server-side non-answer detection - override AI score
       // Use audio_transcription as fallback if student_answer is empty (audio-only questions)
       const rawStudentAnswer = answers[idx]?.student_answer?.toLowerCase().trim() || "";
       const audioTranscription = answers[idx]?.audio_transcription?.toLowerCase().trim() || "";
       const studentAnswer = rawStudentAnswer || audioTranscription;
-      const nonAnswerPatterns = [
-        /^i\s*don'?t\s*know/i,
-        /^idk$/i,
-        /^nie\s*wiem/i,
-        /^no\s*idea/i,
-        /^no\s*se$/i,
-        /^не\s*знаю/i,
-        /^dunno$/i,
-        /^i\s*have\s*no\s*idea/i,
-        /^i'?m?\s*not\s*sure$/i,
-        /^no\s*lo\s*se$/i,
-        /^je\s*ne\s*sais\s*pas$/i,
-        /^ich\s*wei(ss|ß)\s*nicht$/i,
-        /^não\s*sei$/i,
-        /^nwm$/i,
-        /^i\s*dont\s*know/i,
-        /^no\s*answer/i,
-        /^n\/a$/i,
-        /^-$/i,
-        /^\.+$/i,
-        /^x+$/i,
-        /^asdf/i,
-        /^test$/i,
-        /^nothing$/i,
-        /^none$/i,
-      ];
       const closed = isClosedType(answers[idx]?.exercise_type) && !!answers[idx]?.suggested_answer;
       // Closed answers are short by design ("B) drinks", "True", "none"): only an empty answer is a non-answer.
       const isNonAnswer = closed
         ? studentAnswer.length === 0
-        : nonAnswerPatterns.some((p) => p.test(studentAnswer)) || studentAnswer.length === 0;
+        : isNonAnswerText(studentAnswer);
 
       if (isNonAnswer && qualityScore > 0.05) {
         console.log(
@@ -300,7 +276,8 @@ Return exactly ${answers.length} evaluation objects in a JSON array, one per ans
       }
 
       // An answer that talks to the grader instead of answering never keeps a high score.
-      const isInjection = !closed && (
+      // Typed closed items too: aiAlternativeMastery may raise them, so a crafted answer must not earn it.
+      let isInjection = (!closed || !isSelectionType(answers[idx].exercise_type)) && (
         looksLikeInstructionInjection(answers[idx]?.student_answer) ||
         looksLikeInstructionInjection(answers[idx]?.audio_transcription)
       );
@@ -325,6 +302,9 @@ Return exactly ${answers.length} evaluation objects in a JSON array, one per ans
         if (r.keyVerdict === "correct") keyVerdict = true;
         else if (isSelectionType(answers[idx].exercise_type) && r.keyVerdict === "wrong") keyVerdict = false;
       }
+      // The key already marked the answer correct: the cap only guards the AI raise, so the
+      // item keeps its key verdict and feedback (AI never contradicts a key-correct item).
+      if (keyVerdict === true) isInjection = false;
 
       let feedback = e.feedback;
       if (!feedback || feedback.length < 10 || feedback === "Thank you for your answer.") {
@@ -347,13 +327,18 @@ Return exactly ${answers.length} evaluation objects in a JSON array, one per ans
       if (isNonAnswer) {
         feedback = "No answer provided. Try to form at least one sentence about the topic.";
       }
+      // The sentinel feedback belongs to real non-answers only: a scored nonsense or off-topic
+      // answer keeps the model feedback, or a neutral line when the model echoed the sentinel.
+      if (!isNonAnswer && typeof feedback === "string" && /^\s*no answer provided/i.test(feedback)) {
+        feedback = "This answer does not address the question.";
+      }
       if (isInjection && !isNonAnswer) {
         feedback = "This response does not answer the question. Write your own answer about the topic.";
       }
 
       // Extract writing and speaking scores
-      const writingScore = e.writing_score !== undefined ? parseFloat(e.writing_score) : undefined;
-      const speakingScore = e.speaking_score !== undefined ? parseFloat(e.speaking_score) : undefined;
+      const writingScore = e.writing_score !== undefined ? (parseModelScore(e.writing_score) ?? NaN) : undefined;
+      const speakingScore = e.speaking_score !== undefined ? (parseModelScore(e.speaking_score) ?? NaN) : undefined;
 
       return {
         exercise_index: answers[idx]?.exercise_index,

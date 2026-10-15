@@ -17,9 +17,9 @@ const ROOT = path.resolve(__dirname, '..', '..');
 const PUBLIC = path.resolve(ROOT, 'public');
 const WELL_KNOWN = path.resolve(PUBLIC, '.well-known');
 
-const VERSION = 'v6.9.72';
-const RELEASE_DATE = '2026-10-05';
-const RELEASE_NAME = 'SEO x1000 Plan Completion Gate and Worker Deployment Binding';
+const VERSION = 'v6.9.73';
+const RELEASE_DATE = '2026-10-15';
+const RELEASE_NAME = 'Indexation Integrity, Martha Profile Cleanup and Founder Entity Graph';
 const BASE_URL = 'https://edooqoo.com';
 const SOURCE_TRUTH_MANIFEST_PATH = path.join(ROOT, 'docs', 'source-of-truth-manifest.json');
 
@@ -1775,11 +1775,26 @@ const knowledgeGraph = {
       '@id': `${BASE_URL}/#organization`,
       name: 'Edooqoo',
       url: `${BASE_URL}/`,
+      founder: { '@id': `${BASE_URL}/authors/jan-brzostowski#person` },
+      knowsAbout: [
+        'Adult ESL one-to-one tutoring',
+        '1-Minute Prep lesson preparation',
+        'CEFR level diagnostics',
+        'Spaced repetition flashcards',
+      ],
       sameAs: [
         BASE_URL,
         'https://www.linkedin.com/company/edooqoo',
         'https://twitter.com/edooqoo',
       ],
+    },
+    {
+      '@type': 'Person',
+      '@id': `${BASE_URL}/authors/jan-brzostowski#person`,
+      name: 'Jan Brzostowski',
+      url: `${BASE_URL}/authors/jan-brzostowski`,
+      jobTitle: 'Founder of Edooqoo',
+      worksFor: { '@id': `${BASE_URL}/#organization` },
     },
     {
       '@type': 'WebSite',

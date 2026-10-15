@@ -1507,14 +1507,6 @@ export const BLOG_POSTS: BlogPostMeta[] = [
     "state": "hold"
   },
   {
-    "title": "Parent-Teacher Conferences for ESL: Preparation Guide",
-    "description": "Conference structure, visual aids, and navigating language barriers during parent-teacher meetings for ESL programs.",
-    "url": "/blog/parent-teacher-conferences-esl.html",
-    "date": "2025-09-23",
-    "category": "Tutor Business and Tools",
-    "state": "hold"
-  },
-  {
     "title": "How to Write ESL Progress Reports for Adult Students",
     "description": "Write adult ESL progress reports from comparable evidence, independent performance, remaining gaps, and the next learning decision.",
     "url": "/blog/writing-student-progress-reports-esl.html",
@@ -2427,18 +2419,6 @@ export const LANDING_PAGES: LandingPageMeta[] = [
     "title": "English Exam Preparation Worksheets: AI Generator",
     "description": "Generate English exam preparation worksheets with AI. Cambridge FCE/CAE/CPE, IELTS, TOEFL practice exercises. Reading, writing, listening, speaking.",
     "url": "/english-worksheets-for-exam-prep.html",
-    "state": "hold"
-  },
-  {
-    "title": "English Worksheets for Kids: AI Generator",
-    "description": "Generate English worksheets for kids with AI. Age-appropriate vocabulary, simple grammar, fun activities, picture exercises. CEFR A1-A2.",
-    "url": "/english-worksheets-for-kids.html",
-    "state": "hold"
-  },
-  {
-    "title": "English Worksheets for Teenagers: AI Generator",
-    "description": "Generate English worksheets for teenagers with AI. Topics teens care about: social media, music, travel, technology, careers. CEFR A2-B2.",
-    "url": "/english-worksheets-for-teenagers.html",
     "state": "hold"
   },
   {

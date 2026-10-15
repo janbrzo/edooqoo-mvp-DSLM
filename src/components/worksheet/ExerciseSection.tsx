@@ -299,6 +299,8 @@ const ExerciseSection = forwardRef<HTMLDivElement, ExerciseSectionProps>(({
   
   // DSLM: NanoSkill Mastery Modal state
   const [isMasteryModalOpen, setIsMasteryModalOpen] = useState(false);
+  const [savedMarkDoneRatings, setSavedMarkDoneRatings] = useState<{ name: string; mastery: number }[] | null>(null);
+  const [isLoadingSavedRatings, setIsLoadingSavedRatings] = useState(false);
   const [isUndoModalOpen, setIsUndoModalOpen] = useState(false);
   
   // PROBLEM 1.2: AI evaluation state for open-ended exercises
@@ -396,6 +398,49 @@ const ExerciseSection = forwardRef<HTMLDivElement, ExerciseSectionProps>(({
   const handleMarkDoneWithModal = async () => {
     const exerciseType = normalizeExerciseType(exercise.type);
     
+    // Reopening an exercise that is already marked done starts from the teacher's saved
+    // ratings (never the AI/key values), so saving unchanged keeps the correction.
+    setSavedMarkDoneRatings(null);
+    if (isMarkedDone && studentIdProp && worksheetIdForStorage) {
+      setIsLoadingSavedRatings(true);
+      let ratingsUnavailable = false;
+      try {
+        const markDoneIdx = originalIndex !== undefined ? originalIndex : index - 1;
+        const { data: savedEvents, error: savedError } = await supabase
+          .from('student_events')
+          .select('event_payload, created_at')
+          .eq('student_id', studentIdProp)
+          .eq('source_id', worksheetIdForStorage)
+          .eq('event_type', 'mark_done_evaluation')
+          .contains('event_payload', { exercise_index: markDoneIdx })
+          .order('created_at', { ascending: false })
+          .limit(1);
+        const saved = (savedEvents?.[0]?.event_payload as any)?.nano_skill_ratings;
+        if (savedError || !Array.isArray(saved)) {
+          ratingsUnavailable = true;
+        } else {
+          setSavedMarkDoneRatings(
+            saved
+              .filter((r: any) => r && r.hasValue !== false && typeof r.name === 'string' && typeof r.mastery === 'number')
+              .map((r: any) => ({ name: r.name, mastery: r.mastery })),
+          );
+        }
+      } catch (err) {
+        devWarn('[Mark done] Could not load saved ratings:', err);
+        ratingsUnavailable = true;
+      }
+      setIsLoadingSavedRatings(false);
+      if (ratingsUnavailable) {
+        // Opening with AI/key values could overwrite the teacher correction on save.
+        toast({
+          title: "Could not load saved ratings",
+          description: "Please try again in a moment.",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
     // PROBLEM 4 FIX: Open modal IMMEDIATELY for instant feedback
     setIsMasteryModalOpen(true);
     
@@ -1881,7 +1926,8 @@ const ExerciseSection = forwardRef<HTMLDivElement, ExerciseSectionProps>(({
         exerciseData={exercise}
         aiEvaluations={aiEvaluations}
         storedEvaluations={storedMarkDoneEvaluations}
-        isLoadingAiEvaluation={isLoadingAiEvaluation}
+        isLoadingAiEvaluation={isLoadingAiEvaluation || isLoadingSavedRatings}
+        savedRatings={savedMarkDoneRatings}
       />
       
       {/* Undo Mark Done Modal */}

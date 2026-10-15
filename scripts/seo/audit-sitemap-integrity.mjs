@@ -40,12 +40,20 @@ for (const loc of locs) {
   }
 
   const route = loc.slice(BASE.length) || '/';
-  if (!route.endsWith('.html')) continue;
-
-  const file = path.join(PUBLIC, route.replace(/^\//, ''));
-  if (!fs.existsSync(file)) {
-    failures.push(`sitemap URL has no file on disk (404 risk): ${route}`);
-    continue;
+  let file;
+  if (route.endsWith('.html')) {
+    file = path.join(PUBLIC, route.replace(/^\//, ''));
+    if (!fs.existsSync(file)) {
+      failures.push(`sitemap URL has no file on disk (404 risk): ${route}`);
+      continue;
+    }
+  } else {
+    // Clean routes may be backed by a static `${route}.html` twin that crawlers can receive;
+    // its robots meta must agree with the sitemap.
+    if (route === '/') continue;
+    const twin = path.join(PUBLIC, `${route.replace(/^\//, '').replace(/\/$/, '')}.html`);
+    if (!fs.existsSync(twin)) continue;
+    file = twin;
   }
 
   const head = fs.readFileSync(file, 'utf8').slice(0, 4000);

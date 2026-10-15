@@ -60,6 +60,26 @@ export async function callStudentAnswerRpc<N extends TokenRpc>(
   return rpc(legacyName, params);
 }
 
+/**
+ * Submit a homework through the token-checked RPC (20261014090000). Falls back
+ * to the legacy id + email RPC only when the token RPC does not exist yet;
+ * the legacy name is revoked from client roles by 20261014090100.
+ */
+export async function submitHomeworkAnswers(
+  homeworkId: string,
+  studentEmail: string,
+  shareToken: string | null | undefined,
+): Promise<RpcResult<boolean>> {
+  const rpc = supabase.rpc.bind(supabase) as unknown as RpcCall<boolean>;
+  const res = await rpc('submit_homework_answers_by_share_token', {
+    p_share_token: shareToken ?? '',
+    p_homework_id: homeworkId,
+    p_student_email: studentEmail,
+  });
+  if (!isMissingRpcError(res.error)) return res;
+  return rpc('submit_homework_answers', { p_homework_id: homeworkId, p_student_email: studentEmail });
+}
+
 /** Call an RPC that is not in the generated types yet (added by a migration that may not be applied). */
 export function callUntypedRpc<T = unknown>(fn: string, args: Record<string, unknown>): Promise<RpcResult<T>> {
   return (supabase.rpc.bind(supabase) as unknown as RpcCall<T>)(fn, args);

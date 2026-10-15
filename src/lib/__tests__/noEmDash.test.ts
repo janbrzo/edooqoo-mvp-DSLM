@@ -22,7 +22,7 @@ const EXCLUDED = [
   /\.(png|jpe?g|gif|webp|ico|woff2?|ttf|pdf|mp3|mp4)$/,
   /^(package-lock\.json|bun\.lock)$/,
   /^src\/lib\/__tests__\/noEmDash\.test\.ts$/,
-  /^AGENTS\.md$/,
+  /(^|\/)AGENTS\.md$/,
 ];
 
 describe('no em dashes in user-facing text', () => {

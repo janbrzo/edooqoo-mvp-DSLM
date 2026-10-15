@@ -7,12 +7,18 @@ import { DEFAULT_ENGLISH_LEVEL, resolveEnglishLevel } from "../_shared/englishLe
 import { resolveCaller } from "../_shared/auth.ts";
 import { hasWorksheetStudentAccess, userOwnsWorksheet } from "../_shared/evaluationAccess.ts";
 import { hasValidCronSecret } from "../_shared/cronAuth.ts";
+import { buildOpenAnswerContext, openExerciseContextString, openExerciseItems } from "../_shared/openAnswerContext.ts";
+import { buildOpenItemEvaluations, buildQuestionEvaluations } from "./itemBuilder.ts";
+import { processHomeworkAiEvaluations } from "./homeworkEval.ts";
 
 // Supabase Edge runtime hook for work that continues after the response.
 declare const EdgeRuntime: { waitUntil(promise: Promise<unknown>): void } | undefined;
 
 /** Parallel queue rows per run (each row is one AI call). */
 const QUEUE_CONCURRENCY = 3;
+
+/** Submitted homework answers evaluated per scheduled run (the tab fast path handles most). */
+const HOMEWORK_ROWS_PER_RUN = 6;
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -75,10 +81,24 @@ serve(async (req) => {
       await autoQueueForCreateHomework(supabase, worksheetIdFilter, triggerSource, exerciseIndexFilter);
     }
 
+    const isScheduledRun0 = isServiceLike && !worksheetIdFilter;
     // Scheduled run: queue saved answers that still need evaluation (the
     // student's tab may have been closed before the 10-minute client timer).
     if (isServiceLike && !worksheetIdFilter) {
       await queueStaleWorksheetAnswers(supabase);
+    }
+
+    // Scheduled run: homework submitted 3+ minutes ago whose AI evaluation never
+    // arrived (student closed the tab). Failures never block the worksheet queue.
+    let homeworkResult: { processed: number; failed: number; skipped: number } | null = null;
+    if (isScheduledRun0) {
+      try {
+        homeworkResult = await processHomeworkAiEvaluations(
+          supabase, supabaseUrl, supabaseServiceKey, HOMEWORK_ROWS_PER_RUN,
+        );
+      } catch (e) {
+        console.error('[process-pending] homework AI pass failed:', (e as Error).message);
+      }
     }
 
     // Rows are claimed one at a time per worker (atomic; also recovers stale
@@ -107,7 +127,7 @@ serve(async (req) => {
     if (!firstPending) {
       console.log('[process-pending] No pending evaluations found');
       return new Response(
-        JSON.stringify({ processed: 0, message: 'No pending evaluations' }),
+        JSON.stringify({ processed: 0, message: 'No pending evaluations', ...(homeworkResult ? { homework: homeworkResult } : {}) }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
@@ -149,7 +169,7 @@ serve(async (req) => {
 
         let answers = pending.answers || {};
         let context = pending.context || {};
-        const questionItems = context.questions || [];
+        let questionItems: any[] = Array.isArray(context.questions) ? context.questions : [];
         const effectiveTriggerSource = triggerSource || context.trigger_source || (isScheduledRun ? '10min_inactivity' : null);
         
         // Fetch audio answers from the source table
@@ -193,10 +213,26 @@ serve(async (req) => {
           console.error('[process-pending] Error fetching audio_answers:', e);
         }
 
+        // Open exercises: questions, key and source text (passage, transcript, image)
+        // come from the worksheet when the queued context lacks them (title-only rows).
+        let worksheetExercise: any | null = null;
+        let worksheetAudioTranscript: string | null = null;
+        const closedPendingEarly = Array.isArray(context.closed_items) && context.closed_items.length > 0;
+        if (!closedPendingEarly) {
+          const src = await loadWorksheetSource(supabase, pending.worksheet_id, pending.exercise_index);
+          worksheetExercise = src.exercise;
+          worksheetAudioTranscript = src.audioTranscript;
+          if (questionItems.length === 0) questionItems = openExerciseItems(worksheetExercise);
+        }
+        const openExercise = {
+          ...(worksheetExercise || {}),
+          ...(questionItems.length > 0 ? { questions: questionItems } : {}),
+          title: worksheetExercise?.title || context.title,
+        };
         console.log(`[process-pending] Written answers: ${Object.keys(answers).length}, Audio answers: ${Object.keys(audioAnswers).length}`);
 
         // Transcribe audio answers
-        const transcriptionMap: Record<number, { text: string; wordCount: number }> = {};
+        const transcriptionMap: Record<number, { text: string; wordCount: number; duration?: number }> = {};
         for (const [qIdxStr, audioUrl] of Object.entries(audioAnswers)) {
           if (!audioUrl || typeof audioUrl !== 'string' || !audioUrl.startsWith('http')) continue;
           const qIdx = parseInt(qIdxStr);
@@ -215,7 +251,9 @@ serve(async (req) => {
                 const words = transcData.transcription.split(/\s+/).filter((w: string) => w.length > 0);
                 transcriptionMap[qIdx] = {
                   text: transcData.transcription,
-                  wordCount: words.length
+                  wordCount: words.length,
+                  // Seconds, only when transcribe-audio reports it (never guessed).
+                  ...(typeof transcData.duration === 'number' && transcData.duration > 0 ? { duration: transcData.duration } : {}),
                 };
                 console.log(`[process-pending] Transcribed q${qIdx}: ${words.length} words`);
               }
@@ -304,9 +342,13 @@ serve(async (req) => {
 
           if (!effectiveStudentAnswer || effectiveStudentAnswer.trim() === '') continue;
 
-          const questionItem = questionItems[qIdx] || {};
-          const questionText = questionItem?.question || questionItem?.text || questionItem?.prompt || questionItem?.expression || `Question ${qIdx + 1}`;
-          const suggestedAnswer = questionItem?.answer || questionItem?.suggested_answer || questionItem?.paraphrase || '';
+          const octx = buildOpenAnswerContext({
+            exercise: openExercise,
+            questionIndex: qIdx,
+            worksheetAudioTranscript,
+          });
+          const questionText = octx.question_text;
+          const suggestedAnswer = octx.suggested_answer;
 
           const entry: any = {
             exercise_index: pending.exercise_index,
@@ -321,6 +363,7 @@ serve(async (req) => {
           if (transcription) {
             entry.audio_transcription = transcription.text;
             entry.audio_word_count = transcription.wordCount;
+            if (transcription.duration) entry.audio_duration_seconds = transcription.duration;
             audioQuestionsSentToAi++;
           }
 
@@ -355,7 +398,9 @@ serve(async (req) => {
           body: JSON.stringify({
             answers: answersToVerify,
             english_level: await learnerLevel(supabase, pending.worksheet_id, pending.english_level),
-            context: context.title || `Exercise ${pending.exercise_index + 1}`
+            context: isClosedPending
+              ? (context.title || `Exercise ${pending.exercise_index + 1}`)
+              : openExerciseContextString(openExercise, `Exercise ${pending.exercise_index + 1}`, { worksheetAudioTranscript })
           })
         });
 
@@ -377,90 +422,17 @@ serve(async (req) => {
         }
         
         // ========= BUILD CANONICAL ai_evaluation (same as homework) =========
-        const questionEvaluations = (aiResult.evaluations || []).map((e: any) => {
-          const qIdx = e.question_index;
-          const hasAudio = !!transcriptionMap[qIdx];
-          const hasWritten = !!(answers[String(qIdx)] && String(answers[String(qIdx)]).trim());
-          
-          return {
-            question_index: qIdx,
-            is_acceptable: e.is_acceptable ?? ((e.quality_score || 0) >= 0.5),
-            quality_score: e.quality_score ?? 0,
-            feedback: e.feedback || '',
-            ...(e.key_verdict ? { key_verdict: e.key_verdict } : {}),
-            // Only include writing_score if student provided written text
-            writing_score: hasWritten ? e.writing_score : undefined,
-            // Only include speaking_score if student provided audio
-            speaking_score: hasAudio ? e.speaking_score : undefined,
-          };
-        });
-
-        const aiEvaluation = { question_evaluations: questionEvaluations };
+        const hasAudioFor = (q: number) => !!transcriptionMap[q];
+        const aiEvaluation = buildQuestionEvaluations({ evaluations: aiResult.evaluations || [], answers, hasAudio: hasAudioFor });
 
         // ========= BUILD item_evaluations for DSLM (derived from canonical) =========
         // Iterate ALL nano_skills per question (not just the first one)
-        const itemEvaluations: any[] = [];
-        for (const e of (aiResult.evaluations || [])) {
-          const qIdx = e.question_index;
-          const questionItem = questionItems[qIdx] || {};
-          let nanoSkills = questionItem?.nano_skill;
-          
-          // Normalize to array
-          if (!nanoSkills) nanoSkills = [];
-          if (!Array.isArray(nanoSkills)) nanoSkills = [nanoSkills];
-          
-          const hasAudio = !!transcriptionMap[qIdx];
-          const hasWritten = !!(answers[String(qIdx)] && String(answers[String(qIdx)]).trim());
-          
-          // Filter out empty nano_skills
-          const validSkills = nanoSkills.filter((ns: any) => ns && ns.name);
-          
-          if (validSkills.length === 0) {
-            // No nano_skills: skip (don't create junk question_* metrics)
-            console.warn(`[process-pending] Question ${qIdx}: no nano_skills, skipping item_evaluation`);
-            continue;
-          }
-          
-          // Create evaluation for EACH nano_skill
-          for (const ns of validSkills) {
-            const nsName = (ns.name || '').toLowerCase();
-            let mastery: number;
-            
-            // Map writing_score/speaking_score to matching nano_skills
-            if ((nsName.includes('.writing.') || nsName.includes('.wr.')) && hasWritten && e.writing_score !== undefined) {
-              mastery = scoreToMastery(e.writing_score);
-            } else if ((nsName.includes('.speaking.') || nsName.includes('.sp.')) && hasAudio && e.speaking_score !== undefined) {
-              mastery = scoreToMastery(e.speaking_score);
-            } else if ((nsName.includes('.speaking.') || nsName.includes('.sp.')) && !hasAudio) {
-              // No audio submitted, don't evaluate speaking skill
-              mastery = -1;
-            } else {
-              // A real 0 (non-answer, off-topic) stays 0; a missing or invalid score is unevaluated.
-              mastery = scoreToMastery(e.quality_score);
-            }
-            
-            // Adjust confidence based on answer type
-            let confidence = ns.confidence || 0.90;
-            if (nsName.includes('.speaking.') || nsName.includes('.sp.')) {
-              confidence = hasAudio ? 0.90 : 0.30;
-            } else if (nsName.includes('.writing.') || nsName.includes('.wr.')) {
-              confidence = hasWritten ? 0.90 : 0.70;
-            }
-            
-            itemEvaluations.push({
-              question_index: qIdx,
-              name: ns.name,
-              reason: ns.reason || '',
-              mastery,
-              hasValue: mastery >= 0,
-              confidence,
-              feedback: e.feedback || '',
-              response_type: hasAudio ? 'audio' : 'written',
-              writing_score: hasWritten ? e.writing_score : undefined,
-              speaking_score: hasAudio ? e.speaking_score : undefined,
-            });
-          }
-        }
+        const itemEvaluations: any[] = buildOpenItemEvaluations({
+          evaluations: aiResult.evaluations || [],
+          questionItems,
+          answers,
+          hasAudio: hasAudioFor,
+        });
 
         const validEvaluations = itemEvaluations.filter((e: any) => e.hasValue && e.mastery >= 0);
         const overallMastery = validEvaluations.length > 0
@@ -505,7 +477,9 @@ serve(async (req) => {
           if (Object.keys(raisedFields).length === 0) raisedFields = null;
         }
 
-        const updateData: Record<string, unknown> = isClosedPending
+        // An open exercise with no nano skill still gets the model feedback in
+        // ai_evaluation; there is nothing to rate, so item_evaluations and mastery stay.
+        const updateData: Record<string, unknown> = (isClosedPending || itemEvaluations.length === 0)
           ? {
               ai_evaluation: aiEvaluation,
               last_ai_eval_at: answersReadAt,
@@ -590,7 +564,7 @@ serve(async (req) => {
     await runAll();
 
     return new Response(
-      JSON.stringify({ processed, skipped, failed, total: processed + skipped + failed }),
+      JSON.stringify({ processed, skipped, failed, total: processed + skipped + failed, ...(homeworkResult ? { homework: homeworkResult } : {}) }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
 
@@ -918,6 +892,22 @@ async function markNotEvaluable(
       created_at: new Date().toISOString(),
       processed_at: new Date().toISOString(),
     }, { onConflict: 'worksheet_id,student_email,exercise_index' });
+}
+
+/** Exercise plus the worksheet-level listening transcript (not stored on the exercise). */
+async function loadWorksheetSource(
+  supabase: any, worksheetId: string, exerciseIndex: number,
+): Promise<{ exercise: any | null; audioTranscript: string | null }> {
+  try {
+    const { data: worksheet } = await supabase.from('worksheets').select('ai_response').eq('id', worksheetId).single();
+    if (!worksheet?.ai_response) return { exercise: null, audioTranscript: null };
+    const parsed = typeof worksheet.ai_response === 'string' ? JSON.parse(worksheet.ai_response) : worksheet.ai_response;
+    const transcript = typeof parsed?.audio_transcript === 'string' && parsed.audio_transcript.trim() ? parsed.audio_transcript : null;
+    return { exercise: (parsed?.exercises || [])[exerciseIndex] ?? null, audioTranscript: transcript };
+  } catch (e) {
+    console.error('[process-pending] worksheet source read failed:', (e as Error).message);
+    return { exercise: null, audioTranscript: null };
+  }
 }
 
 /** One exercise of a worksheet's generated content, or null when unavailable. */

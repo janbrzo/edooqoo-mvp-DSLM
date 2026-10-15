@@ -13,7 +13,8 @@ import {
 } from '@/data/welcomeTestQuestions';
 import type { WelcomeTestQuestionDef, WelcomeTestSectionDef } from '@/types/welcomeTest';
 import type { Json } from '@/integrations/supabase/types';
-import { toCanonicalId } from '@/utils/welcomeTestNumbering';
+import { buildAnswerEvent, buildSkipEvent, toEventQuestion } from '../../supabase/functions/_shared/welcomeTestEventPayload';
+import { createEventLogger } from '@/lib/welcomeTest/eventLogRetry';
 import { devLog, devWarn } from '@/utils/logger';
 import { consumeWelcomeTestIntegrity } from '@/hooks/useWelcomeTestIntegrity';
 import { checkWelcomeTestKeyedAnswer, welcomeTestRatingFor } from '@/lib/welcomeTest/keyedAnswer';
@@ -66,6 +67,11 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
   const detectedTraits = useRef<Record<string, string>>({});
   const committedSections = useRef<Set<string>>(new Set());
   const pendingCommit = useRef<string | null>(null);
+  // Answer and skip events: first attempt awaited, up to 2 background retries (1 s, 3 s).
+  const eventLogger = useRef(createEventLogger<Record<string, unknown>>({
+    call: (args) => (supabase.rpc as any)('log_welcome_test_event_by_share_token', args),
+    onGiveUp: (key, message) => devWarn('[useWelcomeTest] answer event not logged:', key, message),
+  }));
   
   // PROBLEM 5: Visibility change timer - pause when tab is inactive
   const pausedAtRef = useRef<number | null>(null);
@@ -282,92 +288,26 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
 
       // Log test_answer_submitted event with nano_skill_ratings
       if (state.studentId && state.teacherId) {
-        const nanoSkillRatings = questionDef.nano_skill ? [{
-          name: questionDef.nano_skill,
-          reason: questionDef.scoring_logic || questionDef.description || '',
-          ...welcomeTestRatingFor(isCorrect),
-          question_index: 0,
-        }] : [];
-
-        // Dedup + insert happen server-side in log_welcome_test_event_by_share_token
-        // (anonymous students may not call add_student_event or touch student_events).
-        const canonicalId = toCanonicalId(questionId);
-
-        // Detect trait value for profiling questions - handle multi-select
-        let detectedTraitData: Record<string, string> | undefined;
-        if (questionDef.detected_trait) {
-          if (Array.isArray(answer)) {
-            // FIX 2.3: Multi-select detected_trait mapping for event payload
-            const traitValues = (answer as string[]).map(a => {
-              const idx = questionDef.options?.indexOf(a);
-              if (idx !== undefined && idx >= 0) {
-                return questionDef.detected_trait!.mapping[String(idx)];
-              }
-              return null;
-            }).filter(Boolean);
-            if (traitValues.length > 0) {
-              detectedTraitData = { [questionDef.detected_trait.trait_name]: traitValues.join(', ') };
-            }
-          } else if (typeof answer === 'string') {
-            const optionIndex = questionDef.options?.indexOf(answer);
-            if (optionIndex !== undefined && optionIndex >= 0) {
-              const traitValue = questionDef.detected_trait.mapping[String(optionIndex)];
-              if (traitValue) {
-                detectedTraitData = { [questionDef.detected_trait.trait_name]: traitValue };
-              }
-            }
-          }
-        }
-
-        // Fallback: for profiling questions without detected_trait, save answer value
-        // Round 8: Use semantic trait keys instead of generic 'answer_value'
-        const QUESTION_TRAIT_FALLBACK: Record<string, string> = {
-          'wt_q2': 'main_frustrations',
-          'wt_q3b': 'usage_context',
-          'wt_q6': 'preferred_activities',
-          'wt_q9': 'learning_duration',
-          'wt_q10': 'learning_background',
-          'wt_q11': 'exam_experience',
-          'wt_q12': 'learning_goal',
-          'wt_q13': 'desired_topics',
-          
-          'wt_q41': 'learning_priorities',
-          'wt_q43': 'interest_topics',
-          'wt_q45': 'final_message',
-        };
-
-        if (!detectedTraitData && !questionDef.correct_answer && !questionDef.nano_skill) {
-          if (questionDef.question_type === 'self_assessment_matrix' && typeof answer === 'object') {
-            detectedTraitData = { confidence_matrix: JSON.stringify(answer) };
-          } else if (questionDef.question_type === 'preference_choice' && Array.isArray(answer)) {
-            const traitKey = QUESTION_TRAIT_FALLBACK[questionId] || 'selected_preferences';
-            detectedTraitData = { [traitKey]: (answer as string[]).join('; ') };
-          } else if (answer !== undefined && answer !== null && answer !== '__IDK__') {
-            const traitKey = QUESTION_TRAIT_FALLBACK[questionId] || 'answer_value';
-            detectedTraitData = { [traitKey]: typeof answer === 'string' ? answer : JSON.stringify(answer) };
-          }
-        }
-
-        const { error: eventError } = await (supabase.rpc as any)('log_welcome_test_event_by_share_token', {
+        // Payload built by the shared builder (also used by the server to
+        // reconcile events lost here). Dedup + insert happen server-side in
+        // log_welcome_test_event_by_share_token (anonymous students may not
+        // call add_student_event or touch student_events).
+        const draft = buildAnswerEvent(toEventQuestion(questionDef), {
+          questionIndex,
+          answer,
+          isCorrect,
+          timeSpentSeconds: timeSpent,
+          isIdk: opts.isIdk === true,
+        });
+        await eventLogger.current.log(draft.answer_id, {
           p_share_token: shareToken as string,
           p_event_type: 'test_answer_submitted',
-          p_answer_id: canonicalId,
-          p_legacy_answer_id: questionId,
-          p_element_type: questionDef.element_type || questionDef.question_type || null,
-          p_event_payload: {
-            answer_id: canonicalId,
-            legacy_answer_id: questionId,
-            exercise_type: questionDef.question_type,
-            exercise_index: questionIndex,
-            is_correct: isCorrect,
-            is_idk: opts.isIdk === true ? true : undefined,
-            nano_skill_ratings: nanoSkillRatings,
-            detected_traits: detectedTraitData,
-            time_spent_seconds: timeSpent,
-          } as unknown as Json,
-          p_skill_ids: questionDef.nano_skill ? [questionDef.nano_skill] : [],
+          p_answer_id: draft.answer_id,
+          p_legacy_answer_id: draft.legacy_answer_id,
+          p_element_type: draft.element_type,
+          p_event_payload: draft.event_payload as unknown as Json,
+          p_skill_ids: draft.skill_ids,
         });
-        if (eventError) devWarn('[useWelcomeTest] answer event not logged:', eventError.message);
       }
     } catch (err) {
       console.error('Error committing answer:', err);
@@ -472,21 +412,15 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
           p_time_spent_seconds: null,
         });
 
-        const canonicalId = toCanonicalId(questionDef.id);
-        await (supabase.rpc as any)('log_welcome_test_event_by_share_token', {
+        const draft = buildSkipEvent(toEventQuestion(questionDef), questionIndex);
+        await eventLogger.current.log(draft.answer_id, {
           p_share_token: shareToken as string,
           p_event_type: 'test_answer_skipped',
-          p_answer_id: canonicalId,
-          p_legacy_answer_id: questionDef.id,
-          p_element_type: questionDef.element_type || questionDef.question_type || null,
-          p_event_payload: {
-            answer_id: canonicalId,
-            legacy_answer_id: questionDef.id,
-            exercise_type: questionDef.question_type,
-            exercise_index: questionIndex,
-            is_skipped: true,
-          } as unknown as Json,
-          p_skill_ids: questionDef.nano_skill ? [questionDef.nano_skill] : [],
+          p_answer_id: draft.answer_id,
+          p_legacy_answer_id: draft.legacy_answer_id,
+          p_element_type: draft.element_type,
+          p_event_payload: draft.event_payload as unknown as Json,
+          p_skill_ids: draft.skill_ids,
         });
       } catch (err) {
         console.error('Error logging skip event:', err);
