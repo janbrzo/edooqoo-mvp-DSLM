@@ -23,6 +23,7 @@ import {
 } from "../_shared/dslmPromptCore.ts";
 import { chatCompletion } from "../_shared/aiChat.ts";
 import { NO_EM_DASH_RULE } from "../_shared/writingStyle.ts";
+import { withEffectiveMastery } from "../_shared/forgetting.ts";
 import { computeIntensity, intensityPromptLines, loadLearningProfileForPacing } from "../_shared/pacing.ts";
 
 const corsHeaders = {
@@ -73,7 +74,7 @@ serve(async (req) => {
     // Fetch context
     const [studentRes, metricsRes, knowledgeRes, goalsRes, worksheetsRes, phaseRes, excludeRes, existingStepsRes, learningProfileRes] = await Promise.all([
       supabase.from('students').select('name, english_level, main_goal, main_goal_target_date, dslm_pacing_mode, last_pacing_set_manually, dslm_use_roadmap').eq('id', studentId).eq('teacher_id', teacherId).single(),
-      supabase.from('student_skill_metrics').select('skill_name, skill_category, micro_skill, current_mastery, trend, updated_at')
+      supabase.from('student_skill_metrics').select('skill_name, skill_category, micro_skill, current_mastery, trend, updated_at, last_event_at')
         .eq('student_id', studentId).eq('teacher_id', teacherId).order('current_mastery', { ascending: true }).limit(60),
       supabase.from('student_knowledge_entries').select('content, category, created_at')
         .eq('student_id', studentId).eq('teacher_id', teacherId).is('deleted_at', null).is('is_outdated', false)
@@ -107,7 +108,8 @@ serve(async (req) => {
       });
     }
 
-    const metrics = metricsRes.data || [];
+    // D9: forgetting applied at read time; weakest (lowest effective mastery) first.
+    const metrics = withEffectiveMastery(metricsRes.data || []).sort((a, b) => a.current_mastery - b.current_mastery);
     const knowledge = knowledgeRes.data || [];
     const goals = goalsRes.data || [];
     const recentWorksheets = worksheetsRes.data || [];

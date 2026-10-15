@@ -1,6 +1,7 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { effectiveMastery } from '../../supabase/functions/_shared/forgetting';
 
 export interface SkillMetric {
   id: string;
@@ -8,7 +9,9 @@ export interface SkillMetric {
   teacher_id: string;
   skill_name: string;
   skill_category: string;
+  /** Effective mastery after forgetting (D9); `raw_mastery` is the stored value. */
   current_mastery: number;
+  raw_mastery: number;
   trend: 'improving' | 'declining' | 'stable';
   total_events: number;
   last_event_at: string | null;
@@ -60,7 +63,8 @@ export function useSkillMetrics(studentId: string, teacherId: string, periodDays
       if (error) throw error;
       return (data || []).map(row => ({
         ...row,
-        current_mastery: Number(row.current_mastery) || 0,
+        raw_mastery: Number(row.current_mastery) || 0,
+        current_mastery: effectiveMastery(Number(row.current_mastery) || 0, row.last_event_at),
         total_events: Number(row.total_events) || 0,
         trend: (row.trend as 'improving' | 'declining' | 'stable') || 'stable',
         mastery_history: (row.mastery_history as any[] || []),

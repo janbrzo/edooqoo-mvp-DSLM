@@ -427,7 +427,14 @@ export function SkillsOverviewPanel({ studentId, teacherId, onlySection }: Skill
                       </p>
                     </div>
                     <MasterySparkline history={skill.mastery_history} trend={skill.trend} />
-                    <div className="w-32">
+                    <div
+                      className="w-32"
+                      title={
+                        skill.raw_mastery !== skill.current_mastery && skill.last_event_at
+                          ? `After forgetting: ${skill.current_mastery}%. Last practised ${skill.last_event_at.slice(0, 10)} at ${skill.raw_mastery}%.`
+                          : undefined
+                      }
+                    >
                       <MasteryBar value={skill.current_mastery} />
                     </div>
                   </div>

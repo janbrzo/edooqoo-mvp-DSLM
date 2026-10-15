@@ -13,6 +13,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 import { authorizedTeacherId, jsonResponse, resolveCaller } from "../_shared/auth.ts";
 import { chatCompletion } from "../_shared/aiChat.ts";
 import { NO_EM_DASH_RULE } from "../_shared/writingStyle.ts";
+import { withEffectiveMastery } from "../_shared/forgetting.ts";
 import { resolvePromptPacing, computeIntensity, intensityPromptLines, loadLearningProfileForPacing } from "../_shared/pacing.ts";
 
 // v6.9.13: helpers inlined (previously imported from ../_shared/dslmPromptCore.ts).
@@ -299,7 +300,7 @@ serve(async (req) => {
         .single(),
       supabase
         .from('student_skill_metrics')
-        .select('skill_name, skill_category, micro_skill, current_mastery, trend, updated_at')
+        .select('skill_name, skill_category, micro_skill, current_mastery, trend, updated_at, last_event_at')
         .eq('student_id', studentId)
         .eq('teacher_id', teacherId)
         .order('current_mastery', { ascending: true })
@@ -346,7 +347,8 @@ serve(async (req) => {
       );
     }
 
-    const metrics = metricsRes.data || [];
+    // D9: forgetting applied at read time; weakest (lowest effective mastery) first.
+    const metrics = withEffectiveMastery(metricsRes.data || []).sort((a, b) => a.current_mastery - b.current_mastery);
     const knowledge = knowledgeRes.data || [];
     const goals = goalsRes.data || [];
     const worksheets = worksheetsRes.data || [];
