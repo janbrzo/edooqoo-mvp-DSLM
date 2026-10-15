@@ -14,6 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      _mig_parts: {
+        Row: {
+          chunk: string | null
+          i: number
+          mig: string
+        }
+        Insert: {
+          chunk?: string | null
+          i: number
+          mig: string
+        }
+        Update: {
+          chunk?: string | null
+          i?: number
+          mig?: string
+        }
+        Relationships: []
+      }
       admin_activity_log: {
         Row: {
           action: string
