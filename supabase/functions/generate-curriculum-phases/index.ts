@@ -44,7 +44,8 @@ function buildStudentProfileBlock(student: any, _pacing: number): string {
 function buildWeakAreasBlock(metrics: any[], limit: number): string {
   if (!metrics?.length) return '(no skill metrics yet)';
   return metrics.slice(0, limit).map((m: any) => {
-    const age = m.updated_at ? Math.round((Date.now() - new Date(m.updated_at).getTime()) / (1000*60*60*24)) : null;
+    const seenAt = m.last_event_at || m.updated_at;
+    const age = seenAt ? Math.round((Date.now() - new Date(seenAt).getTime()) / (1000*60*60*24)) : null;
     return `- ${m.skill_category || ''}/${m.micro_skill || m.skill_name}: mastery=${m.current_mastery}, trend=${m.trend || 'flat'}${age !== null ? `, ${age}d old` : ''}`;
   }).join('\n  ');
 }

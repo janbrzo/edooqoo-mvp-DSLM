@@ -18,6 +18,34 @@ const exercise = {
   ],
 };
 
+const commaKeyed = {
+  type: 'fill-in-blanks',
+  sentences: [
+    { text: 'Maria ___ her day early, ___ 6:00 am.', answer: 'starts, at' },
+    { text: 'She ___ lunch ___ noon ___ the office.', answer: 'has, at' },
+  ],
+};
+
+describe('multi-blank key written with commas (181 of 228 production sentences)', () => {
+  it('maps "starts, at" to the two blanks', () => {
+    expect(calculateItemMastery('fill-in-blanks', commaKeyed, 0, undefined, { '0_0': 'starts', '0_1': 'at' })).toBe(100);
+    expect(calculateItemMastery('fill-in-blanks', commaKeyed, 0, undefined, { '0_0': 'starts', '0_1': 'on' })).toBe(50);
+  });
+
+  it('leaves an item unscored when the key cannot be mapped to the blanks', () => {
+    expect(calculateItemMastery('fill-in-blanks', commaKeyed, 1, undefined, { '1_0': 'has', '1_1': 'at', '1_2': 'in' })).toBeNull();
+  });
+
+  it('scores a sentence answered only in its second blank', () => {
+    expect(calculateItemMastery('fill-in-blanks', commaKeyed, 0, undefined, { '0_1': 'at' })).toBe(50);
+  });
+
+  it('gives the AI the key in order', () => {
+    const ctx = buildClosedItemContext('fill-in-blanks', commaKeyed, 0, { '0_0': 'starts', '0_1': 'on' });
+    expect(ctx?.suggested_answer).toBe('starts / at');
+  });
+});
+
 describe('fill-in-blanks with several blanks', () => {
   it('scores each blank on its own: share of correct blanks', () => {
     expect(calculateItemMastery('fill-in-blanks', exercise, 0, undefined, { '0_0': 'am', '0_1': 'new' })).toBe(100);

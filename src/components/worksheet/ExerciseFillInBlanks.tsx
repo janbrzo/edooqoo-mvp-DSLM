@@ -2,6 +2,7 @@ import React, { useMemo } from "react";
 import { InteractiveExerciseProps } from "@/types/interactiveHomework";
 import { Input } from "@/components/ui/input";
 import { matchAnswer, type MatchVerdict } from "@/lib/answers/matchAnswer";
+import { blankAnswers } from "@/lib/answers/blanks";
 import { AnswerStatusBadge, answerFieldClasses } from "./AnswerStatusBadge";
 import NanoSkillBadge, { NanoSkill } from "./NanoSkillBadge";
 import { safeGetText, safeGetNanoSkill, safeGetAllNanoSkills } from "@/utils/textObjectFixer";
@@ -107,17 +108,13 @@ const ExerciseFillInBlanks: React.FC<ExerciseFillInBlanksProps> = ({
           const blanksCount = (sentenceText.match(/_+/g) || []).length;
           const multiBlank = blanksCount > 1;
           const blankKey = (b: number): string | number => (multiBlank ? `${sIndex}_${b}` : sIndex);
-          const correctParts: string[] = (() => {
-            if (Array.isArray(sentence.answers) && sentence.answers.length > 0) return sentence.answers.map(String);
-            const rawAnswer = String(sentence.answer ?? '');
-            return multiBlank && rawAnswer.includes(' / ') ? rawAnswer.split(/\s*\/\s*/) : [rawAnswer];
-          })();
+          const correctParts: string[] = multiBlank ? blankAnswers(sentence, blanksCount) : [String(sentence.answer ?? '')];
           const answersByKey = studentAnswers as Record<string | number, any>;
           // Answers saved under the plain sentence key (before blanks had their own keys) still show in blank 0.
           const blankAnswerOf = (b: number): string =>
             String(answersByKey[blankKey(b)] || (multiBlank && b === 0 && answersByKey[`${sIndex}_0`] === undefined ? answersByKey[sIndex] : '') || '');
           const blankVerdicts = Array.from({ length: Math.max(blanksCount, 1) }).map((_, b) =>
-            matchAnswer(blankAnswerOf(b), correctParts[b] ?? correctParts[0] ?? '', { mode: 'word' }).verdict);
+            matchAnswer(blankAnswerOf(b), multiBlank ? (correctParts[b] ?? '') : (correctParts[0] ?? ''), { mode: 'word' }).verdict);
           const studentAnswer = multiBlank
             ? Array.from({ length: blanksCount }).map((_, b) => blankAnswerOf(b)).join(' / ')
             : blankAnswerOf(0);

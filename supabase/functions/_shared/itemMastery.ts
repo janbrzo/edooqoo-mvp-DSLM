@@ -7,6 +7,8 @@
  */
 import { matchAnswer } from './matchAnswer.ts';
 import { normalizeExerciseShape } from './normalizeExercise.ts';
+import { countBlanks, blankAnswers, hasBlankKeys } from './blanks.ts';
+export { countBlanks, blankAnswers, hasBlankKeys };
 
 /**
  * Text correctness for DSLM.
@@ -25,20 +27,6 @@ const textVerdict = (
   return null; // 'review' / 'empty' => not scored
 };
 
-/** Number of blanks (runs of underscores) in a sentence text. */
-export const countBlanks = (text: unknown): number => (String(text ?? '').match(/_+/g) || []).length;
-
-/** Correct answer per blank: `answers` array, or "a / b" in `answer`, same convention as gap-text. */
-export const blankAnswers = (sentence: any, blanks: number): string[] => {
-  if (Array.isArray(sentence?.answers) && sentence.answers.length > 0) return sentence.answers.map(String);
-  const raw = String(sentence?.answer ?? sentence?.correct ?? sentence?.missing_word ?? '');
-  return blanks > 1 && raw.includes(' / ') ? raw.split(/\s*\/\s*/) : [raw];
-};
-
-/** True when a multi-blank sentence was answered blank by blank (keys `${i}_${b}`). */
-export const hasBlankKeys = (itemIndex: number, allAnswers?: Record<string | number, any>): boolean =>
-  !!allAnswers && allAnswers[`${itemIndex}_0`] !== undefined;
-
 /**
  * Multi-blank fill-in-blanks: each blank is scored on its own and the item is the
  * share of correct blanks. An empty blank counts as wrong, an uncertain match
@@ -52,6 +40,7 @@ export const multiBlankMastery = (
   const text = typeof sentence === 'string' ? sentence : (sentence?.text ?? '');
   const blanks = countBlanks(text);
   const expected = blankAnswers(sentence, blanks);
+  if (expected.length === 0) return null; // key cannot be mapped to the blanks
   let correct = 0;
   let wrong = 0;
   for (let b = 0; b < blanks; b++) {
