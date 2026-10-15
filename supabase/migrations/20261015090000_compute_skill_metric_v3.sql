@@ -256,3 +256,17 @@ BEGIN
   RETURN NULL;
 END;
 $function$;
+
+-- Restoring created_at of rebuilt events (iteration 8 migrations and undo of Mark done)
+-- must recompute the metrics: the update trigger now also fires on created_at changes.
+DROP TRIGGER IF EXISTS trg_refresh_skill_metrics_on_update ON public.student_events;
+CREATE TRIGGER trg_refresh_skill_metrics_on_update
+  AFTER UPDATE OF event_payload, mastery, created_at ON public.student_events
+  FOR EACH ROW
+  WHEN (OLD.event_payload IS DISTINCT FROM NEW.event_payload OR OLD.mastery IS DISTINCT FROM NEW.mastery OR OLD.created_at IS DISTINCT FROM NEW.created_at)
+  EXECUTE FUNCTION refresh_skill_metrics_on_event();
+
+-- compute_skill_metric takes arbitrary student and teacher ids and now an advisory lock:
+-- only the triggers (owner) and the service role may call it.
+REVOKE ALL ON FUNCTION public.compute_skill_metric(uuid, uuid, text, text) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.compute_skill_metric(uuid, uuid, text, text) TO service_role;

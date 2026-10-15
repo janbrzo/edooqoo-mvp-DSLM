@@ -8,7 +8,7 @@ Apply after iteration 7 step 4. Run migrations through the Supabase MCP connecto
 2. `20261015090300_welcome_test_event_reconciliation.sql`: one event per Welcome Test answer, retake supersession, reconciliation RPC. Must precede the `process-welcome-test` deploy (the new calls only warn until it exists).
 3. `20261015090400_homework_ai_queue_and_worksheet_save.sql`: worksheet save without stale values, homework server AI functions and columns.
 4. `20261015090500_test_results_null_for_unattempted.sql`: NULL score for unattempted Welcome Test skills, no tag double count.
-5. Quiet window: `20261015090100_recompute_skill_metrics_v3.sql` (re-run until the NOTICE reports 0 left; about 2 runs for ~2000 metrics), then `20261015090200_mark_done_and_homework_mastery_fixes.sql` (homework row mastery backfill, ~23 rows).
+5. Quiet window: `20261015090100_recompute_skill_metrics_v3.sql` (re-run until the NOTICE reports 0 left; about 5 runs of 500 for ~2200 metrics), then `20261015090200_mark_done_and_homework_mastery_fixes.sql` (homework row mastery backfill, ~23 rows).
 
 Review afterwards: `select step, count(*) from dslm_backfill_audit where step like 'D_%' or step like 'E_%' or step like 'F_%' group by 1;`
 

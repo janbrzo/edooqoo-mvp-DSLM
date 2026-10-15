@@ -116,7 +116,9 @@ BEGIN
       WHEN v_changed THEN EXCLUDED.item_evaluations
       ELSE COALESCE(v_items, worksheet_student_answers.item_evaluations)
     END,
-    eval_trigger = NULL  -- RESET on student save so trigger maps to student_learning_activity
+    -- A changed answer resets the label (student save); a pure re-save keeps it, so the
+    -- answer trigger skips the rebuild and the events keep their type and date.
+    eval_trigger = CASE WHEN v_changed THEN NULL ELSE worksheet_student_answers.eval_trigger END
   RETURNING id INTO v_id;
 
   RETURN v_id;
@@ -178,7 +180,7 @@ BEGIN
       THEN EXCLUDED.audio_answers
       ELSE worksheet_student_answers.audio_answers
     END,
-    eval_trigger = NULL
+    eval_trigger = CASE WHEN v_changed THEN NULL ELSE worksheet_student_answers.eval_trigger END
   RETURNING id INTO v_id;
 
   RETURN v_id;

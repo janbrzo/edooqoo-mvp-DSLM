@@ -1,9 +1,14 @@
 -- Iteration 8 (I8.D): Mark done undo and homework exercise mastery.
 --
+-- RUN IN A QUIET WINDOW: the event rebuilds take advisory locks per skill metric;
+-- two concurrent student saves with overlapping skills can deadlock (the answer
+-- save commits, the event rebuild of the loser is logged in dslm_event_errors and
+-- happens again on the next save). Requires 20261015090000 (trigger on created_at).
+--
 -- 1. delete_mark_done_evaluation also resets worksheet_student_answers.eval_trigger
---    from 'mark_done' to NULL for that student, worksheet and exercise (a label
+--    from mark_done to NULL for that student, worksheet and exercise (a label
 --    without its event is what an undo used to leave behind). The reset makes the
---    answer trigger rebuild that answer's events, so their original created_at is
+--    answer trigger rebuild the events of that answer, so their original created_at is
 --    restored afterwards (recency weighting must not move).
 -- 2. Backfill E_homework_row_mastery: homework_student_answers.mastery is set to the
 --    mean of the scored items of item_evaluations (hasValue not false, mastery >= 0,
@@ -125,7 +130,7 @@ BEGIN
 
     UPDATE public.homework_student_answers SET mastery = r.desired WHERE id = r.id;
 
-    -- The answer trigger may rebuild this answer's events: keep their original dates.
+    -- The answer trigger may rebuild the events of this answer: keep their original dates.
     UPDATE public.student_events e
        SET created_at = (v_dates->>(e.event_payload->>'response_type'))::timestamptz
      WHERE e.event_source = 'homework'

@@ -40,7 +40,7 @@ BEGIN
       correct_answers = v_correct,
       score_percentage = v_score,
       time_spent_seconds = v_time,
-      -- v6.9.50: never downgrade a reviewed test back to 'completed'
+      -- v6.9.50: never downgrade a reviewed test back to completed
       status = CASE WHEN v_current_status = 'reviewed' THEN status ELSE 'completed' END,
       completed_at = COALESCE(completed_at, NOW()),
       updated_at = NOW()

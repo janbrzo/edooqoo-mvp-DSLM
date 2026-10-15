@@ -5,7 +5,7 @@
 -- the end of this transaction and rewrites the metric row, so a student save that
 -- needs one of them waits meanwhile.
 --
--- Batches: one run handles at most 1500 metrics (the advisory locks of a
+-- Batches: one run handles at most 500 metrics (max_locks_per_transaction is 64 in production, so keep the lock count low) (the advisory locks of a
 -- transaction are all held until commit). A metric counts as migrated once its
 -- mastery_history carries event_id (written only by v3, also by live triggers).
 -- If the run reports metrics left, run the file again; a run with nothing left
@@ -33,7 +33,7 @@ REVOKE ALL ON public.dslm_backfill_audit FROM PUBLIC, anon, authenticated;
 DO $recompute$
 DECLARE
   v_run text := 'dslm_metric_v3_' || to_char(clock_timestamp(), 'YYYYMMDD_HH24MISS_MS');
-  v_batch integer := 1500;
+  v_batch integer := 500;
   v_todo integer;
   v_done integer;
   r record;

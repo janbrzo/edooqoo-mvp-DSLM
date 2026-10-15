@@ -196,7 +196,34 @@ describe('Iteration 8: compute_skill_metric v3', () => {
     expect(body).toContain('D_metric_recompute_v3');
     expect(body).toMatch(/pg_advisory_xact_lock/);
     expect(body).toMatch(/mastery_history->0 \? 'event_id'/);
-    expect(body).toMatch(/v_batch integer := 1500/);
+    expect(body).toMatch(/v_batch integer := 500/);
     expect(body).toMatch(/INSERT INTO public\.dslm_backfill_audit/);
+  });
+});
+
+describe('Iteration 8: metric engine v3 review fixes', () => {
+  const v3 = readFileSync(join(MIGRATIONS, '20261015090000_compute_skill_metric_v3.sql'), 'utf8');
+
+  it('the metric update trigger also fires when created_at is restored', () => {
+    expect(v3).toMatch(/AFTER UPDATE OF event_payload, mastery, created_at ON public\.student_events/);
+    expect(v3).toMatch(/OLD\.created_at IS DISTINCT FROM NEW\.created_at/);
+  });
+
+  it('compute_skill_metric is not executable by client roles', () => {
+    expect(v3).toMatch(/REVOKE ALL ON FUNCTION public\.compute_skill_metric\(uuid, uuid, text, text\) FROM PUBLIC, anon, authenticated/);
+    expect(v3).toMatch(/GRANT EXECUTE ON FUNCTION public\.compute_skill_metric\(uuid, uuid, text, text\) TO service_role/);
+  });
+
+  it('a pure re-save of a worksheet answer keeps its eval_trigger label', () => {
+    const save = readFileSync(join(MIGRATIONS, '20261015090400_homework_ai_queue_and_worksheet_save.sql'), 'utf8');
+    expect(save.match(/eval_trigger = CASE WHEN v_changed THEN NULL ELSE worksheet_student_answers\.eval_trigger END/g)?.length).toBe(2);
+  });
+
+  it('migrations of this iteration have no apostrophes in line comments (SQL Editor splitter)', () => {
+    for (const f of readdirSync(MIGRATIONS).filter((n) => n.startsWith('20261015'))) {
+      const lines = readFileSync(join(MIGRATIONS, f), 'utf8').split('\n');
+      const bad = lines.filter((l) => /^\s*--.*'/.test(l));
+      expect({ f, bad }).toEqual({ f, bad: [] });
+    }
   });
 });
