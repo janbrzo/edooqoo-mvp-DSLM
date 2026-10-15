@@ -344,6 +344,12 @@ TECHNICAL MECHANICS: App.tsx exposes SEO routes for /about, /prompts, /glossary,
 
 RAG KEYWORDS: SEO, llms.txt, AI discovery, citable pages, sitemap, schema.org, FAQ JSON-LD, ESL content, programmatic SEO, teacher resources, search landing page, public route, AI agent documentation
 
+INDEXATION INTEGRITY (v6.9.73)
+PROBLEM: GSC flagged sitemap URLs served with noindex; school-age content (kids, teenagers, parent-teacher conferences) diluted the adult 1:1 positioning; Organization JSON-LD had no founder entity.
+EDOOQOO SOLUTION: Audit asserts index,follow plus clean canonical for every sitemap page; content-registry `noindex` flag de-indexes off-profile pages and removes them from sitemap.xml; Organization.founder links to a Person node at /authors/jan-brzostowski#person with knowsAbout.
+TECHNICAL MECHANICS: scripts/seo/audit-seo-assets.mjs, scripts/seo/audit-sitemap-integrity, scripts/seo/content-registry.mjs, scripts/seo/generate-ai-resources.mjs (VERSION/RELEASE_DATE), index.html JSON-LD, public/sitemap.xml, public/blog/index.html, public/resources.html.
+RAG KEYWORDS: indexation, noindex, sitemap integrity, canonical, Google Search Console, content registry, de-indexing, Martha Test, adult ESL positioning, founder entity, Person schema, Organization schema, knowsAbout, E-E-A-T, entity graph
+
 ## SEO and AI Visibility Retrieval Map
 STATUS: PRODUCTION
 
