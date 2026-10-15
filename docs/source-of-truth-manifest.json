@@ -23,7 +23,7 @@
     "serviceModules": 11,
     "edgeFunctions": 81,
     "typedTables": 65,
-    "typedRpcs": 99,
+    "typedRpcs": 101,
     "migrationIndexes": 21
   },
   "routes": [
@@ -55430,6 +55430,57 @@
         "returns": "string"
       },
       {
+        "name": "add_student_event_internal",
+        "args": [
+          {
+            "name": "p_element_type",
+            "type": "string",
+            "optional": true
+          },
+          {
+            "name": "p_event_payload",
+            "type": "Json",
+            "optional": true
+          },
+          {
+            "name": "p_event_source",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_event_type",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_session_id",
+            "type": "string",
+            "optional": true
+          },
+          {
+            "name": "p_skill_ids",
+            "type": "string[]",
+            "optional": true
+          },
+          {
+            "name": "p_source_id",
+            "type": "string",
+            "optional": true
+          },
+          {
+            "name": "p_student_id",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_teacher_id",
+            "type": "string",
+            "optional": false
+          }
+        ],
+        "returns": "string"
+      },
+      {
         "name": "add_tokens",
         "args": [
           {
@@ -57106,6 +57157,27 @@
         "returns": "boolean"
       },
       {
+        "name": "submit_homework_answers_by_share_token",
+        "args": [
+          {
+            "name": "p_homework_id",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_share_token",
+            "type": "string",
+            "optional": false
+          },
+          {
+            "name": "p_student_email",
+            "type": "string",
+            "optional": false
+          }
+        ],
+        "returns": "boolean"
+      },
+      {
         "name": "track_user_event",
         "args": [
           {
@@ -58267,6 +58339,12 @@
         "host": "www.sitemaps.org",
         "callsites": [
           "supabase/functions/regenerate-gallery-sitemap/index.ts"
+        ]
+      },
+      {
+        "host": "x",
+        "callsites": [
+          "src/lib/answers/__tests__/homeworkTranscriptions.test.ts"
         ]
       },
       {

@@ -1,0 +1,25 @@
+# AGENTS.md (scoped rules)
+
+One rule per entry with a one-line why. Moved from the root AGENTS.md.
+
+## Student Workspace
+
+- Student Workspace tab and Learning plan segment state live only in the URL and are resolved via `src/lib/students/workspaceTabs.ts` (`resolveModelSegment` for `view=`); legacy `?tab=` and `view=` values are permanent — because sent emails and bookmarks carry them.
+- The next lesson shown anywhere (Prep card, Learning plan Up next, worksheet form Next steps banner) is ordered only by `orderUpNext` in `src/lib/dslm/learningPlan.ts` — because suggestion `sequence_number` restarts per phase and two selectors once proposed different lessons.
+
+## Runtime Safety
+
+- Homework and shared worksheet answers are autosaved only through `createPendingSaves` in `src/lib/answers/pendingSaves.ts` (one debounce timer per exercise, `flush()` on submit and unmount), never a single shared timer — because a shared timer dropped the pending save of one exercise whenever another was edited within 1.5 s.
+- Student-facing pages never infer "unassigned" or "not shared" from an anonymous read of `worksheets` (RLS hides the row, so null means unknown, see `isKnownUnassigned` in `src/lib/worksheet/shareAssignment.ts`); access is decided by `verify_worksheet_student_email` — because that inference blocked every anonymous student on shared worksheet links.
+- `verify-open-answers` and `process-pending-ai-evaluations` accept only the service role, a signed-in user (worksheet owner for the queue) or a student proving access with share token + assigned email (`supabase/functions/_shared/evaluationAccess.ts`); the client reads and writes student answers only through the `*_by_share_token` RPCs via `src/lib/answers/studentAnswerRpc.ts` (owner teacher always passes; homework submit through `submit_homework_answers_by_share_token`; `update_homework_answer_by_share_token` also checks the assigned email; the legacy id+email RPCs are revoked from anon and authenticated by `20261012200100` and `20261014090100` and stay callable only inside the SECURITY DEFINER wrappers and by the service role); `transcribe-audio` follows the same access rule and fetches only https audio from the allowlisted storage hosts with a 25 MB cap (`_shared/audioFetchGuard.ts`) — because the endpoints were a free public LLM proxy and answers were writable with an id and an email, or with the link token alone.
+- Student text sent to an evaluation model is wrapped with `wrapStudentText` under `STUDENT_TEXT_RULE`; only unambiguous grader-steering (`looksLikeInstructionInjection`: grader field names, or an override request plus a score request) is capped (`supabase/functions/_shared/promptSafety.ts`), never ordinary sentences — because a live probe scored a prompt-injection answer 1.0 while a broad filter would mark genuine answers wrong.
+- Client logging goes through `src/utils/logger.ts`, never raw `console.*` — because production logs must not leak student data.
+- Supabase hooks return early when demo mode (`edooqoo_demo_mode`) is active; `src/lib/demo/demoFetchGuard.ts` (first import of `main.tsx`) answers any remaining REST read carrying a `demo-` id with an empty result — because demo IDs are not UUIDs and crash queries.
+- Teacher-only pages call `useTeacherAuthRedirect` instead of ad-hoc `navigate('/')` — because email deep links must survive login via `state.from`.
+- Edge Functions build links from the `APP_BASE_URL` secret, never a hardcoded domain — because preview, published and custom domains differ.
+- Student-facing pages (Welcome Test, homework) log DSLM events only through token/email-authorised RPCs (`log_welcome_test_event_by_share_token`, `log_homework_submitted_event`), never `add_student_event` or direct `student_events` writes — because those are teacher-only and anonymous calls fail silently with 401.
+- `add_student_event` accepts only the student's own teacher (or the service role); SQL wrappers that authorise their caller themselves call `add_student_event_internal`, which no client role may execute (`20261014090000`) — because SECURITY DEFINER bypassed the RLS teacher check and any signed-in user could write events and skill metrics for another teacher's student.
+- Scheduled Edge Functions (`pacing-periodic-check`, `loop-pacing-aggregator` and the other cron targets) require `x-cron-secret` or the service role key, never the anon key — because a cron job calling with the anon key made the endpoint public.
+- The profile billing guard trigger tests `current_user = 'authenticated'`, never `auth.role()` — because the JWT role is still `authenticated` inside SECURITY DEFINER billing functions like `consume_token`, which then could not charge tokens.
+- Every AI model id used in `supabase/functions/**` is registered in `supabase/functions/_shared/modelRegistry.ts` (enforced by `src/lib/__tests__/modelAudit.test.ts`) — because `audit-llm-models` monitors and advises only on registered models.
+
