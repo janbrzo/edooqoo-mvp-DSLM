@@ -14,7 +14,7 @@ interface ExerciseFillInBlanksProps extends Partial<InteractiveExerciseProps> {
   onWordBankChange: (wIndex: number, value: string) => void;
   onSentenceChange: (sIndex: number, field: string, value: string) => void;
   // PROBLEM 1: Live Session answer prop for displaying student answers in blue
-  liveSessionAnswer?: Record<number, any>;
+  liveSessionAnswer?: Record<string | number, any>;
   disabled?: boolean;
   // For NanoSkill editing
   onNanoSkillChange?: (sIndex: number, nanoSkill: NanoSkill, skillIndex?: number) => void;
@@ -112,7 +112,10 @@ const ExerciseFillInBlanks: React.FC<ExerciseFillInBlanksProps> = ({
             const rawAnswer = String(sentence.answer ?? '');
             return multiBlank && rawAnswer.includes(' / ') ? rawAnswer.split(/\s*\/\s*/) : [rawAnswer];
           })();
-          const blankAnswerOf = (b: number): string => String((studentAnswers as Record<string | number, any>)[blankKey(b)] || '');
+          const answersByKey = studentAnswers as Record<string | number, any>;
+          // Answers saved under the plain sentence key (before blanks had their own keys) still show in blank 0.
+          const blankAnswerOf = (b: number): string =>
+            String(answersByKey[blankKey(b)] || (multiBlank && b === 0 && answersByKey[`${sIndex}_0`] === undefined ? answersByKey[sIndex] : '') || '');
           const blankVerdicts = Array.from({ length: Math.max(blanksCount, 1) }).map((_, b) =>
             matchAnswer(blankAnswerOf(b), correctParts[b] ?? correctParts[0] ?? '', { mode: 'word' }).verdict);
           const studentAnswer = multiBlank
@@ -121,13 +124,18 @@ const ExerciseFillInBlanks: React.FC<ExerciseFillInBlanksProps> = ({
           const correctAnswer = multiBlank ? correctParts.join(' / ') : sentence.answer;
           // Use normalized comparison to ignore punctuation and case
           const match: { verdict: MatchVerdict } = multiBlank
-            ? { verdict: blankVerdicts.every((v) => v === 'correct') ? 'correct' : blankVerdicts.some((v) => v === 'wrong' || v === 'empty') ? 'wrong' : 'review' }
+            ? { verdict: blankVerdicts.every((v) => v === 'correct') ? 'correct' : blankVerdicts.some((v) => v === 'wrong') ? 'wrong' : 'review' }
             : matchAnswer(studentAnswer, correctAnswer, { mode: 'word' });
           const isCorrect = showCorrectAnswers && match.verdict === 'correct';
           const isReview = showCorrectAnswers && match.verdict === 'review';
           const isIncorrect = showCorrectAnswers && match.verdict === 'wrong';
           const isEmpty = showCorrectAnswers && (multiBlank ? blankVerdicts.every((v) => v === 'empty') : !studentAnswer);
-          const liveAnswer = liveSessionAnswer?.[sIndex];
+          const liveAnswer = multiBlank
+            ? (() => {
+                const joined = Array.from({ length: blanksCount }).map((_, b) => String(liveSessionAnswer?.[`${sIndex}_${b}`] ?? '')).join(' / ');
+                return joined.replace(/[\s/]/g, '') ? joined : undefined;
+              })()
+            : liveSessionAnswer?.[sIndex];
           const showNanoSkill = viewMode === 'teacher' && nanoSkill;
 
           return (

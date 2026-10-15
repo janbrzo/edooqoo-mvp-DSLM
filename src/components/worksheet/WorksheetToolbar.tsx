@@ -116,6 +116,7 @@ const WorksheetToolbar = ({
   useEffect(() => {
     const fetchWorksheetData = async () => {
       if (!worksheetId || isDemoMode) return;
+      setHasAssignedStudent(undefined);
       
       try {
         // Fetch worksheet data including share token and student_id

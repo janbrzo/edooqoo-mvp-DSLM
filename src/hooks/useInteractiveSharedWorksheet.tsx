@@ -21,6 +21,7 @@ import { createPendingSaves } from '@/lib/answers/pendingSaves';
 import { parseAiEvaluation, mapItemEvaluationsToAiEvaluations } from '@/utils/aiEvaluationMapper';
 import type { AiEvaluation } from '@/components/homework/AiEvaluationBadge';
 import { devLog, devWarn } from '@/utils/logger';
+import { questionIndicesOf, hasAnswerForQuestion } from '@/lib/answers/answerKeys';
 import { callStudentAnswerRpc, callTokenOrLegacyRpc, studentAnswerRpcName } from '@/lib/answers/studentAnswerRpc';
 
 // Same project values the generated client uses; read from env instead of hardcoding them.
@@ -318,14 +319,15 @@ export const useInteractiveSharedWorksheet = ({
       const exerciseAudio = audioAnswers[exerciseIndex] || {};
       const questionCount = exerciseQuestionCounts[exerciseIndex] || 1;
       
+      // Multi-blank sentences are stored under `${q}_${blank}`: count each sentence once.
       const allQIndices = new Set([
-        ...Object.keys(exerciseAnswers).map(Number),
+        ...questionIndicesOf(exerciseAnswers as Record<string | number, unknown>),
         ...Object.keys(exerciseAudio).map(Number)
       ]);
       
       let answeredQuestionsCount = 0;
       allQIndices.forEach(qIdx => {
-        const hasText = exerciseAnswers[qIdx] !== null && exerciseAnswers[qIdx] !== undefined && exerciseAnswers[qIdx] !== '';
+        const hasText = hasAnswerForQuestion(exerciseAnswers as Record<string | number, unknown>, qIdx);
         const hasAudio = !!exerciseAudio[qIdx];
         if (hasText || hasAudio) answeredQuestionsCount++;
       });
@@ -476,10 +478,7 @@ export const useInteractiveSharedWorksheet = ({
               const exercise = exercises[exerciseIndex];
               // Closed items: answer key resolved client-side (same extractor as homework)
               const closedItems = isClosed
-                ? Object.keys(exerciseAnswers)
-                    .filter(k => !k.startsWith('_') && !isNaN(parseInt(k)))
-                    .map(k => parseInt(k))
-                    .sort((a, b) => a - b)
+                ? questionIndicesOf(exerciseAnswers as Record<string | number, unknown>)
                     .map(qIdx => {
                       const ctx = buildClosedItemContext(exerciseType, exercise, qIdx, exerciseAnswers as Record<string | number, any>);
                       return ctx ? { question_index: qIdx, ...ctx } : null;

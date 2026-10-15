@@ -22,6 +22,7 @@ import { devLog, devWarn } from '@/utils/logger';
 import { transcribeAllAudio, buildAnswersToVerify } from '@/utils/audioEvalUtils';
 import { createPendingSaves } from '@/lib/answers/pendingSaves';
 import { resolveEnglishLevel } from '../../supabase/functions/_shared/englishLevel';
+import { questionIndicesOf, hasAnswerForQuestion } from '@/lib/answers/answerKeys';
 import { callStudentAnswerRpc, callTokenOrLegacyRpc, submitHomeworkAnswers } from '@/lib/answers/studentAnswerRpc';
 import { invokeWithRetry } from '@/lib/answers/invokeWithRetry';
 
@@ -614,14 +615,15 @@ export const useInteractiveHomework = ({
       const exerciseAudio = audioAnswers[exerciseIndex] || {};
       const questionCount = exerciseQuestionCounts[exerciseIndex] || 1;
       
+      // Multi-blank sentences are stored under `${q}_${blank}`: count each sentence once.
       const allQIndices = new Set([
-        ...Object.keys(exerciseAnswers).map(Number),
+        ...questionIndicesOf(exerciseAnswers as Record<string | number, unknown>),
         ...Object.keys(exerciseAudio).map(Number)
       ]);
       
       let answeredQuestionsCount = 0;
       allQIndices.forEach(qIdx => {
-        const hasText = exerciseAnswers[qIdx] !== null && exerciseAnswers[qIdx] !== undefined && exerciseAnswers[qIdx] !== '';
+        const hasText = hasAnswerForQuestion(exerciseAnswers as Record<string | number, unknown>, qIdx);
         const hasAudio = !!exerciseAudio[qIdx];
         if (hasText || hasAudio) answeredQuestionsCount++;
       });
