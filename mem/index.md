@@ -59,3 +59,4 @@
 - [Homework autosave](mem://features/homework/autosave) — per-exercise debounce via createPendingSaves, flush on submit/unmount, lost-answer fix
 - [Generated SEO files CI contract](mem://seo/generated-files-ci-contract) — deterministic generators, seo:sync-generated, post-processing passes in CI before git diff --exit-code
 - [No em dashes](mem://decisions/no-em-dashes) — v6.9.72 U+2014 banned in English user-facing/generated text; replacement rules, exclusions, noEmDash test guard
+- [DSLM forgetting curve](mem://features/dslm/forgetting-curve) — D9/D10 read-time effective mastery (14d grace, 60d half-life, 50% floor), single module _shared/forgetting.ts, 7.1/7.2 deferred
