@@ -92,6 +92,6 @@ Reference: `docs/ux/target-teacher-experience.md` (approved 2026-09-02).
 ## AI Defensibility, Pillar 1
 
 - [x] Stage 1.1: additive micro-skill taxonomy
-- [ ] Stage 1.2: canonical ratings at the event boundary, flashcard vocabulary evidence, knowledge classification updates, regression tests
+- [x] Stage 1.2: canonical ratings at the event boundary, flashcard vocabulary evidence, knowledge classification updates, regression tests (869 passed; isolated SQL flow passed; authenticated browser verification unavailable for external Supabase)
 - [ ] Stage 1.3: student state vector (not part of Stage 1.2)
 - [ ] Stage 1.4: full pillar validation (not part of Stage 1.2)

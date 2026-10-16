@@ -33,7 +33,7 @@ Canonical AI payload and legacy display mappers return -1 instead of a fabricate
 
 ## Verification and limits
 
-Regression coverage: dslmEventBoundary.test.ts plus the existing dslmSqlBaseline and scoreToMastery suites. Isolated PostgreSQL tests exercise classification update, no duplicate event, preserved date, outdated/delete metric removal, flashcard word evidence and invalid ratings. Production read-only probes confirm helper results and denied client execution.
+Regression coverage: dslmEventBoundary.test.ts plus the existing dslmSqlBaseline and scoreToMastery suites; full suite: 869 tests passed across 64 files. Isolated PostgreSQL tests exercise classification update, no duplicate event, preserved date, outdated/delete metric removal, flashcard word evidence and invalid ratings with the actual v3 consumers. Production deployment succeeded; a read-only helper probe was denied because helper execution is intentionally restricted. No production data was modified for testing.
 
 Authenticated browser end-to-end verification is unavailable for this externally managed Supabase project. This limitation is not equivalent to passing a real lesson. Stage 1.3 and 1.4 require separate requests.
 
