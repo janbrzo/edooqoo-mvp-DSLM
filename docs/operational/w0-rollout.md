@@ -1,5 +1,9 @@
 # W0 rollout (caller checks on SECURITY DEFINER functions, token-checked queue RPCs)
 
+**Status 2026-10-16: step 1 (the four migrations) is APPLIED in production and verified** (foreign user gets 42501 on
+consume_token, mark_homework_completed and soft_delete_worksheet, gets no rows from get_worksheet_live_answers; the owner
+keeps full access). Steps 2 and 3 are still open: deploy the release, then apply the revoke a day later.
+
 Order matters: step 1 is backward compatible with the current client; step 3 waits a day after the release.
 Run each step as its own query in the Supabase SQL Editor (see the editor limits in `iteration-7-rollout.md`: the
 editor cuts bodies that contain `SELECT ... INTO` and long pastes, so apply with the Supabase CLI / psql, or as base64
