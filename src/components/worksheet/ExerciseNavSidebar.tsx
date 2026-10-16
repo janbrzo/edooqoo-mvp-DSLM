@@ -16,6 +16,8 @@ interface Exercise {
   title: string;
   icon: string;
   estimated_time?: string;
+  /** Deleted by the teacher: keep the index (answers are keyed by it) but show no entry. */
+  hidden?: boolean;
 }
 
 interface ExerciseNavSidebarProps {
@@ -102,6 +104,7 @@ const ExerciseNavContent: React.FC<ExerciseNavSidebarProps> = ({
       <div className="flex-1 overflow-y-auto">
         <div className="space-y-2">
           {exercises.map((exercise, index) => {
+            if (exercise.hidden) return null;
             const isActive = activeExercise === index;
             
             return (
@@ -200,6 +203,7 @@ const FloatingExerciseButtons: React.FC<{
 
       {/* Numbered exercise buttons */}
       {exercises.map((exercise, index) => {
+        if (exercise.hidden) return null;
         const isActive = activeExercise === index;
         
         return (

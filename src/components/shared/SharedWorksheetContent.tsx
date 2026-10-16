@@ -412,6 +412,9 @@ const SharedWorksheetContent: React.FC<SharedWorksheetContentProps> = ({
 
       {/* Exercises - using proper React components with FIXED ICONS */}
       {worksheetData.exercises && worksheetData.exercises.map((rawExercise: any, index: number) => {
+        // An exercise the teacher deleted stays in the array (answers and events are keyed by
+        // its position) but is never shown to the student.
+        if (rawExercise?.deleted) return null;
         // P1.5: canonicalize drifted exercise shapes before rendering.
         const exercise = normalizeExerciseShape(rawExercise);
         devLog(`🔧 Rendering exercise ${index + 1}: ${exercise.type}`, exercise);

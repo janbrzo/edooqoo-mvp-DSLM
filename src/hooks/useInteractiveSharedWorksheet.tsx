@@ -318,8 +318,12 @@ export const useInteractiveSharedWorksheet = ({
     let totalTasks = 0;
     let answeredTasks = 0;
     
+    // An exercise with 0 tasks was deleted by the teacher: it is hidden and does not count.
+    let visibleExercises = 0;
     for (let i = 0; i < totalExercises; i++) {
-      const questionCount = exerciseQuestionCounts[i] || 1;
+      const questionCount = exerciseQuestionCounts[i] ?? 1;
+      if (questionCount === 0) continue;
+      visibleExercises++;
       totalTasks += questionCount;
     }
     
@@ -332,7 +336,8 @@ export const useInteractiveSharedWorksheet = ({
     allExerciseIndices.forEach(exerciseIndex => {
       const exerciseAnswers = answers[exerciseIndex] || {};
       const exerciseAudio = audioAnswers[exerciseIndex] || {};
-      const questionCount = exerciseQuestionCounts[exerciseIndex] || 1;
+      const questionCount = exerciseQuestionCounts[exerciseIndex] ?? 1;
+      if (questionCount === 0) return;
       
       // Multi-blank sentences are stored under `${q}_${blank}`: count each sentence once.
       const allQIndices = new Set([
@@ -356,7 +361,7 @@ export const useInteractiveSharedWorksheet = ({
       ? Math.min(100, Math.round((cappedAnsweredTasks / totalTasks) * 100))
       : 0;
 
-    return { totalExercises, answeredExercises, percentageComplete, totalTasks, answeredTasks: cappedAnsweredTasks };
+    return { totalExercises: visibleExercises, answeredExercises, percentageComplete, totalTasks, answeredTasks: cappedAnsweredTasks };
   }, [answers, audioAnswers, totalExercises, exerciseQuestionCounts]);
 
   // Load answers on mount

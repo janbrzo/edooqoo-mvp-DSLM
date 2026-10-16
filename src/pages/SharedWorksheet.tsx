@@ -104,6 +104,8 @@ const SharedWorksheet = () => {
     if (!worksheetData?.exercises) return {};
     const counts: Record<number, number> = {};
     worksheetData.exercises.forEach((exercise: any, index: number) => {
+      // A deleted exercise is hidden from the student: it has no tasks to answer.
+      if (exercise.deleted) { counts[index] = 0; return; }
       counts[index] = exercise.questions?.length || 
                       exercise.items?.length || 
                       exercise.sentences?.length ||
@@ -650,7 +652,8 @@ const SharedWorksheet = () => {
             exercises={exercises.map((exercise: any) => ({
               title: exercise.title,
               icon: exercise.icon,
-              estimated_time: exercise.time
+              estimated_time: exercise.time,
+              hidden: !!exercise.deleted
             }))}
             activeExercise={navigation.activeExercise}
             collapsedExercises={navigation.collapsedExercises}
