@@ -604,13 +604,12 @@ export const useInteractiveSharedWorksheet = ({
           }
         });
         
+        // Reveal is derived from the stored rows, so it is refreshed on every poll.
+        revealExercises(revealedExerciseIndices(data));
         if (hasNewEvals) {
           devLog('[useInteractiveSharedWorksheet] Polling found new evaluations:', loadedEvals);
           setItemEvaluations(loadedEvals);
           setAiEvaluations(loadedAiEvals);
-          
-          // Check if any answer has AI evaluation now
-          revealExercises(revealedExerciseIndices(data));
         }
       } catch (err) {
         // Silent fail - polling is non-critical

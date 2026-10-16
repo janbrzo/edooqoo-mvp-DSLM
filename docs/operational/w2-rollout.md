@@ -31,9 +31,11 @@ Client behaviour shipped with the release (no migration needed):
 - Saves of one exercise never overlap; a failed save is kept and retried (3 s, 8 s, 20 s, then every 45 s), the progress
   bar shows "Not saved yet, retrying...", and homework Submit refuses to continue while answers are unsaved.
 - The page-hide keepalive write sends only exercises with unsaved changes, once.
-- Answer keys are revealed per exercise: a finished exercise, an open exercise with its AI evaluation, or (after the
-  10-minute inactivity evaluation succeeded) the exercises the student answered. Revealed exercises are locked for
-  students. A failed evaluation call no longer unlocks the keys.
+- Answer keys are revealed per exercise: a finished exercise, or an exercise the evaluation queue evaluated (open
+  feedback or closed explanation; the queue runs after 10 minutes without a save, and a student save never writes
+  `ai_evaluation`), or, when the 10-minute inactivity evaluation succeeded, the exercises the student answered.
+  Revealed exercises are locked for students and stay revealed after a reload. A failed evaluation call no longer
+  unlocks the keys.
 
 Rollback: re-run the `save_*` definitions from `20261012090000_dslm_pipeline_baseline.sql` and the
 `submit_homework_answers` definition from `20261014090000`.

@@ -19,13 +19,17 @@ export const hasRevealedAnswers = (rows: AnswerRow[] | null | undefined): boolea
 
 /**
  * Per-exercise reveal: the exercises whose answer key may be shown. An exercise is
- * revealed when the student finished it or when it is an open exercise that got its
- * AI evaluation; other exercises stay hidden, so seeing one key never unlocks the rest.
+ * revealed when the student finished it or when the evaluation queue wrote its
+ * `ai_evaluation` (open exercise: feedback; closed exercise: the explanation). The
+ * queue only evaluates an exercise after the student stopped working on it for 10
+ * minutes, and the column is never written by a student save, so a key is never shown
+ * while the student is still answering that exercise. Other exercises stay hidden,
+ * so seeing one key never unlocks the rest, and the state survives a reload.
  */
 export const revealedExerciseIndices = (rows: AnswerRow[] | null | undefined): number[] =>
   [...new Set(
     (rows ?? [])
-      .filter((r) => typeof r.exercise_index === 'number' && hasRevealedAnswers([r]))
+      .filter((r) => typeof r.exercise_index === 'number' && (!!r.is_completed || !!r.ai_evaluation))
       .map((r) => r.exercise_index as number),
   )];
 

@@ -2,14 +2,14 @@ import { describe, it, expect } from 'vitest';
 import { revealedExerciseIndices, answeredExerciseIndices } from '../revealState';
 
 describe('per-exercise reveal of the answer key', () => {
-  it('reveals a finished exercise and an evaluated open exercise, nothing else', () => {
+  it('reveals a finished exercise and every exercise the queue evaluated, nothing else', () => {
     const rows = [
       { exercise_index: 0, is_completed: true, exercise_type: 'multiple-choice' },
       { exercise_index: 1, ai_evaluation: { items: [] }, exercise_type: 'reading' },
-      { exercise_index: 2, ai_evaluation: { explanation: 'x' }, exercise_type: 'multiple-choice' }, // explanation only
-      { exercise_index: 3, exercise_type: 'true-false' },
+      { exercise_index: 2, ai_evaluation: { explanation: 'x' }, exercise_type: 'multiple-choice' }, // closed, queue-evaluated
+      { exercise_index: 3, exercise_type: 'true-false' }, // still being answered
     ];
-    expect(revealedExerciseIndices(rows).sort()).toEqual([0, 1]);
+    expect(revealedExerciseIndices(rows).sort()).toEqual([0, 1, 2]);
   });
 
   it('seeing one key never reveals an untouched exercise', () => {
