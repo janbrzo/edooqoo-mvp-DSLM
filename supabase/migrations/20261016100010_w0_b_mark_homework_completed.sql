@@ -15,7 +15,7 @@
 --    (get_homework_comments was readable by anon with a homework id + email).
 -- 6. Token-checked variants of queue_worksheet_ai_evaluation, needs_ai_evaluation
 --    and insert_homework_submission_notification. The legacy anon-callable names are
---    revoked by 20261016090100 once the client that calls the token variants is live.
+--    revoked by 20261017090100 once the client that calls the token variants is live.
 --
 -- A caller with auth.uid() IS NULL is the service role or a database job
 -- (pg_cron); client roles always carry a uid, so a NULL uid is never a client.

@@ -1,5 +1,8 @@
--- W2: a submitted homework is locked on the server.
+-- W2 (part 2): homework answers merge on save, and a submitted homework is locked on the server.
 --
+-- 0. save_homework_answer replaced the whole answers map on every save (last write wins, a stale
+--    tab erased other keys). The new map is merged over the stored one (`stored || new`); the
+--    client never deletes a key (clearing stores an empty string).
 -- 1. save_homework_answer kept overwriting a row after the student submitted it: the
 --    teacher's homework view saves on blur with its own (possibly stale) snapshot, and
 --    an old tab could do the same (audit 2026-10, H-B1, H-B3). The update now applies
@@ -13,7 +16,7 @@
 --    submit moved the date); the first completion date is kept. mark_homework_completed
 --    (teacher) still sets completed_at itself and is not changed here.
 --
--- Rollback: re-run the definitions from 20261016090000 / 20261014090000.
+-- Rollback: re-run the definitions from 20261016110000 / 20261014090000.
 
 SET LOCAL lock_timeout = '5s';
 

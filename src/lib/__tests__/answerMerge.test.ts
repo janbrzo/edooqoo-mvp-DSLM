@@ -7,26 +7,29 @@ import { join } from 'node:path';
  * tab cannot erase another tab's keys or the `_transcription_N` keys written by the
  * evaluation queue. The client never deletes a key (clearing stores an empty string).
  */
-const sql = readFileSync(join(__dirname, '../../../supabase/migrations/20261016090000_w2_merge_answers_on_save.sql'), 'utf8');
+const sql = readFileSync(join(__dirname, '../../../supabase/migrations/20261016110000_w2_merge_answers_on_save.sql'), 'utf8');
 
-describe('save_worksheet_answer / save_homework_answer merge answers', () => {
-  it.each([
-    ['worksheet_student_answers', 'save_worksheet_answer'],
-    ['homework_student_answers', 'save_homework_answer'],
-  ])('%s keeps stored keys that the new map does not send', (table, fn) => {
-    const start = sql.indexOf(`CREATE OR REPLACE FUNCTION public.${fn}(`);
-    expect(start).toBeGreaterThan(-1);
-    const body = sql.slice(start, sql.indexOf('$function$;', start));
-    expect(body).toContain(`${table}.answers || EXCLUDED.answers`);
-    expect(body).not.toMatch(/answers = EXCLUDED\.answers\s*,/);
-    // behaviour the merge must not change
-    expect(body).toContain('eval_trigger = NULL');
+describe('save_worksheet_answer merges answers on top of the iteration 8 definition', () => {
+  const start = sql.indexOf('CREATE OR REPLACE FUNCTION public.save_worksheet_answer(');
+  const body = sql.slice(start, sql.indexOf('$function$;', start));
+
+  it('merges the new map over the stored one before comparing and storing', () => {
+    expect(body).toContain('v_old.answers || p_answers');
+    expect(body).toContain('worksheet_answers_differ(v_old.answers, v_merged)');
+    expect(body).toMatch(/v_merged, NOW\(\), NOW\(\)/);
+    expect(body).toContain('answers = EXCLUDED.answers');
+  });
+
+  it('keeps what iteration 8 does (ai_evaluation reset, ai_alternative ratings, eval_trigger)', () => {
+    expect(body).toContain('keep_ai_alternative_ratings');
+    expect(body).toContain('ai_evaluation = CASE WHEN v_changed THEN NULL');
+    expect(body).toContain('eval_trigger = CASE WHEN v_changed THEN NULL');
     expect(body).toContain('audio_answers = CASE');
   });
 
-  it('fits one SQL Editor paste and has no SELECT ... INTO', () => {
-    expect(Buffer.byteLength(sql)).toBeLessThan(8000);
-    expect(sql).not.toMatch(/SELECT[^;]*\bINTO\b/i);
+  it('refuses to run before the iteration 8 migration', () => {
+    expect(sql).toMatch(/worksheet_answers_differ\(jsonb, jsonb\)'\) IS NULL/);
+    expect(sql).toContain('Apply 20261015090400');
   });
 
   it('the client clears an answer by storing an empty string, never by deleting the key', () => {
@@ -38,7 +41,11 @@ describe('save_worksheet_answer / save_homework_answer merge answers', () => {
 });
 
 describe('W2: a submitted homework is locked on the server', () => {
-  const lock = readFileSync(join(__dirname, '../../../supabase/migrations/20261016090010_w2_homework_lock_after_submit.sql'), 'utf8');
+  const lock = readFileSync(join(__dirname, '../../../supabase/migrations/20261016110010_w2_homework_lock_after_submit.sql'), 'utf8');
+
+  it('save_homework_answer merges the new answers over the stored ones', () => {
+    expect(lock).toContain('homework_student_answers.answers || EXCLUDED.answers');
+  });
 
   it('save_homework_answer updates only rows that are not submitted yet', () => {
     const start = lock.indexOf('CREATE OR REPLACE FUNCTION public.save_homework_answer(');

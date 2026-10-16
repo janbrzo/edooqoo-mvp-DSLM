@@ -5,12 +5,12 @@ Run each step as its own query in the Supabase SQL Editor (see the editor limits
 editor cuts bodies that contain `SELECT ... INTO` and long pastes, so apply with the Supabase CLI / psql, or as base64
 text executed by one `DO` block).
 
-## 1. Migrations 20261015090000, 090010, 090015, 090020 (before or with the release)
+## 1. Migrations 20261016100000, 100010, 100015, 100020 (before or with the release)
 
 Four idempotent files, each under 8 KB so they fit one SQL Editor paste (no `SELECT ... INTO`); apply them in file-name order:
-`20261015090000_w0_a_consume_token_live_answers_soft_delete.sql`, `20261015090010_w0_b_mark_homework_completed.sql`,
-`20261015090015_w0_b_teacher_comments.sql`, `20261015090020_w0_c_share_token_queue_and_notification.sql`.
-The revoke in step 3 has a later timestamp (`20261016090100`) so `supabase db push` does not apply it together with step 1.
+`20261016100000_w0_a_consume_token_live_answers_soft_delete.sql`, `20261016100010_w0_b_mark_homework_completed.sql`,
+`20261016100015_w0_b_teacher_comments.sql`, `20261016100020_w0_c_share_token_queue_and_notification.sql`.
+The revoke in step 3 has a later timestamp (`20261017090100`) so `supabase db push` does not apply it together with step 1.
 
 - `consume_token` keeps its body as `consume_token_internal` (service role only); the public name is a wrapper that
   lets a signed-in caller charge only their own id. Teacher UI, `useActiveWorksheetGenerationJob` and `useTokenSystem`
@@ -51,7 +51,7 @@ Make sure the `APP_BASE_URL` secret is set (the emails fall back to `https://edo
 
 ## 3. One day after the release
 
-`supabase/migrations/20261016090100_w0_revoke_legacy_queue_and_notification_rpcs.sql` revokes the anon-callable
+`supabase/migrations/20261017090100_w0_revoke_legacy_queue_and_notification_rpcs.sql` revokes the anon-callable
 `queue_worksheet_ai_evaluation`, `needs_ai_evaluation` and `insert_homework_submission_notification` from client roles
 (service role keeps EXECUTE; the token variants call them as their owner). Also apply the pending
 `20261012200100` and `20261014090100` if they are still unapplied (`submit_homework_answers` is already revoked in

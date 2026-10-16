@@ -3,11 +3,11 @@
 Both migrations are backward compatible with the current client; apply them with or before the release. Each file is
 under 8 KB and has no `SELECT ... INTO`, so it fits one SQL Editor paste (see `iteration-7-rollout.md`).
 
-1. `supabase/migrations/20261016090000_w2_merge_answers_on_save.sql`
+1. `supabase/migrations/20261016110000_w2_merge_answers_on_save.sql`
    `save_worksheet_answer` and `save_homework_answer` (9 arguments) merge the new answers over the stored ones
    (`stored || new`) instead of replacing the whole map. A stale tab can no longer erase another tab's keys or the
    `_transcription_N` keys written by the evaluation queue. The client never deletes a key (clearing stores `''`).
-2. `supabase/migrations/20261016090010_w2_homework_lock_after_submit.sql`
+2. `supabase/migrations/20261016110010_w2_homework_lock_after_submit.sql`
    `save_homework_answer` updates only rows with `is_submitted = FALSE` (a save on a submitted row changes nothing and
    returns NULL), so the teacher's homework view or an old tab cannot overwrite submitted answers. The post-submit AI
    phase writes through `update_homework_answer_by_share_token` and is not affected. `submit_homework_answers` keeps
