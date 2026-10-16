@@ -47,6 +47,13 @@ describe('W2: a submitted homework is locked on the server', () => {
     expect(body).toContain('homework_student_answers.answers || EXCLUDED.answers');
   });
 
+  it('save_homework_answer also refuses a new exercise row after a submit', () => {
+    const start = lock.indexOf('CREATE OR REPLACE FUNCTION public.save_homework_answer(');
+    const body = lock.slice(start, lock.indexOf('$function$;', start));
+    expect(body).toMatch(/IF EXISTS \([\s\S]*hs\.is_submitted = TRUE[\s\S]*RETURN NULL;/);
+    expect(body.indexOf('RETURN NULL')).toBeLessThan(body.indexOf('INSERT INTO public.homework_student_answers'));
+  });
+
   it('submit_homework_answers keeps the first completion date', () => {
     expect(lock).toContain('completed_at = COALESCE(completed_at, NOW())');
   });

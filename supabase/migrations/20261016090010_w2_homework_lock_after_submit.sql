@@ -4,10 +4,14 @@
 --    teacher's homework view saves on blur with its own (possibly stale) snapshot, and
 --    an old tab could do the same (audit 2026-10, H-B1, H-B3). The update now applies
 --    only while the row is not submitted; a save on a submitted row changes nothing and
---    returns NULL. The post-submit AI phase writes through
---    update_homework_answer_by_share_token, which is not affected.
--- 2. submit_homework_answers re-dated completed_at on every call (a repeated submit or
---    a teacher mark moved the date); the first completion date is kept.
+--    returns NULL, and so does a save for an exercise that had no row yet once any row
+--    of that student's homework is submitted (production has one homework where an
+--    exercise row was inserted after the submit and made the page look unsubmitted).
+--    The post-submit AI phase writes through update_homework_answer_by_share_token,
+--    which is not affected.
+-- 2. submit_homework_answers re-dated completed_at on every call (a repeated student
+--    submit moved the date); the first completion date is kept. mark_homework_completed
+--    (teacher) still sets completed_at itself and is not changed here.
 --
 -- Rollback: re-run the definitions from 20261016090000 / 20261014090000.
 
@@ -22,6 +26,16 @@ AS $function$
 DECLARE
   v_answer_id UUID;
 BEGIN
+  -- Once the student submitted, no new exercise row may appear either.
+  IF EXISTS (
+    SELECT 1 FROM public.homework_student_answers hs
+    WHERE hs.homework_id = p_homework_id
+      AND hs.student_email = LOWER(TRIM(p_student_email))
+      AND hs.is_submitted = TRUE
+  ) THEN
+    RETURN NULL;
+  END IF;
+
   INSERT INTO public.homework_student_answers (
     homework_id, student_email, exercise_index, exercise_type,
     answers, time_spent_ms, mastery, item_evaluations, audio_answers,
