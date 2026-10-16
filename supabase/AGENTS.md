@@ -4,6 +4,8 @@ One rule per entry with a one-line why. Moved from the root AGENTS.md.
 
 ## Answers & Evaluation
 
+- New event ratings are normalized by `normalize_dslm_ratings` at the `student_events` boundary; knowledge classification updates the original observation and flashcards also emit word-level ratings, without changing card scoring or historical events, because every evidence source must reach metrics without invented scores or duplicate observations.
+
 - All worksheet text answer checking goes through `src/lib/answers/matchAnswer.ts`; an uncertain match returns `review`, never `wrong` (sole exception: Welcome Test grammar fill_blank items are compared strictly in `src/lib/welcomeTest/keyedAnswer.ts`, because the word form is what they test) — because false negatives destroy learner trust and DSLM accuracy.
 - "Homework waiting for review" is decided only by `isHomeworkAwaitingReview` in `src/lib/homework/reviewState.ts`, and every review entry point links to `/homework/:id/review` — because the dashboard, timeline and homework list used to disagree and the review page was unreachable after the first review.
 
