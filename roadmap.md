@@ -88,3 +88,10 @@ Reference: `docs/ux/target-teacher-experience.md` (approved 2026-09-02).
 - [x] M9 — 360px overflow fixes: /calendar header wrap, /worksheets table scroll container, /settings/mcp endpoint break-all, PacingProposalsBell icon-only <640px
 - [x] AI eval for closed items in Create Homework (live session) and worksheet Mark done
 - [x] Closed AI eval hardening: shared key verdict (`key_verdict`), no answer reveal, `ClosedAiExplanations` display
+
+## AI Defensibility, Pillar 1
+
+- [x] Stage 1.1: additive micro-skill taxonomy
+- [ ] Stage 1.2: canonical ratings at the event boundary, flashcard vocabulary evidence, knowledge classification updates, regression tests
+- [ ] Stage 1.3: student state vector (not part of Stage 1.2)
+- [ ] Stage 1.4: full pillar validation (not part of Stage 1.2)
