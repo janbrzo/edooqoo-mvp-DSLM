@@ -139,3 +139,53 @@ describe('createPendingSaves', () => {
     expect(q.pendingIndices()).toEqual([1]);
   });
 });
+
+describe('createPendingSaves: flush while a save is in flight', () => {
+  beforeEach(() => vi.useFakeTimers());
+  afterEach(() => vi.useRealTimers());
+
+  it('flush waits for the in-flight save and the newer job and then reports true', async () => {
+    const q = createPendingSaves(1500);
+    let release!: () => void;
+    const first = vi.fn(() => new Promise<boolean>((r) => { release = () => r(true); }));
+    const second = vi.fn().mockResolvedValue(true);
+    q.schedule(0, first);
+    await vi.advanceTimersByTimeAsync(1500);
+    q.schedule(0, second);
+    const flushed = q.flush();
+    release();
+    await expect(flushed).resolves.toBe(true);
+    expect(second).toHaveBeenCalledTimes(1);
+    expect(q.pendingIndices()).toEqual([]);
+  });
+
+  it('a newer job waits for its own debounce instead of running right after the in-flight save', async () => {
+    const q = createPendingSaves(1500);
+    let release!: () => void;
+    const first = vi.fn(() => new Promise<boolean>((r) => { release = () => r(true); }));
+    const second = vi.fn().mockResolvedValue(true);
+    q.schedule(0, first);
+    await vi.advanceTimersByTimeAsync(1500);
+    q.schedule(0, second);
+    release();
+    await vi.advanceTimersByTimeAsync(100);
+    expect(second).not.toHaveBeenCalled();
+    await vi.advanceTimersByTimeAsync(1500);
+    expect(second).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps retrying at the last delay after the delay list is exhausted', async () => {
+    const q = createPendingSaves(100, [1000, 2000]);
+    const job = vi.fn().mockResolvedValue(false);
+    q.schedule(0, job);
+    await vi.advanceTimersByTimeAsync(100);
+    await vi.advanceTimersByTimeAsync(1000);
+    await vi.advanceTimersByTimeAsync(2000);
+    await vi.advanceTimersByTimeAsync(2000);
+    await vi.advanceTimersByTimeAsync(2000);
+    expect(job.mock.calls.length).toBeGreaterThanOrEqual(5);
+    job.mockResolvedValue(true);
+    await vi.advanceTimersByTimeAsync(2000);
+    expect(q.pendingIndices()).toEqual([]);
+  });
+});

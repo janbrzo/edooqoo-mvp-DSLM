@@ -61,6 +61,7 @@ export const useInteractiveSharedWorksheet = ({
   const [saveFailed, setSaveFailed] = useState(false);
   // One error toast per failure streak: the queue retries on its own.
   const saveErrorShownRef = useRef(false);
+  const lastUnloadWriteRef = useRef(0);
   useEffect(() => pendingSavesQueueRef.current.onStatus((st) => setSaveFailed(st.failed > 0)), []);
   
   // PROBLEM 1 FIX: Active time tracking per exercise
@@ -393,6 +394,9 @@ export const useInteractiveSharedWorksheet = ({
   // USES CONDITIONAL LOGIC: Only queue AI eval if last_saved_at > last_ai_eval_at
   useEffect(() => {
     const handleBeforeUnload = async () => {
+      // beforeunload and pagehide both fire when a tab closes: send the keepalive writes once.
+      if (Date.now() - lastUnloadWriteRef.current < 3000) return;
+      lastUnloadWriteRef.current = Date.now();
       // Iterate through all exercises with answers
       // Only exercises with unsaved changes: a keepalive write of an already saved
       // exercise would reset eval_trigger and re-date its DSLM event for nothing.
@@ -633,7 +637,9 @@ export const useInteractiveSharedWorksheet = ({
     const itemEvals = buildItemEvaluations(exerciseData, currentAnswers as Record<string | number, any>, exerciseType, null, newAudioForExercise);
     const hasRealAiEval = itemEvals?.some(e => e.hasValue !== false);
     const evalToSend = hasRealAiEval ? itemEvals : null;
-    saveAnswer(exerciseIndex, exerciseType, currentAnswers, mastery, evalToSend, newAudioForExercise);
+    const queue = pendingSavesQueueRef.current;
+    queue.schedule(exerciseIndex, () => saveAnswer(exerciseIndex, exerciseType, currentAnswers, mastery, evalToSend, newAudioForExercise), 0);
+    void queue.flushOne(exerciseIndex);
     
     devLog('[useInteractiveSharedWorksheet] Audio answer saved to DB:', { exerciseIndex, questionIndex, audioUrl: audioUrl.substring(0, 50) });
   }, [answers, exercises, saveAnswer, worksheetId, audioAnswers]);

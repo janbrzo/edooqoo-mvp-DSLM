@@ -49,7 +49,7 @@ export const createPendingSaves = (
   const timers = new Map<number, ReturnType<typeof setTimeout>>();
   const jobs = new Map<number, SaveJob>();
   const inflight = new Map<number, Promise<boolean>>();
-  const rerun = new Set<number>();
+  const inflightJob = new Map<number, SaveJob>();
   const failures = new Map<number, number>();
   const listeners = new Set<(status: SaveStatus) => void>();
 
@@ -84,9 +84,13 @@ export const createPendingSaves = (
     clearTimer(i);
     const running = inflight.get(i);
     if (running) {
-      rerun.add(i); // a newer job exists: run it as soon as the in-flight save settles
-      await running;
-      return !jobs.has(i);
+      // Wait for the save in flight. A newer job scheduled meanwhile runs next (its own
+      // timer may be pending, but a flush wants it now); a failed one is not re-run here,
+      // its retry is already armed.
+      const ranJob = inflightJob.get(i);
+      const ok = await running;
+      if (jobs.has(i) && jobs.get(i) !== ranJob) return run(i);
+      return ok && !jobs.has(i);
     }
     const job = jobs.get(i);
     if (!job) return true;
@@ -99,9 +103,11 @@ export const createPendingSaves = (
       }
     })();
     inflight.set(i, attempt);
+    inflightJob.set(i, job);
     emit();
     const ok = await attempt;
     inflight.delete(i);
+    inflightJob.delete(i);
 
     const replaced = jobs.get(i) !== job;
     if (ok) {
@@ -110,14 +116,16 @@ export const createPendingSaves = (
     } else if (!replaced) {
       const n = (failures.get(i) ?? 0) + 1;
       failures.set(i, n);
-      if (n <= retryDelaysMs.length) arm(i, retryDelaysMs[n - 1]);
+      // Keep retrying at the last delay: the student is told "retrying", so it must be true.
+      if (retryDelaysMs.length > 0) arm(i, retryDelaysMs[Math.min(n, retryDelaysMs.length) - 1]);
     } else {
       failures.delete(i);
     }
     emit();
 
-    if (rerun.delete(i) || (replaced && jobs.has(i))) return run(i);
-    return ok;
+    // A newer job is waiting: its debounce timer runs it, unless none is armed.
+    if (replaced && jobs.has(i) && !timers.has(i)) return run(i);
+    return ok && !jobs.has(i);
   }
 
   return {

@@ -718,7 +718,9 @@ export const useInteractiveHomework = ({
     const exerciseData = { ...exercises[exerciseIndex], worksheetId: effectiveWorksheetId };
     const mastery = calculateOverallMastery(exerciseType, exerciseData, currentAnswers as Record<string | number, any>);
     const itemEvals = buildItemEvaluations(exerciseData, currentAnswers as Record<string | number, any>, exerciseType, null, newAudioForExercise);
-    saveAnswer(exerciseIndex, exerciseType, currentAnswers, mastery, itemEvals, newAudioForExercise);
+    const queue = pendingSavesQueueRef.current;
+    queue.schedule(exerciseIndex, () => saveAnswer(exerciseIndex, exerciseType, currentAnswers, mastery, itemEvals, newAudioForExercise), 0);
+    void queue.flushOne(exerciseIndex);
     
     devLog('[useInteractiveHomework] Audio answer saved to DB:', { exerciseIndex, questionIndex, audioUrl: audioUrl.substring(0, 50) });
   }, [answers, exercises, saveAnswer, sourceWorksheetId, homeworkId, audioAnswers, isSubmitted]);
