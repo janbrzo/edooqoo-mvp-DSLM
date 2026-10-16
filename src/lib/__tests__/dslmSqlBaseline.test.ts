@@ -160,6 +160,14 @@ describe('Iteration 8: compute_skill_metric v3', () => {
     expect(fn).toMatch(/v_recent_avg < v_older_avg - 10/);
   });
 
+  it('allows insufficient_data in the trend check constraint', () => {
+    // The metric upsert runs in the student_events trigger: a rejected trend
+    // rolls back the event itself (2026-10-15 incident).
+    const checks = [...sql.matchAll(/ADD CONSTRAINT student_skill_metrics_trend_check\s+CHECK \(([^;]+)\);/g)];
+    expect(checks.length).toBeGreaterThan(0);
+    expect(checks[checks.length - 1][1]).toMatch(/'insufficient_data'/);
+  });
+
   it('keeps the history ascending with the last 20 points and the date key', () => {
     expect(fn).toMatch(/ORDER BY l\.created_at, l\.event_id\), '\[\]'::jsonb\)/);
     expect(fn).toMatch(/ORDER BY p\.created_at DESC, p\.event_id DESC\s+LIMIT 20/);
