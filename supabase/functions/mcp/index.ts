@@ -185,6 +185,40 @@ var list_students_default = defineTool4({
 // src/lib/mcp/tools/get_student_summary.ts
 import { defineTool as defineTool5 } from "npm:@lovable.dev/mcp-js@0.20.0";
 import { z as z5 } from "npm:zod@^3.23.8";
+
+// supabase/functions/_shared/forgetting.ts
+var FORGETTING_GRACE_DAYS = 14;
+var FORGETTING_HALF_LIFE_DAYS = 60;
+var FORGETTING_FLOOR = 0.5;
+var DAY_MS = 864e5;
+function forgettingFactor(daysSinceLastEvent) {
+  if (!Number.isFinite(daysSinceLastEvent) || daysSinceLastEvent <= FORGETTING_GRACE_DAYS) return 1;
+  const decay = Math.pow(0.5, (daysSinceLastEvent - FORGETTING_GRACE_DAYS) / FORGETTING_HALF_LIFE_DAYS);
+  return FORGETTING_FLOOR + (1 - FORGETTING_FLOOR) * decay;
+}
+function effectiveMastery(currentMastery, lastEventAt, now = Date.now()) {
+  const stored = Number(currentMastery);
+  if (!Number.isFinite(stored)) return 0;
+  if (!lastEventAt) return stored;
+  const last = lastEventAt instanceof Date ? lastEventAt.getTime() : new Date(lastEventAt).getTime();
+  if (!Number.isFinite(last)) return stored;
+  const nowMs = now instanceof Date ? now.getTime() : now;
+  const days = (nowMs - last) / DAY_MS;
+  const value = stored * forgettingFactor(days);
+  return Math.max(0, Math.min(stored, Math.round(value * 10) / 10));
+}
+function withEffectiveMastery(rows, now = Date.now()) {
+  return (rows || []).map((row) => {
+    const raw = Number(row.current_mastery);
+    return {
+      ...row,
+      raw_mastery: Number.isFinite(raw) ? raw : 0,
+      current_mastery: effectiveMastery(row.current_mastery, row.last_event_at, now)
+    };
+  });
+}
+
+// src/lib/mcp/tools/get_student_summary.ts
 var get_student_summary_default = defineTool5({
   name: "get_student_summary",
   title: "Get student summary",
@@ -199,9 +233,9 @@ var get_student_summary_default = defineTool5({
     const { data: student, error: sErr } = await auth.supabase.from("students").select("id, name, english_level, main_goal, main_goal_target_date, native_language, created_at, updated_at").eq("id", student_id).eq("teacher_id", auth.teacherId).is("deleted_at", null).maybeSingle();
     if (sErr) return { content: [{ type: "text", text: `DB error: ${sErr.message}` }], isError: true };
     if (!student) return { content: [{ type: "text", text: "Student not found or not owned by you." }], isError: true };
-    const { data: skills } = await auth.supabase.from("student_skill_metrics").select("skill_name, skill_category, current_mastery, trend, total_events").eq("student_id", student_id).eq("teacher_id", auth.teacherId).order("current_mastery", { ascending: false }).limit(10);
+    const { data: skills } = await auth.supabase.from("student_skill_metrics").select("skill_name, skill_category, current_mastery, trend, total_events, last_event_at").eq("student_id", student_id).eq("teacher_id", auth.teacherId).order("current_mastery", { ascending: false }).limit(60);
     const { data: worksheets } = await auth.supabase.from("worksheets").select("id, title, created_at").eq("student_id", student_id).eq("user_id", auth.teacherId).order("created_at", { ascending: false }).limit(5);
-    const summary = { student, top_skills: skills ?? [], recent_worksheets: worksheets ?? [] };
+    const summary = { student, top_skills: withEffectiveMastery(skills ?? []).sort((a, b) => b.current_mastery - a.current_mastery).slice(0, 10), recent_worksheets: worksheets ?? [] };
     return {
       content: [{ type: "text", text: JSON.stringify(summary, null, 2) }],
       structuredContent: summary

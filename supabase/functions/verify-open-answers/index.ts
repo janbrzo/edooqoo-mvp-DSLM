@@ -63,6 +63,7 @@ async function evaluateChunk(
 ): Promise<{ ok: true; evaluations: EvaluationResult[] } | { ok: false; errorText: string }> {
   // Check if any answers have audio transcription
   const hasAnySpeaking = answers.some(a => a.audio_transcription);
+  const hasAnyDuration = answers.some(a => Number(a.audio_duration_seconds) > 0);
   const hasAnyClosed = answers.some(a => isClosedType(a.exercise_type) && !!a.suggested_answer);
 
   const systemPrompt = `You are a STRICT English language teacher evaluating student answers.
@@ -74,9 +75,9 @@ Your task is to evaluate each answer based on:
 3. Completeness - Is the answer sufficiently developed?
 ${hasAnySpeaking ? `
 4. SPEAKING EVALUATION (only when audio_transcription is provided):
- - Fluency: Calculate words per second (audio_word_count / audio_duration_seconds). 
+ ${hasAnyDuration ? `- Fluency: Calculate words per second (audio_word_count / audio_duration_seconds). 
    A2 target: 1.0-1.5 wps. B1 target: 1.5-2.0 wps. B2+: 2.0+ wps.
-   Score 0.9+ if above target, 0.7-0.9 if near target, below 0.5 if very slow (<0.5 wps).
+   Score 0.9+ if above target, 0.7-0.9 if near target, below 0.5 if very slow (<0.5 wps).` : `- Fluency: audio duration is not available, do not estimate speed; judge fluency from the transcript only.`}
  - Coherence: Does the transcribed speech form logical, complete sentences?
  - Grammar accuracy: Are sentences grammatically correct for the level?
  - Task completion: Does the spoken response address the question/prompt?
@@ -91,7 +92,7 @@ For each answer, provide:
 - speaking_score: (0.0-1.0) Score for the SPOKEN answer (from transcription). Omit if no audio transcription provided.
 
 STRICT SCORING RULES (these override everything else):
-1. NON-ANSWERS (ALWAYS score 0.0-0.05): "I don't know", "idk", "nie wiem", "no idea", "no se", "не знаю", "dunno", "I have no idea", "I'm not sure", any equivalent in ANY language, or any response that does not attempt to answer the question. Score: 0.0. Feedback should be: "No answer provided. Try to form at least one sentence about the topic."
+1. NON-ANSWERS (ALWAYS score 0.0-0.05): "I don't know", "idk", "nie wiem", "no idea", "no se", "не знаю", "dunno", "I have no idea", "I'm not sure", any equivalent in ANY language, or any response that does not attempt to answer the question. Score: 0.0. Feedback for an empty answer or an explicit "I don't know": "No answer provided. Try to form at least one sentence about the topic." Feedback for any other response that does not address the question (nonsense, off-topic): "This answer does not address the question."
 2. WRONG LANGUAGE (score 0.05-0.10): Answer written entirely in a non-English language (Polish, Spanish, etc.) unless translation was explicitly requested. Feedback: "Please answer in English."
 3. MINIMAL EFFORT (score 0.1-0.4): Only 1-2 generic words like "yes", "no", "ok", "good", "bad" that don't demonstrate understanding. Feedback should suggest what to add.
 4. PARTIAL ANSWER (score 0.4-0.7): Shows some understanding but is incomplete, has significant errors, or doesn't fully address the question.
@@ -325,6 +326,11 @@ Return exactly ${answers.length} evaluation objects in a JSON array, one per ans
       // Override feedback for non-answers regardless
       if (isNonAnswer) {
         feedback = "No answer provided. Try to form at least one sentence about the topic.";
+      }
+      // The sentinel feedback belongs to real non-answers only: a scored nonsense or off-topic
+      // answer keeps the model feedback, or a neutral line when the model echoed the sentinel.
+      if (!isNonAnswer && typeof feedback === "string" && /^\s*no answer provided/i.test(feedback)) {
+        feedback = "This answer does not address the question.";
       }
       if (isInjection && !isNonAnswer) {
         feedback = "This response does not answer the question. Write your own answer about the topic.";

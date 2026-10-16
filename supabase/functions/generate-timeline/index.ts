@@ -24,6 +24,7 @@ import {
 import { WORKSHEET_HISTORY_COLUMNS, toWorksheetHistoryRows } from "../_shared/worksheetHistory.ts";
 import { chatCompletion } from "../_shared/aiChat.ts";
 import { NO_EM_DASH_RULE } from "../_shared/writingStyle.ts";
+import { withEffectiveMastery } from "../_shared/forgetting.ts";
 import { computeIntensity, intensityPromptLines, loadLearningProfileForPacing } from "../_shared/pacing.ts";
 
 const corsHeaders = {
@@ -108,7 +109,8 @@ serve(async (req) => {
       });
     }
 
-    const metrics = metricsRes.data || [];
+    // D9: forgetting applied at read time; weakest (lowest effective mastery) first.
+    const metrics = withEffectiveMastery(metricsRes.data || []).sort((a, b) => a.current_mastery - b.current_mastery);
     const knowledge = knowledgeRes.data || [];
     const goals = goalsRes.data || [];
     const recentWorksheets = toWorksheetHistoryRows(worksheetsRes.data);

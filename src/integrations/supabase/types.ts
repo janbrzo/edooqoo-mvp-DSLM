@@ -14,6 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      _mig_parts: {
+        Row: {
+          chunk: string | null
+          i: number
+          mig: string
+        }
+        Insert: {
+          chunk?: string | null
+          i: number
+          mig: string
+        }
+        Update: {
+          chunk?: string | null
+          i?: number
+          mig?: string
+        }
+        Relationships: []
+      }
       admin_activity_log: {
         Row: {
           action: string
@@ -3785,6 +3803,20 @@ export type Database = {
         }
         Returns: string
       }
+      add_student_event_internal: {
+        Args: {
+          p_element_type?: string
+          p_event_payload?: Json
+          p_event_source: string
+          p_event_type: string
+          p_session_id?: string
+          p_skill_ids?: string[]
+          p_source_id?: string
+          p_student_id: string
+          p_teacher_id: string
+        }
+        Returns: string
+      }
       add_tokens: {
         Args: {
           p_amount: number
@@ -4418,6 +4450,7 @@ export type Database = {
             }[]
           }
       is_user_anonymous: { Args: { user_id: string }; Returns: boolean }
+      knowledge_entry_dslm_ratings: { Args: { p_entry: Json }; Returns: Json }
       list_public_worksheets: {
         Args: {
           p_level?: string
@@ -4516,6 +4549,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      normalize_dslm_ratings: { Args: { p_ratings: Json }; Returns: Json }
       normalize_tag: { Args: { tag: string }; Returns: string }
       queue_worksheet_ai_evaluation: {
         Args: {
@@ -4788,6 +4822,14 @@ export type Database = {
       }
       submit_homework_answers: {
         Args: { p_homework_id: string; p_student_email: string }
+        Returns: boolean
+      }
+      submit_homework_answers_by_share_token: {
+        Args: {
+          p_homework_id: string
+          p_share_token: string
+          p_student_email: string
+        }
         Returns: boolean
       }
       track_user_event: {

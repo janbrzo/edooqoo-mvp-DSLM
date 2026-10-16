@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { devLog, devWarn } from '@/utils/logger';
 import { isClosedExerciseType } from '@/utils/masteryCalculator';
 import { buildClosedItemContext } from '@/lib/answers/closedItemContext';
+import { buildOpenAnswerContext, openExerciseItems } from '../../supabase/functions/_shared/openAnswerContext';
 
 export interface TranscriptionResult {
   text: string;
@@ -71,7 +72,8 @@ export async function transcribeAllAudio(
           cache[cacheKey] = {
             text: transcResult.transcription,
             wordCount: words.length,
-            duration: undefined
+            // Recording length in seconds when transcribe-audio reports it; never guessed.
+            duration: typeof transcResult.duration === 'number' && transcResult.duration > 0 ? transcResult.duration : undefined
           };
           devLog(`${logPrefix} Transcription success: ${words.length} words`);
         } else {
@@ -95,13 +97,14 @@ export function buildAnswersToVerify(params: {
   exerciseData: any;
   audioAnswers: Record<number, Record<number, string>>;
   transcriptionCache: TranscriptionCache;
+  /** Listening transcript stored on the worksheet (not on the exercise), when known. */
+  worksheetAudioTranscript?: string | null;
 }): AnswerToVerify[] {
-  const { savedAnswer, exerciseData, audioAnswers, transcriptionCache } = params;
+  const { savedAnswer, exerciseData, audioAnswers, transcriptionCache, worksheetAudioTranscript } = params;
   const result: AnswerToVerify[] = [];
   
   const studentAnswersForExercise = savedAnswer.answers || {};
-  const questionItems = exerciseData?.questions || exerciseData?.prompts || exerciseData?.sentences || exerciseData?.expressions || exerciseData?.items || [];
-  
+
   // Build union of question indexes from written answers + audio answers
   const allQuestionIndexes = new Set<number>();
   Object.keys(studentAnswersForExercise)
@@ -137,8 +140,7 @@ export function buildAnswersToVerify(params: {
   }
 
   for (const qIdx of allQuestionIndexes) {
-    const questionItem = questionItems[qIdx];
-    if (!questionItem) continue;
+    if (!openExerciseItems(exerciseData)[qIdx]) continue;
     
     const writtenAnswer = studentAnswersForExercise[qIdx];
     const transcKey = `${savedAnswer.exercise_index}_${qIdx}`;
@@ -152,19 +154,17 @@ export function buildAnswersToVerify(params: {
     
     if (!effectiveAnswer) continue;
     
-    let questionText = '';
-    let suggestedAnswer = '';
-    
-    if (typeof questionItem === 'string') {
-      questionText = questionItem;
-    } else {
-      questionText = questionItem.text || questionItem.question || questionItem.prompt || questionItem.original || '';
-      suggestedAnswer = questionItem.suggested_answer || questionItem.answer || questionItem.correct_answer || questionItem.correct || questionItem.transformed || '';
-    }
-    
-    if (exerciseData?.instructions && qIdx === 0) {
-      questionText = `[Instructions: ${exerciseData.instructions}]\n\n${questionText}`;
-    }
+    // Question, key and the passage / transcript / image the question is about.
+    const ctx = buildOpenAnswerContext({
+      exercise: exerciseData,
+      questionIndex: qIdx,
+      worksheetAudioTranscript,
+      includeInstructions: true,
+    });
+    const questionText = ctx.source_context
+      ? `[Source material]\n${ctx.source_context}\n\n${ctx.question_text}`
+      : ctx.question_text;
+    const suggestedAnswer = ctx.suggested_answer;
     
     result.push({
       exercise_index: savedAnswer.exercise_index,

@@ -46,6 +46,10 @@ const MICRO_SKILL_LABELS: Record<string, string> = {
   vocab: 'Vocabulary', coll: 'Collocations', idiom: 'Idioms', syn: 'Synonyms', ant: 'Antonyms',
   reading: 'Reading', speaking: 'Speaking', writing: 'Writing', listening: 'Listening',
   grammar_other: 'Grammar (Other)', pronunciation: 'Pronunciation',
+  used_to_would: 'Used to / Would', question_forms: 'Question Forms', subject_verb_agreement: 'Subject-Verb Agreement',
+  parts_of_speech: 'Parts of Speech', telephoning: 'Telephoning', negotiation: 'Negotiation',
+  email_register: 'Email Register', diplomatic_language: 'Diplomatic Language', meetings: 'Meetings',
+  presentations: 'Presentations', business_communication: 'Business Communication', functional_language: 'Functional Language',
 };
 
 const CATEGORY_ORDER = ['grammar', 'vocabulary', 'reading', 'speaking', 'writing', 'listening', 'pronunciation', 'visual_comprehension'];
@@ -427,7 +431,14 @@ export function SkillsOverviewPanel({ studentId, teacherId, onlySection }: Skill
                       </p>
                     </div>
                     <MasterySparkline history={skill.mastery_history} trend={skill.trend} />
-                    <div className="w-32">
+                    <div
+                      className="w-32"
+                      title={
+                        skill.raw_mastery !== skill.current_mastery && skill.last_event_at
+                          ? `After forgetting: ${skill.current_mastery}%. Last practised ${skill.last_event_at.slice(0, 10)} at ${skill.raw_mastery}%.`
+                          : undefined
+                      }
+                    >
                       <MasteryBar value={skill.current_mastery} />
                     </div>
                   </div>

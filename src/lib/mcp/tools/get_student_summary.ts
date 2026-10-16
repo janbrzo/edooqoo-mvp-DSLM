@@ -1,6 +1,7 @@
 import { defineTool } from "@lovable.dev/mcp-js";
 import { z } from "zod";
 import { resolveTeacherFromRequest, unauthorized } from "../auth";
+import { withEffectiveMastery } from "../../../../supabase/functions/_shared/forgetting";
 
 export default defineTool({
   name: "get_student_summary",
@@ -27,11 +28,11 @@ export default defineTool({
 
     const { data: skills } = await auth.supabase
       .from("student_skill_metrics")
-      .select("skill_name, skill_category, current_mastery, trend, total_events")
+      .select("skill_name, skill_category, current_mastery, trend, total_events, last_event_at")
       .eq("student_id", student_id)
       .eq("teacher_id", auth.teacherId)
       .order("current_mastery", { ascending: false })
-      .limit(10);
+      .limit(60);
 
     const { data: worksheets } = await auth.supabase
       .from("worksheets")
@@ -41,7 +42,7 @@ export default defineTool({
       .order("created_at", { ascending: false })
       .limit(5);
 
-    const summary = { student, top_skills: skills ?? [], recent_worksheets: worksheets ?? [] };
+    const summary = { student, top_skills: withEffectiveMastery(skills ?? []).sort((a, b) => b.current_mastery - a.current_mastery).slice(0, 10), recent_worksheets: worksheets ?? [] };
     return {
       content: [{ type: "text" as const, text: JSON.stringify(summary, null, 2) }],
       structuredContent: summary,

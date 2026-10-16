@@ -8,9 +8,9 @@ This file classifies every public blog article against Edooqoo's strategic audie
 
 | Action | Count |
 |---|---:|
-| promote-or-refresh | 238 |
+| promote-or-refresh | 237 |
 | merge-redirect-or-noindex | 82 |
-| noindex-keep-accessible | 17 |
+| noindex-keep-accessible | 18 |
 | promote-rewrite-now | 6 |
 
 ## Priority Rewrite / Promote Queue
@@ -161,7 +161,6 @@ This file classifies every public blog article against Edooqoo's strategic audie
 | /blog/motivation-theories-language-learning.html | promote-or-refresh | Adult and professional English | stage-4-refresh-candidate | 76 | 769 | 1:1 English lesson prep, EFL tutor workflow, adult ESL tutor, private English tutor | Generated x1000 adult 1:1 article or refresh already uses the approved evidence-led tutor workflow format. |
 | /blog/needs-analysis-esl-students.html | promote-or-refresh | LLM vs tutor workflow | stage-4-refresh-candidate | 92 | 1391 | 1:1 English lesson prep, EFL tutor workflow, adult ESL tutor, private English tutor | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
 | /blog/pair-work-activities-esl.html | promote-or-refresh | LLM vs tutor workflow | stage-4-refresh-candidate | 88 | 719 | 1:1 English lesson prep, EFL tutor workflow, adult ESL tutor, private English tutor | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
-| /blog/parent-teacher-conferences-esl.html | promote-or-refresh | LLM vs tutor workflow | stage-4-refresh-candidate | 64 | 236 | 1:1 English lesson prep, EFL tutor workflow, adult ESL tutor, private English tutor | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
 | /blog/peer-editing-workshops-esl.html | promote-or-refresh | LLM vs tutor workflow | stage-4-refresh-candidate | 76 | 571 | 1:1 English lesson prep, EFL tutor workflow, adult ESL tutor, private English tutor | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
 | /blog/peer-feedback-activities-english.html | promote-or-refresh | Homework evidence and retention | stage-4-refresh-candidate | 76 | 674 | 1:1 English lesson prep, EFL tutor workflow, adult ESL tutor, private English tutor | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |
 | /blog/peer-observation-esl-teachers.html | promote-or-refresh | What to teach next | stage-4-refresh-candidate | 76 | 455 | 1:1 English lesson prep, EFL tutor workflow, adult ESL tutor, private English tutor | Matches Edooqoo strategic audience or product workflow without strong school-like drift. |

@@ -27,7 +27,7 @@ export function parseAiEvaluation(aiEval: any): Record<number, AiEvaluation> | u
     const qIdx = qe.question_index ?? 0;
     result[qIdx] = {
       is_acceptable: qe.is_acceptable ?? (qe.quality_score >= 0.5),
-      quality_score: qe.quality_score ?? 0,
+      quality_score: typeof qe.quality_score === 'number' && Number.isFinite(qe.quality_score) ? qe.quality_score : -1,
       feedback: qe.feedback ?? '',
       question_index: qIdx,
       writing_score: qe.writing_score,
@@ -92,11 +92,11 @@ export function mapItemEvaluationsToAiEvaluations(items: any[] | undefined): Rec
     const effectiveMastery = baseMastery ?? 
       (writingMastery !== undefined && speakingMastery !== undefined 
         ? Math.round((writingMastery + speakingMastery) / 2) 
-        : writingMastery ?? speakingMastery ?? 0);
+        : writingMastery ?? speakingMastery ?? -1);
     
     result[qIdx] = {
       is_acceptable: effectiveMastery >= 70,
-      quality_score: effectiveMastery / 100,
+      quality_score: effectiveMastery >= 0 ? effectiveMastery / 100 : -1,
       feedback,
       question_index: qIdx,
       writing_score: writingMastery !== undefined ? writingMastery / 100 : undefined,

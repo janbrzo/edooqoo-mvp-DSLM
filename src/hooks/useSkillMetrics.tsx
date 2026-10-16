@@ -1,6 +1,7 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { effectiveMastery } from '../../supabase/functions/_shared/forgetting';
 
 export interface SkillMetric {
   id: string;
@@ -8,8 +9,10 @@ export interface SkillMetric {
   teacher_id: string;
   skill_name: string;
   skill_category: string;
+  /** Effective mastery after forgetting (D9); `raw_mastery` is the stored value. */
   current_mastery: number;
-  trend: 'improving' | 'declining' | 'stable';
+  raw_mastery: number;
+  trend: 'improving' | 'declining' | 'stable' | 'insufficient_data';
   total_events: number;
   last_event_at: string | null;
   first_event_at: string | null;
@@ -23,7 +26,7 @@ export interface CategoryMetric {
   avg_mastery: number;
   skill_count: number;
   total_events: number;
-  trend: 'improving' | 'declining' | 'stable';
+  trend: 'improving' | 'declining' | 'stable' | 'insufficient_data';
   last_activity: string | null;
 }
 
@@ -34,7 +37,7 @@ export interface MicroSkillMetric {
   nano_skill_count: number;
   total_events: number;
   last_activity: string | null;
-  trend: 'improving' | 'declining' | 'stable';
+  trend: 'improving' | 'declining' | 'stable' | 'insufficient_data';
 }
 
 export function useSkillMetrics(studentId: string, teacherId: string, periodDays?: number | null) {
@@ -60,9 +63,10 @@ export function useSkillMetrics(studentId: string, teacherId: string, periodDays
       if (error) throw error;
       return (data || []).map(row => ({
         ...row,
-        current_mastery: Number(row.current_mastery) || 0,
+        raw_mastery: Number(row.current_mastery) || 0,
+        current_mastery: effectiveMastery(Number(row.current_mastery) || 0, row.last_event_at),
         total_events: Number(row.total_events) || 0,
-        trend: (row.trend as 'improving' | 'declining' | 'stable') || 'stable',
+        trend: (row.trend as 'improving' | 'declining' | 'stable' | 'insufficient_data') || 'stable',
         mastery_history: (row.mastery_history as any[] || []),
         micro_skill: (row as any).micro_skill || null,
       })) as SkillMetric[];
@@ -110,7 +114,7 @@ export function useSkillMetrics(studentId: string, teacherId: string, periodDays
         avg_mastery: Number(row.avg_mastery) || 0,
         skill_count: Number(row.skill_count) || 0,
         total_events: Number(row.total_events) || 0,
-        trend: (row.trend as 'improving' | 'declining' | 'stable') || 'stable',
+        trend: (row.trend as 'improving' | 'declining' | 'stable' | 'insufficient_data') || 'stable',
         last_activity: row.last_activity as string | null,
       })) as CategoryMetric[];
     },

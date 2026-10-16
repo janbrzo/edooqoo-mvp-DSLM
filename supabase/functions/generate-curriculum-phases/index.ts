@@ -14,6 +14,7 @@ import { authorizedTeacherId, jsonResponse, resolveCaller } from "../_shared/aut
 import { chatCompletion } from "../_shared/aiChat.ts";
 import { NO_EM_DASH_RULE } from "../_shared/writingStyle.ts";
 import { WORKSHEET_HISTORY_COLUMNS, toWorksheetHistoryRows } from "../_shared/worksheetHistory.ts";
+import { withEffectiveMastery } from "../_shared/forgetting.ts";
 import { resolvePromptPacing, computeIntensity, intensityPromptLines, loadLearningProfileForPacing } from "../_shared/pacing.ts";
 
 // v6.9.13: helpers inlined (previously imported from ../_shared/dslmPromptCore.ts).
@@ -349,7 +350,8 @@ serve(async (req) => {
       );
     }
 
-    const metrics = metricsRes.data || [];
+    // D9: forgetting applied at read time; weakest (lowest effective mastery) first.
+    const metrics = withEffectiveMastery(metricsRes.data || []).sort((a, b) => a.current_mastery - b.current_mastery);
     const knowledge = knowledgeRes.data || [];
     const goals = goalsRes.data || [];
     const worksheets = toWorksheetHistoryRows(worksheetsRes.data);
