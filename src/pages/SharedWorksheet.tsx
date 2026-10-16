@@ -476,6 +476,7 @@ const SharedWorksheet = () => {
         <SharedWorksheetProgressBar
           progress={interactiveHook.getProgress()}
           isSaving={interactiveHook.isSaving}
+          saveFailed={interactiveHook.saveFailed}
           lastSavedAt={interactiveHook.lastSavedAt}
         />
       )}

@@ -136,6 +136,7 @@ export default function HomeworkPage() {
     aiEvaluations,
     isLoading: answersLoading,
     isSaving,
+    saveFailed,
     lastSavedAt,
     isSubmitted,
     submittedAt,
@@ -628,6 +629,7 @@ export default function HomeworkPage() {
       <HomeworkProgressBar
         progress={progress}
         isSaving={isSaving}
+        saveFailed={saveFailed}
         lastSavedAt={lastSavedAt}
         isSubmitted={finalIsSubmitted}
         isTeacher={isTeacher}

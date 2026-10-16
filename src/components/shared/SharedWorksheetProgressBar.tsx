@@ -10,12 +10,15 @@ import { SharedWorksheetProgress } from '@/types/interactiveSharedWorksheet';
 interface SharedWorksheetProgressBarProps {
   progress: SharedWorksheetProgress;
   isSaving: boolean;
+  /** A save failed and is being retried. */
+  saveFailed?: boolean;
   lastSavedAt: Date | null;
 }
 
 export const SharedWorksheetProgressBar = ({
   progress,
   isSaving,
+  saveFailed = false,
   lastSavedAt
 }: SharedWorksheetProgressBarProps) => {
   const formatTime = (date: Date) => {
@@ -62,7 +65,11 @@ export const SharedWorksheetProgressBar = ({
 
           {/* Status indicators */}
           <div className="flex items-center gap-2">
-            {isSaving ? (
+            {saveFailed ? (
+              <Badge variant="destructive">
+                Not saved yet, retrying...
+              </Badge>
+            ) : isSaving ? (
               <Badge variant="secondary" className="animate-pulse">
                 <Loader2 className="h-3 w-3 mr-1 animate-spin" />
                 Saving...

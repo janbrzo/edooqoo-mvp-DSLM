@@ -67,6 +67,11 @@ export const useInteractiveHomework = ({
   
   const pendingSavesQueueRef = useRef(createPendingSaves());
   const pendingSavesRef = useRef<Set<number>>(new Set());
+  // True while at least one save failed and is waiting for a retry (shown in the progress bar).
+  const [saveFailed, setSaveFailed] = useState(false);
+  // One error toast per failure streak: the queue retries on its own.
+  const saveErrorShownRef = useRef(false);
+  useEffect(() => pendingSavesQueueRef.current.onStatus((st) => setSaveFailed(st.failed > 0)), []);
   
   const exerciseStartTimeRef = useRef<Record<number, number>>({});
   const exerciseActiveTimeRef = useRef<Record<number, number>>({});
@@ -177,7 +182,7 @@ export const useInteractiveHomework = ({
     mastery?: number | null,
     itemEvaluations?: ItemEvaluation[] | null,
     audioAnswersForExercise?: Record<number, string> | null
-  ) => {
+  ): Promise<boolean> => {
     try {
       setIsSaving(true);
       
@@ -203,14 +208,20 @@ export const useInteractiveHomework = ({
       if (pendingSavesRef.current.size === 0) {
         setIsSaving(false);
       }
+      saveErrorShownRef.current = false;
+      return true;
     } catch (error: any) {
       console.error('Error saving answer:', error);
-      toast({
-        title: "Error saving answer",
-        description: error.message,
-        variant: "destructive"
-      });
+      if (!saveErrorShownRef.current) {
+        saveErrorShownRef.current = true;
+        toast({
+          title: "Your answer is not saved yet",
+          description: "We will keep trying. Please stay on this page.",
+          variant: "destructive"
+        });
+      }
       setIsSaving(false);
+      return false; // the queue retries a failed save
     }
   }, [homeworkId, studentEmail, getActiveTimeMs, shareToken]);
 
@@ -266,17 +277,16 @@ export const useInteractiveHomework = ({
   const saveOnBlur = useCallback((exerciseIndex: number, exerciseType: string) => {
     if (isSubmitted) return;
 
-    // This exercise is saved right now; other exercises keep their pending saves.
-    pendingSavesQueueRef.current.cancel(exerciseIndex);
-
     const exerciseAnswers = answers[exerciseIndex];
-    if (exerciseAnswers) {
-      const effectiveWorksheetId = sourceWorksheetId || homeworkId;
-      const exerciseData = { ...exercises[exerciseIndex], worksheetId: effectiveWorksheetId };
-      const mastery = calculateOverallMastery(exerciseType, exerciseData, exerciseAnswers as Record<string | number, any>);
-      const itemEvaluations = buildItemEvaluations(exerciseData, exerciseAnswers as Record<string | number, any>, exerciseType, null, audioAnswers[exerciseIndex] || null);
-      saveAnswer(exerciseIndex, exerciseType, exerciseAnswers, mastery, itemEvaluations);
-    }
+    if (!exerciseAnswers) return;
+    const effectiveWorksheetId = sourceWorksheetId || homeworkId;
+    const exerciseData = { ...exercises[exerciseIndex], worksheetId: effectiveWorksheetId };
+    const mastery = calculateOverallMastery(exerciseType, exerciseData, exerciseAnswers as Record<string | number, any>);
+    const itemEvaluations = buildItemEvaluations(exerciseData, exerciseAnswers as Record<string | number, any>, exerciseType, null, audioAnswers[exerciseIndex] || null);
+    // Save this exercise right now through the queue (serialized and retried); other exercises keep their pending saves.
+    const queue = pendingSavesQueueRef.current;
+    queue.schedule(exerciseIndex, () => saveAnswer(exerciseIndex, exerciseType, exerciseAnswers, mastery, itemEvaluations), 0);
+    void queue.flushOne(exerciseIndex);
   }, [answers, saveAnswer, exercises, isSubmitted]);
 
   const submitHomework = useCallback(async () => {
@@ -291,7 +301,17 @@ export const useInteractiveHomework = ({
       }
 
       // Persist every answer still waiting in the autosave debounce before submitting.
-      await pendingSavesQueueRef.current.flush();
+      const allSaved = await pendingSavesQueueRef.current.flush();
+      if (!allSaved) {
+        // Submitting on top of answers the server never received would grade older data.
+        toast({
+          title: "Some answers are not saved yet",
+          description: "Check your connection and press Submit again in a moment.",
+          variant: "destructive"
+        });
+        setIsSaving(false);
+        return false;
+      }
       const latestAnswers = answersRef.current;
 
       const { error } = await submitHomeworkAnswers(homeworkId, studentEmail, shareToken);
@@ -709,6 +729,7 @@ export const useInteractiveHomework = ({
     aiEvaluations,
     isLoading,
     isSaving,
+    saveFailed,
     lastSavedAt,
     isSubmitted,
     submittedAt,

@@ -8,6 +8,8 @@ import { Link, useNavigate } from 'react-router-dom';
 interface HomeworkProgressBarProps {
   progress: HomeworkProgress;
   isSaving: boolean;
+  /** A save failed and is being retried. */
+  saveFailed?: boolean;
   lastSavedAt: Date | null;
   isSubmitted: boolean;
   isTeacher?: boolean;
@@ -21,6 +23,7 @@ interface HomeworkProgressBarProps {
 export const HomeworkProgressBar = ({
   progress,
   isSaving,
+  saveFailed = false,
   lastSavedAt,
   isSubmitted,
   isTeacher = false,
@@ -137,7 +140,11 @@ export const HomeworkProgressBar = ({
               </Badge>
             ) : (
               <>
-                {isSaving ? (
+                {saveFailed ? (
+                  <Badge variant="destructive">
+                    Not saved yet, retrying...
+                  </Badge>
+                ) : isSaving ? (
                   <Badge variant="secondary" className="animate-pulse">
                     <Loader2 className="h-3 w-3 mr-1 animate-spin" />
                     Saving...

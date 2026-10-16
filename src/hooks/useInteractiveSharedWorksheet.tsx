@@ -57,6 +57,11 @@ export const useInteractiveSharedWorksheet = ({
   
   const pendingSavesQueueRef = useRef(createPendingSaves());
   const pendingSavesRef = useRef<Set<number>>(new Set());
+  // True while at least one save failed and is waiting for a retry (shown in the progress bar).
+  const [saveFailed, setSaveFailed] = useState(false);
+  // One error toast per failure streak: the queue retries on its own.
+  const saveErrorShownRef = useRef(false);
+  useEffect(() => pendingSavesQueueRef.current.onStatus((st) => setSaveFailed(st.failed > 0)), []);
   
   // PROBLEM 1 FIX: Active time tracking per exercise
   const exerciseStartTimeRef = useRef<Record<number, number>>({});
@@ -177,7 +182,7 @@ export const useInteractiveSharedWorksheet = ({
     mastery?: number | null,
     itemEvaluations?: ItemEvaluation[] | null,
     audioAnswersForExercise?: Record<number, string> | null
-  ) => {
+  ): Promise<boolean> => {
     try {
       setIsSaving(true);
       
@@ -205,14 +210,20 @@ export const useInteractiveSharedWorksheet = ({
       if (pendingSavesRef.current.size === 0) {
         setIsSaving(false);
       }
+      saveErrorShownRef.current = false;
+      return true;
     } catch (error: any) {
       console.error('Error saving answer:', error);
-      toast({
-        title: "Error saving answer",
-        description: error.message,
-        variant: "destructive"
-      });
+      if (!saveErrorShownRef.current) {
+        saveErrorShownRef.current = true;
+        toast({
+          title: "Your answer is not saved yet",
+          description: "We will keep trying. Please stay on this page.",
+          variant: "destructive"
+        });
+      }
       setIsSaving(false);
+      return false; // the queue retries a failed save
     }
   }, [worksheetId, studentEmail, getActiveTimeMs, shareToken]);
 
@@ -281,20 +292,19 @@ export const useInteractiveSharedWorksheet = ({
 
   // Save immediately on blur (when user leaves input field)
   const saveOnBlur = useCallback((exerciseIndex: number, exerciseType: string) => {
-    // This exercise is saved right now; other exercises keep their pending saves
-    pendingSavesQueueRef.current.cancel(exerciseIndex);
-
     const exerciseAnswers = answers[exerciseIndex];
-    if (exerciseAnswers) {
-      // PROBLEM 1: Build per-item evaluations with nano_skill_ratings
-      const exerciseData = { ...exercises[exerciseIndex], worksheetId };
-      const mastery = calculateOverallMastery(exerciseType, exerciseData, exerciseAnswers as Record<string | number, any>);
-      const itemEvaluations = buildItemEvaluations(exerciseData, exerciseAnswers as Record<string | number, any>, exerciseType, null, audioAnswers[exerciseIndex] || null);
-      // PROBLEM 1 FIX: Don't send item_evaluations if they contain no real AI eval data
-      const hasRealAiEval = itemEvaluations?.some(e => e.hasValue !== false);
-      const evalToSend = hasRealAiEval ? itemEvaluations : null;
-      saveAnswer(exerciseIndex, exerciseType, exerciseAnswers, mastery, evalToSend);
-    }
+    if (!exerciseAnswers) return;
+    // PROBLEM 1: Build per-item evaluations with nano_skill_ratings
+    const exerciseData = { ...exercises[exerciseIndex], worksheetId };
+    const mastery = calculateOverallMastery(exerciseType, exerciseData, exerciseAnswers as Record<string | number, any>);
+    const itemEvaluations = buildItemEvaluations(exerciseData, exerciseAnswers as Record<string | number, any>, exerciseType, null, audioAnswers[exerciseIndex] || null);
+    // PROBLEM 1 FIX: Don't send item_evaluations if they contain no real AI eval data
+    const hasRealAiEval = itemEvaluations?.some(e => e.hasValue !== false);
+    const evalToSend = hasRealAiEval ? itemEvaluations : null;
+    // Save this exercise right now through the queue (serialized and retried); other exercises keep their pending saves.
+    const queue = pendingSavesQueueRef.current;
+    queue.schedule(exerciseIndex, () => saveAnswer(exerciseIndex, exerciseType, exerciseAnswers, mastery, evalToSend), 0);
+    void queue.flushOne(exerciseIndex);
   }, [answers, saveAnswer, exercises]);
 
   // Calculate progress - percentage based on individual tasks, exercises based on full completion
@@ -384,8 +394,9 @@ export const useInteractiveSharedWorksheet = ({
   useEffect(() => {
     const handleBeforeUnload = async () => {
       // Iterate through all exercises with answers
-      for (const exerciseIndexStr of Object.keys(answers)) {
-        const exerciseIndex = parseInt(exerciseIndexStr);
+      // Only exercises with unsaved changes: a keepalive write of an already saved
+      // exercise would reset eval_trigger and re-date its DSLM event for nothing.
+      for (const exerciseIndex of pendingSavesQueueRef.current.pendingIndices()) {
         const exerciseType = exerciseTypesRef.current[exerciseIndex];
         const exerciseAnswers = answers[exerciseIndex];
         
@@ -422,8 +433,13 @@ export const useInteractiveSharedWorksheet = ({
       }
     };
 
+    // pagehide also fires on mobile browsers, where beforeunload often does not.
     window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener('pagehide', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('pagehide', handleBeforeUnload);
+    };
   }, [answers, worksheetId, studentEmail, exercises, getActiveTimeMs, shareToken]);
 
   // Flush pending saves on unmount so the last second of answers is not dropped
@@ -629,6 +645,7 @@ export const useInteractiveSharedWorksheet = ({
     aiEvaluations,
     isLoading,
     isSaving,
+    saveFailed,
     lastSavedAt,
     isSubmittedForReview,
     updateAnswer,
