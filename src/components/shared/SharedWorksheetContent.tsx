@@ -65,6 +65,8 @@ interface SharedWorksheetContentProps {
   showCorrectAnswers?: boolean;
   /** Exercises whose answer key may be shown; when given, the key never appears for the others. */
   revealedExercises?: ReadonlySet<number>;
+  /** Hide exercises the teacher deleted (students). The teacher's own view keeps showing them. */
+  hideDeleted?: boolean;
   /** Lock the inputs of revealed exercises (students) so answers cannot be copied from the key. */
   lockRevealed?: boolean;
   disabled?: boolean;
@@ -162,6 +164,7 @@ const SharedWorksheetContent: React.FC<SharedWorksheetContentProps> = ({
   onAudioAnswerChange,
   showCorrectAnswers = false,
   revealedExercises,
+  hideDeleted = false,
   lockRevealed = false,
   disabled = false,
   answerVisibilityFilter = 'all',
@@ -414,7 +417,7 @@ const SharedWorksheetContent: React.FC<SharedWorksheetContentProps> = ({
       {worksheetData.exercises && worksheetData.exercises.map((rawExercise: any, index: number) => {
         // An exercise the teacher deleted stays in the array (answers and events are keyed by
         // its position) but is never shown to the student.
-        if (rawExercise?.deleted) return null;
+        if (hideDeleted && rawExercise?.deleted) return null;
         // P1.5: canonicalize drifted exercise shapes before rendering.
         const exercise = normalizeExerciseShape(rawExercise);
         devLog(`🔧 Rendering exercise ${index + 1}: ${exercise.type}`, exercise);

@@ -653,7 +653,7 @@ const SharedWorksheet = () => {
               title: exercise.title,
               icon: exercise.icon,
               estimated_time: exercise.time,
-              hidden: !!exercise.deleted
+              hidden: !!exercise.deleted && !isTeacher
             }))}
             activeExercise={navigation.activeExercise}
             collapsedExercises={navigation.collapsedExercises}
@@ -723,6 +723,7 @@ const SharedWorksheet = () => {
               showCorrectAnswers={interactiveHook.isSubmittedForReview}
               revealedExercises={interactiveHook.revealedExercises}
               lockRevealed={!isTeacher}
+              hideDeleted={!isTeacher}
               answerVisibilityFilter={answerVisibility}
               disabled={false}
               mediaPinned={isPinned}
