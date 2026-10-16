@@ -96,7 +96,7 @@ export function mapItemEvaluationsToAiEvaluations(items: any[] | undefined): Rec
     
     result[qIdx] = {
       is_acceptable: effectiveMastery >= 70,
-      quality_score: effectiveMastery / 100,
+      quality_score: effectiveMastery >= 0 ? effectiveMastery / 100 : -1,
       feedback,
       question_index: qIdx,
       writing_score: writingMastery !== undefined ? writingMastery / 100 : undefined,
