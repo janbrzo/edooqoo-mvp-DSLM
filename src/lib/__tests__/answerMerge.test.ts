@@ -36,3 +36,29 @@ describe('save_worksheet_answer / save_homework_answer merge answers', () => {
     }
   });
 });
+
+describe('W2: a submitted homework is locked on the server', () => {
+  const lock = readFileSync(join(__dirname, '../../../supabase/migrations/20261016090010_w2_homework_lock_after_submit.sql'), 'utf8');
+
+  it('save_homework_answer updates only rows that are not submitted yet', () => {
+    const start = lock.indexOf('CREATE OR REPLACE FUNCTION public.save_homework_answer(');
+    const body = lock.slice(start, lock.indexOf('$function$;', start));
+    expect(body).toMatch(/WHERE homework_student_answers\.is_submitted = FALSE\s+RETURNING/);
+    expect(body).toContain('homework_student_answers.answers || EXCLUDED.answers');
+  });
+
+  it('submit_homework_answers keeps the first completion date', () => {
+    expect(lock).toContain('completed_at = COALESCE(completed_at, NOW())');
+  });
+
+  it('fits one SQL Editor paste and has no SELECT ... INTO', () => {
+    expect(Buffer.byteLength(lock)).toBeLessThan(8000);
+    expect(lock).not.toMatch(/SELECT[^;]*\bINTO\b/i);
+  });
+
+  it('the post-submit AI phase does not rely on save_homework_answer', () => {
+    const hook = readFileSync(join(__dirname, '../../../src/hooks/useInteractiveHomework.tsx'), 'utf8');
+    const afterSubmit = hook.slice(hook.indexOf('await submitHomeworkAnswers('));
+    expect(afterSubmit).not.toMatch(/callStudentAnswerRpc\('save_homework_answer'/);
+  });
+});

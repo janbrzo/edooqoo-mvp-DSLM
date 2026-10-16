@@ -718,6 +718,8 @@ const SharedWorksheet = () => {
               audioAnswers={interactiveHook.audioAnswers}
               onAudioAnswerChange={(isTeacher && !teacherEditMode) ? undefined : (exIdx, qIdx, url) => interactiveHook.updateAudioAnswer(exIdx, qIdx, url)}
               showCorrectAnswers={interactiveHook.isSubmittedForReview}
+              revealedExercises={interactiveHook.revealedExercises}
+              lockRevealed={!isTeacher}
               answerVisibilityFilter={answerVisibility}
               disabled={false}
               mediaPinned={isPinned}

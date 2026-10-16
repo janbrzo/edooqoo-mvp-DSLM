@@ -63,6 +63,10 @@ interface SharedWorksheetContentProps {
   onAudioAnswerChange?: (exerciseIndex: number, questionIndex: number, audioUrl: string) => void;
   // DSLM fix: show correct answers & disable after AI eval
   showCorrectAnswers?: boolean;
+  /** Exercises whose answer key may be shown; when given, the key never appears for the others. */
+  revealedExercises?: ReadonlySet<number>;
+  /** Lock the inputs of revealed exercises (students) so answers cannot be copied from the key. */
+  lockRevealed?: boolean;
   disabled?: boolean;
   answerVisibilityFilter?: 'all' | 'closed' | 'open' | 'hidden';
   // Media pin/fullscreen passthrough
@@ -157,6 +161,8 @@ const SharedWorksheetContent: React.FC<SharedWorksheetContentProps> = ({
   audioAnswers,
   onAudioAnswerChange,
   showCorrectAnswers = false,
+  revealedExercises,
+  lockRevealed = false,
   disabled = false,
   answerVisibilityFilter = 'all',
   mediaPinned = false,
@@ -167,9 +173,12 @@ const SharedWorksheetContent: React.FC<SharedWorksheetContentProps> = ({
   // PROBLEM 3: Effective interactive mode (disabled if read-only)
   const effectiveInteractive = isInteractive && !isReadOnly;
   
+  const isRevealed = (index: number): boolean => (revealedExercises ? revealedExercises.has(index) : true);
+  const isLocked = (index: number): boolean => lockRevealed && !!revealedExercises && revealedExercises.has(index);
+
   // Answer visibility filter, controls which exercise types show correct answers
-  const shouldShowCorrectForExercise = (exerciseType: string): boolean => {
-    if (!showCorrectAnswers) return false;
+  const shouldShowCorrectForExercise = (exerciseType: string, index: number): boolean => {
+    if (!showCorrectAnswers || !isRevealed(index)) return false;
     if (answerVisibilityFilter === 'hidden') return false;
     if (answerVisibilityFilter === 'all') return true;
     const isClosed = isClosedExerciseType(exerciseType);
@@ -179,8 +188,8 @@ const SharedWorksheetContent: React.FC<SharedWorksheetContentProps> = ({
   };
 
   // Answer visibility filter for AI evaluations (open-ended exercises)
-  const shouldShowAiEvalsForExercise = (exerciseType: string): boolean => {
-    if (!showCorrectAnswers) return false;
+  const shouldShowAiEvalsForExercise = (exerciseType: string, index: number): boolean => {
+    if (!showCorrectAnswers || !isRevealed(index)) return false;
     if (answerVisibilityFilter === 'hidden') return false;
     if (answerVisibilityFilter === 'all') return true;
     const isClosed = isClosedExerciseType(exerciseType);
@@ -190,7 +199,7 @@ const SharedWorksheetContent: React.FC<SharedWorksheetContentProps> = ({
   };
 
   const getFilteredAiEvals = (exerciseType: string, index: number) => {
-    if (!shouldShowAiEvalsForExercise(exerciseType)) return undefined;
+    if (!shouldShowAiEvalsForExercise(exerciseType, index)) return undefined;
     return aiEvaluations?.[index] ?? convertItemEvalsToAiEvals(itemEvaluations?.[index]);
   };
   devLog('🔧 SharedWorksheetContent: Starting data parsing...');
@@ -487,8 +496,8 @@ const SharedWorksheetContent: React.FC<SharedWorksheetContentProps> = ({
                   isInteractive={effectiveInteractive}
                   studentAnswers={studentAnswers[index] || {}}
                   onAnswerChange={(qIndex, value) => onAnswerChange?.(index, exercise.type, qIndex, value)}
-                  showCorrectAnswers={shouldShowCorrectForExercise(exercise.type)}
-                  disabled={disabled}
+                  showCorrectAnswers={shouldShowCorrectForExercise(exercise.type, index)}
+                  disabled={disabled || isLocked(index)}
                 />
               )}
 
@@ -503,8 +512,8 @@ const SharedWorksheetContent: React.FC<SharedWorksheetContentProps> = ({
                   isInteractive={effectiveInteractive}
                   studentAnswers={studentAnswers[index] || {}}
                   onAnswerChange={(qIndex, value) => onAnswerChange?.(index, exercise.type, qIndex, value)}
-                  showCorrectAnswers={shouldShowCorrectForExercise(exercise.type)}
-                  disabled={disabled}
+                  showCorrectAnswers={shouldShowCorrectForExercise(exercise.type, index)}
+                  disabled={disabled || isLocked(index)}
                 />
               )}
 
@@ -521,8 +530,8 @@ const SharedWorksheetContent: React.FC<SharedWorksheetContentProps> = ({
                   studentAnswers={studentAnswers[index] || {}}
                   onAnswerChange={(qIndex, value) => onAnswerChange?.(index, exercise.type, qIndex, value)}
                   worksheetId={worksheet.id}
-                  showCorrectAnswers={shouldShowCorrectForExercise(exercise.type)}
-                  disabled={disabled}
+                  showCorrectAnswers={shouldShowCorrectForExercise(exercise.type, index)}
+                  disabled={disabled || isLocked(index)}
                 />
               )}
 
@@ -597,8 +606,8 @@ const SharedWorksheetContent: React.FC<SharedWorksheetContentProps> = ({
                   isInteractive={effectiveInteractive}
                   studentAnswers={studentAnswers[index] || {}}
                   onAnswerChange={(qIndex, value) => onAnswerChange?.(index, exercise.type, qIndex, value)}
-                  showCorrectAnswers={shouldShowCorrectForExercise(exercise.type)}
-                  disabled={disabled}
+                  showCorrectAnswers={shouldShowCorrectForExercise(exercise.type, index)}
+                  disabled={disabled || isLocked(index)}
                 />
               )}
 
@@ -611,8 +620,8 @@ const SharedWorksheetContent: React.FC<SharedWorksheetContentProps> = ({
                   isInteractive={effectiveInteractive}
                   studentAnswers={studentAnswers[index] || {}}
                   onAnswerChange={(qIndex, value) => onAnswerChange?.(index, exercise.type, qIndex, value)}
-                  showCorrectAnswers={shouldShowCorrectForExercise(exercise.type)}
-                  disabled={disabled}
+                  showCorrectAnswers={shouldShowCorrectForExercise(exercise.type, index)}
+                  disabled={disabled || isLocked(index)}
                 />
               )}
 
@@ -628,8 +637,8 @@ const SharedWorksheetContent: React.FC<SharedWorksheetContentProps> = ({
                   isInteractive={effectiveInteractive}
                   studentAnswers={studentAnswers[index] || {}}
                   onAnswerChange={(qIndex, value) => onAnswerChange?.(index, exercise.type, qIndex, value)}
-                  showCorrectAnswers={shouldShowCorrectForExercise(exercise.type)}
-                  disabled={disabled}
+                  showCorrectAnswers={shouldShowCorrectForExercise(exercise.type, index)}
+                  disabled={disabled || isLocked(index)}
                 />
               )}
 
@@ -658,8 +667,8 @@ const SharedWorksheetContent: React.FC<SharedWorksheetContentProps> = ({
                   isInteractive={effectiveInteractive}
                   studentAnswers={studentAnswers[index] || {}}
                   onAnswerChange={(qIndex, value) => onAnswerChange?.(index, exercise.type, qIndex, value)}
-                  showCorrectAnswers={shouldShowCorrectForExercise(exercise.type)}
-                  disabled={disabled}
+                  showCorrectAnswers={shouldShowCorrectForExercise(exercise.type, index)}
+                  disabled={disabled || isLocked(index)}
                 />
               )}
 
@@ -673,8 +682,8 @@ const SharedWorksheetContent: React.FC<SharedWorksheetContentProps> = ({
                   isInteractive={effectiveInteractive}
                   studentAnswers={studentAnswers[index] || {}}
                   onAnswerChange={(qIndex, value) => onAnswerChange?.(index, exercise.type, qIndex, value)}
-                  showCorrectAnswers={shouldShowCorrectForExercise(exercise.type)}
-                  disabled={disabled}
+                  showCorrectAnswers={shouldShowCorrectForExercise(exercise.type, index)}
+                  disabled={disabled || isLocked(index)}
                 />
               )}
 
@@ -688,8 +697,8 @@ const SharedWorksheetContent: React.FC<SharedWorksheetContentProps> = ({
                   isInteractive={effectiveInteractive}
                   studentAnswers={studentAnswers[index] || {}}
                   onAnswerChange={(qIndex, value) => onAnswerChange?.(index, exercise.type, qIndex, value)}
-                  showCorrectAnswers={shouldShowCorrectForExercise(exercise.type)}
-                  disabled={disabled}
+                  showCorrectAnswers={shouldShowCorrectForExercise(exercise.type, index)}
+                  disabled={disabled || isLocked(index)}
                 />
               )}
 
@@ -702,8 +711,8 @@ const SharedWorksheetContent: React.FC<SharedWorksheetContentProps> = ({
                   isInteractive={effectiveInteractive}
                   studentAnswers={studentAnswers[index] || {}}
                   onAnswerChange={(qIndex, value) => onAnswerChange?.(index, exercise.type, qIndex, value)}
-                  showCorrectAnswers={shouldShowCorrectForExercise(exercise.type)}
-                  disabled={disabled}
+                  showCorrectAnswers={shouldShowCorrectForExercise(exercise.type, index)}
+                  disabled={disabled || isLocked(index)}
                 />
               )}
 
@@ -716,8 +725,8 @@ const SharedWorksheetContent: React.FC<SharedWorksheetContentProps> = ({
                   isInteractive={effectiveInteractive}
                   studentAnswers={studentAnswers[index] || {}}
                   onAnswerChange={(qIndex, value) => onAnswerChange?.(index, exercise.type, qIndex, value)}
-                  showCorrectAnswers={shouldShowCorrectForExercise(exercise.type)}
-                  disabled={disabled}
+                  showCorrectAnswers={shouldShowCorrectForExercise(exercise.type, index)}
+                  disabled={disabled || isLocked(index)}
                 />
               )}
 
@@ -733,8 +742,8 @@ const SharedWorksheetContent: React.FC<SharedWorksheetContentProps> = ({
                   onAnswerChange={(qIndex, value) => onAnswerChange?.(index, exercise.type, qIndex, value)}
                   worksheetId={worksheet.id}
                   isSharedWorksheet={true}
-                  showCorrectAnswers={shouldShowCorrectForExercise(exercise.type)}
-                  disabled={disabled}
+                  showCorrectAnswers={shouldShowCorrectForExercise(exercise.type, index)}
+                  disabled={disabled || isLocked(index)}
                 />
               )}
 
@@ -751,8 +760,8 @@ const SharedWorksheetContent: React.FC<SharedWorksheetContentProps> = ({
                   isInteractive={effectiveInteractive}
                   studentAnswers={studentAnswers[index] || {}}
                   onAnswerChange={(qIndex, value) => onAnswerChange?.(index, exercise.type, qIndex, value)}
-                  showCorrectAnswers={shouldShowCorrectForExercise(exercise.type)}
-                  disabled={disabled}
+                  showCorrectAnswers={shouldShowCorrectForExercise(exercise.type, index)}
+                  disabled={disabled || isLocked(index)}
                 />
               )}
 
@@ -803,8 +812,8 @@ const SharedWorksheetContent: React.FC<SharedWorksheetContentProps> = ({
                   isInteractive={effectiveInteractive}
                   studentAnswers={studentAnswers[index] || {}}
                   onAnswerChange={(qIndex, value) => onAnswerChange?.(index, exercise.type, qIndex, value)}
-                  showCorrectAnswers={shouldShowCorrectForExercise(exercise.type)}
-                  disabled={disabled}
+                  showCorrectAnswers={shouldShowCorrectForExercise(exercise.type, index)}
+                  disabled={disabled || isLocked(index)}
                 />
               )}
 
@@ -820,8 +829,8 @@ const SharedWorksheetContent: React.FC<SharedWorksheetContentProps> = ({
                   studentAnswers={studentAnswers[index] || {}}
                   onAnswerChange={(qIndex, value) => onAnswerChange?.(index, exercise.type, qIndex, value)}
                   worksheetId={worksheet.id}
-                  showCorrectAnswers={shouldShowCorrectForExercise(exercise.type)}
-                  disabled={disabled}
+                  showCorrectAnswers={shouldShowCorrectForExercise(exercise.type, index)}
+                  disabled={disabled || isLocked(index)}
                 />
               )}
 
@@ -842,8 +851,8 @@ const SharedWorksheetContent: React.FC<SharedWorksheetContentProps> = ({
                   isInteractive={effectiveInteractive}
                   studentAnswers={studentAnswers[index] || {}}
                   onAnswerChange={(qIndex, value) => onAnswerChange?.(index, exercise.type, qIndex, value)}
-                  showCorrectAnswers={shouldShowCorrectForExercise(exercise.type)}
-                  disabled={disabled}
+                  showCorrectAnswers={shouldShowCorrectForExercise(exercise.type, index)}
+                  disabled={disabled || isLocked(index)}
                 />
               )}
 
@@ -899,8 +908,8 @@ const SharedWorksheetContent: React.FC<SharedWorksheetContentProps> = ({
                   isInteractive={effectiveInteractive}
                   studentAnswers={studentAnswers[index] || {}}
                   onAnswerChange={(qIndex, value) => onAnswerChange?.(index, exercise.type, qIndex, value)}
-                  showCorrectAnswers={shouldShowCorrectForExercise(exercise.type)}
-                  disabled={disabled}
+                  showCorrectAnswers={shouldShowCorrectForExercise(exercise.type, index)}
+                  disabled={disabled || isLocked(index)}
                 />
               )}
 
