@@ -14,24 +14,6 @@ export type Database = {
   }
   public: {
     Tables: {
-      _mig_parts: {
-        Row: {
-          chunk: string | null
-          i: number
-          mig: string
-        }
-        Insert: {
-          chunk?: string | null
-          i: number
-          mig: string
-        }
-        Update: {
-          chunk?: string | null
-          i?: number
-          mig?: string
-        }
-        Relationships: []
-      }
       admin_activity_log: {
         Row: {
           action: string
@@ -1646,6 +1628,9 @@ export type Database = {
       }
       homework_student_answers: {
         Row: {
+          ai_eval_attempts: number
+          ai_eval_last_attempt_at: string | null
+          ai_eval_note: string | null
           ai_evaluation: Json | null
           answers: Json
           audio_answers: Json | null
@@ -1664,6 +1649,9 @@ export type Database = {
           time_spent_ms: number | null
         }
         Insert: {
+          ai_eval_attempts?: number
+          ai_eval_last_attempt_at?: string | null
+          ai_eval_note?: string | null
           ai_evaluation?: Json | null
           answers?: Json
           audio_answers?: Json | null
@@ -1682,6 +1670,9 @@ export type Database = {
           time_spent_ms?: number | null
         }
         Update: {
+          ai_eval_attempts?: number
+          ai_eval_last_attempt_at?: string | null
+          ai_eval_note?: string | null
           ai_evaluation?: Json | null
           answers?: Json
           audio_answers?: Json | null
@@ -2210,6 +2201,8 @@ export type Database = {
           skill_ids: string[] | null
           source_id: string | null
           student_id: string
+          superseded_at: string | null
+          superseded_by: string | null
           teacher_id: string
         }
         Insert: {
@@ -2225,6 +2218,8 @@ export type Database = {
           skill_ids?: string[] | null
           source_id?: string | null
           student_id: string
+          superseded_at?: string | null
+          superseded_by?: string | null
           teacher_id: string
         }
         Update: {
@@ -2240,6 +2235,8 @@ export type Database = {
           skill_ids?: string[] | null
           source_id?: string | null
           student_id?: string
+          superseded_at?: string | null
+          superseded_by?: string | null
           teacher_id?: string
         }
         Relationships: [
@@ -3906,6 +3903,10 @@ export type Database = {
         Returns: Json
       }
       calculate_test_results: { Args: { p_test_id: string }; Returns: Json }
+      claim_homework_answer_ai_attempt: {
+        Args: { p_id: string }
+        Returns: boolean
+      }
       claim_pending_ai_evaluations: {
         Args: {
           p_limit?: number
@@ -3966,6 +3967,10 @@ export type Database = {
         Args: { p_teacher_id: string; p_worksheet_id: string }
         Returns: boolean
       }
+      consume_token_internal: {
+        Args: { p_teacher_id: string; p_worksheet_id: string }
+        Returns: boolean
+      }
       create_mcp_token: {
         Args: { _expires_at?: string; _name: string }
         Returns: {
@@ -3980,6 +3985,10 @@ export type Database = {
           p_student_id: string
           p_worksheet_id: string
         }
+        Returns: number
+      }
+      dslm_effective_mastery: {
+        Args: { p_last_event_at: string; p_mastery: number; p_now: string }
         Returns: number
       }
       extract_micro_skill: { Args: { skill_name: string }; Returns: string }
@@ -4239,6 +4248,10 @@ export type Database = {
           title: string
         }[]
       }
+      get_student_dslm_state_vector: {
+        Args: { p_student_id: string; p_teacher_id: string }
+        Returns: Json
+      }
       get_student_homework_answers: {
         Args: { p_homework_id: string; p_student_email: string }
         Returns: {
@@ -4453,6 +4466,14 @@ export type Database = {
         Args: { p_homework_id: string; p_message?: string }
         Returns: undefined
       }
+      insert_homework_submission_notification_by_share_token: {
+        Args: {
+          p_homework_id: string
+          p_share_token: string
+          p_student_email: string
+        }
+        Returns: undefined
+      }
       insert_public_booking_notification: {
         Args: {
           p_message: string
@@ -4507,7 +4528,25 @@ export type Database = {
             }[]
           }
       is_user_anonymous: { Args: { user_id: string }; Returns: boolean }
+      keep_ai_alternative_ratings: {
+        Args: { p_new: Json; p_old: Json }
+        Returns: Json
+      }
       knowledge_entry_dslm_ratings: { Args: { p_entry: Json }; Returns: Json }
+      list_homework_answers_needing_ai_evaluation: {
+        Args: { p_limit?: number }
+        Returns: {
+          answers: Json
+          audio_answers: Json
+          exercise_index: number
+          exercise_type: string
+          homework_id: string
+          id: string
+          item_evaluations: Json
+          last_saved_at: string
+          student_email: string
+        }[]
+      }
       list_public_worksheets: {
         Args: {
           p_level?: string
@@ -4573,7 +4612,19 @@ export type Database = {
         }
         Returns: undefined
       }
+      mark_homework_answer_ai_not_evaluable: {
+        Args: { p_id: string; p_note?: string }
+        Returns: undefined
+      }
       mark_homework_completed: {
+        Args: {
+          p_homework_id: string
+          p_is_teacher?: boolean
+          p_user_id: string
+        }
+        Returns: Json
+      }
+      mark_homework_completed_internal: {
         Args: {
           p_homework_id: string
           p_is_teacher?: boolean
@@ -4606,6 +4657,15 @@ export type Database = {
         }
         Returns: boolean
       }
+      needs_ai_evaluation_by_share_token: {
+        Args: {
+          p_exercise_index: number
+          p_share_token: string
+          p_student_email: string
+          p_worksheet_id: string
+        }
+        Returns: boolean
+      }
       normalize_dslm_ratings: { Args: { p_ratings: Json }; Returns: Json }
       normalize_tag: { Args: { tag: string }; Returns: string }
       queue_worksheet_ai_evaluation: {
@@ -4620,9 +4680,26 @@ export type Database = {
         }
         Returns: string
       }
+      queue_worksheet_ai_evaluation_by_share_token: {
+        Args: {
+          p_answers: Json
+          p_context?: Json
+          p_english_level?: string
+          p_exercise_index: number
+          p_exercise_type: string
+          p_share_token: string
+          p_student_email: string
+          p_worksheet_id: string
+        }
+        Returns: string
+      }
       reactivate_user_account: {
         Args: { user_email: string }
         Returns: boolean
+      }
+      reconcile_welcome_test_events: {
+        Args: { p_events: Json; p_test_id: string }
+        Returns: Json
       }
       revoke_mcp_token: { Args: { _id: string }; Returns: undefined }
       rollback_intake_extraction: {
@@ -4889,6 +4966,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      supersede_previous_welcome_test_events: {
+        Args: { p_test_id: string }
+        Returns: number
+      }
       track_user_event: {
         Args: {
           p_event_data?: Json
@@ -4935,6 +5016,10 @@ export type Database = {
         Returns: boolean
       }
       welcome_test_canonical_id: { Args: { p_legacy: string }; Returns: string }
+      worksheet_answers_differ: {
+        Args: { p_new: Json; p_old: Json }
+        Returns: boolean
+      }
     }
     Enums: {
       app_role: "admin" | "teacher"

@@ -14,6 +14,8 @@ Subdirectories `src/` and `supabase/` have their own `AGENTS.md`; read them befo
 
 ## Documentation & AI Resources
 
+- `get_student_dslm_state_vector` is an owner/service-only, read-only projection of canonical metrics; its SQL decay helper is parity-tested against `forgetting.ts`, excludes duplicate card metrics and never replaces saved scores or automatically feeds the worksheet engine, because a portable state read must preserve evidence authority and the protected generation contract.
+
 - Every sitemap URL is served `index,follow` with a self canonical to the clean URL (asserted by `scripts/seo/audit-seo-assets.mjs` and `audit-sitemap-integrity`); a page is de-indexed only through `noindex` in `scripts/seo/content-registry.mjs`, which also drops it from the sitemap and requires removing internal links — because sitemap+noindex conflicts triggered GSC indexing alerts.
 - `public/llms.txt` and root `llms.txt` are generated only by `scripts/seo/generate-ai-resources.mjs` (`npm run seo:generate-ai`) and gated by `scripts/seo/audit-seo-assets.mjs`; never hand-edit them or append release notes, and change wording in the generator, not the output; generators stay deterministic (no `new Date()`; bump `RELEASE_DATE`/`VERSION`) and `npm run seo:sync-generated` must leave `git diff` clean — because CI runs `git diff --exit-code` after regenerating.
 - `docs/llm-context.md` is updated only for architectural changes (new module, table, Edge Function, route contract) in the `PROBLEM -> EDOOQOO SOLUTION -> TECHNICAL MECHANICS -> RAG KEYWORDS` format — because per-fix changelog entries bloat agent context and go stale.
