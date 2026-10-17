@@ -13,7 +13,34 @@
  * scored, "accurate" when the self-assessed level was missing). Profiles that carry no
  * stamp were written by version 1.
  */
-export const LEVEL_ALGORITHM_VERSION = 2;
+export const LEVEL_ALGORITHM_VERSION = 3;
+
+/**
+ * Version 3 (owner decision, 2026-10-17): no level without enough evidence. A level
+ * needs at least MIN_SCORED_ITEMS scored keyed items ("I don't know" counts as scored),
+ * MIN_ANSWERED_ITEMS of them real answers (not "I don't know") and MIN_SCORED_SKILLS
+ * skills with a score. One forged answer gave C1 and an all-"I don't know" run gave A1.
+ */
+export const MIN_SCORED_ITEMS = 8;
+export const MIN_ANSWERED_ITEMS = 5;
+export const MIN_SCORED_SKILLS = 2;
+
+export interface LevelEvidenceInput {
+  /** Keyed items with a verdict (is_correct not null), "I don't know" included. */
+  scoredItems: number;
+  /** Scored keyed items answered with something other than "I don't know". */
+  answeredItems: number;
+}
+
+export interface LevelEvidence {
+  status: 'ok' | 'insufficient';
+  scored_items: number;
+  answered_items: number;
+  scored_skills: number;
+  min_scored: number;
+  min_answered: number;
+  min_skills: number;
+}
 
 /** Key inside the profile raw_answers JSON that stores the version of the stored level. */
 export const LEVEL_VERSION_KEY = '__level_algorithm_version__';
@@ -27,6 +54,8 @@ export interface LevelInput {
   reading: number | null | undefined;
   writing: number | null | undefined;
   selfAssessedLevel: string | null | undefined;
+  /** Evidence counts; omitted only by callers written before version 3 (no gate). */
+  evidence?: LevelEvidenceInput;
 }
 
 export interface LevelEstimate {
@@ -37,6 +66,8 @@ export interface LevelEstimate {
   averageScore: number | null;
   scoredSkills: string[];
   version: number;
+  /** Present when the caller passed evidence counts. */
+  evidence?: LevelEvidence;
 }
 
 const LEVEL_MAP: Record<string, number> = {
@@ -62,8 +93,22 @@ export function estimateLevel(input: LevelInput): LevelEstimate {
     ['writing', input.writing],
   ];
   const scored = skills.filter((s): s is [string, number] => isScore(s[1]));
-  if (scored.length === 0) {
-    return { level: null, confidence: null, averageScore: null, scoredSkills: [], version: LEVEL_ALGORITHM_VERSION };
+  const evidence: LevelEvidence | undefined = input.evidence
+    ? {
+      status: input.evidence.scoredItems >= MIN_SCORED_ITEMS
+        && input.evidence.answeredItems >= MIN_ANSWERED_ITEMS
+        && scored.length >= MIN_SCORED_SKILLS ? 'ok' : 'insufficient',
+      scored_items: input.evidence.scoredItems,
+      answered_items: input.evidence.answeredItems,
+      scored_skills: scored.length,
+      min_scored: MIN_SCORED_ITEMS,
+      min_answered: MIN_ANSWERED_ITEMS,
+      min_skills: MIN_SCORED_SKILLS,
+    }
+    : undefined;
+  if (scored.length === 0 || evidence?.status === 'insufficient') {
+    const averageScore = scored.length > 0 ? scored.reduce((sum, s) => sum + s[1], 0) / scored.length : null;
+    return { level: null, confidence: null, averageScore, scoredSkills: scored.map((s) => s[0]), version: LEVEL_ALGORITHM_VERSION, ...(evidence ? { evidence } : {}) };
   }
   const averageScore = scored.reduce((sum, s) => sum + s[1], 0) / scored.length;
   const level = levelForAverage(averageScore);
@@ -72,7 +117,7 @@ export function estimateLevel(input: LevelInput): LevelEstimate {
   const confidence: LevelConfidence | null = selfNum === undefined
     ? null
     : Math.abs(estNum - selfNum) <= 0.5 ? 'accurate' : selfNum > estNum ? 'overestimates' : 'underestimates';
-  return { level, confidence, averageScore, scoredSkills: scored.map((s) => s[0]), version: LEVEL_ALGORITHM_VERSION };
+  return { level, confidence, averageScore, scoredSkills: scored.map((s) => s[0]), version: LEVEL_ALGORITHM_VERSION, ...(evidence ? { evidence } : {}) };
 }
 
 export interface StoredLevelProfile {

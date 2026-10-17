@@ -111,7 +111,7 @@ describe('golden profile: live test student', () => {
   });
   it('level from the FINAL scores (writing 48 after AI scoring) is A2, overestimated', () => {
     expect(estimateLevel({ grammar: 38, vocabulary: 75, reading: 50, writing: 48, selfAssessedLevel: traits.self_assessed_level }))
-      .toEqual({ level: 'A2', confidence: 'overestimates', averageScore: 52.75, scoredSkills: ['grammar', 'vocabulary', 'reading', 'writing'], version: 2 });
+      .toEqual({ level: 'A2', confidence: 'overestimates', averageScore: 52.75, scoredSkills: ['grammar', 'vocabulary', 'reading', 'writing'], version: 3 });
   });
   it('divergences are exact', () => {
     const level = estimateLevel({ grammar: 38, vocabulary: 75, reading: 50, writing: 48, selfAssessedLevel: traits.self_assessed_level });
@@ -162,7 +162,7 @@ describe('golden profile: legacy option text (em dash) and multi-select q3b', ()
   });
   it('level without a scored writing item uses the three scored skills', () => {
     expect(estimateLevel({ grammar: 80, vocabulary: 70, reading: 60, writing: null, selfAssessedLevel: traits.self_assessed_level }))
-      .toEqual({ level: 'B1', confidence: 'accurate', averageScore: 70, scoredSkills: ['grammar', 'vocabulary', 'reading'], version: 2 });
+      .toEqual({ level: 'B1', confidence: 'accurate', averageScore: 70, scoredSkills: ['grammar', 'vocabulary', 'reading'], version: 3 });
   });
   it('divergences are exact', () => {
     expect(computeDivergences({
