@@ -5,6 +5,7 @@
 import { Sparkles, AlertCircle, SkipForward, HelpCircle, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import { WELCOME_TEST_ESTIMATED_MINUTES } from '@/lib/welcomeTest/constants';
 
 interface InstructionScreenProps {
   totalQuestions: number;
@@ -19,7 +20,7 @@ export function InstructionScreen({ totalQuestions, onStart }: InstructionScreen
           <Sparkles className="h-10 w-10 text-primary mx-auto mb-3" />
           <h1 className="text-2xl font-bold">Before You Begin</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {totalQuestions} questions • ~30 min
+            {totalQuestions} questions • ~{WELCOME_TEST_ESTIMATED_MINUTES} min
           </p>
         </div>
 

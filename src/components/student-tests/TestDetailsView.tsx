@@ -118,7 +118,9 @@ export function TestDetailsView({ testId, teacherId, studentId, onBack }: TestDe
     const token = await generateShareToken(testId);
     if (token) {
       const isWelcome = test?.test_type === 'welcome';
-      const url = isWelcome 
+      // Legacy non-welcome tests are retired: /test/:token now only shows an "inactive link"
+      // page (src/pages/StudentTestPage.tsx). Do not build new /test/ links for new features.
+      const url = isWelcome
         ? `${window.location.origin}/welcome-test/${token}`
         : `${window.location.origin}/test/${token}`;
       await navigator.clipboard.writeText(url);

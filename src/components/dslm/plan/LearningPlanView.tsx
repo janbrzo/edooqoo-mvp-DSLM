@@ -42,6 +42,7 @@ import { isSuggestedGoal } from '@/lib/dslm/goals';
 import type { ModelAnchor } from '@/lib/students/workspaceTabs';
 import type { GoalType } from '@/types/studentProgress';
 import { SetupChecklist } from './SetupChecklist';
+import { AutoAppliedPacingCard } from '@/components/dslm/AutoAppliedPacingCard';
 import { ReviewStrip } from './ReviewStrip';
 import { UpNextSection, type PlanSuggestion } from './UpNextSection';
 import { RoadmapStrip } from './RoadmapStrip';
@@ -390,6 +391,7 @@ export const LearningPlanView: React.FC<LearningPlanViewProps> = ({
         deleteGoal={progress.deleteGoal}
         onResolved={() => plan.attention.refetch()}
       />
+      <AutoAppliedPacingCard studentId={studentId} />
 
       {readiness.stage === 'setup' ? (
         <div ref={setupRef} className="scroll-mt-24">
