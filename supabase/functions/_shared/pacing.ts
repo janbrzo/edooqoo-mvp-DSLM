@@ -483,7 +483,7 @@ export interface InitialAutoApplyInput {
   triggerType: string | null | undefined;
   /** students.last_pacing_set_manually: true = teacher set it, false = computed value written, null = never set. */
   lastPacingSetManually: boolean | null | undefined;
-  /** An earlier pacing_proposals row with status accepted/applied exists for the student. */
+  /** An earlier teacher decision exists for the student (pacing_proposals status accepted, applied, reverted or rejected). */
   hasEarlierAppliedProposal: boolean;
 }
 

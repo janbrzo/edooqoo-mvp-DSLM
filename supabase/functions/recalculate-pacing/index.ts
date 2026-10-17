@@ -132,7 +132,9 @@ serve(async (req) => {
       const { data: earlier, error: eErr } = await supabase.from('pacing_proposals')
         .select('id')
         .eq('student_id', studentId).eq('teacher_id', teacherId)
-        .in('status', ['accepted', 'applied'])
+        // Any earlier teacher decision counts: an undone auto-apply ('reverted') or a
+        // rejected proposal must not be overridden by the next Welcome Test.
+        .in('status', ['accepted', 'applied', 'reverted', 'rejected'])
         .limit(1);
       const flag = (student as any).last_pacing_set_manually;
       // A failed lookup must not auto-apply: fall through to the approval flow.
