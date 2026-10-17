@@ -156,10 +156,10 @@ export const buildItemEvaluations = (
     // Skip questions without student answers (written or audio)
     let studentAnswer = answers[idx];
     // For gap-text multi-blank, check composite keys like "0_0"
-    if (exerciseType === 'gap-text' && (studentAnswer === undefined || studentAnswer === null)) {
-      const compositeKey = `${idx}_0`;
-      if (answers[compositeKey] !== undefined) {
-        studentAnswer = answers[compositeKey]; // Use first blank as "has answer" indicator
+    if ((exerciseType === 'gap-text' || exerciseType === 'fill-in-blanks') && (studentAnswer === undefined || studentAnswer === null)) {
+      const firstBlankKey = Object.keys(answers).find((k) => k.startsWith(`${idx}_`) && /^\d+_\d+$/.test(k) && (answers as any)[k] !== undefined);
+      if (firstBlankKey) {
+        studentAnswer = (answers as any)[firstBlankKey]; // Any blank is the "has answer" indicator
       }
     }
     const hasStudentAnswer = studentAnswer !== undefined && 
@@ -271,7 +271,8 @@ export const calculateInitialMasteryForItem = (
   const studentAnswer = studentAnswers?.[itemIndex];
   const exerciseType: string = exerciseData?.type || '';
   const hasCompositeAnswer =
-    exerciseType === 'gap-text' && studentAnswers?.[`${itemIndex}_0` as unknown as number] !== undefined;
+    (exerciseType === 'gap-text' || exerciseType === 'fill-in-blanks')
+    && Object.keys(studentAnswers ?? {}).some((k) => k.startsWith(`${itemIndex}_`) && /^\d+_\d+$/.test(k));
   if ((studentAnswer === undefined || studentAnswer === null || studentAnswer === '') && !hasCompositeAnswer) {
     return { mastery: null, hasValue: false };
   }

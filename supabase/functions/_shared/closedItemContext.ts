@@ -13,6 +13,8 @@
  * and process-pending-ai-evaluations. Pure, no I/O, no path aliases. Returns null when the item or the answer cannot be resolved.
  */
 import { shuffleArrayWithSeed, calculateItemMastery } from './itemMastery.ts';
+import { countBlanks, blankAnswers, hasBlankKeys } from './blanks.ts';
+import { normalizeExerciseShape } from './normalizeExercise.ts';
 export { shuffleArrayWithSeed };
 
 export interface ClosedItemContext {
@@ -60,6 +62,7 @@ export function buildClosedItemContext(
   itemIndex: number,
   allAnswers: Record<string | number, any>,
 ): ClosedItemContext | null {
+  exerciseData = normalizeExerciseShape(exerciseData);
   const base = buildBaseContext(exerciseType, exerciseData, itemIndex, allAnswers);
   if (!base) return null;
   let mastery: number | null = null;
@@ -155,6 +158,14 @@ function buildBaseContext(
     // Fill in blanks (incl. audio)
     if (exerciseType.startsWith('fill-in-blanks')) {
       const s = exerciseData.sentences?.[itemIndex];
+      if (exerciseType === 'fill-in-blanks' && s && hasBlankKeys(itemIndex, allAnswers) && countBlanks(textOf(s)) > 1) {
+        const blanks = countBlanks(textOf(s));
+        const parts: string[] = [];
+        for (let b = 0; b < blanks; b++) parts.push(str(allAnswers?.[`${itemIndex}_${b}`]));
+        if (parts.every((p) => p === '')) return null;
+        const expected = blankAnswers(s, blanks);
+        return build(`Fill in the blanks (in order, separated by " / "): ${textOf(s)}`, parts.join(' / '), expected.length ? expected.join(' / ') : null);
+      }
       const key =
         exerciseType === 'fill-in-blanks-audio' && exerciseData.answers?.[itemIndex]
           ? exerciseData.answers[itemIndex]

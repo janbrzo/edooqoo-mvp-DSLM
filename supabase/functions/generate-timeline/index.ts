@@ -21,6 +21,7 @@ import {
   buildExistingStepsBlock,
   getAdaptiveExerciseRules,
 } from "../_shared/dslmPromptCore.ts";
+import { WORKSHEET_HISTORY_COLUMNS, toWorksheetHistoryRows } from "../_shared/worksheetHistory.ts";
 import { chatCompletion } from "../_shared/aiChat.ts";
 import { NO_EM_DASH_RULE } from "../_shared/writingStyle.ts";
 import { withEffectiveMastery } from "../_shared/forgetting.ts";
@@ -81,8 +82,8 @@ serve(async (req) => {
         .order('created_at', { ascending: false }).limit(15),
       supabase.from('student_progress_goals').select('title, description, goal_type, is_achieved, target_date')
         .eq('student_id', studentId).eq('teacher_id', teacherId).is('deleted_at', null).eq('is_achieved', false),
-      supabase.from('worksheets').select('topic, created_at').eq('student_id', studentId).eq('teacher_id', teacherId)
-        .order('created_at', { ascending: false }).limit(10),
+      supabase.from('worksheets').select(WORKSHEET_HISTORY_COLUMNS).eq('student_id', studentId).eq('teacher_id', teacherId)
+        .is('deleted_at', null).order('created_at', { ascending: false }).limit(10),
       finalMode === 'phase_steps' && phaseId
         ? supabase.from('dslm_curriculum_phases').select('id, title, description, focus_areas').eq('id', phaseId).single()
         : Promise.resolve({ data: null }),
@@ -112,7 +113,7 @@ serve(async (req) => {
     const metrics = withEffectiveMastery(metricsRes.data || []).sort((a, b) => a.current_mastery - b.current_mastery);
     const knowledge = knowledgeRes.data || [];
     const goals = goalsRes.data || [];
-    const recentWorksheets = worksheetsRes.data || [];
+    const recentWorksheets = toWorksheetHistoryRows(worksheetsRes.data);
     const phase: any = (phaseRes as any).data || null;
     const excludedTopics = ((excludeRes as any).data || [])
       .map((r: any) => r.suggested_topic).filter(Boolean).join(', ');

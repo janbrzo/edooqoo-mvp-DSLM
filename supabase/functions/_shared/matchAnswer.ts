@@ -29,6 +29,7 @@ export type MatchReason =
   | 'sentinel'
   | 'near'
   | 'no-key'
+  | 'no-error-item'
   | 'mismatch';
 
 export interface MatchResult {
@@ -256,6 +257,17 @@ export const matchAnswer = (
     const key = normalizeAnswerText(variant, caseSensitive).toLowerCase();
     if (isNearMatch(studentExpanded, expandContractions(key), mode)) {
       return { verdict: 'review', matchedVariant: variant, reason: 'near', acceptedAnswers: variants };
+    }
+  }
+
+  // 4) Error-correction item whose key is the source sentence itself ("no error" item):
+  // any other wording can be a valid rewrite of an already correct sentence, so it goes
+  // to review. Only the key-equals-source case is affected; a real correction item is
+  // still marked wrong on a mismatch.
+  if (sourceSentence) {
+    const normalizedSource = normalizeAnswerText(sourceSentence).toLowerCase();
+    if (normalizedSource && variants.some((v) => normalizeAnswerText(v).toLowerCase() === normalizedSource)) {
+      return { verdict: 'review', reason: 'no-error-item', acceptedAnswers: variants };
     }
   }
 

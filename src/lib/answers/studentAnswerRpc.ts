@@ -84,3 +84,21 @@ export async function submitHomeworkAnswers(
 export function callUntypedRpc<T = unknown>(fn: string, args: Record<string, unknown>): Promise<RpcResult<T>> {
   return (supabase.rpc.bind(supabase) as unknown as RpcCall<T>)(fn, args);
 }
+
+/**
+ * Call an RPC through its token-checked variant (20261015090000) and fall back
+ * to the legacy name only when the variant does not exist yet. The legacy
+ * queue and notification RPCs are revoked from client roles by 20261015090100,
+ * so a rejected token (42501) or any other error is returned as is.
+ */
+export async function callTokenOrLegacyRpc<T = unknown>(
+  tokenFn: string,
+  tokenArgs: Record<string, unknown>,
+  legacyFn: string,
+  legacyArgs: Record<string, unknown>,
+): Promise<RpcResult<T>> {
+  const rpc = supabase.rpc.bind(supabase) as unknown as RpcCall<T>;
+  const res = await rpc(tokenFn, tokenArgs);
+  if (!isMissingRpcError(res.error)) return res;
+  return rpc(legacyFn, legacyArgs);
+}
