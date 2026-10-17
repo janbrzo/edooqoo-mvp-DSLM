@@ -227,3 +227,17 @@ Removed (no importers left): `PathwayView`, `NextStepsSection`, `NextStepBanner`
 - Real account (test teacher, 26 students, read-only Node check of the shipped pure rules against live rows): Prep #1 === Plan #1 for every student; one student showed the pre-fix divergence (old Prep proposed a later-phase lesson). Stages: 22 setup, 2 review, 1 ready (+1 setup with phases). Found and fixed: legacy `main_goal` codes (e.g. `grammar-structure`) shown raw as Prep topics.
 - Real account after the merge (2026-10-06): with the test teacher's session, Node ran the hooks' own queries and the shipped rules on all 26 students (Prep #1 === Plan #1 for the 3 students with a queue, onboarding idea steps resolve, the 14 pending pacing proposals are readable) and one write round trip on a test student (set main goal, `recalculate-pacing` proposal 50 to 70, the accept path, then every value restored). A static snapshot of three real students was rendered in Chromium through the fixture harness (no browser traffic to Supabase; the pacing and Welcome Test hooks were un-gated in the scratch copy only): 18/18 checks, including the pacing proposal card, the level change, Up next #1 equal to `orderUpNext` on the real rows, the setup checklist, the "set a main goal" hint and `dslm:addGoal` with `goalType: 'main'`, no horizontal scroll at 390 px and no page errors. Found and fixed: "sent jun 26, 2026" / "Used jun 26, 2026" (`formatRelativeAgeInline`).
 - Still not verified: a live browser session against Supabase (this environment's TLS-intercepting proxy blocks the browser and the workarounds were refused by the session's safety policy), the Prep tab with real suggestions in a browser (demo mode skips them by design), and the 5-teacher Martha test (section 11.7).
+
+## 13. Welcome Test results and profile (2026-10-17)
+
+| State | What the teacher sees |
+|---|---|
+| status `completed` (welcome) | "Analysing results..." card; no interim level or score is shown as final; Re-run analysis (force run) |
+| status `reviewed`, `level_evidence.status = 'insufficient'` | "Not enough answers to estimate a level (X of Y needed). Set the level manually after the first lesson." No level suggestion banner |
+| status `reviewed`, level present | Level labelled "From placement test" (never "set by you"); self-assessed vs estimated with "Self-assessment accuracy" (accurate / overestimates / underestimates) |
+
+- Headline score: "Skill Score (keyed items)" only; "-" when nothing is scored. The score over all questions is never shown.
+- Profile card: every trait with a human label (`src/lib/welcomeTest/traitLabels.ts`), a "based on" note and a confidence chip ("Low confidence (1 answer)" for single-item traits); self-awareness and "I don't know" counts with a one-line interpretation; declared-vs-measured pairs in plain words.
+- Signal feedback: Agree / Partly / Disagree (+ optional note) next to each trait, divergence and the learning-path band, stored in `wt_signal_feedback`; within 14 days of completion a hint asks to rate after 2-4 lessons.
+- Pacing: the first Welcome Test pacing is applied automatically when the teacher never set pacing; an info card shows the change with Undo. Later changes stay proposals.
+- No "Results applied to student's skill ratings" card (ratings are not copied to learning elements).
