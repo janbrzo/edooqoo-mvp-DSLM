@@ -1,6 +1,8 @@
 /**
  * SpeakingRecorder - Microphone recording component for Welcome Test speaking questions
  * Records up to 60s of audio, uploads to R2 via base64 JSON, saves URL as answer
+ * One save path (`saveRecording`): the Save button, Next/Skip/Complete (through
+ * `flushSpeaking`) and unmount all share one upload. Minimum length 1.5 s.
  * Cross-browser: tries audio/webm, audio/mp4, then no mimeType
  * P1.8: capability guards + honest upload failures (no fabricated placeholder answers)
  */
@@ -10,6 +12,7 @@ import { Mic, Square, Play, Pause, RotateCcw, Upload, CheckCircle, Loader2, Aler
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { devLog } from '@/utils/logger';
+import { registerSpeakingFlusher } from '@/lib/welcomeTest/speakingFlush';
 import {
   checkRecordingSupport,
   describeMicrophoneError,
@@ -21,9 +24,9 @@ import {
 interface SpeakingRecorderProps {
   maxSeconds?: number;
   answer?: string; // URL if already recorded
-  onAnswer: (audioUrl: string) => void;
+  /** Called once per saved recording with the question it was recorded for. */
+  onAnswer: (audioUrl: string, questionId?: string) => void;
   questionId?: string;
-  onAutoSave?: (questionId: string, audioUrl: string) => void;
 }
 
 /**
@@ -35,7 +38,10 @@ export async function uploadBlobToR2(blob: Blob): Promise<string | null> {
 }
 
 
-export function SpeakingRecorder({ maxSeconds = 60, answer, onAnswer, questionId, onAutoSave }: SpeakingRecorderProps) {
+/** Recordings shorter than this are discarded (accidental taps, empty audio). */
+const MIN_RECORDING_MS = 1500;
+
+export function SpeakingRecorder({ maxSeconds = 60, answer, onAnswer, questionId }: SpeakingRecorderProps) {
   const [status, setStatus] = useState<'idle' | 'recording' | 'recorded' | 'uploading' | 'done' | 'error'>(
     answer ? 'done' : 'idle'
   );
@@ -49,104 +55,105 @@ export function SpeakingRecorder({ maxSeconds = 60, answer, onAnswer, questionId
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const blobRef = useRef<Blob | null>(null);
-  const statusRef = useRef(status);
-  const prevQuestionIdRef = useRef(questionId);
+  const startedAtRef = useRef(0);
+  // Set when the last recording was discarded as too short; makes a navigation
+  // flush report "not saved" once so the message is seen before leaving.
+  const errorFromTooShortRef = useRef(false);
+  // Resolvers waiting for the recorder's final blob (onstop).
+  const stopWaitersRef = useRef<Array<(blob: Blob | null) => void>>([]);
+  // Single upload in flight: every save path (Save button, Next, Skip, Complete,
+  // unmount) shares it, so one recording is uploaded exactly once.
+  const uploadRef = useRef<Promise<boolean> | null>(null);
+  const questionIdRef = useRef(questionId);
+  const onAnswerRef = useRef(onAnswer);
+  questionIdRef.current = questionId;
+  onAnswerRef.current = onAnswer;
 
-  useEffect(() => { statusRef.current = status; }, [status]);
+  const clearTimer = () => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    timerRef.current = null;
+  };
 
-  // Auto-save when questionId changes (user navigates away via useEffect - FALLBACK)
-  useEffect(() => {
-    const prevId = prevQuestionIdRef.current;
-    const currentBlob = blobRef.current;
-    const currentStatus = statusRef.current;
-    
-    prevQuestionIdRef.current = questionId;
-    
-    if (prevId && questionId && prevId !== questionId) {
-      if (currentBlob && (currentStatus === 'recorded' || currentStatus === 'recording')) {
-        if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
-          mediaRecorderRef.current.stop();
-          if (timerRef.current) clearInterval(timerRef.current);
-        }
-        
-        const blob = currentBlob;
-        const capturedPrevId = prevId;
-        
-        devLog('[SpeakingRecorder] Auto-saving (questionId change) for:', capturedPrevId);
-        
-        uploadBlobToR2(blob)
-          .then((url) => {
-            if (url && onAutoSave) {
-              devLog('[SpeakingRecorder] Auto-save success:', capturedPrevId, url);
-              onAutoSave(capturedPrevId, url);
-            } else if (url) {
-              onAnswer(url);
-            } else {
-              // Never fabricate a placeholder answer; an unsaved recording
-              // must stay unsaved so the student can retry.
-              console.error('[SpeakingRecorder] Auto-save upload failed for:', capturedPrevId);
-              toast.error('We could not save your recording. Please record it again.');
-            }
-          })
-          .catch((err) => {
-            console.error('[SpeakingRecorder] Auto-save failed:', err);
-            toast.error('We could not save your recording. Please record it again.');
-          });
-
-      } else if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
-        mediaRecorderRef.current.stop();
-        if (timerRef.current) clearInterval(timerRef.current);
-      }
-      
-      blobRef.current = null;
-      setSeconds(0);
-      setIsPlaying(false);
-      setErrorMsg(null);
-    }
-  }, [questionId, onAutoSave, onAnswer]);
-
-  // Reset visual state when answer prop changes
+  // Reset visual state when the question or the saved answer changes
   useEffect(() => {
     setStatus(answer ? 'done' : 'idle');
     setAudioUrl(answer || null);
+    setSeconds(0);
+    setIsPlaying(false);
+    setErrorMsg(null);
   }, [answer, questionId]);
 
-  // Cleanup on unmount - FALLBACK auto-save
+  /** Stops an active recording and resolves with its final blob (null when none or too short). */
+  const stopAndGetBlob = useCallback((): Promise<Blob | null> => {
+    const mr = mediaRecorderRef.current;
+    if (mr && mr.state === 'recording') {
+      clearTimer();
+      return new Promise((resolve) => {
+        stopWaitersRef.current.push(resolve);
+        mr.stop();
+      });
+    }
+    return Promise.resolve(blobRef.current);
+  }, []);
+
+  /**
+   * The only save path. Resolves true when there is nothing left to save (or the
+   * upload succeeded), false when a recording exists but could not be saved.
+   */
+  const saveRecording = useCallback((): Promise<boolean> => {
+    if (uploadRef.current) return uploadRef.current;
+    const job = (async () => {
+      const targetQuestionId = questionIdRef.current;
+      const blob = await stopAndGetBlob();
+      if (!blob) {
+        const tooShort = errorFromTooShortRef.current;
+        errorFromTooShortRef.current = false;
+        return !tooShort;
+      }
+      setStatus('uploading');
+      setErrorMsg(null);
+      try {
+        const url = await uploadRecording(blob, {
+          filenamePrefix: 'welcome-test-speaking',
+          onRetry: (attempt) => devLog('[SpeakingRecorder] Upload retry', attempt),
+        });
+        blobRef.current = null;
+        setAudioUrl(url);
+        setStatus('done');
+        onAnswerRef.current(url, targetQuestionId);
+        toast.success('Recording saved!');
+        return true;
+      } catch (err) {
+        // Honest failure: keep the blob so the student can retry.
+        devLog('[SpeakingRecorder] Upload error:', err);
+        setStatus('recorded');
+        setErrorMsg("We couldn't upload your recording. Check your connection and tap Save again.");
+        toast.error('Recording not saved: please try again.');
+        return false;
+      }
+    })().finally(() => { uploadRef.current = null; });
+    uploadRef.current = job;
+    return job;
+  }, [stopAndGetBlob]);
+
+  // Let the page flush this recording before navigating (Next, Skip, Complete).
+  useEffect(() => registerSpeakingFlusher(saveRecording), [saveRecording]);
+
+  // Cleanup on unmount: finish and upload whatever was recorded, release the mic.
   useEffect(() => {
     return () => {
-      const blob = blobRef.current;
-      const currentStatus = statusRef.current;
-      const prevId = prevQuestionIdRef.current;
-
-      if (blob && (currentStatus === 'recorded' || currentStatus === 'recording')) {
-        if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
-          mediaRecorderRef.current.stop();
-        }
-
-        devLog('[SpeakingRecorder] Unmount auto-save for:', prevId);
-
-        uploadBlobToR2(blob)
-          .then((url) => {
-            if (url && prevId) {
-              devLog('[SpeakingRecorder] Unmount auto-save success:', prevId);
-              (window as any).__welcomeTestAutoSave?.(prevId, url);
-            }
-          })
-          .catch((err) => {
-            console.error('[SpeakingRecorder] Unmount auto-save failed:', err);
-          });
-      }
-
-      if (timerRef.current) clearInterval(timerRef.current);
+      void saveRecording();
+      clearTimer();
       if (audioRef.current) {
         audioRef.current.pause();
         audioRef.current = null;
       }
     };
-  }, []);
+  }, [saveRecording]);
 
   const startRecording = useCallback(async () => {
     setErrorMsg(null);
+    errorFromTooShortRef.current = false;
 
     const support = checkRecordingSupport();
     if (!support.supported) {
@@ -158,18 +165,17 @@ export function SpeakingRecorder({ maxSeconds = 60, answer, onAnswer, questionId
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
 
-      
       const mimeType = getSupportedMimeType();
       let mediaRecorder: MediaRecorder;
       try {
-        mediaRecorder = mimeType 
+        mediaRecorder = mimeType
           ? new MediaRecorder(stream, { mimeType })
           : new MediaRecorder(stream);
       } catch (err) {
-        console.error('MediaRecorder creation failed:', err);
+        devLog('[SpeakingRecorder] MediaRecorder creation failed:', err);
         try {
           mediaRecorder = new MediaRecorder(stream);
-        } catch (err2) {
+        } catch {
           stream.getTracks().forEach(t => t.stop());
           setErrorMsg('Your browser does not support audio recording. Please try Chrome or Firefox.');
           setStatus('error');
@@ -185,16 +191,27 @@ export function SpeakingRecorder({ maxSeconds = 60, answer, onAnswer, questionId
       };
 
       mediaRecorder.onstop = () => {
-        const actualMime = mediaRecorder.mimeType || 'audio/webm';
-        const blob = new Blob(chunksRef.current, { type: actualMime });
-        blobRef.current = blob;
-        const url = URL.createObjectURL(blob);
-        setAudioUrl(url);
-        setStatus('recorded');
         stream.getTracks().forEach(t => t.stop());
-        // Set global pending recording for parent-level flush before navigation
-        (window as any).__pendingSpeakingRecording = { questionId, blob };
-        devLog('[SpeakingRecorder] Set __pendingSpeakingRecording for:', questionId);
+        clearTimer();
+        const tooShort = Date.now() - startedAtRef.current < MIN_RECORDING_MS;
+        let result: Blob | null = null;
+        if (tooShort || chunksRef.current.length === 0) {
+          blobRef.current = null;
+          errorFromTooShortRef.current = true;
+          setAudioUrl(null);
+          setSeconds(0);
+          setErrorMsg('That recording was too short. Please record for a couple of seconds.');
+          setStatus('error');
+        } else {
+          const actualMime = mediaRecorder.mimeType || 'audio/webm';
+          result = new Blob(chunksRef.current, { type: actualMime });
+          blobRef.current = result;
+          setAudioUrl(URL.createObjectURL(result));
+          setStatus('recorded');
+        }
+        const waiters = stopWaitersRef.current;
+        stopWaitersRef.current = [];
+        waiters.forEach((resolve) => resolve(result));
       };
 
       mediaRecorder.onerror = () => {
@@ -204,31 +221,31 @@ export function SpeakingRecorder({ maxSeconds = 60, answer, onAnswer, questionId
       };
 
       mediaRecorder.start();
+      startedAtRef.current = Date.now();
       setStatus('recording');
       setSeconds(0);
 
       timerRef.current = setInterval(() => {
         setSeconds(prev => {
           if (prev >= maxSeconds - 1) {
-            mediaRecorder.stop();
-            if (timerRef.current) clearInterval(timerRef.current);
+            clearTimer();
+            if (mediaRecorder.state === 'recording') mediaRecorder.stop();
             return maxSeconds;
           }
           return prev + 1;
         });
       }, 1000);
     } catch (err: any) {
-      console.error('Microphone error:', err);
+      devLog('[SpeakingRecorder] Microphone error:', err);
       setErrorMsg(describeMicrophoneError(err));
       setStatus('error');
     }
-  }, [maxSeconds, questionId]);
-
+  }, [maxSeconds]);
 
   const stopRecording = useCallback(() => {
     if (mediaRecorderRef.current && mediaRecorderRef.current.state === 'recording') {
+      clearTimer();
       mediaRecorderRef.current.stop();
-      if (timerRef.current) clearInterval(timerRef.current);
     }
   }, []);
 
@@ -251,38 +268,14 @@ export function SpeakingRecorder({ maxSeconds = 60, answer, onAnswer, questionId
     if (audioUrl && audioUrl.startsWith('blob:')) URL.revokeObjectURL(audioUrl);
     setAudioUrl(null);
     blobRef.current = null;
+    errorFromTooShortRef.current = false;
     setSeconds(0);
     setStatus('idle');
     setIsPlaying(false);
     setErrorMsg(null);
-    delete (window as any).__pendingSpeakingRecording;
   }, [audioUrl]);
 
-  const uploadAndSave = useCallback(async () => {
-    if (!blobRef.current) return;
-    setStatus('uploading');
-    setErrorMsg(null);
-
-    try {
-      const url = await uploadRecording(blobRef.current, {
-        filenamePrefix: 'welcome-test-speaking',
-        onRetry: (attempt) => devLog('[SpeakingRecorder] Upload retry', attempt),
-      });
-
-      setAudioUrl(url);
-      setStatus('done');
-      onAnswer(url);
-      delete (window as any).__pendingSpeakingRecording;
-      toast.success('Recording saved!');
-    } catch (err) {
-      // Honest failure: keep the blob so the student can retry.
-      console.error('Upload error:', err);
-      setStatus('recorded');
-      setErrorMsg("We couldn't upload your recording. Check your connection and tap Save again.");
-      toast.error('Recording not saved: please try again.');
-    }
-  }, [onAnswer]);
-
+  const uploadAndSave = useCallback(() => { void saveRecording(); }, [saveRecording]);
 
   const formatTime = (s: number) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
 
