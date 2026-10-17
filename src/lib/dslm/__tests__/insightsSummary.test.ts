@@ -36,7 +36,7 @@ describe('buildInsightsSummary', () => {
     const s = buildInsightsSummary(base);
     expect(s.hasEvidence).toBe(false);
     expect(s.lines).toEqual([
-      'Level B2 (set by you) · placement test: not taken',
+      'Level B2 · placement test: not taken',
       'No lessons, homework or flashcard activity yet',
     ]);
   });
@@ -57,7 +57,7 @@ describe('buildInsightsSummary', () => {
     });
     expect(s.hasEvidence).toBe(true);
     expect(s.lines).toEqual([
-      'Level B2 (set by you) · placement test estimate: B1',
+      'Level B2 · placement test estimate: B1',
       'Strongest: Reading 78% · Work on: Writing 41%, Grammar 55%',
       'Last active 3 days ago · homework 4 of 5 done',
     ]);
@@ -77,6 +77,17 @@ describe('buildInsightsSummary', () => {
       'Only Speaking has evidence so far: 62%',
       'Homework 0 of 2 done',
     ]);
+  });
+
+  it('never says the level was set by the teacher; labels a placement level as such', () => {
+    const same = buildInsightsSummary({ ...base, hasPlacementProfile: true, estimatedLevel: 'B2' });
+    expect(same.lines[0]).toBe('Level B2 (from placement test) · placement test estimate: B2');
+    expect(same.lines[0]).not.toContain('set by you');
+  });
+
+  it('says plainly when the placement test had too few answers', () => {
+    const s = buildInsightsSummary({ ...base, hasPlacementProfile: true, estimatedLevel: null, levelEvidenceStatus: 'insufficient' });
+    expect(s.lines[0]).toBe('Level B2 · placement test: not enough answers to estimate a level');
   });
 
   it('phrases today and yesterday', () => {

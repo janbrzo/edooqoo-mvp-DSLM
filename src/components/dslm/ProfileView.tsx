@@ -17,22 +17,15 @@ import { Brain, Activity as ActivityIcon, User, StickyNote, Bug, Sparkles } from
 import type { LearningProfileV2Columns } from '@/types/dslm/learningProfileV2';
 import { isFallbackSummary } from '@/lib/dslm/learningProfileView';
 import { AnswerBehaviourLine, DeclaredVsMeasured, LearningPathBlock, LowCoverageBadge } from './ProfileSignalsV2';
+import { AwarenessBlock, LevelAssessmentBlock, ProfileTraits } from '@/components/welcome-test/profile/ProfileTraits';
+import { FeedbackHint, WtFeedbackProvider } from '@/components/welcome-test/profile/SignalFeedback';
+import { readInterpretationVersion } from '@/lib/welcomeTest/profileDisplay';
 
 interface ProfileViewProps {
   studentId: string;
   teacherId: string;
   studentName: string;
 }
-
-const TraitBadge = ({ label, value }: { label: string; value: string | null }) => {
-  if (!value) return null;
-  return (
-    <div className="space-y-0.5">
-      <p className="text-[10px] text-muted-foreground uppercase tracking-wide">{label}</p>
-      <Badge variant="outline" className="text-xs">{value}</Badge>
-    </div>
-  );
-};
 
 export const ProfileView: React.FC<ProfileViewProps> = ({
   studentId,
@@ -123,17 +116,23 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
         ) : (
           <div className="space-y-3">
             {profileV2 && <LowCoverageBadge profile={profileV2} />}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
-              <TraitBadge label="Motivation" value={profile.motivation_type} />
-              <TraitBadge label="Anxiety" value={profile.anxiety_level} />
-              <TraitBadge label="Errors" value={profile.error_attitude} />
-              <TraitBadge label="Ambiguity" value={profile.ambiguity_tolerance} />
-              <TraitBadge label="Feedback" value={profile.feedback_preference} />
-              <TraitBadge label="Input" value={profile.preferred_input_channel} />
-              <TraitBadge label="Level" value={profile.estimated_level ?? 'not enough data'} />
-              <TraitBadge label="Confidence" value={profile.level_confidence} />
-              <TraitBadge label="Study Time" value={profile.weekly_study_time} />
-            </div>
+            <WtFeedbackProvider
+              studentId={studentId}
+              teacherId={teacherId}
+              testId={profile.welcome_test_id ?? null}
+              interpretationVersion={readInterpretationVersion(profile.raw_answers)}
+            >
+              <FeedbackHint completedAt={profile.updated_at ?? profile.created_at} />
+              <LevelAssessmentBlock profile={profile as unknown as Record<string, unknown>} />
+              <ProfileTraits profile={profile as unknown as Record<string, unknown>} />
+              <AwarenessBlock profile={profile as unknown as Record<string, unknown>} />
+              {profileV2 && (
+                <>
+                  <DeclaredVsMeasured profile={profileV2} />
+                  <LearningPathBlock profile={profileV2} />
+                </>
+              )}
+            </WtFeedbackProvider>
 
             {profile.preferred_activities && profile.preferred_activities.length > 0 && (
               <div>
@@ -171,13 +170,7 @@ export const ProfileView: React.FC<ProfileViewProps> = ({
               </div>
             )}
 
-            {profileV2 && (
-              <>
-                <DeclaredVsMeasured profile={profileV2} />
-                <LearningPathBlock profile={profileV2} />
-                <AnswerBehaviourLine profile={profileV2} />
-              </>
-            )}
+            {profileV2 && <AnswerBehaviourLine profile={profileV2} />}
           </div>
         )}
       </CollapsibleSection>

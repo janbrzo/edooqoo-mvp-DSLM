@@ -37,6 +37,13 @@ export interface StudentProfile {
   communication_score: number | null;
   raw_answers: any;
   created_at: string | null;
+  updated_at?: string | null;
+  welcome_test_id?: string | null;
+  self_assessed_level?: string | null;
+  self_awareness_score?: number | null;
+  idk_count_total?: number | null;
+  idk_count_skill?: number | null;
+  traits?: Record<string, unknown> | null;
 }
 
 interface UseStudentProfileProps {

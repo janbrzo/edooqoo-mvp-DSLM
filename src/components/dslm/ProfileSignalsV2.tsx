@@ -17,6 +17,9 @@ import {
   resolveSignalCoverage,
   toDivergenceRows,
 } from '@/lib/dslm/learningProfileView';
+import { formatDivergenceText } from '@/lib/welcomeTest/traitLabels';
+import { LEARNING_PATH_SIGNAL_KEY, divergenceSignalKeys } from '@/lib/welcomeTest/profileDisplay';
+import { SignalFeedback } from '@/components/welcome-test/profile/SignalFeedback';
 
 const SEVERITY_CLASS: Record<DivergenceSeverity, string> = {
   info: 'border-border text-muted-foreground',
@@ -45,22 +48,34 @@ export const LowCoverageBadge: React.FC<{ profile: LearningProfileV2Columns }> =
 export const DeclaredVsMeasured: React.FC<{ profile: LearningProfileV2Columns }> = ({ profile }) => {
   const rows = toDivergenceRows(profile.divergences);
   if (!rows) return null;
+  const rawPairs = (Array.isArray(profile.divergences) ? profile.divergences : []).map((d) =>
+    d && typeof d === 'object' && typeof d.pair === 'string' ? d.pair : '');
+  const feedbackKeys = divergenceSignalKeys(rawPairs);
   return (
     <div data-testid="profile-divergences">
       <SectionLabel>Declared vs measured</SectionLabel>
       <div className="rounded border divide-y">
-        {rows.map((row) => (
-          <div key={row.key} className="grid grid-cols-[minmax(0,7rem)_1fr_auto] items-start gap-2 px-2 py-1.5 text-xs">
-            <span className="font-medium">{row.label}</span>
-            <span className="min-w-0">
-              <span className="text-muted-foreground">Declared:</span> {row.declared}
-              <span className="text-muted-foreground"> · Observed:</span> {row.observed}
-            </span>
-            <Badge variant="outline" className={cn('text-[10px]', SEVERITY_CLASS[row.severity])}>
-              {row.severityLabel}
-            </Badge>
-          </div>
-        ))}
+        {rows.map((row) => {
+          const text = formatDivergenceText({ declared: row.rawDeclared, observed: row.rawObserved });
+          return (
+            <div key={row.key} className="px-2 py-1.5 space-y-1 text-xs">
+              <div className="grid grid-cols-[minmax(0,7rem)_1fr_auto] items-start gap-2">
+                <span className="font-medium">{row.label}</span>
+                <span className="min-w-0">
+                  <span className="text-muted-foreground">Declared:</span> {text?.declared ?? row.declared}
+                  <span className="text-muted-foreground"> · Observed:</span> {text?.observed ?? row.observed}
+                </span>
+                <Badge variant="outline" className={cn('text-[10px]', SEVERITY_CLASS[row.severity])}>
+                  {row.severityLabel}
+                </Badge>
+              </div>
+              <SignalFeedback
+                signalKey={feedbackKeys[row.index] ?? `divergence:${row.pair}`}
+                signalValue={text?.sentence ?? `${row.declared} | ${row.observed}`}
+              />
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -104,6 +119,12 @@ export const LearningPathBlock: React.FC<{ profile: LearningProfileV2Columns }> 
             <AlertTriangle className="h-3.5 w-3.5 flex-shrink-0 mt-0.5" />
             <span>{view.capacityWarning}</span>
           </div>
+        )}
+        {view.pathLabel && (
+          <SignalFeedback
+            signalKey={LEARNING_PATH_SIGNAL_KEY}
+            signalValue={view.score !== null ? `${view.pathLabel} (${view.score}/100)` : view.pathLabel}
+          />
         )}
       </div>
     </div>
