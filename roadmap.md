@@ -93,5 +93,5 @@ Reference: `docs/ux/target-teacher-experience.md` (approved 2026-09-02).
 
 - [x] Stage 1.1: additive micro-skill taxonomy
 - [x] Stage 1.2: canonical ratings at the event boundary, flashcard vocabulary evidence, knowledge classification updates, regression tests (869 passed; isolated SQL flow passed; authenticated browser verification unavailable for external Supabase)
-- [ ] Stage 1.3: implement and verify the owner-only, read-time student state vector RPC; preserve existing consumers and stored mastery
+- [x] Stage 1.3: owner/service-only read-time state vector RPC, canonical metrics, parity-tested decay, 1056 tests passed; production student reads and <15 ms latency unverified because external Supabase testing has no authorized session (spec: docs/operational/pillar-1-stage-13.md)
 - [ ] Stage 1.4: full pillar validation (not part of Stage 1.2)

@@ -35,4 +35,6 @@ Selected: the approved read-time RPC. It uses SECURITY INVOKER plus explicit cal
 
 Production migrations succeeded. A read-only production catalog probe confirms SECURITY INVOKER, fixed search_path and authenticated/service_role-only execution. The connected query tool is supabase_read_only_user and cannot execute the RPC; production student-data reads, authenticated browser flows and the <15 ms production latency target remain unverified. No service credentials were requested merely for testing. Local integration results do not establish production latency or a successful real lesson.
 
+Final verification: 80 test files and 1056 tests passed, including 11 actual PostgreSQL cases plus the static state-vector contract case. SEO asset audit passed and preview build logs reported build OK. Independent review identified fresh fractional-score rounding drift; the follow-up migration fixed it and new parity cases pass. No production student data was changed for testing.
+
 No UI change is part of this stage. Prep/dashboard integration and whole-pillar validation remain separate work. Existing 145 database security findings predate this migration and are outside scope. public/llms.txt stays unchanged because this internal read contract is not a new public product capability.
