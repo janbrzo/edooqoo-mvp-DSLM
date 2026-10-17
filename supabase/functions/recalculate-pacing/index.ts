@@ -139,7 +139,8 @@ serve(async (req) => {
         .limit(1);
       const flag = (student as any).last_pacing_set_manually;
       // A failed lookup must not auto-apply: fall through to the approval flow.
-      if (!eErr && shouldAutoApplyInitialWtPacing({
+      // Nothing to apply when the Welcome Test confirms the current pacing.
+      if (!eErr && pacingMode !== currentPacing && shouldAutoApplyInitialWtPacing({
         triggerType,
         lastPacingSetManually: typeof flag === 'boolean' ? flag : null,
         hasEarlierAppliedProposal: (earlier || []).length > 0,

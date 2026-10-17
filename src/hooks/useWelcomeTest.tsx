@@ -554,6 +554,12 @@ export function useWelcomeTest({ shareToken }: UseWelcomeTestProps) {
       const answers = answersRef.current;
       const finalAnsweredCount = allVisibleQuestions.filter(q => answers[q.id] !== undefined).length;
 
+      // Transitional (rollout window): an older process-welcome-test computes the
+      // results only after its AI step. The server re-grades and recomputes anyway,
+      // so a refusal here (test no longer in progress, e.g. a retry) is harmless.
+      const { error: resultsError } = await supabase.rpc('calculate_test_results', { p_test_id: testId });
+      if (resultsError) devWarn('[welcome-test] calculate_test_results skipped:', resultsError.message);
+
       const { error: countError } = await supabase.rpc('set_test_answered_count_by_share_token', {
         p_share_token: shareTokenRef.current as string,
         p_answered_count: finalAnsweredCount,

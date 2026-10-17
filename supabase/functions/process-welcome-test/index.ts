@@ -15,7 +15,7 @@ import {
   type ProfileModelOutput,
 } from "../_shared/welcomeTestLevel.ts";
 import { buildReconcileEvents } from "../_shared/welcomeTestEventPayload.ts";
-import { regradeQuestionRows } from "../_shared/welcomeTestKeyedAnswer.ts";
+import { regradeQuestionRows, welcomeTestRatingFor } from "../_shared/welcomeTestKeyedAnswer.ts";
 import {
   INTERPRETATION_VERSION,
   INTERPRETATION_VERSION_KEY,
@@ -259,6 +259,7 @@ serve(async (req) => {
     // key (the browser's is_correct is provisional), open, speaking and profile
     // items carry no verdict until the AI scores them. Then the test results are
     // computed once from those verdicts.
+    const regradedRows: Array<{ question_index: number; is_correct: boolean | null }> = [];
     {
       const changes = regradeQuestionRows(questions as any[]);
       for (const c of changes) {
@@ -271,7 +272,10 @@ serve(async (req) => {
           continue;
         }
         const row = (questions as any[]).find((q) => q.id === c.id);
-        if (row) row.is_correct = c.is_correct;
+        if (row) {
+          row.is_correct = c.is_correct;
+          regradedRows.push({ question_index: row.question_index, is_correct: c.is_correct });
+        }
       }
       if (changes.length > 0) console.log(`[process-welcome-test] re-graded ${changes.length} stored answers`);
       const { error: resultsError } = await supabase.rpc('calculate_test_results', { p_test_id: test_id });
@@ -298,6 +302,39 @@ serve(async (req) => {
       }
     } catch (reconcileErr) {
       console.warn('[process-welcome-test] event reconciliation failed', reconcileErr);
+    }
+
+    // Events logged by the browser carry its provisional verdict: bring every
+    // keyed answer event in line with the server verdict (the skill metrics are
+    // built from the events, not from the rows).
+    if (regradedRows.length > 0) {
+      for (const row of regradedRows) {
+        const { data: evts, error: evtErr } = await supabase
+          .from('student_events')
+          .select('id, event_payload, mastery')
+          .eq('source_id', test_id)
+          .eq('event_source', 'welcome_test')
+          .eq('event_type', 'test_answer_submitted')
+          .eq('event_payload->>exercise_index', String(row.question_index));
+        if (evtErr) {
+          console.warn('[process-welcome-test] event verdict sync failed', evtErr.message);
+          continue;
+        }
+        const rating = welcomeTestRatingFor(row.is_correct);
+        for (const evt of (evts || []) as any[]) {
+          const payload = { ...(evt.event_payload || {}) } as Record<string, any>;
+          payload.is_correct = row.is_correct;
+          if (Array.isArray(payload.nano_skill_ratings)) {
+            payload.nano_skill_ratings = payload.nano_skill_ratings.map((r: any) => ({ ...r, mastery: rating.mastery, hasValue: rating.hasValue }));
+          }
+          const mastery = rating.hasValue ? rating.mastery : null;
+          const { error: updErr } = await supabase
+            .from('student_events')
+            .update({ event_payload: payload, mastery })
+            .eq('id', evt.id);
+          if (updErr) console.warn('[process-welcome-test] event verdict update failed', updErr.message);
+        }
+      }
     }
 
     // Percent per skill from the scored items (is_correct null = not scored).
@@ -446,7 +483,15 @@ serve(async (req) => {
 
     // Signals computed in code before any AI step (they must not depend on it).
     const behaviour = answerBehaviour(questions as any[]);
-    const learningPath = computeLearningPathScore(traits, answers);
+    // A force re-run of the same attempt keeps the learning-path version its
+    // profile was written with: v2 is recomputed as v2, an older stored path is kept.
+    const storedLearningPath = force && sameAttemptAsStored
+      ? ((previousProfile as any)?.learning_path ?? (previousProfile as any)?.raw_answers?.learning_path ?? null)
+      : null;
+    const storedLpsVersion = Number(storedLearningPath?.version ?? 0);
+    const learningPath: any = storedLearningPath && storedLpsVersion < 2
+      ? storedLearningPath
+      : computeLearningPathScore(traits, answers, storedLearningPath && storedLpsVersion === 2 ? { version: 2 } : undefined);
     enrichedAnswers.learning_path = learningPath; // older readers look in raw_answers
     let divergences: Divergence[] = computeDivergences({
       traits,
@@ -810,7 +855,7 @@ serve(async (req) => {
           ? `- IDK signal: no metacognition signal (no incorrect/IDK on skill items).`
           : `- IDK signal: self-awareness ${selfAwarenessScore}% (admitted "I don't know" on ${idkCountSkill}/${skillWrongOrIdk} skill items where they were uncertain; ${idkCountTotal} IDK overall). High = honest metacognition, prefer scaffolding before harder content. Low = compulsive guessing, recalibrate confidence and add formative checks.`;
         const pct = (v: number | null) => (v === null ? 'no data' : `${v}%`);
-        const lpsLine = `- Learning Path Score: ${learningPath.score === null ? 'not computed (not enough signals)' : `${learningPath.score} (${learningPath.path})`}; signal coverage ${learningPath.coverage}; capacity ${learningPath.capacity ?? 'unknown'}${learningPath.overrides_applied.length > 0 ? `; overrides: ${learningPath.overrides_applied.join(', ')}` : ''}`;
+        const lpsLine = `- Learning Path Score: ${learningPath.score === null ? 'not computed (not enough signals)' : `${learningPath.score} (${learningPath.path})`}; signal coverage ${learningPath.coverage}; capacity ${learningPath.capacity ?? 'unknown'}${(learningPath.overrides_applied ?? []).length > 0 ? `; overrides: ${(learningPath.overrides_applied ?? []).join(', ')}` : ''}`;
         const behaviourLine = `- Answer behaviour: skill items answered ${behaviour.keyed_answered}/${behaviour.keyed_total}, skipped ${behaviour.skip_count_skill}, "I don't know" ${behaviour.idk_count_skill}, median time ${behaviour.median_seconds_keyed ?? 'n/a'}s, very fast answers ${behaviour.rushed_count}`;
         const answeredLine = `- Questions answered: ${questions.filter((q: any) => q.student_answer !== null).length}/${questions.length}`;
         // Everything the model is told, from the current values. Built before the scoring call
@@ -1160,7 +1205,24 @@ serve(async (req) => {
 
     // Notification, teacher email and student thank-you email are sent once per
     // attempt: a re-run of an attempt the profile already describes sends none.
-    const firstRunOfAttempt = !sameAttemptAsStored;
+    let firstRunOfAttempt = !sameAttemptAsStored;
+    if (firstRunOfAttempt) {
+      // Two runs of the same attempt in flight (a retried completion): the
+      // notification written by the other run since this test was completed wins.
+      const { data: completedRow } = await supabase
+        .from('student_tests').select('completed_at').eq('id', test_id).maybeSingle();
+      const since = (completedRow as any)?.completed_at;
+      if (since) {
+        const { count: alreadyNotified } = await supabase
+          .from('homework_notifications')
+          .select('id', { count: 'exact', head: true })
+          .eq('student_id', student_id)
+          .eq('teacher_id', teacher_id)
+          .eq('notification_type', 'welcome_test_completed')
+          .gte('created_at', since);
+        if ((alreadyNotified ?? 0) > 0) firstRunOfAttempt = false;
+      }
+    }
 
     // --- Point 6: Create notification for teacher ---
     if (firstRunOfAttempt) try {
@@ -1355,7 +1417,7 @@ serve(async (req) => {
 
     // Learning Path Score: computed and stored with the profile above.
     const learningPathResult = learningPath;
-    console.log(`[process-welcome-test] Learning Path Score v2: ${learningPath.score} (${learningPath.path}), coverage ${learningPath.coverage}, overrides: ${learningPath.overrides_applied.join(', ') || 'none'}`);
+    console.log(`[process-welcome-test] Learning Path Score v${learningPath.version ?? 1}: ${learningPath.score} (${learningPath.path}), coverage ${learningPath.coverage}, overrides: ${(learningPath.overrides_applied ?? []).join(', ') || 'none'}`);
 
     // v5.0: pacing proposal after the Welcome Test. Runs last, so it reads the
     // complete profile of THIS attempt (learning path, AI scores, metrics).
@@ -1389,11 +1451,39 @@ serve(async (req) => {
     });
     } catch (pipelineError) {
       console.error('Error processing welcome test:', pipelineError);
+      // Background runs have no caller to tell: leave a record for /admin/error-logs.
+      // The test stays 'completed' (analysing) and the teacher can re-run it.
+      try {
+        await supabaseAdmin.from('error_logs').insert({
+          severity: 'critical',
+          source: 'edge_function',
+          source_name: 'process-welcome-test',
+          component: 'pipeline',
+          error_code: 'welcome_test_processing_failed',
+          message: String((pipelineError as Error)?.message ?? pipelineError).slice(0, 500),
+          context: { test_id, student_id, teacher_id, force: !!force },
+        });
+      } catch (logErr) {
+        console.error('[process-welcome-test] failure record not written', logErr);
+      }
       return new Response(JSON.stringify({ error: (pipelineError as Error)?.message ?? String(pipelineError) }), {
         status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
     };
+
+    // Checks that can fail are answered to the caller before the 202.
+    {
+      const { count: questionCount } = await supabaseAdmin
+        .from('student_test_questions')
+        .select('id', { count: 'exact', head: true })
+        .eq('test_id', test_id);
+      if (!questionCount) {
+        return new Response(JSON.stringify({ error: 'No questions found' }), {
+          status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        });
+      }
+    }
 
     // deno-lint-ignore no-explicit-any
     const edgeRuntime = (globalThis as any).EdgeRuntime;
