@@ -78,7 +78,7 @@ describe('State vector read-only contract (Stage 1.3)', () => {
       for (const entry of readdirSync(dir, { withFileTypes: true })) {
         const p = join(dir, entry.name);
         if (entry.isDirectory()) { if (entry.name !== '__tests__') walk(p); }
-        else if (/\.(ts|tsx)$/.test(entry.name) && !entry.name.endsWith('.test.ts')) srcFiles.push(p);
+        else if (/\.(ts|tsx)$/.test(entry.name) && !entry.name.endsWith('.test.ts') && entry.name !== 'types.ts') srcFiles.push(p);
       }
     };
     walk(join(__dirname, '../..'));

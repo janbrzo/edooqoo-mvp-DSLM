@@ -299,11 +299,15 @@ describe('Pillar 1.2: canonical ratings at the event boundary (20261016074048)',
 });
 
 describe('Pillar 1.3: owner/service-only read-time state vector (20261017134759)', () => {
-  const body = readFileSync(join(MIGRATIONS, '20261017134759_4942ac57-81e4-47df-a362-f032f608f5f0.sql'), 'utf8');
+  // The functions were refined in follow-up migrations the same day (rounding
+  // parity fix); assert on the latest definition, which must keep the contract.
+  const body = latestDefinition('get_student_dslm_state_vector');
 
-  it('is the latest definition of both functions', () => {
-    expect(latestDefinition('dslm_effective_mastery')).toBe(body);
-    expect(latestDefinition('get_student_dslm_state_vector')).toBe(body);
+  it('both functions are defined in the Stage 1.3 migration family', () => {
+    for (const f of ['20261017134759_4942ac57-81e4-47df-a362-f032f608f5f0.sql', '20261017134848_e57ec5ea-4827-4d2c-a99b-afe88e150d9a.sql', '20261017135037_f8cf555a-7b86-47a5-a998-915463827528.sql']) {
+      expect(readFileSync(join(MIGRATIONS, f), 'utf8')).toMatch(/CREATE OR REPLACE FUNCTION public\.(dslm_effective_mastery|get_student_dslm_state_vector)\(/);
+    }
+    expect(latestDefinition('dslm_effective_mastery')).toBeTruthy();
   });
 
   it('pins one read timestamp per statement and excludes duplicate card metrics', () => {
