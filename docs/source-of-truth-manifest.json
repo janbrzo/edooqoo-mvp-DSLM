@@ -43091,6 +43091,7 @@
         "dataDependencies": {
           "tables": [],
           "rpcs": [
+            "calculate_test_results",
             "get_test_by_share_token",
             "get_test_context_by_share_token",
             "get_test_questions_by_share_token",
@@ -46693,6 +46694,7 @@
           "detected_traits",
           "force",
           "integrity",
+          "is_correct",
           "nano_skill_ratings",
           "reviewed_at",
           "share_token",
@@ -46727,6 +46729,7 @@
         ],
         "dataDependencies": {
           "tables": [
+            "error_logs",
             "homework_notifications",
             "profiles",
             "student_events",
@@ -48734,7 +48737,8 @@
       {
         "name": "calculate_test_results",
         "callsites": [
-          "src/hooks/useStudentTests.tsx"
+          "src/hooks/useStudentTests.tsx",
+          "src/hooks/useWelcomeTest.tsx"
         ],
         "payloadFields": [
           "p_test_id"
@@ -51102,6 +51106,7 @@
           "clientFiles": [],
           "edgeFunctions": [
             "audit-llm-models",
+            "process-welcome-test",
             "send-welcome-test-completion-email"
           ]
         }
