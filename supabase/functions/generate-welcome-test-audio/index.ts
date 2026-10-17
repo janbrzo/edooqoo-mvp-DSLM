@@ -6,6 +6,11 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { logModelFailure } from "../_shared/modelFailureLogger.ts";
+import { resolveCaller, teacherIdOf } from "../_shared/auth.ts";
+
+/** Listening transcripts are short; the cap stops the endpoint being a free TTS proxy. */
+const MAX_TRANSCRIPT_CHARS = 2000;
+const ALLOWED_VOICES = new Set(['alloy', 'echo', 'fable', 'onyx', 'nova', 'shimmer']);
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -18,9 +23,17 @@ serve(async (req) => {
   }
 
   try {
+    // Paid TTS and storage: only the service role or a signed-in teacher.
+    const caller = await resolveCaller(req);
+    if (caller.kind !== 'service' && !teacherIdOf(caller)) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     const { transcript, voice } = await req.json();
 
-    if (!transcript) {
+    if (!transcript || typeof transcript !== 'string') {
       return new Response(JSON.stringify({ error: 'transcript is required' }), {
         status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -34,7 +47,13 @@ serve(async (req) => {
       });
     }
 
-    const selectedVoice = voice || 'nova';
+    if (transcript.length > MAX_TRANSCRIPT_CHARS) {
+      return new Response(JSON.stringify({ error: `transcript is limited to ${MAX_TRANSCRIPT_CHARS} characters` }), {
+        status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
+    const selectedVoice = typeof voice === 'string' && ALLOWED_VOICES.has(voice) ? voice : 'nova';
     
     // Use TTS-1 for exact verbatim reading (no improvisation)
     const response = await fetch('https://api.openai.com/v1/audio/speech', {
