@@ -269,6 +269,71 @@ describe('Welcome Test server authority and retake history (2026-10-17 audit)', 
   });
 });
 
+describe('Pillar 1.1: additive micro-skill taxonomy (20261015201345)', () => {
+  const body = readFileSync(join(MIGRATIONS, '20261015201345_c5c1929e-6931-46d3-b7bd-444dbf6a607b.sql'), 'utf8');
+
+  it('is the latest extract_micro_skill definition and stays additive', () => {
+    expect(latestDefinition('extract_micro_skill')).toBe(body);
+    expect(body).toMatch(/every v1 rule kept in order/);
+  });
+});
+
+describe('Pillar 1.2: canonical ratings at the event boundary (20261016074048)', () => {
+  const body = readFileSync(join(MIGRATIONS, '20261016074048_b88b1f50-d5b7-4190-9d4a-6a5962a2016d.sql'), 'utf8');
+
+  it('normalizes nano_skill_ratings on every student_events insert and payload update', () => {
+    expect(body).toMatch(/CREATE TRIGGER trg_normalize_student_event_ratings BEFORE INSERT OR UPDATE OF event_payload, mastery, skill_ids\s+ON public\.student_events/);
+    expect(body).toMatch(/NEW\.event_payload := jsonb_set\(NEW\.event_payload, '\{nano_skill_ratings\}', public\.normalize_dslm_ratings/);
+  });
+
+  it('the normalizer and knowledge classifier are service-role only', () => {
+    for (const fn of ['normalize_dslm_ratings(jsonb)', 'normalize_student_event_ratings()', 'knowledge_entry_dslm_ratings(jsonb)', 'log_knowledge_entry_event()']) {
+      expect(body).toContain(`REVOKE ALL ON FUNCTION public.${fn} FROM PUBLIC, anon, authenticated;`);
+      expect(body).toContain(`GRANT EXECUTE ON FUNCTION public.${fn} TO service_role;`);
+    }
+  });
+
+  it('knowledge classification re-logs the DSLM event on category/content/tags changes', () => {
+    expect(body).toMatch(/CREATE TRIGGER trigger_log_knowledge_entry_event AFTER INSERT OR UPDATE OF category, content, tags, metadata, ai_classified, ai_confidence, deleted_at, is_outdated/);
+  });
+});
+
+describe('Pillar 1.3: owner/service-only read-time state vector (20261017134759)', () => {
+  // The functions were refined in follow-up migrations the same day (rounding
+  // parity fix); assert on the latest definition, which must keep the contract.
+  const body = latestDefinition('get_student_dslm_state_vector');
+
+  it('both functions are defined in the Stage 1.3 migration family', () => {
+    for (const f of ['20261017134759_4942ac57-81e4-47df-a362-f032f608f5f0.sql', '20261017134848_e57ec5ea-4827-4d2c-a99b-afe88e150d9a.sql', '20261017135037_f8cf555a-7b86-47a5-a998-915463827528.sql']) {
+      expect(readFileSync(join(MIGRATIONS, f), 'utf8')).toMatch(/CREATE OR REPLACE FUNCTION public\.(dslm_effective_mastery|get_student_dslm_state_vector)\(/);
+    }
+    expect(latestDefinition('dslm_effective_mastery')).toBeTruthy();
+  });
+
+  it('pins one read timestamp per statement and excludes duplicate card metrics', () => {
+    expect(body).toMatch(/v_now timestamptz := statement_timestamp\(\)/);
+    expect(body).toMatch(/m\.skill_name NOT LIKE 'flashcard:%'/);
+  });
+
+  it('returns the version 1 contract with the four skill lists and a focus', () => {
+    for (const key of ["'version', 1", "'strongest_skills'", "'critical_gaps'", "'decaying_skills'", "'recommended_focus'"]) {
+      expect(body).toContain(key);
+    }
+  });
+
+  it('is revoked from PUBLIC and anon; authenticated and service_role may execute', () => {
+    expect(body).toMatch(/REVOKE ALL ON FUNCTION public\.get_student_dslm_state_vector\(uuid, uuid\) FROM PUBLIC, anon, authenticated/);
+    expect(body).toMatch(/GRANT EXECUTE ON FUNCTION public\.get_student_dslm_state_vector\(uuid, uuid\) TO authenticated, service_role/);
+    expect(body).toMatch(/REVOKE ALL ON FUNCTION public\.dslm_effective_mastery\(numeric, timestamptz, timestamptz\) FROM PUBLIC, anon, authenticated/);
+  });
+
+  it('never writes: the migration contains no INSERT, UPDATE or DELETE on metrics', () => {
+    expect(body).not.toMatch(/INSERT INTO public\.student_skill_metrics/);
+    expect(body).not.toMatch(/UPDATE public\.student_skill_metrics/);
+    expect(body).not.toMatch(/DELETE FROM public\.student_skill_metrics/);
+  });
+});
+
 describe('Timestamp defaults (2026-10-17)', () => {
   it('no migration after the fix sets a column default with AT TIME ZONE', () => {
     const files = readdirSync(MIGRATIONS).filter((f) => f.endsWith('.sql') && f >= '20261017140000').sort();
