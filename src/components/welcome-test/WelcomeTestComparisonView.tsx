@@ -20,6 +20,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { traitLabel, traitValueLabel, humanizeKey } from '@/lib/welcomeTest/traitLabels';
 import { useWelcomeTestHistory, type WelcomeAttempt } from '@/hooks/useWelcomeTestHistory';
 
 interface Props {
@@ -42,10 +43,10 @@ const ScoreCell: React.FC<{ label: string; value: number | null | undefined }> =
   </div>
 );
 
-const TraitCell: React.FC<{ label: string; value: string | null | undefined }> = ({ label, value }) => (
+const TraitCell: React.FC<{ traitKey: string; value: string | null | undefined }> = ({ traitKey, value }) => (
   <div>
-    <div className="text-[10px] text-muted-foreground uppercase tracking-wide">{label}</div>
-    <Badge variant="outline" className="text-xs mt-0.5">{value || '-'}</Badge>
+    <div className="text-[10px] text-muted-foreground uppercase tracking-wide">{traitLabel(traitKey)}</div>
+    <Badge variant="outline" className="text-xs mt-0.5 whitespace-normal text-left">{traitValueLabel(traitKey, value)}</Badge>
   </div>
 );
 
@@ -88,19 +89,19 @@ const AttemptRow: React.FC<{ attempt: WelcomeAttempt; isLatest: boolean }> = ({ 
               <ScoreCell label="Comm." value={profile.communication_score} />
             </div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
-              <TraitCell label="Motivation" value={profile.motivation_type} />
-              <TraitCell label="Anxiety" value={profile.anxiety_level} />
-              <TraitCell label="Errors" value={profile.error_attitude} />
-              <TraitCell label="Ambiguity" value={profile.ambiguity_tolerance} />
+              <TraitCell traitKey="motivation_type" value={profile.motivation_type} />
+              <TraitCell traitKey="anxiety_level" value={profile.anxiety_level} />
+              <TraitCell traitKey="error_attitude" value={profile.error_attitude} />
+              <TraitCell traitKey="ambiguity_tolerance" value={profile.ambiguity_tolerance} />
             </div>
             <div className="grid grid-cols-2 gap-2 text-xs pt-1">
               <div>
                 <span className="text-muted-foreground">Strongest: </span>
-                <span className="font-medium">{profile.strongest_skill || '-'}</span>
+                <span className="font-medium">{profile.strongest_skill ? humanizeKey(profile.strongest_skill) : '-'}</span>
               </div>
               <div>
                 <span className="text-muted-foreground">Weakest: </span>
-                <span className="font-medium">{profile.weakest_skill || '-'}</span>
+                <span className="font-medium">{profile.weakest_skill ? humanizeKey(profile.weakest_skill) : '-'}</span>
               </div>
             </div>
           </>
