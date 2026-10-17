@@ -1,6 +1,6 @@
 /**
  * TestDetailsView - Detailed view of a test with questions and results
- * Used by teachers to review tests and apply results to Progress
+ * Used by teachers to review tests (non-welcome tests can apply results to Progress)
  * Issues fixed: welcome test score (4), teacher notes (10), re-take (10), audio player (1)
  */
 
@@ -40,6 +40,7 @@ import { SuggestedLevelChangeBanner } from './SuggestedLevelChangeBanner';
 import { ALL_WELCOME_TEST_QUESTIONS } from '@/data/welcomeTestQuestions';
 import { sendWelcomeTestEmail } from '@/lib/welcomeTest/ensureWelcomeTest';
 import { formatWelcomeTestAnswer, isWelcomeTestIdk } from '@/lib/welcomeTest/answerDisplay';
+import { ANALYSING_MESSAGE, computeKeyedScore, isKeyedQuestion } from '@/lib/welcomeTest/profileDisplay';
 import { 
   TEST_STATUS_CONFIG, 
   TEST_TYPES, 
@@ -71,9 +72,7 @@ export function TestDetailsView({ testId, teacherId, studentId, onBack }: TestDe
   const [studentLevel, setStudentLevel] = useState<string>('');
   const [teacherName, setTeacherName] = useState<string>('');
   const [retaking, setRetaking] = useState(false);
-  // v6.9.40 P3: Track whether the teacher just clicked "Apply to Progress"
-  // so the success card stops claiming results were applied "automatically".
-  const [manualApplyCompleted, setManualApplyCompleted] = useState(false);
+  const [rerunning, setRerunning] = useState(false);
 
   useEffect(() => {
     loadTest();
@@ -129,34 +128,29 @@ export function TestDetailsView({ testId, teacherId, studentId, onBack }: TestDe
     setSharingLoading(false);
   };
 
-  const handleApplyResults = async () => {
-    // v6.9.48: Try re-running process-welcome-test with force=true first.
-    // This repairs Welcome Tests that completed before the v6.9.40 auto-apply
-    // fix (status stuck at 'completed'). Falls back to client-side rating
-    // application for non-welcome tests or when the function is unreachable.
-    const isWelcome = test?.test_type === 'welcome';
-    if (isWelcome) {
-      try {
-        const { error } = await supabase.functions.invoke('process-welcome-test', {
-          body: { test_id: testId, force: true },
-        });
-        if (!error) {
-          setManualApplyCompleted(true);
-          toast.success('Re-ran analysis and applied results.');
-          loadTest();
-          return;
-        }
-        console.warn('[TestDetailsView] force reprocess failed, falling back', error);
-      } catch (err) {
-        console.warn('[TestDetailsView] process-welcome-test invoke threw, falling back', err);
-      }
+  // Welcome Test: re-run the analysis (force) when it is stuck or the teacher wants it rebuilt.
+  const handleRerunAnalysis = async () => {
+    setRerunning(true);
+    try {
+      const { error } = await supabase.functions.invoke('process-welcome-test', {
+        body: { test_id: testId, force: true },
+      });
+      if (error) throw error;
+      toast.success('Analysis re-run.');
+      loadTest();
+    } catch (err) {
+      console.warn('[TestDetailsView] re-run analysis failed', err);
+      toast.error('Could not re-run the analysis. Try again in a moment.');
+    } finally {
+      setRerunning(false);
     }
+  };
+
+  // Non-welcome tests: write the skill results to Progress.
+  const handleApplyResults = async () => {
     if (!test?.skill_results) return;
     const success = await applyResultsToProgress(testId, test.skill_results);
-    if (success) {
-      setManualApplyCompleted(true);
-      loadTest();
-    }
+    if (success) loadTest();
   };
 
   const handleCalculateResults = async () => {
@@ -268,16 +262,14 @@ export function TestDetailsView({ testId, teacherId, studentId, onBack }: TestDe
   // No Quick Version logic - always show all questions
   const answeredQuestions = questions.filter(q => q.student_answer !== null);
 
-  // Issue 4: For welcome tests, only count skill questions (those with correct_answer)
-  const skillQuestions = isWelcomeTest 
-    ? questions.filter(q => q.correct_answer && q.correct_answer !== '' && q.correct_answer !== '""')
-    : questions;
+  // Welcome Test headline: only items with a key count (profile questions and open
+  // tasks never enter the score). Other tests score every question.
+  const skillQuestions = isWelcomeTest ? questions.filter(isKeyedQuestion) : questions;
+  const keyedScore = computeKeyedScore(skillQuestions);
   const correctSkillQuestions = skillQuestions.filter(q => q.is_correct === true);
-  const skillScorePercent = skillQuestions.length > 0 
-    ? Math.round((correctSkillQuestions.length / skillQuestions.length) * 100)
-    : 0;
+  const skillScorePercent = keyedScore.percent ?? 0;
   // No data (nothing scored yet) is shown as "-", never as 0%.
-  const hasScoredSkillQuestions = skillQuestions.some(q => q.is_correct !== null && q.is_correct !== undefined);
+  const hasScoredSkillQuestions = keyedScore.percent !== null;
 
   return (
     <div className="space-y-6">
@@ -342,7 +334,7 @@ export function TestDetailsView({ testId, teacherId, studentId, onBack }: TestDe
               <p className="text-muted-foreground">{test.description}</p>
               <TestDates
                 createdAt={(test as any).created_at}
-                completedAt={(test as any).completed_at}
+                completedAt={test.completed_at}
                 reviewedAt={(test as any).reviewed_at}
                 className="mt-2"
               />
@@ -362,7 +354,7 @@ export function TestDetailsView({ testId, teacherId, studentId, onBack }: TestDe
               <>
                 <div className="text-center p-4 bg-green-50 dark:bg-green-900/20 rounded-lg">
                   <div className="text-2xl font-bold text-green-600">{hasScoredSkillQuestions ? `${skillScorePercent}%` : '-'}</div>
-                  <div className="text-sm text-muted-foreground">Skill Score</div>
+                  <div className="text-sm text-muted-foreground">Skill Score (keyed items)</div>
                 </div>
                 <div className="text-center p-4 bg-muted/30 rounded-lg">
                   <div className="text-2xl font-bold">{correctSkillQuestions.length}/{skillQuestions.length}</div>
@@ -400,7 +392,14 @@ export function TestDetailsView({ testId, teacherId, studentId, onBack }: TestDe
 
       {/* Welcome Test Learning Profile - FIX 2.2: always show, even before completion */}
       {isWelcomeTest && (
-        <WelcomeTestResults testId={testId} studentId={studentId} teacherId={teacherId} questions={questions} />
+        <WelcomeTestResults
+          testId={testId}
+          studentId={studentId}
+          teacherId={teacherId}
+          questions={questions}
+          testStatus={test.status}
+          completedAt={test.completed_at}
+        />
       )}
 
       {/* v6.9.49: Reusable suggested-level-change banner (also rendered on DSLM tab). */}
@@ -413,32 +412,37 @@ export function TestDetailsView({ testId, teacherId, studentId, onBack }: TestDe
         />
       )}
 
-      {/* v6.9.29: Results are auto-applied by process-welcome-test (status=reviewed).
-          If auto-apply failed, the test stays in 'completed' and we expose a manual
-          fallback button so the teacher can retry once. */}
-      {test.status === 'reviewed' && (
-        <Card className="border-green-500/40 bg-green-500/5">
-          <CardContent className="py-3">
-            <div className="flex items-center gap-3">
-              <CheckCircle className="h-5 w-5 text-green-600" />
-              <p className="text-sm font-medium">
-                {manualApplyCompleted
-                  ? "Results manually applied to student's skill ratings."
-                  : "Results applied to student's skill ratings."}
-              </p>
+      {/* Welcome Test: 'completed' means the analysis is still running, 'reviewed' means done. */}
+      {isWelcomeTest && test.status === 'completed' && (
+        <Card className="border-primary/30 bg-primary/5">
+          <CardContent className="py-4">
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <div className="flex items-center gap-3">
+                <Loader2 className="h-5 w-5 text-primary animate-spin" aria-hidden="true" />
+                <div>
+                  <p className="font-medium" role="status">{ANALYSING_MESSAGE}</p>
+                  <p className="text-sm text-muted-foreground">
+                    The profile appears here when the analysis finishes. If it stays like this for a few minutes, re-run it.
+                  </p>
+                </div>
+              </div>
+              <Button variant="outline" onClick={handleRerunAnalysis} disabled={rerunning}>
+                {rerunning ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <RotateCcw className="h-4 w-4 mr-2" />}
+                Re-run analysis
+              </Button>
             </div>
           </CardContent>
         </Card>
       )}
-      {test.status === 'completed' && (
+      {!isWelcomeTest && test.status === 'completed' && (
         <Card className="border-amber-500/40 bg-amber-500/5">
           <CardContent className="py-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <TrendingUp className="h-5 w-5 text-amber-600" />
                 <div>
-                  <p className="font-medium">Auto-apply did not complete</p>
-                  <p className="text-sm text-muted-foreground">Apply skill ratings to Progress manually.</p>
+                  <p className="font-medium">Results not applied yet</p>
+                  <p className="text-sm text-muted-foreground">Apply the skill results to Progress.</p>
                 </div>
               </div>
               <Button onClick={handleApplyResults}>Apply to Progress</Button>

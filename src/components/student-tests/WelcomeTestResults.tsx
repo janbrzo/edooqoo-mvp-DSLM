@@ -7,7 +7,7 @@ import { useState, useEffect } from 'react';
 import { 
   Sparkles, Brain, Target, BookOpen, MessageCircle, 
   TrendingUp, Star, AlertCircle, Clock, Smile, Frown, Meh,
-  Bot, Lightbulb
+  Bot, Lightbulb, Loader2
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -16,6 +16,11 @@ import { supabase } from '@/integrations/supabase/client';
 import type { LearningProfile } from '@/types/welcomeTest';
 import { sanitizeAiText, sanitizeAiList } from '@/utils/sanitizeAiSummary';
 import { isSkillSkipped } from '@/lib/welcomeTest/skillAttempts';
+import { AwarenessBlock, LevelAssessmentBlock, ProfileTraits } from '@/components/welcome-test/profile/ProfileTraits';
+import { FeedbackHint, WtFeedbackProvider } from '@/components/welcome-test/profile/SignalFeedback';
+import { readInterpretationVersion } from '@/lib/welcomeTest/profileDisplay';
+import { AnswerBehaviourLine, DeclaredVsMeasured, LearningPathBlock, LowCoverageBadge } from '@/components/dslm/ProfileSignalsV2';
+import type { LearningProfileV2Columns } from '@/types/dslm/learningProfileV2';
 
 interface TestQuestionLike {
   element_type?: string | null;
@@ -30,6 +35,10 @@ interface WelcomeTestResultsProps {
   /** Optional: when provided, listening/other skills can fall back to a
    *  per-question computation if `test_skill_results` lacks an entry. */
   questions?: TestQuestionLike[];
+  /** student_tests.status: 'completed' = analysis still running, 'reviewed' = done. */
+  testStatus?: string | null;
+  /** student_tests.completed_at, drives the "rate after 2-4 lessons" hint. */
+  completedAt?: string | null;
 }
 
 interface AiSummaryData {
@@ -46,7 +55,7 @@ interface SkillResultData {
   score_percentage: number | null;
 }
 
-export function WelcomeTestResults({ testId, studentId, teacherId, questions }: WelcomeTestResultsProps) {
+export function WelcomeTestResults({ testId, studentId, teacherId, questions, testStatus, completedAt }: WelcomeTestResultsProps) {
   const [profile, setProfile] = useState<LearningProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [aiSummary, setAiSummary] = useState<AiSummaryData | null>(null);
@@ -81,6 +90,9 @@ export function WelcomeTestResults({ testId, studentId, teacherId, questions }: 
           data = latest;
         }
 
+        // While the analysis of this attempt is running, an older attempt's profile must not stand in for it.
+        if (data && testStatus === 'completed' && testId && data.welcome_test_id !== testId) data = null;
+
         if (data) {
           setProfile(data as unknown as LearningProfile);
           if ((data as any).ai_summary) {
@@ -91,6 +103,9 @@ export function WelcomeTestResults({ testId, studentId, teacherId, questions }: 
               setAiSummary({ summary: (data as any).ai_summary, recommendations: [], writing_quality: 'unknown', key_observations: [] });
             }
           }
+        } else {
+          setProfile(null);
+          setAiSummary(null);
         }
 
         // v6.9.47: skill results should match the rendered test, not the
@@ -110,10 +125,21 @@ export function WelcomeTestResults({ testId, studentId, teacherId, questions }: 
     };
 
     fetchProfile();
-  }, [studentId, teacherId, testId]);
+  }, [studentId, teacherId, testId, testStatus]);
 
   if (loading) {
     return <div className="py-8 text-center text-muted-foreground">Loading learning profile...</div>;
+  }
+
+  if (!profile && testStatus === 'completed') {
+    return (
+      <Card className="border-primary/30 bg-primary/5">
+        <CardContent className="py-6 text-center">
+          <Loader2 className="h-6 w-6 text-primary mx-auto mb-2 animate-spin" aria-hidden="true" />
+          <p className="text-sm text-muted-foreground" role="status">Analysing results...</p>
+        </CardContent>
+      </Card>
+    );
   }
 
   if (!profile) {
@@ -130,9 +156,8 @@ export function WelcomeTestResults({ testId, studentId, teacherId, questions }: 
     );
   }
 
-  const anxietyIcon = profile.anxiety_level === 'low' ? <Smile className="h-4 w-4 text-green-500" /> :
-    profile.anxiety_level === 'high' ? <Frown className="h-4 w-4 text-red-500" /> :
-    <Meh className="h-4 w-4 text-amber-500" />;
+  const profileRecord = profile as unknown as Record<string, unknown>;
+  const profileV2 = profile as unknown as LearningProfileV2Columns;
 
   return (
     <div className="space-y-6">
@@ -199,25 +224,7 @@ export function WelcomeTestResults({ testId, studentId, teacherId, questions }: 
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-3 gap-4">
-            <div className="text-center p-4 bg-primary/5 rounded-lg">
-              <div className="text-2xl font-bold text-primary">{profile.estimated_level || '-'}</div>
-              <div className="text-xs text-muted-foreground">Estimated Level</div>
-            </div>
-            <div className="text-center p-4 bg-muted/30 rounded-lg">
-              <div className="text-2xl font-bold">{profile.self_assessed_level || '-'}</div>
-              <div className="text-xs text-muted-foreground">Self-Assessed</div>
-            </div>
-            <div className="text-center p-4 bg-muted/30 rounded-lg">
-              <Badge variant={
-                profile.level_confidence === 'accurate' ? 'default' :
-                profile.level_confidence === 'overestimates' ? 'destructive' : 'secondary'
-              }>
-                {profile.level_confidence || 'Unknown'}
-              </Badge>
-              <div className="text-xs text-muted-foreground mt-1">Self-Awareness</div>
-            </div>
-          </div>
+          <LevelAssessmentBlock profile={profileRecord} testStatus={testStatus} isWelcomeTest />
         </CardContent>
       </Card>
 
@@ -338,69 +345,41 @@ export function WelcomeTestResults({ testId, studentId, teacherId, questions }: 
         </CardContent>
       </Card>
 
-      {/* Learner Profile */}
-      <div className="grid grid-cols-2 gap-4">
+      {/* Learner Profile: every trait with its basis, confidence and the teacher's verdict */}
+      <WtFeedbackProvider
+        studentId={studentId}
+        teacherId={teacherId}
+        testId={profile.welcome_test_id ?? testId}
+        interpretationVersion={readInterpretationVersion(profile.raw_answers)}
+      >
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
               <Brain className="h-4 w-4 text-primary" />
-              Motivation & Personality
+              Learner Profile
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Motivation</span>
-              <Badge variant="outline">{profile.motivation_type || '-'}</Badge>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-muted-foreground">Anxiety Level</span>
-              <div className="flex items-center gap-1">
-                {anxietyIcon}
-                <span>{profile.anxiety_level || '-'}</span>
+            <FeedbackHint completedAt={completedAt} />
+            <LowCoverageBadge profile={profileV2} />
+            <ProfileTraits profile={profileRecord} />
+            <AwarenessBlock profile={profileRecord} />
+            <DeclaredVsMeasured profile={profileV2} />
+            <LearningPathBlock profile={profileV2} />
+            <AnswerBehaviourLine profile={profileV2} />
+            {(profile.preferred_activities || []).length > 0 && (
+              <div>
+                <span className="text-xs text-muted-foreground block mb-1">Preferred Activities</span>
+                <div className="flex flex-wrap gap-1">
+                  {(profile.preferred_activities || []).map((a, i) => (
+                    <Badge key={i} variant="secondary" className="text-xs">{a}</Badge>
+                  ))}
+                </div>
               </div>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Ambiguity Tolerance</span>
-              <span>{profile.ambiguity_tolerance || '-'}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Error Attitude</span>
-              <span>{profile.error_attitude || '-'}</span>
-            </div>
+            )}
           </CardContent>
         </Card>
-
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <BookOpen className="h-4 w-4 text-primary" />
-              Learning Preferences
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3 text-sm">
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Input Channel</span>
-              <Badge variant="outline">{profile.preferred_input_channel || '-'}</Badge>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Feedback</span>
-              <span>{profile.feedback_preference || '-'}</span>
-            </div>
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Weekly Time</span>
-              <span>{profile.weekly_study_time || '-'}</span>
-            </div>
-            <div>
-              <span className="text-muted-foreground block mb-1">Preferred Activities</span>
-              <div className="flex flex-wrap gap-1">
-                {(profile.preferred_activities || []).map((a, i) => (
-                  <Badge key={i} variant="secondary" className="text-xs">{a}</Badge>
-                ))}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
+      </WtFeedbackProvider>
 
       {/* Interest Topics */}
       {profile.interest_topics && profile.interest_topics.length > 0 && (

@@ -3712,6 +3712,63 @@ export type Database = {
         }
         Relationships: []
       }
+      wt_signal_feedback: {
+        Row: {
+          comment: string | null
+          created_at: string
+          id: string
+          interpretation_version: number | null
+          signal_key: string
+          signal_value: string | null
+          student_id: string
+          teacher_id: string
+          test_id: string | null
+          updated_at: string
+          verdict: string
+        }
+        Insert: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          interpretation_version?: number | null
+          signal_key: string
+          signal_value?: string | null
+          student_id: string
+          teacher_id?: string
+          test_id?: string | null
+          updated_at?: string
+          verdict: string
+        }
+        Update: {
+          comment?: string | null
+          created_at?: string
+          id?: string
+          interpretation_version?: number | null
+          signal_key?: string
+          signal_value?: string | null
+          student_id?: string
+          teacher_id?: string
+          test_id?: string | null
+          updated_at?: string
+          verdict?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "wt_signal_feedback_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "students"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "wt_signal_feedback_test_id_fkey"
+            columns: ["test_id"]
+            isOneToOne: false
+            referencedRelation: "student_tests"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       conversion_funnel: {

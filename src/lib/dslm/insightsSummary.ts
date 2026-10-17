@@ -37,6 +37,8 @@ export interface InsightsSummaryInput {
   /** True when a Welcome Test learning profile exists. */
   hasPlacementProfile: boolean;
   estimatedLevel: string | null;
+  /** raw_answers.level_evidence.status of the placement profile, when known. */
+  levelEvidenceStatus?: 'ok' | 'insufficient' | null;
   categories: readonly CategorySignal[] | null | undefined;
   daysSinceLastActivity: number | null;
   homeworkTotal: number;
@@ -83,12 +85,19 @@ export function buildInsightsSummary(input: InsightsSummaryInput): InsightsSumma
   const lines: string[] = [];
 
   const level = input.englishLevel?.trim();
-  const levelPart = level ? `Level ${level} (set by you)` : 'Level not set';
+  // The level's origin is not stored: it is "from placement test" only when it equals the
+  // placement estimate, never claimed as set by the teacher.
+  const fromPlacement = !!level && input.hasPlacementProfile && !!input.estimatedLevel && input.estimatedLevel === level;
+  const levelPart = level ? `Level ${level}${fromPlacement ? ' (from placement test)' : ''}` : 'Level not set';
   let placementPart = 'placement test: not taken';
   if (input.hasPlacementProfile) {
-    placementPart = input.estimatedLevel
-      ? `placement test estimate: ${input.estimatedLevel}`
-      : 'placement test: completed';
+    if (input.levelEvidenceStatus === 'insufficient') {
+      placementPart = 'placement test: not enough answers to estimate a level';
+    } else {
+      placementPart = input.estimatedLevel
+        ? `placement test estimate: ${input.estimatedLevel}`
+        : 'placement test: completed';
+    }
   }
   lines.push(`${levelPart} · ${placementPart}`);
 
