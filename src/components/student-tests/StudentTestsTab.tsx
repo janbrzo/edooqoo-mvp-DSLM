@@ -232,7 +232,7 @@ export function StudentTestsTab({
       );
       const nextAttempt = maxAttempt + 1;
       const { data: student } = await supabase
-        .from('students').select('name').eq('id', studentId).maybeSingle();
+        .from('students').select('name, student_email').eq('id', studentId).maybeSingle();
       const newTest = await createTest({
         student_id: studentId,
         test_type: 'welcome',

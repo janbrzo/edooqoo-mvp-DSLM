@@ -280,16 +280,24 @@ export function useStudentTests({ studentId, teacherId }: UseStudentTestsProps) 
 
       if (rpcError) throw rpcError;
 
-      // Update local state
-      setTests(prev => prev.map(t => 
-        t.id === testId ? { ...t, share_token: data, status: 'assigned' as TestStatus } : t
+      // Only a draft becomes assigned. An in_progress/completed/reviewed test keeps
+      // its status (resetting it would reopen a finished test).
+      const current = tests.find(t => t.id === testId);
+      const promote = !current || current.status === 'draft';
+      setTests(prev => prev.map(t =>
+        t.id === testId
+          ? { ...t, share_token: data, ...(promote ? { status: 'assigned' as TestStatus } : {}) }
+          : t
       ));
 
-      // Also update status to assigned
-      await supabase
-        .from('student_tests')
-        .update({ status: 'assigned', assigned_at: new Date().toISOString() })
-        .eq('id', testId);
+      if (promote) {
+        const { error: statusError } = await supabase
+          .from('student_tests')
+          .update({ status: 'assigned', assigned_at: new Date().toISOString() })
+          .eq('id', testId)
+          .eq('status', 'draft');
+        if (statusError) throw statusError;
+      }
 
       toast.success('Share link generated');
       return data;

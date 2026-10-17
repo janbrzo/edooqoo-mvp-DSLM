@@ -89,18 +89,22 @@ export function computeModelReadiness(input: ReadinessInput): Readiness {
 export interface WelcomeTestRow {
   status: string | null;
   created_at: string | null;
+  /** When selected: a null token means no link was ever issued. Omitted = unknown, not judged. */
+  share_token?: string | null;
 }
 
 /**
  * Collapse every Welcome Test attempt into one state. Any completed or
  * reviewed attempt means the placement evidence exists (a pending retake does
- * not erase it); otherwise any attempt row means the test was issued.
+ * not erase it); otherwise any issued attempt row (not a draft, with a link)
+ * means the test was sent.
  */
 export function resolveWelcomeTestState(rows: readonly WelcomeTestRow[] | null | undefined): {
   state: WelcomeTestState;
   sentAt: string | null;
 } {
-  const list = rows ?? [];
+  // A draft row, or one whose link was never issued, was not sent to the student.
+  const list = (rows ?? []).filter((row) => row.status !== 'draft' && row.share_token !== null);
   if (list.length === 0) return { state: 'none', sentAt: null };
   const latestCreated = [...list]
     .map((row) => row.created_at)

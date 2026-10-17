@@ -3,9 +3,11 @@
  * so teachers don't see raw identifiers in summaries, recommendations or
  * observations. The model is also instructed to avoid IDs, but this is the
  * runtime safety net for legacy summaries already persisted in DB.
+ *
+ * Only the identifiers are removed. Prepositions are left alone: stripping
+ * "in/at/on/for" corrupted ordinary sentences ("estimated at a B2").
  */
 const ID_TOKEN_RE = /\(?(?:wt_)?q\d+[a-z]?\)?/gi;
-const FILLER_RE = /\b(?:in|from|on|at|for|via)\s*(?=[,.;:]|\s|$)/gi;
 const MULTI_SPACE_RE = /\s{2,}/g;
 const SPACE_BEFORE_PUNCT_RE = /\s+([.,;:!?])/g;
 
@@ -13,7 +15,6 @@ export function sanitizeAiText(input: string | null | undefined): string {
   if (!input) return "";
   return input
     .replace(ID_TOKEN_RE, "")
-    .replace(FILLER_RE, "")
     .replace(SPACE_BEFORE_PUNCT_RE, "$1")
     .replace(MULTI_SPACE_RE, " ")
     .trim();

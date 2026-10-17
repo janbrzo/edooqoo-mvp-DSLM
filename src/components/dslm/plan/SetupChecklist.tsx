@@ -10,6 +10,7 @@ import React from 'react';
 import { Check, Copy, Loader2, Map, Plus, Send, Sparkles, Target } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { WELCOME_TEST_ESTIMATED_MINUTES } from '@/lib/welcomeTest/constants';
 import { formatRelativeAgeInline } from '@/lib/students/prepPlan';
 import type { SetupStep, SetupStepKey, WelcomeTestState } from '@/lib/dslm/modelReadiness';
 import { PlanSection } from './PlanSection';
@@ -119,7 +120,7 @@ export const SetupChecklist: React.FC<SetupChecklistProps> = (props) => {
           };
         }
         return {
-          detail: `10-minute placement test. ${firstName} gets it by email.`,
+          detail: `${WELCOME_TEST_ESTIMATED_MINUTES}-minute placement test. ${firstName} gets it by email.`,
           actions: (
             <>
               <Button size="sm" variant={variantFor('test')} onClick={props.onSendTest} disabled={props.testBusy}>
