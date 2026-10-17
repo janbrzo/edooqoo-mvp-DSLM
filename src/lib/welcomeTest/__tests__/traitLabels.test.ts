@@ -41,7 +41,7 @@ describe('trait label parity with the server', () => {
       for (const value of Object.values(cfg.mapping)) {
         const text = traitValueLabel(key, value);
         expect(text).not.toMatch(/_/);
-        expect(text).not.toContain('—');
+        expect(text).not.toContain('\u2014');
       }
     }
   });

@@ -35,14 +35,12 @@ BEGIN
 END;
 $$;
 
-DROP TRIGGER IF EXISTS wt_signal_feedback_touch_updated_at ON public.wt_signal_feedback;
-CREATE TRIGGER wt_signal_feedback_touch_updated_at
+CREATE OR REPLACE TRIGGER wt_signal_feedback_touch_updated_at
   BEFORE UPDATE ON public.wt_signal_feedback
   FOR EACH ROW EXECUTE FUNCTION public.wt_signal_feedback_touch_updated_at();
 
 ALTER TABLE public.wt_signal_feedback ENABLE ROW LEVEL SECURITY;
 
-DROP POLICY IF EXISTS "Teachers read own signal feedback" ON public.wt_signal_feedback;
 CREATE POLICY "Teachers read own signal feedback"
   ON public.wt_signal_feedback FOR SELECT TO authenticated
   USING (
@@ -50,7 +48,6 @@ CREATE POLICY "Teachers read own signal feedback"
     AND EXISTS (SELECT 1 FROM public.students s WHERE s.id = wt_signal_feedback.student_id AND s.teacher_id = auth.uid())
   );
 
-DROP POLICY IF EXISTS "Teachers insert own signal feedback" ON public.wt_signal_feedback;
 CREATE POLICY "Teachers insert own signal feedback"
   ON public.wt_signal_feedback FOR INSERT TO authenticated
   WITH CHECK (
@@ -58,7 +55,6 @@ CREATE POLICY "Teachers insert own signal feedback"
     AND EXISTS (SELECT 1 FROM public.students s WHERE s.id = wt_signal_feedback.student_id AND s.teacher_id = auth.uid())
   );
 
-DROP POLICY IF EXISTS "Teachers update own signal feedback" ON public.wt_signal_feedback;
 CREATE POLICY "Teachers update own signal feedback"
   ON public.wt_signal_feedback FOR UPDATE TO authenticated
   USING (
@@ -70,7 +66,6 @@ CREATE POLICY "Teachers update own signal feedback"
     AND EXISTS (SELECT 1 FROM public.students s WHERE s.id = wt_signal_feedback.student_id AND s.teacher_id = auth.uid())
   );
 
-DROP POLICY IF EXISTS "Teachers delete own signal feedback" ON public.wt_signal_feedback;
 CREATE POLICY "Teachers delete own signal feedback"
   ON public.wt_signal_feedback FOR DELETE TO authenticated
   USING (
