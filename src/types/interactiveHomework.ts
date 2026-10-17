@@ -24,6 +24,7 @@ export interface TrueFalseAnswers {
 // For Fill-in-blanks exercises (text inputs)
 export interface FillInBlanksAnswers {
   [blankIndex: number]: string; // User's text input
+  [blankKey: string]: string; // `${sentence}_${blank}` for sentences with several blanks
 }
 
 // For Reading comprehension questions (text inputs/textareas)
@@ -64,6 +65,7 @@ export interface WordOrderAnswers {
 // For Gap Text exercises (text inputs)
 export interface GapTextAnswers {
   [gapIndex: number]: string; // User's text input
+  [gapKey: string]: string; // `${sentence}_${blank}` for sentences with several blanks
 }
 
 // For Dialogue exercises (textareas for role-play)

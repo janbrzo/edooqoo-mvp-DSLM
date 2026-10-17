@@ -103,6 +103,8 @@ const WorksheetToolbar = ({
   // PROBLEM 6 & 7: Track student email and share token status
   const [studentEmail, setStudentEmail] = useState<string | undefined>(undefined);
   const [hasActiveShareToken, setHasActiveShareToken] = useState(false);
+  // undefined until the worksheet row is loaded; false when no student is assigned
+  const [hasAssignedStudent, setHasAssignedStudent] = useState<boolean | undefined>(undefined);
   
   // Handler for locked features (anonymous users)
   const handleLockedFeatureClick = (featureName: string) => {
@@ -114,6 +116,7 @@ const WorksheetToolbar = ({
   useEffect(() => {
     const fetchWorksheetData = async () => {
       if (!worksheetId || isDemoMode) return;
+      setHasAssignedStudent(undefined);
       
       try {
         // Fetch worksheet data including share token and student_id
@@ -127,6 +130,7 @@ const WorksheetToolbar = ({
         
         // Check if share token exists (permanent links, no expiration)
         setHasActiveShareToken(!!worksheet?.share_token);
+        setHasAssignedStudent(!!worksheet?.student_id);
         
         // Fetch student email if student_id exists (PROBLEM 6)
         if (worksheet?.student_id) {
@@ -619,6 +623,7 @@ const WorksheetToolbar = ({
           worksheetId={worksheetId!}
           worksheetTitle={editableWorksheet?.title || 'English Worksheet'}
           studentEmail={studentEmail}
+          hasAssignedStudent={hasAssignedStudent}
         />
       )}
 

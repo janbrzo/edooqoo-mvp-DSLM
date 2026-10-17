@@ -13,6 +13,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 import { authorizedTeacherId, jsonResponse, resolveCaller } from "../_shared/auth.ts";
 import { chatCompletion } from "../_shared/aiChat.ts";
 import { NO_EM_DASH_RULE } from "../_shared/writingStyle.ts";
+import { WORKSHEET_HISTORY_COLUMNS, toWorksheetHistoryRows } from "../_shared/worksheetHistory.ts";
 import { withEffectiveMastery } from "../_shared/forgetting.ts";
 import { resolvePromptPacing, computeIntensity, intensityPromptLines, loadLearningProfileForPacing } from "../_shared/pacing.ts";
 
@@ -44,7 +45,8 @@ function buildStudentProfileBlock(student: any, _pacing: number): string {
 function buildWeakAreasBlock(metrics: any[], limit: number): string {
   if (!metrics?.length) return '(no skill metrics yet)';
   return metrics.slice(0, limit).map((m: any) => {
-    const age = m.updated_at ? Math.round((Date.now() - new Date(m.updated_at).getTime()) / (1000*60*60*24)) : null;
+    const seenAt = m.last_event_at || m.updated_at;
+    const age = seenAt ? Math.round((Date.now() - new Date(seenAt).getTime()) / (1000*60*60*24)) : null;
     return `- ${m.skill_category || ''}/${m.micro_skill || m.skill_name}: mastery=${m.current_mastery}, trend=${m.trend || 'flat'}${age !== null ? `, ${age}d old` : ''}`;
   }).join('\n  ');
 }
@@ -323,9 +325,10 @@ serve(async (req) => {
         .eq('is_achieved', false),
       supabase
         .from('worksheets')
-        .select('topic, created_at')
+        .select(WORKSHEET_HISTORY_COLUMNS)
         .eq('student_id', studentId)
         .eq('teacher_id', teacherId)
+        .is('deleted_at', null)
         .order('created_at', { ascending: false })
         .limit(20),
       supabase
@@ -351,7 +354,7 @@ serve(async (req) => {
     const metrics = withEffectiveMastery(metricsRes.data || []).sort((a, b) => a.current_mastery - b.current_mastery);
     const knowledge = knowledgeRes.data || [];
     const goals = goalsRes.data || [];
-    const worksheets = worksheetsRes.data || [];
+    const worksheets = toWorksheetHistoryRows(worksheetsRes.data);
     const existingPhases = existingPhasesRes.data || [];
 
     // v6.9.46: hard preservation invariant: done AND in_progress phases are

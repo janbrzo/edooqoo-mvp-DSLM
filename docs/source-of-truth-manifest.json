@@ -10904,6 +10904,11 @@
               "name": "studentEmail",
               "type": "string",
               "optional": true
+            },
+            {
+              "name": "hasAssignedStudent",
+              "type": "boolean",
+              "optional": true
             }
           ]
         }
@@ -10973,9 +10978,9 @@
         "Send via Email",
         "Sending...",
         "Share Worksheet",
-        "Share link is permanent • Student will verify email to access",
         "Share this link:",
         "Student Email",
+        "This worksheet has no student assigned, so a student cannot open it with an email. Assign a student to the worksheet (or create it from the student page) to share it for tracked work. The copied link still opens for you.",
         "Worksheet:",
         "student@example.com",
         "when I copy the link"
@@ -23904,6 +23909,11 @@
               "optional": false
             },
             {
+              "name": "saveFailed",
+              "type": "boolean",
+              "optional": true
+            },
+            {
               "name": "lastSavedAt",
               "type": "Date | null",
               "optional": false
@@ -23964,6 +23974,7 @@
         "Dashboard",
         "End Presentation",
         "Homework",
+        "Not saved yet, retrying...",
         "Presentation Mode",
         "Progress:",
         "Saved at",
@@ -26306,6 +26317,21 @@
               "optional": true
             },
             {
+              "name": "revealedExercises",
+              "type": "ReadonlySet<number>",
+              "optional": true
+            },
+            {
+              "name": "hideDeleted",
+              "type": "boolean",
+              "optional": true
+            },
+            {
+              "name": "lockRevealed",
+              "type": "boolean",
+              "optional": true
+            },
+            {
               "name": "disabled",
               "type": "boolean",
               "optional": true
@@ -26479,6 +26505,11 @@
               "optional": false
             },
             {
+              "name": "saveFailed",
+              "type": "boolean",
+              "optional": true
+            },
+            {
               "name": "lastSavedAt",
               "type": "Date | null",
               "optional": false
@@ -26498,6 +26529,7 @@
       },
       "storage": [],
       "userFacingText": [
+        "Not saved yet, retrying...",
         "Progress:",
         "Saved at",
         "Saving...",
@@ -34524,7 +34556,7 @@
             },
             {
               "name": "liveSessionAnswer",
-              "type": "Record<number, any>",
+              "type": "Record<string | number, any>",
               "optional": true
             },
             {
@@ -39029,6 +39061,11 @@
           "value": "hasActiveShareToken",
           "setter": "setHasActiveShareToken",
           "initial": "false"
+        },
+        {
+          "value": "hasAssignedStudent",
+          "setter": "setHasAssignedStudent",
+          "initial": "undefined"
         }
       ],
       "hooks": [
@@ -41289,6 +41326,11 @@
             "value": "isWaitingForAiEval",
             "setter": "setIsWaitingForAiEval",
             "initial": "false"
+          },
+          {
+            "value": "saveFailed",
+            "setter": "setSaveFailed",
+            "initial": "false"
           }
         ],
         "hooks": [
@@ -41304,7 +41346,6 @@
         "dataDependencies": {
           "tables": [],
           "rpcs": [
-            "insert_homework_submission_notification",
             "update_homework_answer_by_share_token",
             "verify_homework_student_email"
           ],
@@ -41403,8 +41444,13 @@
             "initial": "null"
           },
           {
-            "value": "isSubmittedForReview",
-            "setter": "setIsSubmittedForReview",
+            "value": "revealedExercises",
+            "setter": "setRevealedExercises",
+            "initial": "new Set()"
+          },
+          {
+            "value": "saveFailed",
+            "setter": "setSaveFailed",
             "initial": "false"
           }
         ],
@@ -41422,8 +41468,6 @@
         "dataDependencies": {
           "tables": [],
           "rpcs": [
-            "needs_ai_evaluation",
-            "queue_worksheet_ai_evaluation",
             "verify_worksheet_student_email"
           ],
           "edgeFunctions": [
@@ -46987,6 +47031,7 @@
           "fetchTargets": []
         },
         "environmentVariables": [
+          "APP_BASE_URL",
           "RESEND_API_KEY",
           "SUPABASE_SERVICE_ROLE_KEY",
           "SUPABASE_URL"
@@ -47020,7 +47065,6 @@
           "APP_BASE_URL",
           "CRON_SECRET",
           "RESEND_API_KEY",
-          "SUPABASE_ANON_KEY",
           "SUPABASE_SERVICE_ROLE_KEY",
           "SUPABASE_URL"
         ]
@@ -47256,6 +47300,7 @@
           "fetchTargets": []
         },
         "environmentVariables": [
+          "APP_BASE_URL",
           "RESEND_API_KEY",
           "SUPABASE_SERVICE_ROLE_KEY",
           "SUPABASE_URL"
@@ -49005,16 +49050,6 @@
         "payloadExpressions": []
       },
       {
-        "name": "insert_homework_submission_notification",
-        "callsites": [
-          "src/hooks/useInteractiveHomework.tsx"
-        ],
-        "payloadFields": [
-          "p_homework_id"
-        ],
-        "payloadExpressions": []
-      },
-      {
         "name": "insert_public_booking_notification",
         "callsites": [
           "src/hooks/usePublicBooking.tsx"
@@ -49072,34 +49107,6 @@
           "p_entry_id",
           "p_reason",
           "p_teacher_id"
-        ],
-        "payloadExpressions": []
-      },
-      {
-        "name": "needs_ai_evaluation",
-        "callsites": [
-          "src/hooks/useInteractiveSharedWorksheet.tsx"
-        ],
-        "payloadFields": [
-          "p_exercise_index",
-          "p_student_email",
-          "p_worksheet_id"
-        ],
-        "payloadExpressions": []
-      },
-      {
-        "name": "queue_worksheet_ai_evaluation",
-        "callsites": [
-          "src/hooks/useInteractiveSharedWorksheet.tsx"
-        ],
-        "payloadFields": [
-          "p_answers",
-          "p_context",
-          "p_english_level",
-          "p_exercise_index",
-          "p_exercise_type",
-          "p_student_email",
-          "p_worksheet_id"
         ],
         "payloadExpressions": []
       },
@@ -57900,6 +57907,10 @@
         "migration": "supabase/migrations/20260615164911_f17d6d20-5a34-4783-b8e7-403175d8c56f.sql"
       },
       {
+        "name": "consume_token",
+        "migration": "supabase/migrations/20261016100000_w0_a_consume_token_live_answers_soft_delete.sql"
+      },
+      {
         "name": "create_mcp_token",
         "migration": "supabase/migrations/20260725124453_86489a73-813a-457d-aff2-4f7037b4d6c5.sql"
       },
@@ -57942,6 +57953,10 @@
       {
         "name": "get_flashcard_set_is_bidirectional",
         "migration": "supabase/migrations/20260728202525_74d9d02e-d674-4a75-955e-7eba54b61291.sql"
+      },
+      {
+        "name": "get_homework_comments",
+        "migration": "supabase/migrations/20261016100015_w0_b_teacher_comments.sql"
       },
       {
         "name": "get_homework_owner_ids",
@@ -57992,6 +58007,10 @@
         "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
       },
       {
+        "name": "get_worksheet_live_answers",
+        "migration": "supabase/migrations/20261016100000_w0_a_consume_token_live_answers_soft_delete.sql"
+      },
+      {
         "name": "get_worksheet_student_answers_by_share_token",
         "migration": "supabase/migrations/20261012090100_student_answer_share_token_rpcs.sql"
       },
@@ -58014,6 +58033,10 @@
       {
         "name": "increment_download_session_by_token",
         "migration": "supabase/migrations/20260727075433_18fadd76-8521-42b8-9575-9cf22e1f3c52.sql"
+      },
+      {
+        "name": "insert_homework_submission_notification_by_share_token",
+        "migration": "supabase/migrations/20261016100020_w0_c_share_token_queue_and_notification.sql"
       },
       {
         "name": "insert_public_booking_notification",
@@ -58108,8 +58131,16 @@
         "migration": "supabase/migrations/20261015090400_homework_ai_queue_and_worksheet_save.sql"
       },
       {
+        "name": "mark_homework_completed",
+        "migration": "supabase/migrations/20261016100010_w0_b_mark_homework_completed.sql"
+      },
+      {
         "name": "mark_worksheet_answer_not_evaluable",
         "migration": "supabase/migrations/20261012160200_ai_queue_not_evaluable_marker.sql"
+      },
+      {
+        "name": "needs_ai_evaluation_by_share_token",
+        "migration": "supabase/migrations/20261016100020_w0_c_share_token_queue_and_notification.sql"
       },
       {
         "name": "needs_ai_evaluation",
@@ -58130,6 +58161,10 @@
       {
         "name": "prevent_profile_billing_self_update",
         "migration": "supabase/migrations/20261006090000_billing_guard_and_student_events.sql"
+      },
+      {
+        "name": "queue_worksheet_ai_evaluation_by_share_token",
+        "migration": "supabase/migrations/20261016100020_w0_c_share_token_queue_and_notification.sql"
       },
       {
         "name": "queue_worksheet_ai_evaluation",
@@ -58176,12 +58211,20 @@
         "migration": "supabase/migrations/20261012090000_dslm_pipeline_baseline.sql"
       },
       {
+        "name": "save_homework_answer",
+        "migration": "supabase/migrations/20261016110010_w2_homework_lock_after_submit.sql"
+      },
+      {
         "name": "save_mark_done_evaluation",
         "migration": "supabase/migrations/20261012120000_dslm_event_triggers_v2.sql"
       },
       {
         "name": "save_mark_done_evaluation",
         "migration": "supabase/migrations/20261014090000_event_and_homework_answer_access.sql"
+      },
+      {
+        "name": "save_teacher_comment",
+        "migration": "supabase/migrations/20261016100015_w0_b_teacher_comments.sql"
       },
       {
         "name": "save_test_answer_by_share_token",
@@ -58204,8 +58247,16 @@
         "migration": "supabase/migrations/20261015090400_homework_ai_queue_and_worksheet_save.sql"
       },
       {
+        "name": "save_worksheet_answer",
+        "migration": "supabase/migrations/20261016110000_w2_merge_answers_on_save.sql"
+      },
+      {
         "name": "set_test_answered_count_by_share_token",
         "migration": "supabase/migrations/20260804200705_0c128cfa-b83a-47b2-8d69-90962554c973.sql"
+      },
+      {
+        "name": "soft_delete_worksheet",
+        "migration": "supabase/migrations/20261016100000_w0_a_consume_token_live_answers_soft_delete.sql"
       },
       {
         "name": "start_test_by_share_token",
@@ -58230,6 +58281,10 @@
       {
         "name": "submit_homework_answers",
         "migration": "supabase/migrations/20261014090000_event_and_homework_answer_access.sql"
+      },
+      {
+        "name": "submit_homework_answers",
+        "migration": "supabase/migrations/20261016110010_w2_homework_lock_after_submit.sql"
       },
       {
         "name": "supersede_previous_welcome_test_events",
@@ -58679,12 +58734,6 @@
         "callsites": [
           "src/lib/demo/__tests__/demoFetchGuard.test.ts"
         ]
-      },
-      {
-        "host": "your-domain.com",
-        "callsites": [
-          "supabase/functions/send-homework-email/index.ts"
-        ]
       }
     ],
     "environmentVariables": [
@@ -58700,10 +58749,12 @@
           "supabase/functions/publish-worksheet/index.ts",
           "supabase/functions/regenerate-gallery-sitemap/index.ts",
           "supabase/functions/send-calendar-notification-email/index.ts",
+          "supabase/functions/send-homework-email/index.ts",
           "supabase/functions/send-homework-reminders/index.ts",
           "supabase/functions/send-next-lesson-newsletter/index.ts",
           "supabase/functions/send-test-email/index.ts",
           "supabase/functions/send-welcome-email/index.ts",
+          "supabase/functions/send-worksheet-email/index.ts",
           "supabase/functions/submit-bug-report/index.ts"
         ]
       },
@@ -58927,7 +58978,6 @@
           "supabase/functions/format-worksheet-prompt/index.ts",
           "supabase/functions/generate-image/index.ts",
           "supabase/functions/publish-worksheet/index.ts",
-          "supabase/functions/send-homework-reminders/index.ts",
           "supabase/functions/submit-bug-report/index.ts",
           "supabase/functions/unpublish-worksheet/index.ts",
           "supabase/functions/upload-to-r2/index.ts"

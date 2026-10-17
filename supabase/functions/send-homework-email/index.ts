@@ -167,7 +167,7 @@ serve(async (req: Request) => {
     }
 
     // Generate homework link
-    const homeworkLink = `${req.headers.get("origin") || "https://your-domain.com"}/homework/${homeworkWithRelations.share_token}`;
+    const homeworkLink = `${(Deno.env.get("APP_BASE_URL") || "https://edooqoo.com").replace(/\/+$/, "")}/homework/${homeworkWithRelations.share_token}`;
 
     // Get teacher name
     const teacherName = homeworkWithRelations.profiles?.first_name
