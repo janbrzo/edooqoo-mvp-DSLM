@@ -12,6 +12,7 @@
  */
 import { useEffect, useMemo, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
+import { withEffectiveMastery } from '../../supabase/functions/_shared/forgetting';
 
 interface SkillMetric {
   skill_name: string | null;
@@ -126,12 +127,13 @@ export const useGoalProgress = (
     (async () => {
       const { data, error } = await supabase
         .from('student_skill_metrics' as any)
-        .select('skill_name, micro_skill, current_mastery')
+        .select('skill_name, micro_skill, current_mastery, last_event_at')
         .eq('student_id', studentId)
         .eq('teacher_id', teacherId);
       if (cancelled) return;
       if (error) { setMetrics([]); return; }
-      setMetrics((data || []) as any);
+      const rows = (data || []) as unknown as Array<SkillMetric & { last_event_at: string | null }>;
+      setMetrics(withEffectiveMastery(rows));
     })();
     return () => { cancelled = true; };
   }, [studentId, teacherId]);

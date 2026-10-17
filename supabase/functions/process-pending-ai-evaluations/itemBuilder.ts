@@ -82,7 +82,7 @@ export function buildQuestionEvaluations(params: {
       return {
         question_index: qIdx,
         is_acceptable: e.is_acceptable ?? ((e.quality_score || 0) >= 0.5),
-        quality_score: e.quality_score ?? 0,
+        quality_score: typeof e.quality_score === 'number' && Number.isFinite(e.quality_score) ? e.quality_score : -1,
         feedback: e.feedback || '',
         ...(e.key_verdict ? { key_verdict: e.key_verdict } : {}),
         writing_score: hasWritten ? e.writing_score : undefined,

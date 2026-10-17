@@ -54,6 +54,7 @@ const ExerciseMatchingHalves: React.FC<ExerciseMatchingHalvesProps> = ({
   studentAnswers = {},
   onAnswerChange,
   showCorrectAnswers = false,
+  disabled = false,
   // NanoSkill props
   onNanoSkillChange,
   isSharedWorksheet = false
@@ -148,6 +149,7 @@ const ExerciseMatchingHalves: React.FC<ExerciseMatchingHalvesProps> = ({
                     <Select
                       value={studentAnswer || ''}
                       onValueChange={(value) => onAnswerChange?.(hIndex, value)}
+                      disabled={disabled}
                     >
                       <SelectTrigger className="w-14 h-8">
                         <SelectValue placeholder="?" />

@@ -163,7 +163,7 @@ serve(async (req: Request) => {
     }
 
     // Generate worksheet link
-    const worksheetLink = `${req.headers.get("origin") || "https://edooqoo.com"}/shared/${worksheet.share_token}`;
+    const worksheetLink = `${(Deno.env.get("APP_BASE_URL") || "https://edooqoo.com").replace(/\/+$/, "")}/shared/${worksheet.share_token}`;
 
     // Get teacher name
     const teacherName = teacherProfile?.first_name

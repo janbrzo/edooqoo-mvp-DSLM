@@ -3,6 +3,7 @@ import { Resend } from "npm:resend@4.0.0";
 import { renderAsync } from "npm:@react-email/components@0.0.22";
 import React from "npm:react@18.3.1";
 import { HomeworkReminderEmail } from "../_shared/email-templates/homework-reminder.tsx";
+import { resolveCaller, teacherIdOf } from "../_shared/auth.ts";
 
 const resend = new Resend(Deno.env.get("RESEND_API_KEY") as string);
 
@@ -24,6 +25,15 @@ Deno.serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
+  }
+
+  // Only the service role or the teacher who owns the homework may force a reminder.
+  const caller = await resolveCaller(req);
+  if (caller.kind !== "service" && !teacherIdOf(caller)) {
+    return new Response(
+      JSON.stringify({ error: "Unauthorized" }),
+      { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
   }
 
   try {
@@ -85,6 +95,14 @@ Deno.serve(async (req) => {
           status: 404,
           headers: { ...corsHeaders, "Content-Type": "application/json" } 
         }
+      );
+    }
+
+    const ownerId = teacherIdOf(caller);
+    if (caller.kind !== "service" && ownerId !== (homework as { teacher_id?: string }).teacher_id) {
+      return new Response(
+        JSON.stringify({ error: "Forbidden" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 

@@ -104,6 +104,8 @@ const SharedWorksheet = () => {
     if (!worksheetData?.exercises) return {};
     const counts: Record<number, number> = {};
     worksheetData.exercises.forEach((exercise: any, index: number) => {
+      // A deleted exercise is hidden from the student: it has no tasks to answer.
+      if (exercise.deleted) { counts[index] = 0; return; }
       counts[index] = exercise.questions?.length || 
                       exercise.items?.length || 
                       exercise.sentences?.length ||
@@ -476,6 +478,7 @@ const SharedWorksheet = () => {
         <SharedWorksheetProgressBar
           progress={interactiveHook.getProgress()}
           isSaving={interactiveHook.isSaving}
+          saveFailed={interactiveHook.saveFailed}
           lastSavedAt={interactiveHook.lastSavedAt}
         />
       )}
@@ -649,7 +652,8 @@ const SharedWorksheet = () => {
             exercises={exercises.map((exercise: any) => ({
               title: exercise.title,
               icon: exercise.icon,
-              estimated_time: exercise.time
+              estimated_time: exercise.time,
+              hidden: !!exercise.deleted && !isTeacher
             }))}
             activeExercise={navigation.activeExercise}
             collapsedExercises={navigation.collapsedExercises}
@@ -717,6 +721,9 @@ const SharedWorksheet = () => {
               audioAnswers={interactiveHook.audioAnswers}
               onAudioAnswerChange={(isTeacher && !teacherEditMode) ? undefined : (exIdx, qIdx, url) => interactiveHook.updateAudioAnswer(exIdx, qIdx, url)}
               showCorrectAnswers={interactiveHook.isSubmittedForReview}
+              revealedExercises={interactiveHook.revealedExercises}
+              lockRevealed={!isTeacher}
+              hideDeleted={!isTeacher}
               answerVisibilityFilter={answerVisibility}
               disabled={false}
               mediaPinned={isPinned}

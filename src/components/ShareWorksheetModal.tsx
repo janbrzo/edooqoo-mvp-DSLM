@@ -18,6 +18,12 @@ interface ShareWorksheetModalProps {
   worksheetId: string;
   worksheetTitle: string;
   studentEmail?: string;
+  /**
+   * false = the worksheet has no assigned student. verify_worksheet_student_email
+   * rejects every email then, so an emailed link could never be opened by the student.
+   * undefined (not loaded yet) and true keep the email section.
+   */
+  hasAssignedStudent?: boolean;
 }
 
 const ShareWorksheetModal = ({ 
@@ -25,8 +31,10 @@ const ShareWorksheetModal = ({
   onClose, 
   worksheetId, 
   worksheetTitle,
-  studentEmail: initialStudentEmail 
+  studentEmail: initialStudentEmail,
+  hasAssignedStudent,
 }: ShareWorksheetModalProps) => {
+  const canEmailStudent = hasAssignedStudent !== false;
   const [shareUrl, setShareUrl] = useState<string>('');
   const [isLoading, setIsLoading] = useState(false);
   const [isSendingEmail, setIsSendingEmail] = useState(false);
@@ -117,7 +125,7 @@ const ShareWorksheetModal = ({
         className: "bg-green-50 border-green-200"
       });
       // P2.3: send the worksheet email automatically when enabled
-      if (autoNotify && recipientEmail) {
+      if (autoNotify && recipientEmail && canEmailStudent) {
         await sendEmail({ silentDuplicate: true });
       }
     } catch (error) {
@@ -239,6 +247,19 @@ const ShareWorksheetModal = ({
               </div>
 
               {/* Email Section */}
+              {!canEmailStudent ? (
+                <div className="border-t pt-4">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Mail className="h-4 w-4 text-gray-500" />
+                    <p className="text-sm font-medium">Send via Email</p>
+                  </div>
+                  <p className="text-sm text-gray-600 rounded-md border p-3 bg-gray-50">
+                    This worksheet has no student assigned, so a student cannot open it with an email.
+                    Assign a student to the worksheet (or create it from the student page) to share it for tracked work.
+                    The copied link still opens for you.
+                  </p>
+                </div>
+              ) : (
               <div className="border-t pt-4">
                 <div className="flex items-center gap-2 mb-3">
                   <Mail className="h-4 w-4 text-gray-500" />
@@ -301,9 +322,10 @@ const ShareWorksheetModal = ({
                   </Button>
                 </div>
               </div>
+              )}
 
               <p className="text-xs text-gray-500 text-center">
-                Share link is permanent • Student will verify email to access
+                {canEmailStudent ? 'Share link is permanent • Student will verify email to access' : 'Share link is permanent'}
               </p>
             </div>
           )}

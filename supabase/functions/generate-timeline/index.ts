@@ -21,8 +21,10 @@ import {
   buildExistingStepsBlock,
   getAdaptiveExerciseRules,
 } from "../_shared/dslmPromptCore.ts";
+import { WORKSHEET_HISTORY_COLUMNS, toWorksheetHistoryRows } from "../_shared/worksheetHistory.ts";
 import { chatCompletion } from "../_shared/aiChat.ts";
 import { NO_EM_DASH_RULE } from "../_shared/writingStyle.ts";
+import { withEffectiveMastery } from "../_shared/forgetting.ts";
 import { computeIntensity, intensityPromptLines, loadLearningProfileForPacing } from "../_shared/pacing.ts";
 
 const corsHeaders = {
@@ -73,15 +75,15 @@ serve(async (req) => {
     // Fetch context
     const [studentRes, metricsRes, knowledgeRes, goalsRes, worksheetsRes, phaseRes, excludeRes, existingStepsRes, learningProfileRes] = await Promise.all([
       supabase.from('students').select('name, english_level, main_goal, main_goal_target_date, dslm_pacing_mode, last_pacing_set_manually, dslm_use_roadmap').eq('id', studentId).eq('teacher_id', teacherId).single(),
-      supabase.from('student_skill_metrics').select('skill_name, skill_category, micro_skill, current_mastery, trend, updated_at')
+      supabase.from('student_skill_metrics').select('skill_name, skill_category, micro_skill, current_mastery, trend, updated_at, last_event_at')
         .eq('student_id', studentId).eq('teacher_id', teacherId).order('current_mastery', { ascending: true }).limit(60),
       supabase.from('student_knowledge_entries').select('content, category, created_at')
         .eq('student_id', studentId).eq('teacher_id', teacherId).is('deleted_at', null).is('is_outdated', false)
         .order('created_at', { ascending: false }).limit(15),
       supabase.from('student_progress_goals').select('title, description, goal_type, is_achieved, target_date')
         .eq('student_id', studentId).eq('teacher_id', teacherId).is('deleted_at', null).eq('is_achieved', false),
-      supabase.from('worksheets').select('topic, created_at').eq('student_id', studentId).eq('teacher_id', teacherId)
-        .order('created_at', { ascending: false }).limit(10),
+      supabase.from('worksheets').select(WORKSHEET_HISTORY_COLUMNS).eq('student_id', studentId).eq('teacher_id', teacherId)
+        .is('deleted_at', null).order('created_at', { ascending: false }).limit(10),
       finalMode === 'phase_steps' && phaseId
         ? supabase.from('dslm_curriculum_phases').select('id, title, description, focus_areas').eq('id', phaseId).single()
         : Promise.resolve({ data: null }),
@@ -107,10 +109,11 @@ serve(async (req) => {
       });
     }
 
-    const metrics = metricsRes.data || [];
+    // D9: forgetting applied at read time; weakest (lowest effective mastery) first.
+    const metrics = withEffectiveMastery(metricsRes.data || []).sort((a, b) => a.current_mastery - b.current_mastery);
     const knowledge = knowledgeRes.data || [];
     const goals = goalsRes.data || [];
-    const recentWorksheets = worksheetsRes.data || [];
+    const recentWorksheets = toWorksheetHistoryRows(worksheetsRes.data);
     const phase: any = (phaseRes as any).data || null;
     const excludedTopics = ((excludeRes as any).data || [])
       .map((r: any) => r.suggested_topic).filter(Boolean).join(', ');

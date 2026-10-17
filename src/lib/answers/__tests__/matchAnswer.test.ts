@@ -150,3 +150,23 @@ describe('regression guard: never stricter than the legacy comparison', () => {
     expect(verdict(a, b)).toBe('correct');
   });
 });
+
+describe('matchAnswer: error-correction item whose key is the source sentence', () => {
+  const source = 'Am I late for the meeting today?';
+
+  it('keeps the exact copy correct', () => {
+    expect(matchAnswer(source, source, { mode: 'sentence', sourceSentence: source }).verdict).toBe('correct');
+  });
+
+  it('sends a different wording to review instead of marking it wrong', () => {
+    const res = matchAnswer('Do I arrive late to the meeting today?', source, { mode: 'sentence', sourceSentence: source });
+    expect(res.verdict).toBe('review');
+    expect(res.reason).toBe('no-error-item');
+  });
+
+  it('still marks a mismatch wrong when the key is a real correction', () => {
+    expect(
+      matchAnswer('She went home yesterday.', 'She goes to school.', { mode: 'sentence', sourceSentence: 'She go to school.' }).verdict,
+    ).toBe('wrong');
+  });
+});

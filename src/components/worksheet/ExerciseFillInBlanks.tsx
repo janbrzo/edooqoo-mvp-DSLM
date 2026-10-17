@@ -1,7 +1,8 @@
 import React, { useMemo } from "react";
 import { InteractiveExerciseProps } from "@/types/interactiveHomework";
 import { Input } from "@/components/ui/input";
-import { matchAnswer } from "@/lib/answers/matchAnswer";
+import { matchAnswer, type MatchVerdict } from "@/lib/answers/matchAnswer";
+import { blankAnswers } from "@/lib/answers/blanks";
 import { AnswerStatusBadge, answerFieldClasses } from "./AnswerStatusBadge";
 import NanoSkillBadge, { NanoSkill } from "./NanoSkillBadge";
 import { safeGetText, safeGetNanoSkill, safeGetAllNanoSkills } from "@/utils/textObjectFixer";
@@ -14,7 +15,7 @@ interface ExerciseFillInBlanksProps extends Partial<InteractiveExerciseProps> {
   onWordBankChange: (wIndex: number, value: string) => void;
   onSentenceChange: (sIndex: number, field: string, value: string) => void;
   // PROBLEM 1: Live Session answer prop for displaying student answers in blue
-  liveSessionAnswer?: Record<number, any>;
+  liveSessionAnswer?: Record<string | number, any>;
   disabled?: boolean;
   // For NanoSkill editing
   onNanoSkillChange?: (sIndex: number, nanoSkill: NanoSkill, skillIndex?: number) => void;
@@ -102,15 +103,36 @@ const ExerciseFillInBlanks: React.FC<ExerciseFillInBlanksProps> = ({
           // Safely extract text and nano_skill
           const sentenceText = safeGetText(sentence.text || sentence);
           const nanoSkill = safeGetNanoSkill(sentence);
-          const studentAnswer = studentAnswers[sIndex] || '';
-          const correctAnswer = sentence.answer;
+          // Several blanks in one sentence: one answer per blank under `${sIndex}_${blankIndex}`
+          // (same convention as gap-text); a single blank keeps the plain `sIndex` key.
+          const blanksCount = (sentenceText.match(/_+/g) || []).length;
+          const multiBlank = blanksCount > 1;
+          const blankKey = (b: number): string | number => (multiBlank ? `${sIndex}_${b}` : sIndex);
+          const correctParts: string[] = multiBlank ? blankAnswers(sentence, blanksCount) : [String(sentence.answer ?? '')];
+          const answersByKey = studentAnswers as Record<string | number, any>;
+          // Answers saved under the plain sentence key (before blanks had their own keys) still show in blank 0.
+          const blankAnswerOf = (b: number): string =>
+            String(answersByKey[blankKey(b)] || (multiBlank && b === 0 && answersByKey[`${sIndex}_0`] === undefined ? answersByKey[sIndex] : '') || '');
+          const blankVerdicts = Array.from({ length: Math.max(blanksCount, 1) }).map((_, b) =>
+            matchAnswer(blankAnswerOf(b), multiBlank ? (correctParts[b] ?? '') : (correctParts[0] ?? ''), { mode: 'word' }).verdict);
+          const studentAnswer = multiBlank
+            ? Array.from({ length: blanksCount }).map((_, b) => blankAnswerOf(b)).join(' / ')
+            : blankAnswerOf(0);
+          const correctAnswer = multiBlank ? correctParts.join(' / ') : sentence.answer;
           // Use normalized comparison to ignore punctuation and case
-          const match = matchAnswer(studentAnswer, correctAnswer, { mode: 'word' });
+          const match: { verdict: MatchVerdict } = multiBlank
+            ? { verdict: blankVerdicts.every((v) => v === 'correct') ? 'correct' : blankVerdicts.some((v) => v === 'wrong') ? 'wrong' : 'review' }
+            : matchAnswer(studentAnswer, correctAnswer, { mode: 'word' });
           const isCorrect = showCorrectAnswers && match.verdict === 'correct';
           const isReview = showCorrectAnswers && match.verdict === 'review';
           const isIncorrect = showCorrectAnswers && match.verdict === 'wrong';
-          const isEmpty = showCorrectAnswers && !studentAnswer;
-          const liveAnswer = liveSessionAnswer?.[sIndex];
+          const isEmpty = showCorrectAnswers && (multiBlank ? blankVerdicts.every((v) => v === 'empty') : !studentAnswer);
+          const liveAnswer = multiBlank
+            ? (() => {
+                const joined = Array.from({ length: blanksCount }).map((_, b) => String(liveSessionAnswer?.[`${sIndex}_${b}`] ?? '')).join(' / ');
+                return joined.replace(/[\s/]/g, '') ? joined : undefined;
+              })()
+            : liveSessionAnswer?.[sIndex];
           const showNanoSkill = viewMode === 'teacher' && nanoSkill;
 
           return (
@@ -133,8 +155,8 @@ const ExerciseFillInBlanks: React.FC<ExerciseFillInBlanksProps> = ({
                               {part}
                               {pIndex < arr.length - 1 && (
                                 <Input
-                                  value={studentAnswer || ''}
-                                  onChange={(e) => onAnswerChange?.(sIndex, e.target.value)}
+                                  value={blankAnswerOf(pIndex)}
+                                  onChange={(e) => onAnswerChange?.(blankKey(pIndex) as number, e.target.value)}
                                   disabled={disabled}
                                   className={`inline-block w-32 mx-1 h-7 
                                     ${isCorrect ? answerFieldClasses('correct') : ''}

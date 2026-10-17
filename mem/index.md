@@ -52,6 +52,7 @@
 - [Quick Student Access](mem://features/dashboard/quick-student-access) — v6.9.110 four paths to any student (jump search, recent pills, inline list, nav switcher), all via quickAccess.ts, no new queries
 - [Student Workspace 4 Tabs](mem://features/student-page/workspace-4-tabs) — v6.9.111 final Prep/Timeline/Library/Learning model; legacy ?tab= aliases permanent; never restore Overview/Worksheets/Skills
 - [DSLM Evaluation Pipeline](mem://features/dslm/evaluation-pipeline) — 2026-10 audit of AI evaluation + DSLM data flow, owner decisions D1-D7, iteration plan; v6.9.115 iteration 1 (SQL baseline, evaluation access, token RPCs, scoreToMastery)
+- [Worksheet + DSLM Audit 2026-10](mem://features/worksheet/audit-2026-10) — 14-agent audit of worksheets standalone and in DSLM, Welcome Test profile and signal validity; plan W0-W9 and owner decisions O1-O10 awaiting approval
 - [Learning Plan Tab](mem://features/dslm/learning-plan) — stage-driven Plan / Insights tab (setup checklist, Needs your OK, Up next, Roadmap, Goals); Prep and Plan share orderUpNext
 - [Quick Add Note](mem://features/student-page/quick-add-note-from-overview) — Add Note opens inline modal in Prep tab QuickNoteBox; never route through tabs
 - [User-flow audit 2026-10](mem://features/dashboard/audit-2026-10-user-flow) — demo student page fix + demoFetchGuard, wrap-safe worksheet toolbars, Prep-first CTAs, useTeacherAuthRedirect, homework error card, vitest in CI; 10-05 follow-up: calendar/MCP/worksheet login return paths, untrimmed Prep topic, no duplicate suggestion tiles
@@ -59,3 +60,6 @@
 - [Homework autosave](mem://features/homework/autosave) — per-exercise debounce via createPendingSaves, flush on submit/unmount, lost-answer fix
 - [Generated SEO files CI contract](mem://seo/generated-files-ci-contract) — deterministic generators, seo:sync-generated, post-processing passes in CI before git diff --exit-code
 - [No em dashes](mem://decisions/no-em-dashes) — v6.9.72 U+2014 banned in English user-facing/generated text; replacement rules, exclusions, noEmDash test guard
+- [DSLM forgetting curve](mem://features/dslm/forgetting-curve) — D9/D10 read-time effective mastery (14d grace, 60d half-life, 50% floor), single module _shared/forgetting.ts, 7.1/7.2 deferred
+- [Micro-skill Taxonomy v2](mem://dslm/micro-skill-taxonomy-v2) — extract_micro_skill changes additive only; never move a skill name between two real topics
+- [AI Defensibility Pillars](mem://strategy/ai-defensibility-roadmap) — approved five-pillar product direction, durable learning state rather than raw generation

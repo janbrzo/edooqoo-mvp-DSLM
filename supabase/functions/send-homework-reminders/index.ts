@@ -18,17 +18,13 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  // Authorization: allow the cron secret (x-cron-secret, used by the pg_cron job),
-  // the anon key or the service role key. The anon-key path alone was rejected in
-  // production (the function's SUPABASE_ANON_KEY differs from the public client key),
-  // so the pg_cron job authenticates with CRON_SECRET instead.
+  // Authorization: the cron secret (x-cron-secret, used by the pg_cron job) or the
+  // service role key. The public anon key is never accepted (AGENTS.md, Runtime Safety).
   const authHeader = req.headers.get("Authorization");
-  const anonKey = Deno.env.get("SUPABASE_ANON_KEY");
   const serviceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
   const isAuthorized =
     hasValidCronSecret(req.headers.get("x-cron-secret"), Deno.env.get("CRON_SECRET")) ||
-    authHeader === `Bearer ${anonKey}` ||
     authHeader === `Bearer ${serviceKey}`;
 
   if (!isAuthorized) {

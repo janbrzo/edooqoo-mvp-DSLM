@@ -15,13 +15,14 @@ import {
   ItemEvaluation 
 } from '@/utils/masteryCalculator';
 import { buildClosedItemContext } from '@/lib/answers/closedItemContext';
-import { hasRevealedAnswers } from '@/lib/answers/revealState';
+import { revealedExerciseIndices, answeredExerciseIndices } from '@/lib/answers/revealState';
 import { DEFAULT_ENGLISH_LEVEL } from '../../supabase/functions/_shared/englishLevel';
 import { createPendingSaves } from '@/lib/answers/pendingSaves';
 import { parseAiEvaluation, mapItemEvaluationsToAiEvaluations } from '@/utils/aiEvaluationMapper';
 import type { AiEvaluation } from '@/components/homework/AiEvaluationBadge';
 import { devLog, devWarn } from '@/utils/logger';
-import { callStudentAnswerRpc, studentAnswerRpcName } from '@/lib/answers/studentAnswerRpc';
+import { questionIndicesOf, hasAnswerForQuestion } from '@/lib/answers/answerKeys';
+import { callStudentAnswerRpc, callTokenOrLegacyRpc, studentAnswerRpcName } from '@/lib/answers/studentAnswerRpc';
 
 // Same project values the generated client uses; read from env instead of hardcoding them.
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
@@ -52,10 +53,22 @@ export const useInteractiveSharedWorksheet = ({
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [lastSavedAt, setLastSavedAt] = useState<Date | null>(null);
-  const [isSubmittedForReview, setIsSubmittedForReview] = useState(false);
+  // Answer keys are revealed per exercise (finished, or an open exercise with its AI evaluation).
+  const [revealedExercises, setRevealedExercises] = useState<ReadonlySet<number>>(new Set());
+  const revealExercises = useCallback((indices: number[]) => {
+    if (indices.length === 0) return;
+    setRevealedExercises((prev) => (indices.every((i) => prev.has(i)) ? prev : new Set([...prev, ...indices])));
+  }, []);
+  const isSubmittedForReview = revealedExercises.size > 0;
   
   const pendingSavesQueueRef = useRef(createPendingSaves());
   const pendingSavesRef = useRef<Set<number>>(new Set());
+  // True while at least one save failed and is waiting for a retry (shown in the progress bar).
+  const [saveFailed, setSaveFailed] = useState(false);
+  // One error toast per failure streak: the queue retries on its own.
+  const saveErrorShownRef = useRef(false);
+  const lastUnloadWriteRef = useRef(0);
+  useEffect(() => pendingSavesQueueRef.current.onStatus((st) => setSaveFailed(st.failed > 0)), []);
   
   // PROBLEM 1 FIX: Active time tracking per exercise
   const exerciseStartTimeRef = useRef<Record<number, number>>({});
@@ -138,12 +151,10 @@ export const useInteractiveSharedWorksheet = ({
         setAiEvaluations(loadedAiEvals);
         
         // Check if any answer has been completed or has AI evaluation
-        const hasCompletedOrAiEval = hasRevealedAnswers(data);
-        if (hasCompletedOrAiEval) {
-          setIsSubmittedForReview(true);
-        }
+        const hasCompletedOrAiEval = revealedExerciseIndices(data);
+        revealExercises(hasCompletedOrAiEval);
         
-        devLog('[useInteractiveSharedWorksheet] Loaded answers:', loadedAnswers, 'audio:', loadedAudio, 'evals:', loadedEvals, 'aiEvals:', loadedAiEvals, 'submittedForReview:', hasCompletedOrAiEval);
+        devLog('[useInteractiveSharedWorksheet] Loaded answers:', loadedAnswers, 'audio:', loadedAudio, 'evals:', loadedEvals, 'aiEvals:', loadedAiEvals, 'revealed exercises:', hasCompletedOrAiEval);
       }
     } catch (error: any) {
       console.error('Error loading answers:', error);
@@ -176,7 +187,7 @@ export const useInteractiveSharedWorksheet = ({
     mastery?: number | null,
     itemEvaluations?: ItemEvaluation[] | null,
     audioAnswersForExercise?: Record<number, string> | null
-  ) => {
+  ): Promise<boolean> => {
     try {
       setIsSaving(true);
       
@@ -204,14 +215,20 @@ export const useInteractiveSharedWorksheet = ({
       if (pendingSavesRef.current.size === 0) {
         setIsSaving(false);
       }
+      saveErrorShownRef.current = false;
+      return true;
     } catch (error: any) {
       console.error('Error saving answer:', error);
-      toast({
-        title: "Error saving answer",
-        description: error.message,
-        variant: "destructive"
-      });
+      if (!saveErrorShownRef.current) {
+        saveErrorShownRef.current = true;
+        toast({
+          title: "Your answer is not saved yet",
+          description: "We will keep trying. Please stay on this page.",
+          variant: "destructive"
+        });
+      }
       setIsSaving(false);
+      return false; // the queue retries a failed save
     }
   }, [worksheetId, studentEmail, getActiveTimeMs, shareToken]);
 
@@ -280,20 +297,19 @@ export const useInteractiveSharedWorksheet = ({
 
   // Save immediately on blur (when user leaves input field)
   const saveOnBlur = useCallback((exerciseIndex: number, exerciseType: string) => {
-    // This exercise is saved right now; other exercises keep their pending saves
-    pendingSavesQueueRef.current.cancel(exerciseIndex);
-
     const exerciseAnswers = answers[exerciseIndex];
-    if (exerciseAnswers) {
-      // PROBLEM 1: Build per-item evaluations with nano_skill_ratings
-      const exerciseData = { ...exercises[exerciseIndex], worksheetId };
-      const mastery = calculateOverallMastery(exerciseType, exerciseData, exerciseAnswers as Record<string | number, any>);
-      const itemEvaluations = buildItemEvaluations(exerciseData, exerciseAnswers as Record<string | number, any>, exerciseType, null, audioAnswers[exerciseIndex] || null);
-      // PROBLEM 1 FIX: Don't send item_evaluations if they contain no real AI eval data
-      const hasRealAiEval = itemEvaluations?.some(e => e.hasValue !== false);
-      const evalToSend = hasRealAiEval ? itemEvaluations : null;
-      saveAnswer(exerciseIndex, exerciseType, exerciseAnswers, mastery, evalToSend);
-    }
+    if (!exerciseAnswers) return;
+    // PROBLEM 1: Build per-item evaluations with nano_skill_ratings
+    const exerciseData = { ...exercises[exerciseIndex], worksheetId };
+    const mastery = calculateOverallMastery(exerciseType, exerciseData, exerciseAnswers as Record<string | number, any>);
+    const itemEvaluations = buildItemEvaluations(exerciseData, exerciseAnswers as Record<string | number, any>, exerciseType, null, audioAnswers[exerciseIndex] || null);
+    // PROBLEM 1 FIX: Don't send item_evaluations if they contain no real AI eval data
+    const hasRealAiEval = itemEvaluations?.some(e => e.hasValue !== false);
+    const evalToSend = hasRealAiEval ? itemEvaluations : null;
+    // Save this exercise right now through the queue (serialized and retried); other exercises keep their pending saves.
+    const queue = pendingSavesQueueRef.current;
+    queue.schedule(exerciseIndex, () => saveAnswer(exerciseIndex, exerciseType, exerciseAnswers, mastery, evalToSend), 0);
+    void queue.flushOne(exerciseIndex);
   }, [answers, saveAnswer, exercises]);
 
   // Calculate progress - percentage based on individual tasks, exercises based on full completion
@@ -302,8 +318,12 @@ export const useInteractiveSharedWorksheet = ({
     let totalTasks = 0;
     let answeredTasks = 0;
     
+    // An exercise with 0 tasks was deleted by the teacher: it is hidden and does not count.
+    let visibleExercises = 0;
     for (let i = 0; i < totalExercises; i++) {
-      const questionCount = exerciseQuestionCounts[i] || 1;
+      const questionCount = exerciseQuestionCounts[i] ?? 1;
+      if (questionCount === 0) continue;
+      visibleExercises++;
       totalTasks += questionCount;
     }
     
@@ -316,16 +336,18 @@ export const useInteractiveSharedWorksheet = ({
     allExerciseIndices.forEach(exerciseIndex => {
       const exerciseAnswers = answers[exerciseIndex] || {};
       const exerciseAudio = audioAnswers[exerciseIndex] || {};
-      const questionCount = exerciseQuestionCounts[exerciseIndex] || 1;
+      const questionCount = exerciseQuestionCounts[exerciseIndex] ?? 1;
+      if (questionCount === 0) return;
       
+      // Multi-blank sentences are stored under `${q}_${blank}`: count each sentence once.
       const allQIndices = new Set([
-        ...Object.keys(exerciseAnswers).map(Number),
+        ...questionIndicesOf(exerciseAnswers as Record<string | number, unknown>),
         ...Object.keys(exerciseAudio).map(Number)
       ]);
       
       let answeredQuestionsCount = 0;
       allQIndices.forEach(qIdx => {
-        const hasText = exerciseAnswers[qIdx] !== null && exerciseAnswers[qIdx] !== undefined && exerciseAnswers[qIdx] !== '';
+        const hasText = hasAnswerForQuestion(exerciseAnswers as Record<string | number, unknown>, qIdx);
         const hasAudio = !!exerciseAudio[qIdx];
         if (hasText || hasAudio) answeredQuestionsCount++;
       });
@@ -339,7 +361,7 @@ export const useInteractiveSharedWorksheet = ({
       ? Math.min(100, Math.round((cappedAnsweredTasks / totalTasks) * 100))
       : 0;
 
-    return { totalExercises, answeredExercises, percentageComplete, totalTasks, answeredTasks: cappedAnsweredTasks };
+    return { totalExercises: visibleExercises, answeredExercises, percentageComplete, totalTasks, answeredTasks: cappedAnsweredTasks };
   }, [answers, audioAnswers, totalExercises, exerciseQuestionCounts]);
 
   // Load answers on mount
@@ -381,9 +403,13 @@ export const useInteractiveSharedWorksheet = ({
   // USES CONDITIONAL LOGIC: Only queue AI eval if last_saved_at > last_ai_eval_at
   useEffect(() => {
     const handleBeforeUnload = async () => {
+      // beforeunload and pagehide both fire when a tab closes: send the keepalive writes once.
+      if (Date.now() - lastUnloadWriteRef.current < 3000) return;
+      lastUnloadWriteRef.current = Date.now();
       // Iterate through all exercises with answers
-      for (const exerciseIndexStr of Object.keys(answers)) {
-        const exerciseIndex = parseInt(exerciseIndexStr);
+      // Only exercises with unsaved changes: a keepalive write of an already saved
+      // exercise would reset eval_trigger and re-date its DSLM event for nothing.
+      for (const exerciseIndex of pendingSavesQueueRef.current.pendingIndices()) {
         const exerciseType = exerciseTypesRef.current[exerciseIndex];
         const exerciseAnswers = answers[exerciseIndex];
         
@@ -420,8 +446,13 @@ export const useInteractiveSharedWorksheet = ({
       }
     };
 
+    // pagehide also fires on mobile browsers, where beforeunload often does not.
     window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener('pagehide', handleBeforeUnload);
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload);
+      window.removeEventListener('pagehide', handleBeforeUnload);
+    };
   }, [answers, worksheetId, studentEmail, exercises, getActiveTimeMs, shareToken]);
 
   // Flush pending saves on unmount so the last second of answers is not dropped
@@ -464,20 +495,19 @@ export const useInteractiveSharedWorksheet = ({
           
           // Check if AI eval is actually needed using RPC
           try {
-            const { data: needsEval } = await supabase.rpc('needs_ai_evaluation', {
-              p_worksheet_id: worksheetId,
-              p_student_email: studentEmail.trim().toLowerCase(),
-              p_exercise_index: exerciseIndex
-            });
+            const normalizedEmail = studentEmail.trim().toLowerCase();
+            const { data: needsEval } = await callTokenOrLegacyRpc<boolean>(
+              'needs_ai_evaluation_by_share_token',
+              { p_share_token: shareToken ?? '', p_worksheet_id: worksheetId, p_student_email: normalizedEmail, p_exercise_index: exerciseIndex },
+              'needs_ai_evaluation',
+              { p_worksheet_id: worksheetId, p_student_email: normalizedEmail, p_exercise_index: exerciseIndex },
+            );
             
             if (needsEval) {
               const exercise = exercises[exerciseIndex];
               // Closed items: answer key resolved client-side (same extractor as homework)
               const closedItems = isClosed
-                ? Object.keys(exerciseAnswers)
-                    .filter(k => !k.startsWith('_') && !isNaN(parseInt(k)))
-                    .map(k => parseInt(k))
-                    .sort((a, b) => a - b)
+                ? questionIndicesOf(exerciseAnswers as Record<string | number, unknown>)
                     .map(qIdx => {
                       const ctx = buildClosedItemContext(exerciseType, exercise, qIdx, exerciseAnswers as Record<string | number, any>);
                       return ctx ? { question_index: qIdx, ...ctx } : null;
@@ -485,9 +515,9 @@ export const useInteractiveSharedWorksheet = ({
                     .filter(Boolean)
                 : undefined;
               if (isClosed && (!closedItems || closedItems.length === 0)) continue;
-              await supabase.rpc('queue_worksheet_ai_evaluation', {
+              const queueArgs = {
                 p_worksheet_id: worksheetId,
-                p_student_email: studentEmail.trim().toLowerCase(),
+                p_student_email: normalizedEmail,
                 p_exercise_index: exerciseIndex,
                 p_exercise_type: exerciseType,
                 p_answers: exerciseAnswers as any, // Cast to any for JSON compatibility
@@ -499,7 +529,13 @@ export const useInteractiveSharedWorksheet = ({
                   questions: exercise?.questions || exercise?.prompts || exercise?.sentences || exercise?.expressions || exercise?.items || [],
                   ...(closedItems ? { closed_items: closedItems } : {}),
                 } as any
-              });
+              };
+              await callTokenOrLegacyRpc(
+                'queue_worksheet_ai_evaluation_by_share_token',
+                { p_share_token: shareToken ?? '', ...queueArgs },
+                'queue_worksheet_ai_evaluation',
+                queueArgs,
+              );
               devLog(`[useInteractiveSharedWorksheet] Queued AI eval for exercise ${exerciseIndex}`);
             }
           } catch (err) {
@@ -513,7 +549,7 @@ export const useInteractiveSharedWorksheet = ({
         // PLAN FIX 1C: Actually process the queued evaluations
         try {
           devLog('[useInteractiveSharedWorksheet] Calling process-pending-ai-evaluations after 10-min timer');
-          await supabase.functions.invoke('process-pending-ai-evaluations', {
+          const { error: processError } = await supabase.functions.invoke('process-pending-ai-evaluations', {
             body: {
               worksheet_id: worksheetId,
               trigger_source: '10min_inactivity',
@@ -521,8 +557,11 @@ export const useInteractiveSharedWorksheet = ({
               student_email: studentEmail.trim().toLowerCase(),
             }
           });
+          // A failed evaluation call must not unlock the answer keys.
+          if (processError) throw processError;
           devLog('[useInteractiveSharedWorksheet] AI evaluations processed successfully');
-          setIsSubmittedForReview(true);
+          // Only the exercises the student answered; an unanswered exercise stays hidden.
+          revealExercises(answeredExerciseIndices(answers as Record<number, Record<string | number, unknown>>));
         } catch (processErr) {
           devWarn('[useInteractiveSharedWorksheet] Failed to process AI evals (non-critical):', processErr);
         }
@@ -533,7 +572,7 @@ export const useInteractiveSharedWorksheet = ({
     const interval = setInterval(checkAndTriggerAiEval, ONE_MINUTE);
     
     return () => clearInterval(interval);
-  }, [lastSavedAt, answers, worksheetId, studentEmail, exercises, shareToken]);
+  }, [lastSavedAt, answers, worksheetId, studentEmail, exercises, shareToken, revealExercises]);
 
   // Polling: refresh aiEvaluations + itemEvaluations every 30s so student sees AI feedback without refresh
   useEffect(() => {
@@ -570,16 +609,12 @@ export const useInteractiveSharedWorksheet = ({
           }
         });
         
+        // Reveal is derived from the stored rows, so it is refreshed on every poll.
+        revealExercises(revealedExerciseIndices(data));
         if (hasNewEvals) {
           devLog('[useInteractiveSharedWorksheet] Polling found new evaluations:', loadedEvals);
           setItemEvaluations(loadedEvals);
           setAiEvaluations(loadedAiEvals);
-          
-          // Check if any answer has AI evaluation now
-          const hasAiEval = hasRevealedAnswers(data);
-          if (hasAiEval) {
-            setIsSubmittedForReview(true);
-          }
         }
       } catch (err) {
         // Silent fail - polling is non-critical
@@ -588,7 +623,7 @@ export const useInteractiveSharedWorksheet = ({
     
     const interval = setInterval(pollEvaluations, POLL_INTERVAL);
     return () => clearInterval(interval);
-  }, [worksheetId, studentEmail, itemEvaluations, shareToken]);
+  }, [worksheetId, studentEmail, itemEvaluations, shareToken, revealExercises]);
 
   // Update audio answer for a specific exercise/question
   const updateAudioAnswer = useCallback((exerciseIndex: number, questionIndex: number, audioUrl: string) => {
@@ -610,7 +645,9 @@ export const useInteractiveSharedWorksheet = ({
     const itemEvals = buildItemEvaluations(exerciseData, currentAnswers as Record<string | number, any>, exerciseType, null, newAudioForExercise);
     const hasRealAiEval = itemEvals?.some(e => e.hasValue !== false);
     const evalToSend = hasRealAiEval ? itemEvals : null;
-    saveAnswer(exerciseIndex, exerciseType, currentAnswers, mastery, evalToSend, newAudioForExercise);
+    const queue = pendingSavesQueueRef.current;
+    queue.schedule(exerciseIndex, () => saveAnswer(exerciseIndex, exerciseType, currentAnswers, mastery, evalToSend, newAudioForExercise), 0);
+    void queue.flushOne(exerciseIndex);
     
     devLog('[useInteractiveSharedWorksheet] Audio answer saved to DB:', { exerciseIndex, questionIndex, audioUrl: audioUrl.substring(0, 50) });
   }, [answers, exercises, saveAnswer, worksheetId, audioAnswers]);
@@ -622,8 +659,10 @@ export const useInteractiveSharedWorksheet = ({
     aiEvaluations,
     isLoading,
     isSaving,
+    saveFailed,
     lastSavedAt,
     isSubmittedForReview,
+    revealedExercises,
     updateAnswer,
     updateAudioAnswer,
     saveOnBlur,

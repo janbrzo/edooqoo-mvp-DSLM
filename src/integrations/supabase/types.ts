@@ -14,6 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      _mig_parts: {
+        Row: {
+          chunk: string | null
+          i: number
+          mig: string
+        }
+        Insert: {
+          chunk?: string | null
+          i: number
+          mig: string
+        }
+        Update: {
+          chunk?: string | null
+          i?: number
+          mig?: string
+        }
+        Relationships: []
+      }
       admin_activity_log: {
         Row: {
           action: string
@@ -4432,6 +4450,7 @@ export type Database = {
             }[]
           }
       is_user_anonymous: { Args: { user_id: string }; Returns: boolean }
+      knowledge_entry_dslm_ratings: { Args: { p_entry: Json }; Returns: Json }
       list_public_worksheets: {
         Args: {
           p_level?: string
@@ -4530,6 +4549,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      normalize_dslm_ratings: { Args: { p_ratings: Json }; Returns: Json }
       normalize_tag: { Args: { tag: string }; Returns: string }
       queue_worksheet_ai_evaluation: {
         Args: {
