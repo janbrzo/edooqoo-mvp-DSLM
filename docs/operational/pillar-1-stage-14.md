@@ -24,8 +24,10 @@ migration files:
   `knowledge_entry_dslm_ratings` and `log_knowledge_entry_event` are all revoked
   from PUBLIC/anon/authenticated and granted to service_role only; the knowledge
   classification trigger re-logs the DSLM event on category/content/tags changes.
-- **Pillar 1.3** (`20261017134759`): the migration is the latest definition of
-  both `dslm_effective_mastery` and `get_student_dslm_state_vector`; the vector
+- **Pillar 1.3** (`20261017134759` plus the same-day rounding-parity follow-ups
+  `20261017134848` and `20261017135037`): assertions run against the latest
+  definition of `dslm_effective_mastery` and `get_student_dslm_state_vector`,
+  which must keep the contract; the vector
   pins one read timestamp via `statement_timestamp()`, excludes `flashcard:%`
   metrics, returns the version 1 contract (`strongest_skills`, `critical_gaps`,
   `decaying_skills`, `recommended_focus`), is revoked from PUBLIC/anon and
