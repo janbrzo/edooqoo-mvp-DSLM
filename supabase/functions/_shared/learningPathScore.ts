@@ -1,6 +1,21 @@
 /**
- * Learning Path Score (LPS) v2: the learner's INTENSITY (decision D3), computed
+ * Learning Path Score (LPS) v3: the learner's INTENSITY (decision D3), computed
  * deterministically from the Welcome Test traits. Pure (no Deno APIs).
+ *
+ * v3 (Stage 4.3) separates NEED from CAPACITY:
+ * - NEED = learning_timeline urgency and career importance. It raises the
+ *   score only through the weighted components, never through a floor: the v2
+ *   floors `urgent_critical_override` (85) and `urgent_lazy_override` (70) are
+ *   gone, because a declared deadline cannot create study capacity.
+ * - CAPACITY = weekly study time triangulated with the homework scenario (q5c
+ *   overrides q5 when they conflict) and persistence. Low capacity caps the
+ *   score at 50 ("guided") even when the need is urgent; when the need is high
+ *   the teacher gets `capacity_warning: 'unrealistic_goal'` instead.
+ * - q4 (ambiguity_tolerance) and q14 (error_attitude) are the same coffee-shop
+ *   style scenario asked twice: v3 counts it once, from q14 (the concrete
+ *   scenario; the scenario items are the behavioural ones), so the
+ *   ambiguity_tolerance component is null in v3.
+ * `computeLearningPathScore(traits, answers, { version: 2 })` still reproduces v2.
  *
  * Changes from v1 (kept on old profiles as raw_answers.learning_path without a
  * version):
@@ -17,7 +32,7 @@
 
 import { matchOptionIndex } from './welcomeTestOptionAliases.ts';
 
-export const LPS_VERSION = 2;
+export const LPS_VERSION = 3;
 
 export type LearningPathName = 'comfort' | 'guided' | 'accelerated' | 'target';
 export type Capacity = 'low' | 'normal' | 'high';
@@ -32,6 +47,18 @@ export interface LearningPathV2 {
   capacity: Capacity | null;
   capacity_cap: number | null;
   capacity_warning: 'unrealistic_goal' | null;
+}
+
+/** Result of any LPS version; `need` is set from v3 on. */
+export interface LearningPathResult extends Omit<LearningPathV2, 'version'> {
+  version: 2 | 3;
+  /** v3: 'high' when the learner declares urgent timeline or critical career use. */
+  need?: 'normal' | 'high';
+}
+
+export interface LearningPathOptions {
+  /** 3 (default) or 2 to reproduce a stored v2 computation. */
+  version?: 2 | 3;
 }
 
 export const LOW_CAPACITY_CAP = 50; // top of "guided"
@@ -89,21 +116,32 @@ const WEIGHTS: Record<string, number> = {
   confidence_overall: 0.04,
 };
 
-export function studyCapacity(traits: Record<string, string>): Capacity | null {
+/**
+ * Study capacity. Declared weekly time (q5) is triangulated with the homework
+ * scenario (q5c): an avoidant or low homework answer overrides a high declared
+ * time. From v3 low persistence (q13b) also counts: it makes capacity low unless
+ * the learner both declares committed time and shows proactive homework, and it
+ * blocks 'high'.
+ */
+export function studyCapacity(traits: Record<string, string>, version: 2 | 3 = 3): Capacity | null {
   const time = traits.weekly_study_time;
   const hw = traits.homework_commitment;
+  const lowPersistence = version === 3 && traits.persistence_level === 'low';
   if (time === undefined && hw === undefined) return null;
   if (time === 'none' || hw === 'avoidant' || hw === 'low') return 'low';
-  if ((time === '2_3_hours' || time === '3_plus_hours') && (hw === undefined || hw === 'high' || hw === 'proactive')) {
-    return 'high';
-  }
+  const committedTime = time === '2_3_hours' || time === '3_plus_hours';
+  const goodHomework = hw === 'high' || hw === 'proactive';
+  if (lowPersistence && !(committedTime && goodHomework)) return 'low';
+  if (committedTime && (hw === undefined || goodHomework) && !lowPersistence) return 'high';
   return 'normal';
 }
 
 export function computeLearningPathScore(
   traits: Record<string, string>,
   answers: Record<string, unknown> | null | undefined,
-): LearningPathV2 {
+  options: LearningPathOptions = {},
+): LearningPathResult {
+  const version: 2 | 3 = options.version === 2 ? 2 : 3;
   const overrides: string[] = [];
   const c: Record<string, number | null> = {};
 
@@ -129,7 +167,8 @@ export function computeLearningPathScore(
     pick({ instrumental: 70, integrative: 30, mixed: 50 }, traits.motivation_type),
     pick({ career_critical: 75, lifestyle: 30, travel_lifestyle: 35 }, traits.latent_goal),
   );
-  c.ambiguity_tolerance = pick({ high: 75, medium: 45, low: 15 }, traits.ambiguity_tolerance);
+  // v3: q4 repeats the q14 scenario; q14 (error_attitude) is the single source.
+  c.ambiguity_tolerance = version === 2 ? pick({ high: 75, medium: 45, low: 15 }, traits.ambiguity_tolerance) : null;
   c.weekly_study_time = triangulate(
     pick({ none: 10, '15_30_min': 25, '1_hour': 45, '2_3_hours': 70, '3_plus_hours': 90 }, traits.weekly_study_time),
     pick({ proactive: 85, high: 75, pragmatic: 50, low: 20, avoidant: 10 }, traits.homework_commitment),
@@ -176,11 +215,13 @@ export function computeLearningPathScore(
     weighted += w * v;
   }
   const coverage = Math.round(weightSum * 100) / 100;
-  const capacity = studyCapacity(traits);
+  const capacity = studyCapacity(traits, version);
+  const need: 'normal' | 'high' = traits.learning_timeline === 'urgent_specific' || traits.career_english_importance === 'critical'
+    ? 'high' : 'normal';
 
   if (weightSum === 0) {
     return {
-      version: 2, score: null, path: null, component_scores: c, coverage: 0,
+      version, need: version === 3 ? need : undefined, score: null, path: null, component_scores: c, coverage: 0,
       overrides_applied: [], capacity, capacity_cap: null, capacity_warning: null,
     };
   }
@@ -188,13 +229,13 @@ export function computeLearningPathScore(
   let score = weighted / weightSum;
 
   // Override rules (as v1).
-  if (traits.learning_timeline === 'urgent_specific' && traits.career_english_importance === 'critical' && score < 85) {
+  if (version === 2 && traits.learning_timeline === 'urgent_specific' && traits.career_english_importance === 'critical' && score < 85) {
     score = 85; overrides.push('urgent_critical_override');
   }
   if (traits.persistence_level === 'low' && traits.learning_timeline === 'hobby_growth' && score > 25) {
     score = 25; overrides.push('lazy_hobby_override');
   }
-  if (traits.learning_timeline === 'urgent_specific' && traits.persistence_level === 'low' && score < 70) {
+  if (version === 2 && traits.learning_timeline === 'urgent_specific' && traits.persistence_level === 'low' && score < 70) {
     score = 70; overrides.push('urgent_lazy_override');
   }
   if (traits.anxiety_level === 'high' && traits.weekly_study_time === 'none' && score > 20) {
@@ -221,8 +262,9 @@ export function computeLearningPathScore(
   let capacityCap: number | null = null;
   let capacityWarning: 'unrealistic_goal' | null = null;
   if (capacity === 'low') {
-    const urgent = traits.learning_timeline === 'urgent_specific';
-    capacityCap = urgent ? LOW_CAPACITY_URGENT_CAP : LOW_CAPACITY_CAP;
+    const urgent = version === 2 ? traits.learning_timeline === 'urgent_specific' : need === 'high';
+    // v3: urgency never lifts the cap (v2 allowed up to 75 for an urgent deadline).
+    capacityCap = version === 2 && urgent ? LOW_CAPACITY_URGENT_CAP : LOW_CAPACITY_CAP;
     if (score > capacityCap) {
       score = capacityCap;
       overrides.push('low_capacity_cap');
@@ -231,7 +273,8 @@ export function computeLearningPathScore(
   }
 
   return {
-    version: 2,
+    version,
+    need: version === 3 ? need : undefined,
     score,
     path: pathForScore(score),
     component_scores: c,

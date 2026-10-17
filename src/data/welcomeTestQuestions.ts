@@ -153,7 +153,7 @@ const aboutYouQuestions: WelcomeTestQuestionDef[] = [
     detected_trait: {
       trait_name: 'ambiguity_tolerance',
       mapping: {
-        '0': 'high',
+        '0': 'medium',
         '1': 'low',
         '2': 'high',
         '3': 'low',
@@ -261,7 +261,7 @@ const aboutYouQuestions: WelcomeTestQuestionDef[] = [
         '1': 'low',
         '2': 'medium',
         '3': 'high',
-        '4': 'high',
+        '4': 'medium',
       },
     },
   },

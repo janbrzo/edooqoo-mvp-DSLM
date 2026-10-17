@@ -223,6 +223,71 @@ export function computeDivergences(input: DivergenceInput): Divergence[] {
   return out;
 }
 
+// ---------------------------------------------------------------------------
+// Calibrated self-awareness (A1-04)
+// ---------------------------------------------------------------------------
+
+export type CalibrationOutcome = 'correct' | 'wrong' | 'idk';
+
+export interface CalibrationItem {
+  /** CEFR level of the item ('B1', 'A2-B1', ...) or its LEVEL_NUMBER; null/unknown = ignored. */
+  itemLevel: string | number | null | undefined;
+  outcome: CalibrationOutcome;
+}
+
+export interface CalibratedSelfAwareness {
+  /** 0-100: how well "I don't know" was used where the item was above the estimated level. */
+  score: number;
+  /** IDK + wrong signals with a known item level. */
+  signals: number;
+  idk_above: number;
+  idk_at: number;
+  idk_below: number;
+  wrong: number;
+}
+
+export const MIN_CALIBRATION_SIGNALS = 3;
+
+const levelNumber = (v: string | number | null | undefined): number | null => {
+  if (typeof v === 'number') return Number.isFinite(v) ? v : null;
+  if (typeof v === 'string') return LEVEL_NUMBER[v.trim().toUpperCase()] ?? null;
+  return null;
+};
+
+/**
+ * Self-awareness as calibration (replaces IDK / (IDK + wrong), which ignored
+ * item level). Only misses count: every "I don't know" and every wrong answer
+ * on an item with a known level is one signal, relative to the estimated level:
+ *   - IDK on an item ABOVE the level: honest, credit 1
+ *   - IDK on an item AT the level: partial, credit 0.5
+ *   - IDK on an item BELOW the level: under-confident, credit 0
+ *   - wrong answer (a guess instead of IDK): credit 0
+ * score = mean credit * 100. Returns null with fewer than 3 signals or without
+ * an estimated level (not enough evidence; never a fabricated 0 or 50).
+ */
+export function computeCalibratedSelfAwareness(
+  items: ReadonlyArray<CalibrationItem> | null | undefined,
+  estimatedLevel: string | number | null | undefined,
+): CalibratedSelfAwareness | null {
+  const est = levelNumber(estimatedLevel);
+  if (est === null) return null;
+  let credit = 0;
+  let signals = 0;
+  const out = { idk_above: 0, idk_at: 0, idk_below: 0, wrong: 0 };
+  for (const it of items || []) {
+    if (!it || (it.outcome !== 'idk' && it.outcome !== 'wrong')) continue;
+    const lvl = levelNumber(it.itemLevel);
+    if (lvl === null) continue;
+    signals += 1;
+    if (it.outcome === 'wrong') { out.wrong += 1; continue; }
+    if (lvl > est) { out.idk_above += 1; credit += 1; }
+    else if (lvl === est) { out.idk_at += 1; credit += 0.5; }
+    else { out.idk_below += 1; }
+  }
+  if (signals < MIN_CALIBRATION_SIGNALS) return null;
+  return { score: Math.round((credit / signals) * 100), signals, ...out };
+}
+
 /** Plain lines for the model prompt; the model explains these, it does not compute them. */
 export function divergencePromptLines(divergences: ReadonlyArray<Divergence>): string {
   if (divergences.length === 0) return '- No declared-vs-measured divergences were found.';

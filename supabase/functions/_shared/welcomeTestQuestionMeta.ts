@@ -137,7 +137,7 @@ export const WELCOME_TEST_EVENT_QUESTIONS: readonly WelcomeEventQuestion[] = [
     "detected_trait": {
       "trait_name": "ambiguity_tolerance",
       "mapping": {
-        "0": "high",
+        "0": "medium",
         "1": "low",
         "2": "high",
         "3": "low",
@@ -247,7 +247,7 @@ export const WELCOME_TEST_EVENT_QUESTIONS: readonly WelcomeEventQuestion[] = [
         "1": "low",
         "2": "medium",
         "3": "high",
-        "4": "high"
+        "4": "medium"
       }
     }
   },
