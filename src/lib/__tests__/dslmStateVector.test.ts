@@ -134,4 +134,32 @@ describe.skipIf(!pgBin)('student state vector in isolated PostgreSQL', () => {
     query(`INSERT INTO public.student_skill_metrics SELECT '${emptyStudent}','${owner}','ns.bulk.'||n,'grammar','bulk',60,4,'stable',now() FROM generate_series(1,1200) n;`);
     expect(vector(emptyStudent).skill_count).toBe(1200);
   });
+  it('uses strict 80 and 50 thresholds and a 30-day elapsed-time boundary', () => {
+    query(`DELETE FROM public.student_skill_metrics WHERE student_id='${emptyStudent}';
+      INSERT INTO public.student_skill_metrics VALUES
+      ('${emptyStudent}','${owner}','ns.at80','grammar','at80',80,4,'stable',now()),
+      ('${emptyStudent}','${owner}','ns.at50','grammar','at50',50,4,'stable',now()),
+      ('${emptyStudent}','${owner}','ns.review','grammar','review',100,4,'stable',now()-interval '31 days');`);
+    const result = vector(emptyStudent);
+    expect(result.critical_gaps).toEqual([]);
+    expect(result.strongest_skills.map((s: { micro_skill: string }) => s.micro_skill)).toEqual(['review']);
+    expect(result.recommended_focus).toMatchObject({ skill_name: 'ns.review', reason: 'spaced_review' });
+    // Use the RPC statement clock itself to avoid crossing the strict boundary between statements.
+    const boundary = JSON.parse(asOwner(`WITH inserted AS (
+      INSERT INTO public.student_skill_metrics VALUES
+      ('${emptyStudent}','${owner}','ns.boundary','grammar','boundary',100,4,'stable',statement_timestamp()-interval '30 days') RETURNING 1)
+      SELECT public.get_student_dslm_state_vector('${emptyStudent}','${owner}') FROM inserted;`));
+    expect(boundary.decaying_skills.some((s: { micro_skill: string }) => s.micro_skill === 'boundary')).toBe(false);
+  });
+  it('computes micro averages without weighting by repetition count and scopes category keys', () => {
+    query(`DELETE FROM public.student_skill_metrics WHERE student_id='${emptyStudent}';
+      INSERT INTO public.student_skill_metrics VALUES
+      ('${emptyStudent}','${owner}','ns.a','grammar','shared',20,100,'stable',now()),
+      ('${emptyStudent}','${owner}','ns.b','grammar','shared',60,1,'stable',now()),
+      ('${emptyStudent}','${owner}','ns.c','speaking','shared',95,4,'stable',now());`);
+    const result = vector(emptyStudent);
+    expect(result.critical_gaps[0]).toMatchObject({ effective_mastery: 40, nano_skill_count: 2, skill_observation_count: 101 });
+    expect(result.strongest_skills[0]).toMatchObject({ skill_category: 'speaking', effective_mastery: 95 });
+    expect(result.recommended_focus.skill_name).toBe('ns.a');
+  });
 });
