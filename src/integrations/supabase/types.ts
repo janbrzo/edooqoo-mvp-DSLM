@@ -3987,6 +3987,10 @@ export type Database = {
         }
         Returns: number
       }
+      dslm_effective_mastery: {
+        Args: { p_last_event_at: string; p_mastery: number; p_now: string }
+        Returns: number
+      }
       extract_micro_skill: { Args: { skill_name: string }; Returns: string }
       extract_skill_category: { Args: { skill_name: string }; Returns: string }
       find_student_by_email: {
@@ -4243,6 +4247,10 @@ export type Database = {
           published_at: string
           title: string
         }[]
+      }
+      get_student_dslm_state_vector: {
+        Args: { p_student_id: string; p_teacher_id: string }
+        Returns: Json
       }
       get_student_homework_answers: {
         Args: { p_homework_id: string; p_student_email: string }
