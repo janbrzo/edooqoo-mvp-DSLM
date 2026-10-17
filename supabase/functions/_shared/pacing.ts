@@ -47,6 +47,13 @@ export interface PacingProfileSignals {
   anxiety_level?: string | null;
   error_attitude?: string | null;
   weekly_study_time?: string | null;
+  /**
+   * Triangulated study capacity (LPS `capacity`: weekly time with the q5c
+   * homework scenario, plus persistence from v3). When present it replaces the
+   * raw declared `weekly_study_time` in style pacing, so a declared "2-3 hours"
+   * cannot push the style when the learner's homework behaviour says otherwise.
+   */
+  capacity?: 'low' | 'normal' | 'high' | null;
 }
 
 export interface StylePacingInput {
@@ -228,12 +235,17 @@ export function computeStylePacing(input: StylePacingInput): StylePacingResult {
   if (style === 'Visual')          { p -= 3; reasoning.push('Visual learner → −3 (structured input)'); }
   if (style === 'Reading-Writing') { p -= 5; reasoning.push('Reading-Writing learner → −5 (text-heavy Scientific)'); }
 
-  // Weekly time availability: Self-Profile slider (1-15h) wins; the Welcome Test
-  // answer is used only when the slider is absent (no double counting).
+  // Weekly time availability: study time contributes in exactly ONE place.
+  // Self-Profile slider (1-15h) wins; otherwise the triangulated Welcome Test
+  // capacity (q5 with q5c); the raw declared q5 only for profiles without it.
+  // error_attitude (q14) is the single source of the q4/q14 scenario here.
   const hours = sp.time_availability_per_week;
   if (typeof hours === 'number') {
     if (hours < 3)      { p -= 5; reasoning.push(`Only ${hours}h/week → −5 (consolidate, don't push)`); }
     else if (hours > 7) { p += 5; reasoning.push(`${hours}h/week available → +5 (sustained Pragmatic load)`); }
+  } else if (profile.capacity === 'low' || profile.capacity === 'high' || profile.capacity === 'normal') {
+    if (profile.capacity === 'low') { p -= 5; reasoning.push('Low study capacity (Welcome Test, homework behaviour weighed with declared time) → −5 (consolidate, don\'t push)'); }
+    else if (profile.capacity === 'high') { p += 5; reasoning.push('High study capacity (Welcome Test, declared time confirmed by homework behaviour) → +5 (sustained Pragmatic load)'); }
   } else {
     const wt = profile.weekly_study_time;
     if (wt === 'none' || wt === '15_30_min') { p -= 5; reasoning.push(`Little study time outside lessons (Welcome Test: ${wt}) → −5 (consolidate, don't push)`); }
@@ -271,7 +283,7 @@ export type IntensityPath = 'comfort' | 'guided' | 'accelerated' | 'target';
 export interface IntensityResult {
   intensity: IntensityPath | null;
   score: number | null;
-  version: 1 | 2 | null;
+  version: 1 | 2 | 3 | null;
   capacityWarning: string | null;
   reasoning: string[];
 }
@@ -294,7 +306,8 @@ export function computeIntensity(learningPath: unknown, deadlineDays: number | n
   if (!learningPath || typeof learningPath !== 'object' || Array.isArray(learningPath)) return empty;
   const lp = learningPath as Record<string, unknown>;
 
-  const version: 1 | 2 = Number(lp.version) === 2 ? 2 : 1;
+  const lpVersion = Number(lp.version);
+  const version: 1 | 2 | 3 = lpVersion === 3 ? 3 : lpVersion === 2 ? 2 : 1;
   const rawScore = typeof lp.score === 'number' ? lp.score : (typeof lp.score === 'string' && lp.score.trim() !== '' ? Number(lp.score) : NaN);
   const score = Number.isFinite(rawScore) ? Math.round(clampPacing(rawScore, 0, 100)) : null;
   const rawPath = typeof lp.path === 'string' ? lp.path.toLowerCase() : '';
@@ -303,13 +316,13 @@ export function computeIntensity(learningPath: unknown, deadlineDays: number | n
     : (score !== null ? pathFromScore(score) : null);
   if (intensity === null && score === null) return { ...empty, version };
 
-  const capacityWarning = version === 2 && typeof lp.capacity_warning === 'string' && lp.capacity_warning.trim() !== ''
+  const capacityWarning = version >= 2 && typeof lp.capacity_warning === 'string' && lp.capacity_warning.trim() !== ''
     ? lp.capacity_warning
     : null;
 
   const reasoning: string[] = [];
   reasoning.push(`Welcome Test Learning Path (v${version}): ${intensity ?? 'unknown'}${score !== null ? ` (score ${score})` : ''} → intensity only, style pacing unchanged`);
-  if (version === 2) {
+  if (version >= 2) {
     const cap = typeof lp.capacity_cap === 'number' ? lp.capacity_cap : null;
     const capacity = typeof lp.capacity === 'string' ? lp.capacity : null;
     if (cap !== null) reasoning.push(`Intensity capped at ${cap} by declared study capacity${capacity ? ` (${capacity})` : ''}`);
@@ -398,6 +411,13 @@ function isMissingColumnError(err: any): boolean {
   return err.code === '42703' || err.code === 'PGRST204' || /learning_path/.test(msg) && /does not exist|could not find/i.test(msg);
 }
 
+/** Triangulated capacity stored in the Learning Path (v2 and later), else null. */
+export function capacityOfLearningPath(learningPath: unknown): 'low' | 'normal' | 'high' | null {
+  if (!learningPath || typeof learningPath !== 'object' || Array.isArray(learningPath)) return null;
+  const c = (learningPath as Record<string, unknown>).capacity;
+  return c === 'low' || c === 'normal' || c === 'high' ? c : null;
+}
+
 /**
  * Loads the Welcome Test signals used by pacing. Reads the `learning_path`
  * column and falls back to `raw_answers->learning_path` (old rows, or the
@@ -431,6 +451,7 @@ export async function loadLearningProfileForPacing(
         anxiety_level: row.anxiety_level ?? null,
         error_attitude: row.error_attitude ?? null,
         weekly_study_time: row.weekly_study_time ?? null,
+        capacity: capacityOfLearningPath(learningPath),
         learning_path: learningPath,
       },
       error: null,
@@ -449,4 +470,34 @@ export function intensityPromptLines(intensity: IntensityResult): string {
     out += `\n- Capacity warning: declared study capacity is low for this deadline; keep homework realistic and flag the risk.`;
   }
   return out;
+}
+
+// ---------------------------------------------------------------------------
+// Decision 5: the first Welcome Test proposal is applied automatically
+// ---------------------------------------------------------------------------
+
+/** `trigger_details.reason` of the applied first-WT proposal (shown by the UI, undoable by the teacher). */
+export const WT_INITIAL_AUTO_REASON = 'welcome_test_initial_auto';
+
+export interface InitialAutoApplyInput {
+  triggerType: string | null | undefined;
+  /** students.last_pacing_set_manually: true = teacher set it, false = computed value written, null = never set. */
+  lastPacingSetManually: boolean | null | undefined;
+  /** An earlier pacing_proposals row with status accepted/applied exists for the student. */
+  hasEarlierAppliedProposal: boolean;
+}
+
+/**
+ * Decision 5 (owner approved): the FIRST Welcome Test pacing proposal for a
+ * student is applied automatically when the teacher never set pacing (flag null
+ * or false) and no proposal was accepted or applied before. Retakes (the first
+ * one leaves an applied proposal), manual values and any other trigger keep the
+ * normal approval flow. `resolvePromptPacing` then uses the stored value because
+ * the apply path sets `last_pacing_set_manually = false`.
+ */
+export function shouldAutoApplyInitialWtPacing(input: InitialAutoApplyInput): boolean {
+  if (input.triggerType !== 'placement_test') return false;
+  if (input.lastPacingSetManually === true) return false;
+  if (input.hasEarlierAppliedProposal) return false;
+  return true;
 }

@@ -12,6 +12,8 @@ import { computeDivergences } from '../../../../supabase/functions/_shared/welco
 import { estimateLevel } from '../../../../supabase/functions/_shared/welcomeTestLevel';
 
 const EM = '\u2014';
+// v2 gave 62; dropping the high q4 component (75) from the average gives 60 in v3.
+const V3_LEGACY_SCORE = 60;
 
 /** The E2E test student of the live audit (WS6-b): A2 measured, self-assessed B2-C1, 5/5 confidence. */
 const LIVE = live as Record<string, unknown>;
@@ -71,8 +73,27 @@ describe('golden profile: live test student', () => {
     expect(withoutUsageContext(traits)).toEqual(LIVE_TRAITS);
     expect(traits.usage_context).toBe('work_formal');
   });
-  it('Learning Path Score v2 is exact and equals the stored production value (75, accelerated, low capacity cap)', () => {
-    const lps = computeLearningPathScore(traits, LIVE);
+  it('interpretation v1 rebuild gives the same traits (this student chose neither remapped option)', () => {
+    expect(reconstructTraits(LIVE, null, 1)).toEqual(traits);
+  });
+  it('Learning Path Score v3 (current): urgency no longer floors the score above capacity, guided + unrealistic_goal', () => {
+    // CHANGED in v3: v2 gave 75 (accelerated) through the 85 floor 'urgent_critical_override' and a 75 urgent cap.
+    // This learner has avoidant/low homework and low persistence, so capacity is low and the cap is 50 (guided).
+    // ambiguity_tolerance is null (q4 repeats the q14 scenario, counted once from error_attitude) and coverage drops 1 -> 0.94.
+    expect(computeLearningPathScore(traits, LIVE)).toEqual({
+      version: 3, need: 'high', score: 50, path: 'guided',
+      component_scores: {
+        deadline_response: 80, learning_timeline: 95, persistence_level: 20, career_importance: 90, usage_context: 70,
+        motivation_type: 73, ambiguity_tolerance: null, weekly_study_time: 43, anxiety_level: 10, learning_duration: 60,
+        learning_autonomy: 70, error_attitude: 10, reading_strategy: 35, feedback_preference: 65, confidence_overall: 100,
+      },
+      coverage: 0.94,
+      overrides_applied: ['plateau_doubt_prone', 'low_capacity_cap'],
+      capacity: 'low', capacity_cap: 50, capacity_warning: 'unrealistic_goal',
+    });
+  });
+  it('Learning Path Score v2 is still reproducible and equals the stored production value (75, accelerated, low capacity cap)', () => {
+    const lps = computeLearningPathScore(traits, LIVE, { version: 2 });
     expect(lps).toEqual({
       version: 2, score: 75, path: 'accelerated',
       component_scores: {
@@ -117,8 +138,18 @@ describe('golden profile: legacy option text (em dash) and multi-select q3b', ()
   it('q3b selections are joined with ", " in answer order', () => {
     expect(traits.usage_context).toBe('travel, social');
   });
-  it('Learning Path Score is exact', () => {
-    expect(computeLearningPathScore(traits, LEGACY)).toEqual({
+  it('Learning Path Score v3 differs from v2 only by the dropped q4 duplicate (no floors involved here)', () => {
+    // CHANGED in v3: ambiguity_tolerance (q4) is null, so its weight 0.06 is renormalised away (coverage 1 -> 0.94).
+    const v3 = computeLearningPathScore(traits, LEGACY);
+    expect(v3.version).toBe(3);
+    expect(v3.component_scores.ambiguity_tolerance).toBeNull();
+    expect(v3.coverage).toBe(0.94);
+    expect(v3.capacity).toBe('high');
+    expect(v3.score).toBe(V3_LEGACY_SCORE);
+    expect(v3.overrides_applied).toEqual(['plateau_intensity_high_grit']);
+  });
+  it('Learning Path Score v2 is exact', () => {
+    expect(computeLearningPathScore(traits, LEGACY, { version: 2 })).toEqual({
       version: 2, score: 62, path: 'accelerated',
       component_scores: {
         deadline_response: 60, learning_timeline: 25, persistence_level: 80, career_importance: 40, usage_context: 40,
@@ -127,7 +158,7 @@ describe('golden profile: legacy option text (em dash) and multi-select q3b', ()
       },
       coverage: 1, overrides_applied: ['plateau_intensity_high_grit'], capacity: 'high', capacity_cap: null, capacity_warning: null,
     });
-    expect(computeLearningPathScore(traits, LEGACY)).toEqual(computeLearningPathScore(withoutUsageContext(traits), LEGACY));
+    expect(computeLearningPathScore(traits, LEGACY, { version: 2 })).toEqual(computeLearningPathScore(withoutUsageContext(traits), LEGACY, { version: 2 }));
   });
   it('level without a scored writing item uses the three scored skills', () => {
     expect(estimateLevel({ grammar: 80, vocabulary: 70, reading: 60, writing: null, selfAssessedLevel: traits.self_assessed_level }))

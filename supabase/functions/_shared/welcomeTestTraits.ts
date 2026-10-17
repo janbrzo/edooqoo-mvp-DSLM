@@ -69,7 +69,8 @@ export const TRAIT_QUESTIONS: Record<string, { questionId: string; options: stri
       'I get stressed and switch to my language',
       'I look it up immediately on my phone',
     ],
-    mapping: { '0': 'high', '1': 'low', '2': 'high', '3': 'low', '4': 'medium' },
+    // v2: option 0 (ask to repeat/explain) is help-seeking, medium (v1: high, see V1_MAPPING_OVERRIDES).
+    mapping: { '0': 'medium', '1': 'low', '2': 'high', '3': 'low', '4': 'medium' },
   },
   weekly_study_time: {
     questionId: 'wt_q5',
@@ -91,7 +92,8 @@ export const TRAIT_QUESTIONS: Record<string, { questionId: string; options: stri
       'I avoid speaking because I fear mistakes',
       'I get very frustrated with myself',
     ],
-    mapping: { '0': 'low', '1': 'low', '2': 'medium', '3': 'high', '4': 'high' },
+    // v2: option 4 (frustrated with myself) is self-criticism, medium (v1: high, see V1_MAPPING_OVERRIDES).
+    mapping: { '0': 'low', '1': 'low', '2': 'medium', '3': 'high', '4': 'medium' },
   },
   preferred_input_channel: {
     questionId: 'wt_q8',
@@ -238,12 +240,43 @@ export const TRAIT_QUESTIONS: Record<string, { questionId: string; options: stri
 };
 
 /**
+ * Interpretation v1 mapping of the options whose mapping changed in v2
+ * (src: Stage 4.2). Profiles stamped with `__interpretation_version__` < 2 (or
+ * unstamped) are rebuilt with these values so a stored profile never changes
+ * silently. v2 values live in TRAIT_QUESTIONS (the current interpretation).
+ *
+ * - anxiety_level / wt_q7 option 4 "I get very frustrated with myself": v1 high.
+ *   That is self-criticism (perfectionism), not fear of speaking, so v2 = medium.
+ * - ambiguity_tolerance / wt_q4 option 0 "I ask the person to repeat or explain":
+ *   v1 high. Asking for clarification is help-seeking (resolving the ambiguity),
+ *   not tolerating it, so v2 = medium.
+ */
+export const V1_MAPPING_OVERRIDES: Record<string, Record<string, string>> = {
+  anxiety_level: { '4': 'high' },
+  ambiguity_tolerance: { '0': 'high' },
+};
+
+/** Mapped value of one option under the given interpretation version (undefined = latest). */
+function mappedValue(traitName: string, optIdx: number, interpretationVersion: number | undefined): string | undefined {
+  const config = TRAIT_QUESTIONS[traitName];
+  if (interpretationVersion !== undefined && interpretationVersion < 2) {
+    const legacy = V1_MAPPING_OVERRIDES[traitName]?.[String(optIdx)];
+    if (legacy) return legacy;
+  }
+  return config.mapping[String(optIdx)];
+}
+
+/**
  * Traits from the answers (option string -> mapped value), then the client's
  * detected_traits for any trait the answers do not resolve.
+ *
+ * `interpretationVersion` omitted = the current interpretation (v2). Pass the
+ * version stamped on a stored profile (1 when unstamped) to rebuild it exactly.
  */
 export function reconstructTraits(
   answers: Record<string, unknown> | null | undefined,
   frontendTraits?: Record<string, unknown> | null,
+  interpretationVersion?: number,
 ): Record<string, string> {
   const traits: Record<string, string> = {};
   for (const [traitName, config] of Object.entries(TRAIT_QUESTIONS)) {
@@ -253,15 +286,15 @@ export function reconstructTraits(
       const mapped = answerVal
         .map((a) => matchOptionIndex(config.questionId, config.options, String(a)))
         .filter((i) => i >= 0)
-        .map((i) => config.mapping[String(i)])
-        .filter(Boolean);
+        .map((i) => mappedValue(traitName, i, interpretationVersion))
+        .filter((v): v is string => Boolean(v));
       if (mapped.length > 0) traits[traitName] = mapped.join(', ');
       continue;
     }
     if (answerVal && typeof answerVal === 'string') {
       const optIdx = matchOptionIndex(config.questionId, config.options, answerVal);
       if (optIdx >= 0) {
-        const mapped = config.mapping[String(optIdx)];
+        const mapped = mappedValue(traitName, optIdx, interpretationVersion);
         if (mapped) traits[traitName] = mapped;
       }
     }
