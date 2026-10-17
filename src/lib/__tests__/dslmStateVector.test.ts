@@ -6,10 +6,11 @@ import { join } from 'node:path';
 import { effectiveMastery } from '../../../supabase/functions/_shared/forgetting';
 
 const migrations = join(__dirname, '../../../supabase/migrations');
-const definitions = readdirSync(migrations).sort().filter(f => f.endsWith('.sql'))
-  .map(f => readFileSync(join(migrations, f), 'utf8'))
-  .filter(sql => /CREATE OR REPLACE FUNCTION public\.get_student_dslm_state_vector\(/i.test(sql));
+const allSql = readdirSync(migrations).sort().filter(f => f.endsWith('.sql'))
+  .map(f => readFileSync(join(migrations, f), 'utf8'));
+const definitions = allSql.filter(sql => /CREATE OR REPLACE FUNCTION public\.get_student_dslm_state_vector\(/i.test(sql));
 const latest = definitions.at(-1) ?? '';
+const latestHelper = allSql.filter(sql => /CREATE OR REPLACE FUNCTION public\.dslm_effective_mastery\(/i.test(sql)).at(-1) ?? '';
 
 describe('versioned student state vector contract', () => {
   it('has a read-only, invoker-authorized implementation with restricted execution', () => {
@@ -79,6 +80,7 @@ describe.skipIf(!pgBin)('student state vector in isolated PostgreSQL', () => {
         ('${student}','${owner}','flashcard:duplicate','vocabulary','gap',0,4,'stable',now());
       INSERT INTO public.student_skill_metrics SELECT '${student}','${owner}','ns.strong.'||n,'vocabulary','strong.'||n,90+n,4,'stable',now() FROM generate_series(1,7) n;`);
     query(latest);
+    query(latestHelper);
   }, 30000);
   afterAll(() => {
     if (started) pg('pg_ctl', ['-D', join(directory, 'data'), '-m', 'immediate', '-w', 'stop']);
@@ -93,6 +95,17 @@ describe.skipIf(!pgBin)('student state vector in isolated PostgreSQL', () => {
       expect(actual).toBe(effectiveMastery(80, last, now));
     }
     expect(Number(query("SELECT public.dslm_effective_mastery(80,NULL,now());"))).toBe(80);
+  });
+  it('matches fractional mastery rounding inside grace and preserves undated raw values', () => {
+    const now = new Date('2026-10-17T13:46:00Z');
+    for (const mastery of [80.04, 80.06, 0, 100]) {
+      for (const days of [0, 14, 14.01, 74, -5]) {
+        const last = new Date(now.getTime() - days * 86400000).toISOString();
+        expect(Number(query(`SELECT public.dslm_effective_mastery(${mastery},'${last}','${now.toISOString()}');`)))
+          .toBe(effectiveMastery(mastery, last, now));
+      }
+    }
+    expect(Number(query('SELECT public.dslm_effective_mastery(80.04,NULL,now());'))).toBe(80.04);
   });
   it('returns at most five strongest micro-skills strictly above 80', () => {
     const result = vector();
