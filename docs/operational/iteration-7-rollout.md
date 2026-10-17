@@ -6,6 +6,8 @@ Run each step as its own query in the Supabase SQL Editor. The editor scans the 
 
 Status 2026-10-14: steps 1 and 2 are applied in production (function bodies verified equal to the repo by md5). The student_events INSERT policy was changed with ALTER POLICY (same end state as the DROP/CREATE in the file).
 
+Status 2026-10-15: step 4 is applied. The legacy save/get answer RPCs were already revoked by an earlier migration; `submit_homework_answers(uuid, text)` was revoked from PUBLIC, anon and authenticated (service_role keeps it). Check query: all false for anon and authenticated; `submit_homework_answers_by_share_token` stays callable.
+
 ## 1. Cron jobs: send x-cron-secret instead of the anon key (before the release)
 
 `pacing-periodic-check-daily` (job 4) and `loop-pacing-aggregator` (job 6) call their functions with the anon key, which the new functions reject. The extra header is ignored by the current functions, so this step is safe before the release. The secret is copied server side from `process-ai-evaluations-5min`, never typed.

@@ -2,6 +2,8 @@
 
 Apply after iteration 7 step 4. Run migrations through the Supabase MCP connector or CLI; from the SQL Editor use the base64 `DO` wrapper described in `iteration-7-rollout.md` (PL/pgSQL bodies, 8 KB limit). Statements with DELETE or DROP must run in the editor.
 
+Status 2026-10-17: all six migrations are applied in production (090000, 090300, 090400, 090500, then 090100 and 090200). Result: 2388 of 2388 metrics in v3 format, 2227 `D_metric_recompute_v3` and 25 `E_homework_row_mastery` audit rows. Applied from the SQL Editor as base64 chunks staged in a temporary table (dropped afterwards).
+
 ## 1. Migrations (order)
 
 1. `20261015090000_compute_skill_metric_v3.sql`: metric engine v3 and the refresh trigger function. Existing metrics keep their values until recomputed; every new event recomputes its skills with v3.
