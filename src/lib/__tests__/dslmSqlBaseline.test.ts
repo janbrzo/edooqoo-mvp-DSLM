@@ -268,3 +268,17 @@ describe('Welcome Test server authority and retake history (2026-10-17 audit)', 
     expect(file).toMatch(/jsonb_populate_record\(q, jsonb_build_object\('correct_answer', NULL\)\)/);
   });
 });
+
+describe('Timestamp defaults (2026-10-17)', () => {
+  it('no migration after the fix sets a column default with AT TIME ZONE', () => {
+    const files = readdirSync(MIGRATIONS).filter((f) => f.endsWith('.sql') && f >= '20261017140000').sort();
+    for (const f of files) {
+      expect(readFileSync(join(MIGRATIONS, f), 'utf8')).not.toMatch(/DEFAULT\s*\(?\s*now\(\)\s*AT TIME ZONE/i);
+    }
+  });
+
+  it('resets every Europe/Warsaw default to now()', () => {
+    const fix = readFileSync(join(MIGRATIONS, '20261017140000_timestamp_defaults_utc.sql'), 'utf8');
+    expect(fix.match(/ALTER COLUMN \w+ SET DEFAULT now\(\);/g)?.length).toBe(26);
+  });
+});
